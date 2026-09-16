@@ -88,6 +88,15 @@
       [description]="'macrodeck.app:Settings.Adb.VersionDescription' | translate">
       <span>{{ adbVersion() ?? ('macrodeck.app:Settings.Adb.VersionUnknown' | translate) }}</span>
     </shared-settings-row>
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Adb.StopServerOnExitLabel' | translate"
+      [description]="'macrodeck.app:Settings.Adb.StopServerOnExitDescription' | translate">
+      <shared-toggle-switch
+        [disabled]="!loaded()"
+        [busy]="stopServerOnExitBusy()"
+        [checked]="stopServerOnExit()"
+        (changed)="setStopServerOnExit($event)" />
+    </shared-settings-row>
     <div class="adb__actions">
       <shared-button
         variant="secondary"

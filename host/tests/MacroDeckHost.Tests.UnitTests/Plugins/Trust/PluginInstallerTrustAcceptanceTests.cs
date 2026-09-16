@@ -13,6 +13,7 @@ using MacroDeckHost.Infrastructure.Plugins.Trust;
 using MacroDeckHost.Tests.UnitTests.Plugins.Installation;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
+using MacroDeckHost.Application.Plugins.Runtime;
 
 namespace MacroDeckHost.Tests.UnitTests.Plugins.Trust;
 
@@ -88,6 +89,7 @@ internal sealed class PluginInstallerTrustAcceptanceTests
 			_supervisor,
 			_integrationRegistrar,
 			sessionRegistry,
+			new PluginTakeoverRegistry(),
 			provider.GetRequiredService<IServiceScopeFactory>(),
 			options,
 			TimeProvider.System,

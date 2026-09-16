@@ -950,13 +950,21 @@ export class ApiService {
     return this.http('POST', '/api/store/uninstall', { kind, id });
   }
 
-  getStoreExtensionIconUrl(kind: StoreExtensionKind, packageId: string): string {
-    return `${this.baseUrl}/api/store/media/${encodeURIComponent(kind)}/${encodeURIComponent(packageId)}/icon`;
+  getStoreExtensionIconUrl(kind: StoreExtensionKind, packageId: string, sha256?: string | null): string {
+    return this.withAssetVersion(
+      `${this.baseUrl}/api/store/media/${encodeURIComponent(kind)}/${encodeURIComponent(packageId)}/icon`,
+      sha256);
   }
 
-  getStoreScreenshotUrl(kind: StoreExtensionKind, packageId: string, index: number): string {
-    return `${this.baseUrl}/api/store/media/${encodeURIComponent(kind)}/${encodeURIComponent(packageId)}`
-      + `/screenshots/${encodeURIComponent(String(index))}`;
+  getStoreScreenshotUrl(kind: StoreExtensionKind, packageId: string, index: number, sha256?: string | null): string {
+    return this.withAssetVersion(
+      `${this.baseUrl}/api/store/media/${encodeURIComponent(kind)}/${encodeURIComponent(packageId)}`
+        + `/screenshots/${encodeURIComponent(String(index))}`,
+      sha256);
+  }
+
+  private withAssetVersion(url: string, sha256?: string | null): string {
+    return sha256 ? `${url}?v=${encodeURIComponent(sha256)}` : url;
   }
 
   getVersion(): Promise<GetVersionResponse> {

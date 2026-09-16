@@ -24,5 +24,17 @@ public enum WidgetAppearanceProperty
 	/// because a widget type either renders a framed icon or none of it, and clearing it means
 	/// "back to the defaults" for the whole framing.
 	/// </summary>
-	IconDisplay = 7
+	IconDisplay = 7,
+
+	/// <summary>
+	/// The highlight colour of a Slider or History Graph - see <see cref="WidgetAppearancePatch.AccentColor" />.
+	/// Clearing it returns the widget to the reader's theme accent.
+	/// </summary>
+	AccentColor = 8,
+
+	/// <summary>
+	/// The colour an action button draws its icon in - see <see cref="WidgetAppearancePatch.IconColor" />.
+	/// Clearing it returns the icon to its own colours.
+	/// </summary>
+	IconColor = 9
 }

@@ -167,8 +167,15 @@ new UiActionsListEditor { Key = "flows", Binding = Bind.To(flows), CanRun = true
 | `device-picker` | `UiDevicePickerInput` | One connected device |
 | `integration-picker` | `UiIntegrationPickerInput` | One integration, or one of its configuration entries |
 | `icon` | `UiIconReferenceInput` | One icon, as a typed provider reference |
+| `icon-display` | `UiIconDisplayInput` | An icon's framing (fit, zoom, offset, opacity) over a preview of `Icon` at `AspectRatio` against `Background`; with `Tint` set, the preview draws the icon in that colour, keeping its transparency |
 
 Each renderer maps these onto the editors it already ships; a plugin ships no renderer code for them.
+
+`UiActionsListEditor.Triggers` names the trigger tabs the editor offers, such as `["onDoublePress"]` for a
+single Double Tap tab. Event triggers, which run a flow when an integration or Macro Deck event fires, are
+offered alongside those tabs either way. The host runs a widget's event flows only from the top-level
+`flows` key of its stored configuration, so bind the editor there, as in the example above, for them to
+fire.
 
 - **`device-picker`** only populates where the viewer holds admin scope, because the device list is an
   administrative endpoint. The desktop editor does; prefer another picker where you have the choice.

@@ -4,9 +4,8 @@ namespace MacroDeck.Plugin.Packaging.Manifest;
 
 /// <summary>
 /// Resolves which manifest entrypoints a running RID may use. Exact match plus a fixed, small set of
-/// silicon fallbacks - no <c>"any"</c> key and no <c>dotnet</c> muxer entrypoints, since #412 does not
-/// support framework-dependent plugins. <c>linux-musl-*</c> resolves no fallback: an explicit
-/// non-goal, not an oversight.
+/// silicon fallbacks - no <c>"any"</c> key; a framework-dependent plugin still declares one entrypoint per
+/// RID. <c>linux-musl-*</c> resolves no fallback: an explicit non-goal, not an oversight.
 /// </summary>
 public static class PluginRuntimeIdentifiers
 {

@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Threading.Channels;
+using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.System.Actions;
 using MacroDeckHost.Integrations.System.Application;
@@ -28,7 +29,9 @@ public sealed class SystemIntegration
 		IIntegrationIssueProvider,
 		IIntegrationIconProvider,
 		IMigrationProvider,
-		IVariableRefreshSignalConsumer
+		IVariableRefreshSignalConsumer,
+		IVariablePollingInvalidationConsumer,
+		IKnownAudioDeviceStoreConsumer
 {
 	public const string IntegrationId = "app.macro-deck.system";
 
@@ -45,6 +48,10 @@ public sealed class SystemIntegration
 
 	private const string VolumePercentId = "system-volume-percent";
 	private const string MutedId = "system-muted";
+	private const string InputVolumePercentId = "system-input-volume-percent";
+	private const string InputMutedId = "system-input-muted";
+
+	private static readonly TimeSpan _audioDiscoveryInterval = TimeSpan.FromSeconds(5);
 
 	private const int MaxIndexedGpus = 8;
 
@@ -91,6 +98,14 @@ public sealed class SystemIntegration
 	private VariableHandle? _focusedAppBundleIdHandle;
 	private IVariableRefreshSignal? _refreshSignal;
 
+	private readonly IReadOnlyList<VariableDefinition> _fixedVariables;
+	private volatile AudioState _audio;
+	private IKnownAudioDeviceStore? _audioStore;
+	private IVariablePollingInvalidationSignal? _pollingInvalidation;
+	private bool _persistAudioDevices;
+	private CancellationTokenSource? _audioDiscoveryCancellation;
+	private Task? _audioDiscoveryLoop;
+
 	public SystemIntegration()
 		: this(ApplicationServiceFactory.Create(),
 			VolumeServiceFactory.Create(),
@@ -117,7 +132,8 @@ public sealed class SystemIntegration
 		_power = power;
 		_lock = lockStateReader ?? new NullLockStateReader();
 
-		Variables = BuildVariables(_metrics.GpuCount);
+		_fixedVariables = BuildVariables(_metrics.GpuCount);
+		_audio = new AudioState([], new HashSet<string>(StringComparer.Ordinal), null, _fixedVariables);
 
 		Actions =
 		[
@@ -126,10 +142,10 @@ public sealed class SystemIntegration
 			new OpenFileActionDefinition(_applications),
 			new OpenFolderActionDefinition(_applications),
 			new KillApplicationActionDefinition(_applications),
-			new IncreaseVolumeActionDefinition(_volume),
-			new DecreaseVolumeActionDefinition(_volume),
-			new MuteVolumeActionDefinition(_volume),
-			new SetVolumeActionDefinition(_volume),
+			new IncreaseVolumeActionDefinition(_volume, KnownAudioDeviceName),
+			new DecreaseVolumeActionDefinition(_volume, KnownAudioDeviceName),
+			new MuteVolumeActionDefinition(_volume, KnownAudioDeviceName),
+			new SetVolumeActionDefinition(_volume, KnownAudioDeviceName),
 			new SendNotificationActionDefinition(_notifications),
 			new RunCommandActionDefinition(_variableAccessor),
 			new LockComputerActionDefinition(_power),
@@ -154,7 +170,7 @@ public sealed class SystemIntegration
 
 	public IReadOnlyList<IIntegrationMigration> Migrations { get; } = [new WindowsUtilsMacroDeck2Migration()];
 
-	public IReadOnlyList<VariableDefinition> Variables { get; }
+	public IReadOnlyList<VariableDefinition> Variables => _audio.Variables;
 
 	private static IReadOnlyList<VariableDefinition> BuildVariables(int gpuCount) =>
 	[
@@ -170,6 +186,19 @@ public sealed class SystemIntegration
 			with
 			{
 				DisplayName = AppStrings.Integrations.System.Variables.Muted()
+			},
+		VariableDefinition.Eager("system_input_volume_percent", VariableType.Numeric, 0, TimeSpan.FromSeconds(2))
+			with
+			{
+				DisplayName = AppStrings.Integrations.System.Variables.InputVolume(),
+				Unit = PercentUnit,
+				SemanticKind = VariableSemanticKinds.Percentage,
+				Write = new VariableWriteCapability()
+			},
+		VariableDefinition.Eager("system_input_muted", VariableType.Boolean, refreshInterval: TimeSpan.FromSeconds(2))
+			with
+			{
+				DisplayName = AppStrings.Integrations.System.Variables.InputMuted()
 			},
 		VariableDefinition.Eager("system_cpu_usage_percent", VariableType.Numeric, 0, TimeSpan.FromSeconds(2))
 			with
@@ -281,8 +310,10 @@ public sealed class SystemIntegration
 			};
 	}
 
-	public Task InitializeAsync(IIntegrationContext context)
+	public async Task InitializeAsync(IIntegrationContext context)
 	{
+		await StopAudioDiscoveryAsync();
+
 		_variableAccessor.Current = context.Variables;
 
 		_volume.Changed -= OnVolumeChanged;
@@ -305,11 +336,19 @@ public sealed class SystemIntegration
 		_focusWriterLoop = Task.Run(() => RunFocusWriterLoopAsync(channel.Reader));
 		channel.Writer.TryWrite(FocusedApplicationSnapshot.Current.Value);
 
-		return Task.CompletedTask;
+		LoadKnownAudioDevices();
+		// IsInitialized is always true, so the poller may already have registered the fixed list; the
+		// first refresh always republishes so the stored devices are declared too.
+		await RefreshAudioDevicesAsync(republish: true, CancellationToken.None);
+
+		var cancellation = new CancellationTokenSource();
+		_audioDiscoveryCancellation = cancellation;
+		_audioDiscoveryLoop = Task.Run(() => RunAudioDiscoveryLoopAsync(cancellation.Token));
 	}
 
 	public async Task ShutdownAsync()
 	{
+		await StopAudioDiscoveryAsync();
 		_volume.Changed -= OnVolumeChanged;
 		FocusedApplicationSnapshot.Current.Changed -= OnFocusChanged;
 		_focusChannel?.Writer.TryComplete();
@@ -326,11 +365,145 @@ public sealed class SystemIntegration
 
 	public void UseVariableRefreshSignal(IVariableRefreshSignal signal) => _refreshSignal = signal;
 
+	public void UseVariablePollingInvalidation(IVariablePollingInvalidationSignal signal)
+		=> _pollingInvalidation = signal;
+
+	public void UseKnownAudioDeviceStore(IKnownAudioDeviceStore store) => _audioStore = store;
+
+	internal Task RefreshAudioDevicesAsync() => RefreshAudioDevicesAsync(republish: false, CancellationToken.None);
+
 	private void OnVolumeChanged()
 	{
 		_refreshSignal?.RequestDefinitionRefresh(IntegrationId, VolumePercentId);
 		_refreshSignal?.RequestDefinitionRefresh(IntegrationId, MutedId);
+
+		var audio = _audio;
+		if (audio.DefaultOutputId is { } defaultOutput &&
+			audio.Known.FirstOrDefault(device =>
+				device.Flow == AudioDeviceVariables.OutputFlow && device.DeviceId == defaultOutput) is { } known)
+		{
+			_refreshSignal?.RequestDefinitionRefresh(IntegrationId, AudioDeviceVariables.VolumeId(known));
+			_refreshSignal?.RequestDefinitionRefresh(IntegrationId, AudioDeviceVariables.MutedId(known));
+		}
 	}
+
+	private void LoadKnownAudioDevices()
+	{
+		IReadOnlyList<KnownAudioDevice> stored = [];
+		_persistAudioDevices = _audioStore is not null && _audioStore.TryLoad(out stored);
+		if (_audioStore is not null && !_persistAudioDevices)
+		{
+			_logger.Warning("The known audio device list could not be read; audio devices are not saved this session");
+		}
+
+		var audio = _audio;
+		_audio = BuildAudioState(AudioDeviceVariables.Valid(stored), audio.Present, audio.DefaultOutputId);
+	}
+
+	private async Task RefreshAudioDevicesAsync(bool republish, CancellationToken cancellationToken)
+	{
+		IReadOnlyList<AudioDevice> devices;
+		try
+		{
+			devices = _volume.IsSupported ? await _volume.GetDevicesAsync(cancellationToken) : [];
+		}
+		catch (Exception ex) when (ex is not OperationCanceledException)
+		{
+			_logger.Warning(ex, "Could not list the audio devices");
+			if (!republish)
+			{
+				return;
+			}
+
+			devices = [];
+		}
+
+		var current = _audio;
+		var known = AudioDeviceVariables.Merge(current.Known, devices);
+		var declarationChanged = !known.SequenceEqual(current.Known);
+		if (declarationChanged && _persistAudioDevices)
+		{
+			_audioStore!.Save(known);
+		}
+
+		var present = devices.Select(device => PresenceKey(device.Flow, device.Id)).ToHashSet(StringComparer.Ordinal);
+		var defaultOutput = devices.FirstOrDefault(device => device is { Flow: AudioFlow.Output, IsDefault: true })?.Id;
+
+		if (!declarationChanged && !republish)
+		{
+			_audio = current with { Present = present, DefaultOutputId = defaultOutput };
+			return;
+		}
+
+		_audio = BuildAudioState(known, present, defaultOutput);
+		_pollingInvalidation?.MarkStale(IntegrationId);
+	}
+
+	private AudioState BuildAudioState(
+		IReadOnlyList<KnownAudioDevice> known,
+		HashSet<string> present,
+		string? defaultOutput)
+		=> new(known, present, defaultOutput, [.. _fixedVariables, .. known.SelectMany(AudioDeviceVariables.Declare)]);
+
+	private async Task RunAudioDiscoveryLoopAsync(CancellationToken cancellationToken)
+	{
+		try
+		{
+			while (true)
+			{
+				await Task.Delay(_audioDiscoveryInterval, cancellationToken);
+				await RefreshAudioDevicesAsync(republish: false, cancellationToken);
+			}
+		}
+		catch (OperationCanceledException)
+		{
+		}
+	}
+
+	private async Task StopAudioDiscoveryAsync()
+	{
+		if (_audioDiscoveryCancellation is not { } cancellation)
+		{
+			return;
+		}
+
+		await cancellation.CancelAsync();
+		if (_audioDiscoveryLoop is { } loop)
+		{
+			await loop;
+		}
+
+		cancellation.Dispose();
+		_audioDiscoveryCancellation = null;
+		_audioDiscoveryLoop = null;
+	}
+
+	private AudioTarget? ResolveKnownTarget(AudioFlow flow, string key)
+	{
+		var audio = _audio;
+		var flowName = AudioDeviceVariables.FlowName(flow);
+		var device = audio.Known.FirstOrDefault(known => known.Flow == flowName && known.Key == key);
+		return device is not null && audio.Present.Contains(PresenceKey(flow, device.DeviceId))
+			? new AudioTarget(flow, device.DeviceId)
+			: null;
+	}
+
+	private string? KnownAudioDeviceName(AudioTarget target)
+	{
+		var flowName = AudioDeviceVariables.FlowName(target.Flow);
+		return target.DeviceId is null
+			? null
+			: _audio.Known.FirstOrDefault(known => known.Flow == flowName && known.DeviceId == target.DeviceId)?.Name;
+	}
+
+	private static string PresenceKey(AudioFlow flow, string deviceId)
+		=> $"{AudioDeviceVariables.FlowName(flow)}:{deviceId}";
+
+	private sealed record AudioState(
+		IReadOnlyList<KnownAudioDevice> Known,
+		HashSet<string> Present,
+		string? DefaultOutputId,
+		IReadOnlyList<VariableDefinition> Variables);
 
 	// One consumer draining a capacity-1 drop-oldest channel, rather than an unordered Task per focus
 	// change: the variable API is async and Changed fires synchronously on the focus pipeline's own
@@ -374,12 +547,16 @@ public sealed class SystemIntegration
 	{
 		return localId switch
 		{
-			VolumePercentId when _volume.IsSupported =>
-				await _volume.GetVolumeAsync(cancellationToken) is { } volume
-					? VariableReading.Of((int)Math.Round(volume * 100), MinVolumePercent, MaxVolumePercent, 1)
-					: VariableReading.Unavailable,
+			VolumePercentId when _volume.IsSupported => await ReadVolumePercentAsync(AudioTarget.DefaultOutput,
+				cancellationToken),
 			MutedId when _volume.IsSupported =>
-				VariableReading.Of(await _volume.GetMuteAsync(cancellationToken)),
+				VariableReading.Of(await _volume.GetMuteAsync(AudioTarget.DefaultOutput, cancellationToken)),
+			InputVolumePercentId when _volume.IsSupported => await ReadVolumePercentAsync(AudioTarget.DefaultInput,
+				cancellationToken),
+			InputMutedId when _volume.IsSupported =>
+				VariableReading.Of(await _volume.GetMuteAsync(AudioTarget.DefaultInput, cancellationToken)),
+			_ when AudioDeviceVariables.TryParseId(localId, out var flow, out var key, out var isVolume) =>
+				await ReadAudioDeviceAsync(flow, key, isVolume, cancellationToken),
 			"system-cpu-usage-percent" =>
 				VariableReading.Of(RoundPercent(await _metrics.GetCpuUsageAsync(cancellationToken))),
 			"system-ram-usage-percent" =>
@@ -404,6 +581,27 @@ public sealed class SystemIntegration
 				VariableReading.Of(LockStateSnapshot.Current.Value ?? _lock.IsLocked()),
 			_ => await ReadIndexedGpuAsync(localId, cancellationToken)
 		};
+	}
+
+	private async ValueTask<VariableReading> ReadVolumePercentAsync(AudioTarget target, CancellationToken cancellationToken)
+		=> await _volume.GetVolumeAsync(target, cancellationToken) is { } volume
+			? VariableReading.Of((int)Math.Round(volume * 100), MinVolumePercent, MaxVolumePercent, 1)
+			: VariableReading.Unavailable;
+
+	private async ValueTask<VariableReading> ReadAudioDeviceAsync(
+		AudioFlow flow,
+		string key,
+		bool isVolume,
+		CancellationToken cancellationToken)
+	{
+		if (!_volume.IsSupported || ResolveKnownTarget(flow, key) is not { } target)
+		{
+			return VariableReading.Unavailable;
+		}
+
+		return isVolume
+			? await ReadVolumePercentAsync(target, cancellationToken)
+			: VariableReading.Of(await _volume.GetMuteAsync(target, cancellationToken));
 	}
 
 	private async ValueTask<VariableReading> ReadIndexedGpuAsync(string localId, CancellationToken cancellationToken)
@@ -440,12 +638,25 @@ public sealed class SystemIntegration
 		object? value,
 		CancellationToken cancellationToken = default)
 	{
-		if (!string.Equals(localId, VolumePercentId, StringComparison.Ordinal))
+		AudioTarget? target;
+		if (localId == VolumePercentId)
+		{
+			target = AudioTarget.DefaultOutput;
+		}
+		else if (localId == InputVolumePercentId)
+		{
+			target = AudioTarget.DefaultInput;
+		}
+		else if (AudioDeviceVariables.TryParseId(localId, out var flow, out var key, out var isVolume) && isVolume)
+		{
+			target = ResolveKnownTarget(flow, key);
+		}
+		else
 		{
 			return VariableWriteResult.NotWritable();
 		}
 
-		if (!_volume.IsSupported)
+		if (!_volume.IsSupported || target is not { } resolved)
 		{
 			return VariableWriteResult.Unavailable();
 		}
@@ -455,11 +666,13 @@ public sealed class SystemIntegration
 			return VariableWriteResult.InvalidValue();
 		}
 
-		await _volume
-			.SetVolumeAsync((float)(Math.Clamp(percent, MinVolumePercent, MaxVolumePercent) / 100), cancellationToken)
+		var applied = await _volume
+			.SetVolumeAsync(resolved,
+				(float)(Math.Clamp(percent, MinVolumePercent, MaxVolumePercent) / 100),
+				cancellationToken)
 			.ConfigureAwait(false);
 
-		return VariableWriteResult.Applied();
+		return applied ? VariableWriteResult.Applied() : VariableWriteResult.Unavailable();
 	}
 
 	private static bool TryReadNumber(object? value, out double number)

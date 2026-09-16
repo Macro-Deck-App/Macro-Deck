@@ -59,6 +59,20 @@ internal sealed class StoreRegistryFixture
 
 	public HashSet<string> Missing { get; } = new(StringComparer.Ordinal);
 
+	public TaskCompletionSource? ManifestHold { get; set; }
+
+	public TaskCompletionSource ManifestRequested { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+	public int ManifestRequests => _manifestRequests;
+
+	private int _manifestRequests;
+
+	private void RecordManifestRequest()
+	{
+		Interlocked.Increment(ref _manifestRequests);
+		ManifestRequested.TrySetResult();
+	}
+
 	public void AddPackage(string kind,
 		string id,
 		string version = "1.0.0",
@@ -225,12 +239,22 @@ internal sealed class StoreRegistryFixture
 			served.Remove(missing);
 		}
 
+		BuiltTree = served;
 		return new FixtureHttpClientFactory(served, this);
 	}
 
 	public DateTimeOffset SignedAt { get; set; } = DateTimeOffset.UnixEpoch;
 
 	public bool Offline { get; set; }
+
+	public Func<string, HttpResponseMessage?>? ServeOverride { get; set; }
+
+	public IReadOnlyDictionary<string, byte[]> BuiltTree { get; private set; } = new Dictionary<string, byte[]>();
+
+	public static HttpResponseMessage Serve(IReadOnlyDictionary<string, byte[]> tree, string relative) =>
+		tree.TryGetValue(relative, out var body)
+			? new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(body) }
+			: new HttpResponseMessage(HttpStatusCode.NotFound) { Content = new ByteArrayContent([]) };
 
 	private sealed class FixtureHttpClientFactory : IHttpClientFactory
 	{
@@ -257,8 +281,22 @@ internal sealed class StoreRegistryFixture
 				_fixture = fixture;
 			}
 
-			protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+			protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
 				CancellationToken cancellationToken)
+			{
+				if (request.RequestUri!.AbsolutePath.EndsWith("/registry-manifest.json", StringComparison.Ordinal))
+				{
+					_fixture.RecordManifestRequest();
+					if (_fixture.ManifestHold is { } hold)
+					{
+						await hold.Task.WaitAsync(cancellationToken);
+					}
+				}
+
+				return await Respond(request);
+			}
+
+			private Task<HttpResponseMessage> Respond(HttpRequestMessage request)
 			{
 				if (_fixture.Offline)
 				{
@@ -274,9 +312,12 @@ internal sealed class StoreRegistryFixture
 					? path[prefix.Length..]
 					: path.TrimStart('/');
 
-				return Task.FromResult(_served.TryGetValue(relative, out var body)
-					? new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(body) }
-					: new HttpResponseMessage(HttpStatusCode.NotFound) { Content = new ByteArrayContent([]) });
+				if (_fixture.ServeOverride?.Invoke(relative) is { } overridden)
+				{
+					return Task.FromResult(overridden);
+				}
+
+				return Task.FromResult(Serve(_served, relative));
 			}
 		}
 	}

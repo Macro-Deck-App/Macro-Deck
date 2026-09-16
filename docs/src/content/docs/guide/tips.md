@@ -42,6 +42,8 @@ Deaths: {{ vars.deaths }}
 - Copy and paste actions between flows with Ctrl/Cmd + C and V.
 - Drag actions to reorder them.
 - **Run** in the editor runs the actions right away, without pressing the button.
+- **Set Accent Color** recolors a slider or history graph. Put it inside an **If / Else** on a value, for
+  example to turn a graph red above a limit and back to blue below it. **Reset** returns to your theme color.
 
 ## Share and back up
 

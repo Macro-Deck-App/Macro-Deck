@@ -271,7 +271,46 @@ public class WidgetActionTargetTests
 		Assert.That(color.SupportsReset, Is.True);
 	}
 
+	[Test]
+	public async Task RealColor_OnSetIconColor_SetsTheIconColor()
+	{
+		await Execute("set-icon-color",
+			new Dictionary<string, object>
+			{
+				["widget"] = _selfWidget,
+				["color"] = "#ef4444"
+			},
+			ownerWidgetId: _selfWidget);
+
+		var request = _widgets.Applied.Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(request.Patch.IconColor, Is.EqualTo("#ef4444"));
+			Assert.That(request.ClearProperties, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task ResetSentinel_OnSetIconColor_ClearsTheIconColor()
+	{
+		await Execute("set-icon-color",
+			new Dictionary<string, object>
+			{
+				["widget"] = _selfWidget,
+				["color"] = WidgetAppearanceValues.Reset
+			},
+			ownerWidgetId: _selfWidget);
+
+		var request = _widgets.Applied.Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(request.Patch.IsEmpty, Is.True);
+			Assert.That(request.ClearProperties, Is.EqualTo(new[] { WidgetAppearanceProperty.IconColor }));
+		});
+	}
+
 	[TestCase("set-label-color")]
+	[TestCase("set-icon-color")]
 	[TestCase("set-border")]
 	public void OtherWidgetColorParameters_SupportReset(string actionId)
 	{
@@ -387,6 +426,71 @@ public class WidgetActionTargetTests
 		});
 	}
 
+	[Test]
+	public async Task ARepeatRunWithNothingToChange_OnAWidgetThatHasTheProperty_Succeeds()
+	{
+		_widgets.ApplyResult = false;
+		_widgets.Targets.Add(Target(_selfWidget, WidgetAppearanceProperty.AccentColor));
+
+		var result = await Execute("set-accent-color",
+			new Dictionary<string, object> { ["widget"] = _selfWidget, ["color"] = "#ef4444" },
+			ownerWidgetId: _selfWidget);
+
+		Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
+	}
+
+	[Test]
+	public async Task NothingApplied_OnAnUnknownWidgetOrOneWithoutTheProperty_IsNotFound()
+	{
+		_widgets.ApplyResult = false;
+		_widgets.Targets.Add(Target(_selfWidget, WidgetAppearanceProperty.BackgroundColor));
+
+		var unsupported = await Execute("set-accent-color",
+			new Dictionary<string, object> { ["widget"] = _selfWidget, ["color"] = "#ef4444" },
+			ownerWidgetId: _selfWidget);
+		var unknown = await Execute("set-accent-color",
+			new Dictionary<string, object> { ["widget"] = _otherWidget, ["color"] = "#ef4444" },
+			ownerWidgetId: _selfWidget);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(unsupported.Status, Is.EqualTo(ActionResultStatus.Failed));
+			Assert.That(unsupported.ErrorCode, Is.EqualTo(ActionErrorCodes.NotFound));
+			Assert.That(unknown.Status, Is.EqualTo(ActionResultStatus.Failed));
+			Assert.That(unknown.ErrorCode, Is.EqualTo(ActionErrorCodes.NotFound));
+		});
+	}
+
+	[Test]
+	public async Task NothingApplied_OnAnIconProviderButton_IsStillRefusedRatherThanReportedDone()
+	{
+		_widgets.ApplyResult = false;
+		_widgets.Targets.Add(Target(_selfWidget, WidgetAppearanceProperty.Icon, hasActiveIconProvider: true));
+
+		var result = await Execute("set-icon",
+			new Dictionary<string, object> { ["widget"] = _selfWidget, ["iconId"] = "pack.icon" },
+			ownerWidgetId: _selfWidget);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
+			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.PermissionDenied));
+		});
+	}
+
+	private static WidgetTargetInfo Target(string widgetId,
+		WidgetAppearanceProperty property,
+		bool hasActiveIconProvider = false)
+		=> new()
+		{
+			Id = widgetId,
+			Label = "Target",
+			Location = "Main / Home",
+			Type = "Widget",
+			AppearanceProperties = [property],
+			HasActiveIconProvider = hasActiveIconProvider
+		};
+
 	private Task<ActionResult> Execute(string actionId, Dictionary<string, object> parameters, string? ownerWidgetId)
 	{
 		var action = _integration.Actions.Single(a => a.Id == actionId);
@@ -406,14 +510,18 @@ public class WidgetActionTargetTests
 		public List<(string WidgetId, WidgetStateSelector State)> Reset { get; } = [];
 #pragma warning restore CS0618
 
-		public IReadOnlyList<WidgetTargetInfo> GetWidgets() => [];
+		public bool ApplyResult { get; set; } = true;
+
+		public List<WidgetTargetInfo> Targets { get; } = [];
+
+		public IReadOnlyList<WidgetTargetInfo> GetWidgets() => Targets;
 
 		public bool Exists(string widgetId) => true;
 
 		public Task<bool> ApplyAsync(WidgetAppearanceRequest request, CancellationToken cancellationToken = default)
 		{
 			Applied.Add(request);
-			return Task.FromResult(true);
+			return Task.FromResult(ApplyResult);
 		}
 
 		public Task<WidgetStateWriteResult> SetStateAsync(

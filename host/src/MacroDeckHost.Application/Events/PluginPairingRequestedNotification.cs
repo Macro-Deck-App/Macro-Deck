@@ -6,4 +6,7 @@ namespace MacroDeckHost.Application.Events;
 /// <see cref="PluginPairingRequestsChangedNotification" />, which also fires on approve, reject and
 /// revoke. Anything that draws the user's attention has to key off this one, or approving a prompt would
 /// itself raise a fresh notification.</summary>
-public sealed record PluginPairingRequestedNotification(string PluginId, string DisplayName) : INotification;
+public sealed record PluginPairingRequestedNotification(
+	string PluginId,
+	string DisplayName,
+	bool TakesOverInstalledPlugin = false) : INotification;

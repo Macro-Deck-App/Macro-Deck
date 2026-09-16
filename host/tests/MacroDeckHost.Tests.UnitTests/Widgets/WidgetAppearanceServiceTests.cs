@@ -421,10 +421,58 @@ public class WidgetAppearanceServiceTests
 				Does.Contain(WidgetAppearanceProperty.Font).And.Contain(WidgetAppearanceProperty.Icon));
 			Assert.That(button.Service.GetWidgets().Single().AppearanceProperties,
 				Does.Contain(WidgetAppearanceProperty.IconDisplay));
+			Assert.That(button.Service.GetWidgets().Single().AppearanceProperties,
+				Does.Contain(WidgetAppearanceProperty.IconColor));
+			Assert.That(slider.Service.GetWidgets().Single().AppearanceProperties,
+				Does.Not.Contain(WidgetAppearanceProperty.IconColor));
 			Assert.That(slider.Service.GetWidgets().Single().AppearanceProperties,
 				Does.Contain(WidgetAppearanceProperty.Icon).And.Not.Contain(WidgetAppearanceProperty.IconDisplay));
 			Assert.That(clock.Service.GetWidgets().Single().AppearanceProperties,
 				Is.EqualTo(new[] { WidgetAppearanceProperty.Border, WidgetAppearanceProperty.BorderColor }));
+		});
+	}
+
+	[Test]
+	public async Task AccentColor_RecoloursASliderOnce_AndTheSameColourAgainChangesNothing()
+	{
+		var fixture = new Fixture("{}", WidgetTypeIds.Slider);
+		var request = new WidgetAppearanceRequest
+		{
+			WidgetId = _widgetId.ToString(),
+			Patch = new WidgetAppearancePatch { AccentColor = "#ef4444" }
+		};
+
+		var first = await fixture.Service.ApplyAsync(request);
+		var second = await fixture.Service.ApplyAsync(request);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(fixture.Service.GetWidgets().Single().AppearanceProperties,
+				Does.Contain(WidgetAppearanceProperty.AccentColor));
+			Assert.That(first, Is.True);
+			Assert.That(JsonNode.Parse(fixture.Widget.Data!)!["color"]!.GetValue<string>(), Is.EqualTo("#ef4444"));
+			Assert.That(second, Is.False, "an unchanged colour is reported like every other colour action's");
+			Assert.That(fixture.Widgets.Updated, Has.Count.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task AccentColor_IsNotAnActionButtonProperty()
+	{
+		var fixture = new Fixture("""{"mode":"momentary"}""");
+
+		var applied = await fixture.Service.ApplyAsync(new WidgetAppearanceRequest
+		{
+			WidgetId = _widgetId.ToString(),
+			Patch = new WidgetAppearancePatch { AccentColor = "#ef4444" }
+		});
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(applied, Is.False);
+			Assert.That(fixture.Service.GetWidgets().Single().AppearanceProperties,
+				Does.Not.Contain(WidgetAppearanceProperty.AccentColor));
+			Assert.That(fixture.Widgets.Updated, Is.Empty);
 		});
 	}
 

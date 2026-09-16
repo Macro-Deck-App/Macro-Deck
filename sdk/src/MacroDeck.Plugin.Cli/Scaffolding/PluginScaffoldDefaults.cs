@@ -18,6 +18,8 @@ internal static class PluginScaffoldDefaults
 
 	public const string License = "MIT";
 
+	public const string DotnetVersion = "10.0";
+
 	public const string DefaultDescription = "A Macro Deck plugin.";
 
 	public const string TemplatePackageId = "MacroDeck.Plugin.Templates";

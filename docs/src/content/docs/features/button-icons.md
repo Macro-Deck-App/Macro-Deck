@@ -132,6 +132,30 @@ The **Set Icon** action fails on a button with an assigned icon provider, the sa
 state-controlled one. This holds even when the provider can't answer right now. In a patch that changes
 several properties, only the icon is dropped and the rest still applies.
 
+## Colouring the icon
+
+An action button can draw its icon in one colour: every pixel takes the colour and keeps its own
+transparency, so a white icon on a transparent background turns into an icon of that colour. The user sets
+it in the button editor, and a flow sets it with the **Set Icon Color** action.
+
+```csharp
+await context.Widgets.ApplyAsync(new WidgetAppearanceRequest
+{
+	WidgetId = widgetId,
+	Patch = new WidgetAppearancePatch { IconColor = "#ef4444" },
+});
+```
+
+`IconColor` takes `#rrggbb`. To return the icon to its own colours, send
+`ClearProperties = [WidgetAppearanceProperty.IconColor]` or an empty string. In state mode the colour
+belongs to the targeted state, like the icon itself.
+
+- Artwork from an icon provider is never tinted. On a button with a provider the call still succeeds and
+  stores the colour, but nothing visible changes until the button falls back to its own icon.
+- A host that predates `IconColor` ignores the field, so a patch that changes only the icon colour makes
+  `ApplyAsync` return `false` there. `WidgetTargetInfo.AppearanceProperties` lists `IconColor` for a
+  button on a host that supports it.
+
 ## Over the plugin protocol
 
 | Operation | SDK member |

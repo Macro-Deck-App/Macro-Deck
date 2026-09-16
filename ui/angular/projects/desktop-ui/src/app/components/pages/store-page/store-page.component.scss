@@ -38,6 +38,14 @@
   margin-bottom: var(--space-4);
 }
 
+.store-refresh-icon-spinning {
+  animation: ds-spin 1s linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
 .store-title {
   margin: 0;
   font-size: var(--text-xl);

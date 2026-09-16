@@ -22,6 +22,10 @@ export class VariableCatalogService {
 
   private readonly pages = new Map<string, WritableSignal<VariableCatalogPage>>();
 
+  readonly revision = signal(0);
+
+  private readonly boundVariables = new Map<string, string>();
+
   private readonly seenLeaves = signal<ReadonlyMap<string, ReadonlyMap<string, boolean>>>(new Map());
   private readonly loadedKeys = new Set<string>();
   private readonly loadingKeys = new Set<string>();
@@ -89,19 +93,25 @@ export class VariableCatalogService {
         : { nodes: [], hasMore: false, available: false });
       this.recordLeaves(integrationId, response?.nodes ?? []);
       this.loadedKeys.add(key);
+      this.revision.update(r => r + 1);
     } catch (error) {
       console.error(`Failed to discover catalog variables for ${integrationId}:`, error);
       this.pageSignal(key).set({ nodes: [], hasMore: false, available: false });
       this.loadedKeys.add(key);
+      this.revision.update(r => r + 1);
     } finally {
       this.loadingKeys.delete(key);
     }
   }
 
   unboundCountFor(integrationId: string): number | null {
-    const reported = this.providersFor()().find(p => p.integrationId === integrationId)?.unboundCount;
+    const provider = this.providersFor()().find(p => p.integrationId === integrationId);
+    const reported = provider?.unboundCount;
     if (reported !== undefined && reported !== null) {
       return reported;
+    }
+    if (provider?.supportsSearch) {
+      return null;
     }
 
     let unbound = 0;
@@ -176,6 +186,7 @@ export class VariableCatalogService {
         this.loadingKeys.delete(key);
       }
     }
+    this.revision.update(r => r + 1);
   }
 
   private recordLeaves(integrationId: string, nodes: readonly VariableCatalogNode[]): void {
@@ -217,8 +228,16 @@ export class VariableCatalogService {
     this.api.onNotification<VariablesChangedEvent>('VariablesChangedEvent').subscribe(event => {
       const integrationIds = new Set<string>();
       for (const variable of event.upserted) {
-        if (variable.dynamicResourceId && variable.ownerIntegrationId) {
+        if (variable.dynamicResourceId && variable.ownerIntegrationId && !this.boundVariables.has(variable.id)) {
+          this.boundVariables.set(variable.id, variable.ownerIntegrationId);
           integrationIds.add(variable.ownerIntegrationId);
+        }
+      }
+      for (const id of event.deletedIds) {
+        const integrationId = this.boundVariables.get(id);
+        if (integrationId) {
+          this.boundVariables.delete(id);
+          integrationIds.add(integrationId);
         }
       }
       for (const integrationId of integrationIds) {

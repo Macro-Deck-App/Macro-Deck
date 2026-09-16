@@ -17,6 +17,7 @@ using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Plugins.Trust;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Infrastructure.Persistence;
+using MacroDeckHost.Localization;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -45,6 +46,7 @@ public sealed class PluginInstaller : IPluginInstaller
 	private readonly IPluginSupervisor _supervisor;
 	private readonly IRemotePluginIntegrationRegistrar _integrationRegistrar;
 	private readonly IPluginSessionRegistry _sessionRegistry;
+	private readonly IPluginTakeoverRegistry _takeovers;
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly PluginInstallerOptions _options;
 	private readonly TimeProvider _timeProvider;
@@ -62,6 +64,7 @@ public sealed class PluginInstaller : IPluginInstaller
 		IPluginSupervisor supervisor,
 		IRemotePluginIntegrationRegistrar integrationRegistrar,
 		IPluginSessionRegistry sessionRegistry,
+		IPluginTakeoverRegistry takeovers,
 		IServiceScopeFactory scopeFactory,
 		PluginInstallerOptions options,
 		TimeProvider timeProvider,
@@ -78,6 +81,7 @@ public sealed class PluginInstaller : IPluginInstaller
 		_supervisor = supervisor;
 		_integrationRegistrar = integrationRegistrar;
 		_sessionRegistry = sessionRegistry;
+		_takeovers = takeovers;
 		_scopeFactory = scopeFactory;
 		_options = options;
 		_timeProvider = timeProvider;
@@ -230,6 +234,11 @@ public sealed class PluginInstaller : IPluginInstaller
 			await gate.WaitAsync(cancellationToken);
 			try
 			{
+				if (await RefuseWhileTakenOver(manifest.Id, manifest.Version) is { } takenOver)
+				{
+					return takenOver;
+				}
+
 				if (await RefuseWhenPreUpdateBackupFails(manifest.Id, cancellationToken) is { } refusal)
 				{
 					return refusal;
@@ -250,6 +259,22 @@ public sealed class PluginInstaller : IPluginInstaller
 		{
 			DeleteDirectory(stagingDirectory);
 		}
+	}
+
+	private async Task<PluginInstallResult?> RefuseWhileTakenOver(string pluginId, string version)
+	{
+		if (!_takeovers.IsActive(pluginId))
+		{
+			return null;
+		}
+
+		var message = await ActiveLocalization.Resolve(_scopeFactory,
+			AppStrings.Errors.Plugins.InstallBlockedByTakeover());
+
+		return PluginInstallResult.Fail(PluginInstallError.Failed, message, pluginId, version) with
+		{
+			BlockedByDevelopmentTakeover = true
+		};
 	}
 
 	/// <summary>
@@ -310,6 +335,11 @@ public sealed class PluginInstaller : IPluginInstaller
 		await gate.WaitAsync(cancellationToken);
 		try
 		{
+			if (await RefuseWhileTakenOver(pluginId, version) is { } takenOver)
+			{
+				return takenOver;
+			}
+
 			var versionDirectory = PluginInstallPaths.VersionDirectory(_paths.PluginsDirectory, pluginId, version);
 			var trust = await _trustEvaluator.EvaluateInstalledAsync(versionDirectory, cancellationToken);
 			var decision = await EvaluateTrustGate(pluginId, version, trust, cancellationToken);
@@ -865,6 +895,10 @@ public sealed class PluginInstaller : IPluginInstaller
 		{
 			PluginInstallerLog.IdClaimFailed(_logger, pluginId, ex);
 		}
+
+		// A takeover can still begin while this activation runs. Ending it after the revoke keeps it from
+		// outliving its credential and lets the start below run.
+		_takeovers.Finish(pluginId);
 
 		var blocked = warnings.Any(warning => warning.Severity == PluginInstallWarningSeverity.Blocking);
 		if (!startAfterActivation || blocked)

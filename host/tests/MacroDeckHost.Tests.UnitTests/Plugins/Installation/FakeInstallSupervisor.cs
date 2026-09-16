@@ -32,6 +32,8 @@ internal sealed class FakeInstallSupervisor : IPluginSupervisor
 
 	public Dictionary<string, bool> DesiredStartState { get; } = new(StringComparer.Ordinal);
 
+	public Action<string, PluginStopReason>? OnStop { get; set; }
+
 	public IReadOnlyList<PluginRuntimeSnapshot> Snapshot()
 	{
 		var installed = _catalog.Discover().Where(plugin => plugin.Versions.Count > 0).ToList();
@@ -79,6 +81,7 @@ internal sealed class FakeInstallSupervisor : IPluginSupervisor
 		CancellationToken cancellationToken = default)
 	{
 		Stops.Add((pluginId, reason));
+		OnStop?.Invoke(pluginId, reason);
 		_runtime.Remove(pluginId);
 
 		if (reason == PluginStopReason.UserRequested && DesiredStartState.ContainsKey(pluginId))
@@ -106,6 +109,12 @@ internal sealed class FakeInstallSupervisor : IPluginSupervisor
 	}
 
 	public Task Reconcile(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+	public Task SuspendForTakeover(string pluginId, CancellationToken cancellationToken = default)
+	{
+		_runtime.Remove(pluginId);
+		return Task.CompletedTask;
+	}
 
 	public bool IsRunning(string pluginId)
 		=> Snapshot().Any(snapshot => string.Equals(snapshot.PluginId, pluginId, StringComparison.Ordinal) &&

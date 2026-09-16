@@ -1,9 +1,13 @@
+using System.Net;
 using System.Text.Json;
 using MacroDeck.Signing;
 using MacroDeck.Signing.Registry;
+using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Store;
 using MacroDeckHost.Domain.Common;
+using Mediator;
+using Microsoft.Extensions.Hosting;
 using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Infrastructure.Store;
@@ -14,7 +18,11 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 	private const string SignatureFileName = "registry-signature.json";
 	private const string CertificateDirectory = "certificates";
 
+	private static readonly TimeSpan _disposeWait = TimeSpan.FromSeconds(5);
+
 	private readonly SemaphoreSlim _gate = new(1, 1);
+	private readonly Lock _inflightLock = new();
+	private readonly CancellationTokenSource _lifetime;
 	private readonly IHttpClientFactory _httpClientFactory;
 	private readonly StoreRegistryOptions _options;
 	private readonly IStoreRegistryStateStore _stateStore;
@@ -22,9 +30,12 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 	private readonly IStoreCatalog _catalog;
 	private readonly IMacroDeckPaths _paths;
 	private readonly TimeProvider _timeProvider;
+	private readonly IStoreRegistryRefreshTracker _tracker;
+	private readonly IMediator _mediator;
 	private readonly ILogger _logger;
 
 	private StoreRegistryStatus _status = StoreRegistryStatus.Unavailable;
+	private Task<Result<RegistryRefreshError>>? _inflight;
 
 	public StoreRegistryRefresher(IHttpClientFactory httpClientFactory,
 		StoreRegistryOptions options,
@@ -33,6 +44,9 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 		IStoreCatalog catalog,
 		IMacroDeckPaths paths,
 		TimeProvider timeProvider,
+		IStoreRegistryRefreshTracker tracker,
+		IMediator mediator,
+		IHostApplicationLifetime lifetime,
 		ILogger logger)
 	{
 		_httpClientFactory = httpClientFactory;
@@ -42,10 +56,22 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 		_catalog = catalog;
 		_paths = paths;
 		_timeProvider = timeProvider;
+		_tracker = tracker;
+		_mediator = mediator;
+		_lifetime = CancellationTokenSource.CreateLinkedTokenSource(lifetime.ApplicationStopping);
 		_logger = logger.ForContext<StoreRegistryRefresher>();
 	}
 
-	public StoreRegistryStatus Status => _status with { Stale = IsStale(_status) };
+	public StoreRegistryStatus Status
+	{
+		get
+		{
+			lock (_inflightLock)
+			{
+				return _status with { Stale = IsStale(_status), Refreshing = _inflight is not null };
+			}
+		}
+	}
 
 	private string Origin => _options.BaseUrl.GetLeftPart(UriPartial.Path);
 
@@ -101,37 +127,166 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 		}
 	}
 
-	public async Task<Result<RegistryRefreshError>> Refresh(CancellationToken cancellationToken = default)
-	{
-		await _gate.WaitAsync(cancellationToken);
-		_status = _status with { Refreshing = true };
-		var staging = Path.Combine(_paths.StoreRegistryStagingDirectory, Guid.CreateVersion7().ToString("N"));
-		try
-		{
-			var result = await RefreshCore(staging, cancellationToken);
-			_status = _status with
-			{
-				Refreshing = false,
-				LastAttemptAt = _timeProvider.GetUtcNow(),
-				LastError = result.Success ? null : result.Error,
-				LastErrorMessage = result.Success ? null : result.ErrorMessage
-			};
+	public Task<Result<RegistryRefreshError>> Refresh(CancellationToken cancellationToken = default) =>
+		Refresh(StoreRegistryRefreshTrigger.Manual, cancellationToken);
 
-			return result;
-		}
-		finally
+	public Task<Result<RegistryRefreshError>> Refresh(StoreRegistryRefreshTrigger trigger,
+		CancellationToken cancellationToken = default)
+	{
+		lock (_inflightLock)
 		{
-			SafeDelete(staging);
-			_gate.Release();
+			if (_inflight is null)
+			{
+				_tracker.Begin(trigger);
+				// Task.Run so the run's finally, which clears the slot under this lock, cannot execute before
+				// the slot is assigned. The run uses the refresher's own token: one caller leaving must not stop it.
+				var token = _lifetime.Token;
+				_inflight = Task.Run(() => RunShared(token), CancellationToken.None);
+			}
+
+			return _inflight.WaitAsync(cancellationToken);
 		}
 	}
 
-	private async Task<Result<RegistryRefreshError>> RefreshCore(string staging,
+	public void Dispose()
+	{
+		_lifetime.Cancel();
+		Task? inflight;
+		lock (_inflightLock)
+		{
+			inflight = _inflight;
+		}
+
+		if (inflight is not null && !WaitQuietly(inflight))
+		{
+			return;
+		}
+
+		_lifetime.Dispose();
+		_gate.Dispose();
+	}
+
+	private async Task<Result<RegistryRefreshError>> RunShared(CancellationToken cancellationToken)
+	{
+		var state = StoreRegistryRefreshRunState.Failed;
+		RegistryRefreshError? error = null;
+		string? detail = null;
+		try
+		{
+			await _gate.WaitAsync(cancellationToken);
+			try
+			{
+				var result = await RefreshUntilConsistent(cancellationToken);
+				// StoreHttp reports a cancelled fetch as a network failure; a stopping host is not a failed refresh.
+				if (!result.Success)
+				{
+					cancellationToken.ThrowIfCancellationRequested();
+				}
+
+				_status = _status with
+				{
+					LastAttemptAt = _timeProvider.GetUtcNow(),
+					LastError = result.Success ? null : result.Error,
+					LastErrorMessage = result.Success ? null : result.ErrorMessage
+				};
+				state = result.Success ? StoreRegistryRefreshRunState.Succeeded : StoreRegistryRefreshRunState.Failed;
+				error = result.Error;
+				detail = result.ErrorMessage;
+				return result;
+			}
+			finally
+			{
+				_gate.Release();
+			}
+		}
+		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+		{
+			state = StoreRegistryRefreshRunState.Cancelled;
+			throw;
+		}
+		catch (Exception ex)
+		{
+			detail = ex.Message;
+			throw;
+		}
+		finally
+		{
+			lock (_inflightLock)
+			{
+				_inflight = null;
+				_tracker.Finish(state, error, detail, _status with { Stale = IsStale(_status), Refreshing = false });
+			}
+
+			if (state is not StoreRegistryRefreshRunState.Cancelled)
+			{
+				await AnnounceOutcome();
+			}
+		}
+	}
+
+	private async Task<Result<RegistryRefreshError>> RefreshUntilConsistent(CancellationToken cancellationToken)
+	{
+		for (var attempt = 0;; attempt++)
+		{
+			var staging = Path.Combine(_paths.StoreRegistryStagingDirectory, Guid.CreateVersion7().ToString("N"));
+			Attempt outcome;
+			try
+			{
+				outcome = await RefreshCore(staging, cancellationToken);
+			}
+			finally
+			{
+				SafeDelete(staging);
+			}
+
+			// Every attempt verifies from scratch, so waiting only defers a failure and never admits anything
+			// unverified; a mismatch that outlasts the waits fails with its own error as before.
+			if (outcome.Result.Success ||
+				!outcome.MayBeUpdateRace ||
+				attempt >= _options.UpdateRaceRetryDelays.Count ||
+				cancellationToken.IsCancellationRequested)
+			{
+				return outcome.Result;
+			}
+
+			var delay = _options.UpdateRaceRetryDelays[attempt];
+			_tracker.Log(StoreRegistryRefreshStep.WaitingForRegistryUpdate,
+				count: (int)Math.Ceiling(delay.TotalSeconds));
+			await Task.Delay(delay, _timeProvider, cancellationToken);
+		}
+	}
+
+	private async Task AnnounceOutcome()
+	{
+		try
+		{
+			await _mediator.Publish(new StoreRegistryRefreshedNotification(Status), CancellationToken.None);
+		}
+		catch (Exception ex)
+		{
+			_logger.Warning(ex, "Announcing the store registry refresh outcome failed.");
+		}
+	}
+
+	private static bool WaitQuietly(Task task)
+	{
+		try
+		{
+			return task.Wait(_disposeWait);
+		}
+		catch (AggregateException)
+		{
+			return true;
+		}
+	}
+
+	private async Task<Attempt> RefreshCore(string staging,
 		CancellationToken cancellationToken)
 	{
 		Directory.CreateDirectory(staging);
 		using var client = CreateClient(StoreHttp.RegistryClientName, _options.RequestTimeout);
 
+		_tracker.Log(StoreRegistryRefreshStep.FetchingManifest);
 		var manifestFetch = await Fetch(client,
 			ManifestFileName,
 			_options.MaxRegistryFileBytes,
@@ -142,6 +297,7 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 			return Result.Fail(RegistryRefreshError.NetworkFailure, manifestFetch.FailureMessage);
 		}
 
+		_tracker.Log(StoreRegistryRefreshStep.FetchingSignature);
 		var signatureFetch = await Fetch(client,
 			SignatureFileName,
 			_options.MaxRegistryFileBytes,
@@ -178,8 +334,9 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 		var accepted = state?.AcceptedSequence ?? 0;
 		if (manifest.Sequence < accepted)
 		{
-			return Result.Fail(RegistryRefreshError.SequenceRollback,
-				$"The registry offered sequence {manifest.Sequence}, below the accepted {accepted}.");
+			return new Attempt(Result.Fail(RegistryRefreshError.SequenceRollback,
+					$"The registry offered sequence {manifest.Sequence}, below the accepted {accepted}."),
+				MayBeUpdateRace: true);
 		}
 
 		if (manifest.Sequence == accepted &&
@@ -188,6 +345,7 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 		{
 			_stateStore.Save(state! with { LastSuccessAt = _timeProvider.GetUtcNow() });
 			_status = _status with { LastSuccessAt = _timeProvider.GetUtcNow() };
+			_tracker.Log(StoreRegistryRefreshStep.UpToDate, sequence: manifest.Sequence);
 			return Result.Ok<RegistryRefreshError>();
 		}
 
@@ -198,6 +356,7 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 				"The registry manifest declares more data than this host will download.");
 		}
 
+		_tracker.Log(StoreRegistryRefreshStep.DownloadingFiles, count: manifest.Files.Count);
 		if (await DownloadDeclaredFiles(client, manifest, staging, cancellationToken) is { } downloadFailure)
 		{
 			return downloadFailure;
@@ -210,10 +369,13 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 			signatureFetch.Content!,
 			cancellationToken);
 
+		_tracker.Log(StoreRegistryRefreshStep.Verifying);
 		var verified = await VerifyTree(staging, accepted, cancellationToken);
 		if (!verified.Success)
 		{
-			return Result.Fail(verified.Error!.Value, verified.FailureMessage);
+			return new Attempt(Result.Fail(verified.Error!.Value, verified.FailureMessage),
+				verified.CertificateMissing ||
+				verified.Error is RegistryRefreshError.SizeMismatch or RegistryRefreshError.SignatureInvalid);
 		}
 
 		if (RevokedSigningKey(staging, signature.KeyId) is { } revokedReason)
@@ -221,6 +383,7 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 			return Result.Fail(RegistryRefreshError.SigningKeyRevoked, revokedReason);
 		}
 
+		_tracker.Log(StoreRegistryRefreshStep.ReadingCatalog);
 		var fetchedAt = _timeProvider.GetUtcNow();
 		var snapshot = _reader.Read(staging,
 			manifest.Sequence,
@@ -260,14 +423,16 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 			CertificateId = verified.CertificateId
 		};
 
+		_tracker.Log(StoreRegistryRefreshStep.Applied, sequence: snapshot.Sequence);
 		return Result.Ok<RegistryRefreshError>();
 	}
 
-	private async Task<Result<RegistryRefreshError>?> DownloadDeclaredFiles(HttpClient client,
+	private async Task<Attempt?> DownloadDeclaredFiles(HttpClient client,
 		RegistryManifestDocument manifest,
 		string staging,
 		CancellationToken cancellationToken)
 	{
+		var completed = 0;
 		foreach (var file in manifest.Files)
 		{
 			if (!IsSafeRelativePath(file.Path))
@@ -289,15 +454,17 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 				cancellationToken);
 			if (!fetch.Success)
 			{
-				return Result.Fail(fetch.SizeMismatch
-						? RegistryRefreshError.SizeMismatch
-						: RegistryRefreshError.NetworkFailure,
-					fetch.FailureMessage);
+				return new Attempt(Result.Fail(fetch.SizeMismatch
+							? RegistryRefreshError.SizeMismatch
+							: RegistryRefreshError.NetworkFailure,
+						fetch.FailureMessage),
+					fetch.SizeMismatch || fetch.StatusCode == (int)HttpStatusCode.NotFound);
 			}
 
 			var destination = Path.Combine(staging, Path.Combine(file.Path.Split('/')));
 			Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
 			await File.WriteAllBytesAsync(destination, fetch.Content!, cancellationToken);
+			_tracker.ReportProgress(++completed, manifest.Files.Count);
 		}
 
 		return null;
@@ -348,7 +515,7 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 		if (!File.Exists(certificatePath) || !File.Exists(certificateSignaturePath))
 		{
 			return VerifiedTree.Fail(RegistryRefreshError.CertificateUntrusted,
-				$"The registry snapshot does not carry certificate '{signature.KeyId}'.");
+				$"The registry snapshot does not carry certificate '{signature.KeyId}'.") with { CertificateMissing = true };
 		}
 
 		var result = await RegistryManifestVerifier.VerifyAsync(manifestPath,
@@ -497,8 +664,6 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 		}
 	}
 
-	public void Dispose() => _gate.Dispose();
-
 	private sealed record VerifiedTree
 	{
 		public required bool Success { get; init; }
@@ -515,7 +680,14 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 
 		public string? FailureMessage { get; init; }
 
+		public bool CertificateMissing { get; init; }
+
 		public static VerifiedTree Fail(RegistryRefreshError error, string message) =>
 			new() { Success = false, Error = error, FailureMessage = message };
+	}
+
+	private sealed record Attempt(Result<RegistryRefreshError> Result, bool MayBeUpdateRace)
+	{
+		public static implicit operator Attempt(Result<RegistryRefreshError> result) => new(result, false);
 	}
 }

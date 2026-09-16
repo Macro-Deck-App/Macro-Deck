@@ -85,12 +85,17 @@ public class PluginRegistrationController : ControllerBase
 			PluginRegistrationOrigins.DeveloperToken);
 		if (!result.Succeeded)
 		{
-			return result.Error == PluginRegistrationError.InvalidPluginId
-				? PluginProtocolHttp.Error(PluginErrors.InvalidPayload(result.ErrorDetail is { } detail
-						? new Dictionary<string, string> { ["pluginId"] = detail }
-						: null),
-					StatusCodes.Status400BadRequest)
-				: PluginProtocolHttp.Error(PluginErrors.AlreadyRegistered(), StatusCodes.Status409Conflict);
+			return result.Error switch
+			{
+				PluginRegistrationError.InvalidPluginId => PluginProtocolHttp.Error(PluginErrors.InvalidPayload(
+						result.ErrorDetail is { } detail
+							? new Dictionary<string, string> { ["pluginId"] = detail }
+							: null),
+					StatusCodes.Status400BadRequest),
+				PluginRegistrationError.PluginInstalled
+					=> PluginProtocolHttp.Error(PluginErrors.PluginInstalled(), StatusCodes.Status409Conflict),
+				_ => PluginProtocolHttp.Error(PluginErrors.AlreadyRegistered(), StatusCodes.Status409Conflict)
+			};
 		}
 
 		_throttle.RegisterSuccess(throttleKey);

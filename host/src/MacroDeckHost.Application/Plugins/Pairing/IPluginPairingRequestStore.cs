@@ -65,7 +65,7 @@ public interface IPluginPairingRequestStore
 	/// <summary>All non-expired records, for building UI/status projections.</summary>
 	IReadOnlyList<PluginPairingRequestRecord> Snapshot();
 
-	bool Approve(string requestId, bool replaceExistingRegistration);
+	bool Approve(string requestId, bool replaceExistingRegistration, bool takeOverInstalledPlugin);
 
 	bool Reject(string requestId);
 

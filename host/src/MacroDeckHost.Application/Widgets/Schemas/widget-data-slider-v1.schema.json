@@ -3,7 +3,7 @@
   "$id": "https://schemas.macro-deck.app/widget-data-slider-v1.schema.json",
   "title": "Macro Deck Slider widget data (v1)",
   "description": "Describes the JSON stored in WidgetEntity.Data for a Slider widget (WidgetType.Slider).",
-  "$comment": "No top-level 'required': a freshly created widget's data is a near-empty JSON object, and every property here has to stay optional so it keeps validating. additionalProperties is deliberately left unset (defaults to true) on this schema and on every nested object - an older or newer client, or a plugin-driven flow, may write extension keys this schema does not know about, and rejecting them would make the widget unsavable. A slider two-way binds to a writable numeric variable through 'valueVariable' and runs no press-trigger flows; its only flows are the optional double-tap ones under 'flows'. Profiles written before that binding existed still carry 'action'; it validates and is simply no longer read.",
+  "$comment": "No top-level 'required': a freshly created widget's data is a near-empty JSON object, and every property here has to stay optional so it keeps validating. additionalProperties is deliberately left unset (defaults to true) on this schema and on every nested object - an older or newer client, or a plugin-driven flow, may write extension keys this schema does not know about, and rejecting them would make the widget unsavable. A slider two-way binds to a writable numeric variable through 'valueVariable' and runs no press-trigger flows; its only flows are the optional double-tap and event-trigger ones under 'flows'. Profiles written before that binding existed still carry 'action'; it validates and is simply no longer read.",
   "type": "object",
   "properties": {
     "label": {
@@ -13,6 +13,10 @@
     "orientation": {
       "enum": ["horizontal", "vertical", null],
       "description": "Slider layout direction."
+    },
+    "interaction": {
+      "enum": ["absolute", "relative", null],
+      "description": "How a drag maps to the value. 'absolute' (also when absent or null) jumps to the pointer; 'relative' leaves the value where it is on press and moves it by the pointer's travel, the full track length spanning the full range."
     },
     "color": {
       "type": ["string", "null"],
@@ -84,14 +88,18 @@
     },
     "step": {
       "type": ["number", "null"],
-      "description": "Grid granularity, used only where the bound variable declares no step of its own. See min for why the fallback is per field."
+      "description": "Grid granularity, used where the bound variable declares no step of its own, or wherever customStep is true. See min for why the fallback is per field."
+    },
+    "customStep": {
+      "type": ["boolean", "null"],
+      "description": "Makes step replace the step the bound variable declares. Absent, null or false keeps the variable's own step, which is how every slider stored before this key behaves."
     },
     "flows": {
       "anyOf": [
         { "type": "string" },
         { "type": "array", "items": { "$ref": "#/$defs/actionFlow" } }
       ],
-      "description": "Action flows stored the same way as an Action Button's; the slider runs only the 'onDoublePress' one, on a double tap. Stored on the wire as a nested JSON string; the editor may show it inlined as an array. Both forms are accepted here."
+      "description": "Action flows stored the same way as an Action Button's; the slider runs the 'onDoublePress' one on a double tap and each 'onEvent' one when its event fires. Stored on the wire as a nested JSON string; the editor may show it inlined as an array. Both forms are accepted here."
     }
   },
   "$defs": {

@@ -346,7 +346,8 @@ public class AdbSettingsHandlersTests
 				Enabled = true,
 				ExecutablePath = null,
 				UsbConnectionsEnabled = true,
-				DefaultDeviceSerial = "R58M12ABCDE"
+				DefaultDeviceSerial = "R58M12ABCDE",
+				StopServerOnExit = true
 			},
 			CancellationToken.None);
 
@@ -358,6 +359,7 @@ public class AdbSettingsHandlersTests
 			Assert.That(response.UsbConnectionsEnabled, Is.False, "the field that was sent must change");
 			Assert.That(response.Enabled, Is.True, "an omitted toggle must not be reset to its default");
 			Assert.That(response.DefaultDeviceSerial, Is.EqualTo("R58M12ABCDE"));
+			Assert.That(response.StopServerOnExit, Is.True, "an omitted stop-on-exit choice must be kept");
 		});
 	}
 

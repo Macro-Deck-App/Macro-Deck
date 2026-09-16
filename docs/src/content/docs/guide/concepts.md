@@ -41,6 +41,9 @@ What a widget does, and when. The **Scenes** button runs **Change Folder to** on
 | Short Press | Switch OBS scene |
 | Long Press | Start the stream |
 | Double Tap | Mute all audio |
+| Event | Turn the mic slider's accent red when OBS reports **Streaming Started** |
+
+Every widget with actions, sliders included, can add event triggers next to its press triggers.
 
 Actions run top to bottom. **If / Else**, **Repeat** and **Wait** build longer flows, for example:
 *mute the mic, wait 3 seconds, switch the scene*. **Run** tries them out right away.
@@ -64,13 +67,23 @@ Values you can show and use anywhere:
 
 Show one in a label with `{{ vars.deaths }}`, like the **Deaths: 3** button above.
 
+Every speaker and microphone gets its own volume and mute variable, named after the device, for
+example `system_audio_input_usb_mic_volume_percent`. An unplugged device keeps its variables; they
+read as unavailable until it is back. The volume actions can control the default output, the default
+input or one specific device.
+
+Some integrations, such as Home Assistant, offer far more values than they list up front. Pick the
+integration in the variable browser and search for an entity by name or variable name, then open it
+to see its state and attributes. If you know the entity id, for example `light.office_lamp` or
+`light.office_lamp/brightness`, type it under **Enter a resource ID** instead.
+
 ![The Variables page with the user variable deaths and system variables](../../../assets/guide/variables.png)
 
 ## Scripts and automations
 
 - **Script:** actions you reuse, for example *Go live* used by three buttons.
-- **Automation:** actions that run on an event instead of a press. **Evening stream** switches the
-  deck to the **Streaming** profile every day at 18:00:
+- **Automation:** actions that run on an event without belonging to a widget. **Evening stream**
+  switches the deck to the **Streaming** profile every day at 18:00:
 
 ![The automation Evening stream: the event Schedule - Daily At 18:00 runs Change Profile to Streaming](../../../assets/guide/automation.png)
 
@@ -84,8 +97,17 @@ Discord and more. Turn on the ones you use under **Integrations**.
 
 ![The Integrations page with ADB, Discord, Home Assistant, HTTP and Keyboard](../../../assets/guide/integrations.png)
 
-The **Store** for more plugins and icon packs is not available yet. Everything published there will
-be reviewed and signed first.
+The **Store** for more plugins and icon packs is not available to everyone yet. Everything published
+there will be reviewed and signed first. Members of the Store tester programme can already use it:
+sign in with your Macro Deck account under **Settings > Account**. A change to your tester access
+can take up to a day to show up. If you were signed in before your Macro Deck version supported
+testers, sign out and in once.
+
+**Refresh** on the Store page fetches the latest catalog and opens a log of each step as it happens.
+Macro Deck also refreshes on its own about once an hour. While a refresh runs, the button says
+**Refreshing…** in every window, and pressing it opens the log of that refresh instead of starting a
+second one. If the store registry is being updated while a refresh runs, the log says so and Macro Deck
+tries again a few times over about five minutes before it reports a failure.
 
 ## Devices
 

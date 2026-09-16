@@ -1694,6 +1694,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Developer.ManagedPlugins.UnmanagedReason" xml:space="preserve">
     <value>Dieses Plugin startet und stoppt sich selbst. Macro Deck beobachtet nur dessen Sitzung, daher kann es hier nicht gestartet, gestoppt oder neu gestartet werden.</value>
   </data>
+  <data name="Developer.ManagedPlugins.TakenOverBadge" xml:space="preserve">
+    <value>Entwicklungs-Build aktiv</value>
+  </data>
+  <data name="Developer.ManagedPlugins.TakenOverReason" xml:space="preserve">
+    <value>Ein Entwicklungs-Build hat dieses Plugin übernommen, daher kann es hier nicht gestartet oder neu gestartet werden. Widerrufe den Entwicklungs-Build auf dieser Seite, um die installierte Version wieder zu starten.</value>
+  </data>
   <data name="Developer.NoActionsAvailableHeading" xml:space="preserve">
     <value>Keine Aktionen verfügbar</value>
   </data>
@@ -1961,6 +1967,13 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>{name} verliert seine Zugangsdaten und wird sofort getrennt. Es muss sich erneut koppeln, um wieder zu verbinden.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Developer.Tokens.EndTakeoverConfirmMessage" xml:space="preserve">
+    <value>{name} verliert seine Zugangsdaten und wird sofort getrennt. Die installierte Version des Plugins startet wieder.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Developer.Tokens.TakeoverBadge" xml:space="preserve">
+    <value>Ersetzt installiertes Plugin</value>
+  </data>
   <data name="Developer.Tokens.RevokePluginFailed" xml:space="preserve">
     <value>Das Plugin konnte nicht widerrufen werden</value>
   </data>
@@ -2117,6 +2130,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Dialogs.PluginPairing.ReplacesWarning" xml:space="preserve">
     <value>Für diese Paket-ID ist bereits ein Plugin gekoppelt. Eine Genehmigung ersetzt dessen Registrierung - die bestehenden Zugangsdaten funktionieren dann nicht mehr, und die Verbindung wird sofort getrennt.</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverConfirmLabel" xml:space="preserve">
+    <value>Mir ist bewusst, dass ein nicht überprüfter Entwicklungs-Build das installierte Plugin ersetzt und dessen Einstellungen und gespeicherte Zugangsdaten erhält</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverWarning" xml:space="preserve">
+    <value>Diese Paket-ID gehört zu einem installierten Plugin. Wenn du zustimmst, ersetzt ein nicht überprüfter Entwicklungs-Build es: das installierte Plugin wird gestoppt, und der Entwicklungs-Build erhält dessen Einstellungen und gespeicherte Zugangsdaten. Die installierte Version startet wieder, sobald die Übernahme endet.</value>
   </data>
   <data name="Dialogs.PluginPairing.ReportedByRequester" xml:space="preserve">
     <value>Vom anfragenden Programm angegeben</value>
@@ -2643,6 +2662,15 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Errors.Plugins.ReplaceCredentialConfirmationRequired" xml:space="preserve">
     <value>Das Bestätigen dieser Anfrage ersetzt die vorhandenen Zugangsdaten eines Plugins. Bestätige zuerst den Ersatz.</value>
+  </data>
+  <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
+    <value>Ein Entwicklungs-Build hat dieses Plugin übernommen. Beende die Übernahme, bevor du es installierst oder aktualisierst.</value>
+  </data>
+  <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
+    <value>Ein Entwicklungs-Build hat dieses Plugin übernommen. Die installierte Version startet wieder, sobald die Übernahme endet.</value>
+  </data>
+  <data name="Errors.Plugins.TakeoverConfirmationRequired" xml:space="preserve">
+    <value>Das Bestätigen dieser Anfrage lässt einen Entwicklungs-Build ein installiertes Plugin übernehmen. Bestätige zuerst die Übernahme.</value>
   </data>
   <data name="Errors.Plugins.SessionNotFound" xml:space="preserve">
     <value>Es existiert keine aktive Sitzung mit dieser ID.</value>
@@ -6861,6 +6889,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Obs.Actions.SetPreviewScene.Name" xml:space="preserve">
     <value>Vorschauszene festlegen</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetProfile.Description" xml:space="preserve">
+    <value>Wechselt OBS zu einem anderen Profil</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetProfile.Name" xml:space="preserve">
+    <value>Profil festlegen</value>
+  </data>
   <data name="Integrations.Obs.Actions.SetScene.Description" xml:space="preserve">
     <value>Wechselt die aktive Programmszene</value>
   </data>
@@ -7060,6 +7094,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Obs.Errors.NoInputSelected" xml:space="preserve">
     <value>Es wurde kein Eingang ausgewählt.</value>
   </data>
+  <data name="Integrations.Obs.Errors.NoProfileSelected" xml:space="preserve">
+    <value>Es wurde kein Profil ausgewählt.</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoSceneOrSourceSelected" xml:space="preserve">
     <value>Es wurde weder eine Szene noch eine Quelle ausgewählt.</value>
   </data>
@@ -7188,6 +7225,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.Obs.Params.ModeToggle" xml:space="preserve">
     <value>Umschalten</value>
+  </data>
+  <data name="Integrations.Obs.Params.Profile" xml:space="preserve">
+    <value>Profil</value>
   </data>
   <data name="Integrations.Obs.Params.SaveToVariable" xml:space="preserve">
     <value>In Variable speichern</value>
@@ -8345,7 +8385,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Studiomodus aktiv</value>
   </data>
   <data name="Integrations.System.Actions.DecreaseVolume.Description" xml:space="preserve">
-    <value>Verringert die Systemlautstärke der Ausgabe.</value>
+    <value>Verringert die Lautstärke des gewählten Audiogeräts.</value>
   </data>
   <data name="Integrations.System.Actions.DecreaseVolume.Name" xml:space="preserve">
     <value>Lautstärke verringern</value>
@@ -8360,7 +8400,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Ruhezustand</value>
   </data>
   <data name="Integrations.System.Actions.IncreaseVolume.Description" xml:space="preserve">
-    <value>Erhöht die Systemlautstärke der Ausgabe.</value>
+    <value>Erhöht die Lautstärke des gewählten Audiogeräts.</value>
   </data>
   <data name="Integrations.System.Actions.IncreaseVolume.Name" xml:space="preserve">
     <value>Lautstärke erhöhen</value>
@@ -8423,7 +8463,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Computer sperren</value>
   </data>
   <data name="Integrations.System.Actions.MuteVolume.Description" xml:space="preserve">
-    <value>Schaltet die Stummschaltung der Systemausgabe um.</value>
+    <value>Schaltet die Stummschaltung des gewählten Audiogeräts um.</value>
   </data>
   <data name="Integrations.System.Actions.MuteVolume.MutedLabel" xml:space="preserve">
     <value>Stumm</value>
@@ -8519,7 +8559,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Titel</value>
   </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
-    <value>Setzt die Systemlautstärke der Ausgabe auf einen bestimmten Wert.</value>
+    <value>Setzt die Lautstärke des gewählten Audiogeräts auf einen bestimmten Wert.</value>
   </data>
   <data name="Integrations.System.Actions.SetVolume.LevelLabel" xml:space="preserve">
     <value>Lautstärke (%)</value>
@@ -8547,6 +8587,30 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.System.Actions.VolumeAmount.Label" xml:space="preserve">
     <value>Menge (%)</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.Label" xml:space="preserve">
+    <value>Audiogerät</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.Description" xml:space="preserve">
+    <value>Das Audiogerät, das die Aktion steuert.</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.DefaultOutput" xml:space="preserve">
+    <value>Standard-Ausgabegerät</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.DefaultInput" xml:space="preserve">
+    <value>Standard-Eingabegerät</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.OutputOption" xml:space="preserve">
+    <value>{device} (Ausgabe)</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.InputOption" xml:space="preserve">
+    <value>{device} (Eingabe)</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.UnavailableOption" xml:space="preserve">
+    <value>{device} (nicht verfügbar)</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.UnknownUnavailableOption" xml:space="preserve">
+    <value>Nicht verfügbares Gerät</value>
   </data>
   <data name="Integrations.System.Actions.WorkingDirectoryLabel" xml:space="preserve">
     <value>Arbeitsverzeichnis</value>
@@ -8668,6 +8732,24 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.System.Variables.Muted" xml:space="preserve">
     <value>Stummgeschaltet</value>
+  </data>
+  <data name="Integrations.System.Variables.InputVolume" xml:space="preserve">
+    <value>Eingabelautstärke</value>
+  </data>
+  <data name="Integrations.System.Variables.InputMuted" xml:space="preserve">
+    <value>Eingabe stummgeschaltet</value>
+  </data>
+  <data name="Integrations.System.Variables.DeviceOutputVolume" xml:space="preserve">
+    <value>{device}: Lautstärke (Ausgabe)</value>
+  </data>
+  <data name="Integrations.System.Variables.DeviceOutputMuted" xml:space="preserve">
+    <value>{device}: stummgeschaltet (Ausgabe)</value>
+  </data>
+  <data name="Integrations.System.Variables.DeviceInputVolume" xml:space="preserve">
+    <value>{device}: Lautstärke (Eingabe)</value>
+  </data>
+  <data name="Integrations.System.Variables.DeviceInputMuted" xml:space="preserve">
+    <value>{device}: stummgeschaltet (Eingabe)</value>
   </data>
   <data name="Integrations.System.Variables.CpuUsage" xml:space="preserve">
     <value>CPU-Auslastung</value>
@@ -10686,6 +10768,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Widgets.Actions.PositionTop" xml:space="preserve">
     <value>Oben</value>
   </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
+    <value>Ändert die Akzentfarbe eines Schiebereglers oder Verlaufsdiagramms.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
+    <value>Akzentfarbe festlegen</value>
+  </data>
   <data name="Integrations.Widgets.Actions.SetBackgroundColorDescription" xml:space="preserve">
     <value>Ändert die Hintergrundfarbe eines Widgets.</value>
   </data>
@@ -10718,6 +10806,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.Widgets.Actions.SetIconDisplayName" xml:space="preserve">
     <value>Symbolanzeige festlegen</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconColorDescription" xml:space="preserve">
+    <value>Ändert die Farbe, in der das Symbol eines Widgets gezeichnet wird.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconColorName" xml:space="preserve">
+    <value>Symbolfarbe festlegen</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetIconName" xml:space="preserve">
     <value>Symbol festlegen</value>
@@ -11548,6 +11642,13 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>{name} wartet in Macro Deck auf deine Freigabe.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
+    <value>Ein Entwicklungs-Build möchte ein Plugin übernehmen</value>
+  </data>
+  <data name="Notifications.PluginTakeoverRequestedMessage" xml:space="preserve">
+    <value>{name} möchte ein installiertes Plugin ersetzen und wartet in Macro Deck auf deine Freigabe.</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.StoreExtensionInstallFailed" xml:space="preserve">
     <value>„{name}“ konnte nicht installiert werden</value>
     <comment>[name:string]</comment>
@@ -12372,6 +12473,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Settings.Adb.StatusHeading" xml:space="preserve">
     <value>Status</value>
+  </data>
+  <data name="Settings.Adb.StopServerOnExitDescription" xml:space="preserve">
+    <value>Stoppt den ADB-Server, wenn Macro Deck beendet, neu gestartet oder aktualisiert wird, aber nur, wenn Macro Deck ihn gestartet hat. Andere Programme, die ADB nutzen, etwa Android Studio, verlieren dann ihre Verbindung.</value>
+  </data>
+  <data name="Settings.Adb.StopServerOnExitLabel" xml:space="preserve">
+    <value>ADB-Server beim Beenden von Macro Deck stoppen</value>
   </data>
   <data name="Settings.Adb.UncleanShutdown.One" xml:space="preserve">
     <value>Macro Deck wurde beim letzten Mal nicht ordnungsgemäß beendet. {count} verbleibende USB-Verbindung wurde bereinigt.</value>
@@ -14171,6 +14278,112 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Store.Queued" xml:space="preserve">
     <value>In Warteschlange</value>
   </data>
+  <data name="Store.RegistryRefresh.Error.BudgetExceeded" xml:space="preserve">
+    <value>Die Registry ist größer, als Macro Deck herunterlädt.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.CertificateUntrusted" xml:space="preserve">
+    <value>Die Registry wurde mit einem Zertifikat signiert, dem Macro Deck nicht vertraut.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.Disabled" xml:space="preserve">
+    <value>Der Store ist ausgeschaltet.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.Malformed" xml:space="preserve">
+    <value>Die Registry hat Daten gesendet, die Macro Deck nicht lesen konnte.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.NetworkFailure" xml:space="preserve">
+    <value>Die Registry war nicht erreichbar.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SequenceRollback" xml:space="preserve">
+    <value>Die Registry hat einen älteren Katalog angeboten als den bereits installierten.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SignatureInvalid" xml:space="preserve">
+    <value>Die Signatur der Registry ist ungültig.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SigningKeyRevoked" xml:space="preserve">
+    <value>Die Registry wurde mit einem widerrufenen Schlüssel signiert.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SizeMismatch" xml:space="preserve">
+    <value>Eine Registry-Datei hatte nicht die angegebene Größe.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SnapshotUnchanged" xml:space="preserve">
+    <value>Der Katalog hat sich nicht geändert.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.StorageFailure" xml:space="preserve">
+    <value>Der neue Katalog konnte nicht gespeichert werden.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
+    <value>Etwas Unerwartetes ist schiefgelaufen.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
+    <value>Store-Registry-Aktualisierung</value>
+  </data>
+  <data name="Store.RegistryRefresh.InProgressAction" xml:space="preserve">
+    <value>Wird aktualisiert…</value>
+  </data>
+  <data name="Store.RegistryRefresh.LogLabel" xml:space="preserve">
+    <value>Aktualisierungsprotokoll</value>
+  </data>
+  <data name="Store.RegistryRefresh.Progress" xml:space="preserve">
+    <value>Dateien: {completed} von {total}</value>
+  </data>
+  <data name="Store.RegistryRefresh.State.Cancelled" xml:space="preserve">
+    <value>Die Aktualisierung wurde abgebrochen.</value>
+  </data>
+  <data name="Store.RegistryRefresh.State.Failed" xml:space="preserve">
+    <value>Die Store-Registry konnte nicht aktualisiert werden.</value>
+  </data>
+  <data name="Store.RegistryRefresh.State.Running" xml:space="preserve">
+    <value>Die Store-Registry wird aktualisiert…</value>
+  </data>
+  <data name="Store.RegistryRefresh.State.Succeeded" xml:space="preserve">
+    <value>Die Store-Registry ist aktuell.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Applied" xml:space="preserve">
+    <value>Katalog auf Version {sequence} aktualisiert</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Cancelled" xml:space="preserve">
+    <value>Abgebrochen, weil Macro Deck beendet wird</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.DownloadingFiles.One" xml:space="preserve">
+    <value>{count} Datei wird heruntergeladen</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.RegistryRefresh.Step.DownloadingFiles.Other" xml:space="preserve">
+    <value>{count} Dateien werden heruntergeladen</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Failed" xml:space="preserve">
+    <value>Fehlgeschlagen: {reason}</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.FetchingManifest" xml:space="preserve">
+    <value>Registry-Manifest wird heruntergeladen</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.FetchingSignature" xml:space="preserve">
+    <value>Registry-Signatur wird heruntergeladen</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.ReadingCatalog" xml:space="preserve">
+    <value>Katalog wird gelesen</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Started" xml:space="preserve">
+    <value>Aktualisierung gestartet</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.StartedScheduled" xml:space="preserve">
+    <value>Automatische Aktualisierung gestartet</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.UpToDate" xml:space="preserve">
+    <value>Nichts Neues: der Katalog ist bereits auf Version {sequence}</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Verifying" xml:space="preserve">
+    <value>Signatur wird geprüft</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.WaitingForRegistryUpdate.One" xml:space="preserve">
+    <value>Die Registry wird gerade aktualisiert. Neuer Versuch in {count} Sekunde</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.RegistryRefresh.Step.WaitingForRegistryUpdate.Other" xml:space="preserve">
+    <value>Die Registry wird gerade aktualisiert. Neuer Versuch in {count} Sekunden</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Store.RetryInstallation" xml:space="preserve">
     <value>Installation erneut versuchen</value>
   </data>
@@ -15551,6 +15764,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Editor.Icon" xml:space="preserve">
     <value>Symbol</value>
   </data>
+  <data name="Widgets.Editor.IconColor" xml:space="preserve">
+    <value>Symbolfarbe</value>
+  </data>
   <data name="Widgets.Editor.IconDisplay" xml:space="preserve">
     <value>Symbolanzeige</value>
   </data>
@@ -16224,11 +16440,29 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Slider.ChooseIcon" xml:space="preserve">
     <value>Symbol auswählen</value>
   </data>
+  <data name="Widgets.Slider.CustomStep" xml:space="preserve">
+    <value>Eigene Schrittweite</value>
+  </data>
+  <data name="Widgets.Slider.CustomStepDescription" xml:space="preserve">
+    <value>Verwendet deine eigene Schrittweite statt der von der Variable vorgegebenen.</value>
+  </data>
   <data name="Widgets.Slider.DefaultVariableDescription" xml:space="preserve">
     <value>Ohne Variable nutzt der Schieberegler seine eigene Widget-Variable slider_value.</value>
   </data>
   <data name="Widgets.Slider.Horizontal" xml:space="preserve">
     <value>Horizontal</value>
+  </data>
+  <data name="Widgets.Slider.InteractionMode" xml:space="preserve">
+    <value>Interaktionsmodus</value>
+  </data>
+  <data name="Widgets.Slider.InteractionAbsolute" xml:space="preserve">
+    <value>Absolut</value>
+  </data>
+  <data name="Widgets.Slider.InteractionRelative" xml:space="preserve">
+    <value>Relativ</value>
+  </data>
+  <data name="Widgets.Slider.InteractionModeDescription" xml:space="preserve">
+    <value>Absolut springt dorthin, wo du tippst. Relativ lässt den Wert stehen und verschiebt ihn um die Strecke, die du ziehst.</value>
   </data>
   <data name="Widgets.Slider.LegacyActionBindingNotice" xml:space="preserve">
     <value>Dieser Schieberegler enthält noch eine Aktionsbindung aus einer älteren Version. Sie wird nicht mehr verwendet und beim nächsten Speichern entfernt.</value>
@@ -16427,6 +16661,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.Obs.Params.Configuration" xml:space="preserve">
     <value>Konfiguration</value>
+  </data>
+  <data name="Integrations.Obs.Variables.CurrentProfile" xml:space="preserve">
+    <value>Aktuelles Profil</value>
   </data>
   <data name="Integrations.Obs.Variables.CurrentScene" xml:space="preserve">
     <value>Aktuelle Szene</value>

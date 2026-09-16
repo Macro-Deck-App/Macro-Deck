@@ -8,11 +8,15 @@ import { EmptyStateComponent } from '../../feedback/empty-state/empty-state.comp
 import { SelectComponent, SelectOption } from '../../forms/select/select.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
 import { StoreSectionComponent } from '../../store/store-section.component';
+import { ConnectAccountService } from '../../../services/connect-account.service';
 import { StoreCatalogService } from '../../../services/store-catalog.service';
 import { StoreOperationService } from '../../../services/store-operation.service';
 import { storeUninstallErrorKey, storeUninstallMessageKey } from '../../../util/store-operation-display';
+import { StoreRegistryRefreshModalComponent } from './store-registry-refresh-modal.component';
 
 type KindFilter = 'all' | StoreExtensionKind;
+
+const STORE_TESTER_ROLE = 'StoreTester';
 
 const BROWSE_KINDS: StoreExtensionKind[] = ['Plugin', 'IconPack'];
 
@@ -33,6 +37,7 @@ const BEST_MATCH_SORT: StoreCatalogSection = 'all';
     InputComponent,
     SegmentedControlComponent,
     SelectComponent,
+    StoreRegistryRefreshModalComponent,
     StoreSectionComponent,
     TranslatePipe,
   ],
@@ -46,6 +51,7 @@ export class StorePageComponent implements OnInit {
   private readonly api = inject(ApiService);
   private readonly localization = inject(LocalizationService);
   private readonly toasts = inject(ToastService);
+  private readonly account = inject(ConnectAccountService);
   protected readonly catalog = inject(StoreCatalogService);
   protected readonly operations = inject(StoreOperationService);
 
@@ -54,6 +60,11 @@ export class StorePageComponent implements OnInit {
   protected readonly sort = signal<StoreCatalogSection>(DEFAULT_SORT);
 
   protected readonly searching = computed(() => this.search().trim() !== '');
+
+  // Temporary: the store is not live, so only store testers get past the coming-soon overlay. Remove
+  // this gate, the overlay, its inert binding and the ComingSoon strings once the store goes live.
+  protected readonly storeUnlocked = computed(() =>
+    this.account.isSignedIn() && (this.account.session()?.account?.roles ?? []).includes(STORE_TESTER_ROLE));
 
   protected readonly kindOptions = computed<SegmentedOption[]>(() => [
     { value: 'all', label: this.localization.translateKey(AppStrings.Store.Page.KindAll) },
@@ -98,6 +109,17 @@ export class StorePageComponent implements OnInit {
     this.localization.translateKey(AppStrings.Store.Page.ResultCount, { count: this.catalog.total() }));
 
   protected readonly pendingUninstall = signal<StoreCatalogItemBody | null>(null);
+
+  protected readonly refreshLogOpen = signal(false);
+
+  // The run that was current when this window asked for a new refresh belongs to an earlier refresh,
+  // so the log shows nothing from it until the host has reported the new run.
+  private readonly supersededRunId = signal<string | null>(null);
+
+  protected readonly refreshLogRun = computed(() => {
+    const run = this.catalog.refreshRun();
+    return run && run.id === this.supersededRunId() ? null : run;
+  });
 
   protected readonly uninstallHeading = computed(() => this.localization.translateKey(AppStrings.Store.UninstallHeading));
 
@@ -176,6 +198,12 @@ export class StorePageComponent implements OnInit {
   }
 
   protected async onRefresh(): Promise<void> {
+    this.refreshLogOpen.set(true);
+    if (this.catalog.refreshing()) {
+      return;
+    }
+
+    this.supersededRunId.set(this.catalog.refreshRun()?.id ?? null);
     await this.catalog.refreshRegistry();
     if (!this.searching()) {
       await this.loadDiscovery();

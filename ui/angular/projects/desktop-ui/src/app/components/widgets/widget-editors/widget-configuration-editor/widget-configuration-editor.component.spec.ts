@@ -279,6 +279,210 @@ describe('WidgetConfigurationEditorComponent', () => {
     });
   });
 
+  describe('following a live change of the stored widget', () => {
+    const OLD = '#3b82f6';
+    const NEW = '#ef4444';
+
+    function buttonTree(color: string, extra: UiNode[] = []): UiNode {
+      return configRoot([propertiesRegion([{
+        id: 'appearance-tabs', type: UiConfigPrimitives.Tabs, children: [{
+          id: 'tab-appearance', type: UiConfigPrimitives.Tab, children: [{
+            id: 'root-appearance', type: UiConfigPrimitives.Stack, children: [{
+              id: 'appearance-fragment', type: UiConfigPrimitives.Stack, children: [
+                colorField('backgroundColor', color),
+                { id: 'fontSize', type: UiConfigPrimitives.Number, properties: {
+                  [UiConfigProperties.Events]: [UiConfigEvents.Change], [UiConfigProperties.Value]: 14 } },
+                ...extra,
+              ],
+            }],
+          }],
+        }],
+      }])]);
+    }
+
+    function draft(fixture: ComponentFixture<WidgetConfigurationEditorComponent>): Record<string, unknown> {
+      return fixture.componentInstance.widget.data as unknown as Record<string, unknown>;
+    }
+
+    async function openButton(
+      data: Record<string, unknown> = { label: '', backgroundColor: OLD },
+      info: WidgetTypeInfo = typeInfo({ id: WidgetType.ActionButton }),
+      firstTree: UiNode = buttonTree(OLD, [stringField('label', '')]),
+    ): Promise<ComponentFixture<WidgetConfigurationEditorComponent>> {
+      const fixture = await createFixture(widget({ type: WidgetType.ActionButton, data: data as never }), info);
+      configHandle().root.set(firstTree);
+      await settle(fixture);
+      return fixture;
+    }
+
+    async function flowWrites(
+      fixture: ComponentFixture<WidgetConfigurationEditorComponent>, data: Record<string, unknown>,
+    ): Promise<void> {
+      fixture.componentRef.setInput('widget', widget({ type: WidgetType.ActionButton, data: data as never }));
+      fixture.componentInstance.followLiveData();
+      await settle(fixture);
+    }
+
+    async function hostRevision(fixture: ComponentFixture<WidgetConfigurationEditorComponent>, root: UiNode): Promise<void> {
+      configHandle().root.set(root);
+      configHandle().revision.update(r => r + 1);
+      await settle(fixture);
+    }
+
+    function configOpens(): number {
+      return opens.filter(r => r.kind === 'config').length;
+    }
+
+    it('keeps the session and sends the new colour when a flow recolours the button being edited', async () => {
+      const fixture = await openButton();
+      const session = configHandle();
+
+      await flowWrites(fixture, { label: '', backgroundColor: NEW });
+
+      expect(configOpens()).toBe(1);
+      expect(session.closed).toBeFalse();
+      expect(session.sent).toContain({ nodeId: 'backgroundColor', name: UiConfigEvents.Change, data: NEW });
+    });
+
+    it('confirms the colour without folding provider defaults the stored data never had', async () => {
+      const fixture = await openButton();
+      await flowWrites(fixture, { label: '', backgroundColor: NEW });
+
+      await hostRevision(fixture, buttonTree(NEW));
+
+      expect(draft(fixture)).toEqual({ label: '', backgroundColor: NEW });
+      expect(configHandle().closed).toBeFalse();
+    });
+
+    it('keeps a write the host made in the same revision that confirms the colour', async () => {
+      const fixture = await openButton();
+      await flowWrites(fixture, { label: '', backgroundColor: NEW });
+
+      await hostRevision(fixture, buttonTree(NEW, [stringField('label', 'Preset')]));
+
+      expect(draft(fixture)).toEqual({ label: 'Preset', backgroundColor: NEW });
+    });
+
+    it('keeps a user edit made while the colour is on its way', async () => {
+      const fixture = await openButton();
+      await flowWrites(fixture, { label: '', backgroundColor: NEW });
+
+      const label = stringField('label', '');
+      fixture.debugElement.injector.get(UiNodeEventBus).emit(label, UiConfigEvents.Change, 'Typed');
+      await settle(fixture);
+      await hostRevision(fixture, buttonTree(NEW, [stringField('label', '')]));
+
+      expect(draft(fixture)).toEqual({ label: 'Typed', backgroundColor: NEW });
+      expect(configOpens()).toBe(1);
+    });
+
+    it('ends with the colour the user picked when they pick one before the flow colour is confirmed', async () => {
+      const fixture = await openButton();
+      await flowWrites(fixture, { label: '', backgroundColor: NEW });
+
+      fixture.debugElement.injector.get(UiNodeEventBus).emit(colorField('backgroundColor', NEW), UiConfigEvents.Change, '#00ff00');
+      await settle(fixture);
+      await hostRevision(fixture, buttonTree(NEW));
+      await hostRevision(fixture, buttonTree('#00ff00'));
+
+      expect(draft(fixture)['backgroundColor']).toBe('#00ff00');
+    });
+
+    it('reopens with the new colour when the host never confirms it', async () => {
+      const fixture = await openButton();
+      const session = configHandle();
+      await flowWrites(fixture, { label: '', backgroundColor: NEW });
+
+      await new Promise(resolve => setTimeout(resolve, 2100));
+      await settle(fixture);
+
+      expect(session.closed).toBeTrue();
+      expect(opens.filter(r => r.kind === 'config')[1])
+        .toEqual(jasmine.objectContaining({ widgetData: JSON.stringify({ label: '', backgroundColor: NEW }) }));
+    });
+
+    it('reopens with the new colour when a revision still shows the old one, and never folds it back', async () => {
+      const fixture = await openButton();
+      const session = configHandle();
+      await flowWrites(fixture, { label: '', backgroundColor: NEW });
+
+      await hostRevision(fixture, buttonTree(OLD, [stringField('label', '')]));
+
+      expect(session.closed).toBeTrue();
+      expect(draft(fixture)['backgroundColor']).toBe(NEW);
+      expect(configOpens()).toBe(2);
+    });
+
+    it('reopens with the new colour when the session is replaced after a follow', async () => {
+      const fixture = await openButton();
+      configHandle().generation.set(1);
+      await settle(fixture);
+      await flowWrites(fixture, { label: '', backgroundColor: NEW });
+      await hostRevision(fixture, buttonTree(NEW));
+
+      configHandle().generation.set(2);
+      await hostRevision(fixture, buttonTree(OLD));
+
+      expect(configOpens()).toBe(2);
+      expect(draft(fixture)['backgroundColor']).toBe(NEW);
+    });
+
+    it('sends nothing and keeps the session when the tree already shows the new colour', async () => {
+      const fixture = await openButton({ label: '' }, undefined, buttonTree(NEW, [stringField('label', '')]));
+      const session = configHandle();
+
+      await flowWrites(fixture, { label: '', backgroundColor: NEW });
+
+      expect(session.sent.length).toBe(0);
+      expect(configOpens()).toBe(1);
+      expect(draft(fixture)).toEqual({ label: '', backgroundColor: NEW });
+    });
+
+    it('reopens for a change to a field that is not a colour', async () => {
+      const fixture = await openButton(
+        { label: 'Before', backgroundColor: OLD }, undefined, buttonTree(OLD, [stringField('label', 'Before')]));
+
+      await flowWrites(fixture, { label: 'After', backgroundColor: OLD });
+
+      expect(configOpens()).toBe(2);
+    });
+
+    it('reopens when the flow changed more than one key', async () => {
+      const fixture = await openButton();
+
+      await flowWrites(fixture, { label: 'After', backgroundColor: NEW });
+
+      expect(configOpens()).toBe(2);
+    });
+
+    it('reopens when the flow removed the colour', async () => {
+      const fixture = await openButton();
+
+      await flowWrites(fixture, { label: '' });
+
+      expect(configOpens()).toBe(2);
+    });
+
+    it('reopens for a widget type a plugin provides', async () => {
+      const fixture = await openButton(undefined, typeInfo({ id: WidgetType.ActionButton, isBuiltIn: false }));
+
+      await flowWrites(fixture, { label: '', backgroundColor: NEW });
+
+      expect(configOpens()).toBe(2);
+      expect(handles[0].sent.length).toBe(0);
+    });
+
+    it('still reopens when a JSON edit reseeds only the colour', async () => {
+      const fixture = await openButton();
+
+      fixture.componentRef.setInput('widget', widget({ type: WidgetType.ActionButton, data: { label: '', backgroundColor: NEW } as never }));
+      fixture.componentInstance.reload();
+      await settle(fixture);
+
+      expect(configOpens()).toBe(2);
+    });
+  });
+
   it('is not ready until the host answers, so the page never reveals the preview-only fallback', async () => {
     // Without a tree there is no editor region, and the single-pane fallback would show the preview
     // alone - which is a legitimate final layout for a type with no editor region, but here only a

@@ -207,7 +207,7 @@ internal sealed class WebNowPlayingIntegrationTests
 	}
 
 	[Test]
-	public async Task Without_a_browser_the_player_is_unavailable_and_commands_do_nothing()
+	public async Task Without_a_browser_nothing_is_playing_rather_than_unavailable_and_commands_do_nothing()
 	{
 		using var integration = await StartAsync();
 
@@ -216,8 +216,10 @@ internal sealed class WebNowPlayingIntegrationTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(state.IsUnavailable, Is.True);
-			Assert.That(state.StatusMessage, Is.Null);
+			Assert.That(state.IsConnected, Is.True);
+			Assert.That(state.IsUnavailable, Is.False);
+			Assert.That(state.PlaybackState, Is.EqualTo(PlaybackState.Stopped));
+			Assert.That(state.TrackName, Is.Null);
 			Assert.That(connected, Is.EqualTo(false));
 			Assert.DoesNotThrowAsync(() => Player(integration).TogglePlayPauseAsync());
 		});
@@ -252,7 +254,7 @@ internal sealed class WebNowPlayingIntegrationTests
 	}
 
 	[Test]
-	public async Task Closing_the_extension_connection_removes_its_players()
+	public async Task A_browser_that_closes_its_connection_leaves_nothing_playing_rather_than_unavailable()
 	{
 		using var integration = await StartAsync();
 		var extension = await ConnectAsync(integration);
@@ -262,8 +264,14 @@ internal sealed class WebNowPlayingIntegrationTests
 		await extension.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None);
 		extension.Dispose();
 
-		var state = await EventuallyAsync(integration, s => s.IsUnavailable);
-		Assert.That(state.TrackName, Is.Null);
+		var state = await EventuallyAsync(integration, s => s.TrackName is null);
+		Assert.Multiple(() =>
+		{
+			Assert.That(state.TrackName, Is.Null);
+			Assert.That(state.IsConnected, Is.True);
+			Assert.That(state.IsUnavailable, Is.False);
+			Assert.That(state.PlaybackState, Is.EqualTo(PlaybackState.Stopped));
+		});
 	}
 
 	[TestCase("https://example.test")]

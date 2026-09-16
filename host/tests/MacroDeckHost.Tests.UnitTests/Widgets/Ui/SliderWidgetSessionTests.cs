@@ -13,6 +13,7 @@ using MacroDeck.Ui.Testing;
 using MacroDeck.Ui.Components;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.MusicPlayer;
+using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
@@ -319,6 +320,59 @@ public class SliderWidgetSessionTests
 		await slider.Host.SettleAsync();
 
 		Assert.That(slider.Value, Is.EqualTo("-30"));
+
+		await slider.DisposeAsync();
+	}
+
+	[TestCase(5, 0.43, 45)]
+	[TestCase(15, 0.5, 45)]
+	public async Task A_custom_step_replaces_the_step_the_variable_declares(double widgetStep,
+		double level,
+		double written)
+	{
+		var slider = Writable(min: 0, max: 100, step: 1, value: 0, configStep: widgetStep, customStep: true);
+
+		slider.Host.ById("slider.track").Raise(UiComponentEvents.Change, level);
+		await slider.Host.SettleAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(slider.Provider.Writes.Single(), Is.EqualTo(written).Within(1e-9));
+			Assert.That(slider.Host.ById("slider.track").Number("step"), Is.EqualTo(widgetStep / 100).Within(1e-9));
+		});
+
+		await slider.DisposeAsync();
+	}
+
+	[TestCase(0)]
+	[TestCase(-5)]
+	[TestCase(500)]
+	public async Task A_custom_step_that_cannot_form_a_grid_falls_back_to_the_step_the_variable_declares(
+		double widgetStep)
+	{
+		var slider = Writable(min: 0, max: 100, step: 1, value: 0, configStep: widgetStep, customStep: true);
+
+		slider.Host.ById("slider.track").Raise(UiComponentEvents.Change, 0.4321);
+		await slider.Host.SettleAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(slider.Provider.Writes.Single(), Is.EqualTo(43).Within(1e-9));
+			Assert.That(slider.Host.ById("slider.track").Number("step"), Is.EqualTo(0.01).Within(1e-9));
+		});
+
+		await slider.DisposeAsync();
+	}
+
+	[Test]
+	public async Task Without_a_custom_step_the_step_the_variable_declares_still_wins()
+	{
+		var slider = Writable(min: 0, max: 100, step: 1, value: 0, configStep: 5);
+
+		slider.Host.ById("slider.track").Raise(UiComponentEvents.Change, 0.43);
+		await slider.Host.SettleAsync();
+
+		Assert.That(slider.Provider.Writes.Single(), Is.EqualTo(43).Within(1e-9));
 
 		await slider.DisposeAsync();
 	}
@@ -704,6 +758,58 @@ public class SliderWidgetSessionTests
 
 	private static IEnumerable<UiNode> Walk(UiNode node) => node.Children.SelectMany(Walk).Prepend(node);
 
+	[Test]
+	public async Task A_colour_only_save_recolours_the_track_in_place_without_losing_the_users_value()
+	{
+		var slider = Writable(min: 0, max: 100, step: 0, value: 50);
+		var signals = new WidgetRenderSignals();
+		var widgetId = Guid.NewGuid();
+		slider.Session.FollowAccentColor(signals, widgetId.ToString(), slider.Config, slider.Accent);
+
+		slider.Host.ById("slider.track").Raise(UiComponentEvents.Adjust, 0.7);
+		await slider.Host.SettleAsync();
+
+		var recoloured = signals.RaiseDataChanged(SavedSlider(widgetId, slider.Config with { Color = "#ef4444" }));
+		await slider.Host.SettleAsync();
+		var redTrack = slider.Host.ById("slider.track");
+		var redColour = redTrack.Text("levelColor");
+		var redLevel = redTrack.Number("level");
+
+		var reset = signals.RaiseDataChanged(SavedSlider(widgetId, slider.Config));
+		await slider.Host.SettleAsync();
+		var themed = slider.Host.ById("slider.track").HasProperty("levelColor");
+
+		var rangeChange = signals.RaiseDataChanged(SavedSlider(widgetId, slider.Config with { Max = 50 }));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(recoloured, Is.True, "a colour-only save must not reopen the session");
+			Assert.That(redColour, Is.EqualTo("#ef4444"));
+			Assert.That(redLevel, Is.EqualTo(0.7).Within(1e-9), "the value the user dragged to survives");
+			Assert.That(reset, Is.True);
+			Assert.That(themed, Is.False, "a reset goes back to the reader's theme accent");
+			Assert.That(rangeChange, Is.False, "anything but the colour still rebuilds the session");
+		});
+
+		await slider.DisposeAsync();
+	}
+
+	private static WidgetEntity SavedSlider(Guid widgetId, SliderWidgetData config)
+		=> new()
+		{
+			Id = widgetId,
+			Type = WidgetTypeIds.Slider,
+			Data = JsonSerializer.Serialize(new
+			{
+				valueVariable = config.ValueVariable,
+				showValue = config.ShowValue,
+				min = config.Min,
+				max = config.Max,
+				step = config.Step,
+				color = config.Color,
+			})
+		};
+
 	private static SliderWidgetUiProvider ProviderWith(VariableRegistry registry,
 		VariableChangeNotifier? notifier = null)
 	{
@@ -728,7 +834,8 @@ public class SliderWidgetSessionTests
 			scopeFactory,
 			new RecordingTriggerService(),
 			new StubFolderCache(),
-			new NullUiTransport());
+			new NullUiTransport(),
+			new RecordingRenderSignals());
 	}
 
 	private static SliderUnderTest Writable(
@@ -741,7 +848,8 @@ public class SliderWidgetSessionTests
 		double configMin = 0,
 		double configMax = 100,
 		double configStep = 0,
-		bool doublePressFlow = false)
+		bool doublePressFlow = false,
+		bool customStep = false)
 		=> SliderUnderTest.Build(entity =>
 			{
 				entity.Classification = VariableClassification.Integration;
@@ -757,7 +865,8 @@ public class SliderWidgetSessionTests
 			configMax,
 			configStep,
 			locked,
-			doublePressFlow: doublePressFlow);
+			doublePressFlow: doublePressFlow,
+			customStep: customStep);
 
 	private static SliderUnderTest ReadOnlyIntegrationOwned(double min, double max, double step, string value)
 		=> SliderUnderTest.Build(entity =>
@@ -806,8 +915,12 @@ public class SliderWidgetSessionTests
 			VariableChangeNotifier notifier,
 			FakeTimeProvider timeProvider,
 			VariableEntity? entity,
-			RecordingTriggerService trigger)
+			RecordingTriggerService trigger,
+			SliderWidgetData config,
+			UiState<string?> accent)
 		{
+			Config = config;
+			Accent = accent;
 			Host = host;
 			Session = session;
 			Provider = provider;
@@ -819,6 +932,10 @@ public class SliderWidgetSessionTests
 		}
 
 		private readonly VariableEntity? _entity;
+
+		public SliderWidgetData Config { get; }
+
+		public UiState<string?> Accent { get; }
 
 		public UiTestHost Host { get; }
 
@@ -855,7 +972,8 @@ public class SliderWidgetSessionTests
 			double configStep,
 			bool locked = false,
 			string? bindingName = null,
-			bool doublePressFlow = false)
+			bool doublePressFlow = false,
+			bool customStep = false)
 		{
 			var registry = new VariableRegistry();
 			var provider = new RecordingVariableProvider(registry);
@@ -899,7 +1017,8 @@ public class SliderWidgetSessionTests
 				configStep,
 				registry,
 				notifier,
-				scopeFactory);
+				scopeFactory,
+				CustomStep: customStep);
 			var state = new UiState<SliderWidgetReadout>(SliderWidgetReadout.Empty);
 
 			var trigger = new RecordingTriggerService();
@@ -926,9 +1045,11 @@ public class SliderWidgetSessionTests
 				ShowValue = true,
 				Min = configMin,
 				Max = configMax,
-				Step = configStep
+				Step = configStep,
+				CustomStep = customStep
 			};
-			var element = SliderWidgetView.Build(config, state, icon: null, session.BuildEvents());
+			var accent = new UiState<string?>(config.Color);
+			var element = SliderWidgetView.Build(config, state, icon: null, session.BuildEvents(), accentColor: accent);
 			var view = new UiView(new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
 				element);
 
@@ -941,7 +1062,9 @@ public class SliderWidgetSessionTests
 				notifier,
 				timeProvider,
 				stored,
-				trigger);
+				trigger,
+				config,
+				accent);
 		}
 	}
 

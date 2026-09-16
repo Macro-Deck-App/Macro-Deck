@@ -188,7 +188,9 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		{
 			_tracker.Transition(operationId,
 				StoreOperationState.Failed,
-				MapPluginError(result.Error),
+				result.BlockedByDevelopmentTakeover
+					? StoreOperationError.InstallBlockedByTakeover
+					: MapPluginError(result.Error),
 				result.ErrorMessage ?? "The plugin could not be installed.");
 			return;
 		}

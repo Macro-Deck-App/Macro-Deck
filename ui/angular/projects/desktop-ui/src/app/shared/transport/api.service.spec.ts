@@ -156,6 +156,24 @@ describe('ApiService', () => {
     });
   });
 
+  describe('store media URLs', () => {
+    it('names the digest of the image, so a changed image never comes out of the cache for its old position', () => {
+      const api = configure();
+
+      expect(api.getStoreScreenshotUrl('Plugin', 'com.acme.hue', 1, 'abc123'))
+        .toMatch(/\/api\/store\/media\/Plugin\/com\.acme\.hue\/screenshots\/1\?v=abc123$/);
+      expect(api.getStoreExtensionIconUrl('Plugin', 'com.acme.hue', 'def456'))
+        .toMatch(/\/api\/store\/media\/Plugin\/com\.acme\.hue\/icon\?v=def456$/);
+    });
+
+    it('asks by position alone when an older host names no digest', () => {
+      const api = configure();
+
+      expect(api.getStoreScreenshotUrl('Plugin', 'com.acme.hue', 0)).toMatch(/\/screenshots\/0$/);
+      expect(api.getStoreExtensionIconUrl('Plugin', 'com.acme.hue', null)).toMatch(/\/icon$/);
+    });
+  });
+
   describe('request caching', () => {
     it('sends API requests with cache no-store, with a token', async () => {
       const api = configure();

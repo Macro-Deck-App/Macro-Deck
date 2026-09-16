@@ -54,8 +54,44 @@
         [style.height.px]="rowHeight">
         @if (row.kind === 'header') {
           <div class="vars-group-header" aria-hidden="true">{{ row.label }}</div>
+        } @else if (row.kind === 'catalog-branch') {
+          <li class="vars-row vars-catalog-branch-row" [style.padding-left.px]="row.depth * catalogIndent">
+            <button
+              type="button"
+              class="vars-row-main vars-catalog-main vars-catalog-branch"
+              [attr.aria-expanded]="row.expanded"
+              (click)="toggleCatalogBranch(row.integrationId, row.node)">
+              <div class="vars-name-col">
+                <span class="vars-public-name">
+                  <span
+                    class="icon icon-xs icon-chevron-right vars-catalog-chevron"
+                    [class.vars-catalog-chevron-open]="row.expanded"
+                    aria-hidden="true"></span>
+                  {{ catalogLabel(row.node) }}
+                </span>
+                <span class="vars-meta">
+                  @if (row.node.type) {
+                    <span class="vars-type-badge type-{{ row.node.type }}">{{ typeLabels()[row.node.type] }}</span>
+                  }
+                </span>
+              </div>
+              <div class="vars-value-col">
+                <span class="vars-dynamic-badge">{{ dynamicBadgeLabel() }}</span>
+              </div>
+            </button>
+            @if (isCatalogBindable(row.node)) {
+              <shared-button
+                class="vars-catalog-bind"
+                variant="secondary"
+                (click)="activateCatalogLeaf(row.integrationId, row.node)">{{ bindActionLabel() }}</shared-button>
+            }
+          </li>
+        } @else if (row.kind === 'catalog-note') {
+          <li class="vars-row vars-catalog-note" [style.padding-left.px]="row.depth * catalogIndent">
+            <span class="vars-public-name">{{ row.text }}</span>
+          </li>
         } @else if (row.kind === 'catalog-leaf') {
-          <li class="vars-row">
+          <li class="vars-row" [style.padding-left.px]="row.depth * catalogIndent">
             <button
               type="button"
               class="vars-row-main vars-catalog-main"
@@ -74,7 +110,7 @@
             </button>
           </li>
         } @else if (row.kind === 'catalog-more') {
-          <li class="vars-row">
+          <li class="vars-row" [style.padding-left.px]="row.depth * catalogIndent">
             <button
               type="button"
               class="vars-row-main vars-catalog-main vars-catalog-more"
@@ -198,6 +234,15 @@
         }
       </div>
     </cdk-virtual-scroll-viewport>
+  }
+
+  @if (manualIdIntegrationId(); as integrationId) {
+    <shared-variable-catalog-id-input
+      class="vars-manual-id"
+      [integrationId]="integrationId"
+      [acceptedTypes]="acceptedTypeList()"
+      [writableOnly]="writableOnlyValue()"
+      (bound)="onManualBound($event)" />
   }
 </div>
 

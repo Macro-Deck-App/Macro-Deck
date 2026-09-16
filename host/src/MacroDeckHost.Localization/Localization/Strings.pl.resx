@@ -1695,6 +1695,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Developer.ManagedPlugins.UnmanagedReason" xml:space="preserve">
     <value>Ta wtyczka uruchamia się i zatrzymuje samodzielnie. Macro Deck jedynie obserwuje jej sesję, więc nie można jej stąd uruchomić, zatrzymać ani ponownie uruchomić.</value>
   </data>
+  <data name="Developer.ManagedPlugins.TakenOverBadge" xml:space="preserve">
+    <value>Kompilacja deweloperska aktywna</value>
+  </data>
+  <data name="Developer.ManagedPlugins.TakenOverReason" xml:space="preserve">
+    <value>Kompilacja deweloperska przejęła tę wtyczkę, więc nie można jej stąd uruchomić ani ponownie uruchomić. Odwołaj kompilację deweloperską na tej stronie, aby ponownie uruchomić zainstalowaną wersję.</value>
+  </data>
   <data name="Developer.NoActionsAvailableHeading" xml:space="preserve">
     <value>Brak dostępnych akcji</value>
   </data>
@@ -1962,6 +1968,13 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>{name} traci swoje dane uwierzytelniające i zostaje natychmiast rozłączona. Aby połączyć się ponownie, musi sparować się od nowa.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Developer.Tokens.EndTakeoverConfirmMessage" xml:space="preserve">
+    <value>{name} traci swoje dane uwierzytelniające i zostaje natychmiast rozłączona. Zainstalowana wersja wtyczki uruchomi się ponownie.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Developer.Tokens.TakeoverBadge" xml:space="preserve">
+    <value>Zastępuje zainstalowaną wtyczkę</value>
+  </data>
   <data name="Developer.Tokens.RevokePluginFailed" xml:space="preserve">
     <value>Nie można odwołać wtyczki</value>
   </data>
@@ -2118,6 +2131,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Dialogs.PluginPairing.ReplacesWarning" xml:space="preserve">
     <value>Wtyczka jest już sparowana dla tego identyfikatora pakietu. Zatwierdzenie zastąpi jej rejestrację - istniejące poświadczenie przestanie działać, a wtyczka zostanie natychmiast rozłączona.</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverConfirmLabel" xml:space="preserve">
+    <value>Rozumiem, że niezweryfikowana kompilacja deweloperska zastąpi zainstalowaną wtyczkę i otrzyma jej ustawienia oraz zapisane dane uwierzytelniające</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverWarning" xml:space="preserve">
+    <value>Ten identyfikator pakietu należy do zainstalowanej wtyczki. Po zatwierdzeniu zastąpi ją niezweryfikowana kompilacja deweloperska: zainstalowana wtyczka zostanie zatrzymana, a kompilacja deweloperska otrzyma jej ustawienia i zapisane dane uwierzytelniające. Zainstalowana wersja uruchomi się ponownie po zakończeniu przejęcia.</value>
   </data>
   <data name="Dialogs.PluginPairing.ReportedByRequester" xml:space="preserve">
     <value>Zgłoszone przez żądający program</value>
@@ -2644,6 +2663,15 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Errors.Plugins.ReplaceCredentialConfirmationRequired" xml:space="preserve">
     <value>Zatwierdzenie tej prośby zastąpi dane uwierzytelniające istniejącej wtyczki. Najpierw potwierdź zastąpienie.</value>
+  </data>
+  <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
+    <value>Kompilacja deweloperska przejęła tę wtyczkę. Przed instalacją lub aktualizacją zakończ przejęcie.</value>
+  </data>
+  <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
+    <value>Kompilacja deweloperska przejęła tę wtyczkę. Zainstalowana wersja uruchomi się ponownie po zakończeniu przejęcia.</value>
+  </data>
+  <data name="Errors.Plugins.TakeoverConfirmationRequired" xml:space="preserve">
+    <value>Zatwierdzenie tej prośby pozwoli kompilacji deweloperskiej przejąć zainstalowaną wtyczkę. Najpierw potwierdź przejęcie.</value>
   </data>
   <data name="Errors.Plugins.SessionNotFound" xml:space="preserve">
     <value>Nie istnieje aktywna sesja o tym identyfikatorze.</value>
@@ -6863,6 +6891,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Obs.Actions.SetPreviewScene.Name" xml:space="preserve">
     <value>Ustaw scenę podglądu</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetProfile.Description" xml:space="preserve">
+    <value>Przełącza OBS na inny profil</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetProfile.Name" xml:space="preserve">
+    <value>Ustaw profil</value>
+  </data>
   <data name="Integrations.Obs.Actions.SetScene.Description" xml:space="preserve">
     <value>Przełącza aktywną scenę programu</value>
   </data>
@@ -7062,6 +7096,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Obs.Errors.NoInputSelected" xml:space="preserve">
     <value>Nie wybrano wejścia.</value>
   </data>
+  <data name="Integrations.Obs.Errors.NoProfileSelected" xml:space="preserve">
+    <value>Nie wybrano profilu.</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoSceneOrSourceSelected" xml:space="preserve">
     <value>Nie wybrano sceny ani źródła.</value>
   </data>
@@ -7190,6 +7227,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Obs.Params.ModeToggle" xml:space="preserve">
     <value>Przełącz</value>
+  </data>
+  <data name="Integrations.Obs.Params.Profile" xml:space="preserve">
+    <value>Profil</value>
   </data>
   <data name="Integrations.Obs.Params.SaveToVariable" xml:space="preserve">
     <value>Zapisz do zmiennej</value>
@@ -8347,7 +8387,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Tryb studyjny aktywny</value>
   </data>
   <data name="Integrations.System.Actions.DecreaseVolume.Description" xml:space="preserve">
-    <value>Zmniejsza głośność wyjścia systemowego.</value>
+    <value>Zmniejsza głośność wybranego urządzenia audio.</value>
   </data>
   <data name="Integrations.System.Actions.DecreaseVolume.Name" xml:space="preserve">
     <value>Zmniejsz głośność</value>
@@ -8362,7 +8402,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Hibernacja</value>
   </data>
   <data name="Integrations.System.Actions.IncreaseVolume.Description" xml:space="preserve">
-    <value>Zwiększa głośność wyjścia systemowego.</value>
+    <value>Zwiększa głośność wybranego urządzenia audio.</value>
   </data>
   <data name="Integrations.System.Actions.IncreaseVolume.Name" xml:space="preserve">
     <value>Zwiększ głośność</value>
@@ -8425,7 +8465,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Zablokuj komputer</value>
   </data>
   <data name="Integrations.System.Actions.MuteVolume.Description" xml:space="preserve">
-    <value>Przełącza wyciszenie wyjścia systemowego.</value>
+    <value>Przełącza wyciszenie wybranego urządzenia audio.</value>
   </data>
   <data name="Integrations.System.Actions.MuteVolume.MutedLabel" xml:space="preserve">
     <value>Wyciszone</value>
@@ -8521,7 +8561,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Tytuł</value>
   </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
-    <value>Ustawia głośność wyjścia systemowego na określony poziom.</value>
+    <value>Ustawia głośność wybranego urządzenia audio na określony poziom.</value>
   </data>
   <data name="Integrations.System.Actions.SetVolume.LevelLabel" xml:space="preserve">
     <value>Głośność (%)</value>
@@ -8549,6 +8589,30 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.System.Actions.VolumeAmount.Label" xml:space="preserve">
     <value>Wartość (%)</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.Label" xml:space="preserve">
+    <value>Urządzenie audio</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.Description" xml:space="preserve">
+    <value>Urządzenie audio sterowane przez akcję.</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.DefaultOutput" xml:space="preserve">
+    <value>Domyślne urządzenie wyjściowe</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.DefaultInput" xml:space="preserve">
+    <value>Domyślne urządzenie wejściowe</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.OutputOption" xml:space="preserve">
+    <value>{device} (wyjście)</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.InputOption" xml:space="preserve">
+    <value>{device} (wejście)</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.UnavailableOption" xml:space="preserve">
+    <value>{device} (niedostępne)</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.UnknownUnavailableOption" xml:space="preserve">
+    <value>Niedostępne urządzenie</value>
   </data>
   <data name="Integrations.System.Actions.WorkingDirectoryLabel" xml:space="preserve">
     <value>Katalog roboczy</value>
@@ -8670,6 +8734,24 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.System.Variables.Muted" xml:space="preserve">
     <value>Wyciszono</value>
+  </data>
+  <data name="Integrations.System.Variables.InputVolume" xml:space="preserve">
+    <value>Głośność wejścia</value>
+  </data>
+  <data name="Integrations.System.Variables.InputMuted" xml:space="preserve">
+    <value>Wejście wyciszone</value>
+  </data>
+  <data name="Integrations.System.Variables.DeviceOutputVolume" xml:space="preserve">
+    <value>{device}: głośność (wyjście)</value>
+  </data>
+  <data name="Integrations.System.Variables.DeviceOutputMuted" xml:space="preserve">
+    <value>{device}: wyciszono (wyjście)</value>
+  </data>
+  <data name="Integrations.System.Variables.DeviceInputVolume" xml:space="preserve">
+    <value>{device}: głośność (wejście)</value>
+  </data>
+  <data name="Integrations.System.Variables.DeviceInputMuted" xml:space="preserve">
+    <value>{device}: wyciszono (wejście)</value>
   </data>
   <data name="Integrations.System.Variables.CpuUsage" xml:space="preserve">
     <value>Obciążenie CPU</value>
@@ -10688,6 +10770,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Widgets.Actions.PositionTop" xml:space="preserve">
     <value>Na górze</value>
   </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
+    <value>Zmienia kolor akcentu suwaka lub wykresu historii.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
+    <value>Ustaw kolor akcentu</value>
+  </data>
   <data name="Integrations.Widgets.Actions.SetBackgroundColorDescription" xml:space="preserve">
     <value>Zmienia kolor tła widżetu.</value>
   </data>
@@ -10720,6 +10808,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Widgets.Actions.SetIconDisplayName" xml:space="preserve">
     <value>Ustaw wyświetlanie ikony</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconColorDescription" xml:space="preserve">
+    <value>Zmienia kolor, w jakim rysowana jest ikona widżetu.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconColorName" xml:space="preserve">
+    <value>Ustaw kolor ikony</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetIconName" xml:space="preserve">
     <value>Ustaw ikonę</value>
@@ -11550,6 +11644,13 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Wtyczka {name} czeka na zatwierdzenie w Macro Decku.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
+    <value>Kompilacja deweloperska chce przejąć wtyczkę</value>
+  </data>
+  <data name="Notifications.PluginTakeoverRequestedMessage" xml:space="preserve">
+    <value>Wtyczka {name} chce zastąpić zainstalowaną wtyczkę i czeka na zatwierdzenie w Macro Decku.</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.StoreExtensionInstallFailed" xml:space="preserve">
     <value>Nie udało się zainstalować {name}</value>
     <comment>[name:string]</comment>
@@ -12374,6 +12475,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Settings.Adb.StatusHeading" xml:space="preserve">
     <value>Stan</value>
+  </data>
+  <data name="Settings.Adb.StopServerOnExitDescription" xml:space="preserve">
+    <value>Serwer ADB zostanie zatrzymany przy zamknięciu, ponownym uruchomieniu lub aktualizacji Macro Deck, ale tylko jeśli uruchomił go Macro Deck. Inne programy korzystające z ADB, np. Android Studio, stracą połączenie.</value>
+  </data>
+  <data name="Settings.Adb.StopServerOnExitLabel" xml:space="preserve">
+    <value>Zatrzymaj serwer ADB przy zamykaniu Macro Deck</value>
   </data>
   <data name="Settings.Adb.UncleanShutdown.One" xml:space="preserve">
     <value>Macro Deck nie został poprawnie zamknięty poprzednim razem. Wyczyszczono {count} pozostałe połączenie USB.</value>
@@ -14173,6 +14280,112 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Queued" xml:space="preserve">
     <value>W kolejce</value>
   </data>
+  <data name="Store.RegistryRefresh.Error.BudgetExceeded" xml:space="preserve">
+    <value>Rejestr jest większy, niż Macro Deck może pobrać.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.CertificateUntrusted" xml:space="preserve">
+    <value>Rejestr został podpisany certyfikatem, któremu Macro Deck nie ufa.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.Disabled" xml:space="preserve">
+    <value>Store jest wyłączony.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.Malformed" xml:space="preserve">
+    <value>Rejestr przesłał dane, których Macro Deck nie mógł odczytać.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.NetworkFailure" xml:space="preserve">
+    <value>Nie można połączyć się z rejestrem.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SequenceRollback" xml:space="preserve">
+    <value>Rejestr zaoferował starszy katalog niż już zainstalowany.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SignatureInvalid" xml:space="preserve">
+    <value>Podpis rejestru jest nieprawidłowy.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SigningKeyRevoked" xml:space="preserve">
+    <value>Rejestr został podpisany unieważnionym kluczem.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SizeMismatch" xml:space="preserve">
+    <value>Plik rejestru nie miał zadeklarowanego rozmiaru.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SnapshotUnchanged" xml:space="preserve">
+    <value>Katalog się nie zmienił.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.StorageFailure" xml:space="preserve">
+    <value>Nie udało się zapisać nowego katalogu.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
+    <value>Wystąpił nieoczekiwany błąd.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
+    <value>Odświeżanie rejestru Store</value>
+  </data>
+  <data name="Store.RegistryRefresh.InProgressAction" xml:space="preserve">
+    <value>Odświeżanie…</value>
+  </data>
+  <data name="Store.RegistryRefresh.LogLabel" xml:space="preserve">
+    <value>Dziennik odświeżania</value>
+  </data>
+  <data name="Store.RegistryRefresh.Progress" xml:space="preserve">
+    <value>Pliki: {completed} z {total}</value>
+  </data>
+  <data name="Store.RegistryRefresh.State.Cancelled" xml:space="preserve">
+    <value>Odświeżanie zostało anulowane.</value>
+  </data>
+  <data name="Store.RegistryRefresh.State.Failed" xml:space="preserve">
+    <value>Nie udało się odświeżyć rejestru Store.</value>
+  </data>
+  <data name="Store.RegistryRefresh.State.Running" xml:space="preserve">
+    <value>Trwa odświeżanie rejestru Store…</value>
+  </data>
+  <data name="Store.RegistryRefresh.State.Succeeded" xml:space="preserve">
+    <value>Rejestr Store jest aktualny.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Applied" xml:space="preserve">
+    <value>Zaktualizowano katalog do wersji {sequence}</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Cancelled" xml:space="preserve">
+    <value>Anulowano, ponieważ Macro Deck jest zamykany</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.DownloadingFiles.One" xml:space="preserve">
+    <value>Pobieranie {count} pliku</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.RegistryRefresh.Step.DownloadingFiles.Other" xml:space="preserve">
+    <value>Pobieranie plików (liczba: {count})</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Failed" xml:space="preserve">
+    <value>Niepowodzenie: {reason}</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.FetchingManifest" xml:space="preserve">
+    <value>Pobieranie manifestu rejestru</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.FetchingSignature" xml:space="preserve">
+    <value>Pobieranie podpisu rejestru</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.ReadingCatalog" xml:space="preserve">
+    <value>Wczytywanie katalogu</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Started" xml:space="preserve">
+    <value>Rozpoczęto odświeżanie</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.StartedScheduled" xml:space="preserve">
+    <value>Rozpoczęto automatyczne odświeżanie</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.UpToDate" xml:space="preserve">
+    <value>Brak zmian: katalog jest już w wersji {sequence}</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Verifying" xml:space="preserve">
+    <value>Weryfikowanie podpisu</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.WaitingForRegistryUpdate.One" xml:space="preserve">
+    <value>Rejestr jest właśnie aktualizowany. Ponowna próba za {count} s</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.RegistryRefresh.Step.WaitingForRegistryUpdate.Other" xml:space="preserve">
+    <value>Rejestr jest właśnie aktualizowany. Ponowna próba za {count} s</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Store.RetryInstallation" xml:space="preserve">
     <value>Ponów instalację</value>
   </data>
@@ -15553,6 +15766,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Widgets.Editor.Icon" xml:space="preserve">
     <value>Ikona</value>
   </data>
+  <data name="Widgets.Editor.IconColor" xml:space="preserve">
+    <value>Kolor ikony</value>
+  </data>
   <data name="Widgets.Editor.IconDisplay" xml:space="preserve">
     <value>Wyświetlanie ikony</value>
   </data>
@@ -16226,11 +16442,29 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Widgets.Slider.ChooseIcon" xml:space="preserve">
     <value>Wybierz ikonę</value>
   </data>
+  <data name="Widgets.Slider.CustomStep" xml:space="preserve">
+    <value>Własny krok</value>
+  </data>
+  <data name="Widgets.Slider.CustomStepDescription" xml:space="preserve">
+    <value>Używany jest własny krok zamiast kroku określonego przez zmienną.</value>
+  </data>
   <data name="Widgets.Slider.DefaultVariableDescription" xml:space="preserve">
     <value>Bez zmiennej używana jest własna zmienna widżetu slider_value.</value>
   </data>
   <data name="Widgets.Slider.Horizontal" xml:space="preserve">
     <value>Poziomo</value>
+  </data>
+  <data name="Widgets.Slider.InteractionMode" xml:space="preserve">
+    <value>Tryb interakcji</value>
+  </data>
+  <data name="Widgets.Slider.InteractionAbsolute" xml:space="preserve">
+    <value>Bezwzględny</value>
+  </data>
+  <data name="Widgets.Slider.InteractionRelative" xml:space="preserve">
+    <value>Względny</value>
+  </data>
+  <data name="Widgets.Slider.InteractionModeDescription" xml:space="preserve">
+    <value>Tryb bezwzględny ustawia wartość w miejscu dotknięcia. Tryb względny pozostawia wartość i przesuwa ją o długość przeciągnięcia.</value>
   </data>
   <data name="Widgets.Slider.LegacyActionBindingNotice" xml:space="preserve">
     <value>Ten suwak nadal zawiera powiązanie z akcją ze starszej wersji. Nie jest już używane i zostanie usunięte przy następnym zapisie.</value>
@@ -16429,6 +16663,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Obs.Params.Configuration" xml:space="preserve">
     <value>Konfiguracja</value>
+  </data>
+  <data name="Integrations.Obs.Variables.CurrentProfile" xml:space="preserve">
+    <value>Bieżący profil</value>
   </data>
   <data name="Integrations.Obs.Variables.CurrentScene" xml:space="preserve">
     <value>Bieżąca scena</value>

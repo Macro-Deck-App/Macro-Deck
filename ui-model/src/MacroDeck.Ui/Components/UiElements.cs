@@ -714,7 +714,8 @@ public sealed record UiProgressText : UiComponentLeaf
 /// absent means vertical.</item>
 /// <item>A pointer anywhere in the box sets the level to its position projected onto that axis, clamped
 /// to <c>0..1</c>; the cross-axis position is ignored, and a pointer that leaves the box mid-drag keeps
-/// controlling the element until it is released.</item>
+/// controlling the element until it is released. This is the absolute interaction, what an absent
+/// <see cref="Interaction" /> means; the relative one is the last item below.</item>
 /// <item>When <see cref="Step" /> is present the level is snapped to <c>round(level / step) * step</c>,
 /// clamped to <c>0..1</c>, before it is painted or sent. <b>A tie rounds up</b> - stated because the
 /// obvious rounding primitive differs by platform, and a reader that rounded half to even would paint one
@@ -729,6 +730,17 @@ public sealed record UiProgressText : UiComponentLeaf
 /// <item>Two taps completed in quick succession, each without a drag, additionally send
 /// <see cref="UiComponentEvents.DoublePress" /> after the second tap's <see cref="UiComponentEvents.Change" />.
 /// The taps still set the level like any other interaction.</item>
+/// <item>With <see cref="Interaction" /> set to <see cref="UiComponentSliderInteractions.Relative" />, and
+/// overriding the pointer, adjust/change and double-tap items above where they differ: a press leaves the
+/// level where the reader paints it and sends nothing. While the pointer stays within the tap slop the
+/// level does not move; once it leaves, the level becomes the one at the press plus the pointer's travel
+/// along the axis since the press, divided by the box's measured length on that axis (up is more when
+/// vertical). The running level is clamped to <c>0..1</c> after every move, so reversing at an end moves
+/// back at once, and a travel of the full box length spans the full range. <see cref="Step" /> snaps the
+/// painted and sent level as usual, and the level counts as moved only once that snapped level differs
+/// from the snapped level at the press. An interaction whose level never moved - a tap - sends neither
+/// adjust nor change and leaves the level as it was; one that moved sends change at release even if it
+/// ended where it began. A double tap sends <see cref="UiComponentEvents.DoublePress" /> on its own.</item>
 /// </list>
 /// </summary>
 public sealed record UiSlider : UiComponentLeaf
@@ -752,6 +764,10 @@ public sealed record UiSlider : UiComponentLeaf
 	/// <see cref="UiComponentDirections.Horizontal" />.</summary>
 	public UiValue<string> Direction { get; init; }
 
+	/// <summary>How a pointer maps to the level - see <see cref="UiComponentSliderInteractions" />. Absent
+	/// means absolute: the level jumps to the pointer. A reader that predates the key stays absolute.</summary>
+	public UiValue<string> Interaction { get; init; }
+
 	/// <summary>The drawn track's thickness on the cross axis. It does not size the element: the box is
 	/// the drag surface and the track is paint inside it.</summary>
 	public UiSize Thickness { get; init; }
@@ -770,6 +786,7 @@ public sealed record UiSlider : UiComponentLeaf
 		properties.Set(UiComponentProperties.Step, Step);
 		properties.Set(UiComponentProperties.LevelColor, LevelColor);
 		properties.Set(UiComponentProperties.Direction, Direction);
+		properties.Set(UiComponentProperties.Interaction, Interaction);
 		properties.Set(UiComponentProperties.Thickness, Thickness.Value);
 	}
 }
@@ -905,6 +922,10 @@ public sealed record UiButton : UiComponentContainer
 	/// states the normative result. Absent means <c>1</c>.</summary>
 	public UiValue<double> Saturation { get; init; }
 
+	/// <summary>The artwork recoloured, as <c>#rrggbb</c> - see <see cref="UiComponentProperties.Tint" />,
+	/// which states the normative result. Absent means the artwork's own colours.</summary>
+	public UiValue<string> Tint { get; init; }
+
 	/// <summary>How the ring is drawn - see <see cref="UiComponentBorderStyles" />. Absent means no
 	/// ring.</summary>
 	public UiValue<string> BorderStyle { get; init; }
@@ -942,6 +963,7 @@ public sealed record UiButton : UiComponentContainer
 		properties.Set(UiComponentProperties.Opacity, Opacity);
 		properties.Set(UiComponentProperties.Brightness, Brightness);
 		properties.Set(UiComponentProperties.Saturation, Saturation);
+		properties.Set(UiComponentProperties.Tint, Tint);
 		properties.Set(UiComponentProperties.BorderStyle, BorderStyle);
 		properties.Set(UiComponentProperties.BorderColor, BorderColor);
 		properties.Set(UiComponentProperties.Corner, Corner);

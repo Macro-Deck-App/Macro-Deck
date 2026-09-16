@@ -1,84 +1,12 @@
 @use '../../../../styles/index' as ds;
 
-// An overlay on the opposite edge to the notification panel, and the mirror image of it in every
-// other way: it slides over the page instead of displacing it, and its box lets clicks through
-// while it is closed.
 :host {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  width: 17.5rem;
-  max-width: 100%;
-  z-index: 30;
-  pointer-events: none;
-}
+  --side-panel-width: 17.5rem;
 
-// Parked off-screen while closed rather than unmounted, so both directions are the one transform
-// transition; a mount-time keyframe would only ever animate the way in.
-.cp-panel {
-  width: 100%;
-  height: 100%;
-  transform: translateX(100%);
-  transition: transform var(--transition-slow);
-  pointer-events: auto;
-
-  @media (prefers-reduced-motion: reduce) {
-    transition: none;
-  }
-}
-
-.cp-panel-open {
-  transform: translateX(0);
-  box-shadow: var(--shadow-lg);
-}
-
-.cp-inner {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  background-color: var(--color-bg-secondary);
-  border-left: 1px solid var(--color-border);
-}
-
-.cp-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  flex-shrink: 0;
-  padding: var(--space-3) var(--space-3) var(--space-2);
-}
-
-.cp-title {
-  font-size: var(--text-sm);
-  font-weight: var(--font-semibold);
-  color: var(--color-text-primary);
-}
-
-.cp-close {
-  @include ds.flex-center;
-
-  width: var(--control-height-compact);
-  height: var(--control-height-compact);
-  border: none;
-  border-radius: var(--radius-md);
-  background: none;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: all var(--transition-normal);
-}
-
-.cp-close:hover {
-  background-color: var(--color-bg-tertiary);
-  color: var(--color-text-primary);
+  display: contents;
 }
 
 .cp-body {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);

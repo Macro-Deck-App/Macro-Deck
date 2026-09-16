@@ -329,3 +329,30 @@
 .vars-catalog-more .vars-public-name {
   color: var(--color-accent);
 }
+
+.vars-catalog-branch-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.vars-catalog-branch {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.vars-catalog-bind {
+  flex: 0 0 auto;
+}
+
+.vars-catalog-chevron {
+  transition: transform var(--transition-fast, 120ms) ease;
+}
+
+.vars-catalog-chevron-open {
+  transform: rotate(90deg);
+}
+
+.vars-catalog-note .vars-public-name {
+  color: var(--color-text-secondary);
+}

@@ -35,10 +35,13 @@ public sealed class PluginPairingUserNotificationHandler : INotificationHandler<
 		{
 			Severity = UserNotificationSeverity.Info,
 			Kind = UserNotificationKind.Security,
-			Title = _localization.Resolve(AppStrings.Notifications.PluginPairingRequested(), culture) ??
-				notification.DisplayName,
-			Message = _localization.Resolve(
-				AppStrings.Notifications.PluginPairingRequestedMessage(name: notification.DisplayName),
+			Title = _localization.Resolve(notification.TakesOverInstalledPlugin
+					? AppStrings.Notifications.PluginTakeoverRequested()
+					: AppStrings.Notifications.PluginPairingRequested(),
+				culture) ?? notification.DisplayName,
+			Message = _localization.Resolve(notification.TakesOverInstalledPlugin
+					? AppStrings.Notifications.PluginTakeoverRequestedMessage(name: notification.DisplayName)
+					: AppStrings.Notifications.PluginPairingRequestedMessage(name: notification.DisplayName),
 				culture),
 			SourceId = notification.PluginId,
 			SourceName = notification.DisplayName,

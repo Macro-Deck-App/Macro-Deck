@@ -199,6 +199,40 @@ public class ConnectCredentialIsolationTests
 		Assert.That(await _store.Load(), Is.Null);
 	}
 
+	[Test]
+	public async Task Verified_roles_are_stored_with_the_credential_and_cleared_with_it()
+	{
+		await _store.Save(new ConnectCredential(Marker(), "sub-1", "Ada", null, DateTimeOffset.UnixEpoch, ["StoreTester"]));
+
+		Assert.That((await _store.Load())!.CachedRoles, Is.EqualTo(new[] { "StoreTester" }));
+
+		await _store.Clear();
+
+		using var scope = _provider.CreateScope();
+		var stored = await scope.ServiceProvider.GetRequiredService<IAppPreferenceRepository>()
+			.GetByKey(AppPreferenceService.ConnectCredentialCachedRolesKey);
+
+		Assert.That(stored?.Value, Is.Null.Or.Empty);
+	}
+
+	[TestCase("")]
+	[TestCase("not json")]
+	public async Task A_credential_without_readable_roles_still_loads_with_none(string storedRoles)
+	{
+		await _store.Save(new ConnectCredential(Marker(), "sub-1", "Ada", null, DateTimeOffset.UnixEpoch, ["StoreTester"]));
+
+		using (var scope = _provider.CreateScope())
+		{
+			await scope.ServiceProvider.GetRequiredService<IAppPreferenceRepository>()
+				.SetValue(AppPreferenceService.ConnectCredentialCachedRolesKey, storedRoles);
+		}
+
+		var loaded = await _store.Load();
+
+		Assert.That(loaded, Is.Not.Null);
+		Assert.That(loaded!.CachedRoles, Is.Null);
+	}
+
 	private static bool ContainsMarker(byte[] content, string marker)
 		=> Contains(content, Encoding.UTF8.GetBytes(marker)) ||
 			Contains(content, Encoding.Unicode.GetBytes(marker)) ||

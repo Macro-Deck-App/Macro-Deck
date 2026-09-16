@@ -40,6 +40,13 @@ public sealed record WidgetAppearancePatch
 	public double? IconOpacity { get; init; }
 
 	/// <summary>
+	/// The colour an action button draws its icon in, as <c>#rrggbb</c>: every pixel of the icon takes
+	/// the colour and keeps its own transparency. An empty string returns the icon to its own colours.
+	/// Artwork from an icon provider is never tinted. A host that predates this property ignores it.
+	/// </summary>
+	public string? IconColor { get; init; }
+
+	/// <summary>
 	/// Stable id of the label's font face, in the host's face-catalog id format. A style that does not
 	/// exist for the chosen family is simply not offered - this never carries a family name alone, so
 	/// there is nothing here that could silently resolve to the wrong weight or style.
@@ -60,6 +67,15 @@ public sealed record WidgetAppearancePatch
 
 	public string? BorderColor { get; init; }
 
+	/// <summary>
+	/// The widget's highlight colour, as <c>#rrggbb</c>: a Slider's filled level and a History Graph's line
+	/// and fill. Other widget types have none and drop it. Clearing it with
+	/// <see cref="WidgetAppearanceProperty.AccentColor" /> returns the widget to the reader's theme accent.
+	/// A value that is not a colour is stored but drawn as the theme accent. A host that predates this
+	/// property ignores it.
+	/// </summary>
+	public string? AccentColor { get; init; }
+
 	public bool IsEmpty => Label is null &&
 		BackgroundColor is null &&
 		LabelColor is null &&
@@ -69,10 +85,12 @@ public sealed record WidgetAppearancePatch
 		IconOffsetX is null &&
 		IconOffsetY is null &&
 		IconOpacity is null &&
+		IconColor is null &&
 		FontFaceId is null &&
 		FontSize is null &&
 		TextAlign is null &&
 		LabelPosition is null &&
 		BorderStyle is null &&
-		BorderColor is null;
+		BorderColor is null &&
+		AccentColor is null;
 }

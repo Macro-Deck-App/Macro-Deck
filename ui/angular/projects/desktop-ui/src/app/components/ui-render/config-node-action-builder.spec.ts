@@ -110,6 +110,36 @@ describe('shared-ui-node actions-list-editor', () => {
     expect(builder(withoutToggle).effectiveTriggerTabs().map(t => t.triggerType)).not.toContain('onStateChange');
   });
 
+  it('offers event triggers next to a single fixed Double Tap tab, as a slider declares', async () => {
+    const rendered = await renderWithApi(actionsListNode({ triggers: ['onDoublePress'] }));
+
+    expect(builder(rendered).triggerTabItems().map(item => item.id)).toEqual(['onDoublePress']);
+    expect(builder(rendered).showAddEventTrigger()).toBeTrue();
+  });
+
+  it('lists a stored event flow as its own tab next to the fixed Double Tap tab', async () => {
+    const rendered = await renderWithApi(actionsListNode({
+      triggers: ['onDoublePress'],
+      value: [
+        { triggerId: 'onDoublePress', triggerType: 'onDoublePress', children: [] },
+        {
+          triggerId: 'evt1',
+          triggerType: 'onEvent',
+          event: { providerId: 'macro-deck', eventId: 'variable-changed', eventName: 'Variable changed' },
+          children: [],
+        },
+      ],
+    }));
+
+    expect(builder(rendered).eventTabItems().map(item => item.label)).toEqual(['Variable changed']);
+  });
+
+  it('keeps offering event triggers for press trigger lists', async () => {
+    const rendered = await renderWithApi(actionsListNode({ triggers: ['onShortPress', 'onLongPress'] }));
+
+    expect(builder(rendered).showAddEventTrigger()).toBeTrue();
+  });
+
   it('forwards canRun to allowRun, gating the Run affordance', async () => {
     const withRun = await renderWithApi(actionsListNode({ canRun: true }));
     expect(builder(withRun).showRun()).toBeTrue();

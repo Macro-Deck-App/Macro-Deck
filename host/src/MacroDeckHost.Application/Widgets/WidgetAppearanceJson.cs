@@ -47,10 +47,12 @@ public static class WidgetAppearanceJson
 			return false;
 		}
 
-		return type switch
+		return (type, property) switch
 		{
-			WidgetTypeIds.ActionButton => ClearOnActionButton(data, property, stateId),
-			WidgetTypeIds.HistoryGraph => ClearOn(data, property, labelKey: "title"),
+			(WidgetTypeIds.Slider, WidgetAppearanceProperty.AccentColor) => Remove(data, "color"),
+			(WidgetTypeIds.HistoryGraph, WidgetAppearanceProperty.AccentColor) => Remove(data, "accentColor"),
+			(WidgetTypeIds.ActionButton, _) => ClearOnActionButton(data, property, stateId),
+			(WidgetTypeIds.HistoryGraph, _) => ClearOn(data, property, labelKey: "title"),
 			_ => ClearOn(data, property, labelKey: "label")
 		};
 	}
@@ -68,6 +70,7 @@ public static class WidgetAppearanceJson
 				WidgetAppearanceProperty.LabelColor,
 				WidgetAppearanceProperty.Icon,
 				WidgetAppearanceProperty.IconDisplay,
+				WidgetAppearanceProperty.IconColor,
 				WidgetAppearanceProperty.Font,
 				WidgetAppearanceProperty.Border,
 				WidgetAppearanceProperty.BorderColor
@@ -79,12 +82,13 @@ public static class WidgetAppearanceJson
 				WidgetAppearanceProperty.LabelColor,
 				WidgetAppearanceProperty.Icon,
 				WidgetAppearanceProperty.Border,
-				WidgetAppearanceProperty.BorderColor
+				WidgetAppearanceProperty.BorderColor,
+				WidgetAppearanceProperty.AccentColor
 			],
 			WidgetTypeIds.HistoryGraph =>
 			[
 				WidgetAppearanceProperty.Label, WidgetAppearanceProperty.Border,
-				WidgetAppearanceProperty.BorderColor
+				WidgetAppearanceProperty.BorderColor, WidgetAppearanceProperty.AccentColor
 			],
 			_ => [WidgetAppearanceProperty.Border, WidgetAppearanceProperty.BorderColor]
 		};
@@ -233,6 +237,7 @@ public static class WidgetAppearanceJson
 			var changed = ApplyLabelProperties(stateObject, patch);
 			changed |= SetIcon(stateObject, patch.IconId);
 			changed |= ApplyIconDisplay(stateObject, patch);
+			changed |= SetIfPresent(stateObject, "iconColor", patch.IconColor);
 			changed |= ApplyBorder(stateObject, patch);
 			return changed;
 		}
@@ -240,13 +245,14 @@ public static class WidgetAppearanceJson
 		var flatChanged = ApplyLabelProperties(data, patch);
 		flatChanged |= ApplyBorder(data, patch);
 
-		if (patch.IconId is not null || HasIconDisplay(patch))
+		if (patch.IconId is not null || HasIconDisplay(patch) || patch.IconColor is not null)
 		{
 			flatChanged |= HoistLegacyMomentaryIcon(data);
 		}
 
 		flatChanged |= SetIcon(data, patch.IconId);
 		flatChanged |= ApplyIconDisplay(data, patch);
+		flatChanged |= SetIfPresent(data, "iconColor", patch.IconColor);
 
 		return flatChanged;
 	}
@@ -299,7 +305,7 @@ public static class WidgetAppearanceJson
 		var rootHoldsIcon = data["icon"] is not null || data["iconId"] is not null || data["iconDisplay"] is not null;
 		var changed = migrated;
 
-		foreach (var key in new[] { "icon", "iconDisplay" })
+		foreach (var key in new[] { "icon", "iconDisplay", "iconColor" })
 		{
 			if (!firstAppearance.ContainsKey(key))
 			{
@@ -332,7 +338,8 @@ public static class WidgetAppearanceJson
 
 		var changed = ClearOn(data, property, labelKey: "label");
 
-		if (property is WidgetAppearanceProperty.Icon or WidgetAppearanceProperty.IconDisplay &&
+		if (property is WidgetAppearanceProperty.Icon or WidgetAppearanceProperty.IconDisplay
+				or WidgetAppearanceProperty.IconColor &&
 			data["states"] is JsonArray states &&
 			states.OfType<JsonObject>().FirstOrDefault()?["appearance"] is JsonObject firstAppearance)
 		{
@@ -350,6 +357,7 @@ public static class WidgetAppearanceJson
 			WidgetAppearanceProperty.LabelColor => Remove(target, "labelColor"),
 			WidgetAppearanceProperty.Icon => Remove(target, "icon", "iconId"),
 			WidgetAppearanceProperty.IconDisplay => Remove(target, "iconDisplay"),
+			WidgetAppearanceProperty.IconColor => Remove(target, "iconColor"),
 			WidgetAppearanceProperty.Font => Remove(target,
 				"fontFaceId",
 				"fontSize",
@@ -377,11 +385,14 @@ public static class WidgetAppearanceJson
 		changed |= SetIfPresent(data, "labelColor", patch.LabelColor);
 		changed |= SetIfPresent(data, "backgroundColor", patch.BackgroundColor);
 		changed |= SetIcon(data, patch.IconId);
+		changed |= SetIfPresent(data, "color", patch.AccentColor);
 		return changed | ApplyBorder(data, patch);
 	}
 
 	private static bool ApplyToHistoryGraph(JsonObject data, WidgetAppearancePatch patch)
-		=> SetIfPresent(data, "title", patch.Label) | ApplyBorder(data, patch);
+		=> SetIfPresent(data, "title", patch.Label) |
+			SetIfPresent(data, "accentColor", patch.AccentColor) |
+			ApplyBorder(data, patch);
 
 	private static bool ApplyLabelProperties(JsonObject target, WidgetAppearancePatch patch)
 	{

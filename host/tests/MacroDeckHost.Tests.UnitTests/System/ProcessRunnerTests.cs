@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using MacroDeckHost.Integrations.System;
 
 namespace MacroDeckHost.Tests.UnitTests.System;
@@ -45,5 +46,17 @@ public class ProcessRunnerTests
 			Assert.That(result.Succeeded, Is.False);
 			Assert.That(result.StandardError, Does.Contain("oops"));
 		});
+	}
+
+	[Test]
+	[Platform(Exclude = "Win")]
+	public void A_cancelled_run_kills_the_hung_process_instead_of_waiting_for_it()
+	{
+		using var cancellation = new CancellationTokenSource(TimeSpan.FromMilliseconds(200));
+		var stopwatch = Stopwatch.StartNew();
+
+		Assert.That(async () => await ProcessRunner.RunWithResultAsync("sleep", ["30"], null, cancellation.Token),
+			Throws.InstanceOf<OperationCanceledException>());
+		Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(10)));
 	}
 }

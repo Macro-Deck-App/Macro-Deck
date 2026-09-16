@@ -1,7 +1,10 @@
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeck.Sdk.Widgets;
+using MacroDeckHost.Widgets.HistoryGraph;
+using MacroDeckHost.Widgets.Slider;
 
 namespace MacroDeckHost.Tests.UnitTests.Widgets;
 
@@ -235,6 +238,120 @@ public class WidgetAppearanceJsonTests
 	}
 
 	[Test]
+	public void MomentaryButton_WritesTheIconColorFlat()
+	{
+		var data = Parse("""{"mode":"momentary","icon":{"type":"icon-pack","reference":"i"}}""");
+
+		var changed = WidgetAppearanceJson.Apply(data,
+			WidgetTypeIds.ActionButton,
+			new WidgetAppearancePatch { IconColor = "#ef4444" },
+			["off"]);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(changed, Is.True);
+			Assert.That(data["iconColor"]!.GetValue<string>(), Is.EqualTo("#ef4444"));
+			Assert.That(data["states"], Is.Null);
+		});
+	}
+
+	[Test]
+	public void ToggleButton_WritesTheIconColorOntoTheSelectedStateOnly()
+	{
+		var data = Parse(
+			"""{"stateMode":true,"iconColor":"#00ff00","states":[{"id":"off","label":"Off","appearance":{}},{"id":"on","label":"On","appearance":{}}]}""");
+
+		var changed = WidgetAppearanceJson.Apply(data,
+			WidgetTypeIds.ActionButton,
+			new WidgetAppearancePatch { IconColor = "#ef4444" },
+			["on"]);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(changed, Is.True);
+			Assert.That(Appearance(data, "on")!["iconColor"]!.GetValue<string>(), Is.EqualTo("#ef4444"));
+			Assert.That(Appearance(data, "off")!["iconColor"], Is.Null);
+			Assert.That(data["iconColor"]!.GetValue<string>(), Is.EqualTo("#00ff00"));
+		});
+	}
+
+	[Test]
+	public void MomentaryButton_ColoringTheIcon_HoistsTheLegacyIconWithIt()
+	{
+		var data = Parse("""{"states":[{"id":"off","label":"Off","appearance":{"iconId":"icon-old"}}]}""");
+
+		WidgetAppearanceJson.Apply(data,
+			WidgetTypeIds.ActionButton,
+			new WidgetAppearancePatch { IconColor = "#ef4444" },
+			["off"]);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(data["icon"]!["reference"]!.GetValue<string>(), Is.EqualTo("icon-old"));
+			Assert.That(data["iconColor"]!.GetValue<string>(), Is.EqualTo("#ef4444"));
+			Assert.That(Appearance(data, "off")!.ContainsKey("iconId"), Is.False);
+		});
+	}
+
+	[Test]
+	public void IconColor_IsDroppedForATypeThatDoesNotRenderIt()
+	{
+		var data = Parse("""{"iconId":"icon-1"}""");
+
+		var changed = WidgetAppearanceJson.Apply(data,
+			WidgetTypeIds.Slider,
+			new WidgetAppearancePatch { IconColor = "#ef4444" },
+			["off"]);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(changed, Is.False);
+			Assert.That(data["iconColor"], Is.Null);
+		});
+	}
+
+	[Test]
+	public void EmptyIconColor_ClearsIt()
+	{
+		var data = Parse("""{"mode":"momentary","iconId":"i","iconColor":"#ef4444"}""");
+
+		WidgetAppearanceJson.Apply(data,
+			WidgetTypeIds.ActionButton,
+			new WidgetAppearancePatch { IconColor = string.Empty },
+			["off"]);
+
+		Assert.That(data["iconColor"], Is.Null);
+	}
+
+	[Test]
+	public void ClearingTheIconColor_RemovesItFromTheStateOrTheRootAndTheLegacyCopy()
+	{
+		var toggle = Parse(
+			"""{"stateMode":true,"states":[{"id":"off","label":"Off","appearance":{"iconColor":"#111111"}},{"id":"on","label":"On","appearance":{"iconColor":"#222222"}}]}""");
+		var momentary = Parse(
+			"""{"iconColor":"#333333","states":[{"id":"off","label":"Off","appearance":{"iconColor":"#444444"}}]}""");
+
+		var toggleCleared = WidgetAppearanceJson.ClearProperty(toggle,
+			WidgetTypeIds.ActionButton,
+			WidgetAppearanceProperty.IconColor,
+			"on");
+		var momentaryCleared = WidgetAppearanceJson.ClearProperty(momentary,
+			WidgetTypeIds.ActionButton,
+			WidgetAppearanceProperty.IconColor,
+			"off");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(toggleCleared, Is.True);
+			Assert.That(Appearance(toggle, "on")!.ContainsKey("iconColor"), Is.False);
+			Assert.That(Appearance(toggle, "off")!["iconColor"]!.GetValue<string>(), Is.EqualTo("#111111"));
+			Assert.That(momentaryCleared, Is.True);
+			Assert.That(momentary.ContainsKey("iconColor"), Is.False);
+			Assert.That(Appearance(momentary, "off")!.ContainsKey("iconColor"), Is.False);
+		});
+	}
+
+	[Test]
 	public void NoMode_DefaultsToMomentaryBehaviour()
 	{
 		var data = Parse("{}");
@@ -298,6 +415,68 @@ public class WidgetAppearanceJsonTests
 			["off"]);
 
 		Assert.That(data["title"]!.GetValue<string>(), Is.EqualTo("CPU"));
+	}
+
+	[Test]
+	public void AccentColor_LandsWhereEachWidgetReadsItsColourFrom()
+	{
+		var slider = Parse("{}");
+		var graph = Parse("{}");
+		var patch = new WidgetAppearancePatch { AccentColor = "#ef4444" };
+
+		var sliderChanged = WidgetAppearanceJson.Apply(slider, WidgetTypeIds.Slider, patch, _offOnly);
+		var graphChanged = WidgetAppearanceJson.Apply(graph, WidgetTypeIds.HistoryGraph, patch, _offOnly);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(sliderChanged, Is.True);
+			Assert.That(graphChanged, Is.True);
+			Assert.That(SliderWidgetData.Parse(Element(slider)).Color, Is.EqualTo("#ef4444"));
+			Assert.That(HistoryGraphWidgetData.Parse(Element(graph)).AccentColor, Is.EqualTo("#ef4444"));
+		});
+	}
+
+	[Test]
+	public void AccentColor_IsDroppedByAnActionButton()
+	{
+		var data = Parse("""{"mode":"momentary"}""");
+
+		var changed = WidgetAppearanceJson.Apply(data,
+			WidgetTypeIds.ActionButton,
+			new WidgetAppearancePatch { AccentColor = "#ef4444" },
+			_offOnly);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(changed, Is.False);
+			Assert.That(data.ToJsonString(), Does.Not.Contain("#ef4444"));
+		});
+	}
+
+	[Test]
+	public void ClearingTheAccentColor_ReturnsEachWidgetToTheThemeAccentAndKeepsTheRest()
+	{
+		var slider = Parse("""{"color":"#ef4444","backgroundColor":"#111111"}""");
+		var graph = Parse("""{"accentColor":"#ef4444","title":"CPU"}""");
+
+		var sliderCleared = WidgetAppearanceJson.ClearProperty(slider,
+			WidgetTypeIds.Slider,
+			WidgetAppearanceProperty.AccentColor,
+			"off");
+		var graphCleared = WidgetAppearanceJson.ClearProperty(graph,
+			WidgetTypeIds.HistoryGraph,
+			WidgetAppearanceProperty.AccentColor,
+			"off");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(sliderCleared, Is.True);
+			Assert.That(graphCleared, Is.True);
+			Assert.That(SliderWidgetData.Parse(Element(slider)).Color, Is.Null);
+			Assert.That(slider["backgroundColor"]!.GetValue<string>(), Is.EqualTo("#111111"));
+			Assert.That(HistoryGraphWidgetData.Parse(Element(graph)).AccentColor, Is.Null);
+			Assert.That(graph["title"]!.GetValue<string>(), Is.EqualTo("CPU"));
+		});
 	}
 
 	[Test]
@@ -413,6 +592,8 @@ public class WidgetAppearanceJsonTests
 #pragma warning restore CS0618
 
 	private static JsonObject Parse(string json) => WidgetAppearanceJson.ParseDataBag(json);
+
+	private static JsonElement Element(JsonObject data) => JsonSerializer.SerializeToElement(data);
 
 	/// <summary>Looks up a state's appearance object by id in the current array shape.</summary>
 	private static JsonObject? Appearance(JsonObject data, string stateId)

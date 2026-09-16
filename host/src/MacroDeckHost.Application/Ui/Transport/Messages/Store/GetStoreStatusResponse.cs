@@ -8,4 +8,6 @@ public class GetStoreStatusResponse
 	/// unsigned install can be offered at all; it is never the permission itself - the host re-reads its
 	/// own preference on every install that asks for unsigned consent.</summary>
 	public bool DeveloperMode { get; set; }
+
+	public StoreRegistryRefreshRunBody? RefreshRun { get; set; }
 }

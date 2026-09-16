@@ -73,6 +73,8 @@ public sealed record WidgetAppearancePatchDto
 
 	public double? IconOpacity { get; init; }
 
+	public string? IconColor { get; init; }
+
 	public string? FontFaceId { get; init; }
 
 	public double? FontSize { get; init; }
@@ -84,6 +86,9 @@ public sealed record WidgetAppearancePatchDto
 	public string? BorderStyle { get; init; }
 
 	public string? BorderColor { get; init; }
+
+	/// <summary>Optional and additive: a host that predates it ignores the field.</summary>
+	public string? AccentColor { get; init; }
 }
 
 /// <summary>

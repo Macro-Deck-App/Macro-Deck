@@ -123,6 +123,7 @@ internal static class ActionButtonWidgetConfigView
 		var iconOffsetX = new UiState<double>(WidgetConfigJson.ReadDouble(iconDisplayData, "offsetX") ?? 0);
 		var iconOffsetY = new UiState<double>(WidgetConfigJson.ReadDouble(iconDisplayData, "offsetY") ?? 0);
 		var iconOpacity = new UiState<double>(WidgetConfigJson.ReadDouble(iconDisplayData, "opacity") ?? 100);
+		var iconColor = new UiState<string>(WidgetConfigJson.ReadString(data, "iconColor") ?? string.Empty);
 		var backgroundColor =
 			new UiState<string>(WidgetConfigJson.ReadString(data, "backgroundColor") ?? string.Empty);
 		var labelColor = new UiState<string>(WidgetConfigJson.ReadString(data, "labelColor") ?? string.Empty);
@@ -152,13 +153,9 @@ internal static class ActionButtonWidgetConfigView
 
 		// ---- mutation helpers ----------------------------------------------------------------------------
 
-		// The Off/On pair a button starts with the first time it enters state mode. "off" deliberately
-		// carries no background of its own and falls through to the reader's accent, while "on" gets a
-		// colour, so a button that has just gained states already reads as two visibly different faces.
-		// Both inherit the caption the button had, so gaining states never blanks its label.
 		List<ActionButtonStateEntry> DefaultStatePair()
 		{
-			JsonObject Appearance(string? background)
+			JsonObject Appearance(string background)
 			{
 				var appearance = new JsonObject();
 
@@ -167,18 +164,15 @@ internal static class ActionButtonWidgetConfigView
 					appearance["label"] = label.Value;
 				}
 
-				if (background is not null)
-				{
-					appearance["backgroundColor"] = background;
-				}
+				appearance["backgroundColor"] = background;
 
 				return appearance;
 			}
 
 			return
 			[
-				new ActionButtonStateEntry(ActionButtonStateModel.DefaultOffStateId, "Off", Appearance(null)),
-				new ActionButtonStateEntry(ActionButtonStateModel.DefaultOnStateId, "On", Appearance("#ef4444")),
+				new ActionButtonStateEntry(ActionButtonStateModel.DefaultOffStateId, "Off", Appearance("#ef4444")),
+				new ActionButtonStateEntry(ActionButtonStateModel.DefaultOnStateId, "On", Appearance("#16a34a")),
 			];
 		}
 
@@ -349,9 +343,11 @@ internal static class ActionButtonWidgetConfigView
 			UiBinding<string> backgroundColorBinding,
 			UiBinding<UiIconReference> iconBinding,
 			UiBinding<UiIconDisplay> iconDisplayBinding,
+			UiBinding<string> iconColorBinding,
 			UiObjectInput borderNode,
 			Func<UiIconReference> currentIcon,
-			Func<string> currentBackgroundColor)
+			Func<string> currentBackgroundColor,
+			Func<string> currentIconColor)
 			=> new UiTabs
 			{
 				Key = key,
@@ -545,6 +541,19 @@ internal static class ActionButtonWidgetConfigView
 							},
 							new UiWhen
 							{
+								Key = "icon-color-when",
+								Condition = () => iconProviderState.Value is null && currentIcon() is not null,
+								Content = () => new UiColorInput
+								{
+									Key = "iconColor",
+									Label = AppStrings.Widgets.Editor.IconColor(),
+									Binding = iconColorBinding,
+									SupportsReset = true,
+									DefaultValue = string.Empty,
+								},
+							},
+							new UiWhen
+							{
 								Key = "icon-display-when",
 								// Only while an icon is actually set - the original editor's own preview needs
 								// something to frame, and offering the drag/zoom control over nothing invites a
@@ -558,6 +567,7 @@ internal static class ActionButtonWidgetConfigView
 									Icon = UiValue.From(currentIcon),
 									AspectRatio = aspectRatio,
 									Background = UiValue.From(currentBackgroundColor),
+									Tint = UiValue.From(currentIconColor),
 								},
 							},
 						],
@@ -817,6 +827,7 @@ internal static class ActionButtonWidgetConfigView
 						backgroundColorBinding: StateStringBinding(states, stateId, "backgroundColor"),
 						iconBinding: iconBinding,
 						iconDisplayBinding: iconDisplayBinding,
+						iconColorBinding: StateStringBinding(states, stateId, "iconColor"),
 						// "off" is the style a state with no border of its own has, and naming it here is what
 						// keeps the control from rendering with nothing selected - see StateStringBinding.
 						borderNode: WidgetConfigFragments.Border(
@@ -824,7 +835,9 @@ internal static class ActionButtonWidgetConfigView
 							StateStringBinding(states, stateId, "border", "color")),
 						currentIcon: () => ReadStateIcon(states.Value, stateId)!,
 						currentBackgroundColor: () =>
-							ReadAppearanceString(states.Value, stateId, "backgroundColor") ?? string.Empty),
+							ReadAppearanceString(states.Value, stateId, "backgroundColor") ?? string.Empty,
+						currentIconColor: () =>
+							ReadAppearanceString(states.Value, stateId, "iconColor") ?? string.Empty),
 				],
 			};
 		}
@@ -1180,9 +1193,11 @@ internal static class ActionButtonWidgetConfigView
 						iconOpacity.Value = value.Opacity.Value;
 					}
 				}),
+			iconColorBinding: Bind.To(iconColor),
 			borderNode: WidgetConfigFragments.Border(borderStyle, borderColor, labelled: false),
 			currentIcon: () => icon.Value!,
-			currentBackgroundColor: () => backgroundColor.Value);
+			currentBackgroundColor: () => backgroundColor.Value,
+			currentIconColor: () => iconColor.Value);
 
 		// ---- assembly -------------------------------------------------------------------------------------
 

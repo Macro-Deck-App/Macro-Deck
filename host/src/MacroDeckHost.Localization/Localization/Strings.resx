@@ -1694,6 +1694,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Developer.ManagedPlugins.UnmanagedReason" xml:space="preserve">
     <value>This plugin starts and stops itself. Macro Deck only observes its session, so it cannot be started, stopped or restarted from here.</value>
   </data>
+  <data name="Developer.ManagedPlugins.TakenOverBadge" xml:space="preserve">
+    <value>Development build active</value>
+  </data>
+  <data name="Developer.ManagedPlugins.TakenOverReason" xml:space="preserve">
+    <value>A development build has taken over this plugin, so it cannot be started or restarted from here. Revoke the development build on this page to start the installed version again.</value>
+  </data>
   <data name="Developer.NoActionsAvailableHeading" xml:space="preserve">
     <value>No actions available</value>
   </data>
@@ -1961,6 +1967,13 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>{name} loses its credential and is disconnected immediately. It has to pair again to reconnect.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Developer.Tokens.EndTakeoverConfirmMessage" xml:space="preserve">
+    <value>{name} loses its credential and is disconnected immediately. The installed version of the plugin starts again.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Developer.Tokens.TakeoverBadge" xml:space="preserve">
+    <value>Replaces installed plugin</value>
+  </data>
   <data name="Developer.Tokens.RevokePluginFailed" xml:space="preserve">
     <value>Could not revoke the plugin</value>
   </data>
@@ -2117,6 +2130,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Dialogs.PluginPairing.ReplacesWarning" xml:space="preserve">
     <value>A plugin is already paired for this package ID. Approving replaces its registration - the existing credential stops working and it is disconnected immediately.</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverConfirmLabel" xml:space="preserve">
+    <value>I understand that an unverified development build replaces the installed plugin and gets its settings and stored credentials</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverWarning" xml:space="preserve">
+    <value>This package ID belongs to an installed plugin. Approving lets an unverified development build replace it: the installed plugin stops, and the development build gets its settings and stored credentials. The installed version starts again when the takeover ends.</value>
   </data>
   <data name="Dialogs.PluginPairing.ReportedByRequester" xml:space="preserve">
     <value>Reported by the requesting program</value>
@@ -2643,6 +2662,15 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Errors.Plugins.ReplaceCredentialConfirmationRequired" xml:space="preserve">
     <value>Approving this request replaces an existing plugin's credential. Confirm the replacement first.</value>
+  </data>
+  <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
+    <value>A development build has taken over this plugin. End the takeover before installing or updating it.</value>
+  </data>
+  <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
+    <value>A development build has taken over this plugin. The installed version starts again when the takeover ends.</value>
+  </data>
+  <data name="Errors.Plugins.TakeoverConfirmationRequired" xml:space="preserve">
+    <value>Approving this request lets a development build take over an installed plugin. Confirm the takeover first.</value>
   </data>
   <data name="Errors.Plugins.SessionNotFound" xml:space="preserve">
     <value>No live session with that id exists.</value>
@@ -6863,6 +6891,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Obs.Actions.SetPreviewScene.Name" xml:space="preserve">
     <value>Set Preview Scene</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetProfile.Description" xml:space="preserve">
+    <value>Switches OBS to another profile</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetProfile.Name" xml:space="preserve">
+    <value>Set Profile</value>
+  </data>
   <data name="Integrations.Obs.Actions.SetScene.Description" xml:space="preserve">
     <value>Switches the active program scene</value>
   </data>
@@ -7062,6 +7096,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Obs.Errors.NoInputSelected" xml:space="preserve">
     <value>No input was selected.</value>
   </data>
+  <data name="Integrations.Obs.Errors.NoProfileSelected" xml:space="preserve">
+    <value>No profile was selected.</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoSceneOrSourceSelected" xml:space="preserve">
     <value>No scene or source was selected.</value>
   </data>
@@ -7190,6 +7227,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.Obs.Params.ModeToggle" xml:space="preserve">
     <value>Toggle</value>
+  </data>
+  <data name="Integrations.Obs.Params.Profile" xml:space="preserve">
+    <value>Profile</value>
   </data>
   <data name="Integrations.Obs.Params.SaveToVariable" xml:space="preserve">
     <value>Save to variable</value>
@@ -8347,7 +8387,7 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Studio Mode Active</value>
   </data>
   <data name="Integrations.System.Actions.DecreaseVolume.Description" xml:space="preserve">
-    <value>Lowers the system output volume.</value>
+    <value>Lowers the volume of the selected audio device.</value>
   </data>
   <data name="Integrations.System.Actions.DecreaseVolume.Name" xml:space="preserve">
     <value>Decrease Volume</value>
@@ -8362,7 +8402,7 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Hibernate</value>
   </data>
   <data name="Integrations.System.Actions.IncreaseVolume.Description" xml:space="preserve">
-    <value>Raises the system output volume.</value>
+    <value>Raises the volume of the selected audio device.</value>
   </data>
   <data name="Integrations.System.Actions.IncreaseVolume.Name" xml:space="preserve">
     <value>Increase Volume</value>
@@ -8425,7 +8465,7 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Lock Computer</value>
   </data>
   <data name="Integrations.System.Actions.MuteVolume.Description" xml:space="preserve">
-    <value>Toggles the system output mute state.</value>
+    <value>Toggles the mute state of the selected audio device.</value>
   </data>
   <data name="Integrations.System.Actions.MuteVolume.MutedLabel" xml:space="preserve">
     <value>Muted</value>
@@ -8521,7 +8561,7 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Title</value>
   </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
-    <value>Sets the system output volume to a specific level.</value>
+    <value>Sets the volume of the selected audio device to a specific level.</value>
   </data>
   <data name="Integrations.System.Actions.SetVolume.LevelLabel" xml:space="preserve">
     <value>Volume (%)</value>
@@ -8549,6 +8589,30 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.System.Actions.VolumeAmount.Label" xml:space="preserve">
     <value>Amount (%)</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.Label" xml:space="preserve">
+    <value>Audio device</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.Description" xml:space="preserve">
+    <value>Which audio device the action controls.</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.DefaultOutput" xml:space="preserve">
+    <value>Default output device</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.DefaultInput" xml:space="preserve">
+    <value>Default input device</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.OutputOption" xml:space="preserve">
+    <value>{device} (Output)</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.InputOption" xml:space="preserve">
+    <value>{device} (Input)</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.UnavailableOption" xml:space="preserve">
+    <value>{device} (unavailable)</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.UnknownUnavailableOption" xml:space="preserve">
+    <value>Unavailable device</value>
   </data>
   <data name="Integrations.System.Actions.WorkingDirectoryLabel" xml:space="preserve">
     <value>Working Directory</value>
@@ -8670,6 +8734,24 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.System.Variables.Muted" xml:space="preserve">
     <value>Muted</value>
+  </data>
+  <data name="Integrations.System.Variables.InputVolume" xml:space="preserve">
+    <value>Input Volume</value>
+  </data>
+  <data name="Integrations.System.Variables.InputMuted" xml:space="preserve">
+    <value>Input Muted</value>
+  </data>
+  <data name="Integrations.System.Variables.DeviceOutputVolume" xml:space="preserve">
+    <value>{device} Volume (Output)</value>
+  </data>
+  <data name="Integrations.System.Variables.DeviceOutputMuted" xml:space="preserve">
+    <value>{device} Muted (Output)</value>
+  </data>
+  <data name="Integrations.System.Variables.DeviceInputVolume" xml:space="preserve">
+    <value>{device} Volume (Input)</value>
+  </data>
+  <data name="Integrations.System.Variables.DeviceInputMuted" xml:space="preserve">
+    <value>{device} Muted (Input)</value>
   </data>
   <data name="Integrations.System.Variables.CpuUsage" xml:space="preserve">
     <value>CPU Usage</value>
@@ -10688,6 +10770,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Widgets.Actions.PositionTop" xml:space="preserve">
     <value>Top</value>
   </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
+    <value>Changes the accent color of a slider or history graph.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
+    <value>Set Accent Color</value>
+  </data>
   <data name="Integrations.Widgets.Actions.SetBackgroundColorDescription" xml:space="preserve">
     <value>Changes a widget's background color.</value>
   </data>
@@ -10720,6 +10808,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.Widgets.Actions.SetIconDisplayName" xml:space="preserve">
     <value>Set Icon Display</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconColorDescription" xml:space="preserve">
+    <value>Changes the color a widget's icon is drawn in.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconColorName" xml:space="preserve">
+    <value>Set Icon Color</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetIconName" xml:space="preserve">
     <value>Set Icon</value>
@@ -11550,6 +11644,13 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>{name} is waiting for your approval in Macro Deck.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
+    <value>A development build wants to take over a plugin</value>
+  </data>
+  <data name="Notifications.PluginTakeoverRequestedMessage" xml:space="preserve">
+    <value>{name} wants to replace an installed plugin and is waiting for your approval in Macro Deck.</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.StoreExtensionInstallFailed" xml:space="preserve">
     <value>Failed to install {name}</value>
     <comment>[name:string]</comment>
@@ -12374,6 +12475,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Settings.Adb.StatusHeading" xml:space="preserve">
     <value>Status</value>
+  </data>
+  <data name="Settings.Adb.StopServerOnExitDescription" xml:space="preserve">
+    <value>Stops the ADB server when Macro Deck exits, restarts or updates, but only if Macro Deck started it. Other programs using ADB, such as Android Studio, lose their connection.</value>
+  </data>
+  <data name="Settings.Adb.StopServerOnExitLabel" xml:space="preserve">
+    <value>Stop ADB server when Macro Deck exits</value>
   </data>
   <data name="Settings.Adb.UncleanShutdown.One" xml:space="preserve">
     <value>Macro Deck did not shut down cleanly last time. {count} leftover USB connection was cleaned up.</value>
@@ -14173,6 +14280,112 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.Queued" xml:space="preserve">
     <value>Queued</value>
   </data>
+  <data name="Store.RegistryRefresh.Error.BudgetExceeded" xml:space="preserve">
+    <value>The registry is larger than Macro Deck will download.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.CertificateUntrusted" xml:space="preserve">
+    <value>The registry was signed with a certificate Macro Deck does not trust.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.Disabled" xml:space="preserve">
+    <value>The store is turned off.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.Malformed" xml:space="preserve">
+    <value>The registry sent data Macro Deck could not read.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.NetworkFailure" xml:space="preserve">
+    <value>The registry could not be reached.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SequenceRollback" xml:space="preserve">
+    <value>The registry offered an older catalog than the one already installed.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SignatureInvalid" xml:space="preserve">
+    <value>The registry signature is not valid.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SigningKeyRevoked" xml:space="preserve">
+    <value>The registry was signed with a revoked key.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SizeMismatch" xml:space="preserve">
+    <value>A registry file did not have the size it declared.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SnapshotUnchanged" xml:space="preserve">
+    <value>The catalog has not changed.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.StorageFailure" xml:space="preserve">
+    <value>The new catalog could not be saved.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
+    <value>Something unexpected went wrong.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
+    <value>Store registry refresh</value>
+  </data>
+  <data name="Store.RegistryRefresh.InProgressAction" xml:space="preserve">
+    <value>Refreshing…</value>
+  </data>
+  <data name="Store.RegistryRefresh.LogLabel" xml:space="preserve">
+    <value>Refresh log</value>
+  </data>
+  <data name="Store.RegistryRefresh.Progress" xml:space="preserve">
+    <value>Files: {completed} of {total}</value>
+  </data>
+  <data name="Store.RegistryRefresh.State.Cancelled" xml:space="preserve">
+    <value>The refresh was cancelled.</value>
+  </data>
+  <data name="Store.RegistryRefresh.State.Failed" xml:space="preserve">
+    <value>The store registry could not be refreshed.</value>
+  </data>
+  <data name="Store.RegistryRefresh.State.Running" xml:space="preserve">
+    <value>Refreshing the store registry…</value>
+  </data>
+  <data name="Store.RegistryRefresh.State.Succeeded" xml:space="preserve">
+    <value>The store registry is up to date.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Applied" xml:space="preserve">
+    <value>Catalog updated to version {sequence}</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Cancelled" xml:space="preserve">
+    <value>Cancelled because Macro Deck is shutting down</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.DownloadingFiles.One" xml:space="preserve">
+    <value>Downloading {count} file</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.RegistryRefresh.Step.DownloadingFiles.Other" xml:space="preserve">
+    <value>Downloading {count} files</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Failed" xml:space="preserve">
+    <value>Failed: {reason}</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.FetchingManifest" xml:space="preserve">
+    <value>Downloading the registry manifest</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.FetchingSignature" xml:space="preserve">
+    <value>Downloading the registry signature</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.ReadingCatalog" xml:space="preserve">
+    <value>Reading the catalog</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Started" xml:space="preserve">
+    <value>Refresh started</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.StartedScheduled" xml:space="preserve">
+    <value>Automatic refresh started</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.UpToDate" xml:space="preserve">
+    <value>Nothing new: the catalog is already at version {sequence}</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Verifying" xml:space="preserve">
+    <value>Verifying the signature</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.WaitingForRegistryUpdate.One" xml:space="preserve">
+    <value>The registry is being updated. Trying again in {count} second</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.RegistryRefresh.Step.WaitingForRegistryUpdate.Other" xml:space="preserve">
+    <value>The registry is being updated. Trying again in {count} seconds</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Store.RetryInstallation" xml:space="preserve">
     <value>Retry installation</value>
   </data>
@@ -15553,6 +15766,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.Editor.Icon" xml:space="preserve">
     <value>Icon</value>
   </data>
+  <data name="Widgets.Editor.IconColor" xml:space="preserve">
+    <value>Icon Color</value>
+  </data>
   <data name="Widgets.Editor.IconDisplay" xml:space="preserve">
     <value>Icon Display</value>
   </data>
@@ -16227,11 +16443,29 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.Slider.ChooseIcon" xml:space="preserve">
     <value>Choose icon</value>
   </data>
+  <data name="Widgets.Slider.CustomStep" xml:space="preserve">
+    <value>Custom step</value>
+  </data>
+  <data name="Widgets.Slider.CustomStepDescription" xml:space="preserve">
+    <value>Snap to your own step instead of the one the variable provides.</value>
+  </data>
   <data name="Widgets.Slider.DefaultVariableDescription" xml:space="preserve">
     <value>Without a variable, the slider uses its own widget variable slider_value.</value>
   </data>
   <data name="Widgets.Slider.Horizontal" xml:space="preserve">
     <value>Horizontal</value>
+  </data>
+  <data name="Widgets.Slider.InteractionMode" xml:space="preserve">
+    <value>Interaction mode</value>
+  </data>
+  <data name="Widgets.Slider.InteractionAbsolute" xml:space="preserve">
+    <value>Absolute</value>
+  </data>
+  <data name="Widgets.Slider.InteractionRelative" xml:space="preserve">
+    <value>Relative</value>
+  </data>
+  <data name="Widgets.Slider.InteractionModeDescription" xml:space="preserve">
+    <value>Absolute jumps to where you touch. Relative leaves the value in place and moves it by how far you drag.</value>
   </data>
   <data name="Widgets.Slider.LegacyActionBindingNotice" xml:space="preserve">
     <value>This slider still carries an action binding from an older version. It is no longer used and is removed the next time you save.</value>
@@ -16430,6 +16664,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.Obs.Params.Configuration" xml:space="preserve">
     <value>Configuration</value>
+  </data>
+  <data name="Integrations.Obs.Variables.CurrentProfile" xml:space="preserve">
+    <value>Current Profile</value>
   </data>
   <data name="Integrations.Obs.Variables.CurrentScene" xml:space="preserve">
     <value>Current Scene</value>

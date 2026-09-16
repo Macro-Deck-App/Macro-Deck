@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { AppStrings, StoreExtensionDetailBody, StoreOperationBody, StoreVersionHistoryBody } from '@macro-deck/runtime';
 import { ApiService, LocalizationService, ToastService } from '@shared';
+import { PluginRuntimeService } from '../../../services/plugin-runtime.service';
 import { StoreOperationService } from '../../../services/store-operation.service';
 import { StoreDetailPageComponent } from './store-detail-page.component';
 import { Observable, Subject } from 'rxjs';
@@ -77,7 +78,7 @@ describe('StoreDetailPageComponent', () => {
   ): Promise<void> {
     notifications = new Map();
     api = jasmine.createSpyObj<ApiService>('ApiService', [
-      'getStoreExtension', 'getStoreExtensionIconUrl', 'getStoreStatus', 'onNotification',
+      'getStoreExtension', 'getStoreExtensionIconUrl', 'getStoreScreenshotUrl', 'getStoreStatus', 'onNotification',
     ]);
     Object.defineProperty(api, 'connectionStateSignal', { value: signal('disconnected') });
     api.getStoreStatus.and.resolveTo({
@@ -85,7 +86,8 @@ describe('StoreDetailPageComponent', () => {
       registry: { hasCatalog: false, sequence: 0, refreshing: false, stale: false },
     });
     api.getStoreExtension.and.resolveTo({ extension: extension(extensionOverrides) });
-    api.getStoreExtensionIconUrl.and.returnValue('');
+    api.getStoreExtensionIconUrl.and.callFake((_kind, _id, sha256) => (sha256 ? `icon-${sha256}` : ''));
+    api.getStoreScreenshotUrl.and.callFake((_kind, _id, index, sha256) => `shot-${index}-${sha256}`);
     api.onNotification.and.callFake((method: string) => {
       let subject = notifications.get(method);
       if (!subject) {
@@ -112,6 +114,7 @@ describe('StoreDetailPageComponent', () => {
         provideZonelessChangeDetection(),
         { provide: ApiService, useValue: api },
         { provide: StoreOperationService, useValue: operationsSpy },
+        { provide: PluginRuntimeService, useValue: { plugins: signal([]) } },
         { provide: Router, useValue: routerSpy },
         {
           provide: ActivatedRoute,
@@ -131,6 +134,26 @@ describe('StoreDetailPageComponent', () => {
     await fixture.whenStable();
     fixture.detectChanges();
   }
+
+  it('loads the icon and every screenshot, thumbnail and enlarged, by the digest of the current image', async () => {
+    await createFixture(null, {
+      hasIcon: true,
+      iconSha256: 'icon-digest',
+      screenshots: [{ index: 0, sha256: 'window-digest' }, { index: 1, sha256: 'card-digest' }],
+    });
+    const host = fixture.nativeElement as HTMLElement;
+    const sources = () => Array.from(host.querySelectorAll('img')).map(img => img.getAttribute('src'));
+
+    expect(sources()).toContain('icon-icon-digest');
+    expect(sources()).toContain('shot-0-window-digest');
+    expect(sources()).toContain('shot-1-card-digest');
+
+    host.querySelector<HTMLButtonElement>('app-store-screenshot-strip button')!.click();
+    fixture.detectChanges();
+
+    expect(Array.from(host.querySelectorAll('app-store-screenshot-viewer img')).map(img => img.getAttribute('src')))
+      .toEqual(['shot-0-window-digest']);
+  });
 
   it('renders progress instead of an Install button when an operation is already in flight at construction', async () => {
     await createFixture(operation({ state: 'Downloading' }));

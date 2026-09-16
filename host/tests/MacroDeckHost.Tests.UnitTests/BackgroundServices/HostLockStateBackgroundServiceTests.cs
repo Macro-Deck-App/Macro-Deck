@@ -331,7 +331,8 @@ internal sealed class HostLockStateBackgroundServiceTests
 		public Task<AdbSettings> SetAdb(bool? enabled,
 			string? executablePath,
 			bool? usbConnectionsEnabled,
-			string? defaultDeviceSerial)
+			string? defaultDeviceSerial,
+			bool? stopServerOnExit)
 			=> throw new NotSupportedException();
 
 		public Task<DeveloperSettings> GetDeveloper() => throw new NotSupportedException();

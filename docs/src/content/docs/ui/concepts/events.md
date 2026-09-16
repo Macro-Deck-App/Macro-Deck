@@ -128,13 +128,13 @@ hidden one keeps and submits its value. See [Conditional content](/ui/concepts/s
 
 | Name | Constant | Declared by | Fires | Payload |
 |---|---|---|---|---|
-| `change` | `UiComponentEvents.Change` | `ui.slider`, `ui.dial`, `ui.text-field`, `ui.toggle`, `ui.segmented` | The value the user settled on - released the drag, left the field, pressed Enter, flipped the switch, chose a segment. Always sent when an interaction ends, even if equal to the last `adjust`. | The value: a number, the level fraction (slider, dial); a string (text field); a boolean, the new state, read with `TryGetBoolean` (toggle); a number, the zero-based segment index, read with `TryGetDouble` (segmented) |
+| `change` | `UiComponentEvents.Change` | `ui.slider`, `ui.dial`, `ui.text-field`, `ui.toggle`, `ui.segmented` | The value the user settled on - released the drag, left the field, pressed Enter, flipped the switch, chose a segment. Always sent when an interaction ends, even if equal to the last `adjust` - except on a slider with `interaction: relative`, where an interaction that never moved the level, such as a tap, sends nothing. | The value: a number, the level fraction (slider, dial); a string (text field); a boolean, the new state, read with `TryGetBoolean` (toggle); a number, the zero-based segment index, read with `TryGetDouble` (segmented) |
 | `adjust` | `UiComponentEvents.Adjust` | `ui.slider`, `ui.dial`, `ui.text-field` | Continuously while the user works the control - every drag step or keystroke. At most ten a second, never after the `change` that ended it. | Same as `change` |
 | `press` | `UiComponentEvents.Press` | `ui.button` | A press completed without being held past the long-press threshold. The primary name a reader implements first. | None |
 | `long-press` | `UiComponentEvents.LongPress` | `ui.button` | The press was still held after 600 ms. At most once per interaction, never together with `press`. | None |
 | `press-start` | `UiComponentEvents.PressStart` | `ui.button` | The press began. | None |
 | `press-end` | `UiComponentEvents.PressEnd` | `ui.button` | The press ended, however it ended. Exactly one follows each `press-start`, including a cancelled gesture or the pointer leaving the element. | None |
-| `double-press` | `UiComponentEvents.DoublePress` | `ui.slider` | Two taps completed in quick succession, each without a drag. Sent after the second tap's `change`, never instead of it. | None |
+| `double-press` | `UiComponentEvents.DoublePress` | `ui.slider` | Two taps completed in quick succession, each without a drag. Sent after the second tap's `change`, never instead of it - on its own on a relative slider, whose taps send no `change`. | None |
 | `reveal` | `UiComponentEvents.Reveal` | `ui.list` | The user scrolled further down the list. At most twice a second, and only for an index beyond the furthest already sent for that list. | Index of the furthest child in view, a number |
 | `drag` | `UiComponentEvents.Drag` | any node | The pointer moved past the slop. At most ten a second. | `{"x":n,"y":n}`, translation since the start in basis fractions |
 | `drag-end` | `UiComponentEvents.DragEnd` | any node | Once on release, after a `drag` began; not if the node left the tree or became disabled meanwhile. | As `drag`, the final translation |
@@ -147,6 +147,21 @@ The thresholds and which of two nested nodes gets a gesture are on [Modifier](/u
 Configuration inputs use `change` from `UiConfigEvents`. See the [component reference](/ui/components/) for
 each component's geometry and semantics, and [Modal views](/ui/views/modal/) for `modal.complete`, the one
 event that is not a component interaction but the answer that ends a dialog.
+
+### Links
+
+A `UiLink` with an external `http` or `https` URL is opened by the host in the user's default browser,
+never inside the surface, whether or not the link declares `activate`. Declaring `activate` only tells your
+plugin that the link was followed: the event arrives in addition to the host opening the URL, so a handler
+must not open the URL itself. A link to the app's own origin, or to any other scheme, is not opened this
+way.
+
+:::caution[Behaviour change in hosts released after 3.0.0-beta.6]
+Up to 3.0.0-beta.6, the desktop app opened a link that declared `activate` only inside the integration setup
+dialog. Anywhere else the plugin received the event and nothing opened. If your handler opened the URL
+itself to work around that, remove that code: the host now opens it and the handler would open a second
+tab.
+:::
 
 ## See also
 

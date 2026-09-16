@@ -1,10 +1,21 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ConnectionEndpoint, GetConnectionInfoResponse } from '@macro-deck/runtime';
 import { ApiService } from '@shared';
 import { ConnectionPanelComponent, encodeConnectLink } from './connection-panel.component';
 import { EMPTY } from 'rxjs';
 import { create } from 'qrcode';
+
+@Component({
+  standalone: true,
+  imports: [ConnectionPanelComponent],
+  template: `
+    <div style="position: fixed; top: 0; left: 0; width: 1000px; height: 400px">
+      <app-connection-panel [isOpen]="true" />
+    </div>
+  `,
+})
+class ConnectionHostComponent {}
 
 describe('ConnectionPanelComponent', () => {
   let fixture: ComponentFixture<ConnectionPanelComponent>;
@@ -23,7 +34,7 @@ describe('ConnectionPanelComponent', () => {
 
   const pairingCode = { code: '482915', expiresAt: new Date(Date.now() + 15 * 60_000).toISOString() };
 
-  async function settle(target: ComponentFixture<ConnectionPanelComponent>): Promise<void> {
+  async function settle(target: ComponentFixture<unknown>): Promise<void> {
     for (let i = 0; i < 10; i++) {
       await target.whenStable();
     }
@@ -75,10 +86,25 @@ describe('ConnectionPanelComponent', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const panel = fixture.nativeElement.querySelector('.cp-panel') as HTMLElement;
+    const panel = fixture.nativeElement.querySelector('.sp-panel') as HTMLElement;
     expect(panel).toBeTruthy();
-    expect(panel.classList).not.toContain('cp-panel-open');
+    expect(panel.classList).not.toContain('sp-panel-open');
     expect(panel.hasAttribute('inert')).toBeTrue();
+  });
+
+  it('keeps its 17.5rem width and opens from the end edge', async () => {
+    const host = TestBed.createComponent(ConnectionHostComponent);
+    host.detectChanges();
+    await settle(host);
+
+    const stage = host.nativeElement.firstElementChild as HTMLElement;
+    const panel = host.nativeElement.querySelector('.sp-panel') as HTMLElement;
+    panel.getAnimations().forEach(animation => animation.finish());
+    const rootFontSizePx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const rect = panel.getBoundingClientRect();
+
+    expect(rect.width).toBeCloseTo(17.5 * rootFontSizePx, 0);
+    expect(rect.right).toBeCloseTo(stage.getBoundingClientRect().right, 0);
   });
 
   it('expands the target picker only for the clicked endpoint, and collapses on re-click', () => {
@@ -157,7 +183,7 @@ describe('ConnectionPanelComponent', () => {
     const closed = jasmine.createSpy('closed');
     fixture.componentInstance.closed.subscribe(closed);
 
-    (fixture.nativeElement.querySelector('.cp-close') as HTMLElement).click();
+    (fixture.nativeElement.querySelector('.sp-close') as HTMLElement).click();
 
     expect(closed).toHaveBeenCalledTimes(1);
   });

@@ -335,6 +335,28 @@ describe('ActionButton: legacy font fields are stripped (issue #457)', () => {
 });
 
 describe('ActionButton: the icon has exactly one home per mode (legacy read path)', () => {
+  it('moves the icon colour with the icon when a hand-edited bag switches modes', () => {
+    const data = parseWidgetData(WidgetType.ActionButton, JSON.stringify({
+      stateMode: false,
+      iconId: 'icon-1',
+      iconColor: '#ff0000',
+    }));
+
+    const editorBag = JSON.parse(toEditorJson(WidgetType.ActionButton, data));
+    editorBag.stateMode = true;
+    const toStates = fromEditorJson(WidgetType.ActionButton, JSON.stringify(editorBag)) as ActionButtonData;
+
+    expect(toStates.iconColor).toBeUndefined();
+    expect(toStates.states![0].appearance?.iconColor).toBe('#ff0000');
+
+    const backBag = JSON.parse(toEditorJson(WidgetType.ActionButton, toStates));
+    backBag.stateMode = false;
+    const toRoot = fromEditorJson(WidgetType.ActionButton, JSON.stringify(backBag)) as ActionButtonData;
+
+    expect(toRoot.iconColor).toBe('#ff0000');
+    expect(toRoot.states![0].appearance?.iconColor).toBeUndefined();
+  });
+
   it('a hand-edited stateMode:false -> true switches the icon into states[0], off and on both exist', () => {
     const data = parseWidgetData(WidgetType.ActionButton, JSON.stringify({
       stateMode: false,

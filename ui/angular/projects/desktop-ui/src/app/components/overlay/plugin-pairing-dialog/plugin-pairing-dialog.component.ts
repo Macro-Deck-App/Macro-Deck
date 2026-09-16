@@ -33,6 +33,7 @@ export class PluginPairingDialogComponent implements OnDestroy {
   private timer?: ReturnType<typeof setInterval>;
 
   readonly replaceConfirmed = signal(false);
+  readonly takeoverConfirmed = signal(false);
 
   readonly busy = signal(false);
   readonly errorMessage = signal<string | null>(null);
@@ -51,7 +52,8 @@ export class PluginPairingDialogComponent implements OnDestroy {
     if (!request || this.busy()) {
       return true;
     }
-    return request.replacesExistingRegistration && !this.replaceConfirmed();
+    return (request.replacesExistingRegistration && !this.replaceConfirmed())
+      || (!!request.takesOverInstalledPlugin && !this.takeoverConfirmed());
   });
 
   constructor() {
@@ -59,6 +61,7 @@ export class PluginPairingDialogComponent implements OnDestroy {
       const request = this.pending();
       untracked(() => {
         this.replaceConfirmed.set(false);
+        this.takeoverConfirmed.set(false);
         this.errorMessage.set(null);
         this.restartTimer(!!request);
       });
@@ -80,6 +83,7 @@ export class PluginPairingDialogComponent implements OnDestroy {
       const succeeded = await this.pairing.approve(
         request.requestId,
         request.replacesExistingRegistration ? this.replaceConfirmed() : false,
+        request.takesOverInstalledPlugin ? this.takeoverConfirmed() : false,
       );
       if (!succeeded) {
         this.errorMessage.set(this.localization.translateKey(AppStrings.Dialogs.PluginPairing.ApproveFailed));

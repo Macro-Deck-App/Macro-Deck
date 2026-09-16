@@ -52,6 +52,7 @@ export { NoticeModalComponent } from './components/overlay/notice-modal/notice-m
 export {
   OverlayPanelComponent,
 } from './components/overlay/overlay-panel/overlay-panel.component';
+export { SidePanelComponent } from './components/overlay/side-panel/side-panel.component';
 export {
   SegmentedControlComponent,
   type SegmentedOption,

@@ -53,7 +53,8 @@ public class PluginPairingServiceTests
 		public Task<AdbSettings> SetAdb(bool? enabled,
 			string? executablePath,
 			bool? usbConnectionsEnabled,
-			string? defaultDeviceSerial)
+			string? defaultDeviceSerial,
+			bool? stopServerOnExit)
 			=> throw new NotSupportedException();
 
 		public Task<OnboardingSettings> GetOnboarding() => throw new NotSupportedException();
@@ -104,6 +105,8 @@ public class PluginPairingServiceTests
 	private PluginSessionRegistry _sessionRegistry = null!;
 	private FakePluginInstallationCatalog _catalog = null!;
 	private PluginRegistrationService _registrationService = null!;
+	private PluginTakeoverRegistry _takeovers = null!;
+	private FakePluginSupervisor _supervisor = null!;
 	private PluginPairingService _service = null!;
 
 	[SetUp]
@@ -120,6 +123,8 @@ public class PluginPairingServiceTests
 		_tokens = new InMemoryPluginAccessTokenRepository();
 		_sessionRegistry = new PluginSessionRegistry(_time, Serilog.Core.Logger.None);
 		_catalog = new FakePluginInstallationCatalog();
+		_takeovers = new PluginTakeoverRegistry();
+		_supervisor = new FakePluginSupervisor();
 
 		var logRateLimiter = new PluginLogRateLimiter(_time);
 		var logIngestor = new PluginLogIngestor(logRateLimiter, _sessionRegistry, new FakePluginSupervisor(), _time);
@@ -130,6 +135,7 @@ public class PluginPairingServiceTests
 				logRateLimiter,
 				logIngestor),
 			_catalog,
+			_takeovers,
 			_time);
 
 		_service = new PluginPairingService(_store,
@@ -137,7 +143,9 @@ public class PluginPairingServiceTests
 			_registrations,
 			_registrationService,
 			_catalog,
-			_sessionRegistry);
+			_sessionRegistry,
+			_supervisor,
+			_takeovers);
 	}
 
 	private static (string Verifier, string Challenge) NewPkcePair()
@@ -150,7 +158,8 @@ public class PluginPairingServiceTests
 
 	private async Task<(string RequestId, string Verifier)> CreateAndApprove(string pluginId,
 		string displayName = "Example Plugin",
-		bool replaceExistingRegistration = false)
+		bool replaceExistingRegistration = false,
+		bool takeOverInstalledPlugin = false)
 	{
 		var (verifier, challenge) = NewPkcePair();
 
@@ -162,7 +171,9 @@ public class PluginPairingServiceTests
 			arrivedOnPublicListener: false);
 		Assert.That(created.Succeeded, Is.True, "precondition: create must succeed");
 
-		var approved = await _service.Approve(created.Record!.RequestId, replaceExistingRegistration);
+		var approved = await _service.Approve(created.Record!.RequestId,
+			replaceExistingRegistration,
+			takeOverInstalledPlugin);
 		Assert.That(approved.Succeeded, Is.True, "precondition: approve must succeed");
 
 		return (created.Record.RequestId, verifier);
@@ -402,23 +413,29 @@ public class PluginPairingServiceTests
 		});
 	}
 
-	[Test]
-	public async Task An_id_already_owned_by_an_installed_plugin_is_refused_at_create_time()
-	{
-		_catalog.Plugins.Add(new InstalledPlugin
+	private void Install(string pluginId)
+		=> _catalog.Plugins.Add(new InstalledPlugin
 		{
-			PluginId = "com.example.installed",
-			PluginDirectory = "/plugins/com.example.installed",
+			PluginId = pluginId,
+			PluginDirectory = $"/plugins/{pluginId}",
 			Versions =
 			[
 				new InstalledPluginVersion
 				{
 					Version = "1.0.0",
-					VersionDirectory = "/plugins/com.example.installed/versions/1.0.0",
-					ManifestPath = "/plugins/com.example.installed/versions/1.0.0/manifest.json"
+					VersionDirectory = $"/plugins/{pluginId}/versions/1.0.0",
+					ManifestPath = $"/plugins/{pluginId}/versions/1.0.0/manifest.json"
 				}
 			]
 		});
+
+	private bool HasActiveRegistration(string pluginId)
+		=> _registrations.Registrations.Any(r => r.PluginId == pluginId && r.RevokedAt is null);
+
+	[Test]
+	public async Task Pairing_an_installed_id_creates_a_request_marked_as_a_takeover()
+	{
+		Install("com.example.installed");
 		var (_, challenge) = NewPkcePair();
 
 		var result = await _service.Create("com.example.installed",
@@ -427,12 +444,206 @@ public class PluginPairingServiceTests
 			PluginPairingChallengeMethods.S256,
 			null,
 			false);
+		var pending = await _service.Pending();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Succeeded, Is.True);
+			Assert.That(result.TakesOverInstalledPlugin, Is.True);
+			Assert.That(pending.Single().TakesOverInstalledPlugin, Is.True);
+			Assert.That(pending.Single().ReplacesExistingRegistration, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_takeover_is_only_approved_with_its_own_confirmation_and_approval_alone_changes_nothing()
+	{
+		Install("com.example.installed");
+		var (_, challenge) = NewPkcePair();
+		var created = await _service.Create("com.example.installed",
+			"Example",
+			challenge,
+			PluginPairingChallengeMethods.S256,
+			null,
+			false);
+
+		var unconfirmed = await _service.Approve(created.Record!.RequestId, replaceExistingRegistration: false);
+		var confirmed = await _service.Approve(created.Record.RequestId,
+			replaceExistingRegistration: false,
+			takeOverInstalledPlugin: true);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(unconfirmed.Succeeded, Is.False);
+			Assert.That(unconfirmed.Error, Is.EqualTo(PluginPairingApproveError.TakeoverNotConfirmed));
+			Assert.That(confirmed.Succeeded, Is.True);
+			Assert.That(_registrations.Registrations, Is.Empty);
+			Assert.That(_takeovers.IsActive("com.example.installed"), Is.False);
+			Assert.That(_supervisor.SuspendCalls, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task Redeeming_a_confirmed_takeover_suspends_the_installed_plugin_and_issues_a_working_credential()
+	{
+		Install("com.example.installed");
+		var (requestId, verifier) = await CreateAndApprove("com.example.installed", takeOverInstalledPlugin: true);
+
+		var redeemed = await _service.Redeem(requestId, verifier);
+
+		var authenticated = await _registrationService.Authenticate("com.example.installed", redeemed.PluginSecret!);
+		var paired = await _service.PairedRegistrations();
+		Assert.Multiple(() =>
+		{
+			Assert.That(redeemed.Succeeded, Is.True);
+			Assert.That(authenticated, Is.Not.Null);
+			Assert.That(_supervisor.SuspendCalls, Is.EqualTo(new[] { "com.example.installed" }));
+			Assert.That(_takeovers.IsActive("com.example.installed"), Is.True);
+			Assert.That(paired.Single().TakesOverInstalledPlugin, Is.True);
+		});
+	}
+
+	[Test]
+	public async Task Developer_mode_switched_off_while_a_takeover_is_redeemed_leaves_no_credential_and_no_takeover()
+	{
+		Install("com.example.installed");
+		var (requestId, verifier) = await CreateAndApprove("com.example.installed", takeOverInstalledPlugin: true);
+		_supervisor.OnSuspend = _ =>
+		{
+			_preferences.Enabled = false;
+			return Task.CompletedTask;
+		};
+
+		var redeemed = await _service.Redeem(requestId, verifier);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(redeemed.Succeeded, Is.False);
+			Assert.That(HasActiveRegistration("com.example.installed"), Is.False);
+			Assert.That(_takeovers.IsActive("com.example.installed"), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_takeover_ended_while_it_is_redeemed_leaves_no_credential_behind()
+	{
+		Install("com.example.installed");
+		var (requestId, verifier) = await CreateAndApprove("com.example.installed", takeOverInstalledPlugin: true);
+		_supervisor.OnSuspend = pluginId =>
+		{
+			_takeovers.Finish(pluginId);
+			return Task.CompletedTask;
+		};
+
+		var redeemed = await _service.Redeem(requestId, verifier);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(redeemed.Succeeded, Is.False);
+			Assert.That(HasActiveRegistration("com.example.installed"), Is.False);
+			Assert.That(_takeovers.IsActive("com.example.installed"), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_request_approved_before_the_id_was_installed_does_not_take_the_installed_plugin_over()
+	{
+		var (requestId, verifier) = await CreateAndApprove("com.example.late");
+		Install("com.example.late");
+
+		var redeemed = await _service.Redeem(requestId, verifier);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(redeemed.Succeeded, Is.False);
+			Assert.That(_registrations.Registrations, Is.Empty);
+			Assert.That(_supervisor.SuspendCalls, Is.Empty);
+			Assert.That(_takeovers.IsActive("com.example.late"), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_second_pairing_during_a_takeover_needs_both_confirmations_and_keeps_the_same_takeover()
+	{
+		Install("com.example.installed");
+		var (firstRequestId, firstVerifier) = await CreateAndApprove("com.example.installed",
+			takeOverInstalledPlugin: true);
+		var first = await _service.Redeem(firstRequestId, firstVerifier);
+		var ticket = _takeovers.CurrentTicket("com.example.installed");
+
+		var (verifier, challenge) = NewPkcePair();
+		var created = await _service.Create("com.example.installed",
+			"Example again",
+			challenge,
+			PluginPairingChallengeMethods.S256,
+			null,
+			false);
+		var pending = (await _service.Pending()).Single();
+		var withoutReplacement = await _service.Approve(created.Record!.RequestId,
+			replaceExistingRegistration: false,
+			takeOverInstalledPlugin: true);
+		var withoutTakeover = await _service.Approve(created.Record.RequestId,
+			replaceExistingRegistration: true,
+			takeOverInstalledPlugin: false);
+		var withBoth = await _service.Approve(created.Record.RequestId,
+			replaceExistingRegistration: true,
+			takeOverInstalledPlugin: true);
+		var second = await _service.Redeem(created.Record.RequestId, verifier);
+
+		var oldAuthenticated = await _registrationService.Authenticate("com.example.installed", first.PluginSecret!);
+		var newAuthenticated = await _registrationService.Authenticate("com.example.installed", second.PluginSecret!);
+		Assert.Multiple(() =>
+		{
+			Assert.That(pending.TakesOverInstalledPlugin, Is.True);
+			Assert.That(pending.ReplacesExistingRegistration, Is.True);
+			Assert.That(withoutReplacement.Error, Is.EqualTo(PluginPairingApproveError.ReplacementNotConfirmed));
+			Assert.That(withoutTakeover.Error, Is.EqualTo(PluginPairingApproveError.TakeoverNotConfirmed));
+			Assert.That(withBoth.Succeeded, Is.True);
+			Assert.That(second.Succeeded, Is.True);
+			Assert.That(oldAuthenticated, Is.Null);
+			Assert.That(newAuthenticated, Is.Not.Null);
+			Assert.That(_takeovers.CurrentTicket("com.example.installed"), Is.EqualTo(ticket));
+			Assert.That(_supervisor.SuspendCalls, Has.Count.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task Replacing_a_credential_left_on_an_installed_id_without_a_takeover_starts_a_takeover_first()
+	{
+		Install("com.example.installed");
+		await _registrationService.Register("com.example.installed",
+			"Left over",
+			accessTokenId: null,
+			PluginRegistrationOrigins.Pairing,
+			allowInstalledId: true);
+
+		var (requestId, verifier) = await CreateAndApprove("com.example.installed",
+			replaceExistingRegistration: true,
+			takeOverInstalledPlugin: true);
+		var redeemed = await _service.Redeem(requestId, verifier);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(redeemed.Succeeded, Is.True);
+			Assert.That(_supervisor.SuspendCalls, Is.EqualTo(new[] { "com.example.installed" }));
+			Assert.That(_takeovers.IsActive("com.example.installed"), Is.True);
+		});
+	}
+
+	[Test]
+	public async Task Revoking_a_takeover_credential_ends_the_takeover()
+	{
+		Install("com.example.installed");
+		var (requestId, verifier) = await CreateAndApprove("com.example.installed", takeOverInstalledPlugin: true);
+		await _service.Redeem(requestId, verifier);
+
+		await _registrationService.Revoke("com.example.installed");
 
 		Assert.Multiple(async () =>
 		{
-			Assert.That(result.Succeeded, Is.False);
-			Assert.That(result.Error, Is.EqualTo(PluginPairingCreateError.AlreadyRegistered));
-			Assert.That((await _service.Pending()), Is.Empty, "no prompt should ever have been created");
+			Assert.That(_takeovers.IsActive("com.example.installed"), Is.False);
+			Assert.That(HasActiveRegistration("com.example.installed"), Is.False);
+			Assert.That((await _service.PairedRegistrations()), Is.Empty);
 		});
 	}
 

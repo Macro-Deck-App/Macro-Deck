@@ -4,9 +4,6 @@ using Mediator;
 
 namespace MacroDeckHost.Application.Events.Handlers;
 
-/// <summary>A registry refresh always changes what the catalog looks like (a new snapshot, or the same
-/// one re-verified), so both the status banner and the catalog listing are told to refresh together.
-/// </summary>
 public sealed class StoreRegistryStatusUiNotificationHandler : INotificationHandler<StoreRegistryRefreshedNotification>
 {
 	private readonly IUiTransport _uiTransport;

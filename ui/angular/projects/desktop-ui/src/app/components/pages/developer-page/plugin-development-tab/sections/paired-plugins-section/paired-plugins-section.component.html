@@ -32,6 +32,11 @@
                   <span class="plugin-tokens-online-badge" [class.is-online]="plugin.online">
                     {{ (plugin.online ? 'macrodeck.app:Developer.Tokens.OnlineStatus' : 'macrodeck.app:Developer.Tokens.OfflineStatus') | translate }}
                   </span>
+                  @if (plugin.takesOverInstalledPlugin) {
+                    <span class="plugin-tokens-takeover-badge">
+                      {{ 'macrodeck.app:Developer.Tokens.TakeoverBadge' | translate }}
+                    </span>
+                  }
                 </span>
                 <span class="plugin-tokens-secondary">{{ plugin.pluginId }}</span>
               </div>
@@ -63,7 +68,7 @@
 @if (revokePairedCandidate(); as plugin) {
   <shared-confirmation-modal
     [heading]="'macrodeck.app:Developer.Tokens.RevokePluginConfirmHeading' | translate"
-    [message]="'macrodeck.app:Developer.Tokens.RevokePluginConfirmMessage' | translate:{ name: plugin.displayName }"
+    [message]="(plugin.takesOverInstalledPlugin ? 'macrodeck.app:Developer.Tokens.EndTakeoverConfirmMessage' : 'macrodeck.app:Developer.Tokens.RevokePluginConfirmMessage') | translate:{ name: plugin.displayName }"
     [confirmText]="'macrodeck.app:Developer.Tokens.RevokeAction' | translate"
     [cancelText]="'macrodeck:Common.Cancel' | translate"
     [danger]="true"

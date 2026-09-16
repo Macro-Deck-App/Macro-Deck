@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, input, ou
 import { RouterLink } from '@angular/router';
 import { AppStrings, StoreCatalogItemBody, StoreOperationBody } from '@macro-deck/runtime';
 import { ApiService, LocalizationService } from '@shared';
+import { PluginRuntimeService } from '../../services/plugin-runtime.service';
 import { storeKindIcon, storeKindLabelKey, storeTrustLabelKey } from '../../util/store-operation-display';
 import { StoreStateBadgeComponent } from './store-state-badge.component';
 import { StoreInstallButtonComponent } from './store-install-button.component';
@@ -17,8 +18,18 @@ import { StoreInstallButtonComponent } from './store-install-button.component';
 export class StoreExtensionCardComponent {
   private readonly api = inject(ApiService);
   private readonly localization = inject(LocalizationService);
+  private readonly runtime = inject(PluginRuntimeService);
 
   readonly item = input.required<StoreCatalogItemBody>();
+
+  protected readonly takenOver = computed(() => {
+    const item = this.item();
+    return item.kind === 'Plugin' &&
+      this.runtime.plugins().some(plugin => plugin.pluginId === item.id && plugin.takenOverByDevelopmentBuild === true);
+  });
+
+  protected readonly takenOverLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Developer.ManagedPlugins.TakenOverBadge));
   readonly operation = input<StoreOperationBody | null>(null);
 
   readonly install = output<void>();
@@ -28,7 +39,7 @@ export class StoreExtensionCardComponent {
 
   protected readonly iconUrl = computed(() => {
     const item = this.item();
-    return item.hasIcon ? this.api.getStoreExtensionIconUrl(item.kind, item.id) : null;
+    return item.hasIcon ? this.api.getStoreExtensionIconUrl(item.kind, item.id, item.iconSha256) : null;
   });
 
   // A missing icon 404s legitimately (the extension never published one) - the flag just tracks

@@ -1,7 +1,4 @@
-<!-- Temporary: the store backend is not live yet, so the whole page sits behind a coming-soon
-     overlay and is held inert. Remove this overlay, the `inert` binding and the ComingSoon* strings
-     once the store goes live. -->
-<div class="store-page" [attr.inert]="''">
+<div class="store-page" [attr.inert]="storeUnlocked() ? null : ''">
   <div class="store-page-content">
     <div class="store-header">
       <div class="store-heading">
@@ -10,10 +7,17 @@
       </div>
       <shared-button
         variant="secondary"
-        [loading]="catalog.registry()?.refreshing === true"
+        [attr.aria-busy]="catalog.refreshing()"
         (click)="onRefresh()">
-        <span class="icon icon-refresh icon-sm" aria-hidden="true"></span>
-        <span>{{ 'macrodeck.app:Store.Page.RefreshAction' | translate }}</span>
+        <span
+          class="icon icon-refresh icon-sm"
+          [class.store-refresh-icon-spinning]="catalog.refreshing()"
+          aria-hidden="true"></span>
+        @if (catalog.refreshing()) {
+          <span>{{ 'macrodeck.app:Store.RegistryRefresh.InProgressAction' | translate }}</span>
+        } @else {
+          <span>{{ 'macrodeck.app:Store.Page.RefreshAction' | translate }}</span>
+        }
       </shared-button>
     </div>
 
@@ -119,6 +123,10 @@
   </div>
 </div>
 
+@if (refreshLogOpen()) {
+  <app-store-registry-refresh-modal [run]="refreshLogRun()" (closed)="refreshLogOpen.set(false)" />
+}
+
 @if (pendingUninstall()) {
   <shared-confirmation-modal
     [heading]="uninstallHeading()"
@@ -129,9 +137,11 @@
     (cancel)="cancelUninstall()" />
 }
 
-<div class="store-coming-soon">
-  <shared-empty-state
-    icon="store"
-    [heading]="'macrodeck.app:Store.Page.ComingSoonHeading' | translate"
-    [message]="'macrodeck.app:Store.Page.ComingSoonMessage' | translate" />
-</div>
+@if (!storeUnlocked()) {
+  <div class="store-coming-soon">
+    <shared-empty-state
+      icon="store"
+      [heading]="'macrodeck.app:Store.Page.ComingSoonHeading' | translate"
+      [message]="'macrodeck.app:Store.Page.ComingSoonMessage' | translate" />
+  </div>
+}

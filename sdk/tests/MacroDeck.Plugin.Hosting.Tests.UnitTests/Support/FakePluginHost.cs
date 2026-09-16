@@ -7,6 +7,7 @@ using System.Threading.Channels;
 using MacroDeck.Plugin.Protocol;
 using MacroDeck.Plugin.Protocol.Auth;
 using MacroDeck.Plugin.Protocol.Envelope;
+using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeck.Plugin.Protocol.Versioning;
@@ -82,6 +83,14 @@ internal sealed class FakePluginHost : IAsyncDisposable
 	/// <summary>Whether <c>POST /api/plugins/pairing</c> answers 403, which is what the real host does
 	/// while Developer Mode is off.</summary>
 	public bool PairingCreateForbidden { get; set; }
+
+	/// <summary>When set, <c>POST /api/plugins/pairing</c> and <c>POST /api/plugins/registration</c>
+	/// answer 409 <c>PLUGIN_ALREADY_REGISTERED</c>, with this as <c>details.reason</c> unless it is empty.</summary>
+	public string? AlreadyRegisteredReason { get; set; }
+
+	/// <summary>Plugin secrets <c>POST /api/plugins/sessions</c> answers 401 for, the way the real host
+	/// refuses a revoked or no longer admitted development credential.</summary>
+	public ConcurrentDictionary<string, bool> RejectedSecrets { get; } = new(StringComparer.Ordinal);
 
 	/// <summary>
 	/// Set to auto-approve a pairing request once it has been polled this many times; left null, a
@@ -227,6 +236,19 @@ internal sealed class FakePluginHost : IAsyncDisposable
 		_sending.Dispose();
 	}
 
+	private IResult AlreadyRegistered()
+		=> Results.Json(new ProtocolError
+			{
+				Code = ProtocolErrorCodes.PluginAlreadyRegistered,
+				Message = ProtocolErrorMessages.For(ProtocolErrorCodes.PluginAlreadyRegistered),
+				Details = string.IsNullOrEmpty(AlreadyRegisteredReason)
+					? null
+					: new Dictionary<string, string> { ["reason"] = AlreadyRegisteredReason },
+				Retryable = false
+			},
+			PluginProtocolJson.Options,
+			statusCode: StatusCodes.Status409Conflict);
+
 	private void MapEndpoints(WebApplication application)
 	{
 		application.Use(async (context, next) =>
@@ -273,6 +295,11 @@ internal sealed class FakePluginHost : IAsyncDisposable
 				if (PairingCreateForbidden)
 				{
 					return Results.StatusCode(StatusCodes.Status403Forbidden);
+				}
+
+				if (AlreadyRegisteredReason is not null)
+				{
+					return AlreadyRegistered();
 				}
 
 				var request
@@ -372,6 +399,11 @@ internal sealed class FakePluginHost : IAsyncDisposable
 				EnrollmentTokens.Enqueue(context.Request.Headers[PluginAuthDefaults.EnrollmentTokenHeaderName]
 					.FirstOrDefault());
 
+				if (AlreadyRegisteredReason is not null)
+				{
+					return AlreadyRegistered();
+				}
+
 				var request
 					= await context.Request.ReadFromJsonAsync<PluginRegistrationRequest>(PluginProtocolJson.Options);
 				Registrations.Enqueue(request!);
@@ -392,6 +424,12 @@ internal sealed class FakePluginHost : IAsyncDisposable
 						context.Request.Headers[PluginAuthDefaults.PluginIdHeaderName].FirstOrDefault()) ||
 					string.IsNullOrEmpty(context.Request.Headers[PluginAuthDefaults.PluginSecretHeaderName]
 						.FirstOrDefault()))
+				{
+					return Results.Unauthorized();
+				}
+
+				if (RejectedSecrets.ContainsKey(
+						context.Request.Headers[PluginAuthDefaults.PluginSecretHeaderName].FirstOrDefault()!))
 				{
 					return Results.Unauthorized();
 				}

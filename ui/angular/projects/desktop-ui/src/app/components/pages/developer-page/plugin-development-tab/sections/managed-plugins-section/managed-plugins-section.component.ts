@@ -1,5 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { AppStrings, PluginRuntimeInfo } from '@macro-deck/runtime';
+import {
+  AppStrings,
+  PLUGIN_RUNTIME_ERROR_TAKEN_OVER_BY_DEVELOPMENT_BUILD,
+  PluginRuntimeInfo,
+  PluginRuntimeOperationResponse,
+} from '@macro-deck/runtime';
 import { ErrorBannerComponent, LocalizationService, ToastService, TranslatePipe } from '@shared';
 import { EmptyStateComponent } from '../../../../../feedback/empty-state/empty-state.component';
 import { DropdownMenuComponent } from '../../../../../overlay/dropdown-menu/dropdown-menu.component';
@@ -43,7 +48,10 @@ export class ManagedPluginsSectionComponent {
   }
 
   canStart(plugin: PluginRuntimeInfo): boolean {
-    return plugin.managed && STARTABLE_STATES.has(plugin.state) && !this.isBusy(plugin.pluginId);
+    return plugin.managed
+      && !plugin.takenOverByDevelopmentBuild
+      && STARTABLE_STATES.has(plugin.state)
+      && !this.isBusy(plugin.pluginId);
   }
 
   canStop(plugin: PluginRuntimeInfo): boolean {
@@ -51,13 +59,19 @@ export class ManagedPluginsSectionComponent {
   }
 
   canRestart(plugin: PluginRuntimeInfo): boolean {
-    return plugin.managed && RESTARTABLE_STATES.has(plugin.state) && !this.isBusy(plugin.pluginId);
+    return plugin.managed
+      && !plugin.takenOverByDevelopmentBuild
+      && RESTARTABLE_STATES.has(plugin.state)
+      && !this.isBusy(plugin.pluginId);
   }
 
   unmanagedReason(plugin: PluginRuntimeInfo): string | null {
-    return plugin.managed
-      ? null
-      : this.localization.translateKey(AppStrings.Developer.ManagedPlugins.UnmanagedReason);
+    if (!plugin.managed) {
+      return this.localization.translateKey(AppStrings.Developer.ManagedPlugins.UnmanagedReason);
+    }
+    return plugin.takenOverByDevelopmentBuild
+      ? this.localization.translateKey(AppStrings.Developer.ManagedPlugins.TakenOverReason)
+      : null;
   }
 
   hasBootstrapOutput(plugin: PluginRuntimeInfo): boolean {
@@ -83,7 +97,7 @@ export class ManagedPluginsSectionComponent {
     const response = await this.runtimeService.start(plugin.pluginId);
     if (!response.success) {
       this.toastService.show(
-        response.error?.message ?? this.localization.translateKey(AppStrings.Developer.ManagedPlugins.StartFailed),
+        this.failureMessage(response, AppStrings.Developer.ManagedPlugins.StartFailed),
         { variant: 'error' });
     }
   }
@@ -93,7 +107,7 @@ export class ManagedPluginsSectionComponent {
     const response = await this.runtimeService.stop(plugin.pluginId);
     if (!response.success) {
       this.toastService.show(
-        response.error?.message ?? this.localization.translateKey(AppStrings.Developer.ManagedPlugins.StopFailed),
+        this.failureMessage(response, AppStrings.Developer.ManagedPlugins.StopFailed),
         { variant: 'error' });
     }
   }
@@ -103,9 +117,16 @@ export class ManagedPluginsSectionComponent {
     const response = await this.runtimeService.restart(plugin.pluginId);
     if (!response.success) {
       this.toastService.show(
-        response.error?.message ?? this.localization.translateKey(AppStrings.Developer.ManagedPlugins.RestartFailed),
+        this.failureMessage(response, AppStrings.Developer.ManagedPlugins.RestartFailed),
         { variant: 'error' });
     }
+  }
+
+  private failureMessage(response: PluginRuntimeOperationResponse, fallbackKey: string): string {
+    if (response.error?.code === PLUGIN_RUNTIME_ERROR_TAKEN_OVER_BY_DEVELOPMENT_BUILD) {
+      return this.localization.translateKey(AppStrings.Errors.Plugins.TakenOverByDevelopmentBuild);
+    }
+    return response.error?.message ?? this.localization.translateKey(fallbackKey);
   }
 
   absoluteTime(iso: string | null | undefined): string {

@@ -1695,6 +1695,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Developer.ManagedPlugins.UnmanagedReason" xml:space="preserve">
     <value>Tento plugin se spouští a zastavuje sám. Macro Deck jen sleduje jeho relaci, takže ho odsud nelze spustit, zastavit ani restartovat.</value>
   </data>
+  <data name="Developer.ManagedPlugins.TakenOverBadge" xml:space="preserve">
+    <value>Vývojové sestavení aktivní</value>
+  </data>
+  <data name="Developer.ManagedPlugins.TakenOverReason" xml:space="preserve">
+    <value>Tento plugin převzalo vývojové sestavení, proto ho odsud nelze spustit ani restartovat. Po odvolání vývojového sestavení na této stránce se nainstalovaná verze znovu spustí.</value>
+  </data>
   <data name="Developer.NoActionsAvailableHeading" xml:space="preserve">
     <value>Žádné dostupné akce</value>
   </data>
@@ -1962,6 +1968,13 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>{name} ztratí přihlašovací údaj a okamžitě se odpojí. Pro opětovné připojení se musí spárovat znovu.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Developer.Tokens.EndTakeoverConfirmMessage" xml:space="preserve">
+    <value>{name} ztratí přihlašovací údaj a okamžitě se odpojí. Nainstalovaná verze pluginu se znovu spustí.</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Developer.Tokens.TakeoverBadge" xml:space="preserve">
+    <value>Nahrazuje nainstalovaný plugin</value>
+  </data>
   <data name="Developer.Tokens.RevokePluginFailed" xml:space="preserve">
     <value>Plugin se nepodařilo odvolat</value>
   </data>
@@ -2118,6 +2131,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Dialogs.PluginPairing.ReplacesWarning" xml:space="preserve">
     <value>Pro toto ID balíčku je již spárovaný plugin. Schválením nahradíte jeho registraci – stávající přihlašovací údaj přestane fungovat a plugin se okamžitě odpojí.</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverConfirmLabel" xml:space="preserve">
+    <value>Rozumím, že neověřené vývojové sestavení nahradí nainstalovaný plugin a získá jeho nastavení a uložené přihlašovací údaje</value>
+  </data>
+  <data name="Dialogs.PluginPairing.TakeoverWarning" xml:space="preserve">
+    <value>Toto ID balíčku patří nainstalovanému pluginu. Po schválení ho nahradí neověřené vývojové sestavení: nainstalovaný plugin se zastaví a vývojové sestavení získá jeho nastavení a uložené přihlašovací údaje. Nainstalovaná verze se znovu spustí po ukončení převzetí.</value>
   </data>
   <data name="Dialogs.PluginPairing.ReportedByRequester" xml:space="preserve">
     <value>Nahlásil žádající program</value>
@@ -2644,6 +2663,15 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Errors.Plugins.ReplaceCredentialConfirmationRequired" xml:space="preserve">
     <value>Schválením této žádosti dojde k nahrazení přihlašovacích údajů existujícího pluginu. Nejprve je nutné nahrazení potvrdit.</value>
+  </data>
+  <data name="Errors.Plugins.InstallBlockedByTakeover" xml:space="preserve">
+    <value>Tento plugin převzalo vývojové sestavení. Před instalací nebo aktualizací je nutné převzetí ukončit.</value>
+  </data>
+  <data name="Errors.Plugins.TakenOverByDevelopmentBuild" xml:space="preserve">
+    <value>Tento plugin převzalo vývojové sestavení. Nainstalovaná verze se znovu spustí po ukončení převzetí.</value>
+  </data>
+  <data name="Errors.Plugins.TakeoverConfirmationRequired" xml:space="preserve">
+    <value>Schválením této žádosti převezme vývojové sestavení nainstalovaný plugin. Nejprve je nutné převzetí potvrdit.</value>
   </data>
   <data name="Errors.Plugins.SessionNotFound" xml:space="preserve">
     <value>Aktivní relace s tímto ID neexistuje.</value>
@@ -6863,6 +6891,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Obs.Actions.SetPreviewScene.Name" xml:space="preserve">
     <value>Nastavit náhledovou scénu</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetProfile.Description" xml:space="preserve">
+    <value>Přepne OBS na jiný profil</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetProfile.Name" xml:space="preserve">
+    <value>Nastavit profil</value>
+  </data>
   <data name="Integrations.Obs.Actions.SetScene.Description" xml:space="preserve">
     <value>Přepne aktivní programovou scénu</value>
   </data>
@@ -7062,6 +7096,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Obs.Errors.NoInputSelected" xml:space="preserve">
     <value>Nebyl vybrán žádný vstup.</value>
   </data>
+  <data name="Integrations.Obs.Errors.NoProfileSelected" xml:space="preserve">
+    <value>Nebyl vybrán žádný profil.</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoSceneOrSourceSelected" xml:space="preserve">
     <value>Nebyla vybrána žádná scéna ani zdroj.</value>
   </data>
@@ -7190,6 +7227,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Obs.Params.ModeToggle" xml:space="preserve">
     <value>Přepnout</value>
+  </data>
+  <data name="Integrations.Obs.Params.Profile" xml:space="preserve">
+    <value>Profil</value>
   </data>
   <data name="Integrations.Obs.Params.SaveToVariable" xml:space="preserve">
     <value>Uložit do proměnné</value>
@@ -8347,7 +8387,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Studiový režim aktivní</value>
   </data>
   <data name="Integrations.System.Actions.DecreaseVolume.Description" xml:space="preserve">
-    <value>Sníží hlasitost systémového výstupu.</value>
+    <value>Sníží hlasitost vybraného zvukového zařízení.</value>
   </data>
   <data name="Integrations.System.Actions.DecreaseVolume.Name" xml:space="preserve">
     <value>Snížit hlasitost</value>
@@ -8362,7 +8402,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Hibernace</value>
   </data>
   <data name="Integrations.System.Actions.IncreaseVolume.Description" xml:space="preserve">
-    <value>Zvýší hlasitost systémového výstupu.</value>
+    <value>Zvýší hlasitost vybraného zvukového zařízení.</value>
   </data>
   <data name="Integrations.System.Actions.IncreaseVolume.Name" xml:space="preserve">
     <value>Zvýšit hlasitost</value>
@@ -8425,7 +8465,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Uzamknout počítač</value>
   </data>
   <data name="Integrations.System.Actions.MuteVolume.Description" xml:space="preserve">
-    <value>Přepne stav ztlumení systémového výstupu.</value>
+    <value>Přepne stav ztlumení vybraného zvukového zařízení.</value>
   </data>
   <data name="Integrations.System.Actions.MuteVolume.MutedLabel" xml:space="preserve">
     <value>Ztlumeno</value>
@@ -8521,7 +8561,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Nadpis</value>
   </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
-    <value>Nastaví hlasitost systémového výstupu na konkrétní úroveň.</value>
+    <value>Nastaví hlasitost vybraného zvukového zařízení na konkrétní úroveň.</value>
   </data>
   <data name="Integrations.System.Actions.SetVolume.LevelLabel" xml:space="preserve">
     <value>Hlasitost (%)</value>
@@ -8549,6 +8589,30 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.System.Actions.VolumeAmount.Label" xml:space="preserve">
     <value>Množství (%)</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.Label" xml:space="preserve">
+    <value>Zvukové zařízení</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.Description" xml:space="preserve">
+    <value>Zvukové zařízení, které akce ovládá.</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.DefaultOutput" xml:space="preserve">
+    <value>Výchozí výstupní zařízení</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.DefaultInput" xml:space="preserve">
+    <value>Výchozí vstupní zařízení</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.OutputOption" xml:space="preserve">
+    <value>{device} (výstup)</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.InputOption" xml:space="preserve">
+    <value>{device} (vstup)</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.UnavailableOption" xml:space="preserve">
+    <value>{device} (nedostupné)</value>
+  </data>
+  <data name="Integrations.System.Actions.AudioDevice.UnknownUnavailableOption" xml:space="preserve">
+    <value>Nedostupné zařízení</value>
   </data>
   <data name="Integrations.System.Actions.WorkingDirectoryLabel" xml:space="preserve">
     <value>Pracovní adresář</value>
@@ -8670,6 +8734,24 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.System.Variables.Muted" xml:space="preserve">
     <value>Ztlumeno</value>
+  </data>
+  <data name="Integrations.System.Variables.InputVolume" xml:space="preserve">
+    <value>Hlasitost vstupu</value>
+  </data>
+  <data name="Integrations.System.Variables.InputMuted" xml:space="preserve">
+    <value>Vstup ztlumen</value>
+  </data>
+  <data name="Integrations.System.Variables.DeviceOutputVolume" xml:space="preserve">
+    <value>{device}: hlasitost (výstup)</value>
+  </data>
+  <data name="Integrations.System.Variables.DeviceOutputMuted" xml:space="preserve">
+    <value>{device}: ztlumeno (výstup)</value>
+  </data>
+  <data name="Integrations.System.Variables.DeviceInputVolume" xml:space="preserve">
+    <value>{device}: hlasitost (vstup)</value>
+  </data>
+  <data name="Integrations.System.Variables.DeviceInputMuted" xml:space="preserve">
+    <value>{device}: ztlumeno (vstup)</value>
   </data>
   <data name="Integrations.System.Variables.CpuUsage" xml:space="preserve">
     <value>Vytížení CPU</value>
@@ -10688,6 +10770,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Widgets.Actions.PositionTop" xml:space="preserve">
     <value>Nahoře</value>
   </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
+    <value>Změní zvýrazňující barvu posuvníku nebo grafu historie.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
+    <value>Nastavit zvýrazňující barvu</value>
+  </data>
   <data name="Integrations.Widgets.Actions.SetBackgroundColorDescription" xml:space="preserve">
     <value>Změní barvu pozadí widgetu.</value>
   </data>
@@ -10720,6 +10808,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Widgets.Actions.SetIconDisplayName" xml:space="preserve">
     <value>Nastavit zobrazení ikony</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconColorDescription" xml:space="preserve">
+    <value>Změní barvu, kterou se kreslí ikona widgetu.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconColorName" xml:space="preserve">
+    <value>Nastavit barvu ikony</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetIconName" xml:space="preserve">
     <value>Nastavit ikonu</value>
@@ -11550,6 +11644,13 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Plugin {name} čeká na schválení v Macro Decku.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
+    <value>Vývojové sestavení žádá o převzetí pluginu</value>
+  </data>
+  <data name="Notifications.PluginTakeoverRequestedMessage" xml:space="preserve">
+    <value>Plugin {name} chce nahradit nainstalovaný plugin a čeká na schválení v Macro Decku.</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.StoreExtensionInstallFailed" xml:space="preserve">
     <value>Instalace {name} se nezdařila</value>
     <comment>[name:string]</comment>
@@ -12374,6 +12475,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Settings.Adb.StatusHeading" xml:space="preserve">
     <value>Stav</value>
+  </data>
+  <data name="Settings.Adb.StopServerOnExitDescription" xml:space="preserve">
+    <value>Server ADB se zastaví při ukončení, restartu nebo aktualizaci Macro Deck, ale jen pokud jej spustil Macro Deck. Ostatní programy využívající ADB, například Android Studio, ztratí připojení.</value>
+  </data>
+  <data name="Settings.Adb.StopServerOnExitLabel" xml:space="preserve">
+    <value>Zastavit server ADB při ukončení Macro Deck</value>
   </data>
   <data name="Settings.Adb.UncleanShutdown.One" xml:space="preserve">
     <value>Macro Deck se naposledy nevypnul správně. Bylo vyčištěno {count} zbývající USB připojení.</value>
@@ -14173,6 +14280,112 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Queued" xml:space="preserve">
     <value>Ve frontě</value>
   </data>
+  <data name="Store.RegistryRefresh.Error.BudgetExceeded" xml:space="preserve">
+    <value>Registr je větší, než kolik Macro Deck stáhne.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.CertificateUntrusted" xml:space="preserve">
+    <value>Registr byl podepsán certifikátem, kterému Macro Deck nedůvěřuje.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.Disabled" xml:space="preserve">
+    <value>Store je vypnutý.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.Malformed" xml:space="preserve">
+    <value>Registr poslal data, která Macro Deck nedokázal přečíst.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.NetworkFailure" xml:space="preserve">
+    <value>Registr nebyl dostupný.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SequenceRollback" xml:space="preserve">
+    <value>Registr nabídl starší katalog, než je již nainstalovaný.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SignatureInvalid" xml:space="preserve">
+    <value>Podpis registru není platný.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SigningKeyRevoked" xml:space="preserve">
+    <value>Registr byl podepsán zneplatněným klíčem.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SizeMismatch" xml:space="preserve">
+    <value>Soubor registru neměl deklarovanou velikost.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.SnapshotUnchanged" xml:space="preserve">
+    <value>Katalog se nezměnil.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.StorageFailure" xml:space="preserve">
+    <value>Nový katalog se nepodařilo uložit.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
+    <value>Došlo k neočekávané chybě.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
+    <value>Obnovení registru Store</value>
+  </data>
+  <data name="Store.RegistryRefresh.InProgressAction" xml:space="preserve">
+    <value>Obnovování…</value>
+  </data>
+  <data name="Store.RegistryRefresh.LogLabel" xml:space="preserve">
+    <value>Protokol obnovení</value>
+  </data>
+  <data name="Store.RegistryRefresh.Progress" xml:space="preserve">
+    <value>Soubory: {completed} z {total}</value>
+  </data>
+  <data name="Store.RegistryRefresh.State.Cancelled" xml:space="preserve">
+    <value>Obnovení bylo zrušeno.</value>
+  </data>
+  <data name="Store.RegistryRefresh.State.Failed" xml:space="preserve">
+    <value>Registr Store se nepodařilo obnovit.</value>
+  </data>
+  <data name="Store.RegistryRefresh.State.Running" xml:space="preserve">
+    <value>Probíhá obnovení registru Store…</value>
+  </data>
+  <data name="Store.RegistryRefresh.State.Succeeded" xml:space="preserve">
+    <value>Registr Store je aktuální.</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Applied" xml:space="preserve">
+    <value>Katalog aktualizován na verzi {sequence}</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Cancelled" xml:space="preserve">
+    <value>Zrušeno, protože se Macro Deck ukončuje</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.DownloadingFiles.One" xml:space="preserve">
+    <value>Stahování {count} souboru</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.RegistryRefresh.Step.DownloadingFiles.Other" xml:space="preserve">
+    <value>Stahování souborů (počet: {count})</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Failed" xml:space="preserve">
+    <value>Nezdařilo se: {reason}</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.FetchingManifest" xml:space="preserve">
+    <value>Stahování manifestu registru</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.FetchingSignature" xml:space="preserve">
+    <value>Stahování podpisu registru</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.ReadingCatalog" xml:space="preserve">
+    <value>Načítání katalogu</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Started" xml:space="preserve">
+    <value>Obnovení zahájeno</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.StartedScheduled" xml:space="preserve">
+    <value>Automatické obnovení zahájeno</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.UpToDate" xml:space="preserve">
+    <value>Nic nového: katalog je již ve verzi {sequence}</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.Verifying" xml:space="preserve">
+    <value>Ověřování podpisu</value>
+  </data>
+  <data name="Store.RegistryRefresh.Step.WaitingForRegistryUpdate.One" xml:space="preserve">
+    <value>Registr se právě aktualizuje. Další pokus za {count} s</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.RegistryRefresh.Step.WaitingForRegistryUpdate.Other" xml:space="preserve">
+    <value>Registr se právě aktualizuje. Další pokus za {count} s</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Store.RetryInstallation" xml:space="preserve">
     <value>Zkusit instalaci znovu</value>
   </data>
@@ -15553,6 +15766,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.Editor.Icon" xml:space="preserve">
     <value>Ikona</value>
   </data>
+  <data name="Widgets.Editor.IconColor" xml:space="preserve">
+    <value>Barva ikony</value>
+  </data>
   <data name="Widgets.Editor.IconDisplay" xml:space="preserve">
     <value>Zobrazení ikony</value>
   </data>
@@ -16226,11 +16442,29 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.Slider.ChooseIcon" xml:space="preserve">
     <value>Vybrat ikonu</value>
   </data>
+  <data name="Widgets.Slider.CustomStep" xml:space="preserve">
+    <value>Vlastní krok</value>
+  </data>
+  <data name="Widgets.Slider.CustomStepDescription" xml:space="preserve">
+    <value>Použije se vlastní krok místo kroku, který určuje proměnná.</value>
+  </data>
   <data name="Widgets.Slider.DefaultVariableDescription" xml:space="preserve">
     <value>Bez proměnné se použije vlastní proměnná widgetu slider_value.</value>
   </data>
   <data name="Widgets.Slider.Horizontal" xml:space="preserve">
     <value>Vodorovně</value>
+  </data>
+  <data name="Widgets.Slider.InteractionMode" xml:space="preserve">
+    <value>Režim ovládání</value>
+  </data>
+  <data name="Widgets.Slider.InteractionAbsolute" xml:space="preserve">
+    <value>Absolutní</value>
+  </data>
+  <data name="Widgets.Slider.InteractionRelative" xml:space="preserve">
+    <value>Relativní</value>
+  </data>
+  <data name="Widgets.Slider.InteractionModeDescription" xml:space="preserve">
+    <value>Absolutní režim nastaví hodnotu podle místa dotyku. Relativní režim hodnotu ponechá a posune ji o délku tažení.</value>
   </data>
   <data name="Widgets.Slider.LegacyActionBindingNotice" xml:space="preserve">
     <value>Tento posuvník stále obsahuje vazbu na akci ze starší verze. Už se nepoužívá a při příštím uložení bude odstraněna.</value>
@@ -16429,6 +16663,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Obs.Params.Configuration" xml:space="preserve">
     <value>Konfigurace</value>
+  </data>
+  <data name="Integrations.Obs.Variables.CurrentProfile" xml:space="preserve">
+    <value>Aktuální profil</value>
   </data>
   <data name="Integrations.Obs.Variables.CurrentScene" xml:space="preserve">
     <value>Aktuální scéna</value>

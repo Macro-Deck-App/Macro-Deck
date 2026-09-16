@@ -12,6 +12,7 @@ namespace MacroDeckHost.Tests.UnitTests.Obs;
 internal sealed class ObsActionsTests
 {
 	private static readonly string[] _expectedSceneOptions = ["Intro", "Gameplay", "Outro"];
+	private static readonly string[] _expectedProfileOptions = ["Recording", "Streaming"];
 	private static readonly string[] _expectedSourceOptions = ["Webcam", "Capture"];
 	private static readonly string[] _expectedFilterOptions = ["Blur", "Color Correction"];
 	private static readonly string[] _expectedSourceNameOptions = ["Gameplay", "Webcam", "Mic/Aux"];
@@ -58,6 +59,68 @@ internal sealed class ObsActionsTests
 				CancellationToken.None);
 
 			Assert.That(result.Options.Select(o => o.Value), Is.EqualTo(_expectedSceneOptions));
+		}
+	}
+
+	[Test]
+	public async Task SetProfile_SwitchesObsToTheChosenProfile()
+	{
+		var (connection, client) = ConnectedConnection();
+		ActionResult result;
+		using (connection)
+		{
+			var action = ObsActions.Create(() => connection, new VariableApiAccessor())
+				.Single(a => a.Id == "set-profile");
+
+			result = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
+				{ [ProfileActionDefinition.ProfileParameter] = "Streaming" }));
+		}
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
+			Assert.That(client.Calls, Does.Contain("SetCurrentProfile:Streaming"));
+		});
+	}
+
+	[Test]
+	public async Task SetProfile_WithoutAProfile_FailsWithoutTouchingObs()
+	{
+		var (connection, client) = ConnectedConnection();
+		ActionResult result;
+		using (connection)
+		{
+			var action = ObsActions.Create(() => connection, new VariableApiAccessor())
+				.Single(a => a.Id == "set-profile");
+
+			result = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>()));
+		}
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.InvalidParameter));
+			Assert.That(client.Calls, Has.None.StartsWith("SetCurrentProfile"));
+		});
+	}
+
+	[Test]
+	public async Task SetProfile_DynamicOptions_ReturnsLiveProfileList()
+	{
+		var (connection, client) = ConnectedConnection();
+		client.ProfileNames = ["Recording", "Streaming"];
+		using (connection)
+		{
+			var action = (IDynamicOptionsActionDefinition)ObsActions.Create(() => connection, new VariableApiAccessor())
+				.Single(a => a.Id == "set-profile");
+
+			var result = await action.GetDynamicOptionsAsync(new DynamicOptionsContext
+				{
+					ParameterName = ProfileActionDefinition.ProfileParameter,
+					CurrentParameters = new Dictionary<string, object?>()
+				},
+				CancellationToken.None);
+
+			Assert.That(result.Options.Select(o => o.Value), Is.EqualTo(_expectedProfileOptions));
 		}
 	}
 

@@ -52,13 +52,11 @@ internal sealed class PluginRegistrationClient(IHttpClientFactory httpClientFact
 
 		await ThrowIfDeveloperModeDisabledAsync(response, "enrol", cancellationToken);
 
-		if (response.StatusCode == HttpStatusCode.Conflict)
-		{
-			throw new PluginRegistrationException(
-				$"The host already has a plugin registered as '{pluginId}'. Remove it there, or start " +
-				"this plugin with the secret it was issued.",
-				response.StatusCode);
-		}
+		await ProtocolHttpHelpers.ThrowIfAlreadyRegisteredAsync(response,
+			pluginId,
+			$"The host already has a plugin registered as '{pluginId}'. Remove it there, or start " +
+			"this plugin with the secret it was issued.",
+			cancellationToken);
 
 		await EnsureSuccessAsync(response, "register the plugin", cancellationToken);
 
@@ -234,6 +232,42 @@ internal static class ProtocolHttpHelpers
 		}
 
 		return value;
+	}
+
+	// Always fatal: the host answers a 409 identically forever and charges every refusal to a throttle
+	// all plugins share, so backing off would still lock out other plugins' pairing.
+	public static async Task ThrowIfAlreadyRegisteredAsync(
+		HttpResponseMessage response,
+		string pluginId,
+		string registeredMessage,
+		CancellationToken cancellationToken)
+	{
+		if (response.StatusCode != HttpStatusCode.Conflict)
+		{
+			return;
+		}
+
+		ProtocolError? error = null;
+		try
+		{
+			error = await response.Content.ReadFromJsonAsync<ProtocolError>(PluginProtocolJson.Options,
+				cancellationToken);
+		}
+		catch (Exception exception) when (exception is JsonException or NotSupportedException)
+		{
+		}
+
+		var installed = error?.Details is not null &&
+			error.Details.TryGetValue("reason", out var reason) &&
+			string.Equals(reason, ProtocolErrorReasons.PluginInstalled, StringComparison.Ordinal);
+
+		throw new PluginRegistrationException(installed
+				? $"Macro Deck has the plugin '{pluginId}' installed, so an enrollment token cannot register " +
+				"this build under the same id. Start it without an enrollment token and with Developer Mode " +
+				"on to take the installed plugin over temporarily, or uninstall it in Macro Deck."
+				: registeredMessage,
+			response.StatusCode,
+			fatal: true);
 	}
 
 	public static async Task EnsureSuccessAsync(

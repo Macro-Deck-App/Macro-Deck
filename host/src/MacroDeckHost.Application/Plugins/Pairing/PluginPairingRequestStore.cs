@@ -87,7 +87,7 @@ public sealed class PluginPairingRequestStore : IPluginPairingRequestStore
 		return _records.Values.ToList();
 	}
 
-	public bool Approve(string requestId, bool replaceExistingRegistration)
+	public bool Approve(string requestId, bool replaceExistingRegistration, bool takeOverInstalledPlugin)
 	{
 		var now = _timeProvider.GetUtcNow();
 
@@ -103,6 +103,7 @@ public sealed class PluginPairingRequestStore : IPluginPairingRequestStore
 
 			record.State = PluginPairingRequestState.Approved;
 			record.ReplaceExistingRegistration = replaceExistingRegistration;
+			record.TakeOverInstalledPlugin = takeOverInstalledPlugin;
 
 			return true;
 		}

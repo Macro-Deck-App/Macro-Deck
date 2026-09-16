@@ -29,6 +29,7 @@ public class StoreController : ControllerBase
 	private readonly StoreRegistryOptions _options;
 	private readonly IMediator _mediator;
 	private readonly IStoreUninstallService _uninstallService;
+	private readonly IStoreRegistryRefreshTracker _refreshTracker;
 
 	public StoreController(IStoreCatalogQueryService catalogQuery,
 		IStoreRegistryRefresher refresher,
@@ -41,7 +42,8 @@ public class StoreController : ControllerBase
 		IMacroDeckPaths paths,
 		StoreRegistryOptions options,
 		IMediator mediator,
-		IStoreUninstallService uninstallService)
+		IStoreUninstallService uninstallService,
+		IStoreRegistryRefreshTracker refreshTracker)
 	{
 		_catalogQuery = catalogQuery;
 		_refresher = refresher;
@@ -55,6 +57,7 @@ public class StoreController : ControllerBase
 		_options = options;
 		_mediator = mediator;
 		_uninstallService = uninstallService;
+		_refreshTracker = refreshTracker;
 	}
 
 	[HttpGet("status")]
@@ -62,17 +65,14 @@ public class StoreController : ControllerBase
 		new()
 		{
 			Registry = StoreRegistryStatusBodyFactory.Create(_refresher.Status),
-			DeveloperMode = (await _preferences.GetDeveloper()).Enabled
+			DeveloperMode = (await _preferences.GetDeveloper()).Enabled,
+			RefreshRun = StoreRegistryRefreshRunBodyFactory.Create(_refreshTracker.Current)
 		};
 
 	[HttpPost("registry/refresh")]
 	public async Task<RefreshStoreRegistryResponse> RefreshRegistry(CancellationToken ct)
 	{
 		var result = await _refresher.Refresh(ct);
-		if (result.Success)
-		{
-			await _mediator.Publish(new StoreRegistryRefreshedNotification(_refresher.Status), ct);
-		}
 
 		return new RefreshStoreRegistryResponse
 		{
@@ -82,9 +82,10 @@ public class StoreController : ControllerBase
 				? null
 				: new TransportError
 				{
-					Code = ToErrorCode(result.Error ?? RegistryRefreshError.NetworkFailure),
+					Code = StoreRegistryRefreshRunBodyFactory.ErrorCode(result.Error ?? RegistryRefreshError.NetworkFailure),
 					Message = result.ErrorMessage ?? "The registry could not be refreshed."
-				}
+				},
+			RefreshRun = StoreRegistryRefreshRunBodyFactory.Create(_refreshTracker.Current)
 		};
 	}
 
@@ -217,12 +218,19 @@ public class StoreController : ControllerBase
 			: Failure("not_found", "The operation could not be dismissed.");
 
 	[HttpGet("media/{kind}/{id}/icon")]
-	public Task<IActionResult> GetIcon(StoreExtensionKind kind, string id, CancellationToken ct) =>
-		ServeMedia(kind, id, screenshotIndex: null, ct);
+	public Task<IActionResult> GetIcon(StoreExtensionKind kind,
+		string id,
+		CancellationToken ct,
+		[FromQuery] string? v = null) =>
+		ServeMedia(kind, id, screenshotIndex: null, v, ct);
 
 	[HttpGet("media/{kind}/{id}/screenshots/{index}")]
-	public Task<IActionResult> GetScreenshot(StoreExtensionKind kind, string id, int index, CancellationToken ct) =>
-		ServeMedia(kind, id, index, ct);
+	public Task<IActionResult> GetScreenshot(StoreExtensionKind kind,
+		string id,
+		int index,
+		CancellationToken ct,
+		[FromQuery] string? v = null) =>
+		ServeMedia(kind, id, index, v, ct);
 
 	// Only an asset the verified catalog entry itself declares (icon, or a screenshot at a declared
 	// index) is ever served, fetched through the artifact downloader (https-only, digest-checked) and
@@ -232,6 +240,7 @@ public class StoreController : ControllerBase
 	private async Task<IActionResult> ServeMedia(StoreExtensionKind kind,
 		string id,
 		int? screenshotIndex,
+		string? version,
 		CancellationToken ct)
 	{
 		var found = _catalogQuery.Find(kind, id);
@@ -299,8 +308,15 @@ public class StoreController : ControllerBase
 
 		Response.Headers.Append("X-Content-Type-Options", "nosniff");
 		Response.Headers.ContentSecurityPolicy = "default-src 'none'; style-src 'unsafe-inline'; sandbox";
-		Response.Headers.CacheControl = "public, max-age=604800, immutable";
-		return File(bytes, contentType);
+		// The route names a position, not an asset: only a request that also names this digest may be cached
+		// for good, anything else revalidates because the asset at that position changes with the listing.
+		Response.Headers.CacheControl = string.Equals(version, digest, StringComparison.OrdinalIgnoreCase)
+			? "public, max-age=604800, immutable"
+			: "no-cache";
+		return File(bytes,
+			contentType,
+			lastModified: null,
+			entityTag: new Microsoft.Net.Http.Headers.EntityTagHeaderValue($"\"{digest}\""));
 	}
 
 	private void DeleteStagingDirectory(Guid operationId)
@@ -384,6 +400,7 @@ public class StoreController : ControllerBase
 		UnsupportedReason = item.UnsupportedReason,
 		Trust = item.Trust,
 		HasIcon = item.Entry.LatestRelease.Icon is not null,
+		IconSha256 = item.Entry.LatestRelease.Icon?.Sha256.ToLowerInvariant(),
 		ActiveOperationId = _operationTracker.FindLive(item.Entry.Kind, item.Entry.Id)?.Id
 	};
 
@@ -402,6 +419,7 @@ public class StoreController : ControllerBase
 		UnsupportedReason = item.UnsupportedReason,
 		Trust = item.Trust,
 		HasIcon = item.Entry.LatestRelease.Icon is not null,
+		IconSha256 = item.Entry.LatestRelease.Icon?.Sha256.ToLowerInvariant(),
 		ActiveOperationId = _operationTracker.FindLive(item.Entry.Kind, item.Entry.Id)?.Id,
 		LongDescription = item.Entry.LongDescription,
 		Changelog = item.Entry.Changelog,
@@ -411,7 +429,12 @@ public class StoreController : ControllerBase
 		SupportedOperatingSystems = SupportedOperatingSystems(item.Entry.SupportedRids),
 		Languages = [.. item.Entry.Languages],
 		Screenshots = item.Entry.LatestRelease.Screenshots
-			.Select((asset, index) => new StoreScreenshotBody { Index = index, Caption = asset.Caption })
+			.Select((asset, index) => new StoreScreenshotBody
+			{
+				Index = index,
+				Caption = asset.Caption,
+				Sha256 = asset.Sha256.ToLowerInvariant()
+			})
 			.ToList(),
 		History = item.Entry.History
 			.Select(entry => new StoreVersionHistoryBody
@@ -449,22 +472,6 @@ public class StoreController : ControllerBase
 		StoreCatalogError.RegistryUnavailable => "registry_unavailable",
 		StoreCatalogError.StoreDisabled => "store_disabled",
 		StoreCatalogError.NotFound => "not_found",
-		_ => "failed"
-	};
-
-	private static string ToErrorCode(RegistryRefreshError error) => error switch
-	{
-		RegistryRefreshError.Disabled => "disabled",
-		RegistryRefreshError.NetworkFailure => "network_failure",
-		RegistryRefreshError.Malformed => "malformed",
-		RegistryRefreshError.BudgetExceeded => "budget_exceeded",
-		RegistryRefreshError.SizeMismatch => "size_mismatch",
-		RegistryRefreshError.SequenceRollback => "sequence_rollback",
-		RegistryRefreshError.SignatureInvalid => "signature_invalid",
-		RegistryRefreshError.CertificateUntrusted => "certificate_untrusted",
-		RegistryRefreshError.SigningKeyRevoked => "signing_key_revoked",
-		RegistryRefreshError.SnapshotUnchanged => "snapshot_unchanged",
-		RegistryRefreshError.StorageFailure => "storage_failure",
 		_ => "failed"
 	};
 }

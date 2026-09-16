@@ -28,7 +28,8 @@ public class SystemIntegrationTests
 
 	private static readonly string[] _expectedVariableNames =
 	[
-		"system_volume_percent", "system_muted", "system_cpu_usage_percent", "system_ram_usage_percent",
+		"system_volume_percent", "system_muted", "system_input_volume_percent", "system_input_muted",
+		"system_cpu_usage_percent", "system_ram_usage_percent",
 		"system_ram_used_gb", "system_ram_total_gb", "system_cpu_name", "system_pc_name", "system_os",
 		"system_date", "system_time", "system_datetime", "system_timestamp_unix",
 		"system_day_of_week", "system_hour", "system_minute", "system_locked",

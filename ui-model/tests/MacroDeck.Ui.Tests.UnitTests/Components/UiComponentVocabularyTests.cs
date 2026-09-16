@@ -50,9 +50,9 @@ public class UiComponentVocabularyTests
 	[
 		"events", "mainSize", "fill", "direction", "justify", "align", "gap", "padding", "background",
 		"text", "size", "minSize", "weight", "role", "color", "maxLines", "wrap", "fontFace", "source",
-		"transition", "fit", "zoom", "offsetX", "offsetY", "opacity", "brightness", "saturation", "start",
+		"transition", "fit", "zoom", "offsetX", "offsetY", "opacity", "brightness", "saturation", "tint", "start",
 		"end", "startColor", "endColor", "marker", "thickness", "value", "format", "seconds", "level",
-		"step", "levelColor", "borderStyle", "borderColor", "corner", "points", "plotTop", "digits",
+		"step", "levelColor", "interaction", "borderStyle", "borderColor", "corner", "points", "plotTop", "digits",
 		"answer", "placeholder", "rotation", "originX", "originY", "shape", "cornerRadius", "strokeColor",
 		"strokeWidth", "path", "icon", "columns", "rows", "columnSpan", "rowSpan", "startAngle", "endAngle",
 		"on", "selected",
@@ -89,6 +89,8 @@ public class UiComponentVocabularyTests
 	private static readonly string[] _expectedImageFits = ["contain", "cover"];
 
 	private static readonly string[] _expectedButtonCorners = ["tile"];
+
+	private static readonly string[] _expectedSliderInteractions = ["relative"];
 
 	private static readonly string[] _expectedBorderStyles =
 	[
@@ -185,6 +187,12 @@ public class UiComponentVocabularyTests
 	public void The_button_corner_set_is_frozen()
 	{
 		Assert.That(UiComponentButtonCorners.WellKnown, Is.EqualTo(_expectedButtonCorners).AsCollection);
+	}
+
+	[Test]
+	public void The_slider_interaction_set_is_frozen()
+	{
+		Assert.That(UiComponentSliderInteractions.WellKnown, Is.EqualTo(_expectedSliderInteractions).AsCollection);
 	}
 
 	[Test]
@@ -392,6 +400,7 @@ public class UiComponentVocabularyTests
 					Step = 0.01,
 					LevelColor = "#3aa0ff",
 					Direction = UiComponentDirections.Vertical,
+					Interaction = UiComponentSliderInteractions.Relative,
 					Thickness = UiSize.FromBasis(0.12, 0.55),
 					Fill = true,
 					Events = [UiEventHandler.On(UiComponentEvents.Change, static () => { })],
@@ -417,6 +426,7 @@ public class UiComponentVocabularyTests
 					OffsetX = 0.08,
 					OffsetY = -0.05,
 					Opacity = 0.85,
+					Tint = "#f5c542",
 					BorderStyle = UiComponentBorderStyles.Static,
 					BorderColor = "#4f8cff",
 					Corner = UiComponentButtonCorners.Tile,

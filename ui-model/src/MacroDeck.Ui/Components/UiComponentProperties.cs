@@ -135,6 +135,12 @@ public static class UiComponentProperties
 	/// normative result.</summary>
 	public const string Saturation = "saturation";
 
+	/// <summary>A button's artwork drawn as a silhouette in this colour, as <c>#rrggbb</c>: every pixel
+	/// takes the colour and keeps its own alpha, so a transparent icon is recoloured and an opaque image
+	/// becomes a solid rectangle. Absent means the artwork's own colours, which is also what a reader that
+	/// does not implement the key draws. Unrelated to the press feedback tint.</summary>
+	public const string Tint = "tint";
+
 	/// <summary>Where a range bar's filled span begins, as a fraction of the track.</summary>
 	public const string Start = "start";
 
@@ -181,6 +187,11 @@ public static class UiComponentProperties
 	/// <summary>A slider's filled span colour, as <c>#rrggbb</c>. Absent means the reader's own accent
 	/// colour.</summary>
 	public const string LevelColor = "levelColor";
+
+	/// <summary>How a pointer on a slider maps to its level - see <see cref="UiComponentSliderInteractions" />.
+	/// Absent means absolute: the level jumps to the pointer. A reader that does not implement the key
+	/// ignores it and keeps that absolute behaviour, which still leaves a working slider.</summary>
+	public const string Interaction = "interaction";
 
 	/// <summary>How a button's ring is drawn - see <see cref="UiComponentBorderStyles" />. Absent means no ring
 	/// at all; there is deliberately no value spelling "off", because absence already spells it and a
@@ -287,8 +298,8 @@ public static class UiComponentProperties
 	[
 		Events, MainSize, Fill, Direction, Justify, Align, Gap, Padding, Background, Text, Size, MinSize,
 		Weight, Role, Color, MaxLines, Wrap, FontFace, Source, Transition, Fit, Zoom, OffsetX, OffsetY,
-		Opacity, Brightness, Saturation, Start, End, StartColor, EndColor, Marker, Thickness, Value,
-		Format, Seconds, Level, Step, LevelColor, BorderStyle, BorderColor, Corner, Points, PlotTop,
+		Opacity, Brightness, Saturation, Tint, Start, End, StartColor, EndColor, Marker, Thickness, Value,
+		Format, Seconds, Level, Step, LevelColor, Interaction, BorderStyle, BorderColor, Corner, Points, PlotTop,
 		Digits, Answer, Placeholder, Rotation, OriginX, OriginY, Shape, CornerRadius, StrokeColor,
 		StrokeWidth, Path, Icon, Columns, Rows, ColumnSpan, RowSpan, StartAngle, EndAngle, On, Selected,
 		Modifiers, Frame, Clip, Mask,

@@ -1,7 +1,7 @@
 import { WritableSignal, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PairedPlugin, PluginRuntimeInfo } from '@macro-deck/runtime';
-import { ToastService } from '@shared';
+import { LocalizationService, ToastService } from '@shared';
 import { DeveloperModeService } from '../../../../../../services/developer-mode.service';
 import { PluginPairingService } from '../../../../../../services/plugin-pairing.service';
 import { PluginRuntimeService } from '../../../../../../services/plugin-runtime.service';
@@ -204,6 +204,54 @@ describe('ManagedPluginsSectionComponent', () => {
 
     const body = fixture.nativeElement.querySelector('.managed-plugins-output-body');
     expect(body.textContent).toContain('line one');
+  });
+
+  describe('while a development build has taken the plugin over', () => {
+    function translate(key: string): string {
+      return TestBed.inject(LocalizationService).translateKey(key);
+    }
+
+    it('shows a taken-over badge only on that row', async () => {
+      configure([
+        plugin('p1', { state: 'stopped', lastStopReason: 'development_takeover', takenOverByDevelopmentBuild: true }),
+        plugin('p2'),
+      ]);
+      fixture = await create();
+
+      const rows = fixture.nativeElement.querySelectorAll('.managed-plugins-row');
+      expect(rows[0].querySelector('.taken-over').textContent.trim())
+        .toBe(translate('macrodeck.app:Developer.ManagedPlugins.TakenOverBadge'));
+      expect(rows[1].querySelector('.taken-over')).toBeFalsy();
+    });
+
+    it('disables Start and Restart and says why', async () => {
+      configure([plugin('p1', { state: 'stopped', takenOverByDevelopmentBuild: true })]);
+      fixture = await create();
+
+      const [start, , restart] = await openMenu('p1');
+
+      expect(start.disabled).toBeTrue();
+      expect(restart.disabled).toBeTrue();
+      expect((fixture.nativeElement.querySelector('.managed-plugins-menu-note') as HTMLElement).textContent)
+        .toContain(translate('macrodeck.app:Developer.ManagedPlugins.TakenOverReason'));
+    });
+
+    for (const action of ['start', 'restart'] as const) {
+      it(`toasts the localized takeover error when ${action} is refused for a takeover`, async () => {
+        configure([plugin('p1', { state: 'failed' })]);
+        fixture = await create();
+        const toastSpy = spyOn(TestBed.inject(ToastService), 'show');
+        runtimeSpy[action].and.resolveTo({
+          success: false,
+          error: { code: 'taken_over_by_development_build', message: 'Plugin is taken over by a development build.' },
+        });
+
+        await fixture.componentInstance[action](fixture.componentInstance.plugins()[0]);
+
+        expect(toastSpy).toHaveBeenCalledWith(
+          translate('macrodeck.app:Errors.Plugins.TakenOverByDevelopmentBuild'), { variant: 'error' });
+      });
+    }
   });
 
   describe('actions call the service', () => {

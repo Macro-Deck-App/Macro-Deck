@@ -27,5 +27,7 @@ public sealed class PluginPairingRequestRecord
 
 	public required bool ReplaceExistingRegistration { get; set; }
 
+	public bool TakeOverInstalledPlugin { get; set; }
+
 	public required bool ArrivedOnPublicListener { get; init; }
 }

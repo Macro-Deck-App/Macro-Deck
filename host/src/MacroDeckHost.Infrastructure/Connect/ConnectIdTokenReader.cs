@@ -1,5 +1,7 @@
+using System.Text.Json;
 using MacroDeckHost.Application.Connect;
 using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 
 namespace MacroDeckHost.Infrastructure.Connect;
 
@@ -12,14 +14,12 @@ public sealed record ConnectIdTokenClaims(
 public static class ConnectIdTokenReader
 {
 	private const string CreatorUsernameClaim = "preferred_username";
+	private const string RolesClaim = "urn:zitadel:iam:org:project:roles";
 
 	private static readonly TimeSpan _clockSkew = TimeSpan.FromMinutes(2);
 
-	// The trust anchor for these claims is the direct TLS channel to the issuer's own token endpoint,
-	// which is where every id token read here comes from - never a redirect, never a client-supplied
-	// value - and the claims are display-only: nothing in the host authorizes anything off them. That is
-	// the only reason the signature is not validated against the issuer's JWKS. The moment any decision
-	// (entitlement, role gate, quota) is taken off these claims, full JWKS validation becomes required.
+	// Profile claims are display-only and trusted through the direct TLS channel to the token endpoint.
+	// Roles decide something, so they count only once ReadVerifiedRoles checked the signature (ADR 0054).
 	public static ConnectIdTokenClaims Read(string idToken, string? expectedNonce, TimeProvider timeProvider)
 	{
 		JsonWebToken token;
@@ -66,6 +66,45 @@ public static class ConnectIdTokenReader
 			ReadClaim(token, "name") ?? token.Subject,
 			ReadClaim(token, "picture"),
 			ReadClaim(token, CreatorUsernameClaim));
+	}
+
+	// Runs between a refresh-token rotation and its durable save, so it must never throw: anything it
+	// cannot verify is null, which leaves the previously verified roles in place.
+	public static async Task<IReadOnlyList<string>?> ReadVerifiedRoles(string idToken, string? signingKeys)
+	{
+		if (signingKeys is null)
+		{
+			return null;
+		}
+
+		try
+		{
+			var result = await new JsonWebTokenHandler().ValidateTokenAsync(idToken,
+				new TokenValidationParameters
+				{
+					IssuerSigningKeys = new JsonWebKeySet(signingKeys).GetSigningKeys(),
+					ValidAlgorithms = [SecurityAlgorithms.RsaSha256],
+					ValidIssuer = ConnectEndpoints.Issuer,
+					ValidAudience = ConnectEndpoints.ClientId,
+					ValidateLifetime = false
+				});
+
+			if (!result.IsValid || result.SecurityToken is not JsonWebToken token)
+			{
+				return null;
+			}
+
+			using var payload = JsonDocument.Parse(Base64UrlEncoder.Decode(token.EncodedPayload));
+
+			return payload.RootElement.TryGetProperty(RolesClaim, out var roles) &&
+				roles.ValueKind is JsonValueKind.Object
+					? roles.EnumerateObject().Select(role => role.Name).Order(StringComparer.Ordinal).ToList()
+					: [];
+		}
+		catch (Exception)
+		{
+			return null;
+		}
 	}
 
 	private static bool IssuerMatches(string? issuer)

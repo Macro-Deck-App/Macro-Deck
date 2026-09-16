@@ -1,15 +1,18 @@
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { WritableSignal, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 
-import { AppStrings, GetStoreCatalogResponse, StoreCatalogItemBody } from '@macro-deck/runtime';
+import { AppStrings, GetConnectSessionResponse, GetStoreCatalogResponse, StoreCatalogItemBody } from '@macro-deck/runtime';
 import { ApiService, LocalizationService, SegmentedControlComponent, ToastService } from '@shared';
+import { ConnectAccountService } from '../../../services/connect-account.service';
+import { PluginRuntimeService } from '../../../services/plugin-runtime.service';
 import { SelectComponent } from '../../forms/select/select.component';
 import { StoreExtensionCardComponent } from '../../store/store-extension-card.component';
 import { StoreSectionComponent } from '../../store/store-section.component';
 import { StorePageComponent } from './store-page.component';
+import { StoreRegistryRefreshModalComponent } from './store-registry-refresh-modal.component';
 
 interface CatalogOptions {
   kinds?: string[];
@@ -50,6 +53,7 @@ describe('StorePageComponent', () => {
   let routerSpy: jasmine.SpyObj<Router>;
   let notifications: Map<string, Subject<unknown>>;
   let catalog: Catalog;
+  let account: { isSignedIn: WritableSignal<boolean>; session: WritableSignal<GetConnectSessionResponse | null> };
 
   function push(method: string, payload: unknown): void {
     notifications.get(method)?.next(payload);
@@ -98,8 +102,13 @@ describe('StorePageComponent', () => {
     notifications = new Map();
     api = jasmine.createSpyObj<ApiService>('ApiService', [
       'onNotification', 'getStoreCatalog', 'refreshStoreRegistry', 'getStoreOperations', 'installStoreExtension',
-      'retryStoreOperation', 'getStoreExtensionIconUrl', 'uninstallStoreExtension',
+      'retryStoreOperation', 'getStoreExtensionIconUrl', 'uninstallStoreExtension', 'getStoreStatus',
     ]);
+    api.getStoreStatus.and.resolveTo({
+      registry: { hasCatalog: true, sequence: 1, refreshing: false, stale: false },
+      developerMode: false,
+      refreshRun: null,
+    });
     api.onNotification.and.callFake((method: string) => {
       let subject = notifications.get(method);
       if (!subject) {
@@ -125,17 +134,20 @@ describe('StorePageComponent', () => {
       }
     });
     api.getStoreOperations.and.resolveTo({ operations: [] });
-    api.getStoreExtensionIconUrl.and.returnValue('');
+    api.getStoreExtensionIconUrl.and.callFake((_kind, _id, sha256) => (sha256 ? `icon-${sha256}` : ''));
     Object.defineProperty(api, 'connectionStateSignal', { value: signal('connected') });
 
     routerSpy = jasmine.createSpyObj<Router>('Router', ['navigate']);
     routerSpy.navigate.and.resolveTo(true);
+    account = { isSignedIn: signal(false), session: signal(null) };
 
     TestBed.configureTestingModule({
       imports: [StorePageComponent],
       providers: [
         provideZonelessChangeDetection(),
         { provide: ApiService, useValue: api },
+        { provide: ConnectAccountService, useValue: account },
+        { provide: PluginRuntimeService, useValue: { plugins: signal([]) } },
         { provide: Router, useValue: routerSpy },
         {
           provide: ActivatedRoute,
@@ -161,10 +173,87 @@ describe('StorePageComponent', () => {
     (fixture.componentInstance as unknown as { onSortChange(value: string): void }).onSortChange(value);
   }
 
+  function refreshModalOpen(): boolean {
+    return fixture.debugElement.queryAll(By.directive(StoreRegistryRefreshModalComponent)).length > 0;
+  }
+
+  it('opens the refresh log and asks the host for exactly one refresh when Refresh is pressed', async () => {
+    await createFixture();
+    api.refreshStoreRegistry.and.resolveTo({
+      success: true,
+      registry: { hasCatalog: true, sequence: 2, refreshing: false, stale: false },
+    });
+
+    findButton(translate(AppStrings.Store.Page.RefreshAction))?.click();
+    await settle();
+
+    expect(refreshModalOpen()).toBeTrue();
+    expect(api.refreshStoreRegistry).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a refresh already under way and opens its log instead of starting another', async () => {
+    await createFixture();
+
+    push('StoreRegistryRefreshChangedEvent', {
+      run: {
+        hostInstanceId: 'host-a',
+        id: 'run-1',
+        revision: 1,
+        trigger: 'Scheduled',
+        state: 'Running',
+        startedAt: '2026-09-15T10:00:00Z',
+        filesCompleted: 0,
+        filesTotal: 0,
+        entries: [],
+      },
+    });
+    await settle();
+    findButton(translate(AppStrings.Store.RegistryRefresh.InProgressAction))?.click();
+    await settle();
+
+    expect(refreshModalOpen()).toBeTrue();
+    expect(api.refreshStoreRegistry).not.toHaveBeenCalled();
+  });
+
+  it('does not show the log of an earlier refresh when a new one is started', async () => {
+    await createFixture();
+    push('StoreRegistryRefreshChangedEvent', {
+      run: {
+        hostInstanceId: 'host-a',
+        id: 'earlier',
+        revision: 4,
+        trigger: 'Scheduled',
+        state: 'Succeeded',
+        startedAt: '2026-09-15T09:00:00Z',
+        filesCompleted: 0,
+        filesTotal: 0,
+        entries: [{ at: '2026-09-15T09:00:00Z', step: 'Started' }],
+      },
+    });
+    await settle();
+    api.refreshStoreRegistry.and.returnValue(new Promise(() => undefined));
+
+    findButton(translate(AppStrings.Store.Page.RefreshAction))?.click();
+    await settle();
+
+    const modal = fixture.debugElement.query(By.directive(StoreRegistryRefreshModalComponent))
+      .componentInstance as StoreRegistryRefreshModalComponent;
+    expect(modal.run()).toBeNull();
+  });
+
   it('renders one card per catalog result', async () => {
     await createFixture({ grid: items(3) });
 
     expect(cardCount()).toBe(3);
+  });
+
+  it('loads a card icon by the digest of the icon the catalog currently lists', async () => {
+    await createFixture({ grid: [item('p1', { hasIcon: true, iconSha256: 'icon-digest' })] });
+
+    const sources = fixture.debugElement.queryAll(By.directive(StoreExtensionCardComponent))
+      .flatMap(card => Array.from<HTMLImageElement>((card.nativeElement as HTMLElement).querySelectorAll('img')))
+      .map(img => img.getAttribute('src'));
+    expect(sources).toContain('icon-icon-digest');
   });
 
   it('drives the host search call from the search box', async () => {
@@ -473,6 +562,66 @@ describe('StorePageComponent', () => {
       for (const cardInstall of cardInstalls) {
         expect(cardInstall.querySelector('shared-confirmation-modal')).toBeNull();
       }
+    });
+  });
+
+  describe('store tester access', () => {
+    async function sessionIs(status: GetConnectSessionResponse['status'], roles: string[]): Promise<void> {
+      account.session.set({
+        status,
+        connectivity: 'ok',
+        offlineSince: null,
+        account: {
+          subject: 'u1', displayName: 'Tester', avatarAvailable: false, avatarVersion: null, creatorUsername: null, roles,
+        },
+        lastSuccessfulRefreshUtc: null,
+        message: null,
+        signInFailure: null,
+        accountManagementUrl: '',
+      });
+      account.isSignedIn.set(status === 'signedIn');
+      await settle();
+    }
+
+    function pageIsInert(): boolean {
+      return (fixture.nativeElement.querySelector('.store-page') as HTMLElement).hasAttribute('inert');
+    }
+
+    function comingSoonShown(): boolean {
+      return fixture.nativeElement.querySelector('.store-coming-soon') !== null;
+    }
+
+    it('keeps the store behind the coming-soon overlay while signed out', async () => {
+      await createFixture();
+
+      expect(pageIsInert()).toBeTrue();
+      expect(comingSoonShown()).toBeTrue();
+    });
+
+    it('keeps the overlay for a signed-in account without the StoreTester role', async () => {
+      await createFixture();
+      await sessionIs('signedIn', ['SomethingElse']);
+
+      expect(pageIsInert()).toBeTrue();
+      expect(comingSoonShown()).toBeTrue();
+    });
+
+    for (const status of ['suspended', 'reauthenticationRequired'] as const) {
+      it(`keeps the overlay for a StoreTester account that is ${status}`, async () => {
+        await createFixture();
+        await sessionIs(status, ['StoreTester']);
+
+        expect(pageIsInert()).toBeTrue();
+        expect(comingSoonShown()).toBeTrue();
+      });
+    }
+
+    it('opens the store for a signed-in StoreTester account', async () => {
+      await createFixture();
+      await sessionIs('signedIn', ['StoreTester']);
+
+      expect(pageIsInert()).toBeFalse();
+      expect(comingSoonShown()).toBeFalse();
     });
   });
 });

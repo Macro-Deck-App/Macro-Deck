@@ -151,10 +151,141 @@ internal sealed class PluginSupervisorTests
 			_launchTokenService,
 			_listenerState,
 			_trustEvaluator,
+			new PluginTakeoverRegistry(),
 			services.GetRequiredService<IServiceScopeFactory>(),
 			_time,
 			_options,
 			Serilog.Core.Logger.None);
+	}
+
+	private void UseFrameworkDependentEntrypoint(string executable, params string[] arguments)
+	{
+		_manifestReader.Default = PluginManifestReadResult.Ok(new PluginManifest
+		{
+			ManifestVersion = 1,
+			Id = PluginId,
+			Name = "Example",
+			Version = Version,
+			Entrypoints = new Dictionary<string, PluginEntrypoint>
+			{
+				[PluginRuntimeIdentifiers.Current] = new()
+				{
+					Executable = executable,
+					Arguments = arguments,
+					Runtime = new PluginEntrypointRuntime
+					{
+						Kind = PluginEntrypointRuntimeKind.FrameworkDependent,
+						DotnetVersion = "10.0"
+					}
+				}
+			}
+		});
+	}
+
+	[Test]
+	public async Task A_framework_dependent_plugin_is_launched_through_the_selected_muxer()
+	{
+		UseFrameworkDependentEntrypoint("runtimes/x/Plugin.dll", "--verbose");
+		var supervisor = CreateSupervisor();
+
+		var result = await supervisor.Start(PluginId);
+
+		Assert.That(result.Success, Is.True, result.Message);
+		var request = _launcher.Requests.Single();
+		var versionDirectory = _catalog.Plugins[0].ActiveVersion!.VersionDirectory;
+		Assert.Multiple(() =>
+		{
+			Assert.That(request.ExecutablePath, Is.EqualTo(_muxerLocator.Selection!.Muxer.ExecutablePath));
+			Assert.That(request.Arguments,
+				Is.EqualTo(new[]
+				{
+					Path.GetFullPath(Path.Combine(versionDirectory, "runtimes/x/Plugin.dll")), "--verbose"
+				}));
+		});
+	}
+
+	[Test]
+	public async Task A_framework_dependent_plugin_without_a_usable_runtime_stays_stopped()
+	{
+		UseFrameworkDependentEntrypoint("Plugin.dll");
+		_muxerLocator.Selection = _muxerLocator.Selection! with
+		{
+			UnmetRequirement = new DotnetFrameworkRequirement
+			{
+				Name = "Microsoft.WindowsDesktop.App", Version = new Version(10, 0, 0)
+			}
+		};
+		var supervisor = CreateSupervisor();
+
+		var result = await supervisor.Start(PluginId);
+		await supervisor.Reconcile();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.False);
+			Assert.That(result.Error, Is.EqualTo(PluginSupervisorError.DotnetRuntimeMissing));
+			Assert.That(result.Message, Does.Contain("Microsoft.WindowsDesktop.App 10.0.0"));
+			Assert.That(_launcher.Requests, Is.Empty);
+			Assert.That(supervisor.Snapshot().Single(s => s.PluginId == PluginId).State,
+				Is.EqualTo(PluginRuntimeState.Stopped));
+		});
+	}
+
+	[Test]
+	public async Task A_missing_runtime_is_reported_with_the_version_the_plugin_asked_for()
+	{
+		UseFrameworkDependentEntrypoint("Plugin.dll");
+		_muxerLocator.Selection = _muxerLocator.Selection! with
+		{
+			UnmetRequirement = DotnetFrameworkRequirement.ForNetCoreApp("11.0")
+		};
+
+		var result = await CreateSupervisor().Start(PluginId);
+
+		Assert.That(result.Message, Does.Contain("required version 11.0."));
+	}
+
+	[Test]
+	public async Task The_plugins_runtimeconfig_decides_which_frameworks_it_needs()
+	{
+		var versionDirectory = _catalog.Plugins[0].ActiveVersion!.VersionDirectory;
+		var createdDirectory = !Directory.Exists(versionDirectory);
+		Directory.CreateDirectory(versionDirectory);
+		var runtimeConfig = Path.Combine(versionDirectory, "AspNetPlugin.runtimeconfig.json");
+		await File.WriteAllTextAsync(runtimeConfig,
+			"""
+			{ "runtimeOptions": { "frameworks": [
+			  { "name": "Microsoft.NETCore.App", "version": "10.0.0" },
+			  { "name": "Microsoft.AspNetCore.App", "version": "10.0.0" } ] } }
+			""");
+		try
+		{
+			UseFrameworkDependentEntrypoint("AspNetPlugin.dll");
+
+			await CreateSupervisor().Start(PluginId);
+
+			Assert.That(_muxerLocator.Requests.Single().Select(requirement => requirement.Name),
+				Is.EqualTo(new[] { "Microsoft.NETCore.App", "Microsoft.AspNetCore.App" }));
+		}
+		finally
+		{
+			File.Delete(runtimeConfig);
+			if (createdDirectory)
+			{
+				Directory.Delete(versionDirectory);
+			}
+		}
+	}
+
+	[Test]
+	public async Task Without_a_runtimeconfig_the_manifest_dotnet_version_is_required()
+	{
+		UseFrameworkDependentEntrypoint("NoRuntimeConfigPlugin.dll");
+
+		await CreateSupervisor().Start(PluginId);
+
+		Assert.That(_muxerLocator.Requests.Single(),
+			Is.EqualTo(new[] { DotnetFrameworkRequirement.ForNetCoreApp("10.0") }));
 	}
 
 	[Test]

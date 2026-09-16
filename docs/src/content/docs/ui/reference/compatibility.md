@@ -37,9 +37,20 @@ profile's rule decides which of the two a new feature is. [Modifiers](/ui/compon
 |---|---|---|
 | `modifiers` (background, radius, border, accessibility text, `disabled`) | A property on any node | Ignores it and draws the node plainer. A disabled subtree still offers none of its own events, because the DSL stopped it declaring them, but the reader does not know the region absorbs the tile's press, so a deck tile's own flows still run there. |
 | `drag`, `drag-end`, `swipe`, `pinch`, `pinch-end` | Event names | Never sends a name it does not implement. |
+| `interaction` on `ui.slider` (`relative`) | A property | Ignores it and keeps the absolute drag: a press jumps the level to the pointer, and a tap sends `change`. |
 | `ui.modifier` (padding, opacity, clip, mask, frame), component version 1 | A type | Draws the node's explicit `fallback`; without one, none of the wrapped content (Macro Deck's renderer shows a faint placeholder box). No fallback is invented for you. |
 
 See [ADR 0064](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0064-components-are-a-registry-over-two-namespaces.md)
 for why the vocabulary is organized as a registry over the `ui.*`/`macrodeck.*` namespaces rather than one
 flat list, and [The UI model](/ui/concepts/ui-model/#model-version-negotiation) for where negotiation
 sits in a session's lifecycle.
+
+## Behaviour changes that moved no version
+
+These change what an existing plugin observes without a new model version. Each is a deliberate
+exception to the [compatibility policy](/policies/compatibility/), listed here so you can check your plugin
+against it.
+
+| Change | Hosts | What an existing plugin sees |
+|---|---|---|
+| A `link` with an external `http` or `https` URL is opened by the host in the default browser on every surface, whether or not it declares `activate` | Released after 3.0.0-beta.6 | A link that declares `activate` still receives it exactly once, and is now opened by the host outside the integration setup dialog too. A handler that opened the URL itself opens a second tab; remove that code. See [Links](/ui/concepts/events/#links). |

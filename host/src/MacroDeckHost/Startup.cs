@@ -404,6 +404,7 @@ public class Startup
 		services.AddSingleton<VariableRegistry>();
 		services.AddSingleton<IUserVariableStore, JsonUserVariableStore>();
 		services.AddSingleton<IVariableBindingStore, JsonVariableBindingStore>();
+		services.AddSingleton<IKnownAudioDeviceStore, JsonKnownAudioDeviceStore>();
 		services.AddSingleton<VariableBindingLookup>();
 		services.AddSingleton<VariableNameFactory>();
 		services.AddSingleton<VariableCatalogProviders>();
@@ -447,6 +448,7 @@ public class Startup
 		// survive across requests; everything backed by the database is scoped, like the rest of the
 		// app's repositories/services.
 		services.AddSingleton<IPluginLaunchTokenService, PluginLaunchTokenService>();
+		services.AddSingleton<IPluginTakeoverRegistry, PluginTakeoverRegistry>();
 		services.AddSingleton<IPluginSessionRegistry, PluginSessionRegistry>();
 		services.AddSingleton<IPluginSessionTokenIssuer, JwtPluginSessionTokenIssuer>();
 		// A singleton for the same reason as the registry above: a compatibility verdict, and the record
@@ -609,6 +611,7 @@ public class Startup
 		services.AddSingleton<IStoreArtifactDownloader, StoreArtifactDownloader>();
 		services.AddSingleton<IStoreUpdateState, StoreUpdateState>();
 		services.AddSingleton<IStoreUpdateDetector, StoreUpdateDetector>();
+		services.AddSingleton<IStoreRegistryRefreshTracker, StoreRegistryRefreshTracker>();
 		services.AddSingleton<IStoreRegistryRefresher, StoreRegistryRefresher>();
 		services.AddSingleton<IStoreInstallCoordinator, StoreInstallCoordinator>();
 		services.AddSingleton<IStoreInstallExecutor, StoreInstallExecutor>();
@@ -617,6 +620,7 @@ public class Startup
 		services.AddHostedService<StoreRegistryRefreshBackgroundService>();
 		services.AddHostedService<StoreOperationBackgroundService>();
 		services.AddHostedService<StoreOperationBroadcastBackgroundService>();
+		services.AddHostedService<StoreRegistryRefreshBroadcastBackgroundService>();
 
 		services.AddHttpClient(ConnectIdentityClient.HttpClientName, client => { })
 			.ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(15));

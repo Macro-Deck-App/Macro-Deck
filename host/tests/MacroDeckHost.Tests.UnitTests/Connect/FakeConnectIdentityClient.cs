@@ -28,6 +28,12 @@ internal sealed class FakeConnectIdentityClient : IConnectIdentityClient
 
 	public string? CreatorUsername { get; set; }
 
+	public string[]? Roles { get; set; }
+
+	public bool SigningKeysUnavailable { get; set; }
+
+	public TaskCompletionSource? SigningKeysGate { get; set; }
+
 	public Queue<Func<ConnectTokenResponse>> Results { get; } = new();
 
 	public Func<Task>? BeforeRefresh { get; set; }
@@ -207,6 +213,23 @@ internal sealed class FakeConnectIdentityClient : IConnectIdentityClient
 		return Task.CompletedTask;
 	}
 
+	public async Task<string?> FetchSigningKeys(CancellationToken cancellationToken)
+	{
+		if (SigningKeysGate is { } gate)
+		{
+			try
+			{
+				await gate.Task.WaitAsync(cancellationToken);
+			}
+			catch (OperationCanceledException)
+			{
+				return null;
+			}
+		}
+
+		return SigningKeysUnavailable ? null : ConnectJwt.Jwks(ConnectJwt.IssuerKey);
+	}
+
 	public static Func<ConnectTokenResponse> Unreachable()
 		=> () => throw new ConnectAuthTransientException("Macro Deck Connect could not be reached.",
 			new HttpRequestException("connection refused"));
@@ -271,7 +294,9 @@ internal sealed class FakeConnectIdentityClient : IConnectIdentityClient
 				Picture,
 				CreatorUsername,
 				null,
-				now + TimeSpan.FromHours(1)),
+				now + TimeSpan.FromHours(1),
+				roles: Roles,
+				signingKey: ConnectJwt.IssuerKey),
 			_accessTokenLifetime);
 	}
 

@@ -32,6 +32,7 @@ internal static class SliderWidgetConfigView
 		// UiBinding<UiIconReference> at the generic level.
 		var icon = new UiState<UiIconReference>(ReadIcon(data)!);
 		var orientation = new UiState<string>(WidgetConfigJson.ReadString(data, "orientation") ?? "horizontal");
+		var interaction = new UiState<string>(WidgetConfigJson.ReadString(data, "interaction") ?? "absolute");
 		var color = new UiState<string>(WidgetConfigJson.ReadString(data, "color") ?? string.Empty);
 		var labelColor = new UiState<string>(WidgetConfigJson.ReadString(data, "labelColor") ?? string.Empty);
 		var backgroundColor =
@@ -42,6 +43,7 @@ internal static class SliderWidgetConfigView
 		var borderColor = new UiState<string>(WidgetConfigJson.ReadString(border, "color") ?? string.Empty);
 
 		var valueVariable = new UiState<string>(WidgetConfigJson.ReadString(data, "valueVariable") ?? string.Empty);
+		var customStep = new UiState<bool>(WidgetConfigJson.ReadBool(data, "customStep") ?? false);
 		var min = new UiState<double>(WidgetConfigJson.ReadDouble(data, "min") ?? 0);
 		var max = new UiState<double>(WidgetConfigJson.ReadDouble(data, "max") ?? 100);
 		var step = new UiState<double>(WidgetConfigJson.ReadDouble(data, "step") ?? 1);
@@ -69,6 +71,31 @@ internal static class SliderWidgetConfigView
 						VariableTypes = UiValue.Of<IReadOnlyList<string>>(["numeric"]),
 						WritableOnly = true,
 					},
+					new UiWhen
+					{
+						Key = "customStepDeclared",
+						Condition = () => Picked(variables, widgetId, valueVariable.Value)?.Step is not null,
+						Content = () => new UiBooleanInput
+						{
+							Key = "customStep",
+							Label = AppStrings.Widgets.Slider.CustomStep(),
+							Description = AppStrings.Widgets.Slider.CustomStepDescription(),
+							// Switching on starts from the variable's own grid, so a fine-grained variable cannot collapse.
+							Binding = Bind.Custom(() => customStep.Value,
+								value =>
+								{
+									if (value &&
+										!customStep.Peek() &&
+										Picked(variables, widgetId, valueVariable.Peek())?.Step is { } declared &&
+										double.IsFinite(declared))
+									{
+										step.Value = declared;
+									}
+
+									customStep.Value = value;
+								}),
+						},
+					},
 					// One row, the way the original binding form laid the three bounds out: each is a
 					// short number and a column apiece would push the region three rows taller.
 					new UiConfigStack
@@ -77,7 +104,7 @@ internal static class SliderWidgetConfigView
 						Direction = "horizontal",
 						Children =
 						[
-							WhenUnbound("min",
+							WhenNotDeclared("min",
 								variables,
 								widgetId,
 								valueVariable,
@@ -88,7 +115,7 @@ internal static class SliderWidgetConfigView
 									Label = AppStrings.Widgets.Slider.Minimum(),
 									Binding = Bind.To(min),
 								}),
-							WhenUnbound("max",
+							WhenNotDeclared("max",
 								variables,
 								widgetId,
 								valueVariable,
@@ -99,7 +126,7 @@ internal static class SliderWidgetConfigView
 									Label = AppStrings.Widgets.Slider.Maximum(),
 									Binding = Bind.To(max),
 								}),
-							WhenUnbound("step",
+							WhenNotDeclared("step",
 								variables,
 								widgetId,
 								valueVariable,
@@ -109,7 +136,8 @@ internal static class SliderWidgetConfigView
 									Key = "step",
 									Label = AppStrings.Widgets.Slider.Step(),
 									Binding = Bind.To(step),
-								}),
+								},
+								overridden: () => customStep.Value),
 						],
 					},
 					new UiHeading
@@ -140,6 +168,17 @@ internal static class SliderWidgetConfigView
 						Options = UiValue.Of<IReadOnlyList<UiOption>>([
 							UiOption.Of("horizontal", AppStrings.Widgets.Slider.Horizontal()),
 							UiOption.Of("vertical", AppStrings.Widgets.Slider.Vertical()),
+						]),
+					},
+					new UiChoiceInput
+					{
+						Key = "interaction",
+						Label = AppStrings.Widgets.Slider.InteractionMode(),
+						Description = AppStrings.Widgets.Slider.InteractionModeDescription(),
+						Binding = Bind.To(interaction),
+						Options = UiValue.Of<IReadOnlyList<UiOption>>([
+							UiOption.Of("absolute", AppStrings.Widgets.Slider.InteractionAbsolute()),
+							UiOption.Of("relative", AppStrings.Widgets.Slider.InteractionRelative()),
 						]),
 					},
 					// All three reset to unset rather than to a literal hex (issue #896): each one's real
@@ -191,9 +230,9 @@ internal static class SliderWidgetConfigView
 
 	/// <summary>
 	/// The field is in the tree while no variable is picked, since the default <c>slider_value</c> declares no
-	/// range, and while the picked variable declares no bound of its own for it -
-	/// the schema's own per-field rule, that <c>min</c>/<c>max</c>/<c>step</c> are used only where the bound
-	/// variable declares no such bound itself.
+	/// range, while the picked variable declares no bound of its own for it, and whenever
+	/// <paramref name="overridden" /> holds - the schema's own per-field rule, that <c>min</c>/<c>max</c>/<c>step</c>
+	/// are used only where the bound variable declares no such bound itself, unless the widget opts out.
 	///
 	/// <para>
 	/// Structural rather than <see cref="UiVisibleWhen" />, because this is not a question about another
@@ -204,31 +243,36 @@ internal static class SliderWidgetConfigView
 	/// node says what is actually meant.
 	/// </para>
 	/// </summary>
-	private static UiWhen WhenUnbound(
+	private static UiWhen WhenNotDeclared(
 		string key,
 		VariableRegistry variables,
 		Guid? widgetId,
 		UiState<string> valueVariable,
 		Func<VariableEntity, double?> ownBound,
-		Func<UiElement> content)
+		Func<UiElement> content,
+		Func<bool>? overridden = null)
 		=> new()
 		{
 			Key = $"{key}Bound",
 			Condition = () =>
 			{
-				var name = valueVariable.Value;
-
-				if (string.IsNullOrEmpty(name))
+				if (overridden?.Invoke() == true)
 				{
 					return true;
 				}
 
-				var entity = SliderDefaultVariable.Find(variables, widgetId, name);
+				if (string.IsNullOrEmpty(valueVariable.Value))
+				{
+					return true;
+				}
 
-				return entity is not null && ownBound(entity) is null;
+				return Picked(variables, widgetId, valueVariable.Value) is { } entity && ownBound(entity) is null;
 			},
 			Content = content,
 		};
+
+	private static VariableEntity? Picked(VariableRegistry variables, Guid? widgetId, string name)
+		=> string.IsNullOrEmpty(name) ? null : SliderDefaultVariable.Find(variables, widgetId, name);
 
 	private static UiIconReference? ReadIcon(JsonElement data)
 	{

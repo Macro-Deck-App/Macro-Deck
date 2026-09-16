@@ -35,10 +35,17 @@ internal static class ProcessRunner
 		public bool Succeeded => ExitCode == 0;
 	}
 
-	public static async Task<ProcessResult> RunWithResultAsync(
+	public static Task<ProcessResult> RunWithResultAsync(
 		string fileName,
 		IReadOnlyList<string> arguments,
 		CancellationToken cancellationToken = default)
+		=> RunWithResultAsync(fileName, arguments, null, cancellationToken);
+
+	public static async Task<ProcessResult> RunWithResultAsync(
+		string fileName,
+		IReadOnlyList<string> arguments,
+		IReadOnlyDictionary<string, string?>? environment,
+		CancellationToken cancellationToken)
 	{
 		var startInfo = new ProcessStartInfo(fileName)
 		{
@@ -53,13 +60,41 @@ internal static class ProcessRunner
 			startInfo.ArgumentList.Add(argument);
 		}
 
+		foreach (var (key, value) in environment ?? new Dictionary<string, string?>())
+		{
+			if (value is null)
+			{
+				startInfo.Environment.Remove(key);
+			}
+			else
+			{
+				startInfo.Environment[key] = value;
+			}
+		}
+
 		using var process = Process.Start(startInfo) ??
 			throw new InvalidOperationException($"Failed to start '{fileName}'.");
 
 		var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
 		var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
-		await Task.WhenAll(outputTask, errorTask);
-		await process.WaitForExitAsync(cancellationToken);
+		try
+		{
+			await Task.WhenAll(outputTask, errorTask);
+			await process.WaitForExitAsync(cancellationToken);
+		}
+		catch (OperationCanceledException)
+		{
+			// A hung child must not outlive the caller that gave up on it.
+			try
+			{
+				process.Kill(entireProcessTree: true);
+			}
+			catch (Exception ex) when (ex is InvalidOperationException or global::System.ComponentModel.Win32Exception)
+			{
+			}
+
+			throw;
+		}
 
 		return new ProcessResult(process.ExitCode, outputTask.Result, errorTask.Result);
 	}

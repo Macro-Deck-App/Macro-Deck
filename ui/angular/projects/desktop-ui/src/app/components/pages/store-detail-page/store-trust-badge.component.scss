@@ -9,3 +9,13 @@
     background-color: var(--color-success);
   }
 }
+
+.takeover-badge {
+  @include ds.chip;
+  color: var(--color-warning);
+  background-color: var(--color-warning-muted);
+
+  .icon {
+    background-color: var(--color-warning);
+  }
+}

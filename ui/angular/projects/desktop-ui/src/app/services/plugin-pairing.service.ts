@@ -83,8 +83,13 @@ export class PluginPairingService {
     }
   }
 
-  async approve(requestId: string, replaceExistingRegistration: boolean): Promise<boolean> {
-    const response = await this.api.approvePluginPairingRequest(requestId, { replaceExistingRegistration });
+  async approve(
+    requestId: string,
+    replaceExistingRegistration: boolean,
+    takeOverInstalledPlugin = false,
+  ): Promise<boolean> {
+    const response = await this.api.approvePluginPairingRequest(
+      requestId, { replaceExistingRegistration, takeOverInstalledPlugin });
     if (response.success) {
       this.removePending(requestId);
     }

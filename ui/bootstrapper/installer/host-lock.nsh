@@ -6,7 +6,7 @@
 ; loop against real processes. installer_config.rs asserts that independence.
 ;
 ; Results are globals rather than stack values: these macros nest, and the Exch juggling a stack
-; result needs is exactly what regresses unnoticed. Callers must not pass $0-$2 as arguments;
+; result needs is exactly what regresses unnoticed. Callers must not pass $0-$3 as arguments;
 ; they are scratch and are restored.
 
 !ifndef MACRODECK_HOST_LOCK_NSH
@@ -24,10 +24,8 @@ Var MacroDeckStopElapsed
 !define MACRODECK_STOP_LOCKED 2
 !define MACRODECK_STOP_KILL_REFUSED 3
 
-; Sets $MacroDeckLockedFile to the first top-level entry of Directory that cannot be opened for
-; writing, or "" when every one of them can. Top level only: the host directory also carries the
-; Angular wwwroot tree, thousands of files that are never locked. A directory that does not exist
-; - a first install - counts as writable.
+; Top level only: wwwroot holds thousands of files that are never locked. The runtime subtree,
+; which plugin dotnet processes map, is walked by MacroDeckProbeTreeWritable instead.
 !macro MacroDeckProbeDirectoryWritable Directory
 	Push $0
 	Push $1
@@ -56,6 +54,53 @@ Var MacroDeckStopElapsed
 		FindClose $0
 	${EndIf}
 
+	Pop $2
+	Pop $1
+	Pop $0
+!macroend
+
+; Walks Directory\Subdirectory depth first; $MacroDeckLockedFile gets the first locked file relative
+; to Directory. Pending directories sit on the NSIS stack above a sentinel, as NSIS has no recursion.
+!macro MacroDeckProbeTreeWritable Directory Subdirectory
+	Push $0
+	Push $1
+	Push $2
+	Push $3
+
+	StrCpy $MacroDeckLockedFile ""
+	${If} ${FileExists} "${Directory}\${Subdirectory}\*.*"
+		Push "|MacroDeckProbeEnd|"
+		Push "${Subdirectory}"
+		${Do}
+			Pop $3
+			${If} $3 == "|MacroDeckProbeEnd|"
+				${ExitDo}
+			${EndIf}
+			${If} $MacroDeckLockedFile != ""
+				${Continue}
+			${EndIf}
+			FindFirst $0 $1 "${Directory}\$3\*"
+			${DoWhile} $1 != ""
+				${If} $1 != "."
+				${AndIf} $1 != ".."
+					${If} ${FileExists} "${Directory}\$3\$1\*.*"
+						Push "$3\$1"
+					${Else}
+						FileOpen $2 "${Directory}\$3\$1" a
+						${If} $2 == ""
+							StrCpy $MacroDeckLockedFile "$3\$1"
+							${ExitDo}
+						${EndIf}
+						FileClose $2
+					${EndIf}
+				${EndIf}
+				FindNext $0 $1
+			${Loop}
+			FindClose $0
+		${Loop}
+	${EndIf}
+
+	Pop $3
 	Pop $2
 	Pop $1
 	Pop $0
@@ -105,6 +150,9 @@ Var MacroDeckStopElapsed
 			StrCpy $MacroDeckStopResult ${MACRODECK_STOP_RUNNING}
 		${Else}
 			!insertmacro MacroDeckProbeDirectoryWritable "${Directory}"
+			${If} $MacroDeckLockedFile == ""
+				!insertmacro MacroDeckProbeTreeWritable "${Directory}" "runtime"
+			${EndIf}
 			${If} $MacroDeckLockedFile == ""
 				StrCpy $MacroDeckStopResult ${MACRODECK_STOP_OK}
 				${ExitDo}

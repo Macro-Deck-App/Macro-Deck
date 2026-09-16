@@ -48,8 +48,10 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			SetLabel(),
 			SetBackgroundColor(),
 			SetLabelColor(),
+			SetAccentColor(),
 			SetIcon(),
 			SetIconDisplay(),
+			SetIconColor(),
 			SetFont(),
 			SetBorder(),
 			new SetButtonStateActionDefinition(() => _widgets),
@@ -78,6 +80,7 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 		=> new("set-label",
 			AppStrings.Integrations.Widgets.Actions.SetLabelName(),
 			AppStrings.Integrations.Widgets.Actions.SetLabelDescription(),
+			WidgetAppearanceProperty.Label,
 			[
 				ActionParameter.MultilineText("label",
 					label: AppStrings.Integrations.Widgets.Actions.LabelLabel(),
@@ -93,6 +96,7 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 		=> new("set-background-color",
 			AppStrings.Integrations.Widgets.Actions.SetBackgroundColorName(),
 			AppStrings.Integrations.Widgets.Actions.SetBackgroundColorDescription(),
+			WidgetAppearanceProperty.BackgroundColor,
 			[
 				ActionParameter.Color("color",
 					label: AppStrings.Integrations.Widgets.Actions.ColorLabel(),
@@ -113,6 +117,7 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 		=> new("set-label-color",
 			AppStrings.Integrations.Widgets.Actions.SetLabelColorName(),
 			AppStrings.Integrations.Widgets.Actions.SetLabelColorDescription(),
+			WidgetAppearanceProperty.LabelColor,
 			[
 				ActionParameter.Color("color",
 					label: AppStrings.Integrations.Widgets.Actions.ColorLabel(),
@@ -129,10 +134,53 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 				? [WidgetAppearanceProperty.LabelColor]
 				: []);
 
+	private WidgetAppearanceActionDefinition SetAccentColor()
+		=> new("set-accent-color",
+			AppStrings.Integrations.Widgets.Actions.SetAccentColorName(),
+			AppStrings.Integrations.Widgets.Actions.SetAccentColorDescription(),
+			WidgetAppearanceProperty.AccentColor,
+			[
+				ActionParameter.Color("color",
+					label: AppStrings.Integrations.Widgets.Actions.ColorLabel(),
+					supportsReset: true)
+			],
+			() => _widgets,
+			context => new WidgetAppearancePatch
+			{
+				AccentColor = WidgetActionParameters.IsReset(context, "color")
+					? null
+					: WidgetActionParameters.ReadOptional(context, "color")
+			},
+			context => WidgetActionParameters.IsReset(context, "color")
+				? [WidgetAppearanceProperty.AccentColor]
+				: []);
+
+	private WidgetAppearanceActionDefinition SetIconColor()
+		=> new("set-icon-color",
+			AppStrings.Integrations.Widgets.Actions.SetIconColorName(),
+			AppStrings.Integrations.Widgets.Actions.SetIconColorDescription(),
+			WidgetAppearanceProperty.IconColor,
+			[
+				ActionParameter.Color("color",
+					label: AppStrings.Integrations.Widgets.Actions.ColorLabel(),
+					supportsReset: true)
+			],
+			() => _widgets,
+			context => new WidgetAppearancePatch
+			{
+				IconColor = WidgetActionParameters.IsReset(context, "color")
+					? null
+					: WidgetActionParameters.ReadOptional(context, "color")
+			},
+			context => WidgetActionParameters.IsReset(context, "color")
+				? [WidgetAppearanceProperty.IconColor]
+				: []);
+
 	private WidgetAppearanceActionDefinition SetIcon()
 		=> new("set-icon",
 			AppStrings.Integrations.Widgets.Actions.SetIconName(),
 			AppStrings.Integrations.Widgets.Actions.SetIconDescription(),
+			WidgetAppearanceProperty.Icon,
 			[
 				ActionParameter.Icon("iconId",
 					label: AppStrings.Integrations.Widgets.Actions.IconLabel(),
@@ -144,13 +192,13 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 				widgets.GetWidgets().FirstOrDefault(w => w.Id == widgetId) is { HasActiveIconProvider: true }
 					? ActionResult.Failed(ActionErrorCodes.PermissionDenied,
 						AppStrings.Integrations.Widgets.Errors.IconControlledByProvider())
-					: ActionResult.Failed(ActionErrorCodes.NotFound,
-						AppStrings.Integrations.Widgets.Errors.WidgetNotFound(widgetId: widgetId)));
+					: null);
 
 	private WidgetAppearanceActionDefinition SetIconDisplay()
 		=> new("set-icon-display",
 			AppStrings.Integrations.Widgets.Actions.SetIconDisplayName(),
 			AppStrings.Integrations.Widgets.Actions.SetIconDisplayDescription(),
+			WidgetAppearanceProperty.IconDisplay,
 			[
 				ActionParameter.Choice("iconFit",
 					_iconFits,
@@ -213,6 +261,7 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 		=> new("set-font",
 			AppStrings.Integrations.Widgets.Actions.SetFontName(),
 			AppStrings.Integrations.Widgets.Actions.SetFontDescription(),
+			WidgetAppearanceProperty.Font,
 			[
 				ActionParameter.Autocomplete("fontFaceId",
 					label: AppStrings.Integrations.Widgets.Actions.FontLabel(),
@@ -261,6 +310,7 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 		=> new("set-border",
 			AppStrings.Integrations.Widgets.Actions.SetBorderName(),
 			AppStrings.Integrations.Widgets.Actions.SetBorderDescription(),
+			WidgetAppearanceProperty.Border,
 			[
 				ActionParameter.Choice("style",
 					[

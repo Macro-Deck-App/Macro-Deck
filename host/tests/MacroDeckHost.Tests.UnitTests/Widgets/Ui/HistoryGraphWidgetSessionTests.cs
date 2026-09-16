@@ -1,12 +1,16 @@
 using System.Collections.Concurrent;
 using System.Globalization;
+using System.Text.Json;
 using MacroDeck.Ui.Model.Events;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Patches;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
 using MacroDeck.Ui.Testing;
+using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Domain.Entities;
+using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using MacroDeckHost.Widgets.HistoryGraph;
 using static MacroDeckHost.Tests.UnitTests.Widgets.Ui.HistoryGraphTestSupport;
@@ -382,6 +386,53 @@ public class HistoryGraphWidgetSessionTests
 		variables.Upsert(existing);
 	}
 
+	[Test]
+	public async Task A_colour_only_save_repaints_the_chart_in_place_and_any_other_save_asks_for_a_rebuild()
+	{
+		await using var fixture = new Fixture(_config);
+
+		var recoloured = fixture.Signals.RaiseDataChanged(SavedGraph(fixture, accentColor: "#ef4444"));
+		var redColour = ChartColor(fixture);
+
+		var reset = fixture.Signals.RaiseDataChanged(SavedGraph(fixture, accentColor: null));
+		var themedColour = ChartColor(fixture);
+
+		var retitled = fixture.Signals.RaiseDataChanged(SavedGraph(fixture, accentColor: null, title: "GPU Load"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(recoloured, Is.True, "a colour-only save must not reopen the card");
+			Assert.That(redColour, Is.EqualTo("#ef4444"));
+			Assert.That(reset, Is.True);
+			Assert.That(themedColour, Is.Null, "a reset goes back to the reader's theme accent");
+			Assert.That(retitled, Is.False, "anything but the colour still rebuilds the card");
+		});
+	}
+
+	private static WidgetEntity SavedGraph(Fixture fixture, string? accentColor, string title = "CPU Load")
+		=> new()
+		{
+			Id = fixture.WidgetId,
+			Type = WidgetTypeIds.HistoryGraph,
+			Data = JsonSerializer.Serialize(new
+			{
+				valueVariable = Metric,
+				title,
+				subtitle = "{{ vars.system_cpu_name }}",
+				maxValue = 100,
+				accentColor,
+			})
+		};
+
+	private static string? ChartColor(Fixture fixture)
+	{
+		var chart = Nodes(fixture.Session.BuildTree().Root).Single(node => node.Id == _chartNodeId);
+
+		return chart.Properties.TryGetValue("color", out var color) ? color.GetString() : null;
+	}
+
+	private static IEnumerable<UiNode> Nodes(UiNode node) => node.Children.SelectMany(Nodes).Prepend(node);
+
 	private sealed class Fixture : IAsyncDisposable
 	{
 		public Fixture(object data, IVariableHistoryWindow? window = null, VariableRegistry? registry = null)
@@ -393,10 +444,12 @@ public class HistoryGraphWidgetSessionTests
 			Variables = new VariableChangeNotifier();
 
 			var state = new UiState<HistoryGraphViewState>(resolver.Resolve(sampled.Values));
+			var accent = new UiState<string?>(config.AccentColor);
 			var view = new UiView(new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
-				HistoryGraphWidgetView.Build(state, config));
+				HistoryGraphWidgetView.Build(state, config, accentColor: accent));
 
 			Session = new HistoryGraphWidgetSession(view, state, resolver, sampled, Variables, config);
+			Session.FollowAccentColor(Signals, WidgetId.ToString(), accent);
 
 			// The snapshot every client starts from; only what follows it is a patch.
 			_ = Session.BuildTree();
@@ -412,6 +465,10 @@ public class HistoryGraphWidgetSessionTests
 		private readonly StubWindow? _stub;
 
 		public VariableChangeNotifier Variables { get; }
+
+		public WidgetRenderSignals Signals { get; } = new();
+
+		public Guid WidgetId { get; } = Guid.NewGuid();
 
 		public HistoryGraphWidgetSession Session { get; }
 

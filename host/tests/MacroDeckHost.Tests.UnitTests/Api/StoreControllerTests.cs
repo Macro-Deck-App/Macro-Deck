@@ -50,8 +50,18 @@ internal sealed class StoreControllerTests
 			new StoreOperationCancellation(),
 			new StoreInstallConsent());
 
-		_controller = new StoreController(_catalogQuery,
-			new FakeStoreRegistryRefresher(),
+		_uninstallService = new FakeStoreUninstallService();
+		_controller = CreateController(new FakeStoreRegistryRefresher(),
+			new StoreRegistryRefreshTracker(TimeProvider.System));
+	}
+
+	[TearDown]
+	public void TearDown() => _paths.Cleanup();
+
+	private StoreController CreateController(IStoreRegistryRefresher refresher,
+		IStoreRegistryRefreshTracker refreshTracker) =>
+		new(_catalogQuery,
+			refresher,
 			_installCoordinator,
 			_tracker,
 			new FakeStoreUpdateDetector(),
@@ -61,17 +71,60 @@ internal sealed class StoreControllerTests
 			_paths,
 			StoreRegistryOptions.Default,
 			new RecordingMediator(),
-			_uninstallService = new FakeStoreUninstallService())
+			_uninstallService,
+			refreshTracker)
 		{
 			ControllerContext = new ControllerContext
 			{
 				HttpContext = new Microsoft.AspNetCore.Http.DefaultHttpContext()
 			}
 		};
-	}
 
-	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	[Test]
+	public async Task A_refresh_requested_while_one_runs_joins_it_and_every_session_sees_the_same_run()
+	{
+		Directory.CreateDirectory(_paths.StoreRegistryDirectory);
+		Directory.CreateDirectory(_paths.StoreRegistryStagingDirectory);
+		var fixture = new StoreRegistryFixture { SignedAt = DateTimeOffset.UtcNow };
+		fixture.AddPackage("plugin", PluginId, "1.0.0", name: "Hue Bridge");
+		fixture.ManifestHold = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		var refreshTracker = new StoreRegistryRefreshTracker(TimeProvider.System);
+		using var lifetime = new StubHostApplicationLifetime();
+		using var refresher = new StoreRegistryRefresher(fixture.Build(),
+			StoreRegistryOptions.Default with
+			{
+				BaseUrl = new Uri(StoreRegistryFixture.BaseUrl),
+				RootPublicKeyOverride = MacroDeck.Signing.TestSupport.TestPki.Root.PublicKey,
+				UpdateRaceRetryDelays = []
+			},
+			new JsonStoreRegistryStateStore(_paths, Serilog.Core.Logger.None),
+			new StoreRegistryReader(Serilog.Core.Logger.None),
+			_catalog,
+			_paths,
+			TimeProvider.System,
+			refreshTracker,
+			new RecordingMediator(),
+			lifetime,
+			Serilog.Core.Logger.None);
+		var controller = CreateController(refresher, refreshTracker);
+
+		var started = controller.RefreshRegistry(CancellationToken.None);
+		await fixture.ManifestRequested.Task.WaitAsync(TimeSpan.FromSeconds(10));
+		var joined = controller.RefreshRegistry(CancellationToken.None);
+		var status = await controller.GetStatus();
+		fixture.ManifestHold.SetResult();
+		var responses = await Task.WhenAll(started, joined);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(fixture.ManifestRequests, Is.EqualTo(1));
+			Assert.That(status.RefreshRun!.State, Is.EqualTo(StoreRegistryRefreshRunState.Running));
+			Assert.That(status.Registry.Refreshing, Is.True);
+			Assert.That(responses.Select(response => response.RefreshRun!.Id), Is.All.EqualTo(status.RefreshRun.Id));
+			Assert.That(responses.Select(response => response.Success), Is.All.True, responses[0].Error?.Message.ToString());
+			Assert.That(responses[0].RefreshRun!.State, Is.EqualTo(StoreRegistryRefreshRunState.Succeeded));
+		});
+	}
 
 	[Test]
 	public void An_uninitialised_registry_answers_registry_unavailable_not_an_empty_catalog()
@@ -268,6 +321,119 @@ internal sealed class StoreControllerTests
 		});
 	}
 
+	[Test]
+	public async Task A_screenshot_requested_with_its_digest_may_be_cached_for_good_and_any_other_request_revalidates()
+	{
+		var digest = SeedPluginWithScreenshots(Png(1)).Single();
+
+		var named = (FileContentResult)await _controller.GetScreenshot(StoreExtensionKind.Plugin,
+			PluginId,
+			0,
+			CancellationToken.None,
+			v: digest.ToUpperInvariant());
+		var namedPolicy = _controller.Response.Headers.CacheControl.ToString();
+		var unnamed = (FileContentResult)await _controller.GetScreenshot(StoreExtensionKind.Plugin,
+			PluginId,
+			0,
+			CancellationToken.None);
+		var unnamedPolicy = _controller.Response.Headers.CacheControl.ToString();
+		await _controller.GetScreenshot(StoreExtensionKind.Plugin,
+			PluginId,
+			0,
+			CancellationToken.None,
+			v: new string('0', 64));
+		var stalePolicy = _controller.Response.Headers.CacheControl.ToString();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(namedPolicy, Does.Contain("immutable"));
+			Assert.That(unnamedPolicy, Is.EqualTo("no-cache"));
+			Assert.That(stalePolicy, Is.EqualTo("no-cache"));
+			Assert.That(named.EntityTag?.Tag.ToString(), Is.EqualTo($"\"{digest}\""));
+			Assert.That(unnamed.EntityTag?.Tag.ToString(), Is.EqualTo($"\"{digest}\""));
+		});
+	}
+
+	[Test]
+	public async Task After_a_listing_reorders_its_screenshots_every_position_serves_and_names_the_current_image()
+	{
+		var card = Png(1);
+		var sleeping = Png(2);
+		var window = Png(3);
+		SeedPluginWithScreenshots(card, sleeping);
+		var current = SeedPluginWithScreenshots(window, card, sleeping);
+
+		var first = (FileContentResult)await _controller.GetScreenshot(StoreExtensionKind.Plugin,
+			PluginId,
+			0,
+			CancellationToken.None);
+		var detail = _controller.GetExtension(StoreExtensionKind.Plugin, PluginId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(first.FileContents, Is.EqualTo(window));
+			Assert.That(detail.Extension!.Screenshots.Select(screenshot => screenshot.Sha256), Is.EqualTo(current));
+		});
+	}
+
+	[Test]
+	public void The_catalog_names_the_digest_of_the_icon_it_currently_serves()
+	{
+		var svg = global::System.Text.Encoding.UTF8.GetBytes(
+			"<?xml version=\"1.0\"?><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1 1\"></svg>");
+		SeedPluginWithIcon(svg);
+
+		var detail = _controller.GetExtension(StoreExtensionKind.Plugin, PluginId);
+
+		Assert.That(detail.Extension!.IconSha256,
+			Is.EqualTo(Convert.ToHexStringLower(global::System.Security.Cryptography.SHA256.HashData(svg))));
+	}
+
+	private static byte[] Png(byte marker) => [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, marker];
+
+	private string[] SeedPluginWithScreenshots(params byte[][] screenshots)
+	{
+		var digests = screenshots
+			.Select(bytes => Convert.ToHexStringLower(global::System.Security.Cryptography.SHA256.HashData(bytes)))
+			.ToArray();
+		for (var index = 0; index < screenshots.Length; index++)
+		{
+			File.WriteAllBytes(Path.Combine(_paths.StoreMediaDirectory, digests[index]), screenshots[index]);
+		}
+
+		_catalog.Swap(new StoreCatalogSnapshot
+		{
+			Sequence = 1,
+			Entries =
+			[
+				new StoreCatalogEntry
+				{
+					Kind = StoreExtensionKind.Plugin,
+					Id = PluginId,
+					Name = "Hue Bridge",
+					LatestVersion = "1.0.0",
+					LatestRelease = new StoreReleaseManifest
+					{
+						Version = "1.0.0",
+						ArtifactUrl = new Uri("https://cdn.example/hue.macroDeckPlugin"),
+						Sha256 = new string('a', 64),
+						Size = 16,
+						Screenshots = screenshots
+							.Select((bytes, index) => new StoreMediaAsset
+							{
+								Url = new Uri($"https://cdn.example/{digests[index]}.png"),
+								Sha256 = digests[index],
+								Size = bytes.LongLength,
+								ContentType = "image/png"
+							})
+							.ToList()
+					}
+				}
+			]
+		});
+		return digests;
+	}
+
 	private void SeedPluginWithIcon(byte[] iconBytes)
 	{
 		var digest = Convert.ToHexStringLower(global::System.Security.Cryptography.SHA256.HashData(iconBytes));
@@ -363,6 +529,10 @@ internal sealed class FakeStoreRegistryRefresher : IStoreRegistryRefresher
 	public StoreRegistryStatus Status => StoreRegistryStatus.Unavailable;
 
 	public Task<Result<RegistryRefreshError>> Refresh(CancellationToken cancellationToken = default) =>
+		throw new NotSupportedException();
+
+	public Task<Result<RegistryRefreshError>> Refresh(StoreRegistryRefreshTrigger trigger,
+		CancellationToken cancellationToken = default) =>
 		throw new NotSupportedException();
 
 	public Task LoadCachedRegistry(CancellationToken cancellationToken = default) => Task.CompletedTask;

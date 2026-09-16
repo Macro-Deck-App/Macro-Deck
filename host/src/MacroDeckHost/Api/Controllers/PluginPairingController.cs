@@ -98,7 +98,9 @@ public class PluginPairingController : ControllerBase
 
 		var record = result.Record!;
 		await _mediator.Publish(new PluginPairingRequestsChangedNotification(), cancellationToken);
-		await _mediator.Publish(new PluginPairingRequestedNotification(record.PluginId, record.DisplayName),
+		await _mediator.Publish(new PluginPairingRequestedNotification(record.PluginId,
+				record.DisplayName,
+				result.TakesOverInstalledPlugin),
 			cancellationToken);
 
 		return PluginProtocolHttp.Json(new PluginPairingResponse

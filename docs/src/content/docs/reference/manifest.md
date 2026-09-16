@@ -26,7 +26,7 @@ What `macrodeck-plugin new` generates:
   },
   "publisher": { "name": "Example Publisher" },
   "license": "MIT",
-  "compatibility": { "macroDeck": ">=3.0.0" },
+  "compatibility": { "macroDeck": ">=3.0.0-0" },
   "repository": "https://github.com/example/hue-lights",
   "homepage": "https://example.com/hue-lights"
 }
@@ -127,6 +127,37 @@ The `runtimes/<rid>/` layout that `build` and `pack` expect is described once, i
 [Staging layout](/cli/build/#staging-layout). `build` and `validate --level package` judge it with one
 shared rule (`entrypoint-layout-invalid`). `build` treats the entrypoint keys as the list of platforms to
 build (or one with `--rid`) and fails when a declared entrypoint is missing from the output.
+
+### Runtime
+
+**Prefer `FrameworkDependent` with `dotnetVersion` `"10.0"`** for a .NET plugin; it is what
+[`new`](/cli/new/#macrodeck-buildjson) generates. Packaged Macro Deck ships a .NET runtime
+(`Microsoft.NETCore.App` and `Microsoft.AspNetCore.App` 10.0, the patch its own release was built and
+tested on) and runs the host itself on it, so a framework-dependent plugin carries no runtime: about
+0.7 MB compressed per platform for the template plugin, against about 43 MB self-contained.
+
+The host launches a framework-dependent entrypoint with `dotnet <executable>` and picks the runtime as
+follows:
+
+1. The bundled runtime, when it has every framework the plugin's `<Name>.runtimeconfig.json` (beside the
+   `.dll`) asks for, under that file's roll-forward policy. Without a readable runtimeconfig the
+   requirement is `Microsoft.NETCore.App` at `dotnetVersion`.
+2. Otherwise a system-installed `dotnet` that has them, for example for `Microsoft.WindowsDesktop.App` or
+   another .NET major. Installed runtimes are read once per host process; restart Macro Deck after
+   installing one.
+3. A system `dotnet` whose runtimes could not be listed is launched anyway; when nothing satisfies the
+   requirement the plugin stays stopped (see
+   [troubleshooting](/guides/troubleshooting/#a-framework-dependent-plugin-reports-a-missing-runtime)).
+
+Later Macro Deck releases add a new .NET major beside the existing one instead of replacing it, and do
+not roll a plugin forward onto a major it did not ask for.
+
+**Stay self-contained** (omit `runtime`) when the plugin needs a runtime Macro Deck does not ship, pins a
+specific runtime patch, or is not .NET at all. Self-contained entrypoints are launched directly.
+
+An `osx-x64` framework-dependent entrypoint that an `osx-arm64` host falls back to (see
+[below](#runtime-identifier-resolution)) runs on the bundled arm64 runtime: managed code works, x64-only
+native libraries do not load. Declare `osx-arm64` for a framework-dependent plugin.
 
 ### Runtime identifier resolution
 
@@ -250,7 +281,7 @@ see [signature](#signature), [Publishing to the Store](/guides/publishing/) and
 "compatibility": {
   "sdk": ">=1.0.0,<2.0.0",
   "protocol": { "minimum": 1, "maximum": 1 },
-  "macroDeck": ">=3.0.0"
+  "macroDeck": ">=3.0.0-0"
 }
 ```
 
@@ -277,6 +308,9 @@ Used by `compatibility.sdk`, `compatibility.macroDeck` and every `versionRange`:
 
 - Comparators: `=`, `>`, `>=`, `<`, `<=`. **No caret, tilde, `||` or wildcard.**
 - Plain SemVer 2.0 precedence: `>=1.0.0` is not satisfied by `1.0.0-beta.1`.
+- To accept prereleases of the lower bound, end it with `-0`, the lowest prerelease of any version:
+  `>=3.0.0-0` is satisfied by `3.0.0-beta.1`, `3.0.0-rc.1`, `3.0.0` and everything after. This is what
+  [`macrodeck-plugin new`](/cli/new/) writes for `compatibility.macroDeck`.
 - Whitespace around comparators and commas is trimmed: `">= 1.0.0, < 2.0.0"` is accepted.
 
 ## Dependencies

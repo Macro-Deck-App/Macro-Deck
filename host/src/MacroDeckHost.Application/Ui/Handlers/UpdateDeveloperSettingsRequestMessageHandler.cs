@@ -1,6 +1,7 @@
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Plugins;
+using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Settings;
@@ -13,15 +14,21 @@ public class UpdateDeveloperSettingsRequestMessageHandler
 {
 	private readonly IAppPreferenceService _service;
 	private readonly IPluginSessionRegistry _sessionRegistry;
+	private readonly IPluginTakeoverRegistry _takeovers;
+	private readonly IPluginRegistrationService _registrationService;
 	private readonly IMediator _mediator;
 
 	public UpdateDeveloperSettingsRequestMessageHandler(
 		IAppPreferenceService service,
 		IPluginSessionRegistry sessionRegistry,
+		IPluginTakeoverRegistry takeovers,
+		IPluginRegistrationService registrationService,
 		IMediator mediator)
 	{
 		_service = service;
 		_sessionRegistry = sessionRegistry;
+		_takeovers = takeovers;
+		_registrationService = registrationService;
 		_mediator = mediator;
 	}
 
@@ -42,11 +49,27 @@ public class UpdateDeveloperSettingsRequestMessageHandler
 		if (!settings.Enabled)
 		{
 			await DropDevelopmentSessions(cancellationToken);
+			await EndTakeovers(cancellationToken);
 		}
 
 		await _mediator.Publish(new DeveloperModeChangedNotification(settings.Enabled), cancellationToken);
 
 		return new UpdateDeveloperSettingsResponse { Enabled = settings.Enabled };
+	}
+
+	private async Task EndTakeovers(CancellationToken cancellationToken)
+	{
+		var active = _takeovers.Active;
+		foreach (var pluginId in active)
+		{
+			await _registrationService.Revoke(pluginId);
+		}
+
+		if (active.Count > 0)
+		{
+			await _mediator.Publish(new PluginPairingRequestsChangedNotification(), cancellationToken);
+			await _mediator.Publish(new PluginRuntimeChangedNotification(), cancellationToken);
+		}
 	}
 
 	/// <summary>

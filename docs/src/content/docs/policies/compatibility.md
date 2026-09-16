@@ -7,7 +7,8 @@ A plugin ships as a compiled assembly, built against an SDK version and updated 
 controls, not Macro Deck. So the promise is: **a plugin compiled against an older SDK keeps loading and
 behaving the same against a newer host - no recompile, no behaviour change.** Every contract below is
 frozen while it is public and not marked `[Obsolete]`, and changes only through the process under
-[how contracts change](#how-contracts-change).
+[how contracts change](#how-contracts-change). The few deliberate exceptions to that promise are listed
+under [behaviour changes that moved no version](/ui/reference/compatibility/#behaviour-changes-that-moved-no-version).
 
 ## What is covered
 
@@ -194,6 +195,10 @@ What did **not** need a major:
   `host.invoke`/`host.result` traffic. Variable definition attributes, a `write` capability and a `set`
   operation *did* change a payload plugins already send, so the **capability** version moved from `1` to
   `2` while `ProtocolVersions.Current` stayed at `3`.
+- Widget appearance gained an accent colour: `WidgetAppearancePatch.AccentColor`,
+  `WidgetAppearanceProperty.AccentColor` and an optional `accentColor` field on the wire patch. An older
+  host ignores the field, so a patch carrying only it applies nothing there and `ApplyAsync` returns
+  `false`.
 - Localization moved the **UI model** major, not this one - see [the localization major](#the-localization-major).
 
 **Negotiation happens exactly once**, in `POST /api/plugins/sessions`:

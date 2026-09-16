@@ -17,6 +17,7 @@ using MacroDeckHost.Tests.UnitTests.Plugins.Installation;
 using MacroDeckHost.Tests.UnitTests.Plugins.Trust;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
+using MacroDeckHost.Application.Plugins.Runtime;
 
 namespace MacroDeckHost.Tests.UnitTests.Store;
 
@@ -43,6 +44,7 @@ internal sealed class StoreInstallExecutorTests
 	private PluginInstaller _pluginInstaller = null!;
 	private IconTestHarness _iconHarness = null!;
 	private StoreInstallExecutor _executor = null!;
+	private IServiceScopeFactory _scopeFactory = null!;
 
 	[SetUp]
 	public void SetUp()
@@ -71,6 +73,7 @@ internal sealed class StoreInstallExecutorTests
 		services.AddScoped<IIconPackRestoreService>(_ => _iconHarness.RestoreService);
 		services.AddScoped<IProfilePortabilityService>(_ => throw new NotSupportedException());
 		var provider = services.BuildServiceProvider();
+		_scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
 
 		_pluginInstaller = new PluginInstaller(_paths,
 			new PluginArtifactReader(pluginManifestReader, Serilog.Core.Logger.None),
@@ -83,6 +86,7 @@ internal sealed class StoreInstallExecutorTests
 			new FakeInstallSupervisor(_pluginCatalog, sessionRegistry),
 			new FakeIntegrationRegistrar(),
 			sessionRegistry,
+			new PluginTakeoverRegistry(),
 			provider.GetRequiredService<IServiceScopeFactory>(),
 			pluginOptions,
 			TimeProvider.System,
@@ -165,6 +169,48 @@ internal sealed class StoreInstallExecutorTests
 			Assert.That(result.State, Is.EqualTo(StoreOperationState.Failed));
 			Assert.That(result.Error, Is.EqualTo(StoreOperationError.ChecksumMismatch));
 			Assert.That(_pluginCatalog.Discover(), Is.Empty, "no plugin tree must be left behind");
+		});
+	}
+
+	[Test]
+	public async Task A_plugin_install_refused_during_a_takeover_fails_with_its_own_error_and_the_installers_message()
+	{
+		var installer = new Plugins.Installation.FakePluginInstaller
+		{
+			ResultToReturn = PluginInstallResult.Fail(PluginInstallError.Failed, "installer message", PluginId) with
+			{
+				BlockedByDevelopmentTakeover = true
+			}
+		};
+		var executor = new StoreInstallExecutor(_catalog,
+			new StoreCatalogQueryService(_catalog, _pluginCatalog, _installations),
+			_tracker,
+			new StoreArtifactDownloader(_httpClientFactory, StoreRegistryOptions.Default, _paths, TimeProvider.System),
+			installer,
+			_iconHarness.Cache,
+			_installations,
+			new StoreInstallConsent(),
+			_scopeFactory,
+			_paths,
+			StoreRegistryOptions.Default,
+			TimeProvider.System,
+			Serilog.Core.Logger.None);
+		_catalog.Swap(new StoreCatalogSnapshot { Sequence = 1, Entries = [PluginEntry()] });
+		var operation = _tracker.Create(StoreOperationKind.Install,
+			StoreExtensionKind.Plugin,
+			PluginId,
+			"1.0.0",
+			"Store Plugin",
+			previousVersion: null);
+
+		await executor.Execute(operation.Id);
+
+		var result = _tracker.Find(operation.Id)!;
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.State, Is.EqualTo(StoreOperationState.Failed));
+			Assert.That(result.Error, Is.EqualTo(StoreOperationError.InstallBlockedByTakeover));
+			Assert.That(result.ErrorMessage, Is.EqualTo("installer message"));
 		});
 	}
 

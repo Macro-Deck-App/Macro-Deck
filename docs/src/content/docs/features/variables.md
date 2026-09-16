@@ -137,6 +137,10 @@ public ValueTask<VariableWriteResult> SetValueAsync(string localId, object? valu
 `Min`, `Max` and `Step` come from the reading rather than the definition because they can change - a
 seek bar's maximum is the current track's length.
 
+`Step` is the slider's default grid, not a guarantee: a user can give a bound slider a custom step, so
+`SetValueAsync` may receive a value that is not a multiple of your step. It is always within `Min` and
+`Max`. Round or reject it the way your target needs.
+
 ## Variables that depend on configuration
 
 `Variables` may change with configuration. After the configuration changed, tell the host to read it
@@ -263,7 +267,9 @@ public sealed class Foobar2000Integration : IPluginIntegration, IVariableProvide
   ignores `ParentId`.
 - **Search.** Leave `SupportsSearch` off unless you honor `query.Search`; the host then shows no search
   box rather than filtering a single page.
-- **`CatalogEntryCount`.** Return a total only when it is cheap; `null` otherwise.
+- **`CatalogEntryCount`.** Return a total only when it is cheap; `null` otherwise. Without a total the
+  host shows how many entries it has loaded so far, or no count at all when `SupportsSearch` is on,
+  because a searchable catalog is only loaded as the user expands or searches it.
 - **`ResolveAsync` returns `null` only for an invalid id.** A resource that is merely gone right now (an
   unplugged device, a disconnected integration) must still resolve: the binding then shows as unavailable
   and resumes on its own, while `null` makes it a broken reference the user has to fix. A plugin that is

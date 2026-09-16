@@ -33,7 +33,9 @@ public static class UiComponentEvents
 {
 	/// <summary>The value a control ended on, sent once when the interaction ends. The payload is the new
 	/// level as a bare number. A reader that offers interaction always sends it, even when the level equals
-	/// the last <see cref="Adjust" />.</summary>
+	/// the last <see cref="Adjust" /> - with one exception: a <see cref="UiSlider" /> in
+	/// <see cref="UiComponentSliderInteractions.Relative" /> interaction sends nothing for an interaction
+	/// whose level never moved, such as a tap.</summary>
 	public const string Change = "change";
 
 	/// <summary>An intermediate value while the user is still working the control. The payload is the same
@@ -87,7 +89,9 @@ public static class UiComponentEvents
 
 	/// <summary>Two taps on a <see cref="UiSlider" /> completed in quick succession, each without a drag.
 	/// Carries no payload. Sent after the second tap's <see cref="Change" />, never instead of it, so a reader
-	/// that does not implement it still leaves both taps as ordinary level changes.</summary>
+	/// that does not implement it still leaves both taps as ordinary level changes. On a slider in
+	/// <see cref="UiComponentSliderInteractions.Relative" /> interaction a tap sends no <see cref="Change" />,
+	/// so there it is sent on its own.</summary>
 	public const string DoublePress = "double-press";
 
 	/// <summary>A drag in progress on any node that declares it. The payload is the cumulative translation

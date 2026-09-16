@@ -508,6 +508,37 @@ public class RemoteIntegrationContextTests
 		});
 	}
 
+	private static readonly WidgetAppearanceProperty[] _pushedAppearanceProperties =
+	[
+		WidgetAppearanceProperty.BackgroundColor, WidgetAppearanceProperty.LabelColor,
+		WidgetAppearanceProperty.Icon, WidgetAppearanceProperty.IconDisplay, WidgetAppearanceProperty.IconColor
+	];
+
+	[TestCase(null)]
+	[TestCase(2)]
+	public void A_widget_push_listing_the_icon_color_keeps_every_value_the_plugin_already_knows(int? negotiatedVersion)
+	{
+		var connection = new PluginConnectionState { NegotiatedVersion = negotiatedVersion };
+		var stateCache = new HostStateCache(connection);
+		var widgets = new RemoteWidgetApi(new RecordingHostInvoker(), connection, stateCache);
+		int[] appearanceProperties = [0, 2, 3, 7, 9];
+		object pushed = negotiatedVersion is >= 2
+			? new List<WidgetTargetInfoDtoV2>
+			{
+				new() { Id = "w1", Label = "Mic", Location = "Home", Type = "action-button",
+					AppearanceProperties = appearanceProperties }
+			}
+			: new List<WidgetTargetInfoDtoV1>
+			{
+				new() { Id = "w1", Label = "Mic", Location = "Home", Type = "action-button",
+					AppearanceProperties = appearanceProperties }
+			};
+
+		stateCache.Apply(StatePush(HostApis.Widgets, pushed));
+
+		Assert.That(widgets.GetWidgets().Single().AppearanceProperties, Is.EqualTo(_pushedAppearanceProperties));
+	}
+
 	[Test]
 	public void Event_bindings_are_empty_before_the_host_pushed_any()
 		=> Assert.That(_context.Events.GetBindings(), Is.Empty);

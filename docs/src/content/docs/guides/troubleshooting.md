@@ -235,7 +235,10 @@ revoked registration, an unknown or expired Developer token and a missing header
 - the `X-MacroDeck-Plugin-Id` and `X-MacroDeck-Plugin-Secret` headers are present and spelled correctly;
 - a self-registered secret file was not deleted;
 - the registration was not revoked;
-- a managed launch token is used within two minutes; otherwise it needs a fresh launch.
+- a managed launch token is used within two minutes; otherwise it needs a fresh launch;
+- a development build that took over an installed plugin lost its credential when the takeover ended.
+  Current SDKs pair again once by themselves; on an older SDK delete
+  `.macrodeck-dev-state/<plugin-id>/credentials.json` and run again.
 
 ### `UNAUTHENTICATED` with HTTP 403
 
@@ -255,7 +258,13 @@ Developer token or paired - not a plugin Macro Deck installed and launches. Such
 A plugin is already registered with this identity.
 ```
 
-A registration exists, but this machine or directory lost its `credentials.json`. Reuse the stored secret,
+If `details.reason` is `plugin_installed`, Macro Deck has a plugin with this id installed and the build
+enrolled with a Developer token. Only that headless path is refused: nobody confirms a takeover there.
+Unset the token and run the build with Developer Mode on, so the prompt can ask you to take over the
+installed plugin (see [Debug an installed plugin](/guides/debugging/#debug-an-installed-plugin)), or
+uninstall the plugin first.
+
+Otherwise a registration exists, but this machine or directory lost its `credentials.json`. Reuse the stored secret,
 or run the plugin with Developer Mode on and let the pairing prompt **replace the development credential**
 (it rotates the secret and ends the old session) - see
 [Interactive pairing](/reference/authentication/#self-registering-interactive-pairing) and
@@ -427,10 +436,22 @@ See [logging](/features/logging/).
 
 ### A framework-dependent plugin reports a missing runtime
 
-No `dotnet` muxer (searched in `DOTNET_ROOT`, then `PATH`, then well-known locations), or no installed
-`Microsoft.NETCore.App` with the entrypoint's `dotnetVersion` major and at least its minor. A higher major
-never satisfies a lower one. Install the matching runtime; the plugin stays stopped instead of burning
-restart budget.
+Packaged Macro Deck ships .NET 10 (`Microsoft.NETCore.App` and `Microsoft.AspNetCore.App`), so this means
+the plugin needs something that runtime lacks: another .NET major, or a framework such as
+`Microsoft.WindowsDesktop.App` named in its `<Name>.runtimeconfig.json`. Macro Deck then looks for a
+system `dotnet` (in `DOTNET_ROOT`, then `PATH`, then well-known locations) that has it, and found none. A
+higher major never satisfies a lower one unless the runtimeconfig allows rolling forward. A host run from
+source (`dotnet run`) has no bundled runtime and relies on the system search alone.
+
+Install the matching runtime, then restart Macro Deck: installed runtimes are read once per host
+process. Until then the plugin stays stopped instead of burning restart budget. The selection rule is in
+the [manifest reference](/reference/manifest/#runtime).
+
+### A plugin shows up as dotnet in the process list
+
+Framework-dependent plugins run as the .NET muxer, so Task Manager shows them as `dotnet` or ".NET Host"
+and Activity Monitor as `dotnet`, not under the plugin's name. Tell them apart by PID or by the command
+line, which ends in the plugin's `.dll`. Self-contained plugins keep their own executable name.
 
 ## Signing and install trust
 

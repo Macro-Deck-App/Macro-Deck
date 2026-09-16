@@ -15,12 +15,12 @@ rm -rf "$publish_dir"
 dotnet publish "$root/host/src/MacroDeckHost" \
 	-c Release \
 	-r "$rid" \
-	--self-contained true \
 	-p:Version="$version" \
 	-p:BuildChannel="$build_channel" \
 	-p:DebugType=None \
 	-p:DebugSymbols=false \
 	-o "$publish_dir"
+"$root/ci/scripts/stage-dotnet-runtime.sh" "$rid" "$publish_dir/runtime"
 
 # wwwroot layout: web-client (public deck) at /, desktop-ui (configuration UI) at /admin, and one
 # device-specific web-client build per target under /targets/<id> (issue #727).

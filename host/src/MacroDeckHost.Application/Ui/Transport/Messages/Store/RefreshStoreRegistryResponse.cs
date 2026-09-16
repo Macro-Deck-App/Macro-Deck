@@ -7,4 +7,6 @@ public class RefreshStoreRegistryResponse
 	public StoreRegistryStatusBody Registry { get; set; } = new();
 
 	public TransportError? Error { get; set; }
+
+	public StoreRegistryRefreshRunBody? RefreshRun { get; set; }
 }

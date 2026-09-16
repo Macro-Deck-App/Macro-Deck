@@ -1,8 +1,8 @@
 /**
  * Guards the layering the routed pages depend on.
  *
- * The shell side panels sit at z-index 30 and the notification panel's close button is its only way
- * out, so a page element that outranks them can cover that button and leave the app stuck (issue 694).
+ * The shell side panels and their scrim sit at z-index 30, so a page element that outranks them can
+ * cover an open panel's close button and scrim and leave the app stuck (issue 694).
  *
  * Only components/pages is walked. Chrome elsewhere is not covered: the layers that legitimately sit
  * above the panels are spread across a dozen files, and exempting them by name would be a list that
@@ -20,8 +20,7 @@ import test from 'node:test';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SRC = path.join(HERE, 'src', 'app');
 const PAGES = path.join(SRC, 'components', 'pages');
-const PANELS = ['notification-panel/notification-panel', 'connection-panel/connection-panel']
-  .map(name => path.join(SRC, 'components', 'shell', `${name}.component.scss`));
+const SIDE_PANEL = path.join(SRC, 'shared', 'components', 'overlay', 'side-panel', 'side-panel.component.scss');
 
 function walk(dir, predicate) {
   const out = [];
@@ -51,16 +50,12 @@ function declarationsOf(file) {
   return [...css, ...bound].map(match => match[1].trim());
 }
 
-// Read from the panels rather than copied, so moving their rung cannot leave this enforcing an
-// old number in silence.
+// Read from the shared side panel rather than copied, so moving its rung cannot leave this enforcing
+// an old number in silence.
 function shellPanelZIndex() {
-  const values = PANELS.map(file => {
-    const match = /:host\s*\{[^}]*?z-index\s*:\s*(\d+)/s.exec(uncommented(readFileSync(file, 'utf8')));
-    assert.ok(match, `no :host z-index found in ${rel(file)}`);
-    return Number(match[1]);
-  });
-  assert.equal(values[0], values[1], 'the two shell side panels should share one rung');
-  return values[0];
+  const match = /:host\s*\{[^}]*?z-index\s*:\s*(\d+)/s.exec(uncommented(readFileSync(SIDE_PANEL, 'utf8')));
+  assert.ok(match, `no :host z-index found in ${rel(SIDE_PANEL)}`);
+  return Number(match[1]);
 }
 
 // auto, unset, initial and revert all resolve to the auto layer, which cannot outrank the panels.

@@ -1,6 +1,4 @@
-using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Store;
-using Mediator;
 using Microsoft.Extensions.Hosting;
 using ILogger = Serilog.ILogger;
 
@@ -12,21 +10,18 @@ public sealed class StoreRegistryRefreshBackgroundService : HostReadyBackgroundS
 
 	private readonly IStoreRegistryRefresher _refresher;
 	private readonly StoreRegistryOptions _options;
-	private readonly IMediator _mediator;
 	private readonly TimeProvider _timeProvider;
 	private readonly ILogger _logger;
 
 	public StoreRegistryRefreshBackgroundService(IHostApplicationLifetime lifetime,
 		IStoreRegistryRefresher refresher,
 		StoreRegistryOptions options,
-		IMediator mediator,
 		TimeProvider timeProvider,
 		ILogger logger)
 		: base(lifetime)
 	{
 		_refresher = refresher;
 		_options = options;
-		_mediator = mediator;
 		_timeProvider = timeProvider;
 		_logger = logger.ForContext<StoreRegistryRefreshBackgroundService>();
 	}
@@ -51,20 +46,21 @@ public sealed class StoreRegistryRefreshBackgroundService : HostReadyBackgroundS
 	{
 		try
 		{
-			var result = await _refresher.Refresh(stoppingToken);
+			var result = await _refresher.Refresh(StoreRegistryRefreshTrigger.Scheduled, stoppingToken);
 			if (!result.Success)
 			{
 				_logger.Warning("Store registry refresh failed with {Error}: {Message}",
 					result.Error,
 					result.ErrorMessage);
-				return;
 			}
-
-			await _mediator.Publish(new StoreRegistryRefreshedNotification(_refresher.Status), stoppingToken);
 		}
 		catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
 		{
 			throw;
+		}
+		// The refresher stops on ApplicationStopping, which fires before stoppingToken is cancelled.
+		catch (OperationCanceledException)
+		{
 		}
 		catch (Exception ex)
 		{

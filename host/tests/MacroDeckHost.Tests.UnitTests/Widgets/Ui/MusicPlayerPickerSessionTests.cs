@@ -139,19 +139,18 @@ public class MusicPlayerPickerSessionTests
 	[CancelAfter(60_000)]
 	public void A_second_search_replaces_the_first_one_s_rows_rather_than_dropping_it()
 	{
-		using var landed = new ManualResetEventSlim(false);
+		using var changed = new ManualResetEventSlim(false);
 
 		var fixture = new PickerFixture();
 
 		try
 		{
-			fixture.Session.Changed += (_, _) => landed.Set();
+			fixture.Session.Changed += (_, _) => changed.Set();
 
 			fixture.NextCatalogCall().Completion.SetResult(Items("a", withArtwork: false));
 
-			Assert.That(landed.Wait(WaitTimeout), Is.True, "the first answer never reached the view");
+			WaitForRows(fixture, changed, Rows("a"), "the first answer never reached the view");
 
-			landed.Reset();
 			fixture.Session.DrainPatches();
 
 			fixture.Type("B");
@@ -162,15 +161,51 @@ public class MusicPlayerPickerSessionTests
 
 			second.Completion.SetResult(Items("b", withArtwork: false));
 
-			Assert.That(landed.Wait(WaitTimeout), Is.True, "the second answer never reached the view");
-
-			Assert.That(RowIds(fixture.Session.BuildTree().Root),
-				Is.EqualTo(Items("b", withArtwork: false).Select(item => _rowPrefix + item.Id)).AsCollection,
-				"the session stopped updating after the first concurrent access");
+			WaitForRows(fixture,
+				changed,
+				Rows("b"),
+				"the second search's rows never replaced the first one's - the session stopped updating after " +
+				"the first concurrent access");
 		}
 		finally
 		{
 			fixture.Session.DisposeAsync().AsTask().GetAwaiter().GetResult();
+		}
+	}
+
+	private static List<string> Rows(string prefix)
+		=> Items(prefix, withArtwork: false).Select(item => _rowPrefix + item.Id).ToList();
+
+	/// <summary>Waits for the tree to hold the rows the test asserts on rather than for one Changed signal -
+	/// a pass raises that event for anything it writes, so a single signal says nothing about which answer
+	/// has been applied. Bounded by the same timeout every other handshake uses and reports what the tree
+	/// held last.</summary>
+	private static void WaitForRows(
+		PickerFixture fixture,
+		ManualResetEventSlim changed,
+		List<string> expected,
+		string because)
+	{
+		var deadline = DateTime.UtcNow + WaitTimeout;
+
+		while (true)
+		{
+			// Reset before the read, so a write that lands between the two still leaves the wait below armed.
+			changed.Reset();
+
+			var rows = RowIds(fixture.Session.BuildTree().Root);
+
+			if (rows.SequenceEqual(expected, StringComparer.Ordinal))
+			{
+				return;
+			}
+
+			var remaining = deadline - DateTime.UtcNow;
+
+			Assert.That(remaining > TimeSpan.Zero && changed.Wait(remaining),
+				Is.True,
+				$"{because}. Expected rows [{string.Join(", ", expected)}] but the tree last held " +
+				$"[{string.Join(", ", rows)}]");
 		}
 	}
 

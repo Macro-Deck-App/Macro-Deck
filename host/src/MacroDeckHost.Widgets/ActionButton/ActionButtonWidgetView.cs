@@ -98,6 +98,10 @@ internal static class ActionButtonWidgetView
 				d.Opacity != 100
 					? UiValue.Of(d.Opacity / 100.0)
 					: UiValue.None<double>()),
+			Tint = UiValue.Optional(() =>
+				Backdrop(config, activeState, iconResources, iconProvider, imageResource).Tint is { } tint
+					? UiValue.Of(tint)
+					: UiValue.None<string>()),
 			BorderStyle = UiValue.Optional(() =>
 			{
 				var style = Appearance(config, activeState).Border?.Style;
@@ -132,7 +136,10 @@ internal static class ActionButtonWidgetView
 		UiState<string?> activeState)
 		=> config.Value.Resolve(activeState.Value);
 
-	private readonly record struct ResolvedBackdrop(UiValue<UiResource> Source, ActionButtonIconDisplay? Display);
+	private readonly record struct ResolvedBackdrop(
+		UiValue<UiResource> Source,
+		ActionButtonIconDisplay? Display,
+		string? Tint = null);
 
 	/// <summary>
 	/// An active icon provider (issue #425) takes precedence over the configured icon entirely - the same
@@ -160,7 +167,7 @@ internal static class ActionButtonWidgetView
 
 		if (icon is not null && iconResources.Value.TryGetValue(icon.Icon, out var iconResource))
 		{
-			return new ResolvedBackdrop(UiValue.Of(iconResource), display);
+			return new ResolvedBackdrop(UiValue.Of(iconResource), display, icon.Color);
 		}
 
 		// The legacy imageUrl face is drawn only as a last resort, when no icon resolves at all - never

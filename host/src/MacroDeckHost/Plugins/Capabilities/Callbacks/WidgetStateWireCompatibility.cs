@@ -110,12 +110,14 @@ internal static class WidgetStateWireCompatibility
 			IconOffsetX = dto.IconOffsetX,
 			IconOffsetY = dto.IconOffsetY,
 			IconOpacity = dto.IconOpacity,
+			IconColor = dto.IconColor,
 			FontFaceId = dto.FontFaceId,
 			FontSize = dto.FontSize,
 			TextAlign = dto.TextAlign,
 			LabelPosition = dto.LabelPosition,
 			BorderStyle = dto.BorderStyle,
-			BorderColor = dto.BorderColor
+			BorderColor = dto.BorderColor,
+			AccentColor = dto.AccentColor
 		};
 
 	private static IReadOnlyCollection<WidgetAppearanceProperty> ToClearProperties(IReadOnlyCollection<int> wire)

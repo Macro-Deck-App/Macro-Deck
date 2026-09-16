@@ -33,5 +33,7 @@ public class StoreCatalogItemBody
 
 	public bool HasIcon { get; set; }
 
+	public string? IconSha256 { get; set; }
+
 	public Guid? ActiveOperationId { get; set; }
 }

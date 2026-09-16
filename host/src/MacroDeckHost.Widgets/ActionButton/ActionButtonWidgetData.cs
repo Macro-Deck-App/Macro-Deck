@@ -60,7 +60,7 @@ public sealed record ActionButtonIconDisplay
 
 /// <summary>One state's or the root's icon: the typed reference and its own non-cascading framing. Never
 /// falls back between states or between a state and the root (issue #291).</summary>
-public sealed record ActionButtonIcon(WidgetIconReference Icon, ActionButtonIconDisplay Display);
+public sealed record ActionButtonIcon(WidgetIconReference Icon, ActionButtonIconDisplay Display, string? Color = null);
 
 /// <summary>A resolved border ring, or <c>null</c> when none is configured for the active appearance.
 /// <see cref="Color" /> is only ever populated for the tinted styles - <c>hue-shift</c> and <c>rgb</c>
@@ -309,7 +309,8 @@ public sealed class ActionButtonWidgetData
 			return reference is null
 				? null
 				: new ActionButtonIcon(reference.Value,
-					ActionButtonIconDisplay.Parse(appearance?["iconDisplay"] as JsonObject));
+					ActionButtonIconDisplay.Parse(appearance?["iconDisplay"] as JsonObject),
+					WidgetColor.Normalize(ReadString(appearance, "iconColor")));
 		}
 
 		var root = _model.Data;
@@ -320,7 +321,9 @@ public sealed class ActionButtonWidgetData
 		{
 			return rootReference is null
 				? null
-				: new ActionButtonIcon(rootReference.Value, ActionButtonIconDisplay.Parse(rootDisplay));
+				: new ActionButtonIcon(rootReference.Value,
+					ActionButtonIconDisplay.Parse(rootDisplay),
+					WidgetColor.Normalize(ReadString(root, "iconColor")));
 		}
 
 		// A legacy tail: a bag saved before the icon/iconDisplay fields moved to the root still carries
@@ -331,7 +334,8 @@ public sealed class ActionButtonWidgetData
 		return legacyReference is null
 			? null
 			: new ActionButtonIcon(legacyReference.Value,
-				ActionButtonIconDisplay.Parse(legacy?["iconDisplay"] as JsonObject));
+				ActionButtonIconDisplay.Parse(legacy?["iconDisplay"] as JsonObject),
+				WidgetColor.Normalize(ReadString(legacy, "iconColor")));
 	}
 
 	/// <summary>Every distinct icon reference used anywhere in this button's data, so a session can

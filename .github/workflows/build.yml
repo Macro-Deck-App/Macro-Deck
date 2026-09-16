@@ -289,6 +289,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
@@ -317,7 +321,6 @@ jobs:
           dotnet publish host/src/MacroDeckHost \
             -c Release \
             -r ${{ matrix.rid }} \
-            --self-contained true \
             -p:Version=${{ needs.prepare.outputs.version }} \
             -p:InformationalVersion=${{ needs.prepare.outputs.informational }} \
             -p:BuildTimestamp=${{ needs.prepare.outputs.build_time }} \
@@ -327,14 +330,16 @@ jobs:
             -p:DebugSymbols=false \
             -o publish
 
-      # Regression guard for issue #316: a loose managed assembly or PDB next to the
-      # single-file host means codesign will fail signing the macOS .app later. The pdb
-      # pattern is narrow (MacroDeck*.pdb only) because win-x64 always ships
-      # libSkiaSharp.pdb/libHarfBuzzSharp.pdb as NuGet content, which -p:DebugType=None
-      # does not strip; a blanket *.pdb check would fail every Windows release build.
+      # The framework-dependent host looks for its runtime in runtime/ next to it; the
+      # official ASP.NET Core archives are staged there at the SDK's runtime patch.
+      - name: Stage bundled .NET runtime
+        run: ci/scripts/stage-dotnet-runtime.sh ${{ matrix.rid }} publish/runtime
+
+      # Issue #316 guard for the host's own output; publish/runtime is loose by design. MacroDeck*.pdb
+      # only, because win-x64 ships SkiaSharp/HarfBuzzSharp pdbs that DebugType=None does not strip.
       - name: Verify the publish output has no loose assemblies
         run: |
-          leftovers=$(find publish -type f \( -name '*.dll' -o -name 'MacroDeck*.pdb' \))
+          leftovers=$(find publish -path publish/runtime -prune -o -type f \( -name '*.dll' -o -name 'MacroDeck*.pdb' \) -print)
           if [ -n "$leftovers" ]; then
             echo "unexpected loose assemblies in the publish output:" >&2
             echo "$leftovers" >&2
@@ -405,14 +410,14 @@ jobs:
           mkdir -p ui/bootstrapper/host-publish
           tar xzf host-linux-x64.tar.gz -C ui/bootstrapper/host-publish
 
-          # The self-contained .NET runtime includes an optional LTTng trace
-          # provider linked against liblttng-ust.so.0. Ubuntu 22.04 only ships
-          # the ABI-incompatible liblttng-ust.so.1, so linuxdeploy cannot scan
-          # the otherwise unused provider - it must not reach the packaged tree,
-          # which the AppImage, DEB and RPM bundles all pack. Single-file
-          # publishing (issue #316) now folds it into the launcher, so it never
-          # exists as a loose file; assert its absence instead of removing it.
-          test ! -e ui/bootstrapper/host-publish/libcoreclrtraceptprovider.so
+          # linuxdeploy cannot scan the LTTng provider on 22.04 (no liblttng-ust.so.0);
+          # stage-dotnet-runtime.sh deletes it, so assert it reached no packaged tree.
+          leftovers=$(find ui/bootstrapper/host-publish -name libcoreclrtraceptprovider.so)
+          if [ -n "$leftovers" ]; then
+            echo "unexpected LTTng trace provider in the staged host:" >&2
+            echo "$leftovers" >&2
+            exit 1
+          fi
 
       - name: Install dependencies
         working-directory: ui/bootstrapper

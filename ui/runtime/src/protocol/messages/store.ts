@@ -39,12 +39,14 @@ export interface StoreCatalogItemBody {
   unsupportedReason?: string | null;
   trust: StoreExtensionTrust;
   hasIcon: boolean;
+  iconSha256?: string | null;
   activeOperationId?: string | null;
 }
 
 export interface StoreScreenshotBody {
   index: number;
   caption?: string | null;
+  sha256?: string | null;
 }
 
 export interface StoreVersionHistoryBody {
@@ -96,15 +98,58 @@ export interface StoreAvailableUpdateBody {
   latestVersion: string;
 }
 
+export type StoreRegistryRefreshTrigger = 'Manual' | 'Scheduled';
+
+export type StoreRegistryRefreshRunState = 'Running' | 'Succeeded' | 'Failed' | 'Cancelled';
+
+export type StoreRegistryRefreshStep =
+  | 'Started'
+  | 'FetchingManifest'
+  | 'FetchingSignature'
+  | 'UpToDate'
+  | 'DownloadingFiles'
+  | 'Verifying'
+  | 'ReadingCatalog'
+  | 'Applied'
+  | 'Failed'
+  | 'Cancelled'
+  | 'WaitingForRegistryUpdate';
+
+export interface StoreRegistryRefreshLogEntryBody {
+  at: string;
+  step: StoreRegistryRefreshStep;
+  count?: number | null;
+  sequence?: number | null;
+  error?: string | null;
+  detail?: string | null;
+}
+
+// hostInstanceId changes with every host process and revision grows with every published change,
+// so a client keeps a snapshot only when it is from another host process or not older than its own.
+export interface StoreRegistryRefreshRunBody {
+  hostInstanceId: string;
+  id: string;
+  revision: number;
+  trigger: StoreRegistryRefreshTrigger;
+  state: StoreRegistryRefreshRunState;
+  startedAt: string;
+  finishedAt?: string | null;
+  filesCompleted: number;
+  filesTotal: number;
+  entries: StoreRegistryRefreshLogEntryBody[];
+}
+
 export interface GetStoreStatusResponse {
   registry: StoreRegistryStatusBody;
   developerMode: boolean;
+  refreshRun?: StoreRegistryRefreshRunBody | null;
 }
 
 export interface RefreshStoreRegistryResponse {
   success: boolean;
   registry: StoreRegistryStatusBody;
   error?: ApiError | null;
+  refreshRun?: StoreRegistryRefreshRunBody | null;
 }
 
 export interface GetStoreCatalogResponse {
@@ -153,6 +198,10 @@ export type StoreCatalogChangedEvent = Record<string, never>;
 
 export interface StoreRegistryStatusChangedEvent {
   registry: StoreRegistryStatusBody;
+}
+
+export interface StoreRegistryRefreshChangedEvent {
+  run: StoreRegistryRefreshRunBody;
 }
 
 export interface StoreOperationChangedEvent {
