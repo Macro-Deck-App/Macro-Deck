@@ -125,6 +125,11 @@ export class UiRenderContext {
     return properties[UiConfigProperties.DefaultValue];
   }
 
+  renderedValue(nodeId: string): unknown {
+    const node = this.nodesById.get(nodeId);
+    return node ? this.getValue(node) : undefined;
+  }
+
   setValue(node: UiNode, value: unknown): void {
     if (this.externalValuesSignal() === null) {
       this.overlaySignal.update(current => ({ ...current, [node.id]: value }));
