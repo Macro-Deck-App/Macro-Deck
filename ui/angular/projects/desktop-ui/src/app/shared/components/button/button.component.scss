@@ -79,7 +79,7 @@
    height still binds the same way with an icon child: a 16px .icon-sm plus 2 x 3px and the 1px
    borders is 24px, under the 26px floor. The 5px it used before made an icon button 28px - 2px
    taller than a compact select or input would have been next to it. Reserved for standalone
-   icon buttons (toolbars, the status bar, notification/connection panels, list rows) now that
+   icon buttons (toolbars, the status bar, side panel headers, list rows) now that
    single-line form controls all render at --control-height (issue #554). Only the inline
    padding stays wider than a field. */
 .sb-compact { min-height: var(--control-height-compact); padding: 0.1875rem 0.6875rem;  font-size: var(--text-sm); }
@@ -92,7 +92,7 @@
 /* icon: square button for icon-only actions - same height as sb-md */
 .sb-icon    { width: var(--control-height); height: var(--control-height); padding: 0; font-size: var(--text-base); }
 /* icon-compact: compact square for standalone icon actions (toolbars, the status bar,
-   notification/connection panels, list rows with no adjoining input) */
+   side panel headers, list rows with no adjoining input) */
 .sb-icon-compact { width: var(--control-height-compact); height: var(--control-height-compact); padding: 0; font-size: var(--text-sm); }
 
 

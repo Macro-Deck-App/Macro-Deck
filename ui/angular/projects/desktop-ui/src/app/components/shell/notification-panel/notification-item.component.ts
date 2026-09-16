@@ -9,6 +9,7 @@ import {
   UserNotificationSeverity,
 } from '@macro-deck/runtime';
 import {
+  ButtonComponent,
   LocalizationService,
   TranslatePipe,
 } from '@shared';
@@ -45,7 +46,7 @@ export interface NotificationActionEvent {
 @Component({
   selector: 'app-notification-item',
   standalone: true,
-  imports: [TranslatePipe],
+  imports: [ButtonComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './notification-item.component.html',
   styleUrls: ['./notification-item.component.scss'],

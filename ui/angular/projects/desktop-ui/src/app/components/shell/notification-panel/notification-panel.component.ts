@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Output, inject, input
 import { Router } from '@angular/router';
 
 import { AppStrings, UserNotification } from '@macro-deck/runtime';
-import { LocalizationService, SidePanelComponent, TranslatePipe } from '@shared';
+import { ButtonComponent, LocalizationService, SidePanelComponent, TranslatePipe } from '@shared';
 import { EmptyStateComponent } from '../../feedback/empty-state/empty-state.component';
 import { IconPackService } from '../../../services/icon-pack.service';
 import { NotificationCenterService } from '../../../services/notification-center.service';
@@ -12,7 +12,7 @@ import { NotificationActionEvent, NotificationItemComponent } from './notificati
 @Component({
   selector: 'app-notification-panel',
   standalone: true,
-  imports: [EmptyStateComponent, NotificationItemComponent, SidePanelComponent, TranslatePipe],
+  imports: [ButtonComponent, EmptyStateComponent, NotificationItemComponent, SidePanelComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './notification-panel.component.html',
   styleUrls: ['./notification-panel.component.scss'],
