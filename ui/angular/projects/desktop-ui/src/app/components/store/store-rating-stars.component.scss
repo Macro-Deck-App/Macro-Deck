@@ -1,0 +1,34 @@
+:host {
+  display: inline-flex;
+}
+
+.stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.star {
+  display: block;
+  width: 12px;
+  height: 12px;
+  flex: none;
+}
+
+.stars--sm .star {
+  width: 14px;
+  height: 14px;
+}
+
+.stars--md .star {
+  width: 18px;
+  height: 18px;
+}
+
+.star-full {
+  fill: var(--color-warning);
+}
+
+.star-empty {
+  fill: var(--color-border-light);
+}

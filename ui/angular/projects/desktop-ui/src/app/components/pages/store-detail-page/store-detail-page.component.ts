@@ -8,6 +8,7 @@ import { DetailPageComponent } from '../../detail-page/detail-page.component';
 import { LoadingStateComponent } from '../../feedback/loading-state/loading-state.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
 import { StoreMarkdownComponent } from '../../store/store-markdown.component';
+import { StoreReviewsSectionComponent } from '../../store/store-reviews-section.component';
 import { cultureDisplayName, sortCulturesForReader } from '../../../localization/culture-display.util';
 import { StoreOperationService } from '../../../services/store-operation.service';
 import { formatBytes } from '../../../util/format-bytes';
@@ -35,6 +36,7 @@ const SIDEBAR_LANGUAGE_LIMIT = 4;
     StoreLanguagesModalComponent,
     StoreScreenshotStripComponent,
     StoreMarkdownComponent,
+    StoreReviewsSectionComponent,
     StoreVersionHistoryModalComponent,
     TranslatePipe,
   ],

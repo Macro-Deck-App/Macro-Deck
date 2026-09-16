@@ -1,0 +1,297 @@
+@if (visible()) {
+  <h2 class="reviews-heading">{{ 'macrodeck.app:Store.Reviews.Heading' | translate }}</h2>
+
+  <div class="reviews-summary">
+    <div class="reviews-aggregate">
+      @if (ratingText(); as text) {
+        <span class="reviews-aggregate-value" aria-hidden="true">{{ text }}</span>
+        <shared-store-rating-stars [rating]="aggregate()!.rating!" size="md" />
+      }
+      <span class="reviews-aggregate-count">{{ ratingCountText() }}</span>
+    </div>
+
+    <ul class="reviews-distribution" [attr.aria-label]="'macrodeck.app:Store.Reviews.DistributionLabel' | translate">
+      @for (bucket of distribution(); track bucket.stars) {
+        <li class="reviews-distribution-row">
+          <span class="reviews-distribution-stars" aria-hidden="true">
+            {{ bucket.stars }}
+            <svg class="reviews-distribution-star" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path [attr.d]="starPath" />
+            </svg>
+          </span>
+          <span
+            class="reviews-distribution-bar"
+            role="progressbar"
+            aria-valuemin="0"
+            [attr.aria-valuemax]="bucket.total"
+            [attr.aria-valuenow]="bucket.count"
+            [attr.aria-valuetext]="bucket.valueText"
+            [attr.aria-label]="bucket.label">
+            <span class="reviews-distribution-fill" [style.width.%]="bucket.percent"></span>
+          </span>
+          <span class="reviews-distribution-count" aria-hidden="true">{{ bucket.count }}</span>
+        </li>
+      }
+    </ul>
+  </div>
+
+  <div class="reviews-compose">
+    <h3 class="reviews-subheading">{{ 'macrodeck.app:Store.Reviews.ComposeHeading' | translate }}</h3>
+
+    @switch (mode()) {
+      @case ('signIn') {
+        <p class="reviews-compose-text">{{ 'macrodeck.app:Store.Reviews.SignInPrompt' | translate }}</p>
+        <div class="reviews-compose-actions">
+          <shared-button class="reviews-sign-in" variant="primary" (click)="openSignIn()">
+            {{ 'macrodeck.app:Settings.Account.SignIn' | translate }}
+          </shared-button>
+        </div>
+      }
+      @case ('suspended') {
+        <p class="reviews-compose-text reviews-suspended">{{ 'macrodeck.app:Store.Reviews.Suspended' | translate }}</p>
+        <ng-container *ngTemplateOutlet="ownSummary" />
+      }
+      @case ('notEntitled') {
+        <p class="reviews-compose-text reviews-not-entitled">{{ 'macrodeck.app:Store.Reviews.NotEntitled' | translate }}</p>
+        <ng-container *ngTemplateOutlet="ownSummary" />
+      }
+      @case ('unavailable') {
+        <p class="reviews-compose-text reviews-unavailable">{{ 'macrodeck.app:Store.Reviews.Unavailable' | translate }}</p>
+      }
+      @case ('form') {
+        @if (ownReview()) {
+          <ng-container *ngTemplateOutlet="ownSummary" />
+        } @else {
+          <p class="reviews-compose-text">{{ 'macrodeck.app:Store.Reviews.WritePrompt' | translate }}</p>
+          <div class="reviews-compose-actions">
+            <shared-button class="reviews-write" variant="primary" (click)="openEditor()">
+              {{ 'macrodeck.app:Store.Reviews.WriteAction' | translate }}
+            </shared-button>
+          </div>
+        }
+      }
+    }
+
+    @if (!editorOpen()) {
+      @if (writeError(); as error) {
+        <p class="reviews-write-error" role="alert">{{ error }}</p>
+      }
+      @if (writeStatus(); as status) {
+        <p class="reviews-write-status" role="status">{{ status }}</p>
+      }
+    }
+  </div>
+
+  <div class="reviews-list-header">
+    <label class="reviews-control">
+      <span class="reviews-label">{{ 'macrodeck.app:Store.Reviews.SortLabel' | translate }}</span>
+      <shared-select class="reviews-sort" [options]="sortOptions()" [ngModel]="sort()" (ngModelChange)="onSortChange($event)" />
+    </label>
+    <label class="reviews-control">
+      <span class="reviews-label">{{ 'macrodeck.app:Store.Reviews.FilterLabel' | translate }}</span>
+      <shared-select class="reviews-filter" [options]="filterOptions()" [ngModel]="filter()" (ngModelChange)="onFilterChange($event)" />
+    </label>
+  </div>
+
+  @if (reviewsFailed()) {
+    <p class="reviews-empty">{{ 'macrodeck.app:Store.Reviews.LoadFailed' | translate }}</p>
+  } @else if (!reviewsLoading() && reviews().length === 0) {
+    <p class="reviews-empty">
+      @if (filter() === 'all') {
+        {{ 'macrodeck.app:Store.Reviews.Empty' | translate }}
+      } @else {
+        {{ 'macrodeck.app:Store.Reviews.EmptyFiltered' | translate }}
+      }
+    </p>
+  }
+
+  <ul class="reviews-list">
+    @for (review of reviews(); track review.id) {
+      <li class="review">
+        <div class="review-header">
+          <shared-avatar [src]="reviewAvatarUrl(review)" [name]="review.authorDisplayName" size="sm" />
+          <div class="review-identity">
+            <span class="review-author">{{ review.authorDisplayName }}</span>
+            <span class="review-meta">
+              <shared-store-rating-stars [rating]="review.rating" />
+              <span>{{ review.createdAt | date: 'mediumDate' }}</span>
+              @if (review.isEdited) {
+                <span class="review-edited">{{ 'macrodeck.app:Store.Reviews.Edited' | translate }}</span>
+              }
+            </span>
+          </div>
+        </div>
+        @if (review.title) {
+          <p class="review-title">{{ review.title }}</p>
+        }
+        @if (review.body) {
+          <p class="review-body">{{ review.body }}</p>
+        }
+      </li>
+    }
+  </ul>
+
+  @if (hasMoreReviews() && !reviewsFailed()) {
+    <div class="reviews-load-more">
+      <shared-button variant="secondary" [loading]="reviewsLoading()" (click)="loadMore()">
+        {{ 'macrodeck.app:Store.Reviews.LoadMoreAction' | translate }}
+      </shared-button>
+    </div>
+  }
+}
+
+<ng-template #ownSummary>
+  @if (ownReview(); as review) {
+    <div class="review review--own">
+      @if (moderated()) {
+        <div class="reviews-moderated" role="note">
+          <p class="reviews-compose-text">{{ 'macrodeck.app:Store.Reviews.ModeratedNotice' | translate }}</p>
+          @if (review.moderationReason; as reason) {
+            <p class="reviews-moderation-reason-heading">{{ 'macrodeck.app:Store.Reviews.ModerationReasonHeading' | translate }}</p>
+            <p class="reviews-moderation-reason">{{ reason }}</p>
+          }
+        </div>
+      }
+      <div class="review-own-row">
+        <div class="review-own-content">
+          <shared-store-rating-stars [rating]="review.rating" size="sm" />
+          @if (review.title) {
+            <p class="review-title">{{ review.title }}</p>
+          }
+          @if (review.body) {
+            <p class="review-body">{{ review.body }}</p>
+          }
+        </div>
+        @if (mode() === 'form') {
+          <shared-button class="reviews-edit" variant="secondary" [disabled]="moderated() || busy()" (click)="openEditor()">
+            {{ 'macrodeck.app:Store.Reviews.EditAction' | translate }}
+          </shared-button>
+        }
+      </div>
+    </div>
+  }
+</ng-template>
+
+@if (editorOpen()) {
+  <shared-modal
+    class="reviews-editor"
+    size="medium"
+    [heading]="(ownReview() ? 'macrodeck.app:Store.Reviews.EditHeading' : 'macrodeck.app:Store.Reviews.WriteHeading') | translate"
+    [closeOnOverlay]="false"
+    (close)="closeEditor()">
+    <form class="reviews-form" (ngSubmit)="save()">
+      <div class="reviews-field">
+        <span class="reviews-label" id="store-review-rating-label">{{ 'macrodeck.app:Store.Reviews.RatingFieldLabel' | translate }}</span>
+        <div
+          class="reviews-star-picker"
+          role="radiogroup"
+          aria-labelledby="store-review-rating-label"
+          [attr.aria-disabled]="busy() || null"
+          [attr.aria-invalid]="visibleErrors().rating ? 'true' : null">
+          @for (value of starValues; track value) {
+            <button
+              type="button"
+              class="reviews-star-option"
+              role="radio"
+              [attr.data-star]="value"
+              [class.is-lit]="(formRating() ?? 0) >= value"
+              [attr.aria-checked]="formRating() === value"
+              [attr.aria-label]="starCountLabel(value)"
+              [attr.tabindex]="starTabIndex(value)"
+              [disabled]="busy()"
+              (click)="selectRating(value)"
+              (keydown)="onStarKeydown($event, formRating() ?? 0)">
+              <svg class="reviews-star-glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path [attr.d]="starPath" />
+              </svg>
+            </button>
+          }
+        </div>
+        @if (visibleErrors().rating; as error) {
+          <p class="reviews-field-error">{{ error }}</p>
+        }
+        @if (suggestIssue()) {
+          <div class="reviews-issue-hint" role="note">
+            <p class="reviews-compose-text">{{ 'macrodeck.app:Store.Reviews.IssueHint' | translate }}</p>
+            <a class="reviews-issue-link" [href]="issueUrl()" target="_blank" rel="noopener noreferrer">
+              {{ 'macrodeck.app:Store.Reviews.IssueAction' | translate }}
+            </a>
+          </div>
+        }
+      </div>
+
+      <label class="reviews-field">
+        <span class="reviews-label">{{ 'macrodeck.app:Store.Reviews.TitleFieldLabel' | translate }}</span>
+        <shared-input
+          class="reviews-title-input"
+          name="title"
+          [disabled]="busy()"
+          [invalid]="!!visibleErrors().title"
+          [ngModel]="formTitle()"
+          (ngModelChange)="formTitle.set($event)" />
+        @if (visibleErrors().title; as error) {
+          <span class="reviews-field-error">{{ error }}</span>
+        }
+      </label>
+
+      <label class="reviews-field">
+        <span class="reviews-label">{{ 'macrodeck.app:Store.Reviews.BodyFieldLabel' | translate }}</span>
+        <shared-input
+          class="reviews-body-input"
+          name="body"
+          [multiline]="true"
+          [rows]="6"
+          [disabled]="busy()"
+          [invalid]="!!visibleErrors().body"
+          [ngModel]="formBody()"
+          (ngModelChange)="formBody.set($event)" />
+        <span class="reviews-counter" aria-live="polite">{{ bodyCounter() }}</span>
+        @if (visibleErrors().body; as error) {
+          <span class="reviews-field-error">{{ error }}</span>
+        }
+      </label>
+
+      @if (writeError(); as error) {
+        <p class="reviews-write-error" role="alert">{{ error }}</p>
+      }
+    </form>
+
+    <div modal-footer class="reviews-editor-actions">
+      @if (ownReview()) {
+        <shared-button
+          class="reviews-delete"
+          variant="ghost"
+          [disabled]="!canDelete()"
+          (click)="requestDelete()">
+          {{ 'macrodeck.app:Store.Reviews.DeleteAction' | translate }}
+        </shared-button>
+      }
+      <span class="reviews-editor-spacer"></span>
+      <shared-button class="reviews-cancel" variant="ghost" [disabled]="busy()" (click)="closeEditor()">
+        {{ 'macrodeck:Common.Cancel' | translate }}
+      </shared-button>
+      <shared-button
+        class="reviews-save"
+        variant="primary"
+        [loading]="busy()"
+        [disabled]="busy()"
+        (click)="save()">
+        @if (ownReview()) {
+          {{ 'macrodeck.app:Store.Reviews.UpdateAction' | translate }}
+        } @else {
+          {{ 'macrodeck:Common.Save' | translate }}
+        }
+      </shared-button>
+    </div>
+  </shared-modal>
+}
+
+@if (deleteConfirmOpen()) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Store.Reviews.DeleteHeading' | translate"
+    [message]="'macrodeck.app:Store.Reviews.DeleteMessage' | translate"
+    [confirmText]="'macrodeck.app:Store.Reviews.DeleteAction' | translate"
+    [danger]="true"
+    (confirm)="confirmDelete()"
+    (cancel)="cancelDelete()" />
+}

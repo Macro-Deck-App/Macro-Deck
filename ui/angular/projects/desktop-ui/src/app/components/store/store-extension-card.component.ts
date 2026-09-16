@@ -3,14 +3,17 @@ import { RouterLink } from '@angular/router';
 import { AppStrings, StoreCatalogItemBody, StoreOperationBody } from '@macro-deck/runtime';
 import { ApiService, LocalizationService } from '@shared';
 import { PluginRuntimeService } from '../../services/plugin-runtime.service';
+import { StoreRatingsService } from '../../services/store-ratings.service';
+import { formatStoreRating } from '../../util/store-rating-format';
 import { storeKindIcon, storeKindLabelKey, storeTrustLabelKey } from '../../util/store-operation-display';
 import { StoreStateBadgeComponent } from './store-state-badge.component';
 import { StoreInstallButtonComponent } from './store-install-button.component';
+import { StoreRatingStarsComponent } from './store-rating-stars.component';
 
 @Component({
   selector: 'shared-store-extension-card',
   standalone: true,
-  imports: [RouterLink, StoreStateBadgeComponent, StoreInstallButtonComponent],
+  imports: [RouterLink, StoreStateBadgeComponent, StoreInstallButtonComponent, StoreRatingStarsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './store-extension-card.component.html',
   styleUrls: ['./store-extension-card.component.scss'],
@@ -19,6 +22,7 @@ export class StoreExtensionCardComponent {
   private readonly api = inject(ApiService);
   private readonly localization = inject(LocalizationService);
   private readonly runtime = inject(PluginRuntimeService);
+  private readonly ratings = inject(StoreRatingsService);
 
   readonly item = input.required<StoreCatalogItemBody>();
 
@@ -63,6 +67,18 @@ export class StoreExtensionCardComponent {
   protected readonly trustLabel = computed(() => {
     const key = storeTrustLabelKey(this.item().kind, this.item().trust);
     return key ? this.localization.translateKey(key) : null;
+  });
+
+  protected readonly rating = computed(() => {
+    const summary = this.ratings.ratings().get(this.item().id);
+    if (!summary || summary.ratingCount <= 0 || summary.rating === null || summary.rating === undefined) {
+      return null;
+    }
+    return {
+      value: summary.rating,
+      text: formatStoreRating(summary.rating, this.localization.culture()),
+      count: this.localization.translateKey(AppStrings.Store.Reviews.RatingCount, { count: summary.ratingCount }),
+    };
   });
 
   constructor() {
