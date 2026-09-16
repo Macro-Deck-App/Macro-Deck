@@ -87,6 +87,53 @@ internal sealed class SpotifyMusicPlayerStateTests
 		}
 		""";
 
+	private const string PodcastWithoutEpisodeOptInJson =
+		"""
+		{
+		  "device": { "id": "dev-1", "is_active": true, "name": "Desk", "type": "Computer", "volume_percent": 55 },
+		  "repeat_state": "off",
+		  "shuffle_state": false,
+		  "progress_ms": 250000,
+		  "is_playing": true,
+		  "currently_playing_type": "episode",
+		  "item": null
+		}
+		""";
+
+	private const string PlayingEpisodeWithoutShowJson =
+		"""
+		{
+		  "device": { "id": "dev-1", "is_active": true, "name": "Desk", "type": "Computer", "volume_percent": 55 },
+		  "repeat_state": "off",
+		  "shuffle_state": false,
+		  "progress_ms": 1000,
+		  "is_playing": true,
+		  "currently_playing_type": "episode",
+		  "item": {
+		    "type": "episode",
+		    "id": "episode-2",
+		    "uri": "spotify:episode:episode-2",
+		    "name": "Show-less Episode",
+		    "duration_ms": 300000,
+		    "images": [],
+		    "external_urls": { "spotify": "https://open.spotify.com/episode/episode-2" }
+		  }
+		}
+		""";
+
+	private const string PlayingAdJson =
+		"""
+		{
+		  "device": { "id": "dev-1", "is_active": true, "name": "Desk", "type": "Computer", "volume_percent": 55 },
+		  "repeat_state": "off",
+		  "shuffle_state": false,
+		  "progress_ms": 12000,
+		  "is_playing": true,
+		  "currently_playing_type": "ad",
+		  "item": null
+		}
+		""";
+
 	private const string PlayingTrackWithoutExternalUrlJson =
 		"""
 		{
@@ -528,6 +575,77 @@ internal sealed class SpotifyMusicPlayerStateTests
 	}
 
 	[Test]
+	public async Task GetStateAsync_asks_Spotify_for_episodes_as_well_as_tracks()
+	{
+		var http = new StubSpotifyHttpClient { Handler = PodcastAwareHandler };
+		var player = CreatePlayer(http);
+
+		await player.GetStateAsync();
+
+		var playback = http.Requests.First(request => request.Endpoint.ToString() == "me/player");
+		Assert.That(AdditionalTypes(playback), Does.Contain("episode"));
+	}
+
+	[Test]
+	public async Task GetStateAsync_maps_a_playing_podcast_to_its_episode_show_and_duration()
+	{
+		var http = new StubSpotifyHttpClient { Handler = PodcastAwareHandler };
+		var player = CreatePlayer(http);
+
+		var state = await player.GetStateAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(state.PlaybackState, Is.EqualTo(PlaybackState.Playing));
+			Assert.That(state.TrackName, Is.EqualTo("Some Episode"));
+			Assert.That(state.Artists, Is.EqualTo(new[] { "Show" }));
+			Assert.That(state.AlbumName, Is.EqualTo("Show"));
+			Assert.That(state.Duration, Is.EqualTo(TimeSpan.FromMinutes(5)));
+			Assert.That(state.Position, Is.EqualTo(TimeSpan.FromMilliseconds(1000)));
+			Assert.That(player.CurrentItem?.Uri, Is.EqualTo("spotify:episode:episode-1"));
+		});
+	}
+
+	[Test]
+	public async Task GetStateAsync_keeps_playing_an_episode_whose_show_is_missing()
+	{
+		var http = new StubSpotifyHttpClient
+		{
+			Handler = request => Json(HttpStatusCode.OK,
+				AsksForEpisodes(request) ? PlayingEpisodeWithoutShowJson : PodcastWithoutEpisodeOptInJson)
+		};
+		var player = CreatePlayer(http);
+
+		var state = await player.GetStateAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(state.IsConnected, Is.True);
+			Assert.That(state.PlaybackState, Is.EqualTo(PlaybackState.Playing));
+			Assert.That(state.TrackName, Is.EqualTo("Show-less Episode"));
+			Assert.That(state.AlbumName, Is.Null);
+			Assert.That(state.Artists, Is.Empty);
+			Assert.That(state.Duration, Is.EqualTo(TimeSpan.FromMinutes(5)));
+		});
+	}
+
+	[Test]
+	public async Task GetStateAsync_reports_no_position_for_an_item_it_cannot_describe()
+	{
+		var http = new StubSpotifyHttpClient { Handler = _ => Json(HttpStatusCode.OK, PlayingAdJson) };
+		var player = CreatePlayer(http);
+
+		var state = await player.GetStateAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(state.PlaybackState, Is.EqualTo(PlaybackState.Playing));
+			Assert.That(state.Position, Is.Null);
+			Assert.That(state.Duration, Is.Null);
+		});
+	}
+
+	[Test]
 	public async Task GetStateAsync_derives_the_url_when_external_urls_is_absent()
 	{
 		var http = new StubSpotifyHttpClient
@@ -895,6 +1013,15 @@ internal sealed class SpotifyMusicPlayerStateTests
 
 	private static bool IsDevicesRequest(IRequest request)
 		=> request.Endpoint.ToString().Contains("devices", StringComparison.Ordinal);
+
+	private static Response PodcastAwareHandler(IRequest request)
+		=> Json(HttpStatusCode.OK, AsksForEpisodes(request) ? PlayingEpisodeJson : PodcastWithoutEpisodeOptInJson);
+
+	private static bool AsksForEpisodes(IRequest request)
+		=> AdditionalTypes(request).Contains("episode", StringComparison.Ordinal);
+
+	private static string AdditionalTypes(IRequest request)
+		=> request.Parameters.TryGetValue("additional_types", out var types) ? types : string.Empty;
 
 	private static SpotifyMusicPlayer CreatePlayer(StubSpotifyHttpClient http, TimeProvider? timeProvider = null)
 	{

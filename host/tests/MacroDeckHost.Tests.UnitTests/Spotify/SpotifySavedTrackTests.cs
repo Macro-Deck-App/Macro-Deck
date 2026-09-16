@@ -181,6 +181,37 @@ internal sealed class SpotifySavedTrackTests
 	}
 
 	[Test]
+	public async Task A_refused_liked_check_for_an_episode_leaves_the_liked_state_working_for_tracks()
+	{
+		var playbackJson = PlayingEpisodeJson;
+		var http = new StubSpotifyHttpClient
+		{
+			Handler = request => IsPlaybackRequest(request)
+				? Json(HttpStatusCode.OK, playbackJson)
+				: ReferenceEquals(playbackJson, PlayingEpisodeJson)
+					? Json(HttpStatusCode.Forbidden, """{"error":{"status":403,"message":"Forbidden"}}""")
+					: Json(HttpStatusCode.OK, "[true]")
+		};
+		var time = new ManualTimeProvider();
+		var player = CreatePlayer(http, time);
+		await player.GetStateAsync();
+		var duringEpisode = await player.IsCurrentItemSavedAsync();
+
+		playbackJson = PlayingTrackJson;
+		time.Advance(TimeSpan.FromMinutes(1));
+		await player.GetStateAsync();
+		var duringTrack = await player.IsCurrentItemSavedAsync();
+
+		var trackCheck = http.Requests.Last(IsCheckRequest);
+		Assert.Multiple(() =>
+		{
+			Assert.That(duringEpisode, Is.Null);
+			Assert.That(duringTrack, Is.True);
+			Assert.That(trackCheck.Parameters["uris"], Is.EqualTo("spotify:track:track-1"));
+		});
+	}
+
+	[Test]
 	public async Task IsCurrentItemSavedAsync_does_not_throw_on_a_500()
 	{
 		var http = new StubSpotifyHttpClient

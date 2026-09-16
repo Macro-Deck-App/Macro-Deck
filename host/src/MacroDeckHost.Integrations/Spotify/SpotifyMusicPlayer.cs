@@ -559,7 +559,11 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 
 				var authElapsed = stopwatch.Elapsed;
 				phase = "playback";
-				var playback = await client.Player.GetCurrentPlayback(readToken);
+				// Spotify nulls the item for anything but a track unless the client opts in, so without
+				// this a podcast reports playing with nothing in it.
+				var playback = await client.Player.GetCurrentPlayback(
+					new PlayerCurrentPlaybackRequest(PlayerCurrentPlaybackRequest.AdditionalTypes.All),
+					readToken);
 				var state = playback is not null
 					? Map(playback)
 					: await BuildIdleStateAsync(client, readToken);
@@ -1489,7 +1493,11 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 		}
 		catch (Exception ex)
 		{
-			if (IsForbidden(ex) && !SpotifyApiLimits.IsQuotaExceeded(ex))
+			// A 403 on a track means the library scope is gone for good; on an episode it may be that
+			// endpoint refusing the kind, which must not disable the liked state for songs too.
+			if (IsForbidden(ex) &&
+				!SpotifyApiLimits.IsQuotaExceeded(ex) &&
+				item.Kind is SpotifyPlayingItemKind.Track)
 			{
 				LatchSavedStateOff();
 			}
@@ -1766,9 +1774,10 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 		}
 		else if (playback.Item is FullEpisode episode)
 		{
+			var show = episode.Show?.Name;
 			trackName = episode.Name;
-			artists = [];
-			albumName = episode.Show.Name;
+			artists = string.IsNullOrEmpty(show) ? [] : [show];
+			albumName = show;
 			duration = TimeSpan.FromMilliseconds(episode.DurationMs);
 			artworkId = RegisterArtwork(episode.Images);
 		}
@@ -1785,7 +1794,11 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 			Artists = artists,
 			AlbumName = albumName,
 			ArtworkId = artworkId,
-			Position = TimeSpan.FromMilliseconds(playback.ProgressMs),
+			// Spotify keeps reporting progress for items it will not describe, which leaves a clock
+			// running over "Nothing playing" and a bound control with no range.
+			Position = playback.Item is FullTrack or FullEpisode
+				? TimeSpan.FromMilliseconds(playback.ProgressMs)
+				: null,
 			Duration = duration,
 			VolumePercent = device?.VolumePercent,
 			ShuffleEnabled = playback.ShuffleState,
