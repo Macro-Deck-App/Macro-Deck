@@ -12,8 +12,12 @@ installed.
 dotnet tool install --global MacroDeck.Plugin.Cli --prerelease
 ```
 
-- `--prerelease` is required until a stable 3.0 build ships: only `-preview` versions are published, and
-  `dotnet tool install` skips prereleases unless asked.
+- `--prerelease` is required until a stable 3.0 build ships: only prerelease versions are published, and
+  `dotnet tool install` skips them unless asked.
+- It does not install the newest one today. SemVer orders `beta` before `preview`, so `--prerelease`
+  resolves to `3.0.0-preview.10` while the newest release is `3.0.0-beta.11`. Commands added since
+  `preview.10`, [`merge`](/cli/merge/) among them, need it by name:
+  `dotnet tool install --global MacroDeck.Plugin.Cli --version 3.0.0-beta.11`.
 - The tool needs the **ASP.NET Core shared framework**, not just the .NET runtime, because `run` and
   `test` start a real Kestrel loopback host (via
   [`MacroDeck.Plugin.Testing`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/sdk/src/MacroDeck.Plugin.Testing/README.md)).
