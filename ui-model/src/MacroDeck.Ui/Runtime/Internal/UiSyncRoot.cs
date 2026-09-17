@@ -63,6 +63,9 @@ internal sealed class UiSyncRoot
 	private static List<UiDeferredWork>? _deferredWork;
 
 	[ThreadStatic]
+	private static List<UiView>? _deferredDisposals;
+
+	[ThreadStatic]
 	private static List<UiPendingNotification>? _notifications;
 
 	private readonly Lock _gate = new();
@@ -168,6 +171,8 @@ internal sealed class UiSyncRoot
 	internal static void DeferWork(UiView view, Task work) =>
 		(_deferredWork ??= []).Add(new UiDeferredWork(view, work));
 
+	internal static void DeferDispose(UiView view) => (_deferredDisposals ??= []).Add(view);
+
 	/// <summary>Queues <c>Changed</c> (a <c>null</c> fault) or <c>HandlerFaulted</c> for
 	/// <paramref name="view" />, to be raised once this thread is outside every gate. Raised immediately when
 	/// it already is - an asynchronous handler's fault lands there.</summary>
@@ -248,8 +253,9 @@ internal sealed class UiSyncRoot
 				var reads = _deferredReads;
 				var work = _deferredWork;
 				var writes = _deferredWrites;
+				var disposals = _deferredDisposals;
 
-				if (merges is null && reads is null && work is null && writes is null)
+				if (merges is null && reads is null && work is null && writes is null && disposals is null)
 				{
 					break;
 				}
@@ -259,6 +265,7 @@ internal sealed class UiSyncRoot
 				_deferredReads = null;
 				_deferredWork = null;
 				_deferredWrites = null;
+				_deferredDisposals = null;
 
 				// Everything taken above is discarded with the throw: a drain that will not converge is a
 				// defect in the plugin driving it, and finishing this pass would only extend the loop it is
@@ -282,6 +289,7 @@ internal sealed class UiSyncRoot
 				DrainReads(reads, ref faults);
 				DrainWork(work, ref faults);
 				DrainWrites(writes, ref faults);
+				DrainDisposals(disposals, ref faults);
 			}
 		}
 		finally
@@ -359,6 +367,28 @@ internal sealed class UiSyncRoot
 			try
 			{
 				write.NotifyDeferredWrite();
+			}
+#pragma warning disable CA1031 // See DrainReads.
+			catch (Exception exception)
+#pragma warning restore CA1031
+			{
+				(faults ??= []).Add(exception);
+			}
+		}
+	}
+
+	private static void DrainDisposals(List<UiView>? disposals, ref List<Exception>? faults)
+	{
+		if (disposals is null)
+		{
+			return;
+		}
+
+		foreach (var view in disposals)
+		{
+			try
+			{
+				view.Dispose();
 			}
 #pragma warning disable CA1031 // See DrainReads.
 			catch (Exception exception)

@@ -40,6 +40,9 @@ public static UiElement Offline() => WeatherView.Build(new MockWeatherService { 
 The method must be `static`, take no parameters, and return a `UiElement`, a `UiView` or a `UiPreview`.
 Nothing is injected: a scenario builds its own mocks, and nothing reaches the real service.
 
+A returned `UiView` belongs to the preview, which disposes it when the preview ends. Build a new one on
+every call rather than returning a cached instance, or the next open gets a view that ignores every event.
+
 ## Grouping and profile
 
 ```csharp

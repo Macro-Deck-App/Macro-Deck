@@ -66,13 +66,22 @@ public sealed class ViewSession : IUiSession
 
     public void Dispatch(UiEvent uiEvent) => _view.Dispatch(uiEvent);
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public ValueTask DisposeAsync()
+    {
+        _view.Dispose();
+        return ValueTask.CompletedTask;
+    }
 }
 ```
 
 `ViewSession` is the whole adapter between a `MacroDeck.Ui` `UiView` and `IUiSession`; the other pages
 in this section reuse it. `IUiSession` itself speaks only `MacroDeck.Ui.Model` terms, so a provider can
 serve a tree without the DSL.
+
+Disposing the view is what lets a closed session go. `_count` belongs to the provider and outlives every
+session, and a state keeps each view that reads it alive and flushes into it on every write. A session that
+skips `_view.Dispose()` stays in memory for as long as the plugin runs, and so does every patch queued for
+it. See [Disposing](/ui/concepts/reactive-updates/#disposing).
 
 ## Declaring surfaces
 
@@ -97,7 +106,7 @@ depend on a live connection. Declaring a surface does not commit you to every se
 | Snapshot | The host asks for a full tree when a client attaches and whenever it must resynchronise. | `BuildTree()` must describe the revision your emitted patches have reached. |
 | Patches | You raise `Changed`; the host drains. | Coalescing several changes into one raise is fine - the host drains rather than counts. A patch dropped in `DrainPatches` is lost to every attached client. |
 | Events | `Dispatch` delivers a client event, never concurrently for one session. | Reject an event by producing no patch. A throw faults the session. |
-| Close | The host disposes the session - at any time: a client leaving for good, a limit trip, or a fault. | Release what the session holds in `DisposeAsync`. |
+| Close | The host disposes the session - at any time: a client leaving for good, a limit trip, or a fault. | Release what the session holds in `DisposeAsync`, including disposing its `UiView`. |
 
 You never see who is attached, how many clients there are, or when one attaches: one code path serves one
 deck or several.

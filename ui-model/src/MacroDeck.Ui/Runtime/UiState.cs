@@ -276,6 +276,15 @@ public sealed class UiState<T> : IUiTrackedState
 		}
 	}
 
+	void IUiTrackedState.Detach(UiView view)
+	{
+		lock (_gate)
+		{
+			_views.Remove(view);
+			_dependents.RemoveAll(dependent => ReferenceEquals(dependent.View, view));
+		}
+	}
+
 	void IUiTrackedState.NotifyDeferredWrite()
 	{
 		UiSyncRoot root;

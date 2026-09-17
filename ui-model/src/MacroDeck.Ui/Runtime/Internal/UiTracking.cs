@@ -69,6 +69,8 @@ internal interface IUiTrackedState
 	/// <summary>Drops <paramref name="dependent" />, called before it re-evaluates so a provider whose
 	/// dependencies changed does not keep the old ones.</summary>
 	void Unobserve(UiDependent dependent);
+
+	void Detach(UiView view);
 }
 
 /// <summary>
@@ -104,7 +106,7 @@ internal abstract class UiDependent
 	/// </summary>
 	internal void RecordDependency(IUiTrackedState state)
 	{
-		if (_view is null || _dependencies.Contains(state))
+		if (_view is null || _view.IsDisposeRequested || _dependencies.Contains(state))
 		{
 			return;
 		}
@@ -117,6 +119,7 @@ internal abstract class UiDependent
 		if (state.Observe(this, _view))
 		{
 			_dependencies.Add(state);
+			_view.RetainRead(state);
 		}
 	}
 
@@ -128,6 +131,7 @@ internal abstract class UiDependent
 		foreach (var state in _dependencies)
 		{
 			state.Unobserve(this);
+			_view?.ReleaseRead(state);
 		}
 
 		_dependencies.Clear();

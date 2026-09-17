@@ -7,9 +7,6 @@ using MacroDeck.Ui.Runtime;
 
 namespace MacroDeckHost.Widgets.DeveloperPreviews;
 
-// Disposal releases whatever the scenario handed over and detaches the view's handlers, which is what
-// stops a mock's subscription the moment the preview does - see the identical SDK-side
-// MacroDeck.Plugin.Hosting.Capabilities.Ui.UiPreviewSession this mirrors.
 internal sealed class WidgetUiPreviewSession : IUiSession
 {
 	private readonly UiPreviewInstance _instance;
