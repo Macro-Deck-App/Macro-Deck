@@ -2,6 +2,8 @@ import { UiComponentEvents } from './component-events';
 import { nodeClaimsGesture } from '../ui-framework/node-gestures';
 import type { UiComponentContext } from '../ui-framework/component-registry';
 import { PressFeedback } from '../render/press-feedback';
+import { emitsEvent } from '../ui-framework/node-properties.util';
+import { TapSequencer } from './tap-sequencer';
 
 const LONG_PRESS_MS = 600;
 
@@ -10,6 +12,7 @@ export interface PressGestureState {
   pointerId: number | null;
   longPressTimer: ReturnType<typeof setTimeout> | null;
   longPressTriggered: boolean;
+  readonly taps: TapSequencer;
 }
 
 export function createPressGestureState<TState>(ctx: UiComponentContext<TState>): PressGestureState {
@@ -27,6 +30,7 @@ export function createPressGestureState<TState>(ctx: UiComponentContext<TState>)
     pointerId: null,
     longPressTimer: null,
     longPressTriggered: false,
+    taps: new TapSequencer(),
   };
 }
 
@@ -40,14 +44,24 @@ export function bindPressGesture<TState>(
   ctx: UiComponentContext<TState>,
   state: PressGestureState,
 ): void {
-  function endPress(committed: boolean): void {
+  function endPress(committed: boolean, x?: number, y?: number): void {
     const current = ctx.current();
     state.longPressTimer = clearTimer(state.longPressTimer);
     state.pointerId = null;
 
     state.feedback.release();
+    const tap = committed && !state.longPressTriggered;
+    if (!tap) state.taps.interrupted();
     ctx.emit(current, UiComponentEvents.PressEnd);
-    if (committed && !state.longPressTriggered) ctx.emit(current, UiComponentEvents.Press);
+    if (tap) {
+      state.taps.tapCompleted(
+        emitsEvent(current, UiComponentEvents.DoublePress),
+        () => ctx.emit(ctx.current(), UiComponentEvents.Press),
+        () => ctx.emit(ctx.current(), UiComponentEvents.DoublePress),
+        x,
+        y,
+      );
+    }
   }
 
   element.addEventListener('pointerdown', (event: Event) => {
@@ -79,11 +93,13 @@ export function bindPressGesture<TState>(
       // See above - the press still ends, through pointerleave rather than through capture.
     }
 
+    state.taps.pressStarted(pointer.clientX, pointer.clientY);
     ctx.emit(current, UiComponentEvents.PressStart);
 
     state.longPressTimer = setTimeout(() => {
       state.longPressTimer = null;
       state.longPressTriggered = true;
+      state.taps.interrupted();
       ctx.emit(ctx.current(), UiComponentEvents.LongPress);
     }, LONG_PRESS_MS);
   });
@@ -95,7 +111,7 @@ export function bindPressGesture<TState>(
       event.preventDefault();
       event.stopPropagation();
     }
-    endPress(committed);
+    endPress(committed, pointer.clientX, pointer.clientY);
   };
 
   element.addEventListener('widget-gesture-cancel', () => {
@@ -117,5 +133,6 @@ export function bindPressGesture<TState>(
 export function releasePressGesture(state: PressGestureState): void {
   state.longPressTimer = clearTimer(state.longPressTimer);
   state.pointerId = null;
+  state.taps.dispose();
   state.feedback.dispose();
 }

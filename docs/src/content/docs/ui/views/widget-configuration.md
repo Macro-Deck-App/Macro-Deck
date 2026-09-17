@@ -172,7 +172,8 @@ new UiActionsListEditor { Key = "flows", Binding = Bind.To(flows), CanRun = true
 Each renderer maps these onto the editors it already ships; a plugin ships no renderer code for them.
 
 `UiActionsListEditor.Triggers` names the trigger tabs the editor offers, such as `["onDoublePress"]` for a
-single Double Tap tab. Event triggers, which run a flow when an integration or Macro Deck event fires, are
+single Double Tap tab. Leave it unset for the default press tabs: Short Press, Long Press, Touch Start, Touch
+End and Double Tap. Event triggers, which run a flow when an integration or Macro Deck event fires, are
 offered alongside those tabs either way. The host runs a widget's event flows only from the top-level
 `flows` key of its stored configuration, so bind the editor there, as in the example above, for them to
 fire.

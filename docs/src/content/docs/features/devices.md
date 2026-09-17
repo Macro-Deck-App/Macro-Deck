@@ -210,9 +210,18 @@ answered `NotSupported`.
 | `Release` | `onTouchEnd`, plus `onShortPress` if the long press had not fired. |
 | `ShortPress` / `LongPress` | That trigger directly - no synthesis. |
 
+A built-in widget with a Double Tap action changes the `Release` row. The `onShortPress` is held for 400 ms. A second
+`Press` in that window that is released before the long press runs `onDoublePress` after its `onTouchEnd`,
+and neither tap runs `onShortPress`. If that second press becomes a long press, the held `onShortPress` runs
+first, right before `onLongPress`. Navigation, the device going offline and the session closing drop a held
+`onShortPress`. Double taps come only from `Press`/`Release` pairs: an explicit `ShortPress` always runs at
+once and keeps its verdict, so hardware that reports whole presses never produces `onDoublePress`. A widget
+whose only press action is a Double Tap advertises `Press` and `Release` only.
+
 A tile that a plugin or integration serves, rather than a built-in one, answers a press from its own UI tree
 first, exactly as it does on screen: a [disabled region](/ui/components/modifier/) absorbs the press, and a
-control that declares the press receives it instead of the tile's flows. The host asks that tree once per
+control that declares the press receives it instead of the tile's flows. One difference: a tree's `double-press` is
+never sent from a hardware deck, so a button declaring it receives `press` for every tap. The host asks that tree once per
 press and waits at most a second for it; a tree that does not answer in time absorbs the press. Because the
 tree may arrive over the same connection your report came in on, the host never holds your report for it:
 `Press` and `Release` return at once as always, and a `ShortPress` or `LongPress` whose tree has not answered

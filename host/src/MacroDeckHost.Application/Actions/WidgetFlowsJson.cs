@@ -39,6 +39,39 @@ public static class WidgetFlowsJson
 		}
 	}
 
+	public static bool HasRunnableFlow(string? widgetData, string triggerType)
+	{
+		if (!TryExtract(widgetData, out var flowsJson))
+		{
+			return false;
+		}
+
+		try
+		{
+			using var document = JsonDocument.Parse(flowsJson);
+			return HasRunnableFlow(document.RootElement, triggerType);
+		}
+		catch (JsonException)
+		{
+			return false;
+		}
+	}
+
+	public static bool HasRunnableFlow(JsonElement flows, string triggerType)
+		=> flows.ValueKind == JsonValueKind.Array &&
+			flows.EnumerateArray()
+				.Any(flow => flow.ValueKind == JsonValueKind.Object &&
+					TryGetProperty(flow, "triggerType", out var type) &&
+					type.ValueKind == JsonValueKind.String &&
+					string.Equals(type.GetString(), triggerType, StringComparison.OrdinalIgnoreCase) &&
+					TryGetProperty(flow, "children", out var children) &&
+					children.ValueKind == JsonValueKind.Array &&
+					children.EnumerateArray().Any(IsEnabledBlock));
+
+	private static bool IsEnabledBlock(JsonElement block)
+		=> block.ValueKind == JsonValueKind.Object &&
+			!(block.TryGetProperty("disabled", out var disabled) && disabled.ValueKind == JsonValueKind.True);
+
 	/// <summary>The distinct trigger types the widget has a flow for, in the order they are stored.</summary>
 	public static IReadOnlyList<string> TriggerTypes(string? widgetData)
 	{

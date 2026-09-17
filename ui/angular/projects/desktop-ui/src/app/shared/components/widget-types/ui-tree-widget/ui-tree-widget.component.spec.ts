@@ -384,6 +384,69 @@ describe('UiTreeWidgetComponent', () => {
       }
     });
 
+    describe('with a Double Tap flow', () => {
+      const doubleTapData = { flows: [{ triggerId: 'd', triggerType: 'onDoublePress', children: [{ id: 'b1' }] }] };
+
+      const tap = (el: HTMLElement) => {
+        el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+        jasmine.clock().tick(50);
+        el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+      };
+
+      it('emits onDoublePress and no onShortPress for two quick taps', () => {
+        jasmine.clock().install();
+        try {
+          const fixture = createFixture({ widgetId: 'w1', data: doubleTapData });
+          const triggers: string[] = [];
+          fixture.componentInstance.trigger.subscribe(t => triggers.push(t));
+
+          tap(tile(fixture));
+          jasmine.clock().tick(150);
+          tap(tile(fixture));
+          jasmine.clock().tick(1000);
+
+          expect(triggers).toEqual(['onTouchStart', 'onTouchEnd', 'onTouchStart', 'onTouchEnd', 'onDoublePress']);
+        } finally {
+          jasmine.clock().uninstall();
+        }
+      });
+
+      it('emits onShortPress only once the double tap window has passed', () => {
+        jasmine.clock().install();
+        try {
+          const fixture = createFixture({ widgetId: 'w1', data: doubleTapData });
+          const triggers: string[] = [];
+          fixture.componentInstance.trigger.subscribe(t => triggers.push(t));
+
+          tap(tile(fixture));
+          jasmine.clock().tick(399);
+          expect(triggers).toEqual(['onTouchStart', 'onTouchEnd']);
+
+          jasmine.clock().tick(1);
+          expect(triggers).toEqual(['onTouchStart', 'onTouchEnd', 'onShortPress']);
+        } finally {
+          jasmine.clock().uninstall();
+        }
+      });
+
+      it('drops a waiting onShortPress when the tile is destroyed', () => {
+        jasmine.clock().install();
+        try {
+          const fixture = createFixture({ widgetId: 'w1', data: doubleTapData });
+          const triggers: string[] = [];
+          fixture.componentInstance.trigger.subscribe(t => triggers.push(t));
+
+          tap(tile(fixture));
+          fixture.destroy();
+          jasmine.clock().tick(1000);
+
+          expect(triggers).toEqual(['onTouchStart', 'onTouchEnd']);
+        } finally {
+          jasmine.clock().uninstall();
+        }
+      });
+    });
+
     it('emits onTouchStart, onLongPress, onTouchEnd (no onShortPress) on a long press', () => {
       jasmine.clock().install();
       try {

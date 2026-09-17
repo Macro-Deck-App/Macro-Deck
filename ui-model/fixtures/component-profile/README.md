@@ -181,11 +181,12 @@ contract a screenshot comparison would never catch.
 The button is the profile's other interactive element, and unlike the slider it also carries its own
 artwork and its own ring, so this tree pins three things no other fixture exercises:
 
-- **four declaration shapes** - `events` declaring all four names, `events` of `["press"]` alone,
+- **five declaration shapes** - `events` declaring all four press names, `events` of `["press"]` alone,
   `events` of `["press-end","press-start"]` alone, and no `events` key at all. A tree carrying only the
   pair passes a reader that infers `press` from `press-start`/`press-end` ending back to back, which is
   exactly the inference the contract forbids; a tree missing the undeclared case passes a reader that
-  offers interaction unconditionally;
+  offers interaction unconditionally; and `conformance.double` with `["double-press","press"]`, the only
+  declaration under which a reader may hold `press` back for a double tap;
 - a backdrop with **every** framing key at a non-default value - `fit: "cover"`, a `zoom` away from `1`,
   `offsetX`/`offsetY` non-zero and of **opposite sign**, and an `opacity` below `1` - next to a button
   that carries a `source` and **none** of those keys. The second is the case that matters: a reader that

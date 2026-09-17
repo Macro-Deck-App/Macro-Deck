@@ -8,6 +8,8 @@ import { UiNode } from '../ui-framework/ui-node.interface';
 import { treeClaimsGesture } from '../ui-framework/node-gestures';
 import { widgetTileBorder } from '../ui-components/style';
 import { PressFeedback } from './press-feedback';
+import { TapSequencer } from '../ui-components/tap-sequencer';
+import { hasRunnableFlow } from '../domain/deck-navigation.util';
 import { renderUiNode, UiNodeRenderHandle } from './ui-node-renderer';
 import { renderWidgetBorder, WidgetBorderHandle } from './widget-border';
 import { UiRenderHost } from './ui-render-host';
@@ -84,6 +86,7 @@ interface Tile {
   longPressTimer: ReturnType<typeof setTimeout> | null;
   longPressFired: boolean;
   treePressed: boolean;
+  taps: TapSequencer;
 }
 
 export function renderWidgetGrid(
@@ -170,8 +173,16 @@ export function renderWidgetGrid(
     }
 
     tile.press.release();
+    const tap = committed && !tile.longPressFired;
+    if (!tap) tile.taps.interrupted();
     trigger(tile, 'onTouchEnd');
-    if (committed && !tile.longPressFired) trigger(tile, 'onShortPress');
+    if (tap) {
+      tile.taps.tapCompleted(
+        hasRunnableFlow((tile.widget.data as { flows?: unknown }).flows, 'onDoublePress'),
+        () => trigger(tile, 'onShortPress'),
+        () => trigger(tile, 'onDoublePress'),
+      );
+    }
   }
 
   function bindTilePress(tile: Tile): void {
@@ -187,11 +198,13 @@ export function renderWidgetGrid(
       tile.pointerId = pointer.pointerId;
       tile.longPressFired = false;
       tile.press.press();
+      tile.taps.pressStarted();
       trigger(tile, 'onTouchStart');
 
       tile.longPressTimer = setTimeout(() => {
         tile.longPressTimer = null;
         tile.longPressFired = true;
+        tile.taps.interrupted();
         trigger(tile, 'onLongPress');
       }, LONG_PRESS_MS);
     });
@@ -251,6 +264,7 @@ export function renderWidgetGrid(
       longPressTimer: null,
       longPressFired: false,
       treePressed: false,
+      taps: new TapSequencer(),
     };
     tile.press = new PressFeedback(() => paintPressed(tile));
 
@@ -261,6 +275,7 @@ export function renderWidgetGrid(
 
   function destroyTile(tile: Tile): void {
     if (tile.longPressTimer !== null) clearTimeout(tile.longPressTimer);
+    tile.taps.dispose();
     tile.press.dispose();
     if (tile.mounted) tile.mounted.destroy();
     tile.border.destroy();

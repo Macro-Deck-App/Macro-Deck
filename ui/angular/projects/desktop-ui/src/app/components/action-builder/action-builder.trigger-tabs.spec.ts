@@ -49,6 +49,23 @@ describe('ActionBuilderComponent configured trigger tabs', () => {
     expect(component.addableTriggerTabs().map(t => t.triggerType)).toContain('onShortPress');
   });
 
+  it('offers Double Tap as a trigger a widget can add', () => {
+    fixture.componentRef.setInput('flows', []);
+    fixture.detectChanges();
+
+    expect(component.addableTriggerTabs().map(t => t.triggerType)).toContain('onDoublePress');
+  });
+
+  it('shows only Double Tap for a widget whose one trigger is a double tap, with Short Press still addable', () => {
+    fixture.componentRef.setInput('flows', [
+      { triggerId: 'onDoublePress', triggerType: 'onDoublePress', children: [{ id: 'b1' }] },
+    ]);
+    fixture.detectChanges();
+
+    expect(component.triggerTabItems().map(t => t.id)).toEqual(['onDoublePress']);
+    expect(component.addableTriggerTabs().map(t => t.triggerType)).toContain('onShortPress');
+  });
+
   it('shows configured triggers in canonical order, not in the order they were added', () => {
     fixture.componentRef.setInput('flows', [
       { triggerId: 'onTouchEnd', triggerType: 'onTouchEnd', children: [] },
@@ -113,13 +130,14 @@ describe('ActionBuilderComponent configured trigger tabs', () => {
   it('shrinks the add menu and hides it once every trigger is configured', () => {
     expect(component.showAddTrigger()).toBeTrue();
     expect(component.addableTriggerTabs().map(t => t.triggerType))
-      .toEqual(['onLongPress', 'onTouchStart', 'onTouchEnd']);
+      .toEqual(['onLongPress', 'onTouchStart', 'onTouchEnd', 'onDoublePress']);
 
     fixture.componentRef.setInput('flows', [
       { triggerId: 'onShortPress', triggerType: 'onShortPress', children: [] },
       { triggerId: 'onLongPress', triggerType: 'onLongPress', children: [] },
       { triggerId: 'onTouchStart', triggerType: 'onTouchStart', children: [] },
       { triggerId: 'onTouchEnd', triggerType: 'onTouchEnd', children: [] },
+      { triggerId: 'onDoublePress', triggerType: 'onDoublePress', children: [] },
     ]);
     fixture.detectChanges();
 

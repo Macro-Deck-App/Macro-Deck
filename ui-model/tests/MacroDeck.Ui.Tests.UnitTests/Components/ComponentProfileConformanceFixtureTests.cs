@@ -271,10 +271,11 @@ public class ComponentProfileConformanceFixtureTests
 		var press = nodes["conformance.press"];
 		var boundary = nodes["conformance.boundary"];
 		var silent = nodes["conformance.silent"];
+		var doublePress = nodes["conformance.double"];
 
 		Assert.Multiple(() =>
 		{
-			// Four declaration shapes, because the rule under test is "send what the node declares" and
+			// Five declaration shapes, because the rule under test is "send what the node declares" and
 			// a fixture missing any one of them passes a reader that infers or offers more than that.
 			Assert.That(full.Properties["events"].GetRawText(),
 				Is.EqualTo("""["long-press","press","press-end","press-start"]"""));
@@ -284,6 +285,7 @@ public class ComponentProfileConformanceFixtureTests
 			// Absent, never an empty array: a reader offers no affordance at all rather than an inert
 			// one, and a reader must never infer "press" from the start/end pair on conformance.boundary.
 			Assert.That(silent.Properties.ContainsKey("events"), Is.False);
+			Assert.That(doublePress.Properties["events"].GetRawText(), Is.EqualTo("""["double-press","press"]"""));
 
 			// A tinted ring and a self-cycling one: borderColor is present on the first and absent on
 			// the second, which is the case a reader that always echoed borderColor would fail.

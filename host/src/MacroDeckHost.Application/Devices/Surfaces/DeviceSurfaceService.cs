@@ -90,7 +90,8 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 		};
 		session.Presses = new DeviceSurfacePressTracker(_timeProvider,
 			widgetId => _interactions.ClaimAsync(session, widgetId),
-			(widgetId, triggerType, claim) => _interactions.ExecuteTriggerAsync(session, widgetId, triggerType, claim));
+			(widgetId, triggerType, claim) => _interactions.ExecuteTriggerAsync(session, widgetId, triggerType, claim),
+			widgetId => _interactions.HasDoubleTapFlow(session, widgetId));
 
 		if (!_sessions.TryAdd(deviceId, session))
 		{
