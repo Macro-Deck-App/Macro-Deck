@@ -105,6 +105,7 @@ internal sealed class StoreInstallExecutorTests
 			_iconHarness.Cache,
 			_installations,
 			new StoreInstallConsent(),
+			new StoreInstallBackupBatches(),
 			provider.GetRequiredService<IServiceScopeFactory>(),
 			_paths,
 			StoreRegistryOptions.Default,
@@ -190,6 +191,7 @@ internal sealed class StoreInstallExecutorTests
 			_iconHarness.Cache,
 			_installations,
 			new StoreInstallConsent(),
+			new StoreInstallBackupBatches(),
 			_scopeFactory,
 			_paths,
 			StoreRegistryOptions.Default,
@@ -211,6 +213,58 @@ internal sealed class StoreInstallExecutorTests
 			Assert.That(result.State, Is.EqualTo(StoreOperationState.Failed));
 			Assert.That(result.Error, Is.EqualTo(StoreOperationError.InstallBlockedByTakeover));
 			Assert.That(result.ErrorMessage, Is.EqualTo("installer message"));
+		});
+	}
+
+	[Test]
+	public async Task A_plugin_update_reports_installing_once_the_download_is_done_and_remembers_it_came_from_the_store()
+	{
+		var installer = new Plugins.Installation.FakePluginInstaller
+		{
+			ResultToReturn = PluginInstallResult.Ok(PluginId, "1.1.0", "1.0.0", activated: true)
+		};
+		var batches = new StoreInstallBackupBatches();
+		var executor = new StoreInstallExecutor(_catalog,
+			new StoreCatalogQueryService(_catalog, _pluginCatalog, _installations),
+			_tracker,
+			new StoreArtifactDownloader(_httpClientFactory, StoreRegistryOptions.Default, _paths, TimeProvider.System),
+			installer,
+			_iconHarness.Cache,
+			_installations,
+			new StoreInstallConsent(),
+			batches,
+			_scopeFactory,
+			_paths,
+			StoreRegistryOptions.Default,
+			TimeProvider.System,
+			Serilog.Core.Logger.None);
+		_catalog.Swap(new StoreCatalogSnapshot { Sequence = 1, Entries = [PluginEntry()] });
+		var operation = _tracker.Create(StoreOperationKind.Update,
+			StoreExtensionKind.Plugin,
+			PluginId,
+			"1.1.0",
+			"Store Plugin",
+			previousVersion: "1.0.0");
+		batches.Record(operation.Id, "batch-1");
+		var states = new List<StoreOperationState>();
+		_tracker.Changed += changed =>
+		{
+			if (changed.Id == operation.Id)
+			{
+				states.Add(changed.State);
+			}
+		};
+
+		await executor.Execute(operation.Id);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(states, Is.EqualTo(new[]
+			{
+				StoreOperationState.Downloading, StoreOperationState.Installing, StoreOperationState.Completed
+			}));
+			Assert.That(installer.LastInstallRequest!.BackupBatchId, Is.EqualTo("batch-1"));
+			Assert.That(_installations.Find(StoreExtensionKind.Plugin, PluginId)?.Version, Is.EqualTo("1.1.0"));
 		});
 	}
 

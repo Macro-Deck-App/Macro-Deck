@@ -27,6 +27,24 @@ Switching the mode away from **Automatic** during the countdown stops it.
 With **Before Macro Deck updates** turned on in **Settings > Backups**, Macro Deck makes a backup before it
 installs.
 
+## Extension updates
+
+Plugins and icon packs from the Store have their own updates, set in **Settings > Extensions**.
+
+- **Notify about updates** shows a notification when a new version of an installed plugin or icon pack
+  is out. It is on by default. Macro Deck tells you about each version once per session; a notification
+  you dismiss comes back only when a newer version appears. Opening it shows **Installed** in the Store.
+- **Update extensions automatically** installs new versions on its own, then shows one notification
+  listing what was updated, or what failed. It is off by default. An automatic update that failed is not
+  retried until Macro Deck restarts; update it from **Installed** instead.
+
+Automatic updates only replace plugins and icon packs you installed from the Store. A plugin you
+installed from a file, or one installed from the Store before this setting existed, is announced instead;
+update it once from the Store to include it. Profile templates are never updated automatically.
+
+With **Before plugin updates** turned on in **Settings > Backups**, Macro Deck makes one backup before a
+batch of plugin updates.
+
 ## What's new
 
 The first time Macro Deck starts after an update installed from within the app, it shows the release notes

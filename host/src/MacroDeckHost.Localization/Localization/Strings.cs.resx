@@ -11649,6 +11649,30 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Plugin {name} chce nahradit nainstalovaný plugin a čeká na schválení v Macro Decku.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.StoreAutoUpdateFailed.One" xml:space="preserve">
+    <value>Neúspěšné automatické aktualizace rozšíření: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdateFailed.Other" xml:space="preserve">
+    <value>Neúspěšné automatické aktualizace rozšíření: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdateFailedMessage" xml:space="preserve">
+    <value>Nepodařilo se aktualizovat: {names}. Opakovat lze v nainstalovaných rozšířeních.</value>
+    <comment>[names:string]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdated.One" xml:space="preserve">
+    <value>Automaticky aktualizovaná rozšíření: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdated.Other" xml:space="preserve">
+    <value>Automaticky aktualizovaná rozšíření: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdatedMessage" xml:space="preserve">
+    <value>Nyní aktuální: {names}.</value>
+    <comment>[names:string]</comment>
+  </data>
   <data name="Notifications.StoreExtensionInstallFailed" xml:space="preserve">
     <value>Instalace {name} se nezdařila</value>
     <comment>[name:string]</comment>
@@ -11664,6 +11688,18 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Notifications.StoreExtensionUpdated" xml:space="preserve">
     <value>Aktualizováno: {name}</value>
     <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.StoreUpdatesAvailable.One" xml:space="preserve">
+    <value>Dostupné aktualizace rozšíření: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreUpdatesAvailable.Other" xml:space="preserve">
+    <value>Dostupné aktualizace rozšíření: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreUpdatesAvailableMessage" xml:space="preserve">
+    <value>Nové verze jsou připraveny pro: {names}.</value>
+    <comment>[names:string]</comment>
   </data>
   <data name="Notifications.StoreVersionReady" xml:space="preserve">
     <value>Verze {version} je připravena.</value>
@@ -13031,6 +13067,24 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.Devices.ThisDeviceMarker" xml:space="preserve">
     <value>Toto zařízení</value>
   </data>
+  <data name="Settings.Extensions.AutoUpdate" xml:space="preserve">
+    <value>Automaticky aktualizovat rozšíření</value>
+  </data>
+  <data name="Settings.Extensions.AutoUpdateDescription" xml:space="preserve">
+    <value>Nové verze pluginů a sad ikon nainstalovaných ze Store se nainstalují, jakmile jsou k dispozici, a poté se zobrazí oznámení.</value>
+  </data>
+  <data name="Settings.Extensions.Heading" xml:space="preserve">
+    <value>Rozšíření</value>
+  </data>
+  <data name="Settings.Extensions.NotifyOnUpdates" xml:space="preserve">
+    <value>Upozorňovat na aktualizace</value>
+  </data>
+  <data name="Settings.Extensions.NotifyOnUpdatesDescription" xml:space="preserve">
+    <value>Zobrazí oznámení, když je k dispozici nová verze nainstalovaného rozšíření.</value>
+  </data>
+  <data name="Settings.Extensions.UpdatesSection" xml:space="preserve">
+    <value>Aktualizace</value>
+  </data>
   <data name="Settings.Language.ActiveDescription" xml:space="preserve">
     <value>Použije se okamžitě u všech připojených klientů.</value>
   </data>
@@ -14131,6 +14185,23 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Page.FeaturedSectionHeading" xml:space="preserve">
     <value>Doporučené</value>
   </data>
+  <data name="Store.Page.InstalledEmptyHeading" xml:space="preserve">
+    <value>Nejsou nainstalována žádná rozšíření</value>
+  </data>
+  <data name="Store.Page.InstalledEmptyMessage" xml:space="preserve">
+    <value>Zde se zobrazí pluginy a sady ikon nainstalované ze Store.</value>
+  </data>
+  <data name="Store.Page.InstalledUpToDate" xml:space="preserve">
+    <value>Vše je aktuální</value>
+  </data>
+  <data name="Store.Page.InstalledUpdatesAvailable.One" xml:space="preserve">
+    <value>Dostupné aktualizace: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.InstalledUpdatesAvailable.Other" xml:space="preserve">
+    <value>Dostupné aktualizace: {count}</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Store.Page.InstalledVersionField" xml:space="preserve">
     <value>Nainstalovaná verze</value>
   </data>
@@ -14247,6 +14318,15 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Page.Subtitle" xml:space="preserve">
     <value>Procházejte pluginy a sady ikon z registru Macro Deck</value>
   </data>
+  <data name="Store.Page.TabDiscover" xml:space="preserve">
+    <value>Objevovat</value>
+  </data>
+  <data name="Store.Page.TabInstalled" xml:space="preserve">
+    <value>Nainstalováno</value>
+  </data>
+  <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
+    <value>Sekce Store</value>
+  </data>
   <data name="Store.Page.Title" xml:space="preserve">
     <value>Store</value>
   </data>
@@ -14255,6 +14335,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Store.Page.UnavailableMessage" xml:space="preserve">
     <value>Registr nebyl dostupný a k dispozici není žádný uložený katalog.</value>
+  </data>
+  <data name="Store.Page.UpdateAllAction" xml:space="preserve">
+    <value>Aktualizovat vše</value>
   </data>
   <data name="Store.Page.UpdatedField" xml:space="preserve">
     <value>Aktualizováno</value>

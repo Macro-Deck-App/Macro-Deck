@@ -15,7 +15,8 @@ public interface IStoreInstallCoordinator
 	StoreOperation Install(StoreExtensionKind kind,
 		string packageId,
 		string? version = null,
-		bool allowUnsigned = false);
+		bool allowUnsigned = false,
+		string? backupBatchId = null);
 
 	StoreOperation? Retry(Guid operationId);
 

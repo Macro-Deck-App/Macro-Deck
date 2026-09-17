@@ -149,3 +149,49 @@ describe('StoreExtensionCardComponent rating', () => {
     expect(meta().querySelector('shared-store-rating-stars')).toBeNull();
   });
 });
+
+describe('StoreExtensionCardComponent install state', () => {
+  function render(installState: StoreCatalogItemBody['installState']): HTMLElement {
+    TestBed.configureTestingModule({
+      imports: [StoreExtensionCardComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        ...provideLocalizationTesting(),
+        { provide: PluginRuntimeService, useValue: { plugins: signal([]) } },
+        {
+          provide: DeveloperModeService,
+          useValue: { enabled: signal(false), ensureLoaded: jasmine.createSpy('ensureLoaded').and.resolveTo() },
+        },
+      ],
+    });
+
+    const fixture = TestBed.createComponent(StoreExtensionCardComponent);
+    fixture.componentRef.setInput('item', {
+      kind: 'Plugin',
+      id: 'com.suchbyte.macrogotchi',
+      name: 'Macrogotchi',
+      latestVersion: '1.1.0',
+      installedVersion: '1.0.5',
+      installState,
+      trust: 'PublisherVerified',
+      hasIcon: false,
+    } satisfies StoreCatalogItemBody);
+    fixture.detectChanges();
+    return fixture.nativeElement as HTMLElement;
+  }
+
+  it('lets the update button speak for an available update instead of repeating it in a badge', () => {
+    const card = render('UpdateAvailable');
+
+    expect(card.querySelector('shared-store-state-badge')).toBeNull();
+    expect(card.textContent).toContain(TestBed.inject(LocalizationService)
+      .translateKey(AppStrings.Store.UpdateTo, { version: '1.1.0' }));
+  });
+
+  it('still names the state of an extension that is up to date', () => {
+    const card = render('Installed');
+
+    expect(card.querySelector('shared-store-state-badge')).not.toBeNull();
+  });
+});

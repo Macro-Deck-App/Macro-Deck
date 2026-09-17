@@ -87,11 +87,13 @@ public partial class AppPreferenceService : IAppPreferenceService
 	public const string ExtensionsCheckForUpdatesKey = "extensions.checkForUpdates";
 	public const string ExtensionsNotifyOnUpdatesKey = "extensions.notifyOnUpdates";
 	public const string ExtensionsRefreshIntervalMinutesKey = "extensions.refreshIntervalMinutes";
+	public const string ExtensionsAutoUpdateKey = "extensions.autoUpdate";
 
 	public const bool DefaultExtensionsStoreEnabled = true;
 	public const bool DefaultExtensionsCheckForUpdates = true;
 	public const bool DefaultExtensionsNotifyOnUpdates = true;
 	public const int DefaultExtensionsRefreshIntervalMinutes = 60;
+	public const bool DefaultExtensionsAutoUpdate = false;
 
 	// The issue requires the store to check for updates at least hourly, so a longer interval must never
 	// be settable - only the lower bound protects the registry from being polled too aggressively.
@@ -406,28 +408,36 @@ public partial class AppPreferenceService : IAppPreferenceService
 		var checkForUpdates = (await _repository.GetByKey(ExtensionsCheckForUpdatesKey))?.Value;
 		var notifyOnUpdates = (await _repository.GetByKey(ExtensionsNotifyOnUpdatesKey))?.Value;
 		var refreshIntervalMinutes = (await _repository.GetByKey(ExtensionsRefreshIntervalMinutesKey))?.Value;
+		var autoUpdate = (await _repository.GetByKey(ExtensionsAutoUpdateKey))?.Value;
 
 		return new ExtensionSettings(NormalizeExtensionsFlag(storeEnabled, DefaultExtensionsStoreEnabled),
 			NormalizeExtensionsFlag(checkForUpdates, DefaultExtensionsCheckForUpdates),
 			NormalizeExtensionsFlag(notifyOnUpdates, DefaultExtensionsNotifyOnUpdates),
-			NormalizeRefreshIntervalMinutes(refreshIntervalMinutes));
+			NormalizeRefreshIntervalMinutes(refreshIntervalMinutes),
+			NormalizeExtensionsFlag(autoUpdate, DefaultExtensionsAutoUpdate));
 	}
 
 	public async Task<ExtensionSettings> SetExtensions(bool? storeEnabled,
 		bool? checkForUpdates,
 		bool? notifyOnUpdates,
-		int? refreshIntervalMinutes)
+		int? refreshIntervalMinutes,
+		bool? autoUpdate = null)
 	{
-		var resolved = new ExtensionSettings(storeEnabled ?? DefaultExtensionsStoreEnabled,
-			checkForUpdates ?? DefaultExtensionsCheckForUpdates,
-			notifyOnUpdates ?? DefaultExtensionsNotifyOnUpdates,
-			NormalizeRefreshIntervalMinutes(refreshIntervalMinutes?.ToString(CultureInfo.InvariantCulture)));
+		var current = await GetExtensions();
+		var resolved = new ExtensionSettings(storeEnabled ?? current.StoreEnabled,
+			checkForUpdates ?? current.CheckForUpdates,
+			notifyOnUpdates ?? current.NotifyOnUpdates,
+			refreshIntervalMinutes is { } minutes
+				? NormalizeRefreshIntervalMinutes(minutes.ToString(CultureInfo.InvariantCulture))
+				: current.RefreshIntervalMinutes,
+			autoUpdate ?? current.AutoUpdate);
 
 		await _repository.SetValue(ExtensionsStoreEnabledKey, resolved.StoreEnabled.ToString());
 		await _repository.SetValue(ExtensionsCheckForUpdatesKey, resolved.CheckForUpdates.ToString());
 		await _repository.SetValue(ExtensionsNotifyOnUpdatesKey, resolved.NotifyOnUpdates.ToString());
 		await _repository.SetValue(ExtensionsRefreshIntervalMinutesKey,
 			resolved.RefreshIntervalMinutes.ToString(CultureInfo.InvariantCulture));
+		await _repository.SetValue(ExtensionsAutoUpdateKey, resolved.AutoUpdate.ToString());
 
 		return resolved;
 	}

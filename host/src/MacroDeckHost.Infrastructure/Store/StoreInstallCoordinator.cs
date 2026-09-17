@@ -11,24 +11,28 @@ public sealed class StoreInstallCoordinator : IStoreInstallCoordinator
 	private readonly StoreOperationChannel _channel;
 	private readonly StoreOperationCancellation _cancellation;
 	private readonly StoreInstallConsent _consent;
+	private readonly StoreInstallBackupBatches _backupBatches;
 
 	public StoreInstallCoordinator(IStoreCatalogQueryService catalogQuery,
 		IStoreOperationTracker tracker,
 		StoreOperationChannel channel,
 		StoreOperationCancellation cancellation,
-		StoreInstallConsent consent)
+		StoreInstallConsent consent,
+		StoreInstallBackupBatches backupBatches)
 	{
 		_catalogQuery = catalogQuery;
 		_tracker = tracker;
 		_channel = channel;
 		_cancellation = cancellation;
 		_consent = consent;
+		_backupBatches = backupBatches;
 	}
 
 	public StoreOperation Install(StoreExtensionKind kind,
 		string packageId,
 		string? version = null,
-		bool allowUnsigned = false)
+		bool allowUnsigned = false,
+		string? backupBatchId = null)
 	{
 		ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
 
@@ -60,6 +64,11 @@ public sealed class StoreInstallCoordinator : IStoreInstallCoordinator
 		if (allowUnsigned)
 		{
 			_consent.Record(operation.Id);
+		}
+
+		if (backupBatchId is not null)
+		{
+			_backupBatches.Record(operation.Id, backupBatchId);
 		}
 
 		_channel.Writer.TryWrite(operation.Id);

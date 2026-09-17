@@ -185,6 +185,10 @@ public sealed record PluginInstallRequest
 	// Never implied by Force: forcing a reinstall is about overwriting an existing version directory, not
 	// about accepting an unsigned artifact - the two questions must stay independently answerable.
 	public bool AllowUnsigned { get; init; }
+
+	public string? BackupBatchId { get; init; }
+
+	public Action? Acquired { get; init; }
 }
 
 public sealed record PluginUninstallRequest

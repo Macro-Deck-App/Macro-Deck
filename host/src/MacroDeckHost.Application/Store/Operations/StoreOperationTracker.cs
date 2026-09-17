@@ -125,7 +125,8 @@ public sealed class StoreOperationTracker : IStoreOperationTracker
 
 	public void ReportProgress(Guid operationId, long bytesDownloaded, long? totalBytes)
 	{
-		if (!_operations.TryGetValue(operationId, out var current) || current.IsTerminal)
+		if (!_operations.TryGetValue(operationId, out var current) ||
+			current.State is not (StoreOperationState.Queued or StoreOperationState.Downloading))
 		{
 			return;
 		}

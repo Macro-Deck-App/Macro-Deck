@@ -38,6 +38,11 @@
   margin-bottom: var(--space-4);
 }
 
+.store-view-switcher {
+  display: flex;
+  margin-bottom: var(--space-4);
+}
+
 .store-refresh-icon-spinning {
   animation: ds-spin 1s linear infinite;
 

@@ -50,7 +50,9 @@
   }
 
   <div class="card-footer">
-    <shared-store-state-badge [state]="item().installState" tone="quiet" />
+    @if (item().installState !== 'UpdateAvailable') {
+      <shared-store-state-badge [state]="item().installState" tone="quiet" />
+    }
     <div class="card-install">
       <shared-store-install-button
         [item]="item()"

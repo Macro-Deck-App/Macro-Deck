@@ -11647,6 +11647,30 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>{name} möchte ein installiertes Plugin ersetzen und wartet in Macro Deck auf deine Freigabe.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.StoreAutoUpdateFailed.One" xml:space="preserve">
+    <value>{count} automatisches Erweiterungs-Update fehlgeschlagen</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdateFailed.Other" xml:space="preserve">
+    <value>{count} automatische Erweiterungs-Updates fehlgeschlagen</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdateFailedMessage" xml:space="preserve">
+    <value>{names} konnte nicht aktualisiert werden. Öffne die installierten Erweiterungen, um es erneut zu versuchen.</value>
+    <comment>[names:string]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdated.One" xml:space="preserve">
+    <value>{count} Erweiterung automatisch aktualisiert</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdated.Other" xml:space="preserve">
+    <value>{count} Erweiterungen automatisch aktualisiert</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdatedMessage" xml:space="preserve">
+    <value>Jetzt aktuell: {names}.</value>
+    <comment>[names:string]</comment>
+  </data>
   <data name="Notifications.StoreExtensionInstallFailed" xml:space="preserve">
     <value>„{name}“ konnte nicht installiert werden</value>
     <comment>[name:string]</comment>
@@ -11662,6 +11686,18 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Notifications.StoreExtensionUpdated" xml:space="preserve">
     <value>„{name}“ aktualisiert</value>
     <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.StoreUpdatesAvailable.One" xml:space="preserve">
+    <value>{count} Erweiterungs-Update verfügbar</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreUpdatesAvailable.Other" xml:space="preserve">
+    <value>{count} Erweiterungs-Updates verfügbar</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreUpdatesAvailableMessage" xml:space="preserve">
+    <value>Neue Versionen sind bereit für {names}.</value>
+    <comment>[names:string]</comment>
   </data>
   <data name="Notifications.StoreVersionReady" xml:space="preserve">
     <value>Version {version} ist bereit.</value>
@@ -13029,6 +13065,24 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.Devices.ThisDeviceMarker" xml:space="preserve">
     <value>Dieses Gerät</value>
   </data>
+  <data name="Settings.Extensions.AutoUpdate" xml:space="preserve">
+    <value>Erweiterungen automatisch aktualisieren</value>
+  </data>
+  <data name="Settings.Extensions.AutoUpdateDescription" xml:space="preserve">
+    <value>Installiert neue Versionen von Plugins und Icon-Packs aus dem Store, sobald sie verfügbar sind, und benachrichtigt dich danach.</value>
+  </data>
+  <data name="Settings.Extensions.Heading" xml:space="preserve">
+    <value>Erweiterungen</value>
+  </data>
+  <data name="Settings.Extensions.NotifyOnUpdates" xml:space="preserve">
+    <value>Über Updates benachrichtigen</value>
+  </data>
+  <data name="Settings.Extensions.NotifyOnUpdatesDescription" xml:space="preserve">
+    <value>Zeigt eine Benachrichtigung, wenn eine neue Version einer installierten Erweiterung verfügbar ist.</value>
+  </data>
+  <data name="Settings.Extensions.UpdatesSection" xml:space="preserve">
+    <value>Updates</value>
+  </data>
   <data name="Settings.Language.ActiveDescription" xml:space="preserve">
     <value>Gilt sofort für alle verbundenen Clients.</value>
   </data>
@@ -14129,6 +14183,23 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Store.Page.FeaturedSectionHeading" xml:space="preserve">
     <value>Empfohlen</value>
   </data>
+  <data name="Store.Page.InstalledEmptyHeading" xml:space="preserve">
+    <value>Keine Erweiterungen installiert</value>
+  </data>
+  <data name="Store.Page.InstalledEmptyMessage" xml:space="preserve">
+    <value>Plugins und Icon-Packs, die du aus dem Store installierst, erscheinen hier.</value>
+  </data>
+  <data name="Store.Page.InstalledUpToDate" xml:space="preserve">
+    <value>Alles ist aktuell</value>
+  </data>
+  <data name="Store.Page.InstalledUpdatesAvailable.One" xml:space="preserve">
+    <value>{count} Update verfügbar</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.InstalledUpdatesAvailable.Other" xml:space="preserve">
+    <value>{count} Updates verfügbar</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Store.Page.InstalledVersionField" xml:space="preserve">
     <value>Installierte Version</value>
   </data>
@@ -14245,6 +14316,15 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Store.Page.Subtitle" xml:space="preserve">
     <value>Durchsuche Plugins und Icon-Packs aus der Macro-Deck-Registry</value>
   </data>
+  <data name="Store.Page.TabDiscover" xml:space="preserve">
+    <value>Entdecken</value>
+  </data>
+  <data name="Store.Page.TabInstalled" xml:space="preserve">
+    <value>Installiert</value>
+  </data>
+  <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
+    <value>Store-Bereiche</value>
+  </data>
   <data name="Store.Page.Title" xml:space="preserve">
     <value>Store</value>
   </data>
@@ -14253,6 +14333,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Store.Page.UnavailableMessage" xml:space="preserve">
     <value>Die Registry konnte nicht erreicht werden, und es ist kein zwischengespeicherter Katalog vorhanden.</value>
+  </data>
+  <data name="Store.Page.UpdateAllAction" xml:space="preserve">
+    <value>Alle aktualisieren</value>
   </data>
   <data name="Store.Page.UpdatedField" xml:space="preserve">
     <value>Aktualisiert</value>

@@ -186,7 +186,7 @@ describe('SettingsModalComponent', () => {
 
   it('renders the category rail and the appearance section by default', () => {
     const railButtons = fixture.nativeElement.querySelectorAll('.settings-nav__item');
-    expect(railButtons.length).toBe(14);
+    expect(railButtons.length).toBe(15);
     expect(fixture.nativeElement.querySelector('app-appearance-settings')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.settings-modal__title')?.textContent).toContain('Appearance');
   });
@@ -310,7 +310,7 @@ describe('SettingsModalComponent', () => {
     expect(groups.map(group => Array.from(group.querySelectorAll('.settings-nav__item'))
       .map(item => item.textContent?.trim())))
       .toEqual([
-        ['Appearance', 'Startup', 'Language'],
+        ['Appearance', 'Startup', 'Language', 'Extensions'],
         ['Network', 'Devices', 'Device clients', 'Companion license'],
         ['Security'],
         ['Backups', 'Migration'],
@@ -497,7 +497,7 @@ describe('SettingsModalComponent', () => {
   });
 
   it('switches to the account pane and labels it, without adding it to the category rail', () => {
-    expect(fixture.nativeElement.querySelectorAll('.settings-nav__item').length).toBe(14);
+    expect(fixture.nativeElement.querySelectorAll('.settings-nav__item').length).toBe(15);
 
     component.selectAccount();
     fixture.detectChanges();

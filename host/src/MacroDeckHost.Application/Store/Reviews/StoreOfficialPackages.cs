@@ -65,8 +65,8 @@ public sealed class StoreOfficialPackages : IStoreOfficialPackages
 	public bool IsInstalled(string packageId) =>
 		InstalledPackageIds().Contains(packageId, StringComparer.OrdinalIgnoreCase);
 
-	// Plugins carry no installation record, so a plugin counts only while the official catalog lists it.
-	// Icon packs and templates also count from their own official-origin record once unlisted.
+	// A plugin counts only while the official catalog lists it installed; its store record can outlive a
+	// plugin removed outside the store. Icon packs and templates also count from their record once unlisted.
 	public IReadOnlyList<string> InstalledPackageIds()
 	{
 		if (!_options.IsOfficialRegistry)
@@ -85,7 +85,7 @@ public sealed class StoreOfficialPackages : IStoreOfficialPackages
 		}
 
 		ids.AddRange(_installations.LoadAll()
-			.Where(record => StoreRegistryOptions.IsOfficial(record.Origin))
+			.Where(record => record.Kind is not StoreExtensionKind.Plugin && StoreRegistryOptions.IsOfficial(record.Origin))
 			.Select(record => record.PackageId));
 
 		return ids.Distinct(StringComparer.OrdinalIgnoreCase).ToList();

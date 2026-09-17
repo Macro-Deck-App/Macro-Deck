@@ -6,7 +6,7 @@ namespace MacroDeckHost.Infrastructure.BackgroundServices;
 
 public sealed class StoreRegistryRefreshBackgroundService : HostReadyBackgroundService
 {
-	private static readonly TimeSpan _maxStartupJitter = TimeSpan.FromSeconds(120);
+	private static readonly TimeSpan _maxStartupJitter = TimeSpan.FromSeconds(5);
 
 	private readonly IStoreRegistryRefresher _refresher;
 	private readonly StoreRegistryOptions _options;

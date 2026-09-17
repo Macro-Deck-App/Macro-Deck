@@ -1,0 +1,69 @@
+<div class="store-page" [attr.inert]="storeUnlocked() ? null : ''">
+  <div class="store-page-content">
+    <div class="store-header">
+      <div class="store-heading">
+        <h1 class="store-title">{{ 'macrodeck.app:Store.Page.Title' | translate }}</h1>
+        <p class="store-subtitle">{{ updatesSummary() }}</p>
+      </div>
+      <shared-button
+        variant="primary"
+        [disabled]="updates.count() === 0 || updateAllBusy()"
+        [loading]="updates.installing()"
+        (click)="onUpdateAll()">
+        <span class="icon icon-refresh icon-sm" aria-hidden="true"></span>
+        <span>{{ 'macrodeck.app:Store.Page.UpdateAllAction' | translate }}</span>
+      </shared-button>
+    </div>
+
+    <div class="store-view-switcher">
+      <app-store-view-switcher active="installed" />
+    </div>
+
+    @if (loadError()) {
+      <shared-error-banner [message]="loadError()!" (dismiss)="loadError.set(null)" />
+    }
+
+    <div class="store-sections">
+      @if (loaded() && items().length === 0 && !loadError()) {
+        <shared-empty-state
+          icon="store"
+          [heading]="'macrodeck.app:Store.Page.InstalledEmptyHeading' | translate"
+          [message]="'macrodeck.app:Store.Page.InstalledEmptyMessage' | translate" />
+      } @else {
+        <shared-store-section
+          [items]="items()"
+          (install)="onInstall($event)"
+          (installUnsigned)="onInstallUnsigned($event)"
+          (retry)="onRetry($event)"
+          (uninstall)="onUninstallRequested($event)" />
+
+        @if (hasMore() && !loadError()) {
+          <div class="store-load-more">
+            <shared-button variant="secondary" [loading]="loadingMore()" (click)="onLoadMore()">
+              {{ 'macrodeck.app:Store.Page.LoadMoreAction' | translate }}
+            </shared-button>
+          </div>
+        }
+      }
+    </div>
+  </div>
+</div>
+
+@if (pendingUninstall()) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Store.UninstallHeading' | translate"
+    [message]="uninstallMessage()"
+    [confirmText]="'macrodeck.app:Store.Uninstall' | translate"
+    [danger]="true"
+    (confirm)="confirmUninstall()"
+    (cancel)="cancelUninstall()" />
+}
+
+@if (!storeUnlocked()) {
+  <div class="store-coming-soon">
+    <shared-empty-state
+      icon="store"
+      [heading]="'macrodeck.app:Store.Page.ComingSoonHeading' | translate"
+      [message]="'macrodeck.app:Store.Page.ComingSoonMessage' | translate" />
+  </div>
+}

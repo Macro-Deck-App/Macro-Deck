@@ -517,6 +517,33 @@ public class AppPreferenceServiceTests
 	}
 
 	[Test]
+	public async Task Extensions_do_not_update_automatically_until_the_user_turns_it_on()
+	{
+		var service = CreateService();
+
+		var settings = await service.GetExtensions();
+
+		Assert.That(settings.AutoUpdate, Is.False);
+	}
+
+	[Test]
+	public async Task Turning_on_automatic_updates_keeps_the_other_extension_settings()
+	{
+		var service = CreateService();
+		await service.SetExtensions(null, null, notifyOnUpdates: false, 30);
+
+		await service.SetExtensions(null, null, null, null, autoUpdate: true);
+		var reloaded = await service.GetExtensions();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(reloaded.AutoUpdate, Is.True);
+			Assert.That(reloaded.NotifyOnUpdates, Is.False);
+			Assert.That(reloaded.RefreshIntervalMinutes, Is.EqualTo(30));
+		});
+	}
+
+	[Test]
 	public async Task GetExtensions_treats_an_unparseable_stored_interval_as_the_hourly_default()
 	{
 		var repository = new FakeAppPreferenceRepository();

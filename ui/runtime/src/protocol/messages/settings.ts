@@ -260,6 +260,26 @@ export interface UpdateDeveloperSettingsResponse {
   enabled: boolean;
 }
 
+export interface ExtensionSettingsBody {
+  storeEnabled: boolean;
+  checkForUpdates: boolean;
+  notifyOnUpdates: boolean;
+  refreshIntervalMinutes: number;
+  autoUpdate: boolean;
+}
+
+export type GetExtensionSettingsResponse = ExtensionSettingsBody;
+
+export type UpdateExtensionSettingsResponse = ExtensionSettingsBody;
+
+export interface UpdateExtensionSettingsRequest {
+  storeEnabled?: boolean;
+  checkForUpdates?: boolean;
+  notifyOnUpdates?: boolean;
+  refreshIntervalMinutes?: number;
+  autoUpdate?: boolean;
+}
+
 export interface GetLockScreenSettingsResponse {
   enabled: boolean;
 }

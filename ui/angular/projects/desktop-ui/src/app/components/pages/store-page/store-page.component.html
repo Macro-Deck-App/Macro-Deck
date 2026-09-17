@@ -21,6 +21,10 @@
       </shared-button>
     </div>
 
+    <div class="store-view-switcher">
+      <app-store-view-switcher active="discover" />
+    </div>
+
     @if (catalog.registry()?.stale) {
       <shared-error-banner
         [message]="catalog.registry()?.lastErrorMessage || ('macrodeck.app:Store.Page.StaleCatalogMessage' | translate)"

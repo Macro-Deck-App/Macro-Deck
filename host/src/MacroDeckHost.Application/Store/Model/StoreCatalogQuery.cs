@@ -13,4 +13,6 @@ public sealed record StoreCatalogQuery
 	public int Skip { get; init; }
 
 	public int Take { get; init; } = MaxTake;
+
+	public bool Installed { get; init; }
 }
