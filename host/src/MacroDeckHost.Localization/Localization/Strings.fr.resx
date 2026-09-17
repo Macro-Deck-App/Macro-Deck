@@ -6054,6 +6054,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Keyboard.Actions.TypeTextPlaceholder" xml:space="preserve">
     <value>Bonjour le monde</value>
   </data>
+  <data name="Integrations.Keyboard.Config.HoldTargetModeDescription" xml:space="preserve">
+    <value>Comment transmettre la touche lorsqu'une application cible est définie. Uniquement au premier plan maintient la touche seulement si l'application a le focus quand l'action s'exécute ; la touche reste ensuite maintenue jusqu'à ce qu'elle soit relâchée. En arrière-plan maintient la touche dans l'application sans lui donner le focus. Cela se fait au mieux : certaines plateformes ne peuvent pas maintenir ainsi les touches de modification, et un modificateur maintenu en arrière-plan ne s'applique pas à « Presser une touche / combinaison » ni aux séquences de touches. « Relâcher une touche » relâche la touche partout où elle est maintenue.</value>
+  </data>
   <data name="Integrations.Keyboard.Config.TargetModeBackgroundOption" xml:space="preserve">
     <value>Envoyer en arrière-plan (au mieux, pas pour les jeux)</value>
   </data>

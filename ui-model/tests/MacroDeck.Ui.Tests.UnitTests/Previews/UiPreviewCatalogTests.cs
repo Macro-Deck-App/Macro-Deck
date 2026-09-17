@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using MacroDeck.Ui.Model.Serialization;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Previews;
@@ -121,6 +122,31 @@ public class UiPreviewCatalogTests
 		await instance.DisposeAsync();
 
 		Assert.That(mock.Disposed, Is.True);
+	}
+
+	[Test]
+	public async Task Closing_a_preview_releases_the_view_a_scenario_returned_from_a_state_that_outlives_it()
+	{
+		var released = await OpenAndCloseSharedStatePreview();
+
+		PreviewFixtures.SharedStatePreviews.Shared.Value = Guid.NewGuid().ToString();
+		GC.Collect();
+		GC.WaitForPendingFinalizers();
+		GC.Collect();
+
+		Assert.That(released.IsAlive, Is.False);
+	}
+
+	[MethodImpl(MethodImplOptions.NoInlining)]
+	private static async Task<WeakReference> OpenAndCloseSharedStatePreview()
+	{
+		var preview = Single(nameof(PreviewFixtures.SharedStatePreviews), "Returns a view");
+		var instance = preview.Create(_surface);
+		var view = new WeakReference(instance.View);
+
+		await instance.DisposeAsync();
+
+		return view;
 	}
 
 	private static List<UiPreviewRegistration> Scan(params string[] fixtures)

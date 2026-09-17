@@ -6054,6 +6054,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Keyboard.Actions.TypeTextPlaceholder" xml:space="preserve">
     <value>Ahoj světe</value>
   </data>
+  <data name="Integrations.Keyboard.Config.HoldTargetModeDescription" xml:space="preserve">
+    <value>Jak se klávesa doručí, když je nastavena cílová aplikace. Doručení pouze při zaměřené aplikaci klávesu podrží jen tehdy, když je aplikace při spuštění akce zaměřená; klávesa pak zůstane podržená až do uvolnění. Doručení na pozadí klávesu podrží v aplikaci bez jejího zaměření. Probíhá podle nejlepších možností: některé platformy takto nedokážou podržet modifikační klávesy a modifikátor podržený na pozadí neplatí pro akci „Stisknout klávesu / kombinaci“ ani pro sekvence kláves. Akce „Uvolnit klávesu“ klávesu uvolní všude, kde je podržená.</value>
+  </data>
   <data name="Integrations.Keyboard.Config.TargetModeBackgroundOption" xml:space="preserve">
     <value>Odeslat na pozadí (bez záruky, nevhodné pro hry)</value>
   </data>

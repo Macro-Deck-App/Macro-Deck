@@ -72,8 +72,10 @@ public sealed class NowPlayingUiProvider : IUiProvider
 }
 ```
 
-`ViewSession` forwards `BuildTree`, `DrainPatches`, `Changed`, `Faulted` and `Dispatch` to the `UiView` -
-see [Serving a view](/ui/views/sessions/#example) for it, the lifecycle and the limits. A folder only
+`ViewSession` forwards `BuildTree`, `DrainPatches`, `Changed`, `Faulted` and `Dispatch` to the `UiView`
+and disposes the view when the session closes, which matters here: the service's state outlives every
+session, and an undisposed view reading it would never be released - see
+[Serving a view](/ui/views/sessions/#example) for it, the lifecycle and the limits. A folder only
 opens this surface once your integration has registered the view through `IFolderViewProvider`; when you
 offer more than one folder view, check `UiFolderSurfaceAttributes.ViewId` and decline the others. See
 [Folder views](/ui/views/folder-views/).

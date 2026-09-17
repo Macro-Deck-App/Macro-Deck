@@ -89,11 +89,11 @@ public sealed class KeyboardSequenceExecutor : IKeyboardSequenceExecutor
 				break;
 			case KeyDownStep keyDown:
 				var (downMods, downKey) = Resolve(keyDown.Modifiers, keyDown.Key);
-				await _input.KeyDownAsync(downMods, downKey, cancellationToken).ConfigureAwait(false);
+				await session.KeyDownAsync(downMods, downKey, cancellationToken).ConfigureAwait(false);
 				break;
 			case KeyUpStep keyUp:
 				var (upMods, upKey) = Resolve(keyUp.Modifiers, keyUp.Key);
-				await _input.KeyUpAsync(upMods, upKey, cancellationToken).ConfigureAwait(false);
+				await session.KeyUpAsync(upMods, upKey, cancellationToken).ConfigureAwait(false);
 				break;
 			default:
 				_logger.Warning("Skipping unsupported keyboard step {StepType}", step.GetType().Name);
@@ -122,13 +122,20 @@ public sealed class KeyboardSequenceExecutor : IKeyboardSequenceExecutor
 	{
 		foreach (var step in sequence.Steps)
 		{
-			if (step is not KeyComboStep combo)
+			var (modifierNames, keyName) = step switch
+			{
+				KeyComboStep combo => (combo.Modifiers, combo.Key),
+				KeyDownStep keyDown => (keyDown.Modifiers, keyDown.Key),
+				_ => ((IReadOnlyList<string>?)null, string.Empty)
+			};
+
+			if (modifierNames is null)
 			{
 				continue;
 			}
 
-			var modifiers = _layout.ResolveModifiers(combo.Modifiers);
-			_layout.TryResolveKey(combo.Key, out var key);
+			var modifiers = _layout.ResolveModifiers(modifierNames);
+			_layout.TryResolveKey(keyName, out var key);
 			if (KeyboardBackgroundDelivery.ModifiersCannotBeDelivered(_input, target, modifiers, key))
 			{
 				return true;

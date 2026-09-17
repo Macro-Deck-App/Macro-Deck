@@ -10,4 +10,8 @@ public interface IKeyboardInputSession : IDisposable
 		CancellationToken cancellationToken = default);
 
 	Task TypeTextAsync(string text, CancellationToken cancellationToken = default);
+
+	Task KeyDownAsync(KeyModifier modifiers, KeyCode key, CancellationToken cancellationToken = default);
+
+	Task KeyUpAsync(KeyModifier modifiers, KeyCode key, CancellationToken cancellationToken = default);
 }

@@ -35,5 +35,10 @@ internal sealed class WellBehavedUiSession : IUiSession
 
 	public void Dispatch(UiEvent uiEvent) => _view.Dispatch(uiEvent);
 
-	public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+	public ValueTask DisposeAsync()
+	{
+		_view.Dispose();
+
+		return ValueTask.CompletedTask;
+	}
 }

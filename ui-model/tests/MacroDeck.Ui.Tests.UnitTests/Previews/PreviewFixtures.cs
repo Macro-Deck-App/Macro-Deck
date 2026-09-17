@@ -1,6 +1,8 @@
 using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Dsl;
+using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Previews;
+using MacroDeck.Ui.Runtime;
 
 namespace MacroDeck.Ui.Tests.UnitTests.Previews;
 
@@ -78,6 +80,23 @@ internal static class PreviewFixtures
 
 			return UiPreview.Of(Showing("Mocked"), mock);
 		}
+	}
+
+	internal static class SharedStatePreviews
+	{
+		internal static readonly UiState<string> Shared = new("initial");
+
+		[UiPreview("Returns a view")]
+		internal static UiView ReturnsAView()
+			=> new(new UiSurface { Kind = UiSurfaceKinds.DeveloperPreview, SessionMode = UiSessionModes.Exclusive },
+				new UiConfigStack
+				{
+					Key = "root",
+					Children =
+					[
+						new UiStringInput { Key = "shared", Binding = Bind.ReadOnly(UiValue.From(() => Shared.Value)) },
+					],
+				});
 	}
 
 	internal sealed class SpyResource : IDisposable

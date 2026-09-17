@@ -7,9 +7,6 @@ using MacroDeck.Ui.Runtime;
 
 namespace MacroDeck.Plugin.Hosting.Capabilities.Ui;
 
-// Disposal releases whatever the scenario handed over and detaches the view's handlers. The view itself
-// owns nothing disposable - its cells die with it - but a view that faults after the session closed must
-// not raise into it, and a mock's subscription must stop the moment the preview does.
 internal sealed class UiPreviewSession : IUiSession
 {
 	private readonly UiPreviewInstance _instance;

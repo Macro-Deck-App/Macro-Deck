@@ -22,6 +22,7 @@ internal sealed class FakeKeyboardInputProvider : IKeyboardInputProvider
 	public string? ForegroundProcessName { get; set; }
 	public FakeTargetWindow? Target { get; set; }
 	public string? ResolvedProcess { get; private set; }
+	public int ResolveCount { get; private set; }
 
 	public void RequestPermission()
 	{
@@ -38,6 +39,7 @@ internal sealed class FakeKeyboardInputProvider : IKeyboardInputProvider
 	public IKeyboardTargetWindow? ResolveTarget(string processName)
 	{
 		ResolvedProcess = processName;
+		ResolveCount++;
 		return Target;
 	}
 }

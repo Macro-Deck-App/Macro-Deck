@@ -68,6 +68,35 @@ jobs:
 
 Each step fails the job on a non-zero exit code; no output parsing is needed.
 
+To publish one package for every platform, add a job that merges what the matrix built:
+
+```yaml
+  package:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install the CLI
+        run: dotnet tool install --global MacroDeck.Plugin.Cli --prerelease
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: plugin-*
+          path: artifacts
+          merge-multiple: true
+
+      - name: Merge
+        run: macrodeck-plugin merge artifacts/*.macroDeckPlugin --output dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plugin
+          path: dist/*.macroDeckPlugin
+```
+
 ## Notes
 
 - **One runtime identifier per runner.** `build --rid` builds only that target, so each job produces and
@@ -105,6 +134,7 @@ These points apply equally to [`sign`](/cli/signing/#sign), wherever it does run
 ## See also
 
 - [`macrodeck-plugin build`](/cli/build/) - the `--rid` matrix build.
+- [`macrodeck-plugin merge`](/cli/merge/) - one package from the matrix.
 - [`macrodeck-plugin test`](/cli/test/) - filters and report formats.
 - [Signing packages](/cli/signing/) - `verify` in full.
 - [Publishing to the Store](/guides/publishing/) - what the publishing workflow submits.

@@ -299,7 +299,6 @@ public class Startup
 		services.AddHostedService<LoopbackPortFileService>();
 		services.AddMediator();
 
-		services.AddHostedService<UiConnectionShutdownBackgroundService>();
 		services.AddHostedService<CachingInitializeBackgroundService>();
 		services.AddHostedService<PublicTlsCertificateRenewalBackgroundService>();
 		services.AddHostedService<DeviceLayoutConstraintWarmupBackgroundService>();

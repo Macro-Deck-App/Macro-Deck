@@ -6052,6 +6052,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Keyboard.Actions.TypeTextPlaceholder" xml:space="preserve">
     <value>Hallo Welt</value>
   </data>
+  <data name="Integrations.Keyboard.Config.HoldTargetModeDescription" xml:space="preserve">
+    <value>Wie die Taste zugestellt wird, wenn eine Zielanwendung festgelegt ist. Nur bei fokussierter App hält die Taste nur, wenn die App beim Ausführen der Aktion fokussiert ist; danach bleibt sie gehalten, bis sie losgelassen wird. Im Hintergrund hält die Taste in der App, ohne sie zu fokussieren. Das erfolgt nach bestem Bemühen: Manche Plattformen können Modifikatortasten so nicht halten, und ein im Hintergrund gehaltener Modifikator wirkt nicht auf „Taste/Kombination drücken“ oder Tastenfolgen. „Taste loslassen“ lässt die Taste überall los, wo sie gehalten wird.</value>
+  </data>
   <data name="Integrations.Keyboard.Config.TargetModeBackgroundOption" xml:space="preserve">
     <value>Im Hintergrund senden (nach bestem Bemühen, nicht für Spiele)</value>
   </data>
