@@ -128,6 +128,33 @@ does not hold up another.
 - **A write can run another view's flush on your thread before it returns** when a shared state connects the
   two views, so any lock you hold across `Set` is a lock a value provider runs under.
 
+## Disposing
+
+```csharp
+view.Dispose();
+```
+
+A state keeps every view that reads it reachable. When the state outlives the view - it belongs to your
+provider or service, or several sessions share it - the view stays in memory after its session closed, and
+every later write still re-evaluates its values and queues a patch nobody drains. `Dispose` detaches the view
+from every state it reads. Dispose the view when the session that serves it closes; `ViewSession` in
+[Serving a view](/ui/views/sessions/#example) does it in `DisposeAsync`.
+
+- **Idempotent and safe from any thread,** including from a handler, a value provider or a `Changed`
+  subscriber. Called while another view's work runs on your thread, the release happens as soon as that
+  work returns.
+- **Nothing throws afterwards.** `Dispatch` ignores every event, `DrainPatches` returns nothing, and `Tree` and
+  `Revision` keep the last tree, so a host racing a dispatch against closing the session needs no guard.
+- **Nothing is raised afterwards.** `Changed` and `HandlerFaulted` stop, including for an asynchronous handler
+  that faults later, and `WhenIdleAsync` no longer waits for work still running.
+- **Other views are unaffected.** A view that shares the state keeps receiving its patches.
+
+A live view also lets go of a state once none of its values read it any more, for example when the content
+that read it is removed. A state read directly by a `UiWhen` condition or content, or by a `UiRepeat` item
+list or template, stays attached until that conditional or repeat is itself removed or the view is disposed.
+`WhenIdleAsync` does not wait for a `UiAsyncState` load the view is not reading; once the view reads that
+state again, it waits for a load still running.
+
 ## See also
 
 - [State and bindings](/ui/concepts/state-and-bindings/)

@@ -8,7 +8,8 @@ namespace MacroDeck.Sdk.Ui;
 /// <remarks>
 /// Deliberately expressed in <c>MacroDeck.Ui.Model</c> terms rather than the <c>MacroDeck.Ui</c> DSL, so
 /// a provider can serve a tree without taking the DSL as a dependency. A DSL user forwards these members
-/// to their <c>UiView</c>.
+/// to their <c>UiView</c> and disposes that view in <see cref="IAsyncDisposable.DisposeAsync" />: a state
+/// that outlives the session otherwise keeps the view alive and keeps flushing patches into it.
 /// </remarks>
 public interface IUiSession : IAsyncDisposable
 {

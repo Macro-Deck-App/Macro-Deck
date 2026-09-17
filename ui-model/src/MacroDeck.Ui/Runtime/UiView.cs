@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Model.Events;
@@ -46,20 +48,30 @@ namespace MacroDeck.Ui.Runtime;
 /// that did the work rather than on any pump, once the patch is already queued: a subscriber may read
 /// <see cref="Tree" />, call <see cref="DrainPatches" />, write state and dispatch again.
 /// </para>
+///
+/// <para>
+/// <b>Dispose a view when its session ends.</b> A state keeps every view that reads it reachable, so a view
+/// reading a state that outlives it - one owned by the plugin or shared by several sessions - stays alive and
+/// keeps being flushed on every write until <see cref="Dispose" /> detaches it.
+/// </para>
 /// </summary>
-public sealed class UiView
+public sealed class UiView : IDisposable
 {
 	private readonly UiSyncRoot _sync = new();
 	private readonly List<UiPropertyCell> _dirtyCells = [];
 	private readonly List<UiStructuralScope> _dirtyScopes = [];
 	private readonly List<UiPatch> _patches = [];
 	private readonly List<Task> _pendingWork = [];
+	private readonly Dictionary<IUiTrackedState, int> _reads = new(ReferenceEqualityComparer.Instance);
+	private readonly HashSet<IUiTrackedState> _unread = new(ReferenceEqualityComparer.Instance);
 	private readonly UiStructuralReconciler _reconciler;
 	private UiMaterializedNode _rootNode;
 	private UiTree _tree;
 	private int _batchDepth;
 	private bool _built;
 	private bool _flushing;
+	private int _disposeRequested;
+	private bool _released;
 
 	/// <summary>Materializes <paramref name="root" /> for <paramref name="surface" /> at revision 0. Throws
 	/// <see cref="UiViewException" /> when the tree violates an identity rule - see
@@ -81,6 +93,16 @@ public sealed class UiView
 			try
 			{
 				_rootNode = materializer.MaterializeRoot(root);
+				_tree = new UiTree { Revision = 0, Surface = surface, Root = _rootNode.Node };
+				_built = true;
+
+				// A provider that wrote state while the tree was being materialized - a value read that starts the
+				// load it is waiting for - marked its cells against a view that did not exist yet, so nothing could
+				// flush them. They belong to revision 1, not to a queue nobody drains.
+				if (_dirtyCells.Count > 0 || _dirtyScopes.Count > 0)
+				{
+					Flush();
+				}
 			}
 			catch
 			{
@@ -90,18 +112,9 @@ public sealed class UiView
 					dependent.Release();
 				}
 
+				Release();
+
 				throw;
-			}
-
-			_tree = new UiTree { Revision = 0, Surface = surface, Root = _rootNode.Node };
-			_built = true;
-
-			// A provider that wrote state while the tree was being materialized - a value read that starts the
-			// load it is waiting for - marked its cells against a view that did not exist yet, so nothing could
-			// flush them. They belong to revision 1, not to a queue nobody drains.
-			if (_dirtyCells.Count > 0 || _dirtyScopes.Count > 0)
-			{
-				Flush();
 			}
 		}
 	}
@@ -173,6 +186,11 @@ public sealed class UiView
 	/// queued, neither losing nor duplicating a patch.</summary>
 	public IReadOnlyList<UiPatch> DrainPatches()
 	{
+		if (IsDisposeRequested)
+		{
+			return [];
+		}
+
 		using (_sync.Enter())
 		{
 			var drained = _patches.ToArray();
@@ -253,6 +271,11 @@ public sealed class UiView
 	public UiDispatchResult Dispatch(UiEvent @event)
 	{
 		ArgumentNullException.ThrowIfNull(@event);
+
+		if (IsDisposeRequested)
+		{
+			return UiDispatchResult.Ignored("The view has been disposed.");
+		}
 
 		using var scope = _sync.Enter();
 
@@ -346,9 +369,69 @@ public sealed class UiView
 		}
 	}
 
+	/// <summary>
+	/// Detaches this view from every state it reads, so a state that outlives it no longer keeps it reachable or
+	/// flushes into it. Call it when the session serving the view closes.
+	///
+	/// <para>
+	/// Idempotent and safe from any thread, including from a handler, a value provider or a
+	/// <see cref="Changed" /> subscriber; called while another view's work is running on this thread, the
+	/// release happens as soon as that work returns. Afterwards <see cref="Dispatch" /> ignores every event,
+	/// <see cref="DrainPatches" /> returns nothing, <see cref="Tree" /> and <see cref="Revision" /> keep
+	/// answering with the last tree, <see cref="Changed" /> and <see cref="HandlerFaulted" /> are no longer
+	/// raised - not even for an asynchronous handler that faults later - and <see cref="WhenIdleAsync" /> no
+	/// longer waits for work that is still running. Nothing throws <see cref="ObjectDisposedException" />, so a
+	/// host racing a dispatch or a drain against closing the session needs no guard of its own.
+	/// </para>
+	/// </summary>
+	public void Dispose()
+	{
+		Interlocked.Exchange(ref _disposeRequested, 1);
+
+		if (UiSyncRoot.IsForeign(_sync))
+		{
+			UiSyncRoot.DeferDispose(this);
+
+			return;
+		}
+
+		using (_sync.Enter())
+		{
+			Release();
+		}
+	}
+
+	internal bool IsDisposeRequested => Volatile.Read(ref _disposeRequested) != 0;
+
+	internal void RetainRead(IUiTrackedState state)
+	{
+		ref var count = ref CollectionsMarshal.GetValueRefOrAddDefault(_reads, state, out _);
+		count++;
+	}
+
+	internal void ReleaseRead(IUiTrackedState state)
+	{
+		ref var count = ref CollectionsMarshal.GetValueRefOrNullRef(_reads, state);
+
+		if (Unsafe.IsNullRef(ref count) || count == 0)
+		{
+			return;
+		}
+
+		if (--count == 0)
+		{
+			_unread.Add(state);
+		}
+	}
+
 	/// <summary>Registers asynchronous work <see cref="WhenIdleAsync" /> has to wait for.</summary>
 	internal void RegisterPendingWork(Task work)
 	{
+		if (IsDisposeRequested)
+		{
+			return;
+		}
+
 		// A thread holding another component's gate never takes this one - the registration waits for the
 		// depth-0 drain instead. It is deferred rather than dropped because WhenIdleAsync on this view would
 		// otherwise return while the load it is waiting for is still running.
@@ -374,6 +457,11 @@ public sealed class UiView
 	/// it is invalidated first.</summary>
 	internal void MarkDirty(UiPropertyCell cell)
 	{
+		if (IsDisposeRequested)
+		{
+			return;
+		}
+
 		using (_sync.Enter())
 		{
 			if (cell.IsDirty)
@@ -390,6 +478,11 @@ public sealed class UiView
 	/// it is invalidated first.</summary>
 	internal void MarkStructural(UiStructuralScope scope)
 	{
+		if (IsDisposeRequested)
+		{
+			return;
+		}
+
 		using (_sync.Enter())
 		{
 			if (scope.IsQueued)
@@ -409,7 +502,7 @@ public sealed class UiView
 		{
 			// Nothing to flush into yet: the tree is still being materialized, so the marked cells are picked up
 			// by the flush the constructor runs once it exists.
-			if (!_built)
+			if (!_built || IsDisposeRequested)
 			{
 				return;
 			}
@@ -428,6 +521,11 @@ public sealed class UiView
 	/// <see cref="Changed" /> otherwise. Called outside the gate - see this type's remarks.</summary>
 	internal void RaiseNotification(UiHandlerFaultEventArgs? fault)
 	{
+		if (IsDisposeRequested)
+		{
+			return;
+		}
+
 		if (fault is null)
 		{
 			Changed?.Invoke(this, EventArgs.Empty);
@@ -592,7 +690,7 @@ public sealed class UiView
 	{
 		// A provider that writes state while it is being evaluated would otherwise re-enter the flush and
 		// interleave two patches. The write still marks its cells, so the next flush picks them up.
-		if (_flushing)
+		if (_flushing || IsDisposeRequested)
 		{
 			return;
 		}
@@ -612,9 +710,11 @@ public sealed class UiView
 		finally
 		{
 			_flushing = false;
+			DetachUnread();
 		}
 
-		if (operations.Count == 0)
+		// A value provider may have disposed this view while the flush was running.
+		if (operations.Count == 0 || IsDisposeRequested)
 		{
 			return;
 		}
@@ -634,6 +734,47 @@ public sealed class UiView
 		// handler that drains can never see a Changed whose patch is not there yet, and it runs outside the gate
 		// so it may write and dispatch straight back in.
 		UiSyncRoot.Raise(this, null);
+	}
+
+	private void DetachUnread()
+	{
+		if (_unread.Count == 0)
+		{
+			return;
+		}
+
+		foreach (var state in _unread)
+		{
+			if (_reads.TryGetValue(state, out var count) && count == 0)
+			{
+				_reads.Remove(state);
+				state.Detach(this);
+			}
+		}
+
+		_unread.Clear();
+	}
+
+	private void Release()
+	{
+		if (_released)
+		{
+			return;
+		}
+
+		_released = true;
+
+		foreach (var state in _reads.Keys)
+		{
+			state.Detach(this);
+		}
+
+		_reads.Clear();
+		_unread.Clear();
+		_dirtyCells.Clear();
+		_dirtyScopes.Clear();
+		_patches.Clear();
+		_pendingWork.Clear();
 	}
 
 	/// <summary>Reconciles every queued structural scope into its operations.</summary>
