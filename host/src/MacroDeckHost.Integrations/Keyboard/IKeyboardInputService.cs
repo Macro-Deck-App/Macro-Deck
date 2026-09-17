@@ -53,6 +53,12 @@ public interface IKeyboardInputService
 
 	Task KeyDownAsync(KeyModifier modifiers, KeyCode key, CancellationToken cancellationToken = default);
 
+	Task<KeyboardSessionUnavailableReason?> KeyDownAsync(
+		KeyModifier modifiers,
+		KeyCode key,
+		KeyboardTarget target,
+		CancellationToken cancellationToken = default);
+
 	Task KeyUpAsync(KeyModifier modifiers, KeyCode key, CancellationToken cancellationToken = default);
 
 	Task ReleaseAllAsync(CancellationToken cancellationToken = default);

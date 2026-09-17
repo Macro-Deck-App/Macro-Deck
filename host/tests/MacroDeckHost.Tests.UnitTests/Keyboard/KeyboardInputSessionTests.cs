@@ -175,6 +175,91 @@ public class KeyboardInputSessionTests
 	}
 
 	[Test]
+	public async Task Background_hold_and_release_go_to_the_target_only()
+	{
+		_provider.SupportsBackgroundSend = true;
+		var target = new FakeTargetWindow();
+		_provider.Target = target;
+
+		using (var session =
+			(await _service.OpenSessionAsync(new KeyboardTarget("code", KeyboardTargetMode.Background))).Session)
+		{
+			await session!.KeyDownAsync(KeyModifier.Shift, KeyCode.A);
+			await session.KeyUpAsync(KeyModifier.Shift, KeyCode.A);
+		}
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(target.Events,
+				Is.EqualTo(new[]
+				{
+					(KeyCode.LeftShift, true),
+					(KeyCode.A, true),
+					(KeyCode.A, false),
+					(KeyCode.LeftShift, false)
+				}));
+			Assert.That(_provider.Events, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task Background_session_releases_keys_still_held_when_it_ends()
+	{
+		_provider.SupportsBackgroundSend = true;
+		var target = new FakeTargetWindow();
+		_provider.Target = target;
+
+		using (var session =
+			(await _service.OpenSessionAsync(new KeyboardTarget("code", KeyboardTargetMode.Background))).Session)
+		{
+			await session!.KeyDownAsync(KeyModifier.None, KeyCode.W);
+		}
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(target.Events, Is.EqualTo(new[] { (KeyCode.W, true), (KeyCode.W, false) }));
+			Assert.That(_provider.Events, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task Background_session_release_of_a_key_held_system_wide_releases_it_system_wide()
+	{
+		_provider.SupportsBackgroundSend = true;
+		var target = new FakeTargetWindow();
+		_provider.Target = target;
+		await _service.KeyDownAsync(KeyModifier.None, KeyCode.LeftControl);
+
+		using (var session =
+			(await _service.OpenSessionAsync(new KeyboardTarget("code", KeyboardTargetMode.Background))).Session)
+		{
+			await session!.KeyUpAsync(KeyModifier.None, KeyCode.LeftControl);
+		}
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_provider.Events,
+				Is.EqualTo(new[] { (KeyCode.LeftControl, true), (KeyCode.LeftControl, false) }));
+			Assert.That(target.Events, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task Unscoped_session_hold_outlives_the_session_until_released()
+	{
+		using (var session = (await _service.OpenSessionAsync(KeyboardTarget.None)).Session)
+		{
+			await session!.KeyDownAsync(KeyModifier.None, KeyCode.W);
+		}
+
+		Assert.That(_provider.Events, Is.EqualTo(new[] { (KeyCode.W, true) }));
+
+		await _service.ReleaseAllAsync();
+
+		Assert.That(_provider.Events, Is.EqualTo(new[] { (KeyCode.W, true), (KeyCode.W, false) }));
+	}
+
+	[Test]
 	public async Task Background_type_text_routes_to_the_target()
 	{
 		_provider.SupportsBackgroundSend = true;

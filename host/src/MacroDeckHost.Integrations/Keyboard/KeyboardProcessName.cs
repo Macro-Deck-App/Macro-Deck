@@ -48,7 +48,7 @@ internal static class KeyboardProcessName
 		}
 	}
 
-	private static string Normalize(string name)
+	internal static string Normalize(string name)
 	{
 		var trimmed = name.Trim();
 		foreach (var suffix in _strippedSuffixes)

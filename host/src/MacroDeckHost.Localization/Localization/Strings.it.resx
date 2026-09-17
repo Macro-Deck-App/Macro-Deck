@@ -6054,6 +6054,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.Keyboard.Actions.TypeTextPlaceholder" xml:space="preserve">
     <value>Ciao mondo</value>
   </data>
+  <data name="Integrations.Keyboard.Config.HoldTargetModeDescription" xml:space="preserve">
+    <value>Come recapitare il tasto quando è impostata un'applicazione di destinazione. Solo con l'app in primo piano tiene premuto il tasto solo se l'app è in primo piano quando l'azione viene eseguita; poi il tasto resta premuto finché non viene rilasciato. In background tiene premuto il tasto nell'app senza portarla in primo piano. Funziona a massimo impegno: alcune piattaforme non possono tenere premuti i tasti modificatori in questo modo, e un modificatore tenuto in background non vale per "Premi tasto / combinazione" o per le sequenze di tasti. "Rilascia tasto" rilascia il tasto ovunque sia tenuto premuto.</value>
+  </data>
   <data name="Integrations.Keyboard.Config.TargetModeBackgroundOption" xml:space="preserve">
     <value>Invia in background (best-effort, non per i giochi)</value>
   </data>

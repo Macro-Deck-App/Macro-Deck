@@ -6054,6 +6054,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.Keyboard.Actions.TypeTextPlaceholder" xml:space="preserve">
     <value>Hola Mundo</value>
   </data>
+  <data name="Integrations.Keyboard.Config.HoldTargetModeDescription" xml:space="preserve">
+    <value>Cómo entregar la tecla cuando hay una aplicación de destino configurada. Solo con la app enfocada mantiene la tecla solo si la app tiene el foco cuando se ejecuta la acción; después la tecla sigue pulsada hasta que se libere. En segundo plano mantiene la tecla dentro de la app sin enfocarla. Es de mejor esfuerzo: algunas plataformas no pueden mantener así las teclas modificadoras, y un modificador mantenido en segundo plano no se aplica a "Pulsar tecla / combinación" ni a las secuencias de teclas. "Liberar tecla" libera la tecla allí donde esté pulsada.</value>
+  </data>
   <data name="Integrations.Keyboard.Config.TargetModeBackgroundOption" xml:space="preserve">
     <value>Enviar en segundo plano (mejor esfuerzo, no válido para juegos)</value>
   </data>
