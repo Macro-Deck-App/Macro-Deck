@@ -8,6 +8,12 @@ on:
   workflow_run:
     workflows: [Build]
     types: [completed]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Build run to publish (run id of a successful Build on main)
+        required: true
+        type: string
 
 concurrency:
   group: publish-release
@@ -20,18 +26,36 @@ permissions:
 jobs:
   publish:
     name: Publish GitHub release
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'workflow_dispatch' && github.event.workflow_run.head_branch == 'main' }}
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'workflow_dispatch' && github.event.workflow_run.head_branch == 'main') }}
+    runs-on: ubuntu-latest
     # The release announcement webhook and the R2 credentials are production environment secrets.
     environment: production
     outputs:
       version: ${{ steps.release.outputs.version }}
+      run_id: ${{ inputs.run_id || github.event.workflow_run.id }}
     env:
       GH_TOKEN: ${{ github.token }}
-      SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+      SOURCE_RUN_ID: ${{ inputs.run_id || github.event.workflow_run.id }}
       TARGET_SHA: ${{ github.event.workflow_run.head_sha }}
     steps:
       - uses: actions/checkout@v5
+
+      # A manual run names the build run instead of being triggered by it, so the same
+      # guarantees the workflow_run filter gives are asserted here before anything is published.
+      - name: Resolve source build run
+        run: |
+          set -euo pipefail
+          read -r name conclusion event branch sha < <(
+            gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}" \
+              --jq '[.name, .conclusion, .event, .head_branch, .head_sha] | @tsv'
+          )
+
+          if [ "$name" != 'Build' ] || [ "$conclusion" != 'success' ] || [ "$event" != 'workflow_dispatch' ] || [ "$branch" != 'main' ]; then
+            echo "Run $SOURCE_RUN_ID is not a successful manual Build on main (workflow=$name, conclusion=$conclusion, event=$event, branch=$branch)." >&2
+            exit 1
+          fi
+
+          echo "TARGET_SHA=$sha" >> "$GITHUB_ENV"
 
       # For ci/scripts/point-manifests-at-release.mjs below.
       - uses: actions/setup-node@v7
@@ -242,7 +266,7 @@ jobs:
     uses: ./.github/workflows/nuget-publish.yml
     with:
       version: ${{ needs.publish.outputs.version }}
-      run_id: ${{ github.event.workflow_run.id }}
+      run_id: ${{ needs.publish.outputs.run_id }}
       allow_failure: true
     secrets:
       NUGET_USER: ${{ secrets.NUGET_USER }}
