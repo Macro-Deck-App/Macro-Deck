@@ -1,10 +1,15 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using MacroDeckHost.Application.Deck;
 using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Application.Triggers.Providers;
 
 namespace MacroDeckHost.Application.Devices;
 
+[SuppressMessage("Design",
+	"CA1001:Types that own disposable fields should be disposable",
+	Justification = "A process-lifetime singleton whose shutdown token must stay readable by connections that " +
+		"end after shutdown. The source has no timer and holds no unmanaged resource.")]
 public sealed class DeviceConnectionTracker
 {
 	private sealed class ConnectionEntry
@@ -22,6 +27,7 @@ public sealed class DeviceConnectionTracker
 	private readonly Dictionary<string, PendingDisconnect> _pendingDisconnects = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<Guid, DateTime> _revokedUntil = new();
 	private readonly Lock _sync = new();
+	private readonly CancellationTokenSource _shutdown = new();
 
 	private readonly IEventBus _bus;
 	private readonly TimeProvider _timeProvider;
@@ -35,6 +41,8 @@ public sealed class DeviceConnectionTracker
 		_timeProvider = timeProvider;
 		_deckClients = deckClients;
 	}
+
+	public CancellationToken ShutdownToken => _shutdown.Token;
 
 	public void Attach(string connectionId, Guid? deviceId, Action abort)
 	{
@@ -200,6 +208,8 @@ public sealed class DeviceConnectionTracker
 		{
 			abort?.Invoke();
 		}
+
+		_shutdown.Cancel();
 	}
 
 	public void RevokeUntil(Guid deviceId, DateTime until) => _revokedUntil[deviceId] = until;

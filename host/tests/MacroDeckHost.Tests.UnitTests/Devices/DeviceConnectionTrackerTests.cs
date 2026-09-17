@@ -244,6 +244,23 @@ public class DeviceConnectionTrackerTests
 	}
 
 	[Test]
+	public void Only_closing_every_connection_for_shutdown_cancels_the_shutdown_token()
+	{
+		var deviceId = Guid.NewGuid();
+		_tracker.Attach("conn-1", deviceId, () => { });
+
+		_tracker.AbortDevice(deviceId);
+		var afterDeviceRevocation = _tracker.ShutdownToken.IsCancellationRequested;
+		_tracker.AbortAll();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(afterDeviceRevocation, Is.False);
+			Assert.That(_tracker.ShutdownToken.IsCancellationRequested, Is.True);
+		});
+	}
+
+	[Test]
 	public void The_payload_carries_device_id_device_name_and_client_id()
 	{
 		var deviceId = Guid.NewGuid();

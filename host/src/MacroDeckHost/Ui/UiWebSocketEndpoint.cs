@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Text.Json;
 using System.Threading.Channels;
+using MacroDeckHost.Application.Devices;
 using MacroDeckHost.WebSockets;
 using Serilog;
 using ILogger = Serilog.ILogger;
@@ -21,7 +22,7 @@ public sealed class UiWebSocketEndpoint(
 	IUiWebSocketTickets tickets,
 	WebSocketUiTransport transport,
 	IServiceScopeFactory scopes,
-	IHostApplicationLifetime lifetime,
+	DeviceConnectionTracker connections,
 	TimeProvider timeProvider)
 {
 	private const int QueueLimit = 256;
@@ -50,7 +51,7 @@ public sealed class UiWebSocketEndpoint(
 
 		using var socket = await context.WebSockets.AcceptWebSocketAsync(UiWebSocketProtocol.SubProtocol);
 		using var cancellation
-			= CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted, lifetime.ApplicationStopping);
+			= CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted, connections.ShutdownToken);
 		var connectionId = Guid.NewGuid().ToString("N");
 		var outbound = Channel.CreateBounded<UiWebSocketEnvelope>(new BoundedChannelOptions(QueueLimit)
 		{
