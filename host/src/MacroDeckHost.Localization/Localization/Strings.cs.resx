@@ -4694,6 +4694,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Discord.Config.OAuthFailed" xml:space="preserve">
     <value>Přihlášení k Discordu se nezdařilo: {details}</value>
   </data>
+  <data name="Integrations.Discord.Config.OnlyRichPresenceServer" xml:space="preserve">
+    <value>Byla nalezena pouze služba Discord Rich Presence, nikoli desktopová aplikace Discord. Klienti jako Vesktop, Equibop nebo Legcord sdílejí herní aktivitu, ale Macro Deck je nemůže ovládat. Spustit oficiální desktopovou aplikaci Discord a zkusit to znovu.</value>
+  </data>
   <data name="Integrations.Discord.Config.PrivilegeMismatch" xml:space="preserve">
     <value>Discord odmítl připojení. Macro Deck a Discord musí běžet se stejnými oprávněními: pokud je jeden z nich spuštěn se zvýšenými oprávněními („Spustit jako správce“), je nutné oba spustit stejným způsobem.</value>
   </data>

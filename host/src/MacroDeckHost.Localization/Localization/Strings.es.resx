@@ -4694,6 +4694,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.Discord.Config.OAuthFailed" xml:space="preserve">
     <value>El inicio de sesión con Discord falló: {details}</value>
   </data>
+  <data name="Integrations.Discord.Config.OnlyRichPresenceServer" xml:space="preserve">
+    <value>Solo se encontró un servicio de Rich Presence de Discord, no la aplicación de escritorio de Discord. Clientes como Vesktop, Equibop o Legcord comparten la actividad de juego, pero Macro Deck no puede controlarlos. Inicia la aplicación de escritorio oficial de Discord e inténtalo de nuevo.</value>
+  </data>
   <data name="Integrations.Discord.Config.PrivilegeMismatch" xml:space="preserve">
     <value>Discord rechazó la conexión. Macro Deck y Discord deben ejecutarse con los mismos privilegios: si uno de ellos se ejecuta como elevado ("Ejecutar como administrador"), inicia ambos de la misma forma.</value>
   </data>

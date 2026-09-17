@@ -78,6 +78,14 @@ Most plugins run on the .NET runtime that comes with Macro Deck, so Task Manager
 list them as `dotnet` or ".NET Host" rather than by the plugin's name. This is expected; ending
 Macro Deck ends them too.
 
+## Discord cannot be connected
+
+If the Discord setup says that only a Discord Rich Presence service was found, or Discord stays
+disconnected, Macro Deck cannot find the official Discord desktop app. Third-party clients such as
+Vesktop, Equibop, Legcord or Dorion can share game activity, but Macro Deck cannot control them.
+Start the official Discord desktop app, including the Flatpak or Snap version on Linux, and try
+again. The third-party client can keep running alongside it.
+
 ## Installing on Linux
 
 - **The stable APT suite is empty:** there is no stable release of Macro Deck 3 yet. Use the beta

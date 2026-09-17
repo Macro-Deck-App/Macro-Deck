@@ -4694,6 +4694,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Discord.Config.OAuthFailed" xml:space="preserve">
     <value>Logowanie do Discorda nie powiodło się: {details}</value>
   </data>
+  <data name="Integrations.Discord.Config.OnlyRichPresenceServer" xml:space="preserve">
+    <value>Znaleziono tylko usługę Discord Rich Presence, a nie aplikację Discord na komputer. Klienty takie jak Vesktop, Equibop czy Legcord udostępniają aktywność w grach, ale Macro Deck nie może nimi sterować. Uruchom oficjalną aplikację Discord na komputer i spróbuj ponownie.</value>
+  </data>
   <data name="Integrations.Discord.Config.PrivilegeMismatch" xml:space="preserve">
     <value>Discord odmówił połączenia. Macro Deck i Discord muszą działać z takimi samymi uprawnieniami: jeśli jeden z nich jest uruchomiony z podwyższonymi uprawnieniami („Uruchom jako administrator”), uruchom oba programy w ten sam sposób.</value>
   </data>

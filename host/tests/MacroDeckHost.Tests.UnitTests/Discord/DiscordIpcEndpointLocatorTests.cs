@@ -106,26 +106,4 @@ internal sealed class DiscordIpcEndpointLocatorTests
 		Assert.That(paths.Take(DiscordIpcEndpointLocator.SocketCount),
 			Is.All.StartsWith("/run/user/1000/discord-ipc-"));
 	}
-
-	private sealed class EnvironmentScope : IDisposable
-	{
-		private readonly Dictionary<string, string?> _original = new(StringComparer.Ordinal);
-
-		public string? this[string name]
-		{
-			set
-			{
-				_original.TryAdd(name, Environment.GetEnvironmentVariable(name));
-				Environment.SetEnvironmentVariable(name, value);
-			}
-		}
-
-		public void Dispose()
-		{
-			foreach (var (name, value) in _original)
-			{
-				Environment.SetEnvironmentVariable(name, value);
-			}
-		}
-	}
 }

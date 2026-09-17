@@ -4694,6 +4694,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Discord.Config.OAuthFailed" xml:space="preserve">
     <value>Discord sign-in failed: {details}</value>
   </data>
+  <data name="Integrations.Discord.Config.OnlyRichPresenceServer" xml:space="preserve">
+    <value>Only a Discord Rich Presence service was found, not the Discord desktop app. Clients such as Vesktop, Equibop or Legcord share game activity but cannot be controlled by Macro Deck. Start the official Discord desktop app and try again.</value>
+  </data>
   <data name="Integrations.Discord.Config.PrivilegeMismatch" xml:space="preserve">
     <value>Discord refused the connection. Macro Deck and Discord have to run with the same privileges: if one of them is elevated ("Run as administrator"), start both the same way.</value>
   </data>

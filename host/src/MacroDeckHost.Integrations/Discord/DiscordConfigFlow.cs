@@ -22,7 +22,7 @@ public sealed class DiscordConfigFlow : IConfigFlow
 	private string _clientSecret = string.Empty;
 
 	public DiscordConfigFlow()
-		: this(() => new DiscordRpcClient(new DiscordIpcTransport()), new DiscordOAuthClient())
+		: this(() => new DiscordRpcClient(() => new DiscordIpcTransport()), new DiscordOAuthClient())
 	{
 	}
 
@@ -140,9 +140,12 @@ public sealed class DiscordConfigFlow : IConfigFlow
 		catch (DiscordIpcUnavailableException ex)
 		{
 			return ConfigFlowResult.Error(AuthorizeStep(),
-				ex.AccessDenied
-					? AppStrings.Integrations.Discord.Config.PrivilegeMismatch()
-					: AppStrings.Integrations.Discord.Config.NoClientFound());
+				ex switch
+				{
+					{ AccessDenied: true } => AppStrings.Integrations.Discord.Config.PrivilegeMismatch(),
+					{ RichPresenceOnly: true } => AppStrings.Integrations.Discord.Config.OnlyRichPresenceServer(),
+					_ => AppStrings.Integrations.Discord.Config.NoClientFound()
+				});
 		}
 		catch (Exception ex) when (ex is DiscordRpcException or TimeoutException or IOException)
 		{
@@ -274,6 +277,11 @@ public sealed class DiscordConfigFlow : IConfigFlow
 		if (exception.IsScopeProblem)
 		{
 			return AppStrings.Integrations.Discord.Config.ScopeProblem();
+		}
+
+		if (exception.IsUnknownCommand)
+		{
+			return AppStrings.Integrations.Discord.Config.OnlyRichPresenceServer();
 		}
 
 		return exception.Code == 4000

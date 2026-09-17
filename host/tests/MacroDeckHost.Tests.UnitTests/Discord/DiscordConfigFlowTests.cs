@@ -166,6 +166,44 @@ internal sealed class DiscordConfigFlowTests
 	}
 
 	[Test]
+	public async Task Finding_only_a_rich_presence_server_asks_for_the_official_discord_app()
+	{
+		_client.ConnectException = new DiscordIpcUnavailableException("rich presence only", richPresenceOnly: true);
+		await Submit("credentials", Credentials());
+
+		var result = await Submit("authorize", new Dictionary<string, object?>(StringComparer.Ordinal));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Kind, Is.EqualTo(ConfigFlowResultKind.Error));
+			Assert.That(TestLocalization.Resolve(result.ErrorMessage), Does.Contain("official Discord desktop app"));
+		});
+	}
+
+	[Test]
+	public async Task A_refused_endpoint_outranks_a_skipped_rich_presence_server()
+	{
+		_client.ConnectException =
+			new DiscordIpcUnavailableException("refused", accessDenied: true, richPresenceOnly: true);
+		await Submit("credentials", Credentials());
+
+		var result = await Submit("authorize", new Dictionary<string, object?>(StringComparer.Ordinal));
+
+		Assert.That(TestLocalization.Resolve(result.ErrorMessage), Does.Contain("same privileges"));
+	}
+
+	[Test]
+	public async Task An_unknown_authorize_command_is_explained_as_a_rich_presence_server()
+	{
+		_client.Fails("AUTHORIZE", new DiscordRpcException(1000, "Unknown command: AUTHORIZE"));
+		await Submit("credentials", Credentials());
+
+		var result = await Submit("authorize", new Dictionary<string, object?>(StringComparer.Ordinal));
+
+		Assert.That(TestLocalization.Resolve(result.ErrorMessage), Does.Contain("official Discord desktop app"));
+	}
+
+	[Test]
 	public async Task A_user_who_declines_the_prompt_gets_a_readable_error()
 	{
 		_client.Fails("AUTHORIZE", new DiscordRpcException(4001, "User declined"));
