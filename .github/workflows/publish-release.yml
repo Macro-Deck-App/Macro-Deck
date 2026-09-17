@@ -110,17 +110,44 @@ jobs:
 
           echo "Publishing $tag from build run $SOURCE_RUN_ID at $TARGET_SHA"
 
-      - name: Create GitHub release
+      # Draft first, published last: releases in this repository are immutable, so a tag is
+      # spent the moment its release goes out. Uploading into a draft keeps a failed upload
+      # retryable, and the release only becomes visible once it carries every asset.
+      - name: Create draft release
         env:
           VERSION: ${{ steps.release.outputs.version }}
           TAG: ${{ steps.release.outputs.tag }}
           PRERELEASE: ${{ steps.release.outputs.prerelease }}
         run: |
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Release $TAG already exists." >&2
-            exit 1
+          if draft=$(gh release view "$TAG" --json isDraft --jq '.isDraft' 2>/dev/null); then
+            if [ "$draft" != 'true' ]; then
+              echo "Release $TAG already exists." >&2
+              exit 1
+            fi
+            # A draft never reached anyone and holds no tag, so a failed run's leftover is
+            # replaced rather than blocking the retry it exists for.
+            echo "Replacing the leftover draft for $TAG."
+            gh release delete "$TAG" --yes
           fi
 
+          args=(
+            "$TAG"
+            --draft
+            --target "$TARGET_SHA"
+            --title "Macro Deck $VERSION"
+            --notes-file release-notes/release-notes.md
+          )
+
+          if [ "$PRERELEASE" = 'true' ]; then
+            args+=(--prerelease)
+          fi
+
+          gh release create "${args[@]}"
+
+      - name: Upload release assets
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
           assets=()
           while IFS= read -r -d '' asset; do
             assets+=("$asset")
@@ -141,19 +168,24 @@ jobs:
             exit 1
           fi
 
-          args=(
-            "$TAG"
-            "${assets[@]}"
-            --target "$TARGET_SHA"
-            --title "Macro Deck $VERSION"
-            --notes-file release-notes/release-notes.md
-          )
+          # A single flaky upload used to cost the whole version; --clobber makes a retry
+          # resume over whatever the previous attempt already got through.
+          for attempt in 1 2 3; do
+            if gh release upload "$TAG" "${assets[@]}" --clobber; then
+              exit 0
+            fi
+            echo "::warning::Asset upload attempt $attempt failed."
+            sleep $((attempt * 15))
+          done
 
-          if [ "$PRERELEASE" = 'true' ]; then
-            args+=(--prerelease)
-          fi
+          echo "Could not upload the release assets after 3 attempts." >&2
+          exit 1
 
-          gh release create "${args[@]}"
+      # The point of no return: from here the tag is spent and the release is public.
+      - name: Publish release
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+        run: gh release edit "$TAG" --draft=false
 
       # GitHub sanitizes asset names on upload, so the urls the build wrote are only
       # provisional; this rewrites them to the assets the release actually carries and
