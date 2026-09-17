@@ -11,3 +11,5 @@ export * from './variables-page/variables-page.component';
 export * from './developer-page/developer-page.component';
 export * from './store-page/store-page.component';
 export * from './store-detail-page/store-detail-page.component';
+export * from './store-installed-page/store-installed-page.component';
+export * from './store-tests-page/store-tests-page.component';

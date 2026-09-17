@@ -109,7 +109,8 @@ internal sealed class FakeLocalizationPreferences : IAppPreferenceService
 	public Task<ExtensionSettings> SetExtensions(bool? storeEnabled,
 		bool? checkForUpdates,
 		bool? notifyOnUpdates,
-		int? refreshIntervalMinutes)
+		int? refreshIntervalMinutes,
+		bool? autoUpdate = null)
 		=> throw new NotSupportedException();
 
 	public Task<BackupSettings> GetBackups() => throw new NotSupportedException();

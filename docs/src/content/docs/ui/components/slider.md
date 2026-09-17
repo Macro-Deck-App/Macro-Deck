@@ -114,7 +114,8 @@ A reader without `ui.slider` draws the fallback, here the same level as a read-o
 Declare `double-press` for an action on a double tap, such as resetting to a home level. Each tap is still an
 ordinary interaction and sends its own `change` first, so the handler sees the level the second tap set and
 replaces it. A reader that predates `double-press` never sends it, and the taps stay plain level changes. On a
-relative slider a tap moves nothing, so `double-press` arrives on its own.
+relative slider a tap moves nothing, so `double-press` arrives on its own. Unlike on a [button](/ui/components/button/#reader-behaviour),
+nothing is held back while waiting for a second tap.
 
 ## Children
 

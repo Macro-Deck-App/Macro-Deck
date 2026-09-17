@@ -54,7 +54,7 @@ internal sealed class DeviceSurfaceWorld : IDisposable
 			new SingleProviderResolver(provider, providerId),
 			Profiles,
 			Presence,
-			new DeviceInteractionRouter(scopeFactory, new CallbackFakeHostLockState(), Time, Serilog.Core.Logger.None),
+			new DeviceInteractionRouter(scopeFactory, new CallbackFakeHostLockState(), Time, Serilog.Core.Logger.None, Profiles),
 			new NoFocusRules(),
 			new NoEventBus(),
 			new WidgetStateSubscriptionTracker(),

@@ -61,7 +61,7 @@ export class NotificationPanelComponent {
         this.settingsModal.open('about');
         break;
       case 'OpenExtensionStore':
-        void this.router.navigate(['/store']);
+        void this.router.navigate(action.target === 'installed' ? ['/store', 'installed'] : ['/store']);
         break;
       case 'RestartApplication':
         void this.restartApplication();

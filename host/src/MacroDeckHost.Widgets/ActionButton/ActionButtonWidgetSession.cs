@@ -118,6 +118,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 			[UiComponentEvents.LongPress] = WidgetTriggerTypes.LongPress,
 			[UiComponentEvents.PressStart] = WidgetTriggerTypes.TouchStart,
 			[UiComponentEvents.PressEnd] = WidgetTriggerTypes.TouchEnd,
+			[UiComponentEvents.DoublePress] = WidgetTriggerTypes.DoublePress,
 		};
 
 	/// <param name="interactive">Whether this session accepts presses at all - true only for the Widget

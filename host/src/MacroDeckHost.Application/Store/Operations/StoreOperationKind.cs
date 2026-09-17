@@ -6,5 +6,6 @@ namespace MacroDeckHost.Application.Store.Operations;
 public enum StoreOperationKind
 {
 	Install,
-	Update
+	Update,
+	TestInstall
 }

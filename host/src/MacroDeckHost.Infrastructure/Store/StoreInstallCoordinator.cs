@@ -1,6 +1,7 @@
 using MacroDeckHost.Application.Store;
 using MacroDeckHost.Application.Store.Model;
 using MacroDeckHost.Application.Store.Operations;
+using MacroDeckHost.Application.Store.Reviews;
 
 namespace MacroDeckHost.Infrastructure.Store;
 
@@ -11,24 +12,28 @@ public sealed class StoreInstallCoordinator : IStoreInstallCoordinator
 	private readonly StoreOperationChannel _channel;
 	private readonly StoreOperationCancellation _cancellation;
 	private readonly StoreInstallConsent _consent;
+	private readonly StoreInstallBackupBatches _backupBatches;
 
 	public StoreInstallCoordinator(IStoreCatalogQueryService catalogQuery,
 		IStoreOperationTracker tracker,
 		StoreOperationChannel channel,
 		StoreOperationCancellation cancellation,
-		StoreInstallConsent consent)
+		StoreInstallConsent consent,
+		StoreInstallBackupBatches backupBatches)
 	{
 		_catalogQuery = catalogQuery;
 		_tracker = tracker;
 		_channel = channel;
 		_cancellation = cancellation;
 		_consent = consent;
+		_backupBatches = backupBatches;
 	}
 
 	public StoreOperation Install(StoreExtensionKind kind,
 		string packageId,
 		string? version = null,
-		bool allowUnsigned = false)
+		bool allowUnsigned = false,
+		string? backupBatchId = null)
 	{
 		ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
 
@@ -58,6 +63,41 @@ public sealed class StoreInstallCoordinator : IStoreInstallCoordinator
 		// Recorded against this operation id alone, so it reaches the worker without being persisted with
 		// the operation and without a retry - which creates a new operation - inheriting it.
 		if (allowUnsigned)
+		{
+			_consent.Record(operation.Id);
+		}
+
+		if (backupBatchId is not null)
+		{
+			_backupBatches.Record(operation.Id, backupBatchId);
+		}
+
+		_channel.Writer.TryWrite(operation.Id);
+		return operation;
+	}
+
+	public StoreOperation InstallTestBuild(string packageId,
+		string displayName,
+		StorePlatformTestBuild build,
+		bool consent)
+	{
+		ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
+		ArgumentNullException.ThrowIfNull(build);
+
+		var live = _tracker.FindLive(StoreExtensionKind.Plugin, packageId);
+		if (live is not null)
+		{
+			return live;
+		}
+
+		var operation = _tracker.Create(StoreOperationKind.TestInstall,
+			StoreExtensionKind.Plugin,
+			packageId,
+			build.Version,
+			displayName,
+			previousVersion: null,
+			testBuild: new StoreTestBuildReference(build.Id, build.Build));
+		if (consent)
 		{
 			_consent.Record(operation.Id);
 		}

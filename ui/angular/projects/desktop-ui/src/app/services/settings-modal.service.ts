@@ -10,6 +10,7 @@ export type SettingsCategory =
   | 'devices'
   | 'client-targets'
   | 'license'
+  | 'extensions'
   | 'adb'
   | 'backups'
   | 'migration'

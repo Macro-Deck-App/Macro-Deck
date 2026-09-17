@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Widgets;
@@ -187,11 +188,14 @@ public sealed class ActionButtonWidgetData
 {
 	private readonly ActionButtonStateModel _model;
 
-	private ActionButtonWidgetData(ActionButtonStateModel model, IReadOnlySet<string> triggerTypes)
+	private ActionButtonWidgetData(ActionButtonStateModel model, IReadOnlySet<string> triggerTypes, bool hasDoublePressFlow)
 	{
 		_model = model;
 		TriggerTypes = triggerTypes;
+		_hasDoublePressFlow = hasDoublePressFlow;
 	}
+
+	private readonly bool _hasDoublePressFlow;
 
 	public bool StateMode => _model.StateMode;
 
@@ -230,7 +234,10 @@ public sealed class ActionButtonWidgetData
 		var model = ActionButtonStateModel.Read(root);
 		var triggerTypes = ActionButtonFlowTriggers.ReadTriggerTypes(model.Data);
 
-		return new ActionButtonWidgetData(model, triggerTypes);
+		var hasDoublePressFlow = data.ValueKind == JsonValueKind.Object &&
+			WidgetFlowsJson.HasRunnableFlow(data.GetRawText(), WidgetTriggerTypes.DoublePress);
+
+		return new ActionButtonWidgetData(model, triggerTypes, hasDoublePressFlow);
 	}
 
 	/// <summary>The event names this button's tree declares. A pure function of the stored flows and
@@ -240,7 +247,7 @@ public sealed class ActionButtonWidgetData
 	{
 		var names = new List<string>();
 
-		if (TriggerTypes.Contains(WidgetTriggerTypes.ShortPress) || CanAdvanceState)
+		if (TriggerTypes.Contains(WidgetTriggerTypes.ShortPress) || CanAdvanceState || _hasDoublePressFlow)
 		{
 			names.Add(MacroDeck.Ui.Components.UiComponentEvents.Press);
 		}
@@ -258,6 +265,11 @@ public sealed class ActionButtonWidgetData
 		if (TriggerTypes.Contains(WidgetTriggerTypes.TouchEnd))
 		{
 			names.Add(MacroDeck.Ui.Components.UiComponentEvents.PressEnd);
+		}
+
+		if (_hasDoublePressFlow)
+		{
+			names.Add(MacroDeck.Ui.Components.UiComponentEvents.DoublePress);
 		}
 
 		return names;

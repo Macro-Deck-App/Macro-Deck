@@ -10,6 +10,8 @@ using MacroDeckHost.Application.Store;
 using MacroDeckHost.Application.Store.Installation;
 using MacroDeckHost.Application.Store.Model;
 using MacroDeckHost.Application.Store.Operations;
+using MacroDeckHost.Application.Store.Reviews;
+using MacroDeckHost.Application.Store.Testing;
 using MacroDeckHost.Domain.Enums;
 using Microsoft.Extensions.DependencyInjection;
 using ILogger = Serilog.ILogger;
@@ -26,6 +28,7 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 	private readonly IIconPackCache _iconPackCache;
 	private readonly IStoreInstallationStore _installations;
 	private readonly StoreInstallConsent _consent;
+	private readonly StoreInstallBackupBatches _backupBatches;
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly IMacroDeckPaths _paths;
 	private readonly StoreRegistryOptions _options;
@@ -40,6 +43,7 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		IIconPackCache iconPackCache,
 		IStoreInstallationStore installations,
 		StoreInstallConsent consent,
+		StoreInstallBackupBatches backupBatches,
 		IServiceScopeFactory scopeFactory,
 		IMacroDeckPaths paths,
 		StoreRegistryOptions options,
@@ -54,6 +58,7 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		_iconPackCache = iconPackCache;
 		_installations = installations;
 		_consent = consent;
+		_backupBatches = backupBatches;
 		_scopeFactory = scopeFactory;
 		_paths = paths;
 		_options = options;
@@ -66,6 +71,12 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		var operation = _tracker.Find(operationId);
 		if (operation is null || operation.IsTerminal)
 		{
+			return;
+		}
+
+		if (operation.Kind == StoreOperationKind.TestInstall)
+		{
+			await ExecuteTestBuild(operation, _consent.Consume(operationId), cancellationToken);
 			return;
 		}
 
@@ -107,13 +118,19 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		// registry-authenticated, with no signature path to consent to - is dropped rather than left
 		// waiting to be picked up by something else.
 		var consented = _consent.Consume(operationId);
+		var backupBatchId = _backupBatches.Consume(operationId);
 
 		try
 		{
 			switch (operation.ExtensionKind)
 			{
 				case StoreExtensionKind.Plugin:
-					await ExecutePlugin(operationId, item.Entry, consented, cancellationToken);
+					await ExecutePlugin(operationId,
+						item.Entry,
+						consented,
+						backupBatchId,
+						snapshot.Sequence,
+						cancellationToken);
 					break;
 				case StoreExtensionKind.IconPack:
 					await ExecuteIconPack(operationId, item.Entry, snapshot.Sequence, cancellationToken);
@@ -154,6 +171,8 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 	private async Task ExecutePlugin(Guid operationId,
 		StoreCatalogEntry entry,
 		bool consented,
+		string? backupBatchId,
+		long registrySequence,
 		CancellationToken cancellationToken)
 	{
 		// Developer mode is read from the host's own preferences, never from the request: consent asked
@@ -181,7 +200,14 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 			{
 				Progress = progress
 			};
-		var request = new PluginInstallRequest { AllowUnsigned = consented, Force = false, RetainDownload = false };
+		var request = new PluginInstallRequest
+		{
+			AllowUnsigned = consented,
+			Force = false,
+			RetainDownload = false,
+			BackupBatchId = backupBatchId,
+			Acquired = () => _tracker.Transition(operationId, StoreOperationState.Installing)
+		};
 
 		var result = await _pluginInstaller.Install(source, request, cancellationToken);
 		if (!result.Success)
@@ -195,7 +221,121 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 			return;
 		}
 
+		_installations.Save(new StoreInstallationRecord
+		{
+			Origin = _options.BaseUrl.ToString(),
+			Kind = StoreExtensionKind.Plugin,
+			PackageId = entry.Id,
+			Version = string.IsNullOrEmpty(result.Version) ? entry.LatestVersion : result.Version,
+			ArtifactSha256 = entry.LatestRelease.Sha256,
+			DisplayName = entry.Name,
+			RegistrySequence = registrySequence,
+			InstalledAt = _timeProvider.GetUtcNow(),
+			TargetIds = []
+		});
+
 		_tracker.Transition(operationId, StoreOperationState.Completed);
+	}
+
+	private async Task ExecuteTestBuild(StoreOperation operation,
+		bool consented,
+		CancellationToken cancellationToken)
+	{
+		var operationId = operation.Id;
+		if (!consented)
+		{
+			_tracker.Transition(operationId,
+				StoreOperationState.Failed,
+				StoreOperationError.TestConsentRequired,
+				"A test build is only installed after you confirm it.");
+			return;
+		}
+
+		if (operation.TestBuildId is not { } buildId)
+		{
+			_tracker.Transition(operationId,
+				StoreOperationState.Failed,
+				StoreOperationError.TestBuildUnavailable,
+				"The operation names no test build.");
+			return;
+		}
+
+		try
+		{
+			using var scope = _scopeFactory.CreateScope();
+			var platform = scope.ServiceProvider.GetRequiredService<IStorePlatformClient>();
+			var testInstallations = scope.ServiceProvider.GetRequiredService<IStoreTestInstallationStore>();
+
+			var download = await platform.GetTestBuildDownload(operation.PackageId, buildId, cancellationToken);
+			if (!download.Success || download.Value is not { } link)
+			{
+				_tracker.Transition(operationId,
+					StoreOperationState.Failed,
+					download.Failure is StorePlatformFailure.SignInRequired or StorePlatformFailure.AccountSuspended
+						? StoreOperationError.SignInRequired
+						: StoreOperationError.TestBuildUnavailable,
+					"The test build could not be requested from the Macro Deck Platform.");
+				return;
+			}
+
+			_tracker.Transition(operationId, StoreOperationState.Downloading);
+			var progress = new Progress<PluginArtifactDownloadProgress>(sample =>
+				_tracker.ReportProgress(operationId, sample.BytesRead, sample.TotalBytes));
+			var source = PluginArtifactSource.FromTestBuild(link.Url, AssetContentHash.Sha256Prefix + link.Sha256)
+				with
+				{
+					Progress = progress
+				};
+
+			// ExpectedPluginId keeps a build of one plugin from being installed as another; Force replaces an
+			// installed build of the same version.
+			var request = new PluginInstallRequest
+			{
+				ExpectedPluginId = operation.PackageId,
+				AllowUnsigned = true,
+				Force = true,
+				RetainDownload = false
+			};
+			var result = await _pluginInstaller.Install(source, request, cancellationToken);
+			if (!result.Success)
+			{
+				_tracker.Transition(operationId,
+					StoreOperationState.Failed,
+					result.BlockedByDevelopmentTakeover
+						? StoreOperationError.InstallBlockedByTakeover
+						: result.Error == PluginInstallError.IdMismatch
+							? StoreOperationError.TestBuildMismatch
+							: MapPluginError(result.Error),
+					result.ErrorMessage ?? "The test build could not be installed.");
+				return;
+			}
+
+			testInstallations.Save(new StoreTestInstallationRecord
+			{
+				PluginId = operation.PackageId,
+				Version = result.Version ?? operation.Version,
+				Build = operation.TestBuild ?? string.Empty,
+				BuildId = buildId,
+				ArtifactSha256 = link.Sha256,
+				InstalledAt = _timeProvider.GetUtcNow()
+			});
+			_tracker.Transition(operationId, StoreOperationState.Completed);
+		}
+		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+		{
+			_tracker.Transition(operationId,
+				StoreOperationState.Cancelled,
+				StoreOperationError.Cancelled,
+				"Cancelled.");
+		}
+		catch (Exception ex)
+		{
+			_logger.Error(ex, "Test install of {PackageId} threw", operation.PackageId);
+			_tracker.Transition(operationId,
+				StoreOperationState.Failed,
+				StoreOperationError.InstallFailed,
+				ex.Message);
+		}
 	}
 
 	private async Task ExecuteIconPack(Guid operationId,

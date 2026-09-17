@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Widgets.Configuration;
@@ -75,24 +76,9 @@ public sealed record SliderWidgetData
 			Max = ReadDouble(data, "max") ?? 100,
 			Step = ReadDouble(data, "step") ?? 1,
 			CustomStep = ReadBool(data, "customStep") ?? false,
-			HasDoublePressFlow = HasFlowFor(data, WidgetTriggerTypes.DoublePress),
+			HasDoublePressFlow = WidgetFlowsJson.HasRunnableFlow(WidgetConfigJson.ReadFlows(data), WidgetTriggerTypes.DoublePress),
 		};
 	}
-
-	private static bool HasFlowFor(JsonElement data, string triggerType)
-		=> WidgetConfigJson.ReadFlows(data)
-			.EnumerateArray()
-			.Any(flow => flow.ValueKind == JsonValueKind.Object &&
-				flow.TryGetProperty("triggerType", out var type) &&
-				type.ValueKind == JsonValueKind.String &&
-				string.Equals(type.GetString(), triggerType, StringComparison.OrdinalIgnoreCase) &&
-				flow.TryGetProperty("children", out var children) &&
-				children.ValueKind == JsonValueKind.Array &&
-				children.EnumerateArray().Any(IsEnabledBlock));
-
-	private static bool IsEnabledBlock(JsonElement block)
-		=> block.ValueKind == JsonValueKind.Object &&
-			!(block.TryGetProperty("disabled", out var disabled) && disabled.ValueKind == JsonValueKind.True);
 
 	private static WidgetIconReference? ReadIcon(JsonElement data)
 	{

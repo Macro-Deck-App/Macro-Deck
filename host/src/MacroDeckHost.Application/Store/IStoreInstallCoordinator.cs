@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Store.Model;
 using MacroDeckHost.Application.Store.Operations;
+using MacroDeckHost.Application.Store.Reviews;
 
 namespace MacroDeckHost.Application.Store;
 
@@ -15,7 +16,13 @@ public interface IStoreInstallCoordinator
 	StoreOperation Install(StoreExtensionKind kind,
 		string packageId,
 		string? version = null,
-		bool allowUnsigned = false);
+		bool allowUnsigned = false,
+		string? backupBatchId = null);
+
+	StoreOperation InstallTestBuild(string packageId,
+		string displayName,
+		StorePlatformTestBuild build,
+		bool consent);
 
 	StoreOperation? Retry(Guid operationId);
 

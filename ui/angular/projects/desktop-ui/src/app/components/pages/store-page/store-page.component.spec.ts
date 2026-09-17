@@ -287,7 +287,7 @@ describe('StorePageComponent', () => {
       expect(call.kinds).toEqual(['Plugin', 'IconPack']);
     }
 
-    const filter = fixture.debugElement.query(By.directive(SegmentedControlComponent))
+    const filter = fixture.debugElement.query(By.css('.store-facets shared-segmented-control'))
       .componentInstance as SegmentedControlComponent;
     expect(filter.options.map(option => option.value)).toEqual(['all', 'Plugin', 'IconPack']);
   });
@@ -616,6 +616,17 @@ describe('StorePageComponent', () => {
         expect(comingSoonShown()).toBeTrue();
       });
     }
+
+    it('lets a signed-in account without the StoreTester role open its tests from the overlay', async () => {
+      await createFixture();
+      expect(findButton(translate(AppStrings.Store.Page.ComingSoonTestsAction))).toBeUndefined();
+
+      await sessionIs('signedIn', []);
+      findButton(translate(AppStrings.Store.Page.ComingSoonTestsAction))!.click();
+
+      expect(comingSoonShown()).toBeTrue();
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/store/tests']);
+    });
 
     it('opens the store for a signed-in StoreTester account', async () => {
       await createFixture();

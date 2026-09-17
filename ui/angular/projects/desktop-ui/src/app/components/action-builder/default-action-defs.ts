@@ -8,6 +8,8 @@ export interface TriggerTab {
 
 export const DEFAULT_TRIGGER_TYPE = 'onShortPress';
 
+export const DOUBLE_PRESS_TRIGGER_TYPE = 'onDoublePress';
+
 type Translator = (key: string) => string;
 
 export function defaultTriggerTabs(t: Translator): readonly TriggerTab[] {
@@ -17,6 +19,7 @@ export function defaultTriggerTabs(t: Translator): readonly TriggerTab[] {
     { triggerType: 'onLongPress', label: t(T.LongPress) },
     { triggerType: 'onTouchStart', label: t(T.TouchStart) },
     { triggerType: 'onTouchEnd', label: t(T.TouchEnd) },
+    { triggerType: DOUBLE_PRESS_TRIGGER_TYPE, label: t(T.DoublePress) },
   ];
 }
 
@@ -33,13 +36,12 @@ export function widgetTriggerCatalog(t: Translator): readonly TriggerTab[] {
   return [
     ...defaultTriggerTabs(t),
     toggleTriggerTab(t),
-    { triggerType: 'onDoublePress', label: t(AppStrings.ActionBuilder.Trigger.DoublePress) },
   ];
 }
 
 export function fixedTriggerTabsFor(triggers: readonly string[] | undefined, t: Translator): TriggerTab[] | null {
   const named = triggers ?? [];
-  const presses = new Set(defaultTriggerTabs(t).map(tab => tab.triggerType));
+  const presses = new Set(defaultTriggerTabs(t).map(tab => tab.triggerType).filter(type => type !== DOUBLE_PRESS_TRIGGER_TYPE));
   if (named.length === 0 || named.some(trigger => presses.has(trigger))) return null;
 
   const tabs = widgetTriggerCatalog(t).filter(tab => named.includes(tab.triggerType));

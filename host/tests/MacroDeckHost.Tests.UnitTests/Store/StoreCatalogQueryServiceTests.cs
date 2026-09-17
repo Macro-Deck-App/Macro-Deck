@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Store;
+using MacroDeckHost.Application.Store.Installation;
 using MacroDeckHost.Application.Store.Model;
 using MacroDeckHost.Infrastructure.Plugins;
 using MacroDeckHost.Infrastructure.Store;
@@ -46,6 +47,32 @@ internal sealed class StoreCatalogQueryServiceTests
 			Assert.That(first.Total, Is.EqualTo(7));
 			Assert.That(Ids(last), Is.EqualTo(new[] { "p7" }));
 			Assert.That(last.Total, Is.EqualTo(7));
+		});
+	}
+
+	[Test]
+	public void The_installed_view_lists_only_extensions_that_are_installed()
+	{
+		Seed([
+			Entry("com.acme.hue", "Hue Bridge"),
+			Entry("com.acme.material", "Material", StoreExtensionKind.IconPack),
+			Entry("com.acme.fluent", "Fluent", StoreExtensionKind.IconPack)
+		]);
+		new JsonStoreInstallationStore(_paths, Serilog.Core.Logger.None).Save(new StoreInstallationRecord
+		{
+			Origin = "https://registry.example/",
+			Kind = StoreExtensionKind.IconPack,
+			PackageId = "com.acme.material",
+			Version = "0.9.0"
+		});
+
+		var page = Page(new StoreCatalogQuery { Kinds = _browseKinds, Installed = true });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Ids(page), Is.EqualTo(new[] { "com.acme.material" }));
+			Assert.That(page.Total, Is.EqualTo(1));
+			Assert.That(page.Items[0].InstallState, Is.EqualTo(StoreInstallState.UpdateAvailable));
 		});
 	}
 

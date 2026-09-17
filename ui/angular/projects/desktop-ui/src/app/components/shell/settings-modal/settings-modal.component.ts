@@ -16,6 +16,7 @@ import { ClientTargetsSettingsComponent } from './sections/client-targets-settin
 import { AppearanceSettingsComponent } from './sections/appearance-settings.component';
 import { BackupsSettingsComponent } from './sections/backups-settings.component';
 import { DeveloperSettingsComponent } from './sections/developer-settings.component';
+import { ExtensionsSettingsComponent } from './sections/extensions-settings.component';
 import { DevicesSettingsComponent } from './sections/devices-settings.component';
 import { LanguageSettingsComponent } from './sections/language-settings.component';
 import { LicenseSettingsComponent } from './sections/license-settings.component';
@@ -66,7 +67,7 @@ const PINNED_CATEGORY_LABEL_KEYS: Partial<Record<SettingsCategory, string>> = {
     SecuritySettingsComponent, NetworkSettingsComponent, DevicesSettingsComponent, AdbSettingsComponent,
     ClientTargetsSettingsComponent, LicenseSettingsComponent,
     BackupsSettingsComponent, MigrationSettingsComponent,
-    LoggingSettingsComponent, DeveloperSettingsComponent, AboutSettingsComponent],
+    LoggingSettingsComponent, DeveloperSettingsComponent, ExtensionsSettingsComponent, AboutSettingsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './settings-modal.component.html',
   styleUrls: ['./settings-modal.component.scss'],
@@ -100,6 +101,7 @@ export class SettingsModalComponent {
           { id: 'appearance', label: text(Strings.Settings.Appearance), icon: 'sun' },
           { id: 'startup', label: text(Strings.Settings.Startup), icon: 'power' },
           { id: 'language', label: text(Strings.Settings.Language), icon: 'globe' },
+          { id: 'extensions', label: text(AppStrings.Settings.Extensions.Heading), icon: 'store' },
         ],
       },
       {
@@ -111,6 +113,7 @@ export class SettingsModalComponent {
           { id: 'license', label: text(AppStrings.Settings.License.Heading), icon: 'unlock' },
         ],
       },
+
       {
         label: text(Strings.Settings.PrivacyAndSecurity),
         items: [

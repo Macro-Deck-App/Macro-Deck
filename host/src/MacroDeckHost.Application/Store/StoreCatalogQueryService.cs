@@ -50,6 +50,11 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 			entries = entries.Where(entry => Matches(entry, term));
 		}
 
+		if (query.Installed)
+		{
+			entries = entries.Where(entry => InstalledVersion(entry) is not null);
+		}
+
 		var matches = entries.ToList();
 		var take = Math.Clamp(query.Take, 1, StoreCatalogQuery.MaxTake);
 		var items = Order(matches, query.Section, term, featured)

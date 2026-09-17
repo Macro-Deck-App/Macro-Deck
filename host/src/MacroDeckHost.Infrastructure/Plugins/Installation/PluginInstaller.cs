@@ -16,6 +16,8 @@ using MacroDeckHost.Application.Plugins.Installation;
 using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Plugins.Trust;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Store.Installation;
+using MacroDeckHost.Application.Store.Model;
 using MacroDeckHost.Infrastructure.Persistence;
 using MacroDeckHost.Localization;
 using Microsoft.Extensions.DependencyInjection;
@@ -230,6 +232,8 @@ public sealed class PluginInstaller : IPluginInstaller
 					manifest.Version);
 			}
 
+			request.Acquired?.Invoke();
+
 			var gate = _pluginGates.GetOrAdd(manifest.Id, _ => new SemaphoreSlim(1, 1));
 			await gate.WaitAsync(cancellationToken);
 			try
@@ -239,7 +243,8 @@ public sealed class PluginInstaller : IPluginInstaller
 					return takenOver;
 				}
 
-				if (await RefuseWhenPreUpdateBackupFails(manifest.Id, cancellationToken) is { } refusal)
+				if (await RefuseWhenPreUpdateBackupFails(manifest.Id, request.BackupBatchId, cancellationToken) is
+					{ } refusal)
 				{
 					return refusal;
 				}
@@ -283,6 +288,7 @@ public sealed class PluginInstaller : IPluginInstaller
 	/// asked to have a copy of first.
 	/// </summary>
 	private async Task<PluginInstallResult?> RefuseWhenPreUpdateBackupFails(string pluginId,
+		string? batchId,
 		CancellationToken cancellationToken)
 	{
 		if (!_catalog.TryResolveActive(pluginId, out _))
@@ -304,7 +310,7 @@ public sealed class PluginInstaller : IPluginInstaller
 				pluginId);
 		}
 
-		var outcome = await coordinator.EnsureBeforePluginUpdate(pluginId, batchId: null, cancellationToken);
+		var outcome = await coordinator.EnsureBeforePluginUpdate(pluginId, batchId, cancellationToken);
 		if (outcome.Success || outcome.Skipped)
 		{
 			return null;
@@ -458,6 +464,8 @@ public sealed class PluginInstaller : IPluginInstaller
 
 			await DeleteTrustRecordsForPlugin(pluginId);
 
+			ForgetStoreInstallation(pluginId);
+
 			await _supervisor.Forget(pluginId, cancellationToken);
 
 			await _integrationRegistrar.ForgetAsync(pluginId, cancellationToken);
@@ -543,6 +551,12 @@ public sealed class PluginInstaller : IPluginInstaller
 		{
 			return false;
 		}
+	}
+
+	private void ForgetStoreInstallation(string pluginId)
+	{
+		using var scope = _scopeFactory.CreateScope();
+		scope.ServiceProvider.GetService<IStoreInstallationStore>()?.Delete(StoreExtensionKind.Plugin, pluginId);
 	}
 
 	private async Task RetireRegistration(string pluginId)
@@ -730,7 +744,7 @@ public sealed class PluginInstaller : IPluginInstaller
 		// check on the active version alone would let an unsigned update through with consent in that case.
 		var admittedVerdict = await GetHighestAdmittedTier(manifest.Id);
 
-		if (PluginTrustPolicy.IsDowngrade(admittedVerdict, trust.Verdict))
+		if (PluginTrustPolicy.IsDowngrade(admittedVerdict, trust.Verdict, acquisition.SourceKind))
 		{
 			return PluginInstallResult.Fail(PluginInstallError.TrustDowngrade,
 					$"'{manifest.Id}' was previously admitted as trusted; this update verifies as " +

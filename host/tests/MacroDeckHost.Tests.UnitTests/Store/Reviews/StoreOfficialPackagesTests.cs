@@ -47,6 +47,23 @@ internal sealed class StoreOfficialPackagesTests
 	}
 
 	[Test]
+	public void A_store_plugin_removed_outside_the_store_no_longer_counts_as_installed()
+	{
+		_catalog.Swap(new StoreCatalogSnapshot { Sequence = 1, Entries = [Entry("com.acme.hue", StoreExtensionKind.Plugin)] });
+		_installations.Save(new StoreInstallationRecord
+		{
+			Origin = StoreRegistryOptions.OfficialOrigin,
+			Kind = StoreExtensionKind.Plugin,
+			PackageId = "com.acme.hue",
+			Version = "1.0.0"
+		});
+
+		var installed = Create(StoreRegistryOptions.Default).InstalledPackageIds();
+
+		Assert.That(installed, Is.Empty);
+	}
+
+	[Test]
 	public void A_non_official_registry_offers_no_ratings_at_all()
 	{
 		_catalog.Swap(new StoreCatalogSnapshot { Sequence = 1, Entries = [Entry("com.acme.icons", StoreExtensionKind.IconPack)] });

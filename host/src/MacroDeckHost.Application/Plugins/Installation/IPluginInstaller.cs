@@ -127,7 +127,9 @@ public enum PluginArtifactSourceKind
 
 	Upload,
 
-	Url
+	Url,
+
+	TestBuild
 }
 
 /// <summary>A download-progress sample for a <see cref="PluginArtifactSourceKind.Url" /> source. Local-path
@@ -161,6 +163,17 @@ public sealed record PluginArtifactSource
 		return new PluginArtifactSource { Kind = PluginArtifactSourceKind.Upload, Content = content };
 	}
 
+	// A build shared with testers before review, downloaded like a Url but installed under its own trust rules.
+	public static PluginArtifactSource FromTestBuild(Uri url, string expectedSha256)
+	{
+		return new PluginArtifactSource
+		{
+			Kind = PluginArtifactSourceKind.TestBuild,
+			Url = url,
+			ExpectedSha256 = expectedSha256
+		};
+	}
+
 	public static PluginArtifactSource FromUrl(Uri url, string? expectedSha256 = null)
 	{
 		return new PluginArtifactSource
@@ -185,6 +198,10 @@ public sealed record PluginInstallRequest
 	// Never implied by Force: forcing a reinstall is about overwriting an existing version directory, not
 	// about accepting an unsigned artifact - the two questions must stay independently answerable.
 	public bool AllowUnsigned { get; init; }
+
+	public string? BackupBatchId { get; init; }
+
+	public Action? Acquired { get; init; }
 }
 
 public sealed record PluginUninstallRequest

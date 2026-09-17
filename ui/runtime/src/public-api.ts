@@ -100,8 +100,10 @@ export {
   removeOperand,
   replaceOperand,
 } from './domain/condition-expression.util';
+export { DOUBLE_TAP_WINDOW_MS, TapSequencer } from './ui-components/tap-sequencer';
 export {
   findFlowForTrigger,
+  hasRunnableFlow,
   type LocalDeckNavigation,
   resolveLocalDeckNavigation,
 } from './domain/deck-navigation.util';
@@ -1007,6 +1009,10 @@ export {
   type GetDataDirectoryResponse,
   type CompanionLicenseStatus,
   type GetDeveloperSettingsResponse,
+  type ExtensionSettingsBody,
+  type GetExtensionSettingsResponse,
+  type UpdateExtensionSettingsRequest,
+  type UpdateExtensionSettingsResponse,
   type GetLockScreenSettingsResponse,
   type GetLoggingSettingsResponse,
   type GetNetworkSettingsResponse,
@@ -1040,8 +1046,11 @@ export {
   type GetStoreExtensionResponse,
   type GetStoreOperationsResponse,
   type GetStoreStatusResponse,
+  type GetStoreTestsResponse,
   type GetStoreUpdatesResponse,
   type InstallStoreExtensionRequest,
+  type InstallStoreTestBuildErrorCode,
+  type InstallStoreTestBuildRequest,
   type RefreshStoreRegistryResponse,
   type StoreAvailableUpdateBody,
   type StoreCatalogChangedEvent,
@@ -1065,6 +1074,9 @@ export {
   type StoreRegistryStatusBody,
   type StoreRegistryStatusChangedEvent,
   type StoreScreenshotBody,
+  type StoreTestBody,
+  type StoreTestBuildBody,
+  type StoreTestsErrorCode,
   type StoreUpdatesChangedEvent,
   type StoreVersionHistoryBody,
   type UninstallStoreExtensionRequest,

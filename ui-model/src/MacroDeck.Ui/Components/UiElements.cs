@@ -841,8 +841,8 @@ public sealed record UiSlider : UiComponentLeaf
 /// it, and there is deliberately no disabled property. A button that declares no events is drawn - it is a
 /// container, and its face is worth as much unpressed - but it accepts nothing. The names it may declare
 /// are <see cref="UiComponentEvents.Press" />, <see cref="UiComponentEvents.LongPress" />,
-/// <see cref="UiComponentEvents.PressStart" /> and <see cref="UiComponentEvents.PressEnd" />, and a reader owes
-/// this ordering:
+/// <see cref="UiComponentEvents.PressStart" />, <see cref="UiComponentEvents.PressEnd" /> and
+/// <see cref="UiComponentEvents.DoublePress" />, and a reader owes this ordering:
 /// </para>
 ///
 /// <list type="bullet">
@@ -860,6 +860,15 @@ public sealed record UiSlider : UiComponentLeaf
 /// <item>A reader sends only the names the node declares, and never infers one from another - in
 /// particular, <see cref="UiComponentEvents.Press" /> is never inferred from a
 /// <see cref="UiComponentEvents.PressStart" />/<see cref="UiComponentEvents.PressEnd" /> pair.</item>
+/// <item>With <see cref="UiComponentEvents.DoublePress" /> declared, a completed tap holds its
+/// <see cref="UiComponentEvents.Press" /> for <c>400</c>ms. A second press starting within that window, and
+/// within <c>24</c>px of the first tap, that completes as a tap sends <see cref="UiComponentEvents.DoublePress" />
+/// after its <see cref="UiComponentEvents.PressEnd" /> and no <see cref="UiComponentEvents.Press" /> for either
+/// tap. If the second press becomes a long press or is cancelled, the held <see cref="UiComponentEvents.Press" />
+/// is sent then, after the second press's <see cref="UiComponentEvents.PressStart" />; a second press starting
+/// farther away sends it before its own <see cref="UiComponentEvents.PressStart" />. This applies to pointer
+/// readers; a press forwarded from a hardware deck never sends it. Without it declared,
+/// <see cref="UiComponentEvents.Press" /> is never delayed.</item>
 /// <item>There is no rate limit, unlike <see cref="UiComponentEvents.Adjust" />: a finger bounds the rate. The
 /// producer is the side that coalesces.</item>
 /// </list>

@@ -603,14 +603,19 @@ public class Startup
 		services.AddSingleton<StoreRegistryReader>();
 		services.AddSingleton<IStoreRegistryStateStore, JsonStoreRegistryStateStore>();
 		services.AddSingleton<IStoreInstallationStore, JsonStoreInstallationStore>();
+		services.AddSingleton<MacroDeckHost.Application.Store.Testing.IStoreTestInstallationStore, JsonStoreTestInstallationStore>();
 		services.AddSingleton<IStoreOperationStore, JsonStoreOperationStore>();
 		services.AddSingleton<IStoreOperationTracker, StoreOperationTracker>();
 		services.AddSingleton<StoreOperationChannel>();
 		services.AddSingleton<StoreOperationCancellation>();
 		services.AddSingleton<StoreInstallConsent>();
+		services.AddSingleton<StoreInstallBackupBatches>();
 		services.AddSingleton<IStoreArtifactDownloader, StoreArtifactDownloader>();
 		services.AddSingleton<IStoreUpdateState, StoreUpdateState>();
 		services.AddSingleton<IStoreUpdateDetector, StoreUpdateDetector>();
+		services.AddSingleton<IStoreUpdateBatchInstaller, StoreUpdateBatchInstaller>();
+		services.AddSingleton<StoreAutoUpdater>();
+		services.AddSingleton<StoreUpdateNotifier>();
 		services.AddSingleton<IStoreRegistryRefreshTracker, StoreRegistryRefreshTracker>();
 		services.AddSingleton<IStoreRegistryRefresher, StoreRegistryRefresher>();
 		services.AddSingleton<IStoreInstallCoordinator, StoreInstallCoordinator>();
@@ -620,6 +625,7 @@ public class Startup
 		services.AddHostedService<StoreRegistryRefreshBackgroundService>();
 		services.AddHostedService<StoreOperationBackgroundService>();
 		services.AddHostedService<StoreOperationBroadcastBackgroundService>();
+		services.AddHostedService<StoreUpdatesBroadcastBackgroundService>();
 		services.AddHostedService<StoreRegistryRefreshBroadcastBackgroundService>();
 
 		services.AddHttpClient(ConnectIdentityClient.HttpClientName, client => { })
@@ -658,6 +664,7 @@ public class Startup
 		services.AddSingleton<IStoreReviewAvatarProxy, StoreReviewAvatarProxy>();
 		services.AddSingleton<IStoreOfficialPackages, StoreOfficialPackages>();
 		services.AddSingleton<IStoreReviewService, StoreReviewService>();
+		services.AddSingleton<MacroDeckHost.Application.Store.Testing.IStoreTestService, MacroDeckHost.Application.Store.Testing.StoreTestService>();
 		services.AddHostedService<StoreEntitlementSyncBackgroundService>();
 
 		services.AddScoped<ISecretRepository, SecretRepository>();

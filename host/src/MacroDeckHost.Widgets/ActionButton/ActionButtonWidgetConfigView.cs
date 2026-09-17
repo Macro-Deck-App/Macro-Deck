@@ -1262,6 +1262,7 @@ internal static class ActionButtonWidgetConfigView
 								WidgetTriggerTypes.LongPress,
 								WidgetTriggerTypes.TouchStart,
 								WidgetTriggerTypes.TouchEnd,
+								WidgetTriggerTypes.DoublePress,
 							];
 
 							if (stateMode.Value)

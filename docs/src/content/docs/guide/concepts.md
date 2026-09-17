@@ -45,6 +45,10 @@ What a widget does, and when. The **Scenes** button runs **Change Folder to** on
 
 Every widget with actions, sliders included, can add event triggers next to its press triggers.
 
+Once a widget has a Double Tap action, its Short Press waits a moment to see whether a second tap follows,
+so a single tap runs slightly later. A double tap runs only the Double Tap action. On a slider, a double tap
+still moves the level with each tap.
+
 Actions run top to bottom. **If / Else**, **Repeat** and **Wait** build longer flows, for example:
 *mute the mic, wait 3 seconds, switch the scene*. **Run** tries them out right away.
 
@@ -104,10 +108,16 @@ can take up to a day to show up. If you were signed in before your Macro Deck ve
 testers, sign out and in once.
 
 **Refresh** on the Store page fetches the latest catalog and opens a log of each step as it happens.
-Macro Deck also refreshes on its own about once an hour. While a refresh runs, the button says
+Macro Deck also refreshes on its own a few seconds after it starts and then once an hour. While a refresh runs, the button says
 **Refreshing…** in every window, and pressing it opens the log of that refresh instead of starting a
 second one. If the store registry is being updated while a refresh runs, the log says so and Macro Deck
 tries again a few times over about five minutes before it reports a failure.
+
+**Installed** at the top of the Store lists the Store's plugins and icon packs you have installed, with their
+version and any update waiting for them. Update one at a time from its card, or all at once with
+**Update all**. After an update downloads, the card shows **Installing…** while Macro Deck backs up,
+installs and restarts the plugin, then the version that is now installed. See
+[Updates](/guide/updates/#extension-updates) for update notifications and automatic updates.
 
 Store items show their star rating, and an item's page lists its **Ratings and reviews**. Anyone can
 read them. To rate or review an item yourself, sign in with Macro Deck Connect under
@@ -115,6 +125,19 @@ read them. To rate or review an item yourself, sign in with Macro Deck Connect u
 you sign in, and whenever you install something while signed in, Macro Deck records your installed
 Store items for your account so you can rate them. If ratings cannot be reached, the Store keeps
 working without them.
+
+### Tests
+
+A plugin creator can invite you to test a plugin before it is reviewed. The invitation arrives by
+email; accept it in the Creator Portal with the same Macro Deck account you use in Macro Deck. While
+you are signed in under **Settings > Account**, **Tests** appears at the top of the Store next to
+**Installed**, listing every plugin you test and its builds, newest first. You do not need to be a Store
+tester to see it: while the Store itself is not open to you, its notice offers **Open your tests**.
+
+Test builds are not reviewed or signed by Macro Deck: they come straight from the creator and may be
+unstable. Choosing **Install** or **Install test build** asks you to confirm that first. A test build
+replaces the version of the plugin you have installed, including one from the Store, and the build
+that is currently installed shows as **Installed**.
 
 ## Devices
 

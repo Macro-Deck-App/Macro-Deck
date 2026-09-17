@@ -1,7 +1,7 @@
 import { ActionFlow, ConditionExpression } from './action-builder.interface';
 import type { WidgetIconRef } from './widget-icon-ref.util';
 
-export type ActionButtonTriggerType = 'onShortPress' | 'onLongPress' | 'onTouchStart' | 'onTouchEnd' | 'onStateChange';
+export type ActionButtonTriggerType = 'onShortPress' | 'onLongPress' | 'onTouchStart' | 'onTouchEnd' | 'onDoublePress' | 'onStateChange';
 
 export const DEFAULT_BUTTON_BACKGROUND_COLOR = 'var(--color-accent)';
 

@@ -1,6 +1,8 @@
 using System.Text.Json;
 using MacroDeck.Sdk.Devices;
+using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.HostLocking;
+using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Actions;
@@ -33,13 +35,16 @@ public sealed class DeviceInteractionRouter
 	private readonly IHostLockState _lockState;
 	private readonly TimeProvider _timeProvider;
 	private readonly ILogger _logger;
+	private readonly IProfileRegistry _profiles;
 
 	public DeviceInteractionRouter(
 		IServiceScopeFactory scopeFactory,
 		IHostLockState lockState,
 		TimeProvider timeProvider,
-		ILogger logger)
+		ILogger logger,
+		IProfileRegistry profiles)
 	{
+		_profiles = profiles;
 		_scopeFactory = scopeFactory;
 		_lockState = lockState;
 		_timeProvider = timeProvider;
@@ -244,6 +249,27 @@ public sealed class DeviceInteractionRouter
 		}
 
 		return DeviceInteractionOutcome.Accepted;
+	}
+
+	public bool HasDoubleTapFlow(DeviceSurfaceSession session, string widgetId)
+	{
+		var type = session.LastPushed?.Widgets
+			.FirstOrDefault(widget => string.Equals(widget.Id, widgetId, StringComparison.Ordinal))?.Type;
+		if (type is null ||
+			string.Equals(type, WidgetTypeIds.Slider, StringComparison.Ordinal) ||
+			!WidgetTypeIds.BuiltIn.Contains(type, StringComparer.Ordinal) ||
+			session.ProfileId is not { } profileId ||
+			session.OwningFolderIdOf(widgetId) is not { } folderId)
+		{
+			return false;
+		}
+
+		var widget = _profiles
+			.GetFoldersForProfile(profileId)
+			.FirstOrDefault(folder => string.Equals(folder.Id, folderId, StringComparison.Ordinal))?
+			.Widgets.FirstOrDefault(candidate => string.Equals(candidate.Id, widgetId, StringComparison.Ordinal));
+
+		return widget is not null && WidgetFlowsJson.HasRunnableFlow(widget.Data, WidgetTriggerTypes.DoublePress);
 	}
 
 	private static DeviceSurfacePressTracker Presses(DeviceSurfaceSession session)

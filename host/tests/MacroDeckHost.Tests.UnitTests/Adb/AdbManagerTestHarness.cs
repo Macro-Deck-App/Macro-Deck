@@ -71,7 +71,8 @@ internal sealed class FakeAdbPreferenceService : IAppPreferenceService
 	public Task<ExtensionSettings> SetExtensions(bool? storeEnabled,
 		bool? checkForUpdates,
 		bool? notifyOnUpdates,
-		int? refreshIntervalMinutes)
+		int? refreshIntervalMinutes,
+		bool? autoUpdate = null)
 		=> throw new NotSupportedException();
 
 	// Answered rather than refused: anything resolving a localized string reaches this, and refusing

@@ -16,6 +16,14 @@ namespace MacroDeck.Sdk.Devices;
 /// <see cref="LongPress" /> explicitly instead of the raw press/release pair, so the host does not have
 /// to re-derive what the device already knows.
 /// </para>
+///
+/// <para>
+/// Double taps are recognised only from <see cref="Press" />/<see cref="Release" /> pairs. For a built-in widget
+/// with a Double Tap action (not a plugin-served tile), the host holds the <c>onShortPress</c> synthesized from
+/// a pair for 400 ms and runs the Double Tap action instead when a second press starts in that window and is
+/// released before the long press threshold. An explicit <see cref="ShortPress" /> is always run at once, never forms a double tap, and keeps
+/// its verdict.
+/// </para>
 /// </remarks>
 public enum DeviceInteractionKind
 {

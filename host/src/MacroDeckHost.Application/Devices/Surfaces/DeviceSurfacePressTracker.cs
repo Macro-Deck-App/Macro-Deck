@@ -17,20 +17,26 @@ public sealed class DeviceSurfacePressTracker : IDisposable
 {
 	public static readonly TimeSpan LongPressThreshold = TimeSpan.FromMilliseconds(600);
 
+	public static readonly TimeSpan DoubleTapWindow = TimeSpan.FromMilliseconds(400);
+
 	private readonly TimeProvider _timeProvider;
 	private readonly Func<string, Task<DevicePressClaim>> _claim;
 	private readonly Func<string, string, DevicePressClaim, Task> _execute;
 	private readonly Lock _sync = new();
 	private readonly Dictionary<string, PressState> _presses = new(StringComparer.Ordinal);
+	private readonly Dictionary<string, TapState> _taps = new(StringComparer.Ordinal);
+	private readonly Func<string, bool> _doubleTapEnabled;
 
 	public DeviceSurfacePressTracker(
 		TimeProvider timeProvider,
 		Func<string, Task<DevicePressClaim>> claim,
-		Func<string, string, DevicePressClaim, Task> execute)
+		Func<string, string, DevicePressClaim, Task> execute,
+		Func<string, bool>? doubleTapEnabled = null)
 	{
 		_timeProvider = timeProvider;
 		_claim = claim;
 		_execute = execute;
+		_doubleTapEnabled = doubleTapEnabled ?? (_ => false);
 	}
 
 	/// <summary>
@@ -48,6 +54,14 @@ public sealed class DeviceSurfacePressTracker : IDisposable
 			}
 
 			state = new PressState();
+			if (_taps.TryGetValue(widgetId, out var tap) && tap.Second is null)
+			{
+				tap.Timer?.Dispose();
+				tap.Timer = null;
+				tap.Second = state;
+				state.Tail = tap.First.Tail;
+			}
+
 			state.Timer = _timeProvider.CreateTimer(_ => OnLongPressElapsed(widgetId, state),
 				null,
 				LongPressThreshold,
@@ -79,6 +93,7 @@ public sealed class DeviceSurfacePressTracker : IDisposable
 		lock (_sync)
 		{
 			held = [.. _presses.Keys];
+			DropTaps();
 		}
 
 		foreach (var widgetId in held)
@@ -98,6 +113,7 @@ public sealed class DeviceSurfacePressTracker : IDisposable
 			}
 
 			_presses.Clear();
+			DropTaps();
 		}
 	}
 
@@ -115,16 +131,125 @@ public sealed class DeviceSurfacePressTracker : IDisposable
 	{
 		try
 		{
-			await Enqueue(widgetId, state, WidgetTriggerTypes.TouchEnd);
-			if (released && !state.LongPressFired)
+			var tapped = released && !state.LongPressFired;
+			var doubleTapEnabled = tapped && _doubleTapEnabled(widgetId);
+			var completion = TapCompletion.None;
+			(Task Previous, TaskCompletionSource Done)? heldShortPress = null;
+			(Task Previous, TaskCompletionSource Done) touchEnd;
+			(PressState Owner, (Task Previous, TaskCompletionSource Done) Slot)? flushed = null;
+
+			// A press that began between Take and this lock is adopted as the second tap in HoldShortPress,
+			// so the short press this release holds cannot be lost to it.
+			lock (_sync)
+			{
+				var isSecond = _taps.TryGetValue(widgetId, out var tap) && ReferenceEquals(tap.Second, state);
+				if (isSecond)
+				{
+					_taps.Remove(widgetId);
+				}
+
+				if (isSecond && released && !doubleTapEnabled)
+				{
+					heldShortPress = Reserve(state);
+				}
+
+				touchEnd = Reserve(state);
+
+				completion = (isSecond, doubleTapEnabled, tapped) switch
+				{
+					(true, true, _) => TapCompletion.Double,
+					(false, true, _) => TapCompletion.Held,
+					(_, _, true) => TapCompletion.Single,
+					_ => TapCompletion.None,
+				};
+
+				if (completion == TapCompletion.Held)
+				{
+					flushed = HoldShortPress(widgetId, state);
+				}
+			}
+
+			if (heldShortPress is { } held)
+			{
+				await RunAsync(widgetId, state, WidgetTriggerTypes.ShortPress, held);
+			}
+
+			if (flushed is { } stale)
+			{
+				_ = RunAsync(widgetId, stale.Owner, WidgetTriggerTypes.ShortPress, stale.Slot);
+			}
+
+			await RunAsync(widgetId, state, WidgetTriggerTypes.TouchEnd, touchEnd);
+
+			if (completion == TapCompletion.Single)
 			{
 				await Enqueue(widgetId, state, WidgetTriggerTypes.ShortPress);
+			}
+			else if (completion == TapCompletion.Double)
+			{
+				await Enqueue(widgetId, state, WidgetTriggerTypes.DoublePress);
 			}
 		}
 		finally
 		{
 			await (await state.Claim).DisposeAsync();
 		}
+	}
+
+	private (PressState Owner, (Task Previous, TaskCompletionSource Done) Slot)? HoldShortPress(
+		string widgetId,
+		PressState first)
+	{
+		(PressState, (Task, TaskCompletionSource))? flushed = null;
+		if (_taps.Remove(widgetId, out var previous))
+		{
+			previous.Timer?.Dispose();
+			flushed = (previous.First, Reserve(previous.First));
+		}
+
+		var tap = new TapState(first);
+		if (_presses.TryGetValue(widgetId, out var active))
+		{
+			tap.Second = active;
+		}
+		else
+		{
+			tap.Timer = _timeProvider.CreateTimer(_ => OnDoubleTapWindowElapsed(widgetId, tap),
+				null,
+				DoubleTapWindow,
+				Timeout.InfiniteTimeSpan);
+		}
+
+		_taps[widgetId] = tap;
+		return flushed;
+	}
+
+	private void OnDoubleTapWindowElapsed(string widgetId, TapState tap)
+	{
+		(Task Previous, TaskCompletionSource Done) slot;
+		lock (_sync)
+		{
+			if (!_taps.TryGetValue(widgetId, out var current) || !ReferenceEquals(current, tap) || tap.Second is not null)
+			{
+				return;
+			}
+
+			_taps.Remove(widgetId);
+			tap.Timer?.Dispose();
+			slot = Reserve(tap.First);
+		}
+
+		_ = RunAsync(widgetId, tap.First, WidgetTriggerTypes.ShortPress, slot);
+	}
+
+	private void DropTaps()
+	{
+		foreach (var tap in _taps.Values)
+		{
+			tap.Timer?.Dispose();
+		}
+
+		_taps.Clear();
 	}
 
 	private Task Enqueue(string widgetId, PressState state, string triggerType)
@@ -180,6 +305,7 @@ public sealed class DeviceSurfacePressTracker : IDisposable
 	private void OnLongPressElapsed(string widgetId, PressState state)
 	{
 		(Task Previous, TaskCompletionSource Done) slot;
+		(Task Previous, TaskCompletionSource Done)? heldShortPress = null;
 		lock (_sync)
 		{
 			if (!_presses.TryGetValue(widgetId, out var current) || !ReferenceEquals(current, state))
@@ -191,12 +317,40 @@ public sealed class DeviceSurfacePressTracker : IDisposable
 			state.Timer?.Dispose();
 			state.Timer = null;
 
+			if (_taps.TryGetValue(widgetId, out var tap) && ReferenceEquals(tap.Second, state))
+			{
+				_taps.Remove(widgetId);
+				heldShortPress = Reserve(state);
+			}
+
 			// Reserved under the same lock a release takes the press with, so the long press can never land
 			// behind that release's touch end or after its claim was closed.
 			slot = Reserve(state);
 		}
 
+		if (heldShortPress is { } held)
+		{
+			_ = RunAsync(widgetId, state, WidgetTriggerTypes.ShortPress, held);
+		}
+
 		_ = RunAsync(widgetId, state, WidgetTriggerTypes.LongPress, slot);
+	}
+
+	private enum TapCompletion
+	{
+		None,
+		Single,
+		Double,
+		Held,
+	}
+
+	private sealed class TapState(PressState first)
+	{
+		public PressState First { get; } = first;
+
+		public PressState? Second;
+
+		public ITimer? Timer;
 	}
 
 	private sealed class PressState

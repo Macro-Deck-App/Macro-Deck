@@ -8,7 +8,6 @@ using MacroDeckHost.Application.Store.Operations;
 using MacroDeckHost.Application.Store.Updates;
 using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Application.Ui.Transport.Messages.Store;
-using Mediator;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MacroDeckHost.Api.Controllers;
@@ -27,9 +26,9 @@ public class StoreController : ControllerBase
 	private readonly IAppPreferenceService _preferences;
 	private readonly IMacroDeckPaths _paths;
 	private readonly StoreRegistryOptions _options;
-	private readonly IMediator _mediator;
 	private readonly IStoreUninstallService _uninstallService;
 	private readonly IStoreRegistryRefreshTracker _refreshTracker;
+	private readonly IStoreUpdateBatchInstaller _updateInstaller;
 
 	public StoreController(IStoreCatalogQueryService catalogQuery,
 		IStoreRegistryRefresher refresher,
@@ -41,9 +40,9 @@ public class StoreController : ControllerBase
 		IAppPreferenceService preferences,
 		IMacroDeckPaths paths,
 		StoreRegistryOptions options,
-		IMediator mediator,
 		IStoreUninstallService uninstallService,
-		IStoreRegistryRefreshTracker refreshTracker)
+		IStoreRegistryRefreshTracker refreshTracker,
+		IStoreUpdateBatchInstaller updateInstaller)
 	{
 		_catalogQuery = catalogQuery;
 		_refresher = refresher;
@@ -55,9 +54,9 @@ public class StoreController : ControllerBase
 		_preferences = preferences;
 		_paths = paths;
 		_options = options;
-		_mediator = mediator;
 		_uninstallService = uninstallService;
 		_refreshTracker = refreshTracker;
+		_updateInstaller = updateInstaller;
 	}
 
 	[HttpGet("status")]
@@ -95,7 +94,8 @@ public class StoreController : ControllerBase
 		[FromQuery] StoreCatalogSection? section,
 		[FromQuery] int skip = 0,
 		[FromQuery] int take = StoreCatalogQuery.MaxTake,
-		[FromQuery] StoreExtensionKind[]? kinds = null)
+		[FromQuery] StoreExtensionKind[]? kinds = null,
+		[FromQuery] bool installed = false)
 	{
 		var query = new StoreCatalogQuery
 		{
@@ -103,7 +103,8 @@ public class StoreController : ControllerBase
 			Search = search,
 			Section = section ?? StoreCatalogSection.All,
 			Skip = skip,
-			Take = take
+			Take = take,
+			Installed = installed
 		};
 
 		var result = _catalogQuery.Query(query);
@@ -141,13 +142,21 @@ public class StoreController : ControllerBase
 		new() { Updates = _updateState.Current.Select(StoreAvailableUpdateBodyFactory.Create).ToList() };
 
 	[HttpPost("updates/check")]
-	public async Task<GetStoreUpdatesResponse> CheckUpdates(CancellationToken ct)
+	public GetStoreUpdatesResponse CheckUpdates()
 	{
 		var updates = _updateDetector.Check();
-		await _mediator.Publish(new StoreUpdatesChangedNotification(updates), ct);
 		return new GetStoreUpdatesResponse
 			{ Updates = updates.Select(StoreAvailableUpdateBodyFactory.Create).ToList() };
 	}
+
+	[HttpPost("updates/install")]
+	public GetStoreOperationsResponse InstallUpdates() =>
+		new()
+		{
+			Operations = _updateInstaller.Install(_updateState.Current)
+				.Select(StoreOperationBodyFactory.Create)
+				.ToList()
+		};
 
 	[HttpGet("operations")]
 	public GetStoreOperationsResponse GetOperations() =>

@@ -632,7 +632,7 @@ export class Client {
     // only the gesture the person actually performed reports a refusal. Reporting the lifecycle too
     // would say the same thing three times for one press of an unconfigured tile, whose data carries
     // no flows to have returned above.
-    const gesture = triggerType === 'onShortPress' || triggerType === 'onLongPress';
+    const gesture = triggerType === 'onShortPress' || triggerType === 'onLongPress' || triggerType === 'onDoublePress';
 
     let response: ExecuteActionButtonTriggerResponse;
     try {

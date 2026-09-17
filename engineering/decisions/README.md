@@ -48,6 +48,7 @@ code, protocol schemas, issue discussions or exhaustive option lists.
 - [0044 - The host enforces trust as a verdict, and the Store adds the signed registry chain](0044-plugin-and-store-trust-enforcement.md)
 - [0088 - Plugins run on the .NET runtime bundled with the host](0088-plugins-run-on-the-host-bundled-dotnet-runtime.md)
 - [0089 - A development build can temporarily take over an installed plugin](0089-a-development-build-can-temporarily-take-over-an-installed-plugin.md)
+- [0090 - Invited testers install unreviewed test builds](0090-invited-testers-install-unreviewed-test-builds.md)
 
 ## Macro Deck UI
 

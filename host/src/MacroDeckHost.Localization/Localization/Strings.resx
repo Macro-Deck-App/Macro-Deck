@@ -11652,6 +11652,30 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>{name} wants to replace an installed plugin and is waiting for your approval in Macro Deck.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.StoreAutoUpdateFailed.One" xml:space="preserve">
+    <value>{count} automatic extension update failed</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdateFailed.Other" xml:space="preserve">
+    <value>{count} automatic extension updates failed</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdateFailedMessage" xml:space="preserve">
+    <value>Could not update {names}. Open the installed extensions to try again.</value>
+    <comment>[names:string]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdated.One" xml:space="preserve">
+    <value>{count} extension updated automatically</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdated.Other" xml:space="preserve">
+    <value>{count} extensions updated automatically</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdatedMessage" xml:space="preserve">
+    <value>Now up to date: {names}.</value>
+    <comment>[names:string]</comment>
+  </data>
   <data name="Notifications.StoreExtensionInstallFailed" xml:space="preserve">
     <value>Failed to install {name}</value>
     <comment>[name:string]</comment>
@@ -11667,6 +11691,18 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Notifications.StoreExtensionUpdated" xml:space="preserve">
     <value>Updated {name}</value>
     <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.StoreUpdatesAvailable.One" xml:space="preserve">
+    <value>{count} extension update available</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreUpdatesAvailable.Other" xml:space="preserve">
+    <value>{count} extension updates available</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreUpdatesAvailableMessage" xml:space="preserve">
+    <value>New versions are ready for {names}.</value>
+    <comment>[names:string]</comment>
   </data>
   <data name="Notifications.StoreVersionReady" xml:space="preserve">
     <value>Version {version} is ready.</value>
@@ -13034,6 +13070,24 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Settings.Devices.ThisDeviceMarker" xml:space="preserve">
     <value>This device</value>
   </data>
+  <data name="Settings.Extensions.AutoUpdate" xml:space="preserve">
+    <value>Update extensions automatically</value>
+  </data>
+  <data name="Settings.Extensions.AutoUpdateDescription" xml:space="preserve">
+    <value>Installs new versions of plugins and icon packs you installed from the store as soon as they are available, and notifies you afterwards.</value>
+  </data>
+  <data name="Settings.Extensions.Heading" xml:space="preserve">
+    <value>Extensions</value>
+  </data>
+  <data name="Settings.Extensions.NotifyOnUpdates" xml:space="preserve">
+    <value>Notify about updates</value>
+  </data>
+  <data name="Settings.Extensions.NotifyOnUpdatesDescription" xml:space="preserve">
+    <value>Show a notification when a new version of an installed extension is available.</value>
+  </data>
+  <data name="Settings.Extensions.UpdatesSection" xml:space="preserve">
+    <value>Updates</value>
+  </data>
   <data name="Settings.Language.ActiveDescription" xml:space="preserve">
     <value>Applies to every connected client immediately.</value>
   </data>
@@ -14000,6 +14054,18 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.Error.Unsupported" xml:space="preserve">
     <value>This extension does not support this platform.</value>
   </data>
+  <data name="Store.Error.SignInRequired" xml:space="preserve">
+    <value>Sign in to your Macro Deck Connect account to install this.</value>
+  </data>
+  <data name="Store.Error.TestBuildUnavailable" xml:space="preserve">
+    <value>This test build is no longer available.</value>
+  </data>
+  <data name="Store.Error.TestConsentRequired" xml:space="preserve">
+    <value>Installing a test build needs your confirmation first.</value>
+  </data>
+  <data name="Store.Error.TestBuildMismatch" xml:space="preserve">
+    <value>The download did not match the test build that was offered, so it was not installed.</value>
+  </data>
   <data name="Store.EtaMinutesLeft.One" xml:space="preserve">
     <value>about {count} min left</value>
     <comment>[plural][count:int] Remaining download time, a minute or more.</comment>
@@ -14116,6 +14182,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.Page.ComingSoonMessage" xml:space="preserve">
     <value>We're still building it. Plugins and icon packs will show up here in a future update.</value>
   </data>
+  <data name="Store.Page.ComingSoonTestsAction" xml:space="preserve">
+    <value>Open your tests</value>
+  </data>
   <data name="Store.Page.CompatibilityField" xml:space="preserve">
     <value>Compatibility</value>
   </data>
@@ -14133,6 +14202,23 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Store.Page.FeaturedSectionHeading" xml:space="preserve">
     <value>Featured</value>
+  </data>
+  <data name="Store.Page.InstalledEmptyHeading" xml:space="preserve">
+    <value>No extensions installed</value>
+  </data>
+  <data name="Store.Page.InstalledEmptyMessage" xml:space="preserve">
+    <value>Plugins and icon packs you install from the store appear here.</value>
+  </data>
+  <data name="Store.Page.InstalledUpToDate" xml:space="preserve">
+    <value>Everything is up to date</value>
+  </data>
+  <data name="Store.Page.InstalledUpdatesAvailable.One" xml:space="preserve">
+    <value>{count} update available</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.InstalledUpdatesAvailable.Other" xml:space="preserve">
+    <value>{count} updates available</value>
+    <comment>[plural]</comment>
   </data>
   <data name="Store.Page.InstalledVersionField" xml:space="preserve">
     <value>Installed version</value>
@@ -14250,6 +14336,15 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.Page.Subtitle" xml:space="preserve">
     <value>Browse plugins and icon packs from the Macro Deck registry</value>
   </data>
+  <data name="Store.Page.TabDiscover" xml:space="preserve">
+    <value>Discover</value>
+  </data>
+  <data name="Store.Page.TabInstalled" xml:space="preserve">
+    <value>Installed</value>
+  </data>
+  <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
+    <value>Store sections</value>
+  </data>
   <data name="Store.Page.Title" xml:space="preserve">
     <value>Store</value>
   </data>
@@ -14258,6 +14353,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Store.Page.UnavailableMessage" xml:space="preserve">
     <value>The registry could not be reached and there is no cached catalog to show.</value>
+  </data>
+  <data name="Store.Page.UpdateAllAction" xml:space="preserve">
+    <value>Update all</value>
   </data>
   <data name="Store.Page.UpdatedField" xml:space="preserve">
     <value>Updated</value>
@@ -17274,5 +17372,81 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Store.Reviews.Error.PlatformUnavailable" xml:space="preserve">
     <value>Ratings could not be reached. Try again later.</value>
+  </data>
+  <data name="Store.Tests.Title" xml:space="preserve">
+    <value>Tests</value>
+    <comment>Tab and heading for the test builds a creator invited the user to try before review.</comment>
+  </data>
+  <data name="Store.Tests.Intro" xml:space="preserve">
+    <value>Builds from creators who invited you to test their plugins. Macro Deck has not reviewed them yet.</value>
+  </data>
+  <data name="Store.Tests.Loading" xml:space="preserve">
+    <value>Loading your tests…</value>
+  </data>
+  <data name="Store.Tests.EmptyHeading" xml:space="preserve">
+    <value>No tests yet</value>
+  </data>
+  <data name="Store.Tests.EmptyMessage" xml:space="preserve">
+    <value>When a creator invites you to test a plugin, the invitation arrives by email. Accept it in the Creator Portal and its builds appear here.</value>
+  </data>
+  <data name="Store.Tests.SignInHeading" xml:space="preserve">
+    <value>Sign in to see your tests</value>
+  </data>
+  <data name="Store.Tests.SignInMessage" xml:space="preserve">
+    <value>Sign in with Macro Deck Connect again to see the builds you were invited to test.</value>
+  </data>
+  <data name="Store.Tests.SuspendedHeading" xml:space="preserve">
+    <value>Tests are not available</value>
+  </data>
+  <data name="Store.Tests.SuspendedMessage" xml:space="preserve">
+    <value>Your Macro Deck Connect account is suspended.</value>
+  </data>
+  <data name="Store.Tests.UnavailableHeading" xml:space="preserve">
+    <value>Tests could not be loaded</value>
+  </data>
+  <data name="Store.Tests.UnavailableMessage" xml:space="preserve">
+    <value>The Macro Deck Platform could not be reached. Try again in a moment.</value>
+  </data>
+  <data name="Store.Tests.RateLimitedMessage" xml:space="preserve">
+    <value>Too many requests were sent. Wait a moment and try again.</value>
+  </data>
+  <data name="Store.Tests.InstalledVersion" xml:space="preserve">
+    <value>Installed: {version}</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Store.Tests.BuildsAriaLabel" xml:space="preserve">
+    <value>Test builds of {name}</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Store.Tests.BuildLabel" xml:space="preserve">
+    <value>Build {build}</value>
+    <comment>[build:string]</comment>
+  </data>
+  <data name="Store.Tests.AvailableSince" xml:space="preserve">
+    <value>Available {time}</value>
+    <comment>[time:string] time is a relative time such as "3 days ago" or "just now".</comment>
+  </data>
+  <data name="Store.Tests.InstallTestBuild" xml:space="preserve">
+    <value>Install test build</value>
+  </data>
+  <data name="Store.Tests.ShowChangelog" xml:space="preserve">
+    <value>Show changelog</value>
+  </data>
+  <data name="Store.Tests.HideChangelog" xml:space="preserve">
+    <value>Hide changelog</value>
+  </data>
+  <data name="Store.Tests.InstallFailed" xml:space="preserve">
+    <value>The test build could not be installed.</value>
+  </data>
+  <data name="Store.Tests.ConfirmHeading" xml:space="preserve">
+    <value>Install an unreviewed build?</value>
+  </data>
+  <data name="Store.Tests.ConfirmMessage" xml:space="preserve">
+    <value>{name} {version} (build {build}) was not reviewed by Macro Deck. It comes directly from the plugin's creator and may be unstable.</value>
+    <comment>[name:string][version:string][build:string]</comment>
+  </data>
+  <data name="Store.Tests.ConfirmReplaceMessage" xml:space="preserve">
+    <value>{name} {version} (build {build}) was not reviewed by Macro Deck. It comes directly from the plugin's creator, may be unstable, and replaces the installed version {installedVersion}.</value>
+    <comment>[name:string][version:string][build:string][installedVersion:string]</comment>
   </data>
 </root>
