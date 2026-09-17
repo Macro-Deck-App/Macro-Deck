@@ -4693,6 +4693,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Discord.Config.OAuthFailed" xml:space="preserve">
     <value>Die Discord-Anmeldung ist fehlgeschlagen: {details}</value>
   </data>
+  <data name="Integrations.Discord.Config.OnlyRichPresenceServer" xml:space="preserve">
+    <value>Es wurde nur ein Discord-Rich-Presence-Dienst gefunden, nicht die Discord-Desktop-App. Clients wie Vesktop, Equibop oder Legcord teilen zwar deine Spielaktivität, lassen sich aber nicht von Macro Deck steuern. Starte die offizielle Discord-Desktop-App und versuche es erneut.</value>
+  </data>
   <data name="Integrations.Discord.Config.PrivilegeMismatch" xml:space="preserve">
     <value>Discord hat die Verbindung abgelehnt. Macro Deck und Discord müssen mit denselben Rechten laufen: Ist eines der beiden erhöht („Als Administrator ausführen“), starte beide auf die gleiche Weise.</value>
   </data>

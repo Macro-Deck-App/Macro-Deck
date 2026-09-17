@@ -29,4 +29,6 @@ internal sealed class DiscordRpcException : Exception
 	public bool IsAuthProblem => Code is 4009 or 4010;
 
 	public bool IsAlreadyInVoiceChannel => Code == 5003;
+
+	public bool IsUnknownCommand => Code == 1000 && Message.StartsWith("Unknown command", StringComparison.Ordinal);
 }

@@ -11,7 +11,7 @@ internal sealed class DiscordRpcClientTests
 	public async Task Connecting_sends_the_handshake_and_returns_the_ready_payload()
 	{
 		var transport = new FakeDiscordIpcTransport();
-		using var client = new DiscordRpcClient(transport);
+		using var client = new DiscordRpcClient(() => transport);
 
 		var ready = await client.ConnectAsync("123456", CancellationToken.None);
 
@@ -34,7 +34,7 @@ internal sealed class DiscordRpcClientTests
 				? FakeResponse.Ok("""{"mute":true}""")
 				: FakeResponse.Ok()
 		};
-		using var client = new DiscordRpcClient(transport);
+		using var client = new DiscordRpcClient(() => transport);
 		await client.ConnectAsync("1", CancellationToken.None);
 
 		var response = await client.SendCommandAsync("GET_VOICE_SETTINGS");
@@ -49,7 +49,7 @@ internal sealed class DiscordRpcClientTests
 		{
 			Responder = command => FakeResponse.Ok($$"""{"echo":"{{command.Command}}"}""")
 		};
-		using var client = new DiscordRpcClient(transport);
+		using var client = new DiscordRpcClient(() => transport);
 		await client.ConnectAsync("1", CancellationToken.None);
 
 		var first = client.SendCommandAsync("GET_GUILDS");
@@ -66,12 +66,12 @@ internal sealed class DiscordRpcClientTests
 	public async Task A_subscribe_carries_the_event_name_and_its_arguments()
 	{
 		var transport = new FakeDiscordIpcTransport();
-		using var client = new DiscordRpcClient(transport);
+		using var client = new DiscordRpcClient(() => transport);
 		await client.ConnectAsync("1", CancellationToken.None);
 
 		await client.SendCommandAsync("SUBSCRIBE", new { channel_id = "42" }, "VOICE_STATE_UPDATE");
 
-		var command = transport.Commands.Single();
+		var command = transport.Commands.Single(c => c.Command == "SUBSCRIBE");
 		Assert.Multiple(() =>
 		{
 			Assert.That(command.Command, Is.EqualTo("SUBSCRIBE"));
@@ -89,7 +89,7 @@ internal sealed class DiscordRpcClientTests
 				? FakeResponse.Error(4009, "Invalid token")
 				: FakeResponse.Ok()
 		};
-		using var client = new DiscordRpcClient(transport);
+		using var client = new DiscordRpcClient(() => transport);
 		await client.ConnectAsync("1", CancellationToken.None);
 
 		var exception
@@ -107,7 +107,7 @@ internal sealed class DiscordRpcClientTests
 	public async Task A_scope_error_is_recognised_as_one()
 	{
 		var transport = new FakeDiscordIpcTransport { Responder = _ => FakeResponse.Error(4007, "Invalid scope") };
-		using var client = new DiscordRpcClient(transport);
+		using var client = new DiscordRpcClient(() => transport);
 		await client.ConnectAsync("1", CancellationToken.None);
 
 		var exception = Assert.ThrowsAsync<DiscordRpcException>(async () => await client.SendCommandAsync("AUTHORIZE"));
@@ -119,7 +119,7 @@ internal sealed class DiscordRpcClientTests
 	public async Task Events_without_a_nonce_are_dispatched_to_subscribers()
 	{
 		var transport = new FakeDiscordIpcTransport();
-		using var client = new DiscordRpcClient(transport);
+		using var client = new DiscordRpcClient(() => transport);
 		var received = new List<DiscordRpcEventArgs>();
 		client.EventReceived += (_, e) => received.Add(e);
 
@@ -139,7 +139,7 @@ internal sealed class DiscordRpcClientTests
 	public async Task A_ping_is_answered_with_a_pong_carrying_the_same_payload()
 	{
 		var transport = new FakeDiscordIpcTransport();
-		using var client = new DiscordRpcClient(transport);
+		using var client = new DiscordRpcClient(() => transport);
 		await client.ConnectAsync("1", CancellationToken.None);
 
 		transport.Push(DiscordRpcOpcode.Ping, """{"nonce":"abc"}""");
@@ -154,7 +154,7 @@ internal sealed class DiscordRpcClientTests
 	public async Task A_closed_stream_reports_a_disconnect()
 	{
 		var transport = new FakeDiscordIpcTransport();
-		using var client = new DiscordRpcClient(transport);
+		using var client = new DiscordRpcClient(() => transport);
 		string? reason = null;
 		client.Disconnected += (_, r) => reason = r;
 
@@ -174,7 +174,7 @@ internal sealed class DiscordRpcClientTests
 	public async Task A_close_frame_reports_the_reason_discord_gave()
 	{
 		var transport = new FakeDiscordIpcTransport();
-		using var client = new DiscordRpcClient(transport);
+		using var client = new DiscordRpcClient(() => transport);
 		string? reason = null;
 		client.Disconnected += (_, r) => reason = r;
 
@@ -189,12 +189,15 @@ internal sealed class DiscordRpcClientTests
 	[Test]
 	public async Task Losing_the_connection_faults_pending_commands()
 	{
-		var transport = new FakeDiscordIpcTransport { Responder = _ => null };
-		using var client = new DiscordRpcClient(transport);
+		var transport = new FakeDiscordIpcTransport
+		{
+			Responder = command => command.Command == "GET_GUILDS" ? FakeResponse.NotAuthenticated() : null
+		};
+		using var client = new DiscordRpcClient(() => transport);
 		await client.ConnectAsync("1", CancellationToken.None);
 
-		var pending = client.SendCommandAsync("GET_GUILDS");
-		await WaitForAsync(() => transport.Commands.Count > 0);
+		var pending = client.SendCommandAsync("GET_VOICE_SETTINGS");
+		await WaitForAsync(() => transport.Commands.Any(c => c.Command == "GET_VOICE_SETTINGS"));
 		transport.Close();
 
 		Assert.ThrowsAsync<DiscordRpcException>(async () => await pending);
@@ -204,7 +207,7 @@ internal sealed class DiscordRpcClientTests
 	public async Task A_connection_level_error_faults_the_handshake()
 	{
 		var transport = new FakeDiscordIpcTransport { AutoReady = false };
-		using var client = new DiscordRpcClient(transport);
+		using var client = new DiscordRpcClient(() => transport);
 
 		var connecting = client.ConnectAsync("1", CancellationToken.None);
 		await WaitForAsync(() => transport.WrittenWithOpcode(DiscordRpcOpcode.Handshake).Any());
@@ -219,7 +222,7 @@ internal sealed class DiscordRpcClientTests
 	public void Sending_before_connecting_fails_fast()
 	{
 		var transport = new FakeDiscordIpcTransport();
-		using var client = new DiscordRpcClient(transport);
+		using var client = new DiscordRpcClient(() => transport);
 
 		Assert.ThrowsAsync<DiscordRpcException>(async () => await client.SendCommandAsync("GET_GUILDS"));
 	}
@@ -228,7 +231,7 @@ internal sealed class DiscordRpcClientTests
 	public async Task A_malformed_frame_is_discarded_without_dropping_the_connection()
 	{
 		var transport = new FakeDiscordIpcTransport();
-		using var client = new DiscordRpcClient(transport);
+		using var client = new DiscordRpcClient(() => transport);
 		var disconnected = false;
 		client.Disconnected += (_, _) => disconnected = true;
 

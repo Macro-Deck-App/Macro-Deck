@@ -19,7 +19,7 @@ internal sealed class DiscordIpcTransport : IDiscordIpcTransport
 
 	public string? Endpoint { get; private set; }
 
-	public async Task ConnectAsync(CancellationToken cancellationToken)
+	public async Task ConnectAsync(IReadOnlySet<string> skippedEndpoints, CancellationToken cancellationToken)
 	{
 		if (_stream is not null)
 		{
@@ -29,7 +29,7 @@ internal sealed class DiscordIpcTransport : IDiscordIpcTransport
 		var accessDenied = false;
 		var attempted = 0;
 
-		foreach (var candidate in Candidates())
+		foreach (var candidate in Candidates().Where(c => !skippedEndpoints.Contains(c.Target)))
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 			attempted++;
@@ -37,7 +37,7 @@ internal sealed class DiscordIpcTransport : IDiscordIpcTransport
 			try
 			{
 				_stream = await OpenAsync(candidate, cancellationToken).ConfigureAwait(false);
-				Endpoint = candidate.Description;
+				Endpoint = candidate.Target;
 				_logger.Debug("Connected to Discord IPC endpoint {Endpoint}", Endpoint);
 				return;
 			}

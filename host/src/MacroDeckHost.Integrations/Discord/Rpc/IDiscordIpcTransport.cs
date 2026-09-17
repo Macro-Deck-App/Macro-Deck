@@ -6,7 +6,7 @@ internal interface IDiscordIpcTransport : IDisposable
 
 	string? Endpoint { get; }
 
-	Task ConnectAsync(CancellationToken cancellationToken);
+	Task ConnectAsync(IReadOnlySet<string> skippedEndpoints, CancellationToken cancellationToken);
 
 	Task WriteFrameAsync(DiscordRpcOpcode opcode, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken);
 

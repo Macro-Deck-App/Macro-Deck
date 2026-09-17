@@ -12,6 +12,11 @@ internal sealed record FakeResponse(string? Data, int ErrorCode = 0, string Erro
 	public static FakeResponse Ok(string data = "{}") => new(data);
 
 	public static FakeResponse Error(int code, string message = "rejected") => new(null, code, message);
+
+	public static FakeResponse NotAuthenticated() => Error(4006, "Not authenticated or invalid scope");
+
+	public static FakeResponse RealClient(FakeCommand command)
+		=> command.Command == "GET_GUILDS" ? NotAuthenticated() : Ok();
 }
 
 internal sealed class FakeDiscordIpcTransport : IDiscordIpcTransport
@@ -21,6 +26,12 @@ internal sealed class FakeDiscordIpcTransport : IDiscordIpcTransport
 	public bool IsConnected { get; private set; }
 
 	public string? Endpoint { get; private set; }
+
+	public string Name { get; init; } = "fake";
+
+	public bool AccessDenied { get; init; }
+
+	public bool Disposed { get; private set; }
 
 	public List<DiscordIpcFrame> Written { get; } = [];
 
@@ -32,17 +43,22 @@ internal sealed class FakeDiscordIpcTransport : IDiscordIpcTransport
 
 	public string ReadyData { get; set; } = """{"v":1,"user":{"id":"1","username":"tester"}}""";
 
-	public Func<FakeCommand, FakeResponse?> Responder { get; set; } = _ => FakeResponse.Ok();
+	public Func<FakeCommand, FakeResponse?> Responder { get; set; } = FakeResponse.RealClient;
 
-	public Task ConnectAsync(CancellationToken cancellationToken)
+	public Task ConnectAsync(IReadOnlySet<string> skippedEndpoints, CancellationToken cancellationToken)
 	{
 		if (ConnectException is not null)
 		{
 			return Task.FromException(ConnectException);
 		}
 
+		if (AccessDenied || skippedEndpoints.Contains(Name))
+		{
+			return Task.FromException(new DiscordIpcUnavailableException("No usable endpoint.", AccessDenied));
+		}
+
 		IsConnected = true;
-		Endpoint = "fake";
+		Endpoint = Name;
 		return Task.CompletedTask;
 	}
 
@@ -90,6 +106,7 @@ internal sealed class FakeDiscordIpcTransport : IDiscordIpcTransport
 
 	public void Dispose()
 	{
+		Disposed = true;
 		IsConnected = false;
 		_inbound.Writer.TryComplete();
 	}

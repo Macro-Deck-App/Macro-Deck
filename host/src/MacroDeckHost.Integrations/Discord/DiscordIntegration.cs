@@ -502,7 +502,7 @@ public sealed class DiscordIntegration
 			.ConfigureAwait(false));
 
 		_entryId = entry.Id;
-		_connection = new DiscordConnection(() => new DiscordRpcClient(new DiscordIpcTransport()),
+		_connection = new DiscordConnection(() => new DiscordRpcClient(() => new DiscordIpcTransport()),
 			_oauth,
 			clientId,
 			clientSecret,
