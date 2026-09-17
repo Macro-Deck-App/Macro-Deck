@@ -9,4 +9,6 @@ public class UpdateExtensionSettingsResponse
 	public bool NotifyOnUpdates { get; set; }
 
 	public int RefreshIntervalMinutes { get; set; }
+
+	public bool AutoUpdate { get; set; }
 }

@@ -8,7 +8,8 @@ import { EmptyStateComponent } from '../../feedback/empty-state/empty-state.comp
 import { SelectComponent, SelectOption } from '../../forms/select/select.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
 import { StoreSectionComponent } from '../../store/store-section.component';
-import { ConnectAccountService } from '../../../services/connect-account.service';
+import { StoreViewSwitcherComponent } from '../../store/store-view-switcher.component';
+import { StoreAccessService } from '../../../services/store-access.service';
 import { StoreCatalogService } from '../../../services/store-catalog.service';
 import { StoreOperationService } from '../../../services/store-operation.service';
 import { StoreRatingsService } from '../../../services/store-ratings.service';
@@ -16,8 +17,6 @@ import { storeUninstallErrorKey, storeUninstallMessageKey } from '../../../util/
 import { StoreRegistryRefreshModalComponent } from './store-registry-refresh-modal.component';
 
 type KindFilter = 'all' | StoreExtensionKind;
-
-const STORE_TESTER_ROLE = 'StoreTester';
 
 const BROWSE_KINDS: StoreExtensionKind[] = ['Plugin', 'IconPack'];
 
@@ -40,6 +39,7 @@ const BEST_MATCH_SORT: StoreCatalogSection = 'all';
     SelectComponent,
     StoreRegistryRefreshModalComponent,
     StoreSectionComponent,
+    StoreViewSwitcherComponent,
     TranslatePipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -52,7 +52,6 @@ export class StorePageComponent implements OnInit {
   private readonly api = inject(ApiService);
   private readonly localization = inject(LocalizationService);
   private readonly toasts = inject(ToastService);
-  private readonly account = inject(ConnectAccountService);
   protected readonly catalog = inject(StoreCatalogService);
   protected readonly operations = inject(StoreOperationService);
   private readonly ratings = inject(StoreRatingsService);
@@ -63,10 +62,7 @@ export class StorePageComponent implements OnInit {
 
   protected readonly searching = computed(() => this.search().trim() !== '');
 
-  // Temporary: the store is not live, so only store testers get past the coming-soon overlay. Remove
-  // this gate, the overlay, its inert binding and the ComingSoon strings once the store goes live.
-  protected readonly storeUnlocked = computed(() =>
-    this.account.isSignedIn() && (this.account.session()?.account?.roles ?? []).includes(STORE_TESTER_ROLE));
+  protected readonly storeUnlocked = inject(StoreAccessService).unlocked;
 
   protected readonly kindOptions = computed<SegmentedOption[]>(() => [
     { value: 'all', label: this.localization.translateKey(AppStrings.Store.Page.KindAll) },

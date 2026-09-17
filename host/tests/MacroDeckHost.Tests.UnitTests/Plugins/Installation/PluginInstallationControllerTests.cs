@@ -147,6 +147,7 @@ internal sealed class PluginInstallationControllerTests
 			new FakeInstallationCatalog(),
 			new PluginManifestReader(),
 			new FakeArtifactCache(),
-			new InMemoryPluginTrustRecordRepository());
+			new InMemoryPluginTrustRecordRepository(),
+			new Api.FakeStoreUpdateDetector());
 	}
 }

@@ -39,7 +39,8 @@ internal sealed class StoreInstallCoordinatorTests
 			_tracker,
 			_channel,
 			new StoreOperationCancellation(),
-			new StoreInstallConsent());
+			new StoreInstallConsent(),
+			new StoreInstallBackupBatches());
 
 		_catalog.Swap(new StoreCatalogSnapshot
 		{

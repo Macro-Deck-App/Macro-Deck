@@ -48,7 +48,8 @@ internal sealed class StoreControllerTests
 			_tracker,
 			new StoreOperationChannel(),
 			new StoreOperationCancellation(),
-			new StoreInstallConsent());
+			new StoreInstallConsent(),
+			new StoreInstallBackupBatches());
 
 		_uninstallService = new FakeStoreUninstallService();
 		_controller = CreateController(new FakeStoreRegistryRefresher(),
@@ -70,9 +71,9 @@ internal sealed class StoreControllerTests
 			new FakeDeveloperModePreferences(),
 			_paths,
 			StoreRegistryOptions.Default,
-			new RecordingMediator(),
 			_uninstallService,
-			refreshTracker)
+			refreshTracker,
+			new StoreUpdateBatchInstaller(_installCoordinator))
 		{
 			ControllerContext = new ControllerContext
 			{

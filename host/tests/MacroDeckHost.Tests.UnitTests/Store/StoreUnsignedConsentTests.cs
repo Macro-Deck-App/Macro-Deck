@@ -41,6 +41,7 @@ internal sealed class StoreUnsignedConsentTests
 	private StoreOperationTracker _tracker = null!;
 	private StoreCatalog _catalog = null!;
 	private StoreInstallConsent _consent = null!;
+	private StoreInstallBackupBatches _backupBatches = null!;
 	private StoreInstallCoordinator _coordinator = null!;
 	private StoreInstallExecutor _executor = null!;
 	private PluginInstallationCatalog _pluginCatalog = null!;
@@ -67,6 +68,7 @@ internal sealed class StoreUnsignedConsentTests
 		_tracker = new StoreOperationTracker(new InMemoryStoreOperationStore(), TimeProvider.System);
 		_catalog = new StoreCatalog();
 		_consent = new StoreInstallConsent();
+		_backupBatches = new StoreInstallBackupBatches();
 		_preferences = new FakeDeveloperModePreferences();
 		_trustRecords = new InMemoryPluginTrustRecordRepository();
 		_iconHarness = new IconTestHarness();
@@ -114,7 +116,8 @@ internal sealed class StoreUnsignedConsentTests
 			_tracker,
 			new StoreOperationChannel(),
 			new StoreOperationCancellation(),
-			_consent);
+			_consent,
+			_backupBatches);
 
 		_executor = new StoreInstallExecutor(_catalog,
 			catalogQuery,
@@ -124,6 +127,7 @@ internal sealed class StoreUnsignedConsentTests
 			_iconHarness.Cache,
 			installations,
 			_consent,
+			_backupBatches,
 			provider.GetRequiredService<IServiceScopeFactory>(),
 			_paths,
 			StoreRegistryOptions.Default,

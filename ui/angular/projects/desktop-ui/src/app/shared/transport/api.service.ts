@@ -111,6 +111,9 @@ import {
   CompleteOnboardingResponse,
   CompanionLicenseStatus,
   GetDeveloperSettingsResponse,
+  GetExtensionSettingsResponse,
+  UpdateExtensionSettingsRequest,
+  UpdateExtensionSettingsResponse,
   GetOnboardingStateResponse,
   GetDeviceSetupResponse,
   GetDevicesResponse,
@@ -895,6 +898,7 @@ export class ApiService {
     section?: StoreCatalogSection;
     skip?: number;
     take?: number;
+    installed?: boolean;
   }): Promise<GetStoreCatalogResponse> {
     const query = new URLSearchParams();
     if (options?.kind) {
@@ -917,6 +921,9 @@ export class ApiService {
     if (options?.take !== undefined) {
       query.set('take', String(options.take));
     }
+    if (options?.installed) {
+      query.set('installed', 'true');
+    }
     const suffix = query.size > 0 ? `?${query}` : '';
     return this.http('GET', `/api/store/catalog${suffix}`);
   }
@@ -931,6 +938,10 @@ export class ApiService {
 
   checkStoreUpdates(): Promise<GetStoreUpdatesResponse> {
     return this.http('POST', '/api/store/updates/check');
+  }
+
+  installStoreUpdates(): Promise<GetStoreOperationsResponse> {
+    return this.http('POST', '/api/store/updates/install');
   }
 
   getStoreOperations(): Promise<GetStoreOperationsResponse> {
@@ -1163,6 +1174,14 @@ export class ApiService {
 
   updateDeveloperSettings(request: UpdateDeveloperSettingsRequest): Promise<UpdateDeveloperSettingsResponse> {
     return this.http('PUT', '/api/settings/developer', request);
+  }
+
+  getExtensionSettings(): Promise<GetExtensionSettingsResponse> {
+    return this.http('GET', '/api/settings/extensions');
+  }
+
+  updateExtensionSettings(request: UpdateExtensionSettingsRequest): Promise<UpdateExtensionSettingsResponse> {
+    return this.http('PUT', '/api/settings/extensions', request);
   }
 
   getCompanionLicense(): Promise<CompanionLicenseStatus> {

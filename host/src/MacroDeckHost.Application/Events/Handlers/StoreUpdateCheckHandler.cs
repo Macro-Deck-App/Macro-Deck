@@ -8,22 +8,28 @@ namespace MacroDeckHost.Application.Events.Handlers;
 public sealed class StoreUpdateCheckHandler : INotificationHandler<StoreRegistryRefreshedNotification>
 {
 	private readonly IStoreUpdateDetector _detector;
-	private readonly IMediator _mediator;
+	private readonly StoreAutoUpdater _autoUpdater;
 
-	public StoreUpdateCheckHandler(IStoreUpdateDetector detector, IMediator mediator)
+	public StoreUpdateCheckHandler(IStoreUpdateDetector detector, StoreAutoUpdater autoUpdater)
 	{
 		_detector = detector;
-		_mediator = mediator;
+		_autoUpdater = autoUpdater;
 	}
 
-	public async ValueTask Handle(StoreRegistryRefreshedNotification notification, CancellationToken cancellationToken)
+	public ValueTask Handle(StoreRegistryRefreshedNotification notification, CancellationToken cancellationToken)
 	{
 		if (!notification.Status.HasCatalog)
 		{
-			return;
+			return ValueTask.CompletedTask;
 		}
 
-		var updates = _detector.Check();
-		await _mediator.Publish(new StoreUpdatesChangedNotification(updates), cancellationToken);
+		// The cached registry loaded at startup has no attempt yet; only a fetch made in this session counts.
+		if (notification.Status is { LastError: null, LastAttemptAt: not null })
+		{
+			_autoUpdater.MarkRegistryFresh();
+		}
+
+		_detector.Check();
+		return ValueTask.CompletedTask;
 	}
 }

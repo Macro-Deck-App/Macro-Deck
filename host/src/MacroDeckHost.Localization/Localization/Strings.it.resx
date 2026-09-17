@@ -11646,6 +11646,30 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>{name} vuole sostituire un plugin installato e attende la tua approvazione in Macro Deck.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.StoreAutoUpdateFailed.One" xml:space="preserve">
+    <value>{count} aggiornamento automatico delle estensioni non riuscito</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdateFailed.Other" xml:space="preserve">
+    <value>{count} aggiornamenti automatici delle estensioni non riusciti</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdateFailedMessage" xml:space="preserve">
+    <value>Impossibile aggiornare {names}. Apri le estensioni installate per riprovare.</value>
+    <comment>[names:string]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdated.One" xml:space="preserve">
+    <value>{count} estensione aggiornata automaticamente</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdated.Other" xml:space="preserve">
+    <value>{count} estensioni aggiornate automaticamente</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdatedMessage" xml:space="preserve">
+    <value>Ora aggiornate: {names}.</value>
+    <comment>[names:string]</comment>
+  </data>
   <data name="Notifications.StoreExtensionInstallFailed" xml:space="preserve">
     <value>Installazione di {name} non riuscita</value>
     <comment>[name:string]</comment>
@@ -11661,6 +11685,18 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Notifications.StoreExtensionUpdated" xml:space="preserve">
     <value>{name} aggiornato</value>
     <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.StoreUpdatesAvailable.One" xml:space="preserve">
+    <value>{count} aggiornamento disponibile per le estensioni</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreUpdatesAvailable.Other" xml:space="preserve">
+    <value>{count} aggiornamenti disponibili per le estensioni</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreUpdatesAvailableMessage" xml:space="preserve">
+    <value>Sono pronte nuove versioni di {names}.</value>
+    <comment>[names:string]</comment>
   </data>
   <data name="Notifications.StoreVersionReady" xml:space="preserve">
     <value>La versione {version} è pronta.</value>
@@ -13028,6 +13064,24 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Settings.Devices.ThisDeviceMarker" xml:space="preserve">
     <value>Questo dispositivo</value>
   </data>
+  <data name="Settings.Extensions.AutoUpdate" xml:space="preserve">
+    <value>Aggiorna automaticamente le estensioni</value>
+  </data>
+  <data name="Settings.Extensions.AutoUpdateDescription" xml:space="preserve">
+    <value>Installa le nuove versioni dei plugin e dei pacchetti di icone installati dallo Store non appena sono disponibili e poi ti avvisa.</value>
+  </data>
+  <data name="Settings.Extensions.Heading" xml:space="preserve">
+    <value>Estensioni</value>
+  </data>
+  <data name="Settings.Extensions.NotifyOnUpdates" xml:space="preserve">
+    <value>Notifica gli aggiornamenti</value>
+  </data>
+  <data name="Settings.Extensions.NotifyOnUpdatesDescription" xml:space="preserve">
+    <value>Mostra una notifica quando è disponibile una nuova versione di un'estensione installata.</value>
+  </data>
+  <data name="Settings.Extensions.UpdatesSection" xml:space="preserve">
+    <value>Aggiornamenti</value>
+  </data>
   <data name="Settings.Language.ActiveDescription" xml:space="preserve">
     <value>Si applica immediatamente a ogni client connesso.</value>
   </data>
@@ -14128,6 +14182,23 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Store.Page.FeaturedSectionHeading" xml:space="preserve">
     <value>In evidenza</value>
   </data>
+  <data name="Store.Page.InstalledEmptyHeading" xml:space="preserve">
+    <value>Nessuna estensione installata</value>
+  </data>
+  <data name="Store.Page.InstalledEmptyMessage" xml:space="preserve">
+    <value>I plugin e i pacchetti di icone che installi dallo Store compaiono qui.</value>
+  </data>
+  <data name="Store.Page.InstalledUpToDate" xml:space="preserve">
+    <value>È tutto aggiornato</value>
+  </data>
+  <data name="Store.Page.InstalledUpdatesAvailable.One" xml:space="preserve">
+    <value>{count} aggiornamento disponibile</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.InstalledUpdatesAvailable.Other" xml:space="preserve">
+    <value>{count} aggiornamenti disponibili</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Store.Page.InstalledVersionField" xml:space="preserve">
     <value>Versione installata</value>
   </data>
@@ -14244,6 +14315,15 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Store.Page.Subtitle" xml:space="preserve">
     <value>Sfoglia plugin e pacchetti di icone dal registro di Macro Deck</value>
   </data>
+  <data name="Store.Page.TabDiscover" xml:space="preserve">
+    <value>Scopri</value>
+  </data>
+  <data name="Store.Page.TabInstalled" xml:space="preserve">
+    <value>Installate</value>
+  </data>
+  <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
+    <value>Sezioni dello Store</value>
+  </data>
   <data name="Store.Page.Title" xml:space="preserve">
     <value>Store</value>
   </data>
@@ -14252,6 +14332,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Store.Page.UnavailableMessage" xml:space="preserve">
     <value>Impossibile raggiungere il registro e nessun catalogo salvato è disponibile da mostrare.</value>
+  </data>
+  <data name="Store.Page.UpdateAllAction" xml:space="preserve">
+    <value>Aggiorna tutto</value>
   </data>
   <data name="Store.Page.UpdatedField" xml:space="preserve">
     <value>Aggiornato</value>

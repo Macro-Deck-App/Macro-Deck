@@ -1,0 +1,24 @@
+<div class="extensions-settings">
+  <shared-settings-section [heading]="'macrodeck.app:Settings.Extensions.UpdatesSection' | translate">
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Extensions.NotifyOnUpdates' | translate"
+      [description]="'macrodeck.app:Settings.Extensions.NotifyOnUpdatesDescription' | translate">
+      <shared-toggle-switch
+        [ariaLabel]="'macrodeck.app:Settings.Extensions.NotifyOnUpdates' | translate"
+        [busy]="busy()"
+        [disabled]="busy() || !settings()"
+        [checked]="settings()?.notifyOnUpdates ?? false"
+        (changed)="setNotifyOnUpdates($event)" />
+    </shared-settings-row>
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Extensions.AutoUpdate' | translate"
+      [description]="'macrodeck.app:Settings.Extensions.AutoUpdateDescription' | translate">
+      <shared-toggle-switch
+        [ariaLabel]="'macrodeck.app:Settings.Extensions.AutoUpdate' | translate"
+        [busy]="busy()"
+        [disabled]="busy() || !settings()"
+        [checked]="settings()?.autoUpdate ?? false"
+        (changed)="setAutoUpdate($event)" />
+    </shared-settings-row>
+  </shared-settings-section>
+</div>

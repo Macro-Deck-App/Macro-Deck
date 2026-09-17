@@ -177,3 +177,45 @@ describe('StoreInstallButtonComponent uninstall', () => {
     expect(fixture.nativeElement.querySelector('shared-confirmation-modal')).toBeNull();
   });
 });
+
+describe('StoreInstallButtonComponent after an update', () => {
+  it('shows the version that is now installed once the update finishes', async () => {
+    TestBed.configureTestingModule({
+      imports: [StoreInstallButtonComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        ...provideLocalizationTesting(),
+        { provide: DeveloperModeService, useValue: { enabled: signal(false), ensureLoaded: jasmine.createSpy().and.resolveTo() } },
+      ],
+    });
+    const fixture = TestBed.createComponent(StoreInstallButtonComponent);
+    fixture.componentRef.setInput('item', {
+      kind: 'Plugin',
+      id: 'com.suchbyte.macrogotchi',
+      name: 'Macrogotchi',
+      latestVersion: '1.1.0',
+      installedVersion: '1.0.5',
+      installState: 'UpdateAvailable',
+      trust: 'PublisherVerified',
+      hasIcon: false,
+    } satisfies StoreCatalogItemBody);
+    fixture.componentRef.setInput('operation', {
+      id: 'op-1',
+      kind: 'Update',
+      extensionKind: 'Plugin',
+      packageId: 'com.suchbyte.macrogotchi',
+      version: '1.1.0',
+      displayName: 'Macrogotchi',
+      state: 'Completed',
+      bytesDownloaded: 2291529,
+      startedAt: '2026-01-01T00:00:00Z',
+      updatedAt: '2026-01-01T00:00:10Z',
+      canRetry: false,
+    } satisfies StoreOperationBody);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+      TestBed.inject(LocalizationService).translateKey(AppStrings.Store.InstalledVersion, { version: '1.1.0' }));
+  });
+});

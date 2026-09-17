@@ -125,6 +125,11 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 		{
 			_gate.Release();
 		}
+
+		if (_status.HasCatalog)
+		{
+			await AnnounceOutcome();
+		}
 	}
 
 	public Task<Result<RegistryRefreshError>> Refresh(CancellationToken cancellationToken = default) =>

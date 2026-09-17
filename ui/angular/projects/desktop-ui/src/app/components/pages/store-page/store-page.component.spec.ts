@@ -287,7 +287,7 @@ describe('StorePageComponent', () => {
       expect(call.kinds).toEqual(['Plugin', 'IconPack']);
     }
 
-    const filter = fixture.debugElement.query(By.directive(SegmentedControlComponent))
+    const filter = fixture.debugElement.query(By.css('.store-facets shared-segmented-control'))
       .componentInstance as SegmentedControlComponent;
     expect(filter.options.map(option => option.value)).toEqual(['all', 'Plugin', 'IconPack']);
   });

@@ -104,10 +104,16 @@ can take up to a day to show up. If you were signed in before your Macro Deck ve
 testers, sign out and in once.
 
 **Refresh** on the Store page fetches the latest catalog and opens a log of each step as it happens.
-Macro Deck also refreshes on its own about once an hour. While a refresh runs, the button says
+Macro Deck also refreshes on its own a few seconds after it starts and then once an hour. While a refresh runs, the button says
 **Refreshing…** in every window, and pressing it opens the log of that refresh instead of starting a
 second one. If the store registry is being updated while a refresh runs, the log says so and Macro Deck
 tries again a few times over about five minutes before it reports a failure.
+
+**Installed** at the top of the Store lists the Store's plugins and icon packs you have installed, with their
+version and any update waiting for them. Update one at a time from its card, or all at once with
+**Update all**. After an update downloads, the card shows **Installing…** while Macro Deck backs up,
+installs and restarts the plugin, then the version that is now installed. See
+[Updates](/guide/updates/#extension-updates) for update notifications and automatic updates.
 
 Store items show their star rating, and an item's page lists its **Ratings and reviews**. Anyone can
 read them. To rate or review an item yourself, sign in with Macro Deck Connect under

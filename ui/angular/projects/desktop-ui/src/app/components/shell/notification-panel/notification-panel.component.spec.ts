@@ -191,6 +191,18 @@ describe('NotificationPanelComponent', () => {
     expect(navigateSpy).toHaveBeenCalledWith(['/developer'], { queryParams: { tab: 'logs' } });
   });
 
+  it('opens the installed extensions for an extension update notification', () => {
+    fireAction(notification(), { kind: 'OpenExtensionStore', target: 'installed' });
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/store', 'installed']);
+  });
+
+  it('opens the store for a store notification without a target', () => {
+    fireAction(notification(), { kind: 'OpenExtensionStore' });
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/store']);
+  });
+
   it('navigates to the integration an integration notification came from', () => {
     fireAction(notification(), { kind: 'OpenIntegration', target: 'obs' });
 

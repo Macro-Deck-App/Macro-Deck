@@ -305,7 +305,8 @@ internal sealed class ContractAppPreferences : IAppPreferenceService
 	public Task<ExtensionSettings> SetExtensions(bool? storeEnabled,
 		bool? checkForUpdates,
 		bool? notifyOnUpdates,
-		int? refreshIntervalMinutes) => throw new NotSupportedException();
+		int? refreshIntervalMinutes,
+		bool? autoUpdate = null) => throw new NotSupportedException();
 }
 
 /// <summary>The deck the contract tests project: one profile, one folder, and a widget whose stored data

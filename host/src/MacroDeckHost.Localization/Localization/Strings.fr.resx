@@ -11646,6 +11646,30 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>{name} veut remplacer une extension installée et attend ton approbation dans Macro Deck.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.StoreAutoUpdateFailed.One" xml:space="preserve">
+    <value>{count} mise à jour automatique d'extension a échoué</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdateFailed.Other" xml:space="preserve">
+    <value>{count} mises à jour automatiques d'extensions ont échoué</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdateFailedMessage" xml:space="preserve">
+    <value>Impossible de mettre à jour {names}. Ouvre les extensions installées pour réessayer.</value>
+    <comment>[names:string]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdated.One" xml:space="preserve">
+    <value>{count} extension mise à jour automatiquement</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdated.Other" xml:space="preserve">
+    <value>{count} extensions mises à jour automatiquement</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdatedMessage" xml:space="preserve">
+    <value>Désormais à jour : {names}.</value>
+    <comment>[names:string]</comment>
+  </data>
   <data name="Notifications.StoreExtensionInstallFailed" xml:space="preserve">
     <value>Échec de l'installation de {name}</value>
     <comment>[name:string]</comment>
@@ -11661,6 +11685,18 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Notifications.StoreExtensionUpdated" xml:space="preserve">
     <value>{name} mis à jour</value>
     <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.StoreUpdatesAvailable.One" xml:space="preserve">
+    <value>{count} mise à jour d'extension disponible</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreUpdatesAvailable.Other" xml:space="preserve">
+    <value>{count} mises à jour d'extensions disponibles</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreUpdatesAvailableMessage" xml:space="preserve">
+    <value>De nouvelles versions sont prêtes pour {names}.</value>
+    <comment>[names:string]</comment>
   </data>
   <data name="Notifications.StoreVersionReady" xml:space="preserve">
     <value>La version {version} est prête.</value>
@@ -13028,6 +13064,24 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Settings.Devices.ThisDeviceMarker" xml:space="preserve">
     <value>Cet appareil</value>
   </data>
+  <data name="Settings.Extensions.AutoUpdate" xml:space="preserve">
+    <value>Mettre à jour les extensions automatiquement</value>
+  </data>
+  <data name="Settings.Extensions.AutoUpdateDescription" xml:space="preserve">
+    <value>Installe les nouvelles versions des extensions et packs d'icônes installés depuis le Store dès qu'elles sont disponibles, puis te prévient.</value>
+  </data>
+  <data name="Settings.Extensions.Heading" xml:space="preserve">
+    <value>Extensions</value>
+  </data>
+  <data name="Settings.Extensions.NotifyOnUpdates" xml:space="preserve">
+    <value>Notifier les mises à jour</value>
+  </data>
+  <data name="Settings.Extensions.NotifyOnUpdatesDescription" xml:space="preserve">
+    <value>Affiche une notification quand une nouvelle version d'une extension installée est disponible.</value>
+  </data>
+  <data name="Settings.Extensions.UpdatesSection" xml:space="preserve">
+    <value>Mises à jour</value>
+  </data>
   <data name="Settings.Language.ActiveDescription" xml:space="preserve">
     <value>S'applique immédiatement à tous les clients connectés.</value>
   </data>
@@ -14128,6 +14182,23 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Store.Page.FeaturedSectionHeading" xml:space="preserve">
     <value>En vedette</value>
   </data>
+  <data name="Store.Page.InstalledEmptyHeading" xml:space="preserve">
+    <value>Aucune extension installée</value>
+  </data>
+  <data name="Store.Page.InstalledEmptyMessage" xml:space="preserve">
+    <value>Les extensions et packs d'icônes que tu installes depuis le Store apparaissent ici.</value>
+  </data>
+  <data name="Store.Page.InstalledUpToDate" xml:space="preserve">
+    <value>Tout est à jour</value>
+  </data>
+  <data name="Store.Page.InstalledUpdatesAvailable.One" xml:space="preserve">
+    <value>{count} mise à jour disponible</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.InstalledUpdatesAvailable.Other" xml:space="preserve">
+    <value>{count} mises à jour disponibles</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Store.Page.InstalledVersionField" xml:space="preserve">
     <value>Version installée</value>
   </data>
@@ -14244,6 +14315,15 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Store.Page.Subtitle" xml:space="preserve">
     <value>Parcours les extensions et packs d'icônes du registre Macro Deck</value>
   </data>
+  <data name="Store.Page.TabDiscover" xml:space="preserve">
+    <value>Découvrir</value>
+  </data>
+  <data name="Store.Page.TabInstalled" xml:space="preserve">
+    <value>Installées</value>
+  </data>
+  <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
+    <value>Sections du Store</value>
+  </data>
   <data name="Store.Page.Title" xml:space="preserve">
     <value>Store</value>
   </data>
@@ -14252,6 +14332,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Store.Page.UnavailableMessage" xml:space="preserve">
     <value>Le registre n'a pas pu être contacté et aucun catalogue en cache n'est disponible.</value>
+  </data>
+  <data name="Store.Page.UpdateAllAction" xml:space="preserve">
+    <value>Tout mettre à jour</value>
   </data>
   <data name="Store.Page.UpdatedField" xml:space="preserve">
     <value>Mis à jour</value>

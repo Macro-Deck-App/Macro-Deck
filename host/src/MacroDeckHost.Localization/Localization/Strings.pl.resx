@@ -11646,6 +11646,30 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Wtyczka {name} chce zastąpić zainstalowaną wtyczkę i czeka na zatwierdzenie w Macro Decku.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.StoreAutoUpdateFailed.One" xml:space="preserve">
+    <value>Nieudane automatyczne aktualizacje rozszerzeń: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdateFailed.Other" xml:space="preserve">
+    <value>Nieudane automatyczne aktualizacje rozszerzeń: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdateFailedMessage" xml:space="preserve">
+    <value>Nie udało się zaktualizować: {names}. Ponowna próba jest możliwa w zainstalowanych rozszerzeniach.</value>
+    <comment>[names:string]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdated.One" xml:space="preserve">
+    <value>Automatycznie zaktualizowane rozszerzenia: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdated.Other" xml:space="preserve">
+    <value>Automatycznie zaktualizowane rozszerzenia: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreAutoUpdatedMessage" xml:space="preserve">
+    <value>Teraz aktualne: {names}.</value>
+    <comment>[names:string]</comment>
+  </data>
   <data name="Notifications.StoreExtensionInstallFailed" xml:space="preserve">
     <value>Nie udało się zainstalować {name}</value>
     <comment>[name:string]</comment>
@@ -11661,6 +11685,18 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Notifications.StoreExtensionUpdated" xml:space="preserve">
     <value>Zaktualizowano {name}</value>
     <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.StoreUpdatesAvailable.One" xml:space="preserve">
+    <value>Dostępne aktualizacje rozszerzeń: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreUpdatesAvailable.Other" xml:space="preserve">
+    <value>Dostępne aktualizacje rozszerzeń: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.StoreUpdatesAvailableMessage" xml:space="preserve">
+    <value>Nowe wersje są gotowe dla: {names}.</value>
+    <comment>[names:string]</comment>
   </data>
   <data name="Notifications.StoreVersionReady" xml:space="preserve">
     <value>Wersja {version} jest gotowa.</value>
@@ -13028,6 +13064,24 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Settings.Devices.ThisDeviceMarker" xml:space="preserve">
     <value>To urządzenie</value>
   </data>
+  <data name="Settings.Extensions.AutoUpdate" xml:space="preserve">
+    <value>Automatycznie aktualizuj rozszerzenia</value>
+  </data>
+  <data name="Settings.Extensions.AutoUpdateDescription" xml:space="preserve">
+    <value>Nowe wersje wtyczek i pakietów ikon zainstalowanych ze Store są instalowane, gdy tylko są dostępne, a następnie wyświetlane jest powiadomienie.</value>
+  </data>
+  <data name="Settings.Extensions.Heading" xml:space="preserve">
+    <value>Rozszerzenia</value>
+  </data>
+  <data name="Settings.Extensions.NotifyOnUpdates" xml:space="preserve">
+    <value>Powiadamiaj o aktualizacjach</value>
+  </data>
+  <data name="Settings.Extensions.NotifyOnUpdatesDescription" xml:space="preserve">
+    <value>Wyświetla powiadomienie, gdy dostępna jest nowa wersja zainstalowanego rozszerzenia.</value>
+  </data>
+  <data name="Settings.Extensions.UpdatesSection" xml:space="preserve">
+    <value>Aktualizacje</value>
+  </data>
   <data name="Settings.Language.ActiveDescription" xml:space="preserve">
     <value>Ma natychmiastowe zastosowanie do wszystkich połączonych klientów.</value>
   </data>
@@ -14128,6 +14182,23 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Page.FeaturedSectionHeading" xml:space="preserve">
     <value>Polecane</value>
   </data>
+  <data name="Store.Page.InstalledEmptyHeading" xml:space="preserve">
+    <value>Brak zainstalowanych rozszerzeń</value>
+  </data>
+  <data name="Store.Page.InstalledEmptyMessage" xml:space="preserve">
+    <value>Tutaj pojawiają się wtyczki i pakiety ikon zainstalowane ze Store.</value>
+  </data>
+  <data name="Store.Page.InstalledUpToDate" xml:space="preserve">
+    <value>Wszystko jest aktualne</value>
+  </data>
+  <data name="Store.Page.InstalledUpdatesAvailable.One" xml:space="preserve">
+    <value>Dostępne aktualizacje: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.InstalledUpdatesAvailable.Other" xml:space="preserve">
+    <value>Dostępne aktualizacje: {count}</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Store.Page.InstalledVersionField" xml:space="preserve">
     <value>Zainstalowana wersja</value>
   </data>
@@ -14244,6 +14315,15 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Page.Subtitle" xml:space="preserve">
     <value>Przeglądaj wtyczki i pakiety ikon z rejestru Macro Deck</value>
   </data>
+  <data name="Store.Page.TabDiscover" xml:space="preserve">
+    <value>Odkrywaj</value>
+  </data>
+  <data name="Store.Page.TabInstalled" xml:space="preserve">
+    <value>Zainstalowane</value>
+  </data>
+  <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
+    <value>Sekcje Store</value>
+  </data>
   <data name="Store.Page.Title" xml:space="preserve">
     <value>Store</value>
   </data>
@@ -14252,6 +14332,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Store.Page.UnavailableMessage" xml:space="preserve">
     <value>Nie udało się połączyć z rejestrem, a brak zbuforowanego katalogu do wyświetlenia.</value>
+  </data>
+  <data name="Store.Page.UpdateAllAction" xml:space="preserve">
+    <value>Aktualizuj wszystko</value>
   </data>
   <data name="Store.Page.UpdatedField" xml:space="preserve">
     <value>Zaktualizowano</value>

@@ -27,6 +27,24 @@ internal sealed class StoreOperationTrackerProgressTests
 	}
 
 	[Test]
+	public void A_download_sample_that_arrives_after_installation_started_does_not_show_the_download_again()
+	{
+		var tracker = new StoreOperationTracker(new InMemoryStoreOperationStore(), TimeProvider.System);
+		var operation = tracker.Create(StoreOperationKind.Update,
+			StoreExtensionKind.Plugin,
+			"com.acme.hue",
+			"1.1.0",
+			"Hue Bridge",
+			previousVersion: "1.0.0");
+		tracker.Transition(operation.Id, StoreOperationState.Downloading);
+		tracker.Transition(operation.Id, StoreOperationState.Installing);
+
+		tracker.ReportProgress(operation.Id, 4096, 4096);
+
+		Assert.That(tracker.Find(operation.Id)!.State, Is.EqualTo(StoreOperationState.Installing));
+	}
+
+	[Test]
 	public void A_failure_is_never_overwritten_by_progress_still_in_flight()
 	{
 		for (var attempt = 0; attempt < 50; attempt++)

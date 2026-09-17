@@ -8,6 +8,7 @@ using MacroDeckHost.Localization;
 using MacroDeckHost.Application.Plugins.Trust;
 using MacroDeckHost.Application.Ui.Transport.Messages;
 using Microsoft.AspNetCore.Mvc;
+using MacroDeckHost.Application.Store.Updates;
 
 namespace MacroDeckHost.Api.Controllers;
 
@@ -94,18 +95,21 @@ public class PluginInstallationController : ControllerBase
 	private readonly IPluginManifestReader _manifestReader;
 	private readonly IPluginArtifactCache _cache;
 	private readonly IPluginTrustRecordRepository _trustRecords;
+	private readonly IStoreUpdateDetector _updateDetector;
 
 	public PluginInstallationController(IPluginInstaller installer,
 		IPluginInstallationCatalog catalog,
 		IPluginManifestReader manifestReader,
 		IPluginArtifactCache cache,
-		IPluginTrustRecordRepository trustRecords)
+		IPluginTrustRecordRepository trustRecords,
+		IStoreUpdateDetector updateDetector)
 	{
 		_installer = installer;
 		_catalog = catalog;
 		_manifestReader = manifestReader;
 		_cache = cache;
 		_trustRecords = trustRecords;
+		_updateDetector = updateDetector;
 	}
 
 	[HttpGet]
@@ -148,9 +152,9 @@ public class PluginInstallationController : ControllerBase
 		}
 
 		await using var stream = file.OpenReadStream();
-		return ToResponse(await _installer.Install(PluginArtifactSource.FromUpload(stream),
+		return ToResponse(Rechecked(await _installer.Install(PluginArtifactSource.FromUpload(stream),
 			new PluginInstallRequest { Force = force, AllowUnsigned = allowUnsigned },
-			ct));
+			ct)));
 	}
 
 	[HttpPost("inspect-path")]
@@ -176,9 +180,9 @@ public class PluginInstallationController : ControllerBase
 			return new PluginInstallActionResponse(false, null, null, null, false, false, [], refusal);
 		}
 
-		return ToResponse(await _installer.Install(PluginArtifactSource.FromPath(body.Path),
+		return ToResponse(Rechecked(await _installer.Install(PluginArtifactSource.FromPath(body.Path),
 			new PluginInstallRequest { Force = body.Force, AllowUnsigned = body.AllowUnsigned },
-			ct));
+			ct)));
 	}
 
 	[HttpPost("install-url")]
@@ -195,9 +199,9 @@ public class PluginInstallationController : ControllerBase
 			RetainDownload = body.RetainDownload,
 			Force = body.Force
 		};
-		return ToResponse(await _installer.Install(PluginArtifactSource.FromUrl(url, body.Sha256),
+		return ToResponse(Rechecked(await _installer.Install(PluginArtifactSource.FromUrl(url, body.Sha256),
 			request,
-			ct));
+			ct)));
 	}
 
 	[HttpPost("{pluginId}/activate")]
@@ -205,7 +209,7 @@ public class PluginInstallationController : ControllerBase
 		ActivatePluginVersionRequest body,
 		CancellationToken ct)
 	{
-		return ToResponse(await _installer.Activate(pluginId, body.Version, ct));
+		return ToResponse(Rechecked(await _installer.Activate(pluginId, body.Version, ct)));
 	}
 
 	[HttpDelete("{pluginId}")]
@@ -215,7 +219,7 @@ public class PluginInstallationController : ControllerBase
 		[FromQuery] bool force = false)
 	{
 		var request = new PluginUninstallRequest { KeepData = keepData, Force = force };
-		return ToResponse(await _installer.Uninstall(pluginId, request, ct));
+		return ToResponse(Rechecked(await _installer.Uninstall(pluginId, request, ct)));
 	}
 
 	[HttpDelete("cache")]
@@ -263,6 +267,16 @@ public class PluginInstallationController : ControllerBase
 			false,
 			[],
 			new TransportError { Code = code, Message = message });
+	}
+
+	private PluginInstallResult Rechecked(PluginInstallResult result)
+	{
+		if (result.Success)
+		{
+			_updateDetector.Check();
+		}
+
+		return result;
 	}
 
 	private static PluginInstallActionResponse ToResponse(PluginInstallResult result)

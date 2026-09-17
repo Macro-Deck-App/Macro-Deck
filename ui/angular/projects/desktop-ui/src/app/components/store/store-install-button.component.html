@@ -94,7 +94,7 @@
       @if (prominent()) {
         <span class="icon icon-check icon-sm" aria-hidden="true"></span>
       }
-      {{ 'macrodeck.app:Store.Installed' | translate }}
+      {{ 'macrodeck.app:Store.InstalledVersion' | translate:{ version: operation()?.version } }}
     </shared-button>
   }
   @case ('failed') {

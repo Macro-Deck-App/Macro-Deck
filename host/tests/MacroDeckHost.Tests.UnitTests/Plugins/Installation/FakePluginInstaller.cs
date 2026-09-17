@@ -16,7 +16,14 @@ internal sealed class FakePluginInstaller : IPluginInstaller
 
 	public Task<PluginInstallResult> Install(PluginArtifactSource source,
 		PluginInstallRequest request,
-		CancellationToken cancellationToken = default) => Task.FromResult(ResultToReturn);
+		CancellationToken cancellationToken = default)
+	{
+		LastInstallRequest = request;
+		request.Acquired?.Invoke();
+		return Task.FromResult(ResultToReturn);
+	}
+
+	public PluginInstallRequest? LastInstallRequest { get; private set; }
 
 	public Task<PluginInstallResult> Activate(string pluginId,
 		string version,

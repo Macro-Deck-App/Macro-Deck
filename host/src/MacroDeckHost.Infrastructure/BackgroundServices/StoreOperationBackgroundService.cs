@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Store;
 using MacroDeckHost.Application.Store.Operations;
+using MacroDeckHost.Application.Store.Updates;
 using MacroDeckHost.Infrastructure.Store;
 using Microsoft.Extensions.Hosting;
 using ILogger = Serilog.ILogger;
@@ -17,6 +18,7 @@ public sealed class StoreOperationBackgroundService : HostReadyBackgroundService
 	private readonly IStoreOperationStore _operationStore;
 	private readonly IStoreOperationTracker _tracker;
 	private readonly IStoreInstallExecutor _executor;
+	private readonly IStoreUpdateDetector _updateDetector;
 	private readonly ILogger _logger;
 
 	public StoreOperationBackgroundService(IHostApplicationLifetime lifetime,
@@ -25,6 +27,7 @@ public sealed class StoreOperationBackgroundService : HostReadyBackgroundService
 		IStoreOperationStore operationStore,
 		IStoreOperationTracker tracker,
 		IStoreInstallExecutor executor,
+		IStoreUpdateDetector updateDetector,
 		ILogger logger)
 		: base(lifetime)
 	{
@@ -33,6 +36,7 @@ public sealed class StoreOperationBackgroundService : HostReadyBackgroundService
 		_operationStore = operationStore;
 		_tracker = tracker;
 		_executor = executor;
+		_updateDetector = updateDetector;
 		_logger = logger.ForContext<StoreOperationBackgroundService>();
 	}
 
@@ -55,6 +59,10 @@ public sealed class StoreOperationBackgroundService : HostReadyBackgroundService
 			try
 			{
 				await _executor.Execute(operationId, cts.Token);
+				if (_tracker.Find(operationId)?.State is StoreOperationState.Completed)
+				{
+					_updateDetector.Check();
+				}
 			}
 			catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
 			{

@@ -60,7 +60,7 @@ public sealed class PreUpdateBackupCoordinator : IPreUpdateBackupCoordinator
 			bool alreadyBackedUp;
 			lock (_sync)
 			{
-				alreadyBackedUp = !_backedUpBatchIds.Add(batchId);
+				alreadyBackedUp = _backedUpBatchIds.Contains(batchId);
 			}
 
 			if (alreadyBackedUp)
@@ -73,8 +73,17 @@ public sealed class PreUpdateBackupCoordinator : IPreUpdateBackupCoordinator
 		}
 
 		var request = new CreateBackupRequest(BackupTrigger.BeforePluginUpdate, $"Before installing {pluginId}");
+		var outcome = await CreateBackup(request, cancellationToken);
 
-		return await CreateBackup(request, cancellationToken);
+		if (batchId is not null && outcome.Success)
+		{
+			lock (_sync)
+			{
+				_backedUpBatchIds.Add(batchId);
+			}
+		}
+
+		return outcome;
 	}
 
 	private async Task<PreUpdateBackupOutcome> CreateBackup(CreateBackupRequest request,
