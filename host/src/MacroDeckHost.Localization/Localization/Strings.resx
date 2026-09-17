@@ -6054,6 +6054,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Keyboard.Actions.TypeTextPlaceholder" xml:space="preserve">
     <value>Hello World</value>
   </data>
+  <data name="Integrations.Keyboard.Config.HoldTargetModeDescription" xml:space="preserve">
+    <value>How to deliver the key when a target application is set. Only when focused holds the key only if the app is focused when the action runs; the key then stays held until it is released. Background holds it inside the app without focusing it. This is best effort: some platforms cannot hold modifier keys this way, and a modifier held in the background does not apply to Press Key or key sequences. Release Key releases the key wherever it is held.</value>
+  </data>
   <data name="Integrations.Keyboard.Config.TargetModeBackgroundOption" xml:space="preserve">
     <value>Send in background (best-effort, not games)</value>
   </data>

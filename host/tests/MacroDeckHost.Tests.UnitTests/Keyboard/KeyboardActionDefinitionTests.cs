@@ -33,11 +33,23 @@ public class KeyboardActionDefinitionTests
 		});
 	}
 
-	[TestCase("key-down")]
-	[TestCase("key-up")]
-	public void Hold_and_release_stay_global(string actionId)
+	[Test]
+	public void Hold_key_offers_a_target_without_focus_then_send()
 	{
-		var action = new KeyboardInputIntegration().Actions.Single(a => a.Id == actionId);
+		var action = new KeyboardInputIntegration().Actions.Single(a => a.Id == "key-down");
+		var targetMode = action.Parameters.Single(p => p.Name == "targetMode");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(action.Parameters.Select(p => p.Name), Does.Contain("targetProcess"));
+			Assert.That(targetMode.Options!.Select(o => o.Value), Is.EquivalentTo(new[] { "focused", "background" }));
+		});
+	}
+
+	[Test]
+	public void Release_key_needs_no_target_because_it_releases_wherever_the_key_is_held()
+	{
+		var action = new KeyboardInputIntegration().Actions.Single(a => a.Id == "key-up");
 		Assert.That(action.Parameters.Select(p => p.Name), Does.Not.Contain("targetProcess"));
 	}
 }

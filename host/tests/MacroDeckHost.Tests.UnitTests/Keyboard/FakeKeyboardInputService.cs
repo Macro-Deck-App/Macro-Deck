@@ -21,6 +21,10 @@ internal sealed class FakeKeyboardInputService : IKeyboardInputService
 
 	public KeyboardTarget LastSessionTarget { get; private set; }
 
+	public KeyboardTarget LastHoldTarget { get; private set; }
+
+	public KeyboardSessionUnavailableReason? HoldUnavailableReason { get; set; }
+
 	public Task RequestPermissionAsync(CancellationToken cancellationToken = default)
 	{
 		Calls.Add("requestPermission");
@@ -48,6 +52,21 @@ internal sealed class FakeKeyboardInputService : IKeyboardInputService
 	{
 		Calls.Add($"down:{modifiers}+{key}");
 		return Task.CompletedTask;
+	}
+
+	public Task<KeyboardSessionUnavailableReason?> KeyDownAsync(
+		KeyModifier modifiers,
+		KeyCode key,
+		KeyboardTarget target,
+		CancellationToken cancellationToken = default)
+	{
+		LastHoldTarget = target;
+		if (HoldUnavailableReason is null)
+		{
+			Calls.Add($"down:{modifiers}+{key}");
+		}
+
+		return Task.FromResult(HoldUnavailableReason);
 	}
 
 	public Task KeyUpAsync(KeyModifier modifiers, KeyCode key, CancellationToken cancellationToken = default)
@@ -97,6 +116,12 @@ internal sealed class FakeKeyboardInputService : IKeyboardInputService
 			_owner.Calls.Add($"text:{text}");
 			return Task.CompletedTask;
 		}
+
+		public Task KeyDownAsync(KeyModifier modifiers, KeyCode key, CancellationToken cancellationToken = default)
+			=> _owner.KeyDownAsync(modifiers, key, cancellationToken);
+
+		public Task KeyUpAsync(KeyModifier modifiers, KeyCode key, CancellationToken cancellationToken = default)
+			=> _owner.KeyUpAsync(modifiers, key, cancellationToken);
 
 		public void Dispose()
 		{

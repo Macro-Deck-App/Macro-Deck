@@ -6054,6 +6054,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Keyboard.Actions.TypeTextPlaceholder" xml:space="preserve">
     <value>Witaj świecie</value>
   </data>
+  <data name="Integrations.Keyboard.Config.HoldTargetModeDescription" xml:space="preserve">
+    <value>Sposób dostarczenia klawisza, gdy ustawiono aplikację docelową. Dostarczanie tylko przy aktywnej aplikacji przytrzymuje klawisz tylko wtedy, gdy aplikacja jest aktywna w chwili uruchomienia akcji; klawisz pozostaje wtedy przytrzymany do zwolnienia. Dostarczanie w tle przytrzymuje klawisz w aplikacji bez jej aktywowania. Działa to w miarę możliwości: niektóre platformy nie mogą w ten sposób przytrzymać klawiszy modyfikujących, a modyfikator przytrzymany w tle nie działa w akcji „Naciśnij klawisz / kombinację” ani w sekwencjach klawiszy. Akcja „Zwolnij klawisz” zwalnia klawisz wszędzie, gdzie jest przytrzymany.</value>
+  </data>
   <data name="Integrations.Keyboard.Config.TargetModeBackgroundOption" xml:space="preserve">
     <value>Wyślij w tle (bez gwarancji, nie dla gier)</value>
   </data>

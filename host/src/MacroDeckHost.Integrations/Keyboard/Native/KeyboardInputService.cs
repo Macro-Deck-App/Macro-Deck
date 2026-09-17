@@ -11,6 +11,7 @@ public sealed class KeyboardInputService : IKeyboardInputService
 
 	private readonly Lock _gate = new();
 	private readonly HashSet<KeyCode> _heldKeys = [];
+	private readonly Dictionary<string, BackgroundHold> _backgroundHolds = new(StringComparer.OrdinalIgnoreCase);
 
 	public KeyboardInputService(IKeyboardInputProvider provider, IKeyboardLayoutService layout, ILogger? logger = null)
 	{
@@ -58,13 +59,23 @@ public sealed class KeyboardInputService : IKeyboardInputService
 				cancellationToken.ThrowIfCancellationRequested();
 				lock (_gate)
 				{
-					foreach (var modifierKey in _layout.ExpandModifiers(modifiers))
-					{
-						HoldKey(modifierKey);
-					}
-
-					HoldKey(key);
+					HoldGlobally(modifiers, key);
 				}
+			},
+			cancellationToken);
+	}
+
+	public Task<KeyboardSessionUnavailableReason?> KeyDownAsync(
+		KeyModifier modifiers,
+		KeyCode key,
+		KeyboardTarget target,
+		CancellationToken cancellationToken = default)
+	{
+		EnsureSupported();
+		return Task.Run(() =>
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+				return Hold(modifiers, key, target);
 			},
 			cancellationToken);
 	}
@@ -104,6 +115,13 @@ public sealed class KeyboardInputService : IKeyboardInputService
 					}
 
 					_heldKeys.Clear();
+
+					foreach (var hold in _backgroundHolds.Values)
+					{
+						hold.ReleaseAll();
+					}
+
+					_backgroundHolds.Clear();
 				}
 			},
 			cancellationToken);
@@ -260,6 +278,110 @@ public sealed class KeyboardInputService : IKeyboardInputService
 		}
 	}
 
+	private KeyboardSessionUnavailableReason? Hold(KeyModifier modifiers, KeyCode key, KeyboardTarget target)
+	{
+		if (!target.HasProcess)
+		{
+			lock (_gate)
+			{
+				HoldGlobally(modifiers, key);
+			}
+
+			return null;
+		}
+
+		switch (target.Mode)
+		{
+			case KeyboardTargetMode.WhenFocused:
+			{
+				if (!_provider.SupportsWindowTargeting)
+				{
+					WarnUnsupported(target, "only-when-focused");
+					return KeyboardSessionUnavailableReason.Unsupported;
+				}
+
+				if (!KeyboardProcessName.Matches(_provider.GetForegroundProcessName(), target.ProcessName))
+				{
+					return KeyboardSessionUnavailableReason.NotFocused;
+				}
+
+				lock (_gate)
+				{
+					HoldGlobally(modifiers, key);
+				}
+
+				return null;
+			}
+
+			case KeyboardTargetMode.Background:
+			{
+				if (!_provider.SupportsBackgroundSend)
+				{
+					WarnUnsupported(target, "background");
+					return KeyboardSessionUnavailableReason.Unsupported;
+				}
+
+				lock (_gate)
+				{
+					return HoldInBackground(modifiers, key, target);
+				}
+			}
+
+			default:
+				WarnUnsupported(target, "focus-then-send");
+				return KeyboardSessionUnavailableReason.Unsupported;
+		}
+	}
+
+	private KeyboardSessionUnavailableReason? HoldInBackground(
+		KeyModifier modifiers,
+		KeyCode key,
+		KeyboardTarget target)
+	{
+		var processKey = KeyboardProcessName.Normalize(target.ProcessName);
+		var isNew = !_backgroundHolds.TryGetValue(processKey, out var hold);
+		if (hold is null)
+		{
+			var window = _provider.ResolveTarget(target.ProcessName);
+			if (window is null)
+			{
+				DebugUnresolved(target);
+				return KeyboardSessionUnavailableReason.TargetNotFound;
+			}
+
+			hold = new BackgroundHold(window);
+		}
+
+		if (KeyboardBackgroundDelivery.ModifiersCannotBeDelivered(this, target, modifiers, key))
+		{
+			if (isNew)
+			{
+				hold.Window.Dispose();
+			}
+
+			return KeyboardSessionUnavailableReason.BackgroundModifiersUnsupported;
+		}
+
+		_backgroundHolds[processKey] = hold;
+		foreach (var modifierKey in _layout.ExpandModifiers(modifiers))
+		{
+			hold.Hold(modifierKey);
+		}
+
+		hold.Hold(key);
+		return null;
+	}
+
+	private void HoldGlobally(KeyModifier modifiers, KeyCode key)
+	{
+		foreach (var modifierKey in _layout.ExpandModifiers(modifiers))
+		{
+			HoldKey(modifierKey);
+		}
+
+		HoldKey(key);
+	}
+
 	private void HoldKey(KeyCode key)
 	{
 		if (key == KeyCode.None)
@@ -273,12 +395,26 @@ public sealed class KeyboardInputService : IKeyboardInputService
 
 	private void ReleaseKey(KeyCode key)
 	{
-		if (key == KeyCode.None || !_heldKeys.Remove(key))
+		if (key == KeyCode.None)
 		{
 			return;
 		}
 
-		_provider.KeyUp(key);
+		if (_heldKeys.Remove(key))
+		{
+			_provider.KeyUp(key);
+		}
+
+		foreach (var (processKey, hold) in _backgroundHolds.ToArray())
+		{
+			if (!hold.Release(key) || !hold.IsEmpty)
+			{
+				continue;
+			}
+
+			hold.Window.Dispose();
+			_backgroundHolds.Remove(processKey);
+		}
 	}
 
 	private void WarnUnsupported(KeyboardTarget target, string mode)
@@ -302,12 +438,60 @@ public sealed class KeyboardInputService : IKeyboardInputService
 
 	private readonly record struct Emitter(Action<KeyCode> Down, Action<KeyCode> Up, Action<string> Type);
 
+	private sealed class BackgroundHold
+	{
+		private readonly HashSet<KeyCode> _keys = [];
+
+		public BackgroundHold(IKeyboardTargetWindow window)
+		{
+			Window = window;
+		}
+
+		public IKeyboardTargetWindow Window { get; }
+
+		public bool IsEmpty => _keys.Count == 0;
+
+		public void Hold(KeyCode key)
+		{
+			if (key == KeyCode.None)
+			{
+				return;
+			}
+
+			Window.KeyDown(key);
+			_keys.Add(key);
+		}
+
+		public bool Release(KeyCode key)
+		{
+			if (!_keys.Remove(key))
+			{
+				return false;
+			}
+
+			Window.KeyUp(key);
+			return true;
+		}
+
+		public void ReleaseAll()
+		{
+			foreach (var key in _keys)
+			{
+				Window.KeyUp(key);
+			}
+
+			_keys.Clear();
+			Window.Dispose();
+		}
+	}
+
 	private sealed class Session : IKeyboardInputSession
 	{
 		private readonly KeyboardInputService _owner;
 		private readonly Emitter _emitter;
 		private readonly IKeyboardTargetWindow? _window;
 		private readonly IDisposable? _focus;
+		private readonly HashSet<KeyCode> _heldInWindow = [];
 
 		public Session(
 			KeyboardInputService owner,
@@ -321,6 +505,8 @@ public sealed class KeyboardInputService : IKeyboardInputService
 			_focus = focus;
 		}
 
+		private bool HoldsInWindow => _window is not null && _focus is null;
+
 		public Task PressComboAsync(
 			KeyModifier modifiers,
 			KeyCode key,
@@ -332,10 +518,87 @@ public sealed class KeyboardInputService : IKeyboardInputService
 		public Task TypeTextAsync(string text, CancellationToken cancellationToken = default)
 			=> _owner.RunTypeTextAsync(_emitter, text, cancellationToken);
 
+		public Task KeyDownAsync(KeyModifier modifiers, KeyCode key, CancellationToken cancellationToken = default)
+		{
+			if (!HoldsInWindow)
+			{
+				return _owner.KeyDownAsync(modifiers, key, cancellationToken);
+			}
+
+			return Task.Run(() =>
+				{
+					cancellationToken.ThrowIfCancellationRequested();
+					lock (_owner._gate)
+					{
+						foreach (var modifierKey in _owner._layout.ExpandModifiers(modifiers))
+						{
+							HoldInWindow(modifierKey);
+						}
+
+						HoldInWindow(key);
+					}
+				},
+				cancellationToken);
+		}
+
+		public Task KeyUpAsync(KeyModifier modifiers, KeyCode key, CancellationToken cancellationToken = default)
+		{
+			if (!HoldsInWindow)
+			{
+				return _owner.KeyUpAsync(modifiers, key, cancellationToken);
+			}
+
+			return Task.Run(() =>
+				{
+					cancellationToken.ThrowIfCancellationRequested();
+					lock (_owner._gate)
+					{
+						ReleaseInWindow(key);
+						foreach (var modifierKey in _owner._layout.ExpandModifiers(modifiers))
+						{
+							ReleaseInWindow(modifierKey);
+						}
+					}
+				},
+				cancellationToken);
+		}
+
 		public void Dispose()
 		{
+			lock (_owner._gate)
+			{
+				foreach (var key in _heldInWindow)
+				{
+					_emitter.Up(key);
+				}
+
+				_heldInWindow.Clear();
+			}
+
 			_focus?.Dispose();
 			_window?.Dispose();
+		}
+
+		private void HoldInWindow(KeyCode key)
+		{
+			if (key == KeyCode.None)
+			{
+				return;
+			}
+
+			_emitter.Down(key);
+			_heldInWindow.Add(key);
+		}
+
+		private void ReleaseInWindow(KeyCode key)
+		{
+			if (_heldInWindow.Remove(key))
+			{
+				_emitter.Up(key);
+				return;
+			}
+
+			_owner.ReleaseKey(key);
 		}
 	}
 }

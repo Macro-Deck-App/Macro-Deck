@@ -24,7 +24,8 @@ internal sealed class KeyDownActionDefinition : IActionDefinition
 		ActionParameter.KeyboardCombo("keys",
 			label: AppStrings.Integrations.Keyboard.Actions.KeyParameterLabel(),
 			description: AppStrings.Integrations.Keyboard.Actions.KeyDownParameterDescription(),
-			required: true)
+			required: true),
+		.. KeyboardTargetParameters.Hold
 	];
 
 	public IActionExecutor CreateExecutor() => new Executor(_input, _layout);
@@ -45,8 +46,21 @@ internal sealed class KeyDownActionDefinition : IActionDefinition
 			var (modifierNames, keyName) = KeyboardActionValues.ReadHotkey(context.Parameters, "keys");
 			var modifiers = _layout.ResolveModifiers(modifierNames);
 			_layout.TryResolveKey(keyName, out var key);
-			await _input.KeyDownAsync(modifiers, key, context.CancellationToken);
-			return ActionResult.Success();
+			if (key == KeyCode.None && modifiers == KeyModifier.None)
+			{
+				return ActionResult.Success();
+			}
+
+			var target = KeyboardActionValues.ReadTarget(context.Parameters);
+			if (target.Mode == KeyboardTargetMode.FocusThenSend)
+			{
+				target = target with { Mode = KeyboardTargetMode.WhenFocused };
+			}
+
+			var unavailable = await _input.KeyDownAsync(modifiers, key, target, context.CancellationToken);
+			return unavailable is null
+				? ActionResult.Success()
+				: KeyboardActionValues.SessionUnavailableResult(unavailable);
 		}
 	}
 }

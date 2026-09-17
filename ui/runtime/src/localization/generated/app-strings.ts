@@ -2491,6 +2491,7 @@ export const AppStrings = {
 				TypeTextPlaceholder: 'macrodeck.app:Integrations.Keyboard.Actions.TypeTextPlaceholder',
 			},
 			Config: {
+				HoldTargetModeDescription: 'macrodeck.app:Integrations.Keyboard.Config.HoldTargetModeDescription',
 				TargetModeBackgroundOption: 'macrodeck.app:Integrations.Keyboard.Config.TargetModeBackgroundOption',
 				TargetModeDescription: 'macrodeck.app:Integrations.Keyboard.Config.TargetModeDescription',
 				TargetModeFocusSendOption: 'macrodeck.app:Integrations.Keyboard.Config.TargetModeFocusSendOption',
@@ -8955,6 +8956,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Integrations.Keyboard.Actions.TypeTextName': 'Type Text',
 	'macrodeck.app:Integrations.Keyboard.Actions.TypeTextParameterDescription': 'The text to type. Supports variables/templates, e.g. {{ vars.name }}.',
 	'macrodeck.app:Integrations.Keyboard.Actions.TypeTextPlaceholder': 'Hello World',
+	'macrodeck.app:Integrations.Keyboard.Config.HoldTargetModeDescription': 'How to deliver the key when a target application is set. Only when focused holds the key only if the app is focused when the action runs; the key then stays held until it is released. Background holds it inside the app without focusing it. This is best effort: some platforms cannot hold modifier keys this way, and a modifier held in the background does not apply to Press Key or key sequences. Release Key releases the key wherever it is held.',
 	'macrodeck.app:Integrations.Keyboard.Config.TargetModeBackgroundOption': 'Send in background (best-effort, not games)',
 	'macrodeck.app:Integrations.Keyboard.Config.TargetModeDescription': 'How to deliver the keystroke when a target application is set. Only when focused skips the keystroke silently while the app is not focused. Background delivery is best effort and on some platforms cannot carry modifier keys. Focusing the app first is the only mode that works for games.',
 	'macrodeck.app:Integrations.Keyboard.Config.TargetModeFocusSendOption': 'Focus the app, then send (works for games)',
