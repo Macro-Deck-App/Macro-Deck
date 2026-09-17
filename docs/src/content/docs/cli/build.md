@@ -113,8 +113,8 @@ job is not failed by platforms it never built.
 ## Single-platform artifacts
 
 A `--rid` artifact's manifest declares only that runtime identifier, so it never claims platforms the job
-did not produce. The CLI does not merge per-runner artifacts; for one package covering every platform, run
-a full build on a machine that can build them all.
+did not produce. To get one package covering every platform from per-runner builds, combine them with
+[`merge`](/cli/merge/).
 
 ## What build changes in the manifest
 
@@ -149,6 +149,7 @@ error rid-not-declared: The manifest does not declare 'win-arm64'. Declared runt
 ## See also
 
 - [`new`](/cli/new/) - scaffold a project with a ready `macrodeck-build.json`.
+- [`merge`](/cli/merge/) - combine `--rid` artifacts into one package.
 - [`pack`](/cli/pack/) - package output you built yourself.
 - [`validate`](/cli/validate/) - check the artifact `build` produced.
 - [Manifest reference](/reference/manifest/).
