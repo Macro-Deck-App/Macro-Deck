@@ -1,8 +1,9 @@
 # Documentation Site
 
-`docs/` is the Astro/Starlight project published at <https://docs.macro-deck.app>. It has two topics, each with its own sidebar in [`astro.config.mjs`](astro.config.mjs):
+`docs/` is the Astro/Starlight project published at <https://docs.macro-deck.app>. It has three topics, each with its own sidebar in [`astro.config.mjs`](astro.config.mjs):
 
 - **User guide** (`src/content/docs/guide/`): installing, setting up and using Macro Deck, for people who use it.
+- **Creator Portal** (`src/content/docs/creator-portal/`): publishing plugins and icon packs to the Store through the Creator Portal.
 - **Plugin development** (everything else): public plugin, SDK, CLI, protocol, and compatibility documentation. It documents extending Macro Deck from the outside - documentation for built-in integrations and for contributing one lives in [`engineering/`](../engineering/).
 
 A new page must be listed in one topic's sidebar, or the build fails.
@@ -54,3 +55,10 @@ Things that cost time before:
 - A parallel `npm run build` can leave `npm run dev` serving stale pages; restart the dev server.
 
 Brand assets should be updated from the Macro Deck Branding repository rather than edited independently here.
+## Creator Portal screenshots
+
+Screenshots under `src/assets/creator-portal/` are captures of the Creator Portal in the Platform repository's mock mode (`docs/development/mock-mode.md` there), so no real account, GitHub App or storage is involved.
+
+1. Run the API with `--MockMode=true` against a throwaway PostgreSQL database, and the portal with `ng serve developer-portal --ssl=false`.
+2. Build the example state through the API with `Authorization: Bearer mock:mock-creator:`: create the Projects, connect `mock-creator/sample-plugin`, `POST /api/v1/mock/projects/{id}/builds` for a build, then create and submit the Version.
+3. Capture with `node screenshots/guide.mjs`. Set `localStorage['macrodeck.mock-persona']` first, and hide what only mock mode shows in every shot: `md-creator-mock-bar` and the **Simulate release** button.

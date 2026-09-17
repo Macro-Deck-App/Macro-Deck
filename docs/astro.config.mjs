@@ -248,6 +248,34 @@ export default defineConfig({
 								},
 							],
 						},
+						{
+							id: 'creator-portal',
+							label: 'Creator Portal',
+							link: '/creator-portal/',
+							icon: 'rocket',
+							items: [
+								{
+									label: 'Get started',
+									items: [
+										{ label: 'Overview', slug: 'creator-portal' },
+										'creator-portal/projects',
+									],
+								},
+								{
+									label: 'Publish',
+									items: [
+										'creator-portal/publish-plugin',
+										'creator-portal/publish-icon-pack',
+										'creator-portal/review',
+										'creator-portal/testers',
+									],
+								},
+								{
+									label: 'Reference',
+									items: ['creator-portal/release-workflow'],
+								},
+							],
+						},
 					],
 					// starlight-openapi injects these pages, so they are listed in no topic's items.
 					{ topics: { developers: ['/reference/rest/**'] } },
