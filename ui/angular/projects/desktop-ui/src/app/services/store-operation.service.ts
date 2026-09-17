@@ -1,5 +1,5 @@
 import { Injectable, Signal, computed, effect, inject, signal } from '@angular/core';
-import { AppStrings, StoreExtensionKind, StoreOperationBody, UninstallStoreExtensionResponse } from '@macro-deck/runtime';
+import { AppStrings, StoreExtensionKind, StoreOperationActionResponse, StoreOperationBody, UninstallStoreExtensionResponse } from '@macro-deck/runtime';
 import { ApiService, LocalizationService } from '@shared';
 import { isTerminalStoreOperationState } from '../util/store-operation-display';
 
@@ -99,6 +99,14 @@ export class StoreOperationService {
       this.upsert(response.operation);
     }
     return response.operation ?? null;
+  }
+
+  async installTestBuild(packageId: string, buildId: string): Promise<StoreOperationActionResponse> {
+    const response = await this.api.installStoreTestBuild(packageId, buildId);
+    if (response.operation) {
+      this.upsert(response.operation);
+    }
+    return response;
   }
 
   async retry(operationId: string): Promise<StoreOperationBody | null> {

@@ -22,5 +22,9 @@ public enum StoreOperationError
 	InstallFailed,
 	Interrupted,
 	Cancelled,
-	InstallBlockedByTakeover
+	InstallBlockedByTakeover,
+	SignInRequired,
+	TestBuildUnavailable,
+	TestConsentRequired,
+	TestBuildMismatch
 }

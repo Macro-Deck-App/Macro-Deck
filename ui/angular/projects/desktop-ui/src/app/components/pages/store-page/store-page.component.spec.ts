@@ -617,6 +617,17 @@ describe('StorePageComponent', () => {
       });
     }
 
+    it('lets a signed-in account without the StoreTester role open its tests from the overlay', async () => {
+      await createFixture();
+      expect(findButton(translate(AppStrings.Store.Page.ComingSoonTestsAction))).toBeUndefined();
+
+      await sessionIs('signedIn', []);
+      findButton(translate(AppStrings.Store.Page.ComingSoonTestsAction))!.click();
+
+      expect(comingSoonShown()).toBeTrue();
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/store/tests']);
+    });
+
     it('opens the store for a signed-in StoreTester account', async () => {
       await createFixture();
       await sessionIs('signedIn', ['StoreTester']);

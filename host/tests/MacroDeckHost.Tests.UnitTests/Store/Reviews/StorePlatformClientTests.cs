@@ -245,6 +245,75 @@ internal sealed class StorePlatformClientTests
 		});
 	}
 
+	[Test]
+	public async Task Tests_are_read_for_the_signed_in_account_with_its_bearer_token()
+	{
+		var buildId = Guid.NewGuid();
+		_handler.Respond = _ => Json(new[]
+		{
+			new
+			{
+				packageId = "com.acme.hue",
+				displayName = "Hue",
+				joinedAt = DateTimeOffset.UnixEpoch,
+				builds = new[]
+				{
+					new
+					{
+						id = buildId,
+						version = "1.2.0",
+						build = "42",
+						changelog = "Fixes",
+						fileName = "hue.macroDeckPlugin",
+						sha256 = new string('a', 64),
+						sizeInBytes = 1024,
+						uploadedAt = DateTimeOffset.UnixEpoch,
+						availableAt = DateTimeOffset.UnixEpoch
+					}
+				}
+			}
+		});
+
+		var result = await _client.GetTests();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True);
+			Assert.That(result.Value!.Single().Builds.Single().Id, Is.EqualTo(buildId));
+			Assert.That(_handler.Requests.Single().Method, Is.EqualTo("GET"));
+			Assert.That(_handler.Requests.Single().Uri.AbsolutePath, Is.EqualTo("/api/v1/store/tests"));
+			Assert.That(_handler.Requests.Single().Authorization, Is.EqualTo("Bearer access-token"));
+		});
+	}
+
+	[Test]
+	public async Task A_test_build_link_is_asked_for_by_package_and_build_and_never_while_signed_out()
+	{
+		var buildId = Guid.NewGuid();
+		_handler.Respond = _ => Json(new
+		{
+			url = "https://staging.example/hue.macroDeckPlugin",
+			fileName = "hue.macroDeckPlugin",
+			sha256 = new string('b', 64),
+			sizeInBytes = 2048,
+			expiresAt = DateTimeOffset.UnixEpoch
+		});
+
+		var link = await _client.GetTestBuildDownload("com.acme.hue", buildId);
+		_session.Current = ConnectSessionSnapshot.SignedOut;
+		var signedOut = await _client.GetTestBuildDownload("com.acme.hue", buildId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(link.Value!.Url, Is.EqualTo(new Uri("https://staging.example/hue.macroDeckPlugin")));
+			Assert.That(_handler.Requests.Single().Method, Is.EqualTo("POST"));
+			Assert.That(_handler.Requests.Single().Uri.AbsolutePath,
+				Is.EqualTo($"/api/v1/store/tests/com.acme.hue/builds/{buildId:D}/download"));
+			Assert.That(signedOut.Failure, Is.EqualTo(StorePlatformFailure.SignInRequired));
+			Assert.That(_handler.Requests, Has.Count.EqualTo(1), "a signed-out account asks nothing");
+		});
+	}
+
 	private static HttpResponseMessage Json(object value, HttpStatusCode status = HttpStatusCode.OK) =>
 		new(status)
 		{

@@ -146,6 +146,12 @@
     <shared-empty-state
       icon="store"
       [heading]="'macrodeck.app:Store.Page.ComingSoonHeading' | translate"
-      [message]="'macrodeck.app:Store.Page.ComingSoonMessage' | translate" />
+      [message]="'macrodeck.app:Store.Page.ComingSoonMessage' | translate">
+      @if (signedIn()) {
+        <shared-button variant="secondary" (click)="openTests()">
+          {{ 'macrodeck.app:Store.Page.ComingSoonTestsAction' | translate }}
+        </shared-button>
+      }
+    </shared-empty-state>
   </div>
 }

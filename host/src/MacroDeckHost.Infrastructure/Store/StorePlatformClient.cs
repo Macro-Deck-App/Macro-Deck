@@ -208,6 +208,28 @@ public sealed class StorePlatformClient : IStorePlatformClient, IDisposable
 		return StorePlatformResult.Ok<IReadOnlyDictionary<string, StoreEntitlementClaimStatus>>(merged);
 	}
 
+	public async Task<StorePlatformResult<IReadOnlyList<StorePlatformTest>>> GetTests(
+		CancellationToken cancellationToken = default)
+	{
+		var result = await Send<List<StorePlatformTest>>(HttpMethod.Get,
+			"api/v1/store/tests",
+			content: null,
+			authenticated: true,
+			cancellationToken);
+		return result.Success
+			? StorePlatformResult.Ok<IReadOnlyList<StorePlatformTest>>(result.Value)
+			: StorePlatformResult.Fail<IReadOnlyList<StorePlatformTest>>(result.Failure, result.RetryAfter, result.Field);
+	}
+
+	public Task<StorePlatformResult<StorePlatformTestBuildDownload>> GetTestBuildDownload(string packageId,
+		Guid buildId,
+		CancellationToken cancellationToken = default) =>
+		Send<StorePlatformTestBuildDownload>(HttpMethod.Post,
+			$"api/v1/store/tests/{Uri.EscapeDataString(packageId)}/builds/{buildId:D}/download",
+			content: null,
+			authenticated: true,
+			cancellationToken);
+
 	private async Task<StorePlatformResult<T>> Send<T>(HttpMethod method,
 		string relativeUrl,
 		HttpContent? content,

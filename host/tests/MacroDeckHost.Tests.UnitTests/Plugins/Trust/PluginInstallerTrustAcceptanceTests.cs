@@ -188,6 +188,15 @@ internal sealed class PluginInstallerTrustAcceptanceTests
 				var url = new Uri($"https://plugins.example/{Path.GetFileName(artifactPath)}");
 				return await _installer.Install(PluginArtifactSource.FromUrl(url), request);
 			}
+			case PluginArtifactSourceKind.TestBuild:
+			{
+				var bytes = await File.ReadAllBytesAsync(artifactPath);
+				_httpClientFactory.Body = bytes;
+				var url = new Uri($"https://staging.example/{Path.GetFileName(artifactPath)}");
+				return await _installer.Install(PluginArtifactSource.FromTestBuild(url,
+						"sha256:" + Convert.ToHexStringLower(global::System.Security.Cryptography.SHA256.HashData(bytes))),
+					request);
+			}
 			default:
 				throw new NotSupportedException(kind.ToString());
 		}

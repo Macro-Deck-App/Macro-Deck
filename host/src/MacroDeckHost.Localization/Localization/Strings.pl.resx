@@ -14051,6 +14051,18 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Error.Unsupported" xml:space="preserve">
     <value>To rozszerzenie nie obsługuje tej platformy.</value>
   </data>
+  <data name="Store.Error.SignInRequired" xml:space="preserve">
+    <value>Do instalacji wymagane jest zalogowanie się na konto Macro Deck Connect.</value>
+  </data>
+  <data name="Store.Error.TestBuildUnavailable" xml:space="preserve">
+    <value>Ta kompilacja testowa nie jest już dostępna.</value>
+  </data>
+  <data name="Store.Error.TestConsentRequired" xml:space="preserve">
+    <value>Instalację kompilacji testowej trzeba najpierw potwierdzić.</value>
+  </data>
+  <data name="Store.Error.TestBuildMismatch" xml:space="preserve">
+    <value>Pobrany plik nie odpowiadał oferowanej kompilacji testowej, dlatego nie został zainstalowany.</value>
+  </data>
   <data name="Store.EtaMinutesLeft.One" xml:space="preserve">
     <value>pozostało około {count} min</value>
     <comment>[plural][count:int] Remaining download time, a minute or more.</comment>
@@ -14166,6 +14178,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Store.Page.ComingSoonMessage" xml:space="preserve">
     <value>Trwają jeszcze prace. Wtyczki i paczki ikon pojawią się tutaj w jednej z przyszłych aktualizacji.</value>
+  </data>
+  <data name="Store.Page.ComingSoonTestsAction" xml:space="preserve">
+    <value>Otwórz testy</value>
   </data>
   <data name="Store.Page.CompatibilityField" xml:space="preserve">
     <value>Zgodność</value>
@@ -17353,5 +17368,81 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Store.Reviews.Error.PlatformUnavailable" xml:space="preserve">
     <value>Nie udało się połączyć z ocenami. Spróbuj ponownie później.</value>
+  </data>
+  <data name="Store.Tests.Title" xml:space="preserve">
+    <value>Testy</value>
+    <comment>Tab and heading for the test builds a creator invited the user to try before review.</comment>
+  </data>
+  <data name="Store.Tests.Intro" xml:space="preserve">
+    <value>Kompilacje od twórców, którzy zaprosili to konto do testowania swoich wtyczek. Macro Deck jeszcze ich nie sprawdził.</value>
+  </data>
+  <data name="Store.Tests.Loading" xml:space="preserve">
+    <value>Wczytywanie testów…</value>
+  </data>
+  <data name="Store.Tests.EmptyHeading" xml:space="preserve">
+    <value>Brak testów</value>
+  </data>
+  <data name="Store.Tests.EmptyMessage" xml:space="preserve">
+    <value>Zaproszenie do testowania wtyczki przychodzi e-mailem. Po jego zaakceptowaniu w Creator Portal kompilacje pojawią się tutaj.</value>
+  </data>
+  <data name="Store.Tests.SignInHeading" xml:space="preserve">
+    <value>Zaloguj się, aby zobaczyć testy</value>
+  </data>
+  <data name="Store.Tests.SignInMessage" xml:space="preserve">
+    <value>Aby zobaczyć kompilacje, do których testowania przyszło zaproszenie, należy ponownie zalogować się przez Macro Deck Connect.</value>
+  </data>
+  <data name="Store.Tests.SuspendedHeading" xml:space="preserve">
+    <value>Testy są niedostępne</value>
+  </data>
+  <data name="Store.Tests.SuspendedMessage" xml:space="preserve">
+    <value>Konto Macro Deck Connect jest zawieszone.</value>
+  </data>
+  <data name="Store.Tests.UnavailableHeading" xml:space="preserve">
+    <value>Nie udało się wczytać testów</value>
+  </data>
+  <data name="Store.Tests.UnavailableMessage" xml:space="preserve">
+    <value>Macro Deck Platform jest nieosiągalna. Spróbuj ponownie za chwilę.</value>
+  </data>
+  <data name="Store.Tests.RateLimitedMessage" xml:space="preserve">
+    <value>Wysłano zbyt wiele żądań. Odczekaj chwilę i spróbuj ponownie.</value>
+  </data>
+  <data name="Store.Tests.InstalledVersion" xml:space="preserve">
+    <value>Zainstalowano: {version}</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Store.Tests.BuildsAriaLabel" xml:space="preserve">
+    <value>Kompilacje testowe: {name}</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Store.Tests.BuildLabel" xml:space="preserve">
+    <value>Kompilacja {build}</value>
+    <comment>[build:string]</comment>
+  </data>
+  <data name="Store.Tests.AvailableSince" xml:space="preserve">
+    <value>Opublikowano {time}</value>
+    <comment>[time:string] time is a relative time such as "3 days ago" or "just now".</comment>
+  </data>
+  <data name="Store.Tests.InstallTestBuild" xml:space="preserve">
+    <value>Zainstaluj kompilację testową</value>
+  </data>
+  <data name="Store.Tests.ShowChangelog" xml:space="preserve">
+    <value>Pokaż zmiany</value>
+  </data>
+  <data name="Store.Tests.HideChangelog" xml:space="preserve">
+    <value>Ukryj zmiany</value>
+  </data>
+  <data name="Store.Tests.InstallFailed" xml:space="preserve">
+    <value>Nie udało się zainstalować kompilacji testowej.</value>
+  </data>
+  <data name="Store.Tests.ConfirmHeading" xml:space="preserve">
+    <value>Zainstalować niesprawdzoną kompilację?</value>
+  </data>
+  <data name="Store.Tests.ConfirmMessage" xml:space="preserve">
+    <value>{name} {version} (kompilacja {build}) nie została sprawdzona przez Macro Deck. Pochodzi bezpośrednio od twórcy wtyczki i może działać niestabilnie.</value>
+    <comment>[name:string][version:string][build:string]</comment>
+  </data>
+  <data name="Store.Tests.ConfirmReplaceMessage" xml:space="preserve">
+    <value>{name} {version} (kompilacja {build}) nie została sprawdzona przez Macro Deck. Pochodzi bezpośrednio od twórcy wtyczki, może działać niestabilnie i zastąpi zainstalowaną wersję {installedVersion}.</value>
+    <comment>[name:string][version:string][build:string][installedVersion:string]</comment>
   </data>
 </root>

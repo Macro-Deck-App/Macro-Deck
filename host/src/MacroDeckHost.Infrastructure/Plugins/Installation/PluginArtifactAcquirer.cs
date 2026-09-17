@@ -87,7 +87,8 @@ public sealed class PluginArtifactAcquirer : IPluginArtifactAcquirer
 				stagingDirectory,
 				cancellationToken),
 			PluginArtifactSourceKind.Upload => await AcquireUpload(source, stagingDirectory, cancellationToken),
-			PluginArtifactSourceKind.Url => await AcquireUrl(source, stagingDirectory, cancellationToken),
+			PluginArtifactSourceKind.Url or PluginArtifactSourceKind.TestBuild =>
+				await AcquireUrl(source, stagingDirectory, cancellationToken),
 			_ => PluginArtifactAcquisition.Fail(PluginInstallError.Failed,
 				$"Unknown artifact source kind '{source.Kind}'.")
 		};
@@ -265,7 +266,7 @@ public sealed class PluginArtifactAcquirer : IPluginArtifactAcquirer
 					$"The downloaded artifact hashes to '{sha256}', not the expected '{expected}'.");
 			}
 
-			return PluginArtifactAcquisition.Ok(stagedPath, sha256, hostOwned: true, PluginArtifactSourceKind.Url);
+			return PluginArtifactAcquisition.Ok(stagedPath, sha256, hostOwned: true, source.Kind);
 		}
 		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
 		{

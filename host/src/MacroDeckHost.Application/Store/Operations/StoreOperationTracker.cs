@@ -42,7 +42,8 @@ public sealed class StoreOperationTracker : IStoreOperationTracker
 		string version,
 		string displayName,
 		string? previousVersion,
-		Guid? retryOf = null)
+		Guid? retryOf = null,
+		StoreTestBuildReference? testBuild = null)
 	{
 		var now = _timeProvider.GetUtcNow();
 		var operation = new StoreOperation
@@ -57,7 +58,9 @@ public sealed class StoreOperationTracker : IStoreOperationTracker
 			State = StoreOperationState.Queued,
 			StartedAt = now,
 			UpdatedAt = now,
-			RetryOf = retryOf
+			RetryOf = retryOf,
+			TestBuildId = testBuild?.BuildId,
+			TestBuild = testBuild?.Build
 		};
 
 		_operations[operation.Id] = operation;

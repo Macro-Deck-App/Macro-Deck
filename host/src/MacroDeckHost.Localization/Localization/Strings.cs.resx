@@ -14051,6 +14051,18 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Error.Unsupported" xml:space="preserve">
     <value>Toto rozšíření tuto platformu nepodporuje.</value>
   </data>
+  <data name="Store.Error.SignInRequired" xml:space="preserve">
+    <value>Pro instalaci je nutné se přihlásit k účtu Macro Deck Connect.</value>
+  </data>
+  <data name="Store.Error.TestBuildUnavailable" xml:space="preserve">
+    <value>Toto testovací sestavení již není k dispozici.</value>
+  </data>
+  <data name="Store.Error.TestConsentRequired" xml:space="preserve">
+    <value>Instalaci testovacího sestavení je nutné nejprve potvrdit.</value>
+  </data>
+  <data name="Store.Error.TestBuildMismatch" xml:space="preserve">
+    <value>Stažený soubor neodpovídal nabízenému testovacímu sestavení, proto nebyl nainstalován.</value>
+  </data>
   <data name="Store.EtaMinutesLeft.One" xml:space="preserve">
     <value>zbývá přibližně {count} min</value>
     <comment>[plural][count:int] Remaining download time, a minute or more.</comment>
@@ -14166,6 +14178,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Store.Page.ComingSoonMessage" xml:space="preserve">
     <value>Stále se na něm pracuje. Pluginy a balíčky ikon se tu objeví v některé z příštích aktualizací.</value>
+  </data>
+  <data name="Store.Page.ComingSoonTestsAction" xml:space="preserve">
+    <value>Otevřít testy</value>
   </data>
   <data name="Store.Page.CompatibilityField" xml:space="preserve">
     <value>Kompatibilita</value>
@@ -17353,5 +17368,81 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Store.Reviews.Error.PlatformUnavailable" xml:space="preserve">
     <value>Hodnocení se nepodařilo kontaktovat. Zkuste to později.</value>
+  </data>
+  <data name="Store.Tests.Title" xml:space="preserve">
+    <value>Testy</value>
+    <comment>Tab and heading for the test builds a creator invited the user to try before review.</comment>
+  </data>
+  <data name="Store.Tests.Intro" xml:space="preserve">
+    <value>Sestavení od autorů, kteří k testování svých pluginů pozvali tento účet. Macro Deck je zatím nezkontroloval.</value>
+  </data>
+  <data name="Store.Tests.Loading" xml:space="preserve">
+    <value>Načítání testů…</value>
+  </data>
+  <data name="Store.Tests.EmptyHeading" xml:space="preserve">
+    <value>Zatím žádné testy</value>
+  </data>
+  <data name="Store.Tests.EmptyMessage" xml:space="preserve">
+    <value>Pozvánka k testování pluginu přichází e-mailem. Po jejím přijetí v Creator Portalu se zde zobrazí sestavení.</value>
+  </data>
+  <data name="Store.Tests.SignInHeading" xml:space="preserve">
+    <value>Pro zobrazení testů je nutné přihlášení</value>
+  </data>
+  <data name="Store.Tests.SignInMessage" xml:space="preserve">
+    <value>Pro zobrazení sestavení, k jejichž testování přišla pozvánka, je nutné se znovu přihlásit přes Macro Deck Connect.</value>
+  </data>
+  <data name="Store.Tests.SuspendedHeading" xml:space="preserve">
+    <value>Testy nejsou k dispozici</value>
+  </data>
+  <data name="Store.Tests.SuspendedMessage" xml:space="preserve">
+    <value>Účet Macro Deck Connect je pozastaven.</value>
+  </data>
+  <data name="Store.Tests.UnavailableHeading" xml:space="preserve">
+    <value>Testy se nepodařilo načíst</value>
+  </data>
+  <data name="Store.Tests.UnavailableMessage" xml:space="preserve">
+    <value>Macro Deck Platform není dostupná. Zkuste to za chvíli znovu.</value>
+  </data>
+  <data name="Store.Tests.RateLimitedMessage" xml:space="preserve">
+    <value>Bylo odesláno příliš mnoho požadavků. Chvíli počkejte a zkuste to znovu.</value>
+  </data>
+  <data name="Store.Tests.InstalledVersion" xml:space="preserve">
+    <value>Nainstalováno: {version}</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Store.Tests.BuildsAriaLabel" xml:space="preserve">
+    <value>Testovací sestavení: {name}</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Store.Tests.BuildLabel" xml:space="preserve">
+    <value>Sestavení {build}</value>
+    <comment>[build:string]</comment>
+  </data>
+  <data name="Store.Tests.AvailableSince" xml:space="preserve">
+    <value>Zveřejněno {time}</value>
+    <comment>[time:string] time is a relative time such as "3 days ago" or "just now".</comment>
+  </data>
+  <data name="Store.Tests.InstallTestBuild" xml:space="preserve">
+    <value>Instalovat testovací sestavení</value>
+  </data>
+  <data name="Store.Tests.ShowChangelog" xml:space="preserve">
+    <value>Zobrazit změny</value>
+  </data>
+  <data name="Store.Tests.HideChangelog" xml:space="preserve">
+    <value>Skrýt změny</value>
+  </data>
+  <data name="Store.Tests.InstallFailed" xml:space="preserve">
+    <value>Testovací sestavení se nepodařilo nainstalovat.</value>
+  </data>
+  <data name="Store.Tests.ConfirmHeading" xml:space="preserve">
+    <value>Instalovat nezkontrolované sestavení?</value>
+  </data>
+  <data name="Store.Tests.ConfirmMessage" xml:space="preserve">
+    <value>{name} {version} (sestavení {build}) nebylo zkontrolováno týmem Macro Deck. Pochází přímo od autora pluginu a může být nestabilní.</value>
+    <comment>[name:string][version:string][build:string]</comment>
+  </data>
+  <data name="Store.Tests.ConfirmReplaceMessage" xml:space="preserve">
+    <value>{name} {version} (sestavení {build}) nebylo zkontrolováno týmem Macro Deck. Pochází přímo od autora pluginu, může být nestabilní a nahradí nainstalovanou verzi {installedVersion}.</value>
+    <comment>[name:string][version:string][build:string][installedVersion:string]</comment>
   </data>
 </root>

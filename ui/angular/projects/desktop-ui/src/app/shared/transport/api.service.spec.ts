@@ -156,6 +156,21 @@ describe('ApiService', () => {
     });
   });
 
+  describe('store test builds', () => {
+    it('posts the chosen build with consent to the test install route', async () => {
+      const api = configure();
+      const fetchSpy = spyOn(window, 'fetch').and.resolveTo(new Response('{"success":true}', { status: 200 }));
+
+      await api.installStoreTestBuild('com.acme.deck-tools', 'build-2');
+
+      const [url, init] = fetchSpy.calls.mostRecent().args;
+      expect(url as string).toContain('/api/store/tests/install');
+      expect((init as RequestInit).method).toBe('POST');
+      expect(JSON.parse((init as RequestInit).body as string))
+        .toEqual({ packageId: 'com.acme.deck-tools', buildId: 'build-2', consent: true });
+    });
+  });
+
   describe('store media URLs', () => {
     it('names the digest of the image, so a changed image never comes out of the cache for its old position', () => {
       const api = configure();

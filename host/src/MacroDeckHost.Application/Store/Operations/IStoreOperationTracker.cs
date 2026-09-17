@@ -16,7 +16,8 @@ public interface IStoreOperationTracker
 		string version,
 		string displayName,
 		string? previousVersion,
-		Guid? retryOf = null);
+		Guid? retryOf = null,
+		StoreTestBuildReference? testBuild = null);
 
 	StoreOperation? Transition(Guid operationId,
 		StoreOperationState state,
@@ -31,3 +32,5 @@ public interface IStoreOperationTracker
 
 	event Action<StoreOperation>? Changed;
 }
+
+public sealed record StoreTestBuildReference(Guid BuildId, string Build);
