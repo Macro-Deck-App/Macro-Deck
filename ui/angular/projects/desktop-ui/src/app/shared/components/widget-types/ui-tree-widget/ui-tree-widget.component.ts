@@ -20,6 +20,8 @@ import {
   activationClaim,
   activationFor,
   emitsEvent,
+  hasRunnableFlow,
+  TapSequencer,
   treeClaimsGesture,
   UiNode,
   UiNodeEvent,
@@ -75,6 +77,7 @@ export class UiTreeWidgetComponent implements OnInit, OnChanges, OnDestroy {
   protected readonly pressFeedback = new PressFeedback(pressed => this.pressedChange.emit(pressed));
   private longPressTriggered = false;
   private longPressTimeout: ReturnType<typeof setTimeout> | null = null;
+  private readonly taps = new TapSequencer();
 
   private readonly treeContext = inject(UiWidgetTreeContext);
   private readonly uiSessions = inject(UiSessionService);
@@ -146,6 +149,7 @@ export class UiTreeWidgetComponent implements OnInit, OnChanges, OnDestroy {
     this.clearPreviewDebounce();
     this.closeSessionHandle();
     this.clearLongPressTimeout();
+    this.taps.dispose();
     this.pressFeedback.dispose();
   }
 
@@ -243,10 +247,12 @@ export class UiTreeWidgetComponent implements OnInit, OnChanges, OnDestroy {
     this.clearLongPressTimeout();
     this.longPressTriggered = false;
     this.setPressed(true);
+    this.taps.pressStarted();
     this.trigger.emit('onTouchStart');
     this.longPressTimeout = setTimeout(() => {
       if (this.isPressed) {
         this.longPressTriggered = true;
+        this.taps.interrupted();
         this.trigger.emit('onLongPress');
       }
     }, this.LONG_PRESS_MS);
@@ -263,14 +269,21 @@ export class UiTreeWidgetComponent implements OnInit, OnChanges, OnDestroy {
     event.stopPropagation();
     this.clearLongPressTimeout();
     this.setPressed(false);
-    this.trigger.emit('onTouchEnd');
-    if (!this.longPressTriggered) {
-      this.trigger.emit('onShortPress');
+    if (this.longPressTriggered) {
+      this.trigger.emit('onTouchEnd');
+      return;
     }
+    this.trigger.emit('onTouchEnd');
+    this.taps.tapCompleted(
+      hasRunnableFlow((this.data as { flows?: unknown }).flows, 'onDoublePress'),
+      () => this.trigger.emit('onShortPress'),
+      () => this.trigger.emit('onDoublePress'),
+    );
   }
 
   protected onPressCancel(): void {
     if (this.isPressed) {
+      this.taps.interrupted();
       this.trigger.emit('onTouchEnd');
     }
     this.clearLongPressTimeout();

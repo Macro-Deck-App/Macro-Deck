@@ -124,6 +124,45 @@ public class ActionButtonWidgetSessionTests
 		await fixture.Session.DisposeAsync();
 	}
 
+	[TestCase("[{\\\"id\\\":\\\"b1\\\"}]", new[] { "press", "double-press" })]
+	[TestCase("[{\\\"id\\\":\\\"b1\\\",\\\"disabled\\\":true}]", new string[0])]
+	[TestCase("[]", new string[0])]
+	public async Task A_button_declares_double_press_and_press_only_for_a_runnable_double_tap_flow(
+		string children,
+		string[] expected)
+	{
+		const string singleState = "{\"stateMode\":false,\"flows\":\"[{\\\"triggerType\\\":\\\"onDoublePress\\\",\\\"children\\\":CHILDREN}]\"}";
+		var fixture = Build(singleState.Replace("CHILDREN", children), interactive: true);
+
+		var events = fixture.Host.ById("actionButton").Property("events") is { } declared
+			? declared.EnumerateArray().Select(name => name.GetString()).ToArray()
+			: [];
+
+		Assert.That(events, Is.EqualTo(expected));
+
+		await fixture.Session.DisposeAsync();
+	}
+
+	[Test]
+	public async Task A_double_press_runs_the_double_tap_flow_and_does_not_advance_state()
+	{
+		var data = TwoStateData.Replace("\"flows\":\"[]\"",
+			"\"flows\":\"[{\\\"triggerType\\\":\\\"onDoublePress\\\",\\\"children\\\":[{\\\"id\\\":\\\"b1\\\"}]}]\"");
+		var fixture = Build(data, interactive: true);
+
+		var result = fixture.Host.ById("actionButton").Raise(UiComponentEvents.DoublePress);
+		await fixture.Host.SettleAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.IsAccepted, Is.True);
+			Assert.That(fixture.Host.ById("actionButton.label").Text("text"), Is.EqualTo("Off"));
+			Assert.That(fixture.Trigger.Calls.Single().TriggerType, Is.EqualTo("onDoublePress"));
+		});
+
+		await fixture.Session.DisposeAsync();
+	}
+
 	[Test]
 	public async Task A_dispatch_while_locked_is_rejected_and_runs_no_trigger()
 	{

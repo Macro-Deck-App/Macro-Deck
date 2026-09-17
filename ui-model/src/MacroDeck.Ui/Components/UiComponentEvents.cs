@@ -87,11 +87,16 @@ public static class UiComponentEvents
 	/// </summary>
 	public const string Reveal = "reveal";
 
-	/// <summary>Two taps on a <see cref="UiSlider" /> completed in quick succession, each without a drag.
-	/// Carries no payload. Sent after the second tap's <see cref="Change" />, never instead of it, so a reader
-	/// that does not implement it still leaves both taps as ordinary level changes. On a slider in
-	/// <see cref="UiComponentSliderInteractions.Relative" /> interaction a tap sends no <see cref="Change" />,
-	/// so there it is sent on its own.</summary>
+	/// <summary>Two taps completed in quick succession. Carries no payload.
+	/// <para>On a <see cref="UiSlider" />, each tap without a drag: sent after the second tap's
+	/// <see cref="Change" />, never instead of it, so a reader that does not implement it still leaves both taps
+	/// as ordinary level changes. On a slider in <see cref="UiComponentSliderInteractions.Relative" />
+	/// interaction a tap sends no <see cref="Change" />, so there it is sent on its own.</para>
+	/// <para>On a <see cref="UiButton" /> or any other node that also declares a press name: a node declaring it
+	/// has its <see cref="Press" /> held back for 400 ms after a tap, and a second press starting in that window
+	/// and completing as a tap sends this instead of either <see cref="Press" />. A reader that does not
+	/// implement it sends <see cref="Press" /> for every tap, and so does the host for a press a hardware deck
+	/// forwards to the tree.</para></summary>
 	public const string DoublePress = "double-press";
 
 	/// <summary>A drag in progress on any node that declares it. The payload is the cumulative translation

@@ -42,6 +42,11 @@ behaviour. A button with no events is still drawn, but accepts nothing. To show 
 wrap it in a [modifier](/ui/components/modifier/#disabled) with `Disabled`.
 Use `PressStart` and `PressEnd` to drive something for as long as the finger is down.
 
+Declare `DoublePress` next to `Press` for a separate action on a double tap. The trade-off: once
+`DoublePress` is declared, every single tap's `Press` arrives 400 ms late, because the reader waits to see
+whether a second tap follows. A double tap sends `DoublePress` only, never `Press`. A reader that predates
+`double-press` sends `Press` for each tap, so a button stays usable there.
+
 ## Artwork and ring
 
 ```csharp
@@ -108,6 +113,7 @@ Enum values live in `UiComponentImageFits`, `UiComponentImageTransitions`, `UiCo
 | `long-press` (`UiComponentEvents.LongPress`) | The press was still held after 600 ms | None |
 | `press-start` (`UiComponentEvents.PressStart`) | The press began | None |
 | `press-end` (`UiComponentEvents.PressEnd`) | The press ended, however it ended | None |
+| `double-press` (`UiComponentEvents.DoublePress`) | A second tap completed shortly after the first; the taps send no `press` | None |
 
 ## Children
 
@@ -127,6 +133,15 @@ box among its children. On its parent's main axis a button follows the ordinary 
   already fired, and never sends a name the node did not declare.
 - **`press-end` always follows `press-start`**, including when the pointer left the element or the gesture
   was cancelled.
+- **Double tap:** only with `double-press` declared, a completed tap holds its `press` for 400 ms. A second
+  press starting within that window and within 24 px of the first tap, and released before the long-press
+  threshold, sends `double-press` after its `press-end`, and neither tap sends `press`. If the second press
+  becomes a long press or is cancelled, the held `press` is sent at that moment, after the second press's
+  `press-start`. A second press starting farther away sends the held `press` first and counts as a new first
+  tap. Without `double-press` declared, `press` is never delayed. This is a pointer reader's rule: a press
+  from a hardware deck reaches your tree as `press` for every tap, never as `double-press`. The same rule applies to any
+  other node that declares a press name. The slider's own `double-press` rule is different; see
+  [Slider](/ui/components/slider/).
 - **Press feedback is local and immediate:** tint the whole element white at `0.2` alpha, fade in over
   `20 ms`, out over `140 ms`, visible at least `60 ms`. Never wait for the producer before painting.
 - **Paint order:** `background`, artwork, children, press feedback, ring.

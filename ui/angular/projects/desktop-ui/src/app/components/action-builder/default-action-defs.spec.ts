@@ -15,6 +15,7 @@ describe('fixedTriggerTabsFor', () => {
     expect(fixedTriggerTabsFor(undefined, t)).toBeNull();
     expect(fixedTriggerTabsFor([], t)).toBeNull();
     expect(fixedTriggerTabsFor(['onPluginGesture'], t)).toBeNull();
+    expect(fixedTriggerTabsFor(['onShortPress', 'onLongPress', 'onTouchStart', 'onTouchEnd', 'onDoublePress'], t)).toBeNull();
   });
 });
 

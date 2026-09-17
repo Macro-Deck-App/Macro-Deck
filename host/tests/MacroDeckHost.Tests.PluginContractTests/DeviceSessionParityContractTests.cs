@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text;
 using MacroDeck.Plugin.Hosting.Capabilities.DeviceProvider;
 using MacroDeckHost.Application.Ui.Sessions;
@@ -120,6 +121,43 @@ internal sealed class DeviceSessionParityContractTests : CapabilityContractFixtu
 		var deviceId = await world.RegisterAndOpenAsync(ProviderDeviceId);
 
 		Assert.That(await RunAsync(world, provider, deviceId), Is.EqualTo(_expectedObservations));
+	}
+
+	[Test]
+	public async Task A_provider_reporting_whole_short_presses_keeps_an_immediate_verdict_on_a_widget_with_a_double_tap_flow()
+	{
+		var provider = new WalkthroughProvider();
+		var adapter = new InProcessDeviceSurfaceProvider("integration.walkthrough",
+			provider,
+			() => _world!.Service,
+			Serilog.Core.Logger.None);
+
+		using var world = new DeviceSurfaceWorld(adapter, "integration.walkthrough");
+		_world = world;
+		world.Profiles.GetFoldersForProfile(ContractDeck.ProfileId)
+			.Single(folder => folder.Id == ContractDeck.FolderId)
+			.Widgets.Single().Data = JsonSerializer.Serialize(new Dictionary<string, object?>
+			{
+				["flows"] = new[]
+				{
+					new Dictionary<string, object?> { ["triggerType"] = "onShortPress", ["children"] = new[] { new { id = "a" } } },
+					new Dictionary<string, object?> { ["triggerType"] = "onDoublePress", ["children"] = new[] { new { id = "b" } } }
+				}
+			});
+
+		await world.RegisterAndOpenAsync(ProviderDeviceId);
+		await WaitForAsync(() => provider.Surfaces.Count == 1, "the provider never received its first surface");
+
+		var first = await provider.SendAsync(DeviceInteractionKind.ShortPress, ContractDeck.WidgetId.ToString());
+		var second = await provider.SendAsync(DeviceInteractionKind.ShortPress, ContractDeck.WidgetId.ToString());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(first.Status, Is.EqualTo(DeviceInteractionStatus.Accepted));
+			Assert.That(second.Status, Is.EqualTo(DeviceInteractionStatus.Accepted));
+			Assert.That(world.Triggers.Requests.Select(request => request.TriggerType),
+				Is.EqualTo(new[] { "onShortPress", "onShortPress" }));
+		});
 	}
 
 	[Test]

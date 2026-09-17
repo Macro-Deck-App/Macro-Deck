@@ -97,7 +97,7 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 			new SingleProviderResolver(Provider),
 			Profiles,
 			Presence,
-			new DeviceInteractionRouter(scopeFactory, LockState, Time, Serilog.Core.Logger.None),
+			new DeviceInteractionRouter(scopeFactory, LockState, Time, Serilog.Core.Logger.None, Profiles),
 			Focus,
 			Bus,
 			new WidgetStateSubscriptionTracker(),

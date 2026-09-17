@@ -339,6 +339,182 @@ describe('runtime widget grid', () => {
     expect(fired).toEqual([]);
   });
 
+  describe('double tap', () => {
+    const doubleTapFlow = (disabled = false) =>
+      ({ flows: [{ triggerId: 'd', triggerType: 'onDoublePress', children: [{ id: 'b', disabled }] }] });
+
+    const withData = (data: object): GridWidget => ({ ...widget('a', 0, 0), data } as GridWidget);
+
+    beforeEach(() => jasmine.clock().install());
+    afterEach(() => jasmine.clock().uninstall());
+
+    const tileTriggers = (gridWidget: GridWidget) => {
+      const fired: string[] = [];
+      const handle = renderWidgetGrid(container, {
+        host,
+        geometry: { cols: 5, rows: 3 },
+        onWidgetTrigger: (_widgetId, triggerType) => fired.push(triggerType),
+      });
+      handle.update([gridWidget], () => tree('clock'));
+      return { fired, handle, surface: container.querySelector('.deck-grid-tile-surface') as HTMLElement };
+    };
+
+    it('runs only the double tap flow for two quick taps on a tile that has one', () => {
+      const { fired, surface } = tileTriggers(withData(doubleTapFlow()));
+
+      press(surface);
+      jasmine.clock().tick(200);
+      press(surface);
+      jasmine.clock().tick(1000);
+
+      expect(fired).toEqual(['onTouchStart', 'onTouchEnd', 'onTouchStart', 'onTouchEnd', 'onDoublePress']);
+    });
+
+    it('runs the short press once the double tap window has passed', () => {
+      const { fired, surface } = tileTriggers(withData(doubleTapFlow()));
+
+      press(surface);
+      jasmine.clock().tick(399);
+      expect(fired).toEqual(['onTouchStart', 'onTouchEnd']);
+
+      jasmine.clock().tick(1);
+      expect(fired).toEqual(['onTouchStart', 'onTouchEnd', 'onShortPress']);
+    });
+
+    it('runs the waiting short press before a long press that follows it', () => {
+      const { fired, surface } = tileTriggers(withData(doubleTapFlow()));
+
+      press(surface);
+      jasmine.clock().tick(100);
+      surface.dispatchEvent(pointer('pointerdown'));
+      jasmine.clock().tick(600);
+      surface.dispatchEvent(pointer('pointerup'));
+
+      expect(fired).toEqual(['onTouchStart', 'onTouchEnd', 'onTouchStart', 'onShortPress', 'onLongPress', 'onTouchEnd']);
+    });
+
+    it('keeps the short press immediate without a runnable double tap flow', () => {
+      for (const data of [{}, doubleTapFlow(true), { flows: [{ triggerId: 'd', triggerType: 'onDoublePress', children: [] }] }]) {
+        container.innerHTML = '';
+        const { fired, surface } = tileTriggers(withData(data));
+
+        press(surface);
+        press(surface);
+
+        expect(fired).toEqual(['onTouchStart', 'onTouchEnd', 'onShortPress', 'onTouchStart', 'onTouchEnd', 'onShortPress']);
+      }
+    });
+
+    it('drops a waiting short press when the tile goes away', () => {
+      const { fired, surface, handle } = tileTriggers(withData(doubleTapFlow()));
+
+      press(surface);
+      handle.update([], () => undefined);
+      jasmine.clock().tick(1000);
+
+      expect(fired).toEqual(['onTouchStart', 'onTouchEnd']);
+    });
+
+    describe('on a button that declares double-press', () => {
+      const button = (events: string[]): UiNode =>
+        ({ id: 'root', type: 'ui.button', properties: { events } }) as UiNode;
+
+      const buttonEvents = (root: () => UiNode) => {
+        const seen: string[] = [];
+        const handle = renderWidgetGrid(container, {
+          host,
+          geometry: { cols: 5, rows: 3 },
+          onWidgetEvent: (_widgetId, _node, name) => seen.push(name),
+        });
+        handle.update([widget('a', 0, 0)], root);
+        return { seen, handle, element: () => container.querySelector('.widget-button') as HTMLElement };
+      };
+
+      it('sends double-press instead of two presses', () => {
+        const { seen, element } = buttonEvents(() => button(['press', 'double-press']));
+
+        press(element());
+        jasmine.clock().tick(300);
+        press(element());
+        jasmine.clock().tick(1000);
+
+        expect(seen).toEqual(['double-press']);
+      });
+
+      it('sends a single press after the window, even when the tree was updated meanwhile', () => {
+        const { seen, element, handle } = buttonEvents(() => button(['press', 'double-press']));
+
+        press(element());
+        handle.update([widget('a', 0, 0)], () => button(['press', 'double-press']));
+        jasmine.clock().tick(400);
+
+        expect(seen).toEqual(['press']);
+      });
+
+      const at = (type: string, x: number): Event => {
+        const event = pointer(type) as Event & { clientX: number };
+        event.clientX = x;
+        return event;
+      };
+
+      it('sends the held press for the first tap when the second starts too far away, then presses again', () => {
+        const { seen, element } = buttonEvents(() => button(['press', 'double-press', 'press-start']));
+
+        element().dispatchEvent(at('pointerdown', 0));
+        element().dispatchEvent(at('pointerup', 0));
+        element().dispatchEvent(at('pointerdown', 25));
+        element().dispatchEvent(at('pointerup', 25));
+        jasmine.clock().tick(1000);
+
+        expect(seen).toEqual(['press-start', 'press', 'press-start', 'press']);
+      });
+
+      it('treats a second tap within 24 px as a double tap', () => {
+        const { seen, element } = buttonEvents(() => button(['press', 'double-press']));
+
+        element().dispatchEvent(at('pointerdown', 0));
+        element().dispatchEvent(at('pointerup', 0));
+        element().dispatchEvent(at('pointerdown', 24));
+        element().dispatchEvent(at('pointerup', 24));
+        jasmine.clock().tick(1000);
+
+        expect(seen).toEqual(['double-press']);
+      });
+
+      it('sends the held press once a second press is cancelled, after that press began', () => {
+        const { seen, element } = buttonEvents(() => button(['press', 'double-press', 'press-start', 'press-end']));
+
+        press(element());
+        element().dispatchEvent(pointer('pointerdown'));
+        element().dispatchEvent(pointer('pointercancel'));
+        jasmine.clock().tick(1000);
+
+        expect(seen).toEqual(['press-start', 'press-end', 'press-start', 'press', 'press-end']);
+      });
+
+      it('sends the held press before a long press on the second tap', () => {
+        const { seen, element } = buttonEvents(() => button(['press', 'double-press', 'long-press']));
+
+        press(element());
+        element().dispatchEvent(pointer('pointerdown'));
+        jasmine.clock().tick(600);
+        element().dispatchEvent(pointer('pointerup'));
+        jasmine.clock().tick(1000);
+
+        expect(seen).toEqual(['press', 'long-press']);
+      });
+
+      it('presses immediately on a button that does not declare double-press', () => {
+        const { seen, element } = buttonEvents(() => button(['press']));
+
+        press(element());
+        press(element());
+
+        expect(seen).toEqual(['press', 'press']);
+      });
+    });
+  });
+
   describe('a tile whose tree claims part of it', () => {
     const tileTriggers = (root: UiNode) => {
       const fired: string[] = [];

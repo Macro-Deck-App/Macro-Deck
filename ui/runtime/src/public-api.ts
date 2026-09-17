@@ -100,8 +100,10 @@ export {
   removeOperand,
   replaceOperand,
 } from './domain/condition-expression.util';
+export { DOUBLE_TAP_WINDOW_MS, TapSequencer } from './ui-components/tap-sequencer';
 export {
   findFlowForTrigger,
+  hasRunnableFlow,
   type LocalDeckNavigation,
   resolveLocalDeckNavigation,
 } from './domain/deck-navigation.util';

@@ -158,13 +158,20 @@ public sealed class DeviceSurfaceBuilder
 			string.Equals(type, WidgetTriggerTypes.TouchStart, StringComparison.OrdinalIgnoreCase) ||
 			string.Equals(type, WidgetTriggerTypes.TouchEnd, StringComparison.OrdinalIgnoreCase));
 
-		return hasPressFlow
-			?
+		if (hasPressFlow)
+		{
+			return
 			[
 				DeviceInteractionKind.Press, DeviceInteractionKind.Release, DeviceInteractionKind.ShortPress,
 				DeviceInteractionKind.LongPress
-			]
-			: [];
+			];
+		}
+
+		return !string.Equals(widget.Type, WidgetTypeIds.Slider, StringComparison.Ordinal) &&
+			WidgetTypeIds.BuiltIn.Contains(widget.Type, StringComparer.Ordinal) &&
+			WidgetFlowsJson.HasRunnableFlow(widget.Data, WidgetTriggerTypes.DoublePress)
+				? [DeviceInteractionKind.Press, DeviceInteractionKind.Release]
+				: [];
 	}
 
 	private static string? ReadString(JsonObject? data, string key)

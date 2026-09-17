@@ -122,6 +122,7 @@ describe('ActionBuilderComponent toolbar layout', () => {
       { triggerId: 'onLongPress', triggerType: 'onLongPress', children: [] },
       { triggerId: 'onTouchStart', triggerType: 'onTouchStart', children: [] },
       { triggerId: 'onTouchEnd', triggerType: 'onTouchEnd', children: [] },
+      { triggerId: 'onDoublePress', triggerType: 'onDoublePress', children: [] },
     ]);
     fixture.detectChanges();
 

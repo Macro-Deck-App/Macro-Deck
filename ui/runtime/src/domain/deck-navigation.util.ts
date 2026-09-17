@@ -19,6 +19,12 @@ export function findFlowForTrigger(flows: readonly ActionFlow[], triggerType: st
   return flows.find(f => f.triggerType.toLowerCase() === triggerType.toLowerCase());
 }
 
+export function hasRunnableFlow(flows: unknown, triggerType: string): boolean {
+  if (!Array.isArray(flows)) return false;
+  const flow = findFlowForTrigger(flows as ActionFlow[], triggerType);
+  return !!flow && Array.isArray(flow.children) && flow.children.some(block => !!block && block.disabled !== true);
+}
+
 export function resolveLocalDeckNavigation(
   flows: readonly ActionFlow[] | undefined,
   triggerType: string
