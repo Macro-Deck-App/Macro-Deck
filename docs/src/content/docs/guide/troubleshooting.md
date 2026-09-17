@@ -34,8 +34,23 @@ Macro Deck writes its logs to the `logs` folder inside its data folder:
 - **Port:** Macro Deck listens on port `8193` by default, and on `8194` for HTTPS. You can see the
   port it is actually using in **Settings > Network**.
 - **Firewall:** allow Macro Deck, or the port above, through the firewall of the computer running it.
+- **Wi-Fi driver:** see [the connection drops after a few minutes](#the-connection-drops-after-a-few-minutes).
 - **No Wi-Fi at all:** an Android phone can connect over a USB cable instead, see
   [Connect over USB](/guide/usb-connection/).
+
+## The connection drops after a few minutes
+
+Devices connect at first, then disconnect or stop responding after a few minutes, often while the
+deck sits idle.
+
+- **Wi-Fi driver of the computer:** some Wi-Fi adapter drivers, especially in laptops, drop clients
+  that have been idle for a few minutes. Update the driver from the laptop or adapter manufacturer.
+  Do not fall back to a much older driver instead: it can make the adapter unstable on newer
+  hardware.
+- **Power saving:** in Windows, open **Device Manager**, open the Wi-Fi adapter's properties and turn
+  off **Allow the computer to turn off this device to save power** on **Power Management**.
+- **Wired connection:** connect the computer running Macro Deck to the router with a cable. An
+  Android phone can also [connect over USB](/guide/usb-connection/).
 
 ## Macro Deck is not listening on its port
 
