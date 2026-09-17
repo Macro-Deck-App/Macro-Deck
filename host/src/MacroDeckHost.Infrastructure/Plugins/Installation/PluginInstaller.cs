@@ -744,7 +744,7 @@ public sealed class PluginInstaller : IPluginInstaller
 		// check on the active version alone would let an unsigned update through with consent in that case.
 		var admittedVerdict = await GetHighestAdmittedTier(manifest.Id);
 
-		if (PluginTrustPolicy.IsDowngrade(admittedVerdict, trust.Verdict))
+		if (PluginTrustPolicy.IsDowngrade(admittedVerdict, trust.Verdict, acquisition.SourceKind))
 		{
 			return PluginInstallResult.Fail(PluginInstallError.TrustDowngrade,
 					$"'{manifest.Id}' was previously admitted as trusted; this update verifies as " +

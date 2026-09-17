@@ -34,4 +34,10 @@ public interface IStorePlatformClient
 	Task<StorePlatformResult<IReadOnlyDictionary<string, StoreEntitlementClaimStatus>>> ClaimEntitlements(
 		IReadOnlyCollection<string> packageIds,
 		CancellationToken cancellationToken = default);
+
+	Task<StorePlatformResult<IReadOnlyList<StorePlatformTest>>> GetTests(CancellationToken cancellationToken = default);
+
+	Task<StorePlatformResult<StorePlatformTestBuildDownload>> GetTestBuildDownload(string packageId,
+		Guid buildId,
+		CancellationToken cancellationToken = default);
 }

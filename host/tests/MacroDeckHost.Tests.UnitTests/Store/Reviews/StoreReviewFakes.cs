@@ -107,6 +107,28 @@ internal sealed class FakeStorePlatformClient : IStorePlatformClient
 		return Task.FromResult(ClaimResult(packageIds));
 	}
 
+	public List<StorePlatformTest> Tests { get; } = [];
+
+	public StorePlatformFailure TestsFailure { get; set; }
+
+	public StorePlatformResult<StorePlatformTestBuildDownload>? TestBuildDownload { get; set; }
+
+	public List<(string PackageId, Guid BuildId)> TestBuildDownloadRequests { get; } = [];
+
+	public Task<StorePlatformResult<IReadOnlyList<StorePlatformTest>>> GetTests(CancellationToken cancellationToken = default) =>
+		Task.FromResult(TestsFailure != StorePlatformFailure.None
+			? StorePlatformResult.Fail<IReadOnlyList<StorePlatformTest>>(TestsFailure)
+			: StorePlatformResult.Ok<IReadOnlyList<StorePlatformTest>>(Tests.ToList()));
+
+	public Task<StorePlatformResult<StorePlatformTestBuildDownload>> GetTestBuildDownload(string packageId,
+		Guid buildId,
+		CancellationToken cancellationToken = default)
+	{
+		TestBuildDownloadRequests.Add((packageId, buildId));
+		return Task.FromResult(TestBuildDownload ??
+			StorePlatformResult.Fail<StorePlatformTestBuildDownload>(StorePlatformFailure.NotFound));
+	}
+
 	public static StorePlatformOwnReview Own(string packageId, int rating, string? title, string? body) =>
 		new(Guid.NewGuid(), packageId, rating, title, body, "Visible", false, DateTimeOffset.UnixEpoch,
 			DateTimeOffset.UnixEpoch, false, null);

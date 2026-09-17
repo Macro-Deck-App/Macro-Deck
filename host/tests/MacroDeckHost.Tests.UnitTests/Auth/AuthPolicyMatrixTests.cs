@@ -479,6 +479,21 @@ public class AuthPolicyMatrixTests
 	}
 
 	[Test]
+	public async Task Store_tests_and_installing_a_test_build_are_admin_only()
+	{
+		var responses = new[]
+		{
+			await Send(HttpMethod.Get, "/api/store/tests", _clientToken),
+			await SendJson(HttpMethod.Post,
+				"/api/store/tests/install",
+				new { packageId = "com.acme.hue", buildId = Guid.NewGuid(), consent = true },
+				_clientToken)
+		};
+
+		Assert.That(responses.Select(response => response.StatusCode), Is.All.EqualTo(HttpStatusCode.Forbidden));
+	}
+
+	[Test]
 	public async Task The_onboarding_state_is_admin_only()
 	{
 		var get = await Send(HttpMethod.Get, "/api/settings/onboarding", _clientToken);

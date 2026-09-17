@@ -603,6 +603,7 @@ public class Startup
 		services.AddSingleton<StoreRegistryReader>();
 		services.AddSingleton<IStoreRegistryStateStore, JsonStoreRegistryStateStore>();
 		services.AddSingleton<IStoreInstallationStore, JsonStoreInstallationStore>();
+		services.AddSingleton<MacroDeckHost.Application.Store.Testing.IStoreTestInstallationStore, JsonStoreTestInstallationStore>();
 		services.AddSingleton<IStoreOperationStore, JsonStoreOperationStore>();
 		services.AddSingleton<IStoreOperationTracker, StoreOperationTracker>();
 		services.AddSingleton<StoreOperationChannel>();
@@ -663,6 +664,7 @@ public class Startup
 		services.AddSingleton<IStoreReviewAvatarProxy, StoreReviewAvatarProxy>();
 		services.AddSingleton<IStoreOfficialPackages, StoreOfficialPackages>();
 		services.AddSingleton<IStoreReviewService, StoreReviewService>();
+		services.AddSingleton<MacroDeckHost.Application.Store.Testing.IStoreTestService, MacroDeckHost.Application.Store.Testing.StoreTestService>();
 		services.AddHostedService<StoreEntitlementSyncBackgroundService>();
 
 		services.AddScoped<ISecretRepository, SecretRepository>();

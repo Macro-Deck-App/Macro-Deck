@@ -1,6 +1,7 @@
 using MacroDeckHost.Application.Store;
 using MacroDeckHost.Application.Store.Model;
 using MacroDeckHost.Application.Store.Operations;
+using MacroDeckHost.Application.Store.Reviews;
 
 namespace MacroDeckHost.Infrastructure.Store;
 
@@ -69,6 +70,36 @@ public sealed class StoreInstallCoordinator : IStoreInstallCoordinator
 		if (backupBatchId is not null)
 		{
 			_backupBatches.Record(operation.Id, backupBatchId);
+		}
+
+		_channel.Writer.TryWrite(operation.Id);
+		return operation;
+	}
+
+	public StoreOperation InstallTestBuild(string packageId,
+		string displayName,
+		StorePlatformTestBuild build,
+		bool consent)
+	{
+		ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
+		ArgumentNullException.ThrowIfNull(build);
+
+		var live = _tracker.FindLive(StoreExtensionKind.Plugin, packageId);
+		if (live is not null)
+		{
+			return live;
+		}
+
+		var operation = _tracker.Create(StoreOperationKind.TestInstall,
+			StoreExtensionKind.Plugin,
+			packageId,
+			build.Version,
+			displayName,
+			previousVersion: null,
+			testBuild: new StoreTestBuildReference(build.Id, build.Build));
+		if (consent)
+		{
+			_consent.Record(operation.Id);
 		}
 
 		_channel.Writer.TryWrite(operation.Id);

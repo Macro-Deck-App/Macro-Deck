@@ -10,6 +10,7 @@ import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/con
 import { StoreSectionComponent } from '../../store/store-section.component';
 import { StoreViewSwitcherComponent } from '../../store/store-view-switcher.component';
 import { StoreAccessService } from '../../../services/store-access.service';
+import { ConnectAccountService } from '../../../services/connect-account.service';
 import { StoreCatalogService } from '../../../services/store-catalog.service';
 import { StoreOperationService } from '../../../services/store-operation.service';
 import { StoreRatingsService } from '../../../services/store-ratings.service';
@@ -63,6 +64,9 @@ export class StorePageComponent implements OnInit {
   protected readonly searching = computed(() => this.search().trim() !== '');
 
   protected readonly storeUnlocked = inject(StoreAccessService).unlocked;
+
+  // The overlay keeps an invited tester out of the unreleased catalog, not out of the builds they test.
+  protected readonly signedIn = inject(ConnectAccountService).isSignedIn;
 
   protected readonly kindOptions = computed<SegmentedOption[]>(() => [
     { value: 'all', label: this.localization.translateKey(AppStrings.Store.Page.KindAll) },
@@ -199,6 +203,10 @@ export class StorePageComponent implements OnInit {
 
   protected async onLoadMore(): Promise<void> {
     await this.catalog.loadMore();
+  }
+
+  protected openTests(): void {
+    void this.router.navigate(['/store/tests']);
   }
 
   protected async onRefresh(): Promise<void> {

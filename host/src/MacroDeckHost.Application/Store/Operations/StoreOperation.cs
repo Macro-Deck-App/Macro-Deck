@@ -34,6 +34,10 @@ public sealed record StoreOperation
 
 	public Guid? RetryOf { get; init; }
 
+	public Guid? TestBuildId { get; init; }
+
+	public string? TestBuild { get; init; }
+
 	public StoreOperationError? Error { get; init; }
 
 	public string? ErrorMessage { get; init; }
@@ -42,5 +46,7 @@ public sealed record StoreOperation
 		or StoreOperationState.Failed
 		or StoreOperationState.Cancelled;
 
-	public bool CanRetry => State is StoreOperationState.Failed or StoreOperationState.Cancelled;
+	// A test install carries the consent given for it alone, so it is started again from the Tests tab rather than retried.
+	public bool CanRetry => (State is StoreOperationState.Failed or StoreOperationState.Cancelled) &&
+		Kind != StoreOperationKind.TestInstall;
 }

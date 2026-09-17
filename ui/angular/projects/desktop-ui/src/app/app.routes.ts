@@ -66,6 +66,10 @@ export const routes: Routes = [
         loadComponent: () => import('./components/pages').then(m => m.StoreInstalledPageComponent)
       },
       {
+        path: 'store/tests',
+        loadComponent: () => import('./components/pages').then(m => m.StoreTestsPageComponent)
+      },
+      {
         path: 'store/:kind/:extensionId',
         loadComponent: () => import('./components/pages').then(m => m.StoreDetailPageComponent)
       },

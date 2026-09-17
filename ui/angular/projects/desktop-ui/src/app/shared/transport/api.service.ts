@@ -161,6 +161,7 @@ import {
   GetStoreExtensionResponse,
   GetStoreOperationsResponse,
   GetStoreStatusResponse,
+  GetStoreTestsResponse,
   GetStoreUpdatesResponse,
   GetSystemFontsResponse,
   GetUserNotificationsResponse,
@@ -182,6 +183,7 @@ import {
   InspectArchiveResponse,
   InspectBackupResponse,
   InstallStoreExtensionRequest,
+  InstallStoreTestBuildRequest,
   LabelImagePreviewRequest,
   ListUiPreviewsResponse,
   LocalizedText,
@@ -962,6 +964,16 @@ export class ApiService {
 
   dismissStoreOperation(operationId: string): Promise<StoreOperationActionResponse> {
     return this.http('DELETE', `/api/store/operations/${encodeURIComponent(operationId)}`);
+  }
+
+  getStoreTests(): Promise<GetStoreTestsResponse> {
+    return this.http('GET', '/api/store/tests');
+  }
+
+  // Only called once the user confirmed installing a build that Macro Deck never reviewed.
+  installStoreTestBuild(packageId: string, buildId: string): Promise<StoreOperationActionResponse> {
+    const request: InstallStoreTestBuildRequest = { packageId, buildId, consent: true };
+    return this.http('POST', '/api/store/tests/install', request);
   }
 
   uninstallStoreExtension(kind: StoreExtensionKind, id: string): Promise<UninstallStoreExtensionResponse> {

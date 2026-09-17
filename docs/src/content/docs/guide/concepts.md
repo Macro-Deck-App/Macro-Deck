@@ -122,6 +122,19 @@ you sign in, and whenever you install something while signed in, Macro Deck reco
 Store items for your account so you can rate them. If ratings cannot be reached, the Store keeps
 working without them.
 
+### Tests
+
+A plugin creator can invite you to test a plugin before it is reviewed. The invitation arrives by
+email; accept it in the Creator Portal with the same Macro Deck account you use in Macro Deck. While
+you are signed in under **Settings > Account**, **Tests** appears at the top of the Store next to
+**Installed**, listing every plugin you test and its builds, newest first. You do not need to be a Store
+tester to see it: while the Store itself is not open to you, its notice offers **Open your tests**.
+
+Test builds are not reviewed or signed by Macro Deck: they come straight from the creator and may be
+unstable. Choosing **Install** or **Install test build** asks you to confirm that first. A test build
+replaces the version of the plugin you have installed, including one from the Store, and the build
+that is currently installed shows as **Installed**.
+
 ## Devices
 
 Every phone, tablet or browser that connects shows up in **Settings > Devices**. Choose there which

@@ -13,6 +13,8 @@ public static class StoreOperationBodyFactory
 		Version = operation.Version,
 		DisplayName = operation.DisplayName,
 		PreviousVersion = operation.PreviousVersion,
+		TestBuildId = operation.TestBuildId,
+		TestBuild = operation.TestBuild,
 		State = operation.State,
 		BytesDownloaded = operation.BytesDownloaded,
 		TotalBytes = operation.TotalBytes,

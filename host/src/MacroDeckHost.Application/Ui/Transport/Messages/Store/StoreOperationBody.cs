@@ -19,6 +19,10 @@ public class StoreOperationBody
 
 	public string? PreviousVersion { get; set; }
 
+	public Guid? TestBuildId { get; set; }
+
+	public string? TestBuild { get; set; }
+
 	public StoreOperationState State { get; set; }
 
 	public long BytesDownloaded { get; set; }

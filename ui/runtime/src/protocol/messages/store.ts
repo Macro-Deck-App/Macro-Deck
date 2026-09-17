@@ -8,7 +8,7 @@ export type StoreExtensionTrust = 'RegistryAuthenticated' | 'PublisherVerified';
 
 export type StoreOperationState = 'Queued' | 'Downloading' | 'Validating' | 'Installing' | 'Completed' | 'Failed' | 'Cancelled';
 
-export type StoreOperationKind = 'Install' | 'Update';
+export type StoreOperationKind = 'Install' | 'Update' | 'TestInstall';
 
 export type StoreCatalogSection = 'all' | 'newest' | 'recentlyUpdated' | 'name' | 'featured';
 
@@ -78,6 +78,8 @@ export interface StoreOperationBody {
   version: string;
   displayName: string;
   previousVersion?: string | null;
+  testBuildId?: string | null;
+  testBuild?: string | null;
   state: StoreOperationState;
   bytesDownloaded: number;
   totalBytes?: number | null;
@@ -182,6 +184,47 @@ export interface InstallStoreExtensionRequest {
   packageId: string;
   version?: string | null;
   allowUnsigned?: boolean;
+}
+
+export type StoreTestsErrorCode = 'sign_in_required' | 'account_suspended' | 'rate_limited' | 'unavailable';
+
+export type InstallStoreTestBuildErrorCode = StoreTestsErrorCode | 'invalid_request' | 'consent_required' | 'not_found';
+
+export interface StoreTestBuildBody {
+  id: string;
+  version: string;
+  build: string;
+  changelog?: string | null;
+  sizeInBytes: number;
+  uploadedAt: string;
+  availableAt: string;
+}
+
+// builds are newest first. installedTestBuildId is set only while exactly that test build is the active
+// install; installedVersion is whatever version of the plugin is installed, from the Store or a test.
+export interface StoreTestBody {
+  packageId: string;
+  displayName: string;
+  joinedAt: string;
+  hasIcon: boolean;
+  iconSha256?: string | null;
+  installedVersion?: string | null;
+  installedTestBuildId?: string | null;
+  activeOperationId?: string | null;
+  builds: StoreTestBuildBody[];
+}
+
+export interface GetStoreTestsResponse {
+  success: boolean;
+  error?: ApiError | null;
+  tests: StoreTestBody[];
+}
+
+// The host refuses the install unless consent is true, which a client sends only after the user confirmed.
+export interface InstallStoreTestBuildRequest {
+  packageId: string;
+  buildId: string;
+  consent: boolean;
 }
 
 export interface UninstallStoreExtensionRequest {

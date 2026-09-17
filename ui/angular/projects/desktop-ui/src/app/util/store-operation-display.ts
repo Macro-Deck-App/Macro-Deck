@@ -124,6 +124,14 @@ export function storeOperationErrorKey(code: string | null | undefined): string 
       return AppStrings.Store.Error.Interrupted;
     case 'Cancelled':
       return AppStrings.Store.Error.Cancelled;
+    case 'SignInRequired':
+      return AppStrings.Store.Error.SignInRequired;
+    case 'TestBuildUnavailable':
+      return AppStrings.Store.Error.TestBuildUnavailable;
+    case 'TestConsentRequired':
+      return AppStrings.Store.Error.TestConsentRequired;
+    case 'TestBuildMismatch':
+      return AppStrings.Store.Error.TestBuildMismatch;
     case 'InstallBlockedByTakeover':
       return AppStrings.Errors.Plugins.InstallBlockedByTakeover;
     default:

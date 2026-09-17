@@ -14049,6 +14049,18 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Store.Error.Unsupported" xml:space="preserve">
     <value>Diese Erweiterung unterstützt diese Plattform nicht.</value>
   </data>
+  <data name="Store.Error.SignInRequired" xml:space="preserve">
+    <value>Melde dich mit deinem Macro Deck Connect-Konto an, um das zu installieren.</value>
+  </data>
+  <data name="Store.Error.TestBuildUnavailable" xml:space="preserve">
+    <value>Dieser Test-Build ist nicht mehr verfügbar.</value>
+  </data>
+  <data name="Store.Error.TestConsentRequired" xml:space="preserve">
+    <value>Die Installation eines Test-Builds muss zuerst von dir bestätigt werden.</value>
+  </data>
+  <data name="Store.Error.TestBuildMismatch" xml:space="preserve">
+    <value>Der Download stimmte nicht mit dem angebotenen Test-Build überein und wurde deshalb nicht installiert.</value>
+  </data>
   <data name="Store.EtaMinutesLeft.One" xml:space="preserve">
     <value>noch etwa {count} Min.</value>
     <comment>[plural][count:int] Remaining download time, a minute or more.</comment>
@@ -14164,6 +14176,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Store.Page.ComingSoonMessage" xml:space="preserve">
     <value>Wir bauen ihn noch. Plugins und Icon-Packs findest du hier in einem späteren Update.</value>
+  </data>
+  <data name="Store.Page.ComingSoonTestsAction" xml:space="preserve">
+    <value>Deine Tests öffnen</value>
   </data>
   <data name="Store.Page.CompatibilityField" xml:space="preserve">
     <value>Kompatibilität</value>
@@ -17351,5 +17366,81 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Store.Reviews.Error.PlatformUnavailable" xml:space="preserve">
     <value>Bewertungen sind gerade nicht erreichbar. Versuche es später erneut.</value>
+  </data>
+  <data name="Store.Tests.Title" xml:space="preserve">
+    <value>Tests</value>
+    <comment>Tab and heading for the test builds a creator invited the user to try before review.</comment>
+  </data>
+  <data name="Store.Tests.Intro" xml:space="preserve">
+    <value>Builds von Creators, die dich eingeladen haben, ihre Plugins zu testen. Macro Deck hat sie noch nicht geprüft.</value>
+  </data>
+  <data name="Store.Tests.Loading" xml:space="preserve">
+    <value>Tests werden geladen…</value>
+  </data>
+  <data name="Store.Tests.EmptyHeading" xml:space="preserve">
+    <value>Noch keine Tests</value>
+  </data>
+  <data name="Store.Tests.EmptyMessage" xml:space="preserve">
+    <value>Wenn dich ein Creator einlädt, ein Plugin zu testen, kommt die Einladung per E-Mail. Nimm sie im Creator Portal an, dann erscheinen die Builds hier.</value>
+  </data>
+  <data name="Store.Tests.SignInHeading" xml:space="preserve">
+    <value>Melde dich an, um deine Tests zu sehen</value>
+  </data>
+  <data name="Store.Tests.SignInMessage" xml:space="preserve">
+    <value>Melde dich erneut mit Macro Deck Connect an, um die Builds zu sehen, zu deren Test du eingeladen wurdest.</value>
+  </data>
+  <data name="Store.Tests.SuspendedHeading" xml:space="preserve">
+    <value>Tests sind nicht verfügbar</value>
+  </data>
+  <data name="Store.Tests.SuspendedMessage" xml:space="preserve">
+    <value>Dein Macro Deck Connect-Konto ist gesperrt.</value>
+  </data>
+  <data name="Store.Tests.UnavailableHeading" xml:space="preserve">
+    <value>Tests konnten nicht geladen werden</value>
+  </data>
+  <data name="Store.Tests.UnavailableMessage" xml:space="preserve">
+    <value>Die Macro Deck Platform ist nicht erreichbar. Versuche es gleich noch einmal.</value>
+  </data>
+  <data name="Store.Tests.RateLimitedMessage" xml:space="preserve">
+    <value>Es wurden zu viele Anfragen gesendet. Warte einen Moment und versuche es erneut.</value>
+  </data>
+  <data name="Store.Tests.InstalledVersion" xml:space="preserve">
+    <value>Installiert: {version}</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Store.Tests.BuildsAriaLabel" xml:space="preserve">
+    <value>Test-Builds von {name}</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Store.Tests.BuildLabel" xml:space="preserve">
+    <value>Build {build}</value>
+    <comment>[build:string]</comment>
+  </data>
+  <data name="Store.Tests.AvailableSince" xml:space="preserve">
+    <value>Bereitgestellt {time}</value>
+    <comment>[time:string] time is a relative time such as "3 days ago" or "just now".</comment>
+  </data>
+  <data name="Store.Tests.InstallTestBuild" xml:space="preserve">
+    <value>Test-Build installieren</value>
+  </data>
+  <data name="Store.Tests.ShowChangelog" xml:space="preserve">
+    <value>Änderungen anzeigen</value>
+  </data>
+  <data name="Store.Tests.HideChangelog" xml:space="preserve">
+    <value>Änderungen ausblenden</value>
+  </data>
+  <data name="Store.Tests.InstallFailed" xml:space="preserve">
+    <value>Der Test-Build konnte nicht installiert werden.</value>
+  </data>
+  <data name="Store.Tests.ConfirmHeading" xml:space="preserve">
+    <value>Ungeprüften Build installieren?</value>
+  </data>
+  <data name="Store.Tests.ConfirmMessage" xml:space="preserve">
+    <value>{name} {version} (Build {build}) wurde nicht von Macro Deck geprüft. Er stammt direkt vom Creator des Plugins und kann instabil sein.</value>
+    <comment>[name:string][version:string][build:string]</comment>
+  </data>
+  <data name="Store.Tests.ConfirmReplaceMessage" xml:space="preserve">
+    <value>{name} {version} (Build {build}) wurde nicht von Macro Deck geprüft. Er stammt direkt vom Creator des Plugins, kann instabil sein und ersetzt die installierte Version {installedVersion}.</value>
+    <comment>[name:string][version:string][build:string][installedVersion:string]</comment>
   </data>
 </root>

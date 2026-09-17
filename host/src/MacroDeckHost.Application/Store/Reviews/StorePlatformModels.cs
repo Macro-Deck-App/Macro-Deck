@@ -97,3 +97,27 @@ public enum StoreEntitlementClaimStatus
 	AlreadyEntitled,
 	Unavailable
 }
+
+public sealed record StorePlatformTestBuild(
+	Guid Id,
+	string Version,
+	string Build,
+	string? Changelog,
+	string FileName,
+	string Sha256,
+	long SizeInBytes,
+	DateTimeOffset UploadedAt,
+	DateTimeOffset AvailableAt);
+
+public sealed record StorePlatformTest(
+	string PackageId,
+	string DisplayName,
+	DateTimeOffset JoinedAt,
+	IReadOnlyList<StorePlatformTestBuild> Builds);
+
+public sealed record StorePlatformTestBuildDownload(
+	Uri Url,
+	string FileName,
+	string Sha256,
+	long SizeInBytes,
+	DateTimeOffset ExpiresAt);

@@ -135,6 +135,9 @@ launch gate; it is gated by possession of its credential and is never reported a
 
 ## Consequences
 
+- Amended by [ADR 0090](0090-invited-testers-install-unreviewed-test-builds.md): a test build an
+  invited tester installs is consentable without Developer Mode and may replace a plugin admitted as trusted;
+  the persisted tier is not lowered.
 - Amended by [ADR 0089](0089-a-development-build-can-temporarily-take-over-an-installed-plugin.md):
   a development build can temporarily take over an installed id. Its session is still never reported
   as trusted, the persisted tier is never touched, and the Store card describes the installed artifact.
