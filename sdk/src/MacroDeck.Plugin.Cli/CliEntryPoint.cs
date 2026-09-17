@@ -25,7 +25,7 @@ internal static class CliEntryPoint
 		// MacroDeck.Plugin.Testing's InternalsVisibleTo. A Command constructed with an explicit name renders
 		// that name instead, for both the root and every subcommand's own usage line.
 		var rootCommand = new Command("macrodeck-plugin",
-			"macrodeck-plugin: build, validate, inspect, pack, run, test, sign and verify Macro Deck plugins " +
+			"macrodeck-plugin: build, validate, inspect, pack, merge, run, test, sign and verify Macro Deck plugins " +
 			"without a running host.");
 
 		// Only RootCommand adds --help/--version for you; a plain Command needs them added explicitly.
@@ -39,6 +39,7 @@ internal static class CliEntryPoint
 		rootCommand.Add(ValidateCommand.Create());
 		rootCommand.Add(InspectCommand.Create());
 		rootCommand.Add(PackCommand.Create());
+		rootCommand.Add(MergeCommand.Create());
 		rootCommand.Add(RunCommand.Create(pairingProbe));
 		rootCommand.Add(TestCommand.Create());
 		rootCommand.Add(KeygenCommand.Create());
