@@ -28,6 +28,8 @@ The portal runs automated checks on every submission and shows the findings in t
 - the package is unchanged since upload,
 - `manifest.json` can be read and signed.
 
+The moderator also sees the build's [conformance report](/creator-portal/conformance/) and its warnings.
+
 A check that could not run, for example because GitHub was unavailable, is a warning, never an error.
 
 ## Changes requested

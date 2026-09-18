@@ -267,6 +267,7 @@ export default defineConfig({
 										'creator-portal/publish-plugin',
 										'creator-portal/publish-icon-pack',
 										'creator-portal/review',
+										'creator-portal/conformance',
 										'creator-portal/testers',
 									],
 								},

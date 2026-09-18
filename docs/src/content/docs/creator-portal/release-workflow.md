@@ -40,8 +40,8 @@ workflow.
 | `runners` | no | `{}` | JSON object naming the runner that builds a runtime identifier, merged over the defaults, for example `'{"osx-arm64": "macos-15"}'`. |
 | `run-tests` | no | `true` | Run the repository's tests with `dotnet test -c Release` after the build. A failing test stops the release. |
 | `test-path` | no | the only solution | Solution, project or directory `dotnet test` runs, relative to the repository root. With no `*.sln`/`*.slnx` at the root, or several, the step is skipped with a warning. |
-| `run-stub-host` | no | `true` | Run the [conformance suite](/cli/test/) against the package on a disposable stub host before the upload. A failed required check stops the release. |
-| `cli-version` | no | `3.0.0-beta.11` | `MacroDeck.Plugin.Cli` version to build with. |
+| `run-stub-host` | no | `true` | Run the plugin on a disposable stub host with the conformance suite and upload its report. A failed required check stops the release. |
+| `cli-version` | no | newest prerelease | `MacroDeck.Plugin.Cli` version to build with. |
 | `upload-artifact` | no | `false` | Also keep the `.macroDeckPlugin` as a workflow artifact. |
 | `artifact-name` | no | package file name | Name of that artifact. |
 | `artifact-retention-days` | no | `0` | Days to keep the artifact, 1-90. `0` uses the repository default. |
@@ -96,7 +96,8 @@ A rule of thumb: if `macrodeck-plugin build` succeeds on Ubuntu, leave this off.
 | --- | --- |
 | `.macroDeckPlugin` | The built, unsigned package. |
 | `build-metadata.json` | Package id (from `manifest.json`), version, build and changelog. |
-| `dependencies.json` | Optional. The NuGet packages the build restored, with known vulnerabilities. |
+| `dependencies.json` | The NuGet packages the build restored, with known vulnerabilities. |
+| `conformance.json` | Optional. The conformance suite's report from the stub host run; see [Conformance report](/creator-portal/conformance/). |
 
 Commit, tag, repository and workflow are read from GitHub's signed token, never from these files.
 
