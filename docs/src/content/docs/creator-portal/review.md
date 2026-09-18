@@ -62,7 +62,9 @@ The portal checks a published plugin's repository every few hours.
 | Private, deleted or App access removed | Email with a deadline. After 14 days the plugin is unlisted. |
 | Reachable again | The plugin is listed again automatically. |
 
-A renamed or transferred repository is followed and needs nothing from you.
+A repository renamed or moved within the same GitHub account is followed and needs nothing from you.
+A repository transferred to another account has to be
+[connected again](/creator-portal/publish-plugin/#change-the-repository) from there before the deadline.
 
 ## Unlist
 

@@ -46,6 +46,22 @@ A Project starts as **Draft**. Nothing is public until a review is approved.
 A Project cannot be submitted without an icon. New images wait for review like the listing text.
 Reordering screenshots that were already approved takes effect immediately.
 
+## Move to an Organization
+
+A Project can move into an Organization you are an **Owner** of, so the Store publishes it under the
+Organization's name. Open **General Information**, choose the Organization under **Transfer** and
+select **Move**, then confirm with the Project's Display Name.
+
+![The Transfer panel with Example Labs chosen and the Move button](../../../assets/creator-portal/project-transfer.png)
+
+- The Store shows the Organization as publisher from the next release on, and releases are signed
+  with the Organization's key. The Package ID stays the same, so installed copies keep updating.
+- For a plugin, the next build must name the Organization as `publisher.name` in its `manifest.json`.
+- Every member of the Organization can work on the Project. It leaves your personal context.
+- Only your own Project, or one in an Organization you own, can be moved.
+- A Project cannot move while a review is in progress, an approved version waits to be released, or
+  a Store change is still running.
+
 ## Delete or unlist
 
 - **Delete Project** works until a version has been published. It removes the versions, builds and

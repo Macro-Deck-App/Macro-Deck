@@ -28,6 +28,20 @@ organization if GitHub asks for it.
 
 One repository per Project, one Project per repository. Private repositories are not offered.
 
+### Change the repository
+
+Select **Change** next to the connected repository to pick it again, for example after you moved it to
+a GitHub organization or renamed it.
+
+![The Repository panel after Change, with the repository picker, Connect GitHub again and Cancel](../../../assets/creator-portal/builds-change-repository.png)
+
+- If the repository moved to another account, install the Macro Deck Platform App there and select
+  **Connect GitHub again** first, so the picker offers it.
+- Once a version is published, only the same GitHub repository can be connected: moved or renamed is
+  fine, a different repository is refused. **Disconnect** is no longer offered.
+- Upload a new build afterwards. Builds from before the move name the old location in their
+  `manifest.json` and do not pass review.
+
 ## 2. Add the release workflow
 
 While there are no builds, the portal checks the default branch for the workflow.
