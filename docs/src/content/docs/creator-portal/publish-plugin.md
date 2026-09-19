@@ -41,6 +41,8 @@ a GitHub organization or renamed it.
   fine, a different repository is refused. **Disconnect** is no longer offered.
 - Upload a new build afterwards. Builds from before the move name the old location in their
   `manifest.json` and do not pass review.
+- After a Project was [transferred to you](/creator-portal/projects/#transfer-a-project) by another
+  person, builds are refused until you connect its repository again here.
 
 ## 2. Add the release workflow
 
