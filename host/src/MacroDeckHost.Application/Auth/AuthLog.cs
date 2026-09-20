@@ -13,4 +13,16 @@ internal static partial class AuthLog
 		double secondsAgo,
 		Guid userId,
 		Guid? deviceId);
+
+	[LoggerMessage(EventId = 5601,
+		Level = LogLevel.Warning,
+		Message = "Refresh token {TokenId} was presented after it had been rotated out: revoked the {Revoked} " +
+			"live token(s) of family {FamilyId} (user {UserId}, device {DeviceId}). Other sessions of the " +
+			"account are untouched.")]
+	public static partial void FamilyRevokedAsReuse(ILogger logger,
+		Guid tokenId,
+		Guid familyId,
+		int revoked,
+		Guid userId,
+		Guid? deviceId);
 }

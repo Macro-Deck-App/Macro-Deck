@@ -8,6 +8,8 @@ public class RefreshTokenEntity : BaseEntity
 
 	public required string TokenHash { get; set; }
 
+	public required Guid FamilyId { get; set; }
+
 	public Guid? DeviceId { get; set; }
 
 	public required AuthScope Scope { get; set; }

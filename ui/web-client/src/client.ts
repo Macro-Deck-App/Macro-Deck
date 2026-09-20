@@ -751,9 +751,9 @@ export class Client {
   }
 
   // One refresh at a time, in this page and across every tab of this origin. Two in flight rotate the
-  // same cookie twice, and the host reads the second use of a rotated refresh token as theft and
-  // revokes every session the account has. In-page single-flight cannot see the other tab, and
-  // / and /admin share this origin, so there usually is one.
+  // same cookie twice, and the host reads the second use of a rotated refresh token as theft and ends
+  // this session. In-page single-flight cannot see the other tab, and / and /admin share this origin,
+  // so there usually is one.
   private tryRefresh(): Promise<RefreshOutcome> {
     if (this.refreshPromise === null) {
       this.refreshPromise = runExclusively(

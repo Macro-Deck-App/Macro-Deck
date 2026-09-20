@@ -41,17 +41,29 @@ callers, and neither fits that store.
 - The result is at most five comparisons per minted code, and at most five per lockout window, against a
   one in a million code, and only while a code exists.
 
-**Refresh tokens live 365 days**, for every scope. Rotation on every refresh and the reuse detection that
-revokes every session of the account stay. The refresh cookie's expiry follows the token. Rotated and
+**Refresh tokens live 365 days**, for every scope. Rotation on every refresh and the reuse detection stay. The refresh cookie's expiry follows the token. Rotated and
 logged-out rows are deleted 30 days after they were revoked (`AuthDefaults.RevokedRefreshTokenRetention`)
 instead of at their original expiry.
 
 ## Consequences
 
 - Reuse detection sees a rotated token for 30 days, the window it effectively had under the 30 day
-  lifetime. A rotated token that returns later is refused as invalid, and does not revoke every session.
+  lifetime. A rotated token that returns later is refused as invalid.
 - Amended by issue #815: the token rotated out most recently is accepted once more within
   `AuthDefaults.RefreshTokenReuseGrace` of its rotation, so a lost rotation response does not count as reuse.
+- Amended: reuse revokes the **rotation family**, not the account. Every token carries the id of the token
+  that started its chain (`rt_family_id`, backfilled per chain by `V1_17_0_0__AddRefreshTokenFamily.sql`);
+  a login or a device enrollment starts a family, a rotation inherits one, and a detected reuse revokes only
+  that family. This is the blast radius the leak actually has, and it is what OAuth 2.0 Security BCP asks
+  for. Account-wide revocation stays where it is a deliberate act: a password change, a reset, or signing a
+  device out.
+- Amended: the reuse grace does not run while the host is not answering refreshes. It is measured from the
+  later of the rotation and `RefreshServingEpoch`, the moment this process began serving. Without that, a
+  host that restarted between a rotation and its lost response - most visibly one that came up on the key
+  ring unlock gate - read the client's first retry as reuse, and under the old account-wide radius that
+  signed out every device at once.
+- A reuse revocation is logged at warning level (`AuthLog.FamilyRevokedAsReuse`, event 5601), so a session
+  that ends this way leaves a trace to read afterwards.
 - An attacker on the LAN who keeps sending wrong codes can hold pairing by code at `429` for as long as
   they keep doing it. Password login is unaffected and is the fallback.
 - A stolen refresh token is useful for up to a year of inactivity instead of 30 days. Signing the device

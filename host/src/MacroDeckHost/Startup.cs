@@ -430,6 +430,7 @@ public class Startup
 		services.AddSingleton(TimeProvider.System);
 		services.AddSingleton<LoginThrottle>();
 		services.AddSingleton<AccessTokenCutoff>();
+		services.AddSingleton<RefreshServingEpoch>();
 		services.AddSingleton<FailedLoginNotificationTracker>();
 		services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
 		services.AddSingleton<IAccessTokenIssuer, JwtAccessTokenIssuer>();
@@ -869,6 +870,14 @@ public class Startup
 
 	public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 	{
+		ArgumentNullException.ThrowIfNull(app);
+
+		// Before the first request, so the rotation grace measures from a host that is actually serving
+		// rather than from a rotation this process may have been restarted in the middle of.
+		var services = app.ApplicationServices;
+		services.GetRequiredService<RefreshServingEpoch>()
+			.Begin(services.GetRequiredService<TimeProvider>().GetUtcNow().UtcDateTime);
+
 		app.UseExceptionHandler();
 
 		// Outermost after the exception handler, so the status code it observes is the one the client

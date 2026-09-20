@@ -59,6 +59,7 @@ public class DeviceRegistrationTests
 			new DeviceEnrollmentStore(),
 			new PairingCodeStore(),
 			new AccessTokenCutoff(),
+			new RefreshServingEpoch(),
 			new FakeOnboardingPreferences(),
 			_time,
 			NullLogger<AuthService>.Instance);

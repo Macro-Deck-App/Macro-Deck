@@ -962,7 +962,8 @@ public class AuthPolicyMatrixTests
 			Assert.That(refresh.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 			Assert.That(retry.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 			Assert.That(reuse.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
-			Assert.That(other.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+			// The reuse belongs to one rotation chain: a session that never saw that token keeps working.
+			Assert.That(other.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 		});
 	}
 

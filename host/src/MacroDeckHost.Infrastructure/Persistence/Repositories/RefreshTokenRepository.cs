@@ -49,6 +49,11 @@ public class RefreshTokenRepository : IRefreshTokenRepository
 			.Where(t => t.UserId == userId && t.RevokedAt == null)
 			.ExecuteUpdateAsync(s => s.SetProperty(t => t.RevokedAt, revokedAt));
 
+	public Task<int> RevokeFamily(Guid familyId, DateTime revokedAt)
+		=> _context.RefreshTokens
+			.Where(t => t.FamilyId == familyId && t.RevokedAt == null)
+			.ExecuteUpdateAsync(s => s.SetProperty(t => t.RevokedAt, revokedAt));
+
 	public Task RevokeAllForDevice(Guid deviceId, DateTime revokedAt)
 		=> _context.RefreshTokens
 			.Where(t => t.DeviceId == deviceId && t.RevokedAt == null)

@@ -81,6 +81,7 @@ public class DeviceServiceTests
 			{
 				Id = Guid.NewGuid(),
 				UserId = Guid.NewGuid(),
+				FamilyId = Guid.NewGuid(),
 				TokenHash = "token-hash-" + device.Id,
 				DeviceId = device.Id,
 				Scope = AuthScope.Client,
@@ -582,6 +583,7 @@ public class DeviceServiceTests
 			new DeviceEnrollmentStore(),
 			new PairingCodeStore(),
 			new AccessTokenCutoff(),
+			new RefreshServingEpoch(),
 			new FakeOnboardingPreferences(),
 			_time,
 			NullLogger<AuthService>.Instance);

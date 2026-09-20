@@ -94,6 +94,17 @@ internal sealed class InMemoryRefreshTokenRepository : IRefreshTokenRepository
 		return Task.CompletedTask;
 	}
 
+	public Task<int> RevokeFamily(Guid familyId, DateTime revokedAt)
+	{
+		var revoked = Tokens.Where(t => t.FamilyId == familyId && t.RevokedAt is null).ToList();
+		foreach (var token in revoked)
+		{
+			token.RevokedAt = revokedAt;
+		}
+
+		return Task.FromResult(revoked.Count);
+	}
+
 	public Task RevokeAllForDevice(Guid deviceId, DateTime revokedAt)
 	{
 		foreach (var token in Tokens.Where(t => t.DeviceId == deviceId && t.RevokedAt is null))

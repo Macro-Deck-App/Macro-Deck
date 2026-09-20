@@ -22,6 +22,7 @@ public class AuthServiceTests
 	private PairingCodeStore _pairingCodes = null!;
 	private DeviceConnectionTracker _connections = null!;
 	private AccessTokenCutoff _cutoff = null!;
+	private RefreshServingEpoch _epoch = null!;
 
 	private static readonly DeviceRegistration _phone = new(null,
 		null,
@@ -45,6 +46,7 @@ public class AuthServiceTests
 		readiness.MarkVariablesReady();
 		_connections = new DeviceConnectionTracker(new RecordingEventBus(), _time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None));
 		_cutoff = new AccessTokenCutoff();
+		_epoch = new RefreshServingEpoch();
 		_service = new AuthService(_users,
 			_tokens,
 			new FakePasswordHasher(),
@@ -64,6 +66,7 @@ public class AuthServiceTests
 			new DeviceEnrollmentStore(),
 			_pairingCodes,
 			_cutoff,
+			_epoch,
 			_preferences,
 			_time,
 			NullLogger<AuthService>.Instance);
@@ -221,12 +224,13 @@ public class AuthServiceTests
 	}
 
 	[Test]
-	public async Task Refresh_reuse_revokes_every_token_of_the_user()
+	public async Task Refresh_reuse_revokes_the_reused_family_and_leaves_other_sessions_alone()
 	{
 		await _service.Setup("admin", "password123");
 		var login = await _service.Login("admin", "password123", AuthScope.Client);
 		var otherSession = await _service.Login("admin", "password123", AuthScope.Admin);
-		await _service.Refresh(login.Data!.RefreshToken);
+		var rotated = await _service.Refresh(login.Data!.RefreshToken);
+		var family = TokenRow(rotated.Data!.RefreshToken).FamilyId;
 
 		_time.Advance(AuthDefaults.RefreshTokenReuseGrace + TimeSpan.FromSeconds(1));
 		var reuse = await _service.Refresh(login.Data.RefreshToken);
@@ -235,8 +239,9 @@ public class AuthServiceTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(reuse.Error, Is.EqualTo(AuthError.RefreshTokenReused));
-			Assert.That(otherAfterReuse.Error, Is.EqualTo(AuthError.InvalidRefreshToken));
-			Assert.That(_tokens.Tokens.All(t => t.RevokedAt is not null), Is.True);
+			Assert.That(otherAfterReuse.Success, Is.True);
+			Assert.That(_tokens.Tokens.Where(t => t.FamilyId == family).All(t => t.RevokedAt is not null),
+				Is.True);
 		});
 	}
 
@@ -264,7 +269,44 @@ public class AuthServiceTests
 	}
 
 	[Test]
-	public async Task The_previous_token_presented_a_second_time_revokes_every_session()
+	public async Task A_rotation_response_lost_to_a_restart_can_still_be_retried_once_the_host_is_back()
+	{
+		await _service.Setup("admin", "password123");
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		_epoch.Begin(_time.GetUtcNow().UtcDateTime);
+		var lost = await _service.Refresh(login.Data!.RefreshToken);
+
+		// The host is away far longer than the grace - restarted, or held on the key ring unlock gate.
+		_time.Advance(TimeSpan.FromMinutes(30));
+		_epoch.Begin(_time.GetUtcNow().UtcDateTime);
+		_time.Advance(TimeSpan.FromSeconds(2));
+
+		var retry = await _service.Refresh(login.Data.RefreshToken);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(retry.Success, Is.True);
+			Assert.That(retry.Data!.RefreshToken, Is.Not.EqualTo(lost.Data!.RefreshToken));
+			Assert.That(retry.Data.DeviceId, Is.EqualTo(login.Data.DeviceId));
+		});
+	}
+
+	[Test]
+	public async Task A_previous_token_coming_back_late_to_a_host_that_never_stopped_is_still_reuse()
+	{
+		await _service.Setup("admin", "password123");
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		_epoch.Begin(_time.GetUtcNow().UtcDateTime);
+		await _service.Refresh(login.Data!.RefreshToken);
+
+		_time.Advance(AuthDefaults.RefreshTokenReuseGrace + TimeSpan.FromSeconds(1));
+		var retry = await _service.Refresh(login.Data.RefreshToken);
+
+		Assert.That(retry.Error, Is.EqualTo(AuthError.RefreshTokenReused));
+	}
+
+	[Test]
+	public async Task The_previous_token_presented_a_second_time_revokes_its_own_family()
 	{
 		await _service.Setup("admin", "password123");
 		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
@@ -281,12 +323,12 @@ public class AuthServiceTests
 			Assert.That(retry.Success, Is.True);
 			Assert.That(secondRetry.Error, Is.EqualTo(AuthError.RefreshTokenReused));
 			Assert.That(retried.Success, Is.False);
-			Assert.That(other.Success, Is.False);
+			Assert.That(other.Success, Is.True);
 		});
 	}
 
 	[Test]
-	public async Task An_older_ancestor_revokes_every_session_even_inside_the_grace_window()
+	public async Task An_older_ancestor_revokes_its_own_family_even_inside_the_grace_window()
 	{
 		await _service.Setup("admin", "password123");
 		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
@@ -303,9 +345,9 @@ public class AuthServiceTests
 		});
 	}
 
-	[TestCase(true, TestName = "The_previous_token_whose_successor_belongs_to_another_device_revokes_every_session")]
-	[TestCase(false, TestName = "The_previous_token_whose_successor_has_another_scope_revokes_every_session")]
-	public async Task The_previous_token_whose_successor_does_not_match_revokes_every_session(bool otherDevice)
+	[TestCase(true, TestName = "The_previous_token_whose_successor_belongs_to_another_device_revokes_its_family")]
+	[TestCase(false, TestName = "The_previous_token_whose_successor_has_another_scope_revokes_its_family")]
+	public async Task The_previous_token_whose_successor_does_not_match_revokes_its_family(bool otherDevice)
 	{
 		await _service.Setup("admin", "password123");
 		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
@@ -343,7 +385,7 @@ public class AuthServiceTests
 	}
 
 	[Test]
-	public async Task The_token_a_retry_rotated_away_revokes_every_session_when_it_comes_back()
+	public async Task The_token_a_retry_rotated_away_revokes_its_family_when_it_comes_back()
 	{
 		await _service.Setup("admin", "password123");
 		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
@@ -383,7 +425,7 @@ public class AuthServiceTests
 	}
 
 	[Test]
-	public async Task The_owner_refreshing_while_its_predecessor_is_replayed_revokes_every_session()
+	public async Task The_owner_refreshing_while_its_predecessor_is_replayed_revokes_its_family()
 	{
 		await _service.Setup("admin", "password123");
 		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
@@ -722,7 +764,7 @@ public class AuthServiceTests
 	}
 
 	[Test]
-	public async Task A_rotated_refresh_token_presented_again_within_30_days_still_revokes_every_session()
+	public async Task A_rotated_refresh_token_presented_again_within_30_days_still_revokes_its_family()
 	{
 		await _service.Setup("admin", "password123");
 		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
