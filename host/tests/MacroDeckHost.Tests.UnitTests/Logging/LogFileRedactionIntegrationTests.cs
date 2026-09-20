@@ -2,12 +2,15 @@ using MacroDeckHost.Application.Logging;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Extensions;
 using MacroDeckHost.Infrastructure.Logging;
+using MacroDeckHost.Logging;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Serilog;
 
 namespace MacroDeckHost.Tests.UnitTests.Logging;
@@ -17,7 +20,7 @@ public class LogFileRedactionIntegrationTests
 	private const string Jwt = "eyJhbGciOiJIUzI1NiJ9.eyJzY29wZSI6ImFkbWluIn0.dBjftJeZ4CVP-mB92K27uhbUJU1p";
 
 	private TestPaths _paths = null!;
-	private ILogger _previousLogger = null!;
+	private Serilog.ILogger _previousLogger = null!;
 
 	[SetUp]
 	public void SetUp()
@@ -113,6 +116,55 @@ public class LogFileRedactionIntegrationTests
 			Assert.That(contents, Does.Not.Contain("other-user"));
 			Assert.That(contents, Does.Contain("MacroDeck"));
 			Assert.That(contents, Does.Contain(@"C:\Users\<user>\Documents\profile.json"));
+		});
+	}
+
+	[Test]
+	public async Task Http_Logs_Only_Reach_The_File_When_Debug_Is_Enabled()
+	{
+		var state = new LogLevelState(LogEntryLevel.Information);
+		using (var host = await Host.CreateDefaultBuilder()
+			.ConfigureSerilog(_paths, state)
+			.ConfigureWebHost(web => web
+				.UseTestServer()
+				.Configure(app =>
+				{
+					app.UseRequestOutcomeLogging();
+					app.Run(context => context.Response.WriteAsync("ok"));
+				}))
+			.StartAsync())
+		{
+			Assert.That(host.Services.GetServices<ILoggerProvider>(), Is.Empty,
+				"Default providers, including Windows EventLog, must be removed.");
+			using var client = host.GetTestClient();
+			var outgoing = host.Services.GetRequiredService<ILoggerFactory>()
+				.CreateLogger("System.Net.Http.HttpClient.HealthProbe.LogicalHandler");
+			await client.GetAsync("/_macrodeck/health?phase=quiet");
+			outgoing.LogInformation("outgoing-quiet");
+			outgoing.LogWarning("outgoing-warning");
+
+			state.Minimum = LogEntryLevel.Debug;
+			await client.GetAsync("/_macrodeck/health?phase=debug");
+			outgoing.LogInformation("outgoing-debug");
+
+			state.Minimum = LogEntryLevel.Information;
+			await client.GetAsync("/_macrodeck/health?phase=quiet-again");
+			outgoing.LogInformation("outgoing-quiet-again");
+			await host.StopAsync();
+		}
+
+		await Log.CloseAndFlushAsync();
+		var contents = string.Concat(Directory.EnumerateFiles(_paths.LogsDirectory, "host-*.log")
+			.Select(File.ReadAllText));
+		Assert.Multiple(() =>
+		{
+			Assert.That(contents, Does.Not.Contain("phase=quiet"));
+			Assert.That(contents, Does.Not.Contain("outgoing-quiet"));
+			Assert.That(contents, Does.Contain("phase=debug"));
+			Assert.That(contents, Does.Contain("outgoing-debug"));
+			Assert.That(contents, Does.Contain("outgoing-warning"));
+			Assert.That(contents.Split('\n').Count(line => line.Contains("HTTP ", StringComparison.Ordinal)),
+				Is.EqualTo(1), "Only the Debug request should produce an outcome entry.");
 		});
 	}
 

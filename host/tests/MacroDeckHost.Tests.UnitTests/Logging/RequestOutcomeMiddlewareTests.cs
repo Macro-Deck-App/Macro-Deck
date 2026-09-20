@@ -9,10 +9,30 @@ namespace MacroDeckHost.Tests.UnitTests.Logging;
 
 public class RequestOutcomeMiddlewareTests
 {
+	[TestCase(200)]
+	[TestCase(204)]
+	public async Task Successful_Request_Outcomes_Are_Only_Logged_At_Debug(int status)
+	{
+		var atInformation = await Run(status, LogEventLevel.Information);
+		var atDebug = await Run(status, LogEventLevel.Debug);
+
+		Assert.That(atDebug, Has.Count.EqualTo(1));
+		Assert.Multiple(() =>
+		{
+			Assert.That(atInformation, Is.Empty);
+			Assert.That(atDebug[0].Level, Is.EqualTo(LogEventLevel.Debug));
+			Assert.That(atDebug[0].RenderMessage(CultureInfo.InvariantCulture),
+				Does.Contain(status.ToString(CultureInfo.InvariantCulture)).And.Contain("/api/thing"));
+		});
+	}
+
+	[TestCase(400, LogEventLevel.Information)]
 	[TestCase(404, LogEventLevel.Information)]
 	[TestCase(409, LogEventLevel.Information)]
 	[TestCase(500, LogEventLevel.Warning)]
-	public async Task A_Request_That_Fails_Without_Throwing_Is_Still_Logged(int status, LogEventLevel expected)
+	[TestCase(503, LogEventLevel.Warning)]
+	public async Task Failed_Request_Outcomes_Are_Logged_At_The_Information_Minimum(
+		int status, LogEventLevel expected)
 	{
 		var events = await Run(status, LogEventLevel.Information);
 
@@ -22,19 +42,6 @@ public class RequestOutcomeMiddlewareTests
 			Assert.That(events[0].Level, Is.EqualTo(expected));
 			Assert.That(events[0].RenderMessage(CultureInfo.InvariantCulture),
 				Does.Contain(status.ToString(CultureInfo.InvariantCulture)).And.Contain("/api/thing"));
-		});
-	}
-
-	[Test]
-	public async Task A_Successful_Request_Says_Nothing_Above_Debug()
-	{
-		var atInformation = await Run(200, LogEventLevel.Information);
-		var atDebug = await Run(200, LogEventLevel.Debug);
-
-		Assert.Multiple(() =>
-		{
-			Assert.That(atInformation, Is.Empty);
-			Assert.That(atDebug.Select(logEvent => logEvent.Level), Is.EqualTo(new[] { LogEventLevel.Debug }));
 		});
 	}
 

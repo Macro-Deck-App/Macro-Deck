@@ -44,7 +44,12 @@ public sealed class RequestOutcomeMiddleware
 
 	private void Log(HttpContext context, long started, int status)
 	{
-		var level = LevelFor(status);
+		var level = status switch
+		{
+			>= 500 => LogEventLevel.Warning,
+			>= 400 => LogEventLevel.Information,
+			_ => LogEventLevel.Debug
+		};
 		if (!_logger.IsEnabled(level))
 		{
 			return;
@@ -57,14 +62,6 @@ public sealed class RequestOutcomeMiddleware
 			status,
 			(long)Stopwatch.GetElapsedTime(started).TotalMilliseconds);
 	}
-
-	private static LogEventLevel LevelFor(int status)
-		=> status switch
-		{
-			>= 500 => LogEventLevel.Warning,
-			>= 400 => LogEventLevel.Information,
-			_ => LogEventLevel.Debug
-		};
 }
 
 public static class RequestOutcomeApplicationBuilderExtensions
