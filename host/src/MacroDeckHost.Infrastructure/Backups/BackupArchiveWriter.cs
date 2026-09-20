@@ -87,7 +87,7 @@ public sealed class BackupArchiveWriter : IBackupArchiveWriter
 		BackupArchiveWriteRequest request,
 		CancellationToken cancellationToken)
 	{
-		var entry = inner.CreateEntry(BackupFileNames.DatabaseEntry, CompressionLevel.Optimal);
+		var entry = inner.CreateEntry(BackupFileNames.DatabaseEntry, CompressionLevel.Fastest);
 
 		FileStream opened;
 		try
@@ -133,7 +133,8 @@ public sealed class BackupArchiveWriter : IBackupArchiveWriter
 
 		await using (source)
 		{
-			var entry = inner.CreateEntry(BackupFileNames.FilesPrefix + file.RelativePath, CompressionLevel.Optimal);
+			var entry = inner.CreateEntry(BackupFileNames.FilesPrefix + file.RelativePath,
+				BackupEntryCompression.For(file.RelativePath));
 			await using var target = entry.Open();
 			var digest = await CopyWithDigest(source, target, progress, cancellationToken);
 

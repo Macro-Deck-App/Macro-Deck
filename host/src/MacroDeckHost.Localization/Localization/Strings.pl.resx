@@ -13993,6 +13993,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>Build deweloperski</value>
   </data>
+  <data name="Store.BackingUp" xml:space="preserve">
+    <value>Tworzenie kopii zapasowej</value>
+  </data>
+  <data name="Store.BackingUpEllipsis" xml:space="preserve">
+    <value>Tworzenie kopii zapasowej…</value>
+  </data>
   <data name="Store.Cancelled" xml:space="preserve">
     <value>Anulowano</value>
   </data>

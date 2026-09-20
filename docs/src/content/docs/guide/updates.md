@@ -43,7 +43,9 @@ installed from a file, or one installed from the Store before this setting exist
 update it once from the Store to include it. Profile templates are never updated automatically.
 
 With **Before plugin updates** turned on in **Settings > Backups**, Macro Deck makes one backup before a
-batch of plugin updates.
+batch of plugin updates. The Store shows this as its own **Backing up** step before the update installs, so
+an update takes longer than a first-time install of the same plugin. Turn the setting off if you would
+rather not wait for it.
 
 ## What's new
 

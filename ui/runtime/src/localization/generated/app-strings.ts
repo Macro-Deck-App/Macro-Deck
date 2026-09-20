@@ -5716,6 +5716,8 @@ export const AppStrings = {
 		},
 	},
 	Store: {
+		BackingUp: 'macrodeck.app:Store.BackingUp',
+		BackingUpEllipsis: 'macrodeck.app:Store.BackingUpEllipsis',
 		Cancelled: 'macrodeck.app:Store.Cancelled',
 		Details: 'macrodeck.app:Store.Details',
 		Dismiss: 'macrodeck.app:Store.Dismiss',
@@ -11682,6 +11684,8 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Shell.Splash.PreparingUpdate': 'Preparing update…',
 	'macrodeck.app:Shell.Splash.Stopping': 'Stopping Macro Deck…',
 	'macrodeck.app:Shell.Statusbar.DevelopmentBuild': 'Development Build',
+	'macrodeck.app:Store.BackingUp': 'Backing up',
+	'macrodeck.app:Store.BackingUpEllipsis': 'Backing up…',
 	'macrodeck.app:Store.Cancelled': 'Cancelled',
 	'macrodeck.app:Store.Details': 'Details',
 	'macrodeck.app:Store.Dismiss': 'Dismiss',

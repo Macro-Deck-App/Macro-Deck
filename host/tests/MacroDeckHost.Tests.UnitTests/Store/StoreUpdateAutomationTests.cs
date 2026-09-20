@@ -325,6 +325,32 @@ internal sealed class StoreUpdateAutomationTests
 		});
 	}
 
+	[Test]
+	public async Task The_archiving_step_is_announced_only_when_a_backup_is_really_written()
+	{
+		var backups = new CountingBackupService();
+		var services = new ServiceCollection();
+		services.AddSingleton<IAppPreferenceService>(_preferences);
+		services.AddSingleton<IBackupService>(backups);
+		await using var provider = services.BuildServiceProvider();
+		var coordinator = new PreUpdateBackupCoordinator(provider.GetRequiredService<IServiceScopeFactory>());
+
+		var announced = 0;
+
+		await coordinator.EnsureBeforePluginUpdate("com.acme.a", "batch", () => announced++);
+		var afterBatchIsCovered = announced;
+		await coordinator.EnsureBeforePluginUpdate("com.acme.b", "batch", () => announced++);
+
+		await _preferences.SetBackups(null, null, null, null, null, null, null, beforePluginUpdate: false);
+		await coordinator.EnsureBeforePluginUpdate("com.acme.c", null, () => announced++);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(afterBatchIsCovered, Is.EqualTo(1));
+			Assert.That(announced, Is.EqualTo(1), "a skipped backup must not show the user an archiving step");
+		});
+	}
+
 	private async Task EnableAutoUpdate(bool markFresh = true)
 	{
 		await _preferences.SetExtensions(null, null, null, null, autoUpdate: true);

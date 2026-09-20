@@ -185,6 +185,13 @@ public sealed record PluginArtifactSource
 	}
 }
 
+public enum PluginInstallStage
+{
+	Acquired,
+	BackingUp,
+	Installing
+}
+
 public sealed record PluginInstallRequest
 {
 	public string? ExpectedPluginId { get; init; }
@@ -201,7 +208,7 @@ public sealed record PluginInstallRequest
 
 	public string? BackupBatchId { get; init; }
 
-	public Action? Acquired { get; init; }
+	public Action<PluginInstallStage>? Stage { get; init; }
 }
 
 public sealed record PluginUninstallRequest

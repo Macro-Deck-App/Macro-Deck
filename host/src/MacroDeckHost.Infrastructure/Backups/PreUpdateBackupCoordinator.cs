@@ -47,6 +47,7 @@ public sealed class PreUpdateBackupCoordinator : IPreUpdateBackupCoordinator
 
 	public async Task<PreUpdateBackupOutcome> EnsureBeforePluginUpdate(string pluginId,
 		string? batchId,
+		Action? starting = null,
 		CancellationToken cancellationToken = default)
 	{
 		var settings = await GetBackupSettings();
@@ -71,6 +72,8 @@ public sealed class PreUpdateBackupCoordinator : IPreUpdateBackupCoordinator
 					null);
 			}
 		}
+
+		starting?.Invoke();
 
 		var request = new CreateBackupRequest(BackupTrigger.BeforePluginUpdate, $"Before installing {pluginId}");
 		var outcome = await CreateBackup(request, cancellationToken);

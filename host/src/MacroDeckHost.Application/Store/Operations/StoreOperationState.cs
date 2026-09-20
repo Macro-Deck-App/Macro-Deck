@@ -8,6 +8,7 @@ public enum StoreOperationState
 	Queued,
 	Downloading,
 	Validating,
+	BackingUp,
 	Installing,
 	Completed,
 	Failed,

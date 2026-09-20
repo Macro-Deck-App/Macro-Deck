@@ -6,7 +6,7 @@ import { formatEta, storeOperationByteReadout, storeOperationErrorKey, storeOper
 
 type EffectiveState =
   | 'install' | 'installed' | 'update' | 'unsupported'
-  | 'queued' | 'downloading' | 'validating' | 'installing' | 'completed' | 'failed';
+  | 'queued' | 'downloading' | 'validating' | 'backingUp' | 'installing' | 'completed' | 'failed';
 
 @Component({
   selector: 'shared-store-install-button',
@@ -55,6 +55,7 @@ export class StoreInstallButtonComponent {
         case 'Queued': return 'queued';
         case 'Downloading': return 'downloading';
         case 'Validating': return 'validating';
+        case 'BackingUp': return 'backingUp';
         case 'Installing': return 'installing';
         case 'Failed': return 'failed';
         case 'Completed': return 'completed';

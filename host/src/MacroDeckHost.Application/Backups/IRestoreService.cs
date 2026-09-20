@@ -57,6 +57,7 @@ public interface IPreUpdateBackupCoordinator : IRestoreLock
 {
 	Task<PreUpdateBackupOutcome> EnsureBeforePluginUpdate(string pluginId,
 		string? batchId,
+		Action? starting = null,
 		CancellationToken cancellationToken = default);
 
 	Task<PreUpdateBackupOutcome> CreateBeforeHostUpdate(string? version,

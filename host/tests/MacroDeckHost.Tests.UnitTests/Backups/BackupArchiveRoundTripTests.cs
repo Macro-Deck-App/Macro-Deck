@@ -26,6 +26,7 @@ public class BackupArchiveRoundTripTests
 		Seed("data/profiles/living-room.json", """{"name":"Living Room"}""");
 		Seed("data/scripts/greet.json", """{"name":"Greet"}""");
 		Seed("data/icons/packs/pack.json", """{"id":"pack"}""");
+		SeedBytes("data/icons/packs/tile.png", RandomNumberGenerator.GetBytes(64 * 1024));
 		Seed("keys/key-11111111.xml", "<key/>");
 		Seed("keys/kek.escrow", """{"version":1}""");
 		Seed("keys/auth-signing.key", "signing");
@@ -74,6 +75,7 @@ public class BackupArchiveRoundTripTests
 			"data/profiles/living-room.json",
 			"data/scripts/greet.json",
 			"data/icons/packs/pack.json",
+			"data/icons/packs/tile.png",
 			"keys/key-11111111.xml",
 			"keys/kek.escrow",
 			"keys/auth-signing.key",
@@ -118,6 +120,40 @@ public class BackupArchiveRoundTripTests
 	}
 
 	[Test]
+	public async Task StoresAlreadyCompressedContentAndDeflatesTheRest()
+	{
+		var payloadPath = await DecryptPayload();
+		using var inner = ZipFile.OpenRead(payloadPath);
+
+		var image = inner.GetEntry("files/data/icons/packs/tile.png")!;
+		var json = inner.GetEntry("files/data/profiles/living-room.json")!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(image.CompressedLength,
+				Is.EqualTo(image.Length),
+				"deflating an image costs a full pass over the bytes and saves nothing");
+			Assert.That(json.CompressedLength, Is.Not.EqualTo(json.Length));
+		});
+	}
+
+	[Test]
+	public async Task RestoresStoredContentByteForByte()
+	{
+		var payloadPath = await DecryptPayload();
+		using var inner = ZipFile.OpenRead(payloadPath);
+
+		using var stream = inner.GetEntry("files/data/icons/packs/tile.png")!.Open();
+		using var restored = new MemoryStream();
+		await stream.CopyToAsync(restored);
+
+		var expected = await File.ReadAllBytesAsync(Path.Combine(_paths.BaseDirectory,
+			Path.Combine("data", "icons", "packs", "tile.png")));
+
+		Assert.That(restored.ToArray(), Is.EqualTo(expected));
+	}
+
+	[Test]
 	public async Task ReadsTheManifestWithoutAnyKeyMaterial()
 	{
 		using var archive = new MemoryStream(await WriteArchive());
@@ -134,6 +170,15 @@ public class BackupArchiveRoundTripTests
 
 	private static BackupComponentGroup Component(BackupContentIndex index, string path)
 		=> index.Entries.Single(entry => entry.Path == path).Component;
+
+	private async Task<string> DecryptPayload()
+	{
+		using var archive = new MemoryStream(await WriteArchive());
+		var payloadPath = Path.Combine(_paths.BaseDirectory, "payload.zip");
+		await new BackupArchiveReader().DecryptPayload(archive, _recoveryKey, payloadPath);
+
+		return payloadPath;
+	}
 
 	private async Task<List<string>> WriteAndReadInnerEntries()
 	{
@@ -196,10 +241,13 @@ public class BackupArchiveRoundTripTests
 	}
 
 	private void Seed(string relativePath, string content)
+		=> SeedBytes(relativePath, Encoding.UTF8.GetBytes(content));
+
+	private void SeedBytes(string relativePath, byte[] content)
 	{
 		var path = Path.Combine(_paths.BaseDirectory, relativePath.Replace('/', Path.DirectorySeparatorChar));
 		Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-		File.WriteAllText(path, content);
+		File.WriteAllBytes(path, content);
 	}
 
 	// The archive writes enums as names, which is what lets an older reader keep understanding a manifest
