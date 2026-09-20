@@ -1,0 +1,69 @@
+name: SDK capability request
+description: Request something the plugin SDK, protocol, CLI or packaging cannot do yet
+title: "[SDK] "
+labels: ["feature", "area:sdk", "status:needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this when you are building a plugin and the public surface does not let you do something. For a missing feature in Macro Deck itself use **Feature request**, and for a built-in integration use **Integration capability request**.
+
+        Plugin documentation: https://docs.macro-deck.app
+
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Which part?
+      description: Pick the closest one. If you are not sure, choose "Not sure".
+      options:
+        - SDK API (actions, widgets, configuration, hosting, services)
+        - Plugin protocol (HTTP or WebSocket)
+        - Analyzers and diagnostics
+        - Plugin CLI
+        - Packaging, signing or publishing
+        - Testing and conformance
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to build?
+      description: Describe the plugin and the behaviour you want your users to get.
+      placeholder: "For example: a plugin that shows a live chart on a widget and updates it while the deck is open."
+    validations:
+      required: true
+
+  - type: textarea
+    id: blocker
+    attributes:
+      label: What stops you today?
+      description: Which API, message or command is missing, or where does the existing one fall short?
+    validations:
+      required: true
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Is there a workaround?
+      description: Tell us what you tried and why it is not good enough. Leave this empty if you did not find one.
+
+  - type: input
+    id: sdk-version
+    attributes:
+      label: SDK version
+      placeholder: 3.0.0-beta.4
+
+  - type: textarea
+    id: shape
+    attributes:
+      label: How would you like it to look?
+      description: A sketch of the API, message or command you have in mind. Optional, and we may well end up with a different shape.
+      render: csharp
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else?
+      description: Links to your plugin, similar APIs elsewhere or related issues are welcome, but optional.
