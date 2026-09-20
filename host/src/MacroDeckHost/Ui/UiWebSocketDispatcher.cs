@@ -94,6 +94,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 	private readonly CompanionDeviceRegistry _companions;
 	private readonly ICompanionLicenseService _licenses;
 	private readonly AccessTokenCutoff _accessTokenCutoff;
+	private readonly DeviceSessionGuard _deviceSessionGuard;
 	private readonly SemaphoreSlim _dispatch = new(1, 1);
 
 	public UiWebSocketDispatcher(
@@ -139,6 +140,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		CompanionDeviceRegistry companions,
 		ICompanionLicenseService licenses,
 		AccessTokenCutoff accessTokenCutoff,
+		DeviceSessionGuard deviceSessionGuard,
 		CancellationToken connectionCancellation)
 	{
 		_connectionId = connectionId;
@@ -180,11 +182,14 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		_companions = companions;
 		_licenses = licenses;
 		_accessTokenCutoff = accessTokenCutoff;
+		_deviceSessionGuard = deviceSessionGuard;
 	}
 
 	public Task<bool> ConnectedAsync()
 	{
-		if (_lifetime.ApplicationStopping.IsCancellationRequested || _accessTokenCutoff.Rejects(_principal))
+		if (_lifetime.ApplicationStopping.IsCancellationRequested ||
+			_accessTokenCutoff.Rejects(_principal) ||
+			_deviceSessionGuard.Rejects(_principal))
 		{
 			return Task.FromResult(false);
 		}
@@ -192,10 +197,6 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		var deviceId = Guid.TryParse(_principal.FindFirst(AuthDefaults.DeviceClaim)?.Value, out var parsed)
 			? parsed
 			: (Guid?)null;
-		if (deviceId is { } revoked && _deviceConnections.IsRevoked(revoked))
-		{
-			return Task.FromResult(false);
-		}
 
 		_deviceConnections.Attach(_connectionId, deviceId, _abort);
 		return Task.FromResult(true);

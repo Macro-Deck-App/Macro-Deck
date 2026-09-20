@@ -25,7 +25,6 @@ public sealed class DeviceConnectionTracker
 	private readonly ConcurrentDictionary<string, ConnectionEntry> _connections = new(StringComparer.Ordinal);
 	private readonly Dictionary<string, int> _countsByKey = new(StringComparer.Ordinal);
 	private readonly Dictionary<string, PendingDisconnect> _pendingDisconnects = new(StringComparer.Ordinal);
-	private readonly ConcurrentDictionary<Guid, DateTime> _revokedUntil = new();
 	private readonly Lock _sync = new();
 	private readonly CancellationTokenSource _shutdown = new();
 
@@ -118,7 +117,6 @@ public sealed class DeviceConnectionTracker
 
 	public void FlushPendingDisconnects(DateTime now)
 	{
-		PruneExpiredRevocations(now);
 
 		var window = TimeSpan.FromSeconds(DeviceDefaults.PresenceLingerSeconds);
 		List<(Guid? DeviceId, string? ClientId)>? due = null;
@@ -210,24 +208,6 @@ public sealed class DeviceConnectionTracker
 		}
 
 		_shutdown.Cancel();
-	}
-
-	public void RevokeUntil(Guid deviceId, DateTime until) => _revokedUntil[deviceId] = until;
-
-	public bool IsRevoked(Guid deviceId)
-		=> _revokedUntil.TryGetValue(deviceId, out var until) && _timeProvider.GetUtcNow().UtcDateTime < until;
-
-	private void PruneExpiredRevocations(DateTime now)
-	{
-		foreach (var entry in _revokedUntil)
-		{
-			if (now >= entry.Value)
-			{
-				// Compare-and-remove: a concurrent RevokeUntil extending this device's window between
-				// the enumeration and here must not be clobbered by removing its fresh value.
-				_revokedUntil.TryRemove(entry);
-			}
-		}
 	}
 
 	public void SetDeviceNames(IReadOnlyDictionary<Guid, string> names)

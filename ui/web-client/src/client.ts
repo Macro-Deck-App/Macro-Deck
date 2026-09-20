@@ -60,6 +60,9 @@ const REFRESH_LOCK_NAME = 'macro-deck.auth.refresh';
 
 const REFRESH_LEEWAY_SECONDS = 60;
 const MIN_REFRESH_DELAY_MS = 5000;
+// setTimeout cannot carry more than 2^31-1 ms (~24.8 days) and silently fires at once beyond that. A
+// client-scope access token outlives that, so the timer is armed in chunks and re-armed.
+const MAX_REFRESH_DELAY_MS = 12 * 60 * 60 * 1000;
 
 const INITIAL_LOCALIZATION_RETRY_DELAY_MS = 5000;
 const MAX_LOCALIZATION_RETRY_DELAY_MS = 60000;
@@ -815,16 +818,26 @@ export class Client {
 
   private scheduleRefresh(expiresInSeconds: number): void {
     this.clearRefreshTimer();
-    const delayMs = Math.max(
+    const untilRefresh = Math.max(
       (expiresInSeconds - REFRESH_LEEWAY_SECONDS) * 1000, MIN_REFRESH_DELAY_MS);
+    const delayMs = Math.min(untilRefresh, MAX_REFRESH_DELAY_MS);
     this.refreshTimer = setTimeout(() => {
       this.refreshTimer = null;
+      if (untilRefresh > delayMs) {
+        this.scheduleRefresh(this.secondsUntilAccessTokenExpiry());
+        return;
+      }
       void this.tryRefresh().then(outcome => {
         if (!this.app.conditions.get().authenticated) return;
         if (outcome === 'invalid') this.endSession();
         else if (outcome === 'unreachable') this.scheduleSessionRetry();
       });
     }, delayMs);
+  }
+
+  private secondsUntilAccessTokenExpiry(): number {
+    if (this.accessTokenExpiresAt === null) return 0;
+    return Math.max((this.accessTokenExpiresAt - Date.now()) / 1000, 0);
   }
 
   private clearRefreshTimer(): void {

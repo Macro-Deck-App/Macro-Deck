@@ -103,8 +103,10 @@ GET /plugins/ws?access_token=<session-token> HTTP/1.1
   once even though its 15-minute JWT is still cryptographically valid.
 - **Identity is never taken from a claim.** The host checks the credential against its own record.
   `MACRO_DECK_PLUGIN_LAUNCH_ID` is yours to log and nothing more.
-- **Client sessions** (web client, companion) hold a 15-minute access token and a refresh token that
-  rotates on every use and lives 365 days. A rotated refresh token presented again within 30 days of its
+- **Client sessions** (web client, companion) hold an access token - 15 minutes for the admin surface,
+  60 days for a deck device - and a refresh token that rotates on every use and lives 365 days. Signing a
+  device out in the devices list, or removing it, is checked on every request from then on, so a long
+  device token ends the moment you end the session rather than when it expires. A rotated refresh token presented again within 30 days of its
   rotation revokes that token's rotation chain - the session it belongs to - and leaves every other session
   of the account signed in. One exception: the token rotated out most recently is accepted once more within
   60 seconds, from the same device and scope, so a client whose rotation response was lost in transit can

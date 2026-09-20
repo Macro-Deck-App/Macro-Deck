@@ -28,6 +28,10 @@ public class DeviceEntity : BaseEntity
 
 	public DateTime LastSeenAt { get; set; }
 
+	// Access tokens for this device issued at or before this instant are refused. A JWT carries no
+	// server state, so signing a device out has to be recorded somewhere its tokens are checked against.
+	public DateTime? SessionsRevokedAt { get; set; }
+
 	// Virtual profile IDs use integrationId::localId, so this cannot be a Guid.
 	public string? StartupProfileId { get; set; }
 

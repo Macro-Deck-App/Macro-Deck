@@ -255,7 +255,7 @@ internal sealed class FakeAccessTokenIssuer : IAccessTokenIssuer
 		var device = deviceId is { } id ? $":{id}" : string.Empty;
 
 		return new AccessToken($"token:{username}:{AuthDefaults.ScopeClaimValue(scope)}{device}",
-			_timeProvider.GetUtcNow().UtcDateTime.Add(AuthDefaults.AccessTokenLifetime));
+			_timeProvider.GetUtcNow().UtcDateTime.Add(AuthDefaults.AccessTokenLifetimeFor(scope)));
 	}
 }
 

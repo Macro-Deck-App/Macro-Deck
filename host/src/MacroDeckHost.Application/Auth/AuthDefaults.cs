@@ -33,7 +33,23 @@ public static class AuthDefaults
 	public const int MinPasswordLength = 8;
 	public const int MaxUsernameLength = 64;
 
-	public static readonly TimeSpan AccessTokenLifetime = TimeSpan.FromMinutes(15);
+	/// <summary>
+	/// The admin surface's access token lifetime, and the one a session without a device gets. Short
+	/// because an admin token is the account: it configures the host and installs plugins.
+	/// </summary>
+	public static readonly TimeSpan AdminAccessTokenLifetime = TimeSpan.FromMinutes(15);
+
+	/// <summary>
+	/// A deck device's access token lifetime. Long on purpose: these are wall-mounted tablets and phones
+	/// on the local network, and every refresh they avoid is a rotation that cannot go wrong. Safe only
+	/// because <see cref="DeviceSessionGuard" /> refuses a signed-out device's token on the next request
+	/// rather than waiting for it to expire.
+	/// </summary>
+	public static readonly TimeSpan ClientAccessTokenLifetime = TimeSpan.FromDays(60);
+
+	public static TimeSpan AccessTokenLifetimeFor(AuthScope scope)
+		=> scope == AuthScope.Admin ? AdminAccessTokenLifetime : ClientAccessTokenLifetime;
+
 	public static readonly TimeSpan RefreshTokenLifetime = TimeSpan.FromDays(365);
 
 	// Reuse detection only sees a rotated token while its row exists: this is that window. See ADR 0083.

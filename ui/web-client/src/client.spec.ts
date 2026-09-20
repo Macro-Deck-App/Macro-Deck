@@ -462,6 +462,45 @@ describe('Client', () => {
     });
   });
 
+  describe('a deck device access token that outlives a timer', () => {
+    const SIXTY_DAYS_SECONDS = 60 * 24 * 60 * 60;
+
+    const signedInWithALongToken = async () => {
+      // The re-arm reads the wall clock to see how much of the token is left, so it has to move with
+      // the ticks; jasmine's clock only replaces the timers.
+      jasmine.clock().mockDate(new Date());
+      twoProfiles();
+      host.loginAnswer = token({ expiresInSeconds: SIXTY_DAYS_SECONDS });
+      const client = build();
+      await client.probe();
+      await client.signIn('owner', 'secret');
+      await settle();
+      host.calls.length = 0;
+      return client;
+    };
+
+    it('does not refresh before the token is anywhere near expiring', async () => {
+      const client = await signedInWithALongToken();
+
+      // setTimeout cannot carry 60 days and fires at once instead. Past that ceiling the session would
+      // refresh on a loop, spending a rotation every tick.
+      jasmine.clock().tick(40 * 24 * 60 * 60 * 1000);
+      await settle();
+
+      expect(host.pathsFor('POST', '/api/auth/refresh').length).toBe(0);
+      expect(client.app.conditions.get().authenticated).toBe(true);
+    });
+
+    it('still refreshes once the token really is about to expire', async () => {
+      await signedInWithALongToken();
+
+      jasmine.clock().tick((SIXTY_DAYS_SECONDS - 30) * 1000);
+      await settle();
+
+      expect(host.pathsFor('POST', '/api/auth/refresh').length).toBe(1);
+    });
+  });
+
   describe('picking the session back up on a reload', () => {
     it('resumes the session the refresh cookie still stands for', async () => {
       twoProfiles();

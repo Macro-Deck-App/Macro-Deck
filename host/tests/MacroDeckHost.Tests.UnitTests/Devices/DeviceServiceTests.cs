@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Security.Claims;
 using MacroDeckHost.Infrastructure.Auth;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Devices;
@@ -21,6 +23,7 @@ public class DeviceServiceTests
 	private InMemoryDeviceRepository _devices = null!;
 	private InMemoryRefreshTokenRepository _tokens = null!;
 	private DeviceConnectionTracker _tracker = null!;
+	private DeviceSessionGuard _sessionGuard = null!;
 	private RecordingUiTransport _transport = null!;
 	private RecordingMediator _mediator = null!;
 	private ManualTimeProvider _time = null!;
@@ -36,6 +39,7 @@ public class DeviceServiceTests
 		_devices = new InMemoryDeviceRepository();
 		_tokens = new InMemoryRefreshTokenRepository();
 		_time = new ManualTimeProvider();
+		_sessionGuard = new DeviceSessionGuard();
 		_tracker = new DeviceConnectionTracker(new RecordingEventBus(), _time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None));
 		_transport = new RecordingUiTransport();
 		_mediator = new RecordingMediator();
@@ -56,8 +60,18 @@ public class DeviceServiceTests
 			_readiness,
 			_providerPresence,
 			new FakeIntegrationRegistry(),
-			TestScreenSaverProviders.Registry());
+			TestScreenSaverProviders.Registry(),
+			_sessionGuard);
 	}
+
+	private ClaimsPrincipal TokenFor(Guid deviceId)
+		=> new(new ClaimsIdentity(
+		[
+			new Claim(AuthDefaults.DeviceClaim, deviceId.ToString()),
+			new Claim(AccessTokenIssuedAt.Claim,
+				AccessTokenIssuedAt.UnixSeconds(_time.GetUtcNow().UtcDateTime)
+					.ToString(CultureInfo.InvariantCulture))
+		]));
 
 	private async Task<DeviceEntity> SeedDevice(bool withLiveToken)
 	{
@@ -74,6 +88,8 @@ public class DeviceServiceTests
 			CreatedAt = now
 		};
 		await _devices.Create(device);
+		// What the host does at startup for every device row it finds.
+		_sessionGuard.Track(device.Id, device.SessionsRevokedAt);
 
 		if (withLiveToken)
 		{
@@ -342,7 +358,8 @@ public class DeviceServiceTests
 			new StartupReadiness(),
 			_providerPresence,
 			new FakeIntegrationRegistry(),
-			TestScreenSaverProviders.Registry());
+			TestScreenSaverProviders.Registry(),
+			_sessionGuard);
 
 		var result = await notReadyService.ResolveStartupProfileId(device.Id);
 
@@ -498,8 +515,8 @@ public class DeviceServiceTests
 				Is.True);
 			Assert.That(_mediator.Published.OfType<DeviceChangedNotification>().Any(n => n.DeviceId == device.Id),
 				Is.False);
-			Assert.That(_tracker.IsRevoked(device.Id), Is.True);
-			Assert.That(_tracker.IsRevoked(other.Id), Is.False);
+			Assert.That(_sessionGuard.Rejects(TokenFor(device.Id)), Is.True);
+			Assert.That(_sessionGuard.Rejects(TokenFor(other.Id)), Is.False);
 		});
 	}
 
@@ -515,7 +532,6 @@ public class DeviceServiceTests
 			Assert.That(result.Error, Is.EqualTo(DeviceError.NotFound));
 			Assert.That(_transport.GroupMessages, Is.Empty);
 			Assert.That(_mediator.Published, Is.Empty);
-			Assert.That(_tracker.IsRevoked(id), Is.False);
 		});
 	}
 

@@ -44,8 +44,10 @@ There is one user, but tokens carry a `scope` claim of `admin` or `client`. `Set
 requires admin, so an endpoint without explicit authorization metadata is admin-only; viewer-safe
 endpoints opt into the `ClientAccess` policy. A missing annotation therefore fails closed.
 
-`POST /api/auth/login` issues a 15-minute access token plus a rotating refresh token whose SHA-256
-hash is stored; reuse of a rotated token is treated as compromise and revokes all sessions. The
+`POST /api/auth/login` issues an access token plus a rotating refresh token whose SHA-256 hash is
+stored; reuse of a rotated token is treated as compromise and revokes its rotation family. The access
+token lasts 15 minutes for admin scope and 60 days for client scope, per
+[ADR 0091](0091-enforced-device-revocation-and-long-client-access-tokens.md). The
 refresh token is an HttpOnly cookie scoped to `/api/auth`. The access token is also set as a
 `Path=/` cookie so `<img>` and font URLs authenticate without a header — it authenticates GET and
 HEAD only, never mutations, which keeps it CSRF-safe. CORS is configured without `AllowCredentials`,

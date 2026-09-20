@@ -23,6 +23,7 @@ public class AuthServiceTests
 	private DeviceConnectionTracker _connections = null!;
 	private AccessTokenCutoff _cutoff = null!;
 	private RefreshServingEpoch _epoch = null!;
+	private DeviceSessionGuard _sessionGuard = null!;
 
 	private static readonly DeviceRegistration _phone = new(null,
 		null,
@@ -47,6 +48,7 @@ public class AuthServiceTests
 		_connections = new DeviceConnectionTracker(new RecordingEventBus(), _time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None));
 		_cutoff = new AccessTokenCutoff();
 		_epoch = new RefreshServingEpoch();
+		_sessionGuard = new DeviceSessionGuard();
 		_service = new AuthService(_users,
 			_tokens,
 			new FakePasswordHasher(),
@@ -62,7 +64,8 @@ public class AuthServiceTests
 				readiness,
 				new ProviderDevicePresenceTracker(),
 				new FakeIntegrationRegistry(),
-			TestScreenSaverProviders.Registry()),
+			TestScreenSaverProviders.Registry(),
+				_sessionGuard),
 			new DeviceEnrollmentStore(),
 			_pairingCodes,
 			_cutoff,
@@ -572,7 +575,6 @@ public class AuthServiceTests
 		{
 			Assert.That(deviceAborts, Is.EqualTo(1));
 			Assert.That(desktopAborts, Is.Zero);
-			Assert.That(_connections.IsRevoked(deviceId), Is.False);
 			Assert.That(again.Data?.DeviceId, Is.EqualTo(deviceId));
 		});
 	}

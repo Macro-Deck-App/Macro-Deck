@@ -190,6 +190,21 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 		return result!.Value.Deserialize<UiAttachSessionResponse>(UiWebSocketProtocol.Json)!;
 	}
 
+	// The guard refuses a device it does not know, which a real host learns from its device rows.
+	private static DeviceSessionGuard GuardFor(IEnumerable<Claim> claims)
+	{
+		var guard = new DeviceSessionGuard();
+		foreach (var claim in claims.Where(c => c.Type == AuthDefaults.DeviceClaim))
+		{
+			if (Guid.TryParse(claim.Value, out var deviceId))
+			{
+				guard.Track(deviceId);
+			}
+		}
+
+		return guard;
+	}
+
 	private UiWebSocketDispatcher DispatcherFor(string connectionId, params Claim[] claims)
 		=> DispatcherFor(connectionId, null, claims);
 
@@ -235,6 +250,7 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			companions: null!,
 			licenses: null!,
 			accessTokenCutoff: cutoff,
+			deviceSessionGuard: GuardFor(claims),
 			connectionCancellation: CancellationToken.None);
 
 	private sealed class RunningLifetime : IHostApplicationLifetime
@@ -292,6 +308,7 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			companions: null!,
 			licenses: null!,
 			accessTokenCutoff: new AccessTokenCutoff(),
+			deviceSessionGuard: GuardFor(claims),
 			connectionCancellation: CancellationToken.None);
 
 	private UiWebSocketDispatcher DispatcherFor(
@@ -336,6 +353,7 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			companions: null!,
 			licenses: null!,
 			accessTokenCutoff: new AccessTokenCutoff(),
+			deviceSessionGuard: GuardFor(claims),
 			connectionCancellation: CancellationToken.None);
 
 	/// <summary>Stands in for the real catalog handler: this test asserts the route exists, not what the

@@ -41,10 +41,21 @@ public class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions
 		{
 			OnTokenValidated = context =>
 			{
-				if (context.Principal is { } principal &&
-					context.HttpContext.RequestServices.GetService<AccessTokenCutoff>()?.Rejects(principal) == true)
+				if (context.Principal is not { } principal)
+				{
+					return Task.CompletedTask;
+				}
+
+				var services = context.HttpContext.RequestServices;
+				if (services.GetService<AccessTokenCutoff>()?.Rejects(principal) == true)
 				{
 					context.Fail("The access token was issued before the password was reset.");
+				}
+				else if (services.GetService<DeviceSessionGuard>()?.Rejects(principal) == true)
+				{
+					// Checked on every request, not only on the socket: a client-scope token lives long
+					// enough that waiting for it to expire would leave a signed-out device working for weeks.
+					context.Fail("The device this access token names was signed out or removed.");
 				}
 
 				return Task.CompletedTask;

@@ -431,6 +431,7 @@ public class Startup
 		services.AddSingleton<LoginThrottle>();
 		services.AddSingleton<AccessTokenCutoff>();
 		services.AddSingleton<RefreshServingEpoch>();
+		services.AddSingleton<DeviceSessionGuard>();
 		services.AddSingleton<FailedLoginNotificationTracker>();
 		services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
 		services.AddSingleton<IAccessTokenIssuer, JwtAccessTokenIssuer>();
@@ -868,6 +869,19 @@ public class Startup
 		}
 	}
 
+	private static void SeedDeviceSessions(IServiceProvider services)
+	{
+		if (KeyRingStartupState.IsLocked)
+		{
+			return;
+		}
+
+		using var scope = services.CreateScope();
+		var devices = scope.ServiceProvider.GetRequiredService<IDeviceRepository>().GetAll().GetAwaiter().GetResult();
+		services.GetRequiredService<DeviceSessionGuard>()
+			.Seed(devices.Select(device => (device.Id, device.SessionsRevokedAt)));
+	}
+
 	public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 	{
 		ArgumentNullException.ThrowIfNull(app);
@@ -877,6 +891,10 @@ public class Startup
 		var services = app.ApplicationServices;
 		services.GetRequiredService<RefreshServingEpoch>()
 			.Begin(services.GetRequiredService<TimeProvider>().GetUtcNow().UtcDateTime);
+
+		// Seeded here rather than from a hosted service: those start after the server is already
+		// listening, and an unseeded guard refuses every device token it does not know yet.
+		SeedDeviceSessions(services);
 
 		app.UseExceptionHandler();
 

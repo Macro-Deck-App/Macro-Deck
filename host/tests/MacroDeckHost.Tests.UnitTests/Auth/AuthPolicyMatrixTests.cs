@@ -1016,6 +1016,27 @@ public class AuthPolicyMatrixTests
 		});
 	}
 
+	[Test]
+	public async Task Signing_a_device_out_refuses_its_access_token_on_the_next_request()
+	{
+		var (body, _) = await LoginWithDevice("Wall tablet");
+		var token = body.GetProperty("accessToken").GetString()!;
+		var deviceId = body.GetProperty("device").GetProperty("deviceId").GetString()!;
+		var before = await ReadJson(await Send(HttpMethod.Get, "/api/auth/status", bearerToken: token));
+
+		await Send(HttpMethod.Post, $"/api/devices/{deviceId}/logout", loopback: true);
+
+		// The token is still inside its lifetime and still correctly signed. Only the host's own record
+		// of the device says the session is over, which is the whole point of checking it per request.
+		var after = await ReadJson(await Send(HttpMethod.Get, "/api/auth/status", bearerToken: token));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(before.GetProperty("authenticated").GetBoolean(), Is.True);
+			Assert.That(after.GetProperty("authenticated").GetBoolean(), Is.False);
+		});
+	}
+
 	private static StartupReadiness CompletedStartupReadiness()
 	{
 		var readiness = new StartupReadiness();

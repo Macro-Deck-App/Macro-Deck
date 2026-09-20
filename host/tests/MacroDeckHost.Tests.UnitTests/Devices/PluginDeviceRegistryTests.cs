@@ -1,4 +1,5 @@
 using MacroDeck.Sdk.Devices;
+using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.Layouts;
 using MacroDeckHost.Application.Persistence.Repositories;
@@ -70,7 +71,8 @@ public class PluginDeviceRegistryTests
 			readiness,
 			_presence,
 			new FakeIntegrationRegistry(),
-			TestScreenSaverProviders.Registry());
+			TestScreenSaverProviders.Registry(),
+			new DeviceSessionGuard());
 	}
 
 	private static DeviceDescriptor Descriptor(

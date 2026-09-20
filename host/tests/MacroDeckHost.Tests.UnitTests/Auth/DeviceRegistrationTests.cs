@@ -32,7 +32,8 @@ public class DeviceRegistrationTests
 			CompletedStartupReadiness(),
 			new ProviderDevicePresenceTracker(),
 			new FakeIntegrationRegistry(),
-			TestScreenSaverProviders.Registry());
+			TestScreenSaverProviders.Registry(),
+			new DeviceSessionGuard());
 
 	private static StartupReadiness CompletedStartupReadiness()
 	{

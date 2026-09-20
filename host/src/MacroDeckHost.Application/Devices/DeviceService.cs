@@ -32,6 +32,7 @@ public class DeviceService : IDeviceService
 	private readonly ProviderDevicePresenceTracker _providerPresence;
 	private readonly IIntegrationRegistry _integrationRegistry;
 	private readonly IScreenSaverRegistry _screenSavers;
+	private readonly DeviceSessionGuard _sessionGuard;
 
 	public DeviceService(
 		IDeviceRepository deviceRepository,
@@ -45,7 +46,8 @@ public class DeviceService : IDeviceService
 		StartupReadiness readiness,
 		ProviderDevicePresenceTracker providerPresence,
 		IIntegrationRegistry integrationRegistry,
-		IScreenSaverRegistry screenSavers)
+		IScreenSaverRegistry screenSavers,
+		DeviceSessionGuard sessionGuard)
 	{
 		_deviceRepository = deviceRepository;
 		_refreshTokenRepository = refreshTokenRepository;
@@ -59,6 +61,7 @@ public class DeviceService : IDeviceService
 		_providerPresence = providerPresence;
 		_integrationRegistry = integrationRegistry;
 		_screenSavers = screenSavers;
+		_sessionGuard = sessionGuard;
 	}
 
 	public async Task<DeviceRegistrationResult> RegisterOrReuse(DeviceRegistration registration, DateTime now)
@@ -67,6 +70,7 @@ public class DeviceService : IDeviceService
 		var result = existing is null ? await Mint(registration, now) : await Reuse(existing, registration, now);
 
 		_connectionTracker.SetDeviceName(result.Device.Id, result.Device.Name);
+		_sessionGuard.Track(result.Device.Id, result.Device.SessionsRevokedAt);
 
 		await _mediator.Publish(new DeviceChangedNotification(result.Device.Id));
 
@@ -94,6 +98,7 @@ public class DeviceService : IDeviceService
 
 		foreach (var id in removable)
 		{
+			_sessionGuard.Forget(id);
 			await _mediator.Publish(new DeviceRemovedNotification(id));
 		}
 	}
@@ -324,10 +329,9 @@ public class DeviceService : IDeviceService
 
 		var now = UtcNow();
 		await _refreshTokenRepository.RevokeAllForDevice(id, now);
+		await RevokeDeviceSessions(device, now);
 
 		await _uiTransport.SendToGroup(UiDeviceGroups.For(id), new DeviceSessionRevokedEvent());
-
-		_connectionTracker.RevokeUntil(id, now.Add(AuthDefaults.AccessTokenLifetime).AddSeconds(30));
 
 		_connectionTracker.AbortDevice(id);
 
@@ -345,10 +349,18 @@ public class DeviceService : IDeviceService
 				continue;
 			}
 
+			await RevokeDeviceSessions(device, UtcNow());
 			await _uiTransport.SendToGroup(UiDeviceGroups.For(device.Id), new DeviceSessionRevokedEvent());
 			_connectionTracker.AbortDevice(device.Id);
 			await _mediator.Publish(new DeviceChangedNotification(device.Id));
 		}
+	}
+
+	private async Task RevokeDeviceSessions(DeviceEntity device, DateTime now)
+	{
+		device.SessionsRevokedAt = now;
+		await _deviceRepository.Update(device);
+		_sessionGuard.Revoke(device.Id, now);
 	}
 
 	public async Task<Result<DeviceError>> RemoveDevice(Guid id)
@@ -362,12 +374,12 @@ public class DeviceService : IDeviceService
 		var now = UtcNow();
 		await _refreshTokenRepository.RevokeAllForDevice(id, now);
 		await _uiTransport.SendToGroup(UiDeviceGroups.For(id), new DeviceSessionRevokedEvent());
-		_connectionTracker.RevokeUntil(id, now.Add(AuthDefaults.AccessTokenLifetime).AddSeconds(30));
 		_connectionTracker.AbortDevice(id);
 
 		_providerPresence.Forget(id);
 
 		await _deviceRepository.Delete(id);
+		_sessionGuard.Forget(id);
 		await _mediator.Publish(new DeviceRemovedNotification(id));
 
 		return Result.Ok<DeviceError>();
