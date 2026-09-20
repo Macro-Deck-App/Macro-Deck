@@ -13993,6 +13993,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>Build de développement</value>
   </data>
+  <data name="Store.BackingUp" xml:space="preserve">
+    <value>Sauvegarde</value>
+  </data>
+  <data name="Store.BackingUpEllipsis" xml:space="preserve">
+    <value>Sauvegarde…</value>
+  </data>
   <data name="Store.Cancelled" xml:space="preserve">
     <value>Annulé</value>
   </data>

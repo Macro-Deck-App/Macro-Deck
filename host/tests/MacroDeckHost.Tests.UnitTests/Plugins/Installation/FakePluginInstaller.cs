@@ -19,7 +19,7 @@ internal sealed class FakePluginInstaller : IPluginInstaller
 		CancellationToken cancellationToken = default)
 	{
 		LastInstallRequest = request;
-		request.Acquired?.Invoke();
+		request.Stage?.Invoke(PluginInstallStage.Acquired);
 		return Task.FromResult(ResultToReturn);
 	}
 

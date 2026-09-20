@@ -13993,6 +13993,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>Build di sviluppo</value>
   </data>
+  <data name="Store.BackingUp" xml:space="preserve">
+    <value>Backup in corso</value>
+  </data>
+  <data name="Store.BackingUpEllipsis" xml:space="preserve">
+    <value>Backup in corso…</value>
+  </data>
   <data name="Store.Cancelled" xml:space="preserve">
     <value>Annullato</value>
   </data>

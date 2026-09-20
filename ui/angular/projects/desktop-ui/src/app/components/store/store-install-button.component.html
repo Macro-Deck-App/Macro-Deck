@@ -83,6 +83,12 @@
       <span class="progress-readout">{{ 'macrodeck.app:Store.ValidatingEllipsis' | translate }}</span>
     </div>
   }
+  @case ('backingUp') {
+    <div class="store-progress">
+      <div class="progress-bar indeterminate" role="progressbar" [attr.aria-valuetext]="'macrodeck.app:Store.BackingUp' | translate"></div>
+      <span class="progress-readout">{{ 'macrodeck.app:Store.BackingUpEllipsis' | translate }}</span>
+    </div>
+  }
   @case ('installing') {
     <div class="store-progress">
       <div class="progress-bar indeterminate" role="progressbar" [attr.aria-valuetext]="'macrodeck.app:Store.Installing' | translate"></div>

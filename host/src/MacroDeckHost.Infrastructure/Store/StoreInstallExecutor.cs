@@ -206,7 +206,10 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 			Force = false,
 			RetainDownload = false,
 			BackupBatchId = backupBatchId,
-			Acquired = () => _tracker.Transition(operationId, StoreOperationState.Installing)
+			Stage = stage => _tracker.Transition(operationId,
+				stage == PluginInstallStage.BackingUp
+					? StoreOperationState.BackingUp
+					: StoreOperationState.Installing)
 		};
 
 		var result = await _pluginInstaller.Install(source, request, cancellationToken);

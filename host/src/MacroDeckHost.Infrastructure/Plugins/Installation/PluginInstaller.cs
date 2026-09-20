@@ -232,7 +232,7 @@ public sealed class PluginInstaller : IPluginInstaller
 					manifest.Version);
 			}
 
-			request.Acquired?.Invoke();
+			request.Stage?.Invoke(PluginInstallStage.Acquired);
 
 			var gate = _pluginGates.GetOrAdd(manifest.Id, _ => new SemaphoreSlim(1, 1));
 			await gate.WaitAsync(cancellationToken);
@@ -243,7 +243,7 @@ public sealed class PluginInstaller : IPluginInstaller
 					return takenOver;
 				}
 
-				if (await RefuseWhenPreUpdateBackupFails(manifest.Id, request.BackupBatchId, cancellationToken) is
+				if (await RefuseWhenPreUpdateBackupFails(manifest.Id, request, cancellationToken) is
 					{ } refusal)
 				{
 					return refusal;
@@ -288,7 +288,7 @@ public sealed class PluginInstaller : IPluginInstaller
 	/// asked to have a copy of first.
 	/// </summary>
 	private async Task<PluginInstallResult?> RefuseWhenPreUpdateBackupFails(string pluginId,
-		string? batchId,
+		PluginInstallRequest request,
 		CancellationToken cancellationToken)
 	{
 		if (!_catalog.TryResolveActive(pluginId, out _))
@@ -310,7 +310,10 @@ public sealed class PluginInstaller : IPluginInstaller
 				pluginId);
 		}
 
-		var outcome = await coordinator.EnsureBeforePluginUpdate(pluginId, batchId, cancellationToken);
+		var outcome = await coordinator.EnsureBeforePluginUpdate(pluginId,
+			request.BackupBatchId,
+			() => request.Stage?.Invoke(PluginInstallStage.BackingUp),
+			cancellationToken);
 		if (outcome.Success || outcome.Skipped)
 		{
 			return null;
@@ -681,6 +684,7 @@ public sealed class PluginInstaller : IPluginInstaller
 		string stagingDirectory,
 		CancellationToken cancellationToken)
 	{
+		request.Stage?.Invoke(PluginInstallStage.Installing);
 		PluginInstallerLog.Installing(_logger, manifest.Id, manifest.Version);
 
 		var versionDirectory = PluginInstallPaths.VersionDirectory(_paths.PluginsDirectory,

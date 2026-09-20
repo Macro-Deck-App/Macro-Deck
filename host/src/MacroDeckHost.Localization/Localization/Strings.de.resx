@@ -13991,6 +13991,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>Entwicklungsversion</value>
   </data>
+  <data name="Store.BackingUp" xml:space="preserve">
+    <value>Sicherung wird erstellt</value>
+  </data>
+  <data name="Store.BackingUpEllipsis" xml:space="preserve">
+    <value>Sicherung wird erstellt…</value>
+  </data>
   <data name="Store.Cancelled" xml:space="preserve">
     <value>Abgebrochen</value>
   </data>

@@ -12,6 +12,7 @@ const STATE_LABEL_KEYS: Record<StoreOperationState, string> = {
   Queued: AppStrings.Store.Queued,
   Downloading: AppStrings.Store.Downloading,
   Validating: AppStrings.Store.Validating,
+  BackingUp: AppStrings.Store.BackingUp,
   Installing: AppStrings.Store.Installing,
   Completed: AppStrings.Store.Installed,
   Failed: AppStrings.Store.Failed,
@@ -23,7 +24,7 @@ export function storeOperationStateLabelKey(state: StoreOperationState): string 
 }
 
 export function storeOperationPercent(operation: StoreOperationBody): number | null {
-  if (operation.state === 'Validating' || operation.state === 'Installing') {
+  if (operation.state === 'Validating' || operation.state === 'BackingUp' || operation.state === 'Installing') {
     return null;
   }
   if (!operation.totalBytes || operation.totalBytes <= 0) {

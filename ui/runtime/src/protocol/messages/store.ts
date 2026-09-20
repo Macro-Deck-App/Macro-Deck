@@ -6,7 +6,7 @@ export type StoreInstallState = 'NotInstalled' | 'Installed' | 'UpdateAvailable'
 
 export type StoreExtensionTrust = 'RegistryAuthenticated' | 'PublisherVerified';
 
-export type StoreOperationState = 'Queued' | 'Downloading' | 'Validating' | 'Installing' | 'Completed' | 'Failed' | 'Cancelled';
+export type StoreOperationState = 'Queued' | 'Downloading' | 'Validating' | 'BackingUp' | 'Installing' | 'Completed' | 'Failed' | 'Cancelled';
 
 export type StoreOperationKind = 'Install' | 'Update' | 'TestInstall';
 
