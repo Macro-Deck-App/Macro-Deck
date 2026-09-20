@@ -123,7 +123,7 @@ public class LogFileRedactionIntegrationTests
 	public async Task Http_Logs_Only_Reach_The_File_When_Debug_Is_Enabled()
 	{
 		var state = new LogLevelState(LogEntryLevel.Information);
-		using (var host = await Host.CreateDefaultBuilder()
+		using (var host = await Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
 			.ConfigureSerilog(_paths, state)
 			.ConfigureWebHost(web => web
 				.UseTestServer()
@@ -139,17 +139,19 @@ public class LogFileRedactionIntegrationTests
 			using var client = host.GetTestClient();
 			var outgoing = host.Services.GetRequiredService<ILoggerFactory>()
 				.CreateLogger("System.Net.Http.HttpClient.HealthProbe.LogicalHandler");
+			var logInformation = LoggerMessage.Define<string>(LogLevel.Information, new EventId(1), "{Message}");
+			var logWarning = LoggerMessage.Define<string>(LogLevel.Warning, new EventId(2), "{Message}");
 			await client.GetAsync("/_macrodeck/health?phase=quiet");
-			outgoing.LogInformation("outgoing-quiet");
-			outgoing.LogWarning("outgoing-warning");
+			logInformation(outgoing, "outgoing-quiet", null);
+			logWarning(outgoing, "outgoing-warning", null);
 
 			state.Minimum = LogEntryLevel.Debug;
 			await client.GetAsync("/_macrodeck/health?phase=debug");
-			outgoing.LogInformation("outgoing-debug");
+			logInformation(outgoing, "outgoing-debug", null);
 
 			state.Minimum = LogEntryLevel.Information;
 			await client.GetAsync("/_macrodeck/health?phase=quiet-again");
-			outgoing.LogInformation("outgoing-quiet-again");
+			logInformation(outgoing, "outgoing-quiet-again", null);
 			await host.StopAsync();
 		}
 
