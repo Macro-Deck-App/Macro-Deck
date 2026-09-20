@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using MacroDeckHost.Application.Logging;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
@@ -22,12 +21,14 @@ public static class HostBuilderExtensions
 		// SQL text at Debug is a redaction surface rather than request diagnostics, so this one stays a
 		// hard floor a lowered minimum cannot lift.
 		var databaseCommand = logLevelState.RegisterOverride(LogEventLevel.Warning);
-		var httpClient = logLevelState.RegisterNoiseFloor(Debugger.IsAttached
-			? LogEventLevel.Debug
-			: LogEventLevel.Information);
+		var httpClient = logLevelState.RegisterNoiseFloor(LogEventLevel.Warning);
 		var requestPipeline = LogNoiseCategories.RequestPipeline
 			.Select(category => (Category: category, Switch: logLevelState.RegisterNoiseFloor(LogEventLevel.Warning)))
 			.ToList();
+
+		// Use only the central, filtered and redacted pipeline, including on Windows where
+		// CreateDefaultBuilder registers an EventLog provider.
+		hostBuilder.ConfigureLogging(logging => logging.ClearProviders());
 
 		return hostBuilder.UseSerilog((_, _, configuration) =>
 		{
