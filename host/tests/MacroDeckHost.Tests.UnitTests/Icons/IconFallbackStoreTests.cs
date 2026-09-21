@@ -63,7 +63,86 @@ public class IconFallbackStoreTests
 		});
 	}
 
+	[Test]
+	public async Task An_animated_icon_falls_back_to_a_gif_that_draws_exactly_its_mostly_opaque_pixels()
+	{
+		using var source = new Image<Rgba32>(EdgedFrameSize, EdgedFrameSize);
+		PaintEdgedSquare(source.Frames.RootFrame, offset: 2);
+		using (var second = new Image<Rgba32>(EdgedFrameSize, EdgedFrameSize))
+		{
+			PaintEdgedSquare(second.Frames.RootFrame, offset: 6);
+			source.Frames.AddFrame(second.Frames.RootFrame);
+		}
+
+		var icon = await StoreAnimatedIcon(source);
+
+		var image = await _harness.FallbackStore.GetOrCreate(icon,
+			IconVariants.Master,
+			staticFrame: false,
+			CancellationToken.None);
+
+		Assert.That(image, Is.Not.Null);
+		using var decoded = await Image.LoadAsync<Rgba32>(image!.Content);
+		Assert.That(decoded.Frames.Count, Is.EqualTo(2));
+		for (var index = 0; index < decoded.Frames.Count; index++)
+		{
+			Assert.That(DrawnPixels(decoded.Frames[index], alphaThreshold: 128),
+				Is.EquivalentTo(DrawnPixels(source.Frames[index], alphaThreshold: 128)),
+				$"frame {index}");
+		}
+	}
+
+	private const int EdgedFrameSize = 20;
+
+	private static void PaintEdgedSquare(ImageFrame<Rgba32> frame, int offset)
+	{
+		for (var y = 0; y < EdgedFrameSize; y++)
+		{
+			for (var x = 0; x < EdgedFrameSize; x++)
+			{
+				var distance = Math.Max(Math.Max(offset - x, x - (offset + 5)), Math.Max(offset - y, y - (offset + 5)));
+				var alpha = distance switch
+				{
+					<= 0 => 255,
+					1 => 192,
+					2 => 64,
+					_ => 0
+				};
+				frame[x, y] = new Rgba32(255, 255, 255, (byte)alpha);
+			}
+		}
+	}
+
+	private static List<(int X, int Y)> DrawnPixels(ImageFrame<Rgba32> frame, int alphaThreshold)
+	{
+		var drawn = new List<(int X, int Y)>();
+		for (var y = 0; y < frame.Height; y++)
+		{
+			for (var x = 0; x < frame.Width; x++)
+			{
+				if (frame[x, y].A >= alphaThreshold)
+				{
+					drawn.Add((x, y));
+				}
+			}
+		}
+
+		return drawn;
+	}
+
 	private async Task<IconEntity> StoreAnimatedIcon(int frameCount)
+	{
+		using var image = new Image<Rgba32>(8, 8, FrameColor(0));
+		for (var i = 1; i < frameCount; i++)
+		{
+			using var frame = new Image<Rgba32>(8, 8, FrameColor(i));
+			image.Frames.AddFrame(frame.Frames.RootFrame);
+		}
+
+		return await StoreAnimatedIcon(image);
+	}
+
+	private async Task<IconEntity> StoreAnimatedIcon(Image<Rgba32> image)
 	{
 		var packId = Guid.NewGuid();
 		var icon = new IconEntity
@@ -72,20 +151,16 @@ public class IconFallbackStoreTests
 			PackId = packId,
 			Name = "spinner",
 			IsAnimated = true,
-			FrameCount = frameCount,
+			FrameCount = image.Frames.Count,
 			ProcessingState = IconProcessingState.Ready
 		};
 
-		using var image = new Image<Rgba32>(8, 8, FrameColor(0));
-		for (var i = 1; i < frameCount; i++)
-		{
-			using var frame = new Image<Rgba32>(8, 8, FrameColor(i));
-			image.Frames.AddFrame(frame.Frames.RootFrame);
-		}
-
 		foreach (var frame in image.Frames)
 		{
-			frame.Metadata.GetWebpMetadata().FrameDelay = 100;
+			var webpFrame = frame.Metadata.GetWebpMetadata();
+			webpFrame.FrameDelay = 100;
+			webpFrame.BlendMethod = WebpBlendMethod.Source;
+			webpFrame.DisposalMethod = WebpDisposalMethod.DoNotDispose;
 		}
 
 		using var stream = new MemoryStream();
