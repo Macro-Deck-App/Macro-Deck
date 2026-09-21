@@ -208,6 +208,15 @@ public static class UiConfigPrimitives
 	/// Optional: a widget that needs no such area serves a root without one.</summary>
 	public const string WidgetEditor = "widget-editor";
 
+	/// <summary>A compact line naming what currently governs a setting, with its own controls trailing it.</summary>
+	public const string Status = "status";
+
+	/// <summary>A compact control that opens a list of actions, each one a button.</summary>
+	public const string Menu = "menu";
+
+	/// <summary>A question the surface puts to the user in a modal dialog while the node is in the tree.</summary>
+	public const string Dialog = "dialog";
+
 #pragma warning restore CA1720
 
 	/// <summary>The types this package ships names for, inputs first and then chrome, each in the order they
@@ -225,6 +234,7 @@ public static class UiConfigPrimitives
 		Image, KeyboardSequence, KeyboardCombo, WidgetTarget, ActionsListEditor, ActionPicker, VariablePicker,
 		DevicePicker, IntegrationPicker, IconDisplay, StateMappingEditor, Flow, Step, Stack, Tabs,
 		Tab, Heading, Prose, Instructions, Instruction, CopyValue, Link, AdvancedSection, Divider, Banner,
-		ValidationMessage, Busy, Button, WidgetConfiguration, WidgetProperties, WidgetEditor,
+		ValidationMessage, Busy, Button, WidgetConfiguration, WidgetProperties, WidgetEditor, Status,
+		Menu, Dialog,
 	];
 }

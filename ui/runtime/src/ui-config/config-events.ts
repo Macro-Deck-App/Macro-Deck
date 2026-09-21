@@ -11,4 +11,5 @@ export const UiConfigEvents = {
   Reload: 'reload',
   Add: 'add',
   Remove: 'remove',
+  Provide: 'provide',
 } as const;

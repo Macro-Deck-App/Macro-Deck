@@ -16042,6 +16042,24 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.Editor.SwitchProviderMessage" xml:space="preserve">
     <value>Switching to this state provider will replace the currently active state definitions.</value>
   </data>
+  <data name="Widgets.Editor.StateProvidedBy" xml:space="preserve">
+    <value>State from {integration}: {action}</value>
+  </data>
+  <data name="Widgets.Editor.UseProvidedIconConfirm" xml:space="preserve">
+    <value>Use provided icon</value>
+  </data>
+  <data name="Widgets.Editor.UseSelectedProvidersConfirm" xml:space="preserve">
+    <value>Use selected</value>
+  </data>
+  <data name="Widgets.Editor.SwitchProviderConfirm" xml:space="preserve">
+    <value>Switch provider</value>
+  </data>
+  <data name="Widgets.Editor.ProviderReturnedNoStates" xml:space="preserve">
+    <value>This action has not returned any states yet.</value>
+  </data>
+  <data name="Widgets.Editor.ProviderProbeFailed" xml:space="preserve">
+    <value>Could not ask this action for its states.</value>
+  </data>
   <data name="Widgets.Editor.ThisAction" xml:space="preserve">
     <value>This action</value>
   </data>

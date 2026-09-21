@@ -346,7 +346,12 @@
           [triggers]="actionTriggers()"
           [states]="actionStateOptions()"
           [canRun]="canRunFlows()"
-          (flowsChange)="onActionFlowsChange($event)" />
+          [offersStateProvider]="offersStateProvider()"
+          [offersIconProvider]="offersIconProvider()"
+          [stateProviderBlockId]="stateProviderBlockId()"
+          [iconProviderBlockId]="iconProviderBlockId()"
+          (flowsChange)="onActionFlowsChange($event)"
+          (providerChange)="onProviderChange($event)" />
       }
       @case (types.ActionPicker) {
         <shared-node-action-picker [value]="stringValue()" (valueChange)="onChange($event)" />

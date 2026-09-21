@@ -54,10 +54,12 @@ public class UiConfigVocabularyTests
 		"widget-configuration", "widget-properties", "widget-editor",
 	];
 
+	private static readonly string[] _expectedLaterChrome = ["status", "menu", "dialog"];
+
 	private static readonly string[] _expectedEvents =
 	[
 		"change", "submit", "cancel", "back", "activate", "expand", "collapse", "open", "filter", "reload",
-		"add", "remove",
+		"add", "remove", "provide",
 	];
 
 	/// <summary>Regularised spellings a reasonable person would reach for and this vocabulary must not
@@ -82,6 +84,7 @@ public class UiConfigVocabularyTests
 			.Concat(_expectedMacroDeckInputs)
 			.Concat(_expectedChrome)
 			.Concat(_expectedWidgetChrome)
+			.Concat(_expectedLaterChrome)
 			.ToArray();
 
 		Assert.Multiple(() =>
@@ -89,10 +92,10 @@ public class UiConfigVocabularyTests
 			Assert.That(UiConfigPrimitives.WellKnown,
 				Is.EqualTo(expected).AsCollection,
 				"the primitive vocabulary is the 27 control names, then the 7 high-level controls, then the " +
-				"17 chrome names, then the 3 widget configuration regions, in order");
-			Assert.That(UiConfigPrimitives.WellKnown, Has.Count.EqualTo(54));
+				"17 chrome names, then the 3 widget configuration regions, then later chrome, in order");
+			Assert.That(UiConfigPrimitives.WellKnown, Has.Count.EqualTo(57));
 			Assert.That(UiConfigPrimitives.WellKnown.Distinct(StringComparer.Ordinal).Count(),
-				Is.EqualTo(54));
+				Is.EqualTo(57));
 
 			foreach (var forbidden in _forbiddenPrimitives)
 			{
@@ -104,12 +107,12 @@ public class UiConfigVocabularyTests
 	}
 
 	[Test]
-	public void The_event_vocabulary_is_the_twelve_frozen_names()
+	public void The_event_vocabulary_is_exactly_the_shipped_names()
 	{
 		Assert.Multiple(() =>
 		{
 			Assert.That(UiConfigEvents.WellKnown, Is.EqualTo(_expectedEvents).AsCollection);
-			Assert.That(UiConfigEvents.WellKnown, Has.Count.EqualTo(12));
+			Assert.That(UiConfigEvents.WellKnown, Has.Count.EqualTo(13));
 
 			foreach (var forbidden in _forbiddenEvents)
 			{
@@ -155,6 +158,72 @@ public class UiConfigVocabularyTests
 		var node = Walk(tree.Root).Single(n => n.Type == UiConfigPrimitives.MultiSelect);
 
 		Assert.That(node.Properties.Keys, Does.Not.Contain(UiConfigProperties.Reorderable));
+	}
+
+	[Test]
+	public void A_button_authored_without_a_confirmation_emits_the_same_node_as_before()
+	{
+		var tree = UiViewBuilder.Build(ConfigSurface(),
+			new UiConfigButton
+			{
+				Key = "apply",
+				Label = "Apply preset",
+				Icon = "plus",
+				Events = [UiEventHandler.On(UiConfigEvents.Activate, () => { })],
+			});
+
+		var node = Walk(tree.Root).Single(n => n.Type == UiConfigPrimitives.Button);
+
+		Assert.That(node.Properties.Keys,
+			Is.EquivalentTo(new[] { UiConfigProperties.Events, UiConfigProperties.Label, UiConfigProperties.Icon }));
+	}
+
+	[Test]
+	public void An_action_list_authored_without_provider_offers_emits_the_same_node_as_before()
+	{
+		var tree = UiViewBuilder.Build(ConfigSurface(),
+			new UiActionsListEditor
+			{
+				Key = "flows",
+				Binding = Bind.Custom(() => JsonSerializer.SerializeToElement(Array.Empty<object>()), _ => { }),
+				CanRun = true,
+			});
+
+		var node = Walk(tree.Root).Single(n => n.Type == UiConfigPrimitives.ActionsListEditor);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(node.Properties.Keys,
+				Is.EquivalentTo(new[] { UiConfigProperties.Events, UiConfigProperties.Value, UiConfigProperties.CanRun }));
+			Assert.That(node.Properties[UiConfigProperties.Events].EnumerateArray().Select(e => e.GetString()),
+				Is.EqualTo(new[] { UiConfigEvents.Change }).AsCollection);
+		});
+	}
+
+	[Test]
+	public void An_action_list_offering_providers_emits_the_offers_the_active_blocks_and_the_provide_event()
+	{
+		var tree = UiViewBuilder.Build(ConfigSurface(),
+			new UiActionsListEditor
+			{
+				Key = "flows",
+				OffersStateProvider = true,
+				OffersIconProvider = false,
+				StateProviderBlockId = "b1",
+				Events = [UiEventHandler.On(UiConfigEvents.Provide, () => { })],
+			});
+
+		var node = Walk(tree.Root).Single(n => n.Type == UiConfigPrimitives.ActionsListEditor);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(node.Properties[UiConfigProperties.OffersStateProvider].GetBoolean(), Is.True);
+			Assert.That(node.Properties[UiConfigProperties.OffersIconProvider].GetBoolean(), Is.False);
+			Assert.That(node.Properties[UiConfigProperties.StateProviderBlockId].GetString(), Is.EqualTo("b1"));
+			Assert.That(node.Properties.Keys, Does.Not.Contain(UiConfigProperties.IconProviderBlockId));
+			Assert.That(node.Properties[UiConfigProperties.Events].EnumerateArray().Select(e => e.GetString()),
+				Does.Contain(UiConfigEvents.Provide));
+		});
 	}
 
 	[Test]
@@ -244,6 +313,10 @@ public class UiConfigVocabularyTests
 							Key = "flows",
 							Triggers = UiValue.Of<IReadOnlyList<string>>(["press"]),
 							CanRun = true,
+							OffersStateProvider = true,
+							OffersIconProvider = true,
+							StateProviderBlockId = "state-block",
+							IconProviderBlockId = "icon-block",
 						}),
 						Configure(new UiActionPickerInput
 							{ Key = "action", IntegrationId = "com.example.demo" }),
@@ -305,6 +378,41 @@ public class UiConfigVocabularyTests
 						new UiValidationMessage { Key = "message", Text = "Required.", For = "text" },
 						new UiBusy { Key = "busy", Text = "Loading..." },
 						new UiConfigButton { Key = "apply", Label = "Apply preset", Icon = "plus" },
+						new UiStatus
+						{
+							Key = "status",
+							Icon = "zap",
+							Label = "Provided by",
+							Value = "Mute",
+							Children = [new UiConfigButton { Key = "stop", Label = "Stop", Icon = "x" }],
+						},
+						new UiConfigDialog
+						{
+							Key = "dialog",
+							Title = "Stop?",
+							Text = "Your states come back.",
+							Children = [new UiConfigButton { Key = "dialog-stop", Label = "Stop" }],
+						},
+						new UiConfigMenu
+						{
+							Key = "menu",
+							Label = "Manage",
+							Icon = "dots-vertical",
+							Children =
+							[
+								new UiConfigButton
+								{
+									Key = "rename",
+									Label = "Rename",
+									ConfirmTitle = "Rename",
+									ConfirmMessage = "Enter a name.",
+									ConfirmLabel = "Save",
+									ConfirmDanger = false,
+									PromptValue = "Old",
+									Placeholder = "Name",
+								},
+							],
+						},
 					],
 				},
 			],

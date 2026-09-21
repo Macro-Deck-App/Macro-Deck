@@ -95,8 +95,9 @@ so a reference-only provider does not override it.
 The rules match [reading state](/features/button-states/#reading-state):
 
 - **Answer for the configured instance**, from `parameters`. The same action on several buttons answers
-  for each separately. The host decides which instance, if any, is a button's icon provider (at most one
-  per button), and resolves it once per button - you own the icon currently rendered, not one icon per
+  for each separately. The user adopts at most one instance as a button's icon provider, from the
+  control the button editor shows on each such action or from the offer when one is added, and the host
+  resolves it once per button - you own the icon currently rendered, not one icon per
   state.
 - **Tolerate a half-filled draft.** It is called once per settled editor draft while the user configures
   the action, so a missing value must not throw.

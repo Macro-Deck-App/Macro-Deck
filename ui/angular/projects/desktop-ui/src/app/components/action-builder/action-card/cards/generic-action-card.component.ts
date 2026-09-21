@@ -63,11 +63,13 @@ export class GenericActionCardComponent {
 
   get providesButtonState(): boolean {
     return this.store.consumerSupportsStateProvider() &&
+      (!this.block.disabled || this.store.stateProviderBlockId() === this.block.id) &&
       this.store.providesButtonState(this.block.integrationId, this.block.actionId);
   }
 
   get providesWidgetIcon(): boolean {
     return this.store.consumerSupportsIconProvider() &&
+      (!this.block.disabled || this.store.iconProviderBlockId() === this.block.id) &&
       this.store.providesWidgetIcon(this.block.integrationId, this.block.actionId);
   }
 

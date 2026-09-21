@@ -16041,6 +16041,24 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Widgets.Editor.SwitchProviderMessage" xml:space="preserve">
     <value>Przełączenie na tego dostawcę stanu zastąpi obecnie aktywne definicje stanów.</value>
   </data>
+  <data name="Widgets.Editor.StateProvidedBy" xml:space="preserve">
+    <value>Stan z {integration}: {action}</value>
+  </data>
+  <data name="Widgets.Editor.UseProvidedIconConfirm" xml:space="preserve">
+    <value>Użyj dostarczonej ikony</value>
+  </data>
+  <data name="Widgets.Editor.UseSelectedProvidersConfirm" xml:space="preserve">
+    <value>Użyj wybranych</value>
+  </data>
+  <data name="Widgets.Editor.SwitchProviderConfirm" xml:space="preserve">
+    <value>Zmień dostawcę</value>
+  </data>
+  <data name="Widgets.Editor.ProviderReturnedNoStates" xml:space="preserve">
+    <value>Ta akcja nie zwróciła jeszcze żadnych stanów.</value>
+  </data>
+  <data name="Widgets.Editor.ProviderProbeFailed" xml:space="preserve">
+    <value>Nie udało się pobrać stanów tej akcji.</value>
+  </data>
   <data name="Widgets.Editor.ThisAction" xml:space="preserve">
     <value>Ta akcja</value>
   </data>

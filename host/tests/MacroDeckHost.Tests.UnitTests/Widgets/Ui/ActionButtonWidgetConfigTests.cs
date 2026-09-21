@@ -5,6 +5,8 @@ using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Testing;
+using MacroDeckHost.Application.Actions;
+using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Actions;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -158,8 +160,7 @@ public class ActionButtonWidgetConfigTests
 		AssertValidatesAgainstSchema(ComposeRootWithStates(host));
 
 		// Delete "on" - still the selected state, via the state row's "Manage this state" menu.
-		host.ById("root.properties.state-row.manageState").Activate();
-		host.ById("root.properties.deleteState").Activate();
+		host.ById("root.properties.state-row.manageState.deleteState").Activate();
 
 		var afterDelete = ReadStates(host);
 		Assert.That(afterDelete.Select(Id), Is.EqualTo(new[] { "off" }));
@@ -179,8 +180,7 @@ public class ActionButtonWidgetConfigTests
 		});
 
 		host.ById("activeStateId").Change("on");
-		host.ById("root.properties.state-row.manageState").Activate();
-		host.ById("root.properties.deleteState").Activate();
+		host.ById("root.properties.state-row.manageState.deleteState").Activate();
 
 		var mapping = host.ById("stateMapping").Property(UiConfigProperties.Value)!.Value;
 		var stillReferencesOn = mapping.GetProperty("rules").EnumerateArray()
@@ -305,61 +305,73 @@ public class ActionButtonWidgetConfigTests
 	[Test]
 	public void Delete_is_unavailable_below_two_states()
 	{
-		// Delete lives behind the state row's "Manage this state" menu (issue #837), so opening it is what
-		// both hosts need before this can tell "unavailable" from "not yet revealed".
 		var soloHost = Render(new
 		{
 			stateMode = true, states = new object[] { new { id = "solo", label = "Solo" } },
 		});
-		soloHost.ById("root.properties.state-row.manageState").Activate();
 		var twoStateHost = Render(_twoStates);
-		twoStateHost.ById("root.properties.state-row.manageState").Activate();
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(soloHost.FindById("root.properties.deleteState"), Is.Null);
-			Assert.That(twoStateHost.FindById("root.properties.deleteState"), Is.Not.Null);
+			Assert.That(soloHost.FindById("root.properties.state-row.manageState.deleteState"), Is.Null);
+			Assert.That(twoStateHost.FindById("root.properties.state-row.manageState.deleteState"), Is.Not.Null);
 		});
 	}
 
 	[Test]
-	public void State_management_is_unavailable_while_a_state_provider_is_set()
+	public void A_state_provider_owns_the_state_set_but_each_provided_state_stays_selectable_and_styleable()
 	{
 		var host = Render(new
 		{
 			stateMode = true,
 			states = new object[] { new { id = "muted", label = "Muted" }, new { id = "unmuted", label = "Unmuted" } },
+			activeStateId = "muted",
 			stateProvider = new { blockId = "b1", integrationId = "int", actionId = "act", actionLabel = "Mute" },
+			flows = FlowWith("b1"),
 		});
+
+		host.ById("activeStateId").Change("unmuted");
+		host.ById("states.unmuted.appearance.backgroundColor").Change("#123456");
+
+		var unmuted = ReadStates(host).Single(state => Id(state) == "unmuted");
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(host.FindById("activeStateId"), Is.Null);
+			Assert.That(host.ById("activeStateId").Text(UiConfigProperties.Value), Is.EqualTo("unmuted"));
+			Assert.That(unmuted.GetProperty("appearance").GetProperty("backgroundColor").GetString(),
+				Is.EqualTo("#123456"));
 			Assert.That(host.FindById("root.properties.state-row.addState"), Is.Null);
-			Assert.That(host.FindById("states"), Is.Null);
+			Assert.That(host.FindById("root.properties.state-row.manageState"), Is.Null);
+			Assert.That(host.FindById("states.unmuted.label"), Is.Null);
 			Assert.That(host.FindById("stateMapping"), Is.Null);
-			Assert.That(host.FindById("root.properties.removeStateProvider"), Is.Not.Null);
+			Assert.That(host.FindById("cycleStatesOnPress"), Is.Null);
+			Assert.That(host.FindById("root.properties.stateProviderStatus.removeStateProvider"), Is.Not.Null);
 		});
 	}
 
 	[Test]
-	public void The_icon_control_is_unavailable_while_an_icon_provider_is_set()
+	public void The_icon_control_is_locked_while_an_icon_provider_is_set()
 	{
 		var offHost = Render(new
 		{
 			stateMode = false, iconProvider = new { blockId = "b1", integrationId = "int", actionId = "act" },
+			flows = FlowWith("b1"),
 		});
-
-		Assert.That(offHost.FindById("icon"), Is.Null);
 
 		var onHost = Render(new
 		{
 			stateMode = true,
 			states = new object[] { new { id = "off", label = "Off" }, new { id = "on", label = "On" } },
 			iconProvider = new { blockId = "b1", integrationId = "int", actionId = "act" },
+			flows = FlowWith("b1"),
 		});
 
-		Assert.That(onHost.FindById("states.off.appearance.icon"), Is.Null);
+		Assert.Multiple(() =>
+		{
+			Assert.That(offHost.ById("icon").Flag(UiConfigProperties.Disabled), Is.True);
+			Assert.That(onHost.ById("states.off.appearance.icon").Flag(UiConfigProperties.Disabled), Is.True);
+			Assert.That(Render(new { }).ById("icon").Flag(UiConfigProperties.Disabled), Is.Not.True);
+		});
 	}
 
 	[Test]
@@ -370,6 +382,7 @@ public class ActionButtonWidgetConfigTests
 			stateMode = true,
 			states = new object[] { new { id = "muted", label = "Muted" }, new { id = "unmuted", label = "Unmuted" } },
 			stateProvider = new { blockId = "b1", integrationId = "int", actionId = "act", actionLabel = "Mute" },
+			flows = FlowWith("b1"),
 			manualStateBackup = new
 			{
 				states = new object[]
@@ -381,7 +394,7 @@ public class ActionButtonWidgetConfigTests
 			},
 		});
 
-		host.ById("root.properties.removeStateProvider").Activate();
+		host.ById("root.properties.stateProviderStatus.removeStateProvider").Activate();
 
 		var restored = ReadStates(host);
 
@@ -390,7 +403,7 @@ public class ActionButtonWidgetConfigTests
 			Assert.That(restored.Select(Id), Is.EqualTo(new[] { "off", "on" }));
 			Assert.That(restored[0].GetProperty("appearance").GetProperty("backgroundColor").GetString(),
 				Is.EqualTo("#000000"));
-			Assert.That(host.FindById("root.properties.removeStateProvider"),
+			Assert.That(host.FindById("root.properties.stateProviderStatus.removeStateProvider"),
 				Is.Null,
 				"No provider is active any more.");
 		});
@@ -525,6 +538,7 @@ public class ActionButtonWidgetConfigTests
 			stateMode = true,
 			states = new object[] { new { id = "off", label = "Off" }, new { id = "on", label = "On" } },
 			stateProvider = new { blockId = "b1", integrationId = "int", actionId = "act", actionLabel = "Mute" },
+			flows = FlowWith("b1"),
 		});
 
 		Assert.Multiple(() =>
@@ -564,8 +578,7 @@ public class ActionButtonWidgetConfigTests
 		// on the actions node instead.
 		var host = Render(_twoStates);
 		host.ById("activeStateId").Change("on");
-		host.ById("root.properties.state-row.manageState").Activate();
-		host.ById("states.on.label").Change("Recording");
+		host.ById("root.properties.state-row.manageState.renameState").Raise(UiConfigEvents.Activate, "Recording");
 
 		Assert.Multiple(() =>
 		{
@@ -931,7 +944,7 @@ public class ActionButtonWidgetConfigTests
 	// ---- the state row's "Manage this state" menu (issue #837) ----------------------------------------------
 
 	[Test]
-	public void The_third_state_row_control_is_a_manage_menu_not_a_delete_button()
+	public void The_third_state_row_control_is_a_manage_menu_offering_rename_and_delete()
 	{
 		var host = Render(_twoStates);
 
@@ -939,38 +952,55 @@ public class ActionButtonWidgetConfigTests
 
 		Assert.Multiple(() =>
 		{
+			Assert.That(manage.Type, Is.EqualTo(UiConfigPrimitives.Menu));
 			Assert.That(manage.Text(UiConfigProperties.Icon), Is.EqualTo("dots-vertical"));
 			// Label crosses as a localized reference, resolved client-side (S11 in WeatherWidgetViewTests
 			// documents the same shape) - asserting the raw reference is what keeps this test from silently
 			// passing against whatever English happens to say today.
 			Assert.That(manage.Property(UiConfigProperties.Label)!.Value.GetRawText(),
 				Is.EqualTo("""{"$localized":{"scope":"macrodeck.app","key":"Widgets.Editor.ManageThisState"}}"""));
-			Assert.That(host.FindById("root.properties.deleteState"),
-				Is.Null,
-				"delete stays behind the menu until it is opened");
+			Assert.That(manage.Children.Select(child => child.Id),
+				Is.EqualTo(new[]
+				{
+					"root.properties.state-row.manageState.renameState",
+					"root.properties.state-row.manageState.deleteState",
+				}).AsCollection);
 		});
 	}
 
 	[Test]
-	public void Opening_the_manage_menu_reveals_rename_and_delete_hiding_delete_below_two_states()
+	public void Rename_asks_for_the_new_name_starting_from_the_current_one_and_delete_asks_before_removing()
 	{
 		var host = Render(_twoStates);
+		host.ById("activeStateId").Change("on");
 
-		Assert.That(host.FindById("states.off.label"), Is.Null, "rename is hidden until the menu is opened");
-
-		host.ById("root.properties.state-row.manageState").Activate();
+		var rename = host.ById("root.properties.state-row.manageState.renameState");
+		var delete = host.ById("root.properties.state-row.manageState.deleteState");
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(host.FindById("states.off.label"), Is.Not.Null);
-			Assert.That(host.FindById("root.properties.deleteState"), Is.Not.Null);
+			Assert.That(rename.Text(UiConfigProperties.PromptValue), Is.EqualTo("On"));
+			Assert.That(delete.HasProperty(UiConfigProperties.ConfirmMessage), Is.True);
+			Assert.That(delete.Flag(UiConfigProperties.ConfirmDanger), Is.True);
 		});
 
-		host.ById("root.properties.deleteState").Activate();
+		rename.Raise(UiConfigEvents.Activate, "  Recording  ");
+		rename.Raise(UiConfigEvents.Activate, "   ");
+		host.ById("root.properties.state-row.manageState.renameState").Raise(UiConfigEvents.Activate);
 
-		Assert.That(host.FindById("root.properties.deleteState"),
-			Is.Null,
-			"a stateful button keeps at least one state");
+		Assert.That(ReadStates(host).Single(state => Id(state) == "on").GetProperty("label").GetString(),
+			Is.EqualTo("Recording"),
+			"a blank name or an answer without text leaves the name alone");
+
+		host.ById("root.properties.state-row.manageState.deleteState").Activate();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ReadStates(host).Select(Id), Is.EqualTo(new[] { "off" }));
+			Assert.That(host.FindById("root.properties.state-row.manageState.deleteState"),
+				Is.Null,
+				"a stateful button keeps at least one state");
+		});
 	}
 
 	// ---- the live state line (issue #837) --------------------------------------------------------------------
@@ -1089,7 +1119,10 @@ public class ActionButtonWidgetConfigTests
 			null!,
 			null!,
 			new FakeIntegrationRegistry(),
-			new FakeFontCatalog());
+			new FakeFontCatalog(),
+			null!,
+			null!,
+			TimeProvider.System);
 
 		var surface = ConfigSurface(WidgetTypeIds.Clock, "{}");
 
@@ -1132,11 +1165,37 @@ public class ActionButtonWidgetConfigTests
 		double aspectRatio = 1,
 		WidgetStateOption? liveState = null,
 		IFontCatalog? fonts = null)
-		=> UiTestHost.Render(ActionButtonWidgetConfigView.Build(JsonSerializer.SerializeToElement(data),
+	{
+		var registry = new FakeIntegrationRegistry();
+		var clock = TimeProvider.System;
+
+		return UiTestHost.Render(ActionButtonWidgetConfigView.Build(JsonSerializer.SerializeToElement(data),
 			aspectRatio,
-			new FakeIntegrationRegistry(),
+			registry,
 			fonts ?? new FakeFontCatalog(),
-			liveState));
+			liveState,
+			new ActionButtonConfigContext(new ActionProviderProbe(registry,
+					new RemoteIconProviderActionRegistry(null!, null!, null!),
+					clock,
+					Serilog.Core.Logger.None),
+				TestLocalization.Resolver,
+				"en",
+				clock,
+				CancellationToken.None)));
+	}
+
+	private static object[] FlowWith(params string[] blockIds)
+		=>
+		[
+			new
+			{
+				id = "flow-1",
+				triggerType = "short-press",
+				children = blockIds
+					.Select(id => new { id, integrationId = "int", actionId = "act", label = string.Empty })
+					.ToArray(),
+			},
+		];
 
 	private static object StatesData(int count) => new
 	{

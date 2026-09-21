@@ -363,6 +363,44 @@ public sealed record UiDivider : UiLeaf
 	public override string Type => UiConfigPrimitives.Divider;
 }
 
+/// <summary>
+/// A compact, framed line naming what currently governs a setting: an optional leading <see cref="Icon" />, a
+/// muted <see cref="Label" /> and the emphasized <see cref="Value" /> it introduces, such as "Provided by" and
+/// the action that provides a button's state. Children are drawn trailing it, typically an icon-only
+/// <see cref="UiConfigButton" /> that stops what the line names. Contributes no key of its own.
+///
+/// <para>
+/// A renderer that does not know the type declines it like any unknown node and draws its fallback, so give
+/// the node one built from a <see cref="UiProse" /> and the same buttons where that matters.
+/// </para>
+/// </summary>
+public sealed record UiStatus : UiContainer
+{
+	/// <summary>An icon name drawn ahead of the text. Absent draws none.</summary>
+	public UiValue<string> Icon { get; init; }
+
+	/// <summary>The muted text that introduces <see cref="Value" />.</summary>
+	public UiText Label { get; init; }
+
+	/// <summary>The emphasized text: what governs the setting.</summary>
+	public UiText Value { get; init; }
+
+	/// <inheritdoc />
+	public override string Type => UiConfigPrimitives.Status;
+
+	/// <inheritdoc />
+	protected internal override void DeclareProperties(UiPropertyDeclaration properties)
+	{
+		ArgumentNullException.ThrowIfNull(properties);
+
+		base.DeclareProperties(properties);
+
+		properties.Set(UiConfigProperties.Icon, Icon);
+		properties.Set(UiConfigProperties.Label, Label.Value);
+		properties.Set(UiConfigProperties.Value, Value.Value);
+	}
+}
+
 /// <summary>A message about the flow as a whole rather than about one field. Counterpart of the existing
 /// dialog's banner, which carries the error or status message a step returned.</summary>
 public sealed record UiBanner : UiLeaf
@@ -462,8 +500,102 @@ public sealed record UiConfigButton : UiLeaf
 	/// </summary>
 	public UiValue<string> Icon { get; init; }
 
+	/// <summary>
+	/// A question the renderer asks in a dialog before it raises <c>activate</c>; declining raises nothing.
+	/// Absent means the button acts at once. A renderer that predates confirmation raises <c>activate</c>
+	/// without asking, so a button whose action cannot be undone should not rely on it alone.
+	/// </summary>
+	public UiText ConfirmMessage { get; init; }
+
+	/// <summary>The dialog's heading. Absent lets the renderer choose a generic one.</summary>
+	public UiText ConfirmTitle { get; init; }
+
+	/// <summary>The caption of the dialog's accepting control. Absent lets the renderer choose one.</summary>
+	public UiText ConfirmLabel { get; init; }
+
+	/// <summary>Whether accepting destroys something, so the renderer can style the dialog as a warning.</summary>
+	public UiValue<bool> ConfirmDanger { get; init; }
+
+	/// <summary>
+	/// Makes the dialog ask for text, starting with this value, and raise <c>activate</c> with the entered
+	/// text as a string payload. <see cref="Placeholder" /> is the field's hint. A renderer that predates
+	/// prompting raises <c>activate</c> without a payload, which a handler has to tolerate.
+	/// </summary>
+	public UiValue<string> PromptValue { get; init; }
+
+	/// <summary>The hint shown in the prompt's empty text field.</summary>
+	public UiText Placeholder { get; init; }
+
 	/// <inheritdoc />
 	public override string Type => UiConfigPrimitives.Button;
+
+	/// <inheritdoc />
+	protected internal override void DeclareProperties(UiPropertyDeclaration properties)
+	{
+		ArgumentNullException.ThrowIfNull(properties);
+
+		base.DeclareProperties(properties);
+
+		properties.Set(UiConfigProperties.Label, Label.Value);
+		properties.Set(UiConfigProperties.Icon, Icon);
+		properties.Set(UiConfigProperties.ConfirmMessage, ConfirmMessage.Value);
+		properties.Set(UiConfigProperties.ConfirmTitle, ConfirmTitle.Value);
+		properties.Set(UiConfigProperties.ConfirmLabel, ConfirmLabel.Value);
+		properties.Set(UiConfigProperties.ConfirmDanger, ConfirmDanger);
+		properties.Set(UiConfigProperties.PromptValue, PromptValue);
+		properties.Set(UiConfigProperties.Placeholder, Placeholder.Value);
+	}
+}
+
+/// <summary>
+/// A question the surface puts to the user in a modal dialog for as long as this node is in the tree, so the
+/// provider opens it by adding the node (typically inside a <see cref="Dsl.UiWhen" />) and closes it by
+/// removing it. <see cref="Title" /> is the heading and <see cref="Text" /> the message. Child
+/// <see cref="UiConfigButton" />s are the dialog's answers, drawn in order with the last one as the primary
+/// answer (or as a warning when it declares <see cref="UiConfigButton.ConfirmDanger" />); any other children,
+/// such as boolean inputs, are drawn as the dialog's body. Dismissing the dialog without answering raises
+/// <c>cancel</c> on this node, so a provider handles <c>cancel</c> to remove it. A renderer that predates the
+/// type declines it and draws the node's fallback in place.
+/// </summary>
+public sealed record UiConfigDialog : UiContainer
+{
+	/// <summary>The dialog's heading.</summary>
+	public UiText Title { get; init; }
+
+	/// <summary>The message the dialog asks.</summary>
+	public UiText Text { get; init; }
+
+	/// <inheritdoc />
+	public override string Type => UiConfigPrimitives.Dialog;
+
+	/// <inheritdoc />
+	protected internal override void DeclareProperties(UiPropertyDeclaration properties)
+	{
+		ArgumentNullException.ThrowIfNull(properties);
+
+		base.DeclareProperties(properties);
+
+		properties.Set(UiConfigProperties.Title, Title.Value);
+		properties.Set(UiConfigProperties.Text, Text.Value);
+	}
+}
+
+/// <summary>
+/// A compact control that opens a list of actions: its children are <see cref="UiConfigButton" />s, drawn as
+/// the list's entries with their icons and labels, and each raises its own <c>activate</c> (asking first when
+/// it declares a confirmation). <see cref="Label" /> is the control's accessible name, <see cref="Icon" /> its
+/// trigger icon. A renderer that predates the type declines it and draws the node's fallback.
+/// </summary>
+public sealed record UiConfigMenu : UiContainer
+{
+	/// <summary>The control's accessible name.</summary>
+	public UiText Label { get; init; }
+
+	/// <summary>The trigger's icon. Absent lets the renderer use its usual overflow icon.</summary>
+	public UiValue<string> Icon { get; init; }
+
+	/// <inheritdoc />
+	public override string Type => UiConfigPrimitives.Menu;
 
 	/// <inheritdoc />
 	protected internal override void DeclareProperties(UiPropertyDeclaration properties)

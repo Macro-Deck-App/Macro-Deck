@@ -3,6 +3,12 @@ import { UiNode } from '@macro-deck/runtime';
 import { ExternalLinkService } from '../../services/external-link.service';
 import { el, renderTree, tick } from './ui-render-test-support';
 
+async function until(condition: () => boolean): Promise<void> {
+  for (let attempt = 0; attempt < 100 && !condition(); attempt++) {
+    await new Promise(resolve => setTimeout(resolve, 20));
+  }
+}
+
 async function type(input: HTMLInputElement, value: string): Promise<void> {
   input.value = value;
   input.dispatchEvent(new Event('input'));
@@ -31,6 +37,108 @@ describe('shared-ui-node event gating', () => {
 
     expect(rendered.events.length).toBe(1);
     expect(rendered.events[0]).toEqual({ nodeId: 'name2', name: 'change', data: 'ab' });
+  });
+
+  it('draws a status line with its emphasised value and turns its icon button into activate on that button', async () => {
+    const root: UiNode = {
+      id: 'status',
+      type: 'status',
+      properties: { icon: 'zap', label: 'Provided by', value: 'Mute / Unmute' },
+      children: [
+        { id: 'status.stop', type: 'button', properties: { label: 'Stop using', icon: 'x', events: ['activate'] } },
+      ],
+    };
+    const rendered = await renderTree(root);
+    const host = el(rendered);
+
+    expect(host.querySelector('.config-chrome-status strong')?.textContent).toBe('Mute / Unmute');
+    expect(host.querySelector('.config-chrome-status-copy')?.textContent).toContain('Provided by');
+    const stop = host.querySelector('.config-chrome-status [aria-label="Stop using"] button') as HTMLButtonElement;
+    stop.click();
+    await tick(rendered);
+
+    expect(rendered.events).toEqual([{ nodeId: 'status.stop', name: 'activate' }]);
+  });
+
+  it('raises a confirming button\'s activate only after its dialog is accepted', async () => {
+    const root: UiNode = {
+      id: 'stop',
+      type: 'button',
+      properties: {
+        label: 'Stop', icon: 'x', events: ['activate'],
+        confirmTitle: 'Stop using?', confirmMessage: 'Your states come back.', confirmLabel: 'Stop using', confirmDanger: true,
+      },
+    };
+    const rendered = await renderTree(root);
+
+    (el(rendered).querySelector('.config-chrome-icon-button') as HTMLButtonElement).click();
+    await tick(rendered);
+    expect(rendered.events).toEqual([]);
+    expect(document.body.textContent).toContain('Your states come back.');
+
+    const accept = [...document.querySelectorAll('shared-confirmation-modal shared-button button')]
+      .find(button => button.textContent?.trim() === 'Stop using') as HTMLButtonElement;
+    accept.click();
+    await until(() => rendered.events.length > 0);
+
+    expect(rendered.events).toEqual([{ nodeId: 'stop', name: 'activate' }]);
+  });
+
+  it('opens a menu of buttons and hands a prompting entry\'s entered text to its activate', async () => {
+    const root: UiNode = {
+      id: 'manage',
+      type: 'menu',
+      properties: { label: 'Manage this state', icon: 'dots-vertical' },
+      children: [
+        {
+          id: 'manage.rename',
+          type: 'button',
+          properties: { label: 'Rename', icon: 'pencil', events: ['activate'], confirmLabel: 'Save', promptValue: 'On' },
+        },
+      ],
+    };
+    const rendered = await renderTree(root);
+
+    (el(rendered).querySelector('.dropdown-trigger') as HTMLButtonElement).click();
+    await tick(rendered);
+    (document.querySelector('.config-chrome-menu-item') as HTMLButtonElement).click();
+    await tick(rendered);
+
+    const field = document.querySelector('shared-confirmation-modal input') as HTMLInputElement;
+    expect(field.value).toBe('On');
+    field.value = 'Recording';
+    field.dispatchEvent(new Event('input'));
+    await tick(rendered);
+    const save = [...document.querySelectorAll('shared-confirmation-modal shared-button button')]
+      .find(button => button.textContent?.trim() === 'Save') as HTMLButtonElement;
+    save.click();
+    await until(() => rendered.events.length > 0);
+
+    expect(rendered.events).toEqual([{ nodeId: 'manage.rename', name: 'activate', data: 'Recording' }]);
+  });
+
+  it('shows a dialog node as a modal whose buttons answer and whose close raises cancel', async () => {
+    const root: UiNode = {
+      id: 'stop',
+      type: 'dialog',
+      properties: { title: 'Stop using?', text: 'Your states come back.', events: ['cancel'] },
+      children: [
+        { id: 'stop.keep', type: 'button', properties: { label: 'Cancel', events: ['activate'] } },
+        { id: 'stop.now', type: 'button', properties: { label: 'Stop using', confirmDanger: true, events: ['activate'] } },
+      ],
+    };
+    const rendered = await renderTree(root);
+
+    expect(document.body.textContent).toContain('Your states come back.');
+    const stop = [...document.querySelectorAll('shared-modal shared-button button')]
+      .find(button => button.textContent?.trim() === 'Stop using') as HTMLButtonElement;
+    stop.click();
+    await tick(rendered);
+    expect(rendered.events).toEqual([{ nodeId: 'stop.now', name: 'activate' }]);
+
+    (document.querySelector('shared-modal .modal-close-btn') as HTMLButtonElement).click();
+    await until(() => rendered.events.length > 1);
+    expect(rendered.events[1]).toEqual({ nodeId: 'stop', name: 'cancel' });
   });
 
   it('opens an unbound link through the external-link service and raises no event', async () => {

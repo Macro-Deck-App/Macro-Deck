@@ -16039,6 +16039,24 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Editor.SwitchProviderMessage" xml:space="preserve">
     <value>Der Wechsel zu diesem Status-Provider ersetzt die aktuell aktiven Statusdefinitionen.</value>
   </data>
+  <data name="Widgets.Editor.StateProvidedBy" xml:space="preserve">
+    <value>Status von {integration}: {action}</value>
+  </data>
+  <data name="Widgets.Editor.UseProvidedIconConfirm" xml:space="preserve">
+    <value>Bereitgestelltes Symbol verwenden</value>
+  </data>
+  <data name="Widgets.Editor.UseSelectedProvidersConfirm" xml:space="preserve">
+    <value>Auswahl verwenden</value>
+  </data>
+  <data name="Widgets.Editor.SwitchProviderConfirm" xml:space="preserve">
+    <value>Provider wechseln</value>
+  </data>
+  <data name="Widgets.Editor.ProviderReturnedNoStates" xml:space="preserve">
+    <value>Diese Aktion hat noch keine Status zurückgegeben.</value>
+  </data>
+  <data name="Widgets.Editor.ProviderProbeFailed" xml:space="preserve">
+    <value>Die Status dieser Aktion konnten nicht abgefragt werden.</value>
+  </data>
   <data name="Widgets.Editor.ThisAction" xml:space="preserve">
     <value>Diese Aktion</value>
   </data>

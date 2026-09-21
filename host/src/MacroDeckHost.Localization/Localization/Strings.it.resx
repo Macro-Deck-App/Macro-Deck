@@ -16041,6 +16041,24 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Widgets.Editor.SwitchProviderMessage" xml:space="preserve">
     <value>Passando a questo fornitore di stato, le definizioni di stato attualmente attive verranno sostituite.</value>
   </data>
+  <data name="Widgets.Editor.StateProvidedBy" xml:space="preserve">
+    <value>Stato da {integration}: {action}</value>
+  </data>
+  <data name="Widgets.Editor.UseProvidedIconConfirm" xml:space="preserve">
+    <value>Usa l'icona fornita</value>
+  </data>
+  <data name="Widgets.Editor.UseSelectedProvidersConfirm" xml:space="preserve">
+    <value>Usa la selezione</value>
+  </data>
+  <data name="Widgets.Editor.SwitchProviderConfirm" xml:space="preserve">
+    <value>Cambia fornitore</value>
+  </data>
+  <data name="Widgets.Editor.ProviderReturnedNoStates" xml:space="preserve">
+    <value>Questa azione non ha ancora restituito alcuno stato.</value>
+  </data>
+  <data name="Widgets.Editor.ProviderProbeFailed" xml:space="preserve">
+    <value>Impossibile chiedere a questa azione i suoi stati.</value>
+  </data>
   <data name="Widgets.Editor.ThisAction" xml:space="preserve">
     <value>Questa azione</value>
   </data>

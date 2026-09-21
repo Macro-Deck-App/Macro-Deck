@@ -30,7 +30,7 @@ export interface StateMappingValue {
           {{ 'macrodeck:Common.None' | translate }}
         }
       </span>
-      <span class="icon icon-chevron-right icon-xs" aria-hidden="true"></span>
+      <span class="icon icon-chevron-right icon-xs state-mapping-chevron" aria-hidden="true"></span>
     </button>
 
     @if (isOpen()) {
@@ -45,39 +45,38 @@ export interface StateMappingValue {
     }
   `,
   styles: `
-    .state-mapping-icon {
-      flex: none;
-      margin-right: var(--space-2);
-    }
+    @use '../../../../styles/index' as ds;
 
     .state-mapping-row {
+      @include ds.control-base;
+      @include ds.control-interactive;
       display: flex;
       align-items: center;
-      width: 100%;
       gap: var(--space-2);
-      padding: var(--space-2) var(--space-3);
-      background: none;
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
+      width: 100%;
+      min-width: 0;
       color: var(--color-text-primary);
-      cursor: pointer;
+      font-size: var(--text-sm);
       text-align: left;
+      cursor: pointer;
 
       &:hover {
         background-color: var(--color-bg-hover);
       }
     }
 
-    .state-mapping-label {
+    .state-mapping-icon,
+    .state-mapping-chevron {
       flex: 0 0 auto;
-      font-weight: var(--font-medium);
+      color: var(--color-text-muted);
+    }
+
+    .state-mapping-label {
+      flex: 1 1 auto;
     }
 
     .state-mapping-value {
-      flex: 1 1 auto;
       color: var(--color-text-secondary);
-      font-size: var(--text-sm);
-      text-align: right;
     }
   `,
 })

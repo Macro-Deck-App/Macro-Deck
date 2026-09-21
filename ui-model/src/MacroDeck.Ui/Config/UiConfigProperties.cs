@@ -226,6 +226,37 @@ public static class UiConfigProperties
 	/// value meaningful.</summary>
 	public const string Reorderable = "reorderable";
 
+	/// <summary>Whether an action list lets the user adopt one of its actions as the surface's state provider.
+	/// Takes effect only while the node also handles <see cref="UiConfigEvents.Provide" />.</summary>
+	public const string OffersStateProvider = "offersStateProvider";
+
+	/// <summary>Whether an action list lets the user adopt one of its actions as the surface's icon provider.
+	/// Takes effect only while the node also handles <see cref="UiConfigEvents.Provide" />.</summary>
+	public const string OffersIconProvider = "offersIconProvider";
+
+	/// <summary>The id of the action block an action list's surface currently uses as its state provider.</summary>
+	public const string StateProviderBlockId = "stateProviderBlockId";
+
+	/// <summary>The id of the action block an action list's surface currently uses as its icon provider.</summary>
+	public const string IconProviderBlockId = "iconProviderBlockId";
+
+	/// <summary>The heading of the dialog a button asks through before it raises <c>activate</c>.</summary>
+	public const string ConfirmTitle = "confirmTitle";
+
+	/// <summary>The question a button asks before it raises <c>activate</c>. Its presence is what makes the
+	/// button ask.</summary>
+	public const string ConfirmMessage = "confirmMessage";
+
+	/// <summary>The caption of the dialog's accepting control.</summary>
+	public const string ConfirmLabel = "confirmLabel";
+
+	/// <summary>Whether accepting the dialog destroys something, so the renderer can warn.</summary>
+	public const string ConfirmDanger = "confirmDanger";
+
+	/// <summary>The text a button's dialog starts with when it asks the user to enter text; its presence is
+	/// what makes the dialog ask for text.</summary>
+	public const string PromptValue = "promptValue";
+
 #pragma warning restore CA1720
 
 	/// <summary>The property keys this package ships names for, in declaration order. Not exhaustive - see the
@@ -239,6 +270,7 @@ public static class UiConfigProperties
 		CanSubmit, Direction, Text, Url, DefaultExpanded, ClearOnCollapse, Severity, For, Triggers, CanRun,
 		IntegrationId, VariableTypes, WritableOnly, Capability, ConfigurationEntries, Segmented, Cards, Icon,
 		AspectRatio, Background, Tint, States, FalseLabel, TrueLabel, RowWeight, Wrap, HideLabel,
-		Reorderable,
+		Reorderable, OffersStateProvider, OffersIconProvider, StateProviderBlockId, IconProviderBlockId,
+		ConfirmTitle, ConfirmMessage, ConfirmLabel, ConfirmDanger, PromptValue,
 	];
 }

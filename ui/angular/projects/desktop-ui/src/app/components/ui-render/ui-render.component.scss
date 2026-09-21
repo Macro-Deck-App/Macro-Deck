@@ -24,6 +24,7 @@
 // `childFlex()` gives it, rather than wrapping onto a line of its own once the row runs out of room.
 .config-chrome-stack-row.config-chrome-stack-nowrap {
   flex-wrap: nowrap;
+  gap: var(--space-2);
 
   // A flex item's default minimum width is its own content's, which would keep a weighted child from
   // ever shrinking below that - defeating the very proportion `childFlex()` asked for once the row is
@@ -118,6 +119,95 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+}
+
+.config-chrome-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  padding-inline: var(--space-3);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.config-chrome-status-icon {
+  flex: 0 0 auto;
+  color: var(--color-accent);
+}
+
+.config-chrome-status-copy {
+  @include ds.truncate;
+  flex: 1 1 auto;
+
+  strong {
+    color: var(--color-text-primary);
+    font-weight: var(--font-medium);
+  }
+}
+
+.config-chrome-icon-button {
+  @include ds.control-base;
+  @include ds.control-interactive;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  padding: 0;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--color-text-primary);
+  }
+}
+
+.config-chrome-dialog-message {
+  margin: 0;
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.config-chrome-menu {
+  display: flex;
+  flex-direction: column;
+}
+
+.config-chrome-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) 0.5rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: var(--text-base);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+
+  &:hover {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+  }
+
+  &.is-danger:hover {
+    color: var(--color-danger);
+  }
+}
+
+.config-chrome-menu-label {
+  @include ds.truncate;
+  flex: 1 1 auto;
 }
 
 .config-chrome-banner {

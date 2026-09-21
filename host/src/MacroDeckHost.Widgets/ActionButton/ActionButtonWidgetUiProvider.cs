@@ -1,12 +1,15 @@
 using System.Text.Json;
+using MacroDeck.Localization;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Resources;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
+using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Rendering;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Ui.Transport;
@@ -39,6 +42,9 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly IIntegrationRegistry _integrations;
 	private readonly IFontCatalog _fonts;
+	private readonly ActionProviderProbe _providerProbe;
+	private readonly ILocalizationResolver _localization;
+	private readonly TimeProvider _timeProvider;
 
 	public ActionButtonWidgetUiProvider(
 		IFolderCache folderCache,
@@ -54,7 +60,10 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 		IWidgetSampleTextResolver sampleText,
 		IServiceScopeFactory scopeFactory,
 		IIntegrationRegistry integrations,
-		IFontCatalog fonts)
+		IFontCatalog fonts,
+		ActionProviderProbe providerProbe,
+		ILocalizationResolver localization,
+		TimeProvider timeProvider)
 	{
 		_folderCache = folderCache;
 		_iconResources = iconResources;
@@ -70,9 +79,21 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 		_scopeFactory = scopeFactory;
 		_integrations = integrations;
 		_fonts = fonts;
+		_providerProbe = providerProbe;
+		_localization = localization;
+		_timeProvider = timeProvider;
 	}
 
 	public string WidgetTypeId => WidgetTypeIds.ActionButton;
+
+	// The preference service is scoped and this provider is a singleton.
+	private async Task<string?> ResolveCultureAsync()
+	{
+		using var scope = _scopeFactory.CreateScope();
+		var preferences = scope.ServiceProvider.GetRequiredService<IAppPreferenceService>();
+
+		return (await preferences.GetLocalization().ConfigureAwait(false)).Culture;
+	}
 
 	public IReadOnlyList<UiSurfaceDeclaration> Surfaces { get; } =
 	[
@@ -99,14 +120,28 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 			var liveState
 				= await ResolveLiveStateAsync(WidgetConfigSurfaces.WidgetId(request.Surface), cancellationToken)
 					.ConfigureAwait(false);
+			var culture = await ResolveCultureAsync().ConfigureAwait(false);
+			var sessionLifetime = new CancellationTokenSource();
+			var context = new ActionButtonConfigContext(_providerProbe,
+				_localization,
+				culture,
+				_timeProvider,
+				sessionLifetime.Token);
 			var configView = new UiView(request.Surface,
 				ActionButtonWidgetConfigView.Build(configData,
 					WidgetConfigSurfaces.AspectRatio(request.Surface),
 					_integrations,
 					_fonts,
-					liveState));
+					liveState,
+					context));
+			context.Attach(configView);
 
-			return new WidgetConfigSession(configView);
+			return new WidgetConfigSession(configView,
+				() =>
+				{
+					sessionLifetime.Cancel();
+					sessionLifetime.Dispose();
+				});
 		}
 
 		if (request.Surface.Kind is not (UiSurfaceKinds.Widget or UiSurfaceKinds.Preview))

@@ -25,7 +25,7 @@ import { DevicePickerComponent } from '../forms/device-picker/device-picker.comp
 import { IntegrationPickerComponent } from '../forms/integration-picker/integration-picker.component';
 import { NodeVariablePickerComponent } from '../forms/variable-picker-field/variable-picker-field.component';
 import { NodeParamInputComponent } from '../forms/param-input-field/param-input-field.component';
-import { NodeActionBuilderComponent } from '../action-builder/node-action-builder.component';
+import { NodeActionBuilderComponent, type ProviderChangeRequest } from '../action-builder/node-action-builder.component';
 import { NodeActionPickerComponent } from '../action-builder/action-picker/node-action-picker.component';
 import { NodeStateMappingEditorComponent, type StateMappingValue } from '../widgets/state-mapping/node-state-mapping-editor.component';
 import { UiRenderContext } from './ui-render-context';
@@ -289,8 +289,19 @@ export class UiInputComponent {
   protected readonly actionStateOptions = computed<UiNodeOption[] | undefined>(() =>
     Array.isArray(nodeRaw(this.node(), Properties.States)) ? this.nodeStateOptions() : undefined);
 
+  protected readonly offersStateProvider = computed(() =>
+    nodeBoolean(this.node(), Properties.OffersStateProvider) === true && emitsEvent(this.node(), UiConfigEvents.Provide));
+  protected readonly offersIconProvider = computed(() =>
+    nodeBoolean(this.node(), Properties.OffersIconProvider) === true && emitsEvent(this.node(), UiConfigEvents.Provide));
+  protected readonly stateProviderBlockId = computed(() => nodeString(this.node(), Properties.StateProviderBlockId) || undefined);
+  protected readonly iconProviderBlockId = computed(() => nodeString(this.node(), Properties.IconProviderBlockId) || undefined);
+
   protected onActionFlowsChange(flows: ActionFlow[]): void {
     this.onChange(flows);
+  }
+
+  protected onProviderChange(request: ProviderChangeRequest): void {
+    this.context.emit(this.node(), UiConfigEvents.Provide, request);
   }
 
   // --- state-mapping-editor: `NodeStateMappingEditorComponent` sources the client-owned variable

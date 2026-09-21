@@ -184,6 +184,36 @@ fire.
   `Fallback`. To stay configurable there, give the node a fallback built from primitives - a `json` input
   over the same value is usually enough.
 
+### Letting the user adopt a provider action
+
+A widget that follows an action's state or icon, like the Action Button, can let the user adopt one of the
+actions in its own flows as that provider, right from the action list:
+
+```csharp
+new UiActionsListEditor
+{
+    Key = "flows",
+    Binding = Bind.To(flows),
+    OffersStateProvider = true,
+    OffersIconProvider = true,
+    StateProviderBlockId = UiValue.From(() => stateProvider.Value?.BlockId ?? string.Empty),
+    Events = [UiEventHandler.OnAsync(UiConfigEvents.Provide, (data, _) => AdoptAsync(data))],
+}
+```
+
+| Property | Meaning |
+| --- | --- |
+| `OffersStateProvider`, `OffersIconProvider` | The renderer marks actions that can provide states or an icon, and puts a control on each such action in the list. |
+| `StateProviderBlockId`, `IconProviderBlockId` | The block the widget currently uses, so that control shows as active. Empty means none. |
+
+Using a control raises `provide` on the node, with the payload
+`{ "capability": "state" | "icon", "blockId": "...", "enabled": true | false }`. It is a request: your handler
+decides whether to adopt, switch or stop, and the two block id properties report the result. The offer
+properties do nothing unless the node also handles `provide`, so a renderer never shows a control that
+cannot answer. A renderer or host that predates these properties and the event ignores them, and the action
+list looks the way it always did. To show which action currently provides, the Action Button uses a
+[status line](/ui/views/configuration/#showing-what-governs-a-setting).
+
 ## Declining
 
 ```csharp
