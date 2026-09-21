@@ -46,7 +46,8 @@ public record AdbSettings(
 	string? ExecutablePath,
 	bool UsbConnectionsEnabled,
 	string? DefaultDeviceSerial,
-	bool StopServerOnExit = false);
+	bool StopServerOnExit = false,
+	bool AllowPlugins = true);
 
 public record DeveloperSettings(bool Enabled);
 
@@ -104,11 +105,13 @@ public interface IAppPreferenceService
 
 	Task<AdbSettings> GetAdb();
 
+	// allowPlugins is not nullable: a null would land on the default, which silently re-grants plugin access.
 	Task<AdbSettings> SetAdb(bool? enabled,
 		string? executablePath,
 		bool? usbConnectionsEnabled,
 		string? defaultDeviceSerial,
-		bool? stopServerOnExit);
+		bool? stopServerOnExit,
+		bool allowPlugins);
 
 	Task<DeveloperSettings> GetDeveloper();
 

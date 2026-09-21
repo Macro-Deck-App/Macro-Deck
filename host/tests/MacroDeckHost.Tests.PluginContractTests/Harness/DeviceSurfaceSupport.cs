@@ -271,7 +271,8 @@ internal sealed class ContractAppPreferences : IAppPreferenceService
 		string? executablePath,
 		bool? usbConnectionsEnabled,
 		string? defaultDeviceSerial,
-		bool? stopServerOnExit) => throw new NotSupportedException();
+		bool? stopServerOnExit,
+		bool allowPlugins) => throw new NotSupportedException();
 
 	public Task<DeveloperSettings> GetDeveloper() => throw new NotSupportedException();
 

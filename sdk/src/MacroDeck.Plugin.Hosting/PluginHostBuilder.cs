@@ -13,6 +13,7 @@ using MacroDeck.Plugin.Hosting.Transport;
 using MacroDeck.Plugin.Hosting.Validation;
 using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Sdk;
+using MacroDeck.Sdk.Android;
 using MacroDeck.Sdk.Devices;
 using MacroDeck.Sdk.Identity;
 using MacroDeck.Plugin.Hosting.Capabilities.Ui;
@@ -475,6 +476,7 @@ public sealed class PluginHostBuilder
 		Services.TryAddSingleton<IWidgetTypeProviderContext, RemoteWidgetTypeProviderContext>();
 		Services.TryAddSingleton<ModalResultStore>();
 		Services.TryAddSingleton<IIntegrationContext, RemoteIntegrationContext>();
+		Services.TryAddSingleton<IAndroidDeviceManager, RemoteAndroidDeviceManager>();
 
 		// The producer half of state.update (#413's remote weather-location bug fix): a plugin author
 		// injects this directly, not through IIntegrationContext - unlike Events/Notifications, it is

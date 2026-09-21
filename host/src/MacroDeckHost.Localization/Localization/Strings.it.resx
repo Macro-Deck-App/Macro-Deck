@@ -2073,6 +2073,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Dialogs.Notice.GotIt" xml:space="preserve">
     <value>Ho capito</value>
   </data>
+  <data name="Dialogs.PluginAdbConsent.AdbMissingHeading" xml:space="preserve">
+    <value>Scarica gli Android platform-tools</value>
+  </data>
+  <data name="Dialogs.PluginAdbConsent.AdbMissingMessage" xml:space="preserve">
+    <value>ADB è attivo, ma Macro Deck non trova adb su questo computer. Vuoi scaricare ora gli Android platform-tools, così i plugin possono lavorare con i tuoi dispositivi Android?</value>
+  </data>
   <data name="Dialogs.PluginPairing.Approve" xml:space="preserve">
     <value>Approva</value>
   </data>
@@ -11644,6 +11650,21 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Notifications.NetworkUnreachableTlsMessage" xml:space="preserve">
     <value>HTTPS è impostato per sostituire il listener pubblico, ma il suo certificato non è utilizzabile, quindi nulla in rete può raggiungere questo computer - Macro Deck non ripiega su un listener non cifrato.</value>
   </data>
+  <data name="Notifications.PluginAdbAccessRequested" xml:space="preserve">
+    <value>Un plugin vuole usare ADB</value>
+  </data>
+  <data name="Notifications.PluginAdbAccessRequestedAdbMissingMessage" xml:space="preserve">
+    <value>{name} ha bisogno di ADB per lavorare con i tuoi dispositivi Android. ADB è attivo, ma Macro Deck non trova adb su questo computer. Vuoi configurarlo ora?</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.PluginAdbAccessRequestedAdbOffMessage" xml:space="preserve">
+    <value>{name} ha bisogno di ADB per lavorare con i tuoi dispositivi Android, ma ADB è disattivato in Macro Deck. Vuoi attivare ADB e consentire ai plugin di usarlo?</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.PluginAdbAccessRequestedMessage" xml:space="preserve">
+    <value>{name} ha bisogno di ADB per lavorare con i tuoi dispositivi Android, ma al momento i plugin non possono usare ADB. Consentire ai plugin di usare ADB?</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.RestartToApplyNetwork" xml:space="preserve">
     <value>Riavvia per applicare le nuove impostazioni di rete</value>
   </data>
@@ -11853,6 +11874,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Plugins.UnverifiedClaim" xml:space="preserve">
     <value>dichiarazione non verificata</value>
+  </data>
+  <data name="Plugins.UsesAdbBadge" xml:space="preserve">
+    <value>Usa ADB</value>
+  </data>
+  <data name="Plugins.UsesAdbNote" xml:space="preserve">
+    <value>Questo plugin usa ADB per lavorare con i tuoi dispositivi Android. Può eseguire comandi, copiare file e installare app.</value>
   </data>
   <data name="Plugins.VerifiedNoPublisherHint" xml:space="preserve">
     <value>La firma di questo plugin è stata verificata dal Macro Deck Creator Portal, ma il suo manifest non indica alcun autore.</value>
@@ -12441,6 +12468,42 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Settings.Account.SigningInMessage" xml:space="preserve">
     <value>In attesa che tu completi l'accesso nel browser…</value>
+  </data>
+  <data name="Settings.Adb.AllowPluginsDescription" xml:space="preserve">
+    <value>I plugin che dichiarano l'accesso ad ADB possono usare la connessione ADB di Macro Deck per lavorare con i tuoi dispositivi Android, ad esempio per eseguire comandi shell, copiare file o installare app.</value>
+  </data>
+  <data name="Settings.Adb.AllowPluginsLabel" xml:space="preserve">
+    <value>Consenti ai plugin di usare ADB</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiLabel" xml:space="preserve">
+    <value>Connetti tramite Wi-Fi</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiHint" xml:space="preserve">
+    <value>Inserisci indirizzo IP e porta di un telefono con il debug wireless attivo, per esempio 192.168.1.20:5555. Il dispositivo compare poi nell'elenco qui sopra e anche i plugin che usano ADB possono raggiungerlo.</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiPlaceholder" xml:space="preserve">
+    <value>192.168.1.20:5555</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiTimeout" xml:space="preserve">
+    <value>La connessione a {address} ha richiesto troppo tempo. Controlla che il telefono sia sulla stessa rete e che il debug wireless sia attivo.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Settings.Adb.ConnectedOverWifi" xml:space="preserve">
+    <value>Connesso tramite Wi-Fi</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiButton" xml:space="preserve">
+    <value>Connetti</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiInvalid" xml:space="preserve">
+    <value>Inserisci un indirizzo IP o un nome host con la porta, per esempio 192.168.1.20:5555.</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiFailed" xml:space="preserve">
+    <value>Macro Deck non è riuscito a connettersi a {address}.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Settings.Adb.ConnectWifiFailedReason" xml:space="preserve">
+    <value>Macro Deck non è riuscito a connettersi a {address}: {reason}</value>
+    <comment>[address:string] [reason:string]</comment>
   </data>
   <data name="Settings.Adb.DefaultDeviceLabel" xml:space="preserve">
     <value>Dispositivo predefinito</value>
@@ -13991,6 +14054,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Shell.Footer.Version" xml:space="preserve">
     <value>Versione {version}</value>
+  </data>
+  <data name="Shell.Notifications.Action.EnablePluginAdb" xml:space="preserve">
+    <value>Consenti</value>
   </data>
   <data name="Shell.Notifications.Action.OpenExtensionStore" xml:space="preserve">
     <value>Apri lo store</value>

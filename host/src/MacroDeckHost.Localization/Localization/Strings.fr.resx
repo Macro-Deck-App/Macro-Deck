@@ -2073,6 +2073,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Dialogs.Notice.GotIt" xml:space="preserve">
     <value>Compris</value>
   </data>
+  <data name="Dialogs.PluginAdbConsent.AdbMissingHeading" xml:space="preserve">
+    <value>Obtenir les Android platform-tools</value>
+  </data>
+  <data name="Dialogs.PluginAdbConsent.AdbMissingMessage" xml:space="preserve">
+    <value>ADB est activé, mais Macro Deck ne trouve pas adb sur cet ordinateur. Télécharger maintenant les Android platform-tools pour que les extensions puissent travailler avec tes appareils Android ?</value>
+  </data>
   <data name="Dialogs.PluginPairing.Approve" xml:space="preserve">
     <value>Approuver</value>
   </data>
@@ -11644,6 +11650,21 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Notifications.NetworkUnreachableTlsMessage" xml:space="preserve">
     <value>HTTPS doit remplacer l'écouteur public, mais son certificat n'a pas pu être utilisé, rien sur le réseau ne peut donc joindre cet ordinateur - Macro Deck ne bascule pas vers un écouteur non chiffré.</value>
   </data>
+  <data name="Notifications.PluginAdbAccessRequested" xml:space="preserve">
+    <value>Une extension veut utiliser ADB</value>
+  </data>
+  <data name="Notifications.PluginAdbAccessRequestedAdbMissingMessage" xml:space="preserve">
+    <value>{name} a besoin d'ADB pour travailler avec tes appareils Android. ADB est activé, mais Macro Deck ne trouve pas adb sur cet ordinateur. Le configurer maintenant ?</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.PluginAdbAccessRequestedAdbOffMessage" xml:space="preserve">
+    <value>{name} a besoin d'ADB pour travailler avec tes appareils Android, mais ADB est désactivé dans Macro Deck. Activer ADB et autoriser les extensions à l'utiliser ?</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.PluginAdbAccessRequestedMessage" xml:space="preserve">
+    <value>{name} a besoin d'ADB pour travailler avec tes appareils Android, mais les extensions ne sont pas autorisées à utiliser ADB pour le moment. Autoriser les extensions à utiliser ADB ?</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.RestartToApplyNetwork" xml:space="preserve">
     <value>Redémarre pour appliquer les nouveaux paramètres réseau</value>
   </data>
@@ -11853,6 +11874,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Plugins.UnverifiedClaim" xml:space="preserve">
     <value>revendication non vérifiée</value>
+  </data>
+  <data name="Plugins.UsesAdbBadge" xml:space="preserve">
+    <value>Utilise ADB</value>
+  </data>
+  <data name="Plugins.UsesAdbNote" xml:space="preserve">
+    <value>Cette extension utilise ADB pour travailler avec tes appareils Android. Elle peut y exécuter des commandes, copier des fichiers et installer des applications.</value>
   </data>
   <data name="Plugins.VerifiedNoPublisherHint" xml:space="preserve">
     <value>La signature de cette extension a été vérifiée par le Macro Deck Creator Portal, mais son manifeste n'indique aucun auteur.</value>
@@ -12441,6 +12468,42 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Settings.Account.SigningInMessage" xml:space="preserve">
     <value>En attente de la fin de la connexion dans ton navigateur…</value>
+  </data>
+  <data name="Settings.Adb.AllowPluginsDescription" xml:space="preserve">
+    <value>Les extensions qui déclarent un accès à ADB peuvent utiliser la connexion ADB de Macro Deck pour travailler avec tes appareils Android, par exemple pour exécuter des commandes shell, copier des fichiers ou installer des applications.</value>
+  </data>
+  <data name="Settings.Adb.AllowPluginsLabel" xml:space="preserve">
+    <value>Autoriser les extensions à utiliser ADB</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiLabel" xml:space="preserve">
+    <value>Connecter via Wi-Fi</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiHint" xml:space="preserve">
+    <value>Saisis l'adresse IP et le port d'un téléphone dont le débogage sans fil est activé, par exemple 192.168.1.20:5555. L'appareil apparaît ensuite dans la liste ci-dessus, et les extensions qui utilisent ADB peuvent aussi l'atteindre.</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiPlaceholder" xml:space="preserve">
+    <value>192.168.1.20:5555</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiTimeout" xml:space="preserve">
+    <value>La connexion à {address} a pris trop de temps. Vérifie que le téléphone est sur le même réseau et que le débogage sans fil est activé.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Settings.Adb.ConnectedOverWifi" xml:space="preserve">
+    <value>Connecté via Wi-Fi</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiButton" xml:space="preserve">
+    <value>Connecter</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiInvalid" xml:space="preserve">
+    <value>Saisis une adresse IP ou un nom d'hôte avec un port, par exemple 192.168.1.20:5555.</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiFailed" xml:space="preserve">
+    <value>Macro Deck n'a pas pu se connecter à {address}.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Settings.Adb.ConnectWifiFailedReason" xml:space="preserve">
+    <value>Macro Deck n'a pas pu se connecter à {address} : {reason}</value>
+    <comment>[address:string] [reason:string]</comment>
   </data>
   <data name="Settings.Adb.DefaultDeviceLabel" xml:space="preserve">
     <value>Appareil par défaut</value>
@@ -13991,6 +14054,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Shell.Footer.Version" xml:space="preserve">
     <value>Version {version}</value>
+  </data>
+  <data name="Shell.Notifications.Action.EnablePluginAdb" xml:space="preserve">
+    <value>Autoriser</value>
   </data>
   <data name="Shell.Notifications.Action.OpenExtensionStore" xml:space="preserve">
     <value>Ouvrir la boutique</value>

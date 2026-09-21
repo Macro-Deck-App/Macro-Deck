@@ -52,6 +52,7 @@ public sealed class PluginWebSocketEndpoint
 	private readonly IRemotePluginIntegrationRegistrar _registrar;
 	private readonly RemotePluginSnapshotRefresher _snapshotRefresher;
 	private readonly IPluginCallbackRouter _callbackRouter;
+	private readonly PluginAdbInvokeRunner? _adbInvokes;
 	private readonly IPluginAssetReceiver _assetReceiver;
 	private readonly IPluginHostAssetSender? _hostAssetSender;
 	private readonly HostStatePusher _statePusher;
@@ -80,9 +81,11 @@ public sealed class PluginWebSocketEndpoint
 		IHostApplicationLifetime lifetime,
 		IPluginLogIngestor logIngestor,
 		ILogger logger,
-		IPluginHostAssetSender? hostAssetSender = null)
+		IPluginHostAssetSender? hostAssetSender = null,
+		PluginAdbInvokeRunner? adbInvokes = null)
 	{
 		_hostAssetSender = hostAssetSender;
+		_adbInvokes = adbInvokes;
 		_sessionRegistry = sessionRegistry;
 		_invoker = invoker;
 		_registrar = registrar;
@@ -617,6 +620,7 @@ public sealed class PluginWebSocketEndpoint
 				break;
 
 			case MessageTypes.HostCancel:
+				_adbInvokes?.Cancel(connection, envelope.CorrelationId);
 				break;
 
 			case MessageTypes.EventPublish:
@@ -851,6 +855,12 @@ public sealed class PluginWebSocketEndpoint
 		if (payload is null || string.IsNullOrEmpty(payload.Api) || string.IsNullOrEmpty(payload.Operation))
 		{
 			await SendProtocolErrorAsync(connection, ProtocolErrorCodes.InvalidPayload, envelope.Id, cancellationToken);
+			return;
+		}
+
+		if (_adbInvokes is not null && string.Equals(payload.Api, HostApis.Adb, StringComparison.Ordinal))
+		{
+			await _adbInvokes.StartAsync(connection, pluginId, envelope.Id, payload, cancellationToken);
 			return;
 		}
 

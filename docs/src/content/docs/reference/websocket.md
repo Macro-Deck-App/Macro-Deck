@@ -259,7 +259,7 @@ The only kind that is **item-shaped and provider-shaped at once**. The eager hal
 | `host.cancel` | plugin → host | `reason` - best-effort cancellation of a `host.invoke` |
 | `host.state` | host → plugin | `api` (required), `data` - the list a plugin's synchronous members serve from |
 
-APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `notifications`, `action-interactions`, `ui`, `devices`, `variable-values`, `layouts`, `folder-views`, `widget-types`, `screensavers`, and the push-only `event-bindings`. There is no `events` api; use `event.publish`. A plugin ignores a `host.state` api it does not know.
+APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `notifications`, `action-interactions`, `ui`, `devices`, `variable-values`, `layouts`, `folder-views`, `widget-types`, `screensavers`, `adb`, and the push-only `event-bindings`. There is no `events` api; use `event.publish`. A plugin ignores a `host.state` api it does not know.
 
 `host.state` for `config` has no `data`: it means "your config changed, re-read it". Built from the schema:
 
@@ -274,6 +274,7 @@ APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `no
 | `ui` | Not charged to the per-plugin callback throttle; bounded per session by `maxUiUpdatesPerSecond` / `maxUiUpdateBurst`. |
 | `variable-values` | Data-carrying push for the catalog half only; eager variables are always polled via `variables`/`get`. |
 | `event-bindings` | Push-only `host.state`, no `host.invoke` operations. `data` lists the triggers bound to this plugin's own events, each an `eventId` and `parameters` keyed by name (`value`, absent for a state operator, and `operator`). Sent on registration and whenever that list changes. |
+| `adb` | Gated per plugin, runs off the session's dispatch loop, at most 4 calls in flight per plugin - see [`adb`](#adb). |
 
 #### `widgets` by major
 
@@ -321,6 +322,68 @@ For a major `1` session the host translates rather than refuses: `off`/`on` map 
 | `invalidate` | none | The resource set changed. Accepted and recorded but not acted on today - nothing re-queries `discover`. |
 
 See [Push instead of poll](/features/variables/#push-instead-of-poll).
+
+#### `adb`
+
+```json
+{"type":"host.invoke","id":"<uuid-v7>","deadlineMs":90000,
+ "payload":{"api":"adb","operation":"shell","arguments":{"serial":"R58M123","command":"getprop ro.build.version.release"}}}
+```
+
+Operations on the Android devices the host's own adb server sees. Every operation names the device by
+`serial`. Argument and result shapes are in
+[`AdbInvokeArguments.cs`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/protocol/src/MacroDeck.Plugin.Protocol/Callbacks/AdbInvokeArguments.cs).
+
+| Operation | Arguments | Result `data` |
+| --- | --- | --- |
+| `shell` | `serial`, `command` | `exitCode`, `standardOutput`, `standardError`, `truncated` |
+| `battery` | `serial` | `level`, `isCharging`, `status`, `health` |
+| `push` | `serial`, `localPath`, `remotePath` | none |
+| `pull` | `serial`, `remotePath`, `localPath` | none |
+| `install` | `serial`, `apkPath` | none |
+| `uninstall` | `serial`, `packageName` | none |
+| `package-installed` | `serial`, `packageName` | `installed` |
+| `connect` | `address` (`host:port`) | `serial` |
+
+- **Access is per plugin.** An installed plugin needs `host:adb` in its manifest; a self-registered
+  session does not. ADB must be enabled and the user must allow plugins to use it. A refused call fails
+  with `ADB_NOT_ENABLED` or `ADB_NOT_ALLOWED`. See [Android devices](/features/android-devices/#who-decides).
+- **A non-zero shell exit code is a result.** `command` must not start with `-` and gets no standard
+  input. `truncated` is `true` when the host cut the output to fit one message.
+- **Local paths** (`localPath`, `apkPath`) are absolute paths on the host's machine, read and written with
+  the host's identity. **Device paths** are absolute.
+- **At most 4 calls in flight per plugin.** A fifth is refused at once with a retryable `RATE_LIMITED`.
+  Calls also count toward the per-plugin callback throttle. Other host APIs keep flowing while an `adb`
+  call runs.
+- **`host.cancel` ends an in-flight call.** It then gets exactly one `host.result`, with `CANCELLED`.
+- **`connect`** runs `adb connect` for a host name or IPv4 address with a port and answers with the serial
+  the device has from then on, which is its address. The device reaches every plugin through the `adb`
+  `host.state` push. adb reporting that it could not connect is `ADB_FAILED` with `adb_command_failed`.
+- **While the host is locked**, `shell`, `push`, `pull`, `install`, `uninstall` and `connect` fail with a retryable
+  `CAPABILITY_UNAVAILABLE` and `details.reason: "host_locked"`. `battery` and `package-installed` still
+  answer.
+- **A failure of adb or the device** is `ADB_FAILED`, refined by `details.reason`: `adb_executable_not_found`,
+  `adb_server_unreachable`, `adb_device_not_found`, `adb_device_offline`, `adb_device_unauthorized`,
+  `adb_timeout`, `adb_command_failed`, `adb_invalid_argument`, `adb_unsupported`. Treat an unknown reason as
+  `ADB_FAILED` alone.
+- **The host's own time limit** is ten seconds for `battery` and `package-installed`, twenty seconds for
+  `connect`, one minute for `shell` and `uninstall`, and five minutes for `push`, `pull` and `install`. It ends in `ADB_FAILED` with
+  `adb_timeout`. Wait longer than that before giving up on the `host.result`, as the .NET SDK does.
+
+The `adb` `host.state` push is per plugin, sent on registration and whenever this plugin's access or the
+device list changes. Its shape is
+[`AdbStateDto`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/protocol/src/MacroDeck.Plugin.Protocol/Callbacks/AdbStateDto.cs):
+
+```json
+{"type":"host.state","id":"<uuid-v7>","payload":{"api":"adb","data":{"access":"available","revision":7,
+ "devices":[{"serial":"R58M123","state":"online","model":"SM-G991B","manufacturer":"samsung","product":"o1s"}]}}}
+```
+
+`access` is `available`, `adb-not-enabled` or `adb-not-allowed`; `devices` is empty unless it is
+`available`, and a device that left is simply absent. A device's `state` is `online`, `connecting`,
+`offline` or `unauthorized`. `revision` follows the same rule as the `deck` push: apply a push only when
+its revision is higher than the last one applied in this session. A host without this api never pushes it
+and answers every `adb` invoke with `CAPABILITY_UNSUPPORTED`.
 
 ### Events, logs and state
 
@@ -436,9 +499,9 @@ A reply sets `correlationId` to the `id` it answers. Five types **require** one:
 
 ## Error handling
 
-A protocol-level failure sets `error` instead of `payload`. Default messages are in [the protocol page](/reference/protocol/#errors). The twenty-one codes, append-only within a protocol major (removing or renaming one requires a version advance):
+A protocol-level failure sets `error` instead of `payload`. Default messages are in [the protocol page](/reference/protocol/#errors). The twenty-four codes, append-only within a protocol major (removing or renaming one requires a version advance):
 
-`PROTOCOL_VERSION_UNSUPPORTED`, `UNKNOWN_MESSAGE_TYPE`, `MALFORMED_ENVELOPE`, `INVALID_PAYLOAD`, `UNAUTHENTICATED`, `PLUGIN_ALREADY_REGISTERED`, `SESSION_EXPIRED`, `SESSION_NOT_RESUMABLE`, `SESSION_REPLACED`, `SESSION_NOT_FOUND`, `CAPABILITY_UNSUPPORTED`, `CAPABILITY_UNAVAILABLE`, `PAYLOAD_TOO_LARGE`, `ASSET_TOO_LARGE`, `QUEUE_OVERFLOW`, `RATE_LIMITED`, `TIMEOUT`, `CANCELLED`, `CORRELATION_UNKNOWN`, `DUPLICATE_IDEMPOTENCY_KEY`, `INTERNAL_ERROR`.
+`PROTOCOL_VERSION_UNSUPPORTED`, `UNKNOWN_MESSAGE_TYPE`, `MALFORMED_ENVELOPE`, `INVALID_PAYLOAD`, `UNAUTHENTICATED`, `PLUGIN_ALREADY_REGISTERED`, `SESSION_EXPIRED`, `SESSION_NOT_RESUMABLE`, `SESSION_REPLACED`, `SESSION_NOT_FOUND`, `CAPABILITY_UNSUPPORTED`, `CAPABILITY_UNAVAILABLE`, `PAYLOAD_TOO_LARGE`, `ASSET_TOO_LARGE`, `QUEUE_OVERFLOW`, `RATE_LIMITED`, `TIMEOUT`, `CANCELLED`, `CORRELATION_UNKNOWN`, `DUPLICATE_IDEMPOTENCY_KEY`, `INTERNAL_ERROR`, `ADB_NOT_ENABLED`, `ADB_NOT_ALLOWED`, `ADB_FAILED`.
 
 ### Close codes
 

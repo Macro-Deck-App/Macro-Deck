@@ -97,6 +97,15 @@
         [checked]="stopServerOnExit()"
         (changed)="setStopServerOnExit($event)" />
     </shared-settings-row>
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Adb.AllowPluginsLabel' | translate"
+      [description]="'macrodeck.app:Settings.Adb.AllowPluginsDescription' | translate">
+      <shared-toggle-switch
+        [disabled]="!loaded()"
+        [busy]="allowPluginsBusy()"
+        [checked]="allowPlugins()"
+        (changed)="setAllowPlugins($event)" />
+    </shared-settings-row>
     <div class="adb__actions">
       <shared-button
         variant="secondary"
@@ -189,6 +198,26 @@
         }
       </ul>
     }
+
+    <div class="adb__path adb__connect">
+      <p class="adb__path-label">{{ 'macrodeck.app:Settings.Adb.ConnectWifiLabel' | translate }}</p>
+      <p class="adb__path-hint">{{ 'macrodeck.app:Settings.Adb.ConnectWifiHint' | translate }}</p>
+      <div class="adb__field">
+        <shared-input
+          [ariaLabel]="'macrodeck.app:Settings.Adb.ConnectWifiLabel' | translate"
+          [placeholder]="'macrodeck.app:Settings.Adb.ConnectWifiPlaceholder' | translate"
+          [disabled]="!loaded() || connecting()"
+          [ngModel]="connectDraft()"
+          (ngModelChange)="connectDraft.set($event)" />
+        <shared-button
+          variant="primary"
+          [disabled]="!canConnect()"
+          [loading]="connecting()"
+          (click)="connectOverWifi()">
+          {{ 'macrodeck.app:Settings.Adb.ConnectWifiButton' | translate }}
+        </shared-button>
+      </div>
+    </div>
   </shared-settings-section>
 
   <shared-settings-section [heading]="'macrodeck.app:Settings.Adb.DiagnosticsHeading' | translate">

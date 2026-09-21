@@ -54,7 +54,8 @@ public class PluginPairingServiceTests
 			string? executablePath,
 			bool? usbConnectionsEnabled,
 			string? defaultDeviceSerial,
-			bool? stopServerOnExit)
+			bool? stopServerOnExit,
+			bool allowPlugins)
 			=> throw new NotSupportedException();
 
 		public Task<OnboardingSettings> GetOnboarding() => throw new NotSupportedException();

@@ -10,8 +10,17 @@ using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Infrastructure.Adb;
 
-public sealed class AdbManager : IAdbManager, IDisposable
+public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 {
+	private static readonly TimeSpan _pluginShellTimeout = TimeSpan.FromSeconds(60);
+	private static readonly TimeSpan _pluginQueryTimeout = TimeSpan.FromSeconds(10);
+	private static readonly TimeSpan _connectTimeout = TimeSpan.FromSeconds(20);
+	private static readonly TimeSpan _pluginTransferTimeout = TimeSpan.FromMinutes(5);
+	private static readonly TimeSpan _pluginUninstallTimeout = TimeSpan.FromSeconds(60);
+	private static readonly TimeSpan _batteryFreshness = TimeSpan.FromSeconds(10);
+	private const int MaxPluginOutputChars = 96 * 1024;
+	private const int MaxFailureMessageLength = 500;
+
 	private static readonly TimeSpan _defaultCommandTimeout = TimeSpan.FromSeconds(10);
 	private static readonly TimeSpan _rebootCommandTimeout = TimeSpan.FromSeconds(30);
 	private static readonly TimeSpan _screenshotTimeout = TimeSpan.FromSeconds(30);
@@ -50,6 +59,10 @@ public sealed class AdbManager : IAdbManager, IDisposable
 	private readonly ConcurrentDictionary<string, string?> _manufacturerCache = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, AdbDeviceProperties> _propertiesCache = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, DateTimeOffset> _propertiesRequestedAt = new(StringComparer.Ordinal);
+	private readonly ConcurrentDictionary<string, (DateTimeOffset At, AdbBatteryReading Reading)> _batteryCache
+		= new(StringComparer.Ordinal);
+	private readonly ConcurrentDictionary<string, Lazy<Task<Result<AdbBatteryReading, AdbFailureCode>>>> _batteryProbes
+		= new(StringComparer.Ordinal);
 
 	/// <summary>
 	/// Devices that answered the property probe with nothing usable. A device that has no `dumpsys` is
@@ -98,6 +111,8 @@ public sealed class AdbManager : IAdbManager, IDisposable
 	public IReadOnlyList<AdbDevice> Devices => Volatile.Read(ref _snapshot).Devices;
 
 	public event EventHandler<AdbDeviceChange>? DeviceChanged;
+
+	public event EventHandler? SnapshotChanged;
 
 	public AdbDevice? ResolveDevice(string? serialOrDefault)
 	{
@@ -285,6 +300,209 @@ public sealed class AdbManager : IAdbManager, IDisposable
 		_propertiesRequestedAt[device.Serial] = _timeProvider.GetUtcNow();
 
 		return Task.FromResult(_propertiesCache.GetValueOrDefault(device.Serial));
+	}
+
+	public async Task<Result<AdbShellOutput, AdbFailureCode>> RunShellAsync(string serial,
+		string command,
+		CancellationToken cancellationToken)
+	{
+		var built = AdbCommandBuilder.BuildPluginShell(serial, command);
+		if (!built.Success)
+		{
+			return Result.Fail<AdbShellOutput, AdbFailureCode>(built.Error!.Value, built.ErrorMessage);
+		}
+
+		var failure = PreflightForPlugin(serial, out var executablePath);
+		if (failure is { } refused)
+		{
+			return Result.Fail<AdbShellOutput, AdbFailureCode>(refused.Code, refused.Message);
+		}
+
+		var result = await _processRunner.RunBoundedAsync(executablePath,
+			built.Data!,
+			_pluginShellTimeout,
+			MaxPluginOutputChars,
+			cancellationToken);
+
+		if (!result.Started)
+		{
+			return Result.Fail<AdbShellOutput, AdbFailureCode>(AdbFailureCode.CommandFailed, "adb could not be started.");
+		}
+
+		return result.TimedOut
+			? Result.Fail<AdbShellOutput, AdbFailureCode>(AdbFailureCode.Timeout, "The shell command timed out.")
+			: Result.Ok<AdbShellOutput, AdbFailureCode>(new AdbShellOutput(result.ExitCode,
+				result.StandardOutput,
+				result.StandardError,
+				result.Truncated));
+	}
+
+	public Task<Result<AdbBatteryReading, AdbFailureCode>> GetBatteryAsync(string serial,
+		CancellationToken cancellationToken)
+	{
+		var built = AdbCommandBuilder.BuildBattery(serial);
+		if (!built.Success)
+		{
+			return Task.FromResult(Result.Fail<AdbBatteryReading, AdbFailureCode>(built.Error!.Value, built.ErrorMessage));
+		}
+
+		var failure = PreflightForPlugin(serial, out var executablePath);
+		if (failure is { } refused)
+		{
+			return Task.FromResult(Result.Fail<AdbBatteryReading, AdbFailureCode>(refused.Code, refused.Message));
+		}
+
+		if (_propertiesUnavailable.ContainsKey(serial))
+		{
+			return Task.FromResult(Result.Fail<AdbBatteryReading, AdbFailureCode>(AdbFailureCode.Unsupported,
+				"This device does not report its battery."));
+		}
+
+		if (_batteryCache.TryGetValue(serial, out var cached) &&
+			_timeProvider.GetUtcNow() - cached.At < _batteryFreshness)
+		{
+			return Task.FromResult(Result.Ok<AdbBatteryReading, AdbFailureCode>(cached.Reading));
+		}
+
+		var probe = _batteryProbes.GetOrAdd(serial,
+			_ => new Lazy<Task<Result<AdbBatteryReading, AdbFailureCode>>>(() =>
+				ProbeBatteryAsync(executablePath, serial, built.Data!)));
+
+		return probe.Value.WaitAsync(cancellationToken);
+	}
+
+	public async Task<Result<AdbFailureCode>> PushFileAsync(string serial,
+		string localPath,
+		string remotePath,
+		CancellationToken cancellationToken)
+	{
+		var built = AdbCommandBuilder.BuildPush(serial, localPath, remotePath);
+		if (built.Success && !File.Exists(localPath))
+		{
+			return Result.Fail<AdbFailureCode>(AdbFailureCode.InvalidParameter, "The local file does not exist.");
+		}
+
+		return await RunTransferAsync(serial, built, _pluginTransferTimeout, cancellationToken);
+	}
+
+	public async Task<Result<AdbFailureCode>> PullFileAsync(string serial,
+		string remotePath,
+		string localPath,
+		CancellationToken cancellationToken)
+	{
+		var built = AdbCommandBuilder.BuildPull(serial, remotePath, localPath);
+		if (built.Success && !Directory.Exists(Path.GetDirectoryName(localPath)))
+		{
+			return Result.Fail<AdbFailureCode>(AdbFailureCode.InvalidParameter,
+				"The directory of the local path does not exist.");
+		}
+
+		return await RunTransferAsync(serial, built, _pluginTransferTimeout, cancellationToken);
+	}
+
+	public async Task<Result<AdbFailureCode>> InstallApkAsync(string serial,
+		string apkPath,
+		CancellationToken cancellationToken)
+	{
+		var built = AdbCommandBuilder.BuildInstall(serial, apkPath);
+		if (built.Success && !File.Exists(apkPath))
+		{
+			return Result.Fail<AdbFailureCode>(AdbFailureCode.InvalidParameter, "The APK file does not exist.");
+		}
+
+		return await RunTransferAsync(serial, built, _pluginTransferTimeout, cancellationToken);
+	}
+
+	public Task<Result<AdbFailureCode>> UninstallPackageAsync(string serial,
+		string packageName,
+		CancellationToken cancellationToken)
+		=> RunTransferAsync(serial,
+			AdbCommandBuilder.BuildUninstall(serial, packageName),
+			_pluginUninstallTimeout,
+			cancellationToken);
+
+	public async Task<Result<bool, AdbFailureCode>> IsPackageInstalledAsync(string serial,
+		string packageName,
+		CancellationToken cancellationToken)
+	{
+		var built = AdbCommandBuilder.BuildPackagePath(serial, packageName);
+		if (!built.Success)
+		{
+			return Result.Fail<bool, AdbFailureCode>(built.Error!.Value, built.ErrorMessage);
+		}
+
+		var failure = PreflightForPlugin(serial, out var executablePath);
+		if (failure is { } refused)
+		{
+			return Result.Fail<bool, AdbFailureCode>(refused.Code, refused.Message);
+		}
+
+		var result = await _processRunner.RunBoundedAsync(executablePath,
+			built.Data!,
+			_pluginQueryTimeout,
+			MaxPluginOutputChars,
+			cancellationToken);
+
+		if (!result.Started)
+		{
+			return Result.Fail<bool, AdbFailureCode>(AdbFailureCode.CommandFailed, "adb could not be started.");
+		}
+
+		// pm path prints nothing for an unknown package: exit 1 from Android 7, exit 0 before it.
+		return result.TimedOut
+			? Result.Fail<bool, AdbFailureCode>(AdbFailureCode.Timeout, "The package query timed out.")
+			: Result.Ok<bool, AdbFailureCode>(result.StandardOutput.Contains("package:", StringComparison.Ordinal));
+	}
+
+	public async Task<Result<string, AdbFailureCode>> ConnectAsync(string address, CancellationToken cancellationToken)
+	{
+		var built = AdbCommandBuilder.BuildConnect(address);
+		if (!built.Success)
+		{
+			return Result.Fail<string, AdbFailureCode>(built.Error!.Value, built.ErrorMessage);
+		}
+
+		var status = Status;
+		if (!status.Enabled)
+		{
+			return Result.Fail<string, AdbFailureCode>(AdbFailureCode.Disabled, "ADB is disabled.");
+		}
+
+		if (status.ResolvedExecutablePath is null)
+		{
+			return Result.Fail<string, AdbFailureCode>(AdbFailureCode.ExecutableNotFound,
+				"The adb executable could not be located.");
+		}
+
+		var result = await _processRunner.RunBoundedAsync(status.ResolvedExecutablePath,
+			built.Data!,
+			_connectTimeout,
+			MaxPluginOutputChars,
+			cancellationToken);
+
+		if (!result.Started)
+		{
+			return Result.Fail<string, AdbFailureCode>(AdbFailureCode.CommandFailed, "adb could not be started.");
+		}
+
+		if (result.TimedOut)
+		{
+			return Result.Fail<string, AdbFailureCode>(AdbFailureCode.Timeout, "Connecting to the device timed out.");
+		}
+
+		// adb connect exits 0 even when it could not connect; only its output tells.
+		var output = (result.StandardOutput + result.StandardError).Trim();
+		if (result.ExitCode != 0 || !output.Contains("connected to", StringComparison.OrdinalIgnoreCase) ||
+			output.Contains("failed", StringComparison.OrdinalIgnoreCase) ||
+			output.Contains("cannot", StringComparison.OrdinalIgnoreCase) ||
+			output.Contains("unable", StringComparison.OrdinalIgnoreCase))
+		{
+			return Result.Fail<string, AdbFailureCode>(AdbFailureCode.CommandFailed,
+				output.Length > MaxFailureMessageLength ? output[..MaxFailureMessageLength] : output);
+		}
+
+		await RefreshNowAsync(cancellationToken);
+		return Result.Ok<string, AdbFailureCode>(address);
 	}
 
 	public async Task ApplySettingsAsync(CancellationToken cancellationToken)
@@ -576,7 +794,9 @@ public sealed class AdbManager : IAdbManager, IDisposable
 
 		if (settings.UsbConnectionsEnabled)
 		{
-			var authorizedOnline = merged.Where(device => device.State == AdbDeviceState.Device).ToList();
+			var authorizedOnline = merged
+				.Where(device => device.State == AdbDeviceState.Device && !device.IsNetworkConnection)
+				.ToList();
 			var tunnels = await _tunnelCoordinator.ReconcileAsync(authorizedOnline, cancellationToken);
 			merged = merged
 				.Select(device => tunnels.TryGetValue(device.Serial, out var tunnel)
@@ -830,7 +1050,140 @@ public sealed class AdbManager : IAdbManager, IDisposable
 	}
 
 	private void SetSnapshot(AdbStatus status, IReadOnlyList<AdbDevice> devices)
-		=> Volatile.Write(ref _snapshot, new Snapshot(status, devices));
+	{
+		var next = new Snapshot(status, devices);
+		var previous = Interlocked.Exchange(ref _snapshot, next);
+		if (VisibleToPlugins(previous) == VisibleToPlugins(next))
+		{
+			return;
+		}
+
+		try
+		{
+			SnapshotChanged?.Invoke(this, EventArgs.Empty);
+		}
+		catch (Exception ex)
+		{
+			_logger.Warning(ex, "A SnapshotChanged subscriber threw");
+		}
+	}
+
+	// Only what the plugin adb push carries, so a poll that merely refreshes LastSeenAt raises nothing.
+	private static string VisibleToPlugins(Snapshot snapshot)
+		=> string.Join('\n',
+			new[] { $"{snapshot.Status.Enabled}|{snapshot.Status.Supported}" }.Concat(snapshot.Devices
+				.Where(device => device.State != AdbDeviceState.Disconnected)
+				.OrderBy(device => device.Serial, StringComparer.Ordinal)
+				.Select(device => $"{device.Serial}|{device.State}|{device.Model}|{device.Manufacturer}|{device.Product}")));
+
+	private (AdbFailureCode Code, string Message)? PreflightForPlugin(string serial, out string executablePath)
+	{
+		executablePath = string.Empty;
+		var status = Status;
+		if (!status.Enabled)
+		{
+			return (AdbFailureCode.Disabled, "ADB is disabled.");
+		}
+
+		if (status.ResolvedExecutablePath is null)
+		{
+			return (AdbFailureCode.ExecutableNotFound, "The adb executable could not be located.");
+		}
+
+		var device = Devices.FirstOrDefault(candidate => string.Equals(candidate.Serial, serial, StringComparison.Ordinal));
+		var failure = ValidateDeviceState(device, serial);
+		if (failure is not null)
+		{
+			return failure;
+		}
+
+		executablePath = status.ResolvedExecutablePath;
+		return null;
+	}
+
+	private async Task<Result<AdbFailureCode>> RunTransferAsync(string serial,
+		Result<IReadOnlyList<string>, AdbFailureCode> built,
+		TimeSpan timeout,
+		CancellationToken cancellationToken)
+	{
+		if (!built.Success)
+		{
+			return Result.Fail<AdbFailureCode>(built.Error!.Value, built.ErrorMessage);
+		}
+
+		var failure = PreflightForPlugin(serial, out var executablePath);
+		if (failure is { } refused)
+		{
+			return Result.Fail<AdbFailureCode>(refused.Code, refused.Message);
+		}
+
+		var result = await _processRunner.RunBoundedAsync(executablePath,
+			built.Data!,
+			timeout,
+			MaxPluginOutputChars,
+			cancellationToken);
+
+		if (!result.Started)
+		{
+			return Result.Fail<AdbFailureCode>(AdbFailureCode.CommandFailed, "adb could not be started.");
+		}
+
+		if (result.TimedOut)
+		{
+			return Result.Fail<AdbFailureCode>(AdbFailureCode.Timeout, "The adb command timed out.");
+		}
+
+		// Older adb versions report a refused install or uninstall on stdout and still exit 0.
+		var output = result.StandardOutput + result.StandardError;
+		if (result.ExitCode != 0 || output.Contains("Failure [", StringComparison.Ordinal))
+		{
+			var message = output.Trim();
+			return Result.Fail<AdbFailureCode>(AdbFailureCode.CommandFailed,
+				message.Length > MaxFailureMessageLength ? message[..MaxFailureMessageLength] : message);
+		}
+
+		return Result.Ok<AdbFailureCode>();
+	}
+
+	private async Task<Result<AdbBatteryReading, AdbFailureCode>> ProbeBatteryAsync(string executablePath,
+		string serial,
+		IReadOnlyList<string> arguments)
+	{
+		try
+		{
+			var result = await _processRunner.RunBoundedAsync(executablePath,
+				arguments,
+				_pluginQueryTimeout,
+				MaxPluginOutputChars,
+				CancellationToken.None);
+
+			if (result.TimedOut)
+			{
+				return Result.Fail<AdbBatteryReading, AdbFailureCode>(AdbFailureCode.Timeout, "Reading the battery timed out.");
+			}
+
+			// 127 is the shell's command-not-found: the device has no dumpsys, which will not change.
+			if (result is not { Started: true, ExitCode: 0 or 127 })
+			{
+				return Result.Fail<AdbBatteryReading, AdbFailureCode>(AdbFailureCode.CommandFailed,
+					"The battery could not be read.");
+			}
+
+			var reading = AdbPropertyParsers.ParseBatteryState(result.StandardOutput);
+			if (reading is null)
+			{
+				return Result.Fail<AdbBatteryReading, AdbFailureCode>(AdbFailureCode.Unsupported,
+					"This device does not report its battery.");
+			}
+
+			_batteryCache[serial] = (_timeProvider.GetUtcNow(), reading);
+			return Result.Ok<AdbBatteryReading, AdbFailureCode>(reading);
+		}
+		finally
+		{
+			_batteryProbes.TryRemove(serial, out _);
+		}
+	}
 
 	private void SignalWake()
 	{

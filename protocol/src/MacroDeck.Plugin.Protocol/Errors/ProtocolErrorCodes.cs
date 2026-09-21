@@ -53,6 +53,16 @@ public static class ProtocolErrorCodes
 
 	public const string InternalError = "INTERNAL_ERROR";
 
+	/// <summary>An <c>adb</c> call refused because ADB is switched off in Macro Deck.</summary>
+	public const string AdbNotEnabled = "ADB_NOT_ENABLED";
+
+	/// <summary>An <c>adb</c> call refused because ADB is on but this plugin may not use it.</summary>
+	public const string AdbNotAllowed = "ADB_NOT_ALLOWED";
+
+	/// <summary>An <c>adb</c> call that adb or the device could not carry out. The details'
+	/// <c>reason</c> names why, from the <c>adb_</c> values of <see cref="ProtocolErrorReasons" />.</summary>
+	public const string AdbFailed = "ADB_FAILED";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		ProtocolVersionUnsupported, UnknownMessageType, MalformedEnvelope, InvalidPayload, Unauthenticated,
@@ -60,5 +70,6 @@ public static class ProtocolErrorCodes
 		CapabilityUnsupported,
 		CapabilityUnavailable, PayloadTooLarge, AssetTooLarge, QueueOverflow, RateLimited,
 		Timeout, Cancelled, CorrelationUnknown, DuplicateIdempotencyKey, InternalError,
+		AdbNotEnabled, AdbNotAllowed, AdbFailed,
 	];
 }

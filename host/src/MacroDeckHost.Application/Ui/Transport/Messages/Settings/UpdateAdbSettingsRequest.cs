@@ -11,4 +11,6 @@ public class UpdateAdbSettingsRequest
 	public string? DefaultDeviceSerial { get; set; }
 
 	public bool? StopServerOnExit { get; set; }
+
+	public bool? AllowPlugins { get; set; }
 }

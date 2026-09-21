@@ -2,7 +2,8 @@ import { Component, computed, provideZonelessChangeDetection, signal } from '@an
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 
-import { UserNotification, UserNotificationAction } from '@macro-deck/runtime';
+import { UpdateAdbSettingsResponse, UserNotification, UserNotificationAction } from '@macro-deck/runtime';
+import { ApiService } from '@shared';
 import { IconPackService } from '../../../services/icon-pack.service';
 import { NotificationCenterService } from '../../../services/notification-center.service';
 import { RestartNoticeService, SettingsModalService, UpdateModalService, UpdateService } from '../../../services';
@@ -35,6 +36,7 @@ describe('NotificationPanelComponent', () => {
   let updateModalOpenSpy: jasmine.Spy;
   let updateInstallSpy: jasmine.Spy;
   let updateCancelSpy: jasmine.Spy;
+  let updateAdbSettingsSpy: jasmine.Spy;
 
   function fireAction(notification: UserNotification, action: UserNotificationAction): void {
     fixture.componentInstance.onAction({ notification, action });
@@ -102,6 +104,9 @@ describe('NotificationPanelComponent', () => {
         },
       ],
     }).compileComponents();
+
+    updateAdbSettingsSpy = spyOn(TestBed.inject(ApiService), 'updateAdbSettings')
+      .and.resolveTo({ success: true, error: null, resolvedExecutablePath: 'C:/platform-tools/adb.exe' } as UpdateAdbSettingsResponse);
 
     fixture = TestBed.createComponent(NotificationPanelComponent);
     fixture.detectChanges();
@@ -267,6 +272,41 @@ describe('NotificationPanelComponent', () => {
 
     expect(navigateSpy).toHaveBeenCalledWith([iconPacks!.route]);
     expect(closedSpy).toHaveBeenCalled();
+  });
+
+  describe('plugin ADB access action', () => {
+    it('turns on ADB and plugin access and clears the question without touching any other ADB setting', async () => {
+      notifications.set([notification({ id: 'adb-1', severity: 'Warning' })]);
+
+      fireAction(notification({ id: 'adb-1', severity: 'Warning' }), { kind: 'EnablePluginAdb' });
+      await new Promise(resolve => setTimeout(resolve));
+
+      expect(updateAdbSettingsSpy).toHaveBeenCalledOnceWith({ enabled: true, allowPlugins: true });
+      expect(dismissSpy).toHaveBeenCalledWith('adb-1');
+      expect(settingsOpenSpy).not.toHaveBeenCalled();
+    });
+
+    it('keeps the question and opens the ADB settings when the change could not be saved', async () => {
+      updateAdbSettingsSpy.and.rejectWith(new Error('offline'));
+
+      fireAction(notification({ id: 'adb-1', severity: 'Warning' }), { kind: 'EnablePluginAdb' });
+      await new Promise(resolve => setTimeout(resolve));
+
+      expect(dismissSpy).not.toHaveBeenCalled();
+      expect(settingsOpenSpy).toHaveBeenCalledWith('adb');
+    });
+
+    it('labels the action so the user can tell what it allows', async () => {
+      notifications.set([notification({
+        id: 'adb-1',
+        severity: 'Warning',
+        title: 'A plugin wants to use ADB',
+        actions: [{ kind: 'EnablePluginAdb' }, { kind: 'DismissNotification' }],
+      })]);
+      await open();
+
+      expect(fixture.nativeElement.textContent).toContain('Allow');
+    });
   });
 
   describe('update notification actions (issue #249)', () => {

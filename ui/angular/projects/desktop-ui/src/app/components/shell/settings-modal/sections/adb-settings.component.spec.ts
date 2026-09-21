@@ -24,6 +24,7 @@ describe('AdbSettingsComponent', () => {
     authorized: true,
     isDefault: true,
     tunnelEstablished: true,
+    networkConnection: false,
     tunnelDevicePort: 55001,
     tunnelError: null,
   };
@@ -39,6 +40,7 @@ describe('AdbSettingsComponent', () => {
     usbConnectionsEnabled: true,
     defaultDeviceSerial: 'R58M12ABCDE',
     stopServerOnExit: false,
+    allowPlugins: true,
     activePublicPort: 8193,
     deviceSidePortCandidates: [58193, 58194],
     devices: [device],
@@ -60,6 +62,7 @@ describe('AdbSettingsComponent', () => {
       usbConnectionsEnabled: request.usbConnectionsEnabled ?? resolved.usbConnectionsEnabled,
       defaultDeviceSerial: request.defaultDeviceSerial ?? null,
       stopServerOnExit: request.stopServerOnExit ?? resolved.stopServerOnExit,
+      allowPlugins: request.allowPlugins ?? resolved.allowPlugins,
       success: true,
       error: null,
     }));
@@ -73,6 +76,7 @@ describe('AdbSettingsComponent', () => {
       'updateAdbSettings',
       'restartAdbServer',
       'downloadAdbPlatformTools',
+      'connectAdbDevice',
       'onAdbStateChanged',
       'onNotification',
     ]);
@@ -109,6 +113,7 @@ describe('AdbSettingsComponent', () => {
       authorized: false,
       isDefault: false,
       tunnelEstablished: false,
+      networkConnection: false,
       tunnelDevicePort: null,
       tunnelError: 'Port already in use',
     };
@@ -210,6 +215,103 @@ describe('AdbSettingsComponent', () => {
 
     expect(api.updateAdbSettings)
       .toHaveBeenCalledOnceWith(jasmine.objectContaining({ usbConnectionsEnabled: false, stopServerOnExit: true }));
+  });
+
+  it('stops plugins from using ADB through its own switch', async () => {
+    const fixture = await create();
+
+    const row = Array.from(fixture.nativeElement.querySelectorAll('shared-settings-row') as NodeListOf<HTMLElement>)
+      .find(candidate => candidate.textContent!.includes('Allow plugins to use ADB'))!;
+    const toggle = row.querySelector('shared-toggle-switch .ts-input') as HTMLInputElement;
+    expect(toggle.checked).toBeTrue();
+
+    toggle.click();
+    await fixture.whenStable();
+
+    expect(api.updateAdbSettings).toHaveBeenCalledOnceWith(jasmine.objectContaining({ allowPlugins: false }));
+  });
+
+  it('leaves the plugin access choice alone when another setting is saved', async () => {
+    installApi({ allowPlugins: false });
+    const fixture = await create();
+
+    await fixture.componentInstance.setUsbConnectionsEnabled(false);
+
+    expect(api.updateAdbSettings.calls.mostRecent().args[0].allowPlugins).toBeUndefined();
+  });
+
+  function connectField(fixture: ComponentFixture<AdbSettingsComponent>): { input: HTMLInputElement; button: HTMLButtonElement } {
+    const block = fixture.nativeElement.querySelector('.adb__connect') as HTMLElement;
+    return { input: block.querySelector('input')!, button: block.querySelector('shared-button button')! };
+  }
+
+  it('connects a phone over Wi-Fi and shows it in the device list', async () => {
+    const wireless: AdbDevice = { ...device, serial: '192.168.1.20:5555', model: 'Pixel 9', isDefault: false };
+    api.connectAdbDevice.and.resolveTo({ ...defaults, devices: [device, wireless], success: true, error: null });
+    const fixture = await create();
+
+    const { input, button } = connectField(fixture);
+    input.value = ' 192.168.1.20:5555 ';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    button.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(api.connectAdbDevice).toHaveBeenCalledOnceWith({ address: '192.168.1.20:5555' });
+    expect(fixture.nativeElement.querySelectorAll('.adb__device-row').length).toBe(2);
+    expect(fixture.componentInstance.connectDraft()).toBe('');
+  });
+
+  it('says a phone on Wi-Fi is connected over Wi-Fi instead of describing a USB tunnel', async () => {
+    installApi({ devices: [{ ...device, serial: '192.168.1.20:5555', networkConnection: true, tunnelEstablished: false, tunnelDevicePort: null }] });
+
+    const fixture = await create();
+
+    const row = fixture.nativeElement.querySelector('.adb__device-row') as HTMLElement;
+    expect(row.textContent).toContain('Connected over Wi-Fi');
+    expect(row.textContent).not.toContain('Ready on port');
+  });
+
+  it('refuses an address without a port before asking the host', async () => {
+    const fixture = await create();
+    fixture.componentInstance.connectDraft.set('192.168.1.20');
+
+    await fixture.componentInstance.connectOverWifi();
+    fixture.detectChanges();
+
+    expect(api.connectAdbDevice).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).toContain('with a port');
+  });
+
+  it('says which address could not be connected and why', async () => {
+    api.connectAdbDevice.and.resolveTo({
+      ...defaults, success: false, errorCode: 'CommandFailed',
+      error: "failed to connect to '192.168.1.20:5555': Connection refused",
+    });
+    const fixture = await create();
+    fixture.componentInstance.connectDraft.set('192.168.1.20:5555');
+
+    await fixture.componentInstance.connectOverWifi();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Macro Deck could not connect to 192.168.1.20:5555');
+    expect(fixture.nativeElement.textContent).toContain('Connection refused');
+    expect(fixture.componentInstance.connectDraft()).toBe('192.168.1.20:5555');
+  });
+
+  it('explains a connect that timed out in the user language rather than with the host message', async () => {
+    api.connectAdbDevice.and.resolveTo({
+      ...defaults, success: false, errorCode: 'Timeout', error: 'Connecting to the device timed out.',
+    });
+    const fixture = await create();
+    fixture.componentInstance.connectDraft.set('192.168.1.20:5555');
+
+    await fixture.componentInstance.connectOverWifi();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Connecting to 192.168.1.20:5555 took too long');
+    expect(fixture.nativeElement.textContent).not.toContain('Connecting to the device timed out.');
   });
 
   it('never mentions reverse tunnels or forwarding in the USB connections copy', async () => {

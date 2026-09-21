@@ -94,6 +94,14 @@
                   </span>
                 </div>
               }
+              @if (usesAdb()) {
+                <div class="detail-field">
+                  <span class="detail-label">{{ 'macrodeck.app:Plugins.UsesAdbBadge' | translate }}</span>
+                  <span class="detail-value">
+                    <span class="icon icon-check icon-xs"></span>
+                  </span>
+                </div>
+              }
             </section>
 
             <section class="detail-card detail-card-wide">

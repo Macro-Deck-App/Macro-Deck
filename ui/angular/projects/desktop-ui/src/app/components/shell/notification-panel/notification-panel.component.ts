@@ -6,6 +6,7 @@ import { ButtonComponent, LocalizationService, SidePanelComponent, TranslatePipe
 import { EmptyStateComponent } from '../../feedback/empty-state/empty-state.component';
 import { IconPackService } from '../../../services/icon-pack.service';
 import { NotificationCenterService } from '../../../services/notification-center.service';
+import { PluginAdbConsentService } from '../../../services/plugin-adb-consent.service';
 import { RestartNoticeService, SettingsModalService, UpdateModalService, UpdateService } from '../../../services';
 import { NotificationActionEvent, NotificationItemComponent } from './notification-item.component';
 
@@ -27,6 +28,7 @@ export class NotificationPanelComponent {
   private readonly updateService = inject(UpdateService);
   private readonly iconPacks = inject(IconPackService);
   private readonly restartNotice = inject(RestartNoticeService);
+  private readonly adbConsent = inject(PluginAdbConsentService);
 
   readonly isOpen = input(false);
 
@@ -75,11 +77,20 @@ export class NotificationPanelComponent {
       case 'DismissNotification':
         this.notificationCenter.dismiss(notification.id);
         return;
+      case 'EnablePluginAdb':
+        void this.allowPluginsToUseAdb(notification.id);
+        return;
       case 'None':
         break;
     }
 
     this.closed.emit();
+  }
+
+  private async allowPluginsToUseAdb(notificationId: string): Promise<void> {
+    if (!await this.adbConsent.allow(notificationId)) {
+      this.closed.emit();
+    }
   }
 
   private async restartApplication(): Promise<void> {

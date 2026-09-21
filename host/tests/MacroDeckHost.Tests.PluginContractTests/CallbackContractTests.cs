@@ -421,6 +421,30 @@ internal sealed class CallbackContractTests
 		});
 	}
 
+	[Test]
+	public async Task A_plugin_that_never_uses_adb_keeps_working_after_the_host_pushes_adb_state()
+	{
+		_link.PushHostState(HostApis.Adb,
+			new AdbStateDto
+			{
+				Access = AdbAccessStates.Available,
+				Devices = [new AdbDeviceStateDto { Serial = "emulator-5554", State = AdbDeviceStates.Online }],
+				Revision = 1
+			});
+		_link.PushHostState(HostApis.Deck,
+			new DeckStateDto { Folders = [new DeckFolder { Id = "f1", Label = "Folder 1" }] });
+
+		await WaitForAsync(() => _context.Deck.GetFolders().Count > 0);
+		var result = await _context.Scripts.RunAsync("script-1");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_context.Deck.GetFolders().Select(f => f.Id), Is.EqualTo(new[] { "f1" }));
+			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
+			Assert.That(_scriptApi.RanScripts, Is.EqualTo(new[] { "script-1" }));
+		});
+	}
+
 
 	[Test]
 	public async Task Notify_lands_in_the_hosts_notification_store()

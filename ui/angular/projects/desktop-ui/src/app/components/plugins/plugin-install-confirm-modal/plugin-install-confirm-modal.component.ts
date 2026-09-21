@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild, computed, inject, signal } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { AppStrings, PLUGIN_WARNING_ARTIFACT_UNSIGNED, PLUGIN_WARNING_SIGNATURE_UNVERIFIED, PluginInstallActionResponse, PluginInstallWarning, PluginSignatureVerification } from '@macro-deck/runtime';
+import { AppStrings, PLUGIN_WARNING_ARTIFACT_UNSIGNED, PLUGIN_WARNING_SIGNATURE_UNVERIFIED, PLUGIN_WARNING_USES_ADB, PluginInstallActionResponse, PluginInstallWarning, PluginSignatureVerification } from '@macro-deck/runtime';
 import { ButtonComponent, LocalizationService, ModalComponent, TranslatePipe, dismissModal } from '@shared';
 import { LoadingStateComponent } from '../../feedback/loading-state/loading-state.component';
 
@@ -296,7 +296,9 @@ export class PluginInstallConfirmModalComponent {
     (this.inspection()?.warnings ?? [])
       .filter(warning => !isSignatureWarning(warning))
       .map(warning => ({
-        message: warning.message,
+        message: warning.code === PLUGIN_WARNING_USES_ADB
+          ? this.localization.translateKey(AppStrings.Plugins.UsesAdbNote)
+          : warning.message,
         severity: warning.severity === 'blocking' ? 'error' : 'warn',
         blocking: warning.severity === 'blocking'
       }))

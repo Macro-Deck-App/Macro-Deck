@@ -59,7 +59,7 @@ public sealed record PluginManifest
 	/// <summary>Null means "declares nothing", which is never the same as "incompatible".</summary>
 	public PluginCompatibility? Compatibility { get; init; }
 
-	/// <summary>Declared for disclosure only. Nothing in the host enforces these today; see
+	/// <summary>Declared for disclosure. The host enforces only <c>host:adb</c>; see
 	/// <c>PluginPermissions</c>.</summary>
 	public IReadOnlyList<string>? Permissions { get; init; }
 

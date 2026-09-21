@@ -151,28 +151,9 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		ArgumentException.ThrowIfNullOrEmpty(pluginId);
 		ArgumentNullException.ThrowIfNull(payload);
 
-		if (!HostApis.IsKnown(payload.Api))
+		if (Admit(pluginId, payload) is { } refused)
 		{
-			return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
-				$"The host has no api '{payload.Api}'.");
-		}
-
-		if (!HostOperations.IsKnown(payload.Api, payload.Operation))
-		{
-			return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
-				$"The '{payload.Api}' api has no operation '{payload.Operation}'.");
-		}
-
-		// The ui api is deliberately exempt. Its traffic is a per-session tree and patch stream whose rate
-		// is already bounded, per session, by ProtocolLimits.MaxUiUpdatesPerSecond and the session's own
-		// token bucket. Charging it to the shared per-plugin bucket as well would let one busy view
-		// starve every other callback the plugin makes, and would drop patches under a limiter that
-		// cannot ask for the resync the session limiter asks for.
-		if (!string.Equals(payload.Api, HostApis.Ui, StringComparison.Ordinal) && !_throttle.TryConsume(pluginId))
-		{
-			return HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
-				"This plugin is calling back into the host too quickly.",
-				retryable: true);
+			return refused;
 		}
 
 		try
@@ -208,6 +189,35 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			return HostCallbackResult.Fail(ProtocolErrorCodes.InternalError,
 				ProtocolErrorMessages.For(ProtocolErrorCodes.InternalError));
 		}
+	}
+
+	public HostCallbackResult? Admit(string pluginId, HostInvokePayload payload)
+	{
+		if (!HostApis.IsKnown(payload.Api))
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
+				$"The host has no api '{payload.Api}'.");
+		}
+
+		if (!HostOperations.IsKnown(payload.Api, payload.Operation))
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
+				$"The '{payload.Api}' api has no operation '{payload.Operation}'.");
+		}
+
+		// The ui api is deliberately exempt. Its traffic is a per-session tree and patch stream whose rate
+		// is already bounded, per session, by ProtocolLimits.MaxUiUpdatesPerSecond and the session's own
+		// token bucket. Charging it to the shared per-plugin bucket as well would let one busy view
+		// starve every other callback the plugin makes, and would drop patches under a limiter that
+		// cannot ask for the resync the session limiter asks for.
+		if (!string.Equals(payload.Api, HostApis.Ui, StringComparison.Ordinal) && !_throttle.TryConsume(pluginId))
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
+				"This plugin is calling back into the host too quickly.",
+				retryable: true);
+		}
+
+		return null;
 	}
 
 	private async Task<HostCallbackResult> RouteVariablesAsync(string pluginId,

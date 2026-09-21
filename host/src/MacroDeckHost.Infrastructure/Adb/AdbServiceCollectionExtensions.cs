@@ -24,6 +24,7 @@ public static class AdbServiceCollectionExtensions
 			sp.GetRequiredService<TimeProvider>(),
 			sp.GetRequiredService<ILogger>()));
 		services.AddSingleton<IAdbManager>(sp => sp.GetRequiredService<AdbManager>());
+		services.AddSingleton<IAdbDeviceOperations>(sp => sp.GetRequiredService<AdbManager>());
 		services.AddSingleton<IAdbGateway>(sp => new AdbGateway(sp.GetRequiredService<IAdbManager>(),
 			sp.GetRequiredService<ILogger>()));
 		// AdbPlatformToolsInstaller's constructor is internal for the same reason as the two above; the

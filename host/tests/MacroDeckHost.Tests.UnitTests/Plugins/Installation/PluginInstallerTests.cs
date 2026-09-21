@@ -29,6 +29,7 @@ internal sealed class PluginInstallerTests
 	private FakeInstallSupervisor _supervisor = null!;
 	private PluginInstallationCatalog _catalog = null!;
 	private PluginInstaller _installer = null!;
+	private RecordingConsentNotifier _adbConsent = null!;
 	private FakeIntegrationRegistrar _integrationRegistrar = null!;
 	private string _sourceDirectory = null!;
 
@@ -75,6 +76,7 @@ internal sealed class PluginInstallerTests
 			TimeProvider.System));
 		var provider = services.BuildServiceProvider();
 
+		_adbConsent = new RecordingConsentNotifier();
 		_installer = new PluginInstaller(_paths,
 			new PluginArtifactReader(manifestReader, Serilog.Core.Logger.None),
 			new PluginArtifactAcquirer(new NoHttpClientFactory(),
@@ -92,7 +94,8 @@ internal sealed class PluginInstallerTests
 			provider.GetRequiredService<IServiceScopeFactory>(),
 			options,
 			TimeProvider.System,
-			Serilog.Core.Logger.None);
+			Serilog.Core.Logger.None,
+			_adbConsent);
 	}
 
 	[TearDown]
@@ -157,6 +160,27 @@ internal sealed class PluginInstallerTests
 			Assert.That(File.Exists(Path.Combine(VersionDirectory("1.0.0"), "manifest.json")), Is.True);
 			Assert.That(ActiveVersion(), Is.EqualTo("1.0.0"));
 		});
+	}
+
+	[Test]
+	public async Task Installing_a_plugin_that_declares_adb_asks_once_and_an_update_that_still_declares_it_does_not()
+	{
+		const string declaresAdb = "\"permissions\": [\"host:adb\"]";
+
+		await Install(BuildArtifact("1.0.0", declaresAdb));
+		await Install(BuildArtifact("2.0.0", declaresAdb, fileName: "update.macroDeckPlugin"));
+
+		Assert.That(_adbConsent.Installed, Is.EqualTo(new[] { (PluginId, true, false), (PluginId, true, true) }));
+	}
+
+	[Test]
+	public async Task Uninstalling_a_plugin_withdraws_its_adb_question()
+	{
+		await Install(BuildArtifact());
+
+		await _installer.Uninstall(PluginId, new PluginUninstallRequest());
+
+		Assert.That(_adbConsent.Dismissed, Is.EqualTo(new[] { PluginId }));
 	}
 
 	[Test]

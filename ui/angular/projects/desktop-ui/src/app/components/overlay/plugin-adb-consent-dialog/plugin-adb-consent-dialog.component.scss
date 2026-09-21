@@ -1,0 +1,32 @@
+.plugin-adb-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-warning) 12%, transparent);
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+
+  .icon {
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+    color: var(--color-warning);
+  }
+}
+
+.plugin-adb-consent-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+
+  p {
+    margin: 0;
+  }
+}
+
+.plugin-adb-consent-hint {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}

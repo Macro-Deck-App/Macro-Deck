@@ -20,6 +20,15 @@ internal interface IHostInvoker
 		object? arguments,
 		CancellationToken cancellationToken);
 
+	/// <summary>As <see cref="InvokeAsync(string, string, object?, CancellationToken)" />, waiting up to
+	/// <paramref name="timeout" /> instead of the default request timeout.</summary>
+	Task<JsonElement?> InvokeAsync(string api,
+		string operation,
+		object? arguments,
+		TimeSpan timeout,
+		CancellationToken cancellationToken)
+		=> InvokeAsync(api, operation, arguments, cancellationToken);
+
 	/// <summary>Completes a pending invocation from the connection's receive loop. False when the
 	/// correlation is unknown to this invoker.</summary>
 	bool TryComplete(ProtocolEnvelope result);

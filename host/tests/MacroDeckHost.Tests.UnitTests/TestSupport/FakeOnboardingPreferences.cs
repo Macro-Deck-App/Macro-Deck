@@ -40,7 +40,8 @@ internal sealed class FakeOnboardingPreferences : IAppPreferenceService
 		string? executablePath,
 		bool? usbConnectionsEnabled,
 		string? defaultDeviceSerial,
-		bool? stopServerOnExit)
+		bool? stopServerOnExit,
+		bool allowPlugins)
 		=> throw new NotSupportedException();
 
 	public Task<OnboardingSettings> GetOnboarding()

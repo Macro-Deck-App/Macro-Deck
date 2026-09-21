@@ -2073,6 +2073,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Dialogs.Notice.GotIt" xml:space="preserve">
     <value>Rozumiem</value>
   </data>
+  <data name="Dialogs.PluginAdbConsent.AdbMissingHeading" xml:space="preserve">
+    <value>Pobierz Android platform-tools</value>
+  </data>
+  <data name="Dialogs.PluginAdbConsent.AdbMissingMessage" xml:space="preserve">
+    <value>ADB jest włączone, ale Macro Deck nie może znaleźć adb na tym komputerze. Pobrać teraz Android platform-tools, aby wtyczki mogły pracować z urządzeniami z Androidem?</value>
+  </data>
   <data name="Dialogs.PluginPairing.Approve" xml:space="preserve">
     <value>Zatwierdź</value>
   </data>
@@ -11644,6 +11650,21 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Notifications.NetworkUnreachableTlsMessage" xml:space="preserve">
     <value>HTTPS ma zastąpić publiczny nasłuch, ale nie można było użyć jego certyfikatu, więc nic w sieci nie dotrze do tego komputera - Macro Deck nie wraca do nieszyfrowanego nasłuchu.</value>
   </data>
+  <data name="Notifications.PluginAdbAccessRequested" xml:space="preserve">
+    <value>Wtyczka prosi o dostęp do ADB</value>
+  </data>
+  <data name="Notifications.PluginAdbAccessRequestedAdbMissingMessage" xml:space="preserve">
+    <value>Wtyczka {name} potrzebuje ADB do pracy z urządzeniami z Androidem. ADB jest włączone, ale Macro Deck nie może znaleźć adb na tym komputerze. Skonfigurować je teraz?</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.PluginAdbAccessRequestedAdbOffMessage" xml:space="preserve">
+    <value>Wtyczka {name} potrzebuje ADB do pracy z urządzeniami z Androidem, ale ADB jest wyłączone w aplikacji Macro Deck. Włączyć ADB i zezwolić wtyczkom na jego używanie?</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.PluginAdbAccessRequestedMessage" xml:space="preserve">
+    <value>Wtyczka {name} potrzebuje ADB do pracy z urządzeniami z Androidem, ale wtyczki nie mogą obecnie używać ADB. Zezwolić wtyczkom na używanie ADB?</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.RestartToApplyNetwork" xml:space="preserve">
     <value>Uruchom ponownie, aby zastosować nowe ustawienia sieciowe</value>
   </data>
@@ -11853,6 +11874,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Plugins.UnverifiedClaim" xml:space="preserve">
     <value>niezweryfikowana deklaracja</value>
+  </data>
+  <data name="Plugins.UsesAdbBadge" xml:space="preserve">
+    <value>Używa ADB</value>
+  </data>
+  <data name="Plugins.UsesAdbNote" xml:space="preserve">
+    <value>Ta wtyczka używa ADB do pracy z urządzeniami z Androidem. Może uruchamiać na nich polecenia, kopiować pliki i instalować aplikacje.</value>
   </data>
   <data name="Plugins.VerifiedNoPublisherHint" xml:space="preserve">
     <value>Podpis tej wtyczki został sprawdzony przez Macro Deck Creator Portal, ale jej manifest nie podaje autora.</value>
@@ -12441,6 +12468,42 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Settings.Account.SigningInMessage" xml:space="preserve">
     <value>Oczekiwanie na dokończenie logowania w przeglądarce…</value>
+  </data>
+  <data name="Settings.Adb.AllowPluginsDescription" xml:space="preserve">
+    <value>Wtyczki deklarujące dostęp do ADB mogą korzystać z połączenia ADB aplikacji Macro Deck do pracy z urządzeniami z Androidem, na przykład do uruchamiania poleceń powłoki, kopiowania plików lub instalowania aplikacji.</value>
+  </data>
+  <data name="Settings.Adb.AllowPluginsLabel" xml:space="preserve">
+    <value>Zezwalaj wtyczkom na używanie ADB</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiLabel" xml:space="preserve">
+    <value>Połącz przez Wi-Fi</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiHint" xml:space="preserve">
+    <value>Wpisz adres IP i port telefonu z włączonym debugowaniem bezprzewodowym, na przykład 192.168.1.20:5555. Urządzenie pojawi się wtedy na liście powyżej, a wtyczki używające ADB również będą mogły z niego korzystać.</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiPlaceholder" xml:space="preserve">
+    <value>192.168.1.20:5555</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiTimeout" xml:space="preserve">
+    <value>Łączenie z {address} trwało zbyt długo. Sprawdź, czy telefon jest w tej samej sieci i ma włączone debugowanie bezprzewodowe.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Settings.Adb.ConnectedOverWifi" xml:space="preserve">
+    <value>Połączono przez Wi-Fi</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiButton" xml:space="preserve">
+    <value>Połącz</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiInvalid" xml:space="preserve">
+    <value>Wpisz adres IP lub nazwę hosta z portem, na przykład 192.168.1.20:5555.</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiFailed" xml:space="preserve">
+    <value>Nie udało się połączyć z {address}.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Settings.Adb.ConnectWifiFailedReason" xml:space="preserve">
+    <value>Nie udało się połączyć z {address}: {reason}</value>
+    <comment>[address:string] [reason:string]</comment>
   </data>
   <data name="Settings.Adb.DefaultDeviceLabel" xml:space="preserve">
     <value>Urządzenie domyślne</value>
@@ -13991,6 +14054,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Shell.Footer.Version" xml:space="preserve">
     <value>Wersja {version}</value>
+  </data>
+  <data name="Shell.Notifications.Action.EnablePluginAdb" xml:space="preserve">
+    <value>Zezwól</value>
   </data>
   <data name="Shell.Notifications.Action.OpenExtensionStore" xml:space="preserve">
     <value>Otwórz sklep</value>

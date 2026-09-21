@@ -13,6 +13,8 @@ internal static partial class AdbCommandBuilder
 	private const int MaxTextLength = 500;
 	private const int MaxDevicePathLength = 512;
 	private const int MaxServiceNameLength = 128;
+	private const int MaxPluginShellCommandLength = 8192;
+	private const int MaxPluginPathLength = 1024;
 
 	public static Result<IReadOnlyList<string>, AdbFailureCode> Build(AdbCommand command)
 	{
@@ -211,8 +213,70 @@ internal static partial class AdbCommandBuilder
 		AdbRemountRootWritableCommand command)
 		=> Shell(command.Serial, "mount -o remount,rw /");
 
+	public static Result<IReadOnlyList<string>, AdbFailureCode> BuildPluginShell(string serial, string command)
+	{
+		var failure = ValidateSerial(serial);
+		if (failure is not null)
+		{
+			return failure;
+		}
+
+		// adb reads a leading dash as one of its own shell options rather than as the command.
+		if (string.IsNullOrWhiteSpace(command) ||
+			command.Length > MaxPluginShellCommandLength ||
+			command.Contains('\0') ||
+			command.TrimStart().StartsWith('-'))
+		{
+			return Fail("The shell command is empty, too long, or starts with '-'.");
+		}
+
+		return Shell(serial, command);
+	}
+
+	public static Result<IReadOnlyList<string>, AdbFailureCode> BuildBattery(string serial)
+		=> ValidateSerial(serial) ?? Shell(serial, "dumpsys battery");
+
+	public static Result<IReadOnlyList<string>, AdbFailureCode> BuildPush(string serial,
+		string localPath,
+		string remotePath)
+		=> ValidateSerial(serial) ??
+			ValidateLocalPath(localPath) ??
+			ValidateRemotePath(remotePath) ??
+			Result.Ok<IReadOnlyList<string>, AdbFailureCode>(["-s", serial, "push", localPath, remotePath]);
+
+	public static Result<IReadOnlyList<string>, AdbFailureCode> BuildPull(string serial,
+		string remotePath,
+		string localPath)
+		=> ValidateSerial(serial) ??
+			ValidateRemotePath(remotePath) ??
+			ValidateLocalPath(localPath) ??
+			Result.Ok<IReadOnlyList<string>, AdbFailureCode>(["-s", serial, "pull", remotePath, localPath]);
+
+	public static Result<IReadOnlyList<string>, AdbFailureCode> BuildInstall(string serial, string apkPath)
+		=> ValidateSerial(serial) ??
+			ValidateLocalPath(apkPath) ??
+			Result.Ok<IReadOnlyList<string>, AdbFailureCode>(["-s", serial, "install", "-r", apkPath]);
+
+	public static Result<IReadOnlyList<string>, AdbFailureCode> BuildUninstall(string serial, string packageName)
+		=> ValidateSerial(serial) ??
+			ValidatePackage(packageName) ??
+			Result.Ok<IReadOnlyList<string>, AdbFailureCode>(["-s", serial, "uninstall", packageName]);
+
+	public static Result<IReadOnlyList<string>, AdbFailureCode> BuildPackagePath(string serial, string packageName)
+		=> ValidateSerial(serial) ??
+			ValidatePackage(packageName) ??
+			Shell(serial, $"pm path {AdbShellQuote.Quote(packageName)}");
+
 	private static Result<IReadOnlyList<string>, AdbFailureCode> Shell(string serial, string shellCommand)
 		=> Result.Ok<IReadOnlyList<string>, AdbFailureCode>(["-s", serial, "shell", shellCommand]);
+
+	public static Result<IReadOnlyList<string>, AdbFailureCode> BuildConnect(string address)
+		=> address is not null &&
+			NetworkAddressRegex().Match(address) is { Success: true } match &&
+			int.TryParse(match.Groups["port"].Value, out var port) &&
+			port is >= 1 and <= 65535
+				? Result.Ok<IReadOnlyList<string>, AdbFailureCode>(["connect", address])
+				: Fail("The address must be host:port, for example 192.168.1.20:5555.");
 
 	private static Result<IReadOnlyList<string>, AdbFailureCode>? ValidateSerial(string serial)
 		=> !string.IsNullOrWhiteSpace(serial) && SerialRegex().IsMatch(serial) ? null : Fail("Invalid serial.");
@@ -229,6 +293,25 @@ internal static partial class AdbCommandBuilder
 			DevicePathRegex().IsMatch(devicePath)
 				? null
 				: Fail("Invalid device path.");
+
+	// A fully qualified path never starts with '-', so adb cannot read it as one of its options.
+	private static Result<IReadOnlyList<string>, AdbFailureCode>? ValidateLocalPath(string localPath)
+		=> !string.IsNullOrWhiteSpace(localPath) &&
+			localPath.Length <= MaxPluginPathLength &&
+			!HasControlCharacter(localPath) &&
+			Path.IsPathFullyQualified(localPath)
+				? null
+				: Fail("The local path must be an absolute path.");
+
+	private static Result<IReadOnlyList<string>, AdbFailureCode>? ValidateRemotePath(string remotePath)
+		=> !string.IsNullOrWhiteSpace(remotePath) &&
+			remotePath.Length <= MaxPluginPathLength &&
+			remotePath.StartsWith('/') &&
+			!HasControlCharacter(remotePath)
+				? null
+				: Fail("The device path must be an absolute path.");
+
+	private static bool HasControlCharacter(string value) => value.Any(char.IsControl);
 
 	private static Result<IReadOnlyList<string>, AdbFailureCode>? ValidateServiceName(string serviceName)
 		=> serviceName.Length <= MaxServiceNameLength && ServiceNameRegex().IsMatch(serviceName)
@@ -284,6 +367,9 @@ internal static partial class AdbCommandBuilder
 
 	[GeneratedRegex(@"^[A-Za-z0-9._:\-]{1,128}$")]
 	private static partial Regex SerialRegex();
+
+	[GeneratedRegex(@"^[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?)*:(?<port>[0-9]{1,5})$")]
+	private static partial Regex NetworkAddressRegex();
 
 	[GeneratedRegex(@"^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+$")]
 	private static partial Regex PackageRegex();

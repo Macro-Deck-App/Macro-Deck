@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { AdbDevice, AdbDeviceState, AppStrings, GetAdbSettingsResponse, UpdateAdbSettingsRequest } from '@macro-deck/runtime';
+import { AdbDevice, AdbDeviceState, AppStrings, ConnectAdbDeviceResponse, GetAdbSettingsResponse, UpdateAdbSettingsRequest } from '@macro-deck/runtime';
 import { ApiService, ButtonComponent, ErrorBannerComponent, InputComponent, LocalizationService, SettingsRowComponent, SettingsSectionComponent, ToggleSwitchComponent, TranslatePipe } from '@shared';
 import { EmptyStateComponent } from '../../../feedback/empty-state/empty-state.component';
 import { ConfirmationModalComponent } from '../../../overlay/confirmation-modal/confirmation-modal.component';
@@ -14,6 +14,8 @@ const STATE_LABEL_KEYS: Partial<Record<AdbDeviceState, string>> = {
   NoPermissions: AppStrings.Settings.Adb.StateNoPermissions,
   Authorizing: AppStrings.Settings.Adb.StateAuthorizing,
 };
+
+const NETWORK_ADDRESS = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*:(?:[1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/;
 
 const SOURCE_LABEL_KEYS: Record<string, string> = {
   None: AppStrings.Settings.Adb.SourceNotFound,
@@ -69,6 +71,8 @@ export class AdbSettingsComponent {
   readonly restartPromptOpen = signal(false);
   readonly stopServerOnExit = signal(false);
   readonly stopServerOnExitBusy = signal(false);
+  readonly allowPlugins = signal(true);
+  readonly allowPluginsBusy = signal(false);
 
   readonly usbConnectionsEnabled = signal(false);
   readonly usbBusy = signal(false);
@@ -76,6 +80,10 @@ export class AdbSettingsComponent {
   readonly devices = signal<AdbDevice[]>([]);
   readonly defaultDeviceSerial = signal<string | null>(null);
   readonly settingDefaultSerial = signal<string | null>(null);
+
+  readonly connectDraft = signal('');
+  readonly connecting = signal(false);
+  readonly canConnect = computed(() => this.loaded() && !this.connecting() && this.connectDraft().trim() !== '');
 
   readonly lastError = signal<string | null>(null);
   readonly lastErrorAt = signal<string | null>(null);
@@ -151,6 +159,19 @@ export class AdbSettingsComponent {
     }
   }
 
+  async setAllowPlugins(value: boolean): Promise<void> {
+    if (!this.loaded() || this.allowPluginsBusy()) {
+      return;
+    }
+    this.allowPluginsBusy.set(true);
+    this.allowPlugins.set(value);
+    try {
+      await this.updateSettings({ allowPlugins: value });
+    } finally {
+      this.allowPluginsBusy.set(false);
+    }
+  }
+
   async savePath(): Promise<void> {
     if (!this.canSavePath()) {
       return;
@@ -192,6 +213,50 @@ export class AdbSettingsComponent {
       await this.updateSettings({ defaultDeviceSerial: serial });
     } finally {
       this.settingDefaultSerial.set(null);
+    }
+  }
+
+  async connectOverWifi(): Promise<void> {
+    const address = this.connectDraft().trim();
+    if (!this.canConnect()) {
+      return;
+    }
+    this.error.set(null);
+    if (!NETWORK_ADDRESS.test(address)) {
+      this.error.set(this.localization.translateKey(AppStrings.Settings.Adb.ConnectWifiInvalid));
+      return;
+    }
+    this.connecting.set(true);
+    try {
+      const response = await this.api.connectAdbDevice({ address });
+      this.applyState(response);
+      if (response.success) {
+        this.connectDraft.set('');
+      } else {
+        this.error.set(this.connectFailure(address, response));
+      }
+    } catch {
+      this.error.set(this.localization.translateKey(AppStrings.Settings.Adb.ConnectWifiFailed, { address }));
+    } finally {
+      this.connecting.set(false);
+    }
+  }
+
+  private connectFailure(address: string, response: ConnectAdbDeviceResponse): string {
+    switch (response.errorCode) {
+      case 'Timeout':
+        return this.localization.translateKey(AppStrings.Settings.Adb.ConnectWifiTimeout, { address });
+      case 'InvalidParameter':
+        return this.localization.translateKey(AppStrings.Settings.Adb.ConnectWifiInvalid);
+      case 'ExecutableNotFound':
+        return this.localization.translateKey(AppStrings.Settings.Adb.NotFoundError);
+      case 'CommandFailed':
+        // adb's own output, which names the network error; there is no localized text for it.
+        return response.error
+          ? this.localization.translateKey(AppStrings.Settings.Adb.ConnectWifiFailedReason, { address, reason: response.error })
+          : this.localization.translateKey(AppStrings.Settings.Adb.ConnectWifiFailed, { address });
+      default:
+        return this.localization.translateKey(AppStrings.Settings.Adb.ConnectWifiFailed, { address });
     }
   }
 
@@ -268,6 +333,9 @@ export class AdbSettingsComponent {
   }
 
   usbStatus(device: AdbDevice): string {
+    if (device.networkConnection && device.state === 'Device') {
+      return this.localization.translateKey(AppStrings.Settings.Adb.ConnectedOverWifi);
+    }
     if (device.tunnelEstablished) {
       return device.tunnelDevicePort !== null
         ? this.localization.translateKey(AppStrings.Settings.Adb.UsbReadyOnPort, { port: device.tunnelDevicePort })
@@ -319,6 +387,7 @@ export class AdbSettingsComponent {
     this.adbVersion.set(state.adbVersion);
     this.serverReachable.set(state.serverReachable);
     this.stopServerOnExit.set(state.stopServerOnExit);
+    this.allowPlugins.set(state.allowPlugins);
     this.usbConnectionsEnabled.set(state.usbConnectionsEnabled);
     this.devices.set(state.devices);
     this.defaultDeviceSerial.set(state.defaultDeviceSerial);

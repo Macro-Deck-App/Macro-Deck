@@ -208,6 +208,30 @@ public static class HostOperations
 		public static readonly IReadOnlyList<string> All = [Register, Unregister];
 	}
 
+	/// <summary>The <c>adb</c> host api. Every operation names the device by serial.</summary>
+	public static class Adb
+	{
+		public const string Shell = "shell";
+
+		public const string Battery = "battery";
+
+		public const string Push = "push";
+
+		public const string Pull = "pull";
+
+		public const string Install = "install";
+
+		public const string Uninstall = "uninstall";
+
+		public const string PackageInstalled = "package-installed";
+
+		/// <summary>Connects the host's adb to a device over the network. Takes no serial.</summary>
+		public const string Connect = "connect";
+
+		public static readonly IReadOnlyList<string> All =
+			[Shell, Battery, Push, Pull, Install, Uninstall, PackageInstalled, Connect];
+	}
+
 	/// <summary>The <c>event-bindings</c> host api is push-only, so it declares no operations.</summary>
 	public static class EventBindings
 	{
@@ -233,6 +257,7 @@ public static class HostOperations
 			[HostApis.ScreenSavers] = ScreenSavers.All,
 			[HostApis.WidgetTypes] = WidgetTypes.All,
 			[HostApis.EventBindings] = EventBindings.All,
+			[HostApis.Adb] = Adb.All,
 		};
 
 	public static IReadOnlyList<string> For(string api) => _byApi[api];

@@ -5,11 +5,11 @@ namespace MacroDeck.Plugin.Packaging.Manifest;
 /// <summary>
 /// The permission vocabulary a manifest may declare.
 /// <para>
-/// <b>Nothing in the host enforces these today.</b> They are parsed, shape-validated, persisted and
-/// exposed so an artifact can disclose what it intends to reach, and so a consent surface has something
-/// to render. Enforcement is a separate change: every plugin that exists now declares no permissions and
-/// self-registering development plugins have no manifest at all, so default-deny would break shipped
-/// behaviour while default-allow would not be a security boundary at all. See ADR 0029.
+/// <b>The host enforces only <see cref="HostAdb" />.</b> An installed plugin reaches the <c>adb</c> host api
+/// only when its manifest declares it (ADR 0092). Every other permission is parsed, shape-validated,
+/// persisted and exposed so an artifact can disclose what it intends to reach, and so a consent surface has
+/// something to render, but is not enforced: every plugin that predates them declares none, so default-deny
+/// would break shipped behaviour.
 /// </para>
 /// <para>
 /// The <c>host:</c> entries mirror <see cref="HostApis"/> one for one, so the vocabulary cannot drift
@@ -47,6 +47,9 @@ public static class PluginPermissions
 	public const string HostEventBindings = "host:event-bindings";
 	public const string HostScreenSavers = "host:screensavers";
 
+	/// <summary>Enforced: required for an installed plugin to use the <c>adb</c> host api.</summary>
+	public const string HostAdb = "host:adb";
+
 	public const string EventsPublish = "events:publish";
 
 	public const string AssetsUpload = "assets:upload";
@@ -63,7 +66,7 @@ public static class PluginPermissions
 	[
 		HostVariables, HostUserVariables, HostConfig, HostDeck, HostScripts, HostWidgets,
 		HostNotifications, HostActionInteractions, HostDevices, HostVariableValues, HostLayouts,
-		HostFolderViews, HostWidgetTypes, HostEventBindings, HostScreenSavers, EventsPublish, AssetsUpload, NetOutbound, FileSystemUserFiles,
+		HostFolderViews, HostWidgetTypes, HostEventBindings, HostScreenSavers, HostAdb, EventsPublish, AssetsUpload, NetOutbound, FileSystemUserFiles,
 		ProcessSpawn, DeviceUsb,
 	];
 

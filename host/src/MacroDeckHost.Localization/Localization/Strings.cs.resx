@@ -2073,6 +2073,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Dialogs.Notice.GotIt" xml:space="preserve">
     <value>Rozumím</value>
   </data>
+  <data name="Dialogs.PluginAdbConsent.AdbMissingHeading" xml:space="preserve">
+    <value>Získat Android platform-tools</value>
+  </data>
+  <data name="Dialogs.PluginAdbConsent.AdbMissingMessage" xml:space="preserve">
+    <value>ADB je zapnuté, ale Macro Deck na tomto počítači nenašel adb. Stáhnout nyní Android platform-tools, aby pluginy mohly pracovat se zařízeními Android?</value>
+  </data>
   <data name="Dialogs.PluginPairing.Approve" xml:space="preserve">
     <value>Schválit</value>
   </data>
@@ -11644,6 +11650,21 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Notifications.NetworkUnreachableTlsMessage" xml:space="preserve">
     <value>HTTPS má nahradit veřejný naslouchací port, ale jeho certifikát nebylo možné použít, takže tento počítač není ze sítě dostupný - Macro Deck se nevrací k nešifrovanému naslouchacímu portu.</value>
   </data>
+  <data name="Notifications.PluginAdbAccessRequested" xml:space="preserve">
+    <value>Plugin žádá o přístup k ADB</value>
+  </data>
+  <data name="Notifications.PluginAdbAccessRequestedAdbMissingMessage" xml:space="preserve">
+    <value>Plugin {name} potřebuje ADB pro práci se zařízeními Android. ADB je zapnuté, ale Macro Deck na tomto počítači nenašel adb. Nastavit ho nyní?</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.PluginAdbAccessRequestedAdbOffMessage" xml:space="preserve">
+    <value>Plugin {name} potřebuje ADB pro práci se zařízeními Android, ale ADB je v aplikaci Macro Deck vypnuté. Zapnout ADB a povolit pluginům jeho používání?</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.PluginAdbAccessRequestedMessage" xml:space="preserve">
+    <value>Plugin {name} potřebuje ADB pro práci se zařízeními Android, ale pluginy nyní nemají povoleno ADB používat. Povolit pluginům používat ADB?</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.RestartToApplyNetwork" xml:space="preserve">
     <value>Restartováním použijete nové nastavení sítě</value>
   </data>
@@ -11853,6 +11874,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Plugins.UnverifiedClaim" xml:space="preserve">
     <value>neověřené tvrzení</value>
+  </data>
+  <data name="Plugins.UsesAdbBadge" xml:space="preserve">
+    <value>Používá ADB</value>
+  </data>
+  <data name="Plugins.UsesAdbNote" xml:space="preserve">
+    <value>Tento plugin používá ADB pro práci se zařízeními Android. Může na nich spouštět příkazy, kopírovat soubory a instalovat aplikace.</value>
   </data>
   <data name="Plugins.VerifiedNoPublisherHint" xml:space="preserve">
     <value>Podpis tohoto pluginu zkontroloval portál Macro Deck Creator Portal, ale jeho manifest neuvádí žádného autora.</value>
@@ -12441,6 +12468,42 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Settings.Account.SigningInMessage" xml:space="preserve">
     <value>Čeká se na dokončení přihlášení v prohlížeči…</value>
+  </data>
+  <data name="Settings.Adb.AllowPluginsDescription" xml:space="preserve">
+    <value>Pluginy, které deklarují přístup k ADB, mohou používat připojení ADB aplikace Macro Deck k práci se zařízeními Android, například ke spouštění příkazů shellu, kopírování souborů nebo instalaci aplikací.</value>
+  </data>
+  <data name="Settings.Adb.AllowPluginsLabel" xml:space="preserve">
+    <value>Povolit pluginům používat ADB</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiLabel" xml:space="preserve">
+    <value>Připojit přes Wi-Fi</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiHint" xml:space="preserve">
+    <value>Zadejte IP adresu a port telefonu se zapnutým bezdrátovým laděním, například 192.168.1.20:5555. Zařízení se pak zobrazí v seznamu výše a dosáhnou na něj i pluginy, které používají ADB.</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiPlaceholder" xml:space="preserve">
+    <value>192.168.1.20:5555</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiTimeout" xml:space="preserve">
+    <value>Připojení k {address} trvalo příliš dlouho. Zkontrolujte, že je telefon ve stejné síti a má zapnuté bezdrátové ladění.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Settings.Adb.ConnectedOverWifi" xml:space="preserve">
+    <value>Připojeno přes Wi-Fi</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiButton" xml:space="preserve">
+    <value>Připojit</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiInvalid" xml:space="preserve">
+    <value>Zadejte IP adresu nebo název hostitele s portem, například 192.168.1.20:5555.</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiFailed" xml:space="preserve">
+    <value>Připojení k {address} se nezdařilo.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Settings.Adb.ConnectWifiFailedReason" xml:space="preserve">
+    <value>Připojení k {address} se nezdařilo: {reason}</value>
+    <comment>[address:string] [reason:string]</comment>
   </data>
   <data name="Settings.Adb.DefaultDeviceLabel" xml:space="preserve">
     <value>Výchozí zařízení</value>
@@ -13991,6 +14054,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Shell.Footer.Version" xml:space="preserve">
     <value>Verze {version}</value>
+  </data>
+  <data name="Shell.Notifications.Action.EnablePluginAdb" xml:space="preserve">
+    <value>Povolit</value>
   </data>
   <data name="Shell.Notifications.Action.OpenExtensionStore" xml:space="preserve">
     <value>Otevřít obchod</value>

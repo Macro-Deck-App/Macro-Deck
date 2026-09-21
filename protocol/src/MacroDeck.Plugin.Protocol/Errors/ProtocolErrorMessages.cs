@@ -33,6 +33,9 @@ public static class ProtocolErrorMessages
 			[ProtocolErrorCodes.CorrelationUnknown] = "No in-flight message matches this correlation id.",
 			[ProtocolErrorCodes.DuplicateIdempotencyKey] = "This idempotency key is already in flight.",
 			[ProtocolErrorCodes.InternalError] = "An internal error occurred.",
+			[ProtocolErrorCodes.AdbNotEnabled] = "ADB is not enabled in Macro Deck.",
+			[ProtocolErrorCodes.AdbNotAllowed] = "This plugin is not allowed to use ADB.",
+			[ProtocolErrorCodes.AdbFailed] = "The ADB operation failed.",
 		};
 
 	public static string For(string code)

@@ -24,9 +24,16 @@ internal sealed class HostInvoker(PluginConnectionState state, TimeProvider time
 	private readonly ConcurrentDictionary<string, TaskCompletionSource<ProtocolEnvelope>> _pending
 		= new(StringComparer.Ordinal);
 
+	public Task<JsonElement?> InvokeAsync(string api,
+		string operation,
+		object? arguments,
+		CancellationToken cancellationToken)
+		=> InvokeAsync(api, operation, arguments, ProtocolTimeouts.DefaultRequest, cancellationToken);
+
 	public async Task<JsonElement?> InvokeAsync(string api,
 		string operation,
 		object? arguments,
+		TimeSpan timeout,
 		CancellationToken cancellationToken)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(api);
@@ -45,7 +52,7 @@ internal sealed class HostInvoker(PluginConnectionState state, TimeProvider time
 		{
 			Type = MessageTypes.HostInvoke,
 			Id = correlationId,
-			DeadlineMs = (int)ProtocolTimeouts.DefaultRequest.TotalMilliseconds,
+			DeadlineMs = (int)timeout.TotalMilliseconds,
 			Payload = JsonSerializer.SerializeToElement(new HostInvokePayload
 					{ Api = api, Operation = operation, Arguments = SerializeArguments(arguments) },
 				PluginProtocolJson.Options)
@@ -57,7 +64,7 @@ internal sealed class HostInvoker(PluginConnectionState state, TimeProvider time
 		try
 		{
 			await connection.SendAsync(envelope, cancellationToken).ConfigureAwait(false);
-			return await AwaitResultAsync(connection, correlationId, completion, cancellationToken)
+			return await AwaitResultAsync(connection, correlationId, completion, timeout, cancellationToken)
 				.ConfigureAwait(false);
 		}
 		finally
@@ -87,6 +94,7 @@ internal sealed class HostInvoker(PluginConnectionState state, TimeProvider time
 		PluginSessionConnection connection,
 		string correlationId,
 		TaskCompletionSource<ProtocolEnvelope> completion,
+		TimeSpan timeout,
 		CancellationToken cancellationToken)
 	{
 		var cancelled = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -94,7 +102,7 @@ internal sealed class HostInvoker(PluginConnectionState state, TimeProvider time
 			static state => ((TaskCompletionSource)state!).TrySetResult(),
 			cancelled);
 
-		var timeoutTask = Task.Delay(ProtocolTimeouts.DefaultRequest, timeProvider, CancellationToken.None);
+		var timeoutTask = Task.Delay(timeout, timeProvider, CancellationToken.None);
 		var winner = await Task.WhenAny(completion.Task, timeoutTask, cancelled.Task, connection.Ended)
 			.ConfigureAwait(false);
 

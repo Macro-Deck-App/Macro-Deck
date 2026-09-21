@@ -418,6 +418,11 @@ public class RemoteIntegrationContextTests
 			covered.Add((HostApis.ScreenSavers, operation));
 		}
 
+		foreach (var operation in HostOperations.Adb.All)
+		{
+			covered.Add((HostApis.Adb, operation));
+		}
+
 		var declared = HostApis.All.SelectMany(api => HostOperations.For(api).Select(operation => (api, operation)));
 
 		Assert.That(declared, Is.SubsetOf(covered));
