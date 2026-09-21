@@ -64,6 +64,13 @@
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
   </Folder>
+  <Folder Name="/tools/" />
+  <Folder Name="/tools/src/">
+    <Project Path="tools/src/MacroDeck.LicenseTool/MacroDeck.LicenseTool.csproj" />
+  </Folder>
+  <Folder Name="/tools/tests/">
+    <Project Path="tools/tests/MacroDeck.LicenseTool.Tests.UnitTests/MacroDeck.LicenseTool.Tests.UnitTests.csproj" />
+  </Folder>
   <Folder Name="/ui-model/" />
   <Folder Name="/ui-model/src/">
     <Project Path="ui-model/src/MacroDeck.Ui/MacroDeck.Ui.csproj" />

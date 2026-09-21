@@ -15,7 +15,7 @@ import { TranslatePipe } from '../../../localization';
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             @if (toast.variant === 'error') {
               <circle cx="12" cy="12" r="10"/>
-              <path d="M12 8v5"/>
+              <path d="M12 8v4"/>
               <path d="M12 16h.01"/>
             } @else {
               <path d="M20 6 9 17l-5-5"/>

@@ -26,13 +26,10 @@ import { type WakeLockStatus } from '../wake-lock';
 
 const INSTALL_DISMISSED_HINT_MS = 4000;
 
-const GEAR_RING = 'M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0'
-  + ' 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0'
-  + ' 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2'
-  + ' 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65'
-  + ' 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0'
-  + ' 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2'
-  + ' 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z';
+const GEAR_RING = 'M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033'
+  + ' 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0'
+  + ' 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051'
+  + 'a2.34 2.34 0 0 0 3.319-1.915';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -92,6 +89,7 @@ export interface ClientSettingsOptions {
   install: PwaInstallSurface;
   capabilities: WebClientTargetCapabilities;
   openDeviceSetup?(): void;
+  loadNotices(): Promise<string>;
   legacyEntry?: boolean;
   timer?: HintTimer;
 }
@@ -168,8 +166,22 @@ function wakeLockStatusKey(status: WakeLockStatus): string | null {
   }
 }
 
+interface LicensesViewer {
+  element: HTMLElement;
+  back: HTMLButtonElement;
+  loading: HTMLElement;
+  notices: HTMLElement;
+  failure: HTMLElement;
+  loaded: boolean;
+  request: number;
+}
+
 interface OpenModal {
   backdrop: HTMLElement;
+  heading: HTMLElement;
+  body: HTMLElement;
+  licensesButton: HTMLButtonElement;
+  licenses: LicensesViewer;
   themeMode: { setValue(value: string | null): void };
   renderMode: { setValue(value: string | null): void };
   wakeLockControl: HTMLElement;
@@ -250,6 +262,45 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
     return section.element;
   }
 
+  function licensesViewer(onBack: () => void): LicensesViewer {
+    const viewer = element('div', 'wc-client-settings-licenses');
+    viewer.setAttribute('hidden', '');
+
+    const back = createButton({
+      label: text(Strings.Common.Back),
+      variant: 'ghost',
+      onClick: onBack,
+    });
+    const toolbar = element('div', 'wc-client-settings-licenses-toolbar');
+    toolbar.appendChild(back.element);
+    viewer.appendChild(toolbar);
+
+    const loading = paragraph('wc-client-settings-status', text(Strings.Common.Loading));
+    loading.setAttribute('role', 'status');
+    viewer.appendChild(loading);
+
+    const failure = element('div', 'wc-client-settings-licenses-failure');
+    failure.setAttribute('role', 'alert');
+    show(failure, false);
+    viewer.appendChild(failure);
+
+    const notices = element('pre', 'wc-client-settings-licenses-text');
+    notices.setAttribute('tabindex', '0');
+    notices.setAttribute('aria-label', text(ClientAppStrings.WebClient.Settings.Licenses.Title));
+    show(notices, false);
+    viewer.appendChild(notices);
+
+    return {
+      element: viewer,
+      back: back.element,
+      loading: loading,
+      notices: notices,
+      failure: failure,
+      loaded: false,
+      request: 0,
+    };
+  }
+
   function build(): OpenModal {
     const backdrop = element('div', 'wc-client-settings-backdrop');
     const dialog = element('div', 'wc-client-settings-dialog');
@@ -272,6 +323,11 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
 
     const body = element('div', 'wc-client-settings-body');
     dialog.appendChild(body);
+
+    // A sibling of the settings body rather than a replacement for it: render() keeps updating the
+    // controls in the body while the viewer is showing, so they must stay attached.
+    const licenses = licensesViewer(() => closeLicenses());
+    dialog.appendChild(licenses.element);
 
     if (options.legacyEntry === true) body.appendChild(legacySection());
 
@@ -366,12 +422,25 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
       })],
     }).element);
 
+    const licensesButton = createButton({
+      label: text(ClientAppStrings.WebClient.Settings.Licenses.Button),
+      variant: 'ghost',
+      onClick: () => openLicenses(),
+    });
+    const licensesEntry = element('div', 'wc-client-settings-licenses-entry');
+    licensesEntry.appendChild(licensesButton.element);
+    body.appendChild(licensesEntry);
+
     backdrop.addEventListener('click', event => {
       if (event.target === backdrop) close();
     });
 
     return {
       backdrop: backdrop,
+      heading: heading,
+      body: body,
+      licensesButton: licensesButton.element,
+      licenses: licenses,
       themeMode: themeMode,
       renderMode: renderMode,
       wakeLockControl: wakeLockControl,
@@ -477,6 +546,62 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
     renderWakeLock(modal);
     renderInstall(modal);
     renderUpdate(modal);
+  }
+
+  function openLicenses(): void {
+    const modal = open;
+    if (modal === null) return;
+    show(modal.body, false);
+    show(modal.licenses.element, true);
+    modal.heading.textContent = text(ClientAppStrings.WebClient.Settings.Licenses.Title);
+    modal.licenses.back.focus();
+    if (!modal.licenses.loaded) void loadLicenses(modal);
+  }
+
+  function closeLicenses(): void {
+    const modal = open;
+    if (modal === null) return;
+    show(modal.licenses.element, false);
+    show(modal.body, true);
+    modal.heading.textContent = text(Strings.Settings.Title);
+    modal.licensesButton.focus();
+  }
+
+  async function loadLicenses(modal: OpenModal): Promise<void> {
+    const viewer = modal.licenses;
+    const request = ++viewer.request;
+    show(viewer.loading, true);
+    clear(viewer.failure);
+    show(viewer.failure, false);
+    show(viewer.notices, false);
+
+    let notices: string | null = null;
+    try {
+      notices = await options.loadNotices();
+    } catch {
+      notices = null;
+    }
+    if (open !== modal || request !== viewer.request) return;
+
+    show(viewer.loading, false);
+    if (notices === null) {
+      viewer.failure.appendChild(
+        paragraph('wc-client-settings-status', text(ClientAppStrings.WebClient.Settings.Licenses.LoadFailed)));
+      viewer.failure.appendChild(createButton({
+        label: text(Strings.Common.Retry),
+        variant: 'secondary',
+        onClick: () => {
+          // The retry button is removed by the reload it starts, so focus moves somewhere that stays.
+          viewer.back.focus();
+          void loadLicenses(modal);
+        },
+      }).element);
+      show(viewer.failure, true);
+      return;
+    }
+    viewer.notices.textContent = notices;
+    viewer.loaded = true;
+    show(viewer.notices, true);
   }
 
   function runUpdateAction(): void {

@@ -102,6 +102,7 @@ public class AuthPolicyMatrixTests
 		var pluginTokens = await Send(HttpMethod.Get, "/api/plugin-tokens");
 		var pluginSessions = await Send(HttpMethod.Get, "/api/plugin-sessions");
 		var localization = await Send(HttpMethod.Get, "/api/localization");
+		var thirdPartyNotices = await Send(HttpMethod.Get, "/api/system/third-party-notices");
 
 		Assert.Multiple(() =>
 		{
@@ -118,6 +119,29 @@ public class AuthPolicyMatrixTests
 			Assert.That(pluginTokens.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
 			Assert.That(pluginSessions.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
 			Assert.That(localization.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+			Assert.That(thirdPartyNotices.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+		});
+	}
+
+	[Test]
+	public async Task Third_party_notices_text_is_public_and_the_structured_view_is_admin_only()
+	{
+		var anonymousText = await Send(HttpMethod.Get, "/api/system/third-party-notices.txt");
+		var clientDocument = await Send(HttpMethod.Get, "/api/system/third-party-notices", _clientToken);
+		var adminDocument = await Send(HttpMethod.Get, "/api/system/third-party-notices", _adminToken);
+		var body = JsonDocument.Parse(await adminDocument.Content.ReadAsStringAsync()).RootElement;
+		var text = await anonymousText.Content.ReadAsStringAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(anonymousText.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+			Assert.That(anonymousText.Content.Headers.ContentType?.MediaType, Is.EqualTo("text/plain"));
+			Assert.That(anonymousText.Headers.CacheControl?.Public, Is.True);
+			Assert.That(text, Does.StartWith("THIRD-PARTY SOFTWARE NOTICES AND INFORMATION"));
+			Assert.That(clientDocument.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+			Assert.That(adminDocument.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+			Assert.That(body.GetProperty("components").GetArrayLength(), Is.GreaterThan(0));
+			Assert.That(body.GetProperty("texts").GetArrayLength(), Is.GreaterThan(0));
 		});
 	}
 

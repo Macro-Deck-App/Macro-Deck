@@ -148,6 +148,11 @@ export class Shell {
       install: services.pwa.install,
       capabilities: services.target.capabilities,
       openDeviceSetup: () => this.openDeviceSetup(),
+      loadNotices: async () => {
+        const response = await client.http.fetchWithAuth('GET', '/api/system/third-party-notices.txt');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.text();
+      },
     });
     if (this.settings !== null) this.root.appendChild(this.settings.element);
 

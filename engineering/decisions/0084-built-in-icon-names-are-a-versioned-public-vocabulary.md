@@ -34,6 +34,13 @@ reader can draw.
   the app stops using it.
 - Readers must carry every group up to the version they advertise.
 
+## Clarification (2026-09-21)
+
+"Meaning the same thing" refers to the concept a name denotes, not to its drawing. Glyphs may be redrawn in
+the app's icon style, as happened when the app icons moved to Lucide; a name is never redrawn as a different
+concept. `action-button-type` still denotes the action button widget type and now draws a tapping hand,
+because a deck button is pressed with a finger.
+
 ## References
 
 - Issue #777

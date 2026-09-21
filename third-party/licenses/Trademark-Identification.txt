@@ -1,0 +1,3 @@
+These logos are trademarks of their respective owners. Macro Deck shows them only to identify the application
+an integration connects to; no endorsement by or affiliation with the owners is implied. They are not licensed
+under the Apache License 2.0.

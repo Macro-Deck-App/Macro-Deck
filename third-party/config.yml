@@ -1,0 +1,99 @@
+# What Macro Deck ships and which licenses it accepts. Read by tools/src/MacroDeck.LicenseTool;
+# see engineering/development/third-party-notices.md.
+
+noticeHeader: |
+  Macro Deck
+  Copyright (c) 2026 Macro Deck Contributors.
+
+  This product is licensed under the Apache License 2.0 (see LICENSE).
+
+  Third-party components and their licenses are listed in THIRD-PARTY-NOTICES.
+  The notices below are reproduced as their licenses require.
+
+policy:
+  # Order is preference: for a choice such as "MIT OR Apache-2.0" the earlier license is attributed.
+  allowedLicenses:
+    - MIT
+    - MIT-0
+    - ISC
+    - 0BSD
+    - BSD-2-Clause
+    - BSD-3-Clause
+    - Zlib
+    - Apache-2.0
+    - BSL-1.0
+    - Unicode-3.0
+    - Unicode-DFS-2016
+    - CC0-1.0
+    - Unlicense
+    - blessing
+    - CDLA-Permissive-2.0
+    - CC-BY-3.0
+    - MS-PL
+    - MPL-2.0
+  allowedExceptions:
+    - LLVM-exception
+
+nuget:
+  - project: host/src/MacroDeckHost/MacroDeckHost.csproj
+    targetFramework: net10.0
+    runtimeIdentifiers:
+      - id: win-x64
+        platform: Windows
+      - id: linux-x64
+        platform: Linux
+      - id: osx-arm64
+        platform: macOS
+
+npm:
+  root: ui
+  workspaces:
+    - path: angular
+      tsconfig: tsconfig.json
+      entries:
+        - projects/desktop-ui/src/main.ts
+        - projects/desktop-ui/src/styles.scss
+      styleRoots:
+        - projects/desktop-ui/src
+    - path: web-client
+      tsconfig: tsconfig.json
+      entries:
+        - src/main.ts
+        - src/targets/*/active-target.ts
+        - src/pwa/service-worker.js
+        - legacy/polyfills.legacy.js
+      styleRoots:
+        - src
+    - path: runtime
+      entries:
+        - src/public-api.ts
+      styleRoots:
+        - styles
+
+cargo:
+  - manifestDirectory: ui/bootstrapper
+    targets:
+      - id: x86_64-pc-windows-msvc
+        platform: Windows
+      - id: x86_64-unknown-linux-gnu
+        platform: Linux
+      - id: aarch64-apple-darwin
+        platform: macOS
+
+# Files that must be covered by an attribution or listed as first-party (see CLAUDE.md, Icons).
+assets:
+  roots:
+    - host/src/MacroDeckHost.Integrations
+    - host/src/MacroDeckHost.Widgets
+    - ui/runtime/styles/icons
+    - ui/web-client/public
+    - ui/angular/projects/desktop-ui/public
+    - ui/bootstrapper/icons
+    - ui/bootstrapper/installer
+    - ui/bootstrapper/packaging
+  extensions: [.svg, .png, .ico, .icns, .bmp, .car, .jpg, .jpeg, .gif, .webp]
+  firstParty:
+    - host/src/MacroDeckHost.Widgets/MusicPlayer/Icons/playing.svg
+    - ui/runtime/styles/icons/align-top.svg
+    - ui/runtime/styles/icons/align-middle.svg
+    - ui/runtime/styles/icons/align-bottom.svg

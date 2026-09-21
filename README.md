@@ -90,7 +90,13 @@ Contributions and feedback are welcome. Please read the [contribution guidelines
 
 ## License
 
-Macro Deck is open-source software licensed under the [Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for additional attribution and legal notices.
+Macro Deck is open-source software licensed under the [Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for additional legal notices and [THIRD-PARTY-NOTICES](THIRD-PARTY-NOTICES) for the third-party components Macro Deck includes and their licenses.
+
+## Trademarks and branding
+
+The Macro Deck name, logo and branding assets are not covered by the Apache License 2.0. They are licensed
+exclusively to the Macro Deck project. Forks and other derived products must use their own name and branding
+and replace the logo, icons and other branding assets. See [NOTICE](NOTICE).
 
 ## Special thanks
 

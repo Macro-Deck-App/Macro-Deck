@@ -92,4 +92,11 @@
       <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Include="..\..\..\LICENSE;..\..\..\NOTICE;..\..\..\THIRD-PARTY-NOTICES"
+            CopyToOutputDirectory="PreserveNewest"
+            CopyToPublishDirectory="PreserveNewest"
+            Visible="false" />
+    </ItemGroup>
+
 </Project>

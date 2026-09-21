@@ -81,6 +81,21 @@ MACRODECK_UPDATE_GENERATED=1 dotnet test sdk/tests/MacroDeck.Localization.Tests.
 
 See [`docs/src/content/docs/features/localization.md`](docs/src/content/docs/features/localization.md).
 
+## Icons
+
+App icons come from [Lucide](https://lucide.dev), which includes the Feather set. When Lucide has no icon
+for the concept, draw one in the same style: 24x24 viewBox, no fill, stroke width 2, round caps and joins.
+Mask icons in `ui/runtime/styles/icons/` use `stroke="#000"`; icons shown as images set the colour they need.
+
+The only exceptions are logos of third-party products (take them from Dashboard Icons or Simple Icons,
+otherwise the vendor's own logo), the Macro Deck logo and branding, the weather widget's icons and the
+music player's animated playing badge. Every icon file is
+either attributed in `third-party/attributions.yml` or listed as first-party in `third-party/config.yml`; the
+license tool fails otherwise (see [third-party notices](engineering/development/third-party-notices.md)).
+
+Published `ui.icon` names keep their meaning: an icon may be redrawn in this style, never replaced by a
+different concept ([ADR 0084](engineering/decisions/0084-built-in-icon-names-are-a-versioned-public-vocabulary.md)).
+
 ## Code comments
 
 Internal implementation code normally carries no comments and no XML documentation. Comment only for

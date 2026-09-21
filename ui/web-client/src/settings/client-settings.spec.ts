@@ -156,6 +156,7 @@ interface Fixture {
   update: ReturnType<typeof appUpdate>;
   install: ReturnType<typeof pwaInstall>;
   timer: ReturnType<typeof manualTimer>;
+  loadNotices: jasmine.Spy<() => Promise<string>>;
 }
 
 let live: ClientSettingsHandle[] = [];
@@ -173,6 +174,7 @@ function create(overrides?: Partial<ClientSettingsOptions>): Fixture {
     update: appUpdate(),
     install: pwaInstall(),
     timer: manualTimer(),
+    loadNotices: jasmine.createSpy<() => Promise<string>>('loadNotices').and.resolveTo('NOTICES'),
   };
   const handle = createClientSettings({
     client: parts.client,
@@ -183,6 +185,7 @@ function create(overrides?: Partial<ClientSettingsOptions>): Fixture {
     install: parts.install,
     capabilities: capabilities(),
     timer: parts.timer,
+    loadNotices: () => parts.loadNotices(),
     ...(overrides === undefined ? {} : overrides),
   });
   if (handle === null) throw new Error('the surface was gated off');
@@ -249,6 +252,7 @@ describe('client settings', () => {
       update: appUpdate(),
       install: pwaInstall(),
       capabilities: capabilities({ clientSettings: false }),
+      loadNotices: () => Promise.resolve(''),
     });
 
     expect(handle).toBeNull();
@@ -555,6 +559,116 @@ describe('client settings', () => {
       fixture.handle.open();
 
       expect(text()).not.toContain(english(ClientAppStrings.WebClient.Legacy.SectionTitle));
+    });
+  });
+
+  describe('the open source licenses', () => {
+    const notices = 'THIRD-PARTY SOFTWARE NOTICES AND INFORMATION\n\nCronos\n  License: MIT';
+
+    function title(): string {
+      return dialog().querySelector('.wc-client-settings-title')?.textContent as string;
+    }
+
+    function viewer(): HTMLElement {
+      return dialog().querySelector('.wc-client-settings-licenses') as HTMLElement;
+    }
+
+    function settingsBody(): HTMLElement {
+      return dialog().querySelector('.wc-client-settings-body') as HTMLElement;
+    }
+
+    function noticesText(): HTMLElement {
+      return dialog().querySelector('.wc-client-settings-licenses-text') as HTMLElement;
+    }
+
+    function openViewer(): void {
+      (buttonLabelled(english(ClientAppStrings.WebClient.Settings.Licenses.Button)) as HTMLButtonElement).click();
+    }
+
+    function viewerLines(): string[] {
+      const lines = viewer().querySelectorAll<HTMLElement>('.wc-client-settings-status');
+      const found: string[] = [];
+      for (let index = 0; index < lines.length; index++) {
+        if (lines[index].closest('[hidden]') === null) found.push(lines[index].textContent as string);
+      }
+      return found;
+    }
+
+    function activeOptions(): string[] {
+      const active = settingsBody().querySelectorAll<HTMLElement>('.wc-seg-option.wc-seg-active');
+      const found: string[] = [];
+      for (let index = 0; index < active.length; index++) found.push(active[index].textContent as string);
+      return found;
+    }
+
+    it('shows the notices in place of the settings, with focus on the way back', async () => {
+      const fixture = create();
+      fixture.loadNotices.and.resolveTo(notices);
+      fixture.handle.open();
+
+      openViewer();
+
+      expect(title()).toBe(english(ClientAppStrings.WebClient.Settings.Licenses.Title));
+      expect(settingsBody().hasAttribute('hidden')).toBeTrue();
+      expect(viewer().hasAttribute('hidden')).toBeFalse();
+      expect(document.activeElement).toBe(buttonLabelled(english(Strings.Common.Back)));
+      expect(viewerLines()).toContain(english(Strings.Common.Loading));
+
+      await flush();
+
+      expect(fixture.loadNotices).toHaveBeenCalledTimes(1);
+      expect(noticesText().hasAttribute('hidden')).toBeFalse();
+      expect(noticesText().textContent).toBe(notices);
+      expect(viewerLines()).not.toContain(english(Strings.Common.Loading));
+    });
+
+    it('says the notices could not be loaded and fetches them again on retry', async () => {
+      const fixture = create();
+      fixture.loadNotices.and.rejectWith(new Error('HTTP 404'));
+      fixture.handle.open();
+      openViewer();
+      await flush();
+
+      expect(viewerLines()).toContain(english(ClientAppStrings.WebClient.Settings.Licenses.LoadFailed));
+      expect(noticesText().hasAttribute('hidden')).toBeTrue();
+
+      fixture.loadNotices.and.resolveTo(notices);
+      (buttonLabelled(english(Strings.Common.Retry)) as HTMLButtonElement).click();
+      await flush();
+
+      expect(fixture.loadNotices).toHaveBeenCalledTimes(2);
+      expect(viewerLines()).not.toContain(english(ClientAppStrings.WebClient.Settings.Licenses.LoadFailed));
+      expect(noticesText().textContent).toBe(notices);
+    });
+
+    it('goes back to settings that still follow a theme changed elsewhere', async () => {
+      const fixture = create();
+      fixture.handle.open();
+      openViewer();
+      await flush();
+
+      (buttonLabelled(english(Strings.Common.Back)) as HTMLButtonElement).click();
+
+      expect(title()).toBe(english(Strings.Settings.Title));
+      expect(viewer().hasAttribute('hidden')).toBeTrue();
+      expect(settingsBody().hasAttribute('hidden')).toBeFalse();
+      expect(document.activeElement).toBe(buttonLabelled(english(ClientAppStrings.WebClient.Settings.Licenses.Button)));
+
+      fixture.appearance.current = 'dark';
+      fixture.appearance.notify();
+
+      expect(activeOptions()).toContain(english(ClientAppStrings.Settings.Appearance.Dark));
+    });
+
+    it('closes the whole dialog on Escape while the notices are showing', async () => {
+      const fixture = create();
+      fixture.handle.open();
+      openViewer();
+      await flush();
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+
+      expect(document.querySelector('.wc-client-settings-dialog')).toBeNull();
     });
   });
 

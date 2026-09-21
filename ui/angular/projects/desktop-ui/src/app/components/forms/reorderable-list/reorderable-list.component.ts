@@ -24,14 +24,7 @@ import { MultiSelectOption } from '../multi-select/multi-select.component';
             cdkDragHandle
             role="img"
             [attr.aria-label]="'macrodeck.app:ActionBuilder.DragToReorder' | translate">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
-              <circle cx="4" cy="3" r="1.2"/>
-              <circle cx="4" cy="7" r="1.2"/>
-              <circle cx="4" cy="11" r="1.2"/>
-              <circle cx="10" cy="3" r="1.2"/>
-              <circle cx="10" cy="7" r="1.2"/>
-              <circle cx="10" cy="11" r="1.2"/>
-            </svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
           </span>
           <shared-checkbox
             class="rl-check"

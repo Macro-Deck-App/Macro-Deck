@@ -1,0 +1,58 @@
+# Corrections where package metadata is wrong or insufficient, matched by ecosystem and name for every
+# version. Fields: engineering/development/third-party-notices.md.
+packages:
+  - ecosystem: nuget
+    name: SixLabors.ImageSharp
+    license: LicenseRef-SixLabors-Split-1.0
+    reviewed: >-
+      Six Labors Split License 1.0 (the package LICENSE). Macro Deck is distributed under the Apache
+      License 2.0 and uses ImageSharp 3.x under the license's Open Source exemption. ImageSharp 4 is held
+      back in renovate.json because it changes these terms.
+    notice: |
+      SixLabors.ImageSharp (https://github.com/SixLabors/ImageSharp)
+      Used for icon image processing (decode, resize, WebP encoding).
+      Licensed under the Six Labors Split License; Macro Deck qualifies for its
+      Open Source exemption as a project distributed under the Apache License 2.0.
+
+  - ecosystem: nuget
+    name: JsonSchema.Net
+    license: LicenseRef-OSMF-EULA
+    reviewed: &osmf >-
+      json-everything publishes its binaries under the Open Source Maintenance Fee EULA (OSMFEULA.txt in
+      the package; the source is MIT). A fee applies to revenue-generating users above US$10,000 annual
+      gross revenue. Approved by the maintainer on 2026-09-21 while Macro Deck is below that threshold;
+      clarifying or replacing the dependency is tracked separately.
+  - ecosystem: nuget
+    name: JsonPointer.Net
+    license: LicenseRef-OSMF-EULA
+    reviewed: *osmf
+  - ecosystem: nuget
+    name: Json.More.Net
+    license: LicenseRef-OSMF-EULA
+    reviewed: *osmf
+
+  - ecosystem: nuget
+    name: SQLite
+    license: blessing
+    url: https://sqlite.org/copyright.html
+
+  # These nuspecs declare their license as a file only; the file is the MIT License.
+  - ecosystem: nuget
+    name: Mediator.Abstractions
+    license: MIT
+  - ecosystem: nuget
+    name: obs-websocket-dotnet
+    license: MIT
+
+  # The package.json has no license field; its LICENSE file is the MIT License.
+  - ecosystem: npm
+    name: valid-url
+    license: MIT
+
+  - ecosystem: cargo
+    name: webview2-com-sys
+    additionalLicenses:
+      - title: Microsoft WebView2 SDK loader (WebView2LoaderStatic.lib, statically linked on Windows)
+        license: BSD-3-Clause
+        copyright: Microsoft Corporation
+        licenseFile: third-party/licenses/Microsoft-WebView2-SDK.txt
