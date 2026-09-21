@@ -71,7 +71,7 @@ public class IconPackService : IIconPackService
 			return Result.Fail<IconPackEntity, IconPackError>(IconPackError.NotFound);
 		}
 
-		if (pack.IsReadOnly)
+		if (_ownerRegistry.IsReadOnly(pack))
 		{
 			return Result.Fail<IconPackEntity, IconPackError>(IconPackError.ReadOnly,
 				"Read-only icon packs cannot be edited");

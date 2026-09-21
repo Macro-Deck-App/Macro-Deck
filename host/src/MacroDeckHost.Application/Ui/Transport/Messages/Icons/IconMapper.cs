@@ -21,13 +21,13 @@ public static class IconMapper
 			Author = entity.Author,
 			Version = entity.Version,
 			IsDefault = entity.IsDefault,
-			IsReadOnly = entity.IsReadOnly,
+			IsReadOnly = entity.IsReadOnly || owner.IsReadOnly,
 			SourceType = entity.SourceType.ToString(),
 			CreatedAt = entity.CreatedAt,
 			UpdatedAt = entity.UpdatedAt,
 			IconCount = iconCount,
 			OwnerKind = owner.Kind.ToString(),
-			CanDelete = owner.CanRemove
+			CanDelete = owner.CanRemove && !entity.IsReadOnly
 		};
 
 	public static ImportIconsResponse ToImportResponse(Result<IconImportBatchEntity, IconError> result,

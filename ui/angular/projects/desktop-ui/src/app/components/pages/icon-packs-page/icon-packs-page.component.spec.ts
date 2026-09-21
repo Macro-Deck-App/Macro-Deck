@@ -307,12 +307,14 @@ describe('IconPacksPageComponent pack deletion and ownership', () => {
 
   // Counterexample to "hide delete for managed packs": a Store-owned pack must stay directly
   // deletable, with the host routing the removal through the owning provider.
-  it('keeps the delete entry enabled for a Store-owned pack and deletes it exactly once on confirm', async () => {
+  it('keeps the delete entry enabled for a read-only Store-owned pack and deletes it exactly once on confirm', async () => {
     const deleteSpy = spyOn(iconPacks, 'deletePack').and.resolveTo(true);
-    const storePack = pack('store-pack', { ownerKind: 'Store', canDelete: true });
+    const storePack = pack('store-pack', { ownerKind: 'Store', isReadOnly: true, canDelete: true });
     component.packMenu.set({ pack: storePack, x: 0, y: 0 });
 
     expect(component.packMenuItems().find(i => i.id === 'delete')?.disabled).toBeFalsy();
+    expect(component.packMenuItems().find(i => i.id === 'edit')?.disabled).toBeTrue();
+    expect(component.packMenuItems().find(i => i.id === 'import')?.disabled).toBeTrue();
 
     component.requestDeletePack(storePack);
     expect(component.packPendingDeletion()).toBe(storePack);

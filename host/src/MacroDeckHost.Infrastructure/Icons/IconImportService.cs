@@ -1,6 +1,7 @@
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Icons;
+using MacroDeckHost.Application.Icons.Ownership;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -22,6 +23,7 @@ public sealed class IconImportService : IIconImportService
 	private readonly IconImportCoalescer _coalescer;
 	private readonly IAppIconExtractor _appIconExtractor;
 	private readonly IMediator _mediator;
+	private readonly IIconPackOwnerRegistry _ownerRegistry;
 	private readonly ILogger _logger;
 
 	public IconImportService(
@@ -35,6 +37,7 @@ public sealed class IconImportService : IIconImportService
 		IconImportCoalescer coalescer,
 		IAppIconExtractor appIconExtractor,
 		IMediator mediator,
+		IIconPackOwnerRegistry ownerRegistry,
 		ILogger logger)
 	{
 		_iconPackCache = iconPackCache;
@@ -47,6 +50,7 @@ public sealed class IconImportService : IIconImportService
 		_coalescer = coalescer;
 		_appIconExtractor = appIconExtractor;
 		_mediator = mediator;
+		_ownerRegistry = ownerRegistry;
 		_logger = logger;
 	}
 
@@ -478,7 +482,7 @@ public sealed class IconImportService : IIconImportService
 			return Result.Fail<IconPackEntity, IconError>(IconError.PackNotFound);
 		}
 
-		if (pack.IsReadOnly)
+		if (_ownerRegistry.IsReadOnly(pack))
 		{
 			return Result.Fail<IconPackEntity, IconError>(IconError.PackReadOnly);
 		}

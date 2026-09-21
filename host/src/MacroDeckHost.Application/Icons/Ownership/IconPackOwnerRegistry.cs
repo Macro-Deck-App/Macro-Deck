@@ -15,4 +15,6 @@ public sealed class IconPackOwnerRegistry : IIconPackOwnerRegistry
 
 	public IconPackOwnerDescriptor Describe(IconPackEntity pack) =>
 		Resolve(pack)?.Describe(pack) ?? IconPackOwnerDescriptor.UserCreated;
+
+	public bool IsReadOnly(IconPackEntity pack) => pack.IsReadOnly || Describe(pack).IsReadOnly;
 }

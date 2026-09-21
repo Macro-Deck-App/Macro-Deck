@@ -119,6 +119,11 @@ version and any update waiting for them. Update one at a time from its card, or 
 installs and restarts the plugin, then the version that is now installed. See
 [Updates](/guide/updates/#extension-updates) for update notifications and automatic updates.
 
+Icon packs from the Store are read-only on the **Icon Packs** page. You can use their icons on your buttons
+and export the pack, but you can't rename, import, or delete icons in it, or edit its name and details.
+Deleting the pack there uninstalls it from the Store. To change the icons, export the pack and import the
+copy as a pack of your own.
+
 Store items show their star rating, and an item's page lists its **Ratings and reviews**. Anyone can
 read them. To rate or review an item yourself, sign in with Macro Deck Connect under
 **Settings > Account** and install the item first: only items you have installed can be rated. When
