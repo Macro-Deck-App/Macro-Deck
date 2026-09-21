@@ -34,6 +34,7 @@ fn main() {
             "save_file",
             "get_hide_dock_icon",
             "set_hide_dock_icon",
+            "set_appearance",
             "take_opened_files",
             "take_menu_action",
             "set_hotkey_capture",

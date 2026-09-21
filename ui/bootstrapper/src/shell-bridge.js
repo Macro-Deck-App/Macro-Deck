@@ -119,6 +119,9 @@
     setHideDockIcon: function (enabled) {
       return invoke('set_hide_dock_icon', { enabled: enabled === true });
     },
+    setAppearance: function (themeMode, accentColor) {
+      return invoke('set_appearance', { themeMode: String(themeMode), accentColor: String(accentColor) });
+    },
     checkForUpdate: function () {
       return invoke('check_for_update');
     },

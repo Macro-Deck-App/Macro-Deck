@@ -89,6 +89,22 @@ describe('ThemeService', () => {
     expect(root.style.getPropertyValue('--color-accent-muted')).toContain('rgba(255, 0, 0');
   });
 
+  it('hands the chosen theme and accent to the desktop shell for its own windows', () => {
+    const setAppearance = jasmine.createSpy('setAppearance').and.resolveTo();
+    window.macroDeckShell = { setAppearance } as unknown as NonNullable<Window['macroDeckShell']>;
+    try {
+      const service = create();
+
+      service.setThemeMode('light');
+      service.setAccentColor('#ff0000');
+      TestBed.tick();
+
+      expect(setAppearance).toHaveBeenCalledWith('light', '#ff0000');
+    } finally {
+      delete window.macroDeckShell;
+    }
+  });
+
   it('writes nothing that rescales the root font size', () => {
     const service = create();
 

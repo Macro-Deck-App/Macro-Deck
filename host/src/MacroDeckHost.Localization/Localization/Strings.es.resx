@@ -954,6 +954,10 @@ Cierra la aplicación que usa el puerto (o un Macro Deck que aún esté en ejecu
   <data name="Bootstrapper.Tray.Show" xml:space="preserve">
     <value>Mostrar</value>
   </data>
+  <data name="Bootstrapper.Tray.UpdateTo" xml:space="preserve">
+    <value>Actualizar a {version}</value>
+    <comment>[version:string]</comment>
+  </data>
   <data name="Bootstrapper.Update.AllFeedsFailed" xml:space="preserve">
     <value>no se pudieron buscar actualizaciones en ningún feed ({reasons})</value>
   </data>
@@ -1034,6 +1038,42 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Bootstrapper.Update.PartialCheckFailed.Other" xml:space="preserve">
     <value>No se pudieron comprobar los feeds de actualizaciones de {names}.</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.CancelDownload" xml:space="preserve">
+    <value>Cancelar descarga</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.ChangelogHeading" xml:space="preserve">
+    <value>Novedades</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.CurrentVersion" xml:space="preserve">
+    <value>Actualmente tienes {version}</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.DownloadingStatus" xml:space="preserve">
+    <value>Descargando… {percent}%</value>
+    <comment>[percent:int]</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.InstallingStatus" xml:space="preserve">
+    <value>Instalando la actualización. Macro Deck se reiniciará en un momento.</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.NoChangelog" xml:space="preserve">
+    <value>No se publicaron notas de la versión para esta actualización.</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.PreparingStatus" xml:space="preserve">
+    <value>Preparando la descarga…</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.ReadyStatus" xml:space="preserve">
+    <value>La actualización está descargada. Reinicia Macro Deck para instalarla.</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.RestartNow" xml:space="preserve">
+    <value>Reiniciar ahora</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.TryAgain" xml:space="preserve">
+    <value>Reintentar</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.VersionHeading" xml:space="preserve">
+    <value>Macro Deck {version}</value>
+    <comment>[version:string]</comment>
   </data>
   <data name="ClientTargets.CarThing.Configure.Description" xml:space="preserve">
     <value>Macro Deck coloca en el directorio que el dispositivo ya sirve una página que apunta al cliente. Ajusta estos valores si tu firmware los guarda en otro sitio.</value>

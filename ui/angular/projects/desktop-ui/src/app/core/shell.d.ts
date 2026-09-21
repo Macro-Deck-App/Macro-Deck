@@ -46,6 +46,7 @@ declare global {
       onUpdateState?: (callback: (state: ShellUpdateState) => void) => Promise<() => void>;
       getHideDockIcon?: () => Promise<ShellDockIconStatus>;
       setHideDockIcon?: (enabled: boolean) => Promise<ShellDockIconStatus>;
+      setAppearance?: (themeMode: 'light' | 'dark' | 'system', accentColor: string) => Promise<void>;
     };
   }
 

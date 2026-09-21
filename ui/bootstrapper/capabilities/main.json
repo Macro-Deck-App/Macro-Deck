@@ -30,6 +30,7 @@
     "allow-dismiss-post-update-changelog",
     "allow-get-hide-dock-icon",
     "allow-set-hide-dock-icon",
+    "allow-set-appearance",
     "core:event:allow-listen",
     "core:event:allow-unlisten"
   ]

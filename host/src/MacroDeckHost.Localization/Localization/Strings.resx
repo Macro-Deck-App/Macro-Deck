@@ -953,6 +953,10 @@ Close the application using the port (or a still-running Macro Deck) and try aga
   <data name="Bootstrapper.Tray.Show" xml:space="preserve">
     <value>Show</value>
   </data>
+  <data name="Bootstrapper.Tray.UpdateTo" xml:space="preserve">
+    <value>Update to {version}</value>
+    <comment>[version:string]</comment>
+  </data>
   <data name="Bootstrapper.Update.AllFeedsFailed" xml:space="preserve">
     <value>could not check for updates on any feed ({reasons})</value>
   </data>
@@ -1033,6 +1037,42 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Bootstrapper.Update.PartialCheckFailed.Other" xml:space="preserve">
     <value>Could not check the {names} update feeds.</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.CancelDownload" xml:space="preserve">
+    <value>Cancel download</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.ChangelogHeading" xml:space="preserve">
+    <value>What's new</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.CurrentVersion" xml:space="preserve">
+    <value>You currently have {version}</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.DownloadingStatus" xml:space="preserve">
+    <value>Downloading… {percent}%</value>
+    <comment>[percent:int]</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.InstallingStatus" xml:space="preserve">
+    <value>Installing the update. Macro Deck restarts in a moment.</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.NoChangelog" xml:space="preserve">
+    <value>No release notes were published for this version.</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.PreparingStatus" xml:space="preserve">
+    <value>Preparing the download…</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.ReadyStatus" xml:space="preserve">
+    <value>The update is downloaded. Restart Macro Deck to install it.</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.RestartNow" xml:space="preserve">
+    <value>Restart now</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.TryAgain" xml:space="preserve">
+    <value>Try again</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.VersionHeading" xml:space="preserve">
+    <value>Macro Deck {version}</value>
+    <comment>[version:string]</comment>
   </data>
   <data name="ClientTargets.CarThing.Configure.Description" xml:space="preserve">
     <value>Macro Deck puts a page in the directory the device already serves, pointing it at the client. Adjust these if your firmware keeps them somewhere else.</value>

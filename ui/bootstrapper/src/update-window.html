@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Macro Deck</title>
+  <link rel="stylesheet" href="update-window.css">
+  <script src="update-window.js" defer></script>
+</head>
+<body>
+  <main class="update">
+    <header class="update__header">
+      <h1 class="update__version" id="heading"></h1>
+      <p class="update__current" id="current"></p>
+    </header>
+    <section class="update__changelog-section">
+      <h2 class="update__section-heading" id="changelog-heading"></h2>
+      <div class="update__changelog" id="changelog"></div>
+    </section>
+    <div class="update__progress" id="progress" hidden>
+      <progress class="update__bar" id="bar" max="100" aria-labelledby="heading"></progress>
+    </div>
+    <p class="update__status" id="status" role="status" hidden></p>
+  </main>
+  <footer class="update__actions" id="actions"></footer>
+</body>
+</html>

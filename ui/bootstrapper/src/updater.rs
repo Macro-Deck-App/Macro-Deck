@@ -45,7 +45,7 @@ use std::time::Duration;
 
 use semver::Version;
 use serde::Serialize;
-use tauri::{AppHandle, Emitter};
+use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_dialog::{DialogExt, MessageDialogButtons};
 use tauri_plugin_opener::OpenerExt;
 use tauri_plugin_updater::{Error as UpdaterError, RemoteRelease, Update, UpdaterExt};
@@ -60,6 +60,8 @@ use crate::update_mode::{self, UpdateMode};
 use crate::update_state::{
     self, AutoInstallTick, CheckTrigger, DownloadProgress, UpdatePhase, UpdateSnapshot, UpdateState,
 };
+use crate::update_window;
+use crate::window;
 
 const RELEASE_VERSION: &str = env!("MACRODECK_RELEASE_VERSION");
 
@@ -500,7 +502,20 @@ fn lock_state(app: &AppHandle) -> std::sync::MutexGuard<'static, UpdateState> {
 
 fn emit_state(app: &AppHandle) {
     let snapshot = lock_state(app).snapshot();
+    let offered = update_window::offered_version(&snapshot);
+    window::sync_tray_update(app, offered);
+    if offered.is_none() {
+        update_window::close(app);
+    }
     let _ = app.emit(UPDATE_STATE_EVENT, snapshot);
+}
+
+pub(crate) fn snapshot(app: &AppHandle) -> UpdateSnapshot {
+    lock_state(app).snapshot()
+}
+
+fn main_window_open(app: &AppHandle) -> bool {
+    app.get_webview_window(window::MAIN_WINDOW).is_some()
 }
 
 // Reports the newly-available version to the host, if it has not already
@@ -853,21 +868,44 @@ fn restore_parked_download(app: &AppHandle, now: u64, partial_check: Option<Stri
     arm_auto_install(app);
 }
 
-async fn run_action(app: &AppHandle, action: CheckAction, update: Update, reported: bool) {
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub(crate) enum FoundUpdateStep {
+    Download,
+    UpdateWindow,
+    NativeDialog,
+    Nothing,
+}
+
+pub(crate) fn found_update_step(
+    action: CheckAction,
+    main_window_open: bool,
+    reported: bool,
+) -> FoundUpdateStep {
     match action {
-        CheckAction::ExternalNotify => {
-            if !reported {
-                notify_external_download(app, &update);
-            }
+        CheckAction::DownloadThenInstall => FoundUpdateStep::Download,
+        _ if !main_window_open => FoundUpdateStep::UpdateWindow,
+        _ if reported => FoundUpdateStep::Nothing,
+        _ => FoundUpdateStep::NativeDialog,
+    }
+}
+
+pub(crate) fn step_after_automatic_download(main_window_open: bool) -> FoundUpdateStep {
+    if main_window_open {
+        FoundUpdateStep::Nothing
+    } else {
+        FoundUpdateStep::UpdateWindow
+    }
+}
+
+async fn run_action(app: &AppHandle, action: CheckAction, update: Update, reported: bool) {
+    match found_update_step(action, main_window_open(app), reported) {
+        FoundUpdateStep::Download => download_then_install(app, update).await,
+        FoundUpdateStep::UpdateWindow => update_window::offer(app, &update.version),
+        FoundUpdateStep::NativeDialog if action == CheckAction::ExternalNotify => {
+            notify_external_download(app, &update);
         }
-        CheckAction::ConfirmThenInstall => {
-            if !reported {
-                confirm_then_download_and_install(app, update).await;
-            }
-        }
-        CheckAction::DownloadThenInstall => {
-            download_then_install(app, update).await;
-        }
+        FoundUpdateStep::NativeDialog => confirm_then_download_and_install(app, update).await,
+        FoundUpdateStep::Nothing => {}
     }
 }
 
@@ -933,7 +971,8 @@ async fn run_auto_install_countdown(app: AppHandle, mut token: u64) {
     loop {
         tokio::time::sleep(Duration::from_secs(1)).await;
         let automatic = update_mode::current(&app) == UpdateMode::Automatic;
-        let tick = lock_state(&app).auto_install_tick(now_secs(), token, automatic);
+        let watched = main_window_open(&app);
+        let tick = lock_state(&app).auto_install_tick(now_secs(), token, automatic, watched);
         match tick {
             AutoInstallTick::Wait => {}
             AutoInstallTick::Exit => {
@@ -948,6 +987,15 @@ async fn run_auto_install_countdown(app: AppHandle, mut token: u64) {
             }
             AutoInstallTick::Claim => {
                 install_claimed(&app).await;
+                return;
+            }
+            AutoInstallTick::Unwatched => {
+                logging::info("[updater] main window closed during the countdown");
+                emit_state(&app);
+                let version = lock_state(&app).version.clone();
+                if let Some(version) = version {
+                    update_window::offer(&app, &version);
+                }
                 return;
             }
         }
@@ -1150,13 +1198,17 @@ async fn download_then_install(app: &AppHandle, update: Update) {
         }
     };
 
-    park_pending_download(update.version.clone(), update, bytes);
+    let version = update.version.clone();
+    park_pending_download(version.clone(), update, bytes);
     {
         let mut guard = lock_state(app);
         guard.record_downloaded();
     }
     emit_state_and_report(app).await;
-    arm_auto_install(app);
+    match step_after_automatic_download(main_window_open(app)) {
+        FoundUpdateStep::UpdateWindow => update_window::offer(app, &version),
+        _ => arm_auto_install(app),
+    }
 }
 
 async fn confirm_then_download_and_install(app: &AppHandle, update: Update) {
@@ -2062,5 +2114,54 @@ mod tests {
             "a matching version must hand back exactly the parked bytes"
         );
         assert!(slot.is_none(), "a hit consumes the slot");
+    }
+
+    #[test]
+    fn a_found_update_opens_the_update_window_when_the_main_window_is_closed() {
+        for action in [CheckAction::ConfirmThenInstall, CheckAction::ExternalNotify] {
+            for reported in [true, false] {
+                assert_eq!(
+                    found_update_step(action, false, reported),
+                    FoundUpdateStep::UpdateWindow,
+                    "{action:?} must be visible without opening Macro Deck (reported: {reported})"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn with_the_main_window_open_a_reported_update_stays_in_the_notification_center() {
+        assert_eq!(
+            found_update_step(CheckAction::ConfirmThenInstall, true, true),
+            FoundUpdateStep::Nothing
+        );
+        assert_eq!(
+            found_update_step(CheckAction::ConfirmThenInstall, true, false),
+            FoundUpdateStep::NativeDialog,
+            "an unreported update still needs the native dialog fallback"
+        );
+    }
+
+    #[test]
+    fn automatic_mode_downloads_regardless_of_the_main_window() {
+        for open in [true, false] {
+            assert_eq!(
+                found_update_step(CheckAction::DownloadThenInstall, open, false),
+                FoundUpdateStep::Download
+            );
+        }
+    }
+
+    #[test]
+    fn an_automatic_download_waits_for_a_click_when_the_main_window_is_closed() {
+        assert_eq!(
+            step_after_automatic_download(false),
+            FoundUpdateStep::UpdateWindow
+        );
+        assert_ne!(
+            step_after_automatic_download(true),
+            FoundUpdateStep::UpdateWindow,
+            "with the main window open the in-app countdown still applies"
+        );
     }
 }

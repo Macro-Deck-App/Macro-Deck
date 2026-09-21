@@ -52,6 +52,7 @@ export class ThemeService {
       this.applyToDom(theme, accent);
       localStorage.setItem(STORAGE_KEY_MODE, this.themeMode());
       localStorage.setItem(STORAGE_KEY_ACCENT, accent);
+      void window.macroDeckShell?.setAppearance?.(this.themeMode(), accent)?.catch(() => undefined);
     });
 
     effect(() => {
