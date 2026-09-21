@@ -928,6 +928,10 @@ Výstup hostitele:
   <data name="Bootstrapper.Tray.Show" xml:space="preserve">
     <value>Zobrazit</value>
   </data>
+  <data name="Bootstrapper.Tray.UpdateTo" xml:space="preserve">
+    <value>Aktualizovat na {version}</value>
+    <comment>[version:string]</comment>
+  </data>
   <data name="Bootstrapper.Update.AllFeedsFailed" xml:space="preserve">
     <value>nepodařilo se zkontrolovat aktualizace v žádném zdroji ({reasons})</value>
   </data>
@@ -1008,6 +1012,42 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Bootstrapper.Update.PartialCheckFailed.Other" xml:space="preserve">
     <value>Nepodařilo se zkontrolovat kanály aktualizací {names}.</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.CancelDownload" xml:space="preserve">
+    <value>Zrušit stahování</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.ChangelogHeading" xml:space="preserve">
+    <value>Co je nového</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.CurrentVersion" xml:space="preserve">
+    <value>Aktuálně nainstalovaná verze: {version}</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.DownloadingStatus" xml:space="preserve">
+    <value>Stahování… {percent} %</value>
+    <comment>[percent:int]</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.InstallingStatus" xml:space="preserve">
+    <value>Probíhá instalace aktualizace. Macro Deck se za chvíli restartuje.</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.NoChangelog" xml:space="preserve">
+    <value>Pro tuto verzi nebyly zveřejněny žádné poznámky k vydání.</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.PreparingStatus" xml:space="preserve">
+    <value>Příprava stahování…</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.ReadyStatus" xml:space="preserve">
+    <value>Aktualizace je stažená. K instalaci je potřeba restartovat Macro Deck.</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.RestartNow" xml:space="preserve">
+    <value>Restartovat nyní</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.TryAgain" xml:space="preserve">
+    <value>Zkusit znovu</value>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.VersionHeading" xml:space="preserve">
+    <value>Macro Deck {version}</value>
+    <comment>[version:string]</comment>
   </data>
   <data name="ClientTargets.CarThing.Configure.Description" xml:space="preserve">
     <value>Macro Deck umístí do adresáře, který zařízení už obsluhuje, stránku odkazující na klienta. Pokud je firmware ukládá jinam, je potřeba hodnoty upravit.</value>

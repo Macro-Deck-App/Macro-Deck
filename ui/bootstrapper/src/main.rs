@@ -6,6 +6,7 @@
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod appearance;
 mod bridge;
 mod dock_icon;
 mod host;
@@ -22,6 +23,7 @@ mod redact;
 mod update_channel;
 mod update_mode;
 mod update_state;
+mod update_window;
 mod updater;
 mod window;
 mod window_geometry;
@@ -156,6 +158,7 @@ fn main() {
                 .default_version_comparator(updater::version_comparator)
                 .build(),
         )
+        .register_uri_scheme_protocol(update_window::SCHEME, update_window::handle_request)
         .manage(Arc::new(host::HostState::new()))
         .manage(opened_files::PendingOpenFiles::default())
         .invoke_handler(tauri::generate_handler![
@@ -167,6 +170,7 @@ fn main() {
             bridge::save_file,
             dock_icon::get_hide_dock_icon,
             dock_icon::set_hide_dock_icon,
+            appearance::set_appearance,
             menu::set_hotkey_capture,
             menu::take_menu_action,
             opened_files::take_opened_files,

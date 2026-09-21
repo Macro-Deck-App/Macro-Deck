@@ -48,6 +48,7 @@ pub mod keys {
     pub const MENU_WINDOW: &str = "Bootstrapper.Menu.Window";
     pub const TRAY_QUIT: &str = "Bootstrapper.Tray.Quit";
     pub const TRAY_SHOW: &str = "Bootstrapper.Tray.Show";
+    pub const TRAY_UPDATE_TO: &str = "Bootstrapper.Tray.UpdateTo";
     pub const UPDATE_ALL_FEEDS_FAILED: &str = "Bootstrapper.Update.AllFeedsFailed";
     pub const UPDATE_ALREADY_IN_PROGRESS: &str = "Bootstrapper.Update.AlreadyInProgress";
     pub const UPDATE_APT_AVAILABLE: &str = "Bootstrapper.Update.AptAvailable";
@@ -71,6 +72,17 @@ pub mod keys {
     pub const UPDATE_NOT_INSTALLED: &str = "Bootstrapper.Update.NotInstalled";
     pub const UPDATE_OPEN_DOWNLOAD_PAGE: &str = "Bootstrapper.Update.OpenDownloadPage";
     pub const UPDATE_PARTIAL_CHECK_FAILED: &str = "Bootstrapper.Update.PartialCheckFailed";
+    pub const UPDATE_WINDOW_CANCEL_DOWNLOAD: &str = "Bootstrapper.UpdateWindow.CancelDownload";
+    pub const UPDATE_WINDOW_CHANGELOG_HEADING: &str = "Bootstrapper.UpdateWindow.ChangelogHeading";
+    pub const UPDATE_WINDOW_CURRENT_VERSION: &str = "Bootstrapper.UpdateWindow.CurrentVersion";
+    pub const UPDATE_WINDOW_DOWNLOADING_STATUS: &str = "Bootstrapper.UpdateWindow.DownloadingStatus";
+    pub const UPDATE_WINDOW_INSTALLING_STATUS: &str = "Bootstrapper.UpdateWindow.InstallingStatus";
+    pub const UPDATE_WINDOW_NO_CHANGELOG: &str = "Bootstrapper.UpdateWindow.NoChangelog";
+    pub const UPDATE_WINDOW_PREPARING_STATUS: &str = "Bootstrapper.UpdateWindow.PreparingStatus";
+    pub const UPDATE_WINDOW_READY_STATUS: &str = "Bootstrapper.UpdateWindow.ReadyStatus";
+    pub const UPDATE_WINDOW_RESTART_NOW: &str = "Bootstrapper.UpdateWindow.RestartNow";
+    pub const UPDATE_WINDOW_TRY_AGAIN: &str = "Bootstrapper.UpdateWindow.TryAgain";
+    pub const UPDATE_WINDOW_VERSION_HEADING: &str = "Bootstrapper.UpdateWindow.VersionHeading";
 }
 
 /// Culture to its templates, sorted by key.
@@ -114,6 +126,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Menu.Window", "Okno"),
         ("Bootstrapper.Tray.Quit", "Ukončit"),
         ("Bootstrapper.Tray.Show", "Zobrazit"),
+        ("Bootstrapper.Tray.UpdateTo", "Aktualizovat na {version}"),
         ("Bootstrapper.Update.AllFeedsFailed", "nepodařilo se zkontrolovat aktualizace v žádném zdroji ({reasons})"),
         ("Bootstrapper.Update.AlreadyInProgress", "Aktualizace se již instaluje."),
         ("Bootstrapper.Update.AptAvailable", "Je k dispozici Macro Deck {version}.\n\nMacro Deck byl nainstalován z repozitáře APT. Po zveřejnění nové verze v repozitáři spusťte sudo apt update && sudo apt upgrade. Beta verze jsou dostupné pouze v sadě beta."),
@@ -138,6 +151,17 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Update.OpenDownloadPage", "Otevřít stránku ke stažení"),
         ("Bootstrapper.Update.PartialCheckFailed.One", "Nepodařilo se zkontrolovat kanál aktualizací {names}."),
         ("Bootstrapper.Update.PartialCheckFailed.Other", "Nepodařilo se zkontrolovat kanály aktualizací {names}."),
+        ("Bootstrapper.UpdateWindow.CancelDownload", "Zrušit stahování"),
+        ("Bootstrapper.UpdateWindow.ChangelogHeading", "Co je nového"),
+        ("Bootstrapper.UpdateWindow.CurrentVersion", "Aktuálně nainstalovaná verze: {version}"),
+        ("Bootstrapper.UpdateWindow.DownloadingStatus", "Stahování… {percent} %"),
+        ("Bootstrapper.UpdateWindow.InstallingStatus", "Probíhá instalace aktualizace. Macro Deck se za chvíli restartuje."),
+        ("Bootstrapper.UpdateWindow.NoChangelog", "Pro tuto verzi nebyly zveřejněny žádné poznámky k vydání."),
+        ("Bootstrapper.UpdateWindow.PreparingStatus", "Příprava stahování…"),
+        ("Bootstrapper.UpdateWindow.ReadyStatus", "Aktualizace je stažená. K instalaci je potřeba restartovat Macro Deck."),
+        ("Bootstrapper.UpdateWindow.RestartNow", "Restartovat nyní"),
+        ("Bootstrapper.UpdateWindow.TryAgain", "Zkusit znovu"),
+        ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("de", &[
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Macro Deck konnte nicht verschoben werden"),
@@ -177,6 +201,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Menu.Window", "Fenster"),
         ("Bootstrapper.Tray.Quit", "Beenden"),
         ("Bootstrapper.Tray.Show", "Anzeigen"),
+        ("Bootstrapper.Tray.UpdateTo", "Auf {version} aktualisieren"),
         ("Bootstrapper.Update.AllFeedsFailed", "Updates konnten auf keinem Feed geprüft werden ({reasons})"),
         ("Bootstrapper.Update.AlreadyInProgress", "Es wird bereits ein Update installiert."),
         ("Bootstrapper.Update.AptAvailable", "Macro Deck {version} ist verfügbar.\n\nMacro Deck wurde aus seinem APT-Repository installiert. Führe sudo apt update && sudo apt upgrade aus, sobald die neue Version dort veröffentlicht ist. Beta-Versionen kommen nur über die Beta-Suite."),
@@ -201,6 +226,17 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Update.OpenDownloadPage", "Downloadseite öffnen"),
         ("Bootstrapper.Update.PartialCheckFailed.One", "Der Update-Feed {names} konnte nicht geprüft werden."),
         ("Bootstrapper.Update.PartialCheckFailed.Other", "Die Update-Feeds {names} konnten nicht geprüft werden."),
+        ("Bootstrapper.UpdateWindow.CancelDownload", "Download abbrechen"),
+        ("Bootstrapper.UpdateWindow.ChangelogHeading", "Was ist neu"),
+        ("Bootstrapper.UpdateWindow.CurrentVersion", "Du hast aktuell {version}"),
+        ("Bootstrapper.UpdateWindow.DownloadingStatus", "Wird heruntergeladen … {percent}%"),
+        ("Bootstrapper.UpdateWindow.InstallingStatus", "Das Update wird installiert. Macro Deck startet gleich neu."),
+        ("Bootstrapper.UpdateWindow.NoChangelog", "Für diese Version wurden keine Versionshinweise veröffentlicht."),
+        ("Bootstrapper.UpdateWindow.PreparingStatus", "Download wird vorbereitet …"),
+        ("Bootstrapper.UpdateWindow.ReadyStatus", "Das Update ist heruntergeladen. Starte Macro Deck neu, um es zu installieren."),
+        ("Bootstrapper.UpdateWindow.RestartNow", "Jetzt neu starten"),
+        ("Bootstrapper.UpdateWindow.TryAgain", "Erneut versuchen"),
+        ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("en", &[
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Macro Deck could not be moved"),
@@ -240,6 +276,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Menu.Window", "Window"),
         ("Bootstrapper.Tray.Quit", "Quit"),
         ("Bootstrapper.Tray.Show", "Show"),
+        ("Bootstrapper.Tray.UpdateTo", "Update to {version}"),
         ("Bootstrapper.Update.AllFeedsFailed", "could not check for updates on any feed ({reasons})"),
         ("Bootstrapper.Update.AlreadyInProgress", "An update is already being installed."),
         ("Bootstrapper.Update.AptAvailable", "Macro Deck {version} is available.\n\nMacro Deck was installed from its APT repository, so run sudo apt update && sudo apt upgrade once the new version is published there. Beta versions arrive only through the beta suite."),
@@ -264,6 +301,17 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Update.OpenDownloadPage", "Open download page"),
         ("Bootstrapper.Update.PartialCheckFailed.One", "Could not check the {names} update feed."),
         ("Bootstrapper.Update.PartialCheckFailed.Other", "Could not check the {names} update feeds."),
+        ("Bootstrapper.UpdateWindow.CancelDownload", "Cancel download"),
+        ("Bootstrapper.UpdateWindow.ChangelogHeading", "What's new"),
+        ("Bootstrapper.UpdateWindow.CurrentVersion", "You currently have {version}"),
+        ("Bootstrapper.UpdateWindow.DownloadingStatus", "Downloading… {percent}%"),
+        ("Bootstrapper.UpdateWindow.InstallingStatus", "Installing the update. Macro Deck restarts in a moment."),
+        ("Bootstrapper.UpdateWindow.NoChangelog", "No release notes were published for this version."),
+        ("Bootstrapper.UpdateWindow.PreparingStatus", "Preparing the download…"),
+        ("Bootstrapper.UpdateWindow.ReadyStatus", "The update is downloaded. Restart Macro Deck to install it."),
+        ("Bootstrapper.UpdateWindow.RestartNow", "Restart now"),
+        ("Bootstrapper.UpdateWindow.TryAgain", "Try again"),
+        ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("es", &[
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "No se pudo mover Macro Deck"),
@@ -303,6 +351,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Menu.Window", "Ventana"),
         ("Bootstrapper.Tray.Quit", "Salir"),
         ("Bootstrapper.Tray.Show", "Mostrar"),
+        ("Bootstrapper.Tray.UpdateTo", "Actualizar a {version}"),
         ("Bootstrapper.Update.AllFeedsFailed", "no se pudieron buscar actualizaciones en ningún feed ({reasons})"),
         ("Bootstrapper.Update.AlreadyInProgress", "Ya se está instalando una actualización."),
         ("Bootstrapper.Update.AptAvailable", "Macro Deck {version} está disponible.\n\nMacro Deck se instaló desde su repositorio APT: ejecuta sudo apt update && sudo apt upgrade cuando la nueva versión esté publicada allí. Las versiones beta solo llegan a través de la suite beta."),
@@ -327,6 +376,17 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Update.OpenDownloadPage", "Abrir página de descarga"),
         ("Bootstrapper.Update.PartialCheckFailed.One", "No se pudo comprobar el feed de actualizaciones de {names}."),
         ("Bootstrapper.Update.PartialCheckFailed.Other", "No se pudieron comprobar los feeds de actualizaciones de {names}."),
+        ("Bootstrapper.UpdateWindow.CancelDownload", "Cancelar descarga"),
+        ("Bootstrapper.UpdateWindow.ChangelogHeading", "Novedades"),
+        ("Bootstrapper.UpdateWindow.CurrentVersion", "Actualmente tienes {version}"),
+        ("Bootstrapper.UpdateWindow.DownloadingStatus", "Descargando… {percent}%"),
+        ("Bootstrapper.UpdateWindow.InstallingStatus", "Instalando la actualización. Macro Deck se reiniciará en un momento."),
+        ("Bootstrapper.UpdateWindow.NoChangelog", "No se publicaron notas de la versión para esta actualización."),
+        ("Bootstrapper.UpdateWindow.PreparingStatus", "Preparando la descarga…"),
+        ("Bootstrapper.UpdateWindow.ReadyStatus", "La actualización está descargada. Reinicia Macro Deck para instalarla."),
+        ("Bootstrapper.UpdateWindow.RestartNow", "Reiniciar ahora"),
+        ("Bootstrapper.UpdateWindow.TryAgain", "Reintentar"),
+        ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("fr", &[
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Macro Deck n'a pas pu être déplacé"),
@@ -366,6 +426,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Menu.Window", "Fenêtre"),
         ("Bootstrapper.Tray.Quit", "Quitter"),
         ("Bootstrapper.Tray.Show", "Afficher"),
+        ("Bootstrapper.Tray.UpdateTo", "Mettre à jour vers {version}"),
         ("Bootstrapper.Update.AllFeedsFailed", "impossible de vérifier les mises à jour sur aucun flux ({reasons})"),
         ("Bootstrapper.Update.AlreadyInProgress", "Une mise à jour est déjà en cours d'installation."),
         ("Bootstrapper.Update.AptAvailable", "Macro Deck {version} est disponible.\n\nMacro Deck a été installé depuis son dépôt APT : exécute sudo apt update && sudo apt upgrade dès que la nouvelle version y est publiée. Les versions bêta n'arrivent que par la suite beta."),
@@ -390,6 +451,17 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Update.OpenDownloadPage", "Ouvrir la page de téléchargement"),
         ("Bootstrapper.Update.PartialCheckFailed.One", "Impossible de vérifier le flux de mise à jour de {names}."),
         ("Bootstrapper.Update.PartialCheckFailed.Other", "Impossible de vérifier les flux de mise à jour de {names}."),
+        ("Bootstrapper.UpdateWindow.CancelDownload", "Annuler le téléchargement"),
+        ("Bootstrapper.UpdateWindow.ChangelogHeading", "Quoi de neuf"),
+        ("Bootstrapper.UpdateWindow.CurrentVersion", "Tu as actuellement la version {version}"),
+        ("Bootstrapper.UpdateWindow.DownloadingStatus", "Téléchargement… {percent} %"),
+        ("Bootstrapper.UpdateWindow.InstallingStatus", "Installation de la mise à jour. Macro Deck va redémarrer dans un instant."),
+        ("Bootstrapper.UpdateWindow.NoChangelog", "Aucune note de version n'a été publiée pour cette mise à jour."),
+        ("Bootstrapper.UpdateWindow.PreparingStatus", "Préparation du téléchargement…"),
+        ("Bootstrapper.UpdateWindow.ReadyStatus", "La mise à jour est téléchargée. Redémarre Macro Deck pour l'installer."),
+        ("Bootstrapper.UpdateWindow.RestartNow", "Redémarrer maintenant"),
+        ("Bootstrapper.UpdateWindow.TryAgain", "Réessayer"),
+        ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("it", &[
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Impossibile spostare Macro Deck"),
@@ -429,6 +501,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Menu.Window", "Finestra"),
         ("Bootstrapper.Tray.Quit", "Esci"),
         ("Bootstrapper.Tray.Show", "Mostra"),
+        ("Bootstrapper.Tray.UpdateTo", "Aggiorna a {version}"),
         ("Bootstrapper.Update.AllFeedsFailed", "impossibile controllare gli aggiornamenti su nessun feed ({reasons})"),
         ("Bootstrapper.Update.AlreadyInProgress", "È già in corso l'installazione di un aggiornamento."),
         ("Bootstrapper.Update.AptAvailable", "Macro Deck {version} è disponibile.\n\nMacro Deck è stato installato dal suo repository APT: esegui sudo apt update && sudo apt upgrade quando la nuova versione vi sarà pubblicata. Le versioni beta arrivano solo tramite la suite beta."),
@@ -453,6 +526,17 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Update.OpenDownloadPage", "Apri pagina di download"),
         ("Bootstrapper.Update.PartialCheckFailed.One", "Impossibile controllare il feed di aggiornamento di {names}."),
         ("Bootstrapper.Update.PartialCheckFailed.Other", "Impossibile controllare i feed di aggiornamento di {names}."),
+        ("Bootstrapper.UpdateWindow.CancelDownload", "Annulla download"),
+        ("Bootstrapper.UpdateWindow.ChangelogHeading", "Novità"),
+        ("Bootstrapper.UpdateWindow.CurrentVersion", "Attualmente hai la versione {version}"),
+        ("Bootstrapper.UpdateWindow.DownloadingStatus", "Download in corso… {percent}%"),
+        ("Bootstrapper.UpdateWindow.InstallingStatus", "Installazione dell'aggiornamento in corso. Macro Deck si riavvierà a breve."),
+        ("Bootstrapper.UpdateWindow.NoChangelog", "Non sono state pubblicate note di rilascio per questa versione."),
+        ("Bootstrapper.UpdateWindow.PreparingStatus", "Preparazione del download…"),
+        ("Bootstrapper.UpdateWindow.ReadyStatus", "L'aggiornamento è stato scaricato. Riavvia Macro Deck per installarlo."),
+        ("Bootstrapper.UpdateWindow.RestartNow", "Riavvia ora"),
+        ("Bootstrapper.UpdateWindow.TryAgain", "Riprova"),
+        ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("pl", &[
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Nie udało się przenieść Macro Deck"),
@@ -492,6 +576,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Menu.Window", "Okno"),
         ("Bootstrapper.Tray.Quit", "Zakończ"),
         ("Bootstrapper.Tray.Show", "Pokaż"),
+        ("Bootstrapper.Tray.UpdateTo", "Aktualizuj do {version}"),
         ("Bootstrapper.Update.AllFeedsFailed", "nie udało się sprawdzić aktualizacji w żadnym źródle ({reasons})"),
         ("Bootstrapper.Update.AlreadyInProgress", "Aktualizacja jest już instalowana."),
         ("Bootstrapper.Update.AptAvailable", "Dostępny jest Macro Deck {version}.\n\nMacro Deck został zainstalowany z repozytorium APT. Po opublikowaniu nowej wersji w repozytorium uruchom sudo apt update && sudo apt upgrade. Wersje beta są dostępne tylko w gałęzi beta."),
@@ -516,5 +601,16 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Update.OpenDownloadPage", "Otwórz stronę pobierania"),
         ("Bootstrapper.Update.PartialCheckFailed.One", "Nie można sprawdzić kanału aktualizacji {names}."),
         ("Bootstrapper.Update.PartialCheckFailed.Other", "Nie można sprawdzić kanałów aktualizacji {names}."),
+        ("Bootstrapper.UpdateWindow.CancelDownload", "Anuluj pobieranie"),
+        ("Bootstrapper.UpdateWindow.ChangelogHeading", "Co nowego"),
+        ("Bootstrapper.UpdateWindow.CurrentVersion", "Obecnie zainstalowana jest wersja {version}"),
+        ("Bootstrapper.UpdateWindow.DownloadingStatus", "Pobieranie… {percent}%"),
+        ("Bootstrapper.UpdateWindow.InstallingStatus", "Trwa instalacja aktualizacji. Macro Deck za chwilę uruchomi się ponownie."),
+        ("Bootstrapper.UpdateWindow.NoChangelog", "Dla tej wersji nie opublikowano informacji o wydaniu."),
+        ("Bootstrapper.UpdateWindow.PreparingStatus", "Przygotowywanie pobierania…"),
+        ("Bootstrapper.UpdateWindow.ReadyStatus", "Aktualizacja została pobrana. Instalacja wymaga ponownego uruchomienia Macro Deck."),
+        ("Bootstrapper.UpdateWindow.RestartNow", "Uruchom ponownie teraz"),
+        ("Bootstrapper.UpdateWindow.TryAgain", "Spróbuj ponownie"),
+        ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
 ];

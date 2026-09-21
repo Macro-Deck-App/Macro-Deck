@@ -14,15 +14,33 @@ Choose how Macro Deck handles new versions in **Settings > About**, under **Upda
 
 ## Automatic installs
 
-Once an automatic download finishes, a dialog counts down 60 seconds before Macro Deck restarts to install
-the update.
+Once an automatic download finishes while the Macro Deck window is open, a dialog counts down 60 seconds
+before Macro Deck restarts to install the update. A minimized window counts as open.
 
 - **Install now** restarts right away.
 - **Not now**, or closing the dialog, skips the install until you next start Macro Deck. You can still
   install it from **Settings > About** in the meantime.
 
-The countdown runs even when the Macro Deck window is closed, so an unattended computer stays up to date.
-Switching the mode away from **Automatic** during the countdown stops it.
+Switching the mode away from **Automatic** during the countdown stops it. Closing the Macro Deck window
+during the countdown stops it too, and the update window below asks instead.
+
+## When the Macro Deck window is closed
+
+Macro Deck keeps checking for updates while it runs in the background, for example after it started with
+your computer or after you closed its window. When it finds a new version then, it opens a small update
+window with the release notes, so you do not have to open Macro Deck to see it.
+
+- In **Notify only**, choose **Download & install**. The window shows the download, then Macro Deck
+  restarts to install the update.
+- In **Automatic**, the update is already downloaded. Choose **Restart now** to install it. There is no
+  countdown: nothing is installed until you choose to.
+- **Later**, or closing the window, leaves the update for now.
+
+The update window opens on its own at most once per version while Macro Deck runs, when an update is found
+in the background. It never opens in **Off** mode.
+
+While an update is waiting, the Macro Deck icon in the system tray or menu bar has an **Update to**
+entry with the new version. It opens the update window again.
 
 With **Before Macro Deck updates** turned on in **Settings > Backups**, Macro Deck makes a backup before it
 installs.
@@ -65,4 +83,5 @@ of the new version once. An update installed by running a downloaded installer y
 ## Linux
 
 On Linux, Macro Deck never installs updates itself. It tells you that a new version exists, and you update
-through `apt` or the package you installed. See [Installation](/guide/installation/).
+through `apt` or the package you installed. The update window and the tray entry still show the release
+notes, with the `apt` command or a link to the download page instead of an install button. See [Installation](/guide/installation/).

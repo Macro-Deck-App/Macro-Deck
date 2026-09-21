@@ -35,6 +35,7 @@ pub(crate) enum AutoInstallTick {
     Exit,
     Rearm(u64),
     Claim,
+    Unwatched,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -441,6 +442,7 @@ impl UpdateState {
         now: u64,
         token: u64,
         automatic: bool,
+        watched: bool,
     ) -> AutoInstallTick {
         if self.auto_install_at != Some(token) {
             return AutoInstallTick::Exit;
@@ -448,6 +450,10 @@ impl UpdateState {
         if !automatic {
             self.auto_install_at = None;
             return AutoInstallTick::Exit;
+        }
+        if !watched && self.phase == UpdatePhase::Downloaded {
+            self.auto_install_at = None;
+            return AutoInstallTick::Unwatched;
         }
         if self.phase != UpdatePhase::Downloaded || now < token {
             return AutoInstallTick::Wait;
@@ -907,17 +913,17 @@ mod tests {
         let token = state.schedule_auto_install(100).unwrap();
 
         assert_eq!(
-            state.auto_install_tick(token - 1, token, true),
+            state.auto_install_tick(token - 1, token, true, true),
             AutoInstallTick::Wait
         );
         assert_eq!(
-            state.auto_install_tick(token, token, true),
+            state.auto_install_tick(token, token, true, true),
             AutoInstallTick::Claim
         );
         assert_eq!(state.phase, UpdatePhase::Installing);
         assert_eq!(state.snapshot().auto_install_at, None);
         assert_eq!(
-            state.auto_install_tick(token + 1, token, true),
+            state.auto_install_tick(token + 1, token, true, true),
             AutoInstallTick::Exit
         );
     }
@@ -930,7 +936,7 @@ mod tests {
         assert!(state.postpone_auto_install());
 
         assert_eq!(
-            state.auto_install_tick(token, token, true),
+            state.auto_install_tick(token, token, true, true),
             AutoInstallTick::Exit
         );
         assert_eq!(state.phase, UpdatePhase::Downloaded);
@@ -955,7 +961,7 @@ mod tests {
         let mut state = downloaded_state("3.1.0");
         let token = state.schedule_auto_install(100).unwrap();
         assert_eq!(
-            state.auto_install_tick(token, token, true),
+            state.auto_install_tick(token, token, true, true),
             AutoInstallTick::Claim
         );
 
@@ -971,7 +977,7 @@ mod tests {
         assert!(state.try_begin_install());
 
         assert_eq!(
-            state.auto_install_tick(token, token, true),
+            state.auto_install_tick(token, token, true, true),
             AutoInstallTick::Exit
         );
     }
@@ -982,7 +988,7 @@ mod tests {
         let token = state.schedule_auto_install(100).unwrap();
 
         assert_eq!(
-            state.auto_install_tick(token, token, false),
+            state.auto_install_tick(token, token, false, true),
             AutoInstallTick::Exit
         );
 
@@ -992,22 +998,57 @@ mod tests {
     }
 
     #[test]
+    fn closing_the_main_window_during_the_countdown_never_installs_unseen() {
+        let mut state = downloaded_state("3.1.0");
+        let token = state.schedule_auto_install(100).unwrap();
+
+        assert_eq!(
+            state.auto_install_tick(token, token, true, false),
+            AutoInstallTick::Unwatched
+        );
+
+        assert_eq!(
+            state.phase,
+            UpdatePhase::Downloaded,
+            "the download is kept for a click"
+        );
+        assert_eq!(state.snapshot().auto_install_at, None);
+        assert_eq!(
+            state.auto_install_tick(token + 1, token, true, true),
+            AutoInstallTick::Exit,
+            "the cancelled countdown cannot claim later"
+        );
+    }
+
+    #[test]
+    fn an_unwatched_countdown_waits_while_a_check_is_running() {
+        let mut state = downloaded_state("3.1.0");
+        let token = state.schedule_auto_install(100).unwrap();
+        assert!(state.try_begin_check());
+
+        assert_eq!(
+            state.auto_install_tick(token, token, true, false),
+            AutoInstallTick::Wait
+        );
+    }
+
+    #[test]
     fn sleeping_through_the_deadline_starts_a_fresh_countdown_instead_of_installing() {
         let mut state = downloaded_state("3.1.0");
         let token = state.schedule_auto_install(100).unwrap();
         let woke_at = token + AUTO_INSTALL_GRACE_SECS + 1_000;
 
-        let tick = state.auto_install_tick(woke_at, token, true);
+        let tick = state.auto_install_tick(woke_at, token, true, true);
 
         let new_token = woke_at + AUTO_INSTALL_DELAY_SECS;
         assert_eq!(tick, AutoInstallTick::Rearm(new_token));
         assert_eq!(state.phase, UpdatePhase::Downloaded);
         assert_eq!(
-            state.auto_install_tick(woke_at + 1, new_token, true),
+            state.auto_install_tick(woke_at + 1, new_token, true, true),
             AutoInstallTick::Wait
         );
         assert_eq!(
-            state.auto_install_tick(new_token, new_token, true),
+            state.auto_install_tick(new_token, new_token, true, true),
             AutoInstallTick::Claim
         );
     }
@@ -1019,7 +1060,7 @@ mod tests {
         assert!(state.try_begin_check());
 
         assert_eq!(
-            state.auto_install_tick(token, token, true),
+            state.auto_install_tick(token, token, true, true),
             AutoInstallTick::Wait
         );
     }
@@ -1035,11 +1076,11 @@ mod tests {
 
         assert_eq!(state.phase, UpdatePhase::Downloaded);
         assert_eq!(
-            state.auto_install_tick(old_token, old_token, true),
+            state.auto_install_tick(old_token, old_token, true, true),
             AutoInstallTick::Exit
         );
         assert_eq!(
-            state.auto_install_tick(new_token, new_token, true),
+            state.auto_install_tick(new_token, new_token, true, true),
             AutoInstallTick::Claim
         );
     }
@@ -1060,7 +1101,7 @@ mod tests {
         let token = failed.schedule_auto_install(100).unwrap();
         failed.record_check_failed(120, "offline".to_string());
         assert_eq!(
-            failed.auto_install_tick(token, token, true),
+            failed.auto_install_tick(token, token, true, true),
             AutoInstallTick::Exit
         );
 
@@ -1068,7 +1109,7 @@ mod tests {
         let token = newer.schedule_auto_install(100).unwrap();
         newer.record_available(120, "3.2.0".to_string(), None, None, None);
         assert_eq!(
-            newer.auto_install_tick(token, token, true),
+            newer.auto_install_tick(token, token, true, true),
             AutoInstallTick::Exit
         );
     }

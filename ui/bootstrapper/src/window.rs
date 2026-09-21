@@ -1,9 +1,10 @@
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Mutex;
 
-use tauri::menu::{MenuBuilder, MenuItemBuilder};
+use tauri::menu::{Menu, MenuBuilder, MenuItemBuilder};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::utils::platform::Target;
-use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder, Wry};
 use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
 
 use crate::bridge;
@@ -147,6 +148,7 @@ pub fn create_main_window(app: &AppHandle) {
             .permission("allow-dismiss-post-update-changelog")
             .permission("allow-get-hide-dock-icon")
             .permission("allow-set-hide-dock-icon")
+            .permission("allow-set-appearance")
             .permission("core:event:allow-listen")
             .permission("core:event:allow-unlisten");
         if let Err(error) = app.add_capability(capability) {
@@ -292,10 +294,56 @@ pub fn show_main_window(app: &AppHandle) {
     }
 }
 
-pub fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
+const TRAY_ID: &str = "main";
+
+static TRAY_UPDATE_VERSION: Mutex<Option<String>> = Mutex::new(None);
+
+fn tray_menu(app: &AppHandle, update_version: Option<&str>) -> tauri::Result<Menu<Wry>> {
+    let mut menu = MenuBuilder::new(app);
+    if let Some(version) = update_version {
+        let update = MenuItemBuilder::with_id(
+            "update",
+            localization::t_args(keys::TRAY_UPDATE_TO, &[("version", version)]),
+        )
+        .build(app)?;
+        menu = menu.item(&update).separator();
+    }
     let show = MenuItemBuilder::with_id("show", localization::t(keys::TRAY_SHOW)).build(app)?;
     let quit = MenuItemBuilder::with_id("quit", localization::t(keys::TRAY_QUIT)).build(app)?;
-    let menu = MenuBuilder::new(app).item(&show).item(&quit).build()?;
+    menu.item(&show).item(&quit).build()
+}
+
+pub fn sync_tray_update(app: &AppHandle, version: Option<&str>) {
+    {
+        let mut current = TRAY_UPDATE_VERSION
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
+        if current.as_deref() == version {
+            return;
+        }
+        *current = version.map(str::to_string);
+    }
+    let version = version.map(str::to_string);
+    dispatch_to_main_thread(app, "update the tray menu", {
+        let app = app.clone();
+        move || {
+            let Some(tray) = app.tray_by_id(TRAY_ID) else {
+                return;
+            };
+            match tray_menu(&app, version.as_deref()) {
+                Ok(menu) => {
+                    let _ = tray.set_menu(Some(menu));
+                }
+                Err(error) => {
+                    logging::error(&format!("[tray] could not rebuild the menu: {error}"))
+                }
+            }
+        }
+    });
+}
+
+pub fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
+    let menu = tray_menu(app, None)?;
 
     // macOS gets a flat black silhouette because it is used as a template image:
     // the system recolours it for the menu bar's appearance and for the selected
@@ -311,13 +359,14 @@ pub fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
     };
     let icon = tauri::image::Image::from_bytes(icon_bytes)?;
 
-    let mut builder = TrayIconBuilder::with_id("main")
+    let mut builder = TrayIconBuilder::with_id(TRAY_ID)
         .icon(icon)
         .icon_as_template(cfg!(target_os = "macos"))
         .tooltip("Macro Deck")
         .menu(&menu)
         .on_menu_event(|app, event| match event.id().as_ref() {
             "show" => show_main_window(app),
+            "update" => crate::update_window::show(app),
             "quit" => crate::request_quit(app),
             _ => {}
         });
