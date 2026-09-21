@@ -1007,6 +1007,7 @@ export {
   type GetAppearanceSettingsResponse,
   type GetAutostartSettingsResponse,
   type GetDataDirectoryResponse,
+  type CompanionLicenseChangedEvent,
   type CompanionLicenseStatus,
   type GetDeveloperSettingsResponse,
   type ExtensionSettingsBody,

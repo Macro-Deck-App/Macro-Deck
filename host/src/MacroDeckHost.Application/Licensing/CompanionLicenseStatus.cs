@@ -12,7 +12,15 @@ public class CompanionLicenseStatus
 
 	public long? IssuedAt { get; set; }
 
+	public long? PurchasedAt { get; set; }
+
+	public string? BillingId { get; set; }
+
 	public bool IsTest { get; set; }
 
 	public bool TestLicenseStored { get; set; }
+
+	public bool IssuePending { get; set; }
+
+	public long? NextIssueAttemptAt { get; set; }
 }

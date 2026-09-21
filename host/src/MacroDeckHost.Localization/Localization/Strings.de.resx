@@ -13168,11 +13168,17 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.Language.TimeFormatLabel" xml:space="preserve">
     <value>Zeitformat</value>
   </data>
+  <data name="Settings.License.BillingIdLabel" xml:space="preserve">
+    <value>Abrechnungs-ID</value>
+  </data>
   <data name="Settings.License.Description" xml:space="preserve">
     <value>Die Lizenz für Macro Deck Companion, die dieser Host besitzt. Der Host gibt sie an jede Companion-App weiter, die sich verbindet.</value>
   </data>
   <data name="Settings.License.Heading" xml:space="preserve">
     <value>Companion-Lizenz</value>
+  </data>
+  <data name="Settings.License.IssuePending" xml:space="preserve">
+    <value>Dein Kauf wird in eine Lizenz umgewandelt. Dafür ist eine Internetverbindung nötig, und Macro Deck versucht es von selbst weiter.</value>
   </data>
   <data name="Settings.License.IssueTestAction" xml:space="preserve">
     <value>Testlizenz ausstellen</value>
@@ -13201,8 +13207,17 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.License.LoadFailed" xml:space="preserve">
     <value>Der Lizenzstatus konnte nicht geladen werden.</value>
   </data>
+  <data name="Settings.License.NextAttempt" xml:space="preserve">
+    <value>Nächster Versuch: {time}</value>
+  </data>
+  <data name="Settings.License.NextAttemptSoon" xml:space="preserve">
+    <value>Nächster Versuch: gleich</value>
+  </data>
   <data name="Settings.License.NotLicensed" xml:space="preserve">
     <value>Nicht lizenziert</value>
+  </data>
+  <data name="Settings.License.PurchasedAtLabel" xml:space="preserve">
+    <value>Gekauft am</value>
   </data>
   <data name="Settings.License.RevokeTestAction" xml:space="preserve">
     <value>Testlizenz widerrufen</value>

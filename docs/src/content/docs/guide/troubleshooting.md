@@ -67,6 +67,25 @@ Connected devices show a lock screen for as long as the computer is locked. You 
 visible instead by turning off **Lock clients when this computer is locked** in
 **Settings > Security**. Actions stay blocked either way.
 
+## The Companion app stays unlicensed after a purchase
+
+When a Companion app that was bought connects, Macro Deck exchanges the purchase for a license with the
+Macro Deck servers. **Settings > Companion license** shows the progress:
+
+- **Your purchase is being turned into a license:** the computer running Macro Deck needs an internet
+  connection. Macro Deck keeps trying on its own, first after a few seconds and then less often, at
+  least every 30 minutes, also after a restart. The page shows when the next attempt runs. A purchase
+  the store is still processing can take a while.
+- **Licensed:** Macro Deck hands the license to every Companion app that connects to it.
+- **Not licensed, nothing pending:** the store did not confirm the purchase, for example after a
+  refund or for a test purchase. Macro Deck asks again at most once a day, and never again for a
+  refunded, cancelled or revoked purchase. Check the purchase in the Google Play or App Store account
+  the app was bought with, and ask on Discord if it looks right there. Purchases of the earlier iOS
+  app are not turned into licenses yet.
+
+For support, quote the **License ID** shown on that page. It is safe to share; the license itself is
+never shown.
+
 ## Macro Deck does not open a second time
 
 Only one Macro Deck can run on a computer at a time. If it is already running, starting it again

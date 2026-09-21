@@ -13170,11 +13170,17 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.Language.TimeFormatLabel" xml:space="preserve">
     <value>Formát času</value>
   </data>
+  <data name="Settings.License.BillingIdLabel" xml:space="preserve">
+    <value>Fakturační ID</value>
+  </data>
   <data name="Settings.License.Description" xml:space="preserve">
     <value>Licence Macro Deck Companion, kterou tento hostitel má. Hostitel ji předává každé připojené aplikaci Companion.</value>
   </data>
   <data name="Settings.License.Heading" xml:space="preserve">
     <value>Licence Companion</value>
+  </data>
+  <data name="Settings.License.IssuePending" xml:space="preserve">
+    <value>Nákup se převádí na licenci. Je potřeba připojení k internetu a Macro Deck to automaticky zkouší dál.</value>
   </data>
   <data name="Settings.License.IssueTestAction" xml:space="preserve">
     <value>Vydat testovací licenci</value>
@@ -13203,8 +13209,17 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.License.LoadFailed" xml:space="preserve">
     <value>Stav licence se nepodařilo načíst.</value>
   </data>
+  <data name="Settings.License.NextAttempt" xml:space="preserve">
+    <value>Další pokus: {time}</value>
+  </data>
+  <data name="Settings.License.NextAttemptSoon" xml:space="preserve">
+    <value>Další pokus: za okamžik</value>
+  </data>
   <data name="Settings.License.NotLicensed" xml:space="preserve">
     <value>Bez licence</value>
+  </data>
+  <data name="Settings.License.PurchasedAtLabel" xml:space="preserve">
+    <value>Zakoupeno</value>
   </data>
   <data name="Settings.License.RevokeTestAction" xml:space="preserve">
     <value>Zrušit testovací licenci</value>
