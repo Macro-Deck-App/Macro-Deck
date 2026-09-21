@@ -437,6 +437,9 @@ public class StoreController : ControllerBase
 		Changelog = item.Entry.Changelog,
 		Repository = item.Entry.Repository,
 		License = item.Entry.License,
+		AdditionalLinks = item.Entry.AdditionalLinks
+			.Select(link => new StoreExtensionLinkBody { Type = link.Type, Url = link.Url, Label = link.Label })
+			.ToList(),
 		DownloadSize = item.Entry.LatestRelease.Size,
 		SupportedOperatingSystems = SupportedOperatingSystems(item.Entry.SupportedRids),
 		Languages = [.. item.Entry.Languages],

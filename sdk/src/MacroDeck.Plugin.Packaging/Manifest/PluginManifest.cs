@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using MacroDeck.Plugin.Protocol.Versioning;
 
 namespace MacroDeck.Plugin.Packaging.Manifest;
@@ -46,6 +47,15 @@ public sealed record PluginManifest
 
 	public string? Repository { get; init; }
 
+	/// <summary>Further resources the author points to, such as documentation or an issue tracker, in
+	/// declared order. Carried as authored: the reader never rejects a manifest over this list and never
+	/// filters it, so a plugin cannot stop loading because of a link. Validate it with
+	/// <see cref="PluginManifestLinks.Validate"/> and show only <see cref="PluginManifestLinks.Displayable"/>
+	/// entries. A malformed entry reads as a <see cref="PluginManifestLink"/> with null members, keeping
+	/// indices aligned with the document.</summary>
+	[JsonConverter(typeof(PluginManifestLinkListConverter))]
+	public IReadOnlyList<PluginManifestLink>? AdditionalLinks { get; init; }
+
 	/// <summary>Null means "declares nothing", which is never the same as "incompatible".</summary>
 	public PluginCompatibility? Compatibility { get; init; }
 
@@ -73,6 +83,20 @@ public sealed record PluginManifest
 	public IReadOnlyList<PluginFileDigest>? Files { get; init; }
 
 	public PluginSignature? Signature { get; init; }
+}
+
+/// <summary>One entry of <see cref="PluginManifest.AdditionalLinks"/>. Every member is nullable because the
+/// reader is tolerant; <see cref="PluginManifestLinks.Validate"/> states what a valid entry looks like.</summary>
+public sealed record PluginManifestLink
+{
+	/// <summary>One of <see cref="PluginManifestLinkTypes"/>, or a type this build does not know yet.</summary>
+	public string? Type { get; init; }
+
+	/// <summary>Absolute http or https URL.</summary>
+	public string? Url { get; init; }
+
+	/// <summary>Required for <see cref="PluginManifestLinkTypes.Custom"/>, not allowed on a standard type.</summary>
+	public string? Label { get; init; }
 }
 
 /// <summary>One RID's launch target, relative to the version directory.</summary>

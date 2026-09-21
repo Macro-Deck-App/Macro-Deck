@@ -12,6 +12,8 @@ namespace MacroDeck.Plugin.Cli.Tests.UnitTests;
 [TestFixture]
 public class ManifestValidatorTests
 {
+	private static readonly string[] _invalidAdditionalLink = ["invalid-additional-link"];
+
 	[Test]
 	public async Task A_well_formed_manifest_validates_clean_and_exits_success()
 	{
@@ -493,5 +495,78 @@ public class ManifestValidatorTests
 			? (int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture),
 				int.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture))
 			: null;
+	}
+
+	[TestCase("""[{ "type": "custom", "url": "https://example.com/setup" }]""", "/additionalLinks/0/label")]
+	[TestCase("""[{ "type": "wiki", "url": "ftp://example.com/wiki" }]""", "/additionalLinks/0/url")]
+	[TestCase("""[{ "url": "https://example.com/wiki" }]""", "/additionalLinks/0/type")]
+	[TestCase("""[{ "type": "wiki", "label": "Wiki", "url": "https://example.com/wiki" }]""", "/additionalLinks/0/label")]
+	[TestCase("""[{ "type": "wiki", "url": "https://example.com/a" }, { "type": "wiki", "url": "https://example.com/b" }]""", "/additionalLinks/1/type")]
+	[TestCase("""{ "type": "wiki" }""", "/additionalLinks")]
+	public async Task An_invalid_additional_link_is_reported_once_as_invalid_additional_link(string links, string location)
+	{
+		var directory = ManifestFixtures.WriteManifestDirectoryWithAdditionalLinks(links);
+
+		try
+		{
+			var result = await ManifestValidator.ValidateManifestFileAsync(Path.Combine(directory, "manifest.json"));
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(result.Valid, Is.False);
+				Assert.That(result.ExitCode, Is.EqualTo(ExitCode.SubjectInvalid));
+				Assert.That(result.Problems.Select(problem => (problem.Code, problem.Pointer)),
+					Is.EqualTo(new[] { ("invalid-additional-link", location) }));
+			});
+		}
+		finally
+		{
+			Directory.Delete(directory, recursive: true);
+		}
+	}
+
+	[Test]
+	public async Task An_unknown_link_type_is_a_warning_and_the_manifest_stays_valid()
+	{
+		var directory = ManifestFixtures.WriteManifestDirectoryWithAdditionalLinks(
+			"""[{ "type": "roadmap", "url": "https://example.com/roadmap" }]""");
+
+		try
+		{
+			var result = await ManifestValidator.ValidateManifestFileAsync(Path.Combine(directory, "manifest.json"));
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(result.Valid, Is.True);
+				Assert.That(result.Problems.Select(problem => (problem.Severity, problem.Code, problem.Pointer)),
+					Is.EqualTo(new[] { (ManifestProblemSeverity.Warning, "unknown-link-type", "/additionalLinks/0/type") }));
+			});
+		}
+		finally
+		{
+			Directory.Delete(directory, recursive: true);
+		}
+	}
+
+	[Test]
+	public async Task A_bad_link_in_a_manifest_the_reader_rejects_is_still_reported_as_invalid_additional_link()
+	{
+		var directory = ManifestFixtures.WriteManifestDirectoryWithAdditionalLinks(
+			"""[{ "type": "custom", "url": "https://example.com/setup" }]""",
+			ManifestFixtures.InvalidPluginId);
+
+		try
+		{
+			var result = await ManifestValidator.ValidateManifestFileAsync(Path.Combine(directory, "manifest.json"));
+			var linkProblems = result.Problems
+				.Where(problem => problem.Pointer?.StartsWith("/additionalLinks", StringComparison.Ordinal) == true)
+				.Select(problem => problem.Code);
+
+			Assert.That(linkProblems, Is.EqualTo(_invalidAdditionalLink));
+		}
+		finally
+		{
+			Directory.Delete(directory, recursive: true);
+		}
 	}
 }

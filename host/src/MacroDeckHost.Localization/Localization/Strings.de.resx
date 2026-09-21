@@ -806,26 +806,12 @@
   <data name="Bootstrapper.Errors.HostDidNotStart" xml:space="preserve">
     <value>Der Host-Prozess von Macro Deck wurde nicht gestartet.</value>
   </data>
-  <data name="Bootstrapper.Errors.HostDidNotStartWithLog" xml:space="preserve">
-    <value>Der Host-Prozess von Macro Deck wurde nicht gestartet.
-
-Host-Ausgabe:
-{log}</value>
-  </data>
   <data name="Bootstrapper.Errors.HostPortNotResolved" xml:space="preserve">
     <value>Der Host-Port von Macro Deck wurde nicht ermittelt, daher kann das Fenster nicht erstellt werden.</value>
   </data>
   <data name="Bootstrapper.Errors.HostProcessCouldNotStart" xml:space="preserve">
     <value>Der Host-Prozess von Macro Deck konnte nicht gestartet werden:
 {error}</value>
-  </data>
-  <data name="Bootstrapper.Errors.HostStoppedTitle" xml:space="preserve">
-    <value>Macro-Deck-Host beendet</value>
-  </data>
-  <data name="Bootstrapper.Errors.HostStoppedUnexpectedly" xml:space="preserve">
-    <value>Der Host-Prozess von Macro Deck wurde unerwartet beendet (Exitcode {code}).
-
-{log}</value>
   </data>
   <data name="Bootstrapper.Errors.InstallLocationUnknown" xml:space="preserve">
     <value>Der Installationsort von Macro Deck konnte nicht ermittelt werden.
@@ -878,18 +864,58 @@ Dadurch wird das vorhandene Macro Deck im Programme-Ordner ersetzt.</value>
     <value>Macro Deck konnte nicht gestartet werden, da Port {port} bereits von einer anderen Anwendung verwendet wird.
 Beende die Anwendung, die den Port belegt (oder ein noch laufendes Macro Deck), und versuche es erneut, oder starte Macro Deck mit MACRO_DECK_PORT auf einem freien Port.</value>
   </data>
-  <data name="Bootstrapper.Errors.PortInUseWithLog" xml:space="preserve">
-    <value>Macro Deck konnte nicht gestartet werden, da Port {port} bereits von einer anderen Anwendung verwendet wird.
-Beende die Anwendung, die den Port belegt (oder ein noch laufendes Macro Deck), und versuche es erneut, oder starte Macro Deck mit MACRO_DECK_PORT auf einem freien Port.
-
-Host-Ausgabe:
-{log}</value>
-  </data>
   <data name="Bootstrapper.Errors.RestartFailed" xml:space="preserve">
     <value>Macro Deck konnte sich nicht selbst neu starten. Beende die Anwendung und starte sie erneut, um die Änderung zu übernehmen.</value>
   </data>
   <data name="Bootstrapper.Files.OpenDialogFilter" xml:space="preserve">
     <value>Dateien</value>
+  </data>
+  <data name="Bootstrapper.HostError.Attempts.One" xml:space="preserve">
+    <value>Macro Deck hat {count} Neustart versucht, aber der Host ist nicht wieder angelaufen.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Bootstrapper.HostError.Attempts.Other" xml:space="preserve">
+    <value>Macro Deck hat {count} Neustarts versucht, aber der Host ist nicht wieder angelaufen.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Bootstrapper.HostError.Copied" xml:space="preserve">
+    <value>Kopiert</value>
+  </data>
+  <data name="Bootstrapper.HostError.CopyDetails" xml:space="preserve">
+    <value>Details kopieren</value>
+  </data>
+  <data name="Bootstrapper.HostError.DetailsLabel" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Bootstrapper.HostError.ExitCode" xml:space="preserve">
+    <value>Exitcode: {code}</value>
+  </data>
+  <data name="Bootstrapper.HostError.ExitCodeUnknown" xml:space="preserve">
+    <value>Exitcode: unbekannt</value>
+  </data>
+  <data name="Bootstrapper.HostError.HeadingNotStarted" xml:space="preserve">
+    <value>Macro Deck konnte seinen Host nicht starten</value>
+  </data>
+  <data name="Bootstrapper.HostError.HeadingStopped" xml:space="preserve">
+    <value>Macro Deck konnte seinen Host nicht am Laufen halten</value>
+  </data>
+  <data name="Bootstrapper.HostError.Help" xml:space="preserve">
+    <value>Kopiere die Details und füge sie deiner Fehlermeldung bei, damit das Problem behoben werden kann.</value>
+  </data>
+  <data name="Bootstrapper.HostError.ReportIssue" xml:space="preserve">
+    <value>Problem auf GitHub melden</value>
+  </data>
+  <data name="Bootstrapper.HostError.RestartFailed" xml:space="preserve">
+    <value>Macro Deck konnte sich nicht selbst neu starten. Beende die Anwendung und starte sie erneut.</value>
+  </data>
+  <data name="Bootstrapper.HostError.RestartMacroDeck" xml:space="preserve">
+    <value>Macro Deck neu starten</value>
+  </data>
+  <data name="Bootstrapper.HostError.Unresponsive" xml:space="preserve">
+    <value>Der Host hat nicht innerhalb von {seconds} Sekunden geantwortet.</value>
+  </data>
+  <data name="Bootstrapper.HostError.WindowTitle" xml:space="preserve">
+    <value>Macro Deck wurde beendet</value>
   </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>Über Macro Deck</value>
@@ -14374,6 +14400,36 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Store.Page.LicenseField" xml:space="preserve">
     <value>Lizenz</value>
+  </data>
+  <data name="Store.Page.Link.Changelog" xml:space="preserve">
+    <value>Änderungsprotokoll</value>
+  </data>
+  <data name="Store.Page.Link.Community" xml:space="preserve">
+    <value>Community</value>
+  </data>
+  <data name="Store.Page.Link.Documentation" xml:space="preserve">
+    <value>Dokumentation</value>
+  </data>
+  <data name="Store.Page.Link.Donate" xml:space="preserve">
+    <value>Spenden</value>
+  </data>
+  <data name="Store.Page.Link.Issues" xml:space="preserve">
+    <value>Problem melden</value>
+  </data>
+  <data name="Store.Page.Link.License" xml:space="preserve">
+    <value>Lizenz</value>
+  </data>
+  <data name="Store.Page.Link.Privacy" xml:space="preserve">
+    <value>Datenschutzerklärung</value>
+  </data>
+  <data name="Store.Page.Link.Support" xml:space="preserve">
+    <value>Support</value>
+  </data>
+  <data name="Store.Page.Link.Terms" xml:space="preserve">
+    <value>Nutzungsbedingungen</value>
+  </data>
+  <data name="Store.Page.Link.Wiki" xml:space="preserve">
+    <value>Wiki</value>
   </data>
   <data name="Store.Page.LinksHeading" xml:space="preserve">
     <value>Links</value>

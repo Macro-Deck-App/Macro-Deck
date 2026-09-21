@@ -806,26 +806,12 @@
   <data name="Bootstrapper.Errors.HostDidNotStart" xml:space="preserve">
     <value>The Macro Deck host process did not start.</value>
   </data>
-  <data name="Bootstrapper.Errors.HostDidNotStartWithLog" xml:space="preserve">
-    <value>The Macro Deck host process did not start.
-
-Host output:
-{log}</value>
-  </data>
   <data name="Bootstrapper.Errors.HostPortNotResolved" xml:space="preserve">
     <value>The Macro Deck host port is not resolved, so the window cannot be created.</value>
   </data>
   <data name="Bootstrapper.Errors.HostProcessCouldNotStart" xml:space="preserve">
     <value>The Macro Deck host process could not be started:
 {error}</value>
-  </data>
-  <data name="Bootstrapper.Errors.HostStoppedTitle" xml:space="preserve">
-    <value>Macro Deck host stopped</value>
-  </data>
-  <data name="Bootstrapper.Errors.HostStoppedUnexpectedly" xml:space="preserve">
-    <value>The Macro Deck host process stopped unexpectedly (exit code {code}).
-
-{log}</value>
   </data>
   <data name="Bootstrapper.Errors.InstallLocationUnknown" xml:space="preserve">
     <value>Macro Deck's install location could not be determined.
@@ -878,18 +864,58 @@ This will replace the existing Macro Deck in your Applications folder.</value>
     <value>Macro Deck could not start because port {port} is already in use by another application.
 Close the application using the port (or a still-running Macro Deck) and try again, or start Macro Deck with MACRO_DECK_PORT set to a free port to change it back.</value>
   </data>
-  <data name="Bootstrapper.Errors.PortInUseWithLog" xml:space="preserve">
-    <value>Macro Deck could not start because port {port} is already in use by another application.
-Close the application using the port (or a still-running Macro Deck) and try again, or start Macro Deck with MACRO_DECK_PORT set to a free port to change it back.
-
-Host output:
-{log}</value>
-  </data>
   <data name="Bootstrapper.Errors.RestartFailed" xml:space="preserve">
     <value>Macro Deck could not relaunch itself. Quit and start it again to apply the change.</value>
   </data>
   <data name="Bootstrapper.Files.OpenDialogFilter" xml:space="preserve">
     <value>Files</value>
+  </data>
+  <data name="Bootstrapper.HostError.Attempts.One" xml:space="preserve">
+    <value>Macro Deck tried {count} restart, but the host did not come back.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Bootstrapper.HostError.Attempts.Other" xml:space="preserve">
+    <value>Macro Deck tried {count} restarts, but the host did not come back.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Bootstrapper.HostError.Copied" xml:space="preserve">
+    <value>Copied</value>
+  </data>
+  <data name="Bootstrapper.HostError.CopyDetails" xml:space="preserve">
+    <value>Copy details</value>
+  </data>
+  <data name="Bootstrapper.HostError.DetailsLabel" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Bootstrapper.HostError.ExitCode" xml:space="preserve">
+    <value>Exit code: {code}</value>
+  </data>
+  <data name="Bootstrapper.HostError.ExitCodeUnknown" xml:space="preserve">
+    <value>Exit code: unknown</value>
+  </data>
+  <data name="Bootstrapper.HostError.HeadingNotStarted" xml:space="preserve">
+    <value>Macro Deck could not start its host</value>
+  </data>
+  <data name="Bootstrapper.HostError.HeadingStopped" xml:space="preserve">
+    <value>Macro Deck could not keep its host running</value>
+  </data>
+  <data name="Bootstrapper.HostError.Help" xml:space="preserve">
+    <value>Copy the details and include them when you report the problem, so it can be fixed.</value>
+  </data>
+  <data name="Bootstrapper.HostError.ReportIssue" xml:space="preserve">
+    <value>Report the problem on GitHub</value>
+  </data>
+  <data name="Bootstrapper.HostError.RestartFailed" xml:space="preserve">
+    <value>Macro Deck could not restart itself. Quit it and start it again.</value>
+  </data>
+  <data name="Bootstrapper.HostError.RestartMacroDeck" xml:space="preserve">
+    <value>Restart Macro Deck</value>
+  </data>
+  <data name="Bootstrapper.HostError.Unresponsive" xml:space="preserve">
+    <value>The host did not respond within {seconds} seconds.</value>
+  </data>
+  <data name="Bootstrapper.HostError.WindowTitle" xml:space="preserve">
+    <value>Macro Deck stopped</value>
   </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>About Macro Deck</value>
@@ -14376,6 +14402,36 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Store.Page.LicenseField" xml:space="preserve">
     <value>License</value>
+  </data>
+  <data name="Store.Page.Link.Changelog" xml:space="preserve">
+    <value>Changelog</value>
+  </data>
+  <data name="Store.Page.Link.Community" xml:space="preserve">
+    <value>Community</value>
+  </data>
+  <data name="Store.Page.Link.Documentation" xml:space="preserve">
+    <value>Documentation</value>
+  </data>
+  <data name="Store.Page.Link.Donate" xml:space="preserve">
+    <value>Donate</value>
+  </data>
+  <data name="Store.Page.Link.Issues" xml:space="preserve">
+    <value>Report an issue</value>
+  </data>
+  <data name="Store.Page.Link.License" xml:space="preserve">
+    <value>License</value>
+  </data>
+  <data name="Store.Page.Link.Privacy" xml:space="preserve">
+    <value>Privacy policy</value>
+  </data>
+  <data name="Store.Page.Link.Support" xml:space="preserve">
+    <value>Support</value>
+  </data>
+  <data name="Store.Page.Link.Terms" xml:space="preserve">
+    <value>Terms of service</value>
+  </data>
+  <data name="Store.Page.Link.Wiki" xml:space="preserve">
+    <value>Wiki</value>
   </data>
   <data name="Store.Page.LinksHeading" xml:space="preserve">
     <value>Links</value>

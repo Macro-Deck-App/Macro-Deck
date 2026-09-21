@@ -807,26 +807,12 @@
   <data name="Bootstrapper.Errors.HostDidNotStart" xml:space="preserve">
     <value>Proces hostitele Macro Deck se nespustil.</value>
   </data>
-  <data name="Bootstrapper.Errors.HostDidNotStartWithLog" xml:space="preserve">
-    <value>Proces hostitele Macro Deck se nespustil.
-
-Výstup hostitele:
-{log}</value>
-  </data>
   <data name="Bootstrapper.Errors.HostPortNotResolved" xml:space="preserve">
     <value>Port hostitele Macro Deck nebyl zjištěn, takže okno nelze vytvořit.</value>
   </data>
   <data name="Bootstrapper.Errors.HostProcessCouldNotStart" xml:space="preserve">
     <value>Proces hostitele Macro Deck se nepodařilo spustit:
 {error}</value>
-  </data>
-  <data name="Bootstrapper.Errors.HostStoppedTitle" xml:space="preserve">
-    <value>Hostitel Macro Deck se zastavil</value>
-  </data>
-  <data name="Bootstrapper.Errors.HostStoppedUnexpectedly" xml:space="preserve">
-    <value>Proces hostitele Macro Deck se neočekávaně zastavil (návratový kód {code}).
-
-{log}</value>
   </data>
   <data name="Bootstrapper.Errors.InstallLocationUnknown" xml:space="preserve">
     <value>Umístění instalace Macro Deck se nepodařilo určit.
@@ -879,18 +865,58 @@ Tímto se nahradí stávající Macro Deck ve složce Aplikace.</value>
     <value>Macro Deck se nepodařilo spustit, protože port {port} už používá jiná aplikace.
 Zavřete aplikaci používající tento port (nebo stále běžící Macro Deck) a zkuste to znovu, nebo spusťte Macro Deck s proměnnou MACRO_DECK_PORT nastavenou na volný port, abyste to změnili zpět.</value>
   </data>
-  <data name="Bootstrapper.Errors.PortInUseWithLog" xml:space="preserve">
-    <value>Macro Deck se nepodařilo spustit, protože port {port} už používá jiná aplikace.
-Zavřete aplikaci používající tento port (nebo stále běžící Macro Deck) a zkuste to znovu, nebo spusťte Macro Deck s proměnnou MACRO_DECK_PORT nastavenou na volný port, abyste to změnili zpět.
-
-Výstup hostitele:
-{log}</value>
-  </data>
   <data name="Bootstrapper.Errors.RestartFailed" xml:space="preserve">
     <value>Macro Deck se nepodařilo znovu spustit. Ukončete jej a spusťte znovu, aby se změna projevila.</value>
   </data>
   <data name="Bootstrapper.Files.OpenDialogFilter" xml:space="preserve">
     <value>Soubory</value>
+  </data>
+  <data name="Bootstrapper.HostError.Attempts.One" xml:space="preserve">
+    <value>Pokusy o restart: {count}. Hostitel se znovu nespustil.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Bootstrapper.HostError.Attempts.Other" xml:space="preserve">
+    <value>Pokusy o restart: {count}. Hostitel se znovu nespustil.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Bootstrapper.HostError.Copied" xml:space="preserve">
+    <value>Zkopírováno</value>
+  </data>
+  <data name="Bootstrapper.HostError.CopyDetails" xml:space="preserve">
+    <value>Kopírovat podrobnosti</value>
+  </data>
+  <data name="Bootstrapper.HostError.DetailsLabel" xml:space="preserve">
+    <value>Podrobnosti</value>
+  </data>
+  <data name="Bootstrapper.HostError.ExitCode" xml:space="preserve">
+    <value>Návratový kód: {code}</value>
+  </data>
+  <data name="Bootstrapper.HostError.ExitCodeUnknown" xml:space="preserve">
+    <value>Návratový kód: neznámý</value>
+  </data>
+  <data name="Bootstrapper.HostError.HeadingNotStarted" xml:space="preserve">
+    <value>Hostitele Macro Deck se nepodařilo spustit</value>
+  </data>
+  <data name="Bootstrapper.HostError.HeadingStopped" xml:space="preserve">
+    <value>Hostitele Macro Deck se nepodařilo udržet v chodu</value>
+  </data>
+  <data name="Bootstrapper.HostError.Help" xml:space="preserve">
+    <value>Zkopírujte podrobnosti a přiložte je k hlášení problému, aby jej bylo možné opravit.</value>
+  </data>
+  <data name="Bootstrapper.HostError.ReportIssue" xml:space="preserve">
+    <value>Nahlásit problém na GitHubu</value>
+  </data>
+  <data name="Bootstrapper.HostError.RestartFailed" xml:space="preserve">
+    <value>Macro Deck se nepodařilo znovu spustit. Ukončete jej a spusťte znovu.</value>
+  </data>
+  <data name="Bootstrapper.HostError.RestartMacroDeck" xml:space="preserve">
+    <value>Restartovat Macro Deck</value>
+  </data>
+  <data name="Bootstrapper.HostError.Unresponsive" xml:space="preserve">
+    <value>Hostitel neodpověděl v časovém limitu {seconds} s.</value>
+  </data>
+  <data name="Bootstrapper.HostError.WindowTitle" xml:space="preserve">
+    <value>Macro Deck se zastavil</value>
   </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>O aplikaci Macro Deck</value>
@@ -14376,6 +14402,36 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Store.Page.LicenseField" xml:space="preserve">
     <value>Licence</value>
+  </data>
+  <data name="Store.Page.Link.Changelog" xml:space="preserve">
+    <value>Seznam změn</value>
+  </data>
+  <data name="Store.Page.Link.Community" xml:space="preserve">
+    <value>Komunita</value>
+  </data>
+  <data name="Store.Page.Link.Documentation" xml:space="preserve">
+    <value>Dokumentace</value>
+  </data>
+  <data name="Store.Page.Link.Donate" xml:space="preserve">
+    <value>Přispět</value>
+  </data>
+  <data name="Store.Page.Link.Issues" xml:space="preserve">
+    <value>Nahlásit problém</value>
+  </data>
+  <data name="Store.Page.Link.License" xml:space="preserve">
+    <value>Licence</value>
+  </data>
+  <data name="Store.Page.Link.Privacy" xml:space="preserve">
+    <value>Zásady ochrany osobních údajů</value>
+  </data>
+  <data name="Store.Page.Link.Support" xml:space="preserve">
+    <value>Podpora</value>
+  </data>
+  <data name="Store.Page.Link.Terms" xml:space="preserve">
+    <value>Podmínky používání</value>
+  </data>
+  <data name="Store.Page.Link.Wiki" xml:space="preserve">
+    <value>Wiki</value>
   </data>
   <data name="Store.Page.LinksHeading" xml:space="preserve">
     <value>Odkazy</value>

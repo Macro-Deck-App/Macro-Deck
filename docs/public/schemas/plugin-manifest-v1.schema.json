@@ -90,6 +90,15 @@
       "x-macrodeck-requirement": "publication",
       "description": "Source repository URL. Informational only. Must be an absolute http or https URL; the reader rejects anything else."
     },
+    "additionalLinks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/additionalLink"
+      },
+      "$comment": "The host reader never rejects a manifest over this list, so a plugin cannot stop loading because of a link. 'macrodeck-plugin validate', 'build' and 'pack' apply the full rule set (MacroDeck.Plugin.Packaging.Manifest.PluginManifestLinks), which also rejects a URL, a standard type or a custom label (trimmed, case-insensitive) declared twice; uniqueItems cannot express that.",
+      "x-macrodeck-requirement": "recommended",
+      "description": "Further resources beyond homepage and repository, such as documentation, an issue tracker or a community, shown with the package in the Store in declared order. Standard types are labelled by Macro Deck in the viewer's language; 'custom' links bring their own label."
+    },
     "compatibility": {
       "$ref": "#/$defs/compatibility",
       "x-macrodeck-requirement": "publication",
@@ -369,6 +378,58 @@
         }
       }
     },
+    "additionalLink": {
+      "type": "object",
+      "required": ["type", "url"],
+      "description": "One additional link. A standard type must not carry a label; 'custom' must.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "x-macrodeck-requirement": "recommended",
+          "description": "One of documentation, wiki, issues, support, community, donate, privacy, terms, changelog, license, or custom. Deliberately not an enum: an unknown type is a warning, not an error, so a type added later still installs on an older host, which does not show it."
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https?://",
+          "x-macrodeck-requirement": "recommended",
+          "description": "Absolute http or https URL."
+        },
+        "label": {
+          "type": ["string", "null"],
+          "minLength": 1,
+          "maxLength": 128,
+          "x-macrodeck-requirement": "recommended",
+          "description": "Display text, required for 'custom' and not allowed on a standard type. At most 128 characters, no control characters. Null is the same as absent."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "type": { "const": "custom" } },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["label"],
+            "properties": { "label": { "type": "string" } }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": ["documentation", "wiki", "issues", "support", "community", "donate", "privacy", "terms", "changelog", "license"]
+              }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "properties": { "label": { "type": "null" } }
+          }
+        }
+      ]
+    },
     "iconPackReference": {
       "type": "object",
       "required": ["id"],
@@ -494,6 +555,11 @@
       "license": "MIT",
       "homepage": "https://example.com/full-plugin",
       "repository": "https://github.com/example/full-plugin",
+      "additionalLinks": [
+        { "type": "documentation", "url": "https://docs.example.com/full-plugin" },
+        { "type": "issues", "url": "https://github.com/example/full-plugin/issues" },
+        { "type": "custom", "label": "Setup Guide", "url": "https://example.com/full-plugin/setup" }
+      ],
       "compatibility": {
         "sdk": ">=1.0.0,<2.0.0",
         "protocol": { "minimum": 1, "maximum": 1 },

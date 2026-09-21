@@ -807,26 +807,12 @@
   <data name="Bootstrapper.Errors.HostDidNotStart" xml:space="preserve">
     <value>Il processo host di Macro Deck non è partito.</value>
   </data>
-  <data name="Bootstrapper.Errors.HostDidNotStartWithLog" xml:space="preserve">
-    <value>Il processo host di Macro Deck non è partito.
-
-Output dell'host:
-{log}</value>
-  </data>
   <data name="Bootstrapper.Errors.HostPortNotResolved" xml:space="preserve">
     <value>La porta host di Macro Deck non è stata risolta, quindi non è possibile creare la finestra.</value>
   </data>
   <data name="Bootstrapper.Errors.HostProcessCouldNotStart" xml:space="preserve">
     <value>Impossibile avviare il processo host di Macro Deck:
 {error}</value>
-  </data>
-  <data name="Bootstrapper.Errors.HostStoppedTitle" xml:space="preserve">
-    <value>L'host di Macro Deck si è arrestato</value>
-  </data>
-  <data name="Bootstrapper.Errors.HostStoppedUnexpectedly" xml:space="preserve">
-    <value>Il processo host di Macro Deck si è arrestato inaspettatamente (codice di uscita {code}).
-
-{log}</value>
   </data>
   <data name="Bootstrapper.Errors.InstallLocationUnknown" xml:space="preserve">
     <value>Non è stato possibile determinare la posizione di installazione di Macro Deck.
@@ -879,18 +865,58 @@ Questo sostituirà il Macro Deck già presente nella cartella Applicazioni.</val
     <value>Macro Deck non è riuscito ad avviarsi perché la porta {port} è già in uso da un'altra applicazione.
 Chiudi l'applicazione che utilizza la porta (o un Macro Deck ancora in esecuzione) e riprova, oppure avvia Macro Deck con MACRO_DECK_PORT impostata su una porta libera per ripristinarla.</value>
   </data>
-  <data name="Bootstrapper.Errors.PortInUseWithLog" xml:space="preserve">
-    <value>Macro Deck non è riuscito ad avviarsi perché la porta {port} è già in uso da un'altra applicazione.
-Chiudi l'applicazione che utilizza la porta (o un Macro Deck ancora in esecuzione) e riprova, oppure avvia Macro Deck con MACRO_DECK_PORT impostata su una porta libera per ripristinarla.
-
-Output dell'host:
-{log}</value>
-  </data>
   <data name="Bootstrapper.Errors.RestartFailed" xml:space="preserve">
     <value>Macro Deck non è riuscito a riavviarsi da solo. Chiudilo e avvialo di nuovo per applicare la modifica.</value>
   </data>
   <data name="Bootstrapper.Files.OpenDialogFilter" xml:space="preserve">
     <value>File</value>
+  </data>
+  <data name="Bootstrapper.HostError.Attempts.One" xml:space="preserve">
+    <value>Macro Deck ha tentato {count} riavvio, ma l'host non è ripartito.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Bootstrapper.HostError.Attempts.Other" xml:space="preserve">
+    <value>Macro Deck ha tentato {count} riavvii, ma l'host non è ripartito.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Bootstrapper.HostError.Copied" xml:space="preserve">
+    <value>Copiato</value>
+  </data>
+  <data name="Bootstrapper.HostError.CopyDetails" xml:space="preserve">
+    <value>Copia dettagli</value>
+  </data>
+  <data name="Bootstrapper.HostError.DetailsLabel" xml:space="preserve">
+    <value>Dettagli</value>
+  </data>
+  <data name="Bootstrapper.HostError.ExitCode" xml:space="preserve">
+    <value>Codice di uscita: {code}</value>
+  </data>
+  <data name="Bootstrapper.HostError.ExitCodeUnknown" xml:space="preserve">
+    <value>Codice di uscita: sconosciuto</value>
+  </data>
+  <data name="Bootstrapper.HostError.HeadingNotStarted" xml:space="preserve">
+    <value>Macro Deck non è riuscito ad avviare il suo host</value>
+  </data>
+  <data name="Bootstrapper.HostError.HeadingStopped" xml:space="preserve">
+    <value>Macro Deck non è riuscito a mantenere attivo il suo host</value>
+  </data>
+  <data name="Bootstrapper.HostError.Help" xml:space="preserve">
+    <value>Copia i dettagli e includili quando segnali il problema, così potrà essere risolto.</value>
+  </data>
+  <data name="Bootstrapper.HostError.ReportIssue" xml:space="preserve">
+    <value>Segnala il problema su GitHub</value>
+  </data>
+  <data name="Bootstrapper.HostError.RestartFailed" xml:space="preserve">
+    <value>Macro Deck non è riuscito a riavviarsi. Chiudilo e avvialo di nuovo.</value>
+  </data>
+  <data name="Bootstrapper.HostError.RestartMacroDeck" xml:space="preserve">
+    <value>Riavvia Macro Deck</value>
+  </data>
+  <data name="Bootstrapper.HostError.Unresponsive" xml:space="preserve">
+    <value>L'host non ha risposto entro {seconds} secondi.</value>
+  </data>
+  <data name="Bootstrapper.HostError.WindowTitle" xml:space="preserve">
+    <value>Macro Deck si è arrestato</value>
   </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>Informazioni su Macro Deck</value>
@@ -14376,6 +14402,36 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Store.Page.LicenseField" xml:space="preserve">
     <value>Licenza</value>
+  </data>
+  <data name="Store.Page.Link.Changelog" xml:space="preserve">
+    <value>Registro delle modifiche</value>
+  </data>
+  <data name="Store.Page.Link.Community" xml:space="preserve">
+    <value>Community</value>
+  </data>
+  <data name="Store.Page.Link.Documentation" xml:space="preserve">
+    <value>Documentazione</value>
+  </data>
+  <data name="Store.Page.Link.Donate" xml:space="preserve">
+    <value>Dona</value>
+  </data>
+  <data name="Store.Page.Link.Issues" xml:space="preserve">
+    <value>Segnala un problema</value>
+  </data>
+  <data name="Store.Page.Link.License" xml:space="preserve">
+    <value>Licenza</value>
+  </data>
+  <data name="Store.Page.Link.Privacy" xml:space="preserve">
+    <value>Informativa sulla privacy</value>
+  </data>
+  <data name="Store.Page.Link.Support" xml:space="preserve">
+    <value>Supporto</value>
+  </data>
+  <data name="Store.Page.Link.Terms" xml:space="preserve">
+    <value>Termini di servizio</value>
+  </data>
+  <data name="Store.Page.Link.Wiki" xml:space="preserve">
+    <value>Wiki</value>
   </data>
   <data name="Store.Page.LinksHeading" xml:space="preserve">
     <value>Link</value>

@@ -1,5 +1,7 @@
 using System.IO.Compression;
 using System.Security.Cryptography;
+using System.Text.Json;
+using MacroDeck.Plugin.Cli.Manifests;
 using MacroDeck.Plugin.Cli.Packing;
 using MacroDeck.Plugin.Packaging.Artifacts;
 using MacroDeck.Plugin.Packaging.Manifest;
@@ -431,5 +433,57 @@ public class PluginPackerTests
 		File.WriteAllText(Path.Combine(directory, ManifestFixtures.EntrypointFileName), string.Empty);
 		File.WriteAllText(Path.Combine(directory, PluginArtifactFiles.ManifestFileName),
 			ManifestFixtures.ValidManifestJson());
+	}
+
+	[Test]
+	public async Task A_packed_manifest_keeps_its_additional_links_and_validates_clean_as_an_artifact()
+	{
+		var directory = ManifestFixtures.WriteManifestDirectoryWithAdditionalLinks("""
+			[
+			  { "type": "documentation", "url": "https://docs.example.com" },
+			  { "type": "custom", "label": "Setup Guide", "url": "https://example.com/setup" }
+			]
+			""");
+		var outputPath = Path.Combine(Path.GetTempPath(),
+			$"macrodeck-plugin-cli-tests-{Guid.NewGuid():N}.macroDeckPlugin");
+
+		try
+		{
+			var packResult = await PluginPacker.PackAsync(directory,
+				Path.Combine(directory, "manifest.json"),
+				_ => outputPath,
+				force: false);
+			Assert.That(packResult.Success, Is.True, packResult.FailureMessage);
+
+			var validation = await ManifestValidator.ValidateArtifactAsync(outputPath);
+
+			using var archive = ZipFile.OpenRead(outputPath);
+			await using var manifestStream = await archive.GetEntry(PluginArtifactFiles.ManifestFileName)!.OpenAsync();
+			using var packed = await JsonDocument.ParseAsync(manifestStream);
+			var links = packed.RootElement.GetProperty("additionalLinks");
+			var schemaProblems = PluginManifestSchema.Validate(packed.RootElement);
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(validation.Problems.Where(problem => problem.Pointer?.StartsWith("/additionalLinks",
+						StringComparison.Ordinal) ==
+					true), Is.Empty);
+				Assert.That(schemaProblems.Where(problem => problem.Pointer?.StartsWith("/additionalLinks",
+						StringComparison.Ordinal) ==
+					true), Is.Empty);
+				Assert.That(links.GetArrayLength(), Is.EqualTo(2));
+				Assert.That(links[0].TryGetProperty("label", out _), Is.False);
+				Assert.That(links[1].GetProperty("label").GetString(), Is.EqualTo("Setup Guide"));
+			});
+		}
+		finally
+		{
+			Directory.Delete(directory, recursive: true);
+
+			if (File.Exists(outputPath))
+			{
+				File.Delete(outputPath);
+			}
+		}
 	}
 }
