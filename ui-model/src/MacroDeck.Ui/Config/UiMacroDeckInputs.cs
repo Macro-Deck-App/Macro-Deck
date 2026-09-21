@@ -41,6 +41,25 @@ public sealed record UiActionsListEditor : UiInput<JsonElement>
 	/// host's answer alone.</summary>
 	public UiValue<IReadOnlyList<UiOption>> States { get; init; }
 
+	/// <summary>Whether the user may adopt an action inside these flows as the surface's state provider. The
+	/// renderer then marks actions that can provide states and offers a control on each one, which raises
+	/// <see cref="UiConfigEvents.Provide" />. Takes effect only while this node also handles that event, so a
+	/// surface that sets it without a handler shows nothing new. Absent or false offers no
+	/// adoption.</summary>
+	public UiValue<bool> OffersStateProvider { get; init; }
+
+	/// <summary>Whether the user may adopt an action inside these flows as the surface's icon provider, with
+	/// the same handler requirement as <see cref="OffersStateProvider" />.</summary>
+	public UiValue<bool> OffersIconProvider { get; init; }
+
+	/// <summary>The id of the block the surface currently uses as its state provider, so the renderer can show
+	/// it as the active one. Absent or empty means none.</summary>
+	public UiValue<string> StateProviderBlockId { get; init; }
+
+	/// <summary>The id of the block the surface currently uses as its icon provider. Absent or empty means
+	/// none.</summary>
+	public UiValue<string> IconProviderBlockId { get; init; }
+
 	/// <inheritdoc />
 	public override string Type => UiConfigPrimitives.ActionsListEditor;
 
@@ -54,6 +73,10 @@ public sealed record UiActionsListEditor : UiInput<JsonElement>
 		properties.Set(UiConfigProperties.Triggers, Triggers);
 		properties.Set(UiConfigProperties.CanRun, CanRun);
 		properties.Set(UiConfigProperties.States, States);
+		properties.Set(UiConfigProperties.OffersStateProvider, OffersStateProvider);
+		properties.Set(UiConfigProperties.OffersIconProvider, OffersIconProvider);
+		properties.Set(UiConfigProperties.StateProviderBlockId, StateProviderBlockId);
+		properties.Set(UiConfigProperties.IconProviderBlockId, IconProviderBlockId);
 	}
 }
 

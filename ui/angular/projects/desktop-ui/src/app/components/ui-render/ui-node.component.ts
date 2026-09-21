@@ -44,6 +44,7 @@ const RENDER_CAPABILITIES: Readonly<Record<string, UiComponentRange>> = Object.f
   host: {
     '[attr.data-node-id]': 'hostId()',
     '[attr.data-node-type]': 'hostType()',
+    '[style.display]': "context.isVisible(node()) ? null : 'none'",
   },
   template: `
     @if (context.isVisible(node())) {

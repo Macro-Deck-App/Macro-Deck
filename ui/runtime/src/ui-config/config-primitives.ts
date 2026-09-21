@@ -56,6 +56,9 @@ export const UiConfigPrimitives = {
   WidgetConfiguration: 'widget-configuration',
   WidgetProperties: 'widget-properties',
   WidgetEditor: 'widget-editor',
+  Status: 'status',
+  Menu: 'menu',
+  Dialog: 'dialog',
 } as const;
 
 export const UI_CONFIG_PRIMITIVES_WELL_KNOWN: readonly string[] = [
@@ -76,5 +79,6 @@ export const UI_CONFIG_PRIMITIVES_WELL_KNOWN: readonly string[] = [
   UiConfigPrimitives.Link, UiConfigPrimitives.AdvancedSection, UiConfigPrimitives.Divider,
   UiConfigPrimitives.Banner, UiConfigPrimitives.ValidationMessage, UiConfigPrimitives.Busy, UiConfigPrimitives.Button,
   UiConfigPrimitives.WidgetConfiguration, UiConfigPrimitives.WidgetProperties,
-  UiConfigPrimitives.WidgetEditor,
+  UiConfigPrimitives.WidgetEditor, UiConfigPrimitives.Status, UiConfigPrimitives.Menu,
+  UiConfigPrimitives.Dialog,
 ];

@@ -33,8 +33,8 @@ describe('GenericActionCardComponent state provider control', () => {
     return !!fixture.nativeElement.querySelector('shared-provide-widget-icon-field');
   }
 
-  async function render(): Promise<void> {
-    fixture.componentRef.setInput('block', BLOCK);
+  async function render(block: ActionBlock = BLOCK): Promise<void> {
+    fixture.componentRef.setInput('block', block);
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -99,6 +99,17 @@ describe('GenericActionCardComponent state provider control', () => {
     await render();
 
     expect(hasStateControl()).toBeFalse();
+  });
+
+  it('hides the control on a disabled action, which cannot drive the button', async () => {
+    consumerSupportsStateProvider = true;
+    consumerSupportsIconProvider = true;
+    providesWidgetIcon = true;
+
+    await render({ ...BLOCK, disabled: true });
+
+    expect(hasStateControl()).toBeFalse();
+    expect(hasIconControl()).toBeFalse();
   });
 });
 

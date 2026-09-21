@@ -62,6 +62,15 @@ export const UiConfigProperties = {
   Wrap: 'wrap',
   HideLabel: 'hideLabel',
   Reorderable: 'reorderable',
+  OffersStateProvider: 'offersStateProvider',
+  OffersIconProvider: 'offersIconProvider',
+  StateProviderBlockId: 'stateProviderBlockId',
+  IconProviderBlockId: 'iconProviderBlockId',
+  ConfirmTitle: 'confirmTitle',
+  ConfirmMessage: 'confirmMessage',
+  ConfirmLabel: 'confirmLabel',
+  ConfirmDanger: 'confirmDanger',
+  PromptValue: 'promptValue',
 } as const;
 
 export interface UiNodeOption {

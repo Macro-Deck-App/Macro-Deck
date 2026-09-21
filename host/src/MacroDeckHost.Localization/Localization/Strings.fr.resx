@@ -16128,6 +16128,24 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.Editor.SwitchProviderMessage" xml:space="preserve">
     <value>Basculer vers ce fournisseur d'état remplacera les définitions d'état actuellement actives.</value>
   </data>
+  <data name="Widgets.Editor.StateProvidedBy" xml:space="preserve">
+    <value>État depuis {integration} : {action}</value>
+  </data>
+  <data name="Widgets.Editor.UseProvidedIconConfirm" xml:space="preserve">
+    <value>Utiliser l'icône fournie</value>
+  </data>
+  <data name="Widgets.Editor.UseSelectedProvidersConfirm" xml:space="preserve">
+    <value>Utiliser la sélection</value>
+  </data>
+  <data name="Widgets.Editor.SwitchProviderConfirm" xml:space="preserve">
+    <value>Changer de fournisseur</value>
+  </data>
+  <data name="Widgets.Editor.ProviderReturnedNoStates" xml:space="preserve">
+    <value>Cette action n'a encore renvoyé aucun état.</value>
+  </data>
+  <data name="Widgets.Editor.ProviderProbeFailed" xml:space="preserve">
+    <value>Impossible de demander ses états à cette action.</value>
+  </data>
   <data name="Widgets.Editor.ThisAction" xml:space="preserve">
     <value>Cette action</value>
   </data>

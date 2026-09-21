@@ -144,7 +144,8 @@ hidden one keeps and submits its value. See [Conditional content](/ui/concepts/s
 
 The thresholds and which of two nested nodes gets a gesture are on [Modifier](/ui/components/modifier/#gestures).
 
-Configuration inputs use `change` from `UiConfigEvents`. See the [component reference](/ui/components/) for
+Configuration inputs use `change` from `UiConfigEvents`. An action list that lets the user adopt a provider
+action also raises `provide`; see [Widget configuration](/ui/views/widget-configuration/#letting-the-user-adopt-a-provider-action). See the [component reference](/ui/components/) for
 each component's geometry and semantics, and [Modal views](/ui/views/modal/) for `modal.complete`, the one
 event that is not a component interaction but the answer that ends a dialog.
 

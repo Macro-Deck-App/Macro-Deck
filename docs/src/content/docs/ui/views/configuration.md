@@ -199,6 +199,103 @@ stored values, keyed by parameter name. `Secret` and `Password` parameters arriv
 (`UiConfigSurfaceAttributes.MaskedSecretValue`, `"$masked"`), because opening a configuration surface is
 not an intent to reveal a secret. You get the real value the ordinary way, when the user submits.
 
+## Showing what governs a setting
+
+`UiStatus` is a compact, framed line for "this setting is currently controlled by something else": an
+optional leading `Icon`, a muted `Label` and the emphasized `Value` it introduces. Its children are drawn
+trailing the text; an icon-only `UiConfigButton` there becomes a borderless control, typically the one that
+stops what the line names.
+
+```csharp
+var stop = new UiConfigButton
+{
+    Key = "stop",
+    Label = "Stop using",
+    Icon = "x",
+    Events = [UiEventHandler.On(UiConfigEvents.Activate, StopUsingProvider)],
+};
+
+new UiStatus
+{
+    Key = "provider",
+    Icon = "zap",
+    Label = "Provided by",
+    Value = "Mute / Unmute",
+    Children = [stop],
+    Fallback = new UiConfigStack
+    {
+        Key = "provider-fallback",
+        Children = [new UiProse { Key = "provider-text", Text = "Provided by Mute / Unmute" }, stop with { Key = "stop-text", Icon = default }],
+    },
+}
+```
+
+A renderer that predates `status` declines it like any unknown type and draws the `Fallback`, so give it one
+built from a `UiProse` and the same button where the line matters.
+
+## Asking before a button acts
+
+A `UiConfigButton` can ask first. With `ConfirmMessage` set, the renderer shows a dialog (`ConfirmTitle`,
+`ConfirmLabel`, and `ConfirmDanger` for a destructive action) and raises `activate` only when the user
+accepts. With `PromptValue` set, the dialog asks for text instead, starting from that value with
+`Placeholder` as its hint, and `activate` carries the entered text as a string payload:
+
+```csharp
+new UiConfigButton
+{
+    Key = "rename",
+    Label = "Rename",
+    ConfirmLabel = "Save",
+    PromptValue = UiValue.From(() => current.Value),
+    Events = [UiEventHandler.On(UiConfigEvents.Activate, data =>
+    {
+        if (data.TryGetString(out var name) && name.Trim().Length > 0)
+        {
+            current.Value = name.Trim();
+        }
+    })],
+}
+```
+
+A renderer that predates these properties raises `activate` at once and without a payload, so a handler
+has to tolerate a missing answer, and an action that cannot be undone should not rely on the question alone.
+
+## Grouping actions in a menu
+
+`UiConfigMenu` is a compact trigger (`Icon`, with `Label` as its accessible name) that opens a list of its
+child `UiConfigButton`s, each drawn with its icon and label and each asking first if it declares a question.
+A renderer that predates `menu` declines it and draws the node's `Fallback`.
+
+## Putting a question to the user
+
+`UiConfigDialog` is a modal dialog shown for as long as the node is in the tree, so a provider opens it by
+adding it inside a `UiWhen` and closes it by removing it. `Title` is the heading and `Text` the message; child
+`UiConfigButton`s are the answers, drawn in order with the last one as the primary answer (or as a warning
+when it declares `ConfirmDanger`), and other children such as boolean inputs are the dialog's body. Closing the
+dialog without answering raises `cancel` on it:
+
+```csharp
+new UiWhen
+{
+    Key = "stop-when",
+    Condition = () => asking.Value,
+    Content = () => new UiConfigDialog
+    {
+        Key = "stop",
+        Title = "Stop using this provider?",
+        Text = "Your own states come back.",
+        Events = [UiEventHandler.On(UiConfigEvents.Cancel, () => asking.Value = false)],
+        Children =
+        [
+            new UiConfigButton { Key = "keep", Label = "Cancel", Events = [UiEventHandler.On(UiConfigEvents.Activate, () => asking.Value = false)] },
+            new UiConfigButton { Key = "stop-now", Label = "Stop using", ConfirmDanger = true, Events = [UiEventHandler.On(UiConfigEvents.Activate, Stop)] },
+        ],
+    },
+}
+```
+
+A renderer that predates `dialog` declines it and draws its fallback in place.
+
 ## Declining and fallback
 
 ```csharp

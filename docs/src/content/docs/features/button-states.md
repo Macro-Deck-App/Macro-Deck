@@ -48,12 +48,20 @@ internal sealed class MicMuteAction(VoiceClient client) : IActionDefinition, ISt
 A button running **Toggle mute** can adopt it as its state provider. It starts out green or red with the
 labels "Unmuted"/"Muted", and switches whenever the mic does.
 
+The user adopts it in the button editor. The action picker marks actions that provide states, and each
+such action in the button's flows has a control to use it as the provider. Adding one to a button also
+offers it right away, turning Multi state on if the button had a single state. The provider's states then
+replace the button's own: the user still picks each one and styles it (label, colours, font, icon), but
+cannot add, rename or delete states, and no state mapping applies. Stopping, or removing the action from
+the flows, brings back the states the button had before; Multi state stays on. Changing the action's settings asks it for its
+states again, so a different device can bring a different set.
+
 Things to know:
 
 - **Answer for the configured instance.** `parameters` is the instance's configuration. The same
   action can sit on several buttons with different parameters, and each answers for itself.
-- **The host picks the provider.** It decides which instance, if any, drives a button (at most one per
-  button). The action never claims a button for itself.
+- **The user picks the provider.** At most one instance drives a button, and only the one the user
+  adopted. The action never claims a button for itself.
 - **It is free-standing.** `IStateProviderActionDefinition` does not extend `IActionDefinition`. Implement
   both on the same class.
 - **Read-only and cheap.** Called while the user is still editing and polled while the button is on

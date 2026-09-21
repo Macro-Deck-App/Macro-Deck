@@ -8,6 +8,12 @@ import { IntegrationService } from '../../services/integration.service';
 import { ActionBuilderComponent } from './action-builder.component';
 import { TOGGLE_TRIGGER_TYPE, fixedTriggerTabsFor } from './default-action-defs';
 
+export interface ProviderChangeRequest {
+  capability: 'state' | 'icon';
+  blockId: string;
+  enabled: boolean;
+}
+
 @Component({
   selector: 'shared-node-action-builder',
   standalone: true,
@@ -31,7 +37,13 @@ import { TOGGLE_TRIGGER_TYPE, fixedTriggerTabsFor } from './default-action-defs'
       [alwaysShowTabRow]="!!fixedTriggerTabs()"
       [allowRun]="canRun()"
       [unsavedChanges]="unsavedChanges()"
-      (flowsChange)="flowsChange.emit($event)" />
+      [supportsStateProvider]="offersStateProvider()"
+      [supportsIconProvider]="offersIconProvider()"
+      [stateProviderBlockId]="stateProviderBlockId()"
+      [iconProviderBlockId]="iconProviderBlockId()"
+      (flowsChange)="flowsChange.emit($event)"
+      (stateProviderChange)="providerChange.emit({ capability: 'state', blockId: $event.blockId, enabled: $event.checked })"
+      (iconProviderChange)="providerChange.emit({ capability: 'icon', blockId: $event.blockId, enabled: $event.checked })" />
   `,
 })
 export class NodeActionBuilderComponent {
@@ -46,8 +58,13 @@ export class NodeActionBuilderComponent {
   readonly triggers = input<string[] | undefined>(undefined);
   readonly states = input<UiNodeOption[] | undefined>(undefined);
   readonly canRun = input(false);
+  readonly offersStateProvider = input(false);
+  readonly offersIconProvider = input(false);
+  readonly stateProviderBlockId = input<string | undefined>(undefined);
+  readonly iconProviderBlockId = input<string | undefined>(undefined);
 
   readonly flowsChange = output<ActionFlow[]>();
+  readonly providerChange = output<ProviderChangeRequest>();
 
   protected readonly availableBlocks = this.actionService.actionBlockDefinitions;
   protected readonly scopeRefId = computed(() => this.context.scopeRefId);

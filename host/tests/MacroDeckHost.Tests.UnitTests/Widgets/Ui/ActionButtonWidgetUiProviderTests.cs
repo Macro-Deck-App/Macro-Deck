@@ -447,6 +447,7 @@ public class ActionButtonWidgetUiProviderTests
 			: new LabelTextService(folderCache, new VariableTemplateRenderer(variables), readiness));
 		services.AddScoped<IWidgetIconService>(_ => new FakeWidgetIconService());
 		services.AddScoped<IWidgetStateService>(_ => stateService ?? new FakeWidgetStateService());
+		services.AddScoped<IAppPreferenceService>(_ => new FakeLocalizationPreferences());
 		var scopeFactory = services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
 
 		return new ActionButtonWidgetUiProvider(folderCache,
@@ -462,7 +463,15 @@ public class ActionButtonWidgetUiProviderTests
 			TestLocalization.SampleText,
 			scopeFactory,
 			new FakeIntegrationRegistry(),
-			new FakeFontCatalog());
+			new FakeFontCatalog(),
+			new ActionProviderProbe(new FakeIntegrationRegistry(),
+				new MacroDeckHost.Application.Plugins.Capabilities.Adapters.Actions.RemoteIconProviderActionRegistry(null!,
+					null!,
+					null!),
+				TimeProvider.System,
+				Serilog.Core.Logger.None),
+			TestLocalization.Resolver,
+			TimeProvider.System);
 	}
 
 	private static UiSessionRequest PreviewRequest(string data, string? variableScopeWidgetId)

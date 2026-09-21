@@ -18,6 +18,9 @@ export const UI_CHROME_TYPES: ReadonlySet<string> = new Set([
   UiConfigPrimitives.ValidationMessage,
   UiConfigPrimitives.Busy,
   UiConfigPrimitives.Button,
+  UiConfigPrimitives.Status,
+  UiConfigPrimitives.Menu,
+  UiConfigPrimitives.Dialog,
   // The three regions of a widget's configuration surface (issue #837): a separate workstream
   // assembles the widget editor shell around them, but wherever this renderer meets them itself -
   // negotiated down to an older client, or nested anywhere else in a tree - they are plain ordered

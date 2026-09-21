@@ -1,7 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, forwardRef, inject, input, signal } from '@angular/core';
 
-import { AppStrings, UiConfigEvents, UiConfigPrimitives, UiConfigProperties, UiNode, emitsEvent, nodeBoolean, nodeNumber, nodeString, nodeText } from '@macro-deck/runtime';
-import { ButtonComponent, LocalizationService, SegmentedControlComponent, SegmentedOption, ToggleSwitchComponent } from '@shared';
+import { AppStrings, UiConfigEvents, UiConfigPrimitives, UiConfigProperties, UiNode, emitsEvent, nodeBoolean, nodeNumber, nodeRaw, nodeString, nodeText } from '@macro-deck/runtime';
+import { FormsModule } from '@angular/forms';
+import { ButtonComponent, InputComponent, LocalizationService, ModalComponent, SegmentedControlComponent, SegmentedOption, ToggleSwitchComponent } from '@shared';
+import { ConfirmationModalComponent } from '../overlay/confirmation-modal/confirmation-modal.component';
+import { DropdownMenuComponent } from '../overlay/dropdown-menu/dropdown-menu.component';
 import { CopyValueComponent } from '../copy-value/copy-value.component';
 import { UiRenderContext } from './ui-render-context';
 import { UiNodeComponent } from './ui-node.component';
@@ -25,7 +28,12 @@ function isExternalUrl(url: string): boolean {
   imports: [
     forwardRef(() => UiNodeComponent),
     ButtonComponent,
+    ConfirmationModalComponent,
     CopyValueComponent,
+    DropdownMenuComponent,
+    FormsModule,
+    InputComponent,
+    ModalComponent,
     SegmentedControlComponent,
     ToggleSwitchComponent,
   ],
@@ -130,18 +138,83 @@ function isExternalUrl(url: string): boolean {
       }
       @case (types.Button) {
         @if (buttonIcon(); as icon) {
-          <shared-button
-            variant="secondary"
-            size="icon"
+          <button
+            type="button"
             class="config-chrome-icon-button"
             [title]="label() ?? ''"
             [attr.aria-label]="label() ?? ''"
-            (click)="onActivate()">
-            <span class="icon icon-{{ icon }} icon-sm" aria-hidden="true"></span>
-          </shared-button>
+            (click)="requestActivate(node())">
+            <span class="icon icon-{{ icon }} icon-xs" aria-hidden="true"></span>
+          </button>
         } @else {
-          <shared-button variant="secondary" size="compact" (click)="onActivate()">{{ label() ?? '' }}</shared-button>
+          <shared-button variant="secondary" size="compact" (click)="requestActivate(node())">{{ label() ?? '' }}</shared-button>
         }
+      }
+      @case (types.Status) {
+        <div class="config-chrome-status">
+          @if (buttonIcon(); as icon) {
+            <span class="icon icon-{{ icon }} icon-sm config-chrome-status-icon" aria-hidden="true"></span>
+          }
+          <span class="config-chrome-status-copy">{{ label() }} <strong>{{ statusValue() }}</strong></span>
+          @for (child of children(); track child.id) {
+            @if (child.type === types.Button && iconOf(child); as icon) {
+              <shared-button
+                variant="ghost"
+                size="icon-compact"
+                [title]="labelOf(child)"
+                [attr.aria-label]="labelOf(child)"
+                (click)="requestActivate(child)">
+                <span class="icon icon-{{ icon }} icon-xs" aria-hidden="true"></span>
+              </shared-button>
+            } @else {
+              <shared-ui-node [node]="child" />
+            }
+          }
+        </div>
+      }
+      @case (types.Menu) {
+        <shared-dropdown-menu
+          position="bottom-right"
+          [minWidth]="180"
+          [closeOnItemClick]="true"
+          [triggerIcon]="'icon-' + (buttonIcon() ?? 'dots-vertical')"
+          [triggerAriaLabel]="label() ?? ''">
+          <ng-template #menuContent>
+            <div class="config-chrome-menu">
+              @for (child of children(); track child.id) {
+                @if (child.type === types.Button) {
+                  <button
+                    type="button"
+                    class="config-chrome-menu-item"
+                    [class.is-danger]="isDanger(child)"
+                    (click)="requestActivate(child)">
+                    @if (iconOf(child); as icon) {
+                      <span class="icon icon-{{ icon }} icon-sm" aria-hidden="true"></span>
+                    }
+                    <span class="config-chrome-menu-label">{{ labelOf(child) }}</span>
+                  </button>
+                } @else {
+                  <shared-ui-node [node]="child" />
+                }
+              }
+            </div>
+          </ng-template>
+        </shared-dropdown-menu>
+      }
+      @case (types.Dialog) {
+        <shared-modal [heading]="title() ?? ''" [showFooter]="true" (close)="cancelDialog()">
+          @if (text(); as message) {
+            <p class="config-chrome-dialog-message">{{ message }}</p>
+          }
+          @for (child of dialogBody(); track child.id) { <shared-ui-node [node]="child" /> }
+          <div modal-footer>
+            @for (answer of dialogAnswers(); track answer.id; let last = $last) {
+              <shared-button
+                [variant]="isDanger(answer) ? 'danger' : last ? 'primary' : 'secondary'"
+                (click)="requestActivate(answer)">{{ labelOf(answer) }}</shared-button>
+            }
+          </div>
+        </shared-modal>
       }
       @case (types.WidgetConfiguration) {
         <div class="config-chrome-widget-configuration">
@@ -158,6 +231,24 @@ function isExternalUrl(url: string): boolean {
           @for (child of children(); track child.id) { <shared-ui-node [node]="child" /> }
         </div>
       }
+    }
+    @if (pending(); as asking) {
+      <shared-confirmation-modal
+        [heading]="textOf(asking.node, properties.ConfirmTitle) ?? labelOf(asking.node)"
+        [message]="textOf(asking.node, properties.ConfirmMessage) ?? ''"
+        [confirmText]="textOf(asking.node, properties.ConfirmLabel) ?? labelOf(asking.node)"
+        [danger]="isDanger(asking.node)"
+        (confirm)="confirmPending()"
+        (cancel)="pending.set(null)">
+        @if (asking.prompt) {
+          <shared-input
+            [inputId]="asking.node.id + '-prompt'"
+            [inputName]="asking.node.id + '-prompt'"
+            [placeholder]="textOf(asking.node, properties.Placeholder) ?? ''"
+            [ngModel]="asking.text"
+            (ngModelChange)="pending.set({ node: asking.node, prompt: true, text: $event })" />
+        }
+      </shared-confirmation-modal>
     }
   `,
   styleUrls: ['./ui-render.component.scss'],
@@ -226,12 +317,51 @@ export class UiChromeComponent {
   }
 
   protected readonly buttonIcon = computed(() => nodeString(this.node(), Properties.Icon));
+  protected readonly statusValue = computed(() => nodeText(this.node(), Properties.Value, this.localization));
 
-  protected onActivate(): void {
+  protected iconOf(child: UiNode): string | undefined {
+    return nodeString(child, Properties.Icon);
+  }
+
+  protected labelOf(child: UiNode): string {
+    return nodeText(child, Properties.Label, this.localization) ?? '';
+  }
+
+  protected readonly properties = Properties;
+  protected readonly dialogAnswers = computed(() => this.children().filter(child => child.type === Primitives.Button));
+  protected readonly dialogBody = computed(() => this.children().filter(child => child.type !== Primitives.Button));
+
+  protected cancelDialog(): void {
     const node = this.node();
+    if (emitsEvent(node, UiConfigEvents.Cancel)) this.context.emit(node, UiConfigEvents.Cancel);
+  }
+  protected readonly pending = signal<{ node: UiNode; prompt: boolean; text: string } | null>(null);
+
+  protected textOf(node: UiNode, key: string): string | undefined {
+    return nodeText(node, key, this.localization) ?? undefined;
+  }
+
+  protected isDanger(node: UiNode): boolean {
+    return nodeBoolean(node, Properties.ConfirmDanger) === true;
+  }
+
+  protected requestActivate(node: UiNode): void {
     if (!emitsEvent(node, UiConfigEvents.Activate)) return;
+    const prompt = nodeRaw(node, Properties.PromptValue) !== undefined;
+    if (prompt || nodeRaw(node, Properties.ConfirmMessage) !== undefined) {
+      this.pending.set({ node, prompt, text: nodeString(node, Properties.PromptValue) ?? '' });
+      return;
+    }
     this.context.emit(node, UiConfigEvents.Activate);
   }
+
+  protected confirmPending(): void {
+    const asking = this.pending();
+    this.pending.set(null);
+    if (!asking) return;
+    this.context.emit(asking.node, UiConfigEvents.Activate, asking.prompt ? asking.text : undefined);
+  }
+
 
   protected onToggleExpanded(open: boolean): void {
     const node = this.node();

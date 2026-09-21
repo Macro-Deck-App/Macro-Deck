@@ -140,6 +140,48 @@ describe('shared-ui-node actions-list-editor', () => {
     expect(builder(rendered).showAddEventTrigger()).toBeTrue();
   });
 
+  it('lets the user adopt provider actions only when the node offers it and handles provide', async () => {
+    const offered = await renderWithApi(actionsListNode({
+      events: ['change', 'provide'],
+      offersStateProvider: true,
+      offersIconProvider: true,
+      stateProviderBlockId: 'b1',
+    }));
+    const store = storeFor(offered);
+    expect(store.consumerSupportsStateProvider()).toBeTrue();
+    expect(store.consumerSupportsIconProvider()).toBeTrue();
+    expect(store.stateProviderBlockId()).toBe('b1');
+    expect(store.iconProviderBlockId()).toBeUndefined();
+
+    const unhandled = await renderWithApi(actionsListNode({
+      events: ['change'],
+      offersStateProvider: true,
+      offersIconProvider: true,
+    }));
+    expect(storeFor(unhandled).consumerSupportsStateProvider()).toBeFalse();
+    expect(storeFor(unhandled).consumerSupportsIconProvider()).toBeFalse();
+  });
+
+  it('turns a card provider toggle into a provide request on the node', async () => {
+    const rendered = await renderWithApi(actionsListNode({
+      events: ['change', 'provide'],
+      offersStateProvider: true,
+      offersIconProvider: true,
+    }));
+
+    storeFor(rendered).requestStateProviderToggle({
+      blockId: 'b2', integrationId: 'com.example.demo', actionId: 'ping', checked: true,
+    });
+    storeFor(rendered).requestIconProviderToggle({
+      blockId: 'b3', integrationId: 'com.example.demo', actionId: 'ping', checked: false,
+    });
+
+    expect(rendered.events.filter(event => event.name === 'provide').map(event => event.data)).toEqual([
+      { capability: 'state', blockId: 'b2', enabled: true },
+      { capability: 'icon', blockId: 'b3', enabled: false },
+    ]);
+  });
+
   it('forwards canRun to allowRun, gating the Run affordance', async () => {
     const withRun = await renderWithApi(actionsListNode({ canRun: true }));
     expect(builder(withRun).showRun()).toBeTrue();

@@ -6,6 +6,7 @@ using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Config.Options;
 using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Runtime;
+using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Widgets;
@@ -23,30 +24,6 @@ namespace MacroDeckHost.Widgets.ActionButton;
 /// <c>flows</c> region. The state mapping is the same move: it names <see cref="UiStateMappingEditorInput" />
 /// rather than exposing its rules as a raw array a renderer with no dedicated editor would have to draw as a
 /// list of condition builders.
-///
-/// <para>
-/// The state machinery (state list, state mapping, state/icon providers) is genuinely new among the six
-/// built-in widgets, so it gets more code than the other five combined - but it is still ordinary
-/// configuration: every field is a real schema key, states are addressed by their own stable
-/// <see cref="ActionButtonStateEntry.Id" /> and never by position (a <see cref="UiRepeat{TItem}" /> keyed
-/// that way, per ADR 0050), and the two provider-adoption "offers" are a <see cref="UiBanner" /> plus
-/// <see cref="UiConfigButton" />s rather than a modal dialog - the Angular editor's confirmation dialogs are
-/// one renderer's way of asking, not part of the contract.
-/// </para>
-///
-/// <para>
-/// The state row (which state is being edited, adding one, deleting it) is rebuilt from existing
-/// primitives instead: a dropdown-plus-menu picker is not a control this profile names, so a
-/// <see cref="UiChoiceInput" /> bound to the schema's own <c>activeStateId</c>, plus an add and a delete
-/// <see cref="UiConfigButton" />, are the honest equivalent. The rename field for the selected state has to
-/// stay nested inside that state's own <c>states</c> array item rather than sit beside those buttons: the
-/// client patches a widget's draft data by the tree position of the node an event fired on
-/// (<c>config-draft.util.ts</c>), so a control addressing <c>states.&lt;id&gt;.label</c> has to actually be
-/// declared under that scope. The same reasoning is why every state still contributes an item to the array
-/// even though only the selected one carries a rename field and an appearance subtree: the client rebuilds
-/// the array from exactly the item nodes present in the tree, so an item missing from it is an item silently
-/// dropped from the saved data, not merely one this renderer chose not to draw.
-/// </para>
 /// </summary>
 internal static class ActionButtonWidgetConfigView
 {
@@ -58,10 +35,12 @@ internal static class ActionButtonWidgetConfigView
 		double aspectRatio,
 		IIntegrationRegistry integrations,
 		IFontCatalog fonts,
-		WidgetStateOption? liveState)
+		WidgetStateOption? liveState,
+		ActionButtonConfigContext context)
 	{
 		ArgumentNullException.ThrowIfNull(integrations);
 		ArgumentNullException.ThrowIfNull(fonts);
+		ArgumentNullException.ThrowIfNull(context);
 
 		var root = data.ValueKind == JsonValueKind.Object
 			? JsonNode.Parse(data.GetRawText()) as JsonObject ?? new JsonObject()
@@ -113,7 +92,7 @@ internal static class ActionButtonWidgetConfigView
 		// re-resolved for the life of this session - a config editor is a short-lived, single-shot surface,
 		// not a live view of the running button.
 		var liveStateId = new UiState<string>(liveState?.Id ?? string.Empty);
-		var liveStateLabel = new UiState<string>(liveState?.Label.Literal ?? string.Empty);
+		var liveStateLabel = new UiState<string>(liveState is null ? string.Empty : context.Resolve(liveState.Label));
 
 		var label = new UiState<string>(WidgetConfigJson.ReadString(data, "label") ?? string.Empty);
 		var icon = new UiState<UiIconReference>(ReadIcon(data)!);
@@ -138,18 +117,43 @@ internal static class ActionButtonWidgetConfigView
 		var flows = new UiState<JsonElement>(WidgetConfigJson.ReadFlows(data));
 
 		// ---- Local, session-only UI state - never bound to a widget-data key ----------------------------
-		//
-		// Declining a provider/icon offer is remembered for the life of this session only - a fresh
-		// session (reopening the editor) asks again, which is the same "re-offer" behaviour a fresh
-		// mount of the Angular editor already has.
-		var declinedStateBlocks = new UiState<HashSet<string>>(new HashSet<string>(StringComparer.Ordinal));
-		var declinedIconBlocks = new UiState<HashSet<string>>(new HashSet<string>(StringComparer.Ordinal));
 
-		// Whether the state row's "Manage this state" menu is open (issue #837): the DSL has no dropdown-menu
-		// chrome, so this is the disclosure fallback the issue itself allows - it reveals the rename field
-		// (nested inside the selected state's own array item, below) and the delete action together, closing
-		// again on a second click of the same button.
-		var stateManageOpen = new UiState<bool>(false);
+		var pendingOffer = new UiState<ProviderOffer?>(null);
+		var offerUseState = new UiState<bool>(true);
+		var offerUseIcon = new UiState<bool>(true);
+		var pendingSwitch = new UiState<ProviderSwitch?>(null);
+		var pendingStop = new UiState<string?>(null);
+		var stateNotices = new UiState<IReadOnlyList<ProviderNotice>>([]);
+		var iconNotices = new UiState<IReadOnlyList<ProviderNotice>>([]);
+		var iconHasSnapshot = new UiAsyncState<bool?>(async cancellationToken =>
+			{
+				if (iconProviderState.Peek() is not { } provider ||
+					FindBlock(provider.BlockId) is not { } block)
+				{
+					return null;
+				}
+
+				using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
+					context.SessionToken);
+				var result = await context.Probe
+					.ProbeIconAsync(block.IntegrationId, block.ActionId, block.Parameters, linked.Token)
+					.ConfigureAwait(false);
+
+				return result.Outcome == ActionProbeOutcome.Ok ? result.Snapshot is not null : null;
+			},
+			null);
+
+		// The snapshot and hand-offs are only touched inside a dispatch; the generations and offerInFlight are
+		// also read and written by settle continuations, hence Volatile and Interlocked.
+		var knownBlocks = BlocksById(flows.Peek());
+		ActionButtonFlowBlockInfo? handoffOffer = null;
+		ActionButtonFlowBlockInfo? handoffRefresh = null;
+		string? offerInFlight = null;
+		var handoffIconReload = false;
+		var iconGeneration = 0;
+		var offerGeneration = 0;
+		var refreshGeneration = 0;
+
 
 		// ---- mutation helpers ----------------------------------------------------------------------------
 
@@ -237,18 +241,52 @@ internal static class ActionButtonWidgetConfigView
 
 		void ApplyEnableStateProvider(ActionButtonFlowBlockInfo block, ActionStateSnapshot snapshot)
 		{
-			StashManualBackup();
-			states.Value = AdoptProvidedStates(states.Value, snapshot.States);
-			mappingRules.Value = [];
-			fallbackStateId.Value = string.Empty;
-			stateProvider.Value = new ActionButtonStateProvider(block.Id,
+			var switching = stateProvider.Value is not null;
+
+			if (!switching)
+			{
+				StashManualBackup();
+				mappingRules.Value = [];
+				fallbackStateId.Value = string.Empty;
+			}
+
+			var data = new JsonObject
+			{
+				["stateMode"] = true,
+				["states"] = JsonNode.Parse(SerializeStates(states.Value).GetRawText()),
+				// Written before adoption: AdoptProviderStates only fills the cache of a provider it can see.
+				["stateProvider"] = ProviderJson(new ActionButtonStateProvider(block.Id,
+					block.IntegrationId,
+					block.ActionId,
+					ActionLabelOf(block),
+					[])),
+			};
+			ActionButtonStateJson.AdoptProviderStates(data, snapshot.States, context.Localization, context.Culture);
+			var adopted = ActionButtonStateModel.Read(data);
+
+			states.Value = adopted.States.ToList();
+			stateProvider.Value = adopted.StateProvider;
+			stateMode.Value = true;
+
+			if (!switching || states.Value.All(s => s.Id != activeStoredStateId.Value))
+			{
+				activeStoredStateId.Value = states.Value.Count > 0 ? states.Value[0].Id : string.Empty;
+			}
+		}
+
+		void AdoptIconProvider(ActionButtonFlowBlockInfo block)
+		{
+			iconProviderState.Value = new ActionButtonIconProvider(block.Id,
 				block.IntegrationId,
 				block.ActionId,
-				block.Label,
-				snapshot.States.Select(s => new ActionButtonStateProviderOption(s.Id, DisplayLabel(s.Label))).ToList());
-			stateMode.Value = true;
-			// Not written while a provider is authoritative - the host resolves the live one instead.
-			activeStoredStateId.Value = string.Empty;
+				ActionLabelOf(block));
+			iconHasSnapshot.Reload();
+		}
+
+		void ClearIconProvider()
+		{
+			iconProviderState.Value = null;
+			iconHasSnapshot.Reload();
 		}
 
 		void RemoveSelectedState()
@@ -274,50 +312,411 @@ internal static class ActionButtonWidgetConfigView
 			}
 		}
 
-		ActionButtonFlowBlockInfo? FindEligibleStateBlock()
+		ActionButtonFlowBlockInfo? FindBlock(string blockId)
+			=> ActionButtonFlowBlocks.Enumerate(flows.Peek()).FirstOrDefault(b => b.Id == blockId);
+
+		bool IsStateCapable(ActionButtonFlowBlockInfo block)
+			=> !block.Disabled && context.Probe.IsStateProvider(block.IntegrationId, block.ActionId);
+
+		bool IsIconCapable(ActionButtonFlowBlockInfo block)
+			=> !block.Disabled && context.Probe.IsIconProvider(block.IntegrationId, block.ActionId);
+
+		string ActionLabelOf(ActionButtonFlowBlockInfo block)
+			=> block.Label.Length > 0
+				? block.Label
+				: integrations.FindAction(block.IntegrationId, block.ActionId) is { } action
+					? context.Resolve(action.Name)
+					: block.ActionId;
+
+		string IntegrationNameOf(string? integrationId)
+			=> integrations.Integrations.FirstOrDefault(i => i.Id == integrationId) is { } integration
+				? context.Resolve(integration.Name)
+				: integrationId ?? string.Empty;
+
+		string StateNamesOf(ActionStateSnapshot snapshot)
+			=> string.Join(", ", snapshot.States.Select(state => context.Resolve(state.Label)));
+
+		void Notify(UiState<IReadOnlyList<ProviderNotice>> target, string severity, params LocalizedString[] texts)
+			=> target.Value = [.. texts.Select(text => new ProviderNotice(Guid.NewGuid().ToString("N"), text, severity))];
+
+		void NotifyProbeFailure(ActionProbeOutcome outcome)
+			=> Notify(stateNotices,
+				"warning",
+				outcome == ActionProbeOutcome.Timeout
+					? AppStrings.Errors.Actions.ProviderTimeout()
+					: AppStrings.Widgets.Editor.ProviderProbeFailed());
+
+		void RepairMissingProviders(IReadOnlyDictionary<string, ActionButtonFlowBlockInfo> blocks)
 		{
-			if (stateProvider.Value is not null)
+			if (stateProvider.Value is { } provider && !blocks.ContainsKey(provider.BlockId))
 			{
-				return null;
+				var hadBackup = manualBackup.Value is not null;
+
+				if (hadBackup)
+				{
+					RestoreManualStates(false);
+					Notify(stateNotices,
+						"info",
+						AppStrings.Widgets.Editor.ProviderActionRemoved(),
+						AppStrings.Widgets.Editor.PreviousStateRestored());
+				}
+				else
+				{
+					stateProvider.Value = null;
+					Notify(stateNotices, "info", AppStrings.Widgets.Editor.ProviderActionRemoved());
+				}
 			}
 
-			foreach (var block in ActionButtonFlowBlocks.Enumerate(flows.Value))
+			if (iconProviderState.Value is { } iconProvider && !blocks.ContainsKey(iconProvider.BlockId))
 			{
-				if (declinedStateBlocks.Value.Contains(block.Id) || !integrations.IsEnabled(block.IntegrationId))
-				{
-					continue;
-				}
-
-				if (integrations.FindAction(block.IntegrationId, block.ActionId) is IStateProviderActionDefinition)
-				{
-					return block;
-				}
+				ClearIconProvider();
+				Notify(iconNotices, "info", AppStrings.Widgets.Editor.IconProviderActionRemoved());
 			}
 
-			return null;
+			if (pendingOffer.Value is { } offer && !blocks.ContainsKey(offer.Block.Id))
+			{
+				pendingOffer.Value = null;
+			}
+
+			if (pendingSwitch.Value is { } request && !blocks.ContainsKey(request.Block.Id))
+			{
+				pendingSwitch.Value = null;
+			}
 		}
 
-		ActionButtonFlowBlockInfo? FindEligibleIconBlock()
+		void OnFlowsChanged()
 		{
-			if (iconProviderState.Value is not null)
+			var current = BlocksById(flows.Value);
+
+			RepairMissingProviders(current);
+
+			var added = current.Values
+				.Where(b => !knownBlocks.ContainsKey(b.Id) && (IsStateCapable(b) || IsIconCapable(b)))
+				.ToList();
+
+			if (added.Count > 0)
 			{
-				return null;
+				handoffOffer = added[^1];
+				Interlocked.Increment(ref offerGeneration);
 			}
 
-			foreach (var block in ActionButtonFlowBlocks.Enumerate(flows.Value))
-			{
-				if (declinedIconBlocks.Value.Contains(block.Id) || !integrations.IsEnabled(block.IntegrationId))
-				{
-					continue;
-				}
+			var offeredId = pendingOffer.Value?.Block.Id ?? Volatile.Read(ref offerInFlight);
 
-				if (integrations.FindAction(block.IntegrationId, block.ActionId) is IIconProviderActionDefinition)
+			if (handoffOffer is null &&
+				offeredId is not null &&
+				current.TryGetValue(offeredId, out var offered) &&
+				knownBlocks.TryGetValue(offeredId, out var offeredBefore) &&
+				offered.ParametersSignature != offeredBefore.ParametersSignature)
+			{
+				handoffOffer = offered;
+				Interlocked.Increment(ref offerGeneration);
+				pendingOffer.Value = null;
+			}
+
+			if (iconProviderState.Value is { } iconProvider &&
+				current.TryGetValue(iconProvider.BlockId, out var iconNow) &&
+				knownBlocks.TryGetValue(iconProvider.BlockId, out var iconBefore) &&
+				iconNow.ParametersSignature != iconBefore.ParametersSignature)
+			{
+				handoffIconReload = true;
+				Interlocked.Increment(ref iconGeneration);
+			}
+
+			if (stateProvider.Value is { } provider &&
+				current.TryGetValue(provider.BlockId, out var now) &&
+				knownBlocks.TryGetValue(provider.BlockId, out var before) &&
+				now.ParametersSignature != before.ParametersSignature)
+			{
+				handoffRefresh = now;
+				Interlocked.Increment(ref refreshGeneration);
+			}
+
+			knownBlocks = current;
+		}
+
+		async Task SettleAndProbeAsync()
+		{
+			// Read before the first await: the next dispatch may already overwrite the hand-off.
+			var offerBlock = handoffOffer;
+			var refreshBlock = handoffRefresh;
+			var offerAt = Volatile.Read(ref offerGeneration);
+			var refreshAt = Volatile.Read(ref refreshGeneration);
+			var iconReload = handoffIconReload;
+			var iconAt = Volatile.Read(ref iconGeneration);
+			handoffOffer = null;
+			handoffRefresh = null;
+			handoffIconReload = false;
+
+			if (offerBlock is not null)
+			{
+				Volatile.Write(ref offerInFlight, offerBlock.Id);
+			}
+
+			if (offerBlock is null && refreshBlock is null && !iconReload)
+			{
+				return;
+			}
+
+			try
+			{
+				await Task.Delay(ActionButtonConfigContext.SettleDelay, context.TimeProvider, context.SessionToken)
+					.ConfigureAwait(false);
+			}
+			catch (OperationCanceledException)
+			{
+				return;
+			}
+
+			if (iconReload && Volatile.Read(ref iconGeneration) == iconAt)
+			{
+				iconHasSnapshot.Reload();
+			}
+
+			if (refreshBlock is not null)
+			{
+				await RefreshProvidedStatesAsync(refreshBlock, refreshAt).ConfigureAwait(false);
+			}
+
+			if (offerBlock is not null)
+			{
+				await OfferAsync(offerBlock, offerAt).ConfigureAwait(false);
+
+				if (Volatile.Read(ref offerGeneration) == offerAt)
 				{
-					return block;
+					Volatile.Write(ref offerInFlight, null);
+				}
+			}
+		}
+
+		async Task RefreshProvidedStatesAsync(ActionButtonFlowBlockInfo block, int generation)
+		{
+			if (Volatile.Read(ref refreshGeneration) != generation)
+			{
+				return;
+			}
+
+			var result = await context.Probe
+				.ProbeStatesAsync(block.IntegrationId, block.ActionId, block.Parameters, context.SessionToken)
+				.ConfigureAwait(false);
+
+			using var batch = context.Batch();
+
+			if (Volatile.Read(ref refreshGeneration) != generation ||
+				stateProvider.Peek()?.BlockId != block.Id ||
+				FindBlock(block.Id) is not { } current ||
+				current.ParametersSignature != block.ParametersSignature ||
+				context.SessionToken.IsCancellationRequested)
+			{
+				return;
+			}
+
+			switch (result)
+			{
+				case { Outcome: ActionProbeOutcome.Ok, Snapshot: { States.Count: > 0 } refreshed }:
+					ApplyEnableStateProvider(current, refreshed);
+					break;
+				case { Outcome: ActionProbeOutcome.Ok }:
+					Notify(stateNotices, "warning", AppStrings.Widgets.Editor.ProviderNoStatesYet());
+					break;
+				default:
+					NotifyProbeFailure(result.Outcome);
+					break;
+			}
+		}
+
+		async Task OfferAsync(ActionButtonFlowBlockInfo block, int generation)
+		{
+			ActionStateSnapshot? snapshot = null;
+
+			if (IsStateCapable(block) && stateProvider.Peek() is null)
+			{
+				var result = await context.Probe
+					.ProbeStatesAsync(block.IntegrationId, block.ActionId, block.Parameters, context.SessionToken)
+					.ConfigureAwait(false);
+
+				if (result is { Outcome: ActionProbeOutcome.Ok, Snapshot: { States.Count: > 0 } probed })
+				{
+					snapshot = probed;
 				}
 			}
 
-			return null;
+			var iconAnswers = false;
+
+			if (IsIconCapable(block) && iconProviderState.Peek() is null)
+			{
+				var result = await context.Probe
+					.ProbeIconAsync(block.IntegrationId, block.ActionId, block.Parameters, context.SessionToken)
+					.ConfigureAwait(false);
+
+				iconAnswers = result is { Outcome: ActionProbeOutcome.Ok, Snapshot: not null };
+			}
+
+			using var batch = context.Batch();
+
+			if (Volatile.Read(ref offerGeneration) != generation ||
+				context.SessionToken.IsCancellationRequested ||
+				FindBlock(block.Id) is not { Disabled: false } current ||
+				current.ParametersSignature != block.ParametersSignature)
+			{
+				return;
+			}
+
+			if (stateProvider.Peek() is not null)
+			{
+				snapshot = null;
+			}
+
+			var icon = iconAnswers && iconProviderState.Peek() is null && IsIconCapable(current);
+
+			if (snapshot is null && !icon)
+			{
+				return;
+			}
+
+			offerUseState.Value = snapshot is not null;
+			offerUseIcon.Value = icon;
+			pendingOffer.Value = new ProviderOffer(current, snapshot, icon);
+		}
+
+		void AcceptOffer(bool useState, bool useIcon)
+		{
+			if (pendingOffer.Value is not { } offer)
+			{
+				return;
+			}
+
+			pendingOffer.Value = null;
+
+			if (useState && offer.States is { } snapshot && stateProvider.Value is null)
+			{
+				ApplyEnableStateProvider(offer.Block, snapshot);
+			}
+
+			if (useIcon && offer.Icon && iconProviderState.Value is null)
+			{
+				AdoptIconProvider(offer.Block);
+			}
+		}
+
+		async Task OnProvideAsync(UiEventData data)
+		{
+			if (data.Raw is not { ValueKind: JsonValueKind.Object } payload ||
+				WidgetConfigJson.ReadString(payload, "capability") is not { } capability ||
+				WidgetConfigJson.ReadString(payload, "blockId") is not { } blockId ||
+				!payload.TryGetProperty("enabled", out var enabledElement) ||
+				enabledElement.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+			{
+				return;
+			}
+
+			var enabled = enabledElement.GetBoolean();
+			var block = FindBlock(blockId);
+
+			if (capability == "icon")
+			{
+				if (!enabled)
+				{
+					if (iconProviderState.Value?.BlockId == blockId)
+					{
+						pendingStop.Value = "icon";
+					}
+
+					return;
+				}
+
+				if (block is null || !IsIconCapable(block) || iconProviderState.Value?.BlockId == blockId)
+				{
+					return;
+				}
+
+				if (iconProviderState.Value is not null)
+				{
+					pendingSwitch.Value = new ProviderSwitch("icon", block, null);
+
+					return;
+				}
+
+				AdoptIconProvider(block);
+
+				return;
+			}
+
+			if (capability != "state")
+			{
+				return;
+			}
+
+			if (!enabled)
+			{
+				if (stateProvider.Value?.BlockId == blockId)
+				{
+					pendingStop.Value = "state";
+				}
+
+				return;
+			}
+
+			if (block is null || !IsStateCapable(block) || stateProvider.Value?.BlockId == blockId)
+			{
+				return;
+			}
+
+			var result = await context.Probe
+				.ProbeStatesAsync(block.IntegrationId, block.ActionId, block.Parameters, context.SessionToken)
+				.ConfigureAwait(false);
+
+			using var batch = context.Batch();
+
+			if (context.SessionToken.IsCancellationRequested ||
+				FindBlock(blockId) is not { Disabled: false } current ||
+				current.ParametersSignature != block.ParametersSignature ||
+				stateProvider.Peek()?.BlockId == blockId)
+			{
+				return;
+			}
+
+			switch (result)
+			{
+				case { Outcome: ActionProbeOutcome.Ok, Snapshot: { States.Count: > 0 } offered }
+					when stateProvider.Peek() is not null:
+					pendingSwitch.Value = new ProviderSwitch("state", current, offered);
+					break;
+				case { Outcome: ActionProbeOutcome.Ok, Snapshot: { States.Count: > 0 } adopted }:
+					ApplyEnableStateProvider(current, adopted);
+					break;
+				case { Outcome: ActionProbeOutcome.Ok }:
+					Notify(stateNotices, "warning", AppStrings.Widgets.Editor.ProviderReturnedNoStates());
+					break;
+				default:
+					NotifyProbeFailure(result.Outcome);
+					break;
+			}
+		}
+
+		void ConfirmSwitch()
+		{
+			if (pendingSwitch.Value is not { } request)
+			{
+				return;
+			}
+
+			pendingSwitch.Value = null;
+
+			if (request is { Capability: "state", States: { } snapshot })
+			{
+				ApplyEnableStateProvider(request.Block, snapshot);
+			}
+			else if (request.Capability == "icon")
+			{
+				AdoptIconProvider(request.Block);
+			}
+		}
+
+		RepairMissingProviders(knownBlocks);
+
+		if (iconProviderState.Peek() is not null)
+		{
+			iconHasSnapshot.Reload();
 		}
 
 		// ---- appearance tabs - shared shape between the root and every per-state appearance -------------
@@ -530,14 +929,12 @@ internal static class ActionButtonWidgetConfigView
 								SupportsReset = true,
 								DefaultValue = string.Empty,
 							},
-							new UiWhen
+							new UiIconReferenceInput
 							{
-								Key = "icon-when",
-								Condition = () => iconProviderState.Value is null,
-								Content = () => new UiIconReferenceInput
-								{
-									Key = "icon", Label = AppStrings.Widgets.Editor.Icon(), Binding = iconBinding,
-								},
+								Key = "icon",
+								Label = AppStrings.Widgets.Editor.Icon(),
+								Binding = iconBinding,
+								Disabled = UiValue.From(() => iconProviderState.Value is not null),
 							},
 							new UiWhen
 							{
@@ -581,24 +978,6 @@ internal static class ActionButtonWidgetConfigView
 
 		// ---- state row - the compact "which state am I editing" controls --------------------------------
 		//
-		// Reproduces the original dropdown-plus-menu picker from existing primitives (issue #837): a
-		// choice bound to the schema's own activeStateId - the field WidgetStateService itself resolves a
-		// manual live face from, so picking a state to style here also makes it the one the button shows
-		// while no provider or mapping governs, exactly like the original picker's own live/edited
-		// distinction collapses once there is only one selection to make - plus an Add button and a third
-		// control standing in for the original's own "Manage this state" dropdown menu (rename and
-		// delete). The DSL names no dropdown-menu chrome, so this is the disclosure fallback the issue
-		// itself allows: the button toggles stateManageOpen, which reveals the rename field - nested on
-		// the selected item inside the states array below, not here (a client patches a widget's draft
-		// data structurally, per config-draft.util.ts, matching a changed node to its data path by tree
-		// position, so a rename control has to live inside that state's own array item for an edit to land
-		// on states.<id>.label rather than on some unrelated key of its own) - and the delete action,
-		// built by BuildManageStateDisclosure below.
-		// A single non-wrapping line (issue #837): the picker takes the remaining share once the two
-		// buttons claim theirs, and its own caption is suppressed because the STATE heading immediately
-		// above this row already names it - the picker's dynamic label (which state is being edited, or
-		// that there are none yet) still carries the accessible name, just as an aria-label rather than a
-		// visible caption.
 		UiElement BuildStateRow() => new UiConfigStack
 		{
 			Key = "state-row",
@@ -628,7 +1007,7 @@ internal static class ActionButtonWidgetConfigView
 				new UiWhen
 				{
 					Key = "addState-when",
-					Condition = () => states.Value.Count < ActionButtonStateModel.MaxStates,
+					Condition = () => stateProvider.Value is null && states.Value.Count < ActionButtonStateModel.MaxStates,
 					Content = () => new UiConfigButton
 					{
 						Key = "addState",
@@ -647,50 +1026,77 @@ internal static class ActionButtonWidgetConfigView
 						],
 					},
 				},
-				new UiConfigButton
+				new UiWhen
 				{
-					Key = "manageState",
-					Label = AppStrings.Widgets.Editor.ManageThisState(),
-					Icon = "dots-vertical",
-					Events =
-					[
-						UiEventHandler.On(UiConfigEvents.Activate, () => stateManageOpen.Value = !stateManageOpen.Value)
-					],
+					Key = "manageState-when",
+					Condition = () => stateProvider.Value is null,
+					Content = () => new UiConfigMenu
+					{
+						Key = "manageState",
+						Label = AppStrings.Widgets.Editor.ManageThisState(),
+						Icon = "dots-vertical",
+						Children = ManageStateEntries(string.Empty),
+						Fallback = new UiConfigStack
+						{
+							Key = "manageState-fallback",
+							Direction = "horizontal",
+							Wrap = false,
+							Children = ManageStateEntries("-fallback"),
+						},
+					},
 				},
 			],
 		};
 
-		// The "Manage this state" disclosure's own content (issue #837): only Delete lives here - Rename is
-		// the state item's own label field, nested inside the states array for the structural reason
-		// BuildStateRow's remarks give, and stateManageOpen also gates that field's visibility (see
-		// BuildStateItem). A stateful button keeps at least one state, so Delete stays hidden rather than
-		// disabled below two - UiConfigButton carries no Disabled property of its own (that lives on
-		// UiInput).
-		UiElement BuildManageStateDisclosure() => new UiWhen
-		{
-			Key = "manageState-when",
-			Condition = () => stateManageOpen.Value,
-			Content = () => new UiWhen
+		UiElement[] ManageStateEntries(string keySuffix) =>
+		[
+			new UiConfigButton
 			{
-				Key = "deleteState-when",
+				Key = $"renameState{keySuffix}",
+				Label = MacroDeckStrings.Common.Rename(),
+				Icon = "pencil",
+				ConfirmTitle = MacroDeckStrings.Common.Rename(),
+				ConfirmLabel = MacroDeckStrings.Common.Save(),
+				PromptValue = UiValue.From(() =>
+					states.Value.FirstOrDefault(s => s.Id == EffectiveSelectedStateId())?.Label ?? string.Empty),
+				Placeholder = AppStrings.Widgets.Editor.StateNamePlaceholder(),
+				Events = [UiEventHandler.On(UiConfigEvents.Activate, data => RenameSelectedState(data))],
+			},
+			new UiWhen
+			{
+				Key = $"deleteState-when{keySuffix}",
 				Condition = () => states.Value.Count > 1,
 				Content = () => new UiConfigButton
 				{
-					Key = "deleteState",
+					Key = $"deleteState{keySuffix}",
 					Label = MacroDeckStrings.Common.Delete(),
 					Icon = "trash",
-					Events =
-					[
-						UiEventHandler.On(UiConfigEvents.Activate,
-							() =>
-							{
-								RemoveSelectedState();
-								stateManageOpen.Value = false;
-							}),
-					],
+					ConfirmTitle = AppStrings.Widgets.Editor.RemoveStateHeading(),
+					ConfirmMessage = UiText.FromLocalized(() =>
+						IsReferencedByMapping(EffectiveSelectedStateId())
+							? AppStrings.Widgets.Editor.RemoveStateConfirm(
+								name: states.Value.FirstOrDefault(s => s.Id == EffectiveSelectedStateId())?.Label ??
+									string.Empty)
+							: AppStrings.Dialogs.Confirm.DefaultMessage()),
+					ConfirmLabel = MacroDeckStrings.Common.Remove(),
+					ConfirmDanger = true,
+					Events = [UiEventHandler.On(UiConfigEvents.Activate, RemoveSelectedState)],
 				},
 			},
-		};
+		];
+
+		bool IsReferencedByMapping(string stateId)
+			=> fallbackStateId.Value == stateId || mappingRules.Value.Any(rule => rule.StateId == stateId);
+
+		void RenameSelectedState(UiEventData data)
+		{
+			var stateId = EffectiveSelectedStateId();
+
+			if (data.TryGetString(out var name) && name.Trim() is { Length: > 0 } trimmed && stateId.Length > 0)
+			{
+				states.Value = states.Value.Select(s => s.Id == stateId ? s with { Label = trimmed } : s).ToList();
+			}
+		}
 
 		// The live state line (issue #837): "Currently <state>" under the state row, naming the state the
 		// widget is actually showing right now - a small green dot (UiProse's Severity, "success") ahead
@@ -705,7 +1111,9 @@ internal static class ActionButtonWidgetConfigView
 		{
 			Key = "live-state-when",
 			Condition = () =>
-				!string.IsNullOrEmpty(liveStateId.Value) && liveStateId.Value != EffectiveSelectedStateId(),
+				!string.IsNullOrEmpty(liveStateId.Value) &&
+				liveStateId.Value != EffectiveSelectedStateId() &&
+				(states.Value.Count == 0 || states.Value.Any(s => s.Id == liveStateId.Value)),
 			Content = () => new UiProse
 			{
 				Key = "live-state",
@@ -719,7 +1127,7 @@ internal static class ActionButtonWidgetConfigView
 		UiElement BuildStateLimitLine() => new UiWhen
 		{
 			Key = "state-limit-when",
-			Condition = () => states.Value.Count >= ActionButtonStateModel.MaxStates,
+			Condition = () => stateProvider.Value is null && states.Value.Count >= ActionButtonStateModel.MaxStates,
 			Content = () => new UiProse
 			{
 				Key = "state-limit",
@@ -754,22 +1162,6 @@ internal static class ActionButtonWidgetConfigView
 							Key = "selected",
 							Children =
 							[
-								// Rename lives here, nested inside this state's own array item, rather than in
-								// the state row above - see BuildStateRow's remarks for why a control has to
-								// sit under states.<id> to land on states.<id>.label. Revealed by the row's
-								// "Manage this state" button rather than always shown (issue #837): the
-								// original's own menu-driven rename, not a permanent field.
-								new UiWhen
-								{
-									Key = "rename-when",
-									Condition = () => stateManageOpen.Value,
-									Content = () => new UiStringInput
-									{
-										Key = "label",
-										Placeholder = AppStrings.Widgets.Editor.StateNamePlaceholder(),
-										Binding = StateLabelBinding(states, state.Id),
-									},
-								},
 								// Every chrome key below carries this state's id, and the root section's
 								// counterparts are keyed apart again: chrome inside an array item composes
 								// its id from the enclosing structural scope, not from the item, so two
@@ -845,7 +1237,7 @@ internal static class ActionButtonWidgetConfigView
 		UiElement BuildStatesArray() => new UiWhen
 		{
 			Key = "states-when",
-			Condition = () => stateMode.Value && stateProvider.Value is null,
+			Condition = () => stateMode.Value,
 			Content = () => new UiArrayInput
 			{
 				Key = "states",
@@ -869,13 +1261,13 @@ internal static class ActionButtonWidgetConfigView
 		UiElement BuildStateRowSection() => new UiWhen
 		{
 			Key = "state-row-when",
-			Condition = () => stateMode.Value && stateProvider.Value is null,
+			Condition = () => stateMode.Value,
 			Content = () => new UiFragment
 			{
 				Key = "state-row-group",
 				Children =
 				[
-					BuildStateRow(), BuildManageStateDisclosure(), BuildStateLimitLine(), BuildLiveStateLine()
+					BuildStateRow(), BuildStateLimitLine(), BuildLiveStateLine()
 				],
 			},
 		};
@@ -926,114 +1318,87 @@ internal static class ActionButtonWidgetConfigView
 
 		// ---- state/icon provider banners --------------------------------------------------------------------
 
-		// Two sibling UiWhens rather than one UiWhen branching inside Content(): a structural scope's
-		// Content only re-runs when its own Condition's boolean result changes, so a decision that lives
-		// entirely inside Content (as an earlier draft of this method had it) never re-evaluates when the
-		// state it reads changes but the outer Condition does not - the active/offer choice has to be the
-		// Condition itself for each branch to react on its own.
+		// Each branch is its own UiWhen: a structural scope's Content only re-runs when its own Condition
+		// changes, so a choice made inside Content would never react to the state it reads.
+		UiElement BuildNotices(string key, UiState<IReadOnlyList<ProviderNotice>> notices) => new UiWhen
+		{
+			Key = $"{key}-when",
+			Condition = () => notices.Value.Count > 0,
+			Content = () => new UiFragment
+			{
+				Key = key,
+				Children =
+				[
+					new UiRepeat<ProviderNotice>
+					{
+						Key = $"{key}-items",
+						Items = UiValue.From(() => notices.Value),
+						KeySelector = notice => notice.Id,
+						Template = (notice, _) => new UiProse
+						{
+							Key = $"{key}-{notice.Id}", Severity = notice.Severity, Text = notice.Text,
+						},
+					},
+					new UiConfigButton
+					{
+						Key = $"{key}-dismiss",
+						Label = AppStrings.Feedback.Dismiss(),
+						Events = [UiEventHandler.On(UiConfigEvents.Activate, () => notices.Value = [])],
+					},
+				],
+			},
+		};
+
+		UiText ProviderName(string? actionLabel)
+			=> string.IsNullOrEmpty(actionLabel) ? AppStrings.Widgets.Editor.AnAction() : actionLabel;
+
+		UiStatus ProviderStatus(string key, string icon, UiText label, UiText value, UiText sentence, UiConfigButton stop)
+			=> new()
+			{
+				Key = $"{key}Status",
+				Icon = icon,
+				Label = label,
+				Value = value,
+				Children = [stop],
+				Fallback = new UiConfigStack
+				{
+					Key = $"{key}StatusFallback",
+					Children =
+					[
+						new UiProse { Key = $"{key}StatusFallbackText", Text = sentence },
+						stop with { Key = $"{stop.Key}Fallback", Icon = default },
+					],
+				},
+			};
+
 		UiElement BuildStateProviderSection() => new UiFragment
 		{
 			Key = "stateProvider-group",
 			Children =
 			[
+				BuildNotices("stateProviderNotices", stateNotices),
 				new UiWhen
 				{
 					Key = "stateProviderActive-when",
 					Condition = () => stateMode.Value && stateProvider.Value is not null,
-					Content = () =>
-					{
-						var provider = stateProvider.Value!;
-
-						return new UiFragment
+					Content = () => ProviderStatus("stateProvider",
+						"zap",
+						AppStrings.Widgets.Editor.ProvidedByPrefix(),
+						UiText.Optional(() => ProviderName(stateProvider.Value?.ActionLabel)),
+						UiText.FromLocalized(() => AppStrings.Widgets.Editor.StateProvidedBy(
+							integration: IntegrationNameOf(stateProvider.Value?.IntegrationId),
+							action: stateProvider.Value?.ActionLabel ?? string.Empty)),
+						new UiConfigButton
 						{
-							Key = "stateProviderActive",
-							Children =
-							[
-								new UiBanner
-								{
-									Key = "stateProviderBanner",
-									Severity = "info",
-									// No state-specific "controlled by" wording exists with placeholders - the
-									// icon provider's carries the same "an action governs this" meaning and
-									// already has both.
-									Text = AppStrings.Widgets.Editor.IconProvidedByPrefix(
-										integration: provider.IntegrationId ?? string.Empty,
-										action: provider.ActionLabel ?? string.Empty),
-								},
-								new UiConfigButton
-								{
-									Key = "removeStateProvider",
-									Label = AppStrings.Widgets.Editor.StopUsingProviderAction(),
-									Events =
-									[
-										UiEventHandler.On(UiConfigEvents.Activate, () => RestoreManualStates(false))
-									],
-								},
-							],
-						};
-					},
-				},
-				new UiWhen
-				{
-					Key = "stateProviderOffer-when",
-					Condition = () =>
-						stateMode.Value && stateProvider.Value is null && FindEligibleStateBlock() is not null,
-					Content = () =>
-					{
-						var block = FindEligibleStateBlock()!;
-
-						return new UiFragment
-						{
-							Key = "stateProviderOffer",
-							Children =
-							[
-								new UiBanner
-								{
-									Key = "stateProviderOfferBanner",
-									Severity = "info",
-									Text = AppStrings.Widgets.Editor.ProviderMultiStatesHeading(),
-								},
-								new UiConfigButton
-								{
-									Key = "acceptStateProvider",
-									Label = AppStrings.Widgets.Editor.UseProvidedStatesConfirm(),
-									Events =
-									[
-										UiEventHandler.OnAsync(UiConfigEvents.Activate,
-											async (_, cancellationToken) =>
-											{
-												if (integrations.FindAction(block.IntegrationId, block.ActionId) is not
-													IStateProviderActionDefinition stateProviderAction)
-												{
-													return;
-												}
-
-												var snapshot = await stateProviderAction
-													.GetActionStateAsync(block.Parameters, cancellationToken)
-													.ConfigureAwait(false);
-
-												if (snapshot is not { States.Count: > 0 })
-												{
-													return;
-												}
-
-												ApplyEnableStateProvider(block, snapshot);
-											}),
-									],
-								},
-								new UiConfigButton
-								{
-									Key = "declineStateProvider",
-									Label = AppStrings.Feedback.Dismiss(),
-									Events =
-									[
-										UiEventHandler.On(UiConfigEvents.Activate,
-											() => declinedStateBlocks.Value = [.. declinedStateBlocks.Value, block.Id]),
-									],
-								},
-							],
-						};
-					},
+							Key = "removeStateProvider",
+							Label = AppStrings.Widgets.Editor.StopUsingProviderAction(),
+							Icon = "x",
+							ConfirmTitle = AppStrings.Widgets.Editor.StopUsingProviderHeading(),
+							ConfirmMessage = AppStrings.Widgets.Editor.RestoreManualStatesMessage(),
+							ConfirmLabel = AppStrings.Widgets.Editor.StopUsingProviderConfirm(),
+							ConfirmDanger = true,
+							Events = [UiEventHandler.On(UiConfigEvents.Activate, () => RestoreManualStates(false))],
+						}),
 				},
 			],
 		};
@@ -1045,90 +1410,189 @@ internal static class ActionButtonWidgetConfigView
 			Key = $"iconProvider-group{keySuffix}",
 			Children =
 			[
+				BuildNotices($"iconProviderNotices{keySuffix}", iconNotices),
 				new UiWhen
 				{
 					Key = $"iconProviderActive-when{keySuffix}",
 					Condition = () => iconProviderState.Value is not null,
-					Content = () =>
+					Content = () => new UiFragment
 					{
-						var iconProviderValue = iconProviderState.Value!;
-
-						return new UiFragment
-						{
-							Key = $"iconProviderActive{keySuffix}",
-							Children =
-							[
-								new UiBanner
-								{
-									Key = $"iconProviderBanner{keySuffix}",
-									Severity = "info",
-									Text = AppStrings.Widgets.Editor.IconProvidedByPrefix(
-										integration: iconProviderValue.IntegrationId ?? string.Empty,
-										action: iconProviderValue.ActionLabel ?? string.Empty),
-								},
+						Key = $"iconProviderActive{keySuffix}",
+						Children =
+						[
+							ProviderStatus($"iconProvider{keySuffix}",
+								"image",
+								AppStrings.Widgets.Editor.ProvidedByPrefix(),
+								UiText.Optional(() => ProviderName(iconProviderState.Value?.ActionLabel)),
+								UiText.FromLocalized(() => AppStrings.Widgets.Editor.IconProvidedByPrefix(
+									integration: IntegrationNameOf(iconProviderState.Value?.IntegrationId),
+									action: iconProviderState.Value?.ActionLabel ?? string.Empty)),
 								new UiConfigButton
 								{
 									Key = $"removeIconProvider{keySuffix}",
 									Label = AppStrings.Widgets.Editor.StopUsingIconProviderAction(),
-									Events =
-									[
-										UiEventHandler.On(UiConfigEvents.Activate, () => iconProviderState.Value = null)
-									],
+									Icon = "x",
+									ConfirmTitle = AppStrings.Widgets.Editor.StopUsingIconProviderHeading(),
+									ConfirmMessage = AppStrings.Widgets.Editor.StopUsingIconProviderMessage(),
+									ConfirmLabel = AppStrings.Widgets.Editor.StopUsingIconProviderConfirm(),
+									ConfirmDanger = true,
+									Events = [UiEventHandler.On(UiConfigEvents.Activate, ClearIconProvider)],
+								}),
+							new UiWhen
+							{
+								Key = $"iconProviderNoIcon-when{keySuffix}",
+								Condition = () => iconHasSnapshot.Value == false,
+								Content = () => new UiProse
+								{
+									Key = $"iconProviderNoIcon{keySuffix}",
+									Severity = "warning",
+									Text = AppStrings.Widgets.Editor.IconProviderNoIconYet(),
 								},
-							],
-						};
+							},
+							new UiProse
+							{
+								Key = $"iconProviderPreviewNote{keySuffix}",
+								Text = AppStrings.Widgets.Editor.IconProviderPreviewNote(),
+							},
+						],
 					},
 				},
-				new UiWhen
-				{
-					Key = $"iconProviderOffer-when{keySuffix}",
-					Condition = () => iconProviderState.Value is null && FindEligibleIconBlock() is not null,
-					Content = () =>
-					{
-						var block = FindEligibleIconBlock()!;
+			],
+		};
 
-						return new UiFragment
-						{
-							Key = $"iconProviderOffer{keySuffix}",
-							Children =
-							[
-								new UiBanner
-								{
-									Key = $"iconProviderOfferBanner{keySuffix}",
-									Severity = "info",
-									Text = AppStrings.Widgets.Editor.OfferIconProviderMessage(action: block.Label),
-								},
-								new UiConfigButton
-								{
-									Key = $"acceptIconProvider{keySuffix}",
-									Label = AppStrings.Widgets.Editor.UseProvidedStatesConfirm(),
-									Events =
-									[
-										UiEventHandler.On(UiConfigEvents.Activate,
-											() =>
-											{
-												iconProviderState.Value =
-													new ActionButtonIconProvider(block.Id,
-														block.IntegrationId,
-														block.ActionId,
-														block.Label);
-											}),
-									],
-								},
-								new UiConfigButton
-								{
-									Key = $"declineIconProvider{keySuffix}",
-									Label = AppStrings.Feedback.Dismiss(),
-									Events =
-									[
-										UiEventHandler.On(UiConfigEvents.Activate,
-											() => declinedIconBlocks.Value = [.. declinedIconBlocks.Value, block.Id]),
-									],
-								},
-							],
-						};
-					},
+		UiConfigButton AnswerButton(string key, UiText label, Action answer, bool danger = false) => new()
+		{
+			Key = key,
+			Label = label,
+			ConfirmDanger = danger,
+			Events = [UiEventHandler.On(UiConfigEvents.Activate, answer)],
+		};
+
+		UiElement Dialog(string key, Func<bool> open, Func<UiText> title, Func<UiText> text, Action cancel,
+			Func<IReadOnlyList<UiElement>> children)
+			=> new UiWhen
+			{
+				Key = $"{key}-when",
+				Condition = open,
+				Content = () => new UiConfigDialog
+				{
+					Key = key,
+					Title = title(),
+					Text = text(),
+					Events = [UiEventHandler.On(UiConfigEvents.Cancel, cancel)],
+					Children = [.. children()],
 				},
+			};
+
+		UiElement BuildDialogs() => new UiFragment
+		{
+			Key = "dialogs",
+			Children =
+			[
+				Dialog("stateProviderOffer",
+					() => pendingOffer.Value is { States: not null, Icon: false },
+					() => stateMode.Value
+						? AppStrings.Widgets.Editor.ProviderOwnStatesHeading()
+						: AppStrings.Widgets.Editor.ProviderMultiStatesHeading(),
+					() => stateMode.Value
+						? AppStrings.Widgets.Editor.OfferProviderMessage(action: ActionLabelOf(pendingOffer.Value!.Block),
+							names: StateNamesOf(pendingOffer.Value!.States!))
+						: AppStrings.Widgets.Editor.EnableMultiStateMessage(action: ActionLabelOf(pendingOffer.Value!.Block),
+							names: StateNamesOf(pendingOffer.Value!.States!)),
+					() => pendingOffer.Value = null,
+					() =>
+					[
+						AnswerButton("declineStateProvider", AppStrings.Feedback.Dismiss(), () => pendingOffer.Value = null),
+						AnswerButton("acceptStateProvider",
+							stateMode.Value
+								? AppStrings.Widgets.Editor.UseProvidedStatesConfirm()
+								: AppStrings.Widgets.Editor.TurnOnMultiStateConfirm(),
+							() => AcceptOffer(true, false)),
+					]),
+				Dialog("combinedProviderOffer",
+					() => pendingOffer.Value is { States: not null, Icon: true },
+					() => AppStrings.Widgets.Editor.CombinedProviderHeading(),
+					() => AppStrings.Widgets.Editor.CombinedProviderMessage(action: ActionLabelOf(pendingOffer.Value!.Block)),
+					() => pendingOffer.Value = null,
+					() =>
+					[
+						new UiBooleanInput
+						{
+							Key = "combinedProviderUseState",
+							Transient = true,
+							Label = AppStrings.Widgets.Editor.CombinedProviderStateCheckboxLabel(
+								names: StateNamesOf(pendingOffer.Value!.States!)),
+							Binding = Bind.To(offerUseState),
+						},
+						new UiBooleanInput
+						{
+							Key = "combinedProviderUseIcon",
+							Transient = true,
+							Label = AppStrings.Widgets.Editor.CombinedProviderIconCheckboxLabel(),
+							Binding = Bind.To(offerUseIcon),
+						},
+						AnswerButton("declineCombinedProvider", AppStrings.Feedback.Dismiss(), () => pendingOffer.Value = null),
+						AnswerButton("acceptCombinedProvider",
+							AppStrings.Widgets.Editor.UseSelectedProvidersConfirm(),
+							() => AcceptOffer(offerUseState.Value, offerUseIcon.Value)),
+					]),
+				Dialog("iconProviderOffer",
+					() => pendingOffer.Value is { States: null, Icon: true },
+					() => AppStrings.Dialogs.Confirm.DefaultHeading(),
+					() => AppStrings.Widgets.Editor.OfferIconProviderMessage(action: ActionLabelOf(pendingOffer.Value!.Block)),
+					() => pendingOffer.Value = null,
+					() =>
+					[
+						AnswerButton("declineIconProvider", AppStrings.Feedback.Dismiss(), () => pendingOffer.Value = null),
+						AnswerButton("acceptIconProvider", AppStrings.Widgets.Editor.UseProvidedIconConfirm(),
+							() => AcceptOffer(false, true)),
+					]),
+				Dialog("providerSwitch",
+					() => pendingSwitch.Value is not null,
+					() => AppStrings.Dialogs.Confirm.DefaultHeading(),
+					() => pendingSwitch.Value?.Capability == "icon"
+						? AppStrings.Widgets.Editor.SwitchIconProviderMessage()
+						: AppStrings.Widgets.Editor.SwitchProviderMessage(),
+					() => pendingSwitch.Value = null,
+					() =>
+					[
+						AnswerButton("providerSwitchDismiss", MacroDeckStrings.Common.Cancel(), () => pendingSwitch.Value = null),
+						AnswerButton("providerSwitchConfirm", AppStrings.Widgets.Editor.SwitchProviderConfirm(), ConfirmSwitch),
+					]),
+				Dialog("stopStateProvider",
+					() => pendingStop.Value == "state",
+					() => AppStrings.Widgets.Editor.StopUsingProviderHeading(),
+					() => AppStrings.Widgets.Editor.RestoreManualStatesMessage(),
+					() => pendingStop.Value = null,
+					() =>
+					[
+						AnswerButton("stopStateProviderCancel", MacroDeckStrings.Common.Cancel(), () => pendingStop.Value = null),
+						AnswerButton("stopStateProviderConfirm",
+							AppStrings.Widgets.Editor.StopUsingProviderConfirm(),
+							() =>
+							{
+								pendingStop.Value = null;
+								RestoreManualStates(false);
+							},
+							danger: true),
+					]),
+				Dialog("stopIconProvider",
+					() => pendingStop.Value == "icon",
+					() => AppStrings.Widgets.Editor.StopUsingIconProviderHeading(),
+					() => AppStrings.Widgets.Editor.StopUsingIconProviderMessage(),
+					() => pendingStop.Value = null,
+					() =>
+					[
+						AnswerButton("stopIconProviderCancel", MacroDeckStrings.Common.Cancel(), () => pendingStop.Value = null),
+						AnswerButton("stopIconProviderConfirm",
+							AppStrings.Widgets.Editor.StopUsingIconProviderConfirm(),
+							() =>
+							{
+								pendingStop.Value = null;
+								ClearIconProvider();
+							},
+							danger: true),
+					]),
 			],
 		};
 
@@ -1199,6 +1663,15 @@ internal static class ActionButtonWidgetConfigView
 			currentBackgroundColor: () => backgroundColor.Value,
 			currentIconColor: () => iconColor.Value);
 
+		// Host-owned keys no control edits: a bound composite is authoritative in the client's draft, and a
+		// sibling value stateMode never takes keeps it out of sight while it is still submitted.
+		UiObjectInput PersistedNode(string key, Func<JsonNode?> read) => new()
+		{
+			Key = key,
+			Binding = Bind.ReadOnly(UiValue.From(() => ToElement(read()))),
+			VisibleWhen = new UiVisibleWhen { ParameterName = "stateMode", Values = ["persisted-only"] },
+		};
+
 		// ---- assembly -------------------------------------------------------------------------------------
 
 		return new UiWidgetConfiguration
@@ -1223,12 +1696,20 @@ internal static class ActionButtonWidgetConfigView
 								{
 									EnableStateMode();
 								}
+								else if (stateProvider.Value is not null)
+								{
+									RestoreManualStates(true);
+								}
 								else
 								{
 									stateMode.Value = false;
 								}
 							}),
 					},
+					PersistedNode("stateProvider", () => ProviderJson(stateProvider.Value)),
+					PersistedNode("manualStateBackup", () => BackupJson(manualBackup.Value)),
+					PersistedNode("iconProvider", () => IconProviderJson(iconProviderState.Value)),
+					BuildDialogs(),
 					BuildStateProviderSection(),
 					BuildStateRowSection(),
 					BuildStateMappingSection(),
@@ -1248,6 +1729,17 @@ internal static class ActionButtonWidgetConfigView
 						Binding = Bind.To(flows),
 						// A placed widget's own actions can be run against it from the editor.
 						CanRun = true,
+						OffersStateProvider = true,
+						OffersIconProvider = true,
+						StateProviderBlockId = UiValue.From(() => stateProvider.Value?.BlockId ?? string.Empty),
+						IconProviderBlockId = UiValue.From(() => iconProviderState.Value?.BlockId ?? string.Empty),
+						// The synchronous diff must run before the settle step that consumes its hand-off.
+						Events =
+						[
+							UiEventHandler.On(UiConfigEvents.Change, OnFlowsChanged),
+							UiEventHandler.OnAsync(UiConfigEvents.Change, _ => SettleAndProbeAsync()),
+							UiEventHandler.OnAsync(UiConfigEvents.Provide, (data, _) => OnProvideAsync(data)),
+						],
 						// The draft state list: a "Set Button State" block inside these flows resolves its
 						// options from stored widget data, which has not seen a state added in this session
 						// until the widget is saved.
@@ -1279,10 +1771,6 @@ internal static class ActionButtonWidgetConfigView
 	}
 
 	// ---- bindings into the states list ---------------------------------------------------------------------
-
-	private static UiBinding<string> StateLabelBinding(UiState<List<ActionButtonStateEntry>> states, string stateId)
-		=> Bind.Custom(() => states.Value.FirstOrDefault(s => s.Id == stateId)?.Label ?? string.Empty,
-			value => states.Value = states.Value.Select(s => s.Id == stateId ? s with { Label = value } : s).ToList());
 
 	/// <param name="fallback">What the control shows while the state stores nothing for this field. An
 	/// enumerated control with no matching option renders with nothing selected, which reads as broken
@@ -1561,67 +2049,6 @@ internal static class ActionButtonWidgetConfigView
 		return result;
 	}
 
-	// ---- provider adoption helpers --------------------------------------------------------------------------
-
-	/// <summary>Re-adopts a provider's declared state set: a state id that already exists keeps the
-	/// appearance the user configured for it (a provider never overwrites hand-authored styling - see
-	/// <see cref="ActionStateAppearance" />), and a newly-declared id seeds from the provider's own default
-	/// appearance. A previously-adopted id the provider no longer declares is dropped.</summary>
-	private static List<ActionButtonStateEntry> AdoptProvidedStates(
-		IReadOnlyList<ActionButtonStateEntry> existing,
-		IReadOnlyList<ActionStateDefinition> declared)
-	{
-		var byId = existing.ToDictionary(s => s.Id, StringComparer.Ordinal);
-		var result = new List<ActionButtonStateEntry>(declared.Count);
-
-		foreach (var definition in declared)
-		{
-			if (byId.TryGetValue(definition.Id, out var current))
-			{
-				result.Add(current with { Label = DisplayLabel(definition.Label) });
-
-				continue;
-			}
-
-			JsonObject? appearance = null;
-
-			if (definition.DefaultAppearance is { } defaultAppearance)
-			{
-				appearance = [];
-
-				if (defaultAppearance.Label is { } appearanceLabel)
-				{
-					appearance["label"] = appearanceLabel;
-				}
-
-				if (defaultAppearance.BackgroundColor is { } backgroundColor)
-				{
-					appearance["backgroundColor"] = backgroundColor;
-				}
-
-				if (defaultAppearance.LabelColor is { } labelColor)
-				{
-					appearance["labelColor"] = labelColor;
-				}
-
-				if (defaultAppearance.IconId is { } iconId)
-				{
-					appearance["icon"] = WidgetIconReference.IconPack(iconId).ToJson();
-				}
-			}
-
-			result.Add(new ActionButtonStateEntry(definition.Id, DisplayLabel(definition.Label), appearance));
-		}
-
-		return result;
-	}
-
-	/// <summary>A best-effort plain string for a provider-declared label: the literal text when the action
-	/// declared one directly, which is the overwhelming common case, and the id otherwise - this
-	/// configuration session has no per-viewer culture to resolve a <see cref="LocalizedText" /> reference
-	/// against, unlike a rendered widget view.</summary>
-	private static string DisplayLabel(LocalizedText text) => text.Literal ?? string.Empty;
-
 	private static string NextStateLabel(List<ActionButtonStateEntry> states)
 	{
 		var existingLabels = new HashSet<string>(states.Select(s => s.Label), StringComparer.Ordinal);
@@ -1636,6 +2063,77 @@ internal static class ActionButtonWidgetConfigView
 
 		return candidate;
 	}
+
+	// Imported or hand-edited flows can repeat a block id; the first one wins, as ActionFlowJson.TryFindBlock does.
+	private static Dictionary<string, ActionButtonFlowBlockInfo> BlocksById(JsonElement flows)
+	{
+		var blocks = new Dictionary<string, ActionButtonFlowBlockInfo>(StringComparer.Ordinal);
+
+		foreach (var block in ActionButtonFlowBlocks.Enumerate(flows))
+		{
+			blocks.TryAdd(block.Id, block);
+		}
+
+		return blocks;
+	}
+
+	private static JsonElement ToElement(JsonNode? node)
+		=> node is null
+			? JsonSerializer.SerializeToElement<object?>(null)
+			: JsonSerializer.Deserialize<JsonElement>(node.ToJsonString());
+
+	private static JsonObject? ProviderJson(ActionButtonStateProvider? provider)
+		=> provider is null
+			? null
+			: new JsonObject
+			{
+				["blockId"] = provider.BlockId,
+				["integrationId"] = provider.IntegrationId,
+				["actionId"] = provider.ActionId,
+				["actionLabel"] = provider.ActionLabel,
+				["states"] = new JsonArray(provider.States
+					.Select(state => (JsonNode)new JsonObject { ["id"] = state.Id, ["label"] = state.Label })
+					.ToArray()),
+			};
+
+	private static JsonObject? IconProviderJson(ActionButtonIconProvider? provider)
+		=> provider is null
+			? null
+			: new JsonObject
+			{
+				["blockId"] = provider.BlockId,
+				["integrationId"] = provider.IntegrationId,
+				["actionId"] = provider.ActionId,
+				["actionLabel"] = provider.ActionLabel,
+			};
+
+	private static JsonObject? BackupJson(ActionButtonManualStateBackup? backup)
+	{
+		if (backup is null)
+		{
+			return null;
+		}
+
+		var result = new JsonObject { ["states"] = JsonNode.Parse(SerializeStates(backup.States).GetRawText()) };
+
+		if (backup.StateMapping is { } mapping)
+		{
+			result["stateMapping"] = JsonNode.Parse(SerializeMapping(mapping.Rules, mapping.FallbackStateId).GetRawText());
+		}
+
+		if (backup.ActiveStateId is { Length: > 0 } activeStateId)
+		{
+			result["activeStateId"] = activeStateId;
+		}
+
+		return result;
+	}
+
+	private sealed record ProviderNotice(string Id, LocalizedString Text, string Severity);
+
+	private sealed record ProviderOffer(ActionButtonFlowBlockInfo Block, ActionStateSnapshot? States, bool Icon);
+
+	private sealed record ProviderSwitch(string Capability, ActionButtonFlowBlockInfo Block, ActionStateSnapshot? States);
 
 	private static UiIconReference? ReadIcon(JsonElement data)
 	{

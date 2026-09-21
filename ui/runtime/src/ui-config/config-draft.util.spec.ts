@@ -203,6 +203,25 @@ describe('composeConfigDraft', () => {
     });
   });
 
+  it('writes a hidden, read-only bound object the host owns, and drops the key once the host clears it', () => {
+    const hostOwned = (value: unknown): UiNode => ({
+      id: 'root',
+      type: 'stack',
+      children: [
+        { id: 'stateMode', type: UiConfigPrimitives.Boolean, properties: { value: true, events: ['change'] } },
+        {
+          id: 'stateProvider',
+          type: UiConfigPrimitives.Object,
+          properties: { value, visibleWhen: { parameterName: 'stateMode', values: ['persisted-only'] } },
+        },
+      ],
+    });
+    const provider = { blockId: 'b1', integrationId: 'demo', actionId: 'mute', actionLabel: 'Mute', states: [] };
+
+    expect(composeConfigDraft(hostOwned(provider), { stateMode: false })).toEqual({ stateMode: true, stateProvider: provider });
+    expect(composeConfigDraft(hostOwned(null), { stateMode: true, stateProvider: provider })).toEqual({ stateMode: true });
+  });
+
   it('leaves a key alone when its node cannot be edited', () => {
     const root: UiNode = {
       id: 'root',

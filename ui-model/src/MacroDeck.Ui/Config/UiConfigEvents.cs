@@ -1,11 +1,11 @@
 namespace MacroDeck.Ui.Config;
 
 /// <summary>
-/// The event names the configuration profile ships. Twelve, and every one of them is an interaction the
-/// existing editor and config flow dialog already have: editing a field, the dialog's Continue and Cancel
-/// buttons, going back a step, following a link, the advanced-configuration switch, opening a picker, typing
-/// into an autocomplete, the reload button next to a dynamic choice, and the add and remove buttons on an
-/// array.
+/// The event names the configuration profile ships, every one of them an interaction the existing editor and
+/// config flow dialog already have: editing a field, the dialog's Continue and Cancel buttons, going back a
+/// step, following a link, the advanced-configuration switch, opening a picker, typing into an autocomplete,
+/// the reload button next to a dynamic choice, the add and remove buttons on an array, and asking an action
+/// list to adopt one of its actions as a state or icon provider.
 ///
 /// <para>
 /// Absent on purpose: <c>click</c>, <c>input</c>, <c>blur</c> and above all <c>focus</c>. Focus is per-client
@@ -59,10 +59,16 @@ public static class UiConfigEvents
 	/// <summary>An item was removed from an array. The payload names which.</summary>
 	public const string Remove = "remove";
 
+	/// <summary>The user asked an action list to start or stop using one of its actions as the surface's state
+	/// or icon provider. The payload is an object: <c>capability</c> (<c>"state"</c> or <c>"icon"</c>),
+	/// <c>blockId</c> (the action block) and <c>enabled</c> (start or stop). A request, not a write: the
+	/// handler decides, and the node's provider block ids report the outcome.</summary>
+	public const string Provide = "provide";
+
 	/// <summary>The event names this package ships, in declaration order. Not exhaustive - see the type's
 	/// remarks.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
 	[
-		Change, Submit, Cancel, Back, Activate, Expand, Collapse, Open, Filter, Reload, Add, Remove,
+		Change, Submit, Cancel, Back, Activate, Expand, Collapse, Open, Filter, Reload, Add, Remove, Provide,
 	];
 }

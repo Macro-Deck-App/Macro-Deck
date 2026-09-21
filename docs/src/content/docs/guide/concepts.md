@@ -62,6 +62,12 @@ tap switches to the next one.
 With **State mapping**, the state follows a variable instead, for example Discord's **Self Muted**.
 The button then shows the truth even when you mute in Discord itself.
 
+Some actions know their own state, for example **Mute / Unmute** or OBS's scene actions. The action list
+marks them, and each one gets a button to let it drive this button's states. When you add such an action,
+the editor offers this right away. The action then decides which states exist, and you still style each of
+them. The **×** next to *Provided by* brings your own states back. Plugin actions that supply an icon work the same
+way for the button's icon.
+
 ## Variables
 
 Values you can show and use anywhere:

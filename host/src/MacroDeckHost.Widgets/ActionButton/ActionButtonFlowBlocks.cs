@@ -12,7 +12,9 @@ internal sealed record ActionButtonFlowBlockInfo(
 	string IntegrationId,
 	string ActionId,
 	string Label,
-	IReadOnlyDictionary<string, object?> Parameters);
+	IReadOnlyDictionary<string, object?> Parameters,
+	bool Disabled,
+	string ParametersSignature);
 
 /// <summary>
 /// Enumerates the action blocks in a button's own <c>flows</c> array, depth-first through nested children and
@@ -66,7 +68,9 @@ internal static class ActionButtonFlowBlocks
 					integrationId,
 					actionId,
 					ReadString(block, "label") ?? string.Empty,
-					ReadParameters(block)));
+					ReadParameters(block),
+					block.TryGetProperty("disabled", out var disabled) && disabled.ValueKind == JsonValueKind.True,
+					block.TryGetProperty("parameters", out var parameters) ? parameters.GetRawText() : string.Empty));
 			}
 
 			if (block.TryGetProperty("children", out var nested))

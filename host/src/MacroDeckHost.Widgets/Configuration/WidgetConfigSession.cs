@@ -16,12 +16,14 @@ namespace MacroDeckHost.Widgets.Configuration;
 internal sealed class WidgetConfigSession : IUiSession
 {
 	private readonly UiView _view;
+	private Action? _onDispose;
 
-	public WidgetConfigSession(UiView view)
+	public WidgetConfigSession(UiView view, Action? onDispose = null)
 	{
 		ArgumentNullException.ThrowIfNull(view);
 
 		_view = view;
+		_onDispose = onDispose;
 		_view.Changed += (_, _) => Changed?.Invoke(this, EventArgs.Empty);
 		_view.HandlerFaulted += (_, fault)
 			=> Faulted?.Invoke(this, new UiSessionFaultedEventArgs(fault.Exception.Message, fault.Exception));
@@ -37,5 +39,10 @@ internal sealed class WidgetConfigSession : IUiSession
 
 	public void Dispatch(UiEvent uiEvent) => _view.Dispatch(uiEvent);
 
-	public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+	public ValueTask DisposeAsync()
+	{
+		Interlocked.Exchange(ref _onDispose, null)?.Invoke();
+
+		return ValueTask.CompletedTask;
+	}
 }

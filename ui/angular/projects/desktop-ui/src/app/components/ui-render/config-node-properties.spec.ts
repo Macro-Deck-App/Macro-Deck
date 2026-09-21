@@ -52,6 +52,9 @@ describe('shared-ui-node property typing and visibility', () => {
 
     await updateTree(rendered, { root: tree('basic') });
     expect(host.querySelector('[data-node-id="timeout"] input')).toBeNull();
+    expect(getComputedStyle(host.querySelector('[data-node-id="timeout"]')!).display)
+      .withContext('a hidden field takes no gap in its column either')
+      .toBe('none');
     expect(host.querySelector('[data-node-id="orphan"] input')).not.toBeNull();
 
     await updateTree(rendered, { root: tree('ADVANCED') });

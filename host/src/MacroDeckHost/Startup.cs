@@ -241,6 +241,7 @@ public class Startup
 		services.AddSingleton<IUiResourceStore, UiResourceStore>();
 		services.AddSingleton<RemoteUiProviderRegistry>();
 		services.AddSingleton<RemoteIconProviderActionRegistry>();
+		services.AddSingleton<ActionProviderProbe>();
 		services.AddSingleton(provider => new UiProviderRegistry(provider.GetRequiredService<IIntegrationRegistry>(),
 			provider.GetRequiredService<IUiSessionSink>,
 			provider.GetRequiredService<Serilog.ILogger>()));
