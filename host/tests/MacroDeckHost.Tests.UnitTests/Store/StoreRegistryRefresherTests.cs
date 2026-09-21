@@ -162,6 +162,51 @@ internal sealed class StoreRegistryRefresherTests
 	}
 
 	[Test]
+	public async Task A_packages_valid_additional_links_reach_the_catalog_in_declared_order()
+	{
+		var fixture = Registry();
+		fixture.AddPackage("plugin",
+			"com.acme.linked",
+			additionalLinks: new object[]
+			{
+				new { type = "documentation", url = "https://docs.acme.test" },
+				new { type = "wiki", url = "javascript:alert(1)" },
+				new { type = "roadmap", url = "https://acme.test/roadmap" },
+				new { type = "custom", label = "Setup Guide", url = "https://acme.test/setup" },
+				new { type = "support", url = "https://docs.acme.test" }
+			});
+
+		await Create(fixture).Refresh();
+
+		Assert.That(_catalog.Snapshot.Entries.Single(entry => entry.Id == "com.acme.linked").AdditionalLinks,
+			Is.EqualTo(new[]
+			{
+				new StoreExtensionLink { Type = "documentation", Url = "https://docs.acme.test" },
+				new StoreExtensionLink { Type = "custom", Url = "https://acme.test/setup", Label = "Setup Guide" }
+			}));
+	}
+
+	[Test]
+	public async Task Malformed_additional_links_never_cost_the_package_or_the_refresh()
+	{
+		var fixture = Registry();
+		fixture.AddPackage("plugin", "com.acme.string-links", additionalLinks: "https://acme.test");
+		fixture.AddPackage("plugin", "com.acme.odd-links", additionalLinks: new object?[] { null, 5, new { type = 7, url = new[] { 1 } } });
+
+		await Create(fixture).Refresh();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_catalog.Snapshot.Entries.Single(entry => entry.Id == "com.acme.string-links").AdditionalLinks,
+				Is.Empty);
+			Assert.That(_catalog.Snapshot.Entries.Single(entry => entry.Id == "com.acme.odd-links").AdditionalLinks,
+				Is.Empty);
+			Assert.That(_catalog.Snapshot.Entries.Single(entry => entry.Id == "com.acme.hue").AdditionalLinks,
+				Is.Empty);
+		});
+	}
+
+	[Test]
 	public async Task A_published_featured_list_reaches_the_catalog_in_the_order_it_was_published()
 	{
 		var fixture = Registry();

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using MacroDeck.Plugin.Packaging.Manifest;
 
 namespace MacroDeck.Plugin.Packaging.Tests.UnitTests.Manifest;
@@ -15,6 +16,8 @@ internal sealed class PluginManifestBlockValidationTests
 	private static readonly string[] _singleUnknownPermission = ["totally.made.up"];
 
 	private static readonly string[] _threeLanguages = ["en", "zh-Hant-TW", "qya"];
+
+	private static readonly string[] _typeAndUrl = ["type", "url"];
 
 	private readonly PluginManifestReader _reader = new();
 
@@ -415,6 +418,80 @@ internal sealed class PluginManifestBlockValidationTests
 					   "publisher": { "name": "Suchbyte", "id": "Suchbyte" }
 					   """,
 			PluginManifestError.InvalidPublisher);
+	}
+
+	// --- additional links ---------------------------------------------------------------------
+
+	[Test]
+	public void A_manifest_without_additional_links_reads_them_as_absent()
+	{
+		var result = Read(null);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True, result.ErrorMessage);
+			Assert.That(result.Manifest!.AdditionalLinks, Is.Null);
+		});
+	}
+
+	[Test]
+	public void Additional_links_are_read_in_declared_order()
+	{
+		var result = Read("""
+						  "additionalLinks": [
+						    { "type": "documentation", "url": "https://docs.example.com" },
+						    { "type": "custom", "label": "Setup Guide", "url": "https://example.com/setup" }
+						  ]
+						  """);
+
+		Assert.That(result.Manifest!.AdditionalLinks,
+			Is.EqualTo(new[]
+			{
+				new PluginManifestLink { Type = "documentation", Url = "https://docs.example.com" },
+				new PluginManifestLink { Type = "custom", Url = "https://example.com/setup", Label = "Setup Guide" }
+			}));
+	}
+
+	[TestCase("\"additionalLinks\": \"https://example.com\"")]
+	[TestCase("\"additionalLinks\": [ null, 5, \"x\" ]")]
+	[TestCase("\"additionalLinks\": [ { \"type\": 5, \"url\": [] } ]")]
+	[TestCase("\"additionalLinks\": [ { \"type\": \"wiki\", \"label\": \"Mine\", \"url\": \"ftp://x\" } ]")]
+	[TestCase("\"additionalLinks\": [ { \"url\": \"https://a.example\" }, { \"url\": \"https://a.example\" } ]")]
+	public void Invalid_additional_links_never_stop_a_manifest_from_loading(string block)
+	{
+		var result = Read(block);
+
+		Assert.That(result.Success, Is.True, result.ErrorMessage);
+	}
+
+	[Test]
+	public void Malformed_link_entries_keep_their_position()
+	{
+		var result = Read("""
+						  "additionalLinks": [ null, { "type": 5, "url": "https://example.com" } ]
+						  """);
+
+		Assert.That(result.Manifest!.AdditionalLinks,
+			Is.EqualTo(new[] { new PluginManifestLink(), new PluginManifestLink { Url = "https://example.com" } }));
+	}
+
+	[Test]
+	public void Writing_a_manifest_never_emits_a_null_link_member()
+	{
+		var manifest = Read("""
+							"additionalLinks": [ { "type": "wiki", "url": "https://example.com/wiki" } ]
+							""").Manifest!;
+
+		var json = JsonSerializer.Serialize(manifest, PluginManifestJson.Options);
+		using var document = JsonDocument.Parse(json);
+		var link = document.RootElement.GetProperty("additionalLinks")[0];
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(link.EnumerateObject().Select(property => property.Name), Is.EqualTo(_typeAndUrl));
+			Assert.That(JsonSerializer.Deserialize<PluginManifest>(json, PluginManifestJson.Options)!.AdditionalLinks,
+				Is.EqualTo(manifest.AdditionalLinks));
+		});
 	}
 
 	// --- unchanged behaviour ------------------------------------------------------------------

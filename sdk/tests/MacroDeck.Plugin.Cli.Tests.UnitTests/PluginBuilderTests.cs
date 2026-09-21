@@ -630,6 +630,40 @@ public class PluginBuilderTests
 	}
 
 	[Test]
+	public async Task A_manifest_repeating_a_link_is_refused_before_any_target_is_built()
+	{
+		var rids = ManifestFixtures.PickForeignRids(2);
+		var project = BuildFixtures.WriteProject(rids);
+
+		try
+		{
+			var manifest = JsonNode.Parse(BuildFixtures.ManifestJson(rids))!;
+			manifest["additionalLinks"] = JsonNode.Parse("""
+				[
+				  { "type": "documentation", "url": "https://docs.example.com" },
+				  { "type": "support", "url": "https://docs.example.com" }
+				]
+				""");
+			await File.WriteAllTextAsync(Path.Combine(project, "manifest.json"), manifest.ToJsonString());
+
+			var runner = new FakePluginBuildRunner { OnRun = BuildFixtures.ProducingOutput(project, rids) };
+
+			var result = await BuildAsync(project, runner);
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(result.FailureReason, Is.EqualTo(PluginBuildFailureReason.ManifestInvalid));
+				Assert.That(result.FailureDetail, Does.Contain("invalid-additional-link"));
+				Assert.That(runner.Invocations, Is.Empty);
+			});
+		}
+		finally
+		{
+			Delete(project);
+		}
+	}
+
+	[Test]
 	public async Task A_stale_files_list_and_signature_neither_fail_the_build_nor_reach_the_artifact()
 	{
 		var rids = ManifestFixtures.PickForeignRids(1);

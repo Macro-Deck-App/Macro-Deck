@@ -14363,6 +14363,36 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.Page.LicenseField" xml:space="preserve">
     <value>License</value>
   </data>
+  <data name="Store.Page.Link.Changelog" xml:space="preserve">
+    <value>Changelog</value>
+  </data>
+  <data name="Store.Page.Link.Community" xml:space="preserve">
+    <value>Community</value>
+  </data>
+  <data name="Store.Page.Link.Documentation" xml:space="preserve">
+    <value>Documentation</value>
+  </data>
+  <data name="Store.Page.Link.Donate" xml:space="preserve">
+    <value>Donate</value>
+  </data>
+  <data name="Store.Page.Link.Issues" xml:space="preserve">
+    <value>Report an issue</value>
+  </data>
+  <data name="Store.Page.Link.License" xml:space="preserve">
+    <value>License</value>
+  </data>
+  <data name="Store.Page.Link.Privacy" xml:space="preserve">
+    <value>Privacy policy</value>
+  </data>
+  <data name="Store.Page.Link.Support" xml:space="preserve">
+    <value>Support</value>
+  </data>
+  <data name="Store.Page.Link.Terms" xml:space="preserve">
+    <value>Terms of service</value>
+  </data>
+  <data name="Store.Page.Link.Wiki" xml:space="preserve">
+    <value>Wiki</value>
+  </data>
   <data name="Store.Page.LinksHeading" xml:space="preserve">
     <value>Links</value>
   </data>

@@ -56,6 +56,13 @@ export interface StoreVersionHistoryBody {
   changelog?: string | null;
 }
 
+// A standard type is labelled by the client in the viewer's language; only custom links carry a label.
+export interface StoreExtensionLinkBody {
+  type: string;
+  url: string;
+  label?: string | null;
+}
+
 // longDescription and changelog are third-party registry markdown: render through
 // StoreMarkdownComponent's safe-subset parser, never innerHTML or a DomSanitizer escape hatch.
 // history is newest first; an older host sends an empty array, so callers fall back to changelog.
@@ -64,6 +71,8 @@ export interface StoreExtensionDetailBody extends StoreCatalogItemBody {
   changelog?: string | null;
   repository?: string | null;
   license?: string | null;
+  // Absent from an older host.
+  additionalLinks?: StoreExtensionLinkBody[];
   screenshots: StoreScreenshotBody[];
   downloadSize: number;
   supportedOperatingSystems: string[];

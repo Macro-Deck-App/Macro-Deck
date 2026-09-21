@@ -14363,6 +14363,36 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Page.LicenseField" xml:space="preserve">
     <value>Licencja</value>
   </data>
+  <data name="Store.Page.Link.Changelog" xml:space="preserve">
+    <value>Lista zmian</value>
+  </data>
+  <data name="Store.Page.Link.Community" xml:space="preserve">
+    <value>Społeczność</value>
+  </data>
+  <data name="Store.Page.Link.Documentation" xml:space="preserve">
+    <value>Dokumentacja</value>
+  </data>
+  <data name="Store.Page.Link.Donate" xml:space="preserve">
+    <value>Wesprzyj</value>
+  </data>
+  <data name="Store.Page.Link.Issues" xml:space="preserve">
+    <value>Zgłoś problem</value>
+  </data>
+  <data name="Store.Page.Link.License" xml:space="preserve">
+    <value>Licencja</value>
+  </data>
+  <data name="Store.Page.Link.Privacy" xml:space="preserve">
+    <value>Polityka prywatności</value>
+  </data>
+  <data name="Store.Page.Link.Support" xml:space="preserve">
+    <value>Wsparcie</value>
+  </data>
+  <data name="Store.Page.Link.Terms" xml:space="preserve">
+    <value>Warunki korzystania</value>
+  </data>
+  <data name="Store.Page.Link.Wiki" xml:space="preserve">
+    <value>Wiki</value>
+  </data>
   <data name="Store.Page.LinksHeading" xml:space="preserve">
     <value>Linki</value>
   </data>

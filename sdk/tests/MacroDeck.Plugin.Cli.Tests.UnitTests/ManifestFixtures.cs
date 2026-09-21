@@ -235,6 +235,28 @@ internal static class ManifestFixtures
 		return directory;
 	}
 
+	public static string WriteManifestDirectoryWithAdditionalLinks(string additionalLinksJson, string id = PluginId)
+	{
+		var directory = Directory.CreateTempSubdirectory("macrodeck-plugin-cli-tests-").FullName;
+		File.WriteAllText(Path.Combine(directory, EntrypointFileName), string.Empty);
+
+		var json = $$"""
+					 {
+					 	"manifestVersion": 1,
+					 	"id": "{{id}}",
+					 	"name": "Test Plugin",
+					 	"version": "{{Version}}",
+					 	"entrypoints": {
+					 		"{{PluginRuntimeIdentifiers.Current}}": { "executable": "{{EntrypointFileName}}" }
+					 	},
+					 	"additionalLinks": {{additionalLinksJson}}
+					 }
+					 """;
+
+		File.WriteAllText(Path.Combine(directory, PluginArtifactFiles.ManifestFileName), json);
+		return directory;
+	}
+
 	/// <summary>JSON broken on an early line (line 2: an unquoted, unterminated string value) - the file
 	/// never parses at all, so <c>IPluginManifestReader</c> reports <c>Malformed</c>.</summary>
 	public static string WriteEarlyMalformedManifestDirectory()

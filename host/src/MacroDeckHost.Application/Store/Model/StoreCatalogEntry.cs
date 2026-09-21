@@ -18,6 +18,8 @@ public sealed record StoreCatalogEntry
 
 	public string? License { get; init; }
 
+	public IReadOnlyList<StoreExtensionLink> AdditionalLinks { get; init; } = [];
+
 	public DateTimeOffset? CreatedAt { get; init; }
 
 	public DateTimeOffset? UpdatedAt { get; init; }

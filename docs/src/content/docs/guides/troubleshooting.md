@@ -134,6 +134,8 @@ com.example.my-plugin 1.0: 1 error(s), 1 warning(s).
 | `invalid-plugin-id` | `id` is not reverse-domain: two or more dot-separated segments, lowercase, no underscores. | `com.example.my-plugin`. |
 | `id-mismatch`, `version-mismatch` | The manifest disagrees with the directories it is installed under. | Match `<id>/versions/<version>/`. |
 | `unknown-permission` | A permission outside the vocabulary. Advisory: it still installs. | Check [the vocabulary](/reference/manifest/#permissions). |
+| `invalid-additional-link` | An `additionalLinks` entry has no `type` or `url`, a URL that is not absolute `http`/`https`, a `custom` link without a `label`, a `label` on a standard type, or repeats a URL, type or label. | Follow [the rules](/reference/manifest/#additionallinks). |
+| `unknown-link-type` | An `additionalLinks` type outside the standard list. Advisory: it installs, but the Store does not show the link. | Use a standard type or `custom` with a `label`. |
 | `file-missing`, `file-size-mismatch`, `file-digest-mismatch` | `files[]` disagrees with the disk. | Do not hand-write `files[]`; let `pack` recompute it. |
 | `undeclared-file` | A file in the artifact that `files[]` omits; once present, `files[]` is a complete inventory. | Repack. |
 | `not-an-artifact` (exit `3`) | `--artifact` is not a ZIP, often a `manifest.json`. | Use `--manifest`; the CLI suggests it. |
