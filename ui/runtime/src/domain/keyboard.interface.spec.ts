@@ -32,6 +32,23 @@ describe('keyFromEvent', () => {
     expect(keyFromEvent(new KeyboardEvent('keydown', { key: '5', code: 'Digit5' }))).toBe('5');
   });
 
+  it('records the physical letter or digit when AltGr or Shift makes the key produce another character', () => {
+    const altGr = { ctrlKey: true, altKey: true };
+    expect(keyFromEvent(new KeyboardEvent('keydown', { key: '³', code: 'Digit3', ...altGr }))).toBe('3');
+    expect(keyFromEvent(new KeyboardEvent('keydown', { key: '@', code: 'KeyQ', ...altGr }))).toBe('Q');
+    expect(keyFromEvent(new KeyboardEvent('keydown', { key: '€', code: 'KeyE', ...altGr }))).toBe('E');
+    expect(keyFromEvent(new KeyboardEvent('keydown', { key: '!', code: 'Digit1', shiftKey: true }))).toBe('1');
+  });
+
+  it('records the Latin letter of the physical key on non-Latin layouts', () => {
+    expect(keyFromEvent(new KeyboardEvent('keydown', { key: 'й', code: 'KeyQ' }))).toBe('Q');
+  });
+
+  it('keeps the layout letter when the key already produces a letter', () => {
+    expect(keyFromEvent(new KeyboardEvent('keydown', { key: 'y', code: 'KeyZ' }))).toBe('Y');
+    expect(keyFromEvent(new KeyboardEvent('keydown', { key: 'a', code: 'KeyQ' }))).toBe('A');
+  });
+
   it('passes named keys through unchanged', () => {
     expect(keyFromEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter' }))).toBe('Enter');
     expect(keyFromEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', code: 'ArrowUp' }))).toBe('ArrowUp');
