@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text.Json;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
@@ -9,7 +10,9 @@ public sealed record CompanionLicense(
 	string LicenseId,
 	string Source,
 	string KeyId,
-	DateTimeOffset IssuedAt)
+	DateTimeOffset IssuedAt,
+	DateTimeOffset? PurchasedAt = null,
+	string? BillingId = null)
 {
 	public bool IsTest => KeyId == CompanionLicenseTokens.TestKeyId;
 }
@@ -20,6 +23,8 @@ public sealed class CompanionLicenseTokens
 	public const string Audience = "macrodeck-companion";
 	public const string Product = "companion_app_license";
 	public const string TestKeyId = "test-2026";
+	public const int MaximumBillingIdLength = 256;
+	private const long MaximumEpochSeconds = 253402300799;
 
 	private const string TestPublicKey =
 		"BMdFPTKg5HJXAsVCgNN171OyCGorswlhp7x8ikN/sd5ILXO0aL7NWXsaH5ZQKqeaZzjqXarz5MIg06nglE1Hecw=";
@@ -74,25 +79,72 @@ public sealed class CompanionLicenseTokens
 			return null;
 		}
 
-		return new CompanionLicense(token, jwt.Subject, source, jwt.Kid, new DateTimeOffset(jwt.IssuedAt, TimeSpan.Zero));
+		var (purchasedAt, billingId) = DisplayClaims(jwt);
+		return new CompanionLicense(token,
+			jwt.Subject,
+			source,
+			jwt.Kid,
+			new DateTimeOffset(jwt.IssuedAt, TimeSpan.Zero),
+			purchasedAt,
+			billingId);
+	}
+
+	private static (DateTimeOffset? PurchasedAt, string? BillingId) DisplayClaims(JsonWebToken jwt)
+	{
+		try
+		{
+			using var payload = JsonDocument.Parse(Base64UrlEncoder.DecodeBytes(jwt.EncodedPayload));
+			var root = payload.RootElement;
+			DateTimeOffset? purchasedAt = root.TryGetProperty("purchased_at", out var purchased) &&
+				purchased.ValueKind == JsonValueKind.Number &&
+				purchased.TryGetInt64(out var seconds) &&
+				seconds is > 0 and <= MaximumEpochSeconds
+					? DateTimeOffset.FromUnixTimeSeconds(seconds)
+					: null;
+			var billingId = root.TryGetProperty("billing_id", out var billing) &&
+				billing.ValueKind == JsonValueKind.String &&
+				billing.GetString() is { Length: > 0 and <= MaximumBillingIdLength } value &&
+				!value.Any(char.IsControl)
+					? value
+					: null;
+			return (purchasedAt, billingId);
+		}
+		catch (Exception ex) when (ex is JsonException or FormatException or ArgumentException)
+		{
+			return (null, null);
+		}
 	}
 
 	public static string Sign(ECDsa privateKey,
 		string keyId,
 		string licenseId,
 		string source,
-		DateTimeOffset issuedAt)
-		=> Handler.CreateToken(new SecurityTokenDescriptor
+		DateTimeOffset issuedAt,
+		DateTimeOffset? purchasedAt = null,
+		string? billingId = null)
+	{
+		var claims = new Dictionary<string, object>
+		{
+			[JwtRegisteredClaimNames.Sub] = licenseId,
+			["product"] = Product,
+			["source"] = source
+		};
+		if (purchasedAt is { } purchased)
+		{
+			claims["purchased_at"] = purchased.ToUnixTimeSeconds();
+		}
+
+		if (billingId is not null)
+		{
+			claims["billing_id"] = billingId;
+		}
+
+		return Handler.CreateToken(new SecurityTokenDescriptor
 		{
 			Issuer = Issuer,
 			Audience = Audience,
 			IssuedAt = issuedAt.UtcDateTime,
-			Claims = new Dictionary<string, object>
-			{
-				[JwtRegisteredClaimNames.Sub] = licenseId,
-				["product"] = Product,
-				["source"] = source
-			},
+			Claims = claims,
 			// The default factory caches a signer per key id, which outlives a key disposed after signing.
 			SigningCredentials = new SigningCredentials(
 				new ECDsaSecurityKey(privateKey)
@@ -102,6 +154,7 @@ public sealed class CompanionLicenseTokens
 				},
 				SecurityAlgorithms.EcdsaSha256)
 		});
+	}
 
 	private ECDsaSecurityKey? Resolve(string? kid, bool trustTestKey)
 	{

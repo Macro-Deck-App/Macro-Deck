@@ -697,8 +697,13 @@ public class Startup
 		services.AddSingleton<CompanionDeviceRegistry>();
 		services.AddSingleton<ICompanionGateway>(sp => sp.GetRequiredService<CompanionDeviceRegistry>());
 		services.AddSingleton(new CompanionLicenseTokens(CompanionLicenseTokens.ProductionKeys));
-		services.AddSingleton<IPlatformLicenseClient, FakePlatformLicenseClient>();
-		services.AddSingleton<ICompanionLicenseService, CompanionLicenseService>();
+		services.AddHttpClient(PlatformLicenseClient.HttpClientName)
+			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
+		services.AddSingleton<IPlatformLicenseClient, PlatformLicenseClient>();
+		services.AddSingleton<TestCompanionLicenseIssuer>();
+		services.AddSingleton<CompanionLicenseService>();
+		services.AddSingleton<ICompanionLicenseService>(sp => sp.GetRequiredService<CompanionLicenseService>());
+		services.AddHostedService<CompanionLicenseBackgroundService>();
 		services.AddSingleton<IIntegrationConfigMutationCoordinator, IntegrationConfigMutationCoordinator>();
 		services.AddSingleton<IntegrationInitializer>();
 		services.AddSingleton<IIntegrationLifecycle, IntegrationLifecycle>();

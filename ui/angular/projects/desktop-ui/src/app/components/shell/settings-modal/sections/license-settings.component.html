@@ -7,6 +7,21 @@
         {{ (status()?.licensed ? 'macrodeck.app:Settings.License.Licensed' : 'macrodeck.app:Settings.License.NotLicensed') | translate }}
       </span>
     </shared-settings-row>
+    @if (status()?.issuePending) {
+      <div class="license-settings__pending" data-testid="license-issue-pending" role="status">
+        <span class="icon icon-refresh icon-sm" aria-hidden="true"></span>
+        <div>
+          <p>{{ 'macrodeck.app:Settings.License.IssuePending' | translate }}</p>
+          <p data-testid="license-next-attempt">
+            @if (nextAttempt(); as time) {
+              {{ 'macrodeck.app:Settings.License.NextAttempt' | translate: { time: time } }}
+            } @else {
+              {{ 'macrodeck.app:Settings.License.NextAttemptSoon' | translate }}
+            }
+          </p>
+        </div>
+      </div>
+    }
     @if (status()?.licensed) {
       @if (status()?.isTest) {
         <p class="license-settings__test-marker" data-testid="license-test-marker">
@@ -20,6 +35,16 @@
       <shared-settings-row [label]="'macrodeck.app:Settings.License.SourceLabel' | translate">
         <span class="license-settings__value">{{ sourceLabel() }}</span>
       </shared-settings-row>
+      @if (purchasedAt(); as purchased) {
+        <shared-settings-row [label]="'macrodeck.app:Settings.License.PurchasedAtLabel' | translate">
+          <span class="license-settings__value" data-testid="license-purchased-at">{{ purchased }}</span>
+        </shared-settings-row>
+      }
+      @if (status()?.billingId; as billingId) {
+        <shared-settings-row [label]="'macrodeck.app:Settings.License.BillingIdLabel' | translate">
+          <span class="license-settings__value license-settings__value--mono" data-testid="license-billing-id">{{ billingId }}</span>
+        </shared-settings-row>
+      }
       <shared-settings-row [label]="'macrodeck.app:Settings.License.KeyIdLabel' | translate">
         <span class="license-settings__value license-settings__value--mono">{{ status()?.keyId ?? '-' }}</span>
       </shared-settings-row>

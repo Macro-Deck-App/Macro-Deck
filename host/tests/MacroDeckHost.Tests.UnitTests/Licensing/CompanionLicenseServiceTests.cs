@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text.Json;
@@ -6,6 +7,7 @@ using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Licensing;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Licensing;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Infrastructure.Licensing;
@@ -14,6 +16,7 @@ using MacroDeckHost.Tests.UnitTests.Companion;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Ui;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -41,33 +44,29 @@ internal sealed class CompanionLicenseServiceTests
 	}
 
 	[Test]
-	public async Task A_proof_is_answered_at_once_then_exchanged_stored_and_pushed()
+	public async Task A_proof_is_answered_at_once_then_issued_in_the_background_stored_and_pushed()
 	{
 		var fixture = new Fixture();
-		fixture.Platform = new GatedPlatform();
-		var gated = (GatedPlatform)fixture.Platform;
 		var device = fixture.Harness.AddDevice("Tablet");
 		await fixture.Harness.ReportAsync("connection-other", device);
-
-		var answer = await fixture.Service.SyncAsync("connection-buyer",
-			new SyncCompanionLicenseRequest
-			{
-				Proof = new CompanionLicenseProof { Platform = "google-play", ProductId = CompanionLicenseTokens.Product }
-			},
-			CancellationToken.None);
-		var answeredBeforeExchange = !fixture.Service.Exchange.IsCompleted;
 		var token = Sign(ProductionKey, ProductionKeyId);
-		gated.Issued.SetResult(token);
-		await fixture.Service.Exchange.WaitAsync(TimeSpan.FromSeconds(5));
+		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Issued(token);
+
+		var answer = await fixture.Service.SyncAsync("connection-buyer", GooglePlay("purchase-a"), CancellationToken.None);
+		var callsBeforeWork = fixture.Platform.Proofs.Count;
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 
 		var pushes = fixture.Harness.Transport.ConnectionMessages
 			.Where(message => message.Message is CompanionLicenseEvent)
 			.ToList();
-		Assert.Multiple(async () =>
+		var status = await fixture.Service.GetStatusAsync(CancellationToken.None);
+		Assert.Multiple(() =>
 		{
 			Assert.That(answer.License, Is.Null);
-			Assert.That(answeredBeforeExchange, Is.True);
-			Assert.That((await fixture.Service.GetStatusAsync(CancellationToken.None)).Licensed, Is.True);
+			Assert.That(callsBeforeWork, Is.Zero);
+			Assert.That(fixture.Platform.Proofs.Select(proof => proof.PurchaseToken), Is.EqualTo(new[] { "purchase-a" }));
+			Assert.That(status.Licensed, Is.True);
+			Assert.That(status.IssuePending, Is.False);
 			Assert.That(pushes.Select(push => push.ConnectionId),
 				Is.EquivalentTo(new[] { "connection-other", "connection-buyer" }));
 			Assert.That(pushes.Select(push => ((CompanionLicenseEvent)push.Message).License),
@@ -151,7 +150,6 @@ internal sealed class CompanionLicenseServiceTests
 	public async Task The_test_key_is_trusted_only_while_developer_mode_is_on()
 	{
 		var fixture = new Fixture();
-		fixture.Platform = new FakePlatformLicenseClient(fixture.ScopeFactory, fixture.Time);
 
 		var refusedWhileOff = await fixture.Service.IssueTestLicenseAsync(default);
 		fixture.Preferences.DeveloperMode = true;
@@ -178,7 +176,6 @@ internal sealed class CompanionLicenseServiceTests
 	public async Task A_production_license_replaces_a_stored_test_license()
 	{
 		var fixture = new Fixture();
-		fixture.Platform = new FakePlatformLicenseClient(fixture.ScopeFactory, fixture.Time);
 		fixture.Preferences.DeveloperMode = true;
 		await fixture.Service.IssueTestLicenseAsync(default);
 		var production = Sign(ProductionKey, ProductionKeyId, "license-real");
@@ -198,7 +195,6 @@ internal sealed class CompanionLicenseServiceTests
 	public async Task A_test_license_never_replaces_a_stored_production_license()
 	{
 		var fixture = new Fixture();
-		fixture.Platform = new FakePlatformLicenseClient(fixture.ScopeFactory, fixture.Time);
 		fixture.Preferences.DeveloperMode = true;
 		var production = Sign(ProductionKey, ProductionKeyId, "license-real");
 		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = production }, default);
@@ -216,20 +212,13 @@ internal sealed class CompanionLicenseServiceTests
 	public async Task A_proof_is_exchanged_while_only_a_test_license_is_stored()
 	{
 		var fixture = new Fixture();
-		fixture.Platform = new FakePlatformLicenseClient(fixture.ScopeFactory, fixture.Time);
 		fixture.Preferences.DeveloperMode = true;
 		await fixture.Service.IssueTestLicenseAsync(default);
-		var gated = new GatedPlatform();
-		fixture.Platform = gated;
+		var production = Sign(ProductionKey, ProductionKeyId, "license-bought");
+		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Issued(production);
 
-		await fixture.Service.SyncAsync("c",
-			new SyncCompanionLicenseRequest
-			{
-				Proof = new CompanionLicenseProof { Platform = "google-play", ProductId = CompanionLicenseTokens.Product }
-			},
-			default);
-		gated.Issued.SetResult(Sign(ProductionKey, ProductionKeyId, "license-bought"));
-		await fixture.Service.Exchange.WaitAsync(TimeSpan.FromSeconds(5));
+		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), default);
+		await fixture.Service.RunDueWorkAsync(default);
 
 		var status = await fixture.Service.GetStatusAsync(default);
 		Assert.Multiple(() =>
@@ -243,7 +232,6 @@ internal sealed class CompanionLicenseServiceTests
 	public async Task Revoking_removes_a_stored_test_license_records_its_id_and_tells_every_companion()
 	{
 		var fixture = new Fixture();
-		fixture.Platform = new FakePlatformLicenseClient(fixture.ScopeFactory, fixture.Time);
 		fixture.Preferences.DeveloperMode = true;
 		var issued = await fixture.Service.IssueTestLicenseAsync(default);
 		var device = fixture.Harness.AddDevice("Tablet");
@@ -270,7 +258,6 @@ internal sealed class CompanionLicenseServiceTests
 	public async Task A_stored_test_license_stays_revocable_after_developer_mode_is_turned_off()
 	{
 		var fixture = new Fixture();
-		fixture.Platform = new FakePlatformLicenseClient(fixture.ScopeFactory, fixture.Time);
 		fixture.Preferences.DeveloperMode = true;
 		await fixture.Service.IssueTestLicenseAsync(default);
 		fixture.Preferences.DeveloperMode = false;
@@ -309,7 +296,6 @@ internal sealed class CompanionLicenseServiceTests
 	public async Task A_revoked_test_token_is_not_adopted_again_and_sync_names_it()
 	{
 		var fixture = new Fixture();
-		fixture.Platform = new FakePlatformLicenseClient(fixture.ScopeFactory, fixture.Time);
 		fixture.Preferences.DeveloperMode = true;
 		await fixture.Service.IssueTestLicenseAsync(default);
 		var held = (await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest(), default)).License;
@@ -332,7 +318,6 @@ internal sealed class CompanionLicenseServiceTests
 	public async Task The_revoked_list_is_capped_by_dropping_the_oldest_id()
 	{
 		var fixture = new Fixture();
-		fixture.Platform = new FakePlatformLicenseClient(fixture.ScopeFactory, fixture.Time);
 		fixture.Preferences.DeveloperMode = true;
 		var seeded = Enumerable.Range(0, CompanionLicenseService.MaximumRevokedTestIds).Select(index => $"seeded-{index}");
 		await fixture.Repository.SetValue(CompanionLicenseService.RevokedTestIdsKey, JsonSerializer.Serialize(seeded));
@@ -351,14 +336,11 @@ internal sealed class CompanionLicenseServiceTests
 	}
 
 	[Test]
-	public async Task The_fake_platform_issues_nothing_without_developer_mode()
+	public async Task The_test_issuer_issues_nothing_without_developer_mode()
 	{
 		var fixture = new Fixture();
-		var platform = new FakePlatformLicenseClient(fixture.ScopeFactory, fixture.Time);
 
-		var issued = await platform.IssueCompanionLicenseAsync(
-			new CompanionLicenseProof { Platform = "app-store", ProductId = CompanionLicenseTokens.Product },
-			default);
+		var issued = await new TestCompanionLicenseIssuer(fixture.ScopeFactory, fixture.Time).IssueAsync(default);
 
 		Assert.That(issued, Is.Null);
 	}
@@ -464,11 +446,606 @@ internal sealed class CompanionLicenseServiceTests
 		});
 	}
 
+	[Test]
+	public async Task A_transient_failure_keeps_the_proof_pending_and_retries_with_growing_delays()
+	{
+		var fixture = new Fixture();
+		var token = Sign(ProductionKey, ProductionKeyId);
+		var failures = 3;
+		fixture.Platform.Answer = _ => failures-- > 0
+			? new PlatformLicenseIssueResult.Retry(null, false)
+			: new PlatformLicenseIssueResult.Issued(token);
+		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), default);
+
+		var delays = new List<TimeSpan>();
+		var pendingSeen = new List<bool>();
+		for (var attempt = 0; attempt < 3; attempt++)
+		{
+			await fixture.Service.RunDueWorkAsync(default);
+			var status = await fixture.Service.GetStatusAsync(default);
+			pendingSeen.Add(status.IssuePending);
+			var next = DateTimeOffset.FromUnixTimeMilliseconds(status.NextIssueAttemptAt!.Value);
+			delays.Add(next - fixture.Time.Now);
+			await fixture.Service.RunDueWorkAsync(default);
+			fixture.Time.Now = next;
+		}
+
+		var callsBeforeRecovery = fixture.Platform.Proofs.Count;
+		await fixture.Service.RunDueWorkAsync(default);
+		var recovered = await fixture.Service.GetStatusAsync(default);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(pendingSeen, Is.All.True);
+			Assert.That(callsBeforeRecovery, Is.EqualTo(3), "a retry never runs before its time");
+			Assert.That(delays[0], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1)).And.LessThanOrEqualTo(TimeSpan.FromSeconds(10)));
+			Assert.That(delays[2], Is.GreaterThan(delays[0]));
+			Assert.That(recovered.Licensed, Is.True);
+			Assert.That(recovered.IssuePending, Is.False);
+			Assert.That(recovered.NextIssueAttemptAt, Is.Null);
+		});
+	}
+
+	[Test]
+	public void The_retry_delay_starts_at_a_few_seconds_is_jittered_capped_at_thirty_minutes_and_honours_retry_after()
+	{
+		var fixture = new Fixture();
+		fixture.RandomValue = 0;
+		var firstLow = fixture.Service.RetryDelay(1, null);
+		var manyLow = fixture.Service.RetryDelay(5000, null);
+		fixture.RandomValue = 1;
+		var firstHigh = fixture.Service.RetryDelay(1, null);
+		var manyHigh = fixture.Service.RetryDelay(int.MaxValue, null);
+		var requested = fixture.Service.RetryDelay(1, TimeSpan.FromMinutes(10));
+		var excessive = fixture.Service.RetryDelay(1, TimeSpan.FromHours(5));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(firstLow, Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1)));
+			Assert.That(firstHigh, Is.LessThanOrEqualTo(TimeSpan.FromSeconds(10)));
+			Assert.That(firstLow, Is.Not.EqualTo(firstHigh), "jitter");
+			Assert.That(manyLow, Is.GreaterThan(TimeSpan.FromMinutes(5)).And.LessThanOrEqualTo(TimeSpan.FromMinutes(30)));
+			Assert.That(manyHigh, Is.EqualTo(TimeSpan.FromMinutes(30)));
+			Assert.That(requested, Is.EqualTo(TimeSpan.FromMinutes(10)));
+			Assert.That(excessive, Is.LessThanOrEqualTo(TimeSpan.FromMinutes(30)));
+		});
+	}
+
+	[Test]
+	public async Task A_pending_proof_survives_a_restart_and_is_encrypted_at_rest()
+	{
+		var fixture = new Fixture();
+		await fixture.Service.SyncAsync("c", GooglePlay("secret-purchase-token"), default);
+		await fixture.Service.RunDueWorkAsync(default);
+		var stored = string.Join("\n", fixture.Repository.Values.Values);
+		var token = Sign(ProductionKey, ProductionKeyId);
+		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Issued(token);
+
+		var restarted = fixture.Restart();
+		var pendingAfterRestart = (await restarted.GetStatusAsync(default)).IssuePending;
+		fixture.Time.Advance(TimeSpan.FromMinutes(1));
+		await restarted.RunDueWorkAsync(default);
+
+		Assert.Multiple(async () =>
+		{
+			Assert.That(stored, Does.Not.Contain("secret-purchase-token"));
+			Assert.That(stored, Does.Not.Contain("GPA.1234"));
+			Assert.That(pendingAfterRestart, Is.True);
+			Assert.That(fixture.Platform.Proofs.Last().PurchaseToken, Is.EqualTo("secret-purchase-token"));
+			Assert.That((await restarted.GetStatusAsync(default)).Licensed, Is.True);
+		});
+	}
+
+	[Test]
+	public async Task A_refusal_stops_retrying_and_the_same_purchase_is_not_sent_again_even_after_a_restart()
+	{
+		var fixture = new Fixture();
+		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Refused("purchase-refunded");
+
+		await fixture.Service.SyncAsync("c", AppStore("2000001", "1000001"), default);
+		await fixture.Service.RunDueWorkAsync(default);
+		var afterRefusal = await fixture.Service.GetStatusAsync(default);
+		var restarted = fixture.Restart();
+		await restarted.SyncAsync("c", AppStore("2000002", "1000001"), default);
+		fixture.Time.Advance(TimeSpan.FromHours(1));
+		await restarted.RunDueWorkAsync(default);
+
+		Assert.Multiple(async () =>
+		{
+			Assert.That(afterRefusal.IssuePending, Is.False);
+			Assert.That(fixture.Platform.Proofs, Has.Count.EqualTo(1));
+			Assert.That((await restarted.GetStatusAsync(default)).IssuePending, Is.False);
+		});
+	}
+
+	[TestCase("invalid-signature")]
+	[TestCase("bundle-mismatch")]
+	public async Task A_refused_proof_is_not_sent_again_but_a_different_proof_for_the_purchase_is(string code)
+	{
+		var fixture = new Fixture();
+		fixture.Platform.Answer = proof => proof.TransactionId == "2000001"
+			? new PlatformLicenseIssueResult.Refused(code)
+			: new PlatformLicenseIssueResult.Issued(Sign(ProductionKey, ProductionKeyId));
+
+		await fixture.Service.SyncAsync("c", AppStore("2000001", "1000001"), default);
+		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.SyncAsync("c", AppStore("2000001", "1000001"), default);
+		await fixture.Service.RunDueWorkAsync(default);
+		var callsForTheRefusedProof = fixture.Platform.Proofs.Count;
+		var restarted = fixture.Restart();
+		await restarted.SyncAsync("c", AppStore("2000002", "1000001"), default);
+		await restarted.RunDueWorkAsync(default);
+
+		Assert.Multiple(async () =>
+		{
+			Assert.That(callsForTheRefusedProof, Is.EqualTo(1));
+			Assert.That((await restarted.GetStatusAsync(default)).Licensed, Is.True);
+		});
+	}
+
+	[TestCase("package-mismatch")]
+	[TestCase("sandbox-purchase")]
+	public async Task A_google_play_proof_refused_for_a_platform_side_reason_is_tried_again_after_a_day(string code)
+	{
+		var fixture = new Fixture();
+		var answers = new Queue<PlatformLicenseIssueResult>([
+			new PlatformLicenseIssueResult.Refused(code),
+			new PlatformLicenseIssueResult.Issued(Sign(ProductionKey, ProductionKeyId))
+		]);
+		fixture.Platform.Answer = _ => answers.Dequeue();
+
+		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), default);
+		await fixture.Service.RunDueWorkAsync(default);
+		fixture.Time.Advance(TimeSpan.FromHours(2));
+		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), default);
+		await fixture.Service.RunDueWorkAsync(default);
+		var callsWithinADay = fixture.Platform.Proofs.Count;
+		var restarted = fixture.Restart();
+		fixture.Time.Advance(TimeSpan.FromDays(1));
+		await restarted.SyncAsync("c", GooglePlay("purchase-a"), default);
+		await restarted.RunDueWorkAsync(default);
+
+		Assert.Multiple(async () =>
+		{
+			Assert.That(callsWithinADay, Is.EqualTo(1));
+			Assert.That((await restarted.GetStatusAsync(default)).Licensed, Is.True);
+		});
+	}
+
+	[Test]
+	public async Task A_full_refused_list_drops_a_one_day_block_before_a_refunded_purchase()
+	{
+		var fixture = new Fixture();
+		fixture.Platform.Answer = proof => new PlatformLicenseIssueResult.Refused(
+			proof.PurchaseToken!.StartsWith("refunded", StringComparison.Ordinal) ? "purchase-refunded" : "package-mismatch");
+		await fixture.Service.SyncAsync("c", GooglePlay("refunded-0"), default);
+		await fixture.Service.RunDueWorkAsync(default);
+
+		for (var index = 0; index < CompanionLicenseService.MaximumRefusedProofKeys; index++)
+		{
+			await fixture.Service.SyncAsync("c", GooglePlay($"misconfigured-{index}"), default);
+			await fixture.Service.RunDueWorkAsync(default);
+		}
+
+		var calls = fixture.Platform.Proofs.Count;
+		await fixture.Service.SyncAsync("c", GooglePlay("refunded-0"), default);
+		await fixture.Service.RunDueWorkAsync(default);
+
+		Assert.That(fixture.Platform.Proofs, Has.Count.EqualTo(calls));
+	}
+
+	[Test]
+	public async Task Two_app_store_proofs_of_one_purchase_share_one_pending_entry()
+	{
+		var fixture = new Fixture();
+
+		await fixture.Service.SyncAsync("c", AppStore("2000001", "1000001"), default);
+		await fixture.Service.SyncAsync("d", AppStore("2000002", "1000001"), default);
+		await fixture.Service.RunDueWorkAsync(default);
+
+		Assert.That(fixture.Platform.Proofs.Select(proof => proof.TransactionId), Is.EqualTo(new[] { "2000002" }));
+	}
+
+	[Test]
+	public async Task A_different_purchase_is_still_issued_while_another_stays_pending_at_the_store()
+	{
+		var fixture = new Fixture();
+		var token = Sign(ProductionKey, ProductionKeyId, "license-b");
+		fixture.Platform.Answer = proof => proof.PurchaseToken == "purchase-b"
+			? new PlatformLicenseIssueResult.Issued(token)
+			: new PlatformLicenseIssueResult.Retry(null, true);
+
+		await fixture.Service.SyncAsync("a", GooglePlay("purchase-a"), default);
+		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.SyncAsync("b", GooglePlay("purchase-b"), default);
+		await fixture.Service.RunDueWorkAsync(default);
+
+		var status = await fixture.Service.GetStatusAsync(default);
+		Assert.Multiple(() =>
+		{
+			Assert.That(status.LicenseId, Is.EqualTo("license-b"));
+			Assert.That(status.IssuePending, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_purchase_the_store_never_completes_is_dropped_after_a_week()
+	{
+		var fixture = new Fixture();
+		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Retry(null, true);
+		await fixture.Service.SyncAsync("a", GooglePlay("purchase-a"), default);
+		await fixture.Service.RunDueWorkAsync(default);
+		var pendingAfterADay = false;
+
+		for (var day = 1; day <= 8; day++)
+		{
+			fixture.Time.Advance(TimeSpan.FromDays(1));
+			await fixture.Service.RunDueWorkAsync(default);
+			if (day == 1)
+			{
+				pendingAfterADay = (await fixture.Service.GetStatusAsync(default)).IssuePending;
+			}
+		}
+
+		var calls = fixture.Platform.Proofs.Count;
+		await fixture.Service.SyncAsync("a", GooglePlay("purchase-a"), default);
+		await fixture.Service.RunDueWorkAsync(default);
+
+		Assert.Multiple(async () =>
+		{
+			Assert.That(pendingAfterADay, Is.True);
+			Assert.That((await fixture.Service.GetStatusAsync(default)).IssuePending, Is.False);
+			Assert.That(fixture.Platform.Proofs, Has.Count.EqualTo(calls));
+		});
+	}
+
+	[Test]
+	public async Task A_sync_during_an_attempt_is_answered_at_once_and_a_new_purchase_stays_pending()
+	{
+		var fixture = new Fixture();
+		fixture.Platform.Gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		await fixture.Service.SyncAsync("a", GooglePlay("purchase-a"), default);
+		var run = fixture.Service.RunDueWorkAsync(default);
+		await fixture.Platform.Called.Task.WaitAsync(TimeSpan.FromSeconds(5));
+
+		var sameAnswer = await fixture.Service.SyncAsync("a", GooglePlay("purchase-a"), default)
+			.WaitAsync(TimeSpan.FromSeconds(5));
+		await fixture.Service.SyncAsync("b", GooglePlay("purchase-b"), default).WaitAsync(TimeSpan.FromSeconds(5));
+		fixture.Platform.Gate.SetResult();
+		await run.WaitAsync(TimeSpan.FromSeconds(5));
+
+		var pending = JsonSerializer.Deserialize<List<JsonElement>>(
+			fixture.Repository.Values[CompanionLicenseService.PendingProofsKey])!;
+		Assert.Multiple(() =>
+		{
+			Assert.That(sameAnswer.License, Is.Null);
+			Assert.That(pending, Has.Count.EqualTo(2));
+			Assert.That(fixture.Platform.Proofs.Count(proof => proof.PurchaseToken == "purchase-a"), Is.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task A_license_the_platform_revokes_is_dropped_every_companion_is_told_and_it_is_never_taken_back()
+	{
+		var fixture = new Fixture();
+		var revokedId = HexId(7);
+		var production = Sign(ProductionKey, ProductionKeyId, revokedId);
+		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = production }, default);
+		var device = fixture.Harness.AddDevice("Tablet");
+		await fixture.Harness.ReportAsync("connection-a", device);
+		fixture.Platform.RevokedIds = [revokedId, HexId(8)];
+
+		await fixture.Service.RunDueWorkAsync(default);
+		var answer = await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = production }, default);
+
+		var pushes = fixture.Harness.Transport.ConnectionMessages
+			.Where(message => message.Message is CompanionLicenseRevokedEvent)
+			.ToList();
+		Assert.Multiple(async () =>
+		{
+			Assert.That((await fixture.Service.GetStatusAsync(default)).Licensed, Is.False);
+			Assert.That(answer.License, Is.Null);
+			Assert.That(answer.RevokedLicenseIds, Is.EquivalentTo(new[] { revokedId, HexId(8) }));
+			Assert.That(pushes.Select(push => push.ConnectionId), Is.EqualTo(new[] { "connection-a" }));
+			Assert.That(pushes.Select(push => ((CompanionLicenseRevokedEvent)push.Message).LicenseId),
+				Is.All.EqualTo(revokedId));
+		});
+	}
+
+	[Test]
+	public async Task The_cached_revocation_list_still_applies_while_the_platform_is_unreachable()
+	{
+		var fixture = new Fixture();
+		var revokedId = HexId(7);
+		await fixture.Service.SyncAsync("c",
+			new SyncCompanionLicenseRequest { License = Sign(ProductionKey, ProductionKeyId, HexId(1)) },
+			default);
+		fixture.Platform.RevokedIds = [revokedId];
+		await fixture.Service.RunDueWorkAsync(default);
+		fixture.Platform.RevokedIds = null;
+		var restarted = fixture.Restart();
+		await fixture.Repository.SetValue(CompanionLicenseService.TokenKey,
+			Sign(ProductionKey, ProductionKeyId, revokedId));
+
+		await restarted.RunDueWorkAsync(default);
+		var answer = await restarted.SyncAsync("c", new SyncCompanionLicenseRequest(), default);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(answer.License, Is.Null);
+			Assert.That(answer.RevokedLicenseIds, Is.EqualTo(new[] { revokedId }));
+		});
+	}
+
+	[Test]
+	public async Task A_host_without_any_companion_never_asks_the_platform_for_revocations()
+	{
+		var fixture = new Fixture();
+
+		await fixture.Service.RunDueWorkAsync(default);
+		var withoutCompanion = fixture.Platform.RevocationFetches;
+		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest(), default);
+		await fixture.Service.RunDueWorkAsync(default);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(withoutCompanion, Is.Zero);
+			Assert.That(fixture.Platform.RevocationFetches, Is.EqualTo(1));
+		});
+	}
+
+	[TestCase(4000, true)]
+	[TestCase(10_000, false)]
+	public async Task A_sync_answer_carries_the_platform_list_and_always_fits_in_one_websocket_message(int count,
+		bool complete)
+	{
+		var fixture = new Fixture();
+		var held = HexId(3);
+		fixture.Platform.RevokedIds = Enumerable.Range(0, count).Select(HexId).ToList();
+		await fixture.Repository.SetValue(CompanionLicenseService.RevokedTestIdsKey,
+			JsonSerializer.Serialize(Enumerable.Range(0, CompanionLicenseService.MaximumRevokedTestIds)
+				.Select(index => Guid.NewGuid().ToString("N"))));
+		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest(), default);
+		await fixture.Service.RunDueWorkAsync(default);
+		var stored = Sign(ProductionKey, ProductionKeyId, HexId(count + 1), billingId: new string('b', 256));
+		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = stored }, default);
+
+		var answer = await fixture.Service.SyncAsync("c",
+			new SyncCompanionLicenseRequest { License = Sign(ProductionKey, ProductionKeyId, held) },
+			default);
+		var bytes = JsonSerializer.SerializeToUtf8Bytes(new UiWebSocketEnvelope(UiWebSocketProtocol.Version,
+				"response",
+				"SyncCompanionLicense",
+				Guid.NewGuid().ToString(),
+				Guid.NewGuid().ToString(),
+				answer,
+				null),
+			UiWebSocketProtocol.Json);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(bytes.Length, Is.LessThan(UiWebSocketProtocol.MaxMessageBytes));
+			Assert.That(answer.RevokedLicenseIds, Does.Contain(held));
+			Assert.That(answer.RevokedLicenseIds.Count(id => id.All(Uri.IsHexDigit) && id.Length == 32 && id != held),
+				complete ? Is.GreaterThanOrEqualTo(count - 1) : Is.EqualTo(CompanionLicenseService.MaximumRevokedTestIds));
+		});
+	}
+
+	[Test]
+	public async Task Purchase_details_are_shown_when_present_and_a_malformed_one_only_hides_the_detail()
+	{
+		var fixture = new Fixture();
+		var purchasedAt = Fixture.Now.AddDays(-2);
+		var detailed = Sign(ProductionKey, ProductionKeyId, "license-1", purchasedAt, "GPA.3344-5566");
+		var malformed = SignWithClaims(new Dictionary<string, object>
+		{
+			["sub"] = "license-2", ["product"] = CompanionLicenseTokens.Product, ["source"] = "app-store",
+			["purchased_at"] = "yesterday", ["billing_id"] = 42
+		});
+
+		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = detailed }, default);
+		var status = await fixture.Service.GetStatusAsync(default);
+		var tokens = new CompanionLicenseTokens(TrustedKeys);
+		var malformedLicense = await tokens.VerifyAsync(malformed, trustTestKey: false);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(status.PurchasedAt, Is.EqualTo(purchasedAt.ToUnixTimeSeconds() * 1000));
+			Assert.That(status.BillingId, Is.EqualTo("GPA.3344-5566"));
+			Assert.That(status.LicenseId, Is.EqualTo("license-1"));
+			Assert.That(malformedLicense, Is.Not.Null);
+			Assert.That(malformedLicense!.PurchasedAt, Is.Null);
+			Assert.That(malformedLicense.BillingId, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task The_license_page_is_told_about_every_change_and_never_sees_the_token()
+	{
+		var fixture = new Fixture();
+		var token = Sign(ProductionKey, ProductionKeyId, HexId(5));
+		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Issued(token);
+
+		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), default);
+		var afterQueue = ChangeEvents(fixture);
+		await fixture.Service.RunDueWorkAsync(default);
+		var afterIssue = ChangeEvents(fixture);
+		var status = JsonSerializer.Serialize(await fixture.Service.GetStatusAsync(default));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(afterQueue, Is.GreaterThan(0));
+			Assert.That(afterIssue, Is.GreaterThan(afterQueue));
+			Assert.That(status, Does.Not.Contain(token.Split('.')[2]));
+		});
+	}
+
+	[Test]
+	public async Task Nothing_secret_reaches_the_log()
+	{
+		var fixture = new Fixture();
+		var token = Sign(ProductionKey, ProductionKeyId, HexId(5));
+		var answers = new Queue<PlatformLicenseIssueResult>([
+			new PlatformLicenseIssueResult.Retry(null, false),
+			new PlatformLicenseIssueResult.Refused("purchase-refunded"),
+			new PlatformLicenseIssueResult.Issued(token)
+		]);
+		fixture.Platform.Answer = _ => answers.Dequeue();
+
+		await fixture.Service.SyncAsync("c", GooglePlay("secret-token-a"), default);
+		await fixture.Service.RunDueWorkAsync(default);
+		fixture.Time.Advance(TimeSpan.FromMinutes(1));
+		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.SyncAsync("c", AppStore("2000001", "1000001"), default);
+		await fixture.Service.RunDueWorkAsync(default);
+		fixture.Platform.RevokedIds = [HexId(5)];
+		fixture.Time.Advance(TimeSpan.FromHours(2));
+		await fixture.Service.RunDueWorkAsync(default);
+
+		var logged = string.Join("\n", fixture.Sink.Events.Select(logEvent =>
+			logEvent.RenderMessage(CultureInfo.InvariantCulture) + string.Join(",", logEvent.Properties.Values)));
+		Assert.Multiple(() =>
+		{
+			Assert.That(fixture.Sink.Events, Is.Not.Empty);
+			Assert.That(logged, Does.Not.Contain("secret-token-a"));
+			Assert.That(logged, Does.Not.Contain(token.Split('.')[1]));
+			Assert.That(logged, Does.Not.Contain("c2lnbmF0dXJl"));
+			Assert.That(logged, Does.Not.Contain("GPA.1234"));
+		});
+	}
+
+	[Test]
+	public async Task The_worker_retries_a_proof_left_pending_before_a_restart_and_fetches_revocations()
+	{
+		var fixture = new Fixture();
+		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), default);
+		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Issued(Sign(ProductionKey, ProductionKeyId));
+		var restarted = fixture.Restart();
+		var worker = Worker(fixture, restarted);
+
+		await worker.StartAsync(default);
+		var licensed = await Eventually(async () => (await restarted.GetStatusAsync(default)).Licensed);
+		await worker.StopAsync(default);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(licensed, Is.True);
+			Assert.That(fixture.Platform.RevocationFetches, Is.GreaterThanOrEqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task A_new_proof_wakes_the_worker_without_waiting_for_a_timer()
+	{
+		var fixture = new Fixture();
+		var worker = Worker(fixture, fixture.Service);
+		await worker.StartAsync(default);
+
+		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), default);
+		var called = await Eventually(() => Task.FromResult(!fixture.Platform.Proofs.IsEmpty));
+		await worker.StopAsync(default);
+
+		Assert.That(called, Is.True);
+	}
+
+	[Test]
+	public async Task A_failing_pass_is_logged_and_the_worker_keeps_going()
+	{
+		var fixture = new Fixture();
+		var token = Sign(ProductionKey, ProductionKeyId);
+		var calls = 0;
+		fixture.Platform.Answer = _ => Interlocked.Increment(ref calls) == 1
+			? throw new InvalidOperationException("boom")
+			: new PlatformLicenseIssueResult.Issued(token);
+		var worker = Worker(fixture, fixture.Service);
+		await worker.StartAsync(default);
+
+		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), default);
+		var licensed = await Eventually(async () =>
+		{
+			fixture.Time.Advance(CompanionLicenseBackgroundService.FailureDelay);
+			return (await fixture.Service.GetStatusAsync(default)).Licensed;
+		});
+		await worker.StopAsync(default);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(licensed, Is.True);
+			Assert.That(fixture.Sink.Events.Select(logEvent => logEvent.Exception), Has.Some.InstanceOf<InvalidOperationException>());
+		});
+	}
+
+	private static CompanionLicenseBackgroundService Worker(Fixture fixture, CompanionLicenseService service)
+		=> new(service, fixture.Time, new LoggerConfiguration().WriteTo.Sink(fixture.Sink).CreateLogger());
+
+	private static async Task<bool> Eventually(Func<Task<bool>> condition)
+	{
+		var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+		while (DateTime.UtcNow < deadline)
+		{
+			if (await condition())
+			{
+				return true;
+			}
+
+			await Task.Delay(20);
+		}
+
+		return false;
+	}
+
+	private static int ChangeEvents(Fixture fixture)
+		=> fixture.Harness.Transport.GroupMessages.Count(message =>
+			message.Group == UiAdminGroups.Admin && message.Message is CompanionLicenseChangedEvent);
+
+	private static SyncCompanionLicenseRequest GooglePlay(string purchaseToken, string? license = null)
+		=> new()
+		{
+			License = license,
+			Proof = new CompanionLicenseProof
+			{
+				Platform = "google-play", ProductId = CompanionLicenseTokens.Product, PurchaseToken = purchaseToken,
+				PackageName = "app.macrodeck.companion", OrderId = "GPA.1234"
+			}
+		};
+
+	private static SyncCompanionLicenseRequest AppStore(string transactionId, string originalTransactionId)
+		=> new()
+		{
+			Proof = new CompanionLicenseProof
+			{
+				Platform = "app-store", ProductId = CompanionLicenseTokens.Product, TransactionId = transactionId,
+				SignedPayload = $"eyJhbGciOiJFUzI1NiJ9.{Base64Url(JsonSerializer.SerializeToUtf8Bytes(new
+				{
+					transactionId, originalTransactionId, productId = CompanionLicenseTokens.Product
+				}))}.c2lnbmF0dXJl"
+			}
+		};
+
+	private static string HexId(int index) => index.ToString("x32", CultureInfo.InvariantCulture);
+
 	private static SyncCompanionLicenseRequest Trial(string deviceId, bool started)
 		=> new() { TrialDeviceId = deviceId, TrialStarted = started };
 
-	private static string Sign(ECDsa key, string keyId, string licenseId = "license-1")
-		=> CompanionLicenseTokens.Sign(key, keyId, licenseId, "google-play", Fixture.Now);
+	private static string Sign(ECDsa key,
+		string keyId,
+		string licenseId = "license-1",
+		DateTimeOffset? purchasedAt = null,
+		string? billingId = null)
+		=> CompanionLicenseTokens.Sign(key, keyId, licenseId, "google-play", Fixture.Now, purchasedAt, billingId);
+
+	private static string SignWithClaims(Dictionary<string, object> claims)
+		=> new Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler { SetDefaultTimesOnTokenCreation = false }
+			.CreateToken(new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
+			{
+				Issuer = CompanionLicenseTokens.Issuer,
+				Audience = CompanionLicenseTokens.Audience,
+				IssuedAt = Fixture.Now.UtcDateTime,
+				Claims = claims,
+				SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
+					new Microsoft.IdentityModel.Tokens.ECDsaSecurityKey(ProductionKey) { KeyId = ProductionKeyId },
+					Microsoft.IdentityModel.Tokens.SecurityAlgorithms.EcdsaSha256)
+			});
 
 	private static string WrongProduct()
 	{
@@ -501,33 +1078,31 @@ internal sealed class CompanionLicenseServiceTests
 	{
 		public static readonly DateTimeOffset Now = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
 
-		private readonly ForwardingPlatform _platform = new();
-
 		public Fixture()
 		{
 			var services = new ServiceCollection();
 			services.AddSingleton<IAppPreferenceRepository>(Repository);
 			services.AddSingleton<IAppPreferenceService>(Preferences);
 			ScopeFactory = services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
-			Service = new CompanionLicenseService(ScopeFactory,
-				_platform,
-				new CompanionLicenseTokens(TrustedKeys),
-				Harness.DeviceRegistry,
-				Time,
-				new LoggerConfiguration().CreateLogger());
+			Service = Create();
 		}
 
 		public CompanionHarness Harness { get; } = new();
 		public MemoryPreferences Repository { get; } = new();
 		public FakeDeveloperModePreferences Preferences { get; } = new();
 		public FakeTimeProvider Time { get; } = new() { Now = Now };
+		public ScriptedPlatform Platform { get; } = new();
+		public EphemeralDataProtectionProvider Protection { get; } = new();
+		public CompanionHarness.CapturingSink Sink { get; } = new();
+		public double RandomValue { get; set; } = 0.5;
 		public IServiceScopeFactory ScopeFactory { get; }
-		public CompanionLicenseService Service { get; }
+		public CompanionLicenseService Service { get; private set; }
 
-		public IPlatformLicenseClient Platform
+		public CompanionLicenseService Restart()
 		{
-			get => _platform.Inner;
-			set => _platform.Inner = value;
+			Service.Dispose();
+			Service = Create();
+			return Service;
 		}
 
 		public Dictionary<string, long> StoredTrials()
@@ -539,22 +1114,53 @@ internal sealed class CompanionLicenseServiceTests
 			=> Repository.Values.TryGetValue(CompanionLicenseService.RevokedTestIdsKey, out var json)
 				? JsonSerializer.Deserialize<List<string>>(json)!
 				: [];
+
+		private CompanionLicenseService Create()
+			=> new(ScopeFactory,
+				Platform,
+				new TestCompanionLicenseIssuer(ScopeFactory, Time),
+				new CompanionLicenseTokens(TrustedKeys),
+				Harness.DeviceRegistry,
+				Harness.Transport,
+				Protection,
+				Time,
+				() => RandomValue,
+				new LoggerConfiguration().MinimumLevel.Verbose().WriteTo.Sink(Sink).CreateLogger());
 	}
 
-	private sealed class ForwardingPlatform : IPlatformLicenseClient
+	internal sealed class ScriptedPlatform : IPlatformLicenseClient
 	{
-		public IPlatformLicenseClient Inner { get; set; } = new GatedPlatform();
+		public ConcurrentQueue<CompanionLicenseProof> Proofs { get; } = new();
 
-		public Task<string?> IssueCompanionLicenseAsync(CompanionLicenseProof proof, CancellationToken cancellationToken)
-			=> Inner.IssueCompanionLicenseAsync(proof, cancellationToken);
-	}
+		public Func<CompanionLicenseProof, PlatformLicenseIssueResult> Answer { get; set; } =
+			_ => new PlatformLicenseIssueResult.Retry(null, false);
 
-	private sealed class GatedPlatform : IPlatformLicenseClient
-	{
-		public TaskCompletionSource<string?> Issued { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+		public TaskCompletionSource? Gate { get; set; }
 
-		public Task<string?> IssueCompanionLicenseAsync(CompanionLicenseProof proof, CancellationToken cancellationToken)
-			=> Issued.Task;
+		public TaskCompletionSource Called { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		public IReadOnlyList<string>? RevokedIds { get; set; } = [];
+
+		public int RevocationFetches;
+
+		public async Task<PlatformLicenseIssueResult> IssueCompanionLicenseAsync(CompanionLicenseProof proof,
+			CancellationToken cancellationToken)
+		{
+			Proofs.Enqueue(proof);
+			Called.TrySetResult();
+			if (Gate is { } gate)
+			{
+				await gate.Task.WaitAsync(cancellationToken);
+			}
+
+			return Answer(proof);
+		}
+
+		public Task<IReadOnlyList<string>?> GetRevokedLicenseIdsAsync(CancellationToken cancellationToken)
+		{
+			Interlocked.Increment(ref RevocationFetches);
+			return Task.FromResult(RevokedIds);
+		}
 	}
 
 	internal sealed class MemoryPreferences : IAppPreferenceRepository

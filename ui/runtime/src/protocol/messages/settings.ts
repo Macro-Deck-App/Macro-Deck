@@ -236,9 +236,15 @@ export interface CompanionLicenseStatus {
   source: string | null;
   keyId: string | null;
   issuedAt: number | null;
+  purchasedAt: number | null;
+  billingId: string | null;
   isTest: boolean;
   testLicenseStored: boolean;
+  issuePending: boolean;
+  nextIssueAttemptAt: number | null;
 }
+
+export interface CompanionLicenseChangedEvent {}
 
 /**
  * The first-launch onboarding wizard (issue #893). Armed by account setup and cleared once the user

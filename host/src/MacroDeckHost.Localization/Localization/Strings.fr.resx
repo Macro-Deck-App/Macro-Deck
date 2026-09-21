@@ -13107,11 +13107,17 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Settings.Language.TimeFormatLabel" xml:space="preserve">
     <value>Format de l'heure</value>
   </data>
+  <data name="Settings.License.BillingIdLabel" xml:space="preserve">
+    <value>ID de facturation</value>
+  </data>
   <data name="Settings.License.Description" xml:space="preserve">
     <value>La licence Macro Deck Companion que possède cet hôte. L'hôte la transmet à chaque application Companion qui se connecte.</value>
   </data>
   <data name="Settings.License.Heading" xml:space="preserve">
     <value>Licence Companion</value>
+  </data>
+  <data name="Settings.License.IssuePending" xml:space="preserve">
+    <value>Ton achat est en cours de conversion en licence. Une connexion Internet est nécessaire, et Macro Deck réessaie tout seul.</value>
   </data>
   <data name="Settings.License.IssueTestAction" xml:space="preserve">
     <value>Émettre une licence de test</value>
@@ -13140,8 +13146,17 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Settings.License.LoadFailed" xml:space="preserve">
     <value>L'état de la licence n'a pas pu être chargé.</value>
   </data>
+  <data name="Settings.License.NextAttempt" xml:space="preserve">
+    <value>Prochaine tentative : {time}</value>
+  </data>
+  <data name="Settings.License.NextAttemptSoon" xml:space="preserve">
+    <value>Prochaine tentative : dans un instant</value>
+  </data>
   <data name="Settings.License.NotLicensed" xml:space="preserve">
     <value>Sans licence</value>
+  </data>
+  <data name="Settings.License.PurchasedAtLabel" xml:space="preserve">
+    <value>Achetée le</value>
   </data>
   <data name="Settings.License.RevokeTestAction" xml:space="preserve">
     <value>Révoquer la licence de test</value>

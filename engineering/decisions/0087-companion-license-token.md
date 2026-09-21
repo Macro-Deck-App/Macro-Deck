@@ -7,16 +7,18 @@ Status: Accepted
 The Companion app is paid: bought once through Google Play or the App Store, or carried over from the
 previous iOS app. The host needs to hold a license so that other Companions connecting to it can use it,
 and it needs the trial start of each phone so that reinstalling the app does not restart the trial. The
-Platform API that turns a store purchase into a license does not exist yet. The Companion already checks
-ECDSA P-256 signatures on Android and iOS. Ed25519 is not available on Android below API 33, and Kotlin/Native
-on iOS cannot use it either.
+Platform API turns a verified store purchase into a license (Macro-Deck-Platform
+docs/companion-licensing.md). The Companion already checks ECDSA P-256 signatures on Android and iOS.
+Ed25519 is not available on Android below API 33, and Kotlin/Native on iOS cannot use it either.
 
 ## Decision
 
 **Token.** A license is a compact JWS, `alg` ES256, with a `kid` header. Its claims are `iss`
 `https://platform.macro-deck.app`, `aud` `macrodeck-companion`, `sub` (the license id), `product`
 `companion_app_license`, `source` (`google-play`, `app-store`, `app-store-legacy` or `test`) and `iat` in
-seconds. There is no `exp`, because the license does not expire. The host checks it with
+seconds. There is no `exp`, because the license does not expire. The optional display claims `purchased_at`
+(epoch seconds) and `billing_id` (store order or original transaction id) are shown when present; a malformed
+value hides the detail and never rejects the license. The host checks it with
 Microsoft.IdentityModel.JsonWebTokens in `CompanionLicenseTokens`.
 
 **Trust and rotation.** The trusted keys are a hardcoded map from `kid` to a P-256 public key, the same on
@@ -31,23 +33,42 @@ the host holds none yet, and handed to every Companion that syncs with that host
 licenses the hosts it connects to, and every device on those hosts. That is intended: the product sells one
 license per user, not per device.
 
-**Fake platform and developer mode.** Until the Platform API exists, `FakePlatformLicenseClient` stands in
-for it. It signs with the committed `test-2026` key. The key and everything built on it only work in
-developer mode (the `developer.mode` preference):
+**Platform client and developer mode.** `PlatformLicenseClient` posts a purchase proof to
+`api.macro-deck.app` (`POST api/v1/companion-licenses`). Only `google-play` and `app-store` proofs are sent; the
+Platform does not issue `app-store-legacy` yet. The base URL can be redirected with `MACRO_DECK_PLATFORM_URL` in
+Development-channel builds only, for example to Platform mock mode or staging, which sign with `test-2026`.
+`TestCompanionLicenseIssuer` signs with the committed `test-2026` key for the Issue test license button. The key
+and everything built on it only work in developer mode (the `developer.mode` preference):
 
-- the fake issues only while developer mode is on;
+- the test issuer issues only while developer mode is on;
 - the host trusts `test-2026` only while developer mode is on, so a stored test license stops being handed
   out once it is switched off;
 - `POST api/settings/license/test` answers 404 unless developer mode is on;
 - the status page shows the source and key id, and marks a test license.
 
 On the Companion side only debug builds trust `test-2026`, so the committed private key cannot unlock a
-release build.
+release build. A debug Companion with a sandbox purchase is refused by the production Platform
+(`sandbox-purchase`); a developer uses the test license button or points a development build at staging.
 
 **Sync.** The `SyncCompanionLicense` request, client scope with a device claim, is answered at once with the
-stored token and the known trial start. A purchase proof is exchanged with the platform in the background,
-and the issued token is stored and pushed as `CompanionLicenseEvent` to every connected Companion, including
-the one that sent the proof. One lock guards every read-modify-write of the token and of the trial map.
+stored token and the known trial start; it never waits for the Platform. While no production license is stored,
+a purchase proof is queued and exchanged in the background by `CompanionLicenseBackgroundService`; the issued
+token is stored and pushed as `CompanionLicenseEvent` to every connected Companion, including the one that sent
+the proof. One lock guards every read-modify-write of the token, the trial map and the pending proofs.
+
+**Issuing retries.** Pending proofs are kept in the preference `license.pendingProofs`, at most 8, each
+encrypted with ASP.NET Core data protection and keyed by a hash of its purchase (the Google purchase token or
+the App Store original transaction id, as the Platform keys it). A network failure, timeout, 5xx, 429 or a 403
+without the `license-revoked` code is retried with exponential backoff from about 5 seconds to at most 30
+minutes, with jitter and `Retry-After` honoured, and survives a restart. A purchase the store has not
+completed yet (`purchase-not-found`, `purchase-not-completed`) is retried the same way for at most 7 days. Any
+other refusal drops the proof and records a hash in `license.refusedProofKeys` (at most 64), so reconnecting
+Companions do not send it again. A refusal about the purchase itself (refunded, revoked, cancelled, a revoked
+license) blocks the purchase for good. Any other refusal, an issued license the host does not accept, or a
+purchase still pending after 7 days blocks only that exact proof, and only for a day, because a Platform
+misconfiguration such as a missing Apple root or a wrong package name must not block the purchase for good.
+The License page shows a pending proof and its next attempt, and is told of every change with
+`CompanionLicenseChangedEvent`.
 
 **Trials.** Trial starts are kept in the preference `license.trials`, a map from trial device id to host UTC
 epoch milliseconds. The host records its own clock the first time a device reports `trialStarted` and never
@@ -61,11 +82,19 @@ the oldest dropped first. The host pushes `CompanionLicenseRevokedEvent` to ever
 the revoked ids in every sync answer as `revokedLicenseIds` so an offline Companion learns of it later, and
 never adopts a revoked id again, so a Companion still holding the token cannot put it back. Issuing a new test
 license still works, since it carries a new id. Only test licenses can be revoked this way; a stored
-production license is never touched, and revoking one belongs to the platform. The License tab offers the
+production license is never touched here, and revoking one belongs to the platform. The License tab offers the
 revocation whenever a test license is stored, whatever the developer mode, because debug Companions keep
-trusting it. A debug build backed by a store purchase reports its proof again and, while developer mode is
-on, the fake platform answers with a fresh test license under a new id: revocation drops a license, not a
-purchase.
+trusting it. Revocation drops a license, not a purchase: a fresh test license carries a new id.
+
+**Platform revocation.** While licensing is in use (a stored license, a pending proof, a cached list or a
+Companion that synced since start), the host fetches `GET api/v1/companion-licenses/revocations` hourly, and every
+5 minutes up to hourly after a failure. The list (at most 10,000 ids; a longer one keeps the previous copy) is
+cached in `license.platformRevokedIds`, so an offline host still applies the last one. A stored license on the
+list is removed, whatever key signed it, `CompanionLicenseRevokedEvent` is pushed, and a listed id is never
+adopted. The sync answer's `revokedLicenseIds` carries the host's test ids plus the Platform ids while the
+Platform list has at most 4,000 ids; above that it carries only the listed ids of the license the Companion
+submitted and of the host's stored license, because a UI WebSocket message is capped at 256 KB. The Companion
+fetches the full list from the Platform itself.
 
 ## Consequences
 
@@ -87,14 +116,16 @@ purchase.
   stores it in its preferences, so it is part of host backups. The store privacy labels are the
   maintainer's decision.
 - Refunds and revocation: a store entitlement that has no token yet is dropped on the phone when the store
-  reports it refunded or revoked. A token, once issued, can only be revoked by the platform. Until the
-  Platform API exists, a refunded purchase that already produced a token stays licensed.
+  reports it refunded or revoked. A token, once issued, can only be revoked by the platform. Refunds after
+  issuing are not detected automatically; an administrator revokes the license, and the revocation list is
+  how that reaches hosts and phones.
 - The 1000 entry trial cap is a known ceiling. A central trial record belongs to the Platform API.
-- Replacing the fake with a real Platform API client changes only the `IPlatformLicenseClient`
-  registration. The token format and the trust map stay as they are.
+- A host that uses Companions calls `api.macro-deck.app` about once an hour for the revocation list.
 
 ## References
 
 - [`CompanionLicenseTokens`](../../host/src/MacroDeckHost.Infrastructure/Licensing/CompanionLicenseTokens.cs)
 - [`CompanionLicenseService`](../../host/src/MacroDeckHost/Licensing/CompanionLicenseService.cs)
-- [`FakePlatformLicenseClient`](../../host/src/MacroDeckHost.Infrastructure/Licensing/FakePlatformLicenseClient.cs)
+- [`PlatformLicenseClient`](../../host/src/MacroDeckHost.Infrastructure/Licensing/PlatformLicenseClient.cs)
+- [`TestCompanionLicenseIssuer`](../../host/src/MacroDeckHost.Infrastructure/Licensing/TestCompanionLicenseIssuer.cs)
+- [`CompanionLicenseBackgroundService`](../../host/src/MacroDeckHost/Licensing/CompanionLicenseBackgroundService.cs)
