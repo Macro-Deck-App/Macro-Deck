@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.WebSockets;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -76,6 +77,7 @@ internal sealed class PluginConnectionHostedService(
 	// Set only once a re-pairing succeeded, so a rejected stored credential raises at most one prompt
 	// per process; a mid-poll blip still resumes _pairingAttempt.
 	private bool _rePairedAfterRejection;
+	private bool _storedHostMismatchReported;
 
 	/// <summary>
 	/// Starts connecting and returns. It deliberately does not wait for the first connection: a plugin
@@ -244,12 +246,21 @@ internal sealed class PluginConnectionHostedService(
 
 		var session = _session!;
 
-		// The connection owns the socket from here: two owners would mean a disposed socket being
-		// closed a second time during shutdown.
-		var socket = await ClientWebSocketPluginSocket.ConnectAsync(new Uri(credentials.HostUrl),
-			session.SessionToken,
-			session.Limits.MaxMessageBytes,
-			cancellationToken);
+		// The socket goes to the host the session was just opened on. The stored credential's host url
+		// only records the issuer, which is stale once the same host listens on another port.
+		ClientWebSocketPluginSocket socket;
+		try
+		{
+			socket = await ClientWebSocketPluginSocket.ConnectAsync(new Uri(_options.HostUrl),
+				session.SessionToken,
+				session.Limits.MaxMessageBytes,
+				cancellationToken);
+		}
+		catch (Exception exception) when (exception is WebSocketException or HttpRequestException)
+		{
+			return ConnectionOutcome.Retry(
+				$"Could not open the session socket at {_options.HostUrl}: {exception.Message}");
+		}
 
 		await using var connection = new PluginSessionConnection(socket,
 			session,
@@ -363,6 +374,13 @@ internal sealed class PluginConnectionHostedService(
 		Sdk = sdkUsage
 	};
 
+	private static bool SameHost(string left, string right)
+		=> Uri.TryCreate(left, UriKind.Absolute, out var leftUri) &&
+			Uri.TryCreate(right, UriKind.Absolute, out var rightUri)
+				? Uri.Compare(leftUri, rightUri, UriComponents.SchemeAndServer, UriFormat.Unescaped,
+					StringComparison.OrdinalIgnoreCase) == 0
+				: string.Equals(left, right, StringComparison.OrdinalIgnoreCase);
+
 	private bool CanRePairAfterRejection(
 		PluginRegistrationException exception,
 		PluginPairingDescriptor? pairingDescriptor)
@@ -386,6 +404,12 @@ internal sealed class PluginConnectionHostedService(
 
 		if (stored is not null)
 		{
+			if (!_storedHostMismatchReported && !SameHost(stored.HostUrl, _options.HostUrl))
+			{
+				_storedHostMismatchReported = true;
+				_logger.StoredCredentialFromOtherHost(stored.HostUrl, _options.HostUrl);
+			}
+
 			return stored;
 		}
 

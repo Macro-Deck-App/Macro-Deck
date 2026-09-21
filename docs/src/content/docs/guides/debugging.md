@@ -160,8 +160,9 @@ Replace `Demo` with your project name. Keep `cwd` on the project directory: the 
   persists, and toggling it takes effect without restarting the plugin or Macro Deck.
 - The SDK creates the pairing request, waits for approval, redeems it and writes the per-plugin secret
   to `.macrodeck-dev-state/<plugin-id>/credentials.json` before using it. The file also records the
-  issuing host. It is owner-only on Unix, inherits the directory ACL on Windows, and is **not encrypted
-  at rest**.
+  issuing host, for reference only: the plugin always connects to `MACRO_DECK_PLUGIN_HOST_URL`, so the
+  credential keeps working when Macro Deck moves to another port. It is owner-only on Unix, inherits the
+  directory ACL on Windows, and is **not encrypted at rest**.
 - The generated `.gitignore` already ignores `**/.macrodeck-dev-state/`. Keep that rule: the directory
   holds the long-lived secret and fallback logs. `launchSettings.json` holds no secret and can be
   committed.

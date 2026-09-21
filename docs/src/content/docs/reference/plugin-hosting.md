@@ -81,6 +81,12 @@ keeps its credentials), `MACRO_DECK_PLUGIN_PAIRING` (`PairingEnabled`, default `
 `MACRO_DECK_PLUGIN_PAIRING_TIMEOUT` (`PairingTimeout`). `HostUrl` defaults to `http://127.0.0.1:8193`. All
 of `PluginHostOptions` binds from `MacroDeck:Plugin`, so `appsettings.json` and the command line work too.
 
+`HostUrl` is where the plugin connects, for the REST calls and the session socket alike. A stored credential
+records the host that issued it, but does not redirect the plugin there: when the two differ (the same Macro
+Deck on another port), the plugin connects to `HostUrl` and logs a warning. A different Macro Deck rejects the
+credential when the session is opened; on first connect, with pairing on and no enrollment token, the plugin
+then pairs again.
+
 ## Lifecycle
 
 ```

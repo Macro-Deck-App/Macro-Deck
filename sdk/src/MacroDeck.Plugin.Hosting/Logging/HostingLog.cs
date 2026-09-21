@@ -52,6 +52,13 @@ internal static class HostingLog
 	public static void CapabilityRejected(this ILogger logger, string kind, string? reason)
 		=> logger.Warning("The host rejected the '{Kind}' capability: {Reason}", kind, reason);
 
+	public static void StoredCredentialFromOtherHost(this ILogger logger, string storedHost, string configuredHost)
+		=> logger.Warning(
+			"The stored credential was issued by {StoredHost}, but the plugin is configured for {ConfiguredHost}. " +
+			"Connecting to {ConfiguredHost}; if that is a different Macro Deck, it rejects the credential.",
+			storedHost,
+			configuredHost);
+
 	public static void ConnectionFaulted(this ILogger logger, string reason)
 		=> logger.Error("The plugin cannot connect to the host: {Reason}", reason);
 
