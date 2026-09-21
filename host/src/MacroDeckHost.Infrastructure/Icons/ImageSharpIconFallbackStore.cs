@@ -4,6 +4,7 @@ using MacroDeckHost.Domain.Entities;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
 using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Infrastructure.Icons;
@@ -73,7 +74,7 @@ public sealed class ImageSharpIconFallbackStore : IIconImageFallbackStore, IDisp
 
 		try
 		{
-			using var image = await Image.LoadAsync(source, cancellationToken);
+			using var image = await Image.LoadAsync<Rgba32>(source, cancellationToken);
 			Directory.CreateDirectory(Path.GetDirectoryName(cachePath)!);
 
 			var tempPath = cachePath + ".tmp";

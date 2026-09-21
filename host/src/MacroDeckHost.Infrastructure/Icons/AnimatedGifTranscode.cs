@@ -1,5 +1,6 @@
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Gif;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace MacroDeckHost.Infrastructure.Icons;
 
@@ -29,7 +30,7 @@ internal static class AnimatedGifTranscode
 	/// reader clamps to a floor of its own - the animation came out several times too slow.
 	/// </para>
 	/// </summary>
-	public static void PrepareForGif(Image image)
+	public static void PrepareForGif(Image<Rgba32> image)
 	{
 		ArgumentNullException.ThrowIfNull(image);
 
@@ -37,6 +38,8 @@ internal static class AnimatedGifTranscode
 
 		foreach (var frame in image.Frames)
 		{
+			SnapToSingleBitAlpha(frame);
+
 			var delayMs = frame.Metadata.GetWebpMetadata().FrameDelay;
 			var gif = frame.Metadata.GetGifMetadata();
 
@@ -47,5 +50,21 @@ internal static class AnimatedGifTranscode
 		}
 
 		image.Metadata.GetGifMetadata().RepeatCount = webp.RepeatCount;
+	}
+
+	// The GIF quantizer keeps only an all-zero pixel transparent: a transparent pixel that still carries
+	// a colour, or a partly transparent one, is written opaque.
+	private static void SnapToSingleBitAlpha(ImageFrame<Rgba32> frame)
+	{
+		frame.ProcessPixelRows(accessor =>
+		{
+			for (var y = 0; y < accessor.Height; y++)
+			{
+				foreach (ref var pixel in accessor.GetRowSpan(y))
+				{
+					pixel = pixel.A >= 128 ? pixel with { A = byte.MaxValue } : default;
+				}
+			}
+		});
 	}
 }
