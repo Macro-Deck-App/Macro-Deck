@@ -301,8 +301,8 @@ internal static class PluginBuilder
 		return null;
 	}
 
-	/// <summary>The published schema alone - the same embedded document <c>validate</c> evaluates, and one
-	/// of the layers the packer's own validation runs. Deliberately not the whole validator, which
+	/// <summary>The published schema plus the additionalLinks rules - the same document checks <c>validate</c>
+	/// runs, and one of the layers the packer's own validation runs. Deliberately not the whole validator, which
 	/// existence-checks the host's entrypoint and so cannot pass before a build; this only rules out a
 	/// manifest that could never pack, before a multi-platform publish is spent on it.</summary>
 	private static List<ManifestProblem> SchemaProblems(string manifestPath)
@@ -311,7 +311,7 @@ internal static class PluginBuilder
 		{
 			using var document = JsonDocument.Parse(File.ReadAllText(manifestPath));
 
-			return PluginManifestSchema.Validate(document.RootElement)
+			return ManifestDocumentProblems.Evaluate(document.RootElement)
 				.Where(problem => problem.Severity == ManifestProblemSeverity.Error)
 				.ToList();
 		}

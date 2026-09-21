@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AppStrings, StoreExtensionDetailBody, StoreExtensionKind, StoreVersionHistoryBody } from '@macro-deck/runtime';
-import { ApiService, ButtonComponent, ErrorBannerComponent, LocalizationService, ToastService, TranslatePipe } from '@shared';
+import { ApiService, ButtonComponent, ErrorBannerComponent, LocalizationKey, LocalizationService, ToastService, TranslatePipe } from '@shared';
 import { DetailPageComponent } from '../../detail-page/detail-page.component';
 import { LoadingStateComponent } from '../../feedback/loading-state/loading-state.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
@@ -21,6 +21,25 @@ import { StoreVersionHistoryModalComponent } from './store-version-history-modal
 const KNOWN_KINDS: readonly StoreExtensionKind[] = ['Plugin', 'IconPack', 'ProfileTemplate'];
 
 const SIDEBAR_LANGUAGE_LIMIT = 4;
+
+const STANDARD_LINK_LABELS: Readonly<Record<string, LocalizationKey>> = {
+  documentation: AppStrings.Store.Page.Link.Documentation,
+  wiki: AppStrings.Store.Page.Link.Wiki,
+  issues: AppStrings.Store.Page.Link.Issues,
+  support: AppStrings.Store.Page.Link.Support,
+  community: AppStrings.Store.Page.Link.Community,
+  donate: AppStrings.Store.Page.Link.Donate,
+  privacy: AppStrings.Store.Page.Link.Privacy,
+  terms: AppStrings.Store.Page.Link.Terms,
+  changelog: AppStrings.Store.Page.Link.Changelog,
+  license: AppStrings.Store.Page.Link.License,
+};
+
+interface StoreDetailLink {
+  url: string;
+  labelKey: LocalizationKey | null;
+  label: string | null;
+}
 
 @Component({
   selector: 'app-store-detail-page',
@@ -104,6 +123,26 @@ export class StoreDetailPageComponent implements OnInit {
   protected readonly visibleLanguages = computed(() => this.languages().slice(0, SIDEBAR_LANGUAGE_LIMIT));
 
   protected readonly hasMoreLanguages = computed(() => this.languages().length > SIDEBAR_LANGUAGE_LIMIT);
+
+  protected readonly links = computed<StoreDetailLink[]>(() => {
+    const extension = this.extension();
+    if (!extension) {
+      return [];
+    }
+    const links: StoreDetailLink[] = [];
+    if (extension.repository) {
+      links.push({ url: extension.repository, labelKey: AppStrings.Store.Page.RepositoryLink, label: null });
+    }
+    for (const link of extension.additionalLinks ?? []) {
+      const labelKey = Object.hasOwn(STANDARD_LINK_LABELS, link.type) ? STANDARD_LINK_LABELS[link.type] : null;
+      if (labelKey) {
+        links.push({ url: link.url, labelKey, label: null });
+      } else if (link.type === 'custom' && link.label) {
+        links.push({ url: link.url, labelKey: null, label: link.label });
+      }
+    }
+    return links;
+  });
 
   protected readonly languagesModalOpen = signal(false);
   private languagesTriggerElement: HTMLElement | null = null;

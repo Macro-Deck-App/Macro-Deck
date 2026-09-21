@@ -124,12 +124,18 @@
                 (closed)="onLanguagesModalClosed()" />
             }
 
-            @if (extension.repository) {
+            @if (links().length > 0) {
               <div class="links-group">
                 <h2 class="detail-heading">{{ 'macrodeck.app:Store.Page.LinksHeading' | translate }}</h2>
-                <a class="detail-link" [href]="extension.repository" target="_blank" rel="noopener noreferrer">
-                  {{ 'macrodeck.app:Store.Page.RepositoryLink' | translate }}
-                </a>
+                <ul class="link-list">
+                  @for (link of links(); track $index) {
+                    <li>
+                      <a class="detail-link" [href]="link.url" target="_blank" rel="noopener noreferrer">
+                        {{ link.labelKey ? (link.labelKey | translate) : link.label }}
+                      </a>
+                    </li>
+                  }
+                </ul>
               </div>
             }
           </aside>

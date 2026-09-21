@@ -57,6 +57,7 @@ Requirement is the [category](#requirement-categories) that decides when a field
 | `repository` | string | publication | Absolute `http`/`https` URL. Informational. |
 | `compatibility` | object | publication | SDK, protocol and Macro Deck ranges the plugin supports. |
 | `homepage` | string | recommended | Absolute `http`/`https` URL. Informational. |
+| `additionalLinks` | object[] | recommended | Further links shown in the Store. See [`additionalLinks`](#additionallinks). |
 | `shutdown` | object | recommended | Graceful shutdown timeout. |
 | `health` | object | recommended | Health probe settings. |
 | `permissions` | string[] | recommended | Host capabilities the plugin declares it uses. |
@@ -260,6 +261,58 @@ Recommended. Array of unique [BCP-47](https://www.rfc-editor.org/info/bcp47) tag
 
 `homepage`, `repository` and `publisher.url` must be absolute `http`/`https` URLs.
 
+### `additionalLinks`
+
+Resources beyond `homepage` and `repository`, shown in declared order under **Links** on the package's
+Store page, after the repository.
+
+```json
+"additionalLinks": [
+  { "type": "documentation", "url": "https://docs.example.com" },
+  { "type": "issues", "url": "https://github.com/example/hue-lights/issues" },
+  { "type": "community", "url": "https://discord.gg/example" },
+  { "type": "custom", "label": "Setup Guide", "url": "https://example.com/setup" }
+]
+```
+
+| `type` | Shown as (English) |
+| --- | --- |
+| `documentation` | Documentation |
+| `wiki` | Wiki |
+| `issues` | Report an issue |
+| `support` | Support |
+| `community` | Community |
+| `donate` | Donate |
+| `privacy` | Privacy policy |
+| `terms` | Terms of service |
+| `changelog` | Changelog |
+| `license` | License |
+| `custom` | Its own `label` |
+
+Macro Deck labels the standard types in the viewer's language. The constants are
+`PluginManifestLinkTypes` in `MacroDeck.Plugin.Packaging`.
+
+| Field | Type | Rules |
+| --- | --- | --- |
+| `type` | string | Required. |
+| `url` | string | Required. Absolute `http`/`https` URL. |
+| `label` | string | Required for `custom`, at most 128 characters, no control characters, shown as written. Not allowed on a standard type. `null` is the same as absent. |
+
+- No two links may share a URL. URLs are compared after normalising scheme and host case; the path, query
+  and fragment must match exactly, so `docs#setup` and `docs#faq` are different links.
+- No standard type may appear twice. Two `community` links would both read "Community"; give the second one
+  a `custom` label instead.
+- No two `custom` labels may be equal, ignoring case and surrounding spaces.
+- An unknown `type` is a warning (`unknown-link-type`), never an error. A type added in a later release still
+  installs on an older Macro Deck, which simply does not show that link.
+
+`validate`, `build` and `pack` report a broken link as `invalid-additional-link`. The host itself never refuses to install or run a plugin because of `additionalLinks`: an invalid
+link is not shown. `pack` rewrites each entry with only `type`, `url` and `label`. Tools can apply the same
+rules with `PluginManifestLinks.Validate`, and pick the entries safe to show with
+`PluginManifestLinks.Displayable`.
+
+Older Macro Deck versions ignore the field.
+
 ### `publisher`
 
 | Field | Type | Requirement | Rules |
@@ -454,6 +507,10 @@ Actual output for broken variants of the example:
 | `"icon": "../icon.svg"` | `error invalid-icon: Icon path '../icon.svg' is not a safe relative path.` |
 | Missing icon file, `--level package` | `error icon-declared-not-present: 'Assets/nope.svg' is declared as 'icon' but is not present in the packaged content. [/icon] (package)` |
 | `"homepage": "example.com"` | `error schema:pattern: The string value is not a match for the indicated regular expression [/homepage]` |
+| `{ "type": "custom", "url": "https://example.com/setup" }` | `error invalid-additional-link: Link 0 is a custom link and must declare a label. [/additionalLinks/0/label]` |
+| `{ "type": "wiki", "label": "Our wiki", ... }` | `error invalid-additional-link: Link 0 is a 'wiki' link, which Macro Deck labels itself; remove its label. [/additionalLinks/0/label]` |
+| Two links with the same `url` | `error invalid-additional-link: Link 1 url 'https://docs.example.com' is already declared by another link. [/additionalLinks/1/url]` |
+| `{ "type": "roadmap", ... }` | `warning unknown-link-type: Link 0 has the unknown type 'roadmap' and will not be shown. [/additionalLinks/0/type]` |
 | Permission listed twice | `error invalid-permission: Permission 'host:variables' is declared more than once.` |
 | `"permissions": ["host:teleport"]` | `warning unknown-permission: 'host:teleport' is not a known permission. [/permissions/0]` |
 | `"languages": ["de", "DE"]` | `error invalid-language: Language 'DE' is declared more than once.` |

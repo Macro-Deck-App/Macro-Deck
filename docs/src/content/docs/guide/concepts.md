@@ -130,6 +130,9 @@ and export the pack, but you can't rename, import, or delete icons in it, or edi
 Deleting the pack there uninstalls it from the Store. To change the icons, export the pack and import the
 copy as a pack of your own.
 
+An item's page lists **Links** its creator provides, such as the source repository, documentation or a
+place to report an issue. They open in your browser.
+
 Store items show their star rating, and an item's page lists its **Ratings and reviews**. Anyone can
 read them. To rate or review an item yourself, sign in with Macro Deck Connect under
 **Settings > Account** and install the item first: only items you have installed can be rated. When

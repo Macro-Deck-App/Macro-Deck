@@ -14335,6 +14335,36 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Store.Page.LicenseField" xml:space="preserve">
     <value>Lizenz</value>
   </data>
+  <data name="Store.Page.Link.Changelog" xml:space="preserve">
+    <value>Änderungsprotokoll</value>
+  </data>
+  <data name="Store.Page.Link.Community" xml:space="preserve">
+    <value>Community</value>
+  </data>
+  <data name="Store.Page.Link.Documentation" xml:space="preserve">
+    <value>Dokumentation</value>
+  </data>
+  <data name="Store.Page.Link.Donate" xml:space="preserve">
+    <value>Spenden</value>
+  </data>
+  <data name="Store.Page.Link.Issues" xml:space="preserve">
+    <value>Problem melden</value>
+  </data>
+  <data name="Store.Page.Link.License" xml:space="preserve">
+    <value>Lizenz</value>
+  </data>
+  <data name="Store.Page.Link.Privacy" xml:space="preserve">
+    <value>Datenschutzerklärung</value>
+  </data>
+  <data name="Store.Page.Link.Support" xml:space="preserve">
+    <value>Support</value>
+  </data>
+  <data name="Store.Page.Link.Terms" xml:space="preserve">
+    <value>Nutzungsbedingungen</value>
+  </data>
+  <data name="Store.Page.Link.Wiki" xml:space="preserve">
+    <value>Wiki</value>
+  </data>
   <data name="Store.Page.LinksHeading" xml:space="preserve">
     <value>Links</value>
   </data>

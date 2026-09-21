@@ -117,7 +117,7 @@ The three cumulative [requirement levels](/reference/manifest/#requirement-categ
 
 | Level | Adds over the level before |
 | --- | --- |
-| `development` | The manifest reader, the embedded JSON Schema, the permission vocabulary, SemVer `version`, and declared `files[]` digests when present. What the host enforces at install time. |
+| `development` | The manifest reader, the embedded JSON Schema, the permission vocabulary, SemVer `version`, the [`additionalLinks` rules](/reference/manifest/#additionallinks), and declared `files[]` digests when present. What the host enforces at install time, except `additionalLinks`, which the host never enforces. |
 | `package` | Every declared entrypoint (every RID, not only the current host's) and a declared `icon` checked against real content; a valid multi-RID layout; missing `publication` fields as warnings. |
 | `publication` | Missing `publication` fields become errors. |
 
@@ -148,6 +148,8 @@ exist yet.
 | `malformed` | Not valid JSON; the message names the file with a 1-based line and position. |
 | `invalid-version` | `version` is not SemVer. |
 | `unknown-permission` | A permission outside the vocabulary (warning). |
+| `invalid-additional-link` | An `additionalLinks` entry breaks a [rule](/reference/manifest/#additionallinks); the pointer names the entry and field. Replaces any `schema:*` problem inside `additionalLinks`. |
+| `unknown-link-type` | An `additionalLinks` type outside the standard list (warning; the link is not shown). |
 | `schema:<keyword>` | A JSON Schema violation, e.g. `schema:required`. |
 | `file-missing`, `file-size-mismatch`, `file-digest-mismatch` | A declared `files[]` entry does not match the real bytes. |
 | `undeclared-file` | A file in the artifact that `files[]` does not declare (`--artifact` only). |

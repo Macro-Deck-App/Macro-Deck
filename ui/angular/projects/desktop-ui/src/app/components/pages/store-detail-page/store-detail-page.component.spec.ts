@@ -259,6 +259,57 @@ describe('StoreDetailPageComponent', () => {
     expect(fixture.nativeElement.querySelector('.languages-group')).toBeNull();
   });
 
+  function renderedLinks(): { text: string | undefined; href: string | null }[] {
+    return Array.from<HTMLAnchorElement>(fixture.nativeElement.querySelectorAll('.links-group a'))
+      .map(link => ({ text: link.textContent?.trim(), href: link.getAttribute('href') }));
+  }
+
+  it('shows the repository alone exactly as before when a package declares no additional links', async () => {
+    await createFixture(null, { repository: 'https://github.com/example/plugin' });
+
+    expect(renderedLinks()).toEqual([{ text: 'Repository', href: 'https://github.com/example/plugin' }]);
+  });
+
+  it('lists additional links after the repository, with Macro Deck labels for standard types and the author label for custom ones', async () => {
+    await createFixture(null, {
+      repository: 'https://github.com/example/plugin',
+      additionalLinks: [
+        { type: 'issues', url: 'https://github.com/example/plugin/issues' },
+        { type: 'custom', label: 'Setup Guide', url: 'https://example.com/setup' },
+        { type: 'privacy', url: 'https://example.com/privacy' },
+      ],
+    });
+
+    expect(renderedLinks()).toEqual([
+      { text: 'Repository', href: 'https://github.com/example/plugin' },
+      { text: 'Report an issue', href: 'https://github.com/example/plugin/issues' },
+      { text: 'Setup Guide', href: 'https://example.com/setup' },
+      { text: 'Privacy policy', href: 'https://example.com/privacy' },
+    ]);
+    for (const link of Array.from<HTMLAnchorElement>(fixture.nativeElement.querySelectorAll('.links-group a'))) {
+      expect(link.getAttribute('target')).toBe('_blank');
+      expect(link.getAttribute('rel')).toBe('noopener noreferrer');
+    }
+  });
+
+  it('shows the links section for additional links even without a repository, and skips links it cannot label', async () => {
+    await createFixture(null, {
+      additionalLinks: [
+        { type: 'roadmap', url: 'https://example.com/roadmap' },
+        { type: 'custom', url: 'https://example.com/unlabelled' },
+        { type: 'documentation', url: 'https://docs.example.com' },
+      ],
+    });
+
+    expect(renderedLinks()).toEqual([{ text: 'Documentation', href: 'https://docs.example.com' }]);
+  });
+
+  it('shows no links section when there is neither a repository nor an additional link', async () => {
+    await createFixture(null, { additionalLinks: [] });
+
+    expect(fixture.nativeElement.querySelector('.links-group')).toBeNull();
+  });
+
   it('shows the version-history trigger when there are two history entries', async () => {
     await createFixture(null, {
       history: [

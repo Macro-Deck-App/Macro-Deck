@@ -1059,6 +1059,7 @@ export {
   type StoreCatalogSection,
   type StoreExtensionDetailBody,
   type StoreExtensionKind,
+  type StoreExtensionLinkBody,
   type StoreExtensionTrust,
   type StoreInstallState,
   type StoreOperationActionResponse,
