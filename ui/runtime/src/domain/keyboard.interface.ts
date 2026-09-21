@@ -189,11 +189,20 @@ const MEDIA_KEY_NAMES = new Set([
   'AudioVolumeMute',
 ]);
 
+const LETTER_OR_DIGIT = /^[A-Z0-9]$/;
+const LETTER_OR_DIGIT_CODE = /^(?:Key([A-Z])|Digit([0-9]))$/;
+
 export function keyFromEvent(event: KeyboardEvent): string {
   if (event.code === 'Space' || event.key === ' ') return 'Space';
   if (MEDIA_KEY_NAMES.has(event.code)) return event.code;
   if (MEDIA_KEY_NAMES.has(event.key)) return event.key;
   if (NUMPAD_KEY_NAMES.has(event.code)) return event.code;
-  if (event.key.length === 1) return event.key.toUpperCase();
+  if (event.key.length === 1) {
+    const key = event.key.toUpperCase();
+    if (LETTER_OR_DIGIT.test(key)) return key;
+    const physical = LETTER_OR_DIGIT_CODE.exec(event.code);
+    if (physical) return physical[1] ?? physical[2];
+    return key;
+  }
   return event.key;
 }

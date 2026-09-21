@@ -87,7 +87,10 @@ internal sealed class StoreDownloadMetadataTests
 			TimeProvider.System,
 			Serilog.Core.Logger.None);
 
-		var catalogQuery = new StoreCatalogQueryService(_catalog, _installedPlugins, _installations);
+		var catalogQuery = new StoreCatalogQueryService(_catalog,
+			_installedPlugins,
+			_installations,
+			new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None));
 		_coordinator = new StoreInstallCoordinator(catalogQuery,
 			_tracker,
 			new StoreOperationChannel(),
