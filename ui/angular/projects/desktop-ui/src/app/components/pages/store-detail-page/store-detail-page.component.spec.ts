@@ -76,13 +76,14 @@ describe('StoreDetailPageComponent', () => {
   async function createFixture(
     initialOperation: StoreOperationBody | null,
     extensionOverrides: Partial<StoreExtensionDetailBody> = {},
+    reviewsAvailable = false,
   ): Promise<void> {
     notifications = new Map();
     api = jasmine.createSpyObj<ApiService>('ApiService', [
       'getStoreExtension', 'getStoreExtensionIconUrl', 'getStoreScreenshotUrl', 'getStoreStatus', 'onNotification',
       'getStoreRating', 'getStoreReviews', 'getOwnStoreReview',
     ]);
-    api.getStoreRating.and.resolveTo({ available: false, rating: null, ratingCount: 0, distribution: [] });
+    api.getStoreRating.and.resolveTo({ available: reviewsAvailable, rating: null, ratingCount: 0, distribution: [] });
     api.getStoreReviews.and.resolveTo({ available: false, items: [], page: 1, pageSize: 20, totalCount: 0, reviewCount: 0 });
     api.getOwnStoreReview.and.resolveTo({ state: 'SignedOut', review: null });
     Object.defineProperty(api, 'connectionStateSignal', { value: signal('disconnected') });
@@ -159,6 +160,24 @@ describe('StoreDetailPageComponent', () => {
 
     expect(Array.from(host.querySelectorAll('app-store-screenshot-viewer img')).map(img => img.getAttribute('src')))
       .toEqual(['shot-0-window-digest']);
+  });
+
+  it('offers reporting the item only where the Store can take reports for it', async () => {
+    await createFixture(null, {}, false);
+    expect((fixture.nativeElement as HTMLElement).querySelector('.detail-report')).toBeNull();
+
+    TestBed.resetTestingModule();
+    await createFixture(null, {}, true);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const report = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.detail-report button');
+    expect(report?.textContent)
+      .toContain(TestBed.inject(LocalizationService).translateKey(AppStrings.Store.Report.EntryAction));
+
+    report!.click();
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('app-store-report-dialog')).not.toBeNull();
   });
 
   it('renders progress instead of an Install button when an operation is already in flight at construction', async () => {

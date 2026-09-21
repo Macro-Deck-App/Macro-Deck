@@ -13,7 +13,8 @@ public enum StorePlatformFailure
 	Gone,
 	Cooldown,
 	Validation,
-	NotFound
+	NotFound,
+	AlreadyReported
 }
 
 public sealed record StorePlatformResult<T>

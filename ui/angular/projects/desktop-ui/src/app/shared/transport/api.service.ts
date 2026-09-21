@@ -267,6 +267,8 @@ import {
   GetStoreOwnReviewResponse,
   PutStoreOwnReviewRequest,
   StoreOwnReviewWriteResponse,
+  ReportStoreContentRequest,
+  StoreReportResponse,
   StoreReviewSortOrder,
   SubmitConfigFlowStepRequest,
   SubmitConfigFlowStepResponse,
@@ -1021,6 +1023,26 @@ export class ApiService {
 
   deleteOwnStoreReview(kind: StoreExtensionKind, packageId: string): Promise<StoreOwnReviewWriteResponse> {
     return this.http('DELETE', `${this.storeReviewsPath(kind, packageId)}/reviews/me`);
+  }
+
+  reportStoreEntry(
+    kind: StoreExtensionKind,
+    packageId: string,
+    request: ReportStoreContentRequest,
+  ): Promise<StoreReportResponse> {
+    return this.http('POST', `${this.storeReviewsPath(kind, packageId)}/report`, request);
+  }
+
+  reportStoreReview(
+    kind: StoreExtensionKind,
+    packageId: string,
+    reviewId: string,
+    request: ReportStoreContentRequest,
+  ): Promise<StoreReportResponse> {
+    return this.http(
+      'POST',
+      `${this.storeReviewsPath(kind, packageId)}/reviews/${encodeURIComponent(reviewId)}/report`,
+      request);
   }
 
   getStoreReviewAvatarUrl(hostRelativePath: string): string {

@@ -27,15 +27,35 @@ public interface IStoreReviewService
 		CancellationToken cancellationToken);
 
 	Task<StoreOwnReviewWriteResponse> DeleteOwnReview(StoreExtensionKind kind, string id, CancellationToken cancellationToken);
+
+	Task<StoreReportResponse> ReportEntry(StoreExtensionKind kind,
+		string id,
+		ReportStoreContentRequest request,
+		CancellationToken cancellationToken);
+
+	Task<StoreReportResponse> ReportReview(StoreExtensionKind kind,
+		string id,
+		Guid reviewId,
+		ReportStoreContentRequest request,
+		CancellationToken cancellationToken);
 }
 
 public sealed class StoreReviewService : IStoreReviewService
 {
 	public const int MaxPageSize = 50;
+	public const string ReportUnavailableCode = "report_unavailable";
 	public const int MaxTitleLength = 120;
 	public const int MinBodyLength = 3;
 	public const int MaxBodyLength = 2000;
 	public const string AvatarRoute = "/api/store/review-avatars";
+	public const int MaxReportDetailLength = 1000;
+	public const string OtherReportCategory = "Other";
+
+	public static readonly IReadOnlyList<string> EntryReportCategories =
+		["InappropriateContent", "Misleading", "Impersonation", "Malicious", "Spam", OtherReportCategory];
+
+	public static readonly IReadOnlyList<string> ReviewReportCategories =
+		["Spam", "Abuse", "OffTopic", OtherReportCategory];
 
 	private readonly IStorePlatformClient _platform;
 	private readonly IStoreOfficialPackages _packages;
@@ -289,8 +309,42 @@ public sealed class StoreReviewService : IStoreReviewService
 		return new StoreOwnReviewWriteResponse { Success = true };
 	}
 
+	public async Task<StoreReportResponse> ReportEntry(StoreExtensionKind kind,
+		string id,
+		ReportStoreContentRequest request,
+		CancellationToken cancellationToken)
+	{
+		var (report, refused) = PrepareReport(kind, id, request, EntryReportCategories);
+		if (report is null)
+		{
+			return refused!;
+		}
+
+		var result = await _platform.ReportPackage(report.PackageId, report.Category, report.Detail, cancellationToken);
+		return result.Failure == StorePlatformFailure.NotFound
+			? ReportFailure(ReportUnavailableCode, result)
+			: ReportResult(result);
+	}
+
+	public async Task<StoreReportResponse> ReportReview(StoreExtensionKind kind,
+		string id,
+		Guid reviewId,
+		ReportStoreContentRequest request,
+		CancellationToken cancellationToken)
+	{
+		var (report, refused) = PrepareReport(kind, id, request, ReviewReportCategories);
+		if (report is null)
+		{
+			return refused!;
+		}
+
+		return ReportResult(
+			await _platform.ReportReview(report.PackageId, reviewId, report.Category, report.Detail, cancellationToken));
+	}
+
 	public static string ErrorCode(StorePlatformFailure failure) => failure switch
 	{
+		StorePlatformFailure.AlreadyReported => "already_reported",
 		StorePlatformFailure.RetryLater => "retry_later",
 		StorePlatformFailure.SignInRequired => "sign_in_required",
 		StorePlatformFailure.AccountSuspended => "account_suspended",
@@ -338,6 +392,61 @@ public sealed class StoreReviewService : IStoreReviewService
 			status is StoreEntitlementClaimStatus.Claimed or StoreEntitlementClaimStatus.AlreadyEntitled;
 	}
 
+	private (PreparedReport? Report, StoreReportResponse? Refused) PrepareReport(StoreExtensionKind kind,
+		string id,
+		ReportStoreContentRequest request,
+		IReadOnlyList<string> categories)
+	{
+		if (_packages.ResolveListed(kind, id) is not { } packageId)
+		{
+			return Refuse(StorePlatformFailure.NotFound);
+		}
+
+		switch (_session.Current.Status)
+		{
+			case ConnectAccountStatus.Suspended:
+				return Refuse(StorePlatformFailure.AccountSuspended);
+			case not ConnectAccountStatus.SignedIn:
+				return Refuse(StorePlatformFailure.SignInRequired);
+		}
+
+		var category = request.Category?.Trim() ?? string.Empty;
+		if (!categories.Contains(category, StringComparer.Ordinal))
+		{
+			return Refuse(StorePlatformFailure.Validation, "Category");
+		}
+
+		var detail = Normalize(request.Detail);
+		// The Platform's rule: nothing below 0x20 except tab, CR and LF, while DEL and C1 are accepted.
+		if ((detail is null && category == OtherReportCategory) ||
+			(detail is not null && (CodePoints(detail) > MaxReportDetailLength || detail.Any(IsDisallowedControl))))
+		{
+			return Refuse(StorePlatformFailure.Validation, "Detail");
+		}
+
+		return (new PreparedReport(packageId, category, detail), null);
+
+		static (PreparedReport?, StoreReportResponse?) Refuse(StorePlatformFailure failure, string? field = null) =>
+			(null, ReportResult(StorePlatformResult.Fail<bool>(failure, field: field)));
+	}
+
+	private static bool IsDisallowedControl(char character) =>
+		character < '\u0020' && character is not ('\t' or '\r' or '\n');
+
+	private static StoreReportResponse ReportResult(StorePlatformResult<bool> result) =>
+		result.Success ? new StoreReportResponse { Success = true } : ReportFailure(ErrorCode(result.Failure), result);
+
+	private static StoreReportResponse ReportFailure(string code, StorePlatformResult<bool> result) => new()
+	{
+		Success = false,
+		Error = new StoreReviewWriteError
+		{
+			Code = code,
+			Field = result.Field,
+			RetryAfterSeconds = result.RetryAfter is { } retryAfter ? (int)Math.Ceiling(retryAfter.TotalSeconds) : null
+		}
+	};
+
 	private static int CodePoints(string value) => value.EnumerateRunes().Count();
 
 	private static string? Normalize(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
@@ -373,6 +482,7 @@ public sealed class StoreReviewService : IStoreReviewService
 
 	private static StoreOwnReviewBody ToBody(StorePlatformOwnReview review) => new()
 	{
+		Id = review.Id,
 		Rating = review.Rating,
 		Title = review.Title,
 		Body = review.Body,
@@ -384,4 +494,6 @@ public sealed class StoreReviewService : IStoreReviewService
 	};
 
 	private sealed record CachedRating(StorePlatformRating? Rating, DateTimeOffset ExpiresAt);
+
+	private sealed record PreparedReport(string PackageId, string Category, string? Detail);
 }

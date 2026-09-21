@@ -12,7 +12,7 @@ import {
   StoreOwnReviewBody,
   StoreReviewBody,
 } from '@macro-deck/runtime';
-import { ApiService, LocalizationService } from '@shared';
+import { ApiService, LocalizationService, ToastService } from '@shared';
 import { provideLocalizationTesting } from '../../../testing/localization-test-support';
 import { ConnectAccountService } from '../../services/connect-account.service';
 import { SettingsModalService } from '../../services/settings-modal.service';
@@ -39,6 +39,7 @@ function review(overrides: Partial<StoreReviewBody> = {}): StoreReviewBody {
 
 function ownReview(overrides: Partial<StoreOwnReviewBody> = {}): StoreOwnReviewBody {
   return {
+    id: 'own-review',
     rating: 3,
     title: 'Mine',
     body: 'My own words.',
@@ -76,7 +77,7 @@ describe('StoreReviewsSectionComponent', () => {
     const notifications = new Map<string, Subject<unknown>>();
     api = jasmine.createSpyObj<ApiService>('ApiService', [
       'getStoreRating', 'getStoreReviews', 'getOwnStoreReview', 'putOwnStoreReview', 'deleteOwnStoreReview',
-      'getStoreReviewAvatarUrl', 'onNotification',
+      'getStoreReviewAvatarUrl', 'onNotification', 'reportStoreReview',
     ]);
     Object.defineProperty(api, 'connectionStateSignal', { value: signal('disconnected') });
     api.onNotification.and.callFake((method: string) => {
@@ -368,5 +369,113 @@ describe('StoreReviewsSectionComponent', () => {
 
     expect(api.deleteOwnStoreReview).toHaveBeenCalledOnceWith('Plugin', 'com.acme.deck-tools');
     expect(host().querySelector('form')).toBeNull();
+  });
+
+  describe('reporting a review', () => {
+    function reportButton(reviewId: string): HTMLButtonElement | null {
+      const items = Array.from(host().querySelectorAll<HTMLElement>('.reviews-list li'));
+      const index = currentReviews.findIndex(item => item.id === reviewId);
+      return items[index]?.querySelector<HTMLButtonElement>('.review-report button') ?? null;
+    }
+
+    function reasonLabels(): string[] {
+      return Array.from(host().querySelectorAll<HTMLElement>('.report-reason')).map(label => label.textContent!.trim());
+    }
+
+    function chooseReason(label: string): void {
+      const option = Array.from(host().querySelectorAll<HTMLLabelElement>('.report-reason'))
+        .find(item => item.textContent!.trim() === label)!;
+      option.querySelector<HTMLInputElement>('input')!.click();
+    }
+
+    async function typeDetail(value: string): Promise<void> {
+      const field = host().querySelector<HTMLTextAreaElement>('.report-detail-input textarea')!;
+      field.value = value;
+      field.dispatchEvent(new Event('input'));
+      await settle();
+    }
+
+    async function submit(): Promise<void> {
+      host().querySelector<HTMLButtonElement>('.report-submit button')!.click();
+      await settle();
+    }
+
+    let currentReviews: StoreReviewBody[];
+
+    async function setupReviews(scenario: Scenario = {}): Promise<void> {
+      currentReviews = scenario.reviews ?? [
+        review({ id: 'own-review', authorDisplayName: 'Me' }),
+        review({ id: 'review-2', authorDisplayName: 'Grace Hopper' }),
+      ];
+      await setup({ own: { state: 'Entitled', review: ownReview() }, ...scenario, reviews: currentReviews });
+    }
+
+    it('offers Report on every review except the reader\'s own, named after its author', async () => {
+      await setupReviews();
+
+      expect(reportButton('own-review')).toBeNull();
+      expect(reportButton('review-2')?.getAttribute('aria-label'))
+        .toBe(text(AppStrings.Store.Report.ReviewAction, { author: 'Grace Hopper' }));
+    });
+
+    it('sends a signed-out reader to sign in instead of opening the report', async () => {
+      await setupReviews({ status: 'signedOut', own: { state: 'SignedOut' } });
+
+      reportButton('review-2')!.click();
+      await settle();
+
+      expect(settingsModal.open).toHaveBeenCalledOnceWith('account');
+      expect(host().querySelector('app-store-report-dialog')).toBeNull();
+    });
+
+    it('offers the review reasons, needs a description for Other and confirms the report', async () => {
+      await setupReviews();
+      api.reportStoreReview.and.resolveTo({ success: true });
+      reportButton('review-2')!.click();
+      await settle();
+
+      expect(reasonLabels()).toEqual([
+        text(AppStrings.Store.Report.Reason.Spam),
+        text(AppStrings.Store.Report.Reason.Abuse),
+        text(AppStrings.Store.Report.Reason.OffTopic),
+        text(AppStrings.Store.Report.Reason.Other),
+      ]);
+
+      chooseReason(text(AppStrings.Store.Report.Reason.Other));
+      await settle();
+      await submit();
+
+      expect(host().textContent).toContain(text(AppStrings.Store.Report.Validation.DetailRequired));
+      expect(api.reportStoreReview).not.toHaveBeenCalled();
+
+      await typeDetail('  Links to a scam site  ');
+      await submit();
+
+      expect(api.reportStoreReview).toHaveBeenCalledOnceWith('Plugin', 'com.acme.deck-tools', 'review-2', {
+        category: 'Other',
+        detail: 'Links to a scam site',
+      });
+      expect(host().querySelector('app-store-report-dialog')).toBeNull();
+      expect(TestBed.inject(ToastService).toasts().map(toast => toast.message))
+        .toContain(text(AppStrings.Store.Report.Received));
+      expect(reportButton('review-2')).toBeNull();
+      expect(host().querySelector('.review-reported')?.textContent).toContain(text(AppStrings.Store.Report.Reported));
+      expect(document.activeElement).toBe(host().querySelector('.review-reported'));
+    });
+
+    it('tells the reader to wait when the Platform limits reports', async () => {
+      await setupReviews();
+      api.reportStoreReview.and.resolveTo({ success: false, error: { code: 'cooldown', retryAfterSeconds: 30 } });
+      reportButton('review-2')!.click();
+      await settle();
+
+      chooseReason(text(AppStrings.Store.Report.Reason.Spam));
+      await settle();
+      await submit();
+
+      expect(host().querySelector('.report-error')?.textContent)
+        .toContain(text(AppStrings.Store.Report.Error.CooldownSeconds, { count: 30 }));
+      expect(host().querySelector('app-store-report-dialog')).not.toBeNull();
+    });
   });
 });

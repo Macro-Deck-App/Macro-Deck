@@ -1,4 +1,4 @@
-@if (visible()) {
+@if (available()) {
   <h2 class="reviews-heading">{{ 'macrodeck.app:Store.Reviews.Heading' | translate }}</h2>
 
   <div class="reviews-summary">
@@ -120,6 +120,22 @@
               }
             </span>
           </div>
+          @if (review.id !== ownReviewId()) {
+            @if (reportedReviewIds().has(review.id)) {
+              <span class="review-reported" tabindex="-1" [attr.data-reported-review]="review.id">
+                {{ 'macrodeck.app:Store.Report.Reported' | translate }}
+              </span>
+            } @else {
+              <shared-button
+                class="review-report"
+                variant="ghost"
+                size="compact"
+                [ariaLabel]="reviewReportLabel(review)"
+                (click)="requestReport(review)">
+                {{ 'macrodeck.app:Store.Report.Action' | translate }}
+              </shared-button>
+            }
+          }
         </div>
         @if (review.title) {
           <p class="review-title">{{ review.title }}</p>
@@ -284,6 +300,15 @@
       </shared-button>
     </div>
   </shared-modal>
+}
+
+@if (reportTarget(); as target) {
+  <app-store-report-dialog
+    [extensionKind]="kind()"
+    [extensionId]="id()"
+    [target]="target"
+    (closed)="closeReport()"
+    (reported)="onReported()" />
 }
 
 @if (deleteConfirmOpen()) {

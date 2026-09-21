@@ -305,6 +305,17 @@
   min-width: 0;
 }
 
+.review-report,
+.review-reported {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.review-reported {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
 .review-author {
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);

@@ -146,6 +146,70 @@ internal sealed class StorePlatformClientTests
 	}
 
 	[Test]
+	public async Task Reports_are_posted_for_the_signed_in_account_with_their_reason_and_detail()
+	{
+		var reviewId = Guid.Parse("6f1c1a4e-2b0d-4c55-9f0e-6f39b6a1d2c3");
+		_handler.Respond = _ => new HttpResponseMessage(HttpStatusCode.NoContent);
+
+		var entry = await _client.ReportPackage("com.acme.hue", "Misleading", "Claims features it lacks");
+		var review = await _client.ReportReview("com.acme.hue", reviewId, "Spam", null);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(entry.Success, Is.True);
+			Assert.That(review.Success, Is.True);
+			Assert.That(_handler.Requests.Select(request => (request.Method, request.Uri.AbsolutePath)), Is.EqualTo(new[]
+			{
+				("POST", "/api/v1/store/packages/com.acme.hue/report"),
+				("POST", $"/api/v1/store/packages/com.acme.hue/reviews/{reviewId:D}/report")
+			}));
+			Assert.That(_handler.Requests.All(request => request.Authorization == "Bearer access-token"), Is.True);
+			var entryBody = JsonSerializer.Deserialize<JsonElement>(_handler.Requests[0].Body!, _json);
+			Assert.That(entryBody.GetProperty("category").GetString(), Is.EqualTo("Misleading"));
+			Assert.That(entryBody.GetProperty("detail").GetString(), Is.EqualTo("Claims features it lacks"));
+			var reviewBody = JsonSerializer.Deserialize<JsonElement>(_handler.Requests[1].Body!, _json);
+			Assert.That(reviewBody.GetProperty("category").GetString(), Is.EqualTo("Spam"));
+			Assert.That(reviewBody.GetProperty("detail").ValueKind, Is.EqualTo(JsonValueKind.Null));
+		});
+	}
+
+	[TestCase(HttpStatusCode.Conflict, "{}", StorePlatformFailure.AlreadyReported)]
+	[TestCase(HttpStatusCode.Forbidden, "{\"title\":\"You cannot report your own review.\"}", StorePlatformFailure.Forbidden)]
+	[TestCase(HttpStatusCode.Forbidden, "{\"accountSuspended\":true}", StorePlatformFailure.AccountSuspended)]
+	[TestCase(HttpStatusCode.NotFound, "", StorePlatformFailure.NotFound)]
+	[TestCase(HttpStatusCode.TooManyRequests, "{}", StorePlatformFailure.Cooldown)]
+	public async Task A_refused_report_says_what_the_platform_meant(HttpStatusCode status,
+		string body,
+		StorePlatformFailure expected)
+	{
+		_handler.Respond = _ =>
+			new HttpResponseMessage(status) { Content = new StringContent(body, Encoding.UTF8, "application/problem+json") };
+
+		var entry = await _client.ReportPackage("com.acme.hue", "Spam", null);
+		var review = await _client.ReportReview("com.acme.hue", Guid.NewGuid(), "Spam", null);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(entry.Failure, Is.EqualTo(expected));
+			Assert.That(review.Failure, Is.EqualTo(expected));
+		});
+	}
+
+	[Test]
+	public async Task A_report_is_never_sent_while_signed_out()
+	{
+		_session.Current = ConnectSessionSnapshot.SignedOut;
+
+		var result = await _client.ReportReview("com.acme.hue", Guid.NewGuid(), "Spam", null);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Failure, Is.EqualTo(StorePlatformFailure.SignInRequired));
+			Assert.That(_handler.Requests, Is.Empty);
+		});
+	}
+
+	[Test]
 	public async Task No_own_review_is_an_empty_answer_not_a_failure()
 	{
 		_handler.Respond = _ => new HttpResponseMessage(HttpStatusCode.NotFound);
