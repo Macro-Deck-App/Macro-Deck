@@ -17346,6 +17346,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Reviews.Edited" xml:space="preserve">
     <value>Edytowano</value>
   </data>
+  <data name="Store.Reviews.DeveloperResponse" xml:space="preserve">
+    <value>Odpowiedź dewelopera</value>
+  </data>
+  <data name="Store.Reviews.ReplyEdited" xml:space="preserve">
+    <value>Edytowano</value>
+  </data>
   <data name="Store.Reviews.ComposeHeading" xml:space="preserve">
     <value>Własna recenzja</value>
   </data>

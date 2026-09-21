@@ -17344,6 +17344,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Store.Reviews.Edited" xml:space="preserve">
     <value>Bearbeitet</value>
   </data>
+  <data name="Store.Reviews.DeveloperResponse" xml:space="preserve">
+    <value>Antwort des Entwicklers</value>
+  </data>
+  <data name="Store.Reviews.ReplyEdited" xml:space="preserve">
+    <value>Bearbeitet</value>
+  </data>
   <data name="Store.Reviews.ComposeHeading" xml:space="preserve">
     <value>Deine Rezension</value>
   </data>

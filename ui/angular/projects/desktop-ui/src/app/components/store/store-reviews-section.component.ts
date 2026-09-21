@@ -67,6 +67,7 @@ export class StoreReviewsSectionComponent {
   readonly kind = input.required<StoreExtensionKind>();
   readonly id = input.required<string>();
   readonly repository = input<string | null>(null);
+  readonly publisher = input<string | null>(null);
 
   protected readonly starValues = STAR_VALUES;
   protected readonly starPath = STORE_STAR_PATH;

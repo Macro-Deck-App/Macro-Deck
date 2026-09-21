@@ -368,7 +368,16 @@ public sealed class StoreReviewService : IStoreReviewService
 			: null,
 		CreatedAt = review.CreatedAt,
 		IsEdited = review.IsEdited,
-		DownloadedBeforeReview = review.DownloadedBeforeReview
+		DownloadedBeforeReview = review.DownloadedBeforeReview,
+		Reply = review.Reply is { } reply && !string.IsNullOrWhiteSpace(reply.Body)
+			? new StoreReviewReplyBody
+			{
+				Body = reply.Body,
+				CreatedAt = reply.CreatedAt,
+				UpdatedAt = reply.UpdatedAt,
+				IsEdited = reply.IsEdited
+			}
+			: null
 	};
 
 	private static StoreOwnReviewBody ToBody(StorePlatformOwnReview review) => new()

@@ -241,6 +241,33 @@ internal sealed class StoreReviewServiceTests
 	}
 
 	[Test]
+	public async Task A_creator_reply_reaches_the_store_on_the_review_it_answers_and_nowhere_else()
+	{
+		var repliedAt = new DateTimeOffset(2026, 9, 2, 8, 0, 0, TimeSpan.Zero);
+		var answered = Review(null) with
+		{
+			Reply = new StorePlatformReviewReply("Thanks, fixed in 1.2.", repliedAt, repliedAt.AddDays(1), true)
+		};
+		var unanswered = Review(null);
+		_platform.ReviewPage = new StorePlatformReviewPage([unanswered, answered], 1, 20, 2, 4, 2, 2);
+
+		var reviews = await _service.GetReviews(StoreExtensionKind.Plugin, PackageId, 1, 20,
+			StoreReviewSortOrder.Newest, null, CancellationToken.None);
+		var reply = reviews.Items.Single(review => review.Id == answered.Id).Reply;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(reviews.Items, Has.Count.EqualTo(2));
+			Assert.That(reviews.TotalCount, Is.EqualTo(2));
+			Assert.That(reviews.Items.Single(review => review.Id == unanswered.Id).Reply, Is.Null);
+			Assert.That(reply?.Body, Is.EqualTo("Thanks, fixed in 1.2."));
+			Assert.That(reply?.CreatedAt, Is.EqualTo(repliedAt));
+			Assert.That(reply?.UpdatedAt, Is.EqualTo(repliedAt.AddDays(1)));
+			Assert.That(reply?.IsEdited, Is.True);
+		});
+	}
+
+	[Test]
 	public async Task An_unreachable_platform_is_not_asked_again_for_every_page_until_the_cache_lifetime_passes()
 	{
 		_platform.RatingsFailure = StorePlatformFailure.Unavailable;

@@ -246,6 +246,48 @@ internal sealed class StorePlatformClientTests
 	}
 
 	[Test]
+	public async Task A_creator_reply_is_read_with_the_review_it_answers()
+	{
+		var answered = Guid.NewGuid();
+		var unanswered = Guid.NewGuid();
+		var repliedAt = new DateTimeOffset(2026, 9, 2, 8, 0, 0, TimeSpan.Zero);
+		var editedAt = repliedAt.AddHours(3);
+		_handler.Respond = _ => Json(new
+		{
+			items = new object[]
+			{
+				new
+				{
+					id = answered, rating = 2, title = (string?)null, body = "Crashes on start",
+					author = new { displayName = "Ada", avatarUrl = (string?)null },
+					createdAt = DateTimeOffset.UnixEpoch, updatedAt = DateTimeOffset.UnixEpoch,
+					downloadedBeforeReview = true, isEdited = false,
+					reply = new { body = "Fixed in 1.2, please update.", createdAt = repliedAt, updatedAt = editedAt, isEdited = true }
+				},
+				new
+				{
+					id = unanswered, rating = 5, title = "Great", body = (string?)null,
+					author = new { displayName = "Grace", avatarUrl = (string?)null },
+					createdAt = DateTimeOffset.UnixEpoch, updatedAt = DateTimeOffset.UnixEpoch,
+					downloadedBeforeReview = true, isEdited = false,
+					reply = (object?)null
+				}
+			},
+			page = 1, pageSize = 20, totalCount = 2, rating = 3.5, ratingCount = 2, reviewCount = 2
+		});
+
+		var result = await _client.GetReviews("com.acme.hue", 1, 20, StorePlatformReviewSort.NewestFirst, null);
+		var items = result.Value!.Items;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(items.Single(review => review.Id == answered).Reply,
+				Is.EqualTo(new StorePlatformReviewReply("Fixed in 1.2, please update.", repliedAt, editedAt, true)));
+			Assert.That(items.Single(review => review.Id == unanswered).Reply, Is.Null);
+		});
+	}
+
+	[Test]
 	public async Task Tests_are_read_for_the_signed_in_account_with_its_bearer_token()
 	{
 		var buildId = Guid.NewGuid();

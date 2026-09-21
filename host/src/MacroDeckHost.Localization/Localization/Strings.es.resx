@@ -17346,6 +17346,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Store.Reviews.Edited" xml:space="preserve">
     <value>Editada</value>
   </data>
+  <data name="Store.Reviews.DeveloperResponse" xml:space="preserve">
+    <value>Respuesta del desarrollador</value>
+  </data>
+  <data name="Store.Reviews.ReplyEdited" xml:space="preserve">
+    <value>Editada</value>
+  </data>
   <data name="Store.Reviews.ComposeHeading" xml:space="preserve">
     <value>Tu reseña</value>
   </data>
