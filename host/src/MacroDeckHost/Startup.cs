@@ -1,4 +1,6 @@
-﻿using MacroDeckHost.Infrastructure.Backups.Storage;
+﻿using MacroDeckHost.Application.ThirdParty;
+using MacroDeckHost.Infrastructure.ThirdParty;
+using MacroDeckHost.Infrastructure.Backups.Storage;
 using MacroDeckHost.Infrastructure.Backups.Retention;
 using MacroDeckHost.Infrastructure.Backups.Restore;
 using MacroDeckHost.Infrastructure.Backups;
@@ -542,6 +544,7 @@ public class Startup
 				AllowAutoRedirect = false
 			});
 		services.AddSingleton<IDotnetMuxerLocator, DotnetMuxerLocator>();
+		services.AddSingleton<IThirdPartyNotices, ThirdPartyNoticesFile>();
 		services.AddSingleton<IPluginSupervisor, PluginSupervisor>();
 		services.AddHostedService<PluginSupervisorBackgroundService>();
 

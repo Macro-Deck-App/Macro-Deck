@@ -15,7 +15,7 @@ export interface ToastHostOptions {
 const DEFAULT_DURATION_MS = 5000;
 
 const CHECK = ['M20 6 9 17l-5-5'];
-const ALERT = ['M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20', 'M12 8v5', 'M12 16h.01'];
+const ALERT = ['M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20', 'M12 8v4', 'M12 16h.01'];
 
 interface Shown {
   id: number;

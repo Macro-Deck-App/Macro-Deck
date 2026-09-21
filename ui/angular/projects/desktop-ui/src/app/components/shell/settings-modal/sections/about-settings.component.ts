@@ -1,7 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { GetAboutInfoResponse } from '@macro-deck/runtime';
-import { ApiService, LocalizationService, SettingsRowComponent, SettingsSectionComponent, TranslatePipe } from '@shared';
+import {
+  ApiService,
+  ButtonComponent,
+  LocalizationService,
+  SettingsRowComponent,
+  SettingsSectionComponent,
+  TranslatePipe,
+} from '@shared';
 import { ExternalLinkService } from '../../../../services/external-link.service';
+import { ThirdPartyNoticesModalComponent } from './third-party-notices-modal.component';
 import { UpdateCheckComponent } from './update-check.component';
 import { formatBuildVersion } from '../../../../services';
 
@@ -10,7 +18,14 @@ const LICENSE_URL = 'https://www.apache.org/licenses/LICENSE-2.0';
 @Component({
   selector: 'app-about-settings',
   standalone: true,
-  imports: [SettingsSectionComponent, SettingsRowComponent, UpdateCheckComponent, TranslatePipe],
+  imports: [
+    SettingsSectionComponent,
+    SettingsRowComponent,
+    ButtonComponent,
+    UpdateCheckComponent,
+    ThirdPartyNoticesModalComponent,
+    TranslatePipe,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './about-settings.component.html',
   styleUrls: ['./about-settings.component.scss'],
@@ -24,6 +39,10 @@ export class AboutSettingsComponent {
   readonly loadFailed = signal(false);
 
   readonly shellVersion = signal<string | null>(null);
+
+  readonly noticesOpen = signal(false);
+
+  readonly linuxHost = computed(() => this.info()?.operatingSystem.includes('Linux') ?? false);
 
   readonly buildTime = computed(() => {
     const timestamp = this.info()?.buildTimestamp;
@@ -53,6 +72,14 @@ export class AboutSettingsComponent {
 
   openLicense(): void {
     this.externalLinks.open(LICENSE_URL);
+  }
+
+  openNotices(): void {
+    this.noticesOpen.set(true);
+  }
+
+  closeNotices(): void {
+    this.noticesOpen.set(false);
   }
 
   private async load(): Promise<void> {

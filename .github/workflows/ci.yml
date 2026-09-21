@@ -246,6 +246,50 @@ jobs:
       - name: Service worker manifest check
         run: node ci/scripts/verify-worker-manifest.mjs ui/web-client/dist ui/web-client/dist-carthing
 
+  third-party-notices:
+    name: Third-party notices & license policy
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+
+      # cargo metadata downloads crate sources for their license files but builds nothing, so no target
+      # or system library is needed.
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Install npm packages
+        working-directory: ui
+        run: npm ci --ignore-scripts
+
+      - name: Restore the host for every shipped runtime
+        run: dotnet restore host/src/MacroDeckHost/MacroDeckHost.csproj '-p:RuntimeIdentifiers="win-x64;linux-x64;osx-arm64"'
+
+      - name: Generate third-party notices
+        run: dotnet run --project tools/src/MacroDeck.LicenseTool -c Release
+
+      - name: Committed notices are up to date
+        run: |
+          if ! git diff --exit-code NOTICE THIRD-PARTY-NOTICES; then
+            echo "::error::NOTICE or THIRD-PARTY-NOTICES is out of date. Run 'dotnet run --project tools/src/MacroDeck.LicenseTool' (see engineering/development/third-party-notices.md) and commit the result."
+            exit 1
+          fi
+
   aur-package:
     name: AUR package
     # Main and manual runs only: a broken PKGBUILD has to be caught before the next release,

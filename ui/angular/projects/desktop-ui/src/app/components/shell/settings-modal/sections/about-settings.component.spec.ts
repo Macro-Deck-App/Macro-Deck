@@ -31,7 +31,13 @@ describe('AboutSettingsComponent', () => {
     info: Partial<GetAboutInfoResponse> = {},
     options: { fail?: boolean } = {}
   ): Promise<ComponentFixture<AboutSettingsComponent>> {
-    api = jasmine.createSpyObj<ApiService>('ApiService', ['getAboutInfo', 'onNotification', 'connectionStateSignal']);
+    api = jasmine.createSpyObj<ApiService>('ApiService', [
+      'getAboutInfo',
+      'getThirdPartyNotices',
+      'onNotification',
+      'connectionStateSignal',
+    ]);
+    api.getThirdPartyNotices.and.resolveTo({ components: [], texts: [] });
     api.onNotification.and.returnValue(EMPTY);
     // UpdateCheckComponent (nested via AboutSettingsComponent) pulls in UpdateService, which
     // watches this to fire a reconnect re-check - never 'connected' here, so it stays inert.
@@ -119,6 +125,23 @@ describe('AboutSettingsComponent', () => {
     const text = fixture.nativeElement.textContent as string;
     expect(text).toContain('Bootstrapper');
     expect(text).toContain('3.0.0-beta.42 - Tauri 2.9.0 (WebView 620.1)');
+  });
+
+  it('opens the open source licenses from the license section', async () => {
+    const fixture = await createFixture();
+    expect(fixture.nativeElement.querySelector('app-third-party-notices-modal')).toBeNull();
+
+    const rows = Array.from(fixture.nativeElement.querySelectorAll('.settings-row')) as HTMLElement[];
+    const licensesRow = rows.find(row => row.textContent?.includes('Open source licenses'));
+    licensesRow?.querySelector('button')?.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const modal = fixture.nativeElement.querySelector('app-third-party-notices-modal') as HTMLElement | null;
+    expect(modal).toBeTruthy();
+    expect(modal?.querySelector('[role="dialog"]')?.textContent).toContain('Open source licenses');
+    expect(api.getThirdPartyNotices).toHaveBeenCalled();
   });
 
   it('shows an error note when the host request fails', async () => {

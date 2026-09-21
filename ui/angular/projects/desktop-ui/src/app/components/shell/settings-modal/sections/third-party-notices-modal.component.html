@@ -1,0 +1,107 @@
+<shared-modal
+  [heading]="'macrodeck.app:Settings.About.OpenSourceLicenses' | translate"
+  size="large"
+  [zIndex]="1100"
+  [style.--modal-height]="'min(48rem, 90vh)'"
+  (close)="close()">
+  <div class="notices">
+    @if (loading()) {
+      <p class="notices__status" role="status">{{ 'macrodeck:Common.Loading' | translate }}</p>
+    } @else if (loadFailed()) {
+      <div class="notices__failure" role="alert">
+        <p class="notices__status">{{ strings.LoadFailed | translate }}</p>
+        <shared-button variant="secondary" (click)="load()">
+          {{ 'macrodeck:Common.Retry' | translate }}
+        </shared-button>
+      </div>
+    } @else {
+      <shared-input
+        type="search"
+        class="notices__search"
+        [placeholder]="strings.SearchPlaceholder | translate"
+        [ariaLabel]="strings.SearchLabel | translate"
+        [ngModel]="query()"
+        (ngModelChange)="query.set($event)" />
+
+      @for (group of groups(); track group.ecosystem) {
+        <section class="notices__group" [attr.aria-labelledby]="'notices-group-' + group.ecosystem">
+          <h3 class="notices__group-heading" [id]="'notices-group-' + group.ecosystem">
+            <span>{{ group.headingKey | translate }}</span>
+            <span class="notices__count">{{ strings.ComponentCount | translate: { count: group.rows.length } }}</span>
+          </h3>
+          <ul class="notices__list">
+            @for (row of group.rows; track row.key) {
+              <li class="notices__row">
+                <div class="notices__row-header">
+                  @if (row.hasDetails) {
+                    <button
+                      type="button"
+                      class="notices__toggle"
+                      [attr.aria-expanded]="isExpanded(row.key)"
+                      [attr.aria-controls]="isExpanded(row.key) ? 'notices-details-' + row.key : null"
+                      [attr.aria-label]="(isExpanded(row.key) ? strings.HideTexts : strings.ShowTexts) | translate: { name: row.component.name }"
+                      [attr.aria-describedby]="'notices-meta-' + row.key"
+                      (click)="toggle(row.key)">
+                      <span
+                        class="icon icon-chevron-right icon-sm notices__chevron"
+                        [class.notices__chevron--open]="isExpanded(row.key)"
+                        aria-hidden="true"></span>
+                      <span class="notices__name">{{ row.component.name }}</span>
+                      <span class="notices__meta" [id]="'notices-meta-' + row.key">
+                        <span class="notices__licenses">{{ row.licenseLabel }}</span>
+                        @if (row.platformsLabel; as platforms) {
+                          <span class="notices__platforms">{{ strings.Platforms | translate: { platforms: platforms } }}</span>
+                        }
+                      </span>
+                    </button>
+                  } @else {
+                    <div class="notices__toggle notices__toggle--static">
+                      <span class="notices__name">{{ row.component.name }}</span>
+                      <span class="notices__meta">
+                        <span class="notices__licenses">{{ row.licenseLabel }}</span>
+                        @if (row.platformsLabel; as platforms) {
+                          <span class="notices__platforms">{{ strings.Platforms | translate: { platforms: platforms } }}</span>
+                        }
+                      </span>
+                    </div>
+                  }
+                  @if (row.component.url; as url) {
+                    <button
+                      type="button"
+                      class="notices__link"
+                      [attr.aria-label]="strings.OpenWebsite | translate: { name: row.component.name }"
+                      (click)="openUrl(url)">
+                      {{ strings.Website | translate }}
+                      <span class="icon icon-external-link icon-sm" aria-hidden="true"></span>
+                    </button>
+                  }
+                </div>
+                @if (isExpanded(row.key)) {
+                  <div class="notices__details" [id]="'notices-details-' + row.key">
+                    @if (row.component.note; as note) {
+                      <p class="notices__note">{{ note }}</p>
+                    }
+                    @for (text of textsFor(row); track $index) {
+                      <pre class="notices__text">{{ text }}</pre>
+                    }
+                  </div>
+                }
+              </li>
+            }
+          </ul>
+        </section>
+      } @empty {
+        <p class="notices__status">{{ strings.NoResults | translate }}</p>
+      }
+    }
+  </div>
+
+  <div modal-footer class="notices__footer">
+    @if (showAppImageNote()) {
+      <p class="notices__footnote">{{ strings.AppImageNote | translate }}</p>
+    }
+    <shared-button variant="secondary" (click)="close()">
+      {{ 'macrodeck:Common.Close' | translate }}
+    </shared-button>
+  </div>
+</shared-modal>

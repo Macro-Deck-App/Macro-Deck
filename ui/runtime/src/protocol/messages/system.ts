@@ -28,6 +28,29 @@ export interface GetAboutInfoResponse {
   operatingSystem: string;
 }
 
+export type ThirdPartyComponentEcosystem = 'nuget' | 'npm' | 'cargo' | 'asset';
+
+export interface ThirdPartyComponent {
+  name: string;
+  ecosystem: ThirdPartyComponentEcosystem;
+  licenses: string[];
+  declared: string[];
+  url: string | null;
+  platforms: string[];
+  note: string | null;
+  textIds: number[];
+}
+
+export interface ThirdPartyNoticeText {
+  id: number;
+  content: string;
+}
+
+export interface GetThirdPartyNoticesResponse {
+  components: ThirdPartyComponent[];
+  texts: ThirdPartyNoticeText[];
+}
+
 export interface ConnectionEndpoint {
   address: string;
   port: number;

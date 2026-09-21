@@ -1,19 +1,20 @@
-NOTICE
-This product is licensed under the Apache License 2.0.
+Macro Deck
 Copyright (c) 2026 Macro Deck Contributors.
 
-Third-party components:
+This product is licensed under the Apache License 2.0 (see LICENSE).
 
+Third-party components and their licenses are listed in THIRD-PARTY-NOTICES.
+The notices below are reproduced as their licenses require.
+
+Macro Deck name, logo and branding assets
+-----------------------------------------
+The Macro Deck name, logo and branding assets are not licensed under the Apache License 2.0.
+Copyright (c) 2026 Radioactive.exe, licensed exclusively to the Macro Deck project; all other rights
+reserved. Forks and derived products must not use the Macro Deck name or logo.
+
+SixLabors.ImageSharp
+--------------------
 SixLabors.ImageSharp (https://github.com/SixLabors/ImageSharp)
 Used for icon image processing (decode, resize, WebP encoding).
 Licensed under the Six Labors Split License; Macro Deck qualifies for its
 Open Source exemption as a project distributed under the Apache License 2.0.
-
-Svg.Skia (https://github.com/wieslawsoltes/Svg.Skia)
-Used for rasterizing SVG icons. Licensed under the MIT License.
-
-SkiaSharp.Skottie (https://github.com/mono/SkiaSharp)
-Used for rendering Lottie animations to frames on import. Licensed under the MIT License.
-
-WebNowPlaying icon (https://github.com/keifufu/WebNowPlaying)
-The WebNowPlaying integration icon is adapted from its logo. Copyright (c) 2024 keifufu. Licensed under the MIT License.

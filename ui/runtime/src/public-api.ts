@@ -1111,9 +1111,13 @@ export {
   type GetRunningApplicationsResponse,
   type GetSystemFontsRequest,
   type GetSystemFontsResponse,
+  type GetThirdPartyNoticesResponse,
   type HostLockStateChangedEvent,
   type RunningApplication,
   type SystemFontFace,
+  type ThirdPartyComponent,
+  type ThirdPartyComponentEcosystem,
+  type ThirdPartyNoticeText,
 } from './protocol/messages/system';
 export {
   type ComparisonExpressionPayload,

@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.ThirdParty;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.System;
 using MacroDeckHost.Application.Ui.Transport.Messages.Version;
@@ -37,6 +38,7 @@ public class SystemController : ControllerBase
 	private readonly IFontCatalog _fontCatalog;
 	private readonly IHostListenerState _listenerState;
 	private readonly IHostIdentityKeyProvider _hostIdentity;
+	private readonly IThirdPartyNotices _thirdPartyNotices;
 
 	public SystemController(
 		IUiTransportMessageHandler<GetVersionRequest, GetVersionResponse> getVersion,
@@ -50,7 +52,8 @@ public class SystemController : ControllerBase
 		IUiTransportMessageHandler<GetLockStateRequest, GetLockStateResponse> getLockState,
 		IFontCatalog fontCatalog,
 		IHostListenerState listenerState,
-		IHostIdentityKeyProvider hostIdentity)
+		IHostIdentityKeyProvider hostIdentity,
+		IThirdPartyNotices thirdPartyNotices)
 	{
 		_getVersion = getVersion;
 		_getAboutInfo = getAboutInfo;
@@ -62,6 +65,7 @@ public class SystemController : ControllerBase
 		_fontCatalog = fontCatalog;
 		_listenerState = listenerState;
 		_hostIdentity = hostIdentity;
+		_thirdPartyNotices = thirdPartyNotices;
 	}
 
 	[HttpGet("version")]
@@ -72,6 +76,24 @@ public class SystemController : ControllerBase
 	[HttpGet("about")]
 	public Task<GetAboutInfoResponse> GetAbout(CancellationToken ct)
 		=> _getAboutInfo.Handle(new GetAboutInfoRequest(), ct).AsTask();
+
+	[HttpGet("third-party-notices")]
+	public ActionResult<ThirdPartyNoticesDocument> GetThirdPartyNotices()
+		=> _thirdPartyNotices.Read() is { } document ? document : NotFound();
+
+	// Public on purpose: every device that receives the web client may read the notices of what it runs.
+	[HttpGet("third-party-notices.txt")]
+	[AllowAnonymous]
+	public IActionResult GetThirdPartyNoticesText()
+	{
+		if (_thirdPartyNotices.ReadText() is not { } text)
+		{
+			return NotFound();
+		}
+
+		Response.Headers.CacheControl = "public, max-age=3600";
+		return Content(text, "text/plain; charset=utf-8");
+	}
 
 	[HttpGet("time")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]

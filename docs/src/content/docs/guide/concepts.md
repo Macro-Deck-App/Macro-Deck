@@ -143,3 +143,11 @@ that is currently installed shows as **Installed**.
 
 Every phone, tablet or browser that connects shows up in **Settings > Devices**. Choose there which
 profile each device opens with.
+
+## Open source licenses
+
+Macro Deck is built on open source software. **Settings > About > Open source licenses** lists every
+third-party component it includes, with its license and the full license text; search by name or license.
+On a phone or tablet, the web client's settings offer the same list under **Open source licenses**. The
+files `LICENSE`, `NOTICE` and `THIRD-PARTY-NOTICES` also sit next to the Macro Deck host in the installation
+folder, and the Linux AppImage adds a notices file for the system libraries it bundles.

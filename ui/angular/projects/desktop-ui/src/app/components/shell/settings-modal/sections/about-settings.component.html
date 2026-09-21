@@ -43,9 +43,20 @@
         <span class="icon icon-arrow-right icon-sm" aria-hidden="true"></span>
       </button>
     </shared-settings-row>
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.About.OpenSourceLicenses' | translate"
+      [description]="'macrodeck.app:Settings.About.OpenSourceLicensesDescription' | translate">
+      <shared-button variant="secondary" (click)="openNotices()">
+        {{ 'macrodeck.app:Settings.About.ViewLicenses' | translate }}
+      </shared-button>
+    </shared-settings-row>
   </shared-settings-section>
 
   @if (loadFailed()) {
     <p class="about__error">{{ 'macrodeck.app:Settings.About.LoadFailed' | translate }}</p>
   }
 </div>
+
+@if (noticesOpen()) {
+  <app-third-party-notices-modal [showAppImageNote]="linuxHost()" (closed)="closeNotices()" />
+}

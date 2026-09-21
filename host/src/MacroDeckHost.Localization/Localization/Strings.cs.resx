@@ -12295,6 +12295,69 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.About.LicenseDescription" xml:space="preserve">
     <value>Macro Deck je open source software.</value>
   </data>
+  <data name="Settings.About.Licenses.AppImageNote" xml:space="preserve">
+    <value>Sestavení AppImage pro Linux obsahují další soubor s upozorněními pro přibalené systémové knihovny.</value>
+  </data>
+  <data name="Settings.About.Licenses.ComponentCount.One" xml:space="preserve">
+    <value>1 komponenta</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.About.Licenses.ComponentCount.Other" xml:space="preserve">
+    <value>Komponent: {count}</value>
+    <comment>[plural] [count:int]</comment>
+  </data>
+  <data name="Settings.About.Licenses.Group.Asset" xml:space="preserve">
+    <value>Přibalené prostředky</value>
+  </data>
+  <data name="Settings.About.Licenses.Group.Cargo" xml:space="preserve">
+    <value>Balíčky Rust (crates)</value>
+  </data>
+  <data name="Settings.About.Licenses.Group.Npm" xml:space="preserve">
+    <value>Balíčky npm</value>
+  </data>
+  <data name="Settings.About.Licenses.Group.NuGet" xml:space="preserve">
+    <value>Balíčky NuGet</value>
+  </data>
+  <data name="Settings.About.Licenses.HideTexts" xml:space="preserve">
+    <value>Skrýt licenční texty pro {name}</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Settings.About.Licenses.LoadFailed" xml:space="preserve">
+    <value>Licence open source se nepodařilo načíst z hostitele.</value>
+  </data>
+  <data name="Settings.About.Licenses.NoResults" xml:space="preserve">
+    <value>Hledání neodpovídá žádná komponenta.</value>
+  </data>
+  <data name="Settings.About.Licenses.OpenWebsite" xml:space="preserve">
+    <value>Otevřít web {name}</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Settings.About.Licenses.Platforms" xml:space="preserve">
+    <value>Platformy: {platforms}</value>
+    <comment>[platforms:string]</comment>
+  </data>
+  <data name="Settings.About.Licenses.SearchLabel" xml:space="preserve">
+    <value>Hledat komponenty</value>
+  </data>
+  <data name="Settings.About.Licenses.SearchPlaceholder" xml:space="preserve">
+    <value>Hledat podle názvu nebo licence…</value>
+  </data>
+  <data name="Settings.About.Licenses.ShowTexts" xml:space="preserve">
+    <value>Zobrazit licenční texty pro {name}</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Settings.About.Licenses.Website" xml:space="preserve">
+    <value>Web</value>
+  </data>
+  <data name="Settings.About.OpenSourceLicenses" xml:space="preserve">
+    <value>Licence open source</value>
+  </data>
+  <data name="Settings.About.OpenSourceLicensesDescription" xml:space="preserve">
+    <value>Licence a upozornění komponent třetích stran, které Macro Deck obsahuje.</value>
+  </data>
+  <data name="Settings.About.ViewLicenses" xml:space="preserve">
+    <value>Zobrazit licence</value>
+  </data>
   <data name="Settings.About.LoadFailed" xml:space="preserve">
     <value>Informace o sestavení se nepodařilo načíst z hostitele.</value>
   </data>
@@ -15383,6 +15446,15 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="WebClient.Settings.DisplaySection" xml:space="preserve">
     <value>Zobrazení</value>
+  </data>
+  <data name="WebClient.Settings.Licenses.Button" xml:space="preserve">
+    <value>Licence open source</value>
+  </data>
+  <data name="WebClient.Settings.Licenses.LoadFailed" xml:space="preserve">
+    <value>Licence open source se nepodařilo načíst.</value>
+  </data>
+  <data name="WebClient.Settings.Licenses.Title" xml:space="preserve">
+    <value>Licence open source</value>
   </data>
   <data name="WebClient.Settings.OpenSettings" xml:space="preserve">
     <value>Otevřít nastavení Macro Deck</value>

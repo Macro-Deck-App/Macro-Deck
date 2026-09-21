@@ -1,0 +1,10 @@
+Macro Deck name, logo and branding assets
+
+Copyright (c) 2026 Radioactive.exe. All rights reserved.
+
+The Macro Deck name, logo, app and tray icons, favicons and other branding assets are not licensed under
+the Apache License 2.0 that covers Macro Deck's source code. They are licensed exclusively to the Macro Deck
+project and may be used only in connection with the official Macro Deck project and its products.
+
+Forks and other derived products must not use the Macro Deck name or logo and must replace the branding
+assets with their own.

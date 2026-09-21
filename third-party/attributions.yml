@@ -1,0 +1,225 @@
+# Third-party files Macro Deck ships that no package graph describes. Every glob in paths must match at
+# least one file, and every file under config.yml assets must be covered here or listed as first-party.
+assets:
+  - name: Macro Deck name, logo and branding assets
+    license: LicenseRef-MacroDeck-Branding
+    copyright: Copyright (c) 2026 Radioactive.exe
+    licenseFile: third-party/licenses/Macro-Deck-Branding.txt
+    reviewed: Exclusive asset license from the logo's creator to the Macro Deck project; excluded from Apache-2.0.
+    notice: |
+      The Macro Deck name, logo and branding assets are not licensed under the Apache License 2.0.
+      Copyright (c) 2026 Radioactive.exe, licensed exclusively to the Macro Deck project; all other rights
+      reserved. Forks and derived products must not use the Macro Deck name or logo.
+    paths:
+      - ui/bootstrapper/icons/128x128.png
+      - ui/bootstrapper/icons/128x128@2x.png
+      - ui/bootstrapper/icons/32x32.png
+      - ui/bootstrapper/icons/64x64.png
+      - ui/bootstrapper/icons/app-icon.png
+      - ui/bootstrapper/icons/icon.png
+      - ui/bootstrapper/icons/tray-icon-macos.png
+      - ui/bootstrapper/icons/tray-icon-win.png
+      - ui/bootstrapper/icons/tray-icon.png
+      - ui/bootstrapper/icons/icon.icns
+      - ui/bootstrapper/icons/icon.ico
+      - ui/bootstrapper/installer/header.bmp
+      - ui/bootstrapper/installer/sidebar.bmp
+      - ui/bootstrapper/installer/header.svg
+      - ui/bootstrapper/installer/sidebar.svg
+      - ui/bootstrapper/packaging/macos/Assets.car
+      - ui/bootstrapper/packaging/macos/dmg-background.png
+      - ui/bootstrapper/packaging/macos/dmg-background.svg
+      - ui/bootstrapper/packaging/macos/Macro Deck.icon/Assets/Foreground_MD_Logo.svg
+      - ui/web-client/public/favicon.ico
+      - ui/web-client/public/logo.png
+      - ui/web-client/public/icons/apple-touch-icon-152.png
+      - ui/web-client/public/icons/apple-touch-icon-167.png
+      - ui/web-client/public/icons/apple-touch-icon-180.png
+      - ui/web-client/public/icons/icon-192.png
+      - ui/web-client/public/icons/icon-512.png
+      - ui/web-client/public/icons/icon-maskable-512.png
+      - ui/angular/projects/desktop-ui/public/favicon.ico
+      - ui/angular/projects/desktop-ui/public/images/logo.png
+      - host/src/MacroDeckHost.Integrations/Delegation/delegate-icon.png
+
+  - name: Lucide icons
+    url: https://github.com/lucide-icons/lucide
+    license: ISC AND MIT
+    licenseFile: third-party/licenses/Lucide-icons-LICENSE.txt
+    note: >-
+      Lucide 1.47.0 icons (MIT for the icons derived from Feather), used in the configuration UI, the web
+      client, the music player widget and the integration icons, some recoloured or placed in a badge.
+    paths:
+      - ui/runtime/styles/icons/action-button-type.svg
+      - ui/runtime/styles/icons/alert-triangle.svg
+      - ui/runtime/styles/icons/align-center.svg
+      - ui/runtime/styles/icons/align-left.svg
+      - ui/runtime/styles/icons/align-right.svg
+      - ui/runtime/styles/icons/arrow-down.svg
+      - ui/runtime/styles/icons/arrow-left.svg
+      - ui/runtime/styles/icons/arrow-right.svg
+      - ui/runtime/styles/icons/arrow-up.svg
+      - ui/runtime/styles/icons/bell.svg
+      - ui/runtime/styles/icons/braces-x.svg
+      - ui/runtime/styles/icons/bug.svg
+      - ui/runtime/styles/icons/chart.svg
+      - ui/runtime/styles/icons/check.svg
+      - ui/runtime/styles/icons/chevron-right.svg
+      - ui/runtime/styles/icons/clipboard.svg
+      - ui/runtime/styles/icons/clock-type.svg
+      - ui/runtime/styles/icons/code.svg
+      - ui/runtime/styles/icons/copy.svg
+      - ui/runtime/styles/icons/crosshair.svg
+      - ui/runtime/styles/icons/device-desktop.svg
+      - ui/runtime/styles/icons/device-floppy.svg
+      - ui/runtime/styles/icons/device-phone.svg
+      - ui/runtime/styles/icons/device-tablet.svg
+      - ui/runtime/styles/icons/disc.svg
+      - ui/runtime/styles/icons/dots-vertical.svg
+      - ui/runtime/styles/icons/download.svg
+      - ui/runtime/styles/icons/external-link.svg
+      - ui/runtime/styles/icons/file-text.svg
+      - ui/runtime/styles/icons/folder-plus.svg
+      - ui/runtime/styles/icons/folder.svg
+      - ui/runtime/styles/icons/globe.svg
+      - ui/runtime/styles/icons/grid.svg
+      - ui/runtime/styles/icons/heart.svg
+      - ui/runtime/styles/icons/history-graph-type.svg
+      - ui/runtime/styles/icons/image.svg
+      - ui/runtime/styles/icons/info.svg
+      - ui/runtime/styles/icons/layers.svg
+      - ui/runtime/styles/icons/list-play.svg
+      - ui/runtime/styles/icons/lock.svg
+      - ui/runtime/styles/icons/log-out.svg
+      - ui/runtime/styles/icons/message-square.svg
+      - ui/runtime/styles/icons/minus.svg
+      - ui/runtime/styles/icons/moon.svg
+      - ui/runtime/styles/icons/music-note.svg
+      - ui/runtime/styles/icons/music-player-type.svg
+      - ui/runtime/styles/icons/pause.svg
+      - ui/runtime/styles/icons/pencil.svg
+      - ui/runtime/styles/icons/pin-off.svg
+      - ui/runtime/styles/icons/pin.svg
+      - ui/runtime/styles/icons/play.svg
+      - ui/runtime/styles/icons/plus.svg
+      - ui/runtime/styles/icons/power.svg
+      - ui/runtime/styles/icons/puzzle.svg
+      - ui/runtime/styles/icons/refresh.svg
+      - ui/runtime/styles/icons/scissors.svg
+      - ui/runtime/styles/icons/search.svg
+      - ui/runtime/styles/icons/settings.svg
+      - ui/runtime/styles/icons/sidebar.svg
+      - ui/runtime/styles/icons/sliders.svg
+      - ui/runtime/styles/icons/star.svg
+      - ui/runtime/styles/icons/store.svg
+      - ui/runtime/styles/icons/sun.svg
+      - ui/runtime/styles/icons/trash.svg
+      - ui/runtime/styles/icons/undo.svg
+      - ui/runtime/styles/icons/unlock.svg
+      - ui/runtime/styles/icons/upload.svg
+      - ui/runtime/styles/icons/user.svg
+      - ui/runtime/styles/icons/weather-type.svg
+      - ui/runtime/styles/icons/wifi-solid-full.svg
+      - ui/runtime/styles/icons/x.svg
+      - ui/runtime/styles/icons/zap.svg
+      - host/src/MacroDeckHost.Widgets/MusicPlayer/Icons/disc.svg
+      - host/src/MacroDeckHost.Widgets/MusicPlayer/Icons/disc-spinning.svg
+      - host/src/MacroDeckHost.Widgets/MusicPlayer/Icons/music-note.svg
+      - host/src/MacroDeckHost.Widgets/MusicPlayer/Icons/paused.svg
+      - host/src/MacroDeckHost.Widgets/MusicPlayer/Icons/warning.svg
+      - host/src/MacroDeckHost.Integrations/Companion/companion-icon.svg
+      - host/src/MacroDeckHost.Integrations/Http/http-icon.svg
+      - host/src/MacroDeckHost.Integrations/Keyboard/keyboard-icon.svg
+      - host/src/MacroDeckHost.Integrations/Mouse/mouse-icon.svg
+      - host/src/MacroDeckHost.Integrations/System/system-icon.svg
+      - host/src/MacroDeckHost.Integrations/Voicemeeter/voicemeeter-icon.svg
+      - host/src/MacroDeckHost.Integrations/Weather/weather-icon.svg
+      - ui/angular/projects/desktop-ui/src/app/components/action-builder/action-card/nested-action-list.component.html
+      - ui/angular/projects/desktop-ui/src/app/components/config-flow/config-field.component.ts
+      - ui/angular/projects/desktop-ui/src/app/components/forms/color-picker/color-picker.component.html
+      - ui/angular/projects/desktop-ui/src/app/components/forms/combobox/combobox.component.ts
+      - ui/angular/projects/desktop-ui/src/app/components/forms/file-browser-dialog/file-browser-dialog.component.ts
+      - ui/angular/projects/desktop-ui/src/app/components/forms/hotkey-recorder/hotkey-recorder.component.ts
+      - ui/angular/projects/desktop-ui/src/app/components/forms/reorderable-list/reorderable-list.component.ts
+      - ui/angular/projects/desktop-ui/src/app/components/forms/secret-input/secret-input.component.ts
+      - ui/angular/projects/desktop-ui/src/app/components/forms/select-caret/select-caret.component.ts
+      - ui/angular/projects/desktop-ui/src/app/components/forms/select/select.component.ts
+      - ui/angular/projects/desktop-ui/src/app/components/store/store-rating-stars.component.ts
+      - ui/angular/projects/desktop-ui/src/app/shared/components/feedback/error-banner/error-banner.component.ts
+      - ui/angular/projects/desktop-ui/src/app/shared/components/feedback/toast-host/toast-host.component.ts
+      - ui/web-client/src/settings/client-settings.ts
+      - ui/web-client/src/ui/dom.ts
+      - ui/web-client/src/ui/toast.ts
+
+  - name: Dashboard Icons
+    url: https://github.com/homarr-labs/dashboard-icons
+    license: Apache-2.0
+    copyright: Dashboard Icons contributors
+    note: >-
+      Logos of the Discord, Home Assistant, Spotify, Twitch and YouTube Music integrations. The logos are
+      trademarks of their respective owners and are used to identify the integration only.
+    paths:
+      - host/src/MacroDeckHost.Integrations/Discord/discord-icon.svg
+      - host/src/MacroDeckHost.Integrations/HomeAssistant/home-assistant-icon.svg
+      - host/src/MacroDeckHost.Integrations/Spotify/spotify-icon.svg
+      - host/src/MacroDeckHost.Integrations/Twitch/twitch-icon.svg
+      - host/src/MacroDeckHost.Integrations/YtmDesktop/ytmdesktop-icon.svg
+
+  - name: Android robot
+    url: https://developer.android.com/distribute/marketing-tools/brand-guidelines
+    license: CC-BY-3.0
+    copyright: Google LLC
+    licenseFile: third-party/licenses/CC-BY-3.0.txt
+    note: >-
+      Icon of the ADB integration, taken from Dashboard Icons. The Android robot is reproduced or modified from
+      work created and shared by Google and used according to terms described in the Creative Commons 3.0
+      Attribution License.
+    paths:
+      - host/src/MacroDeckHost.Integrations/Adb/adb-icon.svg
+
+  - name: Simple Icons (Discord glyph)
+    url: https://github.com/simple-icons/simple-icons
+    license: CC0-1.0
+    licenseFile: third-party/licenses/CC0-1.0.txt
+    note: Discord glyph of the configuration UI and web client icon set.
+    paths:
+      - ui/runtime/styles/icons/discord.svg
+
+  - name: Product logos of integrated applications
+    license: LicenseRef-Trademark-Identification
+    licenseFile: third-party/licenses/Trademark-Identification.txt
+    reviewed: >-
+      Logos of the applications Macro Deck integrates with, shown only to identify the integration. The SinusBot
+      file carries a no-redistribution notice from WebAilesi; the maintainer is asking the SinusBot developer for
+      permission.
+    note: OBS Studio, Streamer.bot, Meld, Streamlabs Desktop and SinusBot logos. Trademarks of their respective owners.
+    paths:
+      - host/src/MacroDeckHost.Integrations/Obs/obs-icon.svg
+      - host/src/MacroDeckHost.Integrations/Streamerbot/streamerbot-icon.svg
+      - host/src/MacroDeckHost.Integrations/Meld/meld-icon.svg
+      - host/src/MacroDeckHost.Integrations/StreamlabsDesktop/streamlabs-icon.png
+      - host/src/MacroDeckHost.Integrations/SinusBot/sinusbot-icon.svg
+
+  - name: Weather icons (Makin-Things/weather-icons)
+    url: https://github.com/Makin-Things/weather-icons
+    license: MIT
+    licenseFile: host/src/MacroDeckHost.Widgets/Weather/Icons/LICENSE
+    note: Weather widget icons, embedded in the host. Artwork (c) ammap.com.
+    paths:
+      - host/src/MacroDeckHost.Widgets/Weather/Icons/**/*.svg
+
+  - name: WebNowPlaying icon
+    url: https://github.com/keifufu/WebNowPlaying
+    license: MIT
+    copyright: keifufu (2024)
+    note: The WebNowPlaying integration icon is adapted from the WebNowPlaying logo.
+    paths:
+      - host/src/MacroDeckHost.Integrations/WebNowPlaying/webnowplaying-icon.png
+
+  - name: .NET runtime and ASP.NET Core runtime
+    url: https://github.com/dotnet/dotnet
+    license: MIT
+    copyright: .NET Foundation and Contributors
+    note: >-
+      Bundled in the host's runtime folder. The runtime archive's own LICENSE.txt and
+      ThirdPartyNotices.txt ship alongside it in that folder.

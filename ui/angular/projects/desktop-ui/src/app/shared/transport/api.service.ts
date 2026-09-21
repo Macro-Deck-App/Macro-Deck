@@ -88,6 +88,7 @@ import {
   ScreenSaverCatalogChangedEvent,
   GetScreenSaversResponse,
   GetAboutInfoResponse,
+  GetThirdPartyNoticesResponse,
   GetActionButtonStateOptionsRequest,
   GetActionButtonStateOptionsResponse,
   GetActionParameterOptionsRequest,
@@ -1057,6 +1058,10 @@ export class ApiService {
 
   getAboutInfo(): Promise<GetAboutInfoResponse> {
     return this.http('GET', '/api/system/about');
+  }
+
+  getThirdPartyNotices(): Promise<GetThirdPartyNoticesResponse> {
+    return this.http('GET', '/api/system/third-party-notices');
   }
 
   getAppearanceSettings(): Promise<GetAppearanceSettingsResponse> {

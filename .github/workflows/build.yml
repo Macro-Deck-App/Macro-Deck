@@ -456,7 +456,9 @@ jobs:
       # distributions (issue #448). The bundler exposes no way to pass
       # linuxdeploy's --exclude-library, so they are removed from the finished
       # AppImage instead - see the script header for the full rationale.
-      - name: Strip bundled Wayland libraries from the AppImage
+      # The same pass writes the notices for the bundled Ubuntu libraries from
+      # this runner's dpkg database and repacks with the pinned AppImage runtime.
+      - name: Strip bundled Wayland libraries and add library notices to the AppImage
         run: ci/scripts/strip-appimage-wayland.sh ui/bootstrapper/target/release/bundle/appimage
 
       # Repacking the AppImage invalidates the signature the build wrote, so

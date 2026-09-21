@@ -12295,6 +12295,69 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Settings.About.LicenseDescription" xml:space="preserve">
     <value>Macro Deck est un logiciel open source.</value>
   </data>
+  <data name="Settings.About.Licenses.AppImageNote" xml:space="preserve">
+    <value>Les builds AppImage pour Linux contiennent un fichier de mentions supplémentaire pour les bibliothèques système qu'elles embarquent.</value>
+  </data>
+  <data name="Settings.About.Licenses.ComponentCount.One" xml:space="preserve">
+    <value>1 composant</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Settings.About.Licenses.ComponentCount.Other" xml:space="preserve">
+    <value>{count} composants</value>
+    <comment>[plural] [count:int]</comment>
+  </data>
+  <data name="Settings.About.Licenses.Group.Asset" xml:space="preserve">
+    <value>Ressources incluses</value>
+  </data>
+  <data name="Settings.About.Licenses.Group.Cargo" xml:space="preserve">
+    <value>Crates Rust</value>
+  </data>
+  <data name="Settings.About.Licenses.Group.Npm" xml:space="preserve">
+    <value>Paquets npm</value>
+  </data>
+  <data name="Settings.About.Licenses.Group.NuGet" xml:space="preserve">
+    <value>Paquets NuGet</value>
+  </data>
+  <data name="Settings.About.Licenses.HideTexts" xml:space="preserve">
+    <value>Masquer les textes de licence de {name}</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Settings.About.Licenses.LoadFailed" xml:space="preserve">
+    <value>Impossible de charger les licences open source depuis l'hôte.</value>
+  </data>
+  <data name="Settings.About.Licenses.NoResults" xml:space="preserve">
+    <value>Aucun composant ne correspond à ta recherche.</value>
+  </data>
+  <data name="Settings.About.Licenses.OpenWebsite" xml:space="preserve">
+    <value>Ouvrir le site web de {name}</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Settings.About.Licenses.Platforms" xml:space="preserve">
+    <value>Plateformes : {platforms}</value>
+    <comment>[platforms:string]</comment>
+  </data>
+  <data name="Settings.About.Licenses.SearchLabel" xml:space="preserve">
+    <value>Rechercher des composants</value>
+  </data>
+  <data name="Settings.About.Licenses.SearchPlaceholder" xml:space="preserve">
+    <value>Rechercher par nom ou licence…</value>
+  </data>
+  <data name="Settings.About.Licenses.ShowTexts" xml:space="preserve">
+    <value>Afficher les textes de licence de {name}</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Settings.About.Licenses.Website" xml:space="preserve">
+    <value>Site web</value>
+  </data>
+  <data name="Settings.About.OpenSourceLicenses" xml:space="preserve">
+    <value>Licences open source</value>
+  </data>
+  <data name="Settings.About.OpenSourceLicensesDescription" xml:space="preserve">
+    <value>Licences et mentions des composants tiers inclus dans Macro Deck.</value>
+  </data>
+  <data name="Settings.About.ViewLicenses" xml:space="preserve">
+    <value>Voir les licences</value>
+  </data>
   <data name="Settings.About.LoadFailed" xml:space="preserve">
     <value>Impossible de charger les informations de build depuis l'hôte.</value>
   </data>
@@ -15383,6 +15446,15 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="WebClient.Settings.DisplaySection" xml:space="preserve">
     <value>Affichage</value>
+  </data>
+  <data name="WebClient.Settings.Licenses.Button" xml:space="preserve">
+    <value>Licences open source</value>
+  </data>
+  <data name="WebClient.Settings.Licenses.LoadFailed" xml:space="preserve">
+    <value>Impossible de charger les licences open source.</value>
+  </data>
+  <data name="WebClient.Settings.Licenses.Title" xml:space="preserve">
+    <value>Licences open source</value>
   </data>
   <data name="WebClient.Settings.OpenSettings" xml:space="preserve">
     <value>Ouvrir les paramètres de Macro Deck</value>

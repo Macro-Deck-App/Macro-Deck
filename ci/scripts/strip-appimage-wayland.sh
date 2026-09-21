@@ -19,6 +19,9 @@
 # neither passes it nor offers an environment hook, so the exclusion cannot be
 # requested through `tauri build`.
 #
+# It also writes the bundled Ubuntu libraries' notices (appimage-library-notices.mjs) and
+# repacks with the pinned runtime, so it always repacks.
+#
 # Repacking invalidates the updater signature `tauri build` wrote, so the caller
 # must re-sign the AppImage afterwards (see .github/workflows/build.yml).
 #
@@ -30,6 +33,8 @@ set -euo pipefail
 
 appimage_dir=${1:?usage: strip-appimage-wayland.sh <appimageDir>}
 arch=${ARCH:-x86_64}
+notices_tool="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/appimage-library-notices.mjs"
+notices_path=usr/share/doc/macro-deck/THIRD-PARTY-NOTICES-LINUX-LIBRARIES
 
 mapfile -t images < <(find "$appimage_dir" -maxdepth 1 -name '*.AppImage')
 if [ "${#images[@]}" -ne 1 ]; then
@@ -46,21 +51,23 @@ trap 'rm -rf "$work"' EXIT
 appdir="$work/squashfs-root"
 
 mapfile -t libs < <(find "$appdir" -name 'libwayland*')
+# Not an error: a future linuxdeploy with an up-to-date excludelist stops
+# bundling them, and the notices below still need the repack.
 if [ "${#libs[@]}" -eq 0 ]; then
-	# Not an error: a future linuxdeploy with an up-to-date excludelist stops
-	# bundling them, at which point there is nothing to do - and skipping the
-	# repack keeps the signature `tauri build` produced valid.
 	echo "No bundled libwayland* found in $(basename "$appimage") - nothing to strip"
-	exit 0
 fi
 for lib in "${libs[@]}"; do
 	echo "Removing ${lib#"$appdir"/}"
 done
 find "$appdir" -name 'libwayland*' -delete
 
-# Repack with the very tool Tauri used, so the AppImage runtime and the squashfs
-# settings cannot drift from a normally built one. Tauri downloads it to its own
-# tools cache during the build; fall back to the same URL it fetches from.
+runtime="$work/runtime-$arch"
+node "$notices_tool" fetch-runtime "$runtime"
+# Generated after the strip so the removed libraries are not attributed.
+node "$notices_tool" generate "$appdir"
+
+# Repack with the very tool Tauri used so the squashfs settings match; only the runtime is the
+# pinned one the notices name. Tauri caches the tool; fall back to the URL it fetches from.
 tools_dir="${XDG_CACHE_HOME:-$HOME/.cache}/tauri"
 # The unsuffixed name is what the bundler caches the plugin under; downloading
 # into the same slot when it is missing also primes it for the next build.
@@ -73,7 +80,7 @@ fi
 chmod +x "$plugin"
 
 out="$work/$(basename "$appimage")"
-env APPIMAGE_EXTRACT_AND_RUN=1 ARCH="$arch" OUTPUT="$out" "$plugin" --appdir "$appdir"
+env APPIMAGE_EXTRACT_AND_RUN=1 ARCH="$arch" OUTPUT="$out" LDAI_RUNTIME_FILE="$runtime" "$plugin" --appdir "$appdir"
 if [ ! -f "$out" ]; then
 	echo "error: linuxdeploy-plugin-appimage did not produce $out" >&2
 	exit 1
@@ -106,5 +113,10 @@ if [ -z "$(find "$verify_appdir" -maxdepth 1 -name '*.desktop')" ]; then
 	echo "error: repacked AppImage has no desktop entry" >&2
 	exit 1
 fi
+if ! cmp -s "$appdir/$notices_path" "$verify_appdir/$notices_path"; then
+	echo "error: repacked AppImage does not carry the generated $notices_path" >&2
+	exit 1
+fi
+node "$notices_tool" check-runtime "$appimage"
 
-echo "Stripped ${#libs[@]} libwayland* file(s) and repacked $(basename "$appimage")"
+echo "Stripped ${#libs[@]} libwayland* file(s), added $notices_path and repacked $(basename "$appimage")"

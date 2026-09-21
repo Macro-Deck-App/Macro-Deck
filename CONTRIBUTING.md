@@ -8,6 +8,7 @@ Contributions are welcome. Keep changes focused and avoid unrelated refactoring 
 - Run tests for changed observable behaviour or public contracts.
 - Add a regression test for a bug fix when practical.
 - Verify user-facing changes in the running application when practical.
+- After adding, removing or updating a dependency, regenerate the third-party notices ([engineering/development/third-party-notices.md](engineering/development/third-party-notices.md)).
 - Do not break a non-obsolete public SDK, plugin protocol, package, manifest, analyzer, or conformance contract without an explicitly approved breaking change.
 
 Commands and CI guidance are in [engineering/development/building-and-testing.md](engineering/development/building-and-testing.md).

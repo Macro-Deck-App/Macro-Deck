@@ -3,7 +3,7 @@
 This directory contains repository-internal documentation for contributors and maintainers.
 
 - [architecture.md](architecture.md) - system boundaries and trust model.
-- [development/](development/) - setup, verification, release operation, [contributing an integration](development/contributing-integrations.md), and [adding a Web Client target](development/web-client-targets.md).
+- [development/](development/) - setup, verification, release operation, [contributing an integration](development/contributing-integrations.md), [adding a Web Client target](development/web-client-targets.md), and [third-party notices and the license policy](development/third-party-notices.md).
 - [api/](api/) - internal transport and authentication notes.
 - [decisions/](decisions/) - architecture decision records.
 

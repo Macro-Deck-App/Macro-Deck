@@ -283,6 +283,11 @@ export const ClientAppStrings = {
 		Settings: {
 			DisplaySection: 'macrodeck.app:WebClient.Settings.DisplaySection',
 			OpenSettings: 'macrodeck.app:WebClient.Settings.OpenSettings',
+			Licenses: {
+				Button: 'macrodeck.app:WebClient.Settings.Licenses.Button',
+				LoadFailed: 'macrodeck.app:WebClient.Settings.Licenses.LoadFailed',
+				Title: 'macrodeck.app:WebClient.Settings.Licenses.Title',
+			},
 		},
 		Setup: {
 			Body: 'macrodeck.app:WebClient.Setup.Body',
@@ -556,6 +561,9 @@ export const ClientAppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:WebClient.Rendering.Simple': 'Simple',
 	'macrodeck.app:WebClient.Rendering.Standard': 'Standard',
 	'macrodeck.app:WebClient.Settings.DisplaySection': 'Display',
+	'macrodeck.app:WebClient.Settings.Licenses.Button': 'Open source licenses',
+	'macrodeck.app:WebClient.Settings.Licenses.LoadFailed': 'Could not load the open source licenses.',
+	'macrodeck.app:WebClient.Settings.Licenses.Title': 'Open source licenses',
 	'macrodeck.app:WebClient.Settings.OpenSettings': 'Open Macro Deck settings',
 	'macrodeck.app:WebClient.Setup.Body': 'Finish the first-time setup in the Macro Deck desktop app, then reload this page.',
 	'macrodeck.app:WebClient.Update.ApplyFailed': 'The update could not be installed. Reload this page to try again.',
