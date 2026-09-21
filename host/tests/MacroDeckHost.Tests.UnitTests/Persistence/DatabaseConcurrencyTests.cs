@@ -70,6 +70,16 @@ public class DatabaseConcurrencyTests
 	}
 
 	[Test]
+	public void The_context_opens_unpooled_connections()
+	{
+		using var context = new DatabaseContext(Log.Logger, _paths);
+
+		var options = new SqliteConnectionStringBuilder(context.Database.GetConnectionString());
+
+		Assert.That(options.Pooling, Is.False);
+	}
+
+	[Test]
 	public void The_migrated_database_uses_write_ahead_logging()
 	{
 		using var connection = new SqliteConnection($"Data Source={_paths.DatabasePath}");

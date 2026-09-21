@@ -96,10 +96,31 @@ internal sealed class CachingInitializeBackgroundServiceTests
 		Assert.That(profileService.CreatedNames, Has.One.EqualTo("Standardprofil"));
 	}
 
+	[Test]
+	public async Task A_failed_cache_initialization_stops_the_host_instead_of_leaving_it_never_ready()
+	{
+		var profileService = new RecordingProfileService { Fail = true };
+		var readiness = new StartupReadiness();
+		var lifetime = new StartedHostLifetime();
+		var service = CreateService(new InMemoryProfileStore(), profileService, readiness, lifetime);
+
+		await service.StartAsync(CancellationToken.None);
+		await service.ExecuteTask!;
+		await service.StopAsync(CancellationToken.None);
+		readiness.MarkVariablesReady();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(lifetime.StopRequested, Is.True);
+			Assert.That(readiness.IsReady, Is.False);
+		});
+	}
+
 	private static CachingInitializeBackgroundService CreateService(
 		InMemoryProfileStore profileStore,
 		RecordingProfileService profileService,
-		StartupReadiness readiness)
+		StartupReadiness readiness,
+		StartedHostLifetime? lifetime = null)
 	{
 		var profileCache = new ProfileCache(profileStore, Log.Logger);
 		var folderCache = new StubFolderCache();
@@ -112,7 +133,7 @@ internal sealed class CachingInitializeBackgroundServiceTests
 		services.AddSingleton(TestLocalization.Preferences);
 		var scopeFactory = services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
 
-		return new CachingInitializeBackgroundService(new StartedHostLifetime(),
+		return new CachingInitializeBackgroundService(lifetime ?? new StartedHostLifetime(),
 			profileCache,
 			folderCache,
 			scriptCache,
@@ -128,14 +149,16 @@ internal sealed class CachingInitializeBackgroundServiceTests
 		public CancellationToken ApplicationStopping { get; } = new(true);
 		public CancellationToken ApplicationStopped { get; } = new(true);
 
-		public void StopApplication()
-		{
-		}
+		public bool StopRequested { get; private set; }
+
+		public void StopApplication() => StopRequested = true;
 	}
 
 	private sealed class RecordingProfileService : IProfileService
 	{
 		public List<string> CreatedNames { get; } = [];
+
+		public bool Fail { get; init; }
 
 		public Task<Result<ProfileEntity, ProfileError>> Create(
 			string name,
@@ -146,6 +169,11 @@ internal sealed class CachingInitializeBackgroundServiceTests
 			int? defaultWidgetSpacing = null,
 			int? defaultWidgetBorderRadius = null)
 		{
+			if (Fail)
+			{
+				throw new InvalidOperationException("database unavailable");
+			}
+
 			CreatedNames.Add(name);
 			var profile = new ProfileEntity { Id = Guid.NewGuid(), Name = name };
 			return Task.FromResult(Result.Ok<ProfileEntity, ProfileError>(profile));

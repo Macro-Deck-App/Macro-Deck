@@ -15,6 +15,7 @@ public class CachingInitializeBackgroundService : HostReadyBackgroundService
 	private readonly IAutomationCache _automationCache;
 	private readonly IServiceScopeFactory _serviceScopeFactory;
 	private readonly StartupReadiness _readiness;
+	private readonly IHostApplicationLifetime _lifetime;
 	private readonly ILogger _logger;
 
 	public CachingInitializeBackgroundService(
@@ -33,11 +34,25 @@ public class CachingInitializeBackgroundService : HostReadyBackgroundService
 		_scriptCache = scriptCache;
 		_automationCache = automationCache;
 		_serviceScopeFactory = serviceScopeFactory;
+		_lifetime = lifetime;
 		_readiness = readiness;
 		_logger = logger;
 	}
 
 	protected override async Task ExecuteWhenReady(CancellationToken stoppingToken)
+	{
+		try
+		{
+			await InitializeCaches();
+		}
+		catch (Exception ex) when (!stoppingToken.IsCancellationRequested)
+		{
+			_logger.Fatal(ex, "Failed to initialize the caches; stopping the host");
+			_lifetime.StopApplication();
+		}
+	}
+
+	private async Task InitializeCaches()
 	{
 		await _profileCache.InitializeCache();
 		await _folderCache.InitializeCache();
