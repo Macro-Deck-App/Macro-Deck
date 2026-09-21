@@ -1,7 +1,9 @@
 using System.Security.Cryptography;
 using MacroDeck.Plugin.Packaging.Artifacts;
 using MacroDeckHost.Application.Plugins.Installation;
+using MacroDeckHost.Application.Store;
 using MacroDeckHost.Infrastructure.Plugins.Installation;
+using MacroDeckHost.Tests.UnitTests.Http;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.Plugins.Installation;
@@ -169,6 +171,75 @@ internal sealed class PluginArtifactAcquirerTests
 		{
 			Assert.That(result.Success, Is.True, result.ErrorMessage);
 			Assert.That(result.Sha256, Is.EqualTo("sha256:" + expectedHex));
+		});
+	}
+
+	private const string StoreAssetUrl = "https://store-assets.macro-deck.app/plugins/com.acme.p/1.0.0/p.macroDeckPlugin";
+
+	private static StoreDownloadMetadata Metadata(StoreDownloadOperation operation, string? currentVersion = null) => new()
+	{
+		Operation = operation,
+		OperationId = Guid.NewGuid(),
+		CurrentVersion = currentVersion
+	};
+
+	[Test]
+	public async Task A_manually_supplied_url_on_the_store_asset_host_is_downloaded_without_store_metadata()
+	{
+		using var http = new RecordingHttpClientFactory { Body = "bytes"u8.ToArray() };
+		var acquirer = new PluginArtifactAcquirer(http, PluginInstallerOptions.Default, Serilog.Core.Logger.None);
+
+		var result = await acquirer.Acquire(PluginArtifactSource.FromUrl(new Uri(StoreAssetUrl)), _stagingDirectory);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True, result.ErrorMessage);
+			Assert.That(http.Requests.Single().HasMacroDeckHeaders, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_test_build_source_never_sends_store_metadata_even_when_some_is_attached()
+	{
+		using var http = new RecordingHttpClientFactory { Body = "bytes"u8.ToArray() };
+		var acquirer = new PluginArtifactAcquirer(http, PluginInstallerOptions.Default, Serilog.Core.Logger.None);
+		var source = PluginArtifactSource.FromTestBuild(new Uri(StoreAssetUrl), Sha256Of("bytes"u8.ToArray())) with
+		{
+			DownloadMetadata = Metadata(StoreDownloadOperation.Install)
+		};
+
+		var result = await acquirer.Acquire(source, _stagingDirectory);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True, result.ErrorMessage);
+			Assert.That(http.Requests.Single().HasMacroDeckHeaders, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task Concurrent_store_downloads_on_one_shared_client_each_carry_only_their_own_metadata()
+	{
+		using var http = new RecordingHttpClientFactory(shareClient: true) { Body = "bytes"u8.ToArray(), HoldUntilInFlight = 2 };
+		var acquirer = new PluginArtifactAcquirer(http, PluginInstallerOptions.Default, Serilog.Core.Logger.None);
+		var install = Metadata(StoreDownloadOperation.Install);
+		var update = Metadata(StoreDownloadOperation.Update, "1.2.0");
+
+		var results = await Task.WhenAll(
+			acquirer.Acquire(PluginArtifactSource.FromUrl(new Uri(StoreAssetUrl)) with { DownloadMetadata = install },
+				Path.Combine(_stagingDirectory, "a")),
+			acquirer.Acquire(PluginArtifactSource.FromUrl(new Uri(StoreAssetUrl)) with { DownloadMetadata = update },
+				Path.Combine(_stagingDirectory, "b")));
+
+		var byId = http.Requests.ToDictionary(request => request.Header("X-MacroDeck-Operation-Id")!);
+		Assert.Multiple(() =>
+		{
+			Assert.That(results.Select(result => result.Success), Is.All.True);
+			Assert.That(byId.Keys, Is.EquivalentTo(new[] { install.OperationId.ToString("D"), update.OperationId.ToString("D") }));
+			Assert.That(byId[install.OperationId.ToString("D")].Header("X-MacroDeck-Operation"), Is.EqualTo("install"));
+			Assert.That(byId[install.OperationId.ToString("D")].Header("X-MacroDeck-Current-Version"), Is.Null);
+			Assert.That(byId[update.OperationId.ToString("D")].Header("X-MacroDeck-Operation"), Is.EqualTo("update"));
+			Assert.That(byId[update.OperationId.ToString("D")].Header("X-MacroDeck-Current-Version"), Is.EqualTo("1.2.0"));
 		});
 	}
 

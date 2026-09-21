@@ -47,6 +47,16 @@ batch of plugin updates. The Store shows this as its own **Backing up** step bef
 an update takes longer than a first-time install of the same plugin. Turn the setting off if you would
 rather not wait for it.
 
+## Store download statistics
+
+When Macro Deck downloads a plugin, icon pack or profile template from the Store, for a first install, an
+update or a reinstall, it tells the Store which of the three it is, so downloads can be counted per
+version. An update or reinstall also sends the version you had installed. Each install or update action gets
+its own temporary ID, which a retry of that action reuses so it is counted once.
+
+The download sends no account, device or installation ID, and no list of your other extensions. Test builds
+and plugins installed from a URL or file send none of this.
+
 ## What's new
 
 The first time Macro Deck starts after an update installed from within the app, it shows the release notes

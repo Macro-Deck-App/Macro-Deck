@@ -39,6 +39,7 @@ public interface IStoreArtifactDownloader
 		string expectedSha256Hex,
 		long expectedSize,
 		Guid operationId,
+		StoreDownloadMetadata? downloadMetadata,
 		IProgress<StoreArtifactDownloadProgress>? progress,
 		CancellationToken cancellationToken = default);
 }

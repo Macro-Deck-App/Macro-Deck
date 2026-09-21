@@ -292,6 +292,7 @@ public class StoreController : ControllerBase
 					digest,
 					asset.Size,
 					operationId,
+					downloadMetadata: null,
 					progress: null,
 					ct);
 				if (!download.Success)

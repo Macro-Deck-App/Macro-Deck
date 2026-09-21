@@ -1,6 +1,7 @@
 using MacroDeck.Plugin.Packaging.Artifacts;
 using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeckHost.Application.Plugins.Trust;
+using MacroDeckHost.Application.Store;
 
 namespace MacroDeckHost.Application.Plugins.Installation;
 
@@ -152,6 +153,8 @@ public sealed record PluginArtifactSource
 	// Added after FromUrl shipped: a new required or positional parameter on FromUrl would be a binary
 	// break for compiled plugins/callers, so progress is opted into with `with { Progress = ... }` instead.
 	public IProgress<PluginArtifactDownloadProgress>? Progress { get; init; }
+
+	public StoreDownloadMetadata? DownloadMetadata { get; init; }
 
 	public static PluginArtifactSource FromPath(string path)
 	{

@@ -121,6 +121,7 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		// waiting to be picked up by something else.
 		var consented = _consent.Consume(operationId);
 		var backupBatchId = _backupBatches.Consume(operationId);
+		var downloadMetadata = StoreDownloadMetadata.For(operation, item.Entry.LatestVersion);
 
 		try
 		{
@@ -131,14 +132,23 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 						item.Entry,
 						consented,
 						backupBatchId,
+						downloadMetadata,
 						snapshot.Sequence,
 						cancellationToken);
 					break;
 				case StoreExtensionKind.IconPack:
-					await ExecuteIconPack(operationId, item.Entry, snapshot.Sequence, cancellationToken);
+					await ExecuteIconPack(operationId,
+						item.Entry,
+						downloadMetadata,
+						snapshot.Sequence,
+						cancellationToken);
 					break;
 				case StoreExtensionKind.ProfileTemplate:
-					await ExecuteProfileTemplate(operationId, item.Entry, snapshot.Sequence, cancellationToken);
+					await ExecuteProfileTemplate(operationId,
+						item.Entry,
+						downloadMetadata,
+						snapshot.Sequence,
+						cancellationToken);
 					break;
 				default:
 					_tracker.Transition(operationId,
@@ -174,6 +184,7 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		StoreCatalogEntry entry,
 		bool consented,
 		string? backupBatchId,
+		StoreDownloadMetadata? downloadMetadata,
 		long registrySequence,
 		CancellationToken cancellationToken)
 	{
@@ -200,7 +211,8 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		var source = PluginArtifactSource.FromUrl(entry.LatestRelease.ArtifactUrl, expectedSha256)
 			with
 			{
-				Progress = progress
+				Progress = progress,
+				DownloadMetadata = downloadMetadata
 			};
 		var request = new PluginInstallRequest
 		{
@@ -345,6 +357,7 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 
 	private async Task ExecuteIconPack(Guid operationId,
 		StoreCatalogEntry entry,
+		StoreDownloadMetadata? downloadMetadata,
 		long registrySequence,
 		CancellationToken cancellationToken)
 	{
@@ -357,6 +370,7 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 				entry.LatestRelease.Sha256,
 				entry.LatestRelease.Size,
 				operationId,
+				downloadMetadata,
 				progress,
 				cancellationToken);
 			if (!download.Success)
@@ -435,6 +449,7 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 
 	private async Task ExecuteProfileTemplate(Guid operationId,
 		StoreCatalogEntry entry,
+		StoreDownloadMetadata? downloadMetadata,
 		long registrySequence,
 		CancellationToken cancellationToken)
 	{
@@ -447,6 +462,7 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 				entry.LatestRelease.Sha256,
 				entry.LatestRelease.Size,
 				operationId,
+				downloadMetadata,
 				progress,
 				cancellationToken);
 			if (!download.Success)
