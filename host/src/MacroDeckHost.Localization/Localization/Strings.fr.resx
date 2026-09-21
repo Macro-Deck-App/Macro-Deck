@@ -14337,6 +14337,36 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Store.Page.LicenseField" xml:space="preserve">
     <value>Licence</value>
   </data>
+  <data name="Store.Page.Link.Changelog" xml:space="preserve">
+    <value>Journal des modifications</value>
+  </data>
+  <data name="Store.Page.Link.Community" xml:space="preserve">
+    <value>Communauté</value>
+  </data>
+  <data name="Store.Page.Link.Documentation" xml:space="preserve">
+    <value>Documentation</value>
+  </data>
+  <data name="Store.Page.Link.Donate" xml:space="preserve">
+    <value>Faire un don</value>
+  </data>
+  <data name="Store.Page.Link.Issues" xml:space="preserve">
+    <value>Signaler un problème</value>
+  </data>
+  <data name="Store.Page.Link.License" xml:space="preserve">
+    <value>Licence</value>
+  </data>
+  <data name="Store.Page.Link.Privacy" xml:space="preserve">
+    <value>Politique de confidentialité</value>
+  </data>
+  <data name="Store.Page.Link.Support" xml:space="preserve">
+    <value>Assistance</value>
+  </data>
+  <data name="Store.Page.Link.Terms" xml:space="preserve">
+    <value>Conditions d'utilisation</value>
+  </data>
+  <data name="Store.Page.Link.Wiki" xml:space="preserve">
+    <value>Wiki</value>
+  </data>
   <data name="Store.Page.LinksHeading" xml:space="preserve">
     <value>Liens</value>
   </data>

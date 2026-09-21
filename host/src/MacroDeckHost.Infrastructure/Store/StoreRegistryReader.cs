@@ -1,4 +1,5 @@
 using System.Text.Json;
+using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeck.Plugin.Packaging.Versioning;
 using MacroDeckHost.Application.Store.Model;
 using ILogger = Serilog.ILogger;
@@ -186,6 +187,11 @@ public sealed class StoreRegistryReader
 				Publisher = package.Publisher,
 				Repository = package.Repository,
 				License = package.License,
+				AdditionalLinks = package.AdditionalLinks is { } additionalLinks
+					? PluginManifestLinks.Displayable(additionalLinks)
+						.Select(link => new StoreExtensionLink { Type = link.Type!, Url = link.Url!, Label = link.Label })
+						.ToList()
+					: [],
 				CreatedAt = package.CreatedAt,
 				UpdatedAt = package.UpdatedAt,
 				SupportedRids = package.SupportedRids ?? [],

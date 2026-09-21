@@ -299,6 +299,25 @@ internal sealed class StoreControllerTests
 	}
 
 	[Test]
+	public void The_detail_body_carries_the_packages_additional_links_in_order()
+	{
+		SeedPlugin(additionalLinks:
+		[
+			new StoreExtensionLink { Type = "issues", Url = "https://github.com/acme/hue/issues" },
+			new StoreExtensionLink { Type = "custom", Url = "https://acme.test/setup", Label = "Setup Guide" }
+		]);
+
+		var links = _controller.GetExtension(StoreExtensionKind.Plugin, PluginId).Extension!.AdditionalLinks;
+
+		Assert.That(links.Select(link => (link.Type, link.Url, link.Label)),
+			Is.EqualTo(new (string, string, string?)[]
+			{
+				("issues", "https://github.com/acme/hue/issues", null),
+				("custom", "https://acme.test/setup", "Setup Guide")
+			}));
+	}
+
+	[Test]
 	public void A_package_that_declares_no_runtime_identifiers_reports_no_operating_system_restriction()
 	{
 		SeedPlugin();
@@ -547,7 +566,9 @@ internal sealed class StoreControllerTests
 			}
 		};
 
-	private void SeedPlugin(string[]? supportedRids = null, long size = 16)
+	private void SeedPlugin(string[]? supportedRids = null,
+		long size = 16,
+		IReadOnlyList<StoreExtensionLink>? additionalLinks = null)
 	{
 		_catalog.Swap(new StoreCatalogSnapshot
 		{
@@ -561,6 +582,7 @@ internal sealed class StoreControllerTests
 					Name = "Hue Bridge",
 					LatestVersion = "1.0.0",
 					SupportedRids = supportedRids ?? [],
+					AdditionalLinks = additionalLinks ?? [],
 					LatestRelease = new StoreReleaseManifest
 					{
 						Version = "1.0.0",

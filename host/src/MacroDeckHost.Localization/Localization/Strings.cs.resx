@@ -14337,6 +14337,36 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Page.LicenseField" xml:space="preserve">
     <value>Licence</value>
   </data>
+  <data name="Store.Page.Link.Changelog" xml:space="preserve">
+    <value>Seznam změn</value>
+  </data>
+  <data name="Store.Page.Link.Community" xml:space="preserve">
+    <value>Komunita</value>
+  </data>
+  <data name="Store.Page.Link.Documentation" xml:space="preserve">
+    <value>Dokumentace</value>
+  </data>
+  <data name="Store.Page.Link.Donate" xml:space="preserve">
+    <value>Přispět</value>
+  </data>
+  <data name="Store.Page.Link.Issues" xml:space="preserve">
+    <value>Nahlásit problém</value>
+  </data>
+  <data name="Store.Page.Link.License" xml:space="preserve">
+    <value>Licence</value>
+  </data>
+  <data name="Store.Page.Link.Privacy" xml:space="preserve">
+    <value>Zásady ochrany osobních údajů</value>
+  </data>
+  <data name="Store.Page.Link.Support" xml:space="preserve">
+    <value>Podpora</value>
+  </data>
+  <data name="Store.Page.Link.Terms" xml:space="preserve">
+    <value>Podmínky používání</value>
+  </data>
+  <data name="Store.Page.Link.Wiki" xml:space="preserve">
+    <value>Wiki</value>
+  </data>
   <data name="Store.Page.LinksHeading" xml:space="preserve">
     <value>Odkazy</value>
   </data>

@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace MacroDeckHost.Infrastructure.Store;
 
 // Wire shapes of the registry's public files. Everything read through these is untrusted until
@@ -108,6 +110,9 @@ internal sealed record RegistryPackageDocument
 	public string? Repository { get; init; }
 
 	public string? License { get; init; }
+
+	// Kept as raw JSON: a typed list would let one malformed link fail the whole registry refresh.
+	public JsonElement? AdditionalLinks { get; init; }
 
 	public DateTimeOffset? CreatedAt { get; init; }
 

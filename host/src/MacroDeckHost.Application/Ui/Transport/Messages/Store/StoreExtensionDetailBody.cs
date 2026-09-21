@@ -10,6 +10,8 @@ public class StoreExtensionDetailBody : StoreCatalogItemBody
 
 	public string? License { get; set; }
 
+	public List<StoreExtensionLinkBody> AdditionalLinks { get; set; } = [];
+
 	public long DownloadSize { get; set; }
 
 	public List<string> SupportedOperatingSystems { get; set; } = [];

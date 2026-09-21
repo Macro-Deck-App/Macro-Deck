@@ -362,7 +362,7 @@ internal static class ManifestValidator
 
 		using (document)
 		{
-			problems = PluginManifestSchema.Validate(document!.RootElement);
+			problems = ManifestDocumentProblems.Evaluate(document!.RootElement);
 		}
 
 		return true;
