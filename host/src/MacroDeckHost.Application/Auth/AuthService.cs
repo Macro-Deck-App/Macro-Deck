@@ -19,6 +19,7 @@ public class AuthService : IAuthService
 	private readonly PairingCodeStore _pairingCodes;
 	private readonly AccessTokenCutoff _accessTokenCutoff;
 	private readonly RefreshServingEpoch _servingEpoch;
+	private readonly ILastServedRotation _lastRotation;
 	private readonly IAppPreferenceService _appPreferences;
 	private readonly TimeProvider _timeProvider;
 	private readonly ILogger<AuthService> _logger;
@@ -33,6 +34,7 @@ public class AuthService : IAuthService
 		PairingCodeStore pairingCodes,
 		AccessTokenCutoff accessTokenCutoff,
 		RefreshServingEpoch servingEpoch,
+		ILastServedRotation lastRotation,
 		IAppPreferenceService appPreferences,
 		TimeProvider timeProvider,
 		ILogger<AuthService> logger)
@@ -46,6 +48,7 @@ public class AuthService : IAuthService
 		_pairingCodes = pairingCodes;
 		_accessTokenCutoff = accessTokenCutoff;
 		_servingEpoch = servingEpoch;
+		_lastRotation = lastRotation;
 		_appPreferences = appPreferences;
 		_timeProvider = timeProvider;
 		_logger = logger;
@@ -252,6 +255,9 @@ public class AuthService : IAuthService
 				token.DeviceId);
 		}
 
+		// Read by the next host to tell an interrupted rotation from one this host outlived.
+		_lastRotation.Record(now);
+
 		var startupProfileId = rotating.DeviceId is { } deviceId
 			? await _deviceService.ResolveStartupProfileId(deviceId)
 			: null;
@@ -283,10 +289,19 @@ public class AuthService : IAuthService
 	// restart would otherwise be judged as reuse the moment the host came back.
 	private bool WithinGrace(DateTime revokedAt, DateTime now)
 	{
-		var servingSince = _servingEpoch.StartedAt;
-		var from = revokedAt > servingSince ? revokedAt : servingSince;
+		if (now - revokedAt <= AuthDefaults.RefreshTokenReuseGrace)
+		{
+			return true;
+		}
 
-		return now - from <= AuthDefaults.RefreshTokenReuseGrace;
+		var servingSince = _servingEpoch.StartedAt;
+		var previousRotation = _servingEpoch.PreviousRotationAt;
+
+		return previousRotation > DateTime.MinValue &&
+			revokedAt <= previousRotation &&
+			previousRotation - revokedAt <= AuthDefaults.RefreshTokenReuseGrace &&
+			revokedAt < servingSince &&
+			now - servingSince <= AuthDefaults.RefreshTokenReuseGraceAfterRestart;
 	}
 
 	private async Task<Result<LoginResult, AuthError>> RevokeFamilyAsReuse(RefreshTokenEntity token, DateTime now)
@@ -295,6 +310,13 @@ public class AuthService : IAuthService
 		// belongs to and only that one, which is as far as the leak reaches.
 		var revoked = await _refreshTokenRepository.RevokeFamily(token.FamilyId, now);
 		AuthLog.FamilyRevokedAsReuse(_logger, token.Id, token.FamilyId, revoked, token.UserId, token.DeviceId);
+
+		// The access token the leak also carries outlives the refresh token by up to
+		// AuthDefaults.ClientAccessTokenLifetime, so the device's sessions end here too.
+		if (token.DeviceId is { } deviceId)
+		{
+			await _deviceService.LogoutDevice(deviceId);
+		}
 
 		return Result.Fail<LoginResult, AuthError>(AuthError.RefreshTokenReused, "Refresh token was already used.");
 	}
@@ -325,7 +347,10 @@ public class AuthService : IAuthService
 			return Result.Fail(AuthError.InvalidCredentials, "Current password is incorrect.");
 		}
 
-		await SetPassword(user, newPassword, UtcNow());
+		var changedAt = UtcNow();
+		_accessTokenCutoff.Set(changedAt);
+		await SetPassword(user, newPassword, changedAt);
+		await _deviceService.EndAllSessions();
 
 		return Result.Ok<AuthError>();
 	}
@@ -347,9 +372,9 @@ public class AuthService : IAuthService
 		var now = UtcNow();
 		_accessTokenCutoff.Set(now);
 		await SetPassword(user, newPassword, now);
+		await _deviceService.EndAllSessions();
 		_pairingCodes.Rotate(now);
 		_deviceEnrollments.Clear();
-		await _deviceService.EndAllSessions();
 
 		return Result.Ok<AuthError>();
 	}
@@ -371,8 +396,10 @@ public class AuthService : IAuthService
 		var now = UtcNow();
 		user.Username = newUsername;
 		user.UpdatedAt = now;
+		_accessTokenCutoff.Set(now);
 		await _userRepository.Update(user);
 		await _refreshTokenRepository.RevokeAllForUser(user.Id, now);
+		await _deviceService.EndAllSessions();
 
 		return Result.Ok<AuthError>();
 	}
@@ -399,7 +426,6 @@ public class AuthService : IAuthService
 		{
 			Id = id,
 			UserId = user.Id,
-			// A login starts a family named after its first token; a rotation stays in the one it inherits.
 			FamilyId = familyId ?? id,
 			TokenHash = HashToken(rawRefreshToken),
 			DeviceId = deviceId,

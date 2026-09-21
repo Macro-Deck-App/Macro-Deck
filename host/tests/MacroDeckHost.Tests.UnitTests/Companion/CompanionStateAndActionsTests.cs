@@ -178,7 +178,6 @@ internal sealed class CompanionStateAndActionsTests
 	internal static JsonElement Payload(object value) =>
 		JsonSerializer.SerializeToElement(value, UiWebSocketProtocol.Json);
 
-	// The guard refuses a device it does not know, which a real host learns from its device rows.
 	internal static DeviceSessionGuard GuardFor(IEnumerable<Claim> claims)
 	{
 		var guard = new DeviceSessionGuard();

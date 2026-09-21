@@ -41,7 +41,8 @@ callers, and neither fits that store.
 - The result is at most five comparisons per minted code, and at most five per lockout window, against a
   one in a million code, and only while a code exists.
 
-**Refresh tokens live 365 days**, for every scope. Rotation on every refresh and the reuse detection stay. The refresh cookie's expiry follows the token. Rotated and
+**Refresh tokens live 365 days**, for every scope. Rotation on every refresh and the reuse detection
+stay. The refresh cookie's expiry follows the token. Rotated and
 logged-out rows are deleted 30 days after they were revoked (`AuthDefaults.RevokedRefreshTokenRetention`)
 instead of at their original expiry.
 
@@ -57,11 +58,16 @@ instead of at their original expiry.
   that family. This is the blast radius the leak actually has, and it is what OAuth 2.0 Security BCP asks
   for. Account-wide revocation stays where it is a deliberate act: a password change, a reset, or signing a
   device out.
-- Amended: the reuse grace does not run while the host is not answering refreshes. It is measured from the
-  later of the rotation and `RefreshServingEpoch`, the moment this process began serving. Without that, a
-  host that restarted between a rotation and its lost response - most visibly one that came up on the key
-  ring unlock gate - read the client's first retry as reuse, and under the old account-wide radius that
-  signed out every device at once.
+- Amended: the reuse grace does not run while the host is not answering refreshes. A rotated token is
+  accepted either within `RefreshTokenReuseGrace` of its rotation or within
+  `RefreshTokenReuseGraceAfterRestart` of `RefreshServingEpoch`, the moment this process began serving,
+  and then only for the rotation the restart interrupted - the last one the previous host recorded
+  through `ILastServedRotation`.
+  Without that, a host that restarted between a rotation and its lost response - most visibly one that
+  came up on the key ring unlock gate - read the client's first retry as reuse, and under the old
+  account-wide radius that signed out every device at once. The window from the host's start is the
+  wider of the two because a device that lost a rotation comes back over a reconnect backoff or out of
+  standby, not within the second.
 - A reuse revocation is logged at warning level (`AuthLog.FamilyRevokedAsReuse`, event 5601), so a session
   that ends this way leaves a trace to read afterwards.
 - An attacker on the LAN who keeps sending wrong codes can hold pairing by code at `429` for as long as

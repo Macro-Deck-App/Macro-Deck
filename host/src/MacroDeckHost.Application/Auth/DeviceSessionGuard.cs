@@ -60,8 +60,14 @@ public sealed class DeviceSessionGuard
 			return true;
 		}
 
-		return revokedAt != _never &&
-			AccessTokenIssuedAt.TryRead(principal, out var issuedAt) &&
+		if (revokedAt == _never)
+		{
+			return false;
+		}
+
+		// A revoked device plus a token the host cannot date is refused: failing open here would let a
+		// token without a readable iat outlive the sign-out it was issued before.
+		return !AccessTokenIssuedAt.TryRead(principal, out var issuedAt) ||
 			issuedAt <= AccessTokenIssuedAt.UnixSeconds(revokedAt);
 	}
 }

@@ -432,6 +432,7 @@ public class Startup
 		services.AddSingleton<AccessTokenCutoff>();
 		services.AddSingleton<RefreshServingEpoch>();
 		services.AddSingleton<DeviceSessionGuard>();
+		services.AddSingleton<ILastServedRotation, Infrastructure.Auth.LastServedRotation>();
 		services.AddSingleton<FailedLoginNotificationTracker>();
 		services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
 		services.AddSingleton<IAccessTokenIssuer, JwtAccessTokenIssuer>();
@@ -886,11 +887,12 @@ public class Startup
 	{
 		ArgumentNullException.ThrowIfNull(app);
 
-		// Before the first request, so the rotation grace measures from a host that is actually serving
-		// rather than from a rotation this process may have been restarted in the middle of.
+		// Before the first request, and before this host rotates anything over the record: the grace needs
+		// the rotation the previous host was interrupted at, not one this process served.
 		var services = app.ApplicationServices;
+		var now = services.GetRequiredService<TimeProvider>().GetUtcNow().UtcDateTime;
 		services.GetRequiredService<RefreshServingEpoch>()
-			.Begin(services.GetRequiredService<TimeProvider>().GetUtcNow().UtcDateTime);
+			.Begin(now, services.GetRequiredService<ILastServedRotation>().Read());
 
 		// Seeded here rather than from a hosted service: those start after the server is already
 		// listening, and an unseeded guard refuses every device token it does not know yet.

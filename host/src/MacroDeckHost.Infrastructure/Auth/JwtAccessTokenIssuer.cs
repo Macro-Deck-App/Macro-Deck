@@ -28,7 +28,7 @@ public class JwtAccessTokenIssuer : IAccessTokenIssuer
 	public AccessToken Issue(Guid userId, string username, AuthScope scope, Guid? deviceId)
 	{
 		var now = _timeProvider.GetUtcNow().UtcDateTime;
-		var expiresAt = now.Add(AuthDefaults.AccessTokenLifetimeFor(scope));
+		var expiresAt = now.Add(AuthDefaults.AccessTokenLifetimeFor(scope, deviceId));
 		var claims = new Dictionary<string, object>
 		{
 			[JwtRegisteredClaimNames.Sub] = userId.ToString(),

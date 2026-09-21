@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using MacroDeck.Sdk.Devices;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Devices;
@@ -29,6 +30,7 @@ public class PluginDeviceRegistryTests
 	private FakeProfileRegistry _profileRegistry = null!;
 	private IServiceScopeFactory _scopeFactory = null!;
 	private PluginDeviceRegistry _registry = null!;
+	private DeviceSessionGuard _sessionGuard = null!;
 	private DeviceService _service = null!;
 
 	[SetUp]
@@ -39,6 +41,7 @@ public class PluginDeviceRegistryTests
 		_time = new ManualTimeProvider();
 		_tracker = new DeviceConnectionTracker(new RecordingEventBus(), _time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None));
 		_presence = new ProviderDevicePresenceTracker();
+		_sessionGuard = new DeviceSessionGuard();
 		_profileRegistry = new FakeProfileRegistry();
 
 		var services = new ServiceCollection();
@@ -49,6 +52,7 @@ public class PluginDeviceRegistryTests
 		_registry = new PluginDeviceRegistry(_scopeFactory,
 			_presence,
 			_tracker,
+			_sessionGuard,
 			new LayoutRegistry(new RecordingMediator()),
 			_time);
 		_service = CreateDeviceService();
@@ -86,6 +90,19 @@ public class PluginDeviceRegistryTests
 			"com.example.deck::xl",
 			new DeviceCapabilities { KeyCount = 32, SupportsImages = true },
 			presence);
+
+	[Test]
+	public async Task A_registered_device_is_one_the_session_guard_knows()
+	{
+		var registration = await _registry.RegisterAsync(ProviderId, Descriptor());
+
+		var token = new ClaimsPrincipal(new ClaimsIdentity(
+		[
+			new Claim(AuthDefaults.DeviceClaim, registration.DeviceId.ToString())
+		]));
+
+		Assert.That(_sessionGuard.Rejects(token), Is.False);
+	}
 
 	[Test]
 	public async Task A_registered_device_appears_in_the_device_list_with_its_metadata()
@@ -157,6 +174,7 @@ public class PluginDeviceRegistryTests
 		var afterRestart = new PluginDeviceRegistry(_scopeFactory,
 			new ProviderDevicePresenceTracker(),
 			new DeviceConnectionTracker(new RecordingEventBus(), _time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None)),
+			new DeviceSessionGuard(),
 			new LayoutRegistry(new RecordingMediator()),
 			_time);
 

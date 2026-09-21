@@ -88,7 +88,6 @@ public class DeviceServiceTests
 			CreatedAt = now
 		};
 		await _devices.Create(device);
-		// What the host does at startup for every device row it finds.
 		_sessionGuard.Track(device.Id, device.SessionsRevokedAt);
 
 		if (withLiveToken)
@@ -600,6 +599,7 @@ public class DeviceServiceTests
 			new PairingCodeStore(),
 			new AccessTokenCutoff(),
 			new RefreshServingEpoch(),
+			new FakeLastServedRotation(),
 			new FakeOnboardingPreferences(),
 			_time,
 			NullLogger<AuthService>.Instance);

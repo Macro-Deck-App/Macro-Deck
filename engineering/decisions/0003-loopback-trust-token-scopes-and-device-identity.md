@@ -75,6 +75,11 @@ claim, read only off the validated principal so a client cannot assert a device 
   connections; there is no persistent blocked flag, because the failure mode of blocking the wrong
   device is losing access to the UI that unblocks it. Removal additionally deletes the row and gates
   reconnects for the access-token lifetime.
+  Reversed by [ADR 0091](0091-enforced-device-revocation-and-long-client-access-tokens.md): the sign-out
+  is now a persistent per-device revocation instant, checked on every request. The failure mode it
+  worried about is survivable rather than absent: the desktop app reaches the host over the loopback
+  transport without a token at all, and a browser-served admin session that signs its own device out
+  gets back in by logging in again.
 - **The loopback desktop UI is not a device.** It never logs in, so every device-less path is a
   supported state.
 
@@ -82,8 +87,10 @@ claim, read only off the validated principal so a client cannot assert a device 
 
 - The desktop UI stays credential-less and loads over the private loopback transport without a login.
 - The web client cannot rewrite widget actions: client scope reaches only whitelisted runtime routes.
-- Signing a device out does not invalidate its already-issued access token, so it retains REST and
-  media access for up to 15 minutes. This matches the existing behaviour of a password change.
+- Signing a device out did not invalidate its already-issued access token, so it retained REST and
+  media access for up to 15 minutes, matching the password change of the time. Both halves were
+  corrected by [ADR 0091](0091-enforced-device-revocation-and-long-client-access-tokens.md): a
+  sign-out and a password change now end the access token too.
 - Clearing browser storage registers a new logical device; stale rows without a live session are
   purged after 60 days. Copying browser storage to a second browser makes both act as the same device
   — accepted, since the credential is not an independent factor.

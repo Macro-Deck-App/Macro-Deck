@@ -23,7 +23,10 @@ public class AuthServiceTests
 	private DeviceConnectionTracker _connections = null!;
 	private AccessTokenCutoff _cutoff = null!;
 	private RefreshServingEpoch _epoch = null!;
+	private FakeLastServedRotation _lastRotation = null!;
 	private DeviceSessionGuard _sessionGuard = null!;
+	private InMemoryDeviceRepository _devices = null!;
+	private StartupReadiness _readiness = null!;
 
 	private static readonly DeviceRegistration _phone = new(null,
 		null,
@@ -42,18 +45,24 @@ public class AuthServiceTests
 		_tokens = new InMemoryRefreshTokenRepository();
 		_time = new ManualTimeProvider();
 		_preferences = new FakeOnboardingPreferences();
-		var readiness = new StartupReadiness();
-		readiness.MarkCachesReady();
-		readiness.MarkVariablesReady();
+		_devices = new InMemoryDeviceRepository();
+		_readiness = new StartupReadiness();
+		_readiness.MarkCachesReady();
+		_readiness.MarkVariablesReady();
 		_connections = new DeviceConnectionTracker(new RecordingEventBus(), _time, new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None));
 		_cutoff = new AccessTokenCutoff();
 		_epoch = new RefreshServingEpoch();
+		_lastRotation = new FakeLastServedRotation();
 		_sessionGuard = new DeviceSessionGuard();
-		_service = new AuthService(_users,
+		BuildService();
+	}
+
+	private void BuildService()
+		=> _service = new AuthService(_users,
 			_tokens,
 			new FakePasswordHasher(),
 			new FakeAccessTokenIssuer(_time),
-			new DeviceService(new InMemoryDeviceRepository(),
+			new DeviceService(_devices,
 				_tokens,
 				_connections,
 				new RecordingUiTransport(),
@@ -61,19 +70,19 @@ public class AuthServiceTests
 				_time,
 				new FakeProfileRegistry(),
 				new FakeDeviceDeckNavigator(),
-				readiness,
+				_readiness,
 				new ProviderDevicePresenceTracker(),
 				new FakeIntegrationRegistry(),
-			TestScreenSaverProviders.Registry(),
+				TestScreenSaverProviders.Registry(),
 				_sessionGuard),
 			new DeviceEnrollmentStore(),
 			_pairingCodes,
 			_cutoff,
 			_epoch,
+			_lastRotation,
 			_preferences,
 			_time,
 			NullLogger<AuthService>.Instance);
-	}
 
 	[Test]
 	public async Task Setup_creates_the_single_user()
@@ -276,13 +285,12 @@ public class AuthServiceTests
 	{
 		await _service.Setup("admin", "password123");
 		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
-		_epoch.Begin(_time.GetUtcNow().UtcDateTime);
+		Restart();
 		var lost = await _service.Refresh(login.Data!.RefreshToken);
 
-		// The host is away far longer than the grace - restarted, or held on the key ring unlock gate.
 		_time.Advance(TimeSpan.FromMinutes(30));
-		_epoch.Begin(_time.GetUtcNow().UtcDateTime);
-		_time.Advance(TimeSpan.FromSeconds(2));
+		Restart();
+		_time.Advance(TimeSpan.FromMinutes(5));
 
 		var retry = await _service.Refresh(login.Data.RefreshToken);
 
@@ -295,17 +303,74 @@ public class AuthServiceTests
 	}
 
 	[Test]
+	public async Task A_device_that_stays_away_past_the_restart_window_is_treated_as_reuse()
+	{
+		await _service.Setup("admin", "password123");
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		Restart();
+		await _service.Refresh(login.Data!.RefreshToken);
+
+		_time.Advance(TimeSpan.FromMinutes(30));
+		Restart();
+		_time.Advance(AuthDefaults.RefreshTokenReuseGraceAfterRestart + TimeSpan.FromMinutes(1));
+
+		var retry = await _service.Refresh(login.Data.RefreshToken);
+
+		Assert.That(retry.Error, Is.EqualTo(AuthError.RefreshTokenReused));
+	}
+
+	[Test]
 	public async Task A_previous_token_coming_back_late_to_a_host_that_never_stopped_is_still_reuse()
 	{
 		await _service.Setup("admin", "password123");
 		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
-		_epoch.Begin(_time.GetUtcNow().UtcDateTime);
+		Restart();
 		await _service.Refresh(login.Data!.RefreshToken);
 
 		_time.Advance(AuthDefaults.RefreshTokenReuseGrace + TimeSpan.FromSeconds(1));
 		var retry = await _service.Refresh(login.Data.RefreshToken);
 
 		Assert.That(retry.Error, Is.EqualTo(AuthError.RefreshTokenReused));
+	}
+
+	[Test]
+	public async Task A_rotation_the_previous_host_long_outlived_is_not_replayable_after_a_restart()
+	{
+		await _service.Setup("admin", "password123");
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		Restart();
+		await _service.Refresh(login.Data!.RefreshToken);
+
+		var other = await _service.Login("admin", "password123", AuthScope.Client);
+		_time.Advance(TimeSpan.FromDays(3));
+		await _service.Refresh(other.Data!.RefreshToken);
+
+		_time.Advance(TimeSpan.FromMinutes(1));
+		Restart();
+		_time.Advance(TimeSpan.FromMinutes(1));
+
+		var replay = await _service.Refresh(login.Data.RefreshToken);
+
+		Assert.That(replay.Error, Is.EqualTo(AuthError.RefreshTokenReused));
+	}
+
+	[Test]
+	public async Task Reuse_ends_the_access_the_compromised_device_already_holds()
+	{
+		await _service.Setup("admin", "password123");
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		var deviceId = login.Data!.DeviceId!.Value;
+		var issuedAt = _time.GetUtcNow().UtcDateTime;
+		await _service.Refresh(login.Data.RefreshToken);
+
+		_time.Advance(AuthDefaults.RefreshTokenReuseGrace + TimeSpan.FromSeconds(1));
+		var reuse = await _service.Refresh(login.Data.RefreshToken);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(reuse.Error, Is.EqualTo(AuthError.RefreshTokenReused));
+			Assert.That(_sessionGuard.Rejects(TokenIssuedAt(issuedAt, deviceId)), Is.True);
+		});
 	}
 
 	[Test]
@@ -495,6 +560,63 @@ public class AuthServiceTests
 		{
 			Assert.That(_tokens.Tokens[0].RevokedAt, Is.Not.Null);
 			Assert.That(_tokens.Tokens, Has.Count.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task ChangePassword_also_ends_the_access_tokens_already_out_there()
+	{
+		await _service.Setup("admin", "password123");
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		var deviceId = login.Data!.DeviceId!.Value;
+		var issuedAt = _time.GetUtcNow().UtcDateTime;
+
+		_time.Advance(TimeSpan.FromMinutes(5));
+		await _service.ChangePassword("password123", "newpassword1");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_cutoff.Rejects(TokenIssuedAt(issuedAt, deviceId)), Is.True);
+			Assert.That(_sessionGuard.Rejects(TokenIssuedAt(issuedAt, deviceId)), Is.True);
+		});
+	}
+
+	[Test]
+	public async Task ChangeUsername_also_ends_the_access_tokens_already_out_there()
+	{
+		await _service.Setup("admin", "password123");
+		var login = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		var deviceId = login.Data!.DeviceId!.Value;
+		var issuedAt = _time.GetUtcNow().UtcDateTime;
+
+		_time.Advance(TimeSpan.FromMinutes(5));
+		await _service.ChangeUsername("password123", "renamed");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_cutoff.Rejects(TokenIssuedAt(issuedAt, deviceId)), Is.True);
+			Assert.That(_sessionGuard.Rejects(TokenIssuedAt(issuedAt, deviceId)), Is.True);
+		});
+	}
+
+	[Test]
+	public async Task Only_a_session_tied_to_a_device_gets_the_long_access_token()
+	{
+		await _service.Setup("admin", "password123");
+		var now = _time.GetUtcNow().UtcDateTime;
+
+		var device = await _service.Login("admin", "password123", AuthScope.Client, _phone);
+		var deviceless = await _service.Login("admin", "password123", AuthScope.Client);
+		var admin = await _service.Login("admin", "password123", AuthScope.Admin, _phone);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(device.Data!.AccessTokenExpiresAt,
+				Is.EqualTo(now.Add(AuthDefaults.ClientAccessTokenLifetime)));
+			Assert.That(deviceless.Data!.AccessTokenExpiresAt,
+				Is.EqualTo(now.Add(AuthDefaults.AdminAccessTokenLifetime)));
+			Assert.That(admin.Data!.AccessTokenExpiresAt,
+				Is.EqualTo(now.Add(AuthDefaults.AdminAccessTokenLifetime)));
 		});
 	}
 
@@ -800,6 +922,21 @@ public class AuthServiceTests
 			Assert.That(_tokens.Tokens.Any(t => t.TokenHash == TokenHasher.Hash(rotated.Data!.RefreshToken)), Is.True);
 		});
 	}
+
+	private void Restart()
+	{
+		_epoch = new RefreshServingEpoch();
+		_epoch.Begin(_time.GetUtcNow().UtcDateTime, _lastRotation.Read());
+		BuildService();
+	}
+
+	private static ClaimsPrincipal TokenIssuedAt(DateTime issuedAt, Guid deviceId)
+		=> new(new ClaimsIdentity(
+		[
+			new Claim(AuthDefaults.DeviceClaim, deviceId.ToString()),
+			new Claim(AccessTokenIssuedAt.Claim,
+				AccessTokenIssuedAt.UnixSeconds(issuedAt).ToString(CultureInfo.InvariantCulture))
+		]));
 
 	private Domain.Entities.RefreshTokenEntity TokenRow(string rawToken)
 		=> _tokens.Tokens.Single(t => t.TokenHash == TokenHasher.Hash(rawToken));

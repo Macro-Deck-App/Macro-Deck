@@ -255,7 +255,7 @@ internal sealed class FakeAccessTokenIssuer : IAccessTokenIssuer
 		var device = deviceId is { } id ? $":{id}" : string.Empty;
 
 		return new AccessToken($"token:{username}:{AuthDefaults.ScopeClaimValue(scope)}{device}",
-			_timeProvider.GetUtcNow().UtcDateTime.Add(AuthDefaults.AccessTokenLifetimeFor(scope)));
+			_timeProvider.GetUtcNow().UtcDateTime.Add(AuthDefaults.AccessTokenLifetimeFor(scope, deviceId)));
 	}
 }
 
@@ -328,4 +328,14 @@ internal sealed class FakeDeviceDeckNavigator : IDeviceDeckNavigator
 		ProfileCalls.Add((deviceId, profileId));
 		return Task.FromResult(ChangeProfileResult);
 	}
+}
+
+// Records what a host rotated, the way LastServedRotation does, without touching the filesystem.
+internal sealed class FakeLastServedRotation : ILastServedRotation
+{
+	public DateTime Recorded { get; private set; } = DateTime.MinValue;
+
+	public DateTime Read() => Recorded;
+
+	public void Record(DateTime rotatedAt) => Recorded = rotatedAt;
 }

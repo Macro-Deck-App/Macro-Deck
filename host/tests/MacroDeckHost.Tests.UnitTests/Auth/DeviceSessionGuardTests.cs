@@ -80,6 +80,18 @@ public class DeviceSessionGuardTests
 	}
 
 	[Test]
+	public void A_revoked_device_presenting_a_token_the_host_cannot_date_is_refused()
+	{
+		var guard = new DeviceSessionGuard();
+		guard.Track(Device);
+		guard.Revoke(Device, SignedOutAt);
+
+		var undated = new ClaimsPrincipal(new ClaimsIdentity([new Claim(AuthDefaults.DeviceClaim, Device.ToString())]));
+
+		Assert.That(guard.Rejects(undated), Is.True);
+	}
+
+	[Test]
 	public void Seeding_restores_a_sign_out_that_happened_before_this_host_started()
 	{
 		var guard = new DeviceSessionGuard();

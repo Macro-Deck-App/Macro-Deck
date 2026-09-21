@@ -2,7 +2,7 @@ namespace MacroDeck.Plugin.Protocol.Limits;
 
 /// <summary>
 /// Every timeout v1 enforces. <see cref="TimeSpan" /> cannot be <c>const</c>, so these are
-/// <c>static readonly</c> - matching <c>AuthDefaults.AccessTokenLifetime</c> in the host.
+/// <c>static readonly</c> - matching <c>AuthDefaults.AdminAccessTokenLifetime</c> in the host.
 /// </summary>
 public static class ProtocolTimeouts
 {

@@ -117,7 +117,6 @@ public sealed class DeviceConnectionTracker
 
 	public void FlushPendingDisconnects(DateTime now)
 	{
-
 		var window = TimeSpan.FromSeconds(DeviceDefaults.PresenceLingerSeconds);
 		List<(Guid? DeviceId, string? ClientId)>? due = null;
 

@@ -1,12 +1,37 @@
+using System.Globalization;
+
 namespace MacroDeckHost.Application.Auth;
 
-// Set once per process, before the first request: the rotation grace measures from the later of this and
-// the rotation, so time the host spent down or locked does not spend a client's one retry.
+// Both values feed AuthService.WithinGrace; see AuthDefaults.RefreshTokenReuseGraceAfterRestart.
 public sealed class RefreshServingEpoch
 {
-	private long _ticks;
+	private long _startedTicks;
+	private long _previousEndedTicks;
 
-	public DateTime StartedAt => new(Interlocked.Read(ref _ticks), DateTimeKind.Utc);
+	public DateTime StartedAt => new(Interlocked.Read(ref _startedTicks), DateTimeKind.Utc);
 
-	public void Begin(DateTime utcNow) => Interlocked.Exchange(ref _ticks, utcNow.Ticks);
+	// MinValue when there is no record, which refuses the post-restart grace outright.
+	public DateTime PreviousRotationAt => new(Interlocked.Read(ref _previousEndedTicks), DateTimeKind.Utc);
+
+	// Only the first caller wins, so a second cannot replace the predecessor's record with one this host
+	// has already written.
+	public bool Begin(DateTime utcNow, DateTime previousEndedAt)
+	{
+		if (Interlocked.CompareExchange(ref _startedTicks, utcNow.Ticks, 0) != 0)
+		{
+			return false;
+		}
+
+		Interlocked.Exchange(ref _previousEndedTicks, previousEndedAt.Ticks);
+
+		return true;
+	}
+
+	public static string Format(DateTime utc) => utc.ToString("O", CultureInfo.InvariantCulture);
+
+	// Anything unreadable reads as MinValue, which refuses the post-restart grace rather than widening it.
+	public static DateTime Parse(string? value)
+		=> DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsed)
+			? parsed.ToUniversalTime()
+			: DateTime.MinValue;
 }

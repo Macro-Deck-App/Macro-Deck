@@ -49,6 +49,7 @@ code, protocol schemas, issue discussions or exhaustive option lists.
 - [0088 - Plugins run on the .NET runtime bundled with the host](0088-plugins-run-on-the-host-bundled-dotnet-runtime.md)
 - [0089 - A development build can temporarily take over an installed plugin](0089-a-development-build-can-temporarily-take-over-an-installed-plugin.md)
 - [0090 - Invited testers install unreviewed test builds](0090-invited-testers-install-unreviewed-test-builds.md)
+- [0091 - Enforced device revocation and long client access tokens](0091-enforced-device-revocation-and-long-client-access-tokens.md)
 
 ## Macro Deck UI
 

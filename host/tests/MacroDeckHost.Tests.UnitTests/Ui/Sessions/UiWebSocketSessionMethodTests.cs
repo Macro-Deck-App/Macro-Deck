@@ -190,7 +190,6 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 		return result!.Value.Deserialize<UiAttachSessionResponse>(UiWebSocketProtocol.Json)!;
 	}
 
-	// The guard refuses a device it does not know, which a real host learns from its device rows.
 	private static DeviceSessionGuard GuardFor(IEnumerable<Claim> claims)
 	{
 		var guard = new DeviceSessionGuard();
