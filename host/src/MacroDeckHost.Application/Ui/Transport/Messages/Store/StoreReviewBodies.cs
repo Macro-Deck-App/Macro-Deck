@@ -34,6 +34,17 @@ public class GetStoreRatingResponse
 	public List<StoreRatingBucketBody> Distribution { get; set; } = [];
 }
 
+public class StoreReviewReplyBody
+{
+	public string Body { get; set; } = string.Empty;
+
+	public DateTimeOffset CreatedAt { get; set; }
+
+	public DateTimeOffset UpdatedAt { get; set; }
+
+	public bool IsEdited { get; set; }
+}
+
 public class StoreReviewBody
 {
 	public Guid Id { get; set; }
@@ -53,6 +64,8 @@ public class StoreReviewBody
 	public bool IsEdited { get; set; }
 
 	public bool DownloadedBeforeReview { get; set; }
+
+	public StoreReviewReplyBody? Reply { get; set; }
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -88,6 +101,8 @@ public enum StoreReviewComposeState
 
 public class StoreOwnReviewBody
 {
+	public Guid Id { get; set; }
+
 	public int Rating { get; set; }
 
 	public string? Title { get; set; }
@@ -135,6 +150,20 @@ public class StoreOwnReviewWriteResponse
 	public bool Success { get; set; }
 
 	public StoreOwnReviewBody? Review { get; set; }
+
+	public StoreReviewWriteError? Error { get; set; }
+}
+
+public class ReportStoreContentRequest
+{
+	public string? Category { get; set; }
+
+	public string? Detail { get; set; }
+}
+
+public class StoreReportResponse
+{
+	public bool Success { get; set; }
 
 	public StoreReviewWriteError? Error { get; set; }
 }

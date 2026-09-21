@@ -1,4 +1,4 @@
-@if (visible()) {
+@if (available()) {
   <h2 class="reviews-heading">{{ 'macrodeck.app:Store.Reviews.Heading' | translate }}</h2>
 
   <div class="reviews-summary">
@@ -120,12 +120,45 @@
               }
             </span>
           </div>
+          @if (review.id !== ownReviewId()) {
+            @if (reportedReviewIds().has(review.id)) {
+              <span class="review-reported" tabindex="-1" [attr.data-reported-review]="review.id">
+                {{ 'macrodeck.app:Store.Report.Reported' | translate }}
+              </span>
+            } @else {
+              <shared-button
+                class="review-report"
+                variant="ghost"
+                size="compact"
+                [ariaLabel]="reviewReportLabel(review)"
+                (click)="requestReport(review)">
+                {{ 'macrodeck.app:Store.Report.Action' | translate }}
+              </shared-button>
+            }
+          }
         </div>
         @if (review.title) {
           <p class="review-title">{{ review.title }}</p>
         }
         @if (review.body) {
           <p class="review-body">{{ review.body }}</p>
+        }
+        @if (review.reply; as reply) {
+          <div class="review-reply">
+            <div class="review-reply-header">
+              <span class="review-reply-label">{{ 'macrodeck.app:Store.Reviews.DeveloperResponse' | translate }}</span>
+              @if (publisher(); as name) {
+                <span class="review-reply-publisher">{{ name }}</span>
+              }
+            </div>
+            <span class="review-meta">
+              <span>{{ reply.createdAt | date: 'mediumDate' }}</span>
+              @if (reply.isEdited) {
+                <span class="review-edited">{{ 'macrodeck.app:Store.Reviews.ReplyEdited' | translate }}</span>
+              }
+            </span>
+            <p class="review-reply-body">{{ reply.body }}</p>
+          </div>
         }
       </li>
     }
@@ -284,6 +317,15 @@
       </shared-button>
     </div>
   </shared-modal>
+}
+
+@if (reportTarget(); as target) {
+  <app-store-report-dialog
+    [extensionKind]="kind()"
+    [extensionId]="id()"
+    [target]="target"
+    (closed)="closeReport()"
+    (reported)="onReported()" />
 }
 
 @if (deleteConfirmOpen()) {

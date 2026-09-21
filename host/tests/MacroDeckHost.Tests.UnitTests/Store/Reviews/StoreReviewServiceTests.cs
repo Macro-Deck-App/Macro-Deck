@@ -241,6 +241,33 @@ internal sealed class StoreReviewServiceTests
 	}
 
 	[Test]
+	public async Task A_creator_reply_reaches_the_store_on_the_review_it_answers_and_nowhere_else()
+	{
+		var repliedAt = new DateTimeOffset(2026, 9, 2, 8, 0, 0, TimeSpan.Zero);
+		var answered = Review(null) with
+		{
+			Reply = new StorePlatformReviewReply("Thanks, fixed in 1.2.", repliedAt, repliedAt.AddDays(1), true)
+		};
+		var unanswered = Review(null);
+		_platform.ReviewPage = new StorePlatformReviewPage([unanswered, answered], 1, 20, 2, 4, 2, 2);
+
+		var reviews = await _service.GetReviews(StoreExtensionKind.Plugin, PackageId, 1, 20,
+			StoreReviewSortOrder.Newest, null, CancellationToken.None);
+		var reply = reviews.Items.Single(review => review.Id == answered.Id).Reply;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(reviews.Items, Has.Count.EqualTo(2));
+			Assert.That(reviews.TotalCount, Is.EqualTo(2));
+			Assert.That(reviews.Items.Single(review => review.Id == unanswered.Id).Reply, Is.Null);
+			Assert.That(reply?.Body, Is.EqualTo("Thanks, fixed in 1.2."));
+			Assert.That(reply?.CreatedAt, Is.EqualTo(repliedAt));
+			Assert.That(reply?.UpdatedAt, Is.EqualTo(repliedAt.AddDays(1)));
+			Assert.That(reply?.IsEdited, Is.True);
+		});
+	}
+
+	[Test]
 	public async Task An_unreachable_platform_is_not_asked_again_for_every_page_until_the_cache_lifetime_passes()
 	{
 		_platform.RatingsFailure = StorePlatformFailure.Unavailable;
@@ -271,4 +298,133 @@ internal sealed class StoreReviewServiceTests
 	private static StorePlatformReview Review(string? avatarUrl) =>
 		new(Guid.NewGuid(), 4, "Title", "Body", new StorePlatformReviewAuthor("Ada", avatarUrl),
 			DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch, false, false);
+
+	[Test]
+	public async Task A_report_needs_a_signed_in_account_that_is_not_suspended()
+	{
+		_session.Current = ConnectSessionSnapshot.SignedOut;
+		var signedOut = await _service.ReportEntry(StoreExtensionKind.Plugin, PackageId,
+			new ReportStoreContentRequest { Category = "Spam" }, CancellationToken.None);
+		_session.Current = FakeConnectSessionService.SignedIn(null) with { Status = ConnectAccountStatus.Suspended };
+		var suspended = await _service.ReportReview(StoreExtensionKind.Plugin, PackageId, Guid.NewGuid(),
+			new ReportStoreContentRequest { Category = "Spam" }, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(signedOut.Error?.Code, Is.EqualTo("sign_in_required"));
+			Assert.That(suspended.Error?.Code, Is.EqualTo("account_suspended"));
+			Assert.That(_platform.Reports, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_package_outside_the_official_catalog_cannot_be_reported()
+	{
+		var result = await _service.ReportEntry(StoreExtensionKind.Plugin, "com.other.thing",
+			new ReportStoreContentRequest { Category = "Spam" }, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error?.Code, Is.EqualTo("not_found"));
+			Assert.That(_platform.Reports, Is.Empty);
+		});
+	}
+
+	[TestCase("Abuse", null, "Category")]
+	[TestCase("other", "Uses our logo", "Category")]
+	[TestCase("Other", "   ", "Detail")]
+	[TestCase("Spam", "ring\u0007ring", "Detail")]
+	public async Task An_invalid_entry_report_is_refused_before_it_reaches_the_platform(string category,
+		string? detail,
+		string field)
+	{
+		var result = await _service.ReportEntry(StoreExtensionKind.Plugin, PackageId,
+			new ReportStoreContentRequest { Category = category, Detail = detail },
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error?.Code, Is.EqualTo("validation"));
+			Assert.That(result.Error?.Field, Is.EqualTo(field));
+			Assert.That(_platform.Reports, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_review_report_offers_only_review_reasons_and_needs_a_description_for_other()
+	{
+		var entryReason = await _service.ReportReview(StoreExtensionKind.Plugin, PackageId, Guid.NewGuid(),
+			new ReportStoreContentRequest { Category = "Malicious" }, CancellationToken.None);
+		var otherWithoutDetail = await _service.ReportReview(StoreExtensionKind.Plugin, PackageId, Guid.NewGuid(),
+			new ReportStoreContentRequest { Category = "Other" }, CancellationToken.None);
+		var tooLong = await _service.ReportReview(StoreExtensionKind.Plugin, PackageId, Guid.NewGuid(),
+			new ReportStoreContentRequest
+			{
+				Category = "Other",
+				Detail = new string('x', StoreReviewService.MaxReportDetailLength + 1)
+			},
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(entryReason.Error?.Field, Is.EqualTo("Category"));
+			Assert.That(otherWithoutDetail.Error?.Field, Is.EqualTo("Detail"));
+			Assert.That(tooLong.Error?.Field, Is.EqualTo("Detail"));
+			Assert.That(_platform.Reports, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_valid_report_reaches_the_platform_trimmed_and_leaves_the_ratings_alone()
+	{
+		var reviewId = Guid.NewGuid();
+		_platform.Ratings[PackageId] = new StorePlatformRating(4.5, 2, []);
+		await _service.GetRatings([PackageId], CancellationToken.None);
+
+		var entry = await _service.ReportEntry(StoreExtensionKind.Plugin, PackageId,
+			new ReportStoreContentRequest { Category = " Other ", Detail = "  Uses our logo  " }, CancellationToken.None);
+		var review = await _service.ReportReview(StoreExtensionKind.Plugin, PackageId, reviewId,
+			new ReportStoreContentRequest { Category = "Abuse", Detail = " " }, CancellationToken.None);
+		await _service.GetRatings([PackageId], CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(entry.Success, Is.True);
+			Assert.That(review.Success, Is.True);
+			Assert.That(_platform.Reports, Is.EqualTo(new (string, Guid?, string, string?)[]
+			{
+				(PackageId, null, "Other", "Uses our logo"),
+				(PackageId, reviewId, "Abuse", null)
+			}));
+			Assert.That(_platform.RatingRequests, Has.Count.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task A_platform_without_entry_reports_reads_as_unavailable_while_a_missing_review_reads_as_gone()
+	{
+		_platform.ReportResult = StorePlatformResult.Fail<bool>(StorePlatformFailure.NotFound);
+
+		var entry = await _service.ReportEntry(StoreExtensionKind.Plugin, PackageId,
+			new ReportStoreContentRequest { Category = "Spam" }, CancellationToken.None);
+		var review = await _service.ReportReview(StoreExtensionKind.Plugin, PackageId, Guid.NewGuid(),
+			new ReportStoreContentRequest { Category = "Spam" }, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(entry.Error?.Code, Is.EqualTo("report_unavailable"));
+			Assert.That(review.Error?.Code, Is.EqualTo("not_found"));
+		});
+	}
+
+	[Test]
+	public async Task A_second_report_of_the_same_content_is_answered_as_already_reported()
+	{
+		_platform.ReportResult = StorePlatformResult.Fail<bool>(StorePlatformFailure.AlreadyReported);
+
+		var result = await _service.ReportReview(StoreExtensionKind.Plugin, PackageId, Guid.NewGuid(),
+			new ReportStoreContentRequest { Category = "Spam" }, CancellationToken.None);
+
+		Assert.That(result.Error?.Code, Is.EqualTo("already_reported"));
+	}
 }

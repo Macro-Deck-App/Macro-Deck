@@ -1,5 +1,17 @@
 import { DatePipe, NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  inject,
+  Injector,
+  input,
+  signal,
+  untracked,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import {
@@ -21,6 +33,7 @@ import { SettingsModalService } from '../../services/settings-modal.service';
 import { StoreRatingsService } from '../../services/store-ratings.service';
 import { formatStoreRating } from '../../util/store-rating-format';
 import { STORE_STAR_PATH, StoreRatingStarsComponent } from './store-rating-stars.component';
+import { StoreReportDialogComponent, StoreReportTarget } from './store-report-dialog.component';
 
 export const STORE_REVIEWS_PAGE_SIZE = 20;
 export const STORE_REVIEW_TITLE_MAX = 120;
@@ -48,13 +61,14 @@ type ComposeMode = 'signIn' | 'suspended' | 'notEntitled' | 'unavailable' | 'for
     ModalComponent,
     SelectComponent,
     StoreRatingStarsComponent,
+    StoreReportDialogComponent,
     TranslatePipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './store-reviews-section.component.html',
   styleUrls: ['./store-reviews-section.component.scss'],
   host: {
-    '[style.display]': "visible() ? null : 'none'",
+    '[style.display]': "available() ? null : 'none'",
   },
 })
 export class StoreReviewsSectionComponent {
@@ -63,16 +77,19 @@ export class StoreReviewsSectionComponent {
   private readonly account = inject(ConnectAccountService);
   private readonly settingsModal = inject(SettingsModalService);
   private readonly ratingsService = inject(StoreRatingsService);
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
 
   readonly kind = input.required<StoreExtensionKind>();
   readonly id = input.required<string>();
   readonly repository = input<string | null>(null);
+  readonly publisher = input<string | null>(null);
 
   protected readonly starValues = STAR_VALUES;
   protected readonly starPath = STORE_STAR_PATH;
 
   protected readonly aggregate = signal<GetStoreRatingResponse | null>(null);
-  protected readonly visible = computed(() => this.aggregate()?.available === true);
+  readonly available = computed(() => this.aggregate()?.available === true);
 
   protected readonly reviews = signal<StoreReviewBody[]>([]);
   protected readonly totalReviews = signal(0);
@@ -95,6 +112,8 @@ export class StoreReviewsSectionComponent {
   protected readonly writeStatus = signal<string | null>(null);
   protected readonly deleteConfirmOpen = signal(false);
   protected readonly editorOpen = signal(false);
+  protected readonly reportTarget = signal<StoreReportTarget | null>(null);
+  protected readonly reportedReviewIds = signal<ReadonlySet<string>>(new Set());
 
   protected readonly ratingText = computed(() => {
     const rating = this.aggregate()?.rating;
@@ -140,6 +159,8 @@ export class StoreReviewsSectionComponent {
   });
 
   protected readonly ownReview = computed(() => this.own()?.review ?? null);
+
+  protected readonly ownReviewId = computed(() => this.ownReview()?.id ?? null);
 
   protected readonly moderated = computed(() => {
     const visibility = this.ownReview()?.visibility?.toLowerCase();
@@ -231,6 +252,32 @@ export class StoreReviewsSectionComponent {
 
   protected openSignIn(): void {
     this.settingsModal.open('account');
+  }
+
+  protected reviewReportLabel(review: StoreReviewBody): string {
+    return this.localization.translateKey(AppStrings.Store.Report.ReviewAction, { author: review.authorDisplayName });
+  }
+
+  protected requestReport(review: StoreReviewBody): void {
+    if (this.mode() === 'signIn') {
+      this.openSignIn();
+      return;
+    }
+    this.reportTarget.set({ type: 'review', reviewId: review.id });
+  }
+
+  protected closeReport(): void {
+    this.reportTarget.set(null);
+  }
+
+  protected onReported(): void {
+    const target = this.reportTarget();
+    if (target?.type === 'review') {
+      this.reportedReviewIds.update(ids => new Set([...ids, target.reviewId]));
+      afterNextRender(() => this.element.nativeElement
+        .querySelector<HTMLElement>(`[data-reported-review="${target.reviewId}"]`)?.focus(), { injector: this.injector });
+    }
+    this.reportTarget.set(null);
   }
 
   protected onSortChange(value: StoreReviewSortOrder): void {

@@ -134,11 +134,20 @@ An item's page lists **Links** its creator provides, such as the source reposito
 place to report an issue. They open in your browser.
 
 Store items show their star rating, and an item's page lists its **Ratings and reviews**. Anyone can
-read them. To rate or review an item yourself, sign in with Macro Deck Connect under
+read them. When the creator has answered a review, their reply appears under it as a **Developer
+response**. To rate or review an item yourself, sign in with Macro Deck Connect under
 **Settings > Account** and install the item first: only items you have installed can be rated. When
 you sign in, and whenever you install something while signed in, Macro Deck records your installed
 Store items for your account so you can rate them. If ratings cannot be reached, the Store keeps
 working without them.
+
+To report a Store item, open its page and choose **Report this item** at the bottom of the details.
+To report a review, choose **Report** next to it. Pick a reason and, if you like, add details;
+**Other** needs a short description. Reporting needs a Macro Deck Connect sign-in, and each review
+can be reported once per account. Reports go to the Macro Deck moderators and do not hide
+anything on their own: the item or review stays visible until a moderator has looked at it. Reporting
+Store items only works once the Store supports it; until then, Macro Deck tells you it is not
+available.
 
 ### Tests
 

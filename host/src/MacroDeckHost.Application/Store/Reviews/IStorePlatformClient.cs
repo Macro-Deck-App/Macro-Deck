@@ -27,6 +27,17 @@ public interface IStorePlatformClient
 
 	Task<StorePlatformResult<bool>> DeleteOwnReview(string packageId, CancellationToken cancellationToken = default);
 
+	Task<StorePlatformResult<bool>> ReportPackage(string packageId,
+		string category,
+		string? detail,
+		CancellationToken cancellationToken = default);
+
+	Task<StorePlatformResult<bool>> ReportReview(string packageId,
+		Guid reviewId,
+		string category,
+		string? detail,
+		CancellationToken cancellationToken = default);
+
 	Task<StorePlatformResult<IReadOnlyDictionary<string, StoreEntitlementStatus>>> GetEntitlements(
 		IReadOnlyCollection<string> packageIds,
 		CancellationToken cancellationToken = default);

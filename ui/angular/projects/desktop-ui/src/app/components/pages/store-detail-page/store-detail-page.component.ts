@@ -1,5 +1,16 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  Injector,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AppStrings, StoreExtensionDetailBody, StoreExtensionKind, StoreVersionHistoryBody } from '@macro-deck/runtime';
@@ -8,8 +19,11 @@ import { DetailPageComponent } from '../../detail-page/detail-page.component';
 import { LoadingStateComponent } from '../../feedback/loading-state/loading-state.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
 import { StoreMarkdownComponent } from '../../store/store-markdown.component';
+import { StoreReportDialogComponent, StoreReportTarget } from '../../store/store-report-dialog.component';
 import { StoreReviewsSectionComponent } from '../../store/store-reviews-section.component';
 import { cultureDisplayName, sortCulturesForReader } from '../../../localization/culture-display.util';
+import { ConnectAccountService } from '../../../services/connect-account.service';
+import { SettingsModalService } from '../../../services/settings-modal.service';
 import { StoreOperationService } from '../../../services/store-operation.service';
 import { formatBytes } from '../../../util/format-bytes';
 import { storeUninstallErrorKey, storeUninstallMessageKey } from '../../../util/store-operation-display';
@@ -55,6 +69,7 @@ interface StoreDetailLink {
     StoreLanguagesModalComponent,
     StoreScreenshotStripComponent,
     StoreMarkdownComponent,
+    StoreReportDialogComponent,
     StoreReviewsSectionComponent,
     StoreVersionHistoryModalComponent,
     TranslatePipe,
@@ -69,7 +84,12 @@ export class StoreDetailPageComponent implements OnInit {
   private readonly api = inject(ApiService);
   private readonly localization = inject(LocalizationService);
   private readonly toasts = inject(ToastService);
+  private readonly account = inject(ConnectAccountService);
+  private readonly settingsModal = inject(SettingsModalService);
   protected readonly operations = inject(StoreOperationService);
+  private readonly reviewsSection = viewChild(StoreReviewsSectionComponent);
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
 
   protected readonly kind = signal<StoreExtensionKind | null>(null);
   protected readonly extensionId = signal('');
@@ -148,6 +168,15 @@ export class StoreDetailPageComponent implements OnInit {
   private languagesTriggerElement: HTMLElement | null = null;
 
   protected readonly cultureDisplayName = cultureDisplayName;
+
+  protected readonly reportAvailable = computed(() => this.reviewsSection()?.available() ?? false);
+  protected readonly reportTarget = signal<StoreReportTarget | null>(null);
+  private readonly reportedEntries = signal<ReadonlySet<string>>(new Set());
+
+  protected readonly entryReported = computed(() => {
+    const extension = this.extension();
+    return extension !== null && this.reportedEntries().has(entryKey(extension.kind, extension.id));
+  });
 
   protected compatibilityLabel(operatingSystems: readonly string[]): string {
     return operatingSystems.length > 0
@@ -260,6 +289,33 @@ export class StoreDetailPageComponent implements OnInit {
     }
   }
 
+  protected requestEntryReport(): void {
+    const extension = this.extension();
+    if (!extension) {
+      return;
+    }
+    const status = this.account.session()?.status;
+    if (status === 'signedOut' || status === 'reauthenticationRequired') {
+      this.settingsModal.open('account');
+      return;
+    }
+    this.reportTarget.set({ type: 'entry', name: extension.name });
+  }
+
+  protected closeEntryReport(): void {
+    this.reportTarget.set(null);
+  }
+
+  protected onEntryReported(): void {
+    const extension = this.extension();
+    if (extension) {
+      this.reportedEntries.update(keys => new Set([...keys, entryKey(extension.kind, extension.id)]));
+      afterNextRender(() => this.element.nativeElement.querySelector<HTMLElement>('.detail-reported')?.focus(),
+        { injector: this.injector });
+    }
+    this.reportTarget.set(null);
+  }
+
   protected onUninstallRequested(): void {
     this.uninstallConfirmOpen.set(true);
   }
@@ -284,4 +340,8 @@ export class StoreDetailPageComponent implements OnInit {
       });
     }
   }
+}
+
+function entryKey(kind: StoreExtensionKind, id: string): string {
+  return `${kind}:${id}`;
 }

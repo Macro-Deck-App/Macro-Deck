@@ -64,6 +64,21 @@ public class StoreReviewsController : ControllerBase
 	public Task<StoreOwnReviewWriteResponse> DeleteOwnReview(StoreExtensionKind kind, string id, CancellationToken ct) =>
 		_reviews.DeleteOwnReview(kind, id, ct);
 
+	[HttpPost("catalog/{kind}/{id}/report")]
+	public Task<StoreReportResponse> ReportEntry(StoreExtensionKind kind,
+		string id,
+		ReportStoreContentRequest body,
+		CancellationToken ct) =>
+		_reviews.ReportEntry(kind, id, body, ct);
+
+	[HttpPost("catalog/{kind}/{id}/reviews/{reviewId:guid}/report")]
+	public Task<StoreReportResponse> ReportReview(StoreExtensionKind kind,
+		string id,
+		Guid reviewId,
+		ReportStoreContentRequest body,
+		CancellationToken ct) =>
+		_reviews.ReportReview(kind, id, reviewId, body, ct);
+
 	[HttpGet("review-avatars")]
 	public async Task<IActionResult> GetAvatar([FromQuery] string? src, CancellationToken ct)
 	{

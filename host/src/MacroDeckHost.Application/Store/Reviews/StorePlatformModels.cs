@@ -13,7 +13,8 @@ public enum StorePlatformFailure
 	Gone,
 	Cooldown,
 	Validation,
-	NotFound
+	NotFound,
+	AlreadyReported
 }
 
 public sealed record StorePlatformResult<T>
@@ -45,6 +46,8 @@ public sealed record StorePlatformRating(double? Rating, int RatingCount, IReadO
 
 public sealed record StorePlatformReviewAuthor(string DisplayName, string? AvatarUrl);
 
+public sealed record StorePlatformReviewReply(string Body, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt, bool IsEdited);
+
 public sealed record StorePlatformReview(
 	Guid Id,
 	int Rating,
@@ -54,7 +57,8 @@ public sealed record StorePlatformReview(
 	DateTimeOffset CreatedAt,
 	DateTimeOffset UpdatedAt,
 	bool DownloadedBeforeReview,
-	bool IsEdited);
+	bool IsEdited,
+	StorePlatformReviewReply? Reply = null);
 
 public sealed record StorePlatformReviewPage(
 	IReadOnlyList<StorePlatformReview> Items,

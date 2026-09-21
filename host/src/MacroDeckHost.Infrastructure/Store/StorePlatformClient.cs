@@ -148,6 +148,19 @@ public sealed class StorePlatformClient : IStorePlatformClient, IDisposable
 			: StorePlatformResult.Fail<bool>(result.Failure, result.RetryAfter, result.Field);
 	}
 
+	public Task<StorePlatformResult<bool>> ReportPackage(string packageId,
+		string category,
+		string? detail,
+		CancellationToken cancellationToken = default) =>
+		Report($"{PackagePath(packageId)}/report", category, detail, cancellationToken);
+
+	public Task<StorePlatformResult<bool>> ReportReview(string packageId,
+		Guid reviewId,
+		string category,
+		string? detail,
+		CancellationToken cancellationToken = default) =>
+		Report($"{PackagePath(packageId)}/reviews/{reviewId:D}/report", category, detail, cancellationToken);
+
 	public async Task<StorePlatformResult<IReadOnlyDictionary<string, StoreEntitlementStatus>>> GetEntitlements(
 		IReadOnlyCollection<string> packageIds,
 		CancellationToken cancellationToken = default)
@@ -229,6 +242,27 @@ public sealed class StorePlatformClient : IStorePlatformClient, IDisposable
 			content: null,
 			authenticated: true,
 			cancellationToken);
+
+	private async Task<StorePlatformResult<bool>> Report(string relativeUrl,
+		string category,
+		string? detail,
+		CancellationToken cancellationToken)
+	{
+		var result = await Send<JsonElement?>(HttpMethod.Post,
+			relativeUrl,
+			JsonContent.Create(new { category, detail }, options: _json),
+			authenticated: true,
+			cancellationToken);
+		if (result.Success)
+		{
+			return StorePlatformResult.Ok(true);
+		}
+
+		var failure = result.Failure == StorePlatformFailure.Moderated
+			? StorePlatformFailure.AlreadyReported
+			: result.Failure;
+		return StorePlatformResult.Fail<bool>(failure, result.RetryAfter, result.Field);
+	}
 
 	private async Task<StorePlatformResult<T>> Send<T>(HttpMethod method,
 		string relativeUrl,
