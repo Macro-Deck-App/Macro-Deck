@@ -29,7 +29,7 @@ public sealed class StoreIconPackOwner : IIconPackOwner
 	// record to delete.
 	public bool Owns(IconPackEntity pack) => FindRecord(pack) is not null;
 
-	public IconPackOwnerDescriptor Describe(IconPackEntity pack) => new(IconPackOwnerKind.Store, true);
+	public IconPackOwnerDescriptor Describe(IconPackEntity pack) => new(IconPackOwnerKind.Store, CanRemove: true, IsReadOnly: true);
 
 	public Task Release(IconPackEntity pack)
 	{

@@ -1,13 +1,20 @@
+using System.Security.Cryptography;
+using System.Text;
 using MacroDeck.Plugin.Packaging.Artifacts;
 using MacroDeck.Plugin.Packaging.Manifest;
+using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Icons;
+using MacroDeckHost.Application.Icons.Ownership;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Installation;
 using MacroDeckHost.Application.Portable;
 using MacroDeckHost.Application.Store;
+using MacroDeckHost.Application.Store.Installation;
 using MacroDeckHost.Application.Store.Model;
 using MacroDeckHost.Application.Store.Operations;
+using MacroDeckHost.Application.Store.Updates;
+using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure.Plugins;
 using MacroDeckHost.Infrastructure.Plugins.Installation;
 using MacroDeckHost.Infrastructure.Store;
@@ -71,6 +78,7 @@ internal sealed class StoreInstallExecutorTests
 		services.AddSingleton<IPluginRegistrationRepository, InMemoryPluginRegistrationRepository>();
 		services.AddSingleton<IPluginAccessTokenRepository, InMemoryPluginAccessTokenRepository>();
 		services.AddScoped<IIconPackRestoreService>(_ => _iconHarness.RestoreService);
+		services.AddSingleton<Mediator.IMediator>(_iconHarness.Mediator);
 		services.AddScoped<IProfilePortabilityService>(_ => throw new NotSupportedException());
 		var provider = services.BuildServiceProvider();
 		_scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
@@ -290,6 +298,109 @@ internal sealed class StoreInstallExecutorTests
 			Assert.That(_iconHarness.Cache.GetAllPacks(), Is.Empty, "no icon pack must be left behind");
 			Assert.That(_installations.Find(StoreExtensionKind.IconPack, IconPackId), Is.Null);
 		});
+	}
+
+	[Test]
+	public async Task An_installed_Store_icon_pack_is_announced_as_Store_owned_and_read_only()
+	{
+		var artifact = await BuildIconPackArtifact("1.0.0");
+		ServeIconPack(artifact, "1.0.0");
+		var operation = _tracker.Create(StoreOperationKind.Install,
+			StoreExtensionKind.IconPack,
+			IconPackId,
+			"1.0.0",
+			"Store Icons",
+			previousVersion: null);
+		_iconHarness.Mediator.Published.Clear();
+
+		await _executor.Execute(operation.Id);
+
+		var pack = _iconHarness.Cache.GetAllPacks().Single();
+		var announced = _iconHarness.Mediator.Published.OfType<IconPackUpdatedNotification>().LastOrDefault();
+		Assert.Multiple(() =>
+		{
+			Assert.That(_tracker.Find(operation.Id)!.State, Is.EqualTo(StoreOperationState.Completed));
+			Assert.That(announced?.Pack.Id, Is.EqualTo(pack.Id));
+			Assert.That(OwnerRegistry().Describe(announced!.Pack).Kind, Is.EqualTo(IconPackOwnerKind.Store));
+			Assert.That(OwnerRegistry().IsReadOnly(pack), Is.True);
+		});
+	}
+
+	[Test]
+	public async Task A_Store_update_of_an_installed_read_only_icon_pack_still_installs()
+	{
+		ServeIconPack(await BuildIconPackArtifact("1.0.0"), "1.0.0");
+		var install = _tracker.Create(StoreOperationKind.Install,
+			StoreExtensionKind.IconPack,
+			IconPackId,
+			"1.0.0",
+			"Store Icons",
+			previousVersion: null);
+		await _executor.Execute(install.Id);
+		var installed = _iconHarness.Cache.GetAllPacks().Single();
+
+		ServeIconPack(await BuildIconPackArtifact("1.1.0"), "1.1.0");
+		var update = _tracker.Create(StoreOperationKind.Update,
+			StoreExtensionKind.IconPack,
+			IconPackId,
+			"1.1.0",
+			"Store Icons",
+			previousVersion: "1.0.0");
+		await _executor.Execute(update.Id);
+
+		var packs = _iconHarness.Cache.GetAllPacks();
+		Assert.Multiple(() =>
+		{
+			Assert.That(_tracker.Find(update.Id)!.State, Is.EqualTo(StoreOperationState.Completed));
+			Assert.That(packs, Has.Count.EqualTo(1));
+			Assert.That(packs.Single().Id, Is.EqualTo(installed.Id));
+			Assert.That(packs.Single().Version, Is.EqualTo("1.1.0"));
+			Assert.That(_installations.Find(StoreExtensionKind.IconPack, IconPackId)!.Version, Is.EqualTo("1.1.0"));
+		});
+	}
+
+	private IconPackOwnerRegistry OwnerRegistry()
+		=> new([
+			new StoreIconPackOwner(_installations,
+				new StoreUpdateDetector(_catalog, _pluginCatalog, _installations, new StoreUpdateState()),
+				Serilog.Core.Logger.None)
+		]);
+
+	private void ServeIconPack(byte[] artifact, string version)
+	{
+		_httpClientFactory.Body = artifact;
+		_catalog.Swap(new StoreCatalogSnapshot
+		{
+			Sequence = 1,
+			Entries =
+			[
+				IconPackEntry() with
+				{
+					LatestVersion = version,
+					LatestRelease = new StoreReleaseManifest
+					{
+						Version = version,
+						ArtifactUrl = new Uri($"https://cdn.example/store-icons-{version}.macroDeckIconPack"),
+						Sha256 = Convert.ToHexStringLower(SHA256.HashData(artifact)),
+						Size = artifact.LongLength
+					}
+				}
+			]
+		});
+	}
+
+	private async Task<byte[]> BuildIconPackArtifact(string version)
+	{
+		var source = await _iconHarness.CreatePack("Store Icons");
+		source.Version = version;
+		await _iconHarness.Cache.AddOrUpdatePack(source);
+		await _iconHarness.AddReadyIcon(source.Id, "home", Encoding.UTF8.GetBytes(version));
+
+		var stream = new MemoryStream();
+		var export = await _iconHarness.CreateExportService().Export(source.Id, stream, CancellationToken.None);
+		Assert.That(export.Success, Is.True);
+		await _iconHarness.Cache.RemovePack(source.Id);
+		return stream.ToArray();
 	}
 }
 

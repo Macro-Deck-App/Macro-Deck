@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Icons;
+using MacroDeckHost.Application.Icons.Ownership;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Icons;
@@ -36,24 +37,29 @@ internal sealed class IconTestHarness : IDisposable
 		FallbackStore = new ImageSharpIconFallbackStore(Storage, Paths, Logger);
 		BatchTracker = new IconImportBatchTracker(BatchStore);
 		BatchFinalizer = new IconImportBatchFinalizer(Cache, BatchTracker, Storage, Logger);
-		RestoreService = new IconPackRestoreService(Cache, Storage, PackStore, Paths, Mediator, Logger);
+		RestoreService = CreateRestoreService();
 	}
 
 	public ImageSharpIconFallbackStore FallbackStore { get; }
 
 	public IconPackRestoreService RestoreService { get; }
 
-	public IconImportService CreateImportService(IAppIconExtractor? appIconExtractor = null)
+	public IconPackRestoreService CreateRestoreService(IIconPackOwnerRegistry? ownerRegistry = null)
+		=> new(Cache, Storage, PackStore, Paths, Mediator, ownerRegistry ?? new IconPackOwnerRegistry([]), Logger);
+
+	public IconImportService CreateImportService(IAppIconExtractor? appIconExtractor = null,
+		IIconPackOwnerRegistry? ownerRegistry = null)
 		=> new(Cache,
 			Storage,
 			BatchTracker,
 			BatchFinalizer,
 			ProcessingChannel,
-			RestoreService,
+			ownerRegistry is null ? RestoreService : CreateRestoreService(ownerRegistry),
 			CancellationRegistry,
 			Coalescer,
 			appIconExtractor ?? new FakeAppIconExtractor(),
 			Mediator,
+			ownerRegistry ?? new IconPackOwnerRegistry([]),
 			Logger);
 
 	public IconPackExportService CreateExportService() => new(Cache, Storage, Logger);

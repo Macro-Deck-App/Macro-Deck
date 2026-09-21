@@ -1,6 +1,7 @@
 using MacroDeck.Plugin.Packaging.Artifacts;
 using MacroDeck.Plugin.Protocol.Assets;
 using MacroDeckHost.Application.Caching;
+using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Plugins.Installation;
@@ -13,6 +14,7 @@ using MacroDeckHost.Application.Store.Operations;
 using MacroDeckHost.Application.Store.Reviews;
 using MacroDeckHost.Application.Store.Testing;
 using MacroDeckHost.Domain.Enums;
+using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using ILogger = Serilog.ILogger;
 
@@ -411,6 +413,19 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 			});
 
 			_tracker.Transition(operationId, StoreOperationState.Completed);
+
+			// Restore announced the pack before the installation record existed, so clients still
+			// describe it as user-owned and editable until they hear it is Store-owned.
+			try
+			{
+				await scope.ServiceProvider.GetRequiredService<IMediator>()
+					.Publish(new IconPackUpdatedNotification(pack, _iconPackCache.GetIconCount(pack.Id)),
+						CancellationToken.None);
+			}
+			catch (Exception ex)
+			{
+				_logger.Warning(ex, "Failed to announce installed icon pack {PackId}", pack.Id);
+			}
 		}
 		finally
 		{

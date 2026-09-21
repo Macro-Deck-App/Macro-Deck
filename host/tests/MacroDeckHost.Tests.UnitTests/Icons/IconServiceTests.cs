@@ -1,6 +1,7 @@
 using System.Text;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Icons;
+using MacroDeckHost.Application.Icons.Ownership;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Icons;
@@ -25,7 +26,8 @@ public class IconServiceTests
 			_harness.Storage,
 			_harness.FallbackStore,
 			_harness.Coalescer,
-			_harness.Mediator);
+			_harness.Mediator,
+			new IconPackOwnerRegistry([]));
 	}
 
 	[TearDown]

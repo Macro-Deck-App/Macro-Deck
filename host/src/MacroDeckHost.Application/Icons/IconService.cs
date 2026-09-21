@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.Icons.Ownership;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -14,18 +15,21 @@ public class IconService : IIconService
 	private readonly IIconImageFallbackStore _fallbackStore;
 	private readonly IconImportCoalescer _coalescer;
 	private readonly IMediator _mediator;
+	private readonly IIconPackOwnerRegistry _ownerRegistry;
 
 	public IconService(IIconPackCache iconPackCache,
 		IIconStorage storage,
 		IIconImageFallbackStore fallbackStore,
 		IconImportCoalescer coalescer,
-		IMediator mediator)
+		IMediator mediator,
+		IIconPackOwnerRegistry ownerRegistry)
 	{
 		_iconPackCache = iconPackCache;
 		_storage = storage;
 		_fallbackStore = fallbackStore;
 		_coalescer = coalescer;
 		_mediator = mediator;
+		_ownerRegistry = ownerRegistry;
 	}
 
 	public async Task<Result<IconEntity, IconError>> Rename(Guid iconId, string name)
@@ -36,7 +40,7 @@ public class IconService : IIconService
 			return Result.Fail<IconEntity, IconError>(IconError.NotFound);
 		}
 
-		if (_iconPackCache.GetPackById(icon.PackId) is { IsReadOnly: true })
+		if (IsPackReadOnly(icon.PackId))
 		{
 			return Result.Fail<IconEntity, IconError>(IconError.PackReadOnly,
 				"Icons in read-only packs cannot be renamed");
@@ -61,7 +65,7 @@ public class IconService : IIconService
 			return Result.Fail(IconError.NotFound);
 		}
 
-		if (_iconPackCache.GetPackById(icon.PackId) is { IsReadOnly: true })
+		if (IsPackReadOnly(icon.PackId))
 		{
 			return Result.Fail(IconError.PackReadOnly, "Icons in read-only packs cannot be deleted");
 		}
@@ -83,7 +87,7 @@ public class IconService : IIconService
 
 		foreach (var packId in icons.Select(i => i.PackId).Distinct())
 		{
-			if (_iconPackCache.GetPackById(packId) is { IsReadOnly: true })
+			if (IsPackReadOnly(packId))
 			{
 				return Result.Fail<int, IconError>(IconError.PackReadOnly,
 					"Icons in read-only packs cannot be deleted");
@@ -150,6 +154,9 @@ public class IconService : IIconService
 		var etag = $"\"{IconEtagIdentity(icon)}-{variant}\"";
 		return Result.Ok<IconImageResult, IconError>(new IconImageResult(stream, etag));
 	}
+
+	private bool IsPackReadOnly(Guid packId)
+		=> _iconPackCache.GetPackById(packId) is { } pack && _ownerRegistry.IsReadOnly(pack);
 
 	private static string IconEtagIdentity(IconEntity icon)
 		=> icon.MasterContentHash ?? icon.SourceContentHash ?? icon.Id.ToString("N");

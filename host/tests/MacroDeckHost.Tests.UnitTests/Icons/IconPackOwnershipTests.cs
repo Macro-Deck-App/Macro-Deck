@@ -349,8 +349,10 @@ internal sealed class IconPackOwnershipTests
 		{
 			Assert.That(storeDto.OwnerKind, Is.EqualTo("Store"));
 			Assert.That(storeDto.CanDelete, Is.True);
+			Assert.That(storeDto.IsReadOnly, Is.True);
 			Assert.That(userDto.OwnerKind, Is.EqualTo("User"));
 			Assert.That(userDto.CanDelete, Is.True);
+			Assert.That(userDto.IsReadOnly, Is.False);
 			Assert.That(defaultDto.OwnerKind, Is.EqualTo("User"));
 			Assert.That(defaultDto.CanDelete, Is.True);
 			Assert.That(forbiddenDto.OwnerKind, Is.EqualTo("Plugin"));
@@ -378,6 +380,113 @@ internal sealed class IconPackOwnershipTests
 			Assert.That(result.Success, Is.True);
 			Assert.That(_harness.Cache.GetPackById(pack.Id), Is.Null);
 		});
+	}
+
+	[Test]
+	public async Task Icons_in_a_Store_installed_pack_cannot_be_renamed_or_deleted_while_user_pack_icons_can()
+	{
+		var storePack = await InstallStorePack();
+		var storeIcon = await _harness.AddReadyIcon(storePack.Id, "home", [1, 2, 3]);
+		var storeIcon2 = await _harness.AddReadyIcon(storePack.Id, "play", [4, 5, 6]);
+		var userPack = await _harness.CreatePack("User Pack");
+		var userIcon = await _harness.AddReadyIcon(userPack.Id, "mine", [7, 8, 9]);
+		var service = CreateIconService(_storeOwner);
+
+		var rename = await service.Rename(storeIcon.Id, "renamed");
+		var delete = await service.Delete(storeIcon.Id);
+		var deleteMany = await service.DeleteMany([storeIcon2.Id]);
+		var userRename = await service.Rename(userIcon.Id, "still editable");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(rename.Error, Is.EqualTo(IconError.PackReadOnly));
+			Assert.That(delete.Error, Is.EqualTo(IconError.PackReadOnly));
+			Assert.That(deleteMany.Error, Is.EqualTo(IconError.PackReadOnly));
+			Assert.That(_harness.Cache.GetIconsByPackId(storePack.Id).Select(icon => icon.Name),
+				Is.EquivalentTo(new[] { "home", "play" }));
+			Assert.That(userRename.Success, Is.True);
+			Assert.That(_harness.Cache.GetIconById(userIcon.Id)!.Name, Is.EqualTo("still editable"));
+		});
+	}
+
+	[Test]
+	public async Task A_Store_installed_pack_refuses_metadata_edits_but_can_still_be_removed()
+	{
+		var pack = await InstallStorePack();
+		var service = CreateService(_storeOwner);
+
+		var update = await service.Update(pack.Id, "Renamed", "changed", "someone", "9.9.9");
+		var renamedTo = _harness.Cache.GetPackById(pack.Id)!.Name;
+		var delete = await service.Delete(pack.Id);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(update.Error, Is.EqualTo(IconPackError.ReadOnly));
+			Assert.That(renamedTo, Is.EqualTo("Material Icons"));
+			Assert.That(delete.Success, Is.True);
+			Assert.That(_installations.Find(StoreExtensionKind.IconPack, IconPackId), Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task Importing_icons_into_a_Store_installed_pack_is_refused()
+	{
+		var pack = await InstallStorePack();
+		Directory.CreateDirectory(_harness.Paths.BaseDirectory);
+		var sourceFile = Path.Combine(_harness.Paths.BaseDirectory, "dropped.png");
+		await File.WriteAllBytesAsync(sourceFile, [1, 2, 3]);
+		var service = _harness.CreateImportService(ownerRegistry: new IconPackOwnerRegistry([_storeOwner]));
+
+		var import = await service.Import(pack.Id, "drop", Files("logo.png"), CancellationToken.None);
+		var single = await service.ImportSingle(pack.Id,
+			new IconImportFile("single.png", new MemoryStream([4, 5, 6])),
+			CancellationToken.None);
+		var fromPath = await service.ImportFromPath(pack.Id, [sourceFile], CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(import.Error, Is.EqualTo(IconError.PackReadOnly));
+			Assert.That(single.Error, Is.EqualTo(IconError.PackReadOnly));
+			Assert.That(fromPath.Error, Is.EqualTo(IconError.PackReadOnly));
+			Assert.That(_harness.Cache.GetIconsByPackId(pack.Id), Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_pack_stamped_ExtensionStore_with_no_matching_record_stays_editable()
+	{
+		var pack = await _harness.CreatePack("Orphan Stamp");
+		pack.SourceType = IconPackSourceType.ExtensionStore;
+		pack.SourceId = "com.acme.orphan-stamp";
+		await _harness.Cache.AddOrUpdatePack(pack);
+		var icon = await _harness.AddReadyIcon(pack.Id, "home", [1, 2, 3]);
+
+		var update = await CreateService(_storeOwner).Update(pack.Id, "Renamed", null, null, null);
+		var rename = await CreateIconService(_storeOwner).Rename(icon.Id, "renamed");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(update.Success, Is.True);
+			Assert.That(rename.Success, Is.True);
+		});
+	}
+
+	private IconService CreateIconService(params IIconPackOwner[] owners)
+		=> new(_harness.Cache,
+			_harness.Storage,
+			_harness.FallbackStore,
+			_harness.Coalescer,
+			_harness.Mediator,
+			new IconPackOwnerRegistry(owners));
+
+	private static async IAsyncEnumerable<IconImportFile> Files(params string[] names)
+	{
+		foreach (var name in names)
+		{
+			yield return new IconImportFile(name, new MemoryStream([1, 2, 3]));
+		}
+
+		await Task.CompletedTask;
 	}
 
 	private sealed class TestIconPackOwner : IIconPackOwner

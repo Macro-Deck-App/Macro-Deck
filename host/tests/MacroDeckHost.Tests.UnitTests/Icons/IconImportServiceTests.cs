@@ -1,6 +1,7 @@
 using System.IO.Compression;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Icons;
+using MacroDeckHost.Application.Icons.Ownership;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Icons;
@@ -745,7 +746,8 @@ public class IconImportServiceTests
 			_harness.Storage,
 			_harness.FallbackStore,
 			_harness.Coalescer,
-			_harness.Mediator);
+			_harness.Mediator,
+			new IconPackOwnerRegistry([]));
 		await _service.Import(pack.Id, "drop", Files(("logo.png", [5, 5])), CancellationToken.None);
 		var pending = _harness.Cache.GetIconsByPackId(pack.Id).Single();
 		await iconService.Delete(pending.Id);

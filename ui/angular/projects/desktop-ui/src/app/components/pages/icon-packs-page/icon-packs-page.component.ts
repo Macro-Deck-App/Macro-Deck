@@ -115,7 +115,7 @@ export class IconPacksPageComponent {
       { id: 'import', label: t(AppStrings.IconPacks.ImportIconsAction), icon: 'icon-download', disabled: readOnly },
       { id: 'export', label: t(AppStrings.IconPacks.ExportPackAction), icon: 'icon-upload', dividerAfter: true },
       { id: 'delete', label: t(AppStrings.IconPacks.DeletePackAction), icon: 'icon-trash', danger: true, dividerAfter: false,
-        disabled: readOnly || (pack?.isDefault ?? false) || !(pack?.canDelete ?? true) },
+        disabled: (pack?.isDefault ?? false) || !(pack?.canDelete ?? true) },
     ];
   });
 
@@ -287,7 +287,7 @@ export class IconPacksPageComponent {
   }
 
   protected requestDeletePack(pack: IconPackModel): void {
-    if (!pack.isReadOnly && !pack.isDefault && pack.canDelete) {
+    if (!pack.isDefault && pack.canDelete) {
       this.packPendingDeletion.set(pack);
     }
   }

@@ -4,6 +4,7 @@ using System.Text.Json;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Icons;
+using MacroDeckHost.Application.Icons.Ownership;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Persistence.Icons;
@@ -27,6 +28,7 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 	private readonly IIconPackStore _packStore;
 	private readonly IMacroDeckPaths _paths;
 	private readonly IMediator _mediator;
+	private readonly IIconPackOwnerRegistry _ownerRegistry;
 	private readonly ILogger _logger;
 
 	public IconPackRestoreService(
@@ -35,6 +37,7 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 		IIconPackStore packStore,
 		IMacroDeckPaths paths,
 		IMediator mediator,
+		IIconPackOwnerRegistry ownerRegistry,
 		ILogger logger)
 	{
 		_iconPackCache = iconPackCache;
@@ -42,6 +45,7 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 		_packStore = packStore;
 		_paths = paths;
 		_mediator = mediator;
+		_ownerRegistry = ownerRegistry;
 		_logger = logger;
 	}
 
@@ -115,7 +119,7 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 			return Result.Fail<IReadOnlyList<IconEntity>, IconError>(IconError.PackNotFound);
 		}
 
-		if (pack.IsReadOnly)
+		if (_ownerRegistry.IsReadOnly(pack))
 		{
 			return Result.Fail<IReadOnlyList<IconEntity>, IconError>(IconError.PackReadOnly);
 		}
