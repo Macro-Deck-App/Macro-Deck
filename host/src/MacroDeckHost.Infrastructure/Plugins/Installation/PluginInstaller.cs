@@ -55,6 +55,7 @@ public sealed class PluginInstaller : IPluginInstaller
 	private readonly TimeProvider _timeProvider;
 	private readonly ILogger _logger;
 	private readonly DurableJsonFile _currentVersionFiles;
+	private readonly IPluginAdbConsentNotifier? _adbConsent;
 
 	public PluginInstaller(IMacroDeckPaths paths,
 		IPluginArtifactReader artifactReader,
@@ -71,8 +72,10 @@ public sealed class PluginInstaller : IPluginInstaller
 		IServiceScopeFactory scopeFactory,
 		PluginInstallerOptions options,
 		TimeProvider timeProvider,
-		ILogger logger)
+		ILogger logger,
+		IPluginAdbConsentNotifier? adbConsent = null)
 	{
+		_adbConsent = adbConsent;
 		_paths = paths;
 		_artifactReader = artifactReader;
 		_acquirer = acquirer;
@@ -474,6 +477,8 @@ public sealed class PluginInstaller : IPluginInstaller
 
 			await _integrationRegistrar.ForgetAsync(pluginId, cancellationToken);
 
+			_adbConsent?.Dismiss(pluginId);
+
 			PluginInstallerLog.Uninstalled(_logger, pluginId, request.KeepData);
 			return PluginInstallResult.Ok(pluginId,
 				installed?.ActiveVersion?.Version ?? string.Empty,
@@ -831,6 +836,7 @@ public sealed class PluginInstaller : IPluginInstaller
 		// Health-gating a plugin this machine cannot launch would fail every time and roll back a
 		// perfectly good install of a cross-platform artifact.
 		var canStart = request.StartAfterActivation && HasEntrypointForThisHost(manifest);
+		var previouslyDeclaredAdb = ActiveVersionDeclaresAdb(manifest.Id);
 		var result = await ActivateAndValidate(manifest.Id,
 			manifest.Version,
 			warnings,
@@ -853,6 +859,8 @@ public sealed class PluginInstaller : IPluginInstaller
 			{
 				ForgetTestInstallation(manifest.Id);
 			}
+
+			await AskForAdbConsentAsync(manifest, previouslyDeclaredAdb, cancellationToken);
 
 			// A plugin that was activated but deliberately not started never welcomes a session, and the
 			// registrar only registers such plugins at startup. Without this an install held back by a
@@ -1105,6 +1113,38 @@ public sealed class PluginInstaller : IPluginInstaller
 		return $"The plugin needs Macro Deck '{hostRange}'; this host is {HostVersion.Current}.";
 	}
 
+	private static bool DeclaresAdb(PluginManifest manifest)
+		=> manifest.Permissions?.Contains(PluginPermissions.HostAdb, StringComparer.Ordinal) == true;
+
+	private async Task AskForAdbConsentAsync(PluginManifest manifest,
+		bool previouslyDeclaredAdb,
+		CancellationToken cancellationToken)
+	{
+		if (_adbConsent is null)
+		{
+			return;
+		}
+
+		try
+		{
+			await _adbConsent.NotifyIfNeededAsync(manifest.Id,
+				manifest.Name ?? manifest.Id,
+				DeclaresAdb(manifest),
+				previouslyDeclaredAdb,
+				cancellationToken);
+		}
+		catch (Exception exception) when (exception is not (OperationCanceledException or OutOfMemoryException))
+		{
+			_logger.Warning(exception, "Could not ask whether {PluginId} may use ADB", manifest.Id);
+		}
+	}
+
+	private bool ActiveVersionDeclaresAdb(string pluginId)
+		=> _catalog.TryResolveActive(pluginId, out var active) &&
+			active is not null &&
+			_manifestReader.Read(active.ManifestPath, pluginId, active.Version).Manifest is { } manifest &&
+			DeclaresAdb(manifest);
+
 	private List<PluginInstallWarning> CollectWarnings(PluginManifest manifest,
 		PluginTrustResult? trust)
 	{
@@ -1127,6 +1167,12 @@ public sealed class PluginInstaller : IPluginInstaller
 		{
 			warnings.Add(PluginInstallWarning.Advisory(PluginDependencyWarningCodes.PermissionsRequested,
 				$"The plugin declares the permissions: {string.Join(", ", permissions)}."));
+		}
+
+		if (DeclaresAdb(manifest))
+		{
+			warnings.Add(PluginInstallWarning.Advisory(PluginDependencyWarningCodes.UsesAdb,
+				"The plugin uses ADB to work with Android devices."));
 		}
 
 		if (!HasEntrypointForThisHost(manifest))

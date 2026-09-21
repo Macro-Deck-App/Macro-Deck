@@ -217,12 +217,14 @@ Recommended. Array of unique strings. Known vocabulary, one per host callback su
 
 | Group | Permissions |
 | --- | --- |
-| Host | `host:variables`, `host:user-variables`, `host:config`, `host:deck`, `host:scripts`, `host:widgets`, `host:notifications`, `host:action-interactions`, `host:devices`, `host:variable-values`, `host:layouts`, `host:folder-views`, `host:widget-types`, `host:event-bindings`, `host:screensavers` |
+| Host | `host:variables`, `host:user-variables`, `host:config`, `host:deck`, `host:scripts`, `host:widgets`, `host:notifications`, `host:action-interactions`, `host:devices`, `host:variable-values`, `host:layouts`, `host:folder-views`, `host:widget-types`, `host:event-bindings`, `host:screensavers`, `host:adb` |
 | Other | `events:publish`, `assets:upload`, `net:outbound`, `fs:user-files`, `process:spawn`, `device:usb` |
 
 - Unknown permission: warning (`unknown-permission`), still installs. Not an enum on purpose.
 - Duplicate: rejected.
-- **Declared, validated, persisted and exposed - enforced nowhere.** See
+- **Declared, validated, persisted and exposed.** The host enforces only `host:adb`: an installed plugin
+  that does not declare it cannot use the `adb` host API, see [Android devices](/features/android-devices/).
+  Every other permission is enforced nowhere. See
   [the security model](/policies/security/#permissions-declared-not-enforced).
 
 ## `languages`

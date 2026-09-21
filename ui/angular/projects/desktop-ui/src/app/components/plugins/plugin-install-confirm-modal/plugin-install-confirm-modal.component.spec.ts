@@ -318,6 +318,15 @@ describe('PluginInstallConfirmModalComponent', () => {
     expect(text()).not.toContain('This artifact is not signed.');
   });
 
+  it('tells the user in their language what a plugin that uses ADB can do on their Android devices', async () => {
+    await setup(inspection({
+      warnings: [warning({ code: 'uses_adb', severity: 'advisory', message: 'The plugin uses ADB to work with Android devices.' })],
+    }));
+
+    expect(text()).toContain('It can run commands on them, copy files and install apps.');
+    expect(installButton().disabled).toBeFalse();
+  });
+
   it('names the plugin from its manifest rather than only by its id', async () => {
     await setup(inspection());
 

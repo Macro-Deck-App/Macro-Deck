@@ -26,8 +26,8 @@ internal sealed class HostStateCache
 {
 	private readonly ConcurrentDictionary<string, JsonElement?> _byApi = new(StringComparer.Ordinal);
 	private readonly PluginConnectionState _connectionState;
-	private readonly Lock _deckGate = new();
-	private long _lastDeckRevision;
+	private readonly Lock _revisionGate = new();
+	private readonly Dictionary<string, long> _lastRevisions = new(StringComparer.Ordinal);
 
 	public HostStateCache(PluginConnectionState connectionState)
 	{
@@ -48,6 +48,8 @@ internal sealed class HostStateCache
 
 	public event Action? DeckChanged;
 
+	public event Action? AdbChanged;
+
 	public event Action? EventBindingsChanged;
 
 	/// <summary>Applies one <c>host.state</c> push, replacing whatever was cached for its API.</summary>
@@ -61,7 +63,21 @@ internal sealed class HostStateCache
 
 		if (string.Equals(api, Protocol.Callbacks.HostApis.Deck, StringComparison.Ordinal))
 		{
-			ApplyDeck(payload.Data);
+			if (ApplyRevisioned(api, payload.Data))
+			{
+				DeckChanged?.Invoke();
+			}
+
+			return;
+		}
+
+		if (string.Equals(api, Protocol.Callbacks.HostApis.Adb, StringComparison.Ordinal))
+		{
+			if (ApplyRevisioned(api, payload.Data))
+			{
+				AdbChanged?.Invoke();
+			}
+
 			return;
 		}
 
@@ -145,36 +161,38 @@ internal sealed class HostStateCache
 		}
 	}
 
-	private void ApplyDeck(JsonElement? data)
+	private bool ApplyRevisioned(string api, JsonElement? data)
 	{
 		long revision;
 		try
 		{
-			revision = data?.Deserialize<DeckStateDto>(PluginProtocolJson.Options)?.Revision ?? 0;
+			revision = data?.Deserialize<RevisionOnly>(PluginProtocolJson.Options)?.Revision ?? 0;
 		}
 		catch (JsonException)
 		{
 			revision = 0;
 		}
 
-		lock (_deckGate)
+		lock (_revisionGate)
 		{
 			// Revision 0 comes from a host that predates revisions, which has no push order to protect.
 			if (revision > 0)
 			{
-				if (revision <= _lastDeckRevision)
+				if (revision <= _lastRevisions.GetValueOrDefault(api))
 				{
-					return;
+					return false;
 				}
 
-				_lastDeckRevision = revision;
+				_lastRevisions[api] = revision;
 			}
 
-			_byApi[Protocol.Callbacks.HostApis.Deck] = data;
+			_byApi[api] = data;
 		}
 
-		DeckChanged?.Invoke();
+		return true;
 	}
+
+	private sealed record RevisionOnly(long Revision);
 
 	// A new session may face a restarted host, whose revisions count from 1 again.
 	private void OnConnected(object? sender, PluginConnectedEventArgs e)
@@ -184,9 +202,9 @@ internal sealed class HostStateCache
 			return;
 		}
 
-		lock (_deckGate)
+		lock (_revisionGate)
 		{
-			_lastDeckRevision = 0;
+			_lastRevisions.Clear();
 		}
 	}
 }

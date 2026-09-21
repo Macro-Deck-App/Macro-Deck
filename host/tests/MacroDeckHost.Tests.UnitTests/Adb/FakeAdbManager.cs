@@ -34,6 +34,10 @@ internal sealed class FakeAdbManager : IAdbManager
 
 	public event EventHandler<AdbDeviceChange>? DeviceChanged;
 
+	public event EventHandler? SnapshotChanged;
+
+	public void RaiseSnapshotChanged() => SnapshotChanged?.Invoke(this, EventArgs.Empty);
+
 	public AdbDevice? ResolveDevice(string? serialOrDefault)
 	{
 		var serial = string.IsNullOrWhiteSpace(serialOrDefault) ? Status.DefaultDeviceSerial : serialOrDefault;

@@ -35,6 +35,7 @@ public partial class AppPreferenceService : IAppPreferenceService
 	public const string AdbUsbConnectionsEnabledKey = "adb.usbConnectionsEnabled";
 	public const string AdbDefaultDeviceSerialKey = "adb.defaultDeviceSerial";
 	public const string AdbStopServerOnExitKey = "adb.stopServerOnExit";
+	public const string AdbAllowPluginsKey = "adb.allowPlugins";
 
 	public const string DeveloperModeKey = "developer.mode";
 
@@ -104,6 +105,8 @@ public partial class AppPreferenceService : IAppPreferenceService
 	public const string DefaultAccentColor = "#2196F3";
 
 	public const bool DefaultAdbUsbConnectionsEnabled = true;
+
+	public const bool DefaultAdbAllowPlugins = true;
 
 	public const string BackupScheduleOff = "off";
 	public const string BackupScheduleDaily = "daily";
@@ -273,31 +276,36 @@ public partial class AppPreferenceService : IAppPreferenceService
 		var usbConnectionsEnabled = (await _repository.GetByKey(AdbUsbConnectionsEnabledKey))?.Value;
 		var defaultDeviceSerial = (await _repository.GetByKey(AdbDefaultDeviceSerialKey))?.Value;
 		var stopServerOnExit = (await _repository.GetByKey(AdbStopServerOnExitKey))?.Value;
+		var allowPlugins = (await _repository.GetByKey(AdbAllowPluginsKey))?.Value;
 
 		return new AdbSettings(NormalizeAdbFlag(enabled),
 			NormalizeAdbExecutablePath(executablePath),
 			NormalizeAdbFlag(usbConnectionsEnabled, DefaultAdbUsbConnectionsEnabled),
 			NormalizeAdbDeviceSerial(defaultDeviceSerial),
-			NormalizeAdbFlag(stopServerOnExit));
+			NormalizeAdbFlag(stopServerOnExit),
+			NormalizeAdbFlag(allowPlugins, DefaultAdbAllowPlugins));
 	}
 
 	public async Task<AdbSettings> SetAdb(bool? enabled,
 		string? executablePath,
 		bool? usbConnectionsEnabled,
 		string? defaultDeviceSerial,
-		bool? stopServerOnExit)
+		bool? stopServerOnExit,
+		bool allowPlugins)
 	{
 		var resolved = new AdbSettings(NormalizeAdbFlag(enabled?.ToString()),
 			NormalizeAdbExecutablePath(executablePath),
 			NormalizeAdbFlag(usbConnectionsEnabled?.ToString(), DefaultAdbUsbConnectionsEnabled),
 			NormalizeAdbDeviceSerial(defaultDeviceSerial),
-			NormalizeAdbFlag(stopServerOnExit?.ToString()));
+			NormalizeAdbFlag(stopServerOnExit?.ToString()),
+			allowPlugins);
 
 		await _repository.SetValue(AdbEnabledKey, resolved.Enabled.ToString());
 		await _repository.SetValue(AdbExecutablePathKey, resolved.ExecutablePath ?? string.Empty);
 		await _repository.SetValue(AdbUsbConnectionsEnabledKey, resolved.UsbConnectionsEnabled.ToString());
 		await _repository.SetValue(AdbDefaultDeviceSerialKey, resolved.DefaultDeviceSerial ?? string.Empty);
 		await _repository.SetValue(AdbStopServerOnExitKey, resolved.StopServerOnExit.ToString());
+		await _repository.SetValue(AdbAllowPluginsKey, resolved.AllowPlugins.ToString());
 
 		return resolved;
 	}

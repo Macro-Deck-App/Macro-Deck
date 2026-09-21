@@ -88,3 +88,5 @@ export const PLUGIN_INSTALL_ERROR_ALREADY_INSTALLED = 'already_installed';
 
 export const PLUGIN_WARNING_ARTIFACT_UNSIGNED = 'unsigned';
 export const PLUGIN_WARNING_SIGNATURE_UNVERIFIED = 'signature_unverified';
+export const PLUGIN_WARNING_USES_ADB = 'uses_adb';
+export const PLUGIN_PERMISSION_HOST_ADB = 'host:adb';

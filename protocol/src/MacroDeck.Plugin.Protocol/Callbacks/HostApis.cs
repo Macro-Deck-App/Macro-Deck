@@ -49,10 +49,16 @@ public static class HostApis
 	/// </summary>
 	public const string ScreenSavers = "screensavers";
 
+	/// <summary>
+	/// The <c>adb</c> host api: operations on the Android devices the host's adb server sees, plus a
+	/// <c>host.state</c> push of this plugin's access and the device list. Gated per plugin.
+	/// </summary>
+	public const string Adb = "adb";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		Variables, UserVariables, Config, Deck, Scripts, Widgets, Notifications, ActionInteractions, Ui,
-		Devices, VariableValues, Layouts, FolderViews, WidgetTypes, EventBindings, ScreenSavers,
+		Devices, VariableValues, Layouts, FolderViews, WidgetTypes, EventBindings, ScreenSavers, Adb,
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);

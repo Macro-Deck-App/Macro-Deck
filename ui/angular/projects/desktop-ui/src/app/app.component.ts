@@ -4,6 +4,7 @@ import { RouterOutlet } from '@angular/router';
 import { AppStrings } from '@macro-deck/runtime';
 import { ApiService, AuthService, KeyRingService, LoginFormComponent, LocalizationService, ThemeService, ToastHostComponent, VariableService, UiModalHostComponent } from '@shared';
 import { PluginPairingDialogComponent } from './components/overlay/plugin-pairing-dialog/plugin-pairing-dialog.component';
+import { PluginAdbConsentDialogComponent } from './components/overlay/plugin-adb-consent-dialog/plugin-adb-consent-dialog.component';
 import { HostSessionService } from './services/host-session.service';
 import { SplashComponent } from './components/splash';
 import { FirstRunWizardComponent } from './components/first-run-wizard/first-run-wizard.component';
@@ -22,7 +23,7 @@ const BOOTSTRAP_RETRY_MS = 1500;
   standalone: true,
   imports: [
     RouterOutlet, SplashComponent, FirstRunWizardComponent,
-    KeyRingUnlockGateComponent, LoginFormComponent, ToastHostComponent, PluginPairingDialogComponent,
+    KeyRingUnlockGateComponent, LoginFormComponent, ToastHostComponent, PluginPairingDialogComponent, PluginAdbConsentDialogComponent,
     UiModalHostComponent, OnboardingWizardComponent, MigrationOfferModalComponent, MigrationWizardComponent,
   ],
   template: `
@@ -55,6 +56,7 @@ const BOOTSTRAP_RETRY_MS = 1500;
       }
     }
     <shared-plugin-pairing-dialog></shared-plugin-pairing-dialog>
+    <shared-plugin-adb-consent-dialog></shared-plugin-adb-consent-dialog>
     <!-- Mounted at the shell, not on the deck page: an action can be run from the editor or a script
          page too, and its modal has to appear wherever the user set it going. -->
     <shared-ui-modal-host></shared-ui-modal-host>

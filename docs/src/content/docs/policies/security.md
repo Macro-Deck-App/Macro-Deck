@@ -13,7 +13,7 @@ or shipped but not implemented, is stated as such.
 | --- | --- | --- |
 | Host | Everything: it owns state, credentials, secrets and install decisions | - |
 | Desktop app, over the private loopback port | **Admin**, with no token | The same trust goes to any local process - see [loopback trust](#loopback-trust-is-transport-trust-not-authentication) |
-| Plugin process | Scope `plugin`: the plugin protocol surface, and nothing else | Not sandboxed: it runs with the user's full privileges. Declared permissions are [not enforced](#permissions-declared-not-enforced) |
+| Plugin process | Scope `plugin`: the plugin protocol surface, and nothing else | Not sandboxed: it runs with the user's full privileges. Declared permissions are [not enforced](#permissions-declared-not-enforced), except `host:adb` |
 | Deck clients (web client, companion) | Scope `client`: the viewer-safe endpoints | Plugin endpoints refuse them |
 | LAN callers and browsers | The public listener's API and web client | Every plugin endpoint refuses them |
 | Creator Portal and Store | Signing Store plugins after checking the publishing workflow's provenance; publishing the signed registry | Revocation: no feed is published yet |
@@ -293,24 +293,39 @@ digest, and every declared file's hash and size. See [`sign`](/cli/signing/#sign
 | `publisher` is a claim | It becomes an attribution only behind a `Trusted` verdict. Verified publisher identity comes from the Creator Portal having checked the workflow's provenance before signing, never from the manifest |
 | Only plugins carry a publisher signature | Store icon packs and profile templates are authenticated by the signed registry: the pinned root signs the registry's certificate, that certificate signs the registry manifest, and the manifest carries the digest and size of every file, including the release manifest that declares each artifact's digest. That proves the bytes are the ones the Macro Deck registry published, nothing more: they are never presented as publisher-verified |
 
-## Permissions: declared, not enforced
+<a id="permissions-declared-not-enforced"></a>
+
+## Permissions: declared, and enforced only for ADB
 
 ```json
-{ "permissions": ["host:variables"] }
+{ "permissions": ["host:variables", "host:adb"] }
 ```
 
 A manifest may declare permissions from a fixed vocabulary (`host:variables` through `device:usb`),
 mirroring the host callback surface one for one. They are parsed, shape-validated, persisted and surfaced
 through the installed-plugins API so a consent surface has something real to render.
 
-**Nothing in the host gates a host callback on whether the calling plugin declared the permission that
-covers it.** ADR 0029 calls this a sequencing decision, not an oversight: every plugin today declares no
-permissions, and self-registering development plugins have no manifest, so "a default-deny posture would
-break every plugin already running, and a default-allow posture would not be a security boundary in any
-sense worth calling one." Enforcement at the host callback router is a named follow-up that needs its own
-ADR.
+**The host gates exactly one host API on a declared permission: `adb`, on `host:adb`.** Every other host
+callback is served whether or not the calling plugin declared the permission that covers it. Plugins that
+predate the vocabulary declare nothing, so a default-deny posture for the rest would break every plugin
+already running, and a default-allow posture would not be a boundary worth the name.
 
-Treat declared permissions as documentation of intent, not as a constraint on what a plugin can reach.
+`host:adb` is enforced because it is new: no existing plugin relied on it. A plugin reaches Macro Deck's
+ADB connection only when ADB is enabled, the user has left **Allow plugins to use ADB** on, and the active
+version of the installed plugin declares `host:adb`. Installing a plugin that declares it while ADB or
+that setting is off asks the user whether to turn both on. A self-registered session, admitted through a
+developer token or interactive pairing, is exempt from the declaration because the user admitted it by
+hand. See [Android devices](/features/android-devices/) and
+[ADR 0092](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0092-plugins-reach-adb-through-a-permission-gated-host-api.md).
+
+**This is user control, not isolation.** A plugin process is not sandboxed and could run its own `adb`
+without declaring anything. `host:adb` gives the user a visible, switchable decision about plugins using
+Macro Deck's connection; it does not stop a hostile plugin from reaching a device. Local paths an `adb`
+call names are read and written with Macro Deck's identity, which is the same user the plugin already runs
+as.
+
+Treat the other declared permissions as documentation of intent, not as a constraint on what a plugin can
+reach.
 
 ## Logging and redaction
 
@@ -333,7 +348,7 @@ Read this before deciding what a plugin should be trusted with.
 | Limitation | Detail |
 | --- | --- |
 | A plugin runs with the user's full privileges | A managed plugin is an ordinary child process: no sandbox, container, separate account or privilege reduction. It can do anything the user can - read and write their files, open network connections, start processes. Installing one is equivalent to running any other downloaded program |
-| Permissions are not a boundary | A plugin that declares nothing can still reach every host API - see [above](#permissions-declared-not-enforced) |
+| Permissions are not a boundary | A plugin that declares nothing can still reach every host API except `adb`, and even `host:adb` gates only Macro Deck's own ADB connection, not a plugin's own - see [above](#permissions-declared-not-enforced) |
 | An unsigned plugin is still admitted on your say-so | See [signing](#signing-the-creator-portal-signs-and-the-host-verifies-before-install-and-before-every-load). For an unsigned install the declared-digest check is corruption detection, not a boundary: whoever can rewrite the binary can rewrite the unsigned manifest. Trust rests on where you got the file |
 | Revocation is enforced but never fed | A compromised signing key has to be contained by other means until a feed ships |
 | Any local process can reach the loopback listener | And is trusted as admin on the private port. The model defends against LAN callers and browsers, not a hostile process running as the same user |

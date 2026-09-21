@@ -1,0 +1,52 @@
+@if (offeringDownload()) {
+  <shared-modal
+    [heading]="'macrodeck.app:Dialogs.PluginAdbConsent.AdbMissingHeading' | translate"
+    size="medium"
+    [closeOnOverlay]="false"
+    [showClose]="!downloading()"
+    [showFooter]="true"
+    (close)="skipDownload()">
+    <div class="plugin-adb-consent-body">
+      <p>{{ 'macrodeck.app:Dialogs.PluginAdbConsent.AdbMissingMessage' | translate }}</p>
+      <p class="plugin-adb-consent-hint">{{ 'macrodeck.app:Settings.Adb.DownloadHint' | translate }}</p>
+      @if (downloadError(); as error) {
+        <shared-error-banner [message]="error" (dismiss)="dismissDownloadError()" />
+      }
+    </div>
+
+    <div modal-footer>
+      <shared-button variant="secondary" [disabled]="downloading()" (click)="skipDownload()">
+        {{ 'macrodeck.app:Settings.Update.NotNowAction' | translate }}
+      </shared-button>
+      <shared-button variant="primary" [loading]="downloading()" (click)="download()">
+        {{ 'macrodeck.app:Settings.Adb.DownloadButton' | translate }}
+      </shared-button>
+    </div>
+  </shared-modal>
+} @else if (pending(); as request) {
+  <shared-modal
+    [heading]="request.title"
+    size="medium"
+    [closeOnOverlay]="false"
+    [showFooter]="true"
+    (close)="notNow()">
+    <div class="plugin-adb-consent">
+      <span class="icon icon-alert-triangle icon-sm"></span>
+      <div class="plugin-adb-consent-body">
+        @if (request.message) {
+          <p>{{ request.message }}</p>
+        }
+        <p>{{ 'macrodeck.app:Plugins.UsesAdbNote' | translate }}</p>
+      </div>
+    </div>
+
+    <div modal-footer>
+      <shared-button variant="secondary" [disabled]="busy()" (click)="notNow()">
+        {{ 'macrodeck.app:Settings.Update.NotNowAction' | translate }}
+      </shared-button>
+      <shared-button variant="primary" [loading]="busy()" (click)="allow()">
+        {{ 'macrodeck.app:Shell.Notifications.Action.EnablePluginAdb' | translate }}
+      </shared-button>
+    </div>
+  </shared-modal>
+}

@@ -46,6 +46,7 @@ public class RestartAdbServerRequestMessageHandler
 			UsbConnectionsEnabled = view.UsbConnectionsEnabled,
 			DefaultDeviceSerial = view.DefaultDeviceSerial,
 			StopServerOnExit = view.StopServerOnExit,
+			AllowPlugins = view.AllowPlugins,
 			ActivePublicPort = view.ActivePublicPort,
 			DeviceSidePortCandidates = AdbUsbTunnelPorts.DeviceSideCandidates,
 			Devices = view.Devices,

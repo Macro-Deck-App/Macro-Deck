@@ -34,6 +34,7 @@ A plugin implements the same SDK contracts as an in-process integration, but the
 | Layout providers | Yes | Same | Registered through the `layouts` host API; see [Provider catalogues across a disconnect](#provider-catalogues-across-a-disconnect). |
 | Migrations | Yes | Same | `describe`, `migrate-action` and `migrate-configuration` work; the declared list is snapshot-backed - see [Migrations](#migrations). |
 | Integration issues | Yes | Same | Listing and resolving are live calls. |
+| Android devices (`IAndroidDeviceManager`) | No | Differs | Plugin-only: a built-in integration reaches ADB through the host's own services, and gets no `IAndroidDeviceManager`. A plugin needs `host:adb` and the user's consent - see [Android devices](/features/android-devices/). |
 | Host callbacks (`IIntegrationContext`) | Yes | Same | Host APIs cross the protocol or use pushed snapshots instead of object references - see [Host callbacks](#host-callbacks). |
 | Synchronous catalogs | Yes | Differs | Serve the last `describe` snapshot until `state.update` refreshes it. |
 | Multiple integrations per process | Yes | No | One plugin session is one integration; ship separate plugins for separate integration identities. |

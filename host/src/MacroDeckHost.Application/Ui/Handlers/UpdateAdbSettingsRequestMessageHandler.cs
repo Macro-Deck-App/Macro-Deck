@@ -1,8 +1,10 @@
 using MacroDeckHost.Application.Adb;
 using MacroDeckHost.Application.Configuration;
+using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Settings;
+using Mediator;
 
 namespace MacroDeckHost.Application.Ui.Handlers;
 
@@ -12,14 +14,17 @@ public class UpdateAdbSettingsRequestMessageHandler
 	private readonly IAppPreferenceService _preferences;
 	private readonly IAdbManager _adbManager;
 	private readonly IHostListenerState _listenerState;
+	private readonly IMediator _mediator;
 
 	public UpdateAdbSettingsRequestMessageHandler(IAppPreferenceService preferences,
 		IAdbManager adbManager,
-		IHostListenerState listenerState)
+		IHostListenerState listenerState,
+		IMediator mediator)
 	{
 		_preferences = preferences;
 		_adbManager = adbManager;
 		_listenerState = listenerState;
+		_mediator = mediator;
 	}
 
 	public async ValueTask<UpdateAdbSettingsResponse> Handle(UpdateAdbSettingsRequest request,
@@ -44,9 +49,11 @@ public class UpdateAdbSettingsRequestMessageHandler
 			request.ExecutablePath ?? current.ExecutablePath,
 			request.UsbConnectionsEnabled ?? current.UsbConnectionsEnabled,
 			request.DefaultDeviceSerial ?? current.DefaultDeviceSerial,
-			request.StopServerOnExit ?? current.StopServerOnExit);
+			request.StopServerOnExit ?? current.StopServerOnExit,
+			request.AllowPlugins ?? current.AllowPlugins);
 
 		await _adbManager.ApplySettingsAsync(cancellationToken);
+		await _mediator.Publish(new AdbSettingsChangedNotification(updated), cancellationToken);
 
 		return Respond(updated, true, null);
 	}
@@ -72,6 +79,7 @@ public class UpdateAdbSettingsRequestMessageHandler
 			UsbConnectionsEnabled = view.UsbConnectionsEnabled,
 			DefaultDeviceSerial = view.DefaultDeviceSerial,
 			StopServerOnExit = view.StopServerOnExit,
+			AllowPlugins = view.AllowPlugins,
 			ActivePublicPort = view.ActivePublicPort,
 			DeviceSidePortCandidates = AdbUsbTunnelPorts.DeviceSideCandidates,
 			Devices = view.Devices,

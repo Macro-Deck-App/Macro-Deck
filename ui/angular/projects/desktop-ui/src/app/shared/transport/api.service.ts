@@ -15,6 +15,8 @@ import {
   CancelRestoreResponse,
   ChangePasswordRequest,
   ChangeUsernameRequest,
+  ConnectAdbDeviceRequest,
+  ConnectAdbDeviceResponse,
   ResetPasswordRequest,
   CloneSecretResponse,
   CommitRestoreRequest,
@@ -1164,6 +1166,10 @@ export class ApiService {
 
   restartAdbServer(): Promise<RestartAdbServerResponse> {
     return this.http('POST', '/api/settings/adb/restart-server');
+  }
+
+  connectAdbDevice(request: ConnectAdbDeviceRequest): Promise<ConnectAdbDeviceResponse> {
+    return this.http('POST', '/api/settings/adb/connect', request);
   }
 
   downloadAdbPlatformTools(): Promise<DownloadAdbPlatformToolsResponse> {

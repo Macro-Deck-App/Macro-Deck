@@ -16,17 +16,25 @@ public sealed class HostInvocationException : Exception
 		ProtocolErrorCodes.CapabilityUnavailable,
 	};
 
-	private HostInvocationException(string code, string message, bool retryable)
+	private HostInvocationException(string code,
+		string message,
+		bool retryable,
+		IReadOnlyDictionary<string, string>? details = null)
 		: base(message)
 	{
 		Code = code;
 		Retryable = retryable;
+		Details = details ?? new Dictionary<string, string>(StringComparer.Ordinal);
 	}
 
 	/// <summary>The wire error code, e.g. <see cref="ProtocolErrorCodes.CapabilityUnavailable"/>.</summary>
 	public string Code { get; }
 
 	public bool Retryable { get; }
+
+	/// <summary>The error's details, empty when it carried none. A <c>reason</c> entry refines <see cref="Code" />;
+	/// see <see cref="ProtocolErrorReasons" />.</summary>
+	public IReadOnlyDictionary<string, string> Details { get; }
 
 	/// <summary>Maps a wire-level <see cref="ProtocolError"/> to the exception a call site sees. A
 	/// <c>CANCELLED</c> code becomes <see cref="OperationCanceledException"/>, mirroring
@@ -38,7 +46,10 @@ public sealed class HostInvocationException : Exception
 			return new OperationCanceledException(error.Message);
 		}
 
-		return new HostInvocationException(error.Code, error.Message, _retryableCodes.Contains(error.Code));
+		return new HostInvocationException(error.Code,
+			error.Message,
+			_retryableCodes.Contains(error.Code),
+			error.Details);
 	}
 
 	public static HostInvocationException CreateRetryable(string code, string message)

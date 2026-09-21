@@ -2,6 +2,7 @@ using System.Text.Json;
 using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Serialization;
+using MacroDeckHost.Application.Adb;
 using MacroDeckHost.Application.Deck;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Plugins;
@@ -21,6 +22,8 @@ public sealed class HostStatePusher(
 	IWidgetApi widgetApi,
 	IEventBindingTracker bindingTracker,
 	DeckClientTracker deckClients,
+	IAdbManager adbManager,
+	IPluginAdbAccessPolicy adbAccessPolicy,
 	ILogger logger) :
 	INotificationHandler<FolderCreatedNotification>,
 	INotificationHandler<FolderUpdatedNotification>,
@@ -39,14 +42,21 @@ public sealed class HostStatePusher(
 	INotificationHandler<WidgetsCreatedNotification>,
 	INotificationHandler<WidgetsUpdatedNotification>,
 	INotificationHandler<WidgetsDeletedNotification>,
+	INotificationHandler<AdbSettingsChangedNotification>,
 	IDisposable
 {
 	private readonly SemaphoreSlim _eventBindingsPush = new(1, 1);
 	private int _subscribedToBindings;
 	private readonly Lock _deckGate = new();
 	private long _deckRevision;
+	private readonly SemaphoreSlim _adbPush = new(1, 1);
+	private long _adbRevision;
 
-	public void Dispose() => _eventBindingsPush.Dispose();
+	public void Dispose()
+	{
+		_eventBindingsPush.Dispose();
+		_adbPush.Dispose();
+	}
 
 	public Task PushAllAsync(string pluginId, CancellationToken cancellationToken = default)
 	{
@@ -55,12 +65,20 @@ public sealed class HostStatePusher(
 		{
 			bindingTracker.Subscribe(PushEventBindingsIfConnectedAsync);
 			deckClients.StateChanged += OnDeckClientsChanged;
+			adbManager.SnapshotChanged += OnAdbSnapshotChanged;
 		}
 
 		return Task.WhenAll(PushDeckAsync(pluginId, cancellationToken),
 			PushScriptsAsync(pluginId, cancellationToken),
 			PushWidgetsAsync(pluginId, cancellationToken),
-			PushEventBindingsAsync(pluginId, cancellationToken));
+			PushEventBindingsAsync(pluginId, cancellationToken),
+			PushAdbAsync(pluginId, cancellationToken));
+	}
+
+	public ValueTask Handle(AdbSettingsChangedNotification notification, CancellationToken cancellationToken)
+	{
+		adbAccessPolicy.Refresh(notification.Settings);
+		return BroadcastAdbAsync(cancellationToken);
 	}
 
 	public ValueTask Handle(FolderCreatedNotification notification, CancellationToken cancellationToken)
@@ -214,6 +232,82 @@ public sealed class HostStatePusher(
 		};
 
 	private void OnDeckClientsChanged() => _ = PushDeckClientsAsync();
+
+	private void OnAdbSnapshotChanged(object? sender, EventArgs e) => _ = PushAdbChangeAsync();
+
+	private async Task PushAdbChangeAsync()
+	{
+		try
+		{
+			await BroadcastAdbAsync(CancellationToken.None);
+		}
+		catch (Exception exception) when (exception is not OutOfMemoryException)
+		{
+			logger.ForContext<HostStatePusher>().Error(exception, "Failed to push adb state to plugins");
+		}
+	}
+
+	private async ValueTask BroadcastAdbAsync(CancellationToken cancellationToken)
+	{
+		var pluginIds = sessionRegistry.Snapshot()
+			.Where(session => session.State == PluginSessionState.Connected)
+			.Select(session => session.PluginId)
+			.Distinct(StringComparer.Ordinal)
+			.ToList();
+
+		foreach (var pluginId in pluginIds)
+		{
+			await PushAdbAsync(pluginId, cancellationToken);
+		}
+	}
+
+	// Serialized so a push evaluated against older access or devices can never carry the higher revision.
+	private async Task<bool> PushAdbAsync(string pluginId, CancellationToken cancellationToken)
+	{
+		await _adbPush.WaitAsync(cancellationToken);
+		try
+		{
+			var access = await adbAccessPolicy.EvaluateAsync(pluginId, cancellationToken);
+			return await sessionRegistry.SendToPlugin(pluginId,
+				BuildEnvelope(HostApis.Adb, BuildAdbState(access)),
+				cancellationToken);
+		}
+		finally
+		{
+			_adbPush.Release();
+		}
+	}
+
+	private AdbStateDto BuildAdbState(PluginAdbAccess access)
+		=> new()
+		{
+			Access = access switch
+			{
+				PluginAdbAccess.Available => AdbAccessStates.Available,
+				PluginAdbAccess.NotAllowed => AdbAccessStates.NotAllowed,
+				_ => AdbAccessStates.NotEnabled
+			},
+			Devices = access == PluginAdbAccess.Available
+				? [.. adbManager.Devices.Where(device => device.State != AdbDeviceState.Disconnected).Select(ToDto)]
+				: [],
+			Revision = ++_adbRevision
+		};
+
+	private static AdbDeviceStateDto ToDto(AdbDevice device)
+		=> new()
+		{
+			Serial = device.Serial,
+			State = device.State switch
+			{
+				AdbDeviceState.Device => AdbDeviceStates.Online,
+				AdbDeviceState.Authorizing => AdbDeviceStates.Connecting,
+				AdbDeviceState.Unauthorized or AdbDeviceState.NoPermissions => AdbDeviceStates.Unauthorized,
+				_ => AdbDeviceStates.Offline
+			},
+			Model = device.Model,
+			Manufacturer = device.Manufacturer,
+			Product = device.Product
+		};
 
 	private async Task PushDeckClientsAsync()
 	{

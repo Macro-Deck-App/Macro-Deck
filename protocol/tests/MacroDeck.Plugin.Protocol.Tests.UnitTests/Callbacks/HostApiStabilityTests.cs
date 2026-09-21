@@ -13,6 +13,7 @@ public class HostApiStabilityTests
 	private static readonly string[] _expectedApisSortedOrdinal =
 	[
 		"action-interactions",
+		"adb",
 		"config",
 		"deck",
 		"devices",
@@ -50,6 +51,8 @@ public class HostApiStabilityTests
 			[HostApis.WidgetTypes] = ["register", "unregister"],
 			[HostApis.EventBindings] = [],
 			[HostApis.ScreenSavers] = ["register", "unregister"],
+			[HostApis.Adb] =
+				["shell", "battery", "push", "pull", "install", "uninstall", "package-installed", "connect"],
 		};
 
 	[Test]

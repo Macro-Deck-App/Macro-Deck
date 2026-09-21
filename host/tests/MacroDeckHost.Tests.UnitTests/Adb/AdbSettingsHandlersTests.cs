@@ -1,12 +1,14 @@
 using System.Reflection;
 using MacroDeckHost.Application.Adb;
 using MacroDeckHost.Application.Configuration;
+using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Handlers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Settings;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.Adb;
 
@@ -47,6 +49,7 @@ public class AdbSettingsHandlersTests
 		FakeAppPreferenceRepository Repository,
 		FakeAdbManager AdbManager,
 		FakeAdbPlatformToolsInstaller Installer,
+		RecordingMediator Mediator,
 		GetAdbSettingsRequestMessageHandler Get,
 		UpdateAdbSettingsRequestMessageHandler Update,
 		RestartAdbServerRequestMessageHandler Restart,
@@ -59,12 +62,14 @@ public class AdbSettingsHandlersTests
 		var preferences = new AppPreferenceService(repository, new FakeBuildEnvironment(), listenerState);
 		var adbManager = new FakeAdbManager();
 		var installer = new FakeAdbPlatformToolsInstaller();
+		var mediator = new RecordingMediator();
 
 		return new Fixture(repository,
 			adbManager,
 			installer,
+			mediator,
 			new GetAdbSettingsRequestMessageHandler(preferences, adbManager, listenerState),
-			new UpdateAdbSettingsRequestMessageHandler(preferences, adbManager, listenerState),
+			new UpdateAdbSettingsRequestMessageHandler(preferences, adbManager, listenerState, mediator),
 			new RestartAdbServerRequestMessageHandler(preferences, adbManager, listenerState),
 			new DownloadAdbPlatformToolsRequestMessageHandler(preferences, adbManager, installer, listenerState));
 	}
@@ -364,6 +369,51 @@ public class AdbSettingsHandlersTests
 	}
 
 	[Test]
+	public async Task Plugin_access_to_adb_is_on_by_default_and_an_update_that_omits_it_keeps_it_off()
+	{
+		var fixture = CreateFixture();
+		var initial = await fixture.Get.Handle(new GetAdbSettingsRequest(), CancellationToken.None);
+		await fixture.Update.Handle(new UpdateAdbSettingsRequest { AllowPlugins = false }, CancellationToken.None);
+
+		var response = await fixture.Update.Handle(new UpdateAdbSettingsRequest { UsbConnectionsEnabled = false },
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(initial.AllowPlugins, Is.True);
+			Assert.That(response.AllowPlugins, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task An_update_announces_the_settings_it_landed_on()
+	{
+		var fixture = CreateFixture();
+
+		await fixture.Update.Handle(new UpdateAdbSettingsRequest { AllowPlugins = false }, CancellationToken.None);
+
+		Assert.That(fixture.Mediator.Published.OfType<AdbSettingsChangedNotification>().Single().Settings.AllowPlugins,
+			Is.False);
+	}
+
+	[Test]
+	public async Task Downloading_platform_tools_keeps_plugin_access_as_it_was_and_reports_it()
+	{
+		var fixture = CreateFixture();
+		await fixture.Update.Handle(new UpdateAdbSettingsRequest { AllowPlugins = false }, CancellationToken.None);
+		fixture.Installer.InstallResult = Result.Ok<string, AdbFailureCode>("/opt/platform-tools/platform-tools/adb");
+
+		var response = await fixture.Download.Handle(new DownloadAdbPlatformToolsRequest(), CancellationToken.None);
+		var stored = await fixture.Get.Handle(new GetAdbSettingsRequest(), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.AllowPlugins, Is.False);
+			Assert.That(stored.AllowPlugins, Is.False);
+		});
+	}
+
+	[Test]
 	public async Task Update_clears_a_text_field_when_it_is_sent_as_an_empty_string()
 	{
 		var fixture = CreateFixture();
@@ -396,6 +446,37 @@ public class AdbSettingsHandlersTests
 				Assert.That(name, Does.Not.Contain("port"), $"{property.Name} looks like a port.");
 				Assert.That(name, Does.Not.Contain("device"), $"{property.Name} looks like device data.");
 			}
+		});
+	}
+
+	[Test]
+	public async Task Connecting_over_wifi_returns_the_new_device_list_and_says_why_it_failed_otherwise()
+	{
+		var fixture = CreateFixture();
+		fixture.AdbManager.Status = SampleStatus();
+		var operations = new Plugins.FakeAdbDeviceOperations
+		{
+			Connect = _ => Result.Fail<string, AdbFailureCode>(AdbFailureCode.Timeout, "Connecting to the device timed out.")
+		};
+		var handler = new ConnectAdbDeviceRequestMessageHandler(new AppPreferenceService(fixture.Repository,
+				new FakeBuildEnvironment(),
+				new FakeHostListenerState { PublicPort = ActivePort }),
+			fixture.AdbManager,
+			new FakeHostListenerState { PublicPort = ActivePort },
+			operations);
+
+		var failed = await handler.Handle(new ConnectAdbDeviceRequest { Address = " 192.168.1.20:5555 " }, CancellationToken.None);
+		operations.Connect = address => Result.Ok<string, AdbFailureCode>(address);
+		fixture.AdbManager.Devices = [SampleDevice("192.168.1.20:5555")];
+		var connected = await handler.Handle(new ConnectAdbDeviceRequest { Address = "192.168.1.20:5555" }, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(operations.ConnectedAddresses, Is.EqualTo(new[] { "192.168.1.20:5555", "192.168.1.20:5555" }));
+			Assert.That(failed.Success, Is.False);
+			Assert.That(failed.ErrorCode, Is.EqualTo(nameof(AdbFailureCode.Timeout)));
+			Assert.That(connected.Success, Is.True);
+			Assert.That(connected.Devices.Select(device => device.Serial), Is.EqualTo(new[] { "192.168.1.20:5555" }));
 		});
 	}
 }

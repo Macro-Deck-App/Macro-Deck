@@ -48,6 +48,7 @@ public class SettingsController : ControllerBase
 	private readonly IUiTransportMessageHandler<UpdateAdbSettingsRequest, UpdateAdbSettingsResponse> _updateAdb;
 
 	private readonly IUiTransportMessageHandler<RestartAdbServerRequest, RestartAdbServerResponse> _restartAdbServer;
+	private readonly IUiTransportMessageHandler<ConnectAdbDeviceRequest, ConnectAdbDeviceResponse> _connectAdbDevice;
 
 	private readonly IUiTransportMessageHandler<DownloadAdbPlatformToolsRequest, DownloadAdbPlatformToolsResponse>
 		_downloadAdbPlatformTools;
@@ -100,6 +101,7 @@ public class SettingsController : ControllerBase
 		IUiTransportMessageHandler<GetAdbSettingsRequest, GetAdbSettingsResponse> getAdb,
 		IUiTransportMessageHandler<UpdateAdbSettingsRequest, UpdateAdbSettingsResponse> updateAdb,
 		IUiTransportMessageHandler<RestartAdbServerRequest, RestartAdbServerResponse> restartAdbServer,
+		IUiTransportMessageHandler<ConnectAdbDeviceRequest, ConnectAdbDeviceResponse> connectAdbDevice,
 		IUiTransportMessageHandler<DownloadAdbPlatformToolsRequest, DownloadAdbPlatformToolsResponse>
 			downloadAdbPlatformTools,
 		IUiTransportMessageHandler<GetDeveloperSettingsRequest, GetDeveloperSettingsResponse> getDeveloper,
@@ -130,6 +132,7 @@ public class SettingsController : ControllerBase
 		_getAdb = getAdb;
 		_updateAdb = updateAdb;
 		_restartAdbServer = restartAdbServer;
+		_connectAdbDevice = connectAdbDevice;
 		_downloadAdbPlatformTools = downloadAdbPlatformTools;
 		_getDeveloper = getDeveloper;
 		_updateDeveloper = updateDeveloper;
@@ -204,6 +207,10 @@ public class SettingsController : ControllerBase
 	[HttpPost("adb/restart-server")]
 	public Task<RestartAdbServerResponse> RestartAdbServer(CancellationToken ct)
 		=> _restartAdbServer.Handle(new RestartAdbServerRequest(), ct).AsTask();
+
+	[HttpPost("adb/connect")]
+	public Task<ConnectAdbDeviceResponse> ConnectAdbDevice(ConnectAdbDeviceRequest body, CancellationToken ct)
+		=> _connectAdbDevice.Handle(body, ct).AsTask();
 
 	[HttpPost("adb/download-platform-tools")]
 	public Task<DownloadAdbPlatformToolsResponse> DownloadAdbPlatformTools(CancellationToken ct)

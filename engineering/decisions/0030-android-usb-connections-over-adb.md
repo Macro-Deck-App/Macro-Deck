@@ -108,6 +108,8 @@ user-supplied value is additionally POSIX-quoted before it becomes part of a dev
   with the integration disabled, and the integration owns no adb process or device list of its own.
 - `IAdbManager` is deliberately **not** part of the SDK. If third-party plugins ever need controlled adb
   access, that is a separate decision with a wider blast radius.
+- That decision is [ADR 0092](0092-plugins-reach-adb-through-a-permission-gated-host-api.md): plugins
+  reach adb through a separate, permission-gated `adb` host API, and `IAdbManager` stays out of the SDK.
 - Real adb behaviour cannot be exercised in CI: USB permissions on Linux need udev rules, Windows needs
   OEM drivers, and the on-device authorization dialog requires a physical confirmation. Executable
   discovery and command construction are pure and tested for all three platforms; the rest is documented

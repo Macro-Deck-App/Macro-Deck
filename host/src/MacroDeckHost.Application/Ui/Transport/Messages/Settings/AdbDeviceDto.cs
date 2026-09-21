@@ -18,6 +18,8 @@ public class AdbDeviceDto
 
 	public bool TunnelEstablished { get; set; }
 
+	public bool NetworkConnection { get; set; }
+
 	public int? TunnelDevicePort { get; set; }
 
 	public string? TunnelError { get; set; }
@@ -31,6 +33,7 @@ public class AdbDeviceDto
 		Authorized = device.IsAuthorized,
 		IsDefault = string.Equals(device.Serial, defaultDeviceSerial, StringComparison.Ordinal),
 		TunnelEstablished = device.Tunnel?.Established ?? false,
+		NetworkConnection = device.IsNetworkConnection,
 		TunnelDevicePort = device.Tunnel?.DevicePort,
 		TunnelError = device.Tunnel?.FailureMessage
 	};

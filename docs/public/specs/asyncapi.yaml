@@ -37,6 +37,9 @@ x-macrodeck-error-codes:
   - CORRELATION_UNKNOWN
   - DUPLICATE_IDEMPOTENCY_KEY
   - INTERNAL_ERROR
+  - ADB_NOT_ENABLED
+  - ADB_NOT_ALLOWED
+  - ADB_FAILED
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Errors.ProtocolCloseCodes
 x-macrodeck-close-codes:

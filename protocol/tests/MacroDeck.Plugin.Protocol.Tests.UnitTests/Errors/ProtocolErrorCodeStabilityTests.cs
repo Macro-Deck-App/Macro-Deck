@@ -14,6 +14,9 @@ public class ProtocolErrorCodeStabilityTests
 {
 	private static readonly string[] _expectedCodesSortedOrdinal =
 	[
+		"ADB_FAILED",
+		"ADB_NOT_ALLOWED",
+		"ADB_NOT_ENABLED",
 		"ASSET_TOO_LARGE",
 		"CANCELLED",
 		"CAPABILITY_UNAVAILABLE",

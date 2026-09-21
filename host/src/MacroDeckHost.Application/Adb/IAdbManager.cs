@@ -12,6 +12,9 @@ public interface IAdbManager
 
 	event EventHandler<AdbDeviceChange>? DeviceChanged;
 
+	// Raised under the reconcile gate: handlers must not block.
+	event EventHandler? SnapshotChanged;
+
 	Task<Result<AdbFailureCode>> ExecuteAsync(AdbCommand command, CancellationToken cancellationToken);
 
 	/// <summary>

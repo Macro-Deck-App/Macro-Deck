@@ -9,4 +9,6 @@ public interface IPluginCallbackRouter
 		string correlationId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken);
+
+	HostCallbackResult? Admit(string pluginId, HostInvokePayload payload);
 }

@@ -141,6 +141,9 @@ x-macrodeck-error-codes:
   - CORRELATION_UNKNOWN
   - DUPLICATE_IDEMPOTENCY_KEY
   - INTERNAL_ERROR
+  - ADB_NOT_ENABLED
+  - ADB_NOT_ALLOWED
+  - ADB_FAILED
 
 servers:
   - url: /
@@ -506,6 +509,9 @@ components:
         - CORRELATION_UNKNOWN
         - DUPLICATE_IDEMPOTENCY_KEY
         - INTERNAL_ERROR
+        - ADB_NOT_ENABLED
+        - ADB_NOT_ALLOWED
+        - ADB_FAILED
 
     ProtocolError:
       type: object

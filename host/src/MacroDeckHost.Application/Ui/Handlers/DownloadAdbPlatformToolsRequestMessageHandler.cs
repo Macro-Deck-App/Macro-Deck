@@ -39,7 +39,8 @@ public class DownloadAdbPlatformToolsRequestMessageHandler
 			result.Data,
 			current.UsbConnectionsEnabled,
 			current.DefaultDeviceSerial,
-			current.StopServerOnExit);
+			current.StopServerOnExit,
+			current.AllowPlugins);
 
 		await _adbManager.ApplySettingsAsync(cancellationToken);
 
@@ -67,6 +68,7 @@ public class DownloadAdbPlatformToolsRequestMessageHandler
 			UsbConnectionsEnabled = view.UsbConnectionsEnabled,
 			DefaultDeviceSerial = view.DefaultDeviceSerial,
 			StopServerOnExit = view.StopServerOnExit,
+			AllowPlugins = view.AllowPlugins,
 			ActivePublicPort = view.ActivePublicPort,
 			DeviceSidePortCandidates = AdbUsbTunnelPorts.DeviceSideCandidates,
 			Devices = view.Devices,

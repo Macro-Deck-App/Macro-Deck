@@ -41,7 +41,7 @@ public class PluginWebSocketEndpointDispatchTests
 		var invoker = new FakePluginCapabilityInvoker();
 		var throttle = new LoginThrottle(TimeProvider.System);
 		var statePusher
-			= new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), Serilog.Core.Logger.None);
+			= new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), new MacroDeckHost.Tests.UnitTests.Adb.FakeAdbManager(), new MacroDeckHost.Tests.UnitTests.TestSupport.FixedAdbAccessPolicy(), Serilog.Core.Logger.None);
 		var endpoint = new PluginWebSocketEndpoint(registry,
 			invoker,
 			new FakeRemotePluginIntegrationRegistrar(),
@@ -74,7 +74,7 @@ public class PluginWebSocketEndpointDispatchTests
 		var snapshotStore = new InMemorySnapshotStore();
 		var throttle = new LoginThrottle(TimeProvider.System);
 		var statePusher
-			= new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), Serilog.Core.Logger.None);
+			= new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), new MacroDeckHost.Tests.UnitTests.Adb.FakeAdbManager(), new MacroDeckHost.Tests.UnitTests.TestSupport.FixedAdbAccessPolicy(), Serilog.Core.Logger.None);
 		var endpoint = new PluginWebSocketEndpoint(registry,
 			invoker,
 			registrar,
@@ -133,6 +133,8 @@ public class PluginWebSocketEndpointDispatchTests
 			HostInvokePayload payload,
 			CancellationToken cancellationToken)
 			=> Task.FromResult(HostCallbackResult.Ok());
+
+		public HostCallbackResult? Admit(string pluginId, HostInvokePayload payload) => null;
 	}
 
 	private sealed class FakeEventBus : IEventBus
@@ -611,7 +613,7 @@ public class PluginWebSocketEndpointDispatchTests
 		var invoker = new FakePluginCapabilityInvoker();
 		var throttle = new LoginThrottle(TimeProvider.System);
 		var statePusher
-			= new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), Serilog.Core.Logger.None);
+			= new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), new MacroDeckHost.Tests.UnitTests.Adb.FakeAdbManager(), new MacroDeckHost.Tests.UnitTests.TestSupport.FixedAdbAccessPolicy(), Serilog.Core.Logger.None);
 
 		var sink = new CapturingLogSink();
 		var capturingLogger = new LoggerConfiguration().MinimumLevel.Is(minimumLevel).WriteTo.Sink(sink).CreateLogger();

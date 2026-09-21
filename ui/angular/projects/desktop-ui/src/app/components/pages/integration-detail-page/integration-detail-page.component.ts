@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, EMPTY, exhaustMap, from, timer } from 'rxjs';
-import { AppStrings, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IpcProvidedCapability, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationVariableCapability, VariableCatalogNode, IpcIntegrationIssue, PluginCompatibilityReport, resolveLocalizedText } from '@macro-deck/runtime';
+import { AppStrings, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IpcProvidedCapability, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationVariableCapability, VariableCatalogNode, IpcIntegrationIssue, PLUGIN_PERMISSION_HOST_ADB, PluginCompatibilityReport, resolveLocalizedText } from '@macro-deck/runtime';
 import { ApiService, ErrorBannerComponent, InputComponent, LocalizationService, LocalizedTextPipe, ModalComponent, ToastService, ToggleSwitchComponent, ButtonComponent, TranslatePipe, VariableService } from '@shared';
 import { ConfigFlowDialogComponent } from '../../config-flow/config-flow-dialog.component';
 import { DetailPageComponent } from '../../detail-page/detail-page.component';
@@ -16,6 +16,7 @@ import { COUNTED_CAPABILITY_KINDS } from '../../../domain/integration-capability
 import { ConfigFlowService } from '../../../services/config-flow.service';
 import { IntegrationService, Integration } from '../../../services/integration.service';
 import { PluginCompatibilityService } from '../../../services/plugin-compatibility.service';
+import { PluginInstallationService } from '../../../services/plugin-installation.service';
 import { VariableCatalogService } from '../../../services/variable-catalog.service';
 import { VariableBindDialogComponent } from '../../variables/variable-bind-dialog.component';
 import { ActionCapabilityRowComponent } from './action-capability-row.component';
@@ -74,6 +75,7 @@ export class IntegrationDetailPageComponent implements OnInit {
   private readonly variableCatalog = inject(VariableCatalogService);
   private readonly toasts = inject(ToastService);
   protected readonly compatibilityService = inject(PluginCompatibilityService);
+  private readonly installation = inject(PluginInstallationService);
 
   protected readonly integrationId = signal<string>('');
   protected readonly configEntries = signal<ConfigEntryDto[]>([]);
@@ -245,6 +247,12 @@ export class IntegrationDetailPageComponent implements OnInit {
   protected closeCatalogBindDialog(): void {
     this.catalogBindNode.set(null);
   }
+
+  protected readonly usesAdb = computed(() => {
+    const integration = this.integration();
+    return integration?.isInternal === false
+      && !!this.installation.find(integration.id)?.permissions.includes(PLUGIN_PERMISSION_HOST_ADB);
+  });
 
   protected readonly additionalCapabilities = computed<IpcProvidedCapability[]>(() =>
     (this.integration()?.providedCapabilities ?? []).filter(c => !COUNTED_CAPABILITY_KINDS.includes(c.kind)));

@@ -2099,6 +2099,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Dialogs.Notice.GotIt" xml:space="preserve">
     <value>Entendido</value>
   </data>
+  <data name="Dialogs.PluginAdbConsent.AdbMissingHeading" xml:space="preserve">
+    <value>Obtener Android platform-tools</value>
+  </data>
+  <data name="Dialogs.PluginAdbConsent.AdbMissingMessage" xml:space="preserve">
+    <value>ADB está activado, pero Macro Deck no encuentra adb en este equipo. ¿Descargar ahora las Android platform-tools para que los complementos puedan trabajar con tus dispositivos Android?</value>
+  </data>
   <data name="Dialogs.PluginPairing.Approve" xml:space="preserve">
     <value>Aprobar</value>
   </data>
@@ -11670,6 +11676,21 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Notifications.NetworkUnreachableTlsMessage" xml:space="preserve">
     <value>HTTPS está configurado para sustituir al listener público, pero su certificado no se pudo usar, así que nada en la red puede alcanzar este equipo - Macro Deck no recurre a un listener sin cifrar.</value>
   </data>
+  <data name="Notifications.PluginAdbAccessRequested" xml:space="preserve">
+    <value>Un complemento quiere usar ADB</value>
+  </data>
+  <data name="Notifications.PluginAdbAccessRequestedAdbMissingMessage" xml:space="preserve">
+    <value>{name} necesita ADB para trabajar con tus dispositivos Android. ADB está activado, pero Macro Deck no encuentra adb en este equipo. ¿Configurarlo ahora?</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.PluginAdbAccessRequestedAdbOffMessage" xml:space="preserve">
+    <value>{name} necesita ADB para trabajar con tus dispositivos Android, pero ADB está desactivado en Macro Deck. ¿Activar ADB y permitir que los complementos lo usen?</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.PluginAdbAccessRequestedMessage" xml:space="preserve">
+    <value>{name} necesita ADB para trabajar con tus dispositivos Android, pero ahora mismo los complementos no pueden usar ADB. ¿Permitir que los complementos usen ADB?</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.RestartToApplyNetwork" xml:space="preserve">
     <value>Reiniciar para aplicar la nueva configuración de red</value>
   </data>
@@ -11879,6 +11900,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Plugins.UnverifiedClaim" xml:space="preserve">
     <value>reclamo no verificado</value>
+  </data>
+  <data name="Plugins.UsesAdbBadge" xml:space="preserve">
+    <value>Usa ADB</value>
+  </data>
+  <data name="Plugins.UsesAdbNote" xml:space="preserve">
+    <value>Este complemento usa ADB para trabajar con tus dispositivos Android. Puede ejecutar comandos en ellos, copiar archivos e instalar apps.</value>
   </data>
   <data name="Plugins.VerifiedNoPublisherHint" xml:space="preserve">
     <value>La firma de este complemento fue verificada por el Macro Deck Creator Portal, pero su manifiesto no indica ningún autor.</value>
@@ -12467,6 +12494,42 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Settings.Account.SigningInMessage" xml:space="preserve">
     <value>Esperando a que termines de iniciar sesión en tu navegador…</value>
+  </data>
+  <data name="Settings.Adb.AllowPluginsDescription" xml:space="preserve">
+    <value>Los complementos que declaran acceso a ADB pueden usar la conexión ADB de Macro Deck para trabajar con tus dispositivos Android, por ejemplo para ejecutar comandos de shell, copiar archivos o instalar apps.</value>
+  </data>
+  <data name="Settings.Adb.AllowPluginsLabel" xml:space="preserve">
+    <value>Permitir que los complementos usen ADB</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiLabel" xml:space="preserve">
+    <value>Conectar por Wi-Fi</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiHint" xml:space="preserve">
+    <value>Introduce la dirección IP y el puerto de un teléfono con la depuración inalámbrica activada, por ejemplo 192.168.1.20:5555. El dispositivo aparecerá en la lista de arriba y los complementos que usan ADB también podrán acceder a él.</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiPlaceholder" xml:space="preserve">
+    <value>192.168.1.20:5555</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiTimeout" xml:space="preserve">
+    <value>La conexión con {address} tardó demasiado. Comprueba que el teléfono esté en la misma red y que la depuración inalámbrica esté activada.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Settings.Adb.ConnectedOverWifi" xml:space="preserve">
+    <value>Conectado por Wi-Fi</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiButton" xml:space="preserve">
+    <value>Conectar</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiInvalid" xml:space="preserve">
+    <value>Introduce una dirección IP o un nombre de host con puerto, por ejemplo 192.168.1.20:5555.</value>
+  </data>
+  <data name="Settings.Adb.ConnectWifiFailed" xml:space="preserve">
+    <value>Macro Deck no pudo conectarse a {address}.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Settings.Adb.ConnectWifiFailedReason" xml:space="preserve">
+    <value>Macro Deck no pudo conectarse a {address}: {reason}</value>
+    <comment>[address:string] [reason:string]</comment>
   </data>
   <data name="Settings.Adb.DefaultDeviceLabel" xml:space="preserve">
     <value>Dispositivo predeterminado</value>
@@ -14017,6 +14080,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Shell.Footer.Version" xml:space="preserve">
     <value>Versión {version}</value>
+  </data>
+  <data name="Shell.Notifications.Action.EnablePluginAdb" xml:space="preserve">
+    <value>Permitir</value>
   </data>
   <data name="Shell.Notifications.Action.OpenExtensionStore" xml:space="preserve">
     <value>Abrir la tienda</value>

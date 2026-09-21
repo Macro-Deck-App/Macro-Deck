@@ -29,6 +29,8 @@ public static class PluginDependencyWarningCodes
 	public const string SdkCompatibilityUnchecked = "sdk_compatibility_unchecked";
 
 	public const string NoEntrypointForRuntime = "no_entrypoint_for_runtime";
+
+	public const string UsesAdb = "uses_adb";
 }
 
 public interface IPluginDependencyResolver

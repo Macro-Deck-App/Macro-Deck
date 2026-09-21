@@ -486,6 +486,10 @@ public class Startup
 		services.AddSingleton<IPluginHostAssetSender, PluginHostAssetSender>();
 		services.AddSingleton<HostCallbackThrottle>();
 		services.AddSingleton<IPluginCallbackRouter, PluginCallbackRouter>();
+		services.AddSingleton<IPluginAdbAccessPolicy, PluginAdbAccessPolicy>();
+		services.AddSingleton<IPluginAdbConsentNotifier, PluginAdbConsentNotifier>();
+		services.AddSingleton<PluginAdbCallbacks>();
+		services.AddSingleton<PluginAdbInvokeRunner>();
 		// Mediator's source generator only runs over MacroDeckHost.Application, so a handler in this
 		// assembly is registered by hand - as HostStatePusher is below. This one has to live here rather
 		// than in Application: INotificationService is an Integrations type, which Application does not

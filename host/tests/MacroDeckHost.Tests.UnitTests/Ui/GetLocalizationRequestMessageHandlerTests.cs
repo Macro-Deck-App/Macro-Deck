@@ -51,7 +51,8 @@ public class GetLocalizationRequestMessageHandlerTests
 			string? executablePath,
 			bool? usbConnectionsEnabled,
 			string? defaultDeviceSerial,
-			bool? stopServerOnExit)
+			bool? stopServerOnExit,
+			bool allowPlugins)
 			=> throw new NotSupportedException();
 
 		public Task<DeveloperSettings> GetDeveloper() => throw new NotSupportedException();

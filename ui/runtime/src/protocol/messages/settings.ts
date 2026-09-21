@@ -165,6 +165,7 @@ export interface AdbDevice {
   authorized: boolean;
   isDefault: boolean;
   tunnelEstablished: boolean;
+  networkConnection: boolean;
   tunnelDevicePort: number | null;
   tunnelError: string | null;
 }
@@ -180,6 +181,7 @@ export interface GetAdbSettingsResponse {
   usbConnectionsEnabled: boolean;
   defaultDeviceSerial: string | null;
   stopServerOnExit: boolean;
+  allowPlugins: boolean;
   activePublicPort: number;
   deviceSidePortCandidates: number[];
   devices: AdbDevice[];
@@ -197,6 +199,7 @@ export interface UpdateAdbSettingsRequest {
   usbConnectionsEnabled?: boolean;
   defaultDeviceSerial?: string;
   stopServerOnExit?: boolean;
+  allowPlugins?: boolean;
 }
 
 export interface UpdateAdbSettingsResponse extends GetAdbSettingsResponse {
@@ -207,6 +210,16 @@ export interface UpdateAdbSettingsResponse extends GetAdbSettingsResponse {
 export interface RestartAdbServerResponse extends GetAdbSettingsResponse {
   success: boolean;
   error: string | null;
+}
+
+export interface ConnectAdbDeviceRequest {
+  address: string;
+}
+
+export interface ConnectAdbDeviceResponse extends GetAdbSettingsResponse {
+  success: boolean;
+  error: string | null;
+  errorCode?: string | null;
 }
 
 export interface DownloadAdbPlatformToolsResponse extends GetAdbSettingsResponse {

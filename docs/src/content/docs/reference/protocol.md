@@ -199,6 +199,9 @@ host restarts; hosts that predate it omit both fields, which read as an empty li
 arrive out of order, so apply one only when its revision is higher than the last one applied in this
 session, always apply revision 0, and reset the last applied revision when a session is not resumed.
 
+The `adb` snapshot, pushed per plugin, follows the same revision rule. It is the only host API a plugin
+may be refused by its manifest: see [the WebSocket reference](/reference/websocket/#adb).
+
 A callback can return bytes: an icon from the `devices` api's `icon` operation, or a widget's rendered
 action icon from its `widget-icon` operation. These travel over `host.asset.*`, a host-to-plugin
 pipeline kept separate from the plugin-to-host `asset.*` types so those keep their major-1 direction.
@@ -243,9 +246,16 @@ keyed by `code`; localise from the code. `details` is a string-to-string map, at
 | `CORRELATION_UNKNOWN` | No in-flight message matches this correlation id. |
 | `DUPLICATE_IDEMPOTENCY_KEY` | This idempotency key is already in flight. |
 | `INTERNAL_ERROR` | An internal error occurred. |
+| `ADB_NOT_ENABLED` | ADB is not enabled in Macro Deck. |
+| `ADB_NOT_ALLOWED` | This plugin is not allowed to use ADB. |
+| `ADB_FAILED` | The ADB operation failed. |
 
-The list is append-only within a major. A `reason` in `details` (today only `developer_mode_disabled`)
-refines a deliberately generic code; a client that does not recognise it handles the code alone.
+The list is append-only within a major. The three `ADB_*` codes answer only the `adb` host API; see
+[the WebSocket reference](/reference/websocket/#adb). A `reason` in `details` refines a deliberately generic
+code, for example `developer_mode_disabled`, `host_locked`, or one of the `adb_` reasons of `ADB_FAILED`;
+the values are in
+[`ProtocolErrorReasons.cs`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/protocol/src/MacroDeck.Plugin.Protocol/Errors/ProtocolErrorReasons.cs).
+A client that does not recognise a reason handles the code alone.
 
 Closing the socket is reserved for seven conditions; everything else is a `protocol.error` on an open
 socket:

@@ -61,3 +61,29 @@ Macro Deck exits** under **Status**. Macro Deck then stops the server when it ex
 installs an update, but only a server Macro Deck started itself; one that was already running is left
 alone. Other programs using that server, such as Android Studio, lose their connection. If you turn
 off **Enable ADB** before quitting, the server keeps running.
+
+## Plugins and ADB
+
+Some plugins use Macro Deck's ADB connection to work with your Android devices: they can run commands on
+them, copy files and install apps. A plugin can do this only while **Enable ADB** is on and
+**Allow plugins to use ADB** is on in **Settings > ADB**, and only if it says in advance that it uses ADB.
+**Allow plugins to use ADB** is on by default and applies to every plugin that uses ADB.
+
+- When you install a plugin that uses ADB, the install dialog says so.
+- A plugin that uses ADB lists **Uses ADB** under **Capabilities** on its page.
+- If you install such a plugin while **Enable ADB** or **Allow plugins to use ADB** is off, Macro Deck
+  asks **A plugin wants to use ADB** in a dialog. Click **Allow** to turn on both, so plugins can use ADB.
+  **Not now** closes the dialog; the question stays in your notifications until you answer or dismiss it.
+- If Macro Deck cannot find adb after you allow it, the dialog offers **Download platform-tools**, the same
+  download as in **Settings > ADB**.
+- A plugin that tries to use ADB while it is off asks the same question once each time Macro Deck runs,
+  even if it was installed earlier. It also asks when ADB is on but Macro Deck cannot find adb, and then
+  offers **Download platform-tools** straight away.
+- To use a phone over Wi-Fi, turn on wireless debugging on the phone and enter its IP address and port in
+  **Settings > ADB**, **Connect over Wi-Fi**, for example `192.168.1.20:5555`. The phone then appears under
+  **Devices**, and plugins that use ADB can reach it too. On Android 11 and later the phone must have been
+  paired with this computer first. A phone on Wi-Fi reaches Macro Deck over the network, so Macro Deck sets up no USB
+  tunnel for it; the device list shows it as **Connected over Wi-Fi**.
+
+Turning off **Allow plugins to use ADB** stops every plugin from using Macro Deck's ADB connection. It
+does not affect USB connections for the app or the web client.

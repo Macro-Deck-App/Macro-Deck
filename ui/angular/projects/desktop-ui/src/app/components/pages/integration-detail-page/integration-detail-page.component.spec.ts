@@ -4,11 +4,12 @@ import { By } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, EMPTY } from 'rxjs';
 
-import { ActionParameterType, CompatibilityFinding, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationIssue, IpcIntegrationVariableCapability, PluginCompatibilityReport, Variable } from '@macro-deck/runtime';
+import { ActionParameterType, CompatibilityFinding, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationIssue, IpcIntegrationVariableCapability, InstalledPlugin, PluginCompatibilityReport, Variable } from '@macro-deck/runtime';
 import { ApiService, ToastService, VariableService } from '@shared';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
 import { Integration, IntegrationService } from '../../../services/integration.service';
 import { PluginCompatibilityService } from '../../../services/plugin-compatibility.service';
+import { PluginInstallationService } from '../../../services/plugin-installation.service';
 
 import { IntegrationDetailPageComponent } from './integration-detail-page.component';
 
@@ -16,6 +17,7 @@ describe('IntegrationDetailPageComponent', () => {
   const integrations = signal<Integration[]>([]);
   const liveVariables = signal<Variable[]>([]);
   const compatibilityReports = signal<PluginCompatibilityReport[]>([]);
+  const installedPlugins = signal<InstalledPlugin[]>([]);
   let entries: ConfigEntryDto[] = [];
   let issuesEvents: Subject<IntegrationIssuesChangedEvent>;
   let integrationsEvents: Subject<IntegrationsChangedEvent>;
@@ -29,6 +31,17 @@ describe('IntegrationDetailPageComponent', () => {
   let routerSpy: jasmine.SpyObj<Router>;
   let routeIntegrationId: string;
   let queryTab: string | null;
+
+  function installedPlugin(overrides: Partial<InstalledPlugin> = {}): InstalledPlugin {
+    return {
+      pluginId: 'app.macro-deck.spotify',
+      name: 'Spotify',
+      versions: [{ version: '1.0.0', active: true }],
+      activeVersion: '1.0.0',
+      permissions: [],
+      ...overrides,
+    };
+  }
 
   function integration(overrides: Partial<Integration> = {}): Integration {
     return {
@@ -154,6 +167,7 @@ describe('IntegrationDetailPageComponent', () => {
     integrations.set([integration()]);
     liveVariables.set([]);
     compatibilityReports.set([]);
+    installedPlugins.set([]);
     entries = [];
     routeIntegrationId = 'app.macro-deck.spotify';
     queryTab = null;
@@ -241,6 +255,10 @@ describe('IntegrationDetailPageComponent', () => {
             loadError: signal<string | null>(null),
             load: async () => undefined,
           },
+        },
+        {
+          provide: PluginInstallationService,
+          useValue: { find: (pluginId: string) => installedPlugins().find(p => p.pluginId === pluginId) ?? null },
         },
         { provide: Router, useValue: routerSpy },
         {
@@ -422,6 +440,25 @@ describe('IntegrationDetailPageComponent', () => {
 
     beforeEach(() => {
       integrations.set([integration({ isInternal: false })]);
+    });
+
+    it('lists ADB among the capabilities of a plugin that uses it', async () => {
+      installedPlugins.set([installedPlugin({ permissions: ['host:adb'] })]);
+
+      const fixture = await createFixture();
+
+      expect(badgeLabels(fixture)).not.toContain('Uses ADB');
+      expect(cardTitled(fixture, 'Capabilities')!.textContent).toContain('Uses ADB');
+      fixture.destroy();
+    });
+
+    it('does not mark a plugin that does not declare ADB', async () => {
+      installedPlugins.set([installedPlugin({ permissions: ['host:deck'] })]);
+
+      const fixture = await createFixture();
+
+      expect(cardTitled(fixture, 'Capabilities')!.textContent).not.toContain('Uses ADB');
+      fixture.destroy();
     });
 
     it('replaces the Compatibility card with a badge for a plugin with a clean verdict', async () => {

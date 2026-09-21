@@ -17,7 +17,8 @@ internal sealed class FakeAdbPreferenceService : IAppPreferenceService
 		string? executablePath,
 		bool? usbConnectionsEnabled,
 		string? defaultDeviceSerial,
-		bool? stopServerOnExit)
+		bool? stopServerOnExit,
+		bool allowPlugins)
 		=> throw new NotSupportedException();
 
 	public Task<AppearanceSettings> GetAppearance() => throw new NotSupportedException();
