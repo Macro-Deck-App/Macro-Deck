@@ -9,6 +9,7 @@ using MacroDeckHost.Application.Ui.Transport.Messages.Store;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Infrastructure.Plugins;
 using MacroDeckHost.Infrastructure.Store;
+using MacroDeckHost.Tests.UnitTests.Http;
 using MacroDeckHost.Tests.UnitTests.Store;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.AspNetCore.Mvc;
@@ -60,14 +61,15 @@ internal sealed class StoreControllerTests
 	public void TearDown() => _paths.Cleanup();
 
 	private StoreController CreateController(IStoreRegistryRefresher refresher,
-		IStoreRegistryRefreshTracker refreshTracker) =>
+		IStoreRegistryRefreshTracker refreshTracker,
+		IStoreArtifactDownloader? downloader = null) =>
 		new(_catalogQuery,
 			refresher,
 			_installCoordinator,
 			_tracker,
 			new FakeStoreUpdateDetector(),
 			new StoreUpdateState(),
-			new ThrowingStoreArtifactDownloader(),
+			downloader ?? new ThrowingStoreArtifactDownloader(),
 			new FakeDeveloperModePreferences(),
 			_paths,
 			StoreRegistryOptions.Default,
@@ -435,6 +437,53 @@ internal sealed class StoreControllerTests
 		return digests;
 	}
 
+	[Test]
+	public async Task A_registry_icon_on_the_store_asset_host_is_fetched_without_store_download_metadata()
+	{
+		var iconBytes = "<svg xmlns=\"http://www.w3.org/2000/svg\"/>"u8.ToArray();
+		using var http = new RecordingHttpClientFactory { Body = iconBytes };
+		Directory.CreateDirectory(_paths.StoreStagingDirectory);
+		_catalog.Swap(new StoreCatalogSnapshot
+		{
+			Sequence = 1,
+			Entries =
+			[
+				new StoreCatalogEntry
+				{
+					Kind = StoreExtensionKind.Plugin,
+					Id = PluginId,
+					Name = "Hue Bridge",
+					LatestVersion = "1.0.0",
+					LatestRelease = new StoreReleaseManifest
+					{
+						Version = "1.0.0",
+						ArtifactUrl = new Uri($"https://store-assets.macro-deck.app/plugins/{PluginId}/1.0.0/hue.macroDeckPlugin"),
+						Sha256 = new string('a', 64),
+						Size = 16,
+						Icon = new StoreMediaAsset
+						{
+							Url = new Uri($"https://store-assets.macro-deck.app/plugins/{PluginId}/1.0.0/icon.svg"),
+							Sha256 = Convert.ToHexStringLower(global::System.Security.Cryptography.SHA256.HashData(iconBytes)),
+							Size = iconBytes.LongLength,
+							ContentType = "image/svg+xml"
+						}
+					}
+				}
+			]
+		});
+		var controller = CreateController(new FakeStoreRegistryRefresher(),
+			new StoreRegistryRefreshTracker(TimeProvider.System),
+			new StoreArtifactDownloader(http, StoreRegistryOptions.Default, _paths, TimeProvider.System));
+
+		var result = await controller.GetIcon(StoreExtensionKind.Plugin, PluginId, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result, Is.InstanceOf<FileContentResult>());
+			Assert.That(http.Requests.Single().HasMacroDeckHeaders, Is.False);
+		});
+	}
+
 	private void SeedPluginWithIcon(byte[] iconBytes)
 	{
 		var digest = Convert.ToHexStringLower(global::System.Security.Cryptography.SHA256.HashData(iconBytes));
@@ -556,6 +605,7 @@ internal sealed class ThrowingStoreArtifactDownloader : IStoreArtifactDownloader
 		string expectedSha256Hex,
 		long expectedSize,
 		Guid operationId,
+		StoreDownloadMetadata? downloadMetadata,
 		IProgress<StoreArtifactDownloadProgress>? progress,
 		CancellationToken cancellationToken = default) =>
 		throw new NotSupportedException();

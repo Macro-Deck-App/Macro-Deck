@@ -239,7 +239,13 @@ public sealed class PluginArtifactAcquirer : IPluginArtifactAcquirer
 			linkedCts.CancelAfter(_options.DownloadTimeout);
 
 			var client = _httpClientFactory.CreateClient(HttpClientName);
-			using var response = await client.GetAsync(source.Url,
+			using var request = new HttpRequestMessage(HttpMethod.Get, source.Url);
+			if (source.Kind == PluginArtifactSourceKind.Url)
+			{
+				source.DownloadMetadata?.ApplyTo(request);
+			}
+
+			using var response = await client.SendAsync(request,
 				HttpCompletionOption.ResponseHeadersRead,
 				linkedCts.Token);
 			response.EnsureSuccessStatusCode();

@@ -46,6 +46,7 @@ public sealed class StoreOperationTracker : IStoreOperationTracker
 		StoreTestBuildReference? testBuild = null)
 	{
 		var now = _timeProvider.GetUtcNow();
+		var original = retryOf is { } retried ? Find(retried) : null;
 		var operation = new StoreOperation
 		{
 			Id = Guid.CreateVersion7(),
@@ -59,6 +60,7 @@ public sealed class StoreOperationTracker : IStoreOperationTracker
 			StartedAt = now,
 			UpdatedAt = now,
 			RetryOf = retryOf,
+			RootOperationId = original is null ? null : original.RootOperationId ?? original.Id,
 			TestBuildId = testBuild?.BuildId,
 			TestBuild = testBuild?.Build
 		};

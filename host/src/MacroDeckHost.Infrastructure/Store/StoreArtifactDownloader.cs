@@ -31,6 +31,7 @@ public sealed class StoreArtifactDownloader : IStoreArtifactDownloader
 		string expectedSha256Hex,
 		long expectedSize,
 		Guid operationId,
+		StoreDownloadMetadata? downloadMetadata,
 		IProgress<StoreArtifactDownloadProgress>? progress,
 		CancellationToken cancellationToken = default)
 	{
@@ -59,7 +60,9 @@ public sealed class StoreArtifactDownloader : IStoreArtifactDownloader
 		{
 			var client = _httpClientFactory.CreateClient(StoreHttp.ArtifactClientName);
 			client.Timeout = _options.DownloadTimeout;
-			response = await client.GetAsync(artifactUrl,
+			using var request = new HttpRequestMessage(HttpMethod.Get, artifactUrl);
+			downloadMetadata?.ApplyTo(request);
+			response = await client.SendAsync(request,
 				HttpCompletionOption.ResponseHeadersRead,
 				cancellationToken);
 		}

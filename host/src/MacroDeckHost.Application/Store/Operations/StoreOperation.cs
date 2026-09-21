@@ -34,6 +34,8 @@ public sealed record StoreOperation
 
 	public Guid? RetryOf { get; init; }
 
+	public Guid? RootOperationId { get; init; }
+
 	public Guid? TestBuildId { get; init; }
 
 	public string? TestBuild { get; init; }

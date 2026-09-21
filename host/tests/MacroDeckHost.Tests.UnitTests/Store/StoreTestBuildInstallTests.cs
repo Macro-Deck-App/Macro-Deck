@@ -18,6 +18,7 @@ using MacroDeckHost.Infrastructure.Plugins;
 using MacroDeckHost.Infrastructure.Plugins.Installation;
 using MacroDeckHost.Infrastructure.Plugins.Trust;
 using MacroDeckHost.Infrastructure.Store;
+using MacroDeckHost.Tests.UnitTests.Http;
 using MacroDeckHost.Tests.UnitTests.Icons;
 using MacroDeckHost.Tests.UnitTests.Plugins;
 using MacroDeckHost.Tests.UnitTests.Plugins.Installation;
@@ -38,7 +39,7 @@ internal sealed class StoreTestBuildInstallTests
 	private const string PluginId = "com.acme.store-consent";
 
 	private TestPaths _paths = null!;
-	private FakeUrlHttpClientFactory _httpClientFactory = null!;
+	private RecordingHttpClientFactory _httpClientFactory = null!;
 	private FakeStorePlatformClient _platform = null!;
 	private JsonStoreTestInstallationStore _testInstallations = null!;
 	private StoreOperationTracker _tracker = null!;
@@ -67,7 +68,7 @@ internal sealed class StoreTestBuildInstallTests
 		_sourceDirectory = Path.Combine(_paths.BaseDirectory, "artifacts");
 		Directory.CreateDirectory(_sourceDirectory);
 
-		_httpClientFactory = new FakeUrlHttpClientFactory();
+		_httpClientFactory = new RecordingHttpClientFactory();
 		_platform = new FakeStorePlatformClient();
 		_testInstallations = new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None);
 		_tracker = new StoreOperationTracker(new InMemoryStoreOperationStore(), TimeProvider.System);
@@ -153,6 +154,7 @@ internal sealed class StoreTestBuildInstallTests
 	{
 		_paths.Cleanup();
 		_iconHarness.Dispose();
+		_httpClientFactory.Dispose();
 	}
 
 	private Task<string> TrustedArtifact(string version = "1.0.0", string pluginId = PluginId)
@@ -219,6 +221,25 @@ internal sealed class StoreTestBuildInstallTests
 			Assert.That(result.CanRetry, Is.False);
 			Assert.That(ActiveVersion(), Is.EqualTo("1.2.0"));
 			Assert.That(listed.Tests.Single().InstalledTestBuildId, Is.EqualTo(build.Id));
+		});
+	}
+
+	[Test]
+	public async Task A_test_build_served_from_the_store_asset_host_is_downloaded_without_store_metadata()
+	{
+		var build = await ShareTestBuild(UnsignedArtifact("1.2.0"), "1.2.0", "42");
+		var link = _platform.TestBuildDownload!.Value!;
+		_platform.TestBuildDownload = StorePlatformResult.Ok(link with
+		{
+			Url = new Uri($"https://store-assets.macro-deck.app/plugins/{PluginId}/tests/{link.FileName}")
+		});
+
+		var result = await InstallTestBuild(build);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.State, Is.EqualTo(StoreOperationState.Completed), result.ErrorMessage);
+			Assert.That(_httpClientFactory.Requests.Single().HasMacroDeckHeaders, Is.False);
 		});
 	}
 
