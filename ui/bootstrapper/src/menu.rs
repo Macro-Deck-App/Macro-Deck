@@ -17,7 +17,7 @@ const DISCORD_ITEM_ID: &str = "menu-discord";
 
 const SETTINGS_ACTION: &str = "settings";
 
-const DISCORD_URL: &str = "https://discord.macro-deck.app";
+pub(crate) const DISCORD_URL: &str = "https://discord.macro-deck.app";
 
 #[cfg(target_os = "macos")]
 const WEBSITE_URL: &str = "https://macro-deck.app";
