@@ -26,6 +26,8 @@ public sealed record StoreTest
 
 	public Guid? InstalledTestBuildId { get; init; }
 
+	public string? StoreVersion { get; init; }
+
 	public Guid? ActiveOperationId { get; init; }
 
 	public bool HasIcon { get; init; }

@@ -127,6 +127,7 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 				case StoreExtensionKind.Plugin:
 					await ExecutePlugin(operationId,
 						item.Entry,
+						item.InstalledTestBuild is not null,
 						consented,
 						backupBatchId,
 						snapshot.Sequence,
@@ -170,6 +171,7 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 
 	private async Task ExecutePlugin(Guid operationId,
 		StoreCatalogEntry entry,
+		bool replacesTestBuild,
 		bool consented,
 		string? backupBatchId,
 		long registrySequence,
@@ -203,7 +205,8 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		var request = new PluginInstallRequest
 		{
 			AllowUnsigned = consented,
-			Force = false,
+			// The release's version directory can hold the test build itself, or the rollback copy kept when it was installed.
+			Force = replacesTestBuild,
 			RetainDownload = false,
 			BackupBatchId = backupBatchId,
 			Stage = stage => _tracker.Transition(operationId,

@@ -33,10 +33,19 @@ interface BuildRow {
   failure: string | null;
 }
 
+type ReturnAction = 'return' | 'progress' | null;
+
 interface TestCard {
   test: StoreTestBody;
   iconUrl: string | null;
   rows: BuildRow[];
+  expanded: boolean;
+  buildCount: string;
+  installedTestBuild: string | null;
+  returnAction: ReturnAction;
+  returnPercent: number | null;
+  returnProgressLabel: string;
+  returnFailure: string | null;
 }
 
 interface PendingInstall {
@@ -124,6 +133,17 @@ export class StoreTestsTabComponent implements OnInit {
     });
   }
 
+  protected toggleCard(packageId: string): void {
+    this.service.toggleExpanded(packageId);
+  }
+
+  protected async returnToStoreVersion(test: StoreTestBody): Promise<void> {
+    const operation = await this.service.returnToStoreVersion(test.packageId);
+    if (!operation) {
+      this.toasts.show(this.localization.translateKey(AppStrings.Store.InstallationFailed), { variant: 'error' });
+    }
+  }
+
   protected requestInstall(test: StoreTestBody, build: StoreTestBuildBody): void {
     this.pendingInstall.set({ test, build });
   }
@@ -156,12 +176,32 @@ export class StoreTestsTabComponent implements OnInit {
   private card(test: StoreTestBody): TestCard {
     const operation = this.operations.operationFor('Plugin', test.packageId)();
     const live = operation !== null && !isTerminalStoreOperationState(operation.state);
+    const storeOperation = operation !== null && operation.kind !== 'TestInstall' ? operation : null;
+    const installedTestBuild = test.builds.find(build => build.id === test.installedTestBuildId)?.build ?? null;
+
+    let returnAction: ReturnAction = null;
+    const canReturn = !!test.installedTestBuildId && !!test.storeVersion;
+    if (storeOperation && live) {
+      returnAction = 'progress';
+    } else if (canReturn && !live) {
+      returnAction = 'return';
+    }
+
     return {
       test,
       iconUrl: test.hasIcon && !this.failedIcons().has(test.packageId)
         ? this.api.getStoreExtensionIconUrl('Plugin', test.packageId, test.iconSha256)
         : null,
       rows: test.builds.map(build => this.row(test, build, operation, live)),
+      expanded: this.service.expanded().has(test.packageId),
+      buildCount: this.localization.translateKey(AppStrings.Store.Tests.BuildCount, { count: test.builds.length }),
+      installedTestBuild,
+      returnAction,
+      returnPercent: returnAction === 'progress' ? storeOperationPercent(storeOperation!) : null,
+      returnProgressLabel: returnAction === 'progress' ? this.progressLabel(storeOperation!) : '',
+      returnFailure: canReturn && !live && storeOperation?.state === 'Failed'
+        ? this.localization.translateKey(storeOperationErrorKey(storeOperation.error))
+        : null,
     };
   }
 

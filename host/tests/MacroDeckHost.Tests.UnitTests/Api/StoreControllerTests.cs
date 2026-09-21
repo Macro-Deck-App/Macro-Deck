@@ -42,7 +42,7 @@ internal sealed class StoreControllerTests
 		_catalog = new StoreCatalog();
 		var installations = new JsonStoreInstallationStore(_paths, Serilog.Core.Logger.None);
 		var plugins = new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None);
-		_catalogQuery = new StoreCatalogQueryService(_catalog, plugins, installations);
+		_catalogQuery = new StoreCatalogQueryService(_catalog, plugins, installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None));
 		_tracker = new StoreOperationTracker(new InMemoryStoreOperationStore(), TimeProvider.System);
 		_installCoordinator = new StoreInstallCoordinator(_catalogQuery,
 			_tracker,

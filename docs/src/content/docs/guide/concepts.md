@@ -131,13 +131,18 @@ working without them.
 A plugin creator can invite you to test a plugin before it is reviewed. The invitation arrives by
 email; accept it in the Creator Portal with the same Macro Deck account you use in Macro Deck. While
 you are signed in under **Settings > Account**, **Tests** appears at the top of the Store next to
-**Installed**, listing every plugin you test and its builds, newest first. You do not need to be a Store
-tester to see it: while the Store itself is not open to you, its notice offers **Open your tests**.
+**Installed**, listing every plugin you test. Each plugin starts collapsed and shows how many test
+builds it has; select it to see its builds, newest first. You do not need to be a Store tester to see
+it: while the Store itself is not open to you, its notice offers **Open your tests**.
 
 Test builds are not reviewed or signed by Macro Deck: they come straight from the creator and may be
 unstable. Choosing **Install** or **Install test build** asks you to confirm that first. A test build
 replaces the version of the plugin you have installed, including one from the Store, and the build
 that is currently installed shows as **Installed**.
+
+While a test build is installed, the plugin is marked **Test build** under **Tests**, **Installed** and
+**Discover**. If the plugin is also published in the Store, **Return to Store version** installs its
+current Store release in place of the test build.
 
 ## Devices
 

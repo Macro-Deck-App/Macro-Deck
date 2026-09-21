@@ -36,6 +36,7 @@ export interface StoreCatalogItemBody {
   updatedAt?: string | null;
   installState: StoreInstallState;
   installedVersion?: string | null;
+  installedTestBuild?: string | null;
   unsupportedReason?: string | null;
   trust: StoreExtensionTrust;
   hasIcon: boolean;
@@ -210,6 +211,7 @@ export interface StoreTestBody {
   iconSha256?: string | null;
   installedVersion?: string | null;
   installedTestBuildId?: string | null;
+  storeVersion?: string | null;
   activeOperationId?: string | null;
   builds: StoreTestBuildBody[];
 }

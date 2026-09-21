@@ -98,7 +98,7 @@ internal sealed class StoreInstallExecutorTests
 			TimeProvider.System);
 
 		_executor = new StoreInstallExecutor(_catalog,
-			new StoreCatalogQueryService(_catalog, _pluginCatalog, _installations),
+			new StoreCatalogQueryService(_catalog, _pluginCatalog, _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None)),
 			_tracker,
 			downloader,
 			_pluginInstaller,
@@ -184,7 +184,7 @@ internal sealed class StoreInstallExecutorTests
 			}
 		};
 		var executor = new StoreInstallExecutor(_catalog,
-			new StoreCatalogQueryService(_catalog, _pluginCatalog, _installations),
+			new StoreCatalogQueryService(_catalog, _pluginCatalog, _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None)),
 			_tracker,
 			new StoreArtifactDownloader(_httpClientFactory, StoreRegistryOptions.Default, _paths, TimeProvider.System),
 			installer,
@@ -225,7 +225,7 @@ internal sealed class StoreInstallExecutorTests
 		};
 		var batches = new StoreInstallBackupBatches();
 		var executor = new StoreInstallExecutor(_catalog,
-			new StoreCatalogQueryService(_catalog, _pluginCatalog, _installations),
+			new StoreCatalogQueryService(_catalog, _pluginCatalog, _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None)),
 			_tracker,
 			new StoreArtifactDownloader(_httpClientFactory, StoreRegistryOptions.Default, _paths, TimeProvider.System),
 			installer,

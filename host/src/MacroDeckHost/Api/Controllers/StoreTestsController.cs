@@ -39,6 +39,7 @@ public class StoreTestsController : ControllerBase
 					IconSha256 = test.IconSha256,
 					InstalledVersion = test.InstalledVersion,
 					InstalledTestBuildId = test.InstalledTestBuildId,
+					StoreVersion = test.StoreVersion,
 					ActiveOperationId = test.ActiveOperationId,
 					Builds = test.Test.Builds
 						.Select(build => new StoreTestBuildBody

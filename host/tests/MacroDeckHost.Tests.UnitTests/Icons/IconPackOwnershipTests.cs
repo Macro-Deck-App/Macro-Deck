@@ -46,7 +46,7 @@ internal sealed class IconPackOwnershipTests
 		_plugins = new PluginInstallationCatalog(_harness.Paths, Serilog.Core.Logger.None);
 		_updateState = new StoreUpdateState();
 		_updateDetector = new StoreUpdateDetector(_catalog, _plugins, _installations, _updateState);
-		_catalogQuery = new StoreCatalogQueryService(_catalog, _plugins, _installations);
+		_catalogQuery = new StoreCatalogQueryService(_catalog, _plugins, _installations, new JsonStoreTestInstallationStore(_harness.Paths, Serilog.Core.Logger.None));
 		_storeOwner = new StoreIconPackOwner(_installations, _updateDetector, _harness.Logger);
 	}
 

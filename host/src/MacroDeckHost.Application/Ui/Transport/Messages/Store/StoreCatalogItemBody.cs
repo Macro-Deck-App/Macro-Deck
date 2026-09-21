@@ -24,6 +24,8 @@ public class StoreCatalogItemBody
 
 	public string? InstalledVersion { get; set; }
 
+	public string? InstalledTestBuild { get; set; }
+
 	/// <summary>Why the host considers this package unsupported here, naming the runtime identifier it
 	/// checked. Diagnostic only and never localized - a client that wants to say this to a reader uses
 	/// its own <c>Store.NotSupportedOnPlatform</c> wording instead.</summary>

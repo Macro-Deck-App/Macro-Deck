@@ -13,106 +13,157 @@
           @for (card of cards(); track card.test.packageId) {
             <section class="test-card">
               <div class="test-card-header">
-                <div class="test-icon">
-                  @if (card.iconUrl; as icon) {
-                    <img [src]="icon" alt="" loading="lazy" (error)="onIconError(card.test.packageId)">
-                  } @else {
-                    <span class="icon icon-{{ pluginIcon }} icon-lg" aria-hidden="true"></span>
+                <h2 class="test-heading">
+                  <button
+                    type="button"
+                    class="test-card-toggle"
+                    [attr.aria-expanded]="card.expanded"
+                    [attr.aria-controls]="card.expanded ? 'test-builds-' + card.test.packageId : null"
+                    (click)="toggleCard(card.test.packageId)">
+                    <span class="icon icon-chevron-right icon-xs test-card-chevron" [class.open]="card.expanded" aria-hidden="true"></span>
+                    <span class="test-icon">
+                      @if (card.iconUrl; as icon) {
+                        <img [src]="icon" alt="" loading="lazy" (error)="onIconError(card.test.packageId)">
+                      } @else {
+                        <span class="icon icon-{{ pluginIcon }} icon-lg" aria-hidden="true"></span>
+                      }
+                    </span>
+                    <span class="test-identity">
+                      <span class="test-name">{{ card.test.displayName }}</span>
+                      <span class="test-package-id">{{ card.test.packageId }}</span>
+                      <span class="test-build-count">{{ card.buildCount }}</span>
+                    </span>
+                  </button>
+                </h2>
+                <div class="test-card-status">
+                  @if (card.installedTestBuild; as build) {
+                    <span class="test-build-chip">
+                      <span class="icon icon-alert-triangle icon-xs" aria-hidden="true"></span>
+                      {{ 'macrodeck.app:Store.TestBuildActive' | translate:{ build: build } }}
+                    </span>
+                  } @else if (card.test.installedVersion) {
+                    <span class="test-installed">
+                      {{ 'macrodeck.app:Store.Tests.InstalledVersion' | translate:{ version: card.test.installedVersion } }}
+                    </span>
+                  }
+                  @switch (card.returnAction) {
+                    @case ('return') {
+                      <shared-button variant="secondary" size="compact" (click)="returnToStoreVersion(card.test)">
+                        {{ 'macrodeck.app:Store.ReturnToStoreVersion' | translate:{ version: card.test.storeVersion } }}
+                      </shared-button>
+                    }
+                    @case ('progress') {
+                      <div class="build-progress">
+                        <div
+                          class="progress-bar"
+                          [class.indeterminate]="card.returnPercent === null"
+                          role="progressbar"
+                          [attr.aria-valuenow]="card.returnPercent"
+                          [attr.aria-valuemin]="card.returnPercent !== null ? 0 : null"
+                          [attr.aria-valuemax]="card.returnPercent !== null ? 100 : null"
+                          [attr.aria-valuetext]="card.returnProgressLabel">
+                          @if (card.returnPercent !== null) {
+                            <div class="progress-fill" [style.width.%]="card.returnPercent"></div>
+                          }
+                        </div>
+                        <span class="progress-readout">{{ card.returnProgressLabel }}</span>
+                      </div>
+                    }
                   }
                 </div>
-                <div class="test-identity">
-                  <h2 class="test-name">{{ card.test.displayName }}</h2>
-                  <span class="test-package-id">{{ card.test.packageId }}</span>
-                </div>
-                @if (card.test.installedVersion) {
-                  <span class="test-installed">
-                    {{ 'macrodeck.app:Store.Tests.InstalledVersion' | translate:{ version: card.test.installedVersion } }}
-                  </span>
-                }
               </div>
 
-              <ul class="test-builds" [attr.aria-label]="'macrodeck.app:Store.Tests.BuildsAriaLabel' | translate:{ name: card.test.displayName }">
-                @for (row of card.rows; track row.build.id) {
-                  <li class="test-build">
-                    <div class="build-main">
-                      <div class="build-version">
-                        <span class="build-version-label">{{ 'macrodeck.app:Store.Page.VersionLabel' | translate:{ version: row.build.version } }}</span>
-                        <span class="build-number">{{ 'macrodeck.app:Store.Tests.BuildLabel' | translate:{ build: row.build.build } }}</span>
-                      </div>
-                      <div class="build-meta">
-                        <span>{{ 'macrodeck.app:Store.Tests.AvailableSince' | translate:{ time: row.available } }}</span>
-                        @if (row.size) {
-                          <span class="build-meta-separator" aria-hidden="true">·</span>
-                          <span>{{ row.size }}</span>
-                        }
-                      </div>
-                      <div class="build-action">
-                        @switch (row.action) {
-                          @case ('installed') {
-                            <shared-button variant="secondary" size="compact" [disabled]="true">
-                              <span class="icon icon-check icon-sm" aria-hidden="true"></span>
-                              {{ 'macrodeck.app:Store.Installed' | translate }}
-                            </shared-button>
+              @if (card.returnFailure) {
+                <p class="build-failure" role="alert">
+                  <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+                  <span>{{ card.returnFailure }}</span>
+                </p>
+              }
+
+              @if (card.expanded) {
+                <ul class="test-builds" [id]="'test-builds-' + card.test.packageId" [attr.aria-label]="'macrodeck.app:Store.Tests.BuildsAriaLabel' | translate:{ name: card.test.displayName }">
+                  @for (row of card.rows; track row.build.id) {
+                    <li class="test-build">
+                      <div class="build-main">
+                        <div class="build-version">
+                          <span class="build-version-label">{{ 'macrodeck.app:Store.Page.VersionLabel' | translate:{ version: row.build.version } }}</span>
+                          <span class="build-number">{{ 'macrodeck.app:Store.Tests.BuildLabel' | translate:{ build: row.build.build } }}</span>
+                        </div>
+                        <div class="build-meta">
+                          <span>{{ 'macrodeck.app:Store.Tests.AvailableSince' | translate:{ time: row.available } }}</span>
+                          @if (row.size) {
+                            <span class="build-meta-separator" aria-hidden="true">·</span>
+                            <span>{{ row.size }}</span>
                           }
-                          @case ('progress') {
-                            <div class="build-progress">
-                              <div
-                                class="progress-bar"
-                                [class.indeterminate]="row.percent === null"
-                                role="progressbar"
-                                [attr.aria-valuenow]="row.percent"
-                                [attr.aria-valuemin]="row.percent !== null ? 0 : null"
-                                [attr.aria-valuemax]="row.percent !== null ? 100 : null"
-                                [attr.aria-valuetext]="row.progressLabel">
-                                @if (row.percent !== null) {
-                                  <div class="progress-fill" [style.width.%]="row.percent"></div>
-                                }
+                        </div>
+                        <div class="build-action">
+                          @switch (row.action) {
+                            @case ('installed') {
+                              <shared-button variant="secondary" size="compact" [disabled]="true">
+                                <span class="icon icon-check icon-sm" aria-hidden="true"></span>
+                                {{ 'macrodeck.app:Store.Installed' | translate }}
+                              </shared-button>
+                            }
+                            @case ('progress') {
+                              <div class="build-progress">
+                                <div
+                                  class="progress-bar"
+                                  [class.indeterminate]="row.percent === null"
+                                  role="progressbar"
+                                  [attr.aria-valuenow]="row.percent"
+                                  [attr.aria-valuemin]="row.percent !== null ? 0 : null"
+                                  [attr.aria-valuemax]="row.percent !== null ? 100 : null"
+                                  [attr.aria-valuetext]="row.progressLabel">
+                                  @if (row.percent !== null) {
+                                    <div class="progress-fill" [style.width.%]="row.percent"></div>
+                                  }
+                                </div>
+                                <span class="progress-readout">{{ row.progressLabel }}</span>
                               </div>
-                              <span class="progress-readout">{{ row.progressLabel }}</span>
-                            </div>
+                            }
+                            @case ('install') {
+                              <shared-button variant="primary" size="compact" (click)="requestInstall(card.test, row.build)">
+                                {{ 'macrodeck.app:Store.Install' | translate }}
+                              </shared-button>
+                            }
+                            @default {
+                              <shared-button
+                                variant="secondary"
+                                size="compact"
+                                [disabled]="row.action === 'busy'"
+                                (click)="requestInstall(card.test, row.build)">
+                                {{ 'macrodeck.app:Store.Tests.InstallTestBuild' | translate }}
+                              </shared-button>
+                            }
                           }
-                          @case ('install') {
-                            <shared-button variant="primary" size="compact" (click)="requestInstall(card.test, row.build)">
-                              {{ 'macrodeck.app:Store.Install' | translate }}
-                            </shared-button>
-                          }
-                          @default {
-                            <shared-button
-                              variant="secondary"
-                              size="compact"
-                              [disabled]="row.action === 'busy'"
-                              (click)="requestInstall(card.test, row.build)">
-                              {{ 'macrodeck.app:Store.Tests.InstallTestBuild' | translate }}
-                            </shared-button>
-                          }
-                        }
+                        </div>
                       </div>
-                    </div>
 
-                    @if (row.failure) {
-                      <p class="build-failure" role="alert">
-                        <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
-                        <span>{{ row.failure }}</span>
-                      </p>
-                    }
+                      @if (row.failure) {
+                        <p class="build-failure" role="alert">
+                          <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+                          <span>{{ row.failure }}</span>
+                        </p>
+                      }
 
-                    @if (row.build.changelog) {
-                      <div class="build-changelog">
-                        <shared-button variant="ghost" size="compact" (click)="toggleChangelog(row.build.id)">
+                      @if (row.build.changelog) {
+                        <div class="build-changelog">
+                          <shared-button variant="ghost" size="compact" (click)="toggleChangelog(row.build.id)">
+                            @if (isChangelogExpanded(row.build.id)) {
+                              {{ 'macrodeck.app:Store.Tests.HideChangelog' | translate }}
+                            } @else {
+                              {{ 'macrodeck.app:Store.Tests.ShowChangelog' | translate }}
+                            }
+                          </shared-button>
                           @if (isChangelogExpanded(row.build.id)) {
-                            {{ 'macrodeck.app:Store.Tests.HideChangelog' | translate }}
-                          } @else {
-                            {{ 'macrodeck.app:Store.Tests.ShowChangelog' | translate }}
+                            <shared-store-markdown [text]="row.build.changelog" />
                           }
-                        </shared-button>
-                        @if (isChangelogExpanded(row.build.id)) {
-                          <shared-store-markdown [text]="row.build.changelog" />
-                        }
-                      </div>
-                    }
-                  </li>
-                }
-              </ul>
+                        </div>
+                      }
+                    </li>
+                  }
+                </ul>
+              }
             </section>
           }
         </div>

@@ -2,6 +2,7 @@ using MacroDeck.Plugin.Packaging.Versioning;
 using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Store.Installation;
 using MacroDeckHost.Application.Store.Model;
+using MacroDeckHost.Application.Store.Testing;
 using MacroDeckHost.Domain.Common;
 
 namespace MacroDeckHost.Application.Store;
@@ -11,14 +12,17 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 	private readonly IStoreCatalog _catalog;
 	private readonly IPluginInstallationCatalog _plugins;
 	private readonly IStoreInstallationStore _installations;
+	private readonly IStoreTestInstallationStore _testInstallations;
 
 	public StoreCatalogQueryService(IStoreCatalog catalog,
 		IPluginInstallationCatalog plugins,
-		IStoreInstallationStore installations)
+		IStoreInstallationStore installations,
+		IStoreTestInstallationStore testInstallations)
 	{
 		_catalog = catalog;
 		_plugins = plugins;
 		_installations = installations;
+		_testInstallations = testInstallations;
 	}
 
 	public Result<StoreCatalogPage, StoreCatalogError> Query(StoreCatalogQuery query)
@@ -159,8 +163,22 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 			Entry = entry,
 			InstallState = state,
 			InstalledVersion = installedVersion,
+			InstalledTestBuild = InstalledTestBuild(entry, installedVersion),
 			UnsupportedReason = unsupportedReason
 		};
+	}
+
+	private string? InstalledTestBuild(StoreCatalogEntry entry, string? installedVersion)
+	{
+		if (entry.Kind is not StoreExtensionKind.Plugin || installedVersion is null)
+		{
+			return null;
+		}
+
+		var record = _testInstallations.Find(entry.Id);
+		return record is not null && string.Equals(record.Version, installedVersion, StringComparison.Ordinal)
+			? record.Build
+			: null;
 	}
 
 	private string? InstalledVersion(StoreCatalogEntry entry)

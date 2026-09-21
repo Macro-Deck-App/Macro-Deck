@@ -17455,4 +17455,20 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>{name} {version} (build {build}) was not reviewed by Macro Deck. It comes directly from the plugin's creator, may be unstable, and replaces the installed version {installedVersion}.</value>
     <comment>[name:string][version:string][build:string][installedVersion:string]</comment>
   </data>
+  <data name="Store.TestBuildActive" xml:space="preserve">
+    <value>Test build {build}</value>
+    <comment>[build:string] Shown on a Store plugin whose installed version is an unreviewed test build rather than the published release.</comment>
+  </data>
+  <data name="Store.ReturnToStoreVersion" xml:space="preserve">
+    <value>Return to Store version {version}</value>
+    <comment>[version:string] Replaces an installed test build with the currently published Store release.</comment>
+  </data>
+  <data name="Store.Tests.BuildCount.One" xml:space="preserve">
+    <value>{count} test build</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Tests.BuildCount.Other" xml:space="preserve">
+    <value>{count} test builds</value>
+    <comment>[plural]</comment>
+  </data>
 </root>

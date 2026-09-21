@@ -7,9 +7,11 @@ using MacroDeckHost.Application.Plugins.Compatibility;
 using MacroDeckHost.Application.Plugins.Installation;
 using MacroDeckHost.Application.Plugins.Logging;
 using MacroDeckHost.Application.Plugins.Trust;
+using MacroDeckHost.Application.Store.Testing;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Infrastructure.Plugins;
 using MacroDeckHost.Infrastructure.Plugins.Installation;
+using MacroDeckHost.Infrastructure.Store;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -31,6 +33,7 @@ internal sealed class PluginInstallerUninstallTests
 	private PluginSessionRegistry _sessionRegistry = null!;
 	private PluginCompatibilityService _compatibility = null!;
 	private PluginInstallationCatalog _catalog = null!;
+	private JsonStoreTestInstallationStore _testInstallations = null!;
 	private string _sourceDirectory = null!;
 
 	[SetUp]
@@ -75,6 +78,8 @@ internal sealed class PluginInstallerUninstallTests
 			TimeProvider.System));
 		services.AddSingleton<IPluginTrustRecordRepository, InMemoryPluginTrustRecordRepository>();
 		services.AddSingleton<IPluginTrustBaseline, FakePluginTrustBaseline>();
+		_testInstallations = new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None);
+		services.AddSingleton<IStoreTestInstallationStore>(_testInstallations);
 		var provider = services.BuildServiceProvider();
 
 		_installer = new PluginInstaller(_paths,
@@ -245,6 +250,28 @@ internal sealed class PluginInstallerUninstallTests
 			Assert.That(_supervisor.DesiredStartState.ContainsKey(PluginId), Is.False);
 			Assert.That(Directory.Exists(PluginInstallPaths.PluginDirectory(_paths.PluginsDirectory, PluginId)),
 				Is.False);
+		});
+	}
+
+	[Test]
+	public async Task Uninstalling_forgets_the_test_build_the_plugin_was_installed_from()
+	{
+		await Install(BuildArtifact("1.2.0"));
+		_testInstallations.Save(new StoreTestInstallationRecord
+		{
+			PluginId = PluginId,
+			Version = "1.2.0",
+			Build = "42",
+			BuildId = Guid.NewGuid(),
+			ArtifactSha256 = new string('0', 64)
+		});
+
+		var result = await _installer.Uninstall(PluginId, new PluginUninstallRequest());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True, result.ErrorMessage);
+			Assert.That(_testInstallations.Find(PluginId), Is.Null);
 		});
 	}
 

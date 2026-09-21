@@ -21,9 +21,91 @@
 
 .test-card-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
   min-width: 0;
+}
+
+.test-heading {
+  flex: 1 1 16rem;
+  min-width: 0;
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.test-card-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-md);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+
+  &:hover {
+    .test-card-chevron {
+      color: var(--color-text-primary);
+    }
+
+    .test-name {
+      color: var(--color-accent);
+    }
+
+    .test-icon {
+      background-color: var(--color-bg-hover);
+    }
+  }
+
+  &:focus-visible {
+    @include ds.focus-ring;
+  }
+}
+
+.test-card-chevron {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  transition: transform var(--transition-fast);
+
+  &.open {
+    transform: rotate(90deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.test-card-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+}
+
+.test-build-count {
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+}
+
+.test-build-chip {
+  @include ds.chip;
+  flex-shrink: 0;
+  color: var(--color-warning);
+  background-color: var(--color-warning-muted);
+
+  .icon {
+    background-color: var(--color-warning);
+  }
 }
 
 .test-icon {
@@ -55,7 +137,6 @@
 }
 
 .test-name {
-  margin: 0;
   font-size: var(--text-base);
   font-weight: var(--font-semibold);
   @include ds.truncate;
@@ -76,37 +157,63 @@
 }
 
 .test-builds {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(8rem, 1fr) minmax(0, 2fr) auto;
+  column-gap: var(--space-3);
   margin: 0;
   padding: 0;
   list-style: none;
+
+  @include ds.breakpoint-down('sm') {
+    grid-template-columns: 1fr auto;
+  }
 }
 
 .test-build {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  row-gap: var(--space-2);
   padding: var(--space-3) 0;
   border-top: 1px solid var(--color-border);
 
   &:last-child {
     padding-bottom: 0;
   }
+
+  > * {
+    grid-column: 1 / -1;
+  }
 }
 
 .build-main {
   display: grid;
-  grid-template-columns: minmax(8rem, 1fr) minmax(0, 2fr) auto;
+  grid-template-columns: subgrid;
   align-items: center;
-  gap: var(--space-3);
+  row-gap: var(--space-3);
 
   @include ds.breakpoint-down('sm') {
-    grid-template-columns: 1fr auto;
-
     .build-meta {
       grid-column: 1 / -1;
       grid-row: 2;
+    }
+  }
+}
+
+// macOS 11 ships a WebKit without subgrid: there each row keeps its own grid, unaligned but intact.
+@supports not (grid-template-columns: subgrid) {
+  .test-builds,
+  .test-build {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .build-main {
+    grid-template-columns: minmax(8rem, 1fr) minmax(0, 2fr) auto;
+    column-gap: var(--space-3);
+
+    @include ds.breakpoint-down('sm') {
+      grid-template-columns: 1fr auto;
     }
   }
 }
