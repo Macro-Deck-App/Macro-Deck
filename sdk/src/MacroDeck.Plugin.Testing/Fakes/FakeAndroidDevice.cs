@@ -111,7 +111,9 @@ public sealed class FakeAndroidDevice : IAndroidDevice
 		Begin(nameof(InstallApkAsync), cancellationToken, apkPath);
 		lock (_gate)
 		{
-			InstalledPackages.Add(Path.GetFileNameWithoutExtension(apkPath));
+			// Either separator: a test may name a Windows path while running on Linux or macOS.
+			var fileName = apkPath[(apkPath.LastIndexOfAny(['/', '\\']) + 1)..];
+			InstalledPackages.Add(Path.GetFileNameWithoutExtension(fileName));
 		}
 
 		return Task.CompletedTask;
