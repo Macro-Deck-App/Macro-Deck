@@ -7,7 +7,8 @@ Status: Accepted
 The companion app (Android, iOS) keeps several addresses per saved host and learns new ones from mDNS. The
 host serves plain HTTP on the LAN by design, and the app matched hosts by instance name or a shared IP, so any
 device on the network advertising the host's name could receive the bearer token, the refresh cookie and
-the stored password. A replayed refresh token also revokes every session of the account.
+the stored password. A replayed refresh token also revokes the session it belongs to (every session of the
+account, until [ADR 0083](0083-companion-pairing-code-and-year-long-refresh.md) was amended).
 
 ## Decision
 

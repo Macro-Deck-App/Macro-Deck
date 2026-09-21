@@ -47,7 +47,7 @@ public class AccessTokenCutoffTests
 	{
 		var cutoff = new AccessTokenCutoff();
 		cutoff.Set(ResetAt);
-		var issuer = new JwtAccessTokenIssuer(new FixedKey(), new FixedTime(ResetAt), cutoff);
+		var issuer = new JwtAccessTokenIssuer(new FixedKey(), new FixedTime(ResetAt), cutoff, new DeviceSessionGuard());
 
 		var token = new JsonWebToken(issuer.Issue(Guid.NewGuid(), "admin", AuthScope.Client, null).Token);
 

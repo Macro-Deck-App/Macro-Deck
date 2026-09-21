@@ -432,6 +432,9 @@ public class Startup
 		services.AddSingleton(TimeProvider.System);
 		services.AddSingleton<LoginThrottle>();
 		services.AddSingleton<AccessTokenCutoff>();
+		services.AddSingleton<RefreshServingEpoch>();
+		services.AddSingleton<DeviceSessionGuard>();
+		services.AddSingleton<ILastServedRotation, Infrastructure.Auth.LastServedRotation>();
 		services.AddSingleton<FailedLoginNotificationTracker>();
 		services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
 		services.AddSingleton<IAccessTokenIssuer, JwtAccessTokenIssuer>();
@@ -870,8 +873,34 @@ public class Startup
 		}
 	}
 
+	private static void SeedDeviceSessions(IServiceProvider services)
+	{
+		if (KeyRingStartupState.IsLocked)
+		{
+			return;
+		}
+
+		using var scope = services.CreateScope();
+		var devices = scope.ServiceProvider.GetRequiredService<IDeviceRepository>().GetAll().GetAwaiter().GetResult();
+		services.GetRequiredService<DeviceSessionGuard>()
+			.Seed(devices.Select(device => (device.Id, device.SessionsRevokedAt)));
+	}
+
 	public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 	{
+		ArgumentNullException.ThrowIfNull(app);
+
+		// Before the first request, and before this host rotates anything over the record: the grace needs
+		// the rotation the previous host was interrupted at, not one this process served.
+		var services = app.ApplicationServices;
+		var now = services.GetRequiredService<TimeProvider>().GetUtcNow().UtcDateTime;
+		services.GetRequiredService<RefreshServingEpoch>()
+			.Begin(now, services.GetRequiredService<ILastServedRotation>().Read());
+
+		// Seeded here rather than from a hosted service: those start after the server is already
+		// listening, and an unseeded guard refuses every device token it does not know yet.
+		SeedDeviceSessions(services);
+
 		app.UseExceptionHandler();
 
 		// Outermost after the exception handler, so the status code it observes is the one the client

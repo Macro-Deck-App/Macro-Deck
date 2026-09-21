@@ -33,7 +33,18 @@ public static class AuthDefaults
 	public const int MinPasswordLength = 8;
 	public const int MaxUsernameLength = 64;
 
-	public static readonly TimeSpan AccessTokenLifetime = TimeSpan.FromMinutes(15);
+	public static readonly TimeSpan AdminAccessTokenLifetime = TimeSpan.FromMinutes(15);
+
+	// Only safe because DeviceSessionGuard refuses a signed-out device's token on the next request.
+	public static readonly TimeSpan ClientAccessTokenLifetime = TimeSpan.FromDays(60);
+
+	// Earned by the device claim, not by the scope: a token naming no device is outside the guard's reach
+	// and has no durable way to be revoked, so it keeps the short life.
+	public static TimeSpan AccessTokenLifetimeFor(AuthScope scope, Guid? deviceId)
+		=> scope != AuthScope.Admin && deviceId is not null
+			? ClientAccessTokenLifetime
+			: AdminAccessTokenLifetime;
+
 	public static readonly TimeSpan RefreshTokenLifetime = TimeSpan.FromDays(365);
 
 	// Reuse detection only sees a rotated token while its row exists: this is that window. See ADR 0083.
@@ -42,6 +53,9 @@ public static class AuthDefaults
 	// The just-rotated token is accepted once this soon after rotation, so a lost response does not sign out
 	// every device. Accepted cost: a stolen token replayed this soon, before its owner, is not detected.
 	public static readonly TimeSpan RefreshTokenReuseGrace = TimeSpan.FromSeconds(60);
+
+	// Only ever offered for the rotation the previous host was interrupted at; see AuthService.WithinGrace.
+	public static readonly TimeSpan RefreshTokenReuseGraceAfterRestart = TimeSpan.FromMinutes(10);
 
 	public static readonly TimeSpan PairingCodeLifetime = TimeSpan.FromMinutes(15);
 

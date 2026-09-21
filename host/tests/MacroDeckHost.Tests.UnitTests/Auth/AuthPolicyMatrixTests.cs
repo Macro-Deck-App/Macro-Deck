@@ -986,7 +986,7 @@ public class AuthPolicyMatrixTests
 			Assert.That(refresh.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 			Assert.That(retry.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 			Assert.That(reuse.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
-			Assert.That(other.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+			Assert.That(other.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 		});
 	}
 
@@ -1036,6 +1036,66 @@ public class AuthPolicyMatrixTests
 			// Cookie authentication must never read as transport-level trust.
 			Assert.That(status.GetProperty("authenticated").GetBoolean(), Is.True);
 			Assert.That(status.GetProperty("trusted").GetBoolean(), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task Signing_a_device_out_refuses_its_access_token_on_the_next_request()
+	{
+		var (body, _) = await LoginWithDevice("Wall tablet");
+		var token = body.GetProperty("accessToken").GetString()!;
+		var deviceId = body.GetProperty("device").GetProperty("deviceId").GetString()!;
+		// A guarded route, not the anonymous status endpoint: NotFound here means the request was
+		// authorized and only the icon is missing.
+		var before = await Send(HttpMethod.Get, $"/api/icons/{Guid.NewGuid()}/image", bearerToken: token);
+
+		await Send(HttpMethod.Post, $"/api/devices/{deviceId}/logout", loopback: true);
+
+		var after = await Send(HttpMethod.Get, $"/api/icons/{Guid.NewGuid()}/image", bearerToken: token);
+		var status = await ReadJson(await Send(HttpMethod.Get, "/api/auth/status", bearerToken: token));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(before.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+			Assert.That(after.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+			Assert.That(status.GetProperty("authenticated").GetBoolean(), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_signed_out_device_that_signs_in_again_is_accepted_at_once()
+	{
+		var (body, _) = await LoginWithDevice("Wall tablet");
+		var deviceId = body.GetProperty("device").GetProperty("deviceId").GetString()!;
+		var secret = body.GetProperty("device").GetProperty("deviceSecret").GetString()!;
+		await Send(HttpMethod.Post, $"/api/devices/{deviceId}/logout", loopback: true);
+
+		var again = await SendJson(HttpMethod.Post,
+			"/api/auth/login",
+			new
+			{
+				username = "admin",
+				password = "password123",
+				scope = "client",
+				device = new
+				{
+					deviceId,
+					deviceSecret = secret,
+					clientType = "web-client",
+					proposedName = "Wall tablet",
+					platform = "Windows",
+					browser = "Chrome",
+					formFactor = "desktop",
+					appVersion = "test"
+				}
+			});
+		var token = (await ReadJson(again)).GetProperty("accessToken").GetString()!;
+		var guarded = await Send(HttpMethod.Get, $"/api/icons/{Guid.NewGuid()}/image", bearerToken: token);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(again.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+			Assert.That(guarded.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
 		});
 	}
 

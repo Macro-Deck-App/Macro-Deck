@@ -94,6 +94,17 @@ internal sealed class InMemoryRefreshTokenRepository : IRefreshTokenRepository
 		return Task.CompletedTask;
 	}
 
+	public Task<int> RevokeFamily(Guid familyId, DateTime revokedAt)
+	{
+		var revoked = Tokens.Where(t => t.FamilyId == familyId && t.RevokedAt is null).ToList();
+		foreach (var token in revoked)
+		{
+			token.RevokedAt = revokedAt;
+		}
+
+		return Task.FromResult(revoked.Count);
+	}
+
 	public Task RevokeAllForDevice(Guid deviceId, DateTime revokedAt)
 	{
 		foreach (var token in Tokens.Where(t => t.DeviceId == deviceId && t.RevokedAt is null))
@@ -244,7 +255,7 @@ internal sealed class FakeAccessTokenIssuer : IAccessTokenIssuer
 		var device = deviceId is { } id ? $":{id}" : string.Empty;
 
 		return new AccessToken($"token:{username}:{AuthDefaults.ScopeClaimValue(scope)}{device}",
-			_timeProvider.GetUtcNow().UtcDateTime.Add(AuthDefaults.AccessTokenLifetime));
+			_timeProvider.GetUtcNow().UtcDateTime.Add(AuthDefaults.AccessTokenLifetimeFor(scope, deviceId)));
 	}
 }
 
@@ -317,4 +328,14 @@ internal sealed class FakeDeviceDeckNavigator : IDeviceDeckNavigator
 		ProfileCalls.Add((deviceId, profileId));
 		return Task.FromResult(ChangeProfileResult);
 	}
+}
+
+// Records what a host rotated, the way LastServedRotation does, without touching the filesystem.
+internal sealed class FakeLastServedRotation : ILastServedRotation
+{
+	public DateTime Recorded { get; private set; } = DateTime.MinValue;
+
+	public DateTime Read() => Recorded;
+
+	public void Record(DateTime rotatedAt) => Recorded = rotatedAt;
 }

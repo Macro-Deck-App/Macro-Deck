@@ -103,11 +103,18 @@ GET /plugins/ws?access_token=<session-token> HTTP/1.1
   once even though its 15-minute JWT is still cryptographically valid.
 - **Identity is never taken from a claim.** The host checks the credential against its own record.
   `MACRO_DECK_PLUGIN_LAUNCH_ID` is yours to log and nothing more.
-- **Client sessions** (web client, companion) hold a 15-minute access token and a refresh token that
-  rotates on every use and lives 365 days. A rotated refresh token presented again within 30 days of its
-  rotation revokes every session of the account, with one exception: the token rotated out most recently
-  is accepted once more within 60 seconds of its rotation, from the same device and scope, so a client
-  whose rotation response was lost in transit can retry. The companion pairs with a six-digit, single-use code
+- **Client sessions** (web client, companion) hold an access token - 15 minutes for the admin surface,
+  60 days for a deck device - and a refresh token that rotates on every use and lives 365 days. Signing a
+  device out in the devices list, removing it, or changing the account password or username is checked on
+  every request from then on, so a long device token ends the moment you end the session rather than when
+  it expires - every device at once for a credential change. A client session that is not tied to a device keeps the 15 minute token, because there is
+  nothing to revoke it by. A rotated refresh token presented again within 30 days of its
+  rotation revokes that token's rotation chain - the session it belongs to - and leaves every other session
+  of the account signed in. One exception: the token rotated out most recently is accepted once more, from the same device and
+  scope, so a client whose rotation response was lost in transit can retry - within a minute of the
+  rotation, or, when the host restarted in between, within ten minutes of it starting up - and then only
+  for the rotation that restart interrupted, because a restart is exactly when a rotation response goes
+  missing. The companion pairs with a six-digit, single-use code
   from the desktop app's network panel: one code at a time, minted only on the loopback listener, cleared
   after five failed guesses from any caller, and throttled globally. See
   [ADR 0083](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0083-companion-pairing-code-and-year-long-refresh.md).

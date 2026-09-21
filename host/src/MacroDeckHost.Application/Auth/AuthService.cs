@@ -18,6 +18,8 @@ public class AuthService : IAuthService
 	private readonly IDeviceEnrollmentStore _deviceEnrollments;
 	private readonly PairingCodeStore _pairingCodes;
 	private readonly AccessTokenCutoff _accessTokenCutoff;
+	private readonly RefreshServingEpoch _servingEpoch;
+	private readonly ILastServedRotation _lastRotation;
 	private readonly IAppPreferenceService _appPreferences;
 	private readonly TimeProvider _timeProvider;
 	private readonly ILogger<AuthService> _logger;
@@ -31,6 +33,8 @@ public class AuthService : IAuthService
 		IDeviceEnrollmentStore deviceEnrollments,
 		PairingCodeStore pairingCodes,
 		AccessTokenCutoff accessTokenCutoff,
+		RefreshServingEpoch servingEpoch,
+		ILastServedRotation lastRotation,
 		IAppPreferenceService appPreferences,
 		TimeProvider timeProvider,
 		ILogger<AuthService> logger)
@@ -43,6 +47,8 @@ public class AuthService : IAuthService
 		_deviceEnrollments = deviceEnrollments;
 		_pairingCodes = pairingCodes;
 		_accessTokenCutoff = accessTokenCutoff;
+		_servingEpoch = servingEpoch;
+		_lastRotation = lastRotation;
 		_appPreferences = appPreferences;
 		_timeProvider = timeProvider;
 		_logger = logger;
@@ -206,7 +212,7 @@ public class AuthService : IAuthService
 			rotating = await GraceSuccessor(token, now);
 			if (rotating is null)
 			{
-				return await RevokeAllAsReuse(token.UserId, now);
+				return await RevokeFamilyAsReuse(token, now);
 			}
 		}
 
@@ -216,18 +222,18 @@ public class AuthService : IAuthService
 			return Result.Fail<LoginResult, AuthError>(AuthError.InvalidRefreshToken, "Invalid refresh token.");
 		}
 
-		var result = await IssueTokens(user, rotating.Scope, rotating.DeviceId);
+		var result = await IssueTokens(user, rotating.Scope, rotating.DeviceId, rotating.FamilyId);
 		if (!await _refreshTokenRepository.TryRevoke(rotating.Id, now, result.RefreshTokenId, inGrace))
 		{
 			if (inGrace)
 			{
-				return await RevokeAllAsReuse(token.UserId, now);
+				return await RevokeFamilyAsReuse(token, now);
 			}
 
 			var raced = await _refreshTokenRepository.GetById(token.Id);
 			if (raced is { RotatedByGrace: true })
 			{
-				return await RevokeAllAsReuse(token.UserId, now);
+				return await RevokeFamilyAsReuse(token, now);
 			}
 
 			if (raced?.ReplacedById is null)
@@ -249,6 +255,9 @@ public class AuthService : IAuthService
 				token.DeviceId);
 		}
 
+		// Read by the next host to tell an interrupted rotation from one this host outlived.
+		_lastRotation.Record(now);
+
 		var startupProfileId = rotating.DeviceId is { } deviceId
 			? await _deviceService.ResolveStartupProfileId(deviceId)
 			: null;
@@ -261,7 +270,7 @@ public class AuthService : IAuthService
 
 	private async Task<RefreshTokenEntity?> GraceSuccessor(RefreshTokenEntity token, DateTime now)
 	{
-		if (token.RotatedByGrace || now - token.RevokedAt > AuthDefaults.RefreshTokenReuseGrace)
+		if (token.RotatedByGrace || !WithinGrace(token.RevokedAt!.Value, now))
 		{
 			return null;
 		}
@@ -276,11 +285,39 @@ public class AuthService : IAuthService
 				: null;
 	}
 
-	private async Task<Result<LoginResult, AuthError>> RevokeAllAsReuse(Guid userId, DateTime now)
+	// The grace does not run while the host is not answering refreshes: a rotation response lost to a
+	// restart would otherwise be judged as reuse the moment the host came back.
+	private bool WithinGrace(DateTime revokedAt, DateTime now)
 	{
-		// A rotated-out token coming back means it leaked or the client state diverged:
-		// kill every session for the user instead of trusting either party.
-		await _refreshTokenRepository.RevokeAllForUser(userId, now);
+		if (now - revokedAt <= AuthDefaults.RefreshTokenReuseGrace)
+		{
+			return true;
+		}
+
+		var servingSince = _servingEpoch.StartedAt;
+		var previousRotation = _servingEpoch.PreviousRotationAt;
+
+		return previousRotation > DateTime.MinValue &&
+			revokedAt <= previousRotation &&
+			previousRotation - revokedAt <= AuthDefaults.RefreshTokenReuseGrace &&
+			revokedAt < servingSince &&
+			now - servingSince <= AuthDefaults.RefreshTokenReuseGraceAfterRestart;
+	}
+
+	private async Task<Result<LoginResult, AuthError>> RevokeFamilyAsReuse(RefreshTokenEntity token, DateTime now)
+	{
+		// A rotated-out token coming back means it leaked or the client state diverged: kill the chain it
+		// belongs to and only that one, which is as far as the leak reaches.
+		var revoked = await _refreshTokenRepository.RevokeFamily(token.FamilyId, now);
+		AuthLog.FamilyRevokedAsReuse(_logger, token.Id, token.FamilyId, revoked, token.UserId, token.DeviceId);
+
+		// The access token the leak also carries outlives the refresh token by up to
+		// AuthDefaults.ClientAccessTokenLifetime, so the device's sessions end here too.
+		if (token.DeviceId is { } deviceId)
+		{
+			await _deviceService.LogoutDevice(deviceId);
+		}
+
 		return Result.Fail<LoginResult, AuthError>(AuthError.RefreshTokenReused, "Refresh token was already used.");
 	}
 
@@ -310,7 +347,10 @@ public class AuthService : IAuthService
 			return Result.Fail(AuthError.InvalidCredentials, "Current password is incorrect.");
 		}
 
-		await SetPassword(user, newPassword, UtcNow());
+		var changedAt = UtcNow();
+		_accessTokenCutoff.Set(changedAt);
+		await SetPassword(user, newPassword, changedAt);
+		await _deviceService.EndAllSessions();
 
 		return Result.Ok<AuthError>();
 	}
@@ -332,9 +372,9 @@ public class AuthService : IAuthService
 		var now = UtcNow();
 		_accessTokenCutoff.Set(now);
 		await SetPassword(user, newPassword, now);
+		await _deviceService.EndAllSessions();
 		_pairingCodes.Rotate(now);
 		_deviceEnrollments.Clear();
-		await _deviceService.EndAllSessions();
 
 		return Result.Ok<AuthError>();
 	}
@@ -356,8 +396,10 @@ public class AuthService : IAuthService
 		var now = UtcNow();
 		user.Username = newUsername;
 		user.UpdatedAt = now;
+		_accessTokenCutoff.Set(now);
 		await _userRepository.Update(user);
 		await _refreshTokenRepository.RevokeAllForUser(user.Id, now);
+		await _deviceService.EndAllSessions();
 
 		return Result.Ok<AuthError>();
 	}
@@ -373,15 +415,18 @@ public class AuthService : IAuthService
 	private async Task<(LoginResult Login, Guid RefreshTokenId)> IssueTokens(
 		UserEntity user,
 		AuthScope scope,
-		Guid? deviceId)
+		Guid? deviceId,
+		Guid? familyId = null)
 	{
 		var now = UtcNow();
 		var rawRefreshToken = GenerateRefreshToken();
+		var id = Guid.NewGuid();
 
 		var entity = new RefreshTokenEntity
 		{
-			Id = Guid.NewGuid(),
+			Id = id,
 			UserId = user.Id,
+			FamilyId = familyId ?? id,
 			TokenHash = HashToken(rawRefreshToken),
 			DeviceId = deviceId,
 			Scope = scope,

@@ -2,7 +2,7 @@ namespace MacroDeck.Plugin.Protocol.Auth;
 
 /// <summary>
 /// Header names, scope value and lifetimes for plugin authentication. <see cref="SessionTokenLifetime" />
-/// mirrors the host's <c>AuthDefaults.AccessTokenLifetime</c>, duplicated rather than referenced -
+/// mirrors the host's <c>AuthDefaults.AdminAccessTokenLifetime</c>, duplicated rather than referenced -
 /// this project never references the host.
 /// </summary>
 public static class PluginAuthDefaults

@@ -17,6 +17,7 @@ public class RefreshTokenEntityConfig : BaseEntityConfig<RefreshTokenEntity>
 
 		builder.Property(x => x.UserId).HasColumnName(ColumnPrefix + "user_id");
 		builder.Property(x => x.TokenHash).HasColumnName(ColumnPrefix + "token_hash");
+		builder.Property(x => x.FamilyId).HasColumnName(ColumnPrefix + "family_id");
 		builder.Property(x => x.DeviceId).HasColumnName(ColumnPrefix + "device_id");
 		builder.Property(x => x.Scope).HasColumnName(ColumnPrefix + "scope");
 		builder.Property(x => x.ExpiresAt).HasColumnName(ColumnPrefix + "expires_at");

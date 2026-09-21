@@ -32,7 +32,8 @@ public class DeviceRegistrationTests
 			CompletedStartupReadiness(),
 			new ProviderDevicePresenceTracker(),
 			new FakeIntegrationRegistry(),
-			TestScreenSaverProviders.Registry());
+			TestScreenSaverProviders.Registry(),
+			new DeviceSessionGuard());
 
 	private static StartupReadiness CompletedStartupReadiness()
 	{
@@ -59,6 +60,8 @@ public class DeviceRegistrationTests
 			new DeviceEnrollmentStore(),
 			new PairingCodeStore(),
 			new AccessTokenCutoff(),
+			new RefreshServingEpoch(),
+			new FakeLastServedRotation(),
 			new FakeOnboardingPreferences(),
 			_time,
 			NullLogger<AuthService>.Instance);

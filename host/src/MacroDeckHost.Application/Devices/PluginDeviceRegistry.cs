@@ -7,6 +7,9 @@ using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
+// Aliased rather than imported: MacroDeckHost.Application.Auth also declares DeviceRegistration, which
+// would collide with MacroDeck.Sdk.Devices.DeviceRegistration in this file.
+using DeviceSessionGuard = MacroDeckHost.Application.Auth.DeviceSessionGuard;
 
 namespace MacroDeckHost.Application.Devices;
 
@@ -18,6 +21,7 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly ProviderDevicePresenceTracker _presence;
 	private readonly DeviceConnectionTracker _connectionTracker;
+	private readonly DeviceSessionGuard _sessionGuard;
 	private readonly ILayoutRegistry _layoutRegistry;
 	private readonly TimeProvider _timeProvider;
 
@@ -25,12 +29,14 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 		IServiceScopeFactory scopeFactory,
 		ProviderDevicePresenceTracker presence,
 		DeviceConnectionTracker connectionTracker,
+		DeviceSessionGuard sessionGuard,
 		ILayoutRegistry layoutRegistry,
 		TimeProvider timeProvider)
 	{
 		_scopeFactory = scopeFactory;
 		_presence = presence;
 		_connectionTracker = connectionTracker;
+		_sessionGuard = sessionGuard;
 		_layoutRegistry = layoutRegistry;
 		_timeProvider = timeProvider;
 	}
@@ -73,6 +79,7 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 
 			Apply(existing, device, name, now);
 			await repository.Create(existing);
+			_sessionGuard.Track(existing.Id, existing.SessionsRevokedAt);
 		}
 		else
 		{

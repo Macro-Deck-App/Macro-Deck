@@ -462,6 +462,53 @@ describe('Client', () => {
     });
   });
 
+  describe('a deck device access token that outlives a timer', () => {
+    const SIXTY_DAYS_SECONDS = 60 * 24 * 60 * 60;
+    const SET_TIMEOUT_CEILING_MS = 2 ** 31 - 1;
+
+    it('never arms a delay the platform would fire immediately', async () => {
+      // setTimeout stores its delay in a signed 32-bit int: past the ceiling it fires at once, so a
+      // 60 day token would refresh on a loop rather than in two months.
+      const armed: number[] = [];
+      const realSetTimeout = globalThis.setTimeout;
+      (globalThis as { setTimeout: unknown }).setTimeout =
+        ((handler: TimerHandler, delay?: number, ...rest: unknown[]) => {
+          if (typeof delay === 'number') armed.push(delay);
+          return realSetTimeout(handler, delay, ...rest);
+        }) as typeof globalThis.setTimeout;
+
+      try {
+        twoProfiles();
+        host.loginAnswer = token({ expiresInSeconds: SIXTY_DAYS_SECONDS });
+        const client = build();
+        await client.probe();
+        await client.signIn('owner', 'secret');
+        await settle();
+      } finally {
+        (globalThis as { setTimeout: unknown }).setTimeout = realSetTimeout;
+      }
+
+      expect(armed.length).toBeGreaterThan(0);
+      expect(Math.max(...armed)).toBeLessThanOrEqual(SET_TIMEOUT_CEILING_MS);
+    });
+
+    it('still refreshes once the token really is about to expire', async () => {
+      jasmine.clock().mockDate(new Date());
+      twoProfiles();
+      host.loginAnswer = token({ expiresInSeconds: SIXTY_DAYS_SECONDS });
+      const client = build();
+      await client.probe();
+      await client.signIn('owner', 'secret');
+      await settle();
+      host.calls.length = 0;
+
+      jasmine.clock().tick((SIXTY_DAYS_SECONDS - 30) * 1000);
+      await settle();
+
+      expect(host.pathsFor('POST', '/api/auth/refresh').length).toBe(1);
+    });
+  });
+
   describe('picking the session back up on a reload', () => {
     it('resumes the session the refresh cookie still stands for', async () => {
       twoProfiles();

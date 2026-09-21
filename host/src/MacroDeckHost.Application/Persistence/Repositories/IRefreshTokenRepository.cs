@@ -16,6 +16,8 @@ public interface IRefreshTokenRepository
 
 	Task RevokeAllForUser(Guid userId, DateTime revokedAt);
 
+	Task<int> RevokeFamily(Guid familyId, DateTime revokedAt);
+
 	Task RevokeAllForDevice(Guid deviceId, DateTime revokedAt);
 
 	Task<IReadOnlyList<Guid>> GetDeviceIdsWithLiveTokens(DateTime now);

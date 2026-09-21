@@ -178,6 +178,20 @@ internal sealed class CompanionStateAndActionsTests
 	internal static JsonElement Payload(object value) =>
 		JsonSerializer.SerializeToElement(value, UiWebSocketProtocol.Json);
 
+	internal static DeviceSessionGuard GuardFor(IEnumerable<Claim> claims)
+	{
+		var guard = new DeviceSessionGuard();
+		foreach (var claim in claims.Where(c => c.Type == AuthDefaults.DeviceClaim))
+		{
+			if (Guid.TryParse(claim.Value, out var deviceId))
+			{
+				guard.Track(deviceId);
+			}
+		}
+
+		return guard;
+	}
+
 	internal static UiWebSocketDispatcher Dispatcher(CompanionHarness harness,
 		ClaimsPrincipal principal,
 		ICompanionLicenseService? licenses = null)
@@ -219,5 +233,6 @@ internal sealed class CompanionStateAndActionsTests
 			companions: harness.DeviceRegistry,
 			licenses: licenses!,
 			accessTokenCutoff: new AccessTokenCutoff(),
+			deviceSessionGuard: GuardFor(principal.Claims),
 			connectionCancellation: CancellationToken.None);
 }
