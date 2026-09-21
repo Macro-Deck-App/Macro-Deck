@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { By } from '@angular/platform-browser';
 import { Subject } from 'rxjs';
 import { ListUiPreviewsResponse, UiPreviewEntry } from '@macro-deck/runtime';
@@ -30,13 +31,17 @@ function fakeUiSessionService(): UiSessionService {
 
 describe('UiPreviewsTabComponent', () => {
   let apiSpy: jasmine.SpyObj<ApiService>;
+  let routerSpy: jasmine.SpyObj<Router>;
+  let integrationsChanged: Subject<unknown>;
   let fixture: ComponentFixture<UiPreviewsTabComponent>;
 
-  async function setUp(response: ListUiPreviewsResponse): Promise<void> {
-    apiSpy = jasmine.createSpyObj<ApiService>('ApiService', ['listUiPreviews', 'onNotification']);
-    apiSpy.listUiPreviews.and.resolveTo(response);
-    apiSpy.onNotification.and.returnValue(new Subject().asObservable());
+  function configure(queryParams: Record<string, string> = {}): void {
+    integrationsChanged = new Subject();
+    apiSpy.onNotification.and.callFake(<T>(method: string) =>
+      (method === 'IntegrationsChangedEvent' ? integrationsChanged : new Subject<T>()).asObservable() as never);
     Object.defineProperty(apiSpy, 'connectionStateSignal', { value: signal<ConnectionState>('connected') });
+    routerSpy = jasmine.createSpyObj<Router>('Router', ['navigate']);
+    routerSpy.navigate.and.resolveTo(true);
 
     TestBed.configureTestingModule({
       imports: [UiPreviewsTabComponent],
@@ -45,13 +50,47 @@ describe('UiPreviewsTabComponent', () => {
         provideLocalizationTesting(),
         { provide: ApiService, useValue: apiSpy },
         { provide: UiSessionService, useFactory: fakeUiSessionService },
+        { provide: Router, useValue: routerSpy },
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap(queryParams) } } },
       ],
     });
+  }
 
+  async function render(): Promise<void> {
     fixture = TestBed.createComponent(UiPreviewsTabComponent);
+    await settle();
+  }
+
+  async function settle(): Promise<void> {
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
+  }
+
+  async function setUp(response: ListUiPreviewsResponse, queryParams: Record<string, string> = {}): Promise<void> {
+    apiSpy = jasmine.createSpyObj<ApiService>('ApiService', ['listUiPreviews', 'onNotification']);
+    apiSpy.listUiPreviews.and.resolveTo(response);
+    configure(queryParams);
+    await render();
+  }
+
+  function canvas(): PreviewCanvasComponent | null {
+    return fixture.debugElement.query(By.directive(PreviewCanvasComponent))?.componentInstance ?? null;
+  }
+
+  async function integrationChangeSettled(): Promise<void> {
+    const before = apiSpy.listUiPreviews.calls.count();
+    integrationsChanged.next({ integrationId: 'plugin.example' });
+    await waitFor(() => apiSpy.listUiPreviews.calls.count() > before);
+    await settle();
+  }
+
+  async function waitFor(condition: () => boolean): Promise<void> {
+    const deadline = Date.now() + 5000;
+    while (!condition()) {
+      if (Date.now() > deadline) throw new Error('The preview list was never reloaded.');
+      await new Promise(resolve => setTimeout(resolve, 20));
+    }
   }
 
   function groupHeaders(): string[] {
@@ -124,23 +163,8 @@ describe('UiPreviewsTabComponent', () => {
   it('reports a load failure', async () => {
     apiSpy = jasmine.createSpyObj<ApiService>('ApiService', ['listUiPreviews', 'onNotification']);
     apiSpy.listUiPreviews.and.rejectWith(new Error('offline'));
-    apiSpy.onNotification.and.returnValue(new Subject().asObservable());
-    Object.defineProperty(apiSpy, 'connectionStateSignal', { value: signal<ConnectionState>('connected') });
-
-    TestBed.configureTestingModule({
-      imports: [UiPreviewsTabComponent],
-      providers: [
-        provideZonelessChangeDetection(),
-        provideLocalizationTesting(),
-        { provide: ApiService, useValue: apiSpy },
-        { provide: UiSessionService, useFactory: fakeUiSessionService },
-      ],
-    });
-
-    fixture = TestBed.createComponent(UiPreviewsTabComponent);
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
+    configure();
+    await render();
 
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('could not be loaded');
   });
@@ -162,5 +186,91 @@ describe('UiPreviewsTabComponent', () => {
     const ownerLabels = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.group-owner'))
       .map(el => el.textContent?.trim());
     expect(ownerLabels).toContain('Example Plugin');
+  });
+  describe('across plugin restarts and reloads', () => {
+    const scenario = preview('p1', 'MainView', 'Default', 'plugin.example');
+    const sibling = preview('p2', 'MainView', 'Other', 'plugin.example');
+
+    it('reloads the list on an integration change and keeps the selection, reporting availability', async () => {
+      await setUp({ previews: [scenario, sibling], diagnostics: [] }, { preview: 'p1', owner: 'plugin.example' });
+      expect(canvas()?.available()).toBeTrue();
+      const revision = canvas()!.catalogRevision();
+
+      apiSpy.listUiPreviews.and.resolveTo({ previews: [], diagnostics: [] });
+      await integrationChangeSettled();
+
+      expect(canvas()?.preview()?.id).toBe('p1');
+      expect(canvas()?.available()).toBeFalse();
+      expect(canvas()?.ownerConnected()).toBeFalse();
+
+      apiSpy.listUiPreviews.and.resolveTo({ previews: [scenario, sibling], diagnostics: [] });
+      await integrationChangeSettled();
+
+      expect(canvas()?.available()).toBeTrue();
+      expect(canvas()!.catalogRevision()).toBe(revision + 2);
+    });
+
+    it('treats a scenario its connected plugin stopped listing as gone rather than waiting', async () => {
+      await setUp({ previews: [scenario, sibling], diagnostics: [] }, { preview: 'p1', owner: 'plugin.example' });
+
+      apiSpy.listUiPreviews.and.resolveTo({ previews: [sibling], diagnostics: [] });
+      await integrationChangeSettled();
+
+      expect(canvas()?.available()).toBeFalse();
+      expect(canvas()?.ownerConnected()).toBeTrue();
+    });
+
+    it('fetches again when a change arrives while a fetch is still running', async () => {
+      await setUp({ previews: [scenario], diagnostics: [] });
+      let release!: () => void;
+      apiSpy.listUiPreviews.and.returnValue(new Promise(resolve => {
+        release = () => resolve({ previews: [], diagnostics: [] });
+      }));
+      const callsBefore = apiSpy.listUiPreviews.calls.count();
+      integrationsChanged.next({});
+      await waitFor(() => apiSpy.listUiPreviews.calls.count() > callsBefore);
+      const callsWhileRunning = apiSpy.listUiPreviews.calls.count();
+
+      apiSpy.listUiPreviews.and.resolveTo({ previews: [scenario, sibling], diagnostics: [] });
+      integrationsChanged.next({});
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      expect(apiSpy.listUiPreviews.calls.count()).toBe(callsWhileRunning);
+
+      release();
+      await waitFor(() => apiSpy.listUiPreviews.calls.count() === callsWhileRunning + 1);
+      await settle();
+      await fixture.whenStable();
+      await settle();
+      expect(scenarioLabels()).toContain('Other');
+    });
+
+    it('restores the selection, owner and size from the URL before the plugin has connected', async () => {
+      await setUp({ previews: [], diagnostics: [] }, { preview: 'p1', owner: 'plugin.example', w: '320', h: '99999' });
+
+      expect(canvas()?.preview()?.id).toBe('p1');
+      expect(canvas()?.preview()?.ownerId).toBe('plugin.example');
+      expect(canvas()?.available()).toBeFalse();
+      expect(canvas()?.ownerConnected()).toBeFalse();
+      expect(canvas()?.initialSize()).toEqual({ width: 320, height: 4000 });
+    });
+
+    it('ignores a size in the URL that is not a number', async () => {
+      await setUp({ previews: [scenario], diagnostics: [] }, { preview: 'p1', w: 'wide', h: '200' });
+
+      expect(canvas()?.initialSize()).toBeNull();
+    });
+
+    it('writes the selected scenario and its owner to the URL without adding history', async () => {
+      await setUp({ previews: [scenario], diagnostics: [] });
+
+      ((fixture.nativeElement as HTMLElement).querySelector('.rail-item') as HTMLButtonElement).click();
+      await settle();
+
+      expect(routerSpy.navigate).toHaveBeenCalledWith([], jasmine.objectContaining({
+        queryParams: { preview: 'p1', owner: 'plugin.example' },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      }));
+    });
   });
 });

@@ -57,6 +57,7 @@
     <Project Path="sdk/tests/support/MacroDeck.Signing.TestSupport/MacroDeck.Signing.TestSupport.csproj" />
   </Folder>
   <Folder Name="/sdk/tests/fixtures/">
+    <Project Path="sdk/tests/fixtures/MacroDeck.Plugin.Hosting.Tests.PreviewFixture/MacroDeck.Plugin.Hosting.Tests.PreviewFixture.csproj" />
     <Project Path="sdk/tests/fixtures/MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin/MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin.csproj" />
     <Project Path="sdk/tests/fixtures/MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin/MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin.csproj" />
   </Folder>

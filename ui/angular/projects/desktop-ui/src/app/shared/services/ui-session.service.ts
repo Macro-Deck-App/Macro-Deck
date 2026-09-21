@@ -32,6 +32,7 @@ export interface UiSessionHandle {
   readonly root: Signal<UiNode | null>;
   readonly revision: Signal<number>;
   readonly rejection: Signal<UiSessionRejection | null>;
+  readonly fault?: Signal<UiSessionRejection | null>;
   readonly generation: Signal<number>;
   send(event: UiNodeEvent): void;
   close(): void;
@@ -86,6 +87,7 @@ class LiveUiSessionHandle implements UiSessionHandle {
   readonly root = signal<UiNode | null>(null);
   readonly revision = signal(0);
   readonly rejection = signal<UiSessionRejection | null>(null);
+  readonly fault = signal<UiSessionRejection | null>(null);
   readonly generation = signal(0);
 
   private sessionId: string | null = null;
@@ -192,6 +194,7 @@ class LiveUiSessionHandle implements UiSessionHandle {
 
     this.root.set(root);
     this.revision.set(event.revision);
+    this.fault.set(null);
     this.hadTree = true;
     this.reopens = 0;
   }
@@ -235,6 +238,7 @@ class LiveUiSessionHandle implements UiSessionHandle {
     if (this.closed) return;
 
     const wasShowingTree = this.hadTree && this.root() !== null;
+    this.fault.set(rejection);
     this.root.set(null);
     if (!this.hadTree) this.rejection.set(rejection);
 

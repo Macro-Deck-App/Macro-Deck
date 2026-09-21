@@ -63,7 +63,17 @@
   overflow: hidden;
 }
 
-.canvas-rejection {
+.canvas-content {
+  position: absolute;
+  inset: 0;
+
+  &.stale {
+    opacity: 0.35;
+    filter: grayscale(1);
+  }
+}
+
+.canvas-notice {
   position: absolute;
   inset: 0;
   display: flex;
@@ -75,12 +85,12 @@
   text-align: center;
 }
 
-.canvas-rejection-heading {
+.canvas-notice-heading {
   margin: 0;
   font-weight: var(--font-semibold);
 }
 
-.canvas-rejection-message {
+.canvas-notice-message {
   margin: 0;
   font-size: var(--text-sm);
   color: var(--color-text-muted);

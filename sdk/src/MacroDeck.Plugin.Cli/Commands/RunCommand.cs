@@ -62,6 +62,11 @@ internal static class RunCommand
 			{ Description = "Managed only, diagnostic. Defaults to a fresh id." };
 		var listenUrlOption = new Option<string?>("--listen-url")
 			{ Description = "Where the plugin listens. Defaults to http://127.0.0.1:0 (an OS-chosen loopback port)." };
+		var watchOption = new Option<bool>("--watch")
+		{
+			Description = "With --project against a real host: run the plugin under dotnet watch, so a saved change " +
+				"is applied with .NET Hot Reload, or rebuilds and restarts the plugin when it cannot be."
+		};
 
 		var command = new Command("run", "Launch a plugin against a stub or real host, streaming its output.");
 		command.Add(projectOption);
@@ -79,6 +84,7 @@ internal static class RunCommand
 		command.Add(instanceIdOption);
 		command.Add(launchIdOption);
 		command.Add(listenUrlOption);
+		command.Add(watchOption);
 
 		command.SetAction(async (parseResult, cancellationToken) =>
 		{
@@ -100,7 +106,8 @@ internal static class RunCommand
 				DataDirectory = parseResult.GetValue(dataDirectoryOption),
 				InstanceId = parseResult.GetValue(instanceIdOption),
 				LaunchId = parseResult.GetValue(launchIdOption),
-				ListenUrl = parseResult.GetValue(listenUrlOption)
+				ListenUrl = parseResult.GetValue(listenUrlOption),
+				Watch = parseResult.GetValue(watchOption)
 			};
 
 			return await RunSession.RunAsync(console, options, pairingProbe, cancellationToken).ConfigureAwait(false);
@@ -158,4 +165,6 @@ internal sealed record RunOptions
 	public string? LaunchId { get; init; }
 
 	public string? ListenUrl { get; init; }
+
+	public bool Watch { get; init; }
 }

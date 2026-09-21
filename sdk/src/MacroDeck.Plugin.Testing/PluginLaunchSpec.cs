@@ -165,7 +165,7 @@ public sealed class PluginLaunchSpec
 		}
 	}
 
-	private static string DotnetMuxerPath()
+	internal static string DotnetMuxerPath()
 	{
 		var current = Process.GetCurrentProcess().MainModule?.FileName;
 

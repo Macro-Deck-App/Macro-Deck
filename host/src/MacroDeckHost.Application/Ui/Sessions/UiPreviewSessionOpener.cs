@@ -25,19 +25,22 @@ public sealed class UiPreviewSessionOpener : IUiPreviewSessionOpener
 	private readonly IRemotePluginSnapshotStore _snapshots;
 	private readonly UiSessionRegistry _registry;
 	private readonly IUiSessionBroker _broker;
+	private readonly IRemotePluginConnectionState _connections;
 
 	public UiPreviewSessionOpener(
 		IEnumerable<IUiPreviewSource> sources,
 		IIntegrationRegistry integrations,
 		IRemotePluginSnapshotStore snapshots,
 		UiSessionRegistry registry,
-		IUiSessionBroker broker)
+		IUiSessionBroker broker,
+		IRemotePluginConnectionState connections)
 	{
 		_sources = sources;
 		_integrations = integrations;
 		_snapshots = snapshots;
 		_registry = registry;
 		_broker = broker;
+		_connections = connections;
 	}
 
 	public UiSessionOpenTicket Open(OpenUiPreviewSessionRequest request, string ownerPrincipal, bool isAdmin)
@@ -60,17 +63,24 @@ public sealed class UiPreviewSessionOpener : IUiPreviewSessionOpener
 				"That preview does not exist.");
 		}
 
-		var providerId = ResolveProviderId(previewId, ownerPrincipal, out var profile);
+		var providerId = ResolveProviderId(previewId, ownerPrincipal, out var profile, out var servedByPlugin);
 		if (providerId is null)
 		{
 			return UiSessionOpenTicket.Rejected(UiSessionErrorCodes.ProviderUnavailable,
 				"That preview does not exist.");
 		}
 
+		// Accepted, the open would fail before the client could attach, and a refused attach cannot say why.
+		if (servedByPlugin && !_connections.IsConnected(providerId))
+		{
+			return UiSessionOpenTicket.Rejected(UiSessionErrorCodes.ProviderDisconnected,
+				"The plugin serving that preview is not connected.");
+		}
+
 		// A refresh is "open the same preview again", not "attach to what is already open" - the caller
 		// wants a scenario nothing has touched yet, so any prior session for this preview and principal is
 		// closed rather than reused.
-		CloseExisting(providerId, ownerPrincipal);
+		CloseExisting(providerId, previewId, ownerPrincipal);
 
 		var surface = new UiSurface
 		{
@@ -82,8 +92,10 @@ public sealed class UiPreviewSessionOpener : IUiPreviewSessionOpener
 		return _broker.Open(providerId, surface, ownerPrincipal);
 	}
 
-	private string? ResolveProviderId(string previewId, string ownerPrincipal, out string profile)
+	private string? ResolveProviderId(string previewId, string ownerPrincipal, out string profile, out bool servedByPlugin)
 	{
+		servedByPlugin = false;
+
 		var firstParty = _sources
 			.SelectMany(source => source.Previews)
 			.FirstOrDefault(preview => string.Equals(preview.Id, previewId, StringComparison.Ordinal));
@@ -107,6 +119,7 @@ public sealed class UiPreviewSessionOpener : IUiPreviewSessionOpener
 			if (match is not null)
 			{
 				profile = match.Profile;
+				servedByPlugin = true;
 
 				// A plugin's own id is the provider id, so RemoteUiProviderRegistry resolves it exactly as
 				// it does for every other plugin-served UI session - the scenario id travels only in the
@@ -119,17 +132,25 @@ public sealed class UiPreviewSessionOpener : IUiPreviewSessionOpener
 		return null;
 	}
 
-	private void CloseExisting(string providerId, string ownerPrincipal)
+	private void CloseExisting(string providerId, string previewId, string ownerPrincipal)
 	{
 		foreach (var session in _registry.SessionsForProvider(providerId))
 		{
-			if (string.Equals(session.OwnerPrincipal, ownerPrincipal, StringComparison.Ordinal) &&
+			if (string.Equals(session.Surface.Kind, UiSurfaceKinds.DeveloperPreview, StringComparison.Ordinal) &&
+				PreviewIdOf(session.Surface) == previewId &&
+				string.Equals(session.OwnerPrincipal, ownerPrincipal, StringComparison.Ordinal) &&
 				session.State is not (UiSessionState.Closed or UiSessionState.Invalidated))
 			{
 				_broker.CloseOwned(session.SessionId, ownerPrincipal, "The preview was refreshed.");
 			}
 		}
 	}
+
+	private static string? PreviewIdOf(UiSurface surface)
+		=> surface.Attributes.TryGetValue(UiDeveloperPreviewSurfaceAttributes.PreviewId, out var value) &&
+			value.ValueKind == JsonValueKind.String
+				? value.GetString()
+				: null;
 
 	private static Dictionary<string, JsonElement> BuildAttributes(string previewId, string profile)
 		=> new(StringComparer.Ordinal)

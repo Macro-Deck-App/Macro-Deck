@@ -78,6 +78,14 @@ internal sealed class UiSessionStore : IAsyncDisposable
 		return true;
 	}
 
+	public void RebuildAll()
+	{
+		foreach (var live in _sessions.Values)
+		{
+			live.RequestRebuild();
+		}
+	}
+
 	public async ValueTask DisposeAsync()
 	{
 		foreach (var sessionId in _sessions.Keys)
@@ -107,7 +115,9 @@ internal sealed class UiSessionStore : IAsyncDisposable
 
 		Snapshot,
 
-		Event
+		Event,
+
+		Rebuild
 	}
 
 	private sealed class LiveSession : IAsyncDisposable
@@ -124,6 +134,7 @@ internal sealed class UiSessionStore : IAsyncDisposable
 
 		private Task? _pump;
 		private int _drainQueued;
+		private volatile bool _disposing;
 
 		public LiveSession(UiSessionStore owner, string sessionId, IUiSession session)
 		{
@@ -143,8 +154,17 @@ internal sealed class UiSessionStore : IAsyncDisposable
 
 		public void Dispatch(UiEvent uiEvent) => _work.Writer.TryWrite((WorkKind.Event, uiEvent));
 
+		public void RequestRebuild()
+		{
+			if (_session is IRebuildableUiSession)
+			{
+				_work.Writer.TryWrite((WorkKind.Rebuild, null));
+			}
+		}
+
 		public async ValueTask DisposeAsync()
 		{
+			_disposing = true;
 			_session.Changed -= OnChanged;
 			_session.Faulted -= OnFaulted;
 			_work.Writer.TryComplete();
@@ -199,6 +219,7 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			WorkKind.Drain => DrainAsync(),
 			WorkKind.Snapshot => PublishSnapshotAsync(),
 			WorkKind.Event when uiEvent is not null => DispatchAsync(uiEvent),
+			WorkKind.Rebuild => RebuildAsync(),
 			_ => Task.CompletedTask
 		};
 
@@ -246,6 +267,37 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			await SendAsync(HostOperations.Ui.Snapshot,
 					new UiSnapshotArguments { SessionId = _sessionId, Tree = Opaque(tree) })
 				.ConfigureAwait(false);
+		}
+
+		private async Task RebuildAsync()
+		{
+			if (_disposing)
+			{
+				return;
+			}
+
+			IAsyncDisposable previous;
+
+			try
+			{
+				previous = ((IRebuildableUiSession)_session).Rebuild();
+			}
+			catch (Exception exception) when (exception is not OutOfMemoryException)
+			{
+				await FaultOnThrowAsync(exception, "rebuild").ConfigureAwait(false);
+				return;
+			}
+
+			await PublishSnapshotAsync().ConfigureAwait(false);
+
+			try
+			{
+				await previous.DisposeAsync().ConfigureAwait(false);
+			}
+			catch (Exception exception) when (exception is not OutOfMemoryException)
+			{
+				_owner._logger.UiSessionCallFailed(_sessionId, "dispose", exception);
+			}
 		}
 
 		private async Task DispatchAsync(UiEvent uiEvent)

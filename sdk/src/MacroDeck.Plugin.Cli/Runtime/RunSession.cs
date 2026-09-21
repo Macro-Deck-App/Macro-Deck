@@ -132,10 +132,12 @@ internal static class RunSession
 			// docs/src/content/docs/guides/packaging.md's --verbosity row - so they print at every verbosity,
 			// each stream on this process's matching one, unlike the stub host's forwarded log narration in
 			// PollLogsAsync below, which goes through console.Info so --verbosity quiet can suppress it.
-			process = SupervisedPluginProcess.Start(spec,
-				environment,
-				line => WritePluginOutput(console, line, fromStandardError: false),
-				line => WritePluginOutput(console, line, fromStandardError: true));
+			void OnOutput(string line) => WritePluginOutput(console, line, fromStandardError: false);
+			void OnError(string line) => WritePluginOutput(console, line, fromStandardError: true);
+
+			process = options.Watch
+				? SupervisedPluginProcess.Start(DotnetWatchLaunch.For(options.Project!), environment, OnOutput, OnError)
+				: SupervisedPluginProcess.Start(spec, environment, OnOutput, OnError);
 		}
 		catch (Exception ex) when (ex is InvalidOperationException or Win32Exception)
 		{
@@ -145,6 +147,12 @@ internal static class RunSession
 
 		console.Info(
 			$"Started process {process.ProcessId} (mode: {request.Mode}, host: {hostUrl}). Press Ctrl-C to stop.");
+
+		if (options.Watch)
+		{
+			console.Info("Watching the project: a saved change is applied with .NET Hot Reload, or rebuilds and " +
+				"restarts the plugin. Open developer previews in Macro Deck follow along.");
+		}
 
 		using var backgroundCts = new CancellationTokenSource();
 		var backgroundTasks = useStub
@@ -276,6 +284,21 @@ internal static class RunSession
 		if (options.HostUrl is not null && options.StubHost)
 		{
 			console.WriteError("conflicting-options", "Specify at most one of --host-url or --stub-host.");
+			return false;
+		}
+
+		if (options.Watch && options.Project is null)
+		{
+			console.WriteError("watch-needs-project",
+				"--watch rebuilds from source, so it needs --project rather than --executable or --artifact.");
+			return false;
+		}
+
+		if (options.Watch && options.StubHost)
+		{
+			console.WriteError("watch-needs-real-host",
+				"--watch is for iterating against Macro Deck, where developer previews follow the plugin. Drop " +
+				"--stub-host, or run without --watch.");
 			return false;
 		}
 

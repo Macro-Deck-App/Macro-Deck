@@ -10,6 +10,8 @@ using MacroDeck.Ui.Components;
 using MacroDeck.Localization;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
+using MacroDeckHost.Application.Plugins.Capabilities;
+using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Ui;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiPreviews;
@@ -49,7 +51,8 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 			Integrations,
 			new EmptyRemotePluginSnapshotStore(),
 			Registry,
-			Broker);
+			Broker,
+			new NoPluginConnections());
 	}
 
 	private string FindId(string view, string scenario)
@@ -466,6 +469,112 @@ internal sealed class UiPreviewSessionTests : UiSessionFixture
 		Assert.That(accepted.Accepted, Is.True);
 		await accepted.Ready;
 		Assert.That(AdminGatedView.Invocations, Is.EqualTo(1));
+	}
+
+	[Test]
+	public async Task Opening_a_plugin_preview_leaves_that_plugins_other_sessions_for_the_same_principal_open()
+	{
+		AddProvider();
+		Integrations.Add(new StubUiIntegration(ProviderId));
+		var snapshots = new SinglePluginPreviewStore(ProviderId,
+			new RemoteUiPreviewDescriptor
+			{
+				Id = "plugin:Preview.Default", View = "View", Scenario = "Default", Profile = UiPreviewProfiles.Widget
+			});
+		var opener = new UiPreviewSessionOpener([], Integrations, snapshots, Registry, Broker, ConnectedPlugin());
+
+		var widgetTicket = await Broker.OpenAsync(ProviderId,
+			Surface(kind: UiSurfaceKinds.Widget),
+			DeviceA,
+			CancellationToken.None);
+		var request = new OpenUiPreviewSessionRequest { PreviewId = "plugin:Preview.Default" };
+		var firstPreview = opener.Open(request, DeviceA, isAdmin: true);
+		await firstPreview.Ready;
+		var secondPreview = opener.Open(request, DeviceA, isAdmin: true);
+		await secondPreview.Ready;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Registry.Find(widgetTicket.SessionId)?.State, Is.EqualTo(UiSessionState.Open));
+			Assert.That(Registry.Find(firstPreview.SessionId), Is.Null.Or.Property(nameof(UiSessionSnapshot.State))
+				.EqualTo(UiSessionState.Closed));
+			Assert.That(Registry.Find(secondPreview.SessionId)?.State, Is.EqualTo(UiSessionState.Open));
+		});
+	}
+
+	[Test]
+	public async Task Two_scenarios_of_one_plugin_can_be_previewed_side_by_side()
+	{
+		AddProvider();
+		Integrations.Add(new StubUiIntegration(ProviderId));
+		var snapshots = new SinglePluginPreviewStore(ProviderId,
+			new RemoteUiPreviewDescriptor
+			{
+				Id = "plugin:Preview.Default", View = "View", Scenario = "Default", Profile = UiPreviewProfiles.Widget
+			},
+			new RemoteUiPreviewDescriptor
+			{
+				Id = "plugin:Preview.Offline", View = "View", Scenario = "Offline", Profile = UiPreviewProfiles.Widget
+			});
+		var opener = new UiPreviewSessionOpener([], Integrations, snapshots, Registry, Broker, ConnectedPlugin());
+
+		var first = opener.Open(new OpenUiPreviewSessionRequest { PreviewId = "plugin:Preview.Default" },
+			DeviceA,
+			isAdmin: true);
+		await first.Ready;
+		var second = opener.Open(new OpenUiPreviewSessionRequest { PreviewId = "plugin:Preview.Offline" },
+			DeviceA,
+			isAdmin: true);
+		await second.Ready;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Registry.Find(first.SessionId)?.State, Is.EqualTo(UiSessionState.Open));
+			Assert.That(Registry.Find(second.SessionId)?.State, Is.EqualTo(UiSessionState.Open));
+		});
+	}
+
+	[Test]
+	public void A_plugin_preview_is_refused_as_disconnected_while_its_plugin_is_away()
+	{
+		var provider = AddProvider();
+		Integrations.Add(new StubUiIntegration(ProviderId));
+		var snapshots = new SinglePluginPreviewStore(ProviderId,
+			new RemoteUiPreviewDescriptor
+			{
+				Id = "plugin:Preview.Default", View = "View", Scenario = "Default", Profile = UiPreviewProfiles.Widget
+			});
+		var opener = new UiPreviewSessionOpener([], Integrations, snapshots, Registry, Broker, new NoPluginConnections());
+
+		var ticket = opener.Open(new OpenUiPreviewSessionRequest { PreviewId = "plugin:Preview.Default" },
+			DeviceA,
+			isAdmin: true);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ticket.Accepted, Is.False);
+			Assert.That(ticket.Code, Is.EqualTo(UiSessionErrorCodes.ProviderDisconnected));
+			Assert.That(Registry.SessionsForProvider(provider.ProviderId), Is.Empty);
+		});
+	}
+
+	private static NoPluginConnections ConnectedPlugin()
+	{
+		var connections = new NoPluginConnections();
+		connections.Connected.Add(ProviderId);
+		return connections;
+	}
+
+	private sealed class SinglePluginPreviewStore(string pluginId, params RemoteUiPreviewDescriptor[] previews)
+		: IRemotePluginSnapshotStore
+	{
+		public RemotePluginCapabilitySnapshot GetSnapshot(string id)
+			=> RemotePluginCapabilitySnapshot.Empty(id) with { UiPreviews = id == pluginId ? previews : [] };
+
+		public bool Has(string id) => id == pluginId;
+
+		public Task SaveAsync(RemotePluginCapabilitySnapshot snapshot, CancellationToken cancellationToken = default)
+			=> Task.CompletedTask;
 	}
 
 	private sealed class DelegatingResolver : IUiSessionProviderResolver

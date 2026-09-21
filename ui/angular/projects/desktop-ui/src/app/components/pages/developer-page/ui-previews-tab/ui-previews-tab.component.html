@@ -40,19 +40,25 @@
     }
   </ul>
 
-  @if (loadError()) {
+  @if (loaded() && selectedPreview(); as preview) {
+    <app-preview-canvas
+      [preview]="preview"
+      [available]="selectedAvailable()"
+      [ownerConnected]="selectedOwnerConnected()"
+      [catalogRevision]="catalogRevision()"
+      [initialSize]="initialSize"
+      (sizeChange)="onCanvasSizeChange($event)" />
+  } @else if (loadError()) {
     <shared-empty-state
       icon="alert-triangle"
       [message]="'macrodeck.app:Developer.Previews.LoadFailedMessage' | translate" />
-  } @else if (loading() && previews().length === 0) {
+  } @else if (!loaded()) {
     <shared-loading-state />
   } @else if (previews().length === 0) {
     <shared-empty-state
       icon="layers"
       [heading]="'macrodeck.app:Developer.Previews.EmptyHeading' | translate"
       [message]="'macrodeck.app:Developer.Previews.EmptyMessage' | translate" />
-  } @else if (selectedPreview(); as preview) {
-    <app-preview-canvas [preview]="preview" />
   } @else {
     <shared-empty-state
       icon="layers"

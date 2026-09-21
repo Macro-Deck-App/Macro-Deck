@@ -6,7 +6,9 @@ import {
   effect,
   inject,
   input,
+  output,
   signal,
+  untracked,
 } from '@angular/core';
 import {
   UiNode,
@@ -15,13 +17,15 @@ import {
   UiComponentBox,
   isComponentProfileType,
 } from '@macro-deck/runtime';
-import { ApiService, ButtonComponent, ConnectionState, TranslatePipe, UiSessionHandle, UiSessionOpenRequest, UiSessionService, UiWidgetTreeComponent, UiWidgetTreeContext } from '@shared';
+import { ApiService, ButtonComponent, ConnectionState, TranslatePipe, UiSessionHandle, UiSessionOpenRequest, UiSessionRejection, UiSessionService, UiWidgetTreeComponent, UiWidgetTreeContext } from '@shared';
 import { UiTreeComponent } from '../../../ui-render/ui-tree.component';
 
-interface CanvasSize {
+export interface CanvasSize {
   width: number;
   height: number;
 }
+
+export type CanvasState = 'live' | 'waiting' | 'gone' | 'closed' | 'failed';
 
 interface SizePreset {
   width: number;
@@ -35,6 +39,14 @@ const MIN_HEIGHT = 40;
 const KEYBOARD_STEP = 8;
 
 const CELL_PX = 150;
+const SIZE_EMIT_DELAY_MS = 250;
+const RETRY_DELAYS_MS: readonly number[] = [2000, 4000, 8000, 16000, 30000];
+
+const PROVIDER_AWAY_CODES: ReadonlySet<string> = new Set([
+  'PROVIDER_DISCONNECTED',
+  'PROVIDER_UNAVAILABLE',
+  'PROVIDER_TIMEOUT',
+]);
 
 const DEFAULT_SIZE_BY_PROFILE: Readonly<Record<string, CanvasSize>> = {
   widget: { width: CELL_PX, height: CELL_PX },
@@ -66,6 +78,11 @@ const SIZE_PRESETS: readonly SizePreset[] = PRESET_SPANS.map(([columns, rows]) =
 })
 export class PreviewCanvasComponent implements OnDestroy {
   readonly preview = input<UiPreviewEntry | null>(null);
+  readonly available = input(true);
+  readonly ownerConnected = input(true);
+  readonly catalogRevision = input(0);
+  readonly initialSize = input<CanvasSize | null>(null);
+  readonly sizeChange = output<CanvasSize>();
 
   protected readonly presets = SIZE_PRESETS;
 
@@ -74,8 +91,23 @@ export class PreviewCanvasComponent implements OnDestroy {
   private readonly treeContext = inject(UiWidgetTreeContext);
 
   private readonly handleSignal = signal<UiSessionHandle | null>(null);
-  protected readonly root = computed<UiNode | null>(() => this.handleSignal()?.root() ?? null);
-  protected readonly rejection = computed(() => this.handleSignal()?.rejection() ?? null);
+  private readonly liveRoot = computed<UiNode | null>(() => this.handleSignal()?.root() ?? null);
+  private readonly lastRoot = signal<UiNode | null>(null);
+  protected readonly root = computed<UiNode | null>(() => this.liveRoot() ?? this.lastRoot());
+
+  private readonly fault = computed<UiSessionRejection | null>(() => this.handleSignal()?.fault?.() ?? null);
+  protected readonly rejection = computed<UiSessionRejection | null>(() => this.handleSignal()?.rejection() ?? null);
+  private readonly problem = computed<UiSessionRejection | null>(() => this.fault() ?? this.rejection());
+
+  protected readonly state = computed<CanvasState>(() => {
+    if (!this.available()) return this.ownerConnected() ? 'gone' : 'waiting';
+    const problem = this.problem();
+    if (!problem) return 'live';
+    if (problem.code !== undefined && PROVIDER_AWAY_CODES.has(problem.code)) return 'waiting';
+    return this.fault() !== null && problem.code === undefined ? 'closed' : 'failed';
+  });
+
+  protected readonly stale = computed(() => this.state() !== 'live' || this.liveRoot() === null);
 
   protected readonly size = signal<CanvasSize>(DEFAULT_SIZE_BY_PROFILE['config']);
   protected readonly box = computed<UiComponentBox>(() => ({ width: this.size().width, height: this.size().height }));
@@ -86,7 +118,13 @@ export class PreviewCanvasComponent implements OnDestroy {
     return isComponentProfileType(root.type) ? 'widget' : 'config';
   });
 
-  private openedForPreviewId: string | null = null;
+  private currentPreviewId: string | null = null;
+  private sizeFollowsProfile = false;
+  private initialSizeUsed = false;
+  private seenCatalogRevision: number | null = null;
+  private sizeEmitTimer: ReturnType<typeof setTimeout> | null = null;
+  private retryTimer: ReturnType<typeof setTimeout> | null = null;
+  private retryAttempt = 0;
   private reconnectBaseline: ConnectionState | null = null;
   private dragAxis: HandleAxis | null = null;
   private dragStart: CanvasSize = { width: 0, height: 0 };
@@ -100,8 +138,36 @@ export class PreviewCanvasComponent implements OnDestroy {
     });
 
     effect(() => {
+      const root = this.liveRoot();
+      if (root) this.lastRoot.set(root);
+    });
+
+    effect(() => {
       const preview = this.preview();
-      if (preview?.id !== this.openedForPreviewId) this.openSession();
+      untracked(() => this.onPreviewChanged(preview));
+    });
+
+    effect(() => {
+      const available = this.available();
+      untracked(() => {
+        if (!available) this.closeSessionHandle();
+      });
+    });
+
+    effect(() => {
+      const revision = this.catalogRevision();
+      untracked(() => this.onCatalogReloaded(revision));
+    });
+
+    effect(() => {
+      const waitingForProvider = this.available() && this.state() === 'waiting';
+      const showingLiveTree = this.state() === 'live' && this.liveRoot() !== null;
+      untracked(() => this.updateRetry(waitingForProvider, showingLiveTree));
+    });
+
+    effect(() => {
+      const size = this.size();
+      untracked(() => this.scheduleSizeEmit(size));
     });
 
     effect(() => {
@@ -110,7 +176,7 @@ export class PreviewCanvasComponent implements OnDestroy {
         this.reconnectBaseline = state;
         return;
       }
-      if (state === 'connected' && this.reconnectBaseline !== 'connected') {
+      if (state === 'connected' && this.reconnectBaseline !== 'connected' && untracked(this.available)) {
         this.openSession();
       }
       this.reconnectBaseline = state;
@@ -118,6 +184,8 @@ export class PreviewCanvasComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.sizeEmitTimer !== null) clearTimeout(this.sizeEmitTimer);
+    this.clearRetry();
     this.closeSessionHandle();
   }
 
@@ -126,7 +194,7 @@ export class PreviewCanvasComponent implements OnDestroy {
   }
 
   protected refresh(): void {
-    this.openSession();
+    if (this.available()) this.openSession();
   }
 
   protected selectPreset(preset: SizePreset): void {
@@ -194,22 +262,82 @@ export class PreviewCanvasComponent implements OnDestroy {
     };
     const current = this.size();
     if (current.width === next.width && current.height === next.height) return;
+    this.sizeFollowsProfile = false;
     this.size.set(next);
+  }
+
+  private onPreviewChanged(preview: UiPreviewEntry | null): void {
+    const id = preview?.id ?? null;
+
+    if (id === this.currentPreviewId) {
+      if (preview && this.sizeFollowsProfile && preview.profile) this.size.set(this.defaultSizeFor(preview));
+      return;
+    }
+
+    this.currentPreviewId = id;
+    this.closeSessionHandle();
+    this.lastRoot.set(null);
+    if (!preview) return;
+
+    const initial = this.initialSizeUsed ? null : this.initialSize();
+    this.initialSizeUsed = true;
+    this.size.set(initial ?? this.defaultSizeFor(preview));
+    this.sizeFollowsProfile = initial === null && !preview.profile;
+
+    if (this.available()) this.openSession();
+  }
+
+  private onCatalogReloaded(revision: number): void {
+    const first = this.seenCatalogRevision === null;
+    const changed = this.seenCatalogRevision !== revision;
+    this.seenCatalogRevision = revision;
+    if (first || !changed || !this.available() || !this.preview()) return;
+
+    // Only a session the provider lost, or never had, is reopened: one another window closed by
+    // refreshing the same preview must not be taken back, or two windows would keep stealing it.
+    const handle = this.handleSignal();
+    const code = this.problem()?.code;
+    if (handle === null || code?.startsWith('PROVIDER_')) this.openSession();
+  }
+
+  private updateRetry(waitingForProvider: boolean, showingLiveTree: boolean): void {
+    if (showingLiveTree) this.retryAttempt = 0;
+    if (!waitingForProvider) {
+      this.clearRetry();
+      return;
+    }
+    if (this.retryTimer !== null) return;
+
+    const delay = RETRY_DELAYS_MS[Math.min(this.retryAttempt, RETRY_DELAYS_MS.length - 1)];
+    this.retryTimer = setTimeout(() => {
+      this.retryTimer = null;
+      this.retryAttempt++;
+      if (this.available() && this.state() === 'waiting') this.openSession();
+    }, delay);
+  }
+
+  private clearRetry(): void {
+    if (this.retryTimer !== null) clearTimeout(this.retryTimer);
+    this.retryTimer = null;
+  }
+
+  private defaultSizeFor(preview: UiPreviewEntry): CanvasSize {
+    return DEFAULT_SIZE_BY_PROFILE[preview.profile] ?? DEFAULT_SIZE_BY_PROFILE['config'];
+  }
+
+  private scheduleSizeEmit(size: CanvasSize): void {
+    if (this.sizeEmitTimer !== null) clearTimeout(this.sizeEmitTimer);
+    this.sizeEmitTimer = setTimeout(() => {
+      this.sizeEmitTimer = null;
+      this.sizeChange.emit(size);
+    }, SIZE_EMIT_DELAY_MS);
   }
 
   private openSession(): void {
     this.closeSessionHandle();
 
     const preview = this.preview();
-    // Only a different scenario gets the profile's default size. A refresh recreates the scenario at
-    // whatever size the developer is testing at - resetting it would throw away what they were looking for.
-    const isDifferentPreview = preview?.id !== this.openedForPreviewId;
-    this.openedForPreviewId = preview?.id ?? null;
     if (!preview) return;
-
-    if (isDifferentPreview) {
-      this.size.set(DEFAULT_SIZE_BY_PROFILE[preview.profile] ?? DEFAULT_SIZE_BY_PROFILE['config']);
-    }
 
     const request: UiSessionOpenRequest = { kind: 'preview', previewId: preview.id };
     this.handleSignal.set(this.uiSessions.open(request));

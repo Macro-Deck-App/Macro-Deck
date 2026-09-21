@@ -1794,6 +1794,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Developer.Previews.PresetsLabel" xml:space="preserve">
     <value>Größe</value>
   </data>
+  <data name="Developer.Previews.PreviewGone" xml:space="preserve">
+    <value>Dieses Szenario gibt es nicht mehr. Vielleicht wurde es umbenannt oder entfernt.</value>
+  </data>
   <data name="Developer.Previews.RefreshAction" xml:space="preserve">
     <value>Aktualisieren</value>
   </data>
@@ -1811,6 +1814,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>{count} Szenarien</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Developer.Previews.SessionClosed" xml:space="preserve">
+    <value>Diese Vorschau wurde geschlossen, zum Beispiel weil sie in einem anderen Fenster geöffnet wurde. Wähle Aktualisieren, um sie hier wieder anzuzeigen.</value>
+  </data>
   <data name="Developer.Previews.SessionFailedHeading" xml:space="preserve">
     <value>Diese Vorschau konnte nicht gerendert werden</value>
   </data>
@@ -1825,6 +1831,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Developer.Previews.Tab" xml:space="preserve">
     <value>UI-Vorschauen</value>
+  </data>
+  <data name="Developer.Previews.WaitingForProvider" xml:space="preserve">
+    <value>Das Plugin ist nicht verbunden. Die Vorschau öffnet sich wieder, sobald es zurück ist.</value>
   </data>
   <data name="Developer.RunActionButton" xml:space="preserve">
     <value>Aktion ausführen</value>

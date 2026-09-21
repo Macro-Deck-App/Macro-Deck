@@ -40,18 +40,27 @@ internal sealed class SupervisedPluginProcess : IAsyncDisposable
 		IReadOnlyDictionary<string, string?> environment,
 		Action<string> onOutputLine,
 		Action<string> onErrorLine)
+		=> Start(new ProcessLaunch(spec.ExecutablePath, spec.Arguments, spec.WorkingDirectory),
+			environment,
+			onOutputLine,
+			onErrorLine);
+
+	public static SupervisedPluginProcess Start(ProcessLaunch launch,
+		IReadOnlyDictionary<string, string?> environment,
+		Action<string> onOutputLine,
+		Action<string> onErrorLine)
 	{
 		var startInfo = new ProcessStartInfo
 		{
-			FileName = spec.ExecutablePath,
-			WorkingDirectory = spec.WorkingDirectory,
+			FileName = launch.FileName,
+			WorkingDirectory = launch.WorkingDirectory,
 			UseShellExecute = false,
 			CreateNoWindow = true,
 			RedirectStandardOutput = true,
 			RedirectStandardError = true
 		};
 
-		foreach (var argument in spec.Arguments)
+		foreach (var argument in launch.Arguments)
 		{
 			startInfo.ArgumentList.Add(argument);
 		}
@@ -93,7 +102,7 @@ internal sealed class SupervisedPluginProcess : IAsyncDisposable
 
 		if (!process.Start())
 		{
-			throw new InvalidOperationException($"Failed to start '{spec.ExecutablePath}'.");
+			throw new InvalidOperationException($"Failed to start '{launch.FileName}'.");
 		}
 
 		process.BeginOutputReadLine();
