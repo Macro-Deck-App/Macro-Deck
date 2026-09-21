@@ -155,6 +155,9 @@ internal sealed class FakePluginHost : IAsyncDisposable
 	/// </summary>
 	public bool RefuseHandshake { get; set; }
 
+	/// <summary>Answers every socket upgrade with 503 while the REST endpoints keep working.</summary>
+	public bool WebSocketUnavailable { get; set; }
+
 	/// <summary>
 	/// Kills the socket the plugin is currently on, the way a network blip does: aborted rather than
 	/// closed, so the plugin sees a dropped connection and not a goodbye it should stop resuming after.
@@ -469,6 +472,11 @@ internal sealed class FakePluginHost : IAsyncDisposable
 				if (!context.WebSockets.IsWebSocketRequest)
 				{
 					return Results.BadRequest();
+				}
+
+				if (WebSocketUnavailable)
+				{
+					return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
 				}
 
 				OfferedSubProtocols = [.. context.WebSockets.WebSocketRequestedProtocols];
