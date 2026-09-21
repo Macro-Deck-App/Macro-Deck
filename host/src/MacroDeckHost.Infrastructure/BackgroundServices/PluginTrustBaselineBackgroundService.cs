@@ -37,9 +37,7 @@ public sealed class PluginTrustBaselineBackgroundService : HostReadyBackgroundSe
 		}
 		catch (Exception ex) when (ex is not OperationCanceledException)
 		{
-			// Not rethrown: the default BackgroundServiceExceptionBehavior would stop the host over a
-			// grandfathering step that is both idempotent and retried on the next launch - see the class
-			// summary. A DB error here must never take Macro Deck down.
+			// Not rethrown: the step is idempotent and retried on the next launch, see the class summary.
 			_logger.Error(ex, "Failed to establish the plugin trust baseline; it will be retried next launch.");
 		}
 	}

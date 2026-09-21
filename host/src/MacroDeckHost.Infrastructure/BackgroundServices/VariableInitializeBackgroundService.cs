@@ -11,6 +11,7 @@ public sealed class VariableInitializeBackgroundService : HostReadyBackgroundSer
 	private readonly VariableRegistry _registry;
 	private readonly IUserVariableStore _userStore;
 	private readonly StartupReadiness _readiness;
+	private readonly IHostApplicationLifetime _lifetime;
 	private readonly ILogger _logger;
 
 	public VariableInitializeBackgroundService(
@@ -24,10 +25,26 @@ public sealed class VariableInitializeBackgroundService : HostReadyBackgroundSer
 		_registry = registry;
 		_userStore = userStore;
 		_readiness = readiness;
+		_lifetime = lifetime;
 		_logger = logger;
 	}
 
 	protected override Task ExecuteWhenReady(CancellationToken stoppingToken)
+	{
+		try
+		{
+			LoadVariables();
+		}
+		catch (Exception ex) when (!stoppingToken.IsCancellationRequested)
+		{
+			_logger.Fatal(ex, "Failed to load the user variables; stopping the host");
+			_lifetime.StopApplication();
+		}
+
+		return Task.CompletedTask;
+	}
+
+	private void LoadVariables()
 	{
 		var stored = _userStore.Load();
 		foreach (var variable in stored)
@@ -37,6 +54,5 @@ public sealed class VariableInitializeBackgroundService : HostReadyBackgroundSer
 
 		_readiness.MarkVariablesReady();
 		_logger.Information("Loaded {Count} user variable(s) into the registry", stored.Count);
-		return Task.CompletedTask;
 	}
 }

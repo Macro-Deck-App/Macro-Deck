@@ -9,6 +9,17 @@ internal sealed class FakeTimeProvider : TimeProvider
 
 	public override DateTimeOffset GetUtcNow() => Now;
 
+	public int ActiveTimerCount
+	{
+		get
+		{
+			lock (_lock)
+			{
+				return _timers.Count(t => t.IsActive);
+			}
+		}
+	}
+
 	public override ITimer CreateTimer(TimerCallback callback, object? state, TimeSpan dueTime, TimeSpan period)
 	{
 		var timer = new ManualTimer(this, callback, state);

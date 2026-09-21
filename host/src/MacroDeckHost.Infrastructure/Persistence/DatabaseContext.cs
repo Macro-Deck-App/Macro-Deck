@@ -53,7 +53,10 @@ public class DatabaseContext : DbContext
 			_logger.Information("Database path: {DbPath}", databasePath);
 		}
 
-		var connectionString = new SqliteConnectionStringBuilder { DataSource = databasePath }.ToString();
+		// Unpooled until Microsoft.Data.Sqlite ships dotnet/efcore#39012: its pool can hand out a connection
+		// whose sqlite3 handle was already disposed (dotnet/efcore#39008).
+		var connectionString =
+			new SqliteConnectionStringBuilder { DataSource = databasePath, Pooling = false }.ToString();
 		optionsBuilder.UseSqlite(connectionString, b => b.MigrationsAssembly(_migrationsAssembly))
 			.UseLoggerFactory(_loggerFactory)
 			.AddInterceptors(_timestampsInterceptor);

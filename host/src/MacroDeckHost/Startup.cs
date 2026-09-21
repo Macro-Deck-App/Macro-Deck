@@ -548,7 +548,10 @@ public class Startup
 		// Ordered outermost largest so each layer's cap is strictly inside the next: the supervisor's
 		// plugin budget, then this host timeout, then the bootstrapper's own graceful stop timeout.
 		services.Configure<HostOptions>(options =>
-			options.ShutdownTimeout = PluginShutdownBudgets.HostShutdownTimeout);
+		{
+			options.ShutdownTimeout = PluginShutdownBudgets.HostShutdownTimeout;
+			options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
+		});
 
 		// Plugin installation lifecycle (issue #415): the artifact format, safe staging, atomic
 		// activation and rollback. Singletons because the installer serialises concurrent installs of the

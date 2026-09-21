@@ -11,6 +11,7 @@ namespace MacroDeckHost.Infrastructure.BackgroundServices;
 public sealed class BackupScheduleBackgroundService : HostReadyBackgroundService
 {
 	private static readonly TimeSpan _maximumSleep = TimeSpan.FromHours(1);
+	private static readonly TimeSpan _retryAfterFailure = TimeSpan.FromMinutes(5);
 
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly IBackupService _backups;
@@ -36,12 +37,25 @@ public sealed class BackupScheduleBackgroundService : HostReadyBackgroundService
 		{
 			while (!stoppingToken.IsCancellationRequested)
 			{
-				var sleep = await Tick(stoppingToken);
+				var sleep = await SafeTick(stoppingToken);
 				await Task.Delay(sleep, _time, stoppingToken);
 			}
 		}
 		catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
 		{
+		}
+	}
+
+	private async Task<TimeSpan> SafeTick(CancellationToken stoppingToken)
+	{
+		try
+		{
+			return await Tick(stoppingToken);
+		}
+		catch (Exception ex) when (!stoppingToken.IsCancellationRequested)
+		{
+			_logger.Error(ex, "The backup schedule check failed; retrying in {Delay}", _retryAfterFailure);
+			return _retryAfterFailure;
 		}
 	}
 
