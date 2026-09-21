@@ -17557,4 +17557,20 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>{name} {version} (Build {build}) wurde nicht von Macro Deck geprüft. Er stammt direkt vom Creator des Plugins, kann instabil sein und ersetzt die installierte Version {installedVersion}.</value>
     <comment>[name:string][version:string][build:string][installedVersion:string]</comment>
   </data>
+  <data name="Store.TestBuildActive" xml:space="preserve">
+    <value>Test-Build {build}</value>
+    <comment>[build:string] Shown on a Store plugin whose installed version is an unreviewed test build rather than the published release.</comment>
+  </data>
+  <data name="Store.ReturnToStoreVersion" xml:space="preserve">
+    <value>Zurück zur Store-Version {version}</value>
+    <comment>[version:string] Replaces an installed test build with the currently published Store release.</comment>
+  </data>
+  <data name="Store.Tests.BuildCount.One" xml:space="preserve">
+    <value>{count} Test-Build</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Tests.BuildCount.Other" xml:space="preserve">
+    <value>{count} Test-Builds</value>
+    <comment>[plural]</comment>
+  </data>
 </root>

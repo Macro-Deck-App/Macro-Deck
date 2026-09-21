@@ -20,6 +20,23 @@
       </shared-button>
     </div>
   }
+  @case ('testBuild') {
+    <div class="store-installed store-test-build">
+      <span class="test-build-chip">
+        <span class="icon icon-alert-triangle icon-xs" aria-hidden="true"></span>
+        {{ 'macrodeck.app:Store.TestBuildActive' | translate:{ build: item().installedTestBuild } }}
+      </span>
+      <shared-button variant="primary" [size]="size()" (click)="onInstall()">
+        @if (prominent()) {
+          <span class="icon icon-refresh icon-sm" aria-hidden="true"></span>
+        }
+        {{ 'macrodeck.app:Store.ReturnToStoreVersion' | translate:{ version: item().latestVersion } }}
+      </shared-button>
+      <shared-button variant="ghost" [size]="size()" (click)="onUninstall()">
+        {{ 'macrodeck.app:Store.Uninstall' | translate }}
+      </shared-button>
+    </div>
+  }
   @case ('installed') {
     <div class="store-installed">
       @if (prominent()) {

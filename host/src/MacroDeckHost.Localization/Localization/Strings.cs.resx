@@ -17559,4 +17559,20 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>{name} {version} (sestavení {build}) nebylo zkontrolováno týmem Macro Deck. Pochází přímo od autora pluginu, může být nestabilní a nahradí nainstalovanou verzi {installedVersion}.</value>
     <comment>[name:string][version:string][build:string][installedVersion:string]</comment>
   </data>
+  <data name="Store.TestBuildActive" xml:space="preserve">
+    <value>Testovací sestavení {build}</value>
+    <comment>[build:string] Shown on a Store plugin whose installed version is an unreviewed test build rather than the published release.</comment>
+  </data>
+  <data name="Store.ReturnToStoreVersion" xml:space="preserve">
+    <value>Vrátit na verzi ze Store {version}</value>
+    <comment>[version:string] Replaces an installed test build with the currently published Store release.</comment>
+  </data>
+  <data name="Store.Tests.BuildCount.One" xml:space="preserve">
+    <value>{count} testovací sestavení</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Tests.BuildCount.Other" xml:space="preserve">
+    <value>Testovací sestavení: {count}</value>
+    <comment>[plural]</comment>
+  </data>
 </root>

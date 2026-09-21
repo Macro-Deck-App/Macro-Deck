@@ -17559,4 +17559,20 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>{name} {version} (build {build}) n'a pas été vérifiée par Macro Deck. Elle vient directement du créateur de l'extension, peut être instable et remplace la version installée {installedVersion}.</value>
     <comment>[name:string][version:string][build:string][installedVersion:string]</comment>
   </data>
+  <data name="Store.TestBuildActive" xml:space="preserve">
+    <value>Build de test {build}</value>
+    <comment>[build:string] Shown on a Store plugin whose installed version is an unreviewed test build rather than the published release.</comment>
+  </data>
+  <data name="Store.ReturnToStoreVersion" xml:space="preserve">
+    <value>Revenir à la version du Store {version}</value>
+    <comment>[version:string] Replaces an installed test build with the currently published Store release.</comment>
+  </data>
+  <data name="Store.Tests.BuildCount.One" xml:space="preserve">
+    <value>{count} build de test</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Tests.BuildCount.Other" xml:space="preserve">
+    <value>{count} builds de test</value>
+    <comment>[plural]</comment>
+  </data>
 </root>

@@ -161,6 +161,22 @@
   gap: var(--space-2);
 }
 
+.store-test-build {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.test-build-chip {
+  @include ds.chip;
+  flex-shrink: 0;
+  color: var(--color-warning);
+  background-color: var(--color-warning-muted);
+
+  .icon {
+    background-color: var(--color-warning);
+  }
+}
+
 .installed-version {
   color: var(--color-text-muted);
   font-size: var(--text-xs);

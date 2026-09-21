@@ -47,6 +47,7 @@ internal sealed class StoreTestBuildInstallTests
 	private StoreInstallConsent _consent = null!;
 	private StoreInstallCoordinator _coordinator = null!;
 	private StoreTestService _tests = null!;
+	private StoreCatalogQueryService _catalogQuery = null!;
 	private StoreInstallExecutor _executor = null!;
 	private PluginInstallationCatalog _pluginCatalog = null!;
 	private PluginInstaller _pluginInstaller = null!;
@@ -118,8 +119,8 @@ internal sealed class StoreTestBuildInstallTests
 			TimeProvider.System,
 			Serilog.Core.Logger.None);
 
-		var catalogQuery = new StoreCatalogQueryService(_catalog, _pluginCatalog, installations);
-		_coordinator = new StoreInstallCoordinator(catalogQuery,
+		_catalogQuery = new StoreCatalogQueryService(_catalog, _pluginCatalog, installations, _testInstallations);
+		_coordinator = new StoreInstallCoordinator(_catalogQuery,
 			_tracker,
 			new StoreOperationChannel(),
 			new StoreOperationCancellation(),
@@ -131,10 +132,10 @@ internal sealed class StoreTestBuildInstallTests
 			_testInstallations,
 			_tracker,
 			_coordinator,
-			catalogQuery);
+			_catalogQuery);
 
 		_executor = new StoreInstallExecutor(_catalog,
-			catalogQuery,
+			_catalogQuery,
 			_tracker,
 			new StoreArtifactDownloader(_httpClientFactory, StoreRegistryOptions.Default, _paths, TimeProvider.System),
 			_pluginInstaller,
@@ -204,6 +205,42 @@ internal sealed class StoreTestBuildInstallTests
 
 	private string? ActiveVersion()
 		=> _pluginCatalog.Discover().FirstOrDefault(plugin => plugin.PluginId == PluginId)?.ActiveVersion?.Version;
+
+	private async Task Publish(string artifactPath, string version)
+	{
+		var bytes = await File.ReadAllBytesAsync(artifactPath);
+		_httpClientFactory.Body = bytes;
+		_catalog.Swap(new StoreCatalogSnapshot
+		{
+			Sequence = 1,
+			Entries =
+			[
+				new StoreCatalogEntry
+				{
+					Kind = StoreExtensionKind.Plugin,
+					Id = PluginId,
+					Name = "Consent Plugin",
+					LatestVersion = version,
+					LatestRelease = new StoreReleaseManifest
+					{
+						Version = version,
+						ArtifactUrl = new Uri($"https://cdn.example/{Path.GetFileName(artifactPath)}"),
+						Sha256 = Convert.ToHexStringLower(SHA256.HashData(bytes)),
+						Size = bytes.LongLength
+					}
+				}
+			]
+		});
+	}
+
+	private async Task<StoreOperation> InstallFromStore()
+	{
+		var operation = _coordinator.Install(StoreExtensionKind.Plugin, PluginId);
+		await _executor.Execute(operation.Id);
+		return _tracker.Find(operation.Id)!;
+	}
+
+	private string? CatalogTestBuild() => _catalogQuery.Find(StoreExtensionKind.Plugin, PluginId).Data?.InstalledTestBuild;
 
 	[Test]
 	public async Task An_unsigned_test_build_installs_with_consent_without_developer_mode_and_is_remembered()
@@ -351,6 +388,94 @@ internal sealed class StoreTestBuildInstallTests
 			Assert.That(result.State, Is.EqualTo(StoreOperationState.Failed));
 			Assert.That(result.Error, Is.Not.EqualTo(StoreOperationError.TestConsentRequired));
 			Assert.That(ActiveVersion(), Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task Returning_to_the_store_version_replaces_the_test_build_with_the_published_release()
+	{
+		await Publish(await TrustedArtifact("1.1.0"), "1.1.0");
+		Assert.That((await InstallFromStore()).State, Is.EqualTo(StoreOperationState.Completed));
+		Assert.That((await InstallTestBuild(await ShareTestBuild(UnsignedArtifact("1.2.0"), "1.2.0", "42"))).State,
+			Is.EqualTo(StoreOperationState.Completed));
+		await Publish(await TrustedArtifact("1.1.0"), "1.1.0");
+		var before = CatalogTestBuild();
+
+		var result = await InstallFromStore();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(before, Is.EqualTo("42"));
+			Assert.That(result.State, Is.EqualTo(StoreOperationState.Completed), result.ErrorMessage);
+			Assert.That(ActiveVersion(), Is.EqualTo("1.1.0"));
+			Assert.That(_testInstallations.Find(PluginId), Is.Null);
+			Assert.That(CatalogTestBuild(), Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task Returning_from_a_test_build_of_the_published_version_installs_the_release_and_clears_the_test()
+	{
+		var build = await ShareTestBuild(UnsignedArtifact("1.2.0"), "1.2.0", "42");
+		Assert.That((await InstallTestBuild(build)).State, Is.EqualTo(StoreOperationState.Completed));
+		await Publish(await TrustedArtifact("1.2.0"), "1.2.0");
+		var listedBefore = (await _tests.GetTests()).Tests.Single();
+
+		var result = await InstallFromStore();
+		var listedAfter = (await _tests.GetTests()).Tests.Single();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(listedBefore.InstalledTestBuildId, Is.EqualTo(build.Id));
+			Assert.That(listedBefore.StoreVersion, Is.EqualTo("1.2.0"));
+			Assert.That(result.State, Is.EqualTo(StoreOperationState.Completed), result.ErrorMessage);
+			Assert.That(ActiveVersion(), Is.EqualTo("1.2.0"));
+			Assert.That(listedAfter.InstalledTestBuildId, Is.Null);
+			Assert.That(CatalogTestBuild(), Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task A_store_release_that_does_not_verify_does_not_replace_the_test_build()
+	{
+		var build = await ShareTestBuild(UnsignedArtifact("1.2.0"), "1.2.0", "42");
+		Assert.That((await InstallTestBuild(build)).State, Is.EqualTo(StoreOperationState.Completed));
+		await Publish(UnsignedArtifact("1.2.0"), "1.2.0");
+
+		var result = await InstallFromStore();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.State, Is.EqualTo(StoreOperationState.Failed));
+			Assert.That(_testInstallations.Find(PluginId)?.BuildId, Is.EqualTo(build.Id));
+			Assert.That(CatalogTestBuild(), Is.EqualTo("42"));
+		});
+	}
+
+	[Test]
+	public async Task Without_a_test_build_a_store_install_of_the_installed_version_is_still_refused()
+	{
+		await Publish(await TrustedArtifact("1.1.0"), "1.1.0");
+		Assert.That((await InstallFromStore()).State, Is.EqualTo(StoreOperationState.Completed));
+
+		var result = await InstallFromStore();
+
+		Assert.That(result.State, Is.EqualTo(StoreOperationState.Failed));
+	}
+
+	[Test]
+	public async Task A_manual_install_over_a_test_build_is_no_longer_reported_as_a_test_build()
+	{
+		Assert.That((await InstallTestBuild(await ShareTestBuild(UnsignedArtifact("1.2.0"), "1.2.0", "42"))).State,
+			Is.EqualTo(StoreOperationState.Completed));
+
+		var manual = await _pluginInstaller.Install(PluginArtifactSource.FromPath(await TrustedArtifact("1.2.0")),
+			new PluginInstallRequest { Force = true });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(manual.Success, Is.True, manual.ErrorMessage);
+			Assert.That(_testInstallations.Find(PluginId), Is.Null);
 		});
 	}
 }

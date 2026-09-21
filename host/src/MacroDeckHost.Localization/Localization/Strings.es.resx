@@ -17559,4 +17559,20 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>{name} {version} (compilación {build}) no ha sido revisada por Macro Deck. Viene directamente del creador del complemento, puede ser inestable y reemplaza la versión instalada {installedVersion}.</value>
     <comment>[name:string][version:string][build:string][installedVersion:string]</comment>
   </data>
+  <data name="Store.TestBuildActive" xml:space="preserve">
+    <value>Compilación de prueba {build}</value>
+    <comment>[build:string] Shown on a Store plugin whose installed version is an unreviewed test build rather than the published release.</comment>
+  </data>
+  <data name="Store.ReturnToStoreVersion" xml:space="preserve">
+    <value>Volver a la versión de la Store {version}</value>
+    <comment>[version:string] Replaces an installed test build with the currently published Store release.</comment>
+  </data>
+  <data name="Store.Tests.BuildCount.One" xml:space="preserve">
+    <value>{count} compilación de prueba</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Tests.BuildCount.Other" xml:space="preserve">
+    <value>{count} compilaciones de prueba</value>
+    <comment>[plural]</comment>
+  </data>
 </root>

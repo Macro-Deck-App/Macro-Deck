@@ -8,6 +8,8 @@ public sealed record StoreCatalogItem
 
 	public string? InstalledVersion { get; init; }
 
+	public string? InstalledTestBuild { get; init; }
+
 	public Guid? ActiveOperationId { get; init; }
 
 	public StoreTrustPresentation Trust { get; init; } = StoreTrustPresentation.RegistryAuthenticated;

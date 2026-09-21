@@ -105,7 +105,7 @@ internal sealed class StoreOfficialPackagesTests
 
 	private StoreOfficialPackages Create(StoreRegistryOptions options) =>
 		new(_catalog,
-			new StoreCatalogQueryService(_catalog, new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None), _installations),
+			new StoreCatalogQueryService(_catalog, new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None), _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None)),
 			_installations,
 			options);
 

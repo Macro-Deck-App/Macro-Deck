@@ -18,6 +18,7 @@ using MacroDeckHost.Application.Plugins.Trust;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Store.Installation;
 using MacroDeckHost.Application.Store.Model;
+using MacroDeckHost.Application.Store.Testing;
 using MacroDeckHost.Infrastructure.Persistence;
 using MacroDeckHost.Localization;
 using Microsoft.Extensions.DependencyInjection;
@@ -560,6 +561,13 @@ public sealed class PluginInstaller : IPluginInstaller
 	{
 		using var scope = _scopeFactory.CreateScope();
 		scope.ServiceProvider.GetService<IStoreInstallationStore>()?.Delete(StoreExtensionKind.Plugin, pluginId);
+		ForgetTestInstallation(pluginId);
+	}
+
+	private void ForgetTestInstallation(string pluginId)
+	{
+		using var scope = _scopeFactory.CreateScope();
+		scope.ServiceProvider.GetService<IStoreTestInstallationStore>()?.Delete(pluginId);
 	}
 
 	private async Task RetireRegistration(string pluginId)
@@ -840,6 +848,11 @@ public sealed class PluginInstaller : IPluginInstaller
 		if (result.Success)
 		{
 			await PruneOldVersions(manifest.Id, previousVersion);
+
+			if (acquisition.SourceKind != PluginArtifactSourceKind.TestBuild)
+			{
+				ForgetTestInstallation(manifest.Id);
+			}
 
 			// A plugin that was activated but deliberately not started never welcomes a session, and the
 			// registrar only registers such plugins at startup. Without this an install held back by a

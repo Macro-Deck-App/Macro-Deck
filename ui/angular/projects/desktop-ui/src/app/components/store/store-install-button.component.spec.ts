@@ -219,3 +219,100 @@ describe('StoreInstallButtonComponent after an update', () => {
       TestBed.inject(LocalizationService).translateKey(AppStrings.Store.InstalledVersion, { version: '1.1.0' }));
   });
 });
+
+describe('StoreInstallButtonComponent with a test build installed', () => {
+  let fixture: ComponentFixture<StoreInstallButtonComponent>;
+
+  async function setup(overrides: Partial<StoreCatalogItemBody>, operation: StoreOperationBody | null = null): Promise<void> {
+    TestBed.configureTestingModule({
+      imports: [StoreInstallButtonComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        ...provideLocalizationTesting(),
+        { provide: DeveloperModeService, useValue: { enabled: signal(false), ensureLoaded: () => Promise.resolve() } },
+      ],
+    });
+
+    fixture = TestBed.createComponent(StoreInstallButtonComponent);
+    fixture.componentRef.setInput('item', {
+      kind: 'Plugin',
+      id: 'com.acme.deck-tools',
+      name: 'Deck Tools',
+      latestVersion: '1.1.0',
+      installState: 'Installed',
+      installedVersion: '1.2.0',
+      trust: 'RegistryAuthenticated',
+      hasIcon: false,
+      ...overrides,
+    } satisfies StoreCatalogItemBody);
+    fixture.componentRef.setInput('operation', operation);
+    fixture.detectChanges();
+    await fixture.whenStable();
+  }
+
+  function button(text: string): HTMLElement | null {
+    return Array.from(fixture.nativeElement.querySelectorAll('button'))
+      .find(candidate => (candidate as HTMLElement).textContent?.includes(text)) as HTMLElement ?? null;
+  }
+
+  it('says a test build is active and offers returning to the published version', async () => {
+    await setup({ installedTestBuild: '42' });
+    const installs: void[] = [];
+    fixture.componentInstance.install.subscribe(() => installs.push(undefined));
+
+    button('Return to Store version 1.1.0')!.click();
+
+    expect(fixture.nativeElement.textContent).toContain('Test build 42');
+    expect(installs.length).toBe(1);
+  });
+
+  it('offers the return even when the published version is newer than the test build', async () => {
+    await setup({ installedTestBuild: '42', installState: 'UpdateAvailable', installedVersion: '1.0.0' });
+
+    expect(button('Return to Store version 1.1.0')).not.toBeNull();
+  });
+
+  it('still says so once the test build install that put it there has completed', async () => {
+    await setup({ installedTestBuild: '42' }, {
+      id: 'op-test',
+      kind: 'TestInstall',
+      extensionKind: 'Plugin',
+      packageId: 'com.acme.deck-tools',
+      version: '1.2.0',
+      displayName: 'Deck Tools',
+      state: 'Completed',
+      bytesDownloaded: 0,
+      startedAt: '2026-01-01T00:00:00Z',
+      updatedAt: '2026-01-01T00:00:01Z',
+      canRetry: false,
+    });
+
+    expect(fixture.nativeElement.textContent).toContain('Test build 42');
+    expect(button('Return to Store version 1.1.0')).not.toBeNull();
+  });
+
+  it('shows the returned Store version while the catalog still names the replaced test build', async () => {
+    await setup({ installedTestBuild: '42', installedVersion: '1.2.0' }, {
+      id: 'op-return',
+      kind: 'Update',
+      extensionKind: 'Plugin',
+      packageId: 'com.acme.deck-tools',
+      version: '1.1.0',
+      displayName: 'Deck Tools',
+      state: 'Completed',
+      bytesDownloaded: 0,
+      startedAt: '2026-01-01T00:00:00Z',
+      updatedAt: '2026-01-01T00:00:01Z',
+      canRetry: false,
+    });
+
+    expect(button('Return to Store version')).toBeNull();
+  });
+
+  it('offers nothing about test builds for a regular Store install', async () => {
+    await setup({ installedVersion: '1.1.0' });
+
+    expect(button('Return to Store version')).toBeNull();
+    expect(fixture.nativeElement.textContent).not.toContain('Test build');
+  });
+});

@@ -17559,4 +17559,20 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>{name} {version} (kompilacja {build}) nie została sprawdzona przez Macro Deck. Pochodzi bezpośrednio od twórcy wtyczki, może działać niestabilnie i zastąpi zainstalowaną wersję {installedVersion}.</value>
     <comment>[name:string][version:string][build:string][installedVersion:string]</comment>
   </data>
+  <data name="Store.TestBuildActive" xml:space="preserve">
+    <value>Kompilacja testowa {build}</value>
+    <comment>[build:string] Shown on a Store plugin whose installed version is an unreviewed test build rather than the published release.</comment>
+  </data>
+  <data name="Store.ReturnToStoreVersion" xml:space="preserve">
+    <value>Przywróć wersję ze Store {version}</value>
+    <comment>[version:string] Replaces an installed test build with the currently published Store release.</comment>
+  </data>
+  <data name="Store.Tests.BuildCount.One" xml:space="preserve">
+    <value>{count} kompilacja testowa</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Tests.BuildCount.Other" xml:space="preserve">
+    <value>Kompilacje testowe: {count}</value>
+    <comment>[plural]</comment>
+  </data>
 </root>

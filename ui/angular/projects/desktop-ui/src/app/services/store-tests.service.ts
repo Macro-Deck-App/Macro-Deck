@@ -1,5 +1,5 @@
 import { Injectable, effect, inject, signal, untracked } from '@angular/core';
-import { StoreOperationActionResponse, StoreTestBody } from '@macro-deck/runtime';
+import { StoreOperationActionResponse, StoreOperationBody, StoreTestBody } from '@macro-deck/runtime';
 import { ApiService } from '@shared';
 import { isTerminalStoreOperationState } from '../util/store-operation-display';
 import { StoreOperationService } from './store-operation.service';
@@ -13,6 +13,7 @@ export class StoreTestsService {
   readonly isLoading = signal(false);
   readonly loaded = signal(false);
   readonly errorCode = signal<string | null>(null);
+  readonly expanded = signal<ReadonlySet<string>>(new Set());
 
   private generation = 0;
   private readonly liveOperationIds = new Set<string>();
@@ -22,7 +23,7 @@ export class StoreTestsService {
       const listed = new Set(this.tests().map(test => test.packageId));
       let installed = false;
       for (const operation of this.operations.all()) {
-        if (operation.kind !== 'TestInstall' || !listed.has(operation.packageId)) {
+        if (operation.extensionKind !== 'Plugin' || !listed.has(operation.packageId)) {
           continue;
         }
 
@@ -70,5 +71,19 @@ export class StoreTestsService {
 
   install(packageId: string, buildId: string): Promise<StoreOperationActionResponse> {
     return this.operations.installTestBuild(packageId, buildId);
+  }
+
+  returnToStoreVersion(packageId: string): Promise<StoreOperationBody | null> {
+    return this.operations.install('Plugin', packageId);
+  }
+
+  toggleExpanded(packageId: string): void {
+    this.expanded.update(current => {
+      const next = new Set(current);
+      if (!next.delete(packageId)) {
+        next.add(packageId);
+      }
+      return next;
+    });
   }
 }

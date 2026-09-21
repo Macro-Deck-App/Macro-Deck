@@ -27,7 +27,8 @@ internal sealed class StoreCatalogQueryServiceTests
 		_catalog = new StoreCatalog();
 		_query = new StoreCatalogQueryService(_catalog,
 			new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None),
-			new JsonStoreInstallationStore(_paths, Serilog.Core.Logger.None));
+			new JsonStoreInstallationStore(_paths, Serilog.Core.Logger.None),
+			new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None));
 	}
 
 	[TearDown]

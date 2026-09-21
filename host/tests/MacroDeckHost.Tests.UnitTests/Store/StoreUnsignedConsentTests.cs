@@ -111,7 +111,7 @@ internal sealed class StoreUnsignedConsentTests
 			TimeProvider.System,
 			Serilog.Core.Logger.None);
 
-		var catalogQuery = new StoreCatalogQueryService(_catalog, _pluginCatalog, installations);
+		var catalogQuery = new StoreCatalogQueryService(_catalog, _pluginCatalog, installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None));
 		_coordinator = new StoreInstallCoordinator(catalogQuery,
 			_tracker,
 			new StoreOperationChannel(),

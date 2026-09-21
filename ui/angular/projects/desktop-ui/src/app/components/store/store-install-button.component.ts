@@ -5,7 +5,7 @@ import { DeveloperModeService } from '../../services/developer-mode.service';
 import { formatEta, storeOperationByteReadout, storeOperationErrorKey, storeOperationPercent } from '../../util/store-operation-display';
 
 type EffectiveState =
-  | 'install' | 'installed' | 'update' | 'unsupported'
+  | 'install' | 'installed' | 'update' | 'testBuild' | 'unsupported'
   | 'queued' | 'downloading' | 'validating' | 'backingUp' | 'installing' | 'completed' | 'failed';
 
 @Component({
@@ -50,7 +50,10 @@ export class StoreInstallButtonComponent {
 
   protected readonly effective = computed<EffectiveState>(() => {
     const op = this.operation();
-    if (op) {
+    const testBuild = !!this.item().installedTestBuild
+      && (this.item().installState === 'Installed' || this.item().installState === 'UpdateAvailable');
+    const returnedToStore = op?.kind !== 'TestInstall' && op?.version === this.item().latestVersion;
+    if (op && !(testBuild && op.state === 'Completed' && !returnedToStore)) {
       switch (op.state) {
         case 'Queued': return 'queued';
         case 'Downloading': return 'downloading';
@@ -61,6 +64,10 @@ export class StoreInstallButtonComponent {
         case 'Completed': return 'completed';
         case 'Cancelled': break;
       }
+    }
+
+    if (testBuild) {
+      return 'testBuild';
     }
 
     switch (this.item().installState) {

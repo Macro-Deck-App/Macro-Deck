@@ -25,6 +25,8 @@ public class StoreTestBody
 
 	public Guid? InstalledTestBuildId { get; set; }
 
+	public string? StoreVersion { get; set; }
+
 	public Guid? ActiveOperationId { get; set; }
 
 	public List<StoreTestBuildBody> Builds { get; set; } = [];
