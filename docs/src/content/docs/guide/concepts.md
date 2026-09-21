@@ -137,6 +137,14 @@ you sign in, and whenever you install something while signed in, Macro Deck reco
 Store items for your account so you can rate them. If ratings cannot be reached, the Store keeps
 working without them.
 
+To report a Store item, open its page and choose **Report this item** at the bottom of the details.
+To report a review, choose **Report** next to it. Pick a reason and, if you like, add details;
+**Other** needs a short description. Reporting needs a Macro Deck Connect sign-in, and each review
+can be reported once per account. Reports go to the Macro Deck moderators and do not hide
+anything on their own: the item or review stays visible until a moderator has looked at it. Reporting
+Store items only works once the Store supports it; until then, Macro Deck tells you it is not
+available.
+
 ### Tests
 
 A plugin creator can invite you to test a plugin before it is reviewed. The invitation arrives by

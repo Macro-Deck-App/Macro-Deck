@@ -17492,6 +17492,127 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Reviews.Error.PlatformUnavailable" xml:space="preserve">
     <value>Hodnocení se nepodařilo kontaktovat. Zkuste to později.</value>
   </data>
+  <data name="Store.Report.Action" xml:space="preserve">
+    <value>Nahlásit</value>
+  </data>
+  <data name="Store.Report.Reported" xml:space="preserve">
+    <value>Nahlášeno</value>
+    <comment>Shown instead of Report once the content has been reported.</comment>
+  </data>
+  <data name="Store.Report.EntryAction" xml:space="preserve">
+    <value>Nahlásit tuto položku</value>
+  </data>
+  <data name="Store.Report.ReviewAction" xml:space="preserve">
+    <value>Nahlásit recenzi od {author}</value>
+    <comment>[author:string] Accessible name of the Report button on a review.</comment>
+  </data>
+  <data name="Store.Report.EntryHeading" xml:space="preserve">
+    <value>Nahlásit {name}</value>
+    <comment>[name:string] The Store item being reported.</comment>
+  </data>
+  <data name="Store.Report.ReviewHeading" xml:space="preserve">
+    <value>Nahlásit recenzi</value>
+  </data>
+  <data name="Store.Report.Intro" xml:space="preserve">
+    <value>Hlášení dostanou moderátoři Macro Deck. Nic se neskryje, dokud ho neposoudí.</value>
+  </data>
+  <data name="Store.Report.ReasonLabel" xml:space="preserve">
+    <value>Důvod</value>
+  </data>
+  <data name="Store.Report.Reason.InappropriateContent" xml:space="preserve">
+    <value>Nevhodný nebo škodlivý obsah</value>
+  </data>
+  <data name="Store.Report.Reason.Misleading" xml:space="preserve">
+    <value>Zavádějící informace</value>
+  </data>
+  <data name="Store.Report.Reason.Impersonation" xml:space="preserve">
+    <value>Vydávání se za někoho jiného, problém s ochrannou známkou nebo značkou</value>
+  </data>
+  <data name="Store.Report.Reason.Malicious" xml:space="preserve">
+    <value>Škodlivé nebo podezřelé chování</value>
+  </data>
+  <data name="Store.Report.Reason.Spam" xml:space="preserve">
+    <value>Spam</value>
+  </data>
+  <data name="Store.Report.Reason.Abuse" xml:space="preserve">
+    <value>Obtěžování nebo urážlivý obsah</value>
+  </data>
+  <data name="Store.Report.Reason.OffTopic" xml:space="preserve">
+    <value>Mimo téma nebo nesouvisí s touto položkou</value>
+  </data>
+  <data name="Store.Report.Reason.Other" xml:space="preserve">
+    <value>Jiné</value>
+  </data>
+  <data name="Store.Report.DetailLabel" xml:space="preserve">
+    <value>Podrobnosti</value>
+  </data>
+  <data name="Store.Report.DetailHintOptional" xml:space="preserve">
+    <value>Nepovinné. Cokoli, co moderátorům pomůže problém pochopit.</value>
+  </data>
+  <data name="Store.Report.DetailHintRequired" xml:space="preserve">
+    <value>U možnosti Jiné povinné. Popište problém.</value>
+  </data>
+  <data name="Store.Report.Validation.ReasonRequired" xml:space="preserve">
+    <value>Vyberte důvod.</value>
+  </data>
+  <data name="Store.Report.Validation.DetailRequired" xml:space="preserve">
+    <value>Pro nahlášení s důvodem Jiné je nutné popsat problém.</value>
+  </data>
+  <data name="Store.Report.Validation.DetailTooLong" xml:space="preserve">
+    <value>Podrobnosti jsou příliš dlouhé.</value>
+  </data>
+  <data name="Store.Report.Validation.DetailInvalid" xml:space="preserve">
+    <value>Podrobnosti obsahují nepovolené znaky.</value>
+  </data>
+  <data name="Store.Report.Submit" xml:space="preserve">
+    <value>Odeslat hlášení</value>
+  </data>
+  <data name="Store.Report.Received" xml:space="preserve">
+    <value>Děkujeme, hlášení bylo přijato. Moderátoři ho posoudí.</value>
+  </data>
+  <data name="Store.Report.Error.AlreadyReported" xml:space="preserve">
+    <value>Tento obsah už byl nahlášen.</value>
+  </data>
+  <data name="Store.Report.Error.Unavailable" xml:space="preserve">
+    <value>Tuto položku teď nelze nahlásit.</value>
+  </data>
+  <data name="Store.Report.Error.NotAllowed" xml:space="preserve">
+    <value>Tento obsah nelze nahlásit.</value>
+  </data>
+  <data name="Store.Report.Error.NotFound" xml:space="preserve">
+    <value>Obsah už není dostupný, a proto ho nelze nahlásit.</value>
+  </data>
+  <data name="Store.Report.Error.Gone" xml:space="preserve">
+    <value>Tato položka už ve Store není uvedena.</value>
+  </data>
+  <data name="Store.Report.Error.Cooldown" xml:space="preserve">
+    <value>V krátké době bylo odesláno několik hlášení. Zkuste to znovu později.</value>
+  </data>
+  <data name="Store.Report.Error.CooldownSeconds.One" xml:space="preserve">
+    <value>V krátké době bylo odesláno několik hlášení. Zkuste to znovu za {count} sekundu.</value>
+    <comment>[plural][count:int] Too many reports in a short time; count is the wait in seconds.</comment>
+  </data>
+  <data name="Store.Report.Error.CooldownSeconds.Other" xml:space="preserve">
+    <value>V krátké době bylo odesláno několik hlášení. Zbývající čekání v sekundách: {count}.</value>
+    <comment>[plural][count:int] Too many reports in a short time; count is the wait in seconds.</comment>
+  </data>
+  <data name="Store.Report.Error.RetryLater" xml:space="preserve">
+    <value>Hlášení teď nelze odeslat. Zkuste to znovu později.</value>
+  </data>
+  <data name="Store.Report.Error.RetryLaterSeconds.One" xml:space="preserve">
+    <value>Hlášení teď nelze odeslat. Zkuste to znovu za {count} sekundu.</value>
+    <comment>[plural][count:int] Reports are temporarily unavailable; count is the wait in seconds.</comment>
+  </data>
+  <data name="Store.Report.Error.RetryLaterSeconds.Other" xml:space="preserve">
+    <value>Hlášení teď nelze odeslat. Zbývající čekání v sekundách: {count}.</value>
+    <comment>[plural][count:int] Reports are temporarily unavailable; count is the wait in seconds.</comment>
+  </data>
+  <data name="Store.Report.Error.Validation" xml:space="preserve">
+    <value>Zkontrolujte důvod a podrobnosti a zkuste to znovu.</value>
+  </data>
+  <data name="Store.Report.Error.PlatformUnavailable" xml:space="preserve">
+    <value>Hlášení se nepodařilo odeslat. Zkuste to znovu později.</value>
+  </data>
   <data name="Store.Tests.Title" xml:space="preserve">
     <value>Testy</value>
     <comment>Tab and heading for the test builds a creator invited the user to try before review.</comment>

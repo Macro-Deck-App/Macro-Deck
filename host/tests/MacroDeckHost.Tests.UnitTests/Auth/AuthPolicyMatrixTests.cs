@@ -486,7 +486,7 @@ public class AuthPolicyMatrixTests
 	}
 
 	[Test]
-	public async Task Store_ratings_and_the_signed_in_accounts_review_are_admin_only()
+	public async Task Store_ratings_the_signed_in_accounts_review_and_reports_are_admin_only()
 	{
 		const string review = "/api/store/catalog/Plugin/com.acme.hue/reviews/me";
 		var responses = new[]
@@ -496,6 +496,14 @@ public class AuthPolicyMatrixTests
 			await Send(HttpMethod.Get, review, _clientToken),
 			await SendJson(HttpMethod.Put, review, new { rating = 5 }, _clientToken),
 			await Send(HttpMethod.Delete, review, _clientToken),
+			await SendJson(HttpMethod.Post,
+				"/api/store/catalog/Plugin/com.acme.hue/report",
+				new { category = "Spam" },
+				_clientToken),
+			await SendJson(HttpMethod.Post,
+				$"/api/store/catalog/Plugin/com.acme.hue/reviews/{Guid.NewGuid():D}/report",
+				new { category = "Spam" },
+				_clientToken),
 			await Send(HttpMethod.Get, "/api/store/review-avatars?src=x", _clientToken)
 		};
 

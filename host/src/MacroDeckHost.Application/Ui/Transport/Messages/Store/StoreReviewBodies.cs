@@ -88,6 +88,8 @@ public enum StoreReviewComposeState
 
 public class StoreOwnReviewBody
 {
+	public Guid Id { get; set; }
+
 	public int Rating { get; set; }
 
 	public string? Title { get; set; }
@@ -135,6 +137,20 @@ public class StoreOwnReviewWriteResponse
 	public bool Success { get; set; }
 
 	public StoreOwnReviewBody? Review { get; set; }
+
+	public StoreReviewWriteError? Error { get; set; }
+}
+
+public class ReportStoreContentRequest
+{
+	public string? Category { get; set; }
+
+	public string? Detail { get; set; }
+}
+
+public class StoreReportResponse
+{
+	public bool Success { get; set; }
 
 	public StoreReviewWriteError? Error { get; set; }
 }

@@ -306,6 +306,7 @@ export interface GetStoreReviewsResponse {
 export type StoreReviewComposeState = 'SignedOut' | 'NotEntitled' | 'Entitled' | 'Unavailable';
 
 export interface StoreOwnReviewBody {
+  id: string;
   rating: number;
   title?: string | null;
   body?: string | null;
@@ -338,16 +339,38 @@ export type StoreReviewWriteErrorCode =
   | 'retry_later'
   | 'validation'
   | 'not_found'
+  | 'already_reported'
+  | 'report_unavailable'
   | 'platform_unavailable';
 
 export interface StoreReviewWriteError {
   code: StoreReviewWriteErrorCode;
-  field?: 'Rating' | 'Title' | 'Body' | null;
+  field?: 'Rating' | 'Title' | 'Body' | 'Category' | 'Detail' | null;
   retryAfterSeconds?: number | null;
 }
 
 export interface StoreOwnReviewWriteResponse {
   success: boolean;
   review?: StoreOwnReviewBody | null;
+  error?: StoreReviewWriteError | null;
+}
+
+export type StoreEntryReportCategory =
+  | 'InappropriateContent'
+  | 'Misleading'
+  | 'Impersonation'
+  | 'Malicious'
+  | 'Spam'
+  | 'Other';
+
+export type StoreReviewReportCategory = 'Spam' | 'Abuse' | 'OffTopic' | 'Other';
+
+export interface ReportStoreContentRequest {
+  category: StoreEntryReportCategory | StoreReviewReportCategory;
+  detail?: string | null;
+}
+
+export interface StoreReportResponse {
+  success: boolean;
   error?: StoreReviewWriteError | null;
 }

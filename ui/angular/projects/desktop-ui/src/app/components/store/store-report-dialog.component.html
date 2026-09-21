@@ -1,0 +1,79 @@
+<shared-modal
+  class="report-dialog"
+  size="medium"
+  [heading]="heading()"
+  [closeOnOverlay]="false"
+  (close)="close()">
+  @if (suspended()) {
+    <p class="report-text report-suspended" role="note">
+      {{ 'macrodeck.app:Store.Reviews.Error.AccountSuspended' | translate }}
+    </p>
+  } @else {
+    <form class="report-form" (ngSubmit)="submit()">
+      <p class="report-text">{{ 'macrodeck.app:Store.Report.Intro' | translate }}</p>
+
+      <fieldset class="report-reasons" [attr.aria-invalid]="visibleErrors().reason ? 'true' : null" [disabled]="busy()">
+        <legend class="report-label">{{ 'macrodeck.app:Store.Report.ReasonLabel' | translate }}</legend>
+        @for (option of reasons(); track option.value) {
+          <label class="report-reason" [class.is-selected]="reason() === option.value">
+            <input
+              type="radio"
+              name="report-reason"
+              [value]="option.value"
+              [checked]="reason() === option.value"
+              (change)="selectReason(option.value)">
+            <span>{{ option.label }}</span>
+          </label>
+        }
+        @if (visibleErrors().reason; as error) {
+          <p class="report-field-error">{{ error }}</p>
+        }
+      </fieldset>
+
+      <label class="report-field">
+        <span class="report-label">{{ 'macrodeck.app:Store.Report.DetailLabel' | translate }}</span>
+        <span class="report-hint">
+          @if (detailRequired()) {
+            {{ 'macrodeck.app:Store.Report.DetailHintRequired' | translate }}
+          } @else {
+            {{ 'macrodeck.app:Store.Report.DetailHintOptional' | translate }}
+          }
+        </span>
+        <shared-input
+          class="report-detail-input"
+          name="detail"
+          [multiline]="true"
+          [rows]="4"
+          [disabled]="busy()"
+          [inputRequired]="detailRequired()"
+          [invalid]="!!visibleErrors().detail"
+          [ngModel]="detail()"
+          (ngModelChange)="detail.set($event)" />
+        <span class="report-counter" aria-live="polite">{{ detailCounter() }}</span>
+        @if (visibleErrors().detail; as error) {
+          <span class="report-field-error">{{ error }}</span>
+        }
+      </label>
+
+      @if (error(); as message) {
+        <p class="report-error" role="alert">{{ message }}</p>
+      }
+    </form>
+  }
+
+  <div modal-footer class="report-actions">
+    <shared-button class="report-cancel" variant="ghost" [disabled]="busy()" (click)="close()">
+      {{ 'macrodeck:Common.Cancel' | translate }}
+    </shared-button>
+    @if (!suspended()) {
+      <shared-button
+        class="report-submit"
+        variant="primary"
+        [loading]="busy()"
+        [disabled]="busy()"
+        (click)="submit()">
+        {{ 'macrodeck.app:Store.Report.Submit' | translate }}
+      </shared-button>
+    }
+  </div>
+</shared-modal>

@@ -17492,6 +17492,127 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Store.Reviews.Error.PlatformUnavailable" xml:space="preserve">
     <value>Impossibile raggiungere le valutazioni. Riprova più tardi.</value>
   </data>
+  <data name="Store.Report.Action" xml:space="preserve">
+    <value>Segnala</value>
+  </data>
+  <data name="Store.Report.Reported" xml:space="preserve">
+    <value>Segnalato</value>
+    <comment>Shown instead of Report once the content has been reported.</comment>
+  </data>
+  <data name="Store.Report.EntryAction" xml:space="preserve">
+    <value>Segnala questo elemento</value>
+  </data>
+  <data name="Store.Report.ReviewAction" xml:space="preserve">
+    <value>Segnala la recensione di {author}</value>
+    <comment>[author:string] Accessible name of the Report button on a review.</comment>
+  </data>
+  <data name="Store.Report.EntryHeading" xml:space="preserve">
+    <value>Segnala {name}</value>
+    <comment>[name:string] The Store item being reported.</comment>
+  </data>
+  <data name="Store.Report.ReviewHeading" xml:space="preserve">
+    <value>Segnala recensione</value>
+  </data>
+  <data name="Store.Report.Intro" xml:space="preserve">
+    <value>La tua segnalazione arriva ai moderatori di Macro Deck. Nulla viene nascosto finché non l'hanno esaminata.</value>
+  </data>
+  <data name="Store.Report.ReasonLabel" xml:space="preserve">
+    <value>Motivo</value>
+  </data>
+  <data name="Store.Report.Reason.InappropriateContent" xml:space="preserve">
+    <value>Contenuti inappropriati o dannosi</value>
+  </data>
+  <data name="Store.Report.Reason.Misleading" xml:space="preserve">
+    <value>Informazioni fuorvianti</value>
+  </data>
+  <data name="Store.Report.Reason.Impersonation" xml:space="preserve">
+    <value>Furto d'identità, problema di marchio o branding</value>
+  </data>
+  <data name="Store.Report.Reason.Malicious" xml:space="preserve">
+    <value>Comportamento dannoso o sospetto</value>
+  </data>
+  <data name="Store.Report.Reason.Spam" xml:space="preserve">
+    <value>Spam</value>
+  </data>
+  <data name="Store.Report.Reason.Abuse" xml:space="preserve">
+    <value>Molestie o contenuti offensivi</value>
+  </data>
+  <data name="Store.Report.Reason.OffTopic" xml:space="preserve">
+    <value>Fuori tema o non relativo a questo elemento</value>
+  </data>
+  <data name="Store.Report.Reason.Other" xml:space="preserve">
+    <value>Altro</value>
+  </data>
+  <data name="Store.Report.DetailLabel" xml:space="preserve">
+    <value>Dettagli</value>
+  </data>
+  <data name="Store.Report.DetailHintOptional" xml:space="preserve">
+    <value>Facoltativo. Qualsiasi informazione che aiuti i moderatori a capire il problema.</value>
+  </data>
+  <data name="Store.Report.DetailHintRequired" xml:space="preserve">
+    <value>Obbligatorio per Altro. Descrivi il problema.</value>
+  </data>
+  <data name="Store.Report.Validation.ReasonRequired" xml:space="preserve">
+    <value>Scegli un motivo.</value>
+  </data>
+  <data name="Store.Report.Validation.DetailRequired" xml:space="preserve">
+    <value>Descrivi il problema per segnalarlo come Altro.</value>
+  </data>
+  <data name="Store.Report.Validation.DetailTooLong" xml:space="preserve">
+    <value>I dettagli sono troppo lunghi.</value>
+  </data>
+  <data name="Store.Report.Validation.DetailInvalid" xml:space="preserve">
+    <value>I dettagli contengono caratteri non consentiti.</value>
+  </data>
+  <data name="Store.Report.Submit" xml:space="preserve">
+    <value>Invia segnalazione</value>
+  </data>
+  <data name="Store.Report.Received" xml:space="preserve">
+    <value>Grazie, la tua segnalazione è stata ricevuta. I moderatori la esamineranno.</value>
+  </data>
+  <data name="Store.Report.Error.AlreadyReported" xml:space="preserve">
+    <value>Hai già segnalato questo contenuto.</value>
+  </data>
+  <data name="Store.Report.Error.Unavailable" xml:space="preserve">
+    <value>Al momento non è possibile segnalare questo elemento.</value>
+  </data>
+  <data name="Store.Report.Error.NotAllowed" xml:space="preserve">
+    <value>Non puoi segnalare questo contenuto.</value>
+  </data>
+  <data name="Store.Report.Error.NotFound" xml:space="preserve">
+    <value>Questo contenuto non è più disponibile, quindi non può essere segnalato.</value>
+  </data>
+  <data name="Store.Report.Error.Gone" xml:space="preserve">
+    <value>Questo elemento non è più presente nello Store.</value>
+  </data>
+  <data name="Store.Report.Error.Cooldown" xml:space="preserve">
+    <value>Hai inviato diverse segnalazioni in poco tempo. Riprova più tardi.</value>
+  </data>
+  <data name="Store.Report.Error.CooldownSeconds.One" xml:space="preserve">
+    <value>Hai inviato diverse segnalazioni in poco tempo. Riprova tra {count} secondo.</value>
+    <comment>[plural][count:int] Too many reports in a short time; count is the wait in seconds.</comment>
+  </data>
+  <data name="Store.Report.Error.CooldownSeconds.Other" xml:space="preserve">
+    <value>Hai inviato diverse segnalazioni in poco tempo. Riprova tra {count} secondi.</value>
+    <comment>[plural][count:int] Too many reports in a short time; count is the wait in seconds.</comment>
+  </data>
+  <data name="Store.Report.Error.RetryLater" xml:space="preserve">
+    <value>Al momento non è possibile inviare segnalazioni. Riprova più tardi.</value>
+  </data>
+  <data name="Store.Report.Error.RetryLaterSeconds.One" xml:space="preserve">
+    <value>Al momento non è possibile inviare segnalazioni. Riprova tra {count} secondo.</value>
+    <comment>[plural][count:int] Reports are temporarily unavailable; count is the wait in seconds.</comment>
+  </data>
+  <data name="Store.Report.Error.RetryLaterSeconds.Other" xml:space="preserve">
+    <value>Al momento non è possibile inviare segnalazioni. Riprova tra {count} secondi.</value>
+    <comment>[plural][count:int] Reports are temporarily unavailable; count is the wait in seconds.</comment>
+  </data>
+  <data name="Store.Report.Error.Validation" xml:space="preserve">
+    <value>Controlla il motivo e i dettagli e riprova.</value>
+  </data>
+  <data name="Store.Report.Error.PlatformUnavailable" xml:space="preserve">
+    <value>Impossibile inviare la segnalazione. Riprova più tardi.</value>
+  </data>
   <data name="Store.Tests.Title" xml:space="preserve">
     <value>Test</value>
     <comment>Tab and heading for the test builds a creator invited the user to try before review.</comment>

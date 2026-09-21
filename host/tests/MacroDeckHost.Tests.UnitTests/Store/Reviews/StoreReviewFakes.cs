@@ -91,6 +91,29 @@ internal sealed class FakeStorePlatformClient : IStorePlatformClient
 		return Task.FromResult(DeleteResults.Count > 0 ? DeleteResults.Dequeue() : StorePlatformResult.Ok(true));
 	}
 
+	public List<(string PackageId, Guid? ReviewId, string Category, string? Detail)> Reports { get; } = [];
+
+	public StorePlatformResult<bool> ReportResult { get; set; } = StorePlatformResult.Ok(true);
+
+	public Task<StorePlatformResult<bool>> ReportPackage(string packageId,
+		string category,
+		string? detail,
+		CancellationToken cancellationToken = default)
+	{
+		Reports.Add((packageId, null, category, detail));
+		return Task.FromResult(ReportResult);
+	}
+
+	public Task<StorePlatformResult<bool>> ReportReview(string packageId,
+		Guid reviewId,
+		string category,
+		string? detail,
+		CancellationToken cancellationToken = default)
+	{
+		Reports.Add((packageId, reviewId, category, detail));
+		return Task.FromResult(ReportResult);
+	}
+
 	public Task<StorePlatformResult<IReadOnlyDictionary<string, StoreEntitlementStatus>>> GetEntitlements(
 		IReadOnlyCollection<string> packageIds,
 		CancellationToken cancellationToken = default) =>
