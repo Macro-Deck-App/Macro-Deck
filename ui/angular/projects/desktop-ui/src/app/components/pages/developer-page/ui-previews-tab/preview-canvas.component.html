@@ -24,17 +24,38 @@
 
   <div class="canvas-surface-wrap">
     <div #canvas class="canvas-surface" [style.width.px]="size().width" [style.height.px]="size().height">
-      @if (rejection(); as rejection) {
-        <div class="canvas-rejection">
-          <p class="canvas-rejection-heading">{{ 'macrodeck.app:Developer.Previews.SessionFailedHeading' | translate }}</p>
-          @if (rejection.message) {
-            <p class="canvas-rejection-message">{{ rejection.message }}</p>
-          }
-        </div>
-      } @else if (rendererKind() === 'widget') {
-        <shared-ui-widget-tree [root]="root()" [box]="box()" (nodeEvent)="onNodeEvent($event)" />
-      } @else if (rendererKind() === 'config') {
-        <shared-ui-tree [root]="root()" [box]="box()" (nodeEvent)="onNodeEvent($event)" />
+      <div class="canvas-content" [class.stale]="stale()" [inert]="stale()">
+        @if (rendererKind() === 'widget') {
+          <shared-ui-widget-tree [root]="root()" [box]="box()" (nodeEvent)="onNodeEvent($event)" />
+        } @else if (rendererKind() === 'config') {
+          <shared-ui-tree [root]="root()" [box]="box()" (nodeEvent)="onNodeEvent($event)" />
+        }
+      </div>
+
+      @switch (state()) {
+        @case ('waiting') {
+          <div class="canvas-notice" role="status">
+            <p class="canvas-notice-heading">{{ 'macrodeck.app:Developer.Previews.WaitingForProvider' | translate }}</p>
+          </div>
+        }
+        @case ('gone') {
+          <div class="canvas-notice" role="status">
+            <p class="canvas-notice-heading">{{ 'macrodeck.app:Developer.Previews.PreviewGone' | translate }}</p>
+          </div>
+        }
+        @case ('closed') {
+          <div class="canvas-notice" role="status">
+            <p class="canvas-notice-heading">{{ 'macrodeck.app:Developer.Previews.SessionClosed' | translate }}</p>
+          </div>
+        }
+        @case ('failed') {
+          <div class="canvas-notice canvas-rejection" role="status">
+            <p class="canvas-notice-heading">{{ 'macrodeck.app:Developer.Previews.SessionFailedHeading' | translate }}</p>
+            @if (rejection()?.message; as message) {
+              <p class="canvas-notice-message">{{ message }}</p>
+            }
+          </div>
+        }
       }
 
       <div

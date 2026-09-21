@@ -1794,6 +1794,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Developer.Previews.PresetsLabel" xml:space="preserve">
     <value>Size</value>
   </data>
+  <data name="Developer.Previews.PreviewGone" xml:space="preserve">
+    <value>This scenario no longer exists. It may have been renamed or removed.</value>
+  </data>
   <data name="Developer.Previews.RefreshAction" xml:space="preserve">
     <value>Refresh</value>
   </data>
@@ -1811,6 +1814,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>{count} scenarios</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Developer.Previews.SessionClosed" xml:space="preserve">
+    <value>This preview was closed, for example because it was opened in another window. Select Refresh to show it here again.</value>
+  </data>
   <data name="Developer.Previews.SessionFailedHeading" xml:space="preserve">
     <value>This preview could not be rendered</value>
   </data>
@@ -1825,6 +1831,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Developer.Previews.Tab" xml:space="preserve">
     <value>UI Previews</value>
+  </data>
+  <data name="Developer.Previews.WaitingForProvider" xml:space="preserve">
+    <value>The plugin is not connected. The preview reopens as soon as it is back.</value>
   </data>
   <data name="Developer.RunActionButton" xml:space="preserve">
     <value>Run action</value>

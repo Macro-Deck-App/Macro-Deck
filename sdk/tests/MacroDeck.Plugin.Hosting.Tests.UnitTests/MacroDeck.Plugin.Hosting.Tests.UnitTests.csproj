@@ -20,6 +20,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\MacroDeck.Plugin.Hosting\MacroDeck.Plugin.Hosting.csproj" />
         <ProjectReference Include="..\..\src\MacroDeck.Plugin.Testing\MacroDeck.Plugin.Testing.csproj" />
+        <ProjectReference Include="..\fixtures\MacroDeck.Plugin.Hosting.Tests.PreviewFixture\MacroDeck.Plugin.Hosting.Tests.PreviewFixture.csproj" />
     </ItemGroup>
 
     <ItemGroup>

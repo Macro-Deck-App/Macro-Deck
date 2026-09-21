@@ -216,14 +216,26 @@ describe('DeveloperPageComponent', () => {
   it('writes the tab back to the URL, and drops the param for the default tab', () => {
     component.selectTab('logs');
     expect(routerSpy.navigate).toHaveBeenCalledWith([], jasmine.objectContaining({
-      queryParams: { tab: 'logs' },
+      queryParams: jasmine.objectContaining({ tab: 'logs' }),
       queryParamsHandling: 'merge',
     }));
 
     component.selectTab('run-action');
     expect(routerSpy.navigate).toHaveBeenCalledWith([], jasmine.objectContaining({
-      queryParams: { tab: null },
+      queryParams: jasmine.objectContaining({ tab: null }),
       queryParamsHandling: 'merge',
+    }));
+  });
+
+  it('keeps the preview state in the URL only while the previews tab is open', () => {
+    component.selectTab('previews');
+    expect(routerSpy.navigate).toHaveBeenCalledWith([], jasmine.objectContaining({
+      queryParams: { tab: 'previews' },
+    }));
+
+    component.selectTab('logs');
+    expect(routerSpy.navigate).toHaveBeenCalledWith([], jasmine.objectContaining({
+      queryParams: { tab: 'logs', preview: null, owner: null, w: null, h: null },
     }));
   });
 });

@@ -57,6 +57,22 @@ dotnet run --launch-profile "Macro Deck - Real Host"
 Breakpoints in `Program.cs` hit at process start. `IPluginIntegration.InitializeAsync` runs only once a
 session opens, and action handlers only when triggered from Macro Deck.
 
+## Live reload while you work
+
+```bash
+dotnet watch --non-interactive run --launch-profile "Macro Deck - Real Host"
+```
+
+Run this from the plugin project directory and leave a [developer preview](/ui/views/developer-preview/#iterating-on-a-preview)
+open in Macro Deck. When you save, `dotnet watch` applies the change with .NET Hot Reload and the open
+preview updates in place. A change Hot Reload cannot apply restarts the plugin; without `--non-interactive`,
+`dotnet watch` asks first. The preview waits and reopens by itself, and the credential in
+`.macrodeck-dev-state` means no new pairing prompt.
+
+Rider and Visual Studio do the same with their Hot Reload button while debugging.
+[`macrodeck-plugin run --project . --watch`](/cli/run/#watching-for-changes) is the equivalent without an
+IDE profile.
+
 ## Run against the stub host
 
 ```bash

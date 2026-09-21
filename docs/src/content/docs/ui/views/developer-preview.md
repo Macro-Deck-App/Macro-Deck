@@ -82,12 +82,43 @@ from plain data returns the element and never mentions `UiPreview`.
 | A scenario that throws when opened fails only that preview. | Other previews and sessions carry on. |
 | Listing and opening previews require an admin session. | Previews are not reachable by deck clients. |
 
+## Iterating on a preview
+
+Open a scenario once and leave it open while you change the code. Developer Tools keeps it on screen and brings
+it back after a reload.
+
+| You change | What updates | How |
+| --- | --- | --- |
+| A plugin scenario or view, under `dotnet watch` or your IDE's Hot Reload | The open preview, in place | The SDK rebuilds the scenario and sends its new tree. No restart, and the preview keeps its session. |
+| A plugin change Hot Reload cannot apply, or a plain rebuild and restart | The open preview, once the plugin is back | The last tree stays on screen, dimmed, with a notice that the plugin is not connected. The preview reopens by itself when the plugin reconnects. |
+| A scenario that no longer exists (renamed or removed) | A notice instead of the preview | Pick the scenario again from the list, which refreshes by itself. |
+| A built-in Macro Deck view | The open preview, after the host restarts | The preview reopens once Macro Deck is back. |
+| Nothing, but the same scenario is opened in a second window | The second window | The first window says the preview was closed. Refresh takes it back. Different scenarios can stay open side by side. |
+
+The selected scenario and the canvas size are part of the Developer Tools address, so reloading the window
+brings you back to the same scenario at the same size.
+
+`macrodeck-plugin run --project <path> --watch` sets this loop up against the running Macro Deck; see
+[Watching for changes](/cli/run/#watching-for-changes). `dotnet watch run` with the
+[debugging launch profile](/guides/debugging/#live-reload-while-you-work) does the same from your IDE.
+
+A reload rebuilds the scenario from its code, so what the scenario creates starts over: its mock data, and
+anything you typed or selected inside the preview. Put the state you want to look at into the scenario itself.
+
+A plugin whose first-ever scenario is added by Hot Reload does not declare a UI yet, so that scenario appears
+after the next restart.
+
 ## Over the plugin protocol
 
 `describe` lists your scenarios in `previews`. `MacroDeck.Plugin.Hosting` scans the assemblies of your
 registered integrations plus the entry assembly, lazily. A `developer-preview` surface names one scenario
 by id in its attributes; the SDK builds that scenario ahead of every production path and never consults
 `IUiProvider`. See [Serving a view](/ui/views/sessions/#over-the-plugin-protocol).
+
+When .NET Hot Reload updates the plugin, `MacroDeck.Plugin.Hosting` builds every open preview's scenario
+again, sends the new tree as an unrequested `ui/snapshot`, and sends `state.update` for `ui` so the host
+re-reads `describe` and the list picks up new or removed scenarios. A scenario that throws on rebuild faults
+only its own preview. Nothing changes for a plugin that is not being hot reloaded.
 
 ## See also
 

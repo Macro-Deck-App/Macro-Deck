@@ -388,6 +388,22 @@ describe('UiSessionService sessions that end before or while they are shown', ()
     expect(handle.rejection()).not.toBeNull();
   });
 
+  it('says why a shown session ended, and forgets it once a tree arrives again', async () => {
+    const handle = TestBed.inject(UiSessionService).open(request);
+    await settle();
+    showTree(latestSessionId);
+    await settle();
+
+    end(latestSessionId, false);
+    await settle();
+    expect(handle.fault?.()).toEqual({ code: 'PROVIDER_REJECTED', message: 'declined' });
+    expect(handle.rejection()).toBeNull();
+
+    showTree(latestSessionId);
+    await settle();
+    expect(handle.fault?.()).toBeNull();
+  });
+
   it('keeps the shown tree when a re-attach after a failed patch gets no answer at all', async () => {
     const handle = TestBed.inject(UiSessionService).open(request);
     await settle();

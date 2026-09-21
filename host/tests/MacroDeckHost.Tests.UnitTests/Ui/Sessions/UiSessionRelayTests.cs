@@ -42,6 +42,30 @@ internal sealed class UiSessionRelayTests : UiSessionFixture
 	}
 
 	[Test]
+	public async Task A_provider_can_replace_its_tree_with_an_unrequested_snapshot_at_a_lower_revision()
+	{
+		var provider = AddProvider(treeRevision: 5);
+		var sessionId = await OpenAsync(provider);
+		Attach(sessionId, "c1");
+		await WaitForMessagesAsync("c1", 1, "The client never received its first tree.");
+
+		var snapshot = Broker.PublishSnapshot(ProviderId, sessionId, new UiRawJson(UiPayloads.Tree(0)));
+		var patch = Broker.PublishPatch(ProviderId, sessionId, new UiRawJson(UiPayloads.Patch(0, 1)));
+
+		await WaitForAsync(() => MessagesFor<UiSessionPatchedEvent>("c1").Count == 1,
+			"The patch following the replacement tree was never delivered.");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(snapshot.Accepted, Is.True);
+			Assert.That(patch.Accepted, Is.True);
+			Assert.That(MessagesFor<UiSessionTreeUpdatedEvent>("c1")[^1].Revision, Is.EqualTo(0));
+			Assert.That(MessagesFor<UiSessionPatchedEvent>("c1")[0].ToRevision, Is.EqualTo(1));
+			Assert.That(MessagesFor<UiSessionInvalidatedEvent>("c1"), Is.Empty);
+		});
+	}
+
+	[Test]
 	public async Task A_replayed_patch_is_delivered_at_most_once()
 	{
 		var provider = AddProvider();

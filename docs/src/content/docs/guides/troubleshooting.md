@@ -207,6 +207,12 @@ Add `--stub-host`. Against a real host use the default `--mode self-registering`
 workflow in [Debugging plugins](/guides/debugging/), which keeps a Developer token out of history and the
 process list.
 
+### `watch-needs-project` or `watch-needs-real-host`
+
+`run --watch` rebuilds from source against the running Macro Deck. Pass `--project` instead of
+`--executable` or `--artifact`, and drop `--stub-host`. See
+[Watching for changes](/cli/run/#watching-for-changes).
+
 ### `developer-mode-disabled`
 
 `run` asked the host and Developer Mode is off, so no approval prompt can appear. Turn it on under

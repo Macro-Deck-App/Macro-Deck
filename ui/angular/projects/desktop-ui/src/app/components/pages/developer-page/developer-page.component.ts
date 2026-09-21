@@ -18,9 +18,10 @@ import {
   PluginDevelopmentTabComponent,
 } from './plugin-development-tab/plugin-development-tab.component';
 import { TemplateTabComponent } from './template-tab/template-tab.component';
-import { UiPreviewsTabComponent } from './ui-previews-tab/ui-previews-tab.component';
+import { PREVIEW_QUERY_PARAMS, UiPreviewsTabComponent } from './ui-previews-tab/ui-previews-tab.component';
 
 const DEFAULT_TAB = 'run-action';
+const PREVIEWS_TAB = 'previews';
 
 const LEGACY_PLUGIN_TABS: Readonly<Record<string, string>> = {
   'plugin-tokens': PLUGIN_DEVELOPMENT_TAB,
@@ -69,7 +70,7 @@ export class DeveloperPageComponent {
       { id: 'template', label: t(S.TemplateTab) },
       { id: 'events', label: t(S.EventsTab) },
       { id: 'logs', label: t(S.LogsTab) },
-      { id: 'previews', label: t(S.Previews.Tab) },
+      { id: PREVIEWS_TAB, label: t(S.Previews.Tab) },
       { id: PLUGIN_DEVELOPMENT_TAB, label: t(S.PluginDevelopmentTab) },
       { id: 'maintenance', label: t(S.MaintenanceTab) },
     ];
@@ -133,9 +134,10 @@ export class DeveloperPageComponent {
   }
 
   selectTab(tabId: string): void {
+    const previewParams = tabId === PREVIEWS_TAB ? {} : Object.fromEntries(PREVIEW_QUERY_PARAMS.map(key => [key, null]));
     void this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { tab: tabId === DEFAULT_TAB ? null : tabId },
+      queryParams: { tab: tabId === DEFAULT_TAB ? null : tabId, ...previewParams },
       queryParamsHandling: 'merge',
     });
   }

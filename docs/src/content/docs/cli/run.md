@@ -40,6 +40,13 @@ Against the running Macro Deck. Approve the pairing prompt that appears in Macro
 [Pairing with a real host](#pairing-with-a-real-host).
 
 ```bash
+macrodeck-plugin run --project src/HelloDeck --watch
+```
+
+Against the running Macro Deck, rebuilt on every save. Leave a developer preview open and it follows along -
+see [Watching for changes](#watching-for-changes).
+
+```bash
 macrodeck-plugin run --artifact ./artifacts/com.example.hello-deck-1.0.0-osx-arm64.macroDeckPlugin --stub-host
 ```
 
@@ -81,6 +88,7 @@ Exactly one of `--project`, `--executable` or `--artifact` is required.
 | `--instance-id <id>` | fresh id | Both modes. |
 | `--launch-id <id>` | fresh id | Managed only, diagnostic; never asserted on the wire. |
 | `--listen-url <url>` | `http://127.0.0.1:0` | Where the plugin listens; port 0 lets the OS pick. |
+| `--watch` | off | With `--project` against a real host: run the plugin under `dotnet watch`. See [Watching for changes](#watching-for-changes). |
 
 Temp directories `run` created itself are deleted when it exits.
 
@@ -99,6 +107,27 @@ macrodeck-plugin run --project src/HelloDeck --stub-host                        
   written port file wins - the host you started last.
 - No readable port file fails with `host-not-found` (exit 3). `run` never falls back to the stub
   silently.
+
+## Watching for changes
+
+```bash
+macrodeck-plugin run --project src/HelloDeck --watch
+```
+
+`--watch` runs the project with `dotnet watch run`, using the environment `run` composes:
+
+- A saved change that .NET Hot Reload supports - a new text, a changed layout, a different mock value in a
+  preview scenario - is applied to the running plugin. Open [developer previews](/ui/views/developer-preview/#iterating-on-a-preview)
+  are rebuilt in place, without a restart.
+- Any other change rebuilds the project and restarts the plugin. Macro Deck keeps the open preview on
+  screen, marked as waiting, and reopens it when the plugin is back.
+
+The plugin runs from the project directory, like `dotnet run`, and ignores `launchSettings.json` so a profile
+cannot point it at another host or state directory. The state directory is kept for the whole command, so you
+pair once per `run --watch`; pass `--state-directory` to keep the credential across runs.
+
+`--watch` needs `--project` (`watch-needs-project`, exit 2) and a real host (`watch-needs-real-host`, exit 2):
+the stub host has no previews to follow the plugin.
 
 ## Pairing with a real host
 
@@ -172,7 +201,7 @@ Against a real host, `run` owns no session to say goodbye on, so only steps 3 an
 | Code | When |
 | --- | --- |
 | the plugin's own | The plugin exited on its own. |
-| 2 | Usage error: wrong number of launch targets, `--host-url` with `--stub-host`, `managed-needs-stub-host`, `enrollment-token-required`. |
+| 2 | Usage error: wrong number of launch targets, `--host-url` with `--stub-host`, `managed-needs-stub-host`, `enrollment-token-required`, `watch-needs-project`, `watch-needs-real-host`. |
 | 3 | `host-not-found`, a project that fails to build, an unreadable artifact, or a process that fails to start. |
 | 4 | Ctrl-C, whether the plugin exited gracefully or had to be killed. |
 

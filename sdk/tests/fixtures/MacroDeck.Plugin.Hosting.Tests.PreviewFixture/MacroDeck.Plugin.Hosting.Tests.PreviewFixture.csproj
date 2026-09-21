@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\src\MacroDeck.Sdk\MacroDeck.Sdk.csproj" />
+        <ProjectReference Include="..\..\..\..\ui-model\src\MacroDeck.Ui\MacroDeck.Ui.csproj" />
+    </ItemGroup>
+
+</Project>

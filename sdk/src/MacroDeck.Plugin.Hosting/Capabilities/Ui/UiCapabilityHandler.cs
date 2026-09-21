@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text.Json;
 using MacroDeck.Plugin.Hosting.Capabilities.ConfigFlow;
+using MacroDeck.Plugin.Hosting.Integrations.HostApis;
 using MacroDeck.Plugin.Hosting.Transport;
 using MacroDeck.Plugin.Protocol.Capabilities;
 using MacroDeck.Plugin.Protocol.Capabilities.Ui;
@@ -42,7 +43,10 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 	// the package's own semantic version.
 	private readonly IReadOnlyList<IUiProvider> _providers;
 	private readonly IReadOnlyList<IActionDefinition> _actions;
-	private readonly Lazy<UiPreviewScanResult> _previews;
+	private readonly Assembly[] _previewAssemblies;
+	private readonly IPluginCatalogNotifier? _catalogNotifier;
+	private UiPreviewScanResult? _previewScan;
+	private volatile bool _declaredUi;
 	private readonly bool _configFlowServesUiTree;
 	private readonly PluginConfigFlowSessions _configFlowSessions;
 	private readonly UiSessionStore _sessions;
@@ -53,7 +57,8 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 		IHostInvoker hostInvoker,
 		ILogger logger,
 		PluginConfigFlowSessions configFlowSessions,
-		ModalResultStore modalResults)
+		ModalResultStore modalResults,
+		IPluginCatalogNotifier? catalogNotifier = null)
 	{
 		var integrationList = integrations as IReadOnlyCollection<IPluginIntegration> ?? [.. integrations];
 
@@ -73,24 +78,32 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 
 		// Lazy and metadata-only: declaring previews must not run a scenario, and a plugin nobody ever
 		// asks for previews never pays for the scan at all.
-		var assemblies = integrationList
+		_previewAssemblies = integrationList
 			.Select(integration => integration.GetType().Assembly)
 			.Append(Assembly.GetEntryAssembly())
 			.OfType<Assembly>()
 			.Distinct()
 			.ToArray();
-		_previews = new Lazy<UiPreviewScanResult>(() => UiPreviewCatalog.Scan(assemblies));
+		_catalogNotifier = catalogNotifier;
+
+		UiPreviewHotReload.Updated += OnHotReload;
 	}
+
+	private UiPreviewScanResult Previews
+		=> LazyInitializer.EnsureInitialized(ref _previewScan, () => UiPreviewCatalog.Scan(_previewAssemblies));
 
 	public string Kind => CapabilityKinds.Ui;
 
 	private bool ServesUi => _providers.Count > 0 ||
 		_configFlowServesUiTree ||
 		_actions.Any(action => action is IUiConfigurableActionDefinition) ||
-		_previews.Value.Registrations.Count > 0;
+		Previews.Registrations.Count > 0;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> ServesUi
+	{
+		_declaredUi = ServesUi;
+
+		return _declaredUi
 			?
 			[
 				new DeclaredCapability
@@ -99,6 +112,7 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 				}
 			]
 			: [];
+	}
 
 	public Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,
@@ -145,7 +159,27 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 		return CapabilityInvocationResult.Ok();
 	}
 
-	public ValueTask DisposeAsync() => _sessions.DisposeAsync();
+	public ValueTask DisposeAsync()
+	{
+		UiPreviewHotReload.Updated -= OnHotReload;
+
+		return _sessions.DisposeAsync();
+	}
+
+	private void OnHotReload()
+	{
+		if (Volatile.Read(ref _previewScan) is not null)
+		{
+			Volatile.Write(ref _previewScan, UiPreviewCatalog.Scan(_previewAssemblies));
+		}
+
+		_sessions.RebuildAll();
+
+		if (_declaredUi)
+		{
+			_catalogNotifier?.CatalogChanged(CapabilityKinds.Ui, reason: "Hot reload");
+		}
+	}
 
 	private CapabilityInvocationResult Describe()
 	{
@@ -173,7 +207,7 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 			UiModelVersion = UiModelVersions.Current,
 			Previews =
 			[
-				.. _previews.Value.Registrations.Select(preview => new UiPreviewDescriptorDto
+				.. Previews.Registrations.Select(preview => new UiPreviewDescriptorDto
 				{
 					Id = preview.Declaration.Id,
 					View = preview.Declaration.View,
@@ -240,8 +274,8 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 	{
 		if (!request.Surface.Attributes.TryGetValue(UiDeveloperPreviewSurfaceAttributes.PreviewId, out var id) ||
 			id.ValueKind != JsonValueKind.String ||
-			_previews.Value.Registrations.FirstOrDefault(preview =>
-				string.Equals(preview.Declaration.Id, id.GetString(), StringComparison.Ordinal)) is not { } match)
+			id.GetString() is not { } previewId ||
+			FindPreview(previewId) is null)
 		{
 			return CapabilityInvocationResult.Ok(new UiSessionOpenResult
 			{
@@ -253,7 +287,8 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 		UiPreviewSession session;
 		try
 		{
-			session = new UiPreviewSession(match.Create(request.Surface));
+			session = new UiPreviewSession(() => FindPreview(previewId)?.Create(request.Surface) ??
+				throw new InvalidOperationException("This plugin no longer declares that preview."));
 		}
 		catch (Exception exception) when (exception is not OutOfMemoryException)
 		{
@@ -265,6 +300,10 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 
 		return await AcceptSessionAsync(arguments.SessionId, session).ConfigureAwait(false);
 	}
+
+	private UiPreviewRegistration? FindPreview(string previewId)
+		=> Previews.Registrations.FirstOrDefault(preview =>
+			string.Equals(preview.Declaration.Id, previewId, StringComparison.Ordinal));
 
 	/// <summary>
 	/// Routes an <c>integration-config</c> or <c>action-config</c> surface (see
