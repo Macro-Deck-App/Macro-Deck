@@ -807,26 +807,12 @@
   <data name="Bootstrapper.Errors.HostDidNotStart" xml:space="preserve">
     <value>Le processus hôte de Macro Deck n'a pas démarré.</value>
   </data>
-  <data name="Bootstrapper.Errors.HostDidNotStartWithLog" xml:space="preserve">
-    <value>Le processus hôte de Macro Deck n'a pas démarré.
-
-Sortie de l'hôte:
-{log}</value>
-  </data>
   <data name="Bootstrapper.Errors.HostPortNotResolved" xml:space="preserve">
     <value>Le port hôte de Macro Deck n'est pas résolu, la fenêtre ne peut donc pas être créée.</value>
   </data>
   <data name="Bootstrapper.Errors.HostProcessCouldNotStart" xml:space="preserve">
     <value>Le processus hôte de Macro Deck n'a pas pu démarrer:
 {error}</value>
-  </data>
-  <data name="Bootstrapper.Errors.HostStoppedTitle" xml:space="preserve">
-    <value>L'hôte Macro Deck s'est arrêté</value>
-  </data>
-  <data name="Bootstrapper.Errors.HostStoppedUnexpectedly" xml:space="preserve">
-    <value>Le processus hôte de Macro Deck s'est arrêté de manière inattendue (code de sortie {code}).
-
-{log}</value>
   </data>
   <data name="Bootstrapper.Errors.InstallLocationUnknown" xml:space="preserve">
     <value>L'emplacement d'installation de Macro Deck n'a pas pu être déterminé.
@@ -879,18 +865,58 @@ Ceci remplacera le Macro Deck existant dans ton dossier Applications.</value>
     <value>Macro Deck n'a pas pu démarrer car le port {port} est déjà utilisé par une autre application.
 Ferme l'application utilisant ce port (ou un Macro Deck encore en cours d'exécution) et réessaie, ou démarre Macro Deck avec MACRO_DECK_PORT défini sur un port libre pour revenir en arrière.</value>
   </data>
-  <data name="Bootstrapper.Errors.PortInUseWithLog" xml:space="preserve">
-    <value>Macro Deck n'a pas pu démarrer car le port {port} est déjà utilisé par une autre application.
-Ferme l'application utilisant ce port (ou un Macro Deck encore en cours d'exécution) et réessaie, ou démarre Macro Deck avec MACRO_DECK_PORT défini sur un port libre pour revenir en arrière.
-
-Sortie de l'hôte:
-{log}</value>
-  </data>
   <data name="Bootstrapper.Errors.RestartFailed" xml:space="preserve">
     <value>Macro Deck n'a pas pu se relancer lui-même. Quitte-le et redémarre-le pour appliquer le changement.</value>
   </data>
   <data name="Bootstrapper.Files.OpenDialogFilter" xml:space="preserve">
     <value>Fichiers</value>
+  </data>
+  <data name="Bootstrapper.HostError.Attempts.One" xml:space="preserve">
+    <value>Macro Deck a tenté {count} redémarrage, mais l'hôte n'est pas reparti.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Bootstrapper.HostError.Attempts.Other" xml:space="preserve">
+    <value>Macro Deck a tenté {count} redémarrages, mais l'hôte n'est pas reparti.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Bootstrapper.HostError.Copied" xml:space="preserve">
+    <value>Copié</value>
+  </data>
+  <data name="Bootstrapper.HostError.CopyDetails" xml:space="preserve">
+    <value>Copier les détails</value>
+  </data>
+  <data name="Bootstrapper.HostError.DetailsLabel" xml:space="preserve">
+    <value>Détails</value>
+  </data>
+  <data name="Bootstrapper.HostError.ExitCode" xml:space="preserve">
+    <value>Code de sortie : {code}</value>
+  </data>
+  <data name="Bootstrapper.HostError.ExitCodeUnknown" xml:space="preserve">
+    <value>Code de sortie : inconnu</value>
+  </data>
+  <data name="Bootstrapper.HostError.HeadingNotStarted" xml:space="preserve">
+    <value>Macro Deck n'a pas pu démarrer son hôte</value>
+  </data>
+  <data name="Bootstrapper.HostError.HeadingStopped" xml:space="preserve">
+    <value>Macro Deck n'a pas pu maintenir son hôte en marche</value>
+  </data>
+  <data name="Bootstrapper.HostError.Help" xml:space="preserve">
+    <value>Copie les détails et joins-les quand tu signales le problème, pour qu'il puisse être corrigé.</value>
+  </data>
+  <data name="Bootstrapper.HostError.ReportIssue" xml:space="preserve">
+    <value>Signaler le problème sur GitHub</value>
+  </data>
+  <data name="Bootstrapper.HostError.RestartFailed" xml:space="preserve">
+    <value>Macro Deck n'a pas pu se relancer lui-même. Quitte-le et redémarre-le.</value>
+  </data>
+  <data name="Bootstrapper.HostError.RestartMacroDeck" xml:space="preserve">
+    <value>Redémarrer Macro Deck</value>
+  </data>
+  <data name="Bootstrapper.HostError.Unresponsive" xml:space="preserve">
+    <value>L'hôte n'a pas répondu dans les {seconds} secondes.</value>
+  </data>
+  <data name="Bootstrapper.HostError.WindowTitle" xml:space="preserve">
+    <value>Macro Deck s'est arrêté</value>
   </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>À propos de Macro Deck</value>

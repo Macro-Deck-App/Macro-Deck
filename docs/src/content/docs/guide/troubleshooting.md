@@ -91,6 +91,26 @@ never shown.
 Only one Macro Deck can run on a computer at a time. If it is already running, starting it again
 does not open a second copy. Look for the running Macro Deck in the system tray or menu bar.
 
+## Macro Deck stopped
+
+Macro Deck runs its host, the part that talks to your devices and plugins, as a separate process. If
+the host stops unexpectedly, Macro Deck restarts it on its own: up to three times, waiting a few
+seconds longer before each attempt. Devices reconnect once the host is back, and the log records
+every attempt.
+
+If the host does not come back, or does not start at all, Macro Deck shows a **Macro Deck stopped**
+window instead:
+
+![The Macro Deck stopped window: the number of restart attempts, the exit code and the host output, with links to GitHub and Discord](../../../assets/guide/host-error-window.png)
+
+- **Copy details** copies the exit code and the last lines of the host output. Include them, along
+  with your [logs](#where-to-find-the-logs), when you report the problem.
+- **Restart Macro Deck** starts Macro Deck again from scratch.
+- **Quit**, or closing the window, quits Macro Deck.
+
+If the window says a port is already in use, see
+[Macro Deck is not listening on its port](#macro-deck-is-not-listening-on-its-port).
+
 ## Plugins show up as dotnet in Task Manager
 
 Most plugins run on the .NET runtime that comes with Macro Deck, so Task Manager and Activity Monitor

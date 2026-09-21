@@ -7,12 +7,14 @@ use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::sync::atomic::{AtomicBool, AtomicU16, Ordering};
 use std::sync::{Arc, Mutex};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use serde::{Deserialize, Serialize};
 use tauri::AppHandle;
 use tauri::Manager;
 
+use crate::host_error_window::{self, ExitStatus, HostErrorKind, HostErrorReport};
+use crate::host_supervisor::{Decision, ExitAction, Supervisor, MAX_RESTART_ATTEMPTS};
 use crate::localization::{self, keys};
 use crate::logging::{self, LogTail};
 use crate::update_state::UpdateSnapshot;
@@ -63,6 +65,12 @@ const UPDATE_STOP_TIMEOUT: Duration = Duration::from_secs(35);
 
 const FORCED_STOP_TIMEOUT: Duration = Duration::from_secs(10);
 
+const READY_TIMEOUT: Duration = Duration::from_secs(60);
+
+const RETRY_READY_TIMEOUT: Duration = Duration::from_secs(30);
+
+const UNRESPONSIVE_STOP_TIMEOUT: Duration = Duration::from_secs(5);
+
 // Mirrors the host's own configured HostOptions.ShutdownTimeout (not the shorter per-plugin grace
 // inside it), so the two budgets cannot silently drift apart.
 #[cfg(test)]
@@ -77,7 +85,7 @@ pub const RELAUNCH_SETTLE_DELAY: Duration = Duration::from_millis(1500);
 const STOP_POLL_INTERVAL: Duration = Duration::from_millis(250);
 
 pub struct HostState {
-    child: Mutex<Option<Child>>,
+    child: Mutex<Option<(u64, Child)>>,
     #[cfg(windows)]
     job: Mutex<Option<crate::host_job::HostJob>>,
     pub exited: AtomicBool,
@@ -86,6 +94,7 @@ pub struct HostState {
     pub log_tail: Arc<LogTail>,
     stopping: AtomicBool,
     ui_port: AtomicU16,
+    supervisor: Mutex<Supervisor>,
 }
 
 impl HostState {
@@ -100,6 +109,7 @@ impl HostState {
             log_tail: Arc::new(LogTail::new(40)),
             stopping: AtomicBool::new(false),
             ui_port: AtomicU16::new(0),
+            supervisor: Mutex::new(Supervisor::new()),
         }
     }
 
@@ -331,24 +341,14 @@ fn port_from_address(line: &str) -> Option<u16> {
     parse_port(port.trim_end_matches(|c: char| !c.is_ascii_digit()))
 }
 
-pub fn startup_error_message(log: &str) -> String {
-    let port = conflicting_port_from_log(log)
-        .unwrap_or_else(public_port)
-        .to_string();
-
+pub fn startup_failure_reason(log: &str) -> String {
     if detect_port_conflict(log) {
-        if log.is_empty() {
-            localization::t_args(keys::ERRORS_PORT_IN_USE, &[("port", &port)])
-        } else {
-            localization::t_args(
-                keys::ERRORS_PORT_IN_USE_WITH_LOG,
-                &[("port", &port), ("log", log)],
-            )
-        }
-    } else if log.is_empty() {
-        localization::t(keys::ERRORS_HOST_DID_NOT_START)
+        let port = conflicting_port_from_log(log)
+            .unwrap_or_else(public_port)
+            .to_string();
+        localization::t_args(keys::ERRORS_PORT_IN_USE, &[("port", &port)])
     } else {
-        localization::t_args(keys::ERRORS_HOST_DID_NOT_START_WITH_LOG, &[("log", log)])
+        localization::t(keys::ERRORS_HOST_DID_NOT_START)
     }
 }
 
@@ -368,8 +368,6 @@ pub async fn ensure_running(app: &AppHandle) -> bool {
         return true;
     }
 
-    // None only when the home directory is unresolvable. The port file tolerates that and falls
-    // back to the process cwd; the bundle extraction below deliberately does not.
     let config_dir = app.path().app_config_dir().ok();
     let port_file_dir = config_dir.as_deref().unwrap_or(Path::new("."));
 
@@ -399,14 +397,56 @@ pub async fn ensure_running(app: &AppHandle) -> bool {
         }
     }
 
-    let Some(port) = acquire_loopback_port(port_file_dir) else {
-        crate::window::show_error_dialog(
-            app,
-            &localization::t(keys::ERRORS_COULD_NOT_START_TITLE),
-            &localization::t(keys::ERRORS_NO_FREE_PORT),
-        );
+    let started = state
+        .supervisor
+        .lock()
+        .map(|mut supervisor| supervisor.start())
+        .unwrap_or(false);
+    if !started {
         return false;
+    }
+    supervise(app, None).await
+}
+
+enum LaunchError {
+    NoFreePort,
+    BinaryMissing(String),
+    SpawnFailed(String),
+}
+
+impl LaunchError {
+    fn reason(&self) -> String {
+        match self {
+            LaunchError::NoFreePort => localization::t(keys::ERRORS_NO_FREE_PORT),
+            LaunchError::BinaryMissing(paths) => {
+                localization::t_args(keys::ERRORS_HOST_BINARY_MISSING, &[("paths", paths)])
+            }
+            LaunchError::SpawnFailed(error) => localization::t_args(
+                keys::ERRORS_HOST_PROCESS_COULD_NOT_START,
+                &[("error", error)],
+            ),
+        }
+    }
+}
+
+// Runs under the supervisor lock so a stop either happens before the attempt begins or sees the
+// new child in the slot; the child and job slots are only replaced once the spawn succeeded.
+fn launch(app: &AppHandle, state: &HostState) -> Result<Option<(u64, u16)>, LaunchError> {
+    let Ok(mut supervisor) = state.supervisor.lock() else {
+        return Ok(None);
     };
+    if crate::is_quitting() {
+        return Ok(None);
+    }
+    let Some(generation) = supervisor.begin_attempt() else {
+        return Ok(None);
+    };
+
+    // None only when the home directory is unresolvable. The port file tolerates that and falls
+    // back to the process cwd; the bundle extraction below deliberately does not.
+    let config_dir = app.path().app_config_dir().ok();
+    let port_file_dir = config_dir.as_deref().unwrap_or(Path::new("."));
+    let port = acquire_loopback_port(port_file_dir).ok_or(LaunchError::NoFreePort)?;
 
     let Some(binary) = host_binary_path(app) else {
         let candidates = host_binary_candidates(app)
@@ -414,12 +454,7 @@ pub async fn ensure_running(app: &AppHandle) -> bool {
             .map(|path| path.display().to_string())
             .collect::<Vec<_>>()
             .join("\n");
-        crate::window::show_error_dialog(
-            app,
-            &localization::t(keys::ERRORS_COULD_NOT_START_TITLE),
-            &localization::t_args(keys::ERRORS_HOST_BINARY_MISSING, &[("paths", &candidates)]),
-        );
-        return false;
+        return Err(LaunchError::BinaryMissing(candidates));
     };
 
     logging::info(&format!(
@@ -457,20 +492,10 @@ pub async fn ensure_running(app: &AppHandle) -> bool {
         command.process_group(0);
     }
 
-    let mut child = match command.spawn() {
-        Ok(child) => child,
-        Err(error) => {
-            crate::window::show_error_dialog(
-                app,
-                &localization::t(keys::ERRORS_COULD_NOT_START_TITLE),
-                &localization::t_args(
-                    keys::ERRORS_HOST_PROCESS_COULD_NOT_START,
-                    &[("error", &error.to_string())],
-                ),
-            );
-            return false;
-        }
-    };
+    state.log_tail.clear();
+    let mut child = command
+        .spawn()
+        .map_err(|error| LaunchError::SpawnFailed(error.to_string()))?;
 
     if let Some(stdout) = child.stdout.take() {
         pipe_to_tail(stdout, state.log_tail.clone());
@@ -481,31 +506,27 @@ pub async fn ensure_running(app: &AppHandle) -> bool {
 
     #[cfg(windows)]
     {
-        match crate::host_job::HostJob::create_and_assign(&child) {
-            Some(job) => {
-                if let Ok(mut slot) = state.job.lock() {
-                    *slot = Some(job);
-                }
-            }
-            None => logging::warn(
+        let job = crate::host_job::HostJob::create_and_assign(&child);
+        if job.is_none() {
+            logging::warn(
                 "[host] falling back to a plain process kill; the job object was not set up",
-            ),
+            );
+        }
+        if let Ok(mut slot) = state.job.lock() {
+            *slot = job;
         }
     }
 
     if let Ok(mut slot) = state.child.lock() {
-        *slot = Some(child);
+        *slot = Some((generation, child));
+        state.exited.store(false, Ordering::SeqCst);
+        state.ready.store(false, Ordering::SeqCst);
     }
-
-    spawn_exit_monitor(app.clone());
-
-    let ready = wait_for_ready(app, port, Duration::from_secs(60)).await;
     state.ui_port.store(port, Ordering::SeqCst);
-    state.ready.store(ready, Ordering::SeqCst);
-    if ready {
-        adopt_host_culture(app, port).await;
-    }
-    ready
+    drop(supervisor);
+
+    spawn_exit_monitor(app.clone(), generation);
+    Ok(Some((generation, port)))
 }
 
 #[derive(Deserialize)]
@@ -573,35 +594,11 @@ async fn adopt_host_culture(app: &AppHandle, port: u16) {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ExitDisposition {
-    Ignore,
-    Restart,
-    ShowError,
-}
-
-pub fn exit_disposition(
-    code: Option<i32>,
-    shutdown_expected: bool,
-    ready: bool,
-) -> ExitDisposition {
-    if shutdown_expected {
-        return ExitDisposition::Ignore;
-    }
-    if !ready {
-        return ExitDisposition::Ignore;
-    }
-    if code == Some(HOST_RESTART_EXIT_CODE) {
-        return ExitDisposition::Restart;
-    }
-    ExitDisposition::ShowError
-}
-
 pub fn relaunch_target(appimage: Option<PathBuf>, current_exe: Option<PathBuf>) -> Option<PathBuf> {
     appimage.or(current_exe)
 }
 
-fn relaunch(app: &AppHandle) -> bool {
+pub(crate) fn relaunch(app: &AppHandle) -> bool {
     let Some(binary) = relaunch_target(
         std::env::var_os("APPIMAGE").map(PathBuf::from),
         std::env::current_exe().ok(),
@@ -630,15 +627,24 @@ fn relaunch(app: &AppHandle) -> bool {
     }
 }
 
-fn report_failed_restart(app: &AppHandle) {
-    crate::window::show_error_dialog(
+fn report_failed_restart(app: &AppHandle, code: Option<i32>) {
+    let state = app.state::<Arc<HostState>>();
+    if let Ok(mut supervisor) = state.supervisor.lock() {
+        supervisor.give_up();
+    }
+    host_error_window::show(
         app,
-        &localization::t(keys::ERRORS_COULD_NOT_RESTART_TITLE),
-        &localization::t(keys::ERRORS_RESTART_FAILED),
+        HostErrorReport {
+            kind: HostErrorKind::RestartFailed,
+            attempts: 0,
+            reason: Some(localization::t(keys::ERRORS_RESTART_FAILED)),
+            exit: ExitStatus::from_code(code),
+            log: state.log_tail.joined(),
+        },
     );
 }
 
-fn spawn_exit_monitor(app: AppHandle) {
+fn spawn_exit_monitor(app: AppHandle, generation: u64) {
     std::thread::spawn(move || {
         let state = app.state::<Arc<HostState>>();
         let code = loop {
@@ -646,99 +652,319 @@ fn spawn_exit_monitor(app: AppHandle) {
                 let Ok(mut slot) = state.child.lock() else {
                     return;
                 };
-                let Some(child) = slot.as_mut() else {
+                let Some((slot_generation, child)) = slot.as_mut() else {
                     return;
                 };
+                if *slot_generation != generation {
+                    return;
+                }
                 match child.try_wait() {
-                    Ok(Some(status)) => break status.code(),
+                    Ok(Some(status)) => {
+                        state.exited.store(true, Ordering::SeqCst);
+                        break status.code();
+                    }
                     Ok(None) => {}
-                    Err(_) => break None,
+                    Err(_) => {
+                        state.exited.store(true, Ordering::SeqCst);
+                        break None;
+                    }
                 }
             }
             std::thread::sleep(Duration::from_millis(250));
         };
 
-        state.exited.store(true, Ordering::SeqCst);
-        let disposition = exit_disposition(
-            code,
-            state.shutdown_expected.load(Ordering::SeqCst),
-            state.ready.load(Ordering::SeqCst),
-        );
+        let shutdown_expected = state.shutdown_expected.load(Ordering::SeqCst);
+        let action = state
+            .supervisor
+            .lock()
+            .map(|mut supervisor| {
+                supervisor.on_exit(generation, code, shutdown_expected, Instant::now())
+            })
+            .unwrap_or(ExitAction::Ignore);
 
-        match disposition {
-            ExitDisposition::Ignore => {
-                if !state.shutdown_expected.load(Ordering::SeqCst) {
+        match action {
+            ExitAction::Ignore => {
+                if !shutdown_expected {
                     logging::error(&format!("[host] exited unexpectedly with code {code:?}"));
                 }
             }
-            ExitDisposition::Restart => {
+            ExitAction::HandledByLoop => {
+                logging::warn(&format!(
+                    "[host] exited with code {code:?} before it became ready"
+                ));
+            }
+            ExitAction::Relaunch => {
                 logging::info("[host] restart requested by the host; relaunching Macro Deck");
                 let handle = app.clone();
                 let dispatched = app.run_on_main_thread(move || {
                     crate::mark_quitting(&handle);
                     if !relaunch(&handle) {
                         crate::clear_quitting();
-                        report_failed_restart(&handle);
+                        report_failed_restart(&handle, code);
                     }
                 });
                 if let Err(error) = dispatched {
                     logging::error(&format!("[host] could not dispatch the relaunch: {error}"));
-                    report_failed_restart(&app);
+                    report_failed_restart(&app, code);
                 }
             }
-            ExitDisposition::ShowError => {
+            ExitAction::Recover => {
                 logging::error(&format!("[host] exited unexpectedly with code {code:?}"));
-                crate::window::show_error_dialog(
-                    &app,
-                    &localization::t(keys::ERRORS_HOST_STOPPED_TITLE),
-                    &localization::t_args(
-                        keys::ERRORS_HOST_STOPPED_UNEXPECTEDLY,
-                        &[
-                            (
-                                "code",
-                                &code
-                                    .map(|c| c.to_string())
-                                    .unwrap_or_else(|| "unknown".to_string()),
-                            ),
-                            ("log", &state.log_tail.joined()),
-                        ],
-                    ),
-                );
-                app.exit(1);
+                state.ready.store(false, Ordering::SeqCst);
+                let app = app.clone();
+                tauri::async_runtime::spawn(async move {
+                    if supervise(&app, Some(Failure::Exited(code))).await {
+                        crate::window::reload_main_window(&app);
+                    }
+                });
             }
         }
     });
 }
 
-async fn wait_for_ready(app: &AppHandle, port: u16, timeout: Duration) -> bool {
+#[derive(Debug, Clone, Copy)]
+enum Failure {
+    Exited(Option<i32>),
+    Unresponsive(Duration),
+}
+
+impl Failure {
+    fn exit_status(self) -> ExitStatus {
+        match self {
+            Failure::Exited(code) => ExitStatus::from_code(code),
+            Failure::Unresponsive(_) => ExitStatus::NotRecorded,
+        }
+    }
+}
+
+enum AttemptOutcome {
+    Ready,
+    Exited(Option<i32>),
+    TimedOut,
+}
+
+fn stop_requested(state: &HostState) -> bool {
+    crate::is_quitting()
+        || state
+            .supervisor
+            .lock()
+            .map(|supervisor| supervisor.is_stopping())
+            .unwrap_or(true)
+}
+
+fn exit_of(state: &HostState, generation: u64) -> Option<Option<i32>> {
+    state
+        .supervisor
+        .lock()
+        .ok()
+        .and_then(|supervisor| supervisor.exit_of(generation))
+}
+
+async fn supervise(app: &AppHandle, first_failure: Option<Failure>) -> bool {
     let state = app.state::<Arc<HostState>>();
-    let deadline = std::time::Instant::now() + timeout;
-    while std::time::Instant::now() < deadline {
-        if state.exited.load(Ordering::SeqCst) {
-            show_startup_error(app);
-            return false;
+    let mut restarting = first_failure.is_some();
+    let mut pending = first_failure;
+    loop {
+        if let Some(failure) = pending.take() {
+            if stop_requested(&state) {
+                return false;
+            }
+            let log = state.log_tail.joined();
+            logging::error(&format!(
+                "[host] attempt failed ({failure:?}); host output:\n{log}"
+            ));
+            kill_child(&state);
+
+            let decision = match state.supervisor.lock() {
+                Ok(mut supervisor) => supervisor.on_failure(),
+                Err(_) => return false,
+            };
+            match decision {
+                Decision::GiveUp { attempts } => {
+                    logging::error(&format!(
+                        "[host] giving up after {attempts} restart attempts"
+                    ));
+                    give_up(
+                        app,
+                        failure_reason(failure, &log),
+                        failure.exit_status(),
+                        log,
+                    );
+                    return false;
+                }
+                Decision::Retry { attempt, delay } => {
+                    logging::warn(&format!(
+                        "[host] restart attempt {attempt}/{MAX_RESTART_ATTEMPTS} in {}s",
+                        delay.as_secs()
+                    ));
+                    tokio::time::sleep(delay).await;
+                    restarting = true;
+                }
+            }
+        }
+
+        let (generation, port) = match launch(app, &state) {
+            Ok(Some(launched)) => launched,
+            Ok(None) => return false,
+            Err(error) => {
+                let reason = error.reason();
+                logging::error(&format!("[host] could not launch the host: {reason}"));
+                give_up(
+                    app,
+                    Some(reason),
+                    ExitStatus::NotRecorded,
+                    state.log_tail.joined(),
+                );
+                return false;
+            }
+        };
+
+        let timeout = if restarting {
+            RETRY_READY_TIMEOUT
+        } else {
+            READY_TIMEOUT
+        };
+        match wait_for_ready(&state, generation, port, timeout).await {
+            AttemptOutcome::Ready => {
+                let running = state
+                    .supervisor
+                    .lock()
+                    .map(|mut supervisor| {
+                        let running = supervisor.on_ready(generation, Instant::now());
+                        if running {
+                            state.ready.store(true, Ordering::SeqCst);
+                        }
+                        running
+                    })
+                    .unwrap_or(false);
+                if running {
+                    if restarting {
+                        logging::info("[host] restart succeeded; the host is ready again");
+                    }
+                    adopt_host_culture(app, port).await;
+                    return true;
+                }
+                pending = Some(Failure::Exited(exit_of(&state, generation).flatten()));
+            }
+            AttemptOutcome::Exited(code) => pending = Some(Failure::Exited(code)),
+            AttemptOutcome::TimedOut => {
+                logging::warn(&format!(
+                    "[host] did not become ready within {}s; stopping this attempt",
+                    timeout.as_secs()
+                ));
+                if !terminate_attempt(&state, generation, port).await {
+                    logging::error(
+                        "[host] the unresponsive host could not be stopped; not starting another one",
+                    );
+                    let log = state.log_tail.joined();
+                    give_up(
+                        app,
+                        failure_reason(Failure::Unresponsive(timeout), &log),
+                        ExitStatus::NotRecorded,
+                        log,
+                    );
+                    return false;
+                }
+                pending = Some(Failure::Unresponsive(timeout));
+            }
+        }
+    }
+}
+
+fn failure_reason(failure: Failure, log: &str) -> Option<String> {
+    match failure {
+        Failure::Unresponsive(timeout) => Some(localization::t_args(
+            keys::HOST_ERROR_UNRESPONSIVE,
+            &[("seconds", &timeout.as_secs().to_string())],
+        )),
+        Failure::Exited(_) => Some(startup_failure_reason(log)),
+    }
+}
+
+fn give_up(app: &AppHandle, reason: Option<String>, exit: ExitStatus, log: String) {
+    let state = app.state::<Arc<HostState>>();
+    let (ever_running, attempts) = match state.supervisor.lock() {
+        Ok(mut supervisor) => {
+            if supervisor.is_stopping() {
+                return;
+            }
+            supervisor.give_up();
+            (supervisor.ever_running(), supervisor.attempts())
+        }
+        Err(_) => (false, 0),
+    };
+    let kind = if ever_running {
+        HostErrorKind::Stopped
+    } else {
+        HostErrorKind::NotStarted
+    };
+    let reason = match (kind, exit) {
+        (HostErrorKind::Stopped, ExitStatus::Code(_) | ExitStatus::Unknown)
+            if !detect_port_conflict(&log) =>
+        {
+            None
+        }
+        _ => reason,
+    };
+    host_error_window::show(
+        app,
+        HostErrorReport {
+            kind,
+            attempts,
+            reason,
+            exit,
+            log,
+        },
+    );
+}
+
+async fn wait_for_ready(
+    state: &HostState,
+    generation: u64,
+    port: u16,
+    timeout: Duration,
+) -> AttemptOutcome {
+    let deadline = Instant::now() + timeout;
+    while Instant::now() < deadline {
+        if let Some(code) = exit_of(state, generation) {
+            return AttemptOutcome::Exited(code);
         }
         if is_reachable(Some(port), Duration::from_millis(500)).await {
-            return true;
+            return AttemptOutcome::Ready;
         }
         tokio::time::sleep(Duration::from_millis(250)).await;
     }
-    show_startup_error(app);
-    false
+    AttemptOutcome::TimedOut
 }
 
-fn show_startup_error(app: &AppHandle) {
-    let state = app.state::<Arc<HostState>>();
-    let message = startup_error_message(&state.log_tail.joined());
-    crate::window::show_error_dialog(
-        app,
-        &localization::t(keys::ERRORS_COULD_NOT_START_TITLE),
-        &message,
-    );
+async fn terminate_attempt(state: &HostState, generation: u64, port: u16) -> bool {
+    if let Err(error) = post_shutdown(port, "unresponsive").await {
+        logging::warn(&format!("[host] shutdown request failed: {error}"));
+    }
+    if wait_for_exit(state, generation, UNRESPONSIVE_STOP_TIMEOUT).await {
+        return true;
+    }
+    logging::warn("[host] did not stop in time; killing the host process");
+    kill_child(state);
+    wait_for_exit(state, generation, FORCED_STOP_TIMEOUT).await
+}
+
+async fn wait_for_exit(state: &HostState, generation: u64, timeout: Duration) -> bool {
+    let deadline = Instant::now() + timeout;
+    loop {
+        if exit_of(state, generation).is_some() {
+            return true;
+        }
+        if Instant::now() >= deadline {
+            return false;
+        }
+        tokio::time::sleep(STOP_POLL_INTERVAL).await;
+    }
 }
 
 pub async fn stop(app: &AppHandle) {
     let state = app.state::<Arc<HostState>>();
+    begin_stop(&state);
     if !state.spawned() || state.exited.load(Ordering::SeqCst) {
         return;
     }
@@ -752,8 +978,15 @@ pub async fn shutdown_for_update(app: &AppHandle) -> bool {
     stop_host(app, "update", UPDATE_STOP_TIMEOUT).await
 }
 
+fn begin_stop(state: &HostState) {
+    if let Ok(mut supervisor) = state.supervisor.lock() {
+        supervisor.begin_stop();
+    }
+}
+
 async fn stop_host(app: &AppHandle, reason: &str, graceful_timeout: Duration) -> bool {
     let state = app.state::<Arc<HostState>>();
+    begin_stop(&state);
     state.shutdown_expected.store(true, Ordering::SeqCst);
 
     let port = managed_port(&state);
@@ -814,7 +1047,7 @@ fn kill_child(state: &HostState) {
     }
 
     if let Ok(mut slot) = state.child.lock() {
-        if let Some(child) = slot.as_mut() {
+        if let Some((_, child)) = slot.as_mut() {
             #[cfg(unix)]
             {
                 if let Some(target) = process_group_signal_target(child.id()) {
@@ -1257,30 +1490,28 @@ mod tests {
     }
 
     #[test]
-    fn startup_error_includes_host_output() {
-        let message = startup_error_message("boom");
-        assert!(message.contains("did not start"));
-        assert!(message.contains("Host output:\nboom"));
-        assert!(!startup_error_message("").contains("Host output"));
+    fn a_failure_without_a_port_conflict_says_the_host_did_not_start() {
+        assert!(startup_failure_reason("boom").contains("did not start"));
+        assert!(startup_failure_reason("").contains("did not start"));
     }
 
     #[test]
-    fn startup_error_explains_port_conflict() {
-        let message = startup_error_message("Failed to bind to address");
+    fn a_port_conflict_is_explained() {
+        let message = startup_failure_reason("Failed to bind to address");
         assert!(message.contains("port "));
         assert!(message.contains("is already in use"));
         assert!(message.contains("MACRO_DECK_PORT"));
     }
 
     #[test]
-    fn startup_error_names_the_port_the_host_tried() {
-        let message = startup_error_message("Failed to bind to address http://0.0.0.0:9100.");
+    fn a_port_conflict_names_the_port_the_host_tried() {
+        let message = startup_failure_reason("Failed to bind to address http://0.0.0.0:9100.");
         assert!(message.contains("port 9100"));
     }
 
     #[test]
-    fn startup_error_falls_back_to_the_default_port_without_an_address() {
-        let message = startup_error_message("Address already in use");
+    fn a_port_conflict_falls_back_to_the_default_port_without_an_address() {
+        let message = startup_failure_reason("Address already in use");
         assert!(message.contains(&format!("port {}", host_public_port())));
     }
 
@@ -1307,50 +1538,6 @@ mod tests {
     fn the_restart_exit_code_matches_the_host_constant() {
         // Keep in sync with HostExitCodes.RestartRequested in the .NET host.
         assert_eq!(HOST_RESTART_EXIT_CODE, 86);
-    }
-
-    #[test]
-    fn an_expected_shutdown_is_ignored() {
-        assert_eq!(
-            exit_disposition(Some(0), true, true),
-            ExitDisposition::Ignore
-        );
-        assert_eq!(
-            exit_disposition(Some(HOST_RESTART_EXIT_CODE), true, true),
-            ExitDisposition::Ignore
-        );
-    }
-
-    #[test]
-    fn the_restart_exit_code_relaunches_once_the_host_was_ready() {
-        assert_eq!(
-            exit_disposition(Some(HOST_RESTART_EXIT_CODE), false, true),
-            ExitDisposition::Restart
-        );
-    }
-
-    #[test]
-    fn an_exit_before_readiness_is_left_to_the_startup_path() {
-        assert_eq!(
-            exit_disposition(Some(HOST_RESTART_EXIT_CODE), false, false),
-            ExitDisposition::Ignore
-        );
-        assert_eq!(
-            exit_disposition(Some(1), false, false),
-            ExitDisposition::Ignore
-        );
-    }
-
-    #[test]
-    fn a_crash_after_readiness_is_reported() {
-        assert_eq!(
-            exit_disposition(Some(1), false, true),
-            ExitDisposition::ShowError
-        );
-        assert_eq!(
-            exit_disposition(None, false, true),
-            ExitDisposition::ShowError
-        );
     }
 
     #[test]

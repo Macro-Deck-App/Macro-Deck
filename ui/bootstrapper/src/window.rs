@@ -1,4 +1,5 @@
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Mutex;
 
 use tauri::menu::{MenuBuilder, MenuItemBuilder};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
@@ -16,7 +17,9 @@ pub const MAIN_WINDOW: &str = "main";
 
 static MAIN_WINDOW_LOADED: AtomicBool = AtomicBool::new(false);
 
-static CAPABILITIES_REGISTERED: AtomicBool = AtomicBool::new(false);
+static CAPABILITY_ORIGIN: Mutex<Option<String>> = Mutex::new(None);
+
+static SUPPRESS_REVEAL: AtomicBool = AtomicBool::new(false);
 
 const SHELL_BRIDGE_SCRIPT: &str = include_str!("shell-bridge.js");
 const EXTERNAL_LINKS_SCRIPT: &str = include_str!("external-links.js");
@@ -118,61 +121,8 @@ pub fn create_main_window(app: &AppHandle) {
         }
     };
 
-    if host::is_packaged() && !CAPABILITIES_REGISTERED.load(Ordering::SeqCst) {
-        let origin = format!("http://{}", url.authority());
-        let capability = tauri::ipc::CapabilityBuilder::new("main-window-runtime")
-            .local(false)
-            .remote(origin.clone())
-            .window(MAIN_WINDOW)
-            .permission("core:default")
-            .permission("core:window:allow-start-dragging")
-            .permission("allow-get-host-port")
-            .permission("allow-get-shell-info")
-            .permission("allow-get-cursor-position")
-            .permission("allow-open-external")
-            .permission("allow-show-open-dialog")
-            .permission("allow-save-file")
-            .permission("allow-take-opened-files")
-            .permission("allow-take-menu-action")
-            .permission("allow-set-hotkey-capture")
-            .permission("allow-check-for-update")
-            .permission("allow-get-update-state")
-            .permission("allow-request-update-check")
-            .permission("allow-cancel-update-download")
-            .permission("allow-get-update-channel")
-            .permission("allow-set-update-channel")
-            .permission("allow-get-update-mode")
-            .permission("allow-set-update-mode")
-            .permission("allow-get-post-update-changelog")
-            .permission("allow-dismiss-post-update-changelog")
-            .permission("allow-get-hide-dock-icon")
-            .permission("allow-set-hide-dock-icon")
-            .permission("core:event:allow-listen")
-            .permission("core:event:allow-unlisten");
-        if let Err(error) = app.add_capability(capability) {
-            logging::error(&format!(
-                "[window] could not register IPC capability for {origin}: {error}"
-            ));
-        }
-
-        // install_update is Windows/macOS only: Linux is notification-only and
-        // never installs an update itself (issue #271), so the grant is scoped
-        // to a second capability instead of the shared one above.
-        let in_app_update = tauri::ipc::CapabilityBuilder::new("main-window-runtime-in-app-update")
-            .local(false)
-            .remote(origin.clone())
-            .window(MAIN_WINDOW)
-            .platforms([Target::Windows, Target::MacOS])
-            .permission("allow-install-update")
-            .permission("allow-postpone-automatic-install");
-        if let Err(error) = app.add_capability(in_app_update) {
-            logging::error(&format!(
-                "[window] could not register in-app-update IPC capability for {origin}: {error}"
-            ));
-        }
-
-        CAPABILITIES_REGISTERED.store(true, Ordering::SeqCst);
-    }
+    SUPPRESS_REVEAL.store(false, Ordering::SeqCst);
+    ensure_main_window_capability(app, &url);
 
     let devtools_requested = std::env::var("MACRODECK_DEVTOOLS")
         .map(|v| v == "1")
@@ -263,6 +213,95 @@ pub fn create_main_window(app: &AppHandle) {
     });
 }
 
+// The packaged UI is served from a runtime-assigned loopback port, and a recovered host may come
+// back on a different one, so each new origin gets its own grant.
+fn ensure_main_window_capability(app: &AppHandle, url: &tauri::Url) {
+    if !host::is_packaged() {
+        return;
+    }
+    let Ok(mut registered) = CAPABILITY_ORIGIN.lock() else {
+        return;
+    };
+    let origin = format!("http://{}", url.authority());
+    if registered.as_deref() == Some(origin.as_str()) {
+        return;
+    }
+
+    let capability = tauri::ipc::CapabilityBuilder::new("main-window-runtime")
+        .local(false)
+        .remote(origin.clone())
+        .window(MAIN_WINDOW)
+        .permission("core:default")
+        .permission("core:window:allow-start-dragging")
+        .permission("allow-get-host-port")
+        .permission("allow-get-shell-info")
+        .permission("allow-get-cursor-position")
+        .permission("allow-open-external")
+        .permission("allow-show-open-dialog")
+        .permission("allow-save-file")
+        .permission("allow-take-opened-files")
+        .permission("allow-take-menu-action")
+        .permission("allow-set-hotkey-capture")
+        .permission("allow-check-for-update")
+        .permission("allow-get-update-state")
+        .permission("allow-request-update-check")
+        .permission("allow-cancel-update-download")
+        .permission("allow-get-update-channel")
+        .permission("allow-set-update-channel")
+        .permission("allow-get-update-mode")
+        .permission("allow-set-update-mode")
+        .permission("allow-get-post-update-changelog")
+        .permission("allow-dismiss-post-update-changelog")
+        .permission("allow-get-hide-dock-icon")
+        .permission("allow-set-hide-dock-icon")
+        .permission("core:event:allow-listen")
+        .permission("core:event:allow-unlisten");
+    if let Err(error) = app.add_capability(capability) {
+        logging::error(&format!(
+            "[window] could not register IPC capability for {origin}: {error}"
+        ));
+    }
+
+    // install_update is Windows/macOS only: Linux is notification-only and
+    // never installs an update itself (issue #271), so the grant is scoped
+    // to a second capability instead of the shared one above.
+    let in_app_update = tauri::ipc::CapabilityBuilder::new("main-window-runtime-in-app-update")
+        .local(false)
+        .remote(origin.clone())
+        .window(MAIN_WINDOW)
+        .platforms([Target::Windows, Target::MacOS])
+        .permission("allow-install-update")
+        .permission("allow-postpone-automatic-install");
+    if let Err(error) = app.add_capability(in_app_update) {
+        logging::error(&format!(
+            "[window] could not register in-app-update IPC capability for {origin}: {error}"
+        ));
+    }
+
+    *registered = Some(origin);
+}
+
+pub fn reload_main_window(app: &AppHandle) {
+    let Some(window) = app.get_webview_window(MAIN_WINDOW) else {
+        return;
+    };
+    let Some(url) = main_window_url(app).and_then(|raw| raw.parse::<tauri::Url>().ok()) else {
+        return;
+    };
+    ensure_main_window_capability(app, &url);
+    SUPPRESS_REVEAL.store(true, Ordering::SeqCst);
+    if let Err(error) = window.navigate(url) {
+        SUPPRESS_REVEAL.store(false, Ordering::SeqCst);
+        logging::error(&format!(
+            "[window] could not reload the main window: {error}"
+        ));
+    }
+}
+
+pub fn take_suppress_reveal() -> bool {
+    SUPPRESS_REVEAL.swap(false, Ordering::SeqCst)
+}
+
 fn dispatch_to_main_thread(app: &AppHandle, what: &str, work: impl FnOnce() + Send + 'static) {
     if let Err(error) = app.run_on_main_thread(work) {
         logging::error(&format!("[window] could not {what}: {error}"));
@@ -279,6 +318,9 @@ pub fn show_main_window(app: &AppHandle) {
     #[cfg(target_os = "macos")]
     let _ = app.set_activation_policy(tauri::ActivationPolicy::Regular);
 
+    if crate::host_error_window::focus(app) {
+        return;
+    }
     if let Some(window) = app.get_webview_window(MAIN_WINDOW) {
         let _ = window.show();
         let _ = window.unminimize();

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{title}}</title>
+<style>
+	:root {
+		color-scheme: dark;
+		--bg: #121212;
+		--surface: #1a1a1a;
+		--surface-raised: #242424;
+		--hover: rgba(255, 255, 255, 0.05);
+		--border: #333333;
+		--border-light: #404040;
+		--text: #ffffff;
+		--muted: #a0a0a0;
+		--accent: #2196f3;
+		--accent-hover: #1565c0;
+		--on-accent: #ffffff;
+		--danger: #ef4444;
+		--danger-muted: rgba(239, 68, 68, 0.15);
+	}
+	@media (prefers-color-scheme: light) {
+		:root {
+			color-scheme: light;
+			--bg: #ffffff;
+			--surface: #f5f5f5;
+			--surface-raised: #ebebeb;
+			--hover: rgba(0, 0, 0, 0.05);
+			--border: #e0e0e0;
+			--border-light: #d0d0d0;
+			--text: #121212;
+			--muted: #666666;
+			--danger: #dc2626;
+			--danger-muted: rgba(220, 38, 38, 0.1);
+		}
+	}
+	* { box-sizing: border-box; }
+	html, body { margin: 0; height: 100%; }
+	body {
+		background: var(--bg);
+		color: var(--text);
+		font: 13px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+		display: flex;
+		flex-direction: column;
+		padding: 24px;
+		gap: 16px;
+	}
+	header { display: flex; gap: 14px; align-items: flex-start; }
+	header .icon { flex: none; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px; background: var(--danger-muted); color: var(--danger); }
+	header svg { width: 22px; height: 22px; }
+	h1 { font-size: 17px; font-weight: 600; line-height: 1.3; margin: 0 0 6px; }
+	p { margin: 0 0 6px; }
+	.muted { color: var(--muted); }
+	.notice { color: var(--danger); font-weight: 600; }
+	.details { flex: 1; display: flex; flex-direction: column; min-height: 140px; gap: 6px; }
+	.details-head { display: flex; justify-content: space-between; align-items: center; }
+	.details-head span { font-weight: 600; }
+	textarea {
+		flex: 1;
+		width: 100%;
+		resize: none;
+		padding: 10px 12px;
+		border: 1px solid var(--border);
+		border-radius: 6px;
+		background: var(--surface);
+		color: var(--text);
+		font: 12px/1.45 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+		white-space: pre;
+		overflow: auto;
+	}
+	textarea:focus { outline: none; border-color: var(--accent); }
+	.links { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+	a { color: var(--accent); text-decoration: none; }
+	a:hover { text-decoration: underline; }
+	footer { display: flex; justify-content: flex-end; gap: 10px; }
+	.button {
+		display: inline-flex;
+		align-items: center;
+		padding: 7px 16px;
+		border-radius: 6px;
+		border: 1px solid var(--border);
+		background: var(--surface-raised);
+		color: var(--text);
+		font: inherit;
+		font-weight: 500;
+		cursor: pointer;
+		text-decoration: none;
+	}
+	.button:hover { text-decoration: none; border-color: var(--border-light); background: var(--hover); }
+	.button:focus-visible { outline: none; border-color: var(--accent); }
+	.button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+	.button.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+	.button.small { padding: 3px 10px; font-size: 12px; }
+</style>
+</head>
+<body>
+<header>
+	<div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div>
+	<div>
+		<h1>{{heading}}</h1>
+		{{notice}}
+		{{attempts}}
+		{{reason}}
+		<p class="muted">{{help}}</p>
+	</div>
+</header>
+<section class="details">
+	<div class="details-head">
+		<span id="details-label">{{details_label}}</span>
+		<button type="button" class="button small" id="copy" data-copied="{{copied}}">{{copy}}</button>
+	</div>
+	<textarea id="details" readonly spellcheck="false" aria-labelledby="details-label">{{details}}</textarea>
+</section>
+<nav class="links">
+	<a href="{{issues_url}}">{{report_issue}}</a>
+	<a href="{{discord_url}}">{{discord}}</a>
+</nav>
+<footer>
+	<a class="button" href="action/quit">{{quit}}</a>
+	<a class="button primary" href="action/restart">{{restart}}</a>
+</footer>
+<script>
+	const copy = document.getElementById('copy');
+	const details = document.getElementById('details');
+	const label = copy.textContent;
+	copy.addEventListener('click', async () => {
+		let copied = false;
+		try {
+			await navigator.clipboard.writeText(details.value);
+			copied = true;
+		} catch {
+			details.focus();
+			details.select();
+			copied = document.execCommand('copy');
+			details.setSelectionRange(0, 0);
+		}
+		if (copied) {
+			copy.textContent = copy.dataset.copied;
+			setTimeout(() => { copy.textContent = label; }, 2000);
+		}
+	});
+</script>
+</body>
+</html>

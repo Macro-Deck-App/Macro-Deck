@@ -87,3 +87,27 @@ fn every_app_command_is_granted_in_development_and_in_packaged_builds() {
         }
     }
 }
+
+#[test]
+fn no_capability_reaches_the_host_error_window() {
+    for rel in ["capabilities/main.json", "capabilities/in-app-update.json"] {
+        let value: Value = serde_json::from_str(&read(rel)).expect("capability JSON");
+        let windows: Vec<&str> = value["windows"]
+            .as_array()
+            .expect("windows array")
+            .iter()
+            .filter_map(Value::as_str)
+            .collect();
+        assert_eq!(windows, ["main"], "{rel} must only grant the main window");
+    }
+
+    let source = read("src/window.rs");
+    let builders = source.matches("CapabilityBuilder::new(").count();
+    let main_scoped = source.matches(".window(MAIN_WINDOW)").count();
+    assert_eq!(
+        builders, main_scoped,
+        "every runtime grant must be scoped to the main window"
+    );
+    assert!(!source.contains(".windows("));
+    assert!(!read("src/host_error_window.rs").contains("CapabilityBuilder"));
+}

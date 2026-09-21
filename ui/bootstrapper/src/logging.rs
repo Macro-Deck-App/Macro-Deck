@@ -187,6 +187,12 @@ impl LogTail {
         }
     }
 
+    pub fn clear(&self) {
+        if let Ok(mut lines) = self.lines.lock() {
+            lines.clear();
+        }
+    }
+
     pub fn joined(&self) -> String {
         self.lines
             .lock()

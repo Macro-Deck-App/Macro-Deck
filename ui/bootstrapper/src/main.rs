@@ -9,8 +9,10 @@
 mod bridge;
 mod dock_icon;
 mod host;
+mod host_error_window;
 #[cfg(windows)]
 mod host_job;
+mod host_supervisor;
 mod install_state;
 mod localization;
 mod logging;
@@ -112,7 +114,6 @@ fn init_logging(app: &AppHandle) {
 
 async fn startup(app: AppHandle) {
     if !host::ensure_running(&app).await {
-        app.exit(1);
         return;
     }
 
@@ -148,6 +149,9 @@ fn main() {
         }))
         .plugin(tauri_plugin_dialog::init())
         .plugin(opener_plugin())
+        .register_uri_scheme_protocol(host_error_window::SCHEME, |context, request| {
+            host_error_window::respond(context.webview_label(), &request)
+        })
         .plugin(
             tauri_plugin_updater::Builder::new()
                 // Compares against the baked release version rather than
@@ -191,8 +195,9 @@ fn main() {
                 logging::info(&format!("[window] page loaded: {}", payload.url()));
                 let app = webview.app_handle();
                 window::mark_main_window_loaded();
+                let suppress_reveal = window::take_suppress_reveal();
                 if let Some(window) = app.get_webview_window(window::MAIN_WINDOW) {
-                    if !window.is_visible().unwrap_or(false) {
+                    if !suppress_reveal && !window.is_visible().unwrap_or(false) {
                         window::reveal(&window);
                     }
                 }
