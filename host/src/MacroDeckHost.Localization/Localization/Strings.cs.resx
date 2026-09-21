@@ -17355,6 +17355,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Reviews.Edited" xml:space="preserve">
     <value>Upraveno</value>
   </data>
+  <data name="Store.Reviews.DeveloperResponse" xml:space="preserve">
+    <value>Odpověď vývojáře</value>
+  </data>
+  <data name="Store.Reviews.ReplyEdited" xml:space="preserve">
+    <value>Upraveno</value>
+  </data>
   <data name="Store.Reviews.ComposeHeading" xml:space="preserve">
     <value>Vlastní recenze</value>
   </data>

@@ -17356,6 +17356,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.Reviews.Edited" xml:space="preserve">
     <value>Edited</value>
   </data>
+  <data name="Store.Reviews.DeveloperResponse" xml:space="preserve">
+    <value>Developer response</value>
+  </data>
+  <data name="Store.Reviews.ReplyEdited" xml:space="preserve">
+    <value>Edited</value>
+  </data>
   <data name="Store.Reviews.ComposeHeading" xml:space="preserve">
     <value>Your review</value>
   </data>

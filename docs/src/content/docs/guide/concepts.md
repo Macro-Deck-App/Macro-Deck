@@ -131,7 +131,8 @@ Deleting the pack there uninstalls it from the Store. To change the icons, expor
 copy as a pack of your own.
 
 Store items show their star rating, and an item's page lists its **Ratings and reviews**. Anyone can
-read them. To rate or review an item yourself, sign in with Macro Deck Connect under
+read them. When the creator has answered a review, their reply appears under it as a **Developer
+response**. To rate or review an item yourself, sign in with Macro Deck Connect under
 **Settings > Account** and install the item first: only items you have installed can be rated. When
 you sign in, and whenever you install something while signed in, Macro Deck records your installed
 Store items for your account so you can rate them. If ratings cannot be reached, the Store keeps

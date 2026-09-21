@@ -143,6 +143,23 @@
         @if (review.body) {
           <p class="review-body">{{ review.body }}</p>
         }
+        @if (review.reply; as reply) {
+          <div class="review-reply">
+            <div class="review-reply-header">
+              <span class="review-reply-label">{{ 'macrodeck.app:Store.Reviews.DeveloperResponse' | translate }}</span>
+              @if (publisher(); as name) {
+                <span class="review-reply-publisher">{{ name }}</span>
+              }
+            </div>
+            <span class="review-meta">
+              <span>{{ reply.createdAt | date: 'mediumDate' }}</span>
+              @if (reply.isEdited) {
+                <span class="review-edited">{{ 'macrodeck.app:Store.Reviews.ReplyEdited' | translate }}</span>
+              }
+            </span>
+            <p class="review-reply-body">{{ reply.body }}</p>
+          </div>
+        }
       </li>
     }
   </ul>

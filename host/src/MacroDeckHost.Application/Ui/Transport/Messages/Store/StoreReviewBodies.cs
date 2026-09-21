@@ -34,6 +34,17 @@ public class GetStoreRatingResponse
 	public List<StoreRatingBucketBody> Distribution { get; set; } = [];
 }
 
+public class StoreReviewReplyBody
+{
+	public string Body { get; set; } = string.Empty;
+
+	public DateTimeOffset CreatedAt { get; set; }
+
+	public DateTimeOffset UpdatedAt { get; set; }
+
+	public bool IsEdited { get; set; }
+}
+
 public class StoreReviewBody
 {
 	public Guid Id { get; set; }
@@ -53,6 +64,8 @@ public class StoreReviewBody
 	public bool IsEdited { get; set; }
 
 	public bool DownloadedBeforeReview { get; set; }
+
+	public StoreReviewReplyBody? Reply { get; set; }
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]

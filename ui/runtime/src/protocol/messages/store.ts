@@ -279,7 +279,14 @@ export interface GetStoreRatingResponse {
   distribution: StoreRatingBucketBody[];
 }
 
-// title and body are third-party text: render with interpolation only, never markdown or innerHTML.
+// title, body and the reply body are third-party text: render with interpolation only, never markdown or innerHTML.
+export interface StoreReviewReplyBody {
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+  isEdited: boolean;
+}
+
 export interface StoreReviewBody {
   id: string;
   rating: number;
@@ -290,6 +297,7 @@ export interface StoreReviewBody {
   createdAt: string;
   isEdited: boolean;
   downloadedBeforeReview: boolean;
+  reply?: StoreReviewReplyBody | null;
 }
 
 export type StoreReviewSortOrder = 'Newest' | 'Oldest';

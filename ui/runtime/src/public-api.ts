@@ -1096,6 +1096,7 @@ export {
   type StoreRatingSummaryBody,
   type StoreReviewBody,
   type StoreReviewComposeState,
+  type StoreReviewReplyBody,
   type StoreReviewSortOrder,
   type StoreReviewWriteError,
   type StoreReviewWriteErrorCode,

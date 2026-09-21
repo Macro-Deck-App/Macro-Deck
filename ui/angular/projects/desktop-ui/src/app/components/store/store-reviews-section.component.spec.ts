@@ -1,3 +1,4 @@
+import { formatDate } from '@angular/common';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
@@ -58,6 +59,7 @@ interface Scenario {
   reviews?: StoreReviewBody[];
   own?: GetStoreOwnReviewResponse;
   repository?: string | null;
+  publisher?: string | null;
 }
 
 describe('StoreReviewsSectionComponent', () => {
@@ -127,6 +129,7 @@ describe('StoreReviewsSectionComponent', () => {
     fixture.componentRef.setInput('kind', 'Plugin');
     fixture.componentRef.setInput('id', 'com.acme.deck-tools');
     fixture.componentRef.setInput('repository', scenario.repository ?? null);
+    fixture.componentRef.setInput('publisher', scenario.publisher ?? null);
     await settle();
   }
 
@@ -154,6 +157,54 @@ describe('StoreReviewsSectionComponent', () => {
   function starOptions(): HTMLButtonElement[] {
     return Array.from(host().querySelectorAll<HTMLButtonElement>('[role="radiogroup"] [role="radio"]'));
   }
+
+  it('shows a creator reply inside the review it answers and nowhere else', async () => {
+    await setup({
+      publisher: 'Acme Tools',
+      reviews: [
+        review({ id: 'unanswered', body: 'No reply here.' }),
+        review({
+          id: 'answered',
+          body: 'Crashes on start.',
+          reply: {
+            body: 'Fixed in 1.2,\nplease update.',
+            createdAt: '2026-09-02T12:00:00Z',
+            updatedAt: '2026-09-03T12:00:00Z',
+            isEdited: true,
+          },
+        }),
+      ],
+    });
+
+    const [unanswered, answered] = Array.from(host().querySelectorAll<HTMLElement>('.reviews-list > li'));
+    const reply = answered.querySelector<HTMLElement>('.review-reply')!;
+
+    expect(host().querySelectorAll('.reviews-list > li').length).toBe(2);
+    expect(unanswered.querySelector('.review-reply')).toBeNull();
+    expect(unanswered.textContent).not.toContain(text(AppStrings.Store.Reviews.DeveloperResponse));
+    expect(reply.textContent).toContain(text(AppStrings.Store.Reviews.DeveloperResponse));
+    expect(reply.textContent).toContain('Acme Tools');
+    expect(reply.textContent).toContain('Fixed in 1.2,\nplease update.');
+    expect(reply.textContent).toContain(formatDate('2026-09-02T12:00:00Z', 'mediumDate', 'en-US'));
+    expect(reply.textContent).toContain(text(AppStrings.Store.Reviews.ReplyEdited));
+  });
+
+  it('marks an unedited reply as a developer response even when the publisher is unknown', async () => {
+    await setup({
+      publisher: null,
+      reviews: [
+        review({
+          reply: { body: 'Thanks!', createdAt: '2026-09-02T08:00:00Z', updatedAt: '2026-09-02T08:00:00Z', isEdited: false },
+        }),
+      ],
+    });
+
+    const reply = host().querySelector<HTMLElement>('.review-reply')!;
+
+    expect(reply.textContent).toContain(text(AppStrings.Store.Reviews.DeveloperResponse));
+    expect(reply.textContent).toContain('Thanks!');
+    expect(reply.textContent).not.toContain(text(AppStrings.Store.Reviews.ReplyEdited));
+  });
 
   it('prompts a signed-out reader to sign in and opens the account settings', async () => {
     await setup({ status: 'signedOut', own: { state: 'SignedOut' } });
