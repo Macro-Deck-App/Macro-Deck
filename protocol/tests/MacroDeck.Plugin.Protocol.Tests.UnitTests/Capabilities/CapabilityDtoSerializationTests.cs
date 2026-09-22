@@ -5,6 +5,8 @@ using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Capabilities;
 using MacroDeck.Plugin.Protocol.Capabilities.Actions;
 using MacroDeck.Plugin.Protocol.Capabilities.ConfigFlow;
+using MacroDeck.Plugin.Protocol.Capabilities.WidgetTypeProvider;
+using MacroDeck.Localization;
 using MacroDeck.Plugin.Protocol.Serialization;
 
 namespace MacroDeck.Plugin.Protocol.Tests.UnitTests.Capabilities;
@@ -35,6 +37,28 @@ public class CapabilityDtoSerializationTests
 		{
 			Assert.That(actual!.Api, Is.EqualTo(payload.Api));
 			Assert.That(actual.Operation, Is.EqualTo(payload.Operation));
+		});
+	}
+
+	[Test]
+	public void Widget_type_appearance_properties_travel_as_ints_and_are_omitted_when_undeclared()
+	{
+		var declared = new WidgetTypeDescriptorDto
+		{
+			Id = "panel", Name = LocalizedText.FromLiteral("Panel"), AppearanceProperties = [0, 4]
+		};
+		var undeclared = declared with { AppearanceProperties = null };
+
+		var declaredJson = JsonSerializer.Serialize(declared, PluginProtocolJson.Options);
+		var undeclaredJson = JsonSerializer.Serialize(undeclared, PluginProtocolJson.Options);
+		var fromOlderPlugin = JsonSerializer.Deserialize<WidgetTypeDescriptorDto>(
+			"""{"id":"panel","name":"Panel","supportsFlows":true}""", PluginProtocolJson.Options);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(declaredJson, Does.Contain("\"appearanceProperties\":[0,4]"));
+			Assert.That(undeclaredJson, Does.Not.Contain("appearanceProperties"));
+			Assert.That(fromOlderPlugin!.AppearanceProperties, Is.Null);
 		});
 	}
 

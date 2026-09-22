@@ -274,4 +274,101 @@
     <value>{field} exceeds {limit} characters</value>
     <comment>[limit:int] Character limit, not byte length.</comment>
   </data>
+  <data name="Widgets.Appearance.Heading" xml:space="preserve">
+    <value>Appearance</value>
+    <comment>Heading above a widget's standard appearance fields.</comment>
+  </data>
+  <data name="Widgets.Appearance.BackgroundColor" xml:space="preserve">
+    <value>Background color</value>
+  </data>
+  <data name="Widgets.Appearance.Label" xml:space="preserve">
+    <value>Label</value>
+    <comment>The text a widget shows as its caption.</comment>
+  </data>
+  <data name="Widgets.Appearance.LabelColor" xml:space="preserve">
+    <value>Label color</value>
+  </data>
+  <data name="Widgets.Appearance.AccentColor" xml:space="preserve">
+    <value>Accent color</value>
+  </data>
+  <data name="Widgets.Appearance.Font" xml:space="preserve">
+    <value>Font</value>
+  </data>
+  <data name="Widgets.Appearance.FontSize" xml:space="preserve">
+    <value>Size (%)</value>
+    <comment>Label size as a percentage.</comment>
+  </data>
+  <data name="Widgets.Appearance.TextAlign" xml:space="preserve">
+    <value>Align</value>
+    <comment>Horizontal alignment of the label.</comment>
+  </data>
+  <data name="Widgets.Appearance.TextAlignLeft" xml:space="preserve">
+    <value>Left</value>
+  </data>
+  <data name="Widgets.Appearance.TextAlignCenter" xml:space="preserve">
+    <value>Center</value>
+  </data>
+  <data name="Widgets.Appearance.TextAlignRight" xml:space="preserve">
+    <value>Right</value>
+  </data>
+  <data name="Widgets.Appearance.LabelPosition" xml:space="preserve">
+    <value>Position</value>
+    <comment>Vertical position of the label on the widget.</comment>
+  </data>
+  <data name="Widgets.Appearance.LabelPositionTop" xml:space="preserve">
+    <value>Top</value>
+  </data>
+  <data name="Widgets.Appearance.LabelPositionCenter" xml:space="preserve">
+    <value>Center</value>
+  </data>
+  <data name="Widgets.Appearance.LabelPositionBottom" xml:space="preserve">
+    <value>Bottom</value>
+  </data>
+  <data name="Widgets.Appearance.Border" xml:space="preserve">
+    <value>Border</value>
+  </data>
+  <data name="Widgets.Appearance.BorderStyle" xml:space="preserve">
+    <value>Style</value>
+    <comment>Animation style of a widget's border.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderColor" xml:space="preserve">
+    <value>Color</value>
+    <comment>Colour of a widget's border.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderOff" xml:space="preserve">
+    <value>Off</value>
+    <comment>Border style: no border.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderStatic" xml:space="preserve">
+    <value>Static</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderHeartbeat" xml:space="preserve">
+    <value>Heartbeat</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderBreathing" xml:space="preserve">
+    <value>Breathing</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderBlink" xml:space="preserve">
+    <value>Blink</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderComet" xml:space="preserve">
+    <value>Comet</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderMarchingAnts" xml:space="preserve">
+    <value>Marching ants</value>
+    <comment>Border style: a dashed line moving around the widget.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderHueShift" xml:space="preserve">
+    <value>Hue shift</value>
+    <comment>Border style: the colour cycles through the hues.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderRgb" xml:space="preserve">
+    <value>RGB</value>
+    <comment>Border style: rainbow colours.</comment>
+  </data>
 </root>

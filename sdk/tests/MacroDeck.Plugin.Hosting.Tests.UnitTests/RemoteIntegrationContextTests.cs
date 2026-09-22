@@ -338,6 +338,30 @@ public class RemoteIntegrationContextTests
 	}
 
 	[Test]
+	public async Task A_widget_type_registers_its_declared_appearance_properties()
+	{
+		var widgetTypes = new RemoteWidgetTypeProviderContext(_invoker);
+
+		await widgetTypes.RegisterWidgetTypeAsync(new WidgetTypeDescriptor("panel", LocalizedText.FromLiteral("Panel"))
+		{
+			AppearanceProperties = [WidgetAppearanceProperty.BackgroundColor, WidgetAppearanceProperty.Font]
+		});
+
+		Assert.That(((WidgetTypesRegisterArguments)_invoker.LastArguments!).WidgetType.AppearanceProperties,
+			Is.EqualTo(new[] { 0, 4 }));
+	}
+
+	[Test]
+	public async Task A_widget_type_without_an_appearance_declaration_sends_none()
+	{
+		var widgetTypes = new RemoteWidgetTypeProviderContext(_invoker);
+
+		await widgetTypes.RegisterWidgetTypeAsync(new WidgetTypeDescriptor("panel", LocalizedText.FromLiteral("Panel")));
+
+		Assert.That(((WidgetTypesRegisterArguments)_invoker.LastArguments!).WidgetType.AppearanceProperties, Is.Null);
+	}
+
+	[Test]
 	public async Task A_widget_type_that_supports_flows_registers_with_the_flag_set()
 	{
 		var widgetTypes = new RemoteWidgetTypeProviderContext(_invoker);

@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Rendering;
+using MacroDeckHost.Application.Widgets;
 using MacroDeck.Sdk.Widgets;
 
 namespace MacroDeckHost.Infrastructure.Widgets;
@@ -10,7 +11,7 @@ namespace MacroDeckHost.Infrastructure.Widgets;
 /// calling, so <see cref="InvalidateIconAsync" /> - which must trust only the calling integration - needs
 /// the integration id bound at construction rather than threaded through every call.
 /// </summary>
-public sealed class IntegrationWidgetApi : IWidgetApi
+public sealed class IntegrationWidgetApi : IWidgetApi, IWidgetAppearanceOutcomeApi
 {
 	private readonly string _integrationId;
 	private readonly IWidgetApi _inner;
@@ -29,6 +30,15 @@ public sealed class IntegrationWidgetApi : IWidgetApi
 
 	public Task<bool> ApplyAsync(WidgetAppearanceRequest request, CancellationToken cancellationToken = default)
 		=> _inner.ApplyAsync(request, cancellationToken);
+
+	public async Task<WidgetAppearanceOutcome> ApplyWithOutcomeAsync(
+		WidgetAppearanceRequest request,
+		CancellationToken cancellationToken = default)
+		=> _inner is IWidgetAppearanceOutcomeApi outcomes
+			? await outcomes.ApplyWithOutcomeAsync(request, cancellationToken)
+			: await _inner.ApplyAsync(request, cancellationToken)
+				? WidgetAppearanceOutcome.Changed
+				: WidgetAppearanceOutcome.Unchanged;
 
 	public Task<WidgetStateWriteResult> SetStateAsync(
 		string widgetId,

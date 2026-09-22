@@ -19,6 +19,9 @@ internal static class WidgetTypeDescriptorMapper
 			DataSchema = widgetType.DataSchema,
 			HasConfiguration = widgetType.HasConfiguration,
 			SupportsFlows = widgetType.SupportsFlows,
+			AppearanceProperties = widgetType.AppearanceProperties is { } properties
+				? [.. properties.Select(property => (int)property)]
+				: null,
 			Metadata = widgetType.Metadata
 		};
 	}

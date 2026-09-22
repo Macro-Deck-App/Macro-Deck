@@ -10,6 +10,8 @@ using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Widgets.ActionButton;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
+using MacroDeck.Ui.Config;
 using Serilog;
 
 namespace MacroDeckHost.Tests.UnitTests.Widgets;
@@ -476,6 +478,218 @@ public class WidgetAppearanceServiceTests
 		});
 	}
 
+	private static readonly WidgetAppearanceProperty[] _providerDeclaration =
+	[
+		WidgetAppearanceProperty.BackgroundColor, WidgetAppearanceProperty.Label,
+		WidgetAppearanceProperty.LabelColor, WidgetAppearanceProperty.Font, WidgetAppearanceProperty.AccentColor
+	];
+
+	[Test]
+	public async Task ProviderType_DeclaringAppearance_IsOfferedItAlongsideTheBorder()
+	{
+		var fixture = await Fixture.ForProviderType(Frame(_providerDeclaration));
+
+		Assert.That(fixture.Service.GetWidgets().Single().AppearanceProperties,
+			Is.EquivalentTo(_providerDeclaration.Append(WidgetAppearanceProperty.Border)
+				.Append(WidgetAppearanceProperty.BorderColor)));
+	}
+
+	[Test]
+	public async Task ProviderType_WithoutDeclaration_KeepsBorderOnly_AsBeforeTypesCouldDeclare()
+	{
+		var fixture = await Fixture.ForProviderType(new WidgetTypeDescriptor("frame", "Frame"));
+
+		var outcome = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch
+		{
+			BackgroundColor = "#123456", BorderStyle = "static"
+		}));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(fixture.Service.GetWidgets().Single().AppearanceProperties,
+				Is.EqualTo(new[] { WidgetAppearanceProperty.Border, WidgetAppearanceProperty.BorderColor }));
+			Assert.That(outcome, Is.EqualTo(WidgetAppearanceOutcome.Changed));
+			Assert.That(fixture.Widget.Data, Is.EqualTo("""{"border":{"style":"static"}}"""));
+		});
+	}
+
+	[Test]
+	public async Task ProviderType_IconPropertiesInItsDeclaration_AreNotOffered()
+	{
+		var fixture = await Fixture.ForProviderType(Frame([
+			WidgetAppearanceProperty.Icon, WidgetAppearanceProperty.IconDisplay, WidgetAppearanceProperty.IconColor
+		]));
+
+		Assert.That(fixture.Service.GetWidgets().Single().AppearanceProperties,
+			Is.EqualTo(new[] { WidgetAppearanceProperty.Border, WidgetAppearanceProperty.BorderColor }));
+	}
+
+	[Test]
+	public async Task ProviderType_AppearanceActions_WriteTheDocumentedKeys()
+	{
+		var fixture = await Fixture.ForProviderType(Frame(_providerDeclaration));
+
+		var outcome = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch
+		{
+			BackgroundColor = "#101010",
+			Label = "Photos",
+			LabelColor = "#202020",
+			AccentColor = "#303030",
+			FontFaceId = "inter-bold",
+			FontSize = 14,
+			TextAlign = "left",
+			LabelPosition = "bottom"
+		}));
+
+		var data = JsonNode.Parse(fixture.Widget.Data!)!.AsObject();
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome, Is.EqualTo(WidgetAppearanceOutcome.Changed));
+			Assert.That(data[UiWidgetAppearanceKeys.BackgroundColor]!.GetValue<string>(), Is.EqualTo("#101010"));
+			Assert.That(data[UiWidgetAppearanceKeys.Label]!.GetValue<string>(), Is.EqualTo("Photos"));
+			Assert.That(data[UiWidgetAppearanceKeys.LabelColor]!.GetValue<string>(), Is.EqualTo("#202020"));
+			Assert.That(data[UiWidgetAppearanceKeys.AccentColor]!.GetValue<string>(), Is.EqualTo("#303030"));
+			Assert.That(data[UiWidgetAppearanceKeys.FontFaceId]!.GetValue<string>(), Is.EqualTo("inter-bold"));
+			Assert.That(data[UiWidgetAppearanceKeys.FontSize]!.GetValue<double>(), Is.EqualTo(14));
+			Assert.That(data[UiWidgetAppearanceKeys.TextAlign]!.GetValue<string>(), Is.EqualTo("left"));
+			Assert.That(data[UiWidgetAppearanceKeys.LabelPosition]!.GetValue<string>(), Is.EqualTo("bottom"));
+			Assert.That(UiWidgetAppearanceKeys.FontsOptionsSource, Is.EqualTo(WidgetOptionsSources.Fonts));
+		});
+	}
+
+	[Test]
+	public async Task ProviderType_ResetAndEmptyValues_RemoveTheKeys()
+	{
+		var fixture = await Fixture.ForProviderType(Frame(_providerDeclaration),
+			"""{"backgroundColor":"#101010","accentColor":"#303030","label":"Photos","keep":1}""");
+
+		var outcome = await fixture.Service.ApplyWithOutcomeAsync(new WidgetAppearanceRequest
+		{
+			WidgetId = _widgetId.ToString(),
+			Patch = new WidgetAppearancePatch { Label = string.Empty },
+			ClearProperties = [WidgetAppearanceProperty.BackgroundColor, WidgetAppearanceProperty.AccentColor]
+		});
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome, Is.EqualTo(WidgetAppearanceOutcome.Changed));
+			Assert.That(fixture.Widget.Data, Is.EqualTo("""{"keep":1}"""));
+		});
+	}
+
+	[Test]
+	public async Task ProviderType_UndeclaredProperty_IsNotWritten()
+	{
+		var fixture = await Fixture.ForProviderType(Frame([WidgetAppearanceProperty.Label]));
+
+		var outcome = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch
+		{
+			BackgroundColor = "#123456"
+		}));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome, Is.EqualTo(WidgetAppearanceOutcome.Unchanged));
+			Assert.That(fixture.Widgets.Updated, Is.Empty);
+			Assert.That(fixture.Service.GetWidgets().Single().AppearanceProperties,
+				Does.Not.Contain(WidgetAppearanceProperty.BackgroundColor));
+		});
+	}
+
+	[Test]
+	public async Task ProviderType_KeyItsSchemaForbids_IsNotOffered_AndNotWritten()
+	{
+		var fixture = await Fixture.ForProviderType(Frame(
+			[WidgetAppearanceProperty.BackgroundColor, WidgetAppearanceProperty.Label],
+			"""{"type":"object","properties":{"label":{"type":"string"}},"additionalProperties":false}"""));
+
+		var outcome = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch
+		{
+			BackgroundColor = "#123456"
+		}));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(fixture.Service.GetWidgets().Single().AppearanceProperties,
+				Does.Contain(WidgetAppearanceProperty.Label).And.Not.Contain(WidgetAppearanceProperty.BackgroundColor));
+			Assert.That(outcome, Is.EqualTo(WidgetAppearanceOutcome.Unchanged));
+			Assert.That(fixture.Widgets.Updated, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task ProviderType_ValueItsSchemaRejects_IsRejected_AndNotWritten()
+	{
+		var fixture = await Fixture.ForProviderType(Frame([WidgetAppearanceProperty.Label],
+			"""{"type":"object","properties":{"label":{"type":"string","pattern":"^[A-Za-z]+$"}}}"""));
+
+		var outcome = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch { Label = "Two words" }));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome, Is.EqualTo(WidgetAppearanceOutcome.Rejected));
+			Assert.That(fixture.Widgets.Updated, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task ProviderType_ClearThatBreaksARequiredKey_IsRejected()
+	{
+		var fixture = await Fixture.ForProviderType(Frame([WidgetAppearanceProperty.Font],
+			"""{"type":"object","required":["fontFaceId"]}"""), """{"fontFaceId":"inter"}""");
+
+		var outcome = await fixture.Service.ApplyWithOutcomeAsync(new WidgetAppearanceRequest
+		{
+			WidgetId = _widgetId.ToString(),
+			Patch = new WidgetAppearancePatch(),
+			ClearProperties = [WidgetAppearanceProperty.Font]
+		});
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome, Is.EqualTo(WidgetAppearanceOutcome.Rejected));
+			Assert.That(fixture.Widget.Data, Is.EqualTo("""{"fontFaceId":"inter"}"""));
+		});
+	}
+
+	[Test]
+	public async Task ProviderType_BorderWrite_IsNotHeldAgainstItsSchema_AsBeforeTypesCouldDeclare()
+	{
+		var fixture = await Fixture.ForProviderType(new WidgetTypeDescriptor("frame", "Frame",
+			DataSchema: """{"type":"object","additionalProperties":false}"""));
+
+		var outcome = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch { BorderStyle = "static" }));
+
+		Assert.That(outcome, Is.EqualTo(WidgetAppearanceOutcome.Changed));
+	}
+
+	[Test]
+	public async Task ProviderType_DeclaringLabel_IsNamedByItsLabelInTheTargetList()
+	{
+		var fixture = await Fixture.ForProviderType(Frame([WidgetAppearanceProperty.Label]), """{"label":"Photos"}""");
+
+		Assert.That(fixture.Service.GetWidgets().Single().Label, Is.EqualTo("Photos"));
+	}
+
+	[Test]
+	public async Task FailedWrite_IsReportedAsSuch()
+	{
+		var fixture = await Fixture.ForProviderType(Frame([WidgetAppearanceProperty.Label]));
+		fixture.Widgets.FailWrites = true;
+
+		var outcome = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch { Label = "Photos" }));
+
+		Assert.That(outcome, Is.EqualTo(WidgetAppearanceOutcome.WriteFailed));
+	}
+
+	private static WidgetTypeDescriptor Frame(
+		IReadOnlyList<WidgetAppearanceProperty> appearance,
+		string schema = """{"type":"object"}""")
+		=> new("frame", "Frame", DataSchema: schema) { AppearanceProperties = appearance };
+
+	private static WidgetAppearanceRequest Patch(WidgetAppearancePatch patch)
+		=> new() { WidgetId = _widgetId.ToString(), Patch = patch };
+
 	/// <summary>Reads a state's appearance label by id from the persisted array shape.</summary>
 	private static string? StateLabel(Fixture fixture, string stateId)
 	{
@@ -514,7 +728,7 @@ public class WidgetAppearanceServiceTests
 
 	private sealed class Fixture
 	{
-		public Fixture(string data, string type = WidgetTypeIds.ActionButton)
+		public Fixture(string data, string type = WidgetTypeIds.ActionButton, WidgetTypeRegistry? registry = null)
 		{
 			var profileId = Guid.NewGuid();
 			Widget = new WidgetEntity { Id = _widgetId, Type = type, Data = data };
@@ -536,7 +750,17 @@ public class WidgetAppearanceServiceTests
 				Widgets,
 				WriteLock,
 				DerivedStates,
+				registry ??= new WidgetTypeRegistry(new RecordingMediator()),
+				new WidgetDataSchemaProvider(registry),
+				new WidgetAppearanceSchemaProbe(),
 				new LoggerConfiguration().CreateLogger());
+		}
+
+		public static async Task<Fixture> ForProviderType(WidgetTypeDescriptor descriptor, string data = "{}")
+		{
+			var registry = new WidgetTypeRegistry(new RecordingMediator());
+			var registration = await registry.Register("com.example.frames", descriptor);
+			return new Fixture(data, registration.WidgetTypeId, registry);
 		}
 
 		public WidgetEntity Widget { get; }
@@ -563,8 +787,15 @@ public class WidgetAppearanceServiceTests
 	{
 		public List<WidgetEntity> Updated { get; } = [];
 
+		public bool FailWrites { get; set; }
+
 		public Task<Result<WidgetEntity, WidgetError>> Update(WidgetEntity widget)
 		{
+			if (FailWrites)
+			{
+				return Task.FromResult(Result.Fail<WidgetEntity, WidgetError>(WidgetError.NotFound));
+			}
+
 			Updated.Add(widget);
 			return Task.FromResult(Result.Ok<WidgetEntity, WidgetError>(widget));
 		}

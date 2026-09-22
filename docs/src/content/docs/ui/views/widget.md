@@ -90,6 +90,9 @@ The stored configuration travels with the request rather than being looked up, s
 the host can serve a widget. A provider that ignores `sample` or `ghost` keeps behaving exactly as it
 did.
 
+For a type that declares [standard appearance](/ui/views/widget-types/#standard-appearance),
+`UiWidgetAppearance.Read(data)` returns the background, label, colours and font the user or an action set.
+
 ## Previews, samples and ghosts
 
 ```csharp

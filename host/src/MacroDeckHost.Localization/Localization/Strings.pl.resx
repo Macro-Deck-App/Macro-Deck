@@ -10954,11 +10954,18 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Widgets.Errors.UnknownState" xml:space="preserve">
     <value>Żądany stan nie istnieje w tym przycisku.</value>
   </data>
+  <data name="Integrations.Widgets.Errors.ValueRejected" xml:space="preserve">
+    <value>Ten widżet nie akceptuje tej wartości.</value>
+    <comment>An appearance action's value is refused because the widget's stored data would no longer be valid.</comment>
+  </data>
   <data name="Integrations.Widgets.Errors.WidgetNotFound" xml:space="preserve">
     <value>Widżet „{widgetId}” nie istnieje lub nie obsługuje tej zmiany.</value>
   </data>
   <data name="Integrations.Widgets.Errors.WidgetsUnavailable" xml:space="preserve">
     <value>Widżety są niedostępne.</value>
+  </data>
+  <data name="Integrations.Widgets.Errors.WriteFailed" xml:space="preserve">
+    <value>Nie udało się zapisać widżetu.</value>
   </data>
   <data name="Integrations.Widgets.Name" xml:space="preserve">
     <value>Widżet</value>

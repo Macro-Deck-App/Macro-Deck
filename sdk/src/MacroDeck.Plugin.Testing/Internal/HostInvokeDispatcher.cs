@@ -316,7 +316,13 @@ internal static class HostInvokeDispatcher
 			dto.DefaultData,
 			dto.DataSchema,
 			dto.HasConfiguration,
-			dto.Metadata) { SupportsFlows = dto.SupportsFlows };
+			dto.Metadata)
+		{
+			SupportsFlows = dto.SupportsFlows,
+			AppearanceProperties = dto.AppearanceProperties is { } properties
+				? [.. properties.Select(property => (WidgetAppearanceProperty)property)]
+				: null
+		};
 
 	private static async Task<HostInvokeOutcome> LayoutsAsync(
 		FakeIntegrationContext context,

@@ -361,6 +361,7 @@ public class Startup
 		services.AddSingleton<VariableInterestTracker>();
 		services.AddSingleton<VariableBroadcaster>();
 		services.AddSingleton<WidgetDerivedStateStore>();
+		services.AddSingleton<WidgetAppearanceSchemaProbe>();
 		services.AddSingleton<WidgetOptimisticStateStore>();
 		services.AddScoped<IWidgetStateService, WidgetStateService>();
 		services.AddScoped<IWidgetStateReconciler, WidgetStateReconciler>();

@@ -10,15 +10,37 @@ public static class WidgetAppearanceJson
 	/// <summary>Fixed key used for every widget type that has exactly one appearance (not a State-Mode action button).</summary>
 	private const string SingleAppearanceStateId = "off";
 
+	public static IReadOnlyList<WidgetAppearanceProperty> ProviderOptionalProperties { get; } =
+	[
+		WidgetAppearanceProperty.BackgroundColor,
+		WidgetAppearanceProperty.Label,
+		WidgetAppearanceProperty.LabelColor,
+		WidgetAppearanceProperty.Font,
+		WidgetAppearanceProperty.AccentColor
+	];
+
 	public static bool Apply(
 		JsonObject data,
 		string type,
 		WidgetAppearancePatch patch,
 		IReadOnlyCollection<string> stateIds)
+		=> Apply(data, type, patch, stateIds, providerSupported: null);
+
+	public static bool Apply(
+		JsonObject data,
+		string type,
+		WidgetAppearancePatch patch,
+		IReadOnlyCollection<string> stateIds,
+		IReadOnlyCollection<WidgetAppearanceProperty>? providerSupported)
 	{
 		if (patch.IsEmpty || stateIds.Count == 0)
 		{
 			return false;
+		}
+
+		if (providerSupported is not null)
+		{
+			return ApplyToProviderType(data, patch, providerSupported);
 		}
 
 		var changed = false;
@@ -41,7 +63,23 @@ public static class WidgetAppearanceJson
 		string type,
 		WidgetAppearanceProperty property,
 		string stateId)
+		=> ClearProperty(data, type, property, stateId, providerSupported: null);
+
+	public static bool ClearProperty(
+		JsonObject data,
+		string type,
+		WidgetAppearanceProperty property,
+		string stateId,
+		IReadOnlyCollection<WidgetAppearanceProperty>? providerSupported)
 	{
+		if (providerSupported is not null)
+		{
+			return providerSupported.Contains(property) &&
+				(property == WidgetAppearanceProperty.AccentColor
+					? Remove(data, "accentColor")
+					: ClearOn(data, property, labelKey: "label"));
+		}
+
 		if (!SupportedProperties(type).Contains(property))
 		{
 			return false;
@@ -175,7 +213,19 @@ public static class WidgetAppearanceJson
 	}
 
 	public static string? ReadLabel(JsonObject data, string type, string? stateId)
+		=> ReadLabel(data, type, stateId, providerSupported: null);
+
+	public static string? ReadLabel(
+		JsonObject data,
+		string type,
+		string? stateId,
+		IReadOnlyCollection<WidgetAppearanceProperty>? providerSupported)
 	{
+		if (providerSupported is not null)
+		{
+			return providerSupported.Contains(WidgetAppearanceProperty.Label) ? ReadString(data, "label") : null;
+		}
+
 		if (type != WidgetTypeIds.ActionButton)
 		{
 			return type is WidgetTypeIds.Slider ? ReadString(data, "label") : null;
@@ -377,6 +427,55 @@ public static class WidgetAppearanceJson
 		}
 
 		return changed;
+	}
+
+	private static bool ApplyToProviderType(
+		JsonObject data,
+		WidgetAppearancePatch patch,
+		IReadOnlyCollection<WidgetAppearanceProperty> supported)
+	{
+		var changed = false;
+		if (supported.Contains(WidgetAppearanceProperty.Label))
+		{
+			changed |= SetOrRemove(data, "label", patch.Label);
+		}
+
+		if (supported.Contains(WidgetAppearanceProperty.BackgroundColor))
+		{
+			changed |= SetOrRemove(data, "backgroundColor", patch.BackgroundColor);
+		}
+
+		if (supported.Contains(WidgetAppearanceProperty.LabelColor))
+		{
+			changed |= SetOrRemove(data, "labelColor", patch.LabelColor);
+		}
+
+		if (supported.Contains(WidgetAppearanceProperty.AccentColor))
+		{
+			changed |= SetOrRemove(data, "accentColor", patch.AccentColor);
+		}
+
+		if (supported.Contains(WidgetAppearanceProperty.Font))
+		{
+			changed |= SetOrRemove(data, "fontFaceId", patch.FontFaceId);
+			changed |= SetIfPresent(data, "fontSize", patch.FontSize);
+			changed |= SetOrRemove(data, "textAlign", patch.TextAlign);
+			changed |= SetOrRemove(data, "labelPosition", patch.LabelPosition);
+		}
+
+		return changed | ApplyBorder(data, patch);
+	}
+
+	// A provider's schema usually types these keys as plain strings, so an empty value removes the key where
+	// a built-in type stores a JSON null.
+	private static bool SetOrRemove(JsonObject target, string key, string? value)
+	{
+		if (value is null)
+		{
+			return false;
+		}
+
+		return value.Length == 0 ? target.Remove(key) : SetIfPresent(target, key, value);
 	}
 
 	private static bool ApplyToSlider(JsonObject data, WidgetAppearancePatch patch)

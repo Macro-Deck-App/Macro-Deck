@@ -30,6 +30,11 @@ public sealed record WidgetTypeDescriptorDto
 	/// as false.</summary>
 	public bool SupportsFlows { get; init; }
 
+	/// <summary>The standard appearance properties the type draws besides the border, as
+	/// <c>MacroDeck.Sdk.Widgets.WidgetAppearanceProperty</c> values in plain ints. Absent reads as border
+	/// only.</summary>
+	public IReadOnlyList<int>? AppearanceProperties { get; init; }
+
 	public IReadOnlyDictionary<string, string>? Metadata { get; init; }
 }
 

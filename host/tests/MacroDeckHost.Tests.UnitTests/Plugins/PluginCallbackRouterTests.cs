@@ -213,6 +213,34 @@ public class PluginCallbackRouterTests
 		});
 	}
 
+	[TestCase("""{"widgetType":{"id":"panel","name":"Panel"}}""", new int[0])]
+	[TestCase("""{"widgetType":{"id":"panel","name":"Panel","appearanceProperties":[0,1]}}""", new[] { 0, 1 })]
+	public async Task A_widget_type_declares_its_appearance_properties_only_when_its_registration_lists_them(
+		string arguments,
+		int[] expected)
+	{
+		var widgetTypes = new WidgetTypeRegistry(new RecordingMediator());
+		var router = Router(widgetTypes: widgetTypes);
+
+		var registered = await router.RouteAsync("plugin.a",
+			"c1",
+			new HostInvokePayload
+			{
+				Api = HostApis.WidgetTypes,
+				Operation = HostOperations.WidgetTypes.Register,
+				Arguments = JsonDocument.Parse(arguments).RootElement.Clone()
+			},
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(registered.Error, Is.Null);
+			Assert.That(widgetTypes.TryResolve("plugin.a::panel", out var entry), Is.True);
+			Assert.That(entry.Descriptor.AppearanceProperties?.Select(property => (int)property) ?? [],
+				Is.EqualTo(expected));
+		});
+	}
+
 	[Test]
 	public async Task A_device_registered_without_an_id_is_rejected_as_an_invalid_payload()
 	{
