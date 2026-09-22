@@ -7,8 +7,10 @@ import {
   Injector,
   OnInit,
   computed,
+  effect,
   inject,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -25,7 +27,9 @@ import { cultureDisplayName, sortCulturesForReader } from '../../../localization
 import { ConnectAccountService } from '../../../services/connect-account.service';
 import { SettingsModalService } from '../../../services/settings-modal.service';
 import { StoreOperationService } from '../../../services/store-operation.service';
+import { StoreRatingsService } from '../../../services/store-ratings.service';
 import { formatBytes } from '../../../util/format-bytes';
+import { formatStoreCount } from '../../../util/store-rating-format';
 import { storeUninstallErrorKey, storeUninstallMessageKey } from '../../../util/store-operation-display';
 import { StoreDetailHeaderComponent } from './store-detail-header.component';
 import { StoreLanguagesModalComponent } from './store-languages-modal.component';
@@ -87,6 +91,7 @@ export class StoreDetailPageComponent implements OnInit {
   private readonly account = inject(ConnectAccountService);
   private readonly settingsModal = inject(SettingsModalService);
   protected readonly operations = inject(StoreOperationService);
+  private readonly ratings = inject(StoreRatingsService);
   private readonly reviewsSection = viewChild(StoreReviewsSectionComponent);
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
@@ -105,6 +110,11 @@ export class StoreDetailPageComponent implements OnInit {
   });
 
   protected readonly formatBytes = formatBytes;
+
+  protected readonly installCount = computed(() => {
+    const count = this.ratings.installs().get(this.extensionId());
+    return count && count > 0 ? formatStoreCount(count, this.localization.culture()) : null;
+  });
 
   protected readonly uninstallConfirmOpen = signal(false);
 
@@ -185,6 +195,12 @@ export class StoreDetailPageComponent implements OnInit {
   }
 
   constructor() {
+    effect(() => {
+      const id = this.extensionId();
+      this.ratings.installs();
+      untracked(() => void this.ratings.ensureInstalls([id]));
+    });
+
     // Mirrors the store page's subscription: an uninstall creates no operation, so nothing else
     // here would notice the extension is gone and stop showing a live Uninstall button for it.
     this.api.onNotification('StoreCatalogChangedEvent')

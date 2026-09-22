@@ -56,6 +56,46 @@ internal sealed class StorePlatformClientTests
 	}
 
 	[Test]
+	public async Task Install_counts_for_more_than_a_hundred_packages_are_requested_anonymously_in_batches_and_merged()
+	{
+		var ids = Enumerable.Range(1, 150).Select(number => $"com.acme.p{number}").ToList();
+		_handler.Respond = request =>
+		{
+			var requested = Uri.UnescapeDataString(request.RequestUri!.Query).Split('=')[1].Split(',');
+			return Json(requested.ToDictionary(id => id, id => new { installs = id == "com.acme.p150" ? 1234 : 0 }));
+		};
+
+		var result = await _client.GetInstalls(ids);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True);
+			Assert.That(result.Value!.Keys, Is.EquivalentTo(ids));
+			Assert.That(result.Value!["com.acme.p150"].Installs, Is.EqualTo(1234));
+			Assert.That(result.Value!["com.acme.p1"].Installs, Is.Zero);
+			Assert.That(_handler.Requests.Select(request => request.Uri.AbsolutePath),
+				Is.All.EqualTo("/api/v1/store/installs"));
+			Assert.That(_handler.Requests.Select(request => request.Uri.Query.Split(',').Length),
+				Is.EqualTo(new[] { 100, 50 }));
+			Assert.That(_handler.Requests.All(request => request.Authorization is null), Is.True,
+				"public reads must not carry the account token");
+		});
+	}
+
+	[Test]
+	public async Task Install_counts_fail_as_a_whole_when_one_batch_is_refused()
+	{
+		var ids = Enumerable.Range(1, 150).Select(number => $"com.acme.p{number}").ToList();
+		_handler.Respond = request => _handler.Requests.Count == 1
+			? Json(new Dictionary<string, object>())
+			: new HttpResponseMessage(HttpStatusCode.TooManyRequests);
+
+		var result = await _client.GetInstalls(ids);
+
+		Assert.That(result.Success, Is.False);
+	}
+
+	[Test]
 	public async Task A_claim_for_more_than_a_hundred_packages_is_split_and_sends_the_bearer_token()
 	{
 		var ids = Enumerable.Range(1, 150).Select(number => $"com.acme.p{number}").ToList();

@@ -87,6 +87,68 @@ internal sealed class StoreReviewServiceTests
 	}
 
 	[Test]
+	public async Task Install_counts_are_asked_for_official_packages_only_including_zero_and_cached_briefly()
+	{
+		_packages.Listed.Add("com.acme.icons");
+		_platform.Installs[PackageId] = 1234;
+		_platform.Installs["com.acme.icons"] = 0;
+
+		var first = await _service.GetInstalls([PackageId, "com.acme.icons", "com.other.thing"], CancellationToken.None);
+		await _service.GetInstalls([PackageId, "com.acme.icons"], CancellationToken.None);
+		_time.Advance(StorePlatformOptions.Default.RatingsCacheLifetime);
+		await _service.GetInstalls([PackageId], CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(first.Available, Is.True);
+			Assert.That(first.Installs, Is.EquivalentTo(new Dictionary<string, long>
+			{
+				[PackageId] = 1234,
+				["com.acme.icons"] = 0
+			}));
+			Assert.That(_platform.InstallRequests.SelectMany(request => request), Does.Not.Contain("com.other.thing"));
+			Assert.That(_platform.InstallRequests, Has.Count.EqualTo(2));
+		});
+	}
+
+	[Test]
+	public async Task A_package_the_platform_does_not_count_has_no_install_count()
+	{
+		var installs = await _service.GetInstalls([PackageId], CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(installs.Available, Is.True);
+			Assert.That(installs.Installs, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task Unreachable_install_counts_are_unavailable_for_a_while_and_leave_ratings_alone()
+	{
+		_platform.InstallsFailure = StorePlatformFailure.Unavailable;
+		_platform.Ratings[PackageId] = new StorePlatformRating(4.5, 2, []);
+
+		var failed = await _service.GetInstalls([PackageId], CancellationToken.None);
+		_platform.InstallsFailure = StorePlatformFailure.None;
+		_platform.Installs[PackageId] = 5;
+		var backedOff = await _service.GetInstalls([PackageId], CancellationToken.None);
+		var ratings = await _service.GetRatings([PackageId], CancellationToken.None);
+		_time.Advance(StorePlatformOptions.Default.RatingsCacheLifetime);
+		var recovered = await _service.GetInstalls([PackageId], CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(failed.Available, Is.False);
+			Assert.That(backedOff.Available, Is.False);
+			Assert.That(_platform.InstallRequests, Has.Count.EqualTo(2));
+			Assert.That(ratings.Available, Is.True);
+			Assert.That(ratings.Ratings[PackageId].Rating, Is.EqualTo(4.5));
+			Assert.That(recovered.Installs[PackageId], Is.EqualTo(5));
+		});
+	}
+
+	[Test]
 	public async Task Signed_out_users_can_read_but_are_asked_to_sign_in_to_review()
 	{
 		_session.Current = ConnectSessionSnapshot.SignedOut;

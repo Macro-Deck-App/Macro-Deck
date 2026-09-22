@@ -85,6 +85,34 @@ public sealed class StorePlatformClient : IStorePlatformClient, IDisposable
 		return StorePlatformResult.Ok<IReadOnlyDictionary<string, StorePlatformRating>>(merged);
 	}
 
+	public async Task<StorePlatformResult<IReadOnlyDictionary<string, StorePlatformInstalls>>> GetInstalls(
+		IReadOnlyCollection<string> packageIds,
+		CancellationToken cancellationToken = default)
+	{
+		var merged = new Dictionary<string, StorePlatformInstalls>(StringComparer.Ordinal);
+		foreach (var chunk in Chunks(packageIds))
+		{
+			var result = await Send<Dictionary<string, StorePlatformInstalls>>(HttpMethod.Get,
+				$"api/v1/store/installs?packageIds={JoinIds(chunk)}",
+				content: null,
+				authenticated: false,
+				cancellationToken);
+			if (!result.Success)
+			{
+				return StorePlatformResult.Fail<IReadOnlyDictionary<string, StorePlatformInstalls>>(result.Failure,
+					result.RetryAfter,
+					result.Field);
+			}
+
+			foreach (var (id, installs) in result.Value ?? [])
+			{
+				merged[id] = installs;
+			}
+		}
+
+		return StorePlatformResult.Ok<IReadOnlyDictionary<string, StorePlatformInstalls>>(merged);
+	}
+
 	public Task<StorePlatformResult<StorePlatformRating>> GetRating(string packageId,
 		CancellationToken cancellationToken = default) =>
 		Send<StorePlatformRating>(HttpMethod.Get,

@@ -99,7 +99,7 @@ describe('StoreExtensionCardComponent rating', () => {
     }
   });
 
-  function setup(ratings: Map<string, StoreRatingSummaryBody>): void {
+  function setup(ratings: Map<string, StoreRatingSummaryBody>, installs = new Map<string, number>()): void {
     TestBed.configureTestingModule({
       imports: [StoreExtensionCardComponent],
       providers: [
@@ -107,7 +107,13 @@ describe('StoreExtensionCardComponent rating', () => {
         provideRouter([]),
         ...provideLocalizationTesting(),
         { provide: PluginRuntimeService, useValue: { plugins: signal([]) } },
-        { provide: StoreRatingsService, useValue: { ratings: signal<ReadonlyMap<string, StoreRatingSummaryBody>>(ratings) } },
+        {
+          provide: StoreRatingsService,
+          useValue: {
+            ratings: signal<ReadonlyMap<string, StoreRatingSummaryBody>>(ratings),
+            installs: signal<ReadonlyMap<string, number>>(installs),
+          },
+        },
       ],
     });
 
@@ -126,6 +132,10 @@ describe('StoreExtensionCardComponent rating', () => {
 
   function meta(): HTMLElement {
     return (fixture.nativeElement as HTMLElement).querySelector('.card-meta')!;
+  }
+
+  function installs(): HTMLElement | null {
+    return (fixture.nativeElement as HTMLElement).querySelector('.card-installs');
   }
 
   it('shows the stars, the rating and the rating count when the item has ratings', () => {
@@ -147,6 +157,29 @@ describe('StoreExtensionCardComponent rating', () => {
     TestBed.resetTestingModule();
     setup(new Map());
     expect(meta().querySelector('shared-store-rating-stars')).toBeNull();
+  });
+
+  it('shows the install count compactly, and announces the exact count to readers who cannot see it', () => {
+    setup(new Map([['com.acme.deck-tools', { rating: 4.5, ratingCount: 12 }]]), new Map([['com.acme.deck-tools', 1234]]));
+
+    expect(installs()!.textContent).toContain('1.2K');
+    expect(installs()!.getAttribute('role')).toBe('img');
+    expect(installs()!.getAttribute('aria-label')).toBe('1,234 installs');
+  });
+
+  it('shows the install count of an item nobody has rated yet', () => {
+    setup(new Map(), new Map([['com.acme.deck-tools', 1]]));
+
+    expect(installs()!.textContent).toContain('1');
+    expect(installs()!.getAttribute('role')).toBe('img');
+    expect(installs()!.getAttribute('aria-label')).toBe('1 install');
+    expect(meta().querySelector('shared-store-rating-stars')).toBeNull();
+  });
+
+  it('shows no install count when none is known', () => {
+    setup(new Map([['com.acme.deck-tools', { rating: 4.5, ratingCount: 12 }]]));
+
+    expect(installs()).toBeNull();
   });
 });
 

@@ -41,6 +41,16 @@
   }
 }
 
+.card-installs {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  flex-shrink: 0;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
 .card-identity {
   display: flex;
   flex-direction: column;

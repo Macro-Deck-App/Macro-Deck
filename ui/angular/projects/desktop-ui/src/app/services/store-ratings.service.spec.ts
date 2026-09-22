@@ -2,7 +2,7 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Observable, Subject } from 'rxjs';
 
-import { GetStoreRatingsResponse } from '@macro-deck/runtime';
+import { GetStoreInstallsResponse, GetStoreRatingsResponse } from '@macro-deck/runtime';
 import { ApiService } from '@shared';
 import { StoreRatingsService } from './store-ratings.service';
 
@@ -18,9 +18,13 @@ describe('StoreRatingsService', () => {
     };
   }
 
+  function installsFor(ids: readonly string[]): GetStoreInstallsResponse {
+    return { available: true, installs: Object.fromEntries(ids.map(id => [id, 1234])) };
+  }
+
   beforeEach(() => {
     notifications = new Map();
-    api = jasmine.createSpyObj<ApiService>('ApiService', ['getStoreRatings', 'onNotification']);
+    api = jasmine.createSpyObj<ApiService>('ApiService', ['getStoreRatings', 'getStoreInstalls', 'onNotification']);
     Object.defineProperty(api, 'connectionStateSignal', { value: signal('disconnected') });
     api.onNotification.and.callFake((method: string) => {
       let subject = notifications.get(method);
@@ -31,6 +35,7 @@ describe('StoreRatingsService', () => {
       return subject.asObservable() as Observable<never>;
     });
     api.getStoreRatings.and.callFake(async ids => ratingsFor(ids));
+    api.getStoreInstalls.and.callFake(async ids => installsFor(ids));
 
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection(), { provide: ApiService, useValue: api }],
@@ -105,5 +110,57 @@ describe('StoreRatingsService', () => {
     await service.ensure(['a']);
 
     expect(api.getStoreRatings).toHaveBeenCalledTimes(2);
+  });
+
+  it('loads install counts for the same ids in chunks of at most 100', async () => {
+    const ids = Array.from({ length: 150 }, (_, index) => `pkg-${index}`);
+
+    await service.ensure(ids);
+
+    const sent = api.getStoreInstalls.calls.allArgs().map(([chunk]) => chunk);
+    expect(sent.every(chunk => chunk.length <= 100)).toBeTrue();
+    expect(new Set(sent.flat()).size).toBe(150);
+    expect(service.installs().get('pkg-0')).toBe(1234);
+  });
+
+  it('keeps ratings when install counts fail, and install counts when ratings fail', async () => {
+    api.getStoreInstalls.and.rejectWith(new Error('offline'));
+    await service.ensure(['a']);
+    expect(service.summary('a')).toEqual({ rating: 4, ratingCount: 3 });
+    expect(service.installs().size).toBe(0);
+
+    notifications.get('StoreCatalogChangedEvent')!.next({});
+    api.getStoreInstalls.and.callFake(async ids => installsFor(ids));
+    api.getStoreRatings.and.resolveTo({ available: false, ratings: {} });
+    await service.ensure(['a']);
+    expect(service.ratings().size).toBe(0);
+    expect(service.installs().get('a')).toBe(1234);
+  });
+
+  it('asks again for install counts that failed without asking again for known ratings', async () => {
+    api.getStoreInstalls.and.resolveTo({ available: false, installs: {} });
+    await service.ensure(['a']);
+    api.getStoreInstalls.and.callFake(async ids => installsFor(ids));
+    await service.ensure(['a']);
+
+    expect(api.getStoreRatings).toHaveBeenCalledTimes(1);
+    expect(api.getStoreInstalls).toHaveBeenCalledTimes(2);
+    expect(service.installs().get('a')).toBe(1234);
+  });
+
+  it('loads only install counts when asked for install counts alone', async () => {
+    await service.ensureInstalls(['a']);
+
+    expect(api.getStoreInstalls).toHaveBeenCalledOnceWith(['a']);
+    expect(api.getStoreRatings).not.toHaveBeenCalled();
+    expect(service.installs().get('a')).toBe(1234);
+  });
+
+  it('keeps no install count for a package without installs', async () => {
+    api.getStoreInstalls.and.resolveTo({ available: true, installs: { a: 0 } });
+
+    await service.ensure(['a']);
+
+    expect(service.installs().has('a')).toBeFalse();
   });
 });

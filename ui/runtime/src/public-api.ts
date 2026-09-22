@@ -1086,6 +1086,7 @@ export {
   type StoreUpdatesChangedEvent,
   type StoreVersionHistoryBody,
   type UninstallStoreExtensionRequest,
+  type GetStoreInstallsResponse,
   type GetStoreOwnReviewResponse,
   type GetStoreRatingResponse,
   type GetStoreRatingsResponse,

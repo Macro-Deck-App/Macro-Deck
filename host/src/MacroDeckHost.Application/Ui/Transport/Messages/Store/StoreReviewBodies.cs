@@ -16,6 +16,13 @@ public class GetStoreRatingsResponse
 	public Dictionary<string, StoreRatingSummaryBody> Ratings { get; set; } = [];
 }
 
+public class GetStoreInstallsResponse
+{
+	public bool Available { get; set; }
+
+	public Dictionary<string, long> Installs { get; set; } = [];
+}
+
 public class StoreRatingBucketBody
 {
 	public int Stars { get; set; }

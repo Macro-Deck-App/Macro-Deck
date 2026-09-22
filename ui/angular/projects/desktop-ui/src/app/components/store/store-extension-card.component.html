@@ -43,6 +43,13 @@
         }
       </div>
     </div>
+
+    @if (installs(); as installs) {
+      <span class="card-installs" role="img" [attr.aria-label]="installs.label">
+        <span class="icon icon-download icon-xs" aria-hidden="true"></span>
+        <span aria-hidden="true">{{ installs.text }}</span>
+      </span>
+    }
   </div>
 
   @if (item().description) {

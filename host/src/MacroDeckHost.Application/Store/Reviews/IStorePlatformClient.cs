@@ -6,6 +6,10 @@ public interface IStorePlatformClient
 		IReadOnlyCollection<string> packageIds,
 		CancellationToken cancellationToken = default);
 
+	Task<StorePlatformResult<IReadOnlyDictionary<string, StorePlatformInstalls>>> GetInstalls(
+		IReadOnlyCollection<string> packageIds,
+		CancellationToken cancellationToken = default);
+
 	Task<StorePlatformResult<StorePlatformRating>> GetRating(string packageId,
 		CancellationToken cancellationToken = default);
 

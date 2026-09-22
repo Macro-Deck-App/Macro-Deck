@@ -4,7 +4,7 @@ import { AppStrings, StoreCatalogItemBody, StoreOperationBody } from '@macro-dec
 import { ApiService, LocalizationService } from '@shared';
 import { PluginRuntimeService } from '../../services/plugin-runtime.service';
 import { StoreRatingsService } from '../../services/store-ratings.service';
-import { formatStoreRating } from '../../util/store-rating-format';
+import { formatStoreCount, formatStoreInstallCount, formatStoreRating } from '../../util/store-rating-format';
 import { storeKindIcon, storeKindLabelKey, storeTrustLabelKey } from '../../util/store-operation-display';
 import { StoreStateBadgeComponent } from './store-state-badge.component';
 import { StoreInstallButtonComponent } from './store-install-button.component';
@@ -78,6 +78,21 @@ export class StoreExtensionCardComponent {
       value: summary.rating,
       text: formatStoreRating(summary.rating, this.localization.culture()),
       count: this.localization.translateKey(AppStrings.Store.Reviews.RatingCount, { count: summary.ratingCount }),
+    };
+  });
+
+  protected readonly installs = computed(() => {
+    const count = this.ratings.installs().get(this.item().id);
+    if (!count || count <= 0) {
+      return null;
+    }
+    const culture = this.localization.culture();
+    return {
+      text: formatStoreInstallCount(count, culture),
+      label: this.localization.translateKey(AppStrings.Store.Page.InstallCount, {
+        count,
+        installs: formatStoreCount(count, culture),
+      }),
     };
   });
 

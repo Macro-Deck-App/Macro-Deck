@@ -21,10 +21,7 @@ public class StoreReviewsController : ControllerBase
 	[HttpGet("ratings")]
 	public async Task<ActionResult<GetStoreRatingsResponse>> GetRatings([FromQuery] string? ids, CancellationToken ct)
 	{
-		var packageIds = (ids ?? string.Empty)
-			.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-			.Distinct(StringComparer.Ordinal)
-			.ToList();
+		var packageIds = ParseIds(ids);
 		if (packageIds.Count > StorePlatformOptions.MaxIdsPerRequest)
 		{
 			return BadRequest();
@@ -33,6 +30,20 @@ public class StoreReviewsController : ControllerBase
 		return packageIds.Count == 0
 			? new GetStoreRatingsResponse { Available = true }
 			: await _reviews.GetRatings(packageIds, ct);
+	}
+
+	[HttpGet("installs")]
+	public async Task<ActionResult<GetStoreInstallsResponse>> GetInstalls([FromQuery] string? ids, CancellationToken ct)
+	{
+		var packageIds = ParseIds(ids);
+		if (packageIds.Count > StorePlatformOptions.MaxIdsPerRequest)
+		{
+			return BadRequest();
+		}
+
+		return packageIds.Count == 0
+			? new GetStoreInstallsResponse { Available = true }
+			: await _reviews.GetInstalls(packageIds, ct);
 	}
 
 	[HttpGet("catalog/{kind}/{id}/rating")]
@@ -91,4 +102,10 @@ public class StoreReviewsController : ControllerBase
 		Response.Headers.CacheControl = "private, max-age=3600";
 		return File(avatar.Content, avatar.ContentType);
 	}
+
+	private static List<string> ParseIds(string? ids) =>
+		(ids ?? string.Empty)
+			.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+			.Distinct(StringComparer.Ordinal)
+			.ToList();
 }
