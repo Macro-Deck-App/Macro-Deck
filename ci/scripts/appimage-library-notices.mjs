@@ -4,7 +4,8 @@
 
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { chmodSync, lstatSync, mkdirSync, readFileSync, readdirSync, realpathSync, writeFileSync } from 'node:fs';
+import { chmodSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, readlinkSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { basename, dirname, join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -81,9 +82,9 @@ export function mergedUsrVariants(path) {
 
 export function systemCandidates(rel, multiarch) {
 	const candidates = [...mergedUsrVariants('/' + rel)];
-	const flat = /^usr\/lib\/([^/]+)$/.exec(rel);
-	if (flat) {
-		candidates.push(...mergedUsrVariants(`/usr/lib/${multiarch}/${flat[1]}`));
+	const lib = /^usr\/lib\/(.+)$/.exec(rel);
+	if (lib && !lib[1].startsWith(`${multiarch}/`)) {
+		candidates.push(...mergedUsrVariants(`/usr/lib/${multiarch}/${lib[1]}`));
 	}
 	return [...new Set(candidates)];
 }
@@ -145,16 +146,17 @@ export function attributeFile(rel, { multiarch, system, dpkg, hostNames = new Se
 			realPaths.add(real);
 		}
 	}
-	if (realPaths.size === 0 && /^usr\/lib\/[^/]+$/.test(rel)) {
+	const flat = /^usr\/lib\/[^/]+$/.test(rel);
+	if (realPaths.size === 0 && flat && hostNames.has(name)) {
+		return { kind: 'host', systemPaths: [] };
+	}
+	if (realPaths.size === 0 && flat) {
 		for (const entry of dpkg.search(`*/${name}`)) {
 			const real = posix.basename(entry.path) === name ? system.realpath(entry.path) : null;
 			if (real) {
 				realPaths.add(real);
 			}
 		}
-	}
-	if (realPaths.size === 0 && /^usr\/lib\/[^/]+$/.test(rel) && hostNames.has(name)) {
-		return { kind: 'host', systemPaths: [] };
 	}
 	if (realPaths.size === 0) {
 		throw new NoticeError(`${rel}: no file on this system matches it, so its Ubuntu package cannot be determined`);
@@ -343,9 +345,11 @@ export async function generateNotices(appDir, { multiarch, system, dpkg }) {
 	for (const [pkg, files] of byPackage) {
 		const info = dpkg.info(pkg);
 		const name = packageName(pkg);
-		const copyright = system.readFile(`/usr/share/doc/${name}/copyright`);
+		const copyrightPath = `/usr/share/doc/${name}/copyright`;
+		// Some runner images delete /usr/share/doc after installing, so fall back to the installed version's archive.
+		const copyright = system.readFile(copyrightPath) ?? (await dpkg.packagedFile(pkg, copyrightPath));
 		if (!copyright) {
-			problems.push(`${pkg}: /usr/share/doc/${name}/copyright is missing`);
+			problems.push(`${pkg}: ${copyrightPath} is missing and its package archive could not be read`);
 			continue;
 		}
 		packages.push({ name, ...info, files: files.sort(), copyright });
@@ -441,8 +445,66 @@ const hostDpkg = {
 		}
 		const [version, source, sourceVersion] = result.stdout.split('\t');
 		return { version, source, sourceVersion };
+	},
+	async packagedFile(pkg, path) {
+		const work = mkdtempSync(join(tmpdir(), 'deb-'));
+		try {
+			const deb = await downloadInstalledDeb(pkg, work);
+			if (!deb) {
+				return null;
+			}
+			const root = join(work, 'root');
+			const unpacked = spawnSync('dpkg-deb', ['-x', deb, root], { encoding: 'utf8' });
+			if (unpacked.status !== 0) {
+				throw new Error(`dpkg-deb -x ${deb} failed: ${unpacked.error?.message ?? unpacked.stderr}`);
+			}
+			const text = hostSystem.readFile(join(root, path));
+			if (text !== null) {
+				return text;
+			}
+			// A package built with dh_installdocs --link-doc ships its doc directory as a link to a dependency's.
+			const doc = /^\/usr\/share\/doc\/([^/]+)\/(.+)$/.exec(path);
+			const link = doc ? readLink(join(root, 'usr/share/doc', doc[1])) : null;
+			if (!link || link.includes('/')) {
+				return null;
+			}
+			const linked = `/usr/share/doc/${link}/${doc[2]}`;
+			return hostSystem.readFile(linked) ?? (await hostDpkg.packagedFile(link, linked));
+		} finally {
+			rmSync(work, { recursive: true, force: true });
+		}
 	}
 };
+
+function readLink(path) {
+	try {
+		return readlinkSync(path);
+	} catch {
+		return null;
+	}
+}
+
+// The exact installed version: apt's mirrors only keep the newest, Launchpad keeps every published build.
+async function downloadInstalledDeb(pkg, dir) {
+	const query = spawnSync('dpkg-query', ['-W', '-f', '${Package}\t${Version}\t${Architecture}', pkg], { encoding: 'utf8' });
+	if (query.status !== 0) {
+		return null;
+	}
+	const [name, version, arch] = query.stdout.split('\t');
+	const apt = spawnSync('apt-get', ['download', `${pkg}=${version}`], { cwd: dir, encoding: 'utf8' });
+	const fetched = readdirSync(dir).find(file => file.endsWith('.deb'));
+	if (apt.status === 0 && fetched) {
+		return join(dir, fetched);
+	}
+	const file = `${name}_${version.replace(/^\d+:/, '')}_${arch}.deb`;
+	const response = await fetch(`https://launchpad.net/ubuntu/+archive/primary/+files/${file}`);
+	if (!response.ok) {
+		return null;
+	}
+	const deb = join(dir, file);
+	writeFileSync(deb, Buffer.from(await response.arrayBuffer()));
+	return deb;
+}
 
 function runtimeVersionOf(file) {
 	const result = spawnSync(file, ['--appimage-version'], { encoding: 'utf8' });
