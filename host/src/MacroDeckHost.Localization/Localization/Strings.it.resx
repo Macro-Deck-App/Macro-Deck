@@ -14428,6 +14428,18 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Store.Page.FeaturedSectionHeading" xml:space="preserve">
     <value>In evidenza</value>
   </data>
+  <data name="Store.Page.InstallCount.One" xml:space="preserve">
+    <value>{installs} installazione</value>
+    <comment>[plural][count:int][installs:string] Number of times a Store item was installed, next to its rating. installs is the count, already formatted compactly (for example 1.2K).</comment>
+  </data>
+  <data name="Store.Page.InstallCount.Other" xml:space="preserve">
+    <value>{installs} installazioni</value>
+    <comment>[plural][count:int][installs:string] Number of times a Store item was installed, next to its rating. installs is the count, already formatted compactly (for example 1.2K).</comment>
+  </data>
+  <data name="Store.Page.InstallsField" xml:space="preserve">
+    <value>Installazioni</value>
+    <comment>Label of the install count in the Store item details.</comment>
+  </data>
   <data name="Store.Page.InstalledEmptyHeading" xml:space="preserve">
     <value>Nessuna estensione installata</value>
   </data>

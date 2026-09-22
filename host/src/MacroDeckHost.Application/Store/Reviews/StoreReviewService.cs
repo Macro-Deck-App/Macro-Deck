@@ -9,6 +9,8 @@ public interface IStoreReviewService
 {
 	Task<GetStoreRatingsResponse> GetRatings(IReadOnlyCollection<string> packageIds, CancellationToken cancellationToken);
 
+	Task<GetStoreInstallsResponse> GetInstalls(IReadOnlyCollection<string> packageIds, CancellationToken cancellationToken);
+
 	Task<GetStoreRatingResponse> GetRating(StoreExtensionKind kind, string id, CancellationToken cancellationToken);
 
 	Task<GetStoreReviewsResponse> GetReviews(StoreExtensionKind kind,
@@ -64,6 +66,8 @@ public sealed class StoreReviewService : IStoreReviewService
 	private readonly TimeProvider _timeProvider;
 	private readonly ConcurrentDictionary<string, CachedRating> _ratings = new(StringComparer.Ordinal);
 	private long _ratingsUnavailableUntilTicks;
+	private readonly ConcurrentDictionary<string, CachedInstalls> _installs = new(StringComparer.Ordinal);
+	private long _installsUnavailableUntilTicks;
 
 	public StoreReviewService(IStorePlatformClient platform,
 		IStoreOfficialPackages packages,
@@ -114,6 +118,48 @@ public sealed class StoreReviewService : IStoreReviewService
 			if (_ratings.TryGetValue(id, out var cached) && cached.Rating is { RatingCount: > 0 } rating)
 			{
 				response.Ratings[id] = new StoreRatingSummaryBody { Rating = rating.Rating, RatingCount = rating.RatingCount };
+			}
+		}
+
+		return response;
+	}
+
+	public async Task<GetStoreInstallsResponse> GetInstalls(IReadOnlyCollection<string> packageIds,
+		CancellationToken cancellationToken)
+	{
+		var ids = _packages.ListedPackageIds(packageIds);
+		var now = _timeProvider.GetUtcNow();
+		var missing = ids
+			.Where(id => !_installs.TryGetValue(id, out var cached) || cached.ExpiresAt <= now)
+			.ToList();
+
+		if (missing.Count > 0)
+		{
+			if (now.UtcTicks < Interlocked.Read(ref _installsUnavailableUntilTicks))
+			{
+				return new GetStoreInstallsResponse { Available = false };
+			}
+
+			var fetched = await _platform.GetInstalls(missing, cancellationToken);
+			if (!fetched.Success)
+			{
+				Interlocked.Exchange(ref _installsUnavailableUntilTicks, (now + _options.RatingsCacheLifetime).UtcTicks);
+				return new GetStoreInstallsResponse { Available = false };
+			}
+
+			var expiresAt = now + _options.RatingsCacheLifetime;
+			foreach (var id in missing)
+			{
+				_installs[id] = new CachedInstalls(fetched.Value!.GetValueOrDefault(id), expiresAt);
+			}
+		}
+
+		var response = new GetStoreInstallsResponse { Available = true };
+		foreach (var id in ids)
+		{
+			if (_installs.TryGetValue(id, out var cached) && cached.Installs is { } installs)
+			{
+				response.Installs[id] = installs.Installs;
 			}
 		}
 
@@ -503,6 +549,8 @@ public sealed class StoreReviewService : IStoreReviewService
 	};
 
 	private sealed record CachedRating(StorePlatformRating? Rating, DateTimeOffset ExpiresAt);
+
+	private sealed record CachedInstalls(StorePlatformInstalls? Installs, DateTimeOffset ExpiresAt);
 
 	private sealed record PreparedReport(string PackageId, string Category, string? Detail);
 }

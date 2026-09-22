@@ -276,6 +276,11 @@ export interface GetStoreRatingsResponse {
   ratings: Record<string, StoreRatingSummaryBody>;
 }
 
+export interface GetStoreInstallsResponse {
+  available: boolean;
+  installs: Record<string, number>;
+}
+
 export interface StoreRatingBucketBody {
   stars: number;
   count: number;

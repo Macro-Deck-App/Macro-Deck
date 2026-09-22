@@ -492,6 +492,7 @@ public class AuthPolicyMatrixTests
 		var responses = new[]
 		{
 			await Send(HttpMethod.Get, "/api/store/ratings?ids=com.acme.hue", _clientToken),
+			await Send(HttpMethod.Get, "/api/store/installs?ids=com.acme.hue", _clientToken),
 			await Send(HttpMethod.Get, "/api/store/catalog/Plugin/com.acme.hue/reviews", _clientToken),
 			await Send(HttpMethod.Get, review, _clientToken),
 			await SendJson(HttpMethod.Put, review, new { rating = 5 }, _clientToken),

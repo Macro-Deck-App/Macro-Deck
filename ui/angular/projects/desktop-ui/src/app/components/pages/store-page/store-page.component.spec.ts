@@ -103,8 +103,10 @@ describe('StorePageComponent', () => {
     api = jasmine.createSpyObj<ApiService>('ApiService', [
       'onNotification', 'getStoreCatalog', 'refreshStoreRegistry', 'getStoreOperations', 'installStoreExtension',
       'retryStoreOperation', 'getStoreExtensionIconUrl', 'uninstallStoreExtension', 'getStoreStatus', 'getStoreRatings',
+      'getStoreInstalls',
     ]);
     api.getStoreRatings.and.resolveTo({ available: false, ratings: {} });
+    api.getStoreInstalls.and.resolveTo({ available: false, installs: {} });
     api.getStoreStatus.and.resolveTo({
       registry: { hasCatalog: true, sequence: 1, refreshing: false, stale: false },
       developerMode: false,

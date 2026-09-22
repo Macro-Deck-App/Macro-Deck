@@ -77,12 +77,14 @@ describe('StoreDetailPageComponent', () => {
     initialOperation: StoreOperationBody | null,
     extensionOverrides: Partial<StoreExtensionDetailBody> = {},
     reviewsAvailable = false,
+    installs: Record<string, number> = {},
   ): Promise<void> {
     notifications = new Map();
     api = jasmine.createSpyObj<ApiService>('ApiService', [
       'getStoreExtension', 'getStoreExtensionIconUrl', 'getStoreScreenshotUrl', 'getStoreStatus', 'onNotification',
-      'getStoreRating', 'getStoreReviews', 'getOwnStoreReview',
+      'getStoreRating', 'getStoreReviews', 'getOwnStoreReview', 'getStoreInstalls',
     ]);
+    api.getStoreInstalls.and.resolveTo({ available: true, installs });
     api.getStoreRating.and.resolveTo({ available: reviewsAvailable, rating: null, ratingCount: 0, distribution: [] });
     api.getStoreReviews.and.resolveTo({ available: false, items: [], page: 1, pageSize: 20, totalCount: 0, reviewCount: 0 });
     api.getOwnStoreReview.and.resolveTo({ state: 'SignedOut', review: null });
@@ -160,6 +162,21 @@ describe('StoreDetailPageComponent', () => {
 
     expect(Array.from(host.querySelectorAll('app-store-screenshot-viewer img')).map(img => img.getAttribute('src')))
       .toEqual(['shot-0-window-digest']);
+  });
+
+  it('lists the install count in the details, and lists nothing when none is known', async () => {
+    await createFixture(null, {}, false, { 'app.example.plugin': 4200 });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const rows = () => Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.detail-row'))
+      .map(row => row.textContent?.replace(/\s+/gu, ' ').trim() ?? '');
+
+    expect(rows().some(row => row.includes('4,200'))).toBeTrue();
+
+    TestBed.resetTestingModule();
+    await createFixture(null);
+
+    expect(rows().some(row => row.includes('Installs'))).toBeFalse();
   });
 
   it('offers reporting the item only where the Store can take reports for it', async () => {

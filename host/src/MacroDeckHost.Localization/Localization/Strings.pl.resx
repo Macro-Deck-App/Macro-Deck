@@ -14428,6 +14428,18 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Page.FeaturedSectionHeading" xml:space="preserve">
     <value>Polecane</value>
   </data>
+  <data name="Store.Page.InstallCount.One" xml:space="preserve">
+    <value>Liczba instalacji: {installs}</value>
+    <comment>[plural][count:int][installs:string] Number of times a Store item was installed, next to its rating. installs is the count, already formatted compactly (for example 1.2K).</comment>
+  </data>
+  <data name="Store.Page.InstallCount.Other" xml:space="preserve">
+    <value>Liczba instalacji: {installs}</value>
+    <comment>[plural][count:int][installs:string] Number of times a Store item was installed, next to its rating. installs is the count, already formatted compactly (for example 1.2K).</comment>
+  </data>
+  <data name="Store.Page.InstallsField" xml:space="preserve">
+    <value>Instalacje</value>
+    <comment>Label of the install count in the Store item details.</comment>
+  </data>
   <data name="Store.Page.InstalledEmptyHeading" xml:space="preserve">
     <value>Brak zainstalowanych rozszerzeń</value>
   </data>

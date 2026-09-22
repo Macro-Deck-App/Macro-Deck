@@ -50,6 +50,24 @@ internal sealed class FakeStorePlatformClient : IStorePlatformClient
 				Ratings.Where(pair => packageIds.Contains(pair.Key)).ToDictionary()));
 	}
 
+	public ConcurrentQueue<IReadOnlyList<string>> InstallRequests { get; } = new();
+
+	public Dictionary<string, long> Installs { get; } = new(StringComparer.Ordinal);
+
+	public StorePlatformFailure InstallsFailure { get; set; }
+
+	public Task<StorePlatformResult<IReadOnlyDictionary<string, StorePlatformInstalls>>> GetInstalls(
+		IReadOnlyCollection<string> packageIds,
+		CancellationToken cancellationToken = default)
+	{
+		InstallRequests.Enqueue(packageIds.ToList());
+		return Task.FromResult(InstallsFailure != StorePlatformFailure.None
+			? StorePlatformResult.Fail<IReadOnlyDictionary<string, StorePlatformInstalls>>(InstallsFailure)
+			: StorePlatformResult.Ok<IReadOnlyDictionary<string, StorePlatformInstalls>>(
+				Installs.Where(pair => packageIds.Contains(pair.Key))
+					.ToDictionary(pair => pair.Key, pair => new StorePlatformInstalls(pair.Value))));
+	}
+
 	public Task<StorePlatformResult<StorePlatformRating>> GetRating(string packageId,
 		CancellationToken cancellationToken = default) =>
 		Task.FromResult(Ratings.TryGetValue(packageId, out var rating)

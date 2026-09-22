@@ -96,6 +96,12 @@
                   <dd>{{ formatBytes(extension.downloadSize) }}</dd>
                 </div>
               }
+              @if (installCount(); as installs) {
+                <div class="detail-row">
+                  <dt>{{ 'macrodeck.app:Store.Page.InstallsField' | translate }}</dt>
+                  <dd>{{ installs }}</dd>
+                </div>
+              }
               @if (extension.updatedAt) {
                 <div class="detail-row">
                   <dt>{{ 'macrodeck.app:Store.Page.UpdatedField' | translate }}</dt>
