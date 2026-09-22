@@ -1,3 +1,5 @@
+import { setStyle } from '../render/dom-writes';
+
 // An icon's URL is stable for the life of its bytes, so a repaint never re-issues a request that
 // failed: without a reload of its own the tile stays blank until the whole page is loaded again.
 const RETRY_DELAYS_MS = [1000, 3000, 10000];
@@ -49,9 +51,12 @@ function recoveryOf(image: HTMLImageElement): ImageRecovery {
   image.addEventListener('load', () => {
     state.failed = false;
     state.attempt = 0;
+    setStyle(image, 'visibility', null);
   });
+  // WebKit paints its broken-image glyph for a failed image even with an empty alt.
   image.addEventListener('error', () => {
     state.failed = true;
+    setStyle(image, 'visibility', 'hidden');
     scheduleRetry(image, state);
   });
   return state;
@@ -64,6 +69,7 @@ export function setImageSource(image: HTMLImageElement, src: string): void {
   cancel(state);
   state.attempt = 0;
   state.failed = false;
+  setStyle(image, 'visibility', null);
   image.setAttribute('src', src);
 }
 
