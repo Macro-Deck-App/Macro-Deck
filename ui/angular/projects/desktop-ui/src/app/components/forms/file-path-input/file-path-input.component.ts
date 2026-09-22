@@ -28,6 +28,8 @@ const PLACEHOLDER_KEYS: Record<FilePathKind, string> = {
   image: AppStrings.Forms.FilePathInput.PathToImage,
 };
 
+const IMAGE_FILE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'];
+
 @Component({
   selector: 'shared-file-path-input',
   standalone: true,
@@ -50,7 +52,7 @@ const PLACEHOLDER_KEYS: Record<FilePathKind, string> = {
     @if (showBrowser()) {
       <shared-file-browser-dialog
         [directoriesOnly]="kind === 'folder'"
-        [extensions]="extensions"
+        [extensions]="effectiveExtensions"
         [initialPath]="value"
         (picked)="onPicked($event)"
         (close)="showBrowser.set(false)" />
@@ -86,6 +88,13 @@ export class FilePathInputComponent implements OnInit, OnDestroy {
   );
 
   private unregisterDrop: (() => void) | null = null;
+
+  get effectiveExtensions(): string[] | undefined {
+    if (this.extensions?.length) {
+      return this.extensions;
+    }
+    return this.kind === 'image' ? IMAGE_FILE_EXTENSIONS : undefined;
+  }
 
   get defaultPlaceholder(): string {
     return this.localization.translateKey(PLACEHOLDER_KEYS[this.kind]);
@@ -123,7 +132,7 @@ export class FilePathInputComponent implements OnInit, OnDestroy {
       try {
         const path = await bridge.showOpenDialog({
           directory: this.kind === 'folder',
-          extensions: this.extensions ?? [],
+          extensions: this.effectiveExtensions ?? [],
         });
         if (path) {
           this.setValue(path);
@@ -148,11 +157,12 @@ export class FilePathInputComponent implements OnInit, OnDestroy {
     if (this.kind === 'folder') {
       return path.directory;
     }
-    if (!this.extensions?.length) {
+    const extensions = this.effectiveExtensions;
+    if (!extensions?.length) {
       return !path.directory;
     }
 
     const extension = droppedPathExtension(path.path);
-    return this.extensions.some(candidate => candidate.toLowerCase() === extension);
+    return extensions.some(candidate => candidate.toLowerCase() === extension);
   }
 }

@@ -124,6 +124,9 @@ point, inside the folder's own dialog rather than as a flow of its own. Build it
 folder currently stores - the user is choosing. The values are stored with the folder and handed back on
 every later `folder` surface.
 
+To let the user choose a folder of files for the view, use a
+[path input](/ui/views/configuration/#letting-the-user-pick-a-file-folder-or-image).
+
 ## Navigation is Macro Deck's
 
 ```csharp

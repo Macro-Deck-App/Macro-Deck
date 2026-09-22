@@ -199,6 +199,61 @@ stored values, keyed by parameter name. `Secret` and `Password` parameters arriv
 (`UiConfigSurfaceAttributes.MaskedSecretValue`, `"$masked"`), because opening a configuration surface is
 not an intent to reveal a secret. You get the real value the ordinary way, when the user submits.
 
+## Letting the user pick a file, folder or image
+
+For a path, use a path input rather than a `UiStringInput`, so the user can browse instead of typing:
+
+```csharp
+var folder = new UiState<string>(string.Empty);
+var placeholder = new UiState<string>(string.Empty);
+
+new UiConfigStack
+{
+    Key = "root",
+    Children =
+    [
+        new UiFolderInput { Key = "folder", Label = Strings.Frame.Folder(), Required = true, Binding = Bind.To(folder) },
+        new UiImageInput
+        {
+            Key = "placeholder",
+            Label = Strings.Frame.Placeholder(),
+            Description = Strings.Frame.PlaceholderHint(),
+            FileExtensions = UiValue.Of<IReadOnlyList<string>>(["png", "jpg", "webp"]),
+            Binding = Bind.To(placeholder),
+        },
+    ],
+}
+```
+
+| Node type | DSL element | Value |
+| --- | --- | --- |
+| `folder` | `UiFolderInput` | A folder path |
+| `file` | `UiFileInput` | A file path, optionally limited to `FileExtensions` |
+| `image` | `UiImageInput` | An image file path, limited to image formats unless `FileExtensions` says otherwise |
+
+The value is a plain path string on the computer that runs Macro Deck, not on the device the user is
+looking from. The path inputs work in every configuration surface on this page, including widget, folder
+view and screensaver configuration.
+
+- **`FileExtensions` are bare extensions, without the dot**: `["png", "jpg"]`, not `[".png"]`. They narrow
+  what browsing and dropping offer. Leave them unset and a file input accepts any file, while an image
+  input offers the image formats the renderer can draw (PNG, JPEG, GIF, WebP, SVG). Setting them on an
+  image input replaces that list rather than adding to it.
+- **Macro Deck does not check the path.** The user can type or paste any value, including one outside
+  `FileExtensions`, and a file can be moved or deleted after it was picked. Handle a missing file where you
+  read it.
+- `Label`, `Description` and `Placeholder` apply as on any input, and `Required` marks the label. Without a
+  `Placeholder`, the renderer shows its own hint for the kind of path.
+
+The Macro Deck desktop editor draws each as a text field with a Browse button. In the desktop app, Browse
+opens the operating system's file or folder dialog; where that is not available, it opens Macro Deck's
+own file browser. A file or folder dropped onto the field fills it in, if it matches the input. The image
+input shows no preview of the picked file.
+
+In a declared field list, the counterparts are `ActionParameter.File` (with `fileExtensions`),
+`ActionParameter.Folder` and `ActionParameter.Image`, which takes no extensions and always offers the
+image formats.
+
 ## Showing what governs a setting
 
 `UiStatus` is a compact, framed line for "this setting is currently controlled by something else": an

@@ -58,8 +58,8 @@ public sealed record UiDateTimeInput : UiInput<string>
 /// path input with a browse affordance limited to the declared extensions.</summary>
 public sealed record UiFileInput : UiInput<string>
 {
-	/// <summary>The extensions the browse dialog offers. Authored with <see cref="UiValue.Of{T}" />, since an
-	/// interface-typed value has no implicit conversion.</summary>
+	/// <summary>The bare extensions, without the dot, that browsing and dropping offer. Authored with
+	/// <see cref="UiValue.Of{T}" />, since an interface-typed value has no implicit conversion.</summary>
 	public UiValue<IReadOnlyList<string>> FileExtensions { get; init; }
 
 	/// <inheritdoc />
@@ -123,12 +123,14 @@ public sealed record UiIconReference(string Type, string Reference);
 /// <summary>
 /// An image path. Counterpart of the <c>Image</c> parameter type, which the editor renders as the same path
 /// input in image mode. A distinct type rather than a file with image extensions, because that is what the
-/// existing enum has - and the editor's image mode previews the file, which its file mode does not.
+/// existing enum has. The image mode shows no preview of the picked file; it differs from the file mode only
+/// in its default <see cref="FileExtensions" /> and placeholder hint. Nothing checks the typed path.
 /// </summary>
 public sealed record UiImageInput : UiInput<string>
 {
-	/// <summary>The extensions the browse dialog offers, defaulting on the client to the image formats it can
-	/// render.</summary>
+	/// <summary>The bare extensions, without the dot, that browsing and dropping offer. Unset or empty, the
+	/// renderer offers the image formats it can draw; setting it replaces that default rather than adding to
+	/// it.</summary>
 	public UiValue<IReadOnlyList<string>> FileExtensions { get; init; }
 
 	/// <inheritdoc />
