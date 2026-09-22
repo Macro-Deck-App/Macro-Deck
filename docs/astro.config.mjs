@@ -39,8 +39,8 @@ export default defineConfig({
 			social: [
 				{ icon: 'github', label: 'GitHub', href: projectRepo },
 				{ icon: 'discord', label: 'Discord', href: 'https://discord.macro-deck.app' },
-				// Starlight ships no Ko-fi icon; heart is its generic support mark.
-				{ icon: 'heart', label: 'Donate', href: 'https://ko-fi.com/manuelmayer' },
+				// The website's donation page offers GitHub Sponsors and Ko-fi.
+				{ icon: 'heart', label: 'Donate', href: 'https://macro-deck.app/donate' },
 			],
 			editLink: { baseUrl: `${repo}/edit/main/docs/` },
 			plugins: [
