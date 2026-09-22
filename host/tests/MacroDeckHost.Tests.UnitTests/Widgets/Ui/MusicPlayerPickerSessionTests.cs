@@ -32,6 +32,8 @@ public class MusicPlayerPickerSessionTests
 
 	private const string _rowPrefix = "picker.results.";
 
+	private const string _listNodeId = "picker.results";
+
 	[Test]
 	[CancelAfter(60_000)]
 	public async Task Disposing_the_picker_while_a_search_and_a_cover_are_in_flight_is_safe()
@@ -173,6 +175,50 @@ public class MusicPlayerPickerSessionTests
 		}
 	}
 
+	[Test]
+	[CancelAfter(60_000)]
+	public void A_new_search_loads_more_rows_for_a_reveal_below_one_the_previous_search_answered()
+	{
+		using var changed = new ManualResetEventSlim(false);
+
+		var fixture = new PickerFixture();
+
+		try
+		{
+			fixture.Session.Changed += (_, _) => changed.Set();
+
+			fixture.NextCatalogCall().Completion.SetResult(ManyItems("a", 120));
+			WaitForRows(fixture, changed, ManyRows("a", 25), "the first answer never reached the view");
+
+			fixture.Reveal(77);
+			WaitForRows(fixture, changed, ManyRows("a", 102), "scrolling down never loaded more rows");
+
+			fixture.Type("b");
+			fixture.NextCatalogCall().Completion.SetResult(ManyItems("b", 120));
+			WaitForRows(fixture, changed, ManyRows("b", 25), "the new search did not start from its first rows");
+
+			fixture.Reveal(24);
+			WaitForRows(fixture,
+				changed,
+				ManyRows("b", 49),
+				"reaching the end of the new results loaded nothing");
+		}
+		finally
+		{
+			fixture.Session.DisposeAsync().AsTask().GetAwaiter().GetResult();
+		}
+	}
+
+	private static List<MusicPlayerCatalogItem> ManyItems(string prefix, int count)
+		=> Enumerable.Range(0, count)
+			.Select(index => new MusicPlayerCatalogItem($"{prefix}{index}",
+				$"{prefix} {index}",
+				MusicPlayerCatalogItemKind.Track))
+			.ToList();
+
+	private static List<string> ManyRows(string prefix, int count)
+		=> ManyItems(prefix, count).Select(item => _rowPrefix + item.Id).ToList();
+
 	private static List<string> Rows(string prefix)
 		=> Items(prefix, withArtwork: false).Select(item => _rowPrefix + item.Id).ToList();
 
@@ -297,6 +343,14 @@ public class MusicPlayerPickerSessionTests
 				NodeId = _searchNodeId,
 				Name = UiComponentEvents.Change,
 				Data = UiCanonicalJson.ToElement(text),
+			});
+
+		public void Reveal(int index)
+			=> Session.Dispatch(new UiEvent
+			{
+				NodeId = _listNodeId,
+				Name = UiComponentEvents.Reveal,
+				Data = UiCanonicalJson.ToElement(index),
 			});
 
 		/// <summary>The next catalog read the session performs, waited for rather than slept for - the

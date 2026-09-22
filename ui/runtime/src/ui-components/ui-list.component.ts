@@ -10,6 +10,8 @@ const LIST_REVEAL_THROTTLE_MS = 500;
 
 export interface UiListState {
   revealed: number;
+  revealedId: string | null;
+  childCount: number;
   revealTimer: ReturnType<typeof setTimeout> | null;
 }
 
@@ -39,8 +41,13 @@ function reportReveal(element: HTMLElement, ctx: UiComponentContext<UiListState>
   if (index <= state.revealed) return;
 
   state.revealed = index;
+  state.revealedId = node.children?.[index]?.id ?? null;
   ctx.emit(node, UiComponentEvents.Reveal, index);
-  state.revealTimer = setTimeout(() => { state.revealTimer = null; }, LIST_REVEAL_THROTTLE_MS);
+  // Asked again when the throttle ends: a user already at the end of the list never scrolls again.
+  state.revealTimer = setTimeout(() => {
+    state.revealTimer = null;
+    reportReveal(element, ctx);
+  }, LIST_REVEAL_THROTTLE_MS);
 }
 
 export const uiListComponent: UiComponentDefinition<UiListState> = {
@@ -53,7 +60,7 @@ export const uiListComponent: UiComponentDefinition<UiListState> = {
   },
 
   createState(): UiListState {
-    return { revealed: -1, revealTimer: null };
+    return { revealed: -1, revealedId: null, childCount: 0, revealTimer: null };
   },
 
   bind(ctx) {
@@ -96,6 +103,15 @@ export const uiListComponent: UiComponentDefinition<UiListState> = {
     const client = horizontal ? element.clientHeight : element.clientWidth;
     const available = client === 0 ? null : Math.max(0, client - 2 * padding);
     if (available !== null && (given === null || Math.abs(available - given) >= 0.5)) layOut(available);
+
+    // Fewer children, or another child at the furthest index sent, means the content was replaced.
+    const state = ctx.state;
+    if (children.length < state.childCount
+      || (state.revealed >= 0 && children[state.revealed]?.id !== state.revealedId)) {
+      state.revealed = -1;
+      state.revealedId = null;
+    }
+    state.childCount = children.length;
 
     // Asked once after every paint as well as on scroll: a list whose content does not fill its box has
     // been read to the end the moment it is drawn, and nothing would ever scroll to say so.

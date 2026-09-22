@@ -52,6 +52,12 @@ void OnRevealed(UiEventData data)
 not; there are no page sizes and no "has more" flag. When you run out, append nothing - the reader asks
 again only once the user goes further than before.
 
+Replacing the rows, as a new search does, starts that over: once the list holds fewer children than before,
+or a different child sits where the furthest one reported was, the reader reports again from what is in view,
+even an index at or below one it sent earlier. Grow your window only when the new index asks for more, as
+above, so a lower index never takes rows away. If you shrink your window but the list still shows the same
+children, the reader cannot tell, and asks again only beyond the furthest index it already reported.
+
 ## Keeping rows stable
 
 ```csharp
@@ -124,7 +130,11 @@ the list's inner extent. On its own parent's main axis a list follows the ordina
 
 - Send `reveal` only if the node declares it.
 - Send at most two `reveal` events a second, and only for an index beyond the furthest one already sent
-  for the same list.
+  for the same list's current content.
+- Start that over when the list holds fewer children than at its previous paint, or when the child at the
+  furthest index sent is gone or has a different id: the content was replaced.
+- When the throttle holds back an index the user has reached, send it as soon as the throttle allows: a user
+  already at the end of the list may never scroll again.
 - The payload is a child index, not a page; never assume a page size.
 - A version 1 reader ignores `direction` and scrolls vertically - negotiation catches unknown types, not
   unknown values, so producers pair `horizontal` with version 2 and a fallback.

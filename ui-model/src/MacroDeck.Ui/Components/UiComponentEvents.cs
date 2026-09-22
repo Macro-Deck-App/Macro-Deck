@@ -82,7 +82,9 @@ public static class UiComponentEvents
 	/// <para>
 	/// A reader sends it no more than twice a second, and only for an index beyond the furthest one it has
 	/// already sent for the same list - so a user scrolling back up asks for nothing, and a producer that
-	/// appends nothing is not asked again for the same position.
+	/// appends nothing is not asked again for the same position. That starts over when the list's content
+	/// is replaced: it holds fewer children than before, or the child at the furthest index sent is gone or
+	/// has another id. A producer can then receive an index at or below one it has already seen.
 	/// </para>
 	/// </summary>
 	public const string Reveal = "reveal";
