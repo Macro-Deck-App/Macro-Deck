@@ -768,10 +768,10 @@ describe('widget node renderer', () => {
 
     // Stable ids, so a repaint patches the same elements rather than replacing them - which is also
     // what the real list does, and the only way the stubbed geometry below survives an update.
-    const rows = (count: number) => {
+    const rows = (count: number, prefix = 'row') => {
       const children: UiNode[] = [];
       for (let index = 0; index < count; index++) {
-        children.push({ id: `row-${index}`, type: 'ui.text', properties: { text: `row ${index}` } } as UiNode);
+        children.push({ id: `${prefix}-${index}`, type: 'ui.text', properties: { text: `${prefix} ${index}` } } as UiNode);
       }
       return children;
     };
@@ -785,7 +785,8 @@ describe('widget node renderer', () => {
       handle: { update(node: UiNode, box: UiComponentBox, cross: null): void },
       count: number,
       properties: Record<string, unknown>,
-    ) => handle.update(node2('ui.list', properties, rows(count)), { width: 200, height: 100 }, null);
+      prefix = 'row',
+    ) => handle.update(node2('ui.list', properties, rows(count, prefix)), { width: 200, height: 100 }, null);
 
     const surface = () => container.querySelector('.widget-list') as HTMLElement;
 
@@ -958,6 +959,93 @@ describe('widget node renderer', () => {
       (element as unknown as { scrollLeft: number }).scrollLeft = 100;
       element.dispatchEvent(new Event('scroll'));
 
+      expect(emitted).toEqual([{ event: 'reveal', payload: 8 }]);
+    });
+
+    const scrollTo = (element: HTMLElement, top: number) => {
+      (element as unknown as { scrollTop: number }).scrollTop = top;
+      element.dispatchEvent(new Event('scroll'));
+    };
+
+    const revealedDeep = () => {
+      const handle = list(20, { events: ['reveal'] });
+      const element = layOut(3);
+      jasmine.clock().tick(PAST_THROTTLE_MS);
+      repaint(handle, 20, { events: ['reveal'] });
+      jasmine.clock().tick(PAST_THROTTLE_MS);
+      scrollTo(element, 100);
+      expect(emitted).toEqual([{ event: 'reveal', payload: 3 }, { event: 'reveal', payload: 8 }]);
+      emitted.length = 0;
+      return { handle, element };
+    };
+
+    it('asks again once its content is replaced by a shorter list reaching just the furthest index it sent', () => {
+      const { handle, element } = revealedDeep();
+
+      repaint(handle, 9, { events: ['reveal'] });
+      scrollTo(element, 0);
+      jasmine.clock().tick(PAST_THROTTLE_MS);
+
+      expect(emitted).toEqual([{ event: 'reveal', payload: 3 }]);
+    });
+
+    it('asks again after every time it loses children', () => {
+      const { handle, element } = revealedDeep();
+      repaint(handle, 5, { events: ['reveal'] });
+      scrollTo(element, 0);
+      jasmine.clock().tick(PAST_THROTTLE_MS);
+
+      repaint(handle, 20, { events: ['reveal'] });
+      layOut(3);
+      jasmine.clock().tick(PAST_THROTTLE_MS);
+      repaint(handle, 4, { events: ['reveal'] });
+      jasmine.clock().tick(PAST_THROTTLE_MS);
+
+      expect(emitted).toEqual([{ event: 'reveal', payload: 3 }, { event: 'reveal', payload: 3 }]);
+    });
+
+    it('asks again once its rows are replaced by as many different ones', () => {
+      const handle = list(10, { events: ['reveal'] });
+      const element = layOut(3);
+      jasmine.clock().tick(PAST_THROTTLE_MS);
+      repaint(handle, 10, { events: ['reveal'] });
+      jasmine.clock().tick(PAST_THROTTLE_MS);
+      scrollTo(element, 140);
+      expect(emitted).toEqual([{ event: 'reveal', payload: 3 }, { event: 'reveal', payload: 9 }]);
+      emitted.length = 0;
+
+      repaint(handle, 10, { events: ['reveal'] }, 'other');
+      layOut(3);
+      scrollTo(element, 40);
+      jasmine.clock().tick(PAST_THROTTLE_MS);
+
+      expect(emitted).toEqual([{ event: 'reveal', payload: 5 }]);
+    });
+
+    it('does not ask again when it is repainted with the same children', () => {
+      const { handle } = revealedDeep();
+      jasmine.clock().tick(PAST_THROTTLE_MS);
+
+      repaint(handle, 20, { events: ['reveal'] });
+      jasmine.clock().tick(PAST_THROTTLE_MS);
+
+      expect(emitted).toEqual([]);
+    });
+
+    it('sends a position the throttle held back once the throttle ends, and nothing more', () => {
+      const handle = list(20, { events: ['reveal'] });
+      const element = layOut(3);
+      jasmine.clock().tick(PAST_THROTTLE_MS);
+      repaint(handle, 20, { events: ['reveal'] });
+      emitted.length = 0;
+
+      scrollTo(element, 100);
+      expect(emitted).toEqual([]);
+
+      jasmine.clock().tick(PAST_THROTTLE_MS);
+      expect(emitted).toEqual([{ event: 'reveal', payload: 8 }]);
+
+      jasmine.clock().tick(PAST_THROTTLE_MS);
       expect(emitted).toEqual([{ event: 'reveal', payload: 8 }]);
     });
 
