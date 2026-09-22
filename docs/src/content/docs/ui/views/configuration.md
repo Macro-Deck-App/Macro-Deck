@@ -242,8 +242,8 @@ view and screensaver configuration.
 - **Macro Deck does not check the path.** The user can type or paste any value, including one outside
   `FileExtensions`, and a file can be moved or deleted after it was picked. Handle a missing file where you
   read it.
-- `Label`, `Description`, `Placeholder` and `Required` apply as on any input. Without a `Placeholder`, the
-  renderer shows its own hint for the kind of path.
+- `Label`, `Description` and `Placeholder` apply as on any input, and `Required` marks the label. Without a
+  `Placeholder`, the renderer shows its own hint for the kind of path.
 
 The Macro Deck desktop editor draws each as a text field with a Browse button. In the desktop app, Browse
 opens the operating system's file or folder dialog; where that is not available, it opens Macro Deck's

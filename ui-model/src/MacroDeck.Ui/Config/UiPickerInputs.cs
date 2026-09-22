@@ -58,8 +58,8 @@ public sealed record UiDateTimeInput : UiInput<string>
 /// path input with a browse affordance limited to the declared extensions.</summary>
 public sealed record UiFileInput : UiInput<string>
 {
-	/// <summary>The extensions the browse dialog offers. Authored with <see cref="UiValue.Of{T}" />, since an
-	/// interface-typed value has no implicit conversion.</summary>
+	/// <summary>The bare extensions, without the dot, that browsing and dropping offer. Authored with
+	/// <see cref="UiValue.Of{T}" />, since an interface-typed value has no implicit conversion.</summary>
 	public UiValue<IReadOnlyList<string>> FileExtensions { get; init; }
 
 	/// <inheritdoc />

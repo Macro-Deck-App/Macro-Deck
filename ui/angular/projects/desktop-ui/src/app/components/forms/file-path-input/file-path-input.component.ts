@@ -28,7 +28,7 @@ const PLACEHOLDER_KEYS: Record<FilePathKind, string> = {
   image: AppStrings.Forms.FilePathInput.PathToImage,
 };
 
-export const IMAGE_FILE_EXTENSIONS: readonly string[] = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'];
+const IMAGE_FILE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'];
 
 @Component({
   selector: 'shared-file-path-input',
@@ -93,7 +93,7 @@ export class FilePathInputComponent implements OnInit, OnDestroy {
     if (this.extensions?.length) {
       return this.extensions;
     }
-    return this.kind === 'image' ? [...IMAGE_FILE_EXTENSIONS] : undefined;
+    return this.kind === 'image' ? IMAGE_FILE_EXTENSIONS : undefined;
   }
 
   get defaultPlaceholder(): string {
