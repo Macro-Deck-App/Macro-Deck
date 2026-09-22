@@ -17873,4 +17873,25 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>{count} compilaciones de prueba</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Integrations.LiveTennis.Name" xml:space="preserve">
+    <value>Live Tennis API</value>
+  </data>
+  <data name="Integrations.LiveTennis.Scores" xml:space="preserve">
+    <value>Instantáneas de resultados de tenis</value>
+  </data>
+  <data name="Integrations.LiveTennis.MatchCount" xml:space="preserve">
+    <value>Partidos en la instantánea</value>
+  </data>
+  <data name="Integrations.LiveTennis.UpdatedAt" xml:space="preserve">
+    <value>Hora de la instantánea (UTC)</value>
+  </data>
+  <data name="Integrations.LiveTennis.ApiKeyLabel" xml:space="preserve">
+    <value>Clave API</value>
+  </data>
+  <data name="Integrations.LiveTennis.EnterApiKey" xml:space="preserve">
+    <value>Introduce una clave API válida.</value>
+  </data>
+  <data name="Integrations.LiveTennis.SetupDescription" xml:space="preserve">
+    <value>Usa una clave gratuita de Live Tennis API para obtener instantáneas de los resultados cada 15 minutos. Tras la configuración inicial o un cambio, la primera instantánea puede tardar 15 minutos.</value>
+  </data>
 </root>

@@ -17871,4 +17871,25 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>{count} Test-Builds</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Integrations.LiveTennis.Name" xml:space="preserve">
+    <value>Live Tennis API</value>
+  </data>
+  <data name="Integrations.LiveTennis.Scores" xml:space="preserve">
+    <value>Tennis-Spielstandübersicht</value>
+  </data>
+  <data name="Integrations.LiveTennis.MatchCount" xml:space="preserve">
+    <value>Spiele in der Momentaufnahme</value>
+  </data>
+  <data name="Integrations.LiveTennis.UpdatedAt" xml:space="preserve">
+    <value>Zeit der Momentaufnahme (UTC)</value>
+  </data>
+  <data name="Integrations.LiveTennis.ApiKeyLabel" xml:space="preserve">
+    <value>API-Schlüssel</value>
+  </data>
+  <data name="Integrations.LiveTennis.EnterApiKey" xml:space="preserve">
+    <value>Gib einen gültigen API-Schlüssel ein.</value>
+  </data>
+  <data name="Integrations.LiveTennis.SetupDescription" xml:space="preserve">
+    <value>Verwende einen kostenlosen Schlüssel von Live Tennis API für Spielstand-Momentaufnahmen alle 15 Minuten. Nach der Einrichtung oder einer erneuten Konfiguration kann die erste Momentaufnahme 15 Minuten dauern.</value>
+  </data>
 </root>

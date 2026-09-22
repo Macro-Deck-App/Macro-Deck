@@ -17873,4 +17873,25 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Testovací sestavení: {count}</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Integrations.LiveTennis.Name" xml:space="preserve">
+    <value>Live Tennis API</value>
+  </data>
+  <data name="Integrations.LiveTennis.Scores" xml:space="preserve">
+    <value>Snímky tenisových skóre</value>
+  </data>
+  <data name="Integrations.LiveTennis.MatchCount" xml:space="preserve">
+    <value>Zápasy ve snímku</value>
+  </data>
+  <data name="Integrations.LiveTennis.UpdatedAt" xml:space="preserve">
+    <value>Čas snímku (UTC)</value>
+  </data>
+  <data name="Integrations.LiveTennis.ApiKeyLabel" xml:space="preserve">
+    <value>Klíč API</value>
+  </data>
+  <data name="Integrations.LiveTennis.EnterApiKey" xml:space="preserve">
+    <value>Zadat platný klíč API.</value>
+  </data>
+  <data name="Integrations.LiveTennis.SetupDescription" xml:space="preserve">
+    <value>Bezplatný klíč Live Tennis API umožňuje získávat snímky skóre každých 15 minut. Po prvním nebo opakovaném nastavení může získání prvního snímku trvat 15 minut.</value>
+  </data>
 </root>

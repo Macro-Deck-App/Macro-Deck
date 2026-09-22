@@ -17873,4 +17873,25 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>{count} build di test</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Integrations.LiveTennis.Name" xml:space="preserve">
+    <value>Live Tennis API</value>
+  </data>
+  <data name="Integrations.LiveTennis.Scores" xml:space="preserve">
+    <value>Istantanee dei punteggi del tennis</value>
+  </data>
+  <data name="Integrations.LiveTennis.MatchCount" xml:space="preserve">
+    <value>Incontri nell’istantanea</value>
+  </data>
+  <data name="Integrations.LiveTennis.UpdatedAt" xml:space="preserve">
+    <value>Ora dell’istantanea (UTC)</value>
+  </data>
+  <data name="Integrations.LiveTennis.ApiKeyLabel" xml:space="preserve">
+    <value>Chiave API</value>
+  </data>
+  <data name="Integrations.LiveTennis.EnterApiKey" xml:space="preserve">
+    <value>Inserisci una chiave API valida.</value>
+  </data>
+  <data name="Integrations.LiveTennis.SetupDescription" xml:space="preserve">
+    <value>Usa una chiave gratuita di Live Tennis API per ottenere istantanee dei punteggi ogni 15 minuti. Dopo la configurazione iniziale o una modifica, la prima istantanea può richiedere 15 minuti.</value>
+  </data>
 </root>

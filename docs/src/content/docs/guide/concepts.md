@@ -73,6 +73,7 @@ way for the button's icon.
 Values you can show and use anywhere:
 
 - **Integration variables:** the CPU load, the date, the weather, the current OBS scene.
+- **[Tennis score snapshots](/guide/tennis/):** score summaries, match count and snapshot time from Live Tennis API.
 - **User variables:** your own, for example a `deaths` counter.
 
 Show one in a label with `{{ vars.deaths }}`, like the **Deaths: 3** button above.

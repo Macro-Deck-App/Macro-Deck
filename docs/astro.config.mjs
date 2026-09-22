@@ -78,7 +78,7 @@ export default defineConfig({
 								},
 								{
 									label: 'Using Macro Deck',
-									items: ['guide/concepts', 'guide/tips', 'guide/updates', 'guide/troubleshooting'],
+									items: ['guide/concepts', 'guide/tennis', 'guide/tips', 'guide/updates', 'guide/troubleshooting'],
 								},
 								{
 									label: 'Reference',

@@ -2550,6 +2550,15 @@ export const AppStrings = {
 				UnsupportedTitle: 'macrodeck.app:Integrations.Keyboard.Issues.UnsupportedTitle',
 			},
 		},
+		LiveTennis: {
+			ApiKeyLabel: 'macrodeck.app:Integrations.LiveTennis.ApiKeyLabel',
+			EnterApiKey: 'macrodeck.app:Integrations.LiveTennis.EnterApiKey',
+			MatchCount: 'macrodeck.app:Integrations.LiveTennis.MatchCount',
+			Name: 'macrodeck.app:Integrations.LiveTennis.Name',
+			Scores: 'macrodeck.app:Integrations.LiveTennis.Scores',
+			SetupDescription: 'macrodeck.app:Integrations.LiveTennis.SetupDescription',
+			UpdatedAt: 'macrodeck.app:Integrations.LiveTennis.UpdatedAt',
+		},
 		Meld: {
 			Actions: {
 				AdjustTrackVolume: {
@@ -9210,6 +9219,13 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Integrations.Keyboard.Issues.UnsupportedDescription': 'Native keyboard input isn\'t available on this platform or session (for example a Wayland session, where synthetic input is rejected).',
 	'macrodeck.app:Integrations.Keyboard.Issues.UnsupportedTitle': 'Keyboard simulation unavailable',
 	'macrodeck.app:Integrations.Keyboard.Name': 'Keyboard',
+	'macrodeck.app:Integrations.LiveTennis.ApiKeyLabel': 'API key',
+	'macrodeck.app:Integrations.LiveTennis.EnterApiKey': 'Enter a valid API key.',
+	'macrodeck.app:Integrations.LiveTennis.MatchCount': 'Matches in snapshot',
+	'macrodeck.app:Integrations.LiveTennis.Name': 'Live Tennis API',
+	'macrodeck.app:Integrations.LiveTennis.Scores': 'Tennis score snapshots',
+	'macrodeck.app:Integrations.LiveTennis.SetupDescription': 'Use a free Live Tennis API key for score snapshots every 15 minutes. After setup or reconfiguration, the first snapshot can take 15 minutes.',
+	'macrodeck.app:Integrations.LiveTennis.UpdatedAt': 'Snapshot time (UTC)',
 	'macrodeck.app:Integrations.Meld.Actions.AdjustTrackVolume.Description': 'Raises or lowers an audio track\'s volume',
 	'macrodeck.app:Integrations.Meld.Actions.AdjustTrackVolume.Name': 'Adjust Volume',
 	'macrodeck.app:Integrations.Meld.Actions.GetEffectState.Description': 'Reads an effect\'s enabled state into a variable',
