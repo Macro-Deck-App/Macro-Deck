@@ -2,6 +2,7 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Widgets;
+using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Localization;
 using Serilog;
 
@@ -99,16 +100,21 @@ internal sealed class WidgetAppearanceActionDefinition : IDynamicOptionsActionDe
 					AppStrings.Integrations.Widgets.Errors.WidgetsUnavailable());
 			}
 
-			var applied = await widgets.ApplyAsync(new WidgetAppearanceRequest
-				{
-					WidgetId = widgetId,
-					Patch = _buildPatch(context),
-					ClearProperties = _buildClears?.Invoke(context) ?? [],
-					StateIds = WidgetActionParameters.ResolveStateIds(context)
-				},
-				context.CancellationToken);
+			var request = new WidgetAppearanceRequest
+			{
+				WidgetId = widgetId,
+				Patch = _buildPatch(context),
+				ClearProperties = _buildClears?.Invoke(context) ?? [],
+				StateIds = WidgetActionParameters.ResolveStateIds(context)
+			};
 
-			if (applied)
+			var outcome = widgets is IWidgetAppearanceOutcomeApi outcomes
+				? await outcomes.ApplyWithOutcomeAsync(request, context.CancellationToken)
+				: await widgets.ApplyAsync(request, context.CancellationToken)
+					? WidgetAppearanceOutcome.Changed
+					: WidgetAppearanceOutcome.Unchanged;
+
+			if (outcome == WidgetAppearanceOutcome.Changed)
 			{
 				return ActionResult.Success();
 			}
@@ -118,13 +124,30 @@ internal sealed class WidgetAppearanceActionDefinition : IDynamicOptionsActionDe
 				return classified;
 			}
 
-			// ApplyAsync also answers false when the widget already shows this value, so a supported
-			// property on an existing widget is a repeat run with nothing to change, not a failure.
-			return widgets.GetWidgets().FirstOrDefault(w => w.Id == widgetId) is { } target &&
-				target.AppearanceProperties.Contains(_property)
-					? ActionResult.Success()
-					: ActionResult.Failed(ActionErrorCodes.NotFound,
-						AppStrings.Integrations.Widgets.Errors.WidgetNotFound(widgetId: widgetId));
+			if (outcome == WidgetAppearanceOutcome.Rejected)
+			{
+				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,
+					AppStrings.Integrations.Widgets.Errors.ValueRejected());
+			}
+
+			if (outcome == WidgetAppearanceOutcome.WriteFailed)
+			{
+				return ActionResult.Failed(ActionErrorCodes.ProviderError,
+					AppStrings.Integrations.Widgets.Errors.WriteFailed());
+			}
+
+			var target = widgets.GetWidgets().FirstOrDefault(w => w.Id == widgetId);
+			if (target is null)
+			{
+				return ActionResult.Failed(ActionErrorCodes.NotFound,
+					AppStrings.Integrations.Widgets.Errors.WidgetNotFound(widgetId: widgetId));
+			}
+
+			// Unchanged on a supported property is a repeat run with nothing to change, not a failure.
+			return target.AppearanceProperties.Contains(_property)
+				? ActionResult.Success()
+				: ActionResult.Failed(ActionErrorCodes.InvalidParameter,
+					AppStrings.ActionBuilder.WidgetAppearance.Unsupported());
 		}
 	}
 }

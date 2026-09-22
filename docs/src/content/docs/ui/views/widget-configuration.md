@@ -45,10 +45,6 @@ public static class GaugeConfigView
         var label = new UiState<string>(ReadString(data, "label") ?? string.Empty);
         var variable = new UiState<string>(ReadString(data, "variable") ?? string.Empty);
         var maximum = new UiState<double>(100);
-        var border = new UiState<JsonElement>(data.ValueKind == JsonValueKind.Object &&
-            data.TryGetProperty("border", out var b) ? b : default);
-        var borderColor = new UiState<string>(string.Empty);
-        var borderWidth = new UiState<double>(1);
         var flows = new UiState<JsonElement>(data.ValueKind == JsonValueKind.Object &&
             data.TryGetProperty("flows", out var f) ? f : default);
 
@@ -69,17 +65,7 @@ public static class GaugeConfigView
                         Binding = Bind.To(variable),
                     },
                     new UiNumberInput { Key = "maximum", Label = Strings.Gauge.Maximum(), Min = 1, Binding = Bind.To(maximum) },
-                    new UiObjectInput
-                    {
-                        Key = "border",
-                        Label = Strings.Gauge.Border(),
-                        Binding = Bind.To(border),
-                        Children =
-                        [
-                            new UiColorInput { Key = "color", Label = Strings.Gauge.BorderColor(), Binding = Bind.To(borderColor) },
-                            new UiNumberInput { Key = "width", Label = Strings.Gauge.BorderWidth(), Min = 0, Max = 8, Binding = Bind.To(borderWidth) },
-                        ],
-                    },
+                    UiWidgetAppearance.Section(data, UiWidgetAppearanceFields.BackgroundColor | UiWidgetAppearanceFields.Border),
                 ],
             },
             Editor = new UiWidgetEditor
@@ -218,6 +204,36 @@ properties do nothing unless the node also handles `provide`, so a renderer neve
 cannot answer. A renderer or host that predates these properties and the event ignores them, and the action
 list looks the way it always did. To show which action currently provides, the Action Button uses a
 [status line](/ui/views/configuration/#showing-what-governs-a-setting).
+
+## Standard appearance fields
+
+```csharp
+Properties = new UiWidgetProperties
+{
+    Key = "properties",
+    Children =
+    [
+        new UiStringInput { Key = "variable", Label = Strings.Gauge.Variable(), Binding = Bind.To(variable) },
+        UiWidgetAppearance.Section(data, UiWidgetAppearanceFields.All),
+    ],
+},
+```
+
+`UiWidgetAppearance.Section` builds Macro Deck's own appearance fields, already translated: background
+colour, label, label colour, accent colour, font (face, size, alignment, position) and border. Pick the groups
+with `UiWidgetAppearanceFields`, named after the `WidgetAppearanceProperty` values a
+[widget type declares](/ui/views/widget-types/#standard-appearance), so declare the same ones there for the
+appearance actions to reach them.
+
+- The fields write the [documented keys](/ui/views/widget-types/#standard-appearance) and own them as input
+  ids, together with the heading keys `appearance-heading` and `border-heading`: do not use those ids for
+  inputs of your own.
+- Saving without touching a field leaves its key as it was stored. An empty label or border colour is
+  removed rather than stored empty.
+- The font field lists the host's fonts from the `macrodeck.fonts` option source. The desktop editor
+  resolves that source for your tree; it is the only host source it resolves for a provider's tree.
+- On a Macro Deck release older than these fields, the font list stays empty and the field labels show as
+  `[[macrodeck:...]]` keys, because Macro Deck resolves the `macrodeck` catalog from its own copy.
 
 ## Declining
 

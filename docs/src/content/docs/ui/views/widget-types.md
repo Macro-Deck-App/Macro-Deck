@@ -168,6 +168,91 @@ control, as without the flag, and runs no flow.
 
 The default is `false`, and a type that leaves it unset behaves exactly as described above.
 
+## Standard appearance
+
+```csharp
+new WidgetTypeDescriptor("frame", MyStrings.FrameName(), DataSchema: FrameSchema, HasConfiguration: true)
+{
+    AppearanceProperties =
+    [
+        WidgetAppearanceProperty.BackgroundColor, WidgetAppearanceProperty.Label,
+        WidgetAppearanceProperty.LabelColor, WidgetAppearanceProperty.Font,
+    ],
+}
+```
+
+A widget of your type can share the appearance settings of Macro Deck's own widgets. Every type gets a
+**border**: Macro Deck draws the ring around the tile from the `border` key of the widget's stored data, and
+the Set Border action writes it, with or without a declaration. `AppearanceProperties` adds any of
+`BackgroundColor`, `Label`, `LabelColor`, `Font` and `AccentColor`. For each one you list, the widget appearance
+actions (Set Background Color, Set Label, Set Label Color, Set Label Font, Set Accent Color) accept a widget of your
+type and write the value to the stored data, under these keys:
+
+| Key | Property | Value |
+| --- | --- | --- |
+| `border` | `Border`, `BorderColor` | `{ "style": "...", "color": "#rrggbb" }`. `style` is `off`, `static`, `heartbeat`, `breathing`, `blink`, `comet`, `ants`, `hue-shift` or `rgb`; without `color` the ring uses its default colour |
+| `backgroundColor` | `BackgroundColor` | `#rrggbb` |
+| `label` | `Label` | The text as entered |
+| `labelColor` | `LabelColor` | `#rrggbb` |
+| `fontFaceId` | `Font` | A face id from the host's font catalogue (the `macrodeck.fonts` option source) |
+| `fontSize` | `Font` | Size as a whole-number percentage |
+| `textAlign` | `Font` | `left`, `center` or `right` |
+| `labelPosition` | `Font` | `top`, `center` or `bottom` |
+| `accentColor` | `AccentColor` | `#rrggbb` |
+
+`UiWidgetAppearanceKeys` holds the names. Clearing a setting removes its key. Other values of
+`WidgetAppearanceProperty`, such as `Icon`, are ignored for a provider's type.
+
+Macro Deck draws only the border. Draw the rest yourself: the change reopens your widget's session with the
+new data, and `UiWidgetAppearance.Read` gives you the values:
+
+```csharp
+attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var data);
+var appearance = UiWidgetAppearance.Read(data);
+
+var root = new UiButton
+{
+    Key = "frame",
+    Background = appearance.BackgroundColor ?? "#1f2937",
+    Children = [new UiTextRun { Key = "caption", Text = appearance.Label ?? string.Empty, Color = appearance.LabelColor ?? "#ffffff" }],
+};
+```
+
+Your `DataSchema` has to allow the keys you declare. A property is offered for a widget only if the schema
+accepts a plain sample value under its keys (`#000000`, `Label`, a font id with size 12, `center`), so keep
+patterns, enums and ranges on these keys permissive, and a value your schema rejects, such as a label that fails a `pattern`, makes the action fail
+instead of storing data your configuration could no longer save:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "border": { "type": "object" },
+    "backgroundColor": { "type": "string" },
+    "label": { "type": "string" },
+    "labelColor": { "type": "string" },
+    "fontFaceId": { "type": "string" },
+    "fontSize": { "type": "number" },
+    "textAlign": { "type": "string" },
+    "labelPosition": { "type": "string" },
+    "accentColor": { "type": "string" }
+  }
+}
+```
+
+The [widget configuration view](/ui/views/widget-configuration/#standard-appearance-fields) has ready-made
+fields for the same keys.
+
+- **The label is stored as entered.** It may contain a `{{ ... }}` variable template, which Macro Deck
+  renders only for its own Action Button. Show the text as it is, or render it yourself.
+- **Hardware devices read these keys too.** A device plugin receives `label`, `labelColor`,
+  `backgroundColor`, `fontSize`, `textAlign` and `labelPosition` for every widget, but not the font face.
+- **Every change reopens your widget's session** with the new data, so a flow that changes an appearance
+  setting every second rebuilds your tree every second.
+- **While your type is not registered** - your plugin stopped, or still starting - its widgets offer the
+  border only, and the other actions fail for them.
+- **An older Macro Deck ignores the declaration** and offers the border only, as before.
+
 ## When your integration is not running
 
 ```csharp

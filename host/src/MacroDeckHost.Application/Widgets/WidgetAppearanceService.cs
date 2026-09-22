@@ -16,6 +16,11 @@ public interface IWidgetAppearanceService
 	bool Exists(string widgetId);
 
 	Task<bool> ApplyAsync(WidgetAppearanceRequest request, CancellationToken cancellationToken = default);
+
+	async Task<WidgetAppearanceOutcome> ApplyWithOutcomeAsync(
+		WidgetAppearanceRequest request,
+		CancellationToken cancellationToken = default)
+		=> await ApplyAsync(request, cancellationToken) ? WidgetAppearanceOutcome.Changed : WidgetAppearanceOutcome.Unchanged;
 }
 
 public sealed class WidgetAppearanceService : IWidgetAppearanceService
@@ -25,6 +30,9 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 	private readonly IWidgetService _widgetService;
 	private readonly IWidgetDataWriteLock _writeLock;
 	private readonly WidgetDerivedStateStore _derivedStates;
+	private readonly IWidgetTypeRegistry _widgetTypes;
+	private readonly IWidgetDataSchemaProvider _schemas;
+	private readonly WidgetAppearanceSchemaProbe _schemaProbe;
 	private readonly ILogger _logger;
 
 	public WidgetAppearanceService(
@@ -33,6 +41,9 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 		IWidgetService widgetService,
 		IWidgetDataWriteLock writeLock,
 		WidgetDerivedStateStore derivedStates,
+		IWidgetTypeRegistry widgetTypes,
+		IWidgetDataSchemaProvider schemas,
+		WidgetAppearanceSchemaProbe schemaProbe,
 		ILogger logger)
 	{
 		_folderCache = folderCache;
@@ -40,6 +51,9 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 		_widgetService = widgetService;
 		_writeLock = writeLock;
 		_derivedStates = derivedStates;
+		_widgetTypes = widgetTypes;
+		_schemas = schemas;
+		_schemaProbe = schemaProbe;
 		_logger = logger.ForContext<WidgetAppearanceService>();
 	}
 
@@ -55,11 +69,12 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 			{
 				var data = WidgetAppearanceJson.ParseDataBag(widget.Data);
 				var (states, currentStateId) = ResolveTargetStates(widget, data);
+				var providerSupported = ProviderSupported(widget);
 
 				result.Add(new WidgetTargetInfo
 				{
 					Id = widget.Id.ToString(),
-					Label = DescribeWidget(widget, data, states.Count > 0 ? states[0].Id : null),
+					Label = DescribeWidget(widget, data, states.Count > 0 ? states[0].Id : null, providerSupported),
 					Location = location,
 					Type = widget.Type.ToString(),
 #pragma warning disable CS0618 // Kept for a plugin still reading the collapsed on/off flag; States is the replacement.
@@ -67,7 +82,7 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 #pragma warning restore CS0618
 					States = states,
 					CurrentStateId = currentStateId,
-					AppearanceProperties = WidgetAppearanceJson.SupportedProperties(widget.Type),
+					AppearanceProperties = providerSupported ?? WidgetAppearanceJson.SupportedProperties(widget.Type),
 					HasActiveIconProvider = HasActiveIconProvider(widget, data)
 				});
 			}
@@ -81,16 +96,21 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 	public async Task<bool> ApplyAsync(
 		WidgetAppearanceRequest request,
 		CancellationToken cancellationToken = default)
+		=> await ApplyWithOutcomeAsync(request, cancellationToken) == WidgetAppearanceOutcome.Changed;
+
+	public async Task<WidgetAppearanceOutcome> ApplyWithOutcomeAsync(
+		WidgetAppearanceRequest request,
+		CancellationToken cancellationToken = default)
 	{
 		if (request.Patch.IsEmpty && request.ClearProperties.Count == 0)
 		{
-			return false;
+			return WidgetAppearanceOutcome.Unchanged;
 		}
 
 		var widget = Locate(request.WidgetId);
 		if (widget is null)
 		{
-			return false;
+			return WidgetAppearanceOutcome.Unchanged;
 		}
 
 		using var _ = await _writeLock.AcquireAsync(widget.Id, cancellationToken);
@@ -112,16 +132,80 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 			? WithoutIcon(request.Patch, request.ClearProperties)
 			: (request.Patch, request.ClearProperties);
 
-		var changed = WidgetAppearanceJson.Apply(data, widget.Type, patch, states);
+		var providerSupported = ProviderSupported(widget);
+		var before = providerSupported is null ? null : data.DeepClone().AsObject();
+
+		var changed = WidgetAppearanceJson.Apply(data, widget.Type, patch, states, providerSupported);
 		foreach (var property in clearProperties)
 		{
 			foreach (var state in states)
 			{
-				changed |= WidgetAppearanceJson.ClearProperty(data, widget.Type, property, state);
+				changed |= WidgetAppearanceJson.ClearProperty(data, widget.Type, property, state, providerSupported);
 			}
 		}
 
-		return changed && await Write(widget, data);
+		if (!changed)
+		{
+			return WidgetAppearanceOutcome.Unchanged;
+		}
+
+		if (before is not null && AddsSchemaProblems(widget.Type, before, patch, states, data))
+		{
+			_logger.Warning("Widget appearance change on widget {WidgetId} skipped: its type's data schema rejects it",
+				widget.Id);
+			return WidgetAppearanceOutcome.Rejected;
+		}
+
+		return await Write(widget, data) ? WidgetAppearanceOutcome.Changed : WidgetAppearanceOutcome.WriteFailed;
+	}
+
+	private List<WidgetAppearanceProperty>? ProviderSupported(WidgetEntity widget)
+	{
+		if (!_widgetTypes.TryResolve(widget.Type, out var entry) || entry.IsBuiltIn)
+		{
+			return null;
+		}
+
+		var supported = new List<WidgetAppearanceProperty>
+		{
+			WidgetAppearanceProperty.Border, WidgetAppearanceProperty.BorderColor
+		};
+
+		var declared = entry.Descriptor.AppearanceProperties ?? [];
+		var hasSchema = _schemas.TryGet(widget.Type, out var schema);
+		foreach (var property in WidgetAppearanceJson.ProviderOptionalProperties)
+		{
+			if (declared.Contains(property) &&
+				(!hasSchema || _schemaProbe.Accepts(widget.Type, schema!, widget.Data ?? string.Empty, property)))
+			{
+				supported.Add(property);
+			}
+		}
+
+		return supported;
+	}
+
+	// Border writes keep their behaviour from before provider types could declare more, schema or not, so
+	// only what the rest of the patch adds on top of the border change is held against the schema.
+	private bool AddsSchemaProblems(
+		string type,
+		JsonObject before,
+		WidgetAppearancePatch patch,
+		IReadOnlyCollection<string> states,
+		JsonObject after)
+	{
+		if (!_schemas.TryGet(type, out var schema))
+		{
+			return false;
+		}
+
+		var borderOnly = before.DeepClone().AsObject();
+		WidgetAppearanceJson.Apply(borderOnly,
+			type,
+			new WidgetAppearancePatch { BorderStyle = patch.BorderStyle, BorderColor = patch.BorderColor },
+			states,
+			[]);
+		return WidgetAppearanceSchemaProbe.AddsProblems(schema, borderOnly, after);
 	}
 
 	/// <summary>
@@ -228,9 +312,13 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 		return (infos, activeId);
 	}
 
-	private static string DescribeWidget(WidgetEntity widget, JsonObject data, string? stateId)
+	private static string DescribeWidget(
+		WidgetEntity widget,
+		JsonObject data,
+		string? stateId,
+		IReadOnlyCollection<WidgetAppearanceProperty>? providerSupported)
 	{
-		var label = WidgetAppearanceJson.ReadLabel(data, widget.Type, stateId);
+		var label = WidgetAppearanceJson.ReadLabel(data, widget.Type, stateId, providerSupported);
 		return string.IsNullOrWhiteSpace(label) ? DescribeType(widget.Type) : label;
 	}
 

@@ -43,6 +43,7 @@ public sealed class HostStatePusher(
 	INotificationHandler<WidgetsUpdatedNotification>,
 	INotificationHandler<WidgetsDeletedNotification>,
 	INotificationHandler<AdbSettingsChangedNotification>,
+	INotificationHandler<WidgetTypeCatalogChangedNotification>,
 	IDisposable
 {
 	private readonly SemaphoreSlim _eventBindingsPush = new(1, 1);
@@ -50,12 +51,14 @@ public sealed class HostStatePusher(
 	private readonly Lock _deckGate = new();
 	private long _deckRevision;
 	private readonly SemaphoreSlim _adbPush = new(1, 1);
+	private readonly SemaphoreSlim _catalogWidgetsPush = new(1, 1);
 	private long _adbRevision;
 
 	public void Dispose()
 	{
 		_eventBindingsPush.Dispose();
 		_adbPush.Dispose();
+		_catalogWidgetsPush.Dispose();
 	}
 
 	public Task PushAllAsync(string pluginId, CancellationToken cancellationToken = default)
@@ -131,6 +134,14 @@ public sealed class HostStatePusher(
 
 	public ValueTask Handle(WidgetsDeletedNotification notification, CancellationToken cancellationToken)
 		=> BroadcastWidgetsAsync(cancellationToken);
+
+	// The registry publishes this while a plugin registers its types, so a slow or failing send to another
+	// plugin must not hold up or fail that registration.
+	public ValueTask Handle(WidgetTypeCatalogChangedNotification notification, CancellationToken cancellationToken)
+	{
+		_ = PushWidgetsAfterCatalogChangeAsync();
+		return ValueTask.CompletedTask;
+	}
 
 	private async ValueTask BroadcastDeckAsync(CancellationToken cancellationToken)
 	{
@@ -308,6 +319,28 @@ public sealed class HostStatePusher(
 			Manufacturer = device.Manufacturer,
 			Product = device.Product
 		};
+
+	private async Task PushWidgetsAfterCatalogChangeAsync()
+	{
+		try
+		{
+			// One at a time, each reading the widgets once it holds the gate, so a plugin never receives an
+			// older snapshot after a newer one while several types register at once.
+			await _catalogWidgetsPush.WaitAsync();
+			try
+			{
+				await BroadcastWidgetsAsync(CancellationToken.None);
+			}
+			finally
+			{
+				_catalogWidgetsPush.Release();
+			}
+		}
+		catch (Exception exception) when (exception is not OutOfMemoryException)
+		{
+			logger.ForContext<HostStatePusher>().Error(exception, "Failed to push widgets to plugins after a widget type change");
+		}
+	}
 
 	private async Task PushDeckClientsAsync()
 	{

@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Integrations.Widgets;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk;
@@ -439,9 +440,12 @@ public class WidgetActionTargetTests
 		Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 	}
 
-	[Test]
-	public async Task NothingApplied_OnAnUnknownWidgetOrOneWithoutTheProperty_IsNotFound()
+	[TestCase(false)]
+	[TestCase(true)]
+	public async Task NothingApplied_OnAnUnknownWidget_IsNotFound_AndOnOneWithoutTheProperty_IsUnsupported(
+		bool reportsOutcomes)
 	{
+		await UseWidgets(reportsOutcomes ? new FakeOutcomeWidgetApi() : new FakeWidgetApi());
 		_widgets.ApplyResult = false;
 		_widgets.Targets.Add(Target(_selfWidget, WidgetAppearanceProperty.BackgroundColor));
 
@@ -455,10 +459,51 @@ public class WidgetActionTargetTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(unsupported.Status, Is.EqualTo(ActionResultStatus.Failed));
-			Assert.That(unsupported.ErrorCode, Is.EqualTo(ActionErrorCodes.NotFound));
+			Assert.That(unsupported.ErrorCode, Is.EqualTo(ActionErrorCodes.InvalidParameter));
 			Assert.That(unknown.Status, Is.EqualTo(ActionResultStatus.Failed));
 			Assert.That(unknown.ErrorCode, Is.EqualTo(ActionErrorCodes.NotFound));
 		});
+	}
+
+	[TestCase(WidgetAppearanceOutcome.Rejected, ActionErrorCodes.InvalidParameter)]
+	[TestCase(WidgetAppearanceOutcome.WriteFailed, ActionErrorCodes.ProviderError)]
+	public async Task ASupportedChangeThatWasNotStored_IsAFailure_NotARepeatRun(
+		WidgetAppearanceOutcome outcome,
+		string expectedCode)
+	{
+		var widgets = new FakeOutcomeWidgetApi { Outcome = outcome };
+		await UseWidgets(widgets);
+		widgets.Targets.Add(Target(_selfWidget, WidgetAppearanceProperty.Label));
+
+		var result = await Execute("set-label",
+			new Dictionary<string, object> { ["widget"] = _selfWidget, ["label"] = "Photos" },
+			ownerWidgetId: _selfWidget);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
+			Assert.That(result.ErrorCode, Is.EqualTo(expectedCode));
+		});
+	}
+
+	[Test]
+	public async Task NothingApplied_OnAnIconProviderButton_IsRefused_WhenTheApiReportsOutcomes()
+	{
+		await UseWidgets(new FakeOutcomeWidgetApi { ApplyResult = false });
+		_widgets.Targets.Add(Target(_selfWidget, WidgetAppearanceProperty.Icon, hasActiveIconProvider: true));
+
+		var result = await Execute("set-icon",
+			new Dictionary<string, object> { ["widget"] = _selfWidget, ["iconId"] = "pack.icon" },
+			ownerWidgetId: _selfWidget);
+
+		Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.PermissionDenied));
+	}
+
+	private async Task UseWidgets(FakeWidgetApi widgets)
+	{
+		_widgets = widgets;
+		_integration = new WidgetIntegration();
+		await _integration.InitializeAsync(new FakeIntegrationContext(_widgets));
 	}
 
 	[Test]
@@ -502,7 +547,7 @@ public class WidgetActionTargetTests
 			});
 	}
 
-	private sealed class FakeWidgetApi : IWidgetApi
+	private class FakeWidgetApi : IWidgetApi
 	{
 		public List<WidgetAppearanceRequest> Applied { get; } = [];
 
@@ -533,6 +578,19 @@ public class WidgetActionTargetTests
 		public Task<WidgetStateWriteResult> AdvanceStateAsync(string widgetId,
 			CancellationToken cancellationToken = default)
 			=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+	}
+
+	private sealed class FakeOutcomeWidgetApi : FakeWidgetApi, IWidgetAppearanceOutcomeApi
+	{
+		public WidgetAppearanceOutcome? Outcome { get; init; }
+
+		public async Task<WidgetAppearanceOutcome> ApplyWithOutcomeAsync(
+			WidgetAppearanceRequest request,
+			CancellationToken cancellationToken = default)
+		{
+			var applied = await ApplyAsync(request, cancellationToken);
+			return Outcome ?? (applied ? WidgetAppearanceOutcome.Changed : WidgetAppearanceOutcome.Unchanged);
+		}
 	}
 
 	private sealed class FakeIntegrationContext : IIntegrationContext

@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MacroDeckHost.Application.Widgets;
 
-public sealed class WidgetApi : IWidgetApi
+public sealed class WidgetApi : IWidgetApi, IWidgetAppearanceOutcomeApi
 {
 	private readonly IServiceScopeFactory _scopeFactory;
 
@@ -31,6 +31,15 @@ public sealed class WidgetApi : IWidgetApi
 		await using var scope = _scopeFactory.CreateAsyncScope();
 		return await scope.ServiceProvider.GetRequiredService<IWidgetAppearanceService>()
 			.ApplyAsync(request, cancellationToken);
+	}
+
+	public async Task<WidgetAppearanceOutcome> ApplyWithOutcomeAsync(
+		WidgetAppearanceRequest request,
+		CancellationToken cancellationToken = default)
+	{
+		await using var scope = _scopeFactory.CreateAsyncScope();
+		return await scope.ServiceProvider.GetRequiredService<IWidgetAppearanceService>()
+			.ApplyWithOutcomeAsync(request, cancellationToken);
 	}
 
 	public async Task<WidgetStateWriteResult> SetStateAsync(

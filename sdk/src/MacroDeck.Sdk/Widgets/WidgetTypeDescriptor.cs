@@ -63,4 +63,28 @@ public sealed record WidgetTypeDescriptor(
 	/// </para>
 	/// </remarks>
 	public bool SupportsFlows { get; init; }
+
+	/// <summary>
+	/// The standard appearance properties a widget of this type draws from its stored data, beyond
+	/// <see cref="WidgetAppearanceProperty.Border" /> and <see cref="WidgetAppearanceProperty.BorderColor" />,
+	/// which every type has because Macro Deck draws the border itself. Absent or empty means border only.
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// Macro Deck's widget appearance actions (Set Background Color, Set Label, Set Label Color, Set Label
+	/// Font, Set Accent Color) accept a widget of this type for each listed property and write the value to the
+	/// documented data key named in <c>MacroDeck.Ui.Config.UiWidgetAppearanceKeys</c>. The widget's session is
+	/// then reopened with the new data, and the provider draws the value itself; <c>UiWidgetAppearance.Read</c>
+	/// reads them all.
+	/// </para>
+	/// <para>
+	/// Only <see cref="WidgetAppearanceProperty.BackgroundColor" />, <see cref="WidgetAppearanceProperty.Label" />,
+	/// <see cref="WidgetAppearanceProperty.LabelColor" />, <see cref="WidgetAppearanceProperty.Font" /> and
+	/// <see cref="WidgetAppearanceProperty.AccentColor" /> are honoured; any other value is ignored. A listed
+	/// property is offered for a widget only if <see cref="DataSchema" /> accepts a plain sample value under
+	/// its keys, so the schema has to allow the keys without narrow patterns, enums or ranges. A Macro Deck
+	/// release older than this property ignores it and offers border only.
+	/// </para>
+	/// </remarks>
+	public IReadOnlyList<WidgetAppearanceProperty>? AppearanceProperties { get; init; }
 }

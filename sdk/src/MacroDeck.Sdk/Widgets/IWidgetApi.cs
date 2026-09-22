@@ -91,7 +91,9 @@ public sealed class WidgetTargetInfo
 	/// <c>null</c> when <see cref="States" /> is empty.</summary>
 	public string? CurrentStateId { get; init; }
 
-	/// <summary>Appearance properties supported by this widget type.</summary>
+	/// <summary>Appearance properties this widget supports. For a provider's widget type this follows the
+	/// type's <see cref="WidgetTypeDescriptor.AppearanceProperties" /> and what its data schema accepts, and
+	/// falls back to the border while the provider is not registered.</summary>
 	public IReadOnlyCollection<WidgetAppearanceProperty> AppearanceProperties { get; init; } = [];
 
 	/// <summary>

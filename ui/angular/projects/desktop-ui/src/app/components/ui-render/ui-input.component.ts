@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, forwardRef, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, Injector, computed, effect, forwardRef, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { UiConfigEvents, UiConfigPrimitives, UiConfigProperties, UiNode, UiNodeOption, WidgetIconDisplay, WidgetIconRef, emitsEvent, iconPackRef, iconPackReferenceOf, isIconPackRef, nodeBoolean, nodeNumber, nodeOptions, nodeRaw, nodeString, nodeStringArray, nodeText, readWidgetIconRef } from '@macro-deck/runtime';
+import { UiConfigEvents, UiConfigPrimitives, UiConfigProperties, UiNode, UiNodeOption, resolveLocalizedText, WidgetIconDisplay, WidgetIconRef, emitsEvent, iconPackRef, iconPackReferenceOf, isIconPackRef, nodeBoolean, nodeNumber, nodeOptions, nodeRaw, nodeString, nodeStringArray, nodeText, readWidgetIconRef } from '@macro-deck/runtime';
 import { ButtonComponent, IconImageService, InputComponent, LocalizationService, SegmentedControlComponent, SegmentedOption, ToggleSwitchComponent, TranslatePipe } from '@shared';
 import type { ActionFlow, HotkeyValue, KeyboardComboValue, KeyboardSequenceValue, VariableType } from '@macro-deck/runtime';
 import { normalizeHttpsUrl } from '../../domain/url-input.util';
@@ -28,11 +28,16 @@ import { NodeParamInputComponent } from '../forms/param-input-field/param-input-
 import { NodeActionBuilderComponent, type ProviderChangeRequest } from '../action-builder/node-action-builder.component';
 import { NodeActionPickerComponent } from '../action-builder/action-picker/node-action-picker.component';
 import { NodeStateMappingEditorComponent, type StateMappingValue } from '../widgets/state-mapping/node-state-mapping-editor.component';
+import { ActionOptionsService } from '../../services/action-options.service';
 import { UiRenderContext } from './ui-render-context';
 import { UiNodeComponent } from './ui-node.component';
 
 const Primitives = UiConfigPrimitives;
 const Properties = UiConfigProperties;
+
+// Option sources a provider's tree may name for the host to fill. Only these ids: resolving any other host
+// source would hand a plugin's tree lists it was never documented to reach.
+const HOST_RESOLVED_OPTION_SOURCES: readonly string[] = ['macrodeck.fonts'];
 
 @Component({
   selector: 'shared-ui-input',
@@ -84,6 +89,20 @@ export class UiInputComponent {
   protected readonly context = inject(UiRenderContext);
   private readonly localization = inject(LocalizationService);
   private readonly iconImage = inject(IconImageService);
+  private readonly injector = inject(Injector);
+  private readonly hostOptions = signal<UiNodeOption[] | null>(null);
+
+  protected readonly hostOptionsSourceId = computed(() => {
+    const node = this.node();
+    if (Properties.Options in (node.properties ?? {})) return null;
+    if (nodeBoolean(node, Properties.DynamicOptions) !== true) return null;
+    const sourceId = nodeString(node, Properties.OptionsSourceId);
+    return sourceId && HOST_RESOLVED_OPTION_SOURCES.includes(sourceId) ? sourceId : null;
+  });
+
+  private readonly options = computed(
+    () => nodeOptions(this.node(), this.localization) ?? (this.hostOptionsSourceId() ? this.hostOptions() : null),
+  );
 
   protected readonly label = computed(() => nodeText(this.node(), Properties.Label, this.localization));
   protected readonly hideLabel = computed(() => nodeBoolean(this.node(), Properties.HideLabel) === true);
@@ -172,7 +191,7 @@ export class UiInputComponent {
 
   protected readonly numberOptions = computed<SelectOption[]>(() =>
     this.node().type === UiConfigPrimitives.Number
-      ? (nodeOptions(this.node(), this.localization) ?? []).map(toSelectOption)
+      ? (this.options() ?? []).map(toSelectOption)
       : [],
   );
   protected readonly numberOptionValue = computed(() => {
@@ -181,23 +200,23 @@ export class UiInputComponent {
   });
 
   protected readonly selectOptions = computed<SelectOption[]>(() =>
-    (nodeOptions(this.node(), this.localization) ?? []).map(toSelectOption),
+    (this.options() ?? []).map(toSelectOption),
   );
   protected readonly comboboxOptions = computed<ComboboxOption[]>(() =>
-    (nodeOptions(this.node(), this.localization) ?? []).map(toComboboxOption),
+    (this.options() ?? []).map(toComboboxOption),
   );
   protected readonly cardOptions = computed(() =>
-    (nodeOptions(this.node(), this.localization) ?? []).map(option => ({
+    (this.options() ?? []).map(option => ({
       value: option.value,
       label: option.label ?? option.value,
       description: option.description ?? '',
     })),
   );
   protected readonly segmentedOptions = computed<SegmentedOption[]>(() =>
-    (nodeOptions(this.node(), this.localization) ?? []).map(toSegmentedOption),
+    (this.options() ?? []).map(toSegmentedOption),
   );
   protected readonly multiSelectOptions = computed<MultiSelectOption[]>(() =>
-    (nodeOptions(this.node(), this.localization) ?? []).map(toComboboxOption),
+    (this.options() ?? []).map(toComboboxOption),
   );
 
   protected readonly stringValue = computed(() => {
@@ -347,6 +366,10 @@ export class UiInputComponent {
 
   constructor() {
     inject(DestroyRef).onDestroy(() => clearTimeout(this.filterTimer));
+    effect(() => {
+      const sourceId = this.hostOptionsSourceId();
+      if (sourceId) void this.loadHostOptions(sourceId);
+    });
   }
 
   protected fileKind(): FilePathKind {
@@ -370,6 +393,23 @@ export class UiInputComponent {
   protected onUrlBlur(): void {
     if (!this.autoPrefixHttps()) return;
     this.onChange(normalizeHttpsUrl(this.stringValue()));
+  }
+
+  private async loadHostOptions(optionsSourceId: string): Promise<void> {
+    try {
+      const response = await this.injector.get(ActionOptionsService).getOptions({
+        integrationId: '',
+        actionId: '',
+        optionsSourceId,
+        parameterName: this.node().id,
+      });
+      this.hostOptions.set((response.options ?? []).map(option => ({
+        value: option.value,
+        label: resolveLocalizedText(option.label, this.localization) || option.value,
+      })));
+    } catch {
+      this.hostOptions.set([]);
+    }
   }
 
   protected onOpen(): void {

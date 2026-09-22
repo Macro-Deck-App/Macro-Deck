@@ -11,6 +11,7 @@ using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Plugins.Capabilities.Callbacks;
 using MacroDeck.Sdk.Widgets;
+using MacroDeckHost.Tests.PluginContractTests.Harness;
 using Serilog;
 
 namespace MacroDeckHost.Tests.PluginContractTests;
@@ -244,11 +245,15 @@ internal sealed class WidgetStateCompatibilityContractTests
 			};
 
 			_widgetsService = new RecordingWidgetService();
+			var widgetTypes = new WidgetTypeRegistry(new RecordingMediator());
 			var appearanceService = new WidgetAppearanceService(new SingleFolderCache(folder),
 				new SingleProfileCache(profileId, "Main"),
 				_widgetsService,
 				new RecordingWriteLock(),
 				new Application.Rendering.WidgetDerivedStateStore(),
+				widgetTypes,
+				new WidgetDataSchemaProvider(widgetTypes),
+				new WidgetAppearanceSchemaProbe(),
 				new LoggerConfiguration().CreateLogger());
 
 			var sessionRegistry = new PluginSessionRegistry(TimeProvider.System, Log.Logger);
