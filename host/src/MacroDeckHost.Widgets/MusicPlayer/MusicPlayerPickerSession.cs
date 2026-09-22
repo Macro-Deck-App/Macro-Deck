@@ -33,6 +33,10 @@ internal sealed class MusicPlayerPickerSession : IUiSession
 	/// </summary>
 	private static readonly TimeSpan _searchDebounce = TimeSpan.FromMilliseconds(250);
 
+	internal const int MaxConcurrentCovers = 6;
+
+	internal static readonly TimeSpan CoverPublishDelay = TimeSpan.FromMilliseconds(100);
+
 	private readonly UiView _view;
 	private readonly IMusicPlayerRegistry _registry;
 	private readonly IMusicPlayerArtworkService _artworkService;
@@ -48,14 +52,20 @@ internal sealed class MusicPlayerPickerSession : IUiSession
 	private readonly UiState<IReadOnlyDictionary<string, UiResource>> _artwork =
 		new(new Dictionary<string, UiResource>(StringComparer.Ordinal));
 
-	// The debounced search and the cover pass both run on their own Task.Run threads and both replace one of
-	// the two sources below, while a client's dispatch and DisposeAsync do the same from theirs. Taken before
-	// the view's own serialization everywhere - a dispatch enters it while holding this - so the two are
-	// always acquired in that order.
+	// Guards every field below against the passes, a client's dispatch and DisposeAsync. Always taken
+	// before the view's own serialization, because a dispatch enters the view while holding it.
 	private readonly Lock _sync = new();
 
+	private readonly CancellationToken _lifetimeToken;
+	private readonly HashSet<string> _coverRequested = new(StringComparer.Ordinal);
+	private readonly Dictionary<string, UiResource> _resolvedCovers = new(StringComparer.Ordinal);
+
 	private CancellationTokenSource? _search;
-	private CancellationTokenSource? _covers;
+	private CancellationTokenSource? _lifetime;
+	private CancellationTokenSource? _listCovers;
+	private int _coverWorkers;
+	private int _revealAnchor = -1;
+	private bool _publishScheduled;
 	private bool _disposed;
 
 	public MusicPlayerPickerSession(
@@ -75,6 +85,9 @@ internal sealed class MusicPlayerPickerSession : IUiSession
 		_instanceId = instanceId;
 		_kind = kind;
 		_logger = logger.ForContext<MusicPlayerPickerSession>();
+		var lifetime = new CancellationTokenSource();
+		_lifetime = lifetime;
+		_lifetimeToken = lifetime.Token;
 
 		_view = new UiView(surface,
 			MusicPlayerPickerView.Build(_state,
@@ -126,9 +139,10 @@ internal sealed class MusicPlayerPickerSession : IUiSession
 	public ValueTask DisposeAsync()
 	{
 		CancellationTokenSource? search;
-		CancellationTokenSource? covers;
+		CancellationTokenSource? lifetime;
+		CancellationTokenSource? listCovers;
 
-		// The flag and both sources are taken in one step, so a pass that is between its own cancellation
+		// The flag and every source are taken in one step, so a pass that is between its own cancellation
 		// check and its write cannot slip a patch in behind disposal.
 		lock (_sync)
 		{
@@ -139,13 +153,16 @@ internal sealed class MusicPlayerPickerSession : IUiSession
 
 			_disposed = true;
 			search = _search;
-			covers = _covers;
+			lifetime = _lifetime;
+			listCovers = _listCovers;
 			_search = null;
-			_covers = null;
+			_lifetime = null;
+			_listCovers = null;
 		}
 
 		Cancel(search);
-		Cancel(covers);
+		Cancel(listCovers);
+		Cancel(lifetime);
 
 		return ValueTask.CompletedTask;
 	}
@@ -177,6 +194,7 @@ internal sealed class MusicPlayerPickerSession : IUiSession
 		// A new query is a new list: the old window would otherwise hold a scroll position into results
 		// that no longer exist.
 		_window.Value = MusicPlayerPickerView.InitialWindow;
+		_revealAnchor = -1;
 		Reload(filter, immediate: false);
 	}
 
@@ -194,6 +212,7 @@ internal sealed class MusicPlayerPickerSession : IUiSession
 		}
 
 		_window.Value = wanted;
+		_revealAnchor = (int)index;
 		StartCovers();
 	}
 
@@ -225,6 +244,7 @@ internal sealed class MusicPlayerPickerSession : IUiSession
 				}
 
 				var state = await LoadAsync(filter, token).ConfigureAwait(false);
+				CancellationTokenSource? previousCovers;
 
 				lock (_sync)
 				{
@@ -234,7 +254,12 @@ internal sealed class MusicPlayerPickerSession : IUiSession
 					}
 
 					_state.Value = state;
+					previousCovers = _listCovers;
+					_listCovers = new CancellationTokenSource();
+					_coverRequested.IntersectWith(_resolvedCovers.Keys);
 				}
+
+				Cancel(previousCovers);
 
 				StartCovers();
 			},
@@ -311,9 +336,6 @@ internal sealed class MusicPlayerPickerSession : IUiSession
 	/// </summary>
 	private void StartCovers()
 	{
-		CancellationTokenSource? previous;
-		CancellationToken token;
-
 		lock (_sync)
 		{
 			if (_disposed)
@@ -321,58 +343,127 @@ internal sealed class MusicPlayerPickerSession : IUiSession
 				return;
 			}
 
-			previous = _covers;
-			var current = new CancellationTokenSource();
-			_covers = current;
-			token = current.Token;
-		}
+			var workers = PendingCovers()
+				.Distinct(StringComparer.Ordinal)
+				.Take(MaxConcurrentCovers - _coverWorkers)
+				.Count();
 
-		Cancel(previous);
-
-		var items = _state.Value.Items;
-		var window = Math.Min(_window.Value, items.Count);
-
-		RunPass(async () =>
+			for (var worker = 0; worker < workers; worker++)
 			{
-				var resolved = new Dictionary<string, UiResource>(_artwork.Value, StringComparer.Ordinal);
-				var added = false;
+				_coverWorkers++;
+				RunPass(FetchCoversAsync, _lifetimeToken);
+			}
+		}
+	}
 
-				for (var index = 0; index < window && !token.IsCancellationRequested; index++)
+	private async Task FetchCoversAsync()
+	{
+		var exited = false;
+
+		try
+		{
+			while (true)
+			{
+				string artworkId;
+				CancellationToken listToken;
+
+				lock (_sync)
 				{
-					var artworkId = items[index].ArtworkId;
-					if (artworkId is not { Length: > 0 } || resolved.ContainsKey(artworkId))
+					if (_disposed || _listCovers is null || PendingCovers().FirstOrDefault() is not { } next)
+					{
+						_coverWorkers--;
+						exited = true;
+
+						return;
+					}
+
+					_coverRequested.Add(next);
+					artworkId = next;
+					listToken = _listCovers.Token;
+				}
+
+				var resource = await RegisterCoverAsync(artworkId, listToken).ConfigureAwait(false);
+
+				lock (_sync)
+				{
+					if (_disposed || listToken.IsCancellationRequested)
 					{
 						continue;
 					}
 
-					var resource = await RegisterCoverAsync(artworkId, token).ConfigureAwait(false);
 					if (resource is null)
 					{
 						continue;
 					}
 
-					resolved[artworkId] = resource;
-					added = true;
+					_resolvedCovers[artworkId] = resource;
+					SchedulePublish();
 				}
-
-				// One update rather than one per cover: every cover that arrives would otherwise be its own
-				// patch to every client attached to the dialog.
-				if (!added)
+			}
+		}
+		finally
+		{
+			if (!exited)
+			{
+				lock (_sync)
 				{
-					return;
+					_coverWorkers--;
 				}
+			}
+		}
+	}
+
+	private IEnumerable<string> PendingCovers()
+	{
+		var items = _state.Value.Items;
+		var window = Math.Min(_window.Value, items.Count);
+		var anchor = Math.Min(_revealAnchor, window - 1);
+
+		for (var index = anchor; index >= 0; index--)
+		{
+			if (PendingArtworkId(items[index]) is { } artworkId)
+			{
+				yield return artworkId;
+			}
+		}
+
+		for (var index = anchor + 1; index < window; index++)
+		{
+			if (PendingArtworkId(items[index]) is { } artworkId)
+			{
+				yield return artworkId;
+			}
+		}
+	}
+
+	private string? PendingArtworkId(MusicPlayerCatalogItem item)
+		=> item.ArtworkId is { Length: > 0 } artworkId && !_coverRequested.Contains(artworkId) ? artworkId : null;
+
+	private void SchedulePublish()
+	{
+		if (_publishScheduled)
+		{
+			return;
+		}
+
+		_publishScheduled = true;
+
+		RunPass(async () =>
+			{
+				await Task.Delay(CoverPublishDelay, _lifetimeToken).ConfigureAwait(false);
 
 				lock (_sync)
 				{
-					if (_disposed || token.IsCancellationRequested)
+					if (_disposed)
 					{
 						return;
 					}
 
-					_artwork.Value = resolved;
+					_publishScheduled = false;
+					_artwork.Value = new Dictionary<string, UiResource>(_resolvedCovers, StringComparer.Ordinal);
 				}
 			},
-			token);
+			_lifetimeToken);
 	}
 
 	private async Task<UiResource?> RegisterCoverAsync(string artworkId, CancellationToken cancellationToken)
