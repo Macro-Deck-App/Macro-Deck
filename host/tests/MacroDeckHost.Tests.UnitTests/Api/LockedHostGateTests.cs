@@ -1,6 +1,8 @@
 using System.Net;
 using System.Security.Cryptography;
 using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Infrastructure.Auth;
 using Microsoft.AspNetCore.DataProtection;
@@ -138,6 +140,35 @@ public class LockedHostGateTests
 			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.ServiceUnavailable));
 			Assert.That(response.Headers.GetValues("X-MacroDeck-Locked"), Is.EqualTo(new[] { "true" }));
 			Assert.That(File.Exists(Path.Combine(_paths.KeysDirectory, "host-identity.key")), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task The_auth_status_still_tells_a_legacy_app_that_this_is_a_macro_deck_3_host()
+	{
+		var response = await _client.GetAsync(new Uri("/api/auth/status", UriKind.Relative));
+		var body = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+			Assert.That(body.GetProperty("setupComplete").ValueKind, Is.AnyOf(JsonValueKind.True, JsonValueKind.False));
+		});
+	}
+
+	[TestCase("/api/auth/identity", """{ "nonce": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" }""")]
+	[TestCase("/api/legacy/md2-app/license-transfer",
+		"""{ "platform": "app-store-legacy", "legacyKind": "appTransaction", "signedPayload": "a.b.c" }""")]
+	public async Task Anonymous_app_endpoints_answer_a_locked_host_with_the_key_ring_marker(string path, string json)
+	{
+		var response = await _client.PostAsync(new Uri(path, UriKind.Relative),
+			new StringContent(json, Encoding.UTF8, "application/json"));
+		var body = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.ServiceUnavailable));
+			Assert.That(body.GetProperty("error").GetString(), Is.EqualTo("KeyRingLocked"));
 		});
 	}
 

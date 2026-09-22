@@ -975,6 +975,274 @@ internal sealed class CompanionLicenseServiceTests
 		});
 	}
 
+	[Test]
+	public async Task A_macro_deck_2_purchase_is_transferred_stored_and_pushed_to_connected_companions()
+	{
+		var fixture = new Fixture();
+		var device = fixture.Harness.AddDevice("Tablet");
+		await fixture.Harness.ReportAsync("connection-other", device);
+		var token = Sign(ProductionKey, ProductionKeyId);
+		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Issued(token);
+		var proof = Md2Purchase("app-transaction-1");
+
+		var result = await TransferAsync(fixture, proof);
+
+		var sent = fixture.Platform.Proofs.Single();
+		var status = await fixture.Service.GetStatusAsync(default);
+		var pushes = fixture.Harness.Transport.ConnectionMessages
+			.Where(message => message.Message is CompanionLicenseEvent)
+			.ToList();
+		Assert.Multiple(() =>
+		{
+			Assert.That(result, Is.EqualTo(new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Transferred)));
+			Assert.That(sent.Platform, Is.EqualTo("app-store-legacy"));
+			Assert.That(sent.LegacyKind, Is.EqualTo("appTransaction"));
+			Assert.That(sent.ProductId, Is.EqualTo(CompanionLicenseTokens.Product));
+			Assert.That(sent.SignedPayload, Is.EqualTo(proof.SignedPayload));
+			Assert.That(status.Licensed, Is.True);
+			Assert.That(status.IssuePending, Is.False);
+			Assert.That(pushes.Select(push => push.ConnectionId), Is.EqualTo(new[] { "connection-other" }));
+			Assert.That(pushes.Select(push => ((CompanionLicenseEvent)push.Message).License), Is.All.EqualTo(token));
+		});
+	}
+
+	[Test]
+	public async Task A_host_that_already_holds_a_license_answers_already_transferred_without_asking_the_platform()
+	{
+		var fixture = new Fixture();
+		await fixture.Service.SyncAsync("c",
+			new SyncCompanionLicenseRequest { License = Sign(ProductionKey, ProductionKeyId) },
+			default);
+
+		var result = await fixture.Service.TransferLegacyPurchaseAsync(Md2Purchase("app-transaction-1"), default);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result,
+				Is.EqualTo(new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.AlreadyTransferred)));
+			Assert.That(fixture.Platform.Proofs, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_refused_purchase_is_rejected_with_the_platform_code_and_asking_again_does_not_reach_the_platform()
+	{
+		var fixture = new Fixture();
+		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Refused("purchase-before-paid-period");
+		var proof = Md2Purchase("app-transaction-1");
+
+		var first = await TransferAsync(fixture, proof);
+		var second = await fixture.Service.TransferLegacyPurchaseAsync(proof, default).WaitAsync(TimeSpan.FromSeconds(5));
+
+		var expected = new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Rejected, "purchase-before-paid-period");
+		Assert.Multiple(() =>
+		{
+			Assert.That(first, Is.EqualTo(expected));
+			Assert.That(second, Is.EqualTo(expected));
+			Assert.That(fixture.Platform.Proofs, Has.Count.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task A_platform_that_cannot_decide_yet_leaves_the_purchase_pending_with_its_code()
+	{
+		var fixture = new Fixture();
+		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Retry(null, false, "store-unavailable");
+
+		var result = await TransferAsync(fixture, Md2Purchase("app-transaction-1"));
+
+		Assert.Multiple(async () =>
+		{
+			Assert.That(result,
+				Is.EqualTo(new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Pending, "store-unavailable")));
+			Assert.That((await fixture.Service.GetStatusAsync(default)).IssuePending, Is.True);
+		});
+	}
+
+	[Test]
+	public async Task A_transfer_the_platform_does_not_answer_within_ten_seconds_is_reported_pending()
+	{
+		var fixture = new Fixture();
+		fixture.Platform.Gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		var transfer = fixture.Service.TransferLegacyPurchaseAsync(Md2Purchase("app-transaction-1"), default);
+		await WaitingTransfers(fixture, 1);
+		var run = fixture.Service.RunDueWorkAsync(default);
+		await fixture.Platform.Called.Task.WaitAsync(TimeSpan.FromSeconds(5));
+		fixture.Time.Advance(CompanionLicenseService.LegacyTransferWait);
+		var result = await transfer.WaitAsync(TimeSpan.FromSeconds(5));
+		fixture.Platform.Gate.SetResult();
+		await run.WaitAsync(TimeSpan.FromSeconds(5));
+
+		Assert.That(result, Is.EqualTo(new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Pending)));
+	}
+
+	[Test]
+	public async Task Proofs_carrying_the_same_app_transaction_id_are_one_pending_purchase()
+	{
+		var fixture = new Fixture();
+
+		await TransferAsync(fixture, Md2Purchase("app-transaction-1", signedDate: "1"));
+		await TransferAsync(fixture, Md2Purchase("app-transaction-1", signedDate: "2"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(PendingEntries(fixture), Has.Count.EqualTo(1));
+			Assert.That(fixture.Platform.Proofs, Has.Count.EqualTo(2));
+		});
+	}
+
+	[Test]
+	public async Task Transfers_never_push_a_companion_proof_out_of_the_queue()
+	{
+		var fixture = new Fixture();
+		for (var i = 0; i < CompanionLicenseService.MaximumPendingProofs; i++)
+		{
+			await fixture.Service.SyncAsync("c", GooglePlay($"purchase-{i}"), default);
+		}
+
+		var result = await fixture.Service.TransferLegacyPurchaseAsync(Md2Purchase("app-transaction-1"), default)
+			.WaitAsync(TimeSpan.FromSeconds(5));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result, Is.EqualTo(new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Unavailable)));
+			Assert.That(PendingEntries(fixture), Has.Count.EqualTo(CompanionLicenseService.MaximumPendingProofs));
+			Assert.That(PendingEntries(fixture).Count(entry => entry.GetProperty("LegacyApp").GetBoolean()), Is.Zero);
+		});
+	}
+
+	[Test]
+	public async Task A_third_waiting_transfer_replaces_the_oldest_transfer_and_keeps_the_companion_proof()
+	{
+		var fixture = new Fixture();
+		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), default);
+
+		await TransferAsync(fixture, Md2Purchase("app-transaction-1"));
+		fixture.Time.Advance(TimeSpan.FromSeconds(1));
+		await TransferAsync(fixture, Md2Purchase("app-transaction-2"));
+		fixture.Time.Advance(TimeSpan.FromSeconds(1));
+		await TransferAsync(fixture, Md2Purchase("app-transaction-3"));
+
+		var entries = PendingEntries(fixture);
+		Assert.Multiple(() =>
+		{
+			Assert.That(entries, Has.Count.EqualTo(1 + CompanionLicenseService.MaximumPendingLegacyAppProofs));
+			Assert.That(entries.Count(entry => !entry.GetProperty("LegacyApp").GetBoolean()), Is.EqualTo(1));
+			Assert.That(entries.Min(entry => entry.GetProperty("QueuedAt").GetInt64()),
+				Is.EqualTo(Fixture.Now.ToUnixTimeMilliseconds()));
+			Assert.That(entries.Where(entry => entry.GetProperty("LegacyApp").GetBoolean())
+					.Min(entry => entry.GetProperty("QueuedAt").GetInt64()),
+				Is.EqualTo(Fixture.Now.AddSeconds(1).ToUnixTimeMilliseconds()));
+		});
+	}
+
+	[Test]
+	public async Task When_one_purchase_is_transferred_another_waiting_purchase_is_already_transferred()
+	{
+		var fixture = new Fixture();
+		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Issued(Sign(ProductionKey, ProductionKeyId));
+
+		var first = fixture.Service.TransferLegacyPurchaseAsync(Md2Purchase("app-transaction-1"), default);
+		await WaitingTransfers(fixture, 1);
+		var second = fixture.Service.TransferLegacyPurchaseAsync(Md2Purchase("app-transaction-2"), default);
+		await WaitingTransfers(fixture, 2);
+		await fixture.Service.RunDueWorkAsync(default);
+
+		Assert.Multiple(async () =>
+		{
+			Assert.That(await first.WaitAsync(TimeSpan.FromSeconds(5)),
+				Is.EqualTo(new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Transferred)));
+			Assert.That(await second.WaitAsync(TimeSpan.FromSeconds(5)),
+				Is.EqualTo(new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.AlreadyTransferred)));
+			Assert.That(fixture.Platform.Proofs, Has.Count.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task Two_transfers_of_the_same_purchase_at_once_both_get_the_result()
+	{
+		var fixture = new Fixture();
+		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Issued(Sign(ProductionKey, ProductionKeyId));
+		var proof = Md2Purchase("app-transaction-1");
+
+		var first = fixture.Service.TransferLegacyPurchaseAsync(proof, default);
+		var second = fixture.Service.TransferLegacyPurchaseAsync(proof, default);
+		await WaitingTransfers(fixture, 2);
+		await fixture.Service.RunDueWorkAsync(default);
+
+		var expected = new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Transferred);
+		Assert.Multiple(async () =>
+		{
+			Assert.That(await first.WaitAsync(TimeSpan.FromSeconds(5)), Is.EqualTo(expected));
+			Assert.That(await second.WaitAsync(TimeSpan.FromSeconds(5)), Is.EqualTo(expected));
+			Assert.That(fixture.Platform.Proofs, Has.Count.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task An_identical_proof_resent_during_an_attempt_that_is_refused_is_not_sent_again()
+	{
+		var fixture = new Fixture();
+		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Refused("invalid-signature");
+		fixture.Platform.Gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		await fixture.Service.SyncAsync("a", GooglePlay("purchase-a"), default);
+		var run = fixture.Service.RunDueWorkAsync(default);
+		await fixture.Platform.Called.Task.WaitAsync(TimeSpan.FromSeconds(5));
+
+		await fixture.Service.SyncAsync("a", GooglePlay("purchase-a"), default).WaitAsync(TimeSpan.FromSeconds(5));
+		fixture.Platform.Gate.SetResult();
+		await run.WaitAsync(TimeSpan.FromSeconds(5));
+		await fixture.Service.RunDueWorkAsync(default);
+
+		Assert.Multiple(async () =>
+		{
+			Assert.That(fixture.Platform.Proofs, Has.Count.EqualTo(1));
+			Assert.That((await fixture.Service.GetStatusAsync(default)).IssuePending, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_companion_cannot_submit_a_macro_deck_2_purchase()
+	{
+		var fixture = new Fixture();
+
+		await fixture.Service.SyncAsync("c",
+			new SyncCompanionLicenseRequest { Proof = Md2Purchase("app-transaction-1") },
+			default);
+		await fixture.Service.RunDueWorkAsync(default);
+
+		Assert.Multiple(async () =>
+		{
+			Assert.That(fixture.Platform.Proofs, Is.Empty);
+			Assert.That((await fixture.Service.GetStatusAsync(default)).IssuePending, Is.False);
+		});
+	}
+
+	private static async Task<LegacyPurchaseTransferResult> TransferAsync(Fixture fixture, CompanionLicenseProof proof)
+	{
+		var transfer = fixture.Service.TransferLegacyPurchaseAsync(proof, default);
+		await WaitingTransfers(fixture, 1);
+		await fixture.Service.RunDueWorkAsync(default);
+		return await transfer.WaitAsync(TimeSpan.FromSeconds(5));
+	}
+
+	private static async Task WaitingTransfers(Fixture fixture, int count)
+		=> Assert.That(await Eventually(() => Task.FromResult(fixture.Time.ActiveTimerCount >= count)), Is.True);
+
+	private static List<JsonElement> PendingEntries(Fixture fixture)
+		=> JsonSerializer.Deserialize<List<JsonElement>>(fixture.Repository.Values[CompanionLicenseService.PendingProofsKey])!;
+
+	private static CompanionLicenseProof Md2Purchase(string appTransactionId, string signedDate = "1")
+		=> new()
+		{
+			Platform = "app-store-legacy", LegacyKind = "appTransaction", ProductId = CompanionLicenseTokens.Product,
+			SignedPayload = $"eyJhbGciOiJFUzI1NiJ9.{Base64Url(JsonSerializer.SerializeToUtf8Bytes(new
+			{
+				appTransactionId, bundleId = "com.suchbyte.macrodeck", signedDate
+			}))}.c2lnbmF0dXJl"
+		};
+
 	private static CompanionLicenseBackgroundService Worker(Fixture fixture, CompanionLicenseService service)
 		=> new(service, fixture.Time, new LoggerConfiguration().WriteTo.Sink(fixture.Sink).CreateLogger());
 

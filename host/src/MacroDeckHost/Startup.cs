@@ -9,6 +9,7 @@ using MacroDeckHost.Application.Backups.Retention;
 using MacroDeckHost.Application.Backups;
 using MacroDeckHost.Application.Messaging;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using MacroDeck.Localization;
 using MacroDeckHost.Localization;
 using MacroDeckHost.Logging;
@@ -195,7 +196,8 @@ public class Startup
 		services.AddRateLimiter(options =>
 		{
 			options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-			options.GlobalLimiter = HostIdentityRateLimit.Create();
+			options.GlobalLimiter = PartitionedRateLimiter.CreateChained(HostIdentityRateLimit.Create(),
+				LegacyLicenseTransferRateLimit.Create());
 		});
 
 		services.AddSingleton<IConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>();

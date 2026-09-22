@@ -80,8 +80,14 @@ Macro Deck servers. **Settings > Companion license** shows the progress:
 - **Not licensed, nothing pending:** the store did not confirm the purchase, for example after a
   refund or for a test purchase. Macro Deck asks again at most once a day, and never again for a
   refunded, cancelled or revoked purchase. Check the purchase in the Google Play or App Store account
-  the app was bought with, and ask on Discord if it looks right there. Purchases of the earlier iOS
-  app are not turned into licenses yet.
+  the app was bought with, and ask on Discord if it looks right there.
+
+If you bought the Macro Deck 2 app for iPhone or iPad, you do not need to buy the Companion app again. Open
+the Macro Deck 2 app on the same network, choose **Transfer my purchase** and confirm that the identity it
+shows matches **Identity** in Macro Deck's connection panel. Macro Deck then turns the purchase into a license
+like any other, and the page above shows its progress. A download from the time the app was still free is
+not a purchase and cannot be transferred. If the app reports that the purchase could not be verified, the
+Macro Deck servers may not accept these purchases yet; try again a day later.
 
 For support, quote the **License ID** shown on that page. It is safe to share; the license itself is
 never shown.

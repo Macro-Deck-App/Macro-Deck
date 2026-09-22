@@ -34,8 +34,8 @@ licenses the hosts it connects to, and every device on those hosts. That is inte
 license per user, not per device.
 
 **Platform client and developer mode.** `PlatformLicenseClient` posts a purchase proof to
-`api.macro-deck.app` (`POST api/v1/companion-licenses`). Only `google-play` and `app-store` proofs are sent; the
-Platform does not issue `app-store-legacy` yet. The base URL can be redirected with `MACRO_DECK_PLATFORM_URL` in
+`api.macro-deck.app` (`POST api/v1/companion-licenses`). `google-play` and `app-store` proofs are sent, and
+`app-store-legacy` proofs of kind `appTransaction` (with `legacyKind`), which only the Macro Deck 2 app submits. The base URL can be redirected with `MACRO_DECK_PLATFORM_URL` in
 Development-channel builds only, for example to Platform mock mode or staging, which sign with `test-2026`.
 `TestCompanionLicenseIssuer` signs with the committed `test-2026` key for the Issue test license button. The key
 and everything built on it only work in developer mode (the `developer.mode` preference):
@@ -55,6 +55,12 @@ stored token and the known trial start; it never waits for the Platform. While n
 a purchase proof is queued and exchanged in the background by `CompanionLicenseBackgroundService`; the issued
 token is stored and pushed as `CompanionLicenseEvent` to every connected Companion, including the one that sent
 the proof. One lock guards every read-modify-write of the token, the trial map and the pending proofs.
+
+**Macro Deck 2 app purchases.** Buyers of the paid Macro Deck 2 iOS app transfer it with the anonymous
+`POST api/legacy/md2-app/license-transfer` ([macro-deck-2-app.md](../api/macro-deck-2-app.md)). Its proof,
+keyed by the AppTransaction's `appTransactionId`, joins the same queue; that request alone waits up to 10
+seconds for one issuing attempt so the app can report the outcome. At most 2 such proofs wait at once, and
+they never displace a Companion's proof.
 
 **Issuing retries.** Pending proofs are kept in the preference `license.pendingProofs`, at most 8, each
 encrypted with ASP.NET Core data protection and keyed by a hash of its purchase (the Google purchase token or

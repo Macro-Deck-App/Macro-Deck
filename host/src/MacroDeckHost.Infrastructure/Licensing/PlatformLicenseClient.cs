@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using MacroDeckHost.Application.Licensing;
 using MacroDeckHost.Application.Store.Reviews;
@@ -48,7 +49,8 @@ public sealed partial class PlatformLicenseClient : IPlatformLicenseClient, IDis
 
 	public static bool IsSupported(CompanionLicenseProof proof)
 		=> proof.ProductId == CompanionLicenseTokens.Product &&
-			proof.Platform is CompanionLicenseSources.GooglePlay or CompanionLicenseSources.AppStore;
+			(proof.Platform is CompanionLicenseSources.GooglePlay or CompanionLicenseSources.AppStore ||
+				proof is { Platform: CompanionLicenseSources.AppStoreLegacy, LegacyKind: CompanionLicenseSources.AppTransactionKind });
 
 	public async Task<PlatformLicenseIssueResult> IssueCompanionLicenseAsync(CompanionLicenseProof proof,
 		CancellationToken cancellationToken)
@@ -66,7 +68,8 @@ public sealed partial class PlatformLicenseClient : IPlatformLicenseClient, IDis
 					proof.OrderId,
 					proof.PackageName,
 					proof.TransactionId,
-					proof.SignedPayload),
+					proof.SignedPayload,
+					proof.Platform == CompanionLicenseSources.AppStoreLegacy ? proof.LegacyKind : null),
 				options: Json)
 		};
 
@@ -152,16 +155,17 @@ public sealed partial class PlatformLicenseClient : IPlatformLicenseClient, IDis
 			case HttpStatusCode.RequestEntityTooLarge:
 				return new PlatformLicenseIssueResult.Refused("proof-too-large");
 			case HttpStatusCode.Forbidden:
-				return await CodeAsync(response, cancellationToken) == "license-revoked"
+				var forbidden = await CodeAsync(response, cancellationToken);
+				return forbidden == "license-revoked"
 					? new PlatformLicenseIssueResult.Refused("license-revoked")
-					: new PlatformLicenseIssueResult.Retry(retryAfter, false);
+					: new PlatformLicenseIssueResult.Retry(retryAfter, false, forbidden);
 			case HttpStatusCode.UnprocessableEntity:
 				var code = await CodeAsync(response, cancellationToken);
 				return code is not null && RetryableRefusals.Contains(code)
-					? new PlatformLicenseIssueResult.Retry(retryAfter, true)
+					? new PlatformLicenseIssueResult.Retry(retryAfter, true, code)
 					: new PlatformLicenseIssueResult.Refused(code ?? "purchase-refused");
 			default:
-				return new PlatformLicenseIssueResult.Retry(retryAfter, false);
+				return new PlatformLicenseIssueResult.Retry(retryAfter, false, await CodeAsync(response, cancellationToken));
 		}
 	}
 
@@ -226,7 +230,8 @@ public sealed partial class PlatformLicenseClient : IPlatformLicenseClient, IDis
 		string? OrderId,
 		string? PackageName,
 		string? TransactionId,
-		string? SignedPayload);
+		string? SignedPayload,
+		[property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? LegacyKind);
 
 	private sealed record IssueResponse(string? License);
 
@@ -237,4 +242,6 @@ public static class CompanionLicenseSources
 {
 	public const string GooglePlay = "google-play";
 	public const string AppStore = "app-store";
+	public const string AppStoreLegacy = "app-store-legacy";
+	public const string AppTransactionKind = "appTransaction";
 }
