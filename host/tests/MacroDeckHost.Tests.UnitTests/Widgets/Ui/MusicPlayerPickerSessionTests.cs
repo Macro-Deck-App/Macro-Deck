@@ -177,6 +177,172 @@ public class MusicPlayerPickerSessionTests
 
 	[Test]
 	[CancelAfter(60_000)]
+	public async Task Covers_are_fetched_side_by_side_up_to_a_bound_and_each_one_appears_on_its_own()
+	{
+		await using var fixture = new PickerFixture();
+
+		fixture.NextCatalogCall().Completion.SetResult(Covered("r", 25));
+
+		var inFlight = Enumerable.Range(0, MusicPlayerPickerSession.MaxConcurrentCovers)
+			.Select(_ => fixture.NextArtworkCall())
+			.ToList();
+
+		Assert.That(fixture.TryNextArtworkCall(out _),
+			Is.False,
+			"more covers were fetched at once than the session allows");
+
+		var answered = inFlight[1];
+		answered.Completion.SetResult(Image());
+
+		WaitForCovers(fixture, [ItemFor(answered)], "a cover that arrived never reached the view on its own");
+
+		Assert.That(fixture.NextArtworkCall().Filter,
+			Is.Not.Null,
+			"a finished fetch did not free its slot for the next cover");
+	}
+
+	[Test]
+	[CancelAfter(60_000)]
+	public async Task A_reveal_keeps_covers_in_flight_and_fetches_the_visible_rows_before_the_revealed_ones()
+	{
+		await using var fixture = new PickerFixture();
+
+		fixture.NextCatalogCall().Completion.SetResult(Covered("r", 60));
+
+		var inFlight = Enumerable.Range(0, MusicPlayerPickerSession.MaxConcurrentCovers)
+			.Select(_ => fixture.NextArtworkCall())
+			.ToList();
+
+		fixture.Reveal(7);
+
+		Assert.That(inFlight.Select(call => call.Token.IsCancellationRequested),
+			Is.All.False,
+			"a reveal cancelled covers that were already being fetched");
+
+		var requested = inFlight.Select(call => call.Filter!).ToList();
+
+		inFlight[0].Completion.SetResult(Image());
+
+		var next = fixture.NextArtworkCall();
+		requested.Add(next.Filter!);
+
+		Assert.That(next.Filter, Is.EqualTo("r-art-07"), "a row below the screen was fetched before a visible one");
+
+		var pending = new Queue<PendingCall<ArtworkImageResult?>>(inFlight.Skip(1).Append(next));
+		var window = 7 + MusicPlayerPickerView.WindowGrowth;
+
+		while (requested.Count < window)
+		{
+			pending.Dequeue().Completion.SetResult(Image());
+
+			var call = fixture.NextArtworkCall();
+			requested.Add(call.Filter!);
+			pending.Enqueue(call);
+		}
+
+		while (pending.Count > 0)
+		{
+			pending.Dequeue().Completion.SetResult(Image());
+		}
+
+		var expected = Enumerable.Range(0, window).Select(index => $"r{index:00}").ToList();
+
+		WaitForCovers(fixture, expected, "the grown window never showed every cover");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(requested, Is.Unique, "a cover was fetched twice");
+			Assert.That(requested,
+				Is.EquivalentTo(Enumerable.Range(0, window).Select(index => $"r-art-{index:00}")));
+		});
+	}
+
+	[Test]
+	[CancelAfter(60_000)]
+	public async Task A_new_search_frees_the_slots_of_the_old_list_for_its_own_covers()
+	{
+		await using var fixture = new PickerFixture();
+
+		fixture.NextCatalogCall().Completion.SetResult(Covered("a", 25));
+
+		var stale = Enumerable.Range(0, MusicPlayerPickerSession.MaxConcurrentCovers)
+			.Select(_ => fixture.NextArtworkCall())
+			.ToList();
+
+		fixture.Type("B");
+		fixture.NextCatalogCall().Completion.SetResult(Covered("b", 25));
+
+		var fresh = Enumerable.Range(0, MusicPlayerPickerSession.MaxConcurrentCovers)
+			.Select(_ => fixture.NextArtworkCall().Filter)
+			.ToList();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(stale.Select(call => call.Token.IsCancellationRequested),
+				Is.All.True,
+				"covers of a list that was replaced kept their slots");
+			Assert.That(fresh, Is.All.StartsWith("b-art-"), "the new list's covers did not get the freed slots");
+		});
+	}
+
+	[Test]
+	[CancelAfter(60_000)]
+	public async Task A_cover_that_arrives_just_before_disposal_never_reaches_a_client()
+	{
+		var fixture = new PickerFixture();
+
+		fixture.NextCatalogCall().Completion.SetResult(Items("a", withArtwork: true));
+
+		var cover = fixture.NextArtworkCall();
+
+		fixture.Session.DrainPatches();
+		cover.Completion.SetResult(Image());
+
+		var disposeReturned = false;
+		var emittedAfterDisposal = 0;
+
+		fixture.Session.Changed += (_, _) =>
+		{
+			if (Volatile.Read(ref disposeReturned))
+			{
+				Interlocked.Increment(ref emittedAfterDisposal);
+			}
+		};
+
+		await fixture.Session.DisposeAsync();
+		Volatile.Write(ref disposeReturned, true);
+
+		await Task.Delay(MusicPlayerPickerSession.CoverPublishDelay * 5);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(emittedAfterDisposal, Is.Zero, "the session emitted after DisposeAsync returned");
+			Assert.That(fixture.Session.DrainPatches(), Is.Empty, "a cover was put on the wire after disposal");
+		});
+	}
+
+	[Test]
+	[CancelAfter(60_000)]
+	public async Task A_cover_the_library_did_not_return_is_asked_for_again_for_a_new_list()
+	{
+		await using var fixture = new PickerFixture();
+
+		fixture.NextCatalogCall().Completion.SetResult(Items("a", withArtwork: true));
+
+		var failed = fixture.NextArtworkCall();
+		failed.Completion.SetResult(null);
+
+		fixture.Type("A");
+
+		fixture.NextCatalogCall().Completion.SetResult(Items("a", withArtwork: true));
+
+		Assert.That(fixture.NextArtworkCall().Filter,
+			Is.EqualTo(failed.Filter),
+			"a cover missing from the first list was never asked for again");
+	}
+
+	[Test]
+	[CancelAfter(60_000)]
 	public void A_new_search_loads_more_rows_for_a_reveal_below_one_the_previous_search_answered()
 	{
 		using var changed = new ManualResetEventSlim(false);
@@ -264,6 +430,70 @@ public class MusicPlayerPickerSessionTests
 				ArtworkId: withArtwork ? $"{prefix}-art" : null),
 			new($"{prefix}2", $"{prefix} two", MusicPlayerCatalogItemKind.Track),
 		];
+
+	private static List<MusicPlayerCatalogItem> Covered(string prefix, int count)
+		=> Enumerable.Range(0, count)
+			.Select(index => new MusicPlayerCatalogItem($"{prefix}{index:00}",
+				$"{prefix} {index}",
+				MusicPlayerCatalogItemKind.Track,
+				ArtworkId: $"{prefix}-art-{index:00}"))
+			.ToList();
+
+	private static ArtworkImageResult Image() => new([1, 2, 3, 4], "image/webp", "\"cover\"");
+
+	private static string ItemFor(PendingCall<ArtworkImageResult?> call)
+		=> call.Filter!.Replace("-art-", string.Empty, StringComparison.Ordinal);
+
+	private static void WaitForCovers(PickerFixture fixture, List<string> expected, string because)
+	{
+		var deadline = DateTime.UtcNow + WaitTimeout;
+
+		while (true)
+		{
+			var covered = CoveredRows(fixture.Session.BuildTree().Root);
+
+			if (covered.SetEquals(expected))
+			{
+				return;
+			}
+
+			Assert.That(DateTime.UtcNow < deadline,
+				Is.True,
+				$"{because}. Expected covers on [{string.Join(", ", expected)}] but the tree held them on " +
+				$"[{string.Join(", ", covered.Order(StringComparer.Ordinal))}]");
+
+			Thread.Sleep(10);
+		}
+	}
+
+	private static HashSet<string> CoveredRows(UiNode root)
+	{
+		var covered = new HashSet<string>(StringComparer.Ordinal);
+
+		Walk(root, null, covered);
+
+		return covered;
+
+		static void Walk(UiNode node, string? row, HashSet<string> into)
+		{
+			if (node.Id.StartsWith(_rowPrefix, StringComparison.Ordinal) &&
+				node.Id.LastIndexOf('.') == _rowPrefix.Length - 1)
+			{
+				row = node.Id[_rowPrefix.Length..];
+			}
+
+			if (row is not null &&
+				node.Properties.Values.Any(value => value.GetRawText().Contains(".pick.", StringComparison.Ordinal)))
+			{
+				into.Add(row);
+			}
+
+			foreach (var child in node.Children)
+			{
+				Walk(child, row, into);
+			}
+		}
+	}
 
 	/// <summary>Counts like a list of one covered row and throws the moment that row is read.</summary>
 	private sealed class PoisonedList : IReadOnlyList<MusicPlayerCatalogItem>
@@ -358,6 +588,8 @@ public class MusicPlayerPickerSessionTests
 		public PendingCall<IReadOnlyList<MusicPlayerCatalogItem>> NextCatalogCall() => _player.Next();
 
 		public PendingCall<ArtworkImageResult?> NextArtworkCall() => _artwork.Next();
+
+		public bool TryNextArtworkCall(out PendingCall<ArtworkImageResult?>? call) => _artwork.TryNext(out call);
 
 		public ValueTask DisposeAsync() => Session.DisposeAsync();
 	}
@@ -465,9 +697,22 @@ public class MusicPlayerPickerSessionTests
 				Monitor.PulseAll(_gate);
 			}
 
-			return call.Completion.Task;
+			return call.Completion.Task.WaitAsync(cancellationToken);
 		}
 
 		public PendingCall<ArtworkImageResult?> Next() => Take(_gate, _calls, "fetch a cover");
+
+		public bool TryNext(out PendingCall<ArtworkImageResult?>? call)
+		{
+			lock (_gate)
+			{
+				if (_calls.Count == 0)
+				{
+					Monitor.Wait(_gate, TimeSpan.FromMilliseconds(300));
+				}
+
+				return _calls.TryDequeue(out call);
+			}
+		}
 	}
 }
