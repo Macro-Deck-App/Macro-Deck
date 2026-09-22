@@ -297,6 +297,26 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 	[TearDown]
 	public void TearDown() => _coordinator.Dispose();
 
+	private const string ProviderWidgetData =
+		"{\"flows\":[{\"triggerId\":\"t1\",\"triggerType\":\"onShortPress\",\"children\":[]}]}";
+
+	private async Task<ExecuteActionButtonTriggerRequestMessageHandler> CreateHandlerForProviderType(bool supportsFlows)
+	{
+		var registry = new WidgetTypeRegistry(new RecordingMediator());
+		var registration = await registry.Register("com.example.battery",
+			new WidgetTypeDescriptor("panel", "Battery panel") { SupportsFlows = supportsFlows });
+
+		var widget = ActionButtonWidget(registration.WidgetTypeId);
+		widget.Data = ProviderWidgetData;
+		_folders = new FakeFolderCache(widget);
+
+		return new ExecuteActionButtonTriggerRequestMessageHandler(_folders,
+			_profiles,
+			_lockState,
+			CreateTriggerService(_coordinator, new NoOpActionButtonStateService()),
+			registry);
+	}
+
 	private static WidgetEntity ActionButtonWidget(string type = WidgetTypeIds.ActionButton)
 		=> new() { Id = _widgetId, FolderId = _folderId, Type = type, Data = "{}" };
 
@@ -498,6 +518,36 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 		{
 			Assert.That(response.Success, Is.False);
 			Assert.That(response.Error?.Code, Is.EqualTo("VALIDATION_ERROR"));
+		});
+	}
+
+	[Test]
+	public async Task A_press_on_a_provider_widget_whose_type_supports_flows_runs_its_flow()
+	{
+		var handler = await CreateHandlerForProviderType(supportsFlows: true);
+
+		var response = await handler.Handle(Request(), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Success, Is.True);
+			Assert.That(_coordinator.Runs, Is.EqualTo(1));
+			Assert.That(_coordinator.LastRequest?.FlowsSource, Is.EqualTo(ProviderWidgetData));
+		});
+	}
+
+	[Test]
+	public async Task A_press_on_a_provider_widget_whose_type_does_not_support_flows_runs_nothing()
+	{
+		var handler = await CreateHandlerForProviderType(supportsFlows: false);
+
+		var response = await handler.Handle(Request(), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Success, Is.True);
+			Assert.That(response.Status, Is.EqualTo(ActionExecutionStatus.Accepted));
+			Assert.That(_coordinator.Runs, Is.Zero);
 		});
 	}
 

@@ -332,6 +332,17 @@ public class RemoteIntegrationContextTests
 		}
 	}
 
+	[Test]
+	public async Task A_widget_type_that_supports_flows_registers_with_the_flag_set()
+	{
+		var widgetTypes = new RemoteWidgetTypeProviderContext(_invoker);
+
+		await widgetTypes.RegisterWidgetTypeAsync(
+			new WidgetTypeDescriptor("panel", LocalizedText.FromLiteral("Panel")) { SupportsFlows = true });
+
+		Assert.That(((WidgetTypesRegisterArguments)_invoker.LastArguments!).WidgetType.SupportsFlows, Is.True);
+	}
+
 	/// <summary>
 	/// Opening a modal answers on its own result; the user's answer arrives separately, so this covers
 	/// only the outgoing pair - the return trip is <c>UiCapabilityHandlerTests</c>' <c>modal.result</c>.

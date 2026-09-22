@@ -129,13 +129,11 @@ public sealed class ExecuteActionButtonTriggerRequestMessageHandler
 			};
 		}
 
-		// A provider's widget carries no flows for the host to run - its interactions are the events its
-		// own tree declares, dispatched over its UI session. A client that cannot tell reaches here
-		// anyway: a tile whose tree claims no gesture falls through to this path, and the keyboard and
-		// hardware routes have no tree in reach at all. So the press is nothing to do rather than a
-		// failure, which is what stops every press of a plugin widget raising an error the user cannot act
-		// on.
-		if (_widgetTypes.TryResolve(widget.Type, out var entry) && !entry.IsBuiltIn)
+		var isProviderType = _widgetTypes.TryResolve(widget.Type, out var entry) && !entry.IsBuiltIn;
+
+		// Clients send every unclaimed press of a provider's tile here, so one whose type did not opt in to
+		// flows is nothing to do rather than an error the user cannot act on.
+		if (isProviderType && !entry.Descriptor.SupportsFlows)
 		{
 			return new ExecuteActionButtonTriggerResponse
 			{
@@ -143,7 +141,7 @@ public sealed class ExecuteActionButtonTriggerRequestMessageHandler
 			};
 		}
 
-		if (widget.Type is not (WidgetTypeIds.ActionButton
+		if (!isProviderType && widget.Type is not (WidgetTypeIds.ActionButton
 			or WidgetTypeIds.MusicPlayer
 			or WidgetTypeIds.Weather
 			or WidgetTypeIds.HistoryGraph
