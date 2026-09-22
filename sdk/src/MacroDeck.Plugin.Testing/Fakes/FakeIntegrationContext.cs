@@ -5,6 +5,7 @@ using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Messaging;
 using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
+using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
 
@@ -44,6 +45,7 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 		WidgetTypes = new FakeWidgetTypeProviderContext();
 		ScreenSavers = new FakeScreenSaverProviderContext();
 		Messages = new FakeMessageChannel();
+		UiResources = new FakeUiResourceRegistry();
 	}
 
 	/// <summary>The plugin's own variables - see <see cref="FakeVariableApi" />.</summary>
@@ -128,8 +130,14 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 	/// <summary>The message channel - see <see cref="FakeMessageChannel" />.</summary>
 	public FakeMessageChannel Messages { get; }
 
+	/// <summary>Registered UI resources - see <see cref="FakeUiResourceRegistry" />.</summary>
+	public FakeUiResourceRegistry UiResources { get; }
+
 	/// <inheritdoc />
 	IMessageChannel IIntegrationContext.Messages => Messages;
+
+	/// <inheritdoc />
+	IUiResourceRegistry IIntegrationContext.UiResources => UiResources;
 
 	/// <inheritdoc />
 	IVariableApi IIntegrationContext.Variables => Variables;

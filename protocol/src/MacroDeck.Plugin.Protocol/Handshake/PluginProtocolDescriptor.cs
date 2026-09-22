@@ -108,6 +108,10 @@ public sealed record PluginProtocolLimitsDescriptor
 
 	public int? MaxUiResourceBytes { get; init; }
 
+	public int? MaxUiResourceBytesPerPlugin { get; init; }
+
+	public int? MaxUiResourcesPerPlugin { get; init; }
+
 	public int? MaxUiAttachmentsPerSession { get; init; }
 
 	public int? MaxUiSessionsPerProvider { get; init; }

@@ -249,6 +249,7 @@ keyed by `code`; localise from the code. `details` is a string-to-string map, at
 | `ADB_NOT_ENABLED` | ADB is not enabled in Macro Deck. |
 | `ADB_NOT_ALLOWED` | This plugin is not allowed to use ADB. |
 | `ADB_FAILED` | The ADB operation failed. |
+| `UI_RESOURCE_QUOTA_EXCEEDED` | The plugin's UI resource quota is exhausted. |
 
 The list is append-only within a major. The three `ADB_*` codes answer only the `adb` host API; see
 [the WebSocket reference](/reference/websocket/#adb). A `reason` in `details` refines a deliberately generic

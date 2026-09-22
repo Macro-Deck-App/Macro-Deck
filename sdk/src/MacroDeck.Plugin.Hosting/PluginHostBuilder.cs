@@ -476,6 +476,7 @@ public sealed class PluginHostBuilder
 		Services.TryAddSingleton<RemoteWidgetApi>();
 		Services.TryAddSingleton<RemoteEventPublisher>();
 		Services.TryAddSingleton<RemoteUserNotifier>();
+		Services.TryAddSingleton<RemoteUiResourceRegistry>();
 		Services.TryAddSingleton<IDeviceProviderContext, RemoteDeviceProviderContext>();
 		Services.TryAddSingleton<ILayoutProviderContext, RemoteLayoutProviderContext>();
 		Services.TryAddSingleton<IFolderViewProviderContext, RemoteFolderViewProviderContext>();

@@ -63,6 +63,12 @@ public static class ProtocolErrorCodes
 	/// <c>reason</c> names why, from the <c>adb_</c> values of <see cref="ProtocolErrorReasons" />.</summary>
 	public const string AdbFailed = "ADB_FAILED";
 
+	/// <summary>A <c>ui</c>/<c>register-resource</c> refused because it would take the plugin past
+	/// <see cref="Limits.ProtocolLimits.MaxUiResourceBytesPerPlugin" /> or
+	/// <see cref="Limits.ProtocolLimits.MaxUiResourcesPerPlugin" />. The resource previously registered
+	/// under that name, if any, is left as it was.</summary>
+	public const string UiResourceQuotaExceeded = "UI_RESOURCE_QUOTA_EXCEEDED";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		ProtocolVersionUnsupported, UnknownMessageType, MalformedEnvelope, InvalidPayload, Unauthenticated,
@@ -70,6 +76,6 @@ public static class ProtocolErrorCodes
 		CapabilityUnsupported,
 		CapabilityUnavailable, PayloadTooLarge, AssetTooLarge, QueueOverflow, RateLimited,
 		Timeout, Cancelled, CorrelationUnknown, DuplicateIdempotencyKey, InternalError,
-		AdbNotEnabled, AdbNotAllowed, AdbFailed,
+		AdbNotEnabled, AdbNotAllowed, AdbFailed, UiResourceQuotaExceeded,
 	];
 }

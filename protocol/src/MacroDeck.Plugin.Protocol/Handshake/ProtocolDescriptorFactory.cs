@@ -51,6 +51,8 @@ public static class ProtocolDescriptorFactory
 		MaxUiUpdatesPerSecond = ProtocolLimits.MaxUiUpdatesPerSecond,
 		MaxUiUpdateBurst = ProtocolLimits.MaxUiUpdateBurst,
 		MaxUiResourceBytes = ProtocolLimits.MaxUiResourceBytes,
+		MaxUiResourceBytesPerPlugin = ProtocolLimits.MaxUiResourceBytesPerPlugin,
+		MaxUiResourcesPerPlugin = ProtocolLimits.MaxUiResourcesPerPlugin,
 		MaxUiAttachmentsPerSession = ProtocolLimits.MaxUiAttachmentsPerSession,
 		MaxUiSessionsPerProvider = ProtocolLimits.MaxUiSessionsPerProvider,
 		MaxUiWidgetSessionsPerProvider = ProtocolLimits.MaxUiWidgetSessionsPerProvider

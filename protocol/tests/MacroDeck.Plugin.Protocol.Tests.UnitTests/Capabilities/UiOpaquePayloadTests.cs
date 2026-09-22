@@ -116,9 +116,10 @@ public class UiOpaquePayloadTests
 		});
 	}
 
-	private static readonly string[] _uiHostOperations = ["snapshot", "patch", "fault"];
+	private static readonly string[] _uiHostOperations =
+		["snapshot", "patch", "fault", "register-resource", "remove-resource"];
 
 	[Test]
-	public void The_ui_host_api_offers_exactly_snapshot_patch_and_fault()
+	public void The_ui_host_api_offers_exactly_the_session_and_resource_operations()
 		=> Assert.That(HostOperations.For(HostApis.Ui), Is.EqualTo(_uiHostOperations));
 }

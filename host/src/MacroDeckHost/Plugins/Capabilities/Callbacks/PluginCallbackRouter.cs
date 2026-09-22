@@ -29,6 +29,7 @@ using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Variables;
 using MacroDeckHost.Application.Plugins.Capabilities.Mapping;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Widgets;
@@ -75,6 +76,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	private readonly VariableUpdateChannel? _dynamicVariableChannel;
 	private readonly VariableCatalogInvalidationSignal? _dynamicVariableInvalidation;
 	private readonly HostCallbackThrottle _throttle;
+	private readonly IPluginUiResources? _uiResources;
+	private readonly UiResourceCallbackThrottle _uiResourceThrottle;
 
 	// Rate limiting alone does not bound this: an icon transfer outlives the call that started it, so a
 	// plugin fetching a full deck's icons at once would otherwise hold every image, and its base64 chunk
@@ -111,8 +114,12 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		IPluginHostAssetSender? assets = null,
 		RemoteVariableSubscriptions? variableSubscriptions = null,
 		VariableUpdateChannel? dynamicVariableChannel = null,
-		VariableCatalogInvalidationSignal? dynamicVariableInvalidation = null)
+		VariableCatalogInvalidationSignal? dynamicVariableInvalidation = null,
+		IPluginUiResources? uiResources = null,
+		UiResourceCallbackThrottle? uiResourceThrottle = null)
 	{
+		_uiResources = uiResources;
+		_uiResourceThrottle = uiResourceThrottle ?? new UiResourceCallbackThrottle(TimeProvider.System);
 		_deviceSurfaces = deviceSurfaces;
 		_deviceSessions = deviceSessions;
 		_assets = assets;
@@ -142,8 +149,16 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		_logger = logger.ForContext<PluginCallbackRouter>();
 	}
 
+	public Task<HostCallbackResult> RouteAsync(
+		string pluginId,
+		string correlationId,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken)
+		=> RouteAsync(pluginId, null, correlationId, payload, cancellationToken);
+
 	public async Task<HostCallbackResult> RouteAsync(
 		string pluginId,
+		string? sessionId,
 		string correlationId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
@@ -168,7 +183,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				HostApis.Widgets => await RouteWidgetsAsync(pluginId, payload, cancellationToken),
 				HostApis.Notifications => RouteNotifications(pluginId, payload),
 				HostApis.ActionInteractions => RouteActionInteractions(pluginId, correlationId, payload),
-				HostApis.Ui => RouteUi(pluginId, payload),
+				HostApis.Ui => RouteUi(pluginId, sessionId, payload),
 				HostApis.Devices => await RouteDevicesAsync(pluginId, payload, cancellationToken),
 				HostApis.VariableValues => RouteVariableValues(pluginId, payload),
 				HostApis.Layouts => await RouteLayoutsAsync(pluginId, payload, cancellationToken),
@@ -1172,7 +1187,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			: null;
 	}
 
-	private HostCallbackResult RouteUi(string pluginId, HostInvokePayload payload)
+	private HostCallbackResult RouteUi(string pluginId, string? sessionId, HostInvokePayload payload)
 	{
 		switch (payload.Operation)
 		{
@@ -1213,6 +1228,10 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				_uiSessions.PublishFault(pluginId, arguments.SessionId, arguments.Code, arguments.Message);
 				return HostCallbackResult.Ok();
 			}
+
+			case HostOperations.Ui.RegisterResource:
+			case HostOperations.Ui.RemoveResource:
+				return RouteUiResource(pluginId, sessionId, payload);
 
 			default:
 				return UnknownOperation(payload);
@@ -1272,6 +1291,73 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				return UnknownOperation(payload);
 		}
 	}
+
+	private HostCallbackResult RouteUiResource(string pluginId, string? sessionId, HostInvokePayload payload)
+	{
+		if (_uiResources is null)
+		{
+			return UnknownOperation(payload);
+		}
+
+		if (sessionId is null)
+		{
+			return FromUiResource(new PluginUiResourceResult(PluginUiResourceOutcome.SessionNotCurrent));
+		}
+
+		if (!_uiResourceThrottle.TryConsume(pluginId))
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
+				"This plugin is registering UI resources too quickly.",
+				retryable: true);
+		}
+
+		if (payload.Operation == HostOperations.Ui.RegisterResource)
+		{
+			var arguments = Deserialize<UiRegisterResourceArguments>(payload.Arguments);
+
+			return arguments is null
+				? MissingArguments()
+				: FromUiResource(_uiResources.Register(pluginId,
+					sessionId,
+					arguments.Name,
+					arguments.ContentHash,
+					arguments.MediaType));
+		}
+
+		var removal = Deserialize<UiRemoveResourceArguments>(payload.Arguments);
+
+		return removal is null
+			? MissingArguments()
+			: FromUiResource(_uiResources.Remove(pluginId, sessionId, removal.Name));
+	}
+
+	private static HostCallbackResult FromUiResource(PluginUiResourceResult result) => result.Outcome switch
+	{
+		PluginUiResourceOutcome.Registered => HostCallbackResult.Ok(new UiRegisterResourceResult
+		{
+			Resource = new UiResourceHandleDto
+			{
+				ResourceId = result.Resource!.ResourceId,
+				ContentHash = result.Resource.ContentHash!,
+				MediaType = result.Resource.MediaType!,
+				ByteLength = (int)result.Resource.ByteLength!,
+			}
+		}),
+		PluginUiResourceOutcome.UploadRequired => HostCallbackResult.Ok(new UiRegisterResourceResult
+			{ UploadRequired = true }),
+		PluginUiResourceOutcome.Removed => HostCallbackResult.Ok(),
+		PluginUiResourceOutcome.InvalidName => HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
+			"A UI resource name is a letter or digit followed by up to 63 letters, digits, hyphens or underscores."),
+		PluginUiResourceOutcome.UnsupportedMediaType => HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
+			"A UI resource must be one of: " + string.Join(", ", UiResourceRules.SupportedMediaTypes) + "."),
+		PluginUiResourceOutcome.MediaTypeMismatch => HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
+			"The media type differs from the one the upload declared."),
+		PluginUiResourceOutcome.QuotaExceeded => HostCallbackResult.Fail(ProtocolErrorCodes.UiResourceQuotaExceeded,
+			ProtocolErrorMessages.For(ProtocolErrorCodes.UiResourceQuotaExceeded)),
+		_ => HostCallbackResult.Fail(ProtocolErrorCodes.SessionNotFound,
+			"This session is no longer the plugin's current session.",
+			retryable: true),
+	};
 
 	// The ingest verdict is the host.result, so a provider learns from its own reply that a payload was
 	// refused - the deterministic signal a relay that silently drops updates cannot give. Translated

@@ -126,6 +126,7 @@ protocol descriptor and the session response - read them from there, never hard-
 | Node count | Every node, including `fallback` subtrees. |
 | Update rate and burst | Per session, not per provider - one busy view cannot starve another. |
 | `maxUiResourceBytes` | Both a `UiResource`'s declared `byteLength` and the bytes the host's resource store accepts for one resource. A `byteLength` of `null` is accepted. |
+| `maxUiResourceBytesPerPlugin` / `maxUiResourcesPerPlugin` | The bytes and the number of [resources](/ui/reference/resources/#registering-your-own-images) one plugin may have registered at once. |
 
 ## What a refused update looks like
 
