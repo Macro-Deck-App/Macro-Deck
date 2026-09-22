@@ -12,6 +12,7 @@ using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Reconnection;
 using MacroDeck.Plugin.Hosting.Localization;
+using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Plugin.Protocol.Versioning;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -207,6 +208,9 @@ internal sealed class PluginConnectionHostedService(
 		state.Status = PluginConnectionStatus.Connecting;
 
 		var descriptor = await registrationClient.GetProtocolAsync(cancellationToken);
+		state.HostMessaging = descriptor.CapabilityKinds.Contains(CapabilityKinds.Messaging, StringComparer.Ordinal)
+			? HostMessagingSupport.Advertised
+			: HostMessagingSupport.NotAdvertised;
 
 		// Checked against what the host advertises rather than with ProtocolVersionNegotiator, which
 		// answers the host's side of the question and assumes this process defines the ceiling.
@@ -327,6 +331,16 @@ internal sealed class PluginConnectionHostedService(
 		CancellationToken cancellationToken)
 	{
 		var declared = catalog.Declare();
+		if (declared.Count > ProtocolLimits.MaxDeclaredCapabilities &&
+			declared.Any(capability => capability.Kind == CapabilityKinds.Messaging))
+		{
+			_logger.Warning("This plugin declares {Count} capabilities; with the message channel it would exceed " +
+				"the {Limit} the protocol allows, so it cannot use the channel",
+				declared.Count - 1,
+				ProtocolLimits.MaxDeclaredCapabilities);
+			declared = [.. declared.Where(capability => capability.Kind != CapabilityKinds.Messaging)];
+		}
+
 		state.DeclaredCapabilities = declared.Count;
 
 		var response = await registrationClient.CreateSessionAsync(credentials,
@@ -347,6 +361,8 @@ internal sealed class PluginConnectionHostedService(
 		// flattened into the plugin's own language first, is settled here and nowhere else.
 		PluginText.Negotiated(response.NegotiatedVersion);
 		state.AcceptedCapabilities = response.Capabilities.Count(capability => capability.Accepted);
+		state.MessagingAccepted = response.Capabilities.Any(capability =>
+			capability is { Kind: CapabilityKinds.Messaging, Accepted: true });
 
 		return new PluginSession(response.SessionId,
 			response.SessionToken,

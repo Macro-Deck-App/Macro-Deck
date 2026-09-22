@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using MacroDeckHost.Application.Integrations;
+using MacroDeckHost.Application.Messaging;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Rendering;
@@ -58,6 +59,8 @@ public sealed class IntegrationInitializer
 
 	private readonly ConcurrentDictionary<string, byte> _attempted = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, IntegrationEventPublisher> _eventPublishers = new(StringComparer.Ordinal);
+	private readonly ConcurrentDictionary<string, InProcessMessageChannel> _messageChannels = new(StringComparer.Ordinal);
+	private readonly IMessageBroker _messageBroker;
 
 	public IntegrationInitializer(
 		IServiceScopeFactory serviceScopeFactory,
@@ -81,9 +84,11 @@ public sealed class IntegrationInitializer
 		DeviceProviderHost deviceProviders,
 		TimeProvider timeProvider,
 		ILogger logger,
+		IMessageBroker messageBroker,
 		IKnownAudioDeviceStore? knownAudioDevices = null,
 		IVariablePollingInvalidationSignal? pollingInvalidation = null)
 	{
+		_messageBroker = messageBroker;
 		_knownAudioDevices = knownAudioDevices;
 		_pollingInvalidation = pollingInvalidation;
 		_serviceScopeFactory = serviceScopeFactory;
@@ -142,7 +147,8 @@ public sealed class IntegrationInitializer
 			_scriptApi,
 			widgetApi,
 			events,
-			new IntegrationUserNotifier(integration.Id, integrationName, _userNotificationStore, _logger));
+			new IntegrationUserNotifier(integration.Id, integrationName, _userNotificationStore, _logger),
+			await RenewMessageChannelAsync(integration.Id));
 
 		// IIntegration.IsInitialized has no setter, so it is the SDK's own word on whether initialization
 		// finished, not on whether it was attempted. Shutdown needs the latter to avoid leaking whatever a
@@ -174,6 +180,7 @@ public sealed class IntegrationInitializer
 				"Integration '{IntegrationId}' initialization was abandoned because the host is shutting down",
 				integration.Id);
 			ObserveAbandoned(attempt, scope, integration.Id);
+			await ReleaseMessagingAsync(integration.Id);
 			return IntegrationInitializationOutcome.Aborted;
 		}
 		catch (TimeoutException)
@@ -184,6 +191,7 @@ public sealed class IntegrationInitializer
 				_initializeTimeout);
 			_hostIssueStore.RaiseStartupTimeout(integration.Id);
 			ObserveAbandoned(attempt, scope, integration.Id);
+			await ReleaseMessagingAsync(integration.Id);
 			return IntegrationInitializationOutcome.TimedOut;
 		}
 		catch (Exception ex)
@@ -191,6 +199,7 @@ public sealed class IntegrationInitializer
 			_logger.Error(ex, "Failed to initialize integration '{IntegrationId}'", integration.Id);
 			_hostIssueStore.RaiseStartupFailure(integration.Id, ex.Message);
 			await scope.DisposeAsync();
+			await ReleaseMessagingAsync(integration.Id);
 			return IntegrationInitializationOutcome.Failed;
 		}
 
@@ -207,6 +216,30 @@ public sealed class IntegrationInitializer
 		await _deviceProviders.StartAsync(integration, cancellationToken);
 		await scope.DisposeAsync();
 		return IntegrationInitializationOutcome.Initialized;
+	}
+
+	public async Task ReleaseMessagingAsync(string integrationId)
+	{
+		if (_messageChannels.TryRemove(integrationId, out var channel))
+		{
+			await channel.DisposeAsync();
+		}
+	}
+
+	public async Task ReleaseAllMessagingAsync()
+	{
+		foreach (var integrationId in _messageChannels.Keys)
+		{
+			await ReleaseMessagingAsync(integrationId);
+		}
+	}
+
+	private async Task<InProcessMessageChannel> RenewMessageChannelAsync(string integrationId)
+	{
+		await ReleaseMessagingAsync(integrationId);
+		var channel = new InProcessMessageChannel(_messageBroker, integrationId, _logger);
+		_messageChannels[integrationId] = channel;
+		return channel;
 	}
 
 	private void ObserveAbandoned(Task attempt, AsyncServiceScope scope, string integrationId)

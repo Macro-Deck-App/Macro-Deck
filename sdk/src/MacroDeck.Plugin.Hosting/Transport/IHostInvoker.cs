@@ -29,6 +29,14 @@ internal interface IHostInvoker
 		CancellationToken cancellationToken)
 		=> InvokeAsync(api, operation, arguments, cancellationToken);
 
+	Task<JsonElement?> InvokeAsync(string api,
+		string operation,
+		object? arguments,
+		TimeSpan deadline,
+		TimeSpan wait,
+		CancellationToken cancellationToken)
+		=> InvokeAsync(api, operation, arguments, wait, cancellationToken);
+
 	/// <summary>Completes a pending invocation from the connection's receive loop. False when the
 	/// correlation is unknown to this invoker.</summary>
 	bool TryComplete(ProtocolEnvelope result);

@@ -106,6 +106,9 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 	/// <summary>Every event a plugin under test has published.</summary>
 	public PluginEventCollector Events { get; } = new();
 
+	/// <summary>The <c>messaging</c> host api every hosted plugin reaches - see <see cref="TestHostMessaging" />.</summary>
+	public TestHostMessaging Messaging { get; } = new();
+
 	/// <summary>Starts a new host on a random loopback port.</summary>
 	public static async Task<MacroDeckTestHost> StartAsync(MacroDeckTestHostOptions? options = null)
 	{
@@ -713,7 +716,8 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 			Messages,
 			Logs,
 			Events,
-			_fromPlugin.Writer);
+			_fromPlugin.Writer,
+			Messaging);
 
 		record.DroppedAt = null;
 		record.Ended = false;

@@ -79,6 +79,10 @@ public sealed class PluginConnectionState
 	/// </summary>
 	internal PluginSessionConnection? ActiveConnection { get; set; }
 
+	internal HostMessagingSupport HostMessaging { get; set; } = HostMessagingSupport.Unknown;
+
+	internal bool MessagingAccepted { get; set; }
+
 	/// <summary>
 	/// Raised every time the handshake completes and the session becomes usable - including a resume.
 	/// <see cref="Integrations.IntegrationLifecycleHostedService"/> is the subscriber: it initializes
@@ -101,4 +105,13 @@ public sealed class PluginConnectedEventArgs(bool resumed) : EventArgs
 {
 	/// <summary>True when this connect resumed the previous session rather than opening a new one.</summary>
 	public bool Resumed { get; } = resumed;
+}
+
+internal enum HostMessagingSupport
+{
+	Unknown,
+
+	Advertised,
+
+	NotAdvertised
 }

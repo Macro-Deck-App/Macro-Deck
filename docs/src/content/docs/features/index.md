@@ -28,6 +28,7 @@ public sealed class ObsIntegration : IPluginIntegration, IVariableProvider, IEve
 | --- | --- | --- |
 | [Variables](/features/variables/) | `IVariableProvider` | Expose live values such as `{{ vars.music_track }}`. |
 | [Events](/features/events/) | `IEventProvider`, `IEventPublisher` | Let users trigger automation when something happens. |
+| [Messaging between plugins](/features/messaging/) | `IIntegrationContext.Messages` | Talk to other plugins and integrations by topic: events, commands and requests. |
 | [Deck and clients](/features/deck/) | `IIntegrationContext.Deck` | Navigate folders and profiles, and find out which folder each client has open. |
 | [Music players](/features/music-players/) | `IMusicPlayerProvider` | Drive the Music Player widget and reuse Macro Deck's ready-made music actions. |
 | [Weather](/features/weather/) | `IWeatherProvider` | Supply weather stations to Macro Deck's weather features. |
@@ -59,7 +60,7 @@ public sealed class ObsIntegration : IPluginIntegration, IVariableProvider, IEve
 ## Host APIs
 
 `IIntegrationContext` gives an integration access to what Macro Deck owns: [`Deck`](/features/deck/) navigation and client positions, `Scripts`,
-`Widgets`, `Notifications`, variables, configuration and events. In a plugin every call crosses the
+`Widgets`, `Notifications`, variables, configuration, events and [messaging](/features/messaging/). In a plugin every call crosses the
 plugin protocol, so don't call them in a hot loop. [Android devices](/features/android-devices/) are the
 exception to where you find them: take `IAndroidDeviceManager` from dependency injection.
 

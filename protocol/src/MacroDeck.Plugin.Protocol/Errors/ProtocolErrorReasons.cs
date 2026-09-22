@@ -26,6 +26,33 @@ public static class ProtocolErrorReasons
 	/// </summary>
 	public const string HostLocked = "host_locked";
 
+	/// <summary>Refines <see cref="ProtocolErrorCodes.InvalidPayload" /> on <c>messaging</c>: a topic or pattern is malformed.</summary>
+	public const string MessagingInvalidTopic = "messaging_invalid_topic";
+
+	/// <summary>Refines <see cref="ProtocolErrorCodes.CapabilityUnavailable" /> on <c>messaging</c>: nothing handles the topic.</summary>
+	public const string MessagingNoHandler = "messaging_no_handler";
+
+	/// <summary>
+	/// Refines a retryable <see cref="ProtocolErrorCodes.CapabilityUnavailable" /> on <c>messaging</c>: the
+	/// topic has a handler, but it cannot be reached right now, for example while its plugin reconnects.
+	/// </summary>
+	public const string MessagingHandlerUnavailable = "messaging_handler_unavailable";
+
+	/// <summary>Refines <see cref="ProtocolErrorCodes.CapabilityUnavailable" /> on <c>messaging</c>: the handler failed.</summary>
+	public const string MessagingHandlerFailed = "messaging_handler_failed";
+
+	/// <summary>
+	/// The reason a <c>subscriptions</c> entry was rejected because another participant already handles
+	/// the topic. The rejection names that participant.
+	/// </summary>
+	public const string MessagingTopicHandled = "messaging_topic_handled";
+
+	/// <summary>
+	/// Refines <see cref="ProtocolErrorCodes.CapabilityUnavailable" /> on <c>messaging</c>: the session did
+	/// not declare the <c>messaging</c> capability kind, so nothing can be delivered to it.
+	/// </summary>
+	public const string MessagingNotDeclared = "messaging_not_declared";
+
 	/// <summary>Refines <see cref="ProtocolErrorCodes.AdbFailed" />: no adb executable was found.</summary>
 	public const string AdbExecutableNotFound = "adb_executable_not_found";
 

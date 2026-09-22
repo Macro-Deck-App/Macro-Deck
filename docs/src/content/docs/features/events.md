@@ -7,6 +7,9 @@ An integration tells Macro Deck "this just happened" with events. `IEventProvide
 exist; `IEventPublisher`, handed to you on the integration context, publishes an occurrence. Users react
 to them with triggers.
 
+These events are for the user's automation. To tell other plugins that something happened, publish on
+the [message channel](/features/messaging/) instead: its events reach plugins, not triggers.
+
 ## Quick start
 
 ```csharp

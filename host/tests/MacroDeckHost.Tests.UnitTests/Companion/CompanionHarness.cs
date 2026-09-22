@@ -83,6 +83,7 @@ internal sealed class CompanionHarness
 			null!,
 			null!,
 			null!,
+			null!,
 			null!);
 
 		if (register)

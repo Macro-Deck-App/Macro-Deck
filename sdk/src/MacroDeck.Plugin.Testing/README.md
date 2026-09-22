@@ -14,9 +14,9 @@ way a hand-rolled double would.
 - `MacroDeck.Plugin.Testing.Conformance` - a framework-agnostic suite of protocol-level checks any
   plugin can be run against, from your own test project or from `macrodeck-plugin test`. See
   [the conformance guide](https://docs.macro-deck.app/reference/conformance/).
-- `MacroDeck.Plugin.Testing.Fakes` - in-memory stand-ins for the eight APIs `IIntegrationContext`
+- `MacroDeck.Plugin.Testing.Fakes` - in-memory stand-ins for the nine APIs `IIntegrationContext`
   exposes (variables, user variables, config and secrets, deck navigation, scripts, widgets, events,
-  notifications) plus action interactions, so an integration can be exercised without a host on the
+  notifications, the message channel) plus action interactions, so an integration can be exercised without a host on the
   other end of any of them.
 - `ManualTimeProvider` and `Wait.UntilAsync` - a clock you advance by hand and a polling helper that
   throws `PluginTestTimeoutException` instead of hanging.

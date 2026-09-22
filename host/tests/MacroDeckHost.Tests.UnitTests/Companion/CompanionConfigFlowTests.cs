@@ -1,6 +1,7 @@
 using System.Text.Json;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
+using MacroDeckHost.Application.Messaging;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Infrastructure.BackgroundServices;
@@ -128,7 +129,8 @@ internal sealed class CompanionConfigFlowTests
 			TestScreenSaverProviders.Host(),
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
-			CompanionHarness.Logger);
+			CompanionHarness.Logger,
+			new MessageBroker(CompanionHarness.Logger));
 		var startup = new IntegrationStartupBackgroundService(new LifetimeStub(),
 			harness.Registry,
 			harness.ScopeFactory,

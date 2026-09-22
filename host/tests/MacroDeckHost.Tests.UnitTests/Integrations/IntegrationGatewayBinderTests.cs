@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Messaging;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Services;
@@ -232,7 +233,8 @@ internal sealed class IntegrationGatewayBinderTests
 			TestScreenSaverProviders.Host(),
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
-			new LoggerConfiguration().CreateLogger());
+			new LoggerConfiguration().CreateLogger(),
+			new MessageBroker(Serilog.Core.Logger.None));
 
 	private static ServiceProvider BuildScopeServices()
 		=> new ServiceCollection()

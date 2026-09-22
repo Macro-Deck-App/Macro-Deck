@@ -159,7 +159,7 @@ are listed in the descriptor's `capabilityKinds`:
 
 `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`,
 `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`,
-`folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`.
+`folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`, `messaging`.
 
 - **Do not invent operation names inside an existing kind.** Additions to the operation vocabulary are
   compatibility-sensitive protocol changes. Exact operations and payloads are in the protocol package

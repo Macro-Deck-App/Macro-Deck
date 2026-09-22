@@ -147,7 +147,12 @@ internal sealed class CallbackContractTests
 			_scripts,
 			_widgets,
 			_events,
-			_notifications);
+			_notifications,
+			new RemoteMessageChannel(_hostInvoker,
+				_state,
+				new MacroDeck.Plugin.Hosting.PluginMetadata { Id = "com.example.callbacks", Name = "Callbacks", Version = "1.0.0" },
+				TimeProvider.System,
+				Serilog.Core.Logger.None));
 	}
 
 	[TearDown]

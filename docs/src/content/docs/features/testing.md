@@ -91,6 +91,25 @@ Assert.That(published.Parameters!.Value.GetProperty("count").GetInt32(), Is.Equa
 fire-and-forget contract. Parameters are serialized with the protocol's own JSON options, so `Parameters`
 is what the host would receive.
 
+## Testing messaging
+
+```csharp
+harness.Context.Messages.RespondTo("obs.scene.current", _ => JsonSerializer.SerializeToElement("Live"));
+await harness.InitializeIntegrationsAsync();
+
+var reply = await harness.Context.Messages.DeliverRequestAsync("lights.state", sender: "com.example.deck");
+Assert.That(harness.Context.Messages.Published.Select(message => message.Topic), Does.Contain("lights.changed"));
+```
+
+`harness.Context.Messages` is a `FakeMessageChannel`, and an injected `IMessageChannel` resolves to the same
+instance. It routes the plugin's own messages the way Macro Deck does, answers everything else from
+`RespondTo` stubs or with `NoHandler`, and records what the plugin publishes, sends and requests.
+Deliver messages from other participants with its `Deliver*Async` methods rather than raw capability
+invocations. Over the wire, `MacroDeckTestHost.Messaging` records and answers the hosted plugin's
+messages, and `session.Messaging` delivers to it. On a host that offers the channel a plugin declares
+the `messaging` capability too, so an assertion on its exact `Declared` list includes it. See
+[Messaging between plugins](/features/messaging/#testing).
+
 ## Testing configuration
 
 ```csharp

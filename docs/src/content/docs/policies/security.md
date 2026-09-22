@@ -327,6 +327,15 @@ as.
 Treat the other declared permissions as documentation of intent, not as a constraint on what a plugin can
 reach.
 
+## Messages between plugins
+
+Plugins and integrations can exchange messages through Macro Deck's
+[message channel](/features/messaging/). Macro Deck stamps every message with the sender's integration
+id, so `Sender` is reliable, but it authorizes nothing: any plugin can publish on any topic, send commands
+and requests to any handled topic, and handle any topic nobody has claimed yet. Treat a message like any
+other input from another process: validate its payload, and check `Sender` before acting on a command
+where it matters who asked. `host:messaging` is declared, not enforced.
+
 ## Logging and redaction
 
 ```csharp

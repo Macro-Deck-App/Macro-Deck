@@ -36,6 +36,7 @@ public sealed class PluginSessionView : ICapabilityInvoker
 		WidgetTypeProvider = new WidgetTypeProviderTestClient(this);
 		ScreenSaverProvider = new ScreenSaverProviderTestClient(this);
 		Issues = new IssuesTestClient(this);
+		Messaging = new MessagingTestClient(this);
 	}
 
 	/// <summary>The session id the host issued, stable across a resume.</summary>
@@ -94,6 +95,9 @@ public sealed class PluginSessionView : ICapabilityInvoker
 
 	/// <summary>The <c>issues</c> capability.</summary>
 	public IssuesTestClient Issues { get; }
+
+	/// <summary>The <c>messaging</c> capability.</summary>
+	public MessagingTestClient Messaging { get; }
 
 	/// <summary>
 	/// Sends a <c>capability.invoke</c> and returns exactly what the plugin replied with - a real

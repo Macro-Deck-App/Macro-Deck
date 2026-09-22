@@ -114,8 +114,13 @@ internal sealed class IntegrationLifecycleHostedService(
 		}
 
 		await _gate.WaitAsync(CancellationToken.None);
+		var messages = services.GetService<RemoteMessageChannel>();
 		try
 		{
+			// Before ShutdownAsync: an integration disposing its registrations there must not hand
+			// its topics to another plugin while it is about to register them again.
+			messages?.ReleaseLifecycleRegistrations();
+
 			if (_initialized.Count > 0)
 			{
 				// A reconnect, not the first connect: the host may have restarted, so cached state from
@@ -188,6 +193,11 @@ internal sealed class IntegrationLifecycleHostedService(
 					_logger.IntegrationInitializationFailed(metadata.Id, integration.GetType().Name, exception);
 				}
 			}
+
+			if (messages is not null)
+			{
+				await CompleteMessagingReleaseAsync(messages);
+			}
 		}
 		finally
 		{
@@ -221,6 +231,18 @@ internal sealed class IntegrationLifecycleHostedService(
 		}
 
 		_initialized.Clear();
+	}
+
+	private async Task CompleteMessagingReleaseAsync(RemoteMessageChannel messages)
+	{
+		try
+		{
+			await messages.CompleteLifecycleReleaseAsync();
+		}
+		catch (Exception exception) when (exception is not OutOfMemoryException)
+		{
+			_logger.Debug(exception, "Releasing message channel registrations of {PluginId} failed", metadata.Id);
+		}
 	}
 
 	public void Dispose() => _gate.Dispose();
