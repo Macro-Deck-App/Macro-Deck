@@ -126,6 +126,8 @@ public class WeatherWidgetSessionRefreshTests
 			content = default!;
 			return false;
 		}
+
+		public bool Remove(string resourceId) => false;
 	}
 
 	private sealed class PassThroughSampleText : IWidgetSampleTextResolver

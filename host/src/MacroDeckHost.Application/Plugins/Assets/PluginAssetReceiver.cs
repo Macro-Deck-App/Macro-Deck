@@ -42,6 +42,12 @@ public sealed class PluginAssetReceiver : IPluginAssetReceiver
 				$"Asset '{assetId}' declares {totalBytes} bytes, over the {ProtocolLimits.MaxAssetBytes} byte limit.");
 		}
 
+		if (string.Equals(kind, AssetKinds.UiResource, StringComparison.Ordinal) &&
+			CheckUiResource(assetId, mimeType, totalBytes) is { } refused)
+		{
+			return refused;
+		}
+
 		var plugin = _byPlugin.GetOrAdd(pluginId, static _ => new PluginTransfers());
 
 		lock (plugin.Gate)
@@ -160,7 +166,13 @@ public sealed class PluginAssetReceiver : IPluginAssetReceiver
 			RemoveTransfer(plugin, assetId, transfer);
 		}
 
-		_cache.Write(contentHash, mimeType, bytes);
+		// UI resource bytes are user content held only as long as the plugin session registers them; the
+		// shared disk cache would keep them past a host restart and evict other plugins' icons.
+		if (!string.Equals(kind, AssetKinds.UiResource, StringComparison.Ordinal))
+		{
+			_cache.Write(contentHash, mimeType, bytes);
+		}
+
 		AssetCommitted?.Invoke(this, new AssetCommittedEventArgs(pluginId, kind, contentHash, mimeType, bytes));
 
 		return AssetOperationResult.Ok();
@@ -176,6 +188,26 @@ public sealed class PluginAssetReceiver : IPluginAssetReceiver
 				plugin.BufferedBytes = 0;
 			}
 		}
+	}
+
+	private static AssetOperationResult? CheckUiResource(string assetId, string mimeType, int totalBytes)
+	{
+		if (!UiResourceRules.IsSupportedMediaType(mimeType))
+		{
+			return AssetOperationResult.Fail(ProtocolErrorCodes.InvalidPayload,
+				$"Asset '{assetId}' has media type '{mimeType}', which a UI resource cannot have.");
+		}
+
+		if (totalBytes == 0)
+		{
+			return AssetOperationResult.Fail(ProtocolErrorCodes.InvalidPayload,
+				$"Asset '{assetId}' is empty.");
+		}
+
+		return totalBytes > ProtocolLimits.MaxUiResourceBytes
+			? AssetOperationResult.Fail(ProtocolErrorCodes.AssetTooLarge,
+				$"Asset '{assetId}' declares {totalBytes} bytes, over the {ProtocolLimits.MaxUiResourceBytes} byte UI resource limit.")
+			: null;
 	}
 
 	private static AssetOperationResult UnknownAsset(string assetId)

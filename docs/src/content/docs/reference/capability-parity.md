@@ -43,6 +43,7 @@ A plugin implements the same SDK contracts as an in-process integration, but the
 | Platform declaration | Yes | Differs | Follows packaged entrypoints and runtime support, not the `[MacroDeckIntegration]` attribute ([MDP2006](/reference/analyzers/#mdp2006)). |
 | Logging | Yes | Same | `MacroDeck.Plugin.Serilog` forwards events to the host log; identity is stamped from the authenticated session. |
 | Client positions | Yes | Differs | A plugin reads them from pushed deck state, so quick moves can arrive as one change and `GetClients()` is empty until the first push after a host restart. In process, every move is seen. See [Deck and clients](/features/deck/). |
+| UI resource registration | No | Differs | `IIntegrationContext.UiResources` throws `Unsupported` in process; built-in integrations write to the host's resource store directly. See [Resources](/ui/reference/resources/#registering-your-own-images). |
 | Macro Deck UI | Yes | Same | One provider contract: sessions, patch relay, limits and invalidation behave identically, `maxUiResourceBytes` bounds a real transfer, and payloads are relayed byte for byte. |
 
 ## Snapshot-backed state

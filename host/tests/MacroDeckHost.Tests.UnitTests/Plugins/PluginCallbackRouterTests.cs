@@ -1,5 +1,6 @@
 using System.Text.Json;
 using MacroDeck.Plugin.Protocol.Callbacks;
+using MacroDeck.Plugin.Protocol.Callbacks.Ui;
 using MacroDeck.Plugin.Protocol.Capabilities.DeviceProvider;
 using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Errors;
@@ -30,6 +31,7 @@ using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
 using Microsoft.Extensions.DependencyInjection;
 using DomainVariableType = MacroDeckHost.Domain.Enums.VariableType;
+using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 
@@ -52,7 +54,9 @@ public class PluginCallbackRouterTests
 		FakeScriptApi? scriptApi = null,
 		FakePluginDeviceRegistry? deviceRegistry = null,
 		ScreenSaverRegistry? screenSavers = null,
-		WidgetTypeRegistry? widgetTypes = null)
+		WidgetTypeRegistry? widgetTypes = null,
+		IPluginUiResources? uiResources = null,
+		UiResourceCallbackThrottle? uiResourceThrottle = null)
 	{
 		var services = new ServiceCollection();
 		services.AddSingleton<IVariableService>(variableService);
@@ -78,7 +82,9 @@ public class PluginCallbackRouterTests
 			new RecordingUiTransport(),
 			throttle,
 			lockState ?? new FakeHostLockState(),
-			Serilog.Core.Logger.None);
+			Serilog.Core.Logger.None,
+			uiResources: uiResources,
+			uiResourceThrottle: uiResourceThrottle);
 	}
 
 	[SetUp]
@@ -106,6 +112,189 @@ public class PluginCallbackRouterTests
 			deviceRegistry,
 			screenSavers,
 			widgetTypes);
+
+	// ---- ui resources ---------------------------------------------------------------------------
+
+	private PluginCallbackRouter UiResourceRouter(RecordingUiResources resources,
+		int sharedCapacity = 100,
+		int resourceCapacity = 100)
+		=> Router(_variableService,
+			_actionInteractions,
+			_invoker,
+			new HostCallbackThrottle(_time, sharedCapacity, refillPerSecond: 0),
+			uiResources: resources,
+			uiResourceThrottle: new UiResourceCallbackThrottle(_time, resourceCapacity, refillPerSecond: 0));
+
+	private static HostInvokePayload RegisterResource(string name = "photo")
+		=> new()
+		{
+			Api = HostApis.Ui,
+			Operation = HostOperations.Ui.RegisterResource,
+			Arguments = Arg(new UiRegisterResourceArguments
+				{ Name = name, ContentHash = "sha256:abc", MediaType = "image/png" })
+		};
+
+	[Test]
+	public async Task A_resource_registration_is_made_for_the_calling_plugins_session_and_answers_the_handle()
+	{
+		var resources = new RecordingUiResources();
+		var router = UiResourceRouter(resources);
+
+		var result = await router.RouteAsync("plugin.a", "session-1", "c1", RegisterResource(), CancellationToken.None);
+
+		var answer = result.Data?.Deserialize<UiRegisterResourceResult>(PluginProtocolJson.Options);
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.Null);
+			Assert.That(resources.Calls, Is.EqualTo(new[] { ("plugin.a", "session-1", "photo") }));
+			Assert.That(answer?.Resource?.ResourceId, Is.EqualTo("plugin-x.photo"));
+			Assert.That(answer?.Resource?.ContentHash, Is.EqualTo("sha256:abc"));
+		});
+	}
+
+	[Test]
+	public async Task A_resource_registration_without_a_session_is_refused_as_retryable()
+	{
+		var resources = new RecordingUiResources();
+		var router = UiResourceRouter(resources);
+
+		var result = await router.RouteAsync("plugin.a", "c1", RegisterResource(), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error?.Code, Is.EqualTo(ProtocolErrorCodes.SessionNotFound));
+			Assert.That(result.Error?.Retryable, Is.True);
+			Assert.That(resources.Calls, Is.Empty);
+		});
+	}
+
+	[TestCase(PluginUiResourceOutcome.QuotaExceeded, ProtocolErrorCodes.UiResourceQuotaExceeded)]
+	[TestCase(PluginUiResourceOutcome.InvalidName, ProtocolErrorCodes.InvalidPayload)]
+	[TestCase(PluginUiResourceOutcome.MediaTypeMismatch, ProtocolErrorCodes.InvalidPayload)]
+	[TestCase(PluginUiResourceOutcome.SessionNotCurrent, ProtocolErrorCodes.SessionNotFound)]
+	public async Task A_refused_registration_answers_its_protocol_error(PluginUiResourceOutcome outcome, string code)
+	{
+		var router = UiResourceRouter(new RecordingUiResources { Outcome = outcome });
+
+		var result = await router.RouteAsync("plugin.a", "session-1", "c1", RegisterResource(), CancellationToken.None);
+
+		Assert.That(result.Error?.Code, Is.EqualTo(code));
+	}
+
+	[Test]
+	public async Task Resource_registrations_do_not_spend_the_plugins_shared_callback_budget()
+	{
+		var router = UiResourceRouter(new RecordingUiResources(), sharedCapacity: 1);
+
+		for (var index = 0; index < 20; index++)
+		{
+			var result = await router.RouteAsync("plugin.a",
+				"session-1",
+				"c" + index,
+				RegisterResource($"photo-{index}"),
+				CancellationToken.None);
+			Assert.That(result.Error, Is.Null);
+		}
+
+		Assert.That(router.Admit("plugin.a", new HostInvokePayload
+			{
+				Api = HostApis.Variables, Operation = HostOperations.Variables.List
+			}),
+			Is.Null);
+	}
+
+	[Test]
+	public async Task Resource_registrations_beyond_their_own_budget_are_rate_limited()
+	{
+		var router = UiResourceRouter(new RecordingUiResources(), resourceCapacity: 2);
+
+		await router.RouteAsync("plugin.a", "session-1", "c1", RegisterResource(), CancellationToken.None);
+		await router.RouteAsync("plugin.a", "session-1", "c2", RegisterResource(), CancellationToken.None);
+		var third = await router.RouteAsync("plugin.a", "session-1", "c3", RegisterResource(), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(third.Error?.Code, Is.EqualTo(ProtocolErrorCodes.RateLimited));
+			Assert.That(third.Error?.Retryable, Is.True);
+		});
+	}
+
+	[Test]
+	public async Task A_burst_of_ui_patches_is_still_not_throttled()
+	{
+		var router = UiResourceRouter(new RecordingUiResources(), sharedCapacity: 1, resourceCapacity: 1);
+
+		for (var index = 0; index < 100; index++)
+		{
+			var result = await router.RouteAsync("plugin.a",
+				"session-1",
+				"c" + index,
+				new HostInvokePayload
+				{
+					Api = HostApis.Ui,
+					Operation = HostOperations.Ui.Patch,
+					Arguments = Arg(new UiPatchArguments
+						{ SessionId = "ui-1", Patch = JsonSerializer.SerializeToElement(new { }) })
+				},
+				CancellationToken.None);
+			Assert.That(result.Error?.Code, Is.Not.EqualTo(ProtocolErrorCodes.RateLimited));
+		}
+	}
+
+	[Test]
+	public async Task Removing_a_resource_is_made_for_the_calling_plugins_session()
+	{
+		var resources = new RecordingUiResources();
+		var router = UiResourceRouter(resources);
+
+		var result = await router.RouteAsync("plugin.a",
+			"session-1",
+			"c1",
+			new HostInvokePayload
+			{
+				Api = HostApis.Ui,
+				Operation = HostOperations.Ui.RemoveResource,
+				Arguments = Arg(new UiRemoveResourceArguments { Name = "photo" })
+			},
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.Null);
+			Assert.That(resources.Removed, Is.EqualTo(new[] { ("plugin.a", "session-1", "photo") }));
+		});
+	}
+
+	private sealed class RecordingUiResources : IPluginUiResources
+	{
+		public List<(string PluginId, string SessionId, string Name)> Calls { get; } = [];
+
+		public List<(string PluginId, string SessionId, string Name)> Removed { get; } = [];
+
+		public PluginUiResourceOutcome Outcome { get; init; } = PluginUiResourceOutcome.Registered;
+
+		public PluginUiResourceResult Register(string pluginId,
+			string sessionId,
+			string name,
+			string contentHash,
+			string mediaType)
+		{
+			Calls.Add((pluginId, sessionId, name));
+
+			return Outcome == PluginUiResourceOutcome.Registered
+				? new PluginUiResourceResult(Outcome, new MacroDeck.Ui.Model.Resources.UiResource
+				{
+					ResourceId = "plugin-x." + name, ContentHash = contentHash, MediaType = mediaType, ByteLength = 3
+				})
+				: new PluginUiResourceResult(Outcome);
+		}
+
+		public PluginUiResourceResult Remove(string pluginId, string sessionId, string name)
+		{
+			Removed.Add((pluginId, sessionId, name));
+			return new PluginUiResourceResult(PluginUiResourceOutcome.Removed);
+		}
+	}
 
 	// ---- security: ownership containment -----------------------------------------------------
 

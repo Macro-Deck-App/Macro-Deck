@@ -51,7 +51,8 @@ public class RemoteIntegrationContextTests
 				new PluginConnectionState(),
 				new PluginMetadata { Id = "com.example.test", Name = "Test Plugin", Version = "1.0.0" },
 				TimeProvider.System,
-				Serilog.Core.Logger.None));
+				Serilog.Core.Logger.None),
+			new RemoteUiResourceRegistry(_invoker, new Support.FakeAssetUploader()));
 	}
 
 	[TearDown]
@@ -413,6 +414,11 @@ public class RemoteIntegrationContextTests
 		covered.Add((HostApis.Ui, HostOperations.Ui.Snapshot));
 		covered.Add((HostApis.Ui, HostOperations.Ui.Patch));
 		covered.Add((HostApis.Ui, HostOperations.Ui.Fault));
+
+		// The resource operations are covered by RemoteUiResourceRegistryTests, which scripts the
+		// upload-then-register exchange the recording invoker here cannot answer.
+		covered.Add((HostApis.Ui, HostOperations.Ui.RegisterResource));
+		covered.Add((HostApis.Ui, HostOperations.Ui.RemoveResource));
 
 		// devices is handed to a device provider rather than reached through IIntegrationContext, so it
 		// is covered by Device_registrations_send_the_declared_Api_Operation_pair above.

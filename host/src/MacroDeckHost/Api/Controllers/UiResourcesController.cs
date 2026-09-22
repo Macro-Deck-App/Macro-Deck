@@ -15,13 +15,25 @@ public class UiResourcesController : ControllerBase
 
 	[HttpGet("{resourceId}")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
-	public IActionResult Get(string resourceId)
+	public IActionResult Get(string resourceId, [FromQuery(Name = "v")] string? version = null)
 	{
 		if (!_resources.TryGet(resourceId, out var resource))
 		{
 			Response.Headers.CacheControl = "no-store";
 
 			return NotFound();
+		}
+
+		Response.Headers.Append("X-Content-Type-Options", "nosniff");
+		Response.Headers.ContentSecurityPolicy = "default-src 'none'; style-src 'unsafe-inline'; sandbox";
+
+		// A resource registered again under its name keeps its id, so a URL naming an older version must not
+		// cache the current bytes as that version.
+		if (version is not null && !string.Equals(version, resource.ContentHash, StringComparison.Ordinal))
+		{
+			Response.Headers.CacheControl = "no-store";
+
+			return File(resource.Content.ToArray(), resource.MediaType);
 		}
 
 		var etag = $"\"{resource.ContentHash}\"";
@@ -33,9 +45,6 @@ public class UiResourcesController : ControllerBase
 
 			return StatusCode(StatusCodes.Status304NotModified);
 		}
-
-		Response.Headers.Append("X-Content-Type-Options", "nosniff");
-		Response.Headers.ContentSecurityPolicy = "default-src 'none'; style-src 'unsafe-inline'; sandbox";
 
 		Response.Headers.CacheControl = "private, max-age=31536000, immutable";
 		Response.Headers.ETag = etag;

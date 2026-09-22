@@ -61,4 +61,7 @@ public sealed class UiResourceStore : IUiResourceStore
 
 		return false;
 	}
+
+	public bool Remove(string resourceId)
+		=> !string.IsNullOrEmpty(resourceId) && _resources.TryRemove(resourceId, out _);
 }

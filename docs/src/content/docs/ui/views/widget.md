@@ -110,9 +110,9 @@ otherwise identical, and without it the ghost and the tile would share a session
 
 ## Artwork
 
-`_sun` above is a [resource handle](/ui/reference/resources/). Registering your own artwork needs an
-upload path that plugins do not have yet; that is an additive step the component vocabulary was shaped
-for.
+`_sun` above is a [resource handle](/ui/reference/resources/). Get one for your own image from
+`IIntegrationContext.UiResources` and register a name again to change the picture; see
+[Registering your own images](/ui/reference/resources/#registering-your-own-images).
 
 ## See also
 

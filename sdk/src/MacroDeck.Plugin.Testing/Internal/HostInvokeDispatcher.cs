@@ -1,5 +1,6 @@
 using System.Text.Json;
 using MacroDeck.Plugin.Protocol.Callbacks;
+using MacroDeck.Plugin.Protocol.Callbacks.Ui;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeck.Plugin.Testing.Fakes;
@@ -16,6 +17,8 @@ using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.ScreenSavers;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
+using MacroDeck.Sdk.Ui;
+using MacroDeck.Ui.Model.Resources;
 
 namespace MacroDeck.Plugin.Testing.Internal;
 
@@ -45,7 +48,8 @@ internal static class HostInvokeDispatcher
 		int negotiatedVersion,
 		CancellationToken cancellationToken,
 		TestHostMessaging? messaging = null,
-		string? pluginId = null)
+		string? pluginId = null,
+		UiResourceUploads? uiResourceUploads = null)
 	{
 		ArgumentNullException.ThrowIfNull(context);
 		ArgumentNullException.ThrowIfNull(interactions);
@@ -90,6 +94,10 @@ internal static class HostInvokeDispatcher
 				HostApis.ScreenSavers => await ScreenSaversAsync(context, payload, cancellationToken)
 					.ConfigureAwait(false),
 				HostApis.Messaging when messaging is not null && pluginId is not null => messaging.Dispatch(pluginId, payload),
+				HostApis.Ui when uiResourceUploads is not null &&
+					payload.Operation is HostOperations.Ui.RegisterResource or HostOperations.Ui.RemoveResource
+					=> await UiResourcesAsync(context, payload, uiResourceUploads, cancellationToken)
+						.ConfigureAwait(false),
 				_ => HostInvokeOutcome.Failed(ProtocolErrorCodes.CapabilityUnsupported,
 					$"'{payload.Api}' is not a host API this test host knows.")
 			};
@@ -100,6 +108,67 @@ internal static class HostInvokeDispatcher
 				$"The test host's fake '{payload.Api}' threw: {exception.Message}");
 		}
 	}
+
+	private static async Task<HostInvokeOutcome> UiResourcesAsync(
+		FakeIntegrationContext context,
+		HostInvokePayload payload,
+		UiResourceUploads uploads,
+		CancellationToken cancellationToken)
+	{
+		try
+		{
+			if (string.Equals(payload.Operation, HostOperations.Ui.RemoveResource, StringComparison.Ordinal))
+			{
+				var removal = Require<UiRemoveResourceArguments>(payload);
+				await context.UiResources.RemoveAsync(removal.Name, cancellationToken).ConfigureAwait(false);
+
+				return HostInvokeOutcome.Ok((JsonElement?)null);
+			}
+
+			var arguments = Require<UiRegisterResourceArguments>(payload);
+
+			if (context.UiResources.Resources.TryGetValue(arguments.Name, out var existing) &&
+				string.Equals(existing.Handle.ContentHash, arguments.ContentHash, StringComparison.Ordinal) &&
+				string.Equals(existing.Handle.MediaType, arguments.MediaType, StringComparison.OrdinalIgnoreCase))
+			{
+				return HostInvokeOutcome.Ok(new UiRegisterResourceResult { Resource = ToDto(existing.Handle) });
+			}
+
+			if (!uploads.TryTake(arguments.ContentHash, out var bytes, out var mediaType))
+			{
+				return HostInvokeOutcome.Ok(new UiRegisterResourceResult { UploadRequired = true });
+			}
+
+			if (!string.Equals(mediaType, arguments.MediaType, StringComparison.OrdinalIgnoreCase))
+			{
+				return HostInvokeOutcome.Failed(ProtocolErrorCodes.InvalidPayload,
+					"The media type differs from the one the upload declared.");
+			}
+
+			var handle = await context.UiResources
+				.RegisterAsync(arguments.Name, bytes, arguments.MediaType, cancellationToken)
+				.ConfigureAwait(false);
+
+			return HostInvokeOutcome.Ok(new UiRegisterResourceResult { Resource = ToDto(handle) });
+		}
+		catch (UiResourceException exception) when (exception.ErrorCode == UiResourceErrorCode.QuotaExceeded)
+		{
+			return HostInvokeOutcome.Failed(ProtocolErrorCodes.UiResourceQuotaExceeded, exception.Message);
+		}
+		catch (ArgumentException exception)
+		{
+			return HostInvokeOutcome.Failed(ProtocolErrorCodes.InvalidPayload, exception.Message);
+		}
+	}
+
+	private static UiResourceHandleDto ToDto(UiResource handle)
+		=> new()
+		{
+			ResourceId = handle.ResourceId,
+			ContentHash = handle.ContentHash!,
+			MediaType = handle.MediaType!,
+			ByteLength = (int)handle.ByteLength!,
+		};
 
 	private static async Task<HostInvokeOutcome> DevicesAsync(
 		FakeIntegrationContext context,

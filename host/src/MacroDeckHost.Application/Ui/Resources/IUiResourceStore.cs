@@ -27,4 +27,6 @@ public interface IUiResourceStore
 	UiResource Register(UiResourceRegistration registration);
 
 	bool TryGet(string resourceId, out UiResourceContent content);
+
+	bool Remove(string resourceId);
 }

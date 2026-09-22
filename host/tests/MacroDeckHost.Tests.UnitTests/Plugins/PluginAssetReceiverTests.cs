@@ -242,6 +242,50 @@ public class PluginAssetReceiverTests
 		});
 	}
 
+	[TestCase("image/svg+xml", 3, "INVALID_PAYLOAD")]
+	[TestCase("text/html", 3, "INVALID_PAYLOAD")]
+	[TestCase("image/png", 0, "INVALID_PAYLOAD")]
+	[TestCase("image/png", ProtocolLimits.MaxUiResourceBytes + 1, "ASSET_TOO_LARGE")]
+	public void A_ui_resource_that_could_never_be_registered_is_rejected_at_begin(string mimeType,
+		int totalBytes,
+		string expectedCode)
+	{
+		var result = Begin("a1", totalBytes, kind: AssetKinds.UiResource, mimeType: mimeType);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Accepted, Is.False);
+			Assert.That(result.ErrorCode, Is.EqualTo(expectedCode));
+		});
+	}
+
+	[Test]
+	public void A_committed_ui_resource_is_announced_but_kept_out_of_the_disk_cache_while_an_icon_is_cached()
+	{
+		var committed = new List<string>();
+		_receiver.AssetCommitted += (_, e) => committed.Add(e.Kind);
+		var bytes = new byte[] { 1, 2, 3 };
+		var hash = AssetContentHash.Compute(bytes);
+
+		foreach (var (assetId, kind) in new[] { ("r1", AssetKinds.UiResource), ("i1", AssetKinds.Icon) })
+		{
+			Begin(assetId, bytes.Length, hash, kind);
+			_receiver.Chunk(PluginId, assetId, 0, bytes);
+			_receiver.Commit(PluginId, assetId);
+
+			if (kind == AssetKinds.UiResource)
+			{
+				Assert.That(_cache.TryRead(hash, out _, out _), Is.False);
+			}
+		}
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(committed, Is.EqualTo(new[] { AssetKinds.UiResource, AssetKinds.Icon }));
+			Assert.That(_cache.TryRead(hash, out _, out _), Is.True);
+		});
+	}
+
 	private AssetOperationResult Begin(
 		string assetId,
 		int totalBytes,

@@ -842,8 +842,8 @@ public sealed class PluginWebSocketEndpoint
 		}
 	}
 
-	private async Task HandleHostInvokeAsync(
-		PluginWebSocketConnection connection,
+	internal async Task HandleHostInvokeAsync(
+		IPluginConnection connection,
 		string pluginId,
 		string sessionId,
 		ProtocolEnvelope envelope,
@@ -877,7 +877,7 @@ public sealed class PluginWebSocketEndpoint
 			return;
 		}
 
-		var result = await _callbackRouter.RouteAsync(pluginId, envelope.Id, payload, cancellationToken);
+		var result = await _callbackRouter.RouteAsync(pluginId, sessionId, envelope.Id, payload, cancellationToken);
 
 		await connection.Send(new ProtocolEnvelope
 			{

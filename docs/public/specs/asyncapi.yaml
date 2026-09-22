@@ -40,6 +40,7 @@ x-macrodeck-error-codes:
   - ADB_NOT_ENABLED
   - ADB_NOT_ALLOWED
   - ADB_FAILED
+  - UI_RESOURCE_QUOTA_EXCEEDED
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Errors.ProtocolCloseCodes
 x-macrodeck-close-codes:

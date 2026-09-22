@@ -206,6 +206,8 @@ public class WeatherWidgetConfigTests
 			content = default!;
 			return false;
 		}
+
+		public bool Remove(string resourceId) => false;
 	}
 
 	private sealed class PassThroughSampleText : IWidgetSampleTextResolver
