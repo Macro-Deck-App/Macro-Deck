@@ -23,6 +23,7 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 	public const int MaximumRevokedTestIds = 100;
 	public const string PendingProofsKey = "license.pendingProofs";
 	public const int MaximumPendingProofs = 8;
+	public const int MaximumPendingLegacyAppProofs = 2;
 	public const string RefusedProofKeysKey = "license.refusedProofKeys";
 	public const int MaximumRefusedProofKeys = 64;
 	public const string PlatformRevokedIdsKey = "license.platformRevokedIds";
@@ -37,6 +38,7 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 	public static readonly TimeSpan ProofRefusalLifetime = TimeSpan.FromDays(1);
 	public static readonly TimeSpan RevocationRefreshInterval = TimeSpan.FromHours(1);
 	public static readonly TimeSpan RevocationRetryDelay = TimeSpan.FromMinutes(5);
+	public static readonly TimeSpan LegacyTransferWait = TimeSpan.FromSeconds(10);
 
 	private const int MaximumTrialDeviceIdLength = 128;
 
@@ -60,6 +62,7 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 	private readonly Channel<bool> _wake =
 		Channel.CreateBounded<bool>(new BoundedChannelOptions(1) { FullMode = BoundedChannelFullMode.DropWrite });
 	private readonly Dictionary<string, string> _submitters = new(StringComparer.Ordinal);
+	private readonly Dictionary<string, List<TransferWaiter>> _waiters = new(StringComparer.Ordinal);
 
 	private HashSet<string>? _platformRevoked;
 	private bool _platformRevokedFetched;
@@ -118,7 +121,7 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 		var trialStartedAt = await TrialStartAsync(request.TrialDeviceId, request.TrialStarted, cancellationToken);
 		if (license is null or { IsTest: true } && request.Proof is { } proof)
 		{
-			await QueueAsync(connectionId, proof, cancellationToken);
+			await QueueAsync(connectionId, proof, false, cancellationToken);
 		}
 
 		return new SyncCompanionLicenseResponse
@@ -197,6 +200,40 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 		return status;
 	}
 
+	public async Task<LegacyPurchaseTransferResult> TransferLegacyPurchaseAsync(CompanionLicenseProof proof,
+		CancellationToken cancellationToken)
+	{
+		if (await AdoptAsync(null, cancellationToken) is { IsTest: false })
+		{
+			return new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.AlreadyTransferred);
+		}
+
+		var queued = await QueueAsync(null, proof, true, cancellationToken);
+		if (queued.Waiter is not { } waiter)
+		{
+			return queued.Answer!;
+		}
+
+		try
+		{
+			return await waiter.Result.Task.WaitAsync(LegacyTransferWait, _time, cancellationToken);
+		}
+		catch (TimeoutException)
+		{
+			return new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Pending);
+		}
+		finally
+		{
+			lock (_waiters)
+			{
+				if (_waiters.TryGetValue(queued.Key!, out var waiters) && waiters.Remove(waiter) && waiters.Count == 0)
+				{
+					_waiters.Remove(queued.Key!);
+				}
+			}
+		}
+	}
+
 	internal async Task<DateTimeOffset?> RunDueWorkAsync(CancellationToken cancellationToken)
 	{
 		await RefreshRevocationsAsync(cancellationToken);
@@ -232,71 +269,188 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 		return TimeSpan.FromSeconds(Math.Max(jittered, requested));
 	}
 
-	private async Task QueueAsync(string connectionId, CompanionLicenseProof proof, CancellationToken cancellationToken)
+	private async Task<QueueOutcome> QueueAsync(string? connectionId,
+		CompanionLicenseProof proof,
+		bool legacyApp,
+		CancellationToken cancellationToken)
 	{
-		if (!PlatformLicenseClient.IsSupported(proof) || PurchaseKey(proof) is not { } key)
+		if (!PlatformLicenseClient.IsSupported(proof) ||
+			legacyApp != (proof.Platform == CompanionLicenseSources.AppStoreLegacy) ||
+			PurchaseKey(proof) is not { } key)
 		{
-			return;
+			return new QueueOutcome(Rejected("unsupported-source"));
 		}
 
-		bool queued;
+		QueueOutcome outcome;
 		try
 		{
 			var serialized = JsonSerializer.Serialize(proof);
 			var proofHash = Hash(serialized);
 			var protectedProof = _proofProtector.Protect(serialized);
-			queued = await LockedAsync(async preferences =>
+			outcome = await LockedAsync(async preferences =>
 				{
 					var refused = await ReadRefusedAsync(preferences);
-					if (refused.Any(entry => entry.Key == key || entry.Key == proofHash))
+					if (refused.FirstOrDefault(entry => entry.Key == key || entry.Key == proofHash) is { } refusal)
 					{
-						return false;
+						return new QueueOutcome(Rejected(refusal.Code ?? "purchase-refused"));
 					}
 
 					var pending = await ReadPendingAsync(preferences);
 					var now = _time.GetUtcNow().ToUnixTimeMilliseconds();
 					var index = pending.FindIndex(entry => entry.Key == key);
-					if (index >= 0)
+					var added = index < 0;
+					var rescheduled = false;
+					if (!added)
 					{
-						pending[index] = pending[index] with { Proof = protectedProof, ProofHash = proofHash };
+						var entry = pending[index];
+						if (entry.ProofHash != proofHash)
+						{
+							entry = entry with { Proof = protectedProof, ProofHash = proofHash };
+							CompleteWaiters(key,
+								waiter => waiter.ProofHash != proofHash,
+								new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Pending));
+						}
+
+						if (legacyApp)
+						{
+							var due = Math.Max(Math.Min(entry.NextAttemptAt, now), entry.NotBefore ?? 0);
+							rescheduled = due != entry.NextAttemptAt;
+							entry = entry with { NextAttemptAt = due };
+						}
+
+						pending[index] = entry;
 					}
 					else
 					{
-						if (pending.Count >= MaximumPendingProofs)
+						if (!MakeRoom(pending, legacyApp))
 						{
-							var evicted = pending.MinBy(entry => entry.QueuedAt)!;
-							pending.Remove(evicted);
-							lock (_submitters)
-							{
-								_submitters.Remove(evicted.Key);
-							}
+							return new QueueOutcome(new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Unavailable));
 						}
 
-						pending.Add(new PendingProof(key, protectedProof, 0, now, now, proofHash));
+						pending.Add(new PendingProof(key, protectedProof, 0, now, now, proofHash, legacyApp));
 					}
 
 					await WritePendingAsync(preferences, pending);
-					lock (_submitters)
+					if (connectionId is not null)
 					{
-						_submitters[key] = connectionId;
+						lock (_submitters)
+						{
+							_submitters[key] = connectionId;
+						}
 					}
 
-					return index < 0;
+					TransferWaiter? waiter = null;
+					if (legacyApp)
+					{
+						waiter = new TransferWaiter(proofHash,
+							new TaskCompletionSource<LegacyPurchaseTransferResult>(TaskCreationOptions
+								.RunContinuationsAsynchronously));
+						lock (_waiters)
+						{
+							if (!_waiters.TryGetValue(key, out var waiters))
+							{
+								_waiters[key] = waiters = [];
+							}
+
+							waiters.Add(waiter);
+						}
+					}
+
+					return new QueueOutcome(null, key, waiter, added, rescheduled);
 				},
 				cancellationToken);
 		}
 		catch (Exception ex) when (ex is not OperationCanceledException)
 		{
 			_logger.Warning("Queueing a Companion purchase proof for issuing failed: {Error}", ex.GetType().Name);
-			return;
+			return new QueueOutcome(new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Unavailable));
 		}
 
-		if (queued)
+		if (outcome.Added || legacyApp && outcome.Key is not null)
 		{
 			Wake();
+		}
+
+		if (outcome.Added || outcome.Rescheduled)
+		{
 			await NotifyChangedAsync();
 		}
+
+		return outcome;
 	}
+
+	// An anonymous legacy app caller may only displace its own kind, so it can never push a Companion's proof out.
+	private bool MakeRoom(List<PendingProof> pending, bool legacyApp)
+	{
+		PendingProof? evicted = null;
+		if (legacyApp)
+		{
+			var legacyEntries = pending.Where(entry => entry.LegacyApp).ToList();
+			if (legacyEntries.Count >= MaximumPendingLegacyAppProofs || pending.Count >= MaximumPendingProofs)
+			{
+				evicted = legacyEntries.MinBy(entry => entry.QueuedAt);
+				if (evicted is null)
+				{
+					return false;
+				}
+			}
+		}
+		else if (pending.Count >= MaximumPendingProofs)
+		{
+			evicted = pending.MinBy(entry => entry.QueuedAt)!;
+		}
+
+		if (evicted is not null)
+		{
+			pending.Remove(evicted);
+			lock (_submitters)
+			{
+				_submitters.Remove(evicted.Key);
+			}
+
+			CompleteWaiters(evicted.Key,
+				_ => true,
+				new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Unavailable));
+		}
+
+		return true;
+	}
+
+	private void CompleteWaiters(string key, Func<TransferWaiter, bool> match, LegacyPurchaseTransferResult result)
+	{
+		lock (_waiters)
+		{
+			if (!_waiters.TryGetValue(key, out var waiters))
+			{
+				return;
+			}
+
+			foreach (var waiter in waiters.Where(match))
+			{
+				waiter.Result.TrySetResult(result);
+			}
+		}
+	}
+
+	private void CompleteAllWaiters(string? transferredKey)
+	{
+		lock (_waiters)
+		{
+			foreach (var (key, waiters) in _waiters)
+			{
+				var result = new LegacyPurchaseTransferResult(key == transferredKey
+					? LegacyPurchaseTransferStatus.Transferred
+					: LegacyPurchaseTransferStatus.AlreadyTransferred);
+				foreach (var waiter in waiters)
+				{
+					waiter.Result.TrySetResult(result);
+				}
+			}
+		}
+	}
+
+	private static LegacyPurchaseTransferResult Rejected(string code)
+		=> new(LegacyPurchaseTransferStatus.Rejected, code);
 
 	private async Task IssueDueProofsAsync(CancellationToken cancellationToken)
 	{
@@ -315,6 +469,7 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 						{ IsTest: false })
 					{
 						await WritePendingAsync(preferences, []);
+						CompleteAllWaiters(null);
 						return (null, true);
 					}
 
@@ -345,6 +500,7 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 			{
 				_logger.Warning("A pending Companion purchase proof could not be read and was dropped");
 				await SettleAsync(due, null, cancellationToken);
+				CompleteWaiters(due.Key, waiter => waiter.ProofHash == due.ProofHash, Rejected("invalid-proof"));
 				continue;
 			}
 
@@ -360,17 +516,21 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 		switch (result)
 		{
 			case PlatformLicenseIssueResult.Issued issued:
-				var license = await AdoptAsync(issued.License, cancellationToken);
+				var license = await AdoptAsync(issued.License, cancellationToken, due);
 				if (license is { IsTest: false } && license.Token != issued.License)
 				{
 					await SettleAsync(due, null, cancellationToken);
+					CompleteWaiters(due.Key,
+						_ => true,
+						new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.AlreadyTransferred));
 					return;
 				}
 
 				if (license?.Token != issued.License)
 				{
 					_logger.Warning("The Macro Deck Platform issued a Companion license this host does not accept");
-					await SettleAsync(due, due.ProofHash, cancellationToken);
+					await SettleAsync(due, due.ProofHash, cancellationToken, code: "license-not-accepted");
+					CompleteWaiters(due.Key, waiter => waiter.ProofHash == due.ProofHash, Rejected("license-not-accepted"));
 					return;
 				}
 
@@ -382,19 +542,23 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 				}
 
 				await SettleAsync(due, null, cancellationToken);
+				CompleteWaiters(due.Key,
+					_ => true,
+					new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Transferred));
 				await _companions.SendLicenseAsync(new CompanionLicenseEvent { License = license.Token }, submitter);
 				return;
 			case PlatformLicenseIssueResult.Refused refused:
 				_logger.Information("The Macro Deck Platform refused a Companion purchase proof: {Code}", refused.Code);
 				if (PurchaseRefusals.Contains(refused.Code))
 				{
-					await SettleAsync(due, due.Key, cancellationToken, permanent: true);
+					await SettleAsync(due, due.Key, cancellationToken, permanent: true, code: refused.Code);
 				}
 				else
 				{
-					await SettleAsync(due, due.ProofHash, cancellationToken);
+					await SettleAsync(due, due.ProofHash, cancellationToken, code: refused.Code);
 				}
 
+				CompleteWaiters(due.Key, waiter => waiter.ProofHash == due.ProofHash, Rejected(refused.Code));
 				return;
 			case PlatformLicenseIssueResult.Retry retry:
 				await RescheduleAsync(due, retry, cancellationToken);
@@ -411,7 +575,8 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 			now - DateTimeOffset.FromUnixTimeMilliseconds(due.QueuedAt) > PendingPurchaseLifetime)
 		{
 			_logger.Information("A Companion purchase the store still does not report as completed was dropped");
-			await SettleAsync(due, due.ProofHash, cancellationToken);
+			await SettleAsync(due, due.ProofHash, cancellationToken, code: "purchase-not-completed");
+			CompleteWaiters(due.Key, waiter => waiter.ProofHash == due.ProofHash, Rejected("purchase-not-completed"));
 			return;
 		}
 
@@ -424,16 +589,26 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 					return false;
 				}
 
-				var attempts = pending[index].Attempts + 1;
-				pending[index] = pending[index] with
+				var entry = pending[index];
+				var attempts = entry.Attempts + 1;
+				var next = (now + RetryDelay(attempts, retry.RetryAfter)).ToUnixTimeMilliseconds();
+				long? notBefore = retry.RetryAfter is { } retryAfter
+					? (now + TimeSpan.FromSeconds(Math.Clamp(retryAfter.TotalSeconds, 0, MaximumRetryDelay.TotalSeconds)))
+					.ToUnixTimeMilliseconds()
+					: null;
+				if (entry.Proof != due.Proof)
 				{
-					Attempts = attempts,
-					NextAttemptAt = (now + RetryDelay(attempts, retry.RetryAfter)).ToUnixTimeMilliseconds()
-				};
+					next = Math.Max(Math.Min(entry.NextAttemptAt, next), notBefore ?? 0);
+				}
+
+				pending[index] = entry with { Attempts = attempts, NextAttemptAt = next, NotBefore = notBefore };
 				await WritePendingAsync(preferences, pending);
 				return true;
 			},
 			cancellationToken);
+		CompleteWaiters(due.Key,
+			waiter => waiter.ProofHash == due.ProofHash,
+			new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Pending, retry.Code));
 		if (changed)
 		{
 			await NotifyChangedAsync();
@@ -445,7 +620,8 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 	private async Task SettleAsync(PendingProof due,
 		string? refusedKey,
 		CancellationToken cancellationToken,
-		bool permanent = false)
+		bool permanent = false,
+		string? code = null)
 	{
 		var now = _time.GetUtcNow();
 		var removed = await LockedAsync(async preferences =>
@@ -466,7 +642,8 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 					var refused = await ReadRefusedAsync(preferences);
 					refused.RemoveAll(entry => entry.Key == refusedKey || entry.ExpiresAt <= now.ToUnixTimeMilliseconds());
 					refused.Add(new RefusedProof(refusedKey,
-						permanent ? null : (now + ProofRefusalLifetime).ToUnixTimeMilliseconds()));
+						permanent ? null : (now + ProofRefusalLifetime).ToUnixTimeMilliseconds(),
+						code));
 					while (refused.Count > MaximumRefusedProofKeys)
 					{
 						refused.RemoveAt(Math.Max(0, refused.FindIndex(entry => entry.ExpiresAt is not null)));
@@ -590,7 +767,9 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 
 	// The stored token is verified against the current trust set on every read, so a test license
 	// stops being handed out as soon as developer mode is turned off.
-	private async Task<CompanionLicense?> AdoptAsync(string? candidate, CancellationToken cancellationToken)
+	private async Task<CompanionLicense?> AdoptAsync(string? candidate,
+		CancellationToken cancellationToken,
+		PendingProof? issuedFor = null)
 	{
 		bool developerMode;
 		await using (var scope = _scopeFactory.CreateAsyncScope())
@@ -612,9 +791,14 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 				}
 
 				await preferences.SetValue(TokenKey, adopted.Token);
-				if (!adopted.IsTest && (await ReadPendingAsync(preferences)).Count > 0)
+				if (!adopted.IsTest)
 				{
-					await WritePendingAsync(preferences, []);
+					if ((await ReadPendingAsync(preferences)).Count > 0)
+					{
+						await WritePendingAsync(preferences, []);
+					}
+
+					CompleteAllWaiters(issuedFor?.Key);
 				}
 
 				adoptedNew = true;
@@ -752,13 +936,18 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 		}
 	}
 
-	// The Platform keys a purchase by its purchase token or App Store original transaction id. The id is read
+	// The Platform keys a purchase by its purchase token or App Store (app) transaction id. The id is read
 	// from the unverified JWS only to recognise the same purchase here; the Platform verifies the signature.
 	private static string? PurchaseKey(CompanionLicenseProof proof)
 	{
-		var id = proof.Platform == CompanionLicenseSources.AppStore
-			? OriginalTransactionId(proof.SignedPayload) ?? proof.TransactionId
-			: proof.PurchaseToken;
+		var id = proof.Platform switch
+		{
+			CompanionLicenseSources.AppStore => PayloadClaim(proof.SignedPayload, "originalTransactionId") ??
+				proof.TransactionId,
+			CompanionLicenseSources.AppStoreLegacy => PayloadClaim(proof.SignedPayload, "appTransactionId") ??
+				(string.IsNullOrEmpty(proof.SignedPayload) ? null : Hash(proof.SignedPayload)),
+			_ => proof.PurchaseToken
+		};
 		if (string.IsNullOrWhiteSpace(id))
 		{
 			return null;
@@ -769,7 +958,7 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 
 	private static string Hash(string value) => Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(value)));
 
-	private static string? OriginalTransactionId(string? signedPayload)
+	private static string? PayloadClaim(string? signedPayload, string claim)
 	{
 		var parts = signedPayload?.Split('.');
 		if (parts is not { Length: 3 })
@@ -781,7 +970,7 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 		{
 			using var payload = JsonDocument.Parse(Microsoft.IdentityModel.Tokens.Base64UrlEncoder.DecodeBytes(parts[1]));
 			return payload.RootElement.ValueKind == JsonValueKind.Object &&
-				payload.RootElement.TryGetProperty("originalTransactionId", out var id)
+				payload.RootElement.TryGetProperty(claim, out var id)
 					? id.ValueKind switch
 					{
 						JsonValueKind.String => id.GetString(),
@@ -825,9 +1014,20 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 		int Attempts,
 		long NextAttemptAt,
 		long QueuedAt,
-		string? ProofHash = null);
+		string? ProofHash = null,
+		bool LegacyApp = false,
+		long? NotBefore = null);
 
-	private sealed record RefusedProof(string Key, long? ExpiresAt);
+	private sealed record RefusedProof(string Key, long? ExpiresAt, string? Code = null);
+
+	private sealed record TransferWaiter(string ProofHash, TaskCompletionSource<LegacyPurchaseTransferResult> Result);
+
+	private sealed record QueueOutcome(
+		LegacyPurchaseTransferResult? Answer,
+		string? Key = null,
+		TransferWaiter? Waiter = null,
+		bool Added = false,
+		bool Rescheduled = false);
 
 	private sealed record PlatformRevocations(IReadOnlyList<string> Ids, long FetchedAt);
 }

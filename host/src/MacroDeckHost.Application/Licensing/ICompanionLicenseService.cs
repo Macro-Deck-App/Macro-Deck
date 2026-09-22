@@ -13,4 +13,7 @@ public interface ICompanionLicenseService
 	Task<CompanionLicenseStatus?> IssueTestLicenseAsync(CancellationToken cancellationToken);
 
 	Task<CompanionLicenseStatus> RevokeTestLicenseAsync(CancellationToken cancellationToken);
+
+	Task<LegacyPurchaseTransferResult> TransferLegacyPurchaseAsync(CompanionLicenseProof proof,
+		CancellationToken cancellationToken);
 }

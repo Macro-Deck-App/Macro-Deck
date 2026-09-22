@@ -18,7 +18,7 @@ public abstract record PlatformLicenseIssueResult
 
 	public sealed record Issued(string License) : PlatformLicenseIssueResult;
 
-	public sealed record Retry(TimeSpan? RetryAfter, bool PurchasePending) : PlatformLicenseIssueResult;
+	public sealed record Retry(TimeSpan? RetryAfter, bool PurchasePending, string? Code = null) : PlatformLicenseIssueResult;
 
 	public sealed record Refused(string Code) : PlatformLicenseIssueResult;
 }
