@@ -41,4 +41,26 @@ public sealed record WidgetTypeDescriptor(
 	string? DefaultData = null,
 	string? DataSchema = null,
 	bool HasConfiguration = false,
-	IReadOnlyDictionary<string, string>? Metadata = null);
+	IReadOnlyDictionary<string, string>? Metadata = null)
+{
+	/// <summary>
+	/// Whether Macro Deck runs a widget's own action flows when its tile is pressed, as it does for its
+	/// built-in widgets. Default false: a press runs nothing on the host, and the tile only reacts to the
+	/// events its tree declares.
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// When true, a short press, long press, double tap, touch start or touch end that the widget's tree does
+	/// not claim runs the flow for that trigger from the top-level <c>flows</c> key of the widget's stored
+	/// data - the key a <c>UiActionsListEditor</c> bound to <c>flows</c> writes. A press the tree claims still
+	/// goes to the tree and runs no flow. <see cref="DataSchema" /> has to allow <c>flows</c>, or no flow can
+	/// be saved.
+	/// </para>
+	/// <para>
+	/// A hardware deck never produces a double tap for a widget of a provider's type, so a Double Tap flow
+	/// runs only from the desktop app and the web client. A Macro Deck release older than this flag ignores
+	/// it, and presses of the widget run nothing there.
+	/// </para>
+	/// </remarks>
+	public bool SupportsFlows { get; init; }
+}

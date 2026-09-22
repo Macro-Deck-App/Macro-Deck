@@ -176,7 +176,8 @@ single Double Tap tab. Leave it unset for the default press tabs: Short Press, L
 End and Double Tap. Event triggers, which run a flow when an integration or Macro Deck event fires, are
 offered alongside those tabs either way. The host runs a widget's event flows only from the top-level
 `flows` key of its stored configuration, so bind the editor there, as in the example above, for them to
-fire.
+fire. Press flows run only for built-in widgets and for a widget type registered with
+[`SupportsFlows`](/ui/views/widget-types/#running-the-users-actions).
 
 - **`device-picker`** only populates where the viewer holds admin scope, because the device list is an
   administrative endpoint. The desktop editor does; prefer another picker where you have the choice.

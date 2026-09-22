@@ -103,8 +103,9 @@ true**. There is no icon: the picker draws a live sample instead.
 
 One session is opened per widget per viewer, so each tile sees only its own `data`. Push patches on the
 session to update it; events its tree declares come back to that same session. Saved and draft data
-arrive the same way, because you cannot read Macro Deck's stored widgets. A press runs nothing on the host
-- a tile whose tree declares no events does nothing when pressed.
+arrive the same way, because you cannot read Macro Deck's stored widgets. By default a press runs nothing on
+the host - a tile whose tree declares no events does nothing when pressed - unless the type
+[runs the user's actions](#running-the-users-actions).
 
 ## The picker card
 
@@ -130,6 +131,42 @@ later `widget` surface. No second contract is needed - one more surface on the s
 
 Without `HasConfiguration`, no `config` surface is ever opened for your type: editing one of its widgets
 shows the preview and the JSON view, and nothing else.
+
+## Running the user's actions
+
+```csharp
+new WidgetTypeDescriptor("battery", MyStrings.BatteryName(), DataSchema: BatterySchema, HasConfiguration: true)
+{
+    SupportsFlows = true,
+}
+```
+
+A widget that only shows information can still work like a button. With `SupportsFlows`, Macro Deck runs the
+widget's own action flows when its tile is pressed, the way it does for its built-in widgets: Short Press,
+Long Press, Double Tap, Touch Start and Touch End each run the flow bound to that trigger. The flows come
+from the top-level `flows` key of the widget's stored data, so give the user the actions editor bound
+there in your configuration tree, and let your `DataSchema` allow the key:
+
+```csharp
+new UiActionsListEditor { Key = "flows", Binding = Bind.To(flows), CanRun = true }
+```
+
+```json
+{"type":"object","properties":{"flows":{"type":"array"}}}
+```
+
+The [widget configuration view](/ui/views/widget-configuration/#reaching-an-editor-macro-deck-already-has)
+covers the editor. Your tree keeps priority: a press that one of its controls declares is sent to that
+control, as without the flag, and runs no flow.
+
+- **Hardware decks never produce a Double Tap** for a widget of your type, only for built-in ones: a
+  Double Tap flow runs from the desktop app and the web client. Set `UiActionsListEditor.Triggers` to the
+  press tabs you want if that would confuse your users.
+- **An older Macro Deck ignores the flag**, and presses of your widget run nothing there, as before.
+- **While your type is not registered** - your plugin stopped or not installed - Macro Deck cannot tell
+  that the type opted in, and a press of its widget is refused as it is for any unknown type.
+
+The default is `false`, and a type that leaves it unset behaves exactly as described above.
 
 ## When your integration is not running
 

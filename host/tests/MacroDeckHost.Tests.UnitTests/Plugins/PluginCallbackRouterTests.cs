@@ -51,7 +51,8 @@ public class PluginCallbackRouterTests
 		FakeHostLockState? lockState = null,
 		FakeScriptApi? scriptApi = null,
 		FakePluginDeviceRegistry? deviceRegistry = null,
-		ScreenSaverRegistry? screenSavers = null)
+		ScreenSaverRegistry? screenSavers = null,
+		WidgetTypeRegistry? widgetTypes = null)
 	{
 		var services = new ServiceCollection();
 		services.AddSingleton<IVariableService>(variableService);
@@ -71,7 +72,7 @@ public class PluginCallbackRouterTests
 			deviceRegistry ?? new FakePluginDeviceRegistry(),
 			new LayoutRegistry(new RecordingMediator()),
 			new FolderViewRegistry(new RecordingMediator()),
-			new WidgetTypeRegistry(new RecordingMediator()),
+			widgetTypes ?? new WidgetTypeRegistry(new RecordingMediator()),
 			screenSavers ?? new ScreenSaverRegistry(new RecordingMediator()),
 			new ModalInteractionCoordinator(TimeProvider.System),
 			new RecordingUiTransport(),
@@ -94,7 +95,8 @@ public class PluginCallbackRouterTests
 		FakeHostLockState? lockState = null,
 		FakeScriptApi? scriptApi = null,
 		FakePluginDeviceRegistry? deviceRegistry = null,
-		ScreenSaverRegistry? screenSavers = null)
+		ScreenSaverRegistry? screenSavers = null,
+		WidgetTypeRegistry? widgetTypes = null)
 		=> Router(_variableService,
 			_actionInteractions,
 			_invoker,
@@ -102,7 +104,8 @@ public class PluginCallbackRouterTests
 			lockState,
 			scriptApi,
 			deviceRegistry,
-			screenSavers);
+			screenSavers,
+			widgetTypes);
 
 	// ---- security: ownership containment -----------------------------------------------------
 
@@ -180,6 +183,33 @@ public class PluginCallbackRouterTests
 			Assert.That(id.ScreenSaverId, Is.EqualTo("plugin.a::photos"));
 			Assert.That(stillThere, Is.True, "another plugin must not withdraw it");
 			Assert.That(screenSavers.TryResolve(id.ScreenSaverId, out _), Is.False);
+		});
+	}
+
+	[TestCase("""{"widgetType":{"id":"panel","name":"Panel"}}""", false)]
+	[TestCase("""{"widgetType":{"id":"panel","name":"Panel","supportsFlows":true}}""", true)]
+	public async Task A_widget_type_runs_its_flows_only_when_its_registration_says_so(
+		string arguments,
+		bool expected)
+	{
+		var widgetTypes = new WidgetTypeRegistry(new RecordingMediator());
+		var router = Router(widgetTypes: widgetTypes);
+
+		var registered = await router.RouteAsync("plugin.a",
+			"c1",
+			new HostInvokePayload
+			{
+				Api = HostApis.WidgetTypes,
+				Operation = HostOperations.WidgetTypes.Register,
+				Arguments = JsonDocument.Parse(arguments).RootElement.Clone()
+			},
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(registered.Error, Is.Null);
+			Assert.That(widgetTypes.TryResolve("plugin.a::panel", out var entry), Is.True);
+			Assert.That(entry.Descriptor.SupportsFlows, Is.EqualTo(expected));
 		});
 	}
 

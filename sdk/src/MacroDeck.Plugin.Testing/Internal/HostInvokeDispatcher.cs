@@ -313,7 +313,7 @@ internal static class HostInvokeDispatcher
 			dto.DefaultData,
 			dto.DataSchema,
 			dto.HasConfiguration,
-			dto.Metadata);
+			dto.Metadata) { SupportsFlows = dto.SupportsFlows };
 
 	private static async Task<HostInvokeOutcome> LayoutsAsync(
 		FakeIntegrationContext context,

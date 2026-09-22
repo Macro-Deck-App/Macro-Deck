@@ -18,6 +18,7 @@ internal static class WidgetTypeDescriptorMapper
 			DefaultData = widgetType.DefaultData,
 			DataSchema = widgetType.DataSchema,
 			HasConfiguration = widgetType.HasConfiguration,
+			SupportsFlows = widgetType.SupportsFlows,
 			Metadata = widgetType.Metadata
 		};
 	}

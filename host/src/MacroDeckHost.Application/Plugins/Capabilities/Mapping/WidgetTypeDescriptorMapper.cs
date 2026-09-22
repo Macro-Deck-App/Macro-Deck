@@ -17,6 +17,6 @@ public static class WidgetTypeDescriptorMapper
 			dto.DefaultData,
 			dto.DataSchema,
 			dto.HasConfiguration,
-			dto.Metadata);
+			dto.Metadata) { SupportsFlows = dto.SupportsFlows };
 	}
 }
