@@ -60,7 +60,7 @@ public sealed class ObsIntegration : IPluginIntegration, IVariableProvider, IEve
 ## Host APIs
 
 `IIntegrationContext` gives an integration access to what Macro Deck owns: [`Deck`](/features/deck/) navigation and client positions, `Scripts`,
-`Widgets`, `Notifications`, variables, configuration, events and [messaging](/features/messaging/). In a plugin every call crosses the
+`Widgets`, `Notifications`, variables, configuration, events, [messaging](/features/messaging/) and [images for your own UI](/ui/reference/resources/#registering-your-own-images). In a plugin every call crosses the
 plugin protocol, so don't call them in a hot loop. [Android devices](/features/android-devices/) are the
 exception to where you find them: take `IAndroidDeviceManager` from dependency injection.
 

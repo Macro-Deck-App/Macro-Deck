@@ -182,6 +182,12 @@ public class PluginAdbInvokeRunnerTests
 			HostInvokePayload payload,
 			CancellationToken cancellationToken) => throw new NotSupportedException();
 
+		public Task<HostCallbackResult> RouteAsync(string pluginId,
+			string? sessionId,
+			string correlationId,
+			HostInvokePayload payload,
+			CancellationToken cancellationToken) => throw new NotSupportedException();
+
 		public HostCallbackResult? Admit(string pluginId, HostInvokePayload payload)
 		{
 			Admissions++;

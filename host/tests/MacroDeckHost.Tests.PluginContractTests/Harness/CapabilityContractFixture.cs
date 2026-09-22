@@ -150,6 +150,9 @@ internal abstract class CapabilityContractFixture
 
 	protected InMemoryPluginLink Link => _link;
 
+	/// <summary>The plugin-side uploader, live once <see cref="ConnectAsync" /> has run.</summary>
+	protected IPluginAssetUploader AssetUploader => _assetUploader;
+
 	/// <summary>A plugin-side <c>IHostInvoker</c> a handler in the list given to <see cref="ConnectAsync" />
 	/// can be built with, so a handler such as <c>UiCapabilityHandler</c> that takes one as a constructor
 	/// argument - the same shape production DI hands it - can push <c>host.invoke</c> once the connection

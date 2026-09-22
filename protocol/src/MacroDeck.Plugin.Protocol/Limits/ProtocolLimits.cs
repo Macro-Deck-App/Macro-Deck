@@ -126,6 +126,13 @@ public static class ProtocolLimits
 	/// never promise more than the host would actually serve.</summary>
 	public const int MaxUiResourceBytes = 2 * 1024 * 1024;
 
+	/// <summary>Bounds the bytes all of one plugin's registered UI resources hold together. Registering
+	/// under a name the plugin already uses replaces that resource, so only the replacement counts.</summary>
+	public const int MaxUiResourceBytesPerPlugin = 16 * 1024 * 1024;
+
+	/// <summary>Bounds how many UI resources one plugin may have registered at once.</summary>
+	public const int MaxUiResourcesPerPlugin = 256;
+
 	public const int MaxUiAttachmentsPerSession = 16;
 
 	/// <summary>Bounds how much aggregate patch traffic one provider can direct at the shared inbound

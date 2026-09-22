@@ -128,11 +128,23 @@ public class PluginWebSocketEndpointDispatchTests
 
 	private sealed class FakePluginCallbackRouter : IPluginCallbackRouter
 	{
+		public List<string?> RoutedSessionIds { get; } = [];
+
 		public Task<HostCallbackResult> RouteAsync(string pluginId,
 			string correlationId,
 			HostInvokePayload payload,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(HostCallbackResult.Ok());
+			=> RouteAsync(pluginId, null, correlationId, payload, cancellationToken);
+
+		public Task<HostCallbackResult> RouteAsync(string pluginId,
+			string? sessionId,
+			string correlationId,
+			HostInvokePayload payload,
+			CancellationToken cancellationToken)
+		{
+			RoutedSessionIds.Add(sessionId);
+			return Task.FromResult(HostCallbackResult.Ok());
+		}
 
 		public HostCallbackResult? Admit(string pluginId, HostInvokePayload payload) => null;
 	}
@@ -197,6 +209,42 @@ public class PluginWebSocketEndpointDispatchTests
 		public Task<WidgetStateWriteResult> AdvanceStateAsync(string widgetId,
 			CancellationToken cancellationToken = default)
 			=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+	}
+
+	[Test]
+	public async Task A_host_invoke_is_routed_with_the_session_it_arrived_on()
+	{
+		var router = new FakePluginCallbackRouter();
+		var registry = new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None);
+		var endpoint = new PluginWebSocketEndpoint(registry,
+			new FakePluginCapabilityInvoker(),
+			new FakeRemotePluginIntegrationRegistrar(),
+			new RemotePluginSnapshotRefresher(new FakePluginCapabilityInvoker(), new InMemorySnapshotStore()),
+			router,
+			new PluginAssetReceiver(new InMemoryPluginAssetCache()),
+			new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), new MacroDeckHost.Tests.UnitTests.Adb.FakeAdbManager(), new MacroDeckHost.Tests.UnitTests.TestSupport.FixedAdbAccessPolicy(), Serilog.Core.Logger.None),
+			new FakeEventBus(),
+			new LoginThrottle(TimeProvider.System),
+			TimeProvider.System,
+			new RecordingMediator(),
+			new NeverStoppingLifetime(),
+			CreateLogIngestor(registry),
+			Serilog.Core.Logger.None);
+
+		await endpoint.HandleHostInvokeAsync(new FakePluginConnection(),
+			"com.example.plugin",
+			"session-1",
+			new ProtocolEnvelope
+			{
+				Type = MessageTypes.HostInvoke,
+				Id = "1",
+				Payload = JsonSerializer.SerializeToElement(
+					new HostInvokePayload { Api = HostApis.Ui, Operation = HostOperations.Ui.RegisterResource },
+					PluginProtocolJson.Options)
+			},
+			CancellationToken.None);
+
+		Assert.That(router.RoutedSessionIds, Is.EqualTo(new[] { "session-1" }));
 	}
 
 	[Test]

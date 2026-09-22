@@ -125,6 +125,57 @@ public class UiResourcesControllerTests
 		Assert.That(controller.Get(resourceId), Is.InstanceOf<FileContentResult>());
 	}
 
+	[Test]
+	public void A_versioned_url_is_cached_only_while_it_names_the_bytes_currently_registered()
+	{
+		var store = new UiResourceStore();
+		var a = Register(store, "<svg id=\"a\"/>");
+		var b = Register(store, "<svg id=\"b\"/>");
+
+		var stale = Controller(store, $"\"{b.ContentHash}\"");
+		var staleResult = stale.Get(b.ResourceId, a.ContentHash) as FileContentResult;
+		var current = Controller(store);
+		current.Get(b.ResourceId, b.ContentHash);
+
+		Register(store, "<svg id=\"a\"/>");
+		var backToA = Controller(store);
+		var backToAResult = backToA.Get(a.ResourceId, a.ContentHash) as FileContentResult;
+		var nowStale = Controller(store);
+		nowStale.Get(b.ResourceId, b.ContentHash);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(staleResult, Is.Not.Null, "a stale version is answered with the current bytes, never 304");
+			Assert.That(Encoding.UTF8.GetString(staleResult!.FileContents), Is.EqualTo("<svg id=\"b\"/>"));
+			Assert.That(stale.Response.Headers.CacheControl.ToString(), Is.EqualTo("no-store"));
+			Assert.That(stale.Response.Headers.ETag.ToString(), Is.Empty);
+			Assert.That(current.Response.Headers.CacheControl.ToString(), Does.Contain("immutable"));
+			Assert.That(Encoding.UTF8.GetString(backToAResult!.FileContents), Is.EqualTo("<svg id=\"a\"/>"));
+			Assert.That(backToA.Response.Headers.CacheControl.ToString(), Does.Contain("immutable"));
+			Assert.That(nowStale.Response.Headers.CacheControl.ToString(), Is.EqualTo("no-store"));
+		});
+	}
+
+	[Test]
+	public void A_request_without_a_version_is_cached_as_before()
+	{
+		var store = StoreWith(out var resourceId);
+		var controller = Controller(store);
+
+		controller.Get(resourceId);
+
+		Assert.That(controller.Response.Headers.CacheControl.ToString(), Does.Contain("immutable"));
+	}
+
+	private static MacroDeck.Ui.Model.Resources.UiResource Register(UiResourceStore store, string svg)
+		=> store.Register(new UiResourceRegistration
+		{
+			OwnerId = "plugin-0123456789abcdef",
+			Name = "photo",
+			MediaType = "image/svg+xml",
+			Content = Encoding.UTF8.GetBytes(svg),
+		});
+
 	[TestCase("app.macro-deck.weather.does-not-exist")]
 	[TestCase("../../appsettings.json")]
 	[TestCase("/etc/passwd")]

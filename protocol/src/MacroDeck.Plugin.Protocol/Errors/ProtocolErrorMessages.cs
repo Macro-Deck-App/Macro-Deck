@@ -27,6 +27,7 @@ public static class ProtocolErrorMessages
 			[ProtocolErrorCodes.PayloadTooLarge] = "The message payload exceeds the allowed size.",
 			[ProtocolErrorCodes.AssetTooLarge] = "The asset exceeds the allowed size.",
 			[ProtocolErrorCodes.QueueOverflow] = "The message queue overflowed.",
+			[ProtocolErrorCodes.UiResourceQuotaExceeded] = "The plugin's UI resource quota is exhausted.",
 			[ProtocolErrorCodes.RateLimited] = "Too many requests; retry after the given delay.",
 			[ProtocolErrorCodes.Timeout] = "The operation timed out.",
 			[ProtocolErrorCodes.Cancelled] = "The operation was cancelled.",

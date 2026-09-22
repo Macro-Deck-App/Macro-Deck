@@ -159,5 +159,7 @@ internal sealed class BuiltInScreenSaverProviderTests
 			content = null!;
 			return false;
 		}
+
+		public bool Remove(string resourceId) => false;
 	}
 }

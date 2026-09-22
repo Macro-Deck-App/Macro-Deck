@@ -15,7 +15,15 @@ public static class AssetKinds
 	/// </summary>
 	public const string ActionIcon = "action-icon";
 
-	public static readonly IReadOnlyList<string> All = [Icon, Artwork, ActionIcon];
+	/// <summary>
+	/// Bytes a plugin registers as a UI resource through <c>ui</c>/<c>register-resource</c>. Limited to
+	/// <see cref="UiResourceRules.SupportedMediaTypes" /> and
+	/// <see cref="Limits.ProtocolLimits.MaxUiResourceBytes" />, and held in memory only: the host never
+	/// writes them to its on-disk asset cache.
+	/// </summary>
+	public const string UiResource = "ui-resource";
+
+	public static readonly IReadOnlyList<string> All = [Icon, Artwork, ActionIcon, UiResource];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);
 

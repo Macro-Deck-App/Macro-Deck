@@ -10,5 +10,12 @@ public interface IPluginCallbackRouter
 		HostInvokePayload payload,
 		CancellationToken cancellationToken);
 
+	Task<HostCallbackResult> RouteAsync(
+		string pluginId,
+		string? sessionId,
+		string correlationId,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken);
+
 	HostCallbackResult? Admit(string pluginId, HostInvokePayload payload);
 }

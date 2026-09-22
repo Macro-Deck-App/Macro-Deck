@@ -25,8 +25,8 @@ new UiImage
 A weather-condition icon that fades to the new one when the condition changes, adapted from the built-in
 Weather widget. `ConditionIcon` is a `UiResource` handle.
 
-Registering artwork is a host-side API today; plugins get one when the upload path lands. See
-[Resources](/ui/reference/resources/).
+A plugin registers its own images with `IIntegrationContext.UiResources`; see
+[Registering your own images](/ui/reference/resources/#registering-your-own-images).
 
 ## Changing artwork smoothly
 

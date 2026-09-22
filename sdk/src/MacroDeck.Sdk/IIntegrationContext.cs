@@ -4,6 +4,7 @@ using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Messaging;
 using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
+using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
 
@@ -42,4 +43,11 @@ public interface IIntegrationContext
 	/// <see cref="MessageChannelException" /> with <see cref="MessageChannelErrorCode.Unsupported" />.
 	/// </summary>
 	IMessageChannel Messages => UnsupportedMessageChannel.Instance;
+
+	/// <summary>
+	/// Registers images this integration's own trees show. A context from a Macro Deck that cannot register
+	/// UI resources, and any implementation that does not override this member, throws
+	/// <see cref="UiResourceException" /> with <see cref="UiResourceErrorCode.Unsupported" />.
+	/// </summary>
+	IUiResourceRegistry UiResources => UnsupportedUiResourceRegistry.Instance;
 }

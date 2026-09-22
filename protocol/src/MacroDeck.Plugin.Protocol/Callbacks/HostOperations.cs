@@ -110,7 +110,15 @@ public static class HostOperations
 
 		public const string Fault = "fault";
 
-		public static readonly IReadOnlyList<string> All = [Snapshot, Patch, Fault];
+		/// <summary>Registers bytes the plugin uploaded as kind <c>ui-resource</c> under a plugin-chosen
+		/// name and answers the resource handle to reference from a tree. Registering a name again replaces
+		/// the resource. Answers <c>uploadRequired</c> when the host does not hold the bytes yet.</summary>
+		public const string RegisterResource = "register-resource";
+
+		/// <summary>Removes a resource this plugin registered. An unknown name is not an error.</summary>
+		public const string RemoveResource = "remove-resource";
+
+		public static readonly IReadOnlyList<string> All = [Snapshot, Patch, Fault, RegisterResource, RemoveResource];
 	}
 
 	public static class Devices

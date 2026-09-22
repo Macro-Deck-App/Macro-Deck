@@ -488,6 +488,8 @@ public class Startup
 		services.AddSingleton<IPluginAssetReceiver, PluginAssetReceiver>();
 		services.AddSingleton<IPluginHostAssetSender, PluginHostAssetSender>();
 		services.AddSingleton<HostCallbackThrottle>();
+		services.AddSingleton<IPluginUiResources, PluginUiResources>();
+		services.AddSingleton<UiResourceCallbackThrottle>();
 		services.AddSingleton<IPluginCallbackRouter, PluginCallbackRouter>();
 		services.AddSingleton<IPluginAdbAccessPolicy, PluginAdbAccessPolicy>();
 		services.AddSingleton<IPluginAdbConsentNotifier, PluginAdbConsentNotifier>();

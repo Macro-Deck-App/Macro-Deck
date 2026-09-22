@@ -58,6 +58,8 @@ x-macrodeck-limits:
   maxUiUpdatesPerSecond: 30
   maxUiUpdateBurst: 90
   maxUiResourceBytes: 2097152
+  maxUiResourceBytesPerPlugin: 16777216
+  maxUiResourcesPerPlugin: 256
   maxUiAttachmentsPerSession: 16
   maxUiSessionsPerProvider: 8
   maxUiWidgetSessionsPerProvider: 128
@@ -145,6 +147,7 @@ x-macrodeck-error-codes:
   - ADB_NOT_ENABLED
   - ADB_NOT_ALLOWED
   - ADB_FAILED
+  - UI_RESOURCE_QUOTA_EXCEEDED
 
 servers:
   - url: /
@@ -513,6 +516,7 @@ components:
         - ADB_NOT_ENABLED
         - ADB_NOT_ALLOWED
         - ADB_FAILED
+        - UI_RESOURCE_QUOTA_EXCEEDED
 
     ProtocolError:
       type: object

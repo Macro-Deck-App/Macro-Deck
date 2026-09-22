@@ -42,6 +42,7 @@ internal sealed class PluginConnection : IAsyncDisposable
 	/// own asset id. See <see cref="HandleAssetBeginAsync" />'s remarks for why this test host acks them
 	/// at all.</summary>
 	private readonly ConcurrentDictionary<string, PendingAssetUpload> _pendingAssets = new(StringComparer.Ordinal);
+	private readonly UiResourceUploads _uiResourceUploads = new();
 
 	private readonly FakeIntegrationContext _context = new();
 	private readonly CancellationTokenSource _stopping = new();
@@ -423,7 +424,8 @@ internal sealed class PluginConnection : IAsyncDisposable
 					NegotiatedVersion,
 					cancellationToken,
 					_messaging,
-					_session.PluginId)
+					_session.PluginId,
+					_uiResourceUploads)
 				.ConfigureAwait(false);
 		}
 
@@ -461,7 +463,8 @@ internal sealed class PluginConnection : IAsyncDisposable
 			return;
 		}
 
-		_pendingAssets[payload.AssetId] = new PendingAssetUpload(payload.TotalBytes, payload.ContentHash);
+		_pendingAssets[payload.AssetId] =
+			new PendingAssetUpload(payload.Kind, payload.MimeType, payload.TotalBytes, payload.ContentHash);
 
 		await AcknowledgeAssetAsync(envelope, payload.AssetId, index: null, accepted: true).ConfigureAwait(false);
 	}
@@ -508,6 +511,11 @@ internal sealed class PluginConnection : IAsyncDisposable
 			accepted = bytes.Length == pending.TotalBytes &&
 				string.Equals(AssetContentHash.Compute(bytes), pending.ContentHash, StringComparison.Ordinal);
 			pending.Buffer.Dispose();
+
+			if (accepted && string.Equals(pending.Kind, AssetKinds.UiResource, StringComparison.Ordinal))
+			{
+				_uiResourceUploads.Add(pending.ContentHash, bytes, pending.MimeType);
+			}
 		}
 
 		await AcknowledgeAssetAsync(envelope, payload.AssetId, index: null, accepted).ConfigureAwait(false);
@@ -526,8 +534,12 @@ internal sealed class PluginConnection : IAsyncDisposable
 
 	/// <summary>Bytes received so far for one in-progress upload, plus what <c>asset.begin</c> declared
 	/// they must add up to.</summary>
-	private sealed class PendingAssetUpload(int totalBytes, string contentHash)
+	private sealed class PendingAssetUpload(string kind, string mimeType, int totalBytes, string contentHash)
 	{
+		public string Kind { get; } = kind;
+
+		public string MimeType { get; } = mimeType;
+
 		public int TotalBytes { get; } = totalBytes;
 
 		public string ContentHash { get; } = contentHash;

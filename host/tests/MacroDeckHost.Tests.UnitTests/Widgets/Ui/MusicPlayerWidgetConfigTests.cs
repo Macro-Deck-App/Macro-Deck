@@ -224,6 +224,8 @@ public class MusicPlayerWidgetConfigTests
 			content = default!;
 			return false;
 		}
+
+		public bool Remove(string resourceId) => false;
 	}
 
 	private sealed class PassThroughSampleText : MacroDeckHost.Widgets.Preview.IWidgetSampleTextResolver
