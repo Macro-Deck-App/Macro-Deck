@@ -32,7 +32,10 @@ export default defineConfig({
 				{ tag: 'link', attrs: { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' } },
 			],
 			customCss: ['./src/styles/theme.css'],
-			components: { Footer: './src/components/Footer.astro' },
+			components: {
+				Footer: './src/components/Footer.astro',
+				SiteTitle: './src/components/SiteTitle.astro',
+			},
 			social: [
 				{ icon: 'github', label: 'GitHub', href: projectRepo },
 				{ icon: 'discord', label: 'Discord', href: 'https://discord.macro-deck.app' },

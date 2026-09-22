@@ -9,14 +9,28 @@
  * Starlight inverts the meaning of --sl-color-white/black between themes: in
  * dark mode white is the brightest text and black the page background, and in
  * light mode the two swap. The ramps below follow that convention.
+ *
+ * The rest of the file matches the details to macro-deck.app (website repository, src/styles/global.scss): the
+ * header and sidebar sit on the page background with #333 borders, links use the website's link blue, headings are
+ * bold, and buttons and cards have the website's rounded corners.
  */
+
+@font-face {
+	font-family: 'Anta';
+	src: url('/fonts/Anta-Regular.ttf') format('truetype');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
 
 :root {
 	/* Dark theme - the app's default. */
 	--sl-color-accent-low: #10305a;
 	--sl-color-accent: #2196f3;
-	/* Lifted off the raw accent so link text keeps its contrast on #121212. */
-	--sl-color-accent-high: #9ecffa;
+	/* The website's link color (--md-primary-light); lighter than the raw accent so text keeps its contrast on
+	 * #121212. */
+	--sl-color-accent-high: #42a5f5;
+	--md-accent-hover: #1565c0;
 
 	--sl-color-white: #ffffff;
 	--sl-color-gray-1: #ececec;
@@ -26,6 +40,15 @@
 	--sl-color-gray-5: #2a2a2a;
 	--sl-color-gray-6: #1a1a1a;
 	--sl-color-black: #121212;
+
+	/* The website's navbar and cards: page background, #333 borders. */
+	--sl-color-bg-nav: var(--sl-color-black);
+	--sl-color-bg-sidebar: var(--sl-color-black);
+	--sl-color-hairline-shade: #333333;
+	--sl-color-hairline: #2a2a2a;
+	--md-card-bg: #1a1a1a;
+	--md-card-border: #333333;
+	--md-accent-muted: rgba(33, 150, 243, 0.15);
 }
 
 :root[data-theme='light'] {
@@ -43,10 +66,67 @@
 	--sl-color-gray-6: #ebebeb;
 	--sl-color-gray-7: #f5f5f5;
 	--sl-color-black: #ffffff;
+
+	--md-accent-hover: #0d3c75;
+	--sl-color-bg-nav: var(--sl-color-black);
+	--sl-color-bg-sidebar: var(--sl-color-black);
+	--sl-color-hairline-shade: #d0d0d0;
+	--sl-color-hairline: #ebebeb;
+	--md-card-bg: #f5f5f5;
+	--md-card-border: #d0d0d0;
+	--md-accent-muted: rgba(21, 101, 192, 0.1);
 }
 
-/* The logo is a rounded app icon, so it needs no extra chrome, just room to
- * breathe next to the wordmark. */
-.site-title img {
-	border-radius: 6px;
+/* Headings are bold on the website. */
+.sl-markdown-content :is(h1, h2, h3, h4, h5, h6),
+h1#_top {
+	font-weight: 700;
+}
+
+/* Keep the underline, links in running text need more than color, but make it quieter. */
+.sl-markdown-content a:not(:where(.not-content *)) {
+	text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+	text-underline-offset: 0.2em;
+}
+
+.sl-markdown-content a:not(:where(.not-content *)):hover {
+	text-decoration-color: currentColor;
+}
+
+/* The current page in the sidebar, like the active tab on the website's privacy page. */
+.sidebar-content a[aria-current='page'],
+.sidebar-content a[aria-current='page']:hover,
+.sidebar-content a[aria-current='page']:focus {
+	background-color: var(--md-accent-muted);
+	color: var(--sl-color-text-accent);
+}
+
+/* Buttons, such as the actions on the start page, as on the website. */
+.sl-link-button {
+	border-radius: 10px;
+	font-weight: 600;
+}
+
+.sl-link-button.primary {
+	background: var(--sl-color-accent);
+	border-color: var(--sl-color-accent);
+	color: #ffffff;
+}
+
+.sl-link-button.primary:hover {
+	background: var(--md-accent-hover);
+	border-color: var(--md-accent-hover);
+	color: #ffffff;
+}
+
+/* Cards, as the integration groups and download tiles on the website. */
+.sl-link-card {
+	border-radius: 13px;
+	border-color: var(--md-card-border);
+	background: var(--md-card-bg);
+}
+
+.sl-link-card:hover {
+	border-color: var(--sl-color-accent);
+	background: var(--md-card-bg);
 }
