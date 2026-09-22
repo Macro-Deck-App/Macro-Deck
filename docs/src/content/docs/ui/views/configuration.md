@@ -237,7 +237,7 @@ view and screensaver configuration.
 
 - **`FileExtensions` are bare extensions, without the dot**: `["png", "jpg"]`, not `[".png"]`. They narrow
   what browsing and dropping offer. Leave them unset and any file is accepted - an image input included.
-- **Nothing checks the path.** The user can type or paste any value, including one outside
+- **Macro Deck does not check the path.** The user can type or paste any value, including one outside
   `FileExtensions`, and a file can be moved or deleted after it was picked. Handle a missing file where you
   read it.
 - `Label`, `Description`, `Placeholder` and `Required` apply as on any input. Without a `Placeholder`, the
