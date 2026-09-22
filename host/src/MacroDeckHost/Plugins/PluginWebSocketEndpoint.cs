@@ -53,6 +53,7 @@ public sealed class PluginWebSocketEndpoint
 	private readonly RemotePluginSnapshotRefresher _snapshotRefresher;
 	private readonly IPluginCallbackRouter _callbackRouter;
 	private readonly PluginAdbInvokeRunner? _adbInvokes;
+	private readonly PluginMessagingInvokeRunner? _messagingInvokes;
 	private readonly IPluginAssetReceiver _assetReceiver;
 	private readonly IPluginHostAssetSender? _hostAssetSender;
 	private readonly HostStatePusher _statePusher;
@@ -82,10 +83,12 @@ public sealed class PluginWebSocketEndpoint
 		IPluginLogIngestor logIngestor,
 		ILogger logger,
 		IPluginHostAssetSender? hostAssetSender = null,
-		PluginAdbInvokeRunner? adbInvokes = null)
+		PluginAdbInvokeRunner? adbInvokes = null,
+		PluginMessagingInvokeRunner? messagingInvokes = null)
 	{
 		_hostAssetSender = hostAssetSender;
 		_adbInvokes = adbInvokes;
+		_messagingInvokes = messagingInvokes;
 		_sessionRegistry = sessionRegistry;
 		_invoker = invoker;
 		_registrar = registrar;
@@ -354,7 +357,7 @@ public sealed class PluginWebSocketEndpoint
 			loopCts.Token);
 
 		var dispatch = new InboundDispatchState();
-		var processing = ProcessQueuedMessagesAsync(connection, pluginId, dispatch, loopCts.Token);
+		var processing = ProcessQueuedMessagesAsync(connection, pluginId, sessionId, dispatch, loopCts.Token);
 
 		// A separate lane from the queue above, deliberately: log.publish shares no depth counter, no
 		// QUEUE_OVERFLOW and no connection-closing failure mode with HostInvoke/EventPublish/etc. A log
@@ -584,6 +587,7 @@ public sealed class PluginWebSocketEndpoint
 	private async Task ProcessQueuedMessagesAsync(
 		PluginWebSocketConnection connection,
 		string pluginId,
+		string sessionId,
 		InboundDispatchState dispatch,
 		CancellationToken cancellationToken)
 	{
@@ -593,7 +597,7 @@ public sealed class PluginWebSocketEndpoint
 			{
 				try
 				{
-					await RouteQueuedAsync(connection, pluginId, envelope, cancellationToken);
+					await RouteQueuedAsync(connection, pluginId, sessionId, envelope, cancellationToken);
 				}
 				finally
 				{
@@ -610,17 +614,19 @@ public sealed class PluginWebSocketEndpoint
 	private async Task RouteQueuedAsync(
 		PluginWebSocketConnection connection,
 		string pluginId,
+		string sessionId,
 		ProtocolEnvelope envelope,
 		CancellationToken cancellationToken)
 	{
 		switch (envelope.Type)
 		{
 			case MessageTypes.HostInvoke:
-				await HandleHostInvokeAsync(connection, pluginId, envelope, cancellationToken);
+				await HandleHostInvokeAsync(connection, pluginId, sessionId, envelope, cancellationToken);
 				break;
 
 			case MessageTypes.HostCancel:
 				_adbInvokes?.Cancel(connection, envelope.CorrelationId);
+				_messagingInvokes?.Cancel(connection, envelope.CorrelationId);
 				break;
 
 			case MessageTypes.EventPublish:
@@ -839,6 +845,7 @@ public sealed class PluginWebSocketEndpoint
 	private async Task HandleHostInvokeAsync(
 		PluginWebSocketConnection connection,
 		string pluginId,
+		string sessionId,
 		ProtocolEnvelope envelope,
 		CancellationToken cancellationToken)
 	{
@@ -861,6 +868,12 @@ public sealed class PluginWebSocketEndpoint
 		if (_adbInvokes is not null && string.Equals(payload.Api, HostApis.Adb, StringComparison.Ordinal))
 		{
 			await _adbInvokes.StartAsync(connection, pluginId, envelope.Id, payload, cancellationToken);
+			return;
+		}
+
+		if (_messagingInvokes is not null && string.Equals(payload.Api, HostApis.Messaging, StringComparison.Ordinal))
+		{
+			await _messagingInvokes.StartAsync(connection, pluginId, sessionId, envelope, payload, cancellationToken);
 			return;
 		}
 

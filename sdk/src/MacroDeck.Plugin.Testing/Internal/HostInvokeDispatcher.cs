@@ -43,7 +43,9 @@ internal static class HostInvokeDispatcher
 		FakeActionInteractions interactions,
 		HostInvokePayload payload,
 		int negotiatedVersion,
-		CancellationToken cancellationToken)
+		CancellationToken cancellationToken,
+		TestHostMessaging? messaging = null,
+		string? pluginId = null)
 	{
 		ArgumentNullException.ThrowIfNull(context);
 		ArgumentNullException.ThrowIfNull(interactions);
@@ -87,6 +89,7 @@ internal static class HostInvokeDispatcher
 					.ConfigureAwait(false),
 				HostApis.ScreenSavers => await ScreenSaversAsync(context, payload, cancellationToken)
 					.ConfigureAwait(false),
+				HostApis.Messaging when messaging is not null && pluginId is not null => messaging.Dispatch(pluginId, payload),
 				_ => HostInvokeOutcome.Failed(ProtocolErrorCodes.CapabilityUnsupported,
 					$"'{payload.Api}' is not a host API this test host knows.")
 			};
@@ -313,7 +316,7 @@ internal static class HostInvokeDispatcher
 			dto.DefaultData,
 			dto.DataSchema,
 			dto.HasConfiguration,
-			dto.Metadata);
+			dto.Metadata) { SupportsFlows = dto.SupportsFlows };
 
 	private static async Task<HostInvokeOutcome> LayoutsAsync(
 		FakeIntegrationContext context,
@@ -766,4 +769,6 @@ internal readonly struct HostInvokeOutcome
 
 	public static HostInvokeOutcome Failed(string code, string message)
 		=> new() { Error = new ProtocolError { Code = code, Message = message, Retryable = false } };
+
+	public static HostInvokeOutcome Failed(ProtocolError error) => new() { Error = error };
 }

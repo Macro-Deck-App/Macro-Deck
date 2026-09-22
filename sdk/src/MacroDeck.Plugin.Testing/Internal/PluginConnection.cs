@@ -32,6 +32,7 @@ internal sealed class PluginConnection : IAsyncDisposable
 	private readonly PluginLogCollector _logs;
 	private readonly PluginEventCollector _events;
 	private readonly ChannelWriter<ProtocolEnvelope> _fromPlugin;
+	private readonly TestHostMessaging _messaging;
 	private readonly SemaphoreSlim _sending = new(1, 1);
 
 	private readonly ConcurrentDictionary<string, TaskCompletionSource<ProtocolEnvelope>> _pending
@@ -53,8 +54,10 @@ internal sealed class PluginConnection : IAsyncDisposable
 		ProtocolMessageLog messages,
 		PluginLogCollector logs,
 		PluginEventCollector events,
-		ChannelWriter<ProtocolEnvelope> fromPlugin)
+		ChannelWriter<ProtocolEnvelope> fromPlugin,
+		TestHostMessaging messaging)
 	{
+		_messaging = messaging;
 		_socket = socket;
 		_session = session;
 		Resumed = resumed;
@@ -414,7 +417,13 @@ internal sealed class PluginConnection : IAsyncDisposable
 		else
 		{
 			outcome = await HostInvokeDispatcher
-				.DispatchAsync(_context, _context.Interactions, payload, NegotiatedVersion, cancellationToken)
+				.DispatchAsync(_context,
+					_context.Interactions,
+					payload,
+					NegotiatedVersion,
+					cancellationToken,
+					_messaging,
+					_session.PluginId)
 				.ConfigureAwait(false);
 		}
 

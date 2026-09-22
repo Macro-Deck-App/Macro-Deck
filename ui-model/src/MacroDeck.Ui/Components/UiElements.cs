@@ -1230,9 +1230,9 @@ public sealed record UiTextField : UiComponentLeaf
 /// <see cref="UiComponentEvents.Reveal" /> and the reader reports how far the user has come; the producer
 /// appends children by patch, or does not. Nothing here says how many, how often, or whether there are
 /// more - a producer that has reached the end of its data simply appends nothing, and the reader asks
-/// again only when the user goes further than they have been before. There is deliberately no "loading"
-/// or "has more" property: both are the producer's own state, and both are already expressible as
-/// children.
+/// again only when the user goes further than they have been before. Replacing the rows, as a new search
+/// does, starts that over. There is deliberately no "loading" or "has more" property: both are the
+/// producer's own state, and both are already expressible as children.
 /// </para>
 /// </summary>
 // Renaming this would make the type disagree with the wire name a renderer switches on.

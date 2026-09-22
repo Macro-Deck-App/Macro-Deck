@@ -232,6 +232,24 @@ public static class HostOperations
 			[Shell, Battery, Push, Pull, Install, Uninstall, PackageInstalled, Connect];
 	}
 
+	/// <summary>The <c>messaging</c> host api.</summary>
+	public static class Messaging
+	{
+		/// <summary>Publishes an event to every matching subscription. Answers once the host accepted it.</summary>
+		public const string Publish = "publish";
+
+		/// <summary>Sends a command to the topic's one handler. Answers once the handler finished.</summary>
+		public const string Send = "send";
+
+		/// <summary>Sends a request to the topic's one handler and answers with its reply.</summary>
+		public const string Request = "request";
+
+		/// <summary>Replaces this plugin's event subscriptions and handled command and request topics.</summary>
+		public const string Subscriptions = "subscriptions";
+
+		public static readonly IReadOnlyList<string> All = [Publish, Send, Request, Subscriptions];
+	}
+
 	/// <summary>The <c>event-bindings</c> host api is push-only, so it declares no operations.</summary>
 	public static class EventBindings
 	{
@@ -258,6 +276,7 @@ public static class HostOperations
 			[HostApis.WidgetTypes] = WidgetTypes.All,
 			[HostApis.EventBindings] = EventBindings.All,
 			[HostApis.Adb] = Adb.All,
+			[HostApis.Messaging] = Messaging.All,
 		};
 
 	public static IReadOnlyList<string> For(string api) => _byApi[api];

@@ -1,5 +1,6 @@
 using System.Globalization;
 using MacroDeckHost.Application.Integrations;
+using MacroDeckHost.Application.Messaging;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Common;
@@ -245,7 +246,8 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 			TestScreenSaverProviders.Host(),
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
-			new LoggerConfiguration().CreateLogger());
+			new LoggerConfiguration().CreateLogger(),
+			new MessageBroker(Serilog.Core.Logger.None));
 
 	private static IntegrationInitializer CreateRealInitializer(IServiceScopeFactory scopeFactory)
 		=> new(scopeFactory,
@@ -268,7 +270,8 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 			TestScreenSaverProviders.Host(),
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
-			new LoggerConfiguration().CreateLogger());
+			new LoggerConfiguration().CreateLogger(),
+			new MessageBroker(Serilog.Core.Logger.None));
 
 	private static ServiceProvider BuildScopeServices()
 		=> new ServiceCollection()

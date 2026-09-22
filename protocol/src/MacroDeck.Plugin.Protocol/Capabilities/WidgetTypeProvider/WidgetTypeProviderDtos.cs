@@ -26,6 +26,10 @@ public sealed record WidgetTypeDescriptorDto
 	/// type.</summary>
 	public bool HasConfiguration { get; init; }
 
+	/// <summary>Whether the host runs the widget's stored <c>flows</c> when its tile is pressed. Absent reads
+	/// as false.</summary>
+	public bool SupportsFlows { get; init; }
+
 	public IReadOnlyDictionary<string, string>? Metadata { get; init; }
 }
 

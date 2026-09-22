@@ -2,6 +2,7 @@ using MacroDeck.Sdk;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Events;
+using MacroDeck.Sdk.Messaging;
 using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Variables;
@@ -19,7 +20,8 @@ public class IntegrationContext : IIntegrationContext
 		IScriptApi scripts,
 		IWidgetApi widgets,
 		IEventPublisher events,
-		IUserNotifier notifications)
+		IUserNotifier notifications,
+		IMessageChannel messages)
 	{
 		Variables = variables;
 		UserVariables = userVariables;
@@ -29,6 +31,7 @@ public class IntegrationContext : IIntegrationContext
 		Widgets = widgets;
 		Events = events;
 		Notifications = notifications;
+		Messages = messages;
 	}
 
 	public IVariableApi Variables { get; }
@@ -46,4 +49,6 @@ public class IntegrationContext : IIntegrationContext
 	public IEventPublisher Events { get; }
 
 	public IUserNotifier Notifications { get; }
+
+	public IMessageChannel Messages { get; }
 }

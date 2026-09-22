@@ -20,6 +20,7 @@ public class HostApiStabilityTests
 		"event-bindings",
 		"folder-views",
 		"layouts",
+		"messaging",
 		"notifications",
 		"screensavers",
 		"scripts",
@@ -53,6 +54,7 @@ public class HostApiStabilityTests
 			[HostApis.ScreenSavers] = ["register", "unregister"],
 			[HostApis.Adb] =
 				["shell", "battery", "push", "pull", "install", "uninstall", "package-installed", "connect"],
+			[HostApis.Messaging] = ["publish", "send", "request", "subscriptions"],
 		};
 
 	[Test]

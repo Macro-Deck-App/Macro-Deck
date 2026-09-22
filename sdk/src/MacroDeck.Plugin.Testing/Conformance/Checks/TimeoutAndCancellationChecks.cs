@@ -1,5 +1,6 @@
 using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Errors;
+using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Limits;
 
 namespace MacroDeck.Plugin.Testing.Conformance.Checks;
@@ -28,7 +29,7 @@ internal sealed class ExactlyOneReplyPerInvocationCheck() : ConformanceCheckBase
 	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
-		var declared = context.Session!.Declared;
+		var declared = context.Session!.Declared.Where(capability => capability.Kind != CapabilityKinds.Messaging).ToList();
 
 		if (declared.Count == 0)
 		{
@@ -135,7 +136,7 @@ internal sealed class CancelForUnknownOrAnsweredCorrelationIsNoOpCheck() : Confo
 				$"{unknownReplies} message(s) from the plugin were recorded for the unknown correlation id.");
 		}
 
-		var declared = context.Session.Declared;
+		var declared = context.Session.Declared.Where(capability => capability.Kind != CapabilityKinds.Messaging).ToList();
 
 		if (declared.Count == 0)
 		{
@@ -254,7 +255,7 @@ internal sealed class ConcurrencyBoundIsHonestCheck() : ConformanceCheckBase("MD
 	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
-		var declared = context.Session!.Declared;
+		var declared = context.Session!.Declared.Where(capability => capability.Kind != CapabilityKinds.Messaging).ToList();
 
 		if (declared.Count == 0)
 		{

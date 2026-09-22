@@ -188,7 +188,7 @@ Capabilities are first declared on the `POST /api/plugins/sessions` request; `ca
 
 | Shape | Field | Type | Required | Meaning |
 | --- | --- | --- | --- | --- |
-| `DeclaredCapability` | `kind` | string | yes | One of the seventeen kinds below. |
+| `DeclaredCapability` | `kind` | string | yes | One of the eighteen kinds below. |
 | | `localId` | string | yes | The capability's id within the plugin. |
 | | `versionRange` | `{minimum, maximum}` | yes | Integer capability versions the plugin serves. |
 | | `displayName` | string | no | Human-readable name. |
@@ -199,7 +199,7 @@ Capabilities are first declared on the `POST /api/plugins/sessions` request; `ca
 
 Negotiation fails **non-fatally**: an unsupported or unknown kind comes back rejected with a reason, and the session proceeds degraded.
 
-The seventeen `kind` values: `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`, `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`, `folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`. `operation` comes from a fixed vocabulary per kind - see [capability operations](/reference/protocol/#capability-operations). Two more captured invokes:
+The eighteen `kind` values: `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`, `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`, `folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`, `messaging`. `operation` comes from a fixed vocabulary per kind - see [capability operations](/reference/protocol/#capability-operations). Two more captured invokes:
 
 ```json
 {"type":"capability.invoke","id":"01a09528-bc57-7b85-bed4-952327ffedcd",
@@ -259,7 +259,7 @@ The only kind that is **item-shaped and provider-shaped at once**. The eager hal
 | `host.cancel` | plugin → host | `reason` - best-effort cancellation of a `host.invoke` |
 | `host.state` | host → plugin | `api` (required), `data` - the list a plugin's synchronous members serve from |
 
-APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `notifications`, `action-interactions`, `ui`, `devices`, `variable-values`, `layouts`, `folder-views`, `widget-types`, `screensavers`, `adb`, and the push-only `event-bindings`. There is no `events` api; use `event.publish`. A plugin ignores a `host.state` api it does not know.
+APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `notifications`, `action-interactions`, `ui`, `devices`, `variable-values`, `layouts`, `folder-views`, `widget-types`, `screensavers`, `adb`, `messaging`, and the push-only `event-bindings`. There is no `events` api; use `event.publish`. A plugin ignores a `host.state` api it does not know.
 
 `host.state` for `config` has no `data`: it means "your config changed, re-read it". Built from the schema:
 
@@ -275,6 +275,7 @@ APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `no
 | `variable-values` | Data-carrying push for the catalog half only; eager variables are always polled via `variables`/`get`. |
 | `event-bindings` | Push-only `host.state`, no `host.invoke` operations. `data` lists the triggers bound to this plugin's own events, each an `eventId` and `parameters` keyed by name (`value`, absent for a state operator, and `operator`). Sent on registration and whenever that list changes. |
 | `adb` | Gated per plugin, runs off the session's dispatch loop, at most 4 calls in flight per plugin - see [`adb`](#adb). |
+| `messaging` | Needs the `messaging` capability kind; own rate limit instead of the per-plugin callback throttle; `send` and `request` run off the session's dispatch loop - see [`messaging`](#messaging). |
 
 #### `widgets` by major
 
@@ -384,6 +385,77 @@ device list changes. Its shape is
 `offline` or `unauthorized`. `revision` follows the same rule as the `deck` push: apply a push only when
 its revision is higher than the last one applied in this session. A host without this api never pushes it
 and answers every `adb` invoke with `CAPABILITY_UNSUPPORTED`.
+
+#### `messaging`
+
+```json
+{"type":"host.invoke","id":"<uuid-v7>","deadlineMs":10000,
+ "payload":{"api":"messaging","operation":"request","arguments":{"topic":"obs.scene.current","payload":{"format":"short"}}}}
+```
+
+Plugins and integrations talking to each other by topic, brokered by the host. A plugin states what it
+listens to with `subscriptions`; the host delivers to it as `capability.invoke` of the
+[`messaging` capability kind](#the-messaging-capability-kind), which it declares at local id `provider`. Argument
+and result shapes are in
+[`MessagingInvokeArguments.cs`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/protocol/src/MacroDeck.Plugin.Protocol/Callbacks/MessagingInvokeArguments.cs).
+The SDK side is [Messaging between plugins](/features/messaging/).
+
+| Operation | Arguments | Result `data` | Meaning |
+| --- | --- | --- | --- |
+| `publish` | `topic`, `payload` | none | An event for every subscription whose pattern matches, including the publisher's own. Answers once accepted, before delivery. |
+| `send` | `topic`, `payload` | none | A command for the topic's one handler. Answers once the handler finished. |
+| `request` | `topic`, `payload` | `payload` | A request for the topic's one handler; `payload` is its reply. |
+| `subscriptions` | `events`, `commands`, `requests` (arrays of strings) | `rejected` (array) | Replaces everything this plugin listens to. Complete, not a delta. |
+
+- **Topics** are two or more dot-separated segments of `[a-z0-9]`, `-` and `_`, starting and ending with
+  a letter or digit, at most 128 characters. `events` entries may instead be a prefix followed by `.*`,
+  which matches every topic below the prefix. A malformed topic is `INVALID_PAYLOAD` with reason
+  `messaging_invalid_topic`, or a `rejected` entry with that reason.
+- **Payloads** are any JSON value, at most 64 KiB serialized (`PAYLOAD_TOO_LARGE`). The host stamps
+  the sender; a plugin cannot name one.
+- **One handler per command or request topic.** A `subscriptions` entry for a topic another participant
+  already handles comes back in `rejected` with `kind` (`event`, `command` or `request`), `topic`,
+  `reason` `messaging_topic_handled` and `owner`, that participant's integration id. Each list holds at
+  most 256 entries; more is `INVALID_PAYLOAD`.
+- **`deadlineMs` bounds the handler.** For `send` and `request` the host waits for the handler for
+  `deadlineMs`, at most and by default 30 seconds, and then answers `TIMEOUT` itself. Wait a little longer
+  than that for the `host.result`.
+- **Failures** of `send` and `request` are `CAPABILITY_UNAVAILABLE` refined by `details.reason`:
+  `messaging_no_handler`, `messaging_handler_unavailable` (retryable: the handler's plugin is
+  reconnecting) or `messaging_handler_failed`. Treat an unknown reason as a failed handler.
+- **Declare the kind first.** A session that did not declare the `messaging` capability kind gets
+  `CAPABILITY_UNAVAILABLE` with reason `messaging_not_declared` for every operation. A `subscriptions`
+  call from a session that has since been replaced is `SESSION_NOT_FOUND`: send it again from the new
+  session.
+- **Limits.** `publish`, `send` and `request` share a per-plugin budget of 100 calls, refilled at 50 a
+  second, separate from the callback throttle; `subscriptions` is not rate-limited. At most 16 `send`
+  and `request` calls per plugin wait at once, and a handler receives at most 8 at once; beyond either is
+  a retryable `RATE_LIMITED`, never queued. `host.cancel` ends a waiting `send` or `request`.
+- **Lifetime.** A plugin's `subscriptions` survive a resume and are removed when its session is replaced
+  or pruned. Send them again after every new session.
+
+A host without this api answers every `messaging` invoke with `CAPABILITY_UNSUPPORTED`, and does not list
+`messaging` in the descriptor's `capabilityKinds`.
+
+##### The `messaging` capability kind
+
+The host delivers through it:
+
+```json
+{"type":"capability.invoke","id":"<uuid-v7>","deadlineMs":10000,
+ "payload":{"kind":"messaging","localId":"provider","operation":"request",
+   "arguments":{"topic":"obs.scene.current","sender":"com.example.deck","messageId":"<id>","sentAt":"2026-09-22T10:00:00+00:00","payload":{"format":"short"}}}}
+```
+
+| Operation | Arguments | Result `data` |
+| --- | --- | --- |
+| `event` | `topic`, `sender`, `messageId`, `sentAt`, `payload` | none |
+| `command` | same | none |
+| `request` | same | `payload`, the reply |
+
+A plugin answers a topic it does not handle with `CAPABILITY_UNAVAILABLE` and reason
+`messaging_no_handler`, and a handler that failed with reason `messaging_handler_failed`. The kind has no
+`describe`.
 
 ### Events, logs and state
 

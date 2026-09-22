@@ -331,6 +331,24 @@ public static class CapabilityOperations
 		public static readonly IReadOnlyList<string> All = [Describe, WidgetTypes];
 	}
 
+	/// <summary>
+	/// Deliveries to a plugin's own subscriptions and handlers. The kind has no <c>describe</c>: what a
+	/// plugin listens to is stated through the <c>messaging</c> host api instead.
+	/// </summary>
+	public static class Messaging
+	{
+		/// <summary>An event for every local subscription whose pattern matches the topic. Answers with no data.</summary>
+		public const string Event = "event";
+
+		/// <summary>A command for the plugin's handler of the topic. Answers with no data once it finished.</summary>
+		public const string Command = "command";
+
+		/// <summary>A request for the plugin's handler of the topic. Answers with the reply.</summary>
+		public const string Request = "request";
+
+		public static readonly IReadOnlyList<string> All = [Event, Command, Request];
+	}
+
 	private static readonly Dictionary<string, IReadOnlyList<string>> _byKind =
 		new(StringComparer.Ordinal)
 		{
@@ -351,6 +369,7 @@ public static class CapabilityOperations
 			[Handshake.CapabilityKinds.FolderViewProvider] = FolderViewProvider.All,
 			[Handshake.CapabilityKinds.ScreenSaverProvider] = ScreenSaverProvider.All,
 			[Handshake.CapabilityKinds.WidgetTypeProvider] = WidgetTypeProvider.All,
+			[Handshake.CapabilityKinds.Messaging] = Messaging.All,
 		};
 
 	public static IReadOnlyList<string> For(string kind) => _byKind[kind];

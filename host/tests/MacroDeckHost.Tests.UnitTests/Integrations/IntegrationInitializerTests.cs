@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Integrations;
+using MacroDeckHost.Application.Messaging;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Application.Variables;
@@ -314,7 +315,8 @@ internal sealed class IntegrationInitializerTests
 			TestScreenSaverProviders.Host(),
 			TestDeviceProviders.Host(),
 			timeProvider,
-			new LoggerConfiguration().CreateLogger());
+			new LoggerConfiguration().CreateLogger(),
+			new MessageBroker(Serilog.Core.Logger.None));
 
 	private static ServiceProvider BuildScopeServices()
 		=> new ServiceCollection()

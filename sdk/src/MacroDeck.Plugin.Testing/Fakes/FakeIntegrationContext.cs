@@ -2,6 +2,7 @@ using MacroDeck.Sdk;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Events;
+using MacroDeck.Sdk.Messaging;
 using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Variables;
@@ -11,7 +12,7 @@ namespace MacroDeck.Plugin.Testing.Fakes;
 
 /// <summary>
 /// An <see cref="IIntegrationContext" /> built entirely from the fakes in this namespace, so a plugin
-/// under test can be constructed and exercised with no host on the other end of any of its eight
+/// under test can be constructed and exercised with no host on the other end of any of its
 /// capabilities.
 ///
 /// <para>
@@ -42,6 +43,7 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 		FolderViews = new FakeFolderViewProviderContext();
 		WidgetTypes = new FakeWidgetTypeProviderContext();
 		ScreenSavers = new FakeScreenSaverProviderContext();
+		Messages = new FakeMessageChannel();
 	}
 
 	/// <summary>The plugin's own variables - see <see cref="FakeVariableApi" />.</summary>
@@ -122,6 +124,12 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 	/// same reason <see cref="FolderViews" /> is not.
 	/// </summary>
 	public FakeScreenSaverProviderContext ScreenSavers { get; }
+
+	/// <summary>The message channel - see <see cref="FakeMessageChannel" />.</summary>
+	public FakeMessageChannel Messages { get; }
+
+	/// <inheritdoc />
+	IMessageChannel IIntegrationContext.Messages => Messages;
 
 	/// <inheritdoc />
 	IVariableApi IIntegrationContext.Variables => Variables;

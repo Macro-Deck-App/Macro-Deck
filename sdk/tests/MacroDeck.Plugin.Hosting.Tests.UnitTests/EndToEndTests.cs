@@ -96,8 +96,12 @@ public class EndToEndTests
 
 		await _host.ConnectedAsync().WaitAsync(TimeSpan.FromSeconds(10));
 
-		Assert.That(_host.Sessions.Single().Capabilities.Select(capability => capability.LocalId),
-			Is.EquivalentTo(new[] { "play", "pause" }));
+		Assert.That(_host.Sessions.Single().Capabilities.Select(capability => (capability.Kind, capability.LocalId)),
+			Is.EquivalentTo(new[]
+			{
+				(CapabilityKinds.Actions, "play"), (CapabilityKinds.Actions, "pause"),
+				(CapabilityKinds.Messaging, ProviderCapabilityId.LocalId)
+			}));
 	}
 
 	[Test]

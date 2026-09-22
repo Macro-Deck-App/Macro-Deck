@@ -3,6 +3,7 @@ using MacroDeck.Sdk;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Events;
+using MacroDeck.Sdk.Messaging;
 using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Variables;
@@ -26,7 +27,8 @@ internal sealed class RemoteIntegrationContext(
 	RemoteScriptApi scripts,
 	RemoteWidgetApi widgets,
 	RemoteEventPublisher events,
-	RemoteUserNotifier notifications) : IIntegrationContext
+	RemoteUserNotifier notifications,
+	RemoteMessageChannel messages) : IIntegrationContext
 {
 	public IVariableApi Variables { get; } = variables;
 
@@ -43,4 +45,6 @@ internal sealed class RemoteIntegrationContext(
 	public IEventPublisher Events { get; } = events;
 
 	public IUserNotifier Notifications { get; } = notifications;
+
+	public IMessageChannel Messages { get; } = messages.Lifecycle;
 }

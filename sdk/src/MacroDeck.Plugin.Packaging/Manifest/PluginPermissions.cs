@@ -50,6 +50,8 @@ public static class PluginPermissions
 	/// <summary>Enforced: required for an installed plugin to use the <c>adb</c> host api.</summary>
 	public const string HostAdb = "host:adb";
 
+	public const string HostMessaging = "host:messaging";
+
 	public const string EventsPublish = "events:publish";
 
 	public const string AssetsUpload = "assets:upload";
@@ -66,7 +68,7 @@ public static class PluginPermissions
 	[
 		HostVariables, HostUserVariables, HostConfig, HostDeck, HostScripts, HostWidgets,
 		HostNotifications, HostActionInteractions, HostDevices, HostVariableValues, HostLayouts,
-		HostFolderViews, HostWidgetTypes, HostEventBindings, HostScreenSavers, HostAdb, EventsPublish, AssetsUpload, NetOutbound, FileSystemUserFiles,
+		HostFolderViews, HostWidgetTypes, HostEventBindings, HostScreenSavers, HostAdb, HostMessaging, EventsPublish, AssetsUpload, NetOutbound, FileSystemUserFiles,
 		ProcessSpawn, DeviceUsb,
 	];
 

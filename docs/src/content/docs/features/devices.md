@@ -220,8 +220,11 @@ whose only press action is a Double Tap advertises `Press` and `Release` only.
 
 A tile that a plugin or integration serves, rather than a built-in one, answers a press from its own UI tree
 first, exactly as it does on screen: a [disabled region](/ui/components/modifier/) absorbs the press, and a
-control that declares the press receives it instead of the tile's flows. One difference: a tree's `double-press` is
-never sent from a hardware deck, so a button declaring it receives `press` for every tap. The host asks that tree once per
+control that declares the press receives it instead of the tile's flows. A press the tree does not claim
+runs the tile's flows only if its type is registered with
+[`SupportsFlows`](/ui/views/widget-types/#running-the-users-actions). Double taps are never recognised on
+such a tile: a tree's `double-press` is never sent from a hardware deck, so a button declaring it receives
+`press` for every tap, and a Double Tap flow never runs from one. The host asks that tree once per
 press and waits at most a second for it; a tree that does not answer in time absorbs the press. Because the
 tree may arrive over the same connection your report came in on, the host never holds your report for it:
 `Press` and `Release` return at once as always, and a `ShortPress` or `LongPress` whose tree has not answered
