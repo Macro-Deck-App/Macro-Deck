@@ -114,7 +114,7 @@ public class EndToEndTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_host.UpgradeAuthorization, Is.EqualTo("Bearer session-token"));
+			Assert.That(_host.UpgradeAuthorization, Is.EqualTo($"Bearer {FakePluginHost.SessionToken(1)}"));
 			Assert.That(_host.OfferedSubProtocols, Does.Contain(ProtocolConstants.WebSocketSubProtocol));
 
 			// The secret bought the session token; sending it again would expose it on every reconnect.

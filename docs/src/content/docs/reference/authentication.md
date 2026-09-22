@@ -419,18 +419,23 @@ restarting Macro Deck. Stored credentials survive either way. Full schemas:
 | Per-plugin secret | No expiry. Revoked on uninstall or by `DELETE /api/plugins/registration/{pluginId}`. A secret from a Developer token also stops working when that token expires or is revoked; a paired secret has no such dependency. A secret that took over an installed plugin is revoked when the takeover ends |
 | Developer token | Optional expiry, none by default. Expiry or revocation stops every registration it minted from opening a new session |
 | Session token | 15 minutes |
-| Session resume window | 60 seconds after the socket drops |
+| Session resume window | 60 seconds after a welcomed connection drops |
 
-**There is no refresh endpoint, deliberately.** The resume window (a minute) is always shorter than
-the token (fifteen), so a reconnect too late to resume opens a new session and gets a new token anyway.
-To renew, run the session exchange again.
+**There is no refresh endpoint, deliberately.** A reconnect too late to resume opens a new session and
+gets a new token anyway. To renew, run the session exchange again. The window counts from when a
+connection that got `session.welcome` dropped; reconnect attempts that fail do not extend it.
+
+The host answers the `/plugins/ws` upgrade with `401` when it no longer knows the session: after Macro
+Deck restarted, or when a session connected for longer than the token's fifteen minutes tries to
+resume. The SDK then opens a new session with its stored credential straight away.
 
 The host re-checks the live session registry on every request, so terminating a session takes effect
 immediately even though its token stays cryptographically valid for the rest of its 15 minutes.
 
 The SDK reconnects with full-jitter exponential backoff (1 s initial, 30 s maximum, factor 2), resumes
 inside the window, and tolerates `MacroDeck:Plugin:MaxAuthenticationFailures` (default 3) consecutive
-authentication failures on the socket before treating them as fatal.
+authentication failures on the socket before treating them as fatal. A `401` on the upgrade of a session
+token issued in the same attempt counts as one; a `401` for an older session does not.
 
 ## Reachability
 
@@ -484,6 +489,7 @@ follows the same rule. `403` reuses `UNAUTHENTICATED`: the wire vocabulary has n
 | Code | HTTP / close | Meaning | What the SDK does |
 | --- | --- | --- | --- |
 | `UNAUTHENTICATED` | `401` | Any credential failure | Fatal on the REST handshake, except one re-pair when a stored credential is rejected before the process first connected |
+| `UNAUTHENTICATED` | `401` on the `/plugins/ws` upgrade | The host does not know the session, for example after a restart, or its token expired | Drops the cached session and opens a new one with the stored credential. A just-issued token refused this way counts towards `MaxAuthenticationFailures` |
 | `UNAUTHENTICATED` | `403` | Non-loopback or browser caller, or a token naming a different session | Fatal |
 | `UNAUTHENTICATED` + `reason: developer_mode_disabled` | `403` | Developer Mode off (pairing, registration, development-credential session) | Reports Developer Mode as the cause; for pairing, waits and retries if the descriptor reported it |
 | `PLUGIN_ALREADY_REGISTERED` | `409` | Identity already registered | Fatal on pairing and enrolment |

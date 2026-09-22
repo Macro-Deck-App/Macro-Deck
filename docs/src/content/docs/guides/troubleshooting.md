@@ -248,6 +248,11 @@ revoked registration, an unknown or expired Developer token and a missing header
   Current SDKs pair again once by themselves; on an older SDK delete
   `.macrodeck-dev-state/<plugin-id>/credentials.json` and run again.
 
+A `401` on the `/plugins/ws` upgrade, with "The plugin session no longer exists" in the host log, means
+the host does not know the session the plugin presented: Macro Deck restarted, or the session token
+expired. Current SDKs open a new session with the stored credential. An older SDK keeps presenting the
+old session until it gets `429`, and never reconnects: update the SDK, or restart the plugin.
+
 ### `UNAUTHENTICATED` with HTTP 403
 
 The request was not from loopback, looked like a browser, or its session token names another session. Run
@@ -296,7 +301,9 @@ Too many requests; retry after the given delay.
 ```
 
 Too many enrollment or session attempts. Wait for `details.retryAfterSeconds` / `Retry-After`. Enrollment
-shares one bucket; session exchange is keyed per plugin id. A reconnect loop without backoff keeps hitting it.
+shares one bucket; session exchange is keyed per plugin id; the `/plugins/ws` upgrade is keyed per session
+id, so repeatedly presenting a session the host no longer knows ends here (see the `401` section above). A
+reconnect loop without backoff keeps hitting it.
 
 ### The socket closes with code…
 
@@ -306,7 +313,7 @@ shares one bucket; session exchange is keyed per plugin id. A reconnect loop wit
 | `4000` | `SESSION_REPLACED`: another connection for this plugin arrived without `resumeSessionId`. | Expected when a second instance starts; `maxSessionsPerPlugin` is 1. |
 | `4001` | `PROTOCOL_VERSION_UNSUPPORTED`. | See above. Fatal. |
 | `4002` | `SESSION_EXPIRED`. | Retryable: open a fresh session. |
-| `4003` | Authentication failed. | Retryable up to `MaxAuthenticationFailures` (default 3), then fatal. |
+| `4003` | Authentication failed. | Retryable up to `MaxAuthenticationFailures` (default 3), then fatal. A `401` on the upgrade of a just-issued session token counts against the same limit. |
 | `4004` | `SupervisorShutdown`: the supervisor is stopping you. | Not an error; clean up within the grace period. |
 | `4005` | `RegistrationRejected`: invalid or duplicated declared ids, or a colliding integration id. | Terminal. Fix the declaration and reconnect. |
 

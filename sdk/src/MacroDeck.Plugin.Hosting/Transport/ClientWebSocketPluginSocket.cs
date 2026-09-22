@@ -34,6 +34,7 @@ internal sealed class ClientWebSocketPluginSocket(ClientWebSocket socket, int ma
 
 		try
 		{
+			socket.Options.CollectHttpResponseDetails = true;
 			socket.Options.AddSubProtocol(ProtocolConstants.WebSocketSubProtocol);
 			socket.Options.SetRequestHeader(PluginAuthDefaults.AuthorizationHeaderName,
 				$"{PluginAuthDefaults.BearerScheme} {sessionToken}");
@@ -41,7 +42,17 @@ internal sealed class ClientWebSocketPluginSocket(ClientWebSocket socket, int ma
 			var endpoint = new Uri(ToWebSocketScheme(hostUrl), ProtocolConstants.WebSocketPath);
 			await socket.ConnectAsync(endpoint, cancellationToken);
 
+			// Collected only to read the status of a refused upgrade, which the option has to be set
+			// before the connect for.
+			socket.HttpResponseHeaders = null;
+
 			return new ClientWebSocketPluginSocket(socket, maxMessageBytes);
+		}
+		catch (WebSocketException exception) when (socket.HttpStatusCode != 0)
+		{
+			var statusCode = socket.HttpStatusCode;
+			socket.Dispose();
+			throw new PluginSocketUpgradeRefusedException(statusCode, exception);
 		}
 		catch
 		{

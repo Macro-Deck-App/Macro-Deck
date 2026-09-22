@@ -40,6 +40,7 @@ internal sealed class FakePluginHost : IAsyncDisposable
 
 	private readonly TaskCompletionSource _welcomed = new(TaskCreationOptions.RunContinuationsAsynchronously);
 	private readonly ConcurrentQueue<string> _types = new();
+	private readonly ConcurrentDictionary<string, bool> _forgottenTokens = new(StringComparer.Ordinal);
 	private readonly SemaphoreSlim _sending = new(1, 1);
 	private WebSocket? _current;
 	private int _connections;
@@ -158,11 +159,41 @@ internal sealed class FakePluginHost : IAsyncDisposable
 	/// <summary>Answers every socket upgrade with 503 while the REST endpoints keep working.</summary>
 	public bool WebSocketUnavailable { get; set; }
 
+	public bool RejectEveryUpgrade { get; set; }
+
+	public ConcurrentQueue<SessionHelloPayload> Hellos { get; } = new();
+
+	/// <summary>
+	/// Behaves like a host that restarted: every session issued so far is unknown from now on, so its
+	/// token is refused at the upgrade with 401, and the current socket is dropped.
+	/// </summary>
+	public void Restart()
+	{
+		for (var session = 1; session <= Sessions.Count; session++)
+		{
+			_forgottenTokens[SessionToken(session)] = true;
+		}
+
+		DropCurrentConnection();
+	}
+
+	public static string SessionToken(int session) => $"session-token-{session}";
+
 	/// <summary>
 	/// Kills the socket the plugin is currently on, the way a network blip does: aborted rather than
 	/// closed, so the plugin sees a dropped connection and not a goodbye it should stop resuming after.
 	/// </summary>
 	public void DropCurrentConnection() => Volatile.Read(ref _current)?.Abort();
+
+	/// <summary>Closes the socket the plugin is on with a protocol close code, the way the host does.</summary>
+	public async Task CloseCurrentConnectionAsync(int closeCode, string reason)
+	{
+		var socket = Volatile.Read(ref _current);
+		if (socket is { State: WebSocketState.Open })
+		{
+			await socket.CloseOutputAsync((WebSocketCloseStatus)closeCode, reason, CancellationToken.None);
+		}
+	}
 
 	public static async Task<FakePluginHost> StartAsync()
 	{
@@ -443,7 +474,7 @@ internal sealed class FakePluginHost : IAsyncDisposable
 				return Results.Json(new PluginSessionResponse
 					{
 						SessionId = $"session-{Sessions.Count}",
-						SessionToken = "session-token",
+						SessionToken = SessionToken(Sessions.Count),
 						NegotiatedVersion = ProtocolVersions.Current,
 						Capabilities =
 						[
@@ -481,6 +512,12 @@ internal sealed class FakePluginHost : IAsyncDisposable
 
 				OfferedSubProtocols = [.. context.WebSockets.WebSocketRequestedProtocols];
 				UpgradeAuthorization = context.Request.Headers.Authorization.FirstOrDefault();
+
+				var token = UpgradeAuthorization?.Split(' ', 2) is [_, var bearer] ? bearer : string.Empty;
+				if (RejectEveryUpgrade || _forgottenTokens.ContainsKey(token))
+				{
+					return Results.Unauthorized();
+				}
 				SecretSentOnUpgrade = context.Request.Headers.ContainsKey(PluginAuthDefaults.PluginSecretHeaderName);
 
 				using var socket
@@ -540,6 +577,10 @@ internal sealed class FakePluginHost : IAsyncDisposable
 				if (string.Equals(envelope.Type, MessageTypes.SessionHello, StringComparison.Ordinal))
 				{
 					var hello = envelope.Payload?.Deserialize<SessionHelloPayload>(PluginProtocolJson.Options);
+					if (hello is not null)
+					{
+						Hellos.Enqueue(hello);
+					}
 
 					await SendAsync(socket,
 						new ProtocolEnvelope

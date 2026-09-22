@@ -328,6 +328,7 @@ honour cancellation.
 | --- | --- |
 | New connection with `resumeSessionId`, inside the 60 s window, session still exists | Resume: `resumed: true` |
 | Same, but outside the window or the session is gone | `SESSION_NOT_RESUMABLE` - open a new session |
+| The host no longer knows the session at all, for example after a restart, or the token expired | The upgrade is refused with `401` before any hello - open a new session |
 | New session for a plugin that already has one (`maxSessionsPerPlugin` is 1) | The old connection is closed with `4000` |
 | `session.goodbye` or `DELETE /api/plugins/sessions/{sessionId}` | Session non-resumable at once |
 | No inbound traffic for 60 s (host pings every 20 s) | Host aborts the socket |

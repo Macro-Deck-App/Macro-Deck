@@ -76,6 +76,8 @@ internal sealed class PluginSessionConnection(
 	/// <summary>True when the host reported this connection as resuming a prior session.</summary>
 	public bool Resumed { get; private set; }
 
+	public bool Welcomed { get; private set; }
+
 	/// <summary>
 	/// True when the host ended the session voluntarily. A session torn down that way is not
 	/// resumable, so the next attempt must open a new one rather than present a dead id.
@@ -255,6 +257,7 @@ internal sealed class PluginSessionConnection(
 
 		var welcome = Deserialize<SessionWelcomePayload>(envelope.Payload);
 		Resumed = welcome?.Resumed ?? false;
+		Welcomed = true;
 
 		// Ready is "the host has welcomed us", not "the session has ended" - so it is set here rather
 		// than by whatever eventually unwinds the connection.
