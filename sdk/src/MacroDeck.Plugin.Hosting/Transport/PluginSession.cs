@@ -14,15 +14,6 @@ internal sealed record PluginSession(
 	PluginProtocolTimeoutsDescriptor Timeouts,
 	DateTimeOffset OpenedAt)
 {
-	/// <summary>
-	/// Whether a reconnect right now could still resume this session.
-	///
-	/// <para>
-	/// The resume window is a minute and the session token lasts fifteen, so the window is always the
-	/// binding constraint and the token needs no separate refresh: any reconnect too late to resume is
-	/// already opening a new session, which issues a new token anyway.
-	/// </para>
-	/// </summary>
 	public bool CanResumeAt(DateTimeOffset now, DateTimeOffset droppedAt)
 		=> now - droppedAt < Timeouts.SessionResumeWindow;
 }

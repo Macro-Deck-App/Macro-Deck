@@ -160,7 +160,7 @@ separate, explicit security decision.
 | --- | --- | --- |
 | `FailFastOnFirstConnect` | `false` | Stop instead of retrying when the host is unreachable at startup. |
 | `StopApplicationOnFatalProtocolError` | on when managed, off when self-registering | Stop on an unsupported version, a session replaced by another instance, or repeated authentication failures. |
-| `MaxAuthenticationFailures` | `3` (1-100) | Consecutive failures before giving up. A stored secret is never discarded automatically. |
+| `MaxAuthenticationFailures` | `3` (1-100) | Consecutive failures before giving up: socket closes with `4003`, and `401` on the upgrade of a just-issued session token. A stored secret is never discarded automatically. |
 
 Report domain and provider failures through the SDK result types and honour cancellation tokens. Do not
 wrap the hosting runtime in a second connection loop.

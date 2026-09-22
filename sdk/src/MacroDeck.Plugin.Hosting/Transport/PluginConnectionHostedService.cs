@@ -55,6 +55,7 @@ internal sealed class PluginConnectionHostedService(
 
 	private PluginSessionConnection? _connection;
 	private PluginSession? _session;
+	private DateTimeOffset? _sessionDroppedAt;
 	private Task _loop = Task.CompletedTask;
 	private int _authenticationFailures;
 	private bool _everConnected;
@@ -129,15 +130,13 @@ internal sealed class PluginConnectionHostedService(
 
 	private async Task RunAsync(CancellationToken cancellationToken)
 	{
-		var droppedAt = DateTimeOffset.MinValue;
-
 		while (!cancellationToken.IsCancellationRequested)
 		{
 			ConnectionOutcome outcome;
 
 			try
 			{
-				outcome = await ConnectAsync(droppedAt, cancellationToken);
+				outcome = await ConnectAsync(cancellationToken);
 			}
 			catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
 			{
@@ -157,7 +156,6 @@ internal sealed class PluginConnectionHostedService(
 				outcome = ConnectionOutcome.Retry(exception.Message);
 			}
 
-			droppedAt = timeProvider.GetUtcNow();
 			state.LastCloseCode = outcome.CloseCode;
 
 			if (outcome.Fatal)
@@ -203,7 +201,7 @@ internal sealed class PluginConnectionHostedService(
 		}
 	}
 
-	private async Task<ConnectionOutcome> ConnectAsync(DateTimeOffset droppedAt, CancellationToken cancellationToken)
+	private async Task<ConnectionOutcome> ConnectAsync(CancellationToken cancellationToken)
 	{
 		state.Status = PluginConnectionStatus.Connecting;
 
@@ -224,46 +222,78 @@ internal sealed class PluginConnectionHostedService(
 
 		var credentials = await ResolveCredentialsAsync(descriptor.Pairing, cancellationToken);
 
-		// A resume needs the previous session's token, which is why the existing session is kept
-		// rather than replaced eagerly. Outside the window there is nothing to resume, so a fresh
-		// session is opened - which also issues a fresh token, so the fifteen-minute lifetime never
-		// needs its own refresh path.
-		var resuming = _session is not null &&
-			!_sessionEnded &&
-			_session.CanResumeAt(timeProvider.GetUtcNow(), droppedAt);
+		PluginSession session;
+		ClientWebSocketPluginSocket socket;
+		bool resuming;
 
-		if (!resuming)
+		while (true)
 		{
+			// The host resumes only a session whose welcomed connection dropped inside the window. One that
+			// never got that far is attached with a plain hello, so it keeps its token instead of a new one.
+			resuming = false;
+			if (_session is not null && !_sessionEnded && _sessionDroppedAt is { } droppedAt)
+			{
+				resuming = _session.CanResumeAt(timeProvider.GetUtcNow(), droppedAt);
+				if (!resuming)
+				{
+					_session = null;
+				}
+			}
+
+			var opened = false;
+			if (_session is null || _sessionEnded)
+			{
+				try
+				{
+					_session = await OpenSessionAsync(credentials, cancellationToken);
+				}
+				catch (PluginRegistrationException exception) when (CanRePairAfterRejection(exception, descriptor.Pairing))
+				{
+					credentials = await ResolveCredentialsAsync(descriptor.Pairing, cancellationToken, ignoreStored: true);
+					_rePairedAfterRejection = true;
+					_session = await OpenSessionAsync(credentials, cancellationToken);
+				}
+
+				_sessionDroppedAt = null;
+				_sessionEnded = false;
+				opened = true;
+				dispatcher.ResetIdempotency();
+			}
+
+			session = _session!;
+
+			// The socket goes to the host the session was just opened on. The stored credential's host url
+			// only records the issuer, which is stale once the same host listens on another port.
 			try
 			{
-				_session = await OpenSessionAsync(credentials, cancellationToken);
+				socket = await ClientWebSocketPluginSocket.ConnectAsync(new Uri(_options.HostUrl),
+					session.SessionToken,
+					session.Limits.MaxMessageBytes,
+					cancellationToken);
 			}
-			catch (PluginRegistrationException exception) when (CanRePairAfterRejection(exception, descriptor.Pairing))
+			catch (PluginSocketUpgradeRefusedException exception)
+				when (exception.StatusCode == HttpStatusCode.Unauthorized)
 			{
-				credentials = await ResolveCredentialsAsync(descriptor.Pairing, cancellationToken, ignoreStored: true);
-				_rePairedAfterRejection = true;
-				_session = await OpenSessionAsync(credentials, cancellationToken);
+				_session = null;
+
+				if (!opened)
+				{
+					continue;
+				}
+
+				return ++_authenticationFailures > _options.MaxAuthenticationFailures
+					? ConnectionOutcome.Fail("The host rejected the session token.")
+					: ConnectionOutcome.Retry("The host rejected the session token.");
+			}
+			catch (Exception exception) when (exception is WebSocketException
+				or HttpRequestException
+				or PluginSocketUpgradeRefusedException)
+			{
+				return ConnectionOutcome.Retry(
+					$"Could not open the session socket at {_options.HostUrl}: {exception.Message}");
 			}
 
-			dispatcher.ResetIdempotency();
-		}
-
-		var session = _session!;
-
-		// The socket goes to the host the session was just opened on. The stored credential's host url
-		// only records the issuer, which is stale once the same host listens on another port.
-		ClientWebSocketPluginSocket socket;
-		try
-		{
-			socket = await ClientWebSocketPluginSocket.ConnectAsync(new Uri(_options.HostUrl),
-				session.SessionToken,
-				session.Limits.MaxMessageBytes,
-				cancellationToken);
-		}
-		catch (Exception exception) when (exception is WebSocketException or HttpRequestException)
-		{
-			return ConnectionOutcome.Retry(
-				$"Could not open the session socket at {_options.HostUrl}: {exception.Message}");
+			break;
 		}
 
 		await using var connection = new PluginSessionConnection(socket,
@@ -319,6 +349,11 @@ internal sealed class PluginConnectionHostedService(
 			// A half-received transfer cannot be resumed on the next connection, and whoever was waiting
 			// for it must be told rather than left waiting out its own timeout.
 			hostAssets.Reset();
+
+			if (connection.Welcomed)
+			{
+				_sessionDroppedAt = timeProvider.GetUtcNow();
+			}
 
 			_connection = null;
 			state.ActiveConnection = null;
