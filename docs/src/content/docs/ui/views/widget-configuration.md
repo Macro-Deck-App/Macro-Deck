@@ -171,6 +171,10 @@ new UiActionsListEditor { Key = "flows", Binding = Bind.To(flows), CanRun = true
 
 Each renderer maps these onto the editors it already ships; a plugin ships no renderer code for them.
 
+For a file, folder or image path, use the
+[path inputs](/ui/views/configuration/#letting-the-user-pick-a-file-folder-or-image), which work in both
+regions like any other input.
+
 `UiActionsListEditor.Triggers` names the trigger tabs the editor offers, such as `["onDoublePress"]` for a
 single Double Tap tab. Leave it unset for the default press tabs: Short Press, Long Press, Touch Start, Touch
 End and Double Tap. Event triggers, which run a flow when an integration or Macro Deck event fires, are
