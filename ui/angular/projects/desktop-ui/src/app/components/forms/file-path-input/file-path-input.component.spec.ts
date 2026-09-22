@@ -187,6 +187,44 @@ describe('FilePathInputComponent', () => {
     expect(emitted).toEqual(['C:\\tmp\\a.PNG']);
   });
 
+  it('offers only image formats in image mode when no extensions are declared', async () => {
+    create();
+    component.kind = 'image';
+
+    await component.browse();
+
+    const offered = showOpenDialog.calls.mostRecent().args[0]?.extensions ?? [];
+    expect(offered).toEqual(jasmine.arrayContaining(['png', 'jpg', 'webp']));
+    expect(offered).not.toContain('txt');
+  });
+
+  it('takes a dropped image but not another file in image mode without declared extensions', () => {
+    create();
+    component.kind = 'image';
+    const drop = TestBed.inject(ShellFileDropService);
+    const emitted: string[] = [];
+    component.valueChange.subscribe(value => emitted.push(value));
+    spyOn(document, 'elementFromPoint').and.returnValue(fixture.nativeElement as HTMLElement);
+
+    drop.handleEvent({ kind: 'drop', paths: [{ path: '/tmp/notes.txt', directory: false }], x: 1, y: 1 });
+    expect(emitted).toEqual([]);
+
+    drop.handleEvent({ kind: 'drop', paths: [{ path: '/tmp/photo.JPG', directory: false }], x: 1, y: 1 });
+    expect(emitted).toEqual(['/tmp/photo.JPG']);
+  });
+
+  it('takes any dropped file in file mode without declared extensions', () => {
+    create();
+    const drop = TestBed.inject(ShellFileDropService);
+    const emitted: string[] = [];
+    component.valueChange.subscribe(value => emitted.push(value));
+    spyOn(document, 'elementFromPoint').and.returnValue(fixture.nativeElement as HTMLElement);
+
+    drop.handleEvent({ kind: 'drop', paths: [{ path: '/tmp/notes.txt', directory: false }], x: 1, y: 1 });
+
+    expect(emitted).toEqual(['/tmp/notes.txt']);
+  });
+
   it('unregisters its drop target on destroy', () => {
     create();
     const drop = TestBed.inject(ShellFileDropService);

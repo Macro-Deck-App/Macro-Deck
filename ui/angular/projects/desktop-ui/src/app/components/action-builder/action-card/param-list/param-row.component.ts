@@ -39,8 +39,6 @@ import { SelectComponent, SelectOption } from '../../../forms/select/select.comp
 import { SelectCaretComponent } from '../../../forms/select-caret/select-caret.component';
 import { WidgetIconControlComponent } from '../../../widget-appearance/widget-icon-control.component';
 
-const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'];
-
 @Component({
   selector: 'shared-param-row',
   standalone: true,
@@ -623,8 +621,7 @@ export class ParamRowComponent implements OnInit, OnChanges {
   }
 
   get browseExtensions(): string[] | undefined {
-    if (this.param.type === 'image') return IMAGE_EXTENSIONS;
-    return this.param.fileExtensions;
+    return this.param.type === 'image' ? undefined : this.param.fileExtensions;
   }
 
   childParam(child: Omit<ActionBlockParameter, 'value'>): ActionBlockParameter {

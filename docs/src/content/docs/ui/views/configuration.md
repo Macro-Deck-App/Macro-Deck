@@ -229,14 +229,16 @@ new UiConfigStack
 | --- | --- | --- |
 | `folder` | `UiFolderInput` | A folder path |
 | `file` | `UiFileInput` | A file path, optionally limited to `FileExtensions` |
-| `image` | `UiImageInput` | An image file path, optionally limited to `FileExtensions` |
+| `image` | `UiImageInput` | An image file path, limited to image formats unless `FileExtensions` says otherwise |
 
 The value is a plain path string on the computer that runs Macro Deck, not on the device the user is
 looking from. The path inputs work in every configuration surface on this page, including widget, folder
 view and screensaver configuration.
 
 - **`FileExtensions` are bare extensions, without the dot**: `["png", "jpg"]`, not `[".png"]`. They narrow
-  what browsing and dropping offer. Leave them unset and any file is accepted - an image input included.
+  what browsing and dropping offer. Leave them unset and a file input accepts any file, while an image
+  input offers the image formats the renderer can draw (PNG, JPEG, GIF, WebP, SVG). Setting them on an
+  image input replaces that list rather than adding to it.
 - **Macro Deck does not check the path.** The user can type or paste any value, including one outside
   `FileExtensions`, and a file can be moved or deleted after it was picked. Handle a missing file where you
   read it.
@@ -249,7 +251,8 @@ own file browser. A file or folder dropped onto the field fills it in, if it mat
 input shows no preview of the picked file.
 
 In a declared field list, the counterparts are `ActionParameter.File` (with `fileExtensions`),
-`ActionParameter.Folder` and `ActionParameter.Image`, which takes no extensions.
+`ActionParameter.Folder` and `ActionParameter.Image`, which takes no extensions and always offers the
+image formats.
 
 ## Showing what governs a setting
 
