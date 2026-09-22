@@ -35,7 +35,7 @@ function appDir(files, links = {}) {
 }
 
 // An Ubuntu 22.04 build machine: merged /usr, so dpkg may record a library under /lib while it lives in /usr/lib.
-function machine({ files = {}, owners = {}, packages = {} }) {
+function machine({ files = {}, owners = {}, packages = {}, archives = {} }) {
 	const realpaths = new Map();
 	for (const [path, real] of Object.entries(files)) {
 		realpaths.set(path, real);
@@ -44,7 +44,11 @@ function machine({ files = {}, owners = {}, packages = {} }) {
 	const texts = {
 		'/usr/share/common-licenses/LGPL-2.1': LGPL,
 		'/etc/os-release': OS_RELEASE,
-		...Object.fromEntries(Object.entries(packages).map(([pkg, info]) => [`/usr/share/doc/${pkg.replace(/:.*/, '')}/copyright`, info.copyright]))
+		...Object.fromEntries(
+			Object.entries(packages)
+				.filter(([, info]) => info.copyright)
+				.map(([pkg, info]) => [`/usr/share/doc/${pkg.replace(/:.*/, '')}/copyright`, info.copyright])
+		)
 	};
 	return {
 		multiarch: MULTIARCH,
@@ -59,7 +63,8 @@ function machine({ files = {}, owners = {}, packages = {} }) {
 					: Object.keys(owners).filter(path => path === pattern);
 				return matches.map(path => ({ packages: owners[path], path }));
 			},
-			info: pkg => packages[pkg]
+			info: pkg => packages[pkg],
+			packagedFile: async (pkg, path) => archives[pkg]?.[path] ?? null
 		}
 	};
 }
@@ -116,6 +121,63 @@ test('attributes helpers in library subdirectories and data files from Ubuntu pa
 	);
 });
 
+test('attributes GTK modules, pixbuf loaders and typelibs that linuxdeploy moved out of the multiarch directory', async () => {
+	const root = appDir({
+		'usr/lib/gtk-3.0/3.0.0/immodules/im-wayland.so': 'elf',
+		'usr/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.so': 'elf',
+		'usr/lib/girepository-1.0/Atk-1.0.typelib': 'typelib'
+	});
+	const system = [
+		'/usr/lib/x86_64-linux-gnu/gtk-3.0/3.0.0/immodules/im-wayland.so',
+		'/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.so',
+		'/usr/lib/x86_64-linux-gnu/girepository-1.0/Atk-1.0.typelib'
+	];
+	const env = machine({
+		files: Object.fromEntries(system.map(path => [path, path])),
+		owners: {
+			[system[0]]: ['libgtk-3-0:amd64'],
+			[system[1]]: ['librsvg2-common:amd64'],
+			[system[2]]: ['gir1.2-atk-1.0:amd64']
+		},
+		packages: {
+			'libgtk-3-0:amd64': { version: '3.24.33', source: 'gtk+3.0', sourceVersion: '3.24.33', copyright: 'GTK copyright' },
+			'librsvg2-common:amd64': { version: '2.52.5', source: 'librsvg', sourceVersion: '2.52.5', copyright: 'librsvg copyright' },
+			'gir1.2-atk-1.0:amd64': { version: '2.36.0', source: 'atk1.0', sourceVersion: '2.36.0', copyright: 'ATK copyright' }
+		}
+	});
+
+	const { packages } = await generateNotices(root, env);
+
+	assert.deepEqual(
+		packages.map(p => [p.name, p.files]),
+		[
+			['gir1.2-atk-1.0', ['usr/lib/girepository-1.0/Atk-1.0.typelib']],
+			['libgtk-3-0', ['usr/lib/gtk-3.0/3.0.0/immodules/im-wayland.so']],
+			['librsvg2-common', ['usr/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.so']]
+		]
+	);
+});
+
+test('reproduces the copyright from the package archive when the build machine has no /usr/share/doc', async () => {
+	const root = appDir({ 'usr/lib/libfoo.so.1': 'elf' });
+	const env = machine({
+		...LIBFOO,
+		packages: { 'libfoo1:amd64': { ...LIBFOO.packages['libfoo1:amd64'], copyright: null } },
+		archives: { 'libfoo1:amd64': { '/usr/share/doc/libfoo1/copyright': 'Copyright 2020 Foo Authors, from the .deb\n' } }
+	});
+
+	const { text } = await generateNotices(root, env);
+
+	assert.ok(text.includes('Copyright 2020 Foo Authors, from the .deb'));
+});
+
+test('fails when a package copyright is neither installed nor in its archive', async () => {
+	const root = appDir({ 'usr/lib/libfoo.so.1': 'elf' });
+	const env = machine({ ...LIBFOO, packages: { 'libfoo1:amd64': { ...LIBFOO.packages['libfoo1:amd64'], copyright: null } } });
+
+	await assert.rejects(generateNotices(root, env), /libfoo1:amd64: \/usr\/share\/doc\/libfoo1\/copyright is missing/);
+});
+
 test('does not attribute the app binary, its icons, desktop entry, host tree or in-AppDir symlinks', async () => {
 	const root = appDir({}, { 'usr/lib/libfoo-link.so': 'x86_64-linux-gnu/missing.so' });
 
@@ -162,7 +224,11 @@ test('treats a flattened copy of a host library as part of the host', async () =
 		'usr/lib/Macro Deck/host/runtime/shared/Microsoft.NETCore.App/10.0.0/libmscordaccore.so': 'elf'
 	});
 
-	const { text, packages } = await generateNotices(root, machine({}));
+	// PowerShell on the runner ships its own libmscordaccore.so, which must not claim the host's copy.
+	const env = machine({ owners: { '/opt/microsoft/powershell/7/libmscordaccore.so': ['powershell'] } });
+	env.system.realpath = path => (path === '/opt/microsoft/powershell/7/libmscordaccore.so' ? path : null);
+
+	const { text, packages } = await generateNotices(root, env);
 
 	assert.deepEqual(packages, []);
 	assert.match(text, /Copies of Macro Deck host files[\s\S]*usr\/lib\/libmscordaccore\.so/);
