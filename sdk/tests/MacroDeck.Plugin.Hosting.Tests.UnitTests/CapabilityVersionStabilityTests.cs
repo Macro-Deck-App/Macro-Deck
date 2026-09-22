@@ -56,6 +56,7 @@ public class CapabilityVersionStabilityTests
 			[CapabilityKinds.Migration] = (1, 1),
 			[CapabilityKinds.WidgetTypeProvider] = (1, 1),
 			[CapabilityKinds.ScreenSaverProvider] = (1, 1),
+			[CapabilityKinds.Messaging] = (1, 1),
 		};
 
 	/// <summary>The kinds the fixture below actually gets a declaration out of, listed so the assertion
@@ -70,6 +71,7 @@ public class CapabilityVersionStabilityTests
 		CapabilityKinds.Weather,
 		CapabilityKinds.VirtualProfiles,
 		CapabilityKinds.Issues,
+		CapabilityKinds.Messaging,
 	];
 
 	[Test]

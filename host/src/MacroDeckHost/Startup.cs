@@ -7,6 +7,7 @@ using MacroDeckHost.Infrastructure.Backups;
 using MacroDeckHost.Application.Backups.Storage;
 using MacroDeckHost.Application.Backups.Retention;
 using MacroDeckHost.Application.Backups;
+using MacroDeckHost.Application.Messaging;
 using System.Text.Json.Serialization;
 using MacroDeck.Localization;
 using MacroDeckHost.Localization;
@@ -490,6 +491,10 @@ public class Startup
 		services.AddSingleton<IPluginAdbConsentNotifier, PluginAdbConsentNotifier>();
 		services.AddSingleton<PluginAdbCallbacks>();
 		services.AddSingleton<PluginAdbInvokeRunner>();
+		services.AddSingleton<MessageBroker>();
+		services.AddSingleton<IMessageBroker>(provider => provider.GetRequiredService<MessageBroker>());
+		services.AddSingleton<PluginMessagingRegistrations>();
+		services.AddSingleton<PluginMessagingInvokeRunner>();
 		// Mediator's source generator only runs over MacroDeckHost.Application, so a handler in this
 		// assembly is registered by hand - as HostStatePusher is below. This one has to live here rather
 		// than in Application: INotificationService is an Integrations type, which Application does not

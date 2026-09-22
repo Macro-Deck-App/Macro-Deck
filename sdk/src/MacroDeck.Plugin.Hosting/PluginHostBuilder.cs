@@ -2,6 +2,7 @@ using MacroDeck.Localization;
 using MacroDeck.Plugin.Hosting.Capabilities;
 using MacroDeck.Plugin.Hosting.Capabilities.Icons;
 using MacroDeck.Plugin.Hosting.Capabilities.Localization;
+using MacroDeck.Plugin.Hosting.Capabilities.Messaging;
 using MacroDeck.Plugin.Hosting.Localization;
 using MacroDeck.Plugin.Hosting.Configuration;
 using MacroDeck.Plugin.Hosting.Credentials;
@@ -17,9 +18,11 @@ using MacroDeck.Sdk.Android;
 using MacroDeck.Sdk.Devices;
 using MacroDeck.Sdk.Identity;
 using MacroDeck.Plugin.Hosting.Capabilities.Ui;
+using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Sdk.FolderViews;
 using MacroDeck.Sdk.ScreenSavers;
 using MacroDeck.Sdk.Layouts;
+using MacroDeck.Sdk.Messaging;
 using MacroDeck.Sdk.Widgets;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -214,6 +217,10 @@ public sealed class PluginHostBuilder
 		{
 			configure(context, Services);
 		}
+
+		// Declared last, so the conformance checks that invoke the first declared capability keep
+		// choosing the same one they did before the kind existed.
+		Services.TryAddEnumerable(ServiceDescriptor.Singleton<ICapabilityHandler, MessagingCapabilityHandler>());
 
 		// Registered after the author's callbacks so the connection is the last hosted service to
 		// start: an author's own background services are running before the socket opens.
@@ -477,6 +484,8 @@ public sealed class PluginHostBuilder
 		Services.TryAddSingleton<ModalResultStore>();
 		Services.TryAddSingleton<IIntegrationContext, RemoteIntegrationContext>();
 		Services.TryAddSingleton<IAndroidDeviceManager, RemoteAndroidDeviceManager>();
+		Services.TryAddSingleton<RemoteMessageChannel>();
+		Services.TryAddSingleton<IMessageChannel>(provider => provider.GetRequiredService<RemoteMessageChannel>());
 
 		// The producer half of state.update (#413's remote weather-location bug fix): a plugin author
 		// injects this directly, not through IIntegrationContext - unlike Events/Notifications, it is
@@ -559,7 +568,7 @@ public sealed class PluginHostBuilder
 		}
 
 		return PluginCapabilityValidator
-			.Validate(metadata.Id, catalog.Declare())
+			.Validate(metadata.Id, [.. catalog.Declare().Where(capability => capability.Kind != CapabilityKinds.Messaging)])
 			.Select(conflict => conflict.ToString());
 	}
 

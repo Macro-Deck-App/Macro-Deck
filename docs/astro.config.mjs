@@ -110,6 +110,7 @@ export default defineConfig({
 										'features/button-icons',
 										'features/variables',
 										'features/events',
+										{ label: 'Messaging between plugins', slug: 'features/messaging' },
 										'features/deck',
 										'features/setup-flows',
 										'features/music-players',

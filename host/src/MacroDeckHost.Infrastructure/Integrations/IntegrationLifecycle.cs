@@ -88,6 +88,10 @@ public class IntegrationLifecycle : IIntegrationLifecycle
 		{
 			_logger.Error(ex, "Failed to stop integration '{IntegrationId}'", integrationId);
 		}
+		finally
+		{
+			await _initializer.ReleaseMessagingAsync(integrationId);
+		}
 	}
 
 	public async Task ReinitializeAsync(string integrationId, CancellationToken cancellationToken = default)

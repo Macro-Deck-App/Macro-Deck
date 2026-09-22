@@ -4,6 +4,7 @@ using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeck.Plugin.Protocol.Versioning;
 using MacroDeckHost.Application.Integrations;
+using MacroDeckHost.Application.Messaging;
 using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Rendering;
@@ -70,7 +71,8 @@ internal sealed class IntegrationLifecycleTests
 			TestScreenSaverProviders.Host(),
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
-			Serilog.Log.Logger);
+			Serilog.Log.Logger,
+			new MessageBroker(Serilog.Log.Logger));
 
 		_lifecycle = new IntegrationLifecycle(_registry,
 			scopeFactory,

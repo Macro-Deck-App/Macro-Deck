@@ -1,6 +1,7 @@
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Events;
+using MacroDeck.Sdk.Messaging;
 using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Variables;
@@ -33,4 +34,12 @@ public interface IIntegrationContext
 
 	/// <summary>Publishes notifications to the host notification center.</summary>
 	IUserNotifier Notifications { get; }
+
+	/// <summary>
+	/// Talks to other plugins and integrations by topic. Registrations made here are released when the
+	/// integration is shut down or initialized again. A context from a Macro Deck without a message
+	/// channel, and any implementation that does not override this member, throws
+	/// <see cref="MessageChannelException" /> with <see cref="MessageChannelErrorCode.Unsupported" />.
+	/// </summary>
+	IMessageChannel Messages => UnsupportedMessageChannel.Instance;
 }

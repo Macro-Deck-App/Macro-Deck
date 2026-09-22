@@ -51,6 +51,7 @@ code, protocol schemas, issue discussions or exhaustive option lists.
 - [0090 - Invited testers install unreviewed test builds](0090-invited-testers-install-unreviewed-test-builds.md)
 - [0091 - Enforced device revocation and long client access tokens](0091-enforced-device-revocation-and-long-client-access-tokens.md)
 - [0092 - Plugins reach ADB through a permission-gated host API](0092-plugins-reach-adb-through-a-permission-gated-host-api.md)
+- [0093 - Plugins and integrations talk over a host-brokered message channel](0093-plugins-and-integrations-talk-over-a-host-brokered-message-channel.md)
 
 ## Macro Deck UI
 

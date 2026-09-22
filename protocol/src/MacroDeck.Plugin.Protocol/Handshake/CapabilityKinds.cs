@@ -1,7 +1,6 @@
 namespace MacroDeck.Plugin.Protocol.Handshake;
 
-/// <summary>The seventeen capability kinds a plugin can declare - every kind an in-process integration can
-/// implement today.</summary>
+/// <summary>The eighteen capability kinds a plugin can declare.</summary>
 public static class CapabilityKinds
 {
 	public const string Actions = "actions";
@@ -41,11 +40,17 @@ public static class CapabilityKinds
 	/// <summary>Offers screensavers a device shows after sitting idle.</summary>
 	public const string ScreenSaverProvider = "screensaver-provider";
 
+	/// <summary>
+	/// Receives events, commands and requests other plugins and integrations address to a topic this
+	/// plugin subscribed to or handles. Declared at <see cref="Capabilities.ProviderCapabilityId.LocalId" />.
+	/// </summary>
+	public const string Messaging = "messaging";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		Actions, Events, Variables, Icons, ConfigFlow, MusicPlayer, Weather, VirtualProfiles, Issues, Ui,
 		Localization, DeviceProvider, LayoutProvider, FolderViewProvider, Migration, WidgetTypeProvider,
-		ScreenSaverProvider,
+		ScreenSaverProvider, Messaging,
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);

@@ -55,10 +55,17 @@ public static class HostApis
 	/// </summary>
 	public const string Adb = "adb";
 
+	/// <summary>
+	/// The <c>messaging</c> host api: publishes events, sends commands and requests to other plugins and
+	/// integrations by topic, and replaces this plugin's subscriptions and handled topics. Deliveries
+	/// arrive as <c>capability.invoke</c> of the <c>messaging</c> capability kind.
+	/// </summary>
+	public const string Messaging = "messaging";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		Variables, UserVariables, Config, Deck, Scripts, Widgets, Notifications, ActionInteractions, Ui,
-		Devices, VariableValues, Layouts, FolderViews, WidgetTypes, EventBindings, ScreenSavers, Adb,
+		Devices, VariableValues, Layouts, FolderViews, WidgetTypes, EventBindings, ScreenSavers, Adb, Messaging,
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);

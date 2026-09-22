@@ -41,6 +41,7 @@ public class CapabilityOperationStabilityTests
 			[CapabilityKinds.FolderViewProvider] = ["describe", "folder-views"],
 			[CapabilityKinds.WidgetTypeProvider] = ["describe", "widget-types"],
 			[CapabilityKinds.ScreenSaverProvider] = ["describe", "screensavers"],
+			[CapabilityKinds.Messaging] = ["event", "command", "request"],
 		};
 
 	[Test]

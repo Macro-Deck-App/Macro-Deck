@@ -11,6 +11,7 @@ using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeck.Plugin.Testing.Fakes;
 using MacroDeck.Plugin.Testing.Internal;
 using MacroDeck.Sdk;
+using MacroDeck.Sdk.Messaging;
 using MacroDeck.Sdk.Variables;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -183,6 +184,7 @@ public sealed class PluginTestHarness : IAsyncDisposable, ICapabilityInvoker
 		{
 			services.AddSingleton<TimeProvider>(clock);
 			services.AddSingleton<IIntegrationContext>(context);
+			services.AddSingleton<IMessageChannel>(context.Messages);
 			services.AddSingleton<Serilog.ILogger>(collectingLogger);
 		});
 

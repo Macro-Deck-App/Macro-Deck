@@ -46,7 +46,12 @@ public class RemoteIntegrationContextTests
 			new RemoteScriptApi(_invoker, stateCache),
 			new RemoteWidgetApi(_invoker, new PluginConnectionState(), stateCache),
 			new RemoteEventPublisher(new PluginConnectionState(), stateCache, Serilog.Core.Logger.None),
-			new RemoteUserNotifier(_invoker, Serilog.Core.Logger.None));
+			new RemoteUserNotifier(_invoker, Serilog.Core.Logger.None),
+			new RemoteMessageChannel(_invoker,
+				new PluginConnectionState(),
+				new PluginMetadata { Id = "com.example.test", Name = "Test Plugin", Version = "1.0.0" },
+				TimeProvider.System,
+				Serilog.Core.Logger.None));
 	}
 
 	[TearDown]
@@ -432,6 +437,11 @@ public class RemoteIntegrationContextTests
 		foreach (var operation in HostOperations.Adb.All)
 		{
 			covered.Add((HostApis.Adb, operation));
+		}
+
+		foreach (var operation in HostOperations.Messaging.All)
+		{
+			covered.Add((HostApis.Messaging, operation));
 		}
 
 		var declared = HostApis.All.SelectMany(api => HostOperations.For(api).Select(operation => (api, operation)));

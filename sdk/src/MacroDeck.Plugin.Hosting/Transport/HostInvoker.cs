@@ -30,9 +30,17 @@ internal sealed class HostInvoker(PluginConnectionState state, TimeProvider time
 		CancellationToken cancellationToken)
 		=> InvokeAsync(api, operation, arguments, ProtocolTimeouts.DefaultRequest, cancellationToken);
 
+	public Task<JsonElement?> InvokeAsync(string api,
+		string operation,
+		object? arguments,
+		TimeSpan timeout,
+		CancellationToken cancellationToken)
+		=> InvokeAsync(api, operation, arguments, timeout, timeout, cancellationToken);
+
 	public async Task<JsonElement?> InvokeAsync(string api,
 		string operation,
 		object? arguments,
+		TimeSpan deadline,
 		TimeSpan timeout,
 		CancellationToken cancellationToken)
 	{
@@ -52,7 +60,7 @@ internal sealed class HostInvoker(PluginConnectionState state, TimeProvider time
 		{
 			Type = MessageTypes.HostInvoke,
 			Id = correlationId,
-			DeadlineMs = (int)timeout.TotalMilliseconds,
+			DeadlineMs = (int)deadline.TotalMilliseconds,
 			Payload = JsonSerializer.SerializeToElement(new HostInvokePayload
 					{ Api = api, Operation = operation, Arguments = SerializeArguments(arguments) },
 				PluginProtocolJson.Options)
