@@ -80,6 +80,14 @@ and plugins installed from a URL or file send none of this.
 The first time Macro Deck starts after an update installed from within the app, it shows the release notes
 of the new version once. An update installed by running a downloaded installer yourself shows nothing.
 
+## Release notes
+
+Macro Deck loads the release notes from the version's
+[GitHub release](https://github.com/Macro-Deck-App/Macro-Deck/releases) when it finds an update. If GitHub cannot
+be reached, for example behind a firewall or a proxy that inspects secure connections, the update dialog, the
+update window and **What's new** show **Read the release notes on GitHub** instead, which opens the release in
+your browser.
+
 ## Linux
 
 On Linux, Macro Deck never installs updates itself. It tells you that a new version exists, and you update

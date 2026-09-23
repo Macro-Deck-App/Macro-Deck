@@ -16,7 +16,7 @@ export class UpdateModalService {
   constructor() {
     effect(() => {
       const autoInstallAt = this.updates.autoInstallAt();
-      if (autoInstallAt === null || this.postUpdateChangelog.isOpen()) {
+      if (autoInstallAt === null || this.postUpdateChangelog.isOpen() || this.postUpdateChangelog.loading()) {
         return;
       }
       untracked(() => {

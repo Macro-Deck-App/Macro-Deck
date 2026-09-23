@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, ViewChild, computed, inject } from 
 import { AppStrings } from '@macro-deck/runtime';
 import { ButtonComponent, LocalizationService, ModalComponent, TranslatePipe, dismissModal } from '@shared';
 import { StoreMarkdownComponent } from '../../store/store-markdown.component';
+import { ExternalLinkService } from '../../../services/external-link.service';
 import { PostUpdateChangelogService } from '../../../services/post-update-changelog.service';
 import { releaseNoteSections } from '../update-modal/release-notes';
 
@@ -16,6 +17,7 @@ import { releaseNoteSections } from '../update-modal/release-notes';
 export class WhatsNewModalComponent {
   private readonly changelogs = inject(PostUpdateChangelogService);
   private readonly localization = inject(LocalizationService);
+  private readonly externalLinks = inject(ExternalLinkService);
   protected readonly appStrings = AppStrings;
 
   @ViewChild(ModalComponent) private readonly modal?: ModalComponent;
@@ -38,6 +40,11 @@ export class WhatsNewModalComponent {
 
   protected readonly sections = computed(() => releaseNoteSections(this.changelogs.changelog()?.notes ?? ''));
   protected readonly hasChangelog = computed(() => this.sections().length > 0);
+  protected readonly notesUrl = computed(() => this.changelogs.changelog()?.notesUrl ?? null);
+
+  openReleaseNotes(url: string): void {
+    this.externalLinks.open(url);
+  }
 
   close(): void {
     dismissModal(this.modal, () => this.changelogs.dismiss());

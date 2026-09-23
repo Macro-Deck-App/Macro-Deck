@@ -71,8 +71,6 @@ jobs:
           github-token: ${{ github.token }}
           run-id: ${{ env.SOURCE_RUN_ID }}
 
-      # Same artifact the update manifests embed their notes from, so the
-      # release body and the changelog in the update feed cannot drift apart.
       - name: Download release notes
         uses: actions/download-artifact@v7
         with:

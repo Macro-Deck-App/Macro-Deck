@@ -85,6 +85,7 @@ declare global {
     available: boolean;
     version: string | null;
     notes: string | null;
+    notesUrl: string | null;
     error: string | null;
     installStrategy: 'inApp' | 'externalDownload' | 'apt';
     downloadUrl: string;
@@ -124,6 +125,7 @@ declare global {
     currentVersion: string;
     version: string | null;
     notes: string | null;
+    notesUrl: string | null;
     publishedAt: string | null;
     channel: string | null;
     betaInstalled: boolean;
@@ -139,7 +141,8 @@ declare global {
 
   interface ShellPostUpdateChangelog {
     version: string;
-    notes: string;
+    notes: string | null;
+    notesUrl: string | null;
     publishedAt: string | null;
   }
 }

@@ -14,6 +14,7 @@ const IDLE_STATE: ShellUpdateState = {
   currentVersion: '',
   version: null,
   notes: null,
+  notesUrl: null,
   publishedAt: null,
   channel: null,
   betaInstalled: false,
@@ -45,6 +46,7 @@ export class UpdateService {
   readonly currentVersion = computed(() => this.state().currentVersion);
   readonly version = computed(() => this.state().version);
   readonly notes = computed(() => this.state().notes);
+  readonly notesUrl = computed(() => this.state().notesUrl);
   readonly publishedAt = computed(() => this.state().publishedAt);
   readonly channel = computed(() => this.state().channel);
   readonly betaInstalled = computed(() => this.state().betaInstalled);

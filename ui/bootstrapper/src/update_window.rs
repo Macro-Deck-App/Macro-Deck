@@ -82,6 +82,8 @@ pub(crate) struct WindowView {
     pub current_version: String,
     pub changelog_heading: String,
     pub notes: Option<String>,
+    pub notes_url: Option<String>,
+    pub notes_link: String,
     pub no_changelog: String,
     pub status: Option<WindowStatus>,
     pub downloading: bool,
@@ -231,6 +233,8 @@ pub(crate) fn view(snapshot: &UpdateSnapshot, action_error: Option<&str>) -> Win
             .map(str::trim)
             .filter(|notes| !notes.is_empty())
             .map(str::to_string),
+        notes_url: snapshot.notes_url.clone(),
+        notes_link: localization::t(keys::UPDATE_WINDOW_RELEASE_NOTES_LINK),
         no_changelog: localization::t(keys::UPDATE_WINDOW_NO_CHANGELOG),
         status,
         downloading: snapshot.phase == UpdatePhase::Downloading,
@@ -557,6 +561,7 @@ pub fn handle_request(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::release_notes::ReleaseNotes;
     use crate::update_channel::UpdateChannel;
     use crate::update_state::UpdateState;
 
@@ -570,7 +575,7 @@ mod tests {
         state.record_available(
             1,
             "3.1.0".to_string(),
-            Some("## Fixes\n* One".into()),
+            ReleaseNotes::Published("## Fixes\n* One".into()),
             None,
             None,
         );
@@ -598,6 +603,27 @@ mod tests {
         assert_eq!(action_ids(&view), [ActionId::Later, ActionId::Install]);
         assert_eq!(primary(&view), Some(ActionId::Install));
         assert!(view.status.is_none());
+    }
+
+    #[test]
+    fn an_update_whose_notes_could_not_be_loaded_links_to_the_release() {
+        let mut state = state(UpdateInstallStrategy::InApp);
+        state.record_available(
+            1,
+            "3.1.0".to_string(),
+            ReleaseNotes::Unavailable,
+            None,
+            None,
+        );
+
+        let view = view(&state.snapshot(), None);
+
+        assert_eq!(view.notes, None);
+        assert_eq!(
+            view.notes_url.as_deref(),
+            Some("https://github.com/Macro-Deck-App/Macro-Deck/releases/tag/v3.1.0")
+        );
+        assert!(!view.notes_link.is_empty());
     }
 
     #[test]
@@ -779,7 +805,7 @@ mod tests {
             Some("feed unreachable")
         );
 
-        state.record_available(2, "3.2.0".to_string(), None, None, None);
+        state.record_available(2, "3.2.0".to_string(), ReleaseNotes::Empty, None, None);
         assert_eq!(current_action_error(&mut stored, &state.snapshot()), None);
 
         let mut stored = Some(("3.2.0".to_string(), "feed unreachable".to_string()));

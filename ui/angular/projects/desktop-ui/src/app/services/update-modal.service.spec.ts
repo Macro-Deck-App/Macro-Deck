@@ -12,6 +12,7 @@ function makeState(overrides: Partial<ShellUpdateState> = {}): ShellUpdateState 
     currentVersion: '3.1.0',
     version: '3.2.0',
     notes: null,
+    notesUrl: null,
     publishedAt: null,
     channel: 'stable',
     betaInstalled: false,
@@ -91,7 +92,7 @@ describe('UpdateModalService', () => {
 
   it('waits for the what\'s-new dialog of the previous update to be closed first', async () => {
     setShell({
-      getPostUpdateChangelog: () => Promise.resolve({ version: '3.1.0', notes: 'notes', publishedAt: null }),
+      getPostUpdateChangelog: () => Promise.resolve({ version: '3.1.0', notes: 'notes', notesUrl: null, publishedAt: null }),
       dismissPostUpdateChangelog: () => Promise.resolve(),
     });
     const service = createService();
@@ -104,6 +105,27 @@ describe('UpdateModalService', () => {
     expect(service.isOpen()).toBeFalse();
 
     changelog.dismiss();
+    await settle();
+    expect(service.isOpen()).toBeTrue();
+  });
+
+  it('waits while the what\'s-new notes of the previous update are still being fetched', async () => {
+    let answer!: (changelog: ShellPostUpdateChangelog | null) => void;
+    setShell({
+      getPostUpdateChangelog: () => new Promise<ShellPostUpdateChangelog | null>(resolve => { answer = resolve; }),
+      dismissPostUpdateChangelog: () => Promise.resolve(),
+    });
+    const service = createService();
+    const changelog = TestBed.inject(PostUpdateChangelogService);
+    const load = changelog.load();
+    await settle();
+
+    push(makeState({ autoInstallAt: 1_000 }));
+    await settle();
+    expect(service.isOpen()).toBeFalse();
+
+    answer(null);
+    await load;
     await settle();
     expect(service.isOpen()).toBeTrue();
   });

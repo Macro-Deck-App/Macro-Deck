@@ -15,6 +15,10 @@
             [class.whats-new-modal__notes-section--category]="section[0].kind === 'heading'"
             [blocks]="section" />
         }
+      } @else if (notesUrl(); as notesUrl) {
+        <shared-button class="whats-new-modal__notes-link" variant="secondary" size="compact" (click)="openReleaseNotes(notesUrl)">
+          {{ appStrings.Update.Details.ReleaseNotesLink | translate }}
+        </shared-button>
       } @else {
         <p class="whats-new-modal__meta">{{ appStrings.Update.Details.NoChangelog | translate }}</p>
       }

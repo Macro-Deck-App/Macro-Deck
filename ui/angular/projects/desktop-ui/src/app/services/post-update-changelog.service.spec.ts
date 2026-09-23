@@ -17,7 +17,7 @@ describe('PostUpdateChangelogService', () => {
   }
 
   it('offers the changelog the shell remembered for the version that was just installed', async () => {
-    const changelog = { version: '3.2.0', notes: '## Fixes', publishedAt: '2026-09-16' };
+    const changelog = { version: '3.2.0', notes: '## Fixes', notesUrl: null, publishedAt: '2026-09-16' };
     setShell({ getPostUpdateChangelog: () => Promise.resolve(changelog) });
     const service = createService();
 
@@ -25,6 +25,21 @@ describe('PostUpdateChangelogService', () => {
 
     expect(service.isOpen()).toBeTrue();
     expect(service.changelog()).toEqual(changelog);
+  });
+
+  it('is loading while the shell fetches the notes and stops loading when it fails', async () => {
+    let fail!: (error: unknown) => void;
+    setShell({ getPostUpdateChangelog: () => new Promise((_, reject) => { fail = reject; }) });
+    const service = createService();
+
+    const load = service.load();
+    expect(service.loading()).toBeTrue();
+
+    fail(new Error('bridge gone'));
+    await load;
+
+    expect(service.loading()).toBeFalse();
+    expect(service.isOpen()).toBeFalse();
   });
 
   it('shows nothing on a normal start', async () => {

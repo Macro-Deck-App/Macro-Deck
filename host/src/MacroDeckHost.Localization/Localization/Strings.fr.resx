@@ -1065,6 +1065,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Bootstrapper.UpdateWindow.ReadyStatus" xml:space="preserve">
     <value>La mise à jour est téléchargée. Redémarre Macro Deck pour l'installer.</value>
   </data>
+  <data name="Bootstrapper.UpdateWindow.ReleaseNotesLink" xml:space="preserve">
+    <value>Lire les notes de version sur GitHub</value>
+  </data>
   <data name="Bootstrapper.UpdateWindow.RestartNow" xml:space="preserve">
     <value>Redémarrer maintenant</value>
   </data>
@@ -15102,6 +15105,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Update.Details.NoChangelog" xml:space="preserve">
     <value>Aucune note de version n'a été publiée pour cette mise à jour.</value>
+  </data>
+  <data name="Update.Details.ReleaseNotesLink" xml:space="preserve">
+    <value>Lire les notes de version sur GitHub</value>
   </data>
   <data name="Update.Details.PreparingStatus" xml:space="preserve">
     <value>Préparation du téléchargement…</value>

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, ViewChild, computed, in
 import { AppStrings } from '@macro-deck/runtime';
 import { ButtonComponent, LocalizationService, ModalComponent, TranslatePipe, dismissModal } from '@shared';
 import { StoreMarkdownComponent } from '../../store/store-markdown.component';
+import { ExternalLinkService } from '../../../services/external-link.service';
 import { UpdateModalService } from '../../../services/update-modal.service';
 import { UpdateService } from '../../../services/update.service';
 import { releaseNoteSections } from './release-notes';
@@ -18,6 +19,7 @@ export class UpdateModalComponent {
   protected readonly updates = inject(UpdateService);
   private readonly modalService = inject(UpdateModalService);
   private readonly localization = inject(LocalizationService);
+  private readonly externalLinks = inject(ExternalLinkService);
   protected readonly appStrings = AppStrings;
 
   @ViewChild(ModalComponent) private readonly modal?: ModalComponent;
@@ -93,6 +95,10 @@ export class UpdateModalComponent {
 
   install(): void {
     void this.updates.install();
+  }
+
+  openReleaseNotes(url: string): void {
+    this.externalLinks.open(url);
   }
 
   cancelDownload(): void {

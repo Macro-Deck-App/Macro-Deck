@@ -1064,6 +1064,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Bootstrapper.UpdateWindow.ReadyStatus" xml:space="preserve">
     <value>Das Update ist heruntergeladen. Starte Macro Deck neu, um es zu installieren.</value>
   </data>
+  <data name="Bootstrapper.UpdateWindow.ReleaseNotesLink" xml:space="preserve">
+    <value>Versionshinweise auf GitHub lesen</value>
+  </data>
   <data name="Bootstrapper.UpdateWindow.RestartNow" xml:space="preserve">
     <value>Jetzt neu starten</value>
   </data>
@@ -15100,6 +15103,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Update.Details.NoChangelog" xml:space="preserve">
     <value>Für diese Version wurden keine Versionshinweise veröffentlicht.</value>
+  </data>
+  <data name="Update.Details.ReleaseNotesLink" xml:space="preserve">
+    <value>Versionshinweise auf GitHub lesen</value>
   </data>
   <data name="Update.Details.PreparingStatus" xml:space="preserve">
     <value>Download wird vorbereitet …</value>

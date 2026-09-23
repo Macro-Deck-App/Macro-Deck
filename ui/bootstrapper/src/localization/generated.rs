@@ -90,6 +90,7 @@ pub mod keys {
     pub const UPDATE_WINDOW_NO_CHANGELOG: &str = "Bootstrapper.UpdateWindow.NoChangelog";
     pub const UPDATE_WINDOW_PREPARING_STATUS: &str = "Bootstrapper.UpdateWindow.PreparingStatus";
     pub const UPDATE_WINDOW_READY_STATUS: &str = "Bootstrapper.UpdateWindow.ReadyStatus";
+    pub const UPDATE_WINDOW_RELEASE_NOTES_LINK: &str = "Bootstrapper.UpdateWindow.ReleaseNotesLink";
     pub const UPDATE_WINDOW_RESTART_NOW: &str = "Bootstrapper.UpdateWindow.RestartNow";
     pub const UPDATE_WINDOW_TRY_AGAIN: &str = "Bootstrapper.UpdateWindow.TryAgain";
     pub const UPDATE_WINDOW_VERSION_HEADING: &str = "Bootstrapper.UpdateWindow.VersionHeading";
@@ -180,6 +181,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.NoChangelog", "Pro tuto verzi nebyly zveřejněny žádné poznámky k vydání."),
         ("Bootstrapper.UpdateWindow.PreparingStatus", "Příprava stahování…"),
         ("Bootstrapper.UpdateWindow.ReadyStatus", "Aktualizace je stažená. K instalaci je potřeba restartovat Macro Deck."),
+        ("Bootstrapper.UpdateWindow.ReleaseNotesLink", "Zobrazit poznámky k vydání na GitHubu"),
         ("Bootstrapper.UpdateWindow.RestartNow", "Restartovat nyní"),
         ("Bootstrapper.UpdateWindow.TryAgain", "Zkusit znovu"),
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
@@ -266,6 +268,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.NoChangelog", "Für diese Version wurden keine Versionshinweise veröffentlicht."),
         ("Bootstrapper.UpdateWindow.PreparingStatus", "Download wird vorbereitet …"),
         ("Bootstrapper.UpdateWindow.ReadyStatus", "Das Update ist heruntergeladen. Starte Macro Deck neu, um es zu installieren."),
+        ("Bootstrapper.UpdateWindow.ReleaseNotesLink", "Versionshinweise auf GitHub lesen"),
         ("Bootstrapper.UpdateWindow.RestartNow", "Jetzt neu starten"),
         ("Bootstrapper.UpdateWindow.TryAgain", "Erneut versuchen"),
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
@@ -352,6 +355,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.NoChangelog", "No release notes were published for this version."),
         ("Bootstrapper.UpdateWindow.PreparingStatus", "Preparing the download…"),
         ("Bootstrapper.UpdateWindow.ReadyStatus", "The update is downloaded. Restart Macro Deck to install it."),
+        ("Bootstrapper.UpdateWindow.ReleaseNotesLink", "Read the release notes on GitHub"),
         ("Bootstrapper.UpdateWindow.RestartNow", "Restart now"),
         ("Bootstrapper.UpdateWindow.TryAgain", "Try again"),
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
@@ -438,6 +442,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.NoChangelog", "No se publicaron notas de la versión para esta actualización."),
         ("Bootstrapper.UpdateWindow.PreparingStatus", "Preparando la descarga…"),
         ("Bootstrapper.UpdateWindow.ReadyStatus", "La actualización está descargada. Reinicia Macro Deck para instalarla."),
+        ("Bootstrapper.UpdateWindow.ReleaseNotesLink", "Leer las notas de la versión en GitHub"),
         ("Bootstrapper.UpdateWindow.RestartNow", "Reiniciar ahora"),
         ("Bootstrapper.UpdateWindow.TryAgain", "Reintentar"),
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
@@ -524,6 +529,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.NoChangelog", "Aucune note de version n'a été publiée pour cette mise à jour."),
         ("Bootstrapper.UpdateWindow.PreparingStatus", "Préparation du téléchargement…"),
         ("Bootstrapper.UpdateWindow.ReadyStatus", "La mise à jour est téléchargée. Redémarre Macro Deck pour l'installer."),
+        ("Bootstrapper.UpdateWindow.ReleaseNotesLink", "Lire les notes de version sur GitHub"),
         ("Bootstrapper.UpdateWindow.RestartNow", "Redémarrer maintenant"),
         ("Bootstrapper.UpdateWindow.TryAgain", "Réessayer"),
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
@@ -610,6 +616,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.NoChangelog", "Non sono state pubblicate note di rilascio per questa versione."),
         ("Bootstrapper.UpdateWindow.PreparingStatus", "Preparazione del download…"),
         ("Bootstrapper.UpdateWindow.ReadyStatus", "L'aggiornamento è stato scaricato. Riavvia Macro Deck per installarlo."),
+        ("Bootstrapper.UpdateWindow.ReleaseNotesLink", "Leggi le note di rilascio su GitHub"),
         ("Bootstrapper.UpdateWindow.RestartNow", "Riavvia ora"),
         ("Bootstrapper.UpdateWindow.TryAgain", "Riprova"),
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
@@ -696,6 +703,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.NoChangelog", "Dla tej wersji nie opublikowano informacji o wydaniu."),
         ("Bootstrapper.UpdateWindow.PreparingStatus", "Przygotowywanie pobierania…"),
         ("Bootstrapper.UpdateWindow.ReadyStatus", "Aktualizacja została pobrana. Instalacja wymaga ponownego uruchomienia Macro Deck."),
+        ("Bootstrapper.UpdateWindow.ReleaseNotesLink", "Zobacz informacje o wydaniu w serwisie GitHub"),
         ("Bootstrapper.UpdateWindow.RestartNow", "Uruchom ponownie teraz"),
         ("Bootstrapper.UpdateWindow.TryAgain", "Spróbuj ponownie"),
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
