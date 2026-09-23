@@ -34,6 +34,10 @@ internal sealed class FakeInstallSupervisor : IPluginSupervisor
 
 	public Action<string, PluginStopReason>? OnStop { get; set; }
 
+	public Action<string>? OnStart { get; set; }
+
+	public Func<string, bool>? FailsToStart { get; set; }
+
 	public IReadOnlyList<PluginRuntimeSnapshot> Snapshot()
 	{
 		var installed = _catalog.Discover().Where(plugin => plugin.Versions.Count > 0).ToList();
@@ -67,9 +71,10 @@ internal sealed class FakeInstallSupervisor : IPluginSupervisor
 	public Task<PluginSupervisorResult> Start(string pluginId, CancellationToken cancellationToken = default)
 	{
 		Starts.Add(pluginId);
+		OnStart?.Invoke(pluginId);
 		DesiredStartState[pluginId] = true;
 
-		_runtime[pluginId] = UnhealthyPlugins.Contains(pluginId)
+		_runtime[pluginId] = UnhealthyPlugins.Contains(pluginId) || FailsToStart?.Invoke(pluginId) == true
 			? (PluginRuntimeState.Failed, PluginHealthState.Crashed)
 			: (PluginRuntimeState.Running, PluginHealthState.Healthy);
 

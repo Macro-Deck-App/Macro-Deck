@@ -1,3 +1,4 @@
+using System.Runtime.Versioning;
 using System.Text;
 using System.Text.Json;
 using MacroDeck.Plugin.Packaging.Artifacts;
@@ -31,6 +32,8 @@ internal sealed class PluginInstallerTests
 	private PluginInstaller _installer = null!;
 	private RecordingConsentNotifier _adbConsent = null!;
 	private FakeIntegrationRegistrar _integrationRegistrar = null!;
+	private FakePluginTrustEvaluator _trust = null!;
+	private IPluginTrustRecordRepository _trustRecords = null!;
 	private string _sourceDirectory = null!;
 
 	[SetUp]
@@ -75,6 +78,8 @@ internal sealed class PluginInstallerTests
 			new PluginTakeoverRegistry(),
 			TimeProvider.System));
 		var provider = services.BuildServiceProvider();
+		_trustRecords = provider.GetRequiredService<IPluginTrustRecordRepository>();
+		_trust = new FakePluginTrustEvaluator();
 
 		_adbConsent = new RecordingConsentNotifier();
 		_installer = new PluginInstaller(_paths,
@@ -83,7 +88,7 @@ internal sealed class PluginInstallerTests
 				options,
 				Serilog.Core.Logger.None),
 			new PluginArtifactCache(_paths, options, Serilog.Core.Logger.None),
-			new FakePluginTrustEvaluator(),
+			_trust,
 			new PluginDependencyResolver(_catalog, manifestReader),
 			manifestReader,
 			_catalog,
@@ -133,6 +138,9 @@ internal sealed class PluginInstallerTests
 
 	private string VersionDirectory(string version)
 		=> PluginInstallPaths.VersionDirectory(_paths.PluginsDirectory, PluginId, version);
+
+	private string ReadEntrypoint(string version)
+		=> File.ReadAllText(Path.Combine(VersionDirectory(version), ManifestJson.EntrypointExecutable));
 
 	private string DataDirectory() => PluginInstallPaths.DataDirectory(_paths.PluginsDirectory, PluginId);
 
@@ -641,13 +649,98 @@ internal sealed class PluginInstallerTests
 	}
 
 	[Test]
-	public async Task A_forced_reinstall_of_the_active_version_that_fails_health_restores_the_original()
+	public async Task A_forced_reinstall_of_the_running_version_stops_it_before_replacing_its_files()
 	{
 		await Install(BuildArtifact(payload: "original"));
-		_supervisor.UnhealthyPlugins.Add(PluginId);
+		string? filesSeenWhenStopped = null;
+		_supervisor.OnStop = (_, _) => filesSeenWhenStopped ??= ReadEntrypoint("1.0.0");
+
+		var result = await Install(BuildArtifact(payload: "replacement", fileName: "again.macroDeckPlugin"),
+			new PluginInstallRequest { Force = true });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True, result.ErrorMessage);
+			Assert.That(filesSeenWhenStopped, Is.EqualTo("original"), "the plugin must stop before its files are replaced");
+			Assert.That(ReadEntrypoint("1.0.0"), Is.EqualTo("replacement"));
+			Assert.That(_supervisor.IsRunning(PluginId), Is.True);
+		});
+	}
+
+	[Test]
+	[Platform(Exclude = "Win", Reason = "Unix file modes")]
+	[UnsupportedOSPlatform("windows")]
+	public async Task A_forced_reinstall_that_cannot_replace_the_running_version_leaves_the_original_running()
+	{
+		if (Environment.UserName == "root")
+		{
+			Assert.Ignore("root can rename entries in a directory it has no write permission on.");
+		}
+
+		await Install(BuildArtifact(payload: "original"));
+		var versionsDirectory = Path.GetDirectoryName(VersionDirectory("1.0.0"))!;
+		var originalMode = File.GetUnixFileMode(versionsDirectory);
+
+		PluginInstallResult result;
+		File.SetUnixFileMode(versionsDirectory, UnixFileMode.UserRead | UnixFileMode.UserExecute);
+		try
+		{
+			result = await Install(BuildArtifact(payload: "replacement", fileName: "again.macroDeckPlugin"),
+				new PluginInstallRequest { Force = true });
+		}
+		finally
+		{
+			File.SetUnixFileMode(versionsDirectory, originalMode);
+		}
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.False);
+			Assert.That(ActiveVersion(), Is.EqualTo("1.0.0"));
+			Assert.That(ReadEntrypoint("1.0.0"), Is.EqualTo("original"));
+			Assert.That(_supervisor.IsRunning(PluginId), Is.True);
+		});
+	}
+
+	[Test]
+	public async Task A_refused_forced_reinstall_leaves_the_running_version_untouched()
+	{
+		await Install(BuildArtifact(payload: "original"));
+		_supervisor.Stops.Clear();
+		_trust.InstalledResult = PluginTrustResult.Of(PluginTrustVerdict.Unsigned);
+
+		var result = await Install(BuildArtifact(payload: "replacement", fileName: "again.macroDeckPlugin"),
+			new PluginInstallRequest { Force = true });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.False);
+			Assert.That(_supervisor.Stops, Is.Empty);
+			Assert.That(_supervisor.IsRunning(PluginId), Is.True);
+			Assert.That(ReadEntrypoint("1.0.0"), Is.EqualTo("original"));
+		});
+	}
+
+	[Test]
+	public async Task A_forced_reinstall_of_the_active_version_that_fails_health_restores_the_original()
+	{
+		_trust.InstalledResult = PluginTrustResult.Of(PluginTrustVerdict.Trusted, "cert-original");
+		await Install(BuildArtifact(payload: "original"));
+
+		_trust.InstalledResult = PluginTrustResult.Of(PluginTrustVerdict.Trusted, "cert-broken");
+		_supervisor.FailsToStart = _ => ReadEntrypoint("1.0.0") == "broken";
+		string? certificateWhenOriginalStarted = null;
+		_supervisor.OnStart = _ =>
+		{
+			if (ReadEntrypoint("1.0.0") == "original")
+			{
+				certificateWhenOriginalStarted = _trustRecords.GetVersion(PluginId, "1.0.0").Result?.CertificateId;
+			}
+		};
 
 		var result = await Install(BuildArtifact(payload: "broken", fileName: "broken.macroDeckPlugin"),
 			new PluginInstallRequest { Force = true });
+		var trustRecord = await _trustRecords.GetVersion(PluginId, "1.0.0");
 
 		Assert.Multiple(() =>
 		{
@@ -657,8 +750,12 @@ internal sealed class PluginInstallerTests
 			Assert.That(Directory.Exists(VersionDirectory("1.0.0")),
 				Is.True,
 				"the version current.json names must still exist after a rollback");
-			Assert.That(File.ReadAllText(Path.Combine(VersionDirectory("1.0.0"), ManifestJson.EntrypointExecutable)),
-				Is.EqualTo("original"));
+			Assert.That(ReadEntrypoint("1.0.0"), Is.EqualTo("original"));
+			Assert.That(_supervisor.IsRunning(PluginId), Is.True);
+			Assert.That(certificateWhenOriginalStarted,
+				Is.EqualTo("cert-original"),
+				"the launch trust gate compares the restored files with this record");
+			Assert.That(trustRecord?.CertificateId, Is.EqualTo("cert-original"));
 		});
 	}
 
