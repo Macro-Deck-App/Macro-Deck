@@ -14,6 +14,7 @@
 
 use serde::Serialize;
 
+use crate::release_notes::{self, ReleaseNotes};
 use crate::update_channel::{self, UpdateChannel};
 use crate::updater::UpdateInstallStrategy;
 
@@ -155,6 +156,7 @@ pub(crate) struct UpdateSnapshot {
     pub(crate) current_version: String,
     pub(crate) version: Option<String>,
     pub(crate) notes: Option<String>,
+    pub(crate) notes_url: Option<String>,
     pub(crate) published_at: Option<String>,
     pub(crate) channel: UpdateChannel,
     pub(crate) beta_installed: bool,
@@ -174,6 +176,7 @@ pub(crate) struct UpdateState {
     pub(crate) current_version: String,
     pub(crate) version: Option<String>,
     pub(crate) notes: Option<String>,
+    pub(crate) notes_url: Option<String>,
     pub(crate) published_at: Option<String>,
     pub(crate) channel: UpdateChannel,
     pub(crate) beta_installed: bool,
@@ -211,6 +214,7 @@ impl UpdateState {
             current_version,
             version: None,
             notes: None,
+            notes_url: None,
             published_at: None,
             channel,
             beta_installed,
@@ -272,15 +276,19 @@ impl UpdateState {
         &mut self,
         now: u64,
         version: String,
-        notes: Option<String>,
+        notes: ReleaseNotes,
         published_at: Option<String>,
         partial_check: Option<String>,
     ) {
         self.last_check_at = Some(now);
         self.install_on_quit = false;
         self.phase = UpdatePhase::Available;
+        (self.notes, self.notes_url) = match notes {
+            ReleaseNotes::Published(notes) => (Some(notes), None),
+            ReleaseNotes::Empty => (None, None),
+            ReleaseNotes::Unavailable => (None, Some(release_notes::release_page_url(&version))),
+        };
         self.version = Some(version);
-        self.notes = notes;
         self.published_at = published_at;
         self.partial_check = partial_check;
         self.error = None;
@@ -297,6 +305,7 @@ impl UpdateState {
         self.phase = UpdatePhase::UpToDate;
         self.version = None;
         self.notes = None;
+        self.notes_url = None;
         self.published_at = None;
         self.partial_check = partial_check;
         self.error = None;
@@ -413,6 +422,16 @@ impl UpdateState {
         true
     }
 
+    pub(crate) fn cached_notes(&self, version: &str) -> Option<ReleaseNotes> {
+        if self.version.as_deref() != Some(version) || self.notes_url.is_some() {
+            return None;
+        }
+        Some(match &self.notes {
+            Some(notes) => ReleaseNotes::Published(notes.clone()),
+            None => ReleaseNotes::Empty,
+        })
+    }
+
     pub(crate) fn take_availability_signal(&self) -> Option<String> {
         let version = self.version.as_ref()?;
         if self.signalled_version.as_deref() == Some(version.as_str()) {
@@ -433,6 +452,7 @@ impl UpdateState {
             current_version: self.current_version.clone(),
             version: self.version.clone(),
             notes: self.notes.clone(),
+            notes_url: self.notes_url.clone(),
             published_at: self.published_at.clone(),
             channel: self.channel,
             beta_installed: self.beta_installed,
@@ -557,18 +577,18 @@ mod tests {
     fn a_repeat_of_the_same_version_does_not_signal_again_but_a_newer_one_does() {
         let mut state = idle_state();
 
-        state.record_available(1, "3.1.0".to_string(), None, None, None);
+        state.record_available(1, "3.1.0".to_string(), ReleaseNotes::Empty, None, None);
         let first = state.take_availability_signal();
         assert_eq!(first.as_deref(), Some("3.1.0"));
         state.confirm_availability_signalled(first.as_deref().unwrap());
 
-        state.record_available(2, "3.1.0".to_string(), None, None, None);
+        state.record_available(2, "3.1.0".to_string(), ReleaseNotes::Empty, None, None);
         assert!(
             state.take_availability_signal().is_none(),
             "a repeat of the same version must not signal again"
         );
 
-        state.record_available(3, "3.2.0".to_string(), None, None, None);
+        state.record_available(3, "3.2.0".to_string(), ReleaseNotes::Empty, None, None);
         assert_eq!(
             state.take_availability_signal().as_deref(),
             Some("3.2.0"),
@@ -582,7 +602,7 @@ mod tests {
         state.record_available(
             1,
             "3.1.0".to_string(),
-            Some("first notes".to_string()),
+            ReleaseNotes::Published("first notes".to_string()),
             Some("2026-01-01".to_string()),
             None,
         );
@@ -591,7 +611,7 @@ mod tests {
         state.record_available(
             2,
             "3.1.0".to_string(),
-            Some("revised notes".to_string()),
+            ReleaseNotes::Published("revised notes".to_string()),
             Some("2026-01-02".to_string()),
             None,
         );
@@ -599,9 +619,78 @@ mod tests {
     }
 
     #[test]
+    fn unavailable_notes_leave_a_link_to_the_release_instead() {
+        let mut state = idle_state();
+        state.record_available(
+            1,
+            "3.1.0".to_string(),
+            ReleaseNotes::Unavailable,
+            None,
+            None,
+        );
+
+        let snapshot = state.snapshot();
+        assert_eq!(snapshot.notes, None);
+        assert_eq!(
+            snapshot.notes_url.as_deref(),
+            Some("https://github.com/Macro-Deck-App/Macro-Deck/releases/tag/v3.1.0")
+        );
+    }
+
+    #[test]
+    fn fetched_notes_are_reused_for_the_same_version_only() {
+        let mut state = idle_state();
+        state.record_available(
+            1,
+            "3.1.0".to_string(),
+            ReleaseNotes::Published("notes".to_string()),
+            None,
+            None,
+        );
+        assert_eq!(
+            state.cached_notes("3.1.0"),
+            Some(ReleaseNotes::Published("notes".to_string()))
+        );
+        assert_eq!(state.cached_notes("3.2.0"), None);
+
+        state.record_available(2, "3.2.0".to_string(), ReleaseNotes::Empty, None, None);
+        assert_eq!(state.cached_notes("3.2.0"), Some(ReleaseNotes::Empty));
+    }
+
+    #[test]
+    fn unavailable_notes_are_fetched_again_at_the_next_check() {
+        let mut state = idle_state();
+        state.record_available(
+            1,
+            "3.1.0".to_string(),
+            ReleaseNotes::Unavailable,
+            None,
+            None,
+        );
+        assert_eq!(state.cached_notes("3.1.0"), None);
+    }
+
+    #[test]
+    fn up_to_date_forgets_the_notes_and_the_link() {
+        let mut state = idle_state();
+        state.record_available(
+            1,
+            "3.1.0".to_string(),
+            ReleaseNotes::Unavailable,
+            None,
+            None,
+        );
+        state.record_up_to_date(2, None);
+
+        let snapshot = state.snapshot();
+        assert_eq!(snapshot.notes_url, None);
+        assert_eq!(state.cached_notes("3.1.0"), None);
+    }
+
+    #[test]
     fn a_progress_tick_only_touches_progress_and_never_signals() {
         let mut state = idle_state();
-        state.record_available(1, "3.1.0".to_string(), None, None, None);
+        state.record_available(1, "3.1.0".to_string(), ReleaseNotes::Empty, None, None);
         state.confirm_availability_signalled("3.1.0");
 
         state.record_progress(50, Some(100));
@@ -613,7 +702,7 @@ mod tests {
     #[test]
     fn a_failed_report_leaves_the_signal_available_for_the_next_check() {
         let mut state = idle_state();
-        state.record_available(1, "3.1.0".to_string(), None, None, None);
+        state.record_available(1, "3.1.0".to_string(), ReleaseNotes::Empty, None, None);
 
         assert_eq!(state.take_availability_signal().as_deref(), Some("3.1.0"));
         // No confirm_availability_signalled call: simulates a failed report.
@@ -627,7 +716,7 @@ mod tests {
     #[test]
     fn a_download_is_refused_while_already_downloading_and_state_is_unchanged() {
         let mut state = idle_state();
-        state.record_available(1, "3.1.0".to_string(), None, None, None);
+        state.record_available(1, "3.1.0".to_string(), ReleaseNotes::Empty, None, None);
         assert!(state.try_begin_download());
         state.record_progress(10, Some(100));
 
@@ -656,7 +745,7 @@ mod tests {
     #[test]
     fn cancelling_a_download_returns_to_available_and_allows_a_retry() {
         let mut state = idle_state();
-        state.record_available(1, "3.1.0".to_string(), None, None, None);
+        state.record_available(1, "3.1.0".to_string(), ReleaseNotes::Empty, None, None);
         assert!(state.try_begin_download());
         state.record_progress(10, Some(100));
 
@@ -716,7 +805,7 @@ mod tests {
         assert!(state.try_begin_check());
         assert!(!state.try_begin_check());
 
-        state.record_available(1, "3.1.0".to_string(), None, None, None);
+        state.record_available(1, "3.1.0".to_string(), ReleaseNotes::Empty, None, None);
         assert!(state.try_begin_download());
         assert!(!state.try_begin_check());
 
@@ -788,7 +877,7 @@ mod tests {
         );
 
         let mut state = idle_state();
-        state.record_available(1, "3.1.0".to_string(), None, None, None);
+        state.record_available(1, "3.1.0".to_string(), ReleaseNotes::Empty, None, None);
         assert!(state.try_begin_download());
         state.record_install_failed("connection reset".to_string());
         let snapshot = state.snapshot();
@@ -805,28 +894,28 @@ mod tests {
         assert!(state.snapshot().failure.is_none());
 
         state.record_check_failed(3, "feed unreachable".to_string());
-        state.record_available(4, "3.1.0".to_string(), None, None, None);
+        state.record_available(4, "3.1.0".to_string(), ReleaseNotes::Empty, None, None);
         assert!(state.snapshot().failure.is_none());
     }
 
     #[test]
     fn a_fresh_available_never_carries_a_previous_downloads_progress() {
         let mut state = idle_state();
-        state.record_available(1, "3.1.0".to_string(), None, None, None);
+        state.record_available(1, "3.1.0".to_string(), ReleaseNotes::Empty, None, None);
         assert!(state.try_begin_download());
         state.record_progress(100, Some(100));
         state.record_downloaded();
 
         // A later check finds the same (still uninstalled) version available
         // again - it must not report the previous download's 100% progress.
-        state.record_available(2, "3.1.0".to_string(), None, None, None);
+        state.record_available(2, "3.1.0".to_string(), ReleaseNotes::Empty, None, None);
 
         assert!(state.progress.is_none());
     }
 
     fn downloaded_state(version: &str) -> UpdateState {
         let mut state = idle_state();
-        state.record_available(1, version.to_string(), None, None, None);
+        state.record_available(1, version.to_string(), ReleaseNotes::Empty, None, None);
         assert!(state.try_begin_download());
         state.record_downloaded();
         state
@@ -853,7 +942,7 @@ mod tests {
     #[test]
     fn nothing_waits_for_the_quit_before_the_download_finished() {
         let mut state = idle_state();
-        state.record_available(1, "3.1.0".to_string(), None, None, None);
+        state.record_available(1, "3.1.0".to_string(), ReleaseNotes::Empty, None, None);
 
         assert!(!state.arm_install_on_quit());
         assert!(state.try_begin_download());
@@ -935,7 +1024,7 @@ mod tests {
 
         let mut newer = downloaded_state("3.1.0");
         newer.arm_install_on_quit();
-        newer.record_available(120, "3.2.0".to_string(), None, None, None);
+        newer.record_available(120, "3.2.0".to_string(), ReleaseNotes::Empty, None, None);
         assert!(!newer.claim_install_on_quit());
     }
 

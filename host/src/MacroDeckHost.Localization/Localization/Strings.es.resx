@@ -1071,6 +1071,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Bootstrapper.UpdateWindow.ReadyStatus" xml:space="preserve">
     <value>La actualización está descargada. Reinicia Macro Deck para instalarla.</value>
   </data>
+  <data name="Bootstrapper.UpdateWindow.ReleaseNotesLink" xml:space="preserve">
+    <value>Leer las notas de la versión en GitHub</value>
+  </data>
   <data name="Bootstrapper.UpdateWindow.RestartNow" xml:space="preserve">
     <value>Reiniciar ahora</value>
   </data>
@@ -15346,6 +15349,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Update.Details.NoChangelog" xml:space="preserve">
     <value>No se publicaron notas de la versión para esta actualización.</value>
+  </data>
+  <data name="Update.Details.ReleaseNotesLink" xml:space="preserve">
+    <value>Leer las notas de la versión en GitHub</value>
   </data>
   <data name="Update.Details.PreparingStatus" xml:space="preserve">
     <value>Preparando la descarga…</value>

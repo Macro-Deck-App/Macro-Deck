@@ -46,15 +46,14 @@ test('a manifest is repointed at the name GitHub gave the asset', () => {
   assert.equal(manifests[0].manifest.platforms['windows-x86_64'].url, DOWNLOAD_URL);
 });
 
-test('repointing preserves the signature and the notes', () => {
-  const manifest = buildManifest('windows', '3.0.0-beta.42', SETUP_EXE, 'dGVzdA==', '2026-07-21T00:00:00.000Z', 'Fixed a bug');
+test('repointing preserves the signature and the version', () => {
+  const manifest = buildManifest('windows', '3.0.0-beta.42', SETUP_EXE, 'dGVzdA==', '2026-07-21T00:00:00.000Z');
   const { manifests } = pointManifestsAtRelease(
     [{ path: 'latest-windows.json', manifest }],
     [{ name: UPLOADED_EXE, url: DOWNLOAD_URL }]
   );
 
   assert.equal(manifests[0].manifest.platforms['windows-x86_64'].signature, 'dGVzdA==');
-  assert.equal(manifests[0].manifest.notes, 'Fixed a bug');
   assert.equal(manifests[0].manifest.version, '3.0.0-beta.42');
 });
 

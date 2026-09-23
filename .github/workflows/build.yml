@@ -69,12 +69,8 @@ jobs:
           } >> "$GITHUB_OUTPUT"
           echo "Version: ${informational} (build ${{ github.run_number }}, built ${build_time})"
 
-      # Generated ahead of the release (which publish-release.yml creates only
-      # after this workflow succeeds) so the same body can be embedded in the
-      # update manifests below and reused verbatim for the GitHub release
-      # itself, keeping the changelog in both places identical (issue #249).
-      # An empty body is a legitimate outcome - the desktop UI has its own
-      # fallback text - so it must not fail the build.
+      # The body of the GitHub release publish-release.yml creates, which the app
+      # reads its release notes from. An empty body must not fail the build.
       - name: Generate release notes
         env:
           GH_TOKEN: ${{ github.token }}
@@ -513,12 +509,6 @@ jobs:
             "${{ needs.prepare.outputs.rpm_version }}" \
             "${{ needs.prepare.outputs.rpm_release }}"
 
-      - name: Download release notes
-        if: ${{ env.HAS_UPDATER_KEY == 'true' }}
-        uses: actions/download-artifact@v7
-        with:
-          name: release-notes
-
       # Stable releases publish both latest and beta so beta clients can move
       # to GA; beta releases publish only beta and never reach stable clients.
       # Linux's updater payload stays the AppImage - DEB and RPM are plain,
@@ -529,7 +519,7 @@ jobs:
           for channel in ${{ needs.prepare.outputs.manifest_channels }}; do
             output="ui/bootstrapper/target/release/bundle/${channel}-linux.json"
             node ci/scripts/make-update-manifest.mjs linux "${{ needs.prepare.outputs.version }}" \
-              ui/bootstrapper/target/release/bundle "$output" release-notes.md
+              ui/bootstrapper/target/release/bundle "$output"
             test -f "$output"
           done
 
@@ -647,12 +637,6 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_UPDATER_KEY_PASSWORD }}
 
-      - name: Download release notes
-        if: ${{ env.HAS_UPDATER_KEY == 'true' }}
-        uses: actions/download-artifact@v7
-        with:
-          name: release-notes
-
       # Stable releases publish both latest and beta so beta clients can move
       # to GA; beta releases publish only beta and never reach stable clients.
       - name: Generate update manifests
@@ -662,7 +646,7 @@ jobs:
           for channel in ${{ needs.prepare.outputs.manifest_channels }}; do
             output="ui/bootstrapper/target/release/bundle/${channel}-windows.json"
             node ci/scripts/make-update-manifest.mjs windows "${{ needs.prepare.outputs.version }}" \
-              ui/bootstrapper/target/release/bundle "$output" release-notes.md
+              ui/bootstrapper/target/release/bundle "$output"
             test -f "$output"
           done
 
@@ -849,12 +833,6 @@ jobs:
           mv "Macro Deck.app.tar.gz" "Macro Deck_${{ needs.prepare.outputs.version }}_aarch64.app.tar.gz"
           mv "Macro Deck.app.tar.gz.sig" "Macro Deck_${{ needs.prepare.outputs.version }}_aarch64.app.tar.gz.sig"
 
-      - name: Download release notes
-        if: ${{ env.HAS_UPDATER_KEY == 'true' }}
-        uses: actions/download-artifact@v7
-        with:
-          name: release-notes
-
       # Stable releases publish both latest and beta so beta clients can move
       # to GA; beta releases publish only beta and never reach stable clients.
       - name: Generate update manifests
@@ -863,7 +841,7 @@ jobs:
           for channel in ${{ needs.prepare.outputs.manifest_channels }}; do
             output="ui/bootstrapper/target/release/bundle/${channel}-darwin.json"
             node ci/scripts/make-update-manifest.mjs darwin "${{ needs.prepare.outputs.version }}" \
-              ui/bootstrapper/target/release/bundle "$output" release-notes.md
+              ui/bootstrapper/target/release/bundle "$output"
             test -f "$output"
           done
 

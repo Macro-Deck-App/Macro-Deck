@@ -29,6 +29,10 @@
                 [class.update-modal__notes-section--category]="section[0].kind === 'heading'"
                 [blocks]="section" />
             }
+          } @else if (updates.notesUrl(); as notesUrl) {
+            <shared-button class="update-modal__notes-link" variant="secondary" size="compact" (click)="openReleaseNotes(notesUrl)">
+              {{ appStrings.Update.Details.ReleaseNotesLink | translate }}
+            </shared-button>
           } @else {
             <p class="update-modal__no-changelog">{{ appStrings.Update.Details.NoChangelog | translate }}</p>
           }

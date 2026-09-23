@@ -9,13 +9,11 @@
 // names on upload, so point-manifests-at-release.mjs rewrites these urls to the
 // real ones once the release exists.
 //
-// Usage: make-update-manifest.mjs <target> <version> <bundleDir> <outFile> [notesFile]
+// Usage: make-update-manifest.mjs <target> <version> <bundleDir> <outFile>
 //   target:    windows | darwin | linux
 //   version:   full app version (e.g. 3.0.0-beta.42)
 //   bundleDir: tauri bundle output (ui/bootstrapper/target/release/bundle)
 //   outFile:   where to write the manifest JSON
-//   notesFile: optional path to a Markdown file whose contents become the
-//              manifest's `notes` field (the release changelog)
 //
 // GITHUB_REPOSITORY selects the repository the payload urls address.
 
@@ -60,28 +58,11 @@ export function findUpdaterArtifact(target, fileNames) {
   return candidates[0];
 }
 
-// Every client polls its channel manifest on a six-hour timer, so the notes
-// embedded in it must stay small; anything longer is truncated.
-export const MAX_NOTES_LENGTH = 16 * 1024;
-
-// A plain `slice(0, n)` can land the cut in the middle of a UTF-16 surrogate
-// pair (an emoji or other astral character in the notes), leaving a lone
-// surrogate at the end - invalid text that can round-trip strangely once
-// re-encoded downstream. Back off by one code unit when that would happen.
-function truncateAtCodePointBoundary(text, maxLength) {
-  if (text.length <= maxLength) {
-    return text;
-  }
-  const lastCode = text.charCodeAt(maxLength - 1);
-  const isHighSurrogate = lastCode >= 0xd800 && lastCode <= 0xdbff;
-  return text.slice(0, isHighSurrogate ? maxLength - 1 : maxLength);
-}
-
-export function buildManifest(target, version, artifactFileName, signature, pubDate, notes, repository) {
+export function buildManifest(target, version, artifactFileName, signature, pubDate, repository) {
   const spec = TARGETS[target];
   const parsedVersion = parseReleaseVersion(version);
   const baseUrl = releaseAssetBaseUrl(parsedVersion.version, repository);
-  const manifest = {
+  return {
     version: parsedVersion.version,
     pub_date: pubDate,
     platforms: {
@@ -91,35 +72,18 @@ export function buildManifest(target, version, artifactFileName, signature, pubD
       },
     },
   };
-  // An absent, empty or whitespace-only body must leave `notes` out of the
-  // manifest entirely - `null` would still ship a "notes" key over the wire,
-  // and the desktop UI's own fallback text only kicks in when the field is
-  // missing.
-  if (typeof notes === 'string' && notes.trim().length > 0) {
-    manifest.notes = truncateAtCodePointBoundary(notes, MAX_NOTES_LENGTH);
-  }
-  return manifest;
 }
 
 function main(argv) {
-  const [target, version, bundleDir, outFile, notesFile] = argv;
+  const [target, version, bundleDir, outFile] = argv;
   if (!target || !version || !bundleDir || !outFile) {
-    console.error('usage: make-update-manifest.mjs <target> <version> <bundleDir> <outFile> [notesFile]');
+    console.error('usage: make-update-manifest.mjs <target> <version> <bundleDir> <outFile>');
     process.exit(1);
   }
   const spec = TARGETS[target];
   if (!spec) {
     console.error(`unknown target "${target}"`);
     process.exit(1);
-  }
-  let notes;
-  if (notesFile) {
-    try {
-      notes = readFileSync(notesFile, 'utf8');
-    } catch (error) {
-      console.error(`could not read notes file "${notesFile}": ${error.message}`);
-      process.exit(1);
-    }
   }
   const dir = join(bundleDir, spec.subdir);
   const artifact = findUpdaterArtifact(target, readdirSync(dir));
@@ -130,7 +94,6 @@ function main(argv) {
     artifact,
     signature,
     new Date().toISOString(),
-    notes,
     process.env.GITHUB_REPOSITORY || DEFAULT_REPOSITORY
   );
   writeFileSync(outFile, `${JSON.stringify(manifest, null, 2)}\n`);

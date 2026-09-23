@@ -115,6 +115,30 @@ test('a version without release notes says so', async () => {
   );
 });
 
+test('notes that could not be loaded leave a link to the release instead', async () => {
+  const url = 'https://github.com/Macro-Deck-App/Macro-Deck/releases/tag/v3.1.0';
+  const { document } = await load(baseView({
+    notes: null,
+    notesUrl: url,
+    notesLink: 'Read the release notes on GitHub',
+  }));
+
+  const anchor = document.querySelector('#changelog a');
+  assert.equal(anchor.href, url);
+  assert.equal(anchor.textContent, 'Read the release notes on GitHub');
+  assert.ok(!document.getElementById('changelog').textContent.includes('No release notes were published'));
+});
+
+test('the generated comment at the top of GitHub release notes is not shown', async () => {
+  const { document } = await load(baseView({
+    notes: '<!-- Release notes generated using configuration in .github/release.yml at abc -->\r\n\r\n## Fixes\r\n* One',
+  }));
+
+  const text = document.getElementById('changelog').textContent;
+  assert.ok(!text.includes('Release notes generated'));
+  assert.ok(text.includes('One'));
+});
+
 test('a button runs its action', async () => {
   const { window, document, posts } = await load(baseView());
 

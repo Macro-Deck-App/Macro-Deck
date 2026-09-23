@@ -23,6 +23,7 @@ mod opened_files;
 mod post_update_changelog;
 mod quit_after_update;
 mod redact;
+mod release_notes;
 mod update_channel;
 mod update_mode;
 mod update_state;

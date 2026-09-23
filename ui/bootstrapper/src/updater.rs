@@ -56,6 +56,7 @@ use crate::localization::{self, keys};
 use crate::logging;
 use crate::post_update_changelog;
 use crate::quit_after_update;
+use crate::release_notes;
 use crate::update_channel::{self, UpdateChannel};
 use crate::update_mode::{self, UpdateMode};
 use crate::update_state::{
@@ -450,6 +451,7 @@ pub struct UpdateCheckResult {
     pub available: bool,
     pub version: Option<String>,
     pub notes: Option<String>,
+    pub notes_url: Option<String>,
     pub error: Option<String>,
     pub install_strategy: UpdateInstallStrategy,
     pub download_url: &'static str,
@@ -467,6 +469,7 @@ impl From<&UpdateSnapshot> for UpdateCheckResult {
             available: snapshot.version.is_some(),
             version: snapshot.version.clone(),
             notes: snapshot.notes.clone(),
+            notes_url: snapshot.notes_url.clone(),
             error: snapshot.error.clone(),
             install_strategy: snapshot.install_strategy,
             download_url: snapshot.download_url,
@@ -795,7 +798,14 @@ pub(crate) async fn run_check(app: &AppHandle, trigger: CheckTrigger) {
                 restore_parked_download(app, now, partial_check);
                 return;
             }
-            let notes = update.body.clone();
+            let cached = match trigger {
+                CheckTrigger::Manual => None,
+                _ => lock_state(app).cached_notes(&version),
+            };
+            let notes = match cached {
+                Some(notes) => notes,
+                None => release_notes::fetch(&version, &current_version(app)).await,
+            };
             let published_at = published_date(&update);
             // A parked automatic download only ever matters for the version
             // it was downloaded for; once the feed resolves to something
@@ -1303,10 +1313,13 @@ async fn perform_install(
     crate::mark_quitting(app);
     // Written before install: on Windows the plugin exits the process as soon
     // as the installer is launched, so there is no later point to do it.
+    let known = lock_state(app).snapshot();
     post_update_changelog::remember(
         app,
         &update.version,
-        update.body.as_deref(),
+        known.version.as_deref(),
+        known.notes.as_deref(),
+        known.notes_url.as_deref(),
         published_date(&update).as_deref(),
     );
     if after == AfterInstall::Exit {
@@ -1358,6 +1371,7 @@ mod tests {
             current_version: current_version.to_string(),
             version: None,
             notes: None,
+            notes_url: None,
             published_at: None,
             channel,
             beta_installed: update_channel::is_prerelease(current_version),
@@ -1420,6 +1434,20 @@ mod tests {
         assert_eq!(result.notes.as_deref(), Some("Bug fixes"));
         assert!(result.error.is_none());
         assert_eq!(result.download_url, DOWNLOAD_PAGE_URL);
+    }
+
+    #[test]
+    fn available_result_carries_the_release_link_when_notes_are_unavailable() {
+        let mut snap = snapshot(UpdatePhase::Available, "3.0.0", UpdateChannel::Stable);
+        snap.version = Some("3.1.0".to_string());
+        snap.notes_url =
+            Some("https://github.com/Macro-Deck-App/Macro-Deck/releases/tag/v3.1.0".to_string());
+        let result = UpdateCheckResult::from(&snap);
+        assert_eq!(result.notes, None);
+        assert_eq!(
+            result.notes_url.as_deref(),
+            Some("https://github.com/Macro-Deck-App/Macro-Deck/releases/tag/v3.1.0")
+        );
     }
 
     #[test]

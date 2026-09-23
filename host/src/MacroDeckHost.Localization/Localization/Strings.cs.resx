@@ -1071,6 +1071,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Bootstrapper.UpdateWindow.ReadyStatus" xml:space="preserve">
     <value>Aktualizace je stažená. K instalaci je potřeba restartovat Macro Deck.</value>
   </data>
+  <data name="Bootstrapper.UpdateWindow.ReleaseNotesLink" xml:space="preserve">
+    <value>Zobrazit poznámky k vydání na GitHubu</value>
+  </data>
   <data name="Bootstrapper.UpdateWindow.RestartNow" xml:space="preserve">
     <value>Restartovat nyní</value>
   </data>
@@ -15346,6 +15349,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Update.Details.NoChangelog" xml:space="preserve">
     <value>Pro tuto verzi nebyly zveřejněny žádné poznámky k vydání.</value>
+  </data>
+  <data name="Update.Details.ReleaseNotesLink" xml:space="preserve">
+    <value>Zobrazit poznámky k vydání na GitHubu</value>
   </data>
   <data name="Update.Details.PreparingStatus" xml:space="preserve">
     <value>Příprava stahování…</value>

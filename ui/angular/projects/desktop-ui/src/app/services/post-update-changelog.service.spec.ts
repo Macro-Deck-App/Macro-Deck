@@ -17,7 +17,7 @@ describe('PostUpdateChangelogService', () => {
   }
 
   it('offers the changelog the shell remembered for the version that was just installed', async () => {
-    const changelog = { version: '3.2.0', notes: '## Fixes', publishedAt: '2026-09-16' };
+    const changelog = { version: '3.2.0', notes: '## Fixes', notesUrl: null, publishedAt: '2026-09-16' };
     setShell({ getPostUpdateChangelog: () => Promise.resolve(changelog) });
     const service = createService();
 

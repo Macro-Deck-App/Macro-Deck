@@ -1071,6 +1071,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Bootstrapper.UpdateWindow.ReadyStatus" xml:space="preserve">
     <value>Aktualizacja została pobrana. Instalacja wymaga ponownego uruchomienia Macro Deck.</value>
   </data>
+  <data name="Bootstrapper.UpdateWindow.ReleaseNotesLink" xml:space="preserve">
+    <value>Zobacz informacje o wydaniu w serwisie GitHub</value>
+  </data>
   <data name="Bootstrapper.UpdateWindow.RestartNow" xml:space="preserve">
     <value>Uruchom ponownie teraz</value>
   </data>
@@ -15346,6 +15349,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Update.Details.NoChangelog" xml:space="preserve">
     <value>Dla tej wersji nie opublikowano informacji o wydaniu.</value>
+  </data>
+  <data name="Update.Details.ReleaseNotesLink" xml:space="preserve">
+    <value>Zobacz informacje o wydaniu w serwisie GitHub</value>
   </data>
   <data name="Update.Details.PreparingStatus" xml:space="preserve">
     <value>Przygotowywanie pobierania…</value>

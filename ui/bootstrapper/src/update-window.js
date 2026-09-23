@@ -16,7 +16,7 @@
       paragraph = null;
       list = null;
     };
-    for (const raw of text.replace(/\r\n?/g, '\n').split('\n')) {
+    for (const raw of text.replace(/<!--[\s\S]*?(?:-->|$)/g, '').replace(/\r\n?/g, '\n').split('\n')) {
       const line = raw.trimEnd();
       const heading = /^(#{1,6})\s+(.*)$/.exec(line);
       const item = /^\s*[-*+]\s+(.*)$/.exec(line);
@@ -120,7 +120,11 @@
     if (notes.length === 0) {
       const empty = document.createElement('p');
       empty.className = 'update__muted';
-      empty.textContent = view.noChangelog;
+      if (view.notesUrl?.startsWith('https://')) {
+        empty.append(link(view.notesUrl, view.notesLink));
+      } else {
+        empty.textContent = view.noChangelog;
+      }
       container.append(empty);
       return;
     }
@@ -179,7 +183,11 @@
     document.getElementById('heading').textContent = view.heading ?? '';
     document.getElementById('current').textContent = view.currentVersion;
     document.getElementById('changelog-heading').textContent = view.changelogHeading;
-    if (previous?.notes !== view.notes || previous?.noChangelog !== view.noChangelog) {
+    if (
+      previous?.notes !== view.notes
+      || previous?.notesUrl !== view.notesUrl
+      || previous?.noChangelog !== view.noChangelog
+    ) {
       renderChangelog(document.getElementById('changelog'), view);
     }
 

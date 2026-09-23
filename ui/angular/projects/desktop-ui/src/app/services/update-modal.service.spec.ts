@@ -12,6 +12,7 @@ function makeState(overrides: Partial<ShellUpdateState> = {}): ShellUpdateState 
     currentVersion: '3.1.0',
     version: '3.2.0',
     notes: null,
+    notesUrl: null,
     publishedAt: null,
     channel: 'stable',
     betaInstalled: false,

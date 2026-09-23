@@ -10,6 +10,7 @@ function makeState(overrides: Partial<ShellUpdateState> = {}): ShellUpdateState 
     currentVersion: '3.0.0',
     version: '3.1.0',
     notes: null,
+    notesUrl: null,
     publishedAt: null,
     channel: 'stable',
     betaInstalled: false,
@@ -215,6 +216,23 @@ describe('UpdateModalComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain('No release notes were published for this version.');
     expect(fixture.nativeElement.textContent).not.toContain('null');
+  });
+
+  it('links to the release on GitHub when its notes could not be loaded', async () => {
+    const openExternal = jasmine.createSpy('openExternal').and.resolveTo(true);
+    setShell({
+      getUpdateState: () => Promise.resolve(makeState({ notes: null, notesUrl: 'https://github.com/Macro-Deck-App/Macro-Deck/releases/tag/v3.1.0' })),
+      onUpdateState: () => Promise.resolve(() => {}),
+      openExternal,
+    });
+
+    const fixture = await createFixture();
+    const link = Array.from(fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)
+      .find(button => button.textContent?.includes('Read the release notes on GitHub'));
+    link!.click();
+
+    expect(fixture.nativeElement.textContent).not.toContain('No release notes were published for this version.');
+    expect(openExternal).toHaveBeenCalledOnceWith('https://github.com/Macro-Deck-App/Macro-Deck/releases/tag/v3.1.0');
   });
 
   it('shows the no-changelog fallback for whitespace-only notes', async () => {
