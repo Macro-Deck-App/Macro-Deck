@@ -2,8 +2,8 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ApiService } from '@shared';
 import { signal } from '@angular/core';
-import { PostUpdateChangelogService } from './post-update-changelog.service';
 import { UpdateModalService } from './update-modal.service';
+import { UpdateService } from './update.service';
 
 function makeState(overrides: Partial<ShellUpdateState> = {}): ShellUpdateState {
   return {
@@ -22,7 +22,7 @@ function makeState(overrides: Partial<ShellUpdateState> = {}): ShellUpdateState 
     failure: null,
     progress: null,
     lastCheckedAt: null,
-    autoInstallAt: null,
+    installOnQuit: false,
     ...overrides,
   };
 }
@@ -57,54 +57,18 @@ describe('UpdateModalService', () => {
         { provide: ApiService, useValue: { connectionStateSignal: signal('disconnected') } },
       ],
     });
+    TestBed.inject(UpdateService);
     return TestBed.inject(UpdateModalService);
   }
 
-  it('opens by itself when an automatic install countdown starts', async () => {
+  it('never opens by itself when an automatic download finishes', async () => {
     setShell();
     const service = createService();
     await settle();
+
+    push(makeState({ installOnQuit: true }));
+    await settle();
+
     expect(service.isOpen()).toBeFalse();
-
-    push(makeState({ autoInstallAt: 1_000 }));
-    await settle();
-
-    expect(service.isOpen()).toBeTrue();
-  });
-
-  it('does not reopen for the same countdown after the user closed it, but does for a new one', async () => {
-    setShell();
-    const service = createService();
-    await settle();
-    push(makeState({ autoInstallAt: 1_000 }));
-    await settle();
-
-    service.close();
-    push(makeState({ autoInstallAt: 1_000 }));
-    await settle();
-    expect(service.isOpen()).toBeFalse();
-
-    push(makeState({ autoInstallAt: 2_000 }));
-    await settle();
-    expect(service.isOpen()).toBeTrue();
-  });
-
-  it('waits for the what\'s-new dialog of the previous update to be closed first', async () => {
-    setShell({
-      getPostUpdateChangelog: () => Promise.resolve({ version: '3.1.0', notes: 'notes', publishedAt: null }),
-      dismissPostUpdateChangelog: () => Promise.resolve(),
-    });
-    const service = createService();
-    const changelog = TestBed.inject(PostUpdateChangelogService);
-    await changelog.load();
-    await settle();
-
-    push(makeState({ autoInstallAt: 1_000 }));
-    await settle();
-    expect(service.isOpen()).toBeFalse();
-
-    changelog.dismiss();
-    await settle();
-    expect(service.isOpen()).toBeTrue();
   });
 });

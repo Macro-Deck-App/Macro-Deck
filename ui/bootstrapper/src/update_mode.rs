@@ -1,7 +1,7 @@
 // Bootstrapper-owned preference for whether and how the periodic check acts on
 // a new release (issue #715): off skips the feed entirely, notify-only asks
-// before downloading, and automatic downloads and installs after a countdown
-// the user can postpone. The preference has to
+// before downloading, and automatic downloads in the background and installs
+// when the user quits Macro Deck. The preference has to
 // live here rather than on the host: it must be readable before the host is
 // up, and it decides whether the feed is contacted at all.
 //

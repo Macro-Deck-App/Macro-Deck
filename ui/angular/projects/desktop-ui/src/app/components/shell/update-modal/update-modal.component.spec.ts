@@ -20,7 +20,7 @@ function makeState(overrides: Partial<ShellUpdateState> = {}): ShellUpdateState 
     failure: null,
     progress: null,
     lastCheckedAt: null,
-    autoInstallAt: null,
+    installOnQuit: false,
     ...overrides,
   };
 }
@@ -377,44 +377,29 @@ describe('UpdateModalComponent', () => {
     expect(installAfter?.disabled).toBeTrue();
   });
 
-  describe('automatic install countdown', () => {
+  describe('an automatic update waiting for the quit', () => {
     function buttons(fixture: ComponentFixture<UpdateModalComponent>): HTMLButtonElement[] {
       return Array.from(fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>);
     }
 
-    function countdownState(secondsFromNow: number): ShellUpdateState {
-      return makeState({ phase: 'downloaded', autoInstallAt: Math.floor(Date.now() / 1000) + secondsFromNow });
-    }
-
-    it('tells the user when Macro Deck restarts and offers Install now and Not now', async () => {
+    it('says it installs on quit, with no countdown, and still offers Install now', async () => {
       setShell({
-        getUpdateState: () => Promise.resolve(countdownState(30)),
+        getUpdateState: () => Promise.resolve(makeState({ phase: 'downloaded', installOnQuit: true })),
         onUpdateState: () => Promise.resolve(() => {}),
       });
 
       const fixture = await createFixture();
       const text = fixture.nativeElement.textContent as string;
 
-      expect(text).toMatch(/Macro Deck restarts in (29|30) seconds to install this update\./);
-      expect(buttons(fixture).map(b => b.textContent?.trim())).toEqual(jasmine.arrayContaining(['Not now', 'Install now']));
-      expect(text).not.toContain('Download & install');
-    });
-
-    it('never counts below zero once the deadline has passed', async () => {
-      setShell({
-        getUpdateState: () => Promise.resolve(countdownState(-120)),
-        onUpdateState: () => Promise.resolve(() => {}),
-      });
-
-      const fixture = await createFixture();
-
-      expect(fixture.nativeElement.textContent).toContain('Macro Deck restarts in 0 seconds to install this update.');
+      expect(text).toContain('Ready to install. Macro Deck installs it when you quit.');
+      expect(fixture.nativeElement.querySelector('[role="timer"]')).toBeNull();
+      expect(buttons(fixture).map(b => b.textContent?.trim())).toEqual(jasmine.arrayContaining(['Later', 'Install now']));
     });
 
     it('installs right away on Install now', async () => {
       const installUpdate = jasmine.createSpy('installUpdate').and.returnValue(new Promise<void>(() => {}));
       setShell({
-        getUpdateState: () => Promise.resolve(countdownState(30)),
+        getUpdateState: () => Promise.resolve(makeState({ phase: 'downloaded', installOnQuit: true })),
         onUpdateState: () => Promise.resolve(() => {}),
         installUpdate,
       });
@@ -426,51 +411,15 @@ describe('UpdateModalComponent', () => {
       expect(installUpdate).toHaveBeenCalledTimes(1);
     });
 
-    it('postpones the install on Not now', async () => {
-      const postponeAutomaticInstall = jasmine.createSpy('postpone').and.resolveTo(true);
-      setShell({
-        getUpdateState: () => Promise.resolve(countdownState(30)),
-        onUpdateState: () => Promise.resolve(() => {}),
-        postponeAutomaticInstall,
-      });
-
-      const fixture = await createFixture();
-      buttons(fixture).find(b => b.textContent?.includes('Not now'))?.click();
-      await settle(fixture);
-
-      expect(postponeAutomaticInstall).toHaveBeenCalledTimes(1);
-    });
-
-    it('postpones the install when the modal is closed any other way, so no restart comes as a surprise', async () => {
-      const postponeAutomaticInstall = jasmine.createSpy('postpone').and.resolveTo(true);
-      setShell({
-        getUpdateState: () => Promise.resolve(countdownState(30)),
-        onUpdateState: () => Promise.resolve(() => {}),
-        postponeAutomaticInstall,
-      });
-
-      const fixture = await createFixture();
-      (fixture.nativeElement.querySelector('.modal-close-btn') as HTMLButtonElement).click();
-      await new Promise(resolve => setTimeout(resolve, 400));
-      await settle(fixture);
-
-      expect(postponeAutomaticInstall).toHaveBeenCalled();
-    });
-
-    it('does not postpone anything when a ready update without a countdown is closed', async () => {
-      const postponeAutomaticInstall = jasmine.createSpy('postpone').and.resolveTo(false);
+    it('asks for a restart when the download will not install on quit', async () => {
       setShell({
         getUpdateState: () => Promise.resolve(makeState({ phase: 'downloaded' })),
         onUpdateState: () => Promise.resolve(() => {}),
-        postponeAutomaticInstall,
       });
 
       const fixture = await createFixture();
-      expect(fixture.nativeElement.textContent).toContain('Ready to install. Macro Deck restarts to finish.');
-      buttons(fixture).find(b => b.textContent?.includes('Later'))?.click();
-      await settle(fixture);
 
-      expect(postponeAutomaticInstall).not.toHaveBeenCalled();
+      expect(fixture.nativeElement.textContent).toContain('Ready to install. Macro Deck restarts to finish.');
     });
   });
 });

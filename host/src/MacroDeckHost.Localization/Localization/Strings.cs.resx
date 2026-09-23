@@ -939,6 +939,9 @@ Zavřete aplikaci používající tento port (nebo stále běžící Macro Deck)
   <data name="Bootstrapper.Menu.Import" xml:space="preserve">
     <value>Importovat…</value>
   </data>
+  <data name="Bootstrapper.Menu.Quit" xml:space="preserve">
+    <value>Ukončit Macro Deck</value>
+  </data>
   <data name="Bootstrapper.Menu.Settings" xml:space="preserve">
     <value>Nastavení…</value>
   </data>
@@ -1052,6 +1055,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Bootstrapper.UpdateWindow.DownloadingStatus" xml:space="preserve">
     <value>Stahování… {percent} %</value>
     <comment>[percent:int]</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.InstallOnQuitStatus" xml:space="preserve">
+    <value>Aktualizace je stažená. Nainstaluje se při ukončení aplikace Macro Deck.</value>
   </data>
   <data name="Bootstrapper.UpdateWindow.InstallingStatus" xml:space="preserve">
     <value>Probíhá instalace aktualizace. Macro Deck se za chvíli restartuje.</value>
@@ -13965,7 +13971,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Automaticky</value>
   </data>
   <data name="Settings.Update.ModeAutomaticDescription" xml:space="preserve">
-    <value>Macro Deck stahuje a instaluje aktualizace automaticky. Před restartem běží krátké odpočítávání, během kterého lze restart odložit.</value>
+    <value>Macro Deck stahuje aktualizace na pozadí a nainstaluje je při ukončení aplikace.</value>
   </data>
   <data name="Settings.Update.ModeChangeFailed" xml:space="preserve">
     <value>Nastavení aktualizací se nepodařilo změnit. Zkuste to prosím znovu.</value>
@@ -15113,6 +15119,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Update.Details.ReadyStatus" xml:space="preserve">
     <value>Připraveno k instalaci. Macro Deck se pro dokončení restartuje.</value>
   </data>
+  <data name="Update.Details.InstallOnQuitStatus" xml:space="preserve">
+    <value>Připraveno k instalaci. Aktualizace se nainstaluje při ukončení aplikace Macro Deck.</value>
+  </data>
   <data name="Update.Details.KeepInBackgroundNote" xml:space="preserve">
     <value>Toto okno můžete zavřít – stahování pokračuje na pozadí a zůstane v centru oznámení.</value>
   </data>
@@ -15132,14 +15141,6 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Update.Details.InstallNowAction" xml:space="preserve">
     <value>Nainstalovat nyní</value>
-  </data>
-  <data name="Update.Details.AutoInstallCountdown.One" xml:space="preserve">
-    <value>Macro Deck se za {count} sekundu restartuje a nainstaluje tuto aktualizaci.</value>
-    <comment>[plural]</comment>
-  </data>
-  <data name="Update.Details.AutoInstallCountdown.Other" xml:space="preserve">
-    <value>Macro Deck se za {count} s restartuje a nainstaluje tuto aktualizaci.</value>
-    <comment>[plural]</comment>
   </data>
   <data name="Update.WhatsNew.Heading" xml:space="preserve">
     <value>Co je nového v Macro Deck {version}</value>

@@ -183,7 +183,13 @@ pub(crate) fn view(snapshot: &UpdateSnapshot, action_error: Option<&str>) -> Win
             )
         }
         UpdatePhase::Downloaded => (
-            action_error().or_else(|| info(localization::t(keys::UPDATE_WINDOW_READY_STATUS))),
+            action_error().or_else(|| {
+                info(localization::t(if snapshot.install_on_quit {
+                    keys::UPDATE_WINDOW_INSTALL_ON_QUIT_STATUS
+                } else {
+                    keys::UPDATE_WINDOW_READY_STATUS
+                }))
+            }),
             vec![
                 later(),
                 action(ActionId::Install, keys::UPDATE_WINDOW_RESTART_NOW, true),
@@ -434,10 +440,7 @@ pub fn close(app: &AppHandle) {
 
 fn run_action(app: &AppHandle, id: ActionId) {
     match id {
-        ActionId::Later => {
-            updater::postpone_automatic_install(app.clone());
-            close(app);
-        }
+        ActionId::Later => close(app),
         ActionId::Install => {
             // A second click while the first attempt still resolves the feed is ignored, not
             // reported back as an install already in progress.
@@ -619,6 +622,20 @@ mod tests {
         assert_eq!(
             view.status.map(|status| status.kind),
             Some(StatusKind::Info)
+        );
+    }
+
+    #[test]
+    fn a_download_waiting_for_the_quit_says_so_and_still_offers_restart_now() {
+        let mut state = state(UpdateInstallStrategy::InApp);
+        state.record_downloaded();
+        assert!(state.arm_install_on_quit());
+        let view = view(&state.snapshot(), None);
+
+        assert_eq!(action_ids(&view), [ActionId::Later, ActionId::Install]);
+        assert_eq!(
+            view.status.map(|status| status.text),
+            Some(localization::t(keys::UPDATE_WINDOW_INSTALL_ON_QUIT_STATUS))
         );
     }
 

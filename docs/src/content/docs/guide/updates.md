@@ -10,19 +10,31 @@ Choose how Macro Deck handles new versions in **Settings > About**, under **Upda
 | --- | --- |
 | **Off** | Nothing. Macro Deck only looks for updates when you check yourself. |
 | **Notify only** | Macro Deck tells you and asks before it downloads and installs anything. This is the default. |
-| **Automatic** | Macro Deck downloads the update in the background and installs it on its own. Windows and macOS only. |
+| **Automatic** | Macro Deck downloads the update in the background and installs it when you quit Macro Deck. Windows and macOS only. |
 
 ## Automatic installs
 
-Once an automatic download finishes while the Macro Deck window is open, a dialog counts down 60 seconds
-before Macro Deck restarts to install the update. A minimized window counts as open.
+An automatic download finishes quietly: no dialog opens and nothing restarts while you work. The next
+time you quit Macro Deck, it installs the update before it closes. The new version runs from the next
+start, which shows what's new.
 
-- **Install now** restarts right away.
-- **Not now**, or closing the dialog, skips the install until you next start Macro Deck. You can still
-  install it from **Settings > About** in the meantime.
+Quit with **Quit** in the tray icon's menu, or on macOS with **Macro Deck > Quit Macro Deck** (Cmd+Q).
+Quitting takes a little longer then: Macro Deck makes the backup set in **Settings > Backups** and installs
+the update, and on Windows the installer's progress window shows briefly. If the backup takes longer than
+two minutes, Macro Deck quits without installing and downloads the update again at the next start. If
+that happens every time, install the update with **Install now** instead.
 
-Switching the mode away from **Automatic** during the countdown stops it. Closing the Macro Deck window
-during the countdown stops it too, and the update window below asks instead.
+The update is not installed when:
+
+- you only close the Macro Deck window: Macro Deck keeps running in the background and the update keeps
+  waiting;
+- you quit from the macOS Dock, log out, or shut down the computer while Macro Deck is running. The
+  download is then repeated after the next start.
+
+To install it sooner, open **View details** in **Settings > About** and choose **Install now**.
+
+Switching the mode away from **Automatic** keeps the downloaded update until Macro Deck quits, but no
+longer installs it on quit.
 
 ## When the Macro Deck window is closed
 
@@ -32,12 +44,12 @@ window with the release notes, so you do not have to open Macro Deck to see it.
 
 - In **Notify only**, choose **Download & install**. The window shows the download, then Macro Deck
   restarts to install the update.
-- In **Automatic**, the update is already downloaded. Choose **Restart now** to install it. There is no
-  countdown: nothing is installed until you choose to.
+- In **Automatic**, the update window does not open. The update downloads in the background and installs
+  when you quit Macro Deck.
 - **Later**, or closing the window, leaves the update for now.
 
 The update window opens on its own at most once per version while Macro Deck runs, when an update is found
-in the background. It never opens in **Off** mode.
+in the background. It never opens in **Off** or **Automatic** mode.
 
 While an update is waiting, the Macro Deck icon in the system tray or menu bar has an **Update to**
 entry with the new version. It opens the update window again.

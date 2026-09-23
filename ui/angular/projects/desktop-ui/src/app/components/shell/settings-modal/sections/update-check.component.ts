@@ -101,8 +101,11 @@ export class UpdateCheckComponent {
         return this.updates.externalDownload()
           ? t(AppStrings.Settings.Update.AvailableExternal, { version: this.updates.version() })
           : t(AppStrings.Settings.Update.AvailableInApp, { version: this.updates.version() });
-      case 'downloading':
       case 'downloaded':
+        return this.updates.installOnQuit()
+          ? t(AppStrings.Update.Details.InstallOnQuitStatus)
+          : t(AppStrings.Update.Details.ReadyStatus);
+      case 'downloading':
       case 'installing':
         return t(AppStrings.Settings.Update.Installing);
       case 'failed':

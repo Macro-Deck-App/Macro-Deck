@@ -47,7 +47,6 @@ fn main() {
             "set_update_channel",
             "get_update_mode",
             "set_update_mode",
-            "postpone_automatic_install",
             "get_post_update_changelog",
             "dismiss_post_update_changelog",
         ]),
