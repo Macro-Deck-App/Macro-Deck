@@ -938,6 +938,9 @@ Close the application using the port (or a still-running Macro Deck) and try aga
   <data name="Bootstrapper.Menu.Import" xml:space="preserve">
     <value>Import…</value>
   </data>
+  <data name="Bootstrapper.Menu.Quit" xml:space="preserve">
+    <value>Quit Macro Deck</value>
+  </data>
   <data name="Bootstrapper.Menu.Settings" xml:space="preserve">
     <value>Settings…</value>
   </data>
@@ -1051,6 +1054,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Bootstrapper.UpdateWindow.DownloadingStatus" xml:space="preserve">
     <value>Downloading… {percent}%</value>
     <comment>[percent:int]</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.InstallOnQuitStatus" xml:space="preserve">
+    <value>The update is downloaded. Macro Deck installs it when you quit.</value>
   </data>
   <data name="Bootstrapper.UpdateWindow.InstallingStatus" xml:space="preserve">
     <value>Installing the update. Macro Deck restarts in a moment.</value>
@@ -13965,7 +13971,7 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Automatic</value>
   </data>
   <data name="Settings.Update.ModeAutomaticDescription" xml:space="preserve">
-    <value>Macro Deck downloads and installs updates on its own. Before it restarts, a short countdown lets you postpone it.</value>
+    <value>Macro Deck downloads updates in the background and installs them when you quit it.</value>
   </data>
   <data name="Settings.Update.ModeChangeFailed" xml:space="preserve">
     <value>Couldn't change the update setting. Please try again.</value>
@@ -15113,6 +15119,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Update.Details.ReadyStatus" xml:space="preserve">
     <value>Ready to install. Macro Deck restarts to finish.</value>
   </data>
+  <data name="Update.Details.InstallOnQuitStatus" xml:space="preserve">
+    <value>Ready to install. Macro Deck installs it when you quit.</value>
+  </data>
   <data name="Update.Details.KeepInBackgroundNote" xml:space="preserve">
     <value>You can close this window — the download keeps running and stays in the notification center.</value>
   </data>
@@ -15132,14 +15141,6 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Update.Details.InstallNowAction" xml:space="preserve">
     <value>Install now</value>
-  </data>
-  <data name="Update.Details.AutoInstallCountdown.One" xml:space="preserve">
-    <value>Macro Deck restarts in {count} second to install this update.</value>
-    <comment>[plural]</comment>
-  </data>
-  <data name="Update.Details.AutoInstallCountdown.Other" xml:space="preserve">
-    <value>Macro Deck restarts in {count} seconds to install this update.</value>
-    <comment>[plural]</comment>
   </data>
   <data name="Update.WhatsNew.Heading" xml:space="preserve">
     <value>What's new in Macro Deck {version}</value>

@@ -21,6 +21,7 @@ mod menu;
 mod notifications;
 mod opened_files;
 mod post_update_changelog;
+mod quit_after_update;
 mod redact;
 mod update_channel;
 mod update_mode;
@@ -65,7 +66,9 @@ pub fn request_quit(app: &AppHandle) {
     }
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
-        host::stop(&app).await;
+        if !updater::install_on_quit(&app).await {
+            host::stop(&app).await;
+        }
         app.exit(0);
     });
 }
@@ -187,7 +190,6 @@ fn main() {
             update_channel::set_update_channel,
             update_mode::get_update_mode,
             update_mode::set_update_mode,
-            updater::postpone_automatic_install,
             post_update_changelog::get_post_update_changelog,
             post_update_changelog::dismiss_post_update_changelog
         ])
@@ -218,6 +220,12 @@ fn main() {
             ));
             if let Some(dir) = logging::logs_directory() {
                 logging::info(&format!("[app] logs directory: {}", dir.display()));
+            }
+            if quit_after_update::take_for_launch(&handle) {
+                logging::info("[app] relaunched by the installer after an install on quit; exiting");
+                mark_quitting(&handle);
+                handle.exit(0);
+                return Ok(());
             }
             // A launch from the mounted DMG is not an install - no tray, no
             // host, no window; just the move prompt (issue #355). The dialog

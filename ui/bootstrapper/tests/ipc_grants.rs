@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use serde_json::Value;
 
-const IN_APP_ONLY: [&str; 2] = ["install_update", "postpone_automatic_install"];
+const IN_APP_ONLY: [&str; 1] = ["install_update"];
 
 fn read(rel: &str) -> String {
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(rel);

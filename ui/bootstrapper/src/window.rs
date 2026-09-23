@@ -271,8 +271,7 @@ fn ensure_main_window_capability(app: &AppHandle, url: &tauri::Url) {
         .remote(origin.clone())
         .window(MAIN_WINDOW)
         .platforms([Target::Windows, Target::MacOS])
-        .permission("allow-install-update")
-        .permission("allow-postpone-automatic-install");
+        .permission("allow-install-update");
     if let Err(error) = app.add_capability(in_app_update) {
         logging::error(&format!(
             "[window] could not register in-app-update IPC capability for {origin}: {error}"

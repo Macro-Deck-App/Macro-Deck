@@ -939,6 +939,9 @@ Cierra la aplicación que usa el puerto (o un Macro Deck que aún esté en ejecu
   <data name="Bootstrapper.Menu.Import" xml:space="preserve">
     <value>Importar…</value>
   </data>
+  <data name="Bootstrapper.Menu.Quit" xml:space="preserve">
+    <value>Salir de Macro Deck</value>
+  </data>
   <data name="Bootstrapper.Menu.Settings" xml:space="preserve">
     <value>Configuración…</value>
   </data>
@@ -1052,6 +1055,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Bootstrapper.UpdateWindow.DownloadingStatus" xml:space="preserve">
     <value>Descargando… {percent}%</value>
     <comment>[percent:int]</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.InstallOnQuitStatus" xml:space="preserve">
+    <value>La actualización está descargada. Macro Deck la instalará cuando salgas de la aplicación.</value>
   </data>
   <data name="Bootstrapper.UpdateWindow.InstallingStatus" xml:space="preserve">
     <value>Instalando la actualización. Macro Deck se reiniciará en un momento.</value>
@@ -13965,7 +13971,7 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>Automáticas</value>
   </data>
   <data name="Settings.Update.ModeAutomaticDescription" xml:space="preserve">
-    <value>Macro Deck descarga e instala las actualizaciones por su cuenta. Antes de reiniciarse, una breve cuenta atrás te permite posponerlo.</value>
+    <value>Macro Deck descarga las actualizaciones en segundo plano y las instala cuando sales de Macro Deck.</value>
   </data>
   <data name="Settings.Update.ModeChangeFailed" xml:space="preserve">
     <value>No se pudo cambiar la configuración de actualizaciones. Inténtalo de nuevo.</value>
@@ -15113,6 +15119,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Update.Details.ReadyStatus" xml:space="preserve">
     <value>Lista para instalar. Macro Deck se reiniciará para terminar.</value>
   </data>
+  <data name="Update.Details.InstallOnQuitStatus" xml:space="preserve">
+    <value>Lista para instalar. Macro Deck la instalará cuando salgas de la aplicación.</value>
+  </data>
   <data name="Update.Details.KeepInBackgroundNote" xml:space="preserve">
     <value>Puedes cerrar esta ventana: la descarga sigue en curso y permanece en el centro de notificaciones.</value>
   </data>
@@ -15132,14 +15141,6 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Update.Details.InstallNowAction" xml:space="preserve">
     <value>Instalar ahora</value>
-  </data>
-  <data name="Update.Details.AutoInstallCountdown.One" xml:space="preserve">
-    <value>Macro Deck se reiniciará en {count} segundo para instalar esta actualización.</value>
-    <comment>[plural]</comment>
-  </data>
-  <data name="Update.Details.AutoInstallCountdown.Other" xml:space="preserve">
-    <value>Macro Deck se reiniciará en {count} segundos para instalar esta actualización.</value>
-    <comment>[plural]</comment>
   </data>
   <data name="Update.WhatsNew.Heading" xml:space="preserve">
     <value>Novedades de Macro Deck {version}</value>

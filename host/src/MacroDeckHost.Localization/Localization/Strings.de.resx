@@ -938,6 +938,9 @@ Beende die Anwendung, die den Port belegt (oder ein noch laufendes Macro Deck), 
   <data name="Bootstrapper.Menu.Import" xml:space="preserve">
     <value>Importieren…</value>
   </data>
+  <data name="Bootstrapper.Menu.Quit" xml:space="preserve">
+    <value>Macro Deck beenden</value>
+  </data>
   <data name="Bootstrapper.Menu.Settings" xml:space="preserve">
     <value>Einstellungen…</value>
   </data>
@@ -1051,6 +1054,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Bootstrapper.UpdateWindow.DownloadingStatus" xml:space="preserve">
     <value>Wird heruntergeladen … {percent}%</value>
     <comment>[percent:int]</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.InstallOnQuitStatus" xml:space="preserve">
+    <value>Das Update ist heruntergeladen. Macro Deck installiert es, wenn du es beendest.</value>
   </data>
   <data name="Bootstrapper.UpdateWindow.InstallingStatus" xml:space="preserve">
     <value>Das Update wird installiert. Macro Deck startet gleich neu.</value>
@@ -13963,7 +13969,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Automatisch</value>
   </data>
   <data name="Settings.Update.ModeAutomaticDescription" xml:space="preserve">
-    <value>Macro Deck lädt Updates selbst herunter und installiert sie. Vor dem Neustart läuft ein kurzer Countdown, in dem du ihn verschieben kannst.</value>
+    <value>Macro Deck lädt Updates im Hintergrund herunter und installiert sie, wenn du es beendest.</value>
   </data>
   <data name="Settings.Update.ModeChangeFailed" xml:space="preserve">
     <value>Ändern der Update-Einstellung fehlgeschlagen. Bitte versuche es erneut.</value>
@@ -15111,6 +15117,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Update.Details.ReadyStatus" xml:space="preserve">
     <value>Bereit zur Installation. Macro Deck startet neu, um sie abzuschließen.</value>
   </data>
+  <data name="Update.Details.InstallOnQuitStatus" xml:space="preserve">
+    <value>Bereit zur Installation. Macro Deck installiert das Update, wenn du es beendest.</value>
+  </data>
   <data name="Update.Details.KeepInBackgroundNote" xml:space="preserve">
     <value>Du kannst dieses Fenster schließen – der Download läuft weiter und bleibt im Benachrichtigungscenter.</value>
   </data>
@@ -15130,14 +15139,6 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Update.Details.InstallNowAction" xml:space="preserve">
     <value>Jetzt installieren</value>
-  </data>
-  <data name="Update.Details.AutoInstallCountdown.One" xml:space="preserve">
-    <value>Macro Deck startet in {count} Sekunde neu, um dieses Update zu installieren.</value>
-    <comment>[plural]</comment>
-  </data>
-  <data name="Update.Details.AutoInstallCountdown.Other" xml:space="preserve">
-    <value>Macro Deck startet in {count} Sekunden neu, um dieses Update zu installieren.</value>
-    <comment>[plural]</comment>
   </data>
   <data name="Update.WhatsNew.Heading" xml:space="preserve">
     <value>Neu in Macro Deck {version}</value>

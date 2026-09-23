@@ -14,6 +14,7 @@ pub const MENU_ACTION_EVENT: &str = "menu-action";
 const SETTINGS_ITEM_ID: &str = "menu-settings";
 const IMPORT_ITEM_ID: &str = "menu-import";
 const DISCORD_ITEM_ID: &str = "menu-discord";
+const QUIT_ITEM_ID: &str = "menu-quit";
 
 const SETTINGS_ACTION: &str = "settings";
 
@@ -78,6 +79,11 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
             MenuItemBuilder::with_id(SETTINGS_ITEM_ID, localization::t(keys::MENU_SETTINGS))
                 .accelerator("Cmd+,")
                 .build(app)?;
+        // The predefined Quit sends terminate:, which bypasses request_quit and with it
+        // the host stop and the install on quit.
+        let quit = MenuItemBuilder::with_id(QUIT_ITEM_ID, localization::t(keys::MENU_QUIT))
+            .accelerator("Cmd+Q")
+            .build(app)?;
         let application = SubmenuBuilder::new(app, "Macro Deck")
             .about_with_text(localization::t(keys::MENU_ABOUT), Some(about))
             .separator()
@@ -89,7 +95,7 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
             .hide_others()
             .show_all()
             .separator()
-            .quit()
+            .item(&quit)
             .build()?;
 
         let import = MenuItemBuilder::with_id(IMPORT_ITEM_ID, localization::t(keys::MENU_IMPORT))
@@ -153,6 +159,7 @@ pub fn handle_event(app: &AppHandle, event: tauri::menu::MenuEvent) {
         }
         IMPORT_ITEM_ID => import_archive(app),
         DISCORD_ITEM_ID => open_url(app, DISCORD_URL),
+        QUIT_ITEM_ID => crate::request_quit(app),
         _ => {}
     }
 }
