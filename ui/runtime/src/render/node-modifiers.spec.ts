@@ -251,7 +251,7 @@ describe('node modifiers', () => {
         expect(subject.style.getPropertyValue('background')).withContext(type).toBe(normalized('background', '#123456'));
         expect(subject.style.getPropertyValue('border-radius')).withContext(type).toBe('12px');
         const overlay = subject.querySelector(':scope > .widget-modifier-border') as HTMLElement | null;
-        const overlaid = ['ui.stack', 'ui.button', 'ui.layer', 'ui.transform', 'ui.modifier', 'ui.grid', 'ui.toggle', 'ui.segmented'].includes(type);
+        const overlaid = ['ui.stack', 'ui.button', 'ui.layer', 'ui.transform', 'ui.modifier', 'ui.grid', 'ui.toggle', 'ui.segmented', 'ui.responsive'].includes(type);
         expect(overlay === null).withContext(`${type} overlay`).toBe(!overlaid);
         if (!overlaid) expect(subject.style.getPropertyValue('outline')).withContext(type).toBe('1.2px solid #ffffff');
         else expect(overlay?.style.borderWidth).withContext(type).toBe('1.2px');

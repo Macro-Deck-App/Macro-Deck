@@ -10,13 +10,16 @@
             class="type-preview-widget"
             [widgetType]="option.id"
             [sample]="true"
-            [width]="previewSize()"
-            [height]="previewSize()"
-            [style.width.px]="previewSize()"
-            [style.height.px]="previewSize()"
+            [width]="previewCell"
+            [height]="previewCell"
+            [style.width.px]="previewCell"
+            [style.height.px]="previewCell"
+            [style.margin-right.px]="previewSize() - previewCell"
+            [style.margin-bottom.px]="previewSize() - previewCell"
+            [style.transform]="'scale(' + previewScale() + ')'"
             [disabled]="true"
-            [style.--wq.px]="previewSize()"
-            [style.--widget-scale]="previewScale()"
+            [style.--wq.px]="previewCell"
+            [style.--widget-scale]="1"
             [style.--widget-radius.px]="previewRadius">
           </shared-ui-tree-widget>
           @if (preview.rejected()) {

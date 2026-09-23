@@ -29,6 +29,8 @@ public class TypeScriptMirrorDriftTests
 	private const string _componentPropertiesPath = "ui/runtime/src/ui-components/component-properties.ts";
 	private const string _componentEventsPath = "ui/runtime/src/ui-components/component-events.ts";
 	private const string _componentModifiersPath = "ui/runtime/src/ui-components/component-modifiers.ts";
+	private const string _componentTypesPath = "ui/runtime/src/ui-components/ui-component-types.ts";
+	private const string _responsivePath = "ui/runtime/src/ui-framework/responsive.ts";
 
 	[Test]
 	public void The_client_speaks_the_same_ui_model_majors_this_package_does()
@@ -65,6 +67,15 @@ public class TypeScriptMirrorDriftTests
 	[Test]
 	public void The_client_mirrors_the_component_property_keys_in_declaration_order()
 		=> AssertMirrors(_componentPropertiesPath, "UiComponentProperties", UiComponentProperties.WellKnown);
+
+	[Test]
+	public void The_client_mirrors_the_component_types_in_declaration_order()
+		=> AssertMirrors(_componentTypesPath, "UiComponents", UiComponents.WellKnown);
+
+	[Test]
+	public void The_client_chooses_a_responsive_layout_with_the_same_tolerance()
+		=> Assert.That(ReadTopLevelNumber(_responsivePath, "UI_RESPONSIVE_TOLERANCE"),
+			Is.EqualTo(UiResponsiveSelection.Tolerance));
 
 	[Test]
 	public void The_client_mirrors_the_component_events_in_declaration_order()

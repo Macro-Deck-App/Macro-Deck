@@ -86,6 +86,10 @@ registration, the picker card and configuration. The same vocabulary also draws 
 | `sample` | `true` when the picker asks for a representative sample. |
 | `ghost` | `true` when drawing the drag ghost of a widget that is also drawn live. |
 
+The surface carries no size: a widget is resized on the deck without asking you. To lay a 2x1 or 1x2 tile
+out differently from a 1x1 one, use [`UiResponsive`](/ui/components/responsive/), which the reader resolves
+against the tile.
+
 The stored configuration travels with the request rather than being looked up, so a provider outside
 the host can serve a widget. A provider that ignores `sample` or `ghost` keeps behaving exactly as it
 did.

@@ -85,12 +85,12 @@
   background-color: var(--color-bg-primary);
 }
 
-/* Sized in real px from the measurement, never stretched to the stage: the size the tile is drawn at
-   is the size the host built its tree for. `flex: none` and the child selector are both load-bearing -
-   `shared-ui-tree-widget`'s own `:host` sets width and height to 100% at the same specificity. */
+// Laid out as one deck cell and scaled to the stage, so a responsive tree picks its one-cell layout.
+// flex: none and the child selector matter: shared-ui-tree-widget's :host sets 100% at this specificity.
 .type-preview > .type-preview-widget {
   display: block;
   flex: none;
+  transform-origin: 0 0;
 }
 
 .type-info {

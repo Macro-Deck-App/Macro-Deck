@@ -27,7 +27,7 @@ public class UiComponentVocabularyTests
 		"ui.stack", "ui.text", "ui.image", "ui.range-bar", "ui.slider", "ui.button", "ui.layer",
 		"ui.chart", "ui.text-field", "ui.list", "ui.transform", "ui.shape", "ui.icon", "ui.grid", "ui.gauge",
 		"ui.toggle", "ui.segmented", "ui.dial",
-		"ui.modifier",
+		"ui.modifier", "ui.responsive",
 	];
 
 	private static readonly string[] _expectedModifierMembers =
@@ -56,7 +56,7 @@ public class UiComponentVocabularyTests
 		"answer", "placeholder", "rotation", "originX", "originY", "shape", "cornerRadius", "strokeColor",
 		"strokeWidth", "path", "icon", "columns", "rows", "columnSpan", "rowSpan", "startAngle", "endAngle",
 		"on", "selected",
-		"modifiers", "frame", "clip", "mask",
+		"modifiers", "frame", "clip", "mask", "variants",
 	];
 
 	private static readonly string[] _expectedIconsVersion1 =
@@ -107,12 +107,12 @@ public class UiComponentVocabularyTests
 		=> new() { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared };
 
 	[Test]
-	public void The_core_component_set_is_the_nineteen_ui_names()
+	public void The_core_component_set_is_the_twenty_ui_names()
 	{
 		Assert.Multiple(() =>
 		{
 			Assert.That(UiComponents.WellKnown, Is.EqualTo(_expectedCoreComponents).AsCollection);
-			Assert.That(UiComponents.WellKnown.Distinct(StringComparer.Ordinal).Count(), Is.EqualTo(19));
+			Assert.That(UiComponents.WellKnown.Distinct(StringComparer.Ordinal).Count(), Is.EqualTo(20));
 
 			foreach (var type in UiComponents.WellKnown)
 			{
@@ -572,6 +572,19 @@ public class UiComponentVocabularyTests
 					Frame = new UiFrame { AspectRatio = 1 },
 					Radius = 0.05,
 					Child = new UiTextRun { Key = "framedLabel", Text = "Framed" },
+				},
+				new UiResponsive
+				{
+					Key = "layouts",
+					Default = new UiTextRun { Key = "compactLabel", Text = "21°" },
+					Variants =
+					[
+						new UiResponsiveVariant
+						{
+							MinWidth = 1.5,
+							Content = new UiTextRun { Key = "wideLabel", Text = "21° Sunny" },
+						},
+					],
 				},
 				new UiTextField
 				{

@@ -5,6 +5,8 @@ import { UiComponentModifiers } from '../ui-components/component-modifiers';
 import { UiComponents } from '../ui-components/ui-component-types';
 import { UiComponentProperties } from '../ui-components/component-properties';
 import type { UiComponentRegistry } from './component-registry';
+import type { UiComponentBox } from './layout';
+import { tileWalkChildren } from './responsive';
 
 export function nodeClaimsGesture(node: UiNode): boolean {
   return emitsEvent(node, UiComponentEvents.Press)
@@ -49,31 +51,37 @@ export function activationFor(node: UiNode): UiNodeActivation | null {
   return null;
 }
 
-export function findInteractiveNode(node: UiNode | null | undefined): UiNode | null {
+export function findInteractiveNode(
+  node: UiNode | null | undefined,
+  tileBox: UiComponentBox | null = null,
+): UiNode | null {
   if (!node) return null;
   if (nodeIsDisabledRegion(node) || nodeClaimsGesture(node) || nodeClaimsValue(node) || nodeDeclaresGesture(node)) {
     return node;
   }
   if (node.type === UiComponents.Segmented) return null;
 
-  const children = node.children ?? [];
+  const children = tileWalkChildren(node, tileBox);
   for (let index = 0; index < children.length; index++) {
-    const found = findInteractiveNode(children[index]);
+    const found = findInteractiveNode(children[index].child, children[index].box);
     if (found !== null) return found;
   }
   return null;
 }
 
-export function treeClaimsGesture(node: UiNode | null | undefined): boolean {
-  return findInteractiveNode(node) !== null;
+export function treeClaimsGesture(node: UiNode | null | undefined, tileBox: UiComponentBox | null = null): boolean {
+  return findInteractiveNode(node, tileBox) !== null;
 }
 
 export type UiActivationClaim = { node: UiNode } | 'absorbed' | 'none';
 
-export function activationClaim(tree: UiNode | null | undefined): UiActivationClaim {
+export function activationClaim(
+  tree: UiNode | null | undefined,
+  tileBox: UiComponentBox | null = null,
+): UiActivationClaim {
   let absorbed = false;
 
-  function visit(node: UiNode): UiNode | null {
+  function visit(node: UiNode, box: UiComponentBox | null): UiNode | null {
     if (nodeIsDisabledRegion(node)) {
       absorbed = true;
       return null;
@@ -81,15 +89,15 @@ export function activationClaim(tree: UiNode | null | undefined): UiActivationCl
     if (nodeClaimsGesture(node) || nodeClaimsValue(node)) return node;
     if (node.type === UiComponents.Segmented) return null;
 
-    const children = node.children ?? [];
+    const children = tileWalkChildren(node, box);
     for (let index = 0; index < children.length; index++) {
-      const found = visit(children[index]);
+      const found = visit(children[index].child, children[index].box);
       if (found !== null) return found;
     }
     return null;
   }
 
-  const found = tree ? visit(tree) : null;
+  const found = tree ? visit(tree, tileBox) : null;
   if (found !== null) return { node: found };
   return absorbed ? 'absorbed' : 'none';
 }

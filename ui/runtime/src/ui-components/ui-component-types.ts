@@ -18,6 +18,7 @@ export const UiComponents = {
   Segmented: 'ui.segmented',
   Dial: 'ui.dial',
   Modifier: 'ui.modifier',
+  Responsive: 'ui.responsive',
 } as const;
 
 export const UI_COMPONENTS_WELL_KNOWN: readonly string[] = [
@@ -25,7 +26,7 @@ export const UI_COMPONENTS_WELL_KNOWN: readonly string[] = [
   UiComponents.Slider, UiComponents.Button, UiComponents.Layer, UiComponents.Chart,
   UiComponents.TextField, UiComponents.List, UiComponents.Transform, UiComponents.Shape,
   UiComponents.Icon, UiComponents.Grid, UiComponents.Gauge, UiComponents.Toggle,
-  UiComponents.Segmented, UiComponents.Dial, UiComponents.Modifier,
+  UiComponents.Segmented, UiComponents.Dial, UiComponents.Modifier, UiComponents.Responsive,
 ];
 
 export const UiComponentShapes = {

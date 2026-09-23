@@ -45,9 +45,18 @@
     emit: () => {},
   };
 
+  const scale = scene.scale ?? 1;
+  const surface = scale === 1 ? box : box.appendChild(document.createElement('div'));
+  if (scale !== 1) {
+    surface.style.width = `${scene.width / scale}px`;
+    surface.style.height = `${scene.height / scale}px`;
+    surface.style.transform = `scale(${scale})`;
+    surface.style.transformOrigin = '0 0';
+  }
+
   try {
-    renderUiNode(box, scene.root, { width: scene.width, height: scene.height }, null,
-      scene.basis ?? Math.min(scene.width, scene.height), host);
+    renderUiNode(surface, scene.root, { width: scene.width / scale, height: scene.height / scale }, null,
+      (scene.basis ?? Math.min(scene.width, scene.height)) / scale, host);
     document.title = 'ready';
   } catch (error) {
     document.body.textContent = String(error?.stack ?? error);

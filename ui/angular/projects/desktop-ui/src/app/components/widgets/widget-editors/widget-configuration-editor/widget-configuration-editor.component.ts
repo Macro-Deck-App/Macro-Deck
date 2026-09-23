@@ -22,6 +22,7 @@ import {
   composeConfigDraft,
   emitsEvent,
   GridWidget,
+  spanSize,
   UiConfigEntryPoints,
   UiConfigEvents,
   UiConfigPrimitives,
@@ -31,6 +32,8 @@ import {
   WidgetBorder,
   WidgetData,
   widgetTileBorder,
+  WIDGET_REFERENCE_CELL_SIZE,
+  WIDGET_REFERENCE_GAP,
 } from '@macro-deck/runtime';
 import {
   IWidgetEditorComponent,
@@ -57,6 +60,9 @@ const FOLLOW_CONFIRM_MS = 2000;
 
 type Draft = Record<string, unknown>;
 
+const PREVIEW_SHORT_SIDE_PX = 100;
+const PREVIEW_LONG_SIDE_MAX_PX = 220;
+
 @Component({
   selector: 'app-widget-configuration-editor',
   standalone: true,
@@ -78,6 +84,20 @@ type Draft = Record<string, unknown>;
 })
 export class WidgetConfigurationEditorComponent implements IWidgetEditorComponent, OnInit, OnDestroy {
   @Input({ required: true }) widget!: GridWidget;
+
+  protected get previewReference(): { width: number; height: number } {
+    return {
+      width: spanSize(this.widget.w, WIDGET_REFERENCE_CELL_SIZE, WIDGET_REFERENCE_GAP),
+      height: spanSize(this.widget.h, WIDGET_REFERENCE_CELL_SIZE, WIDGET_REFERENCE_GAP),
+    };
+  }
+
+  protected get previewScale(): number {
+    const reference = this.previewReference;
+    return Math.min(
+      PREVIEW_SHORT_SIDE_PX / Math.min(reference.width, reference.height),
+      PREVIEW_LONG_SIDE_MAX_PX / Math.max(reference.width, reference.height));
+  }
 
   private _unsavedChanges = false;
   @Input()

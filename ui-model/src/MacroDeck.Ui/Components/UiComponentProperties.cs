@@ -293,6 +293,10 @@ public static class UiComponentProperties
 	/// <see cref="UiMask" />. Absent means no mask.</summary>
 	public const string Mask = "mask";
 
+	/// <summary>A <see cref="UiComponents.Responsive" /> node's conditions, one object per variant, index-aligned
+	/// with its children after the first - see <see cref="UiResponsiveVariant" />.</summary>
+	public const string Variants = "variants";
+
 	/// <summary>The property keys this profile ships.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
 	[
@@ -302,6 +306,6 @@ public static class UiComponentProperties
 		Format, Seconds, Level, Step, LevelColor, Interaction, BorderStyle, BorderColor, Corner, Points, PlotTop,
 		Digits, Answer, Placeholder, Rotation, OriginX, OriginY, Shape, CornerRadius, StrokeColor,
 		StrokeWidth, Path, Icon, Columns, Rows, ColumnSpan, RowSpan, StartAngle, EndAngle, On, Selected,
-		Modifiers, Frame, Clip, Mask,
+		Modifiers, Frame, Clip, Mask, Variants,
 	];
 }

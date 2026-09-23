@@ -108,6 +108,13 @@ wrapper: `MainSize`, `Fill`, `ColumnSpan` and `RowSpan` go on the `UiModifier`, 
 sets them is rejected when the view is built. A filling wrapper's maximum clamps only its own size - the
 space it gives up is not redistributed to its siblings.
 
+## Changing the layout with the size
+
+Everything above scales one layout. When a 2x1 tile should put the icon beside the text instead of above it,
+or a folder view should show more on a tablet than on a phone, give each size its own layout with
+[`UiResponsive`](/ui/components/responsive/): the reader draws the one whose condition holds for the box, and
+switches when the box changes.
+
 ## Reference
 
 | Length | Resolves to |

@@ -583,6 +583,54 @@ describe('UiTreeWidgetComponent', () => {
     });
   });
 
+  describe('a responsive tree', () => {
+    function responsiveRoot(): UiNode {
+      return {
+        id: 'root',
+        type: UiComponents.Responsive,
+        properties: { [UiComponentProperties.Variants]: [{ minWidth: 1.5 }] },
+        children: [
+          { id: 'root.compact', type: UiComponents.Text, properties: { [UiComponentProperties.Text]: '21' } },
+          { id: 'root.wide', type: UiComponents.Button, properties: { [UiComponentProperties.Events]: ['press'] } },
+        ],
+      };
+    }
+
+    it('re-reads which layout claims the press when the tile is resized, without a new tree', () => {
+      const fixture = createFixture({ widgetId: 'w1', width: 120, height: 120 });
+      handles[0].root.set(responsiveRoot());
+      fixture.detectChanges();
+      const triggers: string[] = [];
+      fixture.componentInstance.trigger.subscribe(t => triggers.push(t));
+
+      fixture.componentInstance.activateFromInput();
+      const oneCell = { sent: handles[0].sent.length, triggers: [...triggers] };
+
+      fixture.componentRef.setInput('width', 252);
+      fixture.detectChanges();
+      fixture.componentInstance.activateFromInput();
+
+      expect(oneCell).toEqual({ sent: 0, triggers: ['onTouchStart', 'onTouchEnd', 'onShortPress'] });
+      expect(handles[0].sent.map(event => event.nodeId)).toEqual(['root.wide']);
+      expect(opens.length).toBe(1);
+    });
+
+    it('lights the tile for a press on the button its wide layout draws as the whole tile', async () => {
+      const fixture = createFixture({ widgetId: 'w1', width: 252, height: 120 });
+      const pressed: boolean[] = [];
+      fixture.componentInstance.pressedChange.subscribe(p => pressed.push(p));
+      handles[0].root.set(responsiveRoot());
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const button = tile(fixture).querySelector('[data-node-id="root.wide"]') as HTMLElement;
+      expect(button).withContext('the wide layout should render').toBeTruthy();
+
+      button.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+
+      expect(pressed).toEqual([true]);
+    });
+  });
+
   describe('activation without a pointer (issue #727)', () => {
     function buttonRoot(events: string[]): UiNode {
       return {

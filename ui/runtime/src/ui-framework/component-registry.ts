@@ -20,6 +20,8 @@ export interface UiComponentContext<TState = unknown> {
 
   readonly box: UiComponentBox;
 
+  readonly givenBox?: UiComponentBox | null;
+
   readonly isTreeRoot: boolean;
 
   readonly registry: UiComponentRegistry;
@@ -64,6 +66,8 @@ export interface UiComponentDefinition<TState = unknown> {
   readonly version?: UiComponentRange;
 
   readonly events?: readonly string[];
+
+  readonly transparentRoot?: boolean;
 
   create(doc: Document): HTMLElement | SVGElement;
 

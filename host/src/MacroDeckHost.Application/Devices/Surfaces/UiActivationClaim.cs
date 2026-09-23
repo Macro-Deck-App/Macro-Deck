@@ -8,11 +8,11 @@ namespace MacroDeckHost.Application.Devices.Surfaces;
 // A tile must answer a hardware press exactly as it answers a pointer or a key, so the two must agree.
 public readonly record struct UiActivationClaim(JsonElement? Claimant, bool Absorbed)
 {
-	public static UiActivationClaim Of(JsonElement tree)
+	public static UiActivationClaim Of(JsonElement tree, double? widthCells = null, double? heightCells = null)
 	{
 		var absorbed = false;
 		var claimant = tree.ValueKind == JsonValueKind.Object && tree.TryGetProperty("root", out var root)
-			? Visit(root, ref absorbed)
+			? Visit(root, widthCells, heightCells, ref absorbed)
 			: null;
 
 		return new UiActivationClaim(claimant, claimant is null && absorbed);
@@ -38,7 +38,7 @@ public readonly record struct UiActivationClaim(JsonElement? Claimant, bool Abso
 		return name is not null && Declares(node, name) ? (name, null) : null;
 	}
 
-	private static JsonElement? Visit(JsonElement node, ref bool absorbed)
+	private static JsonElement? Visit(JsonElement node, double? widthCells, double? heightCells, ref bool absorbed)
 	{
 		if (node.ValueKind != JsonValueKind.Object)
 		{
@@ -66,18 +66,54 @@ public readonly record struct UiActivationClaim(JsonElement? Claimant, bool Abso
 			return null;
 		}
 
-		if (node.TryGetProperty("children", out var children) && children.ValueKind == JsonValueKind.Array)
+		if (!node.TryGetProperty("children", out var children) || children.ValueKind != JsonValueKind.Array)
 		{
-			foreach (var child in children.EnumerateArray())
+			return null;
+		}
+
+		if (IsType(node, UiComponents.Responsive))
+		{
+			var variants = node.TryGetProperty("properties", out var responsiveProperties) &&
+				responsiveProperties.ValueKind == JsonValueKind.Object &&
+				responsiveProperties.TryGetProperty(UiComponentProperties.Variants, out var declared)
+					? declared
+					: default;
+			var index = UiResponsiveSelection.SelectChild(variants, children.GetArrayLength(), widthCells, heightCells);
+
+			return index < 0 ? null : Visit(children[index], widthCells, heightCells, ref absorbed);
+		}
+
+		var passesBox = PassesWholeBox(node);
+		foreach (var child in children.EnumerateArray())
+		{
+			if (Visit(child, passesBox ? widthCells : null, passesBox ? heightCells : null, ref absorbed) is { } found)
 			{
-				if (Visit(child, ref absorbed) is { } found)
-				{
-					return found;
-				}
+				return found;
 			}
 		}
 
 		return null;
+	}
+
+	private static bool IsType(JsonElement node, string type)
+		=> node.TryGetProperty("type", out var value) && value.ValueEquals(type);
+
+	private static bool PassesWholeBox(JsonElement node)
+	{
+		if (IsType(node, UiComponents.Layer) || IsType(node, UiComponents.Transform))
+		{
+			return true;
+		}
+
+		if (!IsType(node, UiComponents.Modifier))
+		{
+			return false;
+		}
+
+		return !node.TryGetProperty("properties", out var properties) ||
+			properties.ValueKind != JsonValueKind.Object ||
+			(!properties.TryGetProperty(UiComponentProperties.Padding, out _) &&
+				!properties.TryGetProperty(UiComponentProperties.Frame, out _));
 	}
 
 	private static object? ChangeFor(JsonElement node)

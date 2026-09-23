@@ -51,6 +51,7 @@ public class ComponentProfileConformanceFixtureTests
 		yield return "conformance-gauge-tree.json";
 		yield return "conformance-building-blocks-tree.json";
 		yield return "conformance-modifier-tree.json";
+		yield return "conformance-responsive-tree.json";
 	}
 
 	private static readonly string[] _transformKeys = ["rotation", "originX", "originY", "zoom", "offsetX", "offsetY"];
@@ -119,6 +120,53 @@ public class ComponentProfileConformanceFixtureTests
 			Assert.That(nodes["conformance"].Properties.ContainsKey("rows"),
 				Is.True,
 				"a declared row count is what makes the grid drop children that do not fit");
+		});
+	}
+
+	[Test]
+	public void The_responsive_fixture_chooses_the_layout_its_layout_file_names_for_every_box()
+	{
+		var tree = JsonSerializer.Deserialize<UiTree>(ReadTree("conformance-responsive-tree.json"), UiCanonicalJson.Options)!;
+		var nodes = Walk(tree.Root).ToDictionary(node => node.Id, StringComparer.Ordinal);
+		using var layout = JsonDocument.Parse(File.ReadAllText(Path.Combine(FixtureDirectory(),
+			"conformance-responsive-layout.json")));
+
+		Assert.Multiple(() =>
+		{
+			foreach (var @case in layout.RootElement.GetProperty("cases").EnumerateArray())
+			{
+				var tile = @case.GetProperty("tile");
+				double? width = tile.ValueKind == JsonValueKind.Object && tile.GetProperty("width").ValueKind == JsonValueKind.Number
+					? tile.GetProperty("width").GetDouble() / UiLength.Cell
+					: null;
+				double? height = tile.ValueKind == JsonValueKind.Object && tile.GetProperty("height").ValueKind == JsonValueKind.Number
+					? tile.GetProperty("height").GetDouble() / UiLength.Cell
+					: null;
+
+				foreach (var expected in @case.GetProperty("chosen").EnumerateObject())
+				{
+					var responsive = nodes[expected.Name];
+					var index = UiResponsiveSelection.SelectChild(responsive.Properties["variants"],
+						responsive.Children.Count,
+						width,
+						height);
+
+					Assert.That(responsive.Children[index].Id,
+						Is.EqualTo(expected.Value.GetString()),
+						@case.GetProperty("name").GetString());
+				}
+
+				if (@case.TryGetProperty("span", out var span))
+				{
+					var spacing = span.GetProperty("spacing").GetDouble();
+					var columns = span.GetProperty("width").GetDouble();
+					var rows = span.GetProperty("height").GetDouble();
+
+					Assert.That((columns * UiLength.Cell + (columns - 1) * spacing, rows * UiLength.Cell + (rows - 1) * spacing),
+						Is.EqualTo((tile.GetProperty("width").GetDouble(), tile.GetProperty("height").GetDouble())),
+						$"{@case.GetProperty("name").GetString()}: a tile's box is its span in cells plus the spacing between them");
+				}
+			}
 		});
 	}
 
