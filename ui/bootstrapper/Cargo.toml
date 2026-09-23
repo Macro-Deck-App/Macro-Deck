@@ -37,6 +37,11 @@ chrono = { version = "0.4", default-features = false, features = ["clock"] }
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"
 
+# Same story as semver/url: tauri already pulls it in (locked at 0.18.2), declared directly because
+# the Wayland title bar needs its buttons handed back - see src/wayland_titlebar.rs.
+[target.'cfg(target_os = "linux")'.dependencies]
+gtk = "0.18"
+
 # Same story as semver/url: tauri already pulls it in (locked at 0.61.3), declared directly because
 # the Windows file picker has to be opened through IFileOpenDialog by hand - see
 # src/windows_file_dialog.rs.

@@ -131,6 +131,7 @@ fn open(app: &AppHandle) {
 
     match built {
         Ok(window) => {
+            crate::wayland_titlebar::release_titlebar_buttons(&window);
             let app = app.clone();
             window.on_window_event(move |event| {
                 if let tauri::WindowEvent::CloseRequested { .. } = event {

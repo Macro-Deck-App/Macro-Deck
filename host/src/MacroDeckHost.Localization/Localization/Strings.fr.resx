@@ -8654,6 +8654,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.System.Actions.RunCommand.ShowWindowLabel" xml:space="preserve">
     <value>Afficher la fenêtre</value>
   </data>
+  <data name="Integrations.System.Actions.RunCommand.TimeoutDescription" xml:space="preserve">
+    <value>Durée d'attente de la commande, 0 attend qu'elle se termine. Une commande encore en cours après ce délai continue de s'exécuter, sauf si sa sortie est enregistrée dans une variable.</value>
+  </data>
   <data name="Integrations.System.Actions.RunCommand.TimeoutLabel" xml:space="preserve">
     <value>Délai d'expiration (secondes)</value>
   </data>
