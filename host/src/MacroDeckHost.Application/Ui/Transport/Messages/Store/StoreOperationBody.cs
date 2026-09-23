@@ -42,4 +42,6 @@ public class StoreOperationBody
 	public string? ErrorMessage { get; set; }
 
 	public bool CanRetry { get; set; }
+
+	public bool VersionPinned { get; set; }
 }

@@ -3,7 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { Observable, Subject } from 'rxjs';
 
 import { StoreOperationBody } from '@macro-deck/runtime';
-import { ApiService } from '@shared';
+import { AppStrings } from '@macro-deck/runtime';
+import { ApiService, LocalizationService, ToastService } from '@shared';
 import { StoreOperationService } from './store-operation.service';
 
 function operation(overrides: Partial<StoreOperationBody> = {}): StoreOperationBody {
@@ -39,7 +40,7 @@ describe('StoreOperationService', () => {
     connectionState = signal<string>('disconnected');
     notifications = new Map();
     const apiSpy = jasmine.createSpyObj<ApiService>('ApiService',
-      ['onNotification', 'getStoreOperations', 'retryStoreOperation', 'uninstallStoreExtension']);
+      ['onNotification', 'getStoreOperations', 'retryStoreOperation', 'uninstallStoreExtension', 'installStoreExtension']);
     apiSpy.onNotification.and.callFake((method: string) => {
       let subject = notifications.get(method);
       if (!subject) {
@@ -99,5 +100,22 @@ describe('StoreOperationService', () => {
 
     expect(api.uninstallStoreExtension).toHaveBeenCalledWith('Plugin', 'app.example.plugin');
     expect(result).toBe(response);
+  });
+
+  it('tells the user when the host refuses an install request outright, for example a version it no longer lists', async () => {
+    api.installStoreExtension.and.resolveTo({
+      success: false,
+      operation: null,
+      error: { code: 'VersionNotFound', message: 'Version 9.9.9 is not available.' },
+    });
+    const toasts = TestBed.inject(ToastService);
+    spyOn(toasts, 'show');
+
+    const result = await service.install('Plugin', 'app.example.plugin', '9.9.9');
+
+    const localization = TestBed.inject(LocalizationService);
+    expect(result).toBeNull();
+    expect(toasts.show).toHaveBeenCalledWith(localization.translateKey(AppStrings.Store.InstallationFailed),
+      jasmine.objectContaining({ detail: localization.translateKey(AppStrings.Store.Error.VersionNotFound), variant: 'error' }));
   });
 });

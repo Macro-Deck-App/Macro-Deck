@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { unsavedChangesGuard } from './guards';
+import { recreateOnParamChange } from './util/recreate-on-param-change.strategy';
 
 export const routes: Routes = [
   {
@@ -71,6 +72,7 @@ export const routes: Routes = [
       },
       {
         path: 'store/:kind/:extensionId',
+        data: recreateOnParamChange(),
         loadComponent: () => import('./components/pages').then(m => m.StoreDetailPageComponent)
       },
       {

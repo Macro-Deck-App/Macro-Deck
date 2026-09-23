@@ -1,4 +1,5 @@
 using System.Text.Json;
+using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeckHost.Api.Controllers;
 using MacroDeckHost.Application.Store;
 using MacroDeckHost.Application.Store.Installation;
@@ -24,6 +25,10 @@ internal sealed class StoreControllerTests
 	private static readonly string[] _appleAndWindowsRids = ["osx-arm64", "osx-x64", "win-x64"];
 	private static readonly string[] _expectedOperatingSystems = ["Windows", "macOS"];
 
+	private static readonly string[] _declaredAiServices = ["OpenAI"];
+
+	private static readonly string[] _detailTags = ["streaming", "obs"];
+
 	private TestPaths _paths = null!;
 	private StoreCatalog _catalog = null!;
 	private StoreCatalogQueryService _catalogQuery = null!;
@@ -31,6 +36,7 @@ internal sealed class StoreControllerTests
 	private StoreInstallCoordinator _installCoordinator = null!;
 	private FakeStoreUninstallService _uninstallService = null!;
 	private StoreController _controller = null!;
+	private FakeStoreInstallCounts _reviews = null!;
 
 	[SetUp]
 	public void SetUp()
@@ -53,6 +59,7 @@ internal sealed class StoreControllerTests
 			new StoreInstallBackupBatches());
 
 		_uninstallService = new FakeStoreUninstallService();
+		_reviews = new FakeStoreInstallCounts();
 		_controller = CreateController(new FakeStoreRegistryRefresher(),
 			new StoreRegistryRefreshTracker(TimeProvider.System));
 	}
@@ -75,7 +82,9 @@ internal sealed class StoreControllerTests
 			StoreRegistryOptions.Default,
 			_uninstallService,
 			refreshTracker,
-			new StoreUpdateBatchInstaller(_installCoordinator))
+			new StoreUpdateBatchInstaller(_installCoordinator),
+			new StoreCatalogPopularity(_catalogQuery, _reviews),
+			new StoreSimilarPackages(_catalogQuery, _reviews))
 		{
 			ControllerContext = new ControllerContext
 			{
@@ -130,9 +139,9 @@ internal sealed class StoreControllerTests
 	}
 
 	[Test]
-	public void An_uninitialised_registry_answers_registry_unavailable_not_an_empty_catalog()
+	public async Task An_uninitialised_registry_answers_registry_unavailable_not_an_empty_catalog()
 	{
-		var response = _controller.GetCatalog(kind: null, search: null, section: null);
+		var response = await _controller.GetCatalog(kind: null, search: null, section: null);
 
 		Assert.Multiple(() =>
 		{
@@ -142,11 +151,11 @@ internal sealed class StoreControllerTests
 	}
 
 	[Test]
-	public void Repeated_kind_parameters_narrow_the_catalog_to_exactly_those_kinds()
+	public async Task Repeated_kind_parameters_narrow_the_catalog_to_exactly_those_kinds()
 	{
 		SeedBrowseCatalog();
 
-		var response = _controller.GetCatalog(kind: null,
+		var response = await _controller.GetCatalog(kind: null,
 			search: null,
 			section: StoreCatalogSection.Name,
 			kinds: [StoreExtensionKind.Plugin, StoreExtensionKind.IconPack]);
@@ -161,12 +170,38 @@ internal sealed class StoreControllerTests
 	}
 
 	[Test]
-	public void A_single_kind_parameter_keeps_selecting_only_that_kind()
+	public async Task A_publisher_parameter_lists_only_that_publishers_packages()
+	{
+		_catalog.Swap(new StoreCatalogSnapshot
+		{
+			Sequence = 1,
+			Entries =
+			[
+				BrowseEntry("p1", "Plugin One", StoreExtensionKind.Plugin) with { Publisher = "PyFlat" },
+				BrowseEntry("p2", "Plugin Two", StoreExtensionKind.Plugin) with { Publisher = "Squibs" },
+				BrowseEntry("i1", "Icons", StoreExtensionKind.IconPack) with { Publisher = "PyFlat" }
+			]
+		});
+
+		var response = await _controller.GetCatalog(kind: null,
+			search: null,
+			section: StoreCatalogSection.Name,
+			publisher: "pyflat");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Items.Select(item => item.Id), Is.EqualTo(new[] { "i1", "p1" }));
+			Assert.That(response.Total, Is.EqualTo(2));
+		});
+	}
+
+	[Test]
+	public async Task A_single_kind_parameter_keeps_selecting_only_that_kind()
 	{
 		SeedBrowseCatalog();
 
-		var plugins = _controller.GetCatalog(kind: StoreExtensionKind.Plugin, search: null, section: null);
-		var templates = _controller.GetCatalog(kind: StoreExtensionKind.ProfileTemplate,
+		var plugins = await _controller.GetCatalog(kind: StoreExtensionKind.Plugin, search: null, section: null);
+		var templates = await _controller.GetCatalog(kind: StoreExtensionKind.ProfileTemplate,
 			search: null,
 			section: null);
 
@@ -180,11 +215,11 @@ internal sealed class StoreControllerTests
 	}
 
 	[Test]
-	public void A_page_smaller_than_the_catalog_still_reports_how_much_there_is_to_reach()
+	public async Task A_page_smaller_than_the_catalog_still_reports_how_much_there_is_to_reach()
 	{
 		SeedBrowseCatalog();
 
-		var response = _controller.GetCatalog(kind: null,
+		var response = await _controller.GetCatalog(kind: null,
 			search: null,
 			section: StoreCatalogSection.Name,
 			skip: 0,
@@ -198,11 +233,11 @@ internal sealed class StoreControllerTests
 	}
 
 	[Test]
-	public void A_registry_that_features_nothing_answers_with_an_empty_section_not_an_unavailable_store()
+	public async Task A_registry_that_features_nothing_answers_with_an_empty_section_not_an_unavailable_store()
 	{
 		SeedBrowseCatalog();
 
-		var response = _controller.GetCatalog(kind: null,
+		var response = await _controller.GetCatalog(kind: null,
 			search: null,
 			section: StoreCatalogSection.Featured);
 
@@ -233,11 +268,11 @@ internal sealed class StoreControllerTests
 	}
 
 	[Test]
-	public void The_catalog_response_never_carries_an_artifact_url()
+	public async Task The_catalog_response_never_carries_an_artifact_url()
 	{
 		SeedPlugin();
 
-		var response = _controller.GetCatalog(kind: null, search: null, section: null);
+		var response = await _controller.GetCatalog(kind: null, search: null, section: null);
 		var json = JsonSerializer.Serialize(response);
 
 		Assert.That(json, Does.Not.Contain("cdn.example"));
@@ -315,6 +350,82 @@ internal sealed class StoreControllerTests
 				("issues", "https://github.com/acme/hue/issues", null),
 				("custom", "https://acme.test/setup", "Setup Guide")
 			}));
+	}
+
+	[Test]
+	public void The_detail_body_carries_the_packages_ai_declaration()
+	{
+		SeedPlugin(ai: new PackageAiDeclaration { GeneratedContent = true, Services = ["OpenAI"] });
+
+		var ai = _controller.GetExtension(StoreExtensionKind.Plugin, PluginId).Extension!.Ai;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ai!.Interaction, Is.False);
+			Assert.That(ai.GeneratedContent, Is.True);
+			Assert.That(ai.GeneratedAssets, Is.False);
+			Assert.That(ai.Services, Is.EqualTo(_declaredAiServices));
+		});
+	}
+
+	[Test]
+	public void The_detail_body_carries_the_packages_tags()
+	{
+		SeedPlugin(tags: ["streaming", "obs"]);
+
+		Assert.That(_controller.GetExtension(StoreExtensionKind.Plugin, PluginId).Extension!.Tags,
+			Is.EqualTo(_detailTags));
+	}
+
+	[Test]
+	public async Task Similar_packages_for_an_unknown_package_answer_not_found_in_the_body()
+	{
+		SeedPlugin();
+
+		var response = await _controller.GetSimilar(StoreExtensionKind.Plugin, "com.acme.missing");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Items, Is.Empty);
+			Assert.That(response.Error!.Code, Is.EqualTo("not_found"));
+		});
+	}
+
+	[Test]
+	public async Task Similar_packages_of_a_lone_package_are_an_empty_list_without_error()
+	{
+		SeedPlugin();
+
+		var response = await _controller.GetSimilar(StoreExtensionKind.Plugin, PluginId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Items, Is.Empty);
+			Assert.That(response.Error, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task The_catalog_filters_by_tag()
+	{
+		SeedPlugin(tags: ["streaming"]);
+
+		var tagged = await _controller.GetCatalog(null, null, StoreCatalogSection.Name, tag: "streaming");
+		var other = await _controller.GetCatalog(null, null, StoreCatalogSection.Name, tag: "music");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(tagged.Items.Select(item => item.Id), Is.EqualTo(new[] { PluginId }));
+			Assert.That(other.Items, Is.Empty);
+		});
+	}
+
+	[Test]
+	public void An_undeclared_package_has_no_ai_declaration_in_its_detail_body()
+	{
+		SeedPlugin();
+
+		Assert.That(_controller.GetExtension(StoreExtensionKind.Plugin, PluginId).Extension!.Ai, Is.Null);
 	}
 
 	[Test]
@@ -537,6 +648,198 @@ internal sealed class StoreControllerTests
 		});
 	}
 
+	[Test]
+	public async Task The_popular_section_lists_every_package_most_installed_first()
+	{
+		SeedBrowseCatalog();
+		_reviews.Counts["p2"] = 12;
+		_reviews.Counts["t1"] = 3;
+
+		var response = await _controller.GetCatalog(kind: null, search: null, section: StoreCatalogSection.Popular);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Items.Select(item => item.Id), Is.EqualTo(new[] { "p2", "t1", "i1", "p1" }));
+			Assert.That(response.Total, Is.EqualTo(4));
+		});
+	}
+
+	[Test]
+	public async Task Asking_for_supported_packages_only_leaves_out_and_does_not_count_the_rest()
+	{
+		_catalog.Swap(new StoreCatalogSnapshot
+		{
+			Sequence = 1,
+			Entries =
+			[
+				BrowseEntry("p1", "Plugin One", StoreExtensionKind.Plugin),
+				BrowseEntry("p2", "Plugin Two", StoreExtensionKind.Plugin) with { SupportedRids = ["plan9-sparc"] }
+			]
+		});
+
+		foreach (var section in new StoreCatalogSection?[] { null, StoreCatalogSection.Popular })
+		{
+			var filtered = await _controller.GetCatalog(kind: null, search: null, section: section, supportedOnly: true);
+			var unfiltered = await _controller.GetCatalog(kind: null, search: null, section: section);
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(filtered.Items.Select(item => item.Id), Is.EqualTo(new[] { "p1" }), section?.ToString());
+				Assert.That(filtered.Total, Is.EqualTo(1));
+				Assert.That(unfiltered.Total, Is.EqualTo(2));
+			});
+		}
+	}
+
+	[Test]
+	public async Task A_card_and_the_detail_page_name_the_first_screenshot_of_the_latest_release_as_the_preview()
+	{
+		SeedPluginVersions(screenshots: ["BBBB", "cccc"]);
+
+		var card = (await _controller.GetCatalog(kind: null, search: null, section: null)).Items.Single();
+		var detail = _controller.GetExtension(StoreExtensionKind.Plugin, PluginId).Extension!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(card.PreviewScreenshotSha256, Is.EqualTo("bbbb"));
+			Assert.That(detail.PreviewScreenshotSha256, Is.EqualTo("bbbb"));
+		});
+	}
+
+	[Test]
+	public async Task A_package_without_screenshots_has_no_preview()
+	{
+		SeedPlugin();
+
+		var card = (await _controller.GetCatalog(kind: null, search: null, section: null)).Items.Single();
+
+		Assert.That(card.PreviewScreenshotSha256, Is.Null);
+	}
+
+	[Test]
+	public void The_version_history_says_which_versions_can_be_installed_and_how_big_they_are()
+	{
+		SeedPluginVersions();
+
+		var history = _controller.GetExtension(StoreExtensionKind.Plugin, PluginId).Extension!.History;
+
+		Assert.That(history.Select(entry => (entry.Version, entry.Size, entry.Installable, entry.UnavailableReason)),
+			Is.EqualTo(new (string, long?, bool, string?)[]
+			{
+				("2.0.0", 200, true, null),
+				("1.5.0", null, false, "Unavailable"),
+				("1.0.0", 100, true, null)
+			}));
+	}
+
+	[Test]
+	public void No_version_of_a_package_this_platform_cannot_run_is_installable()
+	{
+		SeedPluginVersions(supportedRids: ["plan9-sparc"]);
+
+		var history = _controller.GetExtension(StoreExtensionKind.Plugin, PluginId).Extension!.History;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(history.Select(entry => entry.Installable), Has.All.False);
+			Assert.That(history.Select(entry => entry.UnavailableReason), Has.All.EqualTo("UnsupportedPlatform"));
+		});
+	}
+
+	[Test]
+	public void Installing_a_version_the_registry_does_not_publish_is_refused_before_any_operation_starts()
+	{
+		SeedPluginVersions();
+
+		var response = _controller.Install(new InstallStoreExtensionRequest
+		{
+			Kind = StoreExtensionKind.Plugin,
+			PackageId = PluginId,
+			Version = "1.5.0"
+		});
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Success, Is.False);
+			Assert.That(response.Error?.Code, Is.EqualTo("VersionNotFound"));
+			Assert.That(response.Operation, Is.Null);
+			Assert.That(_tracker.Snapshot(), Is.Empty);
+		});
+	}
+
+	[Test]
+	public void Only_an_install_that_names_a_version_pins_it()
+	{
+		SeedPluginVersions();
+
+		var pinned = _controller.Install(new InstallStoreExtensionRequest
+		{
+			Kind = StoreExtensionKind.Plugin,
+			PackageId = PluginId,
+			Version = "1.0.0"
+		});
+		_installCoordinator.Cancel(pinned.Operation!.Id);
+		var latest = _controller.Install(new InstallStoreExtensionRequest
+		{
+			Kind = StoreExtensionKind.Plugin,
+			PackageId = PluginId
+		});
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(pinned.Success, Is.True);
+			Assert.That(pinned.Operation!.Version, Is.EqualTo("1.0.0"));
+			Assert.That(pinned.Operation.VersionPinned, Is.True);
+			Assert.That(latest.Operation!.Version, Is.EqualTo("2.0.0"));
+			Assert.That(latest.Operation.VersionPinned, Is.False);
+		});
+	}
+
+	private void SeedPluginVersions(string[]? screenshots = null, string[]? supportedRids = null)
+	{
+		StoreReleaseManifest Release(string version, long size) => new()
+		{
+			Version = version,
+			ArtifactUrl = new Uri($"https://cdn.example/hue-{version}.macroDeckPlugin"),
+			Sha256 = new string('a', 64),
+			Size = size
+		};
+
+		_catalog.Swap(new StoreCatalogSnapshot
+		{
+			Sequence = 1,
+			Entries =
+			[
+				new StoreCatalogEntry
+				{
+					Kind = StoreExtensionKind.Plugin,
+					Id = PluginId,
+					Name = "Hue Bridge",
+					LatestVersion = "2.0.0",
+					SupportedRids = supportedRids ?? [],
+					LatestRelease = Release("2.0.0", 200) with
+					{
+						Screenshots = (screenshots ?? [])
+							.Select(sha => new StoreMediaAsset
+							{
+								Url = new Uri($"https://cdn.example/{sha}.png"),
+								Sha256 = sha,
+								Size = 4
+							})
+							.ToList()
+					},
+					Releases = [Release("2.0.0", 200), Release("1.0.0", 100)],
+					History =
+					[
+						new StoreVersionHistoryEntry { Version = "2.0.0", Size = 200, HasRelease = true },
+						new StoreVersionHistoryEntry { Version = "1.5.0" },
+						new StoreVersionHistoryEntry { Version = "1.0.0", Size = 100, HasRelease = true }
+					]
+				}
+			]
+		});
+	}
+
 	private void SeedBrowseCatalog() =>
 		_catalog.Swap(new StoreCatalogSnapshot
 		{
@@ -568,7 +871,9 @@ internal sealed class StoreControllerTests
 
 	private void SeedPlugin(string[]? supportedRids = null,
 		long size = 16,
-		IReadOnlyList<StoreExtensionLink>? additionalLinks = null)
+		IReadOnlyList<StoreExtensionLink>? additionalLinks = null,
+		PackageAiDeclaration? ai = null,
+		IReadOnlyList<string>? tags = null)
 	{
 		_catalog.Swap(new StoreCatalogSnapshot
 		{
@@ -583,6 +888,8 @@ internal sealed class StoreControllerTests
 					LatestVersion = "1.0.0",
 					SupportedRids = supportedRids ?? [],
 					AdditionalLinks = additionalLinks ?? [],
+					Ai = ai,
+					Tags = tags ?? [],
 					LatestRelease = new StoreReleaseManifest
 					{
 						Version = "1.0.0",

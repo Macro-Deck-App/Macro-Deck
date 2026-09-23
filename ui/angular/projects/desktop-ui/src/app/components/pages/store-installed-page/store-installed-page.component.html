@@ -1,11 +1,8 @@
-<div class="store-page" [attr.inert]="storeUnlocked() ? null : ''">
+<div class="store-page" [attr.inert]="storeUnlocked() ? null : ''" (scroll)="onScroll($event)">
   <div class="store-page-content">
-    <div class="store-header">
-      <div class="store-heading">
-        <h1 class="store-title">{{ 'macrodeck.app:Store.Page.Title' | translate }}</h1>
-        <p class="store-subtitle">{{ updatesSummary() }}</p>
-      </div>
+    <app-store-page-header active="installed" [subtitle]="updatesSummary()">
       <shared-button
+        storeHeaderAction
         variant="primary"
         [disabled]="updates.count() === 0 || updateAllBusy()"
         [loading]="updates.installing()"
@@ -13,11 +10,7 @@
         <span class="icon icon-refresh icon-sm" aria-hidden="true"></span>
         <span>{{ 'macrodeck.app:Store.Page.UpdateAllAction' | translate }}</span>
       </shared-button>
-    </div>
-
-    <div class="store-view-switcher">
-      <app-store-view-switcher active="installed" />
-    </div>
+    </app-store-page-header>
 
     @if (loadError()) {
       <shared-error-banner [message]="loadError()!" (dismiss)="loadError.set(null)" />
@@ -32,10 +25,12 @@
       } @else {
         <shared-store-section
           [items]="items()"
+          [updatesAvailable]="updatesAvailable"
           (install)="onInstall($event)"
           (installUnsigned)="onInstallUnsigned($event)"
           (retry)="onRetry($event)"
-          (uninstall)="onUninstallRequested($event)" />
+          (uninstall)="onUninstallRequested($event)"
+          (checkForUpdates)="onCheckForUpdates()" />
 
         @if (hasMore() && !loadError()) {
           <div class="store-load-more">
@@ -46,6 +41,8 @@
         }
       }
     </div>
+
+    <app-store-footer />
   </div>
 </div>
 

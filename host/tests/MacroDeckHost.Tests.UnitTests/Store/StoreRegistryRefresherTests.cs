@@ -20,6 +20,10 @@ internal sealed class StoreRegistryRefresherTests
 	private static readonly string[] _expectedHistory = ["2.2.0", "2.1.0", "2.0.0"];
 
 	private static readonly string[] _expectedLanguages = ["en", "de", "zh-Hant-TW"];
+
+	private static readonly string[] _declaredAiServices = ["OpenAI"];
+
+	private static readonly string[] _normalizedTags = ["ok", "streaming"];
 	private static readonly string[] _seededIds = ["com.acme.hue", "com.acme.material", "com.acme.streamer"];
 
 	private static readonly DateTimeOffset _now = DateTimeOffset.UtcNow;
@@ -138,6 +142,60 @@ internal sealed class StoreRegistryRefresherTests
 		});
 	}
 
+	[Test]
+	public async Task Every_published_version_keeps_its_own_verified_release_so_it_can_be_installed()
+	{
+		var fixture = Registry();
+		fixture.Write("plugins/com.acme.hue/versions/2.0.0/manifest.json",
+			new
+			{
+				url = "https://assets.test/com.acme.hue/2.0.0/older.bin",
+				sha256 = new string('b', 64),
+				size = 2048L,
+				uploadedAt = DateTimeOffset.UnixEpoch
+			});
+
+		await Create(fixture).Refresh();
+
+		var entry = _catalog.Snapshot.Entries.Single(candidate => candidate.Id == "com.acme.hue");
+		var older = entry.FindRelease("2.0.0");
+		Assert.Multiple(() =>
+		{
+			Assert.That(older?.ArtifactUrl, Is.EqualTo(new Uri("https://assets.test/com.acme.hue/2.0.0/older.bin")));
+			Assert.That(older?.Sha256, Is.EqualTo(new string('b', 64)));
+			Assert.That(older?.Size, Is.EqualTo(2048));
+			Assert.That(entry.History.Single(version => version.Version == "2.0.0").Size, Is.EqualTo(2048));
+			Assert.That(entry.History.Select(version => version.HasRelease), Has.All.True);
+		});
+	}
+
+	[Test]
+	public async Task A_malformed_older_release_only_makes_that_version_uninstallable()
+	{
+		var fixture = Registry();
+		fixture.Write("plugins/com.acme.hue/versions/2.0.0/manifest.json",
+			new
+			{
+				url = "http://assets.test/com.acme.hue/2.0.0/insecure.bin",
+				sha256 = new string('b', 64),
+				size = 2048L
+			});
+		fixture.WriteText("plugins/com.acme.hue/versions/1.0.0/manifest.json", "{ not json");
+
+		var result = await Create(fixture).Refresh();
+
+		var entry = _catalog.Snapshot.Entries.Single(candidate => candidate.Id == "com.acme.hue");
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True);
+			Assert.That(entry.FindRelease("2.0.0"), Is.Null);
+			Assert.That(entry.FindRelease("1.0.0"), Is.Null);
+			Assert.That(entry.FindRelease(entry.LatestVersion), Is.Not.Null);
+			Assert.That(entry.History.Where(version => version.Version != entry.LatestVersion)
+				.Select(version => (version.HasRelease, version.Size)), Has.All.EqualTo((false, (long?)null)));
+		});
+	}
+
 	/// <summary>The registry is the only thing that can say which languages a package ships before it is
 	/// installed; a package that declares none says nothing, which is never the same as "English only".</summary>
 	[Test]
@@ -160,6 +218,73 @@ internal sealed class StoreRegistryRefresherTests
 				Is.Empty);
 		});
 	}
+
+	[Test]
+	public async Task A_packages_ai_declaration_reaches_the_catalog_and_an_absent_one_stays_undeclared()
+	{
+		var fixture = Registry();
+		fixture.AddPackage("plugin",
+			"com.acme.assistant",
+			ai: new { interaction = true, generatedContent = true, services = new[] { "OpenAI" } });
+		fixture.AddPackage("icon-pack",
+			"com.acme.generated-icons",
+			ai: new { generatedAssets = true });
+
+		await Create(fixture).Refresh();
+
+		var assistant = _catalog.Snapshot.Entries.Single(entry => entry.Id == "com.acme.assistant").Ai;
+		var icons = _catalog.Snapshot.Entries.Single(entry => entry.Id == "com.acme.generated-icons").Ai;
+		Assert.Multiple(() =>
+		{
+			Assert.That(assistant!.Interaction, Is.True);
+			Assert.That(assistant.GeneratedContent, Is.True);
+			Assert.That(assistant.GeneratedAssets, Is.False);
+			Assert.That(assistant.Services, Is.EqualTo(_declaredAiServices));
+			Assert.That(icons!.GeneratedAssets, Is.True);
+			Assert.That(_catalog.Snapshot.Entries.Single(entry => entry.Id == "com.acme.hue").Ai, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task A_malformed_ai_declaration_keeps_the_package_listed_as_undeclared()
+	{
+		var fixture = Registry();
+		fixture.AddPackage("plugin", "com.acme.odd", ai: "yes");
+
+		await Create(fixture).Refresh();
+
+		var entry = _catalog.Snapshot.Entries.SingleOrDefault(candidate => candidate.Id == "com.acme.odd");
+		Assert.Multiple(() =>
+		{
+			Assert.That(entry, Is.Not.Null);
+			Assert.That(entry!.Ai, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task A_packages_tags_reach_the_catalog_normalized_and_bad_entries_never_cost_the_listing()
+	{
+		var fixture = Registry();
+		fixture.AddPackage("plugin",
+			"com.acme.tagged",
+			tags: new object[] { 1, " OK ", "Bad Tag", "a--b", new string('x', 33), "ok", "streaming" });
+		fixture.AddPackage("plugin", "com.acme.number", tags: 5);
+		fixture.AddPackage("plugin", "com.acme.object", tags: new { streaming = true });
+
+		var result = await Create(fixture).Refresh();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True);
+			Assert.That(Tags("com.acme.tagged"), Is.EqualTo(_normalizedTags));
+			Assert.That(Tags("com.acme.number"), Is.Empty);
+			Assert.That(Tags("com.acme.object"), Is.Empty);
+			Assert.That(Tags("com.acme.hue"), Is.Empty);
+		});
+	}
+
+	private IReadOnlyList<string> Tags(string id) =>
+		_catalog.Snapshot.Entries.Single(entry => entry.Id == id).Tags;
 
 	[Test]
 	public async Task A_packages_valid_additional_links_reach_the_catalog_in_declared_order()

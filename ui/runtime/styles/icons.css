@@ -93,6 +93,18 @@
   mask-image: url('./icons/store.svg');
   -webkit-mask-image: url('./icons/store.svg');
 }
+.icon-tag {
+  mask-image: url('./icons/tag.svg');
+  -webkit-mask-image: url('./icons/tag.svg');
+}
+.icon-sparkles {
+  mask-image: url('./icons/sparkles.svg');
+  -webkit-mask-image: url('./icons/sparkles.svg');
+}
+.icon-chevron-left {
+  mask-image: url('./icons/chevron-left.svg');
+  -webkit-mask-image: url('./icons/chevron-left.svg');
+}
 .icon-chevron-right {
   mask-image: url('./icons/chevron-right.svg');
   -webkit-mask-image: url('./icons/chevron-right.svg');
@@ -308,6 +320,18 @@
 .icon-heart {
   mask-image: url('./icons/heart.svg');
   -webkit-mask-image: url('./icons/heart.svg');
+}
+.icon-apple {
+  mask-image: url('./icons/apple.svg');
+  -webkit-mask-image: url('./icons/apple.svg');
+}
+.icon-linux {
+  mask-image: url('./icons/linux.svg');
+  -webkit-mask-image: url('./icons/linux.svg');
+}
+.icon-windows {
+  mask-image: url('./icons/windows.svg');
+  -webkit-mask-image: url('./icons/windows.svg');
 }
 .icon-discord {
   mask-image: url('./icons/discord.svg');

@@ -3,6 +3,7 @@ using MacroDeckHost.Application.Icons.Ownership;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Application.Ui.Transport.Messages.Icons;
+using MacroDeckHost.Domain.Enums;
 
 namespace MacroDeckHost.Application.Ui.Handlers;
 
@@ -24,7 +25,8 @@ public class CreateIconPackRequestMessageHandler
 		var result = await _iconPackService.Create(request.Name,
 			request.Description,
 			request.Author,
-			request.Version);
+			request.Version,
+			request.AiAssets ?? IconPackAiAssets.NotDeclared);
 
 		var response = new CreateIconPackResponse { Success = result.Success };
 		if (result.Success)

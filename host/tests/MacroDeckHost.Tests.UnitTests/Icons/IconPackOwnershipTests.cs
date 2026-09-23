@@ -348,6 +348,8 @@ internal sealed class IconPackOwnershipTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(storeDto.OwnerKind, Is.EqualTo("Store"));
+			Assert.That(storeDto.StorePackageId, Is.EqualTo(IconPackId));
+			Assert.That(userDto.StorePackageId, Is.Null);
 			Assert.That(storeDto.CanDelete, Is.True);
 			Assert.That(storeDto.IsReadOnly, Is.True);
 			Assert.That(userDto.OwnerKind, Is.EqualTo("User"));

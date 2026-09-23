@@ -15,6 +15,9 @@
 
         @if (operation.state === 'Failed') {
           <span class="failed-hint">{{ errorMessage(operation) }}</span>
+          @if (errorDetail(operation); as detail) {
+            <span class="failed-detail">{{ detail }}</span>
+          }
         }
 
         @if (!isTerminal(operation)) {
@@ -41,8 +44,12 @@
           }
         }
 
-        @if (operation.state === 'Failed' && operation.canRetry) {
-          <button type="button" class="retry" (click)="retry(operation)">{{ 'macrodeck:Common.Retry' | translate }}</button>
+        @if (operation.state === 'Failed') {
+          @if (operation.canRetry) {
+            <button type="button" class="retry" (click)="retry(operation)">{{ 'macrodeck:Common.Retry' | translate }}</button>
+          } @else if (operation.error === 'RequiresNewerMacroDeck' && updates.hasBridge) {
+            <button type="button" class="retry" (click)="checkForUpdates()">{{ 'macrodeck.app:Settings.Update.CheckForUpdatesAction' | translate }}</button>
+          }
         }
       </div>
     }

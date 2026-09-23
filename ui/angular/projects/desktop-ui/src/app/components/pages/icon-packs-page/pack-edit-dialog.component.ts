@@ -1,22 +1,24 @@
 import {
-  ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, ViewChild, inject, signal
+  ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, ViewChild, computed, inject, signal
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AppStrings } from '@macro-deck/runtime';
+import { AppStrings, IconPackAiAssets } from '@macro-deck/runtime';
 import { ButtonComponent, ButtonGroupComponent, InputComponent, LocalizationService, ModalComponent, TranslatePipe, dismissModal } from '@shared';
 import { IconPackModel } from '../../../services/icon-pack.service';
+import { SelectComponent, SelectOption } from '../../forms/select/select.component';
 
 export interface PackEditResult {
   name: string;
   description?: string;
   author?: string;
   version?: string;
+  aiAssets: IconPackAiAssets;
 }
 
 @Component({
   selector: 'app-pack-edit-dialog',
   standalone: true,
-  imports: [FormsModule, ButtonComponent, ButtonGroupComponent, InputComponent, ModalComponent, TranslatePipe],
+  imports: [FormsModule, ButtonComponent, ButtonGroupComponent, InputComponent, ModalComponent, SelectComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './pack-edit-dialog.component.html',
   styleUrls: ['./pack-edit-dialog.component.scss'],
@@ -36,6 +38,13 @@ export class PackEditDialogComponent implements OnInit {
   protected readonly description = signal('');
   protected readonly author = signal('');
   protected readonly version = signal('');
+  protected readonly aiAssets = signal<IconPackAiAssets>('NotDeclared');
+
+  protected readonly aiOptions = computed<SelectOption[]>(() => [
+    { value: 'NotDeclared', label: this.localization.translateKey(AppStrings.IconPacks.AiNotDeclared) },
+    { value: 'None', label: this.localization.translateKey(AppStrings.IconPacks.AiNone) },
+    { value: 'Generated', label: this.localization.translateKey(AppStrings.IconPacks.AiGenerated) },
+  ]);
 
   get title(): string {
     return this.localization.translateKey(
@@ -55,6 +64,7 @@ export class PackEditDialogComponent implements OnInit {
       this.description.set(this.pack.description ?? '');
       this.author.set(this.pack.author ?? '');
       this.version.set(this.pack.version ?? '');
+      this.aiAssets.set(this.pack.aiAssets ?? 'NotDeclared');
     }
   }
 
@@ -69,6 +79,7 @@ export class PackEditDialogComponent implements OnInit {
       description: this.description().trim() || undefined,
       author: this.author().trim() || undefined,
       version: this.version().trim() || undefined,
+      aiAssets: this.aiAssets(),
     }));
   }
 

@@ -64,6 +64,7 @@ assets:
       - ui/runtime/styles/icons/bug.svg
       - ui/runtime/styles/icons/chart.svg
       - ui/runtime/styles/icons/check.svg
+      - ui/runtime/styles/icons/chevron-left.svg
       - ui/runtime/styles/icons/chevron-right.svg
       - ui/runtime/styles/icons/clipboard.svg
       - ui/runtime/styles/icons/clock-type.svg
@@ -110,9 +111,11 @@ assets:
       - ui/runtime/styles/icons/settings.svg
       - ui/runtime/styles/icons/sidebar.svg
       - ui/runtime/styles/icons/sliders.svg
+      - ui/runtime/styles/icons/sparkles.svg
       - ui/runtime/styles/icons/star.svg
       - ui/runtime/styles/icons/store.svg
       - ui/runtime/styles/icons/sun.svg
+      - ui/runtime/styles/icons/tag.svg
       - ui/runtime/styles/icons/trash.svg
       - ui/runtime/styles/icons/undo.svg
       - ui/runtime/styles/icons/unlock.svg
@@ -156,14 +159,16 @@ assets:
     license: Apache-2.0
     copyright: Dashboard Icons contributors
     note: >-
-      Logos of the Discord, Home Assistant, Spotify, Twitch and YouTube Music integrations. The logos are
-      trademarks of their respective owners and are used to identify the integration only.
+      Logos of the Discord, Home Assistant, Spotify, Twitch and YouTube Music integrations, and the Windows logo
+      marking the platforms a Store package supports. The logos are trademarks of their respective owners and are
+      used to identify the integration or platform only.
     paths:
       - host/src/MacroDeckHost.Integrations/Discord/discord-icon.svg
       - host/src/MacroDeckHost.Integrations/HomeAssistant/home-assistant-icon.svg
       - host/src/MacroDeckHost.Integrations/Spotify/spotify-icon.svg
       - host/src/MacroDeckHost.Integrations/Twitch/twitch-icon.svg
       - host/src/MacroDeckHost.Integrations/YtmDesktop/ytmdesktop-icon.svg
+      - ui/runtime/styles/icons/windows.svg
 
   - name: Android robot
     url: https://developer.android.com/distribute/marketing-tools/brand-guidelines
@@ -184,6 +189,17 @@ assets:
     note: Discord glyph of the configuration UI and web client icon set.
     paths:
       - ui/runtime/styles/icons/discord.svg
+
+  - name: Simple Icons (operating system logos)
+    url: https://github.com/simple-icons/simple-icons
+    license: CC0-1.0
+    licenseFile: third-party/licenses/CC0-1.0.txt
+    note: >-
+      Apple and Linux logos marking the platforms a Store package supports. The logos are trademarks of their
+      respective owners and are used to identify the platform only.
+    paths:
+      - ui/runtime/styles/icons/apple.svg
+      - ui/runtime/styles/icons/linux.svg
 
   - name: Product logos of integrated applications
     license: LicenseRef-Trademark-Identification

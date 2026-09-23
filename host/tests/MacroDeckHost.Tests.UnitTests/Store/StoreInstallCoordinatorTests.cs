@@ -88,4 +88,45 @@ internal sealed class StoreInstallCoordinatorTests
 
 		Assert.That(second.Id, Is.Not.EqualTo(first.Id));
 	}
+
+	[TestCase(null, false)]
+	[TestCase("1.0.0", true)]
+	public void A_retry_keeps_whether_the_user_chose_the_version(string? version, bool pinned)
+	{
+		var first = _coordinator.Install(StoreExtensionKind.Plugin, PluginId, version);
+		_tracker.Transition(first.Id, StoreOperationState.Failed, StoreOperationError.DownloadFailed, "offline");
+
+		var retry = _coordinator.Retry(first.Id);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(first.VersionPinned, Is.EqualTo(pinned));
+			Assert.That(retry!.VersionPinned, Is.EqualTo(pinned));
+		});
+	}
+
+	[Test]
+	public void A_failure_that_would_repeat_is_not_retried()
+	{
+		var first = _coordinator.Install(StoreExtensionKind.Plugin, PluginId);
+		_tracker.Transition(first.Id, StoreOperationState.Failed, StoreOperationError.RequiresNewerMacroDeck, "too old");
+
+		Assert.That(_coordinator.Retry(first.Id), Is.Null);
+	}
+
+	[TestCase("1.0.0", false)]
+	[TestCase("1.0.0+build.7", false)]
+	[TestCase("0.9.0", true)]
+	public void Only_a_version_the_registry_does_not_publish_is_unavailable(string version, bool unavailable)
+	{
+		Assert.That(_coordinator.IsUnavailableVersion(StoreExtensionKind.Plugin, PluginId, version),
+			Is.EqualTo(unavailable));
+	}
+
+	[Test]
+	public void A_package_the_catalog_does_not_know_is_left_to_the_install_to_report()
+	{
+		Assert.That(_coordinator.IsUnavailableVersion(StoreExtensionKind.Plugin, "com.acme.unknown", "1.0.0"),
+			Is.False);
+	}
 }

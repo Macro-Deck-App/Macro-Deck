@@ -399,7 +399,8 @@ internal sealed class FakeStoreOperationTracker : IStoreOperationTracker
 		string displayName,
 		string? previousVersion,
 		Guid? retryOf = null,
-		StoreTestBuildReference? testBuild = null) =>
+		StoreTestBuildReference? testBuild = null,
+		bool versionPinned = false) =>
 		throw new NotSupportedException();
 
 	public StoreOperation? Transition(Guid operationId,

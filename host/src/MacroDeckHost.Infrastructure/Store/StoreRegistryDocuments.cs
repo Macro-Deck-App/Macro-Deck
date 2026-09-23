@@ -1,4 +1,5 @@
 using System.Text.Json;
+using MacroDeck.Plugin.Packaging.Manifest;
 
 namespace MacroDeckHost.Infrastructure.Store;
 
@@ -121,6 +122,10 @@ internal sealed record RegistryPackageDocument
 	public List<string>? SupportedRids { get; init; }
 
 	public List<string>? Languages { get; init; }
+
+	public PackageAiDeclaration? Ai { get; init; }
+
+	public JsonElement? Tags { get; init; }
 }
 
 internal sealed record RegistryReleaseDocument

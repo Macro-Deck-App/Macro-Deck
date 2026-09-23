@@ -29,6 +29,8 @@ public class StoreController : ControllerBase
 	private readonly IStoreUninstallService _uninstallService;
 	private readonly IStoreRegistryRefreshTracker _refreshTracker;
 	private readonly IStoreUpdateBatchInstaller _updateInstaller;
+	private readonly StoreCatalogPopularity _popularity;
+	private readonly StoreSimilarPackages _similar;
 
 	public StoreController(IStoreCatalogQueryService catalogQuery,
 		IStoreRegistryRefresher refresher,
@@ -42,7 +44,9 @@ public class StoreController : ControllerBase
 		StoreRegistryOptions options,
 		IStoreUninstallService uninstallService,
 		IStoreRegistryRefreshTracker refreshTracker,
-		IStoreUpdateBatchInstaller updateInstaller)
+		IStoreUpdateBatchInstaller updateInstaller,
+		StoreCatalogPopularity popularity,
+		StoreSimilarPackages similar)
 	{
 		_catalogQuery = catalogQuery;
 		_refresher = refresher;
@@ -57,6 +61,8 @@ public class StoreController : ControllerBase
 		_uninstallService = uninstallService;
 		_refreshTracker = refreshTracker;
 		_updateInstaller = updateInstaller;
+		_popularity = popularity;
+		_similar = similar;
 	}
 
 	[HttpGet("status")]
@@ -89,13 +95,17 @@ public class StoreController : ControllerBase
 	}
 
 	[HttpGet("catalog")]
-	public GetStoreCatalogResponse GetCatalog([FromQuery] StoreExtensionKind? kind,
+	public async Task<GetStoreCatalogResponse> GetCatalog([FromQuery] StoreExtensionKind? kind,
 		[FromQuery] string? search,
 		[FromQuery] StoreCatalogSection? section,
 		[FromQuery] int skip = 0,
 		[FromQuery] int take = StoreCatalogQuery.MaxTake,
 		[FromQuery] StoreExtensionKind[]? kinds = null,
-		[FromQuery] bool installed = false)
+		[FromQuery] bool installed = false,
+		[FromQuery] bool supportedOnly = false,
+		[FromQuery] string? publisher = null,
+		[FromQuery] string? tag = null,
+		CancellationToken ct = default)
 	{
 		var query = new StoreCatalogQuery
 		{
@@ -104,10 +114,15 @@ public class StoreController : ControllerBase
 			Section = section ?? StoreCatalogSection.All,
 			Skip = skip,
 			Take = take,
-			Installed = installed
+			Installed = installed,
+			SupportedOnly = supportedOnly,
+			Publisher = publisher,
+			Tag = tag
 		};
 
-		var result = _catalogQuery.Query(query);
+		var result = query.Section is StoreCatalogSection.Popular
+			? await _popularity.Query(query, ct)
+			: _catalogQuery.Query(query);
 		var page = result.Success ? result.Data! : StoreCatalogPage.Empty;
 
 		return new GetStoreCatalogResponse
@@ -135,6 +150,28 @@ public class StoreController : ControllerBase
 		}
 
 		return new GetStoreExtensionResponse { Extension = ToDetailBody(result.Data!) };
+	}
+
+	[HttpGet("catalog/{kind}/{id}/similar")]
+	public async Task<GetStoreSimilarResponse> GetSimilar(StoreExtensionKind kind,
+		string id,
+		[FromQuery] int take = StoreSimilarPackages.DefaultTake,
+		CancellationToken ct = default)
+	{
+		var result = await _similar.Find(kind, id, take, ct);
+		if (!result.Success)
+		{
+			return new GetStoreSimilarResponse
+			{
+				Error = new TransportError
+				{
+					Code = ToErrorCode(result.Error ?? StoreCatalogError.NotFound),
+					Message = result.ErrorMessage ?? "The extension could not be found."
+				}
+			};
+		}
+
+		return new GetStoreSimilarResponse { Items = result.Data!.Select(ToItemBody).ToList() };
 	}
 
 	[HttpGet("updates")]
@@ -168,6 +205,11 @@ public class StoreController : ControllerBase
 		if (string.IsNullOrWhiteSpace(body.PackageId))
 		{
 			return Failure("invalid_package_id", "A package id is required.");
+		}
+
+		if (body.Version is { } version && _installCoordinator.IsUnavailableVersion(body.Kind, body.PackageId, version))
+		{
+			return Failure(nameof(StoreOperationError.VersionNotFound), $"Version {version} is not available.");
 		}
 
 		var operation = _installCoordinator.Install(body.Kind, body.PackageId, body.Version, body.AllowUnsigned);
@@ -412,6 +454,7 @@ public class StoreController : ControllerBase
 		Trust = item.Trust,
 		HasIcon = item.Entry.LatestRelease.Icon is not null,
 		IconSha256 = item.Entry.LatestRelease.Icon?.Sha256.ToLowerInvariant(),
+		PreviewScreenshotSha256 = PreviewScreenshotSha256(item.Entry),
 		ActiveOperationId = _operationTracker.FindLive(item.Entry.Kind, item.Entry.Id)?.Id
 	};
 
@@ -432,6 +475,7 @@ public class StoreController : ControllerBase
 		Trust = item.Trust,
 		HasIcon = item.Entry.LatestRelease.Icon is not null,
 		IconSha256 = item.Entry.LatestRelease.Icon?.Sha256.ToLowerInvariant(),
+		PreviewScreenshotSha256 = PreviewScreenshotSha256(item.Entry),
 		ActiveOperationId = _operationTracker.FindLive(item.Entry.Kind, item.Entry.Id)?.Id,
 		LongDescription = item.Entry.LongDescription,
 		Changelog = item.Entry.Changelog,
@@ -443,6 +487,16 @@ public class StoreController : ControllerBase
 		DownloadSize = item.Entry.LatestRelease.Size,
 		SupportedOperatingSystems = SupportedOperatingSystems(item.Entry.SupportedRids),
 		Languages = [.. item.Entry.Languages],
+		Tags = [.. item.Entry.Tags],
+		Ai = item.Entry.Ai is { } ai
+			? new StoreAiDeclarationBody
+			{
+				Interaction = ai.Interaction,
+				GeneratedContent = ai.GeneratedContent,
+				GeneratedAssets = ai.GeneratedAssets,
+				Services = [.. ai.Services ?? []]
+			}
+			: null,
 		Screenshots = item.Entry.LatestRelease.Screenshots
 			.Select((asset, index) => new StoreScreenshotBody
 			{
@@ -456,10 +510,22 @@ public class StoreController : ControllerBase
 			{
 				Version = entry.Version,
 				ReleasedAt = entry.ReleasedAt,
-				Changelog = entry.Changelog
+				Changelog = entry.Changelog,
+				Size = entry.Size,
+				Installable = entry.HasRelease && item.InstallState is not StoreInstallState.Unsupported,
+				UnavailableReason = item.InstallState is StoreInstallState.Unsupported
+					? StoreVersionHistoryBody.UnsupportedPlatform
+					: entry.HasRelease
+						? null
+						: StoreVersionHistoryBody.Unavailable
 			})
 			.ToList()
 	};
+
+	private static string? PreviewScreenshotSha256(StoreCatalogEntry entry) =>
+		entry.LatestRelease.Screenshots.Count > 0
+			? entry.LatestRelease.Screenshots[0].Sha256.ToLowerInvariant()
+			: null;
 
 	// A package without a runtime identifier list is portable, which is the common case for icon packs
 	// and templates. Architectures are collapsed to their operating system: the store answers "does this

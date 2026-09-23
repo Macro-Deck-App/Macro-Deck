@@ -1,5 +1,4 @@
 using System.Text.RegularExpressions;
-using MacroDeck.Plugin.Packaging.Versioning;
 using MacroDeckHost.Application.Store.Operations;
 
 namespace MacroDeckHost.Application.Store;
@@ -41,7 +40,7 @@ public sealed partial record StoreDownloadMetadata
 
 		return new StoreDownloadMetadata
 		{
-			Operation = SameVersion(installed, targetVersion)
+			Operation = StoreVersions.Same(installed, targetVersion)
 				? StoreDownloadOperation.Repair
 				: StoreDownloadOperation.Update,
 			OperationId = operationId,
@@ -72,12 +71,6 @@ public sealed partial record StoreDownloadMetadata
 			request.Headers.TryAddWithoutValidation(CurrentVersionHeader, version);
 		}
 	}
-
-	private static bool SameVersion(string installed, string target) =>
-		SemanticVersion.TryParse(installed, out var installedVersion) &&
-		SemanticVersion.TryParse(target, out var targetVersion)
-			? installedVersion.Equals(targetVersion)
-			: string.Equals(installed, target, StringComparison.OrdinalIgnoreCase);
 
 	private static string WireName(StoreDownloadOperation operation) => operation switch
 	{

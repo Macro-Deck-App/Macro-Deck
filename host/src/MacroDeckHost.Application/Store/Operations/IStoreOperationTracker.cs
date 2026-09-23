@@ -17,7 +17,8 @@ public interface IStoreOperationTracker
 		string displayName,
 		string? previousVersion,
 		Guid? retryOf = null,
-		StoreTestBuildReference? testBuild = null);
+		StoreTestBuildReference? testBuild = null,
+		bool versionPinned = false);
 
 	StoreOperation? Transition(Guid operationId,
 		StoreOperationState state,

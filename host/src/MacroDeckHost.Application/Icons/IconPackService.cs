@@ -37,7 +37,8 @@ public class IconPackService : IIconPackService
 	public async Task<Result<IconPackEntity, IconPackError>> Create(string name,
 		string? description,
 		string? author,
-		string? version)
+		string? version,
+		IconPackAiAssets aiAssets = IconPackAiAssets.NotDeclared)
 	{
 		if (string.IsNullOrWhiteSpace(name))
 		{
@@ -51,6 +52,7 @@ public class IconPackService : IIconPackService
 			Description = NormalizeOptional(description),
 			Author = NormalizeOptional(author),
 			Version = NormalizeOptional(version),
+			AiAssets = aiAssets,
 			CreatedAt = DateTime.UtcNow
 		};
 
@@ -63,7 +65,8 @@ public class IconPackService : IIconPackService
 		string name,
 		string? description,
 		string? author,
-		string? version)
+		string? version,
+		IconPackAiAssets? aiAssets = null)
 	{
 		var pack = _iconPackCache.GetPackById(id);
 		if (pack is null)
@@ -86,6 +89,7 @@ public class IconPackService : IIconPackService
 		pack.Description = NormalizeOptional(description);
 		pack.Author = NormalizeOptional(author);
 		pack.Version = NormalizeOptional(version);
+		pack.AiAssets = aiAssets ?? pack.AiAssets;
 		await _iconPackCache.AddOrUpdatePack(pack);
 		await _mediator.Publish(new IconPackUpdatedNotification(pack, _iconPackCache.GetIconCount(pack.Id)));
 		return Result.Ok<IconPackEntity, IconPackError>(pack);

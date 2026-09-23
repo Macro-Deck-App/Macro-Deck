@@ -42,6 +42,9 @@ export const STORE_REVIEW_BODY_MAX = 2000;
 
 const MODERATED_VISIBILITIES = ['hidden', 'removed'];
 const STAR_VALUES = [1, 2, 3, 4, 5] as const;
+const LONG_REVIEW_CHARACTERS = 420;
+const LONG_REVIEW_LINES = 6;
+
 const FILTER_ALL = 'all';
 const LOW_RATING_THRESHOLD = 3;
 
@@ -150,6 +153,29 @@ export class StoreReviewsSectionComponent {
   ]);
 
   protected readonly hasMoreReviews = computed(() => this.reviews().length < this.totalReviews());
+
+  protected readonly hasRatings = computed(() => (this.aggregate()?.ratingCount ?? 0) > 0);
+
+  private readonly expandedReviews = signal<ReadonlySet<string>>(new Set());
+
+  protected isLongReview(review: StoreReviewBody): boolean {
+    const body = review.body ?? '';
+    return body.length > LONG_REVIEW_CHARACTERS || body.split('\n').length > LONG_REVIEW_LINES;
+  }
+
+  protected isExpanded(review: StoreReviewBody): boolean {
+    return this.expandedReviews().has(review.id);
+  }
+
+  protected toggleExpanded(review: StoreReviewBody): void {
+    this.expandedReviews.update(ids => {
+      const next = new Set(ids);
+      if (!next.delete(review.id)) {
+        next.add(review.id);
+      }
+      return next;
+    });
+  }
 
   protected readonly issueUrl = computed(() => githubNewIssueUrl(this.repository()));
 

@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeckHost.Application.Packaging;
 using MacroDeckHost.Domain.Enums;
 
@@ -30,8 +31,11 @@ public sealed class IconPackManifest
 
 	public List<IconManifestEntry> Icons { get; set; } = [];
 
+	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+	public PackageAiDeclaration? Ai { get; set; }
+
 	// IconPackManifest also backs internal pack persistence, and PersistenceJsonOptions.Default does not
-	// ignore nulls globally, so these two must opt out individually to stay absent from unsigned packs.
+	// ignore nulls globally, so these must opt out individually to stay absent when unset.
 	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 	public List<PackageFileDigest>? Files { get; set; }
 

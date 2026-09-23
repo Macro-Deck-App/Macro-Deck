@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Store.Model;
 
 namespace MacroDeckHost.Application.Store.Operations;
@@ -14,11 +15,15 @@ public sealed class StoreOperationTracker : IStoreOperationTracker
 	private readonly ConcurrentDictionary<Guid, RateSample> _rates = new();
 	private readonly IStoreOperationStore _store;
 	private readonly TimeProvider _timeProvider;
+	private readonly IBuildEnvironment _buildEnvironment;
 
-	public StoreOperationTracker(IStoreOperationStore store, TimeProvider timeProvider)
+	public StoreOperationTracker(IStoreOperationStore store,
+		TimeProvider timeProvider,
+		IBuildEnvironment? buildEnvironment = null)
 	{
 		_store = store;
 		_timeProvider = timeProvider;
+		_buildEnvironment = buildEnvironment ?? new BuildEnvironment();
 	}
 
 	public event Action<StoreOperation>? Changed;
@@ -43,7 +48,8 @@ public sealed class StoreOperationTracker : IStoreOperationTracker
 		string displayName,
 		string? previousVersion,
 		Guid? retryOf = null,
-		StoreTestBuildReference? testBuild = null)
+		StoreTestBuildReference? testBuild = null,
+		bool versionPinned = false)
 	{
 		var now = _timeProvider.GetUtcNow();
 		var original = retryOf is { } retried ? Find(retried) : null;
@@ -62,7 +68,9 @@ public sealed class StoreOperationTracker : IStoreOperationTracker
 			RetryOf = retryOf,
 			RootOperationId = original is null ? null : original.RootOperationId ?? original.Id,
 			TestBuildId = testBuild?.BuildId,
-			TestBuild = testBuild?.Build
+			TestBuild = testBuild?.Build,
+			VersionPinned = versionPinned,
+			HostVersion = _buildEnvironment.Version
 		};
 
 		_operations[operation.Id] = operation;
@@ -203,6 +211,11 @@ public sealed class StoreOperationTracker : IStoreOperationTracker
 		var now = _timeProvider.GetUtcNow();
 		foreach (var operation in operations)
 		{
+			if (NoLongerApplies(operation))
+			{
+				continue;
+			}
+
 			_operations[operation.Id] = operation.IsTerminal
 				? operation
 				: operation with
@@ -218,6 +231,16 @@ public sealed class StoreOperationTracker : IStoreOperationTracker
 		Prune();
 		Persist();
 	}
+
+	// A refusal because of the Macro Deck version is only true for the version that refused it, so after
+	// an update the package is offered for install again instead of showing a stale failure.
+	private bool NoLongerApplies(StoreOperation operation) =>
+		operation is
+		{
+			State: StoreOperationState.Failed,
+			Error: StoreOperationError.RequiresNewerMacroDeck or StoreOperationError.Incompatible
+		} &&
+		!string.Equals(operation.HostVersion, _buildEnvironment.Version, StringComparison.Ordinal);
 
 	private void Prune()
 	{

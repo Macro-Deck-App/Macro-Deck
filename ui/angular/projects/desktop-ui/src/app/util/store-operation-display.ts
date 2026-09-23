@@ -1,6 +1,7 @@
 import { AppStrings, StoreExtensionKind, StoreExtensionTrust, StoreOperationBody, StoreOperationState } from '@macro-deck/runtime';
 import { LocalizationService } from '@shared';
 import { formatBytes } from './format-bytes';
+import { compareVersions } from './semver-compare';
 
 const TERMINAL_STATES: ReadonlySet<StoreOperationState> = new Set(['Completed', 'Failed', 'Cancelled']);
 
@@ -97,7 +98,12 @@ export function storeOperationErrorKey(code: string | null | undefined): string 
   switch (code) {
     case 'SignatureInvalid':
     case 'SignatureUntrusted':
+    case 'SignatureUnverifiable':
       return AppStrings.Store.Error.SignatureUnverifiable;
+    case 'RequiresNewerMacroDeck':
+      return AppStrings.Store.Error.RequiresNewerMacroDeck;
+    case 'VersionNotFound':
+      return AppStrings.Store.Error.VersionNotFound;
     case 'UnsignedNotPermitted':
       return AppStrings.Store.Error.UnsignedNotPermitted;
     case 'TrustDowngrade':
@@ -138,6 +144,13 @@ export function storeOperationErrorKey(code: string | null | undefined): string 
     default:
       return AppStrings.Store.Error.Failed;
   }
+}
+
+export function isStoreDowngrade(operation: Pick<StoreOperationBody, 'kind' | 'version' | 'previousVersion'>): boolean {
+  if (operation.kind !== 'Update' || !operation.previousVersion) {
+    return false;
+  }
+  return (compareVersions(operation.version, operation.previousVersion) ?? 0) < 0;
 }
 
 const UNINSTALL_MESSAGE_KEYS: Record<StoreExtensionKind, string> = {

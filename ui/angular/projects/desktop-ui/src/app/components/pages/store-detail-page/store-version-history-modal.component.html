@@ -1,17 +1,30 @@
 <shared-modal [heading]="'macrodeck.app:Store.Page.VersionHistoryAction' | translate" size="medium" [showFooter]="false" (close)="onClose()">
-  <div class="history-list">
+  <ol class="history-list">
     @for (entry of history(); track entry.version) {
-      <div class="history-entry">
+      <li class="history-entry" [class.selected]="isSelected(entry)">
         <div class="history-entry-header">
           <span class="history-entry-version">{{ 'macrodeck.app:Store.Page.VersionLabel' | translate:{ version: entry.version } }}</span>
-          @if (entry.releasedAt) {
-            <span class="history-entry-date">{{ entry.releasedAt | date: 'mediumDate' }}</span>
+          @if (option(entry)?.badge; as badge) {
+            <span class="history-entry-badge" [class.unavailable]="option(entry)?.disabled">{{ badge }}</span>
+          }
+          <span class="history-entry-meta">
+            @if (entry.releasedAt) {
+              <span>{{ entry.releasedAt | date: 'mediumDate' }}</span>
+            }
+            @if (entry.size) {
+              <span>{{ formatBytes(entry.size) }}</span>
+            }
+          </span>
+          @if (selectable() && !option(entry)?.disabled && !isSelected(entry)) {
+            <shared-button variant="ghost" size="compact" (click)="selectVersion.emit(entry.version)">
+              {{ 'macrodeck.app:Store.Page.SelectVersionAction' | translate }}
+            </shared-button>
           }
         </div>
         @if (entry.changelog) {
           <shared-store-markdown [text]="entry.changelog" />
         }
-      </div>
+      </li>
     }
-  </div>
+  </ol>
 </shared-modal>

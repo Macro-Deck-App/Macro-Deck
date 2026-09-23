@@ -77,6 +77,46 @@ public class IconPackRestoreServiceTests
 	}
 
 	[Test]
+	public async Task RestoreAsNewPack_KeepsTheExportedAiDeclaration()
+	{
+		var sourcePack = await _harness.CreatePack("Generated");
+		sourcePack.AiAssets = IconPackAiAssets.Generated;
+		await _harness.Cache.AddOrUpdatePack(sourcePack);
+		await AddReadyIcon(sourcePack, "star", sizes: []);
+		var archive = await Export(sourcePack.Id);
+
+		var result = await _harness.RestoreService.RestoreAsNewPack("Generated.macroDeckIconPack",
+			new MemoryStream(archive),
+			CancellationToken.None);
+
+		var ai = JsonNode.Parse(ReadZipEntryText(archive, "pack.json"))!["ai"]!;
+		Assert.Multiple(() =>
+		{
+			Assert.That(ai["generatedAssets"]!.GetValue<bool>(), Is.True);
+			Assert.That(result.Data!.AiAssets, Is.EqualTo(IconPackAiAssets.Generated));
+		});
+	}
+
+	[Test]
+	public async Task RestoreAsNewPack_UndeclaredPack_StaysUndeclaredAndExportsNoDeclaration()
+	{
+		var sourcePack = await _harness.CreatePack("Plain");
+		await AddReadyIcon(sourcePack, "star", sizes: []);
+		var archive = await Export(sourcePack.Id);
+
+		var result = await _harness.RestoreService.RestoreAsNewPack("Plain.macroDeckIconPack",
+			new MemoryStream(archive),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(JsonNode.Parse(ReadZipEntryText(archive, "pack.json"))!.AsObject().ContainsKey("ai"),
+				Is.False);
+			Assert.That(result.Data!.AiAssets, Is.EqualTo(IconPackAiAssets.NotDeclared));
+		});
+	}
+
+	[Test]
 	public async Task RestoreAsNewPack_SameArchiveTwice_CreatesTwoIndependentPacks()
 	{
 		var sourcePack = await _harness.CreatePack("Twice");
@@ -211,6 +251,54 @@ public class IconPackRestoreServiceTests
 			Assert.That(result.Success, Is.True);
 			Assert.That(_harness.Cache.GetIconsByPackId(result.Data!.Id), Has.Count.EqualTo(1));
 		});
+	}
+
+	[TestCase(IconPackAiAssets.None, IconPackAiAssets.Generated, IconPackAiAssets.Generated)]
+	[TestCase(IconPackAiAssets.None, IconPackAiAssets.NotDeclared, IconPackAiAssets.NotDeclared)]
+	[TestCase(IconPackAiAssets.None, IconPackAiAssets.None, IconPackAiAssets.None)]
+	[TestCase(IconPackAiAssets.Generated, IconPackAiAssets.None, IconPackAiAssets.Generated)]
+	[TestCase(IconPackAiAssets.NotDeclared, IconPackAiAssets.None, IconPackAiAssets.NotDeclared)]
+	public async Task MergeIntoPack_KeepsTheTargetsAiDeclarationTrueForEveryIcon(IconPackAiAssets target,
+		IconPackAiAssets incoming,
+		IconPackAiAssets expected)
+	{
+		var sourcePack = await _harness.CreatePack("Source");
+		sourcePack.AiAssets = incoming;
+		await _harness.Cache.AddOrUpdatePack(sourcePack);
+		await AddReadyIcon(sourcePack, "star", sizes: []);
+		var archive = await Export(sourcePack.Id);
+		var targetPack = await _harness.CreatePack("Target");
+		targetPack.AiAssets = target;
+		await _harness.Cache.AddOrUpdatePack(targetPack);
+
+		var result = await _harness.RestoreService.MergeIntoPack(targetPack.Id,
+			Guid.NewGuid(),
+			"Source.macroDeckIconPack",
+			new MemoryStream(archive),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True);
+			Assert.That(_harness.Cache.GetPackById(targetPack.Id)!.AiAssets, Is.EqualTo(expected));
+		});
+	}
+
+	[Test]
+	public async Task RestoreAsNewPack_ADeclarationWithoutGeneratedAssetsButOtherAiUse_IsNotReadAsNone()
+	{
+		var sourcePack = await _harness.CreatePack("Other");
+		await AddReadyIcon(sourcePack, "star", sizes: []);
+		var archive = await Export(sourcePack.Id);
+		var manifest = JsonNode.Parse(ReadZipEntryText(archive, "pack.json"))!.AsObject();
+		manifest["ai"] = new JsonObject { ["interaction"] = true };
+		var edited = ReplaceZipEntry(archive, "pack.json", Encoding.UTF8.GetBytes(manifest.ToJsonString()));
+
+		var result = await _harness.RestoreService.RestoreAsNewPack("Other.macroDeckIconPack",
+			new MemoryStream(edited),
+			CancellationToken.None);
+
+		Assert.That(result.Data!.AiAssets, Is.EqualTo(IconPackAiAssets.NotDeclared));
 	}
 
 	[Test]

@@ -56,6 +56,14 @@ Plugins and icon packs from the Store have their own updates, set in **Settings 
   listing what was updated, or what failed. It is off by default. An automatic update that failed is not
   retried until Macro Deck restarts; update it from **Installed** instead.
 
+If you install an older version of a plugin or icon pack on purpose, or any version other than the latest,
+Macro Deck keeps it: automatic updates and update notifications skip that item until you update it yourself,
+from its page, its card or **Update all**. **Installed** still shows the newer version as available.
+
+A failed install or update offers **Retry** only when trying again can help, for example after a download
+failed. When the item needs a newer Macro Deck, the Store offers **Check for updates** instead; when it does not
+run on your platform or version, it says so without a button to try again.
+
 Automatic updates only replace plugins and icon packs you installed from the Store. A plugin you
 installed from a file, or one installed from the Store before this setting existed, is announced instead;
 update it once from the Store to include it. Profile templates are never updated automatically.
@@ -69,7 +77,8 @@ rather not wait for it.
 
 When Macro Deck downloads a plugin, icon pack or profile template from the Store, for a first install, an
 update or a reinstall, it tells the Store which of the three it is, so downloads can be counted per
-version. An update or reinstall also sends the version you had installed. Each install or update action gets
+version. An update or reinstall also sends the version you had installed. Replacing an installed version with an older
+one counts as an update. Each install or update action gets
 its own temporary ID, which a retry of that action reuses so it is counted once.
 
 The download sends no account, device or installation ID, and no list of your other extensions. Test builds

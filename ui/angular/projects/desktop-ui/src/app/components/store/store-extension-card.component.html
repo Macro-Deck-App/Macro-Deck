@@ -1,4 +1,18 @@
-<div class="store-card">
+<article class="store-card" [class.tile]="variant() === 'tile'" [attr.data-kind]="item().kind">
+  @if (variant() === 'tile') {
+    <div class="card-artwork" aria-hidden="true">
+      @if (artworkUrl(); as artwork) {
+        @if (!artworkFailed()) {
+          <img [src]="artwork" alt="" loading="lazy" (error)="onArtworkError()">
+        } @else {
+          <ng-container [ngTemplateOutlet]="artworkFallback" />
+        }
+      } @else {
+        <ng-container [ngTemplateOutlet]="artworkFallback" />
+      }
+    </div>
+  }
+
   <div class="card-top">
     <div class="card-icon">
       @if (iconUrl(); as icon) {
@@ -14,15 +28,27 @@
 
     <div class="card-identity">
       <h3 class="card-title">
-        <a class="card-title-link" [routerLink]="['/store', item().kind, item().id]">{{ item().name }}</a>
+        <a class="card-title-link" [routerLink]="detailLink()">{{ item().name }}</a>
       </h3>
-
-      <div class="card-meta">
-        @if (publisherText(); as publisher) {
-          <span class="card-meta-text">{{ publisher }}</span>
-          <span class="card-meta-separator" aria-hidden="true">·</span>
+      @if (publisherText(); as publisher) {
+        <a class="card-publisher" [routerLink]="['/store']" [queryParams]="{ publisher: item().publisher }">{{ publisher }}</a>
+      }
+      <div class="card-tags">
+        <span class="kind-chip" [attr.data-kind]="item().kind">
+          <span class="icon icon-{{ kindIcon() }} icon-xs" aria-hidden="true"></span>
+          {{ kindLabel() }}
+        </span>
+        @if (featured()) {
+          <span class="store-badge" data-badge="featured">
+            <span class="icon icon-star icon-xs" aria-hidden="true"></span>
+            {{ 'macrodeck.app:Store.Page.FeaturedBadge' | translate }}
+          </span>
         }
-        <span class="card-meta-text">{{ kindLabel() }}</span>
+        @if (freshness() === 'new') {
+          <span class="store-badge" data-badge="new">{{ 'macrodeck.app:Store.Page.NewBadge' | translate }}</span>
+        } @else if (freshness() === 'updated') {
+          <span class="store-badge" data-badge="updated">{{ 'macrodeck.app:Store.Page.UpdatedBadge' | translate }}</span>
+        }
         @if (takenOver()) {
           <span class="takeover-chip">
             <span class="icon icon-alert-triangle icon-xs" aria-hidden="true"></span>
@@ -34,22 +60,8 @@
             {{ label }}
           </span>
         }
-        @if (rating(); as rating) {
-          <span class="card-rating">
-            <shared-store-rating-stars [rating]="rating.value" />
-            <span class="card-rating-value" aria-hidden="true">{{ rating.text }}</span>
-            <span class="card-meta-text">{{ rating.count }}</span>
-          </span>
-        }
       </div>
     </div>
-
-    @if (installs(); as installs) {
-      <span class="card-installs" role="img" [attr.aria-label]="installs.label">
-        <span class="icon icon-download icon-xs" aria-hidden="true"></span>
-        <span aria-hidden="true">{{ installs.text }}</span>
-      </span>
-    }
   </div>
 
   @if (item().description) {
@@ -57,17 +69,47 @@
   }
 
   <div class="card-footer">
-    @if (item().installState !== 'UpdateAvailable') {
-      <shared-store-state-badge [state]="item().installState" tone="quiet" />
-    }
+    <div class="card-stats">
+      @if (rating(); as rating) {
+        <span class="card-rating">
+          <shared-store-rating-stars [rating]="rating.value" size="xs" />
+          <span class="card-rating-value" aria-hidden="true">{{ rating.text }}</span>
+          <span class="card-stat-muted">({{ rating.count }})</span>
+        </span>
+      }
+      @if (installs(); as installs) {
+        <span class="card-installs" role="img" [attr.aria-label]="installs.label">
+          <span class="icon icon-download icon-xs" aria-hidden="true"></span>
+          <span aria-hidden="true">{{ installs.text }}</span>
+        </span>
+      }
+    </div>
     <div class="card-install">
       <shared-store-install-button
         [item]="item()"
         [operation]="operation()"
+        [updatesAvailable]="updatesAvailable()"
         (install)="install.emit()"
-        (installUnsigned)="installUnsigned.emit()"
+        (installUnsigned)="installUnsigned.emit($event)"
         (retry)="retry.emit()"
-        (uninstall)="uninstall.emit()" />
+        (uninstall)="uninstall.emit()"
+        (checkForUpdates)="checkForUpdates.emit()"
+        (viewDetails)="openDetails()" />
     </div>
   </div>
-</div>
+</article>
+
+<ng-template #artworkFallback>
+  <div class="artwork-fallback">
+    @if (iconUrl(); as icon) {
+      @if (!iconFailed()) {
+        <img class="artwork-backdrop" [src]="icon" alt="" loading="lazy">
+        <img class="artwork-icon" [src]="icon" alt="" loading="lazy">
+      } @else {
+        <span class="icon icon-{{ kindIcon() }} icon-2xl"></span>
+      }
+    } @else {
+      <span class="icon icon-{{ kindIcon() }} icon-2xl"></span>
+    }
+  </div>
+</ng-template>

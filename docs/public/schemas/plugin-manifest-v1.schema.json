@@ -123,6 +123,11 @@
       "x-macrodeck-requirement": "recommended",
       "description": "The languages this plugin's own user-facing strings are available in, as BCP-47 tags. Lets a store list a plugin's languages before it is installed; once it is installed and running, the localization capability it serves is the authority. Full tags, never truncated to a two-letter code - 'zh-Hans' and 'zh-Hant' are different languages to a reader and both would collapse onto 'zh'."
     },
+    "ai": {
+      "$ref": "#/$defs/aiDeclaration",
+      "x-macrodeck-requirement": "recommended",
+      "description": "The plugin's self-declaration about artificial intelligence, shown with its Store listing. Omitting it declares nothing, which the Store shows as 'not declared', never as 'uses no AI'; an object with every flag false and no services states that the plugin uses no AI, while a service list alone still declares AI use. Declarative only: the host never enforces it, and a malformed value never stops the plugin from installing or running."
+    },
     "dependencies": {
       "type": "array",
       "items": {
@@ -177,6 +182,43 @@
       "pattern": "^[A-Za-z]{2,3}(-[A-Za-z]{4})?(-([A-Za-z]{2}|[0-9]{3}))?$",
       "$comment": "The same shape MDLOC005 checks a Localization/Strings.<culture>.resx suffix against (MacroDeck.Localization.Compiler.LocalizationCultureName), so a resource file the SDK accepts always produces a tag this schema accepts. A shape check, not a registry lookup: no validator can know which subtags IANA has registered, and the host deliberately does not reject an unrecognised one.",
       "description": "A BCP-47 language tag of the shapes Macro Deck resources use: 'de', 'de-DE', 'zh-Hans' or 'zh-Hant-TW' - a 2-3 letter language, an optional 4-letter script, and an optional 2-letter or 3-digit region."
+    },
+    "aiDeclaration": {
+      "type": "object",
+      "$comment": "The host reader never rejects a manifest over this object: a flag that is not a boolean (null included), or a services value that is not an array or keeps no readable name, makes the whole declaration read as absent (never as 'uses no AI'); otherwise blank, over-long or duplicated service names are dropped (MacroDeck.Plugin.Packaging.Manifest.PackageAiDeclaration). The same shape is used by icon pack manifests and the Store registry.",
+      "properties": {
+        "interaction": {
+          "type": "boolean",
+          "default": false,
+          "x-macrodeck-requirement": "recommended",
+          "description": "Users interact with an AI system through the plugin, for example a chatbot, a voice assistant or a conversational agent."
+        },
+        "generatedContent": {
+          "type": "boolean",
+          "default": false,
+          "x-macrodeck-requirement": "recommended",
+          "description": "The plugin generates images, audio, video or text with AI while it runs."
+        },
+        "generatedAssets": {
+          "type": "boolean",
+          "default": false,
+          "x-macrodeck-requirement": "recommended",
+          "description": "The plugin ships assets, such as icons, images, sounds or texts, that were created or substantially changed with AI."
+        },
+        "services": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "maxItems": 16,
+          "x-macrodeck-requirement": "recommended",
+          "uniqueItems": true,
+          "description": "Display names of the external AI services the plugin uses, such as a model provider. Shown as plain text in the Store."
+        }
+      },
+      "description": "What a package declares about its use of artificial intelligence."
     },
     "versionRange": {
       "type": "string",
@@ -567,6 +609,12 @@
       },
       "permissions": ["host:variables", "net:outbound"],
       "languages": ["en", "de", "zh-Hant-TW"],
+      "ai": {
+        "interaction": true,
+        "generatedContent": false,
+        "generatedAssets": false,
+        "services": ["OpenAI"]
+      },
       "dependencies": [
         { "id": "com.example.core", "versionRange": ">=1.0.0,<2.0.0", "optional": false },
         { "id": "com.example.extras", "optional": true }

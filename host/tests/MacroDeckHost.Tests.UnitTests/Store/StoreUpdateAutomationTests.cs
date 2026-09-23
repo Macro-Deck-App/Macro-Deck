@@ -351,6 +351,42 @@ internal sealed class StoreUpdateAutomationTests
 		});
 	}
 
+	[Test]
+	public async Task An_older_version_the_user_chose_is_neither_updated_automatically_nor_nagged_about()
+	{
+		await EnableAutoUpdate();
+		InstallFromStore("1.0.0");
+		_installations.Save(_installations.Find(StoreExtensionKind.Plugin, PluginId)! with { Held = true });
+
+		await _autoUpdater.Apply([PluginUpdate("1.1.0")]);
+		await _notifier.Notify([PluginUpdate("1.1.0")]);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_installer.Started, Is.Empty);
+			Assert.That(_notifications.Snapshot(), Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_held_icon_pack_is_not_announced_even_with_automatic_updates_off()
+	{
+		SaveRecord(StoreExtensionKind.IconPack, IconPackId, "1.0.0");
+		_installations.Save(_installations.Find(StoreExtensionKind.IconPack, IconPackId)! with { Held = true });
+		var update = new StoreAvailableUpdate
+		{
+			Kind = StoreExtensionKind.IconPack,
+			PackageId = IconPackId,
+			Name = "Material",
+			InstalledVersion = "1.0.0",
+			LatestVersion = "2.0.0"
+		};
+
+		await _notifier.Notify([update]);
+
+		Assert.That(_notifications.Snapshot(), Is.Empty);
+	}
+
 	private async Task EnableAutoUpdate(bool markFresh = true)
 	{
 		await _preferences.SetExtensions(null, null, null, null, autoUpdate: true);

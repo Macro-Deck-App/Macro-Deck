@@ -11,5 +11,9 @@ public enum StoreCatalogSection
 	Newest,
 	RecentlyUpdated,
 	Name,
-	Featured
+	Featured,
+
+	// Ordered by install counts the catalog does not hold, so StoreCatalogPopularity answers it; the
+	// query service alone treats it like All.
+	Popular
 }

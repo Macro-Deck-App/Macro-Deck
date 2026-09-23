@@ -158,6 +158,7 @@
 .store-installed {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-2);
 }
 
@@ -185,4 +186,95 @@
 
 .progress-separator {
   color: var(--color-text-muted);
+}
+
+.unsupported-note {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.store-blocked {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+
+  .failed-message {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-1);
+    margin: 0;
+    font-size: var(--text-xs);
+    color: var(--color-warning);
+  }
+
+  &.prominent .failed-message {
+    font-size: var(--text-sm);
+  }
+
+  .failed-actions {
+    flex-wrap: wrap;
+  }
+}
+
+:host(.prominent) {
+  width: 100%;
+
+  .store-installed {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-1);
+  }
+
+  .test-build-chip {
+    align-self: flex-start;
+  }
+}
+
+.store-blocked.prominent {
+  border-color: color-mix(in srgb, var(--color-warning) 35%, transparent);
+  background: color-mix(in srgb, var(--color-warning) 10%, transparent);
+
+  .failed-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+}
+
+.installed-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 0;
+  min-height: var(--control-height);
+  border: 1px solid color-mix(in srgb, var(--color-success) 30%, transparent);
+  border-radius: var(--radius-md);
+  background-color: var(--color-success-muted);
+  color: var(--color-success);
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+}
+
+.manage-row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+
+  .manage-main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .manage-uninstall {
+    flex-shrink: 0;
+
+    &:hover .icon {
+      color: var(--color-danger);
+    }
+  }
 }

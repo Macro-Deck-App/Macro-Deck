@@ -3482,6 +3482,21 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="IconPacks.AddIconPack" xml:space="preserve">
     <value>Přidat sadu ikon</value>
   </data>
+  <data name="IconPacks.AiFieldHint" xml:space="preserve">
+    <value>Zobrazí se ve Store po zveřejnění této sady.</value>
+  </data>
+  <data name="IconPacks.AiFieldLabel" xml:space="preserve">
+    <value>Ikony vytvořené pomocí AI</value>
+  </data>
+  <data name="IconPacks.AiGenerated" xml:space="preserve">
+    <value>Obsahuje ikony vytvořené pomocí AI</value>
+  </data>
+  <data name="IconPacks.AiNone" xml:space="preserve">
+    <value>Žádné ikony vytvořené pomocí AI</value>
+  </data>
+  <data name="IconPacks.AiNotDeclared" xml:space="preserve">
+    <value>Neuvedeno</value>
+  </data>
   <data name="IconPacks.AuthorFieldLabel" xml:space="preserve">
     <value>Autor</value>
   </data>
@@ -4459,6 +4474,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Detail.VersionFieldLabel" xml:space="preserve">
     <value>Verze</value>
+  </data>
+  <data name="Integrations.Detail.ViewInStoreAction" xml:space="preserve">
+    <value>Zobrazit ve Store</value>
   </data>
   <data name="Integrations.Discord.Actions.AutomaticGainControl.Description" xml:space="preserve">
     <value>Zapne nebo vypne automatické řízení zisku. Zatímco je aktivní potlačení šumu Krisp, pokročilá hlasová nastavení Discordu mohou být ignorována.</value>
@@ -11791,8 +11809,16 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Aktualizace {name} se nezdařila</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.StoreExtensionDowngradeFailed" xml:space="preserve">
+    <value>Instalace starší verze se nezdařila: {name}</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.StoreExtensionUpdated" xml:space="preserve">
     <value>Aktualizováno: {name}</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.StoreExtensionDowngraded" xml:space="preserve">
+    <value>Nainstalována starší verze: {name}</value>
     <comment>[name:string]</comment>
   </data>
   <data name="Notifications.StoreUpdatesAvailable.One" xml:space="preserve">
@@ -14228,11 +14254,17 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Cancelled" xml:space="preserve">
     <value>Zrušeno</value>
   </data>
+  <data name="Store.ChooseVersion" xml:space="preserve">
+    <value>Vybrat jinou verzi</value>
+  </data>
   <data name="Store.Details" xml:space="preserve">
     <value>Podrobnosti</value>
   </data>
   <data name="Store.Dismiss" xml:space="preserve">
     <value>Zavřít</value>
+  </data>
+  <data name="Store.DowngradeTo" xml:space="preserve">
+    <value>Přejít zpět na {version}</value>
   </data>
   <data name="Store.DownloadReadout" xml:space="preserve">
     <value>{downloaded} z {total}</value>
@@ -14259,6 +14291,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Error.Incompatible" xml:space="preserve">
     <value>Tato verze není kompatibilní s touto verzí Macro Decku.</value>
   </data>
+  <data name="Store.Error.RequiresNewerMacroDeck" xml:space="preserve">
+    <value>Tato verze vyžaduje novější verzi Macro Decku.</value>
+  </data>
   <data name="Store.Error.Interrupted" xml:space="preserve">
     <value>Macro Deck byl ukončen, zatímco toto ještě probíhalo.</value>
   </data>
@@ -14282,6 +14317,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Store.Error.UnsignedNotPermitted" xml:space="preserve">
     <value>Tento balíček není podepsán, takže Macro Deck nemůže ověřit, kdo ho publikoval, ani zda od té doby nebyl změněn. Nebyl nainstalován.</value>
+  </data>
+  <data name="Store.Error.VersionNotFound" xml:space="preserve">
+    <value>Tato verze není ve Store k dispozici.</value>
   </data>
   <data name="Store.Error.Unsupported" xml:space="preserve">
     <value>Toto rozšíření tuto platformu nepodporuje.</value>
@@ -14316,6 +14354,24 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Store.Failed" xml:space="preserve">
     <value>Selhalo</value>
+  </data>
+  <data name="Store.Footer.Copyright" xml:space="preserve">
+    <value>© {year} Macro Deck.</value>
+  </data>
+  <data name="Store.Footer.CreatorPortalAction" xml:space="preserve">
+    <value>Otevřít Creator Portal</value>
+  </data>
+  <data name="Store.Footer.Imprint" xml:space="preserve">
+    <value>Tiráž</value>
+  </data>
+  <data name="Store.Footer.LegalAriaLabel" xml:space="preserve">
+    <value>Právní informace</value>
+  </data>
+  <data name="Store.Footer.PublishBody" xml:space="preserve">
+    <value>Plugin nebo sadu ikon lze odeslat přes Creator Portal a sdílet se všemi uživateli Macro Deck.</value>
+  </data>
+  <data name="Store.Footer.PublishHeading" xml:space="preserve">
+    <value>Publikování na Macro Deck</value>
   </data>
   <data name="Store.IconImport.CancelledKeptCount.One" xml:space="preserve">
     <value>Zrušeno – zachována {count} ikona</value>
@@ -14365,6 +14421,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.InstallAnyway" xml:space="preserve">
     <value>Přesto instalovat</value>
   </data>
+  <data name="Store.InstallVersion" xml:space="preserve">
+    <value>Nainstalovat {version}</value>
+  </data>
   <data name="Store.InstallationFailed" xml:space="preserve">
     <value>Instalace se nezdařila</value>
   </data>
@@ -14395,11 +14454,39 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.OperationFailed" xml:space="preserve">
     <value>Operace se nezdařila</value>
   </data>
+  <data name="Store.Page.AiDeclaredByPublisher" xml:space="preserve">
+    <value>Podle údajů vydavatele.</value>
+  </data>
+  <data name="Store.Page.AiGeneratedAssets" xml:space="preserve">
+    <value>Obsahuje obrázky, zvuky nebo texty vytvořené pomocí AI</value>
+  </data>
+  <data name="Store.Page.AiGeneratedContent" xml:space="preserve">
+    <value>Generuje obsah pomocí AI</value>
+  </data>
+  <data name="Store.Page.AiHeading" xml:space="preserve">
+    <value>AI</value>
+  </data>
+  <data name="Store.Page.AiInteraction" xml:space="preserve">
+    <value>Umožňuje interakci se systémem AI</value>
+  </data>
+  <data name="Store.Page.AiNone" xml:space="preserve">
+    <value>Nepoužívá AI</value>
+  </data>
+  <data name="Store.Page.AiNotDeclared" xml:space="preserve">
+    <value>Vydavatel neuvedl, zda tento balíček používá AI.</value>
+  </data>
+  <data name="Store.Page.AiServices" xml:space="preserve">
+    <value>Služby AI: {services}</value>
+    <comment>[services:string]</comment>
+  </data>
   <data name="Store.Page.AllPlatforms" xml:space="preserve">
     <value>Všechny platformy</value>
   </data>
   <data name="Store.Page.AllSectionHeading" xml:space="preserve">
     <value>Vše</value>
+  </data>
+  <data name="Store.Page.AllVersionsAction" xml:space="preserve">
+    <value>Všechny verze ({count})</value>
   </data>
   <data name="Store.Page.BackToStore" xml:space="preserve">
     <value>Zpět do Store</value>
@@ -14417,11 +14504,20 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Page.ComingSoonTestsAction" xml:space="preserve">
     <value>Otevřít testy</value>
   </data>
+  <data name="Store.Page.CompatibilityCheckedHint" xml:space="preserve">
+    <value>Kompatibilita s touto verzí Macro Deck se ověřuje při instalaci.</value>
+  </data>
   <data name="Store.Page.CompatibilityField" xml:space="preserve">
     <value>Kompatibilita</value>
   </data>
   <data name="Store.Page.DetailsHeading" xml:space="preserve">
     <value>Podrobnosti</value>
+  </data>
+  <data name="Store.Page.DowngradeConfirmHeading" xml:space="preserve">
+    <value>Nainstalovat starší verzi?</value>
+  </data>
+  <data name="Store.Page.DowngradeConfirmMessage" xml:space="preserve">
+    <value>{name} {installed} bude nahrazen verzí {version}. Automatické aktualizace budou {name} vynechávat až do ruční aktualizace na nejnovější verzi.</value>
   </data>
   <data name="Store.Page.EmptyCatalogHeading" xml:space="preserve">
     <value>Ve Store zatím nic není</value>
@@ -14432,8 +14528,28 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Page.ExtensionNotFound" xml:space="preserve">
     <value>Toto rozšíření se nepodařilo najít.</value>
   </data>
+  <data name="Store.Page.FeaturedBadge" xml:space="preserve">
+    <value>Doporučeno</value>
+  </data>
   <data name="Store.Page.FeaturedSectionHeading" xml:space="preserve">
     <value>Doporučené</value>
+  </data>
+  <data name="Store.Page.FeaturedSectionSubheading" xml:space="preserve">
+    <value>Výběr týmu Macro Deck</value>
+  </data>
+  <data name="Store.Page.HeroHeading" xml:space="preserve">
+    <value>Rozšíření pro Macro Deck</value>
+  </data>
+  <data name="Store.Page.HeroSubheading" xml:space="preserve">
+    <value>Pluginy a sady ikon, které do decku přidávají nové akce, widgety a vzhledy.</value>
+  </data>
+  <data name="Store.Page.HiddenUnsupported.One" xml:space="preserve">
+    <value>Skryto kvůli nedostupnosti pro tuto platformu: {count}</value>
+    <comment>[plural][count:int] Discover page note under the filter bar when the supported-only filter hides items.</comment>
+  </data>
+  <data name="Store.Page.HiddenUnsupported.Other" xml:space="preserve">
+    <value>Skryto kvůli nedostupnosti pro tuto platformu: {count}</value>
+    <comment>[plural][count:int] Discover page note under the filter bar when the supported-only filter hides items.</comment>
   </data>
   <data name="Store.Page.InstallCount.One" xml:space="preserve">
     <value>Instalace: {installs}</value>
@@ -14530,11 +14646,29 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Page.LoadingExtension" xml:space="preserve">
     <value>Načítání rozšíření…</value>
   </data>
+  <data name="Store.Page.MadeWithAiBadge" xml:space="preserve">
+    <value>Vytvořeno pomocí AI</value>
+  </data>
+  <data name="Store.Page.MoreActionsAriaLabel" xml:space="preserve">
+    <value>Další akce Store</value>
+  </data>
   <data name="Store.Page.NewAndUpdatedSectionHeading" xml:space="preserve">
     <value>Nové a aktualizované</value>
   </data>
+  <data name="Store.Page.NewAndUpdatedSectionSubheading" xml:space="preserve">
+    <value>Nedávná vydání a aktualizace</value>
+  </data>
+  <data name="Store.Page.NewBadge" xml:space="preserve">
+    <value>Nové</value>
+  </data>
   <data name="Store.Page.NextScreenshotAriaLabel" xml:space="preserve">
     <value>Další snímek obrazovky</value>
+  </data>
+  <data name="Store.Page.NoChangelog" xml:space="preserve">
+    <value>K této verzi nejsou poznámky k vydání.</value>
+  </data>
+  <data name="Store.Page.NoDescription" xml:space="preserve">
+    <value>Vydavatel zatím nepřidal popis.</value>
   </data>
   <data name="Store.Page.NoResultsHeading" xml:space="preserve">
     <value>Nebyla nalezena žádná rozšíření</value>
@@ -14542,8 +14676,29 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Page.NoResultsMessage" xml:space="preserve">
     <value>Zkuste jiný hledaný výraz nebo filtr typu.</value>
   </data>
+  <data name="Store.Page.OlderVersionHoldHint" xml:space="preserve">
+    <value>Automatické aktualizace tento prvek vynechají až do aktualizace na nejnovější verzi.</value>
+  </data>
+  <data name="Store.Page.OpenInLibraryAction" xml:space="preserve">
+    <value>Otevřít v knihovně</value>
+  </data>
+  <data name="Store.Page.OpenSettingsAction" xml:space="preserve">
+    <value>Otevřít nastavení</value>
+  </data>
   <data name="Store.Page.OverviewHeading" xml:space="preserve">
     <value>Přehled</value>
+  </data>
+  <data name="Store.Page.PlatformNotSupported" xml:space="preserve">
+    <value>{platform}: nepodporováno</value>
+  </data>
+  <data name="Store.Page.PlatformSupported" xml:space="preserve">
+    <value>{platform}: podporováno</value>
+  </data>
+  <data name="Store.Page.PopularSectionHeading" xml:space="preserve">
+    <value>Oblíbené</value>
+  </data>
+  <data name="Store.Page.PopularSectionSubheading" xml:space="preserve">
+    <value>Nejčastěji instalované</value>
   </data>
   <data name="Store.Page.PreviousScreenshotAriaLabel" xml:space="preserve">
     <value>Předchozí snímek obrazovky</value>
@@ -14551,8 +14706,20 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Page.PublisherField" xml:space="preserve">
     <value>Vydavatel</value>
   </data>
+  <data name="Store.Page.PublisherFilterNote" xml:space="preserve">
+    <value>Zobrazeny jsou jen prvky od vydavatele {publisher}.</value>
+  </data>
+  <data name="Store.Page.PublisherHeading" xml:space="preserve">
+    <value>Vše od vydavatele {publisher}</value>
+  </data>
   <data name="Store.Page.RefreshAction" xml:space="preserve">
     <value>Obnovit</value>
+  </data>
+  <data name="Store.Page.RefreshStoreAction" xml:space="preserve">
+    <value>Obnovit Store</value>
+  </data>
+  <data name="Store.Page.ReleasedField" xml:space="preserve">
+    <value>Vydáno</value>
   </data>
   <data name="Store.Page.RepositoryLink" xml:space="preserve">
     <value>Repozitář</value>
@@ -14577,14 +14744,32 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Snímek obrazovky {position} z {total}</value>
     <comment>[position:int][total:int]</comment>
   </data>
+  <data name="Store.Page.ScrollBackAction" xml:space="preserve">
+    <value>Posunout zpět</value>
+  </data>
+  <data name="Store.Page.ScrollForwardAction" xml:space="preserve">
+    <value>Posunout vpřed</value>
+  </data>
   <data name="Store.Page.SearchAriaLabel" xml:space="preserve">
     <value>Hledat ve Store</value>
   </data>
   <data name="Store.Page.SearchPlaceholder" xml:space="preserve">
     <value>Hledat pluginy a sady ikon…</value>
   </data>
+  <data name="Store.Page.SearchResultsFor" xml:space="preserve">
+    <value>Výsledky pro „{query}“</value>
+  </data>
   <data name="Store.Page.SearchResultsSectionHeading" xml:space="preserve">
     <value>Výsledky hledání</value>
+  </data>
+  <data name="Store.Page.SelectVersionAction" xml:space="preserve">
+    <value>Vybrat</value>
+  </data>
+  <data name="Store.Page.ShowAllAction" xml:space="preserve">
+    <value>Zobrazit vše</value>
+  </data>
+  <data name="Store.Page.SimilarHeading" xml:space="preserve">
+    <value>Mohlo by se také líbit</value>
   </data>
   <data name="Store.Page.SizeField" xml:space="preserve">
     <value>Velikost</value>
@@ -14601,14 +14786,26 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Page.SortNewest" xml:space="preserve">
     <value>Nejnovější</value>
   </data>
+  <data name="Store.Page.SortPopular" xml:space="preserve">
+    <value>Nejoblíbenější</value>
+  </data>
   <data name="Store.Page.SortRecentlyUpdated" xml:space="preserve">
     <value>Nedávno aktualizováno</value>
   </data>
   <data name="Store.Page.StaleCatalogMessage" xml:space="preserve">
     <value>Katalog Store se nepodařilo obnovit – zobrazuje se poslední známý seznam.</value>
   </data>
+  <data name="Store.Page.StoreSettingsAction" xml:space="preserve">
+    <value>Nastavení Store</value>
+  </data>
   <data name="Store.Page.Subtitle" xml:space="preserve">
     <value>Procházejte pluginy a sady ikon z registru Macro Deck</value>
+  </data>
+  <data name="Store.Page.SupportedOnPlatform" xml:space="preserve">
+    <value>K dispozici pro tuto platformu</value>
+  </data>
+  <data name="Store.Page.SupportedOnlyLabel" xml:space="preserve">
+    <value>Jen dostupné pro tuto platformu</value>
   </data>
   <data name="Store.Page.TabDiscover" xml:space="preserve">
     <value>Objevovat</value>
@@ -14618,6 +14815,17 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
     <value>Sekce Store</value>
+  </data>
+  <data name="Store.Page.TagFilterNote" xml:space="preserve">
+    <value>Zobrazeny jsou jen prvky se štítkem {tag}.</value>
+    <comment>[tag:string]</comment>
+  </data>
+  <data name="Store.Page.TagHeading" xml:space="preserve">
+    <value>Vše se štítkem {tag}</value>
+    <comment>[tag:string]</comment>
+  </data>
+  <data name="Store.Page.TagsHeading" xml:space="preserve">
+    <value>Štítky</value>
   </data>
   <data name="Store.Page.Title" xml:space="preserve">
     <value>Store</value>
@@ -14631,8 +14839,14 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Page.UpdateAllAction" xml:space="preserve">
     <value>Aktualizovat vše</value>
   </data>
+  <data name="Store.Page.UpdatedBadge" xml:space="preserve">
+    <value>Aktualizováno</value>
+  </data>
   <data name="Store.Page.UpdatedField" xml:space="preserve">
     <value>Aktualizováno</value>
+  </data>
+  <data name="Store.Page.UsesAiBadge" xml:space="preserve">
+    <value>Používá AI</value>
   </data>
   <data name="Store.Page.VersionField" xml:space="preserve">
     <value>Verze</value>
@@ -14643,6 +14857,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Page.VersionLabel" xml:space="preserve">
     <value>Verze {version}</value>
     <comment>[version:string]</comment>
+  </data>
+  <data name="Store.Page.VersionLatestBadge" xml:space="preserve">
+    <value>Nejnovější</value>
+  </data>
+  <data name="Store.Page.VersionUnavailableReason" xml:space="preserve">
+    <value>Tuto verzi nelze nainstalovat ze Store.</value>
   </data>
   <data name="Store.Page.WhatsNewHeading" xml:space="preserve">
     <value>Co je nového?</value>
@@ -14762,6 +14982,21 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.RetryInstallation" xml:space="preserve">
     <value>Zkusit instalaci znovu</value>
   </data>
+  <data name="Store.Reviews.NoRatingsYet" xml:space="preserve">
+    <value>Zatím bez hodnocení.</value>
+  </data>
+  <data name="Store.Reviews.OnlyRatings" xml:space="preserve">
+    <value>Zatím jen hodnocení hvězdičkami, bez psaných recenzí.</value>
+  </data>
+  <data name="Store.Reviews.ShowLessAction" xml:space="preserve">
+    <value>Zobrazit méně</value>
+  </data>
+  <data name="Store.Reviews.ShowMoreAction" xml:space="preserve">
+    <value>Zobrazit více</value>
+  </data>
+  <data name="Store.Reviews.YouBadge" xml:space="preserve">
+    <value>Vlastní</value>
+  </data>
   <data name="Store.State.Installed" xml:space="preserve">
     <value>Nainstalováno</value>
   </data>
@@ -14827,6 +15062,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Store.ValidatingEllipsis" xml:space="preserve">
     <value>Ověřování…</value>
+  </data>
+  <data name="Store.VersionUnavailable" xml:space="preserve">
+    <value>Není k dispozici</value>
   </data>
   <data name="Store.WhatMacroDeckReported" xml:space="preserve">
     <value>Co Macro Deck ohlásil</value>

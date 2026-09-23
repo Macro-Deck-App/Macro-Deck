@@ -14,6 +14,9 @@ export interface StoreCatalogQuery {
   kinds?: StoreExtensionKind[];
   search?: string;
   section?: StoreCatalogSection;
+  supportedOnly?: boolean;
+  publisher?: string;
+  tag?: string;
 }
 
 export const STORE_CATALOG_PAGE_SIZE = 24;

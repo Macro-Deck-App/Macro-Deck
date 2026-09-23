@@ -75,6 +75,9 @@ public sealed class StoreAutoUpdater : IDisposable
 		return IsInstalledFromStore(update);
 	}
 
+	public bool IsHeld(StoreAvailableUpdate update) =>
+		_installations.Find(update.Kind, update.PackageId) is { Held: true };
+
 	public async Task Apply(IReadOnlyList<StoreAvailableUpdate> updates, CancellationToken cancellationToken = default)
 	{
 		lock (_sync)
@@ -137,7 +140,7 @@ public sealed class StoreAutoUpdater : IDisposable
 		}
 
 		var record = _installations.Find(update.Kind, update.PackageId);
-		if (record is null)
+		if (record is null or { Held: true })
 		{
 			return false;
 		}

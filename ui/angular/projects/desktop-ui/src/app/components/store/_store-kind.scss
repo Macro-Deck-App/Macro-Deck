@@ -1,0 +1,39 @@
+@use '../../../styles/index' as ds;
+
+@mixin kind-chip {
+  @include ds.badge;
+  font-weight: var(--font-medium);
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-tertiary);
+
+  &[data-kind='Plugin'] {
+    color: var(--type-integration-fg);
+    background-color: var(--type-integration-bg);
+  }
+
+  &[data-kind='IconPack'] {
+    color: var(--type-resource-fg);
+    background-color: var(--type-resource-bg);
+  }
+
+  &[data-kind='ProfileTemplate'] {
+    color: var(--type-system-fg);
+    background-color: var(--type-system-bg);
+  }
+}
+
+@mixin store-badge {
+  @include ds.badge;
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-tertiary);
+
+  &[data-badge='featured'] {
+    color: var(--color-accent);
+    background-color: var(--color-accent-muted);
+  }
+
+  &[data-badge='new'] {
+    color: var(--color-success);
+    background-color: var(--color-success-muted);
+  }
+}

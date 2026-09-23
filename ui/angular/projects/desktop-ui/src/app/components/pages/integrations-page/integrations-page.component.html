@@ -199,94 +199,72 @@
         <div class="integrations-list">
           @for (integration of displayedIntegrations(); track integration.id) {
             <div class="integration-card" (click)="openDetail(integration)">
-              <div class="integration-card-header">
-                <div class="integration-info">
-                  @if (iconUrl(integration); as icon) {
-                    <img class="integration-brand-icon" [src]="icon" alt="">
-                  } @else {
-                    <span class="icon icon-puzzle icon-lg integration-icon"></span>
-                  }
-                  <div>
-                    <span class="integration-name">{{ integration.name }}</span>
-                    @if (!integration.isInternal) {
-                      <span class="integration-version">v{{ integration.version }}</span>
+              <div class="integration-card-main">
+                <div class="integration-card-header">
+                  <div class="integration-info">
+                    @if (iconUrl(integration); as icon) {
+                      <img class="integration-brand-icon" [src]="icon" alt="">
+                    } @else {
+                      <span class="icon icon-puzzle icon-lg integration-icon"></span>
                     }
-                    <span class="kind-badge" [class.internal]="integration.isInternal">
-                      {{ (integration.isInternal ? 'macrodeck.app:Integrations.Page.InternalTag' : 'macrodeck.app:Integrations.Page.ExternalTag') | translate }}
-                    </span>
+                    <div>
+                      <span class="integration-name">{{ integration.name }}</span>
+                      @if (!integration.isInternal) {
+                        <span class="integration-version">v{{ integration.version }}</span>
+                      }
+                      <span class="kind-badge" [class.internal]="integration.isInternal">
+                        {{ (integration.isInternal ? 'macrodeck.app:Integrations.Page.InternalTag' : 'macrodeck.app:Integrations.Page.ExternalTag') | translate }}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <div class="integration-card-actions">
-                  @if (canUninstall(integration)) {
-                    <!-- The whole card navigates on click, so the menu swallows its own events the same
-                         way the toggle beside it does. -->
-                    <span class="integration-card-menu" (click)="$event.stopPropagation()">
-                      <shared-dropdown-menu
-                        position="bottom-right"
-                        [minWidth]="200"
-                        [triggerAriaLabel]="'macrodeck.app:Integrations.Page.MoreActionsAriaLabel' | translate:{ name: integration.name }"
-                        [isOpen]="openMenuId() === integration.id"
-                        (isOpenChange)="setMenuOpen(integration.id, $event)">
-                        <ng-template #menuContent>
-                          <div class="integration-card-menu-items">
-                            <button
-                              type="button"
-                              class="integration-card-menu-item is-danger"
-                              (click)="requestUninstall(integration)">
-                              <span class="icon icon-trash icon-sm"></span>
-                              <span>{{ 'macrodeck.app:Integrations.Page.UninstallMenuAction' | translate }}</span>
-                            </button>
-                          </div>
-                        </ng-template>
-                      </shared-dropdown-menu>
+                <div class="integration-card-meta">
+                  <button
+                    type="button"
+                    class="meta-item meta-item-link"
+                    (click)="$event.stopPropagation(); onShowCapabilityTab(integration, 'actions')">
+                    <span class="icon icon-zap icon-xs"></span>
+                    {{ 'macrodeck.app:Integrations.Page.ActionCount' | translate:{ count: integration.actionCount } }}
+                  </button>
+                  <button
+                    type="button"
+                    class="meta-item meta-item-link"
+                    [title]="variableCountHint(integration)"
+                    (click)="$event.stopPropagation(); onShowCapabilityTab(integration, 'variables')">
+                    <span class="icon icon-sliders icon-xs"></span>
+                    {{ 'macrodeck.app:Integrations.Page.VariableCount' | translate:{ count: integration.variableCount } }}
+                    @if (integration.variablesDependOnConfiguration) {
+                      <span class="meta-item-qualifier">{{ 'macrodeck.app:Integrations.Page.PerConfigurationQualifier' | translate }}</span>
+                    }
+                  </button>
+                  @for (capability of extraCapabilities(integration); track capability.kind) {
+                    <span class="meta-item">
+                      <span class="icon icon-xs" [class]="'icon-' + capabilityIcon(capability.kind)"></span>
+                      {{ capability.name | localizedText }}
                     </span>
                   }
-                  <shared-toggle-switch
-                    #enableToggle
-                    (click)="$event.stopPropagation()"
-                    [checked]="integration.enabled"
-                    (changed)="onToggle(integration, enableToggle)">
-                  </shared-toggle-switch>
-                  <span class="icon icon-chevron-right icon-sm integration-chevron"></span>
+                  @if (integration.issueCount > 0) {
+                    <span class="issue-badge" [class]="'issue-badge-' + (integration.issueSeverity ?? 'warning')">
+                      {{ 'macrodeck.app:Integrations.Page.IssueCount' | translate:{ count: integration.issueCount } }}
+                    </span>
+                  }
+                  @if (compatibilityFor(integration); as compat) {
+                    @if (compat.state !== 'compatible') {
+                      <span class="compat-badge" [class]="'compat-badge-' + compatibilityStateTier(compat.state)">
+                        {{ compatibilityStateLabel(compat.state) }}
+                      </span>
+                    }
+                  }
                 </div>
               </div>
-              <div class="integration-card-meta">
-                <button
-                  type="button"
-                  class="meta-item meta-item-link"
-                  (click)="$event.stopPropagation(); onShowCapabilityTab(integration, 'actions')">
-                  <span class="icon icon-zap icon-xs"></span>
-                  {{ 'macrodeck.app:Integrations.Page.ActionCount' | translate:{ count: integration.actionCount } }}
-                </button>
-                <button
-                  type="button"
-                  class="meta-item meta-item-link"
-                  [title]="variableCountHint(integration)"
-                  (click)="$event.stopPropagation(); onShowCapabilityTab(integration, 'variables')">
-                  <span class="icon icon-sliders icon-xs"></span>
-                  {{ 'macrodeck.app:Integrations.Page.VariableCount' | translate:{ count: integration.variableCount } }}
-                  @if (integration.variablesDependOnConfiguration) {
-                    <span class="meta-item-qualifier">{{ 'macrodeck.app:Integrations.Page.PerConfigurationQualifier' | translate }}</span>
-                  }
-                </button>
-                @for (capability of extraCapabilities(integration); track capability.kind) {
-                  <span class="meta-item">
-                    <span class="icon icon-xs" [class]="'icon-' + capabilityIcon(capability.kind)"></span>
-                    {{ capability.name | localizedText }}
-                  </span>
-                }
-                @if (integration.issueCount > 0) {
-                  <span class="issue-badge" [class]="'issue-badge-' + (integration.issueSeverity ?? 'warning')">
-                    {{ 'macrodeck.app:Integrations.Page.IssueCount' | translate:{ count: integration.issueCount } }}
-                  </span>
-                }
-                @if (compatibilityFor(integration); as compat) {
-                  @if (compat.state !== 'compatible') {
-                    <span class="compat-badge" [class]="'compat-badge-' + compatibilityStateTier(compat.state)">
-                      {{ compatibilityStateLabel(compat.state) }}
-                    </span>
-                  }
-                }
+              <div class="integration-card-actions">
+                <shared-toggle-switch
+                  #enableToggle
+                  (click)="$event.stopPropagation()"
+                  [checked]="integration.enabled"
+                  (changed)="onToggle(integration, enableToggle)">
+                </shared-toggle-switch>
+                <span class="icon icon-chevron-right icon-sm integration-chevron"></span>
               </div>
             </div>
           }
@@ -324,33 +302,6 @@
     (cancel)="cancelReplace()">
   </shared-confirmation-modal>
 }
-
-@if (uninstallTarget(); as uninstalling) {
-  <!-- Not shared-confirmation-modal: this one carries a checkbox, and that component takes no
-       projected content. -->
-  <shared-modal [heading]="'macrodeck.app:Integrations.Page.UninstallHeading' | translate" size="small" (close)="cancelUninstall()">
-    <div class="uninstall-confirm">
-      <p class="uninstall-confirm-text">{{ uninstallMessage() }}</p>
-      <p class="uninstall-confirm-text">
-        {{ 'macrodeck.app:Integrations.Page.UninstallNote' | translate }}
-      </p>
-      <shared-checkbox
-        [label]="'macrodeck.app:Integrations.Page.DeleteDataCheckboxLabel' | translate"
-        [ngModel]="uninstallDeleteData()"
-        (ngModelChange)="uninstallDeleteData.set($event)" />
-      <p class="uninstall-confirm-hint">
-        {{ 'macrodeck.app:Integrations.Page.UninstallHint' | translate:{ name: uninstalling.name } }}
-      </p>
-    </div>
-    <div modal-footer>
-      <shared-button variant="secondary" (click)="cancelUninstall()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
-      <shared-button variant="danger" [loading]="uninstallBusy()" (click)="confirmUninstall()">
-        {{ 'macrodeck.app:Integrations.Page.UninstallAction' | translate }}
-      </shared-button>
-    </div>
-  </shared-modal>
-}
-
 @if (configuringId(); as configuringId) {
   <shared-config-flow-dialog
     [integrationId]="configuringId"

@@ -17,4 +17,6 @@ public class IconPack
 	public int IconCount { get; set; }
 	public string OwnerKind { get; set; } = nameof(IconPackOwnerKind.User);
 	public bool CanDelete { get; set; } = true;
+	public string? StorePackageId { get; set; }
+	public string AiAssets { get; set; } = nameof(IconPackAiAssets.NotDeclared);
 }
