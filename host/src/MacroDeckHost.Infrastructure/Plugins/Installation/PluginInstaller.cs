@@ -378,6 +378,7 @@ public sealed class PluginInstaller : IPluginInstaller
 				warnings,
 				HasEntrypointForThisHost(manifest),
 				PluginRollbackPlan.None,
+				runningBeforeInstall: null,
 				cancellationToken);
 
 			return result with { Signature = trust };
@@ -633,6 +634,28 @@ public sealed class PluginInstaller : IPluginInstaller
 			_timeProvider.GetUtcNow().UtcDateTime);
 	}
 
+	private async Task<PriorTrustRecord?> GetTrustRecord(string pluginId, string version)
+	{
+		using var scope = _scopeFactory.CreateScope();
+		var repository = scope.ServiceProvider.GetRequiredService<IPluginTrustRecordRepository>();
+		return await repository.GetVersion(pluginId, version) is { } record
+			? new PriorTrustRecord(record.AdmittedVerdict, record.CertificateId, record.InstalledAt)
+			: null;
+	}
+
+	private async Task UndoTrustRecord(PluginTrustUndo undo)
+	{
+		if (undo.Prior is not { } prior)
+		{
+			await DeleteTrustRecord(undo.PluginId, undo.Version);
+			return;
+		}
+
+		using var scope = _scopeFactory.CreateScope();
+		var repository = scope.ServiceProvider.GetRequiredService<IPluginTrustRecordRepository>();
+		await repository.Upsert(undo.PluginId, undo.Version, prior.AdmittedVerdict, prior.CertificateId, prior.InstalledAt);
+	}
+
 	private async Task DeleteTrustRecord(string pluginId, string version)
 	{
 		using var scope = _scopeFactory.CreateScope();
@@ -799,57 +822,84 @@ public sealed class PluginInstaller : IPluginInstaller
 		MakeEntrypointsExecutable(manifest, extractDirectory);
 
 		var displacedDirectory = Path.Combine(stagingDirectory, "displaced");
+		var replacesInPlace = request.Force && Directory.Exists(versionDirectory);
+		var wasRunning = IsRunning(manifest.Id);
+		var trustUndo = new PluginTrustUndo(manifest.Id,
+			manifest.Version,
+			await GetTrustRecord(manifest.Id, manifest.Version));
+		var trustWritten = false;
+		var handedOver = false;
 
-		if (PromoteStagedVersion(extractDirectory, versionDirectory, displacedDirectory, request.Force)
-			is { } promoteFailure)
+		IReadOnlyList<PluginInstallWarning> warnings;
+		bool canStart;
+		bool previouslyDeclaredAdb;
+		try
 		{
-			return PluginInstallResult.Fail(PluginInstallError.StagingFailed,
-				promoteFailure,
+			if (await PromoteStagedVersion(manifest.Id,
+					extractDirectory,
+					versionDirectory,
+					displacedDirectory,
+					request.Force,
+					cancellationToken)
+				is { } promoteFailure)
+			{
+				return PluginInstallResult.Fail(PluginInstallError.StagingFailed,
+					promoteFailure,
+					manifest.Id,
+					manifest.Version,
+					previousVersion);
+			}
+
+			var reread = _manifestReader.Read(
+				PluginInstallPaths.ManifestPath(_paths.PluginsDirectory, manifest.Id, manifest.Version),
 				manifest.Id,
-				manifest.Version,
-				previousVersion);
+				manifest.Version);
+
+			if (!reread.Success)
+			{
+				return PluginInstallResult.Fail(PluginInstallError.ManifestInvalid,
+					reread.ErrorMessage ?? "The installed manifest is not valid.",
+					manifest.Id,
+					manifest.Version,
+					previousVersion);
+			}
+
+			warnings = CollectWarnings(manifest, trust);
+
+			// Before activation, not after: ActivateAndValidate starts the plugin, and the supervisor refuses
+			// to launch an installed version that has no trust record. Recording it afterwards would make the
+			// launch this method performs fail its own gate.
+			await UpsertTrustRecord(manifest.Id, manifest.Version, trust.Verdict, trust.CertificateId);
+			trustWritten = true;
+
+			// Health-gating a plugin this machine cannot launch would fail every time and roll back a
+			// perfectly good install of a cross-platform artifact.
+			canStart = request.StartAfterActivation && HasEntrypointForThisHost(manifest);
+			previouslyDeclaredAdb = ActiveVersionDeclaresAdb(manifest.Id);
+			handedOver = true;
+		}
+		finally
+		{
+			if (replacesInPlace && !handedOver)
+			{
+				await RestoreReplacedVersion(manifest.Id,
+					versionDirectory,
+					displacedDirectory,
+					trustWritten ? trustUndo : null,
+					wasRunning);
+			}
 		}
 
-		var reread = _manifestReader.Read(
-			PluginInstallPaths.ManifestPath(_paths.PluginsDirectory, manifest.Id, manifest.Version),
-			manifest.Id,
-			manifest.Version);
-
-		if (!reread.Success)
-		{
-			RestoreDisplacedVersion(displacedDirectory, versionDirectory);
-			return PluginInstallResult.Fail(PluginInstallError.ManifestInvalid,
-				reread.ErrorMessage ?? "The installed manifest is not valid.",
-				manifest.Id,
-				manifest.Version,
-				previousVersion);
-		}
-
-		var warnings = CollectWarnings(manifest, trust);
-		var rollback = new PluginRollbackPlan(displacedDirectory, DeleteFailedVersion: true);
-
-		// Before activation, not after: ActivateAndValidate starts the plugin, and the supervisor refuses
-		// to launch an installed version that has no trust record. Recording it afterwards would make the
-		// launch this method performs fail its own gate.
-		await UpsertTrustRecord(manifest.Id, manifest.Version, trust.Verdict, trust.CertificateId);
-
-		// Health-gating a plugin this machine cannot launch would fail every time and roll back a
-		// perfectly good install of a cross-platform artifact.
-		var canStart = request.StartAfterActivation && HasEntrypointForThisHost(manifest);
-		var previouslyDeclaredAdb = ActiveVersionDeclaresAdb(manifest.Id);
+		var rollback = new PluginRollbackPlan(displacedDirectory, DeleteFailedVersion: true, trustUndo);
 		var result = await ActivateAndValidate(manifest.Id,
 			manifest.Version,
 			warnings,
 			canStart,
 			rollback,
+			replacesInPlace ? wasRunning : null,
 			cancellationToken);
 
 		await FinishArtifact(acquisition, request, result.Success, cancellationToken);
-
-		if (!result.Success)
-		{
-			await DeleteTrustRecord(manifest.Id, manifest.Version);
-		}
 
 		if (result.Success)
 		{
@@ -891,10 +941,11 @@ public sealed class PluginInstaller : IPluginInstaller
 		IReadOnlyList<PluginInstallWarning> warnings,
 		bool startAfterActivation,
 		PluginRollbackPlan rollback,
+		bool? runningBeforeInstall,
 		CancellationToken cancellationToken)
 	{
 		var previousVersion = ActiveVersionOf(pluginId);
-		var wasRunning = IsRunning(pluginId);
+		var wasRunning = runningBeforeInstall ?? IsRunning(pluginId);
 
 		await _supervisor.Stop(pluginId, PluginStopReason.Update, cancellationToken);
 
@@ -978,6 +1029,11 @@ public sealed class PluginInstaller : IPluginInstaller
 		{
 			await _supervisor.Stop(pluginId, PluginStopReason.Update, cancellationToken);
 
+			if (rollback.TrustUndo is { } trustUndo)
+			{
+				await UndoTrustRecord(trustUndo);
+			}
+
 			var failedDirectory = PluginInstallPaths.VersionDirectory(_paths.PluginsDirectory,
 				pluginId,
 				failedVersion);
@@ -1021,9 +1077,35 @@ public sealed class PluginInstaller : IPluginInstaller
 		}
 	}
 
-	private readonly record struct PluginRollbackPlan(string? DisplacedDirectory, bool DeleteFailedVersion)
+	private readonly record struct PluginRollbackPlan(string? DisplacedDirectory,
+		bool DeleteFailedVersion,
+		PluginTrustUndo? TrustUndo = null)
 	{
 		public static PluginRollbackPlan None => new(null, DeleteFailedVersion: false);
+	}
+
+	private sealed record PluginTrustUndo(string PluginId, string Version, PriorTrustRecord? Prior);
+
+	private readonly record struct PriorTrustRecord(string AdmittedVerdict, string? CertificateId, DateTime InstalledAt);
+
+	private async Task RestoreReplacedVersion(string pluginId,
+		string versionDirectory,
+		string displacedDirectory,
+		PluginTrustUndo? trustUndo,
+		bool restart)
+	{
+		await _supervisor.Stop(pluginId, PluginStopReason.Update, CancellationToken.None);
+		RestoreDisplacedVersion(displacedDirectory, versionDirectory);
+
+		if (trustUndo is not null)
+		{
+			await UndoTrustRecord(trustUndo);
+		}
+
+		if (restart)
+		{
+			await _supervisor.Start(pluginId, CancellationToken.None);
+		}
 	}
 
 	private void RestoreDisplacedVersion(string? displacedDirectory, string versionDirectory)
@@ -1319,10 +1401,12 @@ public sealed class PluginInstaller : IPluginInstaller
 		}
 	}
 
-	private string? PromoteStagedVersion(string extractDirectory,
+	private async Task<string?> PromoteStagedVersion(string pluginId,
+		string extractDirectory,
 		string versionDirectory,
 		string displacedDirectory,
-		bool force)
+		bool force,
+		CancellationToken cancellationToken)
 	{
 		var moved = false;
 
@@ -1341,7 +1425,7 @@ public sealed class PluginInstaller : IPluginInstaller
 					return $"'{versionDirectory}' already exists.";
 				}
 
-				Directory.Move(versionDirectory, displacedDirectory);
+				await DisplaceVersionDirectory(pluginId, versionDirectory, displacedDirectory, cancellationToken);
 				moved = true;
 			}
 
@@ -1356,6 +1440,29 @@ public sealed class PluginInstaller : IPluginInstaller
 			}
 
 			return ex.Message;
+		}
+	}
+
+	private async Task DisplaceVersionDirectory(string pluginId,
+		string versionDirectory,
+		string displacedDirectory,
+		CancellationToken cancellationToken)
+	{
+		for (var attempt = 1;; attempt++)
+		{
+			// Windows refuses to move the directory a running plugin works in, and the reconcile loop can
+			// relaunch a plugin stopped for an update, so it is stopped again before every attempt.
+			await _supervisor.Stop(pluginId, PluginStopReason.Update, cancellationToken);
+
+			try
+			{
+				Directory.Move(versionDirectory, displacedDirectory);
+				return;
+			}
+			catch (Exception ex) when ((ex is IOException or UnauthorizedAccessException) && attempt < DeleteAttempts)
+			{
+				await Task.Delay(_deleteRetryDelay, cancellationToken);
+			}
 		}
 	}
 
