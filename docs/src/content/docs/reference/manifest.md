@@ -62,6 +62,7 @@ Requirement is the [category](#requirement-categories) that decides when a field
 | `health` | object | recommended | Health probe settings. |
 | `permissions` | string[] | recommended | Host capabilities the plugin declares it uses. |
 | `languages` | string[] | recommended | BCP-47 tags of the plugin's own strings. Normally derived by the tooling. |
+| `ai` | object | recommended | Self-declaration about AI use, shown in the Store. See [`ai`](#ai). |
 | `dependencies` | object[] | recommended | Plugins this one needs. |
 | `conflicts` | object[] | recommended | Plugins this one cannot run beside. |
 | `iconPacks` | object[] | recommended | Icon packs this one references. |
@@ -245,6 +246,39 @@ Recommended. Array of unique [BCP-47](https://www.rfc-editor.org/info/bcp47) tag
 - Unrecognised tag: not an error. Blank or duplicate (case-insensitive, `de` = `DE`): rejected.
 - For stores and update listings before install only. A running plugin's localization capability is the
   authority; nothing in the host resolves text against this list.
+
+## `ai`
+
+```json
+"ai": {
+  "interaction": true,
+  "generatedContent": false,
+  "generatedAssets": false,
+  "services": ["OpenAI"]
+}
+```
+
+Recommended. The plugin's self-declaration about artificial intelligence. The Store shows it on the
+package page under **AI**.
+
+| Field | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `interaction` | boolean | `false` | Users interact with an AI system through the plugin: a chatbot, a voice assistant, a conversational agent. |
+| `generatedContent` | boolean | `false` | The plugin generates images, audio, video or text with AI while it runs. |
+| `generatedAssets` | boolean | `false` | The plugin ships icons, images, sounds or texts that were created or substantially changed with AI. |
+| `services` | string[] | none | Display names of the external AI services the plugin uses. At most 16 names of at most 64 characters, shown as plain text. |
+
+- **Omitted means "not declared"**, and the Store says exactly that. It never reads as "uses no AI". To
+  state that the plugin uses no AI, declare the object with every flag `false` and no `services`. Naming a
+  service without setting a flag still counts as using AI.
+- Declarative only. The host never enforces or checks it, and a malformed value never stops a plugin from
+  installing or running. A flag that is not `true` or `false` (including `null`), or a `services` value
+  that is not an array or has no readable name left, makes the whole declaration read as not declared,
+  never as "uses no AI". Otherwise blank, over-long or repeated names are dropped. `validate` still
+  reports a shape the schema does not allow.
+- Icon packs and the Store registry use the same object, so every package kind is labelled the same way.
+- A plugin that uses AI must declare it accurately to be listed in the Store. The declaration does not
+  replace your own legal obligations, for example under the EU AI Act.
 
 ## Publication metadata
 

@@ -1,0 +1,41 @@
+<header class="store-header">
+  <div class="store-header-top">
+    <div class="store-heading">
+      <h1 class="store-title">{{ 'macrodeck.app:Store.Page.Title' | translate }}</h1>
+      <p class="store-subtitle">{{ subtitle() ?? ('macrodeck.app:Store.Page.Subtitle' | translate) }}</p>
+    </div>
+    <div class="store-header-actions">
+      <ng-content select="[storeHeaderAction]" />
+      @if (catalog.refreshing()) {
+        <span class="store-refreshing" role="status">
+          <span class="icon icon-refresh icon-xs store-refresh-spin" aria-hidden="true"></span>
+          {{ 'macrodeck.app:Store.RegistryRefresh.InProgressAction' | translate }}
+        </span>
+      }
+      <shared-dropdown-menu
+        position="bottom-right"
+        [minWidth]="220"
+        [triggerAriaLabel]="'macrodeck.app:Store.Page.MoreActionsAriaLabel' | translate"
+        [isOpen]="menuOpen()"
+        (isOpenChange)="menuOpen.set($event)">
+        <ng-template #menuContent>
+          <div class="store-menu">
+            <button type="button" class="store-menu-item" (click)="refresh()">
+              <span class="icon icon-refresh icon-sm" aria-hidden="true"></span>
+              <span>{{ 'macrodeck.app:Store.Page.RefreshStoreAction' | translate }}</span>
+            </button>
+            <button type="button" class="store-menu-item" (click)="openSettings()">
+              <span class="icon icon-settings icon-sm" aria-hidden="true"></span>
+              <span>{{ 'macrodeck.app:Store.Page.StoreSettingsAction' | translate }}</span>
+            </button>
+          </div>
+        </ng-template>
+      </shared-dropdown-menu>
+    </div>
+  </div>
+  <app-store-view-switcher [active]="active()" />
+</header>
+
+@if (refreshLogOpen()) {
+  <app-store-registry-refresh-modal [run]="refreshLogRun()" (closed)="refreshLogOpen.set(false)" />
+}

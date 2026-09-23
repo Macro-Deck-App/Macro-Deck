@@ -2826,7 +2826,7 @@ Android robot
 Dashboard Icons
   License: Apache-2.0
   URL: https://github.com/homarr-labs/dashboard-icons
-  Note: Logos of the Discord, Home Assistant, Spotify, Twitch and YouTube Music integrations. The logos are trademarks of their respective owners and are used to identify the integration only.
+  Note: Logos of the Discord, Home Assistant, Spotify, Twitch and YouTube Music integrations, and the Windows logo marking the platforms a Store package supports. The logos are trademarks of their respective owners and are used to identify the integration or platform only.
   Texts: [259]
 
 Lucide icons
@@ -2848,6 +2848,12 @@ Simple Icons (Discord glyph)
   License: CC0-1.0
   URL: https://github.com/simple-icons/simple-icons
   Note: Discord glyph of the configuration UI and web client icon set.
+  Texts: [116]
+
+Simple Icons (operating system logos)
+  License: CC0-1.0
+  URL: https://github.com/simple-icons/simple-icons
+  Note: Apple and Linux logos marking the platforms a Store package supports. The logos are trademarks of their respective owners and are used to identify the platform only.
   Texts: [116]
 
 Weather icons (Makin-Things/weather-icons)
@@ -13187,7 +13193,7 @@ and labelled as such in comments in the individual source files. All
 have been licensed under extremely permissive terms.
 ------------------------------------------------------------------------------
 
-[116] dunce, Simple Icons (Discord glyph)
+[116] dunce, Simple Icons (Discord glyph), Simple Icons (operating system logos)
 --------------------------------------------------------------------------------
 Creative Commons Legal Code
 

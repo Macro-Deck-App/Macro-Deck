@@ -53,7 +53,7 @@ describe('StoreExtensionCardComponent trust chip', () => {
   }
 
   function metaText(): string {
-    return (fixture.nativeElement as HTMLElement).querySelector('.card-meta')?.textContent ?? '';
+    return (fixture.nativeElement as HTMLElement).querySelector('.card-tags')?.textContent ?? '';
   }
 
   function translate(key: string): string {
@@ -131,7 +131,7 @@ describe('StoreExtensionCardComponent rating', () => {
   }
 
   function meta(): HTMLElement {
-    return (fixture.nativeElement as HTMLElement).querySelector('.card-meta')!;
+    return (fixture.nativeElement as HTMLElement).querySelector('.card-stats')!;
   }
 
   function installs(): HTMLElement | null {
@@ -183,6 +183,29 @@ describe('StoreExtensionCardComponent rating', () => {
   });
 });
 
+describe('StoreExtensionCardComponent publisher link', () => {
+  it('links the publisher to everything that publisher offers', () => {
+    TestBed.configureTestingModule({
+      imports: [StoreExtensionCardComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        ...provideLocalizationTesting(),
+        { provide: PluginRuntimeService, useValue: { plugins: signal([]) } },
+      ],
+    });
+    const fixture = TestBed.createComponent(StoreExtensionCardComponent);
+    fixture.componentRef.setInput('item', {
+      kind: 'Plugin', id: 'com.pyflat.hotkeys', name: 'Hotkeys', publisher: 'PyFlat', latestVersion: '1.0.0',
+      installState: 'NotInstalled', trust: 'RegistryAuthenticated', hasIcon: false,
+    } satisfies StoreCatalogItemBody);
+    fixture.detectChanges();
+
+    const link = (fixture.nativeElement as HTMLElement).querySelector('a.card-publisher')!;
+    expect(link.getAttribute('href')).toBe('/store?publisher=PyFlat');
+  });
+});
+
 describe('StoreExtensionCardComponent install state', () => {
   function render(installState: StoreCatalogItemBody['installState']): HTMLElement {
     TestBed.configureTestingModule({
@@ -225,6 +248,7 @@ describe('StoreExtensionCardComponent install state', () => {
   it('still names the state of an extension that is up to date', () => {
     const card = render('Installed');
 
-    expect(card.querySelector('shared-store-state-badge')).not.toBeNull();
+    expect(card.textContent).toContain(TestBed.inject(LocalizationService)
+      .translateKey(AppStrings.Store.InstalledVersion, { version: '1.0.5' }));
   });
 });

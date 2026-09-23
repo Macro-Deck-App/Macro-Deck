@@ -7,4 +7,8 @@ public sealed record StoreVersionHistoryEntry
 	public DateTimeOffset? ReleasedAt { get; init; }
 
 	public string? Changelog { get; init; }
+
+	public long? Size { get; init; }
+
+	public bool HasRelease { get; init; }
 }

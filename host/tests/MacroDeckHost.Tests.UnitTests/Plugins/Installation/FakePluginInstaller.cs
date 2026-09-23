@@ -19,11 +19,14 @@ internal sealed class FakePluginInstaller : IPluginInstaller
 		CancellationToken cancellationToken = default)
 	{
 		LastInstallRequest = request;
+		LastInstallSource = source;
 		request.Stage?.Invoke(PluginInstallStage.Acquired);
 		return Task.FromResult(ResultToReturn);
 	}
 
 	public PluginInstallRequest? LastInstallRequest { get; private set; }
+
+	public PluginArtifactSource? LastInstallSource { get; private set; }
 
 	public Task<PluginInstallResult> Activate(string pluginId,
 		string version,

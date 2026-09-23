@@ -18,6 +18,11 @@ public class StoreExtensionDetailBody : StoreCatalogItemBody
 
 	public List<string> Languages { get; set; } = [];
 
+	// Null when the package declares nothing, which a client must not show as "uses no AI".
+	public StoreAiDeclarationBody? Ai { get; set; }
+
+	public List<string> Tags { get; set; } = [];
+
 	public List<StoreScreenshotBody> Screenshots { get; set; } = [];
 
 	public List<StoreVersionHistoryBody> History { get; set; } = [];

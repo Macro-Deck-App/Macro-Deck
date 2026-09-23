@@ -352,6 +352,86 @@ internal sealed class StoreCatalogQueryServiceTests
 		});
 	}
 
+	[Test]
+	public void Only_supported_leaves_out_a_package_this_platform_cannot_run_before_counting()
+	{
+		Seed([
+			Entry("portable", "Portable"),
+			Entry("elsewhere", "Elsewhere") with { SupportedRids = ["plan9-sparc"] },
+			Entry("here", "Here") with { SupportedRids = [global::System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier] }
+		]);
+
+		var filtered = Page(new StoreCatalogQuery { Section = StoreCatalogSection.Name, SupportedOnly = true, Take = 1 });
+		var everything = Page(new StoreCatalogQuery { Section = StoreCatalogSection.Name });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(filtered.Total, Is.EqualTo(2));
+			Assert.That(Ids(filtered), Is.EqualTo(new[] { "here" }));
+			Assert.That(Ids(everything), Is.EqualTo(new[] { "elsewhere", "here", "portable" }));
+			Assert.That(everything.Total, Is.EqualTo(3));
+		});
+	}
+
+	[Test]
+	public void A_publisher_lists_exactly_that_publishers_packages_whatever_their_case_or_padding()
+	{
+		Seed([
+			Entry("battery", "Battery") with { Publisher = "PyFlat" },
+			Entry("hotkeys", "Hotkeys") with { Publisher = " pyflat " },
+			Entry("lookalike", "Lookalike") with { Publisher = "PyFlat Labs" },
+			Entry("other", "Other") with { Publisher = "Squibs" }
+		]);
+
+		var page = Page(new StoreCatalogQuery { Section = StoreCatalogSection.Name, Publisher = "PyFlat" });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Ids(page), Is.EqualTo(new[] { "battery", "hotkeys" }));
+			Assert.That(page.Total, Is.EqualTo(2));
+		});
+	}
+
+	[Test]
+	public void A_tag_lists_exactly_the_packages_carrying_it()
+	{
+		Seed([
+			Entry("obs", "OBS") with { Tags = ["streaming", "obs"] },
+			Entry("twitch", "Twitch") with { Tags = ["Streaming"] },
+			Entry("stream-deck", "Stream Deck") with { Tags = ["hardware"] },
+			Entry("untagged", "Untagged")
+		]);
+
+		var page = Page(new StoreCatalogQuery { Section = StoreCatalogSection.Name, Tag = " streaming " });
+
+		Assert.That(Ids(page), Is.EqualTo(new[] { "obs", "twitch" }));
+	}
+
+	[Test]
+	public void A_search_also_finds_packages_by_tag_after_every_other_kind_of_match()
+	{
+		Seed([
+			Entry("tag-only", "Alpha") with { Tags = ["weather"] },
+			Entry("described", "Beta") with { Description = "Shows the weather" },
+			Entry("named", "Weather Station")
+		]);
+
+		var page = Page(new StoreCatalogQuery { Search = "weather" });
+
+		Assert.That(Ids(page), Is.EqualTo(new[] { "named", "described", "tag-only" }));
+	}
+
+	[Test]
+	public void The_popular_section_reaching_the_query_service_is_answered_like_the_default_ordering()
+	{
+		SeedSearchable();
+
+		var popular = Page(new StoreCatalogQuery { Section = StoreCatalogSection.Popular });
+		var all = Page(new StoreCatalogQuery { Section = StoreCatalogSection.All });
+
+		Assert.That(Ids(popular), Is.EqualTo(Ids(all)));
+	}
+
 	private void SeedSearchable() =>
 		Seed([
 			Entry("bright", "Bright Hue", createdAt: new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero)),

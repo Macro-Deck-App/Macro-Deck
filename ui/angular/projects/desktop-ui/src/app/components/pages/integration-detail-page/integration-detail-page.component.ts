@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, EMPTY, exhaustMap, from, timer } from 'rxjs';
 import { AppStrings, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IpcProvidedCapability, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationVariableCapability, VariableCatalogNode, IpcIntegrationIssue, PLUGIN_PERMISSION_HOST_ADB, PluginCompatibilityReport, resolveLocalizedText } from '@macro-deck/runtime';
-import { ApiService, ErrorBannerComponent, InputComponent, LocalizationService, LocalizedTextPipe, ModalComponent, ToastService, ToggleSwitchComponent, ButtonComponent, TranslatePipe, VariableService } from '@shared';
+import { ApiService, CheckboxComponent, ErrorBannerComponent, InputComponent, LocalizationService, LocalizedTextPipe, ModalComponent, ToastService, ToggleSwitchComponent, ButtonComponent, TranslatePipe, VariableService } from '@shared';
 import { ConfigFlowDialogComponent } from '../../config-flow/config-flow-dialog.component';
 import { DetailPageComponent } from '../../detail-page/detail-page.component';
 import { EmptyStateComponent } from '../../feedback/empty-state/empty-state.component';
@@ -17,6 +17,7 @@ import { ConfigFlowService } from '../../../services/config-flow.service';
 import { IntegrationService, Integration } from '../../../services/integration.service';
 import { PluginCompatibilityService } from '../../../services/plugin-compatibility.service';
 import { PluginInstallationService } from '../../../services/plugin-installation.service';
+import { StoreAccessService } from '../../../services/store-access.service';
 import { VariableCatalogService } from '../../../services/variable-catalog.service';
 import { VariableBindDialogComponent } from '../../variables/variable-bind-dialog.component';
 import { ActionCapabilityRowComponent } from './action-capability-row.component';
@@ -40,6 +41,7 @@ const TAB_ID_PREFIX = 'integration-detail';
   standalone: true,
   imports: [
     FormsModule,
+    CheckboxComponent,
     ConfigFlowDialogComponent,
     ConfirmationModalComponent,
     DetailPageComponent,
@@ -78,6 +80,28 @@ export class IntegrationDetailPageComponent implements OnInit {
   private readonly installation = inject(PluginInstallationService);
 
   protected readonly integrationId = signal<string>('');
+  private readonly storeListed = signal(false);
+  private readonly storeUnlocked = inject(StoreAccessService).unlocked;
+  protected readonly showStoreLink = computed(() => this.storeListed() && this.storeUnlocked());
+
+  protected readonly canUninstall = computed(() => {
+    const integration = this.integration();
+    return !!integration && !integration.isInternal && this.installation.installedIds().has(integration.id);
+  });
+
+  protected readonly uninstallOpen = signal(false);
+  protected readonly uninstallDeleteData = signal(false);
+  protected readonly uninstallBusy = signal(false);
+
+  protected readonly uninstallMessage = computed(() => {
+    const integration = this.integration();
+    if (!integration) {
+      return '';
+    }
+    const version = this.installation.find(integration.id)?.activeVersion;
+    const named = version ? `${integration.name} ${version}` : integration.name;
+    return this.localization.translateKey(AppStrings.Integrations.Page.UninstallMessage, { name: named });
+  });
   protected readonly configEntries = signal<ConfigEntryDto[]>([]);
   protected readonly configuring = signal(false);
   protected readonly configuringEntryId = signal<string | null>(null);
@@ -407,6 +431,8 @@ export class IntegrationDetailPageComponent implements OnInit {
       await this.integrationService.loadIntegrations();
     }
 
+    void this.loadStoreListing();
+    void this.installation.load();
     await this.loadConfigEntries();
     await this.loadIssues();
     await this.loadCapabilities();
@@ -417,6 +443,57 @@ export class IntegrationDetailPageComponent implements OnInit {
 
   goBack(): void {
     void this.router.navigate(['/integrations']);
+  }
+
+  protected requestUninstall(): void {
+    this.uninstallDeleteData.set(false);
+    this.uninstallOpen.set(true);
+  }
+
+  protected cancelUninstall(): void {
+    this.uninstallOpen.set(false);
+  }
+
+  protected async confirmUninstall(): Promise<void> {
+    const integration = this.integration();
+    if (!integration) {
+      return;
+    }
+
+    this.uninstallBusy.set(true);
+    const keepData = !this.uninstallDeleteData();
+    const result = await this.installation.uninstall(integration.id, keepData).catch(() => null);
+    this.uninstallBusy.set(false);
+
+    if (!result?.success) {
+      this.toasts.show(this.localization.translateKey(AppStrings.Integrations.Page.UninstallFailed), {
+        detail: result?.error?.message,
+        variant: 'error',
+      });
+      return;
+    }
+
+    this.uninstallOpen.set(false);
+    this.toasts.show(this.localization.translateKey(AppStrings.Integrations.Page.Uninstalled, { name: integration.name }), { variant: 'success' });
+    await this.integrationService.loadIntegrations();
+    void this.router.navigate(['/integrations']);
+  }
+
+  protected openInStore(): void {
+    void this.router.navigate(['/store', 'Plugin', this.integrationId()]);
+  }
+
+  private async loadStoreListing(): Promise<void> {
+    const id = this.integrationId();
+    if (!id || this.integration()?.isInternal) {
+      return;
+    }
+    try {
+      const response = await this.api.getStoreExtension('Plugin', id);
+      this.storeListed.set(!!response.extension && id === this.integrationId());
+    } catch {
+      this.storeListed.set(false);
+    }
   }
 
   iconUrl(): string | null {

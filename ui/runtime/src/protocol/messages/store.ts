@@ -10,7 +10,7 @@ export type StoreOperationState = 'Queued' | 'Downloading' | 'Validating' | 'Bac
 
 export type StoreOperationKind = 'Install' | 'Update' | 'TestInstall';
 
-export type StoreCatalogSection = 'all' | 'newest' | 'recentlyUpdated' | 'name' | 'featured';
+export type StoreCatalogSection = 'all' | 'newest' | 'recentlyUpdated' | 'name' | 'featured' | 'popular';
 
 export interface StoreRegistryStatusBody {
   hasCatalog: boolean;
@@ -42,6 +42,8 @@ export interface StoreCatalogItemBody {
   hasIcon: boolean;
   iconSha256?: string | null;
   activeOperationId?: string | null;
+  // Absent from an older host.
+  previewScreenshotSha256?: string | null;
 }
 
 export interface StoreScreenshotBody {
@@ -50,10 +52,16 @@ export interface StoreScreenshotBody {
   sha256?: string | null;
 }
 
+export type StoreVersionUnavailableReason = 'UnsupportedPlatform' | 'Unavailable';
+
+// size, installable and unavailableReason are absent from an older host, which cannot install an older version.
 export interface StoreVersionHistoryBody {
   version: string;
   releasedAt?: string | null;
   changelog?: string | null;
+  size?: number | null;
+  installable?: boolean;
+  unavailableReason?: StoreVersionUnavailableReason | null;
 }
 
 // A standard type is labelled by the client in the viewer's language; only custom links carry a label.
@@ -61,6 +69,14 @@ export interface StoreExtensionLinkBody {
   type: string;
   url: string;
   label?: string | null;
+}
+
+// The publisher's own declaration, shown as plain text. Null or absent means undeclared, never "no AI".
+export interface StoreAiDeclarationBody {
+  interaction: boolean;
+  generatedContent: boolean;
+  generatedAssets: boolean;
+  services: string[];
 }
 
 // longDescription and changelog are third-party registry markdown: render through
@@ -77,6 +93,10 @@ export interface StoreExtensionDetailBody extends StoreCatalogItemBody {
   downloadSize: number;
   supportedOperatingSystems: string[];
   languages: string[];
+  // Absent from an older host.
+  ai?: StoreAiDeclarationBody | null;
+  // Absent from an older host; empty when the registry declares none.
+  tags?: string[];
   history: StoreVersionHistoryBody[];
 }
 
@@ -100,6 +120,7 @@ export interface StoreOperationBody {
   error?: string | null;
   errorMessage?: string | null;
   canRetry: boolean;
+  versionPinned?: boolean;
 }
 
 export interface StoreAvailableUpdateBody {
@@ -172,6 +193,11 @@ export interface GetStoreCatalogResponse {
 
 export interface GetStoreExtensionResponse {
   extension?: StoreExtensionDetailBody | null;
+  error?: ApiError | null;
+}
+
+export interface GetStoreSimilarResponse {
+  items: StoreCatalogItemBody[];
   error?: ApiError | null;
 }
 

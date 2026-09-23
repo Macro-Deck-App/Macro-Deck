@@ -105,6 +105,7 @@ internal sealed class PluginManifestSchemaTests
 	[TestCase("shutdownSettings", typeof(PluginShutdownSettings))]
 	[TestCase("healthSettings", typeof(PluginHealthSettings))]
 	[TestCase("additionalLink", typeof(PluginManifestLink))]
+	[TestCase("aiDeclaration", typeof(PackageAiDeclaration))]
 	[TestCase("protocolVersionRange", typeof(ProtocolVersionRange))]
 	public void Each_nested_object_declares_exactly_the_model_properties(string definitionName, Type type)
 	{

@@ -121,7 +121,18 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		// waiting to be picked up by something else.
 		var consented = _consent.Consume(operationId);
 		var backupBatchId = _backupBatches.Consume(operationId);
-		var downloadMetadata = StoreDownloadMetadata.For(operation, item.Entry.LatestVersion);
+		var target = operation.VersionPinned ? operation.Version : item.Entry.LatestVersion;
+		if (item.Entry.FindRelease(target) is not { } release)
+		{
+			_tracker.Transition(operationId,
+				StoreOperationState.Failed,
+				StoreOperationError.VersionNotFound,
+				$"Version {target} is not available.");
+			return;
+		}
+
+		var held = StoreVersions.IsOlder(release.Version, item.Entry.LatestVersion);
+		var downloadMetadata = StoreDownloadMetadata.For(operation, release.Version);
 
 		try
 		{
@@ -130,7 +141,10 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 				case StoreExtensionKind.Plugin:
 					await ExecutePlugin(operationId,
 						item.Entry,
-						item.InstalledTestBuild is not null,
+						release,
+						held,
+						item.InstalledTestBuild is not null ||
+						item.InstalledVersion is { } active && !StoreVersions.Same(release.Version, active),
 						consented,
 						backupBatchId,
 						downloadMetadata,
@@ -140,6 +154,8 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 				case StoreExtensionKind.IconPack:
 					await ExecuteIconPack(operationId,
 						item.Entry,
+						release,
+						held,
 						downloadMetadata,
 						snapshot.Sequence,
 						cancellationToken);
@@ -147,6 +163,8 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 				case StoreExtensionKind.ProfileTemplate:
 					await ExecuteProfileTemplate(operationId,
 						item.Entry,
+						release,
+						held,
 						downloadMetadata,
 						snapshot.Sequence,
 						cancellationToken);
@@ -183,7 +201,9 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 
 	private async Task ExecutePlugin(Guid operationId,
 		StoreCatalogEntry entry,
-		bool replacesTestBuild,
+		StoreReleaseManifest release,
+		bool held,
+		bool replacesVersionDirectory,
 		bool consented,
 		string? backupBatchId,
 		StoreDownloadMetadata? downloadMetadata,
@@ -209,8 +229,8 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		// The registry stores a bare hex digest, but PluginArtifactAcquirer expects the prefixed form
 		// AssetContentHash produces everywhere else - the constant is used rather than a literal so the
 		// two can never silently drift onto different formats.
-		var expectedSha256 = AssetContentHash.Sha256Prefix + entry.LatestRelease.Sha256;
-		var source = PluginArtifactSource.FromUrl(entry.LatestRelease.ArtifactUrl, expectedSha256)
+		var expectedSha256 = AssetContentHash.Sha256Prefix + release.Sha256;
+		var source = PluginArtifactSource.FromUrl(release.ArtifactUrl, expectedSha256)
 			with
 			{
 				Progress = progress,
@@ -219,8 +239,9 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		var request = new PluginInstallRequest
 		{
 			AllowUnsigned = consented,
-			// The release's version directory can hold the test build itself, or the rollback copy kept when it was installed.
-			Force = replacesTestBuild,
+			// The target's version directory can hold a test build, its rollback copy, or a retained version
+			// the user is switching back to; the verified registry artifact replaces each of them.
+			Force = replacesVersionDirectory,
 			RetainDownload = false,
 			BackupBatchId = backupBatchId,
 			Stage = stage => _tracker.Transition(operationId,
@@ -236,7 +257,7 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 				StoreOperationState.Failed,
 				result.BlockedByDevelopmentTakeover
 					? StoreOperationError.InstallBlockedByTakeover
-					: MapPluginError(result.Error),
+					: MapPluginError(result),
 				result.ErrorMessage ?? "The plugin could not be installed.");
 			return;
 		}
@@ -246,12 +267,13 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 			Origin = _options.BaseUrl.ToString(),
 			Kind = StoreExtensionKind.Plugin,
 			PackageId = entry.Id,
-			Version = string.IsNullOrEmpty(result.Version) ? entry.LatestVersion : result.Version,
-			ArtifactSha256 = entry.LatestRelease.Sha256,
+			Version = string.IsNullOrEmpty(result.Version) ? release.Version : result.Version,
+			ArtifactSha256 = release.Sha256,
 			DisplayName = entry.Name,
 			RegistrySequence = registrySequence,
 			InstalledAt = _timeProvider.GetUtcNow(),
-			TargetIds = []
+			TargetIds = [],
+			Held = held
 		});
 
 		_tracker.Transition(operationId, StoreOperationState.Completed);
@@ -325,7 +347,7 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 						? StoreOperationError.InstallBlockedByTakeover
 						: result.Error == PluginInstallError.IdMismatch
 							? StoreOperationError.TestBuildMismatch
-							: MapPluginError(result.Error),
+							: MapPluginError(result),
 					result.ErrorMessage ?? "The test build could not be installed.");
 				return;
 			}
@@ -360,6 +382,8 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 
 	private async Task ExecuteIconPack(Guid operationId,
 		StoreCatalogEntry entry,
+		StoreReleaseManifest release,
+		bool held,
 		StoreDownloadMetadata? downloadMetadata,
 		long registrySequence,
 		CancellationToken cancellationToken)
@@ -369,9 +393,9 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 			_tracker.Transition(operationId, StoreOperationState.Downloading);
 			var progress = new Progress<StoreArtifactDownloadProgress>(sample =>
 				_tracker.ReportProgress(operationId, sample.BytesRead, sample.TotalBytes));
-			var download = await _downloader.Download(entry.LatestRelease.ArtifactUrl,
-				entry.LatestRelease.Sha256,
-				entry.LatestRelease.Size,
+			var download = await _downloader.Download(release.ArtifactUrl,
+				release.Sha256,
+				release.Size,
 				operationId,
 				downloadMetadata,
 				progress,
@@ -413,7 +437,7 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 			var pack = restoreResult.Data!;
 			pack.SourceType = IconPackSourceType.ExtensionStore;
 			pack.SourceId = entry.Id;
-			pack.Version = entry.LatestVersion;
+			pack.Version = release.Version;
 			await _iconPackCache.AddOrUpdatePack(pack);
 
 			_installations.Save(new StoreInstallationRecord
@@ -421,12 +445,13 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 				Origin = _options.BaseUrl.ToString(),
 				Kind = StoreExtensionKind.IconPack,
 				PackageId = entry.Id,
-				Version = entry.LatestVersion,
-				ArtifactSha256 = entry.LatestRelease.Sha256,
+				Version = release.Version,
+				ArtifactSha256 = release.Sha256,
 				DisplayName = entry.Name,
 				RegistrySequence = registrySequence,
 				InstalledAt = _timeProvider.GetUtcNow(),
-				TargetIds = [pack.Id]
+				TargetIds = [pack.Id],
+				Held = held
 			});
 
 			_tracker.Transition(operationId, StoreOperationState.Completed);
@@ -452,6 +477,8 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 
 	private async Task ExecuteProfileTemplate(Guid operationId,
 		StoreCatalogEntry entry,
+		StoreReleaseManifest release,
+		bool held,
 		StoreDownloadMetadata? downloadMetadata,
 		long registrySequence,
 		CancellationToken cancellationToken)
@@ -461,9 +488,9 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 			_tracker.Transition(operationId, StoreOperationState.Downloading);
 			var progress = new Progress<StoreArtifactDownloadProgress>(sample =>
 				_tracker.ReportProgress(operationId, sample.BytesRead, sample.TotalBytes));
-			var download = await _downloader.Download(entry.LatestRelease.ArtifactUrl,
-				entry.LatestRelease.Sha256,
-				entry.LatestRelease.Size,
+			var download = await _downloader.Download(release.ArtifactUrl,
+				release.Sha256,
+				release.Size,
 				operationId,
 				downloadMetadata,
 				progress,
@@ -498,12 +525,13 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 				Origin = _options.BaseUrl.ToString(),
 				Kind = StoreExtensionKind.ProfileTemplate,
 				PackageId = entry.Id,
-				Version = entry.LatestVersion,
-				ArtifactSha256 = entry.LatestRelease.Sha256,
+				Version = release.Version,
+				ArtifactSha256 = release.Sha256,
 				DisplayName = entry.Name,
 				RegistrySequence = registrySequence,
 				InstalledAt = _timeProvider.GetUtcNow(),
-				TargetIds = [profile.Id]
+				TargetIds = [profile.Id],
+				Held = held
 			});
 
 			_tracker.Transition(operationId, StoreOperationState.Completed);
@@ -538,20 +566,24 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		}
 	}
 
-	private static StoreOperationError MapPluginError(PluginInstallError? error) => error switch
+	private static StoreOperationError MapPluginError(PluginInstallResult result) => result.Error switch
 	{
 		PluginInstallError.HashMismatch => StoreOperationError.ChecksumMismatch,
 		PluginInstallError.SignatureInvalid => StoreOperationError.SignatureInvalid,
 		PluginInstallError.SignatureUntrusted
-			or PluginInstallError.SignatureRevoked
-			or PluginInstallError.SignatureUnverifiable => StoreOperationError.SignatureUntrusted,
+			or PluginInstallError.SignatureRevoked => StoreOperationError.SignatureUntrusted,
+		PluginInstallError.SignatureUnverifiable => StoreOperationError.SignatureUnverifiable,
 		PluginInstallError.UnsignedNotPermitted => StoreOperationError.UnsignedNotPermitted,
 		PluginInstallError.TrustDowngrade => StoreOperationError.TrustDowngrade,
-		PluginInstallError.Incompatible => StoreOperationError.Incompatible,
+		PluginInstallError.Incompatible => result.Incompatibility is PluginIncompatibility.HostTooOld
+			? StoreOperationError.RequiresNewerMacroDeck
+			: StoreOperationError.Incompatible,
 		PluginInstallError.InvalidArchive
 			or PluginInstallError.ManifestMissing
 			or PluginInstallError.ManifestInvalid
-			or PluginInstallError.UnsafeEntry =>
+			or PluginInstallError.UnsafeEntry
+			or PluginInstallError.ArtifactLimitExceeded
+			or PluginInstallError.IdMismatch =>
 			StoreOperationError.MalformedPackage,
 		PluginInstallError.ArtifactTooLarge => StoreOperationError.ArtifactTooLarge,
 		_ => StoreOperationError.InstallFailed

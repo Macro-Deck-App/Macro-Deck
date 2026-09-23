@@ -24,4 +24,6 @@ public sealed record StoreInstallationRecord
 	public DateTimeOffset InstalledAt { get; init; }
 
 	public IReadOnlyList<Guid> TargetIds { get; init; } = [];
+
+	public bool Held { get; init; }
 }

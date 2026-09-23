@@ -37,5 +37,7 @@ public class StoreCatalogItemBody
 
 	public string? IconSha256 { get; set; }
 
+	public string? PreviewScreenshotSha256 { get; set; }
+
 	public Guid? ActiveOperationId { get; set; }
 }

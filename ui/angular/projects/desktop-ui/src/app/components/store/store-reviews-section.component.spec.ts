@@ -529,4 +529,54 @@ describe('StoreReviewsSectionComponent', () => {
       expect(host().querySelector('app-store-report-dialog')).not.toBeNull();
     });
   });
+
+  describe('compact layout', () => {
+    function host(): HTMLElement {
+      return fixture.nativeElement as HTMLElement;
+    }
+
+    function translate(key: string, params?: Record<string, unknown>): string {
+      return TestBed.inject(LocalizationService).translateKey(key, params);
+    }
+
+    it('says there are no ratings yet instead of drawing an empty distribution', async () => {
+      await setup({ rating: { available: true, rating: null, ratingCount: 0, distribution: [] }, reviews: [] });
+
+      expect(host().querySelector('.reviews-distribution')).toBeNull();
+      expect(host().querySelector('.reviews-controls')).toBeNull();
+      expect(host().textContent).toContain(translate('macrodeck.app:Store.Reviews.NoRatingsYet'));
+    });
+
+    it('explains an empty list when every rating came without text', async () => {
+      await setup({ rating: { available: true, rating: 5, ratingCount: 2, distribution: [{ stars: 5, count: 2 }] }, reviews: [] });
+
+      expect(host().querySelector('.reviews-distribution')).not.toBeNull();
+      expect(host().querySelector('.reviews-empty')?.textContent).toContain(translate('macrodeck.app:Store.Reviews.OnlyRatings'));
+    });
+
+    it('shortens a long review until the reader asks for the rest', async () => {
+      await setup({ reviews: [review({ body: 'Works well. '.repeat(80) })] });
+      const body = () => host().querySelector('.reviews-list .review-body')!;
+
+      expect(body().classList).toContain('clamped');
+      (host().querySelector('.review-more') as HTMLElement).click();
+      await settle();
+      expect(body().classList).not.toContain('clamped');
+    });
+
+    it('does not offer to expand a short review', async () => {
+      await setup({ reviews: [review({ body: 'Short and sweet.' })] });
+
+      expect(host().querySelector('.review-more')).toBeNull();
+    });
+
+    it("marks the reader's own review in the list without offering to report it", async () => {
+      const own = ownReview({ rating: 5 });
+      await setup({ own: { state: 'Entitled', review: own }, reviews: [review({ id: own.id })] });
+
+      const item = host().querySelector('.reviews-list .review')!;
+      expect(item.classList).toContain('review--mine');
+      expect(item.querySelector('.review-report')).toBeNull();
+    });
+  });
 });

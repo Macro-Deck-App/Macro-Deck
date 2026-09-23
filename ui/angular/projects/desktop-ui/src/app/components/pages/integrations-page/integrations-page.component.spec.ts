@@ -468,12 +468,8 @@ interface FilterAccess {
 }
 
 interface InstallAccess {
-  canUninstall(integration: { id: string; isInternal: boolean }): boolean;
   onArtifactPicked(input: HTMLInputElement): Promise<void>;
   confirmInstall(force?: boolean): Promise<void>;
-  requestUninstall(integration: unknown): void;
-  confirmUninstall(): Promise<void>;
-  uninstallDeleteData: { set(value: boolean): void };
   pendingInstall(): unknown;
   replaceTarget(): unknown;
 }
@@ -612,68 +608,6 @@ describe('IntegrationsPageComponent plugin installation', () => {
     await access().confirmInstall(true);
 
     expect(apiSpy.installPluginArtifact.calls.mostRecent().args[1]).toBeTrue();
-  });
-
-  it('offers an uninstall only for integrations the host lists as installed artifacts', async () => {
-    await setup(
-      [
-        integrationDto({ id: 'app.builtin', name: 'Built in', isInternal: true }),
-        integrationDto({ id: 'com.acme.dev-token', name: 'Dev token plugin', isInternal: false }),
-        integrationDto({ id: 'com.acme.deck-tools', name: 'Deck Tools', isInternal: false }),
-      ],
-      ['com.acme.deck-tools']);
-
-    expect(access().canUninstall({ id: 'app.builtin', isInternal: true })).toBeFalse();
-    expect(access().canUninstall({ id: 'com.acme.dev-token', isInternal: false })).toBeFalse();
-    expect(access().canUninstall({ id: 'com.acme.deck-tools', isInternal: false })).toBeTrue();
-  });
-
-  it('keeps the plugin data unless the user asks for its removal', async () => {
-    const integration = integrationDto({ id: 'com.acme.deck-tools', name: 'Deck Tools', isInternal: false });
-    await setup([integration], ['com.acme.deck-tools']);
-
-    access().requestUninstall(integration);
-    await access().confirmUninstall();
-    expect(apiSpy.uninstallPlugin.calls.mostRecent().args[1]).toEqual({ keepData: true });
-
-    access().requestUninstall(integration);
-    access().uninstallDeleteData.set(true);
-    await access().confirmUninstall();
-    expect(apiSpy.uninstallPlugin.calls.mostRecent().args[1]).toEqual({ keepData: false });
-  });
-
-  it('keeps the card and never force-retries when the host refuses the uninstall', async () => {
-    const integration = integrationDto({ id: 'com.acme.deck-tools', name: 'Deck Tools', isInternal: false });
-    await setup([integration], ['com.acme.deck-tools']);
-    apiSpy.uninstallPlugin.and.resolveTo(installResponse({
-      success: false,
-      error: { code: 'dependency_in_use', message: "'com.acme.deck-tools' is required by com.other." },
-    }));
-    apiSpy.getIntegrations.and.resolveTo({ integrations: [] });
-
-    access().requestUninstall(integration);
-    await access().confirmUninstall();
-    await fixture.whenStable();
-
-    const service = TestBed.inject(IntegrationService);
-    expect(service.integrations().some(i => i.id === 'com.acme.deck-tools')).toBeTrue();
-    expect(apiSpy.uninstallPlugin.calls.count()).toBe(1);
-    expect(apiSpy.uninstallPlugin.calls.mostRecent().args[1]).not.toEqual({ keepData: true, force: true });
-  });
-
-  it('drops the card once the host has uninstalled the plugin', async () => {
-    const integration = integrationDto({ id: 'com.acme.deck-tools', name: 'Deck Tools', isInternal: false });
-    await setup([integration], ['com.acme.deck-tools']);
-    apiSpy.getIntegrations.and.resolveTo({ integrations: [] });
-
-    access().requestUninstall(integration);
-    await access().confirmUninstall();
-    await fixture.whenStable();
-
-    const service = TestBed.inject(IntegrationService);
-    expect(service.integrations().some(i => i.id === 'com.acme.deck-tools')).toBeFalse();
-    // Re-read from the host rather than spliced locally, so the page and the host cannot disagree.
-    expect(apiSpy.getIntegrations.calls.count()).toBeGreaterThan(1);
   });
 });
 

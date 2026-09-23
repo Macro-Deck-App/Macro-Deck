@@ -120,9 +120,9 @@ public sealed class PluginInstaller : IPluginInstaller
 			if (Incompatibility(manifest) is { } incompatibility)
 			{
 				return PluginInstallResult.Fail(PluginInstallError.Incompatible,
-					incompatibility,
+					incompatibility.Message,
 					manifest.Id,
-					manifest.Version);
+					manifest.Version) with { Incompatibility = incompatibility.Direction };
 			}
 
 			var extractDirectory = Path.Combine(stagingDirectory, "extract");
@@ -231,9 +231,9 @@ public sealed class PluginInstaller : IPluginInstaller
 			if (Incompatibility(manifest) is { } incompatibility)
 			{
 				return PluginInstallResult.Fail(PluginInstallError.Incompatible,
-					incompatibility,
+					incompatibility.Message,
 					manifest.Id,
-					manifest.Version);
+					manifest.Version) with { Incompatibility = incompatibility.Direction };
 			}
 
 			request.Stage?.Invoke(PluginInstallStage.Acquired);
@@ -1078,7 +1078,7 @@ public sealed class PluginInstaller : IPluginInstaller
 		return false;
 	}
 
-	private string? Incompatibility(PluginManifest manifest)
+	private (string Message, PluginIncompatibility Direction)? Incompatibility(PluginManifest manifest)
 	{
 		if (manifest.Compatibility is not { } compatibility)
 		{
@@ -1088,8 +1088,11 @@ public sealed class PluginInstaller : IPluginInstaller
 		if (compatibility.Protocol is { } protocol &&
 			(protocol.Minimum > ProtocolVersions.Current || protocol.Maximum < ProtocolVersions.Minimum))
 		{
-			return $"The plugin needs plugin protocol {protocol.Minimum}-{protocol.Maximum}; this host " +
-				$"speaks {ProtocolVersions.Minimum}-{ProtocolVersions.Current}.";
+			return ($"The plugin needs plugin protocol {protocol.Minimum}-{protocol.Maximum}; this host " +
+				$"speaks {ProtocolVersions.Minimum}-{ProtocolVersions.Current}.",
+				protocol.Minimum > ProtocolVersions.Current
+					? PluginIncompatibility.HostTooOld
+					: PluginIncompatibility.HostTooNew);
 		}
 
 		if (compatibility.MacroDeck is not { } hostRange || string.IsNullOrWhiteSpace(hostRange))
@@ -1110,7 +1113,8 @@ public sealed class PluginInstaller : IPluginInstaller
 			return null;
 		}
 
-		return $"The plugin needs Macro Deck '{hostRange}'; this host is {HostVersion.Current}.";
+		return ($"The plugin needs Macro Deck '{hostRange}'; this host is {HostVersion.Current}.",
+			PluginHostCompatibility.ClassifyMacroDeckRange(hostRange, HostVersion.Current));
 	}
 
 	private static bool DeclaresAdb(PluginManifest manifest)

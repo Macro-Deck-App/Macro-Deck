@@ -1,6 +1,7 @@
 using System.Text.Json;
 using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeck.Plugin.Packaging.Versioning;
+using MacroDeckHost.Application.Store;
 using MacroDeckHost.Application.Store.Model;
 using ILogger = Serilog.ILogger;
 
@@ -166,17 +167,15 @@ public sealed class StoreRegistryReader
 			}
 
 			var versionDirectory = Path.Combine(packageDirectory, "versions", package.LatestVersion);
-			var release = ReadDocument<RegistryReleaseDocument>(Path.Combine(versionDirectory,
-				PackageManifestFileName));
-			if (release is null ||
-				!Uri.TryCreate(release.Url, UriKind.Absolute, out var artifactUrl) ||
-				!StoreHttp.IsHttps(artifactUrl) ||
-				string.IsNullOrWhiteSpace(release.Sha256))
+			var latestRelease = ToRelease(package.LatestVersion,
+				ReadDocument<RegistryReleaseDocument>(Path.Combine(versionDirectory, PackageManifestFileName)));
+			if (latestRelease is null)
 			{
 				_logger.Warning("Store registry has no usable release for {PackageId}.", id);
 				return false;
 			}
 
+			var (history, releases) = ReadHistory(Path.Combine(packageDirectory, "versions"));
 			entries.Add(new StoreCatalogEntry
 			{
 				Kind = kind,
@@ -196,24 +195,13 @@ public sealed class StoreRegistryReader
 				UpdatedAt = package.UpdatedAt,
 				SupportedRids = package.SupportedRids ?? [],
 				Languages = package.Languages ?? [],
+				Ai = package.Ai,
+				Tags = StoreTags.Normalize(package.Tags),
 				Changelog = ReadText(Path.Combine(versionDirectory, "changelog.md")),
 				LongDescription = ReadText(Path.Combine(versionDirectory, "description.md")),
-				History = ReadHistory(Path.Combine(packageDirectory, "versions")),
-				LatestRelease = new StoreReleaseManifest
-				{
-					Version = package.LatestVersion,
-					ArtifactUrl = artifactUrl,
-					Sha256 = release.Sha256,
-					Size = release.Size,
-					UploadedAt = release.UploadedAt,
-					Icon = ToAsset(release.Media?.Icon),
-					Screenshots = release.Media?.Screenshots
-							.Select(ToAsset)
-							.Where(asset => asset is not null)
-							.Select(asset => asset!)
-							.ToList() ??
-						[]
-				}
+				History = history,
+				LatestRelease = latestRelease,
+				Releases = releases
 			});
 		}
 
@@ -223,14 +211,16 @@ public sealed class StoreRegistryReader
 	// Every published version of a package lives in the signed tree, so the release notes for older
 	// versions are already local: no extra fetch, and nothing here is trusted that the manifest did not
 	// cover. Newest first, and a version whose directory carries no notes still appears.
-	private List<StoreVersionHistoryEntry> ReadHistory(string versionsDirectory)
+	private (List<StoreVersionHistoryEntry> History, List<StoreReleaseManifest> Releases) ReadHistory(
+		string versionsDirectory)
 	{
 		if (!Directory.Exists(versionsDirectory))
 		{
-			return [];
+			return ([], []);
 		}
 
 		var entries = new List<StoreVersionHistoryEntry>();
+		var releases = new List<StoreReleaseManifest>();
 		foreach (var directory in Directory.EnumerateDirectories(versionsDirectory))
 		{
 			var version = Path.GetFileName(directory);
@@ -239,20 +229,56 @@ public sealed class StoreRegistryReader
 				continue;
 			}
 
-			var release = ReadDocument<RegistryReleaseDocument>(Path.Combine(directory, PackageManifestFileName));
+			var document = ReadDocument<RegistryReleaseDocument>(Path.Combine(directory, PackageManifestFileName));
+			// An older release manifest that fails validation only makes that version uninstallable; unlike
+			// the latest release it never fails the refresh.
+			var release = ToRelease(version, document);
+			if (release is not null)
+			{
+				releases.Add(release);
+			}
 
 			entries.Add(new StoreVersionHistoryEntry
 			{
 				Version = version,
-				ReleasedAt = release?.UploadedAt,
-				Changelog = ReadText(Path.Combine(directory, "changelog.md"))
+				ReleasedAt = document?.UploadedAt,
+				Changelog = ReadText(Path.Combine(directory, "changelog.md")),
+				Size = release?.Size,
+				HasRelease = release is not null
 			});
 		}
 
-		return entries
+		return (entries
 			.OrderByDescending(entry => SemanticVersion.TryParse(entry.Version, out var parsed) ? parsed : null)
 			.ThenByDescending(entry => entry.Version, StringComparer.Ordinal)
-			.ToList();
+			.ToList(), releases);
+	}
+
+	private static StoreReleaseManifest? ToRelease(string version, RegistryReleaseDocument? release)
+	{
+		if (release is null ||
+			!Uri.TryCreate(release.Url, UriKind.Absolute, out var artifactUrl) ||
+			!StoreHttp.IsHttps(artifactUrl) ||
+			string.IsNullOrWhiteSpace(release.Sha256))
+		{
+			return null;
+		}
+
+		return new StoreReleaseManifest
+		{
+			Version = version,
+			ArtifactUrl = artifactUrl,
+			Sha256 = release.Sha256,
+			Size = release.Size,
+			UploadedAt = release.UploadedAt,
+			Icon = ToAsset(release.Media?.Icon),
+			Screenshots = release.Media?.Screenshots
+					.Select(ToAsset)
+					.Where(asset => asset is not null)
+					.Select(asset => asset!)
+					.ToList() ??
+				[]
+		};
 	}
 
 	private static StoreMediaAsset? ToAsset(RegistryMediaAsset? asset)

@@ -4,21 +4,42 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  min-width: 0;
+  container-type: inline-size;
 }
 
 .store-section-header {
   display: flex;
-  align-items: baseline;
+  align-items: flex-end;
   justify-content: space-between;
   gap: var(--space-2);
 }
 
+.store-section-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
 .store-section-heading {
-  @include ds.section-label;
   display: flex;
   align-items: center;
   gap: var(--space-2);
   margin: 0;
+  font-size: var(--text-md);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+
+  .icon {
+    color: var(--color-accent);
+  }
+}
+
+.store-section-subheading {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
 }
 
 .store-section-count {
@@ -27,12 +48,71 @@
   white-space: nowrap;
 }
 
+.store-section-nav {
+  display: flex;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.nav-button {
+  @include ds.flex-center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+
+  &:hover {
+    background-color: var(--color-bg-hover);
+    color: var(--color-text-primary);
+  }
+
+  &:focus-visible {
+    @include ds.focus-ring;
+  }
+}
+
 .store-section-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: var(--space-3);
 
-  @include ds.breakpoint-down('md') {
+  @container (max-width: 520px) {
     grid-template-columns: 1fr;
+  }
+}
+
+.store-section.row .store-section-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: none;
+  grid-auto-columns: calc((100% - 3 * var(--space-3)) / 4);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding-bottom: var(--space-1);
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  > * {
+    scroll-snap-align: start;
+  }
+
+  @container (max-width: 1100px) {
+    grid-auto-columns: calc((100% - 2 * var(--space-3)) / 3);
+  }
+
+  @container (max-width: 800px) {
+    grid-auto-columns: calc((100% - var(--space-3)) / 2);
+  }
+
+  @container (max-width: 520px) {
+    grid-auto-columns: 85%;
   }
 }

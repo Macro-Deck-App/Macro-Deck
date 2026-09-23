@@ -113,6 +113,8 @@ internal sealed record PluginInspectionReport
 	/// actually serves once it is running comes from its localization capability, not from here.</summary>
 	public required IReadOnlyList<string> Languages { get; init; }
 
+	public PackageAiDeclaration? Ai { get; init; }
+
 	public required IReadOnlyList<InspectedRelationship> Dependencies { get; init; }
 
 	public required IReadOnlyList<InspectedRelationship> Conflicts { get; init; }
@@ -213,6 +215,7 @@ internal sealed record PluginInspectionReport
 			Entrypoints = entrypoints,
 			Permissions = permissions,
 			Languages = manifest.Languages ?? [],
+			Ai = manifest.Ai,
 			Dependencies = dependencies,
 			Conflicts = conflicts,
 			IconPacks = iconPacks,

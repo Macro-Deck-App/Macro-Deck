@@ -71,6 +71,11 @@ public sealed record PluginManifest
 	/// plugin's resource files where it can discover them, and carried verbatim otherwise.</summary>
 	public IReadOnlyList<string>? Languages { get; init; }
 
+	/// <summary>The plugin's self-declaration about artificial intelligence, shown with its Store listing.
+	/// Null means the plugin declares nothing, never that it uses no AI. Carried verbatim; the reader never
+	/// rejects a manifest over it.</summary>
+	public PackageAiDeclaration? Ai { get; init; }
+
 	public IReadOnlyList<PluginDependency>? Dependencies { get; init; }
 
 	/// <summary>Plugins that must <em>not</em> be installed alongside this one.</summary>

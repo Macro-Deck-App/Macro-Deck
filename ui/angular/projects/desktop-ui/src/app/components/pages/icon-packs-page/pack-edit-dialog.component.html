@@ -40,6 +40,16 @@
       </label>
     </div>
 
+    <label class="field">
+      <span class="label">{{ 'macrodeck.app:IconPacks.AiFieldLabel' | translate }}</span>
+      <shared-select
+        [options]="aiOptions()"
+        [ngModel]="aiAssets()"
+        (ngModelChange)="aiAssets.set($event)"
+        name="packAiAssets" />
+      <span class="hint">{{ 'macrodeck.app:IconPacks.AiFieldHint' | translate }}</span>
+    </label>
+
     <shared-button-group class="actions" align="end">
       <shared-button variant="secondary" (click)="onCancel()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
       <shared-button variant="primary" type="submit" [disabled]="!name().trim()">{{ saveLabel }}</shared-button>

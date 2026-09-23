@@ -42,6 +42,7 @@ public sealed class StoreUpdateNotifier : IDisposable
 			var relevant = settings is { CheckForUpdates: true, NotifyOnUpdates: true }
 				? updates
 					.Where(update => StoreUpdateScope.IsUpdatable(update.Kind))
+					.Where(update => !_autoUpdater.IsHeld(update))
 					.Where(update => !settings.AutoUpdate || !_autoUpdater.Covers(update))
 					.ToList()
 				: [];

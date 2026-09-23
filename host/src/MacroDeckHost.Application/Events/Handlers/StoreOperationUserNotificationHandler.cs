@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Store;
 using MacroDeckHost.Application.Store.Operations;
 using MacroDeck.Localization;
 using MacroDeckHost.Localization;
@@ -45,14 +46,17 @@ public sealed class StoreOperationUserNotificationHandler : INotificationHandler
 
 		var culture = await ActiveLocalization.Culture(_scopeFactory);
 		var isUpdate = operation.Kind is StoreOperationKind.Update;
+		var isDowngrade = isUpdate && StoreVersions.IsOlder(operation.Version, operation.PreviousVersion);
 		var draft = operation.State is StoreOperationState.Completed
 			? new UserNotificationDraft
 			{
 				Severity = UserNotificationSeverity.Info,
 				Kind = UserNotificationKind.Update,
-				Title = _localization.Resolve(isUpdate
-							? AppStrings.Notifications.StoreExtensionUpdated(name: operation.DisplayName)
-							: AppStrings.Notifications.StoreExtensionInstalled(name: operation.DisplayName),
+				Title = _localization.Resolve(isDowngrade
+							? AppStrings.Notifications.StoreExtensionDowngraded(name: operation.DisplayName)
+							: isUpdate
+								? AppStrings.Notifications.StoreExtensionUpdated(name: operation.DisplayName)
+								: AppStrings.Notifications.StoreExtensionInstalled(name: operation.DisplayName),
 						culture) ??
 					operation.DisplayName,
 				Message = _localization.Resolve(AppStrings.Notifications.StoreVersionReady(version: operation.Version),
@@ -64,18 +68,32 @@ public sealed class StoreOperationUserNotificationHandler : INotificationHandler
 			{
 				Severity = UserNotificationSeverity.Error,
 				Kind = UserNotificationKind.Error,
-				Title = _localization.Resolve(isUpdate
-							? AppStrings.Notifications.StoreExtensionUpdateFailed(name: operation.DisplayName)
-							: AppStrings.Notifications.StoreExtensionInstallFailed(name: operation.DisplayName),
+				Title = _localization.Resolve(isDowngrade
+							? AppStrings.Notifications.StoreExtensionDowngradeFailed(name: operation.DisplayName)
+							: isUpdate
+								? AppStrings.Notifications.StoreExtensionUpdateFailed(name: operation.DisplayName)
+								: AppStrings.Notifications.StoreExtensionInstallFailed(name: operation.DisplayName),
 						culture) ??
 					operation.DisplayName,
-				Message = operation.ErrorMessage,
-				Action = new UserNotificationAction(UserNotificationActionKind.OpenExtensionStore, operation.PackageId),
+				Message = FailureHeadline(operation.Error) is { } headline
+					? _localization.Resolve(headline, culture)
+					: operation.ErrorMessage,
+				Action = operation.Error is StoreOperationError.RequiresNewerMacroDeck
+					? new UserNotificationAction(UserNotificationActionKind.OpenUpdateSettings, null)
+					: new UserNotificationAction(UserNotificationActionKind.OpenExtensionStore, operation.PackageId),
 				DedupeKey = dedupeKey
 			};
 
 		_store.Raise(draft);
 	}
+
+	private static LocalizedString? FailureHeadline(StoreOperationError? error) => error switch
+	{
+		StoreOperationError.RequiresNewerMacroDeck => AppStrings.Store.Error.RequiresNewerMacroDeck(),
+		StoreOperationError.Incompatible => AppStrings.Store.Error.Incompatible(),
+		StoreOperationError.VersionNotFound => AppStrings.Store.Error.VersionNotFound(),
+		_ => null
+	};
 
 	private static string DedupeKey(StoreOperation operation) =>
 		$"store-operation:{operation.ExtensionKind}:{operation.PackageId.ToLowerInvariant()}";

@@ -44,11 +44,32 @@ public sealed record StoreOperation
 
 	public string? ErrorMessage { get; init; }
 
+	// Only a version the user asked for is pinned: an unpinned operation installs whatever is latest
+	// when it runs, so a retry after the registry moved on does not reinstall a stale release.
+	public bool VersionPinned { get; init; }
+
+	public string? HostVersion { get; init; }
+
 	public bool IsTerminal => State is StoreOperationState.Completed
 		or StoreOperationState.Failed
 		or StoreOperationState.Cancelled;
 
 	// A test install carries the consent given for it alone, so it is started again from the Tests tab rather than retried.
 	public bool CanRetry => (State is StoreOperationState.Failed or StoreOperationState.Cancelled) &&
-		Kind != StoreOperationKind.TestInstall;
+		Kind != StoreOperationKind.TestInstall &&
+		(Error is not { } error || IsRetryable(error));
+
+	public static bool IsRetryable(StoreOperationError error) => error is not (StoreOperationError.Incompatible
+		or StoreOperationError.RequiresNewerMacroDeck
+		or StoreOperationError.Unsupported
+		or StoreOperationError.PackageRemoved
+		or StoreOperationError.VersionNotFound
+		or StoreOperationError.UnsignedNotPermitted
+		or StoreOperationError.TrustDowngrade
+		or StoreOperationError.SignatureInvalid
+		or StoreOperationError.SignatureUntrusted
+		or StoreOperationError.MalformedPackage
+		or StoreOperationError.ArtifactTooLarge
+		or StoreOperationError.TestConsentRequired
+		or StoreOperationError.TestBuildMismatch);
 }

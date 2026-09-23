@@ -10,6 +10,9 @@ export type IconImportBatchState =
   | 'Failed'
   | 'Cancelled';
 
+// NotDeclared is never the same as None: only None states that no icon was created with AI.
+export type IconPackAiAssets = 'NotDeclared' | 'None' | 'Generated';
+
 export interface IpcIconPack {
   id: string;
   name: string;
@@ -24,6 +27,10 @@ export interface IpcIconPack {
   iconCount: number;
   ownerKind?: string;
   canDelete?: boolean;
+  // Set for a pack the Store installed; absent from an older host.
+  storePackageId?: string | null;
+  // Absent from an older host.
+  aiAssets?: IconPackAiAssets;
 }
 
 export interface IpcIcon {
@@ -70,6 +77,7 @@ export interface CreateIconPackRequest {
   description?: string;
   author?: string;
   version?: string;
+  aiAssets?: IconPackAiAssets;
 }
 
 export interface CreateIconPackResponse extends ResultResponse {
@@ -81,6 +89,8 @@ export interface UpdateIconPackRequest {
   description?: string;
   author?: string;
   version?: string;
+  // Omitted leaves the stored declaration unchanged.
+  aiAssets?: IconPackAiAssets;
 }
 
 export interface UpdateIconPackResponse extends ResultResponse {

@@ -20,5 +20,7 @@ public class IconPackEntity : BaseEntity
 
 	public string? SourceId { get; set; }
 
+	public IconPackAiAssets AiAssets { get; set; }
+
 	public DateTime UpdatedAt { get; set; }
 }

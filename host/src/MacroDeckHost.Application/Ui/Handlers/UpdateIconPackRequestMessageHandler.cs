@@ -45,7 +45,8 @@ public class UpdateIconPackRequestMessageHandler
 			request.Name,
 			request.Description,
 			request.Author,
-			request.Version);
+			request.Version,
+			request.AiAssets);
 
 		var response = new UpdateIconPackResponse { Success = result.Success };
 		if (result.Success)

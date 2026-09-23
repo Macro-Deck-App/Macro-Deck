@@ -162,6 +162,7 @@ import {
   GetServerTimeResponse,
   GetStoreCatalogResponse,
   GetStoreExtensionResponse,
+  GetStoreSimilarResponse,
   GetStoreOperationsResponse,
   GetStoreStatusResponse,
   GetStoreTestsResponse,
@@ -907,6 +908,9 @@ export class ApiService {
     skip?: number;
     take?: number;
     installed?: boolean;
+    supportedOnly?: boolean;
+    publisher?: string;
+    tag?: string;
   }): Promise<GetStoreCatalogResponse> {
     const query = new URLSearchParams();
     if (options?.kind) {
@@ -932,12 +936,27 @@ export class ApiService {
     if (options?.installed) {
       query.set('installed', 'true');
     }
+    if (options?.supportedOnly) {
+      query.set('supportedOnly', 'true');
+    }
+    if (options?.publisher) {
+      query.set('publisher', options.publisher);
+    }
+    if (options?.tag) {
+      query.set('tag', options.tag);
+    }
     const suffix = query.size > 0 ? `?${query}` : '';
     return this.http('GET', `/api/store/catalog${suffix}`);
   }
 
   getStoreExtension(kind: StoreExtensionKind, packageId: string): Promise<GetStoreExtensionResponse> {
     return this.http('GET', `/api/store/catalog/${encodeURIComponent(kind)}/${encodeURIComponent(packageId)}`);
+  }
+
+  getStoreSimilar(kind: StoreExtensionKind, packageId: string, take?: number): Promise<GetStoreSimilarResponse> {
+    const suffix = take === undefined ? '' : `?take=${take}`;
+    return this.http('GET',
+      `/api/store/catalog/${encodeURIComponent(kind)}/${encodeURIComponent(packageId)}/similar${suffix}`);
   }
 
   getStoreUpdates(): Promise<GetStoreUpdatesResponse> {

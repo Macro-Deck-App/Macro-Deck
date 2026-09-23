@@ -1,3 +1,5 @@
+using MacroDeck.Plugin.Packaging.Manifest;
+
 namespace MacroDeckHost.Application.Store.Model;
 
 public sealed record StoreCatalogEntry
@@ -31,6 +33,10 @@ public sealed record StoreCatalogEntry
 	/// English-only.</summary>
 	public IReadOnlyList<string> Languages { get; init; } = [];
 
+	public PackageAiDeclaration? Ai { get; init; }
+
+	public IReadOnlyList<string> Tags { get; init; } = [];
+
 	public required StoreReleaseManifest LatestRelease { get; init; }
 
 	public string? Changelog { get; init; }
@@ -38,4 +44,11 @@ public sealed record StoreCatalogEntry
 	public string? LongDescription { get; init; }
 
 	public IReadOnlyList<StoreVersionHistoryEntry> History { get; init; } = [];
+
+	public IReadOnlyList<StoreReleaseManifest> Releases { get; init; } = [];
+
+	public StoreReleaseManifest? FindRelease(string version) =>
+		StoreVersions.Same(version, LatestVersion)
+			? LatestRelease
+			: Releases.FirstOrDefault(release => StoreVersions.Same(release.Version, version));
 }

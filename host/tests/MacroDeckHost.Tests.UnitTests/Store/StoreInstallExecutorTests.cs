@@ -77,6 +77,9 @@ internal sealed class StoreInstallExecutorTests
 		var services = new ServiceCollection();
 		services.AddSingleton<IPluginRegistrationRepository, InMemoryPluginRegistrationRepository>();
 		services.AddSingleton<IPluginAccessTokenRepository, InMemoryPluginAccessTokenRepository>();
+		services.AddSingleton<IPluginTrustRecordRepository,
+			InMemoryPluginTrustRecordRepository>();
+		services.AddSingleton<MacroDeckHost.Application.Plugins.Trust.IPluginTrustBaseline, FakePluginTrustBaseline>();
 		services.AddScoped<IIconPackRestoreService>(_ => _iconHarness.RestoreService);
 		services.AddSingleton<Mediator.IMediator>(_iconHarness.Mediator);
 		services.AddScoped<IProfilePortabilityService>(_ => throw new NotSupportedException());
@@ -358,6 +361,394 @@ internal sealed class StoreInstallExecutorTests
 			Assert.That(_installations.Find(StoreExtensionKind.IconPack, IconPackId)!.Version, Is.EqualTo("1.1.0"));
 		});
 	}
+
+	[Test]
+	public async Task An_older_version_the_user_chose_is_installed_from_that_releases_own_artifact_and_held()
+	{
+		var older = PluginArtifact("1.0.0");
+		ServePlugins(older, PluginArtifact("2.0.0"));
+		_httpClientFactory.Body = older.Bytes;
+
+		var operation = await Run(StoreOperationKind.Install, "1.0.0", previousVersion: null, pinned: true);
+
+		var record = _installations.Find(StoreExtensionKind.Plugin, PluginId);
+		Assert.Multiple(() =>
+		{
+			Assert.That(operation.State, Is.EqualTo(StoreOperationState.Completed), operation.ErrorMessage);
+			Assert.That(ActivePluginVersion(), Is.EqualTo("1.0.0"));
+			Assert.That(record?.Version, Is.EqualTo("1.0.0"));
+			Assert.That(record?.ArtifactSha256, Is.EqualTo(older.Sha256));
+			Assert.That(record?.Held, Is.True);
+		});
+	}
+
+	[Test]
+	public async Task A_downgrade_onto_a_retained_version_and_the_update_back_both_replace_the_kept_folder()
+	{
+		var older = PluginArtifact("1.0.0");
+		var latest = PluginArtifact("2.0.0");
+		ServePlugins(older, latest);
+		_httpClientFactory.Body = older.Bytes;
+		await Run(StoreOperationKind.Install, "1.0.0", previousVersion: null, pinned: true);
+		_httpClientFactory.Body = latest.Bytes;
+		var update = await Run(StoreOperationKind.Update, "2.0.0", previousVersion: "1.0.0", pinned: false);
+		Assert.That(update.State, Is.EqualTo(StoreOperationState.Completed), update.ErrorMessage);
+		Assert.That(Directory.Exists(PluginVersionDirectory("1.0.0")), Is.True, "the update keeps 1.0.0 for rollback");
+
+		_httpClientFactory.Body = older.Bytes;
+		var downgrade = await Run(StoreOperationKind.Update, "1.0.0", previousVersion: "2.0.0", pinned: true);
+		var heldAfterDowngrade = _installations.Find(StoreExtensionKind.Plugin, PluginId)?.Held;
+		var activeAfterDowngrade = ActivePluginVersion();
+
+		_httpClientFactory.Body = latest.Bytes;
+		var backUp = await Run(StoreOperationKind.Update, "2.0.0", previousVersion: "1.0.0", pinned: false);
+
+		var record = _installations.Find(StoreExtensionKind.Plugin, PluginId);
+		Assert.Multiple(() =>
+		{
+			Assert.That(downgrade.State, Is.EqualTo(StoreOperationState.Completed), downgrade.ErrorMessage);
+			Assert.That(activeAfterDowngrade, Is.EqualTo("1.0.0"));
+			Assert.That(heldAfterDowngrade, Is.True);
+			Assert.That(backUp.State, Is.EqualTo(StoreOperationState.Completed), backUp.ErrorMessage);
+			Assert.That(ActivePluginVersion(), Is.EqualTo("2.0.0"));
+			Assert.That(record?.Version, Is.EqualTo("2.0.0"));
+			Assert.That(record?.Held, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task An_install_that_names_no_version_installs_the_latest_release()
+	{
+		var latest = PluginArtifact("2.0.0");
+		ServePlugins(PluginArtifact("1.0.0"), latest);
+		_httpClientFactory.Body = latest.Bytes;
+
+		var operation = await Run(StoreOperationKind.Install, "2.0.0", previousVersion: null, pinned: false);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(operation.State, Is.EqualTo(StoreOperationState.Completed), operation.ErrorMessage);
+			Assert.That(ActivePluginVersion(), Is.EqualTo("2.0.0"));
+			Assert.That(_installations.Find(StoreExtensionKind.Plugin, PluginId)?.Held, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task Retrying_an_unpinned_update_after_the_registry_moved_on_installs_the_new_latest()
+	{
+		var installer = new Plugins.Installation.FakePluginInstaller
+		{
+			ResultToReturn = PluginInstallResult.Ok(PluginId, "3.0.0", "1.0.0", activated: true)
+		};
+		var executor = ExecutorWith(installer);
+		ServePlugins(PluginArtifact("1.0.0"), PluginArtifact("3.0.0"));
+		var operation = _tracker.Create(StoreOperationKind.Update,
+			StoreExtensionKind.Plugin,
+			PluginId,
+			"2.0.0",
+			"Store Plugin",
+			previousVersion: "1.0.0");
+
+		await executor.Execute(operation.Id);
+
+		var record = _installations.Find(StoreExtensionKind.Plugin, PluginId);
+		Assert.Multiple(() =>
+		{
+			Assert.That(_tracker.Find(operation.Id)!.State, Is.EqualTo(StoreOperationState.Completed));
+			Assert.That(installer.LastInstallSource?.Url,
+				Is.EqualTo(new Uri("https://cdn.example/store-plugin-3.0.0.macroDeckPlugin")));
+			Assert.That(record?.Version, Is.EqualTo("3.0.0"));
+			Assert.That(record?.Held, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_version_that_disappeared_from_the_registry_fails_as_not_found_and_is_not_retried()
+	{
+		var installer = new Plugins.Installation.FakePluginInstaller();
+		var executor = ExecutorWith(installer);
+		ServePlugins(PluginArtifact("2.0.0"));
+		var operation = _tracker.Create(StoreOperationKind.Install,
+			StoreExtensionKind.Plugin,
+			PluginId,
+			"1.0.0",
+			"Store Plugin",
+			previousVersion: null,
+			versionPinned: true);
+
+		await executor.Execute(operation.Id);
+
+		var result = _tracker.Find(operation.Id)!;
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.State, Is.EqualTo(StoreOperationState.Failed));
+			Assert.That(result.Error, Is.EqualTo(StoreOperationError.VersionNotFound));
+			Assert.That(result.CanRetry, Is.False);
+			Assert.That(installer.LastInstallRequest, Is.Null);
+		});
+	}
+
+	[TestCase("1.0.0+build.7", false)]
+	[TestCase("2.0.0", true)]
+	public async Task Only_a_version_other_than_the_active_one_replaces_an_existing_version_folder(string target,
+		bool forced)
+	{
+		var installer = new Plugins.Installation.FakePluginInstaller
+		{
+			ResultToReturn = PluginInstallResult.Ok(PluginId, target, "1.0.0", activated: true)
+		};
+		var executor = ExecutorWith(installer);
+		await InstallActivePlugin(PluginArtifact("1.0.0"));
+		ServePlugins(PluginArtifact("1.0.0"), PluginArtifact("2.0.0"));
+		var operation = _tracker.Create(StoreOperationKind.Update,
+			StoreExtensionKind.Plugin,
+			PluginId,
+			target,
+			"Store Plugin",
+			previousVersion: "1.0.0",
+			versionPinned: true);
+
+		await executor.Execute(operation.Id);
+
+		Assert.That(installer.LastInstallRequest?.Force, Is.EqualTo(forced));
+	}
+
+	[TestCase("1.0.0", "2.0.0", StoreDownloadOperation.Update)]
+	[TestCase("1.0.0", "1.0.0", StoreDownloadOperation.Repair)]
+	public async Task The_download_is_described_against_the_version_actually_installed(string target,
+		string installed,
+		StoreDownloadOperation expected)
+	{
+		var installer = new Plugins.Installation.FakePluginInstaller
+		{
+			ResultToReturn = PluginInstallResult.Ok(PluginId, target, installed, activated: true)
+		};
+		var executor = ExecutorWith(installer);
+		ServePlugins(PluginArtifact("1.0.0"), PluginArtifact("2.0.0"));
+		var operation = _tracker.Create(StoreOperationKind.Update,
+			StoreExtensionKind.Plugin,
+			PluginId,
+			target,
+			"Store Plugin",
+			previousVersion: installed,
+			versionPinned: true);
+
+		await executor.Execute(operation.Id);
+
+		var metadata = installer.LastInstallSource?.DownloadMetadata;
+		Assert.Multiple(() =>
+		{
+			Assert.That(installer.LastInstallSource?.Url,
+				Is.EqualTo(new Uri($"https://cdn.example/store-plugin-{target}.macroDeckPlugin")));
+			Assert.That(metadata?.Operation, Is.EqualTo(expected));
+			Assert.That(metadata?.CurrentVersion, Is.EqualTo(installed));
+		});
+	}
+
+	[TestCase(PluginIncompatibility.HostTooOld, StoreOperationError.RequiresNewerMacroDeck)]
+	[TestCase(PluginIncompatibility.HostTooNew, StoreOperationError.Incompatible)]
+	[TestCase(PluginIncompatibility.Unknown, StoreOperationError.Incompatible)]
+	public async Task An_incompatible_plugin_says_whether_a_newer_Macro_Deck_would_accept_it(
+		PluginIncompatibility direction,
+		StoreOperationError expected)
+	{
+		var executor = ExecutorWith(new Plugins.Installation.FakePluginInstaller
+		{
+			ResultToReturn = PluginInstallResult.Fail(PluginInstallError.Incompatible, "needs another host") with
+			{
+				Incompatibility = direction
+			}
+		});
+		ServePlugins(PluginArtifact("1.0.0"));
+		var operation = _tracker.Create(StoreOperationKind.Install,
+			StoreExtensionKind.Plugin,
+			PluginId,
+			"1.0.0",
+			"Store Plugin",
+			previousVersion: null);
+
+		await executor.Execute(operation.Id);
+
+		Assert.That(_tracker.Find(operation.Id)!.Error, Is.EqualTo(expected));
+	}
+
+	[Test]
+	public async Task A_plugin_needing_a_newer_plugin_protocol_asks_for_a_newer_Macro_Deck()
+	{
+		var artifact = PluginArtifact("1.0.0",
+			"""
+			"compatibility": { "protocol": { "minimum": 99, "maximum": 100 } }
+			""");
+		ServePlugins(artifact);
+		_httpClientFactory.Body = artifact.Bytes;
+
+		var operation = await Run(StoreOperationKind.Install, "1.0.0", previousVersion: null, pinned: false);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(operation.Error, Is.EqualTo(StoreOperationError.RequiresNewerMacroDeck));
+			Assert.That(operation.CanRetry, Is.False);
+		});
+	}
+
+	[TestCase(PluginInstallError.SignatureUnverifiable, StoreOperationError.SignatureUnverifiable)]
+	[TestCase(PluginInstallError.ArtifactLimitExceeded, StoreOperationError.MalformedPackage)]
+	[TestCase(PluginInstallError.IdMismatch, StoreOperationError.MalformedPackage)]
+	[TestCase(PluginInstallError.SignatureRevoked, StoreOperationError.SignatureUntrusted)]
+	public async Task A_plugin_refusal_is_reported_with_the_store_error_that_describes_it(PluginInstallError error,
+		StoreOperationError expected)
+	{
+		var executor = ExecutorWith(new Plugins.Installation.FakePluginInstaller
+		{
+			ResultToReturn = PluginInstallResult.Fail(error, "refused")
+		});
+		ServePlugins(PluginArtifact("1.0.0"));
+		var operation = _tracker.Create(StoreOperationKind.Install,
+			StoreExtensionKind.Plugin,
+			PluginId,
+			"1.0.0",
+			"Store Plugin",
+			previousVersion: null);
+
+		await executor.Execute(operation.Id);
+
+		Assert.That(_tracker.Find(operation.Id)!.Error, Is.EqualTo(expected));
+	}
+
+	[Test]
+	public async Task An_older_icon_pack_version_is_installed_and_recorded_as_held()
+	{
+		var older = await BuildIconPackArtifact("1.0.0");
+		var latest = await BuildIconPackArtifact("2.0.0");
+		_httpClientFactory.Body = older;
+		_catalog.Swap(new StoreCatalogSnapshot
+		{
+			Sequence = 1,
+			Entries =
+			[
+				IconPackEntry() with
+				{
+					LatestVersion = "2.0.0",
+					LatestRelease = IconPackRelease("2.0.0", latest),
+					Releases = [IconPackRelease("2.0.0", latest), IconPackRelease("1.0.0", older)]
+				}
+			]
+		});
+		var operation = _tracker.Create(StoreOperationKind.Install,
+			StoreExtensionKind.IconPack,
+			IconPackId,
+			"1.0.0",
+			"Store Icons",
+			previousVersion: null,
+			versionPinned: true);
+
+		await _executor.Execute(operation.Id);
+
+		var record = _installations.Find(StoreExtensionKind.IconPack, IconPackId);
+		Assert.Multiple(() =>
+		{
+			Assert.That(_tracker.Find(operation.Id)!.State, Is.EqualTo(StoreOperationState.Completed));
+			Assert.That(_iconHarness.Cache.GetAllPacks().Single().Version, Is.EqualTo("1.0.0"));
+			Assert.That(record?.Version, Is.EqualTo("1.0.0"));
+			Assert.That(record?.Held, Is.True);
+		});
+	}
+
+	private static StoreReleaseManifest IconPackRelease(string version, byte[] artifact) => new()
+	{
+		Version = version,
+		ArtifactUrl = new Uri($"https://cdn.example/store-icons-{version}.macroDeckIconPack"),
+		Sha256 = Convert.ToHexStringLower(SHA256.HashData(artifact)),
+		Size = artifact.LongLength
+	};
+
+	private sealed record BuiltPlugin(string Version, string Path, byte[] Bytes)
+	{
+		public string Sha256 => Convert.ToHexStringLower(SHA256.HashData(Bytes));
+	}
+
+	private BuiltPlugin PluginArtifact(string version, string? extraManifestBlocks = null)
+	{
+		var directory = Path.Combine(_paths.BaseDirectory, "artifacts", version);
+		Directory.CreateDirectory(directory);
+		var path = new PluginArtifactBuilder()
+			.WithManifest(ManifestJson.Build(version, PluginId, extraManifestBlocks))
+			.WithFile(ManifestJson.EntrypointExecutable, "binary " + version)
+			.WriteTo(directory);
+		return new BuiltPlugin(version, path, File.ReadAllBytes(path));
+	}
+
+	private static StoreReleaseManifest Release(string version, BuiltPlugin artifact) => new()
+	{
+		Version = version,
+		ArtifactUrl = new Uri($"https://cdn.example/store-plugin-{version}.macroDeckPlugin"),
+		Sha256 = artifact.Sha256,
+		Size = artifact.Bytes.LongLength
+	};
+
+	private void ServePlugins(params BuiltPlugin[] releases)
+	{
+		var latest = releases[^1];
+		_catalog.Swap(new StoreCatalogSnapshot
+		{
+			Sequence = 1,
+			Entries =
+			[
+				PluginEntry() with
+				{
+					LatestVersion = latest.Version,
+					LatestRelease = Release(latest.Version, latest),
+					Releases = releases.Select(release => Release(release.Version, release)).ToList()
+				}
+			]
+		});
+	}
+
+	private async Task<StoreOperation> Run(StoreOperationKind kind, string version, string? previousVersion, bool pinned)
+	{
+		var operation = _tracker.Create(kind,
+			StoreExtensionKind.Plugin,
+			PluginId,
+			version,
+			"Store Plugin",
+			previousVersion,
+			versionPinned: pinned);
+		await _executor.Execute(operation.Id);
+		_pluginCatalog.Invalidate();
+		return _tracker.Find(operation.Id)!;
+	}
+
+	private string? ActivePluginVersion()
+	{
+		_pluginCatalog.Invalidate();
+		return _pluginCatalog.Discover().SingleOrDefault(plugin => plugin.PluginId == PluginId)?.ActiveVersion?.Version;
+	}
+
+	private string PluginVersionDirectory(string version) =>
+		PluginInstallPaths.VersionDirectory(_paths.PluginsDirectory, PluginId, version);
+
+	private async Task InstallActivePlugin(BuiltPlugin artifact)
+	{
+		var result = await _pluginInstaller.Install(PluginArtifactSource.FromPath(artifact.Path), new PluginInstallRequest());
+		Assert.That(result.Success, Is.True, result.ErrorMessage);
+		_pluginCatalog.Invalidate();
+	}
+
+	private StoreInstallExecutor ExecutorWith(IPluginInstaller installer) =>
+		new(_catalog,
+			new StoreCatalogQueryService(_catalog, _pluginCatalog, _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None)),
+			_tracker,
+			new StoreArtifactDownloader(_httpClientFactory, StoreRegistryOptions.Default, _paths, TimeProvider.System),
+			installer,
+			_iconHarness.Cache,
+			_installations,
+			new StoreInstallConsent(),
+			new StoreInstallBackupBatches(),
+			_scopeFactory,
+			_paths,
+			StoreRegistryOptions.Default,
+			TimeProvider.System,
+			Serilog.Core.Logger.None);
 
 	private IconPackOwnerRegistry OwnerRegistry()
 		=> new([

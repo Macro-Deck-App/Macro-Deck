@@ -1,22 +1,82 @@
 @use '../../../../styles/index' as ds;
 
-.strip {
+.gallery {
   display: flex;
-  gap: var(--space-3);
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.gallery-main {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 460px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-bg-tertiary);
+  overflow: hidden;
+  cursor: zoom-in;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  &:hover .gallery-expand,
+  &:focus-visible .gallery-expand {
+    opacity: 1;
+  }
+
+  &:focus-visible {
+    @include ds.focus-ring;
+  }
+}
+
+.gallery-expand {
+  @include ds.flex-center;
+  position: absolute;
+  inset-inline-end: var(--space-3);
+  bottom: var(--space-3);
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-sm);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.gallery-caption {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.gallery-thumbs {
+  display: flex;
+  gap: var(--space-2);
   overflow-x: auto;
-  @include ds.overlay-scrollbar-clearance;
+  padding-bottom: var(--space-1);
+  scrollbar-width: thin;
 }
 
 .thumb {
   flex-shrink: 0;
-  width: 320px;
+  width: 112px;
   aspect-ratio: 16 / 9;
   padding: 0;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
   background-color: var(--color-bg-tertiary);
   overflow: hidden;
+  opacity: 0.7;
   cursor: pointer;
+  transition: opacity var(--transition-fast), border-color var(--transition-fast);
 
   img {
     width: 100%;
@@ -25,7 +85,12 @@
   }
 
   &:hover {
+    opacity: 1;
+  }
+
+  &.active {
     border-color: var(--color-accent);
+    opacity: 1;
   }
 
   &:focus-visible {

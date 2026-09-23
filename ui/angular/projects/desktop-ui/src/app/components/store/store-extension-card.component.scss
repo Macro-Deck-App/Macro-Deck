@@ -1,4 +1,5 @@
 @use '../../../styles/index' as ds;
+@use 'store-kind' as store;
 
 .store-card {
   position: relative;
@@ -12,6 +13,64 @@
   &:hover {
     background-color: var(--color-bg-tertiary);
     border-color: var(--color-border-light);
+  }
+}
+
+.store-card.tile {
+  padding: 0 0 var(--space-3);
+  overflow: hidden;
+
+  > :not(.card-artwork) {
+    margin-inline: var(--space-3);
+  }
+}
+
+.card-artwork {
+  aspect-ratio: 16 / 9;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-bg-tertiary);
+  overflow: hidden;
+
+  > img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.artwork-fallback {
+  @include ds.flex-center;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 25% 20%, var(--color-accent-muted), transparent 60%),
+    radial-gradient(circle at 80% 90%, var(--color-bg-hover), transparent 55%),
+    var(--color-bg-tertiary);
+
+  .artwork-backdrop {
+    position: absolute;
+    inset: -25%;
+    width: 150%;
+    height: 150%;
+    object-fit: cover;
+    filter: blur(36px) saturate(1.4);
+    opacity: 0.45;
+  }
+
+  .artwork-icon {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    border-radius: var(--radius-xl);
+    object-fit: cover;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .icon {
+    color: var(--color-text-muted);
   }
 }
 
@@ -43,7 +102,6 @@
 
 .card-installs {
   display: inline-flex;
-  align-self: flex-start;
   align-items: center;
   flex-shrink: 0;
   gap: var(--space-1);
@@ -83,7 +141,27 @@
   }
 }
 
-.card-meta {
+.card-publisher {
+  position: relative;
+  z-index: 1;
+  align-self: flex-start;
+  max-width: 100%;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  @include ds.truncate;
+
+  &:hover {
+    color: var(--color-text-primary);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    @include ds.focus-ring;
+  }
+}
+
+.card-tags {
   display: flex;
   align-items: center;
   gap: var(--space-1);
@@ -91,15 +169,25 @@
   min-width: 0;
 }
 
-.card-meta-text,
-.card-meta-separator {
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-  min-width: 0;
+.kind-chip {
+  @include store.kind-chip;
 }
 
-.card-meta-text {
-  @include ds.truncate;
+.store-badge {
+  @include store.store-badge;
+}
+
+.card-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.card-stat-muted {
+  color: var(--color-text-muted);
 }
 
 .card-rating {
@@ -118,7 +206,7 @@
 .verified-chip {
   @include ds.chip;
   flex-shrink: 0;
-  margin-inline-start: var(--space-1);
+  font-size: var(--text-xs);
   color: var(--color-success);
   background-color: var(--color-success-muted);
 
@@ -130,7 +218,7 @@
 .takeover-chip {
   @include ds.chip;
   flex-shrink: 0;
-  margin-inline-start: var(--space-1);
+  font-size: var(--text-xs);
   color: var(--color-warning);
   background-color: var(--color-warning-muted);
 
@@ -155,9 +243,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: var(--space-2);
   margin-top: auto;
   padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
 }
 
 .card-install {

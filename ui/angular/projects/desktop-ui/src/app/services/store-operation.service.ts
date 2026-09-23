@@ -1,12 +1,13 @@
 import { Injectable, Signal, computed, effect, inject, signal } from '@angular/core';
 import { AppStrings, StoreExtensionKind, StoreOperationActionResponse, StoreOperationBody, UninstallStoreExtensionResponse } from '@macro-deck/runtime';
-import { ApiService, LocalizationService } from '@shared';
-import { isTerminalStoreOperationState } from '../util/store-operation-display';
+import { ApiService, LocalizationService, ToastService } from '@shared';
+import { isTerminalStoreOperationState, storeOperationErrorKey } from '../util/store-operation-display';
 
 @Injectable({ providedIn: 'root' })
 export class StoreOperationService {
   private readonly api = inject(ApiService);
   private readonly localization = inject(LocalizationService);
+  private readonly toasts = inject(ToastService);
 
   private readonly operationsById = signal<Map<string, StoreOperationBody>>(new Map());
   readonly isLoading = signal(false);
@@ -97,6 +98,11 @@ export class StoreOperationService {
     const response = await this.api.installStoreExtension({ kind, packageId, version, allowUnsigned });
     if (response.operation) {
       this.upsert(response.operation);
+    } else if (!response.success) {
+      this.toasts.show(this.localization.translateKey(AppStrings.Store.InstallationFailed), {
+        detail: this.localization.translateKey(storeOperationErrorKey(response.error?.code)),
+        variant: 'error',
+      });
     }
     return response.operation ?? null;
   }
