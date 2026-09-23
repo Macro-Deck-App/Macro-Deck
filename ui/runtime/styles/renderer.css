@@ -94,6 +94,7 @@
 .widget-grid,
 .widget-segmented,
 .widget-modifier,
+.widget-responsive,
 .widget-list,
 .widget-text,
 .widget-image {
@@ -216,7 +217,8 @@
  */
 .widget-stack > .widget-text,
 .widget-button > .widget-text,
-.widget-modifier > .widget-text {
+.widget-modifier > .widget-text,
+.widget-responsive > .widget-text {
   max-height: calc(100% + 0.4em);
 }
 
@@ -267,6 +269,22 @@
 
 .widget-modifier > * {
   flex: 0 1 auto;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.widget-responsive {
+  position: relative;
+  display: flex;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+}
+
+.widget-responsive > * {
+  flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
   max-width: 100%;

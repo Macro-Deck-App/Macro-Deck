@@ -466,6 +466,13 @@ export {
   type UiNodeActivation,
 } from './ui-framework/node-gestures';
 export {
+  UI_RESPONSIVE_TOLERANCE,
+  effectiveTreeRoot,
+  responsiveChild,
+  responsiveChildIndex,
+  selectResponsiveChild,
+} from './ui-framework/responsive';
+export {
   UI_COMPONENT_BORDER_LINES_WELL_KNOWN,
   UI_COMPONENT_CLIPS_WELL_KNOWN,
   UI_COMPONENT_MODIFIERS_WELL_KNOWN,

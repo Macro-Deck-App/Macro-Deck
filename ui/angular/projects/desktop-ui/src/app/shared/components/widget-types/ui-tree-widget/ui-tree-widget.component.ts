@@ -18,6 +18,7 @@ import {
 import {
   ActionButtonTriggerType,
   activationClaim,
+  effectiveTreeRoot,
   activationFor,
   emitsEvent,
   hasRunnableFlow,
@@ -93,7 +94,7 @@ export class UiTreeWidgetComponent implements OnInit, OnChanges, OnDestroy {
 
   readonly rejected = computed(() => this.handleSignal()?.rejection() != null);
 
-  protected readonly treeClaimsGesture = computed(() => treeClaimsGesture(this.renderedRoot()));
+  protected readonly treeClaimsGesture = computed(() => treeClaimsGesture(this.renderedRoot(), this.treeBox()));
 
   private openedForWidgetId: string | undefined;
   private previewDebounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -160,7 +161,7 @@ export class UiTreeWidgetComponent implements OnInit, OnChanges, OnDestroy {
   protected readonly treeNodePressed = signal(false);
 
   protected onNodePressedChange(event: UiNodePressedEvent): void {
-    if (event.pressed && event.nodeId !== this.renderedRoot()?.id) return;
+    if (event.pressed && event.nodeId !== effectiveTreeRoot(this.renderedRoot(), this.treeBox())?.id) return;
     this.treeNodePressed.set(event.pressed);
     this.pressedChange.emit(event.pressed);
   }
@@ -211,7 +212,7 @@ export class UiTreeWidgetComponent implements OnInit, OnChanges, OnDestroy {
   activateFromInput(): void {
     if (this.disabled) return;
 
-    const claim = activationClaim(this.renderedRoot());
+    const claim = activationClaim(this.renderedRoot(), this.treeBox());
     if (claim === 'absorbed') return;
     const interactive = claim === 'none' ? null : claim.node;
 

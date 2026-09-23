@@ -74,7 +74,7 @@ internal sealed class UiStructuralReconciler
 
 		region.Clear();
 
-		var materializer = new UiElementMaterializer(_view);
+		var materializer = new UiElementMaterializer(_view) { InAutomaticFallback = scope.InAutomaticFallback };
 		foreach (var (segment, element) in content)
 		{
 			materializer.MaterializeInto(element,

@@ -109,6 +109,8 @@ The tree is built from the same [components](/ui/components/) as a deck widget, 
 - **A folder view does not scroll.** Everything has to fit the box you are given.
 - **Lengths are fractions of the box's smaller side.** A folder view is usually far wider than tall, so
   sizes track its height - see [Sizing](/ui/concepts/sizing/).
+- **A different layout per screen** - a phone in portrait, a tablet in landscape - comes from
+  [`UiResponsive`](/ui/components/responsive/), which chooses by the folder view's own box.
 
 ## Configuration
 

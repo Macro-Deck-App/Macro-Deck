@@ -6,6 +6,8 @@ import {
 import { GridGeometry, GridMetrics } from '../grid/grid-metrics';
 import { UiNode } from '../ui-framework/ui-node.interface';
 import { treeClaimsGesture } from '../ui-framework/node-gestures';
+import { effectiveTreeRoot } from '../ui-framework/responsive';
+import { UiComponentBox } from '../ui-framework/layout';
 import { widgetTileBorder } from '../ui-components/style';
 import { PressFeedback } from './press-feedback';
 import { TapSequencer } from '../ui-components/tap-sequencer';
@@ -51,6 +53,8 @@ export interface WidgetGridHandle {
   setBackground(background: string | null): void;
 
   setFocusedWidget(widgetId: string | null): void;
+
+  tileBox(widgetId: string): UiComponentBox | null;
 
   resize(): void;
   destroy(): void;
@@ -141,7 +145,7 @@ export function renderWidgetGrid(
       setPressed: (node, pressed) => {
         const tile = tiles[widgetId];
         // Any release clears: a root replaced mid-press reports its release under the old root's id.
-        if (tile && (!pressed || node.id === trees(widgetId)?.id)) {
+        if (tile && (!pressed || node.id === effectiveTreeRoot(trees(widgetId), boxOfTile(tile))?.id)) {
           tile.treePressed = pressed;
           paintPressed(tile);
         }
@@ -152,6 +156,14 @@ export function renderWidgetGrid(
     };
     hosts[widgetId] = host;
     return host;
+  }
+
+  function boxOfTile(tile: Tile): UiComponentBox | null {
+    const rect = { x: tile.widget.x, y: tile.widget.y, w: tile.widget.w, h: tile.widget.h };
+    const scale = metrics.contentScale;
+    const width = metrics.widthOf(rect) / scale;
+    const height = metrics.heightOf(rect) / scale;
+    return width > 0 && height > 0 ? { width, height } : null;
   }
 
   function paintPressed(tile: Tile): void {
@@ -189,7 +201,7 @@ export function renderWidgetGrid(
     tile.surface.addEventListener('pointerdown', (event: Event) => {
       // A tree that claims the gesture answers for its own press, and running the tile's lifecycle
       // as well would fire the widget's flows twice for one physical press.
-      if (treeClaimsGesture(trees(tile.widget.id))) return;
+      if (treeClaimsGesture(trees(tile.widget.id), boxOfTile(tile))) return;
 
       const pointer = event as PointerEvent;
       if (tile.pointerId !== null || pointer.button > 0) return;
@@ -471,6 +483,11 @@ export function renderWidgetGrid(
       if (widgetId === focusedWidgetId) return;
       focusedWidgetId = widgetId;
       paintFocus();
+    },
+
+    tileBox(widgetId: string): UiComponentBox | null {
+      const tile = tiles[widgetId];
+      return tile === undefined ? null : boxOfTile(tile);
     },
 
     resize,

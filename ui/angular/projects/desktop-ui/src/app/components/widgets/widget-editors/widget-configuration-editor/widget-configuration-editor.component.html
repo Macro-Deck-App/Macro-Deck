@@ -1,13 +1,21 @@
 <ng-template #previewBlock>
   <div class="editor-preview">
-    <div class="preview-frame">
+    <div
+      class="preview-frame preview-frame-scaled"
+      [style.width.px]="previewReference.width * previewScale"
+      [style.height.px]="previewReference.height * previewScale"
+      [style.border-radius.px]="22 * previewScale">
       <shared-ui-tree-widget
-        class="preview-widget"
+        class="preview-widget preview-widget-scaled"
         [widgetType]="widget.type"
         [data]="previewData()"
         [variableScopeWidgetId]="widget.id"
-        [width]="100"
-        [height]="100"
+        [width]="previewReference.width"
+        [height]="previewReference.height"
+        [style.width.px]="previewReference.width"
+        [style.height.px]="previewReference.height"
+        [style.--wq.px]="previewReference.width < previewReference.height ? previewReference.width : previewReference.height"
+        [style.transform]="'scale(' + previewScale + ')'"
         [tileDrawsBorder]="true">
       </shared-ui-tree-widget>
       <shared-widget-border-overlay [border]="previewBorder()" />

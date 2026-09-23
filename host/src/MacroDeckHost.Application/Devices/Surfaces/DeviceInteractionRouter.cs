@@ -1,5 +1,6 @@
 using System.Text.Json;
 using MacroDeck.Sdk.Devices;
+using MacroDeck.Ui.Components;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Profiles;
@@ -92,12 +93,15 @@ public sealed class DeviceInteractionRouter
 
 	public async Task<DevicePressClaim> ClaimAsync(DeviceSurfaceSession session, string widgetId)
 	{
-		var type = session.LastPushed?.Widgets
-			.FirstOrDefault(widget => string.Equals(widget.Id, widgetId, StringComparison.Ordinal))?.Type;
+		var widget = session.LastPushed?.Widgets
+			.FirstOrDefault(candidate => string.Equals(candidate.Id, widgetId, StringComparison.Ordinal));
+		var type = widget?.Type;
 		if (type is null || WidgetTypeIds.BuiltIn.Contains(type, StringComparer.Ordinal))
 		{
 			return DevicePressClaim.None;
 		}
+
+		var spacing = session.LastPushed!.Layout.WidgetSpacing;
 
 		IUiSessionBroker? broker = null;
 		string? sessionId = null;
@@ -124,7 +128,11 @@ public sealed class DeviceInteractionRouter
 			using var deadline = new CancellationTokenSource(_treeDeadline, _timeProvider);
 			if (await broker.FirstTreeAsync(sessionId, deadline.Token) is { } tree)
 			{
-				return DevicePressClaim.From(broker, sessionId, JsonDocument.Parse(tree.Utf8));
+				return DevicePressClaim.From(broker,
+					sessionId,
+					JsonDocument.Parse(tree.Utf8),
+					SpanInCells(widget!.Width, spacing),
+					SpanInCells(widget.Height, spacing));
 			}
 		}
 		catch (Exception exception) when (exception is not OutOfMemoryException)
@@ -274,4 +282,8 @@ public sealed class DeviceInteractionRouter
 
 	private static DeviceSurfacePressTracker Presses(DeviceSurfaceSession session)
 		=> session.Presses ?? throw new InvalidOperationException("The session has no press tracker.");
+
+	// Must equal the box a client lays the tile out in, or a hardware press claims a layout the tile does not show.
+	internal static double SpanInCells(int span, int spacing)
+		=> span + Math.Max(0, span - 1) * spacing / UiLength.Cell;
 }

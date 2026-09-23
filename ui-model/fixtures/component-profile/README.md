@@ -29,6 +29,8 @@ Three artefacts, and the third is the one that does the work:
 | `conformance-building-blocks-layout.json` | each grid cell resolved, plus the shape, glyph, arc, toggle track and segment face geometry at two bases |
 | `conformance-modifier-tree.json` | the wire form of the universal modifiers - every `modifiers` member on ordinary nodes, the `ui.modifier` wrapper with every one of its properties, and the gesture event names |
 | `conformance-modifier-layout.json` | what a reader writes for each of them: backgrounds, corners, the border drawn inside the edge, the accessibility attributes, the dim of a disabled region, and the wrapper's frame, padding, clip and mask resolved |
+| `conformance-responsive-tree.json` | the wire form of `ui.responsive` - the default first, four conditional layouts in order, the automatic fallback copy of the default, and a nested responsive layout inside the default |
+| `conformance-responsive-layout.json` | which layout a reader draws for each tile box, including boxes a unit in the last place off a whole cell, an unknown box and an unmeasured one, and the node a tile-level press is claimed by |
 | this README | what the fixtures deliberately contain, so they are not trimmed by accident |
 
 One tree per widget shape rather than one growing tree: the weather tree's proportions are themselves

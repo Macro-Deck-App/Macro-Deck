@@ -145,6 +145,7 @@ export default defineConfig({
 												'ui/components/grid',
 												'ui/components/transform',
 												'ui/components/modifier',
+												'ui/components/responsive',
 												'ui/components/list',
 												'ui/components/text',
 												'ui/components/image',

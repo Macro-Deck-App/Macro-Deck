@@ -18,6 +18,7 @@ import { uiGaugeComponent } from './ui-gauge.component';
 import { uiToggleComponent } from './ui-toggle.component';
 import { uiSegmentedComponent } from './ui-segmented.component';
 import { uiDialComponent } from './ui-dial.component';
+import { uiResponsiveComponent } from './ui-responsive.component';
 
 export const UI_CORE_COMPONENTS: readonly UiComponentDefinition[] = [
   uiStackComponent,
@@ -39,4 +40,5 @@ export const UI_CORE_COMPONENTS: readonly UiComponentDefinition[] = [
   uiSegmentedComponent,
   uiDialComponent,
   uiModifierComponent,
+  uiResponsiveComponent,
 ];

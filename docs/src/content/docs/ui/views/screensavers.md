@@ -103,7 +103,8 @@ A `screensaver` surface carries `deviceId`, `screenSaverId` and `configuration`.
 with the request because you cannot read Macro Deck's stored devices. Decline a screensaver you do not
 serve rather than guessing from the configuration's shape. The tree fills the whole display; lengths are
 fractions of the display's smaller side, so a full-screen clock is drawn with the same numbers as a
-widget-sized one - see [Sizing](/ui/concepts/sizing/).
+widget-sized one - see [Sizing](/ui/concepts/sizing/). For a different arrangement in portrait and landscape,
+use [`UiResponsive`](/ui/components/responsive/) with aspect conditions.
 
 **Movement has to be cheap.** A screensaver often runs on a tablet or a Raspberry Pi for hours. Move
 things by rewriting one bound property every minute, which is one small patch, rather than animating;

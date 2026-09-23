@@ -15,6 +15,7 @@ import {
   UiNodeEvent,
   UiPreviewEntry,
   UiComponentBox,
+  UI_COMPONENT_CELL,
   isComponentProfileType,
 } from '@macro-deck/runtime';
 import { ApiService, ButtonComponent, ConnectionState, TranslatePipe, UiSessionHandle, UiSessionOpenRequest, UiSessionRejection, UiSessionService, UiWidgetTreeComponent, UiWidgetTreeContext } from '@shared';
@@ -39,6 +40,7 @@ const MIN_HEIGHT = 40;
 const KEYBOARD_STEP = 8;
 
 const CELL_PX = 150;
+const REFERENCE_SCALE = CELL_PX / UI_COMPONENT_CELL;
 const SIZE_EMIT_DELAY_MS = 250;
 const RETRY_DELAYS_MS: readonly number[] = [2000, 4000, 8000, 16000, 30000];
 
@@ -111,6 +113,11 @@ export class PreviewCanvasComponent implements OnDestroy {
 
   protected readonly size = signal<CanvasSize>(DEFAULT_SIZE_BY_PROFILE['config']);
   protected readonly box = computed<UiComponentBox>(() => ({ width: this.size().width, height: this.size().height }));
+  protected readonly referenceScale = REFERENCE_SCALE;
+  protected readonly referenceBox = computed<UiComponentBox>(() => ({
+    width: this.size().width / REFERENCE_SCALE,
+    height: this.size().height / REFERENCE_SCALE,
+  }));
 
   protected readonly rendererKind = computed<'widget' | 'config' | null>(() => {
     const root = this.root();
@@ -133,8 +140,8 @@ export class PreviewCanvasComponent implements OnDestroy {
 
   constructor() {
     effect(() => {
-      const basis = Math.min(this.size().width, this.size().height);
-      this.treeContext.setBasis(basis);
+      const box = this.rendererKind() === 'widget' ? this.referenceBox() : this.box();
+      this.treeContext.setBasis(Math.min(box.width ?? 0, box.height ?? 0));
     });
 
     effect(() => {

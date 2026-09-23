@@ -1,4 +1,5 @@
 using System.Globalization;
+using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Model.Events;
@@ -53,10 +54,13 @@ public sealed class UiTestHost
 
 	private readonly Dictionary<string, UiTestNode> _byId = new(StringComparer.Ordinal);
 	private readonly List<UiTestNode> _documentOrder = [];
+	private readonly HashSet<UiTestNode> _drawn = [];
 	private readonly List<UiPatch> _patches = [];
 	private readonly UiView _view;
 	private UiTree _appliedTree;
 	private UiTestNode? _root;
+	private double? _widthCells;
+	private double? _heightCells;
 
 	private UiTestHost(UiView view)
 	{
@@ -222,6 +226,23 @@ public sealed class UiTestHost
 		}
 	}
 
+	/// <summary>
+	/// The box, in deck cells, the view is drawn in, which decides the layout every
+	/// <see cref="UiComponents.Responsive" /> shows to <see cref="ByType" />, <see cref="SingleByType" /> and
+	/// <see cref="ByText" />: the one at the root, or reached from it only through a layer, a transform or a
+	/// modifier that hands on its whole box, chooses by this box; any other one chooses as if the box were unknown. <c>null</c>, the
+	/// default, means unknown, so each shows its default layout. <see cref="ById" /> and <see cref="FindById" />
+	/// still reach every layout, so a test can raise an event on any of them.
+	/// </summary>
+	/// <param name="widthCells">The width in cells, or <c>null</c>.</param>
+	/// <param name="heightCells">The height in cells, or <c>null</c>.</param>
+	public void SetBox(double? widthCells, double? heightCells)
+	{
+		_widthCells = widthCells;
+		_heightCells = heightCells;
+		_root = null;
+	}
+
 	/// <summary>The node with <paramref name="id" />.</summary>
 	/// <exception cref="UiTestAssertionException">No node has that id. The message names the id and the closest
 	/// candidates, so a mistyped or wrongly composed id reads as itself rather than as a
@@ -251,7 +272,9 @@ public sealed class UiTestHost
 	}
 
 	/// <summary>Every node whose <see cref="UiTestNode.Type" /> is <paramref name="type" />, in document order -
-	/// a pre-order walk of each node, then its children in render order, then its fallback subtree.</summary>
+	/// a pre-order walk of each node, then its children in render order, then its fallback subtree. A
+	/// <see cref="UiComponents.Responsive" /> contributes only the layout it shows for <see cref="SetBox" />'s box,
+	/// and never its fallback, which only a reader that does not know the type draws.</summary>
 	public IReadOnlyList<UiTestNode> ByType(string type)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(type);
@@ -262,7 +285,7 @@ public sealed class UiTestHost
 
 		foreach (var node in _documentOrder)
 		{
-			if (string.Equals(node.Type, type, StringComparison.Ordinal))
+			if (_drawn.Contains(node) && string.Equals(node.Type, type, StringComparison.Ordinal))
 			{
 				matches.Add(node);
 			}
@@ -294,7 +317,7 @@ public sealed class UiTestHost
 	/// <summary>
 	/// Every node carrying <paramref name="text" /> as an ordinal substring of one of its text-bearing
 	/// properties, in document order. Those properties are exactly <c>text</c>, <c>label</c>, <c>title</c>,
-	/// <c>description</c> and <c>validationMessage</c>.
+	/// <c>description</c> and <c>validationMessage</c>. Responsive layouts are filtered as in <see cref="ByType" />.
 	///
 	/// <para>
 	/// Ordinal and substring on purpose: culture-aware matching would make a test's result depend on the
@@ -311,6 +334,11 @@ public sealed class UiTestHost
 
 		foreach (var node in _documentOrder)
 		{
+			if (!_drawn.Contains(node))
+			{
+				continue;
+			}
+
 			foreach (var key in _textBearingKeys)
 			{
 				if (node.Text(key) is { } value && value.Contains(text, StringComparison.Ordinal))
@@ -408,15 +436,37 @@ public sealed class UiTestHost
 
 		_byId.Clear();
 		_documentOrder.Clear();
-		_root = BuildNode(_appliedTree.Root, parent: null, parentPath: null);
+		_drawn.Clear();
+		_root = BuildNode(_appliedTree.Root, parent: null, parentPath: null, drawn: true, _widthCells, _heightCells);
 	}
 
-	private UiTestNode BuildNode(UiNode node, UiTestNode? parent, string? parentPath)
+	private UiTestNode BuildNode(
+		UiNode node,
+		UiTestNode? parent,
+		string? parentPath,
+		bool drawn,
+		double? widthCells,
+		double? heightCells)
 	{
 		var path = parentPath is null ? node.Id : $"{parentPath}/{node.Id}";
 		var wrapper = new UiTestNode(this, node, parent, path);
 
 		_documentOrder.Add(wrapper);
+
+		if (drawn)
+		{
+			_drawn.Add(wrapper);
+		}
+
+		var responsive = string.Equals(node.Type, UiComponents.Responsive, StringComparison.Ordinal);
+		var chosen = responsive
+			? UiResponsiveSelection.SelectChild(
+				node.Properties.GetValueOrDefault(UiComponentProperties.Variants),
+				node.Children.Count,
+				widthCells,
+				heightCells)
+			: -1;
+		var passesBox = responsive || PassesWholeBox(node);
 
 		// Uniqueness is the producer's obligation and the DSL enforces it, so a duplicate here can only come from
 		// a hand-written tree. First wins, and the walk still lists both.
@@ -424,20 +474,32 @@ public sealed class UiTestHost
 
 		var children = new List<UiTestNode>(node.Children.Count);
 
-		foreach (var child in node.Children)
+		for (var index = 0; index < node.Children.Count; index++)
 		{
-			children.Add(BuildNode(child, wrapper, path));
+			children.Add(BuildNode(node.Children[index],
+				wrapper,
+				path,
+				drawn && (!responsive || index == chosen),
+				passesBox ? widthCells : null,
+				passesBox ? heightCells : null));
 		}
 
 		wrapper.SetChildren(children);
 
 		if (node.Fallback is not null)
 		{
-			wrapper.SetFallback(BuildNode(node.Fallback, wrapper, path));
+			wrapper.SetFallback(BuildNode(node.Fallback, wrapper, path, drawn && !responsive, null, null));
 		}
 
 		return wrapper;
 	}
+
+	private static bool PassesWholeBox(UiNode node)
+		=> string.Equals(node.Type, UiComponents.Layer, StringComparison.Ordinal) ||
+			string.Equals(node.Type, UiComponents.Transform, StringComparison.Ordinal) ||
+			(string.Equals(node.Type, UiComponents.Modifier, StringComparison.Ordinal) &&
+				!node.Properties.ContainsKey(UiComponentProperties.Padding) &&
+				!node.Properties.ContainsKey(UiComponentProperties.Frame));
 
 	/// <summary>The ids worth mentioning when <paramref name="id" /> was not found: the ones that contain it or
 	/// are contained by it, and otherwise whatever the tree does have.</summary>

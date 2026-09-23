@@ -3,6 +3,7 @@ import { renderUiNode } from './ui-node-renderer';
 import { UiRenderHost } from './ui-render-host';
 import { PRESS_FEEDBACK_MIN_VISIBLE_MS } from './press-feedback';
 import { DEFAULT_WIDGET_BORDER_COLOR, WIDGET_BORDER_WIDTH } from '../domain/widget.interface';
+import { activationClaim, findInteractiveNode } from '../ui-framework/node-gestures';
 
 interface UiTreeFixture {
   root: UiNode;
@@ -1086,4 +1087,49 @@ describe('component-profile conformance fixtures: coverage', () => {
     ];
     for (const name of exercised) expect(() => loadTree(name)).not.toThrow();
   });
+});
+
+describe('component-profile conformance fixtures: responsive tree', () => {
+  interface ResponsiveCase {
+    name: string;
+    tile: { width: number; height: number | null } | null;
+    chosen: Record<string, string>;
+    claimed: string | null;
+  }
+
+  const tree = loadTree('conformance-responsive-tree.json');
+  const layout = loadJson<{ cases: ResponsiveCase[] }>('conformance-responsive-layout.json');
+
+  for (const testCase of layout.cases) {
+    describe(testCase.name, () => {
+      let container: HTMLElement;
+
+      beforeEach(() => {
+        container = document.createElement('div');
+        document.body.appendChild(container);
+      });
+
+      afterEach(() => container.remove());
+
+      it('draws the layout the fixture names and no other', () => {
+        const box = testCase.tile === null ? null : { width: testCase.tile.width, height: testCase.tile.height };
+        renderUiNode(container, tree, box, null, 120, testHost());
+
+        for (const responsiveId of Object.keys(testCase.chosen)) {
+          const element = container.querySelector(`[data-node-id="${responsiveId}"]`)!;
+          const drawn = Array.from(element.children)
+            .map(child => child.getAttribute('data-node-id'))
+            .filter(id => id !== null);
+          expect(drawn).toEqual([testCase.chosen[responsiveId]]);
+        }
+      });
+
+      it('claims a tile-level press for the node the fixture names', () => {
+        const box = testCase.tile === null ? null : { width: testCase.tile.width, height: testCase.tile.height };
+        const claim = activationClaim(tree, box);
+        expect(claim === 'none' || claim === 'absorbed' ? null : claim.node.id).toBe(testCase.claimed);
+        expect(findInteractiveNode(tree, box)?.id ?? null).toBe(testCase.claimed);
+      });
+    });
+  }
 });

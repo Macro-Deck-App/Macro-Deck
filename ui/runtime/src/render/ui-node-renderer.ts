@@ -59,7 +59,8 @@ export function renderUiNode(
 ): UiNodeRenderHandle {
   const registry = options?.registry ?? DEFAULT_UI_COMPONENT_REGISTRY;
   const timers = options?.timers ?? REAL_TIMERS;
-  return renderInScope(container, node, box, crossExtent, initialBasis, host, registry, timers, createTextFitScope(), () => false);
+  return renderInScope(
+    container, node, box, crossExtent, initialBasis, host, registry, timers, createTextFitScope(), () => false, undefined);
 }
 
 function renderInScope(
@@ -73,6 +74,7 @@ function renderInScope(
   timers: UiRenderTimers,
   scope: TextFitScope,
   parentDisabled: () => boolean,
+  inheritedTreeRoot: boolean | undefined,
 ): UiNodeRenderHandle {
   function setStyle(element: HTMLElement | SVGElement, name: string, value: string | null): void {
     if (writeStyle(element, name, value)) scope.markDirty();
@@ -95,8 +97,8 @@ function renderInScope(
   let activeDefinition: UiComponentDefinition<unknown> | undefined;
   let componentState: unknown;
 
-  const isTreeRoot = typeof container.closest !== 'function'
-    || container.closest('[data-node-id]') === null;
+  const isTreeRoot = inheritedTreeRoot ?? (typeof container.closest !== 'function'
+    || container.closest('[data-node-id]') === null);
   let root: HTMLElement | SVGElement | null = null;
   let children: UiNodeRenderHandle[] = [];
   let childKeys: string[] = [];
@@ -245,7 +247,8 @@ function renderInScope(
       }
 
       next.push(renderInScope(
-        parent, entry.child, entry.box, entry.crossExtent, basis, host, registry, timers, scope, isDisabled));
+        parent, entry.child, entry.box, entry.crossExtent, basis, host, registry, timers, scope, isDisabled,
+        activeDefinition?.transparentRoot ? isTreeRoot : undefined));
     }
 
     let cursor: Node | null = before;
@@ -326,6 +329,7 @@ function renderInScope(
     get basis() { return basis; },
     get crossExtent() { return lastCross; },
     get box() { return resolved; },
+    get givenBox() { return lastBox; },
     isTreeRoot,
     registry,
     current: () => renderNode,

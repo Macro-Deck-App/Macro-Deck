@@ -35,6 +35,8 @@ export class WidgetTypeSelectorComponent implements AfterViewInit, OnDestroy, On
 
   protected readonly previewRadius = WIDGET_REFERENCE_BORDER_RADIUS;
 
+  protected readonly previewCell = WIDGET_REFERENCE_CELL_SIZE;
+
   protected readonly previewSize = signal(WIDGET_REFERENCE_CELL_SIZE);
 
   protected readonly previewScale = signal(1);

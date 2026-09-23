@@ -136,6 +136,7 @@ public void Title_shows_the_current_track()
 | Task | `UiTestHost` / `UiTestNode` |
 | --- | --- |
 | Query rendered nodes | `ById`, `FindById`, `ByType`, `SingleByType`, `ByText` |
+| Choose the box a [responsive](/ui/components/responsive/) view is drawn in | `SetBox(widthCells, heightCells)` - `ByType`, `SingleByType` and `ByText` then see only the layout drawn for it, `ById` still reaches every layout |
 | Simulate events | `Raise(name)`, `Change(value)`, `Activate()`, `Submit()` |
 | Wait for async handlers and loads | `SettleAsync()` |
 | Inspect the tree and emitted patches | `Tree`, `Revision`, `Patches`, `LastPatch`, `Describe()`, `DescribePatches()` |

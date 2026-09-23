@@ -339,6 +339,52 @@ describe('runtime widget grid', () => {
     expect(fired).toEqual([]);
   });
 
+  describe('a tile whose tree is a responsive layout', () => {
+    const responsiveTree = (): UiNode => ({
+      id: 'weather',
+      type: 'ui.responsive',
+      properties: { variants: [{ minWidth: 1.5 }] },
+      children: [
+        { id: 'weather.compact', type: 'ui.text', properties: { text: '21' } },
+        { id: 'weather.wide', type: 'ui.button', properties: { events: ['press'] } },
+      ],
+    }) as UiNode;
+
+    const mountResponsive = (width: number, fired: string[]) => {
+      const handle = renderWidgetGrid(container, {
+        host,
+        geometry: { cols: 5, rows: 3 },
+        onWidgetTrigger: (widgetId, triggerType) => fired.push(`${widgetId}:${triggerType}`),
+      });
+      handle.update([widget('a', 0, 0, width, 1)], () => responsiveTree());
+      return handle;
+    };
+
+    it('runs the tile flow on one cell, where only the text layout is drawn', () => {
+      const fired: string[] = [];
+      mountResponsive(1, fired);
+
+      press(container.querySelector('.deck-grid-tile-surface') as HTMLElement);
+
+      expect(container.querySelector('[data-node-id="weather.compact"]')).not.toBeNull();
+      expect(fired).toEqual(['a:onTouchStart', 'a:onTouchEnd', 'a:onShortPress']);
+    });
+
+    it('leaves the press to the button its wide layout draws on two cells, and lights the tile for it', () => {
+      const fired: string[] = [];
+      const handle = mountResponsive(2, fired);
+      const tile = container.querySelector('.deck-grid-tile') as HTMLElement;
+      const button = container.querySelector('[data-node-id="weather.wide"]') as HTMLElement;
+
+      press(container.querySelector('.deck-grid-tile-surface') as HTMLElement);
+      button.dispatchEvent(pointer('pointerdown'));
+
+      expect(fired).toEqual([]);
+      expect(tile.classList.contains('deck-grid-tile-pressed')).toBeTrue();
+      expect(handle.tileBox('a')!.width! / handle.tileBox('a')!.height!).toBeGreaterThan(2);
+    });
+  });
+
   describe('double tap', () => {
     const doubleTapFlow = (disabled = false) =>
       ({ flows: [{ triggerId: 'd', triggerType: 'onDoublePress', children: [{ id: 'b', disabled }] }] });

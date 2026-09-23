@@ -79,7 +79,8 @@ export class Shell {
     this.deckInput = new DeckInput(
       {
         widgets: () => this.client.deck.displayedWidgets,
-        activateWidget: widgetId => activationClaim(this.client.widgetSessions.treeFor(widgetId)) === 'absorbed',
+        activateWidget: widgetId =>
+          activationClaim(this.client.widgetSessions.treeFor(widgetId), this.grid?.tileBox(widgetId) ?? null) === 'absorbed',
         triggerWidget: (widget: GridWidget) => {
           void this.client.executeTrigger(widget.id, 'onShortPress');
         },

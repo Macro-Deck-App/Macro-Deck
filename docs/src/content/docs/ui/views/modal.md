@@ -119,6 +119,9 @@ is a fixed size and does not grow to your tree, because a box that grew would fe
 back into the basis it is measured against. A tree taller than its box scrolls vertically. It never
 scrolls sideways: a tree wider than its box is an authoring mistake, and Macro Deck clips it.
 
+The box differs between a desktop window and a phone. [`UiResponsive`](/ui/components/responsive/) lets a
+dialog lay itself out differently in a narrow box.
+
 ## What bounds the wait
 
 Check `Cancelled` before touching `Value`. **Everything that is not an explicit completion is a

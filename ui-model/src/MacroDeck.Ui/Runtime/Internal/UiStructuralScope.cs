@@ -38,6 +38,8 @@ internal sealed class UiStructuralScope : UiDependent
 
 	internal IReadOnlyList<UiValue<bool>>? Disabled { get; init; }
 
+	internal bool InAutomaticFallback { get; init; }
+
 	/// <summary>The diagnostic declaration path this scope's element was declared under.</summary>
 	internal string ParentDeclarationPath { get; }
 
