@@ -1,10 +1,11 @@
 import { ApplicationConfig, inject, provideAppInitializer, provideZonelessChangeDetection } from '@angular/core';
-import { provideRouter, withHashLocation } from '@angular/router';
+import { RouteReuseStrategy, provideRouter, withHashLocation } from '@angular/router';
 
 import { HOST_URL_RESOLVER, AUTH_REQUIRED_SCOPE, CLIENT_TYPE, provideVersionCheck, UiWidgetResourceBaseUrl } from '@shared';
 import { TEMPLATE_PREVIEW_SERVICE } from './domain/template-preview.interface';
 import { TemplatePreviewApiService } from './services/template-preview.service';
 import { routes } from './app.routes';
+import { RecreateOnParamChangeStrategy } from './util/recreate-on-param-change.strategy';
 import { provideWidgetRegistry } from './widget-registration';
 
 async function resolveHostUrl(): Promise<string | null> {
@@ -15,6 +16,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
     provideRouter(routes, withHashLocation()),
+    { provide: RouteReuseStrategy, useClass: RecreateOnParamChangeStrategy },
     provideWidgetRegistry(),
     { provide: HOST_URL_RESOLVER, useValue: resolveHostUrl },
     { provide: AUTH_REQUIRED_SCOPE, useValue: 'admin' as const },

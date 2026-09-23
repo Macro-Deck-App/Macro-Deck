@@ -59,6 +59,24 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 			entries = entries.Where(entry => InstalledVersion(entry) is not null);
 		}
 
+		if (query.SupportedOnly)
+		{
+			entries = entries.Where(entry => UnsupportedReason(entry) is null);
+		}
+
+		if (!string.IsNullOrWhiteSpace(query.Publisher))
+		{
+			var publisher = query.Publisher.Trim();
+			entries = entries.Where(entry =>
+				string.Equals(entry.Publisher?.Trim(), publisher, StringComparison.OrdinalIgnoreCase));
+		}
+
+		if (!string.IsNullOrWhiteSpace(query.Tag))
+		{
+			var tag = query.Tag.Trim();
+			entries = entries.Where(entry => entry.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase));
+		}
+
 		var matches = entries.ToList();
 		var take = Math.Clamp(query.Take, 1, StoreCatalogQuery.MaxTake);
 		var items = Order(matches, query.Section, term, featured)
@@ -218,7 +236,8 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 		Contains(entry.Name, term) ||
 		Contains(entry.Id, term) ||
 		Contains(entry.Description, term) ||
-		Contains(entry.Publisher, term);
+		Contains(entry.Publisher, term) ||
+		entry.Tags.Any(tag => Contains(tag, term));
 
 	private static bool Contains(string? value, string term) =>
 		value is not null && value.Contains(term, StringComparison.OrdinalIgnoreCase);
@@ -235,6 +254,16 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 			return 1;
 		}
 
-		return Contains(entry.Name, term) ? 2 : Contains(entry.Publisher, term) ? 3 : 4;
+		if (Contains(entry.Name, term))
+		{
+			return 2;
+		}
+
+		if (Contains(entry.Publisher, term))
+		{
+			return 3;
+		}
+
+		return Contains(entry.Id, term) || Contains(entry.Description, term) ? 4 : 5;
 	}
 }

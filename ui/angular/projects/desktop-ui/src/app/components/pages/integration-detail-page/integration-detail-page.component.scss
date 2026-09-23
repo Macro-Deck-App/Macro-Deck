@@ -115,6 +115,36 @@
 
 .detail-card-wide { grid-column: 1 / -1; }
 
+.detail-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: auto;
+  padding-top: var(--space-3);
+}
+
+.uninstall-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.uninstall-confirm-text,
+.uninstall-confirm-hint {
+  margin: 0;
+  line-height: var(--leading-normal);
+}
+
+.uninstall-confirm-text {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+}
+
+.uninstall-confirm-hint {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
 .detail-card-title {
   @include ds.section-label;
   margin: 0 0 var(--space-2);

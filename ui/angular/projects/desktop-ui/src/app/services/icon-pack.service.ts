@@ -1,5 +1,5 @@
 import { Injectable, Signal, WritableSignal, inject, signal, untracked } from '@angular/core';
-import { AppStrings, IconDeletedEvent, IconImportBatchState, IconImportProgressEvent, IconPackCreatedEvent, IconPackDeletedEvent, IconPackUpdatedEvent, IconProcessingState, IconUpdatedEvent, IconsAddedEvent, IpcIcon, IpcIconImportBatch, IpcIconPack } from '@macro-deck/runtime';
+import { AppStrings, IconDeletedEvent, IconImportBatchState, IconImportProgressEvent, IconPackCreatedEvent, IconPackDeletedEvent, IconPackUpdatedEvent, IconProcessingState, IconPackAiAssets, IconUpdatedEvent, IconsAddedEvent, IpcIcon, IpcIconImportBatch, IpcIconPack } from '@macro-deck/runtime';
 import { ApiService, LocalizationService } from '@shared';
 import { FileSaveService } from './file-save.service';
 
@@ -17,6 +17,8 @@ export interface IconPackModel {
   iconCount: number;
   ownerKind: string;
   canDelete: boolean;
+  storePackageId?: string | null;
+  aiAssets?: IconPackAiAssets;
 }
 
 export interface IconModel {
@@ -48,6 +50,7 @@ export interface IconPackChanges {
   description?: string;
   author?: string;
   version?: string;
+  aiAssets?: IconPackAiAssets;
 }
 
 export interface IconPackExportResult {
@@ -580,6 +583,8 @@ function mapPack(pack: IpcIconPack): IconPackModel {
     updatedAt: pack.updatedAt,
     iconCount: pack.iconCount ?? 0,
     ownerKind: pack.ownerKind ?? 'User',
+    storePackageId: pack.storePackageId ?? null,
+    aiAssets: pack.aiAssets ?? 'NotDeclared',
     canDelete: pack.canDelete ?? true,
   };
 }

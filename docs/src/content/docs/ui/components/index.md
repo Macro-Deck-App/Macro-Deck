@@ -30,6 +30,7 @@ cross axis.
 | `ui.segmented` | A row of segments the user chooses one of | [Segmented](/ui/components/segmented/) |
 | `ui.dial` | A rotary level the user turns | [Dial](/ui/components/dial/) |
 | `ui.modifier` | Pads, fades, clips, masks or frames its one child | [Modifier](/ui/components/modifier/) |
+| `ui.responsive` | Draws one of several layouts, chosen by the box it is given | [Responsive](/ui/components/responsive/) |
 
 Any node can also carry a `modifiers` object - background, border, radius, accessibility text and
 `disabled` - and the gesture events. See [Modifier](/ui/components/modifier/).

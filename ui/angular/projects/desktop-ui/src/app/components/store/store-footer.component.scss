@@ -1,0 +1,110 @@
+@use '../../../styles/index' as ds;
+
+.store-footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+  container-type: inline-size;
+}
+
+.store-footer-publish {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(90deg, var(--color-accent-muted), transparent 70%),
+    var(--color-bg-secondary);
+
+  @container (max-width: 560px) {
+    flex-wrap: wrap;
+  }
+}
+
+.publish-icon {
+  @include ds.flex-center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+.publish-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.publish-heading {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+}
+
+.publish-body {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.publish-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  text-decoration: none;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+
+  &:hover {
+    background-color: var(--color-bg-hover);
+    border-color: var(--color-border-accent);
+  }
+
+  &:focus-visible {
+    @include ds.focus-ring;
+  }
+}
+
+.store-footer-legal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.legal-links {
+  display: flex;
+  gap: var(--space-4);
+
+  a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--color-text-primary);
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      @include ds.focus-ring;
+    }
+  }
+}

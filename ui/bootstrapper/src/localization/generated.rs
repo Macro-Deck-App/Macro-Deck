@@ -53,6 +53,7 @@ pub mod keys {
     pub const MENU_FILE: &str = "Bootstrapper.Menu.File";
     pub const MENU_HELP: &str = "Bootstrapper.Menu.Help";
     pub const MENU_IMPORT: &str = "Bootstrapper.Menu.Import";
+    pub const MENU_QUIT: &str = "Bootstrapper.Menu.Quit";
     pub const MENU_SETTINGS: &str = "Bootstrapper.Menu.Settings";
     pub const MENU_VIEW: &str = "Bootstrapper.Menu.View";
     pub const MENU_WINDOW: &str = "Bootstrapper.Menu.Window";
@@ -86,6 +87,7 @@ pub mod keys {
     pub const UPDATE_WINDOW_CHANGELOG_HEADING: &str = "Bootstrapper.UpdateWindow.ChangelogHeading";
     pub const UPDATE_WINDOW_CURRENT_VERSION: &str = "Bootstrapper.UpdateWindow.CurrentVersion";
     pub const UPDATE_WINDOW_DOWNLOADING_STATUS: &str = "Bootstrapper.UpdateWindow.DownloadingStatus";
+    pub const UPDATE_WINDOW_INSTALL_ON_QUIT_STATUS: &str = "Bootstrapper.UpdateWindow.InstallOnQuitStatus";
     pub const UPDATE_WINDOW_INSTALLING_STATUS: &str = "Bootstrapper.UpdateWindow.InstallingStatus";
     pub const UPDATE_WINDOW_NO_CHANGELOG: &str = "Bootstrapper.UpdateWindow.NoChangelog";
     pub const UPDATE_WINDOW_PREPARING_STATUS: &str = "Bootstrapper.UpdateWindow.PreparingStatus";
@@ -143,6 +145,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Menu.File", "Soubor"),
         ("Bootstrapper.Menu.Help", "Nápověda"),
         ("Bootstrapper.Menu.Import", "Importovat…"),
+        ("Bootstrapper.Menu.Quit", "Ukončit Macro Deck"),
         ("Bootstrapper.Menu.Settings", "Nastavení…"),
         ("Bootstrapper.Menu.View", "Zobrazení"),
         ("Bootstrapper.Menu.Window", "Okno"),
@@ -177,6 +180,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.ChangelogHeading", "Co je nového"),
         ("Bootstrapper.UpdateWindow.CurrentVersion", "Aktuálně nainstalovaná verze: {version}"),
         ("Bootstrapper.UpdateWindow.DownloadingStatus", "Stahování… {percent} %"),
+        ("Bootstrapper.UpdateWindow.InstallOnQuitStatus", "Aktualizace je stažená. Nainstaluje se při ukončení aplikace Macro Deck."),
         ("Bootstrapper.UpdateWindow.InstallingStatus", "Probíhá instalace aktualizace. Macro Deck se za chvíli restartuje."),
         ("Bootstrapper.UpdateWindow.NoChangelog", "Pro tuto verzi nebyly zveřejněny žádné poznámky k vydání."),
         ("Bootstrapper.UpdateWindow.PreparingStatus", "Příprava stahování…"),
@@ -230,6 +234,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Menu.File", "Datei"),
         ("Bootstrapper.Menu.Help", "Hilfe"),
         ("Bootstrapper.Menu.Import", "Importieren…"),
+        ("Bootstrapper.Menu.Quit", "Macro Deck beenden"),
         ("Bootstrapper.Menu.Settings", "Einstellungen…"),
         ("Bootstrapper.Menu.View", "Ansicht"),
         ("Bootstrapper.Menu.Window", "Fenster"),
@@ -264,6 +269,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.ChangelogHeading", "Was ist neu"),
         ("Bootstrapper.UpdateWindow.CurrentVersion", "Du hast aktuell {version}"),
         ("Bootstrapper.UpdateWindow.DownloadingStatus", "Wird heruntergeladen … {percent}%"),
+        ("Bootstrapper.UpdateWindow.InstallOnQuitStatus", "Das Update ist heruntergeladen. Macro Deck installiert es, wenn du es beendest."),
         ("Bootstrapper.UpdateWindow.InstallingStatus", "Das Update wird installiert. Macro Deck startet gleich neu."),
         ("Bootstrapper.UpdateWindow.NoChangelog", "Für diese Version wurden keine Versionshinweise veröffentlicht."),
         ("Bootstrapper.UpdateWindow.PreparingStatus", "Download wird vorbereitet …"),
@@ -317,6 +323,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Menu.File", "File"),
         ("Bootstrapper.Menu.Help", "Help"),
         ("Bootstrapper.Menu.Import", "Import…"),
+        ("Bootstrapper.Menu.Quit", "Quit Macro Deck"),
         ("Bootstrapper.Menu.Settings", "Settings…"),
         ("Bootstrapper.Menu.View", "View"),
         ("Bootstrapper.Menu.Window", "Window"),
@@ -351,6 +358,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.ChangelogHeading", "What's new"),
         ("Bootstrapper.UpdateWindow.CurrentVersion", "You currently have {version}"),
         ("Bootstrapper.UpdateWindow.DownloadingStatus", "Downloading… {percent}%"),
+        ("Bootstrapper.UpdateWindow.InstallOnQuitStatus", "The update is downloaded. Macro Deck installs it when you quit."),
         ("Bootstrapper.UpdateWindow.InstallingStatus", "Installing the update. Macro Deck restarts in a moment."),
         ("Bootstrapper.UpdateWindow.NoChangelog", "No release notes were published for this version."),
         ("Bootstrapper.UpdateWindow.PreparingStatus", "Preparing the download…"),
@@ -404,6 +412,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Menu.File", "Archivo"),
         ("Bootstrapper.Menu.Help", "Ayuda"),
         ("Bootstrapper.Menu.Import", "Importar…"),
+        ("Bootstrapper.Menu.Quit", "Salir de Macro Deck"),
         ("Bootstrapper.Menu.Settings", "Configuración…"),
         ("Bootstrapper.Menu.View", "Ver"),
         ("Bootstrapper.Menu.Window", "Ventana"),
@@ -438,6 +447,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.ChangelogHeading", "Novedades"),
         ("Bootstrapper.UpdateWindow.CurrentVersion", "Actualmente tienes {version}"),
         ("Bootstrapper.UpdateWindow.DownloadingStatus", "Descargando… {percent}%"),
+        ("Bootstrapper.UpdateWindow.InstallOnQuitStatus", "La actualización está descargada. Macro Deck la instalará cuando salgas de la aplicación."),
         ("Bootstrapper.UpdateWindow.InstallingStatus", "Instalando la actualización. Macro Deck se reiniciará en un momento."),
         ("Bootstrapper.UpdateWindow.NoChangelog", "No se publicaron notas de la versión para esta actualización."),
         ("Bootstrapper.UpdateWindow.PreparingStatus", "Preparando la descarga…"),
@@ -491,6 +501,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Menu.File", "Fichier"),
         ("Bootstrapper.Menu.Help", "Aide"),
         ("Bootstrapper.Menu.Import", "Importer…"),
+        ("Bootstrapper.Menu.Quit", "Quitter Macro Deck"),
         ("Bootstrapper.Menu.Settings", "Paramètres…"),
         ("Bootstrapper.Menu.View", "Affichage"),
         ("Bootstrapper.Menu.Window", "Fenêtre"),
@@ -525,6 +536,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.ChangelogHeading", "Quoi de neuf"),
         ("Bootstrapper.UpdateWindow.CurrentVersion", "Tu as actuellement la version {version}"),
         ("Bootstrapper.UpdateWindow.DownloadingStatus", "Téléchargement… {percent} %"),
+        ("Bootstrapper.UpdateWindow.InstallOnQuitStatus", "La mise à jour est téléchargée. Macro Deck l'installera quand tu le quitteras."),
         ("Bootstrapper.UpdateWindow.InstallingStatus", "Installation de la mise à jour. Macro Deck va redémarrer dans un instant."),
         ("Bootstrapper.UpdateWindow.NoChangelog", "Aucune note de version n'a été publiée pour cette mise à jour."),
         ("Bootstrapper.UpdateWindow.PreparingStatus", "Préparation du téléchargement…"),
@@ -578,6 +590,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Menu.File", "File"),
         ("Bootstrapper.Menu.Help", "Aiuto"),
         ("Bootstrapper.Menu.Import", "Importa…"),
+        ("Bootstrapper.Menu.Quit", "Esci da Macro Deck"),
         ("Bootstrapper.Menu.Settings", "Impostazioni…"),
         ("Bootstrapper.Menu.View", "Vista"),
         ("Bootstrapper.Menu.Window", "Finestra"),
@@ -612,6 +625,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.ChangelogHeading", "Novità"),
         ("Bootstrapper.UpdateWindow.CurrentVersion", "Attualmente hai la versione {version}"),
         ("Bootstrapper.UpdateWindow.DownloadingStatus", "Download in corso… {percent}%"),
+        ("Bootstrapper.UpdateWindow.InstallOnQuitStatus", "L'aggiornamento è stato scaricato. Macro Deck lo installerà quando esci dall'app."),
         ("Bootstrapper.UpdateWindow.InstallingStatus", "Installazione dell'aggiornamento in corso. Macro Deck si riavvierà a breve."),
         ("Bootstrapper.UpdateWindow.NoChangelog", "Non sono state pubblicate note di rilascio per questa versione."),
         ("Bootstrapper.UpdateWindow.PreparingStatus", "Preparazione del download…"),
@@ -665,6 +679,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.Menu.File", "Plik"),
         ("Bootstrapper.Menu.Help", "Pomoc"),
         ("Bootstrapper.Menu.Import", "Importuj…"),
+        ("Bootstrapper.Menu.Quit", "Zakończ Macro Deck"),
         ("Bootstrapper.Menu.Settings", "Ustawienia…"),
         ("Bootstrapper.Menu.View", "Widok"),
         ("Bootstrapper.Menu.Window", "Okno"),
@@ -699,6 +714,7 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.ChangelogHeading", "Co nowego"),
         ("Bootstrapper.UpdateWindow.CurrentVersion", "Obecnie zainstalowana jest wersja {version}"),
         ("Bootstrapper.UpdateWindow.DownloadingStatus", "Pobieranie… {percent}%"),
+        ("Bootstrapper.UpdateWindow.InstallOnQuitStatus", "Aktualizacja została pobrana. Zostanie zainstalowana przy zamknięciu aplikacji Macro Deck."),
         ("Bootstrapper.UpdateWindow.InstallingStatus", "Trwa instalacja aktualizacji. Macro Deck za chwilę uruchomi się ponownie."),
         ("Bootstrapper.UpdateWindow.NoChangelog", "Dla tej wersji nie opublikowano informacji o wydaniu."),
         ("Bootstrapper.UpdateWindow.PreparingStatus", "Przygotowywanie pobierania…"),

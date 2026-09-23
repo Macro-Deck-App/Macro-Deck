@@ -9,6 +9,7 @@ import { ApiService, ToastService, VariableService } from '@shared';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
 import { Integration, IntegrationService } from '../../../services/integration.service';
 import { PluginCompatibilityService } from '../../../services/plugin-compatibility.service';
+import { StoreAccessService } from '../../../services/store-access.service';
 import { PluginInstallationService } from '../../../services/plugin-installation.service';
 
 import { IntegrationDetailPageComponent } from './integration-detail-page.component';
@@ -26,6 +27,9 @@ describe('IntegrationDetailPageComponent', () => {
   let getIntegrationIssues: jasmine.Spy;
   let getIntegrationCapabilities: jasmine.Spy;
   let resolveIntegrationIssue: jasmine.Spy;
+  let getStoreExtension: jasmine.Spy;
+  let uninstallPlugin: jasmine.Spy;
+  let storeUnlocked: ReturnType<typeof signal<boolean>>;
   let deleteConfigEntry: jasmine.Spy;
   let startConfigFlow: jasmine.Spy;
   let routerSpy: jasmine.SpyObj<Router>;
@@ -186,6 +190,9 @@ describe('IntegrationDetailPageComponent', () => {
       .createSpy('resolveIntegrationIssue')
       .and.resolveTo({ success: true, followUp: 'None' });
     deleteConfigEntry = jasmine.createSpy('deleteConfigEntry').and.resolveTo({ success: true });
+    getStoreExtension = jasmine.createSpy('getStoreExtension').and.resolveTo({ extension: null });
+    storeUnlocked = signal(true);
+    uninstallPlugin = jasmine.createSpy('uninstallPlugin').and.resolveTo({ success: true });
     startConfigFlow = jasmine.createSpy('startConfigFlow').and.resolveTo({
       supported: true,
       flowId: 'obs-flow',
@@ -207,6 +214,7 @@ describe('IntegrationDetailPageComponent', () => {
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
+        { provide: StoreAccessService, useValue: { unlocked: storeUnlocked } },
         {
           provide: IntegrationService,
           useValue: {
@@ -224,6 +232,7 @@ describe('IntegrationDetailPageComponent', () => {
             getIntegrationCapabilities: (...args: unknown[]) => getIntegrationCapabilities(...args),
             resolveIntegrationIssue: (...args: unknown[]) => resolveIntegrationIssue(...args),
             getIntegrationIconUrl: () => null,
+            getStoreExtension: (...args: unknown[]) => getStoreExtension(...args),
             // Keyed by name, the way the real transport is: handing every subscriber the issues
             // stream means any component that also listens for another event receives an
             // issues payload shaped as that event, which fails inside the wrong consumer.
@@ -258,7 +267,12 @@ describe('IntegrationDetailPageComponent', () => {
         },
         {
           provide: PluginInstallationService,
-          useValue: { find: (pluginId: string) => installedPlugins().find(p => p.pluginId === pluginId) ?? null },
+          useValue: {
+            find: (pluginId: string) => installedPlugins().find(p => p.pluginId === pluginId) ?? null,
+            installedIds: () => new Set(installedPlugins().map(p => p.pluginId)),
+            load: async () => undefined,
+            uninstall: (...args: unknown[]) => uninstallPlugin(...args),
+          },
         },
         { provide: Router, useValue: routerSpy },
         {
@@ -1027,6 +1041,119 @@ describe('IntegrationDetailPageComponent', () => {
 
       expect(getIntegrationCapabilities.calls.count()).toBe(callsBefore);
       fixture.destroy();
+    });
+  });
+
+  describe('store listing', () => {
+    function storeButton(fixture: ComponentFixture<IntegrationDetailPageComponent>): HTMLElement | null {
+      return (fixture.nativeElement as HTMLElement).querySelector('.detail-store-link button');
+    }
+
+    it('links a plugin the Store lists to its Store page, where its readme and versions are', async () => {
+      integrations.set([integration({ isInternal: false })]);
+      getStoreExtension.and.resolveTo({ extension: { id: 'app.macro-deck.spotify' } });
+      const fixture = await createFixture();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(getStoreExtension).toHaveBeenCalledWith('Plugin', 'app.macro-deck.spotify');
+      storeButton(fixture)!.click();
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/store', 'Plugin', 'app.macro-deck.spotify']);
+    });
+
+    it('offers no Store link for a plugin the Store does not list', async () => {
+      integrations.set([integration({ isInternal: false })]);
+      const fixture = await createFixture();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(storeButton(fixture)).toBeNull();
+    });
+
+    it('keeps the Store link hidden while the Store is not open to this account', async () => {
+      integrations.set([integration({ isInternal: false })]);
+      getStoreExtension.and.resolveTo({ extension: { id: 'app.macro-deck.spotify' } });
+      storeUnlocked.set(false);
+      const fixture = await createFixture();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(storeButton(fixture)).toBeNull();
+    });
+
+    it('does not ask the Store about a built-in integration', async () => {
+      const fixture = await createFixture();
+      await fixture.whenStable();
+
+      expect(getStoreExtension).not.toHaveBeenCalled();
+      expect(storeButton(fixture)).toBeNull();
+    });
+  });
+
+  describe('uninstall', () => {
+    function uninstallButton(fixture: ComponentFixture<IntegrationDetailPageComponent>): HTMLElement | null {
+      return (fixture.nativeElement as HTMLElement).querySelector('.detail-uninstall button');
+    }
+
+    function access(fixture: ComponentFixture<IntegrationDetailPageComponent>) {
+      return fixture.componentInstance as unknown as {
+        confirmUninstall(): Promise<void>;
+        uninstallDeleteData: { set(value: boolean): void };
+      };
+    }
+
+    async function installedExternal(): Promise<ComponentFixture<IntegrationDetailPageComponent>> {
+      integrations.set([integration({ isInternal: false })]);
+      installedPlugins.set([{ pluginId: 'app.macro-deck.spotify', activeVersion: '1.0.0', permissions: [] } as unknown as InstalledPlugin]);
+      const fixture = await createFixture();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      return fixture;
+    }
+
+    it('offers no uninstall for a built-in integration', async () => {
+      const builtIn = await createFixture();
+
+      expect(uninstallButton(builtIn)).toBeNull();
+    });
+
+    it('offers an uninstall in the general details for a plugin the host lists as installed', async () => {
+      const fixture = await installedExternal();
+
+      expect(uninstallButton(fixture)).not.toBeNull();
+    });
+
+    it('keeps the plugin data unless the user asks for its removal', async () => {
+      const fixture = await installedExternal();
+
+      uninstallButton(fixture)!.click();
+      await access(fixture).confirmUninstall();
+      expect(uninstallPlugin.calls.mostRecent().args).toEqual(['app.macro-deck.spotify', true]);
+
+      uninstallButton(fixture)!.click();
+      access(fixture).uninstallDeleteData.set(true);
+      await access(fixture).confirmUninstall();
+      expect(uninstallPlugin.calls.mostRecent().args).toEqual(['app.macro-deck.spotify', false]);
+    });
+
+    it('stays on the page and never retries when the host refuses the uninstall', async () => {
+      const fixture = await installedExternal();
+      uninstallPlugin.and.resolveTo({ success: false, error: { code: 'dependency_in_use', message: 'required by com.other' } });
+
+      uninstallButton(fixture)!.click();
+      await access(fixture).confirmUninstall();
+
+      expect(uninstallPlugin.calls.count()).toBe(1);
+      expect(routerSpy.navigate).not.toHaveBeenCalledWith(['/integrations']);
+    });
+
+    it('returns to the integrations list once the plugin is uninstalled', async () => {
+      const fixture = await installedExternal();
+
+      uninstallButton(fixture)!.click();
+      await access(fixture).confirmUninstall();
+
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/integrations']);
     });
   });
 });

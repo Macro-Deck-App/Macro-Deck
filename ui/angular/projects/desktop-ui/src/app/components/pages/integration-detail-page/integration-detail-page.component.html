@@ -74,6 +74,22 @@
                   <span class="detail-value">{{ integration.version }}</span>
                 </div>
               }
+              @if (showStoreLink() || canUninstall()) {
+                <div class="detail-card-actions">
+                  @if (showStoreLink()) {
+                    <shared-button class="detail-store-link" variant="secondary" size="compact" (click)="openInStore()">
+                      <span class="icon icon-store icon-sm" aria-hidden="true"></span>
+                      {{ 'macrodeck.app:Integrations.Detail.ViewInStoreAction' | translate }}
+                    </shared-button>
+                  }
+                  @if (canUninstall()) {
+                    <shared-button class="detail-uninstall" variant="danger-ghost" size="compact" (click)="requestUninstall()">
+                      <span class="icon icon-trash icon-sm" aria-hidden="true"></span>
+                      {{ 'macrodeck.app:Integrations.Page.UninstallAction' | translate }}
+                    </shared-button>
+                  }
+                </div>
+              }
             </section>
 
             <section class="detail-card">
@@ -340,4 +356,30 @@
     (confirm)="confirmDisable()"
     (cancel)="cancelDisable()">
   </shared-confirmation-modal>
+}
+
+@if (uninstallOpen()) {
+  @if (integration(); as uninstalling) {
+    <shared-modal [heading]="'macrodeck.app:Integrations.Page.UninstallHeading' | translate" size="small" (close)="cancelUninstall()">
+      <div class="uninstall-confirm">
+        <p class="uninstall-confirm-text">{{ uninstallMessage() }}</p>
+        <p class="uninstall-confirm-text">
+          {{ 'macrodeck.app:Integrations.Page.UninstallNote' | translate }}
+        </p>
+        <shared-checkbox
+          [label]="'macrodeck.app:Integrations.Page.DeleteDataCheckboxLabel' | translate"
+          [ngModel]="uninstallDeleteData()"
+          (ngModelChange)="uninstallDeleteData.set($event)" />
+        <p class="uninstall-confirm-hint">
+          {{ 'macrodeck.app:Integrations.Page.UninstallHint' | translate:{ name: uninstalling.name } }}
+        </p>
+      </div>
+      <div modal-footer>
+        <shared-button variant="secondary" (click)="cancelUninstall()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+        <shared-button variant="danger" [loading]="uninstallBusy()" (click)="confirmUninstall()">
+          {{ 'macrodeck.app:Integrations.Page.UninstallAction' | translate }}
+        </shared-button>
+      </div>
+    </shared-modal>
+  }
 }

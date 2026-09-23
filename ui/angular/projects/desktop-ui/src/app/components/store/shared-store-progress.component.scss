@@ -83,6 +83,12 @@
   color: var(--color-danger);
 }
 
+.failed-detail {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
 .bar {
   position: relative;
   height: 4px;

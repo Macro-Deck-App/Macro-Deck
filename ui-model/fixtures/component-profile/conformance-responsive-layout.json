@@ -1,0 +1,81 @@
+{
+  "cases": [
+    {
+      "name": "1x1",
+      "span": { "width": 1, "height": 1, "spacing": 12 },
+      "tile": { "width": 120, "height": 120 },
+      "chosen": { "conformance.layouts": "conformance.layouts.compact" },
+      "claimed": null
+    },
+    {
+      "name": "2x1 without spacing",
+      "span": { "width": 2, "height": 1, "spacing": 0 },
+      "tile": { "width": 240, "height": 120 },
+      "chosen": { "conformance.layouts": "conformance.layouts.wide" },
+      "claimed": "conformance.layouts.wide.play"
+    },
+    {
+      "name": "2x1 without spacing, scaled a unit in the last place short",
+      "tile": { "width": 239.99999999999997, "height": 120 },
+      "chosen": { "conformance.layouts": "conformance.layouts.wide" },
+      "claimed": "conformance.layouts.wide.play"
+    },
+    {
+      "name": "2x1 with spacing, exactly at the minimum aspect",
+      "span": { "width": 2, "height": 1, "spacing": 12 },
+      "tile": { "width": 252, "height": 120 },
+      "chosen": { "conformance.layouts": "conformance.layouts.panorama" },
+      "claimed": null
+    },
+    {
+      "name": "2x1 with spacing, scaled a unit in the last place short",
+      "tile": { "width": 251.99999999999997, "height": 120.00000000000001 },
+      "chosen": { "conformance.layouts": "conformance.layouts.panorama" },
+      "claimed": null
+    },
+    {
+      "name": "1x2 with spacing",
+      "span": { "width": 1, "height": 2, "spacing": 12 },
+      "tile": { "width": 120, "height": 252 },
+      "chosen": { "conformance.layouts": "conformance.layouts.tall" },
+      "claimed": null
+    },
+    {
+      "name": "1x2 without spacing, scaled a unit in the last place long",
+      "tile": { "width": 120, "height": 240.00000000000003 },
+      "chosen": { "conformance.layouts": "conformance.layouts.tall" },
+      "claimed": null
+    },
+    {
+      "name": "2x2 with spacing",
+      "span": { "width": 2, "height": 2, "spacing": 12 },
+      "tile": { "width": 252, "height": 252 },
+      "chosen": { "conformance.layouts": "conformance.layouts.large" },
+      "claimed": null
+    },
+    {
+      "name": "2x2 without spacing, scaled a unit in the last place short",
+      "tile": { "width": 239.99999999999997, "height": 239.99999999999997 },
+      "chosen": { "conformance.layouts": "conformance.layouts.large" },
+      "claimed": null
+    },
+    {
+      "name": "no box",
+      "tile": null,
+      "chosen": { "conformance.layouts": "conformance.layouts.compact" },
+      "claimed": null
+    },
+    {
+      "name": "a deck not measured yet",
+      "tile": { "width": 0, "height": 0 },
+      "chosen": { "conformance.layouts": "conformance.layouts.compact" },
+      "claimed": null
+    },
+    {
+      "name": "only the width known",
+      "tile": { "width": 300, "height": null },
+      "chosen": { "conformance.layouts": "conformance.layouts.wide" },
+      "claimed": "conformance.layouts.wide.play"
+    }
+  ]
+}

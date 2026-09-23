@@ -46,6 +46,21 @@ public class IconPackServiceTests
 	}
 
 	[Test]
+	public async Task Update_WithoutAnAiDeclaration_KeepsTheStoredOne()
+	{
+		var pack = (await _service.Create("Pack", null, null, null, IconPackAiAssets.Generated)).Data!;
+
+		var kept = (await _service.Update(pack.Id, "Pack", null, null, null)).Data!.AiAssets;
+		var changed = (await _service.Update(pack.Id, "Pack", null, null, null, IconPackAiAssets.None)).Data!.AiAssets;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(kept, Is.EqualTo(IconPackAiAssets.Generated));
+			Assert.That(changed, Is.EqualTo(IconPackAiAssets.None));
+		});
+	}
+
+	[Test]
 	public async Task Create_EmptyName_Fails()
 	{
 		var result = await _service.Create("   ", null, null, null);

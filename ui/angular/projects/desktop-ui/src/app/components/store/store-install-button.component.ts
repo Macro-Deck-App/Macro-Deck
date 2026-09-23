@@ -1,20 +1,28 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { AppStrings, StoreCatalogItemBody, StoreOperationBody } from '@macro-deck/runtime';
 import { ButtonComponent, LocalizationService, ModalComponent, TranslatePipe } from '@shared';
 import { DeveloperModeService } from '../../services/developer-mode.service';
+import { TooltipDirective } from '../overlay/tooltip/tooltip.directive';
+import { compareVersions, sameVersion } from '../../util/semver-compare';
 import { formatEta, storeOperationByteReadout, storeOperationErrorKey, storeOperationPercent } from '../../util/store-operation-display';
 
 type EffectiveState =
-  | 'install' | 'installed' | 'update' | 'testBuild' | 'unsupported'
-  | 'queued' | 'downloading' | 'validating' | 'backingUp' | 'installing' | 'completed' | 'failed';
+  | 'install' | 'installVersion' | 'installed' | 'update' | 'downgrade' | 'testBuild' | 'unsupported' | 'unavailable'
+  | 'queued' | 'downloading' | 'validating' | 'backingUp' | 'installing' | 'completed' | 'failed' | 'blocked';
+
+type BlockedAction = 'checkForUpdates' | 'chooseVersion' | 'viewDetails' | null;
+
+export type StoreManageAction = 'settings' | 'library';
 
 @Component({
   selector: 'shared-store-install-button',
   standalone: true,
-  imports: [ButtonComponent, ModalComponent, TranslatePipe],
+  imports: [ButtonComponent, ModalComponent, NgTemplateOutlet, TooltipDirective, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './store-install-button.component.html',
   styleUrls: ['./store-install-button.component.scss'],
+  host: { '[class.prominent]': 'prominent()' },
 })
 export class StoreInstallButtonComponent {
   readonly item = input.required<StoreCatalogItemBody>();
@@ -22,7 +30,16 @@ export class StoreInstallButtonComponent {
 
   readonly size = input<'compact' | 'lg'>('compact');
 
+  readonly targetVersion = input<string | null>(null);
+  readonly targetInstallable = input(true);
+  readonly targetUnavailableReason = input<string | null>(null);
+  readonly otherVersionsAvailable = input(false);
+  readonly updatesAvailable = input(false);
+  readonly manageAction = input<StoreManageAction | null>(null);
+
   protected readonly prominent = computed(() => this.size() === 'lg');
+  protected readonly secondarySize = computed(() => this.prominent() ? 'md' : this.size());
+  protected readonly uninstallVariant = computed(() => this.prominent() ? 'danger-ghost' : 'ghost');
 
   private readonly localization = inject(LocalizationService);
 
@@ -34,7 +51,11 @@ export class StoreInstallButtonComponent {
 
   readonly uninstall = output<void>();
 
-  readonly installUnsigned = output<void>();
+  readonly installUnsigned = output<string | undefined>();
+  readonly checkForUpdates = output<void>();
+  readonly chooseVersion = output<void>();
+  readonly viewDetails = output<void>();
+  readonly manage = output<StoreManageAction>();
 
   private readonly developerMode = inject(DeveloperModeService);
 
@@ -48,11 +69,21 @@ export class StoreInstallButtonComponent {
     });
   }
 
+  protected readonly target = computed(() => this.targetVersion() ?? this.item().latestVersion);
+
+  private readonly targetsLatest = computed(() => sameVersion(this.target(), this.item().latestVersion));
+
+  private readonly interactiveFailure = computed(() => {
+    const op = this.operation();
+    return !!op && (op.canRetry || this.canInstallUnsigned());
+  });
+
   protected readonly effective = computed<EffectiveState>(() => {
     const op = this.operation();
-    const testBuild = !!this.item().installedTestBuild
-      && (this.item().installState === 'Installed' || this.item().installState === 'UpdateAvailable');
-    const returnedToStore = op?.kind !== 'TestInstall' && op?.version === this.item().latestVersion;
+    const item = this.item();
+    const testBuild = !!item.installedTestBuild
+      && (item.installState === 'Installed' || item.installState === 'UpdateAvailable');
+    const returnedToStore = op?.kind !== 'TestInstall' && op?.version === item.latestVersion;
     if (op && !(testBuild && op.state === 'Completed' && !returnedToStore)) {
       switch (op.state) {
         case 'Queued': return 'queued';
@@ -60,21 +91,73 @@ export class StoreInstallButtonComponent {
         case 'Validating': return 'validating';
         case 'BackingUp': return 'backingUp';
         case 'Installing': return 'installing';
-        case 'Failed': return 'failed';
-        case 'Completed': return 'completed';
+        case 'Failed':
+          // A failed test build is the Tests tab's to report, and a failure for another version than
+          // the one this button offers says nothing about installing that one.
+          if (op.kind !== 'TestInstall' && sameVersion(op.version, this.target())) {
+            return this.interactiveFailure() ? 'failed' : 'blocked';
+          }
+          break;
+        case 'Completed':
+          if (sameVersion(op.version, this.target())) {
+            return 'completed';
+          }
+          break;
         case 'Cancelled': break;
       }
     }
 
-    if (testBuild) {
+    if (testBuild && this.targetsLatest()) {
       return 'testBuild';
     }
 
-    switch (this.item().installState) {
-      case 'NotInstalled': return 'install';
-      case 'Installed': return 'installed';
-      case 'UpdateAvailable': return 'update';
-      case 'Unsupported': return 'unsupported';
+    if (item.installState === 'Unsupported') {
+      return 'unsupported';
+    }
+
+    if (!this.targetInstallable()) {
+      return 'unavailable';
+    }
+
+    if (this.targetsLatest()) {
+      switch (item.installState) {
+        case 'NotInstalled': return 'install';
+        case 'UpdateAvailable': return 'update';
+        default: return 'installed';
+      }
+    }
+
+    const installed = item.installedVersion;
+    if (!installed || item.installState === 'NotInstalled') {
+      return 'installVersion';
+    }
+
+    if (sameVersion(installed, this.target())) {
+      return 'installed';
+    }
+
+    const order = compareVersions(this.target(), installed);
+    if (order === null) {
+      return 'installVersion';
+    }
+    return order > 0 ? 'update' : 'downgrade';
+  });
+
+  protected readonly isInstalled = computed(() =>
+    this.item().installState === 'Installed' || this.item().installState === 'UpdateAvailable');
+
+  protected readonly blockedAction = computed<BlockedAction>(() => {
+    switch (this.operation()?.error) {
+      case 'RequiresNewerMacroDeck':
+        return this.updatesAvailable() ? 'checkForUpdates' : null;
+      case 'Incompatible':
+      case 'VersionNotFound':
+        if (this.prominent()) {
+          return this.otherVersionsAvailable() ? 'chooseVersion' : null;
+        }
+        return 'viewDetails';
+      default:
+        return null;
     }
   });
 
@@ -134,7 +217,18 @@ export class StoreInstallButtonComponent {
 
   protected onConfirmUnsigned(): void {
     this.unsignedWarningOpen.set(false);
-    this.installUnsigned.emit();
+    // Consent covers the refused package: a pinned refusal is re-requested as that version, an
+    // unpinned one as whatever is latest now, exactly as a plain install would.
+    const op = this.operation();
+    this.installUnsigned.emit(op?.versionPinned ? op.version : undefined);
+  }
+
+  protected onBlockedAction(action: BlockedAction): void {
+    switch (action) {
+      case 'checkForUpdates': this.checkForUpdates.emit(); break;
+      case 'chooseVersion': this.chooseVersion.emit(); break;
+      case 'viewDetails': this.viewDetails.emit(); break;
+    }
   }
 
   protected onInstall(): void {

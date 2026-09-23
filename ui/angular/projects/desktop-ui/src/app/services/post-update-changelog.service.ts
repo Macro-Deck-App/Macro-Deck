@@ -3,12 +3,10 @@ import { Injectable, computed, signal } from '@angular/core';
 @Injectable({ providedIn: 'root' })
 export class PostUpdateChangelogService {
   private readonly pending = signal<ShellPostUpdateChangelog | null>(null);
-  private readonly loadingSignal = signal(false);
   private loaded = false;
 
   readonly changelog = this.pending.asReadonly();
   readonly isOpen = computed(() => this.pending() !== null);
-  readonly loading = this.loadingSignal.asReadonly();
 
   async load(): Promise<void> {
     const bridge = window.macroDeckShell;
@@ -16,12 +14,9 @@ export class PostUpdateChangelogService {
       return;
     }
     this.loaded = true;
-    this.loadingSignal.set(true);
     try {
       this.pending.set(await bridge.getPostUpdateChangelog());
     } catch {
-    } finally {
-      this.loadingSignal.set(false);
     }
   }
 

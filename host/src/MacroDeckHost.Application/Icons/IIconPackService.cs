@@ -9,13 +9,15 @@ public interface IIconPackService
 	Task<Result<IconPackEntity, IconPackError>> Create(string name,
 		string? description,
 		string? author,
-		string? version);
+		string? version,
+		IconPackAiAssets aiAssets = IconPackAiAssets.NotDeclared);
 
 	Task<Result<IconPackEntity, IconPackError>> Update(Guid id,
 		string name,
 		string? description,
 		string? author,
-		string? version);
+		string? version,
+		IconPackAiAssets? aiAssets = null);
 
 	Task<Result<IconPackError>> Delete(Guid id);
 }

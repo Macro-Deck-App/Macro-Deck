@@ -138,10 +138,7 @@ export class StoreTestsTabComponent implements OnInit {
   }
 
   protected async returnToStoreVersion(test: StoreTestBody): Promise<void> {
-    const operation = await this.service.returnToStoreVersion(test.packageId);
-    if (!operation) {
-      this.toasts.show(this.localization.translateKey(AppStrings.Store.InstallationFailed), { variant: 'error' });
-    }
+    await this.service.returnToStoreVersion(test.packageId);
   }
 
   protected requestInstall(test: StoreTestBody, build: StoreTestBuildBody): void {

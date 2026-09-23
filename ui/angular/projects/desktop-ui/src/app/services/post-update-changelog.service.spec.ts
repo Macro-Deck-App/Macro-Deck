@@ -27,21 +27,6 @@ describe('PostUpdateChangelogService', () => {
     expect(service.changelog()).toEqual(changelog);
   });
 
-  it('is loading while the shell fetches the notes and stops loading when it fails', async () => {
-    let fail!: (error: unknown) => void;
-    setShell({ getPostUpdateChangelog: () => new Promise((_, reject) => { fail = reject; }) });
-    const service = createService();
-
-    const load = service.load();
-    expect(service.loading()).toBeTrue();
-
-    fail(new Error('bridge gone'));
-    await load;
-
-    expect(service.loading()).toBeFalse();
-    expect(service.isOpen()).toBeFalse();
-  });
-
   it('shows nothing on a normal start', async () => {
     setShell({ getPostUpdateChangelog: () => Promise.resolve(null) });
     const service = createService();

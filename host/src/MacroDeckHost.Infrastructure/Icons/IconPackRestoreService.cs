@@ -74,6 +74,7 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 				Description = manifest.Description,
 				Author = manifest.Author,
 				Version = manifest.Version,
+				AiAssets = IconPackAiDeclarations.FromManifest(manifest.Ai),
 				SourceType = IconPackSourceType.MacroDeckImport,
 				CreatedAt = DateTime.UtcNow,
 				UpdatedAt = DateTime.UtcNow
@@ -147,6 +148,16 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 			}
 
 			await _iconPackCache.AddIcons(packId, icons);
+			var aiAssets = IconPackAiDeclarations.Merge(pack.AiAssets, IconPackAiDeclarations.FromManifest(manifestResult.Data!.Ai));
+			if (icons.Count > 0 && aiAssets != pack.AiAssets)
+			{
+				pack.AiAssets = aiAssets;
+				pack.UpdatedAt = DateTime.UtcNow;
+				await _iconPackCache.AddOrUpdatePack(pack);
+				await _mediator.Publish(new IconPackUpdatedNotification(pack, _iconPackCache.GetIconCount(packId)),
+					cancellationToken);
+			}
+
 			return Result.Ok<IReadOnlyList<IconEntity>, IconError>(icons);
 		}
 		catch (InvalidDataException)
@@ -262,6 +273,7 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 			pack.Description = manifest.Description ?? pack.Description;
 			pack.Author = manifest.Author ?? pack.Author;
 			pack.Version = manifest.Version;
+			pack.AiAssets = manifest.Ai is null ? pack.AiAssets : IconPackAiDeclarations.FromManifest(manifest.Ai);
 			pack.UpdatedAt = DateTime.UtcNow;
 			await _iconPackCache.AddOrUpdatePack(pack);
 			await _mediator.Publish(new IconPackUpdatedNotification(pack, _iconPackCache.GetIconCount(packId)),

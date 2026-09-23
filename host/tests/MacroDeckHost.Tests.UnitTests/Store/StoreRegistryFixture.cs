@@ -82,6 +82,8 @@ internal sealed class StoreRegistryFixture
 		string[]? supportedRids = null,
 		string[]? languages = null,
 		object? additionalLinks = null,
+		object? ai = null,
+		object? tags = null,
 		DateTimeOffset? createdAt = null,
 		DateTimeOffset? updatedAt = null)
 	{
@@ -115,7 +117,9 @@ internal sealed class StoreRegistryFixture
 				updatedAt = updatedAt ?? DateTimeOffset.UnixEpoch,
 				supportedRids,
 				languages,
-				additionalLinks
+				additionalLinks,
+				ai,
+				tags
 			});
 
 		Write($"{segment}/{id}/versions/{version}/manifest.json",

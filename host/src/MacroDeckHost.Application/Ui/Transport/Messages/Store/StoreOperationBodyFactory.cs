@@ -24,6 +24,7 @@ public static class StoreOperationBodyFactory
 		CompletedAt = operation.CompletedAt,
 		Error = operation.Error,
 		ErrorMessage = operation.ErrorMessage,
-		CanRetry = operation.CanRetry
+		CanRetry = operation.CanRetry,
+		VersionPinned = operation.VersionPinned
 	};
 }

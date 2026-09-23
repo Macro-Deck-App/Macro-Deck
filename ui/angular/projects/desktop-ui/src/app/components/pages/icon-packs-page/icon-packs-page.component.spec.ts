@@ -1,6 +1,8 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
+import { StoreAccessService } from '../../../services/store-access.service';
 import { Subject } from 'rxjs';
 import { AppStrings } from '@macro-deck/runtime';
 import { ApiService, ContextMenuItem, LocalizationService, ToastService } from '@shared';
@@ -17,6 +19,8 @@ interface SelectionAccess {
   selectedIconIds(): ReadonlySet<string>;
   filteredIcons(): IconModel[];
 }
+
+const storeUnlocked = signal(true);
 
 describe('IconPacksPageComponent icon selection', () => {
   let component: SelectionAccess;
@@ -43,7 +47,8 @@ describe('IconPacksPageComponent icon selection', () => {
 
     TestBed.configureTestingModule({
       imports: [IconPacksPageComponent],
-      providers: [provideZonelessChangeDetection(), { provide: ApiService, useValue: apiSpy }],
+      providers: [provideZonelessChangeDetection(),
+        provideRouter([]), { provide: StoreAccessService, useValue: { unlocked: storeUnlocked } }, { provide: ApiService, useValue: apiSpy }],
     });
     const fixture = TestBed.createComponent(IconPacksPageComponent);
     component = fixture.componentInstance as unknown as SelectionAccess;
@@ -127,7 +132,8 @@ describe('IconPacksPageComponent pack import/export', () => {
 
     TestBed.configureTestingModule({
       imports: [IconPacksPageComponent],
-      providers: [provideZonelessChangeDetection(), { provide: ApiService, useValue: apiSpy }],
+      providers: [provideZonelessChangeDetection(),
+        provideRouter([]), { provide: StoreAccessService, useValue: { unlocked: storeUnlocked } }, { provide: ApiService, useValue: apiSpy }],
     });
     iconPacks = TestBed.inject(IconPackService);
     fixture = TestBed.createComponent(IconPacksPageComponent);
@@ -297,7 +303,8 @@ describe('IconPacksPageComponent pack deletion and ownership', () => {
 
     TestBed.configureTestingModule({
       imports: [IconPacksPageComponent],
-      providers: [provideZonelessChangeDetection(), { provide: ApiService, useValue: apiSpy }],
+      providers: [provideZonelessChangeDetection(),
+        provideRouter([]), { provide: StoreAccessService, useValue: { unlocked: storeUnlocked } }, { provide: ApiService, useValue: apiSpy }],
     });
     iconPacks = TestBed.inject(IconPackService);
     const fixture = TestBed.createComponent(IconPacksPageComponent);
@@ -400,7 +407,8 @@ describe('IconPacksPageComponent source label rendering', () => {
 
     TestBed.configureTestingModule({
       imports: [IconPacksPageComponent],
-      providers: [provideZonelessChangeDetection(), { provide: ApiService, useValue: apiSpy }],
+      providers: [provideZonelessChangeDetection(),
+        provideRouter([]), { provide: StoreAccessService, useValue: { unlocked: storeUnlocked } }, { provide: ApiService, useValue: apiSpy }],
     });
     fixture = TestBed.createComponent(IconPacksPageComponent);
     fixture.detectChanges();
@@ -416,6 +424,53 @@ describe('IconPacksPageComponent source label rendering', () => {
 
     expect(railRow('store-pack').querySelector('.tag')?.textContent?.trim()).toBe(expected);
     expect(railRow('user-pack').querySelector('.tag')).toBeNull();
+  });
+});
+
+describe('IconPacksPageComponent Store link', () => {
+  async function render(storePackageId: string | null, packId = 'store-pack'): Promise<ComponentFixture<IconPacksPageComponent>> {
+    const apiSpy = jasmine.createSpyObj<ApiService>('ApiService', ['getIconPacks', 'onNotification']);
+    apiSpy.getIconPacks.and.resolveTo({
+      packs: [
+        { id: 'user-pack', name: 'User', isDefault: true, isReadOnly: false, sourceType: 'User', createdAt: '', updatedAt: '', iconCount: 0 },
+        { id: 'store-pack', name: 'Store', isDefault: false, isReadOnly: true, sourceType: 'ExtensionStore', createdAt: '', updatedAt: '',
+          iconCount: 0, ownerKind: 'Store', storePackageId },
+      ],
+    });
+    apiSpy.onNotification.and.callFake(() => new Subject());
+    TestBed.configureTestingModule({
+      imports: [IconPacksPageComponent],
+      providers: [provideZonelessChangeDetection(),
+        provideRouter([]), { provide: StoreAccessService, useValue: { unlocked: storeUnlocked } }, { provide: ApiService, useValue: apiSpy },
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({ pack: packId }) } } }],
+    });
+    const fixture = TestBed.createComponent(IconPacksPageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  afterEach(() => storeUnlocked.set(true));
+
+  it('opens the pack named in the address and links a Store pack to its Store page', async () => {
+    const fixture = await render('com.suchbyte.colorful-generic-icons');
+    const navigate = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('.detail-header h2')?.textContent).toContain('Store');
+    ((fixture.nativeElement as HTMLElement).querySelector('.view-in-store button') as HTMLElement).click();
+
+    expect(navigate).toHaveBeenCalledWith(['/store', 'IconPack', 'com.suchbyte.colorful-generic-icons']);
+  });
+
+  it('offers no Store link for a pack the Store did not install or while the Store is closed', async () => {
+    const own = await render(null);
+    expect((own.nativeElement as HTMLElement).querySelector('.view-in-store')).toBeNull();
+    TestBed.resetTestingModule();
+
+    storeUnlocked.set(false);
+    const closed = await render('com.suchbyte.colorful-generic-icons');
+    expect((closed.nativeElement as HTMLElement).querySelector('.view-in-store')).toBeNull();
   });
 });
 
@@ -448,7 +503,8 @@ describe('IconPacksPageComponent copy icon id', () => {
 
     TestBed.configureTestingModule({
       imports: [IconPacksPageComponent],
-      providers: [provideZonelessChangeDetection(), { provide: ApiService, useValue: apiSpy }],
+      providers: [provideZonelessChangeDetection(),
+        provideRouter([]), { provide: StoreAccessService, useValue: { unlocked: storeUnlocked } }, { provide: ApiService, useValue: apiSpy }],
     });
     clipboard = TestBed.inject(TextClipboardService);
     fixture = TestBed.createComponent(IconPacksPageComponent);
@@ -583,7 +639,8 @@ describe('IconPacksPageComponent shell drag-and-drop', () => {
 
     TestBed.configureTestingModule({
       imports: [IconPacksPageComponent],
-      providers: [provideZonelessChangeDetection(), { provide: ApiService, useValue: apiSpy }],
+      providers: [provideZonelessChangeDetection(),
+        provideRouter([]), { provide: StoreAccessService, useValue: { unlocked: storeUnlocked } }, { provide: ApiService, useValue: apiSpy }],
     });
     iconPacks = TestBed.inject(IconPackService);
     importFromPathSpy = spyOn(iconPacks, 'importFromPath').and.resolveTo(null);

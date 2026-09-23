@@ -688,6 +688,8 @@ public class Startup
 		services.AddSingleton<IStoreReviewAvatarProxy, StoreReviewAvatarProxy>();
 		services.AddSingleton<IStoreOfficialPackages, StoreOfficialPackages>();
 		services.AddSingleton<IStoreReviewService, StoreReviewService>();
+		services.AddSingleton<StoreCatalogPopularity>();
+		services.AddSingleton<StoreSimilarPackages>();
 		services.AddSingleton<MacroDeckHost.Application.Store.Testing.IStoreTestService, MacroDeckHost.Application.Store.Testing.StoreTestService>();
 		services.AddHostedService<StoreEntitlementSyncBackgroundService>();
 

@@ -94,12 +94,17 @@ public static class UiComponents
 	/// unsupported node when there is none.</summary>
 	public const string Modifier = "ui.modifier";
 
+	/// <summary>A container that draws one of its layouts, chosen by the reader from the box it is given - see
+	/// <see cref="UiResponsive" />. Component version 1. A reader that does not know it draws the node's
+	/// fallback, which <see cref="UiResponsive" /> fills with its default layout when none is set.</summary>
+	public const string Responsive = "ui.responsive";
+
 	/// <summary>The types the core framework ships. Not exhaustive of what a renderer may meet - see the
 	/// type's remarks.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
 	[
 		Stack, Text, Image, RangeBar, Slider, Button, Layer, Chart, TextField, List, Transform,
 		Shape, Icon, Grid, Gauge, Toggle, Segmented, Dial,
-		Modifier,
+		Modifier, Responsive,
 	];
 }

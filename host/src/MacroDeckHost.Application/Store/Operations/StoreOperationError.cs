@@ -26,5 +26,8 @@ public enum StoreOperationError
 	SignInRequired,
 	TestBuildUnavailable,
 	TestConsentRequired,
-	TestBuildMismatch
+	TestBuildMismatch,
+	RequiresNewerMacroDeck,
+	VersionNotFound,
+	SignatureUnverifiable
 }

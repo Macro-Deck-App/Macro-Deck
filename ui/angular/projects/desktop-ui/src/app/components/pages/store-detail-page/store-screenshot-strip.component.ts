@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { AppStrings, StoreExtensionKind, StoreScreenshotBody } from '@macro-deck/runtime';
 import { ApiService, LocalizationService } from '@shared';
 import { StoreScreenshotViewerComponent } from './store-screenshot-viewer.component';
@@ -20,6 +20,12 @@ export class StoreScreenshotStripComponent {
   readonly screenshots = input.required<StoreScreenshotBody[]>();
 
   protected readonly openIndex = signal<number | null>(null);
+  protected readonly selectedIndex = signal(0);
+
+  protected readonly selected = computed(() => {
+    const screenshots = this.screenshots();
+    return screenshots[Math.min(this.selectedIndex(), screenshots.length - 1)] ?? null;
+  });
   private triggerElement: HTMLElement | null = null;
 
   protected thumbnailUrl(screenshot: StoreScreenshotBody): string {
@@ -28,6 +34,10 @@ export class StoreScreenshotStripComponent {
 
   protected thumbnailAriaLabel(screenshot: StoreScreenshotBody, index: number): string {
     return screenshot.caption || this.localization.translateKey(AppStrings.Store.Page.ScreenshotAriaLabel, { number: index + 1 });
+  }
+
+  protected select(index: number): void {
+    this.selectedIndex.set(index);
   }
 
   protected open(index: number, event: MouseEvent): void {

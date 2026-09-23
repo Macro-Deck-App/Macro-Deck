@@ -60,8 +60,8 @@
 .integration-card {
   @include ds.card($padding: var(--space-3) var(--space-4));
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+  align-items: center;
+  gap: var(--space-4);
   cursor: pointer;
   transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
@@ -71,10 +71,17 @@
   border-color: var(--color-border-light);
 }
 
+.integration-card-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .integration-card-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
 }
 
 .integration-info {
@@ -153,6 +160,7 @@
 .integration-card-actions {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   gap: var(--space-3);
 }
 
@@ -224,15 +232,13 @@ button.meta-item-link:hover {
 }
 
 .integrations-add-menu,
-.integrations-filter-menu,
-.integration-card-menu-items {
+.integrations-filter-menu {
   display: flex;
   flex-direction: column;
 }
 
 .integrations-add-menu-item,
-.integrations-filter-option,
-.integration-card-menu-item {
+.integrations-filter-option {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -256,10 +262,6 @@ button.meta-item-link:hover {
     cursor: not-allowed;
   }
 
-  &.is-danger {
-    color: var(--color-danger);
-  }
-
   &.is-selected {
     color: var(--color-accent);
     font-weight: var(--font-semibold);
@@ -269,26 +271,4 @@ button.meta-item-link:hover {
 .integrations-add-menu-label {
   display: flex;
   flex-direction: column;
-}
-
-.uninstall-confirm-hint {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-}
-
-.uninstall-confirm {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.uninstall-confirm-text {
-  font-size: var(--text-base);
-  color: var(--color-text-secondary);
-}
-
-.uninstall-confirm-text,
-.uninstall-confirm-hint {
-  margin: 0;
-  line-height: var(--leading-relaxed);
 }

@@ -25,7 +25,7 @@ const IDLE_STATE: ShellUpdateState = {
   failure: null,
   progress: null,
   lastCheckedAt: null,
-  autoInstallAt: null,
+  installOnQuit: false,
 };
 
 @Injectable({ providedIn: 'root' })
@@ -57,8 +57,7 @@ export class UpdateService {
   readonly failure = computed(() => this.state().failure);
   readonly progressPercent = computed(() => this.state().progress?.percent ?? null);
   readonly lastCheckedAt = computed(() => this.state().lastCheckedAt);
-  readonly autoInstallAt = computed(() =>
-    this.state().phase === 'downloaded' ? (this.state().autoInstallAt ?? null) : null);
+  readonly installOnQuit = computed(() => this.state().phase === 'downloaded' && this.state().installOnQuit === true);
 
   readonly isDownloading = computed(() => this.phase() === 'downloading' || this.installRequested());
   readonly canInstall = computed(() => this.phase() === 'available' || this.phase() === 'downloaded');
@@ -165,17 +164,6 @@ export class UpdateService {
       // is a round-trip away - clearing the progress here rather than waiting
       // for it is what makes the cancel button feel like it did something.
       this.state.update(current => ({ ...current, phase: 'available', progress: null }));
-    } catch {
-    }
-  }
-
-  async postponeAutomaticInstall(): Promise<void> {
-    const bridge = window.macroDeckShell;
-    if (typeof bridge?.postponeAutomaticInstall !== 'function') {
-      return;
-    }
-    try {
-      await bridge.postponeAutomaticInstall();
     } catch {
     }
   }

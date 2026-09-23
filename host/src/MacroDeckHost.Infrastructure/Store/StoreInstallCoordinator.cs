@@ -58,7 +58,8 @@ public sealed class StoreInstallCoordinator : IStoreInstallCoordinator
 			packageId,
 			resolvedVersion,
 			displayName,
-			previousVersion);
+			previousVersion,
+			versionPinned: version is not null);
 
 		// Recorded against this operation id alone, so it reaches the worker without being persisted with
 		// the operation and without a retry - which creates a new operation - inheriting it.
@@ -74,6 +75,12 @@ public sealed class StoreInstallCoordinator : IStoreInstallCoordinator
 
 		_channel.Writer.TryWrite(operation.Id);
 		return operation;
+	}
+
+	public bool IsUnavailableVersion(StoreExtensionKind kind, string packageId, string version)
+	{
+		var found = _catalogQuery.Find(kind, packageId);
+		return found.Success && found.Data!.Entry.FindRelease(version) is null;
 	}
 
 	public StoreOperation InstallTestBuild(string packageId,
@@ -120,7 +127,8 @@ public sealed class StoreInstallCoordinator : IStoreInstallCoordinator
 			operation.Version,
 			operation.DisplayName,
 			operation.PreviousVersion,
-			retryOf: operationId);
+			retryOf: operationId,
+			versionPinned: operation.VersionPinned);
 		_channel.Writer.TryWrite(next.Id);
 		return next;
 	}

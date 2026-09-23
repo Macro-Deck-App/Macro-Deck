@@ -1,27 +1,46 @@
 @if (items().length > 0) {
-  <section class="store-section">
+  <section class="store-section" [class.row]="layout() === 'row'">
     @if (heading()) {
       <div class="store-section-header">
-        <h2 class="store-section-heading">
-          @if (icon()) {
-            <span class="icon icon-{{ icon() }} icon-sm" aria-hidden="true"></span>
+        <div class="store-section-titles">
+          <h2 class="store-section-heading">
+            @if (icon()) {
+              <span class="icon icon-{{ icon() }} icon-sm" aria-hidden="true"></span>
+            }
+            {{ heading() }}
+          </h2>
+          @if (subheading()) {
+            <p class="store-section-subheading">{{ subheading() }}</p>
           }
-          {{ heading() }}
-        </h2>
+        </div>
         @if (count()) {
           <span class="store-section-count">{{ count() }}</span>
         }
+        @if (layout() === 'row') {
+          <div class="store-section-nav">
+            <button type="button" class="nav-button" (click)="scroll(-1)" [attr.aria-label]="'macrodeck.app:Store.Page.ScrollBackAction' | translate">
+              <span class="icon icon-chevron-left icon-sm" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="nav-button" (click)="scroll(1)" [attr.aria-label]="'macrodeck.app:Store.Page.ScrollForwardAction' | translate">
+              <span class="icon icon-chevron-right icon-sm" aria-hidden="true"></span>
+            </button>
+          </div>
+        }
       </div>
     }
-    <div class="store-section-grid">
+    <div class="store-section-grid" #track>
       @for (item of items(); track item.kind + ':' + item.id) {
         <shared-store-extension-card
           [item]="item"
+          [variant]="cardVariant()"
+          [featured]="isFeatured(item)"
+          [updatesAvailable]="updatesAvailable()"
           [operation]="operationFor(item)()"
           (install)="install.emit(item)"
-          (installUnsigned)="installUnsigned.emit(item)"
+          (installUnsigned)="installUnsigned.emit({ item, version: $event })"
           (retry)="retry.emit(item)"
-          (uninstall)="uninstall.emit(item)" />
+          (uninstall)="uninstall.emit(item)"
+          (checkForUpdates)="checkForUpdates.emit()" />
       }
     </div>
   </section>

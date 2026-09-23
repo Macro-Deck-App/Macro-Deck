@@ -1,19 +1,20 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { NgTemplateOutlet } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
 import { AppStrings, StoreCatalogItemBody, StoreOperationBody } from '@macro-deck/runtime';
-import { ApiService, LocalizationService } from '@shared';
+import { ApiService, LocalizationService, TranslatePipe } from '@shared';
 import { PluginRuntimeService } from '../../services/plugin-runtime.service';
 import { StoreRatingsService } from '../../services/store-ratings.service';
+import { storeFreshness } from '../../util/store-badges';
 import { formatStoreCount, formatStoreInstallCount, formatStoreRating } from '../../util/store-rating-format';
 import { storeKindIcon, storeKindLabelKey, storeTrustLabelKey } from '../../util/store-operation-display';
-import { StoreStateBadgeComponent } from './store-state-badge.component';
 import { StoreInstallButtonComponent } from './store-install-button.component';
 import { StoreRatingStarsComponent } from './store-rating-stars.component';
 
 @Component({
   selector: 'shared-store-extension-card',
   standalone: true,
-  imports: [RouterLink, StoreStateBadgeComponent, StoreInstallButtonComponent, StoreRatingStarsComponent],
+  imports: [NgTemplateOutlet, RouterLink, StoreInstallButtonComponent, StoreRatingStarsComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './store-extension-card.component.html',
   styleUrls: ['./store-extension-card.component.scss'],
@@ -23,8 +24,12 @@ export class StoreExtensionCardComponent {
   private readonly localization = inject(LocalizationService);
   private readonly runtime = inject(PluginRuntimeService);
   private readonly ratings = inject(StoreRatingsService);
+  private readonly router = inject(Router);
 
   readonly item = input.required<StoreCatalogItemBody>();
+  readonly variant = input<'compact' | 'tile'>('compact');
+  readonly featured = input(false);
+  readonly updatesAvailable = input(false);
 
   protected readonly takenOver = computed(() => {
     const item = this.item();
@@ -37,14 +42,28 @@ export class StoreExtensionCardComponent {
   readonly operation = input<StoreOperationBody | null>(null);
 
   readonly install = output<void>();
-  readonly installUnsigned = output<void>();
+  readonly installUnsigned = output<string | undefined>();
   readonly retry = output<void>();
   readonly uninstall = output<void>();
+  readonly checkForUpdates = output<void>();
 
   protected readonly iconUrl = computed(() => {
     const item = this.item();
     return item.hasIcon ? this.api.getStoreExtensionIconUrl(item.kind, item.id, item.iconSha256) : null;
   });
+
+  protected readonly artworkUrl = computed(() => {
+    const item = this.item();
+    return item.previewScreenshotSha256
+      ? this.api.getStoreScreenshotUrl(item.kind, item.id, 0, item.previewScreenshotSha256)
+      : null;
+  });
+
+  protected readonly artworkFailed = signal(false);
+
+  protected readonly freshness = computed(() => storeFreshness(this.item()));
+
+  protected readonly detailLink = computed(() => ['/store', this.item().kind, this.item().id]);
 
   // A missing icon 404s legitimately (the extension never published one) - the flag just tracks
   // that so a load failure falls back to the kind glyph instead of a broken image.
@@ -101,9 +120,21 @@ export class StoreExtensionCardComponent {
       this.iconUrl();
       this.iconFailed.set(false);
     });
+    effect(() => {
+      this.artworkUrl();
+      this.artworkFailed.set(false);
+    });
   }
 
   protected onIconError(): void {
     this.iconFailed.set(true);
+  }
+
+  protected onArtworkError(): void {
+    this.artworkFailed.set(true);
+  }
+
+  protected openDetails(): void {
+    void this.router.navigate(this.detailLink());
   }
 }

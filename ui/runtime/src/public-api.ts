@@ -466,6 +466,13 @@ export {
   type UiNodeActivation,
 } from './ui-framework/node-gestures';
 export {
+  UI_RESPONSIVE_TOLERANCE,
+  effectiveTreeRoot,
+  responsiveChild,
+  responsiveChildIndex,
+  selectResponsiveChild,
+} from './ui-framework/responsive';
+export {
   UI_COMPONENT_BORDER_LINES_WELL_KNOWN,
   UI_COMPONENT_CLIPS_WELL_KNOWN,
   UI_COMPONENT_MODIFIERS_WELL_KNOWN,
@@ -775,6 +782,7 @@ export {
   type IconDeletedEvent,
   type IconImportBatchState,
   type IconImportProgressEvent,
+  type IconPackAiAssets,
   type IconPackCreatedEvent,
   type IconPackDeletedEvent,
   type IconPackUpdatedEvent,
@@ -1050,6 +1058,7 @@ export {
   type GetStoreCatalogResponse,
   type GetStoreExtensionResponse,
   type GetStoreOperationsResponse,
+  type GetStoreSimilarResponse,
   type GetStoreStatusResponse,
   type GetStoreTestsResponse,
   type GetStoreUpdatesResponse,
@@ -1057,6 +1066,7 @@ export {
   type InstallStoreTestBuildErrorCode,
   type InstallStoreTestBuildRequest,
   type RefreshStoreRegistryResponse,
+  type StoreAiDeclarationBody,
   type StoreAvailableUpdateBody,
   type StoreCatalogChangedEvent,
   type StoreCatalogItemBody,

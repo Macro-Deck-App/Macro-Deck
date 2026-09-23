@@ -113,11 +113,22 @@ sign in with your Macro Deck account under **Settings > Account**. A change to y
 can take up to a day to show up. If you were signed in before your Macro Deck version supported
 testers, sign out and in once.
 
-**Refresh** on the Store page fetches the latest catalog and opens a log of each step as it happens.
-Macro Deck also refreshes on its own a few seconds after it starts and then once an hour. While a refresh runs, the button says
-**Refreshing…** in every window, and pressing it opens the log of that refresh instead of starting a
-second one. If the store registry is being updated while a refresh runs, the log says so and Macro Deck
-tries again a few times over about five minutes before it reports a failure.
+**Discover** opens with a search box and a chip for each kind of item (**All**, **Plugins**,
+**Icon packs**) with how many there are. Below it, every item is listed as a card showing its kind, rating,
+installs and whether it is **New** (published in the last 30 days) or recently **Updated**. The list is sorted
+by **Most popular** unless you pick another order or search. Once the Store has enough items, rows for
+**Featured**, **Popular** and **New & updated** appear above the list, each item in at most one row.
+Searching also finds items by their tags. **Only available for this platform** hides items that do not run on your computer, and it stays on until you
+turn it off; a note says how many items it hides, with **Show all** next to it. Going back from an item's page
+returns to the list as you left it: the same search, category, order and scroll position.
+
+The **⋮** menu at the top right of the Store has **Refresh Store** and **Store settings**. **Refresh Store**
+fetches the latest catalog and opens a log of each step as it happens. Macro Deck also refreshes on its own
+a few seconds after it starts and then once an hour. While a refresh runs, the Store header says
+**Refreshing…** in every window, and choosing **Refresh Store** again opens the log of that refresh instead of
+starting a second one. If the store registry is being updated while a refresh runs, the log says so and Macro
+Deck tries again a few times over about five minutes before it reports a failure. **Store settings** opens
+**Settings > Extensions**.
 
 **Installed** at the top of the Store lists the Store's plugins and icon packs you have installed, with their
 version and any update waiting for them. Update one at a time from its card, or all at once with
@@ -130,8 +141,41 @@ and export the pack, but you can't rename, import, or delete icons in it, or edi
 Deleting the pack there uninstalls it from the Store. To change the icons, export the pack and import the
 copy as a pack of your own.
 
-An item's page lists **Links** its creator provides, such as the source repository, documentation or a
-place to report an issue. They open in your browser.
+An item's page shows its screenshots, description, what changed in the latest version and, in the details
+beside it, whether it runs on your platform. It lists **Links** its creator provides, such as the source
+repository, documentation or a place to report an issue. They open in your browser.
+
+When the creator has tagged an item, its page lists the **Tags**; select one to see every item with that tag.
+At the bottom, **You might also like** suggests items you have not installed that run on your computer: first
+those that share tags with it, then others from the same creator and of the same kind. Going back from a suggestion
+returns to the item you opened it from.
+
+Under **AI**, the page shows what the creator declares about artificial intelligence: whether the item lets
+you interact with an AI system, generates content with AI, or contains images, sounds or texts created with
+AI, and which AI services it uses. Next to its name, an item that uses AI is marked **Uses AI**, and one that
+only contains content created with AI, such as an icon pack with AI-created icons, is marked **Made with AI**. If the
+creator has not declared anything, the page says so; that does not mean the item uses no AI.
+
+For your own icon packs, select **Edit** on the pack under **Library > Icon Packs** (or **Edit pack** in its
+menu) and set **AI-created icons**. The setting is saved in the exported pack. When you merge a pack that
+contains AI-created icons into one of yours, your pack is marked as containing them too.
+
+To install an older version, pick it under **Version** next to the install button. The latest version is
+selected by default. The button then says **Install**, **Update to** or **Downgrade to** that version, and a
+downgrade asks you to confirm first. Versions that cannot be installed on your computer stay in the list but
+cannot be selected. Whether a version works with your Macro Deck version is only known once it is downloaded:
+if it needs a newer Macro Deck, the Store says so and offers **Check for updates** instead of **Retry**.
+**All versions** under **What's new** lists every version with its release notes. See
+[Updates](/guide/updates/#extension-updates) for how an older version affects automatic updates.
+
+Select the publisher's name on a card or an item's page to see everything that publisher offers. An installed
+plugin's page has **Open settings**, which opens its integration, and an installed icon pack's page has
+**Open in Library**. The other way round, a plugin's page under **Integrations** and a Store icon pack under
+**Library > Icon Packs** have **View in Store**, for the description and release notes. An installed plugin is
+uninstalled from the **General** details of its page under **Integrations**, or from its Store page.
+
+The Store footer links to the **Creator Portal**, where you can publish your own plugins and icon packs, and to
+the imprint and privacy policy.
 
 Store items show their star rating and how many times they have been installed. The install count
 leaves out updates and repairs, and appears once an item has been installed at least once. An item's
@@ -142,7 +186,7 @@ installed can be rated. When you sign in, and whenever you install something whi
 Deck records your installed Store items for your account so you can rate them. If ratings or install
 counts cannot be reached, the Store keeps working without them.
 
-To report a Store item, open its page and choose **Report this item** at the bottom of the details.
+To report a Store item, open its page and choose **Report this item** below the details.
 To report a review, choose **Report** next to it. Pick a reason and, if you like, add details;
 **Other** needs a short description. Reporting needs a Macro Deck Connect sign-in, and each review
 can be reported once per account. Reports go to the Macro Deck moderators and do not hide

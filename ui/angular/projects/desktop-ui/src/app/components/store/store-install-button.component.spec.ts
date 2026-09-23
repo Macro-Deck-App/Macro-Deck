@@ -23,7 +23,7 @@ describe('StoreInstallButtonComponent unsigned consent', () => {
     };
   }
 
-  function failedOperation(error: string): StoreOperationBody {
+  function failedOperation(error: string, overrides: Partial<StoreOperationBody> = {}): StoreOperationBody {
     return {
       id: 'op-1',
       kind: 'Install',
@@ -36,7 +36,8 @@ describe('StoreInstallButtonComponent unsigned consent', () => {
       startedAt: '2026-01-01T00:00:00Z',
       updatedAt: '2026-01-01T00:00:01Z',
       error,
-      canRetry: true,
+      canRetry: false,
+      ...overrides,
     };
   }
 
@@ -110,6 +111,177 @@ describe('StoreInstallButtonComponent unsigned consent', () => {
     await fixture.whenStable();
 
     expect(emitted.length).toBe(1);
+  });
+
+  it('asks again for the version that was refused when that version was chosen on purpose', async () => {
+    await setup(failedOperation('UnsignedNotPermitted', { version: '0.9.0', versionPinned: true }), true,
+      { latestVersion: '1.0.0' });
+    fixture.componentRef.setInput('targetVersion', '0.9.0');
+    fixture.detectChanges();
+
+    const emitted: (string | undefined)[] = [];
+    fixture.componentInstance.installUnsigned.subscribe(version => emitted.push(version));
+    installAnywhereButton()!.click();
+    fixture.detectChanges();
+    (Array.from(fixture.nativeElement.querySelectorAll('button'))
+      .filter(button => (button as HTMLElement).textContent?.includes('Install anyway')).pop() as HTMLElement).click();
+
+    expect(emitted).toEqual(['0.9.0']);
+  });
+
+  it('asks for whatever is latest after refusing an install nobody pinned', async () => {
+    await setup(failedOperation('UnsignedNotPermitted', { version: '1.0.0', versionPinned: false }), true);
+
+    const emitted: (string | undefined)[] = [];
+    fixture.componentInstance.installUnsigned.subscribe(version => emitted.push(version));
+    installAnywhereButton()!.click();
+    fixture.detectChanges();
+    (Array.from(fixture.nativeElement.querySelectorAll('button'))
+      .filter(button => (button as HTMLElement).textContent?.includes('Install anyway')).pop() as HTMLElement).click();
+
+    expect(emitted).toEqual([undefined]);
+  });
+});
+
+describe('StoreInstallButtonComponent version target', () => {
+  let fixture: ComponentFixture<StoreInstallButtonComponent>;
+
+  function item(overrides: Partial<StoreCatalogItemBody> = {}): StoreCatalogItemBody {
+    return {
+      kind: 'Plugin',
+      id: 'com.acme.deck-tools',
+      name: 'Deck Tools',
+      latestVersion: '2.0.0',
+      installState: 'NotInstalled',
+      trust: 'RegistryAuthenticated',
+      hasIcon: false,
+      ...overrides,
+    };
+  }
+
+  function text(key: string, params?: Record<string, unknown>): string {
+    return TestBed.inject(LocalizationService).translateKey(key, params);
+  }
+
+  async function render(itemOverrides: Partial<StoreCatalogItemBody>, targetVersion: string | null,
+                        inputs: Record<string, unknown> = {}, operation: StoreOperationBody | null = null): Promise<HTMLElement> {
+    TestBed.configureTestingModule({
+      imports: [StoreInstallButtonComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        ...provideLocalizationTesting(),
+        { provide: DeveloperModeService, useValue: { enabled: signal(false), ensureLoaded: jasmine.createSpy().and.resolveTo() } },
+      ],
+    });
+    fixture = TestBed.createComponent(StoreInstallButtonComponent);
+    fixture.componentRef.setInput('item', item(itemOverrides));
+    fixture.componentRef.setInput('targetVersion', targetVersion);
+    fixture.componentRef.setInput('operation', operation);
+    fixture.componentRef.setInput('size', 'lg');
+    for (const [name, value] of Object.entries(inputs)) {
+      fixture.componentRef.setInput(name, value);
+    }
+    fixture.detectChanges();
+    await fixture.whenStable();
+    return fixture.nativeElement as HTMLElement;
+  }
+
+  function failed(error: string, overrides: Partial<StoreOperationBody> = {}): StoreOperationBody {
+    return {
+      id: 'op-9', kind: 'Install', extensionKind: 'Plugin', packageId: 'com.acme.deck-tools', version: '2.0.0',
+      displayName: 'Deck Tools', state: 'Failed', bytesDownloaded: 0, startedAt: '2026-01-01T00:00:00Z',
+      updatedAt: '2026-01-01T00:00:01Z', error, canRetry: false, ...overrides,
+    };
+  }
+
+  function buttonLabels(host: HTMLElement): string[] {
+    return Array.from(host.querySelectorAll('button')).map(button => button.textContent?.trim() ?? '');
+  }
+
+  it('installs the latest version when nothing is installed', async () => {
+    expect(buttonLabels(await render({}, '2.0.0'))).toContain(text(AppStrings.Store.Install));
+  });
+
+  it('names an older version when nothing is installed and that version is selected', async () => {
+    expect(buttonLabels(await render({}, '1.0.0'))).toContain(text(AppStrings.Store.InstallVersion, { version: '1.0.0' }));
+  });
+
+  it('shows the selected version as installed when it is the installed one', async () => {
+    const host = await render({ installState: 'UpdateAvailable', installedVersion: '1.0.0' }, '1.0.0');
+    expect(host.querySelector('.installed-status')?.textContent).toContain(text(AppStrings.Store.InstalledVersion, { version: '1.0.0' }));
+    expect(buttonLabels(host)).not.toContain(text(AppStrings.Store.InstalledVersion, { version: '1.0.0' }));
+  });
+
+  it('offers an update when a newer version than the installed one is selected', async () => {
+    const host = await render({ installState: 'UpdateAvailable', installedVersion: '1.0.0' }, '1.5.0');
+    expect(buttonLabels(host)).toContain(text(AppStrings.Store.UpdateTo, { version: '1.5.0' }));
+  });
+
+  it('offers a downgrade when an older version than the installed one is selected', async () => {
+    const host = await render({ installState: 'Installed', installedVersion: '2.0.0' }, '1.0.0');
+    expect(buttonLabels(host)).toContain(text(AppStrings.Store.DowngradeTo, { version: '1.0.0' }));
+  });
+
+  it('refuses a selected version that cannot be installed, and says why', async () => {
+    const host = await render({}, '1.0.0', { targetInstallable: false, targetUnavailableReason: 'Nope' });
+    const button = host.querySelector('button') as HTMLButtonElement;
+    expect(button.disabled).toBeTrue();
+    expect(button.textContent?.trim()).toBe(text(AppStrings.Store.VersionUnavailable));
+  });
+
+  it('offers a Macro Deck update instead of retrying a version that needs a newer Macro Deck', async () => {
+    const host = await render({}, '2.0.0', { updatesAvailable: true }, failed('RequiresNewerMacroDeck'));
+    const labels = buttonLabels(host);
+    expect(labels).toContain(text('macrodeck.app:Settings.Update.CheckForUpdatesAction'));
+    expect(labels).not.toContain(text('macrodeck:Common.Retry'));
+    expect(labels).not.toContain(text(AppStrings.Store.Install));
+  });
+
+  it('does not offer installing the same incompatible version again', async () => {
+    const host = await render({}, '2.0.0', { otherVersionsAvailable: true }, failed('Incompatible'));
+    const labels = buttonLabels(host);
+    expect(labels).toContain(text(AppStrings.Store.ChooseVersion));
+    expect(labels).not.toContain(text(AppStrings.Store.Install));
+  });
+
+  it('offers the normal action again once another version is selected after a failure', async () => {
+    const host = await render({}, '1.0.0', {}, failed('Incompatible'));
+    expect(buttonLabels(host)).toContain(text(AppStrings.Store.InstallVersion, { version: '1.0.0' }));
+  });
+
+  it('keeps Uninstall available while an update failed for good', async () => {
+    const host = await render({ installState: 'UpdateAvailable', installedVersion: '1.0.0' }, '2.0.0', {},
+      failed('Incompatible', { kind: 'Update', previousVersion: '1.0.0' }));
+    expect(buttonLabels(host)).toContain(text(AppStrings.Store.Uninstall));
+  });
+
+  it('puts settings first and uninstall beside it for an installed plugin that has settings', async () => {
+    const host = await render({ installState: 'Installed', installedVersion: '2.0.0' }, '2.0.0', { manageAction: 'settings' });
+    const emitted: string[] = [];
+    fixture.componentInstance.manage.subscribe(action => emitted.push(action));
+
+    expect(buttonLabels(host)).toContain(text(AppStrings.Store.Page.OpenSettingsAction));
+    const uninstall = host.querySelector('.manage-uninstall button') as HTMLElement;
+    expect(uninstall.getAttribute('aria-label')).toBe(text(AppStrings.Store.Uninstall));
+    (host.querySelector('.manage-main button') as HTMLElement).click();
+    expect(emitted).toEqual(['settings']);
+  });
+
+  it('names uninstall in full when there are no settings to open', async () => {
+    const host = await render({ installState: 'Installed', installedVersion: '2.0.0' }, '2.0.0');
+
+    expect(buttonLabels(host)).toContain(text(AppStrings.Store.Uninstall));
+    expect(host.querySelector('.manage-uninstall')).toBeNull();
+  });
+
+  it('leaves a failed test build to the Tests tab', async () => {
+    const host = await render({}, '2.0.0', {}, failed('TestBuildUnavailable', { kind: 'TestInstall' }));
+    expect(buttonLabels(host)).toContain(text(AppStrings.Store.Install));
+  });
+
+  it('still offers Retry for a failure that trying again can fix', async () => {
+    const host = await render({}, '2.0.0', {}, failed('DownloadFailed', { canRetry: true }));
+    expect(buttonLabels(host)).toContain(text('macrodeck:Common.Retry'));
   });
 });
 

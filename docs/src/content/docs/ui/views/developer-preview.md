@@ -98,6 +98,11 @@ it back after a reload.
 The selected scenario and the canvas size are part of the Developer Tools address, so reloading the window
 brings you back to the same scenario at the same size.
 
+A component view on the canvas is laid out the way a deck tile is: each preset cell is one deck cell, so a
+[`UiResponsive`](/ui/components/responsive/) switches layouts at the same sizes it does on the deck. A folder
+view or a dialog in the app is laid out in CSS pixels instead, 120 of them to a cell, so check its thresholds
+there too.
+
 `macrodeck-plugin run --project <path> --watch` sets this loop up against the running Macro Deck; see
 [Watching for changes](/cli/run/#watching-for-changes). `dotnet watch run` with the
 [debugging launch profile](/guides/debugging/#live-reload-while-you-work) does the same from your IDE.

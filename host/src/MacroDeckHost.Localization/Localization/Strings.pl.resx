@@ -939,6 +939,9 @@ Zamknij aplikację korzystającą z tego portu (lub wciąż działający Macro D
   <data name="Bootstrapper.Menu.Import" xml:space="preserve">
     <value>Importuj…</value>
   </data>
+  <data name="Bootstrapper.Menu.Quit" xml:space="preserve">
+    <value>Zakończ Macro Deck</value>
+  </data>
   <data name="Bootstrapper.Menu.Settings" xml:space="preserve">
     <value>Ustawienia…</value>
   </data>
@@ -1052,6 +1055,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Bootstrapper.UpdateWindow.DownloadingStatus" xml:space="preserve">
     <value>Pobieranie… {percent}%</value>
     <comment>[percent:int]</comment>
+  </data>
+  <data name="Bootstrapper.UpdateWindow.InstallOnQuitStatus" xml:space="preserve">
+    <value>Aktualizacja została pobrana. Zostanie zainstalowana przy zamknięciu aplikacji Macro Deck.</value>
   </data>
   <data name="Bootstrapper.UpdateWindow.InstallingStatus" xml:space="preserve">
     <value>Trwa instalacja aktualizacji. Macro Deck za chwilę uruchomi się ponownie.</value>
@@ -3485,6 +3491,21 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="IconPacks.AddIconPack" xml:space="preserve">
     <value>Dodaj pakiet ikon</value>
   </data>
+  <data name="IconPacks.AiFieldHint" xml:space="preserve">
+    <value>Wyświetlane w Store po opublikowaniu tego pakietu.</value>
+  </data>
+  <data name="IconPacks.AiFieldLabel" xml:space="preserve">
+    <value>Ikony utworzone za pomocą AI</value>
+  </data>
+  <data name="IconPacks.AiGenerated" xml:space="preserve">
+    <value>Zawiera ikony utworzone za pomocą AI</value>
+  </data>
+  <data name="IconPacks.AiNone" xml:space="preserve">
+    <value>Brak ikon utworzonych za pomocą AI</value>
+  </data>
+  <data name="IconPacks.AiNotDeclared" xml:space="preserve">
+    <value>Nie podano</value>
+  </data>
   <data name="IconPacks.AuthorFieldLabel" xml:space="preserve">
     <value>Autor</value>
   </data>
@@ -4462,6 +4483,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Detail.VersionFieldLabel" xml:space="preserve">
     <value>Wersja</value>
+  </data>
+  <data name="Integrations.Detail.ViewInStoreAction" xml:space="preserve">
+    <value>Pokaż w Store</value>
   </data>
   <data name="Integrations.Discord.Actions.AutomaticGainControl.Description" xml:space="preserve">
     <value>Włącza lub wyłącza automatyczną regulację wzmocnienia. Zaawansowane ustawienia głosu Discorda mogą być ignorowane, gdy aktywna jest redukcja szumów Krisp.</value>
@@ -11794,8 +11818,16 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Nie udało się zaktualizować {name}</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.StoreExtensionDowngradeFailed" xml:space="preserve">
+    <value>Nie udało się zainstalować starszej wersji: {name}</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.StoreExtensionUpdated" xml:space="preserve">
     <value>Zaktualizowano {name}</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.StoreExtensionDowngraded" xml:space="preserve">
+    <value>Zainstalowano starszą wersję: {name}</value>
     <comment>[name:string]</comment>
   </data>
   <data name="Notifications.StoreUpdatesAvailable.One" xml:space="preserve">
@@ -13968,7 +14000,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Automatyczne</value>
   </data>
   <data name="Settings.Update.ModeAutomaticDescription" xml:space="preserve">
-    <value>Macro Deck samodzielnie pobiera i instaluje aktualizacje. Przed ponownym uruchomieniem krótkie odliczanie pozwala je odłożyć.</value>
+    <value>Macro Deck pobiera aktualizacje w tle i instaluje je przy zamknięciu aplikacji.</value>
   </data>
   <data name="Settings.Update.ModeChangeFailed" xml:space="preserve">
     <value>Nie udało się zmienić ustawienia aktualizacji. Spróbuj ponownie.</value>
@@ -14231,11 +14263,17 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Cancelled" xml:space="preserve">
     <value>Anulowano</value>
   </data>
+  <data name="Store.ChooseVersion" xml:space="preserve">
+    <value>Wybierz inną wersję</value>
+  </data>
   <data name="Store.Details" xml:space="preserve">
     <value>Szczegóły</value>
   </data>
   <data name="Store.Dismiss" xml:space="preserve">
     <value>Odrzuć</value>
+  </data>
+  <data name="Store.DowngradeTo" xml:space="preserve">
+    <value>Przywróć wersję {version}</value>
   </data>
   <data name="Store.DownloadReadout" xml:space="preserve">
     <value>{downloaded} z {total}</value>
@@ -14262,6 +14300,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Error.Incompatible" xml:space="preserve">
     <value>Ta wersja nie jest zgodna z tą wersją Macro Deck.</value>
   </data>
+  <data name="Store.Error.RequiresNewerMacroDeck" xml:space="preserve">
+    <value>Ta wersja wymaga nowszej wersji Macro Deck.</value>
+  </data>
   <data name="Store.Error.Interrupted" xml:space="preserve">
     <value>Macro Deck zatrzymał się, gdy to jeszcze trwało.</value>
   </data>
@@ -14285,6 +14326,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Store.Error.UnsignedNotPermitted" xml:space="preserve">
     <value>Ten pakiet nie jest podpisany, więc Macro Deck nie może zweryfikować, kto go opublikował ani czy od tego czasu nie został zmieniony. Nie został zainstalowany.</value>
+  </data>
+  <data name="Store.Error.VersionNotFound" xml:space="preserve">
+    <value>Ta wersja nie jest dostępna w Store.</value>
   </data>
   <data name="Store.Error.Unsupported" xml:space="preserve">
     <value>To rozszerzenie nie obsługuje tej platformy.</value>
@@ -14319,6 +14363,24 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Store.Failed" xml:space="preserve">
     <value>Niepowodzenie</value>
+  </data>
+  <data name="Store.Footer.Copyright" xml:space="preserve">
+    <value>© {year} Macro Deck.</value>
+  </data>
+  <data name="Store.Footer.CreatorPortalAction" xml:space="preserve">
+    <value>Otwórz Creator Portal</value>
+  </data>
+  <data name="Store.Footer.Imprint" xml:space="preserve">
+    <value>Nota prawna</value>
+  </data>
+  <data name="Store.Footer.LegalAriaLabel" xml:space="preserve">
+    <value>Informacje prawne</value>
+  </data>
+  <data name="Store.Footer.PublishBody" xml:space="preserve">
+    <value>Wtyczkę lub pakiet ikon można przesłać przez Creator Portal i udostępnić wszystkim użytkownikom Macro Deck.</value>
+  </data>
+  <data name="Store.Footer.PublishHeading" xml:space="preserve">
+    <value>Publikowanie w Macro Deck</value>
   </data>
   <data name="Store.IconImport.CancelledKeptCount.One" xml:space="preserve">
     <value>Anulowano — zachowano {count} ikonę</value>
@@ -14368,6 +14430,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.InstallAnyway" xml:space="preserve">
     <value>Zainstaluj mimo to</value>
   </data>
+  <data name="Store.InstallVersion" xml:space="preserve">
+    <value>Zainstaluj {version}</value>
+  </data>
   <data name="Store.InstallationFailed" xml:space="preserve">
     <value>Instalacja nie powiodła się</value>
   </data>
@@ -14398,11 +14463,39 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.OperationFailed" xml:space="preserve">
     <value>Operacja nie powiodła się</value>
   </data>
+  <data name="Store.Page.AiDeclaredByPublisher" xml:space="preserve">
+    <value>Według deklaracji wydawcy.</value>
+  </data>
+  <data name="Store.Page.AiGeneratedAssets" xml:space="preserve">
+    <value>Zawiera obrazy, dźwięki lub teksty utworzone za pomocą AI</value>
+  </data>
+  <data name="Store.Page.AiGeneratedContent" xml:space="preserve">
+    <value>Generuje treści za pomocą AI</value>
+  </data>
+  <data name="Store.Page.AiHeading" xml:space="preserve">
+    <value>AI</value>
+  </data>
+  <data name="Store.Page.AiInteraction" xml:space="preserve">
+    <value>Umożliwia interakcję z systemem AI</value>
+  </data>
+  <data name="Store.Page.AiNone" xml:space="preserve">
+    <value>Nie korzysta z AI</value>
+  </data>
+  <data name="Store.Page.AiNotDeclared" xml:space="preserve">
+    <value>Wydawca nie podał, czy ten pakiet korzysta z AI.</value>
+  </data>
+  <data name="Store.Page.AiServices" xml:space="preserve">
+    <value>Usługi AI: {services}</value>
+    <comment>[services:string]</comment>
+  </data>
   <data name="Store.Page.AllPlatforms" xml:space="preserve">
     <value>Wszystkie platformy</value>
   </data>
   <data name="Store.Page.AllSectionHeading" xml:space="preserve">
     <value>Wszystkie</value>
+  </data>
+  <data name="Store.Page.AllVersionsAction" xml:space="preserve">
+    <value>Wszystkie wersje ({count})</value>
   </data>
   <data name="Store.Page.BackToStore" xml:space="preserve">
     <value>Powrót do Store</value>
@@ -14420,11 +14513,20 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Page.ComingSoonTestsAction" xml:space="preserve">
     <value>Otwórz testy</value>
   </data>
+  <data name="Store.Page.CompatibilityCheckedHint" xml:space="preserve">
+    <value>Zgodność z tą wersją Macro Deck jest sprawdzana podczas instalacji.</value>
+  </data>
   <data name="Store.Page.CompatibilityField" xml:space="preserve">
     <value>Zgodność</value>
   </data>
   <data name="Store.Page.DetailsHeading" xml:space="preserve">
     <value>Szczegóły</value>
+  </data>
+  <data name="Store.Page.DowngradeConfirmHeading" xml:space="preserve">
+    <value>Zainstalować starszą wersję?</value>
+  </data>
+  <data name="Store.Page.DowngradeConfirmMessage" xml:space="preserve">
+    <value>{name} {installed} zostanie zastąpiony wersją {version}. Automatyczne aktualizacje będą pomijać {name} do czasu ręcznej aktualizacji do najnowszej wersji.</value>
   </data>
   <data name="Store.Page.EmptyCatalogHeading" xml:space="preserve">
     <value>W Store nie ma jeszcze niczego</value>
@@ -14435,8 +14537,28 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Page.ExtensionNotFound" xml:space="preserve">
     <value>Nie znaleziono tego rozszerzenia.</value>
   </data>
+  <data name="Store.Page.FeaturedBadge" xml:space="preserve">
+    <value>Polecane</value>
+  </data>
   <data name="Store.Page.FeaturedSectionHeading" xml:space="preserve">
     <value>Polecane</value>
+  </data>
+  <data name="Store.Page.FeaturedSectionSubheading" xml:space="preserve">
+    <value>Wybór zespołu Macro Deck</value>
+  </data>
+  <data name="Store.Page.HeroHeading" xml:space="preserve">
+    <value>Rozszerzenia dla Macro Deck</value>
+  </data>
+  <data name="Store.Page.HeroSubheading" xml:space="preserve">
+    <value>Wtyczki i pakiety ikon, które dodają do decku nowe akcje, widżety i wygląd.</value>
+  </data>
+  <data name="Store.Page.HiddenUnsupported.One" xml:space="preserve">
+    <value>Ukryte z powodu niedostępności na tej platformie: {count}</value>
+    <comment>[plural][count:int] Discover page note under the filter bar when the supported-only filter hides items.</comment>
+  </data>
+  <data name="Store.Page.HiddenUnsupported.Other" xml:space="preserve">
+    <value>Ukryte z powodu niedostępności na tej platformie: {count}</value>
+    <comment>[plural][count:int] Discover page note under the filter bar when the supported-only filter hides items.</comment>
   </data>
   <data name="Store.Page.InstallCount.One" xml:space="preserve">
     <value>Liczba instalacji: {installs}</value>
@@ -14533,11 +14655,29 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Page.LoadingExtension" xml:space="preserve">
     <value>Wczytywanie rozszerzenia…</value>
   </data>
+  <data name="Store.Page.MadeWithAiBadge" xml:space="preserve">
+    <value>Utworzeno za pomocą AI</value>
+  </data>
+  <data name="Store.Page.MoreActionsAriaLabel" xml:space="preserve">
+    <value>Więcej akcji Store</value>
+  </data>
   <data name="Store.Page.NewAndUpdatedSectionHeading" xml:space="preserve">
     <value>Nowości i aktualizacje</value>
   </data>
+  <data name="Store.Page.NewAndUpdatedSectionSubheading" xml:space="preserve">
+    <value>Najnowsze wydania i aktualizacje</value>
+  </data>
+  <data name="Store.Page.NewBadge" xml:space="preserve">
+    <value>Nowość</value>
+  </data>
   <data name="Store.Page.NextScreenshotAriaLabel" xml:space="preserve">
     <value>Następny zrzut ekranu</value>
+  </data>
+  <data name="Store.Page.NoChangelog" xml:space="preserve">
+    <value>Brak informacji o zmianach w tej wersji.</value>
+  </data>
+  <data name="Store.Page.NoDescription" xml:space="preserve">
+    <value>Wydawca nie dodał jeszcze opisu.</value>
   </data>
   <data name="Store.Page.NoResultsHeading" xml:space="preserve">
     <value>Nie znaleziono rozszerzeń</value>
@@ -14545,8 +14685,29 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Page.NoResultsMessage" xml:space="preserve">
     <value>Spróbuj innego wyszukiwanego hasła lub filtra typu.</value>
   </data>
+  <data name="Store.Page.OlderVersionHoldHint" xml:space="preserve">
+    <value>Automatyczne aktualizacje pominą ten element do czasu aktualizacji do najnowszej wersji.</value>
+  </data>
+  <data name="Store.Page.OpenInLibraryAction" xml:space="preserve">
+    <value>Otwórz w bibliotece</value>
+  </data>
+  <data name="Store.Page.OpenSettingsAction" xml:space="preserve">
+    <value>Otwórz ustawienia</value>
+  </data>
   <data name="Store.Page.OverviewHeading" xml:space="preserve">
     <value>Przegląd</value>
+  </data>
+  <data name="Store.Page.PlatformNotSupported" xml:space="preserve">
+    <value>{platform}: nieobsługiwane</value>
+  </data>
+  <data name="Store.Page.PlatformSupported" xml:space="preserve">
+    <value>{platform}: obsługiwane</value>
+  </data>
+  <data name="Store.Page.PopularSectionHeading" xml:space="preserve">
+    <value>Popularne</value>
+  </data>
+  <data name="Store.Page.PopularSectionSubheading" xml:space="preserve">
+    <value>Najczęściej instalowane</value>
   </data>
   <data name="Store.Page.PreviousScreenshotAriaLabel" xml:space="preserve">
     <value>Poprzedni zrzut ekranu</value>
@@ -14554,8 +14715,20 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Page.PublisherField" xml:space="preserve">
     <value>Wydawca</value>
   </data>
+  <data name="Store.Page.PublisherFilterNote" xml:space="preserve">
+    <value>Wyświetlane są tylko elementy wydawcy {publisher}.</value>
+  </data>
+  <data name="Store.Page.PublisherHeading" xml:space="preserve">
+    <value>Wszystko od wydawcy {publisher}</value>
+  </data>
   <data name="Store.Page.RefreshAction" xml:space="preserve">
     <value>Odśwież</value>
+  </data>
+  <data name="Store.Page.RefreshStoreAction" xml:space="preserve">
+    <value>Odśwież Store</value>
+  </data>
+  <data name="Store.Page.ReleasedField" xml:space="preserve">
+    <value>Wydano</value>
   </data>
   <data name="Store.Page.RepositoryLink" xml:space="preserve">
     <value>Repozytorium</value>
@@ -14580,14 +14753,32 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Zrzut ekranu {position} z {total}</value>
     <comment>[position:int][total:int]</comment>
   </data>
+  <data name="Store.Page.ScrollBackAction" xml:space="preserve">
+    <value>Przewiń wstecz</value>
+  </data>
+  <data name="Store.Page.ScrollForwardAction" xml:space="preserve">
+    <value>Przewiń dalej</value>
+  </data>
   <data name="Store.Page.SearchAriaLabel" xml:space="preserve">
     <value>Przeszukaj Store</value>
   </data>
   <data name="Store.Page.SearchPlaceholder" xml:space="preserve">
     <value>Szukaj wtyczek i pakietów ikon…</value>
   </data>
+  <data name="Store.Page.SearchResultsFor" xml:space="preserve">
+    <value>Wyniki dla „{query}”</value>
+  </data>
   <data name="Store.Page.SearchResultsSectionHeading" xml:space="preserve">
     <value>Wyniki wyszukiwania</value>
+  </data>
+  <data name="Store.Page.SelectVersionAction" xml:space="preserve">
+    <value>Wybierz</value>
+  </data>
+  <data name="Store.Page.ShowAllAction" xml:space="preserve">
+    <value>Pokaż wszystkie</value>
+  </data>
+  <data name="Store.Page.SimilarHeading" xml:space="preserve">
+    <value>Może się też spodobać</value>
   </data>
   <data name="Store.Page.SizeField" xml:space="preserve">
     <value>Rozmiar</value>
@@ -14604,14 +14795,26 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Page.SortNewest" xml:space="preserve">
     <value>Najnowsze</value>
   </data>
+  <data name="Store.Page.SortPopular" xml:space="preserve">
+    <value>Najpopularniejsze</value>
+  </data>
   <data name="Store.Page.SortRecentlyUpdated" xml:space="preserve">
     <value>Ostatnio zaktualizowane</value>
   </data>
   <data name="Store.Page.StaleCatalogMessage" xml:space="preserve">
     <value>Nie udało się odświeżyć katalogu Store — wyświetlana jest ostatnia znana lista.</value>
   </data>
+  <data name="Store.Page.StoreSettingsAction" xml:space="preserve">
+    <value>Ustawienia Store</value>
+  </data>
   <data name="Store.Page.Subtitle" xml:space="preserve">
     <value>Przeglądaj wtyczki i pakiety ikon z rejestru Macro Deck</value>
+  </data>
+  <data name="Store.Page.SupportedOnPlatform" xml:space="preserve">
+    <value>Dostępne na tej platformie</value>
+  </data>
+  <data name="Store.Page.SupportedOnlyLabel" xml:space="preserve">
+    <value>Tylko dostępne na tej platformie</value>
   </data>
   <data name="Store.Page.TabDiscover" xml:space="preserve">
     <value>Odkrywaj</value>
@@ -14621,6 +14824,17 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
     <value>Sekcje Store</value>
+  </data>
+  <data name="Store.Page.TagFilterNote" xml:space="preserve">
+    <value>Wyświetlane są tylko elementy z tagiem {tag}.</value>
+    <comment>[tag:string]</comment>
+  </data>
+  <data name="Store.Page.TagHeading" xml:space="preserve">
+    <value>Wszystko z tagiem {tag}</value>
+    <comment>[tag:string]</comment>
+  </data>
+  <data name="Store.Page.TagsHeading" xml:space="preserve">
+    <value>Tagi</value>
   </data>
   <data name="Store.Page.Title" xml:space="preserve">
     <value>Store</value>
@@ -14634,8 +14848,14 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Page.UpdateAllAction" xml:space="preserve">
     <value>Aktualizuj wszystko</value>
   </data>
+  <data name="Store.Page.UpdatedBadge" xml:space="preserve">
+    <value>Zaktualizowane</value>
+  </data>
   <data name="Store.Page.UpdatedField" xml:space="preserve">
     <value>Zaktualizowano</value>
+  </data>
+  <data name="Store.Page.UsesAiBadge" xml:space="preserve">
+    <value>Korzysta z AI</value>
   </data>
   <data name="Store.Page.VersionField" xml:space="preserve">
     <value>Wersja</value>
@@ -14646,6 +14866,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Page.VersionLabel" xml:space="preserve">
     <value>Wersja {version}</value>
     <comment>[version:string]</comment>
+  </data>
+  <data name="Store.Page.VersionLatestBadge" xml:space="preserve">
+    <value>Najnowsza</value>
+  </data>
+  <data name="Store.Page.VersionUnavailableReason" xml:space="preserve">
+    <value>Tej wersji nie można zainstalować ze Store.</value>
   </data>
   <data name="Store.Page.WhatsNewHeading" xml:space="preserve">
     <value>Co nowego?</value>
@@ -14765,6 +14991,21 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.RetryInstallation" xml:space="preserve">
     <value>Ponów instalację</value>
   </data>
+  <data name="Store.Reviews.NoRatingsYet" xml:space="preserve">
+    <value>Brak ocen.</value>
+  </data>
+  <data name="Store.Reviews.OnlyRatings" xml:space="preserve">
+    <value>Na razie tylko oceny w gwiazdkach, bez pisemnych recenzji.</value>
+  </data>
+  <data name="Store.Reviews.ShowLessAction" xml:space="preserve">
+    <value>Pokaż mniej</value>
+  </data>
+  <data name="Store.Reviews.ShowMoreAction" xml:space="preserve">
+    <value>Pokaż więcej</value>
+  </data>
+  <data name="Store.Reviews.YouBadge" xml:space="preserve">
+    <value>Własna</value>
+  </data>
   <data name="Store.State.Installed" xml:space="preserve">
     <value>Zainstalowano</value>
   </data>
@@ -14830,6 +15071,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Store.ValidatingEllipsis" xml:space="preserve">
     <value>Weryfikowanie…</value>
+  </data>
+  <data name="Store.VersionUnavailable" xml:space="preserve">
+    <value>Niedostępne</value>
   </data>
   <data name="Store.WhatMacroDeckReported" xml:space="preserve">
     <value>Co zgłosił Macro Deck</value>
@@ -15119,6 +15363,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Update.Details.ReadyStatus" xml:space="preserve">
     <value>Gotowe do instalacji. Macro Deck uruchomi się ponownie, aby dokończyć.</value>
   </data>
+  <data name="Update.Details.InstallOnQuitStatus" xml:space="preserve">
+    <value>Gotowe do instalacji. Aktualizacja zostanie zainstalowana przy zamknięciu aplikacji Macro Deck.</value>
+  </data>
   <data name="Update.Details.KeepInBackgroundNote" xml:space="preserve">
     <value>To okno można zamknąć — pobieranie będzie kontynuowane i pozostanie widoczne w centrum powiadomień.</value>
   </data>
@@ -15138,14 +15385,6 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Update.Details.InstallNowAction" xml:space="preserve">
     <value>Zainstaluj teraz</value>
-  </data>
-  <data name="Update.Details.AutoInstallCountdown.One" xml:space="preserve">
-    <value>Macro Deck uruchomi się ponownie za {count} sekundę, aby zainstalować tę aktualizację.</value>
-    <comment>[plural]</comment>
-  </data>
-  <data name="Update.Details.AutoInstallCountdown.Other" xml:space="preserve">
-    <value>Macro Deck uruchomi się ponownie za {count} s, aby zainstalować tę aktualizację.</value>
-    <comment>[plural]</comment>
   </data>
   <data name="Update.WhatsNew.Heading" xml:space="preserve">
     <value>Co nowego w Macro Deck {version}</value>

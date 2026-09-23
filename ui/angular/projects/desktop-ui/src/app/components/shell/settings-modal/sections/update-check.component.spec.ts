@@ -27,7 +27,7 @@ function makeState(overrides: Partial<ShellUpdateState> = {}): ShellUpdateState 
     failure: null,
     progress: null,
     lastCheckedAt: null,
-    autoInstallAt: null,
+    installOnQuit: false,
     ...overrides,
   };
 }
@@ -152,6 +152,33 @@ describe('UpdateCheckComponent', () => {
 
     const text = fixture.nativeElement.textContent as string;
     expect(text).toContain('Version 3.1.0 is available');
+    expect(text).toContain('View details');
+  });
+
+  it('says a downloaded update outside automatic mode is ready, not that it is installing', async () => {
+    setShell({
+      getUpdateState: () => Promise.resolve(makeState({ phase: 'downloaded', version: '3.1.0' })),
+      onUpdateState: () => Promise.resolve(() => {}),
+    });
+
+    const fixture = await createFixture();
+
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('Ready to install. Macro Deck restarts to finish.');
+    expect(text).not.toContain('Downloading and installing');
+  });
+
+  it('says a downloaded automatic update installs on quit rather than that it is installing', async () => {
+    setShell({
+      getUpdateState: () => Promise.resolve(makeState({ phase: 'downloaded', version: '3.1.0', installOnQuit: true })),
+      onUpdateState: () => Promise.resolve(() => {}),
+    });
+
+    const fixture = await createFixture();
+
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('Ready to install. Macro Deck installs it when you quit.');
+    expect(text).not.toContain('Macro Deck will restart');
     expect(text).toContain('View details');
   });
 

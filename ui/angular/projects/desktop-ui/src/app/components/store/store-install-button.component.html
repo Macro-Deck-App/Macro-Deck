@@ -1,24 +1,65 @@
 @switch (effective()) {
   @case ('install') {
-    <shared-button variant="primary" [size]="size()" (click)="onInstall()">
+    <shared-button variant="primary" [size]="size()" [fill]="prominent()" (click)="onInstall()">
       @if (prominent()) {
         <span class="icon icon-download icon-sm" aria-hidden="true"></span>
       }
       {{ 'macrodeck.app:Store.Install' | translate }}
     </shared-button>
   }
+  @case ('installVersion') {
+    <shared-button variant="primary" [size]="size()" [fill]="prominent()" (click)="onInstall()">
+      @if (prominent()) {
+        <span class="icon icon-download icon-sm" aria-hidden="true"></span>
+      }
+      {{ 'macrodeck.app:Store.InstallVersion' | translate:{ version: target() } }}
+    </shared-button>
+  }
+  @case ('downgrade') {
+    @if (prominent()) {
+      <shared-button variant="secondary" size="lg" [fill]="true" (click)="onInstall()">
+        <span class="icon icon-undo icon-sm" aria-hidden="true"></span>
+        {{ 'macrodeck.app:Store.DowngradeTo' | translate:{ version: target() } }}
+      </shared-button>
+      <ng-container [ngTemplateOutlet]="manageRow" />
+    } @else {
+      <div class="store-installed">
+        <shared-button variant="secondary" [size]="size()" (click)="onInstall()">
+          {{ 'macrodeck.app:Store.DowngradeTo' | translate:{ version: target() } }}
+        </shared-button>
+        <shared-button variant="ghost" [size]="size()" (click)="onUninstall()">
+          {{ 'macrodeck.app:Store.Uninstall' | translate }}
+        </shared-button>
+      </div>
+    }
+  }
+  @case ('unavailable') {
+    <shared-button
+      variant="secondary"
+      [size]="size()"
+      [fill]="prominent()"
+      [disabled]="true"
+      [title]="targetUnavailableReason() ?? ''">
+      {{ 'macrodeck.app:Store.VersionUnavailable' | translate }}
+    </shared-button>
+  }
   @case ('update') {
-    <div class="store-installed">
-      <shared-button variant="primary" [size]="size()" (click)="onInstall()">
-        @if (prominent()) {
-          <span class="icon icon-refresh icon-sm" aria-hidden="true"></span>
-        }
-        {{ 'macrodeck.app:Store.UpdateTo' | translate:{ version: item().latestVersion } }}
+    @if (prominent()) {
+      <shared-button variant="primary" size="lg" [fill]="true" (click)="onInstall()">
+        <span class="icon icon-refresh icon-sm" aria-hidden="true"></span>
+        {{ 'macrodeck.app:Store.UpdateTo' | translate:{ version: target() } }}
       </shared-button>
-      <shared-button variant="ghost" [size]="size()" (click)="onUninstall()">
-        {{ 'macrodeck.app:Store.Uninstall' | translate }}
-      </shared-button>
-    </div>
+      <ng-container [ngTemplateOutlet]="manageRow" />
+    } @else {
+      <div class="store-installed">
+        <shared-button variant="primary" [size]="size()" (click)="onInstall()">
+          {{ 'macrodeck.app:Store.UpdateTo' | translate:{ version: target() } }}
+        </shared-button>
+        <shared-button variant="ghost" [size]="size()" (click)="onUninstall()">
+          {{ 'macrodeck.app:Store.Uninstall' | translate }}
+        </shared-button>
+      </div>
+    }
   }
   @case ('testBuild') {
     <div class="store-installed store-test-build">
@@ -26,48 +67,61 @@
         <span class="icon icon-alert-triangle icon-xs" aria-hidden="true"></span>
         {{ 'macrodeck.app:Store.TestBuildActive' | translate:{ build: item().installedTestBuild } }}
       </span>
-      <shared-button variant="primary" [size]="size()" (click)="onInstall()">
+      <shared-button variant="primary" [size]="size()" [fill]="prominent()" (click)="onInstall()">
         @if (prominent()) {
           <span class="icon icon-refresh icon-sm" aria-hidden="true"></span>
         }
         {{ 'macrodeck.app:Store.ReturnToStoreVersion' | translate:{ version: item().latestVersion } }}
       </shared-button>
-      <shared-button variant="ghost" [size]="size()" (click)="onUninstall()">
-        {{ 'macrodeck.app:Store.Uninstall' | translate }}
-      </shared-button>
+      @if (prominent()) {
+        <ng-container [ngTemplateOutlet]="manageRow" />
+      } @else {
+        <shared-button variant="ghost" [size]="size()" (click)="onUninstall()">
+          {{ 'macrodeck.app:Store.Uninstall' | translate }}
+        </shared-button>
+      }
     </div>
   }
   @case ('installed') {
-    <div class="store-installed">
-      @if (prominent()) {
-        <shared-button variant="secondary" [size]="size()" [disabled]="true">
-          <span class="icon icon-check icon-sm" aria-hidden="true"></span>
-          {{ 'macrodeck.app:Store.InstalledVersion' | translate:{ version: item().installedVersion } }}
-        </shared-button>
-      } @else {
+    @if (prominent()) {
+      <p class="installed-status">
+        <span class="icon icon-check icon-sm" aria-hidden="true"></span>
+        {{ 'macrodeck.app:Store.InstalledVersion' | translate:{ version: item().installedVersion } }}
+      </p>
+      <ng-container [ngTemplateOutlet]="manageRow" />
+    } @else {
+      <div class="store-installed">
         <!-- On a card the state is already named beside this control, so the version is a quiet
              note rather than a second button competing with the one action worth pressing. -->
         <span class="installed-version">
           {{ 'macrodeck.app:Store.InstalledVersion' | translate:{ version: item().installedVersion } }}
         </span>
-      }
-      <shared-button variant="ghost" [size]="size()" (click)="onUninstall()">
-        {{ 'macrodeck.app:Store.Uninstall' | translate }}
-      </shared-button>
-    </div>
+        <shared-button variant="ghost" [size]="size()" (click)="onUninstall()">
+          {{ 'macrodeck.app:Store.Uninstall' | translate }}
+        </shared-button>
+      </div>
+    }
   }
   @case ('unsupported') {
-    <shared-button
-      variant="secondary"
-      [size]="size()"
-      [disabled]="true"
-      [title]="notSupportedOnPlatform()">
-      {{ 'macrodeck.app:Store.Unsupported' | translate }}
-    </shared-button>
+    @if (prominent()) {
+      <shared-button
+        variant="secondary"
+        [size]="size()"
+        [fill]="prominent()"
+        [disabled]="true"
+        [title]="notSupportedOnPlatform()">
+        {{ 'macrodeck.app:Store.Unsupported' | translate }}
+      </shared-button>
+    } @else {
+      <span class="unsupported-note">
+        <span class="icon icon-info icon-xs" aria-hidden="true"></span>
+        {{ notSupportedOnPlatform() }}
+      </span>
+    }
   }
   @case ('queued') {
     <div class="store-progress">
-      <shared-button variant="secondary" [size]="size()" [disabled]="true">{{ 'macrodeck.app:Store.Queued' | translate }}</shared-button>
+      <shared-button variant="secondary" [size]="size()" [fill]="prominent()" [disabled]="true">{{ 'macrodeck.app:Store.Queued' | translate }}</shared-button>
       <div class="progress-bar indeterminate" role="progressbar" [attr.aria-valuetext]="'macrodeck.app:Store.Queued' | translate"></div>
     </div>
   }
@@ -113,12 +167,55 @@
     </div>
   }
   @case ('completed') {
-    <shared-button variant="secondary" [size]="size()" [disabled]="true">
+    <shared-button variant="secondary" [size]="size()" [fill]="prominent()" [disabled]="true">
       @if (prominent()) {
         <span class="icon icon-check icon-sm" aria-hidden="true"></span>
       }
       {{ 'macrodeck.app:Store.InstalledVersion' | translate:{ version: operation()?.version } }}
     </shared-button>
+  }
+  @case ('blocked') {
+    <div class="store-failed store-blocked" [class.prominent]="prominent()">
+      <p class="failed-message">
+        <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+        <span>{{ errorMessage() }}</span>
+      </p>
+      <div class="failed-actions">
+        @switch (blockedAction()) {
+          @case ('checkForUpdates') {
+            <shared-button variant="primary" [size]="size()" [fill]="prominent()" (click)="onBlockedAction('checkForUpdates')">
+              {{ 'macrodeck.app:Settings.Update.CheckForUpdatesAction' | translate }}
+            </shared-button>
+          }
+          @case ('chooseVersion') {
+            <shared-button variant="secondary" [size]="size()" [fill]="prominent()" (click)="onBlockedAction('chooseVersion')">
+              {{ 'macrodeck.app:Store.ChooseVersion' | translate }}
+            </shared-button>
+          }
+          @case ('viewDetails') {
+            <shared-button variant="secondary" [size]="size()" [fill]="prominent()" (click)="onBlockedAction('viewDetails')">
+              {{ 'macrodeck.app:Settings.Update.ViewDetailsAction' | translate }}
+            </shared-button>
+          }
+        }
+        @if (errorDetail()) {
+          <shared-button variant="ghost" [size]="secondarySize()" [fill]="prominent()" (click)="openDetails()">{{ 'macrodeck.app:Store.Details' | translate }}</shared-button>
+        }
+        @if (isInstalled()) {
+          <shared-button [variant]="uninstallVariant()" [size]="secondarySize()" [fill]="prominent()" (click)="onUninstall()">
+            {{ 'macrodeck.app:Store.Uninstall' | translate }}
+          </shared-button>
+        }
+      </div>
+    </div>
+
+    @if (detailsOpen()) {
+      <shared-modal [heading]="'macrodeck.app:Store.InstallationFailed' | translate" size="small" [showFooter]="false" (close)="closeDetails()">
+        <p class="failure-explanation">{{ errorMessage() }}</p>
+        <p class="failure-detail-label">{{ 'macrodeck.app:Store.WhatMacroDeckReported' | translate }}</p>
+        <p class="failure-detail">{{ errorDetail() }}</p>
+      </shared-modal>
+    }
   }
   @case ('failed') {
     @if (prominent()) {
@@ -192,3 +289,35 @@
     }
   }
 }
+
+<ng-template #manageRow>
+  <div class="manage-row">
+    @if (manageAction(); as action) {
+      <shared-button class="manage-main" variant="secondary" size="md" [fill]="true" (click)="manage.emit(action)">
+        @if (action === 'settings') {
+          <span class="icon icon-settings icon-sm" aria-hidden="true"></span>
+          {{ 'macrodeck.app:Store.Page.OpenSettingsAction' | translate }}
+        } @else {
+          <span class="icon icon-image icon-sm" aria-hidden="true"></span>
+          {{ 'macrodeck.app:Store.Page.OpenInLibraryAction' | translate }}
+        }
+      </shared-button>
+      <shared-button
+        class="manage-uninstall"
+        variant="secondary"
+        size="icon"
+        [iconOnly]="true"
+        [ariaLabel]="'macrodeck.app:Store.Uninstall' | translate"
+        [sharedTooltip]="'macrodeck.app:Store.Uninstall' | translate"
+        tooltipPlacement="left"
+        (click)="onUninstall()">
+        <span class="icon icon-trash icon-sm" aria-hidden="true"></span>
+      </shared-button>
+    } @else {
+      <shared-button class="manage-main" variant="secondary" size="md" [fill]="true" (click)="onUninstall()">
+        <span class="icon icon-trash icon-sm" aria-hidden="true"></span>
+        {{ 'macrodeck.app:Store.Uninstall' | translate }}
+      </shared-button>
+    }
+  </div>
+</ng-template>

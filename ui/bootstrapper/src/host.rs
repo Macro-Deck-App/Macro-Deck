@@ -1160,7 +1160,9 @@ async fn post_update_state(port: u16, body: &UpdateStateBody<'_>) -> Result<(), 
 
 // A full-installation backup is not a three-second request like the other host calls here, so this one
 // gets its own generous timeout.
-const PRE_UPDATE_BACKUP_TIMEOUT: Duration = Duration::from_secs(600);
+pub const PRE_UPDATE_BACKUP_TIMEOUT: Duration = Duration::from_secs(600);
+
+pub const QUIT_PRE_UPDATE_BACKUP_TIMEOUT: Duration = Duration::from_secs(120);
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -1201,10 +1203,9 @@ pub fn interpret_pre_update_backup_response(
 async fn post_pre_update_backup(
     port: u16,
     version: Option<&str>,
+    timeout: Duration,
 ) -> Result<PreUpdateBackupResponse, reqwest::Error> {
-    let client = reqwest::Client::builder()
-        .timeout(PRE_UPDATE_BACKUP_TIMEOUT)
-        .build()?;
+    let client = reqwest::Client::builder().timeout(timeout).build()?;
     client
         .post(format!(
             "http://127.0.0.1:{port}/api/backups/before-host-update"
@@ -1219,13 +1220,14 @@ async fn post_pre_update_backup(
 pub async fn create_pre_update_backup(
     app: &AppHandle,
     version: Option<&str>,
+    timeout: Duration,
 ) -> Result<(), String> {
     let state = app.state::<Arc<HostState>>();
     let Some(port) = managed_port(&state) else {
         return Err(localization::t(keys::UPDATE_BACKUP_HOST_UNREACHABLE));
     };
 
-    match post_pre_update_backup(port, version).await {
+    match post_pre_update_backup(port, version, timeout).await {
         Ok(response) => interpret_pre_update_backup_response(Some(response)),
         Err(error) => {
             logging::warn(&format!("[host] pre-update backup request failed: {error}"));

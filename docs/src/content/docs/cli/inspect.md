@@ -28,6 +28,7 @@ Entrypoints:
 Permissions: (none declared)
 
 Languages: (none declared)
+AI: (not declared)
 
 Dependencies: (none declared)
 
@@ -85,6 +86,7 @@ macrodeck-plugin inspect --artifact com.example.my-plugin-1.0.0.macroDeckPlugin 
   ],
   "permissions": [],
   "languages": [],
+  "ai": null,
   "dependencies": [],
   "conflicts": [],
   "iconPacks": [],
@@ -126,8 +128,8 @@ Exactly one of `--artifact` and `--directory` is required: neither is `no-select
 
 ## What is reported
 
-Entrypoints, permissions, declared languages, dependencies, conflicts, icon packs, compatibility, signature
-shape, entry count, size and compression ratio.
+Entrypoints, permissions, declared languages, the AI declaration, dependencies, conflicts, icon packs,
+compatibility, signature shape, entry count, size and compression ratio.
 
 `inspect` describes, it does not judge: it never runs the JSON Schema, never checks a declared file's digest,
 never flags an undeclared file, and marks an unknown permission `(unknown)` without failing. Use

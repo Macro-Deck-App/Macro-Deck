@@ -1,14 +1,19 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Injector, OnDestroy, OnInit, afterNextRender, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 import { AppStrings, StoreCatalogItemBody, StoreExtensionKind } from '@macro-deck/runtime';
 import { ApiService, ButtonComponent, ErrorBannerComponent, LocalizationService, ToastService, TranslatePipe } from '@shared';
 import { EmptyStateComponent } from '../../feedback/empty-state/empty-state.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
-import { StoreSectionComponent } from '../../store/store-section.component';
-import { StoreViewSwitcherComponent } from '../../store/store-view-switcher.component';
+import { StoreFooterComponent } from '../../store/store-footer.component';
+import { StorePageHeaderComponent } from '../../store/store-page-header.component';
+import { StoreSectionComponent, StoreUnsignedInstallRequest } from '../../store/store-section.component';
 import { StoreAccessService } from '../../../services/store-access.service';
+import { StoreBrowseStateService, isHistoryNavigation, isStoreDetailUrl } from '../../../services/store-browse-state.service';
 import { StoreOperationService } from '../../../services/store-operation.service';
 import { StoreUpdatesService } from '../../../services/store-updates.service';
+import { UpdateModalService } from '../../../services/update-modal.service';
+import { UpdateService } from '../../../services/update.service';
 import { storeUninstallErrorKey, storeUninstallMessageKey } from '../../../util/store-operation-display';
 
 const INSTALLED_KINDS: StoreExtensionKind[] = ['Plugin', 'IconPack'];
@@ -23,21 +28,25 @@ const PAGE_SIZE = 100;
     ConfirmationModalComponent,
     EmptyStateComponent,
     ErrorBannerComponent,
+    StoreFooterComponent,
+    StorePageHeaderComponent,
     StoreSectionComponent,
-    StoreViewSwitcherComponent,
     TranslatePipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './store-installed-page.component.html',
   styleUrls: ['../store-page/store-page.component.scss'],
 })
-export class StoreInstalledPageComponent implements OnInit {
+export class StoreInstalledPageComponent implements OnInit, OnDestroy {
   private readonly api = inject(ApiService);
   private readonly localization = inject(LocalizationService);
   private readonly toasts = inject(ToastService);
   protected readonly operations = inject(StoreOperationService);
   protected readonly updates = inject(StoreUpdatesService);
   protected readonly storeUnlocked = inject(StoreAccessService).unlocked;
+  private readonly appUpdates = inject(UpdateService);
+  private readonly updateModal = inject(UpdateModalService);
+  protected readonly updatesAvailable = this.appUpdates.hasBridge;
 
   protected readonly items = signal<StoreCatalogItemBody[]>([]);
   protected readonly total = signal(0);
@@ -65,6 +74,11 @@ export class StoreInstalledPageComponent implements OnInit {
 
   private generation = 0;
 
+  private readonly router = inject(Router);
+  private readonly browseState = inject(StoreBrowseStateService);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
+
   constructor() {
     this.api.onNotification('StoreCatalogChangedEvent')
       .pipe(takeUntilDestroyed())
@@ -72,7 +86,47 @@ export class StoreInstalledPageComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
+    const returning = isHistoryNavigation(this.router.currentNavigation() ?? this.router.lastSuccessfulNavigation());
     await this.load();
+    const snapshot = returning ? this.browseState.restore('installed', 'installed') : null;
+    if (snapshot) {
+      while (!this.destroyed && this.items().length < snapshot.itemCount && this.hasMore() && !this.loadError()) {
+        const before = this.items().length;
+        await this.onLoadMore();
+        if (this.items().length === before) {
+          break;
+        }
+      }
+      if (this.destroyed) {
+        return;
+      }
+      afterNextRender(() => {
+        const scroller = this.host.nativeElement.querySelector<HTMLElement>('.store-page');
+        if (scroller) {
+          scroller.scrollTop = snapshot.scrollTop;
+        }
+      }, { injector: this.injector });
+    }
+  }
+
+  private lastScrollTop = 0;
+  private destroyed = false;
+
+  protected onScroll(event: Event): void {
+    this.lastScrollTop = (event.target as HTMLElement).scrollTop;
+  }
+
+  ngOnDestroy(): void {
+    this.destroyed = true;
+    if (!isStoreDetailUrl(this.router.currentNavigation()?.finalUrl?.toString())) {
+      this.browseState.forget('installed');
+      return;
+    }
+    this.browseState.save('installed', {
+      key: 'installed',
+      scrollTop: this.lastScrollTop,
+      itemCount: this.items().length,
+    });
   }
 
   protected async onUpdateAll(): Promise<void> {
@@ -83,8 +137,13 @@ export class StoreInstalledPageComponent implements OnInit {
     await this.operations.install(item.kind, item.id);
   }
 
-  protected async onInstallUnsigned(item: StoreCatalogItemBody): Promise<void> {
-    await this.operations.install(item.kind, item.id, undefined, true);
+  protected async onInstallUnsigned(request: StoreUnsignedInstallRequest): Promise<void> {
+    await this.operations.install(request.item.kind, request.item.id, request.version, true);
+  }
+
+  protected onCheckForUpdates(): void {
+    void this.appUpdates.check();
+    this.updateModal.open();
   }
 
   protected async onRetry(item: StoreCatalogItemBody): Promise<void> {

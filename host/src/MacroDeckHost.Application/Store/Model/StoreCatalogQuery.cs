@@ -15,4 +15,10 @@ public sealed record StoreCatalogQuery
 	public int Take { get; init; } = MaxTake;
 
 	public bool Installed { get; init; }
+
+	public bool SupportedOnly { get; init; }
+
+	public string? Publisher { get; init; }
+
+	public string? Tag { get; init; }
 }

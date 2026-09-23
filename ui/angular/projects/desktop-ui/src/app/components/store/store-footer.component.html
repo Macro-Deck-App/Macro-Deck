@@ -1,0 +1,32 @@
+<footer class="store-footer">
+  <div class="store-footer-publish">
+    <span class="publish-icon" aria-hidden="true">
+      <span class="icon icon-upload icon-md"></span>
+    </span>
+    <div class="publish-text">
+      <h2 class="publish-heading">{{ 'macrodeck.app:Store.Footer.PublishHeading' | translate }}</h2>
+      <p class="publish-body">{{ 'macrodeck.app:Store.Footer.PublishBody' | translate }}</p>
+    </div>
+    <a
+      class="publish-link"
+      [href]="links.creatorPortal"
+      target="_blank"
+      rel="noopener noreferrer"
+      (click)="open($event, links.creatorPortal)">
+      {{ 'macrodeck.app:Store.Footer.CreatorPortalAction' | translate }}
+      <span class="icon icon-external-link icon-xs" aria-hidden="true"></span>
+    </a>
+  </div>
+
+  <div class="store-footer-legal">
+    <span class="copyright">{{ 'macrodeck.app:Store.Footer.Copyright' | translate:{ year: year } }}</span>
+    <nav class="legal-links" [attr.aria-label]="'macrodeck.app:Store.Footer.LegalAriaLabel' | translate">
+      <a [href]="links.imprint" target="_blank" rel="noopener noreferrer" (click)="open($event, links.imprint)">
+        {{ 'macrodeck.app:Store.Footer.Imprint' | translate }}
+      </a>
+      <a [href]="links.privacy" target="_blank" rel="noopener noreferrer" (click)="open($event, links.privacy)">
+        {{ 'macrodeck.app:Store.Page.Link.Privacy' | translate }}
+      </a>
+    </nav>
+  </div>
+</footer>

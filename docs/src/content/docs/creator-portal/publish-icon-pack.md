@@ -14,6 +14,10 @@ Start this version  ->  upload .macroDeckIconPack  ->  Add to submission  ->  Su
 In Macro Deck, open **Icon packs**, open the pack's menu and select **Export pack**. You get a
 `.macroDeckIconPack` file.
 
+Before you export, open the pack's menu, select **Edit pack** and set **AI-created icons**. The setting is
+saved in the exported pack's `pack.json` as the same [`ai` declaration](/reference/manifest/#ai) plugins
+use. **Not declared** is never treated as free of AI.
+
 ## 2. Create the Project
 
 Create a Project of type **Icon Pack** and fill in [General Information](/creator-portal/projects/#store-listing).

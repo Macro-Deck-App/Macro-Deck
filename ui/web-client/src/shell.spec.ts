@@ -703,6 +703,60 @@ describe('Shell', () => {
     });
   });
 
+  describe('keyboard activation of a responsive tile', () => {
+    const wideOnlyDisabled: UiNode = {
+      id: 'root', type: 'ui.responsive', properties: { variants: [{ minWidth: 1.5 }] },
+      children: [
+        { id: 'root.compact', type: 'ui.text', properties: { text: '21' } },
+        { id: 'root.wide', type: 'ui.stack', properties: { modifiers: { disabled: true } }, children: [] },
+      ],
+    } as UiNode;
+
+    async function activateOn(width: number): Promise<string[]> {
+      const widgetSessions = new WidgetSessions(new FakeConnection(), client.sessions);
+      (client as unknown as { widgetSessions: WidgetSessions }).widgetSessions = widgetSessions;
+      const executed: string[] = [];
+      spyOn(client, 'executeTrigger').and.callFake((widgetId: string) => {
+        executed.push(widgetId);
+        return Promise.resolve() as never;
+      });
+      const target = { ...DEFAULT_WEB_CLIENT_TARGET, hardwareInput: { keys: [{ key: 'Enter', event: { kind: 'activate' as const } }] } };
+      const widget = { ...gridWidget('w1', 0, 0), w: width } as GridWidget;
+      client.deck.load([{ ...(folder('root') as unknown as Record<string, unknown>), widgets: [widget] } as never]);
+      new Shell(root, client, host, { ...services(), target });
+      client.app.set({ probed: true, authenticated: true, connected: true, deckRendered: true });
+      widgetSessions.sync([widget]);
+      await settle();
+
+      client.sessions.treeUpdated('s1', 1, wideOnlyDisabled);
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      return executed;
+    }
+
+    let width: PropertyDescriptor | undefined;
+    let height: PropertyDescriptor | undefined;
+
+    beforeEach(() => {
+      width = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'clientWidth');
+      height = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'clientHeight');
+      Object.defineProperty(HTMLElement.prototype, 'clientWidth', { value: 1024, configurable: true });
+      Object.defineProperty(HTMLElement.prototype, 'clientHeight', { value: 600, configurable: true });
+    });
+
+    afterEach(() => {
+      if (width) Object.defineProperty(HTMLElement.prototype, 'clientWidth', width);
+      if (height) Object.defineProperty(HTMLElement.prototype, 'clientHeight', height);
+    });
+
+    it('runs the tile flow on one cell, where the drawn layout holds nothing', async () => {
+      expect(await activateOn(1)).toEqual(['w1']);
+    });
+
+    it('is absorbed on two cells, where the drawn layout is a disabled region', async () => {
+      expect(await activateOn(2)).toEqual([]);
+    });
+  });
+
   describe('per-widget session repaints', () => {
     let scheduler: SyncScheduler;
     let widgetSessions: WidgetSessions;

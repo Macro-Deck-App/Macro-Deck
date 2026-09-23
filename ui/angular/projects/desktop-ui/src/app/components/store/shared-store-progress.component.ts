@@ -2,7 +2,9 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@a
 import { AppStrings, StoreOperationBody } from '@macro-deck/runtime';
 import { LocalizationService, TranslatePipe } from '@shared';
 import { StoreOperationService } from '../../services/store-operation.service';
-import { formatEta, isTerminalStoreOperationState, storeOperationByteReadout, storeOperationPercent, storeOperationStateLabelKey } from '../../util/store-operation-display';
+import { UpdateModalService } from '../../services/update-modal.service';
+import { UpdateService } from '../../services/update.service';
+import { formatEta, isTerminalStoreOperationState, storeOperationByteReadout, storeOperationErrorKey, storeOperationPercent, storeOperationStateLabelKey } from '../../util/store-operation-display';
 
 const AUTO_DISMISS_DELAY_MS = 4000;
 
@@ -17,6 +19,8 @@ const AUTO_DISMISS_DELAY_MS = 4000;
 export class SharedStoreProgressComponent {
   private readonly operations = inject(StoreOperationService);
   private readonly localization = inject(LocalizationService);
+  protected readonly updates = inject(UpdateService);
+  private readonly updateModal = inject(UpdateModalService);
   private readonly dismissTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
   protected readonly visible = computed(() =>
@@ -57,7 +61,19 @@ export class SharedStoreProgressComponent {
   }
 
   protected errorMessage(operation: StoreOperationBody): string {
-    return operation.errorMessage || operation.error || this.localization.translateKey(AppStrings.Store.OperationFailed);
+    if (!operation.error) {
+      return operation.errorMessage || this.localization.translateKey(AppStrings.Store.OperationFailed);
+    }
+    return this.localization.translateKey(storeOperationErrorKey(operation.error));
+  }
+
+  protected errorDetail(operation: StoreOperationBody): string | null {
+    return operation.error && operation.errorMessage ? operation.errorMessage : null;
+  }
+
+  protected checkForUpdates(): void {
+    void this.updates.check();
+    this.updateModal.open();
   }
 
   protected dismiss(operation: StoreOperationBody): void {

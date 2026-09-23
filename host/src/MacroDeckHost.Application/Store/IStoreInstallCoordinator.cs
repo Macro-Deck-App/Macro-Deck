@@ -19,6 +19,8 @@ public interface IStoreInstallCoordinator
 		bool allowUnsigned = false,
 		string? backupBatchId = null);
 
+	bool IsUnavailableVersion(StoreExtensionKind kind, string packageId, string version);
+
 	StoreOperation InstallTestBuild(string packageId,
 		string displayName,
 		StorePlatformTestBuild build,

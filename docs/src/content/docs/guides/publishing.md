@@ -20,6 +20,9 @@ Run each check on the build output, not the project directory:
 
   Exit `1` means a field is missing. `build` and `pack` only warn about these fields; the Creator Portal
   applies the same check at upload.
+- **AI use is declared** - a plugin that lets users interact with an AI system, generates content with AI,
+  or ships assets created with AI says so in `ai` ([manifest reference](/reference/manifest/#ai)). Without
+  it, the plugin's Store page says its publisher has not declared whether it uses AI.
 - **The artifact passes conformance** ([conformance suite](/reference/conformance/)):
 
   ```bash

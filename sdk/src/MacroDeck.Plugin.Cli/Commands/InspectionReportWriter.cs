@@ -66,6 +66,7 @@ internal static class InspectionReportWriter
 		console.WriteLine(report.Languages.Count == 0
 			? "Languages: (none declared)"
 			: "Languages: " + string.Join(", ", report.Languages));
+		console.WriteLine("AI: " + DescribeAi(report.Ai));
 
 		WriteRelationships(console, "Dependencies", report.Dependencies);
 		WriteRelationships(console, "Conflicts", report.Conflicts);
@@ -135,6 +136,37 @@ internal static class InspectionReportWriter
 		}
 	}
 
+	private static string DescribeAi(PackageAiDeclaration? ai)
+	{
+		if (ai is null)
+		{
+			return "(not declared)";
+		}
+
+		var uses = new List<string>();
+		if (ai.Interaction)
+		{
+			uses.Add("interaction");
+		}
+
+		if (ai.GeneratedContent)
+		{
+			uses.Add("generated content");
+		}
+
+		if (ai.GeneratedAssets)
+		{
+			uses.Add("generated assets");
+		}
+
+		if (ai.Services is { Count: > 0 } services)
+		{
+			uses.Add("services: " + string.Join(", ", services));
+		}
+
+		return uses.Count == 0 ? "none" : string.Join(", ", uses);
+	}
+
 	private static void WriteJson(CliConsole console, PluginInspectionReport report, bool showDigest)
 	{
 		var payload = new
@@ -146,6 +178,7 @@ internal static class InspectionReportWriter
 			entrypoints = report.Entrypoints,
 			permissions = report.Permissions,
 			languages = report.Languages,
+			ai = report.Ai,
 			dependencies = report.Dependencies,
 			conflicts = report.Conflicts,
 			iconPacks = report.IconPacks,

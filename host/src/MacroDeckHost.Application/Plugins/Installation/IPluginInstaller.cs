@@ -64,6 +64,8 @@ public sealed record PluginInstallResult
 
 	public string? ErrorMessage { get; init; }
 
+	public PluginIncompatibility? Incompatibility { get; init; }
+
 	public bool BlockedByDevelopmentTakeover { get; init; }
 
 	public PluginPublisher? Publisher { get; init; }

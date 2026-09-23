@@ -35,9 +35,14 @@ public sealed class DevicePressClaim : IAsyncDisposable
 	public static DevicePressClaim Absorbing(IUiSessionBroker? broker, string? sessionId)
 		=> new(broker, sessionId, null, null, absorbed: true);
 
-	public static DevicePressClaim From(IUiSessionBroker broker, string sessionId, JsonDocument tree)
+	public static DevicePressClaim From(
+		IUiSessionBroker broker,
+		string sessionId,
+		JsonDocument tree,
+		double? widthCells = null,
+		double? heightCells = null)
 	{
-		var claim = UiActivationClaim.Of(tree.RootElement);
+		var claim = UiActivationClaim.Of(tree.RootElement, widthCells, heightCells);
 		if (claim.Claimant is { } node &&
 			(!node.TryGetProperty("id", out var id) || id.ValueKind != JsonValueKind.String))
 		{

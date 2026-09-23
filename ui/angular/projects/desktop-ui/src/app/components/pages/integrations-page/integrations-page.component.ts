@@ -9,7 +9,7 @@ import {
   IntegrationTypeFilter,
 } from '../../../services/integration-filter.service';
 import { AppStrings, IpcProvidedCapability, PLUGIN_INSTALL_ERROR_ALREADY_INSTALLED, PluginCompatibilityReport, PluginCompatibilityState, PluginInstallActionResponse, LocalizedText, resolveLocalizedText, Strings } from '@macro-deck/runtime';
-import { ApiService, ButtonComponent, CheckboxComponent, ErrorBannerComponent, InputComponent, LocalizationService, LocalizedTextPipe, ModalComponent, ToastService, ToggleSwitchComponent, TranslatePipe } from '@shared';
+import { ApiService, ButtonComponent, CheckboxComponent, ErrorBannerComponent, InputComponent, LocalizationService, LocalizedTextPipe, ToastService, ToggleSwitchComponent, TranslatePipe } from '@shared';
 import { ConfigFlowDialogComponent } from '../../config-flow/config-flow-dialog.component';
 import { EmptyStateComponent } from '../../feedback/empty-state/empty-state.component';
 import { LoadingStateComponent } from '../../feedback/loading-state/loading-state.component';
@@ -46,7 +46,6 @@ type FilterFacet = 'status' | 'type' | 'capabilities' | 'issues';
     ErrorBannerComponent,
     InputComponent,
     LoadingStateComponent,
-    ModalComponent,
     PluginInstallConfirmModalComponent,
     ShellDropTargetDirective,
     ToggleSwitchComponent,
@@ -79,7 +78,6 @@ export class IntegrationsPageComponent implements OnInit {
   protected readonly disableTarget = signal<Integration | null>(null);
 
   protected readonly addMenuOpen = signal(false);
-  protected readonly openMenuId = signal<string | null>(null);
 
   protected readonly pendingInstall =
     signal<{ source: ArchiveSource; inspection: PluginInstallActionResponse } | null>(null);
@@ -91,9 +89,6 @@ export class IntegrationsPageComponent implements OnInit {
 
   protected readonly replaceTarget = signal<{ source: ArchiveSource; version: string | null } | null>(null);
 
-  protected readonly uninstallTarget = signal<Integration | null>(null);
-  protected readonly uninstallDeleteData = signal(false);
-  protected readonly uninstallBusy = signal(false);
 
   protected readonly disableMessage = computed(() => {
     const name = this.disableTarget()?.name ?? this.localization.translateKey(AppStrings.Integrations.Page.FallbackIntegrationName);
@@ -103,16 +98,6 @@ export class IntegrationsPageComponent implements OnInit {
   protected readonly replaceMessage = computed(() => {
     const version = this.replaceTarget()?.version ?? this.localization.translateKey(AppStrings.Integrations.Page.FallbackVersion);
     return this.localization.translateKey(AppStrings.Integrations.Page.ReplaceMessage, { version });
-  });
-
-  protected readonly uninstallMessage = computed(() => {
-    const target = this.uninstallTarget();
-    if (!target) {
-      return '';
-    }
-    const version = this.installation.find(target.id)?.activeVersion;
-    const named = version ? `${target.name} ${version}` : target.name;
-    return this.localization.translateKey(AppStrings.Integrations.Page.UninstallMessage, { name: named });
   });
 
   protected readonly displayedIntegrations = computed(() => {
@@ -208,8 +193,6 @@ export class IntegrationsPageComponent implements OnInit {
     // Fire-and-forget: the badge only renders once a report is in, and this cache is shared with the
     // Developer tab's Compatibility tab and the detail page, so it never blocks the list rendering.
     void this.compatibilityService.load();
-    // Decides which cards may offer an uninstall, so it must not block the list either.
-    void this.installation.load();
   }
 
   private readonly claimOpenedPlugin = effect(() => {
@@ -310,48 +293,6 @@ export class IntegrationsPageComponent implements OnInit {
     }
 
     this.toast.show(this.localization.translateKey(AppStrings.Integrations.Page.Installed, { pluginId: result.pluginId, version: result.version }), { variant: 'success' });
-    await this.integrationService.loadIntegrations();
-  }
-
-  protected canUninstall(integration: Integration): boolean {
-    return !integration.isInternal && this.installation.installedIds().has(integration.id);
-  }
-
-  protected setMenuOpen(integrationId: string, open: boolean): void {
-    this.openMenuId.set(open ? integrationId : null);
-  }
-
-  protected requestUninstall(integration: Integration): void {
-    this.openMenuId.set(null);
-    this.uninstallDeleteData.set(false);
-    this.uninstallTarget.set(integration);
-  }
-
-  protected cancelUninstall(): void {
-    this.uninstallTarget.set(null);
-  }
-
-  protected async confirmUninstall(): Promise<void> {
-    const target = this.uninstallTarget();
-    if (!target) {
-      return;
-    }
-
-    this.uninstallBusy.set(true);
-    const keepData = !this.uninstallDeleteData();
-    const result = await this.installation.uninstall(target.id, keepData).catch(() => null);
-    this.uninstallBusy.set(false);
-
-    if (!result?.success) {
-      this.toast.show(this.localization.translateKey(AppStrings.Integrations.Page.UninstallFailed), {
-        detail: result?.error?.message,
-        variant: 'error'
-      });
-      return;
-    }
-
-    this.uninstallTarget.set(null);
-    this.toast.show(this.localization.translateKey(AppStrings.Integrations.Page.Uninstalled, { name: target.name }), { variant: 'success' });
     await this.integrationService.loadIntegrations();
   }
 

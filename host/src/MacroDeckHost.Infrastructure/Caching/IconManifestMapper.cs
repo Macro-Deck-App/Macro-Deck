@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Persistence.Icons;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Icons;
@@ -18,6 +19,7 @@ internal static class IconManifestMapper
 			IsReadOnly = manifest.IsReadOnly,
 			SourceType = manifest.SourceType,
 			SourceId = manifest.SourceId,
+			AiAssets = IconPackAiDeclarations.FromManifest(manifest.Ai),
 			CreatedAt = manifest.CreatedAt,
 			UpdatedAt = manifest.UpdatedAt
 		};
@@ -59,6 +61,7 @@ internal static class IconManifestMapper
 			IsReadOnly = pack.IsReadOnly,
 			SourceType = pack.SourceType,
 			SourceId = pack.SourceId,
+			Ai = IconPackAiDeclarations.ToManifest(pack.AiAssets),
 			CreatedAt = pack.CreatedAt,
 			UpdatedAt = pack.UpdatedAt,
 			Icons = icons

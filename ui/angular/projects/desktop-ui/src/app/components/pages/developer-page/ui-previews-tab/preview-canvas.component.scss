@@ -73,6 +73,13 @@
   }
 }
 
+.canvas-reference {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+}
+
 .canvas-notice {
   position: absolute;
   inset: 0;

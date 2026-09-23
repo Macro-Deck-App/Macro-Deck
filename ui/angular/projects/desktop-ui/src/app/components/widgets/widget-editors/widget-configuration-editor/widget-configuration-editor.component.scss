@@ -32,3 +32,10 @@
   color: var(--color-text-secondary);
   font-size: var(--text-sm);
 }
+
+.editor-preview .preview-widget.preview-widget-scaled {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+}

@@ -40,11 +40,15 @@ internal sealed class UiElementMaterializer
 	/// </summary>
 	private const int _maxDepth = 32;
 
+	private const string _automaticFallbackSegment = "_fallback";
+
 	private readonly List<UiDependent> _dependents = [];
 	private readonly UiNodeIdRegistry _registry = new();
 	private readonly UiView? _view;
 
 	internal UiElementMaterializer(UiView? view) => _view = view;
+
+	internal bool InAutomaticFallback { get; set; }
 
 	/// <summary>Every cell and structural scope this walk created, so the view can release them all when it
 	/// discards this materialization.</summary>
@@ -168,6 +172,7 @@ internal sealed class UiElementMaterializer
 			}
 
 			case IUiInputContainerElement inputContainer:
+				RejectInputInAutomaticFallback(element, parentDeclarationPath);
 				region.AddNode(MaterializeInputContainer(element,
 					inputContainer,
 					structuralPrefix,
@@ -179,6 +184,7 @@ internal sealed class UiElementMaterializer
 				return;
 
 			case IUiInputElement:
+				RejectInputInAutomaticFallback(element, parentDeclarationPath);
 				region.AddNode(MaterializeInput(element,
 					structuralPrefix,
 					inputScope,
@@ -196,6 +202,16 @@ internal sealed class UiElementMaterializer
 					parentDeclarationPath,
 					disabled,
 					modifiers);
+
+				return;
+
+			case UiResponsive responsive:
+				region.AddNode(MaterializeResponsive(responsive,
+					structuralPrefix,
+					inputScope,
+					parentDeclarationPath,
+					disabled,
+					modifiers));
 
 				return;
 
@@ -372,6 +388,114 @@ internal sealed class UiElementMaterializer
 			_ => false,
 		};
 	}
+
+	private void RejectInputInAutomaticFallback(UiElement input, string parentDeclarationPath)
+	{
+		if (InAutomaticFallback)
+		{
+			throw new UiViewException($"The input keyed '{input.Key}' declared near '{parentDeclarationPath}' sits " +
+				"inside a UiResponsive's Default, which is copied as the fallback an older reader draws, and an " +
+				"input's id cannot appear twice. Give the UiResponsive an explicit Fallback.");
+		}
+	}
+
+	private UiMaterializedNode MaterializeResponsive(
+		UiResponsive responsive,
+		string? structuralPrefix,
+		string? inputScope,
+		string parentDeclarationPath,
+		IReadOnlyList<UiValue<bool>>? disabled,
+		IReadOnlyList<UiModifier>? modifiers)
+	{
+		var where = $"The responsive layout keyed '{responsive.Key}' declared near '{parentDeclarationPath}'";
+
+		if (responsive.Children.Count != 0)
+		{
+			throw new UiViewException($"{where} takes its layouts through Default and Variants, not Children.");
+		}
+
+		IReadOnlyList<UiElement> layouts = [responsive.Default, .. responsive.Variants.Select(v => v.Content)];
+
+		foreach (var layout in layouts)
+		{
+			if (layout is UiWhen or UiFragment or IUiRepeatElement)
+			{
+				throw new UiViewException($"{where} needs a single element as each layout, not a conditional, a " +
+					"repeat or a fragment, which can produce other than one node.");
+			}
+
+			if (string.Equals(layout.Key, _automaticFallbackSegment, StringComparison.Ordinal))
+			{
+				throw new UiViewException($"{where} has a layout keyed '{_automaticFallbackSegment}', which is " +
+					"reserved for the copy of its Default an older reader draws.");
+			}
+
+			if (SizesItselfInParent(layout))
+			{
+				throw new UiViewException($"{where} draws its chosen layout across its whole box, so the layout " +
+					$"keyed '{layout.Key}' cannot set MainSize, Fill, ColumnSpan or RowSpan. Set them on the " +
+					"UiResponsive instead.");
+			}
+		}
+
+		foreach (var variant in responsive.Variants)
+		{
+			if (NeverHolds(variant.MinWidth, variant.MaxWidth) ||
+				NeverHolds(variant.MinHeight, variant.MaxHeight) ||
+				NeverHolds(variant.MinAspect, variant.MaxAspect))
+			{
+				throw new UiViewException($"{where} has a variant keyed '{variant.Content.Key}' whose minimum is " +
+					"not below its maximum, so it could never be drawn.");
+			}
+		}
+
+		var (id, declarationPath) = ComposeAndValidate(structuralPrefix, responsive.Key, parentDeclarationPath);
+
+		var childRegion = new UiChildRegion(parent: null, scope: null);
+		foreach (var layout in layouts)
+		{
+			MaterializeInto(layout, childRegion, id, inputScope, declarationPath, disabled, null);
+		}
+
+		var fallback = responsive.Fallback is not null
+			? MaterializeFallback(responsive, structuralPrefix, inputScope, parentDeclarationPath, disabled)
+			: MaterializeAutomaticFallback(responsive, id, inputScope, declarationPath, disabled, where);
+
+		return BuildNode(responsive, id, childRegion, fallback, disabled, modifiers);
+	}
+
+	private UiMaterializedNode MaterializeAutomaticFallback(
+		UiResponsive responsive,
+		string id,
+		string? inputScope,
+		string declarationPath,
+		IReadOnlyList<UiValue<bool>>? disabled,
+		string where)
+	{
+		var outer = InAutomaticFallback;
+		InAutomaticFallback = true;
+
+		try
+		{
+			return MaterializeSingle(responsive.Default,
+				Compose(id, _automaticFallbackSegment),
+				inputScope,
+				Extend(declarationPath, _automaticFallbackSegment),
+				disabled);
+		}
+		catch (UiViewException exception) when (!outer)
+		{
+			throw new UiViewException($"{where} copies its Default as the fallback an older reader draws, and the " +
+				$"copy failed: {exception.Message} Give the UiResponsive an explicit Fallback.", exception);
+		}
+		finally
+		{
+			InAutomaticFallback = outer;
+		}
+	}
+
+	private static bool NeverHolds(double? minimum, double? maximum)
+		=> minimum is { } min && maximum is { } max && min >= max;
 
 	/// <summary>Materializes a structural element - a <see cref="UiContainer" /> with children or a
 	/// <see cref="UiLeaf" /> without - which composes its id from the structural prefix and opens no input-id
@@ -636,6 +760,7 @@ internal sealed class UiElementMaterializer
 		var scope = new UiStructuralScope(element, structuralPrefix, inputScope, parentDeclarationPath)
 		{
 			Disabled = disabled,
+			InAutomaticFallback = InAutomaticFallback,
 		};
 
 		scope.BindTo(_view);

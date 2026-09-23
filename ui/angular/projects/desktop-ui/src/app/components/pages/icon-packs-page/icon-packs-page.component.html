@@ -73,6 +73,9 @@
           @if (sourceLabel(pack); as source) {
             <span class="tag" [title]="'macrodeck.app:IconPacks.ManagedByStore' | translate">{{ source }}</span>
           }
+          @if (pack.aiAssets === 'Generated') {
+            <span class="tag"><span class="icon icon-sparkles icon-xs" aria-hidden="true"></span> {{ 'macrodeck.app:IconPacks.AiGenerated' | translate }}</span>
+          }
         </div>
         <p class="detail-meta">
           @if (pack.description) {
@@ -95,6 +98,12 @@
               [ngModel]="searchQuery()"
               (ngModelChange)="searchQuery.set($event)" />
           </div>
+          @if (storeLink(pack); as packageId) {
+            <shared-button class="view-in-store" variant="secondary" (click)="openInStore(packageId)">
+              <span class="icon icon-store icon-sm" aria-hidden="true"></span>
+              {{ 'macrodeck.app:Integrations.Detail.ViewInStoreAction' | translate }}
+            </shared-button>
+          }
           @if (!pack.isReadOnly) {
             <shared-button variant="primary" (click)="pickFiles()">
               <span class="icon icon-download icon-sm"></span>
