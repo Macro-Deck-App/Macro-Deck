@@ -30,6 +30,7 @@ assets:
       - ui/bootstrapper/packaging/macos/dmg-background.png
       - ui/bootstrapper/packaging/macos/dmg-background.svg
       - ui/bootstrapper/packaging/macos/Macro Deck.icon/Assets/Foreground_MD_Logo.svg
+      - ui/bootstrapper/packaging/macos/Macro Deck.icon/Assets/Logo-Large.svg
       - ui/web-client/public/favicon.ico
       - ui/web-client/public/logo.png
       - ui/web-client/public/icons/apple-touch-icon-152.png
