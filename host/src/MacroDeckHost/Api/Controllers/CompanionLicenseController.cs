@@ -16,18 +16,4 @@ public class CompanionLicenseController : ControllerBase
 
 	[HttpGet]
 	public Task<CompanionLicenseStatus> Get(CancellationToken ct) => _licenses.GetStatusAsync(ct);
-
-	[HttpPost("test")]
-	public async Task<ActionResult<CompanionLicenseStatus>> IssueTest(CancellationToken ct)
-	{
-		if (await _licenses.IssueTestLicenseAsync(ct) is { } status)
-		{
-			return status;
-		}
-
-		return NotFound();
-	}
-
-	[HttpDelete("test")]
-	public Task<CompanionLicenseStatus> RevokeTest(CancellationToken ct) => _licenses.RevokeTestLicenseAsync(ct);
 }

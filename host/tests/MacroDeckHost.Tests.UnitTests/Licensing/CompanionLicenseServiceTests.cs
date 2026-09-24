@@ -11,6 +11,7 @@ using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Licensing;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Infrastructure.Licensing;
+using MacroDeckHost.Infrastructure.Notifications;
 using MacroDeckHost.Licensing;
 using MacroDeckHost.Tests.UnitTests.Companion;
 using MacroDeckHost.Tests.UnitTests.Delegation;
@@ -23,7 +24,7 @@ using Serilog;
 namespace MacroDeckHost.Tests.UnitTests.Licensing;
 
 [TestFixture]
-internal sealed class CompanionLicenseServiceTests
+internal sealed partial class CompanionLicenseServiceTests
 {
 	private const string ProductionKeyId = "prod-test-a";
 	private const string SecondProductionKeyId = "prod-test-b";
@@ -150,11 +151,12 @@ internal sealed class CompanionLicenseServiceTests
 	public async Task The_test_key_is_trusted_only_while_developer_mode_is_on()
 	{
 		var fixture = new Fixture();
+		var test = TestKeyLicenses.Sign();
 
-		var refusedWhileOff = await fixture.Service.IssueTestLicenseAsync(default);
+		var refusedWhileOff = await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = test }, default);
 		fixture.Preferences.DeveloperMode = true;
-		var issued = await fixture.Service.IssueTestLicenseAsync(default);
-		var answeredWhileOn = await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest(), default);
+		var answeredWhileOn = await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = test }, default);
+		var statusWhileOn = await fixture.Service.GetStatusAsync(default);
 		fixture.Preferences.DeveloperMode = false;
 		var answeredAfterOff = await fixture.Service.SyncAsync("c",
 			new SyncCompanionLicenseRequest { License = answeredWhileOn.License },
@@ -162,11 +164,10 @@ internal sealed class CompanionLicenseServiceTests
 
 		Assert.Multiple(async () =>
 		{
-			Assert.That(refusedWhileOff, Is.Null);
-			Assert.That(issued?.IsTest, Is.True);
-			Assert.That(issued?.Source, Is.EqualTo("test"));
-			Assert.That(issued?.KeyId, Is.EqualTo(CompanionLicenseTokens.TestKeyId));
-			Assert.That(answeredWhileOn.License, Is.Not.Null);
+			Assert.That(refusedWhileOff.License, Is.Null);
+			Assert.That(statusWhileOn.IsTest, Is.True);
+			Assert.That(statusWhileOn.KeyId, Is.EqualTo(CompanionLicenseTokens.TestKeyId));
+			Assert.That(answeredWhileOn.License, Is.EqualTo(test));
 			Assert.That(answeredAfterOff.License, Is.Null);
 			Assert.That((await fixture.Service.GetStatusAsync(default)).Licensed, Is.False);
 		});
@@ -177,7 +178,7 @@ internal sealed class CompanionLicenseServiceTests
 	{
 		var fixture = new Fixture();
 		fixture.Preferences.DeveloperMode = true;
-		await fixture.Service.IssueTestLicenseAsync(default);
+		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = TestKeyLicenses.Sign() }, default);
 		var production = Sign(ProductionKey, ProductionKeyId, "license-real");
 
 		var answer = await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = production }, default);
@@ -199,7 +200,8 @@ internal sealed class CompanionLicenseServiceTests
 		var production = Sign(ProductionKey, ProductionKeyId, "license-real");
 		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = production }, default);
 
-		var afterTest = await fixture.Service.IssueTestLicenseAsync(default);
+		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = TestKeyLicenses.Sign() }, default);
+		var afterTest = await fixture.Service.GetStatusAsync(default);
 
 		Assert.Multiple(() =>
 		{
@@ -213,7 +215,7 @@ internal sealed class CompanionLicenseServiceTests
 	{
 		var fixture = new Fixture();
 		fixture.Preferences.DeveloperMode = true;
-		await fixture.Service.IssueTestLicenseAsync(default);
+		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = TestKeyLicenses.Sign() }, default);
 		var production = Sign(ProductionKey, ProductionKeyId, "license-bought");
 		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Issued(production);
 
@@ -226,123 +228,6 @@ internal sealed class CompanionLicenseServiceTests
 			Assert.That(status.IsTest, Is.False);
 			Assert.That(status.LicenseId, Is.EqualTo("license-bought"));
 		});
-	}
-
-	[Test]
-	public async Task Revoking_removes_a_stored_test_license_records_its_id_and_tells_every_companion()
-	{
-		var fixture = new Fixture();
-		fixture.Preferences.DeveloperMode = true;
-		var issued = await fixture.Service.IssueTestLicenseAsync(default);
-		var device = fixture.Harness.AddDevice("Tablet");
-		await fixture.Harness.ReportAsync("connection-a", device);
-		fixture.Preferences.DeveloperMode = false;
-
-		var status = await fixture.Service.RevokeTestLicenseAsync(default);
-
-		var pushes = fixture.Harness.Transport.ConnectionMessages
-			.Where(message => message.Message is CompanionLicenseRevokedEvent)
-			.ToList();
-		Assert.Multiple(() =>
-		{
-			Assert.That(status.Licensed, Is.False);
-			Assert.That(fixture.Repository.Values[CompanionLicenseService.TokenKey], Is.Empty);
-			Assert.That(fixture.StoredRevokedIds(), Is.EqualTo(new[] { issued!.LicenseId }));
-			Assert.That(pushes.Select(push => push.ConnectionId), Is.EqualTo(new[] { "connection-a" }));
-			Assert.That(pushes.Select(push => ((CompanionLicenseRevokedEvent)push.Message).LicenseId),
-				Is.All.EqualTo(issued.LicenseId));
-		});
-	}
-
-	[Test]
-	public async Task A_stored_test_license_stays_revocable_after_developer_mode_is_turned_off()
-	{
-		var fixture = new Fixture();
-		fixture.Preferences.DeveloperMode = true;
-		await fixture.Service.IssueTestLicenseAsync(default);
-		fixture.Preferences.DeveloperMode = false;
-
-		var status = await fixture.Service.GetStatusAsync(default);
-
-		Assert.Multiple(() =>
-		{
-			Assert.That(status.Licensed, Is.False);
-			Assert.That(status.TestLicenseStored, Is.True);
-		});
-	}
-
-	[Test]
-	public async Task Revoking_leaves_a_production_license_alone_and_tells_nobody()
-	{
-		var fixture = new Fixture();
-		var production = Sign(ProductionKey, ProductionKeyId, "license-real");
-		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = production }, default);
-		var device = fixture.Harness.AddDevice("Tablet");
-		await fixture.Harness.ReportAsync("connection-a", device);
-
-		var status = await fixture.Service.RevokeTestLicenseAsync(default);
-
-		Assert.Multiple(() =>
-		{
-			Assert.That(status.LicenseId, Is.EqualTo("license-real"));
-			Assert.That(fixture.Repository.Values[CompanionLicenseService.TokenKey], Is.EqualTo(production));
-			Assert.That(fixture.StoredRevokedIds(), Is.Empty);
-			Assert.That(fixture.Harness.Transport.ConnectionMessages.Select(message => message.Message),
-				Has.None.InstanceOf<CompanionLicenseRevokedEvent>());
-		});
-	}
-
-	[Test]
-	public async Task A_revoked_test_token_is_not_adopted_again_and_sync_names_it()
-	{
-		var fixture = new Fixture();
-		fixture.Preferences.DeveloperMode = true;
-		await fixture.Service.IssueTestLicenseAsync(default);
-		var held = (await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest(), default)).License;
-		var revokedId = (await new CompanionLicenseTokens(TrustedKeys).VerifyAsync(held, trustTestKey: true))!.LicenseId;
-		await fixture.Service.RevokeTestLicenseAsync(default);
-
-		var answer = await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = held }, default);
-		var reissued = await fixture.Service.IssueTestLicenseAsync(default);
-
-		Assert.Multiple(() =>
-		{
-			Assert.That(answer.License, Is.Null);
-			Assert.That(answer.RevokedLicenseIds, Is.EqualTo(new[] { revokedId }));
-			Assert.That(reissued?.IsTest, Is.True);
-			Assert.That(reissued?.LicenseId, Is.Not.EqualTo(revokedId));
-		});
-	}
-
-	[Test]
-	public async Task The_revoked_list_is_capped_by_dropping_the_oldest_id()
-	{
-		var fixture = new Fixture();
-		fixture.Preferences.DeveloperMode = true;
-		var seeded = Enumerable.Range(0, CompanionLicenseService.MaximumRevokedTestIds).Select(index => $"seeded-{index}");
-		await fixture.Repository.SetValue(CompanionLicenseService.RevokedTestIdsKey, JsonSerializer.Serialize(seeded));
-		var issued = await fixture.Service.IssueTestLicenseAsync(default);
-
-		await fixture.Service.RevokeTestLicenseAsync(default);
-
-		var revoked = fixture.StoredRevokedIds();
-		Assert.Multiple(() =>
-		{
-			Assert.That(revoked, Has.Count.EqualTo(CompanionLicenseService.MaximumRevokedTestIds));
-			Assert.That(revoked, Does.Not.Contain("seeded-0"));
-			Assert.That(revoked[0], Is.EqualTo("seeded-1"));
-			Assert.That(revoked[^1], Is.EqualTo(issued!.LicenseId));
-		});
-	}
-
-	[Test]
-	public async Task The_test_issuer_issues_nothing_without_developer_mode()
-	{
-		var fixture = new Fixture();
-
-		var issued = await new TestCompanionLicenseIssuer(fixture.ScopeFactory, fixture.Time).IssueAsync(default);
-
-		Assert.That(issued, Is.Null);
 	}
 
 	[Test]
@@ -802,9 +687,6 @@ internal sealed class CompanionLicenseServiceTests
 		var fixture = new Fixture();
 		var held = HexId(3);
 		fixture.Platform.RevokedIds = Enumerable.Range(0, count).Select(HexId).ToList();
-		await fixture.Repository.SetValue(CompanionLicenseService.RevokedTestIdsKey,
-			JsonSerializer.Serialize(Enumerable.Range(0, CompanionLicenseService.MaximumRevokedTestIds)
-				.Select(index => Guid.NewGuid().ToString("N"))));
 		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest(), default);
 		await fixture.Service.RunDueWorkAsync(default);
 		var stored = Sign(ProductionKey, ProductionKeyId, HexId(count + 1), billingId: new string('b', 256));
@@ -827,7 +709,7 @@ internal sealed class CompanionLicenseServiceTests
 			Assert.That(bytes.Length, Is.LessThan(UiWebSocketProtocol.MaxMessageBytes));
 			Assert.That(answer.RevokedLicenseIds, Does.Contain(held));
 			Assert.That(answer.RevokedLicenseIds.Count(id => id.All(Uri.IsHexDigit) && id.Length == 32 && id != held),
-				complete ? Is.GreaterThanOrEqualTo(count - 1) : Is.EqualTo(CompanionLicenseService.MaximumRevokedTestIds));
+				complete ? Is.GreaterThanOrEqualTo(count - 1) : Is.Zero);
 		});
 	}
 
@@ -1360,6 +1242,7 @@ internal sealed class CompanionLicenseServiceTests
 		public FakeDeveloperModePreferences Preferences { get; } = new();
 		public FakeTimeProvider Time { get; } = new() { Now = Now };
 		public ScriptedPlatform Platform { get; } = new();
+		public UserNotificationStore Notifications { get; } = new();
 		public EphemeralDataProtectionProvider Protection { get; } = new();
 		public CompanionHarness.CapturingSink Sink { get; } = new();
 		public double RandomValue { get; set; } = 0.5;
@@ -1378,18 +1261,14 @@ internal sealed class CompanionLicenseServiceTests
 				? JsonSerializer.Deserialize<Dictionary<string, long>>(json)!
 				: [];
 
-		public List<string> StoredRevokedIds()
-			=> Repository.Values.TryGetValue(CompanionLicenseService.RevokedTestIdsKey, out var json)
-				? JsonSerializer.Deserialize<List<string>>(json)!
-				: [];
-
 		private CompanionLicenseService Create()
 			=> new(ScopeFactory,
 				Platform,
-				new TestCompanionLicenseIssuer(ScopeFactory, Time),
 				new CompanionLicenseTokens(TrustedKeys),
 				Harness.DeviceRegistry,
 				Harness.Transport,
+				Notifications,
+				TestLocalization.Resolver,
 				Protection,
 				Time,
 				() => RandomValue,
