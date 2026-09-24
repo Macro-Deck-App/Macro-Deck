@@ -66,6 +66,7 @@ describe('VariablesManagerComponent', () => {
   let createVariableSpy: jasmine.Spy;
   let unbindCatalogVariableSpy: jasmine.Spy;
   let setVariableValueSpy: jasmine.Spy;
+  let updateVariableSpy: jasmine.Spy;
 
   const variables: Variable[] = [
     variable('1', 'user'),
@@ -79,6 +80,7 @@ describe('VariablesManagerComponent', () => {
       'getVariables',
       'getIntegrations',
       'createVariable',
+      'updateVariable',
       'setVariableValue',
       'unbindCatalogVariable',
       'getVariableCatalogProviders',
@@ -106,6 +108,7 @@ describe('VariablesManagerComponent', () => {
     createVariableSpy = apiSpy.createVariable;
     unbindCatalogVariableSpy = apiSpy.unbindCatalogVariable;
     setVariableValueSpy = apiSpy.setVariableValue;
+    updateVariableSpy = apiSpy.updateVariable;
 
     TestBed.configureTestingModule({
       imports: [VariablesManagerComponent],
@@ -935,6 +938,72 @@ describe('VariablesManagerComponent', () => {
       expect(leaves.length).toBeGreaterThan(0);
       expect(leaves.length).toBeLessThanOrEqual(1000);
       expect(discoverCalls().some(call => call.parentId === 'c2' || call.parentId === 'c3')).toBeFalse();
+    });
+  });
+
+  describe('a variable that reads from a file', () => {
+    const readOnlyFile: Variable = {
+      ...variable('f1', 'user'),
+      value: 'from the file',
+      canWrite: false,
+      available: false,
+      fileSource: { path: '/home/me/now-playing.txt', allowWriteBack: false },
+    };
+
+    it('creates with the chosen file and write-back instead of an initial value', async () => {
+      component.openCreate();
+      await component.onNameInput('now_playing');
+      component.setFormSource('file');
+      component.setFormInitialValue('ignored');
+      expect(component.canSubmitCreate()).toBeFalse();
+
+      component.setFormFilePath(' /home/me/now-playing.txt ');
+      component.setFormAllowWriteBack(true);
+      await component.submitCreate();
+
+      const request = createVariableSpy.calls.mostRecent().args[0];
+      expect(request.fileSource).toEqual({ path: '/home/me/now-playing.txt', allowWriteBack: true });
+      expect(request.initialValue).toBeUndefined();
+    });
+
+    it('keeps the form open and says why when the host refuses the path', async () => {
+      createVariableSpy.and.resolveTo({ success: false, error: { code: 'InvalidFilePath', message: '' } });
+      component.openCreate();
+      await component.onNameInput('now_playing');
+      component.setFormSource('file');
+      component.setFormFilePath('now-playing.txt');
+
+      await component.submitCreate();
+
+      expect(component.showCreateModal()).toBeTrue();
+      expect(component.createError()).toBeTruthy();
+    });
+
+    it('marks the row as reading from a file, locks its value and explains a missing value', async () => {
+      fixture.componentRef.setInput('variables', [readOnlyFile]);
+      await fixture.whenStable();
+      await flushViewport();
+
+      const row = (Array.from(fixture.nativeElement.querySelectorAll('.vars-row')) as HTMLElement[])
+        .find(candidate => candidate.textContent?.includes('var_f1'));
+
+      expect(row?.querySelector('.vars-file-badge')?.getAttribute('title')).toBe('/home/me/now-playing.txt');
+      expect(row?.querySelector('.read-only-icon')).not.toBeNull();
+      expect(component.unavailableTooltip(readOnlyFile)).toBe(component.fileUnavailableLabel());
+    });
+
+    it('saves changed file settings through an update of the file source', async () => {
+      updateVariableSpy.and.resolveTo({ success: true, variable: readOnlyFile });
+      component.openFileSettings(readOnlyFile);
+      component.setFileSettingsPath('/home/me/other.txt');
+      component.setFileSettingsWriteBack(true);
+
+      await component.saveFileSettings();
+
+      expect(updateVariableSpy).toHaveBeenCalledWith({
+        id: 'f1',
+        fileSource: { path: '/home/me/other.txt', allowWriteBack: true },
+      });
     });
   });
 });

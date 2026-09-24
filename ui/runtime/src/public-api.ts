@@ -226,6 +226,7 @@ export {
 export {
   type Variable,
   type VariableClassification,
+  type VariableFileSource,
   type VariableScope,
   type VariableType,
 } from './domain/variable.interface';

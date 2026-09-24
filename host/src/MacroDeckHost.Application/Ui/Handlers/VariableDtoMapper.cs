@@ -30,6 +30,9 @@ internal static class VariableDtoMapper
 			Unit = entity.Unit,
 			SemanticKind = entity.SemanticKind,
 			Attributes = entity.Attributes,
+			FileSource = entity.FileSource is { } source
+				? new VariableFileSourceDto { Path = source.Path, AllowWriteBack = source.AllowWriteBack }
+				: null,
 			Min = entity.Min,
 			Max = entity.Max,
 			Step = entity.Step,
@@ -97,6 +100,9 @@ internal static class VariableDtoMapper
 		_ => c.ToString().ToLowerInvariant()
 	};
 
+	public static VariableFileSource? FileSourceFromWire(VariableFileSourceDto? dto)
+		=> dto is null ? null : new VariableFileSource(dto.Path, dto.AllowWriteBack);
+
 	public static object? ParseInputValue(DomainType type, string? raw)
 	{
 		return type switch
@@ -112,10 +118,17 @@ internal static class VariableDtoMapper
 
 	public static Transport.Messages.TransportError ToError(VariableError error, string? message)
 	{
-		return new Transport.Messages.TransportError
+		return error switch
 		{
-			Code = error.ToString(),
-			Message = message ?? string.Empty
+			VariableError.InvalidFilePath => new Transport.Messages.TransportError
+				{ Code = error.ToString(), Message = AppStrings.Errors.Variables.InvalidFilePath() },
+			VariableError.FileReadOnly => new Transport.Messages.TransportError
+				{ Code = nameof(VariableError.NotWritable), Message = AppStrings.Errors.Variables.FileReadOnly() },
+			_ => new Transport.Messages.TransportError
+			{
+				Code = error.ToString(),
+				Message = message ?? string.Empty
+			}
 		};
 	}
 

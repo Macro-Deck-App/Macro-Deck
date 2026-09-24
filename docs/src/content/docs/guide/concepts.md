@@ -89,6 +89,26 @@ to see its state and attributes. If you know the entity id, for example `light.o
 
 ![The Variables page with the user variable deaths and system variables](../../../assets/guide/variables.png)
 
+A user variable can also **read from a file**, like OBS's *Read from file*: choose **Read from file** as
+its source when you create it and pick the file. The variable shows the file's content and follows every
+change another program or script makes to it. A trailing line break is ignored, and a number or true/false
+variable needs content of that kind. While the file is missing, unreadable or does not fit, the variable
+reads as unavailable.
+
+Such a variable is read-only. Turn on **Allow write-back** to let changes made in Macro Deck, for example
+with a slider or **Set Variable**, go into the file too. **File settings** in the variable's menu changes
+the file or write-back later. When you export widgets, a variable that reads from a file travels as an
+empty variable: neither its path nor the file's content goes into the archive. Macro Deck watches the file
+for changes; a file on a network share may not report them.
+
+To save any variable's value on demand, use the **Write Variable to File** action. It replaces the file's
+content with the current value, creates the file if needed, and needs a full path whose folder exists.
+
+Only your own variables can read from a file. To keep a file up to date with any other variable, for
+example the current OBS scene or `system_cpu_usage_percent`, create an automation: the event
+**Variable Changed** watching that variable runs **Write Variable to File** for the same variable.
+Every change then lands in the file.
+
 ## Scripts and automations
 
 - **Script:** actions you reuse, for example *Go live* used by three buttons.

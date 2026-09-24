@@ -1062,7 +1062,8 @@ public class PluginCallbackRouterTests
 			string? scopeRefId,
 			DomainVariableType type,
 			object? initialValue,
-			int? decimalPlaces)
+			int? decimalPlaces,
+			VariableFileSource? fileSource = null)
 			=> throw new NotSupportedException();
 
 		public Task<Result<VariableEntity, VariableError>> SetValue(Guid id,
@@ -1071,7 +1072,8 @@ public class PluginCallbackRouterTests
 
 		public Task<Result<VariableEntity, VariableError>> UpdateUserVariable(Guid id,
 			string? name,
-			int? decimalPlaces)
+			int? decimalPlaces,
+			VariableFileSource? fileSource = null)
 			=> throw new NotSupportedException();
 
 		public Task<Result<VariableError>> DeleteUserVariable(Guid id) => throw new NotSupportedException();

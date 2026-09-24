@@ -20,7 +20,7 @@ public class LockedCommandHandlerTests
 	[Test]
 	public async Task Setting_a_variable_is_refused_while_locked_before_the_write_path_is_entered()
 	{
-		var handler = new SetVariableValueRequestMessageHandler(null!, new FakeHostLockState { IsLocked = true });
+		var handler = new SetVariableValueRequestMessageHandler(null!, new FakeHostLockState { IsLocked = true }, null!);
 
 		var response = await handler.Handle(new SetVariableValueRequest { Id = Guid.NewGuid().ToString(), Value = "1" },
 			CancellationToken.None);

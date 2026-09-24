@@ -61,6 +61,7 @@ using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Application.Triggers.Providers;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Variables.Files;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Application.Widgets.Icons;
 using MacroDeckHost.Application.Weather;
@@ -79,6 +80,7 @@ using MacroDeckHost.Infrastructure.ClientTargets;
 using MacroDeckHost.Infrastructure.Applications;
 using MacroDeckHost.Infrastructure.Autostart;
 using MacroDeckHost.Infrastructure.BackgroundServices;
+using MacroDeckHost.Infrastructure.Variables;
 using MacroDeckHost.Infrastructure.Logging;
 using MacroDeckHost.Infrastructure.Caching;
 using MacroDeckHost.Infrastructure.Deck;
@@ -323,6 +325,7 @@ public class Startup
 		services.AddHostedService<ScheduledEventBackgroundService>();
 		services.AddHostedService<BackupScheduleBackgroundService>();
 		services.AddHostedService<VariableInitializeBackgroundService>();
+		services.AddHostedService<FileVariableShutdownBackgroundService>();
 		services.AddHostedService<IntegrationVariablePollingBackgroundService>();
 		services.AddHostedService<VariableBindingRestoreBackgroundService>();
 		services.AddHostedService<VariableCatalogUpdateBackgroundService>();
@@ -409,6 +412,8 @@ public class Startup
 		services.AddScoped<IEventTriggerRunner, EventTriggerRunner>();
 
 		services.AddSingleton<VariableRegistry>();
+		services.AddSingleton<IVariableFileSystem, VariableFileSystem>();
+		services.AddSingleton<FileVariableSynchronizer>();
 		services.AddSingleton<IUserVariableStore, JsonUserVariableStore>();
 		services.AddSingleton<IVariableBindingStore, JsonVariableBindingStore>();
 		services.AddSingleton<IKnownAudioDeviceStore, JsonKnownAudioDeviceStore>();

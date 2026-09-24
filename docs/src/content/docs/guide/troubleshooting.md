@@ -131,6 +131,16 @@ Vesktop, Equibop, Legcord or Dorion can share game activity, but Macro Deck cann
 Start the official Discord desktop app, including the Flatpak or Snap version on Linux, and try
 again. The third-party client can keep running alongside it.
 
+## A variable that reads from a file stays unavailable
+
+Check that the file exists at the exact path in the variable's **File settings**, and that it holds
+what the variable's type expects: a number for a number variable, `true`, `false`, `1` or `0` for a
+true/false one. Files larger than 256 KB are not read.
+
+On macOS, files in **Documents**, **Desktop** and **Downloads** need permission. If macOS asked and
+the request was declined, allow Macro Deck under **System Settings > Privacy & Security > Files and
+Folders**, or keep the file in another folder.
+
 ## Installing on Linux
 
 - **The stable APT suite is empty:** there is no stable release of Macro Deck 3 yet. Use the beta

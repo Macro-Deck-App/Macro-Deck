@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Variables.Files;
 using System.Text.Json;
 using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Application.Integrations;
@@ -57,7 +58,11 @@ internal sealed class CompanionHarness
 			new RecordingMediator(),
 			new VariableCatalogProviders(Registry),
 			RefreshSignal,
-			new MusicPlayerPollNudge(Registry));
+			new MusicPlayerPollNudge(Registry),
+			new FileVariableSynchronizer(VariableRegistry,
+				new RecordingMediator(),
+				new FakeVariableFileSystem(),
+				Serilog.Core.Logger.None));
 		Adapter = new CompanionConfigurationMutationAdapter(Registry, VariableRegistry, ScopeFactory, suffixFactory);
 		Coordinator = new GatedCoordinator(new IntegrationConfigMutationCoordinator(ScopeFactory,
 			new InitializingLifecycle(this),

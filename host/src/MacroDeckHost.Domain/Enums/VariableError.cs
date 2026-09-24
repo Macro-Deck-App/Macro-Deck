@@ -12,5 +12,7 @@ public enum VariableError
 	InternalError,
 	NotWritable,
 	OwnerUnavailable,
-	WriteFailed
+	WriteFailed,
+	FileReadOnly,
+	InvalidFilePath
 }

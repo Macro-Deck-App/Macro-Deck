@@ -67,4 +67,6 @@ public class Variable
 	/// <summary>The catalog resource id this variable is bound to, set only when it was created by binding
 	/// one. Lets a variable row offer Unbind without a second round trip.</summary>
 	public string? DynamicResourceId { get; set; }
+
+	public VariableFileSourceDto? FileSource { get; set; }
 }

@@ -146,7 +146,7 @@ public sealed class PortableAssetManager : IPortableAssetManager
 					WidgetId = widget.Id,
 					Name = snapshot.Name,
 					Type = snapshot.Type,
-					Value = snapshot.Value,
+					Value = snapshot.FileSource is null ? snapshot.Value : string.Empty,
 					DecimalPlaces = snapshot.DecimalPlaces
 				});
 			}
