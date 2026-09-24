@@ -488,3 +488,51 @@ describe('StoreInstallButtonComponent with a test build installed', () => {
     expect(fixture.nativeElement.textContent).not.toContain('Test build');
   });
 });
+
+describe('StoreInstallButtonComponent prominent states', () => {
+  function render(installState: StoreCatalogItemBody['installState'], latestVersion: string): ComponentFixture<StoreInstallButtonComponent> {
+    const fixture = TestBed.createComponent(StoreInstallButtonComponent);
+    fixture.componentRef.setInput('item', {
+      kind: 'Plugin',
+      id: 'com.acme.deck-tools',
+      name: 'Deck Tools',
+      latestVersion,
+      installedVersion: '1.0.0',
+      installState,
+      trust: 'RegistryAuthenticated',
+      hasIcon: false,
+    } satisfies StoreCatalogItemBody);
+    fixture.componentRef.setInput('size', 'lg');
+    fixture.detectChanges();
+    document.body.appendChild(fixture.nativeElement);
+    return fixture;
+  }
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [StoreInstallButtonComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        ...provideLocalizationTesting(),
+        { provide: DeveloperModeService, useValue: { enabled: signal(false), ensureLoaded: async () => undefined } },
+      ],
+    });
+  });
+
+  it('shows the installed status exactly as tall as the update button it replaces', async () => {
+    const measure = async (installState: StoreCatalogItemBody['installState'], latestVersion: string, selector: string) => {
+      const fixture = render(installState, latestVersion);
+      await fixture.whenStable();
+      const element = fixture.nativeElement.querySelector(selector) as HTMLElement;
+      const height = element.getBoundingClientRect().height;
+      fixture.nativeElement.remove();
+      return height;
+    };
+
+    const status = await measure('Installed', '1.0.0', '.installed-status');
+    const button = await measure('UpdateAvailable', '1.1.0', 'shared-button button');
+
+    expect(button).toBeGreaterThan(0);
+    expect(status).toBe(button);
+  });
+});

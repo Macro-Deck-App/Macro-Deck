@@ -94,6 +94,13 @@ internal sealed record RegistryRemovedPackage
 	public string? Replacement { get; init; }
 }
 
+internal sealed record RegistryCategoriesDocument
+{
+	public int Version { get; init; }
+
+	public JsonElement? Categories { get; init; }
+}
+
 internal sealed record RegistryPackageDocument
 {
 	public string Kind { get; init; } = string.Empty;
@@ -109,6 +116,8 @@ internal sealed record RegistryPackageDocument
 	public string? Publisher { get; init; }
 
 	public string? Repository { get; init; }
+
+	public string? Homepage { get; init; }
 
 	public string? License { get; init; }
 

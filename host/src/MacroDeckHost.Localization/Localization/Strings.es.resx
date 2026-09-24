@@ -14736,6 +14736,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Store.Page.RepositoryLink" xml:space="preserve">
     <value>Repositorio</value>
   </data>
+  <data name="Store.Page.HomepageLink" xml:space="preserve">
+    <value>Sitio web</value>
+  </data>
   <data name="Store.Page.ResultCount.One" xml:space="preserve">
     <value>{count} resultado</value>
     <comment>[plural][count:int] Number of extensions the current search and filter match.</comment>
@@ -14825,6 +14828,14 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Store.Page.TabInstalled" xml:space="preserve">
     <value>Instaladas</value>
   </data>
+  <data name="Store.Page.TabInstalledWithUpdates.One" xml:space="preserve">
+    <value>Instaladas, {count} actualización disponible</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.TabInstalledWithUpdates.Other" xml:space="preserve">
+    <value>Instaladas, {count} actualizaciones disponibles</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
     <value>Secciones de la Store</value>
   </data>
@@ -14835,6 +14846,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Store.Page.TagHeading" xml:space="preserve">
     <value>Todo con la etiqueta {tag}</value>
     <comment>[tag:string]</comment>
+  </data>
+  <data name="Store.Page.CategoriesHeading" xml:space="preserve">
+    <value>Categorías</value>
   </data>
   <data name="Store.Page.TagsHeading" xml:space="preserve">
     <value>Etiquetas</value>

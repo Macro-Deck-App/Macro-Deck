@@ -1,11 +1,13 @@
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Location } from '@angular/common';
+import { ActivatedRoute, Navigation, Router } from '@angular/router';
 import { Subject, EMPTY } from 'rxjs';
 
 import { ActionParameterType, CompatibilityFinding, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationIssue, IpcIntegrationVariableCapability, InstalledPlugin, PluginCompatibilityReport, Variable } from '@macro-deck/runtime';
 import { ApiService, ToastService, VariableService } from '@shared';
+import { DetailPageComponent } from '../../detail-page/detail-page.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
 import { Integration, IntegrationService } from '../../../services/integration.service';
 import { PluginCompatibilityService } from '../../../services/plugin-compatibility.service';
@@ -33,6 +35,8 @@ describe('IntegrationDetailPageComponent', () => {
   let deleteConfigEntry: jasmine.Spy;
   let startConfigFlow: jasmine.Spy;
   let routerSpy: jasmine.SpyObj<Router>;
+  let locationSpy: jasmine.SpyObj<Location>;
+  let previousUrl: string | null;
   let routeIntegrationId: string;
   let queryTab: string | null;
 
@@ -208,8 +212,13 @@ describe('IntegrationDetailPageComponent', () => {
       },
       initialValues: { host: '127.0.0.1', port: 4455 },
     });
-    routerSpy = jasmine.createSpyObj<Router>('Router', ['navigate']);
+    routerSpy = jasmine.createSpyObj<Router>('Router', ['navigate', 'currentNavigation', 'lastSuccessfulNavigation']);
     routerSpy.navigate.and.resolveTo(true);
+    previousUrl = null;
+    routerSpy.currentNavigation.and.callFake((() => (previousUrl === null ? null
+      : { previousNavigation: { finalUrl: previousUrl } } as unknown as Navigation)) as never);
+    routerSpy.lastSuccessfulNavigation.and.returnValue(null);
+    locationSpy = jasmine.createSpyObj<Location>('Location', ['back']);
 
     TestBed.configureTestingModule({
       providers: [
@@ -275,6 +284,7 @@ describe('IntegrationDetailPageComponent', () => {
           },
         },
         { provide: Router, useValue: routerSpy },
+        { provide: Location, useValue: locationSpy },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -1154,6 +1164,37 @@ describe('IntegrationDetailPageComponent', () => {
       await access(fixture).confirmUninstall();
 
       expect(routerSpy.navigate).toHaveBeenCalledWith(['/integrations']);
+    });
+  });
+  describe('back navigation', () => {
+    function backButton(fixture: ComponentFixture<IntegrationDetailPageComponent>): HTMLButtonElement {
+      return fixture.nativeElement.querySelector('.dp-back') as HTMLButtonElement;
+    }
+
+    function leave(fixture: ComponentFixture<IntegrationDetailPageComponent>): void {
+      (fixture.debugElement.query(By.directive(DetailPageComponent)).componentInstance as DetailPageComponent).close.emit();
+    }
+
+    it('returns to the Store page it was opened from, and says so', async () => {
+      previousUrl = '/store/Plugin/app.macro-deck.spotify';
+      const fixture = await createFixture();
+
+      expect(backButton(fixture).getAttribute('aria-label')).toBe('Back to the store');
+      leave(fixture);
+
+      expect(locationSpy.back).toHaveBeenCalledTimes(1);
+      expect(routerSpy.navigate).not.toHaveBeenCalledWith(['/integrations']);
+    });
+
+    it('returns to the integrations list when it was not opened from the Store', async () => {
+      previousUrl = '/integrations';
+      const fixture = await createFixture();
+
+      expect(backButton(fixture).getAttribute('aria-label')).not.toBe('Back to the store');
+      leave(fixture);
+
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/integrations']);
+      expect(locationSpy.back).not.toHaveBeenCalled();
     });
   });
 });

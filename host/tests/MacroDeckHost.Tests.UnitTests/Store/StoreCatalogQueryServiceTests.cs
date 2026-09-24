@@ -408,6 +408,74 @@ internal sealed class StoreCatalogQueryServiceTests
 	}
 
 	[Test]
+	public void Categories_count_the_visible_packages_of_the_requested_kinds_that_carry_them()
+	{
+		_catalog.Swap(new StoreCatalogSnapshot
+		{
+			Sequence = 1,
+			Entries =
+			[
+				Entry("obs", "OBS") with { Tags = ["streaming"] },
+				Entry("twitch", "Twitch") with { Tags = ["Streaming", "gaming"] },
+				Entry("removed", "Removed") with { Tags = ["streaming"] },
+				Entry("stream-icons", "Stream Icons", StoreExtensionKind.IconPack) with { Tags = ["streaming", "icons"] },
+				Entry("stream-profile", "Stream Profile", StoreExtensionKind.ProfileTemplate) with { Tags = ["streaming"] }
+			],
+			RemovedPackages = [new StoreRemovedPackage { Id = "removed" }],
+			Categories = [Category("icons"), Category("streaming"), Category("music")]
+		});
+
+		var browse = _query.Categories(_browseKinds);
+		var plugins = _query.Categories([StoreExtensionKind.Plugin]);
+		var everything = _query.Categories(null);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(browse.Select(entry => (entry.Category.Id, entry.Count)),
+				Is.EqualTo(new[] { ("icons", 1), ("streaming", 3), ("music", 0) }));
+			Assert.That(plugins.Select(entry => (entry.Category.Id, entry.Count)),
+				Is.EqualTo(new[] { ("icons", 0), ("streaming", 2), ("music", 0) }));
+			Assert.That(everything.Single(entry => entry.Category.Id == "streaming").Count, Is.EqualTo(4));
+		});
+	}
+
+	[Test]
+	public void With_the_platform_filter_categories_count_only_packages_that_run_here()
+	{
+		_catalog.Swap(new StoreCatalogSnapshot
+		{
+			Sequence = 1,
+			Entries =
+			[
+				Entry("elsewhere", "Elsewhere") with { Tags = ["music"], SupportedRids = ["plan9-sparc"] },
+				Entry("here", "Here") with
+				{
+					Tags = ["music"],
+					SupportedRids = [global::System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier]
+				},
+				Entry("anywhere", "Anywhere") with { Tags = ["gaming"] },
+				Entry("nowhere", "Nowhere") with { Tags = ["system"], SupportedRids = ["plan9-sparc"] }
+			],
+			Categories = [Category("music"), Category("gaming"), Category("system")]
+		});
+
+		var everything = _query.Categories(_browseKinds);
+		var runsHere = _query.Categories(_browseKinds, supportedOnly: true);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(everything.Select(entry => entry.Count), Is.EqualTo(new[] { 2, 1, 1 }));
+			Assert.That(runsHere.Select(entry => entry.Count), Is.EqualTo(new[] { 1, 1, 0 }));
+		});
+	}
+
+	[Test]
+	public void An_unavailable_registry_has_no_categories()
+	{
+		Assert.That(_query.Categories(_browseKinds), Is.Empty);
+	}
+
+	[Test]
 	public void A_search_also_finds_packages_by_tag_after_every_other_kind_of_match()
 	{
 		Seed([
@@ -431,6 +499,9 @@ internal sealed class StoreCatalogQueryServiceTests
 
 		Assert.That(Ids(popular), Is.EqualTo(Ids(all)));
 	}
+
+	private static StoreCategory Category(string id) =>
+		new() { Id = id, Names = new Dictionary<string, string> { ["en"] = id } };
 
 	private void SeedSearchable() =>
 		Seed([

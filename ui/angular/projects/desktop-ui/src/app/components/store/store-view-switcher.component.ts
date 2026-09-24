@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { AppStrings } from '@macro-deck/runtime';
 import { LocalizationService, SegmentedControlComponent, SegmentedOption } from '@shared';
 import { ConnectAccountService } from '../../services/connect-account.service';
+import { StoreUpdatesService } from '../../services/store-updates.service';
 
 export type StoreView = 'discover' | 'installed' | 'tests';
 
@@ -31,17 +32,31 @@ export class StoreViewSwitcherComponent {
   private readonly router = inject(Router);
   private readonly localization = inject(LocalizationService);
   private readonly account = inject(ConnectAccountService);
+  private readonly updates = inject(StoreUpdatesService);
 
   protected readonly ariaLabel = computed(() => this.localization.translateKey(AppStrings.Store.Page.TabsAriaLabel));
 
   protected readonly options = computed<SegmentedOption[]>(() => [
     { value: 'discover', label: this.localization.translateKey(AppStrings.Store.Page.TabDiscover) },
-    { value: 'installed', label: this.localization.translateKey(AppStrings.Store.Page.TabInstalled) },
+    this.installedOption(),
     // Test builds come from the Platform for the signed-in account, so there is nothing to show without one.
     ...(this.account.isSignedIn()
       ? [{ value: 'tests', label: this.localization.translateKey(AppStrings.Store.Tests.Title) }]
       : []),
   ]);
+
+  private installedOption(): SegmentedOption {
+    const label = this.localization.translateKey(AppStrings.Store.Page.TabInstalled);
+    const count = this.updates.count();
+    return count > 0
+      ? {
+        value: 'installed',
+        label,
+        badge: String(count),
+        ariaLabel: this.localization.translateKey(AppStrings.Store.Page.TabInstalledWithUpdates, { count }),
+      }
+      : { value: 'installed', label };
+  }
 
   protected open(value: string): void {
     const route = STORE_VIEW_ROUTES[value as StoreView];
