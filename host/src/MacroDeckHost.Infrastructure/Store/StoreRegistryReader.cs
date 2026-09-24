@@ -11,6 +11,7 @@ public sealed class StoreRegistryReader
 {
 	private const string IndexFileName = "index.json";
 	private const string SecurityFileName = "security.json";
+	private const string CategoriesFileName = "categories.json";
 	private const string PackageManifestFileName = "manifest.json";
 
 	private readonly ILogger _logger;
@@ -74,7 +75,8 @@ public sealed class StoreRegistryReader
 				.Select(key => key.KeyId)
 				.Where(keyId => !string.IsNullOrWhiteSpace(keyId))
 				.ToList(),
-			Featured = ReadFeatured(index.Featured)
+			Featured = ReadFeatured(index.Featured),
+			Categories = ReadCategories(registryRoot)
 		};
 	}
 
@@ -108,6 +110,23 @@ public sealed class StoreRegistryReader
 		}
 
 		return refs;
+	}
+
+	// Older registry snapshots publish no categories.json, and a malformed one only costs the categories.
+	private IReadOnlyList<StoreCategory> ReadCategories(string registryRoot)
+	{
+		var document = ReadDocument<RegistryCategoriesDocument>(Path.Combine(registryRoot, CategoriesFileName));
+		if (document is null)
+		{
+			return [];
+		}
+
+		if (document.Version != StoreCategories.SupportedVersion)
+		{
+			_logger.Warning("Store registry publishes categories in unsupported version {Version}.", document.Version);
+		}
+
+		return StoreCategories.Normalize(document.Version, document.Categories);
 	}
 
 	// The registry names kinds the way its own directories and package manifests do; the enum spelling
@@ -185,6 +204,9 @@ public sealed class StoreRegistryReader
 				Description = package.Description,
 				Publisher = package.Publisher,
 				Repository = package.Repository,
+				Homepage = Uri.TryCreate(package.Homepage, UriKind.Absolute, out var homepage) && StoreHttp.IsHttps(homepage)
+					? package.Homepage
+					: null,
 				License = package.License,
 				AdditionalLinks = package.AdditionalLinks is { } additionalLinks
 					? PluginManifestLinks.Displayable(additionalLinks)

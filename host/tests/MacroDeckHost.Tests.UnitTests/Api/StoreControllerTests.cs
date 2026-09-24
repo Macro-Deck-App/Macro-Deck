@@ -369,6 +369,39 @@ internal sealed class StoreControllerTests
 	}
 
 	[Test]
+	public void The_detail_body_carries_the_packages_homepage()
+	{
+		SeedPlugin(homepage: "https://acme.test/hue");
+
+		Assert.That(_controller.GetExtension(StoreExtensionKind.Plugin, PluginId).Extension!.Homepage,
+			Is.EqualTo("https://acme.test/hue"));
+	}
+
+	[Test]
+	public void The_categories_come_in_registry_order_with_every_name_and_how_many_packages_carry_them()
+	{
+		SeedPlugin(tags: ["music"],
+			categories:
+			[
+				new StoreCategory { Id = "streaming", Names = new Dictionary<string, string> { ["en"] = "Streaming" } },
+				new StoreCategory
+				{
+					Id = "music", Names = new Dictionary<string, string> { ["en"] = "Music", ["de"] = "Musik" }
+				}
+			]);
+
+		var categories = _controller.GetCategories([StoreExtensionKind.Plugin]).Categories;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(categories.Select(category => (category.Id, category.Count)),
+				Is.EqualTo(new[] { ("streaming", 0), ("music", 1) }));
+			Assert.That(categories[1].Names,
+				Is.EquivalentTo(new Dictionary<string, string> { ["en"] = "Music", ["de"] = "Musik" }));
+		});
+	}
+
+	[Test]
 	public void The_detail_body_carries_the_packages_tags()
 	{
 		SeedPlugin(tags: ["streaming", "obs"]);
@@ -873,11 +906,14 @@ internal sealed class StoreControllerTests
 		long size = 16,
 		IReadOnlyList<StoreExtensionLink>? additionalLinks = null,
 		PackageAiDeclaration? ai = null,
-		IReadOnlyList<string>? tags = null)
+		IReadOnlyList<string>? tags = null,
+		string? homepage = null,
+		IReadOnlyList<StoreCategory>? categories = null)
 	{
 		_catalog.Swap(new StoreCatalogSnapshot
 		{
 			Sequence = 1,
+			Categories = categories ?? [],
 			Entries =
 			[
 				new StoreCatalogEntry
@@ -890,6 +926,7 @@ internal sealed class StoreControllerTests
 					AdditionalLinks = additionalLinks ?? [],
 					Ai = ai,
 					Tags = tags ?? [],
+					Homepage = homepage,
 					LatestRelease = new StoreReleaseManifest
 					{
 						Version = "1.0.0",

@@ -133,6 +133,21 @@ public class StoreController : ControllerBase
 		};
 	}
 
+	[HttpGet("categories")]
+	public GetStoreCategoriesResponse GetCategories([FromQuery] StoreExtensionKind[]? kinds = null,
+		[FromQuery] bool supportedOnly = false) =>
+		new()
+		{
+			Categories = _catalogQuery.Categories(kinds, supportedOnly)
+				.Select(entry => new StoreCategoryBody
+				{
+					Id = entry.Category.Id,
+					Names = new Dictionary<string, string>(entry.Category.Names),
+					Count = entry.Count
+				})
+				.ToList()
+		};
+
 	[HttpGet("catalog/{kind}/{id}")]
 	public GetStoreExtensionResponse GetExtension(StoreExtensionKind kind, string id)
 	{
@@ -480,6 +495,7 @@ public class StoreController : ControllerBase
 		LongDescription = item.Entry.LongDescription,
 		Changelog = item.Entry.Changelog,
 		Repository = item.Entry.Repository,
+		Homepage = item.Entry.Homepage,
 		License = item.Entry.License,
 		AdditionalLinks = item.Entry.AdditionalLinks
 			.Select(link => new StoreExtensionLinkBody { Type = link.Type, Url = link.Url, Label = link.Label })

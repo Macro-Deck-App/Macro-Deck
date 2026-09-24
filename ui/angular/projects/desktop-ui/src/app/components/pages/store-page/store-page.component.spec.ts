@@ -4,7 +4,7 @@ import { By } from '@angular/platform-browser';
 import { ActivatedRoute, Navigation, ParamMap, Router, convertToParamMap } from '@angular/router';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 
-import { AppStrings, GetConnectSessionResponse, GetStoreCatalogResponse, StoreCatalogItemBody } from '@macro-deck/runtime';
+import { AppStrings, GetConnectSessionResponse, GetStoreCatalogResponse, StoreCatalogItemBody, StoreCategoryBody } from '@macro-deck/runtime';
 import { ApiService, LocalizationService, ToastService } from '@shared';
 import { ConnectAccountService } from '../../../services/connect-account.service';
 import { PluginRuntimeService } from '../../../services/plugin-runtime.service';
@@ -32,6 +32,7 @@ interface Catalog {
   recentlyUpdated?: StoreCatalogItemBody[];
   installs?: Record<string, number>;
   unsupportedCount?: number;
+  categories?: StoreCategoryBody[] | 'unsupported';
 }
 
 function item(id: string, overrides: Partial<StoreCatalogItemBody> = {}): StoreCatalogItemBody {
@@ -125,8 +126,11 @@ describe('StorePageComponent', () => {
     api = jasmine.createSpyObj<ApiService>('ApiService', [
       'onNotification', 'getStoreCatalog', 'refreshStoreRegistry', 'getStoreOperations', 'installStoreExtension',
       'retryStoreOperation', 'getStoreExtensionIconUrl', 'uninstallStoreExtension', 'getStoreStatus', 'getStoreRatings',
-      'getStoreInstalls',
+      'getStoreInstalls', 'getStoreCategories',
     ]);
+    api.getStoreCategories.and.callFake(() => catalog.categories === 'unsupported'
+      ? Promise.reject(new Error('404'))
+      : Promise.resolve({ categories: catalog.categories ?? [] }));
     api.getStoreRatings.and.resolveTo({ available: false, ratings: {} });
     api.getStoreInstalls.and.callFake(() => Promise.resolve(catalog.installs
       ? { available: true, installs: catalog.installs }
@@ -648,6 +652,99 @@ describe('StorePageComponent', () => {
       expect(calls().every(call => (call as TaggedOptions).tag === 'streaming' && !(call as TaggedOptions).publisher)).toBeTrue();
       expect(routerSpy.navigate).toHaveBeenCalledWith([], jasmine.objectContaining({ queryParams: { publisher: null } }));
       expect(fixture.nativeElement.textContent).not.toContain(translate(AppStrings.Store.Page.PublisherFilterNote, { publisher: 'PyFlat' }));
+    });
+  });
+
+  describe('categories', () => {
+    const music: StoreCategoryBody = { id: 'music', names: { en: 'Music', de: 'Musik' }, count: 2 };
+    const streaming: StoreCategoryBody = { id: 'streaming', names: { en: 'Streaming' }, count: 1 };
+    const gaming: StoreCategoryBody = { id: 'gaming', names: { en: 'Gaming', de: 'Spiele' }, count: 0 };
+
+    function categoryChips(): HTMLButtonElement[] {
+      return Array.from(fixture.nativeElement.querySelectorAll('button[data-category]'));
+    }
+
+    function chipLabels(): string[] {
+      return categoryChips().map(chip => chip.textContent!.trim());
+    }
+
+    it('offers the categories that have items, in registry order, named in the reader\'s language', async () => {
+      await createFixture({ categories: [streaming, gaming, music] }, () => {
+        TestBed.inject(LocalizationService).culture.set('de-DE');
+      });
+
+      expect(chipLabels()).toEqual(['Streaming', 'Musik']);
+      const group = fixture.nativeElement.querySelector('[role="group"] button[data-category]')!.parentElement as HTMLElement;
+      expect(group.getAttribute('aria-label')).toBe(translate(AppStrings.Store.Page.CategoriesHeading));
+    });
+
+    it('filters by a category\'s tag when it is chosen, names it in the heading, and clears it when chosen again', async () => {
+      await createFixture({ grid: items(3), categories: [music] });
+
+      categoryChips()[0].click();
+      expect(routerSpy.navigate).toHaveBeenCalledWith([], jasmine.objectContaining({
+        queryParams: { tag: 'music', publisher: null },
+      }));
+
+      queryParams.next(convertToParamMap({ tag: 'music' }));
+      await settle();
+
+      expect(calls().some(call => (call as CatalogOptions & { tag?: string }).tag === 'music')).toBeTrue();
+      expect(categoryChips()[0].getAttribute('aria-pressed')).toBe('true');
+      expect(fixture.nativeElement.textContent).toContain(translate(AppStrings.Store.Page.TagHeading, { tag: 'Music' }));
+
+      routerSpy.navigate.calls.reset();
+      categoryChips()[0].click();
+      expect(routerSpy.navigate).toHaveBeenCalledWith([], jasmine.objectContaining({
+        queryParams: { tag: null, publisher: null },
+      }));
+    });
+
+    it('counts categories for the kind the reader is browsing and the platform filter they chose', async () => {
+      localStorage.removeItem(STORE_SUPPORTED_ONLY_STORAGE_KEY);
+      await createFixture({ categories: [music] });
+      const supportedOnly = api.getStoreCategories.calls.mostRecent().args[1];
+      expect(api.getStoreCategories.calls.mostRecent().args[0]).toEqual(['Plugin', 'IconPack']);
+
+      chooseKind('IconPack');
+      await settle();
+      expect(api.getStoreCategories.calls.mostRecent().args[0]).toEqual(['IconPack']);
+
+      (fixture.componentInstance as unknown as { onSupportedOnlyChange(value: boolean): void })
+        .onSupportedOnlyChange(!supportedOnly);
+      await settle();
+      expect(!!api.getStoreCategories.calls.mostRecent().args[1]).toBe(!supportedOnly);
+      localStorage.removeItem(STORE_SUPPORTED_ONLY_STORAGE_KEY);
+    });
+
+    it('asks again for categories on the next load after a failed request', async () => {
+      await createFixture({ grid: items(2), categories: 'unsupported' });
+      catalog.categories = [music];
+      api.getStoreCategories.calls.reset();
+
+      search('x');
+      await settle();
+
+      expect(api.getStoreCategories).toHaveBeenCalled();
+      expect(chipLabels()).toEqual(['Music']);
+    });
+
+    it('picks up categories a background registry refresh publishes', async () => {
+      await createFixture({ categories: [] });
+      expect(categoryChips().length).toBe(0);
+
+      catalog.categories = [music];
+      push('StoreCatalogChangedEvent', {});
+      await settle();
+
+      expect(chipLabels()).toEqual(['Music']);
+    });
+
+    it('shows no category chips when the host cannot list categories, and the Store still loads', async () => {
+      await createFixture({ grid: items(2), categories: 'unsupported' });
+
+      expect(categoryChips().length).toBe(0);
+      expect(cardCount()).toBe(2);
     });
   });
 

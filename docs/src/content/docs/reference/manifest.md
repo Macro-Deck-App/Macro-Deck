@@ -297,6 +297,9 @@ package page under **AI**.
 
 `homepage`, `repository` and `publisher.url` must be absolute `http`/`https` URLs.
 
+On the package's Store page, **Links** starts with `homepage` as **Homepage**, then `repository`. The Store
+links only `https` addresses, and lists a `homepage` that equals `repository` once.
+
 ### `additionalLinks`
 
 Resources beyond `homepage` and `repository`, shown in declared order under **Links** on the package's

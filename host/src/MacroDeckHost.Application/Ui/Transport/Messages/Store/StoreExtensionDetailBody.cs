@@ -8,6 +8,8 @@ public class StoreExtensionDetailBody : StoreCatalogItemBody
 
 	public string? Repository { get; set; }
 
+	public string? Homepage { get; set; }
+
 	public string? License { get; set; }
 
 	public List<StoreExtensionLinkBody> AdditionalLinks { get; set; } = [];

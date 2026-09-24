@@ -25,4 +25,6 @@ public sealed record StoreCatalogSnapshot
 	/// <summary>The registry's curated picks, in the order it published them. Empty when the registry
 	/// publishes none, which is what every consumer must treat as "nothing is featured".</summary>
 	public IReadOnlyList<StoreFeaturedRef> Featured { get; init; } = [];
+
+	public IReadOnlyList<StoreCategory> Categories { get; init; } = [];
 }

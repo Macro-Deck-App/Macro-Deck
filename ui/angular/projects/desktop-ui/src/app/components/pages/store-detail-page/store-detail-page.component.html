@@ -210,6 +210,21 @@
               }
             </div>
 
+            @if (packageCategories().length > 0) {
+              <div class="sidebar-card">
+                <h2 class="detail-heading">{{ 'macrodeck.app:Store.Page.CategoriesHeading' | translate }}</h2>
+                <ul class="tag-list" data-testid="store-detail-categories">
+                  @for (category of packageCategories(); track category.id) {
+                    <li>
+                      <button type="button" class="tag-chip" (click)="openTag(category.id)">
+                        <span>{{ category.label }}</span>
+                      </button>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+
             @if (tags().length > 0) {
               <div class="sidebar-card">
                 <h2 class="detail-heading">{{ 'macrodeck.app:Store.Page.TagsHeading' | translate }}</h2>
