@@ -1,0 +1,89 @@
+name: Companion app
+description: Report a problem with or suggest an improvement to the Macro Deck companion app for Android and iOS
+title: "[Companion] "
+labels: ["area:companion", "status:needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for the native companion app on Android, iPhone and iPad. If the problem also happens in the web client in a browser, it is most likely a Macro Deck issue: use **Bug report** instead.
+
+        This tracker is public. Never post license keys, receipts, order numbers or email addresses here.
+
+        For setup help or general support, please use the [Discord community](https://discord.macro-deck.app).
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What is this about?
+      options:
+        - Something is not working
+        - An idea or improvement
+        - Purchase or license
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened, or what would you like?
+      description: For a problem, tell us what went wrong and what you expected instead. For an idea, tell us what you want to do and how this would help.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: How can we reproduce it?
+      description: A short list of steps is enough. Leave this empty for an idea or if you are not sure.
+
+  - type: dropdown
+    id: web-client
+    attributes:
+      label: Does the same happen in the web client?
+      description: Open the deck in the device's browser and try the same thing there.
+      options:
+        - "No, only in the companion app"
+        - "Yes, the web client has the same problem"
+        - I did not try
+        - Not relevant
+
+  - type: input
+    id: app-version
+    attributes:
+      label: Companion app version
+      description: Shown in the app's settings.
+      placeholder: 3.0.0
+
+  - type: input
+    id: device
+    attributes:
+      label: Device and system version
+      placeholder: Pixel 8 with Android 15, iPad Air 2 with iOS 15.8
+
+  - type: dropdown
+    id: connection
+    attributes:
+      label: How is the device connected?
+      options:
+        - Wi-Fi or network
+        - USB (Android only)
+        - Not sure
+
+  - type: input
+    id: macro-deck-version
+    attributes:
+      label: Macro Deck version on the computer
+      placeholder: 3.0.0-beta.4
+
+  - type: input
+    id: operating-system
+    attributes:
+      label: Computer operating system
+      placeholder: Windows 11, macOS 26, Ubuntu 24.04
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else?
+      description: Screenshots, screen recordings or logs are welcome, but optional. Please remove anything personal before you upload them.
