@@ -2869,6 +2869,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Errors.Variables.WriteFailed" xml:space="preserve">
     <value>Der Wert konnte nicht übernommen werden</value>
   </data>
+  <data name="Errors.Variables.FileReadOnly" xml:space="preserve">
+    <value>Diese Variable liest ihren Wert aus einer Datei und schreibt nicht zurück</value>
+  </data>
+  <data name="Errors.Variables.InvalidFilePath" xml:space="preserve">
+    <value>Gib den vollständigen Pfad zu einer Datei ein</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>Die Widget-Daten müssen ein JSON-Objekt sein.</value>
   </data>
@@ -10058,6 +10064,21 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Variables.Actions.VariableLabel" xml:space="preserve">
     <value>Variable</value>
   </data>
+  <data name="Integrations.Variables.Actions.WriteToFileName" xml:space="preserve">
+    <value>Variable in Datei schreiben</value>
+  </data>
+  <data name="Integrations.Variables.Actions.WriteToFileDescription" xml:space="preserve">
+    <value>Schreibt den aktuellen Wert einer Variable in eine Datei und ersetzt deren bisherigen Inhalt.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.WriteToFileVariableDescription" xml:space="preserve">
+    <value>Die Variable, deren Wert geschrieben wird. Jede Variable ist möglich, auch die von Integrationen und Plugins.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.FileLabel" xml:space="preserve">
+    <value>Datei</value>
+  </data>
+  <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
+    <value>Der vollständige Pfad der Datei. Fehlt sie, wird sie angelegt; der Ordner muss bereits existieren.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>Es wurde keine Variable ausgewählt.</value>
   </data>
@@ -10075,6 +10096,15 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.Variables.Errors.VariablesUnavailable" xml:space="preserve">
     <value>Variablen sind nicht verfügbar.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.FilePathNotAbsolute" xml:space="preserve">
+    <value>Der Dateipfad muss ein vollständiger Pfad sein.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
+    <value>Die Variable hat gerade keinen Wert.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
+    <value>Die Datei konnte nicht geschrieben werden.</value>
   </data>
   <data name="Integrations.Variables.Name" xml:space="preserve">
     <value>Variablen</value>
@@ -15614,6 +15644,42 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Variables.Manager.VariableCount.Other" xml:space="preserve">
     <value>{count} Variablen</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="Variables.Manager.SourceField" xml:space="preserve">
+    <value>Quelle</value>
+  </data>
+  <data name="Variables.Manager.SourceOwnValue" xml:space="preserve">
+    <value>Eigener Wert</value>
+  </data>
+  <data name="Variables.Manager.SourceFile" xml:space="preserve">
+    <value>Aus Datei lesen</value>
+  </data>
+  <data name="Variables.Manager.SourceHintOwnValue" xml:space="preserve">
+    <value>Macro Deck speichert den Wert.</value>
+  </data>
+  <data name="Variables.Manager.SourceHintFile" xml:space="preserve">
+    <value>Der Wert ist der Inhalt der Datei und folgt jeder Änderung an ihr.</value>
+  </data>
+  <data name="Variables.Manager.FileField" xml:space="preserve">
+    <value>Datei</value>
+  </data>
+  <data name="Variables.Manager.AllowWriteBack" xml:space="preserve">
+    <value>Zurückschreiben erlauben</value>
+  </data>
+  <data name="Variables.Manager.AllowWriteBackHint" xml:space="preserve">
+    <value>Änderungen in Macro Deck, etwa mit einem Schieberegler, werden in die Datei geschrieben.</value>
+  </data>
+  <data name="Variables.Manager.FileSettings" xml:space="preserve">
+    <value>Dateieinstellungen</value>
+  </data>
+  <data name="Variables.Manager.FileUnavailable" xml:space="preserve">
+    <value>Kein Wert: Die Datei fehlt, ist nicht lesbar oder passt nicht zum Typ der Variable</value>
+  </data>
+  <data name="Variables.Manager.CreateFailed" xml:space="preserve">
+    <value>Variable konnte nicht angelegt werden. Versuch es erneut.</value>
+  </data>
+  <data name="Variables.Manager.SaveFailed" xml:space="preserve">
+    <value>Änderungen konnten nicht gespeichert werden. Versuch es erneut.</value>
   </data>
   <data name="Variables.NewVariable" xml:space="preserve">
     <value>Neue Variable</value>

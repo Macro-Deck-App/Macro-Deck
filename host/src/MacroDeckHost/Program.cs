@@ -247,6 +247,8 @@ public static class Program
 			var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();
 			Integrations.Spotify.SpotifyIntegration.HostTimeOfDayFormat
 				= () => TimeFormatResolver.ResolveAsync(scopeFactory);
+			Integrations.Variables.VariablesIntegration.HostVariableReader
+				= (name, ownerWidgetId, _) => Application.Variables.HostVariableReader.ReadAsync(scopeFactory, name, ownerWidgetId);
 
 			// The shell tells a requested restart from a crash by the exit code alone, so it has to
 			// survive the graceful shutdown RunAsync performs.

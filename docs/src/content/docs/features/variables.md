@@ -314,3 +314,9 @@ a global of the same name; the host refuses an unknown widget id.
 `ApplyAsync`'s `Set` also works on provider variables that declare `Write`; `NotEditable` for the rest.
 `Add`, `Toggle` and `Append` are user-variable only, because they compute from the last value the host
 saw. `Unavailable` means the owner accepts writes but could not take this one - retry later.
+
+A user variable can read its value from a file. Without **Allow write-back** it is read-only: every
+operation answers `NotEditable` and the file is left alone. With write-back it behaves like any other
+user variable, and Macro Deck also writes the new value to the file. This needs no new SDK: a plugin built
+against an older one gets the same `NotEditable` it already handles for read-only variables. `CreateAsync`
+always creates a variable that holds its own value.

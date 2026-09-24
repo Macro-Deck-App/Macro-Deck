@@ -53,6 +53,50 @@ public class JsonUserVariableStoreTests
 	}
 
 	[Test]
+	public void A_file_variable_keeps_its_source_but_not_the_files_content()
+	{
+		var live = new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = "now_playing",
+			Scope = VariableScope.Global,
+			Type = VariableType.Text,
+			Classification = VariableClassification.User,
+			Value = "content read from the file",
+			FileSource = new VariableFileSource("/tmp/now-playing.txt", true)
+		};
+
+		_store.Save([live]);
+		var loaded = _store.Load().Single();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(loaded.FileSource, Is.EqualTo(new VariableFileSource("/tmp/now-playing.txt", true)));
+			Assert.That(loaded.Value, Is.Empty);
+			Assert.That(live.Value, Is.EqualTo("content read from the file"));
+		});
+	}
+
+	[Test]
+	public void A_variable_without_a_file_source_is_saved_without_the_property()
+	{
+		_store.Save([
+			new VariableEntity
+			{
+				Id = Guid.NewGuid(),
+				Name = "count",
+				Scope = VariableScope.Global,
+				Type = VariableType.Numeric,
+				Classification = VariableClassification.User,
+				Value = "3"
+			}
+		]);
+
+		var json = File.ReadAllText(Path.Combine(_paths.DataDirectory, "user-variables.json"));
+		Assert.That(json, Does.Not.Contain("fileSource"));
+	}
+
+	[Test]
 	public void Load_ReadsAScopePersistedAsTheActionButtonEnumName()
 	{
 		// Every file written before the widget scope was generalized spells it "ActionButton". Both entries

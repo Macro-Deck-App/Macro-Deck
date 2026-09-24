@@ -15,23 +15,35 @@ import {
 import { FormsModule } from '@angular/forms';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { AppStrings, VariableCatalogNode, resolveLocalizedText } from '@macro-deck/runtime';
-import { ButtonComponent, ButtonGroupComponent, ErrorBannerComponent, InputComponent, LocalizationService, ModalComponent, TranslatePipe, VariableService, dismissModal } from '@shared';
+import { ButtonComponent, ButtonGroupComponent, ErrorBannerComponent, InputComponent, LocalizationService, ModalComponent, ToggleSwitchComponent, TranslatePipe, VariableService, dismissModal } from '@shared';
 import type { Variable, VariableClassification, VariableScope, VariableType } from '@macro-deck/runtime';
 import { VariableGroup, VariableSourceFilter, groupVariablesBySource, isEventParameter, matchesVariableSource, variableTypeLabels } from '../../domain/variable-source.util';
 import { ConfirmationModalComponent } from '../overlay/confirmation-modal/confirmation-modal.component';
 import { DropdownMenuComponent } from '../overlay/dropdown-menu/dropdown-menu.component';
 import { EmptyStateComponent } from '../feedback/empty-state/empty-state.component';
 import { SelectComponent, SelectOption } from '../forms/select/select.component';
+import { FilePathInputComponent } from '../forms/file-path-input/file-path-input.component';
 import { VariableCatalogService } from '../../services/variable-catalog.service';
 import { IntegrationService } from '../../services/integration.service';
 import { VariableCatalogIdInputComponent } from './variable-catalog-id-input.component';
 
+type VariableSource = 'value' | 'file';
+
 interface CreateForm {
   rawName: string;
   scope: VariableScope;
+  source: VariableSource;
   type: VariableType;
   initialValue: string;
   decimalPlaces: number;
+  filePath: string;
+  allowWriteBack: boolean;
+}
+
+interface FileSettingsForm {
+  variableId: string;
+  path: string;
+  allowWriteBack: boolean;
 }
 
 type VariableRow =
@@ -83,8 +95,10 @@ const CLASSIFICATION_LABEL_KEYS: Record<VariableClassification, string> = {
     DropdownMenuComponent,
     EmptyStateComponent,
     ErrorBannerComponent,
+    FilePathInputComponent,
     InputComponent,
     SelectComponent,
+    ToggleSwitchComponent,
     TranslatePipe,
     VariableCatalogIdInputComponent,
   ],
@@ -226,6 +240,26 @@ export class VariablesManagerComponent implements OnInit {
     this.localization.translateKey(AppStrings.Variables.Manager.UnbindHeading));
   readonly unbindFailedMessage = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Manager.UnbindFailed));
+  readonly sourceFieldLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Manager.SourceField));
+  readonly sourceOptions = computed<SelectOption[]>(() => [
+    { value: 'value', label: this.localization.translateKey(AppStrings.Variables.Manager.SourceOwnValue) },
+    { value: 'file', label: this.localization.translateKey(AppStrings.Variables.Manager.SourceFile) },
+  ]);
+  readonly sourceHintValue = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Manager.SourceHintOwnValue));
+  readonly sourceHintFile = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Manager.SourceHintFile));
+  readonly fileFieldLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Manager.FileField));
+  readonly allowWriteBackLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Manager.AllowWriteBack));
+  readonly allowWriteBackHint = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Manager.AllowWriteBackHint));
+  readonly fileSettingsLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Manager.FileSettings));
+  readonly fileUnavailableLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Manager.FileUnavailable));
 
   readonly subtitle = computed(() => {
     const counted = this.localization.translateKey(
@@ -261,6 +295,14 @@ export class VariablesManagerComponent implements OnInit {
   });
 
   readonly createForm = signal<CreateForm>(this.defaultCreateForm());
+  readonly createError = signal<string | null>(null);
+  readonly fileSettings = signal<FileSettingsForm | null>(null);
+  readonly fileSettingsError = signal<string | null>(null);
+
+  readonly canSubmitCreate = computed(() => {
+    const form = this.createForm();
+    return this.nameSanitized().isValid && (form.source !== 'file' || form.filePath.trim().length > 0);
+  });
   readonly nameSanitized = signal<{ sanitized: string; isValid: boolean }>({
     sanitized: '',
     isValid: false,
@@ -639,6 +681,7 @@ export class VariablesManagerComponent implements OnInit {
 
   openCreate(): void {
     this.createForm.set(this.defaultCreateForm());
+    this.createError.set(null);
     this.nameSanitized.set({ sanitized: '', isValid: false });
     this.showCreateModal.set(true);
   }
@@ -664,10 +707,23 @@ export class VariablesManagerComponent implements OnInit {
     this.createForm.update(f => ({ ...f, initialValue: value }));
   }
 
+  setFormSource(source: VariableSource): void {
+    this.createForm.update(f => ({ ...f, source }));
+  }
+
+  setFormFilePath(filePath: string): void {
+    this.createForm.update(f => ({ ...f, filePath }));
+  }
+
+  setFormAllowWriteBack(allowWriteBack: boolean): void {
+    this.createForm.update(f => ({ ...f, allowWriteBack }));
+  }
+
   async submitCreate(): Promise<void> {
     const form = this.createForm();
     const { sanitized, isValid } = this.variableService.sanitizeNameLocal(form.rawName);
-    if (!isValid) return;
+    if (!isValid || !this.canSubmitCreate()) return;
+    const fromFile = form.source === 'file';
 
     const initialValue = form.type === 'boolean'
       ? (form.initialValue === 'true' ? 'true' : 'false')
@@ -675,18 +731,66 @@ export class VariablesManagerComponent implements OnInit {
 
     const scopeRefId = this.scopeRefIdState() ?? undefined;
     const scoped = form.scope === 'widget' && scopeRefId !== undefined;
-    const variable = await this.variableService.create({
+    this.createError.set(null);
+    const result = await this.variableService.create({
       name: sanitized,
       scope: scoped ? 'widget' : 'global',
       scopeRefId: scoped ? scopeRefId : undefined,
       type: form.type,
-      initialValue,
+      initialValue: fromFile ? undefined : initialValue,
       decimalPlaces: form.type === 'numeric' ? form.decimalPlaces : undefined,
+      fileSource: fromFile ? { path: form.filePath.trim(), allowWriteBack: form.allowWriteBack } : undefined,
     });
 
-    if (variable) {
+    if (result.variable) {
       dismissModal(this.modal, () => this.showCreateModal.set(false));
+    } else {
+      this.createError.set(this.saveErrorMessage(result.errorCode, AppStrings.Variables.Manager.CreateFailed));
     }
+  }
+
+  openFileSettings(variable: Variable): void {
+    if (!variable.fileSource) return;
+    this.fileSettingsError.set(null);
+    this.fileSettings.set({
+      variableId: variable.id,
+      path: variable.fileSource.path,
+      allowWriteBack: variable.fileSource.allowWriteBack,
+    });
+  }
+
+  setFileSettingsPath(path: string): void {
+    this.fileSettings.update(f => f && { ...f, path });
+  }
+
+  setFileSettingsWriteBack(allowWriteBack: boolean): void {
+    this.fileSettings.update(f => f && { ...f, allowWriteBack });
+  }
+
+  closeFileSettings(): void {
+    dismissModal(this.modal, () => this.fileSettings.set(null));
+  }
+
+  async saveFileSettings(): Promise<void> {
+    const form = this.fileSettings();
+    if (!form || form.path.trim().length === 0) return;
+
+    this.fileSettingsError.set(null);
+    const result = await this.variableService.update({
+      id: form.variableId,
+      fileSource: { path: form.path.trim(), allowWriteBack: form.allowWriteBack },
+    });
+
+    if (result.variable) {
+      this.closeFileSettings();
+    } else {
+      this.fileSettingsError.set(this.saveErrorMessage(result.errorCode, AppStrings.Variables.Manager.SaveFailed));
+    }
+  }
+
+  private saveErrorMessage(errorCode: string | null, fallbackKey: string): string {
+    return this.localization.translateKey(
+      errorCode === 'InvalidFilePath' ? AppStrings.Errors.Variables.InvalidFilePath : fallbackKey);
   }
 
   startEdit(variable: Variable): void {
@@ -807,6 +911,9 @@ export class VariablesManagerComponent implements OnInit {
   }
 
   unavailableTooltip(variable: Variable): string {
+    if (variable.fileSource) {
+      return this.fileUnavailableLabel();
+    }
     return this.isBoundDynamic(variable) ? this.resourceUnavailableLabel() : this.valueUnavailableLabel();
   }
 
@@ -828,9 +935,12 @@ export class VariablesManagerComponent implements OnInit {
     return {
       rawName: '',
       scope: scoped ? 'widget' : 'global',
+      source: 'value',
       type: 'text',
       initialValue: '',
       decimalPlaces: 0,
+      filePath: '',
+      allowWriteBack: false,
     };
   }
 }

@@ -821,6 +821,7 @@ public class SliderWidgetSessionTests
 			.AddSingleton<Mediator.IMediator>(new RecordingMediator())
 			.AddSingleton<IVariableRefreshSignal>(new VariableRefreshSignal())
 			.AddSingleton<IMusicPlayerPollNudge>(new MusicPlayerPollNudge(integrations))
+			.AddTestFileVariables()
 			.AddScoped<IVariableService, VariableService>()
 			.BuildServiceProvider()
 			.GetRequiredService<IServiceScopeFactory>();
@@ -1004,7 +1005,8 @@ public class SliderWidgetSessionTests
 				.AddSingleton<Mediator.IMediator>(new RecordingMediator())
 				.AddSingleton<IVariableRefreshSignal>(new VariableRefreshSignal())
 				.AddSingleton<IMusicPlayerPollNudge>(new MusicPlayerPollNudge(integrations))
-				.AddScoped<IVariableService, VariableService>()
+				.AddTestFileVariables()
+			.AddScoped<IVariableService, VariableService>()
 				.BuildServiceProvider()
 				.GetRequiredService<IServiceScopeFactory>();
 

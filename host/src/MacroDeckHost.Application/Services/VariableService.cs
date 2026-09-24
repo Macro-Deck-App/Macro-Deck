@@ -2,6 +2,7 @@ using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Variables.Files;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -19,6 +20,7 @@ public class VariableService : IVariableService
 	private readonly VariableCatalogProviders _providers;
 	private readonly IVariableRefreshSignal _refreshSignal;
 	private readonly IMusicPlayerPollNudge _musicPlayerPollNudge;
+	private readonly FileVariableSynchronizer _files;
 
 	public VariableService(
 		VariableRegistry registry,
@@ -26,7 +28,8 @@ public class VariableService : IVariableService
 		IMediator mediator,
 		VariableCatalogProviders providers,
 		IVariableRefreshSignal refreshSignal,
-		IMusicPlayerPollNudge musicPlayerPollNudge)
+		IMusicPlayerPollNudge musicPlayerPollNudge,
+		FileVariableSynchronizer files)
 	{
 		_registry = registry;
 		_userStore = userStore;
@@ -34,6 +37,7 @@ public class VariableService : IVariableService
 		_providers = providers;
 		_refreshSignal = refreshSignal;
 		_musicPlayerPollNudge = musicPlayerPollNudge;
+		_files = files;
 	}
 
 	public Task<IReadOnlyList<VariableEntity>> GetAll() => Task.FromResult(_registry.GetAll());
@@ -71,7 +75,8 @@ public class VariableService : IVariableService
 		string? scopeRefId,
 		VariableType type,
 		object? initialValue,
-		int? decimalPlaces)
+		int? decimalPlaces,
+		VariableFileSource? fileSource = null)
 		=> CreateInternal(name,
 			scope,
 			scopeRefId,
@@ -79,12 +84,14 @@ public class VariableService : IVariableService
 			initialValue,
 			decimalPlaces,
 			VariableClassification.User,
-			null);
+			null,
+			fileSource: fileSource);
 
 	public async Task<Result<VariableEntity, VariableError>> UpdateUserVariable(
 		Guid id,
 		string? name,
-		int? decimalPlaces)
+		int? decimalPlaces,
+		VariableFileSource? fileSource = null)
 	{
 		var entity = _registry.GetById(id);
 		if (entity is null)
@@ -98,7 +105,53 @@ public class VariableService : IVariableService
 				"Only user-classified variables can be renamed or have their precision changed");
 		}
 
-		return await ApplyUpdate(entity, name, null, decimalPlaces, null);
+		if (fileSource is null)
+		{
+			var updated = await ApplyUpdate(entity, name, null, decimalPlaces, null);
+			if (updated.Success && entity.FileSource is not null && decimalPlaces.HasValue)
+			{
+				await _files.RefreshAsync(entity.Id);
+			}
+
+			return updated;
+		}
+
+		if (entity.FileSource is null)
+		{
+			return Result.Fail<VariableEntity, VariableError>(VariableError.ValidationError,
+				"Only a variable that reads from a file can change its file source");
+		}
+
+		if (NormalizeFileSource(fileSource) is not { } normalized)
+		{
+			return Result.Fail<VariableEntity, VariableError>(VariableError.InvalidFilePath,
+				"The file path must be a full path to a file");
+		}
+
+		var result = await ApplyUpdate(entity, name, null, decimalPlaces, null);
+		if (!result.Success)
+		{
+			return result;
+		}
+
+		if (normalized == entity.FileSource)
+		{
+			if (decimalPlaces.HasValue)
+			{
+				await _files.RefreshAsync(entity.Id);
+			}
+
+			return result;
+		}
+
+		// The synchronizer switches first, so turning write-back on never accepts a write that misses the
+		// file; turning it off may briefly keep one, and the refresh below restores the file's value.
+		_files.ChangeSource(entity.Id, normalized);
+		entity.FileSource = normalized;
+		PersistUserVariables();
+		await _mediator.Publish(new VariableUpdatedNotification(entity));
+		await _files.RefreshAsync(entity.Id);
+		return Result.Ok<VariableEntity, VariableError>(entity);
 	}
 
 	public async Task<Result<VariableEntity, VariableError>> SetValue(
@@ -120,6 +173,13 @@ public class VariableService : IVariableService
 
 		switch (entity.Classification)
 		{
+			case VariableClassification.User when entity.FileSource is { AllowWriteBack: false }:
+				return Result.Fail<VariableEntity, VariableError>(VariableError.FileReadOnly,
+					$"Variable '{entity.Name}' reads its value from a file and does not write back");
+
+			case VariableClassification.User when entity.FileSource is not null:
+				return await ApplyWithWriteBack(entity, value);
+
 			case VariableClassification.User:
 				return await ApplyUpdate(entity, null, value, null, null);
 
@@ -179,6 +239,27 @@ public class VariableService : IVariableService
 		return Result.Ok<VariableEntity, VariableError>(entity);
 	}
 
+	private async Task<Result<VariableEntity, VariableError>> ApplyWithWriteBack(VariableEntity entity, object? value)
+	{
+		var ticket = _files.RequestWrite(entity.Id);
+		try
+		{
+			return await ApplyUpdate(entity, null, value, null, null);
+		}
+		finally
+		{
+			if (ticket is not null)
+			{
+				_files.EnqueueWrite(ticket, entity.Value);
+			}
+		}
+	}
+
+	private static VariableFileSource? NormalizeFileSource(VariableFileSource source)
+		=> VariableFileText.IsValidPath(source.Path)
+			? source with { Path = Path.GetFullPath(source.Path) }
+			: null;
+
 	private static VariableError ErrorOf(VariableWriteStatus status) => status switch
 	{
 		VariableWriteStatus.NotWritable => VariableError.NotWritable,
@@ -205,6 +286,7 @@ public class VariableService : IVariableService
 		}
 
 		_registry.Remove(id);
+		_files.Detach(id);
 		PersistUserVariables();
 		await _mediator.Publish(new VariableDeletedNotification(entity));
 		return Result.Ok<VariableError>();
@@ -453,6 +535,7 @@ public class VariableService : IVariableService
 		foreach (var v in existing)
 		{
 			_registry.Remove(v.Id);
+			_files.Detach(v.Id);
 			removedUser |= v.Classification == VariableClassification.User;
 		}
 
@@ -532,7 +615,8 @@ public class VariableService : IVariableService
 		string? ownerIntegrationId,
 		string? definitionId = null,
 		VariableDeclaration? declaration = null,
-		VariableUpdateMode updateMode = VariableUpdateMode.Polled)
+		VariableUpdateMode updateMode = VariableUpdateMode.Polled,
+		VariableFileSource? fileSource = null)
 	{
 		var canonicalName = VariableNameSanitizer.IsValid(name) ? name : VariableNameSanitizer.Sanitize(name);
 		if (!VariableNameSanitizer.IsValid(canonicalName))
@@ -570,11 +654,29 @@ public class VariableService : IVariableService
 			definitionId,
 			declaration,
 			updateMode);
-		if (!_registry.TryAdd(entity))
+		var available = true;
+		if (fileSource is not null)
 		{
+			if (NormalizeFileSource(fileSource) is not { } normalized)
+			{
+				return Result.Fail<VariableEntity, VariableError>(VariableError.InvalidFilePath,
+					"The file path must be a full path to a file");
+			}
+
+			entity.FileSource = normalized;
+			var initial = await _files.AttachAsync(entity);
+			entity.Value = initial.Value;
+			available = initial.Available;
+		}
+
+		if (!_registry.TryAdd(entity, available))
+		{
+			_files.Detach(entity.Id);
 			return Result.Fail<VariableEntity, VariableError>(VariableError.AlreadyExists,
 				$"A variable named '{canonicalName}' already exists in this scope");
 		}
+
+		_files.Activate(entity.Id);
 
 		if (classification == VariableClassification.User)
 		{
@@ -657,13 +759,21 @@ public class VariableService : IVariableService
 		var wasAvailable = _registry.IsAvailable(entity.Id);
 
 		entity.UpdatedAt = DateTime.UtcNow;
-		_registry.Upsert(entity);
+		if (entity.FileSource is not null)
+		{
+			_registry.UpsertKeepingAvailability(entity);
+		}
+		else
+		{
+			_registry.Upsert(entity);
+		}
+
 		if (entity.Classification == VariableClassification.User)
 		{
 			PersistUserVariables();
 		}
 
-		var becameAvailable = !wasAvailable;
+		var becameAvailable = !wasAvailable && _registry.IsAvailable(entity.Id);
 		if (valueChanged || metadataChanged || becameAvailable)
 		{
 			await _mediator.Publish(new VariableUpdatedNotification(entity));

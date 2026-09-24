@@ -2870,6 +2870,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.Variables.WriteFailed" xml:space="preserve">
     <value>Nie udało się zastosować wartości</value>
   </data>
+  <data name="Errors.Variables.FileReadOnly" xml:space="preserve">
+    <value>Ta zmienna odczytuje wartość z pliku i nie zapisuje jej z powrotem</value>
+  </data>
+  <data name="Errors.Variables.InvalidFilePath" xml:space="preserve">
+    <value>Wprowadź pełną ścieżkę do pliku</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>Dane widżetu muszą być obiektem JSON.</value>
   </data>
@@ -10060,6 +10066,21 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Variables.Actions.VariableLabel" xml:space="preserve">
     <value>Zmienna</value>
   </data>
+  <data name="Integrations.Variables.Actions.WriteToFileName" xml:space="preserve">
+    <value>Zapisz zmienną do pliku</value>
+  </data>
+  <data name="Integrations.Variables.Actions.WriteToFileDescription" xml:space="preserve">
+    <value>Zapisuje bieżącą wartość zmiennej do pliku, zastępując jego dotychczasową zawartość.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.WriteToFileVariableDescription" xml:space="preserve">
+    <value>Zmienna, której wartość zostanie zapisana. Można użyć dowolnej zmiennej, także zmiennych integracji i wtyczek.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.FileLabel" xml:space="preserve">
+    <value>Plik</value>
+  </data>
+  <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
+    <value>Pełna ścieżka do pliku. Jeśli nie istnieje, zostanie utworzony; folder musi już istnieć.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>Nie wybrano żadnej zmiennej.</value>
   </data>
@@ -10077,6 +10098,15 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Variables.Errors.VariablesUnavailable" xml:space="preserve">
     <value>Zmienne są niedostępne.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.FilePathNotAbsolute" xml:space="preserve">
+    <value>Ścieżka do pliku musi być pełna.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
+    <value>Zmienna nie ma teraz wartości.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
+    <value>Nie udało się zapisać pliku.</value>
   </data>
   <data name="Integrations.Variables.Name" xml:space="preserve">
     <value>Zmienne</value>
@@ -15616,6 +15646,42 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Variables.Manager.VariableCount.Other" xml:space="preserve">
     <value>Liczba zmiennych: {count}</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="Variables.Manager.SourceField" xml:space="preserve">
+    <value>Źródło</value>
+  </data>
+  <data name="Variables.Manager.SourceOwnValue" xml:space="preserve">
+    <value>Własna wartość</value>
+  </data>
+  <data name="Variables.Manager.SourceFile" xml:space="preserve">
+    <value>Odczyt z pliku</value>
+  </data>
+  <data name="Variables.Manager.SourceHintOwnValue" xml:space="preserve">
+    <value>Wartość przechowuje Macro Deck.</value>
+  </data>
+  <data name="Variables.Manager.SourceHintFile" xml:space="preserve">
+    <value>Wartością jest zawartość pliku, aktualizowana przy każdej jego zmianie.</value>
+  </data>
+  <data name="Variables.Manager.FileField" xml:space="preserve">
+    <value>Plik</value>
+  </data>
+  <data name="Variables.Manager.AllowWriteBack" xml:space="preserve">
+    <value>Zezwól na zapis zwrotny</value>
+  </data>
+  <data name="Variables.Manager.AllowWriteBackHint" xml:space="preserve">
+    <value>Zmiany wprowadzone w Macro Deck, np. suwakiem, są zapisywane do pliku.</value>
+  </data>
+  <data name="Variables.Manager.FileSettings" xml:space="preserve">
+    <value>Ustawienia pliku</value>
+  </data>
+  <data name="Variables.Manager.FileUnavailable" xml:space="preserve">
+    <value>Brak wartości: pliku brak, nie da się go odczytać lub nie pasuje do typu zmiennej</value>
+  </data>
+  <data name="Variables.Manager.CreateFailed" xml:space="preserve">
+    <value>Nie udało się utworzyć zmiennej. Spróbuj ponownie.</value>
+  </data>
+  <data name="Variables.Manager.SaveFailed" xml:space="preserve">
+    <value>Nie udało się zapisać zmian. Spróbuj ponownie.</value>
   </data>
   <data name="Variables.NewVariable" xml:space="preserve">
     <value>Nowa zmienna</value>

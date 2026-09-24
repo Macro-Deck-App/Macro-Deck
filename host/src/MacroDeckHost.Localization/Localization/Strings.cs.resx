@@ -2870,6 +2870,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Variables.WriteFailed" xml:space="preserve">
     <value>Hodnotu se nepodařilo použít</value>
   </data>
+  <data name="Errors.Variables.FileReadOnly" xml:space="preserve">
+    <value>Tato proměnná čte hodnotu ze souboru a nezapisuje ji zpět</value>
+  </data>
+  <data name="Errors.Variables.InvalidFilePath" xml:space="preserve">
+    <value>Zadejte úplnou cestu k souboru</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>Data widgetu musí být objekt JSON.</value>
   </data>
@@ -10060,6 +10066,21 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Variables.Actions.VariableLabel" xml:space="preserve">
     <value>Proměnná</value>
   </data>
+  <data name="Integrations.Variables.Actions.WriteToFileName" xml:space="preserve">
+    <value>Zapsat proměnnou do souboru</value>
+  </data>
+  <data name="Integrations.Variables.Actions.WriteToFileDescription" xml:space="preserve">
+    <value>Zapíše aktuální hodnotu proměnné do souboru a nahradí jeho dosavadní obsah.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.WriteToFileVariableDescription" xml:space="preserve">
+    <value>Proměnná, jejíž hodnota se zapíše. Lze použít libovolnou proměnnou, i proměnné integrací a pluginů.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.FileLabel" xml:space="preserve">
+    <value>Soubor</value>
+  </data>
+  <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
+    <value>Úplná cesta k souboru. Pokud neexistuje, vytvoří se; složka už musí existovat.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>Nebyla vybrána žádná proměnná.</value>
   </data>
@@ -10077,6 +10098,15 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Variables.Errors.VariablesUnavailable" xml:space="preserve">
     <value>Proměnné nejsou k dispozici.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.FilePathNotAbsolute" xml:space="preserve">
+    <value>Cesta k souboru musí být úplná.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
+    <value>Proměnná teď nemá žádnou hodnotu.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
+    <value>Soubor se nepodařilo zapsat.</value>
   </data>
   <data name="Integrations.Variables.Name" xml:space="preserve">
     <value>Proměnné</value>
@@ -15616,6 +15646,42 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Variables.Manager.VariableCount.Other" xml:space="preserve">
     <value>Proměnných: {count}</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="Variables.Manager.SourceField" xml:space="preserve">
+    <value>Zdroj</value>
+  </data>
+  <data name="Variables.Manager.SourceOwnValue" xml:space="preserve">
+    <value>Vlastní hodnota</value>
+  </data>
+  <data name="Variables.Manager.SourceFile" xml:space="preserve">
+    <value>Číst ze souboru</value>
+  </data>
+  <data name="Variables.Manager.SourceHintOwnValue" xml:space="preserve">
+    <value>Hodnotu ukládá Macro Deck.</value>
+  </data>
+  <data name="Variables.Manager.SourceHintFile" xml:space="preserve">
+    <value>Hodnotou je obsah souboru a mění se s každou jeho změnou.</value>
+  </data>
+  <data name="Variables.Manager.FileField" xml:space="preserve">
+    <value>Soubor</value>
+  </data>
+  <data name="Variables.Manager.AllowWriteBack" xml:space="preserve">
+    <value>Povolit zpětný zápis</value>
+  </data>
+  <data name="Variables.Manager.AllowWriteBackHint" xml:space="preserve">
+    <value>Změny provedené v Macro Decku, například posuvníkem, se zapíší do souboru.</value>
+  </data>
+  <data name="Variables.Manager.FileSettings" xml:space="preserve">
+    <value>Nastavení souboru</value>
+  </data>
+  <data name="Variables.Manager.FileUnavailable" xml:space="preserve">
+    <value>Bez hodnoty: soubor chybí, nelze jej přečíst nebo neodpovídá typu proměnné</value>
+  </data>
+  <data name="Variables.Manager.CreateFailed" xml:space="preserve">
+    <value>Proměnnou se nepodařilo vytvořit. Zkuste to znovu.</value>
+  </data>
+  <data name="Variables.Manager.SaveFailed" xml:space="preserve">
+    <value>Změny se nepodařilo uložit. Zkuste to znovu.</value>
   </data>
   <data name="Variables.NewVariable" xml:space="preserve">
     <value>Nová proměnná</value>

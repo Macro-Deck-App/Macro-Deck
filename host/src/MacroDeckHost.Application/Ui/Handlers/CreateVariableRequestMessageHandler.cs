@@ -2,6 +2,7 @@ using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Application.Ui.Transport.Messages.Variables;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Application.Ui.Handlers;
@@ -10,10 +11,12 @@ public class CreateVariableRequestMessageHandler
 	: IUiTransportMessageHandler<CreateVariableRequest, CreateVariableResponse>
 {
 	private readonly IVariableService _service;
+	private readonly VariableRegistry _registry;
 
-	public CreateVariableRequestMessageHandler(IVariableService service)
+	public CreateVariableRequestMessageHandler(IVariableService service, VariableRegistry registry)
 	{
 		_service = service;
+		_registry = registry;
 	}
 
 	public async ValueTask<CreateVariableResponse> Handle(
@@ -40,7 +43,8 @@ public class CreateVariableRequestMessageHandler
 			request.ScopeRefId,
 			type.Value,
 			initialValue,
-			request.DecimalPlaces);
+			request.DecimalPlaces,
+			VariableDtoMapper.FileSourceFromWire(request.FileSource));
 
 		if (!result.Success || result.Data is null)
 		{
@@ -54,7 +58,7 @@ public class CreateVariableRequestMessageHandler
 		return new CreateVariableResponse
 		{
 			Success = true,
-			Variable = VariableDtoMapper.ToDto(result.Data, true, null)
+			Variable = VariableDtoMapper.ToDto(result.Data, _registry.IsAvailable(result.Data.Id), null)
 		};
 	}
 }

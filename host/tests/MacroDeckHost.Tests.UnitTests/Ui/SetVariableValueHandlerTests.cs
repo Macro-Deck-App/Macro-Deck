@@ -106,7 +106,8 @@ public class SetVariableValueHandlerTests
 			]
 		};
 
-		var service = TestVariableServices.Create(new VariableRegistry(),
+		var registry = new VariableRegistry();
+		var service = TestVariableServices.Create(registry,
 			new NullUserVariableStore(),
 			new RecordingMediator(),
 			new ConfigurableIntegrationRegistry([provider]));
@@ -123,7 +124,7 @@ public class SetVariableValueHandlerTests
 			.GetAwaiter()
 			.GetResult();
 
-		var handler = new SetVariableValueRequestMessageHandler(service, new FakeHostLockState { IsLocked = false });
+		var handler = new SetVariableValueRequestMessageHandler(service, new FakeHostLockState { IsLocked = false }, registry);
 
 		return (handler, provider, created.Data!.Id, service);
 	}

@@ -2870,6 +2870,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Errors.Variables.WriteFailed" xml:space="preserve">
     <value>Non è stato possibile applicare il valore</value>
   </data>
+  <data name="Errors.Variables.FileReadOnly" xml:space="preserve">
+    <value>Questa variabile legge il suo valore da un file e non lo riscrive</value>
+  </data>
+  <data name="Errors.Variables.InvalidFilePath" xml:space="preserve">
+    <value>Inserisci il percorso completo di un file</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>I dati del widget devono essere un oggetto JSON.</value>
   </data>
@@ -10060,6 +10066,21 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.Variables.Actions.VariableLabel" xml:space="preserve">
     <value>Variabile</value>
   </data>
+  <data name="Integrations.Variables.Actions.WriteToFileName" xml:space="preserve">
+    <value>Scrivi variabile su file</value>
+  </data>
+  <data name="Integrations.Variables.Actions.WriteToFileDescription" xml:space="preserve">
+    <value>Scrive il valore attuale di una variabile in un file, sostituendone il contenuto.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.WriteToFileVariableDescription" xml:space="preserve">
+    <value>La variabile il cui valore viene scritto. Va bene qualsiasi variabile, anche quelle di integrazioni e plugin.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.FileLabel" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
+    <value>Il percorso completo del file. Se non esiste viene creato; la cartella deve già esistere.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>Non è stata selezionata alcuna variabile.</value>
   </data>
@@ -10077,6 +10098,15 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Integrations.Variables.Errors.VariablesUnavailable" xml:space="preserve">
     <value>Le variabili non sono disponibili.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.FilePathNotAbsolute" xml:space="preserve">
+    <value>Il percorso del file deve essere completo.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
+    <value>La variabile al momento non ha un valore.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
+    <value>Impossibile scrivere il file.</value>
   </data>
   <data name="Integrations.Variables.Name" xml:space="preserve">
     <value>Variabili</value>
@@ -15616,6 +15646,42 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Variables.Manager.VariableCount.Other" xml:space="preserve">
     <value>{count} variabili</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="Variables.Manager.SourceField" xml:space="preserve">
+    <value>Origine</value>
+  </data>
+  <data name="Variables.Manager.SourceOwnValue" xml:space="preserve">
+    <value>Valore proprio</value>
+  </data>
+  <data name="Variables.Manager.SourceFile" xml:space="preserve">
+    <value>Leggi da file</value>
+  </data>
+  <data name="Variables.Manager.SourceHintOwnValue" xml:space="preserve">
+    <value>Macro Deck memorizza il valore.</value>
+  </data>
+  <data name="Variables.Manager.SourceHintFile" xml:space="preserve">
+    <value>Il valore è il contenuto del file e ne segue ogni modifica.</value>
+  </data>
+  <data name="Variables.Manager.FileField" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="Variables.Manager.AllowWriteBack" xml:space="preserve">
+    <value>Consenti la riscrittura</value>
+  </data>
+  <data name="Variables.Manager.AllowWriteBackHint" xml:space="preserve">
+    <value>Le modifiche fatte in Macro Deck, ad esempio con un cursore, vengono scritte nel file.</value>
+  </data>
+  <data name="Variables.Manager.FileSettings" xml:space="preserve">
+    <value>Impostazioni file</value>
+  </data>
+  <data name="Variables.Manager.FileUnavailable" xml:space="preserve">
+    <value>Nessun valore: il file manca, non è leggibile o non corrisponde al tipo della variabile</value>
+  </data>
+  <data name="Variables.Manager.CreateFailed" xml:space="preserve">
+    <value>Impossibile creare la variabile. Riprova.</value>
+  </data>
+  <data name="Variables.Manager.SaveFailed" xml:space="preserve">
+    <value>Impossibile salvare le modifiche. Riprova.</value>
   </data>
   <data name="Variables.NewVariable" xml:space="preserve">
     <value>Nuova variabile</value>

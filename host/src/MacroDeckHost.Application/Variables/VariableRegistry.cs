@@ -35,19 +35,32 @@ public sealed class VariableRegistry
 		string DefinitionId,
 		VariableType Type);
 
-	public void Upsert(VariableEntity variable)
+	public void Upsert(VariableEntity variable) => Upsert(variable, _ => true);
+
+	public void Upsert(VariableEntity variable, bool available) => Upsert(variable, _ => available);
+
+	public void UpsertKeepingAvailability(VariableEntity variable)
+		=> Upsert(variable, previous => previous?.ProviderAvailable ?? true);
+
+	private void Upsert(VariableEntity variable, Func<Entry?, bool> availability)
 	{
 		var freshness = FreshnessFor(variable);
 
 		lock (_lock)
 		{
-			if (_byId.TryGetValue(variable.Id, out var previous))
+			_byId.TryGetValue(variable.Id, out var previous);
+			if (previous is not null)
 			{
 				_byKey.Remove(KeyOf(previous.Variable));
 				RemoveDefinitionKey(previous.Variable);
 			}
 
-			_byId[variable.Id] = new Entry { Variable = variable, Freshness = freshness };
+			_byId[variable.Id] = new Entry
+			{
+				Variable = variable,
+				Freshness = freshness,
+				ProviderAvailable = availability(previous)
+			};
 			_byKey[KeyOf(variable)] = variable.Id;
 			if (DefinitionKeyOf(variable) is { } definitionKey)
 			{
@@ -56,7 +69,7 @@ public sealed class VariableRegistry
 		}
 	}
 
-	internal bool TryAdd(VariableEntity variable)
+	internal bool TryAdd(VariableEntity variable, bool available = true)
 	{
 		var freshness = FreshnessFor(variable);
 
@@ -73,7 +86,7 @@ public sealed class VariableRegistry
 				return false;
 			}
 
-			_byId[variable.Id] = new Entry { Variable = variable, Freshness = freshness };
+			_byId[variable.Id] = new Entry { Variable = variable, Freshness = freshness, ProviderAvailable = available };
 			_byKey[key] = variable.Id;
 			if (DefinitionKeyOf(variable) is { } createdDefinitionKey)
 			{

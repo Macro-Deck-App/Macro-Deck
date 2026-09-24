@@ -2869,6 +2869,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.Variables.WriteFailed" xml:space="preserve">
     <value>The value could not be applied</value>
   </data>
+  <data name="Errors.Variables.FileReadOnly" xml:space="preserve">
+    <value>This variable reads its value from a file and does not write back</value>
+  </data>
+  <data name="Errors.Variables.InvalidFilePath" xml:space="preserve">
+    <value>Enter the full path to a file</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>The widget data must be a JSON object.</value>
   </data>
@@ -10060,6 +10066,21 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Variables.Actions.VariableLabel" xml:space="preserve">
     <value>Variable</value>
   </data>
+  <data name="Integrations.Variables.Actions.WriteToFileName" xml:space="preserve">
+    <value>Write Variable to File</value>
+  </data>
+  <data name="Integrations.Variables.Actions.WriteToFileDescription" xml:space="preserve">
+    <value>Writes the current value of a variable to a file and replaces what the file contained.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.WriteToFileVariableDescription" xml:space="preserve">
+    <value>The variable whose value is written. Any variable works, including those of integrations and plugins.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.FileLabel" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
+    <value>The full path of the file. It is created if it does not exist; the folder must already exist.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>No variable was selected.</value>
   </data>
@@ -10077,6 +10098,15 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.Variables.Errors.VariablesUnavailable" xml:space="preserve">
     <value>Variables are not available.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.FilePathNotAbsolute" xml:space="preserve">
+    <value>The file path must be a full path.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
+    <value>The variable has no value right now.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
+    <value>The file could not be written.</value>
   </data>
   <data name="Integrations.Variables.Name" xml:space="preserve">
     <value>Variables</value>
@@ -15616,6 +15646,42 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Variables.Manager.VariableCount.Other" xml:space="preserve">
     <value>{count} variables</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="Variables.Manager.SourceField" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="Variables.Manager.SourceOwnValue" xml:space="preserve">
+    <value>Own value</value>
+  </data>
+  <data name="Variables.Manager.SourceFile" xml:space="preserve">
+    <value>Read from file</value>
+  </data>
+  <data name="Variables.Manager.SourceHintOwnValue" xml:space="preserve">
+    <value>Macro Deck stores the value.</value>
+  </data>
+  <data name="Variables.Manager.SourceHintFile" xml:space="preserve">
+    <value>The value is the file's content and follows every change to the file.</value>
+  </data>
+  <data name="Variables.Manager.FileField" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="Variables.Manager.AllowWriteBack" xml:space="preserve">
+    <value>Allow write-back</value>
+  </data>
+  <data name="Variables.Manager.AllowWriteBackHint" xml:space="preserve">
+    <value>Changes made in Macro Deck, for example with a slider, are written to the file.</value>
+  </data>
+  <data name="Variables.Manager.FileSettings" xml:space="preserve">
+    <value>File settings</value>
+  </data>
+  <data name="Variables.Manager.FileUnavailable" xml:space="preserve">
+    <value>No value: the file is missing, can't be read or doesn't fit the variable's type</value>
+  </data>
+  <data name="Variables.Manager.CreateFailed" xml:space="preserve">
+    <value>Couldn't create the variable. Try again.</value>
+  </data>
+  <data name="Variables.Manager.SaveFailed" xml:space="preserve">
+    <value>Couldn't save the changes. Try again.</value>
   </data>
   <data name="Variables.NewVariable" xml:space="preserve">
     <value>New variable</value>
