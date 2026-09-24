@@ -169,4 +169,65 @@ describe('BackupService', () => {
       expect(service.pendingRestore()?.restartSupported).toBeFalse();
     });
   });
+  describe('downloading a backup', () => {
+    const shellWindow = window as { macroDeckShell?: unknown };
+    let saveBackup: jasmine.Spy;
+
+    afterEach(() => delete shellWindow.macroDeckShell);
+
+    function withShell(result: object): void {
+      saveBackup = jasmine.createSpy('saveBackup').and.resolveTo(result);
+      shellWindow.macroDeckShell = { saveBackup };
+    }
+
+    it('asks the app where to save it and reports the chosen path', async () => {
+      withShell({ saved: true, canceled: false, path: '/Users/me/b1.macroDeckBackup', error: null });
+
+      const outcome = await service.downloadBackup(summary('b1', '2026-08-17T03:00:00Z') as never);
+
+      expect(saveBackup).toHaveBeenCalledOnceWith({ backupId: 'b1', fileName: 'Backup b1' });
+      expect(outcome).toEqual({ status: 'saved', path: '/Users/me/b1.macroDeckBackup' });
+      expect(apiSpy.downloadBackup).not.toHaveBeenCalled();
+      expect(service.downloading().size).toBe(0);
+    });
+
+    it('does nothing more when the save dialog is cancelled', async () => {
+      withShell({ saved: false, canceled: true, path: null, error: null });
+
+      const outcome = await service.downloadBackup(summary('b1', '2026-08-17T03:00:00Z') as never);
+
+      expect(outcome).toEqual({ status: 'canceled' });
+      expect(apiSpy.downloadBackup).not.toHaveBeenCalled();
+    });
+
+    it('reports a failed save in the user\'s language rather than the app\'s diagnostic text', async () => {
+      withShell({ saved: false, canceled: false, path: null, error: 'Permission denied (os error 13)' });
+
+      const outcome = await service.downloadBackup(summary('b1', '2026-08-17T03:00:00Z') as never);
+
+      expect(outcome).toEqual({ status: 'error', message: 'The file could not be written' });
+      expect(service.downloading().size).withContext('Download is usable again').toBe(0);
+    });
+
+    it('falls back to a browser download when the app cannot reach the host itself', async () => {
+      withShell({ saved: false, canceled: false, unavailable: true, path: null, error: null });
+      apiSpy.downloadBackup.and.resolveTo({ blob: new Blob(['x']), fileName: 'b1.macroDeckBackup' });
+      spyOn(HTMLAnchorElement.prototype, 'click');
+
+      const outcome = await service.downloadBackup(summary('b1', '2026-08-17T03:00:00Z') as never);
+
+      expect(apiSpy.downloadBackup).toHaveBeenCalledOnceWith('b1');
+      expect(outcome).toEqual({ status: 'saved' });
+    });
+
+    it('downloads in the browser when there is no app around it', async () => {
+      apiSpy.downloadBackup.and.resolveTo({ blob: new Blob(['x']), fileName: 'b1.macroDeckBackup' });
+      spyOn(HTMLAnchorElement.prototype, 'click');
+
+      const outcome = await service.downloadBackup(summary('b1', '2026-08-17T03:00:00Z') as never);
+
+      expect(apiSpy.downloadBackup).toHaveBeenCalledOnceWith('b1');
+      expect(outcome).toEqual({ status: 'saved' });
+    });
+  });
 });

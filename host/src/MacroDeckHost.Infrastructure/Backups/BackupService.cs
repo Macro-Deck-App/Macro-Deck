@@ -278,10 +278,14 @@ public sealed class BackupService : IBackupService
 				!string.Equals(manifest.RecoveryKeyId, localKeyId, StringComparison.Ordinal);
 
 			byte[]? effectiveKey = null;
-			if (!string.IsNullOrWhiteSpace(recoveryKey) &&
-				recoveryKeyService.TryParseExportedKey(recoveryKey, out var parsedKey))
+			var keySupplied = !string.IsNullOrWhiteSpace(recoveryKey);
+			if (keySupplied && recoveryKeyService.TryParseExportedKey(recoveryKey, out var parsedKey))
 			{
 				effectiveKey = parsedKey;
+			}
+			else if (keySupplied && recoveryKeyRequired)
+			{
+				return Result.Fail<BackupInspection, BackupError>(BackupError.RecoveryKeyInvalid);
 			}
 			else if (!recoveryKeyRequired)
 			{
@@ -348,6 +352,12 @@ public sealed class BackupService : IBackupService
 			{
 				return Result.Fail<BackupDescriptor, BackupError>(BackupError.UnsupportedVersion,
 					"This archive was created by a newer version of Macro Deck.");
+			}
+
+			var existing = await _catalog.Find(manifest.BackupId, cancellationToken);
+			if (existing is not null)
+			{
+				return Result.Ok<BackupDescriptor, BackupError>(existing);
 			}
 
 			var provider = _storageRegistry.Primary;

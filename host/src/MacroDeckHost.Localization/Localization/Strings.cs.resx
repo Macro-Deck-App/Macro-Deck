@@ -2399,6 +2399,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Backup.FileLocked" xml:space="preserve">
     <value>Soubor nelze přečíst, protože jej používá jiný program</value>
   </data>
+  <data name="Errors.Backup.ImportFailed" xml:space="preserve">
+    <value>Zálohu se nepodařilo importovat</value>
+  </data>
   <data name="Errors.Backup.InspectFailed" xml:space="preserve">
     <value>Zálohu se nepodařilo prozkoumat</value>
   </data>
@@ -12921,6 +12924,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.Backups.DownloadButton" xml:space="preserve">
     <value>Stáhnout</value>
   </data>
+  <data name="Settings.Backups.DownloadSaved" xml:space="preserve">
+    <value>Záloha uložena</value>
+  </data>
   <data name="Settings.Backups.EmptyHeading" xml:space="preserve">
     <value>Zatím žádné zálohy</value>
   </data>
@@ -12935,6 +12941,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Settings.Backups.Friday" xml:space="preserve">
     <value>Pátek</value>
+  </data>
+  <data name="Settings.Backups.ImportButton" xml:space="preserve">
+    <value>Importovat zálohu</value>
+  </data>
+  <data name="Settings.Backups.ImportSucceeded" xml:space="preserve">
+    <value>Záloha importována</value>
   </data>
   <data name="Settings.Backups.KeepLatestDescription" xml:space="preserve">
     <value>Kolik záloh se má uchovat, než se starší automaticky odstraní.</value>
@@ -13020,6 +13032,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Settings.Backups.RestartFailedToast" xml:space="preserve">
     <value>Macro Deck se nepodařilo restartovat</value>
+  </data>
+  <data name="Settings.Backups.RestoreAdoptsRecoveryKey" xml:space="preserve">
+    <value>Po obnovení bude Macro Deck používat obnovovací klíč, který byl právě zadán. Dosavadní zálohy této instalace lze otevřít pouze jejím současným obnovovacím klíčem, proto si jej před pokračováním uložte.</value>
   </data>
   <data name="Settings.Backups.RestoreButton" xml:space="preserve">
     <value>Obnovit…</value>

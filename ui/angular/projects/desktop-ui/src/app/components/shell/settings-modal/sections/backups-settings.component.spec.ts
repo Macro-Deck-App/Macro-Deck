@@ -40,7 +40,8 @@ describe('BackupsSettingsComponent', () => {
       'getBackups', 'createBackup', 'deleteBackup', 'downloadBackup',
       'getBackupSettings', 'updateBackupSettings',
       'getBackupRecoveryKeyState', 'createBackupRecoveryKey', 'acknowledgeBackupRecoveryKey', 'revealBackupRecoveryKey',
-      'getBackupStatus', 'inspectBackup', 'prepareRestore', 'commitRestore', 'cancelRestore', 'restartApplication',
+      'getBackupStatus', 'inspectBackup', 'importBackup', 'prepareRestore', 'commitRestore', 'cancelRestore',
+      'restartApplication',
       'onNotification',
     ]);
     api.onNotification.and.returnValue(EMPTY);
@@ -79,6 +80,40 @@ describe('BackupsSettingsComponent', () => {
     await f.whenStable();
     f.detectChanges();
     return f;
+  }
+
+  async function settle(): Promise<void> {
+    for (let round = 0; round < 5; round++) {
+      fixture.detectChanges();
+      await fixture.whenStable();
+      await Promise.resolve();
+    }
+    fixture.detectChanges();
+  }
+
+  function recoveryKeyPrompt(): HTMLElement | null {
+    return fixture.nativeElement.querySelector('shared-recovery-key-prompt-modal .modal-overlay:not(.closing)');
+  }
+
+  async function submitRecoveryKey(key: string): Promise<void> {
+    const input = recoveryKeyPrompt()!.querySelector('input') as HTMLInputElement;
+    input.value = key;
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    const continueButton = Array.from(recoveryKeyPrompt()!.querySelectorAll('shared-button button'))
+      .find(el => (el as HTMLElement).textContent?.trim() === 'Continue') as HTMLButtonElement;
+    expect(continueButton.disabled).withContext('Continue enabled after typing').toBeFalse();
+    continueButton.click();
+    await settle();
+  }
+
+  async function chooseImportFile(file: File): Promise<void> {
+    const input = fixture.nativeElement.querySelector('input[type="file"]') as HTMLInputElement;
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    input.files = transfer.files;
+    input.dispatchEvent(new Event('change'));
+    await settle();
   }
 
   function confirmationButton(label: string): HTMLButtonElement {
@@ -248,6 +283,127 @@ describe('BackupsSettingsComponent', () => {
       await fixture.whenStable();
 
       expect(api.prepareRestore).not.toHaveBeenCalled();
+    });
+  });
+  describe('restore from another installation', () => {
+    const foreign = backup('f', { decryptableLocally: false, imported: true });
+    const catalog = [
+      { id: 'Integrations' as const, requires: [] },
+      { id: 'Plugins' as const, requires: ['Integrations' as const] },
+      { id: 'Profiles' as const, requires: [] },
+    ];
+
+    function answerInspect(): void {
+      api.inspectBackup.and.callFake(async (_id: string, key?: string) => {
+        if (!key) {
+          return { success: true, backup: foreign, recoveryKeyRequired: true, components: [], catalog };
+        }
+        if (key !== 'the-right-key') {
+          return {
+            success: false,
+            error: { code: 'RecoveryKeyInvalid', message: 'x' },
+            recoveryKeyRequired: false,
+            components: [],
+            catalog: [],
+          };
+        }
+        return { success: true, backup: foreign, recoveryKeyRequired: true, components: [], catalog };
+      });
+    }
+
+    it('asks for the recovery key, keeps asking after a wrong one, and restores with the right one', async () => {
+      fixture = await create();
+      answerInspect();
+      api.prepareRestore.and.resolveTo({
+        success: true, restoreId: 'r1', backupId: 'f', effective: ['Plugins', 'Integrations'], autoSelected: [],
+        warnings: [], recoveryKeyRequired: true, safetyBackupCreated: true, catalog: [],
+      });
+
+      await fixture.componentInstance.onRestoreRequested(foreign);
+      await settle();
+
+      expect(recoveryKeyPrompt()).withContext('the prompt is the only way in').toBeTruthy();
+      expect(fixture.debugElement.query(By.directive(BackupRestoreModalComponent))).toBeNull();
+
+      await submitRecoveryKey('a-wrong-key');
+
+      expect(recoveryKeyPrompt()).withContext('a rejected key must leave the prompt on screen').toBeTruthy();
+      expect(recoveryKeyPrompt()!.textContent).toContain('That recovery key was not accepted');
+
+      await submitRecoveryKey('the-right-key');
+
+      const pickModal = fixture.debugElement.query(By.directive(BackupRestoreModalComponent));
+      expect(pickModal).toBeTruthy();
+      (pickModal.componentInstance as BackupRestoreModalComponent).confirmed.emit(['Plugins']);
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('shared-confirmation-modal').textContent)
+        .toContain('Macro Deck uses the recovery key you just entered');
+
+      confirmationButton('Restore').click();
+      fixture.detectChanges();
+      jasmine.clock().tick(150);
+      await fixture.whenStable();
+
+      expect(api.prepareRestore).toHaveBeenCalledOnceWith({
+        backupId: 'f', components: ['Plugins'], recoveryKey: 'the-right-key',
+      });
+    });
+
+    it('does not claim the recovery key changes when the restore leaves the secrets alone', async () => {
+      fixture = await create();
+      answerInspect();
+
+      await fixture.componentInstance.onRestoreRequested(foreign);
+      await settle();
+      await submitRecoveryKey('the-right-key');
+
+      const pickModal = fixture.debugElement.query(By.directive(BackupRestoreModalComponent));
+      (pickModal.componentInstance as BackupRestoreModalComponent).confirmed.emit(['Profiles']);
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('shared-confirmation-modal').textContent)
+        .not.toContain('Macro Deck uses the recovery key you just entered');
+    });
+
+    it('imports a chosen backup file and goes straight on to restoring it', async () => {
+      fixture = await create();
+      answerInspect();
+      api.importBackup.and.resolveTo({ success: true, backup: foreign });
+
+      await chooseImportFile(new File(['archive'], 'other.macroDeckBackup'));
+
+      expect(api.importBackup).toHaveBeenCalledTimes(1);
+      expect(toastSpy.show).toHaveBeenCalledWith('Backup imported', jasmine.objectContaining({ variant: 'success' }));
+      expect(api.inspectBackup).toHaveBeenCalledWith('f', undefined);
+      expect(recoveryKeyPrompt()).toBeTruthy();
+    });
+
+    it('explains a rejected import in the user\'s language', async () => {
+      fixture = await create();
+      api.importBackup.and.resolveTo({
+        success: false,
+        error: {
+          code: 'InvalidArchive',
+          message: { $localized: { scope: 'macrodeck.app', key: 'Errors.Backup.InvalidArchive' } } as never,
+        },
+      });
+
+      await chooseImportFile(new File(['not a backup'], 'notes.macroDeckBackup'));
+
+      expect(toastSpy.show).toHaveBeenCalledWith(
+        'The file is not a valid Macro Deck backup', jasmine.objectContaining({ variant: 'error' }));
+      expect(api.inspectBackup).not.toHaveBeenCalled();
+    });
+
+    it('reports an import that never reached the host without leaking transport details', async () => {
+      fixture = await create();
+      api.importBackup.and.rejectWith(new Error('Payload Too Large'));
+
+      await chooseImportFile(new File(['archive'], 'big.macroDeckBackup'));
+
+      expect(toastSpy.show).toHaveBeenCalledWith(
+        'The backup could not be imported', jasmine.objectContaining({ variant: 'error' }));
     });
   });
 });

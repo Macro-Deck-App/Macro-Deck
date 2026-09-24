@@ -2398,6 +2398,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.Backup.FileLocked" xml:space="preserve">
     <value>A file could not be read because another program is using it</value>
   </data>
+  <data name="Errors.Backup.ImportFailed" xml:space="preserve">
+    <value>The backup could not be imported</value>
+  </data>
   <data name="Errors.Backup.InspectFailed" xml:space="preserve">
     <value>The backup could not be inspected</value>
   </data>
@@ -12921,6 +12924,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Settings.Backups.DownloadButton" xml:space="preserve">
     <value>Download</value>
   </data>
+  <data name="Settings.Backups.DownloadSaved" xml:space="preserve">
+    <value>Backup saved</value>
+  </data>
   <data name="Settings.Backups.EmptyHeading" xml:space="preserve">
     <value>No backups yet</value>
   </data>
@@ -12935,6 +12941,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Settings.Backups.Friday" xml:space="preserve">
     <value>Friday</value>
+  </data>
+  <data name="Settings.Backups.ImportButton" xml:space="preserve">
+    <value>Import backup</value>
+  </data>
+  <data name="Settings.Backups.ImportSucceeded" xml:space="preserve">
+    <value>Backup imported</value>
   </data>
   <data name="Settings.Backups.KeepLatestDescription" xml:space="preserve">
     <value>How many backups to keep before older ones are deleted automatically.</value>
@@ -13020,6 +13032,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Settings.Backups.RestartFailedToast" xml:space="preserve">
     <value>Macro Deck could not restart itself</value>
+  </data>
+  <data name="Settings.Backups.RestoreAdoptsRecoveryKey" xml:space="preserve">
+    <value>After the restore, Macro Deck uses the recovery key you just entered. Backups this installation made until now open only with its current recovery key, so make sure you have saved it before you continue.</value>
   </data>
   <data name="Settings.Backups.RestoreButton" xml:space="preserve">
     <value>Restore…</value>

@@ -125,7 +125,9 @@ a pending-restore intent.
 groups swap by directory move with a flushed journal and reverse-replay rollback; database-backed groups
 apply table-wise from the staged database in one transaction over an explicit column list. The migration
 history table is never restored, so a restored installation keeps its own record. A denylist protects the
-recovery-key pointer and the installation id from being overwritten by a partial restore.
+installation id from being overwritten, and the recovery-key pointer from a restore that does not bring the
+secret table. When the secret table is restored, the pointer travels with it: the rows it named are gone,
+and the archive's pointer names the recovery key whose escrow the restored key ring came with.
 
 Selection is nine coarse groups, each replaced wholesale rather than merged field by field, with
 dependencies auto-selected.
@@ -168,6 +170,10 @@ dependencies auto-selected.
   merge one automation from the archive with a newer one on disk.
 - An escrow can name a recovery key the user has already replaced, because the previous wrap is retained
   until the new one is exported. A stale wrap is the smaller problem.
+- Restoring another installation's secrets makes its recovery key this installation's recovery key: the
+  two now share that key and the key-encryption key it escrows. This installation's own recovery key is
+  replaced with the secret table, so its earlier backups, including the safety backup taken just before
+  the restore, need the previous key, which the user has to have saved beforehand.
 
 ## References
 

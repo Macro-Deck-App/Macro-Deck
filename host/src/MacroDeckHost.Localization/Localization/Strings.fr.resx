@@ -2399,6 +2399,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Errors.Backup.FileLocked" xml:space="preserve">
     <value>Un fichier n'a pas pu être lu car un autre programme l'utilise</value>
   </data>
+  <data name="Errors.Backup.ImportFailed" xml:space="preserve">
+    <value>La sauvegarde n'a pas pu être importée</value>
+  </data>
   <data name="Errors.Backup.InspectFailed" xml:space="preserve">
     <value>La sauvegarde n'a pas pu être inspectée</value>
   </data>
@@ -12921,6 +12924,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Settings.Backups.DownloadButton" xml:space="preserve">
     <value>Télécharger</value>
   </data>
+  <data name="Settings.Backups.DownloadSaved" xml:space="preserve">
+    <value>Sauvegarde enregistrée</value>
+  </data>
   <data name="Settings.Backups.EmptyHeading" xml:space="preserve">
     <value>Aucune sauvegarde pour le moment</value>
   </data>
@@ -12935,6 +12941,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Settings.Backups.Friday" xml:space="preserve">
     <value>Vendredi</value>
+  </data>
+  <data name="Settings.Backups.ImportButton" xml:space="preserve">
+    <value>Importer une sauvegarde</value>
+  </data>
+  <data name="Settings.Backups.ImportSucceeded" xml:space="preserve">
+    <value>Sauvegarde importée</value>
   </data>
   <data name="Settings.Backups.KeepLatestDescription" xml:space="preserve">
     <value>Le nombre de sauvegardes à conserver avant que les plus anciennes ne soient supprimées automatiquement.</value>
@@ -13020,6 +13032,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Settings.Backups.RestartFailedToast" xml:space="preserve">
     <value>Macro Deck n'a pas pu redémarrer automatiquement</value>
+  </data>
+  <data name="Settings.Backups.RestoreAdoptsRecoveryKey" xml:space="preserve">
+    <value>Après la restauration, Macro Deck utilise la clé de récupération que tu viens de saisir. Les sauvegardes faites jusqu'ici par cette installation ne s'ouvrent qu'avec sa clé de récupération actuelle : enregistre-la avant de continuer.</value>
   </data>
   <data name="Settings.Backups.RestoreButton" xml:space="preserve">
     <value>Restaurer…</value>

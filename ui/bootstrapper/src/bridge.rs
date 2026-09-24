@@ -4,6 +4,7 @@ use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_dialog::{DialogExt, FilePath};
 use tauri_plugin_opener::OpenerExt;
 
+use crate::backup_download;
 use crate::host;
 use crate::localization::{self, keys};
 use crate::logging;
@@ -39,6 +40,7 @@ const SAVE_FILE_FALLBACK_NAME: &str = "export";
 pub struct SaveFileResult {
     pub saved: bool,
     pub canceled: bool,
+    pub unavailable: bool,
     pub path: Option<String>,
     pub error: Option<String>,
 }
@@ -48,6 +50,7 @@ impl SaveFileResult {
         Self {
             saved: false,
             canceled: true,
+            unavailable: false,
             path: None,
             error: None,
         }
@@ -57,6 +60,7 @@ impl SaveFileResult {
         Self {
             saved: true,
             canceled: false,
+            unavailable: false,
             path: Some(path),
             error: None,
         }
@@ -66,10 +70,28 @@ impl SaveFileResult {
         Self {
             saved: false,
             canceled: false,
+            unavailable: false,
             path: None,
             error: Some(error),
         }
     }
+
+    fn unavailable() -> Self {
+        Self {
+            saved: false,
+            canceled: false,
+            unavailable: true,
+            path: None,
+            error: None,
+        }
+    }
+}
+
+#[derive(Deserialize, Default)]
+#[serde(rename_all = "camelCase", default)]
+pub struct SaveBackupOptions {
+    pub backup_id: String,
+    pub file_name: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -229,26 +251,7 @@ pub async fn save_file(app: AppHandle, request: Request<'_>) -> Result<SaveFileR
         .map(parse_save_file_extensions)
         .unwrap_or_default();
 
-    let mut dialog = app.dialog().file().set_file_name(&file_name);
-    if let Some(window) = app.get_webview_window(window::MAIN_WINDOW) {
-        dialog = dialog.set_parent(&window);
-    }
-    if !extensions.is_empty() {
-        let filters: Vec<&str> = extensions.iter().map(String::as_str).collect();
-        dialog = dialog.add_filter("Macro Deck", &filters);
-    }
-
-    let (tx, mut rx) = tauri::async_runtime::channel(1);
-    dialog.save_file(move |path: Option<FilePath>| {
-        let _ = tx.try_send(path);
-    });
-
-    let Some(path) = rx
-        .recv()
-        .await
-        .flatten()
-        .and_then(|path| path.into_path().ok())
-    else {
+    let Some(path) = pick_save_path(&app, &file_name, None, &extensions).await else {
         return Ok(SaveFileResult::canceled());
     };
 
@@ -260,6 +263,89 @@ pub async fn save_file(app: AppHandle, request: Request<'_>) -> Result<SaveFileR
                 path.display()
             ));
             Ok(SaveFileResult::failed(error.to_string()))
+        }
+    }
+}
+
+async fn pick_save_path(
+    app: &AppHandle,
+    file_name: &str,
+    directory: Option<&std::path::Path>,
+    extensions: &[String],
+) -> Option<std::path::PathBuf> {
+    let mut dialog = app.dialog().file().set_file_name(file_name);
+    if let Some(window) = app.get_webview_window(window::MAIN_WINDOW) {
+        dialog = dialog.set_parent(&window);
+    }
+    if let Some(directory) = directory {
+        dialog = dialog.set_directory(directory);
+    }
+    if !extensions.is_empty() {
+        let filters: Vec<&str> = extensions.iter().map(String::as_str).collect();
+        dialog = dialog.add_filter("Macro Deck", &filters);
+    }
+
+    let (tx, mut rx) = tauri::async_runtime::channel(1);
+    dialog.save_file(move |path: Option<FilePath>| {
+        let _ = tx.try_send(path);
+    });
+
+    rx.recv()
+        .await
+        .flatten()
+        .and_then(|path| path.into_path().ok())
+}
+
+#[tauri::command]
+pub async fn save_backup(app: AppHandle, options: SaveBackupOptions) -> SaveFileResult {
+    let port = {
+        let state = app.state::<std::sync::Arc<host::HostState>>();
+        backup_download::select_download_port(
+            host::is_packaged(),
+            state.ui_port(),
+            host::current_port(),
+        )
+    };
+    let Some(port) = port else {
+        return SaveFileResult::unavailable();
+    };
+    if !backup_download::is_backup_id(&options.backup_id) {
+        return SaveFileResult::failed("not a backup id".to_string());
+    }
+
+    let extensions = vec![backup_download::BACKUP_EXTENSION.to_string()];
+    let mut file_name = backup_download::default_file_name(&sanitize_save_file_name(
+        options.file_name.as_deref().unwrap_or_default(),
+    ));
+    let mut directory: Option<std::path::PathBuf> = None;
+    let path = loop {
+        let Some(chosen) =
+            pick_save_path(&app, &file_name, directory.as_deref(), &extensions).await
+        else {
+            return SaveFileResult::canceled();
+        };
+        let (path, appended) =
+            backup_download::with_extension(chosen, backup_download::BACKUP_EXTENSION);
+        // Some dialogs do not add the extension; the name it now carries was never confirmed there.
+        if appended && path.exists() {
+            file_name = path
+                .file_name()
+                .map(|name| name.to_string_lossy().into_owned())
+                .unwrap_or_default();
+            directory = path.parent().map(std::path::Path::to_path_buf);
+            continue;
+        }
+        break path;
+    };
+
+    match backup_download::download_to(port, &options.backup_id, &path).await {
+        Ok(()) => SaveFileResult::saved(path.display().to_string()),
+        Err(error) => {
+            logging::error(&format!(
+                "[bridge] could not save backup to {}: {error}",
+                path.display()
+            ));
+            SaveFileResult::failed(error)
         }
     }
 }
@@ -445,13 +531,14 @@ mod tests {
         assert!(script.contains("encodeURIComponent"));
     }
 
-    const SHARED_COMMANDS: [&str; 19] = [
+    const SHARED_COMMANDS: [&str; 20] = [
         "get_host_port",
         "get_shell_info",
         "get_cursor_position",
         "open_external",
         "show_open_dialog",
         "save_file",
+        "save_backup",
         "take_opened_files",
         // Only the macOS menu ever parks an action, but the grant is shared:
         // the UI drains the slot on every platform rather than branching on one.

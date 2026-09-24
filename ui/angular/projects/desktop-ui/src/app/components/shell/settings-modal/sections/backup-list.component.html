@@ -73,7 +73,7 @@
                 </ng-template>
                 <ng-template #menuContent>
                   <div class="bl-menu">
-                    <button type="button" class="bl-menu-item" (click)="download(backup)">
+                    <button type="button" class="bl-menu-item" [disabled]="isDownloading(backup)" (click)="download(backup)">
                       <span class="icon icon-download icon-sm"></span>
                       <span>{{ 'macrodeck.app:Settings.Backups.DownloadButton' | translate }}</span>
                     </button>
@@ -84,7 +84,7 @@
                     <button
                       type="button"
                       class="bl-menu-item"
-                      [disabled]="!backup.decryptableLocally || !canMutate()"
+                      [disabled]="!canMutate()"
                       [title]="!backup.decryptableLocally ? ('macrodeck.app:Settings.Backups.NeedsRecoveryKeyTitle' | translate) : ''"
                       (click)="restore(backup)">
                       <span class="icon icon-refresh icon-sm"></span>

@@ -55,7 +55,7 @@ While an update is waiting, the Macro Deck icon in the system tray or menu bar h
 entry with the new version. It opens the update window again.
 
 With **Before Macro Deck updates** turned on in **Settings > Backups**, Macro Deck makes a backup before it
-installs.
+installs. See [Backups](/guide/backups/).
 
 ## Extension updates
 

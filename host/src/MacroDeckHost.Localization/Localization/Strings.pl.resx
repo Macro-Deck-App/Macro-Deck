@@ -2399,6 +2399,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.Backup.FileLocked" xml:space="preserve">
     <value>Nie można odczytać pliku, ponieważ używa go inny program</value>
   </data>
+  <data name="Errors.Backup.ImportFailed" xml:space="preserve">
+    <value>Nie można było zaimportować kopii zapasowej</value>
+  </data>
   <data name="Errors.Backup.InspectFailed" xml:space="preserve">
     <value>Nie można było przeanalizować kopii zapasowej</value>
   </data>
@@ -12921,6 +12924,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Settings.Backups.DownloadButton" xml:space="preserve">
     <value>Pobierz</value>
   </data>
+  <data name="Settings.Backups.DownloadSaved" xml:space="preserve">
+    <value>Kopia zapasowa zapisana</value>
+  </data>
   <data name="Settings.Backups.EmptyHeading" xml:space="preserve">
     <value>Brak kopii zapasowych</value>
   </data>
@@ -12935,6 +12941,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Settings.Backups.Friday" xml:space="preserve">
     <value>Piątek</value>
+  </data>
+  <data name="Settings.Backups.ImportButton" xml:space="preserve">
+    <value>Importuj kopię zapasową</value>
+  </data>
+  <data name="Settings.Backups.ImportSucceeded" xml:space="preserve">
+    <value>Kopia zapasowa zaimportowana</value>
   </data>
   <data name="Settings.Backups.KeepLatestDescription" xml:space="preserve">
     <value>Liczba kopii zapasowych przechowywanych, zanim starsze zostaną usunięte automatycznie.</value>
@@ -13020,6 +13032,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Settings.Backups.RestartFailedToast" xml:space="preserve">
     <value>Macro Deck nie mógł się ponownie uruchomić</value>
+  </data>
+  <data name="Settings.Backups.RestoreAdoptsRecoveryKey" xml:space="preserve">
+    <value>Po przywróceniu Macro Deck będzie używać klucza odzyskiwania, który został właśnie wprowadzony. Dotychczasowe kopie zapasowe tej instalacji można otworzyć tylko jej obecnym kluczem odzyskiwania, dlatego zapisz go przed kontynuowaniem.</value>
   </data>
   <data name="Settings.Backups.RestoreButton" xml:space="preserve">
     <value>Przywróć…</value>

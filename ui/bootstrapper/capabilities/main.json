@@ -15,6 +15,7 @@
     "allow-open-external",
     "allow-show-open-dialog",
     "allow-save-file",
+    "allow-save-backup",
     "allow-take-opened-files",
     "allow-take-menu-action",
     "allow-set-hotkey-capture",
