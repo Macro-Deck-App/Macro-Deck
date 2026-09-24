@@ -189,6 +189,74 @@ public class ActionExecutionCoordinatorTests
 		GC.KeepAlive(pending);
 	}
 
+	[Test]
+	public async Task A_delegate_run_within_the_bound_returns_its_result_inline_and_publishes_no_event()
+	{
+		var executionId = Guid.NewGuid();
+
+		var dispatch = await _coordinator.RunBoundedAsync((_, _) => Task.FromResult(Succeeded(executionId)),
+			_generousBound,
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(dispatch.Result?.ExecutionId, Is.EqualTo(executionId));
+			Assert.That(dispatch.Result?.Status, Is.EqualTo(FlowExecutionStatus.Succeeded));
+			Assert.That(_transport.Sent, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_detached_delegate_run_ignores_the_callers_token_and_stops_with_the_application()
+	{
+		using var lifetime = new StoppableLifetime();
+		var coordinator = new ActionExecutionCoordinator(_services.GetRequiredService<IServiceScopeFactory>(),
+			_transport,
+			lifetime,
+			Log.Logger);
+		using var callerCts = new CancellationTokenSource();
+		var runToken = new TaskCompletionSource<CancellationToken>(TaskCreationOptions.RunContinuationsAsynchronously);
+		var cancelled = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		var dispatch = await coordinator.RunBoundedAsync(async (_, token) =>
+			{
+				runToken.SetResult(token);
+				await using (token.Register(() => cancelled.SetResult()))
+				{
+					await cancelled.Task;
+				}
+
+				return new FlowExecutionResult { ExecutionId = Guid.NewGuid(), Status = FlowExecutionStatus.Cancelled };
+			},
+			_tinyBound,
+			callerCts.Token);
+		Assert.That(dispatch.Result, Is.Null, "the run is still going, so it must answer Accepted");
+
+		callerCts.Cancel();
+		var token = await runToken.Task;
+		Assert.That(token.IsCancellationRequested, Is.False, "the caller's token must not reach the run");
+
+		lifetime.Stop();
+		await cancelled.Task.WaitAsync(TimeSpan.FromSeconds(2));
+		Assert.That(token.IsCancellationRequested, Is.True);
+	}
+
+	[Test]
+	public async Task Delegate_runs_count_towards_the_same_in_flight_cap()
+	{
+		var never = new TaskCompletionSource<FlowExecutionResult>();
+		var pending = new List<Task<ActionExecutionDispatch>>();
+		for (var i = 0; i < 20; i++)
+		{
+			pending.Add(_coordinator.RunBoundedAsync((_, _) => never.Task, _generousBound, CancellationToken.None));
+		}
+
+		var overflow = await _coordinator.RunBoundedAsync(Request(), _tinyBound, CancellationToken.None);
+
+		Assert.That(overflow.Result?.ErrorCode, Is.EqualTo(ActionExecutionErrorCodes.Unavailable));
+		GC.KeepAlive(pending);
+	}
+
 	private static FlowExecutionRequest Request(string? originClientId = "client-1", Guid? executionId = null)
 		=> new()
 		{
@@ -301,5 +369,20 @@ public class ActionExecutionCoordinatorTests
 		public void StopApplication()
 		{
 		}
+	}
+
+	private sealed class StoppableLifetime : IHostApplicationLifetime, IDisposable
+	{
+		private readonly CancellationTokenSource _stopping = new();
+
+		public CancellationToken ApplicationStarted => CancellationToken.None;
+		public CancellationToken ApplicationStopping => _stopping.Token;
+		public CancellationToken ApplicationStopped => CancellationToken.None;
+
+		public void StopApplication() => Stop();
+
+		public void Stop() => _stopping.Cancel();
+
+		public void Dispose() => _stopping.Dispose();
 	}
 }

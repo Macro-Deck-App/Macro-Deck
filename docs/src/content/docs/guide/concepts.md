@@ -112,6 +112,8 @@ Every change then lands in the file.
 ## Scripts and automations
 
 - **Script:** actions you reuse, for example *Go live* used by three buttons.
+  Any device signed in to Macro Deck can also list and run every script that does not run on a widget,
+  with its own input values. Macro Deck Companion does this from Shortcuts or Siri on iOS.
 - **Automation:** actions that run on an event without belonging to a widget. **Evening stream**
   switches the deck to the **Streaming** profile every day at 18:00:
 
