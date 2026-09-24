@@ -17,6 +17,14 @@ import {
   ChangeUsernameRequest,
   ConnectAdbDeviceRequest,
   ConnectAdbDeviceResponse,
+  ConnectNativeUsbDeviceRequest,
+  ConnectNativeUsbDeviceResponse,
+  ForgetNativeUsbDeviceRequest,
+  ForgetNativeUsbDeviceResponse,
+  GetNativeUsbSettingsResponse,
+  NativeUsbStateChangedEvent,
+  UpdateNativeUsbSettingsRequest,
+  UpdateNativeUsbSettingsResponse,
   ResetPasswordRequest,
   CloneSecretResponse,
   CommitRestoreRequest,
@@ -1220,6 +1228,26 @@ export class ApiService {
     return this.http('POST', '/api/settings/adb/download-platform-tools');
   }
 
+  getNativeUsbSettings(): Promise<GetNativeUsbSettingsResponse> {
+    return this.http('GET', '/api/settings/usb');
+  }
+
+  refreshNativeUsbSettings(): Promise<GetNativeUsbSettingsResponse> {
+    return this.http('POST', '/api/settings/usb/refresh');
+  }
+
+  updateNativeUsbSettings(request: UpdateNativeUsbSettingsRequest): Promise<UpdateNativeUsbSettingsResponse> {
+    return this.http('PUT', '/api/settings/usb', request);
+  }
+
+  connectNativeUsbDevice(request: ConnectNativeUsbDeviceRequest): Promise<ConnectNativeUsbDeviceResponse> {
+    return this.http('POST', '/api/settings/usb/connect', request);
+  }
+
+  forgetNativeUsbDevice(request: ForgetNativeUsbDeviceRequest): Promise<ForgetNativeUsbDeviceResponse> {
+    return this.http('POST', '/api/settings/usb/forget', request);
+  }
+
   // Every device-target endpoint below is loopback-only on the host, so these are reachable from the
   // desktop UI and nowhere else (issue #727).
   getWebClientTargets(): Promise<WebClientTargetDto[]> {
@@ -1287,6 +1315,10 @@ export class ApiService {
 
   onAdbStateChanged(): Observable<AdbStateChangedEvent> {
     return this.onNotification<AdbStateChangedEvent>('AdbStateChangedEvent');
+  }
+
+  onNativeUsbStateChanged(): Observable<NativeUsbStateChangedEvent> {
+    return this.onNotification<NativeUsbStateChangedEvent>('NativeUsbStateChangedEvent');
   }
 
   getProfiles(): Promise<GetProfilesResponse> {

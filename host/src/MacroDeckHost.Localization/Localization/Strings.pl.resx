@@ -11713,6 +11713,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Akcja „{name}” nie powiodła się</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.FailedLoginOverUsb" xml:space="preserve">
+    <value>telefonu przez USB ({serial})</value>
+  </data>
   <data name="Notifications.HostIdentityRenewed" xml:space="preserve">
     <value>Ten komputer ma nową tożsamość</value>
   </data>
@@ -14099,6 +14102,141 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Settings.Update.UpToDateWithVersion" xml:space="preserve">
     <value>Zainstalowana jest najnowsza wersja ({version}).</value>
     <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.Usb.AdbSessionsNote" xml:space="preserve">
+    <value>Sesje ADB z tym urządzeniem, na przykład scrcpy lub Android Studio, zostaną przerwane podczas przełączania.</value>
+  </data>
+  <data name="Settings.Usb.AndroidDescription" xml:space="preserve">
+    <value>Zainstaluj libusb na tym komputerze, na przykład przez Homebrew na Macu lub menedżerem pakietów w Linuksie.</value>
+  </data>
+  <data name="Settings.Usb.AndroidLabel" xml:space="preserve">
+    <value>Urządzenia z Androidem</value>
+  </data>
+  <data name="Settings.Usb.Available" xml:space="preserve">
+    <value>Dostępne</value>
+  </data>
+  <data name="Settings.Usb.ConnectButton" xml:space="preserve">
+    <value>Połącz bez debugowania</value>
+  </data>
+  <data name="Settings.Usb.ConnectFailed" xml:space="preserve">
+    <value>Tego urządzenia nie można teraz połączyć. Odłącz je i podłącz ponownie.</value>
+  </data>
+  <data name="Settings.Usb.ConnectHint" xml:space="preserve">
+    <value>Podczas połączenia telefon nie udostępnia przesyłania plików. Bez aplikacji Macro Deck pyta, którą aplikację otworzyć.</value>
+  </data>
+  <data name="Settings.Usb.DevicesHeading" xml:space="preserve">
+    <value>Urządzenia</value>
+  </data>
+  <data name="Settings.Usb.ExperimentalBadge" xml:space="preserve">
+    <value>Eksperymentalne</value>
+  </data>
+  <data name="Settings.Usb.ExperimentalNote" xml:space="preserve">
+    <value>Pozostaje wyłączone do czasu włączenia i nie każdy telefon to obsługuje. ADB i Wi-Fi działają jak dotąd.</value>
+  </data>
+  <data name="Settings.Usb.FeatureDescription" xml:space="preserve">
+    <value>Połączenie aplikacji Macro Deck kablem USB bez opcji programisty w telefonie.</value>
+  </data>
+  <data name="Settings.Usb.FeatureTitle" xml:space="preserve">
+    <value>USB bez debugowania</value>
+  </data>
+  <data name="Settings.Usb.ForgetButton" xml:space="preserve">
+    <value>Zapomnij</value>
+  </data>
+  <data name="Settings.Usb.Heading" xml:space="preserve">
+    <value>Połączenia USB</value>
+  </data>
+  <data name="Settings.Usb.HttpsOnly" xml:space="preserve">
+    <value>Niedostępne, dopóki Macro Deck przyjmuje tylko HTTPS. W Ustawienia &gt; Sieć ustaw Tryb nasłuchu na Użyj dodatkowego portu HTTPS lub wyłącz HTTPS.</value>
+  </data>
+  <data name="Settings.Usb.IosDescription" xml:space="preserve">
+    <value>Zainstaluj aplikację Urządzenia Apple w systemie Windows lub usługę usbmuxd w Linuksie.</value>
+  </data>
+  <data name="Settings.Usb.IosHint" xml:space="preserve">
+    <value>iPhone lub iPad łączy się, gdy jest na nim otwarta aplikacja Macro Deck.</value>
+  </data>
+  <data name="Settings.Usb.IosLabel" xml:space="preserve">
+    <value>iPhone i iPad</value>
+  </data>
+  <data name="Settings.Usb.LoadFailed" xml:space="preserve">
+    <value>Nie udało się wczytać ustawień połączeń USB.</value>
+  </data>
+  <data name="Settings.Usb.NoDevicesHeading" xml:space="preserve">
+    <value>Nie znaleziono urządzeń</value>
+  </data>
+  <data name="Settings.Usb.NoDevicesMessage" xml:space="preserve">
+    <value>Podłącz telefon lub tablet kablem USB przesyłającym dane.</value>
+  </data>
+  <data name="Settings.Usb.NoPublicListener" xml:space="preserve">
+    <value>Niedostępne, dopóki Macro Deck nie ma nasłuchu sieciowego. Sprawdź port w Ustawienia &gt; Sieć.</value>
+  </data>
+  <data name="Settings.Usb.NoRemembered" xml:space="preserve">
+    <value>Brak zapamiętanych urządzeń.</value>
+  </data>
+  <data name="Settings.Usb.PlatformAndroid" xml:space="preserve">
+    <value>Android</value>
+  </data>
+  <data name="Settings.Usb.PlatformIos" xml:space="preserve">
+    <value>iPhone lub iPad</value>
+  </data>
+  <data name="Settings.Usb.RememberedDescription" xml:space="preserve">
+    <value>Te urządzenia z Androidem łączą się ponownie same po podłączeniu.</value>
+  </data>
+  <data name="Settings.Usb.RememberedHeading" xml:space="preserve">
+    <value>Zapamiętane urządzenia</value>
+  </data>
+  <data name="Settings.Usb.ReplugHint" xml:space="preserve">
+    <value>Odłącz je i podłącz ponownie, aby je połączyć.</value>
+  </data>
+  <data name="Settings.Usb.RescanAriaLabel" xml:space="preserve">
+    <value>Wyszukaj urządzenia ponownie</value>
+  </data>
+  <data name="Settings.Usb.SaveFailed" xml:space="preserve">
+    <value>Nie udało się zapisać ustawień połączeń USB.</value>
+  </data>
+  <data name="Settings.Usb.StateAvailable" xml:space="preserve">
+    <value>Niepołączone</value>
+  </data>
+  <data name="Settings.Usb.StateClosed" xml:space="preserve">
+    <value>Zamknięte w aplikacji</value>
+  </data>
+  <data name="Settings.Usb.StateConnecting" xml:space="preserve">
+    <value>Oczekiwanie na aplikację</value>
+  </data>
+  <data name="Settings.Usb.StateConnectingHint" xml:space="preserve">
+    <value>Otwórz Macro Deck na iPhonie lub iPadzie.</value>
+  </data>
+  <data name="Settings.Usb.StateLinked" xml:space="preserve">
+    <value>Połączone</value>
+  </data>
+  <data name="Settings.Usb.StateNotSupported" xml:space="preserve">
+    <value>To urządzenie tego nie obsługuje</value>
+  </data>
+  <data name="Settings.Usb.StateServedByAdb" xml:space="preserve">
+    <value>Połączone przez ADB</value>
+  </data>
+  <data name="Settings.Usb.StateStopped" xml:space="preserve">
+    <value>Zatrzymane</value>
+  </data>
+  <data name="Settings.Usb.StateSwitching" xml:space="preserve">
+    <value>Przełączanie</value>
+  </data>
+  <data name="Settings.Usb.StateWaiting" xml:space="preserve">
+    <value>Oczekiwanie na połączenie</value>
+  </data>
+  <data name="Settings.Usb.StateWaitingForApp" xml:space="preserve">
+    <value>Oczekiwanie na aplikację Macro Deck</value>
+  </data>
+  <data name="Settings.Usb.StatusHeading" xml:space="preserve">
+    <value>Stan</value>
+  </data>
+  <data name="Settings.Usb.StoppedHint" xml:space="preserve">
+    <value>Kliknij Połącz bez debugowania, aby spróbować ponownie, albo odłącz je i podłącz ponownie.</value>
+  </data>
+  <data name="Settings.Usb.Unavailable" xml:space="preserve">
+    <value>Niedostępne</value>
+  </data>
+  <data name="Settings.Usb.UnknownDevice" xml:space="preserve">
+    <value>Urządzenie z Androidem</value>
   </data>
   <data name="Setup.Account.ConfirmPassword" xml:space="preserve">
     <value>Potwierdź hasło</value>

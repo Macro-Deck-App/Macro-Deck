@@ -11713,6 +11713,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Akce „{name}“ selhala</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.FailedLoginOverUsb" xml:space="preserve">
+    <value>telefonu přes USB ({serial})</value>
+  </data>
   <data name="Notifications.HostIdentityRenewed" xml:space="preserve">
     <value>Tento počítač má novou identitu</value>
   </data>
@@ -14099,6 +14102,141 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.Update.UpToDateWithVersion" xml:space="preserve">
     <value>Používáte nejnovější verzi ({version}).</value>
     <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.Usb.AdbSessionsNote" xml:space="preserve">
+    <value>Relace ADB k tomuto zařízení, například scrcpy nebo Android Studio, se při přepnutí přeruší.</value>
+  </data>
+  <data name="Settings.Usb.AndroidDescription" xml:space="preserve">
+    <value>Nainstalujte libusb do tohoto počítače, například pomocí Homebrew na Macu nebo správcem balíčků v Linuxu.</value>
+  </data>
+  <data name="Settings.Usb.AndroidLabel" xml:space="preserve">
+    <value>Zařízení s Androidem</value>
+  </data>
+  <data name="Settings.Usb.Available" xml:space="preserve">
+    <value>K dispozici</value>
+  </data>
+  <data name="Settings.Usb.ConnectButton" xml:space="preserve">
+    <value>Připojit bez ladění</value>
+  </data>
+  <data name="Settings.Usb.ConnectFailed" xml:space="preserve">
+    <value>Toto zařízení teď nelze připojit. Odpojte ho a znovu připojte.</value>
+  </data>
+  <data name="Settings.Usb.ConnectHint" xml:space="preserve">
+    <value>Během připojení telefon nenabízí přenos souborů. Bez aplikace Macro Deck se zeptá, kterou aplikaci otevřít.</value>
+  </data>
+  <data name="Settings.Usb.DevicesHeading" xml:space="preserve">
+    <value>Zařízení</value>
+  </data>
+  <data name="Settings.Usb.ExperimentalBadge" xml:space="preserve">
+    <value>Experimentální</value>
+  </data>
+  <data name="Settings.Usb.ExperimentalNote" xml:space="preserve">
+    <value>Je vypnuto, dokud se nezapne, a zatím to nepodporuje každý telefon. ADB a Wi-Fi fungují dál jako dřív.</value>
+  </data>
+  <data name="Settings.Usb.FeatureDescription" xml:space="preserve">
+    <value>Připojení aplikace Macro Deck kabelem USB bez možností pro vývojáře v telefonu.</value>
+  </data>
+  <data name="Settings.Usb.FeatureTitle" xml:space="preserve">
+    <value>USB bez ladění</value>
+  </data>
+  <data name="Settings.Usb.ForgetButton" xml:space="preserve">
+    <value>Zapomenout</value>
+  </data>
+  <data name="Settings.Usb.Heading" xml:space="preserve">
+    <value>USB připojení</value>
+  </data>
+  <data name="Settings.Usb.HttpsOnly" xml:space="preserve">
+    <value>Není k dispozici, dokud Macro Deck přijímá jen HTTPS. V Nastavení &gt; Síť nastavte Režim posluchače na Použít další port pro HTTPS, nebo HTTPS vypněte.</value>
+  </data>
+  <data name="Settings.Usb.IosDescription" xml:space="preserve">
+    <value>Nainstalujte aplikaci Zařízení Apple ve Windows nebo službu usbmuxd v Linuxu.</value>
+  </data>
+  <data name="Settings.Usb.IosHint" xml:space="preserve">
+    <value>iPhone nebo iPad se připojí, dokud je na něm otevřený Macro Deck.</value>
+  </data>
+  <data name="Settings.Usb.IosLabel" xml:space="preserve">
+    <value>iPhone a iPad</value>
+  </data>
+  <data name="Settings.Usb.LoadFailed" xml:space="preserve">
+    <value>Nastavení USB připojení se nepodařilo načíst.</value>
+  </data>
+  <data name="Settings.Usb.NoDevicesHeading" xml:space="preserve">
+    <value>Nebyla nalezena žádná zařízení</value>
+  </data>
+  <data name="Settings.Usb.NoDevicesMessage" xml:space="preserve">
+    <value>Připojte telefon nebo tablet kabelem USB, který přenáší data.</value>
+  </data>
+  <data name="Settings.Usb.NoPublicListener" xml:space="preserve">
+    <value>Není k dispozici, dokud Macro Deck nemá síťový posluchač. Zkontrolujte port v Nastavení &gt; Síť.</value>
+  </data>
+  <data name="Settings.Usb.NoRemembered" xml:space="preserve">
+    <value>Zatím nejsou zapamatována žádná zařízení.</value>
+  </data>
+  <data name="Settings.Usb.PlatformAndroid" xml:space="preserve">
+    <value>Android</value>
+  </data>
+  <data name="Settings.Usb.PlatformIos" xml:space="preserve">
+    <value>iPhone nebo iPad</value>
+  </data>
+  <data name="Settings.Usb.RememberedDescription" xml:space="preserve">
+    <value>Tato zařízení s Androidem se po připojení kabelem znovu připojí sama.</value>
+  </data>
+  <data name="Settings.Usb.RememberedHeading" xml:space="preserve">
+    <value>Zapamatovaná zařízení</value>
+  </data>
+  <data name="Settings.Usb.ReplugHint" xml:space="preserve">
+    <value>Pro připojení ho odpojte a znovu připojte.</value>
+  </data>
+  <data name="Settings.Usb.RescanAriaLabel" xml:space="preserve">
+    <value>Znovu vyhledat zařízení</value>
+  </data>
+  <data name="Settings.Usb.SaveFailed" xml:space="preserve">
+    <value>Nastavení USB připojení se nepodařilo uložit.</value>
+  </data>
+  <data name="Settings.Usb.StateAvailable" xml:space="preserve">
+    <value>Nepřipojeno</value>
+  </data>
+  <data name="Settings.Usb.StateClosed" xml:space="preserve">
+    <value>Ukončeno v aplikaci</value>
+  </data>
+  <data name="Settings.Usb.StateConnecting" xml:space="preserve">
+    <value>Čeká se na aplikaci</value>
+  </data>
+  <data name="Settings.Usb.StateConnectingHint" xml:space="preserve">
+    <value>Otevřete Macro Deck na iPhonu nebo iPadu.</value>
+  </data>
+  <data name="Settings.Usb.StateLinked" xml:space="preserve">
+    <value>Připojeno</value>
+  </data>
+  <data name="Settings.Usb.StateNotSupported" xml:space="preserve">
+    <value>Toto zařízení to nepodporuje</value>
+  </data>
+  <data name="Settings.Usb.StateServedByAdb" xml:space="preserve">
+    <value>Připojeno přes ADB</value>
+  </data>
+  <data name="Settings.Usb.StateStopped" xml:space="preserve">
+    <value>Zastaveno</value>
+  </data>
+  <data name="Settings.Usb.StateSwitching" xml:space="preserve">
+    <value>Přepíná se</value>
+  </data>
+  <data name="Settings.Usb.StateWaiting" xml:space="preserve">
+    <value>Čeká na připojení</value>
+  </data>
+  <data name="Settings.Usb.StateWaitingForApp" xml:space="preserve">
+    <value>Čeká se na aplikaci Macro Deck</value>
+  </data>
+  <data name="Settings.Usb.StatusHeading" xml:space="preserve">
+    <value>Stav</value>
+  </data>
+  <data name="Settings.Usb.StoppedHint" xml:space="preserve">
+    <value>Pro nový pokus klikněte na Připojit bez ladění, nebo zařízení odpojte a znovu připojte.</value>
+  </data>
+  <data name="Settings.Usb.Unavailable" xml:space="preserve">
+    <value>Není k dispozici</value>
+  </data>
+  <data name="Settings.Usb.UnknownDevice" xml:space="preserve">
+    <value>Zařízení s Androidem</value>
   </data>
   <data name="Setup.Account.ConfirmPassword" xml:space="preserve">
     <value>Potvrdit heslo</value>

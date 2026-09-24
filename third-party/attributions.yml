@@ -121,6 +121,7 @@ assets:
       - ui/runtime/styles/icons/undo.svg
       - ui/runtime/styles/icons/unlock.svg
       - ui/runtime/styles/icons/upload.svg
+      - ui/runtime/styles/icons/usb.svg
       - ui/runtime/styles/icons/user.svg
       - ui/runtime/styles/icons/weather-type.svg
       - ui/runtime/styles/icons/wifi-solid-full.svg

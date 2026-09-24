@@ -53,6 +53,21 @@ public class SettingsController : ControllerBase
 	private readonly IUiTransportMessageHandler<DownloadAdbPlatformToolsRequest, DownloadAdbPlatformToolsResponse>
 		_downloadAdbPlatformTools;
 
+	private readonly IUiTransportMessageHandler<GetNativeUsbSettingsRequest, GetNativeUsbSettingsResponse>
+		_getNativeUsb;
+
+	private readonly IUiTransportMessageHandler<UpdateNativeUsbSettingsRequest, UpdateNativeUsbSettingsResponse>
+		_updateNativeUsb;
+
+	private readonly IUiTransportMessageHandler<RefreshNativeUsbSettingsRequest, GetNativeUsbSettingsResponse>
+		_refreshNativeUsb;
+
+	private readonly IUiTransportMessageHandler<ConnectNativeUsbDeviceRequest, ConnectNativeUsbDeviceResponse>
+		_connectNativeUsbDevice;
+
+	private readonly IUiTransportMessageHandler<ForgetNativeUsbDeviceRequest, ForgetNativeUsbDeviceResponse>
+		_forgetNativeUsbDevice;
+
 	private readonly IUiTransportMessageHandler<GetDeveloperSettingsRequest, GetDeveloperSettingsResponse>
 		_getDeveloper;
 
@@ -104,6 +119,13 @@ public class SettingsController : ControllerBase
 		IUiTransportMessageHandler<ConnectAdbDeviceRequest, ConnectAdbDeviceResponse> connectAdbDevice,
 		IUiTransportMessageHandler<DownloadAdbPlatformToolsRequest, DownloadAdbPlatformToolsResponse>
 			downloadAdbPlatformTools,
+		IUiTransportMessageHandler<GetNativeUsbSettingsRequest, GetNativeUsbSettingsResponse> getNativeUsb,
+		IUiTransportMessageHandler<UpdateNativeUsbSettingsRequest, UpdateNativeUsbSettingsResponse> updateNativeUsb,
+		IUiTransportMessageHandler<RefreshNativeUsbSettingsRequest, GetNativeUsbSettingsResponse> refreshNativeUsb,
+		IUiTransportMessageHandler<ConnectNativeUsbDeviceRequest, ConnectNativeUsbDeviceResponse>
+			connectNativeUsbDevice,
+		IUiTransportMessageHandler<ForgetNativeUsbDeviceRequest, ForgetNativeUsbDeviceResponse>
+			forgetNativeUsbDevice,
 		IUiTransportMessageHandler<GetDeveloperSettingsRequest, GetDeveloperSettingsResponse> getDeveloper,
 		IUiTransportMessageHandler<UpdateDeveloperSettingsRequest, UpdateDeveloperSettingsResponse> updateDeveloper,
 		IUiTransportMessageHandler<GetOnboardingStateRequest, GetOnboardingStateResponse> getOnboarding,
@@ -134,6 +156,11 @@ public class SettingsController : ControllerBase
 		_restartAdbServer = restartAdbServer;
 		_connectAdbDevice = connectAdbDevice;
 		_downloadAdbPlatformTools = downloadAdbPlatformTools;
+		_getNativeUsb = getNativeUsb;
+		_updateNativeUsb = updateNativeUsb;
+		_refreshNativeUsb = refreshNativeUsb;
+		_connectNativeUsbDevice = connectNativeUsbDevice;
+		_forgetNativeUsbDevice = forgetNativeUsbDevice;
 		_getDeveloper = getDeveloper;
 		_updateDeveloper = updateDeveloper;
 		_getOnboarding = getOnboarding;
@@ -215,6 +242,29 @@ public class SettingsController : ControllerBase
 	[HttpPost("adb/download-platform-tools")]
 	public Task<DownloadAdbPlatformToolsResponse> DownloadAdbPlatformTools(CancellationToken ct)
 		=> _downloadAdbPlatformTools.Handle(new DownloadAdbPlatformToolsRequest(), ct).AsTask();
+
+	[HttpGet("usb")]
+	public Task<GetNativeUsbSettingsResponse> GetNativeUsb(CancellationToken ct)
+		=> _getNativeUsb.Handle(new GetNativeUsbSettingsRequest(), ct).AsTask();
+
+	[HttpPut("usb")]
+	public Task<UpdateNativeUsbSettingsResponse> UpdateNativeUsb(UpdateNativeUsbSettingsRequest body,
+		CancellationToken ct)
+		=> _updateNativeUsb.Handle(body, ct).AsTask();
+
+	[HttpPost("usb/refresh")]
+	public Task<GetNativeUsbSettingsResponse> RefreshNativeUsb(CancellationToken ct)
+		=> _refreshNativeUsb.Handle(new RefreshNativeUsbSettingsRequest(), ct).AsTask();
+
+	[HttpPost("usb/connect")]
+	public Task<ConnectNativeUsbDeviceResponse> ConnectNativeUsbDevice(ConnectNativeUsbDeviceRequest body,
+		CancellationToken ct)
+		=> _connectNativeUsbDevice.Handle(body, ct).AsTask();
+
+	[HttpPost("usb/forget")]
+	public Task<ForgetNativeUsbDeviceResponse> ForgetNativeUsbDevice(ForgetNativeUsbDeviceRequest body,
+		CancellationToken ct)
+		=> _forgetNativeUsbDevice.Handle(body, ct).AsTask();
 
 	[HttpGet("developer")]
 	public Task<GetDeveloperSettingsResponse> GetDeveloper(CancellationToken ct)

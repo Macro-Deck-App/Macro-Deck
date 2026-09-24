@@ -19,6 +19,11 @@ public class PluginPairingServiceTests
 	{
 		public bool Enabled { get; set; } = true;
 
+		public Task<NativeUsbSettings> GetNativeUsb() => throw new NotSupportedException();
+
+		public Task<NativeUsbSettings> SetNativeUsb(bool? enabled, IReadOnlyList<RememberedUsbDevice>? rememberedDevices)
+			=> throw new NotSupportedException();
+
 		public Task<DeveloperSettings> GetDeveloper() => Task.FromResult(new DeveloperSettings(Enabled));
 
 		public Task<DeveloperSettings> SetDeveloper(bool? enabled)

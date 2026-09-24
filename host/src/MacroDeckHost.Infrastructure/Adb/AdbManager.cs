@@ -4,6 +4,7 @@ using MacroDeckHost.Application.Adb;
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Usb;
 using MacroDeckHost.Domain.Common;
 using Microsoft.Extensions.DependencyInjection;
 using ILogger = Serilog.ILogger;
@@ -87,7 +88,8 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 		IMacroDeckPaths paths,
 		IHostListenerState listenerState,
 		TimeProvider timeProvider,
-		ILogger logger)
+		ILogger logger,
+		INativeUsbSerials? nativeUsb = null)
 	{
 		_scopeFactory = scopeFactory;
 		_processRunner = processRunner;
@@ -95,7 +97,7 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 		_logger = logger.ForContext<AdbManager>();
 
 		_ownershipMarker = new AdbOwnershipMarker(paths, logger);
-		_tunnelCoordinator = new AdbTunnelCoordinator(processRunner, listenerState, _ownershipMarker, logger);
+		_tunnelCoordinator = new AdbTunnelCoordinator(processRunner, listenerState, _ownershipMarker, logger, nativeUsb);
 
 		var priorState = _ownershipMarker.Read();
 		if (priorState is not null)

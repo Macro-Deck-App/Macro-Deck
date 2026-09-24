@@ -1,4 +1,5 @@
 using System.Net;
+using MacroDeckHost.Application.Usb;
 
 namespace MacroDeckHost.Auth;
 
@@ -17,10 +18,12 @@ public static class LoopbackConnection
 	public static bool IsLoopbackListener(HttpContext context)
 		=> HostEndpoints.TryGetLoopbackPort(out var loopbackPort) && context.Connection.LocalPort == loopbackPort;
 
+	// A connection bridged from a USB link without debugging is not local, although it comes from loopback.
 	public static bool IsLocalRequest(HttpContext context)
 	{
 		var connection = context.Connection;
-		return connection.RemoteIpAddress is not null &&
+		return context.Features.Get<IBridgedConnectionFeature>() is null &&
+			connection.RemoteIpAddress is not null &&
 			IPAddress.IsLoopback(connection.RemoteIpAddress) &&
 			HasLoopbackHost(context.Request);
 	}

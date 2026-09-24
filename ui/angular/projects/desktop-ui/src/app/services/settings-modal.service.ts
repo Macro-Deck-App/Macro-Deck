@@ -12,6 +12,7 @@ export type SettingsCategory =
   | 'license'
   | 'extensions'
   | 'adb'
+  | 'usb'
   | 'backups'
   | 'migration'
   | 'logging'

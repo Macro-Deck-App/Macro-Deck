@@ -186,7 +186,7 @@ describe('SettingsModalComponent', () => {
 
   it('renders the category rail and the appearance section by default', () => {
     const railButtons = fixture.nativeElement.querySelectorAll('.settings-nav__item');
-    expect(railButtons.length).toBe(15);
+    expect(railButtons.length).toBe(16);
     expect(fixture.nativeElement.querySelector('app-appearance-settings')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.settings-modal__title')?.textContent).toContain('Appearance');
   });
@@ -311,7 +311,7 @@ describe('SettingsModalComponent', () => {
       .map(item => item.textContent?.trim())))
       .toEqual([
         ['Appearance', 'Startup', 'Language', 'Extensions'],
-        ['Network', 'Devices', 'Device clients', 'Companion license'],
+        ['Network', 'Devices', 'Device clients', 'USB connections', 'Companion license'],
         ['Security'],
         ['Backups', 'Migration'],
         ['ADB', 'Logging', 'Developer'],
@@ -319,6 +319,13 @@ describe('SettingsModalComponent', () => {
       ]);
 
     expect(groups[5].classList).toContain('settings-nav__group--divided');
+  });
+
+  it('gives USB connections its own USB icon', () => {
+    const items = Array.from(fixture.nativeElement.querySelectorAll('.settings-nav__item')) as HTMLElement[];
+    const usb = items.find(item => item.textContent?.trim() === 'USB connections');
+
+    expect(usb?.querySelector('.icon-usb')).toBeTruthy();
   });
 
   it('renders the logging section when its category is selected', () => {
@@ -497,7 +504,7 @@ describe('SettingsModalComponent', () => {
   });
 
   it('switches to the account pane and labels it, without adding it to the category rail', () => {
-    expect(fixture.nativeElement.querySelectorAll('.settings-nav__item').length).toBe(15);
+    expect(fixture.nativeElement.querySelectorAll('.settings-nav__item').length).toBe(16);
 
     component.selectAccount();
     fixture.detectChanges();

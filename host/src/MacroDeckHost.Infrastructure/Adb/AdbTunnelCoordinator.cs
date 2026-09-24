@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using MacroDeckHost.Application.Adb;
 using MacroDeckHost.Application.Configuration;
+using MacroDeckHost.Application.Usb;
 using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Infrastructure.Adb;
@@ -12,6 +13,7 @@ internal sealed class AdbTunnelCoordinator
 	private readonly IAdbProcessRunner _processRunner;
 	private readonly IHostListenerState _listenerState;
 	private readonly AdbOwnershipMarker _ownershipMarker;
+	private readonly INativeUsbSerials? _nativeUsb;
 	private readonly ILogger _logger;
 
 	private volatile string? _executablePath;
@@ -32,8 +34,10 @@ internal sealed class AdbTunnelCoordinator
 		IAdbProcessRunner processRunner,
 		IHostListenerState listenerState,
 		AdbOwnershipMarker ownershipMarker,
-		ILogger logger)
+		ILogger logger,
+		INativeUsbSerials? nativeUsb = null)
 	{
+		_nativeUsb = nativeUsb;
 		_processRunner = processRunner;
 		_listenerState = listenerState;
 		_ownershipMarker = ownershipMarker;
@@ -85,6 +89,14 @@ internal sealed class AdbTunnelCoordinator
 			}
 
 			cancellationToken.ThrowIfCancellationRequested();
+
+			// Nothing cached survives the switch and re-enumeration, so adb reverse starts fresh if the
+			// phone falls back to adb later.
+			if (_nativeUsb?.IsNative(device.Serial) == true)
+			{
+				_deviceState.Remove(device.Serial);
+				continue;
+			}
 
 			var state = StateFor(device.Serial);
 

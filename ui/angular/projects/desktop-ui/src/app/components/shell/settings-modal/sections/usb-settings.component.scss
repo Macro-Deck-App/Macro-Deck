@@ -1,0 +1,155 @@
+@use '../../../../../styles/index' as ds;
+
+.usb {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.usb__feature-control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.usb__muted {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: var(--leading-normal);
+  max-width: 30rem;
+}
+
+.usb__note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background-color: var(--color-warning-muted);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+
+  .icon {
+    margin-top: 0.1em;
+    color: var(--color-warning);
+  }
+}
+
+.usb__chip {
+  @include ds.badge;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+}
+
+.usb__chip--ok {
+  color: var(--color-success);
+  background-color: var(--color-success-muted);
+}
+
+.usb__chip--pending {
+  color: var(--color-warning);
+  background-color: var(--color-warning-muted);
+}
+
+.usb__chip--neutral {
+  color: var(--color-text-muted);
+  background-color: var(--color-bg-hover);
+}
+
+.usb__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0;
+  margin: 0;
+}
+
+.usb__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+}
+
+.usb__row-icon {
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+}
+
+.usb__row-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1875rem;
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.usb__row-name {
+  font-size: var(--text-md);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  @include ds.truncate;
+}
+
+.usb__row-serial {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  min-width: 0;
+  max-width: 100%;
+
+  span:first-child {
+    @include ds.truncate;
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: var(--color-text-primary);
+  }
+}
+
+.usb__row-serial--static {
+  cursor: default;
+
+  &:hover {
+    color: var(--color-text-muted);
+  }
+}
+
+.usb__row-hint {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.usb__row-trailing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-left: auto;
+}
+
+.usb__notes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-top: var(--space-3);
+}

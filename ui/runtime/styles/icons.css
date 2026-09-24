@@ -337,6 +337,10 @@
   mask-image: url('./icons/discord.svg');
   -webkit-mask-image: url('./icons/discord.svg');
 }
+.icon-usb {
+  mask-image: url('./icons/usb.svg');
+  -webkit-mask-image: url('./icons/usb.svg');
+}
 .icon-user {
   mask-image: url('./icons/user.svg');
   -webkit-mask-image: url('./icons/user.svg');

@@ -64,12 +64,13 @@ use.
 setting then says so. Even where it is supported, battery saver can refuse it, and the browser
 pauses it while the screen is off.
 
-### USB connections are Android only
+### USB connections
 
-Only Android devices can connect over USB, with the companion app or with the web client at
-`http://127.0.0.1` in the device's browser. It uses ADB, which you turn on in **Settings > ADB**, and
-the official Android platform-tools from Google, about 15 MB. iPhone and iPad connect over your
-network only. See [Connect over USB](/guide/usb-connection/) for the full setup.
+Android devices can connect over USB with ADB, with the companion app or with the web client at
+`http://127.0.0.1` in the device's browser. ADB is turned on in **Settings > ADB** and uses the official
+Android platform-tools from Google, about 15 MB. With the Macro Deck app, Android phones and tablets, iPhone and iPad
+can also connect over USB without debugging, set up in **Settings > USB connections**; the web client
+cannot. See [Connect over USB](/guide/usb-connection/) for the full setup.
 
 ### Older browsers
 
