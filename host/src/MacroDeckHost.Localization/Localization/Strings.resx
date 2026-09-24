@@ -8654,6 +8654,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.System.Actions.RunCommand.ShowWindowLabel" xml:space="preserve">
     <value>Show Window</value>
   </data>
+  <data name="Integrations.System.Actions.RunCommand.TimeoutDescription" xml:space="preserve">
+    <value>How long to wait for the command, 0 waits until it exits. A command still running after that is left running, unless its output is saved to a variable.</value>
+  </data>
   <data name="Integrations.System.Actions.RunCommand.TimeoutLabel" xml:space="preserve">
     <value>Timeout (seconds)</value>
   </data>

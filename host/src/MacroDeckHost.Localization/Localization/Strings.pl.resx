@@ -8654,6 +8654,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.System.Actions.RunCommand.ShowWindowLabel" xml:space="preserve">
     <value>Pokaż okno</value>
   </data>
+  <data name="Integrations.System.Actions.RunCommand.TimeoutDescription" xml:space="preserve">
+    <value>Czas oczekiwania na polecenie, 0 oznacza czekanie do jego zakończenia. Polecenie, które nadal działa po tym czasie, pozostaje uruchomione, chyba że jego wynik jest zapisywany w zmiennej.</value>
+  </data>
   <data name="Integrations.System.Actions.RunCommand.TimeoutLabel" xml:space="preserve">
     <value>Limit czasu (sekundy)</value>
   </data>

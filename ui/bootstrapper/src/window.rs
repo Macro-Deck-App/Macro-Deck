@@ -155,6 +155,7 @@ pub fn create_main_window(app: &AppHandle) {
             return;
         }
     };
+    crate::wayland_titlebar::release_titlebar_buttons(&window);
 
     // While the window is still hidden: restores the saved geometry corrected
     // for the current display configuration (not maximized - see `reveal`).
@@ -302,7 +303,11 @@ pub fn take_suppress_reveal() -> bool {
     SUPPRESS_REVEAL.swap(false, Ordering::SeqCst)
 }
 
-fn dispatch_to_main_thread(app: &AppHandle, what: &str, work: impl FnOnce() + Send + 'static) {
+pub(crate) fn dispatch_to_main_thread(
+    app: &AppHandle,
+    what: &str,
+    work: impl FnOnce() + Send + 'static,
+) {
     if let Err(error) = app.run_on_main_thread(work) {
         logging::error(&format!("[window] could not {what}: {error}"));
     }

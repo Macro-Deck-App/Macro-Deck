@@ -8654,6 +8654,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.System.Actions.RunCommand.ShowWindowLabel" xml:space="preserve">
     <value>Mostrar ventana</value>
   </data>
+  <data name="Integrations.System.Actions.RunCommand.TimeoutDescription" xml:space="preserve">
+    <value>Cuánto esperar al comando, 0 espera hasta que termine. Un comando que siga en ejecución después de ese tiempo sigue ejecutándose, salvo que su salida se guarde en una variable.</value>
+  </data>
   <data name="Integrations.System.Actions.RunCommand.TimeoutLabel" xml:space="preserve">
     <value>Tiempo de espera (segundos)</value>
   </data>

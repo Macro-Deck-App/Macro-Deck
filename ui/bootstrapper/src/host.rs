@@ -353,12 +353,23 @@ pub fn startup_failure_reason(log: &str) -> String {
 }
 
 fn pipe_to_tail<R: std::io::Read + Send + 'static>(reader: R, tail: Arc<LogTail>) {
-    std::thread::spawn(move || {
-        let reader = BufReader::new(reader);
-        for line in reader.lines().map_while(Result::ok) {
-            tail.push_chunk(&crate::redact::redact(&line));
+    std::thread::spawn(move || drain_into_tail(reader, &tail));
+}
+
+// Reads to the end whatever the output holds: stopping early closes the pipe, and every later write
+// by the host, or by a program it started, then fails or raises SIGPIPE.
+fn drain_into_tail<R: std::io::Read>(reader: R, tail: &LogTail) {
+    let mut reader = BufReader::new(reader);
+    let mut line = Vec::new();
+    loop {
+        line.clear();
+        match reader.read_until(b'\n', &mut line) {
+            Ok(0) => return,
+            Ok(_) => tail.push_chunk(&crate::redact::redact(&String::from_utf8_lossy(&line))),
+            Err(error) if error.kind() == std::io::ErrorKind::Interrupted => {}
+            Err(_) => return,
         }
-    });
+    }
 }
 
 pub async fn ensure_running(app: &AppHandle) -> bool {
@@ -1590,6 +1601,21 @@ mod tests {
             data_root_directory_name(BUILD_CHANNEL)
         );
         assert_eq!(port_file_name(), loopback_port_file_name(BUILD_CHANNEL));
+    }
+
+    #[test]
+    fn drain_into_tail_keeps_reading_past_output_that_is_not_utf8() {
+        let tail = LogTail::new(10);
+
+        drain_into_tail(
+            std::io::Cursor::new(b"first\n\xff\xfe broken\nlast\n".to_vec()),
+            &tail,
+        );
+
+        let lines = tail.joined();
+        assert!(lines.contains("first"));
+        assert!(lines.contains("broken"));
+        assert!(lines.contains("last"));
     }
 
     #[test]

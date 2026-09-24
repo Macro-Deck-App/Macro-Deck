@@ -58,6 +58,7 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 			optionsSourceId: VariableOptionsSourceIds.UserVariables),
 		ActionParameter.Number("timeout",
 			label: AppStrings.Integrations.System.Actions.RunCommand.TimeoutLabel(),
+			description: AppStrings.Integrations.System.Actions.RunCommand.TimeoutDescription(),
 			min: 0,
 			max: 300,
 			defaultValue: 30)
@@ -119,6 +120,38 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 			(_, _) => ("sh", "-c", false)
 		};
 
+	// A command left running must not hold the host's stdout and stderr: those are the bootstrapper's
+	// pipes, and a write after the bootstrapper quits raises SIGPIPE and kills the launched app.
+	private const string DetachStandardStreams = "exec </dev/null >/dev/null 2>&1; exec \"$0\" \"$@\"";
+
+	internal static bool IsOnPath(string fileName)
+	{
+		if (fileName.Contains(Path.DirectorySeparatorChar))
+		{
+			return IsExecutable(fileName);
+		}
+
+		var path = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
+		return path.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries)
+			.Any(directory => IsExecutable(Path.Combine(directory, fileName)));
+	}
+
+	private static bool IsExecutable(string path)
+	{
+		if (!File.Exists(path))
+		{
+			return false;
+		}
+
+		if (OperatingSystem.IsWindows())
+		{
+			return true;
+		}
+
+		const UnixFileMode anyExecute = UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute;
+		return (File.GetUnixFileMode(path) & anyExecute) != 0;
+	}
+
 	private sealed class Executor : IActionExecutor
 	{
 		private static readonly ILogger _logger =
@@ -148,14 +181,29 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 			var capture = !string.IsNullOrWhiteSpace(outputVariable);
 
 			var (fileName, switchArgument, useArgumentsString) = ResolveShell(shell, OperatingSystem.IsWindows());
+			var detach = !capture && !OperatingSystem.IsWindows();
 
-			var startInfo = new ProcessStartInfo(fileName)
+			if (detach && !IsOnPath(fileName))
+			{
+				_logger.Warning("Shell {Shell} was not found for command: {Command}", fileName, command);
+				return ActionResult.Failed(ActionErrorCodes.ProviderError,
+					AppStrings.Integrations.System.Errors.CommandCouldNotRun());
+			}
+
+			var startInfo = new ProcessStartInfo(detach ? "sh" : fileName)
 			{
 				UseShellExecute = !capture && showWindow,
 				CreateNoWindow = !showWindow,
 				RedirectStandardOutput = capture,
 				RedirectStandardError = capture
 			};
+
+			if (detach)
+			{
+				startInfo.ArgumentList.Add("-c");
+				startInfo.ArgumentList.Add(DetachStandardStreams);
+				startInfo.ArgumentList.Add(fileName);
+			}
 
 			if (useArgumentsString)
 			{
@@ -223,6 +271,18 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 						AppStrings.Integrations.System.Errors.CommandExitCode(code: process.ExitCode));
 				}
 
+				return ActionResult.Success();
+			}
+			catch (OperationCanceledException) when (!capture)
+			{
+				if (context.CancellationToken.IsCancellationRequested)
+				{
+					throw;
+				}
+
+				_logger.Information("Command is still running after {Timeout}s and is left running: {Command}",
+					timeout,
+					command);
 				return ActionResult.Success();
 			}
 			catch (OperationCanceledException)
