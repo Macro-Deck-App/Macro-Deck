@@ -261,6 +261,71 @@ export type CompanionLicenseAccountSync = 'unknown' | 'synced' | 'signedOut';
 
 export interface CompanionLicenseChangedEvent {}
 
+export type CompanionAppDeviceState =
+  | 'NotAuthorized'
+  | 'Checking'
+  | 'NotAndroid'
+  | 'DeviceTooOld'
+  | 'NotInstalled'
+  | 'Installed'
+  | 'UpToDate'
+  | 'UpdateAvailable'
+  | 'InstalledFromPlayStore'
+  | 'Installing'
+  | 'Unknown';
+
+export type CompanionAppError =
+  | 'AdbDisabled'
+  | 'DeviceNotReady'
+  | 'NotAndroid'
+  | 'DeviceTooOld'
+  | 'NoRelease'
+  | 'DownloadFailed'
+  | 'VerificationFailed'
+  | 'IncompatibleSignature'
+  | 'InstallBlockedOnDevice'
+  | 'StorageFull'
+  | 'InstallFailed'
+  | 'PlayStoreInstall';
+
+export interface CompanionAppDevice {
+  serial: string;
+  name: string;
+  state: CompanionAppDeviceState;
+  installedVersion: string | null;
+  installedVersionCode: number | null;
+  error: CompanionAppError | null;
+}
+
+export interface CompanionAppConnectedApp {
+  deviceId: string;
+  name: string;
+  model: string | null;
+  appVersion: string | null;
+  updateAvailable: boolean;
+}
+
+export interface CompanionAppStatus {
+  latestVersion: string | null;
+  latestVersionCode: number | null;
+  publishedAt: number | null;
+  lastCheckedAt: number | null;
+  checking: boolean;
+  checkFailed: boolean;
+  autoUpdate: boolean;
+  adbEnabled: boolean;
+  devices: CompanionAppDevice[];
+  connectedApps: CompanionAppConnectedApp[];
+}
+
+export interface InstallCompanionAppResponse {
+  success: boolean;
+  error: CompanionAppError | null;
+  status: CompanionAppStatus;
+}
+
+export interface CompanionAppChangedEvent {}
+
 /**
  * The first-launch onboarding wizard (issue #893). Armed by account setup and cleared once the user
  * skips or finishes it, so the wizard is owed exactly once per installation.

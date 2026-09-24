@@ -483,6 +483,27 @@ public class AuthPolicyMatrixTests
 	}
 
 	[Test]
+	public async Task The_companion_app_routes_are_admin_only()
+	{
+		var clientResponses = new[]
+		{
+			await Send(HttpMethod.Get, "/api/settings/companion-app", _clientToken),
+			await Send(HttpMethod.Get, "/api/settings/companion-app/apk", _clientToken),
+			await SendJson(HttpMethod.Put, "/api/settings/companion-app", new { autoUpdate = true }, _clientToken),
+			await SendJson(HttpMethod.Post, "/api/settings/companion-app/check", new { }, _clientToken),
+			await SendJson(HttpMethod.Post, "/api/settings/companion-app/install", new { serial = "R58M12ABCDE" }, _clientToken)
+		};
+		var adminStatus = await Send(HttpMethod.Get, "/api/settings/companion-app", _adminToken);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(clientResponses.Select(response => response.StatusCode),
+				Is.All.EqualTo(HttpStatusCode.Forbidden));
+			Assert.That(adminStatus.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+		});
+	}
+
+	[Test]
 	public async Task Store_ratings_the_signed_in_accounts_review_and_reports_are_admin_only()
 	{
 		const string review = "/api/store/catalog/Plugin/com.acme.hue/reviews/me";

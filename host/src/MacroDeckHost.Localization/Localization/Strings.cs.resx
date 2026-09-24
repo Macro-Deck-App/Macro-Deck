@@ -13156,6 +13156,183 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.ClientTargets.Unavailable" xml:space="preserve">
     <value>Pro nastavení tohoto zařízení je nutné povolit ADB a připojení přes USB v Nastavení › ADB.</value>
   </data>
+  <data name="Settings.CompanionApp.AdbDisabled" xml:space="preserve">
+    <value>K instalaci aplikace je potřeba ADB, které je nutné nejprve zapnout v nastavení ADB.</value>
+  </data>
+  <data name="Settings.CompanionApp.ApkSaved" xml:space="preserve">
+    <value>APK byl uložen.</value>
+  </data>
+  <data name="Settings.CompanionApp.AutoUpdateDescription" xml:space="preserve">
+    <value>Aktualizuje aplikaci v zařízeních připojených přes ADB, do kterých byla nainstalována z Macro Decku. Instalace z Google Play aktualizuje Google Play.</value>
+  </data>
+  <data name="Settings.CompanionApp.AutoUpdateLabel" xml:space="preserve">
+    <value>Automaticky instalovat aktualizace</value>
+  </data>
+  <data name="Settings.CompanionApp.CheckFailed" xml:space="preserve">
+    <value>Nejnovější verzi se nepodařilo zjistit. Je potřeba zkontrolovat připojení k internetu a zkusit to znovu.</value>
+  </data>
+  <data name="Settings.CompanionApp.CheckNow" xml:space="preserve">
+    <value>Zkontrolovat</value>
+  </data>
+  <data name="Settings.CompanionApp.Checking" xml:space="preserve">
+    <value>Hledání nejnovější verze…</value>
+  </data>
+  <data name="Settings.CompanionApp.ConnectedDescription" xml:space="preserve">
+    <value>Aplikace Companion pro Android připojené k tomuto hostiteli. Aktualizovat je lze přes ADB výše nebo přes Google Play, pokud odtud byly nainstalovány.</value>
+  </data>
+  <data name="Settings.CompanionApp.ConnectedHeading" xml:space="preserve">
+    <value>Připojené aplikace</value>
+  </data>
+  <data name="Settings.CompanionApp.ConnectedNone" xml:space="preserve">
+    <value>Momentálně není připojena žádná aplikace Companion pro Android.</value>
+  </data>
+  <data name="Settings.CompanionApp.ConnectedVersion" xml:space="preserve">
+    <value>Verze {version}</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.CompanionApp.DevicesHeading" xml:space="preserve">
+    <value>Zařízení připojená přes ADB</value>
+  </data>
+  <data name="Settings.CompanionApp.DirectBuildNote" xml:space="preserve">
+    <value>Jde o samostatnou verzi aplikace, nikoli o verzi z Google Play. Nevyžaduje služby Google Play, a proto funguje i v zařízeních bez nich, například na tabletech Amazon Fire.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.AdbDisabled" xml:space="preserve">
+    <value>ADB je vypnuté.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.DeviceNotReady" xml:space="preserve">
+    <value>Zařízení není připravené. Je potřeba ověřit, že je připojené a ladění USB je povolené.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.DeviceTooOld" xml:space="preserve">
+    <value>Aplikace Companion vyžaduje Android 6 nebo novější.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.DownloadFailed" xml:space="preserve">
+    <value>Aplikaci se nepodařilo stáhnout. Je potřeba zkontrolovat připojení k internetu a zkusit to znovu.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.IncompatibleSignature" xml:space="preserve">
+    <value>Aplikace v zařízení pochází z jiného zdroje. Je nutné ji nejprve v zařízení odinstalovat a pak to zkusit znovu.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.InstallBlockedOnDevice" xml:space="preserve">
+    <value>Zařízení instalaci zablokovalo. Některé telefony, například od Xiaomi, vyžadují zapnutí možnosti „Instalovat přes USB“ v možnostech pro vývojáře.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.InstallFailed" xml:space="preserve">
+    <value>Aplikaci se nepodařilo do zařízení nainstalovat.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.NoRelease" xml:space="preserve">
+    <value>Nejnovější verzi se nepodařilo najít. Je potřeba zkontrolovat připojení k internetu a zkusit to znovu.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.NotAndroid" xml:space="preserve">
+    <value>Toto zařízení nepoužívá Android.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.PlayStoreInstall" xml:space="preserve">
+    <value>Aplikaci do tohoto zařízení nainstaloval Google Play, který ji také aktualizuje.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.StorageFull" xml:space="preserve">
+    <value>V zařízení není dost volného místa.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.VerificationFailed" xml:space="preserve">
+    <value>Stažená aplikace neprošla bezpečnostní kontrolou a nebyla nainstalována.</value>
+  </data>
+  <data name="Settings.CompanionApp.Heading" xml:space="preserve">
+    <value>Aplikace Companion</value>
+  </data>
+  <data name="Settings.CompanionApp.Install" xml:space="preserve">
+    <value>Nainstalovat</value>
+  </data>
+  <data name="Settings.CompanionApp.InstallAriaLabel" xml:space="preserve">
+    <value>Nainstalovat aplikaci Companion do zařízení {name}</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Settings.CompanionApp.InstallDescription" xml:space="preserve">
+    <value>Instalace aplikace Macro Deck Companion do zařízení Android připojeného přes ADB a její aktualizace.</value>
+  </data>
+  <data name="Settings.CompanionApp.InstallHeading" xml:space="preserve">
+    <value>Instalace do zařízení</value>
+  </data>
+  <data name="Settings.CompanionApp.LatestVersionLabel" xml:space="preserve">
+    <value>Nejnovější verze</value>
+  </data>
+  <data name="Settings.CompanionApp.LatestVersionReleased" xml:space="preserve">
+    <value>Vydáno {date}</value>
+    <comment>[date:string]</comment>
+  </data>
+  <data name="Settings.CompanionApp.LatestVersionUnknown" xml:space="preserve">
+    <value>Zatím neznámá</value>
+  </data>
+  <data name="Settings.CompanionApp.LoadFailed" xml:space="preserve">
+    <value>Stav aplikace Companion se nepodařilo načíst.</value>
+  </data>
+  <data name="Settings.CompanionApp.NewerVersionAvailable" xml:space="preserve">
+    <value>K dispozici je novější verze: {version}</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.CompanionApp.NoDevices" xml:space="preserve">
+    <value>Přes ADB není připojeno žádné zařízení. Stačí připojit zařízení Android se zapnutým laděním USB nebo ho připojit přes Wi-Fi v nastavení ADB.</value>
+  </data>
+  <data name="Settings.CompanionApp.NoLicenseMessage" xml:space="preserve">
+    <value>Aplikaci lze nainstalovat přes ADB, poběží však jen jako 7denní zkušební verze. Licenci lze zatím koupit pouze v App Storu nebo na Google Play.</value>
+  </data>
+  <data name="Settings.CompanionApp.NoLicenseTitle" xml:space="preserve">
+    <value>Tento hostitel nemá licenci Companion</value>
+  </data>
+  <data name="Settings.CompanionApp.OpenAdbSettings" xml:space="preserve">
+    <value>Otevřít nastavení ADB</value>
+  </data>
+  <data name="Settings.CompanionApp.SaveApk" xml:space="preserve">
+    <value>Uložit APK</value>
+  </data>
+  <data name="Settings.CompanionApp.SaveApkDescription" xml:space="preserve">
+    <value>Uložení APK pro vlastní instalaci, například pomocí správce souborů v zařízení bez ladění USB.</value>
+  </data>
+  <data name="Settings.CompanionApp.SaveApkLabel" xml:space="preserve">
+    <value>Soubor aplikace (APK)</value>
+  </data>
+  <data name="Settings.CompanionApp.State.Checking" xml:space="preserve">
+    <value>Probíhá kontrola…</value>
+  </data>
+  <data name="Settings.CompanionApp.State.DeviceTooOld" xml:space="preserve">
+    <value>Vyžaduje Android 6 nebo novější</value>
+  </data>
+  <data name="Settings.CompanionApp.State.Installed" xml:space="preserve">
+    <value>Nainstalováno: {version}</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.CompanionApp.State.InstalledFromPlayStore" xml:space="preserve">
+    <value>Nainstalováno z Google Play ({version}), aktualizuje Google Play</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.CompanionApp.State.Installing" xml:space="preserve">
+    <value>Probíhá instalace…</value>
+  </data>
+  <data name="Settings.CompanionApp.State.NotAndroid" xml:space="preserve">
+    <value>Nejde o zařízení Android</value>
+  </data>
+  <data name="Settings.CompanionApp.State.NotAuthorized" xml:space="preserve">
+    <value>Na zařízení je potřeba povolit ladění USB</value>
+  </data>
+  <data name="Settings.CompanionApp.State.NotInstalled" xml:space="preserve">
+    <value>Nenainstalováno</value>
+  </data>
+  <data name="Settings.CompanionApp.State.Unknown" xml:space="preserve">
+    <value>Nainstalovanou verzi se nepodařilo zjistit</value>
+  </data>
+  <data name="Settings.CompanionApp.State.UpToDate" xml:space="preserve">
+    <value>Aktuální ({version})</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.CompanionApp.State.UpdateAvailable" xml:space="preserve">
+    <value>Dostupná aktualizace: {installed} na {latest}</value>
+    <comment>[installed:string] [latest:string]</comment>
+  </data>
+  <data name="Settings.CompanionApp.UnknownVersion" xml:space="preserve">
+    <value>Neznámá verze</value>
+  </data>
+  <data name="Settings.CompanionApp.Update" xml:space="preserve">
+    <value>Aktualizovat</value>
+  </data>
+  <data name="Settings.CompanionApp.UpdateAriaLabel" xml:space="preserve">
+    <value>Aktualizovat aplikaci Companion v zařízení {name}</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Settings.Developer.Description" xml:space="preserve">
     <value>Nastavení pro vývoj a testování pluginů.</value>
   </data>
@@ -13423,7 +13600,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Licence Macro Deck Companion, kterou tento hostitel má. Hostitel ji předává každé připojené aplikaci Companion.</value>
   </data>
   <data name="Settings.License.Heading" xml:space="preserve">
-    <value>Licence Companion</value>
+    <value>Licence</value>
   </data>
   <data name="Settings.License.IssuePending" xml:space="preserve">
     <value>Nákup se převádí na licenci. Je potřeba připojení k internetu a Macro Deck to automaticky zkouší dál.</value>

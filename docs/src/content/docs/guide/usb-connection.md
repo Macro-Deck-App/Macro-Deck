@@ -7,6 +7,8 @@ An Android device can connect over a USB cable, for example when Wi-Fi is unavai
 unstable, with the companion app or with the web client in its browser. This uses ADB, the Android
 Debug Bridge. iPhone and iPad connect over your network only.
 
+Once the device is connected, Macro Deck can also [install the Companion app on it](/guide/companion-app/).
+
 ## On the computer
 
 1. Open **Settings > ADB**.

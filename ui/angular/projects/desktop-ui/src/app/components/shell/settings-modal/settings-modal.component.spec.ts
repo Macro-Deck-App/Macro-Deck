@@ -311,7 +311,7 @@ describe('SettingsModalComponent', () => {
       .map(item => item.textContent?.trim())))
       .toEqual([
         ['Appearance', 'Startup', 'Language', 'Extensions'],
-        ['Network', 'Devices', 'Device clients', 'Companion license'],
+        ['Network', 'Devices', 'Device clients', 'Companion App'],
         ['Security'],
         ['Backups', 'Migration'],
         ['ADB', 'Logging', 'Developer'],

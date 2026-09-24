@@ -151,6 +151,8 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 	public bool TryGetState(Guid deviceId, out CompanionDeviceState state)
 		=> _states.TryGetValue(deviceId, out state!);
 
+	public IReadOnlyList<KeyValuePair<Guid, CompanionDeviceState>> ConnectedStates() => _states.ToArray();
+
 	public async Task<bool> SendAsync(Guid deviceId, CompanionCommand command, CancellationToken cancellationToken)
 	{
 		if (!_states.ContainsKey(deviceId))

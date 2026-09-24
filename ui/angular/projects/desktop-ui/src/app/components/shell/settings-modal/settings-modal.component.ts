@@ -19,7 +19,7 @@ import { DeveloperSettingsComponent } from './sections/developer-settings.compon
 import { ExtensionsSettingsComponent } from './sections/extensions-settings.component';
 import { DevicesSettingsComponent } from './sections/devices-settings.component';
 import { LanguageSettingsComponent } from './sections/language-settings.component';
-import { LicenseSettingsComponent } from './sections/license-settings.component';
+import { CompanionAppSettingsComponent } from './sections/companion-app-settings.component';
 import { LoggingSettingsComponent } from './sections/logging-settings.component';
 import { MigrationSettingsComponent } from './sections/migration-settings.component';
 import { NetworkSettingsComponent } from './sections/network-settings.component';
@@ -65,7 +65,7 @@ const PINNED_CATEGORY_LABEL_KEYS: Partial<Record<SettingsCategory, string>> = {
     AccountSettingsComponent, AppearanceSettingsComponent,
     StartupSettingsComponent, LanguageSettingsComponent,
     SecuritySettingsComponent, NetworkSettingsComponent, DevicesSettingsComponent, AdbSettingsComponent,
-    ClientTargetsSettingsComponent, LicenseSettingsComponent,
+    ClientTargetsSettingsComponent, CompanionAppSettingsComponent,
     BackupsSettingsComponent, MigrationSettingsComponent,
     LoggingSettingsComponent, DeveloperSettingsComponent, ExtensionsSettingsComponent, AboutSettingsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -109,8 +109,8 @@ export class SettingsModalComponent {
         items: [
           { id: 'network', label: text(Strings.Settings.Network), icon: 'wifi' },
           { id: 'devices', label: text(Strings.Settings.Devices), icon: 'device-desktop' },
-          { id: 'client-targets', label: text(AppStrings.Settings.ClientTargets.Heading), icon: 'device-phone' },
-          { id: 'license', label: text(AppStrings.Settings.License.Heading), icon: 'unlock' },
+          { id: 'client-targets', label: text(AppStrings.Settings.ClientTargets.Heading), icon: 'monitor-smartphone' },
+          { id: 'license', label: text(AppStrings.Settings.CompanionApp.Heading), icon: 'device-tablet' },
         ],
       },
 
