@@ -1279,7 +1279,8 @@ export class ApiService {
   async downloadCompanionApk(): Promise<{ blob: Blob; fileName: string }> {
     const response = await this.fetchWithAuth('/api/settings/companion-app/apk', { method: 'GET' });
     if (!response.ok) {
-      throw new TransportError(response.status, `Download failed (${response.status})`);
+      const body = await response.json().catch(() => null) as { error?: string } | null;
+      throw new TransportError(response.status, `Download failed (${response.status})`, body?.error ?? undefined);
     }
 
     const fileName = parseContentDispositionFileName(response.headers.get('Content-Disposition')) ??

@@ -1,6 +1,6 @@
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CompanionAppDevice, CompanionAppStatus, CompanionLicenseStatus } from '@macro-deck/runtime';
+import { CompanionAppDevice, CompanionAppStatus, CompanionLicenseStatus, TransportError } from '@macro-deck/runtime';
 import { ApiService } from '@shared';
 import { EMPTY } from 'rxjs';
 import { DeveloperModeService } from '../../../../services/developer-mode.service';
@@ -239,6 +239,16 @@ describe('CompanionAppSettingsComponent', () => {
 
     expect(fileSave.save).not.toHaveBeenCalled();
     expect(text(fixture, 'companion-app-apk-message')).toContain('could not be downloaded');
+  });
+
+  it('names a failed security check instead of a generic download error', async () => {
+    api.downloadCompanionApk.and.rejectWith(new TransportError(502, 'Download failed (502)', 'VerificationFailed'));
+    const fixture = await create();
+
+    await fixture.componentInstance.saveApk();
+    fixture.detectChanges();
+
+    expect(text(fixture, 'companion-app-apk-message')).toContain('failed its security check');
   });
 
   it('saves the auto-update choice', async () => {

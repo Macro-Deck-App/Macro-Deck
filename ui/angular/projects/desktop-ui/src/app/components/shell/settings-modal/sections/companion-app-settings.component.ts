@@ -8,6 +8,7 @@ import {
   CompanionAppError,
   CompanionAppStatus,
   CompanionLicenseChangedEvent,
+  TransportError,
 } from '@macro-deck/runtime';
 import {
   ApiService,
@@ -154,8 +155,9 @@ export class CompanionAppSettingsComponent {
       } else if (result.status === 'error') {
         this.apkMessage.set(result.message);
       }
-    } catch {
-      this.apkMessage.set(this.localization.translateKey(S.Error.DownloadFailed));
+    } catch (error) {
+      const code = error instanceof TransportError ? error.code as CompanionAppError | undefined : undefined;
+      this.apkMessage.set(this.errorText(code && code in ERROR_KEYS ? code : 'DownloadFailed'));
     } finally {
       this.savingApk.set(false);
     }

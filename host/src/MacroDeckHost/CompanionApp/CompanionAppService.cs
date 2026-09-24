@@ -580,7 +580,7 @@ public sealed partial class CompanionAppService : IDisposable
 
 			foreach (var stale in Directory.EnumerateFiles(directory, "*.apk").Where(file => file != path))
 			{
-				File.Delete(stale);
+				TryDelete(stale);
 			}
 
 			return (path, null);
@@ -589,6 +589,19 @@ public sealed partial class CompanionAppService : IDisposable
 		{
 			_logger.Warning(ex, "Could not prepare the Companion app APK");
 			return (null, CompanionAppErrors.DownloadFailed);
+		}
+	}
+
+	// An older APK can still be open for an export; it is removed on a later download instead.
+	private void TryDelete(string path)
+	{
+		try
+		{
+			File.Delete(path);
+		}
+		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+		{
+			_logger.Debug(ex, "Could not remove the old Companion app APK {Path}", path);
 		}
 	}
 
