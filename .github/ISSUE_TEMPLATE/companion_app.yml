@@ -67,7 +67,9 @@ body:
       label: How is the device connected?
       options:
         - Wi-Fi or network
-        - USB (Android only)
+        - USB with ADB (Android)
+        - USB with libusb (Android without ADB)
+        - USB with usbmuxd (iPhone and iPad)
         - Not sure
 
   - type: input
