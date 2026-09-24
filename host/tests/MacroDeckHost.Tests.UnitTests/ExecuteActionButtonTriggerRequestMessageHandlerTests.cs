@@ -686,6 +686,12 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 
 	private sealed class FakeActionExecutionCoordinator : IActionExecutionCoordinator, IDisposable
 	{
+		public Task<ActionExecutionDispatch> RunBoundedAsync(
+			Func<IServiceProvider, CancellationToken, Task<FlowExecutionResult>> run,
+			TimeSpan bound,
+			CancellationToken cancellationToken)
+			=> throw new NotSupportedException();
+
 		public FakeUiTransport Transport { get; } = new();
 
 		public FlowExecutionResult? InlineResult { get; set; }

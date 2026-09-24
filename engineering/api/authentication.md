@@ -47,6 +47,18 @@ Device identity is separate from authorization scope: it identifies a client; it
 
 See [ADR 0003](../decisions/0003-loopback-trust-token-scopes-and-device-identity.md).
 
+## Companion scripts
+
+`GET /api/companion/scripts` and `POST /api/companion/scripts/{id}/run` are client scope, so a signed-in companion device can run scripts from outside the deck, such as from iOS Shortcuts. They are deliberately narrower than the admin `/api/scripts` routes:
+
+- A script that runs on a widget is neither listed nor run, because it needs an owner widget the caller would have to name.
+- The listing carries names, descriptions and input definitions, never the flow JSON.
+- A run accepts only input values and a client id. The client id is taken as sent, as it is by `POST /api/actions/execute`, and only decides which client "this client" actions reach. The call depth and the owner widget are never taken from the caller, so a client cannot spoof a nested call or aim a script at a widget.
+- A run goes through the action execution coordinator: it answers `Accepted` once the run outlasts `CompanionScriptsController.RunBound`, counts towards the coordinator's cap on detached runs, and is stopped by the host shutting down or the coordinator's own time limit, never by the caller dropping the request.
+- The answer is the outcome only (`success`, `status`, `error`), not the per-action detail.
+
+This widens client scope on purpose. Before it, a client could only press the widgets an admin had placed; now every client-scope token, the web client's included, can list and run every script that does not run on a widget, including scripts only an automation or another script uses. The maintainer chose this over a per-script opt-in.
+
 ## HTTPS and browser security features
 
 The public listener can be configured for HTTPS. Browser features that require a secure context, such as service workers and wake locks, require a certificate the client device actually trusts and an origin covered by the certificate.
