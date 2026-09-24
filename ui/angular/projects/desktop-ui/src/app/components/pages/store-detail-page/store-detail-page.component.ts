@@ -30,6 +30,7 @@ import { cultureDisplayName, sortCulturesForReader } from '../../../localization
 import { ConnectAccountService } from '../../../services/connect-account.service';
 import { SettingsModalService } from '../../../services/settings-modal.service';
 import { STORE_DETAIL_KINDS, isStoreDetailUrl, isStoreListUrl } from '../../../services/store-browse-state.service';
+import { StoreCategoryService, storeCategoryName } from '../../../services/store-category.service';
 import { StoreOperationService } from '../../../services/store-operation.service';
 import { StoreSectionComponent, StoreUnsignedInstallRequest } from '../../store/store-section.component';
 import { StoreRatingsService } from '../../../services/store-ratings.service';
@@ -118,6 +119,7 @@ export class StoreDetailPageComponent implements OnInit {
   private readonly api = inject(ApiService);
   private readonly localization = inject(LocalizationService);
   private readonly toasts = inject(ToastService);
+  private readonly categories = inject(StoreCategoryService);
   private readonly account = inject(ConnectAccountService);
   private readonly settingsModal = inject(SettingsModalService);
   protected readonly operations = inject(StoreOperationService);
@@ -321,7 +323,17 @@ export class StoreDetailPageComponent implements OnInit {
     };
   });
 
-  protected readonly tags = computed(() => this.extension()?.tags ?? []);
+  protected readonly packageCategories = computed(() => {
+    const culture = this.localization.culture();
+    const tags = this.extension()?.tags ?? [];
+    return this.categories.categories()
+      .filter(category => tags.includes(category.id))
+      .map(category => ({ id: category.id, label: storeCategoryName(category, culture) }));
+  });
+
+  protected readonly tags = computed(() => this.categories.settled()
+    ? (this.extension()?.tags ?? []).filter(id => this.categories.find(id) === null)
+    : []);
 
   protected readonly similar = signal<StoreCatalogItemBody[]>([]);
   private similarGeneration = 0;
@@ -336,6 +348,9 @@ export class StoreDetailPageComponent implements OnInit {
       return [];
     }
     const links: StoreDetailLink[] = [];
+    if (extension.homepage && isHttps(extension.homepage) && extension.homepage !== extension.repository) {
+      links.push({ url: extension.homepage, labelKey: AppStrings.Store.Page.HomepageLink, label: null });
+    }
     if (extension.repository && isHttps(extension.repository)) {
       links.push({ url: extension.repository, labelKey: AppStrings.Store.Page.RepositoryLink, label: null });
     }
@@ -403,6 +418,8 @@ export class StoreDetailPageComponent implements OnInit {
       this.ratings.installs();
       untracked(() => void this.ratings.ensure([id]));
     });
+
+    void this.categories.ensure();
 
     // Mirrors the store page's subscription: an uninstall creates no operation, so nothing else
     // here would notice the extension is gone and stop showing a live Uninstall button for it.

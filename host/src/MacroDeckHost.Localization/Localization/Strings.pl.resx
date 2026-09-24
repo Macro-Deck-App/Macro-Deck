@@ -14757,6 +14757,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Page.RepositoryLink" xml:space="preserve">
     <value>Repozytorium</value>
   </data>
+  <data name="Store.Page.HomepageLink" xml:space="preserve">
+    <value>Strona internetowa</value>
+  </data>
   <data name="Store.Page.ResultCount.One" xml:space="preserve">
     <value>{count} wynik</value>
     <comment>[plural][count:int] Number of extensions the current search and filter match.</comment>
@@ -14846,6 +14849,14 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Page.TabInstalled" xml:space="preserve">
     <value>Zainstalowane</value>
   </data>
+  <data name="Store.Page.TabInstalledWithUpdates.One" xml:space="preserve">
+    <value>Zainstalowane, dostępne aktualizacje: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.TabInstalledWithUpdates.Other" xml:space="preserve">
+    <value>Zainstalowane, dostępne aktualizacje: {count}</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
     <value>Sekcje Store</value>
   </data>
@@ -14856,6 +14867,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Page.TagHeading" xml:space="preserve">
     <value>Wszystko z tagiem {tag}</value>
     <comment>[tag:string]</comment>
+  </data>
+  <data name="Store.Page.CategoriesHeading" xml:space="preserve">
+    <value>Kategorie</value>
   </data>
   <data name="Store.Page.TagsHeading" xml:space="preserve">
     <value>Tagi</value>

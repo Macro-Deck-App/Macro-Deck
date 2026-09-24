@@ -161,6 +161,7 @@ import {
   GetScriptUsagesResponse,
   GetServerTimeResponse,
   GetStoreCatalogResponse,
+  GetStoreCategoriesResponse,
   GetStoreExtensionResponse,
   GetStoreSimilarResponse,
   GetStoreOperationsResponse,
@@ -948,6 +949,18 @@ export class ApiService {
     }
     const suffix = query.size > 0 ? `?${query}` : '';
     return this.http('GET', `/api/store/catalog${suffix}`);
+  }
+
+  getStoreCategories(kinds?: StoreExtensionKind[], supportedOnly?: boolean): Promise<GetStoreCategoriesResponse> {
+    const query = new URLSearchParams();
+    for (const kind of kinds ?? []) {
+      query.append('kinds', kind);
+    }
+    if (supportedOnly) {
+      query.set('supportedOnly', 'true');
+    }
+    const suffix = query.size > 0 ? `?${query}` : '';
+    return this.http('GET', `/api/store/categories${suffix}`);
   }
 
   getStoreExtension(kind: StoreExtensionKind, packageId: string): Promise<GetStoreExtensionResponse> {

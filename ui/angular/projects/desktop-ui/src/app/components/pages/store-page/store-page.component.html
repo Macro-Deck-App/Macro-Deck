@@ -47,6 +47,22 @@
           </button>
         }
       </div>
+      @if (categoryOptions().length > 0) {
+        <div class="hero-categories" role="group" [attr.aria-label]="'macrodeck.app:Store.Page.CategoriesHeading' | translate">
+          @for (option of categoryOptions(); track option.id) {
+            <button
+              type="button"
+              class="category-chip"
+              [attr.data-category]="option.id"
+              [class.active]="option.active"
+              [attr.aria-pressed]="option.active"
+              (click)="onCategoryClick(option.id)">
+              <span class="icon icon-tag icon-sm" aria-hidden="true"></span>
+              <span>{{ option.label }}</span>
+            </button>
+          }
+        </div>
+      }
     </section>
 
     <div class="store-sections">
@@ -136,7 +152,7 @@
           @if (tag()) {
             <p class="hidden-note">
               <span class="icon icon-tag icon-xs" aria-hidden="true"></span>
-              <span>{{ 'macrodeck.app:Store.Page.TagFilterNote' | translate:{ tag: tag() } }}</span>
+              <span>{{ 'macrodeck.app:Store.Page.TagFilterNote' | translate:{ tag: tagLabel() } }}</span>
               <button type="button" class="link-button" (click)="clearTag()">
                 {{ 'macrodeck.app:Store.Page.ShowAllAction' | translate }}
               </button>

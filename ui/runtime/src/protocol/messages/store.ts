@@ -86,6 +86,8 @@ export interface StoreExtensionDetailBody extends StoreCatalogItemBody {
   longDescription?: string | null;
   changelog?: string | null;
   repository?: string | null;
+  // Absent from an older host.
+  homepage?: string | null;
   license?: string | null;
   // Absent from an older host.
   additionalLinks?: StoreExtensionLinkBody[];
@@ -189,6 +191,16 @@ export interface GetStoreCatalogResponse {
   items: StoreCatalogItemBody[];
   total: number;
   registry: StoreRegistryStatusBody;
+}
+
+export interface StoreCategoryBody {
+  id: string;
+  names: Record<string, string>;
+  count: number;
+}
+
+export interface GetStoreCategoriesResponse {
+  categories: StoreCategoryBody[];
 }
 
 export interface GetStoreExtensionResponse {

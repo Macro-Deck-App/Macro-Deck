@@ -1059,6 +1059,8 @@ export {
   type GetStoreExtensionResponse,
   type GetStoreOperationsResponse,
   type GetStoreSimilarResponse,
+  type GetStoreCategoriesResponse,
+  type StoreCategoryBody,
   type GetStoreStatusResponse,
   type GetStoreTestsResponse,
   type GetStoreUpdatesResponse,

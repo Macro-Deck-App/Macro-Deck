@@ -332,6 +332,125 @@ internal sealed class StoreRegistryRefresherTests
 	}
 
 	[Test]
+	public async Task Published_categories_reach_the_catalog_in_registry_order_with_their_names()
+	{
+		var fixture = Registry();
+		fixture.Write("categories.json",
+			new
+			{
+				version = 1,
+				categories = new object[]
+				{
+					new { id = "streaming", names = new Dictionary<string, string> { ["en"] = "Streaming", ["cs"] = "Streamování" } },
+					new { id = "music", names = new Dictionary<string, string> { ["en"] = "Music", ["de"] = "Musik" } }
+				}
+			});
+
+		var result = await Create(fixture).Refresh();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True);
+			Assert.That(_catalog.Snapshot.Categories.Select(category => category.Id),
+				Is.EqualTo(new[] { "streaming", "music" }));
+			Assert.That(_catalog.Snapshot.Categories[1].Names,
+				Is.EquivalentTo(new Dictionary<string, string> { ["en"] = "Music", ["de"] = "Musik" }));
+			Assert.That(_catalog.Snapshot.Categories[0].Names["cs"], Is.EqualTo("Streamování"));
+		});
+	}
+
+	[Test]
+	public async Task A_registry_without_categories_refreshes_and_has_no_categories()
+	{
+		var result = await Create(Registry()).Refresh();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True);
+			Assert.That(_catalog.Snapshot.Entries.Select(entry => entry.Id), Is.EquivalentTo(_seededIds));
+			Assert.That(_catalog.Snapshot.Categories, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task Malformed_categories_are_dropped_one_by_one_without_failing_the_refresh()
+	{
+		var fixture = Registry();
+		fixture.Write("categories.json",
+			new
+			{
+				version = 1,
+				categories = new object[]
+				{
+					new { id = "Music", names = new Dictionary<string, object> { ["en"] = "Upper case id" } },
+					new { id = "no-english", names = new Dictionary<string, object> { ["de"] = "Nur Deutsch" } },
+					new { id = "numeric-name", names = new Dictionary<string, object> { ["en"] = 42 } },
+					"not an object",
+					new { id = "gaming", names = new Dictionary<string, object> { ["en"] = " Gaming ", ["deu"] = "Spiele", ["fr"] = 7 } },
+					new { id = "gaming", names = new Dictionary<string, object> { ["en"] = "Duplicate" } },
+					new { id = new string('a', 33), names = new Dictionary<string, object> { ["en"] = "Too long" } },
+					new { id = "system", names = new Dictionary<string, object> { ["en"] = "System", ["de"] = new string('x', 65) } }
+				}
+			});
+
+		var result = await Create(fixture).Refresh();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True);
+			Assert.That(_catalog.Snapshot.Categories.Select(category => category.Id),
+				Is.EqualTo(new[] { "gaming", "system" }));
+			Assert.That(_catalog.Snapshot.Categories[0].Names,
+				Is.EquivalentTo(new Dictionary<string, string> { ["en"] = "Gaming" }));
+			Assert.That(_catalog.Snapshot.Categories[1].Names,
+				Is.EquivalentTo(new Dictionary<string, string> { ["en"] = "System" }));
+		});
+	}
+
+	[TestCase("{\"version\": 2, \"categories\": [{\"id\": \"music\", \"names\": {\"en\": \"Music\"}}]}")]
+	[TestCase("{\"version\": \"one\", \"categories\": []}")]
+	[TestCase("{ not json")]
+	public async Task Categories_the_host_cannot_read_leave_the_catalog_without_categories(string document)
+	{
+		var fixture = Registry();
+		fixture.WriteText("categories.json", document);
+
+		var result = await Create(fixture).Refresh();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True);
+			Assert.That(_catalog.Snapshot.Entries.Select(entry => entry.Id), Is.EquivalentTo(_seededIds));
+			Assert.That(_catalog.Snapshot.Categories, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task Only_an_https_homepage_reaches_the_catalog()
+	{
+		var fixture = Registry();
+		fixture.AddPackage("plugin", "com.acme.secure-home", homepage: "https://acme.example/plugin");
+		fixture.AddPackage("plugin", "com.acme.plain-home", homepage: "http://acme.example/plugin");
+		fixture.AddPackage("plugin", "com.acme.script-home", homepage: "javascript:alert(1)");
+		fixture.AddPackage("icon-pack", "com.acme.pack-home", homepage: "https://acme.example/icons");
+
+		var result = await Create(fixture).Refresh();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True);
+			Assert.That(_catalog.Snapshot.Entries.Single(entry => entry.Id == "com.acme.secure-home").Homepage,
+				Is.EqualTo("https://acme.example/plugin"));
+			Assert.That(_catalog.Snapshot.Entries.Single(entry => entry.Id == "com.acme.pack-home").Homepage,
+				Is.EqualTo("https://acme.example/icons"));
+			Assert.That(_catalog.Snapshot.Entries.Single(entry => entry.Id == "com.acme.plain-home").Homepage,
+				Is.Null);
+			Assert.That(_catalog.Snapshot.Entries.Single(entry => entry.Id == "com.acme.script-home").Homepage,
+				Is.Null);
+		});
+	}
+
+	[Test]
 	public async Task A_published_featured_list_reaches_the_catalog_in_the_order_it_was_published()
 	{
 		var fixture = Registry();

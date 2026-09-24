@@ -1,3 +1,4 @@
+import { Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -18,6 +19,7 @@ import { IntegrationService, Integration } from '../../../services/integration.s
 import { PluginCompatibilityService } from '../../../services/plugin-compatibility.service';
 import { PluginInstallationService } from '../../../services/plugin-installation.service';
 import { StoreAccessService } from '../../../services/store-access.service';
+import { isStoreDetailUrl } from '../../../services/store-browse-state.service';
 import { VariableCatalogService } from '../../../services/variable-catalog.service';
 import { VariableBindDialogComponent } from '../../variables/variable-bind-dialog.component';
 import { ActionCapabilityRowComponent } from './action-capability-row.component';
@@ -70,6 +72,9 @@ export class IntegrationDetailPageComponent implements OnInit {
   private readonly localization = inject(LocalizationService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly location = inject(Location);
+
+  protected readonly openedFromStore = signal(false);
   protected readonly integrationService = inject(IntegrationService);
   protected readonly configFlow = inject(ConfigFlowService);
   private readonly api = inject(ApiService);
@@ -421,6 +426,8 @@ export class IntegrationDetailPageComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.integrationId.set(this.route.snapshot.paramMap.get('integrationId') ?? '');
+    const navigation = this.router.currentNavigation() ?? this.router.lastSuccessfulNavigation();
+    this.openedFromStore.set(isStoreDetailUrl(navigation?.previousNavigation?.finalUrl?.toString()));
 
     const initialTab = this.route.snapshot.queryParamMap.get('tab');
     if (initialTab === 'actions' || initialTab === 'variables') {
@@ -442,6 +449,10 @@ export class IntegrationDetailPageComponent implements OnInit {
   }
 
   goBack(): void {
+    if (this.openedFromStore()) {
+      this.location.back();
+      return;
+    }
     void this.router.navigate(['/integrations']);
   }
 

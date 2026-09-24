@@ -150,6 +150,24 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 			.Where(item => item.InstallState is StoreInstallState.Installed or StoreInstallState.UpdateAvailable)
 			.ToList();
 
+	public IReadOnlyList<StoreCategoryCount> Categories(IReadOnlyCollection<StoreExtensionKind>? kinds,
+		bool supportedOnly = false)
+	{
+		var snapshot = _catalog.Snapshot;
+		var entries = Visible(snapshot)
+			.Where(entry => kinds is not { Count: > 0 } || kinds.Contains(entry.Kind))
+			.Where(entry => !supportedOnly || UnsupportedReason(entry) is null)
+			.ToList();
+
+		return snapshot.Categories
+			.Select(category => new StoreCategoryCount
+			{
+				Category = category,
+				Count = entries.Count(entry => entry.Tags.Contains(category.Id, StringComparer.OrdinalIgnoreCase))
+			})
+			.ToList();
+	}
+
 	private static IReadOnlyList<StoreCatalogEntry> Visible(StoreCatalogSnapshot snapshot)
 	{
 		if (snapshot.RemovedPackages.Count == 0)
