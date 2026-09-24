@@ -176,6 +176,7 @@ import {
   GetWeatherStateResponse,
   GetWidgetDataSchemasResponse,
   HostLockStateChangedEvent,
+  ImportBackupResponse,
   ImportFolderResponse,
   ImportIconPacksResponse,
   ImportIconsFromPathRequest,
@@ -2171,6 +2172,10 @@ export class ApiService {
 
   inspectBackup(backupId: string, recoveryKey?: string): Promise<InspectBackupResponse> {
     return this.http('POST', `/api/backups/${encodeURIComponent(backupId)}/inspect`, { recoveryKey });
+  }
+
+  importBackup(file: File): Promise<ImportBackupResponse> {
+    return this.uploadArchive<ImportBackupResponse>('/api/backups/import', file, {});
   }
 
   prepareRestore(request: PrepareRestoreRequest): Promise<PrepareRestoreResponse> {

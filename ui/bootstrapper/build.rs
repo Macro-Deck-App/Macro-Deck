@@ -32,6 +32,7 @@ fn main() {
             "open_external",
             "show_open_dialog",
             "save_file",
+            "save_backup",
             "get_hide_dock_icon",
             "set_hide_dock_icon",
             "set_appearance",

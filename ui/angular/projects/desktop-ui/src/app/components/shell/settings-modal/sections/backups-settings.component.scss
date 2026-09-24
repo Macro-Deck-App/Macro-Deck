@@ -3,3 +3,15 @@
   flex-direction: column;
   gap: var(--space-4);
 }
+
+.bks-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.bks-notice {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-warning);
+  line-height: 1.5;
+}

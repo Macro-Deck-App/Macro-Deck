@@ -2399,6 +2399,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Errors.Backup.FileLocked" xml:space="preserve">
     <value>Impossibile leggere un file perché un altro programma lo sta usando</value>
   </data>
+  <data name="Errors.Backup.ImportFailed" xml:space="preserve">
+    <value>Impossibile importare il backup</value>
+  </data>
   <data name="Errors.Backup.InspectFailed" xml:space="preserve">
     <value>Impossibile analizzare il backup</value>
   </data>
@@ -12891,6 +12894,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Settings.Backups.DownloadButton" xml:space="preserve">
     <value>Scarica</value>
   </data>
+  <data name="Settings.Backups.DownloadSaved" xml:space="preserve">
+    <value>Backup salvato</value>
+  </data>
   <data name="Settings.Backups.EmptyHeading" xml:space="preserve">
     <value>Nessun backup ancora</value>
   </data>
@@ -12905,6 +12911,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Settings.Backups.Friday" xml:space="preserve">
     <value>Venerdì</value>
+  </data>
+  <data name="Settings.Backups.ImportButton" xml:space="preserve">
+    <value>Importa backup</value>
+  </data>
+  <data name="Settings.Backups.ImportSucceeded" xml:space="preserve">
+    <value>Backup importato</value>
   </data>
   <data name="Settings.Backups.KeepLatestDescription" xml:space="preserve">
     <value>Quanti backup conservare prima che i più vecchi vengano eliminati automaticamente.</value>
@@ -12990,6 +13002,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Settings.Backups.RestartFailedToast" xml:space="preserve">
     <value>Macro Deck non è riuscito a riavviarsi</value>
+  </data>
+  <data name="Settings.Backups.RestoreAdoptsRecoveryKey" xml:space="preserve">
+    <value>Dopo il ripristino, Macro Deck usa la chiave di ripristino che hai appena inserito. I backup creati finora da questa installazione si aprono solo con la sua chiave di ripristino attuale: salvala prima di continuare.</value>
   </data>
   <data name="Settings.Backups.RestoreButton" xml:space="preserve">
     <value>Ripristina…</value>

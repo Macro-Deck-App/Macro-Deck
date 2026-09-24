@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using MacroDeckHost.Application.Backups;
 using MacroDeckHost.Application.Paths;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Infrastructure.Persistence;
 using Microsoft.Data.Sqlite;
 using Serilog;
@@ -191,6 +192,8 @@ public static class StagedRestoreApplier
 		try
 		{
 			using var transaction = connection.BeginTransaction();
+			var restoresSecrets = document.Tables.Contains("secret", StringComparer.OrdinalIgnoreCase);
+			var localRecoveryKey = restoresSecrets ? RecoveryKeySecret(connection, transaction, "main") : null;
 
 			foreach (var table in document.Tables)
 			{
@@ -214,6 +217,11 @@ public static class StagedRestoreApplier
 					transaction);
 			}
 
+			if (restoresSecrets)
+			{
+				AdoptArchiveRecoveryKeyPointer(connection, transaction, localRecoveryKey);
+			}
+
 			transaction.Commit();
 		}
 		finally
@@ -222,14 +230,60 @@ public static class StagedRestoreApplier
 		}
 	}
 
-	// Keys that must survive a restore from a foreign installation: the pointer to this installation's
-	// recovery key, and its own identity.
+	// Keys that must survive a restore from a foreign installation: its own identity, and the pointer to its
+	// recovery key unless the secret table is restored too.
 	private static string PreferenceFilter()
 	{
 		var conditions = BackupComponentGroups.PreferenceKeyDenyPrefixes
 			.Select(prefix => $"ap_key NOT LIKE '{prefix}%'");
 
 		return " WHERE " + string.Join(" AND ", conditions);
+	}
+
+	private static void AdoptArchiveRecoveryKeyPointer(SqliteConnection connection,
+		SqliteTransaction transaction,
+		(string Pointer, string Value)? localRecoveryKey)
+	{
+		var columns = SharedColumns(connection, "app_preference");
+		var archiveRecoveryKey = RecoveryKeySecret(connection, transaction, "backup");
+		if (columns.Count == 0 || archiveRecoveryKey is null || Same(archiveRecoveryKey, localRecoveryKey))
+		{
+			return;
+		}
+
+		var list = string.Join(", ", columns);
+		var match = $"ap_key LIKE '{BackupComponentGroups.RecoveryKeyPreferencePrefix}%'";
+
+		Execute(connection, $"DELETE FROM main.app_preference WHERE {match};", transaction);
+		Execute(connection,
+			$"INSERT INTO main.app_preference ({list}) SELECT {list} FROM backup.app_preference WHERE {match};",
+			transaction);
+	}
+
+	private static bool Same((string Pointer, string Value)? archive, (string Pointer, string Value)? local)
+		=> local is not null &&
+			string.Equals(archive!.Value.Pointer, local.Value.Pointer, StringComparison.OrdinalIgnoreCase) &&
+			string.Equals(archive.Value.Value, local.Value.Value, StringComparison.Ordinal);
+
+	private static (string Pointer, string Value)? RecoveryKeySecret(SqliteConnection connection,
+		SqliteTransaction transaction,
+		string schema)
+	{
+		if (ColumnsOf(connection, schema, "app_preference").Count == 0 ||
+			ColumnsOf(connection, schema, "secret").Count == 0)
+		{
+			return null;
+		}
+
+		using var command = connection.CreateCommand();
+		command.Transaction = transaction;
+		command.CommandText =
+			$"SELECT p.ap_value, s.s_encrypted_value FROM {schema}.app_preference p JOIN {schema}.secret s " +
+			"ON lower(s.s_id) = lower(p.ap_value) WHERE p.ap_key = $pointer;";
+		command.Parameters.AddWithValue("$pointer", AppPreferenceService.BackupRecoveryKeySecretIdKey);
+
+		using var reader = command.ExecuteReader();
+		return reader.Read() ? (reader.GetString(0), reader.GetString(1)) : null;
 	}
 
 	private static List<string> SharedColumns(SqliteConnection connection, string table)

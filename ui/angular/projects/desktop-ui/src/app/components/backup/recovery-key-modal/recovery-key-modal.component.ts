@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AppStrings } from '@macro-deck/runtime';
-import { ButtonComponent, CheckboxComponent, LocalizationService, ModalComponent, TranslatePipe, dismissModal } from '@shared';
-import { downloadFile } from '../../../util/download-file';
+import { ButtonComponent, CheckboxComponent, LocalizationService, ModalComponent, ToastService, TranslatePipe, dismissModal } from '@shared';
+import { FileSaveService } from '../../../services/file-save.service';
 import { CopyValueComponent } from '../../copy-value/copy-value.component';
 
 const FILE_NAME = 'macro-deck-recovery-key.txt';
@@ -17,6 +17,8 @@ const FILE_NAME = 'macro-deck-recovery-key.txt';
 })
 export class RecoveryKeyModalComponent {
   private readonly localization = inject(LocalizationService);
+  private readonly fileSave = inject(FileSaveService);
+  private readonly toasts = inject(ToastService);
 
   @Input({ required: true }) mode: 'created' | 'revealed' = 'revealed';
   @Input({ required: true }) key = '';
@@ -39,8 +41,11 @@ export class RecoveryKeyModalComponent {
 
   protected readonly canConfirm = computed(() => !this.showAcknowledgementCheckbox || this.stored());
 
-  protected downloadKey(): void {
-    downloadFile(new Blob([this.key], { type: 'text/plain' }), FILE_NAME);
+  protected async downloadKey(): Promise<void> {
+    const result = await this.fileSave.save(new Blob([this.key], { type: 'text/plain' }), FILE_NAME);
+    if (result.status === 'error') {
+      this.toasts.show(this.localization.translateKey(AppStrings.Errors.FileSave.WriteFailed), { variant: 'error' });
+    }
   }
 
   onConfirm(): void {

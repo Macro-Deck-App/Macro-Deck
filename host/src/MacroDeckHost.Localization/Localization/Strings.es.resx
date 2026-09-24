@@ -2399,6 +2399,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Errors.Backup.FileLocked" xml:space="preserve">
     <value>No se pudo leer un archivo porque otro programa lo está usando</value>
   </data>
+  <data name="Errors.Backup.ImportFailed" xml:space="preserve">
+    <value>No se pudo importar la copia de seguridad</value>
+  </data>
   <data name="Errors.Backup.InspectFailed" xml:space="preserve">
     <value>No se pudo inspeccionar la copia de seguridad</value>
   </data>
@@ -12891,6 +12894,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Settings.Backups.DownloadButton" xml:space="preserve">
     <value>Descargar</value>
   </data>
+  <data name="Settings.Backups.DownloadSaved" xml:space="preserve">
+    <value>Copia de seguridad guardada</value>
+  </data>
   <data name="Settings.Backups.EmptyHeading" xml:space="preserve">
     <value>Aún no hay copias de seguridad</value>
   </data>
@@ -12905,6 +12911,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Settings.Backups.Friday" xml:space="preserve">
     <value>Viernes</value>
+  </data>
+  <data name="Settings.Backups.ImportButton" xml:space="preserve">
+    <value>Importar copia de seguridad</value>
+  </data>
+  <data name="Settings.Backups.ImportSucceeded" xml:space="preserve">
+    <value>Copia de seguridad importada</value>
   </data>
   <data name="Settings.Backups.KeepLatestDescription" xml:space="preserve">
     <value>Cuántas copias de seguridad conservar antes de eliminar automáticamente las más antiguas.</value>
@@ -12990,6 +13002,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Settings.Backups.RestartFailedToast" xml:space="preserve">
     <value>Macro Deck no pudo reiniciarse</value>
+  </data>
+  <data name="Settings.Backups.RestoreAdoptsRecoveryKey" xml:space="preserve">
+    <value>Después de la restauración, Macro Deck usará la clave de recuperación que acabas de introducir. Las copias de seguridad que esta instalación ha hecho hasta ahora solo se abren con su clave de recuperación actual, así que guárdala antes de continuar.</value>
   </data>
   <data name="Settings.Backups.RestoreButton" xml:space="preserve">
     <value>Restaurar…</value>

@@ -2398,6 +2398,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Errors.Backup.FileLocked" xml:space="preserve">
     <value>Eine Datei konnte nicht gelesen werden, weil ein anderes Programm sie verwendet</value>
   </data>
+  <data name="Errors.Backup.ImportFailed" xml:space="preserve">
+    <value>Die Sicherung konnte nicht importiert werden</value>
+  </data>
   <data name="Errors.Backup.InspectFailed" xml:space="preserve">
     <value>Die Sicherung konnte nicht überprüft werden</value>
   </data>
@@ -12889,6 +12892,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.Backups.DownloadButton" xml:space="preserve">
     <value>Herunterladen</value>
   </data>
+  <data name="Settings.Backups.DownloadSaved" xml:space="preserve">
+    <value>Sicherung gespeichert</value>
+  </data>
   <data name="Settings.Backups.EmptyHeading" xml:space="preserve">
     <value>Noch keine Sicherungen</value>
   </data>
@@ -12903,6 +12909,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Settings.Backups.Friday" xml:space="preserve">
     <value>Freitag</value>
+  </data>
+  <data name="Settings.Backups.ImportButton" xml:space="preserve">
+    <value>Sicherung importieren</value>
+  </data>
+  <data name="Settings.Backups.ImportSucceeded" xml:space="preserve">
+    <value>Sicherung importiert</value>
   </data>
   <data name="Settings.Backups.KeepLatestDescription" xml:space="preserve">
     <value>Wie viele Sicherungen aufbewahrt werden, bevor ältere automatisch gelöscht werden.</value>
@@ -12988,6 +13000,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Settings.Backups.RestartFailedToast" xml:space="preserve">
     <value>Macro Deck konnte sich nicht selbst neu starten</value>
+  </data>
+  <data name="Settings.Backups.RestoreAdoptsRecoveryKey" xml:space="preserve">
+    <value>Nach der Wiederherstellung verwendet Macro Deck den Wiederherstellungsschlüssel, den du gerade eingegeben hast. Bisherige Sicherungen dieser Installation lassen sich nur mit ihrem aktuellen Wiederherstellungsschlüssel öffnen. Speichere ihn, bevor du fortfährst.</value>
   </data>
   <data name="Settings.Backups.RestoreButton" xml:space="preserve">
     <value>Wiederherstellen …</value>

@@ -640,6 +640,7 @@ export {
   type GetBackupSettingsResponse,
   type GetBackupsResponse,
   type GetBackupStatusResponse,
+  type ImportBackupResponse,
   type InspectBackupRequest,
   type InspectBackupResponse,
   type PendingRestoreSummary,

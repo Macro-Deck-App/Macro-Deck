@@ -85,10 +85,18 @@ export class BackupListComponent {
 
   async download(backup: BackupSummary): Promise<void> {
     this.openMenuId.set(null);
-    const result = await this.backupService.downloadBackup(backup.id);
-    if (!result.ok) {
-      this.toastService.show(result.error, { variant: 'error' });
+    const result = await this.backupService.downloadBackup(backup);
+    if (result.status === 'error') {
+      this.toastService.show(result.message, { variant: 'error' });
+    } else if (result.status === 'saved' && result.path) {
+      this.toastService.show(
+        this.localization.translateKey(AppStrings.Settings.Backups.DownloadSaved),
+        { detail: result.path, variant: 'success' });
     }
+  }
+
+  isDownloading(backup: BackupSummary): boolean {
+    return this.backupService.downloading().has(backup.id);
   }
 
   preview(backup: BackupSummary): void {
@@ -97,7 +105,7 @@ export class BackupListComponent {
   }
 
   restore(backup: BackupSummary): void {
-    if (!backup.decryptableLocally || !this.canMutate()) {
+    if (!this.canMutate()) {
       return;
     }
     this.openMenuId.set(null);

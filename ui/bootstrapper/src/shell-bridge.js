@@ -105,6 +105,15 @@
         },
       });
     },
+    saveBackup: function (options) {
+      var input = options || {};
+      return invoke('save_backup', {
+        options: {
+          backupId: String(input.backupId || ''),
+          fileName: encodeURIComponent(input.fileName || ''),
+        },
+      });
+    },
     // Suspends the application menu's key equivalents while a hotkey recorder
     // is armed, so combinations the menu owns reach the WebView (issue #423).
     // macOS only; a no-op everywhere else.

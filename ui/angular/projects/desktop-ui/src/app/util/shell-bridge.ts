@@ -27,9 +27,15 @@ export interface ShellSaveFileOptions {
   data: ArrayBuffer;
 }
 
+export interface ShellSaveBackupOptions {
+  backupId: string;
+  fileName: string;
+}
+
 export interface ShellSaveFileResult {
   saved: boolean;
   canceled: boolean;
+  unavailable?: boolean;
   path: string | null;
   error: string | null;
 }
@@ -50,6 +56,7 @@ export interface ShellBridge {
   takeMenuAction?: () => Promise<string | null>;
   onHostStopping?: (callback: () => void) => Promise<() => void>;
   saveFile?: (options: ShellSaveFileOptions) => Promise<ShellSaveFileResult>;
+  saveBackup?: (options: ShellSaveBackupOptions) => Promise<ShellSaveFileResult>;
   setHotkeyCapture?: (active: boolean) => Promise<void>;
 }
 

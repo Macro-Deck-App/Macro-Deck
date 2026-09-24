@@ -3,6 +3,7 @@ using MacroDeckHost.Application.Backups.Storage;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Backups;
 using MacroDeckHost.Domain.Enums;
+using Serilog;
 
 namespace MacroDeckHost.Application.Ui.Handlers;
 
@@ -11,11 +12,15 @@ public sealed class InspectBackupRequestMessageHandler
 {
 	private readonly IBackupService _backupService;
 	private readonly IBackupStorageRegistry _storageRegistry;
+	private readonly ILogger _logger;
 
-	public InspectBackupRequestMessageHandler(IBackupService backupService, IBackupStorageRegistry storageRegistry)
+	public InspectBackupRequestMessageHandler(IBackupService backupService,
+		IBackupStorageRegistry storageRegistry,
+		ILogger logger)
 	{
 		_backupService = backupService;
 		_storageRegistry = storageRegistry;
+		_logger = logger.ForContext<InspectBackupRequestMessageHandler>();
 	}
 
 	public async ValueTask<InspectBackupResponse> Handle(InspectBackupRequest request,
@@ -28,7 +33,7 @@ public sealed class InspectBackupRequestMessageHandler
 			return new InspectBackupResponse
 			{
 				Success = false,
-				Error = BackupDtoMapper.ToTransportError(BackupError.NotFound, "The backup was not found.")
+				Error = BackupDtoMapper.ToTransportError(BackupError.NotFound, null)
 			};
 		}
 
@@ -36,10 +41,15 @@ public sealed class InspectBackupRequestMessageHandler
 		var result = await _backupService.Inspect(source, request.RecoveryKey, cancellationToken);
 		if (!result.Success)
 		{
+			_logger.Warning("Inspecting backup {BackupId} failed with {Error}: {Detail}",
+				request.BackupId,
+				result.Error,
+				result.ErrorMessage);
+
 			return new InspectBackupResponse
 			{
 				Success = false,
-				Error = BackupDtoMapper.ToTransportError(result.Error!.Value, result.ErrorMessage)
+				Error = BackupDtoMapper.ToTransportError(result.Error!.Value, null)
 			};
 		}
 

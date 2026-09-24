@@ -9,6 +9,7 @@ using MacroDeckHost.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 using AppBackups = MacroDeckHost.Application.Backups;
 using AppBackupsStorage = MacroDeckHost.Application.Backups.Storage;
+using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Api.Controllers;
 
@@ -52,6 +53,7 @@ public class BackupsController : ControllerBase
 	private readonly AppBackups.IBackupService _backupService;
 	private readonly AppBackupsStorage.IBackupStorageRegistry _storageRegistry;
 	private readonly IMacroDeckPaths _paths;
+	private readonly ILogger _logger;
 
 	public BackupsController(
 		IUiTransportMessageHandler<GetBackupsRequest, GetBackupsResponse> getBackups,
@@ -75,7 +77,8 @@ public class BackupsController : ControllerBase
 			triggerBeforeHostUpdate,
 		AppBackups.IBackupService backupService,
 		AppBackupsStorage.IBackupStorageRegistry storageRegistry,
-		IMacroDeckPaths paths)
+		IMacroDeckPaths paths,
+		ILogger logger)
 	{
 		_getBackups = getBackups;
 		_createBackup = createBackup;
@@ -96,6 +99,7 @@ public class BackupsController : ControllerBase
 		_backupService = backupService;
 		_storageRegistry = storageRegistry;
 		_paths = paths;
+		_logger = logger.ForContext<BackupsController>();
 	}
 
 	[HttpGet]
@@ -256,11 +260,7 @@ public class BackupsController : ControllerBase
 		var staged = await BackupHttp.StageUpload(file, _paths, ct);
 		if (!staged.Success)
 		{
-			return Ok(new ImportBackupResponse
-			{
-				Success = false,
-				Error = BackupHttp.ToTransportError(staged.Error!.Value, staged.ErrorMessage)
-			});
+			return Ok(ImportFailure(staged.Error!.Value, staged.ErrorMessage));
 		}
 
 		try
@@ -286,11 +286,7 @@ public class BackupsController : ControllerBase
 		var validation = BackupHttp.ValidatePath(body.Path);
 		if (!validation.Success)
 		{
-			return Ok(new ImportBackupResponse
-			{
-				Success = false,
-				Error = BackupHttp.ToTransportError(validation.Error!.Value, validation.ErrorMessage)
-			});
+			return Ok(ImportFailure(validation.Error!.Value, validation.ErrorMessage));
 		}
 
 		var source = new AppBackups.BackupSourceRef(null, null, body.Path);
@@ -370,16 +366,19 @@ public class BackupsController : ControllerBase
 	{
 		if (!result.Success)
 		{
-			return new ImportBackupResponse
-			{
-				Success = false,
-				Error = BackupHttp.ToTransportError(result.Error!.Value, result.ErrorMessage)
-			};
+			return ImportFailure(result.Error!.Value, result.ErrorMessage);
 		}
 
 		var descriptor = result.Data!;
 		var displayName = _storageRegistry.Find(descriptor.ProviderId)?.DisplayName ?? descriptor.ProviderId;
 
 		return new ImportBackupResponse { Success = true, Backup = BackupDtoMapper.ToSummary(descriptor, displayName) };
+	}
+
+	private ImportBackupResponse ImportFailure(BackupError error, string? detail)
+	{
+		_logger.Warning("A backup import failed with {Error}: {Detail}", error, detail);
+
+		return new ImportBackupResponse { Success = false, Error = BackupHttp.ToTransportError(error, null) };
 	}
 }
