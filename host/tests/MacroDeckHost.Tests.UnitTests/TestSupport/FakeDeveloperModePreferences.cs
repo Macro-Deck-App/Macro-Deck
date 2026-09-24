@@ -80,7 +80,9 @@ internal sealed class FakeDeveloperModePreferences : IAppPreferenceService
 
 	public Task SetBackupScheduleLastRun(DateTimeOffset value) => throw new NotSupportedException();
 
-	public Task<LocalizationSettings> GetLocalization() => throw new NotSupportedException();
+	public string Culture { get; set; } = "en";
+
+	public Task<LocalizationSettings> GetLocalization() => Task.FromResult(new LocalizationSettings(Culture));
 
 	public Task<LocalizationSettings> SetLocalization(string? culture) => throw new NotSupportedException();
 

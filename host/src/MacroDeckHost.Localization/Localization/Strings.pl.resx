@@ -11755,6 +11755,18 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Macro Deck nie mógł odczytać plików (liczba: {count}) i nie była dostępna żadna użyteczna kopia zapasowa. Nieczytelne pliki pozostawiono na miejscu, aby można je było sprawdzić lub przywrócić z własnej kopii zapasowej.</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Notifications.CompanionLicenseDownloaded" xml:space="preserve">
+    <value>Pobrano licencję Companion</value>
+  </data>
+  <data name="Notifications.CompanionLicenseDownloadedMessage" xml:space="preserve">
+    <value>Macro Deck pobrał licencję Companion zapisaną na koncie Macro Deck i przekazuje ją każdej łączącej się aplikacji Companion.</value>
+  </data>
+  <data name="Notifications.CompanionLicenseReceived" xml:space="preserve">
+    <value>Otrzymano licencję Companion</value>
+  </data>
+  <data name="Notifications.CompanionLicenseReceivedMessage" xml:space="preserve">
+    <value>Macro Deck otrzymał licencję Companion z urządzenia i przekazuje ją każdej łączącej się aplikacji Companion.</value>
+  </data>
   <data name="Notifications.HttpsNotRunning" xml:space="preserve">
     <value>HTTPS nie działa</value>
   </data>
@@ -13398,6 +13410,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Settings.Language.TimeFormatLabel" xml:space="preserve">
     <value>Format czasu</value>
   </data>
+  <data name="Settings.License.AccountSignedOut" xml:space="preserve">
+    <value>Po zalogowaniu się na konto Macro Deck tej licencji można używać także na innych komputerach.</value>
+  </data>
+  <data name="Settings.License.AccountSynced" xml:space="preserve">
+    <value>Zapisano na koncie Macro Deck. Inne komputery zalogowane na to konto otrzymają tę licencję, jeśli nie mają żadnej.</value>
+  </data>
   <data name="Settings.License.BillingIdLabel" xml:space="preserve">
     <value>Identyfikator rozliczenia</value>
   </data>
@@ -13409,18 +13427,6 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Settings.License.IssuePending" xml:space="preserve">
     <value>Zakup jest zamieniany na licencję. Wymagane jest połączenie z internetem, a Macro Deck automatycznie ponawia próby.</value>
-  </data>
-  <data name="Settings.License.IssueTestAction" xml:space="preserve">
-    <value>Wystaw licencję testową</value>
-  </data>
-  <data name="Settings.License.IssueTestDescription" xml:space="preserve">
-    <value>Wystawia licencję podpisaną kluczem testowym do wypróbowania licencjonowania aplikacji Companion w kompilacji debugowej. Jest akceptowana tylko przy włączonym trybie dewelopera.</value>
-  </data>
-  <data name="Settings.License.IssueTestFailed" xml:space="preserve">
-    <value>Nie udało się wystawić licencji testowej.</value>
-  </data>
-  <data name="Settings.License.IssueTestLabel" xml:space="preserve">
-    <value>Licencja testowa</value>
   </data>
   <data name="Settings.License.IssuedAtLabel" xml:space="preserve">
     <value>Wystawiono</value>
@@ -13448,12 +13454,6 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Settings.License.PurchasedAtLabel" xml:space="preserve">
     <value>Zakupiono</value>
-  </data>
-  <data name="Settings.License.RevokeTestAction" xml:space="preserve">
-    <value>Unieważnij licencję testową</value>
-  </data>
-  <data name="Settings.License.RevokeTestFailed" xml:space="preserve">
-    <value>Nie udało się unieważnić licencji testowej.</value>
   </data>
   <data name="Settings.License.Source.AppStore" xml:space="preserve">
     <value>App Store</value>

@@ -11755,6 +11755,18 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>Macro Deck non è riuscito a leggere {count} file e non era disponibile alcun backup utilizzabile. I file illeggibili sono stati lasciati al loro posto, così puoi esaminarli o ripristinarli dal tuo backup.</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Notifications.CompanionLicenseDownloaded" xml:space="preserve">
+    <value>Licenza Companion scaricata</value>
+  </data>
+  <data name="Notifications.CompanionLicenseDownloadedMessage" xml:space="preserve">
+    <value>Macro Deck ha scaricato la licenza Companion salvata nel tuo account Macro Deck e la passa a ogni app Companion che si connette.</value>
+  </data>
+  <data name="Notifications.CompanionLicenseReceived" xml:space="preserve">
+    <value>Licenza Companion ricevuta</value>
+  </data>
+  <data name="Notifications.CompanionLicenseReceivedMessage" xml:space="preserve">
+    <value>Macro Deck ha ricevuto una licenza Companion da un dispositivo e la passa a ogni app Companion che si connette.</value>
+  </data>
   <data name="Notifications.HttpsNotRunning" xml:space="preserve">
     <value>HTTPS non è in esecuzione</value>
   </data>
@@ -13398,6 +13410,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Settings.Language.TimeFormatLabel" xml:space="preserve">
     <value>Formato orario</value>
   </data>
+  <data name="Settings.License.AccountSignedOut" xml:space="preserve">
+    <value>Accedi con il tuo account Macro Deck per usare questa licenza anche sugli altri tuoi computer.</value>
+  </data>
+  <data name="Settings.License.AccountSynced" xml:space="preserve">
+    <value>Salvata nel tuo account Macro Deck. Gli altri computer collegati a questo account ricevono questa licenza se non ne hanno una.</value>
+  </data>
   <data name="Settings.License.BillingIdLabel" xml:space="preserve">
     <value>ID fatturazione</value>
   </data>
@@ -13409,18 +13427,6 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Settings.License.IssuePending" xml:space="preserve">
     <value>Il tuo acquisto viene trasformato in una licenza. Serve una connessione a Internet e Macro Deck continua a riprovare da solo.</value>
-  </data>
-  <data name="Settings.License.IssueTestAction" xml:space="preserve">
-    <value>Emetti licenza di prova</value>
-  </data>
-  <data name="Settings.License.IssueTestDescription" xml:space="preserve">
-    <value>Emetti una licenza firmata con la chiave di prova per provare le licenze dell'app Companion con una build di debug. Viene accettata solo mentre la modalità sviluppatore è attiva.</value>
-  </data>
-  <data name="Settings.License.IssueTestFailed" xml:space="preserve">
-    <value>Impossibile emettere la licenza di prova.</value>
-  </data>
-  <data name="Settings.License.IssueTestLabel" xml:space="preserve">
-    <value>Licenza di prova</value>
   </data>
   <data name="Settings.License.IssuedAtLabel" xml:space="preserve">
     <value>Emessa il</value>
@@ -13448,12 +13454,6 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Settings.License.PurchasedAtLabel" xml:space="preserve">
     <value>Acquistata il</value>
-  </data>
-  <data name="Settings.License.RevokeTestAction" xml:space="preserve">
-    <value>Revoca licenza di prova</value>
-  </data>
-  <data name="Settings.License.RevokeTestFailed" xml:space="preserve">
-    <value>Non è stato possibile revocare la licenza di prova.</value>
   </data>
   <data name="Settings.License.Source.AppStore" xml:space="preserve">
     <value>App Store</value>

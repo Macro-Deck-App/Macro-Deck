@@ -11753,6 +11753,18 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Macro Deck konnte {count} Dateien nicht lesen, und es war keine brauchbare Sicherung vorhanden. Die unlesbaren Dateien wurden an ihrem Platz gelassen, damit du sie prüfen oder aus deiner eigenen Sicherung wiederherstellen kannst.</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Notifications.CompanionLicenseDownloaded" xml:space="preserve">
+    <value>Companion-Lizenz heruntergeladen</value>
+  </data>
+  <data name="Notifications.CompanionLicenseDownloadedMessage" xml:space="preserve">
+    <value>Macro Deck hat die Companion-Lizenz aus deinem Macro Deck-Konto heruntergeladen und gibt sie an jede Companion-App weiter, die sich verbindet.</value>
+  </data>
+  <data name="Notifications.CompanionLicenseReceived" xml:space="preserve">
+    <value>Companion-Lizenz erhalten</value>
+  </data>
+  <data name="Notifications.CompanionLicenseReceivedMessage" xml:space="preserve">
+    <value>Macro Deck hat eine Companion-Lizenz von einem Gerät erhalten und gibt sie an jede Companion-App weiter, die sich verbindet.</value>
+  </data>
   <data name="Notifications.HttpsNotRunning" xml:space="preserve">
     <value>HTTPS läuft nicht</value>
   </data>
@@ -13396,6 +13408,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.Language.TimeFormatLabel" xml:space="preserve">
     <value>Zeitformat</value>
   </data>
+  <data name="Settings.License.AccountSignedOut" xml:space="preserve">
+    <value>Melde dich mit deinem Macro Deck-Konto an, um diese Lizenz auch auf deinen anderen Computern zu nutzen.</value>
+  </data>
+  <data name="Settings.License.AccountSynced" xml:space="preserve">
+    <value>In deinem Macro Deck-Konto gespeichert. Andere damit angemeldete Computer erhalten diese Lizenz, wenn sie noch keine haben.</value>
+  </data>
   <data name="Settings.License.BillingIdLabel" xml:space="preserve">
     <value>Abrechnungs-ID</value>
   </data>
@@ -13407,18 +13425,6 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Settings.License.IssuePending" xml:space="preserve">
     <value>Dein Kauf wird in eine Lizenz umgewandelt. Dafür ist eine Internetverbindung nötig, und Macro Deck versucht es von selbst weiter.</value>
-  </data>
-  <data name="Settings.License.IssueTestAction" xml:space="preserve">
-    <value>Testlizenz ausstellen</value>
-  </data>
-  <data name="Settings.License.IssueTestDescription" xml:space="preserve">
-    <value>Stelle eine mit dem Testschlüssel signierte Lizenz aus, um die Lizenzierung der Companion-App mit einem Debug-Build auszuprobieren. Sie wird nur akzeptiert, solange der Entwicklermodus aktiviert ist.</value>
-  </data>
-  <data name="Settings.License.IssueTestFailed" xml:space="preserve">
-    <value>Die Testlizenz konnte nicht ausgestellt werden.</value>
-  </data>
-  <data name="Settings.License.IssueTestLabel" xml:space="preserve">
-    <value>Testlizenz</value>
   </data>
   <data name="Settings.License.IssuedAtLabel" xml:space="preserve">
     <value>Ausgestellt</value>
@@ -13446,12 +13452,6 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Settings.License.PurchasedAtLabel" xml:space="preserve">
     <value>Gekauft am</value>
-  </data>
-  <data name="Settings.License.RevokeTestAction" xml:space="preserve">
-    <value>Testlizenz widerrufen</value>
-  </data>
-  <data name="Settings.License.RevokeTestFailed" xml:space="preserve">
-    <value>Die Testlizenz konnte nicht widerrufen werden.</value>
   </data>
   <data name="Settings.License.Source.AppStore" xml:space="preserve">
     <value>App Store</value>

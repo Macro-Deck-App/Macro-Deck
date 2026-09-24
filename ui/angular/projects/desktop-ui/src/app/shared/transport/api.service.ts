@@ -1277,14 +1277,6 @@ export class ApiService {
     return this.http('GET', '/api/settings/license');
   }
 
-  issueTestCompanionLicense(): Promise<CompanionLicenseStatus> {
-    return this.http('POST', '/api/settings/license/test');
-  }
-
-  revokeTestCompanionLicense(): Promise<CompanionLicenseStatus> {
-    return this.http('DELETE', '/api/settings/license/test');
-  }
-
   getLockScreenSettings(): Promise<GetLockScreenSettingsResponse> {
     return this.http('GET', '/api/settings/lock-screen');
   }

@@ -51,41 +51,19 @@
       <shared-settings-row [label]="'macrodeck.app:Settings.License.IssuedAtLabel' | translate">
         <span class="license-settings__value">{{ issuedAt() }}</span>
       </shared-settings-row>
-    }
-    @if (status()?.testLicenseStored) {
-      <shared-settings-row [label]="'macrodeck.app:Settings.License.IssueTestLabel' | translate">
-        <shared-button
-          variant="secondary"
-          data-testid="revoke-test-license"
-          [disabled]="revoking()"
-          (click)="revokeTestLicense()">
-          {{ 'macrodeck.app:Settings.License.RevokeTestAction' | translate }}
-        </shared-button>
-      </shared-settings-row>
-    }
-    @if (revokeFailed()) {
-      <p class="license-settings__error">{{ 'macrodeck.app:Settings.License.RevokeTestFailed' | translate }}</p>
+      @if (status()?.accountSync === 'synced') {
+        <p class="license-settings__account" data-testid="license-account-synced">
+          <span class="icon icon-user icon-sm" aria-hidden="true"></span>
+          {{ 'macrodeck.app:Settings.License.AccountSynced' | translate }}
+        </p>
+      } @else if (status()?.accountSync === 'signedOut') {
+        <p class="license-settings__account" data-testid="license-account-signed-out">
+          <span class="icon icon-user icon-sm" aria-hidden="true"></span>
+          {{ 'macrodeck.app:Settings.License.AccountSignedOut' | translate }}
+        </p>
+      }
     }
   </shared-settings-section>
-
-  @if (developerMode()) {
-    <shared-settings-section
-      [heading]="'macrodeck.app:Settings.License.IssueTestLabel' | translate"
-      [description]="'macrodeck.app:Settings.License.IssueTestDescription' | translate">
-      <shared-settings-row [label]="'macrodeck.app:Settings.License.IssueTestLabel' | translate">
-        <shared-button
-          variant="secondary"
-          data-testid="issue-test-license"
-          [disabled]="issuing()"
-          (click)="issueTestLicense()">
-          {{ 'macrodeck.app:Settings.License.IssueTestAction' | translate }}
-        </shared-button>
-      </shared-settings-row>
-      @if (issueFailed()) {
-        <p class="license-settings__error">{{ 'macrodeck.app:Settings.License.IssueTestFailed' | translate }}</p>
-      }
-    </shared-settings-section>
-  }
 
   @if (loadFailed()) {
     <p class="license-settings__error">{{ 'macrodeck.app:Settings.License.LoadFailed' | translate }}</p>

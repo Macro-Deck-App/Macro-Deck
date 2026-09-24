@@ -15,8 +15,9 @@ Ed25519 is not available on Android below API 33, and Kotlin/Native on iOS canno
 
 **Token.** A license is a compact JWS, `alg` ES256, with a `kid` header. Its claims are `iss`
 `https://platform.macro-deck.app`, `aud` `macrodeck-companion`, `sub` (the license id), `product`
-`companion_app_license`, `source` (`google-play`, `app-store`, `app-store-legacy` or `test`) and `iat` in
-seconds. There is no `exp`, because the license does not expire. The optional display claims `purchased_at`
+`companion_app_license`, `source` (`google-play`, `app-store`, `app-store-legacy`, or `test` on licenses an
+earlier host version issued itself) and `iat` in seconds. There is no `exp`, because the license does not
+expire. The optional display claims `purchased_at`
 (epoch seconds) and `billing_id` (store order or original transaction id) are shown when present; a malformed
 value hides the detail and never rejects the license. The host checks it with
 Microsoft.IdentityModel.JsonWebTokens in `CompanionLicenseTokens`.
@@ -37,18 +38,18 @@ license per user, not per device.
 `api.macro-deck.app` (`POST api/v1/companion-licenses`). `google-play` and `app-store` proofs are sent, and
 `app-store-legacy` proofs of kind `appTransaction` (with `legacyKind`), which only the Macro Deck 2 app submits. The base URL can be redirected with `MACRO_DECK_PLATFORM_URL` in
 Development-channel builds only, for example to Platform mock mode or staging, which sign with `test-2026`.
-`TestCompanionLicenseIssuer` signs with the committed `test-2026` key for the Issue test license button. The key
-and everything built on it only work in developer mode (the `developer.mode` preference):
+The host issues no license itself; there is no test license button. A `test-2026` license only comes from
+Platform mock mode or staging, and only works in developer mode (the `developer.mode` preference):
 
-- the test issuer issues only while developer mode is on;
 - the host trusts `test-2026` only while developer mode is on, so a stored test license stops being handed
   out once it is switched off;
-- `POST api/settings/license/test` answers 404 unless developer mode is on;
 - the status page shows the source and key id, and marks a test license.
 
-On the Companion side only debug builds trust `test-2026`, so the committed private key cannot unlock a
-release build. A debug Companion with a sandbox purchase is refused by the production Platform
-(`sandbox-purchase`); a developer uses the test license button or points a development build at staging.
+On the Companion side only debug builds trust `test-2026`, so the test private key, which is public, cannot
+unlock a release build. A debug Companion with a sandbox purchase is refused by the production Platform
+(`sandbox-purchase`); a developer points a development build at Platform mock mode or staging. A test license
+left on a developer machine from an earlier version is ignored once developer mode is off and replaced by any
+production license; nothing removes it otherwise.
 
 **Sync.** The `SyncCompanionLicense` request, client scope with a device claim, is answered at once with the
 stored token and the known trial start; it never waits for the Platform. While no production license is stored,
@@ -82,25 +83,47 @@ accepts a time from the client, so a client cannot move a start into the past. T
 entries, and the oldest start is dropped first. That cap limits growth; it does not protect against abuse,
 because a new pairing or a new trial id costs an attacker nothing.
 
-**Revoking a test license.** `DELETE api/settings/license/test` removes a stored test license, in or out of
-developer mode, and records its id in the preference `license.revokedTestIds`, a list of at most 100 ids with
-the oldest dropped first. The host pushes `CompanionLicenseRevokedEvent` to every connected Companion, lists
-the revoked ids in every sync answer as `revokedLicenseIds` so an offline Companion learns of it later, and
-never adopts a revoked id again, so a Companion still holding the token cannot put it back. Issuing a new test
-license still works, since it carries a new id. Only test licenses can be revoked this way; a stored
-production license is never touched here, and revoking one belongs to the platform. The License tab offers the
-revocation whenever a test license is stored, whatever the developer mode, because debug Companions keep
-trusting it. Revocation drops a license, not a purchase: a fresh test license carries a new id.
-
 **Platform revocation.** While licensing is in use (a stored license, a pending proof, a cached list or a
 Companion that synced since start), the host fetches `GET api/v1/companion-licenses/revocations` hourly, and every
 5 minutes up to hourly after a failure. The list (at most 10,000 ids; a longer one keeps the previous copy) is
 cached in `license.platformRevokedIds`, so an offline host still applies the last one. A stored license on the
 list is removed, whatever key signed it, `CompanionLicenseRevokedEvent` is pushed, and a listed id is never
-adopted. The sync answer's `revokedLicenseIds` carries the host's test ids plus the Platform ids while the
-Platform list has at most 4,000 ids; above that it carries only the listed ids of the license the Companion
-submitted and of the host's stored license, because a UI WebSocket message is capped at 256 KB. The Companion
+adopted. The sync answer's `revokedLicenseIds` carries the Platform ids while the Platform list has at most
+4,000 ids; above that it carries only the listed ids of the license the Companion submitted and of the host's
+stored license, because a UI WebSocket message is capped at 256 KB. The Companion
 fetches the full list from the Platform itself.
+
+**Account sync.** While the host is signed in to a Macro Deck account (ADR 0054),
+`CompanionLicenseAccountSyncBackgroundService` keeps the stored license and the license on that account in
+step through `api/v1/companion-licenses/account` (Macro-Deck-Platform docs/companion-licensing.md). It reads
+the account license, reconciles, then long-polls for a change and reconciles every answer:
+
+- both valid: nothing changes, even when they differ, except that a production account license replaces a
+  local test license;
+- only the local license valid: it is uploaded, but only if the host may upload it (below);
+- only the account license valid: it is stored, replacing an invalid or missing local one, and pushed as
+  `CompanionLicenseEvent` to every connected Companion.
+
+Valid means verified with the current trust set and not on the cached Platform revocation list. The
+Platform keeps one license per account and several accounts may hold the same license.
+
+A host uploads only a license it obtained itself: issued from a purchase proof it forwarded (a Companion
+purchase or the Macro Deck 2 transfer) or taken from the account. The id is kept in
+`license.accountEligibleId`. A license merely taken over from a Companion's token is never uploaded, so
+connecting a phone to someone else's signed-in host never puts that license on their account. It also never
+replaces a missing or invalid account license. The first locked access after an upgrade marks a license that
+was already stored as uploadable, and writes `none` otherwise, before anything can be adopted; a restored
+backup from before this version gets the same treatment on its next start.
+
+A local change (a new license, a revocation drop) or a change of account status abandons the poll and starts
+over. An upload the Platform answered without storing (conflict, refusal, unchanged) is not repeated while
+the account, the local license, the account revision and the account license stay the same. An upload refused
+as `license-revoked` drops the local license at once. Unexpected answers back off from 5 seconds to 5
+minutes; an upload refused because the account is suspended or unknown stops uploads for 30 minutes while
+the long poll goes on, and a session Connect itself reports as suspended stops the sync like a sign-out. A license newly
+stored from a Companion, a purchase proof or the account raises an informational user notification, one at a
+time (dedupe key `companionLicense.received`). The License page says when the license is saved to the
+account, or asks a signed-out owner to sign in.
 
 ## Consequences
 
@@ -126,12 +149,18 @@ fetches the full list from the Platform itself.
   issuing are not detected automatically; an administrator revokes the license, and the revocation list is
   how that reaches hosts and phones.
 - The 1000 entry trial cap is a known ceiling. A central trial record belongs to the Platform API.
-- A host that uses Companions calls `api.macro-deck.app` about once an hour for the revocation list.
+- A host that uses Companions calls `api.macro-deck.app` about once an hour for the revocation list. A host
+  signed in to a Macro Deck account also keeps one long poll open there, renewed about every 50 seconds.
+- Linking a license to an account is permanent: there is no unlink. The license, including its display claims
+  such as the billing id, becomes readable to every host signed in to that account.
+- Debug Companions no longer receive the ids of test licenses an earlier host version revoked, and a host in
+  developer mode no longer refuses them.
 
 ## References
 
 - [`CompanionLicenseTokens`](../../host/src/MacroDeckHost.Infrastructure/Licensing/CompanionLicenseTokens.cs)
 - [`CompanionLicenseService`](../../host/src/MacroDeckHost/Licensing/CompanionLicenseService.cs)
 - [`PlatformLicenseClient`](../../host/src/MacroDeckHost.Infrastructure/Licensing/PlatformLicenseClient.cs)
-- [`TestCompanionLicenseIssuer`](../../host/src/MacroDeckHost.Infrastructure/Licensing/TestCompanionLicenseIssuer.cs)
+- [`PlatformLicenseAccountClient`](../../host/src/MacroDeckHost.Infrastructure/Licensing/PlatformLicenseAccountClient.cs)
+- [`CompanionLicenseAccountSyncBackgroundService`](../../host/src/MacroDeckHost/Licensing/CompanionLicenseAccountSyncBackgroundService.cs)
 - [`CompanionLicenseBackgroundService`](../../host/src/MacroDeckHost/Licensing/CompanionLicenseBackgroundService.cs)

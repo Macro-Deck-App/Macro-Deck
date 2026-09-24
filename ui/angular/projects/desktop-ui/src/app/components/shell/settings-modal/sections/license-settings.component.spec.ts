@@ -1,9 +1,8 @@
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CompanionLicenseStatus } from '@macro-deck/runtime';
 import { ApiService } from '@shared';
 import { EMPTY, Subject } from 'rxjs';
-import { DeveloperModeService } from '../../../../services/developer-mode.service';
 import { LicenseSettingsComponent } from './license-settings.component';
 
 const UNLICENSED: CompanionLicenseStatus = {
@@ -15,7 +14,7 @@ const UNLICENSED: CompanionLicenseStatus = {
   purchasedAt: null,
   billingId: null,
   isTest: false,
-  testLicenseStored: false,
+  accountSync: 'unknown',
   issuePending: false,
   nextIssueAttemptAt: null,
 };
@@ -29,7 +28,7 @@ const TEST_LICENSE: CompanionLicenseStatus = {
   purchasedAt: null,
   billingId: null,
   isTest: true,
-  testLicenseStored: true,
+  accountSync: 'unknown',
   issuePending: false,
   nextIssueAttemptAt: null,
 };
@@ -42,24 +41,14 @@ const PURCHASED: CompanionLicenseStatus = {
   purchasedAt: Date.UTC(2026, 0, 1),
   billingId: 'GPA.3344-5566',
   isTest: false,
-  testLicenseStored: false,
 };
 
 describe('LicenseSettingsComponent', () => {
   let api: jasmine.SpyObj<ApiService>;
-  const developerMode = signal(false);
 
   beforeEach(async () => {
-    developerMode.set(false);
-    api = jasmine.createSpyObj<ApiService>('ApiService', [
-      'getCompanionLicense',
-      'issueTestCompanionLicense',
-      'revokeTestCompanionLicense',
-      'onNotification',
-    ]);
+    api = jasmine.createSpyObj<ApiService>('ApiService', ['getCompanionLicense', 'onNotification']);
     api.getCompanionLicense.and.resolveTo(UNLICENSED);
-    api.issueTestCompanionLicense.and.resolveTo(TEST_LICENSE);
-    api.revokeTestCompanionLicense.and.resolveTo(UNLICENSED);
     api.onNotification.and.returnValue(EMPTY);
 
     await TestBed.configureTestingModule({
@@ -67,7 +56,6 @@ describe('LicenseSettingsComponent', () => {
       providers: [
         provideZonelessChangeDetection(),
         { provide: ApiService, useValue: api },
-        { provide: DeveloperModeService, useValue: { enabled: developerMode } },
       ],
     }).compileComponents();
   });
@@ -84,40 +72,12 @@ describe('LicenseSettingsComponent', () => {
     return fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
   }
 
-  it('shows an unlicensed host without the test issuer outside developer mode', async () => {
+  it('offers no way to issue or revoke a test license', async () => {
     const fixture = await create();
 
     expect(fixture.componentInstance.status()?.licensed).toBeFalse();
-    expect(find(fixture, 'issue-test-license')).toBeNull();
+    expect(fixture.nativeElement.querySelectorAll('button').length).toBe(0);
     expect(find(fixture, 'license-test-marker')).toBeNull();
-    expect(find(fixture, 'revoke-test-license')).toBeNull();
-  });
-
-  it('revokes a test license outside developer mode and shows the status the host returns', async () => {
-    api.getCompanionLicense.and.resolveTo({ ...UNLICENSED, testLicenseStored: true });
-    const fixture = await create();
-
-    find(fixture, 'revoke-test-license')?.querySelector('button')?.click();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    expect(api.revokeTestCompanionLicense).toHaveBeenCalledTimes(1);
-    expect(fixture.componentInstance.status()).toEqual(UNLICENSED);
-    expect(find(fixture, 'revoke-test-license')).toBeNull();
-    expect(find(fixture, 'license-test-marker')).toBeNull();
-  });
-
-  it('offers no revoke for a purchased license', async () => {
-    api.getCompanionLicense.and.resolveTo({
-      ...TEST_LICENSE,
-      source: 'google-play',
-      keyId: 'prod-2026',
-      isTest: false,
-      testLicenseStored: false,
-    });
-    const fixture = await create();
-
-    expect(find(fixture, 'revoke-test-license')).toBeNull();
   });
 
   it('marks a test license so it is never mistaken for a purchased one', async () => {
@@ -129,27 +89,28 @@ describe('LicenseSettingsComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('test-2026');
   });
 
-  it('offers the test issuer in developer mode and shows the license it returns', async () => {
-    developerMode.set(true);
+  it('says a license is saved to the Macro Deck account', async () => {
+    api.getCompanionLicense.and.resolveTo({ ...PURCHASED, accountSync: 'synced' });
     const fixture = await create();
 
-    expect(find(fixture, 'issue-test-license')).not.toBeNull();
-    await fixture.componentInstance.issueTestLicense();
-    fixture.detectChanges();
-
-    expect(api.issueTestCompanionLicense).toHaveBeenCalledTimes(1);
-    expect(find(fixture, 'license-test-marker')).not.toBeNull();
+    expect(find(fixture, 'license-account-synced')).not.toBeNull();
+    expect(find(fixture, 'license-account-signed-out')).toBeNull();
   });
 
-  it('reports a failed issue without losing the current status', async () => {
-    developerMode.set(true);
-    api.issueTestCompanionLicense.and.rejectWith(new Error('not found'));
+  it('asks a signed-out owner to sign in to use the license elsewhere', async () => {
+    api.getCompanionLicense.and.resolveTo({ ...PURCHASED, accountSync: 'signedOut' });
     const fixture = await create();
 
-    await fixture.componentInstance.issueTestLicense();
+    expect(find(fixture, 'license-account-signed-out')).not.toBeNull();
+    expect(find(fixture, 'license-account-synced')).toBeNull();
+  });
 
-    expect(fixture.componentInstance.issueFailed()).toBeTrue();
-    expect(fixture.componentInstance.status()).toEqual(UNLICENSED);
+  it('says nothing about the account when the host cannot tell', async () => {
+    api.getCompanionLicense.and.resolveTo(PURCHASED);
+    const fixture = await create();
+
+    expect(find(fixture, 'license-account-synced')).toBeNull();
+    expect(find(fixture, 'license-account-signed-out')).toBeNull();
   });
 
   it('shows the purchase details of a purchased license', async () => {

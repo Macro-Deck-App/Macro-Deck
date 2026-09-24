@@ -731,10 +731,13 @@ public class Startup
 		services.AddHttpClient(PlatformLicenseClient.HttpClientName)
 			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
 		services.AddSingleton<IPlatformLicenseClient, PlatformLicenseClient>();
-		services.AddSingleton<TestCompanionLicenseIssuer>();
+		services.AddHttpClient(PlatformLicenseAccountClient.HttpClientName)
+			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
+		services.AddSingleton<IPlatformLicenseAccountClient, PlatformLicenseAccountClient>();
 		services.AddSingleton<CompanionLicenseService>();
 		services.AddSingleton<ICompanionLicenseService>(sp => sp.GetRequiredService<CompanionLicenseService>());
 		services.AddHostedService<CompanionLicenseBackgroundService>();
+		services.AddHostedService<CompanionLicenseAccountSyncBackgroundService>();
 		services.AddSingleton<IIntegrationConfigMutationCoordinator, IntegrationConfigMutationCoordinator>();
 		services.AddSingleton<IntegrationInitializer>();
 		services.AddSingleton<IIntegrationLifecycle, IntegrationLifecycle>();

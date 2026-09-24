@@ -91,6 +91,15 @@ like any other, and the page above shows its progress. A download from the time 
 not a purchase and cannot be transferred. If the app reports that the purchase could not be verified, the
 Macro Deck servers may not accept these purchases yet; try again a day later.
 
+When you are signed in under **Settings > Account**, Macro Deck saves a license it got from a purchase to
+your Macro Deck account, and the page says so. Your other computers signed in to the same account that
+have no license yet receive it within about a minute, and hand it to their Companion apps. Macro Deck
+shows a notification whenever it receives a license from a device or downloads one from your account. A
+license a computer only received from someone else's Companion app is not saved to your account; a
+license that was already on the computer before it could save licenses to accounts is treated like one
+from a purchase. If a computer already has a different working license, it keeps it; a revoked license is
+replaced by the working one.
+
 For support, quote the **License ID** shown on that page. It is safe to share; the license itself is
 never shown.
 
