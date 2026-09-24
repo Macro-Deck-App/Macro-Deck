@@ -39,6 +39,12 @@ section says so at the top.
 | Not an Android device | An ADB device that does not run Android, such as a Car Thing. |
 | Needs Android 6 or later | The Companion app does not support this Android version. |
 
+## Save the APK
+
+**App file (APK) > Save APK** saves the same checked APK to your computer. Use it to install the app
+yourself, for example with a file manager on a device where USB debugging is not available. Such an
+install is not listed under **Devices connected over ADB** and is not updated automatically.
+
 ## Updates
 
 Macro Deck checks for a new version of the app regularly and whenever you open the page, and

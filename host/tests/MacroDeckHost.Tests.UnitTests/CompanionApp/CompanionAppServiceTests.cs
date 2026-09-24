@@ -402,6 +402,34 @@ public class CompanionAppServiceTests
 	}
 
 	[Test]
+	public async Task The_verified_apk_can_be_exported_without_any_device()
+	{
+		using var fixture = new Fixture();
+		fixture.Adb.Status = AdbStatus.Disabled;
+
+		var (path, release, error) = await fixture.Service.PrepareApkAsync(CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(error, Is.Null);
+			Assert.That(release!.Version, Is.EqualTo("26.1.0"));
+			Assert.That(File.Exists(path), Is.True);
+		});
+	}
+
+	[Test]
+	public async Task An_apk_that_fails_verification_is_not_exported()
+	{
+		using var fixture = new Fixture();
+		fixture.Releases.Outcome = CompanionApkDownloadOutcome.VerificationFailed;
+
+		var (path, _, error) = await fixture.Service.PrepareApkAsync(CancellationToken.None);
+
+		Assert.That(path, Is.Null);
+		Assert.That(error, Is.EqualTo(CompanionAppErrors.VerificationFailed));
+	}
+
+	[Test]
 	public async Task A_device_waiting_for_usb_debugging_approval_is_listed_as_such()
 	{
 		using var fixture = new Fixture();

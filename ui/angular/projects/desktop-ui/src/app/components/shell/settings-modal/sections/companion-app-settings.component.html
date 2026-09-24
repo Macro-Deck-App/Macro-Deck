@@ -66,6 +66,21 @@
           [checked]="current.autoUpdate"
           (changed)="setAutoUpdate($event)" />
       </shared-settings-row>
+
+      <shared-settings-row
+        [label]="'macrodeck.app:Settings.CompanionApp.SaveApkLabel' | translate"
+        [description]="'macrodeck.app:Settings.CompanionApp.SaveApkDescription' | translate">
+        <shared-button
+          variant="secondary"
+          data-testid="companion-app-save-apk"
+          [loading]="savingApk()"
+          (click)="saveApk()">
+          {{ 'macrodeck.app:Settings.CompanionApp.SaveApk' | translate }}
+        </shared-button>
+      </shared-settings-row>
+      @if (apkMessage(); as message) {
+        <p class="companion-app__error" role="status" data-testid="companion-app-apk-message">{{ message }}</p>
+      }
     }
   </shared-settings-section>
 

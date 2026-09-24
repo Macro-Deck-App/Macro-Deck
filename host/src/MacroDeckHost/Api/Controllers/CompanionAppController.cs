@@ -25,6 +25,18 @@ public class CompanionAppController : ControllerBase
 	[HttpPost("check")]
 	public Task<CompanionAppStatus> Check(CancellationToken ct) => _companionApp.CheckNowAsync(ct);
 
+	[HttpGet("apk")]
+	public async Task<IActionResult> DownloadApk(CancellationToken ct)
+	{
+		var (path, release, error) = await _companionApp.PrepareApkAsync(ct);
+		if (path is null || release is null)
+		{
+			return StatusCode(StatusCodes.Status502BadGateway, new { error });
+		}
+
+		return PhysicalFile(path, "application/vnd.android.package-archive", $"macro-deck-companion-{release.Version}.apk");
+	}
+
 	[HttpPost("install")]
 	public async Task<ActionResult<InstallCompanionAppResponse>> Install([FromBody] InstallCompanionAppRequest request,
 		CancellationToken ct)

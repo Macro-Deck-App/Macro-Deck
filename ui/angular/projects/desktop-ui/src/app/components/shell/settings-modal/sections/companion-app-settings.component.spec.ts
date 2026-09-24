@@ -4,6 +4,7 @@ import { CompanionAppDevice, CompanionAppStatus, CompanionLicenseStatus } from '
 import { ApiService } from '@shared';
 import { EMPTY } from 'rxjs';
 import { DeveloperModeService } from '../../../../services/developer-mode.service';
+import { FileSaveService } from '../../../../services/file-save.service';
 import { SettingsModalService } from '../../../../services/settings-modal.service';
 import { CompanionAppSettingsComponent } from './companion-app-settings.component';
 
@@ -61,6 +62,7 @@ function status(overrides: Partial<CompanionAppStatus> = {}): CompanionAppStatus
 describe('CompanionAppSettingsComponent', () => {
   let api: jasmine.SpyObj<ApiService>;
   let settingsModal: SettingsModalService;
+  let fileSave: jasmine.SpyObj<FileSaveService>;
 
   beforeEach(async () => {
     api = jasmine.createSpyObj<ApiService>('ApiService', [
@@ -71,7 +73,9 @@ describe('CompanionAppSettingsComponent', () => {
       'updateCompanionAppSettings',
       'onNotification',
       'onAdbStateChanged',
+      'downloadCompanionApk',
     ]);
+    fileSave = jasmine.createSpyObj<FileSaveService>('FileSaveService', ['save']);
     api.getCompanionLicense.and.resolveTo(UNLICENSED);
     api.getCompanionApp.and.resolveTo(status());
     api.onNotification.and.returnValue(EMPTY);
@@ -83,6 +87,7 @@ describe('CompanionAppSettingsComponent', () => {
         provideZonelessChangeDetection(),
         { provide: ApiService, useValue: api },
         { provide: DeveloperModeService, useValue: { enabled: signal(false) } },
+        { provide: FileSaveService, useValue: fileSave },
       ],
     }).compileComponents();
     settingsModal = TestBed.inject(SettingsModalService);
@@ -209,6 +214,31 @@ describe('CompanionAppSettingsComponent', () => {
     const rows = Array.from(fixture.nativeElement.querySelectorAll('[data-testid="companion-app-connected"]')) as HTMLElement[];
     expect(rows.map(row => row.querySelector('[data-testid="companion-app-newer"]')?.textContent?.trim() ?? null))
       .toEqual(['Newer version available: 26.1.0', null]);
+  });
+
+  it('saves the verified APK through the app file dialog', async () => {
+    const blob = new Blob([new Uint8Array([1, 2, 3])]);
+    api.downloadCompanionApk.and.resolveTo({ blob, fileName: 'macro-deck-companion-26.1.0.apk' });
+    fileSave.save.and.resolveTo({ status: 'saved', viaDialog: true, path: '/tmp/macro-deck-companion-26.1.0.apk' });
+    const fixture = await create();
+
+    (fixture.nativeElement.querySelector('[data-testid="companion-app-save-apk"] button') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fileSave.save).toHaveBeenCalledWith(blob, 'macro-deck-companion-26.1.0.apk');
+    expect(text(fixture, 'companion-app-apk-message')).toBe('The APK was saved.');
+  });
+
+  it('says so when the APK cannot be downloaded', async () => {
+    api.downloadCompanionApk.and.rejectWith(new Error('502'));
+    const fixture = await create();
+
+    await fixture.componentInstance.saveApk();
+    fixture.detectChanges();
+
+    expect(fileSave.save).not.toHaveBeenCalled();
+    expect(text(fixture, 'companion-app-apk-message')).toContain('could not be downloaded');
   });
 
   it('saves the auto-update choice', async () => {

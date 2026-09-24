@@ -13114,6 +13114,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.CompanionApp.AdbDisabled" xml:space="preserve">
     <value>K instalaci aplikace je potřeba ADB, které je nutné nejprve zapnout v nastavení ADB.</value>
   </data>
+  <data name="Settings.CompanionApp.ApkSaved" xml:space="preserve">
+    <value>APK byl uložen.</value>
+  </data>
   <data name="Settings.CompanionApp.AutoUpdateDescription" xml:space="preserve">
     <value>Aktualizuje aplikaci v zařízeních připojených přes ADB, do kterých byla nainstalována z Macro Decku. Instalace z Google Play aktualizuje Google Play.</value>
   </data>
@@ -13228,6 +13231,15 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Settings.CompanionApp.OpenAdbSettings" xml:space="preserve">
     <value>Otevřít nastavení ADB</value>
+  </data>
+  <data name="Settings.CompanionApp.SaveApk" xml:space="preserve">
+    <value>Uložit APK</value>
+  </data>
+  <data name="Settings.CompanionApp.SaveApkDescription" xml:space="preserve">
+    <value>Uložení APK pro vlastní instalaci, například pomocí správce souborů v zařízení bez ladění USB.</value>
+  </data>
+  <data name="Settings.CompanionApp.SaveApkLabel" xml:space="preserve">
+    <value>Soubor aplikace (APK)</value>
   </data>
   <data name="Settings.CompanionApp.State.Checking" xml:space="preserve">
     <value>Probíhá kontrola…</value>

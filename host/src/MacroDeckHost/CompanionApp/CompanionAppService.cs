@@ -157,6 +157,31 @@ public sealed partial class CompanionAppService : IDisposable
 		}
 	}
 
+	public async Task<(string? Path, CompanionAppRelease? Release, string? Error)> PrepareApkAsync(
+		CancellationToken cancellationToken)
+	{
+		await _workGate.WaitAsync(cancellationToken);
+		try
+		{
+			if (_release is null)
+			{
+				await RefreshReleaseAsync(cancellationToken);
+			}
+
+			if (_release is not { } release)
+			{
+				return (null, null, CompanionAppErrors.NoRelease);
+			}
+
+			var (path, error) = await EnsureApkAsync(release, cancellationToken);
+			return (path, release, error);
+		}
+		finally
+		{
+			_workGate.Release();
+		}
+	}
+
 	public async Task<DateTimeOffset?> RunDueWorkAsync(CancellationToken cancellationToken)
 	{
 		await _workGate.WaitAsync(cancellationToken);

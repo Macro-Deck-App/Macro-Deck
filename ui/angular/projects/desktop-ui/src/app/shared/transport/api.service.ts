@@ -1276,6 +1276,17 @@ export class ApiService {
     return this.http('PUT', '/api/settings/companion-app', { autoUpdate });
   }
 
+  async downloadCompanionApk(): Promise<{ blob: Blob; fileName: string }> {
+    const response = await this.fetchWithAuth('/api/settings/companion-app/apk', { method: 'GET' });
+    if (!response.ok) {
+      throw new TransportError(response.status, `Download failed (${response.status})`);
+    }
+
+    const fileName = parseContentDispositionFileName(response.headers.get('Content-Disposition')) ??
+      'macro-deck-companion.apk';
+    return { blob: await response.blob(), fileName };
+  }
+
   getLockScreenSettings(): Promise<GetLockScreenSettingsResponse> {
     return this.http('GET', '/api/settings/lock-screen');
   }

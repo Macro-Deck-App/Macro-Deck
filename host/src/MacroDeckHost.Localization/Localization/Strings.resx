@@ -13114,6 +13114,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Settings.CompanionApp.AdbDisabled" xml:space="preserve">
     <value>Installing the app needs ADB. Turn it on in the ADB settings first.</value>
   </data>
+  <data name="Settings.CompanionApp.ApkSaved" xml:space="preserve">
+    <value>The APK was saved.</value>
+  </data>
   <data name="Settings.CompanionApp.AutoUpdateDescription" xml:space="preserve">
     <value>Updates the app on devices connected over ADB where it was installed from Macro Deck. Google Play keeps its own installs up to date.</value>
   </data>
@@ -13228,6 +13231,15 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Settings.CompanionApp.OpenAdbSettings" xml:space="preserve">
     <value>Open ADB settings</value>
+  </data>
+  <data name="Settings.CompanionApp.SaveApk" xml:space="preserve">
+    <value>Save APK</value>
+  </data>
+  <data name="Settings.CompanionApp.SaveApkDescription" xml:space="preserve">
+    <value>Save the APK to install it yourself, for example with a file manager on a device without USB debugging.</value>
+  </data>
+  <data name="Settings.CompanionApp.SaveApkLabel" xml:space="preserve">
+    <value>App file (APK)</value>
   </data>
   <data name="Settings.CompanionApp.State.Checking" xml:space="preserve">
     <value>Checking…</value>

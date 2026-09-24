@@ -488,6 +488,7 @@ public class AuthPolicyMatrixTests
 		var clientResponses = new[]
 		{
 			await Send(HttpMethod.Get, "/api/settings/companion-app", _clientToken),
+			await Send(HttpMethod.Get, "/api/settings/companion-app/apk", _clientToken),
 			await SendJson(HttpMethod.Put, "/api/settings/companion-app", new { autoUpdate = true }, _clientToken),
 			await SendJson(HttpMethod.Post, "/api/settings/companion-app/check", new { }, _clientToken),
 			await SendJson(HttpMethod.Post, "/api/settings/companion-app/install", new { serial = "R58M12ABCDE" }, _clientToken)

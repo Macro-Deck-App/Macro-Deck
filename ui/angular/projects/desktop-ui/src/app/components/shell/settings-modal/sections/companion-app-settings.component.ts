@@ -18,6 +18,7 @@ import {
   ToggleSwitchComponent,
   TranslatePipe,
 } from '@shared';
+import { FileSaveService } from '../../../../services/file-save.service';
 import { SettingsModalService } from '../../../../services/settings-modal.service';
 import { LicenseSettingsComponent } from './license-settings.component';
 
@@ -60,6 +61,7 @@ export class CompanionAppSettingsComponent {
   private readonly api = inject(ApiService);
   private readonly localization = inject(LocalizationService);
   private readonly settingsModal = inject(SettingsModalService);
+  private readonly fileSave = inject(FileSaveService);
   private loadRequest = 0;
 
   readonly status = signal<CompanionAppStatus | null>(null);
@@ -68,6 +70,8 @@ export class CompanionAppSettingsComponent {
   readonly checking = signal(false);
   readonly autoUpdateBusy = signal(false);
   readonly installingSerial = signal<string | null>(null);
+  readonly savingApk = signal(false);
+  readonly apkMessage = signal<string | null>(null);
 
   readonly latestReleased = computed(() => this.formatDate(this.status()?.publishedAt));
   readonly checkInProgress = computed(() => this.checking() || this.status()?.checking === true);
@@ -133,6 +137,27 @@ export class CompanionAppSettingsComponent {
       });
     } finally {
       this.installingSerial.set(null);
+    }
+  }
+
+  async saveApk(): Promise<void> {
+    if (this.savingApk()) {
+      return;
+    }
+    this.savingApk.set(true);
+    this.apkMessage.set(null);
+    try {
+      const { blob, fileName } = await this.api.downloadCompanionApk();
+      const result = await this.fileSave.save(blob, fileName);
+      if (result.status === 'saved') {
+        this.apkMessage.set(this.localization.translateKey(S.ApkSaved));
+      } else if (result.status === 'error') {
+        this.apkMessage.set(result.message);
+      }
+    } catch {
+      this.apkMessage.set(this.localization.translateKey(S.Error.DownloadFailed));
+    } finally {
+      this.savingApk.set(false);
     }
   }
 
