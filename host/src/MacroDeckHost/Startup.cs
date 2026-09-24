@@ -41,6 +41,9 @@ using MacroDeckHost.Application.Licensing;
 using MacroDeckHost.Application.Lifecycle;
 using MacroDeckHost.Infrastructure.Licensing;
 using MacroDeckHost.Licensing;
+using MacroDeckHost.CompanionApp;
+using MacroDeckHost.Application.CompanionApp;
+using MacroDeckHost.Infrastructure.CompanionApp;
 using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Logging;
 using MacroDeckHost.Application.MusicPlayer;
@@ -730,6 +733,11 @@ public class Startup
 		services.AddSingleton<CompanionLicenseService>();
 		services.AddSingleton<ICompanionLicenseService>(sp => sp.GetRequiredService<CompanionLicenseService>());
 		services.AddHostedService<CompanionLicenseBackgroundService>();
+		services.AddHttpClient(CompanionAppReleaseClient.HttpClientName)
+			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
+		services.AddSingleton<ICompanionAppReleaseClient, CompanionAppReleaseClient>();
+		services.AddSingleton<CompanionAppService>();
+		services.AddHostedService<CompanionAppBackgroundService>();
 		services.AddSingleton<IIntegrationConfigMutationCoordinator, IntegrationConfigMutationCoordinator>();
 		services.AddSingleton<IntegrationInitializer>();
 		services.AddSingleton<IIntegrationLifecycle, IntegrationLifecycle>();

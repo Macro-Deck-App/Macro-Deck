@@ -61,6 +61,12 @@ public sealed record AdbListServicesCommand(string Serial, AdbServiceManager Man
 /// </summary>
 public sealed record AdbDirectoryExistsCommand(string Serial, string DevicePath) : AdbQueryCommand(Serial);
 
+public sealed record AdbSdkLevelCommand(string Serial) : AdbQueryCommand(Serial);
+
+public sealed record AdbPackageInfoCommand(string Serial, string Package) : AdbQueryCommand(Serial);
+
+public sealed record AdbPackageRunningCommand(string Serial, string Package) : AdbQueryCommand(Serial);
+
 public sealed record AdbRestartServiceCommand(
 	string Serial,
 	AdbServiceManager Manager,

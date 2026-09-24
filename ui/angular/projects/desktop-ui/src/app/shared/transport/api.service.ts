@@ -113,6 +113,8 @@ import {
   GetDataDirectoryResponse,
   CompleteOnboardingResponse,
   CompanionLicenseStatus,
+  CompanionAppStatus,
+  InstallCompanionAppResponse,
   GetDeveloperSettingsResponse,
   GetExtensionSettingsResponse,
   UpdateExtensionSettingsRequest,
@@ -1264,6 +1266,22 @@ export class ApiService {
 
   revokeTestCompanionLicense(): Promise<CompanionLicenseStatus> {
     return this.http('DELETE', '/api/settings/license/test');
+  }
+
+  getCompanionApp(): Promise<CompanionAppStatus> {
+    return this.http('GET', '/api/settings/companion-app');
+  }
+
+  checkCompanionAppUpdate(): Promise<CompanionAppStatus> {
+    return this.http('POST', '/api/settings/companion-app/check');
+  }
+
+  installCompanionApp(serial: string): Promise<InstallCompanionAppResponse> {
+    return this.http('POST', '/api/settings/companion-app/install', { serial });
+  }
+
+  updateCompanionAppSettings(autoUpdate: boolean): Promise<CompanionAppStatus> {
+    return this.http('PUT', '/api/settings/companion-app', { autoUpdate });
   }
 
   getLockScreenSettings(): Promise<GetLockScreenSettingsResponse> {

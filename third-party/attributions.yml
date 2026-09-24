@@ -94,6 +94,7 @@ assets:
       - ui/runtime/styles/icons/log-out.svg
       - ui/runtime/styles/icons/message-square.svg
       - ui/runtime/styles/icons/minus.svg
+      - ui/runtime/styles/icons/monitor-smartphone.svg
       - ui/runtime/styles/icons/moon.svg
       - ui/runtime/styles/icons/music-note.svg
       - ui/runtime/styles/icons/music-player-type.svg

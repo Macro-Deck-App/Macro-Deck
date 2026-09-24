@@ -13099,6 +13099,171 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Settings.ClientTargets.Unavailable" xml:space="preserve">
     <value>Enable ADB and USB connections under Settings › ADB to set this device up.</value>
   </data>
+  <data name="Settings.CompanionApp.AdbDisabled" xml:space="preserve">
+    <value>Installing the app needs ADB. Turn it on in the ADB settings first.</value>
+  </data>
+  <data name="Settings.CompanionApp.AutoUpdateDescription" xml:space="preserve">
+    <value>Updates the app on devices connected over ADB where it was installed from Macro Deck. Google Play keeps its own installs up to date.</value>
+  </data>
+  <data name="Settings.CompanionApp.AutoUpdateLabel" xml:space="preserve">
+    <value>Install updates automatically</value>
+  </data>
+  <data name="Settings.CompanionApp.CheckFailed" xml:space="preserve">
+    <value>The latest version could not be checked. Check your internet connection and try again.</value>
+  </data>
+  <data name="Settings.CompanionApp.CheckNow" xml:space="preserve">
+    <value>Check now</value>
+  </data>
+  <data name="Settings.CompanionApp.Checking" xml:space="preserve">
+    <value>Checking for the latest version…</value>
+  </data>
+  <data name="Settings.CompanionApp.ConnectedDescription" xml:space="preserve">
+    <value>Android Companion apps connected to this host. Update them over ADB above, or through Google Play when they were installed from there.</value>
+  </data>
+  <data name="Settings.CompanionApp.ConnectedHeading" xml:space="preserve">
+    <value>Connected apps</value>
+  </data>
+  <data name="Settings.CompanionApp.ConnectedNone" xml:space="preserve">
+    <value>No Android Companion app is connected right now.</value>
+  </data>
+  <data name="Settings.CompanionApp.ConnectedVersion" xml:space="preserve">
+    <value>Version {version}</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.CompanionApp.DevicesHeading" xml:space="preserve">
+    <value>Devices connected over ADB</value>
+  </data>
+  <data name="Settings.CompanionApp.DirectBuildNote" xml:space="preserve">
+    <value>This is a separate version of the app, not the one from Google Play. It does not need Google Play services, so it also runs on devices without them, such as Amazon Fire tablets.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.AdbDisabled" xml:space="preserve">
+    <value>ADB is turned off.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.DeviceNotReady" xml:space="preserve">
+    <value>The device is not ready. Check that it is connected and that USB debugging is allowed.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.DeviceTooOld" xml:space="preserve">
+    <value>The Companion app needs Android 6 or later.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.DownloadFailed" xml:space="preserve">
+    <value>The app could not be downloaded. Check your internet connection and try again.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.IncompatibleSignature" xml:space="preserve">
+    <value>The app on the device comes from another source. Uninstall it on the device first, then try again.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.InstallBlockedOnDevice" xml:space="preserve">
+    <value>The device blocked the install. Some phones, for example from Xiaomi, need “Install via USB” turned on in the developer options.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.InstallFailed" xml:space="preserve">
+    <value>The app could not be installed on the device.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.NoRelease" xml:space="preserve">
+    <value>The latest version could not be found. Check your internet connection and try again.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.NotAndroid" xml:space="preserve">
+    <value>This device does not run Android.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.PlayStoreInstall" xml:space="preserve">
+    <value>Google Play installed the app on this device and keeps it up to date.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.StorageFull" xml:space="preserve">
+    <value>The device does not have enough free storage.</value>
+  </data>
+  <data name="Settings.CompanionApp.Error.VerificationFailed" xml:space="preserve">
+    <value>The downloaded app failed its security check and was not installed.</value>
+  </data>
+  <data name="Settings.CompanionApp.Heading" xml:space="preserve">
+    <value>Companion App</value>
+  </data>
+  <data name="Settings.CompanionApp.Install" xml:space="preserve">
+    <value>Install</value>
+  </data>
+  <data name="Settings.CompanionApp.InstallAriaLabel" xml:space="preserve">
+    <value>Install the Companion app on {name}</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Settings.CompanionApp.InstallDescription" xml:space="preserve">
+    <value>Install the Macro Deck Companion app on an Android device connected over ADB and keep it up to date.</value>
+  </data>
+  <data name="Settings.CompanionApp.InstallHeading" xml:space="preserve">
+    <value>Install on a device</value>
+  </data>
+  <data name="Settings.CompanionApp.LatestVersionLabel" xml:space="preserve">
+    <value>Latest version</value>
+  </data>
+  <data name="Settings.CompanionApp.LatestVersionReleased" xml:space="preserve">
+    <value>Released {date}</value>
+    <comment>[date:string]</comment>
+  </data>
+  <data name="Settings.CompanionApp.LatestVersionUnknown" xml:space="preserve">
+    <value>Not known yet</value>
+  </data>
+  <data name="Settings.CompanionApp.LoadFailed" xml:space="preserve">
+    <value>The Companion app status could not be loaded.</value>
+  </data>
+  <data name="Settings.CompanionApp.NewerVersionAvailable" xml:space="preserve">
+    <value>Newer version available: {version}</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.CompanionApp.NoDevices" xml:space="preserve">
+    <value>No device is connected over ADB. Connect an Android device with USB debugging turned on, or connect one over Wi-Fi in the ADB settings.</value>
+  </data>
+  <data name="Settings.CompanionApp.NoLicenseMessage" xml:space="preserve">
+    <value>You can install the app over ADB, but it then only runs as a 7-day trial. The license can currently only be bought in the App Store or on Google Play.</value>
+  </data>
+  <data name="Settings.CompanionApp.NoLicenseTitle" xml:space="preserve">
+    <value>This host has no Companion license</value>
+  </data>
+  <data name="Settings.CompanionApp.OpenAdbSettings" xml:space="preserve">
+    <value>Open ADB settings</value>
+  </data>
+  <data name="Settings.CompanionApp.State.Checking" xml:space="preserve">
+    <value>Checking…</value>
+  </data>
+  <data name="Settings.CompanionApp.State.DeviceTooOld" xml:space="preserve">
+    <value>Needs Android 6 or later</value>
+  </data>
+  <data name="Settings.CompanionApp.State.Installed" xml:space="preserve">
+    <value>Installed: {version}</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.CompanionApp.State.InstalledFromPlayStore" xml:space="preserve">
+    <value>Installed from Google Play ({version}), updated by Google Play</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.CompanionApp.State.Installing" xml:space="preserve">
+    <value>Installing…</value>
+  </data>
+  <data name="Settings.CompanionApp.State.NotAndroid" xml:space="preserve">
+    <value>Not an Android device</value>
+  </data>
+  <data name="Settings.CompanionApp.State.NotAuthorized" xml:space="preserve">
+    <value>Allow USB debugging on the device</value>
+  </data>
+  <data name="Settings.CompanionApp.State.NotInstalled" xml:space="preserve">
+    <value>Not installed</value>
+  </data>
+  <data name="Settings.CompanionApp.State.Unknown" xml:space="preserve">
+    <value>The installed version could not be read</value>
+  </data>
+  <data name="Settings.CompanionApp.State.UpToDate" xml:space="preserve">
+    <value>Up to date ({version})</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.CompanionApp.State.UpdateAvailable" xml:space="preserve">
+    <value>Update available: {installed} to {latest}</value>
+    <comment>[installed:string] [latest:string]</comment>
+  </data>
+  <data name="Settings.CompanionApp.UnknownVersion" xml:space="preserve">
+    <value>Unknown version</value>
+  </data>
+  <data name="Settings.CompanionApp.Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Settings.CompanionApp.UpdateAriaLabel" xml:space="preserve">
+    <value>Update the Companion app on {name}</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Settings.Developer.Description" xml:space="preserve">
     <value>Settings for developing and testing plugins.</value>
   </data>
@@ -13360,7 +13525,7 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>The Macro Deck Companion license this host holds. The host hands it to every Companion app that connects.</value>
   </data>
   <data name="Settings.License.Heading" xml:space="preserve">
-    <value>Companion license</value>
+    <value>License</value>
   </data>
   <data name="Settings.License.IssuePending" xml:space="preserve">
     <value>Your purchase is being turned into a license. This needs an internet connection, and Macro Deck keeps trying on its own.</value>

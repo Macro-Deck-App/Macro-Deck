@@ -35,6 +35,18 @@ public class AdbCommandValidationTests
 		AssertInvalidParameter(AdbCommandBuilder.Build(new AdbStartAppCommand(Serial, package)));
 	}
 
+	[TestCase("app.macrodeck.companion; reboot")]
+	[TestCase("$(reboot)")]
+	[TestCase("")]
+	public void Package_queries_refuse_a_name_that_could_carry_a_second_command(string package)
+	{
+		Assert.Multiple(() =>
+		{
+			AssertInvalidParameter(AdbCommandBuilder.Build(new AdbPackageInfoCommand(Serial, package)));
+			AssertInvalidParameter(AdbCommandBuilder.Build(new AdbPackageRunningCommand(Serial, package)));
+		});
+	}
+
 	[Test]
 	public void Oversized_package_name_is_rejected()
 	{

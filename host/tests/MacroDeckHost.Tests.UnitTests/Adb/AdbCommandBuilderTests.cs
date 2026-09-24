@@ -254,4 +254,18 @@ public class AdbCommandBuilderTests
 				"appliance firmwares ship the root filesystem read-only, so a write needs this first");
 		});
 	}
+
+	[Test]
+	public void The_companion_app_queries_are_fixed_commands_around_a_quoted_package()
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(AdbCommandBuilder.Build(new AdbSdkLevelCommand(Serial)).Data,
+				Is.EqualTo(new[] { "-s", Serial, "shell", "getprop ro.build.version.sdk" }));
+			Assert.That(AdbCommandBuilder.Build(new AdbPackageInfoCommand(Serial, "app.macrodeck.companion")).Data,
+				Is.EqualTo(new[] { "-s", Serial, "shell", "dumpsys package 'app.macrodeck.companion'" }));
+			Assert.That(AdbCommandBuilder.Build(new AdbPackageRunningCommand(Serial, "app.macrodeck.companion")).Data![3],
+				Does.Contain("pidof 'app.macrodeck.companion'").And.Contain("echo unknown").And.Contain("echo stopped"));
+		});
+	}
 }

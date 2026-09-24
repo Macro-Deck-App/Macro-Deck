@@ -293,6 +293,10 @@
   mask-image: url('./icons/device-tablet.svg');
   -webkit-mask-image: url('./icons/device-tablet.svg');
 }
+.icon-monitor-smartphone {
+  mask-image: url('./icons/monitor-smartphone.svg');
+  -webkit-mask-image: url('./icons/monitor-smartphone.svg');
+}
 .icon-device-desktop {
   mask-image: url('./icons/device-desktop.svg');
   -webkit-mask-image: url('./icons/device-desktop.svg');

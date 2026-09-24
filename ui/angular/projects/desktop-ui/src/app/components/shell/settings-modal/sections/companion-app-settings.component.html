@@ -1,0 +1,158 @@
+<div class="companion-app">
+  <app-license-settings />
+
+  <shared-settings-section
+    [heading]="'macrodeck.app:Settings.CompanionApp.InstallHeading' | translate"
+    [description]="'macrodeck.app:Settings.CompanionApp.InstallDescription' | translate">
+    <div class="companion-app__notice" data-testid="companion-app-direct-build">
+      <span class="icon icon-info icon-sm" aria-hidden="true"></span>
+      <p>{{ 'macrodeck.app:Settings.CompanionApp.DirectBuildNote' | translate }}</p>
+    </div>
+
+    @if (unlicensed()) {
+      <div class="companion-app__notice companion-app__notice--warning" role="status" data-testid="companion-app-no-license">
+        <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+        <div>
+          <p class="companion-app__notice-title">{{ 'macrodeck.app:Settings.CompanionApp.NoLicenseTitle' | translate }}</p>
+          <p>{{ 'macrodeck.app:Settings.CompanionApp.NoLicenseMessage' | translate }}</p>
+        </div>
+      </div>
+    }
+
+    @if (status(); as current) {
+      @if (!current.adbEnabled) {
+        <div class="companion-app__notice" data-testid="companion-app-adb-disabled">
+          <span class="icon icon-info icon-sm" aria-hidden="true"></span>
+          <p>{{ 'macrodeck.app:Settings.CompanionApp.AdbDisabled' | translate }}</p>
+          <shared-button variant="secondary" (click)="openAdbSettings()">
+            {{ 'macrodeck.app:Settings.CompanionApp.OpenAdbSettings' | translate }}
+          </shared-button>
+        </div>
+      }
+
+      <shared-settings-row
+        [label]="'macrodeck.app:Settings.CompanionApp.LatestVersionLabel' | translate"
+        [description]="latestReleased() ? ('macrodeck.app:Settings.CompanionApp.LatestVersionReleased' | translate: { date: latestReleased() }) : ''">
+        <div class="companion-app__latest">
+          <span class="companion-app__value" data-testid="companion-app-latest">
+            @if (current.latestVersion) {
+              {{ current.latestVersion }}
+            } @else if (checkInProgress()) {
+              {{ 'macrodeck.app:Settings.CompanionApp.Checking' | translate }}
+            } @else {
+              {{ 'macrodeck.app:Settings.CompanionApp.LatestVersionUnknown' | translate }}
+            }
+          </span>
+          <shared-button
+            variant="secondary"
+            data-testid="companion-app-check"
+            [loading]="checkInProgress()"
+            (click)="checkNow()">
+            {{ 'macrodeck.app:Settings.CompanionApp.CheckNow' | translate }}
+          </shared-button>
+        </div>
+      </shared-settings-row>
+      @if (current.checkFailed && !checkInProgress()) {
+        <p class="companion-app__error" data-testid="companion-app-check-failed">
+          {{ 'macrodeck.app:Settings.CompanionApp.CheckFailed' | translate }}
+        </p>
+      }
+
+      <shared-settings-row
+        [label]="'macrodeck.app:Settings.CompanionApp.AutoUpdateLabel' | translate"
+        [description]="'macrodeck.app:Settings.CompanionApp.AutoUpdateDescription' | translate">
+        <shared-toggle-switch
+          [busy]="autoUpdateBusy()"
+          [checked]="current.autoUpdate"
+          (changed)="setAutoUpdate($event)" />
+      </shared-settings-row>
+    }
+  </shared-settings-section>
+
+  @if (status()?.adbEnabled) {
+    <shared-settings-section [heading]="'macrodeck.app:Settings.CompanionApp.DevicesHeading' | translate">
+      @if (status()!.devices.length === 0) {
+        <p class="companion-app__empty" data-testid="companion-app-no-devices">
+          {{ 'macrodeck.app:Settings.CompanionApp.NoDevices' | translate }}
+        </p>
+      } @else {
+        <ul class="companion-app__list">
+          @for (device of status()!.devices; track device.serial) {
+            <li class="companion-app__row" data-testid="companion-app-device">
+              <div class="companion-app__info">
+                <span class="companion-app__name">{{ device.name }}</span>
+                <span
+                  class="companion-app__state"
+                  [class.companion-app__state--update]="device.state === 'UpdateAvailable'"
+                  [class.companion-app__state--ok]="device.state === 'UpToDate'"
+                  data-testid="companion-app-device-state">
+                  {{ stateText(device) }}
+                </span>
+                @if (device.error; as error) {
+                  <span class="companion-app__row-error" role="alert" data-testid="companion-app-device-error">{{ errorText(error) }}</span>
+                }
+              </div>
+              @if (canInstall(device)) {
+                <shared-button
+                  variant="primary"
+                  data-testid="companion-app-install"
+                  [ariaLabel]="'macrodeck.app:Settings.CompanionApp.InstallAriaLabel' | translate: { name: device.name }"
+                  [disabled]="installingSerial() !== null && installingSerial() !== device.serial"
+                  [loading]="installingSerial() === device.serial"
+                  (click)="install(device)">
+                  {{ 'macrodeck.app:Settings.CompanionApp.Install' | translate }}
+                </shared-button>
+              } @else if (canUpdate(device)) {
+                <shared-button
+                  variant="primary"
+                  data-testid="companion-app-update"
+                  [ariaLabel]="'macrodeck.app:Settings.CompanionApp.UpdateAriaLabel' | translate: { name: device.name }"
+                  [disabled]="installingSerial() !== null && installingSerial() !== device.serial"
+                  [loading]="installingSerial() === device.serial"
+                  (click)="install(device)">
+                  {{ 'macrodeck.app:Settings.CompanionApp.Update' | translate }}
+                </shared-button>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </shared-settings-section>
+  }
+
+  @if (status(); as current) {
+    <shared-settings-section
+      [heading]="'macrodeck.app:Settings.CompanionApp.ConnectedHeading' | translate"
+      [description]="'macrodeck.app:Settings.CompanionApp.ConnectedDescription' | translate">
+      @if (current.connectedApps.length === 0) {
+        <p class="companion-app__empty">{{ 'macrodeck.app:Settings.CompanionApp.ConnectedNone' | translate }}</p>
+      } @else {
+        <ul class="companion-app__list">
+          @for (app of current.connectedApps; track app.deviceId) {
+            <li class="companion-app__row" data-testid="companion-app-connected">
+              <div class="companion-app__info">
+                <span class="companion-app__name">{{ app.name }}</span>
+                <span class="companion-app__state">
+                  @if (app.appVersion) {
+                    {{ 'macrodeck.app:Settings.CompanionApp.ConnectedVersion' | translate: { version: app.appVersion } }}
+                  } @else {
+                    {{ 'macrodeck.app:Settings.CompanionApp.UnknownVersion' | translate }}
+                  }
+                </span>
+              </div>
+              @if (app.updateAvailable) {
+                <span class="companion-app__badge" data-testid="companion-app-newer">
+                  {{ 'macrodeck.app:Settings.CompanionApp.NewerVersionAvailable' | translate: { version: current.latestVersion } }}
+                </span>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </shared-settings-section>
+  }
+
+  @if (loadFailed()) {
+    <p class="companion-app__error">{{ 'macrodeck.app:Settings.CompanionApp.LoadFailed' | translate }}</p>
+  }
+</div>

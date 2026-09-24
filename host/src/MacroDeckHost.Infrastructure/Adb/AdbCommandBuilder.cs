@@ -39,6 +39,9 @@ internal static partial class AdbCommandBuilder
 			AdbRestartServiceCommand restartService => BuildRestartService(restartService),
 			AdbListServicesCommand listServices => BuildListServices(listServices),
 			AdbDirectoryExistsCommand directoryExists => BuildDirectoryExists(directoryExists),
+			AdbSdkLevelCommand sdkLevel => Shell(sdkLevel.Serial, "getprop ro.build.version.sdk"),
+			AdbPackageInfoCommand packageInfo => BuildPackageInfo(packageInfo),
+			AdbPackageRunningCommand packageRunning => BuildPackageRunning(packageRunning),
 			AdbRemountRootWritableCommand remount => BuildRemountRootWritable(remount),
 			_ => Fail("Unknown command type.")
 		};
@@ -189,6 +192,30 @@ internal static partial class AdbCommandBuilder
 		}
 
 		return Shell(command.Serial, $"test -d {AdbShellQuote.Quote(command.DevicePath)}");
+	}
+
+	private static Result<IReadOnlyList<string>, AdbFailureCode> BuildPackageInfo(AdbPackageInfoCommand command)
+	{
+		var packageFailure = ValidatePackage(command.Package);
+		if (packageFailure is not null)
+		{
+			return packageFailure;
+		}
+
+		return Shell(command.Serial, $"dumpsys package {AdbShellQuote.Quote(command.Package)}");
+	}
+
+	private static Result<IReadOnlyList<string>, AdbFailureCode> BuildPackageRunning(AdbPackageRunningCommand command)
+	{
+		var packageFailure = ValidatePackage(command.Package);
+		if (packageFailure is not null)
+		{
+			return packageFailure;
+		}
+
+		// Always exits 0 and prints the state: a failing exit code is indistinguishable from a timeout.
+		return Shell(command.Serial,
+			$"command -v pidof >/dev/null 2>&1 || {{ echo unknown; exit 0; }}; pidof {AdbShellQuote.Quote(command.Package)} >/dev/null 2>&1 && echo running || echo stopped");
 	}
 
 	private static Result<IReadOnlyList<string>, AdbFailureCode> BuildRestartService(AdbRestartServiceCommand command)

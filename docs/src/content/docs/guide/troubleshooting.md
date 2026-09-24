@@ -70,7 +70,7 @@ visible instead by turning off **Lock clients when this computer is locked** in
 ## The Companion app stays unlicensed after a purchase
 
 When a Companion app that was bought connects, Macro Deck exchanges the purchase for a license with the
-Macro Deck servers. **Settings > Companion license** shows the progress:
+Macro Deck servers. **Settings > Companion App** shows the progress:
 
 - **Your purchase is being turned into a license:** the computer running Macro Deck needs an internet
   connection. Macro Deck keeps trying on its own, first after a few seconds and then less often, at
