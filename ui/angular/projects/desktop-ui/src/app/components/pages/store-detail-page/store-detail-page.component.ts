@@ -21,6 +21,7 @@ import { DetailPageComponent } from '../../detail-page/detail-page.component';
 import { LoadingStateComponent } from '../../feedback/loading-state/loading-state.component';
 import { SelectOption } from '../../forms/select/select.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
+import { StoreCommunityNoticeComponent } from '../../store/store-community-notice.component';
 import { StoreFooterComponent } from '../../store/store-footer.component';
 import { StoreMarkdownComponent } from '../../store/store-markdown.component';
 import { StoreReportDialogComponent, StoreReportTarget } from '../../store/store-report-dialog.component';
@@ -97,6 +98,7 @@ interface StoreDetailLink {
     ErrorBannerComponent,
     LoadingStateComponent,
     StoreDetailHeaderComponent,
+    StoreCommunityNoticeComponent,
     StoreFooterComponent,
     StoreLanguagesModalComponent,
     StoreScreenshotStripComponent,

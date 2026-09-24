@@ -21,6 +21,9 @@
   <div class="store-footer-legal">
     <span class="copyright">{{ 'macrodeck.app:Store.Footer.Copyright' | translate:{ year: year } }}</span>
     <nav class="legal-links" [attr.aria-label]="'macrodeck.app:Store.Footer.LegalAriaLabel' | translate">
+      <button type="button" class="guidelines-link" (click)="guidelinesOpen.set(true)">
+        {{ 'macrodeck.app:Store.Guidelines.Heading' | translate }}
+      </button>
       <a [href]="links.imprint" target="_blank" rel="noopener noreferrer" (click)="open($event, links.imprint)">
         {{ 'macrodeck.app:Store.Footer.Imprint' | translate }}
       </a>
@@ -30,3 +33,7 @@
     </nav>
   </div>
 </footer>
+
+@if (guidelinesOpen()) {
+  <app-store-guidelines-modal (closed)="guidelinesOpen.set(false)" />
+}

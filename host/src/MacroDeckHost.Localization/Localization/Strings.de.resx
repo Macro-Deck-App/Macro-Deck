@@ -14297,6 +14297,21 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Store.ChooseVersion" xml:space="preserve">
     <value>Andere Version wählen</value>
   </data>
+  <data name="Store.CommunityNotice.GuidelinesApply" xml:space="preserve">
+    <value>Für alles im Store gelten die Store-Richtlinien.</value>
+  </data>
+  <data name="Store.CommunityNotice.Heading" xml:space="preserve">
+    <value>Von der Community gemacht</value>
+  </data>
+  <data name="Store.CommunityNotice.NoMacroDeckIssues" xml:space="preserve">
+    <value>Bitte erstelle keine Issues zu Plugins oder Icon-Packs im offiziellen Macro-Deck-Repository.</value>
+  </data>
+  <data name="Store.CommunityNotice.Responsibility" xml:space="preserve">
+    <value>Alles im Store wird von der Community erstellt. Wenn Fehler auftreten oder etwas nicht funktioniert, ist der jeweilige Ersteller dafür zuständig.</value>
+  </data>
+  <data name="Store.CommunityNotice.WhereToReport" xml:space="preserve">
+    <value>Du kannst es bewerten, ein Issue in seinem Repository erstellen oder es melden. Die Links dazu findest du auf seiner Store-Seite.</value>
+  </data>
   <data name="Store.Details" xml:space="preserve">
     <value>Details</value>
   </data>
@@ -14412,6 +14427,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Store.Footer.PublishHeading" xml:space="preserve">
     <value>Auf Macro Deck veröffentlichen</value>
+  </data>
+  <data name="Store.Guidelines.Heading" xml:space="preserve">
+    <value>Store-Richtlinien</value>
+  </data>
+  <data name="Store.Guidelines.Unavailable" xml:space="preserve">
+    <value>Die Store-Richtlinien konnten nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.</value>
   </data>
   <data name="Store.IconImport.CancelledKeptCount.One" xml:space="preserve">
     <value>Abgebrochen - {count} Symbol behalten</value>

@@ -14299,6 +14299,21 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.ChooseVersion" xml:space="preserve">
     <value>Vybrat jinou verzi</value>
   </data>
+  <data name="Store.CommunityNotice.GuidelinesApply" xml:space="preserve">
+    <value>Na vše ve Store se vztahují pravidla Store.</value>
+  </data>
+  <data name="Store.CommunityNotice.Heading" xml:space="preserve">
+    <value>Vytvořeno komunitou</value>
+  </data>
+  <data name="Store.CommunityNotice.NoMacroDeckIssues" xml:space="preserve">
+    <value>Issues k pluginům a sadám ikon nepatří do oficiálního repozitáře Macro Deck.</value>
+  </data>
+  <data name="Store.CommunityNotice.Responsibility" xml:space="preserve">
+    <value>Vše ve Store vytváří komunita. Pokud se objeví chyba nebo něco nefunguje, odpovídá za to autor dané položky.</value>
+  </data>
+  <data name="Store.CommunityNotice.WhereToReport" xml:space="preserve">
+    <value>Položku lze ohodnotit, založit k ní issue v jejím repozitáři nebo ji nahlásit. Odkazy jsou na její stránce ve Store.</value>
+  </data>
   <data name="Store.Details" xml:space="preserve">
     <value>Podrobnosti</value>
   </data>
@@ -14414,6 +14429,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Store.Footer.PublishHeading" xml:space="preserve">
     <value>Publikování na Macro Deck</value>
+  </data>
+  <data name="Store.Guidelines.Heading" xml:space="preserve">
+    <value>Pravidla Store</value>
+  </data>
+  <data name="Store.Guidelines.Unavailable" xml:space="preserve">
+    <value>Pravidla Store se nepodařilo načíst. Zkontrolujte připojení a zkuste to znovu.</value>
   </data>
   <data name="Store.IconImport.CancelledKeptCount.One" xml:space="preserve">
     <value>Zrušeno – zachována {count} ikona</value>

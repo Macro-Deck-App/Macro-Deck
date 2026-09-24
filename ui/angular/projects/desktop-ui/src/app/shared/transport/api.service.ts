@@ -265,6 +265,7 @@ import {
   StoreCatalogSection,
   StoreExtensionKind,
   StoreOperationActionResponse,
+  GetStoreCreatorGuidelinesResponse,
   GetStoreInstallsResponse,
   GetStoreRatingsResponse,
   GetStoreRatingResponse,
@@ -1026,6 +1027,10 @@ export class ApiService {
   getStoreInstalls(packageIds: readonly string[]): Promise<GetStoreInstallsResponse> {
     const ids = packageIds.map(id => encodeURIComponent(id)).join(',');
     return this.http('GET', `/api/store/installs?ids=${ids}`);
+  }
+
+  getStoreCreatorGuidelines(): Promise<GetStoreCreatorGuidelinesResponse> {
+    return this.http('GET', '/api/store/creator-guidelines');
   }
 
   getStoreRating(kind: StoreExtensionKind, packageId: string): Promise<GetStoreRatingResponse> {

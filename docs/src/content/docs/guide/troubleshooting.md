@@ -5,6 +5,8 @@ description: Fixes for common problems when installing, connecting and using Mac
 
 Find your symptom below. If nothing here helps, ask on [Discord](https://discord.macro-deck.app) or
 [open an issue on GitHub](https://github.com/Macro-Deck-App/Macro-Deck/issues) and attach your logs.
+A problem with a plugin or icon pack from the Store belongs to its creator: use the links on the item's Store
+page to open an issue in its repository or report it.
 
 ## Where to find the logs
 

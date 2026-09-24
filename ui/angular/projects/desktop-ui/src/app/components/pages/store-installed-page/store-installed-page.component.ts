@@ -5,6 +5,7 @@ import { AppStrings, StoreCatalogItemBody, StoreExtensionKind } from '@macro-dec
 import { ApiService, ButtonComponent, ErrorBannerComponent, LocalizationService, ToastService, TranslatePipe } from '@shared';
 import { EmptyStateComponent } from '../../feedback/empty-state/empty-state.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
+import { StoreCommunityNoticeComponent } from '../../store/store-community-notice.component';
 import { StoreFooterComponent } from '../../store/store-footer.component';
 import { StorePageHeaderComponent } from '../../store/store-page-header.component';
 import { StoreSectionComponent, StoreUnsignedInstallRequest } from '../../store/store-section.component';
@@ -28,6 +29,7 @@ const PAGE_SIZE = 100;
     ConfirmationModalComponent,
     EmptyStateComponent,
     ErrorBannerComponent,
+    StoreCommunityNoticeComponent,
     StoreFooterComponent,
     StorePageHeaderComponent,
     StoreSectionComponent,

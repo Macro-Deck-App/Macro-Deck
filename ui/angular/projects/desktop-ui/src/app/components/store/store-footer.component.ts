@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { TranslatePipe } from '@shared';
 import { ExternalLinkService } from '../../services/external-link.service';
+import { StoreGuidelinesModalComponent } from './store-guidelines-modal.component';
 
 export const STORE_FOOTER_LINKS = {
   creatorPortal: 'https://creators.macro-deck.app',
@@ -11,7 +12,7 @@ export const STORE_FOOTER_LINKS = {
 @Component({
   selector: 'app-store-footer',
   standalone: true,
-  imports: [TranslatePipe],
+  imports: [StoreGuidelinesModalComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './store-footer.component.html',
   styleUrls: ['./store-footer.component.scss'],
@@ -21,6 +22,7 @@ export class StoreFooterComponent {
 
   protected readonly links = STORE_FOOTER_LINKS;
   protected readonly year = new Date().getFullYear();
+  protected readonly guidelinesOpen = signal(false);
 
   protected open(event: MouseEvent, url: string): void {
     event.preventDefault();

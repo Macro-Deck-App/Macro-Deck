@@ -14299,6 +14299,21 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Store.ChooseVersion" xml:space="preserve">
     <value>Scegli un'altra versione</value>
   </data>
+  <data name="Store.CommunityNotice.GuidelinesApply" xml:space="preserve">
+    <value>A tutto ciò che è nello Store si applicano le linee guida dello Store.</value>
+  </data>
+  <data name="Store.CommunityNotice.Heading" xml:space="preserve">
+    <value>Creato dalla community</value>
+  </data>
+  <data name="Store.CommunityNotice.NoMacroDeckIssues" xml:space="preserve">
+    <value>Non aprire segnalazioni su plugin o pacchetti di icone nel repository ufficiale di Macro Deck.</value>
+  </data>
+  <data name="Store.CommunityNotice.Responsibility" xml:space="preserve">
+    <value>Tutto ciò che trovi nello Store è creato dalla community. Se qualcosa dà errori o non funziona, ne è responsabile il suo autore.</value>
+  </data>
+  <data name="Store.CommunityNotice.WhereToReport" xml:space="preserve">
+    <value>Puoi valutarlo, aprire una segnalazione nel suo repository o segnalarlo. I link sono nella sua pagina dello Store.</value>
+  </data>
   <data name="Store.Details" xml:space="preserve">
     <value>Dettagli</value>
   </data>
@@ -14414,6 +14429,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Store.Footer.PublishHeading" xml:space="preserve">
     <value>Pubblica su Macro Deck</value>
+  </data>
+  <data name="Store.Guidelines.Heading" xml:space="preserve">
+    <value>Linee guida dello Store</value>
+  </data>
+  <data name="Store.Guidelines.Unavailable" xml:space="preserve">
+    <value>Impossibile caricare le linee guida dello Store. Controlla la connessione e riprova.</value>
   </data>
   <data name="Store.IconImport.CancelledKeptCount.One" xml:space="preserve">
     <value>Annullato - mantenuta {count} icona</value>

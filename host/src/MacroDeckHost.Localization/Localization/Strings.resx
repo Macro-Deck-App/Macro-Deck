@@ -14299,6 +14299,21 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.ChooseVersion" xml:space="preserve">
     <value>Choose another version</value>
   </data>
+  <data name="Store.CommunityNotice.GuidelinesApply" xml:space="preserve">
+    <value>The Store guidelines apply to everything in the Store.</value>
+  </data>
+  <data name="Store.CommunityNotice.Heading" xml:space="preserve">
+    <value>Made by the community</value>
+  </data>
+  <data name="Store.CommunityNotice.NoMacroDeckIssues" xml:space="preserve">
+    <value>Please don't open issues about plugins or icon packs in the official Macro Deck repository.</value>
+  </data>
+  <data name="Store.CommunityNotice.Responsibility" xml:space="preserve">
+    <value>Everything in the Store is made by the community. If something fails or doesn't work, its creator is responsible for it.</value>
+  </data>
+  <data name="Store.CommunityNotice.WhereToReport" xml:space="preserve">
+    <value>You can rate it, open an issue in its repository or report it. The links are on its Store page.</value>
+  </data>
   <data name="Store.Details" xml:space="preserve">
     <value>Details</value>
   </data>
@@ -14414,6 +14429,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Store.Footer.PublishHeading" xml:space="preserve">
     <value>Publish on Macro Deck</value>
+  </data>
+  <data name="Store.Guidelines.Heading" xml:space="preserve">
+    <value>Store guidelines</value>
+  </data>
+  <data name="Store.Guidelines.Unavailable" xml:space="preserve">
+    <value>The Store guidelines could not be loaded. Check your connection and try again.</value>
   </data>
   <data name="Store.IconImport.CancelledKeptCount.One" xml:space="preserve">
     <value>Cancelled - kept {count} icon</value>

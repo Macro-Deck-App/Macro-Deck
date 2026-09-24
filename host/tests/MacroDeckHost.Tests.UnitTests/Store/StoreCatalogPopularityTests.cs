@@ -193,4 +193,7 @@ internal sealed class FakeStoreInstallCounts : IStoreReviewService
 		Guid reviewId,
 		ReportStoreContentRequest request,
 		CancellationToken cancellationToken) => throw new NotSupportedException();
+
+	public Task<GetStoreCreatorGuidelinesResponse> GetCreatorGuidelines(CancellationToken cancellationToken) =>
+		throw new NotSupportedException();
 }

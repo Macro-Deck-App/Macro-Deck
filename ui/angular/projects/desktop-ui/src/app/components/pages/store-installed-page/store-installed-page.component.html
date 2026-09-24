@@ -12,6 +12,10 @@
       </shared-button>
     </app-store-page-header>
 
+    @if (storeUnlocked()) {
+      <app-store-community-notice />
+    }
+
     @if (loadError()) {
       <shared-error-banner [message]="loadError()!" (dismiss)="loadError.set(null)" />
     }

@@ -319,6 +319,11 @@ export interface GetStoreInstallsResponse {
   installs: Record<string, number>;
 }
 
+export interface GetStoreCreatorGuidelinesResponse {
+  available: boolean;
+  markdown?: string | null;
+}
+
 export interface StoreRatingBucketBody {
   stars: number;
   count: number;

@@ -23,6 +23,13 @@ public class GetStoreInstallsResponse
 	public Dictionary<string, long> Installs { get; set; } = [];
 }
 
+public class GetStoreCreatorGuidelinesResponse
+{
+	public bool Available { get; set; }
+
+	public string? Markdown { get; set; }
+}
+
 public class StoreRatingBucketBody
 {
 	public int Stars { get; set; }

@@ -7,6 +7,7 @@ import { ApiService, ButtonComponent, ErrorBannerComponent, InputComponent, Loca
 import { EmptyStateComponent } from '../../feedback/empty-state/empty-state.component';
 import { SelectComponent, SelectOption } from '../../forms/select/select.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
+import { StoreCommunityNoticeComponent } from '../../store/store-community-notice.component';
 import { StoreFooterComponent } from '../../store/store-footer.component';
 import { StorePageHeaderComponent } from '../../store/store-page-header.component';
 import { StoreSectionComponent, StoreUnsignedInstallRequest } from '../../store/store-section.component';
@@ -61,6 +62,7 @@ export const STORE_SUPPORTED_ONLY_STORAGE_KEY = 'macrodeck.store.supportedOnly';
     ErrorBannerComponent,
     InputComponent,
     SelectComponent,
+    StoreCommunityNoticeComponent,
     StoreFooterComponent,
     StorePageHeaderComponent,
     StoreSectionComponent,
