@@ -505,7 +505,8 @@ public class AuthPolicyMatrixTests
 				$"/api/store/catalog/Plugin/com.acme.hue/reviews/{Guid.NewGuid():D}/report",
 				new { category = "Spam" },
 				_clientToken),
-			await Send(HttpMethod.Get, "/api/store/review-avatars?src=x", _clientToken)
+			await Send(HttpMethod.Get, "/api/store/review-avatars?src=x", _clientToken),
+			await Send(HttpMethod.Get, "/api/store/creator-guidelines", _clientToken)
 		};
 
 		Assert.That(responses.Select(response => response.StatusCode), Is.All.EqualTo(HttpStatusCode.Forbidden));

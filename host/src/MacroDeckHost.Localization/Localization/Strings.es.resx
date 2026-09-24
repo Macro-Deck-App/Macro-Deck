@@ -14269,6 +14269,21 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Store.ChooseVersion" xml:space="preserve">
     <value>Elegir otra versión</value>
   </data>
+  <data name="Store.CommunityNotice.GuidelinesApply" xml:space="preserve">
+    <value>Todo lo que hay en la Store está sujeto a las directrices de la Store.</value>
+  </data>
+  <data name="Store.CommunityNotice.Heading" xml:space="preserve">
+    <value>Hecho por la comunidad</value>
+  </data>
+  <data name="Store.CommunityNotice.NoMacroDeckIssues" xml:space="preserve">
+    <value>No abras incidencias sobre complementos o paquetes de iconos en el repositorio oficial de Macro Deck.</value>
+  </data>
+  <data name="Store.CommunityNotice.Responsibility" xml:space="preserve">
+    <value>Todo lo que hay en la Store lo crea la comunidad. Si algo falla o no funciona, el responsable es su creador.</value>
+  </data>
+  <data name="Store.CommunityNotice.WhereToReport" xml:space="preserve">
+    <value>Puedes valorarlo, abrir una incidencia en su repositorio o denunciarlo. Encontrarás los enlaces en su página de la Store.</value>
+  </data>
   <data name="Store.Details" xml:space="preserve">
     <value>Detalles</value>
   </data>
@@ -14384,6 +14399,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Store.Footer.PublishHeading" xml:space="preserve">
     <value>Publica en Macro Deck</value>
+  </data>
+  <data name="Store.Guidelines.Heading" xml:space="preserve">
+    <value>Directrices de la Store</value>
+  </data>
+  <data name="Store.Guidelines.Unavailable" xml:space="preserve">
+    <value>No se han podido cargar las directrices de la Store. Comprueba tu conexión y vuelve a intentarlo.</value>
   </data>
   <data name="Store.IconImport.CancelledKeptCount.One" xml:space="preserve">
     <value>Cancelado: se conservó {count} icono</value>

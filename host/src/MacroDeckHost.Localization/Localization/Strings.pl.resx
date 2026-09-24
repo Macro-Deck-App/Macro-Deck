@@ -14269,6 +14269,21 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.ChooseVersion" xml:space="preserve">
     <value>Wybierz inną wersję</value>
   </data>
+  <data name="Store.CommunityNotice.GuidelinesApply" xml:space="preserve">
+    <value>Wszystko w Store podlega wytycznym Store.</value>
+  </data>
+  <data name="Store.CommunityNotice.Heading" xml:space="preserve">
+    <value>Tworzone przez społeczność</value>
+  </data>
+  <data name="Store.CommunityNotice.NoMacroDeckIssues" xml:space="preserve">
+    <value>Problemów z wtyczkami i pakietami ikon nie należy zgłaszać w oficjalnym repozytorium Macro Deck.</value>
+  </data>
+  <data name="Store.CommunityNotice.Responsibility" xml:space="preserve">
+    <value>Wszystko w Store tworzy społeczność. Jeśli wystąpi błąd lub coś nie działa, odpowiada za to twórca danego elementu.</value>
+  </data>
+  <data name="Store.CommunityNotice.WhereToReport" xml:space="preserve">
+    <value>Element można ocenić, zgłosić problem w jego repozytorium lub zgłosić go do moderacji. Linki znajdują się na jego stronie w Store.</value>
+  </data>
   <data name="Store.Details" xml:space="preserve">
     <value>Szczegóły</value>
   </data>
@@ -14384,6 +14399,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Store.Footer.PublishHeading" xml:space="preserve">
     <value>Publikowanie w Macro Deck</value>
+  </data>
+  <data name="Store.Guidelines.Heading" xml:space="preserve">
+    <value>Wytyczne Store</value>
+  </data>
+  <data name="Store.Guidelines.Unavailable" xml:space="preserve">
+    <value>Nie udało się wczytać wytycznych Store. Sprawdź połączenie i spróbuj ponownie.</value>
   </data>
   <data name="Store.IconImport.CancelledKeptCount.One" xml:space="preserve">
     <value>Anulowano — zachowano {count} ikonę</value>

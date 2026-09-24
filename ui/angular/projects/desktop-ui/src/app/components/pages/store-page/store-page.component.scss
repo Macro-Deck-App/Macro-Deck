@@ -35,6 +35,10 @@
   margin-bottom: var(--space-4);
 }
 
+.store-page-content > app-store-community-notice {
+  --store-community-notice-spacing: var(--space-4);
+}
+
 .store-page-content > shared-error-banner {
   display: block;
   margin-bottom: var(--space-3);

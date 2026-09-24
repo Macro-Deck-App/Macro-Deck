@@ -14269,6 +14269,21 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Store.ChooseVersion" xml:space="preserve">
     <value>Choisir une autre version</value>
   </data>
+  <data name="Store.CommunityNotice.GuidelinesApply" xml:space="preserve">
+    <value>Les règles du Store s'appliquent à tout ce qui s'y trouve.</value>
+  </data>
+  <data name="Store.CommunityNotice.Heading" xml:space="preserve">
+    <value>Créé par la communauté</value>
+  </data>
+  <data name="Store.CommunityNotice.NoMacroDeckIssues" xml:space="preserve">
+    <value>N'ouvre pas de tickets concernant des extensions ou des packs d'icônes dans le dépôt officiel de Macro Deck.</value>
+  </data>
+  <data name="Store.CommunityNotice.Responsibility" xml:space="preserve">
+    <value>Tout ce qui se trouve dans le Store est créé par la communauté. Si quelque chose plante ou ne fonctionne pas, c'est son créateur qui en est responsable.</value>
+  </data>
+  <data name="Store.CommunityNotice.WhereToReport" xml:space="preserve">
+    <value>Tu peux le noter, ouvrir un ticket dans son dépôt ou le signaler. Les liens se trouvent sur sa page du Store.</value>
+  </data>
   <data name="Store.Details" xml:space="preserve">
     <value>Détails</value>
   </data>
@@ -14384,6 +14399,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Store.Footer.PublishHeading" xml:space="preserve">
     <value>Publie sur Macro Deck</value>
+  </data>
+  <data name="Store.Guidelines.Heading" xml:space="preserve">
+    <value>Règles du Store</value>
+  </data>
+  <data name="Store.Guidelines.Unavailable" xml:space="preserve">
+    <value>Impossible de charger les règles du Store. Vérifie ta connexion et réessaie.</value>
   </data>
   <data name="Store.IconImport.CancelledKeptCount.One" xml:space="preserve">
     <value>Annulé - {count} icône conservée</value>

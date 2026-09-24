@@ -113,6 +113,12 @@ sign in with your Macro Deck account under **Settings > Account**. A change to y
 can take up to a day to show up. If you were signed in before your Macro Deck version supported
 testers, sign out and in once.
 
+Plugins and icon packs in the Store are made by the community. The first time you open the Store, a notice
+explains that the creator of an item is responsible for it when something fails or doesn't work: rate the item,
+open an issue in its repository or report it, using the links on its page, and don't open issues about Store items
+in the Macro Deck repository. Everything in the Store is subject to the **Store guidelines**; the notice and the
+bottom of every Store page open them, next to the imprint and privacy policy. **Got it** hides the notice for good.
+
 **Discover** opens with a search box and a chip for each kind of item (**All**, **Plugins**,
 **Icon packs**) with how many there are. Below it, every item is listed as a card showing its kind, rating,
 installs and whether it is **New** (published in the last 30 days) or recently **Updated**. The list is sorted

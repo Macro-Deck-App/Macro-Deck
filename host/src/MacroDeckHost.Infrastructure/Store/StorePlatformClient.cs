@@ -271,6 +271,13 @@ public sealed class StorePlatformClient : IStorePlatformClient, IDisposable
 			authenticated: true,
 			cancellationToken);
 
+	public Task<StorePlatformResult<string>> GetCreatorGuidelines(CancellationToken cancellationToken = default) =>
+		Send<string>(HttpMethod.Get,
+			"api/v1/public/creator-guidelines",
+			content: null,
+			authenticated: false,
+			cancellationToken);
+
 	private async Task<StorePlatformResult<bool>> Report(string relativeUrl,
 		string category,
 		string? detail,
@@ -357,6 +364,14 @@ public sealed class StorePlatformClient : IStorePlatformClient, IDisposable
 			if (response.StatusCode == HttpStatusCode.NoContent || typeof(T) == typeof(JsonElement?))
 			{
 				return StorePlatformResult.Ok<T>(default);
+			}
+
+			if (typeof(T) == typeof(string))
+			{
+				var text = await response.Content.ReadAsStringAsync(cancellationToken);
+				return string.IsNullOrWhiteSpace(text)
+					? StorePlatformResult.Fail<T>(StorePlatformFailure.Unavailable)
+					: StorePlatformResult.Ok((T)(object)text);
 			}
 
 			var value = await response.Content.ReadFromJsonAsync<T>(_json, cancellationToken);

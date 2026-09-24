@@ -6,6 +6,8 @@
       <shared-error-banner [message]="loadError()!" [dismissible]="false" />
     } @else if (extension(); as extension) {
       <div class="detail-inner">
+        <app-store-community-notice />
+
         <app-store-detail-header
           [extension]="extension"
           [operation]="operation()"

@@ -2,6 +2,10 @@
   <div class="store-page-content">
     <app-store-page-header #header active="discover" (refreshed)="onRefreshed()" />
 
+    @if (storeUnlocked()) {
+      <app-store-community-notice />
+    }
+
     @if (catalog.registry()?.stale) {
       <shared-error-banner
         [message]="catalog.registry()?.lastErrorMessage || ('macrodeck.app:Store.Page.StaleCatalogMessage' | translate)"

@@ -90,6 +90,10 @@ public class StoreReviewsController : ControllerBase
 		CancellationToken ct) =>
 		_reviews.ReportReview(kind, id, reviewId, body, ct);
 
+	[HttpGet("creator-guidelines")]
+	public Task<GetStoreCreatorGuidelinesResponse> GetCreatorGuidelines(CancellationToken ct) =>
+		_reviews.GetCreatorGuidelines(ct);
+
 	[HttpGet("review-avatars")]
 	public async Task<IActionResult> GetAvatar([FromQuery] string? src, CancellationToken ct)
 	{

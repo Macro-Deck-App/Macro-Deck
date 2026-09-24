@@ -1,5 +1,7 @@
 import { provideZonelessChangeDetection } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { EMPTY } from 'rxjs';
+import { ApiService } from '@shared';
 import { ExternalLinkService } from '../../services/external-link.service';
 import { StoreFooterComponent } from './store-footer.component';
 import { provideLocalizationTesting } from '../../../testing/localization-test-support';
@@ -9,18 +11,24 @@ describe('StoreFooterComponent', () => {
 
   function render(): HTMLElement {
     externalLinks = jasmine.createSpyObj<ExternalLinkService>('ExternalLinkService', ['open']);
+    const api = jasmine.createSpyObj<ApiService>('ApiService', ['getStoreCreatorGuidelines', 'onNotification']);
+    api.onNotification.and.returnValue(EMPTY);
+    api.getStoreCreatorGuidelines.and.resolveTo({ available: true, markdown: 'Be nice.' });
     TestBed.configureTestingModule({
       imports: [StoreFooterComponent],
       providers: [
         provideZonelessChangeDetection(),
         ...provideLocalizationTesting(),
         { provide: ExternalLinkService, useValue: externalLinks },
+        { provide: ApiService, useValue: api },
       ],
     });
-    const fixture = TestBed.createComponent(StoreFooterComponent);
+    fixture = TestBed.createComponent(StoreFooterComponent);
     fixture.detectChanges();
     return fixture.nativeElement as HTMLElement;
   }
+
+  let fixture: ComponentFixture<StoreFooterComponent>;
 
   it('opens the Creator Portal, imprint and privacy policy in the system browser', () => {
     const host = render();
@@ -38,5 +46,16 @@ describe('StoreFooterComponent', () => {
 
   it('names the current year in the copyright line', () => {
     expect(render().querySelector('.copyright')?.textContent).toContain(String(new Date().getFullYear()));
+  });
+
+  it('keeps the Store guidelines reachable after the first-visit notice is gone', async () => {
+    const host = render();
+
+    (host.querySelector('.guidelines-link') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(host.querySelector('app-store-guidelines-modal')?.textContent).toContain('Be nice.');
   });
 });

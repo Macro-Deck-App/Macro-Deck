@@ -72,6 +72,23 @@ internal sealed class StoreReviewServiceTests
 	}
 
 	[Test]
+	public async Task The_creator_guidelines_are_passed_through_and_an_unreachable_platform_reports_them_unavailable()
+	{
+		_platform.CreatorGuidelines = StorePlatformResult.Ok("## Guidelines");
+		var available = await _service.GetCreatorGuidelines(CancellationToken.None);
+		_platform.CreatorGuidelines = StorePlatformResult.Fail<string>(StorePlatformFailure.Unavailable);
+		var unavailable = await _service.GetCreatorGuidelines(CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(available.Available, Is.True);
+			Assert.That(available.Markdown, Is.EqualTo("## Guidelines"));
+			Assert.That(unavailable.Available, Is.False);
+			Assert.That(unavailable.Markdown, Is.Null);
+		});
+	}
+
+	[Test]
 	public async Task An_unreachable_platform_hides_ratings_instead_of_failing()
 	{
 		_platform.RatingsFailure = StorePlatformFailure.Unavailable;
