@@ -15,7 +15,7 @@ public static class LegacyLicenseTransferRateLimit
 	public static PartitionedRateLimiter<HttpContext> Create()
 		=> PartitionedRateLimiter.CreateChained(
 			PartitionedRateLimiter.Create<HttpContext, string>(context =>
-				Partition(context, HostIdentityRateLimit.AddressKey(context.Connection.RemoteIpAddress), PerAddressLimit)),
+				Partition(context, HostIdentityRateLimit.AddressKey(context), PerAddressLimit)),
 			PartitionedRateLimiter.Create<HttpContext, string>(context => Partition(context, "host", HostLimit)));
 
 	private static RateLimitPartition<string> Partition(HttpContext context, string key, int permits)

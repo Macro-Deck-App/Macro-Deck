@@ -111,6 +111,9 @@
           @case ('adb') {
             <app-adb-settings />
           }
+          @case ('usb') {
+            <app-usb-settings />
+          }
           @case ('backups') {
             <!-- Deferred: the backups pane (list, schedule, recovery key and their modals) is
                  sizeable and rarely opened, so it ships as its own chunk instead of padding out

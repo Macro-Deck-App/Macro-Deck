@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using MacroDeckHost.Application.Security.KeyRing;
 using MacroDeckHost.Application.Configuration;
+using MacroDeckHost.Application.Usb;
 using MacroDeckHost.Application.Logging;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
@@ -199,9 +200,11 @@ public static class Program
 
 			// Probes each public port before Kestrel is configured, so a port the OS refuses to bind
 			// (issue #515) costs only that listener instead of the whole host.
+			var bridgedConnections = new BridgedConnections(TimeProvider.System);
 			var listenerPlan = HostListenerPlan.Create(tls.Endpoints,
 				loopbackPort,
-				certificate.Certificate);
+				certificate.Certificate,
+				bridgedConnections: bridgedConnections);
 			ResolvedPublicEndpoints.Set(listenerPlan.Endpoints);
 			var activeFingerprint = listenerPlan.Endpoints.HttpsPort is null
 				? null
@@ -229,6 +232,7 @@ public static class Program
 					services.AddSingleton<ILogLevelState>(logLevelState);
 					services.AddSingleton<IHostListenerState>(listenerState);
 					services.AddSingleton(listenerPlan.CertificateHolder);
+					services.AddSingleton(bridgedConnections);
 					services.AddSingleton(dataProtectionProvider);
 					services.AddSingleton(keyRingPlan);
 					services.AddSingleton(KeyRingStartupState.KekHolder);

@@ -19,7 +19,7 @@ internal static class CarThingIdentity
 	internal static bool Matches(AdbDevice device)
 		=> ContainsMarker(device.Product) || ContainsMarker(device.Model);
 
-	private static bool ContainsMarker(string? value)
+	internal static bool ContainsMarker(string? value)
 	{
 		if (value is null)
 		{

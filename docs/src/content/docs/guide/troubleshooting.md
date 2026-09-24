@@ -37,7 +37,7 @@ Macro Deck writes its logs to the `logs` folder inside its data folder:
   port it is actually using in **Settings > Network**.
 - **Firewall:** allow Macro Deck, or the port above, through the firewall of the computer running it.
 - **Wi-Fi driver:** see [the connection drops after a few minutes](#the-connection-drops-after-a-few-minutes).
-- **No Wi-Fi at all:** an Android phone can connect over a USB cable instead, see
+- **No Wi-Fi at all:** a phone or tablet can connect over a USB cable instead, see
   [Connect over USB](/guide/usb-connection/).
 
 ## The connection drops after a few minutes
@@ -51,8 +51,8 @@ deck sits idle.
   hardware.
 - **Power saving:** in Windows, open **Device Manager**, open the Wi-Fi adapter's properties and turn
   off **Allow the computer to turn off this device to save power** on **Power Management**.
-- **Wired connection:** connect the computer running Macro Deck to the router with a cable. An
-  Android phone can also [connect over USB](/guide/usb-connection/).
+- **Wired connection:** connect the computer running Macro Deck to the router with a cable. A phone
+  or tablet can also [connect over USB](/guide/usb-connection/).
 
 ## Macro Deck is not listening on its port
 

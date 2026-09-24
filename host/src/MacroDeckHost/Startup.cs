@@ -76,6 +76,7 @@ using MacroDeckHost.Application.Store.Reviews;
 using MacroDeckHost.Application.Store.Updates;
 using MacroDeckHost.Infrastructure.Store;
 using MacroDeckHost.Infrastructure.Adb;
+using MacroDeckHost.Infrastructure.Usb.Native;
 using MacroDeckHost.Infrastructure.ClientTargets;
 using MacroDeckHost.Infrastructure.Applications;
 using MacroDeckHost.Infrastructure.Autostart;
@@ -311,6 +312,7 @@ public class Startup
 		services.AddHostedService<PublicTlsCertificateRenewalBackgroundService>();
 		services.AddHostedService<DeviceLayoutConstraintWarmupBackgroundService>();
 		services.AddHostedService<AdbBackgroundService>();
+		services.AddHostedService<NativeUsbBackgroundService>();
 		services.AddHostedService<IntegrationStartupBackgroundService>();
 		services.AddHostedService<PluginDeviceSessionWatcher>();
 		services.AddHostedService<IconPackInitializerBackgroundService>();
@@ -715,6 +717,7 @@ public class Startup
 		services.AddSingleton<IFolderRevealService, FolderRevealService>();
 		services.TryAddSingleton<IHostListenerState>(_ => new HostListenerState(ResolvedPublicEndpoints.Value, false));
 		services.AddAdbManager();
+		services.AddNativeUsb();
 		// Device provisioners run on top of the adb manager registered above (issue #727).
 		services.AddWebClientTargets();
 		services.AddScoped<IIntegrationConfigStore, IntegrationConfigStore>();

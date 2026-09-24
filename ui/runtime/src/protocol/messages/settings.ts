@@ -231,6 +231,77 @@ export interface AdbStateChangedEvent {
   changedAt: string;
 }
 
+export type NativeUsbPlatform = 'Android' | 'Ios';
+
+export type NativeUsbDeviceState =
+  | 'Available'
+  | 'ServedByAdb'
+  | 'Waiting'
+  | 'WaitingForApp'
+  | 'Linked'
+  | 'Closed'
+  | 'Stopped'
+  | 'NotSupported'
+  | 'Connecting'
+  | 'Switching';
+
+export interface NativeUsbDevice {
+  id: string;
+  platform: NativeUsbPlatform;
+  serial: string | null;
+  manufacturer: string | null;
+  product: string | null;
+  state: NativeUsbDeviceState;
+  picked: boolean;
+  remembered: boolean;
+  canConnect: boolean;
+  knownToAdb: boolean;
+}
+
+export interface NativeUsbRememberedDevice {
+  serial: string;
+  name: string | null;
+}
+
+export interface GetNativeUsbSettingsResponse {
+  enabled: boolean;
+  androidAvailable: boolean;
+  iosAvailable: boolean;
+  bridgeAvailable: boolean;
+  httpsOnly: boolean;
+  devices: NativeUsbDevice[];
+  rememberedDevices: NativeUsbRememberedDevice[];
+}
+
+export interface UpdateNativeUsbSettingsRequest {
+  enabled?: boolean;
+}
+
+export interface UpdateNativeUsbSettingsResponse extends GetNativeUsbSettingsResponse {
+  success: boolean;
+}
+
+export interface ConnectNativeUsbDeviceRequest {
+  id: string;
+}
+
+export interface ConnectNativeUsbDeviceResponse extends GetNativeUsbSettingsResponse {
+  success: boolean;
+  errorCode: string | null;
+}
+
+export interface ForgetNativeUsbDeviceRequest {
+  serial: string;
+}
+
+export interface ForgetNativeUsbDeviceResponse extends GetNativeUsbSettingsResponse {
+  success: boolean;
+}
+
+export interface NativeUsbStateChangedEvent {
+  changedAt: string;
+}
+
 export interface GetDeveloperSettingsResponse {
   enabled: boolean;
 }

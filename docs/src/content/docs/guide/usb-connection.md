@@ -1,11 +1,15 @@
 ---
 title: Connect over USB
-description: Connect an Android device over a USB cable instead of Wi-Fi, with the companion app or the web client.
+description: Connect a phone or tablet over a USB cable instead of Wi-Fi, with or without USB debugging.
 ---
 
-An Android device can connect over a USB cable, for example when Wi-Fi is unavailable, blocked or
-unstable, with the companion app or with the web client in its browser. This uses ADB, the Android
-Debug Bridge. iPhone and iPad connect over your network only.
+A phone or tablet can connect over a USB cable, for example when Wi-Fi is unavailable, blocked or
+unstable. There are two ways:
+
+- [Without USB debugging](#without-usb-debugging), experimental: Android phones and tablets, iPhone and iPad with the
+  Macro Deck app. Nothing needs to be turned on on the phone, but you turn it on in Macro Deck first.
+- With ADB, the Android Debug Bridge: Android devices with the companion app or with the web client in
+  the browser. This needs USB debugging on the phone, and is described first below.
 
 ## On the computer
 
@@ -87,3 +91,94 @@ them, copy files and install apps. A plugin can do this only while **Enable ADB*
 
 Turning off **Allow plugins to use ADB** stops every plugin from using Macro Deck's ADB connection. It
 does not affect USB connections for the app or the web client.
+
+## Without USB debugging
+
+The Macro Deck app can also connect over the cable without USB debugging and without ADB, for Android
+phones and for iPhone and iPad. This is experimental: it is off until you turn it on, and not every phone
+supports it yet. If yours does not, ADB and Wi-Fi keep working as before.
+
+### On the computer
+
+1. Open **Settings > USB connections**.
+2. Turn on **USB without debugging**. It is marked **Experimental**.
+3. **Status** shows whether this computer can do it for **Android devices**, which need libusb, and for
+   **iPhone and iPad**, which need the Apple device service (usbmuxd). See
+   [what the computer needs](#what-the-computer-needs).
+
+### Android phone
+
+1. Install the Macro Deck app and connect the phone with a USB cable that carries data.
+2. The phone appears under **Devices** in **Settings > USB connections**. Click **Connect without
+   debugging** next to it.
+3. The phone switches into accessory mode and asks whether to open Macro Deck for this computer, named as
+   in Macro Deck's connection info. Unlock the phone if the question does not show. Tick the option to
+   always open it, and confirm. The Macro Deck app opens.
+4. On a Mac with Apple silicon, the first time you do this macOS asks **Allow accessory to connect?**. Click
+   **Allow**, then click **Connect without debugging** again; the phone does not need to be plugged in again,
+   although that works too. Sign in, and compare the
+   fingerprint the app shows with the one in Macro Deck the first time.
+
+Macro Deck remembers a phone once it connected, and connects it again by itself the next time you plug it
+in. **Remembered devices** lists them; **Forget** stops that. Nothing is ever sent to a phone you did not
+choose here.
+
+While the phone is connected this way:
+
+- It offers no file transfer (MTP) until you unplug it.
+- Without the Macro Deck app installed, the phone asks which app should open. Install the app, or unplug
+  the phone.
+- ADB sessions of other programs on this phone end when it switches, for example Android Studio.
+- If you turn off USB detection in the app, Macro Deck does not connect the phone again until you unplug it
+  and plug it in again.
+
+When **Enable ADB** is on in **Settings > ADB**, a phone ADB already knows is shown as **Connected through
+ADB** and stays with ADB until you click **Connect without debugging** for it. Once you do, or once Macro Deck
+remembers the phone, USB without debugging takes over: the phone switches even though ADB knows it, and
+Macro Deck sets up no ADB connection for it while it is switched. Other programs' ADB sessions to that phone,
+such as scrcpy or Android Studio, end when it switches, and the list says so next to the button. Phones you
+did not choose are left to ADB. If the phone falls back to ADB later, for example after you turn **USB without
+debugging** off or the phone leaves accessory mode, the ADB connection comes back by itself. **Forget** only
+stops Macro Deck from switching the phone the next time; a phone that is connected right now stays connected
+until you unplug it. A phone that stays in accessory mode without a connection, because USB detection was
+turned off in the app (**Closed in the app**) or the Macro Deck app is not installed, can use neither ADB nor
+USB without debugging until you unplug it or turn **USB without debugging** off.
+
+### iPhone and iPad
+
+1. Connect the iPhone or iPad with a USB cable and tap **Trust** when it asks whether to trust this
+   computer.
+2. Open the Macro Deck app and keep it in front. It connects by itself and appears under **Devices** as
+   **Connected**. Until the app is open, it shows **Waiting for the app**.
+
+The connection lasts while the app is open. When the app goes to the background it disconnects, and it
+connects again when you bring it back.
+
+### What the computer needs
+
+| Computer | Android devices | iPhone and iPad |
+| --- | --- | --- |
+| macOS | libusb, for example `brew install libusb` | Nothing extra |
+| Windows | libusb, and the WinUSB driver for the phone, both in normal mode and after it switched (for example installed with Zadig) | The Apple Devices app, or iTunes |
+| Linux | libusb (`libusb-1.0-0`) and a udev rule that gives your user access to the phone | The `usbmuxd` service |
+
+Macro Deck does not include libusb yet; without it, only **Android devices** shows as not available. After you install
+libusb, Macro Deck finds it within about 30 seconds, without a restart.
+
+### Limits
+
+- The app talks plain HTTP over the cable. If Macro Deck only accepts HTTPS, **Status** says so: set
+  **Listener mode** in **Settings > Network** to **Use additional HTTPS port**, or turn HTTPS off.
+
+| Shown for a phone | What to do |
+| --- | --- |
+| Not connected | Click **Connect without debugging** to connect the phone. |
+| Switching | Nothing: the phone is switching to accessory mode, which takes a few seconds. |
+| Waiting to connect | Nothing: Macro Deck connects the phone within a few seconds. |
+| Waiting for the Macro Deck app | Open the app on the phone, or install it. |
+| Connected | The deck is ready in the app. |
+| Waiting for the app | On an iPhone or iPad: open Macro Deck and keep it in front. |
+| Stopped | Click **Connect without debugging** to try again, or unplug the phone and plug it in again. |
+| Closed in the app | USB detection was turned off in the app. Unplug and plug in again. |
+| Connected through ADB | The phone uses the ADB connection above. Click **Connect without debugging** to use this instead. |
+| Not supported by this device | The phone cannot switch to accessory mode. Use ADB or Wi-Fi. |

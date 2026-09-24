@@ -141,7 +141,9 @@ it creates a request, the user approves it in the desktop app, and the plugin re
 Pairing uses the same loopback check as the rest of the plugin protocol, which has no port clause: a device
 reaching the loopback address through an `adb reverse` tunnel is indistinguishable at the socket level from
 a local process ([ADR 0030](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0030-android-usb-connections-over-adb.md)).
-Pairing does not widen that existing exposure.
+Pairing does not widen that existing exposure. A connection from a USB link without debugging is different:
+the host dials it itself and marks it, so it is never taken for a local process and cannot reach pairing
+([ADR 0095](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0095-usb-connections-without-debugging.md)).
 
 What pairing changes is what a hostile local process needs. Before, it could mint a Developer token itself
 through its implicit loopback admin. Now it needs a human to approve a specific prompt while Developer Mode

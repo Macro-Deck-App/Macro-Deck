@@ -25,6 +25,7 @@ import { MigrationSettingsComponent } from './sections/migration-settings.compon
 import { NetworkSettingsComponent } from './sections/network-settings.component';
 import { SecuritySettingsComponent } from './sections/security-settings.component';
 import { StartupSettingsComponent } from './sections/startup-settings.component';
+import { UsbSettingsComponent } from './sections/usb-settings.component';
 
 interface SettingsCategoryItem extends NavItem {
   id: SettingsCategory;
@@ -65,6 +66,7 @@ const PINNED_CATEGORY_LABEL_KEYS: Partial<Record<SettingsCategory, string>> = {
     AccountSettingsComponent, AppearanceSettingsComponent,
     StartupSettingsComponent, LanguageSettingsComponent,
     SecuritySettingsComponent, NetworkSettingsComponent, DevicesSettingsComponent, AdbSettingsComponent,
+    UsbSettingsComponent,
     ClientTargetsSettingsComponent, LicenseSettingsComponent,
     BackupsSettingsComponent, MigrationSettingsComponent,
     LoggingSettingsComponent, DeveloperSettingsComponent, ExtensionsSettingsComponent, AboutSettingsComponent],
@@ -110,6 +112,7 @@ export class SettingsModalComponent {
           { id: 'network', label: text(Strings.Settings.Network), icon: 'wifi' },
           { id: 'devices', label: text(Strings.Settings.Devices), icon: 'device-desktop' },
           { id: 'client-targets', label: text(AppStrings.Settings.ClientTargets.Heading), icon: 'device-phone' },
+          { id: 'usb', label: text(AppStrings.Settings.Usb.Heading), icon: 'usb' },
           { id: 'license', label: text(AppStrings.Settings.License.Heading), icon: 'unlock' },
         ],
       },

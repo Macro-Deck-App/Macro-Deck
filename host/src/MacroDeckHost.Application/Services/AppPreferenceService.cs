@@ -1,4 +1,6 @@
 using System.Globalization;
+using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using MacroDeck.Localization;
 using MacroDeckHost.Application.Configuration;
@@ -36,6 +38,15 @@ public partial class AppPreferenceService : IAppPreferenceService
 	public const string AdbDefaultDeviceSerialKey = "adb.defaultDeviceSerial";
 	public const string AdbStopServerOnExitKey = "adb.stopServerOnExit";
 	public const string AdbAllowPluginsKey = "adb.allowPlugins";
+
+	public const string NativeUsbEnabledKey = "usb.nativeEnabled";
+	public const string NativeUsbDevicesKey = "usb.nativeDevices";
+
+	public const bool DefaultNativeUsbEnabled = false;
+
+	public const int MaxNativeUsbRememberedDevices = 32;
+
+	public const int MaxNativeUsbDeviceNameLength = 96;
 
 	public const string DeveloperModeKey = "developer.mode";
 
@@ -306,6 +317,27 @@ public partial class AppPreferenceService : IAppPreferenceService
 		await _repository.SetValue(AdbDefaultDeviceSerialKey, resolved.DefaultDeviceSerial ?? string.Empty);
 		await _repository.SetValue(AdbStopServerOnExitKey, resolved.StopServerOnExit.ToString());
 		await _repository.SetValue(AdbAllowPluginsKey, resolved.AllowPlugins.ToString());
+
+		return resolved;
+	}
+
+	public async Task<NativeUsbSettings> GetNativeUsb()
+	{
+		var enabled = (await _repository.GetByKey(NativeUsbEnabledKey))?.Value;
+		var devices = (await _repository.GetByKey(NativeUsbDevicesKey))?.Value;
+
+		return new NativeUsbSettings(NormalizeAdbFlag(enabled, DefaultNativeUsbEnabled), ParseNativeUsbDevices(devices));
+	}
+
+	public async Task<NativeUsbSettings> SetNativeUsb(bool? enabled, IReadOnlyList<RememberedUsbDevice>? rememberedDevices)
+	{
+		var current = await GetNativeUsb();
+		var resolved = new NativeUsbSettings(enabled ?? current.Enabled,
+			NormalizeNativeUsbDevices(rememberedDevices ?? current.RememberedDevices));
+
+		await _repository.SetValue(NativeUsbEnabledKey, resolved.Enabled.ToString());
+		await _repository.SetValue(NativeUsbDevicesKey, JsonSerializer.Serialize(resolved.RememberedDevices
+			.Select(device => new StoredUsbDevice(device.Serial, device.Name))));
 
 		return resolved;
 	}
@@ -674,6 +706,68 @@ public partial class AppPreferenceService : IAppPreferenceService
 		}
 
 		return trimmed.Length <= MaxAdbDeviceSerialLength && AdbDeviceSerialRegex().IsMatch(trimmed) ? trimmed : null;
+	}
+
+	private static List<RememberedUsbDevice> ParseNativeUsbDevices(string? value)
+	{
+		if (string.IsNullOrWhiteSpace(value))
+		{
+			return [];
+		}
+
+		try
+		{
+			var stored = JsonSerializer.Deserialize<List<StoredUsbDevice?>>(value) ?? [];
+			return NormalizeNativeUsbDevices(stored.OfType<StoredUsbDevice>()
+				.Where(device => device.Serial is not null)
+				.Select(device => new RememberedUsbDevice(device.Serial, device.Name)));
+		}
+		catch (JsonException)
+		{
+			return [];
+		}
+	}
+
+	private static List<RememberedUsbDevice> NormalizeNativeUsbDevices(IEnumerable<RememberedUsbDevice> devices)
+		=> devices.Select(device => NormalizeUsbSerial(device.Serial) is { } serial
+				? new RememberedUsbDevice(serial, NormalizeUsbDeviceName(device.Name))
+				: null)
+			.OfType<RememberedUsbDevice>()
+			.GroupBy(device => device.Serial, StringComparer.Ordinal)
+			.Select(group => group.Last())
+			.TakeLast(MaxNativeUsbRememberedDevices)
+			.ToList();
+
+	private static string? NormalizeUsbDeviceName(string? value)
+	{
+		var cleaned = new string((value ?? string.Empty).Where(character => !char.IsControl(character)).ToArray()).Trim();
+		if (cleaned.Length == 0)
+		{
+			return null;
+		}
+
+		var elements = StringInfo.GetTextElementEnumerator(cleaned);
+		var builder = new StringBuilder();
+		for (var count = 0; count < MaxNativeUsbDeviceNameLength && elements.MoveNext(); count++)
+		{
+			builder.Append(elements.GetTextElement());
+		}
+
+		return builder.ToString().TrimEnd();
+	}
+
+	private sealed record StoredUsbDevice(
+		[property: System.Text.Json.Serialization.JsonPropertyName("serial")] string Serial,
+		[property: System.Text.Json.Serialization.JsonPropertyName("name")] string? Name);
+
+	private static string? NormalizeUsbSerial(string? value)
+	{
+		var trimmed = value?.Trim();
+		return !string.IsNullOrEmpty(trimmed) &&
+			trimmed.Length <= MaxAdbDeviceSerialLength &&
+			trimmed.All(character => character is >= '!' and <= '~')
+				? trimmed
+				: null;
 	}
 
 	[GeneratedRegex("^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$")]
