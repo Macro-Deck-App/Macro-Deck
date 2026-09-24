@@ -2074,6 +2074,7 @@ name = "macro-deck-bootstrapper"
 version = "3.0.0"
 dependencies = [
  "chrono",
+ "gtk",
  "libc",
  "notify-rust",
  "percent-encoding",

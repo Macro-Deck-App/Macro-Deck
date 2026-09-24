@@ -380,6 +380,7 @@ fn build(app: &AppHandle) -> bool {
 
     match builder.build() {
         Ok(window) => {
+            crate::wayland_titlebar::release_titlebar_buttons(&window);
             let handle = app.clone();
             window.on_window_event(move |event| {
                 if let tauri::WindowEvent::ThemeChanged(_) = event {

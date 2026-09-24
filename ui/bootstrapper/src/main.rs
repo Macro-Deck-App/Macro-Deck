@@ -29,6 +29,7 @@ mod update_mode;
 mod update_state;
 mod update_window;
 mod updater;
+mod wayland_titlebar;
 mod window;
 mod window_geometry;
 mod window_state;

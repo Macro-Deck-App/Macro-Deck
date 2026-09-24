@@ -8654,6 +8654,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.System.Actions.RunCommand.ShowWindowLabel" xml:space="preserve">
     <value>Zobrazit okno</value>
   </data>
+  <data name="Integrations.System.Actions.RunCommand.TimeoutDescription" xml:space="preserve">
+    <value>Jak dlouho čekat na příkaz, 0 čeká až do jeho ukončení. Příkaz, který po této době stále běží, poběží dál, pokud se jeho výstup neukládá do proměnné.</value>
+  </data>
   <data name="Integrations.System.Actions.RunCommand.TimeoutLabel" xml:space="preserve">
     <value>Časový limit (sekundy)</value>
   </data>

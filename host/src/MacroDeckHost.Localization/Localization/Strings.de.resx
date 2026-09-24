@@ -8652,6 +8652,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.System.Actions.RunCommand.ShowWindowLabel" xml:space="preserve">
     <value>Fenster anzeigen</value>
   </data>
+  <data name="Integrations.System.Actions.RunCommand.TimeoutDescription" xml:space="preserve">
+    <value>Wie lange auf den Befehl gewartet wird, 0 wartet, bis er beendet ist. Läuft der Befehl danach noch, läuft er weiter, außer seine Ausgabe wird in einer Variable gespeichert.</value>
+  </data>
   <data name="Integrations.System.Actions.RunCommand.TimeoutLabel" xml:space="preserve">
     <value>Timeout (Sekunden)</value>
   </data>

@@ -3633,6 +3633,7 @@ export const AppStrings = {
 					ShellLabel: 'macrodeck.app:Integrations.System.Actions.RunCommand.ShellLabel',
 					ShellPowerShell: 'macrodeck.app:Integrations.System.Actions.RunCommand.ShellPowerShell',
 					ShowWindowLabel: 'macrodeck.app:Integrations.System.Actions.RunCommand.ShowWindowLabel',
+					TimeoutDescription: 'macrodeck.app:Integrations.System.Actions.RunCommand.TimeoutDescription',
 					TimeoutLabel: 'macrodeck.app:Integrations.System.Actions.RunCommand.TimeoutLabel',
 				},
 				SendNotification: {
@@ -10145,6 +10146,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Integrations.System.Actions.RunCommand.ShellLabel': 'Shell',
 	'macrodeck.app:Integrations.System.Actions.RunCommand.ShellPowerShell': 'PowerShell',
 	'macrodeck.app:Integrations.System.Actions.RunCommand.ShowWindowLabel': 'Show Window',
+	'macrodeck.app:Integrations.System.Actions.RunCommand.TimeoutDescription': 'How long to wait for the command, 0 waits until it exits. A command still running after that is left running, unless its output is saved to a variable.',
 	'macrodeck.app:Integrations.System.Actions.RunCommand.TimeoutLabel': 'Timeout (seconds)',
 	'macrodeck.app:Integrations.System.Actions.SendNotification.Description': 'Shows a native system notification.',
 	'macrodeck.app:Integrations.System.Actions.SendNotification.MessageLabel': 'Message',

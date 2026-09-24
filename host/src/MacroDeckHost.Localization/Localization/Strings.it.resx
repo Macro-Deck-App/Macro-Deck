@@ -8654,6 +8654,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.System.Actions.RunCommand.ShowWindowLabel" xml:space="preserve">
     <value>Mostra finestra</value>
   </data>
+  <data name="Integrations.System.Actions.RunCommand.TimeoutDescription" xml:space="preserve">
+    <value>Quanto attendere il comando, 0 attende finché non termina. Un comando ancora in esecuzione dopo questo tempo continua a funzionare, a meno che il suo output non venga salvato in una variabile.</value>
+  </data>
   <data name="Integrations.System.Actions.RunCommand.TimeoutLabel" xml:space="preserve">
     <value>Timeout (secondi)</value>
   </data>
