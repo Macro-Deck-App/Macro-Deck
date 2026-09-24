@@ -465,23 +465,20 @@ public class AuthPolicyMatrixTests
 	}
 
 	[Test]
-	public async Task The_companion_license_routes_are_admin_only_and_the_test_issuer_needs_developer_mode()
+	public async Task The_companion_license_status_is_admin_only_and_no_route_issues_a_test_license()
 	{
 		var clientStatus = await Send(HttpMethod.Get, "/api/settings/license", _clientToken);
-		var clientTest = await SendJson(HttpMethod.Post, "/api/settings/license/test", new { }, _clientToken);
 		var adminStatus = await Send(HttpMethod.Get, "/api/settings/license", _adminToken);
-		var adminTest = await SendJson(HttpMethod.Post, "/api/settings/license/test", new { }, _adminToken);
-		var clientRevoke = await Send(HttpMethod.Delete, "/api/settings/license/test", _clientToken);
-		var adminRevoke = await Send(HttpMethod.Delete, "/api/settings/license/test", _adminToken);
+		var adminIssue = await SendJson(HttpMethod.Post, "/api/settings/license/test", new { }, _adminToken);
+		var afterIssue = await Send(HttpMethod.Get, "/api/settings/license", _adminToken);
+		using var status = JsonDocument.Parse(await afterIssue.Content.ReadAsStringAsync());
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(clientStatus.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
-			Assert.That(clientTest.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 			Assert.That(adminStatus.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-			Assert.That(adminTest.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-			Assert.That(clientRevoke.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
-			Assert.That(adminRevoke.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+			Assert.That(adminIssue.Content.Headers.ContentType?.MediaType, Is.Not.EqualTo("application/json"));
+			Assert.That(status.RootElement.GetProperty("licensed").GetBoolean(), Is.False);
 		});
 	}
 

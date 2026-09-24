@@ -2,13 +2,16 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Channels;
+using MacroDeck.Localization;
 using MacroDeckHost.Application.Licensing;
+using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Licensing;
 using MacroDeckHost.Infrastructure.Licensing;
 using MacroDeckHost.Integrations;
+using MacroDeckHost.Localization;
 using Microsoft.AspNetCore.DataProtection;
 using ILogger = Serilog.ILogger;
 
@@ -19,14 +22,14 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 	public const string TokenKey = "license.companionToken";
 	public const string TrialsKey = "license.trials";
 	public const int MaximumTrials = 1000;
-	public const string RevokedTestIdsKey = "license.revokedTestIds";
-	public const int MaximumRevokedTestIds = 100;
 	public const string PendingProofsKey = "license.pendingProofs";
 	public const int MaximumPendingProofs = 8;
 	public const int MaximumPendingLegacyAppProofs = 2;
 	public const string RefusedProofKeysKey = "license.refusedProofKeys";
 	public const int MaximumRefusedProofKeys = 64;
 	public const string PlatformRevokedIdsKey = "license.platformRevokedIds";
+	public const string AccountEligibleIdKey = "license.accountEligibleId";
+	public const string NoAccountEligibleId = "none";
 
 	// Above this many Platform ids a sync answer names only the ids that concern the connection, so it stays
 	// under UiWebSocketProtocol.MaxMessageBytes; the Companion fetches the full list itself.
@@ -47,13 +50,15 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 		"purchase-refunded", "purchase-revoked", "purchase-canceled", "license-revoked"
 	};
 	private const string ProofProtectorPurpose = "MacroDeck.CompanionLicense.PendingProof";
+	public const string ReceivedNotificationKey = "companionLicense.received";
 
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly IPlatformLicenseClient _platform;
-	private readonly TestCompanionLicenseIssuer _testIssuer;
 	private readonly CompanionLicenseTokens _tokens;
 	private readonly CompanionDeviceRegistry _companions;
 	private readonly IUiTransport _ui;
+	private readonly IUserNotificationStore _notifications;
+	private readonly ILocalizationResolver _localization;
 	private readonly IDataProtector _proofProtector;
 	private readonly TimeProvider _time;
 	private readonly Func<double> _random;
@@ -70,26 +75,33 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 	private bool _companionSynced;
 	private DateTimeOffset? _revocationDueAt;
 	private int _revocationFailures;
+	private bool _eligibilityInitialized;
+	private AccountState _account = AccountState.Unknown;
+
+	public event EventHandler? LicenseChanged;
 
 	public CompanionLicenseService(IServiceScopeFactory scopeFactory,
 		IPlatformLicenseClient platform,
-		TestCompanionLicenseIssuer testIssuer,
 		CompanionLicenseTokens tokens,
 		CompanionDeviceRegistry companions,
 		IUiTransport ui,
+		IUserNotificationStore notifications,
+		ILocalizationResolver localization,
 		IDataProtectionProvider dataProtection,
 		TimeProvider time,
 		ILogger logger)
-		: this(scopeFactory, platform, testIssuer, tokens, companions, ui, dataProtection, time, Random.Shared.NextDouble, logger)
+		: this(scopeFactory, platform, tokens, companions, ui, notifications, localization, dataProtection, time,
+			Random.Shared.NextDouble, logger)
 	{
 	}
 
 	internal CompanionLicenseService(IServiceScopeFactory scopeFactory,
 		IPlatformLicenseClient platform,
-		TestCompanionLicenseIssuer testIssuer,
 		CompanionLicenseTokens tokens,
 		CompanionDeviceRegistry companions,
 		IUiTransport ui,
+		IUserNotificationStore notifications,
+		ILocalizationResolver localization,
 		IDataProtectionProvider dataProtection,
 		TimeProvider time,
 		Func<double> random,
@@ -97,10 +109,11 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 	{
 		_scopeFactory = scopeFactory;
 		_platform = platform;
-		_testIssuer = testIssuer;
 		_tokens = tokens;
 		_companions = companions;
 		_ui = ui;
+		_notifications = notifications;
+		_localization = localization;
 		_proofProtector = dataProtection.CreateProtector(ProofProtectorPurpose);
 		_time = time;
 		_random = random;
@@ -132,71 +145,26 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 		};
 	}
 
-	public async Task<CompanionLicenseStatus> RevokeTestLicenseAsync(CancellationToken cancellationToken)
-	{
-		var revokedId = await LockedAsync(async preferences =>
-			{
-				var stored = await _tokens.VerifyAsync(await StoredTokenAsync(preferences), trustTestKey: true);
-				if (stored is not { IsTest: true })
-				{
-					return null;
-				}
-
-				var revoked = await ReadRevokedAsync(preferences);
-				revoked.Remove(stored.LicenseId);
-				revoked.Add(stored.LicenseId);
-				await preferences.SetValue(TokenKey, string.Empty);
-				await preferences.SetValue(RevokedTestIdsKey,
-					JsonSerializer.Serialize(revoked.TakeLast(MaximumRevokedTestIds)));
-				return stored.LicenseId;
-			},
-			cancellationToken);
-
-		if (revokedId is not null)
-		{
-			await _companions.SendLicenseRevokedAsync(new CompanionLicenseRevokedEvent { LicenseId = revokedId });
-			await NotifyChangedAsync();
-		}
-
-		return await GetStatusAsync(cancellationToken);
-	}
-
 	public async Task<CompanionLicenseStatus> GetStatusAsync(CancellationToken cancellationToken)
 	{
-		var status = Status(await AdoptAsync(null, cancellationToken));
+		var license = await AdoptAsync(null, cancellationToken);
+		var status = Status(license);
 		await LockedAsync(async preferences =>
 			{
-				// Checked with the test key trusted: debug Companions keep trusting a test license whatever the
-				// host's mode, so it has to stay revocable after developer mode is turned off.
-				status.TestLicenseStored =
-					await _tokens.VerifyAsync(await StoredTokenAsync(preferences), trustTestKey: true) is { IsTest: true };
+				var eligible = license is not null && await EligibleIdAsync(preferences) == license.LicenseId;
+				status.AccountSync = _account switch
+				{
+					_ when license is null => CompanionLicenseAccountSync.Unknown,
+					{ SignedIn: true } when _account.LicenseId == license.LicenseId => CompanionLicenseAccountSync.Synced,
+					{ Known: true, SignedIn: false } when eligible => CompanionLicenseAccountSync.SignedOut,
+					_ => CompanionLicenseAccountSync.Unknown
+				};
 				var pending = await ReadPendingAsync(preferences);
 				status.IssuePending = pending.Count > 0;
 				status.NextIssueAttemptAt = pending.Count > 0 ? pending.Min(entry => entry.NextAttemptAt) : null;
 				return true;
 			},
 			cancellationToken);
-		return status;
-	}
-
-	public async Task<CompanionLicenseStatus?> IssueTestLicenseAsync(CancellationToken cancellationToken)
-	{
-		await using (var scope = _scopeFactory.CreateAsyncScope())
-		{
-			if (!await DeveloperModeAsync(scope.ServiceProvider))
-			{
-				return null;
-			}
-		}
-
-		var license = await AdoptAsync(await _testIssuer.IssueAsync(cancellationToken), cancellationToken);
-		if (license is not null)
-		{
-			await _companions.SendLicenseAsync(new CompanionLicenseEvent { License = license.Token }, null);
-		}
-
-		var status = Status(license);
-		status.TestLicenseStored = license?.IsTest == true;
 		return status;
 	}
 
@@ -232,6 +200,124 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 				}
 			}
 		}
+	}
+
+	internal async Task<AccountReconcileResult> ReconcileAccountAsync(string? accountToken,
+		CancellationToken cancellationToken)
+	{
+		bool developerMode;
+		await using (var scope = _scopeFactory.CreateAsyncScope())
+		{
+			developerMode = await DeveloperModeAsync(scope.ServiceProvider);
+		}
+
+		CompanionLicense? adopted = null;
+		var stateChanged = false;
+		var result = await LockedAsync(async preferences =>
+			{
+				var revoked = await PlatformRevokedAsync(preferences);
+				var local = await _tokens.VerifyAsync(await StoredTokenAsync(preferences), developerMode);
+				if (local is not null && revoked.Contains(local.LicenseId))
+				{
+					local = null;
+				}
+
+				var account = await _tokens.VerifyAsync(accountToken, developerMode);
+				if (account is not null && revoked.Contains(account.LicenseId))
+				{
+					account = null;
+				}
+
+				var state = new AccountState(true, true, account?.LicenseId);
+				stateChanged = _account != state;
+				_account = state;
+				if (account is not null && (local is null || local.IsTest && !account.IsTest))
+				{
+					await preferences.SetValue(TokenKey, account.Token);
+					await MarkEligibleAsync(preferences, account.LicenseId);
+					if (!account.IsTest)
+					{
+						if ((await ReadPendingAsync(preferences)).Count > 0)
+						{
+							await WritePendingAsync(preferences, []);
+						}
+
+						CompleteAllWaiters(null);
+					}
+
+					adopted = account;
+					return new AccountReconcileResult(null, null);
+				}
+
+				return local is not null && account is null && await EligibleIdAsync(preferences) == local.LicenseId
+					? new AccountReconcileResult(local.Token, local.LicenseId)
+					: new AccountReconcileResult(null, null);
+			},
+			cancellationToken);
+
+		if (adopted is not null)
+		{
+			_logger.Information("Stored Companion license {LicenseId} from the Macro Deck account", adopted.LicenseId);
+			await _companions.SendLicenseAsync(new CompanionLicenseEvent { License = adopted.Token }, null);
+			await NotifyChangedAsync();
+			await NotifyReceivedAsync(AppStrings.Notifications.CompanionLicenseDownloaded(),
+				AppStrings.Notifications.CompanionLicenseDownloadedMessage());
+			RaiseLicenseChanged();
+		}
+		else if (stateChanged)
+		{
+			await NotifyChangedAsync();
+		}
+
+		return result;
+	}
+
+	internal async Task ReportAccountSignedOutAsync(CancellationToken cancellationToken)
+	{
+		var changed = await LockedAsync(_ =>
+			{
+				var changed = _account != AccountState.SignedOut;
+				_account = AccountState.SignedOut;
+				return Task.FromResult(changed);
+			},
+			cancellationToken);
+		if (changed)
+		{
+			await NotifyChangedAsync();
+		}
+	}
+
+	internal async Task ReportAccountUnknownAsync(CancellationToken cancellationToken)
+	{
+		var changed = await LockedAsync(_ =>
+			{
+				var changed = _account != AccountState.Unknown;
+				_account = AccountState.Unknown;
+				return Task.FromResult(changed);
+			},
+			cancellationToken);
+		if (changed)
+		{
+			await NotifyChangedAsync();
+		}
+	}
+
+	internal async Task DropRevokedLicenseAsync(string licenseId, CancellationToken cancellationToken)
+	{
+		await LockedAsync(async preferences =>
+			{
+				var revoked = await PlatformRevokedAsync(preferences);
+				if (revoked.Add(licenseId))
+				{
+					await preferences.SetValue(PlatformRevokedIdsKey,
+						JsonSerializer.Serialize(new PlatformRevocations(revoked.ToList(),
+							_time.GetUtcNow().ToUnixTimeMilliseconds())));
+				}
+
+				return true;
+			},
+			cancellationToken);
+		await ApplyRevocationsAsync(cancellationToken);
 	}
 
 	internal async Task<DateTimeOffset?> RunDueWorkAsync(CancellationToken cancellationToken)
@@ -720,6 +806,7 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 		_logger.Information("Removed Companion license {LicenseId}, which the Macro Deck Platform revoked", revokedId);
 		await _companions.SendLicenseRevokedAsync(new CompanionLicenseRevokedEvent { LicenseId = revokedId });
 		await NotifyChangedAsync();
+		RaiseLicenseChanged();
 	}
 
 	private Task<bool> LicensingInUseAsync(CancellationToken cancellationToken)
@@ -755,12 +842,11 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 		var submittedId = (await _tokens.VerifyAsync(submitted, trustTestKey: true))?.LicenseId;
 		return await LockedAsync(async preferences =>
 			{
-				var revoked = await ReadRevokedAsync(preferences);
 				var platform = await PlatformRevokedAsync(preferences);
 				IEnumerable<string> synced = platform.Count <= MaximumSyncedPlatformRevokedIds
 					? platform
 					: new[] { submittedId, stored?.LicenseId }.OfType<string>().Where(platform.Contains);
-				return revoked.Concat(synced).Distinct(StringComparer.Ordinal).ToList();
+				return synced.Distinct(StringComparer.Ordinal).ToList();
 			},
 			cancellationToken);
 	}
@@ -778,19 +864,29 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 		}
 
 		var adoptedNew = false;
+		var changed = false;
 		var license = await LockedAsync(async preferences =>
 			{
 				var stored = await _tokens.VerifyAsync(await StoredTokenAsync(preferences), developerMode);
 				var adopted = await _tokens.VerifyAsync(candidate, developerMode);
 				if (adopted is null ||
 					stored is not null && (!stored.IsTest || adopted.IsTest) ||
-					(await ReadRevokedAsync(preferences)).Contains(adopted.LicenseId) ||
 					(await PlatformRevokedAsync(preferences)).Contains(adopted.LicenseId))
 				{
+					if (issuedFor is not null && adopted is not null && stored?.LicenseId == adopted.LicenseId)
+					{
+						changed = await MarkEligibleAsync(preferences, adopted.LicenseId);
+					}
+
 					return stored;
 				}
 
 				await preferences.SetValue(TokenKey, adopted.Token);
+				if (issuedFor is not null)
+				{
+					await MarkEligibleAsync(preferences, adopted.LicenseId);
+				}
+
 				if (!adopted.IsTest)
 				{
 					if ((await ReadPendingAsync(preferences)).Count > 0)
@@ -808,6 +904,13 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 		if (adoptedNew)
 		{
 			await NotifyChangedAsync();
+			await NotifyReceivedAsync(AppStrings.Notifications.CompanionLicenseReceived(),
+				AppStrings.Notifications.CompanionLicenseReceivedMessage());
+		}
+
+		if (adoptedNew || changed)
+		{
+			RaiseLicenseChanged();
 		}
 
 		return license;
@@ -861,11 +964,81 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 		await _gate.WaitAsync(cancellationToken);
 		try
 		{
+			if (!_eligibilityInitialized)
+			{
+				await InitializeEligibilityAsync(preferences);
+				_eligibilityInitialized = true;
+			}
+
 			return await body(preferences);
 		}
 		finally
 		{
 			_gate.Release();
+		}
+	}
+
+	// Runs before the first locked body of the process, so a license a Companion hands over later is never
+	// taken for one that was stored before eligibility existed.
+	private async Task InitializeEligibilityAsync(IAppPreferenceRepository preferences)
+	{
+		if (!string.IsNullOrEmpty((await preferences.GetByKey(AccountEligibleIdKey))?.Value))
+		{
+			return;
+		}
+
+		var stored = await _tokens.VerifyAsync(await StoredTokenAsync(preferences), trustTestKey: false);
+		await preferences.SetValue(AccountEligibleIdKey, stored?.LicenseId ?? NoAccountEligibleId);
+	}
+
+	private static async Task<bool> MarkEligibleAsync(IAppPreferenceRepository preferences, string licenseId)
+	{
+		if (await EligibleIdAsync(preferences) == licenseId)
+		{
+			return false;
+		}
+
+		await preferences.SetValue(AccountEligibleIdKey, licenseId);
+		return true;
+	}
+
+	private static async Task<string?> EligibleIdAsync(IAppPreferenceRepository preferences)
+		=> (await preferences.GetByKey(AccountEligibleIdKey))?.Value;
+
+	private async Task NotifyReceivedAsync(LocalizedString title, LocalizedString message)
+	{
+		try
+		{
+			string? culture;
+			await using (var scope = _scopeFactory.CreateAsyncScope())
+			{
+				culture = (await scope.ServiceProvider.GetRequiredService<IAppPreferenceService>().GetLocalization()).Culture;
+			}
+
+			_notifications.Raise(new UserNotificationDraft
+			{
+				Severity = UserNotificationSeverity.Info,
+				Kind = UserNotificationKind.General,
+				Title = _localization.Resolve(title, culture),
+				Message = _localization.Resolve(message, culture),
+				DedupeKey = ReceivedNotificationKey
+			});
+		}
+		catch (Exception ex)
+		{
+			_logger.Warning(ex, "Could not show that a Companion license was received");
+		}
+	}
+
+	private void RaiseLicenseChanged()
+	{
+		try
+		{
+			LicenseChanged?.Invoke(this, EventArgs.Empty);
+		}
+		catch (Exception ex)
+		{
+			_logger.Warning(ex, "A Companion license change handler failed");
 		}
 	}
 
@@ -898,9 +1071,6 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 		_platformRevoked = new HashSet<string>(cached?.Ids ?? [], StringComparer.Ordinal);
 		return _platformRevoked;
 	}
-
-	private static async Task<List<string>> ReadRevokedAsync(IAppPreferenceRepository preferences)
-		=> ReadJson<List<string>>((await preferences.GetByKey(RevokedTestIdsKey))?.Value) ?? [];
 
 	private async Task<List<RefusedProof>> ReadRefusedAsync(IAppPreferenceRepository preferences)
 	{
@@ -1028,6 +1198,14 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 		TransferWaiter? Waiter = null,
 		bool Added = false,
 		bool Rescheduled = false);
+
+	internal sealed record AccountReconcileResult(string? UploadToken, string? UploadLicenseId);
+
+	private sealed record AccountState(bool Known, bool SignedIn, string? LicenseId)
+	{
+		public static readonly AccountState Unknown = new(false, false, null);
+		public static readonly AccountState SignedOut = new(true, false, null);
+	}
 
 	private sealed record PlatformRevocations(IReadOnlyList<string> Ids, long FetchedAt);
 }

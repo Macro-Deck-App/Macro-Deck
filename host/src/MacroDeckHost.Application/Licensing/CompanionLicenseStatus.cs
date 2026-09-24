@@ -18,7 +18,7 @@ public class CompanionLicenseStatus
 
 	public bool IsTest { get; set; }
 
-	public bool TestLicenseStored { get; set; }
+	public string AccountSync { get; set; } = CompanionLicenseAccountSync.Unknown;
 
 	public bool IssuePending { get; set; }
 

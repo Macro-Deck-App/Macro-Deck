@@ -11722,6 +11722,18 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Macro Deck could not read {count} files, and no usable backup was available. The unreadable files were left in place so they can be inspected or restored from your own backup.</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Notifications.CompanionLicenseDownloaded" xml:space="preserve">
+    <value>Companion license downloaded</value>
+  </data>
+  <data name="Notifications.CompanionLicenseDownloadedMessage" xml:space="preserve">
+    <value>Macro Deck downloaded the Companion license saved to your Macro Deck account and hands it to every Companion app that connects.</value>
+  </data>
+  <data name="Notifications.CompanionLicenseReceived" xml:space="preserve">
+    <value>Companion license received</value>
+  </data>
+  <data name="Notifications.CompanionLicenseReceivedMessage" xml:space="preserve">
+    <value>Macro Deck received a Companion license from a device and hands it to every Companion app that connects.</value>
+  </data>
   <data name="Notifications.HttpsNotRunning" xml:space="preserve">
     <value>HTTPS is not running</value>
   </data>
@@ -13518,6 +13530,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Settings.Language.TimeFormatLabel" xml:space="preserve">
     <value>Time format</value>
   </data>
+  <data name="Settings.License.AccountSignedOut" xml:space="preserve">
+    <value>Sign in to your Macro Deck account to use this license on your other computers too.</value>
+  </data>
+  <data name="Settings.License.AccountSynced" xml:space="preserve">
+    <value>Saved to your Macro Deck account. Other computers signed in to it receive this license when they have none.</value>
+  </data>
   <data name="Settings.License.BillingIdLabel" xml:space="preserve">
     <value>Billing ID</value>
   </data>
@@ -13529,18 +13547,6 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Settings.License.IssuePending" xml:space="preserve">
     <value>Your purchase is being turned into a license. This needs an internet connection, and Macro Deck keeps trying on its own.</value>
-  </data>
-  <data name="Settings.License.IssueTestAction" xml:space="preserve">
-    <value>Issue test license</value>
-  </data>
-  <data name="Settings.License.IssueTestDescription" xml:space="preserve">
-    <value>Issue a license signed with the test key to try the Companion app's licensing with a debug build. It is accepted only while Developer Mode is on.</value>
-  </data>
-  <data name="Settings.License.IssueTestFailed" xml:space="preserve">
-    <value>The test license could not be issued.</value>
-  </data>
-  <data name="Settings.License.IssueTestLabel" xml:space="preserve">
-    <value>Test license</value>
   </data>
   <data name="Settings.License.IssuedAtLabel" xml:space="preserve">
     <value>Issued</value>
@@ -13568,12 +13574,6 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Settings.License.PurchasedAtLabel" xml:space="preserve">
     <value>Purchased</value>
-  </data>
-  <data name="Settings.License.RevokeTestAction" xml:space="preserve">
-    <value>Revoke test license</value>
-  </data>
-  <data name="Settings.License.RevokeTestFailed" xml:space="preserve">
-    <value>The test license could not be revoked.</value>
   </data>
   <data name="Settings.License.Source.AppStore" xml:space="preserve">
     <value>App Store</value>

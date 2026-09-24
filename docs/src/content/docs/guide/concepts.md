@@ -217,6 +217,11 @@ current Store release in place of the test build.
 Every phone, tablet or browser that connects shows up in **Settings > Devices**. Choose there which
 profile each device opens with.
 
+When you are signed in under **Settings > Account**, a Companion app license this computer got from a
+purchase is saved to your Macro Deck account, and your other computers signed in to it that have no
+license yet receive it within about a minute (see
+[The Companion app stays unlicensed after a purchase](/guide/troubleshooting/#the-companion-app-stays-unlicensed-after-a-purchase)).
+
 ## Open source licenses
 
 Macro Deck is built on open source software. **Settings > About > Open source licenses** lists every

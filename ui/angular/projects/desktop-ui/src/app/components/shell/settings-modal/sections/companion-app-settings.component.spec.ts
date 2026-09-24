@@ -16,7 +16,7 @@ const UNLICENSED: CompanionLicenseStatus = {
   purchasedAt: null,
   billingId: null,
   isTest: false,
-  testLicenseStored: false,
+  accountSync: 'unknown',
   issuePending: false,
   nextIssueAttemptAt: null,
 };

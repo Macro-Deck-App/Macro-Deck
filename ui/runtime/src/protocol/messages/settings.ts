@@ -252,10 +252,12 @@ export interface CompanionLicenseStatus {
   purchasedAt: number | null;
   billingId: string | null;
   isTest: boolean;
-  testLicenseStored: boolean;
+  accountSync: CompanionLicenseAccountSync;
   issuePending: boolean;
   nextIssueAttemptAt: number | null;
 }
+
+export type CompanionLicenseAccountSync = 'unknown' | 'synced' | 'signedOut';
 
 export interface CompanionLicenseChangedEvent {}
 

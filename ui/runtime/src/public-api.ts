@@ -1019,6 +1019,7 @@ export {
   type GetAppearanceSettingsResponse,
   type GetAutostartSettingsResponse,
   type GetDataDirectoryResponse,
+  type CompanionLicenseAccountSync,
   type CompanionLicenseChangedEvent,
   type CompanionLicenseStatus,
   type CompanionAppChangedEvent,
