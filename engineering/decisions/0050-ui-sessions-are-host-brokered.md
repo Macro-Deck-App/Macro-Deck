@@ -46,7 +46,9 @@ and since plugins register as integrations it would give the resolver two candid
 
 ### The broker is a stateless relay
 
-It holds no tree, applies no patch and re-serializes nothing. A payload is bounded by one forward-only
+It holds no tree, applies no patch and re-serializes nothing. The one event it may hold back is a
+`pointer-move` still waiting for the provider, which a newer one for the same node from the same connection
+replaces whole, bytes untouched. A payload is bounded by one forward-only
 reader pass over the bytes the provider sent, and those same bytes are written to the client verbatim. A
 deserialize-and-reserialize hop would drop unknown members, reorder map keys, renormalise numbers and
 collapse duplicates, so the tree a client applies would no longer be the tree the provider produced.

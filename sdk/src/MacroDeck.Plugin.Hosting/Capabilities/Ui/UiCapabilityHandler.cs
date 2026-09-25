@@ -443,7 +443,7 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 			Revision = arguments.Revision
 		};
 
-		return _sessions.Dispatch(arguments.SessionId, uiEvent)
+		return _sessions.Dispatch(arguments.SessionId, uiEvent, arguments.ClientId)
 			? CapabilityInvocationResult.Ok()
 			: UnknownSession(arguments.SessionId);
 	}

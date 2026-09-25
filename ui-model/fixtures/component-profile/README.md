@@ -78,9 +78,12 @@ Trimming any of these turns the fixture into one a wrong renderer passes:
   side the parent leaves open and a `maxWidth` that binds before it does;
 - a wrapper carrying its own `modifiers`, so the background covers the padding, and its opacity is the one
   value a reader writes, never multiplied into a second copy;
-- every gesture event name (`drag`, `drag-end`, `swipe`, `pinch`, `pinch-end`) on one wrapper, which is also
-  what keeps the platform from panning under it;
-- an explicit `fallback` on that wrapper, so a reader without `ui.modifier` still shows the content.
+- every recognised gesture event name (`drag`, `drag-end`, `swipe`, `pinch`, `pinch-end`) on one wrapper,
+  which is also what keeps the platform from panning under it;
+- an explicit `fallback` on that wrapper, so a reader without `ui.modifier` still shows the content;
+- the pointer stream (`pointer-down`, `pointer-move`, `pointer-up`) and `tap` each on a node of its own after
+  the last wrapper, so the wrapper's meaning and every earlier node's box stay as they were, and each still
+  keeps the platform from panning under it.
 
 ## What the history-graph tree deliberately contains
 

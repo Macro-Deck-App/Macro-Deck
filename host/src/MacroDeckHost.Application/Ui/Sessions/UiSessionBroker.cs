@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using MacroDeck.Plugin.Protocol.Limits;
+using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Model.Versioning;
 using MacroDeckHost.Application.Integrations;
@@ -219,7 +220,15 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 			ClientId = actingClientId
 		};
 
-		context.ProviderPump.Enqueue(ct => DispatchEventAsync(context, command, ct));
+		if (string.Equals(command.Name, UiComponentEvents.PointerMove, StringComparison.Ordinal))
+		{
+			context.ProviderPump.EnqueueReplaceable(connectionId + "\n" + command.NodeId,
+				ct => DispatchEventAsync(context, command, ct));
+		}
+		else
+		{
+			context.ProviderPump.Enqueue(ct => DispatchEventAsync(context, command, ct));
+		}
 
 		return new UiSendEventResponse { Accepted = true };
 	}

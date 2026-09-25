@@ -104,6 +104,12 @@ public class TypeScriptMirrorDriftTests
 				Is.EqualTo(UiComponentModifiers.SwipeMaxDurationMs));
 			Assert.That(ReadTopLevelNumber(_componentModifiersPath, "UI_GESTURE_THROTTLE_MS"),
 				Is.EqualTo(UiComponentModifiers.GestureThrottleMs));
+			Assert.That(ReadTopLevelNumber(_componentModifiersPath, "UI_POINTER_MOVE_INTERVAL_MS"),
+				Is.EqualTo(UiComponentModifiers.PointerMoveIntervalMs));
+			Assert.That(ReadTopLevelNumber(_componentModifiersPath, "UI_POINTER_MOVE_MAX_SAMPLES"),
+				Is.EqualTo(UiComponentModifiers.PointerMoveMaxSamples));
+			Assert.That(ReadTopLevelNumber(_componentModifiersPath, "UI_TAP_MAX_DURATION_MS"),
+				Is.EqualTo(UiComponentModifiers.TapMaxDurationMs));
 		});
 	}
 

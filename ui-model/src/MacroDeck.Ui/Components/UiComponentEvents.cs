@@ -1,10 +1,10 @@
 namespace MacroDeck.Ui.Components;
 
 /// <summary>
-/// The event names the widget profile ships, in three families: the pair <see cref="UiSlider" />
-/// uses for a continuous gesture the user works and then lets go of - which
-/// <see cref="UiTextField" /> reuses verbatim for typing - the four <see cref="UiButton" />
-/// uses for a press, and the one <see cref="UiList" /> uses to ask for more.
+/// The event names the widget profile ships: the pair <see cref="UiSlider" /> uses for a continuous
+/// gesture the user works and then lets go of - which <see cref="UiTextField" /> reuses verbatim for
+/// typing - the press names <see cref="UiButton" /> uses, the one <see cref="UiList" /> uses to ask for
+/// more, the recognised gestures any node can declare, and the pointer family that streams raw fingers.
 ///
 /// <para>
 /// <b>Why the pair, rather than one event.</b> Splitting the gesture is what lets a producer act on the
@@ -127,10 +127,74 @@ public static class UiComponentEvents
 	/// began, and not when the node leaves the tree or becomes disabled mid-gesture.</summary>
 	public const string PinchEnd = "pinch-end";
 
+	/// <summary>
+	/// A finger, pen or primary mouse button went down on a node that declares any name of the pointer family
+	/// (<see cref="PointerDown" />, <see cref="PointerMove" />, <see cref="PointerUp" />, <see cref="Tap" />).
+	/// The payload is <c>{"id":n,"x":n,"y":n,"t":n,"width":n,"height":n}</c>, read with
+	/// <see cref="Dsl.UiEventData.TryGetPointerDown" />.
+	///
+	/// <para>
+	/// <c>id</c> is an opaque integer from 0 to 2^31-1, distinct for every pointer one reader reports. Each reader
+	/// starts from a random point, so two decks attached to one shared session reporting the same id is very
+	/// unlikely, though not impossible. <c>x</c> and <c>y</c> are the
+	/// position relative to the node's top-left corner in fractions of the widget basis, the unit
+	/// <see cref="Drag" /> uses, x growing right and y growing down. <c>t</c> is whole milliseconds since the
+	/// first pointer of the current contact went down on the node, so samples of different fingers line up.
+	/// <c>width</c> and <c>height</c> are the node's box in the same unit.
+	/// </para>
+	///
+	/// <para>
+	/// A node declaring any name of the family owns every pointer that starts on it: an ancestor's gesture
+	/// does not take it, the platform does not pan under it, and a deck tile does not run its own press for
+	/// it. The innermost such node wins. A reader that does not implement the family sends nothing, and the
+	/// node stays inert.
+	/// </para>
+	/// </summary>
+	public const string PointerDown = "pointer-down";
+
+	/// <summary>
+	/// Pointers moved. The payload is <c>{"samples":[{"id":n,"x":n,"y":n,"t":n}, ...]}</c>, every position
+	/// recorded since the previous one for all pointers, oldest first, at most
+	/// <see cref="UiComponentModifiers.PointerMoveMaxSamples" /> with the newest kept, read with
+	/// <see cref="Dsl.UiEventData.TryGetPointerSamples" />. Sent no more often than every
+	/// <see cref="UiComponentModifiers.PointerMoveIntervalMs" /> milliseconds, except that samples still
+	/// waiting are always sent at once before any other event of the family.
+	///
+	/// <para>
+	/// <b>A newer one may replace an older one.</b> While a pointer-move for the same node from the same client
+	/// is still waiting to be delivered, the host or the plugin runtime may drop it in favour of the newer
+	/// one, so a slow consumer receives the latest positions instead of a growing backlog. The samples are
+	/// absolute positions: a replaced event loses path detail, and a finger that appeared only in it keeps its
+	/// older position until it moves again or lifts. Read time from <c>t</c>, never from event count. Handle
+	/// it synchronously and do not rebuild the tree for each one: UI updates are rate limited.
+	/// </para>
+	/// </summary>
+	public const string PointerMove = "pointer-move";
+
+	/// <summary>
+	/// A pointer lifted. The payload is <c>{"id":n,"x":n,"y":n,"t":n}</c> plus <c>"cancelled":true</c> when the
+	/// platform cancelled the pointer instead of the finger lifting, read with
+	/// <see cref="Dsl.UiEventData.TryGetPointerUp" />. Exactly one follows each <see cref="PointerDown" />
+	/// while the node still declares it, is enabled and is in the tree. Nothing arrives once the client has
+	/// disconnected or detached, so release whatever a finger holds when the session ends, and do not keep a
+	/// button held for a finger that has sent nothing for a while.
+	/// </summary>
+	public const string PointerUp = "pointer-up";
+
+	/// <summary>
+	/// A quick touch with one or more fingers. The payload is <c>{"pointers":n}</c>, the most pointers that
+	/// were down at once, read with <see cref="Dsl.UiEventData.TryGetTap" />. Sent after the last
+	/// <see cref="PointerUp" /> of a contact that took at most <see cref="UiComponentModifiers.TapMaxDurationMs" />
+	/// from the first finger down to the last finger up, in which no pointer travelled more than
+	/// <see cref="UiComponentModifiers.GestureSlop" /> and none was cancelled. A contact in which any pointer
+	/// started on a node that declares a press name sends no tap, so one touch never sends both.
+	/// </summary>
+	public const string Tap = "tap";
+
 	/// <summary>The event names this profile ships.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
 	[
 		Change, Adjust, Press, LongPress, PressStart, PressEnd, Reveal, DoublePress, Drag, DragEnd, Swipe, Pinch,
-		PinchEnd
+		PinchEnd, PointerDown, PointerMove, PointerUp, Tap
 	];
 }

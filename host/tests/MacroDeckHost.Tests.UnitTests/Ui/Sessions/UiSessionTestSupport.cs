@@ -296,6 +296,9 @@ internal sealed class StubUiSession : IUiSession
 	/// to every attached client without asking the provider to produce it again per client.</summary>
 	public int PatchesDrained { get; private set; }
 
+	/// <summary>Set to hold every dispatch until it is signalled, after the event was recorded.</summary>
+	public ManualResetEventSlim? Hold { get; init; }
+
 	public event EventHandler? Changed;
 
 	public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
@@ -319,6 +322,8 @@ internal sealed class StubUiSession : IUiSession
 		{
 			Dispatched.Add(uiEvent);
 		}
+
+		Hold?.Wait();
 	}
 
 	public void Emit(UiPatch patch)

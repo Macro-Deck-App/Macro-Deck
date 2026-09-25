@@ -1,4 +1,3 @@
-using System.Threading.Channels;
 using Serilog;
 
 namespace MacroDeckHost.Application.Ui.Sessions;
@@ -11,11 +10,7 @@ namespace MacroDeckHost.Application.Ui.Sessions;
 // there is no window in which a group patch reaches a client that does not yet hold a tree.
 public sealed class UiSessionWorkPump : IAsyncDisposable
 {
-	private readonly Channel<Func<CancellationToken, Task>> _operations =
-		Channel.CreateUnbounded<Func<CancellationToken, Task>>(new UnboundedChannelOptions
-		{
-			SingleReader = true, AllowSynchronousContinuations = false
-		});
+	private readonly UiReplaceableWork<Func<CancellationToken, Task>> _operations = new();
 
 	private readonly CancellationTokenSource _stopping = new();
 	private readonly Task _pump;
@@ -29,13 +24,16 @@ public sealed class UiSessionWorkPump : IAsyncDisposable
 		_pump = Task.Run(RunAsync);
 	}
 
-	public void Enqueue(Func<CancellationToken, Task> operation) => _operations.Writer.TryWrite(operation);
+	public void Enqueue(Func<CancellationToken, Task> operation) => _operations.Write(operation);
+
+	public void EnqueueReplaceable(string key, Func<CancellationToken, Task> operation)
+		=> _operations.WriteReplaceable(key, operation);
 
 	// Stops accepting work and waits for everything already enqueued to be written out, so a
 	// terminal message a client must see is never dropped by the shutdown that follows it.
 	public async ValueTask DisposeAsync()
 	{
-		_operations.Writer.TryComplete();
+		_operations.Complete();
 
 		try
 		{
@@ -51,7 +49,7 @@ public sealed class UiSessionWorkPump : IAsyncDisposable
 	{
 		try
 		{
-			await foreach (var operation in _operations.Reader.ReadAllAsync().ConfigureAwait(false))
+			await foreach (var operation in _operations.ReadAllAsync().ConfigureAwait(false))
 			{
 				try
 				{

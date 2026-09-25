@@ -83,6 +83,12 @@
           "borderWidth": 4.8,
           "borderStyle": "solid",
           "borderColor": "#ffffff"
+        },
+        "conformance.stream": {
+          "touchAction": "none"
+        },
+        "conformance.tap": {
+          "touchAction": "none"
         }
       }
     },
@@ -169,6 +175,12 @@
           "borderWidth": 2.4,
           "borderStyle": "solid",
           "borderColor": "#ffffff"
+        },
+        "conformance.stream": {
+          "touchAction": "none"
+        },
+        "conformance.tap": {
+          "touchAction": "none"
         }
       }
     }
