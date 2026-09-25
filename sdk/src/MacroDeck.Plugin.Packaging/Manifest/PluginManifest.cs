@@ -83,6 +83,12 @@ public sealed record PluginManifest
 
 	public IReadOnlyList<PluginIconPackReference>? IconPacks { get; init; }
 
+	/// <summary>Icon packs this plugin ships inside its own artifact, each under a key that is unique
+	/// within the plugin. The host imports them as read-only packs owned by the plugin, and the plugin
+	/// addresses their icons by key and icon name. A host that predates this field installs the plugin
+	/// without them. Each path must also be listed in <see cref="Files"/>, or the host skips that pack.</summary>
+	public IReadOnlyList<PluginBundledIconPack>? BundledIconPacks { get; init; }
+
 	/// <summary>Per-file digests covering the artifact payload. When present the installer verifies every
 	/// entry and rejects undeclared files; when absent it records an advisory warning.</summary>
 	public IReadOnlyList<PluginFileDigest>? Files { get; init; }
@@ -188,6 +194,19 @@ public sealed record PluginIconPackReference
 	public string? VersionRange { get; init; }
 
 	public bool Optional { get; init; }
+}
+
+/// <summary>One entry of <see cref="PluginManifest.BundledIconPacks"/>.</summary>
+public sealed record PluginBundledIconPack
+{
+	/// <summary>Lowercase letters, digits and inner hyphens, at most
+	/// <see cref="PluginBundledIconPacks.MaxKeyLength"/> characters. Stable across plugin versions: an update
+	/// that keeps the key replaces the installed pack and keeps its icons' identity by name.</summary>
+	public required string Key { get; init; }
+
+	/// <summary>Forward-slash separated path to a <c>.macroDeckIconPack</c> file, relative to the version
+	/// directory. Shape-validated by the reader, never checked to exist.</summary>
+	public required string Path { get; init; }
 }
 
 /// <summary>One payload file's expected identity.</summary>

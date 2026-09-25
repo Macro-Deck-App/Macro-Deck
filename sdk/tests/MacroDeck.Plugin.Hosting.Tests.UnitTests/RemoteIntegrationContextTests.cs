@@ -423,6 +423,9 @@ public class RemoteIntegrationContextTests
 		covered.Add((HostApis.Ui, HostOperations.Ui.RegisterResource));
 		covered.Add((HostApis.Ui, HostOperations.Ui.RemoveResource));
 
+		covered.Add((HostApis.IconPacks, HostOperations.IconPacks.GetIconResource));
+		covered.Add((HostApis.IconPacks, HostOperations.IconPacks.SyncBundled));
+
 		// devices is handed to a device provider rather than reached through IIntegrationContext, so it
 		// is covered by Device_registrations_send_the_declared_Api_Operation_pair above.
 		foreach (var operation in HostOperations.Devices.All)

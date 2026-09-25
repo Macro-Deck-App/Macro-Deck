@@ -20,6 +20,15 @@ internal sealed record PluginManifestFile
 	public string? Description { get; init; }
 
 	public string? Icon { get; init; }
+
+	public IReadOnlyList<PluginManifestBundledIconPack>? BundledIconPacks { get; init; }
+}
+
+internal sealed record PluginManifestBundledIconPack
+{
+	public string? Key { get; init; }
+
+	public string? Path { get; init; }
 }
 
 /// <summary>

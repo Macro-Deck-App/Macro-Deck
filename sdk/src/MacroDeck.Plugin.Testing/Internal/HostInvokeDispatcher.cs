@@ -1,5 +1,6 @@
 using System.Text.Json;
 using MacroDeck.Plugin.Protocol.Callbacks;
+using MacroDeck.Plugin.Protocol.Callbacks.IconPacks;
 using MacroDeck.Plugin.Protocol.Callbacks.Ui;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Serialization;
@@ -94,6 +95,8 @@ internal static class HostInvokeDispatcher
 				HostApis.ScreenSavers => await ScreenSaversAsync(context, payload, cancellationToken)
 					.ConfigureAwait(false),
 				HostApis.Messaging when messaging is not null && pluginId is not null => messaging.Dispatch(pluginId, payload),
+				HostApis.IconPacks when payload.Operation == HostOperations.IconPacks.GetIconResource
+					=> await PluginIconAsync(context, payload, cancellationToken).ConfigureAwait(false),
 				HostApis.Ui when uiResourceUploads is not null &&
 					payload.Operation is HostOperations.Ui.RegisterResource or HostOperations.Ui.RemoveResource
 					=> await UiResourcesAsync(context, payload, uiResourceUploads, cancellationToken)
@@ -158,6 +161,26 @@ internal static class HostInvokeDispatcher
 		catch (ArgumentException exception)
 		{
 			return HostInvokeOutcome.Failed(ProtocolErrorCodes.InvalidPayload, exception.Message);
+		}
+	}
+
+	private static async Task<HostInvokeOutcome> PluginIconAsync(
+		FakeIntegrationContext context,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken)
+	{
+		var arguments = Require<GetIconResourceArguments>(payload);
+
+		try
+		{
+			var handle = await context.UiResources.GetPluginIconAsync(arguments.Key, arguments.Name, cancellationToken)
+				.ConfigureAwait(false);
+
+			return HostInvokeOutcome.Ok(ToDto(handle));
+		}
+		catch (UiResourceException exception) when (exception.ErrorCode == UiResourceErrorCode.PluginIconNotFound)
+		{
+			return HostInvokeOutcome.Failed(ProtocolErrorCodes.PluginIconNotFound, exception.Message);
 		}
 	}
 

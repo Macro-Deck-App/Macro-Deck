@@ -66,6 +66,7 @@ Requirement is the [category](#requirement-categories) that decides when a field
 | `dependencies` | object[] | recommended | Plugins this one needs. |
 | `conflicts` | object[] | recommended | Plugins this one cannot run beside. |
 | `iconPacks` | object[] | recommended | Icon packs this one references. |
+| `bundledIconPacks` | object[] | recommended | Icon packs shipped inside the plugin's own package. See [Bundled icon packs](#bundled-icon-packs). |
 | `files` | object[] | generated | Per-file digests of the payload. Written by `pack`. |
 | `signature` | object | generated | Creator signature. Written by the signer. |
 
@@ -434,6 +435,40 @@ A duplicate `id` within one array, or an `id` in both `dependencies` and `confli
 | icon pack | Always | Advisory | Parsed and exposed only - icon packs have database ids minted on import, so resolution cannot succeed today. |
 
 Blocking never fails install or activation; it only withholds the automatic start.
+
+## Bundled icon packs
+
+```json
+"bundledIconPacks": [
+  { "key": "logos", "path": "icon-packs/logos.macroDeckIconPack" },
+  { "key": "status", "path": "icon-packs/status.macroDeckIconPack" }
+]
+```
+
+Icon packs the plugin ships inside its own `.macroDeckPlugin`, such as logos of the services it controls.
+The host imports each one as a read-only pack owned by the plugin, so users can put its icons on any button
+right after installing the plugin, and keeps it in step on update and uninstall. Add them with
+[`macrodeck-plugin icon-pack add`](/cli/icon-pack/) rather than by hand.
+
+| Field | Type | Requirement | Rules |
+| --- | --- | --- | --- |
+| `key` | string | runtime | Identifies the pack within this plugin: lowercase letters, digits and inner hyphens, at most 64 characters. Keep it stable across versions: an update that keeps the key replaces the installed pack and keeps its icons by name, so buttons keep their icons. |
+| `path` | string | runtime | Forward-slash path to a `.macroDeckIconPack` file, relative to the version directory: no `..` segment, no absolute path. The extension is compared case-insensitively. |
+
+- A pack is identified by the plugin id plus its key, never by a global pack id, and its icons by name.
+  Names must be unique within a pack (compared case-insensitively); the same name may appear in two packs of
+  one plugin.
+- At most 32 entries. A repeated `key`, or a repeated `path` (case-insensitive), is rejected by the reader
+  (`invalid-bundled-icon-pack`).
+- The reader checks the shape only, never that the file exists. `validate` warns
+  `bundled-icon-pack-missing` for a declared file that is not there, and for a packed manifest
+  `bundled-icon-pack-not-in-files` for a path `files[]` does not list.
+- List each pack in `files[]` like any other payload file, which `build` and `pack` do for you. The host
+  skips a pack its signed file list does not cover.
+- Separate from [`iconPacks`](#dependencies), which keeps its meaning: references to packs the plugin would
+  like available, not packs it carries.
+- **Compatibility:** a host that predates this field ignores it and installs the plugin without the packs.
+  The plugin still runs; its icon references then resolve to no icon.
 
 ## `files`
 

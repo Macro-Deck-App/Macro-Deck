@@ -147,6 +147,30 @@ public class PluginMergeTests
 	}
 
 	[Test]
+	public async Task Packages_that_bundle_icon_packs_differently_are_refused()
+	{
+		var rids = ManifestFixtures.PickForeignRids(2);
+		var project = BuildFixtures.WriteProject(rids);
+
+		try
+		{
+			IconPackFixtures.Write(Path.Combine(project, "icon-packs", "logos.macroDeckIconPack"), "Logos", ["obs"]);
+			SetBundledIconPackKey(project, "logos");
+			var first = await BuildAsync(project, rids, rids[0], Path.Combine(_work, "a"));
+			SetBundledIconPackKey(project, "brands");
+			var second = await BuildAsync(project, rids, rids[1], Path.Combine(_work, "b"));
+
+			var result = await CliRunner.Run("merge", first, second, "--output", Path.Combine(_work, "merged"));
+
+			AssertRefused(result, "manifest-mismatch");
+		}
+		finally
+		{
+			Directory.Delete(project, recursive: true);
+		}
+	}
+
+	[Test]
 	public async Task An_existing_artifact_is_only_overwritten_with_force()
 	{
 		var rids = ManifestFixtures.PickForeignRids(1);
@@ -209,6 +233,15 @@ public class PluginMergeTests
 		var path = Path.Combine(project, "manifest.json");
 		var manifest = JsonNode.Parse(File.ReadAllText(path))!;
 		manifest["version"] = version;
+		File.WriteAllText(path, manifest.ToJsonString());
+	}
+
+	private static void SetBundledIconPackKey(string project, string key)
+	{
+		var path = Path.Combine(project, "manifest.json");
+		var manifest = JsonNode.Parse(File.ReadAllText(path))!;
+		manifest["bundledIconPacks"] = new JsonArray(new JsonObject
+			{ ["key"] = key, ["path"] = "icon-packs/logos.macroDeckIconPack" });
 		File.WriteAllText(path, manifest.ToJsonString());
 	}
 

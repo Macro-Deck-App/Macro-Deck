@@ -53,6 +53,7 @@ public class IconService : IIconService
 
 		icon.Name = name.Trim();
 		await _iconPackCache.UpdateIcon(icon);
+		await _iconPackCache.ForgetSourceRevision(icon.PackId);
 		await _mediator.Publish(new IconUpdatedNotification(icon));
 		return Result.Ok<IconEntity, IconError>(icon);
 	}
@@ -73,6 +74,7 @@ public class IconService : IIconService
 		await _iconPackCache.RemoveIcon(iconId);
 		_coalescer.ReleaseAll(iconId);
 		_storage.DeleteIconFiles(icon.PackId, iconId);
+		await _iconPackCache.ForgetSourceRevision(icon.PackId);
 		await _mediator.Publish(new IconDeletedNotification(iconId, icon.PackId));
 		return Result.Ok<IconError>();
 	}
@@ -97,6 +99,7 @@ public class IconService : IIconService
 		foreach (var packGroup in icons.GroupBy(i => i.PackId))
 		{
 			await _iconPackCache.RemoveIcons(packGroup.Key, packGroup.Select(i => i.Id).ToList());
+			await _iconPackCache.ForgetSourceRevision(packGroup.Key);
 			foreach (var icon in packGroup)
 			{
 				_coalescer.ReleaseAll(icon.Id);

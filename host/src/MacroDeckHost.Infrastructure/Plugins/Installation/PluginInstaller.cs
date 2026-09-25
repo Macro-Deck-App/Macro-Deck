@@ -13,6 +13,7 @@ using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Capabilities;
+using MacroDeckHost.Application.Plugins.IconPacks;
 using MacroDeckHost.Application.Plugins.Installation;
 using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Plugins.Trust;
@@ -69,6 +70,7 @@ public sealed class PluginInstaller : IPluginInstaller
 	private readonly ILogger _logger;
 	private readonly DurableJsonFile _currentVersionFiles;
 	private readonly IPluginAdbConsentNotifier? _adbConsent;
+	private readonly IPluginIconPackSync? _iconPackSync;
 
 	public PluginInstaller(IMacroDeckPaths paths,
 		IPluginArtifactReader artifactReader,
@@ -86,9 +88,11 @@ public sealed class PluginInstaller : IPluginInstaller
 		PluginInstallerOptions options,
 		TimeProvider timeProvider,
 		ILogger logger,
-		IPluginAdbConsentNotifier? adbConsent = null)
+		IPluginAdbConsentNotifier? adbConsent = null,
+		IPluginIconPackSync? iconPackSync = null)
 	{
 		_adbConsent = adbConsent;
+		_iconPackSync = iconPackSync;
 		_paths = paths;
 		_artifactReader = artifactReader;
 		_acquirer = acquirer;
@@ -253,6 +257,7 @@ public sealed class PluginInstaller : IPluginInstaller
 
 			request.Stage?.Invoke(PluginInstallStage.Acquired);
 
+			PluginInstallResult result;
 			var gate = _pluginGates.GetOrAdd(manifest.Id, _ => new SemaphoreSlim(1, 1));
 			await gate.WaitAsync(cancellationToken);
 			try
@@ -268,12 +273,15 @@ public sealed class PluginInstaller : IPluginInstaller
 					return refusal;
 				}
 
-				return await InstallLocked(manifest, acquisition, request, stagingDirectory, cancellationToken);
+				result = await InstallLocked(manifest, acquisition, request, stagingDirectory, cancellationToken);
 			}
 			finally
 			{
 				gate.Release();
 			}
+
+			await SyncIconPacksAfterChange(manifest.Id, result);
+			return result;
 		}
 		catch (OperationCanceledException)
 		{
@@ -359,6 +367,7 @@ public sealed class PluginInstaller : IPluginInstaller
 				version);
 		}
 
+		PluginInstallResult activated;
 		var gate = _pluginGates.GetOrAdd(pluginId, _ => new SemaphoreSlim(1, 1));
 		await gate.WaitAsync(cancellationToken);
 		try
@@ -398,7 +407,7 @@ public sealed class PluginInstaller : IPluginInstaller
 				runningBeforeInstall: null,
 				cancellationToken);
 
-			return result with { Signature = trust };
+			activated = result with { Signature = trust };
 		}
 		catch (OperationCanceledException)
 		{
@@ -408,6 +417,9 @@ public sealed class PluginInstaller : IPluginInstaller
 		{
 			gate.Release();
 		}
+
+		await SyncIconPacksAfterChange(pluginId, activated);
+		return activated;
 	}
 
 	public async Task<PluginInstallResult> Uninstall(string pluginId,
@@ -427,6 +439,7 @@ public sealed class PluginInstaller : IPluginInstaller
 				pluginId);
 		}
 
+		PluginInstallResult uninstalled;
 		var gate = _pluginGates.GetOrAdd(pluginId, _ => new SemaphoreSlim(1, 1));
 		await gate.WaitAsync(cancellationToken);
 		try
@@ -498,7 +511,7 @@ public sealed class PluginInstaller : IPluginInstaller
 			_adbConsent?.Dismiss(pluginId);
 
 			PluginInstallerLog.Uninstalled(_logger, pluginId, request.KeepData);
-			return PluginInstallResult.Ok(pluginId,
+			uninstalled = PluginInstallResult.Ok(pluginId,
 				installed?.ActiveVersion?.Version ?? string.Empty,
 				previousVersion: null,
 				activated: false);
@@ -510,6 +523,28 @@ public sealed class PluginInstaller : IPluginInstaller
 		finally
 		{
 			gate.Release();
+		}
+
+		await SyncIconPacksAfterChange(pluginId, uninstalled);
+		return uninstalled;
+	}
+
+	// Never under the plugin gate: the sync may wait for startup readiness and must not hold installs up.
+	private async Task SyncIconPacksAfterChange(string pluginId, PluginInstallResult result)
+	{
+		if (_iconPackSync is null || !result.Success)
+		{
+			return;
+		}
+
+		try
+		{
+			_iconPackSync.InstallationChanged(pluginId);
+			await _iconPackSync.SyncAsync(pluginId, CancellationToken.None);
+		}
+		catch (Exception exception)
+		{
+			_logger.Warning(exception, "Syncing the bundled icon packs of {PluginId} failed", pluginId);
 		}
 	}
 

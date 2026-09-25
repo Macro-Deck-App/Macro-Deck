@@ -6,6 +6,7 @@ using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Compatibility;
+using MacroDeckHost.Application.Plugins.IconPacks;
 using MacroDeckHost.Application.Plugins.Installation;
 using MacroDeckHost.Application.Plugins.Logging;
 using MacroDeckHost.Application.Plugins.Trust;
@@ -30,6 +31,7 @@ internal sealed class PluginInstallerTests
 	private FakeInstallSupervisor _supervisor = null!;
 	private PluginInstallationCatalog _catalog = null!;
 	private PluginInstaller _installer = null!;
+	private Func<IPluginIconPackSync?, PluginInstaller> _newInstaller = null!;
 	private RecordingConsentNotifier _adbConsent = null!;
 	private FakeIntegrationRegistrar _integrationRegistrar = null!;
 	private FakePluginTrustEvaluator _trust = null!;
@@ -82,7 +84,7 @@ internal sealed class PluginInstallerTests
 		_trust = new FakePluginTrustEvaluator();
 
 		_adbConsent = new RecordingConsentNotifier();
-		_installer = new PluginInstaller(_paths,
+		_newInstaller = iconPackSync => new PluginInstaller(_paths,
 			new PluginArtifactReader(manifestReader, Serilog.Core.Logger.None),
 			new PluginArtifactAcquirer(new NoHttpClientFactory(),
 				options,
@@ -100,7 +102,9 @@ internal sealed class PluginInstallerTests
 			options,
 			TimeProvider.System,
 			Serilog.Core.Logger.None,
-			_adbConsent);
+			_adbConsent,
+			iconPackSync);
+		_installer = _newInstaller(null);
 	}
 
 	[TearDown]
@@ -1270,6 +1274,81 @@ internal sealed class PluginInstallerTests
 			Assert.That(result.Success, Is.True, result.ErrorMessage);
 			Assert.That(result.Activated, Is.True);
 			Assert.That(_supervisor.Starts, Does.Contain(PluginId));
+		});
+	}
+
+	private const string BundledPackPath = "icon-packs/logos.macroDeckIconPack";
+
+	private static string BundledPackBlocks(byte[] archive, bool signed = true)
+	{
+		var declaration = $"\"bundledIconPacks\": [{{ \"key\": \"logos\", \"path\": \"{BundledPackPath}\" }}]";
+		return signed
+			? declaration + ", \"files\": [" + FileDigest(BundledPackPath, archive) + ", " +
+				FileDigest(ManifestJson.EntrypointExecutable, Encoding.UTF8.GetBytes("binary")) + "]"
+			: declaration;
+	}
+
+	private static string FileDigest(string path, byte[] content)
+		=> $"{{ \"path\": \"{path}\", \"sha256\": \"{PluginArtifactBuilder.Sha256Of(content)}\", \"size\": {content.Length} }}";
+
+	private string BuildArtifactWithPack(byte[] archive, bool signed = true)
+		=> new PluginArtifactBuilder()
+			.WithManifest(ManifestJson.Build("1.0.0", PluginId, BundledPackBlocks(archive, signed)))
+			.WithFile(ManifestJson.EntrypointExecutable, "binary")
+			.WithFile(BundledPackPath, archive)
+			.WriteTo(_sourceDirectory, "bundled.macroDeckPlugin");
+
+	[Test]
+	public async Task Installing_a_plugin_adds_its_bundled_pack_without_starting_it_and_uninstalling_removes_it()
+	{
+		using var icons = new IconPacks.PluginIconPackTestHost(_catalog);
+		_installer = _newInstaller(icons.Sync);
+		var archive = await icons.BuildArchive("Logos", ("spotify", "green"));
+
+		var installed = await Install(BuildArtifactWithPack(archive));
+		var pack = icons.PluginPack(PluginId, "logos");
+		var ownerWhileInstalled = pack is null ? null : icons.OwnerRegistry.Describe(pack);
+		var uninstalled = await _installer.Uninstall(PluginId, new PluginUninstallRequest());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(installed.Success, Is.True, installed.ErrorMessage);
+			Assert.That(pack, Is.Not.Null);
+			Assert.That(ownerWhileInstalled?.OwnerName, Is.EqualTo("Test Plugin"));
+			Assert.That(uninstalled.Success, Is.True, uninstalled.ErrorMessage);
+			Assert.That(icons.Icons.Cache.GetPackById(pack!.Id), Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task A_bundled_pack_the_signed_files_do_not_list_is_not_added()
+	{
+		using var icons = new IconPacks.PluginIconPackTestHost(_catalog);
+		_installer = _newInstaller(icons.Sync);
+		var archive = await icons.BuildArchive("Logos", ("spotify", "green"));
+
+		var installed = await Install(BuildArtifactWithPack(archive, signed: false));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(installed.Success, Is.True, installed.ErrorMessage);
+			Assert.That(icons.PluginPack(PluginId, "logos"), Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task A_host_without_bundled_pack_support_still_installs_a_plugin_that_declares_one()
+	{
+		using var icons = new IconPacks.PluginIconPackTestHost();
+		var archive = await icons.BuildArchive("Logos", ("spotify", "green"));
+
+		var installed = await Install(BuildArtifactWithPack(archive));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(installed.Success, Is.True, installed.ErrorMessage);
+			Assert.That(ActiveVersion(), Is.EqualTo("1.0.0"));
+			Assert.That(File.Exists(Path.Combine(VersionDirectory("1.0.0"), BundledPackPath)), Is.True);
 		});
 	}
 

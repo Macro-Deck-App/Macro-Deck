@@ -401,7 +401,11 @@ describe('IconPacksPageComponent source label rendering', () => {
   beforeEach(async () => {
     const apiSpy = jasmine.createSpyObj<ApiService>('ApiService', ['getIconPacks', 'onNotification']);
     apiSpy.getIconPacks.and.resolveTo({
-      packs: [pack('store-pack', { ownerKind: 'Store' }), pack('user-pack', { ownerKind: 'User' })],
+      packs: [
+        pack('store-pack', { ownerKind: 'Store' }),
+        pack('user-pack', { ownerKind: 'User' }),
+        pack('plugin-pack', { ownerKind: 'Plugin', ownerName: 'Spotify', isReadOnly: true, canDelete: false }),
+      ],
     });
     apiSpy.onNotification.and.callFake(() => new Subject());
 
@@ -424,6 +428,16 @@ describe('IconPacksPageComponent source label rendering', () => {
 
     expect(railRow('store-pack').querySelector('.tag')?.textContent?.trim()).toBe(expected);
     expect(railRow('user-pack').querySelector('.tag')).toBeNull();
+  });
+
+  it('marks a plugin-provided pack with the plugin tag and names the plugin in its title', () => {
+    const localization = TestBed.inject(LocalizationService);
+    const tag = railRow('plugin-pack').querySelector('.tag');
+
+    expect(tag?.textContent?.trim()).toBe(localization.translateKey(AppStrings.IconPacks.SourcePlugin));
+    expect(tag?.getAttribute('title'))
+      .toBe(localization.translateKey(AppStrings.IconPacks.ManagedByPlugin, { name: 'Spotify' }));
+    expect(railRow('plugin-pack').querySelector('.icon-lock')).not.toBeNull();
   });
 });
 

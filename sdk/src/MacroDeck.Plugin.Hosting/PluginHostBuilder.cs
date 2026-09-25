@@ -8,6 +8,7 @@ using MacroDeck.Plugin.Hosting.Configuration;
 using MacroDeck.Plugin.Hosting.Credentials;
 using MacroDeck.Plugin.Hosting.DependencyInjection;
 using MacroDeck.Plugin.Hosting.Endpoints;
+using MacroDeck.Plugin.Hosting.IconPacks;
 using MacroDeck.Plugin.Hosting.Integrations;
 using MacroDeck.Plugin.Hosting.Integrations.HostApis;
 using MacroDeck.Plugin.Hosting.Transport;
@@ -511,6 +512,9 @@ public sealed class PluginHostBuilder
 		// order relative to that insert does not matter - both only start doing anything once a session
 		// is open.
 		Services.AddHostedService<IconAssetPublisherHostedService>();
+
+		Services.TryAddSingleton<IUiSessionReloader, HotReloadUiSessionReloader>();
+		Services.AddHostedService<BundledIconPackSync>();
 
 		// Independent of the connection: a killed host is never seen over the socket at all, so this
 		// cannot wait for one to exist.

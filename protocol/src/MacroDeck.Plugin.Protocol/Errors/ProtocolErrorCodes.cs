@@ -69,6 +69,18 @@ public static class ProtocolErrorCodes
 	/// under that name, if any, is left as it was.</summary>
 	public const string UiResourceQuotaExceeded = "UI_RESOURCE_QUOTA_EXCEEDED";
 
+	/// <summary>An <c>icon-packs</c>/<c>get-icon-resource</c> naming a key or icon name the calling plugin's
+	/// bundled packs do not contain.</summary>
+	public const string PluginIconNotFound = "PLUGIN_ICON_NOT_FOUND";
+
+	/// <summary>An <c>icon-packs</c>/<c>sync-bundled</c> whose uploaded archive is not a usable icon pack. The
+	/// message names the key; packs already installed under that key are left as they were.</summary>
+	public const string IconPackInvalid = "ICON_PACK_INVALID";
+
+	/// <summary>An <c>icon-packs</c>/<c>sync-bundled</c> from a session that is not self-registered. Installed
+	/// plugins get their bundled packs from their artifact.</summary>
+	public const string IconPackSyncNotAllowed = "ICON_PACK_SYNC_NOT_ALLOWED";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		ProtocolVersionUnsupported, UnknownMessageType, MalformedEnvelope, InvalidPayload, Unauthenticated,
@@ -77,5 +89,6 @@ public static class ProtocolErrorCodes
 		CapabilityUnavailable, PayloadTooLarge, AssetTooLarge, QueueOverflow, RateLimited,
 		Timeout, Cancelled, CorrelationUnknown, DuplicateIdempotencyKey, InternalError,
 		AdbNotEnabled, AdbNotAllowed, AdbFailed, UiResourceQuotaExceeded,
+		PluginIconNotFound, IconPackInvalid, IconPackSyncNotAllowed,
 	];
 }

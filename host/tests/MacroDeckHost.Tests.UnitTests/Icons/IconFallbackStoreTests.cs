@@ -130,6 +130,21 @@ public class IconFallbackStoreTests
 		return drawn;
 	}
 
+	[Test]
+	public async Task A_replaced_icon_leaves_only_its_current_fallback_image_behind()
+	{
+		var icon = await StoreAnimatedIcon(frameCount: 2);
+		(await _harness.FallbackStore.GetOrCreate(icon, IconVariants.Master, staticFrame: false, CancellationToken.None))!
+			.Content.Dispose();
+
+		icon.MasterContentHash = "sha256:" + new string('b', 64);
+		(await _harness.FallbackStore.GetOrCreate(icon, IconVariants.Master, staticFrame: false, CancellationToken.None))!
+			.Content.Dispose();
+
+		var cached = Directory.GetFiles(Path.Combine(_harness.Paths.IconsDirectory, "fallback-cache"), $"{icon.Id:N}-*");
+		Assert.That(cached, Has.Length.EqualTo(1));
+	}
+
 	private async Task<IconEntity> StoreAnimatedIcon(int frameCount)
 	{
 		using var image = new Image<Rgba32>(8, 8, FrameColor(0));

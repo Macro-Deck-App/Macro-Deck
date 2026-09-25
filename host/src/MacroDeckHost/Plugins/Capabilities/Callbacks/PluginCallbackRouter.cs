@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Text.Json;
 using MacroDeck.Plugin.Protocol.Assets;
 using MacroDeck.Plugin.Protocol.Callbacks;
+using MacroDeck.Plugin.Protocol.Callbacks.IconPacks;
 using MacroDeck.Plugin.Protocol.Callbacks.Ui;
 using MacroDeck.Plugin.Protocol.Capabilities;
 using MacroDeck.Plugin.Protocol.Capabilities.Ui;
@@ -27,6 +28,7 @@ using MacroDeckHost.Application.Plugins.Capabilities;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Devices;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Variables;
 using MacroDeckHost.Application.Plugins.Capabilities.Mapping;
+using MacroDeckHost.Application.Plugins.IconPacks;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Resources;
@@ -35,6 +37,7 @@ using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Infrastructure.Variables;
+using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Devices;
@@ -78,6 +81,10 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	private readonly HostCallbackThrottle _throttle;
 	private readonly IPluginUiResources? _uiResources;
 	private readonly UiResourceCallbackThrottle _uiResourceThrottle;
+	private readonly IPluginIconPackSync? _iconPackSync;
+	private readonly IPluginIconPackUploads? _iconPackUploads;
+	private readonly IPluginIconUiResources? _pluginIconResources;
+	private readonly IPluginIconResolver? _pluginIconResolver;
 
 	// Rate limiting alone does not bound this: an icon transfer outlives the call that started it, so a
 	// plugin fetching a full deck's icons at once would otherwise hold every image, and its base64 chunk
@@ -116,8 +123,16 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		VariableUpdateChannel? dynamicVariableChannel = null,
 		VariableCatalogInvalidationSignal? dynamicVariableInvalidation = null,
 		IPluginUiResources? uiResources = null,
-		UiResourceCallbackThrottle? uiResourceThrottle = null)
+		UiResourceCallbackThrottle? uiResourceThrottle = null,
+		IPluginIconPackSync? iconPackSync = null,
+		IPluginIconPackUploads? iconPackUploads = null,
+		IPluginIconUiResources? pluginIconResources = null,
+		IPluginIconResolver? pluginIconResolver = null)
 	{
+		_iconPackSync = iconPackSync;
+		_iconPackUploads = iconPackUploads;
+		_pluginIconResources = pluginIconResources;
+		_pluginIconResolver = pluginIconResolver;
 		_uiResources = uiResources;
 		_uiResourceThrottle = uiResourceThrottle ?? new UiResourceCallbackThrottle(TimeProvider.System);
 		_deviceSurfaces = deviceSurfaces;
@@ -190,6 +205,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				HostApis.FolderViews => await RouteFolderViewsAsync(pluginId, payload, cancellationToken),
 				HostApis.WidgetTypes => await RouteWidgetTypesAsync(pluginId, payload, cancellationToken),
 				HostApis.ScreenSavers => await RouteScreenSaversAsync(pluginId, payload, cancellationToken),
+				HostApis.IconPacks => await RouteIconPacksAsync(pluginId, sessionId, payload, cancellationToken),
 				_ => HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
 					$"The host has no api '{payload.Api}'.")
 			};
@@ -1187,6 +1203,166 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			: null;
 	}
 
+	// Runs before the payload validator, so size and shape checks see the bytes that are relayed.
+	private UiRawJson TranslatePluginIcons(string pluginId, UiRawJson payload)
+		=> _pluginIconResolver is null ? payload : PluginIconTreeRewriter.Rewrite(pluginId, payload, _pluginIconResolver);
+
+	private async Task<HostCallbackResult> RouteIconPacksAsync(string pluginId,
+		string? sessionId,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken)
+	{
+		switch (payload.Operation)
+		{
+			case HostOperations.IconPacks.SyncBundled:
+			{
+				if (_iconPackSync is null || _iconPackUploads is null)
+				{
+					return UnknownOperation(payload);
+				}
+
+				var arguments = Deserialize<IconPackSyncArguments>(payload.Arguments);
+				if (arguments is null)
+				{
+					return MissingArguments();
+				}
+
+				// Only a session the user admitted with a developer token or pairing may declare packs; an
+				// installed plugin's packs come from its signed package alone.
+				if (DevelopmentSessionOf(pluginId, sessionId) is not { } session)
+				{
+					return HostCallbackResult.Fail(ProtocolErrorCodes.IconPackSyncNotAllowed,
+						ProtocolErrorMessages.For(ProtocolErrorCodes.IconPackSyncNotAllowed));
+				}
+
+				if (InvalidDeclaration(arguments) is { } invalid)
+				{
+					return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload, invalid);
+				}
+
+				var packs = new List<DevelopmentIconPack>(arguments.Packs.Count);
+				var missing = new List<string>();
+				foreach (var declared in arguments.Packs)
+				{
+					if (_iconPackUploads.Find(pluginId, declared.ContentHash) is { } bytes)
+					{
+						packs.Add(new DevelopmentIconPack(declared.Key, declared.ContentHash, bytes));
+					}
+					else if (!missing.Contains(declared.ContentHash, StringComparer.Ordinal))
+					{
+						missing.Add(declared.ContentHash);
+					}
+				}
+
+				if (missing.Count > 0)
+				{
+					return HostCallbackResult.Ok(new IconPackSyncResult { UploadRequired = missing });
+				}
+
+				var result = await _iconPackSync.SyncDevelopmentAsync(pluginId,
+					session.SessionId,
+					session.DisplayName,
+					packs,
+					cancellationToken);
+
+				if (result.Status != PluginIconPackSyncStatus.Skipped)
+				{
+					_iconPackUploads.Retain(pluginId, packs.Select(pack => pack.ContentHash).ToList());
+				}
+
+				return result.Status switch
+				{
+					PluginIconPackSyncStatus.Invalid => HostCallbackResult.Fail(ProtocolErrorCodes.IconPackInvalid,
+						$"{ProtocolErrorMessages.For(ProtocolErrorCodes.IconPackInvalid)} Keys: {string.Join(", ", result.InvalidKeys ?? [])}."),
+					PluginIconPackSyncStatus.Skipped => HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnavailable,
+						"The host's icon packs are not ready yet.",
+						retryable: true),
+					_ => HostCallbackResult.Ok(new IconPackSyncResult { Changed = result.Changed })
+				};
+			}
+
+			case HostOperations.IconPacks.GetIconResource:
+			{
+				if (_pluginIconResources is null)
+				{
+					return UnknownOperation(payload);
+				}
+
+				var arguments = Deserialize<GetIconResourceArguments>(payload.Arguments);
+				if (arguments is null)
+				{
+					return MissingArguments();
+				}
+
+				if (!PluginBundledIconPacks.IsValidKey(arguments.Key) ||
+					string.IsNullOrEmpty(arguments.Name) ||
+					arguments.Name.Contains('/'))
+				{
+					return HostCallbackResult.Fail(ProtocolErrorCodes.PluginIconNotFound,
+						ProtocolErrorMessages.For(ProtocolErrorCodes.PluginIconNotFound));
+				}
+
+				var resource = await _pluginIconResources.GetHandleAsync(pluginId,
+					arguments.Key,
+					arguments.Name,
+					cancellationToken);
+
+				return resource.Status switch
+				{
+					PluginIconResourceStatus.Found => HostCallbackResult.Ok(new UiResourceHandleDto
+					{
+						ResourceId = resource.Handle!.ResourceId,
+						ContentHash = resource.Handle.ContentHash!,
+						MediaType = resource.Handle.MediaType!,
+						ByteLength = (int)resource.Handle.ByteLength!,
+					}),
+					PluginIconResourceStatus.TooLarge => HostCallbackResult.Fail(ProtocolErrorCodes.AssetTooLarge,
+						$"No rendition of this icon fits the {ProtocolLimits.MaxUiResourceBytes} byte UI resource limit."),
+					_ => HostCallbackResult.Fail(ProtocolErrorCodes.PluginIconNotFound,
+						ProtocolErrorMessages.For(ProtocolErrorCodes.PluginIconNotFound))
+				};
+			}
+
+			default:
+				return UnknownOperation(payload);
+		}
+	}
+
+	private PluginSessionSnapshot? DevelopmentSessionOf(string pluginId, string? sessionId)
+		=> sessionId is null
+			? null
+			: _sessionRegistry.Snapshot()
+				.FirstOrDefault(session => string.Equals(session.SessionId, sessionId, StringComparison.Ordinal) &&
+					string.Equals(session.PluginId, pluginId, StringComparison.Ordinal) &&
+					session.State == PluginSessionState.Connected &&
+					session.Origin == PluginSessionOrigin.SelfRegistered);
+
+	private static string? InvalidDeclaration(IconPackSyncArguments arguments)
+	{
+		if (arguments.Packs.Count > PluginBundledIconPacks.MaxCount)
+		{
+			return $"A plugin may declare at most {PluginBundledIconPacks.MaxCount} bundled icon packs.";
+		}
+
+		var keys = new HashSet<string>(StringComparer.Ordinal);
+		foreach (var pack in arguments.Packs)
+		{
+			if (!PluginBundledIconPacks.IsValidKey(pack.Key) || !keys.Add(pack.Key))
+			{
+				return $"'{pack.Key}' is not a usable, unique bundled icon pack key.";
+			}
+
+			if (!AssetContentHash.IsValid(pack.ContentHash) ||
+				pack.ByteLength <= 0 ||
+				pack.ByteLength > ProtocolLimits.MaxAssetBytes)
+			{
+				return $"Bundled icon pack '{pack.Key}' names no valid archive.";
+			}
+		}
+
+		return null;
+	}
+
 	private HostCallbackResult RouteUi(string pluginId, string? sessionId, HostInvokePayload payload)
 	{
 		switch (payload.Operation)
@@ -1201,7 +1377,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 
 				return FromIngest(_uiSessions.PublishSnapshot(pluginId,
 					arguments.SessionId,
-					UiRawJson.FromElement(arguments.Tree)));
+					TranslatePluginIcons(pluginId, UiRawJson.FromElement(arguments.Tree))));
 			}
 
 			case HostOperations.Ui.Patch:
@@ -1214,7 +1390,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 
 				return FromIngest(_uiSessions.PublishPatch(pluginId,
 					arguments.SessionId,
-					UiRawJson.FromElement(arguments.Patch)));
+					TranslatePluginIcons(pluginId, UiRawJson.FromElement(arguments.Patch))));
 			}
 
 			case HostOperations.Ui.Fault:

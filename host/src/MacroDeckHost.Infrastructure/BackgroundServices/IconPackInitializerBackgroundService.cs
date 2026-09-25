@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Paths;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Store.Installation;
 using MacroDeckHost.Domain.Entities;
 using Microsoft.Extensions.Hosting;
@@ -12,6 +13,7 @@ public class IconPackInitializerBackgroundService : HostReadyBackgroundService
 	private readonly IIconPackCache _iconPackCache;
 	private readonly IStoreInstallationReconciler _installationReconciler;
 	private readonly IMacroDeckPaths _paths;
+	private readonly StartupReadiness _readiness;
 	private readonly ILogger _logger;
 
 	public IconPackInitializerBackgroundService(
@@ -19,37 +21,49 @@ public class IconPackInitializerBackgroundService : HostReadyBackgroundService
 		IIconPackCache iconPackCache,
 		IStoreInstallationReconciler installationReconciler,
 		IMacroDeckPaths paths,
+		StartupReadiness readiness,
 		ILogger logger)
 		: base(lifetime)
 	{
 		_iconPackCache = iconPackCache;
 		_installationReconciler = installationReconciler;
 		_paths = paths;
+		_readiness = readiness;
 		_logger = logger;
 	}
 
 	protected override async Task ExecuteWhenReady(CancellationToken stoppingToken)
 	{
-		SweepLegacyDirectories();
-
-		await _iconPackCache.InitializeCache();
-
-		// Must run after InitializeCache(): the reconciler resolves each record's TargetIds against the
-		// cache, and calling it any earlier would see every record as orphaned and prune installs that
-		// are actually present.
-		_installationReconciler.PruneOrphanedIconPackRecords();
-
-		if (_iconPackCache.GetDefaultPack() is null)
+		try
 		{
-			_logger.Information("Creating default 'Imported Icons' pack");
-			await _iconPackCache.AddOrUpdatePack(new IconPackEntity
+			SweepLegacyDirectories();
+
+			await _iconPackCache.InitializeCache();
+
+			// Must run after InitializeCache(): the reconciler resolves each record's TargetIds against the
+			// cache, and calling it any earlier would see every record as orphaned and prune installs that
+			// are actually present.
+			_installationReconciler.PruneOrphanedIconPackRecords();
+
+			if (_iconPackCache.GetDefaultPack() is null)
 			{
-				Id = Guid.CreateVersion7(),
-				Name = "Imported Icons",
-				Description = "User imported icons",
-				IsDefault = true,
-				CreatedAt = DateTime.UtcNow
-			});
+				_logger.Information("Creating default 'Imported Icons' pack");
+				await _iconPackCache.AddOrUpdatePack(new IconPackEntity
+				{
+					Id = Guid.CreateVersion7(),
+					Name = "Imported Icons",
+					Description = "User imported icons",
+					IsDefault = true,
+					CreatedAt = DateTime.UtcNow
+				});
+			}
+
+			_readiness.MarkIconPacksReady();
+		}
+		catch (Exception ex)
+		{
+			_readiness.MarkIconPacksFailed(ex);
+			throw;
 		}
 	}
 

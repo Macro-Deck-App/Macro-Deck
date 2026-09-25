@@ -318,7 +318,24 @@ export class IconPacksPageComponent {
   }
 
   protected sourceLabel(pack: IconPackModel): string | null {
-    return pack.ownerKind === 'Store' ? this.localization.translateKey(AppStrings.IconPacks.SourceStore) : null;
+    switch (pack.ownerKind) {
+      case 'Store':
+        return this.localization.translateKey(AppStrings.IconPacks.SourceStore);
+      case 'Plugin':
+        return this.localization.translateKey(AppStrings.IconPacks.SourcePlugin);
+      default:
+        return null;
+    }
+  }
+
+  protected sourceTitle(pack: IconPackModel): string {
+    if (pack.ownerKind !== 'Plugin') {
+      return this.localization.translateKey(AppStrings.IconPacks.ManagedByStore);
+    }
+
+    return pack.ownerName
+      ? this.localization.translateKey(AppStrings.IconPacks.ManagedByPlugin, { name: pack.ownerName })
+      : this.localization.translateKey(AppStrings.IconPacks.ManagedByUnnamedPlugin);
   }
 
   protected async confirmDeletePack(): Promise<void> {

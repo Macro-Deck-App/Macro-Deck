@@ -3654,8 +3654,15 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="IconPacks.LoadingIconPacks" xml:space="preserve">
     <value>Chargement des packs d'icônes…</value>
   </data>
+  <data name="IconPacks.ManagedByPlugin" xml:space="preserve">
+    <value>Fourni par {name} et mis à jour avec l’extension</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="IconPacks.ManagedByStore" xml:space="preserve">
     <value>Géré par le Store</value>
+  </data>
+  <data name="IconPacks.ManagedByUnnamedPlugin" xml:space="preserve">
+    <value>Fourni par une extension et mis à jour avec elle</value>
   </data>
   <data name="IconPacks.MoreImportOptions" xml:space="preserve">
     <value>Plus d'options d'importation</value>
@@ -3746,6 +3753,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="IconPacks.SelectAnIconPackMessage" xml:space="preserve">
     <value>Choisis un pack à gauche pour parcourir ses icônes.</value>
+  </data>
+  <data name="IconPacks.SourcePlugin" xml:space="preserve">
+    <value>Extension</value>
   </data>
   <data name="IconPacks.SourceStore" xml:space="preserve">
     <value>Store</value>
@@ -11815,6 +11825,13 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Notifications.PluginAdbAccessRequestedMessage" xml:space="preserve">
     <value>{name} a besoin d'ADB pour travailler avec tes appareils Android, mais les extensions ne sont pas autorisées à utiliser ADB pour le moment. Autoriser les extensions à utiliser ADB ?</value>
     <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.PluginIconPackKept" xml:space="preserve">
+    <value>Pack d'icônes conservé</value>
+  </data>
+  <data name="Notifications.PluginIconPackKeptMessage" xml:space="preserve">
+    <value>{plugin} ne fournit plus le pack d'icônes “{pack}”. Des boutons ou des automatisations utilisent encore ses icônes, il a donc été conservé. Tu peux maintenant le modifier ou le supprimer.</value>
+    <comment>[pack:string] [plugin:string]</comment>
   </data>
   <data name="Notifications.RestartToApplyNetwork" xml:space="preserve">
     <value>Redémarre pour appliquer les nouveaux paramètres réseau</value>

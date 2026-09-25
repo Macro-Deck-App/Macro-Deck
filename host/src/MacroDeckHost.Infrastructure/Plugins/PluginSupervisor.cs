@@ -13,6 +13,7 @@ using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Plugins;
+using MacroDeckHost.Application.Plugins.IconPacks;
 using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Plugins.Trust;
 using Mediator;
@@ -24,6 +25,7 @@ namespace MacroDeckHost.Infrastructure.Plugins;
 public sealed class PluginSupervisor : IPluginSupervisor
 {
 	private static readonly TimeSpan _postKillWait = TimeSpan.FromSeconds(2);
+	private static readonly TimeSpan _iconPackSyncBound = TimeSpan.FromSeconds(30);
 
 	private readonly IPluginManifestReader _manifestReader;
 	private readonly IPluginInstallationCatalog _catalog;
@@ -41,6 +43,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 	private readonly TimeProvider _timeProvider;
 	private readonly PluginSupervisorOptions _options;
 	private readonly ILogger _logger;
+	private readonly IPluginIconPackSync? _iconPackSync;
 	private readonly Random _random = new();
 
 	private readonly Dictionary<string, PluginRuntimeEntry> _entries = new(StringComparer.Ordinal);
@@ -62,8 +65,10 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		IServiceScopeFactory scopeFactory,
 		TimeProvider timeProvider,
 		PluginSupervisorOptions options,
-		ILogger logger)
+		ILogger logger,
+		IPluginIconPackSync? iconPackSync = null)
 	{
+		_iconPackSync = iconPackSync;
 		_manifestReader = manifestReader;
 		_catalog = catalog;
 		_stateStore = stateStore;
@@ -1086,6 +1091,27 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 	}
 
+	private async Task SyncIconPacksBeforeLaunch(string pluginId, CancellationToken ct)
+	{
+		if (_iconPackSync is null)
+		{
+			return;
+		}
+
+		try
+		{
+			await _iconPackSync.SyncAsync(pluginId, ct).WaitAsync(_iconPackSyncBound, _timeProvider, ct);
+		}
+		catch (TimeoutException)
+		{
+			_logger.Warning("Syncing the bundled icon packs of {PluginId} took too long; launching anyway", pluginId);
+		}
+		catch (Exception exception) when (exception is not OperationCanceledException)
+		{
+			_logger.Warning(exception, "Syncing the bundled icon packs of {PluginId} failed; launching anyway", pluginId);
+		}
+	}
+
 	private async Task<PluginSupervisorResult> AttemptLaunch(PluginRuntimeEntry entry,
 		InstalledPlugin installed,
 		bool allowStartupGraceRetry,
@@ -1149,6 +1175,11 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 
 		await ApplyTrustGateAction(installed.PluginId, activeVersion.Version, trustDecision.Action, trust);
+
+		if (manifest.BundledIconPacks is { Count: > 0 })
+		{
+			await SyncIconPacksBeforeLaunch(installed.PluginId, ct);
+		}
 
 		var candidateEntrypoint = PluginRuntimeIdentifiers.CandidatesFor(PluginRuntimeIdentifiers.Current)
 			.Select(rid => manifest.Entrypoints.GetValueOrDefault(rid))

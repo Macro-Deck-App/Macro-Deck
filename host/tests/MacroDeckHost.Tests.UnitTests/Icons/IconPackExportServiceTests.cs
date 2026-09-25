@@ -59,6 +59,40 @@ public class IconPackExportServiceTests
 	}
 
 	[Test]
+	public async Task A_plugin_pack_exports_as_a_user_pack_that_a_reader_without_the_plugin_source_type_can_read()
+	{
+		var pack = await _harness.CreatePack("Logos");
+		pack.SourceType = IconPackSourceType.Plugin;
+		pack.SourceId = "com.example.logos/logos";
+		pack.SourceRevision = "sha256:" + new string('a', 64);
+		await _harness.Cache.AddOrUpdatePack(pack);
+		await AddReadyIcon(pack, "spotify", sizes: []);
+
+		await using var archive = await ExportToArchive(pack.Id);
+		await using var stream = archive.GetEntry("pack.json")!.Open();
+		using var document = await JsonDocument.ParseAsync(stream);
+		var olderReader = document.RootElement.Deserialize<OlderPackManifest>(_manifestOptions);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(olderReader!.SourceType, Is.EqualTo(OlderSourceType.User));
+			Assert.That(olderReader.SourceId, Is.Null);
+			Assert.That(document.RootElement.TryGetProperty("sourceRevision", out _), Is.False);
+		});
+	}
+
+	private enum OlderSourceType
+	{
+		User,
+		StreamDeckImport,
+		ExtensionStore,
+		TouchPortalImport,
+		MacroDeckImport
+	}
+
+	private sealed record OlderPackManifest(OlderSourceType SourceType, string? SourceId);
+
+	[Test]
 	public async Task Export_ScrubsDefaultReadOnlySourceIdAndBatchIds()
 	{
 		var pack = await _harness.CreatePack("Default Pack", isDefault: true);

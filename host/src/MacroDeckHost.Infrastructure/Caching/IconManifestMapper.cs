@@ -19,6 +19,7 @@ internal static class IconManifestMapper
 			IsReadOnly = manifest.IsReadOnly,
 			SourceType = manifest.SourceType,
 			SourceId = manifest.SourceId,
+			SourceRevision = manifest.SourceRevision,
 			AiAssets = IconPackAiDeclarations.FromManifest(manifest.Ai),
 			CreatedAt = manifest.CreatedAt,
 			UpdatedAt = manifest.UpdatedAt
@@ -61,6 +62,7 @@ internal static class IconManifestMapper
 			IsReadOnly = pack.IsReadOnly,
 			SourceType = pack.SourceType,
 			SourceId = pack.SourceId,
+			SourceRevision = pack.SourceRevision,
 			Ai = IconPackAiDeclarations.ToManifest(pack.AiAssets),
 			CreatedAt = pack.CreatedAt,
 			UpdatedAt = pack.UpdatedAt,

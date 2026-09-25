@@ -118,7 +118,48 @@ public sealed record UiIconReferenceInput : UiInput<UiIconReference>
 /// well-formed value, and renders as no icon rather than as a malformed one.</summary>
 /// <param name="Type">The icon provider, for example <c>icon-pack</c>.</param>
 /// <param name="Reference">The provider-specific reference. Opaque - never assumed to be a GUID.</param>
-public sealed record UiIconReference(string Type, string Reference);
+public sealed record UiIconReference(string Type, string Reference)
+{
+	public const string PluginIconType = "plugin-icon";
+
+	/// <summary>
+	/// An icon from the plugin's own bundled icon packs, named by the pack's key in the manifest's
+	/// <c>bundledIconPacks</c> and the icon's name inside that pack. Use it as the default of a
+	/// <see cref="UiIconReferenceInput" /> to preselect one of the plugin's icons.
+	/// </summary>
+	/// <remarks>
+	/// Macro Deck resolves it against the calling plugin's packs only and replaces it with the matching
+	/// <c>icon-pack</c> reference before the form reaches a client, so the value the plugin reads back is an
+	/// <c>icon-pack</c> reference, never this one. An unknown key or name arrives as no default.
+	/// </remarks>
+	/// <exception cref="ArgumentException"><paramref name="key" /> is not a bundled pack key (lowercase ASCII
+	/// letters, digits and inner hyphens, at most 64 characters), or <paramref name="name" /> is blank or
+	/// contains a slash.</exception>
+	public static UiIconReference PluginIcon(string key, string name)
+	{
+		if (!IsBundledPackKey(key))
+		{
+			throw new ArgumentException(
+				$"'{key}' is not a bundled icon pack key: use lowercase letters, digits and inner hyphens, at most 64 characters.",
+				nameof(key));
+		}
+
+		if (string.IsNullOrWhiteSpace(name) || name.Contains('/', StringComparison.Ordinal))
+		{
+			throw new ArgumentException("An icon name must not be blank or contain '/'.", nameof(name));
+		}
+
+		return new UiIconReference(PluginIconType, $"{key}/{name}");
+	}
+
+	// Restates PluginBundledIconPacks.IsValidKey from the packaging assembly, which the UI model must not
+	// reference.
+	private static bool IsBundledPackKey(string? key)
+		=> key is { Length: > 0 and <= 64 } &&
+			key.All(character => character is >= 'a' and <= 'z' or >= '0' and <= '9' or '-') &&
+			key[0] != '-' &&
+			key[^1] != '-';
+}
 
 /// <summary>
 /// An image path. Counterpart of the <c>Image</c> parameter type, which the editor renders as the same path

@@ -34,7 +34,12 @@ public enum PluginManifestError
 	/// <summary>The manifest's <see cref="PluginManifest.Languages"/> carries a blank or duplicated tag.
 	/// An unrecognised language tag is never an error - see the reader for why. Appended at the end for
 	/// the same ordinal-stability reason as <see cref="InvalidName"/>.</summary>
-	InvalidLanguage
+	InvalidLanguage,
+
+	/// <summary>An entry of <see cref="PluginManifest.BundledIconPacks"/> has an invalid key or path, or
+	/// repeats a key or path. Existence on disk is never checked. Appended at the end for the same
+	/// ordinal-stability reason as <see cref="InvalidName"/>.</summary>
+	InvalidBundledIconPack
 }
 
 /// <summary>Either a validated <see cref="Manifest"/>, or the <see cref="Error"/> that stopped it from

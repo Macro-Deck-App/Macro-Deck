@@ -19,6 +19,7 @@ public class HostApiStabilityTests
 		"devices",
 		"event-bindings",
 		"folder-views",
+		"icon-packs",
 		"layouts",
 		"messaging",
 		"notifications",
@@ -55,6 +56,7 @@ public class HostApiStabilityTests
 			[HostApis.Adb] =
 				["shell", "battery", "push", "pull", "install", "uninstall", "package-installed", "connect"],
 			[HostApis.Messaging] = ["publish", "send", "request", "subscriptions"],
+			[HostApis.IconPacks] = ["sync-bundled", "get-icon-resource"],
 		};
 
 	[Test]

@@ -259,7 +259,7 @@ The only kind that is **item-shaped and provider-shaped at once**. The eager hal
 | `host.cancel` | plugin → host | `reason` - best-effort cancellation of a `host.invoke` |
 | `host.state` | host → plugin | `api` (required), `data` - the list a plugin's synchronous members serve from |
 
-APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `notifications`, `action-interactions`, `ui`, `devices`, `variable-values`, `layouts`, `folder-views`, `widget-types`, `screensavers`, `adb`, `messaging`, and the push-only `event-bindings`. There is no `events` api; use `event.publish`. A plugin ignores a `host.state` api it does not know.
+APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `notifications`, `action-interactions`, `ui`, `devices`, `variable-values`, `layouts`, `folder-views`, `widget-types`, `screensavers`, `adb`, `messaging`, `icon-packs`, and the push-only `event-bindings`. There is no `events` api; use `event.publish`. A plugin ignores a `host.state` api it does not know.
 
 `host.state` for `config` has no `data`: it means "your config changed, re-read it". Built from the schema:
 
@@ -275,6 +275,7 @@ APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `no
 | `variable-values` | Data-carrying push for the catalog half only; eager variables are always polled via `variables`/`get`. |
 | `event-bindings` | Push-only `host.state`, no `host.invoke` operations. `data` lists the triggers bound to this plugin's own events, each an `eventId` and `parameters` keyed by name (`value`, absent for a state operator, and `operator`). Sent on registration and whenever that list changes. |
 | `adb` | Gated per plugin, runs off the session's dispatch loop, at most 4 calls in flight per plugin - see [`adb`](#adb). |
+| `icon-packs` | The calling plugin's own bundled icon packs only; `sync-bundled` only from a self-registered development session - see [`icon-packs`](#icon-packs). |
 | `messaging` | Needs the `messaging` capability kind; own rate limit instead of the per-plugin callback throttle; `send` and `request` run off the session's dispatch loop - see [`messaging`](#messaging). |
 
 #### `widgets` by major
@@ -305,6 +306,17 @@ For a major `1` session the host translates rather than refuses: `off`/`on` map 
 `tree` and `patch` are opaque JSON: bounded, then forwarded byte-for-byte (unknown members, member order, number formatting survive). A refused snapshot or patch is an error on its own `host.result`: `PAYLOAD_TOO_LARGE`, `RATE_LIMITED`, `INVALID_PAYLOAD`, `SESSION_NOT_FOUND`. See [Serving a view](/ui/views/sessions/).
 
 To register a resource, call `register-resource` first. On `uploadRequired`, send the bytes as an `asset.*` upload of kind `ui-resource` with the same media type, then call `register-resource` once more; a second `uploadRequired` means the upload was lost, not that you should loop. Registering a name again replaces its bytes: the `resourceId` stays, the `contentHash` changes. Registering unchanged bytes under the same name answers the existing handle without an upload. Resources belong to the plugin session: they survive a resumed session, are released when the session ends or is replaced, and are gone after the host restarts. A refused registration is `INVALID_PAYLOAD` (name, media type, or a type that differs from the upload's), `UI_RESOURCE_QUOTA_EXCEEDED` (`maxUiResourceBytesPerPlugin` or `maxUiResourcesPerPlugin`; what the name held is unchanged), `RATE_LIMITED`, or `SESSION_NOT_FOUND` from a session that has been replaced. A host that predates the operations answers `CAPABILITY_UNSUPPORTED` before any bytes are sent. See [Resources](/ui/reference/resources/#registering-your-own-images).
+
+#### `icon-packs`
+
+| Operation | Arguments | Meaning |
+| --- | --- | --- |
+| `get-icon-resource` | `key`, `name` | Answers a UI resource handle (`resourceId`, `contentHash`, `mediaType`, `byteLength`) for the icon `name` of the calling plugin's bundled pack `key`. |
+| `sync-bundled` | `packs`: `[{key, contentHash, byteLength}]` | Replaces the development session's bundled packs with the complete declared set: adds, replaces and removes packs by key. Answers `uploadRequired` (content hashes) and `changed`. |
+
+`get-icon-resource` needs no upload and uses no UI resource quota: the handle is served from the host's icon store and stays valid across host restarts. Its `contentHash` changes when the icon is replaced, so clients refetch. Only the calling plugin's packs are searched. An unknown key or name is `PLUGIN_ICON_NOT_FOUND`; an icon that cannot be served within `maxUiResourceBytes` is `ASSET_TOO_LARGE`.
+
+`sync-bundled` is how `macrodeck-plugin run` brings a project's bundled packs into a running host without restarting the plugin. Send every pack the manifest declares, each identified by the content hash of its `.macroDeckIconPack` archive (the same hash `asset.begin` carries); a key left out is removed. When `uploadRequired` is not empty nothing was synced: upload each of those archives as an `asset.*` upload of kind `icon-pack` with media type `application/zip`, then call `sync-bundled` again with the same set. Otherwise `changed` says whether any pack was added, replaced or removed. The archive is bounded by `maxAssetBytes`; a larger pack reaches the host only by installing the built plugin. A session that is not self-registered is refused with `ICON_PACK_SYNC_NOT_ALLOWED`, since an installed plugin's packs come from its artifact, and an archive that is not a usable icon pack is `ICON_PACK_INVALID`, leaving what that key held unchanged. A host that predates the api answers `CAPABILITY_UNSUPPORTED` to both operations.
 
 #### `devices`
 
@@ -525,7 +537,7 @@ Built from the schema:
 | `host.asset.ack` | plugin → host | same as `asset.ack` |
 
 - `totalBytes` is checked against `maxAssetBytes` before a byte is buffered; each chunk's pre-encoding size is bounded by `maxAssetChunkBytes`.
-- The `kind` values are `icon`, `artwork`, `action-icon` and `ui-resource`. A `ui-resource` upload is also refused at `asset.begin` when it is empty, larger than `maxUiResourceBytes` (`ASSET_TOO_LARGE`), or not `image/png`, `image/jpeg`, `image/webp` or `image/gif` (`INVALID_PAYLOAD`). Its bytes are held in memory for the `ui`/`register-resource` call that follows and are never written to the host's on-disk asset cache.
+- The `kind` values are `icon`, `artwork`, `action-icon`, `ui-resource` and `icon-pack`. A `ui-resource` upload is also refused at `asset.begin` when it is empty, larger than `maxUiResourceBytes` (`ASSET_TOO_LARGE`), or not `image/png`, `image/jpeg`, `image/webp` or `image/gif` (`INVALID_PAYLOAD`). Its bytes are held in memory for the `ui`/`register-resource` call that follows and are never written to the host's on-disk asset cache. An `icon-pack` upload is held the same way, for the `icon-packs`/`sync-bundled` call that follows.
 - One unacknowledged step in flight at a time, never a burst.
 - `index` must equal the next expected index: no reordering, gaps or duplicates.
 - `asset.commit` verifies the final byte count and a recomputed content hash against `asset.begin`.
@@ -577,9 +589,9 @@ A reply sets `correlationId` to the `id` it answers. Five types **require** one:
 
 ## Error handling
 
-A protocol-level failure sets `error` instead of `payload`. Default messages are in [the protocol page](/reference/protocol/#errors). The twenty-five codes, append-only within a protocol major (removing or renaming one requires a version advance):
+A protocol-level failure sets `error` instead of `payload`. Default messages are in [the protocol page](/reference/protocol/#errors). The twenty-eight codes, append-only within a protocol major (removing or renaming one requires a version advance):
 
-`PROTOCOL_VERSION_UNSUPPORTED`, `UNKNOWN_MESSAGE_TYPE`, `MALFORMED_ENVELOPE`, `INVALID_PAYLOAD`, `UNAUTHENTICATED`, `PLUGIN_ALREADY_REGISTERED`, `SESSION_EXPIRED`, `SESSION_NOT_RESUMABLE`, `SESSION_REPLACED`, `SESSION_NOT_FOUND`, `CAPABILITY_UNSUPPORTED`, `CAPABILITY_UNAVAILABLE`, `PAYLOAD_TOO_LARGE`, `ASSET_TOO_LARGE`, `QUEUE_OVERFLOW`, `RATE_LIMITED`, `TIMEOUT`, `CANCELLED`, `CORRELATION_UNKNOWN`, `DUPLICATE_IDEMPOTENCY_KEY`, `INTERNAL_ERROR`, `ADB_NOT_ENABLED`, `ADB_NOT_ALLOWED`, `ADB_FAILED`, `UI_RESOURCE_QUOTA_EXCEEDED`.
+`PROTOCOL_VERSION_UNSUPPORTED`, `UNKNOWN_MESSAGE_TYPE`, `MALFORMED_ENVELOPE`, `INVALID_PAYLOAD`, `UNAUTHENTICATED`, `PLUGIN_ALREADY_REGISTERED`, `SESSION_EXPIRED`, `SESSION_NOT_RESUMABLE`, `SESSION_REPLACED`, `SESSION_NOT_FOUND`, `CAPABILITY_UNSUPPORTED`, `CAPABILITY_UNAVAILABLE`, `PAYLOAD_TOO_LARGE`, `ASSET_TOO_LARGE`, `QUEUE_OVERFLOW`, `RATE_LIMITED`, `TIMEOUT`, `CANCELLED`, `CORRELATION_UNKNOWN`, `DUPLICATE_IDEMPOTENCY_KEY`, `INTERNAL_ERROR`, `ADB_NOT_ENABLED`, `ADB_NOT_ALLOWED`, `ADB_FAILED`, `UI_RESOURCE_QUOTA_EXCEEDED`, `PLUGIN_ICON_NOT_FOUND`, `ICON_PACK_INVALID`, `ICON_PACK_SYNC_NOT_ALLOWED`.
 
 ### Close codes
 

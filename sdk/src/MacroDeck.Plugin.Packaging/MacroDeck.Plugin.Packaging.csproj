@@ -19,6 +19,10 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="MacroDeck.Plugin.Cli" />
+        <InternalsVisibleTo Include="MacroDeck.Plugin.Cli.Tests.UnitTests" />
+        <InternalsVisibleTo Include="MacroDeck.Plugin.Packaging.Tests.UnitTests" />
+        <InternalsVisibleTo Include="MacroDeckHost.Infrastructure" />
+        <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests" />
     </ItemGroup>
 
     <ItemGroup>

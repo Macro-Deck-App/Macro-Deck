@@ -257,6 +257,26 @@ When the latest version of an item is withdrawn, the item disappears from the St
 installed or updated. If you have it installed, it stays under **Installed**, marked **Removed from the
 Store**, and its page says why; you can still uninstall it there.
 
+### Icon packs from plugins
+
+A plugin can bring its own icon packs, for example the logos of the services it controls. They appear under
+**Library > Icon Packs** and in the icon picker as soon as the plugin is installed, marked **Plugin**; hover
+the mark to see which plugin provides the pack. Use their icons on any button, not only on the plugin's own.
+
+These packs are read-only, like icon packs from the Store, and you can't delete them yourself. They update
+together with the plugin: an update replaces the icons that changed, and buttons keep showing the icon they
+use.
+
+When you uninstall the plugin, or an update no longer includes one of its packs, the pack is deleted. If a
+button or an automation still uses one of its icons, the pack stays instead, becomes an ordinary icon pack you
+can edit or delete, and Macro Deck shows a notification that says why it was kept. An icon that is only
+chosen in a plugin's own settings does not count as used. When the plugin later brings
+the same pack back, for example after a reinstall, it takes the pack over again: the pack becomes read-only
+once more and any changes you made to it in the meantime are replaced by the plugin's icons.
+
+While a plugin developer runs a plugin from its project, its packs appear the same way. If that plugin is never
+installed, the packs stay as ordinary icon packs after the developer stops it.
+
 ## Devices
 
 Every phone, tablet or browser that connects shows up in **Settings > Devices**. Choose there which

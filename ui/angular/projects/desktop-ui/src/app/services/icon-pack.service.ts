@@ -18,6 +18,7 @@ export interface IconPackModel {
   ownerKind: string;
   canDelete: boolean;
   storePackageId?: string | null;
+  ownerName?: string | null;
   aiAssets?: IconPackAiAssets;
 }
 
@@ -584,6 +585,7 @@ function mapPack(pack: IpcIconPack): IconPackModel {
     iconCount: pack.iconCount ?? 0,
     ownerKind: pack.ownerKind ?? 'User',
     storePackageId: pack.storePackageId ?? null,
+    ownerName: pack.ownerName ?? null,
     aiAssets: pack.aiAssets ?? 'NotDeclared',
     canDelete: pack.canDelete ?? true,
   };

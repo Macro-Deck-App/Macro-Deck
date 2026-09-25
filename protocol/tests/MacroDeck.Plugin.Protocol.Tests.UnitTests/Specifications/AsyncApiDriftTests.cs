@@ -1,4 +1,6 @@
 using System.Reflection;
+using MacroDeck.Plugin.Protocol.Assets;
+using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Limits;
@@ -97,6 +99,28 @@ public class AsyncApiDriftTests
 			Assert.That(SpecificationDocuments.AsLong(versions["current"]), Is.EqualTo(ProtocolVersions.Current));
 		});
 	}
+
+	[Test]
+	public void Host_apis_and_their_operations_match_the_contracts()
+	{
+		var documented = SpecificationDocuments.AsMap(SpecificationDocuments.AsyncApi["x-macrodeck-host-operations"]);
+
+		Assert.That(documented.Keys, Is.EquivalentTo(HostApis.All));
+		Assert.Multiple(() =>
+		{
+			foreach (var api in HostApis.All.Where(documented.ContainsKey))
+			{
+				Assert.That(SpecificationDocuments.AsStrings(documented[api]),
+					Is.EqualTo(HostOperations.For(api)),
+					$"operations for '{api}'");
+			}
+		});
+	}
+
+	[Test]
+	public void Asset_kinds_match_the_contracts()
+		=> Assert.That(SpecificationDocuments.AsStrings(SpecificationDocuments.AsyncApi["x-macrodeck-asset-kinds"]),
+			Is.EquivalentTo(AssetKinds.All));
 
 	[Test]
 	public void The_envelope_schema_matches_the_envelope_record()

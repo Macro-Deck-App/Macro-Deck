@@ -59,12 +59,12 @@ public class UiResourcesControllerTests
 	}
 
 	[Test]
-	public void A_served_resource_cannot_be_sniffed_or_run_as_a_document()
+	public async Task A_served_resource_cannot_be_sniffed_or_run_as_a_document()
 	{
 		var store = StoreWith(out var resourceId);
 		var controller = Controller(store);
 
-		controller.Get(resourceId);
+		await controller.Get(resourceId);
 
 		Assert.Multiple(() =>
 		{
@@ -76,12 +76,12 @@ public class UiResourcesControllerTests
 	}
 
 	[Test]
-	public void A_registered_resource_is_served_with_its_media_type_and_a_strong_hash_etag()
+	public async Task A_registered_resource_is_served_with_its_media_type_and_a_strong_hash_etag()
 	{
 		var store = StoreWith(out var resourceId);
 		var controller = Controller(store);
 
-		var result = controller.Get(resourceId) as FileContentResult;
+		var result = await controller.Get(resourceId) as FileContentResult;
 
 		Assert.That(result, Is.Not.Null);
 
@@ -100,13 +100,13 @@ public class UiResourcesControllerTests
 	}
 
 	[Test]
-	public void A_matching_if_none_match_is_answered_with_304_and_no_body()
+	public async Task A_matching_if_none_match_is_answered_with_304_and_no_body()
 	{
 		var store = StoreWith(out var resourceId);
 		var etag = $"\"sha256:{Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(_svg)))}\"";
 		var controller = Controller(store, etag);
 
-		var result = controller.Get(resourceId);
+		var result = await controller.Get(resourceId);
 
 		Assert.Multiple(() =>
 		{
@@ -117,31 +117,31 @@ public class UiResourcesControllerTests
 	}
 
 	[Test]
-	public void A_stale_if_none_match_is_answered_with_the_full_body()
+	public async Task A_stale_if_none_match_is_answered_with_the_full_body()
 	{
 		var store = StoreWith(out var resourceId);
 		var controller = Controller(store, $"\"sha256:{new string('0', 64)}\"");
 
-		Assert.That(controller.Get(resourceId), Is.InstanceOf<FileContentResult>());
+		Assert.That(await controller.Get(resourceId), Is.InstanceOf<FileContentResult>());
 	}
 
 	[Test]
-	public void A_versioned_url_is_cached_only_while_it_names_the_bytes_currently_registered()
+	public async Task A_versioned_url_is_cached_only_while_it_names_the_bytes_currently_registered()
 	{
 		var store = new UiResourceStore();
 		var a = Register(store, "<svg id=\"a\"/>");
 		var b = Register(store, "<svg id=\"b\"/>");
 
 		var stale = Controller(store, $"\"{b.ContentHash}\"");
-		var staleResult = stale.Get(b.ResourceId, a.ContentHash) as FileContentResult;
+		var staleResult = await stale.Get(b.ResourceId, a.ContentHash) as FileContentResult;
 		var current = Controller(store);
-		current.Get(b.ResourceId, b.ContentHash);
+		await current.Get(b.ResourceId, b.ContentHash);
 
 		Register(store, "<svg id=\"a\"/>");
 		var backToA = Controller(store);
-		var backToAResult = backToA.Get(a.ResourceId, a.ContentHash) as FileContentResult;
+		var backToAResult = await backToA.Get(a.ResourceId, a.ContentHash) as FileContentResult;
 		var nowStale = Controller(store);
-		nowStale.Get(b.ResourceId, b.ContentHash);
+		await nowStale.Get(b.ResourceId, b.ContentHash);
 
 		Assert.Multiple(() =>
 		{
@@ -157,12 +157,12 @@ public class UiResourcesControllerTests
 	}
 
 	[Test]
-	public void A_request_without_a_version_is_cached_as_before()
+	public async Task A_request_without_a_version_is_cached_as_before()
 	{
 		var store = StoreWith(out var resourceId);
 		var controller = Controller(store);
 
-		controller.Get(resourceId);
+		await controller.Get(resourceId);
 
 		Assert.That(controller.Response.Headers.CacheControl.ToString(), Does.Contain("immutable"));
 	}
@@ -180,11 +180,11 @@ public class UiResourcesControllerTests
 	[TestCase("../../appsettings.json")]
 	[TestCase("/etc/passwd")]
 	[TestCase("")]
-	public void An_unknown_or_unusable_id_is_answered_the_same_way(string resourceId)
+	public async Task An_unknown_or_unusable_id_is_answered_the_same_way(string resourceId)
 	{
 		var controller = Controller(StoreWith(out _));
 
-		var result = controller.Get(resourceId);
+		var result = await controller.Get(resourceId);
 
 		Assert.Multiple(() =>
 		{

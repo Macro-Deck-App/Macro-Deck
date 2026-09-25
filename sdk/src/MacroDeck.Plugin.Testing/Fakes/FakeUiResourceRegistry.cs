@@ -15,6 +15,7 @@ public sealed class FakeUiResourceRegistry : IUiResourceRegistry
 {
 	private readonly Lock _gate = new();
 	private readonly Dictionary<string, FakeUiResource> _resources = new(StringComparer.Ordinal);
+	private readonly Dictionary<(string Key, string Name), FakeUiResource> _pluginIcons = new(PluginIconComparer.Instance);
 
 	/// <summary>The combined size all resources may have. Defaults to Macro Deck's per-plugin quota.</summary>
 	public int MaxTotalBytes { get; set; } = ProtocolLimits.MaxUiResourceBytesPerPlugin;
@@ -83,6 +84,55 @@ public sealed class FakeUiResourceRegistry : IUiResourceRegistry
 		}
 	}
 
+	/// <summary>
+	/// Makes <paramref name="content" /> the icon <paramref name="name" /> of the bundled pack
+	/// <paramref name="key" />, as if the plugin's manifest bundled it, replacing what that pair held. Like
+	/// Macro Deck, it does not count against the quota and a replaced icon gets a new
+	/// <see cref="UiResource.ContentHash" />.
+	/// </summary>
+	public UiResource AddPluginIcon(string key, string name, byte[] content, string mediaType)
+	{
+		ArgumentException.ThrowIfNullOrWhiteSpace(key);
+		ArgumentException.ThrowIfNullOrWhiteSpace(name);
+		ArgumentNullException.ThrowIfNull(content);
+
+		if (!UiResourceRules.IsSupportedMediaType(mediaType))
+		{
+			throw new ArgumentException($"'{mediaType}' is not a supported media type.", nameof(mediaType));
+		}
+
+		var bytes = content.ToArray();
+		var handle = new UiResource
+		{
+			ResourceId = $"app.macro-deck.plugin-icon.test.{key}.{name}",
+			ContentHash = AssetContentHash.Compute(bytes),
+			MediaType = mediaType.ToLowerInvariant(),
+			ByteLength = bytes.Length,
+		};
+
+		lock (_gate)
+		{
+			_pluginIcons[(key, name)] = new FakeUiResource(handle, bytes);
+		}
+
+		return handle;
+	}
+
+	/// <inheritdoc />
+	/// <remarks>Answers the icons added through <see cref="AddPluginIcon" />, matching the icon name
+	/// case-insensitively as the host does; any other key or name throws
+	/// <see cref="UiResourceErrorCode.PluginIconNotFound" />.</remarks>
+	public Task<UiResource> GetPluginIconAsync(string key, string name, CancellationToken cancellationToken = default)
+	{
+		lock (_gate)
+		{
+			return _pluginIcons.TryGetValue((key, name), out var icon)
+				? Task.FromResult(icon.Handle)
+				: Task.FromException<UiResource>(new UiResourceException(UiResourceErrorCode.PluginIconNotFound,
+					$"The plugin's bundled icon packs contain no icon '{name}' in '{key}'."));
+		}
+	}
+
 	/// <inheritdoc />
 	public Task RemoveAsync(string name, CancellationToken cancellationToken = default)
 	{
@@ -97,6 +147,18 @@ public sealed class FakeUiResourceRegistry : IUiResourceRegistry
 		}
 
 		return Task.CompletedTask;
+	}
+
+	private sealed class PluginIconComparer : IEqualityComparer<(string Key, string Name)>
+	{
+		public static readonly PluginIconComparer Instance = new();
+
+		public bool Equals((string Key, string Name) x, (string Key, string Name) y)
+			=> string.Equals(x.Key, y.Key, StringComparison.Ordinal) &&
+				string.Equals(x.Name, y.Name, StringComparison.OrdinalIgnoreCase);
+
+		public int GetHashCode((string Key, string Name) obj)
+			=> HashCode.Combine(StringComparer.Ordinal.GetHashCode(obj.Key), StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Name));
 	}
 }
 

@@ -6,5 +6,6 @@ public enum IconPackSourceType
 	StreamDeckImport,
 	ExtensionStore,
 	TouchPortalImport,
-	MacroDeckImport
+	MacroDeckImport,
+	Plugin
 }

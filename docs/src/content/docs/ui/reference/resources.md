@@ -12,7 +12,8 @@ new UiImage { Key = "icon", Source = UiValue.Of(handle), Size = 0.2 }
 The handle carries a `resourceId`, and optionally a `contentHash`, `mediaType` and `byteLength`. Macro
 Deck serves the bytes and each client caches them by hash, so an icon shown by a hundred deck widgets is
 transferred once per client rather than embedded a hundred times. A plugin gets a handle for its own bytes
-from [`UiResources`](#registering-your-own-images).
+from [`UiResources`](#registering-your-own-images), and for an icon from its own bundled icon packs from
+[`GetPluginIconAsync`](#icons-from-your-bundled-icon-packs).
 
 Macro Deck's own icons need no resource at all: name one with [`ui.icon`](/ui/components/icon/) and every
 reader draws it from its own set.
@@ -73,6 +74,36 @@ one you build yourself: it carries the `contentHash` that makes clients fetch ne
 
 In tests, `FakeIntegrationContext.UiResources` is a `FakeUiResourceRegistry` that applies the same rules and
 exposes what was registered, and `MacroDeckTestHost` answers registrations over the wire.
+
+## Icons from your bundled icon packs
+
+A plugin that bundles icon packs in its artifact (`bundledIconPacks` in the
+[manifest](/reference/manifest/)) shows one of their icons without uploading anything:
+
+```csharp
+UiResource logo = await context.UiResources.GetPluginIconAsync("logos", "spotify", cancellationToken);
+var image = new UiImage { Key = "logo", Source = UiValue.Of(logo), Size = 0.2 };
+```
+
+The first argument is the pack's key in the manifest, the second the icon's name inside that pack.
+
+- **No upload, no quota.** The handle points into Macro Deck's icon store. Nothing is sent from the
+  plugin, nothing is held in memory for the session, and nothing counts against
+  `maxUiResourceBytesPerPlugin` or `maxUiResourcesPerPlugin`.
+- **Stable across restarts.** The handle stays valid after Macro Deck restarts, unlike a registered
+  resource.
+- **A replaced icon gets a new `contentHash`.** When an update or a development sync replaces the icon,
+  the `resourceId` stays and the `contentHash` changes, so clients fetch the new bytes. Ask again when you
+  build a tree rather than holding a handle for the plugin's whole lifetime.
+- **Your packs only.** The lookup is scoped to the calling plugin, so no plugin can reach another's icons.
+- **Errors.** `UiResourceException.ErrorCode` is `PluginIconNotFound` when your packs hold no such key or
+  name, `Unsupported` on a Macro Deck that predates bundled icon packs, and `Failed` when the icon cannot
+  be served within `maxUiResourceBytes` or the call could not complete.
+
+`UiIcon` stays limited to Macro Deck's own glyphs: a bundled icon is a coloured image and is drawn through
+`UiImage` or a button's `Source`. In tests, `FakeUiResourceRegistry.AddPluginIcon(key, name, bytes,
+mediaType)` makes an icon available to `GetPluginIconAsync`, and `MacroDeckTestHost` answers the lookup
+over the wire as a plugin without bundled packs.
 
 ## Limits
 

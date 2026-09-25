@@ -54,6 +54,7 @@ code, protocol schemas, issue discussions or exhaustive option lists.
 - [0093 - Plugins and integrations talk over a host-brokered message channel](0093-plugins-and-integrations-talk-over-a-host-brokered-message-channel.md)
 - [0095 - USB connections without debugging](0095-usb-connections-without-debugging.md)
 - [0096 - The root stays offline and signs one issuer, and revocation stops new installs](0096-offline-root-with-an-online-issuer.md)
+- [0097 - Plugin-bundled icon packs are owned by declaration and named by key and icon name](0097-plugin-bundled-icon-packs.md)
 
 ## Macro Deck UI
 
