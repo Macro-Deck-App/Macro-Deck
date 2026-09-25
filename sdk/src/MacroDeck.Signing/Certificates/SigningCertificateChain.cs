@@ -308,7 +308,7 @@ public static class SigningCertificateChain
 			issuer));
 	}
 
-	private static bool DeclaresIssuer(byte[] certificateBytes)
+	internal static bool DeclaresIssuer(byte[] certificateBytes)
 	{
 		try
 		{

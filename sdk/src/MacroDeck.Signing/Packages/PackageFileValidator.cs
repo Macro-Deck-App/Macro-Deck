@@ -8,14 +8,15 @@ namespace MacroDeck.Signing.Packages;
 /// The declared-files check shared by every <see cref="SignablePackageFormat"/>, run before signing (so a
 /// broken archive is never signed) and after verifying a signature (so a tampered archive never passes):
 /// every <c>files</c> entry exists with the declared size and SHA-256, and the package contains no entry
-/// beyond those and the root manifest, <c>certificate.json</c>, <c>certificate.sig</c>, <c>issuer.json</c> and
-/// <c>issuer.sig</c>.
+/// beyond those and the root manifest, <c>certificate.json</c> and <c>certificate.sig</c>, and - only for a
+/// certificate that names an issuer - <c>issuer.json</c> and <c>issuer.sig</c>.
 /// </summary>
 internal static class PackageFileValidator
 {
 	public static async Task<SigningFailure?> ValidateAsync(IPackageEntrySource source,
 		JsonObject manifest,
 		string manifestEntryName,
+		bool withIssuer,
 		CancellationToken cancellationToken)
 	{
 		if (!DeclaredPackageFiles.TryParse(manifest, out var declared, out var parseError))
@@ -58,6 +59,12 @@ internal static class PackageFileValidator
 					$"'{file.Path}' is declared more than once.");
 			}
 
+			if (withIssuer && PackageSigningFiles.IsIssuerMaterial(file.Path))
+			{
+				return new SigningFailure(SigningError.ManifestMalformed,
+					$"'{file.Path}' is reserved for the issuer certificate and cannot be declared in 'files'.");
+			}
+
 			var entry = source.Find(file.Path);
 			if (entry is null)
 			{
@@ -82,7 +89,7 @@ internal static class PackageFileValidator
 
 		foreach (var name in archiveEntryNames)
 		{
-			if (IsRootSignatureMaterial(name, manifestEntryName) || declaredPaths.Contains(name))
+			if (IsRootSignatureMaterial(name, manifestEntryName, withIssuer) || declaredPaths.Contains(name))
 			{
 				continue;
 			}
@@ -94,9 +101,9 @@ internal static class PackageFileValidator
 		return null;
 	}
 
-	private static bool IsRootSignatureMaterial(string entryFullName, string manifestEntryName) =>
+	private static bool IsRootSignatureMaterial(string entryFullName, string manifestEntryName, bool withIssuer) =>
 		entryFullName == manifestEntryName ||
-		PackageSigningFiles.IsSignatureMaterial(entryFullName);
+		PackageSigningFiles.IsSignatureMaterial(entryFullName, withIssuer);
 
 	private static async Task<string> ComputeEntrySha256Async(IPackageEntrySource source,
 		PackageEntry entry,

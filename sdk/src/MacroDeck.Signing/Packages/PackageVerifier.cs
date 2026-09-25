@@ -158,8 +158,10 @@ public static class PackageVerifier
 			var certificateBytes = await ReadEntryAsync(source, certificateEntry, cancellationToken);
 			var certificateSignatureBytes = await ReadEntryAsync(source, certificateSignatureEntry, cancellationToken);
 
-			var issuerEntry = source.Find(PluginArtifactFiles.IssuerCertificateFileName);
-			var issuerSignatureEntry = source.Find(PluginArtifactFiles.IssuerCertificateSignatureFileName);
+			var namesIssuer = SigningCertificateChain.DeclaresIssuer(certificateBytes);
+			var issuerEntry = namesIssuer ? source.Find(PluginArtifactFiles.IssuerCertificateFileName) : null;
+			var issuerSignatureEntry
+				= namesIssuer ? source.Find(PluginArtifactFiles.IssuerCertificateSignatureFileName) : null;
 			if (issuerEntry is null != issuerSignatureEntry is null)
 			{
 				return PackageVerifyResult.Fail(SigningError.CertificateIssuerMissing,
@@ -197,7 +199,11 @@ public static class PackageVerifier
 			}
 
 			var filesFailure
-				= await PackageFileValidator.ValidateAsync(source, manifestNode, manifestEntryName, cancellationToken);
+				= await PackageFileValidator.ValidateAsync(source,
+					manifestNode,
+					manifestEntryName,
+					trusted.Issuer is not null,
+					cancellationToken);
 			if (filesFailure is not null)
 			{
 				return PackageVerifyResult.Fail(filesFailure.Error, filesFailure.Message);

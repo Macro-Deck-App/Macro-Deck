@@ -145,6 +145,7 @@ public static class PackageSigner
 			var filesFailure = await PackageFileValidator.ValidateAsync(ZipPackageEntrySource.Wrap(source),
 				manifestNode,
 				manifestEntryName,
+				issuerCertificateBytes is not null,
 				cancellationToken);
 			if (filesFailure is not null)
 			{
@@ -197,7 +198,7 @@ public static class PackageSigner
 				{
 					foreach (var entry in source.Entries)
 					{
-						if (PackageSigningFiles.IsSignatureMaterial(entry.FullName))
+						if (PackageSigningFiles.IsSignatureMaterial(entry.FullName, issuerCertificateBytes is not null))
 						{
 							// Rewritten fresh below from the exact supplied bytes; never carried over from
 							// the unsigned source, which would otherwise leave two same-named entries.

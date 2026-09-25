@@ -172,7 +172,7 @@ internal sealed class IssuerSignedPackageTests
 	}
 
 	[Test]
-	public async Task A_root_signed_package_carrying_issuer_files_is_refused()
+	public async Task A_root_signed_package_carrying_undeclared_issuer_files_is_refused()
 	{
 		var certificate = TestPki.IssueCertificate();
 		var issuer = TestPki.IssueIssuer();
@@ -193,7 +193,69 @@ internal sealed class IssuerSignedPackageTests
 
 		var result = await Verify(output);
 
-		Assert.That(result.Error, Is.EqualTo(SigningError.CertificateIssuerMismatch), result.Message);
+		Assert.That(result.Error, Is.EqualTo(SigningError.UndeclaredFile), result.Message);
+	}
+
+	[Test]
+	public async Task A_root_signed_package_that_declares_its_own_issuer_json_still_verifies()
+	{
+		var package = PackageArchiveFixtures.CreatePluginArchive(Path.Combine(_directory, "package.macroDeckPlugin"),
+			"com.example.issuer",
+			"1.0.0",
+			[
+				new PackageArchiveFixtures.DeclaredFile("app", "binary-content"),
+				new PackageArchiveFixtures.DeclaredFile(PluginArtifactFiles.IssuerCertificateFileName, "{\"theme\":1}")
+			]);
+		var certificate = TestPki.IssueCertificate();
+		var output = Path.Combine(_directory, "signed.macroDeckPlugin");
+		using var signer = CreateSigner(certificate, null);
+
+		var signResult = await PackageSigner.SignAsync(package,
+			output,
+			signer,
+			certificate.CertificateBytes,
+			certificate.CertificateSignatureBytes,
+			_manifestReader);
+		var verifyResult = await Verify(output);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(signResult.Success, Is.True, signResult.Message);
+			Assert.That(verifyResult.Success, Is.True, verifyResult.Message);
+			Assert.That(PackageArchiveFixtures.ReadEntryText(output, PluginArtifactFiles.IssuerCertificateFileName),
+				Is.EqualTo("{\"theme\":1}"));
+		});
+	}
+
+	[Test]
+	public async Task An_issuer_signed_package_cannot_declare_the_issuer_file_names_as_content()
+	{
+		var package = PackageArchiveFixtures.CreatePluginArchive(Path.Combine(_directory, "package.macroDeckPlugin"),
+			"com.example.issuer",
+			"1.0.0",
+			[
+				new PackageArchiveFixtures.DeclaredFile("app", "binary-content"),
+				new PackageArchiveFixtures.DeclaredFile(PluginArtifactFiles.IssuerCertificateFileName, "{}")
+			]);
+		var issuer = TestPki.IssueIssuer();
+		var certificate = TestPki.IssueCertificate(issuer: issuer);
+		var output = Path.Combine(_directory, "signed.macroDeckPlugin");
+		using var signer = CreateSigner(certificate, issuer);
+
+		var result = await PackageSigner.SignAsync(package,
+			output,
+			signer,
+			certificate.CertificateBytes,
+			certificate.CertificateSignatureBytes,
+			issuer.CertificateBytes,
+			issuer.CertificateSignatureBytes,
+			_manifestReader);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.EqualTo(SigningError.ManifestMalformed), result.Message);
+			Assert.That(File.Exists(output), Is.False);
+		});
 	}
 
 	[Test]
@@ -298,20 +360,23 @@ internal sealed class IssuerSignedPackageTests
 	}
 
 	[Test]
-	public async Task Stale_issuer_files_in_the_source_are_not_carried_into_a_root_signed_package()
+	public async Task Stale_issuer_files_in_the_source_are_replaced_by_the_supplied_issuer()
 	{
 		var package = CreatePackage(".macroDeckPlugin");
 		PackageArchiveFixtures.AddEntry(package, PluginArtifactFiles.IssuerCertificateFileName, "stale");
 		PackageArchiveFixtures.AddEntry(package, PluginArtifactFiles.IssuerCertificateSignatureFileName, "stale");
-		var certificate = TestPki.IssueCertificate();
+		var issuer = TestPki.IssueIssuer();
+		var certificate = TestPki.IssueCertificate(issuer: issuer);
 		var output = Path.Combine(_directory, "signed.macroDeckPlugin");
-		using var signer = CreateSigner(certificate, null);
+		using var signer = CreateSigner(certificate, issuer);
 
 		var signResult = await PackageSigner.SignAsync(package,
 			output,
 			signer,
 			certificate.CertificateBytes,
 			certificate.CertificateSignatureBytes,
+			issuer.CertificateBytes,
+			issuer.CertificateSignatureBytes,
 			_manifestReader);
 		var verifyResult = await Verify(output);
 
@@ -320,7 +385,8 @@ internal sealed class IssuerSignedPackageTests
 		{
 			Assert.That(signResult.Success, Is.True, signResult.Message);
 			Assert.That(verifyResult.Success, Is.True, verifyResult.Message);
-			Assert.That(archive.GetEntry(PluginArtifactFiles.IssuerCertificateFileName), Is.Null);
+			Assert.That(archive.Entries.Count(entry => entry.FullName == PluginArtifactFiles.IssuerCertificateFileName),
+				Is.EqualTo(1));
 		});
 	}
 }

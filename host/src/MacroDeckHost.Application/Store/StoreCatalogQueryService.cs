@@ -188,7 +188,10 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 
 	private StoreCatalogItem Describe(StoreCatalogEntry entry)
 	{
-		var installedVersion = InstalledVersion(entry);
+		var activePlugin = entry.Kind is StoreExtensionKind.Plugin ? ActivePluginVersion(entry) : null;
+		var installedVersion = entry.Kind is StoreExtensionKind.Plugin
+			? activePlugin?.Version
+			: _installations.Find(entry.Kind, entry.Id)?.Version;
 		var unsupportedReason = UnsupportedReason(entry);
 		var state = unsupportedReason is not null
 			? StoreInstallState.Unsupported
@@ -205,13 +208,13 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 			InstalledVersion = installedVersion,
 			InstalledTestBuild = InstalledTestBuild(entry, installedVersion),
 			UnsupportedReason = unsupportedReason,
-			SigningRevoked = SigningRevoked(entry)
+			SigningRevoked = SigningRevoked(activePlugin)
 		};
 	}
 
-	private bool SigningRevoked(StoreCatalogEntry entry)
+	private bool SigningRevoked(InstalledPluginVersion? active)
 	{
-		if (entry.Kind is not StoreExtensionKind.Plugin || ActivePluginVersion(entry) is not { } active)
+		if (active is null || _catalog.Snapshot.RevokedKeyIds.Count == 0)
 		{
 			return false;
 		}
