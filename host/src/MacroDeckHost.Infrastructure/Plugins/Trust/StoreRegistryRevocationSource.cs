@@ -3,10 +3,6 @@ using MacroDeckHost.Application.Store;
 
 namespace MacroDeckHost.Infrastructure.Plugins.Trust;
 
-/// <summary>Answers from the revoked keys of the signed Store registry snapshot currently loaded. Without a
-/// loaded snapshot it reports <see cref="PluginRevocationStatus.Unavailable" />, which never blocks:
-/// treating "we cannot check" as "revoked" would refuse every signed plugin on a machine that has not
-/// fetched the registry yet.</summary>
 public sealed class StoreRegistryRevocationSource : IPluginRevocationSource
 {
 	private readonly IStoreCatalog _catalog;
