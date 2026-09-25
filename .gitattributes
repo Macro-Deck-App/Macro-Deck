@@ -16,3 +16,6 @@
 *.ttf binary
 *.woff binary
 *.woff2 binary
+
+# Signed fixtures: their signatures cover the exact bytes.
+sdk/tests/fixtures/signing-vectors/v1-chain/** -text
