@@ -1,6 +1,7 @@
 using MacroDeckHost.Application.Backups;
 using System.Collections.Concurrent;
 using System.Security.Cryptography;
+using System.Text.Json;
 using MacroDeck.Plugin.Analyzers;
 using MacroDeck.Plugin.Packaging.Artifacts;
 using MacroDeck.Plugin.Packaging.Manifest;
@@ -36,10 +37,14 @@ public sealed class PluginInstaller : IPluginInstaller
 
 	private static readonly TimeSpan _healthPollInterval = TimeSpan.FromMilliseconds(250);
 
-	private static readonly HashSet<string> _signatureMaterialFiles = new(StringComparer.OrdinalIgnoreCase)
+	private static readonly HashSet<string> _certificateFiles = new(StringComparer.OrdinalIgnoreCase)
 	{
 		PluginArtifactFiles.CertificateFileName,
-		PluginArtifactFiles.CertificateSignatureFileName,
+		PluginArtifactFiles.CertificateSignatureFileName
+	};
+
+	private static readonly HashSet<string> _issuerFiles = new(StringComparer.OrdinalIgnoreCase)
+	{
 		PluginArtifactFiles.IssuerCertificateFileName,
 		PluginArtifactFiles.IssuerCertificateSignatureFileName
 	};
@@ -1322,10 +1327,11 @@ public sealed class PluginInstaller : IPluginInstaller
 
 		var declaredByPath = declared.ToDictionary(file => file.Path, StringComparer.OrdinalIgnoreCase);
 		var signed = manifest.Signature is not null;
+		var withIssuer = signed && CertificateNamesIssuer(extractDirectory);
 
 		foreach (var relativePath in extractedFiles)
 		{
-			if (IsRootSignatureMaterial(relativePath, signed))
+			if (IsRootSignatureMaterial(relativePath, signed, withIssuer))
 			{
 				continue;
 			}
@@ -1362,12 +1368,30 @@ public sealed class PluginInstaller : IPluginInstaller
 	}
 
 	/// <summary>True for <c>manifest.json</c> itself, always excluded from <c>files[]</c>, and - only when
-	/// <paramref name="signed"/> - for the certificate, its issuer certificate and their signatures a signed
-	/// plugin carries alongside it. An unsigned artifact has no certificate to exclude, so it must declare
-	/// those paths like any other file rather than smuggle them past the check.</summary>
-	private static bool IsRootSignatureMaterial(string relativePath, bool signed)
+	/// <paramref name="signed"/> - for the certificate and its root signature a signed plugin carries
+	/// alongside it. An unsigned artifact has no certificate to exclude, so it must declare those two
+	/// paths like any other file rather than smuggle them past the check.</summary>
+	private static bool IsRootSignatureMaterial(string relativePath, bool signed, bool withIssuer)
 		=> string.Equals(relativePath, PluginArtifactFiles.ManifestFileName, StringComparison.OrdinalIgnoreCase) ||
-			(signed && _signatureMaterialFiles.Contains(relativePath));
+			(signed && _certificateFiles.Contains(relativePath)) ||
+			(withIssuer && _issuerFiles.Contains(relativePath));
+
+	// Unverified: only decides which root files count as signature material; the trust evaluator verifies them.
+	private static bool CertificateNamesIssuer(string extractDirectory)
+	{
+		try
+		{
+			using var document = JsonDocument.Parse(
+				File.ReadAllBytes(Path.Combine(extractDirectory, PluginArtifactFiles.CertificateFileName)));
+			return document.RootElement.ValueKind == JsonValueKind.Object &&
+				document.RootElement.TryGetProperty("issuer", out var issuer) &&
+				issuer.ValueKind != JsonValueKind.Null;
+		}
+		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
+		{
+			return false;
+		}
+	}
 
 	private static string ComputeSha256(string path)
 	{

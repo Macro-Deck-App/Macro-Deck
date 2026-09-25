@@ -196,4 +196,19 @@ public class IssuerSigningCliTests
 
 		Assert.That(result.Problems.Select(problem => problem.Code), Does.Contain("undeclared-file"));
 	}
+
+	[Test]
+	public async Task Validate_flags_issuer_files_in_an_artifact_signed_directly_under_the_root()
+	{
+		var (_, signError, signExit, signedPath) = await Sign(TestPki.IssueCertificate());
+		PackageArchiveFixtures.AddEntry(signedPath, PluginArtifactFiles.IssuerCertificateFileName, "{}");
+
+		var result = await ManifestValidator.ValidateArtifactAsync(signedPath);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(signExit, Is.EqualTo(ExitCode.Success), signError);
+			Assert.That(result.Problems.Select(problem => problem.Code), Does.Contain("undeclared-file"));
+		});
+	}
 }
