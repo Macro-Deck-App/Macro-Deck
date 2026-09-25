@@ -7,6 +7,11 @@ on:
         description: Release version - 3.0.0 for a full release or 3.0.0-beta.4 for a beta
         type: string
         required: true
+      sign_windows:
+        description: Sign Windows with eSigner (uses exactly 4 signatures and enables publishing)
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: build-${{ github.ref }}
@@ -30,13 +35,6 @@ jobs:
   prepare:
     name: Prepare version
     runs-on: blacksmith-2vcpu-ubuntu-2404
-    # Overrides the workflow-level permissions above (a job-level block
-    # replaces rather than adds to them) to grant the contents: write scope
-    # POST /repos/{repo}/releases/generate-notes needs. build.yml is
-    # workflow_dispatch-only, so this elevated scope is never reachable from a
-    # fork pull request.
-    permissions:
-      contents: write
     outputs:
       version: ${{ steps.version.outputs.version }}
       informational: ${{ steps.version.outputs.informational }}
@@ -69,14 +67,21 @@ jobs:
           } >> "$GITHUB_OUTPUT"
           echo "Version: ${informational} (build ${{ github.run_number }}, built ${build_time})"
 
-      # The body of the GitHub release publish-release.yml creates, which the app
-      # reads its release notes from. An empty body must not fail the build.
+  release-notes:
+    name: Generate release notes
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    needs: prepare
+    # POST /repos/{repo}/releases/generate-notes needs contents: write. Keep that
+    # elevated permission isolated from version calculation and every build job.
+    permissions:
+      contents: write
+    steps:
       - name: Generate release notes
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh api "repos/${{ github.repository }}/releases/generate-notes" \
-            -f tag_name="v${{ steps.version.outputs.version }}" \
+            -f tag_name="v${{ needs.prepare.outputs.version }}" \
             -f target_commitish="$GITHUB_SHA" \
             --jq .body > release-notes.md
 
@@ -276,15 +281,14 @@ jobs:
           if-no-files-found: error
 
   publish-host:
-    name: Publish host (${{ matrix.rid }})
+    name: Publish hosts
     runs-on: blacksmith-2vcpu-ubuntu-2404
     needs: [prepare, build-ui]
-    strategy:
-      matrix:
-        rid: [win-x64, linux-x64, osx-arm64]
     steps:
       - uses: actions/checkout@v5
 
+      # stage-dotnet-runtime.sh uses Node to resolve and validate the runtime
+      # archives, even though dotnet publish itself does not need it.
       - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -314,50 +318,63 @@ jobs:
 
       - name: Publish host
         run: |
-          dotnet publish host/src/MacroDeckHost \
-            -c Release \
-            -r ${{ matrix.rid }} \
-            -p:Version=${{ needs.prepare.outputs.version }} \
-            -p:InformationalVersion=${{ needs.prepare.outputs.informational }} \
-            -p:BuildTimestamp=${{ needs.prepare.outputs.build_time }} \
-            -p:BuildNumber=${{ needs.prepare.outputs.build_number }} \
-            -p:BuildChannel=${{ env.BUILD_CHANNEL }} \
-            -p:DebugType=None \
-            -p:DebugSymbols=false \
-            -o publish
+          for rid in win-x64 linux-x64 osx-arm64; do
+            output="publish/$rid"
+            dotnet publish host/src/MacroDeckHost \
+              -c Release \
+              -r "$rid" \
+              -p:Version=${{ needs.prepare.outputs.version }} \
+              -p:InformationalVersion=${{ needs.prepare.outputs.informational }} \
+              -p:BuildTimestamp=${{ needs.prepare.outputs.build_time }} \
+              -p:BuildNumber=${{ needs.prepare.outputs.build_number }} \
+              -p:BuildChannel=${{ env.BUILD_CHANNEL }} \
+              -p:DebugType=None \
+              -p:DebugSymbols=false \
+              -o "$output"
 
-      # The framework-dependent host looks for its runtime in runtime/ next to it; the
-      # official ASP.NET Core archives are staged there at the SDK's runtime patch.
-      - name: Stage bundled .NET runtime
-        run: ci/scripts/stage-dotnet-runtime.sh ${{ matrix.rid }} publish/runtime
+            # The framework-dependent host looks for its runtime in runtime/
+            # next to it. All three archive formats can be staged on Ubuntu.
+            ci/scripts/stage-dotnet-runtime.sh "$rid" "$output/runtime"
 
-      # Issue #316 guard for the host's own output; publish/runtime is loose by design. MacroDeck*.pdb
-      # only, because win-x64 ships SkiaSharp/HarfBuzzSharp pdbs that DebugType=None does not strip.
-      - name: Verify the publish output has no loose assemblies
-        run: |
-          leftovers=$(find publish -path publish/runtime -prune -o -type f \( -name '*.dll' -o -name 'MacroDeck*.pdb' \) -print)
-          if [ -n "$leftovers" ]; then
-            echo "unexpected loose assemblies in the publish output:" >&2
-            echo "$leftovers" >&2
-            exit 1
-          fi
+            # Issue #316 guard for the host's own output; runtime/ is loose by
+            # design. Third-party PDBs do not match MacroDeck*.pdb.
+            leftovers=$(find "$output" -path "$output/runtime" -prune -o \
+              -type f \( -name '*.dll' -o -name 'MacroDeck*.pdb' \) -print)
+            if [ -n "$leftovers" ]; then
+              echo "unexpected loose assemblies in $rid publish output:" >&2
+              echo "$leftovers" >&2
+              exit 1
+            fi
 
-      - name: Add web client, configuration UI and packaged marker
-        run: |
-          cp -R ui/web-client/dist publish/wwwroot
-          cp -R ui/angular/dist/desktop-ui/browser publish/wwwroot/admin
-          mkdir -p publish/wwwroot/targets
-          cp -R ui/web-client/dist-carthing publish/wwwroot/targets/carthing
-          touch publish/.macro-deck-packaged
+            cp -R ui/web-client/dist "$output/wwwroot"
+            cp -R ui/angular/dist/desktop-ui/browser "$output/wwwroot/admin"
+            mkdir -p "$output/wwwroot/targets"
+            cp -R ui/web-client/dist-carthing "$output/wwwroot/targets/carthing"
+            touch "$output/.macro-deck-packaged"
+            tar czf "host-$rid.tar.gz" -C "$output" .
+          done
 
-      - name: Pack (preserve permissions)
-        run: tar czf host-${{ matrix.rid }}.tar.gz -C publish .
-
-      - name: Upload host publish
+      - name: Upload Windows host
         uses: actions/upload-artifact@v7
         with:
-          name: host-${{ matrix.rid }}
-          path: host-${{ matrix.rid }}.tar.gz
+          name: host-win-x64
+          path: host-win-x64.tar.gz
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Upload Linux host
+        uses: actions/upload-artifact@v7
+        with:
+          name: host-linux-x64
+          path: host-linux-x64.tar.gz
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Upload macOS host
+        uses: actions/upload-artifact@v7
+        with:
+          name: host-osx-arm64
+          path: host-osx-arm64.tar.gz
           retention-days: 14
           if-no-files-found: error
 
@@ -368,9 +385,9 @@ jobs:
     # newer ELF features on the ubuntu-latest (24.04) image, and keeps the
     # declared libc6 floor in tauri.linux.conf.json's deb.depends accurate.
     runs-on: blacksmith-2vcpu-ubuntu-2204
-    # The signing and updater credentials this job reads are production environment secrets.
+    # Signing and updater credentials are production environment secrets.
     environment: production
-    needs: [prepare, test-host, build-ui, publish-host]
+    needs: [prepare, publish-host]
     env:
       # Without the updater key the bundle is built without updater artifacts and
       # no channel file is generated (mirrors the signing gates).
@@ -542,7 +559,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: macro-deck-linux
+          name: staging-macro-deck-linux
           path: |
             ui/bootstrapper/target/release/bundle/appimage/*.AppImage
             ui/bootstrapper/target/release/bundle/appimage/*.AppImage.sha256
@@ -552,17 +569,17 @@ jobs:
             ui/bootstrapper/target/release/bundle/rpm/*.rpm.sha256
             ui/bootstrapper/target/release/bundle/latest-linux.json
             ui/bootstrapper/target/release/bundle/beta-linux.json
-          retention-days: 14
+          retention-days: 1
           if-no-files-found: error
 
   package-windows:
-    name: Package Windows (NSIS)
+    name: Package and optionally sign Windows (NSIS)
     runs-on: blacksmith-2vcpu-windows-2025
-    # The signing and updater credentials this job reads are production environment secrets.
+    # This intentionally runs after release-gate. eSigner is quota-limited, so
+    # no Windows signature is spent until every other build and test is green.
     environment: production
-    needs: [prepare, test-host, test-host-windows, build-ui, publish-host]
+    needs: [prepare, publish-host, release-gate]
     env:
-      HAS_WIN_CERT: ${{ secrets.WINDOWS_SIGN_CERT_PFX_BASE64 != '' }}
       HAS_UPDATER_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY != '' }}
     steps:
       - uses: actions/checkout@v5
@@ -590,23 +607,6 @@ jobs:
           mkdir -p ui/bootstrapper/host-publish
           tar xzf host-win-x64.tar.gz -C ui/bootstrapper/host-publish
 
-      - name: Prepare signing certificate
-        if: ${{ env.HAS_WIN_CERT == 'true' }}
-        shell: pwsh
-        run: |
-          $pfxPath = Join-Path $env:RUNNER_TEMP 'codesign.pfx'
-          [System.IO.File]::WriteAllBytes($pfxPath,
-            [System.Convert]::FromBase64String($env:PFX_BASE64))
-          "WINDOWS_SIGN_CERT_PFX_FILE=$pfxPath" >> $env:GITHUB_ENV
-        env:
-          PFX_BASE64: ${{ secrets.WINDOWS_SIGN_CERT_PFX_BASE64 }}
-
-      - name: Sign host binaries
-        shell: pwsh
-        run: ci/signing/sign-windows-files.ps1 -Directory ui/bootstrapper/host-publish
-        env:
-          WINDOWS_SIGN_CERT_PASSWORD: ${{ secrets.WINDOWS_SIGN_CERT_PASSWORD }}
-
       - name: Install dependencies
         working-directory: ui/bootstrapper
         run: npm ci
@@ -619,23 +619,85 @@ jobs:
             "${{ needs.prepare.outputs.version }}" "${{ env.HAS_UPDATER_KEY == 'true' && 'true' || 'false' }}" "${{ needs.prepare.outputs.updater_channel }}" \
             > version-override.json
 
-      # The bootstrapper executable and the NSIS installer are signed through the
-      # windows.signCommand hook (ci/signing/sign-windows-file.ps1), which skips
-      # itself when no certificate is configured.
-      - name: Build NSIS installer
+      # Compile everything before touching the quota-limited eSigner credential.
+      # `tauri bundle` below reuses this executable and performs the package-type
+      # patch before invoking signCommand, so the Authenticode signature remains valid.
+      - name: Build Windows executable without bundling
         working-directory: ui/bootstrapper
-        run: npm run tauri build -- --bundles nsis --config release.conf.json --config version-override.json
+        run: npm run tauri build -- --no-bundle --config release.conf.json --config version-override.json
         env:
-          # Cargo reads a namespaced environment variable; derive it from the
-          # workflow's single BuildChannel source of truth.
           MACRODECK_BUILD_CHANNEL: ${{ env.BUILD_CHANNEL }}
-          # A no-op on Windows (config.version already is the release version):
-          # set uniformly so the updater's comparator path isn't Linux-only and
-          # untested elsewhere (issue #271).
           MACRODECK_RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
-          WINDOWS_SIGN_CERT_PASSWORD: ${{ secrets.WINDOWS_SIGN_CERT_PASSWORD }}
+
+      - name: Validate eSigner configuration
+        if: ${{ inputs.sign_windows }}
+        shell: pwsh
+        env:
+          ES_USERNAME: ${{ secrets.ES_USERNAME }}
+          ES_PASSWORD: ${{ secrets.ES_PASSWORD }}
+          ES_CREDENTIAL_ID: ${{ secrets.ES_CREDENTIAL_ID }}
+          ES_TOTP_SECRET: ${{ secrets.ES_TOTP_SECRET }}
+        run: |
+          $missing = @('ES_USERNAME', 'ES_PASSWORD', 'ES_CREDENTIAL_ID', 'ES_TOTP_SECRET') |
+            Where-Object { -not [Environment]::GetEnvironmentVariable($_) }
+          if ($missing.Count -gt 0) {
+            throw "Windows signing was requested but these signing-environment secrets are missing: $($missing -join ', ')"
+          }
+
+      # Pinned instead of using @develop. This initializes SSL.com's official
+      # CodeSignTool (including its runtime) and exports CODE_SIGN_TOOL_PATH for
+      # the Tauri signCommand. `--version` performs no signing operation.
+      - name: Prepare SSL.com CodeSignTool
+        if: ${{ inputs.sign_windows }}
+        uses: sslcom/esigner-codesign@cf5f6c1d38ad10f47e3ed9aca873f429b1a8d85b # v1.3.2
+        with:
+          command: --version
+          environment_name: PROD
+
+      - name: Sign staged Windows host
+        if: ${{ inputs.sign_windows }}
+        shell: pwsh
+        run: ci/signing/sign-windows-files.ps1 -Directory ui/bootstrapper/host-publish
+        env:
+          WINDOWS_SIGNING_ENABLED: 'true'
+          ES_USERNAME: ${{ secrets.ES_USERNAME }}
+          ES_PASSWORD: ${{ secrets.ES_PASSWORD }}
+          ES_CREDENTIAL_ID: ${{ secrets.ES_CREDENTIAL_ID }}
+          ES_TOTP_SECRET: ${{ secrets.ES_TOTP_SECRET }}
+
+      # The custom signCommand signs the Tauri executable, generated uninstaller
+      # and final installer. Calls for Tauri's five NSIS DLLs are deliberate no-ops.
+      - name: Bundle NSIS installer
+        working-directory: ui/bootstrapper
+        run: npm run tauri bundle -- --bundles nsis --config release.conf.json --config version-override.json
+        env:
+          WINDOWS_SIGNING_ENABLED: ${{ inputs.sign_windows }}
+          ES_USERNAME: ${{ inputs.sign_windows && secrets.ES_USERNAME || '' }}
+          ES_PASSWORD: ${{ inputs.sign_windows && secrets.ES_PASSWORD || '' }}
+          ES_CREDENTIAL_ID: ${{ inputs.sign_windows && secrets.ES_CREDENTIAL_ID || '' }}
+          ES_TOTP_SECRET: ${{ inputs.sign_windows && secrets.ES_TOTP_SECRET || '' }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_UPDATER_KEY_PASSWORD }}
+
+      - name: Verify eSigner signature budget
+        if: ${{ inputs.sign_windows }}
+        shell: pwsh
+        run: |
+          $manifest = Join-Path $env:RUNNER_TEMP 'macro-deck-esigner-signatures.txt'
+          if (-not (Test-Path $manifest)) {
+            throw 'eSigner did not record any signatures'
+          }
+          $roles = @(Get-Content $manifest | ForEach-Object { ($_ -split '\|', 2)[0] })
+          $expected = @('App', 'Host', 'Installer', 'Uninstaller')
+          if ($roles.Count -ne 4 -or (Compare-Object ($roles | Sort-Object) $expected)) {
+            throw "Expected exactly Host, App, Uninstaller and Installer signatures; got: $($roles -join ', ')"
+          }
+          "Windows signing used exactly $($roles.Count) eSigner signatures." >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Record unsigned Windows build
+        if: ${{ ! inputs.sign_windows }}
+        shell: bash
+        run: echo 'Windows artifacts are unsigned; this run will not be published.' >> "$GITHUB_STEP_SUMMARY"
 
       # Stable releases publish both latest and beta so beta clients can move
       # to GA; beta releases publish only beta and never reach stable clients.
@@ -653,20 +715,20 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: macro-deck-windows
+          name: staging-macro-deck-windows
           path: |
             ui/bootstrapper/target/release/bundle/nsis/*.exe
             ui/bootstrapper/target/release/bundle/latest-windows.json
             ui/bootstrapper/target/release/bundle/beta-windows.json
-          retention-days: 14
+          retention-days: 1
           if-no-files-found: error
 
   package-macos:
     name: Package macOS (DMG)
     runs-on: blacksmith-6vcpu-macos-26
-    # The signing, notarization and updater credentials this job reads are production environment secrets.
+    # Signing, notarization and updater credentials are production environment secrets.
     environment: production
-    needs: [prepare, test-host, test-host-macos, build-ui, publish-host]
+    needs: [prepare, publish-host]
     env:
       HAS_MAC_CERT: ${{ secrets.MACOS_SIGN_CERT_P12_BASE64 != '' }}
       HAS_NOTARY_KEY: ${{ secrets.APPLE_API_KEY_P8_BASE64 != '' && secrets.APPLE_API_KEY_ID != '' && secrets.APPLE_API_ISSUER_ID != '' && secrets.MACOS_SIGN_CERT_P12_BASE64 != '' }}
@@ -848,19 +910,108 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: macro-deck-macos
+          name: staging-macro-deck-macos
           path: |
             ui/bootstrapper/target/release/bundle/dmg/*.dmg
             ui/bootstrapper/target/release/bundle/macos/*.app.tar.gz
             ui/bootstrapper/target/release/bundle/latest-darwin.json
             ui/bootstrapper/target/release/bundle/beta-darwin.json
-          retention-days: 14
+          retention-days: 1
           if-no-files-found: error
 
   # The release runs the same suite CI does, against a production host staged from this revision. It
   # needs none of the packaging output - it stages its own - so it runs alongside the packagers rather
-  # than after them. Nothing here waits on it: publish-release.yml only runs for a fully successful
-  # build, which is what keeps a red suite from being published.
+  # than after them. Only release-gate waits for it, to keep a red suite from spending eSigner quota.
   e2e:
     name: E2E
     uses: ./.github/workflows/e2e-run.yml
+
+  # This gate is intentionally stricter than the ordinary package dependencies:
+  # it protects the quota-limited Windows signing step. Linux/macOS packaging and
+  # every test can run in parallel, but eSigner is not touched unless all pass.
+  release-gate:
+    name: Ready for Windows signing
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    needs:
+      - release-notes
+      - pack-nuget
+      - test-host-windows
+      - test-host-macos
+      - e2e
+      - package-linux
+      - package-macos
+    steps:
+      - run: echo 'All builds and tests passed; Windows signing may start.'
+
+  # Platform jobs must upload staging artifacts because GitHub-hosted runners do
+  # not share a filesystem. Only this job exposes the macro-deck-* artifact set
+  # consumed by publish-release.yml, so a partial platform set is never publishable.
+  collect-release-artifacts:
+    name: Collect release artifacts
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    needs: [prepare, package-linux, package-macos, package-windows]
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: staging-macro-deck-linux
+          path: release-artifacts/linux
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: staging-macro-deck-macos
+          path: release-artifacts/macos
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: staging-macro-deck-windows
+          path: release-artifacts/windows
+
+      - name: Verify complete platform set
+        shell: bash
+        run: |
+          set -euo pipefail
+          find release-artifacts/linux -type f \( -name '*.AppImage' -o -name '*.deb' -o -name '*.rpm' \) | grep -q .
+          find release-artifacts/macos -type f -name '*.dmg' | grep -q .
+          find release-artifacts/windows -type f -name '*.exe' | grep -q .
+
+      - name: Upload final Linux artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: macro-deck-linux
+          path: release-artifacts/linux/
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Upload final macOS artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: macro-deck-macos
+          path: release-artifacts/macos/
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Upload final Windows artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: macro-deck-windows
+          path: release-artifacts/windows/
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Write release metadata
+        shell: bash
+        run: |
+          jq -n \
+            --arg version '${{ needs.prepare.outputs.version }}' \
+            --arg commit "$GITHUB_SHA" \
+            --argjson windows_signed '${{ inputs.sign_windows }}' \
+            '{version: $version, commit: $commit, windows_signed: $windows_signed}' \
+            > release-metadata.json
+
+      - name: Upload release metadata
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-metadata
+          path: release-metadata.json
+          retention-days: 14
+          if-no-files-found: error

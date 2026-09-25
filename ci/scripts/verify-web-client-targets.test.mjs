@@ -54,7 +54,11 @@ for (const id of targets) {
 		const destination = `wwwroot/targets/${id}`;
 
 		const workflow = read('.github/workflows/build.yml');
-		assert.ok(workflow.includes(`cp -R ui/web-client/dist-${id} publish/${destination}`),
+		const copiesToSinglePublish = workflow.includes(
+			`cp -R ui/web-client/dist-${id} publish/${destination}`);
+		const copiesToRidPublish = workflow.includes('output="publish/$rid"') && workflow.includes(
+			`cp -R ui/web-client/dist-${id} "$output/${destination}"`);
+		assert.ok(copiesToSinglePublish || copiesToRidPublish,
 			`build.yml does not copy dist-${id} to ${destination}`);
 
 		const staging = read('ci/scripts/stage-host.sh');

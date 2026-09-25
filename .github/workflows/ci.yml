@@ -54,8 +54,13 @@ jobs:
 
       # Runs the cross-platform + SDK tests and the Linux platform project; the Windows/macOS
       # fixtures skip here via their [Platform] guard and run in the platform-tests matrix instead.
+      # The integration-heavy conformance assembly has its own parallel job below; it otherwise adds
+      # about four and a half minutes to this workflow's critical path on every run.
       - name: Test
-        run: dotnet test MacroDeck.slnx -c Release -p:BuildChannel=${{ env.BUILD_CHANNEL }} --no-build --logger trx --results-directory TestResults
+        run: >
+          dotnet test MacroDeck.slnx -c Release -p:BuildChannel=${{ env.BUILD_CHANNEL }} --no-build
+          --filter 'FullyQualifiedName!~MacroDeck.Plugin.Testing.Tests.ConformanceTests'
+          --logger trx --results-directory TestResults
 
       # dotnet test is the pass/fail gate; this step only surfaces the results as a check.
       - name: Report test results
@@ -94,6 +99,43 @@ jobs:
         run: >
           node ci/scripts/verify-nuget-packages.mjs
           "${{ runner.temp }}/packages" "${{ steps.package-version.outputs.version }}"
+
+  # This suite launches real well-behaved and deliberately broken plugin processes and exercises
+  # wall-clock timeout behaviour. It is independent of the package layout checks above and is the
+  # longest test assembly, so running it in parallel shortens CI without weakening either gate.
+  conformance-tests:
+    name: SDK conformance tests
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Test
+        run: >
+          dotnet test
+          sdk/tests/MacroDeck.Plugin.Testing.Tests.ConformanceTests/MacroDeck.Plugin.Testing.Tests.ConformanceTests.csproj
+          -c Release -p:BuildChannel=${{ env.BUILD_CHANNEL }}
+          --logger trx --results-directory TestResults
+
+      - name: Report test results
+        uses: dorny/test-reporter@v3
+        if: always()
+        with:
+          name: .NET conformance tests
+          path: TestResults/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
+          fail-on-empty: false
 
   # Same runners the release builds on. A platform fixture that passes here and fails there - or the
   # reverse - is the failure mode this exists to rule out, and it cannot do that from a different
