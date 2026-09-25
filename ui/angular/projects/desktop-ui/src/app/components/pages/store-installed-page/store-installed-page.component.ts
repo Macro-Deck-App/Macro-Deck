@@ -9,7 +9,6 @@ import { StoreCommunityNoticeComponent } from '../../store/store-community-notic
 import { StoreFooterComponent } from '../../store/store-footer.component';
 import { StorePageHeaderComponent } from '../../store/store-page-header.component';
 import { StoreSectionComponent, StoreUnsignedInstallRequest } from '../../store/store-section.component';
-import { StoreAccessService } from '../../../services/store-access.service';
 import { StoreBrowseStateService, isHistoryNavigation, isStoreDetailUrl } from '../../../services/store-browse-state.service';
 import { StoreOperationService } from '../../../services/store-operation.service';
 import { StoreUpdatesService } from '../../../services/store-updates.service';
@@ -45,7 +44,6 @@ export class StoreInstalledPageComponent implements OnInit, OnDestroy {
   private readonly toasts = inject(ToastService);
   protected readonly operations = inject(StoreOperationService);
   protected readonly updates = inject(StoreUpdatesService);
-  protected readonly storeUnlocked = inject(StoreAccessService).unlocked;
   private readonly appUpdates = inject(UpdateService);
   private readonly updateModal = inject(UpdateModalService);
   protected readonly updatesAvailable = this.appUpdates.hasBridge;

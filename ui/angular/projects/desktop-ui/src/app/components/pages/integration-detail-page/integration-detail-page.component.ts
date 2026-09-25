@@ -18,7 +18,6 @@ import { ConfigFlowService } from '../../../services/config-flow.service';
 import { IntegrationService, Integration } from '../../../services/integration.service';
 import { PluginCompatibilityService } from '../../../services/plugin-compatibility.service';
 import { PluginInstallationService } from '../../../services/plugin-installation.service';
-import { StoreAccessService } from '../../../services/store-access.service';
 import { isStoreDetailUrl } from '../../../services/store-browse-state.service';
 import { VariableCatalogService } from '../../../services/variable-catalog.service';
 import { VariableBindDialogComponent } from '../../variables/variable-bind-dialog.component';
@@ -85,9 +84,7 @@ export class IntegrationDetailPageComponent implements OnInit {
   private readonly installation = inject(PluginInstallationService);
 
   protected readonly integrationId = signal<string>('');
-  private readonly storeListed = signal(false);
-  private readonly storeUnlocked = inject(StoreAccessService).unlocked;
-  protected readonly showStoreLink = computed(() => this.storeListed() && this.storeUnlocked());
+  protected readonly showStoreLink = signal(false);
 
   protected readonly canUninstall = computed(() => {
     const integration = this.integration();
@@ -501,9 +498,9 @@ export class IntegrationDetailPageComponent implements OnInit {
     }
     try {
       const response = await this.api.getStoreExtension('Plugin', id);
-      this.storeListed.set(!!response.extension && id === this.integrationId());
+      this.showStoreLink.set(!!response.extension && id === this.integrationId());
     } catch {
-      this.storeListed.set(false);
+      this.showStoreLink.set(false);
     }
   }
 

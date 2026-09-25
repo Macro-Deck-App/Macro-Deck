@@ -14733,15 +14733,6 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>von {publisher}</value>
     <comment>[publisher:string]</comment>
   </data>
-  <data name="Store.Page.ComingSoonHeading" xml:space="preserve">
-    <value>Der Store ist noch nicht verfügbar</value>
-  </data>
-  <data name="Store.Page.ComingSoonMessage" xml:space="preserve">
-    <value>Wir bauen ihn noch. Plugins und Icon-Packs findest du hier in einem späteren Update.</value>
-  </data>
-  <data name="Store.Page.ComingSoonTestsAction" xml:space="preserve">
-    <value>Deine Tests öffnen</value>
-  </data>
   <data name="Store.Page.CompatibilityCheckedHint" xml:space="preserve">
     <value>Die Kompatibilität mit dieser Macro-Deck-Version wird beim Installieren geprüft.</value>
   </data>

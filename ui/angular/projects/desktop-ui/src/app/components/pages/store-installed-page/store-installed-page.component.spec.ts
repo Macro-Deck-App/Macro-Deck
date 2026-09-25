@@ -38,9 +38,7 @@ describe('StoreInstalledPageComponent', () => {
     }
   }
 
-  async function createFixture(items: StoreCatalogItemBody[],
-                               updates: StoreAvailableUpdateBody[],
-                               roles: string[] = ['StoreTester']): Promise<void> {
+  async function createFixture(items: StoreCatalogItemBody[], updates: StoreAvailableUpdateBody[]): Promise<void> {
     notifications = new Map();
     api = jasmine.createSpyObj<ApiService>('ApiService', [
       'onNotification', 'getStoreCatalog', 'getStoreUpdates', 'installStoreUpdates', 'getStoreOperations',
@@ -80,7 +78,7 @@ describe('StoreInstalledPageComponent', () => {
           provide: ConnectAccountService,
           useValue: {
             isSignedIn: signal(true),
-            session: signal({ account: { roles } }),
+            session: signal({ account: { roles: [] } }),
           },
         },
         { provide: PluginRuntimeService, useValue: { plugins: signal([]) } },
@@ -138,12 +136,5 @@ describe('StoreInstalledPageComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain(TestBed.inject(LocalizationService)
       .translateKey(AppStrings.Store.Page.InstalledEmptyHeading));
-  });
-
-  it('stays behind the coming-soon overlay for accounts that are not store testers', async () => {
-    await createFixture([item('com.acme.hue', 'UpdateAvailable')], [update('com.acme.hue')], []);
-
-    expect((fixture.nativeElement.querySelector('.store-page') as HTMLElement).hasAttribute('inert')).toBeTrue();
-    expect(fixture.nativeElement.querySelector('.store-coming-soon')).not.toBeNull();
   });
 });

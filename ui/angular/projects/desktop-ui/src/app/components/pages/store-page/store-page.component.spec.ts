@@ -913,74 +913,10 @@ describe('StorePageComponent', () => {
     });
   });
 
-  describe('store tester access', () => {
-    async function sessionIs(status: GetConnectSessionResponse['status'], roles: string[]): Promise<void> {
-      account.session.set({
-        status,
-        connectivity: 'ok',
-        offlineSince: null,
-        account: {
-          subject: 'u1', displayName: 'Tester', avatarAvailable: false, avatarVersion: null, creatorUsername: null, roles,
-        },
-        lastSuccessfulRefreshUtc: null,
-        message: null,
-        signInFailure: null,
-        accountManagementUrl: '',
-      });
-      account.isSignedIn.set(status === 'signedIn');
-      await settle();
-    }
+  it('opens the catalog without a signed-in account', async () => {
+    await createFixture();
 
-    function pageIsInert(): boolean {
-      return (fixture.nativeElement.querySelector('.store-page') as HTMLElement).hasAttribute('inert');
-    }
-
-    function comingSoonShown(): boolean {
-      return fixture.nativeElement.querySelector('.store-coming-soon') !== null;
-    }
-
-    it('keeps the store behind the coming-soon overlay while signed out', async () => {
-      await createFixture();
-
-      expect(pageIsInert()).toBeTrue();
-      expect(comingSoonShown()).toBeTrue();
-    });
-
-    it('keeps the overlay for a signed-in account without the StoreTester role', async () => {
-      await createFixture();
-      await sessionIs('signedIn', ['SomethingElse']);
-
-      expect(pageIsInert()).toBeTrue();
-      expect(comingSoonShown()).toBeTrue();
-    });
-
-    for (const status of ['suspended', 'reauthenticationRequired'] as const) {
-      it(`keeps the overlay for a StoreTester account that is ${status}`, async () => {
-        await createFixture();
-        await sessionIs(status, ['StoreTester']);
-
-        expect(pageIsInert()).toBeTrue();
-        expect(comingSoonShown()).toBeTrue();
-      });
-    }
-
-    it('lets a signed-in account without the StoreTester role open its tests from the overlay', async () => {
-      await createFixture();
-      expect(findButton(translate(AppStrings.Store.Page.ComingSoonTestsAction))).toBeUndefined();
-
-      await sessionIs('signedIn', []);
-      findButton(translate(AppStrings.Store.Page.ComingSoonTestsAction))!.click();
-
-      expect(comingSoonShown()).toBeTrue();
-      expect(routerSpy.navigate).toHaveBeenCalledWith(['/store/tests']);
-    });
-
-    it('opens the store for a signed-in StoreTester account', async () => {
-      await createFixture();
-      await sessionIs('signedIn', ['StoreTester']);
-
-      expect(pageIsInert()).toBeFalse();
-      expect(comingSoonShown()).toBeFalse();
-    });
+    expect((fixture.nativeElement.querySelector('.store-page') as HTMLElement).hasAttribute('inert')).toBeFalse();
+    expect(fixture.nativeElement.querySelectorAll('shared-store-extension-card').length).toBeGreaterThan(0);
   });
 });

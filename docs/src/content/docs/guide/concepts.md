@@ -129,11 +129,8 @@ Discord and more. Turn on the ones you use under **Integrations**.
 
 ![The Integrations page with ADB, Discord, Home Assistant, HTTP and Keyboard](../../../assets/guide/integrations.png)
 
-The **Store** for more plugins and icon packs is not available to everyone yet. Everything published
-there will be reviewed and signed first. Members of the Store tester programme can already use it:
-sign in with your Macro Deck account under **Settings > Account**. A change to your tester access
-can take up to a day to show up. If you were signed in before your Macro Deck version supported
-testers, sign out and in once.
+The **Store** offers more plugins and icon packs. Everything published there is reviewed and signed
+first.
 
 Plugins and icon packs in the Store are made by the community. The first time you open the Store, a notice
 explains that the creator of an item is responsible for it when something fails or doesn't work: rate the item,
@@ -232,8 +229,7 @@ A plugin creator can invite you to test a plugin before it is reviewed. The invi
 email; accept it in the Creator Portal with the same Macro Deck account you use in Macro Deck. While
 you are signed in under **Settings > Account**, **Tests** appears at the top of the Store next to
 **Installed**, listing every plugin you test. Each plugin starts collapsed and shows how many test
-builds it has; select it to see its builds, newest first. You do not need to be a Store tester to see
-it: while the Store itself is not open to you, its notice offers **Open your tests**.
+builds it has; select it to see its builds, newest first.
 
 Test builds are not reviewed or signed by Macro Deck: they come straight from the creator and may be
 unstable. Choosing **Install** or **Install test build** asks you to confirm that first. A test build

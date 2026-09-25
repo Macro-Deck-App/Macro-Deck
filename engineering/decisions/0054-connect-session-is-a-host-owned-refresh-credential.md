@@ -119,10 +119,10 @@ written, and `connect.` preference keys are refused on restore.
 - The moment a cloud feature makes an authorization decision from these claims rather than displaying
   them, JWKS validation stops being optional. Project roles are the first such claims, and they are
   JWKS-verified.
-- Amended for Store testers: the Store page opens for a signed-in account with the `StoreTester`
-  project role. This is a presentation gate in the desktop UI, not host-side access control. A role
-  granted or revoked in ZITADEL shows up at the next sign-in or refresh, so within about a day, and a
-  session signed in before roles were requested keeps its old grant until it signs in again.
+- Amended for Store testers: the Store page once opened only for a signed-in account with the
+  `StoreTester` project role, as a presentation gate in the desktop UI. That gate is removed; the Store
+  is open to everyone. Project roles are still read and cached, and a role granted or revoked in
+  ZITADEL shows up at the next sign-in or refresh, so within about a day.
 - Sign-out revokes this installation's authorization only. Other installations keep their own.
 - An admin token is now enough to bind this installation to an account, from anywhere on the network.
   That is the point of the change, and it makes the admin credential the whole boundary; there is no

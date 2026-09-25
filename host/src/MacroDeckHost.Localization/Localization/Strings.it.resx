@@ -14735,15 +14735,6 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>di {publisher}</value>
     <comment>[publisher:string]</comment>
   </data>
-  <data name="Store.Page.ComingSoonHeading" xml:space="preserve">
-    <value>Lo Store non è ancora disponibile</value>
-  </data>
-  <data name="Store.Page.ComingSoonMessage" xml:space="preserve">
-    <value>Lo stiamo ancora sviluppando. Plugin e pacchetti di icone arriveranno qui in un aggiornamento futuro.</value>
-  </data>
-  <data name="Store.Page.ComingSoonTestsAction" xml:space="preserve">
-    <value>Apri i tuoi test</value>
-  </data>
   <data name="Store.Page.CompatibilityCheckedHint" xml:space="preserve">
     <value>La compatibilità con questa versione di Macro Deck viene verificata durante l'installazione.</value>
   </data>
