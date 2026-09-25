@@ -33,6 +33,14 @@ public sealed record UiFaultArguments
 	public string? Message { get; init; }
 }
 
+/// <summary>Arguments for <c>host.invoke ui/reload</c>: the provider's code changed under .NET Hot Reload
+/// and this session has to be built again. The host ends the session and every attached client opens it
+/// again, which asks the provider for a new session.</summary>
+public sealed record UiReloadArguments
+{
+	public required string SessionId { get; init; }
+}
+
 /// <summary>Arguments for <c>host.invoke ui/register-resource</c>. <see cref="ContentHash" /> names bytes
 /// this plugin uploaded as kind <c>ui-resource</c>; <see cref="MediaType" /> must match the type that
 /// upload declared.</summary>

@@ -21,6 +21,8 @@ public static class UiSessionErrorCodes
 
 	public const string ProviderFaulted = "PROVIDER_FAULTED";
 
+	public const string ProviderReloaded = "PROVIDER_RELOADED";
+
 	public const string ProviderTimeout = "PROVIDER_TIMEOUT";
 
 	public const string ProviderRejected = "PROVIDER_REJECTED";

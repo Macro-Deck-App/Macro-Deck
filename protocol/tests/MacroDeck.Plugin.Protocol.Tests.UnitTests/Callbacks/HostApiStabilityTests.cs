@@ -43,7 +43,7 @@ public class HostApiStabilityTests
 			[HostApis.Widgets] = ["apply", "invalidate-icon"],
 			[HostApis.Notifications] = ["notify", "dismiss"],
 			[HostApis.ActionInteractions] = ["request-item-picker", "request-device-picker", "show-modal"],
-			[HostApis.Ui] = ["snapshot", "patch", "fault", "register-resource", "remove-resource"],
+			[HostApis.Ui] = ["snapshot", "patch", "fault", "reload", "register-resource", "remove-resource"],
 			[HostApis.Devices] =
 				["register", "update", "presence", "unregister", "interaction", "icon", "widget-icon", "close"],
 			[HostApis.VariableValues] = ["value", "invalidate"],

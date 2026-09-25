@@ -25,6 +25,7 @@ export { ToastService } from './services/toast.service';
 export {
   type UiSessionHandle,
   type UiSessionOpenRequest,
+  type UiSessionOpenRequestSource,
   type UiSessionRejection,
   UiSessionService,
 } from './services/ui-session.service';

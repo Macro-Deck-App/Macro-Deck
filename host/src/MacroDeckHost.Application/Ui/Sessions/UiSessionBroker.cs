@@ -14,6 +14,8 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 {
 	private const string ProviderFaultMessage = "The provider of this view stopped responding.";
 
+	private const string ProviderReloadedMessage = "The provider of this view was updated and the view has to be built again.";
+
 	private const string ProviderDisconnectedMessage = "The plugin serving this view disconnected.";
 
 	private readonly IUiSessionProviderResolver _resolver;
@@ -261,6 +263,18 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 		UiSessionLog.ProviderReportedFault(_logger, sessionId, providerId, code, message);
 
 		_registry.TryInvalidate(sessionId, UiSessionErrorCodes.ProviderFaulted, ProviderFaultMessage, retryable: true);
+	}
+
+	public void PublishReload(string providerId, string sessionId)
+	{
+		if (!Owns(providerId, sessionId))
+		{
+			return;
+		}
+
+		UiSessionLog.ProviderReloaded(_logger, sessionId, providerId);
+
+		_registry.TryInvalidate(sessionId, UiSessionErrorCodes.ProviderReloaded, ProviderReloadedMessage, retryable: true);
 	}
 
 	public void SweepDraining() => _registry.SweepDraining();

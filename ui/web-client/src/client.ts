@@ -138,6 +138,9 @@ export class Client {
   readonly http: HttpClient;
   readonly connection: UiConnection;
   readonly modal: WritableStore<UiModalOpenedEvent | null> = store<UiModalOpenedEvent | null>(null);
+  private readonly reopenableSessionStore: WritableStore<{ sessionId: string } | null> =
+    store<{ sessionId: string } | null>(null);
+  readonly reopenableSessions: ReadableStore<{ sessionId: string } | null> = this.reopenableSessionStore;
 
   private readonly usernameStore: WritableStore<string | null> = store<string | null>(null);
   readonly signedInAs: ReadableStore<string | null> = this.usernameStore;
@@ -1055,6 +1058,9 @@ export class Client {
           this.widgetSessions.sessionClosed(body['sessionId']);
           // The widget is still on the deck, so it needs a session again.
           this.widgetSessions.sync(this.deck.displayedWidgets);
+          if (type === 'UiSessionInvalidatedEvent' && body['retryable'] === true) {
+            this.reopenableSessionStore.set({ sessionId: body['sessionId'] });
+          }
         }
         break;
       case 'FolderNavigationEvent':

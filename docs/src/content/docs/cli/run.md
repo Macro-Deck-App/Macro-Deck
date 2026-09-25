@@ -118,7 +118,8 @@ macrodeck-plugin run --project src/HelloDeck --watch
 
 - A saved change that .NET Hot Reload supports - a new text, a changed layout, a different mock value in a
   preview scenario - is applied to the running plugin. Open [developer previews](/ui/views/developer-preview/#iterating-on-a-preview)
-  are rebuilt in place, without a restart.
+  are rebuilt in place, without a restart, and the plugin's other open views, such as widgets and
+  configuration editors, are opened again with the new code. See [Real views](/ui/views/developer-preview/#real-views).
 - Any other change rebuilds the project and restarts the plugin. Macro Deck keeps the open preview on
   screen, marked as waiting, and reopens it when the plugin is back.
 

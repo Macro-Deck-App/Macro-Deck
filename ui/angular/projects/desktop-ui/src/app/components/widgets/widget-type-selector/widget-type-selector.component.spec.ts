@@ -5,7 +5,7 @@ import { By } from '@angular/platform-browser';
 import { WidgetType } from '@macro-deck/runtime';
 import {
   UiSessionHandle,
-  UiSessionOpenRequest,
+  UiSessionOpenRequest, UiSessionOpenRequestSource,
   UiSessionService,
   UiTreeWidgetComponent,
   WidgetRegistryService,
@@ -42,7 +42,8 @@ describe('WidgetTypeSelectorComponent', () => {
     rejectedTypes = new Set(declined);
 
     const uiSessions = {
-      open: (request: UiSessionOpenRequest): UiSessionHandle => {
+      open: (source: UiSessionOpenRequestSource): UiSessionHandle => {
+        const request = typeof source === 'function' ? source() : source;
         opens.push(request);
         const declined = rejectedTypes.has((request as { widgetType?: string }).widgetType ?? '');
         return {
