@@ -19,7 +19,6 @@ interface SelectionAccess {
   filteredIcons(): IconModel[];
 }
 
-
 describe('IconPacksPageComponent icon selection', () => {
   let component: SelectionAccess;
 
@@ -462,7 +461,6 @@ describe('IconPacksPageComponent Store link', () => {
     fixture.detectChanges();
     return fixture;
   }
-
 
   it('opens the pack named in the address and links a Store pack to its Store page', async () => {
     const fixture = await render('com.suchbyte.colorful-generic-icons');
