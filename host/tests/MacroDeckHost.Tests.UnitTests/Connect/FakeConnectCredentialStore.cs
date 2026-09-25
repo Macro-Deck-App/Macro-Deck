@@ -24,6 +24,8 @@ internal sealed class FakeConnectCredentialStore : IConnectCredentialStore
 
 	public bool FailNextSave { get; set; }
 
+	public TaskCompletionSource SaveEntered { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
 	public void Seed(ConnectCredential credential)
 	{
 		lock (_sync)
@@ -49,6 +51,8 @@ internal sealed class FakeConnectCredentialStore : IConnectCredentialStore
 			gate = Gate;
 			Gate = null;
 		}
+
+		SaveEntered.TrySetResult();
 
 		if (gate is not null)
 		{
