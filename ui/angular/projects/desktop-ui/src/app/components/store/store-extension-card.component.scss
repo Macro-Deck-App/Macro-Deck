@@ -227,6 +227,18 @@
   }
 }
 
+.revoked-chip {
+  @include ds.chip;
+  flex-shrink: 0;
+  font-size: var(--text-xs);
+  color: var(--color-danger);
+  background-color: var(--color-danger-muted);
+
+  .icon {
+    background-color: var(--color-danger);
+  }
+}
+
 .card-description {
   margin: 0;
   font-size: var(--text-sm);

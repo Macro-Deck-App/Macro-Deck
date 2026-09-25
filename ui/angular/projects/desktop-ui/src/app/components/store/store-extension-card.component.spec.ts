@@ -83,6 +83,20 @@ describe('StoreExtensionCardComponent trust chip', () => {
     expect(metaText()).toContain(translate(AppStrings.Store.PublisherVerified));
   });
 
+  it('marks an installed plugin whose signing certificate was revoked and no longer calls it verified', () => {
+    setup({ signingRevoked: true }, [runtime('com.acme.deck-tools', true)]);
+
+    expect(metaText()).toContain(translate(AppStrings.Store.SigningRevoked));
+    expect(metaText()).not.toContain(translate(AppStrings.Store.PublisherVerified));
+    expect(metaText()).not.toContain(translate('macrodeck.app:Developer.ManagedPlugins.TakenOverBadge'));
+  });
+
+  it('shows no revoked marker for a host that does not report revocation', () => {
+    setup({}, [runtime('com.acme.deck-tools', false)]);
+
+    expect(metaText()).not.toContain(translate(AppStrings.Store.SigningRevoked));
+  });
+
   it('ignores a takeover of a different id and of non-plugin kinds', () => {
     setup({ kind: 'IconPack', trust: 'RegistryAuthenticated' }, [runtime('com.acme.deck-tools', true)]);
 

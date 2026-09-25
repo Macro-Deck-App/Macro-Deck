@@ -83,6 +83,11 @@ export class StoreExtensionCardComponent {
     return key ? this.localization.translateKey(key) : '';
   });
 
+  protected readonly revokedLabel = computed(() => this.localization.translateKey(AppStrings.Store.SigningRevoked));
+
+  protected readonly revokedDescription = computed(() =>
+    this.localization.translateKey(AppStrings.Plugins.TrustRefusal.Revoked));
+
   protected readonly trustLabel = computed(() => {
     const key = storeTrustLabelKey(this.item().kind, this.item().trust);
     return key ? this.localization.translateKey(key) : null;
