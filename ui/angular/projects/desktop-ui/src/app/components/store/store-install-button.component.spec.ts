@@ -255,6 +255,38 @@ describe('StoreInstallButtonComponent version target', () => {
     expect(buttonLabels(host)).toContain(text(AppStrings.Store.Uninstall));
   });
 
+  it('keeps Uninstall and offers no install for an installed package the registry withdrew', async () => {
+    const host = await render({ installState: 'Installed', installedVersion: '1.0.0', withdrawal: { reason: 'Malware' } },
+      '2.0.0', { targetInstallable: false, targetUnavailableReason: 'Withdrawn' });
+    const labels = buttonLabels(host);
+    expect(labels).toContain(text(AppStrings.Store.Uninstall));
+    expect(labels).not.toContain(text(AppStrings.Store.VersionUnavailable));
+  });
+
+  it('keeps Uninstall for a withdrawn package after its update was refused', async () => {
+    const host = await render({ installState: 'Installed', installedVersion: '1.0.0', withdrawal: { reason: 'Malware' } },
+      '2.0.0', { targetInstallable: false }, failed('PackageRemoved', { kind: 'Update', previousVersion: '1.0.0' }));
+    expect(buttonLabels(host)).toContain(text(AppStrings.Store.Uninstall));
+  });
+
+  it('offers going back to the latest version from a withdrawn installed version on the item page', async () => {
+    const host = await render({
+      installState: 'Installed', installedVersion: '1.3.0', latestVersion: '1.2.0',
+      installedVersionWithdrawal: { reason: 'Compromised' },
+    }, '1.2.0');
+    expect(buttonLabels(host)).toContain(text(AppStrings.Store.DowngradeTo, { version: '1.2.0' }));
+  });
+
+  it('offers no downgrade from a withdrawn installed version on a card, which cannot confirm it', async () => {
+    const host = await render({
+      installState: 'Installed', installedVersion: '1.3.0', latestVersion: '1.2.0',
+      installedVersionWithdrawal: { reason: 'Compromised' },
+    }, null);
+    const labels = buttonLabels(host);
+    expect(labels).not.toContain(text(AppStrings.Store.DowngradeTo, { version: '1.2.0' }));
+    expect(labels).toContain(text(AppStrings.Store.Uninstall));
+  });
+
   it('puts settings first and uninstall beside it for an installed plugin that has settings', async () => {
     const host = await render({ installState: 'Installed', installedVersion: '2.0.0' }, '2.0.0', { manageAction: 'settings' });
     const emitted: string[] = [];

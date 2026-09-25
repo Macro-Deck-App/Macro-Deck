@@ -11,35 +11,44 @@ public sealed class StoreUpdateDetector : IStoreUpdateDetector
 	private readonly IPluginInstallationCatalog _plugins;
 	private readonly IStoreInstallationStore _installations;
 	private readonly IStoreUpdateState _state;
+	private readonly IStoreWithdrawalState _withdrawals;
+	private readonly StoreRegistryOptions _options;
 
 	public StoreUpdateDetector(IStoreCatalog catalog,
 		IPluginInstallationCatalog plugins,
 		IStoreInstallationStore installations,
-		IStoreUpdateState state)
+		IStoreUpdateState state,
+		IStoreWithdrawalState withdrawals,
+		StoreRegistryOptions options)
 	{
 		_catalog = catalog;
 		_plugins = plugins;
 		_installations = installations;
 		_state = state;
+		_withdrawals = withdrawals;
+		_options = options;
 	}
 
 	public IReadOnlyList<StoreAvailableUpdate> Check()
 	{
 		var snapshot = _catalog.Snapshot;
-		var removed = snapshot.RemovedPackages.Count == 0
-			? null
-			: snapshot.RemovedPackages.Select(package => package.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
-
+		var plugins = _plugins.Discover();
 		var updates = new List<StoreAvailableUpdate>();
+		var withdrawals = new List<StoreInstalledWithdrawal>();
 		foreach (var entry in snapshot.Entries)
 		{
-			if (removed is not null && removed.Contains(entry.Id))
+			var installedVersion = InstalledVersion(plugins, entry.Kind, entry.Id);
+			if (installedVersion is null)
 			{
 				continue;
 			}
 
-			var installedVersion = InstalledVersion(entry);
-			if (installedVersion is null)
+			if (snapshot.FindRemoval(entry.Id, installedVersion) is { } removal)
+			{
+				withdrawals.Add(Withdrawal(entry.Kind, entry.Id, entry.Name, installedVersion, removal, listed: true));
+			}
+
+			if (snapshot.FindWithdrawal(entry) is not null)
 			{
 				continue;
 			}
@@ -64,20 +73,74 @@ public sealed class StoreUpdateDetector : IStoreUpdateDetector
 			});
 		}
 
+		// An empty snapshot says nothing about removals, so it must not clear warnings a loaded one raised.
+		if (snapshot.Entries.Count > 0 || snapshot.Sequence > 0)
+		{
+			withdrawals.AddRange(UnlistedWithdrawals(snapshot, plugins));
+			_withdrawals.Swap(withdrawals);
+		}
+
 		_state.Swap(updates);
 		return updates;
 	}
 
-	private string? InstalledVersion(StoreCatalogEntry entry)
+	private IEnumerable<StoreInstalledWithdrawal> UnlistedWithdrawals(StoreCatalogSnapshot snapshot,
+		IReadOnlyList<InstalledPlugin> plugins)
 	{
-		if (entry.Kind is StoreExtensionKind.Plugin)
+		foreach (var record in _installations.LoadAll())
 		{
-			return _plugins.Discover()
-				.FirstOrDefault(plugin =>
-					string.Equals(plugin.PluginId, entry.Id, StringComparison.OrdinalIgnoreCase))
+			if (record.Kind is not (StoreExtensionKind.Plugin or StoreExtensionKind.IconPack) ||
+				!SameOrigin(record.Origin) ||
+				snapshot.Entries.Any(entry =>
+					entry.Kind == record.Kind && string.Equals(entry.Id, record.PackageId, StringComparison.OrdinalIgnoreCase)))
+			{
+				continue;
+			}
+
+			var installedVersion = record.Kind is StoreExtensionKind.Plugin
+				? InstalledVersion(plugins, record.Kind, record.PackageId)
+				: record.Version;
+			if (installedVersion is not null && snapshot.FindRemoval(record.PackageId, installedVersion) is { } removal)
+			{
+				yield return Withdrawal(record.Kind,
+					record.PackageId,
+					record.DisplayName ?? record.PackageId,
+					installedVersion,
+					removal,
+					listed: false);
+			}
+		}
+	}
+
+	private bool SameOrigin(string origin) =>
+		Uri.TryCreate(origin, UriKind.Absolute, out var uri) &&
+		string.Equals(uri.GetLeftPart(UriPartial.Path), _options.Origin, StringComparison.OrdinalIgnoreCase);
+
+	private static StoreInstalledWithdrawal Withdrawal(StoreExtensionKind kind,
+		string packageId,
+		string name,
+		string installedVersion,
+		StoreRemovedPackage removal,
+		bool listed) => new()
+	{
+		Kind = kind,
+		PackageId = packageId,
+		Name = name,
+		InstalledVersion = installedVersion,
+		Reason = removal.Reason,
+		Replacement = removal.Replacement,
+		Listed = listed
+	};
+
+	private string? InstalledVersion(IReadOnlyList<InstalledPlugin> plugins, StoreExtensionKind kind, string id)
+	{
+		if (kind is StoreExtensionKind.Plugin)
+		{
+			return plugins
+				.FirstOrDefault(plugin => string.Equals(plugin.PluginId, id, StringComparison.OrdinalIgnoreCase))
 				?.ActiveVersion?.Version;
 		}
 
-		return _installations.Find(entry.Kind, entry.Id)?.Version;
+		return _installations.Find(kind, id)?.Version;
 	}
 }

@@ -11897,6 +11897,13 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Wersja {version} jest gotowa.</value>
     <comment>[version:string]</comment>
   </data>
+  <data name="Notifications.StoreVersionWithdrawn" xml:space="preserve">
+    <value>{name} {version}: wersja została wycofana ze Store</value>
+    <comment>[name:string][version:string]</comment>
+  </data>
+  <data name="Notifications.StoreVersionWithdrawnRemoveHint" xml:space="preserve">
+    <value>Rozszerzenia nie ma już w Store. Można je usunąć w sekcji Integracje lub Biblioteka.</value>
+  </data>
   <data name="Notifications.TlsCertificateInvalidAdvice" xml:space="preserve">
     <value>Nie udało się wczytać zapisanego certyfikatu. Wygeneruj nowy lub prześlij zamiennik w Ustawienia &gt; Sieć.</value>
   </data>
@@ -15094,6 +15101,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Page.VersionUnavailableReason" xml:space="preserve">
     <value>Tej wersji nie można zainstalować ze Store.</value>
   </data>
+  <data name="Store.Page.VersionWithdrawnReason" xml:space="preserve">
+    <value>Ta wersja została wycofana ze Store.</value>
+  </data>
   <data name="Store.Page.WhatsNewHeading" xml:space="preserve">
     <value>Co nowego?</value>
   </data>
@@ -15296,11 +15306,41 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.VersionUnavailable" xml:space="preserve">
     <value>Niedostępne</value>
   </data>
+  <data name="Store.VersionWithdrawn" xml:space="preserve">
+    <value>Wycofana</value>
+  </data>
   <data name="Store.WhatMacroDeckReported" xml:space="preserve">
     <value>Co zgłosił Macro Deck</value>
   </data>
   <data name="Store.Why" xml:space="preserve">
     <value>Dlaczego?</value>
+  </data>
+  <data name="Store.Withdrawal.InstalledAdvice" xml:space="preserve">
+    <value>Zainstaluj inną wersję lub odinstaluj tę.</value>
+  </data>
+  <data name="Store.Withdrawal.InstalledHeading" xml:space="preserve">
+    <value>Zainstalowana wersja {version} została wycofana ze Store</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Store.Withdrawal.PackageChip" xml:space="preserve">
+    <value>Usunięte ze Store</value>
+  </data>
+  <data name="Store.Withdrawal.PackageHeading" xml:space="preserve">
+    <value>To rozszerzenie zostało usunięte ze Store</value>
+  </data>
+  <data name="Store.Withdrawal.PackageMessage" xml:space="preserve">
+    <value>Nie można go już zainstalować ani zaktualizować.</value>
+  </data>
+  <data name="Store.Withdrawal.Reason" xml:space="preserve">
+    <value>Powód: {reason}</value>
+    <comment>[reason:string]</comment>
+  </data>
+  <data name="Store.Withdrawal.Replacement" xml:space="preserve">
+    <value>Zalecany zamiennik: {replacement}</value>
+    <comment>[replacement:string]</comment>
+  </data>
+  <data name="Store.Withdrawal.VersionChip" xml:space="preserve">
+    <value>Wersja wycofana</value>
   </data>
   <data name="TemplateBuilder.Logic" xml:space="preserve">
     <value>Logika</value>

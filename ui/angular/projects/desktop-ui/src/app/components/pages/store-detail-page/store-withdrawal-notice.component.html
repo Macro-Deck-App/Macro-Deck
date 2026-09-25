@@ -1,0 +1,29 @@
+@if (notice(); as notice) {
+  <section class="withdrawal-notice" aria-labelledby="store-withdrawal-notice-heading">
+    <span class="notice-icon" aria-hidden="true">
+      <span class="icon icon-alert-triangle icon-md"></span>
+    </span>
+    <div class="notice-body">
+      <h2 class="notice-heading" id="store-withdrawal-notice-heading">
+        @if (notice.installedVersion) {
+          {{ 'macrodeck.app:Store.Withdrawal.InstalledHeading' | translate:{ version: notice.installedVersion } }}
+        } @else {
+          {{ 'macrodeck.app:Store.Withdrawal.PackageHeading' | translate }}
+        }
+      </h2>
+      @if (notice.withdrawal.reason; as reason) {
+        <p class="notice-text">{{ 'macrodeck.app:Store.Withdrawal.Reason' | translate:{ reason: reason } }}</p>
+      }
+      @if (notice.withdrawal.replacement; as replacement) {
+        <p class="notice-text">{{ 'macrodeck.app:Store.Withdrawal.Replacement' | translate:{ replacement: replacement } }}</p>
+      }
+      <p class="notice-text notice-advice">
+        @if (notice.packageWithdrawn) {
+          {{ 'macrodeck.app:Store.Withdrawal.PackageMessage' | translate }}
+        } @else {
+          {{ 'macrodeck.app:Store.Withdrawal.InstalledAdvice' | translate }}
+        }
+      </p>
+    </div>
+  </section>
+}

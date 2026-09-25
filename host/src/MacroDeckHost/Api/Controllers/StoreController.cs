@@ -466,6 +466,8 @@ public class StoreController : ControllerBase
 		InstalledVersion = item.InstalledVersion,
 		InstalledTestBuild = item.InstalledTestBuild,
 		UnsupportedReason = item.UnsupportedReason,
+		Withdrawal = WithdrawalBody(item.Withdrawal),
+		InstalledVersionWithdrawal = WithdrawalBody(item.InstalledVersionRemoval),
 		Trust = item.Trust,
 		HasIcon = item.Entry.LatestRelease.Icon is not null,
 		IconSha256 = item.Entry.LatestRelease.Icon?.Sha256.ToLowerInvariant(),
@@ -487,6 +489,8 @@ public class StoreController : ControllerBase
 		InstalledVersion = item.InstalledVersion,
 		InstalledTestBuild = item.InstalledTestBuild,
 		UnsupportedReason = item.UnsupportedReason,
+		Withdrawal = WithdrawalBody(item.Withdrawal),
+		InstalledVersionWithdrawal = WithdrawalBody(item.InstalledVersionRemoval),
 		Trust = item.Trust,
 		HasIcon = item.Entry.LatestRelease.Icon is not null,
 		IconSha256 = item.Entry.LatestRelease.Icon?.Sha256.ToLowerInvariant(),
@@ -522,21 +526,32 @@ public class StoreController : ControllerBase
 			})
 			.ToList(),
 		History = item.Entry.History
-			.Select(entry => new StoreVersionHistoryBody
-			{
-				Version = entry.Version,
-				ReleasedAt = entry.ReleasedAt,
-				Changelog = entry.Changelog,
-				Size = entry.Size,
-				Installable = entry.HasRelease && item.InstallState is not StoreInstallState.Unsupported,
-				UnavailableReason = item.InstallState is StoreInstallState.Unsupported
-					? StoreVersionHistoryBody.UnsupportedPlatform
-					: entry.HasRelease
-						? null
-						: StoreVersionHistoryBody.Unavailable
-			})
+			.Select(entry => HistoryBody(item, entry))
 			.ToList()
 	};
+
+	private static StoreVersionHistoryBody HistoryBody(StoreCatalogItem item, StoreVersionHistoryEntry entry)
+	{
+		var reason = item.InstallState is StoreInstallState.Unsupported
+			? StoreVersionHistoryBody.UnsupportedPlatform
+			: item.WithdrawnVersions.Any(version => StoreVersions.Same(version, entry.Version))
+				? StoreVersionHistoryBody.Withdrawn
+				: entry.HasRelease && item.Withdrawal is null
+					? null
+					: StoreVersionHistoryBody.Unavailable;
+		return new StoreVersionHistoryBody
+		{
+			Version = entry.Version,
+			ReleasedAt = entry.ReleasedAt,
+			Changelog = entry.Changelog,
+			Size = entry.Size,
+			Installable = reason is null,
+			UnavailableReason = reason
+		};
+	}
+
+	private static StoreVersionWithdrawalBody? WithdrawalBody(StoreRemovedPackage? removal) =>
+		removal is null ? null : new StoreVersionWithdrawalBody { Reason = removal.Reason, Replacement = removal.Replacement };
 
 	private static string? PreviewScreenshotSha256(StoreCatalogEntry entry) =>
 		entry.LatestRelease.Screenshots.Count > 0

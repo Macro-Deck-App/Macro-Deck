@@ -244,6 +244,19 @@ While a test build is installed, the plugin is marked **Test build** under **Tes
 **Discover**. If the plugin is also published in the Store, **Return to Store version** installs its
 current Store release in place of the test build.
 
+### Withdrawn versions
+
+The Store can withdraw a single version of an item, for example when that version turned out to be unsafe.
+A withdrawn version is marked **Withdrawn** under **Version** and cannot be installed; the other versions
+stay available. If the version you have installed is withdrawn, its card is marked **Version withdrawn**, its
+page says why and may name a suggested replacement, and Macro Deck shows a warning notification. Update to
+the latest version from its card, or open its page to go back to the latest version with **Downgrade to**
+when the latest version is older than yours, or uninstall it.
+
+When the latest version of an item is withdrawn, the item disappears from the Store and can no longer be
+installed or updated. If you have it installed, it stays under **Installed**, marked **Removed from the
+Store**, and its page says why; you can still uninstall it there.
+
 ## Devices
 
 Every phone, tablet or browser that connects shows up in **Settings > Devices**. Choose there which

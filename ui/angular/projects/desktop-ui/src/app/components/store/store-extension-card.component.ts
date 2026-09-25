@@ -39,6 +39,23 @@ export class StoreExtensionCardComponent {
 
   protected readonly takenOverLabel = computed(() =>
     this.localization.translateKey(AppStrings.Developer.ManagedPlugins.TakenOverBadge));
+
+  protected readonly withdrawalChip = computed(() => {
+    const item = this.item();
+    const withdrawal = item.installedVersionWithdrawal ?? (item.installedVersion ? item.withdrawal : null);
+    if (!withdrawal) {
+      return null;
+    }
+    const label = item.installedVersionWithdrawal
+      ? AppStrings.Store.Withdrawal.VersionChip
+      : AppStrings.Store.Withdrawal.PackageChip;
+    return {
+      label: this.localization.translateKey(label),
+      reason: withdrawal.reason
+        ? this.localization.translateKey(AppStrings.Store.Withdrawal.Reason, { reason: withdrawal.reason })
+        : null,
+    };
+  });
   readonly operation = input<StoreOperationBody | null>(null);
 
   readonly install = output<void>();

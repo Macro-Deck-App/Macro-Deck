@@ -93,6 +93,40 @@ internal sealed class StoreOfficialPackagesTests
 		Assert.That(listed, Is.EqualTo(new[] { "com.acme.hue" }));
 	}
 
+	[Test]
+	public void Withdrawing_an_older_version_keeps_the_package_listed_and_withdrawing_the_latest_unlists_it_even_when_installed()
+	{
+		_catalog.Swap(new StoreCatalogSnapshot
+		{
+			Sequence = 1,
+			Entries = [Entry("com.acme.hue", StoreExtensionKind.Plugin), Entry("com.acme.gone", StoreExtensionKind.Plugin)],
+			RemovedPackages =
+			[
+				new StoreRemovedPackage { Id = "com.acme.hue", Version = "0.9.0" },
+				new StoreRemovedPackage { Id = "com.acme.gone", Version = "1.0.0" }
+			]
+		});
+		InstallPlugin("com.acme.gone", "1.0.0");
+		var packages = Create(StoreRegistryOptions.Default);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(packages.ListedPackageIds(["com.acme.hue", "com.acme.gone"]), Is.EqualTo(new[] { "com.acme.hue" }));
+			Assert.That(packages.ResolveListed(StoreExtensionKind.Plugin, "com.acme.hue"), Is.EqualTo("com.acme.hue"));
+			Assert.That(packages.ResolveListed(StoreExtensionKind.Plugin, "com.acme.gone"), Is.Null);
+			Assert.That(packages.InstalledPackageIds(), Is.Empty);
+		});
+	}
+
+	private void InstallPlugin(string pluginId, string version)
+	{
+		var pluginDirectory = Path.Combine(_paths.PluginsDirectory, pluginId);
+		var versionDirectory = Path.Combine(pluginDirectory, "versions", version);
+		Directory.CreateDirectory(versionDirectory);
+		File.WriteAllText(Path.Combine(versionDirectory, "manifest.json"), "{}");
+		File.WriteAllText(Path.Combine(pluginDirectory, "current.json"), $"{{\"version\":\"{version}\"}}");
+	}
+
 	[TestCase(BuildChannel.Development, "http://127.0.0.1:5199", "http://127.0.0.1:5199/")]
 	[TestCase(BuildChannel.Development, "https://platform.test/base", "https://platform.test/base/")]
 	[TestCase(BuildChannel.Development, "http://platform.test", "https://api.macro-deck.app/")]

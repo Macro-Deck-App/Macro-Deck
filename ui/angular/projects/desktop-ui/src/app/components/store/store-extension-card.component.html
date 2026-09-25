@@ -60,6 +60,12 @@
             {{ label }}
           </span>
         }
+        @if (withdrawalChip(); as chip) {
+          <span class="withdrawal-chip" [attr.title]="chip.reason">
+            <span class="icon icon-alert-triangle icon-xs" aria-hidden="true"></span>
+            {{ chip.label }}
+          </span>
+        }
       </div>
     </div>
   </div>

@@ -35,7 +35,7 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 			return Result.Fail<StoreCatalogPage, StoreCatalogError>(StoreCatalogError.RegistryUnavailable);
 		}
 
-		var entries = Visible(snapshot).AsEnumerable();
+		var entries = query.Installed ? snapshot.Entries : Browsable(snapshot);
 		if (query.Kinds is { Count: > 0 })
 		{
 			entries = entries.Where(entry => query.Kinds.Contains(entry.Kind));
@@ -82,7 +82,7 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 		var items = Order(matches, query.Section, term, featured)
 			.Skip(Math.Max(0, query.Skip))
 			.Take(take)
-			.Select(Describe)
+			.Select(entry => Describe(snapshot, entry))
 			.ToList();
 
 		return Result.Ok<StoreCatalogPage, StoreCatalogError>(new StoreCatalogPage
@@ -135,26 +135,31 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 			return Result.Fail<StoreCatalogItem, StoreCatalogError>(StoreCatalogError.RegistryUnavailable);
 		}
 
-		var entry = Visible(snapshot)
+		var entry = snapshot.Entries
 			.FirstOrDefault(candidate =>
 				candidate.Kind == kind && string.Equals(candidate.Id, id, StringComparison.OrdinalIgnoreCase));
+		if (entry is null || (snapshot.FindWithdrawal(entry) is not null && InstalledVersion(entry) is null))
+		{
+			return Result.Fail<StoreCatalogItem, StoreCatalogError>(StoreCatalogError.NotFound);
+		}
 
-		return entry is null
-			? Result.Fail<StoreCatalogItem, StoreCatalogError>(StoreCatalogError.NotFound)
-			: Result.Ok<StoreCatalogItem, StoreCatalogError>(Describe(entry));
+		return Result.Ok<StoreCatalogItem, StoreCatalogError>(Describe(snapshot, entry));
 	}
 
-	public IReadOnlyList<StoreCatalogItem> Installed() =>
-		Visible(_catalog.Snapshot)
-			.Select(Describe)
+	public IReadOnlyList<StoreCatalogItem> Installed()
+	{
+		var snapshot = _catalog.Snapshot;
+		return snapshot.Entries
+			.Select(entry => Describe(snapshot, entry))
 			.Where(item => item.InstallState is StoreInstallState.Installed or StoreInstallState.UpdateAvailable)
 			.ToList();
+	}
 
 	public IReadOnlyList<StoreCategoryCount> Categories(IReadOnlyCollection<StoreExtensionKind>? kinds,
 		bool supportedOnly = false)
 	{
 		var snapshot = _catalog.Snapshot;
-		var entries = Visible(snapshot)
+		var entries = Browsable(snapshot)
 			.Where(entry => kinds is not { Count: > 0 } || kinds.Contains(entry.Kind))
 			.Where(entry => !supportedOnly || UnsupportedReason(entry) is null)
 			.ToList();
@@ -168,29 +173,21 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 			.ToList();
 	}
 
-	private static IReadOnlyList<StoreCatalogEntry> Visible(StoreCatalogSnapshot snapshot)
-	{
-		if (snapshot.RemovedPackages.Count == 0)
-		{
-			return snapshot.Entries;
-		}
+	private static IEnumerable<StoreCatalogEntry> Browsable(StoreCatalogSnapshot snapshot) =>
+		snapshot.RemovedPackages.Count == 0
+			? snapshot.Entries
+			: snapshot.Entries.Where(entry => snapshot.FindWithdrawal(entry) is null);
 
-		var removed = snapshot.RemovedPackages
-			.Select(package => package.Id)
-			.ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-		return snapshot.Entries.Where(entry => !removed.Contains(entry.Id)).ToList();
-	}
-
-	private StoreCatalogItem Describe(StoreCatalogEntry entry)
+	private StoreCatalogItem Describe(StoreCatalogSnapshot snapshot, StoreCatalogEntry entry)
 	{
 		var installedVersion = InstalledVersion(entry);
 		var unsupportedReason = UnsupportedReason(entry);
+		var withdrawal = snapshot.FindWithdrawal(entry);
 		var state = unsupportedReason is not null
 			? StoreInstallState.Unsupported
 			: installedVersion is null
 				? StoreInstallState.NotInstalled
-				: HasUpdate(installedVersion, entry.LatestVersion)
+				: withdrawal is null && HasUpdate(installedVersion, entry.LatestVersion)
 					? StoreInstallState.UpdateAvailable
 					: StoreInstallState.Installed;
 
@@ -200,7 +197,15 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 			InstallState = state,
 			InstalledVersion = installedVersion,
 			InstalledTestBuild = InstalledTestBuild(entry, installedVersion),
-			UnsupportedReason = unsupportedReason
+			UnsupportedReason = unsupportedReason,
+			Withdrawal = withdrawal,
+			InstalledVersionRemoval = installedVersion is null ? null : snapshot.FindRemoval(entry.Id, installedVersion),
+			WithdrawnVersions = snapshot.HasRemoval(entry.Id)
+				? entry.History
+					.Select(release => release.Version)
+					.Where(version => snapshot.FindRemoval(entry.Id, version) is not null)
+					.ToList()
+				: []
 		};
 	}
 

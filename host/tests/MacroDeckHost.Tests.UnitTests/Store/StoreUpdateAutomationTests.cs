@@ -437,6 +437,79 @@ internal sealed class StoreUpdateAutomationTests
 		LatestVersion = latest
 	};
 
+	[Test]
+	public async Task Each_installed_withdrawn_version_raises_a_security_warning_with_the_registrys_reason_and_replacement()
+	{
+		using var withdrawalNotifier = WithdrawalNotifier();
+		await _preferences.SetExtensions(null, null, notifyOnUpdates: false, null);
+
+		await withdrawalNotifier.Notify([
+			Withdrawal("com.acme.hue", "Hue Bridge", reason: "Compromised signing key", replacement: "com.acme.hue2"),
+			Withdrawal("com.acme.icons", "Material Icons", reason: "Malware", listed: false)
+		]);
+
+		var hue = _notifications.Snapshot().Single(entry => entry.Title.Contains("Hue Bridge"));
+		var icons = _notifications.Snapshot().Single(entry => entry.Title.Contains("Material Icons"));
+		Assert.Multiple(() =>
+		{
+			Assert.That(hue.Severity, Is.EqualTo(UserNotificationSeverity.Warning));
+			Assert.That(hue.Kind, Is.EqualTo(UserNotificationKind.Security));
+			Assert.That(hue.Title, Does.Contain("1.2.0"));
+			Assert.That(hue.Message, Does.Contain("Compromised signing key").And.Contain("com.acme.hue2"));
+			Assert.That(hue.Action?.Kind, Is.EqualTo(UserNotificationActionKind.OpenExtensionStore));
+			Assert.That(icons.Message, Does.Contain("Malware").And.Contain("Integrations"));
+			Assert.That(icons.Action, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task A_dismissed_warning_stays_dismissed_until_the_withdrawal_changes()
+	{
+		using var withdrawalNotifier = WithdrawalNotifier();
+		var withdrawal = Withdrawal("com.acme.hue", "Hue Bridge", reason: "Compromised signing key");
+		await withdrawalNotifier.Notify([withdrawal]);
+		_notifications.DismissAll();
+
+		await withdrawalNotifier.Notify([withdrawal]);
+		var afterRepeat = _notifications.Snapshot().Count;
+		await withdrawalNotifier.Notify([withdrawal with { Reason = "Malware" }]);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(afterRepeat, Is.EqualTo(0));
+			Assert.That(_notifications.Snapshot().Single().Message, Does.Contain("Malware"));
+		});
+	}
+
+	[Test]
+	public async Task A_warning_is_retired_once_the_withdrawn_version_is_no_longer_installed()
+	{
+		using var withdrawalNotifier = WithdrawalNotifier();
+		await withdrawalNotifier.Notify([Withdrawal("com.acme.hue", "Hue Bridge", reason: "Compromised signing key")]);
+
+		await withdrawalNotifier.Notify([]);
+
+		Assert.That(_notifications.Snapshot(), Is.Empty);
+	}
+
+	private StoreWithdrawalNotifier WithdrawalNotifier() =>
+		new(_notifications, _provider.GetRequiredService<IServiceScopeFactory>());
+
+	private static StoreInstalledWithdrawal Withdrawal(string id,
+		string name,
+		string? reason = null,
+		string? replacement = null,
+		bool listed = true) => new()
+	{
+		Kind = StoreExtensionKind.Plugin,
+		PackageId = id,
+		Name = name,
+		InstalledVersion = "1.2.0",
+		Reason = reason,
+		Replacement = replacement,
+		Listed = listed
+	};
+
 	private sealed class RecordingBatchInstaller(StoreOperationTracker tracker) : IStoreUpdateBatchInstaller
 	{
 		public List<StoreOperation> Started { get; } = [];
