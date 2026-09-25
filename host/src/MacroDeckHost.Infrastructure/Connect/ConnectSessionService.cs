@@ -546,12 +546,11 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 			changed = SwapSnapshot(next);
 		}
 
+		Notify(changed, next);
 		_failures.RecordSuccess();
-		await AwaitRemoval(clearing);
-
 		_logger.Warning(ex, "Macro Deck Connect rejected the stored credential; a new sign-in is required");
 
-		Notify(changed, next);
+		await AwaitRemoval(clearing);
 		return true;
 	}
 
@@ -583,10 +582,10 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 			changed = SwapSnapshot(next);
 		}
 
+		Notify(changed, next);
 		_failures.RecordSuccess();
 		await _suspensionFloor.Write(_timeProvider.GetUtcNow() + SuspensionRetryFloor, CancellationToken.None);
 
-		Notify(changed, next);
 		return true;
 	}
 
