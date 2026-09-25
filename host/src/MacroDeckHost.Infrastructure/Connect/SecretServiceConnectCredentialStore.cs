@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Security.Cryptography;
-using System.Text.Json;
 using MacroDeckHost.Application.Connect;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Secrets;
@@ -74,8 +73,7 @@ public sealed class SecretServiceConnectCredentialStore : IConnectCredentialStor
 			subject,
 			await ReadValue(preferences, AppPreferenceService.ConnectCredentialCachedDisplayNameKey),
 			await ReadValue(preferences, AppPreferenceService.ConnectCredentialCachedPictureUrlKey),
-			await ReadTimestamp(preferences) ?? DateTimeOffset.UnixEpoch,
-			await ReadRoles(preferences));
+			await ReadTimestamp(preferences) ?? DateTimeOffset.UnixEpoch);
 	}
 
 	public async Task Save(ConnectCredential credential, CancellationToken cancellationToken = default)
@@ -99,8 +97,6 @@ public sealed class SecretServiceConnectCredentialStore : IConnectCredentialStor
 			credential.CachedPictureUrl ?? string.Empty);
 		await preferences.SetValue(AppPreferenceService.ConnectCredentialIssuedAtKey,
 			credential.IssuedAtUtc.ToString("O", CultureInfo.InvariantCulture));
-		await preferences.SetValue(AppPreferenceService.ConnectCredentialCachedRolesKey,
-			JsonSerializer.Serialize(credential.CachedRoles ?? []));
 	}
 
 	public async Task Clear(CancellationToken cancellationToken = default)
@@ -121,7 +117,6 @@ public sealed class SecretServiceConnectCredentialStore : IConnectCredentialStor
 		await preferences.SetValue(AppPreferenceService.ConnectCredentialCachedPictureUrlKey, string.Empty);
 		await preferences.SetValue(AppPreferenceService.ConnectCredentialIssuedAtKey, string.Empty);
 		await preferences.SetValue(AppPreferenceService.ConnectCredentialIssuerKey, string.Empty);
-		await preferences.SetValue(AppPreferenceService.ConnectCredentialCachedRolesKey, string.Empty);
 	}
 
 	private static async Task DropPointer(
@@ -136,7 +131,6 @@ public sealed class SecretServiceConnectCredentialStore : IConnectCredentialStor
 		await preferences.SetValue(AppPreferenceService.ConnectCredentialCachedPictureUrlKey, string.Empty);
 		await preferences.SetValue(AppPreferenceService.ConnectCredentialIssuedAtKey, string.Empty);
 		await preferences.SetValue(AppPreferenceService.ConnectCredentialIssuerKey, string.Empty);
-		await preferences.SetValue(AppPreferenceService.ConnectCredentialCachedRolesKey, string.Empty);
 	}
 
 	private static async Task<Guid?> ReadSecretId(IAppPreferenceRepository preferences)
@@ -160,22 +154,4 @@ public sealed class SecretServiceConnectCredentialStore : IConnectCredentialStor
 			out var parsed)
 			? parsed
 			: null;
-
-	private static async Task<IReadOnlyList<string>?> ReadRoles(IAppPreferenceRepository preferences)
-	{
-		var value = await ReadValue(preferences, AppPreferenceService.ConnectCredentialCachedRolesKey);
-		if (value is null)
-		{
-			return null;
-		}
-
-		try
-		{
-			return JsonSerializer.Deserialize<List<string>>(value);
-		}
-		catch (JsonException)
-		{
-			return null;
-		}
-	}
 }

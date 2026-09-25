@@ -8,10 +8,9 @@ public static class ConnectEndpoints
 	public const string TokenEndpoint = Issuer + "/oauth/v2/token";
 	public const string DeviceAuthorizationEndpoint = Issuer + "/oauth/v2/device_authorization";
 	public const string RevokeEndpoint = Issuer + "/oauth/v2/revoke";
-	public const string KeysEndpoint = Issuer + "/oauth/v2/keys";
 
 	public const string ClientId = "390578325090796895";
-	public const string Scope = "openid profile offline_access urn:zitadel:iam:org:project:roles";
+	public const string Scope = "openid profile offline_access";
 
 	public const string DeviceCodeGrantType = "urn:ietf:params:oauth:grant-type:device_code";
 

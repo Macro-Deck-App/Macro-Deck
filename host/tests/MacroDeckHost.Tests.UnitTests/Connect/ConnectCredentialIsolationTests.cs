@@ -157,6 +157,28 @@ public class ConnectCredentialIsolationTests
 	}
 
 	[Test]
+	public async Task A_credential_saved_with_cached_roles_by_an_earlier_version_still_loads()
+	{
+		var marker = Marker();
+		await _store.Save(new ConnectCredential(marker, "sub-1", "Ada", null, DateTimeOffset.UnixEpoch));
+
+		using (var scope = _provider.CreateScope())
+		{
+			await scope.ServiceProvider.GetRequiredService<IAppPreferenceRepository>()
+				.SetValue("connect.credentialCachedRoles", "[\"StoreTester\"]");
+		}
+
+		var loaded = await _store.Load();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(loaded?.RefreshToken, Is.EqualTo(marker));
+			Assert.That(loaded?.Subject, Is.EqualTo("sub-1"));
+			Assert.That(loaded?.CachedDisplayName, Is.EqualTo("Ada"));
+		});
+	}
+
+	[Test]
 	public async Task Restoring_an_archive_from_another_machine_does_not_resurrect_a_session()
 	{
 		// The archive is built on another machine that was signed in; this installation is not.
@@ -197,40 +219,6 @@ public class ConnectCredentialIsolationTests
 		// that would turn it back into a session.
 		Assert.That(ConnectSecretRows(), Is.GreaterThan(0));
 		Assert.That(await _store.Load(), Is.Null);
-	}
-
-	[Test]
-	public async Task Verified_roles_are_stored_with_the_credential_and_cleared_with_it()
-	{
-		await _store.Save(new ConnectCredential(Marker(), "sub-1", "Ada", null, DateTimeOffset.UnixEpoch, ["StoreTester"]));
-
-		Assert.That((await _store.Load())!.CachedRoles, Is.EqualTo(new[] { "StoreTester" }));
-
-		await _store.Clear();
-
-		using var scope = _provider.CreateScope();
-		var stored = await scope.ServiceProvider.GetRequiredService<IAppPreferenceRepository>()
-			.GetByKey(AppPreferenceService.ConnectCredentialCachedRolesKey);
-
-		Assert.That(stored?.Value, Is.Null.Or.Empty);
-	}
-
-	[TestCase("")]
-	[TestCase("not json")]
-	public async Task A_credential_without_readable_roles_still_loads_with_none(string storedRoles)
-	{
-		await _store.Save(new ConnectCredential(Marker(), "sub-1", "Ada", null, DateTimeOffset.UnixEpoch, ["StoreTester"]));
-
-		using (var scope = _provider.CreateScope())
-		{
-			await scope.ServiceProvider.GetRequiredService<IAppPreferenceRepository>()
-				.SetValue(AppPreferenceService.ConnectCredentialCachedRolesKey, storedRoles);
-		}
-
-		var loaded = await _store.Load();
-
-		Assert.That(loaded, Is.Not.Null);
-		Assert.That(loaded!.CachedRoles, Is.Null);
 	}
 
 	private static bool ContainsMarker(byte[] content, string marker)
