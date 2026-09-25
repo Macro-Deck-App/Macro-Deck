@@ -9,6 +9,7 @@ body:
         Requesting a new integration? Please use the **Integration request** form instead.
         Building a plugin and missing something in the SDK, protocol, CLI or packaging? Use the **SDK capability request** form.
         Ideas for the Android or iOS companion app go in the **Companion app** form.
+        Ideas for your Macro Deck account or the Creator Portal go in the **Account and Creator Portal** form.
 
   - type: textarea
     id: request
