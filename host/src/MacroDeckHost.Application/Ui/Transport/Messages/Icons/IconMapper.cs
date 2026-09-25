@@ -143,6 +143,7 @@ public static class IconMapper
 			ProcessingState = entity.ProcessingState.ToString(),
 			ProcessingError = entity.ProcessingError,
 			AvailableSizes = entity.AvailableSizes.ToList(),
+			ContentHash = IconImageVersion.Of(entity),
 			OriginalFileName = entity.OriginalFileName,
 			CreatedAt = entity.CreatedAt
 		};

@@ -2,7 +2,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Observable, Subject } from 'rxjs';
 import { IpcIcon, IpcIconPack } from '@macro-deck/runtime';
-import { ApiService } from '@shared';
+import { ApiService, IconImageService } from '@shared';
 import { FileSaveService } from './file-save.service';
 import { IconPackService } from './icon-pack.service';
 
@@ -65,7 +65,10 @@ describe('IconPackService', () => {
       'importIconPacks',
       'exportIconPack',
       'cancelIconImportBatch',
+      'getIconImageUrl',
     ]);
+    apiSpy.getIconImageUrl.and.callFake((iconId: string, size?: number, version?: string | null) =>
+      `/api/icons/${iconId}/image?size=${size}${version ? `&v=${version}` : ''}`);
     apiSpy.onNotification.and.callFake(<T>(method: string): Observable<T> => {
       let subject = notifications.get(method);
       if (!subject) {
@@ -199,6 +202,33 @@ describe('IconPackService', () => {
 
     expect(service.iconsFor(packId)().length).toBe(2);
     expect(service.packs()[0].iconCount).toBe(3);
+  });
+
+  it('follows a pack upgrade: replaced and added icons get their new image URLs and the count stays exact', async () => {
+    const images = TestBed.inject(IconImageService);
+    apiSpy.getIcons.and.resolveTo({ icons: [ipcIcon('icon-1', 'logo', { contentHash: 'sha256:old' })] });
+    await service.loadPacks();
+    await service.loadIcons(packId);
+    const before = images.getIconUrl('icon-1', 128);
+
+    push('IconsAddedEvent', { packId, icons: [ipcIcon('icon-2', 'fresh', { contentHash: 'sha256:added' })] });
+    push('IconUpdatedEvent', { icon: ipcIcon('icon-1', 'logo', { contentHash: 'sha256:new' }) });
+    push('IconPackUpdatedEvent', { pack: ipcPack(packId, 'Pack A', { version: '2.0.0', iconCount: 2 }) });
+
+    expect(before).toContain('sha256:old');
+    expect(images.getIconUrl('icon-1', 128)).toContain('sha256:new');
+    expect(images.getIconUrl('icon-2', 128)).toContain('sha256:added');
+    expect(service.iconsFor(packId)().map(icon => icon.contentHash)).toEqual(['sha256:new', 'sha256:added']);
+    expect(service.packs()[0].iconCount).toBe(2);
+  });
+
+  it('gives an icon a new image URL when an update event carries new bytes', async () => {
+    const images = TestBed.inject(IconImageService);
+    await service.loadIcons(packId);
+
+    push('IconUpdatedEvent', { icon: ipcIcon('icon-1', 'logo', { contentHash: 'sha256:new' }) });
+
+    expect(images.getIconUrl('icon-1', 128)).toContain('sha256:new');
   });
 
   it('replaces an icon on IconUpdatedEvent', async () => {
