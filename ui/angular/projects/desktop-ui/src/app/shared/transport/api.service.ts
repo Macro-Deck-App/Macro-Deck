@@ -1962,9 +1962,11 @@ export class ApiService {
     return this.http('POST', `/api/icons/import-batches/${encodeURIComponent(batchId)}/cancel`);
   }
 
-  getIconImageUrl(iconId: string, size?: number): string {
-    const query = size ? `?size=${size}` : '';
-    return `${this.baseUrl}/api/icons/${encodeURIComponent(iconId)}/image${query}`;
+  getIconImageUrl(iconId: string, size?: number, version?: string | null): string {
+    // Always send v: the URL without it may still be cached as immutable by an older host, and an empty v
+    // asks this host to revalidate.
+    const query = [...(size ? [`size=${size}`] : []), `v=${encodeURIComponent(version ?? '')}`].join('&');
+    return `${this.baseUrl}/api/icons/${encodeURIComponent(iconId)}/image?${query}`;
   }
 
   getSystemFonts(): Promise<GetSystemFontsResponse> {

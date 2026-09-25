@@ -45,6 +45,8 @@ export interface IpcIcon {
   processingState: IconProcessingState;
   processingError?: string;
   availableSizes: number[];
+  // Absent from an older host.
+  contentHash?: string | null;
   originalFileName?: string;
   createdAt: string;
 }

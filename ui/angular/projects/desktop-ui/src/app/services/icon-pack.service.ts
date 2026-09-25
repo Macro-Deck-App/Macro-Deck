@@ -1,6 +1,6 @@
 import { Injectable, Signal, WritableSignal, inject, signal, untracked } from '@angular/core';
 import { AppStrings, IconDeletedEvent, IconImportBatchState, IconImportProgressEvent, IconPackCreatedEvent, IconPackDeletedEvent, IconPackUpdatedEvent, IconProcessingState, IconPackAiAssets, IconUpdatedEvent, IconsAddedEvent, IpcIcon, IpcIconImportBatch, IpcIconPack } from '@macro-deck/runtime';
-import { ApiService, LocalizationService } from '@shared';
+import { ApiService, IconImageService, LocalizationService } from '@shared';
 import { FileSaveService } from './file-save.service';
 
 export interface IconPackModel {
@@ -32,6 +32,7 @@ export interface IconModel {
   processingState: IconProcessingState;
   processingError?: string;
   availableSizes: number[];
+  contentHash?: string | null;
   originalFileName?: string;
 }
 
@@ -78,6 +79,7 @@ export class IconPackService {
   private readonly api = inject(ApiService);
   private readonly localization = inject(LocalizationService);
   private readonly fileSave = inject(FileSaveService);
+  private readonly iconImage = inject(IconImageService);
 
   readonly packs = signal<IconPackModel[]>([]);
   readonly isLoading = signal(false);
@@ -124,7 +126,9 @@ export class IconPackService {
     this.loadingPacks.add(packId);
     try {
       const response = await this.api.getIcons({ packId });
-      this.iconsSignal(packId).set((response.icons ?? []).map(mapIcon));
+      const icons = (response.icons ?? []).map(mapIcon);
+      this.iconImage.rememberVersions(icons);
+      this.iconsSignal(packId).set(icons);
       this.loadedPacks.add(packId);
     } catch (error) {
       console.error(`Failed to load icons of pack ${packId}:`, error);
@@ -435,6 +439,7 @@ export class IconPackService {
 
     this.api.onNotification<IconsAddedEvent>('IconsAddedEvent').subscribe(event => {
       const added = event.icons.map(mapIcon);
+      this.iconImage.rememberVersions(added);
       if (this.loadedPacks.has(event.packId)) {
         const icons = this.iconsSignal(event.packId);
         const known = new Set(icons().map(i => i.id));
@@ -449,6 +454,7 @@ export class IconPackService {
 
     this.api.onNotification<IconUpdatedEvent>('IconUpdatedEvent').subscribe(event => {
       const icon = mapIcon(event.icon);
+      this.iconImage.rememberVersions([icon]);
       this.resolveReadyWaiters(icon);
       if (!this.loadedPacks.has(icon.packId)) {
         return;
@@ -602,6 +608,7 @@ function mapIcon(icon: IpcIcon): IconModel {
     processingState: icon.processingState,
     processingError: icon.processingError,
     availableSizes: icon.availableSizes ?? [],
+    contentHash: icon.contentHash ?? null,
     originalFileName: icon.originalFileName,
   };
 }

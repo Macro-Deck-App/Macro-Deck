@@ -35,7 +35,7 @@ export class IconTileComponent {
     this.localization.translateKey(AppStrings.IconPacks.Tile.Processing));
 
   get imageUrl(): string | null {
-    return this.iconImage.getIconUrl(this.icon.id, 128);
+    return this.iconImage.getIconUrl(this.icon.id, 128, this.icon.contentHash);
   }
 
   get failedTooltip(): string {

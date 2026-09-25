@@ -4,7 +4,11 @@ using MacroDeckHost.Domain.Enums;
 
 namespace MacroDeckHost.Application.Icons;
 
-public sealed record IconImageResult(Stream Content, string ETag, string ContentType = "image/webp");
+public sealed record IconImageResult(
+	Stream Content,
+	string ETag,
+	string ContentType = "image/webp",
+	string? Version = null);
 
 public interface IIconService
 {

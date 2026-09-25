@@ -138,7 +138,8 @@ public class IconService : IIconService
 				var fallbackTag = $"\"{IconEtagIdentity(icon)}-{variant}{frameTag}{fallback.FileExtension}\"";
 				return Result.Ok<IconImageResult, IconError>(new IconImageResult(fallback.Content,
 					fallbackTag,
-					fallback.ContentType));
+					fallback.ContentType,
+					IconImageVersion.Of(icon)));
 			}
 		}
 
@@ -155,7 +156,8 @@ public class IconService : IIconService
 		}
 
 		var etag = $"\"{IconEtagIdentity(icon)}-{variant}\"";
-		return Result.Ok<IconImageResult, IconError>(new IconImageResult(stream, etag));
+		return Result.Ok<IconImageResult, IconError>(new IconImageResult(stream, etag,
+			Version: IconImageVersion.Of(icon)));
 	}
 
 	private bool IsPackReadOnly(Guid packId)

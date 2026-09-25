@@ -464,6 +464,32 @@ describe('ApiService', () => {
     });
   });
 
+  describe('icon pack image urls', () => {
+    it('gives an icon whose bytes were replaced a different URL', () => {
+      const api = configure();
+
+      expect(api.getIconImageUrl('icon-1', 128, 'sha256:aaaa')).not.toBe(
+        api.getIconImageUrl('icon-1', 128, 'sha256:bbbb'),
+      );
+    });
+
+    it('never reuses the unversioned URL an older host cached as immutable when no version is known', () => {
+      const api = configure();
+
+      expect(api.getIconImageUrl('icon-1', 128)).toBe('/api/icons/icon-1/image?size=128&v=');
+      expect(api.getIconImageUrl('icon-1', 128, null)).toBe('/api/icons/icon-1/image?size=128&v=');
+      expect(api.getIconImageUrl('icon-1')).toBe('/api/icons/icon-1/image?v=');
+    });
+
+    it('URI-encodes the version', () => {
+      const api = configure();
+
+      expect(api.getIconImageUrl('icon-1', 128, 'sha256:a/b')).toBe(
+        '/api/icons/icon-1/image?size=128&v=sha256%3Aa%2Fb',
+      );
+    });
+  });
+
   describe('integration icon urls', () => {
     // Issue #754: the route is keyed by the integration id, so a replaced icon only reaches an
     // already-rendered <img> if the version the caller knows about is part of the URL.

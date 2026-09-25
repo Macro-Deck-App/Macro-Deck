@@ -206,6 +206,7 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 			var installed = _iconPackCache.GetIconsByPackId(packId);
 			var variantsByIconId = IndexVariantEntries(archive);
 			var added = new List<IconEntity>();
+			var changed = new List<IconEntity>();
 
 			foreach (var entry in manifest.Icons)
 			{
@@ -217,6 +218,8 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 				}
 
 				var existing = Correlate(installed, entry);
+				var previousVersion = existing is null ? null : IconImageVersion.Of(existing);
+				var previousName = existing?.Name;
 				var icon = existing ??
 					new IconEntity
 					{
@@ -263,12 +266,22 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 				else
 				{
 					await _iconPackCache.UpdateIcon(icon);
+					if (IconImageVersion.Of(icon) != previousVersion || icon.Name != previousName)
+					{
+						changed.Add(icon);
+					}
 				}
 			}
 
 			if (added.Count > 0)
 			{
 				await _iconPackCache.AddIcons(packId, added);
+				await _mediator.Publish(new IconsAddedNotification(BatchId: null, packId, added), cancellationToken);
+			}
+
+			foreach (var icon in changed)
+			{
+				await _mediator.Publish(new IconUpdatedNotification(icon), cancellationToken);
 			}
 
 			// Icons the new version dropped are deliberately kept: a button may still reference one, and

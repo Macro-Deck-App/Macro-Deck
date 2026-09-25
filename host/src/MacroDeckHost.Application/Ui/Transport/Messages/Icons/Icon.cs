@@ -11,6 +11,7 @@ public class Icon
 	public string ProcessingState { get; set; } = string.Empty;
 	public string? ProcessingError { get; set; }
 	public List<int> AvailableSizes { get; set; } = [];
+	public string? ContentHash { get; set; }
 	public string? OriginalFileName { get; set; }
 	public DateTime CreatedAt { get; set; }
 }

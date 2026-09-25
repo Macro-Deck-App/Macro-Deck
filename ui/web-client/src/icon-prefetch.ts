@@ -78,7 +78,9 @@ export class IconPrefetch {
   }
 
   private urlFor(target: IconPrefetchTarget): string {
-    return `${this.options.baseUrl()}/api/icons/${encodeURIComponent(target.iconId)}/image?size=${target.size}`;
+    // The bare ?size=N URL may still be cached as immutable by an older host; the empty v asks this
+    // host to revalidate instead, since a folder's icon reference carries no content hash.
+    return `${this.options.baseUrl()}/api/icons/${encodeURIComponent(target.iconId)}/image?size=${target.size}&v=`;
   }
 
   private targets(): IconPrefetchTarget[] | null {
