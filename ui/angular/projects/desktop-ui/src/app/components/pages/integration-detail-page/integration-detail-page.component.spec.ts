@@ -11,7 +11,6 @@ import { DetailPageComponent } from '../../detail-page/detail-page.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
 import { Integration, IntegrationService } from '../../../services/integration.service';
 import { PluginCompatibilityService } from '../../../services/plugin-compatibility.service';
-import { StoreAccessService } from '../../../services/store-access.service';
 import { PluginInstallationService } from '../../../services/plugin-installation.service';
 
 import { IntegrationDetailPageComponent } from './integration-detail-page.component';
@@ -31,7 +30,6 @@ describe('IntegrationDetailPageComponent', () => {
   let resolveIntegrationIssue: jasmine.Spy;
   let getStoreExtension: jasmine.Spy;
   let uninstallPlugin: jasmine.Spy;
-  let storeUnlocked: ReturnType<typeof signal<boolean>>;
   let deleteConfigEntry: jasmine.Spy;
   let startConfigFlow: jasmine.Spy;
   let routerSpy: jasmine.SpyObj<Router>;
@@ -195,7 +193,6 @@ describe('IntegrationDetailPageComponent', () => {
       .and.resolveTo({ success: true, followUp: 'None' });
     deleteConfigEntry = jasmine.createSpy('deleteConfigEntry').and.resolveTo({ success: true });
     getStoreExtension = jasmine.createSpy('getStoreExtension').and.resolveTo({ extension: null });
-    storeUnlocked = signal(true);
     uninstallPlugin = jasmine.createSpy('uninstallPlugin').and.resolveTo({ success: true });
     startConfigFlow = jasmine.createSpy('startConfigFlow').and.resolveTo({
       supported: true,
@@ -223,7 +220,6 @@ describe('IntegrationDetailPageComponent', () => {
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        { provide: StoreAccessService, useValue: { unlocked: storeUnlocked } },
         {
           provide: IntegrationService,
           useValue: {
@@ -1073,17 +1069,6 @@ describe('IntegrationDetailPageComponent', () => {
 
     it('offers no Store link for a plugin the Store does not list', async () => {
       integrations.set([integration({ isInternal: false })]);
-      const fixture = await createFixture();
-      await fixture.whenStable();
-      fixture.detectChanges();
-
-      expect(storeButton(fixture)).toBeNull();
-    });
-
-    it('keeps the Store link hidden while the Store is not open to this account', async () => {
-      integrations.set([integration({ isInternal: false })]);
-      getStoreExtension.and.resolveTo({ extension: { id: 'app.macro-deck.spotify' } });
-      storeUnlocked.set(false);
       const fixture = await createFixture();
       await fixture.whenStable();
       fixture.detectChanges();

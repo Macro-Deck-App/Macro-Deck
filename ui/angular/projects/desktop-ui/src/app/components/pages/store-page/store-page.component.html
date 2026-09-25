@@ -1,10 +1,8 @@
-<div class="store-page" [attr.inert]="storeUnlocked() ? null : ''" (scroll)="onScroll($event)">
+<div class="store-page" (scroll)="onScroll($event)">
   <div class="store-page-content">
     <app-store-page-header #header active="discover" (refreshed)="onRefreshed()" />
 
-    @if (storeUnlocked()) {
-      <app-store-community-notice />
-    }
+    <app-store-community-notice />
 
     @if (catalog.registry()?.stale) {
       <shared-error-banner
@@ -222,19 +220,4 @@
     [danger]="true"
     (confirm)="confirmUninstall()"
     (cancel)="cancelUninstall()" />
-}
-
-@if (!storeUnlocked()) {
-  <div class="store-coming-soon">
-    <shared-empty-state
-      icon="store"
-      [heading]="'macrodeck.app:Store.Page.ComingSoonHeading' | translate"
-      [message]="'macrodeck.app:Store.Page.ComingSoonMessage' | translate">
-      @if (signedIn()) {
-        <shared-button variant="secondary" (click)="openTests()">
-          {{ 'macrodeck.app:Store.Page.ComingSoonTestsAction' | translate }}
-        </shared-button>
-      }
-    </shared-empty-state>
-  </div>
 }

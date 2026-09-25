@@ -14735,15 +14735,6 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>autor: {publisher}</value>
     <comment>[publisher:string]</comment>
   </data>
-  <data name="Store.Page.ComingSoonHeading" xml:space="preserve">
-    <value>Store nie jest jeszcze dostępny</value>
-  </data>
-  <data name="Store.Page.ComingSoonMessage" xml:space="preserve">
-    <value>Trwają jeszcze prace. Wtyczki i paczki ikon pojawią się tutaj w jednej z przyszłych aktualizacji.</value>
-  </data>
-  <data name="Store.Page.ComingSoonTestsAction" xml:space="preserve">
-    <value>Otwórz testy</value>
-  </data>
   <data name="Store.Page.CompatibilityCheckedHint" xml:space="preserve">
     <value>Zgodność z tą wersją Macro Deck jest sprawdzana podczas instalacji.</value>
   </data>
