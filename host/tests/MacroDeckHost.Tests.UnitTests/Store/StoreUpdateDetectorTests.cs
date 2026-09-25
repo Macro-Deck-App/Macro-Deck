@@ -23,6 +23,7 @@ internal sealed class StoreUpdateDetectorTests
 	private JsonStoreInstallationStore _installations = null!;
 	private PluginInstallationCatalog _plugins = null!;
 	private StoreUpdateState _state = null!;
+	private StoreWithdrawalState _withdrawals = null!;
 	private StoreUpdateDetector _detector = null!;
 	private StoreOperationTracker _tracker = null!;
 
@@ -36,7 +37,13 @@ internal sealed class StoreUpdateDetectorTests
 		_installations = new JsonStoreInstallationStore(_paths, Serilog.Core.Logger.None);
 		_plugins = new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None);
 		_state = new StoreUpdateState();
-		_detector = new StoreUpdateDetector(_catalog, _plugins, _installations, _state);
+		_withdrawals = new StoreWithdrawalState();
+		_detector = new StoreUpdateDetector(_catalog,
+			_plugins,
+			_installations,
+			_state,
+			_withdrawals,
+			StoreRegistryOptions.Default);
 		_tracker = new StoreOperationTracker(new InMemoryStoreOperationStore(), TimeProvider.System);
 	}
 
@@ -151,6 +158,134 @@ internal sealed class StoreUpdateDetectorTests
 
 		Assert.That(updates, Is.Empty);
 	}
+
+	[Test]
+	public void An_installed_withdrawn_version_is_reported_and_still_offered_the_clean_latest()
+	{
+		SeedIconPack(latest: "1.3.0", new StoreRemovedPackage
+		{
+			Id = IconPackId, Version = "1.2.0", Reason = "Compromised signing key", Replacement = "com.acme.other"
+		});
+		SaveIconPackRecord("https://registry.test/", "1.2.0");
+
+		var updates = _detector.Check();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(updates.Select(update => update.LatestVersion), Is.EqualTo(new[] { "1.3.0" }));
+			Assert.That(_withdrawals.Current, Is.EqualTo(new[]
+			{
+				new StoreInstalledWithdrawal
+				{
+					Kind = StoreExtensionKind.IconPack,
+					PackageId = IconPackId,
+					Name = "Material Icons",
+					InstalledVersion = "1.2.0",
+					Reason = "Compromised signing key",
+					Replacement = "com.acme.other",
+					Listed = true
+				}
+			}));
+		});
+	}
+
+	[Test]
+	public void No_update_is_offered_to_a_withdrawn_latest_version()
+	{
+		SeedIconPack(latest: "2.0.0", new StoreRemovedPackage { Id = IconPackId, Version = "2.0.0" });
+		SaveIconPackRecord("https://registry.test/", "1.0.0");
+
+		var updates = _detector.Check();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(updates, Is.Empty);
+			Assert.That(_withdrawals.Current, Is.Empty);
+		});
+	}
+
+	[Test]
+	public void A_withdrawn_plugin_or_icon_pack_installed_from_this_registry_is_reported_even_when_it_left_the_index()
+	{
+		_catalog.Swap(new StoreCatalogSnapshot
+		{
+			Sequence = 1,
+			Entries = [],
+			RemovedPackages =
+			[
+				new StoreRemovedPackage { Id = IconPackId, Version = "1.0.0", Reason = "Malware" },
+				new StoreRemovedPackage { Id = "com.acme.streamer", Version = "1.0.0", Reason = "Malware" }
+			]
+		});
+		SaveIconPackRecord(StoreRegistryOptions.Default.BaseUrl.ToString(), "1.0.0", "Material Icons");
+		_installations.Save(new StoreInstallationRecord
+		{
+			Origin = "https://other-registry.test/",
+			Kind = StoreExtensionKind.IconPack,
+			PackageId = "com.other.pack",
+			Version = "1.0.0",
+			InstalledAt = DateTimeOffset.UtcNow
+		});
+		_installations.Save(new StoreInstallationRecord
+		{
+			Origin = StoreRegistryOptions.Default.BaseUrl.ToString(),
+			Kind = StoreExtensionKind.ProfileTemplate,
+			PackageId = "com.acme.streamer",
+			Version = "1.0.0",
+			InstalledAt = DateTimeOffset.UtcNow
+		});
+
+		_detector.Check();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_withdrawals.Current.Select(withdrawal => (withdrawal.PackageId, withdrawal.Name, withdrawal.Listed)),
+				Is.EqualTo(new[] { (IconPackId, "Material Icons", false) }));
+			Assert.That(_withdrawals.Current.Single().Reason, Is.EqualTo("Malware"));
+		});
+	}
+
+	[Test]
+	public void A_check_without_a_loaded_catalog_keeps_the_known_withdrawals()
+	{
+		SeedIconPack(latest: "1.3.0", new StoreRemovedPackage { Id = IconPackId, Version = "1.2.0" });
+		SaveIconPackRecord("https://registry.test/", "1.2.0");
+		_detector.Check();
+
+		_catalog.Swap(StoreCatalogSnapshot.Empty);
+		_detector.Check();
+
+		Assert.That(_withdrawals.Current.Select(withdrawal => withdrawal.PackageId), Is.EqualTo(new[] { IconPackId }));
+	}
+
+	private void SeedIconPack(string latest, params StoreRemovedPackage[] removed) =>
+		_catalog.Swap(new StoreCatalogSnapshot
+		{
+			Sequence = 1,
+			Entries =
+			[
+				new StoreCatalogEntry
+				{
+					Kind = StoreExtensionKind.IconPack,
+					Id = IconPackId,
+					Name = "Material Icons",
+					LatestVersion = latest,
+					LatestRelease = Release(latest)
+				}
+			],
+			RemovedPackages = removed
+		});
+
+	private void SaveIconPackRecord(string origin, string version, string? displayName = null) =>
+		_installations.Save(new StoreInstallationRecord
+		{
+			Origin = origin,
+			Kind = StoreExtensionKind.IconPack,
+			PackageId = IconPackId,
+			Version = version,
+			DisplayName = displayName,
+			InstalledAt = DateTimeOffset.UtcNow
+		});
 
 	private void InstallPluginVersion(string pluginId, string version)
 	{

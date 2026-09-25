@@ -11895,6 +11895,13 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Version {version} ist bereit.</value>
     <comment>[version:string]</comment>
   </data>
+  <data name="Notifications.StoreVersionWithdrawn" xml:space="preserve">
+    <value>{name} {version} wurde aus dem Store zurückgezogen</value>
+    <comment>[name:string][version:string]</comment>
+  </data>
+  <data name="Notifications.StoreVersionWithdrawnRemoveHint" xml:space="preserve">
+    <value>Die Erweiterung ist nicht mehr im Store. Du kannst sie unter Integrationen oder Bibliothek entfernen.</value>
+  </data>
   <data name="Notifications.TlsCertificateInvalidAdvice" xml:space="preserve">
     <value>Das gespeicherte Zertifikat konnte nicht geladen werden. Erzeuge unter Einstellungen &gt; Netzwerk ein neues oder lade einen Ersatz hoch.</value>
   </data>
@@ -15092,6 +15099,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Store.Page.VersionUnavailableReason" xml:space="preserve">
     <value>Diese Version kann nicht aus dem Store installiert werden.</value>
   </data>
+  <data name="Store.Page.VersionWithdrawnReason" xml:space="preserve">
+    <value>Diese Version wurde aus dem Store zurückgezogen.</value>
+  </data>
   <data name="Store.Page.WhatsNewHeading" xml:space="preserve">
     <value>Was ist neu?</value>
   </data>
@@ -15294,11 +15304,41 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Store.VersionUnavailable" xml:space="preserve">
     <value>Nicht verfügbar</value>
   </data>
+  <data name="Store.VersionWithdrawn" xml:space="preserve">
+    <value>Zurückgezogen</value>
+  </data>
   <data name="Store.WhatMacroDeckReported" xml:space="preserve">
     <value>Was Macro Deck gemeldet hat</value>
   </data>
   <data name="Store.Why" xml:space="preserve">
     <value>Warum?</value>
+  </data>
+  <data name="Store.Withdrawal.InstalledAdvice" xml:space="preserve">
+    <value>Installiere eine andere Version oder deinstalliere diese.</value>
+  </data>
+  <data name="Store.Withdrawal.InstalledHeading" xml:space="preserve">
+    <value>Deine installierte Version {version} wurde aus dem Store zurückgezogen</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Store.Withdrawal.PackageChip" xml:space="preserve">
+    <value>Aus dem Store entfernt</value>
+  </data>
+  <data name="Store.Withdrawal.PackageHeading" xml:space="preserve">
+    <value>Diese Erweiterung wurde aus dem Store entfernt</value>
+  </data>
+  <data name="Store.Withdrawal.PackageMessage" xml:space="preserve">
+    <value>Sie kann nicht mehr installiert oder aktualisiert werden.</value>
+  </data>
+  <data name="Store.Withdrawal.Reason" xml:space="preserve">
+    <value>Grund: {reason}</value>
+    <comment>[reason:string]</comment>
+  </data>
+  <data name="Store.Withdrawal.Replacement" xml:space="preserve">
+    <value>Empfohlener Ersatz: {replacement}</value>
+    <comment>[replacement:string]</comment>
+  </data>
+  <data name="Store.Withdrawal.VersionChip" xml:space="preserve">
+    <value>Version zurückgezogen</value>
   </data>
   <data name="TemplateBuilder.Logic" xml:space="preserve">
     <value>Logik</value>

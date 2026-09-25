@@ -83,13 +83,12 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		}
 
 		var snapshot = _catalog.Snapshot;
-		if (snapshot.RemovedPackages.Any(removed =>
-			string.Equals(removed.Id, operation.PackageId, StringComparison.OrdinalIgnoreCase)))
+		var listed = snapshot.Entries.FirstOrDefault(entry =>
+			entry.Kind == operation.ExtensionKind &&
+			string.Equals(entry.Id, operation.PackageId, StringComparison.OrdinalIgnoreCase));
+		if (listed is null ? snapshot.HasRemoval(operation.PackageId) : snapshot.FindWithdrawal(listed) is not null)
 		{
-			_tracker.Transition(operationId,
-				StoreOperationState.Failed,
-				StoreOperationError.PackageRemoved,
-				"This package was removed from the registry.");
+			FailRemoved(operationId);
 			return;
 		}
 
@@ -128,6 +127,12 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 				StoreOperationState.Failed,
 				StoreOperationError.VersionNotFound,
 				$"Version {target} is not available.");
+			return;
+		}
+
+		if (snapshot.FindRemoval(item.Entry.Id, release.Version) is not null)
+		{
+			FailRemoved(operationId);
 			return;
 		}
 
@@ -198,6 +203,12 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 				ex.Message);
 		}
 	}
+
+	private void FailRemoved(Guid operationId) =>
+		_tracker.Transition(operationId,
+			StoreOperationState.Failed,
+			StoreOperationError.PackageRemoved,
+			"This package was removed from the registry.");
 
 	private async Task ExecutePlugin(Guid operationId,
 		StoreCatalogEntry entry,

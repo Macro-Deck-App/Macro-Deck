@@ -501,6 +501,122 @@ internal sealed class StoreCatalogQueryServiceTests
 		Assert.That(Ids(popular), Is.EqualTo(Ids(all)));
 	}
 
+	[Test]
+	public void A_package_with_only_an_older_version_withdrawn_stays_in_the_store()
+	{
+		Seed([Versioned("com.acme.icons", "1.3.0", "1.3.0", "1.2.0")],
+			removed: [Removal("com.acme.icons", "1.2.0")]);
+
+		var page = Page(new StoreCatalogQuery { Section = StoreCatalogSection.All });
+		var found = _query.Find(StoreExtensionKind.IconPack, "com.acme.icons");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Ids(page), Is.EqualTo(new[] { "com.acme.icons" }));
+			Assert.That(found.Success, Is.True);
+			Assert.That(found.Data!.InstallState, Is.EqualTo(StoreInstallState.NotInstalled));
+			Assert.That(found.Data.Withdrawal, Is.Null);
+			Assert.That(found.Data.WithdrawnVersions, Is.EqualTo(new[] { "1.2.0" }));
+		});
+	}
+
+	[Test]
+	public void An_installed_withdrawn_version_carries_the_registrys_reason_and_still_gets_the_update()
+	{
+		Seed([Versioned("com.acme.icons", "1.3.0", "1.3.0", "1.2.0")],
+			removed: [Removal("com.acme.icons", "1.2.0")]);
+		InstallIconPack("com.acme.icons", "1.2.0");
+
+		var item = _query.Find(StoreExtensionKind.IconPack, "com.acme.icons").Data!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(item.InstallState, Is.EqualTo(StoreInstallState.UpdateAvailable));
+			Assert.That(item.InstalledVersionRemoval?.Reason, Is.EqualTo("Compromised signing key"));
+			Assert.That(item.InstalledVersionRemoval?.Replacement, Is.EqualTo("com.acme.better-icons"));
+		});
+	}
+
+	[Test]
+	public void A_package_whose_latest_version_is_withdrawn_is_hidden_until_it_is_installed_and_then_only_listed_as_installed()
+	{
+		Seed([Versioned("com.acme.icons", "2.0.0", "2.0.0", "1.0.0")],
+			removed: [Removal("com.acme.icons", "2.0.0")]);
+		_catalog.Swap(_catalog.Snapshot with { Categories = [Category("icons")] });
+
+		var hiddenFind = _query.Find(StoreExtensionKind.IconPack, "com.acme.icons");
+		var hiddenInstalled = Page(new StoreCatalogQuery { Installed = true });
+
+		InstallIconPack("com.acme.icons", "1.0.0");
+
+		var browse = Page(new StoreCatalogQuery { Section = StoreCatalogSection.All });
+		var installed = Page(new StoreCatalogQuery { Installed = true });
+		var found = _query.Find(StoreExtensionKind.IconPack, "com.acme.icons");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(hiddenFind.Error, Is.EqualTo(StoreCatalogError.NotFound));
+			Assert.That(Ids(hiddenInstalled), Is.Empty);
+			Assert.That(Ids(browse), Is.Empty);
+			Assert.That(_query.Categories(null).Single().Count, Is.EqualTo(0));
+			Assert.That(Ids(installed), Is.EqualTo(new[] { "com.acme.icons" }));
+			Assert.That(_query.Installed().Select(item => item.Entry.Id), Is.EqualTo(new[] { "com.acme.icons" }));
+			Assert.That(found.Success, Is.True);
+			Assert.That(found.Data!.InstallState, Is.EqualTo(StoreInstallState.Installed));
+			Assert.That(found.Data.Withdrawal?.Reason, Is.EqualTo("Compromised signing key"));
+			Assert.That(found.Data.InstalledVersionRemoval, Is.Null);
+		});
+	}
+
+	[Test]
+	public void An_installed_withdrawn_version_newer_than_the_moved_back_latest_is_flagged_but_not_an_update()
+	{
+		Seed([Versioned("com.acme.icons", "1.2.0", "1.3.0", "1.2.0")],
+			removed: [Removal("com.acme.icons", "1.3.0")]);
+		InstallIconPack("com.acme.icons", "1.3.0");
+
+		var item = _query.Find(StoreExtensionKind.IconPack, "com.acme.icons").Data!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(item.InstallState, Is.EqualTo(StoreInstallState.Installed));
+			Assert.That(item.Withdrawal, Is.Null);
+			Assert.That(item.InstalledVersionRemoval, Is.Not.Null);
+		});
+	}
+
+	private static StoreRemovedPackage Removal(string id, string version) => new()
+	{
+		Id = id,
+		Version = version,
+		Reason = "Compromised signing key",
+		Replacement = "com.acme.better-icons"
+	};
+
+	private void InstallIconPack(string id, string version) =>
+		new JsonStoreInstallationStore(_paths, Serilog.Core.Logger.None).Save(new StoreInstallationRecord
+		{
+			Origin = "https://registry.example/",
+			Kind = StoreExtensionKind.IconPack,
+			PackageId = id,
+			Version = version
+		});
+
+	private static StoreCatalogEntry Versioned(string id, string latest, params string[] versions) =>
+		Entry(id, id, StoreExtensionKind.IconPack) with
+		{
+			LatestVersion = latest,
+			LatestRelease = new StoreReleaseManifest
+			{
+				Version = latest,
+				ArtifactUrl = new Uri($"https://cdn.example/{id}-{latest}.bin"),
+				Sha256 = new string('a', 64),
+				Size = 16
+			},
+			Tags = ["icons"],
+			History = versions.Select(version => new StoreVersionHistoryEntry { Version = version, HasRelease = true }).ToList()
+		};
+
 	private static StoreCategory Category(string id) =>
 		new() { Id = id, Names = new Dictionary<string, string> { ["en"] = id } };
 

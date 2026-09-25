@@ -57,9 +57,11 @@ public sealed class StoreTestService : IStoreTestService
 						string.Equals(record.Version, installedVersion, StringComparison.Ordinal)
 							? record.BuildId
 							: null,
-					StoreVersion = catalog.Success && catalog.Data!.InstallState is not StoreInstallState.Unsupported
-						? catalog.Data.Entry.LatestVersion
-						: null,
+					StoreVersion = catalog.Success &&
+						catalog.Data!.InstallState is not StoreInstallState.Unsupported &&
+						catalog.Data.Withdrawal is null
+							? catalog.Data.Entry.LatestVersion
+							: null,
 					ActiveOperationId = _tracker.FindLive(StoreExtensionKind.Plugin, test.PackageId)?.Id,
 					HasIcon = icon is not null,
 					IconSha256 = icon?.Sha256.ToLowerInvariant()

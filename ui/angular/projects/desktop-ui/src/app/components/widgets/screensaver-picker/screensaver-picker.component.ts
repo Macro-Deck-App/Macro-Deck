@@ -108,7 +108,7 @@ export class ScreenSaverPickerComponent {
 
     this.values = this.parseConfiguration(this.configuration());
 
-    this.session.set(this.uiSessions.open({
+    this.session.set(this.uiSessions.open(() => ({
       kind: 'config',
       entryPoint: UiConfigEntryPoints.ScreenSaverConfig,
       integrationId,
@@ -116,7 +116,7 @@ export class ScreenSaverPickerComponent {
       screenSaverId,
       screenSaverConfiguration: this.configuration() ?? undefined,
       configUiModelVersion: 0,
-    }));
+    })));
   }
 
   private closeSession(): void {

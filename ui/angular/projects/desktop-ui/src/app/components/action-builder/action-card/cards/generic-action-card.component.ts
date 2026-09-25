@@ -1,4 +1,8 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, Input, computed, effect, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy, Component, DestroyRef, Input, computed, effect, inject, signal, untracked,
+} from '@angular/core';
+
+import type { UiNode } from '@macro-deck/runtime';
 
 import { UiConfigEntryPoints } from '@macro-deck/runtime';
 import { LocalizationService, UiSessionHandle, UiSessionService } from '@shared';
@@ -45,6 +49,12 @@ export class GenericActionCardComponent {
 
   protected readonly root = computed(() => this.session()?.root() ?? null);
 
+  private openedWith = '';
+  private generation = 0;
+  private retainedRoot: UiNode | null = null;
+  private shownRoot: UiNode | null = null;
+  private caughtUp = false;
+
   constructor() {
     effect(() => {
       if (this.expanded()) {
@@ -52,6 +62,13 @@ export class GenericActionCardComponent {
       } else {
         this.closeSession();
       }
+    });
+
+    effect(() => {
+      const session = this.session();
+      const generation = session?.generation() ?? 0;
+      const root = session?.root() ?? null;
+      if (session) untracked(() => this.catchUp(generation, root));
     });
 
     inject(DestroyRef).onDestroy(() => this.closeSession());
@@ -83,14 +100,39 @@ export class GenericActionCardComponent {
     const definition = this.actionService.definitionFor(this.block.integrationId, this.block.actionId);
     if (!definition?.supportsConfigUi || !this.block.integrationId || !this.block.actionId) return;
 
-    this.session.set(this.uiSessions.open({
-      kind: 'config',
-      entryPoint: UiConfigEntryPoints.ActionConfig,
-      integrationId: this.block.integrationId,
-      actionId: this.block.actionId,
-      parameters: Object.fromEntries((this.block.parameters ?? []).map(p => [p.name, p.value])),
-      configUiModelVersion: definition.configUiModelVersion ?? 0,
+    const { integrationId, actionId } = this.block;
+    this.generation = 0;
+    this.shownRoot = null;
+    this.session.set(this.uiSessions.open(() => {
+      this.openedWith = JSON.stringify(this.parameters());
+      return {
+        kind: 'config',
+        entryPoint: UiConfigEntryPoints.ActionConfig,
+        integrationId,
+        actionId,
+        parameters: this.parameters(),
+        configUiModelVersion: definition.configUiModelVersion ?? 0,
+      };
     }));
+  }
+
+  private parameters(): Record<string, unknown> {
+    return Object.fromEntries((this.block.parameters ?? []).map(p => [p.name, p.value]));
+  }
+
+  // An edit made while a replaced session still shows its predecessor's tree never reached the new one.
+  private catchUp(generation: number, root: UiNode | null): void {
+    if (generation !== this.generation) {
+      this.generation = generation;
+      this.retainedRoot = this.shownRoot;
+      this.caughtUp = false;
+    }
+    if (root) this.shownRoot = root;
+    if (this.caughtUp || !root || root === this.retainedRoot) return;
+    this.caughtUp = true;
+    if (JSON.stringify(this.parameters()) === this.openedWith) return;
+    this.closeSession();
+    this.openSession();
   }
 
   private closeSession(): void {

@@ -215,7 +215,8 @@
   }
 }
 
-.takeover-chip {
+.takeover-chip,
+.withdrawal-chip {
   @include ds.chip;
   flex-shrink: 0;
   font-size: var(--text-xs);

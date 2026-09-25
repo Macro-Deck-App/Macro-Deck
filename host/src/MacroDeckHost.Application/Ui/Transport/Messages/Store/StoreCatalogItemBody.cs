@@ -31,6 +31,10 @@ public class StoreCatalogItemBody
 	/// its own <c>Store.NotSupportedOnPlatform</c> wording instead.</summary>
 	public string? UnsupportedReason { get; set; }
 
+	public StoreVersionWithdrawalBody? Withdrawal { get; set; }
+
+	public StoreVersionWithdrawalBody? InstalledVersionWithdrawal { get; set; }
+
 	public StoreTrustPresentation Trust { get; set; }
 
 	public bool SigningRevoked { get; set; }

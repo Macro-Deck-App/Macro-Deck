@@ -102,6 +102,26 @@ describe('StoreExtensionCardComponent trust chip', () => {
 
     expect(metaText()).not.toContain(translate('macrodeck.app:Developer.ManagedPlugins.TakenOverBadge'));
   });
+
+  it('flags an installed version the registry withdrew and names the reason', () => {
+    setup({ installState: 'UpdateAvailable', installedVersion: '1.2.0', installedVersionWithdrawal: { reason: 'Malware' } });
+
+    const chip = (fixture.nativeElement as HTMLElement).querySelector('.withdrawal-chip');
+    expect(chip?.textContent).toContain(translate(AppStrings.Store.Withdrawal.VersionChip));
+    expect(chip?.getAttribute('title')).toContain('Malware');
+  });
+
+  it('flags an installed package the registry removed from the Store', () => {
+    setup({ installState: 'Installed', installedVersion: '1.0.0', withdrawal: { reason: 'Malware' } });
+
+    expect(metaText()).toContain(translate(AppStrings.Store.Withdrawal.PackageChip));
+  });
+
+  it('shows no withdrawal chip for a package whose withdrawn versions are not installed', () => {
+    setup({ installState: 'Installed', installedVersion: '1.3.0' });
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('.withdrawal-chip')).toBeNull();
+  });
 });
 
 describe('StoreExtensionCardComponent rating', () => {

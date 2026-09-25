@@ -11897,6 +11897,13 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Verze {version} je připravena.</value>
     <comment>[version:string]</comment>
   </data>
+  <data name="Notifications.StoreVersionWithdrawn" xml:space="preserve">
+    <value>{name} {version}: verze byla stažena ze Store</value>
+    <comment>[name:string][version:string]</comment>
+  </data>
+  <data name="Notifications.StoreVersionWithdrawnRemoveHint" xml:space="preserve">
+    <value>Rozšíření již není ve Store. Odebrat ho lze v části Integrace nebo Knihovna.</value>
+  </data>
   <data name="Notifications.TlsCertificateInvalidAdvice" xml:space="preserve">
     <value>Uložený certifikát se nepodařilo načíst. Vygenerujte nový nebo nahrajte náhradní v Nastavení &gt; Síť.</value>
   </data>
@@ -15094,6 +15101,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Page.VersionUnavailableReason" xml:space="preserve">
     <value>Tuto verzi nelze nainstalovat ze Store.</value>
   </data>
+  <data name="Store.Page.VersionWithdrawnReason" xml:space="preserve">
+    <value>Tato verze byla stažena ze Store.</value>
+  </data>
   <data name="Store.Page.WhatsNewHeading" xml:space="preserve">
     <value>Co je nového?</value>
   </data>
@@ -15296,11 +15306,41 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.VersionUnavailable" xml:space="preserve">
     <value>Není k dispozici</value>
   </data>
+  <data name="Store.VersionWithdrawn" xml:space="preserve">
+    <value>Stažena</value>
+  </data>
   <data name="Store.WhatMacroDeckReported" xml:space="preserve">
     <value>Co Macro Deck ohlásil</value>
   </data>
   <data name="Store.Why" xml:space="preserve">
     <value>Proč?</value>
+  </data>
+  <data name="Store.Withdrawal.InstalledAdvice" xml:space="preserve">
+    <value>Nainstalujte jinou verzi nebo tuto odinstalujte.</value>
+  </data>
+  <data name="Store.Withdrawal.InstalledHeading" xml:space="preserve">
+    <value>Nainstalovaná verze {version} byla stažena ze Store</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Store.Withdrawal.PackageChip" xml:space="preserve">
+    <value>Odebráno ze Store</value>
+  </data>
+  <data name="Store.Withdrawal.PackageHeading" xml:space="preserve">
+    <value>Toto rozšíření bylo odebráno ze Store</value>
+  </data>
+  <data name="Store.Withdrawal.PackageMessage" xml:space="preserve">
+    <value>Již ho nelze nainstalovat ani aktualizovat.</value>
+  </data>
+  <data name="Store.Withdrawal.Reason" xml:space="preserve">
+    <value>Důvod: {reason}</value>
+    <comment>[reason:string]</comment>
+  </data>
+  <data name="Store.Withdrawal.Replacement" xml:space="preserve">
+    <value>Doporučená náhrada: {replacement}</value>
+    <comment>[replacement:string]</comment>
+  </data>
+  <data name="Store.Withdrawal.VersionChip" xml:space="preserve">
+    <value>Verze stažena</value>
   </data>
   <data name="TemplateBuilder.Logic" xml:space="preserve">
     <value>Logika</value>

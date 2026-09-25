@@ -67,4 +67,8 @@ internal sealed class PendingTreeUiSessionBroker : IUiSessionBroker
 	public void PublishFault(string providerId, string sessionId, string code, string? message)
 	{
 	}
+
+	public void PublishReload(string providerId, string sessionId)
+	{
+	}
 }

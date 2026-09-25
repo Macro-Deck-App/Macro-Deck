@@ -99,7 +99,7 @@ export class FolderViewPickerComponent {
 
     this.values = this.parseConfiguration(this.configuration());
 
-    this.session.set(this.uiSessions.open({
+    this.session.set(this.uiSessions.open(() => ({
       kind: 'config',
       entryPoint: UiConfigEntryPoints.FolderViewConfig,
       integrationId,
@@ -109,7 +109,7 @@ export class FolderViewPickerComponent {
       // Negotiated per view rather than per integration would need a second round trip for a value the
       // provider already agreed to when it declared the ui capability; 0 means "whatever the host speaks".
       configUiModelVersion: 0,
-    }));
+    })));
   }
 
   private closeSession(): void {

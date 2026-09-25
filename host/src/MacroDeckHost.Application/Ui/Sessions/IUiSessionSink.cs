@@ -10,6 +10,8 @@ public interface IUiSessionSink
 	UiSessionIngestResult PublishPatch(string providerId, string sessionId, UiRawJson patch);
 
 	void PublishFault(string providerId, string sessionId, string code, string? message);
+
+	void PublishReload(string providerId, string sessionId);
 }
 
 public readonly record struct UiSessionIngestResult

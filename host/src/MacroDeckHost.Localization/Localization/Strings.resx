@@ -11897,6 +11897,13 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Version {version} is ready.</value>
     <comment>[version:string]</comment>
   </data>
+  <data name="Notifications.StoreVersionWithdrawn" xml:space="preserve">
+    <value>{name} {version} was withdrawn from the Store</value>
+    <comment>[name:string][version:string]</comment>
+  </data>
+  <data name="Notifications.StoreVersionWithdrawnRemoveHint" xml:space="preserve">
+    <value>The extension is no longer in the Store. You can remove it under Integrations or Library.</value>
+  </data>
   <data name="Notifications.TlsCertificateInvalidAdvice" xml:space="preserve">
     <value>The stored certificate could not be loaded. Generate a new one or upload a replacement in Settings &gt; Network.</value>
   </data>
@@ -15094,6 +15101,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.Page.VersionUnavailableReason" xml:space="preserve">
     <value>This version can't be installed from the Store.</value>
   </data>
+  <data name="Store.Page.VersionWithdrawnReason" xml:space="preserve">
+    <value>This version was withdrawn from the Store.</value>
+  </data>
   <data name="Store.Page.WhatsNewHeading" xml:space="preserve">
     <value>What's new?</value>
   </data>
@@ -15296,11 +15306,41 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.VersionUnavailable" xml:space="preserve">
     <value>Not available</value>
   </data>
+  <data name="Store.VersionWithdrawn" xml:space="preserve">
+    <value>Withdrawn</value>
+  </data>
   <data name="Store.WhatMacroDeckReported" xml:space="preserve">
     <value>What Macro Deck reported</value>
   </data>
   <data name="Store.Why" xml:space="preserve">
     <value>Why?</value>
+  </data>
+  <data name="Store.Withdrawal.InstalledAdvice" xml:space="preserve">
+    <value>Install another version or uninstall this one.</value>
+  </data>
+  <data name="Store.Withdrawal.InstalledHeading" xml:space="preserve">
+    <value>Your installed version {version} was withdrawn from the Store</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Store.Withdrawal.PackageChip" xml:space="preserve">
+    <value>Removed from the Store</value>
+  </data>
+  <data name="Store.Withdrawal.PackageHeading" xml:space="preserve">
+    <value>This extension was removed from the Store</value>
+  </data>
+  <data name="Store.Withdrawal.PackageMessage" xml:space="preserve">
+    <value>It can no longer be installed or updated.</value>
+  </data>
+  <data name="Store.Withdrawal.Reason" xml:space="preserve">
+    <value>Reason: {reason}</value>
+    <comment>[reason:string]</comment>
+  </data>
+  <data name="Store.Withdrawal.Replacement" xml:space="preserve">
+    <value>Suggested replacement: {replacement}</value>
+    <comment>[replacement:string]</comment>
+  </data>
+  <data name="Store.Withdrawal.VersionChip" xml:space="preserve">
+    <value>Version withdrawn</value>
   </data>
   <data name="TemplateBuilder.Logic" xml:space="preserve">
     <value>Logic</value>

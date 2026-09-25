@@ -253,6 +253,23 @@ describe('UiSessionService widget sessions', () => {
     expect(handle.root()).not.toBeNull();
   });
 
+  it('opens a replacement from what the caller holds at that moment, and says why it was replaced', async () => {
+    const service = TestBed.inject(UiSessionService);
+    let draft = 'first';
+    const handle = service.open(() => ({ kind: 'widget', widgetId: 'w1', data: { label: draft } }));
+    await settle();
+    treeUpdated.next({ sessionId: 'widget-session-1', revision: 1, tree: { id: 'root', type: 'ui.stack' } });
+    api.openWidgetUiSession.calls.reset();
+
+    draft = 'edited';
+    invalidated.next({ sessionId: 'widget-session-1', code: 'PROVIDER_RELOADED', message: 'x', retryable: true });
+    await settle();
+
+    expect(api.openWidgetUiSession).toHaveBeenCalledOnceWith(
+      jasmine.objectContaining({ widgetId: 'w1', data: { label: 'edited' } }));
+    expect(handle.reopenReason?.()).toBe('PROVIDER_RELOADED');
+  });
+
   it('stops reopening a session that is invalidated without ever serving a tree', async () => {
     const service = TestBed.inject(UiSessionService);
     const handle = service.open({ kind: 'widget', widgetId: 'w1' });

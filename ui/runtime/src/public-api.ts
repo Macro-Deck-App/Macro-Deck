@@ -1112,6 +1112,7 @@ export {
   type StoreTestsErrorCode,
   type StoreUpdatesChangedEvent,
   type StoreVersionHistoryBody,
+  type StoreVersionWithdrawalBody,
   type UninstallStoreExtensionRequest,
   type GetStoreCreatorGuidelinesResponse,
   type GetStoreInstallsResponse,

@@ -271,7 +271,7 @@ APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `no
 | --- | --- |
 | `action-interactions` | `show-modal` answers with a modal id as soon as the modal opens; the user's answer arrives later as a `ui`/`modal.result` `capability.invoke` naming that modal. Exactly one result per modal. |
 | `widgets` | Payload differs by protocol major - see below. |
-| `ui` | Not charged to the per-plugin callback throttle. `snapshot`, `patch` and `fault` are bounded per session by `maxUiUpdatesPerSecond` / `maxUiUpdateBurst`; `register-resource` and `remove-resource` have their own per-plugin rate limit. |
+| `ui` | Not charged to the per-plugin callback throttle. `snapshot`, `patch` and `fault` are bounded per session by `maxUiUpdatesPerSecond` / `maxUiUpdateBurst`; `reload` ends its session, and one for a session that already ended is ignored; `register-resource` and `remove-resource` have their own per-plugin rate limit. |
 | `variable-values` | Data-carrying push for the catalog half only; eager variables are always polled via `variables`/`get`. |
 | `event-bindings` | Push-only `host.state`, no `host.invoke` operations. `data` lists the triggers bound to this plugin's own events, each an `eventId` and `parameters` keyed by name (`value`, absent for a state operator, and `operator`). Sent on registration and whenever that list changes. |
 | `adb` | Gated per plugin, runs off the session's dispatch loop, at most 4 calls in flight per plugin - see [`adb`](#adb). |
@@ -298,6 +298,7 @@ For a major `1` session the host translates rather than refuses: `off`/`on` map 
 | `snapshot` | `sessionId`, `tree` | The full current tree; send one for every `session.snapshot` the host invokes. |
 | `patch` | `sessionId`, `patch` | One patch; `fromRevision` / `toRevision` are read from the patch itself. |
 | `fault` | `sessionId`, `code`, `message` | The session can no longer be served; the host ends it and tells clients, without relaying your text. |
+| `reload` | `sessionId` | Your code for this session changed during development. The host ends the session without reporting a fault, and every client showing it opens it again, which asks your provider for a new session. The SDK sends it when .NET Hot Reload updates the plugin. A host that predates it answers `CAPABILITY_UNSUPPORTED`; the SDK then sends `fault` instead, which also makes clients reopen. |
 | `register-resource` | `name`, `contentHash`, `mediaType` | Registers bytes as a UI resource under a plugin-chosen name and answers a `resource` (`resourceId`, `contentHash`, `mediaType`, `byteLength`), or `uploadRequired: true` when the host does not hold those bytes for this plugin yet. |
 | `remove-resource` | `name` | Removes the named resource. An unknown name is not an error. |
 

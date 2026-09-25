@@ -16,5 +16,11 @@ public sealed record StoreCatalogItem
 
 	public string? UnsupportedReason { get; init; }
 
+	public StoreRemovedPackage? Withdrawal { get; init; }
+
+	public StoreRemovedPackage? InstalledVersionRemoval { get; init; }
+
+	public IReadOnlyList<string> WithdrawnVersions { get; init; } = [];
+
 	public bool SigningRevoked { get; init; }
 }

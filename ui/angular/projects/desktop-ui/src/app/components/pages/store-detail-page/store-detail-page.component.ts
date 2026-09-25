@@ -47,6 +47,7 @@ import { StoreManageAction } from '../../store/store-install-button.component';
 import { StoreDetailHeaderComponent } from './store-detail-header.component';
 import { StoreLanguagesModalComponent } from './store-languages-modal.component';
 import { StoreScreenshotStripComponent } from './store-screenshot-strip.component';
+import { StoreWithdrawalNoticeComponent } from './store-withdrawal-notice.component';
 import { StoreVersionHistoryModalComponent } from './store-version-history-modal.component';
 
 const KNOWN_KINDS = STORE_DETAIL_KINDS;
@@ -102,6 +103,7 @@ interface StoreDetailLink {
     StoreFooterComponent,
     StoreLanguagesModalComponent,
     StoreScreenshotStripComponent,
+    StoreWithdrawalNoticeComponent,
     StoreSectionComponent,
     StoreMarkdownComponent,
     StoreReportDialogComponent,
@@ -257,7 +259,9 @@ export class StoreDetailPageComponent implements OnInit {
       const badges = [
         sameVersion(entry.version, extension.latestVersion) ? this.localization.translateKey(AppStrings.Store.Page.VersionLatestBadge) : null,
         sameVersion(entry.version, extension.installedVersion) ? this.localization.translateKey(AppStrings.Store.Installed) : null,
-        installable ? null : this.localization.translateKey(AppStrings.Store.VersionUnavailable),
+        installable ? null : this.localization.translateKey(entry.unavailableReason === 'Withdrawn'
+          ? AppStrings.Store.VersionWithdrawn
+          : AppStrings.Store.VersionUnavailable),
       ].filter((badge): badge is string => badge !== null);
       return { value: entry.version, label: entry.version, disabled: !installable, badge: badges.join(' · ') || undefined };
     });
@@ -393,9 +397,12 @@ export class StoreDetailPageComponent implements OnInit {
 
   private unavailableReason(entry: StoreVersionHistoryBody): string {
     const extension = this.extension();
-    return entry.unavailableReason === 'UnsupportedPlatform' || extension?.installState === 'Unsupported'
-      ? this.localization.translateKey(AppStrings.Store.NotSupportedOnPlatform)
-      : this.localization.translateKey(AppStrings.Store.Page.VersionUnavailableReason);
+    if (entry.unavailableReason === 'UnsupportedPlatform' || extension?.installState === 'Unsupported') {
+      return this.localization.translateKey(AppStrings.Store.NotSupportedOnPlatform);
+    }
+    return this.localization.translateKey(entry.unavailableReason === 'Withdrawn'
+      ? AppStrings.Store.Page.VersionWithdrawnReason
+      : AppStrings.Store.Page.VersionUnavailableReason);
   }
 
   protected readonly platforms = computed(() => {

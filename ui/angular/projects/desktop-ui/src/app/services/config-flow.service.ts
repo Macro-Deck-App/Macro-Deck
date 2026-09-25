@@ -1,10 +1,12 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { filter, take } from 'rxjs';
-import { ActionParameterType, AppStrings, ConfigFlowAuthorizedNotification, ConfigFlowStepDto, LocalizedText, UiConfigEntryPoints, resolveLocalizedText } from '@macro-deck/runtime';
+import { ActionParameterType, AppStrings, ConfigFlowAuthorizedNotification, ConfigFlowStepDto, LocalizedText, UiConfigEntryPoints, UiConfigEvents, resolveLocalizedText } from '@macro-deck/runtime';
 import { ApiService, LocalizationService, UiSessionHandle, UiSessionService } from '@shared';
 import type { UiNode, UiNodeEvent } from '@macro-deck/runtime';
 import { isFieldVisible } from '../domain/parameter-visibility.util';
 import { ExternalLinkService } from './external-link.service';
+
+const PROVIDER_RELOADED = 'PROVIDER_RELOADED';
 
 interface StepSnapshot {
   step: ConfigFlowStepDto;
@@ -44,6 +46,23 @@ export class ConfigFlowService {
   readonly canGoBack = computed(() => this.history().length > 0);
 
   readonly canSubmit = computed(() => this.canSubmitWith(this.values()));
+
+  private touched = new Set<string>();
+  private treeGeneration = 0;
+  private retainedRoot: UiNode | null = null;
+  private shownRoot: UiNode | null = null;
+  private replayPending = false;
+  private replayedGeneration = 0;
+
+  constructor() {
+    effect(() => {
+      const session = this.session();
+      if (!session) return;
+      const generation = session.generation();
+      const root = session.root();
+      untracked(() => this.replayDraft(session, generation, root));
+    });
+  }
 
   canSubmitWith(values: Record<string, unknown>): boolean {
     const step = this.step();
@@ -92,7 +111,33 @@ export class ConfigFlowService {
   }
 
   sendTreeEvent(event: UiNodeEvent): void {
+    if (event.name === UiConfigEvents.Change) this.touched.add(event.nodeId);
     this.session()?.send(event);
+  }
+
+  // A reopened session renders the provider's defaults, and Submit reads the rendered values.
+  private replayDraft(session: UiSessionHandle, generation: number, root: UiNode | null): void {
+    if (generation !== this.treeGeneration) {
+      this.treeGeneration = generation;
+      this.retainedRoot = this.shownRoot;
+      this.replayPending = generation > 1;
+    }
+    if (root) this.shownRoot = root;
+    if (!this.replayPending || !root || root === this.retainedRoot) return;
+    this.replayPending = false;
+
+    // A replay the new code faulted on must not be replayed into the session that reopens after it.
+    const reason = session.reopenReason?.() ?? null;
+    if (reason !== PROVIDER_RELOADED && this.replayedGeneration === generation - 1) return;
+
+    const values = this.values();
+    const names = [...this.touched].filter(name => name in values);
+    if (names.length === 0) return;
+
+    this.replayedGeneration = generation;
+    for (const name of names) {
+      session.send({ nodeId: name, name: UiConfigEvents.Change, data: values[name] });
+    }
   }
 
   setValue(name: string, value: unknown): void {
@@ -131,6 +176,7 @@ export class ConfigFlowService {
     this.history.update(current => current.slice(0, -1));
     this.step.set(snapshot.step);
     this.values.set(snapshot.values);
+    this.touched = new Set();
     this.storedSecretFields.set(snapshot.storedSecretFields);
     this.clearedSecretFields.set(snapshot.clearedSecretFields);
     this.fieldErrors.set({});
@@ -233,6 +279,11 @@ export class ConfigFlowService {
   private closeSession(): void {
     this.session()?.close();
     this.session.set(null);
+    this.treeGeneration = 0;
+    this.retainedRoot = null;
+    this.shownRoot = null;
+    this.replayPending = false;
+    this.replayedGeneration = 0;
   }
 
   private resolveMessage(message: LocalizedText | undefined): string | null {
@@ -263,6 +314,7 @@ export class ConfigFlowService {
   private applyStep(step: ConfigFlowStepDto, initialValues: Record<string, unknown> = {}): void {
     this.step.set(step);
     this.values.set({ ...defaultValuesFor(step), ...initialValues });
+    this.touched = new Set();
     this.fieldErrors.set({});
     this.message.set(null);
   }

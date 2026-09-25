@@ -90,6 +90,7 @@ it back after a reload.
 | You change | What updates | How |
 | --- | --- | --- |
 | A plugin scenario or view, under `dotnet watch` or your IDE's Hot Reload | The open preview, in place | The SDK rebuilds the scenario and sends its new tree. No restart, and the preview keeps its session. |
+| Any plugin code, under `dotnet watch` or your IDE's Hot Reload | Every other open view of the plugin: deck widgets, widget, action and integration configuration, folder views, screensavers | Macro Deck opens each view again and your provider builds it with the new code. A configuration editor keeps the unsaved changes. See [Real views](#real-views). |
 | A plugin change Hot Reload cannot apply, or a plain rebuild and restart | The open preview, once the plugin is back | The last tree stays on screen, dimmed, with a notice that the plugin is not connected. The preview reopens by itself when the plugin reconnects. |
 | A scenario that no longer exists (renamed or removed) | A notice instead of the preview | Pick the scenario again from the list, which refreshes by itself. |
 | A built-in Macro Deck view | The open preview, after the host restarts | The preview reopens once Macro Deck is back. |
@@ -113,6 +114,28 @@ anything you typed or selected inside the preview. Put the state you want to loo
 A plugin whose first-ever scenario is added by Hot Reload does not declare a UI yet, so that scenario appears
 after the next restart.
 
+## Real views
+
+A preview is not the only view that follows Hot Reload. Every view your plugin serves in the running app is
+opened again after each update, whichever code changed, so you can work on a widget or a configuration view
+with real data instead of a scenario:
+
+- In the desktop app, and for widgets on a deck, the view keeps showing its last tree until the new one
+  arrives. A folder view or screensaver in the web client shows its loading state in between.
+- A widget, action or integration configuration editor keeps the unsaved changes: Macro Deck opens the new
+  session with the draft it holds, or, for an integration's setup, sends the new session a `change` event for
+  each field the user edited.
+- State that lives in the old session is gone, such as the open tab. State your provider keeps outside the
+  session survives.
+- An open dialog is left alone, because ending it would cancel the action waiting for its answer. The next
+  dialog uses the new code.
+- A view whose new code throws while it is created shows as unavailable after a few attempts. Open it again
+  once the code is fixed.
+- A view that was still being created while the update landed may keep the old code. Open it again.
+- If `dotnet watch` reports `Failed to load type` warnings for an update, restart the plugin (Ctrl+R in
+  `dotnet watch`, or restart it from your IDE). Hot Reload still reports success, but the process can no longer
+  build views reliably, so views stop updating or stay empty.
+
 ## Over the plugin protocol
 
 `describe` lists your scenarios in `previews`. `MacroDeck.Plugin.Hosting` scans the assemblies of your
@@ -123,7 +146,9 @@ by id in its attributes; the SDK builds that scenario ahead of every production 
 When .NET Hot Reload updates the plugin, `MacroDeck.Plugin.Hosting` builds every open preview's scenario
 again, sends the new tree as an unrequested `ui/snapshot`, and sends `state.update` for `ui` so the host
 re-reads `describe` and the list picks up new or removed scenarios. A scenario that throws on rebuild faults
-only its own preview. Nothing changes for a plugin that is not being hot reloaded.
+only its own preview. Every other open session except a `dialog` gets a `ui/reload` (see
+[Host callbacks](/reference/websocket/#ui)), and the host ends it so that clients open it again. Nothing
+changes for a plugin that is not being hot reloaded.
 
 ## See also
 

@@ -415,6 +415,9 @@ public class RemoteIntegrationContextTests
 		covered.Add((HostApis.Ui, HostOperations.Ui.Patch));
 		covered.Add((HostApis.Ui, HostOperations.Ui.Fault));
 
+		// reload is sent only when .NET Hot Reload updates the plugin, so UiPreviewHotReloadTests covers it.
+		covered.Add((HostApis.Ui, HostOperations.Ui.Reload));
+
 		// The resource operations are covered by RemoteUiResourceRegistryTests, which scripts the
 		// upload-then-register exchange the recording invoker here cannot answer.
 		covered.Add((HostApis.Ui, HostOperations.Ui.RegisterResource));

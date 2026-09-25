@@ -173,7 +173,7 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 			Volatile.Write(ref _previewScan, UiPreviewCatalog.Scan(_previewAssemblies));
 		}
 
-		_sessions.RebuildAll();
+		_sessions.ReloadAll();
 
 		if (_declaredUi)
 		{
@@ -246,7 +246,8 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 			.ConfigureAwait(false);
 		if (configSession is not null)
 		{
-			return await AcceptSessionAsync(arguments.SessionId, configSession).ConfigureAwait(false);
+			return await AcceptSessionAsync(arguments.SessionId, configSession, arguments.SurfaceKind)
+				.ConfigureAwait(false);
 		}
 
 		foreach (var provider in _providers)
@@ -258,7 +259,8 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 				continue;
 			}
 
-			return await AcceptSessionAsync(arguments.SessionId, session).ConfigureAwait(false);
+			return await AcceptSessionAsync(arguments.SessionId, session, arguments.SurfaceKind)
+				.ConfigureAwait(false);
 		}
 
 		return CapabilityInvocationResult.Ok(new UiSessionOpenResult
@@ -298,7 +300,7 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 			});
 		}
 
-		return await AcceptSessionAsync(arguments.SessionId, session).ConfigureAwait(false);
+		return await AcceptSessionAsync(arguments.SessionId, session, arguments.SurfaceKind).ConfigureAwait(false);
 	}
 
 	private UiPreviewRegistration? FindPreview(string previewId)
@@ -362,9 +364,10 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 		=> _actions.FirstOrDefault(action => string.Equals(action.Id, actionId, StringComparison.Ordinal))
 			as IUiConfigurableActionDefinition;
 
-	private async Task<CapabilityInvocationResult> AcceptSessionAsync(string sessionId, IUiSession session)
+	private async Task<CapabilityInvocationResult> AcceptSessionAsync(string sessionId, IUiSession session,
+		string surfaceKind)
 	{
-		if (_sessions.TryAdd(sessionId, session))
+		if (_sessions.TryAdd(sessionId, session, surfaceKind))
 		{
 			return CapabilityInvocationResult.Ok(new UiSessionOpenResult
 			{

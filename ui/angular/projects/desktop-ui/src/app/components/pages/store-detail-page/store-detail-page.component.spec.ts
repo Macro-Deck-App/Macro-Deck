@@ -788,6 +788,67 @@ describe('StoreDetailPageComponent', () => {
       expect(component.versionOptions().filter(option => !option.disabled).map(option => option.value)).toEqual(['2.0.0']);
     });
 
+    it('warns about an installed withdrawn version and offers going back to the latest only after confirming', async () => {
+      await createFixture(null, {
+        latestVersion: '1.2.0',
+        installedVersion: '1.3.0',
+        installState: 'Installed',
+        installedVersionWithdrawal: { reason: 'Compromised signing key', replacement: 'com.acme.safe' },
+        history: [
+          { version: '1.3.0', installable: false, unavailableReason: 'Withdrawn' },
+          { version: '1.2.0', installable: true },
+        ],
+      });
+
+      const notice = (fixture.nativeElement as HTMLElement).querySelector('.withdrawal-notice')?.textContent ?? '';
+      clickButton(translate(AppStrings.Store.DowngradeTo, { version: '1.2.0' }));
+
+      expect(notice).toContain(translate(AppStrings.Store.Withdrawal.InstalledHeading, { version: '1.3.0' }));
+      expect(notice).toContain('Compromised signing key');
+      expect(notice).toContain('com.acme.safe');
+      expect(operationsSpy.install).not.toHaveBeenCalled();
+      expect(document.body.querySelector('shared-confirmation-modal')).not.toBeNull();
+    });
+
+    it('says a withdrawn version was withdrawn rather than merely unavailable', async () => {
+      await createFixture(null, {
+        latestVersion: '2.0.0',
+        history: [
+          { version: '2.0.0', installable: true },
+          { version: '1.0.0', installable: false, unavailableReason: 'Withdrawn' },
+        ],
+      });
+      const component = fixture.componentInstance as unknown as {
+        versionOptions(): { value: string; badge?: string }[];
+        selectedUnavailableReason(): string | null;
+      };
+
+      selectVersion('1.0.0');
+
+      expect(component.versionOptions().find(option => option.value === '1.0.0')?.badge)
+        .toContain(translate(AppStrings.Store.VersionWithdrawn));
+      expect(component.selectedUnavailableReason()).toBe(translate(AppStrings.Store.Page.VersionWithdrawnReason));
+    });
+
+    it('keeps Uninstall and no reviews for an installed package the registry removed from the Store', async () => {
+      await createFixture(null, {
+        latestVersion: '2.0.0',
+        installedVersion: '1.0.0',
+        installState: 'Installed',
+        withdrawal: { reason: 'Malware' },
+        history: [
+          { version: '2.0.0', installable: false, unavailableReason: 'Withdrawn' },
+          { version: '1.0.0', installable: false, unavailableReason: 'Withdrawn' },
+        ],
+      }, true);
+      const host = fixture.nativeElement as HTMLElement;
+      const labels = Array.from(host.querySelectorAll('button')).map(button => button.textContent?.trim());
+
+      expect(host.querySelector('.withdrawal-notice')?.textContent).toContain(translate(AppStrings.Store.Withdrawal.PackageHeading));
+      expect(labels).toContain(translate(AppStrings.Store.Uninstall));
+      expect(host.querySelector('app-store-reviews-section')).toBeNull();
+    });
+
     it('opens detail links through the system browser rather than navigating the app', async () => {
       await createFixture(null, { repository: 'https://github.com/example/plugin' });
       const externalLinks = TestBed.inject(ExternalLinkService);

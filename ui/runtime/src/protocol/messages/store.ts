@@ -38,6 +38,9 @@ export interface StoreCatalogItemBody {
   installedVersion?: string | null;
   installedTestBuild?: string | null;
   unsupportedReason?: string | null;
+  // Absent from an older host.
+  withdrawal?: StoreVersionWithdrawalBody | null;
+  installedVersionWithdrawal?: StoreVersionWithdrawalBody | null;
   trust: StoreExtensionTrust;
   hasIcon: boolean;
   iconSha256?: string | null;
@@ -48,13 +51,18 @@ export interface StoreCatalogItemBody {
   signingRevoked?: boolean;
 }
 
+export interface StoreVersionWithdrawalBody {
+  reason?: string | null;
+  replacement?: string | null;
+}
+
 export interface StoreScreenshotBody {
   index: number;
   caption?: string | null;
   sha256?: string | null;
 }
 
-export type StoreVersionUnavailableReason = 'UnsupportedPlatform' | 'Unavailable';
+export type StoreVersionUnavailableReason = 'UnsupportedPlatform' | 'Unavailable' | 'Withdrawn';
 
 // size, installable and unavailableReason are absent from an older host, which cannot install an older version.
 export interface StoreVersionHistoryBody {

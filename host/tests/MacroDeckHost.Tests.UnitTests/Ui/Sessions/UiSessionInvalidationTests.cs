@@ -63,6 +63,43 @@ internal sealed class UiSessionInvalidationTests : UiSessionFixture
 	}
 
 	[Test]
+	public async Task A_provider_reload_ends_the_session_as_a_retryable_reload_and_closes_the_provider_side()
+	{
+		var provider = AddProvider();
+		var sessionId = await OpenAsync(provider);
+		Attach(sessionId, "c1");
+		await WaitForMessagesAsync("c1", 1, "The client never received its first tree.");
+
+		Broker.PublishReload(ProviderId, sessionId);
+
+		await WaitForAsync(() => MessagesFor<UiSessionInvalidatedEvent>("c1").Count == 1,
+			"A reload left the session alive.");
+		await WaitForAsync(() => provider.CloseCalls == 1, "The provider's old session was never closed.");
+
+		var invalidation = MessagesFor<UiSessionInvalidatedEvent>("c1")[0];
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(invalidation.Code, Is.EqualTo(UiSessionErrorCodes.ProviderReloaded));
+			Assert.That(invalidation.Retryable, Is.True);
+		});
+	}
+
+	[Test]
+	public async Task A_reload_naming_another_providers_session_changes_nothing()
+	{
+		var provider = AddProvider();
+		var sessionId = await OpenAsync(provider);
+		Attach(sessionId, "c1");
+		await WaitForMessagesAsync("c1", 1, "The client never received its first tree.");
+
+		Broker.PublishReload("some.other.plugin", sessionId);
+		await SettleAsync();
+
+		Assert.That(MessagesFor<UiSessionInvalidatedEvent>("c1"), Is.Empty);
+	}
+
+	[Test]
 	public async Task A_reconnecting_plugins_new_session_survives_the_old_connections_teardown()
 	{
 		var provider = AddProvider();
