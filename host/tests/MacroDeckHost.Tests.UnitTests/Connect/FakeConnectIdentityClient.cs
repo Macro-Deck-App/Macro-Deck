@@ -38,6 +38,8 @@ internal sealed class FakeConnectIdentityClient : IConnectIdentityClient
 
 	public Func<Task>? BeforeRefresh { get; set; }
 
+	public Func<Task>? AfterRefresh { get; set; }
+
 	public bool Stall { get; set; }
 
 	public TaskCompletionSource StallGate { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -167,6 +169,7 @@ internal sealed class FakeConnectIdentityClient : IConnectIdentityClient
 			return scripted();
 		}
 
+		ConnectTokenResponse issued;
 		lock (_sync)
 		{
 			if (_chainDead)
@@ -192,8 +195,15 @@ internal sealed class FakeConnectIdentityClient : IConnectIdentityClient
 			}
 
 			state.Redeemed = true;
-			return Mint();
+			issued = Mint();
 		}
+
+		if (AfterRefresh is { } after)
+		{
+			await after();
+		}
+
+		return issued;
 	}
 
 	public Task Revoke(string refreshToken, CancellationToken cancellationToken)
