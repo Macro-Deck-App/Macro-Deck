@@ -33,6 +33,14 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 
 	private const int PlaylistMembershipMaxItems = 1000;
 
+	private const int CatalogLibraryPageSize = 50;
+
+	private const int CatalogLibraryMaxItems = 200;
+
+	// Spotify refuses a search limit above 10 for Development Mode apps, and a user-supplied client id
+	// usually is one.
+	private const int CatalogSearchLimit = 10;
+
 	// 30 min TTL, 5 min failure backoff so a stale/unreachable snapshot recovers on its own, and 20s
 	// fetch timeout so a slow refresh cannot pin a device connection indefinitely.
 	private static readonly TimeSpan _topItemsTtl = TimeSpan.FromMinutes(30);
@@ -1077,14 +1085,21 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 		IEnumerable<FullTrack?> tracks;
 		if (!string.IsNullOrWhiteSpace(filter))
 		{
-			var search = await client.Search.Item(new SearchRequest(SearchRequest.Types.Track, filter),
+			var search = await client.Search.Item(
+				new SearchRequest(SearchRequest.Types.Track, filter) { Limit = CatalogSearchLimit },
 				cancellationToken);
 			tracks = search.Tracks.Items ?? [];
 		}
 		else
 		{
-			var liked = await client.Library.GetTracks(cancellationToken);
-			tracks = liked.Items?.Select(s => s.Track) ?? [];
+			tracks = await ReadLibraryPagesAsync(async (offset, limit) =>
+				{
+					var page = await client.Library.GetTracks(
+						new LibraryTracksRequest { Limit = limit, Offset = offset },
+						cancellationToken);
+					return (page.Items?.Select(saved => (FullTrack?)saved.Track).ToList(), page.Total);
+				},
+				cancellationToken);
 		}
 
 		return MapTracks(tracks);
@@ -1098,24 +1113,58 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 		IEnumerable<FullPlaylist?> playlists;
 		if (!string.IsNullOrWhiteSpace(filter))
 		{
-			var search = await client.Search.Item(new SearchRequest(SearchRequest.Types.Playlist, filter),
+			var search = await client.Search.Item(
+				new SearchRequest(SearchRequest.Types.Playlist, filter) { Limit = CatalogSearchLimit },
 				cancellationToken);
 			playlists = search.Playlists.Items ?? [];
 		}
 		else
 		{
-			var page = await client.Playlists.CurrentUsers(cancellationToken);
-			playlists = page.Items ?? [];
+			playlists = await ReadLibraryPagesAsync(async (offset, limit) =>
+				{
+					var page = await client.Playlists.CurrentUsers(
+						new PlaylistCurrentUsersRequest { Limit = limit, Offset = offset },
+						cancellationToken);
+					return (page.Items?.Cast<FullPlaylist?>().ToList(), page.Total);
+				},
+				cancellationToken);
 		}
 
 		return MapPlaylists(playlists);
 	}
 
+	private static async Task<List<T?>> ReadLibraryPagesAsync<T>(
+		Func<int, int, Task<(List<T?>? Items, int? Total)>> readPage,
+		CancellationToken cancellationToken)
+		where T : class
+	{
+		var items = new List<T?>();
+		while (items.Count < CatalogLibraryMaxItems)
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+
+			var limit = Math.Min(CatalogLibraryPageSize, CatalogLibraryMaxItems - items.Count);
+			var (page, total) = await readPage(items.Count, limit);
+			if (page is null)
+			{
+				break;
+			}
+
+			items.AddRange(page);
+			if (page.Count < limit || items.Count >= total)
+			{
+				break;
+			}
+		}
+
+		return items;
+	}
+
 	internal IReadOnlyList<MusicPlayerCatalogItem> MapTracks(IEnumerable<FullTrack?> tracks)
-		=> tracks.Where(t => t?.Id is not null).Select(t => MapTrack(t!)).ToList();
+		=> tracks.Where(t => t?.Id is not null).DistinctBy(t => t!.Id).Select(t => MapTrack(t!)).ToList();
 
 	internal IReadOnlyList<MusicPlayerCatalogItem> MapPlaylists(IEnumerable<FullPlaylist?> playlists)
-		=> playlists.Where(p => p?.Id is not null).Select(p => MapPlaylist(p!)).ToList();
+		=> playlists.Where(p => p?.Id is not null).DistinctBy(p => p!.Id).Select(p => MapPlaylist(p!)).ToList();
 
 	private MusicPlayerCatalogItem MapTrack(FullTrack track)
 		=> new(track.Id,
