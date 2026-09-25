@@ -14735,15 +14735,6 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>od {publisher}</value>
     <comment>[publisher:string]</comment>
   </data>
-  <data name="Store.Page.ComingSoonHeading" xml:space="preserve">
-    <value>Store zatím není k dispozici</value>
-  </data>
-  <data name="Store.Page.ComingSoonMessage" xml:space="preserve">
-    <value>Stále se na něm pracuje. Pluginy a balíčky ikon se tu objeví v některé z příštích aktualizací.</value>
-  </data>
-  <data name="Store.Page.ComingSoonTestsAction" xml:space="preserve">
-    <value>Otevřít testy</value>
-  </data>
   <data name="Store.Page.CompatibilityCheckedHint" xml:space="preserve">
     <value>Kompatibilita s touto verzí Macro Deck se ověřuje při instalaci.</value>
   </data>

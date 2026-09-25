@@ -5,7 +5,6 @@ import { StoreFooterComponent } from '../../store/store-footer.component';
 import { StorePageHeaderComponent } from '../../store/store-page-header.component';
 import { StoreTestsTabComponent } from './store-tests-tab.component';
 
-// Not behind the store coming-soon gate: an invited tester needs the StoreTester role for nothing here.
 @Component({
   selector: 'app-store-tests-page',
   standalone: true,

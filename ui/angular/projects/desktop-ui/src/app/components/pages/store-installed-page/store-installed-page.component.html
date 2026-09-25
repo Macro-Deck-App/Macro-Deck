@@ -1,4 +1,4 @@
-<div class="store-page" [attr.inert]="storeUnlocked() ? null : ''" (scroll)="onScroll($event)">
+<div class="store-page" (scroll)="onScroll($event)">
   <div class="store-page-content">
     <app-store-page-header active="installed" [subtitle]="updatesSummary()">
       <shared-button
@@ -12,9 +12,7 @@
       </shared-button>
     </app-store-page-header>
 
-    @if (storeUnlocked()) {
-      <app-store-community-notice />
-    }
+    <app-store-community-notice />
 
     @if (loadError()) {
       <shared-error-banner [message]="loadError()!" (dismiss)="loadError.set(null)" />
@@ -58,13 +56,4 @@
     [danger]="true"
     (confirm)="confirmUninstall()"
     (cancel)="cancelUninstall()" />
-}
-
-@if (!storeUnlocked()) {
-  <div class="store-coming-soon">
-    <shared-empty-state
-      icon="store"
-      [heading]="'macrodeck.app:Store.Page.ComingSoonHeading' | translate"
-      [message]="'macrodeck.app:Store.Page.ComingSoonMessage' | translate" />
-  </div>
 }

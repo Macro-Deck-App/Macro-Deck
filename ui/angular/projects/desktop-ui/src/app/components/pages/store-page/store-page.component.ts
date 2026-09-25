@@ -11,9 +11,7 @@ import { StoreCommunityNoticeComponent } from '../../store/store-community-notic
 import { StoreFooterComponent } from '../../store/store-footer.component';
 import { StorePageHeaderComponent } from '../../store/store-page-header.component';
 import { StoreSectionComponent, StoreUnsignedInstallRequest } from '../../store/store-section.component';
-import { StoreAccessService } from '../../../services/store-access.service';
 import { StoreBrowseStateService, isHistoryNavigation, isStoreDetailUrl } from '../../../services/store-browse-state.service';
-import { ConnectAccountService } from '../../../services/connect-account.service';
 import { StoreCatalogService } from '../../../services/store-catalog.service';
 import { StoreCategoryService, storeCategoryName } from '../../../services/store-category.service';
 import { StoreOperationService } from '../../../services/store-operation.service';
@@ -98,11 +96,6 @@ export class StorePageComponent implements OnInit, OnDestroy {
   protected readonly narrowed = computed(() => !!this.publisher() || !!this.tag());
 
   protected readonly searching = computed(() => this.search().trim() !== '');
-
-  protected readonly storeUnlocked = inject(StoreAccessService).unlocked;
-
-  // The overlay keeps an invited tester out of the unreleased catalog, not out of the builds they test.
-  protected readonly signedIn = inject(ConnectAccountService).isSignedIn;
 
   protected readonly updatesAvailable = this.updates.hasBridge;
 
@@ -359,10 +352,6 @@ export class StorePageComponent implements OnInit, OnDestroy {
 
   protected async onLoadMore(): Promise<void> {
     await this.catalog.loadMore();
-  }
-
-  protected openTests(): void {
-    void this.router.navigate(['/store/tests']);
   }
 
   protected async onRefreshed(): Promise<void> {
