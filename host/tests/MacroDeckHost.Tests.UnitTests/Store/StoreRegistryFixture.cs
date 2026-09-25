@@ -20,12 +20,16 @@ internal sealed class StoreRegistryFixture
 
 	private readonly Dictionary<string, byte[]> _files = new(StringComparer.Ordinal);
 
-	public StoreRegistryFixture(TestPki.IssuedCertificate? certificate = null)
+	public StoreRegistryFixture(TestPki.IssuedCertificate? certificate = null, TestPki.IssuedCertificate? issuer = null)
 	{
-		Certificate = certificate ?? TestPki.IssueCertificate(subjectKind: "service", keyUsage: _registryUsage);
+		Issuer = issuer;
+		Certificate = certificate ??
+			TestPki.IssueCertificate(subjectKind: "service", keyUsage: _registryUsage, issuer: issuer);
 	}
 
 	public TestPki.IssuedCertificate Certificate { get; }
+
+	public TestPki.IssuedCertificate? Issuer { get; }
 
 	public long Sequence { get; set; } = 1;
 
@@ -192,6 +196,11 @@ internal sealed class StoreRegistryFixture
 
 		_files[$"certificates/{Certificate.CertificateId}.json"] = Certificate.CertificateBytes;
 		_files[$"certificates/{Certificate.CertificateId}.sig"] = Certificate.CertificateSignatureBytes;
+		if (Issuer is not null)
+		{
+			_files[$"certificates/{Issuer.CertificateId}.json"] = Issuer.CertificateBytes;
+			_files[$"certificates/{Issuer.CertificateId}.sig"] = Issuer.CertificateSignatureBytes;
+		}
 
 		var declared = _files.Keys
 			.Where(path => !Unlisted.Contains(path))

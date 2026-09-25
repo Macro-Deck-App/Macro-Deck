@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using MacroDeck.Plugin.Packaging.Artifacts;
 using MacroDeck.Plugin.Packaging.Manifest;
+using MacroDeck.Signing.Certificates;
 using MacroDeck.Signing.Keys;
 
 namespace MacroDeck.Signing.Packages;
@@ -11,7 +12,8 @@ namespace MacroDeck.Signing.Packages;
 /// <summary>
 /// Signs any of the four <see cref="SignablePackageFormat"/> archives. Every format carries its signature
 /// the same way: validated, embedded in its manifest as a <c>signature</c> object, with
-/// <c>certificate.json</c> and <c>certificate.sig</c> written verbatim into the archive root so a signed
+/// <c>certificate.json</c> and <c>certificate.sig</c> (plus <c>issuer.json</c> and <c>issuer.sig</c> for a
+/// certificate an issuer signed) written verbatim into the archive root so a signed
 /// artifact always verifies on its own - Macro Deck packages never carry a detached signature file. Never
 /// overwrites an existing output.
 /// </summary>
@@ -25,11 +27,42 @@ public static class PackageSigner
 	/// <paramref name="manifestReader"/> is only consulted for a <see cref="SignablePackageFormat.Plugin"/>
 	/// archive, which is the only format with a typed manifest model in the SDK.
 	/// </summary>
+	public static Task<PackageSignResult> SignAsync(string packagePath,
+		string outputPath,
+		SigningMaterial signer,
+		byte[] certificateBytes,
+		byte[] certificateSignatureBytes,
+		IPluginManifestReader manifestReader,
+		CancellationToken cancellationToken = default)
+	{
+		return SignAsync(packagePath,
+			outputPath,
+			signer,
+			certificateBytes,
+			certificateSignatureBytes,
+			null,
+			null,
+			manifestReader,
+			cancellationToken);
+	}
+
+	/// <summary>
+	/// Signs <paramref name="packagePath"/> like
+	/// <see cref="SignAsync(string, string, SigningMaterial, byte[], byte[], IPluginManifestReader, CancellationToken)"/>,
+	/// and also writes <paramref name="issuerCertificateBytes"/> and
+	/// <paramref name="issuerCertificateSignatureBytes"/> verbatim into the archive root as <c>issuer.json</c> and
+	/// <c>issuer.sig</c>. They are required exactly when <paramref name="signer"/>'s certificate names an issuer
+	/// (<see cref="SigningError.CertificateIssuerMissing"/> otherwise), must both be supplied or both be
+	/// <see langword="null"/>, and must be the issuer the certificate names
+	/// (<see cref="SigningError.CertificateIssuerMismatch"/> otherwise). Nothing is written when they disagree.
+	/// </summary>
 	public static async Task<PackageSignResult> SignAsync(string packagePath,
 		string outputPath,
 		SigningMaterial signer,
 		byte[] certificateBytes,
 		byte[] certificateSignatureBytes,
+		byte[]? issuerCertificateBytes,
+		byte[]? issuerCertificateSignatureBytes,
 		IPluginManifestReader manifestReader,
 		CancellationToken cancellationToken = default)
 	{
@@ -39,6 +72,12 @@ public static class PackageSigner
 		ArgumentNullException.ThrowIfNull(certificateBytes);
 		ArgumentNullException.ThrowIfNull(certificateSignatureBytes);
 		ArgumentNullException.ThrowIfNull(manifestReader);
+
+		if (CheckIssuerMaterial(signer.Certificate, issuerCertificateBytes, issuerCertificateSignatureBytes) is
+			{ } issuerFailure)
+		{
+			return PackageSignResult.Fail(issuerFailure.Error, issuerFailure.Message);
+		}
 
 		if (SignablePackageFormats.Resolve(packagePath) is not { } format)
 		{
@@ -106,6 +145,7 @@ public static class PackageSigner
 			var filesFailure = await PackageFileValidator.ValidateAsync(ZipPackageEntrySource.Wrap(source),
 				manifestNode,
 				manifestEntryName,
+				issuerCertificateBytes is not null,
 				cancellationToken);
 			if (filesFailure is not null)
 			{
@@ -158,7 +198,7 @@ public static class PackageSigner
 				{
 					foreach (var entry in source.Entries)
 					{
-						if (IsCertificateEntry(entry.FullName))
+						if (PackageSigningFiles.IsSignatureMaterial(entry.FullName, issuerCertificateBytes is not null))
 						{
 							// Rewritten fresh below from the exact supplied bytes; never carried over from
 							// the unsigned source, which would otherwise leave two same-named entries.
@@ -193,6 +233,24 @@ public static class PackageSigner
 					{
 						await writer.WriteAsync(certificateSignatureBytes, cancellationToken);
 					}
+
+					if (issuerCertificateBytes is not null && issuerCertificateSignatureBytes is not null)
+					{
+						var issuerEntry = target.CreateEntry(PluginArtifactFiles.IssuerCertificateFileName,
+							CompressionLevel.Optimal);
+						await using (var writer = issuerEntry.Open())
+						{
+							await writer.WriteAsync(issuerCertificateBytes, cancellationToken);
+						}
+
+						var issuerSignatureEntry = target.CreateEntry(
+							PluginArtifactFiles.IssuerCertificateSignatureFileName,
+							CompressionLevel.Optimal);
+						await using (var writer = issuerSignatureEntry.Open())
+						{
+							await writer.WriteAsync(issuerCertificateSignatureBytes, cancellationToken);
+						}
+					}
 				}
 			}
 			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -218,8 +276,46 @@ public static class PackageSigner
 		}
 	}
 
-	private static bool IsCertificateEntry(string entryFullName) =>
-		entryFullName is PluginArtifactFiles.CertificateFileName or PluginArtifactFiles.CertificateSignatureFileName;
+	private static SigningFailure? CheckIssuerMaterial(SigningCertificate certificate,
+		byte[]? issuerCertificateBytes,
+		byte[]? issuerCertificateSignatureBytes)
+	{
+		if (issuerCertificateBytes is null != issuerCertificateSignatureBytes is null)
+		{
+			return new SigningFailure(SigningError.CertificateIssuerMissing,
+				"The issuer certificate and its signature must be supplied together.");
+		}
+
+		if (certificate.Issuer is null)
+		{
+			return issuerCertificateBytes is null
+				? null
+				: new SigningFailure(SigningError.CertificateIssuerMismatch,
+					"An issuer certificate was supplied for a certificate the root signed directly.");
+		}
+
+		if (issuerCertificateBytes is null)
+		{
+			return new SigningFailure(SigningError.CertificateIssuerMissing,
+				"The certificate names an issuer certificate, but none was supplied.");
+		}
+
+		string? issuerId;
+		try
+		{
+			issuerId = JsonSerializer.Deserialize<SigningCertificate>(issuerCertificateBytes, SigningJson.Options)
+				?.CertificateId;
+		}
+		catch (JsonException)
+		{
+			issuerId = null;
+		}
+
+		return string.Equals(issuerId, certificate.Issuer, StringComparison.Ordinal)
+			? null
+			: new SigningFailure(SigningError.CertificateIssuerMismatch,
+				"The supplied issuer certificate is not the one the certificate names.");
+	}
 
 	private static void TryDelete(string path)
 	{
@@ -238,7 +334,9 @@ public static class PackageSigner
 	}
 }
 
-/// <summary>The outcome of <see cref="PackageSigner.SignAsync"/>.</summary>
+/// <summary>The outcome of
+/// <see cref="PackageSigner.SignAsync(string, string, SigningMaterial, byte[], byte[], byte[], byte[], IPluginManifestReader, CancellationToken)"/>.
+/// </summary>
 public sealed record PackageSignResult
 {
 	public required bool Success { get; init; }

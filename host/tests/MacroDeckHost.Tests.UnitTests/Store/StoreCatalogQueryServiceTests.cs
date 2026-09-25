@@ -4,6 +4,7 @@ using MacroDeckHost.Application.Store.Model;
 using MacroDeckHost.Infrastructure.Plugins;
 using MacroDeckHost.Infrastructure.Store;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
+using MacroDeckHost.Infrastructure.Plugins.Trust;
 
 namespace MacroDeckHost.Tests.UnitTests.Store;
 
@@ -28,7 +29,7 @@ internal sealed class StoreCatalogQueryServiceTests
 		_query = new StoreCatalogQueryService(_catalog,
 			new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None),
 			new JsonStoreInstallationStore(_paths, Serilog.Core.Logger.None),
-			new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None));
+			new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners());
 	}
 
 	[TearDown]
@@ -618,6 +619,55 @@ internal sealed class StoreCatalogQueryServiceTests
 
 	private static StoreCategory Category(string id) =>
 		new() { Id = id, Names = new Dictionary<string, string> { ["en"] = id } };
+
+	[Test]
+	public void An_installed_plugin_whose_signing_issuer_the_registry_revoked_is_flagged()
+	{
+		SeedWithRevoked(["cert_issuer00000000000000000000000001"],
+			Entry("com.acme.revoked", "Revoked"),
+			Entry("com.acme.fine", "Fine"));
+		InstallSignedPlugin("com.acme.revoked", "cert_leaf000000000000000000000000001", "cert_issuer00000000000000000000000001");
+		InstallSignedPlugin("com.acme.fine", "cert_leaf000000000000000000000000002", "cert_issuer00000000000000000000000002");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_query.Find(StoreExtensionKind.Plugin, "com.acme.revoked").Data!.SigningRevoked, Is.True);
+			Assert.That(_query.Find(StoreExtensionKind.Plugin, "com.acme.fine").Data!.SigningRevoked, Is.False);
+		});
+	}
+
+	[Test]
+	public void An_installed_plugin_whose_own_certificate_the_registry_revoked_is_flagged()
+	{
+		SeedWithRevoked(["cert_leaf000000000000000000000000001"], Entry("com.acme.revoked", "Revoked"));
+		InstallSignedPlugin("com.acme.revoked", "cert_leaf000000000000000000000000001", null);
+
+		Assert.That(_query.Find(StoreExtensionKind.Plugin, "com.acme.revoked").Data!.SigningRevoked, Is.True);
+	}
+
+	[Test]
+	public void A_plugin_that_is_not_installed_is_never_flagged()
+	{
+		SeedWithRevoked(["cert_leaf000000000000000000000000001"], Entry("com.acme.revoked", "Revoked"));
+
+		Assert.That(_query.Find(StoreExtensionKind.Plugin, "com.acme.revoked").Data!.SigningRevoked, Is.False);
+	}
+
+	private void SeedWithRevoked(IReadOnlyList<string> revokedKeyIds, params StoreCatalogEntry[] entries) =>
+		_catalog.Swap(new StoreCatalogSnapshot { Sequence = 1, Entries = entries, RevokedKeyIds = revokedKeyIds });
+
+	private void InstallSignedPlugin(string pluginId, string certificateId, string? issuerId)
+	{
+		var pluginDirectory = Path.Combine(_paths.PluginsDirectory, pluginId);
+		var versionDirectory = Path.Combine(pluginDirectory, "versions", "1.0.0");
+		Directory.CreateDirectory(versionDirectory);
+		File.WriteAllText(Path.Combine(versionDirectory, "manifest.json"), "{}");
+		File.WriteAllText(Path.Combine(versionDirectory, "certificate.json"),
+			issuerId is null
+				? $"{{\"certificateId\":\"{certificateId}\"}}"
+				: $"{{\"certificateId\":\"{certificateId}\",\"issuer\":\"{issuerId}\"}}");
+		File.WriteAllText(Path.Combine(pluginDirectory, "current.json"), "{\"version\":\"1.0.0\"}");
+	}
 
 	private void SeedSearchable() =>
 		Seed([

@@ -28,7 +28,8 @@ internal static class SignedPluginArtifacts
 		(byte[] PrivateKey, byte[] PublicKey)? signingRoot = null,
 		IReadOnlyList<string>? keyUsage = null,
 		DateTimeOffset? notBefore = null,
-		DateTimeOffset? notAfter = null)
+		DateTimeOffset? notAfter = null,
+		TestPki.IssuedCertificate? issuer = null)
 	{
 		var digest = PluginArtifactBuilder.Sha256Of(Encoding.UTF8.GetBytes(content));
 		var filesBlock =
@@ -50,7 +51,8 @@ internal static class SignedPluginArtifacts
 		var issued = TestPki.IssueCertificate(keyUsage: keyUsage,
 			notBefore: notBefore,
 			notAfter: notAfter,
-			signingRoot: signingRoot);
+			signingRoot: signingRoot,
+			issuer: issuer);
 
 		// Deserialized directly rather than routed through TestPki.VerifyChain: that helper throws on a
 		// certificate that does not verify, which is exactly what a wrong-purpose or not-yet-valid fixture
@@ -73,6 +75,8 @@ internal static class SignedPluginArtifacts
 			signer,
 			issued.CertificateBytes,
 			issued.CertificateSignatureBytes,
+			issuer?.CertificateBytes,
+			issuer?.CertificateSignatureBytes,
 			_manifestReader);
 
 		if (!result.Success)

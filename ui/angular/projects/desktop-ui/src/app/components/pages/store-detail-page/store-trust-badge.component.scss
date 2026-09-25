@@ -19,3 +19,13 @@
     background-color: var(--color-warning);
   }
 }
+
+.revoked-badge {
+  @include ds.chip;
+  color: var(--color-danger);
+  background-color: var(--color-danger-muted);
+
+  .icon {
+    background-color: var(--color-danger);
+  }
+}

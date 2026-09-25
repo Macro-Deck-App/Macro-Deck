@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Net;
 using System.Text.Json;
 using MacroDeck.Signing;
@@ -19,6 +20,9 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 	private const string CertificateDirectory = "certificates";
 
 	private static readonly TimeSpan _disposeWait = TimeSpan.FromSeconds(5);
+
+	private static readonly SearchValues<char> _certificateIdCharacters
+		= SearchValues.Create("0123456789abcdefghijklmnopqrstuvwxyz");
 
 	private readonly SemaphoreSlim _gate = new(1, 1);
 	private readonly Lock _inflightLock = new();
@@ -383,7 +387,7 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 				verified.Error is RegistryRefreshError.SizeMismatch or RegistryRefreshError.SignatureInvalid);
 		}
 
-		if (RevokedSigningKey(staging, signature.KeyId) is { } revokedReason)
+		if (RevokedSigningKey(staging, verified) is { } revokedReason)
 		{
 			return Result.Fail(RegistryRefreshError.SigningKeyRevoked, revokedReason);
 		}
@@ -515,18 +519,44 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 				$"The snapshot is at sequence {manifest.Sequence}, below the accepted {acceptedSequence}.");
 		}
 
-		var certificatePath = Path.Combine(root, CertificateDirectory, $"{signature.KeyId}.json");
-		var certificateSignaturePath = Path.Combine(root, CertificateDirectory, $"{signature.KeyId}.sig");
-		if (!File.Exists(certificatePath) || !File.Exists(certificateSignaturePath))
+		if (!IsCertificateId(signature.KeyId))
+		{
+			return VerifiedTree.Fail(RegistryRefreshError.Malformed,
+				$"The registry signature names an invalid certificate id '{signature.KeyId}'.");
+		}
+
+		if (await ReadCertificate(root, signature.KeyId, cancellationToken) is not { } certificate)
 		{
 			return VerifiedTree.Fail(RegistryRefreshError.CertificateUntrusted,
 				$"The registry snapshot does not carry certificate '{signature.KeyId}'.") with { CertificateMissing = true };
 		}
 
+		(byte[] Bytes, byte[] Signature)? issuer = null;
+		if (DeclaredIssuer(certificate.Bytes) is { } issuerId)
+		{
+			if (!IsCertificateId(issuerId))
+			{
+				return VerifiedTree.Fail(RegistryRefreshError.Malformed,
+					$"The registry certificate names an invalid issuer certificate id '{issuerId}'.");
+			}
+
+			issuer = await ReadCertificate(root, issuerId, cancellationToken);
+			if (issuer is null)
+			{
+				return VerifiedTree.Fail(RegistryRefreshError.CertificateUntrusted,
+					$"The registry snapshot does not carry issuer certificate '{issuerId}'.") with
+				{
+					CertificateMissing = true
+				};
+			}
+		}
+
 		var result = await RegistryManifestVerifier.VerifyAsync(manifestPath,
 			signaturePath,
-			await File.ReadAllBytesAsync(certificatePath, cancellationToken),
-			await File.ReadAllBytesAsync(certificateSignaturePath, cancellationToken),
+			certificate.Bytes,
+			certificate.Signature,
+			issuer?.Bytes,
+			issuer?.Signature,
 			_options.RootPublicKeyOverride,
 			cancellationToken);
 
@@ -541,27 +571,75 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 			Sequence = manifest.Sequence,
 			GeneratedAt = manifest.GeneratedAt,
 			SignedAt = signature.SignedAt,
-			CertificateId = result.CertificateId
+			CertificateId = result.CertificateId,
+			IssuerCertificateId = result.IssuerCertificateId
 		};
 	}
 
-	private string? RevokedSigningKey(string staging, string keyId)
+	// The registry manifest schema's certificate path pattern, cert_[0-9a-z]{16,64}: ids become file names.
+	private static bool IsCertificateId(string id) =>
+		id.StartsWith("cert_", StringComparison.Ordinal) &&
+		id.Length is >= 21 and <= 69 &&
+		!id.AsSpan(5).ContainsAnyExcept(_certificateIdCharacters);
+
+	private static async Task<(byte[] Bytes, byte[] Signature)?> ReadCertificate(string root,
+		string certificateId,
+		CancellationToken cancellationToken)
 	{
-		// The incoming security.json is checked together with the copy already on disk, so a snapshot
-		// cannot un-revoke the very key that signed it.
-		if (_reader.ReadRevokedKeyIds(staging).Contains(keyId, StringComparer.OrdinalIgnoreCase))
+		var certificatePath = Path.Combine(root, CertificateDirectory, $"{certificateId}.json");
+		var signaturePath = Path.Combine(root, CertificateDirectory, $"{certificateId}.sig");
+		if (!File.Exists(certificatePath) || !File.Exists(signaturePath))
 		{
-			return $"The registry signing key '{keyId}' is revoked.";
+			return null;
+		}
+
+		return (await File.ReadAllBytesAsync(certificatePath, cancellationToken),
+			await File.ReadAllBytesAsync(signaturePath, cancellationToken));
+	}
+
+	// Unverified: only locates the issuer file, whose id the verifier then checks against the certificate.
+	private static string? DeclaredIssuer(byte[] certificateBytes)
+	{
+		try
+		{
+			using var document = JsonDocument.Parse(certificateBytes);
+			return document.RootElement.ValueKind == JsonValueKind.Object &&
+				document.RootElement.TryGetProperty("issuer", out var issuer) &&
+				issuer.ValueKind == JsonValueKind.String
+					? issuer.GetString()
+					: null;
+		}
+		catch (JsonException)
+		{
+			return null;
+		}
+	}
+
+	private string? RevokedSigningKey(string staging, VerifiedTree verified)
+	{
+		string[] keyIds = verified.IssuerCertificateId is { } issuerId
+			? [verified.CertificateId!, issuerId]
+			: [verified.CertificateId!];
+
+		// The incoming security.json is checked together with the copy already on disk, so a snapshot
+		// cannot un-revoke the very key that signed it, or the issuer that vouched for that key.
+		var revokedNow = _reader.ReadRevokedKeyIds(staging);
+		if (keyIds.FirstOrDefault(keyId => revokedNow.Contains(keyId, StringComparer.OrdinalIgnoreCase)) is { } revoked)
+		{
+			return $"The registry signing key '{revoked}' is revoked.";
 		}
 
 		var current = _paths.StoreRegistryCurrentDirectory;
-		if (Directory.Exists(current) &&
-			_reader.ReadRevokedKeyIds(current).Contains(keyId, StringComparer.OrdinalIgnoreCase))
+		if (!Directory.Exists(current))
 		{
-			return $"The registry signing key '{keyId}' was revoked by the previously trusted snapshot.";
+			return null;
 		}
 
-		return null;
+		var revokedBefore = _reader.ReadRevokedKeyIds(current);
+		return keyIds.FirstOrDefault(keyId => revokedBefore.Contains(keyId, StringComparer.OrdinalIgnoreCase)) is
+			{ } previouslyRevoked
+			? $"The registry signing key '{previouslyRevoked}' was revoked by the previously trusted snapshot."
+			: null;
 	}
 
 	private bool Promote(string staging, out string? failure)
@@ -649,7 +727,10 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 			or SigningError.CertificateUnreadable => RegistryRefreshError.CertificateUntrusted,
 		SigningError.CertificateWrongPurpose
 			or SigningError.CertificateNotYetValid
-			or SigningError.CertificateExpired => RegistryRefreshError.CertificateUntrusted,
+			or SigningError.CertificateExpired
+			or SigningError.CertificateIssuerMissing
+			or SigningError.CertificateIssuerMismatch
+			or SigningError.CertificateOutlivesIssuer => RegistryRefreshError.CertificateUntrusted,
 		SigningError.FileDigestMismatch or SigningError.FileSizeMismatch => RegistryRefreshError.SizeMismatch,
 		_ => RegistryRefreshError.SignatureInvalid
 	};
@@ -680,6 +761,8 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 		public DateTimeOffset? SignedAt { get; init; }
 
 		public string? CertificateId { get; init; }
+
+		public string? IssuerCertificateId { get; init; }
 
 		public RegistryRefreshError? Error { get; init; }
 

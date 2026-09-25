@@ -90,7 +90,7 @@ internal sealed class StoreUnsignedConsentTests
 		var provider = services.BuildServiceProvider();
 
 		var trustEvaluator = new PluginTrustEvaluator(manifestReader,
-			new NoRevocationDataSource(),
+			new StoreRegistryRevocationSource(_catalog),
 			new PluginTrustOptions { RootPublicKeyOverride = TestPki.Root.PublicKey },
 			Serilog.Core.Logger.None);
 
@@ -111,7 +111,7 @@ internal sealed class StoreUnsignedConsentTests
 			TimeProvider.System,
 			Serilog.Core.Logger.None);
 
-		var catalogQuery = new StoreCatalogQueryService(_catalog, _pluginCatalog, installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None));
+		var catalogQuery = new StoreCatalogQueryService(_catalog, _pluginCatalog, installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners());
 		_coordinator = new StoreInstallCoordinator(catalogQuery,
 			_tracker,
 			new StoreOperationChannel(),

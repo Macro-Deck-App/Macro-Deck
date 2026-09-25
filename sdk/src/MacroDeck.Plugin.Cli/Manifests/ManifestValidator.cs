@@ -315,6 +315,23 @@ internal static class ManifestValidator
 	/// missing entrypoint means "this is the source tree, not the build output" rather than "the plugin is
 	/// broken". Internal rather than private: <c>PluginBuilder</c> and <c>PluginPacker</c> both need the
 	/// same "is this an unbuilt source tree" judgement for their own generated-field warnings.</summary>
+	// Unverified: only decides which root files count as signature material; verify checks the chain itself.
+	private static bool CertificateNamesIssuer(string directory)
+	{
+		try
+		{
+			using var document = JsonDocument.Parse(
+				File.ReadAllBytes(Path.Combine(directory, PluginArtifactFiles.CertificateFileName)));
+			return document.RootElement.ValueKind == JsonValueKind.Object &&
+				document.RootElement.TryGetProperty("issuer", out var issuer) &&
+				issuer.ValueKind != JsonValueKind.Null;
+		}
+		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
+		{
+			return false;
+		}
+	}
+
 	internal static bool HasProjectFile(string directory)
 	{
 		try
@@ -500,6 +517,7 @@ internal static class ManifestValidator
 		}
 
 		var signed = manifest.Signature is not null;
+		var withIssuer = signed && CertificateNamesIssuer(baseDirectory);
 		var entryNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
 		foreach (var actualPath in Directory.EnumerateFiles(baseDirectory, "*", SearchOption.AllDirectories))
@@ -514,6 +532,13 @@ internal static class ManifestValidator
 							StringComparison.OrdinalIgnoreCase) ||
 						string.Equals(relative,
 							PluginArtifactFiles.CertificateSignatureFileName,
+							StringComparison.OrdinalIgnoreCase))) ||
+				(withIssuer &&
+					(string.Equals(relative,
+							PluginArtifactFiles.IssuerCertificateFileName,
+							StringComparison.OrdinalIgnoreCase) ||
+						string.Equals(relative,
+							PluginArtifactFiles.IssuerCertificateSignatureFileName,
 							StringComparison.OrdinalIgnoreCase))) ||
 				declaredPaths.Contains(relative))
 			{

@@ -34,6 +34,7 @@ macrodeck-plugin verify ./artifacts/com.example.hello-deck-1.0.0-linux-x64.macro
   "valid": false,
   "format": null,
   "certificateId": null,
+  "issuerCertificateId": null,
   "rootAnchored": true,
   "revocationChecked": false,
   "problems": [
@@ -68,7 +69,8 @@ macrodeck-plugin sign ./artifacts/com.example.hello-deck-1.0.0-linux-x64.macroDe
   --private-key ~/.macrodeck/keys/macrodeck-creator.private
 ```
 
-Sign a package for distribution outside the Store, with a certificate the Creator Portal issued.
+Sign a package for distribution outside the Store, with a certificate the Creator Portal issued. If the
+certificate names an issuer, add `--issuer-certificate issuer.json --issuer-certificate-signature issuer.sig`.
 
 ## `keygen`
 
@@ -97,8 +99,9 @@ Exit codes: 0 on success, 2 for `output-exists` or `reserved-key-name`.
 
 Signs a `.macroDeckPlugin`, `.macroDeckIconPack`, `.macroDeckProfile`, `.macroDeckFolder` or
 `.macroDeckWidget` package. There is no detached signature: the signature goes into the artifact's own
-manifest, and the certificate into the archive root as `certificate.json` and `certificate.sig`, so the
-signed artifact verifies on its own.
+manifest, and the certificate into the archive root as `certificate.json` and `certificate.sig`, plus
+`issuer.json` and `issuer.sig` when an issuer certificate signed it, so the signed artifact verifies on its
+own.
 
 | Option | Default | Description |
 | --- | --- | --- |
@@ -107,14 +110,17 @@ signed artifact verifies on its own.
 | `--certificate <path>` | - | **Required.** The signing certificate (`certificate.json`). |
 | `--certificate-signature <path>` | - | **Required.** The root's signature over the certificate (`certificate.sig`). |
 | `--private-key <path>` | - | **Required.** The base64-encoded private key `keygen` wrote. |
+| `--issuer-certificate <path>` | - | The issuer certificate (`issuer.json`) that signed the certificate. Required exactly when the certificate names an `issuer`; give it together with `--issuer-certificate-signature`. |
+| `--issuer-certificate-signature <path>` | - | The root's signature over the issuer certificate (`issuer.sig`). |
 | `--root-public <path>` | pinned Macro Deck root | Verify the certificate against this root instead; testing only. |
 
 `sign` runs these steps in order and stops at the first failure:
 
 1. Declared-file validation, as `validate --artifact` does it: every file in `files[]` checked by
    SHA-256 and size.
-2. Certificate chain verification against the pinned root (or `--root-public`). The certificate needs
-   exclusive `package` key usage and must be valid now.
+2. Certificate chain verification against the pinned root (or `--root-public`), through the issuer
+   certificate when the certificate names one. The certificate needs exclusive `package` key usage, and it
+   and its issuer must be valid now. See [the certificate chain](/policies/security/#signing-the-creator-portal-signs-and-the-host-verifies-before-install-and-before-every-load).
 3. The certificate's public key must match `--private-key`.
 4. The format's canonical digest (`macro-deck-plugin/1`, `macro-deck-iconpack/1` or
    `macro-deck-portable/1`), then the signature.
@@ -130,9 +136,9 @@ error certificate-untrusted: The certificate signature does not verify against t
 
 | Exit code | Failures |
 | --- | --- |
-| 1 | Certificate malformed, untrusted, wrong-purpose, not yet valid or expired. Private key malformed or not matching the certificate. Package already signed; manifest missing, malformed or too large; declared files not matching (digest or size mismatch, undeclared file, missing declared file, unsafe entry). |
-| 2 | Unsupported package format, or `--output` already exists. |
-| 3 | The package, certificate, certificate signature, private key or `--root-public` file could not be read. |
+| 1 | Certificate malformed, untrusted, wrong-purpose, not yet valid or expired; issuer certificate missing (`certificate-issuer-missing`), not the one the certificate names (`certificate-issuer-mismatch`), or ending before the certificate (`certificate-outlives-issuer`). Private key malformed or not matching the certificate. Package already signed; manifest missing, malformed or too large; declared files not matching (digest or size mismatch, undeclared file, missing declared file, unsafe entry). |
+| 2 | Unsupported package format, `--output` already exists, or only one of the two `--issuer-certificate` options given (`issuer-options-incomplete`). |
+| 3 | The package, certificate, certificate signature, issuer certificate, issuer signature, private key or `--root-public` file could not be read. |
 | 4 | Ctrl-C. |
 | 70 | Writing the output failed, or the written artifact failed its own re-verification. |
 
@@ -143,8 +149,9 @@ Checks a signed package's embedded signature and certificate against the pinned 
 [`MacroDeck.Signing`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/sdk/src/MacroDeck.Signing/README.md)
 checks `sign` self-verifies with:
 
-- the certificate chain and its `package` key usage;
-- the certificate's validity **at the signature's `signedAt`**, not at verify time - a package signed
+- the certificate chain and its `package` key usage, through the archive's `issuer.json` and `issuer.sig`
+  when the certificate names an issuer;
+- the certificate's validity, and its issuer's, **at the signature's `signedAt`**, not at verify time - a package signed
   while its certificate was valid still verifies after the certificate expires;
 - the format's canonical digest, and every declared file's SHA-256 and size.
 
@@ -154,8 +161,10 @@ checks `sign` self-verifies with:
 | `--root-public <path>` | pinned Macro Deck root | Verify against this root public key instead; testing only. |
 | `--output <text\|json>` | `text` | How to render the result. |
 
-- **Text:** one line with the format and signing certificate id, or `invalid: <code>: <message>`.
-- **JSON:** `{ valid, format, certificateId, rootAnchored, revocationChecked, problems[] }`.
+- **Text:** one line with the format, the signing certificate id and, when there is one, the issuer's
+  certificate id, or `invalid: <code>: <message>`.
+- **JSON:** `{ valid, format, certificateId, issuerCertificateId, rootAnchored, revocationChecked, problems[] }`.
+  `issuerCertificateId` is `null` for a certificate the root signed directly; older CLI versions omit it.
 - Every run ends by stating that revocation was not checked; `revocationChecked` is always `false`.
   This is local cryptographic verification only.
 - With a `--root-public` that is not the pinned root, `rootAnchored` is `false` and a
@@ -164,7 +173,7 @@ checks `sign` self-verifies with:
 | Exit code | When |
 | --- | --- |
 | 0 | Valid, and anchored to the pinned root (or to `--root-public`). |
-| 1 | Unsigned, tampered or invalid: signature missing, malformed, algorithm-mismatched or not verifying; certificate malformed, untrusted, wrong-purpose or not valid at `signedAt`; declared files not matching; manifest malformed. |
+| 1 | Unsigned, tampered or invalid: signature missing, malformed, algorithm-mismatched or not verifying; certificate malformed, untrusted, wrong-purpose or not valid at `signedAt`; issuer certificate missing, mismatched or ending before the certificate; declared files not matching; manifest malformed. |
 | 2 | The extension is not a signable package format. |
 | 3 | The package or the `--root-public` file could not be read. |
 | 4 | Ctrl-C. |
@@ -197,5 +206,6 @@ echo '*.private' >> .gitignore   # before running keygen, not after
 - [Publishing to the Store](/guides/publishing/) - how Store artifacts are signed.
 - [CI and automation](/cli/ci/) - `verify` as a pipeline gate.
 - [Security model](/policies/security/) - the trust model `verify` checks against.
-- [Certificate schema](/schemas/macrodeck-certificate-v1.schema.json) and
+- Certificate schema ([v1](/schemas/macrodeck-certificate-v1.schema.json),
+  [v2](/schemas/macrodeck-certificate-v2.schema.json)) and
   [package signature schema](/schemas/macrodeck-package-signature-v1.schema.json).

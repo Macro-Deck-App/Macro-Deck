@@ -595,7 +595,8 @@ public class Startup
 		// marker sit on the scoped DbContext, so callers that live longer than a request (the installer,
 		// the supervisor) reach them through IServiceScopeFactory instead of the constructor.
 		services.AddSingleton(PluginTrustOptions.Default);
-		services.AddSingleton<IPluginRevocationSource, NoRevocationDataSource>();
+		services.AddSingleton<IPluginRevocationSource, StoreRegistryRevocationSource>();
+		services.AddSingleton<IInstalledPluginSigners, InstalledPluginSigners>();
 		services.AddSingleton<IPluginTrustEvaluator, PluginTrustEvaluator>();
 		services.AddScoped<IPluginTrustRecordRepository, PluginTrustRecordRepository>();
 		services.AddScoped<IPluginTrustBaseline, PluginTrustBaseline>();

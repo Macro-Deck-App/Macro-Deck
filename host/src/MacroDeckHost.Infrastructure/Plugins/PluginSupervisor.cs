@@ -1121,7 +1121,9 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 		var manifest = manifestResult.Manifest!;
 
-		var trust = await _trustEvaluator.EvaluateInstalledAsync(activeVersion.VersionDirectory, ct);
+		var trust = await _trustEvaluator.EvaluateInstalledAsync(activeVersion.VersionDirectory,
+			PluginRevocationCheck.Skip,
+			ct);
 		var trustDecision = await EvaluateTrustGate(installed.PluginId, activeVersion.Version, trust, ct);
 
 		if (!trustDecision.Permitted)

@@ -40,6 +40,9 @@ internal static class SigningFailureExitCode
 		SigningError.SelfVerificationFailed => ExitCode.InternalError,
 		SigningError.OutputExists => ExitCode.UsageError,
 		SigningError.WriteFailed => ExitCode.InternalError,
+		SigningError.CertificateIssuerMissing => ExitCode.SubjectInvalid,
+		SigningError.CertificateIssuerMismatch => ExitCode.SubjectInvalid,
+		SigningError.CertificateOutlivesIssuer => ExitCode.SubjectInvalid,
 		_ => ExitCode.InternalError
 	};
 }

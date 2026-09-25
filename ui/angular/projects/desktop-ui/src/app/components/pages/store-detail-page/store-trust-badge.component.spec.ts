@@ -10,7 +10,7 @@ describe('StoreTrustBadgeComponent', () => {
   let fixture: ComponentFixture<StoreTrustBadgeComponent>;
   let runtimePlugins: ReturnType<typeof signal<PluginRuntimeInfo[]>>;
 
-  function setup(pluginId: string | null, takenOver: boolean): void {
+  function setup(pluginId: string | null, takenOver: boolean, signingRevoked?: boolean): void {
     runtimePlugins = signal([
       { pluginId: 'app.example.plugin', takenOverByDevelopmentBuild: takenOver } as PluginRuntimeInfo,
     ]);
@@ -28,6 +28,9 @@ describe('StoreTrustBadgeComponent', () => {
     fixture.componentRef.setInput('kind', 'Plugin');
     fixture.componentRef.setInput('trust', 'PublisherVerified');
     fixture.componentRef.setInput('pluginId', pluginId);
+    if (signingRevoked !== undefined) {
+      fixture.componentRef.setInput('signingRevoked', signingRevoked);
+    }
     fixture.detectChanges();
   }
 
@@ -57,4 +60,11 @@ describe('StoreTrustBadgeComponent', () => {
 
     expect(text()).toContain(translate(AppStrings.Store.PublisherVerified));
   });
+  it('marks a revoked signing certificate instead of the verified badge', () => {
+    setup('app.example.plugin', false, true);
+
+    expect(text()).toContain(translate(AppStrings.Store.SigningRevoked));
+    expect(text()).not.toContain(translate(AppStrings.Store.PublisherVerified));
+  });
+
 });
