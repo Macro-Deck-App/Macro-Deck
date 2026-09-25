@@ -4,6 +4,7 @@ using MacroDeckHost.Application.Store.Operations;
 using MacroDeckHost.Infrastructure.Plugins;
 using MacroDeckHost.Infrastructure.Store;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
+using MacroDeckHost.Infrastructure.Plugins.Trust;
 
 namespace MacroDeckHost.Tests.UnitTests.Store;
 
@@ -34,7 +35,7 @@ internal sealed class StoreInstallCoordinatorTests
 		_channel = new StoreOperationChannel();
 
 		var plugins = new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None);
-		var catalogQuery = new StoreCatalogQueryService(_catalog, plugins, _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None));
+		var catalogQuery = new StoreCatalogQueryService(_catalog, plugins, _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners());
 		_coordinator = new StoreInstallCoordinator(catalogQuery,
 			_tracker,
 			_channel,

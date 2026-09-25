@@ -14,6 +14,7 @@ using MacroDeckHost.Tests.UnitTests.Http;
 using MacroDeckHost.Tests.UnitTests.Store;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.AspNetCore.Mvc;
+using MacroDeckHost.Infrastructure.Plugins.Trust;
 
 namespace MacroDeckHost.Tests.UnitTests.Api;
 
@@ -49,7 +50,7 @@ internal sealed class StoreControllerTests
 		_catalog = new StoreCatalog();
 		var installations = new JsonStoreInstallationStore(_paths, Serilog.Core.Logger.None);
 		var plugins = new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None);
-		_catalogQuery = new StoreCatalogQueryService(_catalog, plugins, installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None));
+		_catalogQuery = new StoreCatalogQueryService(_catalog, plugins, installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners());
 		_tracker = new StoreOperationTracker(new InMemoryStoreOperationStore(), TimeProvider.System);
 		_installCoordinator = new StoreInstallCoordinator(_catalogQuery,
 			_tracker,

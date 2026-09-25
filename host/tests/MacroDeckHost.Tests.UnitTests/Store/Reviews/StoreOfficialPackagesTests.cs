@@ -6,6 +6,7 @@ using MacroDeckHost.Application.Store.Reviews;
 using MacroDeckHost.Infrastructure.Plugins;
 using MacroDeckHost.Infrastructure.Store;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
+using MacroDeckHost.Infrastructure.Plugins.Trust;
 
 namespace MacroDeckHost.Tests.UnitTests.Store.Reviews;
 
@@ -105,7 +106,7 @@ internal sealed class StoreOfficialPackagesTests
 
 	private StoreOfficialPackages Create(StoreRegistryOptions options) =>
 		new(_catalog,
-			new StoreCatalogQueryService(_catalog, new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None), _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None)),
+			new StoreCatalogQueryService(_catalog, new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None), _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners()),
 			_installations,
 			options);
 

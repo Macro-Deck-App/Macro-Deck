@@ -33,6 +33,8 @@ public class StoreCatalogItemBody
 
 	public StoreTrustPresentation Trust { get; set; }
 
+	public bool SigningRevoked { get; set; }
+
 	public bool HasIcon { get; set; }
 
 	public string? IconSha256 { get; set; }

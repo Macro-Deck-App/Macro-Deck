@@ -5,6 +5,7 @@ using MacroDeckHost.Application.Ui.Transport.Messages.Store;
 using MacroDeckHost.Infrastructure.Plugins;
 using MacroDeckHost.Infrastructure.Store;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
+using MacroDeckHost.Infrastructure.Plugins.Trust;
 
 namespace MacroDeckHost.Tests.UnitTests.Store;
 
@@ -28,7 +29,7 @@ internal sealed class StoreCatalogPopularityTests
 		_popularity = new StoreCatalogPopularity(new StoreCatalogQueryService(_catalog,
 				new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None),
 				new JsonStoreInstallationStore(_paths, Serilog.Core.Logger.None),
-				new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None)),
+				new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners()),
 			_installs);
 	}
 

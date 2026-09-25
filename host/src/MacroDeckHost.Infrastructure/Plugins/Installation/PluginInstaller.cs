@@ -36,6 +36,14 @@ public sealed class PluginInstaller : IPluginInstaller
 
 	private static readonly TimeSpan _healthPollInterval = TimeSpan.FromMilliseconds(250);
 
+	private static readonly HashSet<string> _signatureMaterialFiles = new(StringComparer.OrdinalIgnoreCase)
+	{
+		PluginArtifactFiles.CertificateFileName,
+		PluginArtifactFiles.CertificateSignatureFileName,
+		PluginArtifactFiles.IssuerCertificateFileName,
+		PluginArtifactFiles.IssuerCertificateSignatureFileName
+	};
+
 	private readonly ConcurrentDictionary<string, SemaphoreSlim> _pluginGates = new(StringComparer.Ordinal);
 
 	private readonly IMacroDeckPaths _paths;
@@ -152,7 +160,9 @@ public sealed class PluginInstaller : IPluginInstaller
 					};
 			}
 
-			var trust = await _trustEvaluator.EvaluateInstalledAsync(extractDirectory, cancellationToken);
+			var trust = await _trustEvaluator.EvaluateInstalledAsync(extractDirectory,
+				PluginRevocationCheck.Check,
+				cancellationToken);
 			var warnings = CollectWarnings(manifest, trust);
 
 			// Blocking here only ever colours this read-only preview for the caller - Inspect never gates
@@ -354,7 +364,9 @@ public sealed class PluginInstaller : IPluginInstaller
 			}
 
 			var versionDirectory = PluginInstallPaths.VersionDirectory(_paths.PluginsDirectory, pluginId, version);
-			var trust = await _trustEvaluator.EvaluateInstalledAsync(versionDirectory, cancellationToken);
+			var trust = await _trustEvaluator.EvaluateInstalledAsync(versionDirectory,
+				PluginRevocationCheck.Skip,
+				cancellationToken);
 			var decision = await EvaluateTrustGate(pluginId, version, trust, cancellationToken);
 
 			if (!decision.Permitted)
@@ -776,7 +788,9 @@ public sealed class PluginInstaller : IPluginInstaller
 		// same form launch-time re-verification reads - never the archive, which nothing re-checks after
 		// this point. Verifying the archive here and extracting from it earlier would leave a window
 		// between the two reads for the staged archive to be swapped out from under the check.
-		var trust = await _trustEvaluator.EvaluateInstalledAsync(extractDirectory, cancellationToken);
+		var trust = await _trustEvaluator.EvaluateInstalledAsync(extractDirectory,
+			PluginRevocationCheck.Check,
+			cancellationToken);
 
 		// Keyed on the highest tier any installed version of this plugin id was ever admitted at, not just
 		// the active version's record: current.json can go missing or unreadable, and previousVersion would
@@ -784,7 +798,9 @@ public sealed class PluginInstaller : IPluginInstaller
 		// check on the active version alone would let an unsigned update through with consent in that case.
 		var admittedVerdict = await GetHighestAdmittedTier(manifest.Id);
 
-		if (PluginTrustPolicy.IsDowngrade(admittedVerdict, trust.Verdict, acquisition.SourceKind))
+		// A revoked certificate is refused as revoked below, not reported as a lower trust tier.
+		if (trust.Verdict != PluginTrustVerdict.Revoked &&
+			PluginTrustPolicy.IsDowngrade(admittedVerdict, trust.Verdict, acquisition.SourceKind))
 		{
 			return PluginInstallResult.Fail(PluginInstallError.TrustDowngrade,
 					$"'{manifest.Id}' was previously admitted as trusted; this update verifies as " +
@@ -1346,18 +1362,12 @@ public sealed class PluginInstaller : IPluginInstaller
 	}
 
 	/// <summary>True for <c>manifest.json</c> itself, always excluded from <c>files[]</c>, and - only when
-	/// <paramref name="signed"/> - for the certificate and its root signature a signed plugin carries
-	/// alongside it. An unsigned artifact has no certificate to exclude, so it must declare those two
-	/// paths like any other file rather than smuggle them past the check.</summary>
+	/// <paramref name="signed"/> - for the certificate, its issuer certificate and their signatures a signed
+	/// plugin carries alongside it. An unsigned artifact has no certificate to exclude, so it must declare
+	/// those paths like any other file rather than smuggle them past the check.</summary>
 	private static bool IsRootSignatureMaterial(string relativePath, bool signed)
 		=> string.Equals(relativePath, PluginArtifactFiles.ManifestFileName, StringComparison.OrdinalIgnoreCase) ||
-			(signed &&
-				(string.Equals(relativePath,
-						PluginArtifactFiles.CertificateFileName,
-						StringComparison.OrdinalIgnoreCase) ||
-					string.Equals(relativePath,
-						PluginArtifactFiles.CertificateSignatureFileName,
-						StringComparison.OrdinalIgnoreCase)));
+			(signed && _signatureMaterialFiles.Contains(relativePath));
 
 	private static string ComputeSha256(string path)
 	{

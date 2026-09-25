@@ -14,6 +14,7 @@ internal sealed class FakePluginTrustEvaluator : IPluginTrustEvaluator
 		= PluginTrustResult.Of(PluginTrustVerdict.Trusted, "cert-fake");
 
 	public Task<PluginTrustResult> EvaluateInstalledAsync(string versionDirectory,
+		PluginRevocationCheck revocationCheck,
 		CancellationToken cancellationToken = default)
 		=> Task.FromResult(InstalledResult);
 }

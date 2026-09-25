@@ -1,5 +1,6 @@
 using MacroDeck.Plugin.Packaging.Versioning;
 using MacroDeckHost.Application.Plugins.Runtime;
+using MacroDeckHost.Application.Plugins.Trust;
 using MacroDeckHost.Application.Store.Installation;
 using MacroDeckHost.Application.Store.Model;
 using MacroDeckHost.Application.Store.Testing;
@@ -13,16 +14,19 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 	private readonly IPluginInstallationCatalog _plugins;
 	private readonly IStoreInstallationStore _installations;
 	private readonly IStoreTestInstallationStore _testInstallations;
+	private readonly IInstalledPluginSigners _signers;
 
 	public StoreCatalogQueryService(IStoreCatalog catalog,
 		IPluginInstallationCatalog plugins,
 		IStoreInstallationStore installations,
-		IStoreTestInstallationStore testInstallations)
+		IStoreTestInstallationStore testInstallations,
+		IInstalledPluginSigners signers)
 	{
 		_catalog = catalog;
 		_plugins = plugins;
 		_installations = installations;
 		_testInstallations = testInstallations;
+		_signers = signers;
 	}
 
 	public Result<StoreCatalogPage, StoreCatalogError> Query(StoreCatalogQuery query)
@@ -200,9 +204,26 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 			InstallState = state,
 			InstalledVersion = installedVersion,
 			InstalledTestBuild = InstalledTestBuild(entry, installedVersion),
-			UnsupportedReason = unsupportedReason
+			UnsupportedReason = unsupportedReason,
+			SigningRevoked = SigningRevoked(entry)
 		};
 	}
+
+	private bool SigningRevoked(StoreCatalogEntry entry)
+	{
+		if (entry.Kind is not StoreExtensionKind.Plugin || ActivePluginVersion(entry) is not { } active)
+		{
+			return false;
+		}
+
+		return _signers.Read(active) is { } signers &&
+			StoreRevocations.IsRevoked(_catalog.Snapshot, signers.CertificateId, signers.IssuerCertificateId);
+	}
+
+	private InstalledPluginVersion? ActivePluginVersion(StoreCatalogEntry entry) =>
+		_plugins.Discover()
+			.FirstOrDefault(plugin => string.Equals(plugin.PluginId, entry.Id, StringComparison.OrdinalIgnoreCase))
+			?.ActiveVersion;
 
 	private string? InstalledTestBuild(StoreCatalogEntry entry, string? installedVersion)
 	{
@@ -221,10 +242,7 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 	{
 		if (entry.Kind is StoreExtensionKind.Plugin)
 		{
-			return _plugins.Discover()
-				.FirstOrDefault(plugin =>
-					string.Equals(plugin.PluginId, entry.Id, StringComparison.OrdinalIgnoreCase))
-				?.ActiveVersion?.Version;
+			return ActivePluginVersion(entry)?.Version;
 		}
 
 		return _installations.Find(entry.Kind, entry.Id)?.Version;

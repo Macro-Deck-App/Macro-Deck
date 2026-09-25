@@ -4,6 +4,7 @@ using MacroDeckHost.Application.Store.Model;
 using MacroDeckHost.Infrastructure.Plugins;
 using MacroDeckHost.Infrastructure.Store;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
+using MacroDeckHost.Infrastructure.Plugins.Trust;
 
 namespace MacroDeckHost.Tests.UnitTests.Store;
 
@@ -31,7 +32,7 @@ internal sealed class StoreSimilarPackagesTests
 		_similar = new StoreSimilarPackages(new StoreCatalogQueryService(_catalog,
 				new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None),
 				_installations,
-				new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None)),
+				new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners()),
 			_installs);
 	}
 

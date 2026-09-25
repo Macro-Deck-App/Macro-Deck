@@ -15,4 +15,6 @@ public sealed record StoreCatalogItem
 	public StoreTrustPresentation Trust { get; init; } = StoreTrustPresentation.RegistryAuthenticated;
 
 	public string? UnsupportedReason { get; init; }
+
+	public bool SigningRevoked { get; init; }
 }

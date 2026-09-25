@@ -86,9 +86,10 @@ internal sealed class StoreRegistryRefresherTests
 			Log.Logger);
 
 	private static StoreRegistryFixture Registry(long sequence = 1,
-		TestPki.IssuedCertificate? certificate = null)
+		TestPki.IssuedCertificate? certificate = null,
+		TestPki.IssuedCertificate? issuer = null)
 	{
-		var fixture = new StoreRegistryFixture(certificate) { Sequence = sequence };
+		var fixture = new StoreRegistryFixture(certificate, issuer) { Sequence = sequence };
 		fixture.SignedAt = _now;
 		fixture.AddPackage("plugin",
 			"com.acme.hue",
@@ -1123,4 +1124,87 @@ internal sealed class StoreRegistryRefresherTests
 			await File.WriteAllBytesAsync(destination, await response.Content.ReadAsByteArrayAsync());
 		}
 	}
+
+	[Test]
+	public async Task A_registry_signed_through_an_issuer_certificate_is_accepted()
+	{
+		var result = await Create(Registry(issuer: TestPki.IssueIssuer())).Refresh();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True, result.ErrorMessage);
+			Assert.That(_catalog.Snapshot.Entries.Select(entry => entry.Id), Is.EquivalentTo(_seededIds));
+		});
+	}
+
+	[Test]
+	public async Task A_registry_whose_issuer_certificate_is_not_published_is_refused()
+	{
+		var fixture = Registry(issuer: TestPki.IssueIssuer());
+		fixture.Unlisted.Add($"certificates/{fixture.Issuer!.CertificateId}.json");
+
+		var result = await Create(fixture).Refresh();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.EqualTo(RegistryRefreshError.CertificateUntrusted));
+			Assert.That(_catalog.Snapshot.Entries, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_registry_certificate_from_an_issuer_the_root_did_not_sign_is_refused()
+	{
+		var result = await Create(Registry(issuer: TestPki.IssueIssuer(signingRoot: TestPki.OtherRoot))).Refresh();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.EqualTo(RegistryRefreshError.CertificateUntrusted));
+			Assert.That(_catalog.Snapshot.Entries, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_registry_signed_under_a_revoked_issuer_is_refused()
+	{
+		var fixture = Registry(issuer: TestPki.IssueIssuer());
+		fixture.RevokedKeyIds.Add(fixture.Issuer!.CertificateId);
+
+		var result = await Create(fixture).Refresh();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.EqualTo(RegistryRefreshError.SigningKeyRevoked));
+			Assert.That(_catalog.Snapshot.Entries, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task An_issuer_the_cached_snapshot_revoked_cannot_vouch_for_a_new_snapshot()
+	{
+		var issuer = TestPki.IssueIssuer();
+		var revoking = Registry(sequence: 1);
+		revoking.RevokedKeyIds.Add(issuer.CertificateId);
+		await Create(revoking).Refresh();
+
+		var result = await Create(Registry(sequence: 2, issuer: issuer)).Refresh();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.EqualTo(RegistryRefreshError.SigningKeyRevoked));
+			Assert.That(_catalog.Snapshot.Sequence, Is.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task Revoked_package_signers_are_published_to_the_catalog()
+	{
+		var fixture = Registry();
+		fixture.RevokedKeyIds.Add("cert_0123456789abcdef0123456789abcdef");
+
+		await Create(fixture).Refresh();
+
+		Assert.That(_catalog.Snapshot.RevokedKeyIds, Does.Contain("cert_0123456789abcdef0123456789abcdef"));
+	}
+
 }

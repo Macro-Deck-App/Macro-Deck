@@ -98,7 +98,7 @@ internal sealed class StoreTestBuildInstallTests
 		var provider = services.BuildServiceProvider();
 
 		var trustEvaluator = new PluginTrustEvaluator(manifestReader,
-			new NoRevocationDataSource(),
+			new StoreRegistryRevocationSource(_catalog),
 			new PluginTrustOptions { RootPublicKeyOverride = TestPki.Root.PublicKey },
 			Serilog.Core.Logger.None);
 
@@ -119,7 +119,7 @@ internal sealed class StoreTestBuildInstallTests
 			TimeProvider.System,
 			Serilog.Core.Logger.None);
 
-		_catalogQuery = new StoreCatalogQueryService(_catalog, _pluginCatalog, installations, _testInstallations);
+		_catalogQuery = new StoreCatalogQueryService(_catalog, _pluginCatalog, installations, _testInstallations, new InstalledPluginSigners());
 		_coordinator = new StoreInstallCoordinator(_catalogQuery,
 			_tracker,
 			new StoreOperationChannel(),
