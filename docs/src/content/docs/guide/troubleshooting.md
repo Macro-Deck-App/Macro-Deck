@@ -139,8 +139,8 @@ Macro Deck ends them too.
 Macro Deck revoked the certificate that signed the installed version of this plugin, or the certificate
 that vouches for it. The installed version keeps working, but Macro Deck refuses to install or update
 anything signed with that certificate. Wait for an update signed with a new certificate, or uninstall the
-plugin if you no longer trust it. Installing that plugin fails with the message that its signing
-certificate has been revoked.
+plugin if you no longer trust it. Installing or updating it from the Store fails with the message that
+Macro Deck could not verify who published the package.
 
 ## Discord cannot be connected
 
