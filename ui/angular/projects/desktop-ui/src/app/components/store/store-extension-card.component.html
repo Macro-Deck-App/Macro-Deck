@@ -49,7 +49,12 @@
         } @else if (freshness() === 'updated') {
           <span class="store-badge" data-badge="updated">{{ 'macrodeck.app:Store.Page.UpdatedBadge' | translate }}</span>
         }
-        @if (takenOver()) {
+        @if (item().signingRevoked) {
+          <span class="revoked-chip" [attr.title]="revokedDescription()">
+            <span class="icon icon-alert-triangle icon-xs" aria-hidden="true"></span>
+            {{ revokedLabel() }}
+          </span>
+        } @else if (takenOver()) {
           <span class="takeover-chip">
             <span class="icon icon-alert-triangle icon-xs" aria-hidden="true"></span>
             {{ takenOverLabel() }}

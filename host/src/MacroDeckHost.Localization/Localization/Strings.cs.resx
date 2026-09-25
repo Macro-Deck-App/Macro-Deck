@@ -18422,6 +18422,10 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Testovací sestavení {build}</value>
     <comment>[build:string] Shown on a Store plugin whose installed version is an unreviewed test build rather than the published release.</comment>
   </data>
+  <data name="Store.SigningRevoked" xml:space="preserve">
+    <value>Certifikát odvolán</value>
+    <comment>Shown on an installed Store plugin whose signing certificate, or the issuer that signed it, the Macro Deck registry revoked.</comment>
+  </data>
   <data name="Store.ReturnToStoreVersion" xml:space="preserve">
     <value>Vrátit na verzi ze Store {version}</value>
     <comment>[version:string] Replaces an installed test build with the currently published Store release.</comment>

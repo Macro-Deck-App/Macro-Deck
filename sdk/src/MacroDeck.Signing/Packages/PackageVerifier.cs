@@ -11,9 +11,10 @@ namespace MacroDeck.Signing.Packages;
 /// <summary>
 /// Verifies a signed archive of any <see cref="SignablePackageFormat"/>. Every check is over the archive's
 /// exact bytes; nothing here consults revocation. The certificate - always read from the archive's own
-/// <c>certificate.json</c> / <c>certificate.sig</c>, since a signed package always verifies on its own -
-/// has its validity window evaluated at the embedded signature's <c>signedAt</c>, not at the instant
-/// verification runs.
+/// <c>certificate.json</c> / <c>certificate.sig</c>, plus <c>issuer.json</c> / <c>issuer.sig</c> when the
+/// certificate names an issuer, since a signed package always verifies on its own - has its validity window,
+/// and its issuer's, evaluated at the embedded signature's <c>signedAt</c>, not at the instant verification
+/// runs.
 /// </summary>
 public static class PackageVerifier
 {
@@ -157,8 +158,26 @@ public static class PackageVerifier
 			var certificateBytes = await ReadEntryAsync(source, certificateEntry, cancellationToken);
 			var certificateSignatureBytes = await ReadEntryAsync(source, certificateSignatureEntry, cancellationToken);
 
+			var namesIssuer = SigningCertificateChain.DeclaresIssuer(certificateBytes);
+			var issuerEntry = namesIssuer ? source.Find(PluginArtifactFiles.IssuerCertificateFileName) : null;
+			var issuerSignatureEntry
+				= namesIssuer ? source.Find(PluginArtifactFiles.IssuerCertificateSignatureFileName) : null;
+			if (issuerEntry is null != issuerSignatureEntry is null)
+			{
+				return PackageVerifyResult.Fail(SigningError.CertificateIssuerMissing,
+					$"The package carries only one of '{PluginArtifactFiles.IssuerCertificateFileName}' / " +
+					$"'{PluginArtifactFiles.IssuerCertificateSignatureFileName}'.");
+			}
+
+			var issuerBytes = issuerEntry is null ? null : await ReadEntryAsync(source, issuerEntry, cancellationToken);
+			var issuerSignatureBytes = issuerSignatureEntry is null
+				? null
+				: await ReadEntryAsync(source, issuerSignatureEntry, cancellationToken);
+
 			var chainResult = SigningCertificateChain.Verify(certificateBytes,
 				certificateSignatureBytes,
+				issuerBytes,
+				issuerSignatureBytes,
 				rootPublicKey.HasValue ? rootPublicKey.Value.Span : MacroDeckRootKey.PublicKey,
 				SigningCertificateChain.PackageKeyUsage);
 			if (!chainResult.Success)
@@ -174,13 +193,17 @@ public static class PackageVerifier
 					"The signature's keyId does not match the archive's certificate.");
 			}
 
-			if (SigningCertificateChain.EnsureValidAt(trusted.Certificate, signature.SignedAt) is { } validityFailure)
+			if (SigningCertificateChain.EnsureValidAt(trusted, signature.SignedAt) is { } validityFailure)
 			{
 				return PackageVerifyResult.Fail(validityFailure.Error, validityFailure.Message);
 			}
 
 			var filesFailure
-				= await PackageFileValidator.ValidateAsync(source, manifestNode, manifestEntryName, cancellationToken);
+				= await PackageFileValidator.ValidateAsync(source,
+					manifestNode,
+					manifestEntryName,
+					trusted.Issuer is not null,
+					cancellationToken);
 			if (filesFailure is not null)
 			{
 				return PackageVerifyResult.Fail(filesFailure.Error, filesFailure.Message);
@@ -198,7 +221,10 @@ public static class PackageVerifier
 					"The package digest signature is not valid.");
 			}
 
-			return PackageVerifyResult.Ok(format, trusted.Certificate.CertificateId);
+			return PackageVerifyResult.Ok(format, trusted.Certificate.CertificateId) with
+			{
+				IssuerCertificateId = trusted.Issuer?.CertificateId
+			};
 		}
 		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
 		{
@@ -217,7 +243,8 @@ public static class PackageVerifier
 	}
 }
 
-/// <summary>The outcome of <see cref="PackageVerifier.VerifyAsync"/>.</summary>
+/// <summary>The outcome of <see cref="PackageVerifier.VerifyAsync"/> and
+/// <see cref="PackageVerifier.VerifyExtractedAsync"/>.</summary>
 public sealed record PackageVerifyResult
 {
 	public required bool Success { get; init; }
@@ -225,6 +252,10 @@ public sealed record PackageVerifyResult
 	public SignablePackageFormat? Format { get; init; }
 
 	public string? CertificateId { get; init; }
+
+	/// <summary>The <c>certificateId</c> of the issuer certificate that signed the package's certificate, or
+	/// <see langword="null"/> when the root signed it directly.</summary>
+	public string? IssuerCertificateId { get; init; }
 
 	public SigningError? Error { get; init; }
 

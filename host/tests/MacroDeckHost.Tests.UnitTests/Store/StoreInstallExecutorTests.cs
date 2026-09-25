@@ -25,6 +25,7 @@ using MacroDeckHost.Tests.UnitTests.Plugins.Trust;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
 using MacroDeckHost.Application.Plugins.Runtime;
+using MacroDeckHost.Infrastructure.Plugins.Trust;
 
 namespace MacroDeckHost.Tests.UnitTests.Store;
 
@@ -109,7 +110,7 @@ internal sealed class StoreInstallExecutorTests
 			TimeProvider.System);
 
 		_executor = new StoreInstallExecutor(_catalog,
-			new StoreCatalogQueryService(_catalog, _pluginCatalog, _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None)),
+			new StoreCatalogQueryService(_catalog, _pluginCatalog, _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners()),
 			_tracker,
 			downloader,
 			_pluginInstaller,
@@ -195,7 +196,7 @@ internal sealed class StoreInstallExecutorTests
 			}
 		};
 		var executor = new StoreInstallExecutor(_catalog,
-			new StoreCatalogQueryService(_catalog, _pluginCatalog, _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None)),
+			new StoreCatalogQueryService(_catalog, _pluginCatalog, _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners()),
 			_tracker,
 			new StoreArtifactDownloader(_httpClientFactory, StoreRegistryOptions.Default, _paths, TimeProvider.System),
 			installer,
@@ -236,7 +237,7 @@ internal sealed class StoreInstallExecutorTests
 		};
 		var batches = new StoreInstallBackupBatches();
 		var executor = new StoreInstallExecutor(_catalog,
-			new StoreCatalogQueryService(_catalog, _pluginCatalog, _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None)),
+			new StoreCatalogQueryService(_catalog, _pluginCatalog, _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners()),
 			_tracker,
 			new StoreArtifactDownloader(_httpClientFactory, StoreRegistryOptions.Default, _paths, TimeProvider.System),
 			installer,
@@ -794,7 +795,7 @@ internal sealed class StoreInstallExecutorTests
 
 	private StoreInstallExecutor ExecutorWith(IPluginInstaller installer) =>
 		new(_catalog,
-			new StoreCatalogQueryService(_catalog, _pluginCatalog, _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None)),
+			new StoreCatalogQueryService(_catalog, _pluginCatalog, _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners()),
 			_tracker,
 			new StoreArtifactDownloader(_httpClientFactory, StoreRegistryOptions.Default, _paths, TimeProvider.System),
 			installer,

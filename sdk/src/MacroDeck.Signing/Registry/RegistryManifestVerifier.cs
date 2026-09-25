@@ -10,8 +10,9 @@ namespace MacroDeck.Signing.Registry;
 /// <summary>
 /// Verifies a Macro Deck Store Registry manifest: that <c>registry-signature.json</c> is a valid signature
 /// over the exact bytes of <c>registry-manifest.json</c>, made by a <c>registry</c>-usage certificate, and
-/// that every file the manifest declares exists on disk with the declared size and SHA-256. This library
-/// never signs a registry manifest or issues certificates - both happen offline, outside Macro Deck.
+/// that every file the manifest declares exists on disk with the declared size and SHA-256. The certificate
+/// chains to the root directly or through one issuer certificate. This library never signs a registry
+/// manifest or issues certificates.
 /// </summary>
 public static class RegistryManifestVerifier
 {
@@ -22,12 +23,38 @@ public static class RegistryManifestVerifier
 	/// <summary>Verifies <paramref name="signaturePath"/> against <paramref name="manifestPath"/>'s exact
 	/// bytes, and every file <paramref name="manifestPath"/> declares against the files on disk beside it.
 	/// <paramref name="rootPublicKey"/> defaults to <see cref="MacroDeckRootKey"/> when omitted.</summary>
-	public static async Task<RegistryManifestVerifyResult> VerifyAsync(string manifestPath,
+	public static Task<RegistryManifestVerifyResult> VerifyAsync(string manifestPath,
 		string signaturePath,
 		byte[] certificateBytes,
 		byte[] certificateSignatureBytes,
 		ReadOnlyMemory<byte>? rootPublicKey = null,
 		CancellationToken cancellationToken = default)
+	{
+		return VerifyAsync(manifestPath,
+			signaturePath,
+			certificateBytes,
+			certificateSignatureBytes,
+			null,
+			null,
+			rootPublicKey,
+			cancellationToken);
+	}
+
+	/// <summary>Verifies like
+	/// <see cref="VerifyAsync(string, string, byte[], byte[], ReadOnlyMemory{byte}?, CancellationToken)"/>, with
+	/// the registry certificate verified through <paramref name="issuerCertificateBytes"/> and
+	/// <paramref name="issuerCertificateSignatureBytes"/> when it names an issuer certificate. Both are
+	/// <see langword="null"/> for a root-signed registry certificate; see
+	/// <see cref="SigningCertificateChain.Verify(byte[], byte[], byte[], byte[], ReadOnlySpan{byte}, string)"/>.
+	/// </summary>
+	public static async Task<RegistryManifestVerifyResult> VerifyAsync(string manifestPath,
+		string signaturePath,
+		byte[] certificateBytes,
+		byte[] certificateSignatureBytes,
+		byte[]? issuerCertificateBytes,
+		byte[]? issuerCertificateSignatureBytes,
+		ReadOnlyMemory<byte>? rootPublicKey,
+		CancellationToken cancellationToken)
 	{
 		ArgumentException.ThrowIfNullOrWhiteSpace(manifestPath);
 		ArgumentException.ThrowIfNullOrWhiteSpace(signaturePath);
@@ -91,6 +118,8 @@ public static class RegistryManifestVerifier
 
 		var chainResult = SigningCertificateChain.Verify(certificateBytes,
 			certificateSignatureBytes,
+			issuerCertificateBytes,
+			issuerCertificateSignatureBytes,
 			rootPublicKey.HasValue ? rootPublicKey.Value.Span : MacroDeckRootKey.PublicKey,
 			SigningCertificateChain.RegistryKeyUsage);
 		if (!chainResult.Success)
@@ -106,7 +135,7 @@ public static class RegistryManifestVerifier
 				"The signature's keyId does not match the supplied certificate.");
 		}
 
-		if (SigningCertificateChain.EnsureValidAt(trusted.Certificate, document.SignedAt) is { } validityFailure)
+		if (SigningCertificateChain.EnsureValidAt(trusted, document.SignedAt) is { } validityFailure)
 		{
 			return RegistryManifestVerifyResult.Fail(validityFailure.Error, validityFailure.Message);
 		}
@@ -117,7 +146,10 @@ public static class RegistryManifestVerifier
 				"The registry manifest signature is not valid.");
 		}
 
-		return RegistryManifestVerifyResult.Ok(trusted.Certificate.CertificateId);
+		return RegistryManifestVerifyResult.Ok(trusted.Certificate.CertificateId) with
+		{
+			IssuerCertificateId = trusted.Issuer?.CertificateId
+		};
 	}
 
 	/// <summary>Validates the manifest's own shape and every file it declares: safe relative paths, no
@@ -255,12 +287,18 @@ public static class RegistryManifestVerifier
 	}
 }
 
-/// <summary>The outcome of <see cref="RegistryManifestVerifier.VerifyAsync"/>.</summary>
+/// <summary>The outcome of
+/// <see cref="RegistryManifestVerifier.VerifyAsync(string, string, byte[], byte[], byte[], byte[], ReadOnlyMemory{byte}?, CancellationToken)"/>.
+/// </summary>
 public sealed record RegistryManifestVerifyResult
 {
 	public required bool Success { get; init; }
 
 	public string? CertificateId { get; init; }
+
+	/// <summary>The <c>certificateId</c> of the issuer certificate that signed the registry certificate, or
+	/// <see langword="null"/> when the root signed it directly.</summary>
+	public string? IssuerCertificateId { get; init; }
 
 	public SigningError? Error { get; init; }
 

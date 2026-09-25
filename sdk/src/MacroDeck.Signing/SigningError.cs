@@ -10,8 +10,8 @@ public enum SigningError
 	/// missing a required property.</summary>
 	CertificateMalformed,
 
-	/// <summary>The certificate's bytes do not verify against the root signature supplied alongside it.
-	/// </summary>
+	/// <summary>The certificate's bytes do not verify against the signature supplied alongside it, made by the
+	/// root or by the certificate's issuer.</summary>
 	CertificateUntrusted,
 
 	/// <summary>The certificate does not exclusively permit the required key usage, or its subject kind is
@@ -100,7 +100,18 @@ public enum SigningError
 	OutputExists,
 
 	/// <summary>Writing the output failed, e.g. due to an I/O error.</summary>
-	WriteFailed
+	WriteFailed,
+
+	/// <summary>The certificate names an issuer certificate, but the issuer certificate or its root signature
+	/// was not supplied.</summary>
+	CertificateIssuerMissing,
+
+	/// <summary>The supplied issuer certificate is not the one the certificate names, belongs to a different
+	/// root, or was supplied for a certificate the root signed directly.</summary>
+	CertificateIssuerMismatch,
+
+	/// <summary>The certificate's validity window is not inside its issuer certificate's window.</summary>
+	CertificateOutlivesIssuer
 }
 
 /// <summary>A failed signing or verification operation.</summary>

@@ -11,6 +11,7 @@ using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure.Plugins;
 using MacroDeckHost.Infrastructure.Store;
+using MacroDeckHost.Infrastructure.Plugins.Trust;
 
 namespace MacroDeckHost.Tests.UnitTests.Icons;
 
@@ -51,7 +52,7 @@ internal sealed class IconPackOwnershipTests
 			_updateState,
 			new StoreWithdrawalState(),
 			StoreRegistryOptions.Default);
-		_catalogQuery = new StoreCatalogQueryService(_catalog, _plugins, _installations, new JsonStoreTestInstallationStore(_harness.Paths, Serilog.Core.Logger.None));
+		_catalogQuery = new StoreCatalogQueryService(_catalog, _plugins, _installations, new JsonStoreTestInstallationStore(_harness.Paths, Serilog.Core.Logger.None), new InstalledPluginSigners());
 		_storeOwner = new StoreIconPackOwner(_installations, _updateDetector, _harness.Logger);
 	}
 

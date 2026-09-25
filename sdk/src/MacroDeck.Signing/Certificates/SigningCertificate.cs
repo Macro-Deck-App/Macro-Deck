@@ -3,7 +3,8 @@ using System.Text.Json.Serialization;
 namespace MacroDeck.Signing.Certificates;
 
 /// <summary>
-/// The DTO for <c>cert_&lt;id&gt;.json</c>, matching <c>macrodeck-certificate-v1.schema.json</c> exactly.
+/// The DTO for <c>cert_&lt;id&gt;.json</c>, matching <c>macrodeck-certificate-v1.schema.json</c> or
+/// <c>macrodeck-certificate-v2.schema.json</c>.
 /// <see cref="SigningCertificateChain"/> is the only supported way to obtain a certificate this library
 /// will act on: deserializing this type on its own gives no assurance the document was ever signed by the
 /// Macro Deck root key.
@@ -33,15 +34,20 @@ public sealed record SigningCertificate
 
 	public required DateTimeOffset IssuedAt { get; init; }
 
-	/// <summary>Identifies the Macro Deck root key that signed this certificate.</summary>
+	/// <summary>Identifies the Macro Deck root key this certificate chains to: the key that signed it, or the key
+	/// that signed its <see cref="Issuer"/>.</summary>
 	public required string RootKeyId { get; init; }
+
+	/// <summary>The <see cref="CertificateId"/> of the issuer certificate that signed this certificate, or
+	/// <see langword="null"/> when the root signed it directly. Schema version 2 only.</summary>
+	public string? Issuer { get; init; }
 }
 
 /// <summary>Who a <see cref="SigningCertificate"/> was issued to.</summary>
 public sealed record SigningCertificateSubject
 {
 	/// <summary><c>"creator"</c> or <c>"organization"</c> for a package certificate; <c>"service"</c> for
-	/// Macro Deck's own registry signing certificate.</summary>
+	/// Macro Deck's own registry signing certificate; <c>"issuer"</c> for an issuer certificate.</summary>
 	public required string Kind { get; init; }
 
 	/// <summary>The subject's Macro Deck Platform identifier.</summary>

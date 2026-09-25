@@ -1,5 +1,6 @@
 using MacroDeck.Plugin.Packaging.Versioning;
 using MacroDeckHost.Application.Plugins.Runtime;
+using MacroDeckHost.Application.Plugins.Trust;
 using MacroDeckHost.Application.Store.Installation;
 using MacroDeckHost.Application.Store.Model;
 using MacroDeckHost.Application.Store.Testing;
@@ -13,16 +14,19 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 	private readonly IPluginInstallationCatalog _plugins;
 	private readonly IStoreInstallationStore _installations;
 	private readonly IStoreTestInstallationStore _testInstallations;
+	private readonly IInstalledPluginSigners _signers;
 
 	public StoreCatalogQueryService(IStoreCatalog catalog,
 		IPluginInstallationCatalog plugins,
 		IStoreInstallationStore installations,
-		IStoreTestInstallationStore testInstallations)
+		IStoreTestInstallationStore testInstallations,
+		IInstalledPluginSigners signers)
 	{
 		_catalog = catalog;
 		_plugins = plugins;
 		_installations = installations;
 		_testInstallations = testInstallations;
+		_signers = signers;
 	}
 
 	public Result<StoreCatalogPage, StoreCatalogError> Query(StoreCatalogQuery query)
@@ -180,7 +184,10 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 
 	private StoreCatalogItem Describe(StoreCatalogSnapshot snapshot, StoreCatalogEntry entry)
 	{
-		var installedVersion = InstalledVersion(entry);
+		var activePlugin = entry.Kind is StoreExtensionKind.Plugin ? ActivePluginVersion(entry) : null;
+		var installedVersion = entry.Kind is StoreExtensionKind.Plugin
+			? activePlugin?.Version
+			: _installations.Find(entry.Kind, entry.Id)?.Version;
 		var unsupportedReason = UnsupportedReason(entry);
 		var withdrawal = snapshot.FindWithdrawal(entry);
 		var state = unsupportedReason is not null
@@ -205,9 +212,26 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 					.Select(release => release.Version)
 					.Where(version => snapshot.FindRemoval(entry.Id, version) is not null)
 					.ToList()
-				: []
+				: [],
+			SigningRevoked = SigningRevoked(snapshot, activePlugin)
 		};
 	}
+
+	private bool SigningRevoked(StoreCatalogSnapshot snapshot, InstalledPluginVersion? active)
+	{
+		if (active is null || snapshot.RevokedKeyIds.Count == 0)
+		{
+			return false;
+		}
+
+		return _signers.Read(active) is { } signers &&
+			StoreRevocations.IsRevoked(snapshot, signers.CertificateId, signers.IssuerCertificateId);
+	}
+
+	private InstalledPluginVersion? ActivePluginVersion(StoreCatalogEntry entry) =>
+		_plugins.Discover()
+			.FirstOrDefault(plugin => string.Equals(plugin.PluginId, entry.Id, StringComparison.OrdinalIgnoreCase))
+			?.ActiveVersion;
 
 	private string? InstalledTestBuild(StoreCatalogEntry entry, string? installedVersion)
 	{
@@ -226,10 +250,7 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 	{
 		if (entry.Kind is StoreExtensionKind.Plugin)
 		{
-			return _plugins.Discover()
-				.FirstOrDefault(plugin =>
-					string.Equals(plugin.PluginId, entry.Id, StringComparison.OrdinalIgnoreCase))
-				?.ActiveVersion?.Version;
+			return ActivePluginVersion(entry)?.Version;
 		}
 
 		return _installations.Find(entry.Kind, entry.Id)?.Version;

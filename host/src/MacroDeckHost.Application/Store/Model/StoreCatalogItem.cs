@@ -21,4 +21,6 @@ public sealed record StoreCatalogItem
 	public StoreRemovedPackage? InstalledVersionRemoval { get; init; }
 
 	public IReadOnlyList<string> WithdrawnVersions { get; init; } = [];
+
+	public bool SigningRevoked { get; init; }
 }

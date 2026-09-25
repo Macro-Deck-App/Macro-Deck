@@ -18422,6 +18422,10 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Kompilacja testowa {build}</value>
     <comment>[build:string] Shown on a Store plugin whose installed version is an unreviewed test build rather than the published release.</comment>
   </data>
+  <data name="Store.SigningRevoked" xml:space="preserve">
+    <value>Certyfikat unieważniony</value>
+    <comment>Shown on an installed Store plugin whose signing certificate, or the issuer that signed it, the Macro Deck registry revoked.</comment>
+  </data>
   <data name="Store.ReturnToStoreVersion" xml:space="preserve">
     <value>Przywróć wersję ze Store {version}</value>
     <comment>[version:string] Replaces an installed test build with the currently published Store release.</comment>

@@ -47,6 +47,8 @@ export interface StoreCatalogItemBody {
   activeOperationId?: string | null;
   // Absent from an older host.
   previewScreenshotSha256?: string | null;
+  // Absent from an older host.
+  signingRevoked?: boolean;
 }
 
 export interface StoreVersionWithdrawalBody {

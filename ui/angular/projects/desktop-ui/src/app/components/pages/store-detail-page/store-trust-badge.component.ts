@@ -9,7 +9,12 @@ import { storeTrustLabelKey } from '../../../util/store-operation-display';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (takenOver()) {
+    @if (signingRevoked()) {
+      <span class="revoked-badge" [attr.title]="revokedDescription()">
+        <span class="icon icon-alert-triangle icon-xs" aria-hidden="true"></span>
+        {{ revokedLabel() }}
+      </span>
+    } @else if (takenOver()) {
       <span class="takeover-badge">
         <span class="icon icon-alert-triangle icon-xs" aria-hidden="true"></span>
         {{ takenOverLabel() }}
@@ -27,6 +32,7 @@ export class StoreTrustBadgeComponent {
   readonly kind = input.required<StoreExtensionKind>();
   readonly trust = input.required<StoreExtensionTrust | string>();
   readonly pluginId = input<string | null>(null);
+  readonly signingRevoked = input(false);
 
   private readonly localization = inject(LocalizationService);
   private readonly runtime = inject(PluginRuntimeService);
@@ -39,6 +45,11 @@ export class StoreTrustBadgeComponent {
 
   protected readonly takenOverLabel = computed(() =>
     this.localization.translateKey(AppStrings.Developer.ManagedPlugins.TakenOverBadge));
+
+  protected readonly revokedLabel = computed(() => this.localization.translateKey(AppStrings.Store.SigningRevoked));
+
+  protected readonly revokedDescription = computed(() =>
+    this.localization.translateKey(AppStrings.Plugins.TrustRefusal.Revoked));
 
   protected readonly label = computed(() => {
     const key = storeTrustLabelKey(this.kind(), this.trust());

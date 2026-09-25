@@ -117,6 +117,7 @@ the one exception on a normal exit: it returns the launched plugin's own exit co
 - [Security model](/policies/security/) - the trust model `verify` checks against.
 - [`MacroDeck.Signing` package README](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/sdk/src/MacroDeck.Signing/README.md) -
   the library behind `sign` and `verify`.
-- [Certificate schema](/schemas/macrodeck-certificate-v1.schema.json) and
+- Certificate schema ([v1](/schemas/macrodeck-certificate-v1.schema.json),
+  [v2](/schemas/macrodeck-certificate-v2.schema.json)) and
   [package signature schema](/schemas/macrodeck-package-signature-v1.schema.json).
 - [`MacroDeck.Plugin.Cli` package README](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/sdk/src/MacroDeck.Plugin.Cli/README.md).

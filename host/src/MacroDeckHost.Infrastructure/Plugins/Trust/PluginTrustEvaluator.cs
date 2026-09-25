@@ -24,11 +24,13 @@ public sealed class PluginTrustEvaluator : IPluginTrustEvaluator
 	}
 
 	public Task<PluginTrustResult> EvaluateInstalledAsync(string versionDirectory,
+		PluginRevocationCheck revocationCheck,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentException.ThrowIfNullOrWhiteSpace(versionDirectory);
 
 		return EvaluateCoreAsync(versionDirectory,
+			revocationCheck,
 			ct => PackageVerifier.VerifyExtractedAsync(versionDirectory,
 				SignablePackageFormat.Plugin,
 				_manifestReader,
@@ -38,6 +40,7 @@ public sealed class PluginTrustEvaluator : IPluginTrustEvaluator
 	}
 
 	private async Task<PluginTrustResult> EvaluateCoreAsync(string subject,
+		PluginRevocationCheck revocationCheck,
 		Func<CancellationToken, Task<PackageVerifyResult>> verify,
 		CancellationToken cancellationToken)
 	{
@@ -51,11 +54,12 @@ public sealed class PluginTrustEvaluator : IPluginTrustEvaluator
 		}
 
 		var certificateId = verified.CertificateId!;
-		var revocation = await CheckRevocation(certificateId, cancellationToken);
+		var revocation = revocationCheck == PluginRevocationCheck.Check
+			? await CheckRevocation(certificateId, verified.IssuerCertificateId, cancellationToken)
+			: new PluginRevocationResult(PluginRevocationStatus.Unavailable, null);
 
-		// Unavailable never blocks (decision: no revocation feed ships yet, and failing closed on an
-		// absent feed would refuse every signed plugin on every machine). Only an explicit Revoked answer
-		// downgrades the verdict.
+		// Unavailable never blocks: without a loaded registry snapshot there is nothing to check against,
+		// and failing closed would refuse every signed plugin. Only an explicit Revoked answer downgrades.
 		var trustVerdict = revocation.Status == PluginRevocationStatus.Revoked
 			? PluginTrustVerdict.Revoked
 			: PluginTrustVerdict.Trusted;
@@ -66,11 +70,12 @@ public sealed class PluginTrustEvaluator : IPluginTrustEvaluator
 	}
 
 	private async Task<PluginRevocationResult> CheckRevocation(string certificateId,
+		string? issuerCertificateId,
 		CancellationToken cancellationToken)
 	{
 		try
 		{
-			return await _revocationSource.CheckAsync(certificateId, cancellationToken);
+			return await _revocationSource.CheckAsync(certificateId, issuerCertificateId, cancellationToken);
 		}
 		catch (Exception ex) when (ex is not OperationCanceledException)
 		{
