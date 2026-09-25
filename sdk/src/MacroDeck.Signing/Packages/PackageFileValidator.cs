@@ -8,7 +8,8 @@ namespace MacroDeck.Signing.Packages;
 /// The declared-files check shared by every <see cref="SignablePackageFormat"/>, run before signing (so a
 /// broken archive is never signed) and after verifying a signature (so a tampered archive never passes):
 /// every <c>files</c> entry exists with the declared size and SHA-256, and the package contains no entry
-/// beyond those and the root manifest, <c>certificate.json</c> and <c>certificate.sig</c>.
+/// beyond those and the root manifest, <c>certificate.json</c>, <c>certificate.sig</c>, <c>issuer.json</c> and
+/// <c>issuer.sig</c>.
 /// </summary>
 internal static class PackageFileValidator
 {
@@ -95,7 +96,7 @@ internal static class PackageFileValidator
 
 	private static bool IsRootSignatureMaterial(string entryFullName, string manifestEntryName) =>
 		entryFullName == manifestEntryName ||
-		entryFullName is PluginArtifactFiles.CertificateFileName or PluginArtifactFiles.CertificateSignatureFileName;
+		PackageSigningFiles.IsSignatureMaterial(entryFullName);
 
 	private static async Task<string> ComputeEntrySha256Async(IPackageEntrySource source,
 		PackageEntry entry,

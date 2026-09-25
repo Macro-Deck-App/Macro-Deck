@@ -141,6 +141,13 @@ public static class PackageArchiveFixtures
 	}
 
 	/// <summary>Adds a brand-new entry to an existing archive, keeping every other entry unchanged.</summary>
+	public static void RemoveEntry(string archivePath, string entryName)
+	{
+		using var stream = new FileStream(archivePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+		using var archive = new ZipArchive(stream, ZipArchiveMode.Update);
+		archive.GetEntry(entryName)?.Delete();
+	}
+
 	public static void AddEntry(string archivePath, string entryName, string content)
 	{
 		using var stream = new FileStream(archivePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
