@@ -65,6 +65,11 @@ const UPDATE_STOP_TIMEOUT: Duration = Duration::from_secs(35);
 
 const FORCED_STOP_TIMEOUT: Duration = Duration::from_secs(10);
 
+// Windows kills a windowless app that has not answered WM_ENDSESSION within 5 s, and shows its
+// blocking screen to one with a window; staying under that still covers the 2 s dispatch window.
+#[cfg(any(windows, test))]
+const SESSION_END_STOP_TIMEOUT: Duration = Duration::from_secs(4);
+
 const READY_TIMEOUT: Duration = Duration::from_secs(60);
 
 const RETRY_READY_TIMEOUT: Duration = Duration::from_secs(30);
@@ -75,6 +80,13 @@ const UNRESPONSIVE_STOP_TIMEOUT: Duration = Duration::from_secs(5);
 // inside it), so the two budgets cannot silently drift apart.
 #[cfg(test)]
 pub const HOST_SHUTDOWN_WORST_CASE: Duration = Duration::from_secs(30);
+
+// Mirrors the host's Server stopped dispatch window in ServerLifecycleEventBackgroundService.
+#[cfg(test)]
+pub const HOST_SERVER_STOPPED_DISPATCH_WINDOW: Duration = Duration::from_secs(2);
+
+#[cfg(test)]
+pub const WINDOWS_END_SESSION_ALLOWANCE: Duration = Duration::from_secs(5);
 
 pub const HOST_RESTART_EXIT_CODE: i32 = 86;
 
@@ -985,6 +997,33 @@ pub async fn stop(app: &AppHandle) {
     stop_host(app, "quit", QUIT_STOP_TIMEOUT).await;
 }
 
+// A Windows session end and the macOS terminate: path destroy the event loop without request_quit.
+// Blocking here keeps the process, and with it the host's job, alive until Server stopped is out.
+pub fn stop_before_exit(app: &AppHandle) {
+    let state = app.state::<Arc<HostState>>();
+    if crate::is_quitting() || !state.spawned() || state.exited.load(Ordering::SeqCst) {
+        return;
+    }
+    logging::info("[host] exiting while the host is still running; stopping it first");
+    crate::mark_quitting(app);
+    state.stopping.store(true, Ordering::SeqCst);
+    #[cfg(windows)]
+    tauri::async_runtime::block_on(async {
+        let stop = async {
+            let port = request_stop(app, "exit").await;
+            wait_until_stopped(app, port, SESSION_END_STOP_TIMEOUT).await
+        };
+        if !matches!(
+            tokio::time::timeout(SESSION_END_STOP_TIMEOUT, stop).await,
+            Ok(true)
+        ) {
+            logging::warn("[host] still stopping as the session ends; the job object ends it");
+        }
+    });
+    #[cfg(not(windows))]
+    tauri::async_runtime::block_on(stop_host(app, "exit", QUIT_STOP_TIMEOUT));
+}
+
 pub async fn shutdown_for_update(app: &AppHandle) -> bool {
     stop_host(app, "update", UPDATE_STOP_TIMEOUT).await
 }
@@ -995,7 +1034,7 @@ fn begin_stop(state: &HostState) {
     }
 }
 
-async fn stop_host(app: &AppHandle, reason: &str, graceful_timeout: Duration) -> bool {
+async fn request_stop(app: &AppHandle, reason: &str) -> Option<u16> {
     let state = app.state::<Arc<HostState>>();
     begin_stop(&state);
     state.shutdown_expected.store(true, Ordering::SeqCst);
@@ -1009,18 +1048,28 @@ async fn stop_host(app: &AppHandle, reason: &str, graceful_timeout: Duration) ->
         }
         None => logging::warn("[host] no loopback port known; skipping the shutdown request"),
     }
+    port
+}
+
+async fn stop_host(app: &AppHandle, reason: &str, graceful_timeout: Duration) -> bool {
+    let port = request_stop(app, reason).await;
 
     if wait_until_stopped(app, port, graceful_timeout).await {
         return true;
     }
 
     logging::warn("[host] did not stop in time; killing the host process");
-    kill_child(&state);
+    kill_child(&app.state::<Arc<HostState>>());
     if wait_until_stopped(app, port, FORCED_STOP_TIMEOUT).await {
         return true;
     }
     logging::error("[host] the host process is still running after the kill");
     false
+}
+
+#[cfg(test)]
+pub fn covers_server_stopped_before_windows_ends_the_session(budget: Duration) -> bool {
+    budget > HOST_SERVER_STOPPED_DISPATCH_WINDOW && budget < WINDOWS_END_SESSION_ALLOWANCE
 }
 
 #[cfg(test)]
@@ -1635,6 +1684,20 @@ mod tests {
         assert!(covers_host_shutdown(
             UPDATE_STOP_TIMEOUT,
             FORCED_STOP_TIMEOUT
+        ));
+    }
+
+    #[test]
+    fn the_session_end_budget_sends_server_stopped_before_windows_ends_the_session() {
+        assert!(covers_server_stopped_before_windows_ends_the_session(
+            SESSION_END_STOP_TIMEOUT
+        ));
+    }
+
+    #[test]
+    fn the_quit_budget_would_outlast_windows_session_end_allowance() {
+        assert!(!covers_server_stopped_before_windows_ends_the_session(
+            QUIT_STOP_TIMEOUT
         ));
     }
 

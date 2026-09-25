@@ -11,8 +11,21 @@ use windows::Win32::System::JobObjects::{
     SetInformationJobObject, TerminateJobObject, JOBOBJECT_EXTENDED_LIMIT_INFORMATION,
     JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
 };
+use windows::Win32::System::Threading::SetProcessShutdownParameters;
 
 use crate::logging;
+
+// Above the host's default level 0x280: Windows ends higher levels first, so the host outlives
+// the bootstrapper's session-end stop instead of being ended alongside it.
+const SHUTDOWN_LEVEL_BEFORE_HOST: u32 = 0x2FF;
+
+pub fn shut_down_before_host() {
+    if let Err(error) = unsafe { SetProcessShutdownParameters(SHUTDOWN_LEVEL_BEFORE_HOST, 0) } {
+        logging::warn(&format!(
+            "[host] could not raise the shutdown level above the host: {error}"
+        ));
+    }
+}
 
 pub struct HostJob(HANDLE);
 
