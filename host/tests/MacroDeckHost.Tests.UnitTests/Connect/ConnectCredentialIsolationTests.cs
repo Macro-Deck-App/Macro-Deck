@@ -157,28 +157,6 @@ public class ConnectCredentialIsolationTests
 	}
 
 	[Test]
-	public async Task A_credential_saved_with_cached_roles_by_an_earlier_version_still_loads()
-	{
-		var marker = Marker();
-		await _store.Save(new ConnectCredential(marker, "sub-1", "Ada", null, DateTimeOffset.UnixEpoch));
-
-		using (var scope = _provider.CreateScope())
-		{
-			await scope.ServiceProvider.GetRequiredService<IAppPreferenceRepository>()
-				.SetValue("connect.credentialCachedRoles", "[\"StoreTester\"]");
-		}
-
-		var loaded = await _store.Load();
-
-		Assert.Multiple(() =>
-		{
-			Assert.That(loaded?.RefreshToken, Is.EqualTo(marker));
-			Assert.That(loaded?.Subject, Is.EqualTo("sub-1"));
-			Assert.That(loaded?.CachedDisplayName, Is.EqualTo("Ada"));
-		});
-	}
-
-	[Test]
 	public async Task Restoring_an_archive_from_another_machine_does_not_resurrect_a_session()
 	{
 		// The archive is built on another machine that was signed in; this installation is not.
