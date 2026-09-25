@@ -94,6 +94,7 @@ internal static class VerifyCommand
 		if (result.Success)
 		{
 			console.WriteLine($"{result.Format}: valid, signed by certificate {result.CertificateId}" +
+				(result.IssuerCertificateId is { } issuer ? $" issued by {issuer}" : "") +
 				(rootAnchored ? "." : " (not anchored to the Macro Deck root)."));
 		}
 		else
@@ -111,6 +112,7 @@ internal static class VerifyCommand
 			valid = result.Success,
 			format = result.Format?.ToString(),
 			certificateId = result.CertificateId,
+			issuerCertificateId = result.IssuerCertificateId,
 			rootAnchored,
 			revocationChecked = false,
 			problems = result.Success

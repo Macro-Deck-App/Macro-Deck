@@ -514,6 +514,12 @@ internal static class ManifestValidator
 							StringComparison.OrdinalIgnoreCase) ||
 						string.Equals(relative,
 							PluginArtifactFiles.CertificateSignatureFileName,
+							StringComparison.OrdinalIgnoreCase) ||
+						string.Equals(relative,
+							PluginArtifactFiles.IssuerCertificateFileName,
+							StringComparison.OrdinalIgnoreCase) ||
+						string.Equals(relative,
+							PluginArtifactFiles.IssuerCertificateSignatureFileName,
 							StringComparison.OrdinalIgnoreCase))) ||
 				declaredPaths.Contains(relative))
 			{

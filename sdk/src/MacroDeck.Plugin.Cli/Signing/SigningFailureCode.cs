@@ -36,6 +36,9 @@ internal static class SigningFailureCode
 		SigningError.SelfVerificationFailed => "self-verification-failed",
 		SigningError.OutputExists => "output-exists",
 		SigningError.WriteFailed => "write-failed",
+		SigningError.CertificateIssuerMissing => "certificate-issuer-missing",
+		SigningError.CertificateIssuerMismatch => "certificate-issuer-mismatch",
+		SigningError.CertificateOutlivesIssuer => "certificate-outlives-issuer",
 		_ => "signing-failed"
 	};
 }
