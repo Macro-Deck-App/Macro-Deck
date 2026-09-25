@@ -173,7 +173,7 @@ export class UiTreeWidgetComponent implements OnInit, OnChanges, OnDestroy {
 
     const request = this.buildOpenRequest();
     if (!request) return;
-    this.handleSignal.set(this.uiSessions.open(request));
+    this.handleSignal.set(this.uiSessions.open(() => this.buildOpenRequest() ?? request));
   }
 
   private buildOpenRequest(): UiSessionOpenRequest | null {

@@ -86,6 +86,11 @@ internal static class UiSessionLog
 			code,
 			message ?? "(no message)");
 
+	public static void ProviderReloaded(ILogger logger, string sessionId, string providerId)
+		=> logger.Information("The UI provider '{ProviderId}' was updated and reloads session '{SessionId}'",
+			providerId,
+			sessionId);
+
 	public static void ProviderCallFailed(ILogger logger, string sessionId, string operation, Exception exception)
 		=> logger.Error(exception,
 			"The UI provider for session '{SessionId}' failed during '{Operation}'",

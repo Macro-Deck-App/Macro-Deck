@@ -177,7 +177,7 @@ describe('screensaver', () => {
     expect(reached).toBe(1);
   });
 
-  it('opens again once when its session ends, and hides rather than looping', async () => {
+  it('opens again each time a session that showed something ends', async () => {
     const view = mount();
     view.show();
     await settle();
@@ -187,11 +187,28 @@ describe('screensaver', () => {
     sessions.invalidated(first);
     await settle();
     expect(sent('OpenScreenSaverUiSession').length).toBe(2);
-    expect(view.element.hidden).toBeFalse();
     const second = (sent('AttachUiSession')[1].payload as [{ sessionId: string }])[0].sessionId;
     sessions.treeUpdated(second, 1, clockTree);
 
     sessions.invalidated(second);
+    await settle();
+    expect(sent('OpenScreenSaverUiSession').length).toBe(3);
+    expect(view.isShowing()).toBeTrue();
+    expect(dismissed).toBe(0);
+  });
+
+  it('hides rather than looping when it loses its session again before anything was shown', async () => {
+    const view = mount();
+    view.show();
+    await settle();
+    sessions.treeUpdated(sessionId(), 1, clockTree);
+
+    sessions.clear();
+    await settle();
+    expect(sent('OpenScreenSaverUiSession').length).toBe(2);
+
+    sessions.treeUpdated('a-deck-widget', 1, clockTree);
+    sessions.clear();
     await settle();
     expect(sent('OpenScreenSaverUiSession').length).toBe(2);
     expect(view.isShowing()).toBeFalse();

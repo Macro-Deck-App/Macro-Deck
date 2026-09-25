@@ -1229,6 +1229,18 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				return HostCallbackResult.Ok();
 			}
 
+			case HostOperations.Ui.Reload:
+			{
+				var arguments = Deserialize<UiReloadArguments>(payload.Arguments);
+				if (arguments is null)
+				{
+					return MissingArguments();
+				}
+
+				_uiSessions.PublishReload(pluginId, arguments.SessionId);
+				return HostCallbackResult.Ok();
+			}
+
 			case HostOperations.Ui.RegisterResource:
 			case HostOperations.Ui.RemoveResource:
 				return RouteUiResource(pluginId, sessionId, payload);

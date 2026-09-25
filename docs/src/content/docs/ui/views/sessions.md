@@ -106,7 +106,7 @@ depend on a live connection. Declaring a surface does not commit you to every se
 | Snapshot | The host asks for a full tree when a client attaches and whenever it must resynchronise. | `BuildTree()` must describe the revision your emitted patches have reached. |
 | Patches | You raise `Changed`; the host drains. | Coalescing several changes into one raise is fine - the host drains rather than counts. A patch dropped in `DrainPatches` is lost to every attached client. |
 | Events | `Dispatch` delivers a client event, never concurrently for one session. | Reject an event by producing no patch. A throw faults the session. |
-| Close | The host disposes the session - at any time: a client leaving for good, a limit trip, or a fault. | Release what the session holds in `DisposeAsync`, including disposing its `UiView`. |
+| Close | The host disposes the session - at any time: a client leaving for good, a limit trip, a fault, or .NET Hot Reload updating your plugin, after which clients open a new session. | Release what the session holds in `DisposeAsync`, including disposing its `UiView`. |
 
 You never see who is attached, how many clients there are, or when one attaches: one code path serves one
 deck or several.

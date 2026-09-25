@@ -65,8 +65,10 @@ dotnet watch --non-interactive run --launch-profile "Macro Deck - Real Host"
 
 Run this from the plugin project directory and leave a [developer preview](/ui/views/developer-preview/#iterating-on-a-preview)
 open in Macro Deck. When you save, `dotnet watch` applies the change with .NET Hot Reload and the open
-preview updates in place. A change Hot Reload cannot apply restarts the plugin; without `--non-interactive`,
-`dotnet watch` asks first. The preview waits and reopens by itself, and the credential in
+preview updates in place. Widgets on the deck and open configuration views of your plugin are opened again
+with the new code, keeping unsaved configuration changes; see
+[Real views](/ui/views/developer-preview/#real-views). A change Hot Reload cannot apply restarts the plugin;
+without `--non-interactive`, `dotnet watch` asks first. The preview waits and reopens by itself, and the credential in
 `.macrodeck-dev-state` means no new pairing prompt.
 
 Rider and Visual Studio do the same with their Hot Reload button while debugging.
