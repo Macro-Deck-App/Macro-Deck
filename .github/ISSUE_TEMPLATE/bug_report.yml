@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        This tracker is for Macro Deck itself and built-in integrations. Problems with third-party plugins belong in the plugin's repository. For the Android or iOS companion app, use the **Companion app** form.
+        This tracker is for Macro Deck itself and built-in integrations. Problems with third-party plugins belong in the plugin's repository. For the Android or iOS companion app, use the **Companion app** form. For your Macro Deck account, sign-in or the Creator Portal, use **Account and Creator Portal**.
 
         For setup help or general support, please use the [Discord community](https://discord.macro-deck.app).
 
