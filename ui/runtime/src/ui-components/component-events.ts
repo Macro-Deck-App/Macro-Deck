@@ -24,6 +24,14 @@ export const UiComponentEvents = {
   Pinch: 'pinch',
 
   PinchEnd: 'pinch-end',
+
+  PointerDown: 'pointer-down',
+
+  PointerMove: 'pointer-move',
+
+  PointerUp: 'pointer-up',
+
+  Tap: 'tap',
 } as const;
 
 export const UI_COMPONENT_EVENTS_WELL_KNOWN: readonly string[] = Object.values(UiComponentEvents);

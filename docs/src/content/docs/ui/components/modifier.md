@@ -114,6 +114,90 @@ The constants live on `UiComponentModifiers` (`GestureSlop`, `SwipeMinDistance`,
   flow from a key.
 - `pinch` on iOS, and every gesture at the Safari 9 floor, is unverified.
 
+## Pointer streams and taps
+
+`drag`, `swipe` and `pinch` report a recognised gesture. For a surface that needs every finger - a touchpad,
+a drawing pad, a joystick - declare the pointer family instead:
+
+```csharp
+new UiModifier
+{
+    Key = "touchpad",
+    Events =
+    [
+        UiEventHandler.On(UiComponentEvents.PointerDown, e =>
+        {
+            if (e.TryGetPointerDown(out var down)) fingers[down.Sample.Id] = down.Sample;
+        }),
+        UiEventHandler.On(UiComponentEvents.PointerMove, e =>
+        {
+            if (!e.TryGetPointerSamples(out var samples)) return;
+            foreach (var sample in samples)
+            {
+                if (fingers.Count == 1 && fingers.TryGetValue(sample.Id, out var last))
+                    mouse.MoveBy(sample.X - last.X, sample.Y - last.Y);
+                fingers[sample.Id] = sample;
+            }
+        }),
+        UiEventHandler.On(UiComponentEvents.PointerUp, e =>
+        {
+            if (e.TryGetPointerUp(out var up)) fingers.Remove(up.Sample.Id);
+        }),
+        UiEventHandler.On(UiComponentEvents.Tap, e =>
+        {
+            if (e.TryGetTap(out var pointers)) mouse.Click(pointers == 2 ? MouseButton.Right : MouseButton.Left);
+        }),
+    ],
+    Child = new UiStack(),
+}
+```
+
+`fingers` is a `Dictionary<int, UiPointerSample>` the view keeps, and `mouse` stands for the plugin's own
+input code.
+
+| Event | Fires | Payload |
+|---|---|---|
+| `pointer-down` (`UiComponentEvents.PointerDown`) | A finger, pen or primary mouse button went down on the node. | `{"id":n,"x":n,"y":n,"t":n,"width":n,"height":n}` |
+| `pointer-move` (`UiComponentEvents.PointerMove`) | Pointers moved. At most every `16 ms`, carrying every position since the previous one, except that waiting samples are sent at once before any other event of the family. | `{"samples":[{"id":n,"x":n,"y":n,"t":n}, ...]}`, oldest first, at most `256` |
+| `pointer-up` (`UiComponentEvents.PointerUp`) | A pointer lifted, or the platform cancelled it. | `{"id":n,"x":n,"y":n,"t":n}`, plus `"cancelled":true` for a cancelled one |
+| `tap` (`UiComponentEvents.Tap`) | After the last `pointer-up` of a touch that took at most `400 ms` from the first finger down to the last finger up, in which no pointer travelled more than `0.04` of the basis and none was cancelled. | `{"pointers":n}`, the most fingers down at once |
+
+- **Ids.** `id` is an opaque integer that stays the same from a pointer's `pointer-down` to its `pointer-up`.
+  Every reader starts its ids at a random point, so two decks on one shared widget reporting the same id is
+  very unlikely, though not impossible.
+- **Positions** are relative to the node's top-left corner in basis fractions, `x` right-positive, `y`
+  down-positive; `width` and `height` on `pointer-down` give the node's size in the same unit. Inside a
+  rotated `ui.transform` they are in screen axes, as `drag` is.
+- **Time.** `t` is whole milliseconds since the first finger of the current touch went down, so samples of
+  different fingers line up.
+- **Order.** Waiting samples are always sent before any other event of the family, and `tap` after the last
+  `pointer-up`.
+- **A newer move may replace an older one.** While a `pointer-move` for the same node from the same client
+  is still waiting to be delivered, Macro Deck and the plugin runtime may drop it in favour of the newer one,
+  and a move the plugin could not take because it was busy or slow is dropped instead of ending the session.
+  A finger that appeared only in a dropped batch keeps its older position until it moves again or lifts.
+  Read time from `t`, never from the number of events.
+- **Handle `pointer-move` synchronously and do not rebuild the tree for each one.** An asynchronous handler
+  is started for every event and not awaited, so slow ones pile up and may finish out of order. UI updates
+  are limited to 30 a second (a burst of 90); a tree that changes on every move soon ends its session.
+- **`pointer-up` is not guaranteed after a connection ends.** One follows each `pointer-down` while the node
+  still declares it, is enabled and is in the tree. Nothing arrives after the client disconnects or leaves the
+  view, or when a stalled connection drops events: release whatever a finger holds when the session ends, and
+  do not keep a mouse button held for a finger that has sent nothing for a while.
+- **The node owns its fingers.** A pointer that starts on a node declaring any of the four belongs to it: an
+  ancestor's `drag`, `pinch` or press does not take it, the browser does not pan under it, and a `ui.list`
+  cannot be scrolled from a touch that starts there. Nested nodes: the innermost one owns the finger, so one
+  touch taps once.
+- **Buttons on a pad.** A finger that starts on a button inside the node is still streamed to the node, the
+  button still presses, and that touch sends no `tap`. A touch on a node that declares a press name itself
+  sends no `tap` either. Once a streamed finger travels past the slop, a press it started ends without
+  `press`, as with `drag`.
+- **Keys and hardware.** A tree declaring only the pointer family still runs the tile's own flow from a key
+  or a hardware deck; nothing is streamed from them. The interactive screensaver does not pass the pointer
+  to these nodes.
+- The constants are `UiComponentModifiers.PointerMoveIntervalMs`, `PointerMoveMaxSamples` and
+  `TapMaxDurationMs`. Below the Safari 9 floor the pointer family is unverified.
+
 ## Disabled
 
 ```csharp

@@ -90,9 +90,11 @@ internal abstract class UiSessionFixture
 
 	/// <summary>Registers an in-process integration that serves UI trees. Nothing else changes: the same
 	/// broker, resolver and transport serve it through the same session API a plugin is served through.</summary>
-	protected StubUiSession AddInProcessProvider(Func<UiTree> tree, string providerId = ProviderId)
+	protected StubUiSession AddInProcessProvider(Func<UiTree> tree,
+		string providerId = ProviderId,
+		ManualResetEventSlim? hold = null)
 	{
-		var session = new StubUiSession { Tree = tree };
+		var session = new StubUiSession { Tree = tree, Hold = hold };
 		Integrations.Add(new StubUiIntegration(providerId) { Session = session });
 		return session;
 	}

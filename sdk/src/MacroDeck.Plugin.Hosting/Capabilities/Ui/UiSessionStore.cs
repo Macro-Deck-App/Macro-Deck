@@ -1,12 +1,12 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
-using System.Threading.Channels;
 using MacroDeck.Plugin.Hosting.Logging;
 using MacroDeck.Plugin.Hosting.Transport;
 using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Callbacks.Ui;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Sdk.Ui;
+using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Events;
 using MacroDeck.Ui.Model.Patches;
 using MacroDeck.Ui.Model.Serialization;
@@ -68,14 +68,14 @@ internal sealed class UiSessionStore : IAsyncDisposable
 		return true;
 	}
 
-	public bool Dispatch(string sessionId, UiEvent uiEvent)
+	public bool Dispatch(string sessionId, UiEvent uiEvent, string? clientId = null)
 	{
 		if (!_sessions.TryGetValue(sessionId, out var live))
 		{
 			return false;
 		}
 
-		live.Dispatch(uiEvent);
+		live.Dispatch(uiEvent, clientId);
 		return true;
 	}
 
@@ -130,11 +130,7 @@ internal sealed class UiSessionStore : IAsyncDisposable
 		private readonly IUiSession _session;
 		private readonly string _surfaceKind;
 
-		private readonly Channel<(WorkKind Kind, UiEvent? Event)> _work =
-			Channel.CreateUnbounded<(WorkKind, UiEvent?)>(new UnboundedChannelOptions
-			{
-				SingleReader = true, AllowSynchronousContinuations = false
-			});
+		private readonly UiReplaceableWork<(WorkKind Kind, UiEvent? Event)> _work = new();
 
 		private Task? _pump;
 		private int _drainQueued;
@@ -155,15 +151,25 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			_pump = Task.Run(RunAsync);
 		}
 
-		public void RequestSnapshot() => _work.Writer.TryWrite((WorkKind.Snapshot, null));
+		public void RequestSnapshot() => _work.Write((WorkKind.Snapshot, null));
 
-		public void Dispatch(UiEvent uiEvent) => _work.Writer.TryWrite((WorkKind.Event, uiEvent));
+		public void Dispatch(UiEvent uiEvent, string? clientId)
+		{
+			if (string.Equals(uiEvent.Name, UiComponentEvents.PointerMove, StringComparison.Ordinal))
+			{
+				_work.WriteReplaceable((clientId ?? string.Empty) + "\n" + uiEvent.NodeId, (WorkKind.Event, uiEvent));
+			}
+			else
+			{
+				_work.Write((WorkKind.Event, uiEvent));
+			}
+		}
 
 		public void RequestReload()
 		{
 			if (_session is IRebuildableUiSession)
 			{
-				_work.Writer.TryWrite((WorkKind.Rebuild, null));
+				_work.Write((WorkKind.Rebuild, null));
 				return;
 			}
 
@@ -171,7 +177,7 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			// the code it was opened with.
 			if (!string.Equals(_surfaceKind, UiSurfaceKinds.Dialog, StringComparison.Ordinal))
 			{
-				_work.Writer.TryWrite((WorkKind.Reload, null));
+				_work.Write((WorkKind.Reload, null));
 			}
 		}
 
@@ -180,7 +186,7 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			_disposing = true;
 			_session.Changed -= OnChanged;
 			_session.Faulted -= OnFaulted;
-			_work.Writer.TryComplete();
+			_work.Complete();
 
 			if (_pump is { } pump)
 			{
@@ -204,7 +210,7 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			// would either lose patches or drain an empty session.
 			if (Interlocked.Exchange(ref _drainQueued, 1) == 0)
 			{
-				_work.Writer.TryWrite((WorkKind.Drain, null));
+				_work.Write((WorkKind.Drain, null));
 			}
 		}
 
@@ -215,7 +221,7 @@ internal sealed class UiSessionStore : IAsyncDisposable
 		{
 			try
 			{
-				await foreach (var (kind, uiEvent) in _work.Reader.ReadAllAsync().ConfigureAwait(false))
+				await foreach (var (kind, uiEvent) in _work.ReadAllAsync().ConfigureAwait(false))
 				{
 					await HandleAsync(kind, uiEvent).ConfigureAwait(false);
 				}

@@ -20,6 +20,18 @@ describe('node gesture walks', () => {
       }
     });
 
+    it('is taken by a tree that only streams pointers or taps', () => {
+      for (const name of ['pointer-down', 'pointer-move', 'pointer-up', 'tap']) {
+        const tree = node('root', 'ui.stack', {}, [node('surface', 'ui.modifier', { events: [name] })]);
+        expect(treeClaimsGesture(tree)).withContext(name).toBeTrue();
+      }
+    });
+
+    it('leaves a key or hardware activation of a pointer-only tree to the tile', () => {
+      const tree = node('root', 'ui.stack', {}, [node('surface', 'ui.modifier', { events: ['pointer-down', 'tap'] })]);
+      expect(activationClaim(tree)).toBe('none');
+    });
+
     it('is absorbed by a disabled region even when nothing enabled claims it', () => {
       expect(treeClaimsGesture(node('root', 'ui.stack', {}, [disabledRegion()]))).toBeTrue();
     });

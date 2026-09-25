@@ -91,6 +91,19 @@ public static class UiComponentModifiers
 	/// <summary>The shortest interval, in milliseconds, between two <see cref="UiComponentEvents.Drag" /> or
 	/// two <see cref="UiComponentEvents.Pinch" /> events from one gesture.</summary>
 	public const int GestureThrottleMs = 100;
+
+	/// <summary>The shortest interval, in milliseconds, between two <see cref="UiComponentEvents.PointerMove" />
+	/// events a reader sends for one node, other than the one it sends right before another event of the
+	/// pointer family.</summary>
+	public const int PointerMoveIntervalMs = 16;
+
+	/// <summary>The most samples one <see cref="UiComponentEvents.PointerMove" /> carries; a reader keeps the
+	/// newest.</summary>
+	public const int PointerMoveMaxSamples = 256;
+
+	/// <summary>The longest a contact may take, in milliseconds from the first finger down to the last finger
+	/// up, to count as a <see cref="UiComponentEvents.Tap" />.</summary>
+	public const int TapMaxDurationMs = 400;
 }
 
 /// <summary>The shapes a <see cref="UiComponents.Modifier" /> clips its child to.</summary>
