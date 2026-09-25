@@ -59,7 +59,7 @@ public sealed class IconImportService : IIconImportService
 		IAsyncEnumerable<IconImportFile> files,
 		CancellationToken cancellationToken)
 	{
-		var packResult = ResolveDestination(packId);
+		var packResult = await ResolveDestination(packId);
 		if (!packResult.Success)
 		{
 			return Result.Fail<IconImportBatchEntity, IconError>(packResult.Error!.Value, packResult.ErrorMessage);
@@ -143,7 +143,7 @@ public sealed class IconImportService : IIconImportService
 			return Result.Fail<IconImportBatchEntity, IconError>(IconError.ValidationError, "No path given");
 		}
 
-		var packResult = ResolveDestination(packId);
+		var packResult = await ResolveDestination(packId);
 		if (!packResult.Success)
 		{
 			return Result.Fail<IconImportBatchEntity, IconError>(packResult.Error!.Value, packResult.ErrorMessage);
@@ -300,7 +300,7 @@ public sealed class IconImportService : IIconImportService
 				$"{Path.GetFileName(file.FileName)} is not a supported image");
 		}
 
-		var packResult = ResolveDestination(packId);
+		var packResult = await ResolveDestination(packId);
 		if (!packResult.Success)
 		{
 			return Result.Fail<SingleIconImportResult, IconError>(packResult.Error!.Value, packResult.ErrorMessage);
@@ -474,7 +474,7 @@ public sealed class IconImportService : IIconImportService
 		await _mediator.Publish(new IconsAddedNotification(batch.Id, packId, icons), cancellationToken);
 	}
 
-	private Result<IconPackEntity, IconError> ResolveDestination(Guid? packId)
+	private async Task<Result<IconPackEntity, IconError>> ResolveDestination(Guid? packId)
 	{
 		var pack = packId is null ? _iconPackCache.GetDefaultPack() : _iconPackCache.GetPackById(packId.Value);
 		if (pack is null)
@@ -487,6 +487,7 @@ public sealed class IconImportService : IIconImportService
 			return Result.Fail<IconPackEntity, IconError>(IconError.PackReadOnly);
 		}
 
+		await _iconPackCache.ForgetSourceRevision(pack.Id);
 		return Result.Ok<IconPackEntity, IconError>(pack);
 	}
 

@@ -71,7 +71,8 @@ plain text.
 1. Validates the manifest with the same validator as [`validate`](/cli/validate/). Any error stops `pack`
    before a byte is written.
 2. Hashes every file under `--source` except `manifest.json`, the `--output` file and any `.macroDeckPlugin` file into a fresh `files[]`. Any `files[]` the source
-   manifest declared is discarded, never merged.
+   manifest declared is discarded, never merged. [Bundled icon packs](/reference/manifest/#bundled-icon-packs)
+   are payload files like any other, so they are hashed here too.
 3. Stops on a symlink, an unsafe path, or any artifact size or entry limit from the
    [`.macroDeckPlugin` artifact section](/reference/plugin-hosting/#the-macrodeckplugin-artifact).
 4. Writes the archive, creating the output directory if needed and saying so.

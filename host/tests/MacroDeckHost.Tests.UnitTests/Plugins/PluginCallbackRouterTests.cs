@@ -16,6 +16,7 @@ using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Capabilities;
+using MacroDeckHost.Application.Plugins.IconPacks;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Domain.Common;
@@ -56,13 +57,19 @@ public class PluginCallbackRouterTests
 		ScreenSaverRegistry? screenSavers = null,
 		WidgetTypeRegistry? widgetTypes = null,
 		IPluginUiResources? uiResources = null,
-		UiResourceCallbackThrottle? uiResourceThrottle = null)
+		UiResourceCallbackThrottle? uiResourceThrottle = null,
+		PluginSessionRegistry? sessionRegistry = null,
+		IUiSessionSink? uiSessions = null,
+		IPluginIconPackSync? iconPackSync = null,
+		IPluginIconPackUploads? iconPackUploads = null,
+		IPluginIconUiResources? pluginIconResources = null,
+		IPluginIconResolver? pluginIconResolver = null)
 	{
 		var services = new ServiceCollection();
 		services.AddSingleton<IVariableService>(variableService);
 		var scopeFactory = services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
 
-		return new PluginCallbackRouter(new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None),
+		return new PluginCallbackRouter(sessionRegistry ?? new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None),
 			invoker,
 			scopeFactory,
 			new FakeNotificationStore(),
@@ -72,7 +79,7 @@ public class PluginCallbackRouterTests
 			new FakeWidgetIconInvalidator(),
 			new FakeUserVariableApi(),
 			actionInteractions,
-			new NoOpUiSessionSink(),
+			uiSessions ?? new NoOpUiSessionSink(),
 			deviceRegistry ?? new FakePluginDeviceRegistry(),
 			new LayoutRegistry(new RecordingMediator()),
 			new FolderViewRegistry(new RecordingMediator()),
@@ -84,7 +91,11 @@ public class PluginCallbackRouterTests
 			lockState ?? new FakeHostLockState(),
 			Serilog.Core.Logger.None,
 			uiResources: uiResources,
-			uiResourceThrottle: uiResourceThrottle);
+			uiResourceThrottle: uiResourceThrottle,
+			iconPackSync: iconPackSync,
+			iconPackUploads: iconPackUploads,
+			pluginIconResources: pluginIconResources,
+			pluginIconResolver: pluginIconResolver);
 	}
 
 	[SetUp]
@@ -884,6 +895,226 @@ public class PluginCallbackRouterTests
 			CancellationToken.None);
 
 		Assert.That(result.Error, Is.Null);
+	}
+
+	// ---- icon packs ---------------------------------------------------------------------------
+
+	private const string IconPluginId = "com.example.logos";
+
+	private PluginCallbackRouter IconPackRouter(IconPacks.PluginIconPackTestHost host,
+		PluginIconPackUploads? uploads = null,
+		IUiSessionSink? uiSessions = null)
+		=> Router(_variableService,
+			_actionInteractions,
+			_invoker,
+			new HostCallbackThrottle(_time, 100, refillPerSecond: 100),
+			sessionRegistry: host.Sessions,
+			uiSessions: uiSessions,
+			iconPackSync: host.Sync,
+			iconPackUploads: uploads ?? new PluginIconPackUploads(new PluginAssetReceiverStub(), host.Sessions),
+			pluginIconResources: host.UiResources,
+			pluginIconResolver: host.Resolver);
+
+	private static Task CreateSession(IconPacks.PluginIconPackTestHost host, PluginSessionOrigin origin)
+		=> host.Sessions.Create(new PluginSessionRecord
+		{
+			SessionId = "session-1",
+			PluginId = IconPluginId,
+			DisplayName = "Logos",
+			Origin = origin,
+			NegotiatedVersion = 1,
+			Capabilities = new Dictionary<string, MacroDeck.Plugin.Protocol.Versioning.CapabilityNegotiationResult>(),
+			DeclaredCapabilities = [],
+			State = PluginSessionState.Connected,
+			CreatedAt = DateTimeOffset.UtcNow
+		});
+
+	private static HostInvokePayload SyncBundled(string key, byte[] archive)
+		=> new()
+		{
+			Api = HostApis.IconPacks,
+			Operation = HostOperations.IconPacks.SyncBundled,
+			Arguments = Arg(new MacroDeck.Plugin.Protocol.Callbacks.IconPacks.IconPackSyncArguments
+			{
+				Packs =
+				[
+					new MacroDeck.Plugin.Protocol.Callbacks.IconPacks.BundledIconPackDeclarationDto
+					{
+						Key = key,
+						ContentHash = MacroDeck.Plugin.Protocol.Assets.AssetContentHash.Compute(archive),
+						ByteLength = archive.Length
+					}
+				]
+			})
+		};
+
+	[Test]
+	public async Task Syncing_bundled_packs_is_refused_for_a_session_the_host_launched_itself()
+	{
+		using var host = new IconPacks.PluginIconPackTestHost();
+		await CreateSession(host, PluginSessionOrigin.Managed);
+		var router = IconPackRouter(host);
+
+		var result = await router.RouteAsync(IconPluginId,
+			"session-1",
+			"c1",
+			SyncBundled("logos", await host.BuildArchive("Logos", ("spotify", "green"))),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error?.Code, Is.EqualTo(ProtocolErrorCodes.IconPackSyncNotAllowed));
+			Assert.That(host.PluginPack(IconPluginId, "logos"), Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task A_development_session_uploads_what_the_host_asks_for_and_then_syncs_its_pack()
+	{
+		using var host = new IconPacks.PluginIconPackTestHost();
+		await CreateSession(host, PluginSessionOrigin.SelfRegistered);
+		var receiver = new MacroDeckHost.Application.Plugins.Assets.PluginAssetReceiver(new InMemoryPluginAssetCache());
+		var router = IconPackRouter(host, new PluginIconPackUploads(receiver, host.Sessions));
+		var archive = await host.BuildArchive("Logos", ("spotify", "green"));
+		var hash = MacroDeck.Plugin.Protocol.Assets.AssetContentHash.Compute(archive);
+
+		var first = await router.RouteAsync(IconPluginId, "session-1", "c1", SyncBundled("logos", archive), CancellationToken.None);
+		receiver.Begin(IconPluginId, "a1", MacroDeck.Plugin.Protocol.Assets.AssetKinds.IconPack, "application/zip", archive.Length, hash);
+		receiver.Chunk(IconPluginId, "a1", 0, archive);
+		receiver.Commit(IconPluginId, "a1");
+		var second = await router.RouteAsync(IconPluginId, "session-1", "c2", SyncBundled("logos", archive), CancellationToken.None);
+
+		var askedFor = first.Data?.Deserialize<MacroDeck.Plugin.Protocol.Callbacks.IconPacks.IconPackSyncResult>(PluginProtocolJson.Options);
+		var synced = second.Data?.Deserialize<MacroDeck.Plugin.Protocol.Callbacks.IconPacks.IconPackSyncResult>(PluginProtocolJson.Options);
+		Assert.Multiple(() =>
+		{
+			Assert.That(askedFor?.UploadRequired, Is.EqualTo(new[] { hash }));
+			Assert.That(second.Error, Is.Null);
+			Assert.That(synced?.Changed, Is.True);
+			Assert.That(host.PluginPack(IconPluginId, "logos"), Is.Not.Null);
+		});
+	}
+
+	[Test]
+	public async Task An_icon_pack_upload_from_a_session_the_host_launched_itself_is_not_kept()
+	{
+		using var host = new IconPacks.PluginIconPackTestHost();
+		await CreateSession(host, PluginSessionOrigin.Managed);
+		var receiver = new MacroDeckHost.Application.Plugins.Assets.PluginAssetReceiver(new InMemoryPluginAssetCache());
+		using var uploads = new PluginIconPackUploads(receiver, host.Sessions);
+		var archive = await host.BuildArchive("Logos", ("spotify", "green"));
+		var hash = MacroDeck.Plugin.Protocol.Assets.AssetContentHash.Compute(archive);
+
+		receiver.Begin(IconPluginId, "a1", MacroDeck.Plugin.Protocol.Assets.AssetKinds.IconPack, "application/zip", archive.Length, hash);
+		receiver.Chunk(IconPluginId, "a1", 0, archive);
+		receiver.Commit(IconPluginId, "a1");
+
+		Assert.That(uploads.Find(IconPluginId, hash), Is.Null);
+	}
+
+	[Test]
+	public async Task A_plugin_asks_for_its_own_icon_as_a_ui_resource_handle_and_an_unknown_one_is_not_found()
+	{
+		using var host = new IconPacks.PluginIconPackTestHost();
+		await host.SyncDevelopment(IconPluginId, ("logos", await host.BuildArchive("Logos", ("spotify", "green"))));
+		var router = IconPackRouter(host);
+
+		HostInvokePayload Get(string name) => new()
+		{
+			Api = HostApis.IconPacks,
+			Operation = HostOperations.IconPacks.GetIconResource,
+			Arguments = Arg(new MacroDeck.Plugin.Protocol.Callbacks.IconPacks.GetIconResourceArguments { Key = "logos", Name = name })
+		};
+
+		var found = await router.RouteAsync(IconPluginId, "session-1", "c1", Get("spotify"), CancellationToken.None);
+		var missing = await router.RouteAsync(IconPluginId, "session-1", "c2", Get("tidal"), CancellationToken.None);
+
+		var handle = found.Data?.Deserialize<UiResourceHandleDto>(PluginProtocolJson.Options);
+		Assert.Multiple(() =>
+		{
+			Assert.That(found.Error, Is.Null);
+			Assert.That(handle?.ResourceId, Does.StartWith(PluginIconReferences.ResourceOwnerId + "."));
+			Assert.That(missing.Error?.Code, Is.EqualTo(ProtocolErrorCodes.PluginIconNotFound));
+		});
+	}
+
+	[Test]
+	public async Task A_ui_snapshot_naming_a_plugin_icon_reaches_clients_as_an_icon_pack_reference()
+	{
+		using var host = new IconPacks.PluginIconPackTestHost();
+		await host.SyncDevelopment(IconPluginId, ("logos", await host.BuildArchive("Logos", ("spotify", "green"))));
+		var spotifyId = host.Icon(host.PluginPack(IconPluginId, "logos")!, "spotify").Id;
+		var sink = new CapturingUiSessionSink();
+		var router = IconPackRouter(host, uiSessions: sink);
+		using var tree = JsonDocument.Parse("""{"type":"image","source":{"type":"plugin-icon","reference":"logos/spotify"}}""");
+
+		await router.RouteAsync(IconPluginId,
+			"session-1",
+			"c1",
+			new HostInvokePayload
+			{
+				Api = HostApis.Ui,
+				Operation = HostOperations.Ui.Snapshot,
+				Arguments = Arg(new UiSnapshotArguments { SessionId = "ui-1", Tree = tree.RootElement.Clone() })
+			},
+			CancellationToken.None);
+
+		var source = sink.Snapshots.Single().ToElement().GetProperty("source");
+		Assert.Multiple(() =>
+		{
+			Assert.That(source.GetProperty("type").GetString(), Is.EqualTo("icon-pack"));
+			Assert.That(source.GetProperty("reference").GetString(), Is.EqualTo(spotifyId.ToString()));
+		});
+	}
+
+	private sealed class CapturingUiSessionSink : IUiSessionSink
+	{
+		public List<UiRawJson> Snapshots { get; } = [];
+
+		public UiSessionIngestResult PublishSnapshot(string providerId, string sessionId, UiRawJson tree)
+		{
+			Snapshots.Add(tree);
+			return UiSessionIngestResult.Accept();
+		}
+
+		public UiSessionIngestResult PublishPatch(string providerId, string sessionId, UiRawJson patch)
+			=> UiSessionIngestResult.Accept();
+
+		public void PublishFault(string providerId, string sessionId, string code, string? message)
+		{
+		}
+
+		public void PublishReload(string providerId, string sessionId)
+		{
+		}
+	}
+
+	private sealed class PluginAssetReceiverStub : MacroDeckHost.Application.Plugins.Assets.IPluginAssetReceiver
+	{
+		public event EventHandler<MacroDeckHost.Application.Plugins.Assets.AssetCommittedEventArgs>? AssetCommitted
+		{
+			add { }
+			remove { }
+		}
+
+		public MacroDeckHost.Application.Plugins.Assets.AssetOperationResult Begin(string pluginId,
+			string assetId,
+			string kind,
+			string mimeType,
+			int totalBytes,
+			string contentHash) => throw new NotSupportedException();
+
+		public MacroDeckHost.Application.Plugins.Assets.AssetOperationResult Chunk(string pluginId,
+			string assetId,
+			int index,
+			ReadOnlySpan<byte> data) => throw new NotSupportedException();
+
+		public MacroDeckHost.Application.Plugins.Assets.AssetOperationResult Commit(string pluginId, string assetId)
+			=> throw new NotSupportedException();
+
+		public void DropSession(string pluginId)
+		{
+		}
 	}
 
 	private static JsonElement Arg<T>(T value)

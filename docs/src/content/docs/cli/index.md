@@ -1,6 +1,6 @@
 ---
 title: Plugin CLI
-description: 'macrodeck-plugin: scaffold, build, validate, inspect, pack, merge, run, test and sign a Macro Deck plugin without installing a host.'
+description: 'macrodeck-plugin: scaffold, build, validate, inspect, pack, merge, bundle icon packs, run, test and sign a Macro Deck plugin without installing a host.'
 ---
 
 `macrodeck-plugin` scaffolds, builds, checks, runs and packages a Macro Deck plugin without Macro Deck
@@ -48,6 +48,7 @@ own infrastructure.
 | [`inspect`](/cli/inspect/) | Report what installing an artifact would find, without a running host. |
 | [`pack`](/cli/pack/) | Pack an existing payload directory into a `.macroDeckPlugin` artifact. |
 | [`merge`](/cli/merge/) | Merge packages built for different runtime identifiers into one package. |
+| [`icon-pack`](/cli/icon-pack/) | Bundle icon packs with the plugin project, list them and remove them. |
 | [`run`](/cli/run/) | Run a plugin against the running host or a disposable stub host. |
 | [`test`](/cli/test/) | Run the [conformance suite](/reference/conformance/) and write a text, JSON or Markdown report. |
 | [`keygen` / `sign` / `verify`](/cli/signing/) | Creator key pairs and package signatures, for artifacts distributed outside the Store. |
@@ -66,7 +67,7 @@ These work on every command, before or after the command name:
 `quiet` hides progress lines only. A command's result - a validation report, a conformance report, a
 plugin's own console output, any `error` or `warning` line - always prints.
 
-`--output` is not global. `validate` and `inspect` use it for a render format (`text`/`json`), `pack` and
+`--output` is not global. `validate`, `inspect` and `icon-pack list` use it for a render format (`text`/`json`), `pack` and
 `test` for a destination file, and `new`, `build`, `merge` and `keygen` for a destination directory.
 
 ## Errors and warnings

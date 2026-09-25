@@ -3654,8 +3654,15 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="IconPacks.LoadingIconPacks" xml:space="preserve">
     <value>Loading icon packs…</value>
   </data>
+  <data name="IconPacks.ManagedByPlugin" xml:space="preserve">
+    <value>Provided by {name} and updated with it</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="IconPacks.ManagedByStore" xml:space="preserve">
     <value>Managed by the Store</value>
+  </data>
+  <data name="IconPacks.ManagedByUnnamedPlugin" xml:space="preserve">
+    <value>Provided by a plugin and updated with it</value>
   </data>
   <data name="IconPacks.MoreImportOptions" xml:space="preserve">
     <value>More import options</value>
@@ -3746,6 +3753,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="IconPacks.SelectAnIconPackMessage" xml:space="preserve">
     <value>Choose a pack on the left to browse its icons.</value>
+  </data>
+  <data name="IconPacks.SourcePlugin" xml:space="preserve">
+    <value>Plugin</value>
   </data>
   <data name="IconPacks.SourceStore" xml:space="preserve">
     <value>Store</value>
@@ -11815,6 +11825,13 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Notifications.PluginAdbAccessRequestedMessage" xml:space="preserve">
     <value>{name} needs ADB to work with your Android devices, but plugins are currently not allowed to use ADB. Allow plugins to use ADB?</value>
     <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.PluginIconPackKept" xml:space="preserve">
+    <value>Icon pack kept</value>
+  </data>
+  <data name="Notifications.PluginIconPackKeptMessage" xml:space="preserve">
+    <value>{plugin} no longer provides the icon pack “{pack}”. Buttons or automations still use its icons, so it was kept, and you can now edit or delete it.</value>
+    <comment>[pack:string] [plugin:string]</comment>
   </data>
   <data name="Notifications.RestartToApplyNetwork" xml:space="preserve">
     <value>Restart to apply the new network settings</value>

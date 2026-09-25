@@ -23,7 +23,13 @@ public static class AssetKinds
 	/// </summary>
 	public const string UiResource = "ui-resource";
 
-	public static readonly IReadOnlyList<string> All = [Icon, Artwork, ActionIcon, UiResource];
+	/// <summary>
+	/// A <c>.macroDeckIconPack</c> archive a development session uploads for <c>icon-packs</c>/<c>sync-bundled</c>.
+	/// Held in memory only and bounded by <see cref="Limits.ProtocolLimits.MaxAssetBytes" />.
+	/// </summary>
+	public const string IconPack = "icon-pack";
+
+	public static readonly IReadOnlyList<string> All = [Icon, Artwork, ActionIcon, UiResource, IconPack];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);
 

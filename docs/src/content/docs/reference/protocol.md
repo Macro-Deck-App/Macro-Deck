@@ -250,6 +250,9 @@ keyed by `code`; localise from the code. `details` is a string-to-string map, at
 | `ADB_NOT_ALLOWED` | This plugin is not allowed to use ADB. |
 | `ADB_FAILED` | The ADB operation failed. |
 | `UI_RESOURCE_QUOTA_EXCEEDED` | The plugin's UI resource quota is exhausted. |
+| `PLUGIN_ICON_NOT_FOUND` | The plugin's bundled icon packs contain no such icon. |
+| `ICON_PACK_INVALID` | The icon pack archive is not usable. |
+| `ICON_PACK_SYNC_NOT_ALLOWED` | Only a self-registered development session can sync bundled icon packs. |
 
 The list is append-only within a major. The three `ADB_*` codes answer only the `adb` host API; see
 [the WebSocket reference](/reference/websocket/#adb). A `reason` in `details` refines a deliberately generic

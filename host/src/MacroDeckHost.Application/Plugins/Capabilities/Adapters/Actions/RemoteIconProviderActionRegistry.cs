@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using MacroDeckHost.Application.Plugins.Assets;
+using MacroDeckHost.Application.Plugins.IconPacks;
 
 namespace MacroDeckHost.Application.Plugins.Capabilities.Adapters.Actions;
 
@@ -23,6 +24,7 @@ public sealed class RemoteIconProviderActionRegistry
 	private readonly IRemotePluginSnapshotStore _snapshots;
 	private readonly IPluginCapabilityInvoker _invoker;
 	private readonly IPluginAssetCache _assetCache;
+	private readonly IPluginIconResolver? _pluginIcons;
 
 	private readonly ConcurrentDictionary<(string PluginId, string LocalId), RemoteIconProviderAction>
 		_adapters = new();
@@ -30,12 +32,22 @@ public sealed class RemoteIconProviderActionRegistry
 	public RemoteIconProviderActionRegistry(
 		IRemotePluginSnapshotStore snapshots,
 		IPluginCapabilityInvoker invoker,
-		IPluginAssetCache assetCache)
+		IPluginAssetCache assetCache,
+		IPluginIconResolver? pluginIcons = null)
 	{
 		_snapshots = snapshots;
 		_invoker = invoker;
 		_assetCache = assetCache;
+		_pluginIcons = pluginIcons;
 	}
+
+	public IReadOnlyList<string> GetIconProviderActionIds(string pluginId)
+		=> _snapshots.Has(pluginId)
+			? _snapshots.GetSnapshot(pluginId).Actions
+				.Where(action => action.ProvidesIcon)
+				.Select(action => action.LocalId)
+				.ToList()
+			: [];
 
 	public RemoteIconProviderAction? Resolve(string pluginId, string localId)
 	{
@@ -54,7 +66,7 @@ public sealed class RemoteIconProviderActionRegistry
 
 		return _adapters.GetOrAdd((pluginId, localId),
 			static (key, state) =>
-				new RemoteIconProviderAction(key.PluginId, key.LocalId, state.Invoker, state.AssetCache),
-			(Invoker: _invoker, AssetCache: _assetCache));
+				new RemoteIconProviderAction(key.PluginId, key.LocalId, state.Invoker, state.AssetCache, state.PluginIcons),
+			(Invoker: _invoker, AssetCache: _assetCache, PluginIcons: _pluginIcons));
 	}
 }

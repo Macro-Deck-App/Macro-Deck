@@ -29,6 +29,8 @@ export interface IpcIconPack {
   canDelete?: boolean;
   // Set for a pack the Store installed; absent from an older host.
   storePackageId?: string | null;
+  // The owning plugin's name for a pack a plugin provides; absent from an older host.
+  ownerName?: string | null;
   // Absent from an older host.
   aiAssets?: IconPackAiAssets;
 }

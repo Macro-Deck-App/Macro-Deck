@@ -15,6 +15,9 @@ internal sealed class UnsupportedUiResourceRegistry : IUiResourceRegistry
 	public Task RemoveAsync(string name, CancellationToken cancellationToken = default)
 		=> Task.FromException(Unsupported());
 
+	public Task<UiResource> GetPluginIconAsync(string key, string name, CancellationToken cancellationToken = default)
+		=> Task.FromException<UiResource>(Unsupported());
+
 	private static UiResourceException Unsupported()
 		=> new(UiResourceErrorCode.Unsupported, "This context cannot register UI resources.");
 }

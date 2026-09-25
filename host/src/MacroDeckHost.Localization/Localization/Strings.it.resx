@@ -3654,8 +3654,15 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="IconPacks.LoadingIconPacks" xml:space="preserve">
     <value>Caricamento pacchetti di icone…</value>
   </data>
+  <data name="IconPacks.ManagedByPlugin" xml:space="preserve">
+    <value>Fornito da {name} e aggiornato insieme al plugin</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="IconPacks.ManagedByStore" xml:space="preserve">
     <value>Gestito dallo Store</value>
+  </data>
+  <data name="IconPacks.ManagedByUnnamedPlugin" xml:space="preserve">
+    <value>Fornito da un plugin e aggiornato insieme a esso</value>
   </data>
   <data name="IconPacks.MoreImportOptions" xml:space="preserve">
     <value>Altre opzioni di importazione</value>
@@ -3746,6 +3753,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="IconPacks.SelectAnIconPackMessage" xml:space="preserve">
     <value>Scegli un pacchetto a sinistra per sfogliarne le icone.</value>
+  </data>
+  <data name="IconPacks.SourcePlugin" xml:space="preserve">
+    <value>Plugin</value>
   </data>
   <data name="IconPacks.SourceStore" xml:space="preserve">
     <value>Store</value>
@@ -11815,6 +11825,13 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Notifications.PluginAdbAccessRequestedMessage" xml:space="preserve">
     <value>{name} ha bisogno di ADB per lavorare con i tuoi dispositivi Android, ma al momento i plugin non possono usare ADB. Consentire ai plugin di usare ADB?</value>
     <comment>[name:string]</comment>
+  </data>
+  <data name="Notifications.PluginIconPackKept" xml:space="preserve">
+    <value>Pacchetto di icone mantenuto</value>
+  </data>
+  <data name="Notifications.PluginIconPackKeptMessage" xml:space="preserve">
+    <value>{plugin} non fornisce più il pacchetto di icone “{pack}”. Pulsanti o automazioni usano ancora le sue icone, quindi è stato mantenuto. Ora puoi modificarlo o eliminarlo.</value>
+    <comment>[pack:string] [plugin:string]</comment>
   </data>
   <data name="Notifications.RestartToApplyNetwork" xml:space="preserve">
     <value>Riavvia per applicare le nuove impostazioni di rete</value>

@@ -1,3 +1,4 @@
+using MacroDeck.Plugin.Cli.IconPacks;
 using MacroDeck.Plugin.Cli.Manifests;
 using MacroDeck.Plugin.Packaging.Manifest;
 
@@ -121,6 +122,8 @@ internal sealed record PluginInspectionReport
 
 	public required IReadOnlyList<InspectedRelationship> IconPacks { get; init; }
 
+	public IReadOnlyList<InspectedBundledIconPack> BundledIconPacks { get; init; } = [];
+
 	public InspectedCompatibility? Compatibility { get; init; }
 
 	public InspectedSignature? Signature { get; init; }
@@ -159,7 +162,8 @@ internal sealed record PluginInspectionReport
 		long totalUncompressedBytes,
 		long? archiveBytes,
 		IReadOnlySet<string>? presentEntryNames,
-		string subjectNoun = "artifact")
+		string subjectNoun = "artifact",
+		BundledIconPackInspectionResult? bundledIconPacks = null)
 	{
 		var entrypoints = manifest.Entrypoints
 			.Select(pair => new InspectedEntrypoint
@@ -176,9 +180,11 @@ internal sealed record PluginInspectionReport
 			.OrderBy(entrypoint => entrypoint.Rid, StringComparer.Ordinal)
 			.ToList();
 
-		var warnings = presentEntryNames is null
-			? []
-			: EntrypointPresence.Missing(manifest, presentEntryNames, subjectNoun);
+		var warnings = (presentEntryNames is null
+				? []
+				: EntrypointPresence.Missing(manifest, presentEntryNames, subjectNoun))
+			.Concat(bundledIconPacks?.Warnings ?? [])
+			.ToList();
 
 		var permissions = (manifest.Permissions ?? [])
 			.Select(permission => new InspectedPermission
@@ -219,6 +225,7 @@ internal sealed record PluginInspectionReport
 			Dependencies = dependencies,
 			Conflicts = conflicts,
 			IconPacks = iconPacks,
+			BundledIconPacks = bundledIconPacks?.Packs ?? [],
 			Compatibility = compatibility,
 			Signature = signature,
 			EntryCount = entryCount,

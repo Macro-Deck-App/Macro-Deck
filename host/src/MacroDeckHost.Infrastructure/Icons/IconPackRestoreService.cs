@@ -51,7 +51,8 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 
 	public async Task<Result<IconPackEntity, IconError>> RestoreAsNewPack(string fileName,
 		Stream content,
-		CancellationToken cancellationToken)
+		CancellationToken cancellationToken,
+		IconPackSourceStamp? stamp = null)
 	{
 		var tempPath = await StageToTempFile(content, cancellationToken);
 		try
@@ -75,7 +76,9 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 				Author = manifest.Author,
 				Version = manifest.Version,
 				AiAssets = IconPackAiDeclarations.FromManifest(manifest.Ai),
-				SourceType = IconPackSourceType.MacroDeckImport,
+				SourceType = stamp?.SourceType ?? IconPackSourceType.MacroDeckImport,
+				SourceId = stamp?.SourceId,
+				SourceRevision = stamp?.SourceRevision,
 				CreatedAt = DateTime.UtcNow,
 				UpdatedAt = DateTime.UtcNow
 			};
@@ -148,6 +151,7 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 			}
 
 			await _iconPackCache.AddIcons(packId, icons);
+			await _iconPackCache.ForgetSourceRevision(packId);
 			var aiAssets = IconPackAiDeclarations.Merge(pack.AiAssets, IconPackAiDeclarations.FromManifest(manifestResult.Data!.Ai));
 			if (icons.Count > 0 && aiAssets != pack.AiAssets)
 			{
@@ -295,6 +299,218 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 		{
 			TryDeleteTempFile(tempPath);
 		}
+	}
+
+	public async Task<Result<IconPackReplaceOutcome, IconError>> ReplaceFromSource(Guid packId,
+		string fileName,
+		Stream content,
+		IconPackSourceStamp stamp,
+		IReadOnlySet<Guid> iconsInUse,
+		CancellationToken cancellationToken)
+	{
+		var pack = _iconPackCache.GetPackById(packId);
+		if (pack is null)
+		{
+			return Result.Fail<IconPackReplaceOutcome, IconError>(IconError.PackNotFound);
+		}
+
+		var tempPath = await StageToTempFile(content, cancellationToken);
+		try
+		{
+			await using var archive = await ZipFile.OpenReadAsync(tempPath, cancellationToken);
+			var manifestResult = ReadManifest(archive, fileName);
+			if (!manifestResult.Success)
+			{
+				return Result.Fail<IconPackReplaceOutcome, IconError>(manifestResult.Error!.Value,
+					manifestResult.ErrorMessage);
+			}
+
+			var manifest = manifestResult.Data!;
+			var variantsByIconId = IndexVariantEntries(archive);
+			var unmatched = _iconPackCache.GetIconsByPackId(packId).OrderBy(icon => icon.CreatedAt).ToList();
+			var added = new List<IconEntity>();
+			var updated = new List<IconEntity>();
+			var seenNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+			foreach (var entry in manifest.Icons)
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+				if (!seenNames.Add(entry.Name) ||
+					!variantsByIconId.TryGetValue(entry.Id, out var variants) ||
+					!variants.TryGetValue(IconVariants.Master, out var masterEntry))
+				{
+					continue;
+				}
+
+				// Names are the identity; the archive id only finds an icon the user renamed since the same
+				// archive was applied, since every fresh export of a local pack mints new ids.
+				var existing = unmatched.FirstOrDefault(icon =>
+						string.Equals(icon.Name, entry.Name, StringComparison.OrdinalIgnoreCase)) ??
+					unmatched.FirstOrDefault(icon => icon.SourceIconId == entry.Id &&
+						!manifest.Icons.Any(other => string.Equals(other.Name, icon.Name, StringComparison.OrdinalIgnoreCase)));
+				if (existing is not null)
+				{
+					unmatched.Remove(existing);
+				}
+
+				var incomingMaster = await HashEntry(masterEntry, cancellationToken);
+				var declared = ContentHash.Normalize(entry.MasterContentHash);
+				if (declared is not null && declared != incomingMaster)
+				{
+					_logger.Warning("Icon {Name} in pack archive {FileName} fails its declared master hash; skipping",
+						entry.Name,
+						fileName);
+					continue;
+				}
+
+				if (existing is not null &&
+					existing.ProcessingState == IconProcessingState.Ready &&
+					existing.MasterContentHash == incomingMaster)
+				{
+					if (!string.Equals(existing.Name, entry.Name, StringComparison.Ordinal))
+					{
+						existing.Name = entry.Name;
+						existing.UpdatedAt = DateTime.UtcNow;
+						await _iconPackCache.UpdateIcon(existing);
+						updated.Add(existing);
+					}
+
+					continue;
+				}
+
+				var icon = existing ??
+					new IconEntity
+					{
+						Id = Guid.CreateVersion7(),
+						PackId = packId,
+						Name = entry.Name,
+						CreatedAt = DateTime.UtcNow
+					};
+
+				var master = await WriteVariants(variants, packId, icon.Id, entry, cancellationToken);
+				if (master is null)
+				{
+					if (existing is null)
+					{
+						_storage.DeleteIconFiles(packId, icon.Id);
+					}
+
+					continue;
+				}
+
+				ApplyEntry(icon, entry, variants, master);
+				if (existing is null)
+				{
+					added.Add(icon);
+				}
+				else
+				{
+					await _iconPackCache.UpdateIcon(icon);
+					updated.Add(icon);
+				}
+			}
+
+			if (added.Count > 0)
+			{
+				await _iconPackCache.AddIcons(packId, added);
+			}
+
+			var dropped = unmatched.Where(icon => !iconsInUse.Contains(icon.Id)).ToList();
+			if (dropped.Count > 0)
+			{
+				await _iconPackCache.RemoveIcons(packId, dropped.Select(icon => icon.Id).ToList());
+				foreach (var icon in dropped)
+				{
+					_storage.DeleteIconFiles(packId, icon.Id);
+				}
+			}
+
+			pack.Name = string.IsNullOrWhiteSpace(manifest.Name) ? pack.Name : manifest.Name.Trim();
+			pack.Description = manifest.Description;
+			pack.Author = manifest.Author;
+			pack.Version = manifest.Version;
+			pack.AiAssets = IconPackAiDeclarations.FromManifest(manifest.Ai);
+			pack.SourceType = stamp.SourceType;
+			pack.SourceId = stamp.SourceId;
+			pack.SourceRevision = stamp.SourceRevision;
+			pack.UpdatedAt = DateTime.UtcNow;
+			await _iconPackCache.AddOrUpdatePack(pack);
+
+			foreach (var icon in updated)
+			{
+				await _mediator.Publish(new IconUpdatedNotification(icon), cancellationToken);
+			}
+
+			foreach (var icon in dropped)
+			{
+				await _mediator.Publish(new IconDeletedNotification(icon.Id, packId), cancellationToken);
+			}
+
+			if (added.Count > 0)
+			{
+				await _mediator.Publish(new IconsAddedNotification(null, packId, added), cancellationToken);
+			}
+
+			await _mediator.Publish(new IconPackUpdatedNotification(pack, _iconPackCache.GetIconCount(packId)),
+				cancellationToken);
+
+			return Result.Ok<IconPackReplaceOutcome, IconError>(new IconPackReplaceOutcome(pack,
+				IconsChanged: added.Count > 0 || updated.Count > 0 || dropped.Count > 0,
+				KeptInUse: unmatched.Count - dropped.Count));
+		}
+		catch (InvalidDataException)
+		{
+			return Result.Fail<IconPackReplaceOutcome, IconError>(IconError.InvalidArchive,
+				"The file is not a valid .macroDeckIconPack archive");
+		}
+		catch (Exception ex) when (ex is not OperationCanceledException)
+		{
+			_logger.Error(ex, "Failed to replace icon pack {PackId} from {FileName}", packId, fileName);
+			return Result.Fail<IconPackReplaceOutcome, IconError>(IconError.StorageFailure);
+		}
+		finally
+		{
+			TryDeleteTempFile(tempPath);
+		}
+	}
+
+	private static async Task<string> HashEntry(ZipArchiveEntry entry, CancellationToken cancellationToken)
+	{
+		await using var stream = await entry.OpenAsync(cancellationToken);
+		using var hash = ContentHash.CreateIncremental();
+		var buffer = new byte[81_920];
+		int read;
+		while ((read = await stream.ReadAsync(buffer, cancellationToken)) > 0)
+		{
+			hash.Append(buffer.AsSpan(0, read));
+		}
+
+		return hash.Finish();
+	}
+
+	private static void ApplyEntry(IconEntity icon,
+		IconManifestEntry entry,
+		Dictionary<string, ZipArchiveEntry> variants,
+		string master)
+	{
+		icon.Name = entry.Name;
+		icon.Width = entry.Width;
+		icon.Height = entry.Height;
+		icon.IsAnimated = entry.IsAnimated;
+		icon.FrameCount = entry.FrameCount;
+		icon.SourceIconId = entry.Id;
+		icon.DeclaredSourceContentHash = ContentHash.Normalize(entry.SourceContentHash ?? entry.Checksum);
+		icon.OriginalFileName = entry.OriginalFileName;
+		icon.OriginalFormat = entry.OriginalFormat;
+		icon.ProcessingState = IconProcessingState.Ready;
+		icon.ProcessingError = null;
+		icon.MasterContentHash = master;
+		icon.AvailableSizes = variants.Keys
+			.Where(variant => variant != IconVariants.Master)
+			.Select(int.Parse)
+			.Order()
+			.ToList();
+		icon.UpdatedAt = DateTime.UtcNow;
 	}
 
 	// Packs installed before the source id was recorded still correlate, by the source hash the archive

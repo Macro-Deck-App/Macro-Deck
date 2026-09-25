@@ -131,6 +131,46 @@ public class PluginEnvironmentComposerTests
 		});
 	}
 
+	[TestCase(false, "sync")]
+	[TestCase(true, "watch")]
+	public void A_self_registering_launch_against_a_real_host_asks_the_plugin_to_sync_its_bundled_icon_packs(
+		bool watch,
+		string expected)
+	{
+		var environment = PluginEnvironmentComposer.Compose(SelfRegisteringRequest() with
+		{
+			RealHost = true,
+			Watch = watch
+		});
+
+		Assert.That(environment["MACRO_DECK_PLUGIN_BUNDLED_ICON_PACKS"], Is.EqualTo(expected));
+	}
+
+	[Test]
+	public void A_project_launch_points_the_bundled_icon_pack_sync_at_the_project_directory()
+	{
+		var environment = PluginEnvironmentComposer.Compose(SelfRegisteringRequest() with
+		{
+			RealHost = true,
+			BundledIconPacksRoot = "/work/plugin"
+		});
+
+		Assert.That(environment["MACRO_DECK_PLUGIN_BUNDLED_ICON_PACKS_ROOT"], Is.EqualTo("/work/plugin"));
+	}
+
+	[Test]
+	public void Bundled_icon_packs_are_never_synced_against_the_stub_host_or_in_managed_mode()
+	{
+		var stub = PluginEnvironmentComposer.Compose(SelfRegisteringRequest() with { Watch = true });
+		var managed = PluginEnvironmentComposer.Compose(ManagedRequest() with { RealHost = true, Watch = true });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(stub.ContainsKey("MACRO_DECK_PLUGIN_BUNDLED_ICON_PACKS"), Is.False);
+			Assert.That(managed.ContainsKey("MACRO_DECK_PLUGIN_BUNDLED_ICON_PACKS"), Is.False);
+		});
+	}
+
 	[Test]
 	public void Every_inherited_macro_deck_plugin_and_aspnetcore_urls_variable_is_scrubbed()
 	{

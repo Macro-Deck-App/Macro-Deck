@@ -126,6 +126,22 @@ public static class HostOperations
 		public static readonly IReadOnlyList<string> All = [Snapshot, Patch, Fault, Reload, RegisterResource, RemoveResource];
 	}
 
+	public static class IconPacks
+	{
+		/// <summary>Replaces the calling development session's bundled icon packs with the complete declared
+		/// set: adds, replaces and removes packs by key. Answers <c>uploadRequired</c> with the content hashes
+		/// the host does not hold yet; the plugin uploads them as kind <c>icon-pack</c> and syncs again.
+		/// Refused with <c>ICON_PACK_SYNC_NOT_ALLOWED</c> unless the session is self-registered.</summary>
+		public const string SyncBundled = "sync-bundled";
+
+		/// <summary>Answers a UI resource handle for one icon of the calling plugin's bundled packs, by pack key
+		/// and icon name. The handle is served by the host's icon store, uses no UI resource quota and stays
+		/// valid across host restarts. Unknown key or name: <c>PLUGIN_ICON_NOT_FOUND</c>.</summary>
+		public const string GetIconResource = "get-icon-resource";
+
+		public static readonly IReadOnlyList<string> All = [SyncBundled, GetIconResource];
+	}
+
 	public static class Devices
 	{
 		public const string Register = "register";
@@ -290,6 +306,7 @@ public static class HostOperations
 			[HostApis.EventBindings] = EventBindings.All,
 			[HostApis.Adb] = Adb.All,
 			[HostApis.Messaging] = Messaging.All,
+			[HostApis.IconPacks] = IconPacks.All,
 		};
 
 	public static IReadOnlyList<string> For(string api) => _byApi[api];

@@ -134,6 +134,30 @@ internal static class HostingLog
 	public static void IconPublishFailed(this ILogger logger, Exception exception)
 		=> logger.Warning(exception, "Publishing the integration icon failed.");
 
+	public static void BundledIconPacksSynced(this ILogger logger, int count, bool changed)
+	{
+		if (changed)
+		{
+			logger.Information("Synced {Count} bundled icon pack(s) to the host.", count);
+		}
+		else
+		{
+			logger.Debug("The host already holds the {Count} bundled icon pack(s).", count);
+		}
+	}
+
+	public static void BundledIconPackSyncSkipped(this ILogger logger, string reason)
+		=> logger.Warning("The bundled icon packs were not synced: {Reason}", reason);
+
+	public static void BundledIconPacksUnsupported(this ILogger logger)
+		=> logger.Warning("The host does not support bundled icon packs, so they are not synced while this plugin runs.");
+
+	public static void BundledIconPackSyncRefused(this ILogger logger, string code, string message)
+		=> logger.Warning("The host refused to sync the bundled icon packs ({Code}): {Message}", code, message);
+
+	public static void BundledIconPackSyncFailed(this ILogger logger, Exception exception)
+		=> logger.Warning(exception, "Syncing the bundled icon packs failed.");
+
 	public static void CatalogChangeNotifyFailed(this ILogger logger, string kind, Exception exception)
 		=> logger.Debug(exception, "Failed to notify the host that the '{Kind}' catalogue changed.", kind);
 

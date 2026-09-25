@@ -195,6 +195,11 @@ public sealed class PluginManifestReader : IPluginManifestReader
 			return iconPackError;
 		}
 
+		if (ValidateBundledIconPacks(manifest) is { } bundledIconPackError)
+		{
+			return bundledIconPackError;
+		}
+
 		if (ValidatePermissions(manifest) is { } permissionError)
 		{
 			return permissionError;
@@ -458,6 +463,55 @@ public sealed class PluginManifestReader : IPluginManifestReader
 			{
 				return PluginManifestReadResult.Fail(PluginManifestError.InvalidDependency,
 					$"Icon pack id '{iconPack.Id}' is declared more than once.");
+			}
+		}
+
+		return null;
+	}
+
+	private static PluginManifestReadResult? ValidateBundledIconPacks(PluginManifest manifest)
+	{
+		if (manifest.BundledIconPacks is not { } packs)
+		{
+			return null;
+		}
+
+		if (packs.Count > PluginBundledIconPacks.MaxCount)
+		{
+			return PluginManifestReadResult.Fail(PluginManifestError.InvalidBundledIconPack,
+				$"At most {PluginBundledIconPacks.MaxCount} bundled icon packs can be declared.");
+		}
+
+		var seenKeys = new HashSet<string>(StringComparer.Ordinal);
+		var seenPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+		foreach (var pack in packs)
+		{
+			if (pack is null || !PluginBundledIconPacks.IsValidKey(pack.Key))
+			{
+				return PluginManifestReadResult.Fail(PluginManifestError.InvalidBundledIconPack,
+					$"Bundled icon pack key '{pack?.Key}' must be lowercase letters, digits and inner hyphens, " +
+					$"at most {PluginBundledIconPacks.MaxKeyLength} characters.");
+			}
+
+			if (pack.Path is null ||
+				!IsSafeRelativeForwardSlashPath(pack.Path) ||
+				!pack.Path.EndsWith(PluginBundledIconPacks.FileExtension, StringComparison.OrdinalIgnoreCase))
+			{
+				return PluginManifestReadResult.Fail(PluginManifestError.InvalidBundledIconPack,
+					$"Bundled icon pack '{pack.Key}' path '{pack.Path}' must be a safe relative path ending in " +
+					$"{PluginBundledIconPacks.FileExtension}.");
+			}
+
+			if (!seenKeys.Add(pack.Key))
+			{
+				return PluginManifestReadResult.Fail(PluginManifestError.InvalidBundledIconPack,
+					$"Bundled icon pack key '{pack.Key}' is declared more than once.");
+			}
+
+			if (!seenPaths.Add(pack.Path))
+			{
+				return PluginManifestReadResult.Fail(PluginManifestError.InvalidBundledIconPack,
+					$"Bundled icon pack path '{pack.Path}' is declared more than once.");
 			}
 		}
 

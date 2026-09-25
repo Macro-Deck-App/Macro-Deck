@@ -868,6 +868,73 @@ public class PluginBuilderTests
 		}
 	}
 
+	[Test]
+	public async Task A_declared_bundled_icon_pack_is_packaged_and_covered_by_the_file_list()
+	{
+		var rids = ManifestFixtures.PickForeignRids(1);
+		var project = BuildFixtures.WriteProject(rids);
+
+		try
+		{
+			IconPackFixtures.Write(Path.Combine(project, "icon-packs", "logos.macroDeckIconPack"), "Logos", ["obs"]);
+			var manifestPath = Path.Combine(project, "manifest.json");
+			var manifest = JsonNode.Parse(await File.ReadAllTextAsync(manifestPath))!.AsObject();
+			manifest["bundledIconPacks"] = new JsonArray(new JsonObject
+				{ ["key"] = "logos", ["path"] = "icon-packs/logos.macroDeckIconPack" });
+			await File.WriteAllTextAsync(manifestPath, manifest.ToJsonString());
+
+			var runner = new FakePluginBuildRunner { OnRun = BuildFixtures.ProducingOutput(project, rids) };
+
+			var result = await BuildAsync(project, runner);
+			var entries = ArtifactEntries(result.Pack!.OutputPath!);
+			using var packaged = ReadPackagedManifest(result.Pack.OutputPath!);
+			var files = packaged.RootElement.GetProperty("files").EnumerateArray()
+				.Select(file => file.GetProperty("path").GetString())
+				.ToList();
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(result.Success, Is.True, result.FailureMessage);
+				Assert.That(entries, Does.Contain("icon-packs/logos.macroDeckIconPack"));
+				Assert.That(files, Does.Contain("icon-packs/logos.macroDeckIconPack"));
+				Assert.That(packaged.RootElement.GetProperty("bundledIconPacks")[0].GetProperty("key").GetString(),
+					Is.EqualTo("logos"));
+				Assert.That(result.Warnings.Select(warning => warning.Message), Has.None.Contains("icon-packs/"));
+			});
+		}
+		finally
+		{
+			Delete(project);
+		}
+	}
+
+	[Test]
+	public async Task A_declared_bundled_icon_pack_missing_from_the_project_is_reported()
+	{
+		var rids = ManifestFixtures.PickForeignRids(1);
+		var project = BuildFixtures.WriteProject(rids);
+
+		try
+		{
+			var manifestPath = Path.Combine(project, "manifest.json");
+			var manifest = JsonNode.Parse(await File.ReadAllTextAsync(manifestPath))!.AsObject();
+			manifest["bundledIconPacks"] = new JsonArray(new JsonObject
+				{ ["key"] = "logos", ["path"] = "icon-packs/logos.macroDeckIconPack" });
+			await File.WriteAllTextAsync(manifestPath, manifest.ToJsonString());
+
+			var runner = new FakePluginBuildRunner { OnRun = BuildFixtures.ProducingOutput(project, rids) };
+
+			var result = await BuildAsync(project, runner);
+
+			Assert.That(result.Warnings.Select(warning => warning.Message),
+				Has.Some.Contains("icon-packs/logos.macroDeckIconPack"));
+		}
+		finally
+		{
+			Delete(project);
+		}
+	}
+
 	private Task<PluginBuildResult> BuildAsync(string project,
 		IPluginBuildRunner runner,
 		string? rid = null,

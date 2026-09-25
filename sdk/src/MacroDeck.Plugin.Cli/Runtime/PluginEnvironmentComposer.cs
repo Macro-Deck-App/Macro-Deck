@@ -90,6 +90,12 @@ internal static class PluginEnvironmentComposer
 			values[$"{Section}:EnrollmentToken"] = request.EnrollmentToken;
 			values[$"{Section}:StateDirectory"] = request.StateDirectory;
 			values[$"{Section}:PairingEnabled"] = request.PairingEnabled ? "true" : "false";
+
+			if (request.RealHost)
+			{
+				values[$"{Section}:BundledIconPacks"] = request.Watch ? "watch" : "sync";
+				values[$"{Section}:BundledIconPacksRoot"] = request.BundledIconPacksRoot;
+			}
 		}
 
 		return values;

@@ -100,6 +100,7 @@ internal sealed class PluginManifestSchemaTests
 	[TestCase("compatibility", typeof(PluginCompatibility))]
 	[TestCase("dependency", typeof(PluginDependency))]
 	[TestCase("iconPackReference", typeof(PluginIconPackReference))]
+	[TestCase("bundledIconPack", typeof(PluginBundledIconPack))]
 	[TestCase("fileDigest", typeof(PluginFileDigest))]
 	[TestCase("signature", typeof(PluginSignature))]
 	[TestCase("shutdownSettings", typeof(PluginShutdownSettings))]
@@ -139,6 +140,7 @@ internal sealed class PluginManifestSchemaTests
 	[TestCase("publisher", typeof(PluginPublisher))]
 	[TestCase("dependency", typeof(PluginDependency))]
 	[TestCase("iconPackReference", typeof(PluginIconPackReference))]
+	[TestCase("bundledIconPack", typeof(PluginBundledIconPack))]
 	[TestCase("fileDigest", typeof(PluginFileDigest))]
 	[TestCase("signature", typeof(PluginSignature))]
 	public void Each_nested_objects_required_set_matches_its_models_required_members(string definitionName,

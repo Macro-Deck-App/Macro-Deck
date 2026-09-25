@@ -130,6 +130,25 @@ pair once per `run --watch`; pass `--state-directory` to keep the credential acr
 `--watch` needs `--project` (`watch-needs-project`, exit 2) and a real host (`watch-needs-real-host`, exit 2):
 the stub host has no previews to follow the plugin.
 
+## Bundled icon packs
+
+A self-registered session against a real host brings the host's copy of the plugin's
+[bundled icon packs](/reference/manifest/#bundled-icon-packs) in line with `manifest.json` when the session
+starts: packs are added, replaced or removed by key, so the icons are in the icon picker and on buttons
+without installing the plugin.
+
+With `--watch`, `run` also watches `icon-packs/` and the manifest's `bundledIconPacks`. An
+[`icon-pack add`](/cli/icon-pack/) or `remove`, or a replaced pack file, is synced right away without
+restarting the plugin, buttons re-render with the new icons, and open plugin views reload.
+
+- Only self-registered sessions sync. Nothing is synced against `--stub-host` or in managed mode.
+- A pack larger than 8 MiB cannot be synced live. Build and install the plugin to try it.
+- `run` asks the plugin to sync through `MACRO_DECK_PLUGIN_BUNDLED_ICON_PACKS` (`sync`, or `watch` with
+  `--watch`). A host that predates bundled icon packs answers that it does not support them, and the plugin
+  runs on without them.
+- With `--project`, `run` also sets `MACRO_DECK_PLUGIN_BUNDLED_ICON_PACKS_ROOT` to the project directory, so
+  the packs are read from the project even though the plugin runs from its build output.
+
 ## Pairing with a real host
 
 **`self-registering` is the default, and the only mode a real host accepts.** A managed launch needs a
@@ -169,6 +188,8 @@ one-time enrollment and IDE profile in
 Every inherited `MACRO_DECK_PLUGIN_*` variable and `ASPNETCORE_URLS` is scrubbed, then set fresh for the
 resolved mode, mirroring
 [what the supervisor injects](/reference/plugin-hosting/#what-the-supervisor-injects).
+Against a real host in self-registering mode `run` also sets `MACRO_DECK_PLUGIN_BUNDLED_ICON_PACKS` (see
+[Bundled icon packs](#bundled-icon-packs)), which the supervisor never sets.
 
 In managed mode, `MACRO_DECK_PLUGIN_ID` comes from the `manifest.json` next to the launch target, because
 the host rejects an injected id that disagrees with the manifest. `--plugin-id` overrides it. Only when

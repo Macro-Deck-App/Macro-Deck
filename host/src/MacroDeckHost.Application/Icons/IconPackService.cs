@@ -90,6 +90,7 @@ public class IconPackService : IIconPackService
 		pack.Author = NormalizeOptional(author);
 		pack.Version = NormalizeOptional(version);
 		pack.AiAssets = aiAssets ?? pack.AiAssets;
+		pack.SourceRevision = null;
 		await _iconPackCache.AddOrUpdatePack(pack);
 		await _mediator.Publish(new IconPackUpdatedNotification(pack, _iconPackCache.GetIconCount(pack.Id)));
 		return Result.Ok<IconPackEntity, IconPackError>(pack);

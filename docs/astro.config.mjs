@@ -214,6 +214,7 @@ export default defineConfig({
 										{ label: 'inspect', slug: 'cli/inspect' },
 										{ label: 'pack', slug: 'cli/pack' },
 										{ label: 'merge', slug: 'cli/merge' },
+										{ label: 'icon-pack', slug: 'cli/icon-pack' },
 										{ label: 'run', slug: 'cli/run' },
 										{ label: 'test', slug: 'cli/test' },
 										'cli/signing',

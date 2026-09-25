@@ -29,7 +29,8 @@ public static class IconMapper
 			IconCount = iconCount,
 			OwnerKind = owner.Kind.ToString(),
 			CanDelete = owner.CanRemove && !entity.IsReadOnly,
-			StorePackageId = owner.Kind == IconPackOwnerKind.Store ? entity.SourceId : null
+			StorePackageId = owner.Kind == IconPackOwnerKind.Store ? entity.SourceId : null,
+			OwnerName = owner.OwnerName
 		};
 
 	public static ImportIconsResponse ToImportResponse(Result<IconImportBatchEntity, IconError> result,

@@ -148,6 +148,9 @@ x-macrodeck-error-codes:
   - ADB_NOT_ALLOWED
   - ADB_FAILED
   - UI_RESOURCE_QUOTA_EXCEEDED
+  - PLUGIN_ICON_NOT_FOUND
+  - ICON_PACK_INVALID
+  - ICON_PACK_SYNC_NOT_ALLOWED
 
 servers:
   - url: /
@@ -517,6 +520,9 @@ components:
         - ADB_NOT_ALLOWED
         - ADB_FAILED
         - UI_RESOURCE_QUOTA_EXCEEDED
+        - PLUGIN_ICON_NOT_FOUND
+        - ICON_PACK_INVALID
+        - ICON_PACK_SYNC_NOT_ALLOWED
 
     ProtocolError:
       type: object

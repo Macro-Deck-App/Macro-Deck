@@ -62,10 +62,18 @@ public static class HostApis
 	/// </summary>
 	public const string Messaging = "messaging";
 
+	/// <summary>
+	/// The <c>icon-packs</c> host api: the icon packs a plugin bundles in its artifact. Resolves one of their
+	/// icons into a UI resource, and lets a self-registered development session sync the packs of its
+	/// project. A host that predates it answers <c>CAPABILITY_UNSUPPORTED</c>.
+	/// </summary>
+	public const string IconPacks = "icon-packs";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		Variables, UserVariables, Config, Deck, Scripts, Widgets, Notifications, ActionInteractions, Ui,
 		Devices, VariableValues, Layouts, FolderViews, WidgetTypes, EventBindings, ScreenSavers, Adb, Messaging,
+		IconPacks,
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);

@@ -69,6 +69,12 @@ public sealed class IconPackExportService : IIconPackExportService
 		manifest.IsDefault = false;
 		manifest.IsReadOnly = false;
 		manifest.SourceId = null;
+		manifest.SourceRevision = null;
+		// Hosts older than the Plugin source type cannot read it back, so an export never carries it.
+		if (manifest.SourceType == IconPackSourceType.Plugin)
+		{
+			manifest.SourceType = IconPackSourceType.User;
+		}
 		foreach (var entry in manifest.Icons)
 		{
 			entry.ImportBatchId = null;
