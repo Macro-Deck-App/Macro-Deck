@@ -217,6 +217,8 @@ fn main() {
         .setup(|app| {
             let handle = app.handle().clone();
             init_logging(&handle);
+            #[cfg(windows)]
+            host_job::shut_down_before_host();
             logging::info(&format!(
                 "[app] Macro Deck Bootstrapper {} starting (packaged: {})",
                 updater::current_version(&handle),
@@ -270,7 +272,10 @@ fn main() {
             // A tray quit goes request_quit -> app.exit(0) -> Exit with no
             // CloseRequested, so the window-state flush there is the only
             // chance to persist that session's geometry.
-            RunEvent::Exit => window_state::flush(app),
+            RunEvent::Exit => {
+                window_state::flush(app);
+                host::stop_before_exit(app);
+            }
             #[cfg(target_os = "macos")]
             RunEvent::Opened { urls } => {
                 window::show_main_window(app);
