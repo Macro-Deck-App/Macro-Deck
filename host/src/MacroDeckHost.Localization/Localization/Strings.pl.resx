@@ -2652,6 +2652,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.IconPack.ExportFailed" xml:space="preserve">
     <value>Eksport nie powiódł się</value>
   </data>
+  <data name="Errors.IconPack.ExportTooLarge" xml:space="preserve">
+    <value>Ten pakiet ikon jest zbyt duży do eksportu. Podziel go na mniejsze pakiety.</value>
+  </data>
   <data name="Errors.IconPack.LoadFailed" xml:space="preserve">
     <value>Nie udało się wczytać pakietów ikon</value>
   </data>

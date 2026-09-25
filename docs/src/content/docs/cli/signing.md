@@ -136,7 +136,7 @@ error certificate-untrusted: The certificate signature does not verify against t
 
 | Exit code | Failures |
 | --- | --- |
-| 1 | Certificate malformed, untrusted, wrong-purpose, not yet valid or expired; issuer certificate missing (`certificate-issuer-missing`), not the one the certificate names (`certificate-issuer-mismatch`), or ending before the certificate (`certificate-outlives-issuer`). Private key malformed or not matching the certificate. Package already signed; manifest missing, malformed or too large; declared files not matching (digest or size mismatch, undeclared file, missing declared file, unsafe entry). |
+| 1 | Certificate malformed, untrusted, wrong-purpose, not yet valid or expired; issuer certificate missing (`certificate-issuer-missing`), not the one the certificate names (`certificate-issuer-mismatch`), or ending before the certificate (`certificate-outlives-issuer`). Private key malformed or not matching the certificate. Package already signed; manifest missing, malformed or too large (8 MiB, or 32 MiB for an icon pack's `pack.json`); an icon pack with more than 30,000 entries once signed (`too-many-entries`); declared files not matching (digest or size mismatch, undeclared file, missing declared file, unsafe entry). |
 | 2 | Unsupported package format, `--output` already exists, or only one of the two `--issuer-certificate` options given (`issuer-options-incomplete`). |
 | 3 | The package, certificate, certificate signature, issuer certificate, issuer signature, private key or `--root-public` file could not be read. |
 | 4 | Ctrl-C. |

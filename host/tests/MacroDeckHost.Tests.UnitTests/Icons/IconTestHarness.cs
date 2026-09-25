@@ -62,7 +62,7 @@ internal sealed class IconTestHarness : IDisposable
 			ownerRegistry ?? new IconPackOwnerRegistry([]),
 			Logger);
 
-	public IconPackExportService CreateExportService() => new(Cache, Storage, Logger);
+	public IconPackExportService CreateExportService() => new(Cache, Storage, Paths, Logger);
 
 	public async Task<IconPackEntity> CreatePack(string name = "Test Pack",
 		bool isDefault = false,

@@ -1,5 +1,5 @@
 // Angular adapter - host connection
-export { ApiService, type ConnectionState, type WidgetTypeInfo } from './transport/api.service';
+export { ApiService, IconPackExportError, type ConnectionState, type WidgetTypeInfo } from './transport/api.service';
 export { HOST_URL_RESOLVER } from './transport/host-url';
 
 // Angular adapter - application state and host-backed services

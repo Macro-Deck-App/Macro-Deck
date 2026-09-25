@@ -1,6 +1,6 @@
 import { Injectable, Signal, WritableSignal, inject, signal, untracked } from '@angular/core';
 import { AppStrings, IconDeletedEvent, IconImportBatchState, IconImportProgressEvent, IconPackCreatedEvent, IconPackDeletedEvent, IconPackUpdatedEvent, IconProcessingState, IconPackAiAssets, IconUpdatedEvent, IconsAddedEvent, IpcIcon, IpcIconImportBatch, IpcIconPack } from '@macro-deck/runtime';
-import { ApiService, IconImageService, LocalizationService } from '@shared';
+import { ApiService, IconImageService, IconPackExportError, LocalizationService } from '@shared';
 import { FileSaveService } from './file-save.service';
 
 export interface IconPackModel {
@@ -343,6 +343,11 @@ export class IconPackService {
       return { ok: true, fileName, path: result.path };
     } catch (error) {
       console.error('Failed to export icon pack:', error);
+      if (error instanceof IconPackExportError) {
+        return error.status === 422
+          ? { ok: false, error: this.localization.translateKey(AppStrings.Errors.IconPack.ExportTooLarge) }
+          : { ok: false };
+      }
       return { ok: false, error: error instanceof Error ? error.message : this.localization.translateKey(AppStrings.Errors.IconPack.ExportFailed) };
     }
   }

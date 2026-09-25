@@ -20,6 +20,8 @@ internal interface IPackageEntrySource : IAsyncDisposable
 	/// can carry the same name twice, and that is itself a failure the caller reports.</summary>
 	IReadOnlyList<PackageEntry> Entries { get; }
 
+	int RawEntryCount { get; }
+
 	/// <summary>The first entry named <paramref name="name"/>, or <c>null</c>.</summary>
 	PackageEntry? Find(string name);
 

@@ -376,6 +376,12 @@ export interface GetWidgetTypesResponse {
 
 const UI_SOCKET_PATH = '/ws/ui';
 
+export class IconPackExportError extends Error {
+  constructor(readonly status: number) {
+    super(`Icon pack export failed with status ${status}`);
+  }
+}
+
 interface IncomingNotification<T = unknown> {
   method: string;
   params: T;
@@ -1945,7 +1951,7 @@ export class ApiService {
       { method: 'GET' }
     );
     if (!response.ok) {
-      throw new Error(`Icon pack export failed with status ${response.status}`);
+      throw new IconPackExportError(response.status);
     }
 
     const fileName =

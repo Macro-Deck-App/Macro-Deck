@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json.Nodes;
@@ -108,6 +109,87 @@ internal sealed class IconPackArchiveTests
 			Assert.That(result.Error, Does.Contain("pack.json"));
 		});
 		stream.Dispose();
+	}
+
+	[Test]
+	public void A_pack_at_the_entry_bound_is_read()
+	{
+		using var pack = PaddedPack(IconPackArchiveLimits.MaxEntries);
+
+		var result = IconPackArchive.Read(pack);
+
+		Assert.That(result.Success, Is.True, result.Error);
+	}
+
+	[Test]
+	public void A_pack_above_the_entry_bound_is_rejected()
+	{
+		using var pack = PaddedPack(IconPackArchiveLimits.MaxEntries + 1);
+
+		var result = IconPackArchive.Read(pack);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.False);
+			Assert.That(result.Error, Does.Contain(IconPackArchiveLimits.MaxEntries.ToString(CultureInfo.InvariantCulture)));
+		});
+	}
+
+	[Test]
+	public void A_pack_json_larger_than_the_plugin_manifest_bound_is_read()
+	{
+		using var pack = PaddedPack(2, manifestPadding: 20 * 1024 * 1024);
+
+		var result = IconPackArchive.Read(pack);
+
+		Assert.That(result.Success, Is.True, result.Error);
+	}
+
+	[Test]
+	public void A_pack_json_above_the_manifest_bound_is_rejected()
+	{
+		using var pack = PaddedPack(2, manifestPadding: IconPackArchiveLimits.MaxManifestBytes);
+
+		var result = IconPackArchive.Read(pack);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.False);
+			Assert.That(result.Error, Does.Contain("pack.json"));
+		});
+	}
+
+	private static MemoryStream PaddedPack(int entries, int manifestPadding = 0)
+	{
+		var id = Guid.NewGuid();
+		var manifest = new JsonObject
+		{
+			["name"] = "Logos",
+			["description"] = new string('x', manifestPadding),
+			["icons"] = new JsonArray(new JsonObject { ["id"] = id.ToString(), ["name"] = "spotify" })
+		};
+
+		var stream = new MemoryStream();
+		using (var archive = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true))
+		{
+			using (var writer = new StreamWriter(archive.CreateEntry("pack.json").Open()))
+			{
+				writer.Write(manifest.ToJsonString());
+			}
+
+			using (var master = archive.CreateEntry($"icons/{id}/master.webp").Open())
+			{
+				master.Write("RIFF-webp-bytes"u8);
+			}
+
+			for (var index = 2; index < entries; index++)
+			{
+				archive.CreateEntry($"filler/{index}");
+			}
+		}
+
+		stream.Position = 0;
+		return stream;
 	}
 
 	private static MemoryStream Pack(IReadOnlyList<string> names, JsonObject? ai = null, string? withoutMaster = null)

@@ -2652,6 +2652,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.IconPack.ExportFailed" xml:space="preserve">
     <value>Export se nezdařil</value>
   </data>
+  <data name="Errors.IconPack.ExportTooLarge" xml:space="preserve">
+    <value>Tato sada ikon je pro export příliš velká. Rozdělte ji na menší sady.</value>
+  </data>
   <data name="Errors.IconPack.LoadFailed" xml:space="preserve">
     <value>Načtení sad ikon se nezdařilo</value>
   </data>

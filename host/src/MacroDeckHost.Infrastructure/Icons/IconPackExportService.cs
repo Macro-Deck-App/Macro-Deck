@@ -1,10 +1,14 @@
 using System.Globalization;
 using System.IO.Compression;
 using System.Text.Json;
+using MacroDeck.Plugin.Packaging.IconPacks;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Packaging;
+using MacroDeckHost.Application.Paths;
+using MacroDeckHost.Application.Persistence.Icons;
 using MacroDeckHost.Domain.Common;
+using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Icons;
 using MacroDeckHost.Infrastructure.Caching;
@@ -21,14 +25,19 @@ public sealed class IconPackExportService : IIconPackExportService
 	// platforms, so the name must be safe everywhere regardless of the host OS.
 	private static readonly char[] _invalidFileNameChars = ['/', '\\', ':', '*', '?', '"', '<', '>', '|'];
 
+	private const string ExportStagingDirectoryName = "_export";
+	private static readonly TimeSpan _staleStagingAge = TimeSpan.FromDays(1);
+
 	private readonly IIconPackCache _iconPackCache;
 	private readonly IIconStorage _storage;
+	private readonly IMacroDeckPaths _paths;
 	private readonly ILogger _logger;
 
-	public IconPackExportService(IIconPackCache iconPackCache, IIconStorage storage, ILogger logger)
+	public IconPackExportService(IIconPackCache iconPackCache, IIconStorage storage, IMacroDeckPaths paths, ILogger logger)
 	{
 		_iconPackCache = iconPackCache;
 		_storage = storage;
+		_paths = paths;
 		_logger = logger;
 	}
 
@@ -80,6 +89,60 @@ public sealed class IconPackExportService : IIconPackExportService
 			entry.ImportBatchId = null;
 		}
 
+		// Counted before anything is written, and the archive is staged, so a refused pack sends nothing.
+		if (icons.Sum(icon => icon.AvailableSizes.Count + 1) + 1 > IconPackArchiveLimits.MaxUnsignedEntries)
+		{
+			return Result.Fail(IconPackError.TooLarge);
+		}
+
+		var stagingDirectory = Path.Combine(_paths.IconStagingDirectory, ExportStagingDirectoryName);
+		Directory.CreateDirectory(stagingDirectory);
+		DeleteAbandonedStagingFiles(stagingDirectory);
+		await using var staging = new FileStream(Path.Combine(stagingDirectory, $"{Guid.CreateVersion7():N}.tmp"),
+			FileMode.CreateNew,
+			FileAccess.ReadWrite,
+			FileShare.None,
+			81_920,
+			FileOptions.DeleteOnClose | FileOptions.Asynchronous);
+		if (!await WriteArchive(packId, manifest, icons, staging, cancellationToken))
+		{
+			return Result.Fail(IconPackError.TooLarge);
+		}
+
+		staging.Position = 0;
+		await staging.CopyToAsync(destination, cancellationToken);
+
+		return Result.Ok<IconPackError>();
+	}
+
+	// DeleteOnClose does not survive a crash on Unix, so a file an export left behind is swept later.
+	private void DeleteAbandonedStagingFiles(string stagingDirectory)
+	{
+		var cutoff = DateTime.UtcNow - _staleStagingAge;
+		foreach (var file in new DirectoryInfo(stagingDirectory).EnumerateFiles("*.tmp"))
+		{
+			if (file.LastWriteTimeUtc >= cutoff)
+			{
+				continue;
+			}
+
+			try
+			{
+				file.Delete();
+			}
+			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+			{
+				_logger.Debug(ex, "Could not delete abandoned export staging file {Path}", file.FullName);
+			}
+		}
+	}
+
+	private async Task<bool> WriteArchive(Guid packId,
+		IconPackManifest manifest,
+		IReadOnlyList<IconEntity> icons,
+		Stream destination,
+		CancellationToken cancellationToken)
+	{
 		await using var archive = new ZipArchive(destination, ZipArchiveMode.Create, leaveOpen: true);
 		var files = new List<PackageFileDigest>();
 
@@ -115,16 +178,19 @@ public sealed class IconPackExportService : IIconPackExportService
 		files.Sort((a, b) => string.CompareOrdinal(a.Path, b.Path));
 		manifest.Files = files;
 
+		var manifestBytes = JsonSerializer.SerializeToUtf8Bytes(manifest, PersistenceJsonOptions.Default);
+		if (manifestBytes.Length > IconPackArchiveLimits.MaxUnsignedManifestBytes)
+		{
+			return false;
+		}
+
 		var manifestEntry = archive.CreateEntry("pack.json");
 		await using (var manifestStream = await manifestEntry.OpenAsync(cancellationToken))
 		{
-			await JsonSerializer.SerializeAsync(manifestStream,
-				manifest,
-				PersistenceJsonOptions.Default,
-				cancellationToken);
+			await manifestStream.WriteAsync(manifestBytes, cancellationToken);
 		}
 
-		return Result.Ok<IconPackError>();
+		return true;
 	}
 
 	private static async Task<(string Sha256, long Size)> CopyAndHash(Stream source,

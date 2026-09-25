@@ -2652,6 +2652,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Errors.IconPack.ExportFailed" xml:space="preserve">
     <value>Error al exportar</value>
   </data>
+  <data name="Errors.IconPack.ExportTooLarge" xml:space="preserve">
+    <value>Este paquete de iconos es demasiado grande para exportarlo. Divídelo en paquetes más pequeños.</value>
+  </data>
   <data name="Errors.IconPack.LoadFailed" xml:space="preserve">
     <value>No se pudieron cargar los paquetes de iconos</value>
   </data>

@@ -35,6 +35,8 @@ internal sealed class ZipPackageEntrySource : IPackageEntrySource
 
 	public IReadOnlyList<PackageEntry> Entries { get; }
 
+	public int RawEntryCount => _archive.Entries.Count;
+
 	public static async Task<ZipPackageEntrySource> OpenAsync(string packagePath, CancellationToken cancellationToken)
 	{
 		return new ZipPackageEntrySource(await ZipFile.OpenReadAsync(packagePath, cancellationToken),

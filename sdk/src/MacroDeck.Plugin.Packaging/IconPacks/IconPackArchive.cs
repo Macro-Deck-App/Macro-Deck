@@ -41,11 +41,11 @@ internal sealed record IconPackArchiveReadResult
 
 internal static class IconPackArchive
 {
-	public const int MaxEntries = 10_000;
+	public const int MaxEntries = IconPackArchiveLimits.MaxEntries;
 
 	public const int MaxIconNameLength = 128;
 
-	public const int MaxManifestBytes = 16 * 1024 * 1024;
+	public const int MaxManifestBytes = IconPackArchiveLimits.MaxManifestBytes;
 
 	public const string ManifestEntryName = "pack.json";
 

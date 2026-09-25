@@ -1,8 +1,8 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Observable, Subject } from 'rxjs';
-import { IpcIcon, IpcIconPack } from '@macro-deck/runtime';
-import { ApiService, IconImageService } from '@shared';
+import { AppStrings, IpcIcon, IpcIconPack } from '@macro-deck/runtime';
+import { ApiService, IconImageService, IconPackExportError, LocalizationService } from '@shared';
 import { FileSaveService } from './file-save.service';
 import { IconPackService } from './icon-pack.service';
 
@@ -405,12 +405,30 @@ describe('IconPackService', () => {
   });
 
   it('reports a failed export', async () => {
-    apiSpy.exportIconPack.and.rejectWith(new Error('404'));
+    apiSpy.exportIconPack.and.rejectWith(new Error('network down'));
 
     const result = await service.exportPack(packId);
 
     expect(result.ok).toBeFalse();
-    expect(result.error).toBe('404');
+    expect(result.error).toBe('network down');
+  });
+
+  it('reports a pack the host refuses to export as too large', async () => {
+    apiSpy.exportIconPack.and.rejectWith(new IconPackExportError(422));
+
+    const result = await service.exportPack(packId);
+
+    expect(result.ok).toBeFalse();
+    expect(result.error).toBe(TestBed.inject(LocalizationService).translateKey(AppStrings.Errors.IconPack.ExportTooLarge));
+  });
+
+  it('reports any other refused export without the raw status as detail', async () => {
+    apiSpy.exportIconPack.and.rejectWith(new IconPackExportError(404));
+
+    const result = await service.exportPack(packId);
+
+    expect(result.ok).toBeFalse();
+    expect(result.error).toBeUndefined();
   });
 
   describe('importSingleFromPath', () => {

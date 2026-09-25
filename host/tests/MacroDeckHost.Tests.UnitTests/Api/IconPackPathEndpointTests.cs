@@ -1,6 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using MacroDeck.Plugin.Packaging.IconPacks;
+using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Infrastructure.Persistence;
@@ -123,6 +125,40 @@ public class IconPackPathEndpointTests
 			new { path }));
 
 		Assert.That(body.GetProperty("error").GetProperty("code").GetString(), Is.EqualTo("NotFound"));
+	}
+
+	[Test]
+	public async Task Exporting_a_pack_above_the_export_bound_answers_422_without_a_file()
+	{
+		var packId = await CreatePack("Wordy");
+		var cache = _host.Services.GetRequiredService<IIconPackCache>();
+		var pack = cache.GetPackById(Guid.Parse(packId))!;
+		pack.Description = new string('\u00e4', IconPackArchiveLimits.MaxUnsignedManifestBytes / 6 + 1);
+		await cache.AddOrUpdatePack(pack);
+
+		var response = await Export(packId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.UnprocessableEntity));
+			Assert.That(response.Content.Headers.ContentDisposition, Is.Null);
+			Assert.That(response.Content.Headers.ContentType?.MediaType, Is.Not.EqualTo("application/zip"));
+		});
+	}
+
+	[Test]
+	public async Task Exporting_an_unknown_pack_answers_404()
+	{
+		var response = await Export(Guid.NewGuid().ToString());
+
+		Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+	}
+
+	private async Task<HttpResponseMessage> Export(string packId)
+	{
+		using var request = new HttpRequestMessage(HttpMethod.Get, $"/api/icon-packs/{packId}/export");
+		request.Headers.Add(LoopbackHeader, "1");
+		return await _client.SendAsync(request);
 	}
 
 	private async Task<string> CreatePack(string name)

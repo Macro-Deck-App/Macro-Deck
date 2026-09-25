@@ -47,6 +47,7 @@ internal sealed class SigningErrorTrustMappingTests
 		[SigningError.ManifestMissing] = PluginTrustVerdict.Malformed,
 		[SigningError.ManifestMalformed] = PluginTrustVerdict.Malformed,
 		[SigningError.ManifestTooLarge] = PluginTrustVerdict.Malformed,
+		[SigningError.TooManyEntries] = PluginTrustVerdict.Malformed,
 		[SigningError.PackageFormatUnsupported] = PluginTrustVerdict.Malformed,
 		[SigningError.CertificateUntrusted] = PluginTrustVerdict.UntrustedRoot,
 		[SigningError.CertificateWrongPurpose] = PluginTrustVerdict.WrongCertificatePurpose,
