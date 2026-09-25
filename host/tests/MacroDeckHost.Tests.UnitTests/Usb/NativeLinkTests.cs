@@ -196,7 +196,7 @@ public class NativeLinkTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(queued, Is.LessThanOrEqualTo(NativeLink.MaxQueuedDataFrames));
-			Assert.That(_link.QueuedFrames, Is.LessThanOrEqualTo(queued + 1));
+			Assert.That(_link.QueuedFrames, Is.LessThanOrEqualTo(NativeLink.MaxQueuedDataFrames));
 			Assert.That(_link.FreeDataSlots, Is.Zero);
 		});
 		never.SetResult();

@@ -4,7 +4,7 @@ The release implementation is split between [`.github/workflows/build.yml`](../.
 
 ## Start a release
 
-Run the `Build` workflow manually and provide `version`: a stable version such as `3.0.0` or a beta such as `3.0.0-beta.4`. Version validation and native package version mapping are handled by [`ci/scripts/release-version.mjs`](../../ci/scripts/release-version.mjs).
+Run the `Build` workflow manually and provide `version`: a stable version such as `3.0.0` or a beta such as `3.0.0-beta.4`. Version validation and native package version mapping are handled by [`ci/scripts/release-version.mjs`](../../ci/scripts/release-version.mjs). Enable `sign_windows` only for a build that should be published: it spends exactly four SSL.com eSigner signatures after every other build and test has passed. An unchecked build remains available as an unsigned workflow artifact and is not published.
 
 Every release covers Windows, Linux, and macOS. There is no platform selection: publishing runs only for a fully successful build, so nothing is published unless all three packaged and the end-to-end suite passed - a channel file that advertises a version its platform never built would offer installed clients an update that 404s.
 
@@ -12,7 +12,7 @@ Release artifacts always use the Production build identity. Beta is derived from
 
 ## What the workflow does
 
-The build workflow tests every platform, builds the Angular UI, publishes the framework-dependent single-file host for all three runtime identifiers together with a bundled .NET runtime in its `runtime/` folder (the official ASP.NET Core runtime archives, resolved from Microsoft's release metadata at the runtime patch the SDK compiled against and checksum-verified, see [`ci/scripts/stage-dotnet-runtime.sh`](../../ci/scripts/stage-dotnet-runtime.sh)), packages the Tauri application on the target operating systems, signs where credentials are available, runs the end-to-end suite against a production host staged from the same revision, and packs the NuGet package family. It publishes nothing itself; everything it produces is a workflow artifact.
+The build workflow tests every platform, builds the Angular UI, publishes the framework-dependent single-file host for all three runtime identifiers together in one Ubuntu job with a bundled .NET runtime in each `runtime/` folder (the official ASP.NET Core runtime archives, resolved from Microsoft's release metadata at the runtime patch the SDK compiled against and checksum-verified, see [`ci/scripts/stage-dotnet-runtime.sh`](../../ci/scripts/stage-dotnet-runtime.sh)), packages the Tauri application on the target operating systems, runs the end-to-end suite against a production host staged from the same revision, and packs the NuGet package family. Linux and macOS package in parallel with the tests. Windows compiles and signs only after they all pass, protecting the eSigner quota. A final collection job exposes the complete platform artifact set atomically. The build publishes nothing externally; everything it produces is a workflow artifact.
 
 Publishing then happens in one order, because each step depends on the one before it:
 
@@ -38,6 +38,10 @@ These files are the source of truth for exact job dependencies, artifact names, 
 ## Signing and publishing
 
 Official packages may require platform signing/notarization, updater signing, and release storage credentials. The workflow owns the exact secret names and guards.
+
+All signing, notarization and deployment credentials remain in the manually protected GitHub `production` environment. In particular, the Windows eSigner integration uses `ES_USERNAME`, `ES_PASSWORD`, `ES_CREDENTIAL_ID`, and `ES_TOTP_SECRET` from that existing environment. GitHub does not forward environment secrets or an environment approval between jobs on different runners, so reducing the number of approvals further would require an explicit repository/environment configuration change rather than moving secrets implicitly in workflow code.
+
+The Windows signer covers `MacroDeckHost.exe`, `MacroDeck.exe`, the generated NSIS uninstaller, and the final NSIS installer. Its wrapper refuses unexpected file types and skips Tauri's NSIS plugin DLLs so they do not consume signing quota. The job fails unless exactly those four signing roles were recorded and successfully verified.
 
 A release should not be considered production-ready merely because an unsigned contributor build succeeded. Check the package/signing steps for every platform and confirm the expected assets reached the GitHub release.
 

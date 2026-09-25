@@ -862,8 +862,8 @@ fn every_release_build_applies_the_release_config() {
 
     assert_eq!(
         bundle_steps.len(),
-        4,
-        "expected one Tauri build or bundle step per bundle pass"
+        5,
+        "expected the Linux, macOS and split Windows compile/bundle passes"
     );
     for step in bundle_steps {
         assert!(

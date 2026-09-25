@@ -1,6 +1,5 @@
-# Signs the .NET host binaries before the Tauri bundler packs them as
-# resources. Uses the same environment variables as sign-windows-file.ps1:
-#   WINDOWS_SIGN_CERT_PFX_FILE, WINDOWS_SIGN_CERT_PASSWORD
+# The .NET host is a single-file executable whose managed assemblies are
+# embedded. Sign exactly that launcher before Tauri packages host-publish/.
 param(
 	[Parameter(Mandatory = $true)]
 	[string] $Directory
@@ -8,30 +7,13 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-if (-not $env:WINDOWS_SIGN_CERT_PFX_FILE) {
-	Write-Host '[sign] WINDOWS_SIGN_CERT_PFX_FILE not set, skipping host signing'
-	exit 0
+$hosts = @(Get-ChildItem -LiteralPath $Directory -File |
+	Where-Object { $_.Name -match '^MacroDeckHost(?:Development)?\.exe$' })
+if ($hosts.Count -ne 1) {
+	throw "Expected exactly one Macro Deck host executable in ${Directory}; found $($hosts.Count)"
 }
 
-$password = if ($env:WINDOWS_SIGN_CERT_PASSWORD) {
-	ConvertTo-SecureString -String $env:WINDOWS_SIGN_CERT_PASSWORD -AsPlainText -Force
-} else {
-	New-Object System.Security.SecureString
-}
-$cert = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new(
-	$env:WINDOWS_SIGN_CERT_PFX_FILE, $password)
-
-# Matches exactly the single-file host launcher (MacroDeckHost.exe or
-# MacroDeckHostDevelopment.exe); the host's own assemblies are bundled inside
-# it, and the bundled .NET runtime under runtime\ is already signed by Microsoft.
-$files = Get-ChildItem -Path $Directory -File |
-	Where-Object { $_.Name -match '^(MacroDeckHost.*\.(exe|dll)|MacroDeck\.Sdk\.dll)$' }
-
-foreach ($file in $files) {
-	$result = Set-AuthenticodeSignature -FilePath $file.FullName -Certificate $cert `
-		-HashAlgorithm SHA256 -TimestampServer 'http://timestamp.digicert.com'
-	if ($result.Status -ne 'Valid' -and $result.Status -ne 'UnknownError') {
-		throw "Signing failed for $($file.Name): $($result.Status) $($result.StatusMessage)"
-	}
-	Write-Host "[sign] $($file.Name): $($result.Status)"
+& (Join-Path $PSScriptRoot 'sign-windows-file.ps1') -FilePath $hosts[0].FullName
+if ($LASTEXITCODE -ne 0) {
+	exit $LASTEXITCODE
 }
