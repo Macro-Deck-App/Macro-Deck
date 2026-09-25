@@ -463,6 +463,58 @@ internal sealed class StoreInstallExecutorTests
 	}
 
 	[Test]
+	public async Task The_latest_release_installs_although_an_older_version_is_withdrawn()
+	{
+		var latest = PluginArtifact("2.0.0");
+		ServePlugins(PluginArtifact("1.0.0"), latest);
+		Withdraw("1.0.0");
+		_httpClientFactory.Body = latest.Bytes;
+
+		var operation = await Run(StoreOperationKind.Install, "2.0.0", previousVersion: null, pinned: false);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(operation.State, Is.EqualTo(StoreOperationState.Completed), operation.ErrorMessage);
+			Assert.That(ActivePluginVersion(), Is.EqualTo("2.0.0"));
+		});
+	}
+
+	[Test]
+	public async Task A_chosen_version_the_registry_withdrew_is_refused_as_removed()
+	{
+		var older = PluginArtifact("1.0.0");
+		ServePlugins(older, PluginArtifact("2.0.0"));
+		Withdraw("1.0.0");
+		_httpClientFactory.Body = older.Bytes;
+
+		var operation = await Run(StoreOperationKind.Install, "1.0.0", previousVersion: null, pinned: true);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(operation.State, Is.EqualTo(StoreOperationState.Failed));
+			Assert.That(operation.Error, Is.EqualTo(StoreOperationError.PackageRemoved));
+			Assert.That(ActivePluginVersion(), Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task A_package_whose_latest_version_is_withdrawn_is_refused_as_removed()
+	{
+		var latest = PluginArtifact("2.0.0");
+		ServePlugins(PluginArtifact("1.0.0"), latest);
+		Withdraw("2.0.0");
+		_httpClientFactory.Body = latest.Bytes;
+
+		var operation = await Run(StoreOperationKind.Install, "2.0.0", previousVersion: null, pinned: false);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(operation.State, Is.EqualTo(StoreOperationState.Failed));
+			Assert.That(operation.Error, Is.EqualTo(StoreOperationError.PackageRemoved));
+		});
+	}
+
+	[Test]
 	public async Task A_version_that_disappeared_from_the_registry_fails_as_not_found_and_is_not_retried()
 	{
 		var installer = new Plugins.Installation.FakePluginInstaller();
@@ -704,6 +756,12 @@ internal sealed class StoreInstallExecutorTests
 		});
 	}
 
+	private void Withdraw(string version) =>
+		_catalog.Swap(_catalog.Snapshot with
+		{
+			RemovedPackages = [new StoreRemovedPackage { Id = PluginId, Version = version, Reason = "Compromised" }]
+		});
+
 	private async Task<StoreOperation> Run(StoreOperationKind kind, string version, string? previousVersion, bool pinned)
 	{
 		var operation = _tracker.Create(kind,
@@ -753,7 +811,12 @@ internal sealed class StoreInstallExecutorTests
 	private IconPackOwnerRegistry OwnerRegistry()
 		=> new([
 			new StoreIconPackOwner(_installations,
-				new StoreUpdateDetector(_catalog, _pluginCatalog, _installations, new StoreUpdateState()),
+				new StoreUpdateDetector(_catalog,
+					_pluginCatalog,
+					_installations,
+					new StoreUpdateState(),
+					new StoreWithdrawalState(),
+					StoreRegistryOptions.Default),
 				Serilog.Core.Logger.None)
 		]);
 

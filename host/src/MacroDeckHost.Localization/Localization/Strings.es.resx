@@ -11897,6 +11897,13 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>La versión {version} está lista.</value>
     <comment>[version:string]</comment>
   </data>
+  <data name="Notifications.StoreVersionWithdrawn" xml:space="preserve">
+    <value>{name} {version} se ha retirado del Store</value>
+    <comment>[name:string][version:string]</comment>
+  </data>
+  <data name="Notifications.StoreVersionWithdrawnRemoveHint" xml:space="preserve">
+    <value>La extensión ya no está en el Store. Puedes quitarla en Integraciones o Biblioteca.</value>
+  </data>
   <data name="Notifications.TlsCertificateInvalidAdvice" xml:space="preserve">
     <value>No se pudo cargar el certificado guardado. Genera uno nuevo o sube un reemplazo en Configuración &gt; Red.</value>
   </data>
@@ -15094,6 +15101,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Store.Page.VersionUnavailableReason" xml:space="preserve">
     <value>Esta versión no se puede instalar desde el Store.</value>
   </data>
+  <data name="Store.Page.VersionWithdrawnReason" xml:space="preserve">
+    <value>Esta versión se ha retirado del Store.</value>
+  </data>
   <data name="Store.Page.WhatsNewHeading" xml:space="preserve">
     <value>¿Qué hay de nuevo?</value>
   </data>
@@ -15296,11 +15306,41 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Store.VersionUnavailable" xml:space="preserve">
     <value>No disponible</value>
   </data>
+  <data name="Store.VersionWithdrawn" xml:space="preserve">
+    <value>Retirada</value>
+  </data>
   <data name="Store.WhatMacroDeckReported" xml:space="preserve">
     <value>Lo que informó Macro Deck</value>
   </data>
   <data name="Store.Why" xml:space="preserve">
     <value>¿Por qué?</value>
+  </data>
+  <data name="Store.Withdrawal.InstalledAdvice" xml:space="preserve">
+    <value>Instala otra versión o desinstala esta.</value>
+  </data>
+  <data name="Store.Withdrawal.InstalledHeading" xml:space="preserve">
+    <value>Tu versión instalada {version} se ha retirado del Store</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Store.Withdrawal.PackageChip" xml:space="preserve">
+    <value>Retirada del Store</value>
+  </data>
+  <data name="Store.Withdrawal.PackageHeading" xml:space="preserve">
+    <value>Esta extensión se ha retirado del Store</value>
+  </data>
+  <data name="Store.Withdrawal.PackageMessage" xml:space="preserve">
+    <value>Ya no se puede instalar ni actualizar.</value>
+  </data>
+  <data name="Store.Withdrawal.Reason" xml:space="preserve">
+    <value>Motivo: {reason}</value>
+    <comment>[reason:string]</comment>
+  </data>
+  <data name="Store.Withdrawal.Replacement" xml:space="preserve">
+    <value>Reemplazo recomendado: {replacement}</value>
+    <comment>[replacement:string]</comment>
+  </data>
+  <data name="Store.Withdrawal.VersionChip" xml:space="preserve">
+    <value>Versión retirada</value>
   </data>
   <data name="TemplateBuilder.Logic" xml:space="preserve">
     <value>Lógica</value>

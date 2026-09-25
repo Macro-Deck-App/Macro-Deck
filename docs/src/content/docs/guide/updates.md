@@ -72,6 +72,10 @@ If you install an older version of a plugin or icon pack on purpose, or any vers
 Macro Deck keeps it: automatic updates and update notifications skip that item until you update it yourself,
 from its page, its card or **Update all**. **Installed** still shows the newer version as available.
 
+Macro Deck never offers or installs an update to a version the Store has withdrawn. If the version you have
+installed is withdrawn, a warning notification says so, whether or not **Notify about updates** is on; see
+[Withdrawn versions](/guide/concepts/#withdrawn-versions).
+
 A failed install or update offers **Retry** only when trying again can help, for example after a download
 failed. When the item needs a newer Macro Deck, the Store offers **Check for updates** instead; when it does not
 run on your platform or version, it says so without a button to try again.

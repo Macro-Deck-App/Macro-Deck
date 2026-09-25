@@ -643,10 +643,12 @@ public class Startup
 		services.AddSingleton<StoreInstallBackupBatches>();
 		services.AddSingleton<IStoreArtifactDownloader, StoreArtifactDownloader>();
 		services.AddSingleton<IStoreUpdateState, StoreUpdateState>();
+		services.AddSingleton<IStoreWithdrawalState, StoreWithdrawalState>();
 		services.AddSingleton<IStoreUpdateDetector, StoreUpdateDetector>();
 		services.AddSingleton<IStoreUpdateBatchInstaller, StoreUpdateBatchInstaller>();
 		services.AddSingleton<StoreAutoUpdater>();
 		services.AddSingleton<StoreUpdateNotifier>();
+		services.AddSingleton<StoreWithdrawalNotifier>();
 		services.AddSingleton<IStoreRegistryRefreshTracker, StoreRegistryRefreshTracker>();
 		services.AddSingleton<IStoreRegistryRefresher, StoreRegistryRefresher>();
 		services.AddSingleton<IStoreInstallCoordinator, StoreInstallCoordinator>();
@@ -657,6 +659,7 @@ public class Startup
 		services.AddHostedService<StoreOperationBackgroundService>();
 		services.AddHostedService<StoreOperationBroadcastBackgroundService>();
 		services.AddHostedService<StoreUpdatesBroadcastBackgroundService>();
+		services.AddHostedService<StoreWithdrawalNotificationBackgroundService>();
 		services.AddHostedService<StoreRegistryRefreshBroadcastBackgroundService>();
 
 		services.AddHttpClient(ConnectIdentityClient.HttpClientName, client => { })
