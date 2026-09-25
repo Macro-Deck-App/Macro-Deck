@@ -11,8 +11,9 @@ What is in here:
   `SigningMaterial`, which pairs a private key with the certificate it belongs to and refuses the
   pairing when it does not.
 - `MacroDeck.Signing.Certificates` - the Macro Deck signing certificate and `SigningCertificateChain`,
-  which verifies a certificate's **exact file bytes** against the Macro Deck root public key, requires
-  an exclusive key usage, and evaluates the validity window at a caller-supplied instant.
+  which verifies a certificate's **exact file bytes** against the Macro Deck root public key, directly or
+  through exactly one root-signed issuer certificate, requires an exclusive key usage, and evaluates the
+  validity windows at a caller-supplied instant.
 - `MacroDeck.Signing.Packages` - `PackageSigner` and `PackageVerifier` over the five signable
   extensions, and the canonical digest of each format (`macro-deck-plugin/1`, `macro-deck-iconpack/1`,
   `macro-deck-portable/1`).
@@ -24,7 +25,8 @@ by the Creator Portal, server-side, and no signing key or certificate ever reach
 workflow. See [Publishing to the Store](https://docs.macro-deck.app/guides/publishing/).
 
 Every signable Macro Deck package carries its signature in its own manifest and its certificate as
-`certificate.json` and `certificate.sig` at its archive root, so a signed artifact verifies on its own.
+`certificate.json` and `certificate.sig` at its archive root, plus `issuer.json` and `issuer.sig` when an
+issuer certificate signed that certificate, so a signed artifact verifies on its own.
 There are no detached signature files.
 
 Two things this package deliberately does not do. It never issues trust: there is no root key
@@ -37,7 +39,8 @@ render, not an exception you catch.
 
 See [the plugin development documentation](https://docs.macro-deck.app/introduction/quickstart/)
 and the published schemas for the
-[certificate](https://schemas.macro-deck.app/macrodeck-certificate-v1.schema.json) and the
+certificate ([v1](https://schemas.macro-deck.app/macrodeck-certificate-v1.schema.json),
+[v2](https://schemas.macro-deck.app/macrodeck-certificate-v2.schema.json)) and the
 [signature material](https://schemas.macro-deck.app/macrodeck-package-signature-v1.schema.json).
 
 Licensed under Apache-2.0.

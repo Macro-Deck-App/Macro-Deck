@@ -134,6 +134,14 @@ Most plugins run on the .NET runtime that comes with Macro Deck, so Task Manager
 list them as `dotnet` or ".NET Host" rather than by the plugin's name. This is expected; ending
 Macro Deck ends them too.
 
+## A plugin in the Store shows Certificate revoked
+
+Macro Deck revoked the certificate that signed the installed version of this plugin, or the certificate
+that vouches for it. The installed version keeps working, but Macro Deck refuses to install or update
+anything signed with that certificate. Wait for an update signed with a new certificate, or uninstall the
+plugin if you no longer trust it. Installing that plugin fails with the message that its signing
+certificate has been revoked.
+
 ## Discord cannot be connected
 
 If the Discord setup says that only a Discord Rich Presence service was found, or Discord stays

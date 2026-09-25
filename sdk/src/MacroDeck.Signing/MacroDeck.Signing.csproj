@@ -21,6 +21,8 @@
     <ItemGroup>
         <EmbeddedResource Include="..\..\..\docs\public\schemas\macrodeck-certificate-v1.schema.json"
                           LogicalName="macrodeck-certificate-v1.schema.json" />
+        <EmbeddedResource Include="..\..\..\docs\public\schemas\macrodeck-certificate-v2.schema.json"
+                          LogicalName="macrodeck-certificate-v2.schema.json" />
         <EmbeddedResource Include="..\..\..\docs\public\schemas\macrodeck-package-signature-v1.schema.json"
                           LogicalName="macrodeck-package-signature-v1.schema.json" />
     </ItemGroup>
