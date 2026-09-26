@@ -42,10 +42,10 @@ public class IconPackExportServiceTests
 	}
 
 	[Test]
-	public async Task Export_WritesManifestAndAllVariantFiles()
+	public async Task Export_CarriesTheManifestAndOnlyEachIconsMaster_EvenWhenSizeVariantsExistLocally()
 	{
 		var pack = await _harness.CreatePack("My Pack");
-		var icon = await AddReadyIcon(pack, "star", sizes: [128]);
+		var icon = await AddReadyIcon(pack, "star", sizes: [128, 256, 512]);
 
 		await using var archive = await ExportToArchive(pack.Id);
 		var manifest = ReadManifest(archive);
@@ -55,8 +55,9 @@ public class IconPackExportServiceTests
 			Assert.That(manifest.Name, Is.EqualTo("My Pack"));
 			Assert.That(manifest.Icons, Has.Count.EqualTo(1));
 			Assert.That(manifest.Icons[0].Id, Is.EqualTo(icon.Id));
-			Assert.That(archive.GetEntry($"icons/{icon.Id}/master.webp"), Is.Not.Null);
-			Assert.That(archive.GetEntry($"icons/{icon.Id}/128.webp"), Is.Not.Null);
+			Assert.That(manifest.Icons[0].AvailableSizes, Is.Empty);
+			Assert.That(archive.Entries.Select(entry => entry.FullName),
+				Is.EquivalentTo(new[] { "pack.json", $"icons/{icon.Id}/master.webp" }));
 		});
 	}
 
@@ -148,8 +149,7 @@ public class IconPackExportServiceTests
 
 		Assert.That(manifest.Files, Is.Not.Null);
 		var declaredPaths = manifest.Files!.Select(f => f.Path).ToList();
-		Assert.That(declaredPaths,
-			Is.EquivalentTo(new[] { $"icons/{icon.Id}/master.webp", $"icons/{icon.Id}/128.webp" }));
+		Assert.That(declaredPaths, Is.EquivalentTo(new[] { $"icons/{icon.Id}/master.webp" }));
 
 		foreach (var file in manifest.Files!)
 		{
@@ -223,22 +223,26 @@ public class IconPackExportServiceTests
 	}
 
 	[Test]
+	public async Task Export_PackWhoseIconsAndManifestFillTheUnsignedEntryBound_Exports()
+	{
+		var pack = await _harness.CreatePack("Full");
+		await _harness.Cache.AddIcons(pack.Id, IconsWithSizeVariants(pack, IconPackArchiveLimits.MaxUnsignedEntries - 1));
+		using var destination = new MemoryStream();
+
+		var result = await _service.Export(pack.Id, destination, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True);
+			Assert.That(destination.Length, Is.GreaterThan(0));
+		});
+	}
+
+	[Test]
 	public async Task Export_PackAboveTheUnsignedEntryBound_IsRefusedAndWritesNothing()
 	{
 		var pack = await _harness.CreatePack("Huge");
-		var icons = Enumerable.Range(0, IconPackArchiveLimits.MaxUnsignedEntries / 4 + 1)
-			.Select(index => new IconEntity
-			{
-				Id = Guid.CreateVersion7(),
-				PackId = pack.Id,
-				Name = $"icon-{index}",
-				ProcessingState = IconProcessingState.Ready,
-				AvailableSizes = [128, 256, 512],
-				MasterContentHash = MasterContentHash.Compute("abc"u8).Value,
-				CreatedAt = DateTime.UtcNow
-			})
-			.ToList();
-		await _harness.Cache.AddIcons(pack.Id, icons);
+		await _harness.Cache.AddIcons(pack.Id, IconsWithSizeVariants(pack, IconPackArchiveLimits.MaxUnsignedEntries));
 		using var destination = new MemoryStream();
 
 		var result = await _service.Export(pack.Id, destination, CancellationToken.None);
@@ -250,6 +254,20 @@ public class IconPackExportServiceTests
 			Assert.That(ExportStagingFiles(), Is.Empty);
 		});
 	}
+
+	private static List<IconEntity> IconsWithSizeVariants(IconPackEntity pack, int count)
+		=> Enumerable.Range(0, count)
+			.Select(index => new IconEntity
+			{
+				Id = Guid.CreateVersion7(),
+				PackId = pack.Id,
+				Name = $"icon-{index}",
+				ProcessingState = IconProcessingState.Ready,
+				AvailableSizes = [128, 256, 512],
+				MasterContentHash = MasterContentHash.Compute("abc"u8).Value,
+				CreatedAt = DateTime.UtcNow
+			})
+			.ToList();
 
 	[Test]
 	public async Task Export_PackJsonAboveTheUnsignedManifestBound_IsRefusedAndWritesNothing()

@@ -118,10 +118,62 @@ public sealed class FileSystemIconStorage : IIconStorage
 		return await WriteAtomic(Path.Combine(directory, variant + ".webp"), content, cancellationToken);
 	}
 
+	public async Task<bool> WriteVariantIfIconExists(Guid packId,
+		Guid iconId,
+		string variant,
+		ReadOnlyMemory<byte> webpData,
+		CancellationToken cancellationToken)
+	{
+		var directory = IconDirectoryFor(packId, iconId);
+		if (!Directory.Exists(directory))
+		{
+			return false;
+		}
+
+		var path = Path.Combine(directory, variant + ".webp");
+		var tempPath = path + ".tmp";
+		try
+		{
+			await File.WriteAllBytesAsync(tempPath, webpData, cancellationToken);
+			File.Move(tempPath, path, overwrite: true);
+			return true;
+		}
+		catch (DirectoryNotFoundException)
+		{
+			return false;
+		}
+	}
+
 	public Stream? OpenVariant(Guid packId, Guid iconId, string variant)
 	{
 		var path = Path.Combine(IconDirectoryFor(packId, iconId), variant + ".webp");
 		return File.Exists(path) ? OpenRead(path) : null;
+	}
+
+	public IReadOnlyList<string> ListVariants(Guid packId, Guid iconId)
+	{
+		var directory = IconDirectoryFor(packId, iconId);
+		if (!Directory.Exists(directory))
+		{
+			return [];
+		}
+
+		return Directory.EnumerateFiles(directory, "*.webp")
+			.Select(Path.GetFileNameWithoutExtension)
+			.OfType<string>()
+			.ToList();
+	}
+
+	public void DeleteVariant(Guid packId, Guid iconId, string variant)
+	{
+		try
+		{
+			File.Delete(Path.Combine(IconDirectoryFor(packId, iconId), variant + ".webp"));
+		}
+		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+		{
+			_logger.Debug(ex, "Could not delete variant {Variant} of icon {IconId} in pack {PackId}", variant, iconId, packId);
+		}
 	}
 
 	public void DeleteIconFiles(Guid packId, Guid iconId)

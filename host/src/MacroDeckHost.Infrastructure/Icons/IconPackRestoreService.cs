@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.IO.Compression;
 using System.Text.Json;
 using MacroDeck.Plugin.Packaging.IconPacks;
@@ -204,16 +203,23 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 
 			var manifest = manifestResult.Data!;
 			var installed = _iconPackCache.GetIconsByPackId(packId);
-			var variantsByIconId = IndexVariantEntries(archive);
+			var mastersByIconId = IndexMasterEntries(archive);
 			var added = new List<IconEntity>();
 			var changed = new List<IconEntity>();
 
 			foreach (var entry in manifest.Icons)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
-				if (!variantsByIconId.TryGetValue(entry.Id, out var variants) ||
-					!variants.ContainsKey(IconVariants.Master))
+				if (!mastersByIconId.TryGetValue(entry.Id, out var masterEntry))
 				{
+					continue;
+				}
+
+				var incomingMaster = await HashEntry(masterEntry, cancellationToken);
+				var declared = ContentHash.Normalize(entry.MasterContentHash);
+				if (declared is not null && declared != incomingMaster)
+				{
+					_logger.Warning("Icon {IconId} fails its declared master hash during upgrade", entry.Id);
 					continue;
 				}
 
@@ -229,15 +235,12 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 						CreatedAt = entry.CreatedAt == default ? DateTime.UtcNow : entry.CreatedAt
 					};
 
-				var master = await WriteVariants(variants, packId, icon.Id, entry, cancellationToken);
-				if (master is null)
+				var masterChanged = existing is not null && existing.MasterContentHash != incomingMaster;
+				var master = await WriteMaster(masterEntry, packId, icon.Id, cancellationToken);
+				if (masterChanged)
 				{
-					if (existing is null)
-					{
-						_storage.DeleteIconFiles(packId, icon.Id);
-					}
-
-					continue;
+					existing!.AvailableSizes = [];
+					DeleteSizeVariants(packId, icon.Id);
 				}
 
 				icon.Name = entry.Name;
@@ -252,11 +255,6 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 				icon.OriginalFormat = entry.OriginalFormat;
 				icon.ProcessingState = IconProcessingState.Ready;
 				icon.MasterContentHash = master;
-				icon.AvailableSizes = variants.Keys
-					.Where(variant => variant != IconVariants.Master)
-					.Select(int.Parse)
-					.Order()
-					.ToList();
 				icon.UpdatedAt = DateTime.UtcNow;
 
 				if (existing is null)
@@ -339,7 +337,7 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 			}
 
 			var manifest = manifestResult.Data!;
-			var variantsByIconId = IndexVariantEntries(archive);
+			var mastersByIconId = IndexMasterEntries(archive);
 			var unmatched = _iconPackCache.GetIconsByPackId(packId).OrderBy(icon => icon.CreatedAt).ToList();
 			var added = new List<IconEntity>();
 			var updated = new List<IconEntity>();
@@ -349,8 +347,7 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 			{
 				cancellationToken.ThrowIfCancellationRequested();
 				if (!seenNames.Add(entry.Name) ||
-					!variantsByIconId.TryGetValue(entry.Id, out var variants) ||
-					!variants.TryGetValue(IconVariants.Master, out var masterEntry))
+					!mastersByIconId.TryGetValue(entry.Id, out var masterEntry))
 				{
 					continue;
 				}
@@ -400,18 +397,14 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 						CreatedAt = DateTime.UtcNow
 					};
 
-				var master = await WriteVariants(variants, packId, icon.Id, entry, cancellationToken);
-				if (master is null)
+				var master = await WriteMaster(masterEntry, packId, icon.Id, cancellationToken);
+				if (existing is not null)
 				{
-					if (existing is null)
-					{
-						_storage.DeleteIconFiles(packId, icon.Id);
-					}
-
-					continue;
+					existing.AvailableSizes = [];
+					DeleteSizeVariants(packId, icon.Id);
 				}
 
-				ApplyEntry(icon, entry, variants, master);
+				ApplyEntry(icon, entry, master);
 				if (existing is null)
 				{
 					added.Add(icon);
@@ -501,10 +494,7 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 		return hash.Finish();
 	}
 
-	private static void ApplyEntry(IconEntity icon,
-		IconManifestEntry entry,
-		Dictionary<string, ZipArchiveEntry> variants,
-		string master)
+	private static void ApplyEntry(IconEntity icon, IconManifestEntry entry, string master)
 	{
 		icon.Name = entry.Name;
 		icon.Width = entry.Width;
@@ -518,11 +508,7 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 		icon.ProcessingState = IconProcessingState.Ready;
 		icon.ProcessingError = null;
 		icon.MasterContentHash = master;
-		icon.AvailableSizes = variants.Keys
-			.Where(variant => variant != IconVariants.Master)
-			.Select(int.Parse)
-			.Order()
-			.ToList();
+		icon.AvailableSizes = [];
 		icon.UpdatedAt = DateTime.UtcNow;
 	}
 
@@ -546,33 +532,21 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 				icon.SourceIconId is null && string.Equals(icon.Name, entry.Name, StringComparison.OrdinalIgnoreCase));
 	}
 
-	private async Task<string?> WriteVariants(Dictionary<string, ZipArchiveEntry> variants,
+	private async Task<string> WriteMaster(ZipArchiveEntry masterEntry,
 		Guid packId,
 		Guid iconId,
-		IconManifestEntry entry,
 		CancellationToken cancellationToken)
 	{
-		string? master = null;
-		foreach (var (variant, zipEntry) in variants)
+		await using var entryStream = await masterEntry.OpenAsync(cancellationToken);
+		return await _storage.WriteVariant(packId, iconId, IconVariants.Master, entryStream, cancellationToken);
+	}
+
+	private void DeleteSizeVariants(Guid packId, Guid iconId)
+	{
+		foreach (var variant in _storage.ListVariants(packId, iconId).Where(variant => variant != IconVariants.Master))
 		{
-			await using var entryStream = await zipEntry.OpenAsync(cancellationToken);
-			var written = await _storage.WriteVariant(packId, iconId, variant, entryStream, cancellationToken);
-			if (variant != IconVariants.Master)
-			{
-				continue;
-			}
-
-			var declared = ContentHash.Normalize(entry.MasterContentHash);
-			if (declared is not null && declared != written)
-			{
-				_logger.Warning("Icon {IconId} fails its declared master hash during upgrade", entry.Id);
-				return null;
-			}
-
-			master = written;
+			_storage.DeleteVariant(packId, iconId, variant);
 		}
-
-		return master;
 	}
 
 	private async Task<string> StageToTempFile(Stream content, CancellationToken cancellationToken)
@@ -655,15 +629,14 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 		Guid? importBatchId,
 		CancellationToken cancellationToken)
 	{
-		var variantsByIconId = IndexVariantEntries(archive);
+		var mastersByIconId = IndexMasterEntries(archive);
 		var icons = new List<IconEntity>();
 		try
 		{
 			foreach (var entry in manifest.Icons)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
-				if (!variantsByIconId.TryGetValue(entry.Id, out var variants) ||
-					!variants.ContainsKey(IconVariants.Master))
+				if (!mastersByIconId.TryGetValue(entry.Id, out var masterEntry))
 				{
 					_logger.Warning("Icon {IconId} in pack archive has no master file; skipping", entry.Id);
 					continue;
@@ -684,54 +657,24 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 					OriginalFileName = entry.OriginalFileName,
 					OriginalFormat = entry.OriginalFormat,
 					ProcessingState = IconProcessingState.Ready,
-					AvailableSizes = variants.Keys
-						.Where(variant => variant != IconVariants.Master)
-						.Select(int.Parse)
-						.Order()
-						.ToList(),
 					ImportBatchId = importBatchId,
 					CreatedAt = entry.CreatedAt == default ? DateTime.UtcNow : entry.CreatedAt,
 					UpdatedAt = DateTime.UtcNow
 				};
 
-				var corrupted = false;
-				foreach (var (variant, zipEntry) in variants)
+				var written = await WriteMaster(masterEntry, targetPackId, icon.Id, cancellationToken);
+
+				// Checked against the bytes on disk: a declared hash that does not match them means a corrupt or
+				// edited archive, and a wrong image is worse than a missing one.
+				var declared = ContentHash.Normalize(entry.MasterContentHash);
+				if (declared is not null && declared != written)
 				{
-					await using var entryStream = await zipEntry.OpenAsync(cancellationToken);
-					var written = await _storage.WriteVariant(targetPackId,
-						icon.Id,
-						variant,
-						entryStream,
-						cancellationToken);
-
-					if (variant != IconVariants.Master)
-					{
-						continue;
-					}
-
-					// Verified against what landed on disk, not against what the manifest claims the source
-					// was: a declared hash that does not match the bytes beside it means the archive is
-					// corrupt or edited, and a wrong image is worse than a missing one. Only the master is
-					// checked - it is the rendition every size falls back to, and the one identity that
-					// travels with the icon.
-					var declared = ContentHash.Normalize(entry.MasterContentHash);
-					if (declared is not null && declared != written)
-					{
-						_logger.Warning("Icon {IconId} in pack archive fails its declared master hash; skipping",
-							entry.Id);
-						corrupted = true;
-						break;
-					}
-
-					icon.MasterContentHash = written;
-				}
-
-				if (corrupted)
-				{
+					_logger.Warning("Icon {IconId} in pack archive fails its declared master hash; skipping", entry.Id);
 					_storage.DeleteIconFiles(targetPackId, icon.Id);
 					continue;
 				}
 
+				icon.MasterContentHash = written;
 				icons.Add(icon);
 			}
 		}
@@ -748,34 +691,19 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 		return icons;
 	}
 
-	private static Dictionary<Guid, Dictionary<string, ZipArchiveEntry>> IndexVariantEntries(ZipArchive archive)
+	private static Dictionary<Guid, ZipArchiveEntry> IndexMasterEntries(ZipArchive archive)
 	{
-		var result = new Dictionary<Guid, Dictionary<string, ZipArchiveEntry>>();
+		var result = new Dictionary<Guid, ZipArchiveEntry>();
 		foreach (var entry in archive.Entries)
 		{
 			var segments = entry.FullName.Replace('\\', '/').Split('/');
-			if (segments.Length != 3 ||
-				!segments[0].Equals("icons", StringComparison.OrdinalIgnoreCase) ||
-				!Guid.TryParse(segments[1], out var iconId))
+			if (segments.Length == 3 &&
+				segments[0].Equals("icons", StringComparison.OrdinalIgnoreCase) &&
+				Guid.TryParse(segments[1], out var iconId) &&
+				segments[2].Equals(IconVariants.Master + ".webp", StringComparison.OrdinalIgnoreCase))
 			{
-				continue;
+				result[iconId] = entry;
 			}
-
-			var fileName = segments[2];
-			if (!fileName.EndsWith(".webp", StringComparison.OrdinalIgnoreCase))
-			{
-				continue;
-			}
-
-			var variant = Path.GetFileNameWithoutExtension(fileName);
-			var isMaster = variant.Equals(IconVariants.Master, StringComparison.OrdinalIgnoreCase);
-			if (!isMaster && !int.TryParse(variant, NumberStyles.None, CultureInfo.InvariantCulture, out _))
-			{
-				continue;
-			}
-
-			var variants = result.TryGetValue(iconId, out var existing) ? existing : result[iconId] = new();
-			variants[isMaster ? IconVariants.Master : variant] = entry;
 		}
 
 		return result;

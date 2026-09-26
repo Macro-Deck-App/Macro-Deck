@@ -129,6 +129,7 @@ internal sealed class PluginIconPackTestHost : IDisposable
 	public IconService IconService() => new(Icons.Cache,
 		Icons.Storage,
 		Icons.FallbackStore,
+		Icons.VariantDeriver,
 		Icons.Coalescer,
 		Icons.Mediator,
 		OwnerRegistry);

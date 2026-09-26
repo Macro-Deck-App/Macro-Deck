@@ -13,7 +13,7 @@ namespace MacroDeckHost.Tests.UnitTests.Icons;
 [TestFixture]
 public class IconPackRestoreServiceTests
 {
-	private static readonly int[] _size128 = [128];
+	private static readonly string[] _masterOnly = [IconVariants.Master];
 	private static readonly string[] _expectedRestoredFiles = ["pack.json", "master.webp"];
 
 	private IconTestHarness _harness = null!;
@@ -58,7 +58,7 @@ public class IconPackRestoreServiceTests
 			Assert.That(icons[0].Id, Is.Not.EqualTo(sourceIcon.Id));
 			Assert.That(icons[0].Name, Is.EqualTo("star"));
 			Assert.That(icons[0].ProcessingState, Is.EqualTo(IconProcessingState.Ready));
-			Assert.That(icons[0].AvailableSizes, Is.EqualTo(_size128));
+			Assert.That(icons[0].AvailableSizes, Is.Empty);
 			Assert.That(_harness.ProcessingChannel.Reader.TryRead(out _),
 				Is.False,
 				"a restore must never enqueue conversion work");
@@ -67,13 +67,7 @@ public class IconPackRestoreServiceTests
 				Is.True);
 		});
 
-		await using var master = _harness.Storage.OpenVariant(restored.Id, icons[0].Id, IconVariants.Master);
-		await using var variant = _harness.Storage.OpenVariant(restored.Id, icons[0].Id, "128");
-		Assert.Multiple(() =>
-		{
-			Assert.That(master, Is.Not.Null);
-			Assert.That(variant, Is.Not.Null);
-		});
+		Assert.That(_harness.Storage.ListVariants(restored.Id, icons[0].Id), Is.EqualTo(_masterOnly));
 	}
 
 	[Test]

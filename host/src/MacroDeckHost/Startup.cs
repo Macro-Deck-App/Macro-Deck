@@ -804,6 +804,7 @@ public class Startup
 		services.AddSingleton<IAppIconExtractor, AppIconExtractor>();
 		services.AddSingleton<IApplicationPathResolver, ApplicationPathResolver>();
 		services.AddSingleton<IIconImageFallbackStore, ImageSharpIconFallbackStore>();
+		services.AddSingleton<IIconVariantDeriver, ImageSharpIconVariantDeriver>();
 		services.AddSingleton<IconProcessingChannel>();
 		services.AddSingleton<IconImportBatchTracker>();
 		services.AddSingleton<IconImportBatchFinalizer>();

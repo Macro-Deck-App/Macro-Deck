@@ -19,8 +19,6 @@ public sealed class ImageSharpIconProcessor : IIconProcessor
 
 	private const int MaxLottieMasterEdge = 512;
 
-	private const int StaticQuality = 85;
-	private const int AnimatedQuality = 75;
 	private const string SvgFormatName = "Svg";
 	private const string LottieFormatName = "Lottie";
 
@@ -140,22 +138,9 @@ public sealed class ImageSharpIconProcessor : IIconProcessor
 			}));
 		}
 
-		// Animated icons are lossy like static ones, and at a cheaper encoder effort. Lossless was the
-		// original choice, and it does not survive a real animation: a 180-frame 400px GIF took 26 s
-		// to encode and its 256px rendition came out at 11.7 MB - larger than the master, because
-		// resampling turns palette-flat frames into noise lossless cannot compress. Lossy at
-		// Level2 encodes the same icon in 4 s with a 0.8 MB rendition, and the alpha plane stays exact,
-		// so a transparent frame still clears the one before it.
-		var encoder = isAnimated
-			? new WebpEncoder
-			{
-				FileFormat = WebpFileFormatType.Lossy,
-				Quality = AnimatedQuality,
-				Method = WebpEncodingMethod.Level2
-			}
-			: new WebpEncoder { FileFormat = WebpFileFormatType.Lossy, Quality = StaticQuality };
+		var encoder = IconWebpEncoding.For(isAnimated);
 
-		var masterWebp = await EncodeToBytes(image, encoder, cancellationToken);
+		var masterWebp = await IconWebpEncoding.EncodeToBytes(image, encoder, cancellationToken);
 
 		var variants = new Dictionary<int, byte[]>();
 		foreach (var size in IconVariants.TargetSizes)
@@ -170,7 +155,7 @@ public sealed class ImageSharpIconProcessor : IIconProcessor
 				Mode = ResizeMode.Max,
 				Size = new Size(size, size)
 			}));
-			variants[size] = await EncodeToBytes(variant, encoder, cancellationToken);
+			variants[size] = await IconWebpEncoding.EncodeToBytes(variant, encoder, cancellationToken);
 		}
 
 		var result = new ProcessedIconResult(masterWebp,
@@ -196,7 +181,7 @@ public sealed class ImageSharpIconProcessor : IIconProcessor
 		}
 
 		using var renderer = opened.Data!;
-		var encoder = new WebpEncoder { FileFormat = WebpFileFormatType.Lossy, Quality = StaticQuality };
+		var encoder = IconWebpEncoding.For(isAnimated: false);
 
 		await _lottieGate.WaitAsync(cancellationToken);
 		try
@@ -207,7 +192,7 @@ public sealed class ImageSharpIconProcessor : IIconProcessor
 			int frameCount;
 			using (var master = renderer.Render(MaxLottieMasterEdge, cancellationToken))
 			{
-				masterWebp = await EncodeToBytes(master, encoder, cancellationToken);
+				masterWebp = await IconWebpEncoding.EncodeToBytes(master, encoder, cancellationToken);
 				width = master.Width;
 				height = master.Height;
 				frameCount = master.Frames.Count;
@@ -222,7 +207,7 @@ public sealed class ImageSharpIconProcessor : IIconProcessor
 				}
 
 				using var variant = renderer.Render(size, cancellationToken);
-				variants[size] = await EncodeToBytes(variant, encoder, cancellationToken);
+				variants[size] = await IconWebpEncoding.EncodeToBytes(variant, encoder, cancellationToken);
 			}
 
 			var isAnimated = frameCount > 1;
@@ -263,15 +248,6 @@ public sealed class ImageSharpIconProcessor : IIconProcessor
 
 	private static bool LooksLikeGif(byte[] bytes)
 		=> bytes.Length > 3 && bytes[0] == (byte)'G' && bytes[1] == (byte)'I' && bytes[2] == (byte)'F';
-
-	private static async Task<byte[]> EncodeToBytes(Image image,
-		WebpEncoder encoder,
-		CancellationToken cancellationToken)
-	{
-		using var stream = new MemoryStream();
-		await image.SaveAsync(stream, encoder, cancellationToken);
-		return stream.ToArray();
-	}
 
 	private static void CopyAnimationMetadata(Image image)
 	{
