@@ -938,8 +938,6 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 	private async Task FinalizeExit(PluginRuntimeEntry entry, IPluginProcess process, string? launchId)
 	{
-		string? finishedLaunchId = null;
-
 		await entry.Gate.WaitAsync();
 		try
 		{
@@ -964,7 +962,9 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			if (launchId is not null)
 			{
 				_launchTokenService.Discard(launchId);
-				finishedLaunchId = launchId;
+				// Under the gate: the exit watcher and a stop both finalize, and the loser returns early, so a
+				// stop must not complete before the winner has cleared the journal.
+				await _journal.Remove(launchId);
 			}
 
 			process.Dispose();
@@ -1000,11 +1000,6 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		finally
 		{
 			entry.Gate.Release();
-		}
-
-		if (finishedLaunchId is not null)
-		{
-			await _journal.Remove(finishedLaunchId);
 		}
 	}
 

@@ -290,20 +290,33 @@ internal sealed class FakePluginRuntimeStateStore : IPluginRuntimeStateStore
 
 internal sealed class FakePluginProcessJournal : IPluginProcessJournal
 {
+	private readonly Lock _lock = new();
+
+	// Plugins finalize concurrently, so like the real journal every mutation is serialized.
 	public List<PluginProcessJournalEntry> Entries { get; } = [];
 
 	public PluginProcessJournalOwner? Owner { get; set; }
 
-	public PluginProcessJournalSnapshot Load() => new()
+	public PluginProcessJournalSnapshot Load()
 	{
-		Owner = Owner,
-		Entries = Entries.ToList()
-	};
+		lock (_lock)
+		{
+			return new PluginProcessJournalSnapshot
+			{
+				Owner = Owner,
+				Entries = Entries.ToList()
+			};
+		}
+	}
 
 	public Task Record(PluginProcessJournalEntry entry)
 	{
-		Entries.RemoveAll(existing => existing.LaunchId == entry.LaunchId);
-		Entries.Add(entry);
+		lock (_lock)
+		{
+			Entries.RemoveAll(existing => existing.LaunchId == entry.LaunchId);
+			Entries.Add(entry);
+		}
+
 		return Task.CompletedTask;
 	}
 
@@ -311,7 +324,11 @@ internal sealed class FakePluginProcessJournal : IPluginProcessJournal
 
 	public Task Remove(IReadOnlyCollection<string> launchIds)
 	{
-		Entries.RemoveAll(entry => launchIds.Contains(entry.LaunchId));
+		lock (_lock)
+		{
+			Entries.RemoveAll(entry => launchIds.Contains(entry.LaunchId));
+		}
+
 		return Task.CompletedTask;
 	}
 }
