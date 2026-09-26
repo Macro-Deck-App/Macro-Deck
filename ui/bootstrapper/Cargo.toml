@@ -31,9 +31,10 @@ tokio = { version = "1", features = ["macros", "sync", "time"] }
 # task and discards the result - the host needs to know whether showing actually worked.
 notify-rust = "4"
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
-# Already locked through tauri/reqwest; declared directly for the loopback secret.
+# The loopback secret and its HMACs.
 getrandom = "0.3"
 sha2 = "0.10"
+hmac = "0.12"
 hex = "0.4"
 
 # Sends the forced-stop SIGKILL to the host's process group rather than just its pid - see
