@@ -70,6 +70,13 @@ $role = if ($file.Extension -ieq '.tmp') {
 	throw "Refusing to spend an eSigner signature on unexpected executable: $($file.FullName)"
 }
 
+# Tauri re-signs any bundled executable that signtool finds unsigned. A dry run leaves
+# the host unsigned, so that second call is one a signed run never makes.
+if ($env:ESIGNER_DRY_RUN -eq 'true' -and $role -eq 'Host' -and $completedRoles -contains 'Host') {
+	Write-Host "[sign] Dry run: skipping Tauri's re-sign of the unsigned host; a signed run skips it too"
+	exit 0
+}
+
 $expectedPreviousRoles = switch ($role) {
 	'Host' { @() }
 	'App' { @('Host') }
