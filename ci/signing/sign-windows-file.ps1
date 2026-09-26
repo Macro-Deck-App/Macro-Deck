@@ -18,7 +18,7 @@ if ($file.Extension -ieq '.dll') {
 	Write-Host "[sign] Quota guard: skipping NSIS DLL $($file.Name)"
 	exit 0
 }
-if ($file.Extension -ine '.exe') {
+if ($file.Extension -notin '.exe', '.tmp') {
 	throw "Refusing to spend an eSigner signature on unexpected file type: $($file.FullName)"
 }
 
@@ -50,21 +50,24 @@ $completedRoles = if (Test-Path -LiteralPath $manifest) {
 }
 
 $name = $file.Name
-$role = if ($name -match '^MacroDeckHost(?:Development)?\.exe$') {
+$role = if ($file.Extension -ieq '.tmp') {
+	# NSIS hands the uninstaller to !uninstfinalize as an opaque nst*.tmp file. Accept
+	# it only as a PE file in the exact position Tauri signs the uninstaller.
+	$header = [byte[]]::new(2)
+	$stream = [System.IO.File]::OpenRead($file.FullName)
+	try { $null = $stream.Read($header, 0, 2) } finally { $stream.Dispose() }
+	if (($completedRoles -join ',') -ne 'Host,App' -or [System.Text.Encoding]::ASCII.GetString($header) -ne 'MZ') {
+		throw "Refusing to spend an eSigner signature on unexpected file: $($file.FullName)"
+	}
+	'Uninstaller'
+} elseif ($name -match '^MacroDeckHost(?:Development)?\.exe$') {
 	'Host'
 } elseif ($name -eq 'MacroDeck.exe') {
 	'App'
 } elseif ($name -match '-setup\.exe$') {
 	'Installer'
 } else {
-	# NSIS supplies a temporary path through !uninstfinalize; its generated
-	# filename is an implementation detail and is not the installed uninstall.exe.
-	# Accept that opaque name only in the exact position Tauri invokes it. This
-	# prevents an unexpected executable from silently spending another signature.
-	if (($completedRoles -join ',') -ne 'Host,App') {
-		throw "Refusing to spend an eSigner signature on unexpected executable: $($file.FullName)"
-	}
-	'Uninstaller'
+	throw "Refusing to spend an eSigner signature on unexpected executable: $($file.FullName)"
 }
 
 $expectedPreviousRoles = switch ($role) {
@@ -75,6 +78,14 @@ $expectedPreviousRoles = switch ($role) {
 }
 if (($completedRoles -join ',') -ne ($expectedPreviousRoles -join ',')) {
 	throw "Refusing out-of-order or duplicate $role signature; completed roles: $($completedRoles -join ', ')"
+}
+
+# CodeSignTool picks the signature format from the file extension, so a .tmp is
+# signed as an .exe copy that replaces the original once it verifies.
+$signPath = $file.FullName
+if ($file.Extension -ieq '.tmp') {
+	$signPath = Join-Path $env:RUNNER_TEMP "macro-deck-$($role.ToLowerInvariant())-$([guid]::NewGuid().ToString('N')).exe"
+	Copy-Item -LiteralPath $file.FullName -Destination $signPath
 }
 
 # A dry run authenticates with the same arguments through the same launcher but
@@ -89,6 +100,10 @@ if ($env:ESIGNER_DRY_RUN -eq 'true') {
 	if ($LASTEXITCODE -ne 0 -or -not ($output -match 'credential_info command executed successfully')) {
 		throw "eSigner credential check failed for $role with exit code $LASTEXITCODE"
 	}
+	if ($signPath -ne $file.FullName) {
+		Copy-Item -LiteralPath $signPath -Destination $file.FullName -Force
+		Remove-Item -LiteralPath $signPath
+	}
 	Add-Content -LiteralPath $manifest -Value "$role|$($file.FullName)"
 	Write-Host "[sign] Dry run: $role would spend one eSigner signature"
 	exit 0
@@ -100,19 +115,23 @@ Write-Host "[sign] Signing $role executable: $($file.FullName)"
 	"-password=$env:ES_PASSWORD" `
 	"-credential_id=$env:ES_CREDENTIAL_ID" `
 	"-totp_secret=$env:ES_TOTP_SECRET" `
-	"-input_file_path=$($file.FullName)" `
+	"-input_file_path=$signPath" `
 	'-override=true' `
 	'-malware_block=false'
 if ($LASTEXITCODE -ne 0) {
 	throw "eSigner failed for $($file.FullName) with exit code $LASTEXITCODE"
 }
 
-$signature = Get-AuthenticodeSignature -LiteralPath $file.FullName
+$signature = Get-AuthenticodeSignature -LiteralPath $signPath
 if ($signature.Status -ne 'Valid') {
 	throw "Invalid Authenticode signature for $($file.FullName): $($signature.Status) $($signature.StatusMessage)"
 }
 if (-not $signature.TimeStamperCertificate) {
 	throw "The Authenticode signature for $($file.FullName) has no timestamp"
+}
+if ($signPath -ne $file.FullName) {
+	Copy-Item -LiteralPath $signPath -Destination $file.FullName -Force
+	Remove-Item -LiteralPath $signPath
 }
 
 Add-Content -LiteralPath $manifest -Value "$role|$($file.FullName)"
