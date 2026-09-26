@@ -11953,6 +11953,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Aktualizaci na Macro Deck {version} se nepodařilo dokončit</value>
     <comment>[version:string]</comment>
   </data>
+  <data name="Notifications.UpdateCheckFailed" xml:space="preserve">
+    <value>Nepodařilo se zkontrolovat aktualizace</value>
+  </data>
   <data name="Plugins.BeforeYouInstallTitle" xml:space="preserve">
     <value>Než budete instalovat</value>
   </data>

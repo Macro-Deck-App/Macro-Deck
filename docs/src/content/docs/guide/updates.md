@@ -12,6 +12,10 @@ Choose how Macro Deck handles new versions in **Settings > About**, under **Upda
 | **Notify only** | Macro Deck tells you and asks before it downloads and installs anything. This is the default. |
 | **Automatic** | Macro Deck downloads the update in the background and installs it when you quit Macro Deck. Windows and macOS only. |
 
+If Macro Deck cannot reach the update server, for example while you are offline, a notification says it could
+not check for updates. You see it once: while checks keep failing, Macro Deck does not warn again until a check
+succeeds or Macro Deck restarts. **Check for updates** tries again right away.
+
 ## Automatic installs
 
 An automatic download finishes quietly: no dialog opens and nothing restarts while you work. The next

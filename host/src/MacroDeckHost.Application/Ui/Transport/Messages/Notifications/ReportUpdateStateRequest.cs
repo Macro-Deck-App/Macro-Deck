@@ -2,7 +2,7 @@ namespace MacroDeckHost.Application.Ui.Transport.Messages.Notifications;
 
 public class ReportUpdateStateRequest
 {
-	public string Version { get; set; } = string.Empty;
+	public string? Version { get; set; }
 
 	public string Phase { get; set; } = string.Empty;
 
@@ -15,6 +15,8 @@ public class ReportUpdateStateRequest
 	public int? Percent { get; set; }
 
 	public string? Error { get; set; }
+
+	public string? Failure { get; set; }
 
 	public bool CanInstall { get; set; }
 }
