@@ -669,7 +669,7 @@ jobs:
       # and final installer. Calls for Tauri's five NSIS DLLs are deliberate no-ops.
       - name: Bundle NSIS installer
         working-directory: ui/bootstrapper
-        run: npm run tauri bundle -- --bundles nsis --config release.conf.json --config version-override.json
+        run: npm run tauri bundle -- --bundles nsis --config release.conf.json --config version-override.json --verbose
         env:
           WINDOWS_SIGNING_ENABLED: ${{ inputs.sign_windows }}
           ES_USERNAME: ${{ inputs.sign_windows && secrets.ES_USERNAME || '' }}
