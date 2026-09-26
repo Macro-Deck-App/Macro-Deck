@@ -97,7 +97,7 @@ if ($env:ESIGNER_DRY_RUN -eq 'true') {
 		"-password=$env:ES_PASSWORD" `
 		"-credential_id=$env:ES_CREDENTIAL_ID" 2>&1 | ForEach-Object { "$_" })
 	$output | ForEach-Object { Write-Host $_ }
-	if ($LASTEXITCODE -ne 0 -or -not ($output -match 'credential_info command executed successfully')) {
+	if ($LASTEXITCODE -ne 0 -or -not ($output -match '^- Certificate Expiry: ')) {
 		throw "eSigner credential check failed for $role with exit code $LASTEXITCODE"
 	}
 	if ($signPath -ne $file.FullName) {
