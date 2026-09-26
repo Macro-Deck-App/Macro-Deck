@@ -8,13 +8,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MacroDeckHost.Application.Ui.Handlers;
 
-// Registered as a singleton (see Startup.AddUiTransport override) so the availability and
-// downloading dedupe state below survives across requests - each report from the bootstrapper
-// arrives as its own scoped call, and there is nowhere else to remember what was last announced.
+// A singleton (see Startup.AddUiTransport) because every bootstrapper report is its own call,
+// and the announcement, download and check-failure dedupe state has to outlive it.
 public class ReportUpdateStateRequestMessageHandler
 	: IUiTransportMessageHandler<ReportUpdateStateRequest, ReportUpdateStateResponse>
 {
 	private const string DedupeKey = "update";
+	private const string CheckFailureDedupeKey = "update-check";
 
 	private readonly IUserNotificationStore _store;
 	private readonly IServiceScopeFactory _scopeFactory;
@@ -23,6 +23,7 @@ public class ReportUpdateStateRequestMessageHandler
 	private readonly object _stateLock = new();
 	private string? _lastAnnouncedAvailableVersion;
 	private bool _downloadRaisedForCurrentPhase;
+	private bool _checkFailureAnnounced;
 
 	public ReportUpdateStateRequestMessageHandler(
 		IUserNotificationStore store,
@@ -71,6 +72,16 @@ public class ReportUpdateStateRequestMessageHandler
 				break;
 
 			case "upToDate":
+				lock (_stateLock)
+				{
+					_downloadRaisedForCurrentPhase = false;
+					_checkFailureAnnounced = false;
+				}
+
+				_store.DismissByKey(DedupeKey);
+				_store.DismissByKey(CheckFailureDedupeKey);
+				break;
+
 			case "installing":
 				lock (_stateLock)
 				{
@@ -86,14 +97,18 @@ public class ReportUpdateStateRequestMessageHandler
 
 	private async ValueTask HandleAvailable(ReportUpdateStateRequest request)
 	{
+		bool alreadyAnnounced;
 		lock (_stateLock)
 		{
-			if (_lastAnnouncedAvailableVersion == request.Version)
-			{
-				return;
-			}
-
+			_checkFailureAnnounced = false;
+			alreadyAnnounced = _lastAnnouncedAvailableVersion == request.Version;
 			_lastAnnouncedAvailableVersion = request.Version;
+		}
+
+		_store.DismissByKey(CheckFailureDedupeKey);
+		if (alreadyAnnounced)
+		{
+			return;
 		}
 
 		var culture = await ActiveLocalization.Culture(_scopeFactory);
@@ -113,8 +128,7 @@ public class ReportUpdateStateRequestMessageHandler
 			Severity = UserNotificationSeverity.Info,
 			Kind = UserNotificationKind.Update,
 			Title = _localization.Resolve(AppStrings.Notifications.UpdateAvailable(version: request.Version),
-					culture) ??
-				request.Version,
+					culture),
 			Message = _localization.Resolve(AppStrings.Notifications.UpdateAvailableMessage(version: request.Version),
 				culture),
 			Actions = actions,
@@ -144,10 +158,8 @@ public class ReportUpdateStateRequestMessageHandler
 		{
 			Severity = UserNotificationSeverity.Info,
 			Kind = UserNotificationKind.Update,
-			Title
-				= _localization.Resolve(AppStrings.Notifications.UpdateDownloading(version: request.Version),
-					culture) ??
-				request.Version,
+			Title = _localization.Resolve(AppStrings.Notifications.UpdateDownloading(version: request.Version),
+				culture),
 			Progress = progress,
 			CancelKey = DedupeKey,
 			Actions = [new UserNotificationAction(UserNotificationActionKind.OpenUpdateDetails, request.Version)],
@@ -167,8 +179,7 @@ public class ReportUpdateStateRequestMessageHandler
 		{
 			Severity = UserNotificationSeverity.Info,
 			Kind = UserNotificationKind.Update,
-			Title = _localization.Resolve(AppStrings.Notifications.UpdateReady(version: request.Version), culture) ??
-				request.Version,
+			Title = _localization.Resolve(AppStrings.Notifications.UpdateReady(version: request.Version), culture),
 			Actions =
 			[
 				new UserNotificationAction(UserNotificationActionKind.OpenUpdateDetails, request.Version),
@@ -181,6 +192,12 @@ public class ReportUpdateStateRequestMessageHandler
 
 	private async ValueTask HandleFailed(ReportUpdateStateRequest request)
 	{
+		if (IsCheckFailure(request))
+		{
+			await HandleCheckFailed(request);
+			return;
+		}
+
 		lock (_stateLock)
 		{
 			_downloadRaisedForCurrentPhase = false;
@@ -193,8 +210,7 @@ public class ReportUpdateStateRequestMessageHandler
 		{
 			Severity = UserNotificationSeverity.Warning,
 			Kind = UserNotificationKind.Update,
-			Title = _localization.Resolve(AppStrings.Notifications.UpdateFailed(version: request.Version), culture) ??
-				request.Version,
+			Title = _localization.Resolve(AppStrings.Notifications.UpdateFailed(version: request.Version), culture),
 			Message = request.Error,
 			Actions =
 			[
@@ -204,4 +220,36 @@ public class ReportUpdateStateRequestMessageHandler
 			DedupeKey = DedupeKey
 		});
 	}
+
+	private async ValueTask HandleCheckFailed(ReportUpdateStateRequest request)
+	{
+		lock (_stateLock)
+		{
+			if (_checkFailureAnnounced)
+			{
+				return;
+			}
+
+			_checkFailureAnnounced = true;
+		}
+
+		var culture = await ActiveLocalization.Culture(_scopeFactory);
+		_store.Raise(new UserNotificationDraft
+		{
+			Severity = UserNotificationSeverity.Warning,
+			Kind = UserNotificationKind.Update,
+			Title = _localization.Resolve(AppStrings.Notifications.UpdateCheckFailed(), culture),
+			Message = request.Error,
+			Actions =
+			[
+				new UserNotificationAction(UserNotificationActionKind.OpenUpdateDetails, request.Version),
+				new UserNotificationAction(UserNotificationActionKind.DismissNotification, null)
+			],
+			DedupeKey = CheckFailureDedupeKey
+		});
+	}
+
+	// Older bootstrappers send no failure kind; without a version, only a check can have failed.
+	private static bool IsCheckFailure(ReportUpdateStateRequest request)
+		=> request.Failure is null ? request.Version is null : request.Failure == "check";
 }

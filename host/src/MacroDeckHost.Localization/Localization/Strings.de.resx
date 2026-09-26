@@ -11951,6 +11951,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Das Update auf Macro Deck {version} konnte nicht abgeschlossen werden</value>
     <comment>[version:string]</comment>
   </data>
+  <data name="Notifications.UpdateCheckFailed" xml:space="preserve">
+    <value>Updates konnten nicht geprüft werden</value>
+  </data>
   <data name="Plugins.BeforeYouInstallTitle" xml:space="preserve">
     <value>Vor der Installation</value>
   </data>

@@ -11953,6 +11953,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>No se pudo completar la actualización a Macro Deck {version}</value>
     <comment>[version:string]</comment>
   </data>
+  <data name="Notifications.UpdateCheckFailed" xml:space="preserve">
+    <value>No se pudieron buscar actualizaciones</value>
+  </data>
   <data name="Plugins.BeforeYouInstallTitle" xml:space="preserve">
     <value>Antes de instalar</value>
   </data>

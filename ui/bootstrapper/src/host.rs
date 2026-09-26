@@ -18,7 +18,7 @@ use crate::host_supervisor::{Decision, ExitAction, Supervisor, MAX_RESTART_ATTEM
 use crate::localization::{self, keys};
 use crate::logging::{self, LogTail};
 use crate::loopback_secret;
-use crate::update_state::UpdateSnapshot;
+use crate::update_state::{UpdateFailure, UpdateSnapshot};
 
 pub const BUILD_CHANNEL: &str = env!("MACRODECK_BUILD_CHANNEL");
 
@@ -1225,6 +1225,7 @@ struct UpdateStateBody<'a> {
     // any consumer that wants the raw counts.
     percent: Option<u8>,
     error: Option<&'a str>,
+    failure: Option<UpdateFailure>,
     can_install: bool,
 }
 
@@ -1341,7 +1342,19 @@ async fn report_update_state_as(app: &AppHandle, snapshot: &UpdateSnapshot, phas
         return false;
     };
 
-    let body = UpdateStateBody {
+    let body = update_state_body(snapshot, phase);
+
+    match post_update_state(port, &body).await {
+        Ok(()) => true,
+        Err(error) => {
+            logging::warn(&format!("[host] update-state report failed: {error}"));
+            false
+        }
+    }
+}
+
+fn update_state_body<'a>(snapshot: &'a UpdateSnapshot, phase: &'a str) -> UpdateStateBody<'a> {
+    UpdateStateBody {
         version: snapshot.version.as_deref(),
         phase,
         published_at: snapshot.published_at.as_deref(),
@@ -1358,21 +1371,67 @@ async fn report_update_state_as(app: &AppHandle, snapshot: &UpdateSnapshot, phas
             .as_ref()
             .and_then(|progress| progress.percent),
         error: snapshot.error.as_deref(),
+        failure: snapshot.failure,
         can_install: snapshot.install_strategy.installs_in_app(),
-    };
-
-    match post_update_state(port, &body).await {
-        Ok(()) => true,
-        Err(error) => {
-            logging::warn(&format!("[host] update-state report failed: {error}"));
-            false
-        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::release_notes::ReleaseNotes;
+    use crate::update_channel::UpdateChannel;
+    use crate::update_state::UpdateState;
+    use crate::updater::UpdateInstallStrategy;
+
+    fn idle_update_state() -> UpdateState {
+        UpdateState::idle(
+            "3.0.0".to_string(),
+            UpdateChannel::Stable,
+            UpdateInstallStrategy::InApp,
+            "https://macro-deck.app/download",
+        )
+    }
+
+    #[test]
+    fn a_failed_check_tells_the_host_it_was_the_check_that_failed() {
+        let mut state = idle_update_state();
+        state.record_available(1, "3.1.0".to_string(), ReleaseNotes::Empty, None, None);
+        state.record_check_failed(2, "feed unreachable".to_string());
+        let snapshot = state.snapshot();
+
+        let body = serde_json::to_value(update_state_body(&snapshot, "failed")).unwrap();
+
+        assert_eq!(body["phase"], "failed");
+        assert_eq!(body["failure"], "check");
+        assert_eq!(body["version"], "3.1.0");
+    }
+
+    #[test]
+    fn a_failed_download_tells_the_host_it_was_the_install_that_failed() {
+        let mut state = idle_update_state();
+        state.record_available(1, "3.1.0".to_string(), ReleaseNotes::Empty, None, None);
+        assert!(state.try_begin_download());
+        state.record_install_failed("connection reset".to_string());
+        let snapshot = state.snapshot();
+
+        let body = serde_json::to_value(update_state_body(&snapshot, "failed")).unwrap();
+
+        assert_eq!(body["failure"], "install");
+    }
+
+    #[test]
+    fn an_up_to_date_report_carries_no_version_and_no_failure() {
+        let mut state = idle_update_state();
+        state.record_check_failed(1, "feed unreachable".to_string());
+        state.record_up_to_date(2, None);
+        let snapshot = state.snapshot();
+
+        let body = serde_json::to_value(update_state_body(&snapshot, "upToDate")).unwrap();
+
+        assert!(body["version"].is_null());
+        assert!(body["failure"].is_null());
+    }
 
     #[test]
     fn a_successful_backup_lets_the_update_proceed() {

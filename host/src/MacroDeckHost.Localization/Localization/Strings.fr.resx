@@ -11953,6 +11953,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>La mise à jour vers Macro Deck {version} n'a pas pu être terminée</value>
     <comment>[version:string]</comment>
   </data>
+  <data name="Notifications.UpdateCheckFailed" xml:space="preserve">
+    <value>Impossible de vérifier les mises à jour</value>
+  </data>
   <data name="Plugins.BeforeYouInstallTitle" xml:space="preserve">
     <value>Avant d'installer</value>
   </data>

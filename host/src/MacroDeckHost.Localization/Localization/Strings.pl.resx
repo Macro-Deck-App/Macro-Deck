@@ -11953,6 +11953,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Nie udało się ukończyć aktualizacji do Macro Deck {version}</value>
     <comment>[version:string]</comment>
   </data>
+  <data name="Notifications.UpdateCheckFailed" xml:space="preserve">
+    <value>Nie udało się sprawdzić dostępności aktualizacji</value>
+  </data>
   <data name="Plugins.BeforeYouInstallTitle" xml:space="preserve">
     <value>Zanim zainstalujesz</value>
   </data>

@@ -11953,6 +11953,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>Non è stato possibile completare l'aggiornamento a Macro Deck {version}</value>
     <comment>[version:string]</comment>
   </data>
+  <data name="Notifications.UpdateCheckFailed" xml:space="preserve">
+    <value>Impossibile controllare gli aggiornamenti</value>
+  </data>
   <data name="Plugins.BeforeYouInstallTitle" xml:space="preserve">
     <value>Prima di installare</value>
   </data>
