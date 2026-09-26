@@ -60,8 +60,17 @@ fn traffic_light_position(title_bar_height: f64) -> tauri::LogicalPosition<f64> 
     tauri::LogicalPosition::new(top, top + WINDOW_BUTTON_CONTAINER_OFFSET)
 }
 
-fn packaged_window_url(port: u16, version: &str) -> String {
-    format!("http://127.0.0.1:{port}/admin?v={version}")
+const VERSION_QUERY: &percent_encoding::AsciiSet =
+    &percent_encoding::NON_ALPHANUMERIC.remove(b'.').remove(b'-');
+
+fn packaged_window_url(port: u16, version: &str, code: Option<&str>) -> String {
+    let version = percent_encoding::utf8_percent_encode(version, VERSION_QUERY);
+    match code {
+        Some(code) => {
+            format!("http://127.0.0.1:{port}/api/auth/loopback-session?code={code}&v={version}")
+        }
+        None => format!("http://127.0.0.1:{port}/admin?v={version}"),
+    }
 }
 
 pub fn main_window_url(app: &AppHandle) -> Option<String> {
@@ -76,7 +85,11 @@ pub fn main_window_url(app: &AppHandle) -> Option<String> {
         // beta RPM the latter is the mapped version, so two different beta
         // builds would cache-bust to the same URL and WebKitGTK could serve the
         // pre-upgrade /admin document after the upgrade (issue #271).
-        Some(packaged_window_url(port, &updater::current_version(app)))
+        Some(packaged_window_url(
+            port,
+            &updater::current_version(app),
+            crate::loopback_secret::fresh_session_code().as_deref(),
+        ))
     } else {
         Some(
             app.config()
@@ -257,6 +270,7 @@ fn ensure_main_window_capability(app: &AppHandle, url: &tauri::Url) {
         .permission("allow-get-hide-dock-icon")
         .permission("allow-set-hide-dock-icon")
         .permission("allow-set-appearance")
+        .permission("allow-reauthenticate")
         .permission("core:event:allow-listen")
         .permission("core:event:allow-unlisten");
     if let Err(error) = app.add_capability(capability) {
@@ -459,16 +473,24 @@ mod tests {
     #[test]
     fn packaged_window_url_is_cache_busted_by_version() {
         assert_eq!(
-            packaged_window_url(51000, "3.0.0-beta.7"),
+            packaged_window_url(51000, "3.0.0-beta.7", None),
             "http://127.0.0.1:51000/admin?v=3.0.0-beta.7"
+        );
+    }
+
+    #[test]
+    fn packaged_window_url_enters_through_the_session_code() {
+        assert_eq!(
+            packaged_window_url(51000, "3.0.0-beta.7+build.5", Some("1.ab.cd")),
+            "http://127.0.0.1:51000/api/auth/loopback-session?code=1.ab.cd&v=3.0.0-beta.7%2Bbuild.5"
         );
     }
 
     #[test]
     fn packaged_window_url_differs_between_versions() {
         assert_ne!(
-            packaged_window_url(51000, "3.0.0-beta.6"),
-            packaged_window_url(51000, "3.0.0-beta.7")
+            packaged_window_url(51000, "3.0.0-beta.6", None),
+            packaged_window_url(51000, "3.0.0-beta.7", None)
         );
     }
 
@@ -477,10 +499,12 @@ mod tests {
         let url_42 = packaged_window_url(
             51000,
             &updater::current_version_for("3.0.0-beta.42", "3.0.0"),
+            None,
         );
         let url_43 = packaged_window_url(
             51000,
             &updater::current_version_for("3.0.0-beta.43", "3.0.0"),
+            None,
         );
         assert_ne!(url_42, url_43);
     }
@@ -489,7 +513,9 @@ mod tests {
     fn packaged_window_url_origin_is_unchanged_by_the_cache_bust() {
         // The query string must not change the origin (scheme://host:port), or
         // localStorage/cookies and the runtime IPC capability would not survive.
-        let url: tauri::Url = packaged_window_url(51000, "3.0.0-beta.7").parse().unwrap();
+        let url: tauri::Url = packaged_window_url(51000, "3.0.0-beta.7", None)
+            .parse()
+            .unwrap();
         assert_eq!(url.authority(), "127.0.0.1:51000");
     }
 

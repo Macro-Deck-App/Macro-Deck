@@ -53,6 +53,9 @@
     getShellInfo: function () {
       return invoke('get_shell_info');
     },
+    reauthenticate: function () {
+      return invoke('reauthenticate');
+    },
     getCursorPosition: function () {
       return invoke('get_cursor_position');
     },

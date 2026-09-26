@@ -16,6 +16,10 @@ public static class LockedHostApplicationBuilderExtensions
 		// ui/bootstrapper/src/host.rs waits on these two and gives up with a blocking error dialog.
 		"/api/system/version",
 		"/api/auth/status",
+		"/api/auth/loopback-proof",
+
+		// The desktop window enters through this to be trusted, and the unlock gate needs that trust.
+		"/api/auth/loopback-session",
 
 		// Without this the bootstrapper's graceful stop is skipped and the host is killed after 5s.
 		"/api/host/shutdown",

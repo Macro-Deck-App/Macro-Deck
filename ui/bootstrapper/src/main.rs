@@ -18,6 +18,7 @@ mod host_supervisor;
 mod install_state;
 mod localization;
 mod logging;
+mod loopback_secret;
 mod menu;
 mod notifications;
 mod opened_files;
@@ -173,6 +174,7 @@ fn main() {
         .manage(opened_files::PendingOpenFiles::default())
         .invoke_handler(tauri::generate_handler![
             bridge::get_host_port,
+            bridge::reauthenticate,
             bridge::get_shell_info,
             bridge::get_cursor_position,
             bridge::open_external,

@@ -1,7 +1,13 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Subject } from 'rxjs';
-import { AuthService, AUTH_REQUIRED_SCOPE, ENROLLMENT_URL_ENVIRONMENT } from './auth.service';
+import {
+  AuthService,
+  AUTH_REQUIRED_SCOPE,
+  ENROLLMENT_URL_ENVIRONMENT,
+  LOOPBACK_REAUTH_ENVIRONMENT,
+  LoopbackReauthEnvironment,
+} from './auth.service';
 import { CROSS_TAB_LOCK_ENVIRONMENT, CrossTabLockEnvironment } from './cross-tab-lock';
 import { DeviceIdentityService } from './device-identity.service';
 import { ApiService } from '../transport/api.service';
@@ -50,7 +56,8 @@ describe('AuthService', () => {
 
   function configure(
     requiredScope: AuthScope | null = null,
-    hash = ''
+    hash = '',
+    reauth: LoopbackReauthEnvironment | null = null
   ): { auth: AuthService; api: ApiService } {
     lockRequests = [];
     clearedHash = false;
@@ -64,6 +71,7 @@ describe('AuthService', () => {
           provide: ENROLLMENT_URL_ENVIRONMENT,
           useValue: { readHash: () => hash, clearHash: () => { clearedHash = true; } },
         },
+        ...(reauth ? [{ provide: LOOPBACK_REAUTH_ENVIRONMENT, useValue: reauth }] : []),
       ],
     });
     return { auth: TestBed.inject(AuthService), api: TestBed.inject(ApiService) };
@@ -81,6 +89,100 @@ describe('AuthService', () => {
       return Promise.reject(new Error(`unrouted fetch: ${url}`));
     });
   }
+
+  describe('desktop window that lost its loopback session', () => {
+    const untrusted = (setupComplete = true) => () => jsonResponse({
+      setupComplete, authenticated: false, trusted: false, scope: null, username: null,
+    });
+    const trusted = () => jsonResponse({
+      setupComplete: true, authenticated: true, trusted: true, scope: 'admin', username: 'admin',
+    });
+
+    function shell(clock = { now: 100000 }): { environment: LoopbackReauthEnvironment; calls: () => number } {
+      let lastAttempt: number | null = null;
+      let calls = 0;
+      return {
+        environment: {
+          reauthenticate: () => {
+            calls++;
+            return Promise.resolve();
+          },
+          lastAttempt: () => lastAttempt,
+          recordAttempt: (at) => { lastAttempt = at; },
+          now: () => clock.now,
+        },
+        calls: () => calls,
+      };
+    }
+
+    it('asks the shell for a fresh session instead of showing the login form', async () => {
+      const desktop = shell();
+      const { auth } = configure(null, '', desktop.environment);
+      mockFetch({ '/api/auth/status': untrusted() });
+
+      await auth.bootstrap();
+
+      expect(desktop.calls()).toBe(1);
+      expect(auth.state()).toBe('unknown');
+    });
+
+    it('asks the shell before offering first-run setup, which only a trusted window can finish', async () => {
+      const desktop = shell();
+      const { auth } = configure(null, '', desktop.environment);
+      mockFetch({ '/api/auth/status': untrusted(false) });
+
+      await auth.bootstrap();
+
+      expect(desktop.calls()).toBe(1);
+      expect(auth.state()).not.toBe('setupRequired');
+    });
+
+    it('falls through to the ordinary paths when a fresh session did not help within 30 seconds', async () => {
+      const clock = { now: 100000 };
+      const desktop = shell(clock);
+      const { auth } = configure(null, '', desktop.environment);
+      mockFetch({ '/api/auth/status': untrusted(false) });
+
+      await auth.bootstrap();
+      clock.now += 29000;
+      await auth.bootstrap();
+
+      expect(desktop.calls()).toBe(1);
+      expect(auth.state()).toBe('setupRequired');
+    });
+
+    it('asks the shell again when a trusted window starts getting 401s', async () => {
+      const desktop = shell();
+      const { auth, api } = configure(null, '', desktop.environment);
+      mockFetch({
+        '/api/auth/status': trusted,
+        '/api/profiles': () => jsonResponse({}, 401),
+      });
+      await auth.bootstrap();
+
+      await api.getProfiles().catch(() => undefined);
+
+      expect(auth.trusted()).toBeTrue();
+      expect(desktop.calls()).toBe(1);
+    });
+
+    it('never asks outside the desktop shell', async () => {
+      const { auth } = configure(null, '', {
+        reauthenticate: undefined,
+        lastAttempt: () => null,
+        recordAttempt: () => {},
+        now: () => 0,
+      });
+      mockFetch({
+        '/api/auth/status': untrusted(),
+        '/api/auth/refresh': () => jsonResponse({}, 401),
+      });
+
+      await auth.bootstrap();
+
+      expect(auth.state()).toBe('loggedOut');
+    });
+  });
 
   describe('device enrollment (issue #727)', () => {
     const session = () => new Response(JSON.stringify({

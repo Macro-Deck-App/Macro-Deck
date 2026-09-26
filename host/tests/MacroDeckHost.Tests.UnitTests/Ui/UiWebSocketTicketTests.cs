@@ -79,6 +79,36 @@ public sealed class UiWebSocketTicketTests
 	}
 
 	[Test]
+	public void The_desktop_session_cookie_alone_mints_and_redeems_a_ticket()
+	{
+		Assert.That(_tickets.TryCreate(DesktopSessionContext(), Principal("desktop"), out var ticket), Is.True);
+
+		Assert.That(_tickets.TryRedeem(DesktopSessionContext(), ticket.Value, out var redeemed), Is.True);
+		Assert.That(redeemed.FindFirst(AuthDefaults.DeviceClaim)?.Value, Is.EqualTo("desktop"));
+	}
+
+	[Test]
+	public void A_desktop_ticket_does_not_redeem_on_a_loopback_connection_without_the_session()
+	{
+		Assert.That(_tickets.TryCreate(DesktopSessionContext(), Principal("desktop"), out var ticket), Is.True);
+
+		Assert.That(_tickets.TryRedeem(LoopbackContext(), ticket.Value, out _), Is.False);
+	}
+
+	[Test]
+	public void A_signed_in_caller_on_the_loopback_listener_gets_a_ticket_bound_to_that_listener()
+	{
+		Assert.That(_tickets.TryCreate(LoopbackContext(), Principal("device-1"), out var ticket), Is.True);
+		Assert.That(_tickets.TryRedeem(LoopbackContext(), ticket.Value, out var redeemed), Is.True);
+		Assert.That(redeemed.FindFirst(AuthDefaults.ScopeClaim)?.Value, Is.EqualTo(AuthDefaults.ClientScope));
+
+		Assert.That(_tickets.TryCreate(LoopbackContext(), Principal("device-1"), out var second), Is.True);
+		Assert.That(_tickets.TryRedeem(PublicContext(null), second.Value, out _), Is.False);
+		Assert.That(_tickets.TryCreate(LoopbackContext(), Principal("device-1"), out var third), Is.True);
+		Assert.That(_tickets.TryRedeem(DesktopSessionContext(), third.Value, out _), Is.False);
+	}
+
+	[Test]
 	public void Expired_ticket_cannot_be_redeemed()
 	{
 		Assert.That(_tickets.TryCreate(PublicContext(null), Principal("device-1"), out var ticket), Is.True);
@@ -130,6 +160,13 @@ public sealed class UiWebSocketTicketTests
 
 	private static DefaultHttpContext LoopbackContext()
 		=> Context(LoopbackPort, IPAddress.Loopback, "localhost");
+
+	private static DefaultHttpContext DesktopSessionContext()
+	{
+		var context = LoopbackContext();
+		context.Request.Headers.Cookie = $"md_loopback_{LoopbackPort}={LoopbackSecret.SessionCookieValue()}";
+		return context;
+	}
 
 	private static DefaultHttpContext Context(int localPort, IPAddress remoteAddress, string host)
 	{

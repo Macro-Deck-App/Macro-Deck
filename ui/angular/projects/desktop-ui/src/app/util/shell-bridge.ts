@@ -58,6 +58,7 @@ export interface ShellBridge {
   saveFile?: (options: ShellSaveFileOptions) => Promise<ShellSaveFileResult>;
   saveBackup?: (options: ShellSaveBackupOptions) => Promise<ShellSaveFileResult>;
   setHotkeyCapture?: (active: boolean) => Promise<void>;
+  reauthenticate?: () => Promise<void>;
 }
 
 export function shellBridge(): ShellBridge | undefined {

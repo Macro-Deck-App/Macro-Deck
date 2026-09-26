@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { LOOPBACK_URL, PUBLIC_URL } from '../playwright.config.js';
+import { loopbackHeaders, openDesktop } from './loopback.js';
 
 const USERNAME = 'e2e-user';
 const PASSWORD = 'macro-deck-e2e-password';
@@ -57,7 +58,7 @@ async function waitForHost(request) {
 // Every locator below matches on English text. Stating that dependency here means a moved default
 // fails once, instead of later as a pile of unfindable elements.
 async function assertHostServesEnglish(request) {
-  const response = await request.get(`${LOOPBACK_URL}/api/localization`);
+  const response = await request.get(`${LOOPBACK_URL}/api/localization`, { headers: loopbackHeaders() });
   expect(response.ok()).toBe(true);
 
   const localization = await response.json();
@@ -66,7 +67,7 @@ async function assertHostServesEnglish(request) {
 }
 
 async function getProfiles(request) {
-  const response = await request.get(`${LOOPBACK_URL}/api/profiles`);
+  const response = await request.get(`${LOOPBACK_URL}/api/profiles`, { headers: loopbackHeaders() });
   expect(response.ok()).toBe(true);
   return (await response.json()).profiles;
 }
@@ -129,7 +130,7 @@ test.describe('Macro Deck core E2E', () => {
   test('@smoke completes first-run setup through the Admin UI', async ({ page, request }) => {
     const assertNoUnexpectedFailures = watchForUnexpectedFailures(page);
 
-    await page.goto('/admin');
+    await openDesktop(page);
     await expect(page.getByRole('heading', { name: 'Welcome to Macro Deck' })).toBeVisible();
 
     await page.getByLabel('Username').fill(USERNAME);
@@ -142,6 +143,8 @@ test.describe('Macro Deck core E2E', () => {
       const response = await request.get(`${LOOPBACK_URL}/api/auth/status`);
       return response.ok() ? (await response.json()).setupComplete : false;
     }).toBe(true);
+    const withoutSecret = await request.get(`${LOOPBACK_URL}/api/profiles`);
+    expect(withoutSecret.status()).toBe(401);
 
     // Creating the account is what makes the host owe a wizard, and it has no skip and no close
     // button, so walking it to the end is also what leaves the rest of the suite a free deck.
@@ -179,7 +182,7 @@ test.describe('Macro Deck core E2E', () => {
 
   test('@smoke creates a profile, changes its grid defaults, and adds an Action Button', async ({ page, request }) => {
     const assertNoUnexpectedFailures = watchForUnexpectedFailures(page);
-    await page.goto('/admin');
+    await openDesktop(page);
 
     const profiles = await getProfiles(request);
     const selectedName = profiles.toSorted((a, b) => a.order - b.order)[0]?.name ?? 'No Profile';
@@ -253,7 +256,7 @@ test.describe('Macro Deck core E2E', () => {
 
   test('@smoke persists profile, widget, and grid state across a real host restart and reconnects the Web Client', async ({ page, request, browser }) => {
     const assertNoUnexpectedFailures = watchForUnexpectedFailures(page);
-    await page.goto('/admin');
+    await openDesktop(page);
     await selectProfile(page, RENAMED_PROFILE_NAME);
     await expect(page.getByText(`${PROFILE_COLUMNS} × ${PROFILE_ROWS} Grid`)).toBeVisible();
     await expect(page.locator('shared-widget-item')).toHaveCount(1);
@@ -269,6 +272,7 @@ test.describe('Macro Deck core E2E', () => {
         const startsBeforeRestart = await getHostStartCount();
         const restart = await request.post(`${LOOPBACK_URL}/api/host/restart`, {
           data: { reason: 'e2e-persistence' },
+          headers: loopbackHeaders(),
         });
         expect(restart.ok()).toBe(true);
         expect(await restart.json()).toMatchObject({ supported: true, success: true });

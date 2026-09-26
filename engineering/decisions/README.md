@@ -19,6 +19,7 @@ code, protocol schemas, issue discussions or exhaustive option lists.
 ## Networking, trust and secrets
 
 - [0003 - Loopback trust, token scopes, and device identity](0003-loopback-trust-token-scopes-and-device-identity.md)
+- [0098 - Loopback trust requires a per-launch secret](0098-loopback-trust-requires-a-per-launch-secret.md)
 - [0030 - Android USB connections terminate on the public listener](0030-android-usb-connections-over-adb.md)
 - [0040 - Public listeners are a resolved endpoint set, secured by a per-installation local CA](0040-public-listeners-and-tls.md)
 - [0047 - Secrets at rest, encrypted backups, and a staged boot-time restore](0047-secrets-backups-and-restore.md)

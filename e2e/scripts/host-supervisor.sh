@@ -14,6 +14,13 @@ child_pid=''
 # it has to advertise the same variable or /api/host/restart reports "not supported".
 export MACRODECK_SHELL_EXECUTABLE=${MACRODECK_SHELL_EXECUTABLE:-$host_binary}
 
+# The bootstrapper would hand the host its loopback secret; Playwright needs the same value, so a
+# local run exports MACRODECK_LOOPBACK_SECRET in both shells. Restarts reuse it like the app does.
+if [[ -z "${MACRODECK_LOOPBACK_SECRET:-}" ]]; then
+  echo "MACRODECK_LOOPBACK_SECRET must be set (for example: export MACRODECK_LOOPBACK_SECRET=\$(openssl rand -hex 32))" >&2
+  exit 2
+fi
+
 log() {
   printf '[%s] %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*" | tee -a "$supervisor_log"
 }

@@ -17,6 +17,7 @@ use crate::host_error_window::{self, ExitStatus, HostErrorKind, HostErrorReport}
 use crate::host_supervisor::{Decision, ExitAction, Supervisor, MAX_RESTART_ATTEMPTS};
 use crate::localization::{self, keys};
 use crate::logging::{self, LogTail};
+use crate::loopback_secret;
 use crate::update_state::UpdateSnapshot;
 
 pub const BUILD_CHANNEL: &str = env!("MACRODECK_BUILD_CHANNEL");
@@ -243,8 +244,10 @@ pub fn parse_trusted_status(body: &str) -> bool {
         .unwrap_or(false)
 }
 
-async fn is_trusted_loopback(port: u16, timeout: Duration) -> bool {
-    let Ok(client) = reqwest::Client::builder().timeout(timeout).build() else {
+// A host from before the per-launch secret trusts any loopback caller; only such a host of ours
+// answers trusted to a request that carries no credential at all.
+async fn is_legacy_trusted_loopback(port: u16, timeout: Duration) -> bool {
+    let Ok(client) = loopback_secret::http_client(timeout) else {
         return false;
     };
     match client
@@ -265,11 +268,11 @@ pub async fn is_reachable(port: Option<u16>, timeout: Duration) -> bool {
     let Some(port) = port else {
         return false;
     };
-    let Ok(client) = reqwest::Client::builder().timeout(timeout).build() else {
+    let Ok(client) = loopback_secret::http_client(timeout) else {
         return false;
     };
     match client
-        .get(format!("http://127.0.0.1:{port}/api/system/version"))
+        .get(format!("http://127.0.0.1:{port}/api/auth/status"))
         .send()
         .await
     {
@@ -395,25 +398,38 @@ pub async fn ensure_running(app: &AppHandle) -> bool {
     let port_file_dir = config_dir.as_deref().unwrap_or(Path::new("."));
 
     // Reuse an already-running host (e.g. restart of the UI only), but only
-    // one this bootstrapper assigned the port to, and only when the port is
-    // really the trusted loopback listener - never a foreign host and never
-    // the public LAN listener, where the UI would load but stay unauthorized
-    // (window shown, no profiles).
+    // one this bootstrapper assigned the port to, and only when it proves it
+    // holds the persisted secret - never a foreign listener that squats the
+    // port and never the public LAN listener.
     if let Some(port) = adoption_candidate(
         env_port_override(),
         port_file_port(),
         read_persisted_port(port_file_dir),
     ) {
-        if is_trusted_loopback(port, Duration::from_secs(1)).await {
-            logging::info(&format!(
-                "[host] adopting running host on loopback port {port}"
-            ));
-            state.ui_port.store(port, Ordering::SeqCst);
-            state.ready.store(true, Ordering::SeqCst);
-            adopt_host_culture(app, port).await;
-            return true;
+        if let Some(secret) = loopback_secret::load(port_file_dir) {
+            loopback_secret::set_secret(secret);
+            if loopback_secret::prove(port, Duration::from_secs(1)).await {
+                logging::info(&format!(
+                    "[host] adopting running host on loopback port {port}"
+                ));
+                state.ui_port.store(port, Ordering::SeqCst);
+                state.ready.store(true, Ordering::SeqCst);
+                adopt_host_culture(app, port).await;
+                return true;
+            }
         }
-        if is_reachable(Some(port), Duration::from_millis(500)).await {
+        if is_legacy_trusted_loopback(port, Duration::from_secs(1)).await {
+            logging::info(&format!(
+                "[host] stopping the host on port {port}, which predates the loopback secret"
+            ));
+            let _ = post_shutdown(port, "replaced").await;
+            let deadline = Instant::now() + Duration::from_secs(10);
+            while Instant::now() < deadline
+                && is_reachable(Some(port), Duration::from_millis(300)).await
+            {
+                tokio::time::sleep(STOP_POLL_INTERVAL).await;
+            }
+        } else if is_reachable(Some(port), Duration::from_millis(500)).await {
             logging::warn(&format!(
                 "[host] port {port} answers but is not a trusted loopback listener; starting our own host"
             ));
@@ -484,10 +500,21 @@ fn launch(app: &AppHandle, state: &HostState) -> Result<Option<(u64, u16)>, Laun
         "[host] starting {} on loopback port {port}",
         binary.display()
     ));
+    let secret = loopback_secret::generate();
+    if let Some(dir) = &config_dir {
+        if let Err(error) = loopback_secret::persist(dir, &secret) {
+            logging::warn(&format!(
+                "[host] could not persist the loopback secret: {error}"
+            ));
+        }
+    }
+    loopback_secret::set_secret(secret.clone());
+
     let mut command = Command::new(&binary);
     command
         .current_dir(binary.parent().unwrap_or(Path::new(".")))
         .env("MACRODECK_HOST_PORT", port.to_string())
+        .env(loopback_secret::ENVIRONMENT_VARIABLE, &secret)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
@@ -565,17 +592,11 @@ async fn adopt_host_culture(app: &AppHandle, port: u16) {
     #[cfg(not(target_os = "macos"))]
     let _ = app;
 
-    let Ok(client) = reqwest::Client::builder()
-        .timeout(Duration::from_secs(3))
-        .build()
-    else {
+    let Ok(client) = loopback_secret::http_client(Duration::from_secs(3)) else {
         return;
     };
-    let response = match client
-        .get(format!("http://127.0.0.1:{port}/api/localization"))
-        .send()
-        .await
-    {
+    let request = client.get(format!("http://127.0.0.1:{port}/api/localization"));
+    let response = match loopback_secret::authorize(request, port).await.send().await {
         Ok(response) if response.status().is_success() => response,
         Ok(response) => {
             logging::warn(&format!(
@@ -684,11 +705,13 @@ fn spawn_exit_monitor(app: AppHandle, generation: u64) {
                 match child.try_wait() {
                     Ok(Some(status)) => {
                         state.exited.store(true, Ordering::SeqCst);
+                        loopback_secret::forget_verified_port();
                         break status.code();
                     }
                     Ok(None) => {}
                     Err(_) => {
                         state.exited.store(true, Ordering::SeqCst);
+                        loopback_secret::forget_verified_port();
                         break None;
                     }
                 }
@@ -952,7 +975,7 @@ async fn wait_for_ready(
         if let Some(code) = exit_of(state, generation) {
             return AttemptOutcome::Exited(code);
         }
-        if is_reachable(Some(port), Duration::from_millis(500)).await {
+        if loopback_secret::prove(port, Duration::from_millis(500)).await {
             return AttemptOutcome::Ready;
         }
         tokio::time::sleep(Duration::from_millis(250)).await;
@@ -1168,13 +1191,12 @@ fn binary_is_replaceable(app: &AppHandle) -> bool {
 }
 
 async fn post_shutdown(port: u16, reason: &str) -> Result<(), reqwest::Error> {
-    let client = reqwest::Client::builder()
-        .timeout(Duration::from_secs(3))
-        .build()?;
-    client
-        .post(format!(
-            "http://127.0.0.1:{port}/api/host/shutdown?reason={reason}"
-        ))
+    let client = loopback_secret::http_client(Duration::from_secs(3))?;
+    let request = client.post(format!(
+        "http://127.0.0.1:{port}/api/host/shutdown?reason={reason}"
+    ));
+    loopback_secret::authorize(request, port)
+        .await
         .send()
         .await?;
     Ok(())
@@ -1207,12 +1229,12 @@ struct UpdateStateBody<'a> {
 }
 
 async fn post_update_state(port: u16, body: &UpdateStateBody<'_>) -> Result<(), reqwest::Error> {
-    let client = reqwest::Client::builder()
-        .timeout(Duration::from_secs(3))
-        .build()?;
-    client
+    let client = loopback_secret::http_client(Duration::from_secs(3))?;
+    let request = client
         .post(format!("http://127.0.0.1:{port}/api/host/update-state"))
-        .json(body)
+        .json(body);
+    loopback_secret::authorize(request, port)
+        .await
         .send()
         .await?;
     Ok(())
@@ -1265,12 +1287,14 @@ async fn post_pre_update_backup(
     version: Option<&str>,
     timeout: Duration,
 ) -> Result<PreUpdateBackupResponse, reqwest::Error> {
-    let client = reqwest::Client::builder().timeout(timeout).build()?;
-    client
+    let client = loopback_secret::http_client(timeout)?;
+    let request = client
         .post(format!(
             "http://127.0.0.1:{port}/api/backups/before-host-update"
         ))
-        .json(&PreUpdateBackupBody { version })
+        .json(&PreUpdateBackupBody { version });
+    loopback_secret::authorize(request, port)
+        .await
         .send()
         .await?
         .json::<PreUpdateBackupResponse>()

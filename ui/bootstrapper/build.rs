@@ -27,6 +27,7 @@ fn main() {
     tauri_build::try_build(tauri_build::Attributes::new().app_manifest(
         tauri_build::AppManifest::new().commands(&[
             "get_host_port",
+            "reauthenticate",
             "get_shell_info",
             "get_cursor_position",
             "open_external",

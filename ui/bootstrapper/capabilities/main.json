@@ -10,6 +10,7 @@
     "core:default",
     "core:window:allow-start-dragging",
     "allow-get-host-port",
+    "allow-reauthenticate",
     "allow-get-shell-info",
     "allow-get-cursor-position",
     "allow-open-external",
