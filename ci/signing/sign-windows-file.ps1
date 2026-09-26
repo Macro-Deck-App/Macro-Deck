@@ -34,9 +34,12 @@ if ($missing.Count -gt 0) {
 	throw "Missing eSigner configuration: $($missing -join ', ')"
 }
 
-$tool = Join-Path $env:CODE_SIGN_TOOL_PATH 'CodeSignTool.bat'
-if (-not (Test-Path -LiteralPath $tool -PathType Leaf)) {
-	throw "SSL.com CodeSignTool was not found at $tool"
+# CodeSignTool.bat forwards %* through cmd.exe, which splits a secret at & | < > ^.
+# Run its bundled Java and jar directly so each argument reaches the tool intact.
+$java = Get-ChildItem -Path (Join-Path $env:CODE_SIGN_TOOL_PATH 'jdk-*\bin\java.exe') -File | Select-Object -First 1
+$jar = Get-ChildItem -Path (Join-Path $env:CODE_SIGN_TOOL_PATH 'jar\code_sign_tool-*.jar') -File | Select-Object -First 1
+if (-not $java -or -not $jar) {
+	throw "SSL.com CodeSignTool was not found under $env:CODE_SIGN_TOOL_PATH"
 }
 
 $manifest = Join-Path $env:RUNNER_TEMP 'macro-deck-esigner-signatures.txt'
@@ -75,7 +78,7 @@ if (($completedRoles -join ',') -ne ($expectedPreviousRoles -join ',')) {
 }
 
 Write-Host "[sign] Signing $role executable: $($file.FullName)"
-& $tool sign `
+& $java.FullName -Xmx1024M -jar $jar.FullName sign `
 	"-username=$env:ES_USERNAME" `
 	"-password=$env:ES_PASSWORD" `
 	"-credential_id=$env:ES_CREDENTIAL_ID" `
