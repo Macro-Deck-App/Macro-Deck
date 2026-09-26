@@ -12,6 +12,11 @@ on:
         type: boolean
         required: false
         default: false
+      windows_signing_dry_run:
+        description: Run every Windows signing step against eSigner without spending a signature (artifacts stay unsigned and unpublished)
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: build-${{ github.ref }}
@@ -630,14 +635,19 @@ jobs:
           MACRODECK_RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
 
       - name: Validate eSigner configuration
-        if: ${{ inputs.sign_windows }}
+        if: ${{ inputs.sign_windows || inputs.windows_signing_dry_run }}
         shell: pwsh
         env:
+          SIGN_WINDOWS: ${{ inputs.sign_windows }}
+          DRY_RUN: ${{ inputs.windows_signing_dry_run }}
           ES_USERNAME: ${{ secrets.ES_USERNAME }}
           ES_PASSWORD: ${{ secrets.ES_PASSWORD }}
           ES_CREDENTIAL_ID: ${{ secrets.ES_CREDENTIAL_ID }}
           ES_TOTP_SECRET: ${{ secrets.ES_TOTP_SECRET }}
         run: |
+          if ($env:SIGN_WINDOWS -eq 'true' -and $env:DRY_RUN -eq 'true') {
+            throw 'Choose either Windows signing or the signing dry run, not both'
+          }
           $missing = @('ES_USERNAME', 'ES_PASSWORD', 'ES_CREDENTIAL_ID', 'ES_TOTP_SECRET') |
             Where-Object { -not [Environment]::GetEnvironmentVariable($_) }
           if ($missing.Count -gt 0) {
@@ -648,18 +658,19 @@ jobs:
       # CodeSignTool (including its runtime) and exports CODE_SIGN_TOOL_PATH for
       # the Tauri signCommand. `--version` performs no signing operation.
       - name: Prepare SSL.com CodeSignTool
-        if: ${{ inputs.sign_windows }}
+        if: ${{ inputs.sign_windows || inputs.windows_signing_dry_run }}
         uses: sslcom/esigner-codesign@cf5f6c1d38ad10f47e3ed9aca873f429b1a8d85b # v1.3.2
         with:
           command: --version
           environment_name: PROD
 
       - name: Sign staged Windows host
-        if: ${{ inputs.sign_windows }}
+        if: ${{ inputs.sign_windows || inputs.windows_signing_dry_run }}
         shell: pwsh
         run: ci/signing/sign-windows-files.ps1 -Directory ui/bootstrapper/host-publish
         env:
           WINDOWS_SIGNING_ENABLED: 'true'
+          ESIGNER_DRY_RUN: ${{ inputs.windows_signing_dry_run }}
           ES_USERNAME: ${{ secrets.ES_USERNAME }}
           ES_PASSWORD: ${{ secrets.ES_PASSWORD }}
           ES_CREDENTIAL_ID: ${{ secrets.ES_CREDENTIAL_ID }}
@@ -671,17 +682,20 @@ jobs:
         working-directory: ui/bootstrapper
         run: npm run tauri bundle -- --bundles nsis --config release.conf.json --config version-override.json --verbose
         env:
-          WINDOWS_SIGNING_ENABLED: ${{ inputs.sign_windows }}
-          ES_USERNAME: ${{ inputs.sign_windows && secrets.ES_USERNAME || '' }}
-          ES_PASSWORD: ${{ inputs.sign_windows && secrets.ES_PASSWORD || '' }}
-          ES_CREDENTIAL_ID: ${{ inputs.sign_windows && secrets.ES_CREDENTIAL_ID || '' }}
-          ES_TOTP_SECRET: ${{ inputs.sign_windows && secrets.ES_TOTP_SECRET || '' }}
+          WINDOWS_SIGNING_ENABLED: ${{ inputs.sign_windows || inputs.windows_signing_dry_run }}
+          ESIGNER_DRY_RUN: ${{ inputs.windows_signing_dry_run }}
+          ES_USERNAME: ${{ (inputs.sign_windows || inputs.windows_signing_dry_run) && secrets.ES_USERNAME || '' }}
+          ES_PASSWORD: ${{ (inputs.sign_windows || inputs.windows_signing_dry_run) && secrets.ES_PASSWORD || '' }}
+          ES_CREDENTIAL_ID: ${{ (inputs.sign_windows || inputs.windows_signing_dry_run) && secrets.ES_CREDENTIAL_ID || '' }}
+          ES_TOTP_SECRET: ${{ (inputs.sign_windows || inputs.windows_signing_dry_run) && secrets.ES_TOTP_SECRET || '' }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_UPDATER_KEY_PASSWORD }}
 
       - name: Verify eSigner signature budget
-        if: ${{ inputs.sign_windows }}
+        if: ${{ inputs.sign_windows || inputs.windows_signing_dry_run }}
         shell: pwsh
+        env:
+          DRY_RUN: ${{ inputs.windows_signing_dry_run }}
         run: |
           $manifest = Join-Path $env:RUNNER_TEMP 'macro-deck-esigner-signatures.txt'
           if (-not (Test-Path $manifest)) {
@@ -692,7 +706,11 @@ jobs:
           if ($roles.Count -ne 4 -or (Compare-Object ($roles | Sort-Object) $expected)) {
             throw "Expected exactly Host, App, Uninstaller and Installer signatures; got: $($roles -join ', ')"
           }
-          "Windows signing used exactly $($roles.Count) eSigner signatures." >> $env:GITHUB_STEP_SUMMARY
+          if ($env:DRY_RUN -eq 'true') {
+            "Windows signing dry run passed: a signed run would use exactly $($roles.Count) eSigner signatures." >> $env:GITHUB_STEP_SUMMARY
+          } else {
+            "Windows signing used exactly $($roles.Count) eSigner signatures." >> $env:GITHUB_STEP_SUMMARY
+          }
 
       - name: Record unsigned Windows build
         if: ${{ ! inputs.sign_windows }}

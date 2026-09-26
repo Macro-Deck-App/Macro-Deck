@@ -77,6 +77,23 @@ if (($completedRoles -join ',') -ne ($expectedPreviousRoles -join ',')) {
 	throw "Refusing out-of-order or duplicate $role signature; completed roles: $($completedRoles -join ', ')"
 }
 
+# A dry run authenticates with the same arguments through the same launcher but
+# only reads the credential, so it proves the setup without spending quota.
+if ($env:ESIGNER_DRY_RUN -eq 'true') {
+	Write-Host "[sign] Dry run: checking eSigner credential instead of signing $role executable: $($file.FullName)"
+	$output = @(& $java.FullName -Xmx1024M -jar $jar.FullName credential_info `
+		"-username=$env:ES_USERNAME" `
+		"-password=$env:ES_PASSWORD" `
+		"-credential_id=$env:ES_CREDENTIAL_ID" 2>&1 | ForEach-Object { "$_" })
+	$output | ForEach-Object { Write-Host $_ }
+	if ($LASTEXITCODE -ne 0 -or -not ($output -match 'credential_info command executed successfully')) {
+		throw "eSigner credential check failed for $role with exit code $LASTEXITCODE"
+	}
+	Add-Content -LiteralPath $manifest -Value "$role|$($file.FullName)"
+	Write-Host "[sign] Dry run: $role would spend one eSigner signature"
+	exit 0
+}
+
 Write-Host "[sign] Signing $role executable: $($file.FullName)"
 & $java.FullName -Xmx1024M -jar $jar.FullName sign `
 	"-username=$env:ES_USERNAME" `
