@@ -1,3 +1,4 @@
+using System.Globalization;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Icons.Ownership;
@@ -13,6 +14,7 @@ public class IconService : IIconService
 	private readonly IIconPackCache _iconPackCache;
 	private readonly IIconStorage _storage;
 	private readonly IIconImageFallbackStore _fallbackStore;
+	private readonly IIconVariantDeriver _variantDeriver;
 	private readonly IconImportCoalescer _coalescer;
 	private readonly IMediator _mediator;
 	private readonly IIconPackOwnerRegistry _ownerRegistry;
@@ -20,6 +22,7 @@ public class IconService : IIconService
 	public IconService(IIconPackCache iconPackCache,
 		IIconStorage storage,
 		IIconImageFallbackStore fallbackStore,
+		IIconVariantDeriver variantDeriver,
 		IconImportCoalescer coalescer,
 		IMediator mediator,
 		IIconPackOwnerRegistry ownerRegistry)
@@ -27,6 +30,7 @@ public class IconService : IIconService
 		_iconPackCache = iconPackCache;
 		_storage = storage;
 		_fallbackStore = fallbackStore;
+		_variantDeriver = variantDeriver;
 		_coalescer = coalescer;
 		_mediator = mediator;
 		_ownerRegistry = ownerRegistry;
@@ -128,36 +132,68 @@ public class IconService : IIconService
 			return Result.Fail<IconImageResult, IconError>(IconError.NotReady);
 		}
 
-		var variant = IconVariants.Resolve(size, icon.AvailableSizes);
-		if (!acceptWebp || (staticFrame && icon.IsAnimated))
+		// One snapshot labels the response: a pack upgrade replaces these fields on the live entity mid-request.
+		var masterContentHash = icon.MasterContentHash;
+		var version = IconImageVersion.Of(icon);
+		var identity = IconEtagIdentity(icon);
+
+		var variant = IconVariants.Resolve(size, icon.AvailableSizes.ToList());
+		var storageName = variant;
+		var stream = variant == IconVariants.Master ? null : _storage.OpenVariant(icon.PackId, icon.Id, variant);
+		if (stream is null)
 		{
-			var fallback = await _fallbackStore.GetOrCreate(icon, variant, staticFrame, cancellationToken);
-			if (fallback is not null)
+			variant = storageName = IconVariants.Master;
+		}
+
+		if (variant == IconVariants.Master && size is not null && masterContentHash is not null)
+		{
+			var target = IconVariants.Resolve(size, IconVariants.TargetSizes);
+			if (target != IconVariants.Master)
 			{
-				var frameTag = staticFrame && icon.IsAnimated ? "-static" : string.Empty;
-				var fallbackTag = $"\"{IconEtagIdentity(icon)}-{variant}{frameTag}{fallback.FileExtension}\"";
-				return Result.Ok<IconImageResult, IconError>(new IconImageResult(fallback.Content,
-					fallbackTag,
-					fallback.ContentType,
-					IconImageVersion.Of(icon)));
+				var derived = await _variantDeriver.GetOrCreate(icon,
+					masterContentHash,
+					int.Parse(target, CultureInfo.InvariantCulture),
+					cancellationToken);
+				if (derived.Outcome == DerivedVariantOutcome.Derived)
+				{
+					variant = target;
+					storageName = derived.StorageName!;
+					stream = derived.Content;
+				}
+				else if (derived.Outcome == DerivedVariantOutcome.Unavailable)
+				{
+					version = null;
+				}
 			}
 		}
 
-		var stream = _storage.OpenVariant(icon.PackId, icon.Id, variant);
-		if (stream is null && variant != IconVariants.Master)
+		if (!acceptWebp || (staticFrame && icon.IsAnimated))
 		{
-			variant = IconVariants.Master;
-			stream = _storage.OpenVariant(icon.PackId, icon.Id, variant);
+			var fallback = await _fallbackStore.GetOrCreate(icon, variant, staticFrame, cancellationToken, storageName);
+			if (fallback is not null)
+			{
+				if (stream is not null)
+				{
+					await stream.DisposeAsync();
+				}
+
+				var frameTag = staticFrame && icon.IsAnimated ? "-static" : string.Empty;
+				var fallbackTag = $"\"{identity}-{variant}{frameTag}{fallback.FileExtension}\"";
+				return Result.Ok<IconImageResult, IconError>(new IconImageResult(fallback.Content,
+					fallbackTag,
+					fallback.ContentType,
+					version));
+			}
 		}
 
+		stream ??= _storage.OpenVariant(icon.PackId, icon.Id, IconVariants.Master);
 		if (stream is null)
 		{
 			return Result.Fail<IconImageResult, IconError>(IconError.StorageFailure, "Icon file is missing");
 		}
 
-		var etag = $"\"{IconEtagIdentity(icon)}-{variant}\"";
-		return Result.Ok<IconImageResult, IconError>(new IconImageResult(stream, etag,
-			Version: IconImageVersion.Of(icon)));
+		var etag = $"\"{identity}-{variant}\"";
+		return Result.Ok<IconImageResult, IconError>(new IconImageResult(stream, etag, Version: version));
 	}
 
 	private bool IsPackReadOnly(Guid packId)

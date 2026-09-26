@@ -1,4 +1,3 @@
-using System.Globalization;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Icons;
@@ -87,25 +86,11 @@ public sealed class PortableAssetManager : IPortableAssetManager
 				continue;
 			}
 
-			var collectedSizes = new List<int>();
 			var fileHashes = new Dictionary<string, string>(StringComparer.Ordinal)
 			{
 				[IconVariants.Master] = ContentHash.Compute(master)
 			};
 			files.Add(new PortableIconFile(icon.Id, IconVariants.Master, master));
-			foreach (var size in icon.AvailableSizes)
-			{
-				var name = size.ToString(CultureInfo.InvariantCulture);
-				var bytes = ReadVariant(icon, name);
-				if (bytes is null)
-				{
-					continue;
-				}
-
-				files.Add(new PortableIconFile(icon.Id, name, bytes));
-				fileHashes[name] = ContentHash.Compute(bytes);
-				collectedSizes.Add(size);
-			}
 
 			icons.Add(new PortableIcon
 			{
@@ -118,8 +103,7 @@ public sealed class PortableAssetManager : IPortableAssetManager
 				SourceContentHash = icon.SourceContentHash ?? icon.DeclaredSourceContentHash,
 				FileContentHashes = fileHashes,
 				OriginalFileName = icon.OriginalFileName,
-				OriginalFormat = icon.OriginalFormat,
-				AvailableSizes = collectedSizes
+				OriginalFormat = icon.OriginalFormat
 			});
 		}
 
@@ -364,10 +348,7 @@ public sealed class PortableAssetManager : IPortableAssetManager
 			}
 
 			var newId = Guid.CreateVersion7();
-			foreach (var variant in variants)
-			{
-				await _iconStorage.WriteVariant(pack.Id, newId, variant.Variant, variant.Bytes, cancellationToken);
-			}
+			await _iconStorage.WriteVariant(pack.Id, newId, IconVariants.Master, masterBytes, cancellationToken);
 
 			newIcons.Add(new IconEntity
 			{
@@ -384,7 +365,6 @@ public sealed class PortableAssetManager : IPortableAssetManager
 				OriginalFileName = portableIcon.OriginalFileName,
 				OriginalFormat = portableIcon.OriginalFormat,
 				ProcessingState = IconProcessingState.Ready,
-				AvailableSizes = portableIcon.AvailableSizes.Order().ToList(),
 				CreatedAt = DateTime.UtcNow,
 				UpdatedAt = DateTime.UtcNow
 			});

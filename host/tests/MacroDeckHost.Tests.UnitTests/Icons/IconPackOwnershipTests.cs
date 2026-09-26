@@ -483,6 +483,7 @@ internal sealed class IconPackOwnershipTests
 		=> new(_harness.Cache,
 			_harness.Storage,
 			_harness.FallbackStore,
+			_harness.VariantDeriver,
 			_harness.Coalescer,
 			_harness.Mediator,
 			new IconPackOwnerRegistry(owners));

@@ -1,5 +1,15 @@
+using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
+using MacroDeck.Signing.Certificates;
+using MacroDeck.Signing.Keys;
+using MacroDeck.Signing.Packages;
+using MacroDeck.Signing.TestSupport;
+using MacroDeckHost.Application.Packaging;
+using MacroDeckHost.Application.Persistence.Icons;
+using MacroDeckHost.Domain.Icons;
+using MacroDeckHost.Infrastructure.Persistence;
 using MacroDeck.Plugin.Packaging.Artifacts;
 using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeckHost.Application.Events;
@@ -842,6 +852,170 @@ internal sealed class StoreInstallExecutorTests
 				}
 			]
 		});
+	}
+
+	[Test]
+	public async Task A_Store_signed_icon_pack_in_the_format_that_carries_size_files_still_installs_and_serves_sizes()
+	{
+		var iconId = Guid.CreateVersion7();
+		var directory = Directory.CreateTempSubdirectory("macrodeck-store-signed-pack-").FullName;
+		try
+		{
+			var unsigned = Path.Combine(directory, "pack.macroDeckIconPack");
+			await File.WriteAllBytesAsync(unsigned, PackWithSizeFiles(iconId, IconImage(1024)));
+			var signed = await SignIconPack(unsigned, directory);
+			var delivered = await File.ReadAllBytesAsync(signed);
+			var verified = await PackageVerifier.VerifyAsync(signed, new PluginManifestReader(), TestPki.Root.PublicKey);
+			ServeIconPack(delivered, "1.0.0");
+
+			var operation = await RunIconPack(StoreOperationKind.Install, "1.0.0", previousVersion: null);
+			var icon = _iconHarness.Cache.GetIconsByPackId(_iconHarness.Cache.GetAllPacks().Single().Id).Single();
+			var edge = await ServedEdge(icon.Id, 128);
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(verified.Success, Is.True, verified.Message);
+				Assert.That(operation.State, Is.EqualTo(StoreOperationState.Completed), operation.ErrorMessage);
+				Assert.That(edge, Is.EqualTo(128));
+			});
+		}
+		finally
+		{
+			Directory.Delete(directory, recursive: true);
+		}
+	}
+
+	[Test]
+	public async Task A_Store_update_with_unchanged_icons_keeps_the_size_variants_an_older_host_installed()
+	{
+		var iconId = Guid.CreateVersion7();
+		var master = IconImage(1024);
+		ServeIconPack(PackWithSizeFiles(iconId, master), "1.0.0");
+		await RunIconPack(StoreOperationKind.Install, "1.0.0", previousVersion: null);
+		var icon = _iconHarness.Cache.GetIconsByPackId(_iconHarness.Cache.GetAllPacks().Single().Id).Single();
+		var olderHostVariant = IconImage(128);
+		await _iconHarness.Storage.WriteVariant(icon.PackId, icon.Id, "128", olderHostVariant, CancellationToken.None);
+		icon.AvailableSizes = [128];
+		await _iconHarness.Cache.UpdateIcon(icon);
+
+		ServeIconPack(PackWithSizeFiles(iconId, master), "1.1.0");
+		var update = await RunIconPack(StoreOperationKind.Update, "1.1.0", previousVersion: "1.0.0");
+		await using var served = _iconHarness.Storage.OpenVariant(icon.PackId, icon.Id, "128")!;
+		using var buffer = new MemoryStream();
+		await served.CopyToAsync(buffer);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(update.State, Is.EqualTo(StoreOperationState.Completed), update.ErrorMessage);
+			Assert.That(_iconHarness.Cache.GetIconById(icon.Id)!.AvailableSizes, Is.EqualTo(new[] { 128 }));
+			Assert.That(buffer.ToArray(), Is.EqualTo(olderHostVariant));
+		});
+	}
+
+	private async Task<StoreOperation> RunIconPack(StoreOperationKind kind, string version, string? previousVersion)
+	{
+		var operation = _tracker.Create(kind, StoreExtensionKind.IconPack, IconPackId, version, "Store Icons", previousVersion);
+		await _executor.Execute(operation.Id);
+		return _tracker.Find(operation.Id)!;
+	}
+
+	private async Task<int> ServedEdge(Guid iconId, int size)
+	{
+		var service = new IconService(_iconHarness.Cache,
+			_iconHarness.Storage,
+			_iconHarness.FallbackStore,
+			_iconHarness.VariantDeriver,
+			_iconHarness.Coalescer,
+			_iconHarness.Mediator,
+			OwnerRegistry());
+		var result = await service.GetImage(iconId, size, acceptWebp: true, staticFrame: false, CancellationToken.None);
+		await using var content = result.Data!.Content;
+		using var image = await SixLabors.ImageSharp.Image.LoadAsync(content);
+		return Math.Max(image.Width, image.Height);
+	}
+
+	private static byte[] PackWithSizeFiles(Guid iconId, byte[] master)
+	{
+		var contents = new List<(string Path, byte[] Content)> { ($"icons/{iconId}/master.webp", master) };
+		contents.AddRange(new[] { 128, 256, 512 }.Select(size => ($"icons/{iconId}/{size}.webp", IconImage(size))));
+		var manifest = new IconPackManifest
+		{
+			Id = Guid.CreateVersion7(),
+			Name = "Store Icons",
+			Icons =
+			[
+				new IconManifestEntry
+				{
+					Id = iconId,
+					Name = "home",
+					State = IconProcessingState.Ready,
+					Width = 1024,
+					Height = 1024,
+					AvailableSizes = [128, 256, 512],
+					MasterContentHash = MasterContentHash.Compute(master).Value
+				}
+			],
+			Files = contents
+				.Select(file => new PackageFileDigest
+				{
+					Path = file.Path,
+					Sha256 = "sha256:" + Convert.ToHexStringLower(SHA256.HashData(file.Content)),
+					Size = file.Content.Length
+				})
+				.ToList()
+		};
+
+		using var stream = new MemoryStream();
+		using (var zip = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true))
+		{
+			WriteEntry(zip, "pack.json", JsonSerializer.SerializeToUtf8Bytes(manifest, PersistenceJsonOptions.Default));
+			foreach (var (path, content) in contents)
+			{
+				WriteEntry(zip, path, content);
+			}
+		}
+
+		return stream.ToArray();
+	}
+
+	private static void WriteEntry(ZipArchive zip, string name, byte[] content)
+	{
+		using var entry = zip.CreateEntry(name).Open();
+		entry.Write(content);
+	}
+
+	private static byte[] IconImage(int edge)
+	{
+		using var image = new SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgba32>(edge,
+			edge,
+			new SixLabors.ImageSharp.PixelFormats.Rgba32(30, 120, 220));
+		using var stream = new MemoryStream();
+		SixLabors.ImageSharp.ImageExtensions.SaveAsWebp(image, stream);
+		return stream.ToArray();
+	}
+
+	private static async Task<string> SignIconPack(string package, string directory)
+	{
+		var issuer = TestPki.IssueIssuer();
+		var certificate = TestPki.IssueCertificate(issuer: issuer);
+		var chain = SigningCertificateChain.Verify(certificate.CertificateBytes,
+			certificate.CertificateSignatureBytes,
+			issuer.CertificateBytes,
+			issuer.CertificateSignatureBytes,
+			TestPki.Root.PublicKey,
+			SigningCertificateChain.PackageKeyUsage);
+		using var signer = SigningMaterial.Create(certificate.PrivateKey, chain.TrustedCertificate!.Certificate).Material!;
+		var output = Path.Combine(directory, "signed.macroDeckIconPack");
+		var result = await PackageSigner.SignAsync(package,
+			output,
+			signer,
+			certificate.CertificateBytes,
+			certificate.CertificateSignatureBytes,
+			issuer.CertificateBytes,
+			issuer.CertificateSignatureBytes,
+			new PluginManifestReader());
+		Assert.That(result.Success, Is.True, result.Message);
+		return output;
 	}
 
 	private async Task<byte[]> BuildIconPackArtifact(string version)
