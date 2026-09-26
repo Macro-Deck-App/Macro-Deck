@@ -69,10 +69,9 @@ internal sealed class AdbTunnelCoordinator
 
 		// The host-side port of every reverse tunnel is a *public* listener and nothing else: never
 		// LoopbackPort, never a constant. An `adb reverse` connection reaches the host from the local
-		// adb server, so its remote address is loopback; on the loopback listener,
-		// LoopbackConnection.IsTrusted (host/src/MacroDeckHost/Auth/LoopbackConnection.cs) grants that
-		// caller a synthetic admin principal with no authentication. Pointing a reverse tunnel there
-		// would hand an unauthenticated phone full admin.
+		// adb server, so its remote address is loopback; the loopback listener belongs to the desktop
+		// app, whose only remaining barrier there is its per-launch secret
+		// (host/src/MacroDeckHost/Auth/LoopbackConnection.cs), not the phone's own sign-in.
 		//
 		// Which public listener comes from PublicEndpointSet.LocalClientEndpoint rather than being
 		// decided here: plain HTTP while one exists (the companion app then needs no certificate

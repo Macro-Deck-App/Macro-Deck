@@ -11,17 +11,21 @@ from pathlib import Path
 REPLACEMENTS = [
     (re.compile(r'("(?:accessToken|refreshToken|password)"\s*:\s*")[^"]*(")', re.IGNORECASE), r'\1[REDACTED]\2'),
     (re.compile(r'((?:authorization|set-cookie|cookie)\s*[:=]\s*)[^\r\n]+', re.IGNORECASE), r'\1[REDACTED]'),
-    (re.compile(r'(md_(?:access|refresh)=)[^;\s"\\]+', re.IGNORECASE), r'\1[REDACTED]'),
+    (re.compile(r'(md_(?:access|refresh|loopback)(?:_\d+)?=)[^;\s"\\]+', re.IGNORECASE), r'\1[REDACTED]'),
+    (re.compile(r'(loopback-session\?code=)[^&\s"\\]+', re.IGNORECASE), r'\1[REDACTED]'),
     (re.compile(r'(Bearer\s+)[A-Za-z0-9._~+\-/]+=*', re.IGNORECASE), r'\1[REDACTED]'),
     (re.compile(r'eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}'), '[REDACTED-JWT]'),
 ]
 
 PASSWORD = os.environ.get('E2E_PASSWORD', 'macro-deck-e2e-password')
+LOOPBACK_SECRET = os.environ.get('MACRODECK_LOOPBACK_SECRET', '')
 
 
 def redact_text(text: str) -> str:
     if PASSWORD:
         text = text.replace(PASSWORD, '[REDACTED-PASSWORD]')
+    if LOOPBACK_SECRET:
+        text = text.replace(LOOPBACK_SECRET, '[REDACTED-LOOPBACK-SECRET]')
     for pattern, replacement in REPLACEMENTS:
         text = pattern.sub(replacement, text)
     return text

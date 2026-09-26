@@ -128,6 +128,10 @@ window instead:
 If the window says a port is already in use, see
 [Macro Deck is not listening on its port](#macro-deck-is-not-listening-on-its-port).
 
+If the host does not start although nothing seems to use the port, a host left over from an earlier
+Macro Deck may still be running and can no longer be taken over. End the **Macro Deck Host** process in
+Task Manager or Activity Monitor, then choose **Restart Macro Deck**.
+
 ## Plugins show up as dotnet in Task Manager
 
 Most plugins run on the .NET runtime that comes with Macro Deck, so Task Manager and Activity Monitor

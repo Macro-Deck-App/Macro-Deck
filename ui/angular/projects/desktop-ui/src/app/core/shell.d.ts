@@ -31,6 +31,7 @@ declare global {
       takeMenuAction?: () => Promise<string | null>;
       onHostStopping?: (callback: () => void) => Promise<() => void>;
       setHotkeyCapture?: (active: boolean) => Promise<void>;
+      reauthenticate?: () => Promise<void>;
       checkForUpdate?: () => Promise<ShellUpdateStatus>;
       installUpdate?: () => Promise<void>;
       onUpdateProgress?: (callback: (progress: ShellUpdateProgress) => void) => Promise<() => void>;

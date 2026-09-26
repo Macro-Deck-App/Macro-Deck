@@ -12,7 +12,7 @@ or shipped but not implemented, is stated as such.
 | Party | Trusted for | Not trusted for, or the limit |
 | --- | --- | --- |
 | Host | Everything: it owns state, credentials, secrets and install decisions | - |
-| Desktop app, over the private loopback port | **Admin**, with no token | The same trust goes to any local process - see [loopback trust](#loopback-trust-is-transport-trust-not-authentication) |
+| Desktop app, over the private loopback port | **Admin**, with a per-launch secret instead of a token | A process running as the same user can read that secret - see [loopback trust](#loopback-trust-needs-a-per-launch-secret) |
 | Plugin process | Scope `plugin`: the plugin protocol surface, and nothing else | Not sandboxed: it runs with the user's full privileges. Declared permissions are [not enforced](#permissions-declared-not-enforced), except `host:adb` |
 | Deck clients (web client, companion) | Scope `client`: the viewer-safe endpoints | Plugin endpoints refuse them |
 | LAN callers and browsers | The public listener's API and web client | Every plugin endpoint refuses them |
@@ -36,16 +36,19 @@ decision.
 | Enabling HTTPS on the public listener does not widen this | The local-only gate grants no principal of its own: reaching it from another listener adds reachability, not authority |
 | `/_macrodeck/*` on the plugin's listener is reserved (`/_macrodeckery` is not) | Middleware added with `Configure` runs after the SDK's and cannot answer there; a constant path there is analyzer error MDP2005. See [reserved routes](/reference/plugin-hosting/#reserved-routes) |
 
-### Loopback trust is transport trust, not authentication
+### Loopback trust needs a per-launch secret
 
 A request on the *private* loopback port, from a loopback address, with a loopback `Host` header, is
-authenticated as **admin**. That is how the desktop UI works without handling a token.
+authenticated as **admin** only when it also presents a secret the desktop app generates for every
+launch: the app itself sends it as a header, and its window holds a session cookie derived from it. That
+is how the desktop UI works without handling a token.
 
-[ADR 0003](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0003-loopback-trust-token-scopes-and-device-identity.md)
-accepts the limit: **any local process can already reach the loopback port**. A hostile process running as
-the same user on the same machine is outside what this boundary defends against; the ADR rejects a
-bootstrap token because it would carry "the same local-attacker exposure". The `Host` header check is a
-DNS-rebinding guard, not a second authentication factor.
+Reaching the port is therefore not enough: another account on the same computer, a local tool that
+fetches URLs for someone else, a sandboxed process or a browser tab gets no admin rights there.
+[ADR 0098](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0098-loopback-trust-requires-a-per-launch-secret.md) states the limit that remains: **a hostile process running as the same user** can
+read the secret, as can anything with that user's file access, such as WSL on Windows, and is outside
+what this boundary defends against. The `Host` header check is a
+DNS-rebinding guard, and a request a browser marks as cross-site is refused even with the cookie.
 
 Plain HTTP on the LAN leaves tokens visible to on-path attackers, so the public listener can be configured
 for TLS. The shipped posture is a self-signed certificate: it "exists to encrypt a link the user already
@@ -146,8 +149,9 @@ the host dials it itself and marks it, so it is never taken for a local process 
 ([ADR 0095](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0095-usb-connections-without-debugging.md)).
 
 What pairing changes is what a hostile local process needs. Before, it could mint a Developer token itself
-through its implicit loopback admin. Now it needs a human to approve a specific prompt while Developer Mode
-is on. That is bounded by Developer Mode being off by default, approval only over the trusted transport, a
+through the then credential-less loopback admin. Now it needs a human to approve a specific prompt while
+Developer Mode is on, unless it runs as the same user and reads the desktop app's
+[loopback secret](#loopback-trust-needs-a-per-launch-secret). That is bounded by Developer Mode being off by default, approval only over the trusted transport, a
 prompt that names what is approved and labels unverified fields, the one-request-per-plugin-id and
 rate-limit rules, and nothing being minted before proof of the verifier - a bound, not a cryptographic
 guarantee, as recorded in
@@ -383,7 +387,7 @@ Read this before deciding what a plugin should be trusted with.
 | Permissions are not a boundary | A plugin that declares nothing can still reach every host API except `adb`, and even `host:adb` gates only Macro Deck's own ADB connection, not a plugin's own - see [above](#permissions-declared-not-enforced) |
 | An unsigned plugin is still admitted on your say-so | See [signing](#signing-the-creator-portal-signs-and-the-host-verifies-before-install-and-before-every-load). For an unsigned install the declared-digest check is corruption detection, not a boundary: whoever can rewrite the binary can rewrite the unsigned manifest. Trust rests on where you got the file |
 | Revocation stops new installs only | A plugin installed before its certificate or issuer was revoked keeps running; the Store marks it, and removing it is your decision |
-| Any local process can reach the loopback listener | And is trusted as admin on the private port. The model defends against LAN callers and browsers, not a hostile process running as the same user |
+| A process running as the same user can become admin | It can read the desktop app's loopback secret. The model defends against LAN callers, browsers and other local accounts, not a hostile process running as the same user |
 | The plugin secret and session token cross plain HTTP on loopback | The local-only rule confines that to processes already on the machine, but it is not encryption |
 | A self-signed public certificate proves nothing about identity | It encrypts the link; it does not authenticate the host to a stranger, and a DHCP change means regenerating it |
 | Supervision contains failure, not intent | Isolation is not a goal. The child's environment is scrubbed of inherited `MACRO_DECK_PLUGIN_*` and `ASPNETCORE_URLS`; the listener port is bound by the host and handed to the child; a fresh credential is minted per launch and discarded on exit; a restart budget stops a crash loop. See [ADR 0029](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0029-plugin-packaging-installation-and-supervision.md) |

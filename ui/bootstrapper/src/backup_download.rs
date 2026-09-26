@@ -87,10 +87,11 @@ pub async fn download_to(port: u16, backup_id: &str, target: &Path) -> Result<()
         .build()
         .map_err(|error| error.to_string())?;
 
-    let mut response = client
-        .get(format!(
-            "http://127.0.0.1:{port}/api/backups/{backup_id}/download"
-        ))
+    let request = client.get(format!(
+        "http://127.0.0.1:{port}/api/backups/{backup_id}/download"
+    ));
+    let mut response = crate::loopback_secret::authorize(request, port)
+        .await
         .send()
         .await
         .map_err(|error| error.to_string())?;

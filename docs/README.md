@@ -32,9 +32,9 @@ User guide screenshots under `src/assets/guide/` are real captures of the deskto
 
 1. **Build a Production-channel host**, so the UI shows no "Development build" badge: `dotnet build host/src/MacroDeckHost/MacroDeckHost.csproj -c Release -p:BuildChannel=Production -o <dir>`.
 2. **Start it isolated** from any other instance on the machine: `MACRO_DECK_DATA_DIRECTORY` pointing at a fresh folder, `MACRODECK_HOST_PORT` and `MACRO_DECK_PORT` on free ports, and its own `TMPDIR`, because the single-instance check lives there.
-3. **Serve the desktop UI** with `ng serve desktop-ui --proxy-config <file>` from `ui/angular/`, proxying `/api` and `/ws` (with `"ws": true`) to the host's loopback port. Build `ui/runtime` first.
+3. **Serve the desktop UI** from `ui/angular/` with `MACRODECK_LOOPBACK_SECRET_FILE=<data directory>/config/loopback-secret ng serve desktop-ui --proxy-config <file>`, where the file is an `.mjs` that exports `proxyConfig('http://127.0.0.1:<loopback port>')` from `ui/angular/proxy.conf.mjs`, so `/api` and `/ws` reach the host with its loopback secret. Build `ui/runtime` first.
 4. **Create the account** on the welcome screen once. Then mark the onboarding tour done with `POST /api/settings/onboarding/complete` and clear notifications with `DELETE /api/notifications`.
-5. **Build the example setup** through the REST API on the loopback port, which needs no login: profiles, folders, widgets, variables, automations, and integrations through their `config-flow` endpoints. Use neutral example data: no personal paths, names or devices.
+5. **Build the example setup** through the REST API on the loopback port, which needs no login, only the `X-MacroDeck-Loopback-Secret` header with the content of that same file: profiles, folders, widgets, variables, automations, and integrations through their `config-flow` endpoints. Use neutral example data: no personal paths, names or devices.
 6. **Capture** with `node screenshots/guide.mjs <shots.json> <outDir>`. It drives Playwright's `chrome-headless-shell` at 1280×800 with a device scale factor of 2. Each shot has a `name`, an optional `url` and `wait`, and optional `steps`: JavaScript run in the page before the capture, with `stepWait` between them.
 
 ```json

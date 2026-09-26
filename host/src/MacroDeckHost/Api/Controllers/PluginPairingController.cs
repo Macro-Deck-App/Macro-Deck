@@ -63,10 +63,10 @@ public class PluginPairingController : ControllerBase
 			return throttled!;
 		}
 
-		// Recorded so an approval prompt can warn when the request did not originate from the trusted
-		// loopback listener - the pairing endpoint itself is reachable from any local process, loopback
-		// or public, and the user deciding whether to trust it should know which.
-		var arrivedOnPublicListener = !LoopbackConnection.IsTrusted(HttpContext);
+		// Recorded so an approval prompt can warn when the request did not originate from the loopback
+		// listener - the pairing endpoint itself is reachable from any local process, loopback or public,
+		// and the user deciding whether to trust it should know which.
+		var arrivedOnPublicListener = !LoopbackConnection.IsLoopbackListener(HttpContext);
 
 		var result = await _pairingService.Create(body.PluginId,
 			body.DisplayName,

@@ -28,13 +28,37 @@ public class LoopbackConnectionTests
 		ResolvedLoopbackPort.Set(TestListenerPorts.Loopback);
 	}
 
-	private static DefaultHttpContext CreateContext(int localPort, IPAddress? remoteAddress, string host)
+	private static DefaultHttpContext CreateContext(int localPort,
+		IPAddress? remoteAddress,
+		string host,
+		bool withSecret = true)
 	{
 		var context = new DefaultHttpContext
 		{
 			Connection = { LocalPort = localPort, RemoteIpAddress = remoteAddress }
 		};
 		context.Request.Host = new HostString(host, localPort);
+		if (withSecret)
+		{
+			context.Request.Headers[LoopbackSecret.HeaderName] = TestListenerPorts.LoopbackSecret;
+		}
+
+		return context;
+	}
+
+	private static DefaultHttpContext CreateLoopbackContext(string? secretHeader = null, string? cookie = null)
+	{
+		var context = CreateContext(LoopbackPort, IPAddress.Loopback, "127.0.0.1", withSecret: false);
+		if (secretHeader is not null)
+		{
+			context.Request.Headers[LoopbackSecret.HeaderName] = secretHeader;
+		}
+
+		if (cookie is not null)
+		{
+			context.Request.Headers.Cookie = cookie;
+		}
+
 		return context;
 	}
 
@@ -144,5 +168,58 @@ public class LoopbackConnectionTests
 			Assert.That(LoopbackConnection.IsTrusted(CreateContext(PublicHttpsPort, IPAddress.Loopback, "127.0.0.1")),
 				Is.False);
 		});
+	}
+
+	[Test]
+	public void A_loopback_caller_without_the_secret_is_not_trusted()
+	{
+		Assert.That(LoopbackConnection.IsTrusted(CreateLoopbackContext()), Is.False);
+	}
+
+	[Test]
+	public void A_wrong_secret_is_not_trusted()
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(LoopbackConnection.IsTrusted(CreateLoopbackContext(new string('0', 64))), Is.False);
+			Assert.That(LoopbackConnection.IsTrusted(CreateLoopbackContext("not-hex")), Is.False);
+			Assert.That(LoopbackConnection.IsTrusted(CreateLoopbackContext(TestListenerPorts.LoopbackSecret[..32])),
+				Is.False);
+		});
+	}
+
+	[Test]
+	public void The_desktop_session_cookie_is_trusted_on_the_loopback_listener()
+	{
+		var cookie = $"md_loopback_{LoopbackPort}={LoopbackSecret.SessionCookieValue()}";
+
+		Assert.That(LoopbackConnection.IsTrusted(CreateLoopbackContext(cookie: cookie)), Is.True);
+	}
+
+	[Test]
+	public void A_session_cookie_is_not_trusted_under_another_port_name_or_on_the_public_listener()
+	{
+		ResolvedPublicEndpoints.Set(PublicEndpointSet.HttpOnly(PublicHttpPort));
+		var value = LoopbackSecret.SessionCookieValue();
+		var onPublic = CreateContext(PublicHttpPort, IPAddress.Loopback, "127.0.0.1", withSecret: false);
+		onPublic.Request.Headers.Cookie = $"md_loopback_{PublicHttpPort}={value}";
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(LoopbackConnection.IsTrusted(CreateLoopbackContext(cookie: $"md_loopback_1234={value}")),
+				Is.False);
+			Assert.That(LoopbackConnection.IsTrusted(CreateLoopbackContext(cookie: $"md_loopback_{LoopbackPort}=00")),
+				Is.False);
+			Assert.That(LoopbackConnection.IsTrusted(onPublic), Is.False);
+		});
+	}
+
+	[Test]
+	public void A_cross_site_page_is_not_trusted_even_with_the_session_cookie()
+	{
+		var context = CreateLoopbackContext(cookie: $"md_loopback_{LoopbackPort}={LoopbackSecret.SessionCookieValue()}");
+		context.Request.Headers["Sec-Fetch-Site"] = "cross-site";
+
+		Assert.That(LoopbackConnection.IsTrusted(context), Is.False);
 	}
 }

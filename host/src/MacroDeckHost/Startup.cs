@@ -964,16 +964,16 @@ public class Startup
 
 		// api/plugin-pairing is excluded alongside the ProtocolConstants.All plugin paths even though it
 		// does not start with /api/plugins: LoopbackConnection.IsTrusted, which every action on that
-		// controller requires, needs no credentials, so without this exclusion any website the developer
-		// happens to have open could cross-origin read pending pairing requests - leaking plugin ids and
-		// executable paths - and POST an approval.
-		// The loopback listener grants trust without credentials, so it never answers with a CORS grant:
-		// the desktop UI is same-origin with it, and no other page may read or preflight it.
+		// controller requires, rides on an ambient session cookie, so without this exclusion any website the
+		// developer happens to have open could cross-origin read pending pairing requests - leaking plugin
+		// ids and executable paths - and POST an approval.
+		// The loopback listener's trust is ambient in the desktop webview, so it never answers with a CORS
+		// grant: the desktop UI is same-origin with it, and no other page may read or preflight it.
 		app.UseWhen(context => !LoopbackConnection.IsLoopbackListener(context) &&
 				!ProtocolConstants.All.Any(path => context.Request.Path.StartsWithSegments(path)) &&
 				!context.Request.Path.StartsWithSegments("/api/plugin-pairing") &&
 				// api/client-targets is excluded for exactly the reason api/plugin-pairing is: every
-				// action on it is gated on LoopbackConnection.IsTrusted and needs no credentials, so
+				// action on it is gated on LoopbackConnection.IsTrusted, an ambient credential, so
 				// without this any page the user has open could drive a device attached to this machine.
 				!context.Request.Path.StartsWithSegments("/api/client-targets") &&
 				!context.Request.Path.StartsWithSegments("/api/ui-websocket/tickets"),

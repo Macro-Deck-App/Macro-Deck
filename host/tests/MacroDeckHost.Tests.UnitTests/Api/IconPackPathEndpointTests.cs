@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Configuration;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -209,6 +210,7 @@ public class IconPackPathEndpointTests
 				app.Use(async (context, nextMiddleware) =>
 				{
 					context.Connection.LocalPort = TestListenerPorts.Loopback;
+					context.Request.Headers[LoopbackSecret.HeaderName] = TestListenerPorts.LoopbackSecret;
 					context.Connection.RemoteIpAddress = IPAddress.Loopback;
 					await nextMiddleware();
 				});

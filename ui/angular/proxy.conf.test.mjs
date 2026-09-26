@@ -23,14 +23,27 @@ const loopbackPort = match(
 	/DevelopmentLoopbackPort\s*=\s*(\d+)/
 );
 
-function proxyTargets(relativePath) {
-	const config = JSON.parse(read(relativePath));
-	return Object.entries(config).map(([context, entry]) => [context, entry.target]);
-}
+const { default: config, loopbackSecret, proxyConfig, SECRET_HEADER } = await import('./proxy.conf.mjs');
 
 test('the desktop proxy targets the host loopback port', () => {
-	for (const [context, target] of proxyTargets('ui/angular/proxy.conf.json')) {
-		assert.equal(target, `http://127.0.0.1:${loopbackPort}`, `unexpected target for ${context}`);
+	for (const [context, entry] of Object.entries(config)) {
+		assert.equal(entry.target, `http://127.0.0.1:${loopbackPort}`, `unexpected target for ${context}`);
+		assert.equal(entry.changeOrigin, undefined, `${context} must keep the loopback Host header`);
 	}
 });
 
+test('proxied HTTP and WebSocket requests carry the loopback secret the dev host wrote', () => {
+	const env = { MACRODECK_LOOPBACK_SECRET: 'ab'.repeat(32) };
+	const handlers = {};
+	proxyConfig('http://127.0.0.1:1', env)['/api'].configure({ on: (event, handler) => { handlers[event] = handler; } });
+
+	for (const event of ['proxyReq', 'proxyReqWs']) {
+		const headers = {};
+		handlers[event]({ setHeader: (name, value) => { headers[name] = value; } });
+		assert.equal(headers[SECRET_HEADER], env.MACRODECK_LOOPBACK_SECRET, event);
+	}
+});
+
+test('without a secret the proxy forwards requests untouched', () => {
+	assert.equal(loopbackSecret({ MACRODECK_LOOPBACK_SECRET_FILE: '/nonexistent/loopback-secret' }), null);
+});

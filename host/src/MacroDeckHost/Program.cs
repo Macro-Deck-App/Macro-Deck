@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Security.Cryptography;
 using MacroDeckHost.Application.Security.KeyRing;
+using MacroDeckHost.Auth;
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Usb;
 using MacroDeckHost.Application.Logging;
@@ -80,11 +81,19 @@ public static class Program
 		try
 		{
 			var loopbackPort = HostEndpoints.ResolveLoopbackPort();
+			var loopbackSecret = LoopbackSecretSource.Resolve();
+			LoopbackSecret.Set(loopbackSecret.Secret);
 
 			if (await SingleInstanceGuard.IsAnotherInstanceRunning())
 			{
 				Log.Information("Another host instance is already running, exiting");
 				return;
+			}
+
+			if (loopbackSecret.Generated)
+			{
+				var secretFile = LoopbackSecretSource.Write(paths.ConfigDirectory, loopbackSecret.Secret);
+				Log.Information("No loopback secret was handed over; generated one for local tools in {File}", secretFile);
 			}
 
 			// The only safe point to swap the data root: nothing has opened the database, the Data Protection

@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Configuration;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -306,6 +307,7 @@ public class CompanionScriptsEndpointTests
 					if (context.Request.Headers.ContainsKey(LoopbackHeader))
 					{
 						context.Connection.LocalPort = TestListenerPorts.Loopback;
+						context.Request.Headers[LoopbackSecret.HeaderName] = TestListenerPorts.LoopbackSecret;
 						context.Connection.RemoteIpAddress = IPAddress.Loopback;
 					}
 					else

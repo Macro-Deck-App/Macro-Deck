@@ -142,6 +142,14 @@ pub fn get_host_port() -> Option<u16> {
 }
 
 #[tauri::command]
+pub fn reauthenticate(app: AppHandle) {
+    let handle = app.clone();
+    window::dispatch_to_main_thread(&app, "re-authenticate the main window", move || {
+        window::reload_main_window(&handle)
+    });
+}
+
+#[tauri::command]
 pub fn get_shell_info(app: AppHandle) -> ShellInfo {
     ShellInfo {
         // Not package_info().version: on a beta RPM that is the mapped version,
@@ -531,8 +539,9 @@ mod tests {
         assert!(script.contains("encodeURIComponent"));
     }
 
-    const SHARED_COMMANDS: [&str; 20] = [
+    const SHARED_COMMANDS: [&str; 21] = [
         "get_host_port",
+        "reauthenticate",
         "get_shell_info",
         "get_cursor_position",
         "open_external",

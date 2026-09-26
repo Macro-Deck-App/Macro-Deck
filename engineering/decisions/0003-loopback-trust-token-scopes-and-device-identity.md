@@ -1,6 +1,7 @@
 # ADR 0003: Loopback trust, token scopes, and device identity
 
-Status: Accepted
+Status: Accepted. Partially superseded by [ADR 0098](0098-loopback-trust-requires-a-per-launch-secret.md):
+loopback trust now also requires the per-launch secret.
 
 ## Context
 
