@@ -30,6 +30,7 @@ public class IconImageEndpointTests
 		_service = new IconService(_harness.Cache,
 			_harness.Storage,
 			_harness.FallbackStore,
+			_harness.VariantDeriver,
 			_harness.Coalescer,
 			_harness.Mediator,
 			new IconPackOwnerRegistry([]));

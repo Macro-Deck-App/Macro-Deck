@@ -20,9 +20,16 @@ use. **Not declared** is never treated as free of AI.
 
 ### Size limits
 
-A pack holds at most 29,996 files, `pack.json` included, and a `pack.json` of at most 32 MiB minus 64 KiB. Every icon takes one file
-for its master image plus one per downscaled size, and `pack.json` lists each icon and each file. The two
-limits apply separately: icons with long non-Latin names fill `pack.json` well before the file limit.
+A pack holds at most 29,996 files, `pack.json` included, and a `pack.json` of at most 32 MiB minus 64 KiB. Every icon takes one file,
+its master image, and `pack.json` lists each icon and each file. The two limits apply separately: icons with
+long non-Latin names fill `pack.json` well before the file limit.
+
+The smaller sizes a deck shows are not part of the pack: the Macro Deck that installs it creates them from each
+master the first time an icon is shown at that size. Packs exported by Macro Deck 3.0.0-beta.13 and older also
+carry a file per downscaled size; they still import, and Macro Deck ignores those files and creates its own.
+Macro Deck 3.0.0-beta.13 and older do not create sizes, so they show the full master of a pack, profile or
+widget exported by a newer version at every size. On a device, a large animated icon can then be too big to
+show.
 
 Macro Deck refuses to export a pack above either limit, so split a larger collection into several packs.
 The limits leave room for the certificate files and the signature that the Store adds when it signs the pack,

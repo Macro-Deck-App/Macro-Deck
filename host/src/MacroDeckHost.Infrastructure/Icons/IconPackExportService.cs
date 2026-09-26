@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.IO.Compression;
 using System.Text.Json;
 using MacroDeck.Plugin.Packaging.IconPacks;
@@ -87,10 +86,11 @@ public sealed class IconPackExportService : IIconPackExportService
 		foreach (var entry in manifest.Icons)
 		{
 			entry.ImportBatchId = null;
+			entry.AvailableSizes = [];
 		}
 
 		// Counted before anything is written, and the archive is staged, so a refused pack sends nothing.
-		if (icons.Sum(icon => icon.AvailableSizes.Count + 1) + 1 > IconPackArchiveLimits.MaxUnsignedEntries)
+		if (icons.Count + 1 > IconPackArchiveLimits.MaxUnsignedEntries)
 		{
 			return Result.Fail(IconPackError.TooLarge);
 		}
@@ -149,29 +149,20 @@ public sealed class IconPackExportService : IIconPackExportService
 		foreach (var icon in icons)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
-			var variants = icon.AvailableSizes
-				.Select(size => size.ToString(CultureInfo.InvariantCulture))
-				.Append(IconVariants.Master);
-			foreach (var variant in variants)
+			var content = _storage.OpenVariant(packId, icon.Id, IconVariants.Master);
+			if (content is null)
 			{
-				var content = _storage.OpenVariant(packId, icon.Id, variant);
-				if (content is null)
-				{
-					_logger.Warning("Missing variant {Variant} for icon {IconId} in pack {PackId}; skipping",
-						variant,
-						icon.Id,
-						packId);
-					continue;
-				}
+				_logger.Warning("Missing master for icon {IconId} in pack {PackId}; skipping", icon.Id, packId);
+				continue;
+			}
 
-				await using (content)
-				{
-					var path = $"icons/{icon.Id}/{variant}.webp";
-					var entry = archive.CreateEntry(path, CompressionLevel.NoCompression);
-					await using var entryStream = await entry.OpenAsync(cancellationToken);
-					var digest = await CopyAndHash(content, entryStream, cancellationToken);
-					files.Add(new PackageFileDigest { Path = path, Sha256 = digest.Sha256, Size = digest.Size });
-				}
+			await using (content)
+			{
+				var path = $"icons/{icon.Id}/{IconVariants.Master}.webp";
+				var entry = archive.CreateEntry(path, CompressionLevel.NoCompression);
+				await using var entryStream = await entry.OpenAsync(cancellationToken);
+				var digest = await CopyAndHash(content, entryStream, cancellationToken);
+				files.Add(new PackageFileDigest { Path = path, Sha256 = digest.Sha256, Size = digest.Size });
 			}
 		}
 

@@ -14,5 +14,6 @@ public interface IIconImageFallbackStore
 	Task<FallbackIconImage?> GetOrCreate(IconEntity icon,
 		string variant,
 		bool staticFrame,
-		CancellationToken cancellationToken);
+		CancellationToken cancellationToken,
+		string? sourceVariant = null);
 }

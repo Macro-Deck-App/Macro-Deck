@@ -29,7 +29,8 @@ public sealed class ImageSharpIconFallbackStore : IIconImageFallbackStore, IDisp
 	public async Task<FallbackIconImage?> GetOrCreate(IconEntity icon,
 		string variant,
 		bool staticFrame,
-		CancellationToken cancellationToken)
+		CancellationToken cancellationToken,
+		string? sourceVariant = null)
 	{
 		var animated = icon.IsAnimated && !staticFrame;
 		var extension = animated ? ".gif" : ".png";
@@ -51,7 +52,7 @@ public sealed class ImageSharpIconFallbackStore : IIconImageFallbackStore, IDisp
 		{
 			if (!File.Exists(cachePath))
 			{
-				if (!await Transcode(icon, variant, animated, cachePath, cancellationToken))
+				if (!await Transcode(icon, sourceVariant ?? variant, animated, cachePath, cancellationToken))
 				{
 					return null;
 				}
