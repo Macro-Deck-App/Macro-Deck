@@ -43,6 +43,7 @@ internal static class SigningFailureExitCode
 		SigningError.CertificateIssuerMissing => ExitCode.SubjectInvalid,
 		SigningError.CertificateIssuerMismatch => ExitCode.SubjectInvalid,
 		SigningError.CertificateOutlivesIssuer => ExitCode.SubjectInvalid,
+		SigningError.TooManyEntries => ExitCode.SubjectInvalid,
 		_ => ExitCode.InternalError
 	};
 }

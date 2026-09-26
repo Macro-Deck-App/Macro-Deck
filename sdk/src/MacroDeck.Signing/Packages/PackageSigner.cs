@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using MacroDeck.Plugin.Packaging.Artifacts;
+using MacroDeck.Plugin.Packaging.IconPacks;
 using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeck.Signing.Certificates;
 using MacroDeck.Signing.Keys;
@@ -112,17 +113,35 @@ public static class PackageSigner
 					$"The archive contains no root '{manifestEntryName}'.");
 			}
 
-			if (manifestEntry.Length is <= 0 or > PluginArtifactLimits.MaxManifestBytes)
+			var maxManifestBytes = PackageManifestEntry.MaxBytesFor(format);
+			if (manifestEntry.Length <= 0 || manifestEntry.Length > maxManifestBytes)
 			{
 				return PackageSignResult.Fail(SigningError.ManifestTooLarge,
-					$"The manifest exceeds the {PluginArtifactLimits.MaxManifestBytes}-byte limit.");
+					$"The manifest exceeds the {maxManifestBytes}-byte limit.");
 			}
 
-			string manifestJson;
-			await using (var manifestStream = await manifestEntry.OpenAsync(cancellationToken))
-			using (var reader = new StreamReader(manifestStream, Encoding.UTF8))
+			if (format == SignablePackageFormat.IconPack)
 			{
-				manifestJson = await reader.ReadToEndAsync(cancellationToken);
+				var signedEntries = source.Entries.Count(entry =>
+						!PackageSigningFiles.IsSignatureMaterial(entry.FullName, issuerCertificateBytes is not null))
+					+ (issuerCertificateBytes is null ? 2 : 4);
+				if (signedEntries > IconPackArchiveLimits.MaxEntries)
+				{
+					return PackageSignResult.Fail(SigningError.TooManyEntries,
+						$"The signed icon pack would have {signedEntries} entries; the limit is {IconPackArchiveLimits.MaxEntries}.");
+				}
+			}
+
+			string? manifestJson;
+			await using (var manifestStream = await manifestEntry.OpenAsync(cancellationToken))
+			{
+				manifestJson = await PackageManifestEntry.ReadBoundedAsync(manifestStream, maxManifestBytes, cancellationToken);
+			}
+
+			if (manifestJson is null)
+			{
+				return PackageSignResult.Fail(SigningError.ManifestTooLarge,
+					$"The manifest exceeds the {maxManifestBytes}-byte limit.");
 			}
 
 			JsonObject manifestNode;
@@ -176,10 +195,10 @@ public static class PackageSigner
 			};
 
 			var rewrittenManifestBytes = Encoding.UTF8.GetBytes(manifestNode.ToJsonString(SigningJson.Options) + "\n");
-			if (rewrittenManifestBytes.Length > PluginArtifactLimits.MaxManifestBytes)
+			if (rewrittenManifestBytes.Length > maxManifestBytes)
 			{
 				return PackageSignResult.Fail(SigningError.ManifestTooLarge,
-					$"The signed manifest exceeds the {PluginArtifactLimits.MaxManifestBytes}-byte limit.");
+					$"The signed manifest exceeds the {maxManifestBytes}-byte limit.");
 			}
 
 			var outputDirectory = Path.GetDirectoryName(Path.GetFullPath(outputPath));

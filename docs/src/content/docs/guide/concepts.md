@@ -168,6 +168,10 @@ and export the pack, but you can't rename, import, or delete icons in it, or edi
 Deleting the pack there uninstalls it from the Store. To change the icons, export the pack and import the
 copy as a pack of your own.
 
+An exported pack has a size limit: at most 29,995 images (one per icon and size), and only so much text
+for the icons' names and details. When a pack is larger, Macro Deck tells you it is too large to export; split
+it into smaller packs.
+
 An item's page shows its screenshots, description, what changed in the latest version and, in the details
 beside it, whether it runs on your platform. It lists **Links** its creator provides, such as its **Homepage**,
 the source repository, documentation or a place to report an issue. They open in your browser.

@@ -19,6 +19,7 @@ internal static class SigningErrorTrustMapping
 		SigningError.ManifestMissing => PluginTrustVerdict.Malformed,
 		SigningError.ManifestMalformed => PluginTrustVerdict.Malformed,
 		SigningError.ManifestTooLarge => PluginTrustVerdict.Malformed,
+		SigningError.TooManyEntries => PluginTrustVerdict.Malformed,
 		SigningError.PackageFormatUnsupported => PluginTrustVerdict.Malformed,
 
 		SigningError.CertificateUntrusted => PluginTrustVerdict.UntrustedRoot,

@@ -39,6 +39,7 @@ internal static class SigningFailureCode
 		SigningError.CertificateIssuerMissing => "certificate-issuer-missing",
 		SigningError.CertificateIssuerMismatch => "certificate-issuer-mismatch",
 		SigningError.CertificateOutlivesIssuer => "certificate-outlives-issuer",
+		SigningError.TooManyEntries => "too-many-entries",
 		_ => "signing-failed"
 	};
 }

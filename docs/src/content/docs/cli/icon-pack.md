@@ -53,7 +53,9 @@ Where the pack comes from decides what happens to the file:
 The pack must pass these checks, or nothing is changed:
 
 - It is a readable `.macroDeckIconPack` archive with a `pack.json` (`icon-pack-invalid`) and fits in one
-  plugin artifact entry (`icon-pack-too-large`).
+  plugin artifact entry (`icon-pack-too-large`). A readable pack has at most 30,000 archive entries and a
+  `pack.json` of at most 32 MiB (`IconPackArchiveLimits`); Macro Deck 3.0.0-beta.13 and older sync at most
+  10,000 entries per bundled pack.
 - Every icon has a master image, and every icon name is unique (compared case-insensitively) and usable as
   an address: not blank, no surrounding whitespace, no `/`, no control characters, at most 128 characters
   (`icon-pack-names-invalid`, which lists every offending name).

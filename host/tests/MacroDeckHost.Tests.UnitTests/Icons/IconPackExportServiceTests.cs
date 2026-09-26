@@ -3,6 +3,7 @@ using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using MacroDeck.Plugin.Packaging.IconPacks;
 using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Persistence.Icons;
 using MacroDeckHost.Domain.Entities;
@@ -16,6 +17,7 @@ namespace MacroDeckHost.Tests.UnitTests.Icons;
 public class IconPackExportServiceTests
 {
 	private static readonly string[] _expectedReadyNames = ["ready"];
+	private static readonly string[] _recentOnly = ["recent.tmp"];
 
 	private static readonly JsonSerializerOptions _manifestOptions = new()
 	{
@@ -218,6 +220,88 @@ public class IconPackExportServiceTests
 		var fileName = _service.GetExportFileName(pack.Id);
 
 		Assert.That(fileName.Data, Is.EqualTo("MyPack2.macroDeckIconPack"));
+	}
+
+	[Test]
+	public async Task Export_PackAboveTheUnsignedEntryBound_IsRefusedAndWritesNothing()
+	{
+		var pack = await _harness.CreatePack("Huge");
+		var icons = Enumerable.Range(0, IconPackArchiveLimits.MaxUnsignedEntries / 4 + 1)
+			.Select(index => new IconEntity
+			{
+				Id = Guid.CreateVersion7(),
+				PackId = pack.Id,
+				Name = $"icon-{index}",
+				ProcessingState = IconProcessingState.Ready,
+				AvailableSizes = [128, 256, 512],
+				MasterContentHash = MasterContentHash.Compute("abc"u8).Value,
+				CreatedAt = DateTime.UtcNow
+			})
+			.ToList();
+		await _harness.Cache.AddIcons(pack.Id, icons);
+		using var destination = new MemoryStream();
+
+		var result = await _service.Export(pack.Id, destination, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.EqualTo(IconPackError.TooLarge));
+			Assert.That(destination.Length, Is.Zero);
+			Assert.That(ExportStagingFiles(), Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task Export_PackJsonAboveTheUnsignedManifestBound_IsRefusedAndWritesNothing()
+	{
+		var pack = await _harness.CreatePack("Wordy");
+		pack.Description = new string('\u00e4', IconPackArchiveLimits.MaxUnsignedManifestBytes / 6 + 1);
+		await _harness.Cache.AddOrUpdatePack(pack);
+		await AddReadyIcon(pack, "star", sizes: [128]);
+		using var destination = new MemoryStream();
+
+		var result = await _service.Export(pack.Id, destination, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.EqualTo(IconPackError.TooLarge));
+			Assert.That(destination.Length, Is.Zero);
+			Assert.That(ExportStagingFiles(), Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task Export_LeavesNoStagingFileBehind()
+	{
+		var pack = await _harness.CreatePack("Small");
+		await AddReadyIcon(pack, "star", sizes: [128]);
+
+		await using var archive = await ExportToArchive(pack.Id);
+
+		Assert.That(ExportStagingFiles(), Is.Empty);
+	}
+
+	[Test]
+	public async Task Export_SweepsStagingFilesAnEarlierExportAbandoned()
+	{
+		var directory = Directory.CreateDirectory(Path.Combine(_harness.Paths.IconStagingDirectory, "_export")).FullName;
+		var abandoned = Path.Combine(directory, "abandoned.tmp");
+		var recent = Path.Combine(directory, "recent.tmp");
+		await File.WriteAllBytesAsync(abandoned, [1]);
+		await File.WriteAllBytesAsync(recent, [1]);
+		File.SetLastWriteTimeUtc(abandoned, DateTime.UtcNow.AddDays(-2));
+		var pack = await _harness.CreatePack("Small");
+		await AddReadyIcon(pack, "star", sizes: []);
+
+		await using var archive = await ExportToArchive(pack.Id);
+
+		Assert.That(ExportStagingFiles().Select(Path.GetFileName), Is.EqualTo(_recentOnly));
+	}
+
+	private string[] ExportStagingFiles()
+	{
+		var directory = Path.Combine(_harness.Paths.IconStagingDirectory, "_export");
+		return Directory.Exists(directory) ? Directory.GetFiles(directory) : [];
 	}
 
 	private async Task<IconEntity> AddReadyIcon(IconPackEntity pack,

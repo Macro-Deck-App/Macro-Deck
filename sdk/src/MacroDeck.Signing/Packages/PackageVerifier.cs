@@ -1,7 +1,7 @@
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using MacroDeck.Plugin.Packaging.Artifacts;
+using MacroDeck.Plugin.Packaging.IconPacks;
 using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeck.Signing.Certificates;
 using MacroDeck.Signing.Keys;
@@ -97,17 +97,29 @@ public static class PackageVerifier
 					$"The package contains no root '{manifestEntryName}'.");
 			}
 
-			if (manifestEntry.Length is <= 0 or > PluginArtifactLimits.MaxManifestBytes)
+			if (format == SignablePackageFormat.IconPack && source.RawEntryCount > IconPackArchiveLimits.MaxEntries)
 			{
-				return PackageVerifyResult.Fail(SigningError.ManifestTooLarge,
-					$"The manifest exceeds the {PluginArtifactLimits.MaxManifestBytes}-byte limit.");
+				return PackageVerifyResult.Fail(SigningError.TooManyEntries,
+					$"The icon pack has {source.RawEntryCount} entries; the limit is {IconPackArchiveLimits.MaxEntries}.");
 			}
 
-			string manifestJson;
-			await using (var manifestStream = await source.OpenAsync(manifestEntry, cancellationToken))
-			using (var reader = new StreamReader(manifestStream, Encoding.UTF8))
+			var maxManifestBytes = PackageManifestEntry.MaxBytesFor(format);
+			if (manifestEntry.Length <= 0 || manifestEntry.Length > maxManifestBytes)
 			{
-				manifestJson = await reader.ReadToEndAsync(cancellationToken);
+				return PackageVerifyResult.Fail(SigningError.ManifestTooLarge,
+					$"The manifest exceeds the {maxManifestBytes}-byte limit.");
+			}
+
+			string? manifestJson;
+			await using (var manifestStream = await source.OpenAsync(manifestEntry, cancellationToken))
+			{
+				manifestJson = await PackageManifestEntry.ReadBoundedAsync(manifestStream, maxManifestBytes, cancellationToken);
+			}
+
+			if (manifestJson is null)
+			{
+				return PackageVerifyResult.Fail(SigningError.ManifestTooLarge,
+					$"The manifest exceeds the {maxManifestBytes}-byte limit.");
 			}
 
 			JsonObject manifestNode;

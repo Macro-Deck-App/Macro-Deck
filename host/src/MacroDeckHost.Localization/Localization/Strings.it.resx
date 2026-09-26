@@ -2652,6 +2652,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Errors.IconPack.ExportFailed" xml:space="preserve">
     <value>Esportazione non riuscita</value>
   </data>
+  <data name="Errors.IconPack.ExportTooLarge" xml:space="preserve">
+    <value>Questo pacchetto di icone è troppo grande per essere esportato. Dividilo in pacchetti più piccoli.</value>
+  </data>
   <data name="Errors.IconPack.LoadFailed" xml:space="preserve">
     <value>Caricamento dei pacchetti di icone non riuscito</value>
   </data>

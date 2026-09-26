@@ -2651,6 +2651,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Errors.IconPack.ExportFailed" xml:space="preserve">
     <value>Export fehlgeschlagen</value>
   </data>
+  <data name="Errors.IconPack.ExportTooLarge" xml:space="preserve">
+    <value>Dieses Symbolpaket ist zu groß zum Exportieren. Teile es in kleinere Symbolpakete auf.</value>
+  </data>
   <data name="Errors.IconPack.LoadFailed" xml:space="preserve">
     <value>Symbolpakete konnten nicht geladen werden</value>
   </data>

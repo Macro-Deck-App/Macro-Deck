@@ -111,7 +111,12 @@ public enum SigningError
 	CertificateIssuerMismatch,
 
 	/// <summary>The certificate's validity window is not inside its issuer certificate's window.</summary>
-	CertificateOutlivesIssuer
+	CertificateOutlivesIssuer,
+
+	/// <summary>The package has more entries than its format allows - for an icon pack,
+	/// <see cref="MacroDeck.Plugin.Packaging.IconPacks.IconPackArchiveLimits.MaxEntries"/>, signature files
+	/// included.</summary>
+	TooManyEntries
 }
 
 /// <summary>A failed signing or verification operation.</summary>

@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.IO.Compression;
 using System.Text.Json;
+using MacroDeck.Plugin.Packaging.IconPacks;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Icons;
@@ -20,7 +21,6 @@ namespace MacroDeckHost.Infrastructure.Icons;
 
 public sealed class IconPackRestoreService : IIconPackRestoreService
 {
-	private const int MaxArchiveEntries = 10_000;
 	private const string RestoreStagingDirectoryName = "_restore";
 
 	private readonly IIconPackCache _iconPackCache;
@@ -588,10 +588,10 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 
 	private Result<IconPackManifest, IconError> ReadManifest(ZipArchive archive, string fileName)
 	{
-		if (archive.Entries.Count > MaxArchiveEntries)
+		if (archive.Entries.Count > IconPackArchiveLimits.MaxEntries)
 		{
 			return Result.Fail<IconPackManifest, IconError>(IconError.InvalidArchive,
-				$"The archive contains more than {MaxArchiveEntries} entries");
+				$"The archive contains more than {IconPackArchiveLimits.MaxEntries} entries");
 		}
 
 		var manifestEntry = archive.GetEntry("pack.json");
@@ -601,9 +601,18 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 				"The archive contains no pack.json manifest");
 		}
 
+		var manifestBytes = manifestEntry.Length <= IconPackArchiveLimits.MaxManifestBytes
+			? ReadBounded(manifestEntry, IconPackArchiveLimits.MaxManifestBytes)
+			: null;
+		if (manifestBytes is null)
+		{
+			return Result.Fail<IconPackManifest, IconError>(IconError.InvalidArchive,
+				$"The pack.json manifest is larger than {IconPackArchiveLimits.MaxManifestBytes} bytes");
+		}
+
 		try
 		{
-			using var stream = manifestEntry.Open();
+			using var stream = new MemoryStream(manifestBytes, writable: false);
 			var manifest = JsonSerializer.Deserialize<IconPackManifest>(stream, PersistenceJsonOptions.Default);
 			if (manifest is null)
 			{
@@ -619,6 +628,25 @@ public sealed class IconPackRestoreService : IIconPackRestoreService
 			return Result.Fail<IconPackManifest, IconError>(IconError.InvalidArchive,
 				"The pack.json manifest is not parseable");
 		}
+	}
+
+	private static byte[]? ReadBounded(ZipArchiveEntry entry, int maxBytes)
+	{
+		using var stream = entry.Open();
+		using var buffer = new MemoryStream();
+		var chunk = new byte[81_920];
+		int read;
+		while ((read = stream.Read(chunk, 0, chunk.Length)) > 0)
+		{
+			if (buffer.Length + read > maxBytes)
+			{
+				return null;
+			}
+
+			buffer.Write(chunk, 0, read);
+		}
+
+		return buffer.ToArray();
 	}
 
 	private async Task<List<IconEntity>> CopyIcons(ZipArchive archive,

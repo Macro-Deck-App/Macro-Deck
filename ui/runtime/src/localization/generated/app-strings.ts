@@ -1044,6 +1044,7 @@ export const AppStrings = {
 		},
 		IconPack: {
 			ExportFailed: 'macrodeck.app:Errors.IconPack.ExportFailed',
+			ExportTooLarge: 'macrodeck.app:Errors.IconPack.ExportTooLarge',
 			LoadFailed: 'macrodeck.app:Errors.IconPack.LoadFailed',
 		},
 		Icons: {
@@ -8163,6 +8164,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Errors.Folders.ProfileIdRequired': 'A valid profile id is required',
 	'macrodeck.app:Errors.Folders.UnknownFolderView': 'That folder view is not available.',
 	'macrodeck.app:Errors.IconPack.ExportFailed': 'Export failed',
+	'macrodeck.app:Errors.IconPack.ExportTooLarge': 'This icon pack is too large to export. Split it into smaller packs.',
 	'macrodeck.app:Errors.IconPack.LoadFailed': 'Failed to load icon packs',
 	'macrodeck.app:Errors.Icons.AllIconIdsMustBeValid': 'All icon ids must be valid',
 	'macrodeck.app:Errors.Icons.AtLeastOnePathRequired': 'At least one path is required',
