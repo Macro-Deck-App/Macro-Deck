@@ -2,8 +2,9 @@ use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+use hmac::{Hmac, Mac};
 use serde::{Deserialize, Serialize};
-use sha2::{Digest, Sha256};
+use sha2::Sha256;
 
 pub const ENVIRONMENT_VARIABLE: &str = "MACRODECK_LOOPBACK_SECRET";
 pub const HEADER: &str = "X-MacroDeck-Loopback-Secret";
@@ -124,26 +125,14 @@ fn write_owner_only(path: &Path, secret: &str) -> std::io::Result<()> {
     file.sync_all()
 }
 
-pub fn hmac_sha256(key: &[u8], message: &[u8]) -> [u8; 32] {
-    const BLOCK: usize = 64;
-    let mut block_key = [0u8; BLOCK];
-    if key.len() > BLOCK {
-        block_key[..32].copy_from_slice(&Sha256::digest(key));
-    } else {
-        block_key[..key.len()].copy_from_slice(key);
-    }
-    let mut inner = Sha256::new();
-    inner.update(block_key.map(|b| b ^ 0x36));
-    inner.update(message);
-    let mut outer = Sha256::new();
-    outer.update(block_key.map(|b| b ^ 0x5c));
-    outer.update(inner.finalize());
-    outer.finalize().into()
+fn keyed(secret: &str, message: &str) -> Option<Hmac<Sha256>> {
+    let mut mac = Hmac::<Sha256>::new_from_slice(&hex::decode(secret).ok()?).ok()?;
+    mac.update(message.as_bytes());
+    Some(mac)
 }
 
 fn mac(secret: &str, message: &str) -> Option<String> {
-    let key = hex::decode(secret).ok()?;
-    Some(hex::encode(hmac_sha256(&key, message.as_bytes())))
+    Some(hex::encode(keyed(secret, message)?.finalize().into_bytes()))
 }
 
 pub fn session_code(secret: &str, now_unix_seconds: u64, nonce: &str) -> Option<String> {
@@ -155,14 +144,6 @@ pub fn session_code(secret: &str, now_unix_seconds: u64, nonce: &str) -> Option<
 pub fn fresh_session_code() -> Option<String> {
     let now = SystemTime::now().duration_since(UNIX_EPOCH).ok()?.as_secs();
     session_code(&secret()?, now, &new_nonce())
-}
-
-pub fn expected_proof(secret: &str, nonce: &str) -> Option<String> {
-    mac(secret, &format!("{PROOF_LABEL}{nonce}"))
-}
-
-fn constant_time_eq(a: &[u8], b: &[u8]) -> bool {
-    a.len() == b.len() && a.iter().zip(b).fold(0u8, |acc, (x, y)| acc | (x ^ y)) == 0
 }
 
 // Proxy variables must not apply: every request here goes to 127.0.0.1 and some carry the secret.
@@ -203,10 +184,11 @@ pub async fn prove(port: u16, timeout: Duration) -> bool {
         }
         _ => None,
     };
-    let proven = match (answer, expected_proof(&secret, &nonce)) {
-        (Some(answer), Some(expected)) => {
-            constant_time_eq(answer.proof.as_bytes(), expected.as_bytes())
-        }
+    let proven = match (
+        answer.and_then(|answer| hex::decode(answer.proof).ok()),
+        keyed(&secret, &format!("{PROOF_LABEL}{nonce}")),
+    ) {
+        (Some(answer), Some(expected)) => expected.verify_slice(&answer).is_ok(),
         _ => false,
     };
     if let Ok(mut current) = CURRENT.lock() {
@@ -242,6 +224,10 @@ pub async fn authorize(builder: reqwest::RequestBuilder, port: u16) -> reqwest::
 mod tests {
     use super::*;
 
+    fn expected_proof(secret: &str, nonce: &str) -> Option<String> {
+        mac(secret, &format!("{PROOF_LABEL}{nonce}"))
+    }
+
     fn session_cookie_value(secret: &str) -> Option<String> {
         mac(secret, "macro-deck-loopback-session")
     }
@@ -263,28 +249,6 @@ mod tests {
         assert_eq!(
             session_code(SECRET, 1_900_000_000, NONCE).unwrap(),
             "1900000060.00112233445566778899aabbccddeeff.c8ba672b12783beb854f70711c5a5a6df1e45a53ef4abec3163c636c932feb73"
-        );
-    }
-
-    #[test]
-    fn hmac_matches_rfc_4231() {
-        let case1 = hmac_sha256(&[0x0b; 20], b"Hi There");
-        assert_eq!(
-            hex::encode(case1),
-            "b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7"
-        );
-        let case2 = hmac_sha256(b"Jefe", b"what do ya want for nothing?");
-        assert_eq!(
-            hex::encode(case2),
-            "5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843"
-        );
-        let case6 = hmac_sha256(
-            &[0xaa; 131],
-            b"Test Using Larger Than Block-Size Key - Hash Key First",
-        );
-        assert_eq!(
-            hex::encode(case6),
-            "60e431591ee0b67f0d8a26aacbf5b77f8e0bc6213728c5140546040f0ee37f54"
         );
     }
 
@@ -376,5 +340,51 @@ mod tests {
         assert_eq!(status.unwrap(), 204);
         assert!(request.starts_with("GET /direct "));
         assert!(proxy.accept().is_err(), "the proxy was contacted");
+    }
+
+    fn serve_one_proof(answer: impl FnOnce(&str) -> String + Send + 'static) -> u16 {
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let port = listener.local_addr().unwrap().port();
+        std::thread::spawn(move || {
+            use std::io::{Read, Write};
+            let (mut stream, _) = listener.accept().unwrap();
+            let mut request = String::new();
+            let mut buffer = [0u8; 4096];
+            while !request.contains("\r\n\r\n") || !request.ends_with('}') {
+                let read = stream.read(&mut buffer).unwrap();
+                if read == 0 {
+                    break;
+                }
+                request.push_str(&String::from_utf8_lossy(&buffer[..read]));
+            }
+            let nonce = request
+                .split("\"nonce\":\"")
+                .nth(1)
+                .and_then(|rest| rest.split('"').next())
+                .unwrap_or_default()
+                .to_string();
+            let body = format!("{{\"proof\":\"{}\"}}", answer(&nonce));
+            let response = format!(
+                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}",
+                body.len()
+            );
+            stream.write_all(response.as_bytes()).unwrap();
+        });
+        port
+    }
+
+    #[test]
+    fn only_a_listener_that_knows_the_secret_is_proven() {
+        set_secret(SECRET.to_string());
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap();
+
+        let genuine = serve_one_proof(|nonce| expected_proof(SECRET, nonce).unwrap());
+        let impostor = serve_one_proof(|nonce| expected_proof(&"ab".repeat(32), nonce).unwrap());
+
+        assert!(runtime.block_on(prove(genuine, Duration::from_secs(5))));
+        assert!(!runtime.block_on(prove(impostor, Duration::from_secs(5))));
     }
 }
