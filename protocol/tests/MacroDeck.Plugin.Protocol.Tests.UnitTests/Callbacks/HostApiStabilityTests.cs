@@ -19,6 +19,7 @@ public class HostApiStabilityTests
 		"devices",
 		"event-bindings",
 		"folder-views",
+		"icon-packs",
 		"layouts",
 		"messaging",
 		"notifications",
@@ -43,7 +44,7 @@ public class HostApiStabilityTests
 			[HostApis.Widgets] = ["apply", "invalidate-icon"],
 			[HostApis.Notifications] = ["notify", "dismiss"],
 			[HostApis.ActionInteractions] = ["request-item-picker", "request-device-picker", "show-modal"],
-			[HostApis.Ui] = ["snapshot", "patch", "fault", "register-resource", "remove-resource"],
+			[HostApis.Ui] = ["snapshot", "patch", "fault", "reload", "register-resource", "remove-resource"],
 			[HostApis.Devices] =
 				["register", "update", "presence", "unregister", "interaction", "icon", "widget-icon", "close"],
 			[HostApis.VariableValues] = ["value", "invalidate"],
@@ -55,6 +56,7 @@ public class HostApiStabilityTests
 			[HostApis.Adb] =
 				["shell", "battery", "push", "pull", "install", "uninstall", "package-installed", "connect"],
 			[HostApis.Messaging] = ["publish", "send", "request", "subscriptions"],
+			[HostApis.IconPacks] = ["sync-bundled", "get-icon-resource"],
 		};
 
 	[Test]

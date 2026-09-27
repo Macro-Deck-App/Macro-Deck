@@ -39,6 +39,16 @@ public sealed class ConnectTokenPersister : IDisposable
 		}
 	}
 
+	public Task<bool> EnqueueClearAndWaitAsync()
+	{
+		lock (_sync)
+		{
+			var mine = ClearAfterAsync(_tail);
+			_tail = mine;
+			return mine;
+		}
+	}
+
 	public async Task FlushAsync()
 	{
 		Task tail;
@@ -72,6 +82,8 @@ public sealed class ConnectTokenPersister : IDisposable
 
 	private async Task<bool> PersistAfterAsync(Task predecessor, ConnectCredential credential)
 	{
+		// Callers enqueue while holding their own lock; the write must never start on their thread.
+		await Task.Yield();
 		await predecessor;
 
 		try
@@ -82,6 +94,23 @@ public sealed class ConnectTokenPersister : IDisposable
 		catch (Exception ex)
 		{
 			_logger.Error(ex, "Failed to persist the rotated Macro Deck Connect credential");
+			return false;
+		}
+	}
+
+	private async Task<bool> ClearAfterAsync(Task predecessor)
+	{
+		await Task.Yield();
+		await predecessor;
+
+		try
+		{
+			await _store.Clear(CancellationToken.None);
+			return true;
+		}
+		catch (Exception ex)
+		{
+			_logger.Error(ex, "Failed to clear the stored Macro Deck Connect credential");
 			return false;
 		}
 	}

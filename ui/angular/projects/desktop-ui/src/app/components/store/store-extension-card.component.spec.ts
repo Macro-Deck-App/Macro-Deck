@@ -83,10 +83,44 @@ describe('StoreExtensionCardComponent trust chip', () => {
     expect(metaText()).toContain(translate(AppStrings.Store.PublisherVerified));
   });
 
+  it('marks an installed plugin whose signing certificate was revoked and no longer calls it verified', () => {
+    setup({ signingRevoked: true }, [runtime('com.acme.deck-tools', true)]);
+
+    expect(metaText()).toContain(translate(AppStrings.Store.SigningRevoked));
+    expect(metaText()).not.toContain(translate(AppStrings.Store.PublisherVerified));
+    expect(metaText()).not.toContain(translate('macrodeck.app:Developer.ManagedPlugins.TakenOverBadge'));
+  });
+
+  it('shows no revoked marker for a host that does not report revocation', () => {
+    setup({}, [runtime('com.acme.deck-tools', false)]);
+
+    expect(metaText()).not.toContain(translate(AppStrings.Store.SigningRevoked));
+  });
+
   it('ignores a takeover of a different id and of non-plugin kinds', () => {
     setup({ kind: 'IconPack', trust: 'RegistryAuthenticated' }, [runtime('com.acme.deck-tools', true)]);
 
     expect(metaText()).not.toContain(translate('macrodeck.app:Developer.ManagedPlugins.TakenOverBadge'));
+  });
+
+  it('flags an installed version the registry withdrew and names the reason', () => {
+    setup({ installState: 'UpdateAvailable', installedVersion: '1.2.0', installedVersionWithdrawal: { reason: 'Malware' } });
+
+    const chip = (fixture.nativeElement as HTMLElement).querySelector('.withdrawal-chip');
+    expect(chip?.textContent).toContain(translate(AppStrings.Store.Withdrawal.VersionChip));
+    expect(chip?.getAttribute('title')).toContain('Malware');
+  });
+
+  it('flags an installed package the registry removed from the Store', () => {
+    setup({ installState: 'Installed', installedVersion: '1.0.0', withdrawal: { reason: 'Malware' } });
+
+    expect(metaText()).toContain(translate(AppStrings.Store.Withdrawal.PackageChip));
+  });
+
+  it('shows no withdrawal chip for a package whose withdrawn versions are not installed', () => {
+    setup({ installState: 'Installed', installedVersion: '1.3.0' });
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('.withdrawal-chip')).toBeNull();
   });
 });
 

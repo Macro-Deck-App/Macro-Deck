@@ -100,7 +100,7 @@ public class UiComponentVocabularyTests
 	private static readonly string[] _expectedEvents =
 	[
 		"change", "adjust", "press", "long-press", "press-start", "press-end", "reveal", "double-press", "drag",
-		"drag-end", "swipe", "pinch", "pinch-end",
+		"drag-end", "swipe", "pinch", "pinch-end", "pointer-down", "pointer-move", "pointer-up", "tap",
 	];
 
 	private static UiSurface WidgetSurface()
@@ -220,6 +220,9 @@ public class UiComponentVocabularyTests
 			Assert.That(UiComponentModifiers.SwipeMinDistance, Is.EqualTo(0.2));
 			Assert.That(UiComponentModifiers.SwipeMaxDurationMs, Is.EqualTo(500));
 			Assert.That(UiComponentModifiers.GestureThrottleMs, Is.EqualTo(100));
+			Assert.That(UiComponentModifiers.PointerMoveIntervalMs, Is.EqualTo(16));
+			Assert.That(UiComponentModifiers.PointerMoveMaxSamples, Is.EqualTo(256));
+			Assert.That(UiComponentModifiers.TapMaxDurationMs, Is.EqualTo(400));
 		});
 	}
 

@@ -106,6 +106,9 @@ user-supplied value is additionally POSIX-quoted before it becomes part of a dev
   and evade the throttle entirely, which is a worse trade than the availability annoyance.
 - ADB infrastructure and the built-in ADB integration are separate enable states: the USB connection works
   with the integration disabled, and the integration owns no adb process or device list of its own.
+- A phone the admin picks for USB without debugging ([ADR 0095](0095-usb-connections-without-debugging.md)),
+  or one remembered from such a pick, leaves adb while it is switched: no reverse tunnel is set up for it then,
+  and other programs' adb sessions to it end. Phones nobody picked stay with adb.
 - `IAdbManager` is deliberately **not** part of the SDK. If third-party plugins ever need controlled adb
   access, that is a separate decision with a wider blast radius.
 - That decision is [ADR 0092](0092-plugins-reach-adb-through-a-permission-gated-host-api.md): plugins

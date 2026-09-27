@@ -13,6 +13,7 @@ using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Plugins;
+using MacroDeckHost.Application.Plugins.IconPacks;
 using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Plugins.Trust;
 using Mediator;
@@ -24,6 +25,7 @@ namespace MacroDeckHost.Infrastructure.Plugins;
 public sealed class PluginSupervisor : IPluginSupervisor
 {
 	private static readonly TimeSpan _postKillWait = TimeSpan.FromSeconds(2);
+	private static readonly TimeSpan _iconPackSyncBound = TimeSpan.FromSeconds(30);
 
 	private readonly IPluginManifestReader _manifestReader;
 	private readonly IPluginInstallationCatalog _catalog;
@@ -41,6 +43,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 	private readonly TimeProvider _timeProvider;
 	private readonly PluginSupervisorOptions _options;
 	private readonly ILogger _logger;
+	private readonly IPluginIconPackSync? _iconPackSync;
 	private readonly Random _random = new();
 
 	private readonly Dictionary<string, PluginRuntimeEntry> _entries = new(StringComparer.Ordinal);
@@ -62,8 +65,10 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		IServiceScopeFactory scopeFactory,
 		TimeProvider timeProvider,
 		PluginSupervisorOptions options,
-		ILogger logger)
+		ILogger logger,
+		IPluginIconPackSync? iconPackSync = null)
 	{
+		_iconPackSync = iconPackSync;
 		_manifestReader = manifestReader;
 		_catalog = catalog;
 		_stateStore = stateStore;
@@ -933,8 +938,6 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 	private async Task FinalizeExit(PluginRuntimeEntry entry, IPluginProcess process, string? launchId)
 	{
-		string? finishedLaunchId = null;
-
 		await entry.Gate.WaitAsync();
 		try
 		{
@@ -959,7 +962,9 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			if (launchId is not null)
 			{
 				_launchTokenService.Discard(launchId);
-				finishedLaunchId = launchId;
+				// Under the gate: the exit watcher and a stop both finalize, and the loser returns early, so a
+				// stop must not complete before the winner has cleared the journal.
+				await _journal.Remove(launchId);
 			}
 
 			process.Dispose();
@@ -995,11 +1000,6 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		finally
 		{
 			entry.Gate.Release();
-		}
-
-		if (finishedLaunchId is not null)
-		{
-			await _journal.Remove(finishedLaunchId);
 		}
 	}
 
@@ -1086,6 +1086,27 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 	}
 
+	private async Task SyncIconPacksBeforeLaunch(string pluginId, CancellationToken ct)
+	{
+		if (_iconPackSync is null)
+		{
+			return;
+		}
+
+		try
+		{
+			await _iconPackSync.SyncAsync(pluginId, ct).WaitAsync(_iconPackSyncBound, _timeProvider, ct);
+		}
+		catch (TimeoutException)
+		{
+			_logger.Warning("Syncing the bundled icon packs of {PluginId} took too long; launching anyway", pluginId);
+		}
+		catch (Exception exception) when (exception is not OperationCanceledException)
+		{
+			_logger.Warning(exception, "Syncing the bundled icon packs of {PluginId} failed; launching anyway", pluginId);
+		}
+	}
+
 	private async Task<PluginSupervisorResult> AttemptLaunch(PluginRuntimeEntry entry,
 		InstalledPlugin installed,
 		bool allowStartupGraceRetry,
@@ -1121,7 +1142,9 @@ public sealed class PluginSupervisor : IPluginSupervisor
 
 		var manifest = manifestResult.Manifest!;
 
-		var trust = await _trustEvaluator.EvaluateInstalledAsync(activeVersion.VersionDirectory, ct);
+		var trust = await _trustEvaluator.EvaluateInstalledAsync(activeVersion.VersionDirectory,
+			PluginRevocationCheck.Skip,
+			ct);
 		var trustDecision = await EvaluateTrustGate(installed.PluginId, activeVersion.Version, trust, ct);
 
 		if (!trustDecision.Permitted)
@@ -1147,6 +1170,11 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 
 		await ApplyTrustGateAction(installed.PluginId, activeVersion.Version, trustDecision.Action, trust);
+
+		if (manifest.BundledIconPacks is { Count: > 0 })
+		{
+			await SyncIconPacksBeforeLaunch(installed.PluginId, ct);
+		}
 
 		var candidateEntrypoint = PluginRuntimeIdentifiers.CandidatesFor(PluginRuntimeIdentifiers.Current)
 			.Select(rid => manifest.Entrypoints.GetValueOrDefault(rid))

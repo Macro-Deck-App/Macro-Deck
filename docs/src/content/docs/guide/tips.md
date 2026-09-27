@@ -48,7 +48,8 @@ Deaths: {{ vars.deaths }}
 ## Share and back up
 
 - Export a widget, folder or profile and import it anywhere, or share the file.
-- **Settings > Backups** makes backups on demand and automatically before every update.
+- **Settings > Backups** makes backups on demand and automatically before every update. See
+  [Backups](/guide/backups/).
 
 ## Test automations
 

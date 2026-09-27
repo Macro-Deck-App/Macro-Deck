@@ -150,7 +150,7 @@ public class AuthController : ControllerBase
 			return Problem(statusCode: StatusCodes.Status400BadRequest, title: "Invalid scope.");
 		}
 
-		var throttleKey = $"{HttpContext.Connection.RemoteIpAddress}|{body.Username}";
+		var throttleKey = $"{BridgedConnectionStamp.ClientKey(HttpContext)}|{body.Username}";
 		if (_loginThrottle.IsThrottled(throttleKey, out var retryAfter))
 		{
 			Response.Headers.RetryAfter
@@ -167,10 +167,14 @@ public class AuthController : ControllerBase
 		{
 			_loginThrottle.RegisterFailure(throttleKey);
 
-			var remoteIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 			var attemptedUsername = Truncate(body.Username, MaxAttemptedUsernameLength);
 			var failureCount = _failedLoginTracker.RegisterFailure();
 			var culture = (await _preferences.GetLocalization()).Culture;
+			var remoteIp = BridgedConnectionStamp.DeviceKey(HttpContext) is { } deviceKey
+				? _localization.Resolve(
+					AppStrings.Notifications.FailedLoginOverUsb(serial: BridgedConnectionStamp.MaskedDevice(deviceKey)),
+					culture)
+				: HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 			_userNotificationStore.Raise(new UserNotificationDraft
 			{
 				Severity = UserNotificationSeverity.Warning,
@@ -234,8 +238,8 @@ public class AuthController : ControllerBase
 	{
 		var token = body.Token ?? string.Empty;
 		string[] throttleKeys = PairingCodeStore.IsPairingCodeShape(token)
-			? [$"{HttpContext.Connection.RemoteIpAddress}|device-enrollment", PairingCodeThrottleKey]
-			: [$"{HttpContext.Connection.RemoteIpAddress}|device-enrollment"];
+			? [$"{BridgedConnectionStamp.ClientKey(HttpContext)}|device-enrollment", PairingCodeThrottleKey]
+			: [$"{BridgedConnectionStamp.ClientKey(HttpContext)}|device-enrollment"];
 
 		var retryAfter = TimeSpan.Zero;
 		foreach (var key in throttleKeys)

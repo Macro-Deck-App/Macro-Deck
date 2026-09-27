@@ -23,7 +23,13 @@ type BackupsModalState =
       components: BackupComponentGroupInfo[];
       recoveryKey?: string;
     }
-  | { kind: 'restoreConfirm'; backup: BackupSummary; components: BackupComponentGroup[]; recoveryKey?: string };
+  | {
+      kind: 'restoreConfirm';
+      backup: BackupSummary;
+      components: BackupComponentGroup[];
+      recoveryKey?: string;
+      adoptsRecoveryKey: boolean;
+    };
 
 @Component({
   selector: 'app-backups-settings',
@@ -53,6 +59,8 @@ export class BackupsSettingsComponent {
 
   readonly canMutate = this.backupService.canMutate;
   readonly creating = signal(false);
+  readonly importing = signal(false);
+  readonly inspecting = signal(false);
   readonly modal = signal<BackupsModalState>({ kind: 'none' });
 
   protected readonly operation = this.backupService.operation;
@@ -91,6 +99,28 @@ export class BackupsSettingsComponent {
     }
   }
 
+  async onImportFileSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    input.value = '';
+    if (!file) {
+      return;
+    }
+
+    this.importing.set(true);
+    try {
+      const result = await this.backupService.importBackup(file);
+      if (!result.ok) {
+        this.toastService.show(result.error, { variant: 'error' });
+        return;
+      }
+      this.toastService.show(this.localization.translateKey(AppStrings.Settings.Backups.ImportSucceeded), { variant: 'success' });
+      await this.inspectForRestore(result.backup);
+    } finally {
+      this.importing.set(false);
+    }
+  }
+
   onPreview(backup: BackupSummary): void {
     this.modal.set({ kind: 'preview', backup });
   }
@@ -115,12 +145,18 @@ export class BackupsSettingsComponent {
     await this.inspectForRestore(backup);
   }
 
-  onRecoveryKeySubmitted(key: string): void {
+  async onRecoveryKeySubmitted(key: string): Promise<void> {
     const state = this.modal();
     if (state.kind !== 'recoveryKeyPrompt') {
       return;
     }
-    void this.inspectForRestore(state.backup, key);
+    this.modal.set({ ...state, invalid: false });
+    this.inspecting.set(true);
+    try {
+      await this.inspectForRestore(state.backup, key);
+    } finally {
+      this.inspecting.set(false);
+    }
   }
 
   onRestorePicked(components: BackupComponentGroup[]): void {
@@ -128,7 +164,13 @@ export class BackupsSettingsComponent {
     if (state.kind !== 'restorePick') {
       return;
     }
-    this.modal.set({ kind: 'restoreConfirm', backup: state.backup, components, recoveryKey: state.recoveryKey });
+    this.modal.set({
+      kind: 'restoreConfirm',
+      backup: state.backup,
+      components,
+      recoveryKey: state.recoveryKey,
+      adoptsRecoveryKey: !state.backup.decryptableLocally && restoresSecrets(components, state.catalog),
+    });
   }
 
   async confirmRestore(): Promise<void> {
@@ -151,6 +193,10 @@ export class BackupsSettingsComponent {
 
   private async inspectForRestore(backup: BackupSummary, recoveryKey?: string): Promise<void> {
     const outcome = await this.backupService.inspectBackup(backup.id, recoveryKey);
+    const current = this.modal();
+    if (recoveryKey && (current.kind !== 'recoveryKeyPrompt' || current.backup.id !== backup.id)) {
+      return;
+    }
     if (outcome.status === 'success') {
       this.modal.set({
         kind: 'restorePick',
@@ -172,4 +218,18 @@ export class BackupsSettingsComponent {
     this.modal.set({ kind: 'none' });
     this.toastService.show(outcome.message, { variant: 'error' });
   }
+}
+
+function restoresSecrets(components: BackupComponentGroup[], catalog: BackupComponentCatalogEntry[]): boolean {
+  const requires = new Map(catalog.map(entry => [entry.id, entry.requires]));
+  const seen = new Set<BackupComponentGroup>();
+  const pending = [...components];
+  while (pending.length > 0) {
+    const group = pending.pop()!;
+    if (!seen.has(group)) {
+      seen.add(group);
+      pending.push(...(requires.get(group) ?? []));
+    }
+  }
+  return seen.has('Integrations');
 }

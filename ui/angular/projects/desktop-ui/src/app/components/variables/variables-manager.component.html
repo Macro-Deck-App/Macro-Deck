@@ -153,6 +153,9 @@
                     <span class="vars-classification class-{{ row.variable.classification }}">
                       {{ classificationLabels()[row.variable.classification] }}
                     </span>
+                    @if (row.variable.fileSource; as fileSource) {
+                      <span class="vars-file-badge" [title]="fileSource.path">{{ fileFieldLabel() }}</span>
+                    }
                     @if (!canEditValue(row.variable)) {
                       <span
                         class="icon icon-lock icon-xs read-only-icon"
@@ -209,6 +212,12 @@
                             <button type="button" class="vars-menu-item" (click)="startEdit(row.variable)">
                               <span class="icon icon-pencil icon-sm"></span>
                               <span>{{ editValueLabel() }}</span>
+                            </button>
+                          }
+                          @if (row.variable.fileSource) {
+                            <button type="button" class="vars-menu-item" (click)="openFileSettings(row.variable)">
+                              <span class="icon icon-file-text icon-sm"></span>
+                              <span>{{ fileSettingsLabel() }}</span>
                             </button>
                           }
                           @if (canManage(row.variable)) {
@@ -291,6 +300,46 @@
       }
 
       <label class="form-group">
+        <span class="form-label">{{ sourceFieldLabel() }}</span>
+        <shared-select
+          class="vars-input"
+          [options]="sourceOptions()"
+          [ngModel]="createForm().source"
+          (ngModelChange)="setFormSource($event)"
+          name="source" />
+        <span class="form-preview">
+          <span class="hint">
+            @if (createForm().source === 'file') {
+              {{ sourceHintFile() }}
+            } @else {
+              {{ sourceHintValue() }}
+            }
+          </span>
+        </span>
+      </label>
+
+      @if (createForm().source === 'file') {
+        <div class="form-group">
+          <span class="form-label">{{ fileFieldLabel() }}</span>
+          <shared-file-path-input
+            class="vars-input"
+            kind="file"
+            [value]="createForm().filePath"
+            (valueChange)="setFormFilePath($event)" />
+        </div>
+
+        <div class="form-group">
+          <shared-toggle-switch
+            [label]="allowWriteBackLabel()"
+            [checked]="createForm().allowWriteBack"
+            (changed)="setFormAllowWriteBack($event)" />
+          <span class="form-preview">
+            <span class="hint">{{ allowWriteBackHint() }}</span>
+          </span>
+        </div>
+      }
+
+      <label class="form-group">
         <span class="form-label">{{ typeFieldLabel() }}</span>
         <shared-select
           class="vars-input"
@@ -314,6 +363,7 @@
         </label>
       }
 
+      @if (createForm().source === 'value') {
       <label class="form-group">
         <span class="form-label">{{ initialValueLabel() }}</span>
         @if (createForm().type === 'boolean') {
@@ -332,10 +382,15 @@
             name="initialValue" />
         }
       </label>
+      }
+
+      @if (createError(); as error) {
+        <shared-error-banner [message]="error" [dismissible]="false" />
+      }
 
       <shared-button-group class="form-actions" align="end">
         <shared-button type="button" variant="secondary" (click)="closeCreate()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
-        <shared-button type="submit" variant="primary" [disabled]="!nameSanitized().isValid">{{ 'macrodeck:Common.Create' | translate }}</shared-button>
+        <shared-button type="submit" variant="primary" [disabled]="!canSubmitCreate()">{{ 'macrodeck:Common.Create' | translate }}</shared-button>
       </shared-button-group>
     </form>
   </shared-modal>
@@ -373,6 +428,40 @@
       <shared-button-group class="form-actions" align="end">
         <shared-button type="button" variant="secondary" (click)="cancelEdit()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
         <shared-button type="submit" variant="primary">{{ 'macrodeck:Common.Save' | translate }}</shared-button>
+      </shared-button-group>
+    </form>
+  </shared-modal>
+}
+
+@if (fileSettings(); as settings) {
+  <shared-modal [heading]="fileSettingsLabel()" size="small" [showFooter]="false" (close)="closeFileSettings()">
+    <form class="create-form" (ngSubmit)="saveFileSettings()">
+      <div class="form-group">
+        <span class="form-label">{{ fileFieldLabel() }}</span>
+        <shared-file-path-input
+          class="vars-input"
+          kind="file"
+          [value]="settings.path"
+          (valueChange)="setFileSettingsPath($event)" />
+      </div>
+
+      <div class="form-group">
+        <shared-toggle-switch
+          [label]="allowWriteBackLabel()"
+          [checked]="settings.allowWriteBack"
+          (changed)="setFileSettingsWriteBack($event)" />
+        <span class="form-preview">
+          <span class="hint">{{ allowWriteBackHint() }}</span>
+        </span>
+      </div>
+
+      @if (fileSettingsError(); as error) {
+        <shared-error-banner [message]="error" [dismissible]="false" />
+      }
+
+      <shared-button-group class="form-actions" align="end">
+        <shared-button type="button" variant="secondary" (click)="closeFileSettings()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+        <shared-button type="submit" variant="primary" [disabled]="settings.path.trim().length === 0">{{ 'macrodeck:Common.Save' | translate }}</shared-button>
       </shared-button-group>
     </form>
   </shared-modal>

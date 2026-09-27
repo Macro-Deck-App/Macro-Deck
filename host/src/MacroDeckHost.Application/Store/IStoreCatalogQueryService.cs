@@ -10,4 +10,6 @@ public interface IStoreCatalogQueryService
 	Result<StoreCatalogItem, StoreCatalogError> Find(StoreExtensionKind kind, string id);
 
 	IReadOnlyList<StoreCatalogItem> Installed();
+
+	IReadOnlyList<StoreCategoryCount> Categories(IReadOnlyCollection<StoreExtensionKind>? kinds, bool supportedOnly = false);
 }

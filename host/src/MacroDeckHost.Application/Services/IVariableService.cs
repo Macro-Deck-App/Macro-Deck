@@ -21,7 +21,8 @@ public interface IVariableService
 		string? scopeRefId,
 		VariableType type,
 		object? initialValue,
-		int? decimalPlaces);
+		int? decimalPlaces,
+		VariableFileSource? fileSource = null);
 
 	/// <summary>
 	/// The one write path. Dispatches on the entity's owner: a user variable is stored, a widget variable
@@ -40,10 +41,14 @@ public interface IVariableService
 		CancellationToken cancellationToken = default);
 
 	/// <summary>
-	/// Edits a user variable's definition - its name and its numeric precision. The value goes through
-	/// <see cref="SetValue"/> instead.
+	/// Edits a user variable's definition - its name, its numeric precision and, for a variable that reads
+	/// from a file, its file source. The value goes through <see cref="SetValue"/> instead.
 	/// </summary>
-	Task<Result<VariableEntity, VariableError>> UpdateUserVariable(Guid id, string? name, int? decimalPlaces);
+	Task<Result<VariableEntity, VariableError>> UpdateUserVariable(
+		Guid id,
+		string? name,
+		int? decimalPlaces,
+		VariableFileSource? fileSource = null);
 
 	Task<Result<VariableError>> DeleteUserVariable(Guid id);
 

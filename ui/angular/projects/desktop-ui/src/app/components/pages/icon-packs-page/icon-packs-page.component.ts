@@ -18,7 +18,6 @@ import { RailPageComponent } from '../../rail-page/rail-page.component';
 import { archiveDropKind } from '../../../domain/archive-drop.util';
 import { savedFileDetail } from '../../../services/file-save.service';
 import { IconModel, IconPackModel, IconPackService } from '../../../services/icon-pack.service';
-import { StoreAccessService } from '../../../services/store-access.service';
 import { TextClipboardService, clipboardFailureDetail } from '../../../services/text-clipboard.service';
 import { PackEditDialogComponent, PackEditResult } from './pack-edit-dialog.component';
 
@@ -69,7 +68,6 @@ export class IconPacksPageComponent {
   private readonly localization = inject(LocalizationService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly storeUnlocked = inject(StoreAccessService).unlocked;
 
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
   @ViewChild('folderInput') folderInput?: ElementRef<HTMLInputElement>;
@@ -310,7 +308,7 @@ export class IconPacksPageComponent {
   }
 
   protected storeLink(pack: IconPackModel): string | null {
-    return pack.storePackageId && this.storeUnlocked() ? pack.storePackageId : null;
+    return pack.storePackageId ?? null;
   }
 
   protected openInStore(packageId: string): void {
@@ -318,7 +316,24 @@ export class IconPacksPageComponent {
   }
 
   protected sourceLabel(pack: IconPackModel): string | null {
-    return pack.ownerKind === 'Store' ? this.localization.translateKey(AppStrings.IconPacks.SourceStore) : null;
+    switch (pack.ownerKind) {
+      case 'Store':
+        return this.localization.translateKey(AppStrings.IconPacks.SourceStore);
+      case 'Plugin':
+        return this.localization.translateKey(AppStrings.IconPacks.SourcePlugin);
+      default:
+        return null;
+    }
+  }
+
+  protected sourceTitle(pack: IconPackModel): string {
+    if (pack.ownerKind !== 'Plugin') {
+      return this.localization.translateKey(AppStrings.IconPacks.ManagedByStore);
+    }
+
+    return pack.ownerName
+      ? this.localization.translateKey(AppStrings.IconPacks.ManagedByPlugin, { name: pack.ownerName })
+      : this.localization.translateKey(AppStrings.IconPacks.ManagedByUnnamedPlugin);
   }
 
   protected async confirmDeletePack(): Promise<void> {

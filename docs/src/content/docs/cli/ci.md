@@ -151,7 +151,9 @@ To publish one package for every platform, add a job that merges what the matrix
 - **It needs no network.** The Macro Deck root public key is compiled in, so it runs offline and in
   air-gapped runners.
 - Gate on the exit code. `--output json` gives the same verdict as
-  `{ valid, format, certificateId, rootAnchored, revocationChecked, problems[] }` when you need details.
+  `{ valid, format, certificateId, issuerCertificateId, rootAnchored, revocationChecked, problems[] }` when
+  you need details. `issuerCertificateId` names the issuer certificate that signed the signing certificate,
+  or is `null` when the root signed it directly.
 - Every run states that revocation was not checked. A `valid` verdict is a cryptographic fact about the
   signature and chain at signing time, not a live trust decision; nothing in the CLI consults
   `security.json` or any other revocation feed.

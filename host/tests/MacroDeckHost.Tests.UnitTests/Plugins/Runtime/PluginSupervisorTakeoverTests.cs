@@ -350,6 +350,7 @@ internal sealed class PluginSupervisorTakeoverTests
 		public TaskCompletionSource Release { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
 		public async Task<PluginTrustResult> EvaluateInstalledAsync(string versionDirectory,
+			PluginRevocationCheck revocationCheck,
 			CancellationToken cancellationToken = default)
 		{
 			await Release.Task.WaitAsync(cancellationToken);

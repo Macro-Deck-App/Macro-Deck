@@ -37,6 +37,9 @@ public static class ProtocolErrorMessages
 			[ProtocolErrorCodes.AdbNotEnabled] = "ADB is not enabled in Macro Deck.",
 			[ProtocolErrorCodes.AdbNotAllowed] = "This plugin is not allowed to use ADB.",
 			[ProtocolErrorCodes.AdbFailed] = "The ADB operation failed.",
+			[ProtocolErrorCodes.PluginIconNotFound] = "The plugin's bundled icon packs contain no such icon.",
+			[ProtocolErrorCodes.IconPackInvalid] = "The icon pack archive is not usable.",
+			[ProtocolErrorCodes.IconPackSyncNotAllowed] = "Only a self-registered development session can sync bundled icon packs.",
 		};
 
 	public static string For(string code)

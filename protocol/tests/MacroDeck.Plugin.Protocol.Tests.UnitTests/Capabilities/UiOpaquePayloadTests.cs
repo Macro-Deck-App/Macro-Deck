@@ -117,7 +117,7 @@ public class UiOpaquePayloadTests
 	}
 
 	private static readonly string[] _uiHostOperations =
-		["snapshot", "patch", "fault", "register-resource", "remove-resource"];
+		["snapshot", "patch", "fault", "reload", "register-resource", "remove-resource"];
 
 	[Test]
 	public void The_ui_host_api_offers_exactly_the_session_and_resource_operations()

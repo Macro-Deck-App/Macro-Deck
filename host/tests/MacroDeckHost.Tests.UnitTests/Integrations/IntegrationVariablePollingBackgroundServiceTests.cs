@@ -429,7 +429,8 @@ internal sealed class IntegrationVariablePollingBackgroundServiceTests
 			string? scopeRefId,
 			VariableType type,
 			object? initialValue,
-			int? decimalPlaces)
+			int? decimalPlaces,
+			VariableFileSource? fileSource = null)
 			=> throw new NotSupportedException();
 
 		public Task<Result<VariableEntity, VariableError>> SetValue(Guid id,
@@ -439,7 +440,8 @@ internal sealed class IntegrationVariablePollingBackgroundServiceTests
 		public Task<Result<VariableEntity, VariableError>> UpdateUserVariable(
 			Guid id,
 			string? name,
-			int? decimalPlaces)
+			int? decimalPlaces,
+			VariableFileSource? fileSource = null)
 			=> throw new NotSupportedException();
 
 		public Task<Result<VariableError>> DeleteUserVariable(Guid id) => throw new NotSupportedException();

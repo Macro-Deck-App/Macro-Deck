@@ -16,6 +16,11 @@ import {
 import { ApiService } from '../transport';
 import { LocalizationService } from '../localization';
 
+export interface VariableSaveResult {
+  variable: Variable | null;
+  errorCode: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class VariableService {
   private readonly ipc = inject(ApiService);
@@ -111,24 +116,24 @@ export class VariableService {
     }
   }
 
-  async create(request: CreateVariableRequest): Promise<Variable | null> {
+  async create(request: CreateVariableRequest): Promise<VariableSaveResult> {
     const response = await this.ipc.createVariable(request);
     if (!response.success || !response.variable) {
       console.warn('createVariable failed:', response.error);
-      return null;
+      return { variable: null, errorCode: response.error?.code ?? null };
     }
     this.upsertLocal(response.variable);
-    return response.variable;
+    return { variable: response.variable, errorCode: null };
   }
 
-  async update(request: UpdateVariableRequest): Promise<Variable | null> {
+  async update(request: UpdateVariableRequest): Promise<VariableSaveResult> {
     const response = await this.ipc.updateVariable(request);
     if (!response.success || !response.variable) {
       console.warn('updateVariable failed:', response.error);
-      return null;
+      return { variable: null, errorCode: response.error?.code ?? null };
     }
     this.upsertLocal(response.variable);
-    return response.variable;
+    return { variable: response.variable, errorCode: null };
   }
 
   async delete(id: string): Promise<boolean> {

@@ -130,10 +130,11 @@ async fn poll(
     client: &reqwest::Client,
     port: u16,
 ) -> Result<Vec<HostNotification>, (Option<u16>, String)> {
-    let response = client
-        .get(format!(
-            "http://127.0.0.1:{port}/api/host/shell-notifications"
-        ))
+    let request = client.get(format!(
+        "http://127.0.0.1:{port}/api/host/shell-notifications"
+    ));
+    let response = crate::loopback_secret::authorize(request, port)
+        .await
         .send()
         .await
         .map_err(|error| (None, error.to_string()))?;
@@ -148,11 +149,13 @@ async fn poll(
 }
 
 async fn report(client: &reqwest::Client, port: u16, id: i64, shown: bool) {
-    if let Err(error) = client
+    let request = client
         .post(format!(
             "http://127.0.0.1:{port}/api/host/shell-notifications/{id}/result"
         ))
-        .json(&serde_json::json!({ "shown": shown }))
+        .json(&serde_json::json!({ "shown": shown }));
+    if let Err(error) = crate::loopback_secret::authorize(request, port)
+        .await
         .send()
         .await
     {
@@ -163,7 +166,7 @@ async fn report(client: &reqwest::Client, port: u16, id: i64, shown: bool) {
 }
 
 async fn run(app: AppHandle, app_name: String, identifier: String) {
-    let Ok(client) = reqwest::Client::builder().timeout(REQUEST_TIMEOUT).build() else {
+    let Ok(client) = crate::loopback_secret::http_client(REQUEST_TIMEOUT) else {
         return;
     };
 

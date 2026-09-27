@@ -1,4 +1,5 @@
-import { LocalizationCatalog, UiSessionStore, type UiConnection, type UiRenderHost } from '@macro-deck/runtime';
+import { LocalizationCatalog, UiSessionStore, type UiConnection, type UiNode, type UiRenderHost } from '@macro-deck/runtime';
+import { ClientAppStrings } from '@macro-deck/runtime';
 import { FolderView } from './folder-view';
 
 describe('folder view', () => {
@@ -136,6 +137,82 @@ describe('folder view', () => {
 
     const attach = requests.filter(entry => entry.type === 'AttachUiSession')[0];
     expect(attach.payload).toEqual([{ sessionId: 's1' }]);
+  });
+
+  const buttonTree: UiNode = {
+    id: 'root', type: 'ui.stack', properties: {},
+    children: [{ id: 'play', type: 'ui.button', properties: { events: ['press'] } }],
+  } as UiNode;
+
+  const opens = () => requests.filter(entry => entry.type === 'OpenFolderUiSession');
+
+  const accept = async (index: number, sessionId: string): Promise<void> => {
+    opens()[index].resolve({ accepted: true, sessionId, viewId: 'acme.x' });
+    await settle();
+  };
+
+  const press = (mounted: FolderView): void => {
+    const button = mounted.element.querySelector('[data-node-id="play"]') as Element;
+    button.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerId: 1, button: 0 }));
+    button.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, cancelable: true, pointerId: 1, button: 0 }));
+  };
+
+  it('opens the same folder again when its session is lost, and talks to the new session', async () => {
+    const mounted = mount();
+    mounted.open('f1');
+    await accept(0, 's1');
+    sessions.treeUpdated('s1', 1, buttonTree);
+    mounted.paint();
+
+    sessions.invalidated('s1');
+    mounted.sessionLost('s1');
+    expect(opens().length).toBe(2);
+    expect(opens()[1].payload).toEqual([{ folderId: 'f1' }]);
+
+    await accept(1, 's2');
+    sessions.treeUpdated('s2', 1, buttonTree);
+    mounted.paint();
+    press(mounted);
+    await settle();
+
+    const events = requests.filter(entry => entry.type === 'SendUiEvent');
+    expect(events.length).toBe(1);
+    expect((events[0].payload as [{ sessionId: string }])[0].sessionId).toBe('s2');
+  });
+
+  it('opens again when the session is lost before it showed anything', async () => {
+    const mounted = mount();
+    mounted.open('f1');
+    await accept(0, 's1');
+
+    mounted.sessionLost('s1');
+
+    expect(opens().length).toBe(2);
+  });
+
+  it('ignores the loss of a session it does not show', async () => {
+    const mounted = mount();
+    mounted.open('f1');
+    await accept(0, 's1');
+
+    mounted.sessionLost('someone-else');
+
+    expect(opens().length).toBe(1);
+  });
+
+  it('stops opening again after repeated losses without a tree and says the view is unavailable', async () => {
+    const mounted = mount();
+    mounted.open('f1');
+    await accept(0, 's0');
+
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      mounted.sessionLost(`s${attempt - 1}`);
+      await accept(attempt, `s${attempt}`);
+    }
+    mounted.sessionLost('s3');
+
+    expect(opens().length).toBe(4);
+    expect(mounted.element.textContent).toContain(english(ClientAppStrings.Deck.FolderView.UnavailableHeading));
   });
 
   it('reopens rather than resyncs when asked for a different folder', async () => {

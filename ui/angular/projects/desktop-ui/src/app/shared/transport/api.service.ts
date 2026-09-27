@@ -17,6 +17,14 @@ import {
   ChangeUsernameRequest,
   ConnectAdbDeviceRequest,
   ConnectAdbDeviceResponse,
+  ConnectNativeUsbDeviceRequest,
+  ConnectNativeUsbDeviceResponse,
+  ForgetNativeUsbDeviceRequest,
+  ForgetNativeUsbDeviceResponse,
+  GetNativeUsbSettingsResponse,
+  NativeUsbStateChangedEvent,
+  UpdateNativeUsbSettingsRequest,
+  UpdateNativeUsbSettingsResponse,
   ResetPasswordRequest,
   CloneSecretResponse,
   CommitRestoreRequest,
@@ -163,6 +171,7 @@ import {
   GetScriptUsagesResponse,
   GetServerTimeResponse,
   GetStoreCatalogResponse,
+  GetStoreCategoriesResponse,
   GetStoreExtensionResponse,
   GetStoreSimilarResponse,
   GetStoreOperationsResponse,
@@ -178,6 +187,7 @@ import {
   GetWeatherStateResponse,
   GetWidgetDataSchemasResponse,
   HostLockStateChangedEvent,
+  ImportBackupResponse,
   ImportFolderResponse,
   ImportIconPacksResponse,
   ImportIconsFromPathRequest,
@@ -266,6 +276,7 @@ import {
   StoreCatalogSection,
   StoreExtensionKind,
   StoreOperationActionResponse,
+  GetStoreCreatorGuidelinesResponse,
   GetStoreInstallsResponse,
   GetStoreRatingsResponse,
   GetStoreRatingResponse,
@@ -366,6 +377,12 @@ export interface GetWidgetTypesResponse {
 }
 
 const UI_SOCKET_PATH = '/ws/ui';
+
+export class IconPackExportError extends Error {
+  constructor(readonly status: number) {
+    super(`Icon pack export failed with status ${status}`);
+  }
+}
 
 interface IncomingNotification<T = unknown> {
   method: string;
@@ -951,6 +968,18 @@ export class ApiService {
     return this.http('GET', `/api/store/catalog${suffix}`);
   }
 
+  getStoreCategories(kinds?: StoreExtensionKind[], supportedOnly?: boolean): Promise<GetStoreCategoriesResponse> {
+    const query = new URLSearchParams();
+    for (const kind of kinds ?? []) {
+      query.append('kinds', kind);
+    }
+    if (supportedOnly) {
+      query.set('supportedOnly', 'true');
+    }
+    const suffix = query.size > 0 ? `?${query}` : '';
+    return this.http('GET', `/api/store/categories${suffix}`);
+  }
+
   getStoreExtension(kind: StoreExtensionKind, packageId: string): Promise<GetStoreExtensionResponse> {
     return this.http('GET', `/api/store/catalog/${encodeURIComponent(kind)}/${encodeURIComponent(packageId)}`);
   }
@@ -1015,6 +1044,10 @@ export class ApiService {
   getStoreInstalls(packageIds: readonly string[]): Promise<GetStoreInstallsResponse> {
     const ids = packageIds.map(id => encodeURIComponent(id)).join(',');
     return this.http('GET', `/api/store/installs?ids=${ids}`);
+  }
+
+  getStoreCreatorGuidelines(): Promise<GetStoreCreatorGuidelinesResponse> {
+    return this.http('GET', '/api/store/creator-guidelines');
   }
 
   getStoreRating(kind: StoreExtensionKind, packageId: string): Promise<GetStoreRatingResponse> {
@@ -1203,6 +1236,26 @@ export class ApiService {
     return this.http('POST', '/api/settings/adb/download-platform-tools');
   }
 
+  getNativeUsbSettings(): Promise<GetNativeUsbSettingsResponse> {
+    return this.http('GET', '/api/settings/usb');
+  }
+
+  refreshNativeUsbSettings(): Promise<GetNativeUsbSettingsResponse> {
+    return this.http('POST', '/api/settings/usb/refresh');
+  }
+
+  updateNativeUsbSettings(request: UpdateNativeUsbSettingsRequest): Promise<UpdateNativeUsbSettingsResponse> {
+    return this.http('PUT', '/api/settings/usb', request);
+  }
+
+  connectNativeUsbDevice(request: ConnectNativeUsbDeviceRequest): Promise<ConnectNativeUsbDeviceResponse> {
+    return this.http('POST', '/api/settings/usb/connect', request);
+  }
+
+  forgetNativeUsbDevice(request: ForgetNativeUsbDeviceRequest): Promise<ForgetNativeUsbDeviceResponse> {
+    return this.http('POST', '/api/settings/usb/forget', request);
+  }
+
   // Every device-target endpoint below is loopback-only on the host, so these are reachable from the
   // desktop UI and nowhere else (issue #727).
   getWebClientTargets(): Promise<WebClientTargetDto[]> {
@@ -1298,6 +1351,10 @@ export class ApiService {
 
   onAdbStateChanged(): Observable<AdbStateChangedEvent> {
     return this.onNotification<AdbStateChangedEvent>('AdbStateChangedEvent');
+  }
+
+  onNativeUsbStateChanged(): Observable<NativeUsbStateChangedEvent> {
+    return this.onNotification<NativeUsbStateChangedEvent>('NativeUsbStateChangedEvent');
   }
 
   getProfiles(): Promise<GetProfilesResponse> {
@@ -1924,7 +1981,7 @@ export class ApiService {
       { method: 'GET' }
     );
     if (!response.ok) {
-      throw new Error(`Icon pack export failed with status ${response.status}`);
+      throw new IconPackExportError(response.status);
     }
 
     const fileName =
@@ -1941,9 +1998,11 @@ export class ApiService {
     return this.http('POST', `/api/icons/import-batches/${encodeURIComponent(batchId)}/cancel`);
   }
 
-  getIconImageUrl(iconId: string, size?: number): string {
-    const query = size ? `?size=${size}` : '';
-    return `${this.baseUrl}/api/icons/${encodeURIComponent(iconId)}/image${query}`;
+  getIconImageUrl(iconId: string, size?: number, version?: string | null): string {
+    // Always send v: the URL without it may still be cached as immutable by an older host, and an empty v
+    // asks this host to revalidate.
+    const query = [...(size ? [`size=${size}`] : []), `v=${encodeURIComponent(version ?? '')}`].join('&');
+    return `${this.baseUrl}/api/icons/${encodeURIComponent(iconId)}/image?${query}`;
   }
 
   getSystemFonts(): Promise<GetSystemFontsResponse> {
@@ -2193,6 +2252,10 @@ export class ApiService {
 
   inspectBackup(backupId: string, recoveryKey?: string): Promise<InspectBackupResponse> {
     return this.http('POST', `/api/backups/${encodeURIComponent(backupId)}/inspect`, { recoveryKey });
+  }
+
+  importBackup(file: File): Promise<ImportBackupResponse> {
+    return this.uploadArchive<ImportBackupResponse>('/api/backups/import', file, {});
   }
 
   prepareRestore(request: PrepareRestoreRequest): Promise<PrepareRestoreResponse> {

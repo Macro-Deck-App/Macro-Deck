@@ -30,7 +30,17 @@ public interface IIconStorage
 		Stream content,
 		CancellationToken cancellationToken);
 
+	Task<bool> WriteVariantIfIconExists(Guid packId,
+		Guid iconId,
+		string variant,
+		ReadOnlyMemory<byte> webpData,
+		CancellationToken cancellationToken);
+
 	Stream? OpenVariant(Guid packId, Guid iconId, string variant);
+
+	IReadOnlyList<string> ListVariants(Guid packId, Guid iconId);
+
+	void DeleteVariant(Guid packId, Guid iconId, string variant);
 
 	void DeleteIconFiles(Guid packId, Guid iconId);
 

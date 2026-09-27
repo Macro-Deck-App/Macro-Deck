@@ -148,6 +148,7 @@ internal static class ManifestValidator
 		// here; ValidateArtifactAsync below additionally checks "present but undeclared".
 		successProblems.AddRange(
 			EvaluateDeclaredFilesAgainstDisk(manifest, baseDirectory, checkForUndeclaredFiles: false));
+		successProblems.AddRange(EvaluateBundledIconPacks(manifest, baseDirectory));
 
 		var looksLikeSourceTree = HasProjectFile(baseDirectory);
 		successProblems.AddRange(RequirementProblems.From(PluginManifestRequirements.Evaluate(manifest, level),
@@ -231,6 +232,7 @@ internal static class ManifestValidator
 				checkForUndeclaredFiles: true,
 				out var presentEntryNames);
 			problems.AddRange(declaredFileProblems);
+			problems.AddRange(EvaluateBundledIconPacks(manifest, extractDirectory));
 
 			// A packed artifact is never an unbuilt source tree - HasProjectFile only matters for the loose
 			// manifest.json / version-directory path above, where a project file next to the manifest means
@@ -308,6 +310,7 @@ internal static class ManifestValidator
 		PluginManifestError.InvalidPermission => "/permissions",
 		PluginManifestError.InvalidCompatibility => "/compatibility",
 		PluginManifestError.InvalidPublisher => "/publisher",
+		PluginManifestError.InvalidBundledIconPack => "/bundledIconPacks",
 		_ => null
 	};
 
@@ -315,6 +318,23 @@ internal static class ManifestValidator
 	/// missing entrypoint means "this is the source tree, not the build output" rather than "the plugin is
 	/// broken". Internal rather than private: <c>PluginBuilder</c> and <c>PluginPacker</c> both need the
 	/// same "is this an unbuilt source tree" judgement for their own generated-field warnings.</summary>
+	// Unverified: only decides which root files count as signature material; verify checks the chain itself.
+	private static bool CertificateNamesIssuer(string directory)
+	{
+		try
+		{
+			using var document = JsonDocument.Parse(
+				File.ReadAllBytes(Path.Combine(directory, PluginArtifactFiles.CertificateFileName)));
+			return document.RootElement.ValueKind == JsonValueKind.Object &&
+				document.RootElement.TryGetProperty("issuer", out var issuer) &&
+				issuer.ValueKind != JsonValueKind.Null;
+		}
+		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
+		{
+			return false;
+		}
+	}
+
 	internal static bool HasProjectFile(string directory)
 	{
 		try
@@ -500,6 +520,7 @@ internal static class ManifestValidator
 		}
 
 		var signed = manifest.Signature is not null;
+		var withIssuer = signed && CertificateNamesIssuer(baseDirectory);
 		var entryNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
 		foreach (var actualPath in Directory.EnumerateFiles(baseDirectory, "*", SearchOption.AllDirectories))
@@ -514,6 +535,13 @@ internal static class ManifestValidator
 							StringComparison.OrdinalIgnoreCase) ||
 						string.Equals(relative,
 							PluginArtifactFiles.CertificateSignatureFileName,
+							StringComparison.OrdinalIgnoreCase))) ||
+				(withIssuer &&
+					(string.Equals(relative,
+							PluginArtifactFiles.IssuerCertificateFileName,
+							StringComparison.OrdinalIgnoreCase) ||
+						string.Equals(relative,
+							PluginArtifactFiles.IssuerCertificateSignatureFileName,
 							StringComparison.OrdinalIgnoreCase))) ||
 				declaredPaths.Contains(relative))
 			{
@@ -567,6 +595,42 @@ internal static class ManifestValidator
 				Pointer = "/icon",
 				Level = PluginManifestValidationLevel.Package
 			};
+		}
+	}
+
+	private static IEnumerable<ManifestProblem> EvaluateBundledIconPacks(PluginManifest manifest, string baseDirectory)
+	{
+		if (manifest.BundledIconPacks is not { } packs)
+		{
+			yield break;
+		}
+
+		var listed = manifest.Files is { } files
+			? new HashSet<string>(files.Select(file => EntrypointPresence.Normalize(file.Path)),
+				StringComparer.OrdinalIgnoreCase)
+			: null;
+
+		for (var index = 0; index < packs.Count; index++)
+		{
+			var pack = packs[index];
+			var pointer = $"/bundledIconPacks/{index}/path";
+
+			if (!File.Exists(Path.Combine(baseDirectory, pack.Path.Replace('/', Path.DirectorySeparatorChar))))
+			{
+				yield return Problem(ManifestProblemSeverity.Warning,
+					"bundled-icon-pack-missing",
+					$"Bundled icon pack '{pack.Key}' declares '{pack.Path}', which does not exist.",
+					pointer);
+			}
+
+			if (listed is not null && !listed.Contains(EntrypointPresence.Normalize(pack.Path)))
+			{
+				yield return Problem(ManifestProblemSeverity.Warning,
+					"bundled-icon-pack-not-in-files",
+					$"Bundled icon pack '{pack.Key}' declares '{pack.Path}', which is not listed in 'files'. The host " +
+					"skips a pack the signed file list does not cover.",
+					pointer);
+			}
 		}
 	}
 

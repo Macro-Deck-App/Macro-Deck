@@ -36,6 +36,9 @@ Conflicts: (none declared)
 
 Icon packs: (none declared)
 
+Bundled icon packs:
+  logos: icon-packs/logos.macroDeckIconPack - Service Logos, 12 icon(s)
+
 Compatibility:
   macroDeck: >=3.0.0-0
 
@@ -90,6 +93,18 @@ macrodeck-plugin inspect --artifact com.example.my-plugin-1.0.0.macroDeckPlugin 
   "dependencies": [],
   "conflicts": [],
   "iconPacks": [],
+  "bundledIconPacks": [
+    {
+      "key": "logos",
+      "path": "icon-packs/logos.macroDeckIconPack",
+      "present": true,
+      "listedInFiles": true,
+      "name": "Service Logos",
+      "version": "1.0.0",
+      "iconCount": 12,
+      "problem": null
+    }
+  ],
   "compatibility": { "sdk": null, "macroDeck": ">=3.0.0-0", "protocolMinimum": null, "protocolMaximum": null },
   "signature": null,
   "entryCount": 346,
@@ -129,7 +144,7 @@ Exactly one of `--artifact` and `--directory` is required: neither is `no-select
 ## What is reported
 
 Entrypoints, permissions, declared languages, the AI declaration, dependencies, conflicts, icon packs,
-compatibility, signature shape, entry count, size and compression ratio.
+bundled icon packs, compatibility, signature shape, entry count, size and compression ratio.
 
 `inspect` describes, it does not judge: it never runs the JSON Schema, never checks a declared file's digest,
 never flags an undeclared file, and marks an unknown permission `(unknown)` without failing. Use
@@ -140,6 +155,14 @@ the real content. A missing one prints `warning entrypoint-not-packed`, is marke
 report, and has `"present": false` in JSON (`null` when the payload could not be read, so presence was not
 checked). JSON also carries a top-level `warnings[]` of `{ code, message }`. A single-platform build is a
 legitimate intermediate state, so this never changes the exit code.
+
+[Bundled icon packs](/reference/manifest/#bundled-icon-packs) are read out of the payload, from inside the
+artifact with `--artifact`, and listed with their key, path, pack name and icon count. Like an entrypoint,
+a declared pack that is not in the payload prints `warning bundled-icon-pack-missing` and is shown as
+`missing`. With `--artifact`, a pack path that `files[]` does not list prints
+`warning bundled-icon-pack-not-in-files`, because the host skips such a pack; `listedInFiles` is `null`
+for a directory. A pack file that is not a readable icon pack prints `warning bundled-icon-pack-invalid`.
+None of these change the exit code.
 
 ## Signature shape
 

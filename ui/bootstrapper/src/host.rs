@@ -17,7 +17,8 @@ use crate::host_error_window::{self, ExitStatus, HostErrorKind, HostErrorReport}
 use crate::host_supervisor::{Decision, ExitAction, Supervisor, MAX_RESTART_ATTEMPTS};
 use crate::localization::{self, keys};
 use crate::logging::{self, LogTail};
-use crate::update_state::UpdateSnapshot;
+use crate::loopback_secret;
+use crate::update_state::{UpdateFailure, UpdateSnapshot};
 
 pub const BUILD_CHANNEL: &str = env!("MACRODECK_BUILD_CHANNEL");
 
@@ -65,6 +66,11 @@ const UPDATE_STOP_TIMEOUT: Duration = Duration::from_secs(35);
 
 const FORCED_STOP_TIMEOUT: Duration = Duration::from_secs(10);
 
+// Windows kills a windowless app that has not answered WM_ENDSESSION within 5 s, and shows its
+// blocking screen to one with a window; staying under that still covers the 2 s dispatch window.
+#[cfg(any(windows, test))]
+const SESSION_END_STOP_TIMEOUT: Duration = Duration::from_secs(4);
+
 const READY_TIMEOUT: Duration = Duration::from_secs(60);
 
 const RETRY_READY_TIMEOUT: Duration = Duration::from_secs(30);
@@ -75,6 +81,13 @@ const UNRESPONSIVE_STOP_TIMEOUT: Duration = Duration::from_secs(5);
 // inside it), so the two budgets cannot silently drift apart.
 #[cfg(test)]
 pub const HOST_SHUTDOWN_WORST_CASE: Duration = Duration::from_secs(30);
+
+// Mirrors the host's Server stopped dispatch window in ServerLifecycleEventBackgroundService.
+#[cfg(test)]
+pub const HOST_SERVER_STOPPED_DISPATCH_WINDOW: Duration = Duration::from_secs(2);
+
+#[cfg(test)]
+pub const WINDOWS_END_SESSION_ALLOWANCE: Duration = Duration::from_secs(5);
 
 pub const HOST_RESTART_EXIT_CODE: i32 = 86;
 
@@ -231,8 +244,10 @@ pub fn parse_trusted_status(body: &str) -> bool {
         .unwrap_or(false)
 }
 
-async fn is_trusted_loopback(port: u16, timeout: Duration) -> bool {
-    let Ok(client) = reqwest::Client::builder().timeout(timeout).build() else {
+// A host from before the per-launch secret trusts any loopback caller; only such a host of ours
+// answers trusted to a request that carries no credential at all.
+async fn is_legacy_trusted_loopback(port: u16, timeout: Duration) -> bool {
+    let Ok(client) = loopback_secret::http_client(timeout) else {
         return false;
     };
     match client
@@ -253,11 +268,11 @@ pub async fn is_reachable(port: Option<u16>, timeout: Duration) -> bool {
     let Some(port) = port else {
         return false;
     };
-    let Ok(client) = reqwest::Client::builder().timeout(timeout).build() else {
+    let Ok(client) = loopback_secret::http_client(timeout) else {
         return false;
     };
     match client
-        .get(format!("http://127.0.0.1:{port}/api/system/version"))
+        .get(format!("http://127.0.0.1:{port}/api/auth/status"))
         .send()
         .await
     {
@@ -383,25 +398,38 @@ pub async fn ensure_running(app: &AppHandle) -> bool {
     let port_file_dir = config_dir.as_deref().unwrap_or(Path::new("."));
 
     // Reuse an already-running host (e.g. restart of the UI only), but only
-    // one this bootstrapper assigned the port to, and only when the port is
-    // really the trusted loopback listener - never a foreign host and never
-    // the public LAN listener, where the UI would load but stay unauthorized
-    // (window shown, no profiles).
+    // one this bootstrapper assigned the port to, and only when it proves it
+    // holds the persisted secret - never a foreign listener that squats the
+    // port and never the public LAN listener.
     if let Some(port) = adoption_candidate(
         env_port_override(),
         port_file_port(),
         read_persisted_port(port_file_dir),
     ) {
-        if is_trusted_loopback(port, Duration::from_secs(1)).await {
-            logging::info(&format!(
-                "[host] adopting running host on loopback port {port}"
-            ));
-            state.ui_port.store(port, Ordering::SeqCst);
-            state.ready.store(true, Ordering::SeqCst);
-            adopt_host_culture(app, port).await;
-            return true;
+        if let Some(secret) = loopback_secret::load(port_file_dir) {
+            loopback_secret::set_secret(secret);
+            if loopback_secret::prove(port, Duration::from_secs(1)).await {
+                logging::info(&format!(
+                    "[host] adopting running host on loopback port {port}"
+                ));
+                state.ui_port.store(port, Ordering::SeqCst);
+                state.ready.store(true, Ordering::SeqCst);
+                adopt_host_culture(app, port).await;
+                return true;
+            }
         }
-        if is_reachable(Some(port), Duration::from_millis(500)).await {
+        if is_legacy_trusted_loopback(port, Duration::from_secs(1)).await {
+            logging::info(&format!(
+                "[host] stopping the host on port {port}, which predates the loopback secret"
+            ));
+            let _ = post_shutdown(port, "replaced").await;
+            let deadline = Instant::now() + Duration::from_secs(10);
+            while Instant::now() < deadline
+                && is_reachable(Some(port), Duration::from_millis(300)).await
+            {
+                tokio::time::sleep(STOP_POLL_INTERVAL).await;
+            }
+        } else if is_reachable(Some(port), Duration::from_millis(500)).await {
             logging::warn(&format!(
                 "[host] port {port} answers but is not a trusted loopback listener; starting our own host"
             ));
@@ -472,10 +500,21 @@ fn launch(app: &AppHandle, state: &HostState) -> Result<Option<(u64, u16)>, Laun
         "[host] starting {} on loopback port {port}",
         binary.display()
     ));
+    let secret = loopback_secret::generate();
+    if let Some(dir) = &config_dir {
+        if let Err(error) = loopback_secret::persist(dir, &secret) {
+            logging::warn(&format!(
+                "[host] could not persist the loopback secret: {error}"
+            ));
+        }
+    }
+    loopback_secret::set_secret(secret.clone());
+
     let mut command = Command::new(&binary);
     command
         .current_dir(binary.parent().unwrap_or(Path::new(".")))
         .env("MACRODECK_HOST_PORT", port.to_string())
+        .env(loopback_secret::ENVIRONMENT_VARIABLE, &secret)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
@@ -553,17 +592,11 @@ async fn adopt_host_culture(app: &AppHandle, port: u16) {
     #[cfg(not(target_os = "macos"))]
     let _ = app;
 
-    let Ok(client) = reqwest::Client::builder()
-        .timeout(Duration::from_secs(3))
-        .build()
-    else {
+    let Ok(client) = loopback_secret::http_client(Duration::from_secs(3)) else {
         return;
     };
-    let response = match client
-        .get(format!("http://127.0.0.1:{port}/api/localization"))
-        .send()
-        .await
-    {
+    let request = client.get(format!("http://127.0.0.1:{port}/api/localization"));
+    let response = match loopback_secret::authorize(request, port).await.send().await {
         Ok(response) if response.status().is_success() => response,
         Ok(response) => {
             logging::warn(&format!(
@@ -672,11 +705,13 @@ fn spawn_exit_monitor(app: AppHandle, generation: u64) {
                 match child.try_wait() {
                     Ok(Some(status)) => {
                         state.exited.store(true, Ordering::SeqCst);
+                        loopback_secret::forget_verified_port();
                         break status.code();
                     }
                     Ok(None) => {}
                     Err(_) => {
                         state.exited.store(true, Ordering::SeqCst);
+                        loopback_secret::forget_verified_port();
                         break None;
                     }
                 }
@@ -940,7 +975,7 @@ async fn wait_for_ready(
         if let Some(code) = exit_of(state, generation) {
             return AttemptOutcome::Exited(code);
         }
-        if is_reachable(Some(port), Duration::from_millis(500)).await {
+        if loopback_secret::prove(port, Duration::from_millis(500)).await {
             return AttemptOutcome::Ready;
         }
         tokio::time::sleep(Duration::from_millis(250)).await;
@@ -985,6 +1020,33 @@ pub async fn stop(app: &AppHandle) {
     stop_host(app, "quit", QUIT_STOP_TIMEOUT).await;
 }
 
+// A Windows session end and the macOS terminate: path destroy the event loop without request_quit.
+// Blocking here keeps the process, and with it the host's job, alive until Server stopped is out.
+pub fn stop_before_exit(app: &AppHandle) {
+    let state = app.state::<Arc<HostState>>();
+    if crate::is_quitting() || !state.spawned() || state.exited.load(Ordering::SeqCst) {
+        return;
+    }
+    logging::info("[host] exiting while the host is still running; stopping it first");
+    crate::mark_quitting(app);
+    state.stopping.store(true, Ordering::SeqCst);
+    #[cfg(windows)]
+    tauri::async_runtime::block_on(async {
+        let stop = async {
+            let port = request_stop(app, "exit").await;
+            wait_until_stopped(app, port, SESSION_END_STOP_TIMEOUT).await
+        };
+        if !matches!(
+            tokio::time::timeout(SESSION_END_STOP_TIMEOUT, stop).await,
+            Ok(true)
+        ) {
+            logging::warn("[host] still stopping as the session ends; the job object ends it");
+        }
+    });
+    #[cfg(not(windows))]
+    tauri::async_runtime::block_on(stop_host(app, "exit", QUIT_STOP_TIMEOUT));
+}
+
 pub async fn shutdown_for_update(app: &AppHandle) -> bool {
     stop_host(app, "update", UPDATE_STOP_TIMEOUT).await
 }
@@ -995,7 +1057,7 @@ fn begin_stop(state: &HostState) {
     }
 }
 
-async fn stop_host(app: &AppHandle, reason: &str, graceful_timeout: Duration) -> bool {
+async fn request_stop(app: &AppHandle, reason: &str) -> Option<u16> {
     let state = app.state::<Arc<HostState>>();
     begin_stop(&state);
     state.shutdown_expected.store(true, Ordering::SeqCst);
@@ -1009,18 +1071,28 @@ async fn stop_host(app: &AppHandle, reason: &str, graceful_timeout: Duration) ->
         }
         None => logging::warn("[host] no loopback port known; skipping the shutdown request"),
     }
+    port
+}
+
+async fn stop_host(app: &AppHandle, reason: &str, graceful_timeout: Duration) -> bool {
+    let port = request_stop(app, reason).await;
 
     if wait_until_stopped(app, port, graceful_timeout).await {
         return true;
     }
 
     logging::warn("[host] did not stop in time; killing the host process");
-    kill_child(&state);
+    kill_child(&app.state::<Arc<HostState>>());
     if wait_until_stopped(app, port, FORCED_STOP_TIMEOUT).await {
         return true;
     }
     logging::error("[host] the host process is still running after the kill");
     false
+}
+
+#[cfg(test)]
+pub fn covers_server_stopped_before_windows_ends_the_session(budget: Duration) -> bool {
+    budget > HOST_SERVER_STOPPED_DISPATCH_WINDOW && budget < WINDOWS_END_SESSION_ALLOWANCE
 }
 
 #[cfg(test)]
@@ -1119,13 +1191,12 @@ fn binary_is_replaceable(app: &AppHandle) -> bool {
 }
 
 async fn post_shutdown(port: u16, reason: &str) -> Result<(), reqwest::Error> {
-    let client = reqwest::Client::builder()
-        .timeout(Duration::from_secs(3))
-        .build()?;
-    client
-        .post(format!(
-            "http://127.0.0.1:{port}/api/host/shutdown?reason={reason}"
-        ))
+    let client = loopback_secret::http_client(Duration::from_secs(3))?;
+    let request = client.post(format!(
+        "http://127.0.0.1:{port}/api/host/shutdown?reason={reason}"
+    ));
+    loopback_secret::authorize(request, port)
+        .await
         .send()
         .await?;
     Ok(())
@@ -1154,16 +1225,17 @@ struct UpdateStateBody<'a> {
     // any consumer that wants the raw counts.
     percent: Option<u8>,
     error: Option<&'a str>,
+    failure: Option<UpdateFailure>,
     can_install: bool,
 }
 
 async fn post_update_state(port: u16, body: &UpdateStateBody<'_>) -> Result<(), reqwest::Error> {
-    let client = reqwest::Client::builder()
-        .timeout(Duration::from_secs(3))
-        .build()?;
-    client
+    let client = loopback_secret::http_client(Duration::from_secs(3))?;
+    let request = client
         .post(format!("http://127.0.0.1:{port}/api/host/update-state"))
-        .json(body)
+        .json(body);
+    loopback_secret::authorize(request, port)
+        .await
         .send()
         .await?;
     Ok(())
@@ -1216,12 +1288,14 @@ async fn post_pre_update_backup(
     version: Option<&str>,
     timeout: Duration,
 ) -> Result<PreUpdateBackupResponse, reqwest::Error> {
-    let client = reqwest::Client::builder().timeout(timeout).build()?;
-    client
+    let client = loopback_secret::http_client(timeout)?;
+    let request = client
         .post(format!(
             "http://127.0.0.1:{port}/api/backups/before-host-update"
         ))
-        .json(&PreUpdateBackupBody { version })
+        .json(&PreUpdateBackupBody { version });
+    loopback_secret::authorize(request, port)
+        .await
         .send()
         .await?
         .json::<PreUpdateBackupResponse>()
@@ -1268,7 +1342,19 @@ async fn report_update_state_as(app: &AppHandle, snapshot: &UpdateSnapshot, phas
         return false;
     };
 
-    let body = UpdateStateBody {
+    let body = update_state_body(snapshot, phase);
+
+    match post_update_state(port, &body).await {
+        Ok(()) => true,
+        Err(error) => {
+            logging::warn(&format!("[host] update-state report failed: {error}"));
+            false
+        }
+    }
+}
+
+fn update_state_body<'a>(snapshot: &'a UpdateSnapshot, phase: &'a str) -> UpdateStateBody<'a> {
+    UpdateStateBody {
         version: snapshot.version.as_deref(),
         phase,
         published_at: snapshot.published_at.as_deref(),
@@ -1285,21 +1371,67 @@ async fn report_update_state_as(app: &AppHandle, snapshot: &UpdateSnapshot, phas
             .as_ref()
             .and_then(|progress| progress.percent),
         error: snapshot.error.as_deref(),
+        failure: snapshot.failure,
         can_install: snapshot.install_strategy.installs_in_app(),
-    };
-
-    match post_update_state(port, &body).await {
-        Ok(()) => true,
-        Err(error) => {
-            logging::warn(&format!("[host] update-state report failed: {error}"));
-            false
-        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::release_notes::ReleaseNotes;
+    use crate::update_channel::UpdateChannel;
+    use crate::update_state::UpdateState;
+    use crate::updater::UpdateInstallStrategy;
+
+    fn idle_update_state() -> UpdateState {
+        UpdateState::idle(
+            "3.0.0".to_string(),
+            UpdateChannel::Stable,
+            UpdateInstallStrategy::InApp,
+            "https://macro-deck.app/download",
+        )
+    }
+
+    #[test]
+    fn a_failed_check_tells_the_host_it_was_the_check_that_failed() {
+        let mut state = idle_update_state();
+        state.record_available(1, "3.1.0".to_string(), ReleaseNotes::Empty, None, None);
+        state.record_check_failed(2, "feed unreachable".to_string());
+        let snapshot = state.snapshot();
+
+        let body = serde_json::to_value(update_state_body(&snapshot, "failed")).unwrap();
+
+        assert_eq!(body["phase"], "failed");
+        assert_eq!(body["failure"], "check");
+        assert_eq!(body["version"], "3.1.0");
+    }
+
+    #[test]
+    fn a_failed_download_tells_the_host_it_was_the_install_that_failed() {
+        let mut state = idle_update_state();
+        state.record_available(1, "3.1.0".to_string(), ReleaseNotes::Empty, None, None);
+        assert!(state.try_begin_download());
+        state.record_install_failed("connection reset".to_string());
+        let snapshot = state.snapshot();
+
+        let body = serde_json::to_value(update_state_body(&snapshot, "failed")).unwrap();
+
+        assert_eq!(body["failure"], "install");
+    }
+
+    #[test]
+    fn an_up_to_date_report_carries_no_version_and_no_failure() {
+        let mut state = idle_update_state();
+        state.record_check_failed(1, "feed unreachable".to_string());
+        state.record_up_to_date(2, None);
+        let snapshot = state.snapshot();
+
+        let body = serde_json::to_value(update_state_body(&snapshot, "upToDate")).unwrap();
+
+        assert!(body["version"].is_null());
+        assert!(body["failure"].is_null());
+    }
 
     #[test]
     fn a_successful_backup_lets_the_update_proceed() {
@@ -1635,6 +1767,20 @@ mod tests {
         assert!(covers_host_shutdown(
             UPDATE_STOP_TIMEOUT,
             FORCED_STOP_TIMEOUT
+        ));
+    }
+
+    #[test]
+    fn the_session_end_budget_sends_server_stopped_before_windows_ends_the_session() {
+        assert!(covers_server_stopped_before_windows_ends_the_session(
+            SESSION_END_STOP_TIMEOUT
+        ));
+    }
+
+    #[test]
+    fn the_quit_budget_would_outlast_windows_session_end_allowance() {
+        assert!(!covers_server_stopped_before_windows_ends_the_session(
+            QUIT_STOP_TIMEOUT
         ));
     }
 

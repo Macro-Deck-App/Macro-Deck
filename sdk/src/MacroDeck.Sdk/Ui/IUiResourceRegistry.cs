@@ -46,4 +46,24 @@ public interface IUiResourceRegistry
 	/// <exception cref="ArgumentException">The name is not valid.</exception>
 	/// <exception cref="UiResourceException">Macro Deck could not carry out the removal.</exception>
 	Task RemoveAsync(string name, CancellationToken cancellationToken = default);
+
+	/// <summary>
+	/// Returns the handle of one icon from this plugin's own bundled icon packs, named by the pack's key in
+	/// the manifest's <c>bundledIconPacks</c> and the icon's name inside that pack, to show through an image.
+	/// </summary>
+	/// <remarks>
+	/// The handle points into Macro Deck's icon store: nothing is uploaded, nothing is held in memory for the
+	/// session and nothing counts against the quota described above. It stays valid across Macro Deck
+	/// restarts. Its <see cref="UiResource.ContentHash" /> changes when an update or a development sync
+	/// replaces the icon, so ask again when building a tree rather than keeping a handle for good. Only the
+	/// calling plugin's own packs are searched.
+	/// </remarks>
+	/// <exception cref="UiResourceException"><see cref="UiResourceErrorCode.PluginIconNotFound" /> when the
+	/// plugin's bundled packs hold no such key or name; <see cref="UiResourceErrorCode.Unsupported" /> from a
+	/// Macro Deck, or a context, without bundled icon packs; <see cref="UiResourceErrorCode.Failed" /> when
+	/// the icon cannot be served within the size one UI resource may have, or the call could not complete.
+	/// </exception>
+	Task<UiResource> GetPluginIconAsync(string key, string name, CancellationToken cancellationToken = default)
+		=> Task.FromException<UiResource>(new UiResourceException(UiResourceErrorCode.Unsupported,
+			"This context cannot resolve bundled plugin icons."));
 }

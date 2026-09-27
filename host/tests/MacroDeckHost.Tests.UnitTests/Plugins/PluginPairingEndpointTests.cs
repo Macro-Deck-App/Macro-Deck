@@ -417,7 +417,7 @@ public class PluginPairingEndpointTests
 			.Single(item => item.GetProperty("requestId").GetString() == requestId);
 		Assert.That(pendingItem.GetProperty("arrivedOnPublicListener").GetBoolean(),
 			Is.False,
-			"a request created over the trusted loopback listener must not be reported as public");
+			"a plugin pairing over the loopback listener, which never holds the desktop secret, must not be reported as public");
 
 		var publicPluginId = $"com.example.leak{Guid.NewGuid():N}";
 		var (_, publicChallenge) = NewPkcePair();
@@ -480,7 +480,7 @@ public class PluginPairingEndpointTests
 	private Task<HttpResponseMessage> CreatePairingRequestAsync(string pluginId, string challenge)
 		=> Send(HttpMethod.Post,
 			"/api/plugins/pairing",
-			shape: FakeConnectionShape.Loopback,
+			shape: FakeConnectionShape.LoopbackWithoutCredential,
 			body: new
 			{
 				pluginId, displayName = "Example Plugin", codeChallenge = challenge, codeChallengeMethod = "S256"

@@ -7,7 +7,6 @@ using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Application.Ui.Transport.Messages.Icons;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Enums;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using MacroDeckHost.Localization;
@@ -139,16 +138,12 @@ public class IconPacksController : ControllerBase
 		Response.ContentType = "application/zip";
 		Response.Headers.ContentDisposition = disposition.ToString();
 
-		var bodyControl = HttpContext.Features.Get<IHttpBodyControlFeature>();
-		if (bodyControl is not null)
-		{
-			bodyControl.AllowSynchronousIO = true;
-		}
-
 		var result = await _iconPackExportService.Export(packId, Response.Body, ct);
 		if (!result.Success && !Response.HasStarted)
 		{
-			return NotFound();
+			Response.Headers.Remove(HeaderNames.ContentDisposition);
+			Response.ContentType = null;
+			return result.Error == IconPackError.TooLarge ? UnprocessableEntity() : NotFound();
 		}
 
 		return new EmptyResult();

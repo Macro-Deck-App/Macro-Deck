@@ -20,9 +20,19 @@ public static class PluginArtifactFiles
 	/// the canonical digest.</summary>
 	public const string CertificateFileName = "certificate.json";
 
-	/// <summary>The root key's detached signature over <see cref="CertificateFileName"/>'s exact bytes,
-	/// carried alongside it at the archive root. Signature material, excluded the same way.</summary>
+	/// <summary>The detached signature over <see cref="CertificateFileName"/>'s exact bytes, made by the root key
+	/// or by the certificate's issuer, carried alongside it at the archive root. Signature material, excluded
+	/// the same way.</summary>
 	public const string CertificateSignatureFileName = "certificate.sig";
+
+	/// <summary>The issuer certificate that signed <see cref="CertificateFileName"/>, exactly as issued, carried
+	/// at the archive root only when the signing certificate names an issuer. Signature material, excluded the
+	/// same way.</summary>
+	public const string IssuerCertificateFileName = "issuer.json";
+
+	/// <summary>The root key's detached signature over <see cref="IssuerCertificateFileName"/>'s exact bytes,
+	/// carried alongside it. Signature material, excluded the same way.</summary>
+	public const string IssuerCertificateSignatureFileName = "issuer.sig";
 
 	/// <summary>Names the active version. Written by the installer, read by the installation catalog.
 	/// </summary>

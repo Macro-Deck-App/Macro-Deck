@@ -255,6 +255,38 @@ describe('StoreInstallButtonComponent version target', () => {
     expect(buttonLabels(host)).toContain(text(AppStrings.Store.Uninstall));
   });
 
+  it('keeps Uninstall and offers no install for an installed package the registry withdrew', async () => {
+    const host = await render({ installState: 'Installed', installedVersion: '1.0.0', withdrawal: { reason: 'Malware' } },
+      '2.0.0', { targetInstallable: false, targetUnavailableReason: 'Withdrawn' });
+    const labels = buttonLabels(host);
+    expect(labels).toContain(text(AppStrings.Store.Uninstall));
+    expect(labels).not.toContain(text(AppStrings.Store.VersionUnavailable));
+  });
+
+  it('keeps Uninstall for a withdrawn package after its update was refused', async () => {
+    const host = await render({ installState: 'Installed', installedVersion: '1.0.0', withdrawal: { reason: 'Malware' } },
+      '2.0.0', { targetInstallable: false }, failed('PackageRemoved', { kind: 'Update', previousVersion: '1.0.0' }));
+    expect(buttonLabels(host)).toContain(text(AppStrings.Store.Uninstall));
+  });
+
+  it('offers going back to the latest version from a withdrawn installed version on the item page', async () => {
+    const host = await render({
+      installState: 'Installed', installedVersion: '1.3.0', latestVersion: '1.2.0',
+      installedVersionWithdrawal: { reason: 'Compromised' },
+    }, '1.2.0');
+    expect(buttonLabels(host)).toContain(text(AppStrings.Store.DowngradeTo, { version: '1.2.0' }));
+  });
+
+  it('offers no downgrade from a withdrawn installed version on a card, which cannot confirm it', async () => {
+    const host = await render({
+      installState: 'Installed', installedVersion: '1.3.0', latestVersion: '1.2.0',
+      installedVersionWithdrawal: { reason: 'Compromised' },
+    }, null);
+    const labels = buttonLabels(host);
+    expect(labels).not.toContain(text(AppStrings.Store.DowngradeTo, { version: '1.2.0' }));
+    expect(labels).toContain(text(AppStrings.Store.Uninstall));
+  });
+
   it('puts settings first and uninstall beside it for an installed plugin that has settings', async () => {
     const host = await render({ installState: 'Installed', installedVersion: '2.0.0' }, '2.0.0', { manageAction: 'settings' });
     const emitted: string[] = [];
@@ -486,5 +518,53 @@ describe('StoreInstallButtonComponent with a test build installed', () => {
 
     expect(button('Return to Store version')).toBeNull();
     expect(fixture.nativeElement.textContent).not.toContain('Test build');
+  });
+});
+
+describe('StoreInstallButtonComponent prominent states', () => {
+  function render(installState: StoreCatalogItemBody['installState'], latestVersion: string): ComponentFixture<StoreInstallButtonComponent> {
+    const fixture = TestBed.createComponent(StoreInstallButtonComponent);
+    fixture.componentRef.setInput('item', {
+      kind: 'Plugin',
+      id: 'com.acme.deck-tools',
+      name: 'Deck Tools',
+      latestVersion,
+      installedVersion: '1.0.0',
+      installState,
+      trust: 'RegistryAuthenticated',
+      hasIcon: false,
+    } satisfies StoreCatalogItemBody);
+    fixture.componentRef.setInput('size', 'lg');
+    fixture.detectChanges();
+    document.body.appendChild(fixture.nativeElement);
+    return fixture;
+  }
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [StoreInstallButtonComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        ...provideLocalizationTesting(),
+        { provide: DeveloperModeService, useValue: { enabled: signal(false), ensureLoaded: async () => undefined } },
+      ],
+    });
+  });
+
+  it('shows the installed status exactly as tall as the update button it replaces', async () => {
+    const measure = async (installState: StoreCatalogItemBody['installState'], latestVersion: string, selector: string) => {
+      const fixture = render(installState, latestVersion);
+      await fixture.whenStable();
+      const element = fixture.nativeElement.querySelector(selector) as HTMLElement;
+      const height = element.getBoundingClientRect().height;
+      fixture.nativeElement.remove();
+      return height;
+    };
+
+    const status = await measure('Installed', '1.0.0', '.installed-status');
+    const button = await measure('UpdateAvailable', '1.1.0', 'shared-button button');
+
+    expect(button).toBeGreaterThan(0);
+    expect(status).toBe(button);
   });
 });

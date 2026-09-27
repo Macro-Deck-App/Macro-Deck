@@ -6,6 +6,11 @@ export type VariableType = 'text' | 'numeric' | 'boolean';
 
 export type VariableClassification = 'user' | 'integration' | 'widget';
 
+export interface VariableFileSource {
+  path: string;
+  allowWriteBack: boolean;
+}
+
 export interface Variable {
   id: string;
   name: string;
@@ -30,6 +35,7 @@ export interface Variable {
   attributes?: Record<string, string>;
   canWrite?: boolean;
   commitOnRelease?: boolean;
+  fileSource?: VariableFileSource | null;
 }
 
 export type { VariableReference } from './action-builder.interface';

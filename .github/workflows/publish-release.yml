@@ -24,25 +24,25 @@ permissions:
   contents: write
 
 jobs:
-  publish:
-    name: Publish GitHub release
+  inspect-build:
+    name: Inspect source build
     if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'workflow_dispatch' && github.event.workflow_run.head_branch == 'main') }}
     runs-on: ubuntu-latest
-    # The release announcement webhook and the R2 credentials are production environment secrets.
-    environment: production
+    permissions:
+      actions: read
+      contents: read
     outputs:
-      version: ${{ steps.release.outputs.version }}
-      run_id: ${{ inputs.run_id || github.event.workflow_run.id }}
+      publishable: ${{ steps.metadata.outputs.publishable }}
+      run_id: ${{ steps.run.outputs.run_id }}
+      target_sha: ${{ steps.run.outputs.target_sha }}
     env:
       GH_TOKEN: ${{ github.token }}
       SOURCE_RUN_ID: ${{ inputs.run_id || github.event.workflow_run.id }}
-      TARGET_SHA: ${{ github.event.workflow_run.head_sha }}
     steps:
-      - uses: actions/checkout@v5
-
-      # A manual run names the build run instead of being triggered by it, so the same
-      # guarantees the workflow_run filter gives are asserted here before anything is published.
+      # This check deliberately runs before the protected production job. An
+      # unsigned build remains downloadable for testing but asks for no deploy approval.
       - name: Resolve source build run
+        id: run
         run: |
           set -euo pipefail
           read -r name conclusion event branch sha < <(
@@ -55,7 +55,50 @@ jobs:
             exit 1
           fi
 
-          echo "TARGET_SHA=$sha" >> "$GITHUB_ENV"
+          {
+            echo "run_id=$SOURCE_RUN_ID"
+            echo "target_sha=$sha"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Download release metadata
+        uses: actions/download-artifact@v7
+        with:
+          name: release-metadata
+          path: metadata
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.run.outputs.run_id }}
+
+      - name: Check publish eligibility
+        id: metadata
+        env:
+          TARGET_SHA: ${{ steps.run.outputs.target_sha }}
+        run: |
+          set -euo pipefail
+          test "$(jq -r .commit metadata/release-metadata.json)" = "$TARGET_SHA"
+          signed=$(jq -r .windows_signed metadata/release-metadata.json)
+          if [ "$signed" = 'true' ]; then
+            echo 'publishable=true' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo 'publishable=false' >> "$GITHUB_OUTPUT"
+          echo 'Unsigned Windows build: artifacts remain available, publication is intentionally skipped.' >> "$GITHUB_STEP_SUMMARY"
+
+  publish:
+    name: Publish GitHub release
+    needs: inspect-build
+    if: ${{ needs.inspect-build.outputs.publishable == 'true' }}
+    runs-on: ubuntu-latest
+    # The release announcement webhook and the R2 credentials are production environment secrets.
+    environment: production
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      run_id: ${{ needs.inspect-build.outputs.run_id }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SOURCE_RUN_ID: ${{ needs.inspect-build.outputs.run_id }}
+      TARGET_SHA: ${{ needs.inspect-build.outputs.target_sha }}
+    steps:
+      - uses: actions/checkout@v5
 
       # For ci/scripts/point-manifests-at-release.mjs below.
       - uses: actions/setup-node@v7

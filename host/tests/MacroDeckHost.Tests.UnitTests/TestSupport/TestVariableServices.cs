@@ -3,6 +3,7 @@ using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Variables.Files;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -27,14 +28,22 @@ internal static class TestVariableServices
 			.AddSingleton(new VariableCatalogProviders(owners))
 			.AddSingleton<IVariableRefreshSignal>(new VariableRefreshSignal())
 			.AddSingleton<IMusicPlayerPollNudge>(new MusicPlayerPollNudge(owners))
+			.AddTestFileVariables()
 			.AddScoped<IVariableService, VariableService>();
 	}
+
+	public static IServiceCollection AddTestFileVariables(this IServiceCollection services)
+		=> services.AddSingleton(provider => new FileVariableSynchronizer(provider.GetRequiredService<VariableRegistry>(),
+			provider.GetRequiredService<IMediator>(),
+			new FakeVariableFileSystem(),
+			Serilog.Core.Logger.None));
 
 	public static VariableService Create(
 		VariableRegistry registry,
 		IUserVariableStore store,
 		IMediator mediator,
-		IIntegrationRegistry? integrations = null)
+		IIntegrationRegistry? integrations = null,
+		FileVariableSynchronizer? files = null)
 	{
 		var owners = integrations ?? new ConfigurableIntegrationRegistry([]);
 
@@ -43,6 +52,7 @@ internal static class TestVariableServices
 			mediator,
 			new VariableCatalogProviders(owners),
 			new VariableRefreshSignal(),
-			new MusicPlayerPollNudge(owners));
+			new MusicPlayerPollNudge(owners),
+			files ?? new FileVariableSynchronizer(registry, mediator, new FakeVariableFileSystem(), Serilog.Core.Logger.None));
 	}
 }

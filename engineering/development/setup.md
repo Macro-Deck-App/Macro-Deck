@@ -31,6 +31,14 @@ Development builds keep their data in the repository-local `.data` directory unl
 
 The development desktop UI reaches the trusted loopback listener. The web client reaches the public listener and therefore exercises the normal client authentication flow. See [architecture.md](../architecture.md) and the relevant ADRs for the trust model rather than duplicating the port and authentication implementation here.
 
+The loopback listener requires a secret ([ADR 0098](../decisions/0098-loopback-trust-requires-a-per-launch-secret.md)). A host started without one generates it on every start and writes it to `config/loopback-secret` in its data directory; the path is in the host log. The `ng serve` proxy and a debug build of the bootstrapper read `.data/config/loopback-secret` in the repository, which is where it lands when the host runs from the repository root as above. Otherwise point `MACRODECK_LOOPBACK_SECRET_FILE` at the file, or export the same `MACRODECK_LOOPBACK_SECRET` for the host and the tools. For `curl`, send it as a header:
+
+```bash
+curl -H "X-MacroDeck-Loopback-Secret: $(cat .data/config/loopback-secret)" http://127.0.0.1:5191/api/profiles
+```
+
+Anyone who can read that file is admin on your development host, and so is anyone who reaches the `ng serve` port, which is why it must stay bound to `localhost`.
+
 ## Run the UI
 
 The desktop UI is the Angular application. It consumes the built `shared` package, and the npm scripts handle the required build order.

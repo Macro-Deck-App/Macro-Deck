@@ -90,8 +90,11 @@ public static class BackupComponentGroups
 			["app_user", "refresh_token", "device"])
 	];
 
+	public const string RecoveryKeyPreferencePrefix = "backups.recoveryKey";
+
 	/// <summary>
-	/// Preference keys and the recovery key row are never overwritten by a restore. Taking them from an
+	/// Preference keys and the recovery key row are never overwritten by a restore of the app settings; the
+	/// recovery key pointer only moves together with the secret table. Taking them from an
 	/// archive would either point this installation at a secret row it does not have - orphaning every
 	/// backup it owns - or give it the installation identity of the machine the archive came from, which
 	/// is what the key ring's KEK store is keyed by.
@@ -101,7 +104,7 @@ public static class BackupComponentGroups
 	/// </summary>
 	public static readonly IReadOnlyList<string> PreferenceKeyDenyPrefixes =
 	[
-		"backups.recoveryKey",
+		RecoveryKeyPreferencePrefix,
 		"telemetry.installationId",
 		"onboarding.",
 		"identity.",

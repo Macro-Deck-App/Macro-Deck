@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Store.Installation;
 using MacroDeckHost.Application.Store.Model;
 using MacroDeckHost.Domain.Enums;
@@ -61,6 +62,7 @@ internal sealed class IconPackInitializerBackgroundServiceTests
 			_harness.Cache,
 			reconciler,
 			_harness.Paths,
+			new StartupReadiness(),
 			_harness.Logger);
 
 		await service.StartAsync(CancellationToken.None);

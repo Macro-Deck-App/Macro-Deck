@@ -47,8 +47,9 @@ grant for that runtime-known origin is registered at runtime, because Tauri's UR
 express a port wildcard.
 
 **Adoption of an already-running host requires proof.** The port-file port must equal the port the
-bootstrapper itself persisted, *and* `GET /api/auth/status` on it must report `trusted: true`, which
-only the loopback listener ever does. Anything else is ignored and the bootstrapper starts its own
+bootstrapper itself persisted, *and* the listener on it must prove it holds the persisted loopback
+secret ([ADR 0098](0098-loopback-trust-requires-a-per-launch-secret.md)); originally a `trusted: true`
+from `GET /api/auth/status` was enough. Anything else is ignored and the bootstrapper starts its own
 host; there is no fallback to the public origin. Without that, a dev host publishing its port could
 make the packaged app open a window against an origin that never authenticated it — a window with no
 profiles in it.

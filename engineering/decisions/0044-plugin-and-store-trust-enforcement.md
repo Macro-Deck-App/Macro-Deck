@@ -135,6 +135,9 @@ launch gate; it is gated by possession of its credential and is never reported a
 
 ## Consequences
 
+- Amended by [ADR 0096](0096-offline-root-with-an-online-issuer.md): revocation is fed from the signed
+  registry's `revokedKeys`, covers a certificate's issuer, and refuses install and update only; activation
+  and launch of an installed version no longer consult it.
 - Amended by [ADR 0090](0090-invited-testers-install-unreviewed-test-builds.md): a test build an
   invited tester installs is consentable without Developer Mode and may replace a plugin admitted as trusted;
   the persisted tier is not lowered.

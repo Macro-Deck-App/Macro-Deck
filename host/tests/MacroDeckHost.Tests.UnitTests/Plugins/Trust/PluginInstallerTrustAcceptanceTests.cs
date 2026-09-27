@@ -14,6 +14,8 @@ using MacroDeckHost.Tests.UnitTests.Plugins.Installation;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
 using MacroDeckHost.Application.Plugins.Runtime;
+using MacroDeckHost.Application.Store;
+using MacroDeckHost.Application.Store.Model;
 
 namespace MacroDeckHost.Tests.UnitTests.Plugins.Trust;
 
@@ -43,6 +45,7 @@ internal sealed class PluginInstallerTrustAcceptanceTests
 	private FakeDeveloperModePreferences _preferences = null!;
 	private PluginInstaller _installer = null!;
 	private string _sourceDirectory = null!;
+	private StoreCatalog _storeCatalog = null!;
 
 	[SetUp]
 	public void SetUp()
@@ -61,6 +64,7 @@ internal sealed class PluginInstallerTrustAcceptanceTests
 		_integrationRegistrar = new FakeIntegrationRegistrar();
 		_httpClientFactory = new FakeUrlHttpClientFactory();
 		_trustRecords = new InMemoryPluginTrustRecordRepository();
+		_storeCatalog = new StoreCatalog();
 		_preferences = new FakeDeveloperModePreferences();
 
 		var manifestReader = new PluginManifestReader();
@@ -74,7 +78,7 @@ internal sealed class PluginInstallerTrustAcceptanceTests
 		var provider = services.BuildServiceProvider();
 
 		var trustEvaluator = new PluginTrustEvaluator(manifestReader,
-			new NoRevocationDataSource(),
+			new StoreRegistryRevocationSource(_storeCatalog),
 			new PluginTrustOptions { RootPublicKeyOverride = TestPki.Root.PublicKey },
 			Serilog.Core.Logger.None);
 
@@ -447,4 +451,109 @@ internal sealed class PluginInstallerTrustAcceptanceTests
 
 		Assert.That(result.Error, Is.EqualTo(PluginInstallError.UnsignedNotPermitted));
 	}
+
+	private void LoadRegistry(params string[] revokedKeyIds) =>
+		_storeCatalog.Swap(new StoreCatalogSnapshot { Sequence = 1, Entries = [], RevokedKeyIds = revokedKeyIds });
+
+	private Task<string> IssuerSignedArtifact(TestPki.IssuedCertificate issuer, string version = "1.0.0")
+		=> SignedPluginArtifacts.CreateSignedAsync(_sourceDirectory,
+			PluginId,
+			version,
+			fileName: $"issuer-signed-{version}-{Guid.NewGuid():N}.macroDeckPlugin",
+			issuer: issuer);
+
+	[Test]
+	public async Task A_plugin_signed_through_an_issuer_installs_as_trusted()
+	{
+		LoadRegistry();
+
+		var install = await _installer.Install(PluginArtifactSource.FromPath(await IssuerSignedArtifact(TestPki.IssueIssuer())),
+			new PluginInstallRequest());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(install.Success, Is.True, install.ErrorMessage);
+			Assert.That(install.Signature?.Verdict, Is.EqualTo(PluginTrustVerdict.Trusted));
+			Assert.That(install.Signature?.Revocation, Is.EqualTo(PluginRevocationStatus.NotRevoked));
+		});
+	}
+
+	[Test]
+	public async Task A_plugin_whose_issuer_the_registry_revoked_is_refused_at_install()
+	{
+		var issuer = TestPki.IssueIssuer();
+		LoadRegistry(issuer.CertificateId);
+
+		var install = await _installer.Install(PluginArtifactSource.FromPath(await IssuerSignedArtifact(issuer)),
+			new PluginInstallRequest());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(install.Success, Is.False);
+			Assert.That(install.Error, Is.EqualTo(PluginInstallError.SignatureRevoked), install.ErrorMessage);
+			Assert.That(_catalog.Discover(), Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_plugin_whose_certificate_the_registry_revoked_is_refused_at_install()
+	{
+		var artifact = await TrustedArtifact();
+		using var certificate = global::System.Text.Json.JsonDocument.Parse(
+			PackageArchiveFixtures.ReadEntryText(artifact, PluginArtifactFiles.CertificateFileName));
+		LoadRegistry(certificate.RootElement.GetProperty("certificateId").GetString()!);
+
+		var install = await _installer.Install(PluginArtifactSource.FromPath(artifact), new PluginInstallRequest());
+
+		Assert.That(install.Error, Is.EqualTo(PluginInstallError.SignatureRevoked), install.ErrorMessage);
+	}
+
+	[Test]
+	public async Task An_update_signed_under_a_revoked_issuer_is_refused_as_revoked_and_keeps_the_installed_version()
+	{
+		LoadRegistry();
+		var installed = await _installer.Install(PluginArtifactSource.FromPath(await TrustedArtifact()),
+			new PluginInstallRequest());
+		Assert.That(installed.Success, Is.True, installed.ErrorMessage);
+		var issuer = TestPki.IssueIssuer();
+		LoadRegistry(issuer.CertificateId);
+
+		var update = await _installer.Install(PluginArtifactSource.FromPath(await IssuerSignedArtifact(issuer, "1.1.0")),
+			new PluginInstallRequest());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(update.Error, Is.EqualTo(PluginInstallError.SignatureRevoked), update.ErrorMessage);
+			Assert.That(_catalog.Discover().Single().ActiveVersion!.Version, Is.EqualTo("1.0.0"));
+		});
+	}
+
+	[Test]
+	public async Task An_installed_plugin_whose_issuer_is_revoked_later_still_activates()
+	{
+		var issuer = TestPki.IssueIssuer();
+		LoadRegistry();
+		var installed = await _installer.Install(PluginArtifactSource.FromPath(await IssuerSignedArtifact(issuer)),
+			new PluginInstallRequest());
+		Assert.That(installed.Success, Is.True, installed.ErrorMessage);
+		LoadRegistry(issuer.CertificateId);
+
+		var activation = await _installer.Activate(PluginId, "1.0.0");
+
+		Assert.That(activation.Success, Is.True, activation.ErrorMessage);
+	}
+
+	[Test]
+	public async Task Without_a_loaded_registry_revocation_cannot_be_checked_and_does_not_block_install()
+	{
+		var install = await _installer.Install(PluginArtifactSource.FromPath(await IssuerSignedArtifact(TestPki.IssueIssuer())),
+			new PluginInstallRequest());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(install.Success, Is.True, install.ErrorMessage);
+			Assert.That(install.Signature?.Revocation, Is.EqualTo(PluginRevocationStatus.Unavailable));
+		});
+	}
+
 }

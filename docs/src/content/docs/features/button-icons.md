@@ -81,7 +81,7 @@ return Task.FromResult<ActionIconSnapshot?>(new ActionIconSnapshot { Version = a
 | `ActionIconSnapshot` | |
 | --- | --- |
 | `Version` | Stable identity of the image. The host refetches bytes only when it changes. Empty with `NoIcon`. |
-| `Reference` | A host-resolvable icon, e.g. `ActionIconReference.IconPack(id)`. Opaque, and **never a URL** - the host never fetches one on a provider's say-so. |
+| `Reference` | A host-resolvable icon: `ActionIconReference.IconPack(id)` or `ActionIconReference.PluginIcon(key, name)`. Opaque, and **never a URL** - the host never fetches one on a provider's say-so. |
 | `MediaType` | Media type of the bytes, when there is no `Reference`. |
 | `NoIcon` | Render nothing. |
 
@@ -89,6 +89,29 @@ return Task.FromResult<ActionIconSnapshot?>(new ActionIconSnapshot { Version = a
 has already moved on, and the host keeps the image it already holds rather than blanking the button. It
 is never called for a snapshot with a `Reference` or `NoIcon`. The default implementation returns `null`,
 so a reference-only provider does not override it.
+
+## Your own bundled icons
+
+A plugin that [bundles icon packs](/reference/manifest/) can point at one of its own icons by the pack's
+key and the icon's name, with no bytes and no pack id:
+
+```csharp
+return Task.FromResult<ActionIconSnapshot?>(new ActionIconSnapshot
+{
+	Version = "spotify",
+	Reference = ActionIconReference.PluginIcon("logos", "spotify")
+});
+```
+
+- **Your packs only.** The host resolves the reference against the calling plugin's own bundled packs, so
+  the same key and name from another plugin never reaches yours, and yours never reaches theirs.
+- **Unknown means no icon.** A key or name your packs do not hold renders no icon, the same as an unknown
+  icon-pack id. `PluginIcon` itself throws `ArgumentException` for a key that is not a valid pack key
+  (lowercase letters, digits and inner hyphens) and for a blank name or one containing `/`.
+- **Older hosts.** A host that predates bundled icon packs does not know the `plugin-icon` reference type
+  and renders no icon.
+- **Updates keep it.** Replacing a pack in an update keeps its icons by name, so the reference goes on
+  resolving to the new artwork.
 
 ## Reading the icon
 

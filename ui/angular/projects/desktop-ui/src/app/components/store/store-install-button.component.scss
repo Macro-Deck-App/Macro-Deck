@@ -250,12 +250,12 @@
   justify-content: center;
   gap: var(--space-2);
   margin: 0;
-  min-height: var(--control-height);
+  min-height: 2.75rem;
   border: 1px solid color-mix(in srgb, var(--color-success) 30%, transparent);
   border-radius: var(--radius-md);
   background-color: var(--color-success-muted);
   color: var(--color-success);
-  font-size: var(--text-base);
+  font-size: var(--text-lg);
   font-weight: var(--font-medium);
 }
 

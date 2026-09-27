@@ -405,7 +405,8 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 			string? scopeRefId,
 			DomainVariableType type,
 			object? initialValue,
-			int? decimalPlaces) => throw new NotSupportedException();
+			int? decimalPlaces,
+			VariableFileSource? fileSource = null) => throw new NotSupportedException();
 
 		public Task<Result<VariableEntity, VariableError>> SetValue(Guid id,
 			object? value,
@@ -413,7 +414,8 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 
 		public Task<Result<VariableEntity, VariableError>> UpdateUserVariable(Guid id,
 			string? name,
-			int? decimalPlaces) => throw new NotSupportedException();
+			int? decimalPlaces,
+			VariableFileSource? fileSource = null) => throw new NotSupportedException();
 
 		public Task<Result<VariableError>> DeleteUserVariable(Guid id) => throw new NotSupportedException();
 

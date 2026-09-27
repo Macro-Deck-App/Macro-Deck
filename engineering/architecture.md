@@ -41,7 +41,7 @@ Internal transport/security notes are under [api/](api/).
 
 ## Trust model
 
-The desktop UI uses a trusted loopback listener. Remote clients use the public listener and normal authentication. Loopback address alone is not sufficient to grant trust; the listeners are deliberately separated.
+The desktop UI uses a trusted loopback listener. Remote clients use the public listener and normal authentication. Loopback address alone is not sufficient to grant trust: the listeners are deliberately separated, and the loopback listener also requires the per-launch secret the bootstrapper hands the host. See [ADR 0098](decisions/0098-loopback-trust-requires-a-per-launch-secret.md).
 
 Transport shortcuts such as Android ADB reverse tunnels must terminate on the public listener so they cannot inherit desktop-loopback trust. See [ADR 0030](decisions/0030-android-usb-connections-over-adb.md).
 

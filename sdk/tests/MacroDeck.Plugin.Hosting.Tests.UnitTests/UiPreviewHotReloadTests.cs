@@ -10,8 +10,10 @@ using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Capabilities;
 using MacroDeck.Plugin.Protocol.Capabilities.Ui;
 using MacroDeck.Plugin.Protocol.Envelope;
+using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Serialization;
+using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Events;
 using MacroDeck.Ui.Model.Nodes;
@@ -81,16 +83,105 @@ public class UiPreviewHotReloadTests
 		HotReloadedViewPreviews.Throws = true;
 		UiPreviewHotReload.UpdateApplication(null);
 
-		var invokes = (await CollectAsync(socket, 2))
-			.Where(envelope => envelope.Type == MessageTypes.HostInvoke)
-			.Select(envelope => envelope.Payload!.Value.Deserialize<HostInvokePayload>(PluginProtocolJson.Options)!)
-			.ToList();
+		var invokes = HostInvokes(await CollectAsync(socket, 3));
+
+		Assert.That(invokes, Has.Count.EqualTo(2));
+		Assert.Multiple(() =>
+		{
+			Assert.That(invokes.Single(invoke => SessionOf(invoke) == "preview-1").Operation,
+				Is.EqualTo(HostOperations.Ui.Fault));
+			Assert.That(invokes.Single(invoke => SessionOf(invoke) == "config-1").Operation,
+				Is.EqualTo(HostOperations.Ui.Reload));
+		});
+
+		socket.CloseFromHost(1000);
+		await run;
+	}
+
+	[Test]
+	public async Task A_hot_reload_asks_the_host_to_reopen_every_open_real_session_and_leaves_dialogs_alone()
+	{
+		var (hostInvoker, state, socket, run) = Connect();
+		await socket.NextAsync(MessageTypes.SessionHello);
+		await using var handler = CreateHandler(hostInvoker, state, new ConfigSession());
+		handler.DeclareCapabilities();
+
+		await OpenConfigAsync(handler, "config-1");
+		await OpenAsync(handler, "dialog-1", UiSurfaceKinds.Dialog);
+
+		UiPreviewHotReload.UpdateApplication(null);
+
+		var invokes = HostInvokes(await CollectAsync(socket, 2));
 
 		Assert.That(invokes, Has.Count.EqualTo(1));
 		Assert.Multiple(() =>
 		{
-			Assert.That(invokes[0].Operation, Is.EqualTo(HostOperations.Ui.Fault));
-			Assert.That(invokes[0].Arguments!.Value.GetProperty("sessionId").GetString(), Is.EqualTo("preview-1"));
+			Assert.That(invokes[0].Api, Is.EqualTo(HostApis.Ui));
+			Assert.That(invokes[0].Operation, Is.EqualTo(HostOperations.Ui.Reload));
+			Assert.That(SessionOf(invokes[0]), Is.EqualTo("config-1"));
+		});
+
+		socket.CloseFromHost(1000);
+		await run;
+	}
+
+	[Test]
+	public async Task A_host_that_predates_reload_is_sent_a_fault_so_it_still_reopens_the_session()
+	{
+		var (hostInvoker, state, socket, run) = Connect();
+		await socket.NextAsync(MessageTypes.SessionHello);
+		await using var handler = CreateHandler(hostInvoker, state, new ConfigSession());
+
+		await OpenConfigAsync(handler, "config-1");
+
+		UiPreviewHotReload.UpdateApplication(null);
+
+		var reload = await socket.NextAsync(MessageTypes.HostInvoke);
+		socket.Push(new ProtocolEnvelope
+		{
+			Type = MessageTypes.HostResult,
+			Id = "result-1",
+			CorrelationId = reload.Id,
+			Error = new ProtocolError
+			{
+				Code = ProtocolErrorCodes.CapabilityUnsupported, Message = "unknown operation", Retryable = false
+			}
+		});
+
+		var fault = HostInvokes([await socket.NextAsync(MessageTypes.HostInvoke)]).Single();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(HostInvokes([reload]).Single().Operation, Is.EqualTo(HostOperations.Ui.Reload));
+			Assert.That(fault.Operation, Is.EqualTo(HostOperations.Ui.Fault));
+			Assert.That(SessionOf(fault), Is.EqualTo("config-1"));
+		});
+
+		socket.CloseFromHost(1000);
+		await run;
+	}
+
+	[Test]
+	public async Task A_config_flow_serves_a_new_session_for_the_same_flow_after_a_reload()
+	{
+		var (hostInvoker, state, socket, run) = Connect();
+		await socket.NextAsync(MessageTypes.SessionHello);
+		var flows = new PluginConfigFlowSessions(TimeProvider.System);
+		var flow = new CountingUiConfigFlow();
+		flows.Set("flow-1", flow);
+		await using var handler = CreateHandler(hostInvoker, state, new ConfigSession(), flows);
+
+		Assert.That(await OpenIntegrationConfigAsync(handler, "config-1", "flow-1"), Is.True);
+
+		UiPreviewHotReload.UpdateApplication(null);
+		var reload = HostInvokes([await socket.NextAsync(MessageTypes.HostInvoke)]).Single();
+		await handler.InvokeAsync(Close("config-1"), CancellationToken.None);
+
+		Assert.Multiple(async () =>
+		{
+			Assert.That(reload.Operation, Is.EqualTo(HostOperations.Ui.Reload));
+			Assert.That(await OpenIntegrationConfigAsync(handler, "config-2", "flow-1"), Is.True);
+			Assert.That(flow.SessionsCreated, Is.EqualTo(2));
 		});
 
 		socket.CloseFromHost(1000);
@@ -115,11 +206,12 @@ public class UiPreviewHotReloadTests
 
 	private static UiCapabilityHandler CreateHandler(IHostInvoker hostInvoker,
 		PluginConnectionState state,
-		ConfigSession configSession)
+		ConfigSession configSession,
+		PluginConfigFlowSessions? flows = null)
 		=> new([new PreviewingIntegration(configSession)],
 			hostInvoker,
 			Serilog.Core.Logger.None,
-			new PluginConfigFlowSessions(TimeProvider.System),
+			flows ?? new PluginConfigFlowSessions(TimeProvider.System),
 			new ModalResultStore(),
 			new PluginCatalogNotifier(state, Serilog.Core.Logger.None));
 
@@ -144,14 +236,58 @@ public class UiPreviewHotReloadTests
 	}
 
 	private static Task<CapabilityInvocationResult> OpenConfigAsync(UiCapabilityHandler handler, string sessionId)
+		=> OpenAsync(handler, sessionId, UiSurfaceKinds.Config);
+
+	private static Task<CapabilityInvocationResult> OpenAsync(UiCapabilityHandler handler, string sessionId,
+		string surfaceKind)
 		=> handler.InvokeAsync(Invocation(new UiSessionOpenArguments
 			{
 				SessionId = sessionId,
-				SurfaceKind = UiSurfaceKinds.Config,
+				SurfaceKind = surfaceKind,
 				SessionMode = UiSessionModes.Exclusive,
 				UiModelVersion = 1
 			}),
 			CancellationToken.None);
+
+	private static async Task<bool> OpenIntegrationConfigAsync(UiCapabilityHandler handler, string sessionId,
+		string flowId)
+	{
+		var result = await handler.InvokeAsync(Invocation(new UiSessionOpenArguments
+			{
+				SessionId = sessionId,
+				SurfaceKind = UiSurfaceKinds.Config,
+				SessionMode = UiSessionModes.Exclusive,
+				UiModelVersion = 1,
+				SurfaceAttributes = JsonSerializer.SerializeToElement(new Dictionary<string, string>
+				{
+					[UiConfigSurfaceAttributes.EntryPoint] = UiConfigEntryPoints.IntegrationConfig,
+					[UiConfigSurfaceAttributes.ConfigFlowSessionId] = flowId
+				})
+			}),
+			CancellationToken.None);
+
+		return result.Data!.Value.Deserialize<UiSessionOpenResult>(PluginProtocolJson.Options)!.Accepted;
+	}
+
+	private static CapabilityInvocation Close(string sessionId)
+		=> new()
+		{
+			Kind = CapabilityKinds.Ui,
+			LocalId = ProviderCapabilityId.LocalId,
+			Operation = CapabilityOperations.Ui.SessionClose,
+			Arguments = JsonSerializer.SerializeToElement(new UiSessionCloseArguments { SessionId = sessionId },
+				PluginProtocolJson.Options),
+			CorrelationId = "c2",
+			Services = new EmptyServiceProvider()
+		};
+
+	private static List<HostInvokePayload> HostInvokes(IEnumerable<ProtocolEnvelope> envelopes)
+		=> envelopes.Where(envelope => envelope.Type == MessageTypes.HostInvoke)
+			.Select(envelope => envelope.Payload!.Value.Deserialize<HostInvokePayload>(PluginProtocolJson.Options)!)
+			.ToList();
+
+	private static string? SessionOf(HostInvokePayload invoke)
+		=> invoke.Arguments!.Value.GetProperty("sessionId").GetString();
 
 	private static CapabilityInvocation Invocation(UiSessionOpenArguments arguments)
 		=> new()
@@ -214,6 +350,26 @@ public class UiPreviewHotReloadTests
 	private sealed class EmptyServiceProvider : IServiceProvider
 	{
 		public object? GetService(Type serviceType) => null;
+	}
+
+	private sealed class CountingUiConfigFlow : IUiConfigFlow
+	{
+		public int SessionsCreated { get; private set; }
+
+		public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
+			=> throw new NotSupportedException();
+
+		public Task<ConfigFlowResult> SubmitAsync(string stepId,
+			IReadOnlyDictionary<string, object?> input,
+			IConfigFlowContext context,
+			CancellationToken cancellationToken)
+			=> throw new NotSupportedException();
+
+		public Task<IUiSession?> CreateUiSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
+		{
+			SessionsCreated++;
+			return Task.FromResult<IUiSession?>(new ConfigSession());
+		}
 	}
 
 	private sealed class ConfigSession : IUiSession

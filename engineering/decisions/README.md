@@ -19,6 +19,7 @@ code, protocol schemas, issue discussions or exhaustive option lists.
 ## Networking, trust and secrets
 
 - [0003 - Loopback trust, token scopes, and device identity](0003-loopback-trust-token-scopes-and-device-identity.md)
+- [0098 - Loopback trust requires a per-launch secret](0098-loopback-trust-requires-a-per-launch-secret.md)
 - [0030 - Android USB connections terminate on the public listener](0030-android-usb-connections-over-adb.md)
 - [0040 - Public listeners are a resolved endpoint set, secured by a per-installation local CA](0040-public-listeners-and-tls.md)
 - [0047 - Secrets at rest, encrypted backups, and a staged boot-time restore](0047-secrets-backups-and-restore.md)
@@ -52,6 +53,9 @@ code, protocol schemas, issue discussions or exhaustive option lists.
 - [0091 - Enforced device revocation and long client access tokens](0091-enforced-device-revocation-and-long-client-access-tokens.md)
 - [0092 - Plugins reach ADB through a permission-gated host API](0092-plugins-reach-adb-through-a-permission-gated-host-api.md)
 - [0093 - Plugins and integrations talk over a host-brokered message channel](0093-plugins-and-integrations-talk-over-a-host-brokered-message-channel.md)
+- [0095 - USB connections without debugging](0095-usb-connections-without-debugging.md)
+- [0096 - The root stays offline and signs one issuer, and revocation stops new installs](0096-offline-root-with-an-online-issuer.md)
+- [0097 - Plugin-bundled icon packs are owned by declaration and named by key and icon name](0097-plugin-bundled-icon-packs.md)
 
 ## Macro Deck UI
 

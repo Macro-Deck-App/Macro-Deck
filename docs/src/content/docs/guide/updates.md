@@ -12,6 +12,10 @@ Choose how Macro Deck handles new versions in **Settings > About**, under **Upda
 | **Notify only** | Macro Deck tells you and asks before it downloads and installs anything. This is the default. |
 | **Automatic** | Macro Deck downloads the update in the background and installs it when you quit Macro Deck. Windows and macOS only. |
 
+If Macro Deck cannot reach the update server, for example while you are offline, a notification says it could
+not check for updates. You see it once: while checks keep failing, Macro Deck does not warn again until a check
+succeeds or Macro Deck restarts. **Check for updates** tries again right away.
+
 ## Automatic installs
 
 An automatic download finishes quietly: no dialog opens and nothing restarts while you work. The next
@@ -55,7 +59,7 @@ While an update is waiting, the Macro Deck icon in the system tray or menu bar h
 entry with the new version. It opens the update window again.
 
 With **Before Macro Deck updates** turned on in **Settings > Backups**, Macro Deck makes a backup before it
-installs.
+installs. See [Backups](/guide/backups/).
 
 ## Extension updates
 
@@ -71,6 +75,10 @@ Plugins and icon packs from the Store have their own updates, set in **Settings 
 If you install an older version of a plugin or icon pack on purpose, or any version other than the latest,
 Macro Deck keeps it: automatic updates and update notifications skip that item until you update it yourself,
 from its page, its card or **Update all**. **Installed** still shows the newer version as available.
+
+Macro Deck never offers or installs an update to a version the Store has withdrawn. If the version you have
+installed is withdrawn, a warning notification says so, whether or not **Notify about updates** is on; see
+[Withdrawn versions](/guide/concepts/#withdrawn-versions).
 
 A failed install or update offers **Retry** only when trying again can help, for example after a download
 failed. When the item needs a newer Macro Deck, the Store offers **Check for updates** instead; when it does not

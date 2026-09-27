@@ -2398,6 +2398,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.Backup.FileLocked" xml:space="preserve">
     <value>A file could not be read because another program is using it</value>
   </data>
+  <data name="Errors.Backup.ImportFailed" xml:space="preserve">
+    <value>The backup could not be imported</value>
+  </data>
   <data name="Errors.Backup.InspectFailed" xml:space="preserve">
     <value>The backup could not be inspected</value>
   </data>
@@ -2648,6 +2651,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.IconPack.ExportFailed" xml:space="preserve">
     <value>Export failed</value>
   </data>
+  <data name="Errors.IconPack.ExportTooLarge" xml:space="preserve">
+    <value>This icon pack is too large to export. Split it into smaller packs.</value>
+  </data>
   <data name="Errors.IconPack.LoadFailed" xml:space="preserve">
     <value>Failed to load icon packs</value>
   </data>
@@ -2868,6 +2874,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Errors.Variables.WriteFailed" xml:space="preserve">
     <value>The value could not be applied</value>
+  </data>
+  <data name="Errors.Variables.FileReadOnly" xml:space="preserve">
+    <value>This variable reads its value from a file and does not write back</value>
+  </data>
+  <data name="Errors.Variables.InvalidFilePath" xml:space="preserve">
+    <value>Enter the full path to a file</value>
   </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>The widget data must be a JSON object.</value>
@@ -3645,8 +3657,15 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="IconPacks.LoadingIconPacks" xml:space="preserve">
     <value>Loading icon packs…</value>
   </data>
+  <data name="IconPacks.ManagedByPlugin" xml:space="preserve">
+    <value>Provided by {name} and updated with it</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="IconPacks.ManagedByStore" xml:space="preserve">
     <value>Managed by the Store</value>
+  </data>
+  <data name="IconPacks.ManagedByUnnamedPlugin" xml:space="preserve">
+    <value>Provided by a plugin and updated with it</value>
   </data>
   <data name="IconPacks.MoreImportOptions" xml:space="preserve">
     <value>More import options</value>
@@ -3737,6 +3756,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="IconPacks.SelectAnIconPackMessage" xml:space="preserve">
     <value>Choose a pack on the left to browse its icons.</value>
+  </data>
+  <data name="IconPacks.SourcePlugin" xml:space="preserve">
+    <value>Plugin</value>
   </data>
   <data name="IconPacks.SourceStore" xml:space="preserve">
     <value>Store</value>
@@ -10060,6 +10082,21 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Variables.Actions.VariableLabel" xml:space="preserve">
     <value>Variable</value>
   </data>
+  <data name="Integrations.Variables.Actions.WriteToFileName" xml:space="preserve">
+    <value>Write Variable to File</value>
+  </data>
+  <data name="Integrations.Variables.Actions.WriteToFileDescription" xml:space="preserve">
+    <value>Writes the current value of a variable to a file and replaces what the file contained.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.WriteToFileVariableDescription" xml:space="preserve">
+    <value>The variable whose value is written. Any variable works, including those of integrations and plugins.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.FileLabel" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
+    <value>The full path of the file. It is created if it does not exist; the folder must already exist.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>No variable was selected.</value>
   </data>
@@ -10077,6 +10114,15 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.Variables.Errors.VariablesUnavailable" xml:space="preserve">
     <value>Variables are not available.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.FilePathNotAbsolute" xml:space="preserve">
+    <value>The file path must be a full path.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
+    <value>The variable has no value right now.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
+    <value>The file could not be written.</value>
   </data>
   <data name="Integrations.Variables.Name" xml:space="preserve">
     <value>Variables</value>
@@ -11680,6 +11726,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>"{name}" failed</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.FailedLoginOverUsb" xml:space="preserve">
+    <value>a phone over USB ({serial})</value>
+  </data>
   <data name="Notifications.HostIdentityRenewed" xml:space="preserve">
     <value>This computer has a new identity</value>
   </data>
@@ -11780,6 +11829,13 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>{name} needs ADB to work with your Android devices, but plugins are currently not allowed to use ADB. Allow plugins to use ADB?</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.PluginIconPackKept" xml:space="preserve">
+    <value>Icon pack kept</value>
+  </data>
+  <data name="Notifications.PluginIconPackKeptMessage" xml:space="preserve">
+    <value>{plugin} no longer provides the icon pack “{pack}”. Buttons or automations still use its icons, so it was kept, and you can now edit or delete it.</value>
+    <comment>[pack:string] [plugin:string]</comment>
+  </data>
   <data name="Notifications.RestartToApplyNetwork" xml:space="preserve">
     <value>Restart to apply the new network settings</value>
   </data>
@@ -11861,6 +11917,13 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Version {version} is ready.</value>
     <comment>[version:string]</comment>
   </data>
+  <data name="Notifications.StoreVersionWithdrawn" xml:space="preserve">
+    <value>{name} {version} was withdrawn from the Store</value>
+    <comment>[name:string][version:string]</comment>
+  </data>
+  <data name="Notifications.StoreVersionWithdrawnRemoveHint" xml:space="preserve">
+    <value>The extension is no longer in the Store. You can remove it under Integrations or Library.</value>
+  </data>
   <data name="Notifications.TlsCertificateInvalidAdvice" xml:space="preserve">
     <value>The stored certificate could not be loaded. Generate a new one or upload a replacement in Settings &gt; Network.</value>
   </data>
@@ -11889,6 +11952,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Notifications.UpdateFailed" xml:space="preserve">
     <value>The update to Macro Deck {version} could not be completed</value>
     <comment>[version:string]</comment>
+  </data>
+  <data name="Notifications.UpdateCheckFailed" xml:space="preserve">
+    <value>Could not check for updates</value>
   </data>
   <data name="Plugins.BeforeYouInstallTitle" xml:space="preserve">
     <value>Before you install</value>
@@ -12903,6 +12969,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Settings.Backups.DownloadButton" xml:space="preserve">
     <value>Download</value>
   </data>
+  <data name="Settings.Backups.DownloadSaved" xml:space="preserve">
+    <value>Backup saved</value>
+  </data>
   <data name="Settings.Backups.EmptyHeading" xml:space="preserve">
     <value>No backups yet</value>
   </data>
@@ -12917,6 +12986,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Settings.Backups.Friday" xml:space="preserve">
     <value>Friday</value>
+  </data>
+  <data name="Settings.Backups.ImportButton" xml:space="preserve">
+    <value>Import backup</value>
+  </data>
+  <data name="Settings.Backups.ImportSucceeded" xml:space="preserve">
+    <value>Backup imported</value>
   </data>
   <data name="Settings.Backups.KeepLatestDescription" xml:space="preserve">
     <value>How many backups to keep before older ones are deleted automatically.</value>
@@ -13002,6 +13077,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Settings.Backups.RestartFailedToast" xml:space="preserve">
     <value>Macro Deck could not restart itself</value>
+  </data>
+  <data name="Settings.Backups.RestoreAdoptsRecoveryKey" xml:space="preserve">
+    <value>After the restore, Macro Deck uses the recovery key you just entered. Backups this installation made until now open only with its current recovery key, so make sure you have saved it before you continue.</value>
   </data>
   <data name="Settings.Backups.RestoreButton" xml:space="preserve">
     <value>Restore…</value>
@@ -14232,6 +14310,141 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>You're on the latest version ({version}).</value>
     <comment>[version:string]</comment>
   </data>
+  <data name="Settings.Usb.AdbSessionsNote" xml:space="preserve">
+    <value>ADB sessions to this device, such as scrcpy or Android Studio, are interrupted when it switches.</value>
+  </data>
+  <data name="Settings.Usb.AndroidDescription" xml:space="preserve">
+    <value>Install libusb on this computer, for example with Homebrew on a Mac or the package manager on Linux.</value>
+  </data>
+  <data name="Settings.Usb.AndroidLabel" xml:space="preserve">
+    <value>Android devices</value>
+  </data>
+  <data name="Settings.Usb.Available" xml:space="preserve">
+    <value>Available</value>
+  </data>
+  <data name="Settings.Usb.ConnectButton" xml:space="preserve">
+    <value>Connect without debugging</value>
+  </data>
+  <data name="Settings.Usb.ConnectFailed" xml:space="preserve">
+    <value>This device cannot be connected right now. Unplug it and plug it in again.</value>
+  </data>
+  <data name="Settings.Usb.ConnectHint" xml:space="preserve">
+    <value>While connected, the phone offers no file transfer. Without the Macro Deck app it asks which app to open.</value>
+  </data>
+  <data name="Settings.Usb.DevicesHeading" xml:space="preserve">
+    <value>Devices</value>
+  </data>
+  <data name="Settings.Usb.ExperimentalBadge" xml:space="preserve">
+    <value>Experimental</value>
+  </data>
+  <data name="Settings.Usb.ExperimentalNote" xml:space="preserve">
+    <value>Off until you turn it on, and not every phone supports it yet. ADB and Wi-Fi keep working as before.</value>
+  </data>
+  <data name="Settings.Usb.FeatureDescription" xml:space="preserve">
+    <value>Connect the Macro Deck app over a USB cable, without developer settings on the phone.</value>
+  </data>
+  <data name="Settings.Usb.FeatureTitle" xml:space="preserve">
+    <value>USB without debugging</value>
+  </data>
+  <data name="Settings.Usb.ForgetButton" xml:space="preserve">
+    <value>Forget</value>
+  </data>
+  <data name="Settings.Usb.Heading" xml:space="preserve">
+    <value>USB connections</value>
+  </data>
+  <data name="Settings.Usb.HttpsOnly" xml:space="preserve">
+    <value>Unavailable while Macro Deck only accepts HTTPS. In Settings &gt; Network, set Listener mode to Use additional HTTPS port, or turn HTTPS off.</value>
+  </data>
+  <data name="Settings.Usb.IosDescription" xml:space="preserve">
+    <value>Install the Apple Devices app on Windows, or the usbmuxd service on Linux.</value>
+  </data>
+  <data name="Settings.Usb.IosHint" xml:space="preserve">
+    <value>An iPhone or iPad connects while Macro Deck is open on it.</value>
+  </data>
+  <data name="Settings.Usb.IosLabel" xml:space="preserve">
+    <value>iPhone and iPad</value>
+  </data>
+  <data name="Settings.Usb.LoadFailed" xml:space="preserve">
+    <value>Could not load the USB connection settings.</value>
+  </data>
+  <data name="Settings.Usb.NoDevicesHeading" xml:space="preserve">
+    <value>No devices found</value>
+  </data>
+  <data name="Settings.Usb.NoDevicesMessage" xml:space="preserve">
+    <value>Plug in a phone or tablet with a USB cable that carries data.</value>
+  </data>
+  <data name="Settings.Usb.NoPublicListener" xml:space="preserve">
+    <value>Unavailable while Macro Deck has no network listener. Check the port in Settings &gt; Network.</value>
+  </data>
+  <data name="Settings.Usb.NoRemembered" xml:space="preserve">
+    <value>No devices remembered yet.</value>
+  </data>
+  <data name="Settings.Usb.PlatformAndroid" xml:space="preserve">
+    <value>Android</value>
+  </data>
+  <data name="Settings.Usb.PlatformIos" xml:space="preserve">
+    <value>iPhone or iPad</value>
+  </data>
+  <data name="Settings.Usb.RememberedDescription" xml:space="preserve">
+    <value>These Android devices connect again by themselves when they are plugged in.</value>
+  </data>
+  <data name="Settings.Usb.RememberedHeading" xml:space="preserve">
+    <value>Remembered devices</value>
+  </data>
+  <data name="Settings.Usb.ReplugHint" xml:space="preserve">
+    <value>Unplug it and plug it in again to connect it.</value>
+  </data>
+  <data name="Settings.Usb.RescanAriaLabel" xml:space="preserve">
+    <value>Search for devices again</value>
+  </data>
+  <data name="Settings.Usb.SaveFailed" xml:space="preserve">
+    <value>Could not save the USB connection settings.</value>
+  </data>
+  <data name="Settings.Usb.StateAvailable" xml:space="preserve">
+    <value>Not connected</value>
+  </data>
+  <data name="Settings.Usb.StateClosed" xml:space="preserve">
+    <value>Closed in the app</value>
+  </data>
+  <data name="Settings.Usb.StateConnecting" xml:space="preserve">
+    <value>Waiting for the app</value>
+  </data>
+  <data name="Settings.Usb.StateConnectingHint" xml:space="preserve">
+    <value>Open Macro Deck on the iPhone or iPad.</value>
+  </data>
+  <data name="Settings.Usb.StateLinked" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="Settings.Usb.StateNotSupported" xml:space="preserve">
+    <value>Not supported by this device</value>
+  </data>
+  <data name="Settings.Usb.StateServedByAdb" xml:space="preserve">
+    <value>Connected through ADB</value>
+  </data>
+  <data name="Settings.Usb.StateStopped" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="Settings.Usb.StateSwitching" xml:space="preserve">
+    <value>Switching</value>
+  </data>
+  <data name="Settings.Usb.StateWaiting" xml:space="preserve">
+    <value>Waiting to connect</value>
+  </data>
+  <data name="Settings.Usb.StateWaitingForApp" xml:space="preserve">
+    <value>Waiting for the Macro Deck app</value>
+  </data>
+  <data name="Settings.Usb.StatusHeading" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Settings.Usb.StoppedHint" xml:space="preserve">
+    <value>Click Connect without debugging to try again, or unplug it and plug it in again.</value>
+  </data>
+  <data name="Settings.Usb.Unavailable" xml:space="preserve">
+    <value>Not available</value>
+  </data>
+  <data name="Settings.Usb.UnknownDevice" xml:space="preserve">
+    <value>Android device</value>
+  </data>
   <data name="Setup.Account.ConfirmPassword" xml:space="preserve">
     <value>Confirm password</value>
   </data>
@@ -14446,6 +14659,21 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.ChooseVersion" xml:space="preserve">
     <value>Choose another version</value>
   </data>
+  <data name="Store.CommunityNotice.GuidelinesApply" xml:space="preserve">
+    <value>The Store guidelines apply to everything in the Store.</value>
+  </data>
+  <data name="Store.CommunityNotice.Heading" xml:space="preserve">
+    <value>Made by the community</value>
+  </data>
+  <data name="Store.CommunityNotice.NoMacroDeckIssues" xml:space="preserve">
+    <value>Please don't open issues about plugins or icon packs in the official Macro Deck repository.</value>
+  </data>
+  <data name="Store.CommunityNotice.Responsibility" xml:space="preserve">
+    <value>Everything in the Store is made by the community. If something fails or doesn't work, its creator is responsible for it.</value>
+  </data>
+  <data name="Store.CommunityNotice.WhereToReport" xml:space="preserve">
+    <value>You can rate it, open an issue in its repository or report it. The links are on its Store page.</value>
+  </data>
   <data name="Store.Details" xml:space="preserve">
     <value>Details</value>
   </data>
@@ -14561,6 +14789,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Store.Footer.PublishHeading" xml:space="preserve">
     <value>Publish on Macro Deck</value>
+  </data>
+  <data name="Store.Guidelines.Heading" xml:space="preserve">
+    <value>Store guidelines</value>
+  </data>
+  <data name="Store.Guidelines.Unavailable" xml:space="preserve">
+    <value>The Store guidelines could not be loaded. Check your connection and try again.</value>
   </data>
   <data name="Store.IconImport.CancelledKeptCount.One" xml:space="preserve">
     <value>Cancelled - kept {count} icon</value>
@@ -14683,15 +14917,6 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.Page.ByPublisher" xml:space="preserve">
     <value>by {publisher}</value>
     <comment>[publisher:string]</comment>
-  </data>
-  <data name="Store.Page.ComingSoonHeading" xml:space="preserve">
-    <value>The store isn't available yet</value>
-  </data>
-  <data name="Store.Page.ComingSoonMessage" xml:space="preserve">
-    <value>We're still building it. Plugins and icon packs will show up here in a future update.</value>
-  </data>
-  <data name="Store.Page.ComingSoonTestsAction" xml:space="preserve">
-    <value>Open your tests</value>
   </data>
   <data name="Store.Page.CompatibilityCheckedHint" xml:space="preserve">
     <value>Compatibility with this Macro Deck version is checked when installing.</value>
@@ -14913,6 +15138,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.Page.RepositoryLink" xml:space="preserve">
     <value>Repository</value>
   </data>
+  <data name="Store.Page.HomepageLink" xml:space="preserve">
+    <value>Homepage</value>
+  </data>
   <data name="Store.Page.ResultCount.One" xml:space="preserve">
     <value>{count} result</value>
     <comment>[plural][count:int] Number of extensions the current search and filter match.</comment>
@@ -15002,6 +15230,14 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.Page.TabInstalled" xml:space="preserve">
     <value>Installed</value>
   </data>
+  <data name="Store.Page.TabInstalledWithUpdates.One" xml:space="preserve">
+    <value>Installed, {count} update available</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.TabInstalledWithUpdates.Other" xml:space="preserve">
+    <value>Installed, {count} updates available</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
     <value>Store sections</value>
   </data>
@@ -15012,6 +15248,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.Page.TagHeading" xml:space="preserve">
     <value>Everything tagged {tag}</value>
     <comment>[tag:string]</comment>
+  </data>
+  <data name="Store.Page.CategoriesHeading" xml:space="preserve">
+    <value>Categories</value>
   </data>
   <data name="Store.Page.TagsHeading" xml:space="preserve">
     <value>Tags</value>
@@ -15052,6 +15291,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Store.Page.VersionUnavailableReason" xml:space="preserve">
     <value>This version can't be installed from the Store.</value>
+  </data>
+  <data name="Store.Page.VersionWithdrawnReason" xml:space="preserve">
+    <value>This version was withdrawn from the Store.</value>
   </data>
   <data name="Store.Page.WhatsNewHeading" xml:space="preserve">
     <value>What's new?</value>
@@ -15255,11 +15497,41 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.VersionUnavailable" xml:space="preserve">
     <value>Not available</value>
   </data>
+  <data name="Store.VersionWithdrawn" xml:space="preserve">
+    <value>Withdrawn</value>
+  </data>
   <data name="Store.WhatMacroDeckReported" xml:space="preserve">
     <value>What Macro Deck reported</value>
   </data>
   <data name="Store.Why" xml:space="preserve">
     <value>Why?</value>
+  </data>
+  <data name="Store.Withdrawal.InstalledAdvice" xml:space="preserve">
+    <value>Install another version or uninstall this one.</value>
+  </data>
+  <data name="Store.Withdrawal.InstalledHeading" xml:space="preserve">
+    <value>Your installed version {version} was withdrawn from the Store</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Store.Withdrawal.PackageChip" xml:space="preserve">
+    <value>Removed from the Store</value>
+  </data>
+  <data name="Store.Withdrawal.PackageHeading" xml:space="preserve">
+    <value>This extension was removed from the Store</value>
+  </data>
+  <data name="Store.Withdrawal.PackageMessage" xml:space="preserve">
+    <value>It can no longer be installed or updated.</value>
+  </data>
+  <data name="Store.Withdrawal.Reason" xml:space="preserve">
+    <value>Reason: {reason}</value>
+    <comment>[reason:string]</comment>
+  </data>
+  <data name="Store.Withdrawal.Replacement" xml:space="preserve">
+    <value>Suggested replacement: {replacement}</value>
+    <comment>[replacement:string]</comment>
+  </data>
+  <data name="Store.Withdrawal.VersionChip" xml:space="preserve">
+    <value>Version withdrawn</value>
   </data>
   <data name="TemplateBuilder.Logic" xml:space="preserve">
     <value>Logic</value>
@@ -15779,6 +16051,42 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Variables.Manager.VariableCount.Other" xml:space="preserve">
     <value>{count} variables</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="Variables.Manager.SourceField" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="Variables.Manager.SourceOwnValue" xml:space="preserve">
+    <value>Own value</value>
+  </data>
+  <data name="Variables.Manager.SourceFile" xml:space="preserve">
+    <value>Read from file</value>
+  </data>
+  <data name="Variables.Manager.SourceHintOwnValue" xml:space="preserve">
+    <value>Macro Deck stores the value.</value>
+  </data>
+  <data name="Variables.Manager.SourceHintFile" xml:space="preserve">
+    <value>The value is the file's content and follows every change to the file.</value>
+  </data>
+  <data name="Variables.Manager.FileField" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="Variables.Manager.AllowWriteBack" xml:space="preserve">
+    <value>Allow write-back</value>
+  </data>
+  <data name="Variables.Manager.AllowWriteBackHint" xml:space="preserve">
+    <value>Changes made in Macro Deck, for example with a slider, are written to the file.</value>
+  </data>
+  <data name="Variables.Manager.FileSettings" xml:space="preserve">
+    <value>File settings</value>
+  </data>
+  <data name="Variables.Manager.FileUnavailable" xml:space="preserve">
+    <value>No value: the file is missing, can't be read or doesn't fit the variable's type</value>
+  </data>
+  <data name="Variables.Manager.CreateFailed" xml:space="preserve">
+    <value>Couldn't create the variable. Try again.</value>
+  </data>
+  <data name="Variables.Manager.SaveFailed" xml:space="preserve">
+    <value>Couldn't save the changes. Try again.</value>
   </data>
   <data name="Variables.NewVariable" xml:space="preserve">
     <value>New variable</value>
@@ -18305,6 +18613,10 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.TestBuildActive" xml:space="preserve">
     <value>Test build {build}</value>
     <comment>[build:string] Shown on a Store plugin whose installed version is an unreviewed test build rather than the published release.</comment>
+  </data>
+  <data name="Store.SigningRevoked" xml:space="preserve">
+    <value>Certificate revoked</value>
+    <comment>Shown on an installed Store plugin whose signing certificate, or the issuer that signed it, the Macro Deck registry revoked.</comment>
   </data>
   <data name="Store.ReturnToStoreVersion" xml:space="preserve">
     <value>Return to Store version {version}</value>

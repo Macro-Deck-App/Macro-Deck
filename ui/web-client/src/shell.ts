@@ -117,6 +117,9 @@ export class Shell {
       }
       this.repaintQueue.widget(widgetId);
     });
+    this.client.reopenableSessions.subscribe(lost => {
+      if (lost !== null) this.folderView?.sessionLost(lost.sessionId);
+    });
     this.client.hostLock.state.subscribe(() => this.paintOverlays());
     this.idleTimer = new IdleTimer(() => this.showScreenSaver(), document, services.idleClock);
     // Any change to the settings ends a showing screensaver: what it draws is fixed at open time.

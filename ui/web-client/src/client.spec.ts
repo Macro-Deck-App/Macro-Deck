@@ -1263,6 +1263,26 @@ describe('Client', () => {
     });
   });
 
+  describe('a ui session the host ended', () => {
+    const notify = (client: Client, type: string, body: unknown) =>
+      (client as unknown as { onNotification(type: string, payload: unknown): void }).onNotification(type, body);
+
+    it('is offered for reopening only when the host says reopening can work', async () => {
+      const client = build();
+      await client.probe();
+      const offered: string[] = [];
+      client.reopenableSessions.subscribe(lost => { if (lost) offered.push(lost.sessionId); });
+
+      notify(client, 'UiSessionInvalidatedEvent',
+        { sessionId: 'reloaded', code: 'PROVIDER_RELOADED', message: 'x', retryable: true });
+      notify(client, 'UiSessionInvalidatedEvent',
+        { sessionId: 'broken', code: 'SESSION_FORBIDDEN', message: 'x', retryable: false });
+      notify(client, 'UiSessionClosedEvent', { sessionId: 'closed' });
+
+      expect(offered).toEqual(['reloaded']);
+    });
+  });
+
   describe('a session that ends without being asked to', () => {
     const revoke = (client: Client) =>
       (client as unknown as { onNotification(type: string, payload: unknown): void })

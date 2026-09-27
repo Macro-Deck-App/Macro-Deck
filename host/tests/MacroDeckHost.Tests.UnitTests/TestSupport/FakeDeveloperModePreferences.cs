@@ -10,6 +10,11 @@ internal sealed class FakeDeveloperModePreferences : IAppPreferenceService
 {
 	public bool DeveloperMode { get; set; }
 
+	public Task<NativeUsbSettings> GetNativeUsb() => throw new NotSupportedException();
+
+	public Task<NativeUsbSettings> SetNativeUsb(bool? enabled, IReadOnlyList<RememberedUsbDevice>? rememberedDevices)
+		=> throw new NotSupportedException();
+
 	public Task<DeveloperSettings> GetDeveloper() => Task.FromResult(new DeveloperSettings(DeveloperMode));
 
 	public Task<DeveloperSettings> SetDeveloper(bool? enabled)

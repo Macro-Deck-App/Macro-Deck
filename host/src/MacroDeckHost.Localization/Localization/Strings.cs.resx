@@ -2399,6 +2399,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Backup.FileLocked" xml:space="preserve">
     <value>Soubor nelze přečíst, protože jej používá jiný program</value>
   </data>
+  <data name="Errors.Backup.ImportFailed" xml:space="preserve">
+    <value>Zálohu se nepodařilo importovat</value>
+  </data>
   <data name="Errors.Backup.InspectFailed" xml:space="preserve">
     <value>Zálohu se nepodařilo prozkoumat</value>
   </data>
@@ -2649,6 +2652,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.IconPack.ExportFailed" xml:space="preserve">
     <value>Export se nezdařil</value>
   </data>
+  <data name="Errors.IconPack.ExportTooLarge" xml:space="preserve">
+    <value>Tato sada ikon je pro export příliš velká. Rozdělte ji na menší sady.</value>
+  </data>
   <data name="Errors.IconPack.LoadFailed" xml:space="preserve">
     <value>Načtení sad ikon se nezdařilo</value>
   </data>
@@ -2869,6 +2875,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Errors.Variables.WriteFailed" xml:space="preserve">
     <value>Hodnotu se nepodařilo použít</value>
+  </data>
+  <data name="Errors.Variables.FileReadOnly" xml:space="preserve">
+    <value>Tato proměnná čte hodnotu ze souboru a nezapisuje ji zpět</value>
+  </data>
+  <data name="Errors.Variables.InvalidFilePath" xml:space="preserve">
+    <value>Zadejte úplnou cestu k souboru</value>
   </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>Data widgetu musí být objekt JSON.</value>
@@ -3645,8 +3657,15 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="IconPacks.LoadingIconPacks" xml:space="preserve">
     <value>Načítání sad ikon…</value>
   </data>
+  <data name="IconPacks.ManagedByPlugin" xml:space="preserve">
+    <value>Poskytuje plugin {name} a aktualizuje se spolu s ním</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="IconPacks.ManagedByStore" xml:space="preserve">
     <value>Spravováno přes Store</value>
+  </data>
+  <data name="IconPacks.ManagedByUnnamedPlugin" xml:space="preserve">
+    <value>Poskytuje plugin a aktualizuje se spolu s ním</value>
   </data>
   <data name="IconPacks.MoreImportOptions" xml:space="preserve">
     <value>Další možnosti importu</value>
@@ -3737,6 +3756,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="IconPacks.SelectAnIconPackMessage" xml:space="preserve">
     <value>Vyberte sadu vlevo a procházejte její ikony.</value>
+  </data>
+  <data name="IconPacks.SourcePlugin" xml:space="preserve">
+    <value>Plugin</value>
   </data>
   <data name="IconPacks.SourceStore" xml:space="preserve">
     <value>Store</value>
@@ -10060,6 +10082,21 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Variables.Actions.VariableLabel" xml:space="preserve">
     <value>Proměnná</value>
   </data>
+  <data name="Integrations.Variables.Actions.WriteToFileName" xml:space="preserve">
+    <value>Zapsat proměnnou do souboru</value>
+  </data>
+  <data name="Integrations.Variables.Actions.WriteToFileDescription" xml:space="preserve">
+    <value>Zapíše aktuální hodnotu proměnné do souboru a nahradí jeho dosavadní obsah.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.WriteToFileVariableDescription" xml:space="preserve">
+    <value>Proměnná, jejíž hodnota se zapíše. Lze použít libovolnou proměnnou, i proměnné integrací a pluginů.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.FileLabel" xml:space="preserve">
+    <value>Soubor</value>
+  </data>
+  <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
+    <value>Úplná cesta k souboru. Pokud neexistuje, vytvoří se; složka už musí existovat.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>Nebyla vybrána žádná proměnná.</value>
   </data>
@@ -10077,6 +10114,15 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Variables.Errors.VariablesUnavailable" xml:space="preserve">
     <value>Proměnné nejsou k dispozici.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.FilePathNotAbsolute" xml:space="preserve">
+    <value>Cesta k souboru musí být úplná.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
+    <value>Proměnná teď nemá žádnou hodnotu.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
+    <value>Soubor se nepodařilo zapsat.</value>
   </data>
   <data name="Integrations.Variables.Name" xml:space="preserve">
     <value>Proměnné</value>
@@ -11680,6 +11726,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Akce „{name}“ selhala</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.FailedLoginOverUsb" xml:space="preserve">
+    <value>telefonu přes USB ({serial})</value>
+  </data>
   <data name="Notifications.HostIdentityRenewed" xml:space="preserve">
     <value>Tento počítač má novou identitu</value>
   </data>
@@ -11780,6 +11829,13 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Plugin {name} potřebuje ADB pro práci se zařízeními Android, ale pluginy nyní nemají povoleno ADB používat. Povolit pluginům používat ADB?</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.PluginIconPackKept" xml:space="preserve">
+    <value>Sada ikon byla zachována</value>
+  </data>
+  <data name="Notifications.PluginIconPackKeptMessage" xml:space="preserve">
+    <value>Plugin {plugin} už neposkytuje sadu ikon „{pack}“. Tlačítka nebo automatizace stále používají její ikony, proto byla zachována. Nyní ji lze upravit nebo odstranit.</value>
+    <comment>[pack:string] [plugin:string]</comment>
+  </data>
   <data name="Notifications.RestartToApplyNetwork" xml:space="preserve">
     <value>Restartováním použijete nové nastavení sítě</value>
   </data>
@@ -11861,6 +11917,13 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Verze {version} je připravena.</value>
     <comment>[version:string]</comment>
   </data>
+  <data name="Notifications.StoreVersionWithdrawn" xml:space="preserve">
+    <value>{name} {version}: verze byla stažena ze Store</value>
+    <comment>[name:string][version:string]</comment>
+  </data>
+  <data name="Notifications.StoreVersionWithdrawnRemoveHint" xml:space="preserve">
+    <value>Rozšíření již není ve Store. Odebrat ho lze v části Integrace nebo Knihovna.</value>
+  </data>
   <data name="Notifications.TlsCertificateInvalidAdvice" xml:space="preserve">
     <value>Uložený certifikát se nepodařilo načíst. Vygenerujte nový nebo nahrajte náhradní v Nastavení &gt; Síť.</value>
   </data>
@@ -11889,6 +11952,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Notifications.UpdateFailed" xml:space="preserve">
     <value>Aktualizaci na Macro Deck {version} se nepodařilo dokončit</value>
     <comment>[version:string]</comment>
+  </data>
+  <data name="Notifications.UpdateCheckFailed" xml:space="preserve">
+    <value>Nepodařilo se zkontrolovat aktualizace</value>
   </data>
   <data name="Plugins.BeforeYouInstallTitle" xml:space="preserve">
     <value>Než budete instalovat</value>
@@ -12903,6 +12969,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.Backups.DownloadButton" xml:space="preserve">
     <value>Stáhnout</value>
   </data>
+  <data name="Settings.Backups.DownloadSaved" xml:space="preserve">
+    <value>Záloha uložena</value>
+  </data>
   <data name="Settings.Backups.EmptyHeading" xml:space="preserve">
     <value>Zatím žádné zálohy</value>
   </data>
@@ -12917,6 +12986,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Settings.Backups.Friday" xml:space="preserve">
     <value>Pátek</value>
+  </data>
+  <data name="Settings.Backups.ImportButton" xml:space="preserve">
+    <value>Importovat zálohu</value>
+  </data>
+  <data name="Settings.Backups.ImportSucceeded" xml:space="preserve">
+    <value>Záloha importována</value>
   </data>
   <data name="Settings.Backups.KeepLatestDescription" xml:space="preserve">
     <value>Kolik záloh se má uchovat, než se starší automaticky odstraní.</value>
@@ -13002,6 +13077,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Settings.Backups.RestartFailedToast" xml:space="preserve">
     <value>Macro Deck se nepodařilo restartovat</value>
+  </data>
+  <data name="Settings.Backups.RestoreAdoptsRecoveryKey" xml:space="preserve">
+    <value>Po obnovení bude Macro Deck používat obnovovací klíč, který byl právě zadán. Dosavadní zálohy této instalace lze otevřít pouze jejím současným obnovovacím klíčem, proto si jej před pokračováním uložte.</value>
   </data>
   <data name="Settings.Backups.RestoreButton" xml:space="preserve">
     <value>Obnovit…</value>
@@ -14232,6 +14310,141 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Používáte nejnovější verzi ({version}).</value>
     <comment>[version:string]</comment>
   </data>
+  <data name="Settings.Usb.AdbSessionsNote" xml:space="preserve">
+    <value>Relace ADB k tomuto zařízení, například scrcpy nebo Android Studio, se při přepnutí přeruší.</value>
+  </data>
+  <data name="Settings.Usb.AndroidDescription" xml:space="preserve">
+    <value>Nainstalujte libusb do tohoto počítače, například pomocí Homebrew na Macu nebo správcem balíčků v Linuxu.</value>
+  </data>
+  <data name="Settings.Usb.AndroidLabel" xml:space="preserve">
+    <value>Zařízení s Androidem</value>
+  </data>
+  <data name="Settings.Usb.Available" xml:space="preserve">
+    <value>K dispozici</value>
+  </data>
+  <data name="Settings.Usb.ConnectButton" xml:space="preserve">
+    <value>Připojit bez ladění</value>
+  </data>
+  <data name="Settings.Usb.ConnectFailed" xml:space="preserve">
+    <value>Toto zařízení teď nelze připojit. Odpojte ho a znovu připojte.</value>
+  </data>
+  <data name="Settings.Usb.ConnectHint" xml:space="preserve">
+    <value>Během připojení telefon nenabízí přenos souborů. Bez aplikace Macro Deck se zeptá, kterou aplikaci otevřít.</value>
+  </data>
+  <data name="Settings.Usb.DevicesHeading" xml:space="preserve">
+    <value>Zařízení</value>
+  </data>
+  <data name="Settings.Usb.ExperimentalBadge" xml:space="preserve">
+    <value>Experimentální</value>
+  </data>
+  <data name="Settings.Usb.ExperimentalNote" xml:space="preserve">
+    <value>Je vypnuto, dokud se nezapne, a zatím to nepodporuje každý telefon. ADB a Wi-Fi fungují dál jako dřív.</value>
+  </data>
+  <data name="Settings.Usb.FeatureDescription" xml:space="preserve">
+    <value>Připojení aplikace Macro Deck kabelem USB bez možností pro vývojáře v telefonu.</value>
+  </data>
+  <data name="Settings.Usb.FeatureTitle" xml:space="preserve">
+    <value>USB bez ladění</value>
+  </data>
+  <data name="Settings.Usb.ForgetButton" xml:space="preserve">
+    <value>Zapomenout</value>
+  </data>
+  <data name="Settings.Usb.Heading" xml:space="preserve">
+    <value>USB připojení</value>
+  </data>
+  <data name="Settings.Usb.HttpsOnly" xml:space="preserve">
+    <value>Není k dispozici, dokud Macro Deck přijímá jen HTTPS. V Nastavení &gt; Síť nastavte Režim posluchače na Použít další port pro HTTPS, nebo HTTPS vypněte.</value>
+  </data>
+  <data name="Settings.Usb.IosDescription" xml:space="preserve">
+    <value>Nainstalujte aplikaci Zařízení Apple ve Windows nebo službu usbmuxd v Linuxu.</value>
+  </data>
+  <data name="Settings.Usb.IosHint" xml:space="preserve">
+    <value>iPhone nebo iPad se připojí, dokud je na něm otevřený Macro Deck.</value>
+  </data>
+  <data name="Settings.Usb.IosLabel" xml:space="preserve">
+    <value>iPhone a iPad</value>
+  </data>
+  <data name="Settings.Usb.LoadFailed" xml:space="preserve">
+    <value>Nastavení USB připojení se nepodařilo načíst.</value>
+  </data>
+  <data name="Settings.Usb.NoDevicesHeading" xml:space="preserve">
+    <value>Nebyla nalezena žádná zařízení</value>
+  </data>
+  <data name="Settings.Usb.NoDevicesMessage" xml:space="preserve">
+    <value>Připojte telefon nebo tablet kabelem USB, který přenáší data.</value>
+  </data>
+  <data name="Settings.Usb.NoPublicListener" xml:space="preserve">
+    <value>Není k dispozici, dokud Macro Deck nemá síťový posluchač. Zkontrolujte port v Nastavení &gt; Síť.</value>
+  </data>
+  <data name="Settings.Usb.NoRemembered" xml:space="preserve">
+    <value>Zatím nejsou zapamatována žádná zařízení.</value>
+  </data>
+  <data name="Settings.Usb.PlatformAndroid" xml:space="preserve">
+    <value>Android</value>
+  </data>
+  <data name="Settings.Usb.PlatformIos" xml:space="preserve">
+    <value>iPhone nebo iPad</value>
+  </data>
+  <data name="Settings.Usb.RememberedDescription" xml:space="preserve">
+    <value>Tato zařízení s Androidem se po připojení kabelem znovu připojí sama.</value>
+  </data>
+  <data name="Settings.Usb.RememberedHeading" xml:space="preserve">
+    <value>Zapamatovaná zařízení</value>
+  </data>
+  <data name="Settings.Usb.ReplugHint" xml:space="preserve">
+    <value>Pro připojení ho odpojte a znovu připojte.</value>
+  </data>
+  <data name="Settings.Usb.RescanAriaLabel" xml:space="preserve">
+    <value>Znovu vyhledat zařízení</value>
+  </data>
+  <data name="Settings.Usb.SaveFailed" xml:space="preserve">
+    <value>Nastavení USB připojení se nepodařilo uložit.</value>
+  </data>
+  <data name="Settings.Usb.StateAvailable" xml:space="preserve">
+    <value>Nepřipojeno</value>
+  </data>
+  <data name="Settings.Usb.StateClosed" xml:space="preserve">
+    <value>Ukončeno v aplikaci</value>
+  </data>
+  <data name="Settings.Usb.StateConnecting" xml:space="preserve">
+    <value>Čeká se na aplikaci</value>
+  </data>
+  <data name="Settings.Usb.StateConnectingHint" xml:space="preserve">
+    <value>Otevřete Macro Deck na iPhonu nebo iPadu.</value>
+  </data>
+  <data name="Settings.Usb.StateLinked" xml:space="preserve">
+    <value>Připojeno</value>
+  </data>
+  <data name="Settings.Usb.StateNotSupported" xml:space="preserve">
+    <value>Toto zařízení to nepodporuje</value>
+  </data>
+  <data name="Settings.Usb.StateServedByAdb" xml:space="preserve">
+    <value>Připojeno přes ADB</value>
+  </data>
+  <data name="Settings.Usb.StateStopped" xml:space="preserve">
+    <value>Zastaveno</value>
+  </data>
+  <data name="Settings.Usb.StateSwitching" xml:space="preserve">
+    <value>Přepíná se</value>
+  </data>
+  <data name="Settings.Usb.StateWaiting" xml:space="preserve">
+    <value>Čeká na připojení</value>
+  </data>
+  <data name="Settings.Usb.StateWaitingForApp" xml:space="preserve">
+    <value>Čeká se na aplikaci Macro Deck</value>
+  </data>
+  <data name="Settings.Usb.StatusHeading" xml:space="preserve">
+    <value>Stav</value>
+  </data>
+  <data name="Settings.Usb.StoppedHint" xml:space="preserve">
+    <value>Pro nový pokus klikněte na Připojit bez ladění, nebo zařízení odpojte a znovu připojte.</value>
+  </data>
+  <data name="Settings.Usb.Unavailable" xml:space="preserve">
+    <value>Není k dispozici</value>
+  </data>
+  <data name="Settings.Usb.UnknownDevice" xml:space="preserve">
+    <value>Zařízení s Androidem</value>
+  </data>
   <data name="Setup.Account.ConfirmPassword" xml:space="preserve">
     <value>Potvrdit heslo</value>
   </data>
@@ -14446,6 +14659,21 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.ChooseVersion" xml:space="preserve">
     <value>Vybrat jinou verzi</value>
   </data>
+  <data name="Store.CommunityNotice.GuidelinesApply" xml:space="preserve">
+    <value>Na vše ve Store se vztahují pravidla Store.</value>
+  </data>
+  <data name="Store.CommunityNotice.Heading" xml:space="preserve">
+    <value>Vytvořeno komunitou</value>
+  </data>
+  <data name="Store.CommunityNotice.NoMacroDeckIssues" xml:space="preserve">
+    <value>Issues k pluginům a sadám ikon nepatří do oficiálního repozitáře Macro Deck.</value>
+  </data>
+  <data name="Store.CommunityNotice.Responsibility" xml:space="preserve">
+    <value>Vše ve Store vytváří komunita. Pokud se objeví chyba nebo něco nefunguje, odpovídá za to autor dané položky.</value>
+  </data>
+  <data name="Store.CommunityNotice.WhereToReport" xml:space="preserve">
+    <value>Položku lze ohodnotit, založit k ní issue v jejím repozitáři nebo ji nahlásit. Odkazy jsou na její stránce ve Store.</value>
+  </data>
   <data name="Store.Details" xml:space="preserve">
     <value>Podrobnosti</value>
   </data>
@@ -14561,6 +14789,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Store.Footer.PublishHeading" xml:space="preserve">
     <value>Publikování na Macro Deck</value>
+  </data>
+  <data name="Store.Guidelines.Heading" xml:space="preserve">
+    <value>Pravidla Store</value>
+  </data>
+  <data name="Store.Guidelines.Unavailable" xml:space="preserve">
+    <value>Pravidla Store se nepodařilo načíst. Zkontrolujte připojení a zkuste to znovu.</value>
   </data>
   <data name="Store.IconImport.CancelledKeptCount.One" xml:space="preserve">
     <value>Zrušeno – zachována {count} ikona</value>
@@ -14683,15 +14917,6 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Page.ByPublisher" xml:space="preserve">
     <value>od {publisher}</value>
     <comment>[publisher:string]</comment>
-  </data>
-  <data name="Store.Page.ComingSoonHeading" xml:space="preserve">
-    <value>Store zatím není k dispozici</value>
-  </data>
-  <data name="Store.Page.ComingSoonMessage" xml:space="preserve">
-    <value>Stále se na něm pracuje. Pluginy a balíčky ikon se tu objeví v některé z příštích aktualizací.</value>
-  </data>
-  <data name="Store.Page.ComingSoonTestsAction" xml:space="preserve">
-    <value>Otevřít testy</value>
   </data>
   <data name="Store.Page.CompatibilityCheckedHint" xml:space="preserve">
     <value>Kompatibilita s touto verzí Macro Deck se ověřuje při instalaci.</value>
@@ -14913,6 +15138,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Page.RepositoryLink" xml:space="preserve">
     <value>Repozitář</value>
   </data>
+  <data name="Store.Page.HomepageLink" xml:space="preserve">
+    <value>Webové stránky</value>
+  </data>
   <data name="Store.Page.ResultCount.One" xml:space="preserve">
     <value>{count} výsledek</value>
     <comment>[plural][count:int] Number of extensions the current search and filter match.</comment>
@@ -15002,6 +15230,14 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Page.TabInstalled" xml:space="preserve">
     <value>Nainstalováno</value>
   </data>
+  <data name="Store.Page.TabInstalledWithUpdates.One" xml:space="preserve">
+    <value>Nainstalováno, dostupné aktualizace: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Store.Page.TabInstalledWithUpdates.Other" xml:space="preserve">
+    <value>Nainstalováno, dostupné aktualizace: {count}</value>
+    <comment>[plural]</comment>
+  </data>
   <data name="Store.Page.TabsAriaLabel" xml:space="preserve">
     <value>Sekce Store</value>
   </data>
@@ -15012,6 +15248,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Page.TagHeading" xml:space="preserve">
     <value>Vše se štítkem {tag}</value>
     <comment>[tag:string]</comment>
+  </data>
+  <data name="Store.Page.CategoriesHeading" xml:space="preserve">
+    <value>Kategorie</value>
   </data>
   <data name="Store.Page.TagsHeading" xml:space="preserve">
     <value>Štítky</value>
@@ -15052,6 +15291,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Store.Page.VersionUnavailableReason" xml:space="preserve">
     <value>Tuto verzi nelze nainstalovat ze Store.</value>
+  </data>
+  <data name="Store.Page.VersionWithdrawnReason" xml:space="preserve">
+    <value>Tato verze byla stažena ze Store.</value>
   </data>
   <data name="Store.Page.WhatsNewHeading" xml:space="preserve">
     <value>Co je nového?</value>
@@ -15255,11 +15497,41 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.VersionUnavailable" xml:space="preserve">
     <value>Není k dispozici</value>
   </data>
+  <data name="Store.VersionWithdrawn" xml:space="preserve">
+    <value>Stažena</value>
+  </data>
   <data name="Store.WhatMacroDeckReported" xml:space="preserve">
     <value>Co Macro Deck ohlásil</value>
   </data>
   <data name="Store.Why" xml:space="preserve">
     <value>Proč?</value>
+  </data>
+  <data name="Store.Withdrawal.InstalledAdvice" xml:space="preserve">
+    <value>Nainstalujte jinou verzi nebo tuto odinstalujte.</value>
+  </data>
+  <data name="Store.Withdrawal.InstalledHeading" xml:space="preserve">
+    <value>Nainstalovaná verze {version} byla stažena ze Store</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Store.Withdrawal.PackageChip" xml:space="preserve">
+    <value>Odebráno ze Store</value>
+  </data>
+  <data name="Store.Withdrawal.PackageHeading" xml:space="preserve">
+    <value>Toto rozšíření bylo odebráno ze Store</value>
+  </data>
+  <data name="Store.Withdrawal.PackageMessage" xml:space="preserve">
+    <value>Již ho nelze nainstalovat ani aktualizovat.</value>
+  </data>
+  <data name="Store.Withdrawal.Reason" xml:space="preserve">
+    <value>Důvod: {reason}</value>
+    <comment>[reason:string]</comment>
+  </data>
+  <data name="Store.Withdrawal.Replacement" xml:space="preserve">
+    <value>Doporučená náhrada: {replacement}</value>
+    <comment>[replacement:string]</comment>
+  </data>
+  <data name="Store.Withdrawal.VersionChip" xml:space="preserve">
+    <value>Verze stažena</value>
   </data>
   <data name="TemplateBuilder.Logic" xml:space="preserve">
     <value>Logika</value>
@@ -15779,6 +16051,42 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Variables.Manager.VariableCount.Other" xml:space="preserve">
     <value>Proměnných: {count}</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="Variables.Manager.SourceField" xml:space="preserve">
+    <value>Zdroj</value>
+  </data>
+  <data name="Variables.Manager.SourceOwnValue" xml:space="preserve">
+    <value>Vlastní hodnota</value>
+  </data>
+  <data name="Variables.Manager.SourceFile" xml:space="preserve">
+    <value>Číst ze souboru</value>
+  </data>
+  <data name="Variables.Manager.SourceHintOwnValue" xml:space="preserve">
+    <value>Hodnotu ukládá Macro Deck.</value>
+  </data>
+  <data name="Variables.Manager.SourceHintFile" xml:space="preserve">
+    <value>Hodnotou je obsah souboru a mění se s každou jeho změnou.</value>
+  </data>
+  <data name="Variables.Manager.FileField" xml:space="preserve">
+    <value>Soubor</value>
+  </data>
+  <data name="Variables.Manager.AllowWriteBack" xml:space="preserve">
+    <value>Povolit zpětný zápis</value>
+  </data>
+  <data name="Variables.Manager.AllowWriteBackHint" xml:space="preserve">
+    <value>Změny provedené v Macro Decku, například posuvníkem, se zapíší do souboru.</value>
+  </data>
+  <data name="Variables.Manager.FileSettings" xml:space="preserve">
+    <value>Nastavení souboru</value>
+  </data>
+  <data name="Variables.Manager.FileUnavailable" xml:space="preserve">
+    <value>Bez hodnoty: soubor chybí, nelze jej přečíst nebo neodpovídá typu proměnné</value>
+  </data>
+  <data name="Variables.Manager.CreateFailed" xml:space="preserve">
+    <value>Proměnnou se nepodařilo vytvořit. Zkuste to znovu.</value>
+  </data>
+  <data name="Variables.Manager.SaveFailed" xml:space="preserve">
+    <value>Změny se nepodařilo uložit. Zkuste to znovu.</value>
   </data>
   <data name="Variables.NewVariable" xml:space="preserve">
     <value>Nová proměnná</value>
@@ -18304,6 +18612,10 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.TestBuildActive" xml:space="preserve">
     <value>Testovací sestavení {build}</value>
     <comment>[build:string] Shown on a Store plugin whose installed version is an unreviewed test build rather than the published release.</comment>
+  </data>
+  <data name="Store.SigningRevoked" xml:space="preserve">
+    <value>Certifikát odvolán</value>
+    <comment>Shown on an installed Store plugin whose signing certificate, or the issuer that signed it, the Macro Deck registry revoked.</comment>
   </data>
   <data name="Store.ReturnToStoreVersion" xml:space="preserve">
     <value>Vrátit na verzi ze Store {version}</value>

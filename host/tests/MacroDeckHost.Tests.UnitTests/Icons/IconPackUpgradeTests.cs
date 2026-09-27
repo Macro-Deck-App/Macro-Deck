@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -54,6 +55,34 @@ public class IconPackUpgradeTests
 		Assert.That(await reader.ReadToEndAsync(),
 			Is.EqualTo("master:two"),
 			"the surviving icon id must resolve to the new version's bytes");
+	}
+
+	[Test]
+	public async Task An_upgrade_announces_the_icons_whose_bytes_changed_and_the_icons_it_added()
+	{
+		var installed = await InstallPack("1.0.0", ("home", "one"), ("play", "one"));
+		var installedIcons = _harness.Cache.GetIconsByPackId(installed.Id);
+		var homeId = installedIcons.Single(icon => icon.Name == "home").Id;
+
+		var next = await BuildArchive("1.1.0", ("home", "two"), ("play", "one"), ("record", "one"));
+		_harness.Mediator.Published.Clear();
+		await _harness.RestoreService.UpgradePack(installed.Id,
+			"pack.macroDeckIconPack",
+			new MemoryStream(next),
+			CancellationToken.None);
+
+		var updated = _harness.Mediator.Published.OfType<IconUpdatedNotification>().ToList();
+		var added = _harness.Mediator.Published.OfType<IconsAddedNotification>().ToList();
+		Assert.Multiple(() =>
+		{
+			Assert.That(updated.Select(n => n.Icon.Id),
+				Is.EqualTo(new[] { homeId }),
+				"only the icon whose bytes changed is announced as updated");
+			Assert.That(updated[0].Icon.MasterContentHash,
+				Is.EqualTo(MasterContentHash.Compute("master:two"u8).Value));
+			Assert.That(added.SelectMany(n => n.Icons).Select(icon => icon.Name), Is.EqualTo(new[] { "record" }));
+			Assert.That(added.Single().PackId, Is.EqualTo(installed.Id));
+		});
 	}
 
 	[Test]

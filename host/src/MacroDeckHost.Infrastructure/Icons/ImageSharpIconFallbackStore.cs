@@ -1,6 +1,7 @@
 using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Domain.Entities;
+using MacroDeckHost.Domain.Icons;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.Formats.Png;
@@ -28,14 +29,17 @@ public sealed class ImageSharpIconFallbackStore : IIconImageFallbackStore, IDisp
 	public async Task<FallbackIconImage?> GetOrCreate(IconEntity icon,
 		string variant,
 		bool staticFrame,
-		CancellationToken cancellationToken)
+		CancellationToken cancellationToken,
+		string? sourceVariant = null)
 	{
 		var animated = icon.IsAnimated && !staticFrame;
 		var extension = animated ? ".gif" : ".png";
 		var contentType = animated ? "image/gif" : "image/png";
+		// The master hash is part of the name because an icon's bytes can be replaced under the same id.
+		var identity = $"{icon.Id:N}-{MasterToken(icon)}";
 		var cacheName = icon.IsAnimated && staticFrame
-			? $"{icon.Id:N}-{variant}-static{extension}"
-			: $"{icon.Id:N}-{variant}{extension}";
+			? $"{identity}-{variant}-static{extension}"
+			: $"{identity}-{variant}{extension}";
 		var cachePath = Path.Combine(_paths.IconsDirectory, CacheDirectoryName, cacheName);
 
 		if (File.Exists(cachePath))
@@ -46,9 +50,14 @@ public sealed class ImageSharpIconFallbackStore : IIconImageFallbackStore, IDisp
 		await _transcodeLock.WaitAsync(cancellationToken);
 		try
 		{
-			if (!File.Exists(cachePath) && !await Transcode(icon, variant, animated, cachePath, cancellationToken))
+			if (!File.Exists(cachePath))
 			{
-				return null;
+				if (!await Transcode(icon, sourceVariant ?? variant, animated, cachePath, cancellationToken))
+				{
+					return null;
+				}
+
+				SweepStale(Path.GetDirectoryName(cachePath)!, icon, identity);
 			}
 		}
 		finally
@@ -57,6 +66,27 @@ public sealed class ImageSharpIconFallbackStore : IIconImageFallbackStore, IDisp
 		}
 
 		return new FallbackIconImage(OpenRead(cachePath), contentType, extension);
+	}
+
+	private void SweepStale(string directory, IconEntity icon, string identity)
+	{
+		foreach (var path in Directory.EnumerateFiles(directory, $"{icon.Id:N}-*"))
+		{
+			var name = Path.GetFileName(path);
+			if (name.StartsWith(identity + "-", StringComparison.Ordinal) || name.EndsWith(".tmp", StringComparison.Ordinal))
+			{
+				continue;
+			}
+
+			try
+			{
+				File.Delete(path);
+			}
+			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+			{
+				_logger.Debug(ex, "Could not delete stale fallback image {Path}", path);
+			}
+		}
 	}
 
 	private async Task<bool> Transcode(IconEntity icon,
@@ -111,6 +141,20 @@ public sealed class ImageSharpIconFallbackStore : IIconImageFallbackStore, IDisp
 		{
 			await source.DisposeAsync();
 		}
+	}
+
+	private static string MasterToken(IconEntity icon)
+	{
+		var hash = icon.MasterContentHash ?? icon.SourceContentHash;
+		if (string.IsNullOrEmpty(hash))
+		{
+			return "0";
+		}
+
+		var hex = hash.StartsWith(ContentHash.Sha256Prefix, StringComparison.Ordinal)
+			? hash[ContentHash.Sha256Prefix.Length..]
+			: hash;
+		return hex.Length > 16 ? hex[..16] : hex;
 	}
 
 	private static FileStream OpenRead(string path)

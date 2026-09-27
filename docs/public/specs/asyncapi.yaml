@@ -41,6 +41,9 @@ x-macrodeck-error-codes:
   - ADB_NOT_ALLOWED
   - ADB_FAILED
   - UI_RESOURCE_QUOTA_EXCEEDED
+  - PLUGIN_ICON_NOT_FOUND
+  - ICON_PACK_INVALID
+  - ICON_PACK_SYNC_NOT_ALLOWED
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Errors.ProtocolCloseCodes
 x-macrodeck-close-codes:
@@ -70,6 +73,38 @@ x-macrodeck-backpressure-exempt-types:
   - host.invoke
   - host.result
   - host.cancel
+
+# Drift anchor: MacroDeck.Plugin.Protocol.Callbacks.HostApis.All and HostOperations.For - the api and
+# operation values a host.invoke may carry. A host that predates an api or operation answers
+# CAPABILITY_UNSUPPORTED.
+x-macrodeck-host-operations:
+  variables: [list, get, create, set, delete]
+  user-variables: [apply, create]
+  config: [entries, get-string, get-secret, set-string, set-secret]
+  deck: [change-folder, change-profile, parent, back]
+  scripts: [run]
+  widgets: [apply, invalidate-icon]
+  notifications: [notify, dismiss]
+  action-interactions: [request-item-picker, request-device-picker, show-modal]
+  ui: [snapshot, patch, fault, reload, register-resource, remove-resource]
+  devices: [register, update, presence, unregister, interaction, icon, widget-icon, close]
+  variable-values: [value, invalidate]
+  layouts: [register, unregister]
+  folder-views: [register, unregister]
+  widget-types: [register, unregister]
+  event-bindings: []
+  screensavers: [register, unregister]
+  adb: [shell, battery, push, pull, install, uninstall, package-installed, connect]
+  messaging: [publish, send, request, subscriptions]
+  icon-packs: [sync-bundled, get-icon-resource]
+
+# Drift anchor: MacroDeck.Plugin.Protocol.Assets.AssetKinds.All - the kind values an asset.begin may carry.
+x-macrodeck-asset-kinds:
+  - icon
+  - artwork
+  - action-icon
+  - ui-resource
+  - icon-pack
 
 defaultContentType: application/json
 
@@ -714,8 +749,10 @@ components:
       properties:
         api:
           type: string
+          description: A key of x-macrodeck-host-operations.
         operation:
           type: string
+          description: One of the operations x-macrodeck-host-operations lists for the api.
         arguments:
           description: Operation arguments, shaped by the api and operation.
 
@@ -756,6 +793,7 @@ components:
           type: string
         kind:
           type: string
+          description: One of x-macrodeck-asset-kinds.
         mimeType:
           type: string
         totalBytes:

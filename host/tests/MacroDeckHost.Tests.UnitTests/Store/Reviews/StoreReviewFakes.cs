@@ -170,6 +170,12 @@ internal sealed class FakeStorePlatformClient : IStorePlatformClient
 			StorePlatformResult.Fail<StorePlatformTestBuildDownload>(StorePlatformFailure.NotFound));
 	}
 
+	public StorePlatformResult<string> CreatorGuidelines { get; set; } =
+		StorePlatformResult.Fail<string>(StorePlatformFailure.Unavailable);
+
+	public Task<StorePlatformResult<string>> GetCreatorGuidelines(CancellationToken cancellationToken = default) =>
+		Task.FromResult(CreatorGuidelines);
+
 	public static StorePlatformOwnReview Own(string packageId, int rating, string? title, string? body) =>
 		new(Guid.NewGuid(), packageId, rating, title, body, "Visible", false, DateTimeOffset.UnixEpoch,
 			DateTimeOffset.UnixEpoch, false, null);

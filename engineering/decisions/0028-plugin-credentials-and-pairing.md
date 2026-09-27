@@ -115,7 +115,8 @@ That is a real dependency on user attention rather than a cryptographic boundary
 Mode being off by default, approval being desktop-only, the prompt labelling unverified fields as such,
 one live request per plugin id with two rate-limit buckets, and nothing being minted until the requester
 proves possession. Closing the underlying gap means revisiting loopback trust itself, which is out of
-scope here.
+scope here. [ADR 0098](0098-loopback-trust-requires-a-per-launch-secret.md) later did: a local process no
+longer has implicit admin unless it runs as the same user and reads the desktop app's secret.
 
 ## Alternatives considered
 

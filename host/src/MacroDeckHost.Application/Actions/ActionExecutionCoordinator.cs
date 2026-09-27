@@ -15,6 +15,11 @@ public interface IActionExecutionCoordinator
 		FlowExecutionRequest request,
 		TimeSpan bound,
 		CancellationToken cancellationToken);
+
+	Task<ActionExecutionDispatch> RunBoundedAsync(
+		Func<IServiceProvider, CancellationToken, Task<FlowExecutionResult>> run,
+		TimeSpan bound,
+		CancellationToken cancellationToken);
 }
 
 public sealed class ActionExecutionCoordinator : IActionExecutionCoordinator
@@ -42,18 +47,36 @@ public sealed class ActionExecutionCoordinator : IActionExecutionCoordinator
 		_logger = logger.ForContext<ActionExecutionCoordinator>();
 	}
 
-	public async Task<ActionExecutionDispatch> RunBoundedAsync(
+	public Task<ActionExecutionDispatch> RunBoundedAsync(
 		FlowExecutionRequest request,
 		TimeSpan bound,
+		CancellationToken cancellationToken)
+		=> RunBoundedAsync(request.ExecutionId,
+			(services, token) => services.GetRequiredService<IFlowExecutor>().ExecuteAsync(request, token),
+			bound,
+			result => PublishStatus(request, result),
+			cancellationToken);
+
+	public Task<ActionExecutionDispatch> RunBoundedAsync(
+		Func<IServiceProvider, CancellationToken, Task<FlowExecutionResult>> run,
+		TimeSpan bound,
+		CancellationToken cancellationToken)
+		=> RunBoundedAsync(Guid.NewGuid(), run, bound, _ => Task.CompletedTask, cancellationToken);
+
+	private async Task<ActionExecutionDispatch> RunBoundedAsync(
+		Guid executionId,
+		Func<IServiceProvider, CancellationToken, Task<FlowExecutionResult>> execute,
+		TimeSpan bound,
+		Func<FlowExecutionResult, Task> detachedCompleted,
 		CancellationToken cancellationToken)
 	{
 		if (Interlocked.Increment(ref _inFlight) > MaxConcurrentRuns)
 		{
 			Interlocked.Decrement(ref _inFlight);
 			_logger.Warning("Rejecting flow execution {ExecutionId}: {MaxConcurrentRuns} runs already in flight",
-				request.ExecutionId,
+				executionId,
 				MaxConcurrentRuns);
-			return new ActionExecutionDispatch(request.ExecutionId, UnavailableResult(request.ExecutionId));
+			return new ActionExecutionDispatch(executionId, UnavailableResult(executionId));
 		}
 
 		// Linked only to the host's own shutdown token - never the caller's. ASP.NET Core cancels a
@@ -63,7 +86,7 @@ public sealed class ActionExecutionCoordinator : IActionExecutionCoordinator
 		var runCts = CancellationTokenSource.CreateLinkedTokenSource(_lifetime.ApplicationStopping);
 		runCts.CancelAfter(_maxRunDuration);
 
-		var run = RunDetached(request, runCts.Token);
+		var run = RunDetached(execute, runCts.Token);
 
 		using var delayCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 		var winner = await Task.WhenAny(run, Task.Delay(bound, delayCts.Token));
@@ -82,28 +105,30 @@ public sealed class ActionExecutionCoordinator : IActionExecutionCoordinator
 			}
 			catch (Exception ex)
 			{
-				_logger.Error(ex, "Flow execution {ExecutionId} faulted", request.ExecutionId);
-				result = FaultedResult(request.ExecutionId);
+				_logger.Error(ex, "Flow execution {ExecutionId} faulted", executionId);
+				result = FaultedResult(executionId);
 			}
 
-			return new ActionExecutionDispatch(request.ExecutionId, result);
+			return new ActionExecutionDispatch(executionId, result);
 		}
 
-		_ = PublishWhenDone(request, run, runCts);
-		return new ActionExecutionDispatch(request.ExecutionId, null);
+		_ = CompleteDetached(executionId, run, runCts, detachedCompleted);
+		return new ActionExecutionDispatch(executionId, null);
 	}
 
-	private async Task<FlowExecutionResult> RunDetached(FlowExecutionRequest request,
+	private async Task<FlowExecutionResult> RunDetached(
+		Func<IServiceProvider, CancellationToken, Task<FlowExecutionResult>> execute,
 		CancellationToken cancellationToken)
 	{
 		await using var scope = _scopeFactory.CreateAsyncScope();
-		return await scope.ServiceProvider.GetRequiredService<IFlowExecutor>().ExecuteAsync(request, cancellationToken);
+		return await execute(scope.ServiceProvider, cancellationToken);
 	}
 
-	private async Task PublishWhenDone(
-		FlowExecutionRequest request,
+	private async Task CompleteDetached(
+		Guid executionId,
 		Task<FlowExecutionResult> run,
-		CancellationTokenSource runCts)
+		CancellationTokenSource runCts,
+		Func<FlowExecutionResult, Task> detachedCompleted)
 	{
 		try
 		{
@@ -114,31 +139,36 @@ public sealed class ActionExecutionCoordinator : IActionExecutionCoordinator
 			}
 			catch (Exception ex)
 			{
-				_logger.Error(ex, "Detached flow execution {ExecutionId} faulted", request.ExecutionId);
-				result = FaultedResult(request.ExecutionId);
+				_logger.Error(ex, "Detached flow execution {ExecutionId} faulted", executionId);
+				result = FaultedResult(executionId);
 			}
 
-			if (string.IsNullOrEmpty(request.OriginClientId))
-			{
-				return;
-			}
-
-			var widgetId = request.OwnerWidgetId?.ToString();
-			var triggerType = request.Trigger.ByTriggerId ? null : request.Trigger.Value;
-			var statusEvent = ActionExecutionDtoMapper.ToStatusEvent(result, widgetId, triggerType);
-			await _transport.SendToGroup(UiClientGroups.For(request.OriginClientId), statusEvent);
+			await detachedCompleted(result);
 		}
 		catch (Exception ex)
 		{
 			_logger.Error(ex,
 				"Failed to publish the status of detached flow execution {ExecutionId}",
-				request.ExecutionId);
+				executionId);
 		}
 		finally
 		{
 			runCts.Dispose();
 			Interlocked.Decrement(ref _inFlight);
 		}
+	}
+
+	private async Task PublishStatus(FlowExecutionRequest request, FlowExecutionResult result)
+	{
+		if (string.IsNullOrEmpty(request.OriginClientId))
+		{
+			return;
+		}
+
+		var widgetId = request.OwnerWidgetId?.ToString();
+		var triggerType = request.Trigger.ByTriggerId ? null : request.Trigger.Value;
+		var statusEvent = ActionExecutionDtoMapper.ToStatusEvent(result, widgetId, triggerType);
+		await _transport.SendToGroup(UiClientGroups.For(request.OriginClientId), statusEvent);
 	}
 
 	private static FlowExecutionResult UnavailableResult(Guid executionId) => new()

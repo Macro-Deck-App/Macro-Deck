@@ -573,6 +573,21 @@ internal sealed class CallbackContractTests
 	}
 
 	[Test]
+	public async Task A_reload_reaches_the_hosts_ui_session_sink_as_a_reload_and_not_a_fault()
+	{
+		await _hostInvoker.InvokeAsync(HostApis.Ui,
+			HostOperations.Ui.Reload,
+			new { sessionId = "s1" },
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_uiSessions.Reloads, Is.EqualTo(new[] { (PluginId, "s1") }));
+			Assert.That(_uiSessions.Faults, Is.Empty);
+		});
+	}
+
+	[Test]
 	public void A_refused_ui_payload_comes_back_to_the_plugin_as_its_own_host_result_error()
 	{
 		_uiSessions.Verdict = UiSessionIngestResult.Reject(UiSessionErrorCodes.PayloadTooLarge, "too big");
@@ -616,6 +631,8 @@ internal sealed class RecordingUiSessionSink : IUiSessionSink
 
 	public List<(string ProviderId, string SessionId, string Code, string? Message)> Faults { get; } = [];
 
+	public List<(string ProviderId, string SessionId)> Reloads { get; } = [];
+
 	public UiSessionIngestResult Verdict { get; set; } = UiSessionIngestResult.Accept();
 
 	public UiSessionIngestResult PublishSnapshot(string providerId, string sessionId, UiRawJson tree)
@@ -632,4 +649,7 @@ internal sealed class RecordingUiSessionSink : IUiSessionSink
 
 	public void PublishFault(string providerId, string sessionId, string code, string? message)
 		=> Faults.Add((providerId, sessionId, code, message));
+
+	public void PublishReload(string providerId, string sessionId)
+		=> Reloads.Add((providerId, sessionId));
 }

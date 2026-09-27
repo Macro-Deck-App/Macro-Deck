@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using MacroDeck.Plugin.Protocol.Limits;
+using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Model.Versioning;
 using MacroDeckHost.Application.Integrations;
@@ -13,6 +14,8 @@ namespace MacroDeckHost.Application.Ui.Sessions;
 public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 {
 	private const string ProviderFaultMessage = "The provider of this view stopped responding.";
+
+	private const string ProviderReloadedMessage = "The provider of this view was updated and the view has to be built again.";
 
 	private const string ProviderDisconnectedMessage = "The plugin serving this view disconnected.";
 
@@ -217,7 +220,15 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 			ClientId = actingClientId
 		};
 
-		context.ProviderPump.Enqueue(ct => DispatchEventAsync(context, command, ct));
+		if (string.Equals(command.Name, UiComponentEvents.PointerMove, StringComparison.Ordinal))
+		{
+			context.ProviderPump.EnqueueReplaceable(connectionId + "\n" + command.NodeId,
+				ct => DispatchEventAsync(context, command, ct));
+		}
+		else
+		{
+			context.ProviderPump.Enqueue(ct => DispatchEventAsync(context, command, ct));
+		}
 
 		return new UiSendEventResponse { Accepted = true };
 	}
@@ -261,6 +272,18 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 		UiSessionLog.ProviderReportedFault(_logger, sessionId, providerId, code, message);
 
 		_registry.TryInvalidate(sessionId, UiSessionErrorCodes.ProviderFaulted, ProviderFaultMessage, retryable: true);
+	}
+
+	public void PublishReload(string providerId, string sessionId)
+	{
+		if (!Owns(providerId, sessionId))
+		{
+			return;
+		}
+
+		UiSessionLog.ProviderReloaded(_logger, sessionId, providerId);
+
+		_registry.TryInvalidate(sessionId, UiSessionErrorCodes.ProviderReloaded, ProviderReloadedMessage, retryable: true);
 	}
 
 	public void SweepDraining() => _registry.SweepDraining();

@@ -12,11 +12,11 @@ or shipped but not implemented, is stated as such.
 | Party | Trusted for | Not trusted for, or the limit |
 | --- | --- | --- |
 | Host | Everything: it owns state, credentials, secrets and install decisions | - |
-| Desktop app, over the private loopback port | **Admin**, with no token | The same trust goes to any local process - see [loopback trust](#loopback-trust-is-transport-trust-not-authentication) |
+| Desktop app, over the private loopback port | **Admin**, with a per-launch secret instead of a token | A process running as the same user can read that secret - see [loopback trust](#loopback-trust-needs-a-per-launch-secret) |
 | Plugin process | Scope `plugin`: the plugin protocol surface, and nothing else | Not sandboxed: it runs with the user's full privileges. Declared permissions are [not enforced](#permissions-declared-not-enforced), except `host:adb` |
 | Deck clients (web client, companion) | Scope `client`: the viewer-safe endpoints | Plugin endpoints refuse them |
 | LAN callers and browsers | The public listener's API and web client | Every plugin endpoint refuses them |
-| Creator Portal and Store | Signing Store plugins after checking the publishing workflow's provenance; publishing the signed registry | Revocation: no feed is published yet |
+| Creator Portal and Store | Signing Store plugins after checking the publishing workflow's provenance; publishing the signed registry and its revoked keys | Revocation refuses new installs and updates, not a plugin that is already installed |
 
 ## Network exposure
 
@@ -36,16 +36,19 @@ decision.
 | Enabling HTTPS on the public listener does not widen this | The local-only gate grants no principal of its own: reaching it from another listener adds reachability, not authority |
 | `/_macrodeck/*` on the plugin's listener is reserved (`/_macrodeckery` is not) | Middleware added with `Configure` runs after the SDK's and cannot answer there; a constant path there is analyzer error MDP2005. See [reserved routes](/reference/plugin-hosting/#reserved-routes) |
 
-### Loopback trust is transport trust, not authentication
+### Loopback trust needs a per-launch secret
 
 A request on the *private* loopback port, from a loopback address, with a loopback `Host` header, is
-authenticated as **admin**. That is how the desktop UI works without handling a token.
+authenticated as **admin** only when it also presents a secret the desktop app generates for every
+launch: the app itself sends it as a header, and its window holds a session cookie derived from it. That
+is how the desktop UI works without handling a token.
 
-[ADR 0003](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0003-loopback-trust-token-scopes-and-device-identity.md)
-accepts the limit: **any local process can already reach the loopback port**. A hostile process running as
-the same user on the same machine is outside what this boundary defends against; the ADR rejects a
-bootstrap token because it would carry "the same local-attacker exposure". The `Host` header check is a
-DNS-rebinding guard, not a second authentication factor.
+Reaching the port is therefore not enough: another account on the same computer, a local tool that
+fetches URLs for someone else, a sandboxed process or a browser tab gets no admin rights there.
+[ADR 0098](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0098-loopback-trust-requires-a-per-launch-secret.md) states the limit that remains: **a hostile process running as the same user** can
+read the secret, as can anything with that user's file access, such as WSL on Windows, and is outside
+what this boundary defends against. The `Host` header check is a
+DNS-rebinding guard, and a request a browser marks as cross-site is refused even with the cookie.
 
 Plain HTTP on the LAN leaves tokens visible to on-path attackers, so the public listener can be configured
 for TLS. The shipped posture is a self-signed certificate: it "exists to encrypt a link the user already
@@ -141,11 +144,14 @@ it creates a request, the user approves it in the desktop app, and the plugin re
 Pairing uses the same loopback check as the rest of the plugin protocol, which has no port clause: a device
 reaching the loopback address through an `adb reverse` tunnel is indistinguishable at the socket level from
 a local process ([ADR 0030](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0030-android-usb-connections-over-adb.md)).
-Pairing does not widen that existing exposure.
+Pairing does not widen that existing exposure. A connection from a USB link without debugging is different:
+the host dials it itself and marks it, so it is never taken for a local process and cannot reach pairing
+([ADR 0095](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0095-usb-connections-without-debugging.md)).
 
 What pairing changes is what a hostile local process needs. Before, it could mint a Developer token itself
-through its implicit loopback admin. Now it needs a human to approve a specific prompt while Developer Mode
-is on. That is bounded by Developer Mode being off by default, approval only over the trusted transport, a
+through the then credential-less loopback admin. Now it needs a human to approve a specific prompt while
+Developer Mode is on, unless it runs as the same user and reads the desktop app's
+[loopback secret](#loopback-trust-needs-a-per-launch-secret). That is bounded by Developer Mode being off by default, approval only over the trusted transport, a
 prompt that names what is approved and labels unverified fields, the one-request-per-plugin-id and
 rate-limit rules, and nothing being minted before proof of the verifier - a bound, not a cryptographic
 guarantee, as recorded in
@@ -224,7 +230,7 @@ The host resolves a package to exactly one verdict:
 
 | Outcome | Verdict | Blocks install? |
 | --- | --- | --- |
-| Signature valid, chained to the Macro Deck root | `Trusted` | No |
+| Signature valid, chained to the Macro Deck root directly or through an issuer certificate | `Trusted` | No |
 | No `signature` declared | `Unsigned` | Only without consent |
 | Signature block malformed | `Malformed` | Yes |
 | Signature present but does not verify | `SignatureInvalid` | Yes |
@@ -232,7 +238,7 @@ The host resolves a package to exactly one verdict:
 | Certificate does not chain to the pinned root | `UntrustedRoot` | Yes |
 | Certificate issued for another purpose | `WrongCertificatePurpose` | Yes |
 | Certificate not valid at `signedAt` | `CertificateNotValidAtSignature` | Yes |
-| Certificate revoked | `Revoked` | Yes |
+| Certificate, or the issuer that signed it, revoked by the Store registry | `Revoked` | Yes, at install and update only |
 | Package unreadable, or algorithm unknown to this host | `VerificationUnavailable` | Yes |
 
 **`Unsigned` is the only verdict a confirmation can admit**, because nothing published today is signed yet:
@@ -251,12 +257,14 @@ unknown signature algorithm fails closed rather than being treated more lenientl
 
 **Signature format.** Every signable format - `.macroDeckPlugin`, `.macroDeckIconPack`, and the portable
 `.macroDeckProfile`, `.macroDeckFolder` and `.macroDeckWidget` - carries its signature in its own manifest
-and its certificate as `certificate.json` and `certificate.sig` at the archive root. There is no detached
-signature file: a signed artifact verifies on its own. The signature covers a format-specific canonical
+and its certificate as `certificate.json` and `certificate.sig` at the archive root, plus `issuer.json` and
+`issuer.sig` when an issuer certificate signed that certificate. There is no detached signature file: a
+signed artifact verifies on its own. The signature covers a format-specific canonical
 digest - the package identity and the declared file list, never the manifest's own JSON encoding - so
 reformatting a manifest does not invalidate a signature, while adding a file or repointing an entrypoint
 does. See [the manifest's `signature` field](/reference/manifest/#signature) and the
-[certificate](/schemas/macrodeck-certificate-v1.schema.json) and
+certificate ([v1](/schemas/macrodeck-certificate-v1.schema.json),
+[v2](/schemas/macrodeck-certificate-v2.schema.json)) and
 [package signature](/schemas/macrodeck-package-signature-v1.schema.json) schemas.
 
 **Trust anchor.** `MacroDeck.Signing.MacroDeckRootKey` (formerly
@@ -265,6 +273,24 @@ offline Ed25519 key pair, verification-only. The private half never exists on a 
 is not any of the release-signing keys. `--root-public` on `sign` and `verify` points at a different root
 for testing; both commands then warn `non-production-root` and report a result not anchored to the Macro
 Deck root.
+
+**Certificate chain.** A certificate is signed either by the root itself or by exactly one **issuer
+certificate** the root signed, so the root can stay offline while the Creator Portal issues certificates
+with the issuer's key. The rules are strict:
+
+- An issuer certificate carries exactly the `issuer` key usage and the `issuer` subject kind, uses
+  `schemaVersion` 2, is signed by the root, and names no issuer of its own. There is never a second
+  intermediate level.
+- A certificate it signs uses `schemaVersion` 2, names the issuer's `certificateId` in `issuer` and the same
+  `rootKeyId`, carries exactly `package` or `registry`, and has a validity window inside the issuer's.
+- An issuer certificate never signs a package or a registry manifest, and a `package` or `registry`
+  certificate never signs another certificate.
+- Both validity windows are evaluated at the signature's `signedAt`.
+- A `schemaVersion` 1 certificate is always signed by the root, exactly as before.
+
+The registry publishes an issuer certificate under `certificates/` beside the certificates it signed. Macro
+Deck versions from before this chain refuse an issuer-signed certificate. See
+[ADR 0096](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0096-offline-root-with-an-online-issuer.md).
 
 **Store artifacts are signed by the Creator Portal, not by their author.** Publishing runs as Trusted
 Publishing: the plugin's CI workflow authenticates to the Creator Portal with its own workload identity,
@@ -287,11 +313,12 @@ digest, and every declared file's hash and size. See [`sign`](/cli/signing/#sign
 | Limit | What it means |
 | --- | --- |
 | `verify` never consults revocation | It says so on every run, in both output formats. A `valid` verdict is a fact about the signature and chain at signing time, not a live trust decision |
-| Revocation is enforced but never fed | A revoked certificate refuses install and launch, but Macro Deck publishes no revocation feed, so nothing is revoked in practice. The host's shipped revocation source always answers `Unavailable`, and that deliberately does not block - failing closed on a feed that does not exist would refuse every signed plugin. See [ADR 0044](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0044-plugin-and-store-trust-enforcement.md) |
+| Revocation stops new installs, not installed plugins | The revoked keys come from the `security.json` of the signed Store registry the host has loaded. A package whose certificate, or whose certificate's issuer, is listed there is refused at install and update. A version that is already installed keeps activating and launching, and the Store marks it **Certificate revoked**. See [ADR 0096](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0096-offline-root-with-an-online-issuer.md) |
+| Revocation needs a loaded registry | A host that has not loaded a registry snapshot yet, or never can because it is offline, answers `Unavailable`, and that deliberately does not block: failing closed would refuse every signed plugin. See [ADR 0044](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0044-plugin-and-store-trust-enforcement.md) |
 | A leaked signing key must be contained by other means | Treat everything signed with it as untrusted. For the Store that is a Creator Portal concern, since the keys are the Portal's; outside the Store see [private-key handling](/cli/signing/#private-key-handling) |
-| `signedAt` is not authenticated | No canonical digest covers it, so the key holder can set any value. Checking validity at `signedAt` is advisory against that key holder: it only protects a package from its certificate's later expiry. Revocation, once it exists, is the control that stops a compromised or misused key |
+| `signedAt` is not authenticated | No canonical digest covers it, so the key holder can set any value. Checking validity at `signedAt` is advisory against that key holder: it only protects a package from its certificate's later expiry. Revocation is the control that stops new installs signed with a compromised or misused key |
 | `publisher` is a claim | It becomes an attribution only behind a `Trusted` verdict. Verified publisher identity comes from the Creator Portal having checked the workflow's provenance before signing, never from the manifest |
-| Only plugins carry a publisher signature | Store icon packs and profile templates are authenticated by the signed registry: the pinned root signs the registry's certificate, that certificate signs the registry manifest, and the manifest carries the digest and size of every file, including the release manifest that declares each artifact's digest. That proves the bytes are the ones the Macro Deck registry published, nothing more: they are never presented as publisher-verified |
+| Only plugins carry a publisher signature | Store icon packs and profile templates are authenticated by the signed registry: the pinned root signs the registry's certificate, directly or through an issuer certificate, that certificate signs the registry manifest, and the manifest carries the digest and size of every file, including the release manifest that declares each artifact's digest. That proves the bytes are the ones the Macro Deck registry published, nothing more: they are never presented as publisher-verified, and a publisher's revoked certificate does not apply to them |
 
 <a id="permissions-declared-not-enforced"></a>
 
@@ -359,8 +386,8 @@ Read this before deciding what a plugin should be trusted with.
 | A plugin runs with the user's full privileges | A managed plugin is an ordinary child process: no sandbox, container, separate account or privilege reduction. It can do anything the user can - read and write their files, open network connections, start processes. Installing one is equivalent to running any other downloaded program |
 | Permissions are not a boundary | A plugin that declares nothing can still reach every host API except `adb`, and even `host:adb` gates only Macro Deck's own ADB connection, not a plugin's own - see [above](#permissions-declared-not-enforced) |
 | An unsigned plugin is still admitted on your say-so | See [signing](#signing-the-creator-portal-signs-and-the-host-verifies-before-install-and-before-every-load). For an unsigned install the declared-digest check is corruption detection, not a boundary: whoever can rewrite the binary can rewrite the unsigned manifest. Trust rests on where you got the file |
-| Revocation is enforced but never fed | A compromised signing key has to be contained by other means until a feed ships |
-| Any local process can reach the loopback listener | And is trusted as admin on the private port. The model defends against LAN callers and browsers, not a hostile process running as the same user |
+| Revocation stops new installs only | A plugin installed before its certificate or issuer was revoked keeps running; the Store marks it, and removing it is your decision |
+| A process running as the same user can become admin | It can read the desktop app's loopback secret. The model defends against LAN callers, browsers and other local accounts, not a hostile process running as the same user |
 | The plugin secret and session token cross plain HTTP on loopback | The local-only rule confines that to processes already on the machine, but it is not encryption |
 | A self-signed public certificate proves nothing about identity | It encrypts the link; it does not authenticate the host to a stranger, and a DHCP change means regenerating it |
 | Supervision contains failure, not intent | Isolation is not a goal. The child's environment is scrubbed of inherited `MACRO_DECK_PLUGIN_*` and `ASPNETCORE_URLS`; the listener port is bound by the host and handed to the child; a fresh credential is minted per launch and discarded on exit; a restart budget stops a crash loop. See [ADR 0029](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0029-plugin-packaging-installation-and-supervision.md) |

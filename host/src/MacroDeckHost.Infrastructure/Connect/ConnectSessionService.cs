@@ -29,6 +29,9 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 
 	private static readonly TimeSpan _persistenceBudget = TimeSpan.FromSeconds(15);
 
+	private static readonly RefreshOutcome _signedOutOutcome =
+		new(RefreshResult.Rejected, null, "No Macro Deck Connect account is signed in.");
+
 	private readonly IConnectIdentityClient _identityClient;
 	private readonly IConnectCredentialStore _store;
 	private readonly ConnectTokenPersister _persister;
@@ -115,7 +118,7 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 				credential.CachedDisplayName ?? credential.Subject,
 				credential.CachedPictureUrl,
 				null,
-				credential.CachedRoles ?? []),
+				[]),
 			null,
 			null,
 			null));
@@ -170,6 +173,7 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 	public async Task SignOut(CancellationToken cancellationToken = default)
 	{
 		ConnectCredential? credential;
+		Task<bool> clearing;
 		lock (_sync)
 		{
 			credential = _credential;
@@ -179,6 +183,9 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 			_refresh = null;
 			_frozen = false;
 			_retryAfter = null;
+			// Queued where the session ends: every save enqueued for it lands first, and a refresh that
+			// finishes later finds itself superseded and enqueues nothing.
+			clearing = _persister.EnqueueClearAndWaitAsync();
 		}
 
 		await _signInFlow.Cancel(cancellationToken);
@@ -197,7 +204,7 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 			}
 		}
 
-		await _store.Clear(cancellationToken);
+		await AwaitRemoval(clearing);
 		Publish(ConnectSessionSnapshot.SignedOut);
 	}
 
@@ -314,7 +321,6 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 
 	private async Task ObserveSignIn()
 	{
-		var signingKeys = _identityClient.FetchSigningKeys(_lifetimeToken);
 		var outcome = await _signInFlow.WaitForOutcome(CancellationToken.None);
 
 		if (outcome.Result is not ConnectSignInResult.Completed)
@@ -349,19 +355,14 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 
 		var tokens = outcome.Tokens!;
 		var claims = outcome.Claims!;
-		// Never waited for: a granted sign-in must commit before a Cancel or sign-out can slip in.
-		var keys = signingKeys.IsCompletedSuccessfully ? signingKeys.Result : null;
-		var roles = await VerifiedRoles(tokens.IdToken, keys) ?? [];
 		var now = _timeProvider.GetUtcNow();
 		var credential = new ConnectCredential(tokens.RefreshToken,
 			claims.Subject,
 			claims.DisplayName,
 			claims.PictureUrl,
-			now,
-			roles);
+			now);
 
-		var persisting = _persister.EnqueueAndWaitAsync(credential);
-
+		Task<bool> persisting;
 		lock (_sync)
 		{
 			_credential = credential;
@@ -369,6 +370,7 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 			_accessTokenRefreshAt = now + tokens.ExpiresIn - RefreshMargin;
 			_frozen = false;
 			_retryAfter = null;
+			persisting = _persister.EnqueueAndWaitAsync(credential);
 		}
 
 		await AwaitDurability(persisting);
@@ -376,7 +378,7 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 
 		Publish(new ConnectSessionSnapshot(ConnectAccountStatus.SignedIn,
 			ConnectConnectivity.Ok,
-			ToAccount(claims, roles),
+			ToAccount(claims),
 			null,
 			now,
 			null));
@@ -415,47 +417,60 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 	private async Task<RefreshOutcome> RefreshCore(ConnectCredential observed, CancellationToken cancellationToken)
 	{
 		await Task.Yield();
+		var owner = observed;
 
 		try
 		{
-			// Fetched before the token request: once the refresh token has rotated, nothing may wait on the
-			// network before the rotated credential is durable.
-			var signingKeys = await _identityClient.FetchSigningKeys(cancellationToken);
-
-			lock (_sync)
-			{
-				if (!ReferenceEquals(_credential, observed))
-				{
-					return new RefreshOutcome(RefreshResult.Rejected,
-						null,
-						"No Macro Deck Connect account is signed in.");
-				}
-			}
-
 			var response = await _identityClient.Refresh(observed.RefreshToken, cancellationToken);
 			var claims = ConnectIdTokenReader.Read(response.IdToken, null, _timeProvider);
-			var roles = await VerifiedRoles(response.IdToken, signingKeys) ?? observed.CachedRoles ?? [];
 			var now = _timeProvider.GetUtcNow();
 			var rotated = new ConnectCredential(response.RefreshToken,
 				claims.Subject,
 				claims.DisplayName,
 				claims.PictureUrl,
-				now,
-				roles);
+				now);
 
-			var persisting = _persister.EnqueueAndWaitAsync(rotated);
-
+			Task<bool>? persisting = null;
 			lock (_sync)
 			{
-				_credential = rotated;
-				_accessToken = response.AccessToken;
-				_accessTokenRefreshAt = now + response.ExpiresIn - RefreshMargin;
-				_retryAfter = null;
+				if (ReferenceEquals(_credential, observed))
+				{
+					_credential = rotated;
+					_accessToken = response.AccessToken;
+					_accessTokenRefreshAt = now + response.ExpiresIn - RefreshMargin;
+					_retryAfter = null;
+					persisting = _persister.EnqueueAndWaitAsync(rotated);
+					owner = rotated;
+				}
+			}
+
+			if (persisting is null)
+			{
+				await RevokeDiscarded(rotated, cancellationToken);
+				return _signedOutOutcome;
 			}
 
 			// The rotated token has to be durable before the access token it came with is handed out: a
 			// crash in between would leave the host holding a token whose predecessor is already redeemed.
 			await AwaitDurability(persisting);
+
+			var signedIn = new ConnectSessionSnapshot(ConnectAccountStatus.SignedIn,
+				ConnectConnectivity.Ok,
+				ToAccount(claims),
+				null,
+				now,
+				null);
+
+			bool changed;
+			lock (_sync)
+			{
+				if (!ReferenceEquals(_credential, rotated))
+				{
+					return _signedOutOutcome;
+				}
+
+				changed = SwapSnapshot(signedIn);
+			}
 
 			if (_failures.RecordSuccess() is { } episode)
 			{
@@ -465,87 +480,135 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 					episode.Failures);
 			}
 
-			Publish(new ConnectSessionSnapshot(ConnectAccountStatus.SignedIn,
-				ConnectConnectivity.Ok,
-				ToAccount(claims, roles),
-				null,
-				now,
-				null));
+			Notify(changed, signedIn);
 
 			return new RefreshOutcome(RefreshResult.Success, response.AccessToken, string.Empty);
 		}
 		catch (ConnectAuthRejectedException ex)
 		{
-			await OnRejected(ex);
-			return new RefreshOutcome(RefreshResult.Rejected, null, ex.Message);
+			return await OnRejected(owner, ex)
+				? new RefreshOutcome(RefreshResult.Rejected, null, ex.Message)
+				: _signedOutOutcome;
 		}
 		catch (ConnectAccountSuspendedException ex)
 		{
-			await OnSuspended(ex);
-			return new RefreshOutcome(RefreshResult.Suspended, null, ex.Message);
+			return await OnSuspended(owner, ex)
+				? new RefreshOutcome(RefreshResult.Suspended, null, ex.Message)
+				: _signedOutOutcome;
 		}
 		catch (Exception ex)
 		{
-			OnTransient(ex);
-			return new RefreshOutcome(RefreshResult.Transient, null, ex.Message);
+			return OnTransient(owner, ex)
+				? new RefreshOutcome(RefreshResult.Transient, null, ex.Message)
+				: _signedOutOutcome;
 		}
 	}
 
-	private async Task OnRejected(ConnectAuthRejectedException ex)
+	private async Task RevokeDiscarded(ConnectCredential rotated, CancellationToken cancellationToken)
 	{
+		// The sign-out revoked the token this refresh presented, which the server may already have
+		// redeemed; the rotated successor must not outlive the session it was issued to.
+		try
+		{
+			await _identityClient.Revoke(rotated.RefreshToken, cancellationToken);
+		}
+		catch (Exception ex)
+		{
+			_logger.Warning(ex, "Revoking a Macro Deck Connect credential rotated after sign-out failed");
+		}
+	}
+
+	private async Task<bool> OnRejected(ConnectCredential owner, ConnectAuthRejectedException ex)
+	{
+		ConnectSessionSnapshot next;
+		bool changed;
+		Task<bool> clearing;
 		lock (_sync)
 		{
+			if (!ReferenceEquals(_credential, owner))
+			{
+				return false;
+			}
+
 			_credential = null;
 			_accessToken = null;
 			_accessTokenRefreshAt = DateTimeOffset.MinValue;
 			_frozen = true;
+			clearing = _persister.EnqueueClearAndWaitAsync();
+
+			next = _snapshot with
+			{
+				Status = ConnectAccountStatus.ReauthenticationRequired,
+				Connectivity = ConnectConnectivity.Ok,
+				OfflineSince = null,
+				Message = ex.Message
+			};
+			changed = SwapSnapshot(next);
 		}
 
+		Notify(changed, next);
 		_failures.RecordSuccess();
-		await _store.Clear(CancellationToken.None);
-
 		_logger.Warning(ex, "Macro Deck Connect rejected the stored credential; a new sign-in is required");
 
-		Publish(Current with
-		{
-			Status = ConnectAccountStatus.ReauthenticationRequired,
-			Connectivity = ConnectConnectivity.Ok,
-			OfflineSince = null,
-			Message = ex.Message
-		});
+		await AwaitRemoval(clearing);
+		return true;
 	}
 
-	private async Task OnSuspended(ConnectAccountSuspendedException ex)
+	private async Task<bool> OnSuspended(ConnectCredential owner, ConnectAccountSuspendedException ex)
 	{
 		// A suspension does not revoke the authorization, so the credential is kept and nothing retries
 		// automatically: the account recovers by itself once the suspension is lifted, and the persisted
 		// floor is what stops a crash loop from hammering the token endpoint until then.
+		ConnectSessionSnapshot next;
+		bool changed;
 		lock (_sync)
 		{
+			if (!ReferenceEquals(_credential, owner))
+			{
+				return false;
+			}
+
 			_accessToken = null;
 			_accessTokenRefreshAt = DateTimeOffset.MinValue;
 			_frozen = true;
+
+			next = _snapshot with
+			{
+				Status = ConnectAccountStatus.Suspended,
+				Connectivity = ConnectConnectivity.Ok,
+				OfflineSince = null,
+				Message = ex.Message
+			};
+			changed = SwapSnapshot(next);
 		}
 
+		Notify(changed, next);
 		_failures.RecordSuccess();
 		await _suspensionFloor.Write(_timeProvider.GetUtcNow() + SuspensionRetryFloor, CancellationToken.None);
 
-		Publish(Current with
-		{
-			Status = ConnectAccountStatus.Suspended,
-			Connectivity = ConnectConnectivity.Ok,
-			OfflineSince = null,
-			Message = ex.Message
-		});
+		return true;
 	}
 
-	private void OnTransient(Exception ex)
+	private bool OnTransient(ConnectCredential owner, Exception ex)
 	{
 		var now = _timeProvider.GetUtcNow();
 
+		ConnectSessionSnapshot next;
+		bool changed;
 		lock (_sync)
 		{
+			if (!ReferenceEquals(_credential, owner))
+			{
+				return false;
+			}
+
 			_retryAfter = ex is ConnectAuthTransientException { RetryAfter: { } retryAfter } ? retryAfter : null;
+
+			next = _snapshot with
+			{
+				Connectivity = ConnectConnectivity.Offline, OfflineSince = _snapshot.OfflineSince ?? now, Message = null
+			};
+			changed = SwapSnapshot(next);
 		}
 
 		var signal = _failures.RecordFailure(ex.Message);
@@ -566,13 +629,9 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 				break;
 		}
 
-		var current = Current;
-		Publish(current with
-		{
-			Connectivity = ConnectConnectivity.Offline, OfflineSince = current.OfflineSince ?? now, Message = null
-		});
-
+		Notify(changed, next);
 		StartRetryLoop();
+		return true;
 	}
 
 	private void StartRetryLoop()
@@ -642,18 +701,36 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 
 	private async Task AwaitDurability(Task<bool> persisting)
 	{
+		switch (await WithinBudget(persisting))
+		{
+			case false:
+				_logger.Error("The rotated Macro Deck Connect credential could not be stored durably");
+				break;
+			case null:
+				// The write is never abandoned or cancelled - only this caller stops waiting for it. Dropping a
+				// rotation mid-write is what loses a refresh token permanently.
+				_logger.Error("The rotated Macro Deck Connect credential is still being written; it stays queued");
+				break;
+		}
+	}
+
+	private async Task AwaitRemoval(Task<bool> clearing)
+	{
+		if (await WithinBudget(clearing) is null)
+		{
+			_logger.Error("The stored Macro Deck Connect credential is still being removed; the removal stays queued");
+		}
+	}
+
+	private async Task<bool?> WithinBudget(Task<bool> write)
+	{
 		try
 		{
-			if (!await persisting.WaitAsync(_persistenceBudget, CancellationToken.None))
-			{
-				_logger.Error("The rotated Macro Deck Connect credential could not be stored durably");
-			}
+			return await write.WaitAsync(_persistenceBudget, _timeProvider, CancellationToken.None);
 		}
 		catch (TimeoutException)
 		{
-			// The write is never abandoned or cancelled - only this caller stops waiting for it. Dropping a
-			// rotation mid-write is what loses a refresh token permanently.
-			_logger.Error("The rotated Macro Deck Connect credential is still being written; it stays queued");
+			return null;
 		}
 	}
 
@@ -666,21 +743,33 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 
 	private void Publish(ConnectSessionSnapshot next)
 	{
-		ConnectSessionSnapshot previous;
+		bool changed;
 		lock (_sync)
 		{
-			previous = _snapshot;
-			_snapshot = next;
+			changed = SwapSnapshot(next);
 		}
+
+		Notify(changed, next);
+	}
+
+	private bool SwapSnapshot(ConnectSessionSnapshot next)
+	{
+		var previous = _snapshot;
+		_snapshot = next;
 
 		// LastSuccessfulRefreshUtc moving on its own is not a transition any client reacts to; broadcasting
 		// it would wake every connected UI once an hour for nothing.
-		if (previous.Status != next.Status ||
+		return previous.Status != next.Status ||
 			previous.Connectivity != next.Connectivity ||
 			previous.OfflineSince != next.OfflineSince ||
 			previous.SignInFailure != next.SignInFailure ||
 			!string.Equals(previous.Message, next.Message, StringComparison.Ordinal) ||
-			!SameAccount(previous.Account, next.Account))
+			!SameAccount(previous.Account, next.Account);
+	}
+
+	private void Notify(bool changed, ConnectSessionSnapshot next)
+	{
+		if (changed)
 		{
 			SessionChanged?.Invoke(this, next);
 		}
@@ -700,19 +789,8 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 			left.Roles.SequenceEqual(right.Roles, StringComparer.Ordinal);
 	}
 
-	private static ConnectAccount ToAccount(ConnectIdTokenClaims claims, IReadOnlyList<string> roles)
-		=> new(claims.Subject, claims.DisplayName, claims.PictureUrl, claims.CreatorUsername, roles);
-
-	private async Task<IReadOnlyList<string>?> VerifiedRoles(string idToken, string? signingKeys)
-	{
-		var roles = await ConnectIdTokenReader.ReadVerifiedRoles(idToken, signingKeys);
-		if (roles is null)
-		{
-			_logger.Warning("The Macro Deck Connect id token could not be verified; its roles were not applied");
-		}
-
-		return roles;
-	}
+	private static ConnectAccount ToAccount(ConnectIdTokenClaims claims)
+		=> new(claims.Subject, claims.DisplayName, claims.PictureUrl, claims.CreatorUsername, []);
 
 	private static TimeSpan DefaultJitter(TimeSpan span)
 		=> span * (0.8 + (Random.Shared.NextDouble() * 0.4));

@@ -71,9 +71,15 @@ public static class HostIdentityRateLimit
 	public static PartitionedRateLimiter<HttpContext> Create()
 		=> PartitionedRateLimiter.CreateChained(
 			PartitionedRateLimiter.Create<HttpContext, string>(context =>
-				Partition(context, AddressKey(context.Connection.RemoteIpAddress), PerAddressLimit)),
+				Partition(context, AddressKey(context), PerAddressLimit)),
 			PartitionedRateLimiter.Create<HttpContext, string>(context =>
-				Partition(context, NetworkKey(context.Connection.RemoteIpAddress), PerNetworkLimit)));
+				Partition(context, NetworkKey(context), PerNetworkLimit)));
+
+	public static string AddressKey(HttpContext context)
+		=> BridgedConnectionStamp.DeviceKey(context) ?? AddressKey(context.Connection.RemoteIpAddress);
+
+	public static string? NetworkKey(HttpContext context)
+		=> BridgedConnectionStamp.DeviceKey(context) is null ? NetworkKey(context.Connection.RemoteIpAddress) : null;
 
 	public static string AddressKey(IPAddress? address)
 	{

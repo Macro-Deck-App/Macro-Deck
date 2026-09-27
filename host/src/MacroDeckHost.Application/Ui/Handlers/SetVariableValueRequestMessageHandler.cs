@@ -4,6 +4,7 @@ using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Application.Ui.Transport.Messages.Variables;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Localization;
 
@@ -14,11 +15,13 @@ public class SetVariableValueRequestMessageHandler
 {
 	private readonly IVariableService _service;
 	private readonly IHostLockState _lockState;
+	private readonly VariableRegistry _registry;
 
-	public SetVariableValueRequestMessageHandler(IVariableService service, IHostLockState lockState)
+	public SetVariableValueRequestMessageHandler(IVariableService service, IHostLockState lockState, VariableRegistry registry)
 	{
 		_service = service;
 		_lockState = lockState;
+		_registry = registry;
 	}
 
 	public async ValueTask<SetVariableValueResponse> Handle(
@@ -76,7 +79,7 @@ public class SetVariableValueRequestMessageHandler
 		{
 			Success = true,
 			Pending = entity.Classification == VariableClassification.Integration,
-			Variable = VariableDtoMapper.ToDto(result.Data, true, null)
+			Variable = VariableDtoMapper.ToDto(result.Data, _registry.IsAvailable(result.Data.Id), null)
 		};
 	}
 }

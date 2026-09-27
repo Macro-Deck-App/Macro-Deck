@@ -1,8 +1,14 @@
+using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 
 namespace MacroDeckHost.Application.Variables;
 
-public sealed record WidgetVariableSnapshot(string Name, VariableType Type, string Value, int? DecimalPlaces);
+public sealed record WidgetVariableSnapshot(
+	string Name,
+	VariableType Type,
+	string Value,
+	int? DecimalPlaces,
+	VariableFileSource? FileSource = null);
 
 public interface IWidgetVariableCloner
 {

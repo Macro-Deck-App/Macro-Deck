@@ -5,6 +5,8 @@ using MacroDeck.Plugin.Protocol.Capabilities.Actions;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeckHost.Application.Plugins.Assets;
+using MacroDeckHost.Application.Plugins.IconPacks;
+using MacroDeckHost.Domain.Widgets;
 using MacroDeck.Sdk.Actions;
 
 namespace MacroDeckHost.Application.Plugins.Capabilities.Adapters.Actions;
@@ -16,16 +18,19 @@ public sealed class RemoteIconProviderAction : IIconProviderActionDefinition
 {
 	private readonly IPluginCapabilityInvoker _invoker;
 	private readonly IPluginAssetCache _assetCache;
+	private readonly IPluginIconResolver? _pluginIcons;
 
 	public RemoteIconProviderAction(string pluginId,
 		string localId,
 		IPluginCapabilityInvoker invoker,
-		IPluginAssetCache assetCache)
+		IPluginAssetCache assetCache,
+		IPluginIconResolver? pluginIcons = null)
 	{
 		PluginId = pluginId;
 		LocalId = localId;
 		_invoker = invoker;
 		_assetCache = assetCache;
+		_pluginIcons = pluginIcons;
 	}
 
 	public string PluginId { get; }
@@ -42,17 +47,19 @@ public sealed class RemoteIconProviderAction : IIconProviderActionDefinition
 
 		var result = data?.Deserialize<ActionIconResult>(PluginProtocolJson.Options);
 
-		return result is { HasValue: true }
-			? new ActionIconSnapshot
-			{
-				Version = result.Version,
-				Reference = result.Reference is { } reference
-					? new ActionIconReference(reference.Type, reference.Reference)
-					: null,
-				MediaType = result.MediaType,
-				NoIcon = result.NoIcon
-			}
-			: null;
+		if (result is not { HasValue: true })
+		{
+			return null;
+		}
+
+		var translated = result.Reference is { } reference ? Translate(reference.Type, reference.Reference) : null;
+		return new ActionIconSnapshot
+		{
+			Version = result.Version,
+			Reference = translated,
+			MediaType = result.MediaType,
+			NoIcon = result.NoIcon || (result.Reference is not null && translated is null)
+		};
 	}
 
 	public async Task<ActionIconContent?> GetActionIconContentAsync(
@@ -75,6 +82,18 @@ public sealed class RemoteIconProviderAction : IIconProviderActionDefinition
 			_assetCache.TryRead(contentHash, out var bytes, out var mimeType)
 				? new ActionIconContent(bytes, mimeType)
 				: null;
+	}
+
+	private ActionIconReference? Translate(string type, string reference)
+	{
+		if (!string.Equals(type, PluginIconReferences.Type, StringComparison.Ordinal))
+		{
+			return new ActionIconReference(type, reference);
+		}
+
+		return _pluginIcons?.Resolve(PluginId, reference) is { } icon
+			? new ActionIconReference(WidgetIconReference.IconPackType, icon.Id.ToString())
+			: null;
 	}
 
 	private Task<JsonElement?> InvokeAsync(string operation, object arguments, CancellationToken cancellationToken)

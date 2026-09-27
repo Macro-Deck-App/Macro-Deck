@@ -2,6 +2,8 @@ using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Network.Tls;
+using MacroDeckHost.Application.Usb;
+using MacroDeckHost.Auth;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Serilog;
 
@@ -9,12 +11,18 @@ namespace MacroDeckHost;
 
 internal sealed class HostListenerPlan
 {
-	private HostListenerPlan(PublicEndpointSet endpoints, int loopbackPort, X509Certificate2? certificate)
+	private HostListenerPlan(PublicEndpointSet endpoints,
+		int loopbackPort,
+		X509Certificate2? certificate,
+		BridgedConnections bridgedConnections)
 	{
 		Endpoints = endpoints;
 		LoopbackPort = loopbackPort;
 		CertificateHolder = new PublicTlsCertificateHolder(certificate);
+		BridgedConnections = bridgedConnections;
 	}
+
+	internal BridgedConnections BridgedConnections { get; }
 
 	internal PublicEndpointSet Endpoints { get; }
 
@@ -27,7 +35,8 @@ internal sealed class HostListenerPlan
 	internal static HostListenerPlan Create(PublicEndpointSet requested,
 		int loopbackPort,
 		X509Certificate2? certificate = null,
-		Func<int, PublicListenerProbeResult>? probe = null)
+		Func<int, PublicListenerProbeResult>? probe = null,
+		BridgedConnections? bridgedConnections = null)
 	{
 		var effectiveProbe = probe ?? PublicListenerProbe.Probe;
 		var effective = requested;
@@ -52,14 +61,17 @@ internal sealed class HostListenerPlan
 			effective = effective.WithoutHttp();
 		}
 
-		return new HostListenerPlan(effective, loopbackPort, certificate);
+		return new HostListenerPlan(effective,
+			loopbackPort,
+			certificate,
+			bridgedConnections ?? new BridgedConnections(TimeProvider.System));
 	}
 
 	internal void Apply(KestrelServerOptions options)
 	{
 		if (Endpoints.HttpPort is { } httpPort)
 		{
-			options.ListenAnyIP(httpPort);
+			options.ListenAnyIP(httpPort, listen => listen.UseBridgedConnectionStamp(BridgedConnections));
 		}
 
 		if (Endpoints.HttpsPort is { } httpsPort)
@@ -68,8 +80,8 @@ internal sealed class HostListenerPlan
 			// cannot be loaded costs the listener rather than every handshake after the port bound. The
 			// selector exists only so a renewed certificate replaces a working one without a restart.
 			options.ListenAnyIP(httpsPort,
-				listen =>
-					listen.UseHttps(https => https.ServerCertificateSelector = (_, _) => CertificateHolder.Current));
+				listen => listen.UseBridgedConnectionStamp(BridgedConnections)
+					.UseHttps(https => https.ServerCertificateSelector = (_, _) => CertificateHolder.Current));
 		}
 
 		options.Listen(IPAddress.Loopback, LoopbackPort);

@@ -38,12 +38,22 @@ export interface StoreCatalogItemBody {
   installedVersion?: string | null;
   installedTestBuild?: string | null;
   unsupportedReason?: string | null;
+  // Absent from an older host.
+  withdrawal?: StoreVersionWithdrawalBody | null;
+  installedVersionWithdrawal?: StoreVersionWithdrawalBody | null;
   trust: StoreExtensionTrust;
   hasIcon: boolean;
   iconSha256?: string | null;
   activeOperationId?: string | null;
   // Absent from an older host.
   previewScreenshotSha256?: string | null;
+  // Absent from an older host.
+  signingRevoked?: boolean;
+}
+
+export interface StoreVersionWithdrawalBody {
+  reason?: string | null;
+  replacement?: string | null;
 }
 
 export interface StoreScreenshotBody {
@@ -52,7 +62,7 @@ export interface StoreScreenshotBody {
   sha256?: string | null;
 }
 
-export type StoreVersionUnavailableReason = 'UnsupportedPlatform' | 'Unavailable';
+export type StoreVersionUnavailableReason = 'UnsupportedPlatform' | 'Unavailable' | 'Withdrawn';
 
 // size, installable and unavailableReason are absent from an older host, which cannot install an older version.
 export interface StoreVersionHistoryBody {
@@ -86,6 +96,8 @@ export interface StoreExtensionDetailBody extends StoreCatalogItemBody {
   longDescription?: string | null;
   changelog?: string | null;
   repository?: string | null;
+  // Absent from an older host.
+  homepage?: string | null;
   license?: string | null;
   // Absent from an older host.
   additionalLinks?: StoreExtensionLinkBody[];
@@ -189,6 +201,16 @@ export interface GetStoreCatalogResponse {
   items: StoreCatalogItemBody[];
   total: number;
   registry: StoreRegistryStatusBody;
+}
+
+export interface StoreCategoryBody {
+  id: string;
+  names: Record<string, string>;
+  count: number;
+}
+
+export interface GetStoreCategoriesResponse {
+  categories: StoreCategoryBody[];
 }
 
 export interface GetStoreExtensionResponse {
@@ -305,6 +327,11 @@ export interface GetStoreRatingsResponse {
 export interface GetStoreInstallsResponse {
   available: boolean;
   installs: Record<string, number>;
+}
+
+export interface GetStoreCreatorGuidelinesResponse {
+  available: boolean;
+  markdown?: string | null;
 }
 
 export interface StoreRatingBucketBody {

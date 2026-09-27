@@ -36,6 +36,7 @@ internal static class PluginManifestErrorExitCode
 		PluginManifestError.InvalidName => ExitCode.SubjectInvalid,
 		PluginManifestError.InvalidLanguage => ExitCode.SubjectInvalid,
 		PluginManifestError.InvalidIcon => ExitCode.SubjectInvalid,
+		PluginManifestError.InvalidBundledIconPack => ExitCode.SubjectInvalid,
 
 		_ => ExitCode.InternalError
 	};

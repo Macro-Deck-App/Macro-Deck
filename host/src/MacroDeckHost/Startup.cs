@@ -64,6 +64,7 @@ using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Application.Triggers.Providers;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Variables.Files;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Application.Widgets.Icons;
 using MacroDeckHost.Application.Weather;
@@ -78,10 +79,12 @@ using MacroDeckHost.Application.Store.Reviews;
 using MacroDeckHost.Application.Store.Updates;
 using MacroDeckHost.Infrastructure.Store;
 using MacroDeckHost.Infrastructure.Adb;
+using MacroDeckHost.Infrastructure.Usb.Native;
 using MacroDeckHost.Infrastructure.ClientTargets;
 using MacroDeckHost.Infrastructure.Applications;
 using MacroDeckHost.Infrastructure.Autostart;
 using MacroDeckHost.Infrastructure.BackgroundServices;
+using MacroDeckHost.Infrastructure.Variables;
 using MacroDeckHost.Infrastructure.Logging;
 using MacroDeckHost.Infrastructure.Caching;
 using MacroDeckHost.Infrastructure.Deck;
@@ -115,6 +118,7 @@ using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Compatibility;
 using MacroDeckHost.Application.Plugins.Assets;
 using MacroDeckHost.Application.Plugins.Capabilities;
+using MacroDeckHost.Application.Plugins.IconPacks;
 using MacroDeckHost.Application.Plugins.Installation;
 using MacroDeckHost.Application.Plugins.Logging;
 using MacroDeckHost.Application.Plugins.Pairing;
@@ -122,6 +126,7 @@ using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Plugins.Trust;
 using MacroDeckHost.Plugins.Capabilities.Callbacks;
 using MacroDeckHost.Infrastructure.Plugins;
+using MacroDeckHost.Infrastructure.Plugins.IconPacks;
 using MacroDeckHost.Infrastructure.Plugins.Installation;
 using MacroDeckHost.Infrastructure.Plugins.Jobs;
 using MacroDeckHost.Infrastructure.Plugins.Trust;
@@ -312,6 +317,7 @@ public class Startup
 		services.AddHostedService<PublicTlsCertificateRenewalBackgroundService>();
 		services.AddHostedService<DeviceLayoutConstraintWarmupBackgroundService>();
 		services.AddHostedService<AdbBackgroundService>();
+		services.AddHostedService<NativeUsbBackgroundService>();
 		services.AddHostedService<IntegrationStartupBackgroundService>();
 		services.AddHostedService<PluginDeviceSessionWatcher>();
 		services.AddHostedService<IconPackInitializerBackgroundService>();
@@ -326,6 +332,7 @@ public class Startup
 		services.AddHostedService<ScheduledEventBackgroundService>();
 		services.AddHostedService<BackupScheduleBackgroundService>();
 		services.AddHostedService<VariableInitializeBackgroundService>();
+		services.AddHostedService<FileVariableShutdownBackgroundService>();
 		services.AddHostedService<IntegrationVariablePollingBackgroundService>();
 		services.AddHostedService<VariableBindingRestoreBackgroundService>();
 		services.AddHostedService<VariableCatalogUpdateBackgroundService>();
@@ -412,6 +419,8 @@ public class Startup
 		services.AddScoped<IEventTriggerRunner, EventTriggerRunner>();
 
 		services.AddSingleton<VariableRegistry>();
+		services.AddSingleton<IVariableFileSystem, VariableFileSystem>();
+		services.AddSingleton<FileVariableSynchronizer>();
 		services.AddSingleton<IUserVariableStore, JsonUserVariableStore>();
 		services.AddSingleton<IVariableBindingStore, JsonVariableBindingStore>();
 		services.AddSingleton<IKnownAudioDeviceStore, JsonKnownAudioDeviceStore>();
@@ -591,7 +600,8 @@ public class Startup
 		// marker sit on the scoped DbContext, so callers that live longer than a request (the installer,
 		// the supervisor) reach them through IServiceScopeFactory instead of the constructor.
 		services.AddSingleton(PluginTrustOptions.Default);
-		services.AddSingleton<IPluginRevocationSource, NoRevocationDataSource>();
+		services.AddSingleton<IPluginRevocationSource, StoreRegistryRevocationSource>();
+		services.AddSingleton<IInstalledPluginSigners, InstalledPluginSigners>();
 		services.AddSingleton<IPluginTrustEvaluator, PluginTrustEvaluator>();
 		services.AddScoped<IPluginTrustRecordRepository, PluginTrustRecordRepository>();
 		services.AddScoped<IPluginTrustBaseline, PluginTrustBaseline>();
@@ -639,10 +649,12 @@ public class Startup
 		services.AddSingleton<StoreInstallBackupBatches>();
 		services.AddSingleton<IStoreArtifactDownloader, StoreArtifactDownloader>();
 		services.AddSingleton<IStoreUpdateState, StoreUpdateState>();
+		services.AddSingleton<IStoreWithdrawalState, StoreWithdrawalState>();
 		services.AddSingleton<IStoreUpdateDetector, StoreUpdateDetector>();
 		services.AddSingleton<IStoreUpdateBatchInstaller, StoreUpdateBatchInstaller>();
 		services.AddSingleton<StoreAutoUpdater>();
 		services.AddSingleton<StoreUpdateNotifier>();
+		services.AddSingleton<StoreWithdrawalNotifier>();
 		services.AddSingleton<IStoreRegistryRefreshTracker, StoreRegistryRefreshTracker>();
 		services.AddSingleton<IStoreRegistryRefresher, StoreRegistryRefresher>();
 		services.AddSingleton<IStoreInstallCoordinator, StoreInstallCoordinator>();
@@ -653,6 +665,7 @@ public class Startup
 		services.AddHostedService<StoreOperationBackgroundService>();
 		services.AddHostedService<StoreOperationBroadcastBackgroundService>();
 		services.AddHostedService<StoreUpdatesBroadcastBackgroundService>();
+		services.AddHostedService<StoreWithdrawalNotificationBackgroundService>();
 		services.AddHostedService<StoreRegistryRefreshBroadcastBackgroundService>();
 
 		services.AddHttpClient(ConnectIdentityClient.HttpClientName, client => { })
@@ -713,6 +726,7 @@ public class Startup
 		services.AddSingleton<IFolderRevealService, FolderRevealService>();
 		services.TryAddSingleton<IHostListenerState>(_ => new HostListenerState(ResolvedPublicEndpoints.Value, false));
 		services.AddAdbManager();
+		services.AddNativeUsb();
 		// Device provisioners run on top of the adb manager registered above (issue #727).
 		services.AddWebClientTargets();
 		services.AddScoped<IIntegrationConfigStore, IntegrationConfigStore>();
@@ -798,6 +812,7 @@ public class Startup
 		services.AddSingleton<IAppIconExtractor, AppIconExtractor>();
 		services.AddSingleton<IApplicationPathResolver, ApplicationPathResolver>();
 		services.AddSingleton<IIconImageFallbackStore, ImageSharpIconFallbackStore>();
+		services.AddSingleton<IIconVariantDeriver, ImageSharpIconVariantDeriver>();
 		services.AddSingleton<IconProcessingChannel>();
 		services.AddSingleton<IconImportBatchTracker>();
 		services.AddSingleton<IconImportBatchFinalizer>();
@@ -809,7 +824,14 @@ public class Startup
 		services.AddScoped<IIconPackExportService, IconPackExportService>();
 		services.AddScoped<IIconPackRestoreService, IconPackRestoreService>();
 		services.AddSingleton<IIconPackOwner, StoreIconPackOwner>();
+		services.AddSingleton<IIconPackOwner, PluginIconPackOwner>();
 		services.AddSingleton<IIconPackOwnerRegistry, IconPackOwnerRegistry>();
+		services.AddSingleton<IIconUsageScanner, IconUsageScanner>();
+		services.AddSingleton<IPluginBundledIconPackDeclarations, PluginBundledIconPackDeclarations>();
+		services.AddSingleton<IPluginIconResolver, PluginIconResolver>();
+		services.AddSingleton<IPluginIconUiResources, PluginIconUiResources>();
+		services.AddSingleton<IPluginIconPackUploads, PluginIconPackUploads>();
+		services.AddSingleton<IPluginIconPackSync, PluginIconPackSync>();
 		services.AddScoped<IPortableAssetManager, PortableAssetManager>();
 		services.AddScoped<IPortableArchiveInspector, PortableArchiveInspector>();
 		services.AddScoped<IProfilePortabilityService, ProfilePortabilityService>();
@@ -950,16 +972,16 @@ public class Startup
 
 		// api/plugin-pairing is excluded alongside the ProtocolConstants.All plugin paths even though it
 		// does not start with /api/plugins: LoopbackConnection.IsTrusted, which every action on that
-		// controller requires, needs no credentials, so without this exclusion any website the developer
-		// happens to have open could cross-origin read pending pairing requests - leaking plugin ids and
-		// executable paths - and POST an approval.
-		// The loopback listener grants trust without credentials, so it never answers with a CORS grant:
-		// the desktop UI is same-origin with it, and no other page may read or preflight it.
+		// controller requires, rides on an ambient session cookie, so without this exclusion any website the
+		// developer happens to have open could cross-origin read pending pairing requests - leaking plugin
+		// ids and executable paths - and POST an approval.
+		// The loopback listener's trust is ambient in the desktop webview, so it never answers with a CORS
+		// grant: the desktop UI is same-origin with it, and no other page may read or preflight it.
 		app.UseWhen(context => !LoopbackConnection.IsLoopbackListener(context) &&
 				!ProtocolConstants.All.Any(path => context.Request.Path.StartsWithSegments(path)) &&
 				!context.Request.Path.StartsWithSegments("/api/plugin-pairing") &&
 				// api/client-targets is excluded for exactly the reason api/plugin-pairing is: every
-				// action on it is gated on LoopbackConnection.IsTrusted and needs no credentials, so
+				// action on it is gated on LoopbackConnection.IsTrusted, an ambient credential, so
 				// without this any page the user has open could drive a device attached to this machine.
 				!context.Request.Path.StartsWithSegments("/api/client-targets") &&
 				!context.Request.Path.StartsWithSegments("/api/ui-websocket/tickets"),

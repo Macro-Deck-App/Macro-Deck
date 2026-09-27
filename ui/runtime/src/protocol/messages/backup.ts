@@ -157,6 +157,10 @@ export interface InspectBackupResponse extends ResultResponse {
   catalog: BackupComponentCatalogEntry[];
 }
 
+export interface ImportBackupResponse extends ResultResponse {
+  backup?: BackupSummary;
+}
+
 export interface PrepareRestoreRequest {
   backupId: string;
   components: BackupComponentGroup[];

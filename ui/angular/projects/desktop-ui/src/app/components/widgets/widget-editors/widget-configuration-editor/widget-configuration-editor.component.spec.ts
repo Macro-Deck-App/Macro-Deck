@@ -6,8 +6,8 @@ import {
   WidgetData, WidgetType,
 } from '@macro-deck/runtime';
 import {
-  ApiService, UiNodeEventBus, UiSessionHandle, UiSessionOpenRequest, UiSessionRejection, UiSessionService,
-  WidgetTypeCatalogService, WidgetTypeInfo,
+  ApiService, UiNodeEventBus, UiSessionHandle, UiSessionOpenRequest, UiSessionOpenRequestSource, UiSessionRejection,
+  UiSessionService, WidgetTypeCatalogService, WidgetTypeInfo,
 } from '@shared';
 import { provideLocalizationTesting } from '../../../../../testing/localization-test-support';
 import { UiRenderContext } from '../../../ui-render/ui-render-context';
@@ -19,7 +19,17 @@ class FakeUiSessionHandle implements UiSessionHandle {
   readonly rejection = signal<UiSessionRejection | null>(null);
   readonly generation = signal(0);
   readonly sent: UiNodeEvent[] = [];
+  readonly requests: UiSessionOpenRequest[] = [];
   closed = false;
+
+  constructor(private readonly source: UiSessionOpenRequestSource) {
+    this.requests.push(resolve(source));
+  }
+
+  replaceSession(): void {
+    this.requests.push(resolve(this.source));
+    this.generation.update(value => value + 1);
+  }
 
   send(event: UiNodeEvent): void {
     this.sent.push(event);
@@ -28,6 +38,10 @@ class FakeUiSessionHandle implements UiSessionHandle {
   close(): void {
     this.closed = true;
   }
+}
+
+function resolve(source: UiSessionOpenRequestSource): UiSessionOpenRequest {
+  return typeof source === 'function' ? source() : source;
 }
 
 function widget(overrides: Partial<GridWidget> = {}): GridWidget {
@@ -127,9 +141,9 @@ describe('WidgetConfigurationEditorComponent', () => {
     infoFor = jasmine.createSpy('infoFor').and.resolveTo(null);
 
     const fakeUiSessions: Pick<UiSessionService, 'open'> = {
-      open: (request: UiSessionOpenRequest): UiSessionHandle => {
-        opens.push(request);
-        const handle = new FakeUiSessionHandle();
+      open: (source: UiSessionOpenRequestSource): UiSessionHandle => {
+        const handle = new FakeUiSessionHandle(source);
+        opens.push(handle.requests[0]);
         handles.push(handle);
         return handle;
       },
@@ -242,6 +256,54 @@ describe('WidgetConfigurationEditorComponent', () => {
       await settle(fixture);
 
       expect(edited.data).toEqual({ label: 'Before' } as WidgetData);
+    });
+
+    it('builds a replaced session from the unsaved draft', async () => {
+      const fixture = await createFixture(widget({ data: { label: 'Before' } as WidgetData }));
+      await editLabel(fixture, 'Edited');
+
+      configHandle().replaceSession();
+      await settle(fixture);
+
+      const replacement = configHandle().requests[1] as { widgetData?: string };
+      expect(JSON.parse(replacement.widgetData ?? '{}')).toEqual({ label: 'Edited' });
+    });
+
+    it('keeps provider defaults out of the draft when a replaced session shows its first tree', async () => {
+      const edited = widget({ data: { label: 'Before' } as WidgetData });
+      const fixture = await createFixture(edited);
+      configHandle().generation.set(1);
+      configHandle().root.set(configRoot([propertiesRegion([stringField('label', 'Before')])]));
+      await settle(fixture);
+
+      configHandle().replaceSession();
+      await settle(fixture);
+      configHandle().root.set(configRoot([
+        propertiesRegion([stringField('label', 'Before'), stringField('seededByProvider', 'default')]),
+      ]));
+      await settle(fixture);
+
+      expect(edited.data).toEqual({ label: 'Before' } as WidgetData);
+      expect(opens.filter(r => r.kind === 'config').length).toBe(1);
+    });
+
+    it('opens once more with an edit made while a replaced session still showed the old tree', async () => {
+      const fixture = await createFixture(widget({ data: { label: 'Before' } as WidgetData }));
+      configHandle().generation.set(1);
+      await settle(fixture);
+      await editLabel(fixture, 'Before');
+
+      configHandle().replaceSession();
+      await settle(fixture);
+      fixture.debugElement.injector.get(UiNodeEventBus)
+        .emit(stringField('label', 'Before'), UiConfigEvents.Change, 'Edited during the gap');
+      await settle(fixture);
+      configHandle().root.set(configRoot([propertiesRegion([stringField('label', 'Before')])]));
+      await settle(fixture);
+
+      expect(opens.filter(r => r.kind === 'config').length).toBe(2);
+      expect(JSON.parse((configHandle2().requests[0] as { widgetData?: string }).widgetData ?? '{}'))
+        .toEqual({ label: 'Edited during the gap' });
     });
 
     async function editLabel(fixture: ComponentFixture<WidgetConfigurationEditorComponent>, value: string): Promise<void> {
@@ -413,17 +475,18 @@ describe('WidgetConfigurationEditorComponent', () => {
       expect(configOpens()).toBe(2);
     });
 
-    it('reopens with the new colour when the session is replaced after a follow', async () => {
+    it('builds a replaced session from the followed colour', async () => {
       const fixture = await openButton();
-      configHandle().generation.set(1);
-      await settle(fixture);
       await flowWrites(fixture, { label: '', backgroundColor: NEW });
       await hostRevision(fixture, buttonTree(NEW));
 
-      configHandle().generation.set(2);
-      await hostRevision(fixture, buttonTree(OLD));
+      configHandle().replaceSession();
+      await settle(fixture);
+      await hostRevision(fixture, buttonTree(NEW));
 
-      expect(configOpens()).toBe(2);
+      const replacement = configHandle().requests[1] as { widgetData?: string };
+      expect(JSON.parse(replacement.widgetData ?? '{}')['backgroundColor']).toBe(NEW);
+      expect(configOpens()).toBe(1);
       expect(draft(fixture)['backgroundColor']).toBe(NEW);
     });
 

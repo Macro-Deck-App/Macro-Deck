@@ -20,6 +20,7 @@ export interface SegmentedOption {
   label?: string;
   icon?: string;
   ariaLabel?: string;
+  badge?: string;
 }
 
 @Component({
@@ -45,6 +46,9 @@ export interface SegmentedOption {
           }
           @if (option.label) {
             <span>{{ option.label }}</span>
+          }
+          @if (option.badge) {
+            <span class="seg-badge" aria-hidden="true">{{ option.badge }}</span>
           }
         </button>
       }

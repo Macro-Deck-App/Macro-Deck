@@ -1,5 +1,10 @@
 import { UiComponentBox } from '../ui-framework/layout';
-import { nodeClaimsGesture, nodeDeclaresGesture, nodeIsDisabledRegion } from '../ui-framework/node-gestures';
+import {
+  nodeClaimsGesture,
+  nodeDeclaresGesture,
+  nodeDeclaresPointerFamily,
+  nodeIsDisabledRegion,
+} from '../ui-framework/node-gestures';
 import { emitsEvent } from '../ui-framework/node-properties.util';
 import { isUnsupportedResolution, resolveRenderableNode } from '../ui-framework/node-resolution.util';
 import { UiNode } from '../ui-framework/ui-node.interface';
@@ -20,6 +25,7 @@ import {
 import { createTextFitScope, MountedFit, TextFit, TextFitScope } from './text-fit';
 import { MODIFIER_BORDER_PART, planNodeModifiers, UiModifierPlan } from './node-modifiers';
 import { bindNodeGestures } from './node-gesture-recognizer';
+import { bindNodePointers } from './node-pointer-tracker';
 
 export interface UiNodeRenderHandle {
   element(): Element | null;
@@ -115,6 +121,7 @@ function renderInScope(
 
   let modifierWrites: UiModifierPlan = { styles: {}, attributes: {} };
   let releaseGestures: (() => void) | null = null;
+  let releasePointers: (() => void) | null = null;
 
   function isDisabled(): boolean {
     return parentDisabled() || nodeIsDisabledRegion(renderNode);
@@ -153,6 +160,8 @@ function renderInScope(
     if (activeDefinition?.release) activeDefinition.release(ctx);
     if (releaseGestures !== null) releaseGestures();
     releaseGestures = null;
+    if (releasePointers !== null) releasePointers();
+    releasePointers = null;
     modifierWrites = { styles: {}, attributes: {} };
     for (const name in parts) {
       if (Object.prototype.hasOwnProperty.call(parts, name)) delete parts[name];
@@ -296,6 +305,7 @@ function renderInScope(
       }
       modifierWrites = planned;
       if (releaseGestures === null && nodeDeclaresGesture(current)) releaseGestures = bindNodeGestures(element, ctx);
+      if (releasePointers === null && nodeDeclaresPointerFamily(current)) releasePointers = bindNodePointers(element, ctx);
     } finally {
       scope.leave();
     }

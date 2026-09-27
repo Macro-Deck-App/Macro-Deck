@@ -31,7 +31,7 @@ public sealed class IconPackWidgetIconSource : IWidgetIconSource
 			return null;
 		}
 
-		return icon.MasterContentHash ?? icon.SourceContentHash;
+		return IconImageVersion.Of(icon);
 	}
 
 	public async Task<WidgetIconImage?> GetImageAsync(

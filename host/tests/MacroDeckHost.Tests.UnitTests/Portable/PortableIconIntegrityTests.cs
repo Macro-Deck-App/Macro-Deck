@@ -9,6 +9,7 @@ namespace MacroDeckHost.Tests.UnitTests.Portable;
 public class PortableIconIntegrityTests
 {
 	private static readonly byte[] _master = [10, 20, 30];
+	private static readonly string[] _masterOnly = [IconVariants.Master];
 
 	private PortabilityTestHarness _harness = null!;
 
@@ -161,6 +162,40 @@ public class PortableIconIntegrityTests
 			Assert.That(imported.ProcessingState, Is.EqualTo(IconProcessingState.Ready));
 			Assert.That(_harness.Icons.Cache.GetPackById(imported.PackId)!.SourceType,
 				Is.EqualTo(IconPackSourceType.MacroDeckImport));
+		});
+	}
+
+	[Test]
+	public async Task Export_BundlesOnlyEachIconsMaster_EvenWhenSizeVariantsExistLocally()
+	{
+		var pack = await _harness.Icons.CreatePack("My Pack");
+		var icon = await _harness.AddReadyIcon(pack.Id, "star", [128, 256]);
+
+		var bundle = await _harness.AssetManager.Collect([new PortableWidgetSource(Guid.NewGuid(), $"{{\"icon\":\"{icon.Id}\"}}")],
+			PortableExportOptions.Default,
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(bundle.Files.Select(file => file.Variant), Is.EqualTo(_masterOnly));
+			Assert.That(bundle.Icons.Single().FileContentHashes.Keys, Is.EqualTo(_masterOnly));
+			Assert.That(bundle.Icons.Single().AvailableSizes, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task Import_OfABundleThatCarriesSizeVariants_KeepsOnlyTheMaster()
+	{
+		await _harness.Icons.CreatePack("My Pack");
+		var content = BundledIcon(out var files, withSize: true);
+
+		var idMap = await Import(content, files);
+
+		var imported = _harness.Icons.Cache.GetIconById(idMap.Values.Single())!;
+		Assert.Multiple(() =>
+		{
+			Assert.That(imported.AvailableSizes, Is.Empty);
+			Assert.That(_harness.Icons.Storage.ListVariants(imported.PackId, imported.Id), Is.EqualTo(_masterOnly));
 		});
 	}
 

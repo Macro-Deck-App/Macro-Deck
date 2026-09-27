@@ -27,11 +27,13 @@ fn main() {
     tauri_build::try_build(tauri_build::Attributes::new().app_manifest(
         tauri_build::AppManifest::new().commands(&[
             "get_host_port",
+            "reauthenticate",
             "get_shell_info",
             "get_cursor_position",
             "open_external",
             "show_open_dialog",
             "save_file",
+            "save_backup",
             "get_hide_dock_icon",
             "set_hide_dock_icon",
             "set_appearance",

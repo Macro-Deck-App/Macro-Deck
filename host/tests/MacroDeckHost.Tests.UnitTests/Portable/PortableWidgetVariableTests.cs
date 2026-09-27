@@ -2,6 +2,7 @@ using System.IO.Compression;
 using System.Text;
 using System.Text.Json.Nodes;
 using MacroDeckHost.Application.Portable;
+using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure.Portable;
 
@@ -105,6 +106,54 @@ public class PortableWidgetVariableTests
 			Assert.That(imported[0].Classification, Is.EqualTo(VariableClassification.User));
 			Assert.That(imported[0].Value, Is.EqualTo("user-value"));
 		});
+	}
+
+	[Test]
+	public async Task A_file_variable_is_exported_without_its_path_or_the_files_content()
+	{
+		var (_, sourceFolder, widget) = await _harness.SeedProfile(null);
+		var created = await _harness.Variables.CreateUserVariable("now_playing",
+			VariableScope.Widget,
+			widget.Id.ToString(),
+			VariableType.Text,
+			null,
+			null,
+			new VariableFileSource(Path.Combine(Path.GetTempPath(), "now-playing.txt"), false));
+		_harness.VariableRegistry.GetById(created.Data!.Id)!.Value = "private file content";
+
+		var export = await _harness.WidgetService.Export(sourceFolder.Id,
+			[widget.Id],
+			PortableExportOptions.Default,
+			CancellationToken.None);
+		var (_, content, _) = ReadRaw(export.Data!);
+		var contentJson = global::System.Text.Json.JsonSerializer.Serialize(content);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(content.Variables.Single().Name, Is.EqualTo("now_playing"));
+			Assert.That(content.Variables.Single().Value, Is.Empty);
+			Assert.That(contentJson, Does.Not.Contain("now-playing.txt"));
+		});
+	}
+
+	[Test]
+	public async Task Duplicating_a_widget_keeps_its_file_variable_reading_the_same_file()
+	{
+		var (_, _, widget) = await _harness.SeedProfile(null);
+		var source = new VariableFileSource(Path.Combine(Path.GetTempPath(), "shared.txt"), true);
+		await _harness.Variables.CreateUserVariable("shared",
+			VariableScope.Widget,
+			widget.Id.ToString(),
+			VariableType.Text,
+			null,
+			null,
+			source);
+		var copyId = Guid.NewGuid();
+
+		await _harness.VariableCloner.Restore(copyId, await _harness.VariableCloner.Snapshot(widget.Id));
+
+		var copied = (await _harness.Variables.GetByScope(VariableScope.Widget, copyId.ToString())).Single();
+		Assert.That(copied.FileSource, Is.EqualTo(source));
 	}
 
 	[Test]

@@ -118,7 +118,10 @@ internal static class RunSession
 			LaunchId = options.LaunchId ?? NewId(),
 			EnrollmentToken = options.EnrollmentToken ?? (useStub ? $"dev-token-{NewId()}" : null),
 			StateDirectory = stateDirectory,
-			PairingEnabled = options.PairingEnabled
+			PairingEnabled = options.PairingEnabled,
+			RealHost = !useStub,
+			Watch = options.Watch,
+			BundledIconPacksRoot = ProjectDirectoryOf(options.Project)
 		};
 
 		var environment = PluginEnvironmentComposer.Compose(request, SnapshotEnvironment());
@@ -398,6 +401,13 @@ internal static class RunSession
 			"--host-url <url>, or use --stub-host to run against a disposable stub host instead.");
 		return false;
 	}
+
+	private static string? ProjectDirectoryOf(string? project)
+		=> project is null
+			? null
+			: Directory.Exists(project)
+				? Path.GetFullPath(project)
+				: Path.GetDirectoryName(Path.GetFullPath(project));
 
 	private static Task<PluginLaunchSpec> ResolveSubjectAsync(CliConsole console,
 		RunOptions options,

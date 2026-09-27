@@ -8,4 +8,5 @@ public class CreateVariableRequest
 	public string Type { get; set; } = "text";
 	public string? InitialValue { get; set; }
 	public int? DecimalPlaces { get; set; }
+	public VariableFileSourceDto? FileSource { get; set; }
 }

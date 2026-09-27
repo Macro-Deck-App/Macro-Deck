@@ -33,7 +33,7 @@ public static class SingleInstanceGuard
 		{
 			using var client = new HttpClient();
 			client.Timeout = TimeSpan.FromSeconds(2);
-			var response = await client.GetAsync(new Uri($"http://127.0.0.1:{port}/api/system/version"));
+			var response = await client.GetAsync(new Uri($"http://127.0.0.1:{port}/api/auth/status"));
 			return response.IsSuccessStatusCode;
 		}
 		catch (Exception e) when (e is HttpRequestException or TaskCanceledException)

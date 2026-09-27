@@ -318,6 +318,8 @@ impl UpdateState {
         self.phase = UpdatePhase::Failed;
         self.error = Some(error);
         self.failure = Some(UpdateFailure::Check);
+        // The host ends its check-failure warning only when told about a successful check.
+        self.signalled_version = None;
     }
 
     // The single replacement for the old `UPDATE_IN_PROGRESS` static: both the
@@ -884,6 +886,17 @@ mod tests {
         assert_eq!(snapshot.phase, UpdatePhase::Failed);
         assert_eq!(snapshot.failure, Some(UpdateFailure::Install));
         assert_eq!(snapshot.version.as_deref(), Some("3.1.0"));
+    }
+
+    #[test]
+    fn a_check_that_succeeds_after_a_failed_one_signals_the_same_version_again() {
+        let mut state = idle_state();
+        state.record_available(1, "3.1.0".to_string(), ReleaseNotes::Empty, None, None);
+        state.confirm_availability_signalled("3.1.0");
+        state.record_check_failed(2, "feed unreachable".to_string());
+        state.record_available(3, "3.1.0".to_string(), ReleaseNotes::Empty, None, None);
+
+        assert_eq!(state.take_availability_signal().as_deref(), Some("3.1.0"));
     }
 
     #[test]

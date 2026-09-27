@@ -40,18 +40,21 @@ public static class TestPki
 		DateTimeOffset? notAfter = null,
 		(byte[] PrivateKey, byte[] PublicKey)? signingRoot = null,
 		string? rootKeyId = null,
-		int schemaVersion = 1,
+		int? schemaVersion = null,
 		string algorithm = "ed25519",
-		(byte[] PrivateKey, byte[] PublicKey)? subjectKeyOverride = null)
+		(byte[] PrivateKey, byte[] PublicKey)? subjectKeyOverride = null,
+		IssuedCertificate? issuer = null,
+		string? issuerIdOverride = null)
 	{
 		var subjectKeys = subjectKeyOverride ?? Ed25519KeyPair.Create();
-		var root = signingRoot ?? Root;
+		var signingKey = issuer is not null ? issuer.PrivateKey : (signingRoot ?? Root).PrivateKey;
 		var certificateId = "cert_" + Guid.NewGuid().ToString("N");
+		var version = schemaVersion ?? (issuer is not null || issuerIdOverride is not null ? 2 : 1);
 
 		var certificate = new SigningCertificate
 		{
-			Schema = "https://schemas.macro-deck.app/macrodeck-certificate-v1.schema.json",
-			SchemaVersion = schemaVersion,
+			Schema = $"https://schemas.macro-deck.app/macrodeck-certificate-v{version}.schema.json",
+			SchemaVersion = version,
 			Subject = new SigningCertificateSubject { Kind = subjectKind, Id = "creator-1", Name = "Test Creator" },
 			Algorithm = algorithm,
 			CertificateId = certificateId,
@@ -60,17 +63,40 @@ public static class TestPki
 			NotBefore = notBefore ?? DateTimeOffset.UtcNow.AddDays(-1),
 			NotAfter = notAfter ?? DateTimeOffset.UtcNow.AddYears(1),
 			IssuedAt = notBefore ?? DateTimeOffset.UtcNow.AddDays(-1),
-			RootKeyId = rootKeyId ?? "root_test0001"
+			RootKeyId = rootKeyId ?? "root_test0001",
+			Issuer = issuerIdOverride ?? issuer?.CertificateId
 		};
 
 		var certificateBytes = SigningJson.Serialize(certificate);
-		var certificateSignatureBytes = SignCertificateBytesAsBase64Text(root.PrivateKey, certificateBytes);
+		var certificateSignatureBytes = SignCertificateBytesAsBase64Text(signingKey, certificateBytes);
 
 		return new IssuedCertificate(certificateBytes,
 			certificateSignatureBytes,
 			subjectKeys.PrivateKey,
 			subjectKeys.PublicKey,
 			certificateId);
+	}
+
+	/// <summary>
+	/// Issues an issuer certificate signed by <paramref name="signingRoot" /> (<see cref="Root" /> by default),
+	/// valid from two days ago for two years so a default <see cref="IssueCertificate" /> under it fits inside
+	/// its window.
+	/// </summary>
+	public static IssuedCertificate IssueIssuer(DateTimeOffset? notBefore = null,
+		DateTimeOffset? notAfter = null,
+		(byte[] PrivateKey, byte[] PublicKey)? signingRoot = null,
+		IReadOnlyList<string>? keyUsage = null,
+		string subjectKind = "issuer",
+		int schemaVersion = 2,
+		IssuedCertificate? issuer = null)
+	{
+		return IssueCertificate(subjectKind: subjectKind,
+			keyUsage: keyUsage ?? [SigningCertificateChain.IssuerKeyUsage],
+			notBefore: notBefore ?? DateTimeOffset.UtcNow.AddDays(-2),
+			notAfter: notAfter ?? DateTimeOffset.UtcNow.AddYears(2),
+			signingRoot: signingRoot,
+			schemaVersion: schemaVersion,
+			issuer: issuer);
 	}
 
 	/// <summary>Runs the issued certificate through <see cref="SigningCertificateChain.Verify(byte[], byte[], ReadOnlySpan{byte}, string)" />

@@ -158,12 +158,13 @@ export class ScreenSaver {
     if (sessionId !== null && sessionId !== this.sessionId) return;
 
     if (this.options.sessions.has(this.sessionId)) {
+      this.reopened = false;
       this.paint();
       return;
     }
 
-    // Opened again at most once per showing: the host answers with the clock when the selection is
-    // gone, and after a second loss only hiding still guarantees a screen with something on it.
+    // Opened again at most once until a tree arrives: the host answers with the clock when the selection
+    // is gone, and a second loss without a tree in between leaves only hiding to show something.
     this.dropTree();
     this.sessionId = null;
     if (this.reopened) {

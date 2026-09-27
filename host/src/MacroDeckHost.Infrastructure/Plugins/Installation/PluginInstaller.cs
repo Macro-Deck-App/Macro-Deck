@@ -1,6 +1,7 @@
 using MacroDeckHost.Application.Backups;
 using System.Collections.Concurrent;
 using System.Security.Cryptography;
+using System.Text.Json;
 using MacroDeck.Plugin.Analyzers;
 using MacroDeck.Plugin.Packaging.Artifacts;
 using MacroDeck.Plugin.Packaging.Manifest;
@@ -12,6 +13,7 @@ using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Capabilities;
+using MacroDeckHost.Application.Plugins.IconPacks;
 using MacroDeckHost.Application.Plugins.Installation;
 using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Plugins.Trust;
@@ -36,6 +38,18 @@ public sealed class PluginInstaller : IPluginInstaller
 
 	private static readonly TimeSpan _healthPollInterval = TimeSpan.FromMilliseconds(250);
 
+	private static readonly HashSet<string> _certificateFiles = new(StringComparer.OrdinalIgnoreCase)
+	{
+		PluginArtifactFiles.CertificateFileName,
+		PluginArtifactFiles.CertificateSignatureFileName
+	};
+
+	private static readonly HashSet<string> _issuerFiles = new(StringComparer.OrdinalIgnoreCase)
+	{
+		PluginArtifactFiles.IssuerCertificateFileName,
+		PluginArtifactFiles.IssuerCertificateSignatureFileName
+	};
+
 	private readonly ConcurrentDictionary<string, SemaphoreSlim> _pluginGates = new(StringComparer.Ordinal);
 
 	private readonly IMacroDeckPaths _paths;
@@ -56,6 +70,7 @@ public sealed class PluginInstaller : IPluginInstaller
 	private readonly ILogger _logger;
 	private readonly DurableJsonFile _currentVersionFiles;
 	private readonly IPluginAdbConsentNotifier? _adbConsent;
+	private readonly IPluginIconPackSync? _iconPackSync;
 
 	public PluginInstaller(IMacroDeckPaths paths,
 		IPluginArtifactReader artifactReader,
@@ -73,9 +88,11 @@ public sealed class PluginInstaller : IPluginInstaller
 		PluginInstallerOptions options,
 		TimeProvider timeProvider,
 		ILogger logger,
-		IPluginAdbConsentNotifier? adbConsent = null)
+		IPluginAdbConsentNotifier? adbConsent = null,
+		IPluginIconPackSync? iconPackSync = null)
 	{
 		_adbConsent = adbConsent;
+		_iconPackSync = iconPackSync;
 		_paths = paths;
 		_artifactReader = artifactReader;
 		_acquirer = acquirer;
@@ -152,7 +169,9 @@ public sealed class PluginInstaller : IPluginInstaller
 					};
 			}
 
-			var trust = await _trustEvaluator.EvaluateInstalledAsync(extractDirectory, cancellationToken);
+			var trust = await _trustEvaluator.EvaluateInstalledAsync(extractDirectory,
+				PluginRevocationCheck.Check,
+				cancellationToken);
 			var warnings = CollectWarnings(manifest, trust);
 
 			// Blocking here only ever colours this read-only preview for the caller - Inspect never gates
@@ -238,6 +257,7 @@ public sealed class PluginInstaller : IPluginInstaller
 
 			request.Stage?.Invoke(PluginInstallStage.Acquired);
 
+			PluginInstallResult result;
 			var gate = _pluginGates.GetOrAdd(manifest.Id, _ => new SemaphoreSlim(1, 1));
 			await gate.WaitAsync(cancellationToken);
 			try
@@ -253,12 +273,15 @@ public sealed class PluginInstaller : IPluginInstaller
 					return refusal;
 				}
 
-				return await InstallLocked(manifest, acquisition, request, stagingDirectory, cancellationToken);
+				result = await InstallLocked(manifest, acquisition, request, stagingDirectory, cancellationToken);
 			}
 			finally
 			{
 				gate.Release();
 			}
+
+			await SyncIconPacksAfterChange(manifest.Id, result);
+			return result;
 		}
 		catch (OperationCanceledException)
 		{
@@ -344,6 +367,7 @@ public sealed class PluginInstaller : IPluginInstaller
 				version);
 		}
 
+		PluginInstallResult activated;
 		var gate = _pluginGates.GetOrAdd(pluginId, _ => new SemaphoreSlim(1, 1));
 		await gate.WaitAsync(cancellationToken);
 		try
@@ -354,7 +378,9 @@ public sealed class PluginInstaller : IPluginInstaller
 			}
 
 			var versionDirectory = PluginInstallPaths.VersionDirectory(_paths.PluginsDirectory, pluginId, version);
-			var trust = await _trustEvaluator.EvaluateInstalledAsync(versionDirectory, cancellationToken);
+			var trust = await _trustEvaluator.EvaluateInstalledAsync(versionDirectory,
+				PluginRevocationCheck.Skip,
+				cancellationToken);
 			var decision = await EvaluateTrustGate(pluginId, version, trust, cancellationToken);
 
 			if (!decision.Permitted)
@@ -381,7 +407,7 @@ public sealed class PluginInstaller : IPluginInstaller
 				runningBeforeInstall: null,
 				cancellationToken);
 
-			return result with { Signature = trust };
+			activated = result with { Signature = trust };
 		}
 		catch (OperationCanceledException)
 		{
@@ -391,6 +417,9 @@ public sealed class PluginInstaller : IPluginInstaller
 		{
 			gate.Release();
 		}
+
+		await SyncIconPacksAfterChange(pluginId, activated);
+		return activated;
 	}
 
 	public async Task<PluginInstallResult> Uninstall(string pluginId,
@@ -410,6 +439,7 @@ public sealed class PluginInstaller : IPluginInstaller
 				pluginId);
 		}
 
+		PluginInstallResult uninstalled;
 		var gate = _pluginGates.GetOrAdd(pluginId, _ => new SemaphoreSlim(1, 1));
 		await gate.WaitAsync(cancellationToken);
 		try
@@ -481,7 +511,7 @@ public sealed class PluginInstaller : IPluginInstaller
 			_adbConsent?.Dismiss(pluginId);
 
 			PluginInstallerLog.Uninstalled(_logger, pluginId, request.KeepData);
-			return PluginInstallResult.Ok(pluginId,
+			uninstalled = PluginInstallResult.Ok(pluginId,
 				installed?.ActiveVersion?.Version ?? string.Empty,
 				previousVersion: null,
 				activated: false);
@@ -493,6 +523,28 @@ public sealed class PluginInstaller : IPluginInstaller
 		finally
 		{
 			gate.Release();
+		}
+
+		await SyncIconPacksAfterChange(pluginId, uninstalled);
+		return uninstalled;
+	}
+
+	// Never under the plugin gate: the sync may wait for startup readiness and must not hold installs up.
+	private async Task SyncIconPacksAfterChange(string pluginId, PluginInstallResult result)
+	{
+		if (_iconPackSync is null || !result.Success)
+		{
+			return;
+		}
+
+		try
+		{
+			_iconPackSync.InstallationChanged(pluginId);
+			await _iconPackSync.SyncAsync(pluginId, CancellationToken.None);
+		}
+		catch (Exception exception)
+		{
+			_logger.Warning(exception, "Syncing the bundled icon packs of {PluginId} failed", pluginId);
 		}
 	}
 
@@ -776,7 +828,9 @@ public sealed class PluginInstaller : IPluginInstaller
 		// same form launch-time re-verification reads - never the archive, which nothing re-checks after
 		// this point. Verifying the archive here and extracting from it earlier would leave a window
 		// between the two reads for the staged archive to be swapped out from under the check.
-		var trust = await _trustEvaluator.EvaluateInstalledAsync(extractDirectory, cancellationToken);
+		var trust = await _trustEvaluator.EvaluateInstalledAsync(extractDirectory,
+			PluginRevocationCheck.Check,
+			cancellationToken);
 
 		// Keyed on the highest tier any installed version of this plugin id was ever admitted at, not just
 		// the active version's record: current.json can go missing or unreadable, and previousVersion would
@@ -784,7 +838,9 @@ public sealed class PluginInstaller : IPluginInstaller
 		// check on the active version alone would let an unsigned update through with consent in that case.
 		var admittedVerdict = await GetHighestAdmittedTier(manifest.Id);
 
-		if (PluginTrustPolicy.IsDowngrade(admittedVerdict, trust.Verdict, acquisition.SourceKind))
+		// A revoked certificate is refused as revoked below, not reported as a lower trust tier.
+		if (trust.Verdict != PluginTrustVerdict.Revoked &&
+			PluginTrustPolicy.IsDowngrade(admittedVerdict, trust.Verdict, acquisition.SourceKind))
 		{
 			return PluginInstallResult.Fail(PluginInstallError.TrustDowngrade,
 					$"'{manifest.Id}' was previously admitted as trusted; this update verifies as " +
@@ -1306,10 +1362,11 @@ public sealed class PluginInstaller : IPluginInstaller
 
 		var declaredByPath = declared.ToDictionary(file => file.Path, StringComparer.OrdinalIgnoreCase);
 		var signed = manifest.Signature is not null;
+		var withIssuer = signed && CertificateNamesIssuer(extractDirectory);
 
 		foreach (var relativePath in extractedFiles)
 		{
-			if (IsRootSignatureMaterial(relativePath, signed))
+			if (IsRootSignatureMaterial(relativePath, signed, withIssuer))
 			{
 				continue;
 			}
@@ -1349,15 +1406,27 @@ public sealed class PluginInstaller : IPluginInstaller
 	/// <paramref name="signed"/> - for the certificate and its root signature a signed plugin carries
 	/// alongside it. An unsigned artifact has no certificate to exclude, so it must declare those two
 	/// paths like any other file rather than smuggle them past the check.</summary>
-	private static bool IsRootSignatureMaterial(string relativePath, bool signed)
+	private static bool IsRootSignatureMaterial(string relativePath, bool signed, bool withIssuer)
 		=> string.Equals(relativePath, PluginArtifactFiles.ManifestFileName, StringComparison.OrdinalIgnoreCase) ||
-			(signed &&
-				(string.Equals(relativePath,
-						PluginArtifactFiles.CertificateFileName,
-						StringComparison.OrdinalIgnoreCase) ||
-					string.Equals(relativePath,
-						PluginArtifactFiles.CertificateSignatureFileName,
-						StringComparison.OrdinalIgnoreCase)));
+			(signed && _certificateFiles.Contains(relativePath)) ||
+			(withIssuer && _issuerFiles.Contains(relativePath));
+
+	// Unverified: only decides which root files count as signature material; the trust evaluator verifies them.
+	private static bool CertificateNamesIssuer(string extractDirectory)
+	{
+		try
+		{
+			using var document = JsonDocument.Parse(
+				File.ReadAllBytes(Path.Combine(extractDirectory, PluginArtifactFiles.CertificateFileName)));
+			return document.RootElement.ValueKind == JsonValueKind.Object &&
+				document.RootElement.TryGetProperty("issuer", out var issuer) &&
+				issuer.ValueKind != JsonValueKind.Null;
+		}
+		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
+		{
+			return false;
+		}
+	}
 
 	private static string ComputeSha256(string path)
 	{

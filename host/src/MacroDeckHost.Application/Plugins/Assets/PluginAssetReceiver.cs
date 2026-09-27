@@ -168,7 +168,10 @@ public sealed class PluginAssetReceiver : IPluginAssetReceiver
 
 		// UI resource bytes are user content held only as long as the plugin session registers them; the
 		// shared disk cache would keep them past a host restart and evict other plugins' icons.
-		if (!string.Equals(kind, AssetKinds.UiResource, StringComparison.Ordinal))
+		// A development icon pack upload is consumed by the next sync and never served by hash, so it stays
+		// out of the disk cache as well.
+		if (!string.Equals(kind, AssetKinds.UiResource, StringComparison.Ordinal) &&
+			!string.Equals(kind, AssetKinds.IconPack, StringComparison.Ordinal))
 		{
 			_cache.Write(contentHash, mimeType, bytes);
 		}

@@ -1,6 +1,6 @@
 import { Injectable, Signal, WritableSignal, inject, signal, untracked } from '@angular/core';
 import { AppStrings, IconDeletedEvent, IconImportBatchState, IconImportProgressEvent, IconPackCreatedEvent, IconPackDeletedEvent, IconPackUpdatedEvent, IconProcessingState, IconPackAiAssets, IconUpdatedEvent, IconsAddedEvent, IpcIcon, IpcIconImportBatch, IpcIconPack } from '@macro-deck/runtime';
-import { ApiService, LocalizationService } from '@shared';
+import { ApiService, IconImageService, IconPackExportError, LocalizationService } from '@shared';
 import { FileSaveService } from './file-save.service';
 
 export interface IconPackModel {
@@ -18,6 +18,7 @@ export interface IconPackModel {
   ownerKind: string;
   canDelete: boolean;
   storePackageId?: string | null;
+  ownerName?: string | null;
   aiAssets?: IconPackAiAssets;
 }
 
@@ -31,6 +32,7 @@ export interface IconModel {
   processingState: IconProcessingState;
   processingError?: string;
   availableSizes: number[];
+  contentHash?: string | null;
   originalFileName?: string;
 }
 
@@ -77,6 +79,7 @@ export class IconPackService {
   private readonly api = inject(ApiService);
   private readonly localization = inject(LocalizationService);
   private readonly fileSave = inject(FileSaveService);
+  private readonly iconImage = inject(IconImageService);
 
   readonly packs = signal<IconPackModel[]>([]);
   readonly isLoading = signal(false);
@@ -123,7 +126,9 @@ export class IconPackService {
     this.loadingPacks.add(packId);
     try {
       const response = await this.api.getIcons({ packId });
-      this.iconsSignal(packId).set((response.icons ?? []).map(mapIcon));
+      const icons = (response.icons ?? []).map(mapIcon);
+      this.iconImage.rememberVersions(icons);
+      this.iconsSignal(packId).set(icons);
       this.loadedPacks.add(packId);
     } catch (error) {
       console.error(`Failed to load icons of pack ${packId}:`, error);
@@ -338,6 +343,11 @@ export class IconPackService {
       return { ok: true, fileName, path: result.path };
     } catch (error) {
       console.error('Failed to export icon pack:', error);
+      if (error instanceof IconPackExportError) {
+        return error.status === 422
+          ? { ok: false, error: this.localization.translateKey(AppStrings.Errors.IconPack.ExportTooLarge) }
+          : { ok: false };
+      }
       return { ok: false, error: error instanceof Error ? error.message : this.localization.translateKey(AppStrings.Errors.IconPack.ExportFailed) };
     }
   }
@@ -434,6 +444,7 @@ export class IconPackService {
 
     this.api.onNotification<IconsAddedEvent>('IconsAddedEvent').subscribe(event => {
       const added = event.icons.map(mapIcon);
+      this.iconImage.rememberVersions(added);
       if (this.loadedPacks.has(event.packId)) {
         const icons = this.iconsSignal(event.packId);
         const known = new Set(icons().map(i => i.id));
@@ -448,6 +459,7 @@ export class IconPackService {
 
     this.api.onNotification<IconUpdatedEvent>('IconUpdatedEvent').subscribe(event => {
       const icon = mapIcon(event.icon);
+      this.iconImage.rememberVersions([icon]);
       this.resolveReadyWaiters(icon);
       if (!this.loadedPacks.has(icon.packId)) {
         return;
@@ -584,6 +596,7 @@ function mapPack(pack: IpcIconPack): IconPackModel {
     iconCount: pack.iconCount ?? 0,
     ownerKind: pack.ownerKind ?? 'User',
     storePackageId: pack.storePackageId ?? null,
+    ownerName: pack.ownerName ?? null,
     aiAssets: pack.aiAssets ?? 'NotDeclared',
     canDelete: pack.canDelete ?? true,
   };
@@ -600,6 +613,7 @@ function mapIcon(icon: IpcIcon): IconModel {
     processingState: icon.processingState,
     processingError: icon.processingError,
     availableSizes: icon.availableSizes ?? [],
+    contentHash: icon.contentHash ?? null,
     originalFileName: icon.originalFileName,
   };
 }

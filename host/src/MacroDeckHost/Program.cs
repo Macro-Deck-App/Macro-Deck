@@ -1,7 +1,9 @@
 using System.Globalization;
 using System.Security.Cryptography;
 using MacroDeckHost.Application.Security.KeyRing;
+using MacroDeckHost.Auth;
 using MacroDeckHost.Application.Configuration;
+using MacroDeckHost.Application.Usb;
 using MacroDeckHost.Application.Logging;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
@@ -79,11 +81,19 @@ public static class Program
 		try
 		{
 			var loopbackPort = HostEndpoints.ResolveLoopbackPort();
+			var loopbackSecret = LoopbackSecretSource.Resolve();
+			LoopbackSecret.Set(loopbackSecret.Secret);
 
 			if (await SingleInstanceGuard.IsAnotherInstanceRunning())
 			{
 				Log.Information("Another host instance is already running, exiting");
 				return;
+			}
+
+			if (loopbackSecret.Generated)
+			{
+				var secretFile = LoopbackSecretSource.Write(paths.ConfigDirectory, loopbackSecret.Secret);
+				Log.Information("No loopback secret was handed over; generated one for local tools in {File}", secretFile);
 			}
 
 			// The only safe point to swap the data root: nothing has opened the database, the Data Protection
@@ -199,9 +209,11 @@ public static class Program
 
 			// Probes each public port before Kestrel is configured, so a port the OS refuses to bind
 			// (issue #515) costs only that listener instead of the whole host.
+			var bridgedConnections = new BridgedConnections(TimeProvider.System);
 			var listenerPlan = HostListenerPlan.Create(tls.Endpoints,
 				loopbackPort,
-				certificate.Certificate);
+				certificate.Certificate,
+				bridgedConnections: bridgedConnections);
 			ResolvedPublicEndpoints.Set(listenerPlan.Endpoints);
 			var activeFingerprint = listenerPlan.Endpoints.HttpsPort is null
 				? null
@@ -229,6 +241,7 @@ public static class Program
 					services.AddSingleton<ILogLevelState>(logLevelState);
 					services.AddSingleton<IHostListenerState>(listenerState);
 					services.AddSingleton(listenerPlan.CertificateHolder);
+					services.AddSingleton(bridgedConnections);
 					services.AddSingleton(dataProtectionProvider);
 					services.AddSingleton(keyRingPlan);
 					services.AddSingleton(KeyRingStartupState.KekHolder);
@@ -247,6 +260,8 @@ public static class Program
 			var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();
 			Integrations.Spotify.SpotifyIntegration.HostTimeOfDayFormat
 				= () => TimeFormatResolver.ResolveAsync(scopeFactory);
+			Integrations.Variables.VariablesIntegration.HostVariableReader
+				= (name, ownerWidgetId, _) => Application.Variables.HostVariableReader.ReadAsync(scopeFactory, name, ownerWidgetId);
 
 			// The shell tells a requested restart from a crash by the exit code alone, so it has to
 			// survive the graceful shutdown RunAsync performs.

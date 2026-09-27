@@ -1475,6 +1475,11 @@ public class RemotePluginIntegrationRegistrarTests
 			bool allowPlugins)
 			=> throw new NotSupportedException();
 
+		public Task<NativeUsbSettings> GetNativeUsb() => throw new NotSupportedException();
+
+		public Task<NativeUsbSettings> SetNativeUsb(bool? enabled, IReadOnlyList<RememberedUsbDevice>? rememberedDevices)
+			=> throw new NotSupportedException();
+
 		public Task<DeveloperSettings> GetDeveloper() => throw new NotSupportedException();
 
 		public Task<DeveloperSettings> SetDeveloper(bool? enabled) => throw new NotSupportedException();

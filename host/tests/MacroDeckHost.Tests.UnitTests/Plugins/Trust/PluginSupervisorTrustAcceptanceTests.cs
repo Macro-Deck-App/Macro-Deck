@@ -14,6 +14,7 @@ using MacroDeckHost.Infrastructure.Plugins.Trust;
 using MacroDeckHost.Tests.UnitTests.Plugins.Installation;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
+using MacroDeckHost.Application.Store;
 
 namespace MacroDeckHost.Tests.UnitTests.Plugins.Trust;
 
@@ -263,7 +264,7 @@ internal sealed class PluginSupervisorTrustAcceptanceTests
 	}
 
 	[Test]
-	public async Task S39_activation_and_launch_both_refuse_once_revocation_reports_revoked()
+	public async Task S39_revocation_refuses_install_but_not_activation_or_launch_of_the_installed_version()
 	{
 		await InstallTrusted();
 		var firstStart = await _supervisor.Start(PluginId);
@@ -278,24 +279,33 @@ internal sealed class PluginSupervisorTrustAcceptanceTests
 
 		var revokedActivation = await Installer.Activate(PluginId, "1.0.0");
 		var restart = await _supervisor.Start(PluginId);
+		await _supervisor.Stop(PluginId, PluginStopReason.UserRequested);
+		var update = await Installer.Install(PluginArtifactSource.FromPath(
+				await SignedPluginArtifacts.CreateSignedAsync(_sourceDirectory,
+					PluginId,
+					"1.0.1",
+					fileName: $"revoked-update-{Guid.NewGuid():N}.macroDeckPlugin")),
+			new PluginInstallRequest());
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(revokedActivation.Success, Is.False);
-			Assert.That(revokedActivation.Error, Is.EqualTo(PluginInstallError.SignatureRevoked));
-			Assert.That(restart.Success, Is.False);
-			Assert.That(restart.Error, Is.EqualTo(PluginSupervisorError.IntegrityFailed));
-			Assert.That(_launcher.Requests, Has.Count.EqualTo(1), "no new process should have been spawned");
+			Assert.That(revokedActivation.Success, Is.True, revokedActivation.ErrorMessage);
+			Assert.That(restart.Success, Is.True, restart.Message);
+			Assert.That(_launcher.Requests, Has.Count.EqualTo(2));
+			Assert.That(update.Success, Is.False);
+			Assert.That(update.Error, Is.EqualTo(PluginInstallError.SignatureRevoked), update.ErrorMessage);
+			Assert.That(_catalog.Discover().Single(p => p.PluginId == PluginId).ActiveVersion!.Version,
+				Is.EqualTo("1.0.0"));
 		});
 	}
 
 	[Test]
-	public async Task S40_the_shipped_no_revocation_data_source_reports_trusted_not_revocation_unavailable()
+	public async Task S40_the_shipped_revocation_source_without_a_loaded_registry_does_not_block_install()
 	{
 		var trustRecords = new InMemoryPluginTrustRecordRepository();
 		var manifestReader = new PluginManifestReader();
 		var trustEvaluator = new PluginTrustEvaluator(manifestReader,
-			new NoRevocationDataSource(),
+			new StoreRegistryRevocationSource(new StoreCatalog()),
 			new PluginTrustOptions { RootPublicKeyOverride = TestPki.Root.PublicKey },
 			Serilog.Core.Logger.None);
 
@@ -433,6 +443,7 @@ internal sealed class PluginSupervisorTrustAcceptanceTests
 		public PluginRevocationStatus Status { get; set; } = PluginRevocationStatus.NotRevoked;
 
 		public Task<PluginRevocationResult> CheckAsync(string certificateId,
+			string? issuerCertificateId,
 			CancellationToken cancellationToken = default)
 			=> Task.FromResult(new PluginRevocationResult(Status, null));
 	}

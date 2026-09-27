@@ -1,5 +1,5 @@
 @if (integration(); as integration) {
-  <shared-detail-page [backLabel]="'macrodeck.app:Integrations.Detail.BackToIntegrations' | translate" (close)="goBack()">
+  <shared-detail-page [backLabel]="(openedFromStore() ? 'macrodeck.app:Store.Page.BackToStore' : 'macrodeck.app:Integrations.Detail.BackToIntegrations') | translate" (close)="goBack()">
     <div class="detail-header-content" detailPageHeader>
       @if (iconUrl(); as icon) {
         <img class="detail-brand-icon" [src]="icon" alt="">
@@ -83,7 +83,7 @@
                     </shared-button>
                   }
                   @if (canUninstall()) {
-                    <shared-button class="detail-uninstall" variant="danger-ghost" size="compact" (click)="requestUninstall()">
+                    <shared-button class="detail-uninstall" variant="secondary" size="compact" (click)="requestUninstall()">
                       <span class="icon icon-trash icon-sm" aria-hidden="true"></span>
                       {{ 'macrodeck.app:Integrations.Page.UninstallAction' | translate }}
                     </shared-button>
@@ -289,7 +289,7 @@
     </div>
   </shared-detail-page>
 } @else if (!integrationService.isLoading()) {
-  <shared-detail-page [backLabel]="'macrodeck.app:Integrations.Detail.BackToIntegrations' | translate" (close)="goBack()">
+  <shared-detail-page [backLabel]="(openedFromStore() ? 'macrodeck.app:Store.Page.BackToStore' : 'macrodeck.app:Integrations.Detail.BackToIntegrations') | translate" (close)="goBack()">
     <h1 class="detail-name" detailPageHeader>{{ 'macrodeck.app:Integrations.Detail.IntegrationNotFound' | translate }}</h1>
   </shared-detail-page>
 }

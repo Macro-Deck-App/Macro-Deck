@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.macro-deck.app/macrodeck-certificate-v2.schema.json",
+  "title": "Macro Deck signing certificate (schemaVersion 2)",
+  "description": "A Macro Deck signing certificate, published as cert_<id>.json beside cert_<id>.sig. The detached .sig file carries the base64 Ed25519 signature over the exact bytes of this file, made by the Macro Deck root key, or by the issuer certificate named in issuer, so re-serializing this document - even changing its whitespace - invalidates it. An issuer certificate is itself signed by the root and never names an issuer, so a chain is at most root -> issuer -> certificate. schemaVersion 1 certificates remain valid and are always signed by the root.",
+  "$comment": "additionalProperties is deliberately left unset for forward compatibility, matching the plugin manifest schema. Verification never depends on this schema: it depends on the exact file bytes the root signature covers.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "certificateId",
+    "subject",
+    "algorithm",
+    "publicKey",
+    "keyUsage",
+    "notBefore",
+    "notAfter",
+    "issuedAt",
+    "rootKeyId"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional pointer to this schema."
+    },
+    "schemaVersion": {
+      "const": 2,
+      "description": "Adds the optional issuer and the issuer key usage to schemaVersion 1."
+    },
+    "certificateId": {
+      "type": "string",
+      "pattern": "^cert_[0-9a-f]{32}$",
+      "description": "Stable certificate identifier. A package signature names it in its keyId, which is how a signature is bound to the certificate that must verify it."
+    },
+    "subject": {
+      "type": "object",
+      "required": ["kind", "id", "name"],
+      "properties": {
+        "kind": {
+          "enum": ["creator", "organization", "service", "issuer"],
+          "description": "Who the certificate was issued to. Package signatures require 'creator' or 'organization'; 'service' belongs to Macro Deck's own registry signing; 'issuer' belongs to an issuer certificate and to nothing else."
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 450,
+          "description": "The subject's Macro Deck Platform identifier."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Human-readable subject name, shown next to a verified package."
+        }
+      }
+    },
+    "algorithm": {
+      "const": "ed25519",
+      "description": "The signature algorithm this certificate's key is for."
+    },
+    "publicKey": {
+      "type": "string",
+      "description": "The certificate's raw 32-byte Ed25519 public key, base64-encoded. Signatures made with the matching private key verify against this."
+    },
+    "keyUsage": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "enum": ["package", "registry", "issuer"]
+      },
+      "description": "What this certificate may sign, exclusively. A certificate carrying more than one usage is rejected rather than treated as permitting either. 'issuer' signs package and registry certificates and never a package or a registry manifest."
+    },
+    "notBefore": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Start of the validity window. A signature is checked against this window at the time the signature itself records, not at verification time."
+    },
+    "notAfter": {
+      "type": "string",
+      "format": "date-time",
+      "description": "End of the validity window."
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When Macro Deck issued the certificate."
+    },
+    "rootKeyId": {
+      "type": "string",
+      "pattern": "^root_[0-9a-z]{4,32}$",
+      "description": "Identifies the Macro Deck root key this certificate chains to: the key that signed it, or the key that signed its issuer, so a rotated root can be told apart from the current one. A certificate names the same rootKeyId as its issuer."
+    },
+    "issuer": {
+      "type": "string",
+      "pattern": "^cert_[0-9a-f]{32}$",
+      "description": "The certificateId of the issuer certificate that signed this certificate. Absent when the root signed it directly. A certificate's validity window lies inside its issuer's."
+    }
+  }
+}

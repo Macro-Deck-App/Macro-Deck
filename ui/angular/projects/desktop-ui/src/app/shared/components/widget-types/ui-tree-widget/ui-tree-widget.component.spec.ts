@@ -4,7 +4,7 @@ import { EMPTY, Observable } from 'rxjs';
 
 import { UiTreeWidgetComponent } from './ui-tree-widget.component';
 import {
-  UiSessionHandle, UiSessionOpenRequest, UiSessionRejection, UiSessionService,
+  UiSessionHandle, UiSessionOpenRequest, UiSessionOpenRequestSource, UiSessionRejection, UiSessionService,
 } from '../../../services/ui-session.service';
 import { ApiService, ConnectionState } from '../../../transport';
 import { HOST_URL_RESOLVER } from '../../../transport/host-url';
@@ -87,8 +87,8 @@ describe('UiTreeWidgetComponent', () => {
     connectionState = signal<ConnectionState>('connected');
 
     const fakeUiSessions = {
-      open: (request: UiSessionOpenRequest): UiSessionHandle => {
-        opens.push(request);
+      open: (source: UiSessionOpenRequestSource): UiSessionHandle => {
+        opens.push(typeof source === 'function' ? source() : source);
         const handle = new FakeUiSessionHandle();
         handles.push(handle);
         return handle;

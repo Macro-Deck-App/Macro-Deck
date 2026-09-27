@@ -60,7 +60,8 @@ internal sealed class CallbackFakeVariableService : IVariableService
 		string? scopeRefId,
 		DomainVariableType type,
 		object? initialValue,
-		int? decimalPlaces)
+		int? decimalPlaces,
+		VariableFileSource? fileSource = null)
 		=> throw new NotSupportedException();
 
 	public Task<Result<VariableEntity, VariableError>> SetValue(Guid id,
@@ -69,7 +70,8 @@ internal sealed class CallbackFakeVariableService : IVariableService
 
 	public Task<Result<VariableEntity, VariableError>> UpdateUserVariable(Guid id,
 		string? name,
-		int? decimalPlaces)
+		int? decimalPlaces,
+		VariableFileSource? fileSource = null)
 		=> throw new NotSupportedException();
 
 	public Task<Result<VariableError>> DeleteUserVariable(Guid id) => throw new NotSupportedException();

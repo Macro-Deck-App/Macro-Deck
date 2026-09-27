@@ -6,11 +6,14 @@ internal sealed class RecordingMediator : IMediator
 {
 	public List<object> Published { get; } = new();
 
+	public Action<object>? BeforePublish { get; set; }
+
 	public ValueTask Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
 		where TNotification : INotification
 	{
 		if (notification is not null)
 		{
+			BeforePublish?.Invoke(notification);
 			Published.Add(notification);
 		}
 

@@ -45,7 +45,9 @@ UiEventHandler.On(UiComponentEvents.Reveal, e =>
 }),
 ```
 
-`UiEventData` offers `TryGetString`, `TryGetBoolean`, `TryGetDouble` and the verbatim `Raw` JSON. A payload is
+`UiEventData` offers `TryGetString`, `TryGetBoolean`, `TryGetDouble` and the verbatim `Raw` JSON, plus
+`TryGetPointerDown`, `TryGetPointerSamples`, `TryGetPointerUp` and `TryGetTap` for the
+[pointer family](/ui/components/modifier/#pointer-streams-and-taps). A payload is
 unvalidated client data, so a getter for the wrong JSON kind returns `false` rather than throwing. Read state
 with `Peek()` inside a handler so the handler does not subscribe to it.
 
@@ -141,8 +143,13 @@ hidden one keeps and submits its value. See [Conditional content](/ui/concepts/s
 | `swipe` | `UiComponentEvents.Swipe` | any node | On release, after a quick travel along one axis. | `"left"`, `"right"`, `"up"` or `"down"` |
 | `pinch` | `UiComponentEvents.Pinch` | any node | While two pointers move. At most ten a second. | The scale since the start, a number |
 | `pinch-end` | `UiComponentEvents.PinchEnd` | any node | Once, when the pinch ends; not if the node left the tree or became disabled meanwhile. | As `pinch`, the final scale |
+| `pointer-down` | `UiComponentEvents.PointerDown` | any node | A finger, pen or primary mouse button went down on the node. | `{"id","x","y","t","width","height"}`, read with `TryGetPointerDown` |
+| `pointer-move` | `UiComponentEvents.PointerMove` | any node | Pointers moved. At most every 16 ms, apart from the waiting samples sent at once before any other event of the family; a newer one may replace one still waiting to be delivered. | `{"samples":[{"id","x","y","t"}, ...]}`, read with `TryGetPointerSamples` |
+| `pointer-up` | `UiComponentEvents.PointerUp` | any node | A pointer lifted or was cancelled. One per `pointer-down` while the node still declares it, is enabled and is in the tree. | `{"id","x","y","t"}`, plus `"cancelled":true`, read with `TryGetPointerUp` |
+| `tap` | `UiComponentEvents.Tap` | any node | After the last `pointer-up` of a quick touch that did not move, with one or more fingers. | `{"pointers":n}`, read with `TryGetTap` |
 
-The thresholds and which of two nested nodes gets a gesture are on [Modifier](/ui/components/modifier/#gestures).
+The thresholds and which of two nested nodes gets a gesture are on [Modifier](/ui/components/modifier/#gestures),
+and the pointer family's rules on [Pointer streams and taps](/ui/components/modifier/#pointer-streams-and-taps).
 
 Configuration inputs use `change` from `UiConfigEvents`. An action list that lets the user adopt a provider
 action also raises `provide`; see [Widget configuration](/ui/views/widget-configuration/#letting-the-user-adopt-a-provider-action). See the [component reference](/ui/components/) for

@@ -21,6 +21,8 @@ internal sealed class DirectoryPackageEntrySource : IPackageEntrySource
 
 	public IReadOnlyList<PackageEntry> Entries { get; }
 
+	public int RawEntryCount => Entries.Count;
+
 	public static DirectoryPackageEntrySource Open(string rootDirectory)
 	{
 		var root = Path.GetFullPath(rootDirectory);

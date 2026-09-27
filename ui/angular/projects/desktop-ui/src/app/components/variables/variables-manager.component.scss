@@ -132,7 +132,8 @@
 }
 
 .vars-type-badge,
-.vars-classification {
+.vars-classification,
+.vars-file-badge {
   @include ds.badge;
   border-radius: var(--radius-sm);
   text-transform: uppercase;
@@ -160,6 +161,11 @@
 .vars-classification.class-widget {
   background-color: var(--type-widget-bg);
   color: var(--type-widget-fg);
+}
+
+.vars-file-badge {
+  background-color: var(--type-resource-bg);
+  color: var(--type-resource-fg);
 }
 
 .read-only-icon {

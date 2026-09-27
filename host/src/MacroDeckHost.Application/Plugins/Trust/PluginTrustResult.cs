@@ -30,9 +30,16 @@ public sealed record PluginTrustResult
 /// <summary>Verifies an on-disk, already-extracted plugin tree - whether it is staged under a temporary
 /// install directory or already promoted to <c>plugins/&lt;id&gt;/versions/&lt;version&gt;/</c>. Installation
 /// and launch both evaluate the identical extracted bytes through this one method, so the two can never
-/// disagree about what "trusted" means.</summary>
+/// disagree about the signature; only admitting new bytes also consults revocation.</summary>
 public interface IPluginTrustEvaluator
 {
 	Task<PluginTrustResult> EvaluateInstalledAsync(string versionDirectory,
+		PluginRevocationCheck revocationCheck,
 		CancellationToken cancellationToken = default);
+}
+
+public enum PluginRevocationCheck
+{
+	Check,
+	Skip
 }

@@ -4,6 +4,7 @@ using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Application.Ui.Transport.Messages.Variables;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Localization;
 
@@ -14,11 +15,13 @@ public class UpdateVariableRequestMessageHandler
 {
 	private readonly IVariableService _service;
 	private readonly IHostLockState _lockState;
+	private readonly VariableRegistry _registry;
 
-	public UpdateVariableRequestMessageHandler(IVariableService service, IHostLockState lockState)
+	public UpdateVariableRequestMessageHandler(IVariableService service, IHostLockState lockState, VariableRegistry registry)
 	{
 		_service = service;
 		_lockState = lockState;
+		_registry = registry;
 	}
 
 	public async ValueTask<UpdateVariableResponse> Handle(
@@ -61,9 +64,12 @@ public class UpdateVariableRequestMessageHandler
 
 		// Definition first: a rename the user asked for in the same request must survive a value write that
 		// is only applied by the owner and reported back later.
-		if (request.Name is not null || request.DecimalPlaces is not null)
+		if (request.Name is not null || request.DecimalPlaces is not null || request.FileSource is not null)
 		{
-			var definition = await _service.UpdateUserVariable(id, request.Name, request.DecimalPlaces);
+			var definition = await _service.UpdateUserVariable(id,
+				request.Name,
+				request.DecimalPlaces,
+				VariableDtoMapper.FileSourceFromWire(request.FileSource));
 			if (!definition.Success || definition.Data is null)
 			{
 				return Failed(definition.Error!.Value, definition.ErrorMessage, entity.OwnerIntegrationId);
@@ -87,7 +93,7 @@ public class UpdateVariableRequestMessageHandler
 		return new UpdateVariableResponse
 		{
 			Success = true,
-			Variable = VariableDtoMapper.ToDto(current, true, null)
+			Variable = VariableDtoMapper.ToDto(current, _registry.IsAvailable(current.Id), null)
 		};
 	}
 

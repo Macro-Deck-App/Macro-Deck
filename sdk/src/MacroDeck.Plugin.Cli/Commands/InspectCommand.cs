@@ -1,5 +1,6 @@
 using System.CommandLine;
 using System.Text.Json;
+using MacroDeck.Plugin.Cli.IconPacks;
 using MacroDeck.Plugin.Cli.Manifests;
 using MacroDeck.Plugin.Packaging.Artifacts;
 using MacroDeck.Plugin.Packaging.Manifest;
@@ -99,7 +100,8 @@ internal static class InspectCommand
 			inspection.TotalUncompressedBytes,
 			fileInfo.Length,
 			presentEntryNames.Count > 0 ? presentEntryNames : null,
-			"artifact");
+			"artifact",
+			BundledIconPackInspection.InspectArtifact(manifest, artifactPath));
 
 		foreach (var warning in report.Warnings)
 		{
@@ -152,7 +154,8 @@ internal static class InspectCommand
 			totalBytes,
 			archiveBytes: null,
 			presentEntryNames,
-			"directory");
+			"directory",
+			BundledIconPackInspection.InspectDirectory(manifest, versionDirectory));
 
 		foreach (var warning in report.Warnings)
 		{

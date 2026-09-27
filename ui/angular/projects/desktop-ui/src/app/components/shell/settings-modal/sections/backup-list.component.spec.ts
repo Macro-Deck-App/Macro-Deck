@@ -37,6 +37,7 @@ describe('BackupListComponent', () => {
     backups: BackupSummary[],
     operation: GetBackupStatusResponse | null = null,
     pendingRestore: PendingRestoreSummary | null = null,
+    canMutate = true,
   ): void {
     backupServiceSpy = jasmine.createSpyObj<BackupService>(
       'BackupService', ['loadBackups', 'downloadBackup', 'commitRestore', 'cancelRestore']);
@@ -48,7 +49,8 @@ describe('BackupListComponent', () => {
     Object.defineProperty(backupServiceSpy, 'loadError', { value: signal(null) });
     Object.defineProperty(backupServiceSpy, 'operation', { value: operationSignal });
     Object.defineProperty(backupServiceSpy, 'pendingRestore', { value: pendingRestoreSignal });
-    Object.defineProperty(backupServiceSpy, 'canMutate', { value: signal(true) });
+    Object.defineProperty(backupServiceSpy, 'canMutate', { value: signal(canMutate) });
+    Object.defineProperty(backupServiceSpy, 'downloading', { value: signal(new Set<string>()) });
 
     toastSpy = jasmine.createSpyObj<ToastService>('ToastService', ['show']);
 
@@ -234,17 +236,53 @@ describe('BackupListComponent', () => {
     expect(banner.querySelector('.bl-pending-cancel')).toBeTruthy();
   });
 
-  it('emits restoreRequested only for a backup that can be decrypted here', () => {
+  it('lets a backup from another installation be restored, since restoring asks for its recovery key', () => {
     configure([backup('a', { decryptableLocally: false }), backup('b', { decryptableLocally: true })]);
     fixture = create();
     const spy = jasmine.createSpy('restoreRequested');
     fixture.componentInstance.restoreRequested.subscribe(spy);
 
     fixture.componentInstance.restore(fixture.componentInstance.backups()[0]);
-    expect(spy).not.toHaveBeenCalled();
-
     fixture.componentInstance.restore(fixture.componentInstance.backups()[1]);
-    expect(spy).toHaveBeenCalledWith(fixture.componentInstance.backups()[1]);
+
+    expect(spy.calls.allArgs()).toEqual([
+      [fixture.componentInstance.backups()[0]],
+      [fixture.componentInstance.backups()[1]],
+    ]);
+  });
+
+  it('restores nothing while another backup operation is running', () => {
+    configure([backup('a', { decryptableLocally: false })], null, null, false);
+    fixture = create();
+    const spy = jasmine.createSpy('restoreRequested');
+    fixture.componentInstance.restoreRequested.subscribe(spy);
+
+    fixture.componentInstance.restore(fixture.componentInstance.backups()[0]);
+
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('tells where a downloaded backup was saved', async () => {
+    configure([backup('a')]);
+    backupServiceSpy.downloadBackup.and.resolveTo({ status: 'saved', path: '/Users/me/Desktop/a.macroDeckBackup' });
+    fixture = create();
+
+    await fixture.componentInstance.download(fixture.componentInstance.backups()[0]);
+
+    expect(backupServiceSpy.downloadBackup).toHaveBeenCalledWith(fixture.componentInstance.backups()[0]);
+    expect(toastSpy.show).toHaveBeenCalledWith('Backup saved', jasmine.objectContaining({
+      detail: '/Users/me/Desktop/a.macroDeckBackup', variant: 'success',
+    }));
+  });
+
+  it('stays quiet when the save dialog is cancelled', async () => {
+    configure([backup('a')]);
+    backupServiceSpy.downloadBackup.and.resolveTo({ status: 'canceled' });
+    fixture = create();
+
+    await fixture.componentInstance.download(fixture.componentInstance.backups()[0]);
+
+    expect(toastSpy.show).not.toHaveBeenCalled();
   });
 
   it('emits deleteRequested without calling the API itself', () => {

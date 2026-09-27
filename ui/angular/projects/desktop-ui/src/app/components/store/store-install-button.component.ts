@@ -84,6 +84,11 @@ export class StoreInstallButtonComponent {
     const testBuild = !!item.installedTestBuild
       && (item.installState === 'Installed' || item.installState === 'UpdateAvailable');
     const returnedToStore = op?.kind !== 'TestInstall' && op?.version === item.latestVersion;
+    const live = !!op && op.state !== 'Completed' && op.state !== 'Failed' && op.state !== 'Cancelled';
+    if (item.withdrawal && this.isInstalled() && !live) {
+      return 'installed';
+    }
+
     if (op && !(testBuild && op.state === 'Completed' && !returnedToStore)) {
       switch (op.state) {
         case 'Queued': return 'queued';
@@ -119,11 +124,16 @@ export class StoreInstallButtonComponent {
       return 'unavailable';
     }
 
+    // A downgrade must be confirmed first, and only the detail page, which passes a target version, asks.
+    const leavesWithdrawnVersion = !!this.targetVersion() && !!item.installedVersionWithdrawal;
     if (this.targetsLatest()) {
       switch (item.installState) {
         case 'NotInstalled': return 'install';
         case 'UpdateAvailable': return 'update';
-        default: return 'installed';
+        default:
+          if (!leavesWithdrawnVersion) {
+            return 'installed';
+          }
       }
     }
 

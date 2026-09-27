@@ -76,6 +76,7 @@ runtimes/win-x64/MyPlugin.exe
 runtimes/osx-arm64/MyPlugin
 runtimes/linux-x64/MyPlugin
 assets/icon.png
+icon-packs/logos.macroDeckIconPack
 ```
 
 ```json
@@ -88,8 +89,10 @@ assets/icon.png
 
 - Each target's output is staged under the directory its entrypoint declares, so identically named macOS
   and Linux executables do not overwrite each other.
-- Besides that output and `manifest.json`, the package holds only the file the manifest's `icon` names and
-  whatever the recipe's `include` lists, each at its project-relative path.
+- Besides that output and `manifest.json`, the package holds only the file the manifest's `icon` names, the
+  pack files its [`bundledIconPacks`](/reference/manifest/#bundled-icon-packs) declare, and whatever the
+  recipe's `include` lists, each at its project-relative path. Bundled packs are listed in `files[]` like
+  any other payload file, so the signature covers them.
 - An `include` entry is a file or directory relative to the project root and must stay inside it; one that
   does not exist fails with `build-config-invalid`.
 - Never packaged, not even inside an included directory: project and source files (`*.csproj`, `*.sln`,

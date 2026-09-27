@@ -1,0 +1,82 @@
+name: Account and Creator Portal
+description: Report a problem with or suggest an improvement to your Macro Deck account, sign-in or the Creator Portal
+title: "[Platform] "
+labels: ["area:platform", "status:needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for the Macro Deck account (sign-up, sign-in, two-factor authentication, profile) and for the Creator Portal (Projects, Store listings, builds, versions, reviews and testers). For a problem inside the Macro Deck app itself, use **Bug report** instead.
+
+        This tracker is public. Never post passwords, recovery codes, tokens, license keys or email addresses here. If you are locked out of your account or found a security problem, contact us privately on the [Discord community](https://discord.macro-deck.app) instead.
+
+        Creator Portal documentation: https://docs.macro-deck.app/creator-portal/
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part?
+      options:
+        - Sign-up or sign-in
+        - Signing in from the Macro Deck app
+        - Two-factor authentication or account recovery
+        - Account and profile settings
+        - Creator Portal - Projects and Store listing
+        - Creator Portal - Plugin builds and release workflow
+        - Creator Portal - Icon pack upload
+        - Creator Portal - Review and release
+        - Creator Portal - Testers
+        - Not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What is this about?
+      options:
+        - Something is not working
+        - An idea or improvement
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened, or what would you like?
+      description: For a problem, tell us what went wrong and what you expected instead. For an idea, tell us what you want to do and how this would help.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: How can we reproduce it?
+      description: A short list of steps is enough. Leave this empty for an idea or if you are not sure.
+
+  - type: input
+    id: project
+    attributes:
+      label: Creator Portal Project
+      description: The Project's name or Store link, if this is about a specific Project. Leave this empty otherwise.
+      placeholder: My OBS Plugin
+
+  - type: input
+    id: time
+    attributes:
+      label: When did it happen?
+      description: Date and time with time zone. This helps us find the request in our logs.
+      placeholder: 2026-09-26 14:30 CEST
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and operating system
+      description: For a sign-in from the app, give the Macro Deck version instead.
+      placeholder: Firefox 143 on Windows 11, Macro Deck 3.0.0-beta.4 on macOS 26
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else?
+      description: Screenshots, error messages, links to a failed release workflow run or related issues are welcome, but optional. Please remove anything personal before you upload them.

@@ -155,6 +155,16 @@
       "x-macrodeck-requirement": "recommended",
       "description": "Icon packs this plugin would like available. Always Advisory regardless of the optional flag, because icon packs are identified by a database id and carry no stable reverse-domain id yet, so resolution can never succeed today."
     },
+    "bundledIconPacks": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "$ref": "#/$defs/bundledIconPack"
+      },
+      "$comment": "The reader rejects a duplicated 'key' and a duplicated 'path' (case-insensitive) within this array. Uniqueness is by one member, not by the whole object, so uniqueItems cannot express it here.",
+      "x-macrodeck-requirement": "recommended",
+      "description": "Icon packs this plugin ships inside its own artifact. The host imports each one as a read-only pack owned by the plugin, identified by the plugin id and the entry's key, and keeps it in step with the plugin on install, update and uninstall. Separate from iconPacks. A host that does not know this field installs the plugin without the packs."
+    },
     "files": {
       "type": "array",
       "items": {
@@ -495,6 +505,26 @@
         }
       }
     },
+    "bundledIconPack": {
+      "type": "object",
+      "required": ["key", "path"],
+      "description": "One icon pack shipped inside the plugin artifact.",
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$",
+          "x-macrodeck-requirement": "runtime",
+          "description": "Identifies the pack within this plugin, stable across versions. An update that keeps the key replaces the installed pack and keeps its icons by name. Lowercase letters, digits and inner hyphens, at most 64 characters."
+        },
+        "path": {
+          "type": "string",
+          "pattern": "\\.[mM][aA][cC][rR][oO][dD][eE][cC][kK][iI][cC][oO][nN][pP][aA][cC][kK]$",
+          "$comment": "The reader applies the same path rule as files[].path: forward slashes only, relative, no '..' segment. Existence on disk is not checked by the reader.",
+          "x-macrodeck-requirement": "runtime",
+          "description": "Forward-slash path to the .macroDeckIconPack file, relative to the artifact root. Must also be listed in files, or the host skips the pack."
+        }
+      }
+    },
     "fileDigest": {
       "type": "object",
       "required": ["path", "sha256", "size"],
@@ -625,11 +655,19 @@
       "iconPacks": [
         { "id": "com.example.icons", "versionRange": ">=1.0.0", "optional": true }
       ],
+      "bundledIconPacks": [
+        { "key": "logos", "path": "icon-packs/logos.macroDeckIconPack" }
+      ],
       "files": [
         {
           "path": "FullPlugin.exe",
           "sha256": "sha256:b512f83e009ab0fcdda47e89a16013fa8bdf0baeb4b10e3343fc7ceca3cf6f3a",
           "size": 204800
+        },
+        {
+          "path": "icon-packs/logos.macroDeckIconPack",
+          "sha256": "sha256:4f1c9d2b7e0a3c5d8f6b1e2a9c7d4b0e3f5a8c1d6e2b9f7a0c4d3e8b1f6a2c5d",
+          "size": 51200
         }
       ],
       "signature": {

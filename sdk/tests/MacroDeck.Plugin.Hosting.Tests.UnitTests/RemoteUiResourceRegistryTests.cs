@@ -4,6 +4,7 @@ using MacroDeck.Plugin.Hosting.Integrations.HostApis;
 using MacroDeck.Plugin.Hosting.Transport;
 using MacroDeck.Plugin.Protocol.Assets;
 using MacroDeck.Plugin.Protocol.Callbacks;
+using MacroDeck.Plugin.Protocol.Callbacks.IconPacks;
 using MacroDeck.Plugin.Protocol.Callbacks.Ui;
 using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Errors;
@@ -142,6 +143,91 @@ public class RemoteUiResourceRegistryTests
 		await registry.RemoveAsync("photo");
 
 		Assert.That(host.Removed, Is.EqualTo(new[] { "photo" }));
+	}
+
+	[Test]
+	public async Task A_bundled_icon_is_looked_up_by_key_and_name_and_answers_the_hosts_handle_without_an_upload()
+	{
+		var host = new FakeIconHost
+		{
+			Handle = new UiResourceHandleDto
+			{
+				ResourceId = "app.macro-deck.plugin-icon.1", ContentHash = "hash-1", MediaType = "image/png",
+				ByteLength = 42,
+			}
+		};
+		var uploader = new FakeResourceHost();
+		var registry = new RemoteUiResourceRegistry(host, uploader);
+
+		var handle = await registry.GetPluginIconAsync("logos", "spotify");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.Calls,
+				Is.EqualTo((List<(string, string)>)[(HostApis.IconPacks, HostOperations.IconPacks.GetIconResource)]));
+			Assert.That(host.LastArguments, Is.EqualTo(new GetIconResourceArguments { Key = "logos", Name = "spotify" }));
+			Assert.That(handle.ResourceId, Is.EqualTo("app.macro-deck.plugin-icon.1"));
+			Assert.That(handle.ContentHash, Is.EqualTo("hash-1"));
+			Assert.That(handle.MediaType, Is.EqualTo("image/png"));
+			Assert.That(handle.ByteLength, Is.EqualTo(42));
+			Assert.That(uploader.Uploads, Is.Empty);
+		});
+	}
+
+	[TestCase(ProtocolErrorCodes.PluginIconNotFound, UiResourceErrorCode.PluginIconNotFound)]
+	[TestCase(ProtocolErrorCodes.CapabilityUnsupported, UiResourceErrorCode.Unsupported)]
+	[TestCase(ProtocolErrorCodes.AssetTooLarge, UiResourceErrorCode.Failed)]
+	[TestCase(ProtocolErrorCodes.RateLimited, UiResourceErrorCode.RateLimited)]
+	[TestCase(ProtocolErrorCodes.InternalError, UiResourceErrorCode.Failed)]
+	public void A_refused_bundled_icon_lookup_surfaces_as_its_error_code(string wireCode, UiResourceErrorCode expected)
+	{
+		var host = new FakeIconHost { RefuseWith = wireCode };
+		var registry = new RemoteUiResourceRegistry(host, new FakeResourceHost());
+
+		var exception = Assert.ThrowsAsync<UiResourceException>(() => registry.GetPluginIconAsync("logos", "spotify"));
+
+		Assert.That(exception!.ErrorCode, Is.EqualTo(expected));
+	}
+
+	[Test]
+	public void A_bundled_icon_lookup_answered_without_a_handle_fails()
+	{
+		var registry = new RemoteUiResourceRegistry(new FakeIconHost(), new FakeResourceHost());
+
+		var exception = Assert.ThrowsAsync<UiResourceException>(() => registry.GetPluginIconAsync("logos", "spotify"));
+
+		Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.Failed));
+	}
+
+	private sealed class FakeIconHost : IHostInvoker
+	{
+		public List<(string Api, string Operation)> Calls { get; } = [];
+
+		public object? LastArguments { get; private set; }
+
+		public UiResourceHandleDto? Handle { get; init; }
+
+		public string? RefuseWith { get; init; }
+
+		public Task<JsonElement?> InvokeAsync(string api,
+			string operation,
+			object? arguments,
+			CancellationToken cancellationToken)
+		{
+			Calls.Add((api, operation));
+			LastArguments = arguments;
+
+			if (RefuseWith is { } code)
+			{
+				throw HostInvocationException.CreateNonRetryable(code, "refused");
+			}
+
+			return Task.FromResult<JsonElement?>(Handle is null
+				? null
+				: JsonSerializer.SerializeToElement(Handle, PluginProtocolJson.Options));
+		}
+
+		public bool TryComplete(ProtocolEnvelope result) => false;
 	}
 
 	private sealed class FakeResourceHost : IHostInvoker, IPluginAssetUploader

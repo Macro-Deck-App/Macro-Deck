@@ -11,8 +11,22 @@ public sealed record ActionIconReference(string Type, string Reference)
 {
 	public const string IconPackType = "icon-pack";
 
+	public const string PluginIconType = "plugin-icon";
+
 	/// <summary>An icon already in the host's icon pack catalog, named by its existing id.</summary>
 	public static ActionIconReference IconPack(string reference) => new(IconPackType, reference);
+
+	/// <summary>
+	/// An icon from one of this plugin's own bundled icon packs, named by the pack's key in the manifest's
+	/// <c>bundledIconPacks</c> and the icon's name inside that pack. The host resolves it against the
+	/// calling plugin's packs only, so it can never name another plugin's icon. An unknown key or name
+	/// renders no icon, as does a host that predates bundled icon packs.
+	/// </summary>
+	/// <exception cref="ArgumentException"><paramref name="key" /> is not a bundled pack key (lowercase ASCII
+	/// letters, digits and inner hyphens, at most 64 characters), or <paramref name="name" /> is blank or
+	/// contains a slash.</exception>
+	public static ActionIconReference PluginIcon(string key, string name)
+		=> new(PluginIconType, PluginIconReferences.Format(key, name));
 }
 
 /// <summary>The bytes behind one <see cref="ActionIconSnapshot.Version" />, mirroring

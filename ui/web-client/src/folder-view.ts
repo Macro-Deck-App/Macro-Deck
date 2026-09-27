@@ -12,6 +12,7 @@ import {
 } from '@macro-deck/runtime';
 
 const NAVIGATION_HIDDEN = 'hidden';
+const MAX_REOPENS_WITHOUT_A_TREE = 3;
 
 interface OpenResponse {
   accepted?: boolean;
@@ -43,6 +44,7 @@ export class FolderView {
   private viewId = '';
   private navigation = '';
   private rejected = false;
+  private reopensWithoutTree = 0;
   private box: UiComponentBox = { width: null, height: null };
   private observer: ResizeObserver | null = null;
 
@@ -67,6 +69,26 @@ export class FolderView {
   open(folderId: string): void {
     if (folderId === this.openedFolderId) return;
     this.close();
+    this.reopensWithoutTree = 0;
+    this.request(folderId);
+  }
+
+  sessionLost(sessionId: string): void {
+    const folderId = this.openedFolderId;
+    if (sessionId !== this.sessionId || folderId === null) return;
+
+    this.dropTree();
+    this.sessionId = null;
+    if (this.reopensWithoutTree >= MAX_REOPENS_WITHOUT_A_TREE) {
+      this.rejected = true;
+      this.paint();
+      return;
+    }
+    this.reopensWithoutTree++;
+    this.request(folderId);
+  }
+
+  private request(folderId: string): void {
     this.openedFolderId = folderId;
     if (!folderId) return;
 
@@ -113,6 +135,7 @@ export class FolderView {
       return;
     }
 
+    this.reopensWithoutTree = 0;
     this.paintTree(tree);
   }
 

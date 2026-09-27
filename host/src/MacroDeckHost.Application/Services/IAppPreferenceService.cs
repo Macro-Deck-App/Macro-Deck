@@ -49,6 +49,13 @@ public record AdbSettings(
 	bool StopServerOnExit = false,
 	bool AllowPlugins = true);
 
+public record RememberedUsbDevice(string Serial, string? Name);
+
+public record NativeUsbSettings(bool Enabled, IReadOnlyList<RememberedUsbDevice> RememberedDevices)
+{
+	public IReadOnlyList<string> RememberedSerials => RememberedDevices.Select(device => device.Serial).ToList();
+}
+
 public record DeveloperSettings(bool Enabled);
 
 public record LockScreenSettings(bool Enabled);
@@ -112,6 +119,10 @@ public interface IAppPreferenceService
 		string? defaultDeviceSerial,
 		bool? stopServerOnExit,
 		bool allowPlugins);
+
+	Task<NativeUsbSettings> GetNativeUsb();
+
+	Task<NativeUsbSettings> SetNativeUsb(bool? enabled, IReadOnlyList<RememberedUsbDevice>? rememberedDevices);
 
 	Task<DeveloperSettings> GetDeveloper();
 

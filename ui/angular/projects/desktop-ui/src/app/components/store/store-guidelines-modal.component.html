@@ -1,0 +1,26 @@
+<shared-modal
+  [heading]="'macrodeck.app:Store.Guidelines.Heading' | translate"
+  size="large"
+  [style.--modal-height]="'min(48rem, 90vh)'"
+  (close)="close()">
+  <div class="guidelines">
+    @if (loading()) {
+      <p class="guidelines-status" role="status">{{ 'macrodeck:Common.Loading' | translate }}</p>
+    } @else if (loadFailed()) {
+      <div class="guidelines-failure" role="alert">
+        <p class="guidelines-status">{{ 'macrodeck.app:Store.Guidelines.Unavailable' | translate }}</p>
+        <shared-button variant="secondary" (click)="load()">
+          {{ 'macrodeck:Common.Retry' | translate }}
+        </shared-button>
+      </div>
+    } @else if (markdown(); as text) {
+      <shared-store-markdown [text]="text" />
+    }
+  </div>
+
+  <div modal-footer class="guidelines-footer">
+    <shared-button variant="secondary" (click)="close()">
+      {{ 'macrodeck:Common.Close' | translate }}
+    </shared-button>
+  </div>
+</shared-modal>

@@ -29,7 +29,8 @@ public static class IconMapper
 			IconCount = iconCount,
 			OwnerKind = owner.Kind.ToString(),
 			CanDelete = owner.CanRemove && !entity.IsReadOnly,
-			StorePackageId = owner.Kind == IconPackOwnerKind.Store ? entity.SourceId : null
+			StorePackageId = owner.Kind == IconPackOwnerKind.Store ? entity.SourceId : null,
+			OwnerName = owner.OwnerName
 		};
 
 	public static ImportIconsResponse ToImportResponse(Result<IconImportBatchEntity, IconError> result,
@@ -142,6 +143,7 @@ public static class IconMapper
 			ProcessingState = entity.ProcessingState.ToString(),
 			ProcessingError = entity.ProcessingError,
 			AvailableSizes = entity.AvailableSizes.ToList(),
+			ContentHash = IconImageVersion.Of(entity),
 			OriginalFileName = entity.OriginalFileName,
 			CreatedAt = entity.CreatedAt
 		};

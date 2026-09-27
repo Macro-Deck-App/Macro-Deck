@@ -4,7 +4,7 @@ The E2E suite runs Playwright against a staged production Macro Deck host rather
 
 Two host listeners are used deliberately:
 
-- the loopback listener is used for the trusted Admin UI and first-run setup;
+- the loopback listener is used for the trusted Admin UI and first-run setup, which the tests enter the way the desktop app does: with a loopback secret shared by the host and Playwright;
 - the public listener is used for the Web Client so authentication and reconnect behavior exercise the same boundary as a browser on another device.
 
 Every workflow run uses a fresh `MACRO_DECK_DATA_DIRECTORY` and dedicated ports. The tests run serially because the initial suite intentionally exercises one complete application lifecycle, including a real host restart and persisted state.
@@ -31,6 +31,8 @@ export MACRO_DECK_DATA_DIRECTORY="$(mktemp -d)"
 export MACRODECK_HOST_PORT=5191
 export MACRO_DECK_PORT=8192
 export MACRO_DECK_SUPERVISOR_LOG="$PWD/macro-deck-e2e-supervisor.log"
+export MACRODECK_LOOPBACK_SECRET="$(openssl rand -hex 32)"
+echo "$MACRODECK_LOOPBACK_SECRET"
 bash ./e2e/scripts/host-supervisor.sh
 ```
 
@@ -39,6 +41,7 @@ In another shell, install Playwright and run the suite:
 ```bash
 cd e2e
 export MACRO_DECK_SUPERVISOR_LOG="$PWD/../macro-deck-e2e-supervisor.log"
+export MACRODECK_LOOPBACK_SECRET=<the value printed by the first shell>
 npm install
 npx playwright install chromium
 npm test
@@ -48,4 +51,4 @@ The GitHub Actions workflow in `.github/workflows/e2e.yml` performs the same set
 
 ## Diagnostics
 
-Failed tests retain screenshots, video, and Playwright traces. Before GitHub Actions uploads those files, `scripts/redact-playwright-artifacts.py` removes the E2E password, access/refresh cookies, bearer tokens, and JWT-shaped values from text content inside the report and trace archives. If redaction fails, the diagnostics upload is skipped.
+Failed tests retain screenshots, video, and Playwright traces. Before GitHub Actions uploads those files, `scripts/redact-playwright-artifacts.py` removes the E2E password, the loopback secret and session code, access/refresh/loopback cookies, bearer tokens, and JWT-shaped values from text content inside the report and trace archives. If redaction fails, the diagnostics upload is skipped.

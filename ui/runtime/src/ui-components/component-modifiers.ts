@@ -28,3 +28,9 @@ export const UI_SWIPE_MIN_DISTANCE = 0.2;
 export const UI_SWIPE_MAX_DURATION_MS = 500;
 
 export const UI_GESTURE_THROTTLE_MS = 100;
+
+export const UI_POINTER_MOVE_INTERVAL_MS = 16;
+
+export const UI_POINTER_MOVE_MAX_SAMPLES = 256;
+
+export const UI_TAP_MAX_DURATION_MS = 400;

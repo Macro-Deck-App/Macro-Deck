@@ -119,8 +119,10 @@ installed 1.0.0  <  Store 1.1.0  ->  shown as an update
 Unlist the Project in the Creator Portal: the plugin disappears from the Store listing, installed copies
 keep working and the package id stays yours. See [Review and release](/creator-portal/review/#unlist).
 
-A plugin removed by Macro Deck is listed as removed in the signed registry. Macro Deck then stops offering
-it as an update and fails any new Store install of it.
+Macro Deck can remove a single version or the whole plugin; the signed registry lists each removed version.
+Macro Deck never installs or offers an update to a removed version and warns users who have one installed,
+with the reason and any suggested replacement. When the latest version is removed, the plugin disappears from
+the Store and cannot be installed or updated; installed copies stay under **Installed** with a warning.
 
 ## See also
 

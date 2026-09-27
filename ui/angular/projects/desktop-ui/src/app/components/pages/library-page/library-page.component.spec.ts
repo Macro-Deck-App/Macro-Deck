@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, provideZonelessChangeDetection, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, RouterOutlet, provideRouter } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -7,7 +7,6 @@ import { ApiService } from '@shared';
 import { LIBRARY_CONTENT_TYPES } from '../../../domain/library-content-type';
 import { bundledTranslator, provideLocalizationTesting } from '../../../../testing/localization-test-support';
 import { routes } from '../../../app.routes';
-import { StoreAccessService } from '../../../services/store-access.service';
 
 @Component({
   standalone: true,
@@ -32,7 +31,6 @@ describe('LibraryPageComponent', () => {
         provideZonelessChangeDetection(),
         ...provideLocalizationTesting(),
         // The shell route lives under the app shell, so mount the library subtree on its own.
-        { provide: StoreAccessService, useValue: { unlocked: signal(false) } },
         provideRouter(
           routes.find(route => route.children)!.children!
             .filter(route => route.path?.startsWith('library'))),

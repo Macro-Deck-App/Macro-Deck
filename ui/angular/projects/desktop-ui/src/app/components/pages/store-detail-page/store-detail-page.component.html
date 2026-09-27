@@ -6,6 +6,9 @@
       <shared-error-banner [message]="loadError()!" [dismissible]="false" />
     } @else if (extension(); as extension) {
       <div class="detail-inner">
+        <app-store-community-notice />
+        <app-store-withdrawal-notice [extension]="extension" />
+
         <app-store-detail-header
           [extension]="extension"
           [operation]="operation()"
@@ -79,7 +82,9 @@
               </div>
             }
 
-            <app-store-reviews-section class="overview-block" [kind]="extension.kind" [id]="extension.id" [repository]="extension.repository ?? null" [publisher]="extension.publisher ?? null" />
+            @if (!extension.withdrawal) {
+              <app-store-reviews-section class="overview-block" [kind]="extension.kind" [id]="extension.id" [repository]="extension.repository ?? null" [publisher]="extension.publisher ?? null" />
+            }
 
             @if (historyModalOpen()) {
               <app-store-version-history-modal
@@ -209,6 +214,21 @@
                 }
               }
             </div>
+
+            @if (packageCategories().length > 0) {
+              <div class="sidebar-card">
+                <h2 class="detail-heading">{{ 'macrodeck.app:Store.Page.CategoriesHeading' | translate }}</h2>
+                <ul class="tag-list" data-testid="store-detail-categories">
+                  @for (category of packageCategories(); track category.id) {
+                    <li>
+                      <button type="button" class="tag-chip" (click)="openTag(category.id)">
+                        <span>{{ category.label }}</span>
+                      </button>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
 
             @if (tags().length > 0) {
               <div class="sidebar-card">

@@ -96,3 +96,20 @@
   flex: 1 1 auto;
   justify-content: center;
 }
+
+.seg-badge {
+  min-width: 1.125rem;
+  padding: 0 var(--space-1);
+  border-radius: 999px;
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  line-height: 1.125rem;
+  text-align: center;
+}
+
+.seg-option.active .seg-badge {
+  background-color: var(--color-on-accent);
+  color: var(--color-accent);
+}

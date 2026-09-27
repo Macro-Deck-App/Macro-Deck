@@ -1,8 +1,8 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Subject } from 'rxjs';
-import { ActionParameterType, ConfigFlowAuthorizedNotification, StartConfigFlowResponse, SubmitConfigFlowStepRequest, SubmitConfigFlowStepResponse } from '@macro-deck/runtime';
-import { ApiService } from '@shared';
+import { ActionParameterType, ConfigFlowAuthorizedNotification, StartConfigFlowResponse, SubmitConfigFlowStepRequest, SubmitConfigFlowStepResponse, UiConfigEvents, UiNode, UiNodeEvent } from '@macro-deck/runtime';
+import { ApiService, UiSessionHandle, UiSessionRejection, UiSessionService } from '@shared';
 import { ConfigFlowService } from './config-flow.service';
 import { ExternalLinkService } from './external-link.service';
 
@@ -288,5 +288,129 @@ describe('ConfigFlowService', () => {
 
     expect(submitted[0].values['password']).toBeUndefined();
     expect(submitted[0].clearedSecretFields).toEqual(['password']);
+  });
+});
+
+class FakeFlowSession implements UiSessionHandle {
+  readonly root = signal<UiNode | null>(null);
+  readonly revision = signal(0);
+  readonly rejection = signal<UiSessionRejection | null>(null);
+  readonly generation = signal(1);
+  readonly reopenReason = signal<string | null>(null);
+  readonly sent: UiNodeEvent[] = [];
+
+  send(event: UiNodeEvent): void {
+    this.sent.push(event);
+  }
+
+  closed = false;
+
+  close(): void {
+    this.closed = true;
+  }
+
+  replace(reason: string): void {
+    this.reopenReason.set(reason);
+    this.generation.update(value => value + 1);
+  }
+}
+
+describe('ConfigFlowService with a tree-based flow', () => {
+  let service: ConfigFlowService;
+  let session: FakeFlowSession;
+
+  const tree = (value: string): UiNode => ({ id: 'root', type: 'ui.config-stack', properties: { value } } as UiNode);
+
+  beforeEach(async () => {
+    session = new FakeFlowSession();
+    const api = {
+      startConfigFlow: (): Promise<StartConfigFlowResponse> => Promise.resolve({
+        supported: true,
+        flowId: 'flow-1',
+        supportsConfigUi: true,
+        step: {
+          stepId: 'connection',
+          fields: [
+            { name: 'host', type: ActionParameterType.String, description: '', required: true },
+            { name: 'port', type: ActionParameterType.String, description: '', required: false },
+          ],
+        },
+      }),
+      onNotification: () => new Subject().asObservable(),
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        ConfigFlowService,
+        { provide: ApiService, useValue: api },
+        { provide: ExternalLinkService, useValue: { open: () => undefined } },
+        { provide: UiSessionService, useValue: { open: () => session } },
+      ],
+    });
+    service = TestBed.inject(ConfigFlowService);
+    await service.start('acme');
+    session.root.set(tree('first'));
+    TestBed.tick();
+  });
+
+  function edit(name: string, value: unknown): void {
+    service.sendTreeEvent({ nodeId: name, name: UiConfigEvents.Change, data: value });
+    service.setValue(name, value);
+  }
+
+  function changesSent(): UiNodeEvent[] {
+    return session.sent.filter(event => event.name === UiConfigEvents.Change);
+  }
+
+  it('gives a replaced session the values the user changed, once its own tree arrives', () => {
+    edit('host', 'studio.local');
+    session.sent.length = 0;
+
+    session.replace('PROVIDER_RELOADED');
+    TestBed.tick();
+    expect(changesSent()).toEqual([]);
+
+    session.root.set(tree('second'));
+    TestBed.tick();
+
+    expect(changesSent()).toEqual([{ nodeId: 'host', name: UiConfigEvents.Change, data: 'studio.local' }]);
+  });
+
+  it('replays nothing the user did not change', () => {
+    session.replace('PROVIDER_RELOADED');
+    TestBed.tick();
+    session.root.set(tree('second'));
+    TestBed.tick();
+
+    expect(changesSent()).toEqual([]);
+  });
+
+  it('does not replay into a session that replaces one the replay itself made fault', () => {
+    edit('host', 'studio.local');
+    session.replace('PROVIDER_RELOADED');
+    TestBed.tick();
+    session.root.set(tree('second'));
+    TestBed.tick();
+    session.sent.length = 0;
+
+    session.replace('PROVIDER_FAULTED');
+    TestBed.tick();
+    session.root.set(tree('third'));
+    TestBed.tick();
+
+    expect(changesSent()).toEqual([]);
+  });
+
+  it('replays again after every reload', () => {
+    edit('host', 'studio.local');
+    for (const name of ['second', 'third']) {
+      session.replace('PROVIDER_RELOADED');
+      TestBed.tick();
+      session.root.set(tree(name));
+      TestBed.tick();
+    }
+
+    expect(changesSent().filter(event => event.data === 'studio.local').length).toBe(3);
   });
 });

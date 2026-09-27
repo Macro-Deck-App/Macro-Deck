@@ -24,7 +24,8 @@ public sealed class WidgetVariableCloner : IWidgetVariableCloner
 			.Select(variable => new WidgetVariableSnapshot(variable.Name,
 				variable.Type,
 				variable.Value,
-				variable.DecimalPlaces))
+				variable.DecimalPlaces,
+				variable.FileSource))
 			.ToList();
 	}
 
@@ -51,7 +52,8 @@ public sealed class WidgetVariableCloner : IWidgetVariableCloner
 					scopeRefId,
 					variable.Type,
 					variable.Value,
-					variable.DecimalPlaces);
+					variable.DecimalPlaces,
+					variable.FileSource);
 				if (!result.Success)
 				{
 					_logger.Warning(

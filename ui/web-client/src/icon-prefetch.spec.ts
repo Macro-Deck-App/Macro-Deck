@@ -107,6 +107,15 @@ describe('IconPrefetch', () => {
     expect(sizesOf(urls)).toEqual([256]);
   });
 
+  it('never asks for the unversioned URL an older host cached as immutable', () => {
+    const folder = makeFolder('f', [button('w1', 'f')]);
+
+    const urls = prefetch([folder], null);
+
+    expect(urls.length).toBe(1);
+    expect(new URL(urls[0]).searchParams.has('v')).toBeTrue();
+  });
+
   it('still excludes the current folder', () => {
     const current = makeFolder('current', [button('w1', 'current', 'visible-anyway')]);
     const other = makeFolder('other', [button('w2', 'other', 'wanted')], { cols: 5, rows: 3, spacing: 12 });

@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
+using MacroDeck.Plugin.Cli.IconPacks;
 using MacroDeck.Plugin.Packaging.Artifacts;
 using MacroDeck.Plugin.Packaging.Manifest;
 
@@ -71,6 +72,7 @@ internal static class InspectionReportWriter
 		WriteRelationships(console, "Dependencies", report.Dependencies);
 		WriteRelationships(console, "Conflicts", report.Conflicts);
 		WriteRelationships(console, "Icon packs", report.IconPacks);
+		WriteBundledIconPacks(console, report.BundledIconPacks);
 
 		console.WriteLine();
 
@@ -136,6 +138,18 @@ internal static class InspectionReportWriter
 		}
 	}
 
+	private static void WriteBundledIconPacks(CliConsole console, IReadOnlyList<InspectedBundledIconPack> packs)
+	{
+		console.WriteLine();
+		console.WriteLine(packs.Count == 0 ? "Bundled icon packs: (none declared)" : "Bundled icon packs:");
+
+		foreach (var pack in packs)
+		{
+			var unlisted = pack.ListedInFiles == false ? " (not in files)" : string.Empty;
+			console.WriteLine($"  {pack.Key}: {pack.Path} - {IconPackCommand.DescribePack(pack)}{unlisted}");
+		}
+	}
+
 	private static string DescribeAi(PackageAiDeclaration? ai)
 	{
 		if (ai is null)
@@ -182,6 +196,7 @@ internal static class InspectionReportWriter
 			dependencies = report.Dependencies,
 			conflicts = report.Conflicts,
 			iconPacks = report.IconPacks,
+			bundledIconPacks = report.BundledIconPacks,
 			compatibility = report.Compatibility,
 			signature = report.Signature,
 			entryCount = report.EntryCount,

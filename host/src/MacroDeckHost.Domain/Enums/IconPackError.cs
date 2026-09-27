@@ -7,5 +7,6 @@ public enum IconPackError
 	ReadOnly,
 	DefaultPackProtected,
 	InternalError,
-	OwnedBySource
+	OwnedBySource,
+	TooLarge
 }

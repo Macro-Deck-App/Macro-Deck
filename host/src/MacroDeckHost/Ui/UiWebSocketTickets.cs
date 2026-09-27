@@ -8,7 +8,8 @@ namespace MacroDeckHost.Ui;
 public enum UiWebSocketListener
 {
 	TrustedLoopback,
-	Public
+	Public,
+	SignedInLoopback
 }
 
 public sealed record UiWebSocketTicket(string Value);
@@ -117,6 +118,12 @@ public sealed class UiWebSocketTickets(TimeProvider timeProvider) : IUiWebSocket
 		if (HostEndpoints.IsPublicPort(context.Connection.LocalPort))
 		{
 			listener = UiWebSocketListener.Public;
+			return true;
+		}
+
+		if (LoopbackConnection.IsLoopbackTransport(context))
+		{
+			listener = UiWebSocketListener.SignedInLoopback;
 			return true;
 		}
 

@@ -40,6 +40,8 @@ public interface IStoreReviewService
 		Guid reviewId,
 		ReportStoreContentRequest request,
 		CancellationToken cancellationToken);
+
+	Task<GetStoreCreatorGuidelinesResponse> GetCreatorGuidelines(CancellationToken cancellationToken);
 }
 
 public sealed class StoreReviewService : IStoreReviewService
@@ -386,6 +388,14 @@ public sealed class StoreReviewService : IStoreReviewService
 
 		return ReportResult(
 			await _platform.ReportReview(report.PackageId, reviewId, report.Category, report.Detail, cancellationToken));
+	}
+
+	public async Task<GetStoreCreatorGuidelinesResponse> GetCreatorGuidelines(CancellationToken cancellationToken)
+	{
+		var result = await _platform.GetCreatorGuidelines(cancellationToken);
+		return result.Success
+			? new GetStoreCreatorGuidelinesResponse { Available = true, Markdown = result.Value }
+			: new GetStoreCreatorGuidelinesResponse { Available = false };
 	}
 
 	public static string ErrorCode(StorePlatformFailure failure) => failure switch

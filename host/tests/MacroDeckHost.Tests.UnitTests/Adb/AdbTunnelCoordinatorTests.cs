@@ -376,15 +376,53 @@ public class AdbTunnelCoordinatorTests
 		Assert.That(tunnel?.Established, Is.True, "the back-off has to expire, not become permanent");
 	}
 
+	[Test]
+	public async Task A_device_a_usb_link_without_debugging_owns_gets_no_reverse_tunnel_until_the_link_ends()
+	{
+		var native = new NativeSerials();
+		var (coordinator, runner, _) = Create(publicPort: 8193, nativeUsb: native);
+		var first = await coordinator.ReconcileAsync([AuthorizedDevice()], CancellationToken.None);
+
+		native.Serials.Add(Serial);
+		var calls = runner.Invocations.Count;
+		var whileNative = await coordinator.ReconcileAsync([AuthorizedDevice()], CancellationToken.None);
+		var callsWhileNative = runner.Invocations.Count - calls;
+
+		native.Serials.Clear();
+		calls = runner.Invocations.Count;
+		var afterwards = await coordinator.ReconcileAsync([AuthorizedDevice()], CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(first[Serial].Established, Is.True);
+			Assert.That(whileNative.ContainsKey(Serial), Is.False);
+			Assert.That(callsWhileNative, Is.Zero);
+			Assert.That(afterwards[Serial].Established, Is.True);
+			Assert.That(runner.Invocations.Count - calls, Is.GreaterThan(0),
+				"the established tunnel from before the switch must not be trusted after it");
+		});
+	}
+
+	private sealed class NativeSerials : MacroDeckHost.Application.Usb.INativeUsbSerials
+	{
+		public HashSet<string> Serials { get; } = [];
+
+		public bool IsNative(string serial) => Serials.Contains(serial);
+	}
+
 	private (AdbTunnelCoordinator Coordinator, FakeAdbProcessRunner Runner, AdbOwnershipMarker Marker) Create(
 		int publicPort,
-		int? loopbackPort = null)
+		int? loopbackPort = null,
+		MacroDeckHost.Application.Usb.INativeUsbSerials? nativeUsb = null)
 	{
 		var runner = new FakeAdbProcessRunner();
 		var marker = new AdbOwnershipMarker(_paths, new LoggerConfiguration().CreateLogger());
 		var listenerState = new FakeHostListenerState { PublicPort = publicPort, LoopbackPort = loopbackPort };
-		var coordinator
-			= new AdbTunnelCoordinator(runner, listenerState, marker, new LoggerConfiguration().CreateLogger());
+		var coordinator = new AdbTunnelCoordinator(runner,
+			listenerState,
+			marker,
+			new LoggerConfiguration().CreateLogger(),
+			nativeUsb);
 		coordinator.SetExecutablePath(ExecutablePath);
 		return (coordinator, runner, marker);
 	}

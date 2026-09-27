@@ -81,6 +81,15 @@ keeps its credentials), `MACRO_DECK_PLUGIN_PAIRING` (`PairingEnabled`, default `
 `MACRO_DECK_PLUGIN_PAIRING_TIMEOUT` (`PairingTimeout`). `HostUrl` defaults to `http://127.0.0.1:8193`. All
 of `PluginHostOptions` binds from `MacroDeck:Plugin`, so `appsettings.json` and the command line work too.
 
+`macrodeck-plugin run` additionally sets `MACRO_DECK_PLUGIN_BUNDLED_ICON_PACKS` (`BundledIconPacks`) for a
+self-registering launch against a real host: `sync` brings the host's copy of the plugin's
+[bundled icon packs](/reference/manifest/#bundled-icon-packs) in line when the session starts, `watch`
+(with `run --watch`) also resyncs whenever `icon-packs/` or the manifest's `bundledIconPacks` change. The
+supervisor never sets it: an installed plugin's bundled packs are imported by the host from its package.
+With `--project`, `run` also sets `MACRO_DECK_PLUGIN_BUNDLED_ICON_PACKS_ROOT` (`BundledIconPacksRoot`) to the
+project directory; the manifest and the packs are read from there instead of the content root.
+See [Bundled icon packs](/cli/run/#bundled-icon-packs).
+
 `HostUrl` is where the plugin connects, for the REST calls and the session socket alike. A stored credential
 records the host that issued it, but does not redirect the plugin there: when the two differ (the same Macro
 Deck on another port), the plugin connects to `HostUrl` and logs a warning. A different Macro Deck rejects the

@@ -82,7 +82,7 @@ export default defineConfig({
 								},
 								{
 									label: 'Using Macro Deck',
-									items: ['guide/concepts', 'guide/tips', 'guide/updates', 'guide/troubleshooting'],
+									items: ['guide/concepts', 'guide/tips', 'guide/updates', 'guide/backups', 'guide/troubleshooting'],
 								},
 								{
 									label: 'Reference',
@@ -215,6 +215,7 @@ export default defineConfig({
 										{ label: 'inspect', slug: 'cli/inspect' },
 										{ label: 'pack', slug: 'cli/pack' },
 										{ label: 'merge', slug: 'cli/merge' },
+										{ label: 'icon-pack', slug: 'cli/icon-pack' },
 										{ label: 'run', slug: 'cli/run' },
 										{ label: 'test', slug: 'cli/test' },
 										'cli/signing',

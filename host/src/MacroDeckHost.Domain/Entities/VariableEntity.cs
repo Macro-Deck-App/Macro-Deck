@@ -53,14 +53,26 @@ public class VariableEntity : BaseEntity
 	[JsonIgnore]
 	public VariableWriteCapability? Write { get; set; }
 
+	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+	public VariableFileSource? FileSource { get; set; }
+
 	// Computed, never stored: user variables are loaded straight into the registry from
 	// user-variables.json and are never re-registered, so a persisted flag would come back false after
 	// the first restart and turn every user variable read-only.
 	[JsonIgnore]
-	public bool CanWrite => Classification == VariableClassification.User || Write is not null;
+	public bool CanWrite =>
+		(Classification == VariableClassification.User && FileSource is not { AllowWriteBack: false }) ||
+		Write is not null;
 
 	[JsonIgnore]
 	public bool CommitOnRelease => Write?.CommitOnRelease == true;
 
 	public DateTime UpdatedAt { get; set; }
+
+	public VariableEntity CopyWithValue(string value)
+	{
+		var copy = (VariableEntity)MemberwiseClone();
+		copy.Value = value;
+		return copy;
+	}
 }

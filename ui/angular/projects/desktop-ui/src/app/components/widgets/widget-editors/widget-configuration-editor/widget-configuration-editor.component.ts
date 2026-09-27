@@ -145,13 +145,14 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
   private seenTree = false;
   private treeGeneration = 0;
   private previousRoot: UiNode | null = null;
+  private retainedRoot: UiNode | null = null;
+  private openedWith: WidgetData | null = null;
 
   private treeDraft: WidgetData | null = null;
 
   private builtIn = false;
   private pendingFollow: { key: string; value: unknown } | null = null;
   private followDeadline: ReturnType<typeof setTimeout> | undefined;
-  private followedSinceOpen = false;
 
   constructor() {
     effect(() => this.context.setRoot(this.root()));
@@ -175,18 +176,18 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
       if (generation !== this.treeGeneration) {
         this.treeGeneration = generation;
         this.seenTree = false;
-        // A replacement session is opened with the original widgetData, which a follow has outdated.
-        if (this.followedSinceOpen) {
-          untracked(() => this.reopen());
-          return;
-        }
+        this.retainedRoot = this.previousRoot;
       }
+
+      if (root === this.retainedRoot) return;
+      this.retainedRoot = null;
 
       const previous = this.previousRoot;
       this.previousRoot = root;
 
       if (!this.seenTree) {
         this.seenTree = true;
+        if (!deepEqual(this.widget.data, this.openedWith)) untracked(() => this.reopen());
         return;
       }
 
@@ -236,7 +237,6 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
     const value = data[field.id];
     this.treeDraft = structuredClone(this.widget.data);
     this.previewData.set({ ...this.widget.data });
-    this.followedSinceOpen = true;
     if (deepEqual(field.properties?.[UiConfigProperties.Value], value)) return;
 
     const follow = { key: field.id, value };
@@ -251,7 +251,6 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
 
   private reopen(): void {
     this.settleFollow();
-    this.followedSinceOpen = false;
     this.previousRoot = null;
     this.handle()?.close();
     this.handle.set(null);
@@ -287,10 +286,6 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
   }
 
   private async openSession(): Promise<void> {
-    // Captured before the await: a draft read after the catalogue lookup could already be a later one.
-    const widgetData = JSON.stringify(this.widget.data);
-    this.treeDraft = structuredClone(this.widget.data);
-
     const info = await this.widgetTypes.infoFor(this.widget.type);
     this.builtIn = info?.isBuiltIn === true;
     if (info && !info.supportsConfigUi) {
@@ -298,17 +293,21 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
       return;
     }
 
-    this.handle.set(this.uiSessions.open({
-      kind: 'config',
-      entryPoint: UiConfigEntryPoints.WidgetConfig,
-      widgetId: this.widget.id,
-      // The draft, not the stored record: this editor owns the transaction, and the tree has to render
-      // what is being edited rather than what the widget was last saved with.
-      widgetData,
-      // The host catalogue is what WidgetRegistryService already consulted to mount this editor at
-      // all; falling back to 0 ("whatever the host speaks") only matters for the narrow race where
-      // that answer is not cached yet.
-      configUiModelVersion: info?.configUiModelVersion ?? 0,
+    this.handle.set(this.uiSessions.open(() => {
+      this.treeDraft = structuredClone(this.widget.data);
+      this.openedWith = structuredClone(this.widget.data);
+      return {
+        kind: 'config',
+        entryPoint: UiConfigEntryPoints.WidgetConfig,
+        widgetId: this.widget.id,
+        // The draft, not the stored record: this editor owns the transaction, and the tree has to render
+        // what is being edited rather than what the widget was last saved with.
+        widgetData: JSON.stringify(this.widget.data),
+        // The host catalogue is what WidgetRegistryService already consulted to mount this editor at
+        // all; falling back to 0 ("whatever the host speaks") only matters for the narrow race where
+        // that answer is not cached yet.
+        configUiModelVersion: info?.configUiModelVersion ?? 0,
+      };
     }));
   }
 

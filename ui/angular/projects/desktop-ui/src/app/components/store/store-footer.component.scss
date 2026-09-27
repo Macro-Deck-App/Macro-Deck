@@ -94,7 +94,16 @@
   display: flex;
   gap: var(--space-4);
 
-  a {
+  .guidelines-link {
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  a,
+  .guidelines-link {
     color: var(--color-text-muted);
     text-decoration: none;
 

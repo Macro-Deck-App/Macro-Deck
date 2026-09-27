@@ -110,6 +110,11 @@ public static class HostOperations
 
 		public const string Fault = "fault";
 
+		/// <summary>Ends a session so that every attached client opens it again with the provider's current
+		/// code, without reporting a fault. Sent by the SDK when .NET Hot Reload updates the plugin. A host
+		/// that predates the operation answers <c>CAPABILITY_UNSUPPORTED</c>.</summary>
+		public const string Reload = "reload";
+
 		/// <summary>Registers bytes the plugin uploaded as kind <c>ui-resource</c> under a plugin-chosen
 		/// name and answers the resource handle to reference from a tree. Registering a name again replaces
 		/// the resource. Answers <c>uploadRequired</c> when the host does not hold the bytes yet.</summary>
@@ -118,7 +123,23 @@ public static class HostOperations
 		/// <summary>Removes a resource this plugin registered. An unknown name is not an error.</summary>
 		public const string RemoveResource = "remove-resource";
 
-		public static readonly IReadOnlyList<string> All = [Snapshot, Patch, Fault, RegisterResource, RemoveResource];
+		public static readonly IReadOnlyList<string> All = [Snapshot, Patch, Fault, Reload, RegisterResource, RemoveResource];
+	}
+
+	public static class IconPacks
+	{
+		/// <summary>Replaces the calling development session's bundled icon packs with the complete declared
+		/// set: adds, replaces and removes packs by key. Answers <c>uploadRequired</c> with the content hashes
+		/// the host does not hold yet; the plugin uploads them as kind <c>icon-pack</c> and syncs again.
+		/// Refused with <c>ICON_PACK_SYNC_NOT_ALLOWED</c> unless the session is self-registered.</summary>
+		public const string SyncBundled = "sync-bundled";
+
+		/// <summary>Answers a UI resource handle for one icon of the calling plugin's bundled packs, by pack key
+		/// and icon name. The handle is served by the host's icon store, uses no UI resource quota and stays
+		/// valid across host restarts. Unknown key or name: <c>PLUGIN_ICON_NOT_FOUND</c>.</summary>
+		public const string GetIconResource = "get-icon-resource";
+
+		public static readonly IReadOnlyList<string> All = [SyncBundled, GetIconResource];
 	}
 
 	public static class Devices
@@ -285,6 +306,7 @@ public static class HostOperations
 			[HostApis.EventBindings] = EventBindings.All,
 			[HostApis.Adb] = Adb.All,
 			[HostApis.Messaging] = Messaging.All,
+			[HostApis.IconPacks] = IconPacks.All,
 		};
 
 	public static IReadOnlyList<string> For(string api) => _byApi[api];

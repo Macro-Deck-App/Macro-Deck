@@ -53,6 +53,9 @@
     getShellInfo: function () {
       return invoke('get_shell_info');
     },
+    reauthenticate: function () {
+      return invoke('reauthenticate');
+    },
     getCursorPosition: function () {
       return invoke('get_cursor_position');
     },
@@ -102,6 +105,15 @@
         headers: {
           'x-macrodeck-file-name': encodeURIComponent(opts.fileName || ''),
           'x-macrodeck-extensions': extensions.join(','),
+        },
+      });
+    },
+    saveBackup: function (options) {
+      var input = options || {};
+      return invoke('save_backup', {
+        options: {
+          backupId: String(input.backupId || ''),
+          fileName: encodeURIComponent(input.fileName || ''),
         },
       });
     },

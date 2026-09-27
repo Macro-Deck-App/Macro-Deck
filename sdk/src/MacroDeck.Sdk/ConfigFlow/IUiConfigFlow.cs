@@ -25,8 +25,11 @@ public interface IUiConfigFlow : IConfigFlow
 	/// an error: Macro Deck then serves this flow's declared field list instead.
 	/// </summary>
 	/// <remarks>
-	/// Called at most once per flow instance. The returned session is owned by the host for the
-	/// session's lifetime and is disposed when the session closes, including after a fault.
+	/// Called once when the flow's view opens, and again for the same flow instance whenever Macro Deck
+	/// ends that session and opens a new one: after a retryable fault, and when .NET Hot Reload updates the
+	/// plugin. Keep state that must outlive a session on the flow, not on the session; the user's unsaved
+	/// edits are replayed to the new session as <c>change</c> events. The returned session is owned by the
+	/// host for the session's lifetime and is disposed when the session closes, including after a fault.
 	/// </remarks>
 	Task<IUiSession?> CreateUiSessionAsync(UiSessionRequest request, CancellationToken cancellationToken);
 }

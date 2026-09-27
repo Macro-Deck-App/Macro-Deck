@@ -7,13 +7,13 @@ import { ApiService, ButtonComponent, ErrorBannerComponent, InputComponent, Loca
 import { EmptyStateComponent } from '../../feedback/empty-state/empty-state.component';
 import { SelectComponent, SelectOption } from '../../forms/select/select.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
+import { StoreCommunityNoticeComponent } from '../../store/store-community-notice.component';
 import { StoreFooterComponent } from '../../store/store-footer.component';
 import { StorePageHeaderComponent } from '../../store/store-page-header.component';
 import { StoreSectionComponent, StoreUnsignedInstallRequest } from '../../store/store-section.component';
-import { StoreAccessService } from '../../../services/store-access.service';
 import { StoreBrowseStateService, isHistoryNavigation, isStoreDetailUrl } from '../../../services/store-browse-state.service';
-import { ConnectAccountService } from '../../../services/connect-account.service';
 import { StoreCatalogService } from '../../../services/store-catalog.service';
+import { StoreCategoryService, storeCategoryName } from '../../../services/store-category.service';
 import { StoreOperationService } from '../../../services/store-operation.service';
 import { StoreRatingsService } from '../../../services/store-ratings.service';
 import { UpdateModalService } from '../../../services/update-modal.service';
@@ -60,6 +60,7 @@ export const STORE_SUPPORTED_ONLY_STORAGE_KEY = 'macrodeck.store.supportedOnly';
     ErrorBannerComponent,
     InputComponent,
     SelectComponent,
+    StoreCommunityNoticeComponent,
     StoreFooterComponent,
     StorePageHeaderComponent,
     StoreSectionComponent,
@@ -76,6 +77,7 @@ export class StorePageComponent implements OnInit, OnDestroy {
   private readonly localization = inject(LocalizationService);
   private readonly toasts = inject(ToastService);
   protected readonly catalog = inject(StoreCatalogService);
+  private readonly categories = inject(StoreCategoryService);
   protected readonly operations = inject(StoreOperationService);
   private readonly ratings = inject(StoreRatingsService);
   private readonly updates = inject(UpdateService);
@@ -95,11 +97,6 @@ export class StorePageComponent implements OnInit, OnDestroy {
 
   protected readonly searching = computed(() => this.search().trim() !== '');
 
-  protected readonly storeUnlocked = inject(StoreAccessService).unlocked;
-
-  // The overlay keeps an invited tester out of the unreleased catalog, not out of the builds they test.
-  protected readonly signedIn = inject(ConnectAccountService).isSignedIn;
-
   protected readonly updatesAvailable = this.updates.hasBridge;
 
   protected readonly kindCounts = signal<ReadonlyMap<KindFilter, number>>(new Map());
@@ -110,6 +107,18 @@ export class StorePageComponent implements OnInit, OnDestroy {
     label: this.localization.translateKey(option.labelKey),
     count: this.kindCounts().get(option.value) ?? null,
   })));
+
+  protected readonly categoryOptions = computed(() => {
+    const culture = this.localization.culture();
+    const active = this.tag();
+    return this.categories.categories()
+      .filter(category => category.count > 0 || category.id === active)
+      .map(category => ({
+        id: category.id,
+        label: storeCategoryName(category, culture),
+        active: category.id === active,
+      }));
+  });
 
   protected readonly sortOptions = computed<SelectOption[]>(() => [
     ...(this.searching()
@@ -193,8 +202,13 @@ export class StorePageComponent implements OnInit, OnDestroy {
     return this.localization.translateKey(storeUninstallMessageKey(item.kind), { name: item.name });
   });
 
-  protected readonly browseHeading = computed(() => {
+  protected readonly tagLabel = computed(() => {
     const tag = this.tag();
+    return tag ? this.categories.displayName(tag) : null;
+  });
+
+  protected readonly browseHeading = computed(() => {
+    const tag = this.tagLabel();
     if (tag) {
       return this.localization.translateKey(AppStrings.Store.Page.TagHeading, { tag });
     }
@@ -291,6 +305,14 @@ export class StorePageComponent implements OnInit, OnDestroy {
     });
   }
 
+  protected onCategoryClick(id: string): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tag: this.tag() === id ? null : id, publisher: null },
+      queryParamsHandling: 'merge',
+    });
+  }
+
   protected onSearchChange(value: string): void {
     const wasSearching = this.searching();
     this.search.set(value);
@@ -332,12 +354,12 @@ export class StorePageComponent implements OnInit, OnDestroy {
     await this.catalog.loadMore();
   }
 
-  protected openTests(): void {
-    void this.router.navigate(['/store/tests']);
-  }
-
   protected async onRefreshed(): Promise<void> {
-    await Promise.all([this.searching() ? Promise.resolve() : this.loadDiscovery(), this.loadCounts()]);
+    await Promise.all([
+      this.searching() ? Promise.resolve() : this.loadDiscovery(),
+      this.loadCounts(),
+      this.categories.reload(),
+    ]);
   }
 
   protected async onInstall(item: StoreCatalogItemBody): Promise<void> {
@@ -491,6 +513,7 @@ export class StorePageComponent implements OnInit, OnDestroy {
       this.catalog.load(this.gridQuery()),
       this.searching() || this.narrowed() ? Promise.resolve() : this.loadDiscovery(),
       this.loadCounts(),
+      this.categories.load({ kinds: this.effectiveKinds(), supportedOnly: this.supportedOnly() }),
     ]);
   }
 

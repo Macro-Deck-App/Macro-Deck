@@ -115,7 +115,10 @@ public class IconsController : ControllerBase
 
 	[HttpGet("{id}/image")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
-	public async Task<IActionResult> GetImage(string id, [FromQuery] int? size, CancellationToken ct)
+	public async Task<IActionResult> GetImage(string id,
+		[FromQuery] int? size,
+		[FromQuery(Name = "v")] string? version,
+		CancellationToken ct)
 	{
 		if (!Guid.TryParse(id, out var iconId))
 		{
@@ -131,16 +134,25 @@ public class IconsController : ControllerBase
 		}
 
 		var image = result.Data!;
+		Response.Headers.Vary = "Accept";
+
+		// Pack upgrades replace bytes under the same id, so only a URL naming the current content may be
+		// cached for good; a request without a known version (missing or empty v) revalidates instead.
+		var unversioned = string.IsNullOrEmpty(version);
+		if (!unversioned && !string.Equals(version, image.Version, StringComparison.Ordinal))
+		{
+			Response.Headers.CacheControl = "no-store";
+			return File(image.Content, image.ContentType);
+		}
+
+		Response.Headers.CacheControl = unversioned ? "no-cache" : "private, max-age=31536000, immutable";
+		Response.Headers.ETag = image.ETag;
 		if (Request.Headers.IfNoneMatch.Any(v => v is not null && v.Contains(image.ETag)))
 		{
 			await image.Content.DisposeAsync();
-			Response.Headers.ETag = image.ETag;
 			return StatusCode(StatusCodes.Status304NotModified);
 		}
 
-		Response.Headers.CacheControl = "public, max-age=31536000, immutable";
-		Response.Headers.ETag = image.ETag;
-		Response.Headers.Vary = "Accept";
 		return File(image.Content, image.ContentType);
 	}
 }

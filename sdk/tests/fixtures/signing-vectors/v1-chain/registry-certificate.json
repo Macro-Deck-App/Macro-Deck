@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.macro-deck.app/macrodeck-certificate-v1.schema.json",
+  "schemaVersion": 1,
+  "subject": {
+    "kind": "service",
+    "id": "creator-1",
+    "name": "Test Creator"
+  },
+  "algorithm": "ed25519",
+  "certificateId": "cert_df252c5f157b4f9886f8a1c1d8a6b1c7",
+  "publicKey": "LFwpeqEhTOA2uj\u002BwBNb7LaUPl0fLFgGk9pu32XRALak=",
+  "keyUsage": [
+    "registry"
+  ],
+  "notBefore": "2026-01-01T00:00:00+00:00",
+  "notAfter": "2099-01-01T00:00:00+00:00",
+  "issuedAt": "2026-01-01T00:00:00+00:00",
+  "rootKeyId": "root_fixture01"
+}

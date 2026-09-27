@@ -278,9 +278,169 @@ public class ReportUpdateStateRequestMessageHandlerTests
 
 		await handler.Handle(new ReportUpdateStateRequest { Version = "1.2.3", Phase = "available" },
 			CancellationToken.None);
-		await handler.Handle(new ReportUpdateStateRequest { Version = "1.2.3", Phase = "upToDate" },
+		await handler.Handle(new ReportUpdateStateRequest { Version = null, Phase = "upToDate" },
 			CancellationToken.None);
 
 		Assert.That(store.Snapshot(), Is.Empty);
 	}
+
+	[Test]
+	public async Task A_failed_check_without_a_version_warns_that_updates_could_not_be_checked()
+	{
+		var store = new UserNotificationStore();
+		var handler = CreateHandler(store);
+
+		await handler.Handle(CheckFailed(), CancellationToken.None);
+
+		var notifications = store.Snapshot();
+		Assert.Multiple(() =>
+		{
+			Assert.That(notifications, Has.Count.EqualTo(1));
+			Assert.That(notifications[0].Kind, Is.EqualTo(UserNotificationKind.Update));
+			Assert.That(notifications[0].Severity, Is.EqualTo(UserNotificationSeverity.Warning));
+			Assert.That(notifications[0].Title, Is.EqualTo("Could not check for updates"));
+			Assert.That(notifications[0].Message, Is.EqualTo(CheckFailed().Error));
+		});
+	}
+
+	[Test]
+	public async Task Checks_that_keep_failing_leave_the_first_warning_in_place()
+	{
+		var store = new UserNotificationStore();
+		var handler = CreateHandler(store);
+
+		await handler.Handle(CheckFailed(), CancellationToken.None);
+		var first = store.Snapshot().Single();
+		await handler.Handle(CheckFailed(), CancellationToken.None);
+
+		var notifications = store.Snapshot();
+		Assert.Multiple(() =>
+		{
+			Assert.That(notifications, Has.Count.EqualTo(1));
+			Assert.That(notifications[0].Id, Is.EqualTo(first.Id));
+			Assert.That(notifications[0].Timestamp, Is.EqualTo(first.Timestamp));
+		});
+	}
+
+	[Test]
+	public async Task A_dismissed_check_failure_stays_dismissed_while_checks_keep_failing()
+	{
+		var store = new UserNotificationStore();
+		var handler = CreateHandler(store);
+
+		await handler.Handle(CheckFailed(), CancellationToken.None);
+		store.Dismiss(store.Snapshot().Single().Id);
+		await handler.Handle(CheckFailed(), CancellationToken.None);
+
+		Assert.That(store.Snapshot(), Is.Empty);
+	}
+
+	[Test]
+	public async Task A_check_that_fails_again_after_one_succeeded_warns_again()
+	{
+		var store = new UserNotificationStore();
+		var handler = CreateHandler(store);
+
+		await handler.Handle(CheckFailed(), CancellationToken.None);
+		store.Dismiss(store.Snapshot().Single().Id);
+		await handler.Handle(new ReportUpdateStateRequest { Version = null, Phase = "upToDate" },
+			CancellationToken.None);
+		await handler.Handle(CheckFailed(), CancellationToken.None);
+
+		var notifications = store.Snapshot();
+		Assert.Multiple(() =>
+		{
+			Assert.That(notifications, Has.Count.EqualTo(1));
+			Assert.That(notifications[0].Title, Is.EqualTo("Could not check for updates"));
+		});
+	}
+
+	[Test]
+	public async Task A_check_that_fails_after_an_update_was_found_leaves_that_update_on_offer()
+	{
+		var store = new UserNotificationStore();
+		var handler = CreateHandler(store);
+
+		await handler.Handle(new ReportUpdateStateRequest { Version = "1.2.3", Phase = "available", CanInstall = true },
+			CancellationToken.None);
+		await handler.Handle(CheckFailed("1.2.3"), CancellationToken.None);
+		await handler.Handle(CheckFailed("1.2.3"), CancellationToken.None);
+
+		var titles = store.Snapshot().Select(n => n.Title);
+		Assert.That(titles,
+			Is.EquivalentTo(new[] { "Macro Deck 1.2.3 is available", "Could not check for updates" }));
+	}
+
+	[Test]
+	public async Task A_successful_check_clears_the_check_failure_warning()
+	{
+		var store = new UserNotificationStore();
+		var handler = CreateHandler(store);
+
+		await handler.Handle(CheckFailed(), CancellationToken.None);
+		await handler.Handle(new ReportUpdateStateRequest { Version = "1.2.3", Phase = "available" },
+			CancellationToken.None);
+
+		Assert.That(store.Snapshot().Select(n => n.Title), Is.EqualTo(new[] { "Macro Deck 1.2.3 is available" }));
+	}
+
+	[Test]
+	public async Task A_failed_install_names_the_version_even_when_the_failure_kind_is_reported()
+	{
+		var store = new UserNotificationStore();
+		var handler = CreateHandler(store);
+
+		await handler.Handle(
+			new ReportUpdateStateRequest { Version = "1.2.3", Phase = "failed", Failure = "install", Error = "reset" },
+			CancellationToken.None);
+
+		Assert.That(store.Snapshot().Single().Title,
+			Is.EqualTo("The update to Macro Deck 1.2.3 could not be completed"));
+	}
+
+	[Test]
+	public async Task Finding_the_same_update_again_after_a_failed_check_clears_the_warning_and_keeps_the_offer()
+	{
+		var store = new UserNotificationStore();
+		var handler = CreateHandler(store);
+
+		await handler.Handle(new ReportUpdateStateRequest { Version = "1.2.3", Phase = "available", CanInstall = true },
+			CancellationToken.None);
+		var offer = store.Snapshot().Single();
+		await handler.Handle(CheckFailed("1.2.3"), CancellationToken.None);
+		await handler.Handle(new ReportUpdateStateRequest { Version = "1.2.3", Phase = "available", CanInstall = true },
+			CancellationToken.None);
+
+		var notifications = store.Snapshot();
+		Assert.Multiple(() =>
+		{
+			Assert.That(notifications.Select(n => n.Title), Is.EqualTo(new[] { "Macro Deck 1.2.3 is available" }));
+			Assert.That(notifications[0].Timestamp, Is.EqualTo(offer.Timestamp));
+		});
+	}
+
+	[Test]
+	public async Task A_failure_streak_that_ended_with_the_same_update_found_again_warns_on_the_next_one()
+	{
+		var store = new UserNotificationStore();
+		var handler = CreateHandler(store);
+
+		await handler.Handle(new ReportUpdateStateRequest { Version = "1.2.3", Phase = "available" },
+			CancellationToken.None);
+		await handler.Handle(CheckFailed("1.2.3"), CancellationToken.None);
+		await handler.Handle(new ReportUpdateStateRequest { Version = "1.2.3", Phase = "available" },
+			CancellationToken.None);
+		await handler.Handle(CheckFailed("1.2.3"), CancellationToken.None);
+
+		Assert.That(store.Snapshot().Select(n => n.Title), Does.Contain("Could not check for updates"));
+	}
+
+	private static ReportUpdateStateRequest CheckFailed(string? knownVersion = null)
+		=> new()
+		{
+			Version = knownVersion,
+			Phase = "failed",
+			Failure = "check",
+			Error = "could not check for updates on any feed (https://updates.example/stable.json: connection refused)"
+		};
 }

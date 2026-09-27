@@ -14,15 +14,19 @@ internal static class SigningErrorTrustMapping
 
 		SigningError.SignatureMalformed => PluginTrustVerdict.Malformed,
 		SigningError.CertificateMalformed => PluginTrustVerdict.Malformed,
+		SigningError.CertificateIssuerMissing => PluginTrustVerdict.Malformed,
 		SigningError.CertificateUnreadable => PluginTrustVerdict.Malformed,
 		SigningError.ManifestMissing => PluginTrustVerdict.Malformed,
 		SigningError.ManifestMalformed => PluginTrustVerdict.Malformed,
 		SigningError.ManifestTooLarge => PluginTrustVerdict.Malformed,
+		SigningError.TooManyEntries => PluginTrustVerdict.Malformed,
 		SigningError.PackageFormatUnsupported => PluginTrustVerdict.Malformed,
 
 		SigningError.CertificateUntrusted => PluginTrustVerdict.UntrustedRoot,
+		SigningError.CertificateIssuerMismatch => PluginTrustVerdict.UntrustedRoot,
 
 		SigningError.CertificateWrongPurpose => PluginTrustVerdict.WrongCertificatePurpose,
+		SigningError.CertificateOutlivesIssuer => PluginTrustVerdict.WrongCertificatePurpose,
 
 		SigningError.CertificateNotYetValid => PluginTrustVerdict.CertificateNotValidAtSignature,
 		SigningError.CertificateExpired => PluginTrustVerdict.CertificateNotValidAtSignature,

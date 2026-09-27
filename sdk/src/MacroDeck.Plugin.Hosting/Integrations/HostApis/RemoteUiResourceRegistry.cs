@@ -2,6 +2,7 @@ using System.Text.Json;
 using MacroDeck.Plugin.Hosting.Transport;
 using MacroDeck.Plugin.Protocol.Assets;
 using MacroDeck.Plugin.Protocol.Callbacks;
+using MacroDeck.Plugin.Protocol.Callbacks.IconPacks;
 using MacroDeck.Plugin.Protocol.Callbacks.Ui;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Limits;
@@ -57,13 +58,7 @@ internal sealed class RemoteUiResourceRegistry(IHostInvoker invoker, IPluginAsse
 			}
 
 			return result.Resource is { } handle
-				? new UiResource
-				{
-					ResourceId = handle.ResourceId,
-					ContentHash = handle.ContentHash,
-					MediaType = handle.MediaType,
-					ByteLength = handle.ByteLength,
-				}
+				? ToResource(handle)
 				: throw new UiResourceException(UiResourceErrorCode.Failed,
 					$"Macro Deck did not accept the bytes uploaded for UI resource '{name}'.");
 		}
@@ -91,7 +86,41 @@ internal sealed class RemoteUiResourceRegistry(IHostInvoker invoker, IPluginAsse
 		}
 	}
 
+	public async Task<UiResource> GetPluginIconAsync(string key, string name, CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(key);
+		ArgumentNullException.ThrowIfNull(name);
+
+		JsonElement? result;
+		try
+		{
+			result = await invoker.InvokeAsync(Protocol.Callbacks.HostApis.IconPacks,
+					HostOperations.IconPacks.GetIconResource,
+					new GetIconResourceArguments { Key = key, Name = name },
+					cancellationToken)
+				.ConfigureAwait(false);
+		}
+		catch (HostInvocationException exception)
+		{
+			throw Translate(exception);
+		}
+
+		return result?.Deserialize<UiResourceHandleDto>(PluginProtocolJson.Options) is { } handle
+			? ToResource(handle)
+			: throw new UiResourceException(UiResourceErrorCode.Failed,
+				$"Macro Deck answered the lookup of bundled icon '{key}/{name}' without a resource.");
+	}
+
 	public void Dispose() => _gate.Dispose();
+
+	private static UiResource ToResource(UiResourceHandleDto handle)
+		=> new()
+		{
+			ResourceId = handle.ResourceId,
+			ContentHash = handle.ContentHash,
+			MediaType = handle.MediaType,
+			ByteLength = handle.ByteLength,
+		};
 
 	private async Task<UiRegisterResourceResult> RegisterOnceAsync(UiRegisterResourceArguments arguments,
 		CancellationToken cancellationToken)
@@ -147,6 +176,7 @@ internal sealed class RemoteUiResourceRegistry(IHostInvoker invoker, IPluginAsse
 			ProtocolErrorCodes.CapabilityUnsupported => UiResourceErrorCode.Unsupported,
 			ProtocolErrorCodes.UiResourceQuotaExceeded => UiResourceErrorCode.QuotaExceeded,
 			ProtocolErrorCodes.RateLimited => UiResourceErrorCode.RateLimited,
+			ProtocolErrorCodes.PluginIconNotFound => UiResourceErrorCode.PluginIconNotFound,
 			_ => UiResourceErrorCode.Failed,
 		};
 

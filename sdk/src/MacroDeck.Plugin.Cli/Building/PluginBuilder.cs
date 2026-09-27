@@ -157,6 +157,26 @@ internal static class PluginBuilder
 					declared.Add(icon);
 				}
 
+				var missingPacks = new List<string>();
+				foreach (var bundled in manifest.BundledIconPacks ?? [])
+				{
+					if (PluginBuildConfigReader.IsContainedRelativePath(bundled.Path, sourceRoot) &&
+						File.Exists(Path.Combine(sourceRoot, bundled.Path)))
+					{
+						declared.Add(bundled.Path);
+					}
+					else
+					{
+						missingPacks.Add(bundled.Path);
+					}
+				}
+
+				if (missingPacks.Count > 0)
+				{
+					warnings.Add(new CliDiagnostic("bundled-icon-pack-missing",
+						$"Declared in bundledIconPacks but not found in the project, so the host will skip it: {PathList(missingPacks)}."));
+				}
+
 				var skipped = BuildStaging.CopyDeclared(sourceRoot,
 					stagingDirectory,
 					declared,

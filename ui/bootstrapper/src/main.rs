@@ -7,6 +7,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod appearance;
+mod backup_download;
 mod bridge;
 mod dock_icon;
 mod host;
@@ -17,6 +18,7 @@ mod host_supervisor;
 mod install_state;
 mod localization;
 mod logging;
+mod loopback_secret;
 mod menu;
 mod notifications;
 mod opened_files;
@@ -172,11 +174,13 @@ fn main() {
         .manage(opened_files::PendingOpenFiles::default())
         .invoke_handler(tauri::generate_handler![
             bridge::get_host_port,
+            bridge::reauthenticate,
             bridge::get_shell_info,
             bridge::get_cursor_position,
             bridge::open_external,
             bridge::show_open_dialog,
             bridge::save_file,
+            bridge::save_backup,
             dock_icon::get_hide_dock_icon,
             dock_icon::set_hide_dock_icon,
             appearance::set_appearance,
@@ -215,6 +219,8 @@ fn main() {
         .setup(|app| {
             let handle = app.handle().clone();
             init_logging(&handle);
+            #[cfg(windows)]
+            host_job::shut_down_before_host();
             logging::info(&format!(
                 "[app] Macro Deck Bootstrapper {} starting (packaged: {})",
                 updater::current_version(&handle),
@@ -268,7 +274,10 @@ fn main() {
             // A tray quit goes request_quit -> app.exit(0) -> Exit with no
             // CloseRequested, so the window-state flush there is the only
             // chance to persist that session's geometry.
-            RunEvent::Exit => window_state::flush(app),
+            RunEvent::Exit => {
+                window_state::flush(app);
+                host::stop_before_exit(app);
+            }
             #[cfg(target_os = "macos")]
             RunEvent::Opened { urls } => {
                 window::show_main_window(app);

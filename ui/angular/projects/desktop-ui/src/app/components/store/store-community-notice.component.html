@@ -1,0 +1,36 @@
+@if (visible()) {
+  <section class="community-notice" aria-labelledby="store-community-notice-heading">
+    <span class="notice-icon" aria-hidden="true">
+      <span class="icon icon-info icon-md"></span>
+    </span>
+    <div class="notice-body">
+      <h2 class="notice-heading" id="store-community-notice-heading">
+        {{ 'macrodeck.app:Store.CommunityNotice.Heading' | translate }}
+      </h2>
+      <p class="notice-text">{{ 'macrodeck.app:Store.CommunityNotice.Responsibility' | translate }}</p>
+      <p class="notice-text">{{ 'macrodeck.app:Store.CommunityNotice.WhereToReport' | translate }}</p>
+      <p class="notice-text notice-emphasis">{{ 'macrodeck.app:Store.CommunityNotice.NoMacroDeckIssues' | translate }}</p>
+      <p class="notice-text">{{ 'macrodeck.app:Store.CommunityNotice.GuidelinesApply' | translate }}</p>
+      <div class="notice-actions">
+        <div class="notice-links">
+          <button type="button" class="notice-link notice-guidelines" (click)="guidelinesOpen.set(true)">
+            {{ 'macrodeck.app:Store.Guidelines.Heading' | translate }}
+          </button>
+          <a class="notice-link" [href]="links.imprint" target="_blank" rel="noopener noreferrer" (click)="open($event, links.imprint)">
+            {{ 'macrodeck.app:Store.Footer.Imprint' | translate }}
+          </a>
+          <a class="notice-link" [href]="links.privacy" target="_blank" rel="noopener noreferrer" (click)="open($event, links.privacy)">
+            {{ 'macrodeck.app:Store.Page.Link.Privacy' | translate }}
+          </a>
+        </div>
+        <shared-button class="notice-dismiss" variant="primary" size="compact" (click)="dismiss()">
+          {{ 'macrodeck.app:Dialogs.Notice.GotIt' | translate }}
+        </shared-button>
+      </div>
+    </div>
+  </section>
+
+  @if (guidelinesOpen()) {
+    <app-store-guidelines-modal (closed)="guidelinesOpen.set(false)" />
+  }
+}

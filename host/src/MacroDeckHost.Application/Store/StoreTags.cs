@@ -22,7 +22,7 @@ public static partial class StoreTags
 		foreach (var entry in array.EnumerateArray())
 		{
 			var tag = entry.ValueKind == JsonValueKind.String ? entry.GetString()?.Trim().ToLowerInvariant() : null;
-			if (tag is null || tag.Length > MaxTagLength || !TagPattern().IsMatch(tag) || tags.Contains(tag))
+			if (tag is null || !IsValid(tag) || tags.Contains(tag))
 			{
 				continue;
 			}
@@ -36,6 +36,8 @@ public static partial class StoreTags
 
 		return tags;
 	}
+
+	public static bool IsValid(string tag) => tag.Length <= MaxTagLength && TagPattern().IsMatch(tag);
 
 	[GeneratedRegex("^[a-z0-9]+(-[a-z0-9]+)*$", RegexOptions.CultureInvariant)]
 	private static partial Regex TagPattern();

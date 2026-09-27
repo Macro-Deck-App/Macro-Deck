@@ -4,6 +4,7 @@ using MacroDeck.Plugin.Protocol.Capabilities.Ui;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Serialization;
+using MacroDeck.Ui.Components;
 using MacroDeckHost.Application.Ui.Sessions;
 
 namespace MacroDeckHost.Application.Plugins.Capabilities.Adapters.Ui;
@@ -61,20 +62,36 @@ public sealed class RemoteUiSessionProvider : IUiSessionProvider
 			new UiSessionSnapshotArguments { SessionId = sessionId },
 			cancellationToken);
 
-	public Task DispatchEventAsync(string sessionId,
+	public async Task DispatchEventAsync(string sessionId,
 		UiSessionEventCommand command,
 		CancellationToken cancellationToken)
-		=> InvokeAsync(CapabilityOperations.Ui.SessionEvent,
-			new UiSessionEventArguments
-			{
-				SessionId = sessionId,
-				NodeId = command.NodeId,
-				Name = command.Name,
-				Data = command.Data.IsEmpty ? null : command.Data.ToElement(),
-				Revision = command.Revision,
-				ClientId = command.ClientId
-			},
-			cancellationToken);
+	{
+		try
+		{
+			await InvokeAsync(CapabilityOperations.Ui.SessionEvent,
+					new UiSessionEventArguments
+					{
+						SessionId = sessionId,
+						NodeId = command.NodeId,
+						Name = command.Name,
+						Data = command.Data.IsEmpty ? null : command.Data.ToElement(),
+						Revision = command.Revision,
+						ClientId = command.ClientId
+					},
+					cancellationToken)
+				.ConfigureAwait(false);
+		}
+		catch (RemoteCapabilityException exception) when (IsDroppableMove(command, exception))
+		{
+			// A pointer-move may be dropped by contract, so a busy or slow plugin loses one batch of
+			// positions instead of the whole session.
+		}
+	}
+
+	private static bool IsDroppableMove(UiSessionEventCommand command, RemoteCapabilityException exception)
+		=> string.Equals(command.Name, UiComponentEvents.PointerMove, StringComparison.Ordinal) &&
+			(string.Equals(exception.Code, ProtocolErrorCodes.RateLimited, StringComparison.Ordinal) ||
+				string.Equals(exception.Code, ProtocolErrorCodes.Timeout, StringComparison.Ordinal));
 
 	private async Task<JsonElement?> InvokeAsync(string operation,
 		object arguments,

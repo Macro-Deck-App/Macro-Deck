@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Navigation, Router } from '@angular/router';
 
-import { AppStrings, StoreCatalogItemBody, StoreExtensionDetailBody, StoreOperationBody, StoreVersionHistoryBody } from '@macro-deck/runtime';
+import { AppStrings, StoreCatalogItemBody, StoreExtensionDetailBody, StoreOperationBody, StoreVersionHistoryBody, StoreCategoryBody } from '@macro-deck/runtime';
 import { ApiService, LocalizationService, ToastService } from '@shared';
 import { ConnectAccountService } from '../../../services/connect-account.service';
 import { IconPackService } from '../../../services/icon-pack.service';
@@ -83,9 +83,11 @@ describe('StoreDetailPageComponent', () => {
   });
 
   let similarItems: StoreCatalogItemBody[] = [];
+  let categories: StoreCategoryBody[] = [];
 
   beforeEach(() => {
     similarItems = [];
+    categories = [];
   });
 
   async function createFixture(
@@ -98,9 +100,10 @@ describe('StoreDetailPageComponent', () => {
     api = jasmine.createSpyObj<ApiService>('ApiService', [
       'getStoreExtension', 'getStoreExtensionIconUrl', 'getStoreScreenshotUrl', 'getStoreStatus', 'onNotification',
       'getStoreRating', 'getStoreReviews', 'getOwnStoreReview', 'getStoreInstalls', 'getStoreRatings',
-      'getStoreSimilar',
+      'getStoreSimilar', 'getStoreCategories',
     ]);
     api.getStoreSimilar.and.resolveTo({ items: similarItems });
+    api.getStoreCategories.and.callFake(() => Promise.resolve({ categories }));
     api.getStoreRatings.and.resolveTo({ available: false, ratings: {} });
     api.getStoreInstalls.and.resolveTo({ available: true, installs });
     api.getStoreRating.and.resolveTo({ available: reviewsAvailable, rating: null, ratingCount: 0, distribution: [] });
@@ -403,6 +406,44 @@ describe('StoreDetailPageComponent', () => {
       expect(TestBed.inject(Router).navigate).toHaveBeenCalledWith(['/store'], { queryParams: { tag: 'obs' } });
     });
 
+    it('lists Store categories in their own section by name and keeps the other tags apart', async () => {
+      categories = [{ id: 'music', names: { en: 'Music', de: 'Musik' }, count: 1 }];
+      await createFixture(null, { tags: ['music', 'playlist'] });
+      await settleSimilar();
+
+      const categoryButtons = Array.from<HTMLButtonElement>(
+        fixture.nativeElement.querySelectorAll('[data-testid="store-detail-categories"] button'));
+      const tagButtons = Array.from<HTMLButtonElement>(
+        fixture.nativeElement.querySelectorAll('[data-testid="store-detail-tags"] button'));
+      expect(categoryButtons.map(button => button.textContent!.trim())).toEqual(['Music']);
+      expect(tagButtons.map(button => button.textContent!.trim())).toEqual(['playlist']);
+
+      categoryButtons[0].click();
+      expect(TestBed.inject(Router).navigate).toHaveBeenCalledWith(['/store'], { queryParams: { tag: 'music' } });
+    });
+
+    it('lists an item\'s categories in the order the registry gives them', async () => {
+      categories = [
+        { id: 'streaming', names: { en: 'Streaming' }, count: 1 },
+        { id: 'music', names: { en: 'Music' }, count: 1 },
+      ];
+      await createFixture(null, { tags: ['music', 'streaming'] });
+      await settleSimilar();
+
+      const labels = Array.from<HTMLButtonElement>(
+        fixture.nativeElement.querySelectorAll('[data-testid="store-detail-categories"] button'))
+        .map(button => button.textContent!.trim());
+      expect(labels).toEqual(['Streaming', 'Music']);
+    });
+
+    it('shows no categories section when none of the tags is a Store category', async () => {
+      categories = [{ id: 'music', names: { en: 'Music' }, count: 1 }];
+      await createFixture(null, { tags: ['playlist'] });
+      await settleSimilar();
+
+      expect(fixture.nativeElement.querySelector('[data-testid="store-detail-categories"]')).toBeNull();
+    });
+
     it('shows no tag section when the registry declares none', async () => {
       await createFixture(null, { tags: [] });
 
@@ -495,6 +536,35 @@ describe('StoreDetailPageComponent', () => {
     });
 
     expect(renderedLinks()).toEqual([{ text: 'Documentation', href: 'https://docs.example.com' }]);
+  });
+
+  it('puts the homepage first, ahead of the repository', async () => {
+    await createFixture(null, {
+      homepage: 'https://example.com/plugin',
+      repository: 'https://github.com/example/plugin',
+      additionalLinks: [{ type: 'issues', url: 'https://github.com/example/plugin/issues' }],
+    });
+
+    expect(renderedLinks()).toEqual([
+      { text: 'Homepage', href: 'https://example.com/plugin' },
+      { text: 'Repository', href: 'https://github.com/example/plugin' },
+      { text: 'Report an issue', href: 'https://github.com/example/plugin/issues' },
+    ]);
+  });
+
+  it('lists a homepage that is the repository only once', async () => {
+    await createFixture(null, {
+      homepage: 'https://github.com/example/plugin',
+      repository: 'https://github.com/example/plugin',
+    });
+
+    expect(renderedLinks()).toEqual([{ text: 'Repository', href: 'https://github.com/example/plugin' }]);
+  });
+
+  it('never links a homepage that is not https', async () => {
+    await createFixture(null, { homepage: 'http://example.com/plugin' });
+
+    expect(fixture.nativeElement.querySelector('.links-group')).toBeNull();
   });
 
   it('shows no links section when there is neither a repository nor an additional link', async () => {
@@ -716,6 +786,67 @@ describe('StoreDetailPageComponent', () => {
       const component = fixture.componentInstance as unknown as { versionOptions(): { value: string; disabled?: boolean }[] };
 
       expect(component.versionOptions().filter(option => !option.disabled).map(option => option.value)).toEqual(['2.0.0']);
+    });
+
+    it('warns about an installed withdrawn version and offers going back to the latest only after confirming', async () => {
+      await createFixture(null, {
+        latestVersion: '1.2.0',
+        installedVersion: '1.3.0',
+        installState: 'Installed',
+        installedVersionWithdrawal: { reason: 'Compromised signing key', replacement: 'com.acme.safe' },
+        history: [
+          { version: '1.3.0', installable: false, unavailableReason: 'Withdrawn' },
+          { version: '1.2.0', installable: true },
+        ],
+      });
+
+      const notice = (fixture.nativeElement as HTMLElement).querySelector('.withdrawal-notice')?.textContent ?? '';
+      clickButton(translate(AppStrings.Store.DowngradeTo, { version: '1.2.0' }));
+
+      expect(notice).toContain(translate(AppStrings.Store.Withdrawal.InstalledHeading, { version: '1.3.0' }));
+      expect(notice).toContain('Compromised signing key');
+      expect(notice).toContain('com.acme.safe');
+      expect(operationsSpy.install).not.toHaveBeenCalled();
+      expect(document.body.querySelector('shared-confirmation-modal')).not.toBeNull();
+    });
+
+    it('says a withdrawn version was withdrawn rather than merely unavailable', async () => {
+      await createFixture(null, {
+        latestVersion: '2.0.0',
+        history: [
+          { version: '2.0.0', installable: true },
+          { version: '1.0.0', installable: false, unavailableReason: 'Withdrawn' },
+        ],
+      });
+      const component = fixture.componentInstance as unknown as {
+        versionOptions(): { value: string; badge?: string }[];
+        selectedUnavailableReason(): string | null;
+      };
+
+      selectVersion('1.0.0');
+
+      expect(component.versionOptions().find(option => option.value === '1.0.0')?.badge)
+        .toContain(translate(AppStrings.Store.VersionWithdrawn));
+      expect(component.selectedUnavailableReason()).toBe(translate(AppStrings.Store.Page.VersionWithdrawnReason));
+    });
+
+    it('keeps Uninstall and no reviews for an installed package the registry removed from the Store', async () => {
+      await createFixture(null, {
+        latestVersion: '2.0.0',
+        installedVersion: '1.0.0',
+        installState: 'Installed',
+        withdrawal: { reason: 'Malware' },
+        history: [
+          { version: '2.0.0', installable: false, unavailableReason: 'Withdrawn' },
+          { version: '1.0.0', installable: false, unavailableReason: 'Withdrawn' },
+        ],
+      }, true);
+      const host = fixture.nativeElement as HTMLElement;
+      const labels = Array.from(host.querySelectorAll('button')).map(button => button.textContent?.trim());
+
+      expect(host.querySelector('.withdrawal-notice')?.textContent).toContain(translate(AppStrings.Store.Withdrawal.PackageHeading));
+      expect(labels).toContain(translate(AppStrings.Store.Uninstall));
+      expect(host.querySelector('app-store-reviews-section')).toBeNull();
     });
 
     it('opens detail links through the system browser rather than navigating the app', async () => {

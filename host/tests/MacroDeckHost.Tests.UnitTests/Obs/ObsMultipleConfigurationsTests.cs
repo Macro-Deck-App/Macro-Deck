@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Variables.Files;
 using System.Text.Json;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Events;
@@ -450,7 +451,11 @@ internal sealed class ObsMultipleConfigurationsTests
 				new RecordingMediator(),
 				new VariableCatalogProviders(Registry),
 				new VariableRefreshSignal(),
-				new MusicPlayerPollNudge(Registry));
+				new MusicPlayerPollNudge(Registry),
+				new FileVariableSynchronizer(VariableRegistry,
+					new RecordingMediator(),
+					new FakeVariableFileSystem(),
+					Serilog.Core.Logger.None));
 			Store = new MemoryConfigStore();
 			var services = new ServiceCollection();
 			services.AddSingleton<IIntegrationConfigStore>(Store);

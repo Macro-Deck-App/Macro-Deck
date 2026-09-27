@@ -21,6 +21,7 @@ import { DetailPageComponent } from '../../detail-page/detail-page.component';
 import { LoadingStateComponent } from '../../feedback/loading-state/loading-state.component';
 import { SelectOption } from '../../forms/select/select.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
+import { StoreCommunityNoticeComponent } from '../../store/store-community-notice.component';
 import { StoreFooterComponent } from '../../store/store-footer.component';
 import { StoreMarkdownComponent } from '../../store/store-markdown.component';
 import { StoreReportDialogComponent, StoreReportTarget } from '../../store/store-report-dialog.component';
@@ -29,6 +30,7 @@ import { cultureDisplayName, sortCulturesForReader } from '../../../localization
 import { ConnectAccountService } from '../../../services/connect-account.service';
 import { SettingsModalService } from '../../../services/settings-modal.service';
 import { STORE_DETAIL_KINDS, isStoreDetailUrl, isStoreListUrl } from '../../../services/store-browse-state.service';
+import { StoreCategoryService, storeCategoryName } from '../../../services/store-category.service';
 import { StoreOperationService } from '../../../services/store-operation.service';
 import { StoreSectionComponent, StoreUnsignedInstallRequest } from '../../store/store-section.component';
 import { StoreRatingsService } from '../../../services/store-ratings.service';
@@ -45,6 +47,7 @@ import { StoreManageAction } from '../../store/store-install-button.component';
 import { StoreDetailHeaderComponent } from './store-detail-header.component';
 import { StoreLanguagesModalComponent } from './store-languages-modal.component';
 import { StoreScreenshotStripComponent } from './store-screenshot-strip.component';
+import { StoreWithdrawalNoticeComponent } from './store-withdrawal-notice.component';
 import { StoreVersionHistoryModalComponent } from './store-version-history-modal.component';
 
 const KNOWN_KINDS = STORE_DETAIL_KINDS;
@@ -96,9 +99,11 @@ interface StoreDetailLink {
     ErrorBannerComponent,
     LoadingStateComponent,
     StoreDetailHeaderComponent,
+    StoreCommunityNoticeComponent,
     StoreFooterComponent,
     StoreLanguagesModalComponent,
     StoreScreenshotStripComponent,
+    StoreWithdrawalNoticeComponent,
     StoreSectionComponent,
     StoreMarkdownComponent,
     StoreReportDialogComponent,
@@ -116,6 +121,7 @@ export class StoreDetailPageComponent implements OnInit {
   private readonly api = inject(ApiService);
   private readonly localization = inject(LocalizationService);
   private readonly toasts = inject(ToastService);
+  private readonly categories = inject(StoreCategoryService);
   private readonly account = inject(ConnectAccountService);
   private readonly settingsModal = inject(SettingsModalService);
   protected readonly operations = inject(StoreOperationService);
@@ -253,7 +259,9 @@ export class StoreDetailPageComponent implements OnInit {
       const badges = [
         sameVersion(entry.version, extension.latestVersion) ? this.localization.translateKey(AppStrings.Store.Page.VersionLatestBadge) : null,
         sameVersion(entry.version, extension.installedVersion) ? this.localization.translateKey(AppStrings.Store.Installed) : null,
-        installable ? null : this.localization.translateKey(AppStrings.Store.VersionUnavailable),
+        installable ? null : this.localization.translateKey(entry.unavailableReason === 'Withdrawn'
+          ? AppStrings.Store.VersionWithdrawn
+          : AppStrings.Store.VersionUnavailable),
       ].filter((badge): badge is string => badge !== null);
       return { value: entry.version, label: entry.version, disabled: !installable, badge: badges.join(' · ') || undefined };
     });
@@ -319,7 +327,17 @@ export class StoreDetailPageComponent implements OnInit {
     };
   });
 
-  protected readonly tags = computed(() => this.extension()?.tags ?? []);
+  protected readonly packageCategories = computed(() => {
+    const culture = this.localization.culture();
+    const tags = this.extension()?.tags ?? [];
+    return this.categories.categories()
+      .filter(category => tags.includes(category.id))
+      .map(category => ({ id: category.id, label: storeCategoryName(category, culture) }));
+  });
+
+  protected readonly tags = computed(() => this.categories.settled()
+    ? (this.extension()?.tags ?? []).filter(id => this.categories.find(id) === null)
+    : []);
 
   protected readonly similar = signal<StoreCatalogItemBody[]>([]);
   private similarGeneration = 0;
@@ -334,6 +352,9 @@ export class StoreDetailPageComponent implements OnInit {
       return [];
     }
     const links: StoreDetailLink[] = [];
+    if (extension.homepage && isHttps(extension.homepage) && extension.homepage !== extension.repository) {
+      links.push({ url: extension.homepage, labelKey: AppStrings.Store.Page.HomepageLink, label: null });
+    }
     if (extension.repository && isHttps(extension.repository)) {
       links.push({ url: extension.repository, labelKey: AppStrings.Store.Page.RepositoryLink, label: null });
     }
@@ -376,9 +397,12 @@ export class StoreDetailPageComponent implements OnInit {
 
   private unavailableReason(entry: StoreVersionHistoryBody): string {
     const extension = this.extension();
-    return entry.unavailableReason === 'UnsupportedPlatform' || extension?.installState === 'Unsupported'
-      ? this.localization.translateKey(AppStrings.Store.NotSupportedOnPlatform)
-      : this.localization.translateKey(AppStrings.Store.Page.VersionUnavailableReason);
+    if (entry.unavailableReason === 'UnsupportedPlatform' || extension?.installState === 'Unsupported') {
+      return this.localization.translateKey(AppStrings.Store.NotSupportedOnPlatform);
+    }
+    return this.localization.translateKey(entry.unavailableReason === 'Withdrawn'
+      ? AppStrings.Store.Page.VersionWithdrawnReason
+      : AppStrings.Store.Page.VersionUnavailableReason);
   }
 
   protected readonly platforms = computed(() => {
@@ -401,6 +425,8 @@ export class StoreDetailPageComponent implements OnInit {
       this.ratings.installs();
       untracked(() => void this.ratings.ensure([id]));
     });
+
+    void this.categories.ensure();
 
     // Mirrors the store page's subscription: an uninstall creates no operation, so nothing else
     // here would notice the extension is gone and stop showing a live Uninstall button for it.

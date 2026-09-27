@@ -33,6 +33,18 @@ describe('IconTileComponent', () => {
     fixture.detectChanges();
   });
 
+  it('requests the thumbnail under the icon content hash so replaced bytes are not served from cache', () => {
+    const api = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
+    api.getIconImageUrl.and.callFake((iconId: string, size?: number, version?: string | null) =>
+      `http://host/api/icons/${iconId}/image?size=${size}&v=${version}`);
+
+    fixture.componentRef.setInput('icon', { ...icon, contentHash: 'sha256:new' });
+    fixture.detectChanges();
+
+    const img = fixture.nativeElement.querySelector('.thumb img') as HTMLImageElement;
+    expect(img.getAttribute('src')).toBe('http://host/api/icons/icon-1/image?size=128&v=sha256:new');
+  });
+
   it('renders the thumbnail as a 1:1 square regardless of the image aspect ratio', () => {
     const thumb = fixture.nativeElement.querySelector('.thumb') as HTMLElement;
     const rect = thumb.getBoundingClientRect();

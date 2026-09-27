@@ -432,10 +432,9 @@ public class ConnectSessionServiceTests
 	}
 
 	[Test]
-	public async Task A_role_granted_at_sign_in_reaches_the_account_and_survives_a_restart()
+	public async Task A_completed_sign_in_is_stored_and_survives_a_restart()
 	{
 		await using var harness = new ConnectTestHarness();
-		harness.Identity.Roles = ["StoreTester"];
 
 		await SignIn(harness);
 
@@ -444,91 +443,16 @@ public class ConnectSessionServiceTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(harness.Service.Current.Account!.Roles, Is.EqualTo(new[] { "StoreTester" }));
-			Assert.That(harness.Store.Saved[^1].CachedRoles, Is.EqualTo(new[] { "StoreTester" }));
-			Assert.That(restarted.Current.Account!.Roles, Is.EqualTo(new[] { "StoreTester" }));
-			Assert.That(harness.Identity.RefreshCount, Is.Zero);
-		});
-	}
-
-	[Test]
-	public async Task A_role_granted_later_arrives_with_the_next_refresh()
-	{
-		await using var harness = new ConnectTestHarness();
-		await SignedIn(harness);
-		harness.Identity.Roles = ["StoreTester"];
-
-		await harness.Service.GetAccessToken();
-
-		Assert.Multiple(() =>
-		{
-			Assert.That(harness.Service.Current.Account!.Roles, Is.EqualTo(new[] { "StoreTester" }));
-			Assert.That(harness.Store.Saved[^1].CachedRoles, Is.EqualTo(new[] { "StoreTester" }));
-		});
-	}
-
-	[Test]
-	public async Task A_revoked_role_is_removed_from_the_account_and_the_stored_credential()
-	{
-		await using var harness = new ConnectTestHarness();
-		await SignedIn(harness, ["StoreTester"]);
-
-		await harness.Service.GetAccessToken();
-
-		Assert.Multiple(() =>
-		{
-			Assert.That(harness.Service.Current.Account!.Roles, Is.Empty);
-			Assert.That(harness.Store.Saved[^1].CachedRoles, Is.Empty);
-		});
-	}
-
-	[Test]
-	public async Task A_refresh_whose_token_cannot_be_verified_still_rotates_and_keeps_the_known_roles()
-	{
-		await using var harness = new ConnectTestHarness();
-		await SignedIn(harness, ["StoreTester"]);
-		harness.Identity.SigningKeysUnavailable = true;
-
-		await harness.Service.GetAccessToken();
-
-		Assert.Multiple(() =>
-		{
-			Assert.That(harness.Store.SaveCount, Is.EqualTo(1));
 			Assert.That(harness.Store.Saved[^1].RefreshToken, Is.EqualTo(harness.Identity.CurrentRefreshToken));
-			Assert.That(harness.Store.Saved[^1].CachedRoles, Is.EqualTo(new[] { "StoreTester" }));
-			Assert.That(harness.Service.Current.Account!.Roles, Is.EqualTo(new[] { "StoreTester" }));
+			Assert.That(restarted.Current.Status, Is.EqualTo(ConnectAccountStatus.SignedIn));
+			Assert.That(restarted.Current.Account!.Subject, Is.EqualTo(harness.Service.Current.Account!.Subject));
 		});
 	}
 
 	[Test]
-	public async Task A_sign_in_whose_token_cannot_be_verified_grants_no_role()
+	public async Task A_declined_sign_in_is_reported()
 	{
 		await using var harness = new ConnectTestHarness();
-		harness.Identity.Roles = ["StoreTester"];
-		harness.Identity.SigningKeysUnavailable = true;
-
-		await SignIn(harness);
-
-		Assert.That(harness.Service.Current.Account!.Roles, Is.Empty);
-	}
-
-	[Test]
-	public async Task A_granted_sign_in_does_not_wait_for_the_signing_keys()
-	{
-		await using var harness = new ConnectTestHarness();
-		harness.Identity.Roles = ["StoreTester"];
-		harness.Identity.SigningKeysGate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-
-		await SignIn(harness);
-
-		Assert.That(harness.Service.Current.Account!.Roles, Is.Empty);
-	}
-
-	[Test]
-	public async Task A_declined_sign_in_does_not_wait_for_the_signing_keys()
-	{
-		await using var harness = new ConnectTestHarness();
-		harness.Identity.SigningKeysGate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 		harness.SignInDelayHandler = (_, _) => Task.CompletedTask;
 		harness.Identity.PollResults.Enqueue(new ConnectDevicePollResult(ConnectDevicePollStatus.Denied));
 
@@ -540,31 +464,159 @@ public class ConnectSessionServiceTests
 	}
 
 	[Test]
-	public async Task Signing_out_while_the_signing_keys_are_fetched_stays_signed_out()
+	public async Task Signing_out_while_a_rotation_is_answered_does_not_bring_the_session_back()
 	{
 		await using var harness = new ConnectTestHarness();
 		await SignedIn(harness);
-		var keys = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-		harness.Identity.SigningKeysGate = keys;
+		string? rotated = null;
+
+		harness.Identity.AfterRefresh = async () =>
+		{
+			harness.Identity.AfterRefresh = null;
+			rotated = harness.Identity.CurrentRefreshToken;
+			await harness.Service.SignOut();
+		};
+
+		Assert.ThrowsAsync<ConnectAuthRejectedException>(() => harness.Service.GetAccessToken());
+		await harness.Persister.FlushAsync();
+		var stored = await harness.Store.Load();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(harness.Service.Current.Status, Is.EqualTo(ConnectAccountStatus.SignedOut));
+			Assert.That(harness.Service.Current.Account, Is.Null);
+			Assert.That(stored, Is.Null);
+			Assert.That(harness.Store.Saved, Is.Empty);
+			Assert.That(harness.Identity.RevokedTokens, Does.Contain(rotated));
+			Assert.ThrowsAsync<ConnectAuthRejectedException>(() => harness.Service.GetAccessToken());
+		});
+	}
+
+	[Test]
+	public async Task Signing_out_while_a_refresh_is_rejected_stays_signed_out()
+	{
+		await using var harness = new ConnectTestHarness();
+		await SignedIn(harness);
+
+		harness.Identity.BeforeRefresh = async () =>
+		{
+			harness.Identity.BeforeRefresh = null;
+			await harness.Service.SignOut();
+		};
+
+		Assert.ThrowsAsync<ConnectAuthRejectedException>(() => harness.Service.GetAccessToken());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(harness.Service.Current.Status, Is.EqualTo(ConnectAccountStatus.SignedOut));
+			Assert.That(harness.Service.Current.Message, Is.Null);
+			Assert.That(harness.Store.ClearCount, Is.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task Signing_out_while_a_refresh_reports_a_suspension_stays_signed_out()
+	{
+		await using var harness = new ConnectTestHarness();
+		await SignedIn(harness);
+
+		harness.Identity.BeforeRefresh = async () =>
+		{
+			harness.Identity.BeforeRefresh = null;
+			await harness.Service.SignOut();
+			harness.Identity.Results.Enqueue(FakeConnectIdentityClient.Suspended());
+		};
+
+		Assert.ThrowsAsync<ConnectAuthRejectedException>(() => harness.Service.GetAccessToken());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(harness.Service.Current.Status, Is.EqualTo(ConnectAccountStatus.SignedOut));
+			Assert.That(harness.Service.Current.Message, Is.Null);
+			Assert.That(harness.Floor.NotBefore, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task Signing_out_while_the_rotated_credential_is_being_stored_leaves_nothing_stored()
+	{
+		await using var harness = new ConnectTestHarness();
+		await SignedIn(harness);
+		var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		harness.Store.Gate = gate;
 
 		var pending = harness.Service.GetAccessToken();
-		await harness.Service.SignOut();
-		keys.SetResult();
+		await harness.Store.SaveEntered.Task.WaitAsync(TimeSpan.FromSeconds(10));
+		var signingOut = harness.Service.SignOut();
+		gate.SetResult();
 
+		await signingOut;
 		Assert.ThrowsAsync<ConnectAuthRejectedException>(() => pending);
 		var stored = await harness.Store.Load();
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(harness.Service.Current.Status, Is.EqualTo(ConnectAccountStatus.SignedOut));
-			Assert.That(harness.Identity.RefreshCount, Is.Zero);
+			Assert.That(harness.Service.Current.Account, Is.Null);
 			Assert.That(stored, Is.Null);
 		});
 	}
 
-	private static async Task<ConnectCredential> SignedIn(ConnectTestHarness harness, string[]? cachedRoles = null)
+	[Test]
+	public async Task Signing_out_finishes_even_when_the_credential_store_never_completes_a_write()
 	{
-		var credential = harness.Identity.SeedCredential(harness.Time.Now) with { CachedRoles = cachedRoles };
+		await using var harness = new ConnectTestHarness();
+		await SignedIn(harness);
+		var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		harness.Store.Gate = gate;
+
+		var pending = harness.Service.GetAccessToken();
+		await harness.Store.SaveEntered.Task.WaitAsync(TimeSpan.FromSeconds(10));
+		var signingOut = harness.Service.SignOut();
+
+		await ConnectTestHarness.WaitUntil(() =>
+			{
+				harness.Time.Advance(TimeSpan.FromSeconds(16));
+				return signingOut.IsCompleted;
+			},
+			"the sign-out waited for the stuck write without a bound");
+
+		await signingOut;
+		Assert.That(harness.Service.Current.Status, Is.EqualTo(ConnectAccountStatus.SignedOut));
+
+		gate.SetResult();
+		Assert.ThrowsAsync<ConnectAuthRejectedException>(() => pending);
+		await harness.Persister.FlushAsync();
+
+		Assert.That(await harness.Store.Load(), Is.Null, "the queued removal did not run after the stuck write");
+	}
+
+	[Test]
+	public async Task Signing_out_while_a_refresh_is_unreachable_stays_signed_out()
+	{
+		await using var harness = new ConnectTestHarness();
+		await SignedIn(harness);
+
+		harness.Identity.BeforeRefresh = async () =>
+		{
+			harness.Identity.BeforeRefresh = null;
+			await harness.Service.SignOut();
+			harness.Identity.Results.Enqueue(FakeConnectIdentityClient.Unreachable());
+		};
+
+		Assert.ThrowsAsync<ConnectAuthRejectedException>(() => harness.Service.GetAccessToken());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(harness.Service.Current.Status, Is.EqualTo(ConnectAccountStatus.SignedOut));
+			Assert.That(harness.Service.Current.Connectivity, Is.EqualTo(ConnectConnectivity.Ok));
+			Assert.That(harness.Service.Current.OfflineSince, Is.Null);
+		});
+	}
+
+	private static async Task<ConnectCredential> SignedIn(ConnectTestHarness harness)
+	{
+		var credential = harness.Identity.SeedCredential(harness.Time.Now);
 		harness.Store.Seed(credential);
 		await harness.Service.Initialize();
 

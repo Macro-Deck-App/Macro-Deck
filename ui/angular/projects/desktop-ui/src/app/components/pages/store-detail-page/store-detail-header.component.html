@@ -29,7 +29,11 @@
           {{ (badge === 'uses' ? 'macrodeck.app:Store.Page.UsesAiBadge' : 'macrodeck.app:Store.Page.MadeWithAiBadge') | translate }}
         </span>
       }
-      <app-store-trust-badge [kind]="extension().kind" [trust]="extension().trust" [pluginId]="extension().id" />
+      <app-store-trust-badge
+        [kind]="extension().kind"
+        [trust]="extension().trust"
+        [pluginId]="extension().id"
+        [signingRevoked]="extension().signingRevoked === true" />
     </div>
     <h1 class="header-title">{{ extension().name }}</h1>
     @if (extension().publisher) {

@@ -42,15 +42,6 @@ public sealed class WidgetIconResources : IWidgetIconResources
 	/// <summary>The owner id every icon resource this bridge registers is namespaced under.</summary>
 	public const string OwnerId = "app.macro-deck.widget-icon";
 
-	// A deck tile never needs a sharper icon than this, and the retired Slider component used the same
-	// rendition size. The further candidates only come into play when the first is too large to register.
-	private static readonly (int Size, bool StaticFrame)[] RenditionCandidates =
-	[
-		(256, false),
-		(128, false),
-		(128, true)
-	];
-
 	// Comfortably above how many distinct icons a real deck's worth of Action Buttons and Sliders puts on
 	// screen at once, while still bounding the process's lifetime memory against an install that has cycled
 	// through hundreds of icons over time.
@@ -113,69 +104,38 @@ public sealed class WidgetIconResources : IWidgetIconResources
 
 		try
 		{
-			// Deliberately not WebP, even though every current desktop browser reads it: these bytes are
-			// registered once, server-side, and served by resource id from a store that does no content
-			// negotiation - so whatever is chosen here is what every client gets. Safari only learned
-			// WebP in 14, which left every icon blank on iOS 13 and older. The fallback is a disk-cached
-			// PNG, or GIF for an animated icon, so animation survives; the cost is a somewhat larger
-			// rendition at 256px, which is the cheaper trade on a local network than an unreadable icon.
-			//
-			// Registering both encodings and negotiating in the controller was the alternative, and was
-			// rejected: IUiResourceStore is an unbounded in-memory dictionary with no eviction (issue
-			// #425), and doubling every icon in it costs more than the bytes saved on the wire.
-			//
-			// A GIF of a long animation can outgrow what a UI resource may carry - 180 frames at 256px
-			// came out at 3.6 MB against a 2 MB limit, and the store refuses it. Rather than draw no icon
-			// at all, the rendition steps down to 128px and finally to the animation's first frame, so
-			// the tile always shows the icon that was picked, at worst without its motion.
-			foreach (var (size, staticFrame) in RenditionCandidates)
+			var rendition = await WidgetIconRenditions.ProduceAsync(source, value.Reference, cancellationToken)
+				.ConfigureAwait(false);
+
+			switch (rendition.Status)
 			{
-				var image = await source
-					.GetImageAsync(value.Reference, size, acceptWebp: false, staticFrame, cancellationToken)
-					.ConfigureAwait(false);
-
-				if (image is null)
+				case WidgetIconRenditionStatus.Rendered:
 				{
+					var resource = _resourceStore.Register(new UiResourceRegistration
+					{
+						OwnerId = OwnerId,
+						Name = $"{value.Type}.{value.Reference}",
+						MediaType = rendition.MediaType!,
+						Content = rendition.Content!,
+					});
+
+					Store(value, resource);
+
+					return resource;
+				}
+
+				case WidgetIconRenditionStatus.TooLarge:
+					_logger.Warning(
+						"Widget icon '{Type}:{Reference}' was not registered: no rendition fits the {Limit} byte limit",
+						value.Type,
+						value.Reference,
+						ProtocolLimits.MaxUiResourceBytes);
+
 					return null;
-				}
 
-				byte[] content;
-				try
-				{
-					using var memory = new MemoryStream();
-					await image.Content.CopyToAsync(memory, cancellationToken).ConfigureAwait(false);
-					content = memory.ToArray();
-				}
-				finally
-				{
-					await image.Content.DisposeAsync().ConfigureAwait(false);
-				}
-
-				if (content.Length > ProtocolLimits.MaxUiResourceBytes)
-				{
-					continue;
-				}
-
-				var resource = _resourceStore.Register(new UiResourceRegistration
-				{
-					OwnerId = OwnerId,
-					Name = $"{value.Type}.{value.Reference}",
-					MediaType = image.MediaType,
-					Content = content,
-				});
-
-				Store(value, resource);
-
-				return resource;
+				default:
+					return null;
 			}
-
-			_logger.Warning(
-				"Widget icon '{Type}:{Reference}' was not registered: no rendition fits the {Limit} byte limit",
-				value.Type,
-				value.Reference,
-				ProtocolLimits.MaxUiResourceBytes);
-
-			return null;
 		}
 #pragma warning disable CA1031 // A missing or unreadable icon must leave a usable widget behind, never fault the session.
 		catch (Exception exception) when (exception is not OperationCanceledException)

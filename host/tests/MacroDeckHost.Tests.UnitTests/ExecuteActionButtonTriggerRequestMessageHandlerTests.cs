@@ -686,6 +686,12 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 
 	private sealed class FakeActionExecutionCoordinator : IActionExecutionCoordinator, IDisposable
 	{
+		public Task<ActionExecutionDispatch> RunBoundedAsync(
+			Func<IServiceProvider, CancellationToken, Task<FlowExecutionResult>> run,
+			TimeSpan bound,
+			CancellationToken cancellationToken)
+			=> throw new NotSupportedException();
+
 		public FakeUiTransport Transport { get; } = new();
 
 		public FlowExecutionResult? InlineResult { get; set; }
@@ -865,7 +871,8 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 			string? scopeRefId,
 			VariableType type,
 			object? initialValue,
-			int? decimalPlaces) => throw new NotSupportedException();
+			int? decimalPlaces,
+			VariableFileSource? fileSource = null) => throw new NotSupportedException();
 
 		public Task<Result<VariableEntity, VariableError>> SetValue(Guid id,
 			object? value,
@@ -874,7 +881,8 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 		public Task<Result<VariableEntity, VariableError>> UpdateUserVariable(
 			Guid id,
 			string? name,
-			int? decimalPlaces) => throw new NotSupportedException();
+			int? decimalPlaces,
+			VariableFileSource? fileSource = null) => throw new NotSupportedException();
 
 		public Task<Result<VariableError>> DeleteUserVariable(Guid id) => throw new NotSupportedException();
 

@@ -2,8 +2,9 @@ namespace MacroDeck.Signing;
 
 /// <summary>
 /// The public Ed25519 key of Macro Deck's offline root, the trust anchor every
-/// <see cref="Certificates.SigningCertificate"/> chains to. Macro Deck itself never holds the matching
-/// private key at runtime; it exists only in the offline key-generation tool.
+/// <see cref="Certificates.SigningCertificate"/> chains to, directly or through one issuer certificate the root
+/// signed. Macro Deck itself never holds the matching private key at runtime; it exists only in the offline
+/// key-generation tool.
 /// </summary>
 public static class MacroDeckRootKey
 {

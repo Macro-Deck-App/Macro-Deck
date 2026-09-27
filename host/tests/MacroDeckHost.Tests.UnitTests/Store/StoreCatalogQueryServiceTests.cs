@@ -4,6 +4,7 @@ using MacroDeckHost.Application.Store.Model;
 using MacroDeckHost.Infrastructure.Plugins;
 using MacroDeckHost.Infrastructure.Store;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
+using MacroDeckHost.Infrastructure.Plugins.Trust;
 
 namespace MacroDeckHost.Tests.UnitTests.Store;
 
@@ -28,7 +29,7 @@ internal sealed class StoreCatalogQueryServiceTests
 		_query = new StoreCatalogQueryService(_catalog,
 			new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None),
 			new JsonStoreInstallationStore(_paths, Serilog.Core.Logger.None),
-			new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None));
+			new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners());
 	}
 
 	[TearDown]
@@ -408,6 +409,74 @@ internal sealed class StoreCatalogQueryServiceTests
 	}
 
 	[Test]
+	public void Categories_count_the_visible_packages_of_the_requested_kinds_that_carry_them()
+	{
+		_catalog.Swap(new StoreCatalogSnapshot
+		{
+			Sequence = 1,
+			Entries =
+			[
+				Entry("obs", "OBS") with { Tags = ["streaming"] },
+				Entry("twitch", "Twitch") with { Tags = ["Streaming", "gaming"] },
+				Entry("removed", "Removed") with { Tags = ["streaming"] },
+				Entry("stream-icons", "Stream Icons", StoreExtensionKind.IconPack) with { Tags = ["streaming", "icons"] },
+				Entry("stream-profile", "Stream Profile", StoreExtensionKind.ProfileTemplate) with { Tags = ["streaming"] }
+			],
+			RemovedPackages = [new StoreRemovedPackage { Id = "removed" }],
+			Categories = [Category("icons"), Category("streaming"), Category("music")]
+		});
+
+		var browse = _query.Categories(_browseKinds);
+		var plugins = _query.Categories([StoreExtensionKind.Plugin]);
+		var everything = _query.Categories(null);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(browse.Select(entry => (entry.Category.Id, entry.Count)),
+				Is.EqualTo(new[] { ("icons", 1), ("streaming", 3), ("music", 0) }));
+			Assert.That(plugins.Select(entry => (entry.Category.Id, entry.Count)),
+				Is.EqualTo(new[] { ("icons", 0), ("streaming", 2), ("music", 0) }));
+			Assert.That(everything.Single(entry => entry.Category.Id == "streaming").Count, Is.EqualTo(4));
+		});
+	}
+
+	[Test]
+	public void With_the_platform_filter_categories_count_only_packages_that_run_here()
+	{
+		_catalog.Swap(new StoreCatalogSnapshot
+		{
+			Sequence = 1,
+			Entries =
+			[
+				Entry("elsewhere", "Elsewhere") with { Tags = ["music"], SupportedRids = ["plan9-sparc"] },
+				Entry("here", "Here") with
+				{
+					Tags = ["music"],
+					SupportedRids = [global::System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier]
+				},
+				Entry("anywhere", "Anywhere") with { Tags = ["gaming"] },
+				Entry("nowhere", "Nowhere") with { Tags = ["system"], SupportedRids = ["plan9-sparc"] }
+			],
+			Categories = [Category("music"), Category("gaming"), Category("system")]
+		});
+
+		var everything = _query.Categories(_browseKinds);
+		var runsHere = _query.Categories(_browseKinds, supportedOnly: true);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(everything.Select(entry => entry.Count), Is.EqualTo(new[] { 2, 1, 1 }));
+			Assert.That(runsHere.Select(entry => entry.Count), Is.EqualTo(new[] { 1, 1, 0 }));
+		});
+	}
+
+	[Test]
+	public void An_unavailable_registry_has_no_categories()
+	{
+		Assert.That(_query.Categories(_browseKinds), Is.Empty);
+	}
+
+	[Test]
 	public void A_search_also_finds_packages_by_tag_after_every_other_kind_of_match()
 	{
 		Seed([
@@ -430,6 +499,174 @@ internal sealed class StoreCatalogQueryServiceTests
 		var all = Page(new StoreCatalogQuery { Section = StoreCatalogSection.All });
 
 		Assert.That(Ids(popular), Is.EqualTo(Ids(all)));
+	}
+
+	[Test]
+	public void A_package_with_only_an_older_version_withdrawn_stays_in_the_store()
+	{
+		Seed([Versioned("com.acme.icons", "1.3.0", "1.3.0", "1.2.0")],
+			removed: [Removal("com.acme.icons", "1.2.0")]);
+
+		var page = Page(new StoreCatalogQuery { Section = StoreCatalogSection.All });
+		var found = _query.Find(StoreExtensionKind.IconPack, "com.acme.icons");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Ids(page), Is.EqualTo(new[] { "com.acme.icons" }));
+			Assert.That(found.Success, Is.True);
+			Assert.That(found.Data!.InstallState, Is.EqualTo(StoreInstallState.NotInstalled));
+			Assert.That(found.Data.Withdrawal, Is.Null);
+			Assert.That(found.Data.WithdrawnVersions, Is.EqualTo(new[] { "1.2.0" }));
+		});
+	}
+
+	[Test]
+	public void An_installed_withdrawn_version_carries_the_registrys_reason_and_still_gets_the_update()
+	{
+		Seed([Versioned("com.acme.icons", "1.3.0", "1.3.0", "1.2.0")],
+			removed: [Removal("com.acme.icons", "1.2.0")]);
+		InstallIconPack("com.acme.icons", "1.2.0");
+
+		var item = _query.Find(StoreExtensionKind.IconPack, "com.acme.icons").Data!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(item.InstallState, Is.EqualTo(StoreInstallState.UpdateAvailable));
+			Assert.That(item.InstalledVersionRemoval?.Reason, Is.EqualTo("Compromised signing key"));
+			Assert.That(item.InstalledVersionRemoval?.Replacement, Is.EqualTo("com.acme.better-icons"));
+		});
+	}
+
+	[Test]
+	public void A_package_whose_latest_version_is_withdrawn_is_hidden_until_it_is_installed_and_then_only_listed_as_installed()
+	{
+		Seed([Versioned("com.acme.icons", "2.0.0", "2.0.0", "1.0.0")],
+			removed: [Removal("com.acme.icons", "2.0.0")]);
+		_catalog.Swap(_catalog.Snapshot with { Categories = [Category("icons")] });
+
+		var hiddenFind = _query.Find(StoreExtensionKind.IconPack, "com.acme.icons");
+		var hiddenInstalled = Page(new StoreCatalogQuery { Installed = true });
+
+		InstallIconPack("com.acme.icons", "1.0.0");
+
+		var browse = Page(new StoreCatalogQuery { Section = StoreCatalogSection.All });
+		var installed = Page(new StoreCatalogQuery { Installed = true });
+		var found = _query.Find(StoreExtensionKind.IconPack, "com.acme.icons");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(hiddenFind.Error, Is.EqualTo(StoreCatalogError.NotFound));
+			Assert.That(Ids(hiddenInstalled), Is.Empty);
+			Assert.That(Ids(browse), Is.Empty);
+			Assert.That(_query.Categories(null).Single().Count, Is.EqualTo(0));
+			Assert.That(Ids(installed), Is.EqualTo(new[] { "com.acme.icons" }));
+			Assert.That(_query.Installed().Select(item => item.Entry.Id), Is.EqualTo(new[] { "com.acme.icons" }));
+			Assert.That(found.Success, Is.True);
+			Assert.That(found.Data!.InstallState, Is.EqualTo(StoreInstallState.Installed));
+			Assert.That(found.Data.Withdrawal?.Reason, Is.EqualTo("Compromised signing key"));
+			Assert.That(found.Data.InstalledVersionRemoval, Is.Null);
+		});
+	}
+
+	[Test]
+	public void An_installed_withdrawn_version_newer_than_the_moved_back_latest_is_flagged_but_not_an_update()
+	{
+		Seed([Versioned("com.acme.icons", "1.2.0", "1.3.0", "1.2.0")],
+			removed: [Removal("com.acme.icons", "1.3.0")]);
+		InstallIconPack("com.acme.icons", "1.3.0");
+
+		var item = _query.Find(StoreExtensionKind.IconPack, "com.acme.icons").Data!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(item.InstallState, Is.EqualTo(StoreInstallState.Installed));
+			Assert.That(item.Withdrawal, Is.Null);
+			Assert.That(item.InstalledVersionRemoval, Is.Not.Null);
+		});
+	}
+
+	private static StoreRemovedPackage Removal(string id, string version) => new()
+	{
+		Id = id,
+		Version = version,
+		Reason = "Compromised signing key",
+		Replacement = "com.acme.better-icons"
+	};
+
+	private void InstallIconPack(string id, string version) =>
+		new JsonStoreInstallationStore(_paths, Serilog.Core.Logger.None).Save(new StoreInstallationRecord
+		{
+			Origin = "https://registry.example/",
+			Kind = StoreExtensionKind.IconPack,
+			PackageId = id,
+			Version = version
+		});
+
+	private static StoreCatalogEntry Versioned(string id, string latest, params string[] versions) =>
+		Entry(id, id, StoreExtensionKind.IconPack) with
+		{
+			LatestVersion = latest,
+			LatestRelease = new StoreReleaseManifest
+			{
+				Version = latest,
+				ArtifactUrl = new Uri($"https://cdn.example/{id}-{latest}.bin"),
+				Sha256 = new string('a', 64),
+				Size = 16
+			},
+			Tags = ["icons"],
+			History = versions.Select(version => new StoreVersionHistoryEntry { Version = version, HasRelease = true }).ToList()
+		};
+
+	private static StoreCategory Category(string id) =>
+		new() { Id = id, Names = new Dictionary<string, string> { ["en"] = id } };
+
+	[Test]
+	public void An_installed_plugin_whose_signing_issuer_the_registry_revoked_is_flagged()
+	{
+		SeedWithRevoked(["cert_issuer00000000000000000000000001"],
+			Entry("com.acme.revoked", "Revoked"),
+			Entry("com.acme.fine", "Fine"));
+		InstallSignedPlugin("com.acme.revoked", "cert_leaf000000000000000000000000001", "cert_issuer00000000000000000000000001");
+		InstallSignedPlugin("com.acme.fine", "cert_leaf000000000000000000000000002", "cert_issuer00000000000000000000000002");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_query.Find(StoreExtensionKind.Plugin, "com.acme.revoked").Data!.SigningRevoked, Is.True);
+			Assert.That(_query.Find(StoreExtensionKind.Plugin, "com.acme.fine").Data!.SigningRevoked, Is.False);
+		});
+	}
+
+	[Test]
+	public void An_installed_plugin_whose_own_certificate_the_registry_revoked_is_flagged()
+	{
+		SeedWithRevoked(["cert_leaf000000000000000000000000001"], Entry("com.acme.revoked", "Revoked"));
+		InstallSignedPlugin("com.acme.revoked", "cert_leaf000000000000000000000000001", null);
+
+		Assert.That(_query.Find(StoreExtensionKind.Plugin, "com.acme.revoked").Data!.SigningRevoked, Is.True);
+	}
+
+	[Test]
+	public void A_plugin_that_is_not_installed_is_never_flagged()
+	{
+		SeedWithRevoked(["cert_leaf000000000000000000000000001"], Entry("com.acme.revoked", "Revoked"));
+
+		Assert.That(_query.Find(StoreExtensionKind.Plugin, "com.acme.revoked").Data!.SigningRevoked, Is.False);
+	}
+
+	private void SeedWithRevoked(IReadOnlyList<string> revokedKeyIds, params StoreCatalogEntry[] entries) =>
+		_catalog.Swap(new StoreCatalogSnapshot { Sequence = 1, Entries = entries, RevokedKeyIds = revokedKeyIds });
+
+	private void InstallSignedPlugin(string pluginId, string certificateId, string? issuerId)
+	{
+		var pluginDirectory = Path.Combine(_paths.PluginsDirectory, pluginId);
+		var versionDirectory = Path.Combine(pluginDirectory, "versions", "1.0.0");
+		Directory.CreateDirectory(versionDirectory);
+		File.WriteAllText(Path.Combine(versionDirectory, "manifest.json"), "{}");
+		File.WriteAllText(Path.Combine(versionDirectory, "certificate.json"),
+			issuerId is null
+				? $"{{\"certificateId\":\"{certificateId}\"}}"
+				: $"{{\"certificateId\":\"{certificateId}\",\"issuer\":\"{issuerId}\"}}");
+		File.WriteAllText(Path.Combine(pluginDirectory, "current.json"), "{\"version\":\"1.0.0\"}");
 	}
 
 	private void SeedSearchable() =>

@@ -25,6 +25,9 @@ public sealed class IconPackManifest
 
 	public string? SourceId { get; set; }
 
+	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+	public string? SourceRevision { get; set; }
+
 	public DateTime CreatedAt { get; set; }
 
 	public DateTime UpdatedAt { get; set; }

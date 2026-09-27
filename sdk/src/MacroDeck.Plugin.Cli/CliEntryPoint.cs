@@ -40,6 +40,7 @@ internal static class CliEntryPoint
 		rootCommand.Add(InspectCommand.Create());
 		rootCommand.Add(PackCommand.Create());
 		rootCommand.Add(MergeCommand.Create());
+		rootCommand.Add(IconPackCommand.Create());
 		rootCommand.Add(RunCommand.Create(pairingProbe));
 		rootCommand.Add(TestCommand.Create());
 		rootCommand.Add(KeygenCommand.Create());

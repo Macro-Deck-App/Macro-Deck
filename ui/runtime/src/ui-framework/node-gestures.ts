@@ -19,12 +19,20 @@ export function nodeClaimsValue(node: UiNode): boolean {
   return emitsEvent(node, UiComponentEvents.Adjust) || emitsEvent(node, UiComponentEvents.Change);
 }
 
+export function nodeDeclaresPointerFamily(node: UiNode): boolean {
+  return emitsEvent(node, UiComponentEvents.PointerDown)
+    || emitsEvent(node, UiComponentEvents.PointerMove)
+    || emitsEvent(node, UiComponentEvents.PointerUp)
+    || emitsEvent(node, UiComponentEvents.Tap);
+}
+
 export function nodeDeclaresGesture(node: UiNode): boolean {
   return emitsEvent(node, UiComponentEvents.Drag)
     || emitsEvent(node, UiComponentEvents.DragEnd)
     || emitsEvent(node, UiComponentEvents.Swipe)
     || emitsEvent(node, UiComponentEvents.Pinch)
-    || emitsEvent(node, UiComponentEvents.PinchEnd);
+    || emitsEvent(node, UiComponentEvents.PinchEnd)
+    || nodeDeclaresPointerFamily(node);
 }
 
 export function nodeIsDisabledRegion(node: UiNode | null | undefined): boolean {

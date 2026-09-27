@@ -1,0 +1,168 @@
+<div class="usb">
+  @if (error(); as message) {
+    <shared-error-banner [message]="message" (dismiss)="dismissError()" />
+  }
+
+  <shared-settings-section
+    class="usb__feature"
+    [heading]="'macrodeck.app:Settings.Usb.FeatureTitle' | translate"
+    [description]="'macrodeck.app:Settings.Usb.FeatureDescription' | translate">
+    <div settingsSectionAction class="usb__feature-control">
+      <span class="usb__chip usb__chip--pending usb__experimental">
+        {{ 'macrodeck.app:Settings.Usb.ExperimentalBadge' | translate }}
+      </span>
+      <shared-toggle-switch
+        [ariaLabel]="'macrodeck.app:Settings.Usb.FeatureTitle' | translate"
+        [disabled]="!loaded()"
+        [busy]="enabledBusy()"
+        [checked]="enabled()"
+        (changed)="setEnabled($event)" />
+    </div>
+    <p class="usb__muted">{{ 'macrodeck.app:Settings.Usb.ExperimentalNote' | translate }}</p>
+  </shared-settings-section>
+
+  @if (loaded() && enabled()) {
+    <shared-settings-section [heading]="'macrodeck.app:Settings.Usb.StatusHeading' | translate">
+      @if (bridgeNote(); as note) {
+        <p class="usb__note">
+          <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+          <span>{{ note }}</span>
+        </p>
+      }
+      <shared-settings-row
+        class="usb__status-android"
+        [label]="'macrodeck.app:Settings.Usb.AndroidLabel' | translate"
+        [description]="androidAvailable() ? undefined : ('macrodeck.app:Settings.Usb.AndroidDescription' | translate)">
+        <span class="usb__chip" [class.usb__chip--ok]="androidAvailable()" [class.usb__chip--neutral]="!androidAvailable()">
+          {{ availabilityLabel(androidAvailable()) }}
+        </span>
+      </shared-settings-row>
+      <shared-settings-row
+        class="usb__status-ios"
+        [label]="'macrodeck.app:Settings.Usb.IosLabel' | translate"
+        [description]="iosAvailable() ? undefined : ('macrodeck.app:Settings.Usb.IosDescription' | translate)">
+        <span class="usb__chip" [class.usb__chip--ok]="iosAvailable()" [class.usb__chip--neutral]="!iosAvailable()">
+          {{ availabilityLabel(iosAvailable()) }}
+        </span>
+      </shared-settings-row>
+    </shared-settings-section>
+
+    <shared-settings-section [heading]="'macrodeck.app:Settings.Usb.DevicesHeading' | translate">
+      <shared-button
+        settingsSectionAction
+        variant="secondary"
+        size="icon-compact"
+        [ariaLabel]="'macrodeck.app:Settings.Usb.RescanAriaLabel' | translate"
+        [loading]="rescanning()"
+        (click)="rescan()">
+        <span class="icon icon-refresh icon-sm" aria-hidden="true"></span>
+      </shared-button>
+
+      @if (devices().length === 0) {
+        <shared-empty-state
+          icon="usb"
+          [heading]="'macrodeck.app:Settings.Usb.NoDevicesHeading' | translate"
+          [message]="'macrodeck.app:Settings.Usb.NoDevicesMessage' | translate" />
+      } @else {
+        <ul class="usb__list">
+          @for (device of devices(); track device.id) {
+            <li class="usb__row">
+              <span
+                class="usb__row-icon icon icon-md {{ platformIcon(device) }}"
+                role="img"
+                [attr.aria-label]="platformLabel(device)"></span>
+
+              <div class="usb__row-info">
+                <span class="usb__row-name">{{ deviceName(device) }}</span>
+                @if (device.serial; as serial) {
+                  <button
+                    type="button"
+                    class="usb__row-serial"
+                    [attr.aria-label]="(serialRevealed(serial)
+                      ? 'macrodeck.app:Settings.Adb.HideSerial'
+                      : 'macrodeck.app:Settings.Adb.ShowSerial') | translate"
+                    [attr.aria-pressed]="serialRevealed(serial)"
+                    (click)="toggleSerial(serial)">
+                    <span>{{ displaySerial(serial) }}</span>
+                    <span
+                      class="icon icon-sm"
+                      [class.icon-unlock]="serialRevealed(serial)"
+                      [class.icon-lock]="!serialRevealed(serial)"
+                      aria-hidden="true"></span>
+                  </button>
+                }
+                @if (device.state === 'Connecting') {
+                  <span class="usb__row-hint">{{ 'macrodeck.app:Settings.Usb.StateConnectingHint' | translate }}</span>
+                }
+                @if (device.state === 'Stopped') {
+                  <span class="usb__row-hint">{{ 'macrodeck.app:Settings.Usb.StoppedHint' | translate }}</span>
+                }
+                @if (device.state === 'Closed') {
+                  <span class="usb__row-hint">{{ 'macrodeck.app:Settings.Usb.ReplugHint' | translate }}</span>
+                }
+                @if (device.canConnect && device.knownToAdb) {
+                  <span class="usb__row-hint usb__row-adb">{{ 'macrodeck.app:Settings.Usb.AdbSessionsNote' | translate }}</span>
+                }
+              </div>
+
+              <div class="usb__row-trailing">
+                <span class="usb__chip usb__row-state usb__chip--{{ stateTone(device.state) }}" role="status">
+                  {{ stateLabel(device.state) }}
+                </span>
+                @if (device.canConnect) {
+                  <shared-button
+                    variant="secondary"
+                    [disabled]="connectingId() !== null || !bridgeAvailable()"
+                    [loading]="connectingId() === device.id"
+                    (click)="connect(device)">
+                    {{ 'macrodeck.app:Settings.Usb.ConnectButton' | translate }}
+                  </shared-button>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      }
+
+      @if (hasAndroid() || hasIos()) {
+        <div class="usb__notes">
+          @if (hasAndroid()) {
+            <p class="usb__muted usb__note-android">{{ 'macrodeck.app:Settings.Usb.ConnectHint' | translate }}</p>
+          }
+          @if (hasIos()) {
+            <p class="usb__muted usb__note-ios">{{ 'macrodeck.app:Settings.Usb.IosHint' | translate }}</p>
+          }
+        </div>
+      }
+    </shared-settings-section>
+
+    <shared-settings-section
+      [heading]="'macrodeck.app:Settings.Usb.RememberedHeading' | translate"
+      [description]="'macrodeck.app:Settings.Usb.RememberedDescription' | translate">
+      @if (rememberedDevices().length === 0) {
+        <p class="usb__muted">{{ 'macrodeck.app:Settings.Usb.NoRemembered' | translate }}</p>
+      } @else {
+        <ul class="usb__list">
+          @for (device of rememberedDevices(); track device.serial) {
+            <li class="usb__row usb__remembered">
+              <span class="usb__row-icon icon icon-md icon-device-phone" aria-hidden="true"></span>
+              <div class="usb__row-info">
+                <span class="usb__row-name">{{ rememberedName(device) }}</span>
+                <span class="usb__row-serial usb__row-serial--static">{{ displaySerial(device.serial) }}</span>
+              </div>
+              <div class="usb__row-trailing">
+                <shared-button
+                  variant="secondary"
+                  [disabled]="forgettingSerial() !== null"
+                  [loading]="forgettingSerial() === device.serial"
+                  (click)="forget(device.serial)">
+                  {{ 'macrodeck.app:Settings.Usb.ForgetButton' | translate }}
+                </shared-button>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </shared-settings-section>
+  }
+</div>

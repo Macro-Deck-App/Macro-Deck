@@ -5,8 +5,7 @@ public sealed record ConnectCredential(
 	string Subject,
 	string? CachedDisplayName,
 	string? CachedPictureUrl,
-	DateTimeOffset IssuedAtUtc,
-	IReadOnlyList<string>? CachedRoles = null);
+	DateTimeOffset IssuedAtUtc);
 
 public interface IConnectCredentialStore
 {

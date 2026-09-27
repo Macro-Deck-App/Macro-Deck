@@ -3,6 +3,7 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk.Devices;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Caching;
+using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Rendering;
@@ -295,7 +296,7 @@ public sealed class DeviceSurfaceBuilder
 			return null;
 		}
 
-		return icon.MasterContentHash ?? icon.SourceContentHash;
+		return IconImageVersion.Of(icon);
 	}
 
 	// A cross-profile navigation moves the session off the device's assigned profile, so the session's

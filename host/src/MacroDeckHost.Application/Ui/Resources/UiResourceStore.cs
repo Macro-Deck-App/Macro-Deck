@@ -3,6 +3,7 @@ using MacroDeck.Plugin.Protocol.Assets;
 using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Ui.Model.Identity;
 using MacroDeck.Ui.Model.Resources;
+using MacroDeckHost.Application.Plugins.IconPacks;
 
 namespace MacroDeckHost.Application.Ui.Resources;
 
@@ -16,6 +17,13 @@ public sealed class UiResourceStore : IUiResourceStore
 		ArgumentNullException.ThrowIfNull(registration);
 
 		var resourceId = $"{registration.OwnerId}.{registration.Name}";
+
+		// Plugin icon handles are served from the icon pack store under this owner; nothing may shadow them.
+		if (resourceId.StartsWith(PluginIconReferences.ResourceOwnerId + ".", StringComparison.Ordinal))
+		{
+			throw new ArgumentException($"'{PluginIconReferences.ResourceOwnerId}' is a reserved resource owner.",
+				nameof(registration));
+		}
 
 		if (!UiIdentifier.TryValidate(resourceId, out var error))
 		{

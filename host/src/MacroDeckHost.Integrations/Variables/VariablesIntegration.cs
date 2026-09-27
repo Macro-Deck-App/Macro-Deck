@@ -13,9 +13,18 @@ public sealed class VariablesIntegration : IIntegration, ISystemIntegration
 
 	private IUserVariableApi? _variables;
 
+	// Built-in integrations are created by Activator.CreateInstance and never see the DI container, so
+	// the host installs its variable lookup here once it is built.
+	internal static VariableReader? HostVariableReader { get; set; }
+
 	public VariablesIntegration()
+		: this(() => HostVariableReader)
 	{
-		Actions = [new SetVariableActionDefinition(() => _variables)];
+	}
+
+	internal VariablesIntegration(Func<VariableReader?> reader)
+	{
+		Actions = [new SetVariableActionDefinition(() => _variables), new WriteVariableToFileActionDefinition(reader)];
 	}
 
 	public string Id => IntegrationId;

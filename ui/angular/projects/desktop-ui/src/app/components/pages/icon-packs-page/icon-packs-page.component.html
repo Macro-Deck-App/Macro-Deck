@@ -46,7 +46,7 @@
                 <span class="tag">{{ 'macrodeck.app:IconPacks.DefaultTag' | translate }}</span>
               }
               @if (sourceLabel(pack); as source) {
-                <span class="tag" [title]="'macrodeck.app:IconPacks.ManagedByStore' | translate">{{ source }}</span>
+                <span class="tag" [title]="sourceTitle(pack)">{{ source }}</span>
               }
             </shared-rail-item>
           </li>
@@ -71,7 +71,7 @@
             <span class="tag"><span class="icon icon-lock icon-xs"></span> {{ 'macrodeck.app:IconPacks.ReadOnly' | translate }}</span>
           }
           @if (sourceLabel(pack); as source) {
-            <span class="tag" [title]="'macrodeck.app:IconPacks.ManagedByStore' | translate">{{ source }}</span>
+            <span class="tag" [title]="sourceTitle(pack)">{{ source }}</span>
           }
           @if (pack.aiAssets === 'Generated') {
             <span class="tag"><span class="icon icon-sparkles icon-xs" aria-hidden="true"></span> {{ 'macrodeck.app:IconPacks.AiGenerated' | translate }}</span>

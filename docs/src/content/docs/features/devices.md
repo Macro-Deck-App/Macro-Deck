@@ -253,7 +253,8 @@ if (appearance?.IconId is { } iconId)
 - **`knownETag`** skips an unchanged transfer: the result has `NotModified` set and empty `Content`.
 - **Cache by `IconId` and `IconVersion`.** Re-rendering an icon keeps its id; the version says the bytes
   changed.
-- **`size: null`** serves the largest rendered variant, never the imported master.
+- **`size: null`** serves the largest size variant (512 px), which Macro Deck creates from the master when a
+  pack arrived without it. An icon no larger than that is served as it is.
 - **Too large** throws `DeviceSessionException` with `ReasonCode` `IconTooLarge`; the session stays open.
 
 The bytes travel the `host.asset.*` chunked channel; `GetIconAsync` hides that.

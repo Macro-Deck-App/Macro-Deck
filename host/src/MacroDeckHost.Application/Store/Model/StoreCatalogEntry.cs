@@ -18,6 +18,8 @@ public sealed record StoreCatalogEntry
 
 	public string? Repository { get; init; }
 
+	public string? Homepage { get; init; }
+
 	public string? License { get; init; }
 
 	public IReadOnlyList<StoreExtensionLink> AdditionalLinks { get; init; } = [];

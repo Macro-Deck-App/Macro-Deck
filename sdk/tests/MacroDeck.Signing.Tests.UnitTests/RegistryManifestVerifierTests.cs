@@ -135,4 +135,63 @@ internal sealed class RegistryManifestVerifierTests
 
 		Assert.That(result.Success, Is.False);
 	}
+
+	[Test]
+	public async Task A_registry_manifest_signed_by_an_issuer_signed_registry_certificate_verifies()
+	{
+		var issuer = TestPki.IssueIssuer();
+		var issued = TestPki.IssueCertificate(subjectKind: "service",
+			keyUsage: [SigningCertificateChain.RegistryKeyUsage],
+			issuer: issuer);
+		var (manifestPath, signaturePath) = WriteSignedRegistry(issued);
+
+		var result = await RegistryManifestVerifier.VerifyAsync(manifestPath,
+			signaturePath,
+			issued.CertificateBytes,
+			issued.CertificateSignatureBytes,
+			issuer.CertificateBytes,
+			issuer.CertificateSignatureBytes,
+			TestPki.Root.PublicKey,
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True, result.Message);
+			Assert.That(result.CertificateId, Is.EqualTo(issued.CertificateId));
+			Assert.That(result.IssuerCertificateId, Is.EqualTo(issuer.CertificateId));
+		});
+	}
+
+	[Test]
+	public async Task An_issuer_signed_registry_certificate_without_its_issuer_is_refused_by_the_root_only_overload()
+	{
+		var issuer = TestPki.IssueIssuer();
+		var issued = TestPki.IssueCertificate(subjectKind: "service",
+			keyUsage: [SigningCertificateChain.RegistryKeyUsage],
+			issuer: issuer);
+		var (manifestPath, signaturePath) = WriteSignedRegistry(issued);
+
+		var result = await RegistryManifestVerifier.VerifyAsync(manifestPath,
+			signaturePath,
+			issued.CertificateBytes,
+			issued.CertificateSignatureBytes,
+			TestPki.Root.PublicKey);
+
+		Assert.That(result.Error, Is.EqualTo(SigningError.CertificateIssuerMissing));
+	}
+
+	[Test]
+	public async Task A_registry_manifest_cannot_be_signed_by_an_issuer_certificate_itself()
+	{
+		var issuer = TestPki.IssueIssuer();
+		var (manifestPath, signaturePath) = WriteSignedRegistry(issuer);
+
+		var result = await RegistryManifestVerifier.VerifyAsync(manifestPath,
+			signaturePath,
+			issuer.CertificateBytes,
+			issuer.CertificateSignatureBytes,
+			TestPki.Root.PublicKey);
+
+		Assert.That(result.Error, Is.EqualTo(SigningError.CertificateWrongPurpose));
+	}
 }

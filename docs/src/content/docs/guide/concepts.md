@@ -89,9 +89,31 @@ to see its state and attributes. If you know the entity id, for example `light.o
 
 ![The Variables page with the user variable deaths and system variables](../../../assets/guide/variables.png)
 
+A user variable can also **read from a file**, like OBS's *Read from file*: choose **Read from file** as
+its source when you create it and pick the file. The variable shows the file's content and follows every
+change another program or script makes to it. A trailing line break is ignored, and a number or true/false
+variable needs content of that kind. While the file is missing, unreadable or does not fit, the variable
+reads as unavailable.
+
+Such a variable is read-only. Turn on **Allow write-back** to let changes made in Macro Deck, for example
+with a slider or **Set Variable**, go into the file too. **File settings** in the variable's menu changes
+the file or write-back later. When you export widgets, a variable that reads from a file travels as an
+empty variable: neither its path nor the file's content goes into the archive. Macro Deck watches the file
+for changes; a file on a network share may not report them.
+
+To save any variable's value on demand, use the **Write Variable to File** action. It replaces the file's
+content with the current value, creates the file if needed, and needs a full path whose folder exists.
+
+Only your own variables can read from a file. To keep a file up to date with any other variable, for
+example the current OBS scene or `system_cpu_usage_percent`, create an automation: the event
+**Variable Changed** watching that variable runs **Write Variable to File** for the same variable.
+Every change then lands in the file.
+
 ## Scripts and automations
 
 - **Script:** actions you reuse, for example *Go live* used by three buttons.
+  Any device signed in to Macro Deck can also list and run every script that does not run on a widget,
+  with its own input values. Macro Deck Companion does this from Shortcuts or Siri on iOS.
 - **Automation:** actions that run on an event without belonging to a widget. **Evening stream**
   switches the deck to the **Streaming** profile every day at 18:00:
 
@@ -107,20 +129,25 @@ Discord and more. Turn on the ones you use under **Integrations**.
 
 ![The Integrations page with ADB, Discord, Home Assistant, HTTP and Keyboard](../../../assets/guide/integrations.png)
 
-The **Store** for more plugins and icon packs is not available to everyone yet. Everything published
-there will be reviewed and signed first. Members of the Store tester programme can already use it:
-sign in with your Macro Deck account under **Settings > Account**. A change to your tester access
-can take up to a day to show up. If you were signed in before your Macro Deck version supported
-testers, sign out and in once.
+The **Store** offers more plugins and icon packs. Everything published there is reviewed and signed
+first.
 
-**Discover** opens with a search box and a chip for each kind of item (**All**, **Plugins**,
-**Icon packs**) with how many there are. Below it, every item is listed as a card showing its kind, rating,
-installs and whether it is **New** (published in the last 30 days) or recently **Updated**. The list is sorted
-by **Most popular** unless you pick another order or search. Once the Store has enough items, rows for
-**Featured**, **Popular** and **New & updated** appear above the list, each item in at most one row.
-Searching also finds items by their tags. **Only available for this platform** hides items that do not run on your computer, and it stays on until you
-turn it off; a note says how many items it hides, with **Show all** next to it. Going back from an item's page
-returns to the list as you left it: the same search, category, order and scroll position.
+Plugins and icon packs in the Store are made by the community. The first time you open the Store, a notice
+explains that the creator of an item is responsible for it when something fails or doesn't work: rate the item,
+open an issue in its repository or report it, using the links on its page, and don't open issues about Store items
+in the Macro Deck repository. Everything in the Store is subject to the **Store guidelines**; the notice and the
+bottom of every Store page open them, next to the imprint and privacy policy. **Got it** hides the notice for good.
+
+**Discover** opens with a search box and a chip for each kind of item (**All**, **Plugins**, **Icon packs**)
+with how many there are. Under those, a chip for each Store category that has items of that kind, such as
+**Music** or **Streaming**, lists only that category; choose it again to see everything. Below it, every item
+is listed as a card showing its kind, rating, installs and whether it is **New** (published in the last 30
+days) or recently **Updated**. The list is sorted by **Most popular** unless you pick another order or search.
+Once the Store has enough items, rows for **Featured**, **Popular** and **New & updated** appear above the
+list, each item in at most one row. Searching also finds items by their tags. **Only available for this
+platform** hides items that do not run on your computer, and it stays on until you turn it off; a note says
+how many items it hides, with **Show all** next to it. Going back from an item's page returns to the list as
+you left it: the same search, kind, category, order and scroll position.
 
 The **⋮** menu at the top right of the Store has **Refresh Store** and **Store settings**. **Refresh Store**
 fetches the latest catalog and opens a log of each step as it happens. Macro Deck also refreshes on its own
@@ -131,21 +158,26 @@ Deck tries again a few times over about five minutes before it reports a failure
 **Settings > Extensions**.
 
 **Installed** at the top of the Store lists the Store's plugins and icon packs you have installed, with their
-version and any update waiting for them. Update one at a time from its card, or all at once with
-**Update all**. After an update downloads, the card shows **Installing…** while Macro Deck backs up,
-installs and restarts the plugin, then the version that is now installed. See
-[Updates](/guide/updates/#extension-updates) for update notifications and automatic updates.
+version and any update waiting for them. While updates are waiting, **Installed** shows how many. Update one
+at a time from its card, or all at once with **Update all**. After an update downloads, the card shows
+**Installing…** while Macro Deck backs up, installs and restarts the plugin, then the version that is now
+installed. See [Updates](/guide/updates/#extension-updates) for update notifications and automatic updates.
 
 Icon packs from the Store are read-only on the **Icon Packs** page. You can use their icons on your buttons
 and export the pack, but you can't rename, import, or delete icons in it, or edit its name and details.
 Deleting the pack there uninstalls it from the Store. To change the icons, export the pack and import the
 copy as a pack of your own.
 
-An item's page shows its screenshots, description, what changed in the latest version and, in the details
-beside it, whether it runs on your platform. It lists **Links** its creator provides, such as the source
-repository, documentation or a place to report an issue. They open in your browser.
+An exported pack has a size limit: at most 29,995 icons, and only so much text
+for the icons' names and details. When a pack is larger, Macro Deck tells you it is too large to export; split
+it into smaller packs.
 
-When the creator has tagged an item, its page lists the **Tags**; select one to see every item with that tag.
+An item's page shows its screenshots, description, what changed in the latest version and, in the details
+beside it, whether it runs on your platform. It lists **Links** its creator provides, such as its **Homepage**,
+the source repository, documentation or a place to report an issue. They open in your browser.
+
+An item in a Store category lists it under **Categories**, and any other tags its creator gave it under
+**Tags**; select one to see every item in that category or with that tag.
 At the bottom, **You might also like** suggests items you have not installed that run on your computer: first
 those that share tags with it, then others from the same creator and of the same kind. Going back from a suggestion
 returns to the item you opened it from.
@@ -169,10 +201,11 @@ if it needs a newer Macro Deck, the Store says so and offers **Check for updates
 [Updates](/guide/updates/#extension-updates) for how an older version affects automatic updates.
 
 Select the publisher's name on a card or an item's page to see everything that publisher offers. An installed
-plugin's page has **Open settings**, which opens its integration, and an installed icon pack's page has
-**Open in Library**. The other way round, a plugin's page under **Integrations** and a Store icon pack under
-**Library > Icon Packs** have **View in Store**, for the description and release notes. An installed plugin is
-uninstalled from the **General** details of its page under **Integrations**, or from its Store page.
+plugin's page has **Open settings**, which opens its integration; its back arrow returns to the Store page. An
+installed icon pack's page has **Open in Library**. The other way round, a plugin's page under
+**Integrations** and a Store icon pack under **Library > Icon Packs** have **View in Store**, for the
+description and release notes. An installed plugin is uninstalled from the **General** details of its page
+under **Integrations**, or from its Store page.
 
 The Store footer links to the **Creator Portal**, where you can publish your own plugins and icon packs, and to
 the imprint and privacy policy.
@@ -200,8 +233,7 @@ A plugin creator can invite you to test a plugin before it is reviewed. The invi
 email; accept it in the Creator Portal with the same Macro Deck account you use in Macro Deck. While
 you are signed in under **Settings > Account**, **Tests** appears at the top of the Store next to
 **Installed**, listing every plugin you test. Each plugin starts collapsed and shows how many test
-builds it has; select it to see its builds, newest first. You do not need to be a Store tester to see
-it: while the Store itself is not open to you, its notice offers **Open your tests**.
+builds it has; select it to see its builds, newest first.
 
 Test builds are not reviewed or signed by Macro Deck: they come straight from the creator and may be
 unstable. Choosing **Install** or **Install test build** asks you to confirm that first. A test build
@@ -211,6 +243,39 @@ that is currently installed shows as **Installed**.
 While a test build is installed, the plugin is marked **Test build** under **Tests**, **Installed** and
 **Discover**. If the plugin is also published in the Store, **Return to Store version** installs its
 current Store release in place of the test build.
+
+### Withdrawn versions
+
+The Store can withdraw a single version of an item, for example when that version turned out to be unsafe.
+A withdrawn version is marked **Withdrawn** under **Version** and cannot be installed; the other versions
+stay available. If the version you have installed is withdrawn, its card is marked **Version withdrawn**, its
+page says why and may name a suggested replacement, and Macro Deck shows a warning notification. Update to
+the latest version from its card, or open its page to go back to the latest version with **Downgrade to**
+when the latest version is older than yours, or uninstall it.
+
+When the latest version of an item is withdrawn, the item disappears from the Store and can no longer be
+installed or updated. If you have it installed, it stays under **Installed**, marked **Removed from the
+Store**, and its page says why; you can still uninstall it there.
+
+### Icon packs from plugins
+
+A plugin can bring its own icon packs, for example the logos of the services it controls. They appear under
+**Library > Icon Packs** and in the icon picker as soon as the plugin is installed, marked **Plugin**; hover
+the mark to see which plugin provides the pack. Use their icons on any button, not only on the plugin's own.
+
+These packs are read-only, like icon packs from the Store, and you can't delete them yourself. They update
+together with the plugin: an update replaces the icons that changed, and buttons keep showing the icon they
+use.
+
+When you uninstall the plugin, or an update no longer includes one of its packs, the pack is deleted. If a
+button or an automation still uses one of its icons, the pack stays instead, becomes an ordinary icon pack you
+can edit or delete, and Macro Deck shows a notification that says why it was kept. An icon that is only
+chosen in a plugin's own settings does not count as used. When the plugin later brings
+the same pack back, for example after a reinstall, it takes the pack over again: the pack becomes read-only
+once more and any changes you made to it in the meantime are replaced by the plugin's icons.
+
+While a plugin developer runs a plugin from its project, its packs appear the same way. If that plugin is never
+installed, the packs stay as ordinary icon packs after the developer stops it.
 
 ## Devices
 

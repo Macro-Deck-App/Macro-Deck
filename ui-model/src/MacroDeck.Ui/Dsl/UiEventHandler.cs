@@ -258,4 +258,118 @@ public readonly record struct UiEventData
 
 		return false;
 	}
+
+	/// <summary>Reads a <see cref="Components.UiComponentEvents.PointerDown" /> payload. Members the reader does
+	/// not know are ignored.</summary>
+	public bool TryGetPointerDown(out UiPointerDown value)
+	{
+		value = default;
+
+		if (Raw is not { ValueKind: JsonValueKind.Object } element ||
+			!TryReadSample(element, out var sample) ||
+			!TryReadNumber(element, "width", out var width) ||
+			!TryReadNumber(element, "height", out var height))
+		{
+			return false;
+		}
+
+		value = new UiPointerDown { Sample = sample, Width = width, Height = height };
+
+		return true;
+	}
+
+	/// <summary>Reads the samples of a <see cref="Components.UiComponentEvents.PointerMove" /> payload, oldest
+	/// first. Fails for a payload in which any sample is malformed.</summary>
+	public bool TryGetPointerSamples(out IReadOnlyList<UiPointerSample> samples)
+	{
+		samples = [];
+
+		if (Raw is not { ValueKind: JsonValueKind.Object } element ||
+			!element.TryGetProperty("samples", out var array) ||
+			array.ValueKind != JsonValueKind.Array)
+		{
+			return false;
+		}
+
+		var read = new List<UiPointerSample>(array.GetArrayLength());
+
+		foreach (var item in array.EnumerateArray())
+		{
+			if (!TryReadSample(item, out var sample))
+			{
+				return false;
+			}
+
+			read.Add(sample);
+		}
+
+		samples = read;
+
+		return true;
+	}
+
+	/// <summary>Reads a <see cref="Components.UiComponentEvents.PointerUp" /> payload. An absent
+	/// <c>cancelled</c> member means the finger lifted.</summary>
+	public bool TryGetPointerUp(out UiPointerUp value)
+	{
+		value = default;
+
+		if (Raw is not { ValueKind: JsonValueKind.Object } element || !TryReadSample(element, out var sample))
+		{
+			return false;
+		}
+
+		var cancelled = element.TryGetProperty("cancelled", out var flag) && flag.ValueKind == JsonValueKind.True;
+		value = new UiPointerUp { Sample = sample, Cancelled = cancelled };
+
+		return true;
+	}
+
+	/// <summary>Reads the number of pointers of a <see cref="Components.UiComponentEvents.Tap" /> payload.</summary>
+	public bool TryGetTap(out int pointers)
+	{
+		pointers = 0;
+
+		if (Raw is not { ValueKind: JsonValueKind.Object } element ||
+			!element.TryGetProperty("pointers", out var count) ||
+			count.ValueKind != JsonValueKind.Number ||
+			!count.TryGetInt32(out var read) ||
+			read < 1)
+		{
+			return false;
+		}
+
+		pointers = read;
+
+		return true;
+	}
+
+	private static bool TryReadSample(JsonElement element, out UiPointerSample sample)
+	{
+		sample = default;
+
+		if (element.ValueKind != JsonValueKind.Object ||
+			!element.TryGetProperty("id", out var id) ||
+			id.ValueKind != JsonValueKind.Number ||
+			!id.TryGetInt32(out var pointerId) ||
+			!TryReadNumber(element, "x", out var x) ||
+			!TryReadNumber(element, "y", out var y) ||
+			!TryReadNumber(element, "t", out var time))
+		{
+			return false;
+		}
+
+		sample = new UiPointerSample { Id = pointerId, X = x, Y = y, TimeMs = time };
+
+		return true;
+	}
+
+	private static bool TryReadNumber(JsonElement element, string name, out double value)
+	{
+		value = 0;
+
+		return element.TryGetProperty(name, out var member) &&
+			member.ValueKind == JsonValueKind.Number &&
+			member.TryGetDouble(out value);
+	}
 }

@@ -44,7 +44,7 @@ public sealed class StoreOfficialPackages : IStoreOfficialPackages
 		}
 
 		var found = _catalogQuery.Find(kind, id);
-		return found.Success ? found.Data!.Entry.Id : null;
+		return found.Success && found.Data!.Withdrawal is null ? found.Data.Entry.Id : null;
 	}
 
 	public IReadOnlyList<string> ListedPackageIds(IEnumerable<string> ids)
@@ -75,7 +75,7 @@ public sealed class StoreOfficialPackages : IStoreOfficialPackages
 		}
 
 		var ids = new List<string>();
-		foreach (var item in _catalogQuery.Installed())
+		foreach (var item in _catalogQuery.Installed().Where(item => item.Withdrawal is null))
 		{
 			if (item.Entry.Kind is StoreExtensionKind.Plugin ||
 				StoreRegistryOptions.IsOfficial(_installations.Find(item.Entry.Kind, item.Entry.Id)?.Origin))
@@ -94,9 +94,8 @@ public sealed class StoreOfficialPackages : IStoreOfficialPackages
 	private Dictionary<string, string> ListedIds()
 	{
 		var snapshot = _catalog.Snapshot;
-		var removed = snapshot.RemovedPackages.Select(package => package.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
 		var listed = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-		foreach (var entry in snapshot.Entries.Where(entry => !removed.Contains(entry.Id)))
+		foreach (var entry in snapshot.Entries.Where(entry => snapshot.FindWithdrawal(entry) is null))
 		{
 			listed.TryAdd(entry.Id, entry.Id);
 		}

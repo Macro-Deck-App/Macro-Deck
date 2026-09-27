@@ -23,6 +23,7 @@ declare global {
         extensions: string[];
         data: ArrayBuffer;
       }) => Promise<ShellSaveFileResult>;
+      saveBackup?: (options: { backupId: string; fileName: string }) => Promise<ShellSaveFileResult>;
       onFileDrop?: (callback: (event: ShellFileDropEvent) => void) => Promise<() => void>;
       onFileOpen?: (callback: () => void) => Promise<() => void>;
       takeOpenedFiles?: () => Promise<string[]>;
@@ -30,6 +31,7 @@ declare global {
       takeMenuAction?: () => Promise<string | null>;
       onHostStopping?: (callback: () => void) => Promise<() => void>;
       setHotkeyCapture?: (active: boolean) => Promise<void>;
+      reauthenticate?: () => Promise<void>;
       checkForUpdate?: () => Promise<ShellUpdateStatus>;
       installUpdate?: () => Promise<void>;
       onUpdateProgress?: (callback: (progress: ShellUpdateProgress) => void) => Promise<() => void>;
@@ -57,6 +59,7 @@ declare global {
   interface ShellSaveFileResult {
     saved: boolean;
     canceled: boolean;
+    unavailable?: boolean;
     path: string | null;
     error: string | null;
   }

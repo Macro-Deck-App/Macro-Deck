@@ -1,0 +1,56 @@
+@use '../../../../styles/index' as ds;
+
+:host {
+  display: contents;
+}
+
+.withdrawal-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-warning);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(90deg, var(--color-warning-muted), transparent 70%),
+    var(--color-bg-secondary);
+}
+
+.notice-icon {
+  @include ds.flex-center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-warning-muted);
+
+  .icon {
+    background-color: var(--color-warning);
+  }
+}
+
+.notice-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+}
+
+.notice-heading {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+}
+
+.notice-text {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.notice-advice {
+  color: var(--color-text-primary);
+}

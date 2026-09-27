@@ -13,7 +13,8 @@ namespace MacroDeck.Plugin.Cli.Commands;
 /// <c>macrodeck-plugin sign</c>: signs a signable package with a creator certificate and private key.
 /// There is no detached signature file - <see cref="PackageSigner" /> embeds the signature in the
 /// artifact's own manifest and writes the certificate material to the archive root. The supplied
-/// certificate is chain-verified against the pinned Macro Deck root (or <c>--root-public</c>) before
+/// certificate is chain-verified against the pinned Macro Deck root (or <c>--root-public</c>), through its issuer
+/// certificate when it names one, before
 /// anything is signed, and the written artifact is re-verified with <see cref="PackageVerifier" /> before
 /// success is reported - a signed artifact that does not itself verify is a failure, not a success.
 /// </summary>
@@ -30,6 +31,13 @@ internal static class SignCommand
 			{ Description = "Path to the root's signature over the certificate (certificate.sig).", Required = true };
 		var privateKeyOption = new Option<string>("--private-key")
 			{ Description = "Path to the base64-encoded private key.", Required = true };
+		var issuerCertificateOption = new Option<string?>("--issuer-certificate")
+		{
+			Description = "Path to the issuer certificate (issuer.json) that signed the signing certificate, when " +
+				"the certificate names one."
+		};
+		var issuerCertificateSignatureOption = new Option<string?>("--issuer-certificate-signature")
+			{ Description = "Path to the root's signature over the issuer certificate (issuer.sig)." };
 		var rootPublicOption = new Option<string?>("--root-public")
 		{
 			Description = "Verify the certificate against this root public key instead of the pinned Macro Deck " +
@@ -42,6 +50,8 @@ internal static class SignCommand
 		command.Add(certificateOption);
 		command.Add(certificateSignatureOption);
 		command.Add(privateKeyOption);
+		command.Add(issuerCertificateOption);
+		command.Add(issuerCertificateSignatureOption);
 		command.Add(rootPublicOption);
 
 		command.SetAction(async (parseResult, cancellationToken) =>
@@ -53,6 +63,15 @@ internal static class SignCommand
 			var certificateSignaturePath = parseResult.GetValue(certificateSignatureOption)!;
 			var privateKeyPath = parseResult.GetValue(privateKeyOption)!;
 			var rootPublicPath = parseResult.GetValue(rootPublicOption);
+			var issuerCertificatePath = parseResult.GetValue(issuerCertificateOption);
+			var issuerCertificateSignaturePath = parseResult.GetValue(issuerCertificateSignatureOption);
+
+			if (issuerCertificatePath is null != issuerCertificateSignaturePath is null)
+			{
+				console.WriteError("issuer-options-incomplete",
+					"--issuer-certificate and --issuer-certificate-signature must be given together.");
+				return ExitCode.UsageError;
+			}
 
 			if (SignablePackageFormats.Resolve(packagePath) is not { } format)
 			{
@@ -76,6 +95,30 @@ internal static class SignCommand
 				return ReportFailure(console,
 					SigningError.CertificateUnreadable,
 					$"No readable certificate signature file at '{CliText.DisplayPath(certificateSignaturePath)}'.");
+			}
+
+			byte[]? issuerCertificateBytes = null;
+			byte[]? issuerCertificateSignatureBytes = null;
+			if (issuerCertificatePath is not null && issuerCertificateSignaturePath is not null)
+			{
+				issuerCertificateBytes
+					= await TryReadFileAsync(issuerCertificatePath, cancellationToken).ConfigureAwait(false);
+				if (issuerCertificateBytes is null)
+				{
+					return ReportFailure(console,
+						SigningError.CertificateUnreadable,
+						$"No readable issuer certificate file at '{CliText.DisplayPath(issuerCertificatePath)}'.");
+				}
+
+				issuerCertificateSignatureBytes = await TryReadFileAsync(issuerCertificateSignaturePath,
+					cancellationToken).ConfigureAwait(false);
+				if (issuerCertificateSignatureBytes is null)
+				{
+					return ReportFailure(console,
+						SigningError.CertificateUnreadable,
+						"No readable issuer certificate signature file at " +
+						$"'{CliText.DisplayPath(issuerCertificateSignaturePath)}'.");
+				}
 			}
 
 			byte[]? rootPublicKeyOverride = null;
@@ -102,10 +145,14 @@ internal static class SignCommand
 			var chainResult = rootPublicKeyOverride is { } customRoot
 				? SigningCertificateChain.Verify(certificateBytes,
 					certificateSignatureBytes,
+					issuerCertificateBytes,
+					issuerCertificateSignatureBytes,
 					customRoot,
 					SigningCertificateChain.PackageKeyUsage)
 				: SigningCertificateChain.Verify(certificateBytes,
 					certificateSignatureBytes,
+					issuerCertificateBytes,
+					issuerCertificateSignatureBytes,
 					SigningCertificateChain.PackageKeyUsage);
 
 			if (!chainResult.Success)
@@ -115,7 +162,7 @@ internal static class SignCommand
 
 			var trusted = chainResult.TrustedCertificate!;
 
-			if (SigningCertificateChain.EnsureValidAt(trusted.Certificate, DateTimeOffset.UtcNow) is
+			if (SigningCertificateChain.EnsureValidAt(trusted, DateTimeOffset.UtcNow) is
 				{ } validityFailure)
 			{
 				return ReportFailure(console, validityFailure.Error, validityFailure.Message);
@@ -143,6 +190,8 @@ internal static class SignCommand
 					signer,
 					certificateBytes,
 					certificateSignatureBytes,
+					issuerCertificateBytes,
+					issuerCertificateSignatureBytes,
 					ArtifactReaders.ManifestReader,
 					cancellationToken)
 				.ConfigureAwait(false);

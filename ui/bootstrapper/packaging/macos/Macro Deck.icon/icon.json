@@ -1,15 +1,28 @@
 {
-  "fill" : "automatic",
+  "fill" : "system-dark",
   "groups" : [
     {
       "layers" : [
         {
+          "glass" : false,
+          "image-name" : "Logo-Large.svg",
+          "name" : "Logo-Large",
+          "position" : {
+            "scale" : 0.42,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        },
+        {
           "blend-mode" : "normal",
           "glass" : false,
+          "hidden" : true,
           "image-name" : "Foreground_MD_Logo.svg",
           "name" : "Foreground_MD_Logo",
           "position" : {
-            "scale" : 0.47,
+            "scale" : 0.41,
             "translation-in-points" : [
               0,
               0

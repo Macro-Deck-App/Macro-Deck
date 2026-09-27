@@ -67,6 +67,13 @@ jobs:
           npm install --no-audit --no-fund
           npx playwright install --with-deps chromium
 
+      # Plays the bootstrapper's part: one secret for the host and for Playwright, masked in the log.
+      - name: Generate loopback secret
+        run: |
+          secret=$(openssl rand -hex 32)
+          echo "::add-mask::$secret"
+          echo "MACRODECK_LOOPBACK_SECRET=$secret" >> "$GITHUB_ENV"
+
       - name: Start isolated Macro Deck host
         env:
           MACRO_DECK_HOST_BINARY: ${{ github.workspace }}/ui/bootstrapper/host-publish/Macro Deck Host

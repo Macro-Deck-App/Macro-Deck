@@ -44,7 +44,10 @@ public sealed class JsonUserVariableStore : IUserVariableStore
 			try
 			{
 				Directory.CreateDirectory(Path.GetDirectoryName(_filePath)!);
-				_files.Write(_filePath, userVariables.ToList());
+				_files.Write(_filePath,
+					userVariables
+						.Select(variable => variable.FileSource is null ? variable : variable.CopyWithValue(string.Empty))
+						.ToList());
 			}
 			catch (Exception ex)
 			{

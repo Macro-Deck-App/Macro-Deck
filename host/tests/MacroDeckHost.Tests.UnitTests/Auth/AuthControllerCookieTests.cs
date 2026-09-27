@@ -4,6 +4,7 @@ using MacroDeckHost.Api.Controllers;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Auth;
 using MacroDeckHost.Application.Notifications;
+using MacroDeckHost.Application.Usb;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure.Notifications;
@@ -241,6 +242,45 @@ public class AuthControllerCookieTests
 			Assert.That(notifications[0].Message, Does.Contain("203.0.113.7"));
 			Assert.That(notifications[0].Message, Does.Not.Contain("wrong-password"));
 		});
+	}
+
+	[Test]
+	public async Task A_failed_login_over_a_usb_link_names_a_phone_with_its_masked_serial_instead_of_the_loopback_address()
+	{
+		var store = new UserNotificationStore();
+		var controller = new AuthController(new FailingAuthService(),
+			new LoginThrottle(TimeProvider.System),
+			new PairingCodeStore(),
+			TimeProvider.System,
+			store,
+			new FailedLoginNotificationTracker(),
+			TestLocalization.Preferences,
+			TestLocalization.Resolver,
+			new FixedHostIdentity())
+		{
+			ControllerContext = new ControllerContext
+			{
+				HttpContext = BridgedContext()
+			}
+		};
+
+		await controller.Login(new LoginRequest("attacker", "wrong-password", AuthDefaults.AdminScope));
+
+		var message = store.Snapshot().Single().Message;
+		Assert.Multiple(() =>
+		{
+			Assert.That(message, Does.Contain("a phone over USB (\u2022\u2022\u2022\u2022\u2022\u2022\u20220001)"));
+			Assert.That(message, Does.Not.Contain("EXAMPLE0001"));
+			Assert.That(message, Does.Not.Contain("usb:"));
+			Assert.That(message, Does.Not.Contain("127.0.0.1"));
+		});
+	}
+
+	private static DefaultHttpContext BridgedContext()
+	{
+		var context = new DefaultHttpContext { Connection = { RemoteIpAddress = IPAddress.Loopback } };
+		context.Features.Set<IBridgedConnectionFeature>(new BridgedConnectionFeature("usb:EXAMPLE0001"));
+		return context;
 	}
 
 	[Test]

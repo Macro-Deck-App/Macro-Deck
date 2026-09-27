@@ -14,6 +14,7 @@ using MacroDeckHost.Tests.UnitTests.Http;
 using MacroDeckHost.Tests.UnitTests.Store;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.AspNetCore.Mvc;
+using MacroDeckHost.Infrastructure.Plugins.Trust;
 
 namespace MacroDeckHost.Tests.UnitTests.Api;
 
@@ -49,7 +50,7 @@ internal sealed class StoreControllerTests
 		_catalog = new StoreCatalog();
 		var installations = new JsonStoreInstallationStore(_paths, Serilog.Core.Logger.None);
 		var plugins = new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None);
-		_catalogQuery = new StoreCatalogQueryService(_catalog, plugins, installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None));
+		_catalogQuery = new StoreCatalogQueryService(_catalog, plugins, installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners());
 		_tracker = new StoreOperationTracker(new InMemoryStoreOperationStore(), TimeProvider.System);
 		_installCoordinator = new StoreInstallCoordinator(_catalogQuery,
 			_tracker,
@@ -365,6 +366,39 @@ internal sealed class StoreControllerTests
 			Assert.That(ai.GeneratedContent, Is.True);
 			Assert.That(ai.GeneratedAssets, Is.False);
 			Assert.That(ai.Services, Is.EqualTo(_declaredAiServices));
+		});
+	}
+
+	[Test]
+	public void The_detail_body_carries_the_packages_homepage()
+	{
+		SeedPlugin(homepage: "https://acme.test/hue");
+
+		Assert.That(_controller.GetExtension(StoreExtensionKind.Plugin, PluginId).Extension!.Homepage,
+			Is.EqualTo("https://acme.test/hue"));
+	}
+
+	[Test]
+	public void The_categories_come_in_registry_order_with_every_name_and_how_many_packages_carry_them()
+	{
+		SeedPlugin(tags: ["music"],
+			categories:
+			[
+				new StoreCategory { Id = "streaming", Names = new Dictionary<string, string> { ["en"] = "Streaming" } },
+				new StoreCategory
+				{
+					Id = "music", Names = new Dictionary<string, string> { ["en"] = "Music", ["de"] = "Musik" }
+				}
+			]);
+
+		var categories = _controller.GetCategories([StoreExtensionKind.Plugin]).Categories;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(categories.Select(category => (category.Id, category.Count)),
+				Is.EqualTo(new[] { ("streaming", 0), ("music", 1) }));
+			Assert.That(categories[1].Names,
+				Is.EquivalentTo(new Dictionary<string, string> { ["en"] = "Music", ["de"] = "Musik" }));
 		});
 	}
 
@@ -747,6 +781,97 @@ internal sealed class StoreControllerTests
 	}
 
 	[Test]
+	public void A_withdrawn_version_is_listed_as_not_installable_while_the_clean_ones_stay_installable()
+	{
+		SeedPluginVersions(removed: [new StoreRemovedPackage { Id = PluginId, Version = "1.0.0", Reason = "Compromised" }]);
+
+		var detail = _controller.GetExtension(StoreExtensionKind.Plugin, PluginId).Extension!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(detail.History.Select(entry => (entry.Version, entry.Installable, entry.UnavailableReason)),
+				Is.EqualTo(new (string, bool, string?)[]
+				{
+					("2.0.0", true, null),
+					("1.5.0", false, "Unavailable"),
+					("1.0.0", false, "Withdrawn")
+				}));
+			Assert.That(detail.Withdrawal, Is.Null);
+			Assert.That(detail.InstalledVersionWithdrawal, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task An_installed_package_whose_latest_version_is_withdrawn_offers_no_version_and_says_why()
+	{
+		SeedPluginVersions(removed:
+			[
+				new StoreRemovedPackage { Id = PluginId, Version = "2.0.0", Reason = "Malware", Replacement = "com.acme.safe" }
+			],
+			kind: StoreExtensionKind.IconPack);
+		new JsonStoreInstallationStore(_paths, Serilog.Core.Logger.None).Save(new StoreInstallationRecord
+		{
+			Origin = "https://registry.example/",
+			Kind = StoreExtensionKind.IconPack,
+			PackageId = PluginId,
+			Version = "1.0.0"
+		});
+
+		var detail = _controller.GetExtension(StoreExtensionKind.IconPack, PluginId).Extension!;
+		var installed = (await _controller.GetCatalog(kind: null, search: null, section: null, installed: true)).Items.Single();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(detail.History.Select(entry => (entry.Version, entry.Installable, entry.UnavailableReason)),
+				Is.EqualTo(new (string, bool, string?)[]
+				{
+					("2.0.0", false, "Withdrawn"),
+					("1.5.0", false, "Unavailable"),
+					("1.0.0", false, "Unavailable")
+				}));
+			Assert.That(detail.Withdrawal?.Reason, Is.EqualTo("Malware"));
+			Assert.That(detail.Withdrawal?.Replacement, Is.EqualTo("com.acme.safe"));
+			Assert.That(detail.InstalledVersionWithdrawal, Is.Null);
+			Assert.That(installed.Withdrawal?.Reason, Is.EqualTo("Malware"));
+		});
+	}
+
+	[Test]
+	public async Task An_installed_withdrawn_version_is_reported_with_the_registrys_reason()
+	{
+		SeedPluginVersions(removed: [new StoreRemovedPackage { Id = PluginId, Version = "1.0.0", Reason = "Compromised", Replacement = "com.acme.safe" }],
+			kind: StoreExtensionKind.IconPack);
+		new JsonStoreInstallationStore(_paths, Serilog.Core.Logger.None).Save(new StoreInstallationRecord
+		{
+			Origin = "https://registry.example/",
+			Kind = StoreExtensionKind.IconPack,
+			PackageId = PluginId,
+			Version = "1.0.0"
+		});
+
+		var card = (await _controller.GetCatalog(kind: null, search: null, section: null)).Items.Single();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(card.InstalledVersionWithdrawal?.Reason, Is.EqualTo("Compromised"));
+			Assert.That(card.InstalledVersionWithdrawal?.Replacement, Is.EqualTo("com.acme.safe"));
+			Assert.That(card.Withdrawal, Is.Null);
+			Assert.That(card.InstallState, Is.EqualTo(StoreInstallState.UpdateAvailable));
+		});
+	}
+
+	[Test]
+	public void A_platform_that_cannot_run_the_package_is_named_before_a_withdrawn_version()
+	{
+		SeedPluginVersions(supportedRids: ["plan9-sparc"],
+			removed: [new StoreRemovedPackage { Id = PluginId, Version = "1.0.0" }]);
+
+		var history = _controller.GetExtension(StoreExtensionKind.Plugin, PluginId).Extension!.History;
+
+		Assert.That(history.Select(entry => entry.UnavailableReason), Has.All.EqualTo("UnsupportedPlatform"));
+	}
+
+	[Test]
 	public void Installing_a_version_the_registry_does_not_publish_is_refused_before_any_operation_starts()
 	{
 		SeedPluginVersions();
@@ -795,7 +920,10 @@ internal sealed class StoreControllerTests
 		});
 	}
 
-	private void SeedPluginVersions(string[]? screenshots = null, string[]? supportedRids = null)
+	private void SeedPluginVersions(string[]? screenshots = null,
+		string[]? supportedRids = null,
+		IReadOnlyList<StoreRemovedPackage>? removed = null,
+		StoreExtensionKind kind = StoreExtensionKind.Plugin)
 	{
 		StoreReleaseManifest Release(string version, long size) => new()
 		{
@@ -812,7 +940,7 @@ internal sealed class StoreControllerTests
 			[
 				new StoreCatalogEntry
 				{
-					Kind = StoreExtensionKind.Plugin,
+					Kind = kind,
 					Id = PluginId,
 					Name = "Hue Bridge",
 					LatestVersion = "2.0.0",
@@ -836,7 +964,8 @@ internal sealed class StoreControllerTests
 						new StoreVersionHistoryEntry { Version = "1.0.0", Size = 100, HasRelease = true }
 					]
 				}
-			]
+			],
+			RemovedPackages = removed ?? []
 		});
 	}
 
@@ -873,11 +1002,14 @@ internal sealed class StoreControllerTests
 		long size = 16,
 		IReadOnlyList<StoreExtensionLink>? additionalLinks = null,
 		PackageAiDeclaration? ai = null,
-		IReadOnlyList<string>? tags = null)
+		IReadOnlyList<string>? tags = null,
+		string? homepage = null,
+		IReadOnlyList<StoreCategory>? categories = null)
 	{
 		_catalog.Swap(new StoreCatalogSnapshot
 		{
 			Sequence = 1,
+			Categories = categories ?? [],
 			Entries =
 			[
 				new StoreCatalogEntry
@@ -890,6 +1022,7 @@ internal sealed class StoreControllerTests
 					AdditionalLinks = additionalLinks ?? [],
 					Ai = ai,
 					Tags = tags ?? [],
+					Homepage = homepage,
 					LatestRelease = new StoreReleaseManifest
 					{
 						Version = "1.0.0",

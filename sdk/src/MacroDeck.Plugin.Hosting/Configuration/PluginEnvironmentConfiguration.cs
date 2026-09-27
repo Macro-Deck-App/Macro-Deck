@@ -33,7 +33,9 @@ public static class PluginEnvironmentConfiguration
 		["MACRO_DECK_PLUGIN_PAIRING"] = "MacroDeck:Plugin:PairingEnabled",
 		["MACRO_DECK_PLUGIN_PAIRING_TIMEOUT"] = "MacroDeck:Plugin:PairingTimeout",
 		["MACRO_DECK_PLUGIN_HOST_PROCESS_ID"] = "MacroDeck:Plugin:HostProcessId",
-		["MACRO_DECK_PLUGIN_HOST_STARTED_AT"] = "MacroDeck:Plugin:HostStartedAt"
+		["MACRO_DECK_PLUGIN_HOST_STARTED_AT"] = "MacroDeck:Plugin:HostStartedAt",
+		["MACRO_DECK_PLUGIN_BUNDLED_ICON_PACKS"] = "MacroDeck:Plugin:BundledIconPacks",
+		["MACRO_DECK_PLUGIN_BUNDLED_ICON_PACKS_ROOT"] = "MacroDeck:Plugin:BundledIconPacksRoot"
 	};
 
 	/// <summary>Every variable this source understands, and the configuration key it maps to.</summary>

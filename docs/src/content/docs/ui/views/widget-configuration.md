@@ -157,6 +157,25 @@ new UiActionsListEditor { Key = "flows", Binding = Bind.To(flows), CanRun = true
 
 Each renderer maps these onto the editors it already ships; a plugin ships no renderer code for them.
 
+To preselect one of your plugin's [bundled icons](/ui/reference/resources/#icons-from-your-bundled-icon-packs)
+in the `icon` picker, give the input a plugin-icon default:
+
+```csharp
+new UiIconReferenceInput
+{
+    Key = "icon",
+    Binding = Bind.To(icon),
+    DefaultValue = UiIconReference.PluginIcon("logos", "spotify"),
+}
+```
+
+Macro Deck resolves the reference against your own bundled packs and replaces it with the matching
+`icon-pack` reference before the form reaches a client, so the picker shows the icon and the user can
+change it like any other. The value that comes back to your plugin, and the one that is saved, is therefore
+an `icon-pack` reference, never a `plugin-icon` one. A key or name your packs do not hold arrives as no
+default. There is no separate "suggested value": the default is how a form proposes an icon. The picker
+lists your bundled packs, read-only, alongside the user's own packs.
+
 For a file, folder or image path, use the
 [path inputs](/ui/views/configuration/#letting-the-user-pick-a-file-folder-or-image), which work in both
 regions like any other input.

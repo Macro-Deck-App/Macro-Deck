@@ -1,8 +1,7 @@
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
-import { StoreAccessService } from '../../../services/store-access.service';
 import { Subject } from 'rxjs';
 import { AppStrings } from '@macro-deck/runtime';
 import { ApiService, ContextMenuItem, LocalizationService, ToastService } from '@shared';
@@ -19,8 +18,6 @@ interface SelectionAccess {
   selectedIconIds(): ReadonlySet<string>;
   filteredIcons(): IconModel[];
 }
-
-const storeUnlocked = signal(true);
 
 describe('IconPacksPageComponent icon selection', () => {
   let component: SelectionAccess;
@@ -48,7 +45,7 @@ describe('IconPacksPageComponent icon selection', () => {
     TestBed.configureTestingModule({
       imports: [IconPacksPageComponent],
       providers: [provideZonelessChangeDetection(),
-        provideRouter([]), { provide: StoreAccessService, useValue: { unlocked: storeUnlocked } }, { provide: ApiService, useValue: apiSpy }],
+        provideRouter([]), { provide: ApiService, useValue: apiSpy }],
     });
     const fixture = TestBed.createComponent(IconPacksPageComponent);
     component = fixture.componentInstance as unknown as SelectionAccess;
@@ -133,7 +130,7 @@ describe('IconPacksPageComponent pack import/export', () => {
     TestBed.configureTestingModule({
       imports: [IconPacksPageComponent],
       providers: [provideZonelessChangeDetection(),
-        provideRouter([]), { provide: StoreAccessService, useValue: { unlocked: storeUnlocked } }, { provide: ApiService, useValue: apiSpy }],
+        provideRouter([]), { provide: ApiService, useValue: apiSpy }],
     });
     iconPacks = TestBed.inject(IconPackService);
     fixture = TestBed.createComponent(IconPacksPageComponent);
@@ -304,7 +301,7 @@ describe('IconPacksPageComponent pack deletion and ownership', () => {
     TestBed.configureTestingModule({
       imports: [IconPacksPageComponent],
       providers: [provideZonelessChangeDetection(),
-        provideRouter([]), { provide: StoreAccessService, useValue: { unlocked: storeUnlocked } }, { provide: ApiService, useValue: apiSpy }],
+        provideRouter([]), { provide: ApiService, useValue: apiSpy }],
     });
     iconPacks = TestBed.inject(IconPackService);
     const fixture = TestBed.createComponent(IconPacksPageComponent);
@@ -401,14 +398,18 @@ describe('IconPacksPageComponent source label rendering', () => {
   beforeEach(async () => {
     const apiSpy = jasmine.createSpyObj<ApiService>('ApiService', ['getIconPacks', 'onNotification']);
     apiSpy.getIconPacks.and.resolveTo({
-      packs: [pack('store-pack', { ownerKind: 'Store' }), pack('user-pack', { ownerKind: 'User' })],
+      packs: [
+        pack('store-pack', { ownerKind: 'Store' }),
+        pack('user-pack', { ownerKind: 'User' }),
+        pack('plugin-pack', { ownerKind: 'Plugin', ownerName: 'Spotify', isReadOnly: true, canDelete: false }),
+      ],
     });
     apiSpy.onNotification.and.callFake(() => new Subject());
 
     TestBed.configureTestingModule({
       imports: [IconPacksPageComponent],
       providers: [provideZonelessChangeDetection(),
-        provideRouter([]), { provide: StoreAccessService, useValue: { unlocked: storeUnlocked } }, { provide: ApiService, useValue: apiSpy }],
+        provideRouter([]), { provide: ApiService, useValue: apiSpy }],
     });
     fixture = TestBed.createComponent(IconPacksPageComponent);
     fixture.detectChanges();
@@ -424,6 +425,16 @@ describe('IconPacksPageComponent source label rendering', () => {
 
     expect(railRow('store-pack').querySelector('.tag')?.textContent?.trim()).toBe(expected);
     expect(railRow('user-pack').querySelector('.tag')).toBeNull();
+  });
+
+  it('marks a plugin-provided pack with the plugin tag and names the plugin in its title', () => {
+    const localization = TestBed.inject(LocalizationService);
+    const tag = railRow('plugin-pack').querySelector('.tag');
+
+    expect(tag?.textContent?.trim()).toBe(localization.translateKey(AppStrings.IconPacks.SourcePlugin));
+    expect(tag?.getAttribute('title'))
+      .toBe(localization.translateKey(AppStrings.IconPacks.ManagedByPlugin, { name: 'Spotify' }));
+    expect(railRow('plugin-pack').querySelector('.icon-lock')).not.toBeNull();
   });
 });
 
@@ -441,7 +452,7 @@ describe('IconPacksPageComponent Store link', () => {
     TestBed.configureTestingModule({
       imports: [IconPacksPageComponent],
       providers: [provideZonelessChangeDetection(),
-        provideRouter([]), { provide: StoreAccessService, useValue: { unlocked: storeUnlocked } }, { provide: ApiService, useValue: apiSpy },
+        provideRouter([]), { provide: ApiService, useValue: apiSpy },
         { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({ pack: packId }) } } }],
     });
     const fixture = TestBed.createComponent(IconPacksPageComponent);
@@ -450,8 +461,6 @@ describe('IconPacksPageComponent Store link', () => {
     fixture.detectChanges();
     return fixture;
   }
-
-  afterEach(() => storeUnlocked.set(true));
 
   it('opens the pack named in the address and links a Store pack to its Store page', async () => {
     const fixture = await render('com.suchbyte.colorful-generic-icons');
@@ -463,14 +472,9 @@ describe('IconPacksPageComponent Store link', () => {
     expect(navigate).toHaveBeenCalledWith(['/store', 'IconPack', 'com.suchbyte.colorful-generic-icons']);
   });
 
-  it('offers no Store link for a pack the Store did not install or while the Store is closed', async () => {
+  it('offers no Store link for a pack the Store did not install', async () => {
     const own = await render(null);
     expect((own.nativeElement as HTMLElement).querySelector('.view-in-store')).toBeNull();
-    TestBed.resetTestingModule();
-
-    storeUnlocked.set(false);
-    const closed = await render('com.suchbyte.colorful-generic-icons');
-    expect((closed.nativeElement as HTMLElement).querySelector('.view-in-store')).toBeNull();
   });
 });
 
@@ -504,7 +508,7 @@ describe('IconPacksPageComponent copy icon id', () => {
     TestBed.configureTestingModule({
       imports: [IconPacksPageComponent],
       providers: [provideZonelessChangeDetection(),
-        provideRouter([]), { provide: StoreAccessService, useValue: { unlocked: storeUnlocked } }, { provide: ApiService, useValue: apiSpy }],
+        provideRouter([]), { provide: ApiService, useValue: apiSpy }],
     });
     clipboard = TestBed.inject(TextClipboardService);
     fixture = TestBed.createComponent(IconPacksPageComponent);
@@ -640,7 +644,7 @@ describe('IconPacksPageComponent shell drag-and-drop', () => {
     TestBed.configureTestingModule({
       imports: [IconPacksPageComponent],
       providers: [provideZonelessChangeDetection(),
-        provideRouter([]), { provide: StoreAccessService, useValue: { unlocked: storeUnlocked } }, { provide: ApiService, useValue: apiSpy }],
+        provideRouter([]), { provide: ApiService, useValue: apiSpy }],
     });
     iconPacks = TestBed.inject(IconPackService);
     importFromPathSpy = spyOn(iconPacks, 'importFromPath').and.resolveTo(null);

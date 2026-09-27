@@ -1,6 +1,6 @@
 import type { UiComponentContext } from '../ui-framework/component-registry';
 import { emitsEvent } from '../ui-framework/node-properties.util';
-import { nodeClaimsValue, nodeDeclaresGesture } from '../ui-framework/node-gestures';
+import { nodeClaimsValue, nodeDeclaresGesture, nodeDeclaresPointerFamily } from '../ui-framework/node-gestures';
 import { UiNode } from '../ui-framework/ui-node.interface';
 import { UiComponentEvents } from '../ui-components/component-events';
 import {
@@ -10,6 +10,7 @@ import {
   UI_SWIPE_MIN_DISTANCE,
 } from '../ui-components/component-modifiers';
 import { UiComponents } from '../ui-components/ui-component-types';
+import { capturePointer, descendantsOnPath, measureBasisUnit } from './node-pointer-path';
 
 export const WIDGET_GESTURE_CANCEL_EVENT = 'widget-gesture-cancel';
 
@@ -23,15 +24,8 @@ interface TrackedPointer {
 
 type Phase = 'idle' | 'pending' | 'drag' | 'pinch';
 
-function ownsItsPointer(node: UiNode): boolean {
+export function ownsItsPointer(node: UiNode): boolean {
   return nodeClaimsValue(node) || nodeDeclaresGesture(node) || node.type === UiComponents.List;
-}
-
-function collect(node: UiNode, into: { [id: string]: UiNode }): void {
-  into[node.id] = node;
-  const children = node.children ?? [];
-  for (let index = 0; index < children.length; index++) collect(children[index], into);
-  if (node.fallback) collect(node.fallback, into);
 }
 
 export function bindNodeGestures(element: HTMLElement | SVGElement, ctx: UiComponentContext<unknown>): () => void {
@@ -63,32 +57,14 @@ export function bindNodeGestures(element: HTMLElement | SVGElement, ctx: UiCompo
     else if (ended === 'pinch') ctx.emit(ctx.current(), UiComponentEvents.PinchEnd, scale);
   }
 
-  function belongsToDescendant(target: EventTarget | null): boolean {
-    const byId: { [id: string]: UiNode } = {};
-    collect(ctx.current(), byId);
-    let current = target as Element | null;
-    while (current !== null && current !== element) {
-      const id = current.getAttribute ? current.getAttribute('data-node-id') : null;
-      const node = id === null ? undefined : byId[id];
-      if (node !== undefined && ownsItsPointer(node)) return true;
-      current = current.parentNode as Element | null;
-    }
+  function belongsToDescendant(target: EventTarget | null, owns: (node: UiNode) => boolean): boolean {
+    const path = descendantsOnPath(element, ctx.current(), target);
+    for (let index = 0; index < path.length; index++) if (owns(path[index])) return true;
     return false;
   }
 
-  function measureUnit(): number {
-    const rect = element.getBoundingClientRect();
-    const boxWidth = ctx.box.width;
-    const ratio = rect.width > 0 && boxWidth ? rect.width / boxWidth : 1;
-    return ctx.basis * ratio > 0 ? ctx.basis * ratio : 1;
-  }
-
   function capture(pointerId: number): void {
-    try {
-      (element as HTMLElement).setPointerCapture(pointerId);
-    } catch {
-      // A synthetic pointer has no OS session to capture; the capture-phase listeners still see it.
-    }
+    capturePointer(element, pointerId);
   }
 
   function flush(): void {
@@ -152,6 +128,7 @@ export function bindNodeGestures(element: HTMLElement | SVGElement, ctx: UiCompo
     };
 
     if (pointers.length === 1 && pointers[0].id !== pointer.pointerId && phase === 'pending' && declaresPinch(node)) {
+      if (belongsToDescendant(event.target, nodeDeclaresPointerFamily)) return;
       pointers.push(tracked);
       pinchStart = spread();
       scale = 1;
@@ -159,13 +136,13 @@ export function bindNodeGestures(element: HTMLElement | SVGElement, ctx: UiCompo
     }
 
     if (phase !== 'idle') endActive();
-    if (belongsToDescendant(event.target)) return;
+    if (belongsToDescendant(event.target, ownsItsPointer)) return;
 
     pointers = [tracked];
     phase = 'pending';
     origin = event.target;
     startedAt = Date.now();
-    unitPx = measureUnit();
+    unitPx = measureBasisUnit(element, ctx);
     capture(pointer.pointerId);
   }, true);
 

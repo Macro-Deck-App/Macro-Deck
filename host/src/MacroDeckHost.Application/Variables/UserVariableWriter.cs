@@ -4,6 +4,7 @@ using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
+using MacroDeckHost.Localization;
 using MacroDeck.Sdk.Variables;
 using Microsoft.Extensions.DependencyInjection;
 using DomainVariableType = MacroDeckHost.Domain.Enums.VariableType;
@@ -87,6 +88,13 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 			if (entity.Classification == VariableClassification.User)
 			{
 				var update = await service.SetValue(entity.Id, computed.Value, cancellationToken);
+				if (update.Error == VariableError.FileReadOnly)
+				{
+					return UserVariableWriteResult.Failed(UserVariableWriteStatus.NotEditable,
+						await ActiveLocalization.Resolve(scope.ServiceProvider,
+							AppStrings.Integrations.Variables.Errors.VariableReadOnly()));
+				}
+
 				return update.Success
 					? UserVariableWriteResult.Applied()
 					: Failed(update.Error, update.ErrorMessage);

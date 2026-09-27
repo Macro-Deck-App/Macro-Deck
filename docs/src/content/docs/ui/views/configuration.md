@@ -137,6 +137,11 @@ thing. Macro Deck relays the tree without inspecting it, so it cannot tell which
 **a flow serving a tree classifies its own secrets** by returning them as `ConfigFlowValue.Secret` from
 `Complete`.
 
+`CreateUiSessionAsync` can be called more than once for the same flow: Macro Deck opens a new session after
+a session ended with a retryable error, and after .NET Hot Reload updated your plugin. Build each session
+from state the flow holds, not from anything the previous session kept. The user's unsaved edits reach the
+new session as `change` events, the same way they reached the first one.
+
 ## From an action
 
 ```csharp

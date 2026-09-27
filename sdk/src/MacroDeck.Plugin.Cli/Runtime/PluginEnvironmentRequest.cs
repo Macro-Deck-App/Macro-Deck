@@ -40,4 +40,12 @@ internal sealed record PluginEnvironmentRequest
 	/// <summary>Self-registering only: <c>MACRO_DECK_PLUGIN_PAIRING</c>. Whether the launched plugin may
 	/// fall back to interactive pairing when no <see cref="EnrollmentToken" /> is given.</summary>
 	public bool PairingEnabled { get; init; } = true;
+
+	public bool RealHost { get; init; }
+
+	public bool Watch { get; init; }
+
+	/// <summary>The project directory whose manifest.json and bundled icon packs a real-host session syncs,
+	/// when the plugin runs from its build output instead.</summary>
+	public string? BundledIconPacksRoot { get; init; }
 }

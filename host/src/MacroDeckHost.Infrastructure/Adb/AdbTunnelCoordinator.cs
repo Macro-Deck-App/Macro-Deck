@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using MacroDeckHost.Application.Adb;
 using MacroDeckHost.Application.Configuration;
+using MacroDeckHost.Application.Usb;
 using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Infrastructure.Adb;
@@ -12,6 +13,7 @@ internal sealed class AdbTunnelCoordinator
 	private readonly IAdbProcessRunner _processRunner;
 	private readonly IHostListenerState _listenerState;
 	private readonly AdbOwnershipMarker _ownershipMarker;
+	private readonly INativeUsbSerials? _nativeUsb;
 	private readonly ILogger _logger;
 
 	private volatile string? _executablePath;
@@ -32,8 +34,10 @@ internal sealed class AdbTunnelCoordinator
 		IAdbProcessRunner processRunner,
 		IHostListenerState listenerState,
 		AdbOwnershipMarker ownershipMarker,
-		ILogger logger)
+		ILogger logger,
+		INativeUsbSerials? nativeUsb = null)
 	{
+		_nativeUsb = nativeUsb;
 		_processRunner = processRunner;
 		_listenerState = listenerState;
 		_ownershipMarker = ownershipMarker;
@@ -65,10 +69,9 @@ internal sealed class AdbTunnelCoordinator
 
 		// The host-side port of every reverse tunnel is a *public* listener and nothing else: never
 		// LoopbackPort, never a constant. An `adb reverse` connection reaches the host from the local
-		// adb server, so its remote address is loopback; on the loopback listener,
-		// LoopbackConnection.IsTrusted (host/src/MacroDeckHost/Auth/LoopbackConnection.cs) grants that
-		// caller a synthetic admin principal with no authentication. Pointing a reverse tunnel there
-		// would hand an unauthenticated phone full admin.
+		// adb server, so its remote address is loopback; the loopback listener belongs to the desktop
+		// app, whose only remaining barrier there is its per-launch secret
+		// (host/src/MacroDeckHost/Auth/LoopbackConnection.cs), not the phone's own sign-in.
 		//
 		// Which public listener comes from PublicEndpointSet.LocalClientEndpoint rather than being
 		// decided here: plain HTTP while one exists (the companion app then needs no certificate
@@ -85,6 +88,14 @@ internal sealed class AdbTunnelCoordinator
 			}
 
 			cancellationToken.ThrowIfCancellationRequested();
+
+			// Nothing cached survives the switch and re-enumeration, so adb reverse starts fresh if the
+			// phone falls back to adb later.
+			if (_nativeUsb?.IsNative(device.Serial) == true)
+			{
+				_deviceState.Remove(device.Serial);
+				continue;
+			}
 
 			var state = StateFor(device.Serial);
 

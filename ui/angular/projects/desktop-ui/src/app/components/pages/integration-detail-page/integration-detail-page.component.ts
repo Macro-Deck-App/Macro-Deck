@@ -1,3 +1,4 @@
+import { Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -17,7 +18,7 @@ import { ConfigFlowService } from '../../../services/config-flow.service';
 import { IntegrationService, Integration } from '../../../services/integration.service';
 import { PluginCompatibilityService } from '../../../services/plugin-compatibility.service';
 import { PluginInstallationService } from '../../../services/plugin-installation.service';
-import { StoreAccessService } from '../../../services/store-access.service';
+import { isStoreDetailUrl } from '../../../services/store-browse-state.service';
 import { VariableCatalogService } from '../../../services/variable-catalog.service';
 import { VariableBindDialogComponent } from '../../variables/variable-bind-dialog.component';
 import { ActionCapabilityRowComponent } from './action-capability-row.component';
@@ -70,6 +71,9 @@ export class IntegrationDetailPageComponent implements OnInit {
   private readonly localization = inject(LocalizationService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly location = inject(Location);
+
+  protected readonly openedFromStore = signal(false);
   protected readonly integrationService = inject(IntegrationService);
   protected readonly configFlow = inject(ConfigFlowService);
   private readonly api = inject(ApiService);
@@ -80,9 +84,7 @@ export class IntegrationDetailPageComponent implements OnInit {
   private readonly installation = inject(PluginInstallationService);
 
   protected readonly integrationId = signal<string>('');
-  private readonly storeListed = signal(false);
-  private readonly storeUnlocked = inject(StoreAccessService).unlocked;
-  protected readonly showStoreLink = computed(() => this.storeListed() && this.storeUnlocked());
+  protected readonly showStoreLink = signal(false);
 
   protected readonly canUninstall = computed(() => {
     const integration = this.integration();
@@ -421,6 +423,8 @@ export class IntegrationDetailPageComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.integrationId.set(this.route.snapshot.paramMap.get('integrationId') ?? '');
+    const navigation = this.router.currentNavigation() ?? this.router.lastSuccessfulNavigation();
+    this.openedFromStore.set(isStoreDetailUrl(navigation?.previousNavigation?.finalUrl?.toString()));
 
     const initialTab = this.route.snapshot.queryParamMap.get('tab');
     if (initialTab === 'actions' || initialTab === 'variables') {
@@ -442,6 +446,10 @@ export class IntegrationDetailPageComponent implements OnInit {
   }
 
   goBack(): void {
+    if (this.openedFromStore()) {
+      this.location.back();
+      return;
+    }
     void this.router.navigate(['/integrations']);
   }
 
@@ -490,9 +498,9 @@ export class IntegrationDetailPageComponent implements OnInit {
     }
     try {
       const response = await this.api.getStoreExtension('Plugin', id);
-      this.storeListed.set(!!response.extension && id === this.integrationId());
+      this.showStoreLink.set(!!response.extension && id === this.integrationId());
     } catch {
-      this.storeListed.set(false);
+      this.showStoreLink.set(false);
     }
   }
 

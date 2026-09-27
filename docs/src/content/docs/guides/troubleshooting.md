@@ -282,7 +282,8 @@ or run the plugin with Developer Mode on and let the pairing prompt **replace th
 (it rotates the secret and ends the old session) - see
 [Interactive pairing](/reference/authentication/#self-registering-interactive-pairing) and
 [Registration is refused as already registered](/guides/debugging/#registration-is-refused-as-already-registered).
-`DELETE /api/plugins/registration/{pluginId}` (admin) still works but is no longer the recommended path.
+`DELETE /api/plugins/registration/{pluginId}` (admin: a login token, or the development host's loopback secret header
+on the loopback port) still works but is no longer the recommended path.
 
 ### `PROTOCOL_VERSION_UNSUPPORTED` (HTTP 422, or close `4001`)
 

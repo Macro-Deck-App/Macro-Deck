@@ -1,15 +1,16 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
-using System.Threading.Channels;
 using MacroDeck.Plugin.Hosting.Logging;
 using MacroDeck.Plugin.Hosting.Transport;
 using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Callbacks.Ui;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Sdk.Ui;
+using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Events;
 using MacroDeck.Ui.Model.Patches;
 using MacroDeck.Ui.Model.Serialization;
+using MacroDeck.Ui.Model.Surfaces;
 using Serilog;
 
 namespace MacroDeck.Plugin.Hosting.Capabilities.Ui;
@@ -32,9 +33,9 @@ internal sealed class UiSessionStore : IAsyncDisposable
 		_logger = logger.ForContext<UiSessionStore>();
 	}
 
-	public bool TryAdd(string sessionId, IUiSession session)
+	public bool TryAdd(string sessionId, IUiSession session, string surfaceKind)
 	{
-		var live = new LiveSession(this, sessionId, session);
+		var live = new LiveSession(this, sessionId, session, surfaceKind);
 
 		if (!_sessions.TryAdd(sessionId, live))
 		{
@@ -67,22 +68,22 @@ internal sealed class UiSessionStore : IAsyncDisposable
 		return true;
 	}
 
-	public bool Dispatch(string sessionId, UiEvent uiEvent)
+	public bool Dispatch(string sessionId, UiEvent uiEvent, string? clientId = null)
 	{
 		if (!_sessions.TryGetValue(sessionId, out var live))
 		{
 			return false;
 		}
 
-		live.Dispatch(uiEvent);
+		live.Dispatch(uiEvent, clientId);
 		return true;
 	}
 
-	public void RebuildAll()
+	public void ReloadAll()
 	{
 		foreach (var live in _sessions.Values)
 		{
-			live.RequestRebuild();
+			live.RequestReload();
 		}
 	}
 
@@ -117,7 +118,9 @@ internal sealed class UiSessionStore : IAsyncDisposable
 
 		Event,
 
-		Rebuild
+		Rebuild,
+
+		Reload
 	}
 
 	private sealed class LiveSession : IAsyncDisposable
@@ -125,22 +128,20 @@ internal sealed class UiSessionStore : IAsyncDisposable
 		private readonly UiSessionStore _owner;
 		private readonly string _sessionId;
 		private readonly IUiSession _session;
+		private readonly string _surfaceKind;
 
-		private readonly Channel<(WorkKind Kind, UiEvent? Event)> _work =
-			Channel.CreateUnbounded<(WorkKind, UiEvent?)>(new UnboundedChannelOptions
-			{
-				SingleReader = true, AllowSynchronousContinuations = false
-			});
+		private readonly UiReplaceableWork<(WorkKind Kind, UiEvent? Event)> _work = new();
 
 		private Task? _pump;
 		private int _drainQueued;
 		private volatile bool _disposing;
 
-		public LiveSession(UiSessionStore owner, string sessionId, IUiSession session)
+		public LiveSession(UiSessionStore owner, string sessionId, IUiSession session, string surfaceKind)
 		{
 			_owner = owner;
 			_sessionId = sessionId;
 			_session = session;
+			_surfaceKind = surfaceKind;
 		}
 
 		public void Start()
@@ -150,15 +151,33 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			_pump = Task.Run(RunAsync);
 		}
 
-		public void RequestSnapshot() => _work.Writer.TryWrite((WorkKind.Snapshot, null));
+		public void RequestSnapshot() => _work.Write((WorkKind.Snapshot, null));
 
-		public void Dispatch(UiEvent uiEvent) => _work.Writer.TryWrite((WorkKind.Event, uiEvent));
+		public void Dispatch(UiEvent uiEvent, string? clientId)
+		{
+			if (string.Equals(uiEvent.Name, UiComponentEvents.PointerMove, StringComparison.Ordinal))
+			{
+				_work.WriteReplaceable((clientId ?? string.Empty) + "\n" + uiEvent.NodeId, (WorkKind.Event, uiEvent));
+			}
+			else
+			{
+				_work.Write((WorkKind.Event, uiEvent));
+			}
+		}
 
-		public void RequestRebuild()
+		public void RequestReload()
 		{
 			if (_session is IRebuildableUiSession)
 			{
-				_work.Writer.TryWrite((WorkKind.Rebuild, null));
+				_work.Write((WorkKind.Rebuild, null));
+				return;
+			}
+
+			// Ending a dialog cancels it and the action waiting for its answer, so an open dialog keeps
+			// the code it was opened with.
+			if (!string.Equals(_surfaceKind, UiSurfaceKinds.Dialog, StringComparison.Ordinal))
+			{
+				_work.Write((WorkKind.Reload, null));
 			}
 		}
 
@@ -167,7 +186,7 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			_disposing = true;
 			_session.Changed -= OnChanged;
 			_session.Faulted -= OnFaulted;
-			_work.Writer.TryComplete();
+			_work.Complete();
 
 			if (_pump is { } pump)
 			{
@@ -191,7 +210,7 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			// would either lose patches or drain an empty session.
 			if (Interlocked.Exchange(ref _drainQueued, 1) == 0)
 			{
-				_work.Writer.TryWrite((WorkKind.Drain, null));
+				_work.Write((WorkKind.Drain, null));
 			}
 		}
 
@@ -202,7 +221,7 @@ internal sealed class UiSessionStore : IAsyncDisposable
 		{
 			try
 			{
-				await foreach (var (kind, uiEvent) in _work.Reader.ReadAllAsync().ConfigureAwait(false))
+				await foreach (var (kind, uiEvent) in _work.ReadAllAsync().ConfigureAwait(false))
 				{
 					await HandleAsync(kind, uiEvent).ConfigureAwait(false);
 				}
@@ -220,6 +239,7 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			WorkKind.Snapshot => PublishSnapshotAsync(),
 			WorkKind.Event when uiEvent is not null => DispatchAsync(uiEvent),
 			WorkKind.Rebuild => RebuildAsync(),
+			WorkKind.Reload => ReloadAsync(),
 			_ => Task.CompletedTask
 		};
 
@@ -297,6 +317,33 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			catch (Exception exception) when (exception is not OutOfMemoryException)
 			{
 				_owner._logger.UiSessionCallFailed(_sessionId, "dispose", exception);
+			}
+		}
+
+		private async Task ReloadAsync()
+		{
+			if (_disposing)
+			{
+				return;
+			}
+
+			try
+			{
+				await _owner._hostInvoker.InvokeAsync(HostApis.Ui,
+						HostOperations.Ui.Reload,
+						new UiReloadArguments { SessionId = _sessionId },
+						CancellationToken.None)
+					.ConfigureAwait(false);
+			}
+			catch (HostInvocationException exception)
+				when (exception.Code == ProtocolErrorCodes.CapabilityUnsupported)
+			{
+				// A host that predates reload still reopens a session that reported a fault.
+				await FaultAsync(ProtocolErrorCodes.InternalError).ConfigureAwait(false);
+			}
+			catch (Exception exception) when (exception is not OutOfMemoryException)
+			{
+				_owner._logger.HostCallbackFailed(HostApis.Ui, HostOperations.Ui.Reload, exception);
 			}
 		}
 

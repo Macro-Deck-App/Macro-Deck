@@ -12,6 +12,7 @@ import {
 import { LocalizationService } from '../localization';
 import { CROSS_TAB_LOCK_ENVIRONMENT, runExclusively } from './cross-tab-lock';
 import { DeviceIdentityService } from './device-identity.service';
+import { shellBridge } from '../../util/shell-bridge';
 
 export type AuthState = 'unknown' | 'setupRequired' | 'loggedOut' | 'authenticated';
 
@@ -49,6 +50,40 @@ export const ENROLLMENT_URL_ENVIRONMENT = new InjectionToken<EnrollmentUrlEnviro
     }),
   });
 
+const LOOPBACK_REAUTH_GUARD_MS = 30000;
+const LOOPBACK_REAUTH_MARKER = 'md.auth.loopbackReauthAt';
+
+export interface LoopbackReauthEnvironment {
+  reauthenticate: (() => Promise<void>) | undefined;
+  lastAttempt(): number | null;
+  recordAttempt(at: number): void;
+  now(): number;
+}
+
+export const LOOPBACK_REAUTH_ENVIRONMENT = new InjectionToken<LoopbackReauthEnvironment>(
+  'LOOPBACK_REAUTH_ENVIRONMENT',
+  {
+    providedIn: 'root',
+    factory: () => ({
+      reauthenticate: shellBridge()?.reauthenticate,
+      lastAttempt: () => {
+        try {
+          const value = Number(sessionStorage.getItem(LOOPBACK_REAUTH_MARKER));
+          return Number.isFinite(value) && value > 0 ? value : null;
+        } catch {
+          return null;
+        }
+      },
+      recordAttempt: (at) => {
+        try {
+          sessionStorage.setItem(LOOPBACK_REAUTH_MARKER, String(at));
+        } catch {
+        }
+      },
+      now: () => Date.now(),
+    }),
+  });
+
 @Injectable({ providedIn: 'root' })
 export class AuthService implements OnDestroy {
   private readonly api = inject(ApiService);
@@ -57,6 +92,7 @@ export class AuthService implements OnDestroy {
   private readonly deviceIdentity = inject(DeviceIdentityService);
   private readonly lockEnvironment = inject(CROSS_TAB_LOCK_ENVIRONMENT);
   private readonly enrollmentEnvironment = inject(ENROLLMENT_URL_ENVIRONMENT);
+  private readonly reauthEnvironment = inject(LOOPBACK_REAUTH_ENVIRONMENT);
 
   private readonly _state = signal<AuthState>('unknown');
   private readonly _scope = signal<AuthScope | null>(null);
@@ -120,6 +156,12 @@ export class AuthService implements OnDestroy {
       }
 
       const status = await this.api.getAuthStatus();
+      // Inside the desktop shell an untrusted status means the window lost its loopback session (the
+      // host restarted under a new secret): the shell re-enters through a fresh session code.
+      if (!status.trusted && this.requestLoopbackReauthentication()) {
+        return;
+      }
+
       if (!status.setupComplete) {
         this._state.set('setupRequired');
         return;
@@ -280,6 +322,7 @@ export class AuthService implements OnDestroy {
 
   private async handleUnauthorized(): Promise<boolean> {
     if (this._trusted()) {
+      this.requestLoopbackReauthentication();
       return false;
     }
 
@@ -318,6 +361,7 @@ export class AuthService implements OnDestroy {
 
   private async handleConnectionUnauthorized(): Promise<void> {
     if (this._trusted()) {
+      this.requestLoopbackReauthentication();
       return;
     }
 
@@ -331,6 +375,23 @@ export class AuthService implements OnDestroy {
       // `retrySession()`'s eventual `reconnectNow()` is what nudges it again, once the host answers.
       this.scheduleSessionRetry();
     }
+  }
+
+  // Once per 30 s per window: a shell that cannot restore trust must fall through to the ordinary
+  // setup and login paths instead of reloading forever.
+  private requestLoopbackReauthentication(): boolean {
+    const reauthenticate = this.reauthEnvironment.reauthenticate;
+    if (!reauthenticate) {
+      return false;
+    }
+    const now = this.reauthEnvironment.now();
+    const last = this.reauthEnvironment.lastAttempt();
+    if (last !== null && now - last < LOOPBACK_REAUTH_GUARD_MS) {
+      return false;
+    }
+    this.reauthEnvironment.recordAttempt(now);
+    reauthenticate().catch(() => {});
+    return true;
   }
 
   private tryRefresh(): Promise<RefreshOutcome> {

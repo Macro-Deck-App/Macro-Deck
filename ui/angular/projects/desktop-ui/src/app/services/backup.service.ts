@@ -1,8 +1,9 @@
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
-import { AppStrings, BackupComponentCatalogEntry, BackupComponentGroupInfo, BackupDependencyWarningDto, BackupListChangedEvent, BackupOperationProgressEvent, BackupOperationStage, BackupRecoveryKeyStateChangedEvent, BackupSummary, GetBackupRecoveryKeyStateResponse, GetBackupSettingsResponse, GetBackupStatusResponse, PendingRestoreSummary, RestorePendingEvent, UpdateBackupSettingsRequest } from '@macro-deck/runtime';
+import { AppStrings, BackupComponentCatalogEntry, BackupComponentGroupInfo, BackupDependencyWarningDto, BackupListChangedEvent, BackupOperationProgressEvent, BackupOperationStage, BackupRecoveryKeyStateChangedEvent, BackupSummary, GetBackupRecoveryKeyStateResponse, GetBackupSettingsResponse, GetBackupStatusResponse, LocalizedText, PendingRestoreSummary, RestorePendingEvent, UpdateBackupSettingsRequest, resolveLocalizedText } from '@macro-deck/runtime';
 import { ApiService, LocalizationService } from '@shared';
 import type { BackupComponentGroup } from '@macro-deck/runtime';
 import { downloadFile } from '../util/download-file';
+import { shellBridge } from '../util/shell-bridge';
 
 const TERMINAL_STAGES: ReadonlySet<string> = new Set(['Completed', 'Failed']);
 
@@ -24,6 +25,13 @@ export type BackupOperationResult = { ok: true } | { ok: false; error: string };
 export type BackupRecoveryKeyOutcome =
   | { status: 'success'; key: string; state: GetBackupRecoveryKeyStateResponse }
   | { status: 'error'; message: string };
+
+export type BackupDownloadOutcome =
+  | { status: 'saved'; path?: string }
+  | { status: 'canceled' }
+  | { status: 'error'; message: string };
+
+export type BackupImportOutcome = { ok: true; backup: BackupSummary } | { ok: false; error: string };
 
 export type BackupInspectOutcome =
   | {
@@ -66,6 +74,7 @@ export class BackupService {
   readonly operation = signal<GetBackupStatusResponse | null>(null);
   readonly settings = signal<GetBackupSettingsResponse | null>(null);
   readonly recoveryKey = signal<GetBackupRecoveryKeyStateResponse | null>(null);
+  readonly downloading = signal<ReadonlySet<string>>(new Set());
 
   readonly running: Signal<boolean> = computed(() => {
     const op = this.operation();
@@ -156,29 +165,76 @@ export class BackupService {
     }
   }
 
-  async downloadBackup(backupId: string): Promise<BackupOperationResult> {
-    try {
-      const { blob, fileName } = await this.api.downloadBackup(backupId);
-      // Not FileSaveService: see ApiService.downloadBackup - this must stay off the Tauri IPC bridge.
-      downloadFile(blob, fileName);
-      return { ok: true };
-    } catch (error) {
-      return { ok: false, error: errorMessage(error, this.localization.translateKey(AppStrings.Errors.Backup.OperationFailed)) };
+  async downloadBackup(backup: BackupSummary): Promise<BackupDownloadOutcome> {
+    if (this.downloading().has(backup.id)) {
+      return { status: 'canceled' };
     }
+    this.setDownloading(backup.id, true);
+    try {
+      const shell = shellBridge();
+      if (shell?.saveBackup) {
+        const result = await shell.saveBackup({ backupId: backup.id, fileName: backup.name });
+        if (result.saved) {
+          return { status: 'saved', path: result.path ?? undefined };
+        }
+        if (result.canceled) {
+          return { status: 'canceled' };
+        }
+        if (!result.unavailable) {
+          console.error('Failed to save the backup:', result.error);
+          return { status: 'error', message: this.localization.translateKey(AppStrings.Errors.FileSave.WriteFailed) };
+        }
+      }
+      // A backup can be gigabytes, so it never goes through FileSaveService: that sends the whole file over IPC.
+      const { blob, fileName } = await this.api.downloadBackup(backup.id);
+      downloadFile(blob, fileName);
+      return { status: 'saved' };
+    } catch (error) {
+      return { status: 'error', message: errorMessage(error, this.localization.translateKey(AppStrings.Errors.Backup.OperationFailed)) };
+    } finally {
+      this.setDownloading(backup.id, false);
+    }
+  }
+
+  private setDownloading(backupId: string, active: boolean): void {
+    const next = new Set(this.downloading());
+    if (active) {
+      next.add(backupId);
+    } else {
+      next.delete(backupId);
+    }
+    this.downloading.set(next);
   }
 
   async inspectBackup(backupId: string, recoveryKey?: string): Promise<BackupInspectOutcome> {
     try {
       const response = await this.api.inspectBackup(backupId, recoveryKey);
       if (response.success && response.backup) {
+        if (response.recoveryKeyRequired && !recoveryKey) {
+          return { status: 'recoveryKeyRequired' };
+        }
         return { status: 'success', backup: response.backup, components: response.components, catalog: response.catalog };
       }
       return mapRecoveryKeyError(response.error?.code) ?? {
         status: 'error',
-        message: response.error?.message ?? this.localization.translateKey(AppStrings.Errors.Backup.InspectFailed),
+        message: this.hostMessage(response.error?.message, AppStrings.Errors.Backup.InspectFailed),
       };
     } catch (error) {
       return { status: 'error', message: errorMessage(error, this.localization.translateKey(AppStrings.Errors.Backup.OperationFailed)) };
+    }
+  }
+
+  async importBackup(file: File): Promise<BackupImportOutcome> {
+    try {
+      const response = await this.api.importBackup(file);
+      if (!response.success || !response.backup) {
+        return { ok: false, error: this.hostMessage(response.error?.message, AppStrings.Errors.Backup.ImportFailed) };
+      }
+      await this.loadBackups();
+      return { ok: true, backup: response.backup };
+    } catch (error) {
+      console.error('Failed to import a backup:', error);
+      return { ok: false, error: this.localization.translateKey(AppStrings.Errors.Backup.ImportFailed) };
     }
   }
 
@@ -318,6 +374,10 @@ export class BackupService {
     }
 
     this.operation.set(status);
+  }
+
+  private hostMessage(message: LocalizedText | undefined, fallback: string): string {
+    return resolveLocalizedText(message, this.localization) || this.localization.translateKey(fallback);
   }
 
   private subscribeToEvents(): void {

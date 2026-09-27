@@ -298,7 +298,8 @@ public class ReadinessGuardedReadHandlersTests
 			string? scopeRefId,
 			VariableType type,
 			object? initialValue,
-			int? decimalPlaces) =>
+			int? decimalPlaces,
+			VariableFileSource? fileSource = null) =>
 			throw new NotSupportedException();
 
 		public Task<Result<VariableEntity, VariableError>> SetValue(Guid id,
@@ -307,7 +308,8 @@ public class ReadinessGuardedReadHandlersTests
 
 		public Task<Result<VariableEntity, VariableError>> UpdateUserVariable(Guid id,
 			string? name,
-			int? decimalPlaces) =>
+			int? decimalPlaces,
+			VariableFileSource? fileSource = null) =>
 			throw new NotSupportedException();
 
 		public Task<Result<VariableError>> DeleteUserVariable(Guid id) => throw new NotSupportedException();

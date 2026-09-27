@@ -5,6 +5,8 @@ description: Fixes for common problems when installing, connecting and using Mac
 
 Find your symptom below. If nothing here helps, ask on [Discord](https://discord.macro-deck.app) or
 [open an issue on GitHub](https://github.com/Macro-Deck-App/Macro-Deck/issues) and attach your logs.
+A problem with a plugin or icon pack from the Store belongs to its creator: use the links on the item's Store
+page to open an issue in its repository or report it.
 
 ## Where to find the logs
 
@@ -35,7 +37,7 @@ Macro Deck writes its logs to the `logs` folder inside its data folder:
   port it is actually using in **Settings > Network**.
 - **Firewall:** allow Macro Deck, or the port above, through the firewall of the computer running it.
 - **Wi-Fi driver:** see [the connection drops after a few minutes](#the-connection-drops-after-a-few-minutes).
-- **No Wi-Fi at all:** an Android phone can connect over a USB cable instead, see
+- **No Wi-Fi at all:** a phone or tablet can connect over a USB cable instead, see
   [Connect over USB](/guide/usb-connection/).
 
 ## The connection drops after a few minutes
@@ -49,8 +51,8 @@ deck sits idle.
   hardware.
 - **Power saving:** in Windows, open **Device Manager**, open the Wi-Fi adapter's properties and turn
   off **Allow the computer to turn off this device to save power** on **Power Management**.
-- **Wired connection:** connect the computer running Macro Deck to the router with a cable. An
-  Android phone can also [connect over USB](/guide/usb-connection/).
+- **Wired connection:** connect the computer running Macro Deck to the router with a cable. A phone
+  or tablet can also [connect over USB](/guide/usb-connection/).
 
 ## Macro Deck is not listening on its port
 
@@ -126,11 +128,23 @@ window instead:
 If the window says a port is already in use, see
 [Macro Deck is not listening on its port](#macro-deck-is-not-listening-on-its-port).
 
+If the host does not start although nothing seems to use the port, a host left over from an earlier
+Macro Deck may still be running and can no longer be taken over. End the **Macro Deck Host** process in
+Task Manager or Activity Monitor, then choose **Restart Macro Deck**.
+
 ## Plugins show up as dotnet in Task Manager
 
 Most plugins run on the .NET runtime that comes with Macro Deck, so Task Manager and Activity Monitor
 list them as `dotnet` or ".NET Host" rather than by the plugin's name. This is expected; ending
 Macro Deck ends them too.
+
+## A plugin in the Store shows Certificate revoked
+
+Macro Deck revoked the certificate that signed the installed version of this plugin, or the certificate
+that vouches for it. The installed version keeps working, but Macro Deck refuses to install or update
+anything signed with that certificate. Wait for an update signed with a new certificate, or uninstall the
+plugin if you no longer trust it. Installing or updating it from the Store fails with the message that
+Macro Deck could not verify who published the package.
 
 ## Discord cannot be connected
 
@@ -139,6 +153,16 @@ disconnected, Macro Deck cannot find the official Discord desktop app. Third-par
 Vesktop, Equibop, Legcord or Dorion can share game activity, but Macro Deck cannot control them.
 Start the official Discord desktop app, including the Flatpak or Snap version on Linux, and try
 again. The third-party client can keep running alongside it.
+
+## A variable that reads from a file stays unavailable
+
+Check that the file exists at the exact path in the variable's **File settings**, and that it holds
+what the variable's type expects: a number for a number variable, `true`, `false`, `1` or `0` for a
+true/false one. Files larger than 256 KB are not read.
+
+On macOS, files in **Documents**, **Desktop** and **Downloads** need permission. If macOS asked and
+the request was declined, allow Macro Deck under **System Settings > Privacy & Security > Files and
+Folders**, or keep the file in another folder.
 
 ## Installing on Linux
 

@@ -35,12 +35,15 @@ internal sealed class IconTestHarness : IDisposable
 		Storage = new FileSystemIconStorage(Paths, Logger);
 		Cache = new IconPackCache(PackStore, Storage, Logger);
 		FallbackStore = new ImageSharpIconFallbackStore(Storage, Paths, Logger);
+		VariantDeriver = new ImageSharpIconVariantDeriver(Storage, Cache, TimeProvider.System, Logger);
 		BatchTracker = new IconImportBatchTracker(BatchStore);
 		BatchFinalizer = new IconImportBatchFinalizer(Cache, BatchTracker, Storage, Logger);
 		RestoreService = CreateRestoreService();
 	}
 
 	public ImageSharpIconFallbackStore FallbackStore { get; }
+
+	public ImageSharpIconVariantDeriver VariantDeriver { get; }
 
 	public IconPackRestoreService RestoreService { get; }
 
@@ -62,7 +65,7 @@ internal sealed class IconTestHarness : IDisposable
 			ownerRegistry ?? new IconPackOwnerRegistry([]),
 			Logger);
 
-	public IconPackExportService CreateExportService() => new(Cache, Storage, Logger);
+	public IconPackExportService CreateExportService() => new(Cache, Storage, Paths, Logger);
 
 	public async Task<IconPackEntity> CreatePack(string name = "Test Pack",
 		bool isDefault = false,
@@ -102,6 +105,7 @@ internal sealed class IconTestHarness : IDisposable
 	{
 		Cache.Dispose();
 		FallbackStore.Dispose();
+		VariantDeriver.Dispose();
 		Paths.Cleanup();
 	}
 }

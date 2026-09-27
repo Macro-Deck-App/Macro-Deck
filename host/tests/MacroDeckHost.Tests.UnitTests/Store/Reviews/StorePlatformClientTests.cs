@@ -83,6 +83,37 @@ internal sealed class StorePlatformClientTests
 	}
 
 	[Test]
+	public async Task The_creator_guidelines_are_read_anonymously_as_markdown()
+	{
+		_handler.Respond = _ => new HttpResponseMessage(HttpStatusCode.OK)
+		{
+			Content = new StringContent("## 1. Open Source\n\nPlugins must be open source.", Encoding.UTF8, "text/markdown")
+		};
+
+		var result = await _client.GetCreatorGuidelines();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True);
+			Assert.That(result.Value, Is.EqualTo("## 1. Open Source\n\nPlugins must be open source."));
+			Assert.That(_handler.Requests.Single().Uri.AbsolutePath, Is.EqualTo("/api/v1/public/creator-guidelines"));
+			Assert.That(_handler.Requests.Single().Authorization, Is.Null, "public reads must not carry the account token");
+		});
+	}
+
+	[TestCase(HttpStatusCode.OK, "")]
+	[TestCase(HttpStatusCode.NotFound, "")]
+	[TestCase(HttpStatusCode.InternalServerError, "oops")]
+	public async Task Creator_guidelines_that_cannot_be_read_are_a_failure(HttpStatusCode status, string body)
+	{
+		_handler.Respond = _ => new HttpResponseMessage(status) { Content = new StringContent(body) };
+
+		var result = await _client.GetCreatorGuidelines();
+
+		Assert.That(result.Success, Is.False);
+	}
+
+	[Test]
 	public async Task Install_counts_fail_as_a_whole_when_one_batch_is_refused()
 	{
 		var ids = Enumerable.Range(1, 150).Select(number => $"com.acme.p{number}").ToList();

@@ -19,6 +19,7 @@ using MacroDeckHost.Tests.UnitTests.Plugins;
 using MacroDeckHost.Tests.UnitTests.Plugins.Installation;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
+using MacroDeckHost.Infrastructure.Plugins.Trust;
 
 namespace MacroDeckHost.Tests.UnitTests.Store;
 
@@ -90,7 +91,7 @@ internal sealed class StoreDownloadMetadataTests
 		var catalogQuery = new StoreCatalogQueryService(_catalog,
 			_installedPlugins,
 			_installations,
-			new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None));
+			new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners());
 		_coordinator = new StoreInstallCoordinator(catalogQuery,
 			_tracker,
 			new StoreOperationChannel(),

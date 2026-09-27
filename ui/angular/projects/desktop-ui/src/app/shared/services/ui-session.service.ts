@@ -1,4 +1,4 @@
-import { Injectable, Signal, inject, signal } from '@angular/core';
+import { Injectable, Signal, inject, signal, untracked } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { ApiService } from '../transport';
@@ -28,12 +28,15 @@ export type UiSessionOpenRequest =
   | ({ kind: 'modal' } & OpenModalUiSessionRequest)
   | ({ kind: 'preview' } & OpenUiPreviewSessionRequest);
 
+export type UiSessionOpenRequestSource = UiSessionOpenRequest | (() => UiSessionOpenRequest);
+
 export interface UiSessionHandle {
   readonly root: Signal<UiNode | null>;
   readonly revision: Signal<number>;
   readonly rejection: Signal<UiSessionRejection | null>;
   readonly fault?: Signal<UiSessionRejection | null>;
   readonly generation: Signal<number>;
+  readonly reopenReason?: Signal<string | null>;
   send(event: UiNodeEvent): void;
   close(): void;
 }
@@ -53,7 +56,8 @@ export class UiSessionService {
   private readonly toast = inject(ToastService);
   private readonly localization = inject(LocalizationService);
 
-  open(request: UiSessionOpenRequest): UiSessionHandle {
+  open(source: UiSessionOpenRequestSource): UiSessionHandle {
+    const request = typeof source === 'function' ? untracked(source) : source;
     if (request.kind === 'config' && isNegotiableVersion(request.configUiModelVersion)
       && !supportsUiModelVersion(request.configUiModelVersion)) {
       // Attaching and then falling back would burn one of the provider's few session slots and
@@ -62,7 +66,8 @@ export class UiSessionService {
       return new NullUiSessionHandle();
     }
 
-    return new LiveUiSessionHandle(this.api, this.toast, this.localization, request);
+    return new LiveUiSessionHandle(this.api, this.toast, this.localization, request,
+      typeof source === 'function' ? source : null);
   }
 }
 
@@ -89,6 +94,7 @@ class LiveUiSessionHandle implements UiSessionHandle {
   readonly rejection = signal<UiSessionRejection | null>(null);
   readonly fault = signal<UiSessionRejection | null>(null);
   readonly generation = signal(0);
+  readonly reopenReason = signal<string | null>(null);
 
   private sessionId: string | null = null;
   private closed = false;
@@ -102,7 +108,8 @@ class LiveUiSessionHandle implements UiSessionHandle {
     private readonly api: ApiService,
     private readonly toast: ToastService,
     private readonly localization: LocalizationService,
-    private readonly request: UiSessionOpenRequest,
+    private request: UiSessionOpenRequest,
+    private readonly nextRequest: (() => UiSessionOpenRequest) | null,
   ) {
     // Subscribed before the first realtime request goes out, so no notification for this session can arrive
     // and be missed while sessionId is still unknown.
@@ -231,6 +238,8 @@ class LiveUiSessionHandle implements UiSessionHandle {
 
     this.reopens++;
     this.sessionId = null;
+    this.reopenReason.set(rejection.code ?? null);
+    if (this.nextRequest) this.request = untracked(this.nextRequest);
     void this.start();
   }
 

@@ -38,9 +38,7 @@ describe('StoreInstalledPageComponent', () => {
     }
   }
 
-  async function createFixture(items: StoreCatalogItemBody[],
-                               updates: StoreAvailableUpdateBody[],
-                               roles: string[] = ['StoreTester']): Promise<void> {
+  async function createFixture(items: StoreCatalogItemBody[], updates: StoreAvailableUpdateBody[]): Promise<void> {
     notifications = new Map();
     api = jasmine.createSpyObj<ApiService>('ApiService', [
       'onNotification', 'getStoreCatalog', 'getStoreUpdates', 'installStoreUpdates', 'getStoreOperations',
@@ -79,8 +77,8 @@ describe('StoreInstalledPageComponent', () => {
         {
           provide: ConnectAccountService,
           useValue: {
-            isSignedIn: signal(true),
-            session: signal({ account: { roles } }),
+            isSignedIn: signal(false),
+            session: signal(null),
           },
         },
         { provide: PluginRuntimeService, useValue: { plugins: signal([]) } },
@@ -107,6 +105,13 @@ describe('StoreInstalledPageComponent', () => {
       kinds: ['Plugin', 'IconPack'],
     }));
     expect(fixture.nativeElement.querySelectorAll('shared-store-extension-card').length).toBe(2);
+  });
+
+  it('opens without a signed-in account', async () => {
+    await createFixture([item('com.acme.hue', 'Installed')], []);
+
+    expect((fixture.nativeElement.querySelector('.store-page') as HTMLElement).hasAttribute('inert')).toBeFalse();
+    expect(fixture.nativeElement.querySelectorAll('shared-store-extension-card').length).toBe(1);
   });
 
   it('updates every extension at once from one place', async () => {
@@ -138,12 +143,5 @@ describe('StoreInstalledPageComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain(TestBed.inject(LocalizationService)
       .translateKey(AppStrings.Store.Page.InstalledEmptyHeading));
-  });
-
-  it('stays behind the coming-soon overlay for accounts that are not store testers', async () => {
-    await createFixture([item('com.acme.hue', 'UpdateAvailable')], [update('com.acme.hue')], []);
-
-    expect((fixture.nativeElement.querySelector('.store-page') as HTMLElement).hasAttribute('inert')).toBeTrue();
-    expect(fixture.nativeElement.querySelector('.store-coming-soon')).not.toBeNull();
   });
 });

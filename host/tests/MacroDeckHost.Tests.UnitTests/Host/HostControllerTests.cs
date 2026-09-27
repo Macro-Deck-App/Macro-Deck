@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Lifecycle;
 using System.ComponentModel;
 using System.Net;
@@ -60,6 +61,7 @@ public class HostControllerTests
 			Connection = { LocalPort = localPort, RemoteIpAddress = remoteAddress }
 		};
 		httpContext.Request.Host = new HostString("127.0.0.1", localPort);
+		httpContext.Request.Headers[LoopbackSecret.HeaderName] = TestListenerPorts.LoopbackSecret;
 
 		var store = userNotificationStore ?? new UserNotificationStore();
 		var restart = new ApplicationRestartService(lifetime, shellExecutable, TimeSpan.Zero);
@@ -102,6 +104,22 @@ public class HostControllerTests
 	{
 		var lifetime = new FakeLifetime();
 		var controller = CreateController(lifetime, TestListenerPorts.Loopback, IPAddress.Parse("192.168.1.10"));
+
+		var result = controller.Shutdown("update");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result, Is.InstanceOf<NotFoundResult>());
+			Assert.That(lifetime.StopRequested, Is.False);
+		});
+	}
+
+	[Test]
+	public void Shutdown_from_a_loopback_caller_without_the_secret_returns_not_found()
+	{
+		var lifetime = new FakeLifetime();
+		var controller = CreateController(lifetime, TestListenerPorts.Loopback, IPAddress.Loopback);
+		controller.HttpContext.Request.Headers.Remove(LoopbackSecret.HeaderName);
 
 		var result = controller.Shutdown("update");
 

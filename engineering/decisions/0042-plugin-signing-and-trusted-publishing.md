@@ -106,6 +106,9 @@ than as a step towards publishing.
 - The concrete publishing interface is not specified here and does not exist yet; the public
   documentation describes the model rather than inventing an interface that would have to be corrected.
 
+- Amended by [ADR 0096](0096-offline-root-with-an-online-issuer.md): a certificate may chain to the root
+  through one issuer certificate, and a signed artifact then carries `issuer.json` and `issuer.sig` too.
+
 ## References
 
 - [Issue #604](https://github.com/Macro-Deck-App/Macro-Deck/issues/604),

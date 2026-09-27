@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Configuration;
 using System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,7 +13,9 @@ public enum FakeConnectionShape
 
 	LoopbackOnPublicPort,
 
-	LanOnPrivatePort
+	LanOnPrivatePort,
+
+	LoopbackWithoutCredential
 }
 
 public sealed class FakeConnectionStartupFilter : IStartupFilter
@@ -35,16 +38,24 @@ public sealed class FakeConnectionStartupFilter : IStartupFilter
 				{
 					case FakeConnectionShape.Loopback:
 						context.Connection.LocalPort = TestListenerPorts.Loopback;
+						context.Request.Headers[LoopbackSecret.HeaderName] = TestListenerPorts.LoopbackSecret;
+						context.Connection.RemoteIpAddress = IPAddress.Loopback;
+						break;
+
+					case FakeConnectionShape.LoopbackWithoutCredential:
+						context.Connection.LocalPort = TestListenerPorts.Loopback;
 						context.Connection.RemoteIpAddress = IPAddress.Loopback;
 						break;
 
 					case FakeConnectionShape.LoopbackOnPublicPort:
 						context.Connection.LocalPort = HostEndpoints.PublicPort;
+						context.Request.Headers[LoopbackSecret.HeaderName] = TestListenerPorts.LoopbackSecret;
 						context.Connection.RemoteIpAddress = IPAddress.Loopback;
 						break;
 
 					case FakeConnectionShape.LanOnPrivatePort:
 						context.Connection.LocalPort = TestListenerPorts.Loopback;
+						context.Request.Headers[LoopbackSecret.HeaderName] = TestListenerPorts.LoopbackSecret;
 						context.Connection.RemoteIpAddress = IPAddress.Parse("192.168.1.50");
 						break;
 

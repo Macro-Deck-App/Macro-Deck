@@ -12,6 +12,18 @@ public sealed class BackupArchiveReader : IBackupArchiveReader
 
 	public BackupArchiveManifest? ReadManifest(Stream archive)
 	{
+		try
+		{
+			return ReadManifestEntry(archive);
+		}
+		catch (InvalidDataException)
+		{
+			return null;
+		}
+	}
+
+	private static BackupArchiveManifest? ReadManifestEntry(Stream archive)
+	{
 		using var outer = new ZipArchive(archive, ZipArchiveMode.Read, leaveOpen: true);
 
 		if (outer.Entries.Count > BackupArchiveLimits.MaxOuterEntries)

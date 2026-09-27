@@ -4,6 +4,7 @@ public class StoreVersionHistoryBody
 {
 	public const string UnsupportedPlatform = "UnsupportedPlatform";
 	public const string Unavailable = "Unavailable";
+	public const string Withdrawn = "Withdrawn";
 
 	public string Version { get; set; } = string.Empty;
 

@@ -96,6 +96,10 @@ public class InProcessUiSessionProviderOriginTests
 		public void PublishFault(string providerId, string sessionId, string code, string? message)
 		{
 		}
+
+		public void PublishReload(string providerId, string sessionId)
+		{
+		}
 	}
 
 	private sealed class RecordingSession : IUiSession, IOriginAwareUiSession

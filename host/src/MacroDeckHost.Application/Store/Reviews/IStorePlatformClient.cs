@@ -55,4 +55,6 @@ public interface IStorePlatformClient
 	Task<StorePlatformResult<StorePlatformTestBuildDownload>> GetTestBuildDownload(string packageId,
 		Guid buildId,
 		CancellationToken cancellationToken = default);
+
+	Task<StorePlatformResult<string>> GetCreatorGuidelines(CancellationToken cancellationToken = default);
 }

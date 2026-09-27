@@ -496,14 +496,32 @@ async function downloadInstalledDeb(pkg, dir) {
 	if (apt.status === 0 && fetched) {
 		return join(dir, fetched);
 	}
+	console.error(`apt-get download ${pkg}=${version} failed, trying Launchpad: ${(apt.error?.message ?? apt.stderr).trim()}`);
 	const file = `${name}_${version.replace(/^\d+:/, '')}_${arch}.deb`;
-	const response = await fetch(`https://launchpad.net/ubuntu/+archive/primary/+files/${file}`);
+	const response = await fetchWithRetry(`https://launchpad.net/ubuntu/+archive/primary/+files/${file}`);
 	if (!response.ok) {
 		return null;
 	}
 	const deb = join(dir, file);
 	writeFileSync(deb, Buffer.from(await response.arrayBuffer()));
 	return deb;
+}
+
+// A bare "fetch failed" names neither the URL nor the network error behind it, which sits in error.cause.
+async function fetchWithRetry(url, attempts = 4) {
+	for (let attempt = 1; ; attempt++) {
+		try {
+			return await fetch(url, { signal: AbortSignal.timeout(120_000) });
+		} catch (error) {
+			const cause = error.cause ? ` (${error.cause.code ?? error.cause.name}: ${error.cause.message})` : '';
+			const message = `fetching ${url} failed: ${error.message}${cause}`;
+			if (attempt === attempts) {
+				throw new Error(message);
+			}
+			console.error(`${message} - retrying`);
+			await new Promise(resolve => setTimeout(resolve, 5_000 * attempt));
+		}
+	}
 }
 
 function runtimeVersionOf(file) {
@@ -515,7 +533,7 @@ function runtimeVersionOf(file) {
 }
 
 async function fetchRuntime(dest) {
-	const response = await fetch(RUNTIME.url);
+	const response = await fetchWithRetry(RUNTIME.url);
 	if (!response.ok) {
 		throw new NoticeError(`downloading ${RUNTIME.url} failed: HTTP ${response.status}`);
 	}

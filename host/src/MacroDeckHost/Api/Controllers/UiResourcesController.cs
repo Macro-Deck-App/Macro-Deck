@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Plugins.IconPacks;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Auth;
 using Microsoft.AspNetCore.Authorization;
@@ -10,14 +11,21 @@ namespace MacroDeckHost.Api.Controllers;
 public class UiResourcesController : ControllerBase
 {
 	private readonly IUiResourceStore _resources;
+	private readonly IPluginIconUiResources? _pluginIcons;
 
-	public UiResourcesController(IUiResourceStore resources) => _resources = resources;
+	public UiResourcesController(IUiResourceStore resources, IPluginIconUiResources? pluginIcons = null)
+	{
+		_resources = resources;
+		_pluginIcons = pluginIcons;
+	}
 
 	[HttpGet("{resourceId}")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
-	public IActionResult Get(string resourceId, [FromQuery(Name = "v")] string? version = null)
+	public async Task<IActionResult> Get(string resourceId,
+		[FromQuery(Name = "v")] string? version = null,
+		CancellationToken cancellationToken = default)
 	{
-		if (!_resources.TryGet(resourceId, out var resource))
+		if (await Find(resourceId, cancellationToken) is not { } resource)
 		{
 			Response.Headers.CacheControl = "no-store";
 
@@ -50,5 +58,15 @@ public class UiResourcesController : ControllerBase
 		Response.Headers.ETag = etag;
 
 		return File(resource.Content.ToArray(), resource.MediaType);
+	}
+
+	private async Task<UiResourceContent?> Find(string resourceId, CancellationToken cancellationToken)
+	{
+		if (_resources.TryGet(resourceId, out var resource))
+		{
+			return resource;
+		}
+
+		return _pluginIcons is null ? null : await _pluginIcons.TryGetAsync(resourceId, cancellationToken);
 	}
 }

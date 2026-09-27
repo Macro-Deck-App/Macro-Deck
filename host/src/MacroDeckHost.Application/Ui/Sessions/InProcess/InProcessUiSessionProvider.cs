@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
-using System.Threading.Channels;
 using MacroDeck.Sdk.Ui;
+using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Events;
 using MacroDeck.Ui.Model.Serialization;
 using Serilog;
@@ -112,11 +112,7 @@ public sealed class InProcessUiSessionProvider : IUiSessionProvider, IAsyncDispo
 		private readonly IUiSession _session;
 		private readonly CancellationTokenSource _stopping = new();
 
-		private readonly Channel<(WorkKind Kind, UiEvent? Event, string? OriginClientId)> _work =
-			Channel.CreateUnbounded<(WorkKind, UiEvent?, string?)>(new UnboundedChannelOptions
-			{
-				SingleReader = true, AllowSynchronousContinuations = false
-			});
+		private readonly UiReplaceableWork<(WorkKind Kind, UiEvent? Event, string? OriginClientId)> _work = new();
 
 		private Task? _pump;
 		private int _drainQueued;
@@ -135,16 +131,26 @@ public sealed class InProcessUiSessionProvider : IUiSessionProvider, IAsyncDispo
 			_pump = Task.Run(RunAsync);
 		}
 
-		public void RequestSnapshot() => _work.Writer.TryWrite((WorkKind.Snapshot, null, null));
+		public void RequestSnapshot() => _work.Write((WorkKind.Snapshot, null, null));
 
 		public void Dispatch(UiEvent uiEvent, string? originClientId)
-			=> _work.Writer.TryWrite((WorkKind.Event, uiEvent, originClientId));
+		{
+			if (string.Equals(uiEvent.Name, UiComponentEvents.PointerMove, StringComparison.Ordinal))
+			{
+				_work.WriteReplaceable((originClientId ?? string.Empty) + "\n" + uiEvent.NodeId,
+					(WorkKind.Event, uiEvent, originClientId));
+			}
+			else
+			{
+				_work.Write((WorkKind.Event, uiEvent, originClientId));
+			}
+		}
 
 		public async ValueTask DisposeAsync()
 		{
 			_session.Changed -= OnChanged;
 			_session.Faulted -= OnFaulted;
-			_work.Writer.TryComplete();
+			_work.Complete();
 			await _stopping.CancelAsync().ConfigureAwait(false);
 
 			if (_pump is { } pump)
@@ -171,7 +177,7 @@ public sealed class InProcessUiSessionProvider : IUiSessionProvider, IAsyncDispo
 			// never depends on the number of raises matching the number of patches.
 			if (Interlocked.Exchange(ref _drainQueued, 1) == 0)
 			{
-				_work.Writer.TryWrite((WorkKind.Drain, null, null));
+				_work.Write((WorkKind.Drain, null, null));
 			}
 		}
 
@@ -191,7 +197,7 @@ public sealed class InProcessUiSessionProvider : IUiSessionProvider, IAsyncDispo
 		{
 			try
 			{
-				await foreach (var (kind, uiEvent, originClientId) in _work.Reader.ReadAllAsync().ConfigureAwait(false))
+				await foreach (var (kind, uiEvent, originClientId) in _work.ReadAllAsync().ConfigureAwait(false))
 				{
 					Handle(kind, uiEvent, originClientId);
 				}

@@ -220,6 +220,12 @@ public class WidgetTriggerServiceTests
 
 	private sealed class RecordingCoordinator : IActionExecutionCoordinator
 	{
+		public Task<ActionExecutionDispatch> RunBoundedAsync(
+			Func<IServiceProvider, CancellationToken, Task<FlowExecutionResult>> run,
+			TimeSpan bound,
+			CancellationToken cancellationToken)
+			=> throw new NotSupportedException();
+
 		public int Runs { get; private set; }
 
 		public FlowExecutionRequest? LastRequest { get; private set; }
