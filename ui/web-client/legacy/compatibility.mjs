@@ -73,6 +73,7 @@ export const CSS_FEATURES = {
   'property:mask': 'css-masks',
   'property:mask-composite': 'css-masks',
   'property:object-fit': 'object-fit',
+  'property:overflow-anchor': 'css-overflow-anchor',
   'property:scale': NEWER_THAN_THE_DATA,
   'property:scrollbar-gutter': NEWER_THAN_THE_DATA,
   'property:touch-action': 'css-touch-action',
@@ -119,6 +120,8 @@ export const ALLOWED_BELOW_FLOOR = {
   'property:mask-composite': 'As property:mask.',
   'property:object-fit': 'object-fit.legacy.js reads the marker the down-level pass leaves and '
     + 'frames the image from script.',
+  'property:overflow-anchor': 'Turns the engine\'s own scroll anchoring off on a list that keeps its view '
+    + 'itself. An engine without the property has no scroll anchoring to turn off.',
   'property:scale': 'The artwork fade-in nudges scale by 2%. Without it the image simply fades.',
   'property:scrollbar-gutter': 'Reserves scrollbar space. Without it the layout shifts by the '
     + 'scrollbar width when a list grows, which no floor engine has anyway (overlay scrollbars).',
@@ -264,6 +267,7 @@ export const DOM_API_EXCEPTIONS = {
   'runtime/src/render/text-fit.ts:ResizeObserver':
     'Guarded on `typeof ResizeObserver`, and supplied by polyfills.legacy.js on the floor.',
   'web-client/src/modal.ts:ResizeObserver': 'As the renderer above.',
+  'runtime/src/ui-components/ui-list.component.ts:ResizeObserver': 'As the renderer above.',
   'web-client/src/folder-view.ts:ResizeObserver': 'As the renderer above.',
   'web-client/src/screensaver.ts:ResizeObserver': 'As the renderer above.',
   'runtime/src/domain/action-flow.util.ts:structuredClone':

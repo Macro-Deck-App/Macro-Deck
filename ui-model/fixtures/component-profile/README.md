@@ -33,6 +33,8 @@ Three artefacts, and the third is the one that does the work:
 | `conformance-responsive-layout.json` | which layout a reader draws for each tile box, including boxes a unit in the last place off a whole cell, an unknown box and an unmeasured one, and the node a tile-level press is claimed by |
 | `conformance-chat-tree.json` | the wire form of a chat feed - `ui.text` `spans` mixing styled text, an image with alt text and a decorative one, and a `ui.stack` whose `overflow` is `clip-start`, asking for component version 2 with a fallback |
 | `conformance-chat-layout.json` | the clipping stack's box, its children at their own size, the runs a reader draws for the spans, the shrinking stacks beside it, and what a reader without `ui.stack` version 2 draws instead |
+| `conformance-anchored-list-tree.json` | the wire form of a feed that follows its end - a `ui.list` whose `anchor` is `end`, asking for component version 3 with a newest-first fallback, beside lists whose anchor a reader has to ignore |
+| `conformance-anchored-list-layout.json` | each list's box, which of them follow their end, and what a reader without `ui.list` version 3 draws instead |
 | this README | what the fixtures deliberately contain, so they are not trimmed by accident |
 
 One tree per widget shape rather than one growing tree: the weather tree's proportions are themselves
@@ -324,3 +326,18 @@ wrong.
 
 Clipping itself is not a number the layout table can state: the table pins the boxes and the end
 alignment, and the desktop client's layout spec (`widget-stack-clip-start.spec.ts`) checks the pixels.
+
+## What the anchored list tree deliberately contains
+
+- a `ui.list` with `anchor: "end"` that `fill`s the rest of the box, so it has a bounded height to scroll
+  inside;
+- that list asking for `requiredComponentVersion: 3` with a fallback holding the same rows in the opposite
+  order and no `anchor` - the layout file's `withoutListVersion3` entry states that a reader whose `ui.list`
+  is version 2 draws that fallback and never the anchored list;
+- an explicit `anchor: "start"` and an unknown `anchor: "middle"` beside it, both drawn exactly like a list
+  without the key;
+- a horizontal list with `anchor: "end"`, which a reader leaves alone: only a vertical list follows its end.
+
+Following itself is not a number the layout table can state: it depends on where the user has scrolled.
+The table pins which lists follow, and the runtime renderer specs and the desktop client's layout spec
+(`widget-list-anchor-end.spec.ts`) check the scrolling.

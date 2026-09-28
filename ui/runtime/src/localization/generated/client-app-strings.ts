@@ -207,6 +207,11 @@ export const ClientAppStrings = {
 			},
 		},
 	},
+	Ui: {
+		List: {
+			JumpToLatest: 'macrodeck.app:Ui.List.JumpToLatest',
+		},
+	},
 	WebClient: {
 		Connecting: 'macrodeck.app:WebClient.Connecting',
 		Account: {
@@ -529,6 +534,7 @@ export const ClientAppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Settings.Network.Tls.UploadSaveFailed': 'The certificate could not be saved.',
 	'macrodeck.app:Settings.Network.Tls.ValidFromLabel': 'Valid from',
 	'macrodeck.app:Settings.Network.Tls.ValidUntilLabel': 'Valid until',
+	'macrodeck.app:Ui.List.JumpToLatest': 'Jump to latest',
 	'macrodeck.app:WebClient.Account.SectionTitle': 'Account',
 	'macrodeck.app:WebClient.Account.SignOut': 'Sign out',
 	'macrodeck.app:WebClient.Account.SignedInLabel': 'Signed in',

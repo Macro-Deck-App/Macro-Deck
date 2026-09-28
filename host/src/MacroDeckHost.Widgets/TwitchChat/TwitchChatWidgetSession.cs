@@ -4,10 +4,11 @@ using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Patches;
 using MacroDeck.Ui.Runtime;
 using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.Ui.Sessions.InProcess;
 
 namespace MacroDeckHost.Widgets.TwitchChat;
 
-internal sealed class TwitchChatWidgetSession : IUiSession
+internal sealed class TwitchChatWidgetSession : IUiSession, IOriginAwareUiSession
 {
 	private readonly UiView _view;
 	private readonly UiState<TwitchChatViewState> _state;
@@ -17,6 +18,8 @@ internal sealed class TwitchChatWidgetSession : IUiSession
 	private readonly Lock _sync = new();
 
 	private string? _shownAccountId;
+	private string? _shownAccountLabel;
+	private string? _pendingOriginClientId;
 	private bool _disposed;
 
 	public TwitchChatWidgetSession(
@@ -56,7 +59,32 @@ internal sealed class TwitchChatWidgetSession : IUiSession
 
 	public IReadOnlyList<UiPatch> DrainPatches() => _view.DrainPatches();
 
-	public void Dispatch(UiEvent uiEvent) => _view.Dispatch(uiEvent);
+	public void Dispatch(UiEvent uiEvent) => Dispatch(uiEvent, null);
+
+	// Held across the view's dispatch so handlers and chat updates take this lock and the view's in one order.
+	public void Dispatch(UiEvent uiEvent, string? originClientId)
+	{
+		lock (_sync)
+		{
+			_pendingOriginClientId = originClientId;
+			_view.Dispatch(uiEvent);
+		}
+	}
+
+	public TwitchChatDialogRequest? DialogRequest()
+	{
+		lock (_sync)
+		{
+			if (_disposed || string.IsNullOrEmpty(_pendingOriginClientId))
+			{
+				return null;
+			}
+
+			return new TwitchChatDialogRequest(_pendingOriginClientId,
+				_shownAccountId ?? _accountId,
+				_shownAccountLabel);
+		}
+	}
 
 	public ValueTask DisposeAsync()
 	{
@@ -86,6 +114,7 @@ internal sealed class TwitchChatWidgetSession : IUiSession
 
 			var snapshot = _feed.Snapshot(_accountId);
 			_shownAccountId = snapshot.Account?.UserId;
+			_shownAccountLabel = snapshot.Account?.Label;
 
 			using (_view.Batch())
 			{
@@ -94,3 +123,5 @@ internal sealed class TwitchChatWidgetSession : IUiSession
 		}
 	}
 }
+
+internal sealed record TwitchChatDialogRequest(string OriginClientId, string? AccountId, string? AccountLabel);

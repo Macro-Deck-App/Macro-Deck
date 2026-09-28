@@ -9373,6 +9373,69 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Twitch.Actions.UnbanUser.Name" xml:space="preserve">
     <value>Odbanuj użytkownika</value>
   </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountChanged" xml:space="preserve">
+    <value>Ten widżet pokazuje teraz inne konto Twitch. Aby je moderować, należy ponownie otworzyć czat.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountUnavailable" xml:space="preserve">
+    <value>Konto Twitch nie jest połączone.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AllowModeration" xml:space="preserve">
+    <value>Zezwalaj na moderowanie w oknie czatu</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AllowModerationDescription" xml:space="preserve">
+    <value>Naciśnięcie widżetu otwiera czat. Gdy ta opcja jest włączona, każdy, kto używa tego decku, może dotknąć tam wiadomości, aby ją usunąć albo nałożyć na autora timeout lub bana.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Ban" xml:space="preserve">
+    <value>Zbanuj</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Banned" xml:space="preserve">
+    <value>Użytkownik {name} został zbanowany.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.ConfirmBan" xml:space="preserve">
+    <value>Zbanować użytkownika {name}? Do czasu odbanowania nie będzie mógł pisać na tym kanale.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.DeleteMessage" xml:space="preserve">
+    <value>Usuń wiadomość</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Deleted" xml:space="preserve">
+    <value>Wiadomość została usunięta.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Failed" xml:space="preserve">
+    <value>Akcja nie powiodła się. Należy sprawdzić połączenie i spróbować jeszcze raz.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.ModerationUnavailable" xml:space="preserve">
+    <value>Moderowanie jest wyłączone dla tego widżetu.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.NotPermitted" xml:space="preserve">
+    <value>Twitch na to nie pozwolił. Należy ponownie połączyć konto Twitch i spróbować jeszcze raz.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.OwnMessage" xml:space="preserve">
+    <value>Wiadomości samego konta kanału nie można moderować.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Refused" xml:space="preserve">
+    <value>Twitch odrzucił tę akcję, na przykład dlatego, że nie dotyczy już tego użytkownika.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.SharedChat" xml:space="preserve">
+    <value>Ta wiadomość pochodzi z czatu kanału {channel}. Moderować ją można tam.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.TimedOut" xml:space="preserve">
+    <value>Użytkownik {name} otrzymał timeout.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout10Minutes" xml:space="preserve">
+    <value>Timeout 10 min</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout1Hour" xml:space="preserve">
+    <value>Timeout 1 godz.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout1Minute" xml:space="preserve">
+    <value>Timeout 1 min</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Unban" xml:space="preserve">
+    <value>Odbanuj</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Unbanned" xml:space="preserve">
+    <value>Użytkownik {name} został odbanowany.</value>
+  </data>
   <data name="Integrations.Twitch.ChatWidget.AccountDescription" xml:space="preserve">
     <value>Czat którego kanału ma zostać wyświetlony.</value>
   </data>
@@ -15904,6 +15967,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="TemplateBuilder.Variables" xml:space="preserve">
     <value>Zmienne</value>
+  </data>
+  <data name="Ui.List.JumpToLatest" xml:space="preserve">
+    <value>Przejdź do najnowszych</value>
   </data>
   <data name="UiRender.AdvancedConfiguration" xml:space="preserve">
     <value>Konfiguracja zaawansowana</value>

@@ -182,10 +182,10 @@ describe('the component registry', () => {
       v3.remove();
     });
 
-    it('advertises ui.list up to version 2, the version that scrolls horizontally', () => {
+    it('advertises ui.list up to version 3, the version that follows its end', () => {
       const registry = createUiComponentRegistry(...UI_CORE_COMPONENTS);
 
-      expect(registry.capabilities()['ui.list']).toEqual({ minimum: 1, maximum: 2 });
+      expect(registry.capabilities()['ui.list']).toEqual({ minimum: 1, maximum: 3 });
     });
 
     it('advertises ui.stack up to version 2, the version that clips at the start, and ui.button at 1', () => {

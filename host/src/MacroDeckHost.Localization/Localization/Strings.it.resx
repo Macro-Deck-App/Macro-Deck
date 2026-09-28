@@ -9373,6 +9373,69 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.Twitch.Actions.UnbanUser.Name" xml:space="preserve">
     <value>Rimuovi Ban Utente</value>
   </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountChanged" xml:space="preserve">
+    <value>Questo widget ora mostra un altro account Twitch. Riapri la chat per moderarlo.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountUnavailable" xml:space="preserve">
+    <value>L'account Twitch non è connesso.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AllowModeration" xml:space="preserve">
+    <value>Consenti la moderazione nella finestra della chat</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AllowModerationDescription" xml:space="preserve">
+    <value>Premendo il widget si apre la chat. Se attivo, chiunque usi questo deck può toccare un messaggio per eliminarlo o per applicare un timeout o un ban all'autore.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Ban" xml:space="preserve">
+    <value>Ban</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Banned" xml:space="preserve">
+    <value>{name} è stato bannato.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.ConfirmBan" xml:space="preserve">
+    <value>Bannare {name}? Non potrà scrivere in questo canale finché non verrà sbannato.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.DeleteMessage" xml:space="preserve">
+    <value>Elimina messaggio</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Deleted" xml:space="preserve">
+    <value>Messaggio eliminato.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Failed" xml:space="preserve">
+    <value>L'azione non è andata a buon fine. Controlla la connessione e riprova.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.ModerationUnavailable" xml:space="preserve">
+    <value>La moderazione è disattivata per questo widget.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.NotPermitted" xml:space="preserve">
+    <value>Twitch non lo ha consentito. Ricollega l'account Twitch e riprova.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.OwnMessage" xml:space="preserve">
+    <value>I messaggi dell'account del canale non si possono moderare.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Refused" xml:space="preserve">
+    <value>Twitch ha rifiutato questa azione, ad esempio perché non si applica più a questo utente.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.SharedChat" xml:space="preserve">
+    <value>Questo messaggio proviene dalla chat di {channel}. Moderalo lì.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.TimedOut" xml:space="preserve">
+    <value>{name} è in timeout.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout10Minutes" xml:space="preserve">
+    <value>Timeout 10 min</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout1Hour" xml:space="preserve">
+    <value>Timeout 1 h</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout1Minute" xml:space="preserve">
+    <value>Timeout 1 min</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Unban" xml:space="preserve">
+    <value>Sbanna</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Unbanned" xml:space="preserve">
+    <value>{name} è stato sbannato.</value>
+  </data>
   <data name="Integrations.Twitch.ChatWidget.AccountDescription" xml:space="preserve">
     <value>Di quale canale mostrare la chat.</value>
   </data>
@@ -15904,6 +15967,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="TemplateBuilder.Variables" xml:space="preserve">
     <value>Variabili</value>
+  </data>
+  <data name="Ui.List.JumpToLatest" xml:space="preserve">
+    <value>Vai ai più recenti</value>
   </data>
   <data name="UiRender.AdvancedConfiguration" xml:space="preserve">
     <value>Configurazione avanzata</value>

@@ -17,6 +17,7 @@ internal static class TwitchChatWidgetConfigView
 
 		var account = new UiState<string>(WidgetConfigJson.ReadString(data, TwitchChatWidgetType.AccountKey) ??
 			string.Empty);
+		var allowModeration = new UiState<bool>(TwitchChatWidgetSettings.AllowsModeration(data));
 
 		return new UiWidgetConfiguration
 		{
@@ -40,6 +41,13 @@ internal static class TwitchChatWidgetConfigView
 						[
 							.. accounts.Select(candidate => UiOption.Of(candidate.UserId, candidate.Label)),
 						]),
+					},
+					new UiBooleanInput
+					{
+						Key = TwitchChatWidgetType.AllowModerationKey,
+						Label = AppStrings.Integrations.Twitch.ChatDialog.AllowModeration(),
+						Description = AppStrings.Integrations.Twitch.ChatDialog.AllowModerationDescription(),
+						Binding = Bind.To(allowModeration),
 					},
 					UiWidgetAppearance.Section(data, UiWidgetAppearanceFields.Border),
 				],

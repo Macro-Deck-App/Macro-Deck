@@ -9,6 +9,8 @@ public static class TwitchChatWidgetType
 	public const string QualifiedId = OwnerId + "::" + LocalId;
 
 	public const string AccountKey = "account";
+
+	public const string AllowModerationKey = "allowModeration";
 }
 
 public sealed record TwitchChatAccount(string UserId, string Label);
@@ -35,7 +37,9 @@ public sealed record TwitchChatMessage(
 	string ChatterName,
 	string Color,
 	IReadOnlyList<TwitchChatBadge> Badges,
-	IReadOnlyList<TwitchChatFragment> Fragments)
+	IReadOnlyList<TwitchChatFragment> Fragments,
+	string? SourceChannelId = null,
+	string? SourceChannelName = null)
 {
 	public string PlainText => string.Concat(Fragments.Select(fragment => fragment.Text));
 

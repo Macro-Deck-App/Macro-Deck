@@ -9373,6 +9373,69 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.Twitch.Actions.UnbanUser.Name" xml:space="preserve">
     <value>Desbanear usuario</value>
   </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountChanged" xml:space="preserve">
+    <value>Este widget ahora muestra otra cuenta de Twitch. Vuelve a abrir el chat para moderarla.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountUnavailable" xml:space="preserve">
+    <value>La cuenta de Twitch no está conectada.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AllowModeration" xml:space="preserve">
+    <value>Permitir moderar en el diálogo del chat</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AllowModerationDescription" xml:space="preserve">
+    <value>Al pulsar el widget se abre el chat. Si está activado, cualquiera que use este deck puede tocar un mensaje para borrarlo o para aplicar un tiempo fuera o un baneo a su autor.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Ban" xml:space="preserve">
+    <value>Banear</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Banned" xml:space="preserve">
+    <value>{name} está baneado.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.ConfirmBan" xml:space="preserve">
+    <value>¿Banear a {name}? No podrá chatear en este canal hasta que se le quite el baneo.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.DeleteMessage" xml:space="preserve">
+    <value>Borrar mensaje</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Deleted" xml:space="preserve">
+    <value>Mensaje borrado.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Failed" xml:space="preserve">
+    <value>La acción no se ha completado. Comprueba la conexión e inténtalo de nuevo.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.ModerationUnavailable" xml:space="preserve">
+    <value>La moderación está desactivada para este widget.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.NotPermitted" xml:space="preserve">
+    <value>Twitch no lo ha permitido. Vuelve a conectar la cuenta de Twitch e inténtalo de nuevo.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.OwnMessage" xml:space="preserve">
+    <value>Los mensajes de la propia cuenta del canal no se pueden moderar.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Refused" xml:space="preserve">
+    <value>Twitch rechazó esta acción, por ejemplo porque ya no se aplica a esta persona.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.SharedChat" xml:space="preserve">
+    <value>Este mensaje viene del chat de {channel}. Modéralo allí.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.TimedOut" xml:space="preserve">
+    <value>{name} está en tiempo fuera.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout10Minutes" xml:space="preserve">
+    <value>Tiempo fuera 10 min</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout1Hour" xml:space="preserve">
+    <value>Tiempo fuera 1 h</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout1Minute" xml:space="preserve">
+    <value>Tiempo fuera 1 min</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Unban" xml:space="preserve">
+    <value>Quitar baneo</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Unbanned" xml:space="preserve">
+    <value>Se ha quitado el baneo a {name}.</value>
+  </data>
   <data name="Integrations.Twitch.ChatWidget.AccountDescription" xml:space="preserve">
     <value>De qué canal mostrar el chat.</value>
   </data>
@@ -15904,6 +15967,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="TemplateBuilder.Variables" xml:space="preserve">
     <value>Variables</value>
+  </data>
+  <data name="Ui.List.JumpToLatest" xml:space="preserve">
+    <value>Ir a lo más reciente</value>
   </data>
   <data name="UiRender.AdvancedConfiguration" xml:space="preserve">
     <value>Configuración avanzada</value>

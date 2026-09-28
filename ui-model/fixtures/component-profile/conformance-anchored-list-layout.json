@@ -1,0 +1,39 @@
+{
+  "cases": [
+    {
+      "basis": 240,
+      "tile": {
+        "width": 240,
+        "height": 240
+      },
+      "nodes": {
+        "conformance.feed": {
+          "width": 240.0,
+          "height": 96.0,
+          "padding": 4.8,
+          "gap": 2.4,
+          "followsEnd": true
+        },
+        "conformance.start": {
+          "width": 240.0,
+          "height": 48.0,
+          "followsEnd": false
+        },
+        "conformance.unknown": {
+          "width": 240.0,
+          "height": 48.0,
+          "followsEnd": false
+        },
+        "conformance.sideways": {
+          "height": 48.0,
+          "followsEnd": false
+        }
+      }
+    }
+  ],
+  "withoutListVersion3": {
+    "draws": "conformance.feedFallback",
+    "notDrawn": "conformance.feed",
+    "note": "A reader whose ui.list is version 2 never draws conformance.feed: it asks for version 3, so the reader draws its fallback, the same rows newest first, where a list that does not follow the end shows them. Had the producer not asked for version 3, that reader would ignore anchor and leave the newest row below the fold."
+  }
+}

@@ -32,7 +32,11 @@ internal sealed class TwitchChatWidgetSessionTests : UiSessionFixture
 			new FakeTwitchChatImages(),
 			TestLocalization.SampleText,
 			new FakeIntegrationRegistry(),
-			new UiResourceStore());
+			new UiResourceStore(),
+			new RecordingUiInteractions(),
+			new FakeFolderCache(),
+			new FakeHostLockState(),
+			Logger.None);
 
 		Resolver.Fallback = new UiSessionProviderResolver(
 			new RemoteUiProviderRegistry(new EmptyRemotePluginSnapshotStore(), Invoker),

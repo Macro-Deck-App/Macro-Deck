@@ -9373,6 +9373,69 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Twitch.Actions.UnbanUser.Name" xml:space="preserve">
     <value>Zrušit ban uživatele</value>
   </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountChanged" xml:space="preserve">
+    <value>Tento widget teď zobrazuje jiný účet Twitch. K moderování je potřeba chat otevřít znovu.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountUnavailable" xml:space="preserve">
+    <value>Účet Twitch není připojen.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AllowModeration" xml:space="preserve">
+    <value>Povolit moderování v dialogu chatu</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AllowModerationDescription" xml:space="preserve">
+    <value>Stisknutím widgetu se otevře chat. Pokud je tato volba zapnutá, může kdokoli, kdo používá tento deck, klepnout na zprávu a smazat ji nebo autorovi udělit timeout či ban.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Ban" xml:space="preserve">
+    <value>Zabanovat</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Banned" xml:space="preserve">
+    <value>Uživatel {name} je zabanován.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.ConfirmBan" xml:space="preserve">
+    <value>Zabanovat uživatele {name}? Do odbanování nebude moci v tomto kanálu chatovat.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.DeleteMessage" xml:space="preserve">
+    <value>Smazat zprávu</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Deleted" xml:space="preserve">
+    <value>Zpráva byla smazána.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Failed" xml:space="preserve">
+    <value>Akce se nezdařila. Je potřeba zkontrolovat připojení a zkusit to znovu.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.ModerationUnavailable" xml:space="preserve">
+    <value>Moderování je pro tento widget vypnuté.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.NotPermitted" xml:space="preserve">
+    <value>Twitch to nepovolil. Je potřeba znovu připojit účet Twitch a zkusit to znovu.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.OwnMessage" xml:space="preserve">
+    <value>Zprávy samotného účtu kanálu nelze moderovat.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Refused" xml:space="preserve">
+    <value>Twitch tuto akci odmítl, například proto, že se na tohoto uživatele už nevztahuje.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.SharedChat" xml:space="preserve">
+    <value>Tato zpráva pochází z chatu kanálu {channel}. Moderovat ji lze tam.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.TimedOut" xml:space="preserve">
+    <value>Uživatel {name} má timeout.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout10Minutes" xml:space="preserve">
+    <value>Timeout 10 min</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout1Hour" xml:space="preserve">
+    <value>Timeout 1 h</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout1Minute" xml:space="preserve">
+    <value>Timeout 1 min</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Unban" xml:space="preserve">
+    <value>Odbanovat</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Unbanned" xml:space="preserve">
+    <value>Uživatel {name} je odbanován.</value>
+  </data>
   <data name="Integrations.Twitch.ChatWidget.AccountDescription" xml:space="preserve">
     <value>Chat kterého kanálu se má zobrazit.</value>
   </data>
@@ -15904,6 +15967,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="TemplateBuilder.Variables" xml:space="preserve">
     <value>Proměnné</value>
+  </data>
+  <data name="Ui.List.JumpToLatest" xml:space="preserve">
+    <value>Přejít na nejnovější</value>
   </data>
   <data name="UiRender.AdvancedConfiguration" xml:space="preserve">
     <value>Pokročilé nastavení</value>
