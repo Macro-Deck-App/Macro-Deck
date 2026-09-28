@@ -30,6 +30,8 @@ function recoveryKeyState(overrides: Partial<GetBackupRecoveryKeyStateResponse> 
 // exported before onboarding ever ran.
 const ALREADY_EXPORTED = recoveryKeyState();
 
+const PAIRING_CODE = { code: '482915', expiresAt: new Date(Date.now() + 15 * 60_000).toISOString() };
+
 describe('OnboardingWizardComponent', () => {
   let fixture: ComponentFixture<OnboardingWizardComponent>;
   let authState: WritableSignal<AuthState>;
@@ -83,10 +85,12 @@ describe('OnboardingWizardComponent', () => {
     authState = signal<AuthState>('unknown');
     connectionState = signal<ConnectionState>('disconnected');
     api = jasmine.createSpyObj<ApiService>(
-      'ApiService', ['getOnboardingState', 'completeOnboarding', 'getConnectionInfo']);
+      'ApiService', ['getOnboardingState', 'completeOnboarding', 'getConnectionInfo', 'rotatePairingCode', 'getPairingCode']);
     api.getOnboardingState.and.resolveTo({ pending });
     api.completeOnboarding.and.resolveTo({ pending: false });
     api.getConnectionInfo.and.resolveTo(connection);
+    api.rotatePairingCode.and.resolveTo(PAIRING_CODE);
+    api.getPairingCode.and.resolveTo(PAIRING_CODE);
     externalLinks = jasmine.createSpyObj<ExternalLinkService>('ExternalLinkService', ['open']);
 
     recoveryKeySignal = signal(initialRecoveryKey);
@@ -319,20 +323,26 @@ describe('OnboardingWizardComponent', () => {
     expect(externalLinks.open).toHaveBeenCalledWith('https://macro-deck.local:8192/admin');
   });
 
-  it('links the native app to its App Store and Google Play listings', async () => {
+  it('offers the native app through the connect QR code with a fresh pairing code', async () => {
     await create(true);
     authState.set('authenticated');
     connectionState.set('connected');
     const connect = await openConnectStep();
 
     expect(connect.textContent).not.toContain('Coming soon');
-    await click(buttonNamed(connect, 'App Store'));
-    await click(buttonNamed(connect, 'Google Play'));
+    expect(connect.querySelector('img[alt="Connect QR code"]')).not.toBeNull();
+    expect(connect.textContent).toContain('482 915');
+    expect(api.rotatePairingCode).toHaveBeenCalledTimes(1);
+  });
 
-    expect(externalLinks.open.calls.allArgs()).toEqual([
-      ['https://apps.apple.com/app/id6810664560'],
-      ['https://play.google.com/store/apps/details?id=app.macrodeck.companion'],
-    ]);
+  it('shows no QR code when the host is not reachable on the network', async () => {
+    await create(true, { ...LAN_ENDPOINT, publicListenerUnavailable: true, endpoints: [] });
+    authState.set('authenticated');
+    connectionState.set('connected');
+    const connect = await openConnectStep();
+
+    expect(connect.querySelector('img[alt="Connect QR code"]')).toBeNull();
+    expect(api.rotatePairingCode).not.toHaveBeenCalled();
   });
 
   it('stays usable when the host cannot report how it is reachable', async () => {

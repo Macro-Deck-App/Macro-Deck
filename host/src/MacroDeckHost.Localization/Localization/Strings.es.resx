@@ -18027,7 +18027,7 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>Aplicación nativa</value>
   </data>
   <data name="Onboarding.Connect.NativeAppDescription" xml:space="preserve">
-    <value>Instala la app de Macro Deck en tu móvil o tablet Android o iOS.</value>
+    <value>Escanea el código con la cámara de tu móvil o tablet. Abre la App Store o Google Play, o se conecta directamente si la app ya está instalada.</value>
   </data>
   <data name="Onboarding.Connect.Open" xml:space="preserve">
     <value>Abrir</value>

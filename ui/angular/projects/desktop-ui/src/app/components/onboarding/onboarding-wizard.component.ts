@@ -7,6 +7,7 @@ import { OnboardingService } from '../../services/onboarding.service';
 import { ConfirmationModalComponent } from '../overlay/confirmation-modal/confirmation-modal.component';
 import { LoadingStateComponent } from '../feedback/loading-state/loading-state.component';
 import { RecoveryKeyModalComponent } from '../backup/recovery-key-modal/recovery-key-modal.component';
+import { ConnectQrComponent } from '../shell/connect-qr/connect-qr.component';
 
 type OnboardingStep = 'welcome' | 'connect' | 'recovery-key' | 'links';
 
@@ -35,11 +36,6 @@ const LINKS = [
   },
 ] as const;
 
-const APP_STORES = [
-  { url: 'https://apps.apple.com/app/id6810664560', label: AppStrings.Settings.License.Source.AppStore },
-  { url: 'https://play.google.com/store/apps/details?id=app.macrodeck.companion', label: AppStrings.Settings.License.Source.GooglePlay },
-] as const;
-
 type RecoveryKeyModalState =
   | { kind: 'none' }
   | { kind: 'revealConfirm' }
@@ -57,6 +53,7 @@ type RecoveryKeyModalState =
     LoadingStateComponent,
     ConfirmationModalComponent,
     RecoveryKeyModalComponent,
+    ConnectQrComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './onboarding-wizard.component.html',
@@ -72,7 +69,6 @@ export class OnboardingWizardComponent {
   protected readonly onboarding = inject(OnboardingService);
   protected readonly appStrings = AppStrings;
   protected readonly links = LINKS;
-  protected readonly appStores = APP_STORES;
 
   protected readonly step = signal<OnboardingStep>('welcome');
   protected readonly connection = signal<GetConnectionInfoResponse | null>(null);

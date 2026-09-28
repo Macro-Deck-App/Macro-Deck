@@ -27,13 +27,11 @@
             <span class="ob-option-title">{{ appStrings.Onboarding.Connect.NativeAppTitle | translate }}</span>
             <span class="ob-option-description">{{ appStrings.Onboarding.Connect.NativeAppDescription | translate }}</span>
           </div>
-          <div class="ob-address-actions">
-            @for (store of appStores; track store.url) {
-              <shared-button variant="secondary" size="compact" (click)="openLink(store.url)">
-                {{ store.label | translate }}
-              </shared-button>
+          @if (connection(); as info) {
+            @if (!info.publicListenerUnavailable) {
+              <app-connect-qr class="ob-qr" [info]="info" [hint]="null" />
             }
-          </div>
+          }
         </div>
 
         <span class="ob-section-label">{{ appStrings.Shell.ConnectionPanel.Addresses | translate }}</span>

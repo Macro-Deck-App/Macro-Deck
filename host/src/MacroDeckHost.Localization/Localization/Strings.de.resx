@@ -18025,7 +18025,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Native App</value>
   </data>
   <data name="Onboarding.Connect.NativeAppDescription" xml:space="preserve">
-    <value>Installiere die Macro-Deck-App auf deinem Android- oder iOS-Smartphone oder -Tablet.</value>
+    <value>Scanne den Code mit der Kamera deines Smartphones oder Tablets. Er öffnet den App Store oder Google Play oder verbindet direkt, wenn die App schon installiert ist.</value>
   </data>
   <data name="Onboarding.Connect.Open" xml:space="preserve">
     <value>Öffnen</value>
