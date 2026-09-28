@@ -1,0 +1,134 @@
+@use '../../../../../styles/index' as ds;
+
+.companion-app {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.companion-app__notice {
+  display: flex;
+  margin-bottom: var(--space-2);
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background-color: var(--color-accent-muted);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+
+  p {
+    margin: 0;
+  }
+
+  > p {
+    flex: 1 1 16rem;
+  }
+
+  .icon {
+    flex-shrink: 0;
+    margin-top: 0.1em;
+    background-color: var(--color-accent);
+  }
+
+  div {
+    display: flex;
+    flex: 1 1 16rem;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+}
+
+.companion-app__notice--warning {
+  background-color: var(--color-warning-muted);
+
+  .icon {
+    background-color: var(--color-warning);
+  }
+}
+
+.companion-app__notice-title {
+  color: var(--color-text-primary);
+  font-weight: var(--font-semibold);
+}
+
+.companion-app__latest {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.companion-app__value {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.companion-app__error,
+.companion-app__empty {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.companion-app__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0;
+  margin: 0;
+}
+
+.companion-app__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+}
+
+.companion-app__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1875rem;
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.companion-app__name {
+  font-size: var(--text-md);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  @include ds.truncate;
+}
+
+.companion-app__state {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.companion-app__state--update {
+  color: var(--color-warning);
+}
+
+.companion-app__state--ok {
+  color: var(--color-success);
+}
+
+.companion-app__row-error {
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+}
+
+.companion-app__badge {
+  @include ds.badge;
+  flex-shrink: 0;
+  color: var(--color-warning);
+  background-color: var(--color-warning-muted);
+  white-space: nowrap;
+}

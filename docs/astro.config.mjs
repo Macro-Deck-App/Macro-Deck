@@ -77,6 +77,7 @@ export default defineConfig({
 										'guide/installation',
 										'guide/getting-started',
 										'guide/usb-connection',
+										'guide/companion-app',
 									],
 								},
 								{
