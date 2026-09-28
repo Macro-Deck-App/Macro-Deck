@@ -13,6 +13,7 @@ Some functionality is incomplete or unstable, and this guide is still being writ
 
 - [Installation](/guide/installation/): download and install Macro Deck.
 - [Getting started](/guide/getting-started/): first launch, connecting a device, your first button.
+- [Companion app](/guide/companion-app/): the app for Android, iPhone and iPad, and what it adds over the web client.
 - [Concepts](/guide/concepts/): the building blocks and how they fit together.
 - [Tips and tricks](/guide/tips/): smaller things worth knowing.
 - [Updates](/guide/updates/): update modes, automatic installs and what's new after an update.

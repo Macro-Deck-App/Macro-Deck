@@ -17968,10 +17968,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Nativní aplikace</value>
   </data>
   <data name="Onboarding.Connect.NativeAppDescription" xml:space="preserve">
-    <value>Nativní aplikace zatím není k dispozici. Prozatím poslouží Web Client.</value>
-  </data>
-  <data name="Onboarding.Connect.NativeAppBadge" xml:space="preserve">
-    <value>Již brzy</value>
+    <value>Aplikaci Macro Deck lze nainstalovat do telefonu nebo tabletu s Androidem či iOS.</value>
   </data>
   <data name="Onboarding.Connect.Open" xml:space="preserve">
     <value>Otevřít</value>
