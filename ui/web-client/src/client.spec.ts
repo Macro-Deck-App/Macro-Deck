@@ -1179,6 +1179,106 @@ describe('Client', () => {
     });
   });
 
+  describe('changes to profiles other than the one on screen', () => {
+    const inheriting = { cols: null, rows: null, spacing: null, borderRadius: null };
+
+    const notify = (client: Client, type: string, payload: Record<string, unknown>) =>
+      (client as unknown as { onNotification(type: string, payload: unknown): void })
+        .onNotification(type, payload);
+
+    const onProfile = async (startupProfileId: string): Promise<Client> => {
+      twoProfiles();
+      host.loginAnswer = token({ device: { deviceId: 'device-1', startupProfileId } });
+      const client = build();
+      await client.probe();
+      await client.signIn('owner', 'secret');
+      await settle();
+      return client;
+    };
+
+    const pinnedButton = (id: string) => ({
+      id, type: 'ActionButton', positionX: 0, positionY: 0, width: 1, height: 1,
+      data: '{"label":"Pinned"}', isPinned: true, pinScope: 'Profile',
+    });
+
+    it('leaves the deck alone when another profile gets a folder', async () => {
+      const client = await onProfile('profile-a');
+
+      notify(client, 'FolderCreatedEvent', {
+        folder: {
+          ...wireFolder('copy-root', null, true), profileId: 'profile-copy', widgets: [pinnedButton('w-copy')],
+        },
+      });
+      notify(client, 'FolderUpdatedEvent', {
+        folder: { ...wireFolder('b-child', 'b-root'), name: 'Renamed', profileId: 'profile-b' },
+      });
+
+      expect(folderIds(client)).toEqual(['a-root', 'a-child']);
+      expect(client.deck.displayedWidgets.map(widget => widget.id)).toEqual([]);
+    });
+
+    it('still follows folder changes of the profile on screen', async () => {
+      const client = await onProfile('profile-a');
+
+      notify(client, 'FolderUpdatedEvent', {
+        folder: { ...wireFolder('a-child', 'a-root'), name: 'Renamed', profileId: 'profile-a' },
+      });
+      notify(client, 'FolderCreatedEvent', {
+        folder: { ...wireFolder('a-new', 'a-root'), profileId: 'profile-a' },
+      });
+
+      expect(folderIds(client)).toEqual(['a-root', 'a-child', 'a-new']);
+      expect(client.deck.folder('a-child')?.name).toBe('Renamed');
+    });
+
+    it('applies a folder from a host that does not say which profile it belongs to', async () => {
+      const client = await onProfile('profile-a');
+
+      notify(client, 'FolderCreatedEvent', { folder: wireFolder('a-new', 'a-root') });
+
+      expect(folderIds(client)).toEqual(['a-root', 'a-child', 'a-new']);
+    });
+
+    it('moves to the profile the device opens with when the profile on screen is deleted', async () => {
+      const client = await onProfile('profile-b');
+      notify(client, 'FolderNavigationEvent', { command: 'changeTo', folderId: 'a-child', profileId: 'profile-a' });
+      await settle();
+      host.profiles = host.profiles.filter(profile => profile.id !== 'profile-a');
+      delete host.foldersByProfile['profile-a'];
+
+      notify(client, 'ProfileDeletedEvent', { profileId: 'profile-a' });
+      await settle();
+
+      expect(folderIds(client)).toEqual(['b-root', 'b-child']);
+      expect(client.deck.location.get()).toEqual({ folderId: 'b-root', history: [] });
+      expect(client.gridFor(inheriting).cols).toBe(8);
+    });
+
+    it('moves to the first profile when the one it opens with is the one deleted', async () => {
+      const client = await onProfile('profile-b');
+      host.profiles = host.profiles.filter(profile => profile.id !== 'profile-b');
+      delete host.foldersByProfile['profile-b'];
+
+      notify(client, 'ProfileDeletedEvent', { profileId: 'profile-b' });
+      await settle();
+
+      expect(folderIds(client)).toEqual(['a-root', 'a-child']);
+      expect(client.deck.location.get().folderId).toBe('a-root');
+      expect(client.gridFor(inheriting).cols).toBe(6);
+    });
+
+    it('keeps the deck when a profile it is not showing is deleted', async () => {
+      const client = await onProfile('profile-a');
+      const reads = host.pathsFor('GET', '/api/folders').length;
+
+      notify(client, 'ProfileDeletedEvent', { profileId: 'profile-b' });
+      await settle();
+
+      expect(folderIds(client)).toEqual(['a-root', 'a-child']);
+      expect(host.pathsFor('GET', '/api/folders').length).toBe(reads);
+    });
+  });
+
   describe('the colours the host is configured for', () => {
     const sink = () => {
       const applied: Array<{ mode: string | undefined; accent: string | undefined }> = [];
