@@ -21,6 +21,8 @@ internal sealed record TwitchNamedOutcome(string Id, string Title);
 
 internal sealed record TwitchCreatedClip(string Id, string EditUrl);
 
+internal sealed record TwitchChatBadgeImage(string SetId, string Id, string ImageUrl);
+
 internal enum TwitchChatMode
 {
 	EmoteOnly,

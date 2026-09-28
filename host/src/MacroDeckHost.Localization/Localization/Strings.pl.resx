@@ -9298,6 +9298,45 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Twitch.Actions.UnbanUser.Name" xml:space="preserve">
     <value>Odbanuj użytkownika</value>
   </data>
+  <data name="Integrations.Twitch.ChatWidget.AccountDescription" xml:space="preserve">
+    <value>Czat którego kanału ma zostać wyświetlony.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Description" xml:space="preserve">
+    <value>Wyświetla czat kanału na żywo, z emotkami i odznakami.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Empty" xml:space="preserve">
+    <value>Oczekiwanie na wiadomości na czacie</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.FirstAccount" xml:space="preserve">
+    <value>Pierwsze połączone konto</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Name" xml:space="preserve">
+    <value>Czat Twitch</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.NameSeparator" xml:space="preserve">
+    <value>: </value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Offline" xml:space="preserve">
+    <value>Brak połączenia z Twitchem</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleChatter1" xml:space="preserve">
+    <value>PixelPanda</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleChatter2" xml:space="preserve">
+    <value>NightOwl</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleChatter3" xml:space="preserve">
+    <value>CozyGamer</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleMessage1" xml:space="preserve">
+    <value>Cześć wszystkim!</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleMessage2" xml:space="preserve">
+    <value>Świetna akcja!</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleMessage3" xml:space="preserve">
+    <value>Do zobaczenia na następnym streamie</value>
+  </data>
   <data name="Integrations.Twitch.Config.AccountResolutionFailed" xml:space="preserve">
     <value>Twitch wydał token, ale nie podał, do którego konta należy. Kliknij Dalej, aby spróbować ponownie.</value>
   </data>

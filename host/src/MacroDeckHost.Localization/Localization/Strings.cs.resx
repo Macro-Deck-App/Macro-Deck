@@ -9298,6 +9298,45 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Twitch.Actions.UnbanUser.Name" xml:space="preserve">
     <value>Zrušit ban uživatele</value>
   </data>
+  <data name="Integrations.Twitch.ChatWidget.AccountDescription" xml:space="preserve">
+    <value>Chat kterého kanálu se má zobrazit.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Description" xml:space="preserve">
+    <value>Zobrazuje chat kanálu v reálném čase včetně emotů a odznaků.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Empty" xml:space="preserve">
+    <value>Čeká se na zprávy v chatu</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.FirstAccount" xml:space="preserve">
+    <value>První připojený účet</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Name" xml:space="preserve">
+    <value>Chat Twitch</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.NameSeparator" xml:space="preserve">
+    <value>: </value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Offline" xml:space="preserve">
+    <value>Nepřipojeno k Twitchi</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleChatter1" xml:space="preserve">
+    <value>PixelPanda</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleChatter2" xml:space="preserve">
+    <value>NightOwl</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleChatter3" xml:space="preserve">
+    <value>CozyGamer</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleMessage1" xml:space="preserve">
+    <value>Ahoj všichni!</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleMessage2" xml:space="preserve">
+    <value>To byla skvělá akce!</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleMessage3" xml:space="preserve">
+    <value>Na viděnou u dalšího streamu</value>
+  </data>
   <data name="Integrations.Twitch.Config.AccountResolutionFailed" xml:space="preserve">
     <value>Twitch vydal token, ale neuvedl, ke kterému účtu patří. Pokračujte a zkuste to znovu.</value>
   </data>

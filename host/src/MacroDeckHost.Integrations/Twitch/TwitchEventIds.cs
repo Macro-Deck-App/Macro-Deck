@@ -53,3 +53,11 @@ internal static class TwitchEventIds
 
 	public const string Any = "event";
 }
+
+// Subscriptions that feed the chat widget only. Deliberately not events: a chat line per trigger evaluation
+// would flood the event bus, so these ids are never declared or published.
+internal static class TwitchFeedIds
+{
+	public const string ChatMessage = "feed:chat-message";
+	public const string ChatUserMessagesCleared = "feed:chat-user-messages-cleared";
+}

@@ -68,6 +68,9 @@ using MacroDeckHost.Application.Variables.Files;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Application.Widgets.Icons;
 using MacroDeckHost.Application.Weather;
+using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Infrastructure.Twitch;
+using MacroDeckHost.Widgets.TwitchChat;
 using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Icons.Ownership;
 using MacroDeckHost.Application.Migration;
@@ -296,6 +299,17 @@ public class Startup
 		services.AddSingleton<IBuiltInIntegrationUiProvider, WeatherDetailsUiProvider>();
 		services.AddSingleton<IBuiltInIntegrationUiProvider, MusicPlayerPickerUiProvider>();
 		services.AddSingleton<IBuiltInIntegrationUiProvider, MusicPlayerDevicePickerUiProvider>();
+		services.AddHttpClient(TwitchChatImageCache.HttpClientName)
+			.ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(15))
+			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
+		services.AddSingleton<TwitchChatImageCache>();
+		services.AddSingleton<ITwitchChatImages>(provider => provider.GetRequiredService<TwitchChatImageCache>());
+		services.AddSingleton(provider => new TwitchChatHub(provider.GetRequiredService<TimeProvider>(),
+			provider.GetRequiredService<Serilog.ILogger>(),
+			provider.GetRequiredService<ITwitchChatImages>()));
+		services.AddSingleton<ITwitchChatSink>(provider => provider.GetRequiredService<TwitchChatHub>());
+		services.AddSingleton<ITwitchChatFeed>(provider => provider.GetRequiredService<TwitchChatHub>());
+		services.AddSingleton<IBuiltInIntegrationUiProvider, TwitchChatWidgetUiProvider>();
 		services.AddSingleton<BuiltInScreenSaverProvider>();
 		services.AddSingleton<IBuiltInIntegrationUiProvider>(provider => provider.GetRequiredService<BuiltInScreenSaverProvider>());
 		services.AddSingleton<IScreenSaverProvider>(provider => provider.GetRequiredService<BuiltInScreenSaverProvider>());
@@ -310,6 +324,7 @@ public class Startup
 		services.AddSingleton<IModalUiSessionOpener, ModalUiSessionOpener>();
 		services.AddHostedService<UiSessionDrainBackgroundService>();
 		services.AddHostedService<ModalSessionWatcher>();
+		services.AddHostedService<TwitchChatPumpBackgroundService>();
 		services.AddHostedService<LoopbackPortFileService>();
 		services.AddMediator();
 

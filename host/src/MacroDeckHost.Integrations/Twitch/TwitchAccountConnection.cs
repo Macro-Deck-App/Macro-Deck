@@ -1,4 +1,5 @@
 using System.Text.Json;
+using MacroDeckHost.Application.Twitch.Chat;
 using MacroDeckHost.Integrations.Twitch.Auth;
 using MacroDeckHost.Integrations.Twitch.Protocol;
 using Serilog;
@@ -9,15 +10,19 @@ internal sealed class TwitchAccountConnection : IDisposable
 {
 	private readonly ILogger _logger;
 	private readonly TwitchEventEmitter? _emitter;
+	private readonly ITwitchChatSink? _chatSink;
 	private readonly Lock _sync = new();
+	private readonly CancellationTokenSource _stopping = new();
 
 	private volatile TwitchAccountState _state = TwitchAccountState.Unknown;
 	private volatile IReadOnlyList<TwitchCustomReward> _rewards = [];
 	private volatile IReadOnlyList<string> _missingScopeEvents = [];
+	private volatile TwitchChatBadgeMap _badges = TwitchChatBadgeMap.Empty;
 
 	private TwitchEventSubSession? _session;
 	private TwitchStatePoller? _poller;
 	private bool _authorizationLost;
+	private int _stopped;
 
 	public TwitchAccountConnection(
 		TwitchAccount account,
@@ -25,7 +30,8 @@ internal sealed class TwitchAccountConnection : IDisposable
 		ITwitchOAuthClient oauthClient,
 		ITwitchHelixClient helix,
 		TwitchEventEmitter? emitter,
-		ILogger logger)
+		ILogger logger,
+		ITwitchChatSink? chatSink = null)
 	{
 		Account = account;
 		Tokens = tokens;
@@ -33,6 +39,7 @@ internal sealed class TwitchAccountConnection : IDisposable
 		Helix = helix;
 		_emitter = emitter;
 		_logger = logger;
+		_chatSink = chatSink;
 	}
 
 	public TwitchAccount Account { get; }
@@ -64,7 +71,7 @@ internal sealed class TwitchAccountConnection : IDisposable
 						Account.Login,
 						report.Created.Count);
 				},
-				OnNotification,
+				HandleNotification,
 				(type, status) => _logger.Debug("Twitch revoked {Type}: {Status}", type, status),
 				OnConnectionChanged,
 				reason =>
@@ -79,6 +86,11 @@ internal sealed class TwitchAccountConnection : IDisposable
 
 		_session.Start();
 		_poller.Start();
+
+		if (_chatSink is not null)
+		{
+			_ = LoadBadgesAsync(_stopping.Token);
+		}
 	}
 
 	public TwitchAccountState Merge(Func<TwitchAccountState, TwitchAccountState> update)
@@ -93,6 +105,7 @@ internal sealed class TwitchAccountConnection : IDisposable
 
 	public void Dispose()
 	{
+		StopBadgeLoad();
 		_poller?.Dispose();
 		_session?.Dispose();
 		Tokens.Dispose();
@@ -101,6 +114,7 @@ internal sealed class TwitchAccountConnection : IDisposable
 
 	public async Task StopAsync()
 	{
+		StopBadgeLoad();
 		_poller?.Dispose();
 		_session?.Dispose();
 		await Tokens.StopAsync();
@@ -120,12 +134,55 @@ internal sealed class TwitchAccountConnection : IDisposable
 	{
 		Merge(state => state with { IsConnected = connected });
 		_emitter?.PublishConnection(Account, connected);
+		_chatSink?.Post(new TwitchChatConnectionChanged(Account.UserId, connected));
 	}
 
-	private void OnNotification(TwitchEventSubMessage message)
+	// Runs on the socket read loop, so the chat path only parses and posts; nothing here waits.
+	internal void HandleNotification(TwitchEventSubMessage message)
 	{
-		_emitter?.Publish(Account, message);
-		ApplyToState(message);
+		if (TwitchEventCatalog.ForType(message.SubscriptionType, message.SubscriptionVersion) is not { IsFeed: true })
+		{
+			_emitter?.Publish(Account, message);
+			ApplyToState(message);
+		}
+
+		if (_chatSink is not null &&
+			message.Payload.ValueKind is JsonValueKind.Object &&
+			message.Payload.TryGetProperty("event", out var payload) &&
+			TwitchChatMessageParser.ToChatEvent(Account.UserId, message.SubscriptionType, payload, _badges) is
+				{ } chatEvent)
+		{
+			_chatSink.Post(chatEvent);
+		}
+	}
+
+	private void StopBadgeLoad()
+	{
+		if (Interlocked.Exchange(ref _stopped, 1) == 0)
+		{
+			_stopping.Cancel();
+			_stopping.Dispose();
+		}
+	}
+
+	internal async Task LoadBadgesAsync(CancellationToken cancellationToken)
+	{
+		try
+		{
+			var global = await Helix.GetGlobalChatBadgesAsync(cancellationToken).ConfigureAwait(false);
+			var channel = await Helix.GetChannelChatBadgesAsync(Account.UserId, cancellationToken)
+				.ConfigureAwait(false);
+			_badges = new TwitchChatBadgeMap(global, channel);
+		}
+		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+		{
+		}
+#pragma warning disable CA1031 // Badges are decoration: without them chat still shows, just without the icons.
+		catch (Exception exception)
+#pragma warning restore CA1031
+		{
+			_logger.Warning(exception, "Could not load the Twitch chat badges for {Login}", Account.Login);
+		}
 	}
 
 	private void ApplyToState(TwitchEventSubMessage message)

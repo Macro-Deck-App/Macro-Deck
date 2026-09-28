@@ -20,7 +20,8 @@ internal sealed record TwitchSubscriptionSpec(
 	string Type,
 	string Version,
 	TwitchConditionKind Condition,
-	string? Scope);
+	string? Scope,
+	bool IsFeed = false);
 
 internal static class TwitchEventCatalog
 {
@@ -175,6 +176,18 @@ internal static class TwitchEventCatalog
 			"1",
 			TwitchConditionKind.BroadcasterAndUser,
 			TwitchScopes.UserReadChat),
+		new(TwitchFeedIds.ChatMessage,
+			"channel.chat.message",
+			"1",
+			TwitchConditionKind.BroadcasterAndUser,
+			TwitchScopes.UserReadChat,
+			IsFeed: true),
+		new(TwitchFeedIds.ChatUserMessagesCleared,
+			"channel.chat.clear_user_messages",
+			"1",
+			TwitchConditionKind.BroadcasterAndUser,
+			TwitchScopes.UserReadChat,
+			IsFeed: true),
 		new(TwitchEventIds.ChatSettingsUpdated,
 			"channel.chat_settings.update",
 			"1",
@@ -186,7 +199,7 @@ internal static class TwitchEventCatalog
 	];
 
 	public static TwitchSubscriptionSpec? ForEvent(string eventId)
-		=> All.FirstOrDefault(spec => string.Equals(spec.EventId, eventId, StringComparison.Ordinal));
+		=> All.FirstOrDefault(spec => !spec.IsFeed && string.Equals(spec.EventId, eventId, StringComparison.Ordinal));
 
 	public static TwitchSubscriptionSpec? ForType(string? subscriptionType, string? version)
 	{
@@ -208,7 +221,10 @@ internal static class TwitchEventCatalog
 
 	public static IReadOnlyList<string> Types { get; } =
 	[
-		.. All.Select(spec => spec.Type).Distinct(StringComparer.Ordinal).OrderBy(type => type, StringComparer.Ordinal)
+		.. All.Where(spec => !spec.IsFeed)
+			.Select(spec => spec.Type)
+			.Distinct(StringComparer.Ordinal)
+			.OrderBy(type => type, StringComparer.Ordinal)
 	];
 
 	public static IReadOnlyDictionary<string, string> BuildCondition(TwitchConditionKind kind, string userId)
