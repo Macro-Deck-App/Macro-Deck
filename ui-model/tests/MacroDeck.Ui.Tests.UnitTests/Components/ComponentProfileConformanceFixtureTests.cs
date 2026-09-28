@@ -53,6 +53,7 @@ public class ComponentProfileConformanceFixtureTests
 		yield return "conformance-modifier-tree.json";
 		yield return "conformance-responsive-tree.json";
 		yield return "conformance-chat-tree.json";
+		yield return "conformance-anchored-list-tree.json";
 	}
 
 	private static readonly bool[] _chatSpanIsImage = [false, false, true, true, false];
@@ -515,6 +516,35 @@ public class ComponentProfileConformanceFixtureTests
 			Assert.That(spans[0].GetProperty("color").GetString(), Is.EqualTo("#9146ff"));
 			Assert.That(spans[4].GetProperty("color").GetString(), Is.EqualTo("red"),
 				"a colour that is not #rrggbb is the case a reader has to ignore");
+		});
+	}
+
+	[Test]
+	public void The_anchored_list_fixture_pins_the_anchor_its_version_three_fallback_and_the_lists_that_ignore_it()
+	{
+		var tree = JsonSerializer.Deserialize<UiTree>(ReadTree("conformance-anchored-list-tree.json"), UiCanonicalJson.Options)!;
+		var nodes = Walk(tree.Root).ToDictionary(node => node.Id, StringComparer.Ordinal);
+
+		var feed = nodes["conformance.feed"];
+		var drawnOrder = feed.Children.Select(child => child.Properties["text"].GetString()).ToList();
+		var fallbackOrder = feed.Fallback!.Children.Select(child => child.Properties["text"].GetString()).ToList();
+		drawnOrder.Reverse();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(feed.Type, Is.EqualTo(UiComponents.List));
+			Assert.That(feed.Properties["anchor"].GetString(), Is.EqualTo(UiComponentListAnchors.End));
+			Assert.That(feed.RequiredComponentVersion, Is.EqualTo(3),
+				"a version 2 reader ignores anchor, so the following list has to ask for version 3");
+			Assert.That(feed.Fallback.Type, Is.EqualTo(UiComponents.List));
+			Assert.That(feed.Fallback.Properties.ContainsKey("anchor"), Is.False);
+			Assert.That(fallbackOrder, Is.EqualTo(drawnOrder).AsCollection,
+				"the fallback puts the newest row first, where a reader that does not follow the end shows it");
+			Assert.That(nodes["conformance.start"].Properties["anchor"].GetString(), Is.EqualTo(UiComponentListAnchors.Start));
+			Assert.That(UiComponentListAnchors.WellKnown, Does.Not.Contain(nodes["conformance.unknown"].Properties["anchor"].GetString()),
+				"an unknown anchor is what a reader has to treat as start");
+			Assert.That(nodes["conformance.sideways"].Properties["direction"].GetString(), Is.EqualTo(UiComponentDirections.Horizontal),
+				"a horizontal list is the case a reader has to leave alone even with anchor end");
 		});
 	}
 
