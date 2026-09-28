@@ -7407,9 +7407,6 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>{enabled} of {total} enabled</value>
     <comment>[enabled:int] [total:int]</comment>
   </data>
-  <data name="Integrations.Page.ExternalTag" xml:space="preserve">
-    <value>External</value>
-  </data>
   <data name="Integrations.Page.FallbackIntegrationName" xml:space="preserve">
     <value>this integration</value>
   </data>

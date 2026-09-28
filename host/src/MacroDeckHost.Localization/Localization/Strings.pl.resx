@@ -7407,9 +7407,6 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Włączone: {enabled} z {total}</value>
     <comment>[enabled:int] [total:int]</comment>
   </data>
-  <data name="Integrations.Page.ExternalTag" xml:space="preserve">
-    <value>Zewnętrzna</value>
-  </data>
   <data name="Integrations.Page.FallbackIntegrationName" xml:space="preserve">
     <value>ta integracja</value>
   </data>

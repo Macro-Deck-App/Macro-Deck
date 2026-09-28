@@ -121,13 +121,8 @@
   letter-spacing: 0.02em;
   text-transform: uppercase;
   vertical-align: middle;
-  background-color: var(--color-bg-hover);
-  color: var(--color-text-secondary);
-}
-
-.kind-badge.internal {
-  background-color: var(--color-accent-muted);
-  color: var(--color-accent);
+  background-color: var(--type-integration-bg);
+  color: var(--type-integration-fg);
 }
 
 .integrations-toolbar,

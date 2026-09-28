@@ -2,8 +2,8 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { Subject } from 'rxjs';
-import { IpcIntegration, PluginCompatibilityReport, PluginInstallActionResponse } from '@macro-deck/runtime';
-import { ApiService } from '@shared';
+import { AppStrings, IpcIntegration, PluginCompatibilityReport, PluginInstallActionResponse } from '@macro-deck/runtime';
+import { ApiService, LocalizationService } from '@shared';
 import { IntegrationService } from '../../../services/integration.service';
 import { FileOpenService } from '../../../services/file-open.service';
 import { IntegrationFilterService } from '../../../services/integration-filter.service';
@@ -257,6 +257,24 @@ describe('IntegrationsPageComponent declared counts', () => {
     expect(chipText.filter(text => text.includes('Variables')).length).toBe(1);
   });
 
+  it('marks only plugin integrations with a plugin badge', async () => {
+    await setup([
+      integrationDto({ id: 'app.builtin', name: 'Built In', isInternal: true }),
+      integrationDto({ id: 'plugin.example', name: 'Example Plugin', isInternal: false }),
+    ]);
+
+    const badgesByCard = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.integration-card'))
+      .map(card => ({
+        name: card.querySelector('.integration-name')?.textContent?.trim(),
+        badges: Array.from<HTMLElement>(card.querySelectorAll('.kind-badge')).map(badge => badge.textContent?.trim()),
+      }));
+    const pluginLabel = TestBed.inject(LocalizationService).translateKey(AppStrings.Store.KindLabel.Plugin);
+    expect(badgesByCard).toEqual(jasmine.arrayWithExactContents([
+      { name: 'Built In', badges: [] },
+      { name: 'Example Plugin', badges: [pluginLabel] },
+    ]));
+  });
+
   it('renders an unrecognised capability kind by its own name', async () => {
     await setup([integrationDto({
       providedCapabilities: [{ kind: 'scene-switcher', name: 'Scene Switcher' }],
@@ -377,6 +395,18 @@ describe('IntegrationsPageComponent filters', () => {
 
     filters.type.set('external');
     expect(await renderedNames()).toEqual(['Bravo', 'Charlie']);
+  });
+
+  it('names the plugin type filter as plugins in the toolbar', async () => {
+    await setup(catalog);
+
+    filters.type.set('external');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const values = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.filter-value'))
+      .map(element => element.textContent?.trim());
+    expect(values).toEqual([TestBed.inject(LocalizationService).translateKey(AppStrings.Store.KindLabel.Plugin)]);
   });
 
   it('keeps only integrations providing every selected capability', async () => {

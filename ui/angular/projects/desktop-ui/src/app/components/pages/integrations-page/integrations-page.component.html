@@ -109,7 +109,7 @@
                   {{ 'macrodeck.app:Integrations.Page.InternalTag' | translate }}
                 </button>
                 <button type="button" class="integrations-filter-option" [class.is-selected]="filters.type() === 'external'" (click)="setTypeFilter('external')">
-                  {{ 'macrodeck.app:Integrations.Page.ExternalTag' | translate }}
+                  {{ 'macrodeck.app:Store.KindLabel.Plugin' | translate }}
                 </button>
               </div>
             </ng-template>
@@ -211,10 +211,8 @@
                       <span class="integration-name">{{ integration.name }}</span>
                       @if (!integration.isInternal) {
                         <span class="integration-version">v{{ integration.version }}</span>
+                        <span class="kind-badge">{{ 'macrodeck.app:Store.KindLabel.Plugin' | translate }}</span>
                       }
-                      <span class="kind-badge" [class.internal]="integration.isInternal">
-                        {{ (integration.isInternal ? 'macrodeck.app:Integrations.Page.InternalTag' : 'macrodeck.app:Integrations.Page.ExternalTag') | translate }}
-                      </span>
                     </div>
                   </div>
                 </div>
