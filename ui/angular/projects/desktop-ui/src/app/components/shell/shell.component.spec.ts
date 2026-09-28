@@ -2,8 +2,16 @@ import { NO_ERRORS_SCHEMA, provideZonelessChangeDetection, signal } from '@angul
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
+import { Announcement } from '@macro-deck/runtime';
 import { NotificationCenterService } from '../../services/notification-center.service';
+import { AnnouncementService } from '../../services/announcement.service';
+import { MigrationOfferService } from '../../services/migration-offer.service';
+import { OnboardingService } from '../../services/onboarding.service';
+import { PostUpdateChangelogService } from '../../services/post-update-changelog.service';
+import { SettingsModalService } from '../../services/settings-modal.service';
+import { UpdateModalService } from '../../services/update-modal.service';
 import { MIN_CONTENT_WIDTH_REM, NavigationService, SIDEBAR_EXPANDED_WIDTH } from '../../services';
+import { ModalComponent } from '@shared';
 import { ShellComponent } from './shell.component';
 import { provideLocalizationTesting } from '../../../testing/localization-test-support';
 
@@ -39,6 +47,10 @@ const notificationCenterStub = {
   badgeText: signal('0'),
 };
 
+const announcementStub = {
+  pending: signal<Announcement | null>(null),
+};
+
 describe('ShellComponent', () => {
   let fixture: ComponentFixture<ShellComponent>;
   let navigationService: NavigationService;
@@ -58,6 +70,7 @@ describe('ShellComponent', () => {
         provideZonelessChangeDetection(),
         ...provideLocalizationTesting(),
         { provide: NotificationCenterService, useValue: notificationCenterStub },
+        { provide: AnnouncementService, useValue: announcementStub },
       ],
     })
       .overrideComponent(ShellComponent, { set: { imports: [], schemas: [NO_ERRORS_SCHEMA] } })
@@ -182,5 +195,133 @@ describe('ShellComponent', () => {
     expect(content.querySelector('app-connection-panel')).not.toBeNull();
     expect(content.querySelector('app-statusbar')).toBeNull();
     expect(content.querySelector('app-footer-bar')).toBeNull();
+  });
+});
+
+describe('ShellComponent announcement', () => {
+  const announcement: Announcement = {
+    number: 4,
+    title: 'Macro Deck 3 is here',
+    content: 'Body',
+    publishedAt: '2026-09-28T15:58:49Z',
+    updatedAt: '2026-09-28T15:58:49Z',
+  };
+
+  let fixture: ComponentFixture<ShellComponent>;
+  let resolveChangelog: (changelog: ShellPostUpdateChangelog | null) => void;
+  let originalResizeObserver: typeof ResizeObserver;
+
+  beforeEach(async () => {
+    originalResizeObserver = window.ResizeObserver;
+    window.ResizeObserver = FakeResizeObserver as unknown as typeof ResizeObserver;
+    (window as { macroDeckShell?: unknown }).macroDeckShell = {
+      getPostUpdateChangelog: () => new Promise(resolve => (resolveChangelog = resolve)),
+      dismissPostUpdateChangelog: () => Promise.resolve(),
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [ShellComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        ...provideLocalizationTesting(),
+        { provide: NotificationCenterService, useValue: notificationCenterStub },
+        { provide: AnnouncementService, useValue: announcementStub },
+      ],
+    })
+      .overrideComponent(ShellComponent, { set: { imports: [], schemas: [NO_ERRORS_SCHEMA] } })
+      .compileComponents();
+
+    TestBed.inject(OnboardingService).state.set('done');
+    TestBed.inject(MigrationOfferService).pending.set(false);
+    fixture = TestBed.createComponent(ShellComponent);
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    window.ResizeObserver = originalResizeObserver;
+    announcementStub.pending.set(null);
+    delete (window as { macroDeckShell?: unknown }).macroDeckShell;
+  });
+
+  const shown = (selector = 'app-announcement-modal'): boolean => {
+    fixture.detectChanges();
+    return !!fixture.nativeElement.querySelector(selector);
+  };
+
+  async function settle(changelog: ShellPostUpdateChangelog | null): Promise<void> {
+    resolveChangelog(changelog);
+    await new Promise(resolve => setTimeout(resolve));
+  }
+
+  it('does not appear before the What\'s New check has finished', async () => {
+    announcementStub.pending.set(announcement);
+
+    expect(shown()).toBeFalse();
+
+    await settle(null);
+    expect(shown()).toBeTrue();
+  });
+
+  it('waits for the What\'s New modal of an installed update and follows it', async () => {
+    announcementStub.pending.set(announcement);
+    await settle({ version: '3.2.0', notes: 'notes', notesUrl: null, publishedAt: null });
+
+    expect(shown()).toBeFalse();
+    expect(shown('app-whats-new-modal')).toBeTrue();
+
+    TestBed.inject(PostUpdateChangelogService).dismiss();
+
+    expect(shown()).toBeTrue();
+    expect(shown('app-whats-new-modal')).toBeFalse();
+  });
+
+  it('never covers an update or settings modal the user opened, and appears once it is closed', async () => {
+    await settle(null);
+    const updateModal = TestBed.inject(UpdateModalService);
+    const settingsModal = TestBed.inject(SettingsModalService);
+    updateModal.open();
+    announcementStub.pending.set(announcement);
+
+    expect(shown()).toBeFalse();
+    expect(shown('app-update-modal')).toBeTrue();
+
+    updateModal.close();
+    settingsModal.open();
+    expect(shown()).toBeFalse();
+
+    settingsModal.close();
+    expect(shown()).toBeTrue();
+  });
+
+  it('waits while a page has a dialog open, and stays once shown when another dialog opens over it', async () => {
+    await settle(null);
+    const pageDialog = TestBed.createComponent(ModalComponent);
+    pageDialog.detectChanges();
+    announcementStub.pending.set(announcement);
+
+    expect(shown()).toBeFalse();
+
+    pageDialog.destroy();
+    expect(shown()).toBeTrue();
+
+    const laterDialog = TestBed.createComponent(ModalComponent);
+    laterDialog.detectChanges();
+    expect(shown()).toBeTrue();
+    laterDialog.destroy();
+  });
+
+  it('waits for onboarding and the migration offer', async () => {
+    await settle(null);
+    const onboarding = TestBed.inject(OnboardingService);
+    const migrationOffer = TestBed.inject(MigrationOfferService);
+    onboarding.state.set('unknown');
+    migrationOffer.pending.set(true);
+    announcementStub.pending.set(announcement);
+
+    expect(shown()).toBeFalse();
+    onboarding.state.set('done');
+    expect(shown()).toBeFalse();
+    migrationOffer.pending.set(false);
+    expect(shown()).toBeTrue();
   });
 });

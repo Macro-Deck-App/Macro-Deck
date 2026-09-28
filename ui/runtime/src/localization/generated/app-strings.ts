@@ -191,6 +191,9 @@ export const AppStrings = {
 			Unsupported: 'macrodeck.app:ActionBuilder.WidgetAppearance.Unsupported',
 		},
 	},
+	Announcements: {
+		PublishedOn: 'macrodeck.app:Announcements.PublishedOn',
+	},
 	Auth: {
 		ForgotPasswordHint: 'macrodeck.app:Auth.ForgotPasswordHint',
 		Password: 'macrodeck.app:Auth.Password',
@@ -7556,6 +7559,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:ActionBuilder.WidgetAppearance.LabelField': 'Label',
 	'macrodeck.app:ActionBuilder.WidgetAppearance.Unsupported': 'This widget does not support this appearance setting.',
 	'macrodeck.app:ActionBuilder.WidgetVariablesHeading': 'Widget variables',
+	'macrodeck.app:Announcements.PublishedOn': 'Published {date}',
 	'macrodeck.app:Auth.ForgotPasswordHint': 'Forgot your password? Reset it on the computer running Macro Deck, under Settings > Security.',
 	'macrodeck.app:Auth.Password': 'Password',
 	'macrodeck.app:Auth.SignIn': 'Sign in',

@@ -459,6 +459,10 @@
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Variables del widget</value>
   </data>
+  <data name="Announcements.PublishedOn" xml:space="preserve">
+    <value>Publicado el {date}</value>
+    <comment>[date:string]</comment>
+  </data>
   <data name="Auth.ForgotPasswordHint" xml:space="preserve">
     <value>¿Olvidaste tu contraseña? Restablécela en el ordenador donde se ejecuta Macro Deck, en Configuración &gt; Seguridad.</value>
   </data>

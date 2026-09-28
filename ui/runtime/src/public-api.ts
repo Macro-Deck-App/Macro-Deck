@@ -888,6 +888,12 @@ export {
   type MusicPlayerStatePayload,
 } from './protocol/messages/music-player';
 export {
+  type Announcement,
+  type AnnouncementChangedEvent,
+  type GetPendingAnnouncementResponse,
+  type MarkAnnouncementSeenRequest,
+} from './protocol/messages/announcements';
+export {
   type GetUserNotificationsResponse,
   type UserNotification,
   type UserNotificationAction,

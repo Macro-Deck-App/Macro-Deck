@@ -604,6 +604,11 @@ locate-path
   URL: https://github.com/sindresorhus/locate-path
   Texts: [43]
 
+marked
+  License: MIT
+  URL: https://github.com/markedjs/marked
+  Texts: [58]
+
 p-limit
   License: MIT
   URL: https://github.com/sindresorhus/p-limit
@@ -622,7 +627,7 @@ p-try
 parse5
   License: MIT
   URL: https://github.com/inikulin/parse5
-  Texts: [58]
+  Texts: [59]
 
 path-exists
   License: MIT
@@ -632,12 +637,12 @@ path-exists
 performance-now
   License: MIT
   URL: https://github.com/braveg1rl/performance-now
-  Texts: [59]
+  Texts: [60]
 
 pngjs
   License: MIT
   URL: https://github.com/lukeapage/pngjs
-  Texts: [60]
+  Texts: [61]
 
 punycode
   License: MIT
@@ -647,42 +652,42 @@ punycode
 qrcode
   License: MIT
   URL: https://github.com/soldair/node-qrcode
-  Texts: [61]
+  Texts: [62]
 
 raf
   License: MIT
   URL: https://github.com/chrisdickinson/raf
-  Texts: [62]
+  Texts: [63]
 
 regenerator-runtime
   License: MIT
   URL: https://github.com/facebook/regenerator/tree/main/packages/runtime
-  Texts: [63]
+  Texts: [64]
 
 require-directory
   License: MIT
   URL: https://github.com/troygoode/node-require-directory
-  Texts: [64]
+  Texts: [65]
 
 require-main-filename
   License: ISC
   URL: ssh://git@github.com/yargs/require-main-filename
-  Texts: [65]
+  Texts: [66]
 
 resize-observer-polyfill
   License: MIT
   URL: https://github.com/que-etc/resize-observer-polyfill
-  Texts: [66]
+  Texts: [67]
 
 rxjs
   License: Apache-2.0
   URL: https://github.com/reactivex/rxjs
-  Texts: [67]
+  Texts: [68]
 
 set-blocking
   License: ISC
   URL: https://github.com/yargs/set-blocking
-  Texts: [65]
+  Texts: [66]
 
 string-width
   License: MIT
@@ -697,42 +702,42 @@ strip-ansi
 style-mod
   License: MIT
   URL: https://github.com/marijnh/style-mod
-  Texts: [68]
+  Texts: [69]
 
 tslib
   License: 0BSD
   URL: https://github.com/Microsoft/tslib
-  Texts: [69]
+  Texts: [70]
 
 uri-js
   License: BSD-2-Clause
   URL: http://github.com/garycourt/uri-js
-  Texts: [70]
+  Texts: [71]
 
 uuid
   License: MIT
   URL: https://github.com/uuidjs/uuid
-  Texts: [71]
+  Texts: [72]
 
 valid-url
   License: MIT
   URL: https://github.com/ogt/valid-url
-  Texts: [72]
+  Texts: [73]
 
 w3c-keyname
   License: MIT
   URL: https://github.com/marijnh/w3c-keyname
-  Texts: [73]
+  Texts: [74]
 
 whatwg-fetch
   License: MIT
   URL: https://github.com/github/fetch
-  Texts: [74]
+  Texts: [75]
 
 which-module
   License: ISC
   URL: https://github.com/nexdrew/which-module
-  Texts: [75]
+  Texts: [76]
 
 wrap-ansi
   License: MIT
@@ -742,22 +747,22 @@ wrap-ansi
 y18n
   License: ISC
   URL: https://github.com/yargs/y18n
-  Texts: [76]
+  Texts: [77]
 
 yargs
   License: MIT
   URL: https://github.com/yargs/yargs
-  Texts: [77]
+  Texts: [78]
 
 yargs-parser
   License: ISC
   URL: https://github.com/yargs/yargs-parser
-  Texts: [65]
+  Texts: [66]
 
 zod
   License: MIT
   URL: https://github.com/colinhacks/zod
-  Texts: [78]
+  Texts: [79]
 
 ================================================================================
 Rust crates (Macro Deck desktop application)
@@ -767,2084 +772,2084 @@ adler2
   License: MIT
   Declared: 0BSD OR MIT OR Apache-2.0
   URL: https://github.com/oyvindln/adler2
-  Texts: [79]
+  Texts: [80]
 
 aho-corasick
   License: MIT
   Declared: Unlicense OR MIT
   URL: https://github.com/BurntSushi/aho-corasick
-  Texts: [80], [81]
+  Texts: [81], [82]
 
 alloc-no-stdlib
   License: BSD-3-Clause
   URL: https://github.com/dropbox/rust-alloc-no-stdlib
-  Texts: [82]
+  Texts: [83]
 
 alloc-stdlib
   License: BSD-3-Clause
   URL: https://github.com/dropbox/rust-alloc-no-stdlib
-  Texts: [83]
+  Texts: [84]
 
 anyhow
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/dtolnay/anyhow
-  Texts: [79]
+  Texts: [80]
 
 async-broadcast
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/smol-rs/async-broadcast
   Platforms: Linux
-  Texts: [84]
+  Texts: [85]
 
 async-channel
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/smol-rs/async-channel
   Platforms: Linux
-  Texts: [79]
+  Texts: [80]
 
 async-executor
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/smol-rs/async-executor
   Platforms: Linux
-  Texts: [79]
+  Texts: [80]
 
 async-io
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/smol-rs/async-io
   Platforms: Linux
-  Texts: [79]
+  Texts: [80]
 
 async-lock
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/smol-rs/async-lock
   Platforms: Linux
-  Texts: [79]
+  Texts: [80]
 
 async-process
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/smol-rs/async-process
   Platforms: Linux
-  Texts: [79]
+  Texts: [80]
 
 async-signal
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/smol-rs/async-signal
   Platforms: Linux
-  Texts: [79]
+  Texts: [80]
 
 async-task
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/smol-rs/async-task
   Platforms: Linux
-  Texts: [79]
+  Texts: [80]
 
 atk
   License: MIT
   URL: https://github.com/gtk-rs/gtk3-rs
   Platforms: Linux
-  Texts: [85]
+  Texts: [86]
 
 atk-sys
   License: MIT
   URL: https://github.com/gtk-rs/gtk3-rs
   Platforms: Linux
-  Texts: [85]
+  Texts: [86]
 
 atomic-waker
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/smol-rs/atomic-waker
-  Texts: [79], [86]
+  Texts: [80], [87]
 
 base64
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/marshallpierce/rust-base64
-  Texts: [87]
+  Texts: [88]
 
 bit-set
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/contain-rs/bit-set
-  Texts: [88]
+  Texts: [89]
 
 bit-vec
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/contain-rs/bit-vec
-  Texts: [88]
+  Texts: [89]
 
 bitflags
   License: MIT
   Declared: MIT OR Apache-2.0; MIT/Apache-2.0
   URL: https://github.com/bitflags/bitflags
-  Texts: [89]
+  Texts: [90]
 
 block-buffer
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/RustCrypto/utils
-  Texts: [90]
+  Texts: [91]
 
 block2
   License: MIT
   URL: https://github.com/madsmtm/objc2
   Platforms: macOS
-  Texts: [91]
+  Texts: [92]
 
 blocking
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/smol-rs/blocking
   Platforms: Linux
-  Texts: [79]
+  Texts: [80]
 
 brotli
   License: BSD-3-Clause AND MIT
   URL: https://github.com/dropbox/rust-brotli
-  Texts: [82], [92]
+  Texts: [83], [93]
 
 brotli-decompressor
   License: MIT
   Declared: BSD-3-Clause/MIT
   URL: https://github.com/dropbox/rust-brotli-decompressor
-  Texts: [82]
+  Texts: [83]
 
 bs58
   License: MIT
   Declared: MIT/Apache-2.0
   URL: https://github.com/Nullus157/bs58-rs
-  Texts: [93]
+  Texts: [94]
 
 bytemuck
   License: MIT
   Declared: Zlib OR Apache-2.0 OR MIT
   URL: https://github.com/Lokathor/bytemuck
-  Texts: [94]
+  Texts: [95]
 
 byteorder
   License: MIT
   Declared: Unlicense OR MIT
   URL: https://github.com/BurntSushi/byteorder
-  Texts: [80], [81]
+  Texts: [81], [82]
 
 byteorder-lite
   License: MIT
   Declared: Unlicense OR MIT
   URL: https://github.com/image-rs/byteorder-lite
-  Texts: [81]
+  Texts: [82]
 
 bytes
   License: MIT
   URL: https://github.com/tokio-rs/bytes
-  Texts: [95]
+  Texts: [96]
 
 cairo-rs
   License: MIT
   URL: https://github.com/gtk-rs/gtk-rs-core
   Platforms: Linux
-  Texts: [85]
+  Texts: [86]
 
 cairo-sys-rs
   License: MIT
   URL: https://github.com/gtk-rs/gtk-rs-core
   Platforms: Linux
-  Texts: [85]
+  Texts: [86]
 
 camino
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/camino-rs/camino
-  Texts: [79]
+  Texts: [80]
 
 cargo-platform
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-lang/cargo
-  Texts: [79]
+  Texts: [80]
 
 cargo_metadata
   License: MIT
   URL: https://github.com/oli-obk/cargo_metadata
-  Texts: [79]
+  Texts: [80]
 
 cfb
   License: MIT
   URL: https://github.com/mdsteele/rust-cfb
-  Texts: [96]
+  Texts: [97]
 
 cfg-if
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-lang/cfg-if
-  Texts: [97]
+  Texts: [98]
 
 chacha20
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/RustCrypto/stream-ciphers
-  Texts: [98]
+  Texts: [99]
 
 chrono
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/chronotope/chrono
-  Texts: [99]
+  Texts: [100]
 
 concurrent-queue
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/smol-rs/concurrent-queue
   Platforms: Linux
-  Texts: [79]
+  Texts: [80]
 
 cookie
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/SergioBenitez/cookie-rs
-  Texts: [100]
+  Texts: [101]
 
 core-foundation
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/servo/core-foundation-rs
   Platforms: macOS
-  Texts: [101]
+  Texts: [102]
 
 core-foundation-sys
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/servo/core-foundation-rs
   Platforms: macOS
-  Texts: [101]
+  Texts: [102]
 
 core-graphics
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/servo/core-foundation-rs
   Platforms: macOS
-  Texts: [101]
+  Texts: [102]
 
 core-graphics-types
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/servo/core-foundation-rs
   Platforms: macOS
-  Texts: [101]
+  Texts: [102]
 
 cpufeatures
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/RustCrypto/utils
-  Texts: [102]
+  Texts: [103]
 
 crc32fast
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/srijs/rust-crc32fast
-  Texts: [103]
+  Texts: [104]
 
 crossbeam-channel
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/crossbeam-rs/crossbeam
-  Texts: [104], [105]
+  Texts: [105], [106]
 
 crossbeam-utils
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/crossbeam-rs/crossbeam
-  Texts: [104]
+  Texts: [105]
 
 crypto-common
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/RustCrypto/traits
-  Texts: [106]
+  Texts: [107]
 
 cssparser
   License: MPL-2.0
   URL: https://github.com/servo/rust-cssparser
-  Texts: [107]
+  Texts: [108]
 
 ctor
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/mmastrac/linktime
-  Texts: [108]
+  Texts: [109]
 
 dbus
   License: MIT
   Declared: Apache-2.0/MIT
   URL: https://github.com/diwic/dbus-rs
   Platforms: Linux
-  Texts: [109]
+  Texts: [110]
 
 deranged
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/jhpratt/deranged
-  Texts: [110]
+  Texts: [111]
 
 derive_more
   License: MIT
   URL: https://github.com/JelteF/derive_more
-  Texts: [111]
+  Texts: [112]
 
 digest
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/RustCrypto/traits
-  Texts: [112]
+  Texts: [113]
 
 dirs
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://codeberg.org/dirs/dirs-rs
-  Texts: [113]
+  Texts: [114]
 
 dirs-sys
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/dirs-dev/dirs-sys-rs
-  Texts: [113]
+  Texts: [114]
 
 dispatch2
   License: MIT
   Declared: Zlib OR Apache-2.0 OR MIT
   URL: https://github.com/madsmtm/objc2
   Platforms: macOS
-  Texts: [114]
+  Texts: [115]
 
 dlopen2
   License: MIT
   URL: https://github.com/OpenByteDev/dlopen2
   Platforms: Linux
-  Texts: [115]
+  Texts: [116]
 
 dom_query
   License: MIT
   URL: https://github.com/niklak/dom_query
-  Texts: [116]
+  Texts: [117]
 
 dpi
   License: Apache-2.0 AND MIT
   URL: https://github.com/rust-windowing/winit
-  Texts: [117], [118]
+  Texts: [118], [119]
 
 dtoa
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/dtolnay/dtoa
-  Texts: [79]
+  Texts: [80]
 
 dtoa-short
   License: MPL-2.0
   URL: https://github.com/upsuper/dtoa-short
-  Texts: [107]
+  Texts: [108]
 
 dunce
   License: MIT-0
   Declared: CC0-1.0 OR MIT-0 OR Apache-2.0
   URL: https://gitlab.com/kornelski/dunce
-  Texts: [119]
+  Texts: [120]
 
 dyn-clone
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/dtolnay/dyn-clone
-  Texts: [79]
+  Texts: [80]
 
 embed_plist
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/nvzqz/embed-plist-rs
   Platforms: macOS
-  Texts: [120]
+  Texts: [121]
 
 endi
   License: MIT
   URL: https://github.com/zeenix/endi
   Platforms: Linux
-  Texts: [79]
+  Texts: [80]
 
 enumflags2
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/meithecatte/enumflags2
   Platforms: Linux
-  Texts: [121]
+  Texts: [122]
 
 equivalent
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/indexmap-rs/equivalent
-  Texts: [122]
+  Texts: [123]
 
 erased-serde
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/dtolnay/erased-serde
-  Texts: [79]
+  Texts: [80]
 
 errno
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/lambda-fairy/rust-errno
   Platforms: Linux, macOS
-  Texts: [123]
+  Texts: [124]
 
 event-listener
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/smol-rs/event-listener
   Platforms: Linux
-  Texts: [79]
+  Texts: [80]
 
 event-listener-strategy
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/smol-rs/event-listener-strategy
   Platforms: Linux
-  Texts: [79]
+  Texts: [80]
 
 fastrand
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/smol-rs/fastrand
-  Texts: [79]
+  Texts: [80]
 
 fdeflate
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/image-rs/fdeflate
-  Texts: [124]
+  Texts: [125]
 
 field-offset
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/Diggsey/rust-field-offset
   Platforms: Linux
-  Texts: [125]
+  Texts: [126]
 
 filetime
   License: MIT
   Declared: MIT/Apache-2.0
   URL: https://github.com/alexcrichton/filetime
   Platforms: Linux, macOS
-  Texts: [97]
+  Texts: [98]
 
 flate2
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-lang/flate2-rs
-  Texts: [126]
+  Texts: [127]
 
 fnv
   License: MIT
   Declared: Apache-2.0 / MIT
   URL: https://github.com/servo/rust-fnv
-  Texts: [127]
+  Texts: [128]
 
 foldhash
   License: Zlib
   URL: https://github.com/orlp/foldhash
-  Texts: [128]
+  Texts: [129]
 
 foreign-types
   License: MIT
   Declared: MIT/Apache-2.0
   URL: https://github.com/sfackler/foreign-types
   Platforms: macOS
-  Texts: [129]
+  Texts: [130]
 
 foreign-types-shared
   License: MIT
   Declared: MIT/Apache-2.0
   URL: https://github.com/sfackler/foreign-types
   Platforms: macOS
-  Texts: [129]
+  Texts: [130]
 
 form_urlencoded
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/servo/rust-url
-  Texts: [130]
+  Texts: [131]
 
 futures-channel
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-lang/futures-rs
-  Texts: [131]
+  Texts: [132]
 
 futures-core
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-lang/futures-rs
-  Texts: [131]
+  Texts: [132]
 
 futures-executor
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-lang/futures-rs
   Platforms: Linux
-  Texts: [131]
+  Texts: [132]
 
 futures-io
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-lang/futures-rs
-  Texts: [131]
+  Texts: [132]
 
 futures-lite
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/smol-rs/futures-lite
   Platforms: Linux
-  Texts: [79], [86]
+  Texts: [80], [87]
 
 futures-sink
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-lang/futures-rs
-  Texts: [131]
+  Texts: [132]
 
 futures-task
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-lang/futures-rs
-  Texts: [131]
+  Texts: [132]
 
 futures-util
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-lang/futures-rs
-  Texts: [131]
+  Texts: [132]
 
 gdk
   License: MIT
   URL: https://github.com/gtk-rs/gtk3-rs
   Platforms: Linux
-  Texts: [85]
+  Texts: [86]
 
 gdk-pixbuf
   License: MIT
   URL: https://github.com/gtk-rs/gtk-rs-core
   Platforms: Linux
-  Texts: [85]
+  Texts: [86]
 
 gdk-pixbuf-sys
   License: MIT
   URL: https://github.com/gtk-rs/gtk-rs-core
   Platforms: Linux
-  Texts: [85]
+  Texts: [86]
 
 gdk-sys
   License: MIT
   URL: https://github.com/gtk-rs/gtk3-rs
   Platforms: Linux
-  Texts: [85]
+  Texts: [86]
 
 gdkwayland-sys
   License: MIT
   URL: https://github.com/gtk-rs/gtk3-rs
   Platforms: Linux
-  Texts: [85]
+  Texts: [86]
 
 gdkx11
   License: MIT
   URL: https://github.com/gtk-rs/gtk3-rs
   Platforms: Linux
-  Texts: [85]
+  Texts: [86]
 
 gdkx11-sys
   License: MIT
   URL: https://github.com/gtk-rs/gtk3-rs
   Platforms: Linux
-  Texts: [85]
+  Texts: [86]
 
 generic-array
   License: MIT
   URL: https://github.com/fizyk20/generic-array
-  Texts: [132]
+  Texts: [133]
 
 getrandom
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-random/getrandom
-  Texts: [133], [134], [135]
+  Texts: [134], [135], [136]
 
 gio
   License: MIT
   URL: https://github.com/gtk-rs/gtk-rs-core
   Platforms: Linux
-  Texts: [85]
+  Texts: [86]
 
 gio-sys
   License: MIT
   URL: https://github.com/gtk-rs/gtk-rs-core
   Platforms: Linux
-  Texts: [85]
+  Texts: [86]
 
 glib
   License: MIT
   URL: https://github.com/gtk-rs/gtk-rs-core
   Platforms: Linux
-  Texts: [85]
+  Texts: [86]
 
 glib-sys
   License: MIT
   URL: https://github.com/gtk-rs/gtk-rs-core
   Platforms: Linux
-  Texts: [85]
+  Texts: [86]
 
 glob
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-lang/glob
-  Texts: [89]
+  Texts: [90]
 
 gobject-sys
   License: MIT
   URL: https://github.com/gtk-rs/gtk-rs-core
   Platforms: Linux
-  Texts: [85]
+  Texts: [86]
 
 gtk
   License: MIT
   URL: https://github.com/gtk-rs/gtk3-rs
   Platforms: Linux
-  Texts: [85]
+  Texts: [86]
 
 gtk-sys
   License: MIT
   URL: https://github.com/gtk-rs/gtk3-rs
   Platforms: Linux
-  Texts: [85]
+  Texts: [86]
 
 hashbrown
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-lang/hashbrown
-  Texts: [136]
+  Texts: [137]
 
 heck
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/withoutboats/heck
-  Texts: [137]
+  Texts: [138]
 
 hex
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/KokaKiwi/rust-hex
-  Texts: [138]
+  Texts: [139]
 
 hmac
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/RustCrypto/MACs
-  Texts: [112]
+  Texts: [113]
 
 html5ever
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/servo/html5ever
-  Texts: [139]
+  Texts: [140]
 
 http
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/hyperium/http
-  Texts: [140]
+  Texts: [141]
 
 http-body
   License: MIT
   URL: https://github.com/hyperium/http-body
-  Texts: [141]
+  Texts: [142]
 
 http-body-util
   License: MIT
   URL: https://github.com/hyperium/http-body
-  Texts: [141]
+  Texts: [142]
 
 httparse
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/seanmonstar/httparse
-  Texts: [142]
+  Texts: [143]
 
 hyper
   License: MIT
   URL: https://github.com/hyperium/hyper
-  Texts: [143]
+  Texts: [144]
 
 hyper-rustls
   License: MIT
   Declared: Apache-2.0 OR ISC OR MIT
   URL: https://github.com/rustls/hyper-rustls
-  Texts: [144]
+  Texts: [145]
 
 hyper-util
   License: MIT
   URL: https://github.com/hyperium/hyper-util
-  Texts: [145]
+  Texts: [146]
 
 iana-time-zone
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/strawlab/iana-time-zone
   Platforms: Linux, macOS
-  Texts: [146]
+  Texts: [147]
 
 icu_collections
   License: Unicode-3.0
   URL: https://github.com/unicode-org/icu4x
-  Texts: [147]
+  Texts: [148]
 
 icu_locale_core
   License: Unicode-3.0
   URL: https://github.com/unicode-org/icu4x
-  Texts: [147]
+  Texts: [148]
 
 icu_normalizer
   License: Unicode-3.0
   URL: https://github.com/unicode-org/icu4x
-  Texts: [147]
+  Texts: [148]
 
 icu_normalizer_data
   License: Unicode-3.0
   URL: https://github.com/unicode-org/icu4x
-  Texts: [147]
+  Texts: [148]
 
 icu_properties
   License: Unicode-3.0
   URL: https://github.com/unicode-org/icu4x
-  Texts: [147]
+  Texts: [148]
 
 icu_properties_data
   License: Unicode-3.0
   URL: https://github.com/unicode-org/icu4x
-  Texts: [147]
+  Texts: [148]
 
 icu_provider
   License: Unicode-3.0
   URL: https://github.com/unicode-org/icu4x
-  Texts: [147]
+  Texts: [148]
 
 idna
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/servo/rust-url
-  Texts: [148]
+  Texts: [149]
 
 idna_adapter
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/hsivonen/idna_adapter
-  Texts: [149]
+  Texts: [150]
 
 image
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/image-rs/image
-  Texts: [124]
+  Texts: [125]
 
 indexmap
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/indexmap-rs/indexmap
-  Texts: [150]
+  Texts: [151]
 
 infer
   License: MIT
   URL: https://github.com/bojand/infer
-  Texts: [151]
+  Texts: [152]
 
 ipnet
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/krisprice/ipnet
-  Texts: [152]
+  Texts: [153]
 
 is-docker
   License: MIT
   URL: https://github.com/TheLarkInn/is-docker
   Platforms: Linux
-  Texts: [153]
+  Texts: [154]
 
 is-wsl
   License: MIT
   URL: https://github.com/TheLarkInn/is-wsl
   Platforms: Linux
-  Texts: [153]
+  Texts: [154]
 
 itoa
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/dtolnay/itoa
-  Texts: [79]
+  Texts: [80]
 
 javascriptcore-rs
   License: MIT
   URL: https://github.com/tauri-apps/javascriptcore-rs
   Platforms: Linux
-  Texts: [154]
+  Texts: [155]
 
 javascriptcore-rs-sys
   License: MIT
   URL: https://github.com/tauri-apps/javascriptcore-rs
   Platforms: Linux
-  Texts: [155]
+  Texts: [156]
 
 json-patch
   License: MIT
   Declared: MIT/Apache-2.0
   URL: https://github.com/idubrov/json-patch
-  Texts: [156]
+  Texts: [157]
 
 jsonptr
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/chanced/jsonptr
-  Texts: [157]
+  Texts: [158]
 
 keyboard-types
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-windowing/keyboard-types
-  Texts: [158]
+  Texts: [159]
 
 libappindicator
   License: MIT
   Declared: Apache-2.0 OR MIT
   Platforms: Linux
-  Texts: [159]
+  Texts: [160]
 
 libappindicator-sys
   License: MIT
   Declared: Apache-2.0 OR MIT
   Platforms: Linux
-  Texts: [160]
+  Texts: [161]
 
 libc
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-lang/libc
-  Texts: [161]
+  Texts: [162]
 
 libdbus-sys
   License: MIT
   Declared: Apache-2.0/MIT
   URL: https://github.com/diwic/dbus-rs
   Platforms: Linux
-  Texts: [109]
+  Texts: [110]
 
 libloading
   License: ISC
   URL: https://github.com/nagisa/rust_libloading
   Platforms: Linux
-  Texts: [162]
+  Texts: [163]
 
 linux-raw-sys
   License: MIT
   Declared: Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT
   URL: https://github.com/sunfishcode/linux-raw-sys
   Platforms: Linux
-  Texts: [79]
+  Texts: [80]
 
 litemap
   License: Unicode-3.0
   URL: https://github.com/unicode-org/icu4x
-  Texts: [147]
+  Texts: [148]
 
 lock_api
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/Amanieu/parking_lot
-  Texts: [163]
+  Texts: [164]
 
 log
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-lang/log
-  Texts: [89]
+  Texts: [90]
 
 lru-slab
   License: MIT
   Declared: MIT OR Apache-2.0 OR Zlib
   URL: https://github.com/Ralith/lru-slab
-  Texts: [164]
+  Texts: [165]
 
 mac-notification-sys
   License: MIT
   Declared: MIT/Apache-2.0
   URL: https://github.com/h4llow3En/mac-notification-sys
   Platforms: macOS
-  Texts: [165]
+  Texts: [166]
 
 markup5ever
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/servo/html5ever
-  Texts: [139]
+  Texts: [140]
 
 memchr
   License: MIT
   Declared: Unlicense OR MIT
   URL: https://github.com/BurntSushi/memchr
-  Texts: [80], [81]
+  Texts: [81], [82]
 
 memoffset
   License: MIT
   URL: https://github.com/Gilnaa/memoffset
   Platforms: Linux
-  Texts: [166]
+  Texts: [167]
 
 mime
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/hyperium/mime
-  Texts: [167]
+  Texts: [168]
 
 minisign-verify
   License: MIT
   URL: https://github.com/jedisct1/rust-minisign-verify
-  Texts: [168]
+  Texts: [169]
 
 miniz_oxide
   License: MIT
   Declared: MIT OR Zlib OR Apache-2.0
   URL: https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide
-  Texts: [169]
+  Texts: [170]
 
 mio
   License: MIT
   URL: https://github.com/tokio-rs/mio
-  Texts: [170]
+  Texts: [171]
 
 moxcms
   License: BSD-3-Clause
   Declared: BSD-3-Clause OR Apache-2.0
   URL: https://github.com/awxkee/moxcms
-  Texts: [171]
+  Texts: [172]
 
 muda
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/muda
-  Texts: [172], [173]
+  Texts: [173], [174]
 
 new_debug_unreachable
   License: MIT
   URL: https://github.com/mbrubeck/rust-debug-unreachable
-  Texts: [174]
+  Texts: [175]
 
 notify-rust
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/hoodie/notify-rust
-  Texts: [175]
+  Texts: [176]
 
 num-conv
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/jhpratt/num-conv
-  Texts: [176]
+  Texts: [177]
 
 num-traits
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-num/num-traits
-  Texts: [89]
+  Texts: [90]
 
 objc2
   License: MIT
   URL: https://github.com/madsmtm/objc2
   Platforms: macOS
-  Texts: [91]
+  Texts: [92]
 
 objc2-app-kit
   License: MIT
   Declared: Zlib OR Apache-2.0 OR MIT
   URL: https://github.com/madsmtm/objc2
   Platforms: macOS
-  Texts: [177]
+  Texts: [178]
 
 objc2-core-foundation
   License: MIT
   Declared: Zlib OR Apache-2.0 OR MIT
   URL: https://github.com/madsmtm/objc2
   Platforms: macOS
-  Texts: [177]
+  Texts: [178]
 
 objc2-core-graphics
   License: MIT
   Declared: Zlib OR Apache-2.0 OR MIT
   URL: https://github.com/madsmtm/objc2
   Platforms: macOS
-  Texts: [177]
+  Texts: [178]
 
 objc2-encode
   License: MIT
   URL: https://github.com/madsmtm/objc2
   Platforms: macOS
-  Texts: [91]
+  Texts: [92]
 
 objc2-exception-helper
   License: MIT
   Declared: Zlib OR Apache-2.0 OR MIT
   URL: https://github.com/madsmtm/objc2
   Platforms: macOS
-  Texts: [91]
+  Texts: [92]
 
 objc2-foundation
   License: MIT
   URL: https://github.com/madsmtm/objc2
   Platforms: macOS
-  Texts: [177]
+  Texts: [178]
 
 objc2-io-surface
   License: MIT
   Declared: Zlib OR Apache-2.0 OR MIT
   URL: https://github.com/madsmtm/objc2
   Platforms: macOS
-  Texts: [177]
+  Texts: [178]
 
 objc2-osa-kit
   License: MIT
   Declared: Zlib OR Apache-2.0 OR MIT
   URL: https://github.com/madsmtm/objc2
   Platforms: macOS
-  Texts: [177]
+  Texts: [178]
 
 objc2-quartz-core
   License: MIT
   Declared: Zlib OR Apache-2.0 OR MIT
   URL: https://github.com/madsmtm/objc2
   Platforms: macOS
-  Texts: [177]
+  Texts: [178]
 
 objc2-web-kit
   License: MIT
   Declared: Zlib OR Apache-2.0 OR MIT
   URL: https://github.com/madsmtm/objc2
   Platforms: macOS
-  Texts: [177]
+  Texts: [178]
 
 once_cell
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/matklad/once_cell
-  Texts: [79]
+  Texts: [80]
 
 open
   License: MIT
   URL: https://github.com/Byron/open-rs
-  Texts: [178]
+  Texts: [179]
 
 openssl-probe
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rustls/openssl-probe
   Platforms: Linux
-  Texts: [97]
+  Texts: [98]
 
 option-ext
   License: MPL-2.0
   URL: https://github.com/soc/option-ext
-  Texts: [179]
+  Texts: [180]
 
 ordered-stream
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/danieldg/ordered-stream
   Platforms: Linux
-  Texts: [79]
+  Texts: [80]
 
 osakit
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/mdevils/rust-osakit
   Platforms: macOS
-  Texts: [180]
+  Texts: [181]
 
 pango
   License: MIT
   URL: https://github.com/gtk-rs/gtk-rs-core
   Platforms: Linux
-  Texts: [85]
+  Texts: [86]
 
 pango-sys
   License: MIT
   URL: https://github.com/gtk-rs/gtk-rs-core
   Platforms: Linux
-  Texts: [85]
+  Texts: [86]
 
 parking
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/smol-rs/parking
   Platforms: Linux
-  Texts: [79], [181]
+  Texts: [80], [182]
 
 parking_lot
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/Amanieu/parking_lot
-  Texts: [163]
+  Texts: [164]
 
 parking_lot_core
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/Amanieu/parking_lot
-  Texts: [163]
+  Texts: [164]
 
 percent-encoding
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/servo/rust-url
-  Texts: [148]
+  Texts: [149]
 
 phf
   License: MIT
   URL: https://github.com/rust-phf/rust-phf
-  Texts: [182]
+  Texts: [183]
 
 phf_shared
   License: MIT
   URL: https://github.com/rust-phf/rust-phf
-  Texts: [182]
+  Texts: [183]
 
 pin-project-lite
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/taiki-e/pin-project-lite
-  Texts: [79]
+  Texts: [80]
 
 piper
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/smol-rs/piper
   Platforms: Linux
-  Texts: [79]
+  Texts: [80]
 
 plist
   License: MIT
   URL: https://github.com/ebarnard/rust-plist
-  Texts: [183]
+  Texts: [184]
 
 png
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/image-rs/image-png
-  Texts: [184]
+  Texts: [185]
 
 polling
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/smol-rs/polling
   Platforms: Linux
-  Texts: [79]
+  Texts: [80]
 
 potential_utf
   License: Unicode-3.0
   URL: https://github.com/unicode-org/icu4x
-  Texts: [147]
+  Texts: [148]
 
 powerfmt
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/jhpratt/powerfmt
-  Texts: [185]
+  Texts: [186]
 
 precomputed-hash
   License: MIT
   URL: https://github.com/emilio/precomputed-hash
-  Texts: [186]
+  Texts: [187]
 
 proc-macro2
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/dtolnay/proc-macro2
-  Texts: [79]
+  Texts: [80]
 
 pxfm
   License: BSD-3-Clause
   Declared: BSD-3-Clause OR Apache-2.0
   URL: https://github.com/awxkee/pxfm
-  Texts: [171]
+  Texts: [172]
 
 quick-xml
   License: MIT
   URL: https://github.com/tafia/quick-xml
-  Texts: [187]
+  Texts: [188]
 
 quinn
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/quinn-rs/quinn
-  Texts: [188]
+  Texts: [189]
 
 quinn-proto
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/quinn-rs/quinn
-  Texts: [188]
+  Texts: [189]
 
 quinn-udp
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/quinn-rs/quinn
-  Texts: [188]
+  Texts: [189]
 
 quote
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/dtolnay/quote
-  Texts: [79]
+  Texts: [80]
 
 rand
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-random/rand
-  Texts: [189]
+  Texts: [190]
 
 rand_core
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-random/rand_core
-  Texts: [190]
+  Texts: [191]
 
 rand_pcg
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-random/rngs
-  Texts: [191]
+  Texts: [192]
 
 raw-window-handle
   License: MIT
   Declared: MIT OR Apache-2.0 OR Zlib
   URL: https://github.com/rust-windowing/raw-window-handle
-  Texts: [192]
+  Texts: [193]
 
 ref-cast
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/dtolnay/ref-cast
-  Texts: [79]
+  Texts: [80]
 
 regex
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-lang/regex
-  Texts: [89]
+  Texts: [90]
 
 regex-automata
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-lang/regex
-  Texts: [89]
+  Texts: [90]
 
 regex-syntax
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-lang/regex
-  Texts: [89]
+  Texts: [90]
 
 reqwest
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/seanmonstar/reqwest
-  Texts: [193], [194]
+  Texts: [194], [195]
 
 rfd
   License: MIT
   URL: https://github.com/PolyMeilex/rfd
-  Texts: [195]
+  Texts: [196]
 
 ring
   License: Apache-2.0 AND ISC
   URL: https://github.com/briansmith/ring
-  Texts: [196], [197], [198]
+  Texts: [197], [198], [199]
 
 rustc-hash
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/rust-lang/rustc-hash
-  Texts: [79]
+  Texts: [80]
 
 rustix
   License: MIT
   Declared: Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT
   URL: https://github.com/bytecodealliance/rustix
   Platforms: Linux, macOS
-  Texts: [79]
+  Texts: [80]
 
 rustls
   License: MIT
   Declared: Apache-2.0 OR ISC OR MIT
   URL: https://github.com/rustls/rustls
-  Texts: [144]
+  Texts: [145]
 
 rustls-native-certs
   License: MIT
   Declared: Apache-2.0 OR ISC OR MIT
   URL: https://github.com/rustls/rustls-native-certs
   Platforms: Linux
-  Texts: [199], [144]
+  Texts: [200], [145]
 
 rustls-pki-types
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rustls/pki-types
-  Texts: [200]
+  Texts: [201]
 
 rustls-platform-verifier
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rustls/rustls-platform-verifier
-  Texts: [201]
+  Texts: [202]
 
 rustls-webpki
   License: ISC
   URL: https://github.com/rustls/webpki
-  Texts: [202]
+  Texts: [203]
 
 ryu
   License: Apache-2.0
   Declared: Apache-2.0 OR BSL-1.0
   URL: https://github.com/dtolnay/ryu
-  Texts: [203]
+  Texts: [204]
 
 same-file
   License: MIT
   Declared: Unlicense/MIT
   URL: https://github.com/BurntSushi/same-file
-  Texts: [80], [204]
+  Texts: [81], [205]
 
 schemars
   License: MIT
   URL: https://github.com/GREsau/schemars
-  Texts: [205]
+  Texts: [206]
 
 scopeguard
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/bluss/scopeguard
-  Texts: [206]
+  Texts: [207]
 
 security-framework
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/kornelski/rust-security-framework
   Platforms: macOS
-  Texts: [207]
+  Texts: [208]
 
 security-framework-sys
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/kornelski/rust-security-framework
   Platforms: macOS
-  Texts: [207]
+  Texts: [208]
 
 selectors
   License: MPL-2.0
   URL: https://github.com/servo/stylo
-  Texts: [208]
+  Texts: [209]
 
 semver
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/dtolnay/semver
-  Texts: [79]
+  Texts: [80]
 
 serde
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/serde-rs/serde
-  Texts: [79]
+  Texts: [80]
 
 serde-untagged
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/dtolnay/serde-untagged
-  Texts: [79]
+  Texts: [80]
 
 serde_core
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/serde-rs/serde
-  Texts: [79]
+  Texts: [80]
 
 serde_json
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/serde-rs/json
-  Texts: [79]
+  Texts: [80]
 
 serde_spanned
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/toml-rs/toml
-  Texts: [209]
+  Texts: [210]
 
 serde_urlencoded
   License: MIT
   Declared: MIT/Apache-2.0
   URL: https://github.com/nox/serde_urlencoded
-  Texts: [210]
+  Texts: [211]
 
 serde_with
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/jonasbb/serde_with
-  Texts: [211]
+  Texts: [212]
 
 serialize-to-javascript
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/chippers/serialize-to-javascript
-  Texts: [212]
+  Texts: [213]
 
 servo_arc
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/servo/stylo
-  Texts: [79]
+  Texts: [80]
 
 sha2
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/RustCrypto/hashes
-  Texts: [213]
+  Texts: [214]
 
 signal-hook-registry
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/vorner/signal-hook
   Platforms: Linux
-  Texts: [214]
+  Texts: [215]
 
 simd-adler32
   License: MIT
   URL: https://github.com/mcountryman/simd-adler32
-  Texts: [215]
+  Texts: [216]
 
 siphasher
   License: MIT
   Declared: MIT/Apache-2.0
   URL: https://github.com/jedisct1/rust-siphash
-  Texts: [216]
+  Texts: [217]
 
 slab
   License: MIT
   URL: https://github.com/tokio-rs/slab
-  Texts: [217]
+  Texts: [218]
 
 smallvec
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/servo/rust-smallvec
-  Texts: [218]
+  Texts: [219]
 
 socket2
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-lang/socket2
-  Texts: [97]
+  Texts: [98]
 
 softbuffer
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rust-windowing/softbuffer
   Platforms: Windows
-  Texts: [219]
+  Texts: [220]
 
 soup3
   License: MIT
   URL: https://gitlab.gnome.org/World/Rust/soup3-rs
   Platforms: Linux
-  Texts: [155]
+  Texts: [156]
 
 soup3-sys
   License: MIT
   URL: https://gitlab.gnome.org/World/Rust/soup3-rs
   Platforms: Linux
-  Texts: [155]
+  Texts: [156]
 
 stable_deref_trait
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/storyyeller/stable_deref_trait
-  Texts: [220]
+  Texts: [221]
 
 string_cache
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/servo/string-cache
-  Texts: [101]
+  Texts: [102]
 
 subtle
   License: BSD-3-Clause
   URL: https://github.com/dalek-cryptography/subtle
-  Texts: [221]
+  Texts: [222]
 
 swift-rs
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/Brendonovich/swift-rs
   Platforms: macOS
-  Texts: [222]
+  Texts: [223]
 
 syn
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/dtolnay/syn
   Platforms: Linux
-  Texts: [79]
+  Texts: [80]
 
 sync_wrapper
   License: Apache-2.0
   URL: https://github.com/Actyx/sync_wrapper
-  Texts: [223]
+  Texts: [224]
 
 system-configuration
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/mullvad/system-configuration-rs
   Platforms: macOS
-  Texts: [224]
+  Texts: [225]
 
 system-configuration-sys
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/mullvad/system-configuration-rs
   Platforms: macOS
-  Texts: [224]
+  Texts: [225]
 
 tao
   License: Apache-2.0
   URL: https://github.com/tauri-apps/tao
-  Texts: [117], [225]
+  Texts: [118], [226]
 
 tar
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/composefs/tar-rs
   Platforms: Linux, macOS
-  Texts: [226]
+  Texts: [227]
 
 tauri
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/tauri
-  Texts: [227]
+  Texts: [228]
 
 tauri-plugin-dialog
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/plugins-workspace
-  Texts: [228], [227]
+  Texts: [229], [228]
 
 tauri-plugin-fs
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/plugins-workspace
-  Texts: [228], [227]
+  Texts: [229], [228]
 
 tauri-plugin-opener
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/plugins-workspace
-  Texts: [228], [227]
+  Texts: [229], [228]
 
 tauri-plugin-single-instance
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/plugins-workspace
-  Texts: [228], [229]
+  Texts: [229], [230]
 
 tauri-plugin-updater
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/plugins-workspace
-  Texts: [228], [227]
+  Texts: [229], [228]
 
 tauri-runtime
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/tauri
-  Texts: [227]
+  Texts: [228]
 
 tauri-runtime-wry
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/tauri
-  Texts: [227]
+  Texts: [228]
 
 tauri-utils
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/tauri
-  Texts: [227]
+  Texts: [228]
 
 tauri-winrt-notification
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/tauri-apps/winrt-notification
   Platforms: Windows
-  Texts: [230], [227]
+  Texts: [231], [228]
 
 tempfile
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/Stebalien/tempfile
-  Texts: [231]
+  Texts: [232]
 
 tendril
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/servo/html5ever
-  Texts: [232]
+  Texts: [233]
 
 thiserror
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/dtolnay/thiserror
-  Texts: [79]
+  Texts: [80]
 
 time
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/time-rs/time
-  Texts: [233]
+  Texts: [234]
 
 time-core
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/time-rs/time
-  Texts: [233]
+  Texts: [234]
 
 tinystr
   License: Unicode-3.0
   URL: https://github.com/unicode-org/icu4x
-  Texts: [147]
+  Texts: [148]
 
 tinyvec
   License: MIT
   Declared: Zlib OR Apache-2.0 OR MIT
   URL: https://github.com/Lokathor/tinyvec
-  Texts: [108]
+  Texts: [109]
 
 tinyvec_macros
   License: MIT
   Declared: MIT OR Apache-2.0 OR Zlib
   URL: https://github.com/Soveu/tinyvec_macros
-  Texts: [234]
+  Texts: [235]
 
 tokio
   License: MIT
   URL: https://github.com/tokio-rs/tokio
-  Texts: [235]
+  Texts: [236]
 
 tokio-rustls
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rustls/tokio-rustls
-  Texts: [236]
+  Texts: [237]
 
 tokio-util
   License: MIT
   URL: https://github.com/tokio-rs/tokio
-  Texts: [235]
+  Texts: [236]
 
 toml
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/toml-rs/toml
-  Texts: [209]
+  Texts: [210]
 
 toml_datetime
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/toml-rs/toml
-  Texts: [209]
+  Texts: [210]
 
 toml_parser
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/toml-rs/toml
-  Texts: [209]
+  Texts: [210]
 
 toml_writer
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/toml-rs/toml
-  Texts: [209]
+  Texts: [210]
 
 tower
   License: MIT
   URL: https://github.com/tower-rs/tower
-  Texts: [237]
+  Texts: [238]
 
 tower-http
   License: MIT
   URL: https://github.com/tower-rs/tower-http
-  Texts: [238]
+  Texts: [239]
 
 tower-layer
   License: MIT
   URL: https://github.com/tower-rs/tower
-  Texts: [237]
+  Texts: [238]
 
 tower-service
   License: MIT
   URL: https://github.com/tower-rs/tower
-  Texts: [237]
+  Texts: [238]
 
 tracing
   License: MIT
   URL: https://github.com/tokio-rs/tracing
-  Texts: [239]
+  Texts: [240]
 
 tracing-core
   License: MIT
   URL: https://github.com/tokio-rs/tracing
-  Texts: [239]
+  Texts: [240]
 
 tray-icon
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/tauri-apps/tray-icon
-  Texts: [172], [240]
+  Texts: [173], [241]
 
 try-lock
   License: MIT
   URL: https://github.com/seanmonstar/try-lock
-  Texts: [241]
+  Texts: [242]
 
 typeid
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/dtolnay/typeid
-  Texts: [79]
+  Texts: [80]
 
 typenum
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/paholg/typenum
-  Texts: [242], [243]
+  Texts: [243], [244]
 
 unicode-ident
   License: MIT AND Unicode-3.0
   Declared: (MIT OR Apache-2.0) AND Unicode-3.0
   URL: https://github.com/dtolnay/unicode-ident
-  Texts: [79], [244]
+  Texts: [80], [245]
 
 unicode-segmentation
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/unicode-rs/unicode-segmentation
   Platforms: Windows
-  Texts: [137]
+  Texts: [138]
 
 untrusted
   License: ISC
   URL: https://github.com/briansmith/untrusted
-  Texts: [245]
+  Texts: [246]
 
 url
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/servo/rust-url
-  Texts: [148]
+  Texts: [149]
 
 urlpattern
   License: MIT
   URL: https://github.com/denoland/rust-urlpattern
-  Texts: [246]
+  Texts: [247]
 
 utf8_iter
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/hsivonen/utf8_iter
-  Texts: [247]
+  Texts: [248]
 
 uuid
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/uuid-rs/uuid
-  Texts: [248]
+  Texts: [249]
 
 walkdir
   License: MIT
   Declared: Unlicense/MIT
   URL: https://github.com/BurntSushi/walkdir
-  Texts: [80], [81]
+  Texts: [81], [82]
 
 want
   License: MIT
   URL: https://github.com/seanmonstar/want
-  Texts: [249]
+  Texts: [250]
 
 web-time
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/daxpedda/web-time
-  Texts: [250]
+  Texts: [251]
 
 webkit2gtk
   License: MIT
   URL: https://github.com/tauri-apps/webkit2gtk-rs
   Platforms: Linux
-  Texts: [251]
+  Texts: [252]
 
 webkit2gtk-sys
   License: MIT
   URL: https://github.com/tauri-apps/webkit2gtk-rs
   Platforms: Linux
-  Texts: [252]
+  Texts: [253]
 
 webpki-roots
   License: CDLA-Permissive-2.0
   URL: https://github.com/rustls/webpki-roots
-  Texts: [253]
+  Texts: [254]
 
 webview2-com
   License: MIT
   URL: https://github.com/wravery/webview2-rs
   Platforms: Windows
-  Texts: [254]
+  Texts: [255]
 
 webview2-com-sys
   License: MIT
   URL: https://github.com/wravery/webview2-rs
   Platforms: Windows
-  Texts: [254], [255]
+  Texts: [255], [256]
 
 web_atoms
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/servo/html5ever
-  Texts: [139]
+  Texts: [140]
 
 winapi-util
   License: MIT
   Declared: Unlicense OR MIT
   URL: https://github.com/BurntSushi/winapi-util
   Platforms: Windows
-  Texts: [80], [204]
+  Texts: [81], [205]
 
 window-vibrancy
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/tauri-plugin-vibrancy
   Platforms: Windows, macOS
-  Texts: [256], [257]
+  Texts: [257], [258]
 
 windows
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [258]
+  Texts: [259]
 
 windows-collections
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [258]
+  Texts: [259]
 
 windows-core
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [258]
+  Texts: [259]
 
 windows-future
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [258]
+  Texts: [259]
 
 windows-link
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [258]
+  Texts: [259]
 
 windows-numerics
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [258]
+  Texts: [259]
 
 windows-registry
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [258]
+  Texts: [259]
 
 windows-result
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [258]
+  Texts: [259]
 
 windows-strings
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [258]
+  Texts: [259]
 
 windows-sys
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [258]
+  Texts: [259]
 
 windows-targets
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [258]
+  Texts: [259]
 
 windows-threading
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [258]
+  Texts: [259]
 
 windows-version
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [258]
+  Texts: [259]
 
 windows_x86_64_msvc
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [258]
+  Texts: [259]
 
 winnow
   License: MIT
   URL: https://github.com/winnow-rs/winnow
-  Texts: [259]
+  Texts: [260]
 
 writeable
   License: Unicode-3.0
   URL: https://github.com/unicode-org/icu4x
-  Texts: [147]
+  Texts: [148]
 
 wry
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/wry
-  Texts: [260], [261]
+  Texts: [261], [262]
 
 x11
   License: MIT
   URL: https://github.com/AltF02/x11-rs
   Platforms: Linux
-  Texts: [79]
+  Texts: [80]
 
 x11-dl
   License: MIT
   URL: https://github.com/AltF02/x11-rs
   Platforms: Linux
-  Texts: [79]
+  Texts: [80]
 
 xattr
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/Stebalien/xattr
   Platforms: Linux, macOS
-  Texts: [231]
+  Texts: [232]
 
 yoke
   License: Unicode-3.0
   URL: https://github.com/unicode-org/icu4x
-  Texts: [147]
+  Texts: [148]
 
 zbus
   License: MIT
   URL: https://github.com/z-galaxy/zbus
   Platforms: Linux
-  Texts: [262]
+  Texts: [263]
 
 zbus_names
   License: MIT
   URL: https://github.com/z-galaxy/zbus
   Platforms: Linux
-  Texts: [262]
+  Texts: [263]
 
 zerofrom
   License: Unicode-3.0
   URL: https://github.com/unicode-org/icu4x
-  Texts: [147]
+  Texts: [148]
 
 zeroize
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/RustCrypto/utils
-  Texts: [263]
+  Texts: [264]
 
 zerotrie
   License: Unicode-3.0
   URL: https://github.com/unicode-org/icu4x
-  Texts: [147]
+  Texts: [148]
 
 zerovec
   License: Unicode-3.0
   URL: https://github.com/unicode-org/icu4x
-  Texts: [147]
+  Texts: [148]
 
 zip
   License: MIT
   URL: https://github.com/zip-rs/zip2
   Platforms: Windows
-  Texts: [264]
+  Texts: [265]
 
 zmij
   License: MIT
   URL: https://github.com/dtolnay/zmij
-  Texts: [79]
+  Texts: [80]
 
 zvariant
   License: MIT
   URL: https://github.com/z-galaxy/zbus
   Platforms: Linux
-  Texts: [262]
+  Texts: [263]
 
 zvariant_utils
   License: MIT
   URL: https://github.com/z-galaxy/zbus
   Platforms: Linux
-  Texts: [79]
+  Texts: [80]
 
 ================================================================================
 Bundled assets
@@ -2854,58 +2859,58 @@ Bundled assets
   License: MIT
   URL: https://github.com/dotnet/dotnet
   Note: Bundled in the host's runtime folder. The runtime archive's own LICENSE.txt and ThirdPartyNotices.txt ship alongside it in that folder.
-  Texts: [265]
+  Texts: [266]
 
 Android robot
   License: CC-BY-3.0
   URL: https://developer.android.com/distribute/marketing-tools/brand-guidelines
   Note: Icon of the ADB integration, taken from Dashboard Icons. The Android robot is reproduced or modified from work created and shared by Google and used according to terms described in the Creative Commons 3.0 Attribution License.
-  Texts: [266]
+  Texts: [267]
 
 Dashboard Icons
   License: Apache-2.0
   URL: https://github.com/homarr-labs/dashboard-icons
   Note: Logos of the Discord, Home Assistant, Spotify, Twitch and YouTube Music integrations, and the Windows logo marking the platforms a Store package supports. The logos are trademarks of their respective owners and are used to identify the integration or platform only.
-  Texts: [267]
+  Texts: [268]
 
 Lucide icons
   License: ISC AND MIT
   URL: https://github.com/lucide-icons/lucide
   Note: Lucide 1.47.0 icons (MIT for the icons derived from Feather), used in the configuration UI, the web client, the music player widget and the integration icons, some recoloured or placed in a badge.
-  Texts: [268]
+  Texts: [269]
 
 Macro Deck name, logo and branding assets
   License: LicenseRef-MacroDeck-Branding
-  Texts: [269]
+  Texts: [270]
 
 Product logos of integrated applications
   License: LicenseRef-Trademark-Identification
   Note: OBS Studio, Streamer.bot, Meld, Streamlabs Desktop and SinusBot logos. Trademarks of their respective owners.
-  Texts: [270]
+  Texts: [271]
 
 Simple Icons (Discord glyph)
   License: CC0-1.0
   URL: https://github.com/simple-icons/simple-icons
   Note: Discord glyph of the configuration UI and web client icon set.
-  Texts: [119]
+  Texts: [120]
 
 Simple Icons (operating system logos)
   License: CC0-1.0
   URL: https://github.com/simple-icons/simple-icons
   Note: Apple and Linux logos marking the platforms a Store package supports. The logos are trademarks of their respective owners and are used to identify the platform only.
-  Texts: [119]
+  Texts: [120]
 
 Weather icons (Makin-Things/weather-icons)
   License: MIT
   URL: https://github.com/Makin-Things/weather-icons
   Note: Weather widget icons, embedded in the host. Artwork (c) ammap.com.
-  Texts: [271]
+  Texts: [272]
 
 WebNowPlaying icon
   License: MIT
   URL: https://github.com/keifufu/WebNowPlaying
   Note: The WebNowPlaying integration icon is adapted from the WebNowPlaying logo.
-  Texts: [272]
+  Texts: [273]
 
 ================================================================================
 License and notice texts
@@ -10403,7 +10408,54 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[58] parse5
+[58] marked
+--------------------------------------------------------------------------------
+# License information
+
+## Contribution License Agreement
+
+If you contribute code to this project, you are implicitly allowing your code
+to be distributed under the MIT license. You are also implicitly verifying that
+all code is your original work. `</legalese>`
+
+## Marked
+
+Copyright (c) 2018+, MarkedJS (https://github.com/markedjs/)
+Copyright (c) 2011-2018, Christopher Jeffrey (https://github.com/chjj/)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+## Markdown
+
+Copyright © 2004, John Gruber
+http://daringfireball.net/
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+* Neither the name “Markdown” nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+This software is provided by the copyright holders and contributors “as is” and any express or implied warranties, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose are disclaimed. In no event shall the copyright owner or contributors be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use of this software, even if advised of the possibility of such damage.
+
+[59] parse5
 --------------------------------------------------------------------------------
 Copyright (c) 2013-2019 Ivan Nikulin (ifaaan@gmail.com, https://github.com/inikulin)
 
@@ -10425,7 +10477,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[59] performance-now
+[60] performance-now
 --------------------------------------------------------------------------------
 Copyright (c) 2013 Braveg1rl
 
@@ -10435,7 +10487,7 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[60] pngjs
+[61] pngjs
 --------------------------------------------------------------------------------
 pngjs2 original work Copyright (c) 2015 Luke Page & Original Contributors
 pngjs derived work Copyright (c) 2012 Kuba Niegowski
@@ -10458,7 +10510,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[61] qrcode
+[62] qrcode
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -10470,7 +10522,7 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[62] raf
+[63] raf
 --------------------------------------------------------------------------------
 Copyright 2013 Chris Dickinson <chris@neversaw.us>
 
@@ -10480,7 +10532,7 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[63] regenerator-runtime
+[64] regenerator-runtime
 --------------------------------------------------------------------------------
 MIT License
 
@@ -10504,7 +10556,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[64] require-directory
+[65] require-directory
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -10529,7 +10581,7 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[65] require-main-filename, set-blocking, yargs-parser
+[66] require-main-filename, set-blocking, yargs-parser
 --------------------------------------------------------------------------------
 Copyright (c) 2016, Contributors
 
@@ -10546,7 +10598,7 @@ OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
 WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-[66] resize-observer-polyfill
+[67] resize-observer-polyfill
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -10570,7 +10622,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[67] rxjs
+[68] rxjs
 --------------------------------------------------------------------------------
                                Apache License
                          Version 2.0, January 2004
@@ -10774,7 +10826,7 @@ SOFTWARE.
  See the License for the specific language governing permissions and
  limitations under the License.
 
-[68] style-mod
+[69] style-mod
 --------------------------------------------------------------------------------
 Copyright (C) 2018 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
 
@@ -10796,7 +10848,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[69] tslib
+[70] tslib
 --------------------------------------------------------------------------------
 Copyright (c) Microsoft Corporation.
 
@@ -10811,7 +10863,7 @@ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 
-[70] uri-js
+[71] uri-js
 --------------------------------------------------------------------------------
 Copyright 2011 Gary Court. All rights reserved.
 
@@ -10825,7 +10877,7 @@ THIS SOFTWARE IS PROVIDED BY GARY COURT "AS IS" AND ANY EXPRESS OR IMPLIED WARRA
 
 The views and conclusions contained in the software and documentation are those of the authors and should not be interpreted as representing official policies, either expressed or implied, of Gary Court.
 
-[71] uuid
+[72] uuid
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -10837,7 +10889,7 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[72] valid-url
+[73] valid-url
 --------------------------------------------------------------------------------
 Copyright (c) 2013 Odysseas Tsatalos and oDesk Corporation
 
@@ -10860,7 +10912,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[73] w3c-keyname
+[74] w3c-keyname
 --------------------------------------------------------------------------------
 Copyright (C) 2016 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
 
@@ -10882,7 +10934,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[74] whatwg-fetch
+[75] whatwg-fetch
 --------------------------------------------------------------------------------
 Copyright (c) 2014-2023 GitHub, Inc.
 
@@ -10905,7 +10957,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[75] which-module
+[76] which-module
 --------------------------------------------------------------------------------
 Copyright (c) 2016, Contributors
 
@@ -10921,7 +10973,7 @@ OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
 TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
 
-[76] y18n
+[77] y18n
 --------------------------------------------------------------------------------
 Copyright (c) 2015, Contributors
 
@@ -10937,7 +10989,7 @@ OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
 TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
 
-[77] yargs
+[78] yargs
 --------------------------------------------------------------------------------
 MIT License
 
@@ -10961,7 +11013,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[78] zod
+[79] zod
 --------------------------------------------------------------------------------
 MIT License
 
@@ -10985,7 +11037,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[79] adler2, anyhow, async-channel, async-executor, async-io, async-lock, async-process, async-signal, async-task, atomic-waker, blocking, camino, cargo-platform, cargo_metadata, concurrent-queue, dtoa, dyn-clone, endi, erased-serde, event-listener, event-listener-strategy, fastrand, futures-lite, itoa, linux-raw-sys, once_cell, ordered-stream, parking, pin-project-lite, piper, polling, proc-macro2, quote, ref-cast, rustc-hash, rustix, semver, serde, serde-untagged, serde_core, serde_json, servo_arc, syn, thiserror, typeid, unicode-ident, x11, x11-dl, zmij, zvariant_utils
+[80] adler2, anyhow, async-channel, async-executor, async-io, async-lock, async-process, async-signal, async-task, atomic-waker, blocking, camino, cargo-platform, cargo_metadata, concurrent-queue, dtoa, dyn-clone, endi, erased-serde, event-listener, event-listener-strategy, fastrand, futures-lite, itoa, linux-raw-sys, once_cell, ordered-stream, parking, pin-project-lite, piper, polling, proc-macro2, quote, ref-cast, rustc-hash, rustix, semver, serde, serde-untagged, serde_core, serde_json, servo_arc, syn, thiserror, typeid, unicode-ident, x11, x11-dl, zmij, zvariant_utils
 --------------------------------------------------------------------------------
 Permission is hereby granted, free of charge, to any
 person obtaining a copy of this software and associated
@@ -11011,13 +11063,13 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[80] aho-corasick, byteorder, memchr, same-file, walkdir, winapi-util
+[81] aho-corasick, byteorder, memchr, same-file, walkdir, winapi-util
 --------------------------------------------------------------------------------
 This project is dual-licensed under the Unlicense and MIT licenses.
 
 You may use this code under the terms of either license.
 
-[81] aho-corasick, byteorder, byteorder-lite, memchr, walkdir
+[82] aho-corasick, byteorder, byteorder-lite, memchr, walkdir
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -11041,7 +11093,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[82] alloc-no-stdlib, brotli, brotli-decompressor
+[83] alloc-no-stdlib, brotli, brotli-decompressor
 --------------------------------------------------------------------------------
 Copyright (c) 2016 Dropbox, Inc.
 All rights reserved.
@@ -11056,7 +11108,7 @@ Redistribution and use in source and binary forms, with or without modification,
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-[83] alloc-stdlib
+[84] alloc-stdlib
 --------------------------------------------------------------------------------
 Copyright holders: Daniel Reiter Horn <danielrh@dropbox.com>
 
@@ -11087,7 +11139,7 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-[84] async-broadcast
+[85] async-broadcast
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -11111,7 +11163,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[85] atk, atk-sys, cairo-rs, cairo-sys-rs, gdk, gdk-pixbuf, gdk-pixbuf-sys, gdk-sys, gdkwayland-sys, gdkx11, gdkx11-sys, gio, gio-sys, glib, glib-sys, gobject-sys, gtk, gtk-sys, pango, pango-sys
+[86] atk, atk-sys, cairo-rs, cairo-sys-rs, gdk, gdk-pixbuf, gdk-pixbuf-sys, gdk-sys, gdkwayland-sys, gdkx11, gdkx11-sys, gio, gio-sys, glib, glib-sys, gobject-sys, gtk, gtk-sys, pango, pango-sys
 --------------------------------------------------------------------------------
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -11131,7 +11183,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[86] atomic-waker, futures-lite
+[87] atomic-waker, futures-lite
 --------------------------------------------------------------------------------
 ===============================================================================
 
@@ -11179,7 +11231,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[87] base64
+[88] base64
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -11203,7 +11255,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[88] bit-set, bit-vec
+[89] bit-set, bit-vec
 --------------------------------------------------------------------------------
 Copyright (c) 2023 The Rust Project Developers
 
@@ -11231,7 +11283,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[89] bitflags, glob, log, num-traits, regex, regex-automata, regex-syntax
+[90] bitflags, glob, log, num-traits, regex, regex-automata, regex-syntax
 --------------------------------------------------------------------------------
 Copyright (c) 2014 The Rust Project Developers
 
@@ -11259,7 +11311,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[90] block-buffer
+[91] block-buffer
 --------------------------------------------------------------------------------
 Copyright (c) 2018-2019 The RustCrypto Project Developers
 
@@ -11287,7 +11339,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[91] block2, objc2, objc2-encode, objc2-exception-helper
+[92] block2, objc2, objc2-encode, objc2-exception-helper
 --------------------------------------------------------------------------------
 Copyright holders: Mads Marquart <mads@marquart.dk>
 
@@ -11311,7 +11363,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[92] brotli
+[93] brotli
 --------------------------------------------------------------------------------
 Copyright (c) 2009, 2010, 2013-2016 by the Brotli Authors.
 
@@ -11333,7 +11385,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[93] bs58
+[94] bs58
 --------------------------------------------------------------------------------
 MIT License
 Copyright (c) 2016 The roaring-rs developers.
@@ -11356,7 +11408,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[94] bytemuck
+[95] bytemuck
 --------------------------------------------------------------------------------
 MIT License
 
@@ -11368,7 +11420,7 @@ The above copyright notice and this permission notice (including the next paragr
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[95] bytes
+[96] bytes
 --------------------------------------------------------------------------------
 Copyright (c) 2018 Carl Lerche
 
@@ -11396,7 +11448,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[96] cfb
+[97] cfb
 --------------------------------------------------------------------------------
 MIT License
 
@@ -11420,7 +11472,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[97] cfg-if, filetime, openssl-probe, socket2
+[98] cfg-if, filetime, openssl-probe, socket2
 --------------------------------------------------------------------------------
 Copyright (c) 2014 Alex Crichton
 
@@ -11448,7 +11500,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[98] chacha20
+[99] chacha20
 --------------------------------------------------------------------------------
 Copyright (c) 2019-2026 The RustCrypto Project Developers
 
@@ -11476,7 +11528,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[99] chrono
+[100] chrono
 --------------------------------------------------------------------------------
 Rust-chrono is dual-licensed under The MIT License [1] and
 Apache 2.0 License [2]. Copyright (c) 2014--2026, Kang Seonghoon and
@@ -11716,7 +11768,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ~~~~
 
-[100] cookie
+[101] cookie
 --------------------------------------------------------------------------------
 Copyright (c) 2017 Sergio Benitez
 Copyright (c) 2014 Alex Crichton
@@ -11745,7 +11797,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[101] core-foundation, core-foundation-sys, core-graphics, core-graphics-types, string_cache
+[102] core-foundation, core-foundation-sys, core-graphics, core-graphics-types, string_cache
 --------------------------------------------------------------------------------
 Copyright (c) 2012-2013 Mozilla Foundation
 
@@ -11773,7 +11825,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[102] cpufeatures
+[103] cpufeatures
 --------------------------------------------------------------------------------
 Copyright (c) 2020-2025 The RustCrypto Project Developers
 
@@ -11801,7 +11853,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[103] crc32fast
+[104] crc32fast
 --------------------------------------------------------------------------------
 MIT License
 
@@ -11825,7 +11877,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[104] crossbeam-channel, crossbeam-utils
+[105] crossbeam-channel, crossbeam-utils
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -11855,7 +11907,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[105] crossbeam-channel
+[106] crossbeam-channel
 --------------------------------------------------------------------------------
 ===============================================================================
 
@@ -12450,7 +12502,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-[106] crypto-common
+[107] crypto-common
 --------------------------------------------------------------------------------
 Copyright (c) 2021 RustCrypto Developers
 
@@ -12478,7 +12530,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[107] cssparser, dtoa-short
+[108] cssparser, dtoa-short
 --------------------------------------------------------------------------------
 Mozilla Public License Version 2.0
 ==================================
@@ -12854,7 +12906,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-[108] ctor, tinyvec
+[109] ctor, tinyvec
 --------------------------------------------------------------------------------
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -12862,7 +12914,7 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[109] dbus, libdbus-sys
+[110] dbus, libdbus-sys
 --------------------------------------------------------------------------------
 Copyright (c) 2014-2018 David Henningsson <diwic@ubuntu.com> and other contributors
 
@@ -12884,7 +12936,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[110] deranged
+[111] deranged
 --------------------------------------------------------------------------------
 Copyright (c) 2024 Jacob Pratt et al.
 
@@ -12906,7 +12958,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[111] derive_more
+[112] derive_more
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -12930,7 +12982,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[112] digest, hmac
+[113] digest, hmac
 --------------------------------------------------------------------------------
 Copyright (c) 2017 Artyom Pavlov
 
@@ -12958,7 +13010,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[113] dirs, dirs-sys
+[114] dirs, dirs-sys
 --------------------------------------------------------------------------------
 Copyright (c) 2018-2019 dirs-rs contributors
 
@@ -12980,7 +13032,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[114] dispatch2
+[115] dispatch2
 --------------------------------------------------------------------------------
 Copyright holders: Mads Marquart <mads@marquart.dk>, Mary <mary@mary.zone>
 
@@ -13004,7 +13056,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[115] dlopen2
+[116] dlopen2
 --------------------------------------------------------------------------------
 Copyright holders: Szymon Wieloch <szymon.wieloch@gmail.com>, Ahmed Masud <ahmed.masud@saf.ai>, OpenByte <development.openbyte@gmail.com>
 
@@ -13028,7 +13080,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[116] dom_query
+[117] dom_query
 --------------------------------------------------------------------------------
 MIT License
 
@@ -13058,7 +13110,7 @@ This project contains portions of code and architectural concepts originally
 derived from the "nipper" project (https://github.com/importcjj/nipper),
 developed by Chen Jiaju, licensed under the MIT License and the Apache License 2.0 (dual licensed).
 
-[117] dpi, tao
+[118] dpi, tao
 --------------------------------------------------------------------------------
 Apache License
                            Version 2.0, January 2004
@@ -13262,7 +13314,7 @@ Apache License
    See the License for the specific language governing permissions and
    limitations under the License.
 
-[118] dpi
+[119] dpi
 --------------------------------------------------------------------------------
 rust-lang/libm as a whole is available for use under the MIT license:
 
@@ -13316,7 +13368,7 @@ and labelled as such in comments in the individual source files. All
 have been licensed under extremely permissive terms.
 ------------------------------------------------------------------------------
 
-[119] dunce, Simple Icons (Discord glyph), Simple Icons (operating system logos)
+[120] dunce, Simple Icons (Discord glyph), Simple Icons (operating system logos)
 --------------------------------------------------------------------------------
 Creative Commons Legal Code
 
@@ -13440,7 +13492,7 @@ express Statement of Purpose.
     party to this document and has no duty or obligation with respect to
     this CC0 or use of the Work.
 
-[120] embed_plist
+[121] embed_plist
 --------------------------------------------------------------------------------
 MIT License
 
@@ -13464,7 +13516,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[121] enumflags2
+[122] enumflags2
 --------------------------------------------------------------------------------
 Copyright (c) 2017-2023 Maik Klein, Maja Kądziołka
 
@@ -13492,7 +13544,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[122] equivalent
+[123] equivalent
 --------------------------------------------------------------------------------
 Copyright (c) 2016--2023
 
@@ -13520,7 +13572,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[123] errno
+[124] errno
 --------------------------------------------------------------------------------
 Copyright (c) 2014 Chris Wong
 
@@ -13548,7 +13600,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[124] fdeflate, image
+[125] fdeflate, image
 --------------------------------------------------------------------------------
 MIT License
 
@@ -13576,7 +13628,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[125] field-offset
+[126] field-offset
 --------------------------------------------------------------------------------
 MIT License
 
@@ -13600,7 +13652,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[126] flate2
+[127] flate2
 --------------------------------------------------------------------------------
 Copyright (c) 2014-2026 Alex Crichton
 
@@ -13628,7 +13680,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[127] fnv
+[128] fnv
 --------------------------------------------------------------------------------
 Copyright (c) 2017 Contributors
 
@@ -13656,7 +13708,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[128] foldhash
+[129] foldhash
 --------------------------------------------------------------------------------
 Copyright (c) 2024 Orson Peters
 
@@ -13678,7 +13730,7 @@ the following restrictions:
 
 3. This notice may not be removed or altered from any source distribution.
 
-[129] foreign-types, foreign-types-shared
+[130] foreign-types, foreign-types-shared
 --------------------------------------------------------------------------------
 Copyright (c) 2017 The foreign-types Developers
 
@@ -13700,7 +13752,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[130] form_urlencoded
+[131] form_urlencoded
 --------------------------------------------------------------------------------
 Copyright (c) 2013-2016 The rust-url developers
 
@@ -13728,7 +13780,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[131] futures-channel, futures-core, futures-executor, futures-io, futures-sink, futures-task, futures-util
+[132] futures-channel, futures-core, futures-executor, futures-io, futures-sink, futures-task, futures-util
 --------------------------------------------------------------------------------
 Copyright (c) 2016 Alex Crichton
 Copyright (c) 2017 The Tokio Authors
@@ -13757,7 +13809,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[132] generic-array
+[133] generic-array
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -13781,7 +13833,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[133] getrandom
+[134] getrandom
 --------------------------------------------------------------------------------
 Copyright (c) 2018-2024 The rust-random Project Developers
 Copyright (c) 2014 The Rust Project Developers
@@ -13810,7 +13862,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[134] getrandom
+[135] getrandom
 --------------------------------------------------------------------------------
 Copyright (c) 2018-2025 The rust-random Project Developers
 Copyright (c) 2014 The Rust Project Developers
@@ -13839,7 +13891,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[135] getrandom
+[136] getrandom
 --------------------------------------------------------------------------------
 Copyright (c) 2018-2026 The rust-random Project Developers
 Copyright (c) 2014 The Rust Project Developers
@@ -13868,7 +13920,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[136] hashbrown
+[137] hashbrown
 --------------------------------------------------------------------------------
 Copyright (c) 2016 Amanieu d'Antras
 
@@ -13896,7 +13948,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[137] heck, unicode-segmentation
+[138] heck, unicode-segmentation
 --------------------------------------------------------------------------------
 Copyright (c) 2015 The Rust Project Developers
 
@@ -13924,7 +13976,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[138] hex
+[139] hex
 --------------------------------------------------------------------------------
 Copyright (c) 2013-2014 The Rust Project Developers.
 Copyright (c) 2015-2020 The rust-hex Developers
@@ -13947,7 +13999,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[139] html5ever, markup5ever, web_atoms
+[140] html5ever, markup5ever, web_atoms
 --------------------------------------------------------------------------------
 Copyright (c) 2014 The html5ever Project Developers
 
@@ -13975,7 +14027,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[140] http
+[141] http
 --------------------------------------------------------------------------------
 Copyright (c) 2017 http-rs authors
 
@@ -14003,7 +14055,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[141] http-body, http-body-util
+[142] http-body, http-body-util
 --------------------------------------------------------------------------------
 Copyright (c) 2019-2026 Sean McArthur & Hyper Contributors
 
@@ -14031,7 +14083,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[142] httparse
+[143] httparse
 --------------------------------------------------------------------------------
 Copyright (c) 2015-2025 Sean McArthur
 
@@ -14053,7 +14105,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[143] hyper
+[144] hyper
 --------------------------------------------------------------------------------
 Copyright (c) 2014-2026 Sean McArthur
 
@@ -14075,7 +14127,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[144] hyper-rustls, rustls, rustls-native-certs
+[145] hyper-rustls, rustls, rustls-native-certs
 --------------------------------------------------------------------------------
 Copyright (c) 2016 Joseph Birr-Pixton <jpixton@gmail.com>
 
@@ -14103,7 +14155,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[145] hyper-util
+[146] hyper-util
 --------------------------------------------------------------------------------
 Copyright (c) 2023-2025 Sean McArthur
 
@@ -14125,7 +14177,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[146] iana-time-zone
+[147] iana-time-zone
 --------------------------------------------------------------------------------
 Copyright (c) 2020 Andrew D. Straw
 
@@ -14153,7 +14205,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[147] icu_collections, icu_locale_core, icu_normalizer, icu_normalizer_data, icu_properties, icu_properties_data, icu_provider, litemap, potential_utf, tinystr, writeable, yoke, zerofrom, zerotrie, zerovec
+[148] icu_collections, icu_locale_core, icu_normalizer, icu_normalizer_data, icu_properties, icu_properties_data, icu_provider, litemap, potential_utf, tinystr, writeable, yoke, zerofrom, zerotrie, zerovec
 --------------------------------------------------------------------------------
 UNICODE LICENSE V3
 
@@ -14202,7 +14254,7 @@ SPDX-License-Identifier: Unicode-3.0
 Portions of ICU4X may have been adapted from ICU4C and/or ICU4J.
 ICU 1.8.1 to ICU 57.1 © 1995-2016 International Business Machines Corporation and others.
 
-[148] idna, percent-encoding, url
+[149] idna, percent-encoding, url
 --------------------------------------------------------------------------------
 Copyright (c) 2013-2025 The rust-url developers
 
@@ -14230,7 +14282,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[149] idna_adapter
+[150] idna_adapter
 --------------------------------------------------------------------------------
 Copyright (c) The rust-url developers
 
@@ -14258,7 +14310,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[150] indexmap
+[151] indexmap
 --------------------------------------------------------------------------------
 Copyright (c) 2016--2017
 
@@ -14286,7 +14338,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[151] infer
+[152] infer
 --------------------------------------------------------------------------------
 MIT License
 
@@ -14310,7 +14362,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[152] ipnet
+[153] ipnet
 --------------------------------------------------------------------------------
 Copyright 2017 Juniper Networks, Inc.
 
@@ -14320,7 +14372,7 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[153] is-docker, is-wsl
+[154] is-docker, is-wsl
 --------------------------------------------------------------------------------
 MIT License
 
@@ -14344,7 +14396,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[154] javascriptcore-rs
+[155] javascriptcore-rs
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -14369,7 +14421,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[155] javascriptcore-rs-sys, soup3, soup3-sys
+[156] javascriptcore-rs-sys, soup3, soup3-sys
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -14393,7 +14445,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[156] json-patch
+[157] json-patch
 --------------------------------------------------------------------------------
 MIT License
 
@@ -14417,7 +14469,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[157] jsonptr
+[158] jsonptr
 --------------------------------------------------------------------------------
 MIT License
 
@@ -14441,7 +14493,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[158] keyboard-types
+[159] keyboard-types
 --------------------------------------------------------------------------------
 Copyright (c) 2017 Pyfisch
 
@@ -14463,7 +14515,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[159] libappindicator
+[160] libappindicator
 --------------------------------------------------------------------------------
 MIT License
 
@@ -14488,7 +14540,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[160] libappindicator-sys
+[161] libappindicator-sys
 --------------------------------------------------------------------------------
 Copyright holders: not stated in package metadata; see the package
 
@@ -14512,7 +14564,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[161] libc
+[162] libc
 --------------------------------------------------------------------------------
 Copyright (c) The Rust Project Developers
 
@@ -14540,7 +14592,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[162] libloading
+[163] libloading
 --------------------------------------------------------------------------------
 Copyright © 2015, Simonas Kazlauskas
 
@@ -14555,7 +14607,7 @@ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF 
 NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
 
-[163] lock_api, parking_lot, parking_lot_core
+[164] lock_api, parking_lot, parking_lot_core
 --------------------------------------------------------------------------------
 Copyright (c) 2016 The Rust Project Developers
 
@@ -14583,7 +14635,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[164] lru-slab
+[165] lru-slab
 --------------------------------------------------------------------------------
 Copyright (c) 2024 The lru-slab Developers
 
@@ -14593,7 +14645,7 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[165] mac-notification-sys
+[166] mac-notification-sys
 --------------------------------------------------------------------------------
 Copyright holders: Felix Döring <development@felixdoering.com>, Hendrik Sollich <hendrik@hoodie.de>
 
@@ -14617,7 +14669,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[166] memoffset
+[167] memoffset
 --------------------------------------------------------------------------------
 Copyright (c) 2017 Gilad Naaman
 
@@ -14639,7 +14691,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[167] mime
+[168] mime
 --------------------------------------------------------------------------------
 Copyright (c) 2014 Sean McArthur
 
@@ -14661,7 +14713,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[168] minisign-verify
+[169] minisign-verify
 --------------------------------------------------------------------------------
 Copyright (c) 2019-2025 Frank Denis
 
@@ -14723,7 +14775,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[169] miniz_oxide
+[170] miniz_oxide
 --------------------------------------------------------------------------------
 MIT License
 
@@ -14750,7 +14802,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[170] mio
+[171] mio
 --------------------------------------------------------------------------------
 Copyright (c) 2014 Carl Lerche and other MIO contributors
 
@@ -14772,7 +14824,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[171] moxcms, pxfm
+[172] moxcms, pxfm
 --------------------------------------------------------------------------------
 Copyright (c) Radzivon Bartoshyk. All rights reserved.
 
@@ -14801,7 +14853,7 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-[172] muda, tray-icon
+[173] muda, tray-icon
 --------------------------------------------------------------------------------
 MIT License
 
@@ -14825,7 +14877,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[173] muda
+[174] muda
 --------------------------------------------------------------------------------
 SPDXVersion: SPDX-2.1
 DataLicense: CC0-1.0
@@ -14847,7 +14899,7 @@ PackageDownloadLocation: git+https://github.com/tauri-apps/muda.git
 PackageDownloadLocation: git+ssh://github.com/tauri-apps/muda.git
 Creator: Person: Daniel Thompson-Yvetot
 
-[174] new_debug_unreachable
+[175] new_debug_unreachable
 --------------------------------------------------------------------------------
 Copyright (c) 2015 Jonathan Reem
 
@@ -14875,7 +14927,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[175] notify-rust
+[176] notify-rust
 --------------------------------------------------------------------------------
 MIT License
 
@@ -14899,7 +14951,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[176] num-conv
+[177] num-conv
 --------------------------------------------------------------------------------
 Copyright (c) Jacob Pratt
 
@@ -14921,7 +14973,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[177] objc2-app-kit, objc2-core-foundation, objc2-core-graphics, objc2-foundation, objc2-io-surface, objc2-osa-kit, objc2-quartz-core, objc2-web-kit
+[178] objc2-app-kit, objc2-core-foundation, objc2-core-graphics, objc2-foundation, objc2-io-surface, objc2-osa-kit, objc2-quartz-core, objc2-web-kit
 --------------------------------------------------------------------------------
 Copyright holders: not stated in package metadata; see https://github.com/madsmtm/objc2
 
@@ -14945,7 +14997,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[178] open
+[179] open
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 =====================
@@ -14973,7 +15025,7 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-[179] option-ext
+[180] option-ext
 --------------------------------------------------------------------------------
 Mozilla Public License Version 2.0
 ==================================
@@ -15349,7 +15401,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-[180] osakit
+[181] osakit
 --------------------------------------------------------------------------------
 Copyright (c) 2024 Marat Dulin
 
@@ -15377,7 +15429,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[181] parking
+[182] parking
 --------------------------------------------------------------------------------
 ===============================================================================
 
@@ -15389,7 +15441,7 @@ http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
 option. All files in the project carrying such notice may not be
 copied, modified, or distributed except according to those terms.
 
-[182] phf, phf_shared
+[183] phf, phf_shared
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -15412,7 +15464,7 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[183] plist
+[184] plist
 --------------------------------------------------------------------------------
 Copyright (c) 2015 Edward Barnard
 
@@ -15434,7 +15486,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[184] png
+[185] png
 --------------------------------------------------------------------------------
 Copyright (c) 2015 nwin
 
@@ -15462,7 +15514,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[185] powerfmt
+[186] powerfmt
 --------------------------------------------------------------------------------
 Copyright (c) 2023 Jacob Pratt et al.
 
@@ -15484,7 +15536,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[186] precomputed-hash
+[187] precomputed-hash
 --------------------------------------------------------------------------------
 MIT License
 
@@ -15508,7 +15560,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[187] quick-xml
+[188] quick-xml
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -15532,7 +15584,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[188] quinn, quinn-proto, quinn-udp
+[189] quinn, quinn-proto, quinn-udp
 --------------------------------------------------------------------------------
 Copyright (c) 2018 The quinn Developers
 
@@ -15542,7 +15594,7 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[189] rand
+[190] rand
 --------------------------------------------------------------------------------
 Copyright 2018 Developers of the Rand project
 Copyright (c) 2014 The Rust Project Developers
@@ -15571,7 +15623,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[190] rand_core
+[191] rand_core
 --------------------------------------------------------------------------------
 Copyright (c) 2018-2026 The Rand Project Developers
 
@@ -15599,7 +15651,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[191] rand_pcg
+[192] rand_pcg
 --------------------------------------------------------------------------------
 Copyright (c) 2014-2017 Melissa O'Neill and PCG Project contributors
 Copyright 2018 Developers of the Rand project
@@ -15628,7 +15680,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[192] raw-window-handle
+[193] raw-window-handle
 --------------------------------------------------------------------------------
 MIT License
 
@@ -15652,7 +15704,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[193] reqwest
+[194] reqwest
 --------------------------------------------------------------------------------
 Copyright (c) 2016-2025 Sean McArthur
 
@@ -15674,7 +15726,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[194] reqwest
+[195] reqwest
 --------------------------------------------------------------------------------
 Copyright (c) 2016-2026 Sean McArthur
 
@@ -15696,7 +15748,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[195] rfd
+[196] rfd
 --------------------------------------------------------------------------------
 MIT License
 
@@ -15720,7 +15772,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[196] ring
+[197] ring
 --------------------------------------------------------------------------------
 *ring* uses an "ISC" license, like BoringSSL used to use, for new code
 files. See LICENSE-other-bits for the text of that license.
@@ -15732,7 +15784,7 @@ license. In each case, the license info is at the top of the file.
 See src/polyfill/once_cell/LICENSE-APACHE and src/polyfill/once_cell/LICENSE-MIT
 for the license to code that was sourced from the once_cell project.
 
-[197] ring
+[198] ring
 --------------------------------------------------------------------------------
                                  Apache License
                            Version 2.0, January 2004
@@ -16004,7 +16056,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-[198] ring
+[199] ring
 --------------------------------------------------------------------------------
 Copyright 2015-2025 Brian Smith.
 
@@ -16020,7 +16072,7 @@ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
 OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-[199] rustls-native-certs
+[200] rustls-native-certs
 --------------------------------------------------------------------------------
 Rustls is distributed under the following three licenses:
 
@@ -16032,7 +16084,7 @@ These are included as LICENSE-APACHE, LICENSE-MIT and LICENSE-ISC
 respectively.  You may use this software under the terms of any
 of these licenses, at your option.
 
-[200] rustls-pki-types
+[201] rustls-pki-types
 --------------------------------------------------------------------------------
 Copyright (c) 2023 Dirkjan Ochtman <dirkjan@ochtman.nl>
 
@@ -16060,7 +16112,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[201] rustls-platform-verifier
+[202] rustls-platform-verifier
 --------------------------------------------------------------------------------
 MIT License
 
@@ -16084,7 +16136,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[202] rustls-webpki
+[203] rustls-webpki
 --------------------------------------------------------------------------------
 Except as otherwise noted, this project is licensed under the following
 (ISC-style) terms:
@@ -16106,7 +16158,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 The files under third-party/chromium are licensed as described in
 third-party/chromium/LICENSE.
 
-[203] ryu
+[204] ryu
 --------------------------------------------------------------------------------
                               Apache License
                         Version 2.0, January 2004
@@ -16285,7 +16337,7 @@ TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 
 END OF TERMS AND CONDITIONS
 
-[204] same-file, winapi-util
+[205] same-file, winapi-util
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -16309,7 +16361,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[205] schemars
+[206] schemars
 --------------------------------------------------------------------------------
 MIT License
 
@@ -16333,7 +16385,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[206] scopeguard
+[207] scopeguard
 --------------------------------------------------------------------------------
 Copyright (c) 2016-2019 Ulrik Sverdrup "bluss" and scopeguard developers
 
@@ -16361,7 +16413,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[207] security-framework, security-framework-sys
+[208] security-framework, security-framework-sys
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -16384,7 +16436,7 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[208] selectors
+[209] selectors
 --------------------------------------------------------------------------------
 Copyright holders: The Servo Project Developers
 
@@ -16762,7 +16814,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-[209] serde_spanned, toml, toml_datetime, toml_parser, toml_writer
+[210] serde_spanned, toml, toml_datetime, toml_parser, toml_writer
 --------------------------------------------------------------------------------
 Copyright (c) Individual contributors
 
@@ -16784,7 +16836,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[210] serde_urlencoded
+[211] serde_urlencoded
 --------------------------------------------------------------------------------
 Copyright (c) 2016 Anthony Ramine
 
@@ -16812,7 +16864,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[211] serde_with
+[212] serde_with
 --------------------------------------------------------------------------------
 Copyright (c) 2015
 
@@ -16840,7 +16892,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[212] serialize-to-javascript
+[213] serialize-to-javascript
 --------------------------------------------------------------------------------
 MIT License
 
@@ -16864,7 +16916,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[213] sha2
+[214] sha2
 --------------------------------------------------------------------------------
 Copyright (c) 2006-2009 Graydon Hoare
 Copyright (c) 2009-2013 Mozilla Foundation
@@ -16894,7 +16946,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[214] signal-hook-registry
+[215] signal-hook-registry
 --------------------------------------------------------------------------------
 Copyright (c) 2017 tokio-jsonrpc developers
 
@@ -16922,7 +16974,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[215] simd-adler32
+[216] simd-adler32
 --------------------------------------------------------------------------------
 MIT License
 
@@ -16946,7 +16998,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[216] siphasher
+[217] siphasher
 --------------------------------------------------------------------------------
 Copyright 2012-2016 The Rust Project Developers.
 Copyright 2016-2026 Frank Denis.
@@ -16956,7 +17008,7 @@ http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
 <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
 option.
 
-[217] slab
+[218] slab
 --------------------------------------------------------------------------------
 Copyright (c) 2019 Carl Lerche
 
@@ -16984,7 +17036,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[218] smallvec
+[219] smallvec
 --------------------------------------------------------------------------------
 Copyright (c) 2018 The Servo Project Developers
 
@@ -17012,7 +17064,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[219] softbuffer
+[220] softbuffer
 --------------------------------------------------------------------------------
 Copyright 2022 Kirill Chibisov
 
@@ -17034,7 +17086,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[220] stable_deref_trait
+[221] stable_deref_trait
 --------------------------------------------------------------------------------
 Copyright (c) 2017 Robert Grosse
 
@@ -17062,7 +17114,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[221] subtle
+[222] subtle
 --------------------------------------------------------------------------------
 Copyright (c) 2016-2017 Isis Agora Lovecruft, Henry de Valence. All rights reserved.
 Copyright (c) 2016-2024 Isis Agora Lovecruft. All rights reserved.
@@ -17094,7 +17146,7 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-[222] swift-rs
+[223] swift-rs
 --------------------------------------------------------------------------------
 Copyright (c) 2023 The swift-rs Developers
 
@@ -17116,7 +17168,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[223] sync_wrapper
+[224] sync_wrapper
 --------------------------------------------------------------------------------
                                  Apache License
                            Version 2.0, January 2004
@@ -17295,7 +17347,7 @@ SOFTWARE.
 
    END OF TERMS AND CONDITIONS
 
-[224] system-configuration, system-configuration-sys
+[225] system-configuration, system-configuration-sys
 --------------------------------------------------------------------------------
 Copyright (c) 2024 Mullvad VPN AB
 
@@ -17323,7 +17375,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[225] tao
+[226] tao
 --------------------------------------------------------------------------------
 SPDXVersion: SPDX-2.1
 DataLicense: CC0-1.0
@@ -17344,7 +17396,7 @@ PackageDownloadLocation: git+https://github.com/tauri-apps/tao.git
 PackageDownloadLocation: git+ssh://github.com/tauri-apps/tao.git
 Creator: Person: Daniel Thompson-Yvetot
 
-[226] tar
+[227] tar
 --------------------------------------------------------------------------------
 Copyright (c) The tar-rs Project Contributors
 
@@ -17372,7 +17424,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[227] tauri, tauri-plugin-dialog, tauri-plugin-fs, tauri-plugin-opener, tauri-plugin-updater, tauri-runtime, tauri-runtime-wry, tauri-utils, tauri-winrt-notification
+[228] tauri, tauri-plugin-dialog, tauri-plugin-fs, tauri-plugin-opener, tauri-plugin-updater, tauri-runtime, tauri-runtime-wry, tauri-utils, tauri-winrt-notification
 --------------------------------------------------------------------------------
 MIT License
 
@@ -17396,7 +17448,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[228] tauri-plugin-dialog, tauri-plugin-fs, tauri-plugin-opener, tauri-plugin-single-instance, tauri-plugin-updater
+[229] tauri-plugin-dialog, tauri-plugin-fs, tauri-plugin-opener, tauri-plugin-single-instance, tauri-plugin-updater
 --------------------------------------------------------------------------------
 SPDXVersion: SPDX-2.1
 DataLicense: CC0-1.0
@@ -17419,7 +17471,7 @@ PackageDownloadLocation: git+https://github.com/tauri-apps/tauri.git
 PackageDownloadLocation: git+ssh://github.com/tauri-apps/tauri.git
 Creator: Person: Daniel Thompson-Yvetot
 
-[229] tauri-plugin-single-instance
+[230] tauri-plugin-single-instance
 --------------------------------------------------------------------------------
 MIT License
 
@@ -17443,7 +17495,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[230] tauri-winrt-notification
+[231] tauri-winrt-notification
 --------------------------------------------------------------------------------
 SPDXVersion: SPDX-2.1
 DataLicense: CC0-1.0
@@ -17465,7 +17517,7 @@ PackageDownloadLocation: git+https://github.com/tauri-apps/winrt-notification.gi
 PackageDownloadLocation: git+ssh://github.com/tauri-apps/winrt-notification.git
 Creator: Person: Daniel Thompson-Yvetot
 
-[231] tempfile, xattr
+[232] tempfile, xattr
 --------------------------------------------------------------------------------
 Copyright (c) 2015 Steven Allen
 
@@ -17493,7 +17545,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[232] tendril
+[233] tendril
 --------------------------------------------------------------------------------
 Copyright (c) 2015 Keegan McAllister
 
@@ -17521,7 +17573,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[233] time, time-core
+[234] time, time-core
 --------------------------------------------------------------------------------
 Copyright (c) Jacob Pratt et al.
 
@@ -17543,7 +17595,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[234] tinyvec_macros
+[235] tinyvec_macros
 --------------------------------------------------------------------------------
 MIT License
 
@@ -17567,7 +17619,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[235] tokio, tokio-util
+[236] tokio, tokio-util
 --------------------------------------------------------------------------------
 MIT License
 
@@ -17591,7 +17643,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[236] tokio-rustls
+[237] tokio-rustls
 --------------------------------------------------------------------------------
 Copyright (c) 2017 quininer kel
 
@@ -17619,7 +17671,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[237] tower, tower-layer, tower-service
+[238] tower, tower-layer, tower-service
 --------------------------------------------------------------------------------
 Copyright (c) 2019 Tower Contributors
 
@@ -17647,7 +17699,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[238] tower-http
+[239] tower-http
 --------------------------------------------------------------------------------
 Copyright (c) 2019-2021 Tower Contributors
 
@@ -17675,7 +17727,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[239] tracing, tracing-core
+[240] tracing, tracing-core
 --------------------------------------------------------------------------------
 Copyright (c) 2019 Tokio Contributors
 
@@ -17703,7 +17755,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[240] tray-icon
+[241] tray-icon
 --------------------------------------------------------------------------------
 SPDXVersion: SPDX-2.1
 DataLicense: CC0-1.0
@@ -17725,7 +17777,7 @@ PackageDownloadLocation: git+https://github.com/tauri-apps/tray-icon.git
 PackageDownloadLocation: git+ssh://github.com/tauri-apps/tray-icon.git
 Creator: Person: Daniel Thompson-Yvetot
 
-[241] try-lock
+[242] try-lock
 --------------------------------------------------------------------------------
 Copyright (c) 2018-2023 Sean McArthur
 Copyright (c) 2016 Alex Crichton
@@ -17748,11 +17800,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[242] typenum
+[243] typenum
 --------------------------------------------------------------------------------
 MIT OR Apache-2.0
 
-[243] typenum
+[244] typenum
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -17776,7 +17828,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[244] unicode-ident
+[245] unicode-ident
 --------------------------------------------------------------------------------
 UNICODE LICENSE V3
 
@@ -17818,7 +17870,7 @@ not be used in advertising or otherwise to promote the sale, use or other
 dealings in these Data Files or Software without prior written
 authorization of the copyright holder.
 
-[245] untrusted
+[246] untrusted
 --------------------------------------------------------------------------------
 // Copyright 2015-2016 Brian Smith.
 //
@@ -17834,7 +17886,7 @@ authorization of the copyright holder.
 // ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 // OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-[246] urlpattern
+[247] urlpattern
 --------------------------------------------------------------------------------
 MIT License
 
@@ -17858,7 +17910,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[247] utf8_iter
+[248] utf8_iter
 --------------------------------------------------------------------------------
 Copyright Mozilla Foundation
 
@@ -17886,7 +17938,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[248] uuid
+[249] uuid
 --------------------------------------------------------------------------------
 Copyright (c) 2014 The Rust Project Developers
 Copyright (c) 2018 Ashley Mannix, Christopher Armstrong, Dylan DPC, Hunar Roop Kahlon
@@ -17915,7 +17967,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[249] want
+[250] want
 --------------------------------------------------------------------------------
 Copyright (c) 2018-2019 Sean McArthur
 
@@ -17937,7 +17989,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[250] web-time
+[251] web-time
 --------------------------------------------------------------------------------
 MIT License
 
@@ -17961,7 +18013,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[251] webkit2gtk
+[252] webkit2gtk
 --------------------------------------------------------------------------------
 Copyright (c) 2016 Boucher, Antoni <bouanto@zoho.com>
 Copyright (c) 2017-2021, The Gtk-rs Project Developers.
@@ -17984,7 +18036,7 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[252] webkit2gtk-sys
+[253] webkit2gtk-sys
 --------------------------------------------------------------------------------
 Copyright (c) 2016 Boucher, Antoni <bouanto@zoho.com>
 
@@ -18005,7 +18057,7 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[253] webpki-roots
+[254] webpki-roots
 --------------------------------------------------------------------------------
 # Community Data License Agreement - Permissive - Version 2.0
 
@@ -18069,7 +18121,7 @@ agreement.
 of Data, including for example machine learning models and models'
 insights.
 
-[254] webview2-com, webview2-com-sys
+[255] webview2-com, webview2-com-sys
 --------------------------------------------------------------------------------
 Copyright holders: not stated in package metadata; see https://github.com/wravery/webview2-rs
 
@@ -18093,7 +18145,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[255] webview2-com-sys
+[256] webview2-com-sys
 --------------------------------------------------------------------------------
 Microsoft WebView2 SDK loader (WebView2LoaderStatic.lib, statically linked on Windows)
 
@@ -18127,7 +18179,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-[256] window-vibrancy
+[257] window-vibrancy
 --------------------------------------------------------------------------------
 MIT License
 
@@ -18151,7 +18203,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[257] window-vibrancy
+[258] window-vibrancy
 --------------------------------------------------------------------------------
 SPDXVersion: SPDX-2.1
 DataLicense: CC0-1.0
@@ -18173,7 +18225,7 @@ PackageDownloadLocation: git+https://github.com/tauri-apps/window-vibrancy.git
 PackageDownloadLocation: git+ssh://github.com/tauri-apps/window-vibrancy.git
 Creator: Person: Daniel Thompson-Yvetot
 
-[258] windows, windows-collections, windows-core, windows-future, windows-link, windows-numerics, windows-registry, windows-result, windows-strings, windows-sys, windows-targets, windows-threading, windows-version, windows_x86_64_msvc
+[259] windows, windows-collections, windows-core, windows-future, windows-link, windows-numerics, windows-registry, windows-result, windows-strings, windows-sys, windows-targets, windows-threading, windows-version, windows_x86_64_msvc
 --------------------------------------------------------------------------------
     MIT License
 
@@ -18197,7 +18249,7 @@ Creator: Person: Daniel Thompson-Yvetot
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE
 
-[259] winnow
+[260] winnow
 --------------------------------------------------------------------------------
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -18218,7 +18270,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[260] wry
+[261] wry
 --------------------------------------------------------------------------------
 MIT License
 
@@ -18242,7 +18294,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[261] wry
+[262] wry
 --------------------------------------------------------------------------------
 SPDXVersion: SPDX-2.1
 DataLicense: CC0-1.0
@@ -18265,7 +18317,7 @@ PackageDownloadLocation: git+https://github.com/tauri-apps/wry.git
 PackageDownloadLocation: git+ssh://github.com/tauri-apps/wry.git
 Creator: Person: Daniel Thompson-Yvetot
 
-[262] zbus, zbus_names, zvariant
+[263] zbus, zbus_names, zvariant
 --------------------------------------------------------------------------------
 Copyright (c) 2024 Zeeshan Ali Khan & zbus contributors
 
@@ -18293,7 +18345,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[263] zeroize
+[264] zeroize
 --------------------------------------------------------------------------------
 Copyright (c) 2018-2026 The RustCrypto Project Developers
 
@@ -18321,7 +18373,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[264] zip
+[265] zip
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -18348,7 +18400,7 @@ SOFTWARE.
 Some files in the "tests/data" subdirectory of this repository are under other
 licences; see files named LICENSE.*.txt for details.
 
-[265] .NET runtime and ASP.NET Core runtime
+[266] .NET runtime and ASP.NET Core runtime
 --------------------------------------------------------------------------------
 Copyright holders: .NET Foundation and Contributors
 
@@ -18372,7 +18424,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[266] Android robot
+[267] Android robot
 --------------------------------------------------------------------------------
 Creative Commons Legal Code
 
@@ -18693,7 +18745,7 @@ Creative Commons Notice
 
     Creative Commons may be contacted at https://creativecommons.org/.
 
-[267] Dashboard Icons
+[268] Dashboard Icons
 --------------------------------------------------------------------------------
 Copyright holders: Dashboard Icons contributors
 
@@ -18899,7 +18951,7 @@ Copyright holders: Dashboard Icons contributors
    See the License for the specific language governing permissions and
    limitations under the License.
 
-[268] Lucide icons
+[269] Lucide icons
 --------------------------------------------------------------------------------
 ISC License
 
@@ -18945,7 +18997,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[269] Macro Deck name, logo and branding assets
+[270] Macro Deck name, logo and branding assets
 --------------------------------------------------------------------------------
 Macro Deck name, logo and branding assets
 
@@ -18958,13 +19010,13 @@ project and may be used only in connection with the official Macro Deck project 
 Forks and other derived products must not use the Macro Deck name or logo and must replace the branding
 assets with their own.
 
-[270] Product logos of integrated applications
+[271] Product logos of integrated applications
 --------------------------------------------------------------------------------
 These logos are trademarks of their respective owners. Macro Deck shows them only to identify the application
 an integration connects to; no endorsement by or affiliation with the owners is implied. They are not licensed
 under the Apache License 2.0.
 
-[271] Weather icons (Makin-Things/weather-icons)
+[272] Weather icons (Makin-Things/weather-icons)
 --------------------------------------------------------------------------------
 MIT License
 
@@ -18988,7 +19040,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[272] WebNowPlaying icon
+[273] WebNowPlaying icon
 --------------------------------------------------------------------------------
 Copyright holders: keifufu (2024)
 

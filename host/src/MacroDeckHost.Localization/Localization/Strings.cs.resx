@@ -459,6 +459,10 @@
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Proměnné widgetu</value>
   </data>
+  <data name="Announcements.PublishedOn" xml:space="preserve">
+    <value>Zveřejněno {date}</value>
+    <comment>[date:string]</comment>
+  </data>
   <data name="Auth.ForgotPasswordHint" xml:space="preserve">
     <value>Zapomenuté heslo? Lze ho obnovit na počítači, na kterém běží Macro Deck, v Nastavení &gt; Zabezpečení.</value>
   </data>

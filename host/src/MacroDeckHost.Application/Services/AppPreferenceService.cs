@@ -99,6 +99,7 @@ public partial class AppPreferenceService : IAppPreferenceService
 	public const string ExtensionsNotifyOnUpdatesKey = "extensions.notifyOnUpdates";
 	public const string ExtensionsRefreshIntervalMinutesKey = "extensions.refreshIntervalMinutes";
 	public const string ExtensionsAutoUpdateKey = "extensions.autoUpdate";
+	public const string AnnouncementLastSeenNumberKey = "announcements.lastSeenNumber";
 
 	public const bool DefaultExtensionsStoreEnabled = true;
 	public const bool DefaultExtensionsCheckForUpdates = true;
