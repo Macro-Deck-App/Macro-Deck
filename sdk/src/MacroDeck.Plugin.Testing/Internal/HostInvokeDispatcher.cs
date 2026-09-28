@@ -97,6 +97,8 @@ internal static class HostInvokeDispatcher
 				HostApis.Messaging when messaging is not null && pluginId is not null => messaging.Dispatch(pluginId, payload),
 				HostApis.IconPacks when payload.Operation == HostOperations.IconPacks.GetIconResource
 					=> await PluginIconAsync(context, payload, cancellationToken).ConfigureAwait(false),
+				HostApis.IconPacks when payload.Operation == HostOperations.IconPacks.GetIcon
+					=> await IconAsync(context, payload, cancellationToken).ConfigureAwait(false),
 				HostApis.Ui when uiResourceUploads is not null &&
 					payload.Operation is HostOperations.Ui.RegisterResource or HostOperations.Ui.RemoveResource
 					=> await UiResourcesAsync(context, payload, uiResourceUploads, cancellationToken)
@@ -181,6 +183,26 @@ internal static class HostInvokeDispatcher
 		catch (UiResourceException exception) when (exception.ErrorCode == UiResourceErrorCode.PluginIconNotFound)
 		{
 			return HostInvokeOutcome.Failed(ProtocolErrorCodes.PluginIconNotFound, exception.Message);
+		}
+	}
+
+	private static async Task<HostInvokeOutcome> IconAsync(
+		FakeIntegrationContext context,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken)
+	{
+		var arguments = Require<GetIconArguments>(payload);
+
+		try
+		{
+			var handle = await context.UiResources.GetIconAsync(arguments.IconId, cancellationToken)
+				.ConfigureAwait(false);
+
+			return HostInvokeOutcome.Ok(ToDto(handle));
+		}
+		catch (UiResourceException exception) when (exception.ErrorCode == UiResourceErrorCode.IconNotFound)
+		{
+			return HostInvokeOutcome.Failed(ProtocolErrorCodes.IconNotFound, exception.Message);
 		}
 	}
 

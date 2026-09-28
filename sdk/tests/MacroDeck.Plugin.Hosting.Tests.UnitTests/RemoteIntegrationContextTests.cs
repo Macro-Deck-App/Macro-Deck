@@ -424,6 +424,7 @@ public class RemoteIntegrationContextTests
 		covered.Add((HostApis.Ui, HostOperations.Ui.RemoveResource));
 
 		covered.Add((HostApis.IconPacks, HostOperations.IconPacks.GetIconResource));
+		covered.Add((HostApis.IconPacks, HostOperations.IconPacks.GetIcon));
 		covered.Add((HostApis.IconPacks, HostOperations.IconPacks.SyncBundled));
 
 		// devices is handed to a device provider rather than reached through IIntegrationContext, so it

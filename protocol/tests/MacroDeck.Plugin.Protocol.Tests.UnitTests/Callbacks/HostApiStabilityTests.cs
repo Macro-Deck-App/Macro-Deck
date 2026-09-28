@@ -56,7 +56,7 @@ public class HostApiStabilityTests
 			[HostApis.Adb] =
 				["shell", "battery", "push", "pull", "install", "uninstall", "package-installed", "connect"],
 			[HostApis.Messaging] = ["publish", "send", "request", "subscriptions"],
-			[HostApis.IconPacks] = ["sync-bundled", "get-icon-resource"],
+			[HostApis.IconPacks] = ["sync-bundled", "get-icon-resource", "get-icon"],
 		};
 
 	[Test]

@@ -81,6 +81,9 @@ public static class ProtocolErrorCodes
 	/// plugins get their bundled packs from their artifact.</summary>
 	public const string IconPackSyncNotAllowed = "ICON_PACK_SYNC_NOT_ALLOWED";
 
+	/// <summary>An <c>icon-packs</c>/<c>get-icon</c> naming an icon id no installed icon pack contains.</summary>
+	public const string IconNotFound = "ICON_NOT_FOUND";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		ProtocolVersionUnsupported, UnknownMessageType, MalformedEnvelope, InvalidPayload, Unauthenticated,
@@ -89,6 +92,6 @@ public static class ProtocolErrorCodes
 		CapabilityUnavailable, PayloadTooLarge, AssetTooLarge, QueueOverflow, RateLimited,
 		Timeout, Cancelled, CorrelationUnknown, DuplicateIdempotencyKey, InternalError,
 		AdbNotEnabled, AdbNotAllowed, AdbFailed, UiResourceQuotaExceeded,
-		PluginIconNotFound, IconPackInvalid, IconPackSyncNotAllowed,
+		PluginIconNotFound, IconPackInvalid, IconPackSyncNotAllowed, IconNotFound,
 	];
 }

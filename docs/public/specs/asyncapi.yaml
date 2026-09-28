@@ -44,6 +44,7 @@ x-macrodeck-error-codes:
   - PLUGIN_ICON_NOT_FOUND
   - ICON_PACK_INVALID
   - ICON_PACK_SYNC_NOT_ALLOWED
+  - ICON_NOT_FOUND
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Errors.ProtocolCloseCodes
 x-macrodeck-close-codes:
@@ -96,7 +97,7 @@ x-macrodeck-host-operations:
   screensavers: [register, unregister]
   adb: [shell, battery, push, pull, install, uninstall, package-installed, connect]
   messaging: [publish, send, request, subscriptions]
-  icon-packs: [sync-bundled, get-icon-resource]
+  icon-packs: [sync-bundled, get-icon-resource, get-icon]
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Assets.AssetKinds.All - the kind values an asset.begin may carry.
 x-macrodeck-asset-kinds:

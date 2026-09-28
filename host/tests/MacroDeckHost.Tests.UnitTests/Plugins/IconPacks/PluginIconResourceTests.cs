@@ -3,6 +3,8 @@ using MacroDeckHost.Application.Plugins.IconPacks;
 using MacroDeckHost.Application.Ui.Resources;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace MacroDeckHost.Tests.UnitTests.Plugins.IconPacks;
 
@@ -75,14 +77,48 @@ internal sealed class PluginIconResourceTests
 	}
 
 	[Test]
-	public async Task An_icon_of_an_ordinary_pack_is_not_served_under_the_plugin_icon_owner()
+	public async Task An_icon_of_an_ordinary_pack_is_handed_out_by_id_and_its_handle_resolves_to_its_bytes()
 	{
 		var pack = await _host.Icons.CreatePack();
-		var icon = await _host.Icons.AddReadyIcon(pack.Id, "home", [1, 2, 3]);
+		var icon = await _host.Icons.AddReadyIcon(pack.Id, "home", await Png());
 
-		var content = await _host.UiResources.TryGetAsync(PluginIconReferences.ResourceId(icon.Id), CancellationToken.None);
+		var handle = await _host.UiResources.GetHandleAsync(icon.Id, CancellationToken.None);
+		var content = await _host.UiResources.TryGetAsync(handle.Handle!.ResourceId, CancellationToken.None);
 
-		Assert.That(content, Is.Null);
+		Assert.Multiple(() =>
+		{
+			Assert.That(handle.Status, Is.EqualTo(PluginIconResourceStatus.Found));
+			Assert.That(handle.Handle.ResourceId, Is.EqualTo(PluginIconReferences.ResourceId(icon.Id)));
+			Assert.That(content, Is.Not.Null);
+			Assert.That(content!.ContentHash, Is.EqualTo(handle.Handle.ContentHash));
+			Assert.That(content.MediaType, Is.EqualTo(handle.Handle.MediaType));
+		});
+	}
+
+	[Test]
+	public async Task A_bundled_plugin_icon_is_handed_out_by_id_to_any_caller()
+	{
+		await _host.SyncDevelopment(PluginId, ("logos", await _host.BuildArchive("Logos", ("spotify", "green"))));
+		var spotify = _host.Icon(_host.PluginPack(PluginId, "logos")!, "spotify");
+
+		var handle = await _host.UiResources.GetHandleAsync(spotify.Id, CancellationToken.None);
+
+		Assert.That(handle.Handle?.ResourceId, Is.EqualTo(PluginIconReferences.ResourceId(spotify.Id)));
+	}
+
+	[Test]
+	public async Task An_unknown_icon_id_is_neither_handed_out_nor_served()
+	{
+		var unknown = Guid.NewGuid();
+
+		var handle = await _host.UiResources.GetHandleAsync(unknown, CancellationToken.None);
+		var content = await _host.UiResources.TryGetAsync(PluginIconReferences.ResourceId(unknown), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(handle.Status, Is.EqualTo(PluginIconResourceStatus.NotFound));
+			Assert.That(content, Is.Null);
+		});
 	}
 
 	[Test]
@@ -97,6 +133,14 @@ internal sealed class PluginIconResourceTests
 			MediaType = "image/png",
 			Content = new byte[] { 1 }
 		}));
+	}
+
+	private static async Task<byte[]> Png()
+	{
+		using var image = new Image<Rgba32>(4, 4, new Rgba32(200, 40, 40, 255));
+		using var buffer = new MemoryStream();
+		await image.SaveAsPngAsync(buffer);
+		return buffer.ToArray();
 	}
 
 	private MacroDeckHost.Application.Widgets.Icons.WidgetIconSourceRegistry WidgetIconSources()

@@ -44,6 +44,26 @@ public class UiResourceRegistryPluginIconCompatibilityTests
 		Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.Unsupported));
 	}
 
+	[Test]
+	public void A_registry_written_before_icon_lookup_by_id_existed_still_builds_and_reports_it_unsupported()
+	{
+		IUiResourceRegistry registry = new RegistryWrittenBeforeBundledIcons();
+
+		var exception = Assert.ThrowsAsync<UiResourceException>(() => registry.GetIconAsync(Guid.NewGuid()));
+
+		Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.Unsupported));
+	}
+
+	[Test]
+	public void A_context_written_before_ui_resources_existed_reports_icon_lookup_by_id_unsupported()
+	{
+		IIntegrationContext context = new ContextWrittenBeforeUiResources();
+
+		var exception = Assert.ThrowsAsync<UiResourceException>(() => context.UiResources.GetIconAsync(Guid.NewGuid()));
+
+		Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.Unsupported));
+	}
+
 	private sealed class RegistryWrittenBeforeBundledIcons : IUiResourceRegistry
 	{
 		public Task<UiResource> RegisterAsync(string name,

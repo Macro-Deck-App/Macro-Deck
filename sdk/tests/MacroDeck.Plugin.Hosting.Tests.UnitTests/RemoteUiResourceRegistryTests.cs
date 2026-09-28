@@ -190,6 +190,50 @@ public class RemoteUiResourceRegistryTests
 	}
 
 	[Test]
+	public async Task An_icon_is_looked_up_by_id_and_answers_the_hosts_handle_without_an_upload()
+	{
+		var iconId = Guid.NewGuid();
+		var host = new FakeIconHost
+		{
+			Handle = new UiResourceHandleDto
+			{
+				ResourceId = "app.macro-deck.plugin-icon.1", ContentHash = "hash-1", MediaType = "image/gif",
+				ByteLength = 7,
+			}
+		};
+		var uploader = new FakeResourceHost();
+		var registry = new RemoteUiResourceRegistry(host, uploader);
+
+		var handle = await registry.GetIconAsync(iconId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.Calls,
+				Is.EqualTo((List<(string, string)>)[(HostApis.IconPacks, HostOperations.IconPacks.GetIcon)]));
+			Assert.That(host.LastArguments, Is.EqualTo(new GetIconArguments { IconId = iconId }));
+			Assert.That(handle.ResourceId, Is.EqualTo("app.macro-deck.plugin-icon.1"));
+			Assert.That(handle.ContentHash, Is.EqualTo("hash-1"));
+			Assert.That(handle.MediaType, Is.EqualTo("image/gif"));
+			Assert.That(handle.ByteLength, Is.EqualTo(7));
+			Assert.That(uploader.Uploads, Is.Empty);
+		});
+	}
+
+	[TestCase(ProtocolErrorCodes.IconNotFound, UiResourceErrorCode.IconNotFound)]
+	[TestCase(ProtocolErrorCodes.CapabilityUnsupported, UiResourceErrorCode.Unsupported)]
+	[TestCase(ProtocolErrorCodes.AssetTooLarge, UiResourceErrorCode.Failed)]
+	[TestCase(ProtocolErrorCodes.RateLimited, UiResourceErrorCode.RateLimited)]
+	public void A_refused_icon_lookup_by_id_surfaces_as_its_error_code(string wireCode, UiResourceErrorCode expected)
+	{
+		var host = new FakeIconHost { RefuseWith = wireCode };
+		var registry = new RemoteUiResourceRegistry(host, new FakeResourceHost());
+
+		var exception = Assert.ThrowsAsync<UiResourceException>(() => registry.GetIconAsync(Guid.NewGuid()));
+
+		Assert.That(exception!.ErrorCode, Is.EqualTo(expected));
+	}
+
+	[Test]
 	public void A_bundled_icon_lookup_answered_without_a_handle_fails()
 	{
 		var registry = new RemoteUiResourceRegistry(new FakeIconHost(), new FakeResourceHost());

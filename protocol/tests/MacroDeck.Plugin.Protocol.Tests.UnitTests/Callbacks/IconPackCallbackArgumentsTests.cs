@@ -53,4 +53,14 @@ public class IconPackCallbackArgumentsTests
 
 		Assert.That(json, Is.EqualTo("""{"key":"logos","name":"spotify"}"""));
 	}
+
+	[Test]
+	public void An_icon_lookup_names_the_icon_by_its_id()
+	{
+		var json = JsonSerializer.Serialize(
+			new GetIconArguments { IconId = Guid.Parse("0f8fad5b-d9cb-469f-a165-70867728950e") },
+			PluginProtocolJson.Options);
+
+		Assert.That(json, Is.EqualTo("""{"iconId":"0f8fad5b-d9cb-469f-a165-70867728950e"}"""));
+	}
 }
