@@ -62,6 +62,18 @@ internal sealed class TwitchIntegrationTests
 	}
 
 	[Test]
+	public void The_brand_icon_keeps_its_colour_in_readers_that_ignore_stylesheets()
+	{
+		var icon = Encoding.UTF8.GetString(_integration.GetIcon());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(icon, Does.Not.Contain("<style"));
+			Assert.That(icon, Does.Contain("fill=\"#6441a5\""));
+		});
+	}
+
+	[Test]
 	public void Shutdown_is_safe_without_a_connection()
 	{
 		Assert.DoesNotThrowAsync(() => _integration.ShutdownAsync());
