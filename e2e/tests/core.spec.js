@@ -270,6 +270,9 @@ test.describe('Macro Deck core E2E', () => {
     await assertNoUnexpectedFailures.whileHostIsRestarting(() =>
       assertNoUnexpectedWebFailures.whileHostIsRestarting(async () => {
         const startsBeforeRestart = await getHostStartCount();
+        // The Admin UI reloads itself once it reconnects to the new host session. A reload of our own
+        // would race that one, and the page could then reload again under the next step.
+        const adminReloaded = page.waitForEvent('load', { timeout: 30_000 });
         const restart = await request.post(`${LOOPBACK_URL}/api/host/restart`, {
           data: { reason: 'e2e-persistence' },
           headers: loopbackHeaders(),
@@ -292,9 +295,9 @@ test.describe('Macro Deck core E2E', () => {
 
         await expect(webPage.getByRole('button', { name: 'Open Macro Deck settings' }))
           .toBeVisible({ timeout: 30_000 });
+        await adminReloaded;
       }));
 
-    await page.reload();
     await selectProfile(page, RENAMED_PROFILE_NAME);
     await expect(page.getByText(`${PROFILE_COLUMNS} × ${PROFILE_ROWS} Grid`)).toBeVisible();
     await expect(page.locator('shared-widget-item')).toHaveCount(1);
