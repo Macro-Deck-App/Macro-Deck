@@ -95,4 +95,6 @@ Pull-request CI is defined by [`.github/workflows/ci.yml`](../../.github/workflo
 
 The end-to-end suite lives in [`.github/workflows/e2e-run.yml`](../../.github/workflows/e2e-run.yml) and is called from three places: pull-request CI, a release, and [`.github/workflows/e2e.yml`](../../.github/workflows/e2e.yml) for a manual run against a chosen suite or filter. It stages its own production host, so it checks the shipped artefact rather than the workflow that assembled it.
 
+The root [`Makefile`](../../Makefile) runs the same suites locally: `make test` for the build and test jobs, `make ci` adding packaging, third-party notices and E2E, and one target per job (`make help`). Windows-only and Arch-only jobs are not covered.
+
 Treat the workflows as the source of truth for job names, runner versions, exact command flags, and dependencies. Update this document only when contributor-facing verification changes.
