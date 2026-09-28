@@ -37,6 +37,7 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 	{
 		await _readiness.WhenReady.WaitAsync(stoppingToken);
 		_index.Rebuild();
+		_readiness.MarkEventDispatchReady();
 
 		var reader = _bus.Reader;
 		while (await reader.WaitToReadAsync(stoppingToken))
