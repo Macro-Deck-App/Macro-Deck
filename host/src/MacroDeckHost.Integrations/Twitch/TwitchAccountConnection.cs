@@ -143,13 +143,24 @@ internal sealed class TwitchAccountConnection : IDisposable
 	private void LoadBadgesIfMissing()
 	{
 		if (_chatSink is null ||
+			Volatile.Read(ref _stopped) == 1 ||
 			!ReferenceEquals(_badges, TwitchChatBadgeMap.Empty) ||
 			Interlocked.Exchange(ref _badgesLoading, 1) == 1)
 		{
 			return;
 		}
 
-		_ = LoadBadgesAsync(_stopping.Token).ContinueWith(_ => Interlocked.Exchange(ref _badgesLoading, 0),
+		CancellationToken stopping;
+		try
+		{
+			stopping = _stopping.Token;
+		}
+		catch (ObjectDisposedException)
+		{
+			return;
+		}
+
+		_ = LoadBadgesAsync(stopping).ContinueWith(_ => Interlocked.Exchange(ref _badgesLoading, 0),
 			CancellationToken.None,
 			TaskContinuationOptions.ExecuteSynchronously,
 			TaskScheduler.Default);

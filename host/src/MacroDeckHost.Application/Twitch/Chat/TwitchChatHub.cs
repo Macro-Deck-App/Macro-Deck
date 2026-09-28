@@ -208,7 +208,10 @@ public sealed class TwitchChatHub : ITwitchChatSink, ITwitchChatFeed, IDisposabl
 
 				if (_changed is not null)
 				{
-					var wanted = listenerJoined || accountsChanged ? retained : added.Where(retained.Contains);
+					var retainedIds = retained.Select(message => message.MessageId).ToHashSet(StringComparer.Ordinal);
+					var wanted = listenerJoined || accountsChanged
+						? retained
+						: added.Where(message => retainedIds.Contains(message.MessageId));
 					foreach (var image in wanted.SelectMany(message => message.Images()))
 					{
 						_images.Request(image);
