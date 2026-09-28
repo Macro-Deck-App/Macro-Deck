@@ -50,6 +50,8 @@ internal sealed class FakeTwitchHelixClient : ITwitchHelixClient
 
 	public Dictionary<string, Exception> FailingReadExceptions { get; } = new(StringComparer.Ordinal);
 
+	public Dictionary<string, Exception> FailingWrites { get; } = new(StringComparer.Ordinal);
+
 	public Task<TwitchSubscriptionResult> CreateEventSubSubscriptionAsync(
 		string type,
 		string version,
@@ -265,7 +267,9 @@ internal sealed class FakeTwitchHelixClient : ITwitchHelixClient
 			Calls.Add(call);
 		}
 
-		return Task.CompletedTask;
+		return FailingWrites.TryGetValue(call.Split(':')[0], out var failure)
+			? Task.FromException(failure)
+			: Task.CompletedTask;
 	}
 
 	private Task<T> Read<T>(string name, T value)

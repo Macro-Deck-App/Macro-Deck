@@ -48,7 +48,11 @@ internal static class TwitchChatMessageParser
 			name,
 			TwitchChatStyle.NormalizeColor(ReadString(payload, "color"), chatterId),
 			ReadBadges(payload, badges),
-			ReadFragments(payload));
+			ReadFragments(payload),
+			ReadString(payload, "source_broadcaster_user_id") is { Length: > 0 } sourceId ? sourceId : null,
+			ReadString(payload, "source_broadcaster_user_name") is { Length: > 0 } sourceName
+				? sourceName
+				: ReadString(payload, "source_broadcaster_user_login"));
 	}
 
 	private static List<TwitchChatBadge> ReadBadges(JsonElement payload, TwitchChatBadgeMap badges)
