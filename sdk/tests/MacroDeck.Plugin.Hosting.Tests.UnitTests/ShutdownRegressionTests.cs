@@ -118,6 +118,42 @@ public class ShutdownRegressionTests
 		});
 	}
 
+	[Test]
+	public async Task Withdrawing_video_stream_providers_at_shutdown_does_not_wait_for_the_host()
+	{
+		using var video = new VideoStreamFixture();
+		var provider = new TestVideoProvider();
+		var integration = new TestVideoIntegration { OnVideoInitialize = context => context.RegisterProviderAsync(provider) };
+		var lifecycle = new IntegrationLifecycleHostedService([integration],
+			TestMetadata.Default,
+			new ConfigOnlyContext(new RemoteIntegrationConfig(video.Invoker)),
+			new FakeDeviceProviderContext(),
+			video.Invoker,
+			new ServiceCollection().AddSingleton(video.Registry).BuildServiceProvider(),
+			new FakeLayoutProviderContext(),
+			new FakeFolderViewProviderContext(),
+			new FakeWidgetTypeProviderContext(),
+			new FakeScreenSaverProviderContext(),
+			video.State,
+			new HostStateCache(new PluginConnectionState()),
+			Serilog.Core.Logger.None);
+		await lifecycle.StartAsync(CancellationToken.None);
+		video.State.RaiseConnected(resumed: false);
+		await VideoStreamFixture.WaitForAsync(() => video.Registry.Snapshot().Count == 1);
+		await video.OpenAsync("s1");
+
+		video.Invoker.Hang = true;
+
+		var stop = lifecycle.StopAsync(CancellationToken.None);
+
+		Assert.DoesNotThrowAsync(async () => await stop.WaitAsync(_smallestGracefulBudget));
+		Assert.Multiple(() =>
+		{
+			Assert.That(provider.Closes, Is.EqualTo(new[] { ("s1", Sdk.VideoStreams.VideoStreamSessionReason.ProviderRemoved) }));
+			Assert.That(integration.ShutdownCount, Is.EqualTo(1));
+		});
+	}
+
 	/// <summary>Reads its config on initialization, the way the fixture does, and records how that
 	/// turned out instead of rethrowing - the lifecycle service swallows the exception, so rethrowing
 	/// would put the outcome out of the test's reach.</summary>

@@ -888,6 +888,12 @@ export {
   type MusicPlayerStatePayload,
 } from './protocol/messages/music-player';
 export {
+  type Announcement,
+  type AnnouncementChangedEvent,
+  type GetPendingAnnouncementResponse,
+  type MarkAnnouncementSeenRequest,
+} from './protocol/messages/announcements';
+export {
   type GetUserNotificationsResponse,
   type UserNotification,
   type UserNotificationAction,
@@ -1249,6 +1255,30 @@ export {
   type GetVersionRequest,
   type GetVersionResponse,
 } from './protocol/messages/version';
+export {
+  type CloseVideoStreamRequest,
+  type GetVideoStreamsRequest,
+  type GetVideoStreamsResponse,
+  type KeepAliveVideoStreamRequest,
+  type OpenVideoStreamRequest,
+  type OpenVideoStreamResponse,
+  type ResumeVideoStreamRequest,
+  type SignalVideoStreamRequest,
+  type SuspendVideoStreamRequest,
+  type VideoStreamCatalogChangedEvent,
+  type VideoStreamDescriptionMessage,
+  type VideoStreamErrorCode,
+  type VideoStreamItem,
+  type VideoStreamProviderItem,
+  type VideoStreamSessionChangedEvent,
+  type VideoStreamSessionClosedEvent,
+  type VideoStreamSessionReason,
+  type VideoStreamSessionRevision,
+  type VideoStreamSessionState,
+  type VideoStreamSignalEvent,
+  type VideoStreamSignalMessage,
+  type VideoStreamState,
+} from './protocol/messages/video-stream';
 export {
   type GetWeatherInstancesResponse,
   type GetWeatherStateResponse,

@@ -127,6 +127,7 @@ internal sealed class CompanionConfigFlowTests
 			TestFolderViewProviders.Host(),
 			TestWidgetTypeProviders.Host(),
 			TestScreenSaverProviders.Host(),
+			TestVideoStreams.Host(),
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
 			CompanionHarness.Logger,

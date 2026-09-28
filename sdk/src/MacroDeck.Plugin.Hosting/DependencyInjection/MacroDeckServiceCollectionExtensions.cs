@@ -4,6 +4,7 @@ using MacroDeck.Plugin.Hosting.Capabilities.ConfigFlow;
 using MacroDeck.Plugin.Hosting.Capabilities.DeviceProvider;
 using MacroDeck.Plugin.Hosting.Capabilities.FolderViewProvider;
 using MacroDeck.Plugin.Hosting.Capabilities.ScreenSaverProvider;
+using MacroDeck.Plugin.Hosting.Capabilities.VideoStreamProvider;
 using MacroDeck.Plugin.Hosting.Capabilities.LayoutProvider;
 using MacroDeck.Plugin.Hosting.Capabilities.WidgetTypeProvider;
 using MacroDeck.Plugin.Hosting.Capabilities.Ui;
@@ -21,6 +22,7 @@ using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.FolderViews;
 using MacroDeck.Sdk.ScreenSavers;
+using MacroDeck.Sdk.VideoStreams;
 using MacroDeck.Sdk.Layouts;
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.Profiles;
@@ -204,6 +206,12 @@ internal static class MacroDeckServiceCollectionExtensions
 		{
 			services.TryAddEnumerable(ServiceDescriptor
 				.Singleton<ICapabilityHandler, ScreenSaverProviderCapabilityHandler>());
+		}
+
+		if (typeof(IVideoStreamIntegration).IsAssignableFrom(typeof(TIntegration)))
+		{
+			services.TryAddEnumerable(ServiceDescriptor
+				.Singleton<ICapabilityHandler, VideoStreamProviderCapabilityHandler>());
 		}
 
 		if (typeof(IWidgetTypeProvider).IsAssignableFrom(typeof(TIntegration)))

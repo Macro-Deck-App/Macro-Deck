@@ -18,6 +18,11 @@ using MacroDeck.Sdk.Layouts;
 using MacroDeck.Sdk.ScreenSavers;
 using MacroDeck.Plugin.Protocol.Errors;
 using Microsoft.Extensions.DependencyInjection;
+using System.Text.Json;
+using MacroDeck.Plugin.Protocol.Capabilities;
+using MacroDeck.Plugin.Protocol.Capabilities.VideoStreamProvider;
+using MacroDeck.Plugin.Protocol.Serialization;
+using MacroDeck.Sdk.VideoStreams;
 
 namespace MacroDeck.Plugin.Hosting.Tests.UnitTests;
 
@@ -325,6 +330,128 @@ public class IntegrationLifecycleHostedServiceTests
 			ProviderStoppedBeforeIntegration = ShutdownCount == 0;
 			return Task.CompletedTask;
 		}
+	}
+
+	private static IntegrationLifecycleHostedService VideoService(TestVideoIntegration integration,
+		VideoStreamFixture video,
+		HostStateCache stateCache)
+		=> new([integration],
+			TestMetadata.Default,
+			new NoOpIntegrationContext(),
+			new FakeDeviceProviderContext(),
+			new NoOpHostInvoker(),
+			new ServiceCollection().AddSingleton(video.Registry).BuildServiceProvider(),
+			new FakeLayoutProviderContext(),
+			new FakeFolderViewProviderContext(),
+			new FakeWidgetTypeProviderContext(),
+			new FakeScreenSaverProviderContext(),
+			video.State,
+			stateCache,
+			Serilog.Core.Logger.None);
+
+	private static async Task<IReadOnlyList<VideoStreamProviderDto>> DescribeVideoAsync(VideoStreamFixture video)
+		=> (await video.InvokeAsync(CapabilityOperations.VideoStreamProvider.Describe)).Data!.Value
+			.Deserialize<VideoStreamProviderDescribePayload>(PluginProtocolJson.Options)!.Providers;
+
+	[Test]
+	public async Task A_video_stream_integration_starts_after_the_integration_itself()
+	{
+		using var video = new VideoStreamFixture();
+		var integration = new TestVideoIntegration();
+		var service = VideoService(integration, video, new HostStateCache(new PluginConnectionState()));
+		await service.StartAsync(CancellationToken.None);
+
+		video.State.RaiseConnected(resumed: false);
+		await WaitForAsync(() => integration.Context is not null);
+
+		Assert.That(integration.WasInitializedBeforeVideo, Is.True);
+		await service.StopAsync(CancellationToken.None);
+	}
+
+	[Test]
+	public async Task Reinitializing_withdraws_the_providers_and_closes_their_sessions_before_the_integration_shuts_down()
+	{
+		using var video = new VideoStreamFixture();
+		var provider = new TestVideoProvider();
+		var shutdownsAtClose = new List<int>();
+		var integration = new TestVideoIntegration { OnVideoInitialize = context => context.RegisterProviderAsync(provider) };
+		provider.OnClose = (_, _) =>
+		{
+			shutdownsAtClose.Add(integration.ShutdownCount);
+			return Task.CompletedTask;
+		};
+		var stateCache = new HostStateCache(new PluginConnectionState());
+		var service = VideoService(integration, video, stateCache);
+		await service.StartAsync(CancellationToken.None);
+		video.State.RaiseConnected(resumed: false);
+		await WaitForAsync(() => integration.Context is not null);
+		var firstRegistration = (await DescribeVideoAsync(video)).Single().RegistrationId;
+		await video.OpenAsync("s1");
+
+		stateCache.Apply(ConfigPush());
+		await WaitForAsync(() => integration.ShutdownCount == 1 && integration.IsInitialized);
+		await WaitForAsync(() => video.Registry.Snapshot().Count == 1);
+		var providers = await DescribeVideoAsync(video);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(provider.Closes, Is.EqualTo(new[] { ("s1", VideoStreamSessionReason.ProviderRemoved) }));
+			Assert.That(shutdownsAtClose, Is.EqualTo(new[] { 0 }));
+			Assert.That(providers.Single().RegistrationId, Is.Not.EqualTo(firstRegistration));
+		});
+
+		await service.StopAsync(CancellationToken.None);
+	}
+
+	[Test]
+	public async Task Stopping_closes_the_sessions_and_withdraws_the_providers()
+	{
+		using var video = new VideoStreamFixture();
+		var provider = new TestVideoProvider();
+		var integration = new TestVideoIntegration { OnVideoInitialize = context => context.RegisterProviderAsync(provider) };
+		var service = VideoService(integration, video, new HostStateCache(new PluginConnectionState()));
+		await service.StartAsync(CancellationToken.None);
+		video.State.RaiseConnected(resumed: false);
+		await WaitForAsync(() => integration.Context is not null);
+		await video.OpenAsync("s1");
+
+		await service.StopAsync(CancellationToken.None);
+		var providers = await DescribeVideoAsync(video);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(provider.Closes, Is.EqualTo(new[] { ("s1", VideoStreamSessionReason.ProviderRemoved) }));
+			Assert.That(providers, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_failed_video_initialization_leaves_no_provider_registered()
+	{
+		using var video = new VideoStreamFixture();
+		var integration = new TestVideoIntegration
+		{
+			OnVideoInitialize = async context =>
+			{
+				await context.RegisterProviderAsync(new TestVideoProvider());
+				throw new InvalidOperationException("The camera is not configured.");
+			}
+		};
+		var service = VideoService(integration, video, new HostStateCache(new PluginConnectionState()));
+		await service.StartAsync(CancellationToken.None);
+
+		video.State.RaiseConnected(resumed: false);
+		await WaitForAsync(() => video.Invoker.Calls.Count == 2);
+		var providers = await DescribeVideoAsync(video);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(providers, Is.Empty);
+			Assert.That(video.Invoker.Calls.Select(call => call.Operation),
+				Is.All.EqualTo(HostOperations.VideoStreams.ProvidersChanged));
+		});
+
+		await service.StopAsync(CancellationToken.None);
 	}
 
 	private static async Task WaitForAsync(Func<bool> condition, TimeSpan? timeout = null)

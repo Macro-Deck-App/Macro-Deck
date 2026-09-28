@@ -9,6 +9,7 @@ import {
   OnInit,
   Output,
   inject,
+  signal,
 } from '@angular/core';
 import { Strings } from '@macro-deck/runtime';
 
@@ -34,6 +35,9 @@ export class ModalComponent implements OnInit, OnDestroy {
   @Input() zIndex: number | null = null;
 
   private static stack: ModalComponent[] = [];
+  private static readonly openCountSignal = signal(0);
+
+  static readonly openCount = ModalComponent.openCountSignal.asReadonly();
 
   static get anyOpen(): boolean {
     return ModalComponent.stack.length > 0;
@@ -80,12 +84,14 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     ModalComponent.stack.push(this);
+    ModalComponent.openCountSignal.set(ModalComponent.stack.length);
     this.openedAt = Date.now();
   }
 
   ngOnDestroy(): void {
     const idx = ModalComponent.stack.lastIndexOf(this);
     if (idx >= 0) ModalComponent.stack.splice(idx, 1);
+    ModalComponent.openCountSignal.set(ModalComponent.stack.length);
     if (this.closeTimer) {
       clearTimeout(this.closeTimer);
     }

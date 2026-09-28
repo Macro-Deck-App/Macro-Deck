@@ -181,13 +181,15 @@ pub fn get_cursor_position(app: AppHandle) -> Option<CursorPosition> {
 
 #[tauri::command]
 pub fn open_external(app: AppHandle, url: String) -> bool {
-    let Ok(parsed) = url.parse::<tauri::Url>() else {
-        return false;
-    };
-    if parsed.scheme() != "http" && parsed.scheme() != "https" {
+    if !is_external_url(&url) {
         return false;
     }
     external_url::open(&app, &url).is_ok()
+}
+
+fn is_external_url(url: &str) -> bool {
+    url.parse::<tauri::Url>()
+        .is_ok_and(|parsed| matches!(parsed.scheme(), "http" | "https" | "mailto"))
 }
 
 #[tauri::command]
@@ -443,6 +445,18 @@ mod tests {
             .map(|s| s.to_string())
             .collect::<Vec<_>>()
             .into_iter()
+    }
+
+    #[test]
+    fn web_and_mail_links_open_externally_and_nothing_else_does() {
+        assert!(is_external_url("https://macro-deck.app/notes"));
+        assert!(is_external_url("http://example.com"));
+        assert!(is_external_url("mailto:support@macro-deck.app"));
+        assert!(!is_external_url("file:///etc/passwd"));
+        assert!(!is_external_url("javascript:alert(1)"));
+        assert!(!is_external_url("data:text/html,hi"));
+        assert!(!is_external_url("macrodeck://open"));
+        assert!(!is_external_url("not a url"));
     }
 
     // Canonicalizing a dropped path resolves symlinks (issue #395), but on Windows it also returns a

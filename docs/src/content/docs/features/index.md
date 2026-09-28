@@ -56,6 +56,7 @@ public sealed class ObsIntegration : IPluginIntegration, IVariableProvider, IEve
 | [Widget types](/ui/views/widget-types/) | `IWidgetTypeProvider` | Add deck widgets beside Macro Deck's own. |
 | [Folder views](/ui/views/folder-views/) | `IFolderViewProvider` | Replace a folder's button grid with your own rendering. |
 | [Screensavers](/ui/views/screensavers/) | `IScreenSaverProvider` | Show something of your own on a device that has sat idle. |
+| [Video streams](/features/video-streams/) | `IVideoStreamIntegration`, `IVideoStreamProvider` | Offer live video, such as cameras or OBS scenes, for Macro Deck to show. |
 
 ## Host APIs
 

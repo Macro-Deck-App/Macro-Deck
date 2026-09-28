@@ -349,6 +349,33 @@ public static class CapabilityOperations
 		public static readonly IReadOnlyList<string> All = [Event, Command, Request];
 	}
 
+	/// <summary>
+	/// The host-to-provider direction of a video stream provider: reading its providers and streams, and
+	/// driving the sessions the host opens. Session state the provider reports itself travels over the
+	/// <c>video-streams</c> host api.
+	/// </summary>
+	public static class VideoStreamProvider
+	{
+		/// <summary>Lists the plugin's registered providers.</summary>
+		public const string Describe = "describe";
+
+		/// <summary>Lists one provider's streams.</summary>
+		public const string Streams = "streams";
+
+		public const string SessionOpen = "session.open";
+
+		public const string SessionSuspend = "session.suspend";
+
+		public const string SessionResume = "session.resume";
+
+		public const string SessionSignal = "session.signal";
+
+		public const string SessionClose = "session.close";
+
+		public static readonly IReadOnlyList<string> All =
+			[Describe, Streams, SessionOpen, SessionSuspend, SessionResume, SessionSignal, SessionClose];
+	}
+
 	private static readonly Dictionary<string, IReadOnlyList<string>> _byKind =
 		new(StringComparer.Ordinal)
 		{
@@ -370,6 +397,7 @@ public static class CapabilityOperations
 			[Handshake.CapabilityKinds.ScreenSaverProvider] = ScreenSaverProvider.All,
 			[Handshake.CapabilityKinds.WidgetTypeProvider] = WidgetTypeProvider.All,
 			[Handshake.CapabilityKinds.Messaging] = Messaging.All,
+			[Handshake.CapabilityKinds.VideoStreamProvider] = VideoStreamProvider.All,
 		};
 
 	public static IReadOnlyList<string> For(string kind) => _byKind[kind];

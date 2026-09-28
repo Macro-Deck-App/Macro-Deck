@@ -42,6 +42,11 @@ public class CapabilityOperationStabilityTests
 			[CapabilityKinds.WidgetTypeProvider] = ["describe", "widget-types"],
 			[CapabilityKinds.ScreenSaverProvider] = ["describe", "screensavers"],
 			[CapabilityKinds.Messaging] = ["event", "command", "request"],
+			[CapabilityKinds.VideoStreamProvider] =
+			[
+				"describe", "streams", "session.open", "session.suspend", "session.resume", "session.signal",
+				"session.close",
+			],
 		};
 
 	[Test]

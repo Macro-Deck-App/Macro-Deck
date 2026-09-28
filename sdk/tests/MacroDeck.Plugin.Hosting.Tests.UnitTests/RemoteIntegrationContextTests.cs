@@ -315,6 +315,42 @@ public class RemoteIntegrationContextTests
 	}
 
 	[Test]
+	public async Task VideoStream_calls_send_the_declared_Api_Operation_pair()
+	{
+		using var registry = new MacroDeck.Plugin.Hosting.Capabilities.VideoStreamProvider.VideoStreamProviderRegistry(
+			_invoker,
+			new PluginConnectionState(),
+			Support.TestMetadata.Default,
+			TimeProvider.System,
+			Serilog.Core.Logger.None);
+		var videoStreams = registry.ContextFor(null);
+		registry.Sessions.TryBeginOpen("s1", "cam", new Support.TestVideoProvider(), registry.Sessions.CurrentEpoch);
+		var signal = new MacroDeck.Sdk.VideoStreams.VideoStreamSignal("candidate", "{}");
+
+		var expected = new (Func<Task> Call, string Operation)[]
+		{
+			(() => videoStreams.RegisterProviderAsync(new Support.TestVideoProvider()),
+				HostOperations.VideoStreams.ProvidersChanged),
+			(() => videoStreams.NotifyStreamsChangedAsync("cam"), HostOperations.VideoStreams.StreamsChanged),
+			(() => videoStreams.UpdateSessionAsync("s1", MacroDeck.Sdk.VideoStreams.VideoStreamSessionState.Active),
+				HostOperations.VideoStreams.SessionUpdate),
+			(() => videoStreams.SendSignalAsync("s1", signal), HostOperations.VideoStreams.SessionSignal),
+			(() => videoStreams.CloseSessionAsync("s1"), HostOperations.VideoStreams.SessionClose)
+		};
+
+		foreach (var (call, operation) in expected)
+		{
+			await call();
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(_invoker.LastApi, Is.EqualTo(HostApis.VideoStreams));
+				Assert.That(_invoker.LastOperation, Is.EqualTo(operation));
+			});
+		}
+	}
+
+	[Test]
 	public async Task WidgetType_registrations_send_the_declared_Api_Operation_pair()
 	{
 		var widgetTypes = new RemoteWidgetTypeProviderContext(_invoker);
@@ -469,6 +505,12 @@ public class RemoteIntegrationContextTests
 		foreach (var operation in HostOperations.ScreenSavers.All)
 		{
 			covered.Add((HostApis.ScreenSavers, operation));
+		}
+
+		// video-streams is covered by VideoStream_calls_send_the_declared_Api_Operation_pair above.
+		foreach (var operation in HostOperations.VideoStreams.All)
+		{
+			covered.Add((HostApis.VideoStreams, operation));
 		}
 
 		foreach (var operation in HostOperations.Adb.All)

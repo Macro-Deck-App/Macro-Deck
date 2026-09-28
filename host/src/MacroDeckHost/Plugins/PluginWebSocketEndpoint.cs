@@ -19,6 +19,7 @@ using MacroDeck.Plugin.Protocol.Events;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Plugins;
+using MacroDeckHost.Application.VideoStreams;
 using MacroDeckHost.Application.Plugins.Assets;
 using MacroDeckHost.Application.Plugins.Capabilities;
 using MacroDeckHost.Application.Plugins.Logging;
@@ -63,6 +64,7 @@ public sealed class PluginWebSocketEndpoint
 	private readonly IMediator _mediator;
 	private readonly IHostApplicationLifetime _lifetime;
 	private readonly IPluginLogIngestor _logIngestor;
+	private readonly VideoStreamPluginSessions? _videoStreams;
 	private readonly ILogger _logger;
 
 	private readonly StateUpdateCoalescer _coalescer = new();
@@ -84,8 +86,10 @@ public sealed class PluginWebSocketEndpoint
 		ILogger logger,
 		IPluginHostAssetSender? hostAssetSender = null,
 		PluginAdbInvokeRunner? adbInvokes = null,
-		PluginMessagingInvokeRunner? messagingInvokes = null)
+		PluginMessagingInvokeRunner? messagingInvokes = null,
+		VideoStreamPluginSessions? videoStreams = null)
 	{
+		_videoStreams = videoStreams;
 		_hostAssetSender = hostAssetSender;
 		_adbInvokes = adbInvokes;
 		_messagingInvokes = messagingInvokes;
@@ -316,17 +320,20 @@ public sealed class PluginWebSocketEndpoint
 		// loop below can read. Awaiting it here deadlocks the handshake against itself until every
 		// describe times out. On rejection the registrar has already sent protocol.error and terminated
 		// the session, which ends the loop on its own.
-		var registration = RegisterAndPushStateAsync(pluginId, hostCancellationToken);
+		var registration = RegisterAndPushStateAsync(pluginId, sessionId, connection, hostCancellationToken);
 
 		await MessageLoopAsync(socket, connection, pluginId, sessionId, hostCancellationToken);
 		await registration;
 	}
 
-	private async Task RegisterAndPushStateAsync(string pluginId, CancellationToken cancellationToken)
+	private async Task RegisterAndPushStateAsync(string pluginId,
+		string sessionId,
+		IPluginConnection connection,
+		CancellationToken cancellationToken)
 	{
 		try
 		{
-			if (await _registrar.RegisterAsync(pluginId, cancellationToken).ConfigureAwait(false))
+			if (await _registrar.RegisterAsync(pluginId, sessionId, connection, cancellationToken).ConfigureAwait(false))
 			{
 				await _statePusher.PushAllAsync(pluginId, cancellationToken).ConfigureAwait(false);
 			}
@@ -505,7 +512,8 @@ public sealed class PluginWebSocketEndpoint
 			// without this check, this (old, still unwinding) connection's drop could wipe transfers a
 			// newer connection for the same plugin has already begun, if that reconnect landed before this
 			// finally block ran.
-			if (_sessionRegistry.IsCurrentConnection(sessionId, connection))
+			var wasCurrent = _sessionRegistry.IsCurrentConnection(sessionId, connection);
+			if (wasCurrent)
 			{
 				_assetReceiver.DropSession(pluginId);
 				_hostAssetSender?.DropSession(pluginId);
@@ -520,6 +528,10 @@ public sealed class PluginWebSocketEndpoint
 				// Not Detach: goodbye must not raise SessionEnded(Detached), which consumers treat as a
 				// drop the plugin may still resume.
 				_sessionRegistry.ReleaseConnection(sessionId, connection);
+				if (wasCurrent)
+				{
+					_videoStreams?.End(pluginId, sessionId);
+				}
 			}
 
 			await _mediator.Publish(new PluginSessionsChangedNotification(), CancellationToken.None);
@@ -634,7 +646,7 @@ public sealed class PluginWebSocketEndpoint
 				break;
 
 			case MessageTypes.CapabilityDeclare:
-				await HandleCapabilityDeclareAsync(connection, pluginId, envelope, cancellationToken);
+				await HandleCapabilityDeclareAsync(connection, pluginId, envelope, cancellationToken, sessionId);
 				break;
 
 			case MessageTypes.StateUpdate:
@@ -701,7 +713,8 @@ public sealed class PluginWebSocketEndpoint
 		IPluginConnection connection,
 		string pluginId,
 		ProtocolEnvelope envelope,
-		CancellationToken cancellationToken)
+		CancellationToken cancellationToken,
+		string? sessionId = null)
 	{
 		CapabilityDeclarePayload? payload;
 		try
@@ -741,7 +754,15 @@ public sealed class PluginWebSocketEndpoint
 					try
 					{
 						await _registrar.UnregisterAsync(pluginId, cancellationToken).ConfigureAwait(false);
-						await _registrar.RegisterAsync(pluginId, cancellationToken).ConfigureAwait(false);
+						if (sessionId is null)
+						{
+							await _registrar.RegisterAsync(pluginId, cancellationToken).ConfigureAwait(false);
+						}
+						else
+						{
+							await _registrar.RegisterAsync(pluginId, sessionId, connection, cancellationToken)
+								.ConfigureAwait(false);
+						}
 					}
 					catch (Exception exception) when (exception is not OutOfMemoryException)
 					{
@@ -877,7 +898,12 @@ public sealed class PluginWebSocketEndpoint
 			return;
 		}
 
-		var result = await _callbackRouter.RouteAsync(pluginId, sessionId, envelope.Id, payload, cancellationToken);
+		var result = await _callbackRouter.RouteAsync(pluginId,
+			sessionId,
+			connection,
+			envelope.Id,
+			payload,
+			cancellationToken);
 
 		await connection.Send(new ProtocolEnvelope
 			{

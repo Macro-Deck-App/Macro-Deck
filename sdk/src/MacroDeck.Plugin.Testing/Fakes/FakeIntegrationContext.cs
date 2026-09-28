@@ -44,6 +44,7 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 		FolderViews = new FakeFolderViewProviderContext();
 		WidgetTypes = new FakeWidgetTypeProviderContext();
 		ScreenSavers = new FakeScreenSaverProviderContext();
+		VideoStreams = new FakeVideoStreamProviderContext();
 		Messages = new FakeMessageChannel();
 		UiResources = new FakeUiResourceRegistry();
 	}
@@ -126,6 +127,12 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 	/// same reason <see cref="FolderViews" /> is not.
 	/// </summary>
 	public FakeScreenSaverProviderContext ScreenSavers { get; }
+
+	/// <summary>
+	/// The video stream provider fake for this context. Not part of <see cref="IIntegrationContext" /> for
+	/// the same reason <see cref="FolderViews" /> is not.
+	/// </summary>
+	public FakeVideoStreamProviderContext VideoStreams { get; }
 
 	/// <summary>The message channel - see <see cref="FakeMessageChannel" />.</summary>
 	public FakeMessageChannel Messages { get; }

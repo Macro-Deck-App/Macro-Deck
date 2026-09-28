@@ -99,8 +99,9 @@ public static class BackupComponentGroups
 	/// archive would either point this installation at a secret row it does not have - orphaning every
 	/// backup it owns - or give it the installation identity of the machine the archive came from, which
 	/// is what the key ring's KEK store is keyed by.
-	/// The onboarding flag is excluded for the same reason: it tracks what this installation has already
-	/// shown its user, so a restore must neither resurrect a finished wizard nor erase one still owed.
+	/// The onboarding flag and the last seen announcement are excluded for the same reason: they track what this
+	/// installation has already shown its user, so a restore must neither resurrect a finished wizard or a seen
+	/// announcement nor erase one still owed.
 	/// The identity flag records whether this installation ever issued a host identity key.
 	/// </summary>
 	public static readonly IReadOnlyList<string> PreferenceKeyDenyPrefixes =
@@ -108,6 +109,7 @@ public static class BackupComponentGroups
 		RecoveryKeyPreferencePrefix,
 		"telemetry.installationId",
 		"onboarding.",
+		"announcements.",
 		"identity.",
 		"connect."
 	];

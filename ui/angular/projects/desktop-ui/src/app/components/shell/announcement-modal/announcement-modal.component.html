@@ -1,0 +1,22 @@
+@if (announcement(); as announcement) {
+  <shared-modal
+    [heading]="announcement.title"
+    size="large"
+    [style.--modal-height]="'min(88vh, 60rem)'"
+    (close)="onModalClose()">
+    <div class="whats-new-modal">
+      @if (publishedOn(); as date) {
+        <p class="whats-new-modal__meta">{{ appStrings.Announcements.PublishedOn | translate:{ date } }}</p>
+      }
+      <div class="whats-new-modal__changelog">
+        <app-announcement-markdown [text]="announcement.content" />
+      </div>
+    </div>
+
+    <div modal-footer class="whats-new-modal__actions">
+      <shared-button variant="primary" (click)="close()">
+        {{ appStrings.Dialogs.Notice.GotIt | translate }}
+      </shared-button>
+    </div>
+  </shared-modal>
+}
