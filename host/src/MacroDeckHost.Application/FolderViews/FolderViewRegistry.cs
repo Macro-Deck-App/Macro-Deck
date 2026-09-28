@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using MacroDeck.Sdk.FolderViews;
 using MacroDeck.Sdk.Identity;
 using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Localization;
 using Mediator;
 
@@ -22,9 +23,11 @@ public sealed class FolderViewRegistry : IFolderViewRegistry
 		new(StringComparer.Ordinal);
 
 	private readonly IPublisher _publisher;
+	private readonly IIntegrationRegistry? _integrations;
 
-	public FolderViewRegistry(IPublisher publisher)
+	public FolderViewRegistry(IPublisher publisher, IIntegrationRegistry? integrations = null)
 	{
+		_integrations = integrations;
 		_publisher = publisher;
 	}
 
@@ -48,6 +51,11 @@ public sealed class FolderViewRegistry : IFolderViewRegistry
 		}
 
 		var qualifiedId = id.ToString();
+		if (_integrations?.IsExplicitlyDisabled(ownerId) == true)
+		{
+			return new FolderViewRegistration(qualifiedId, ownerId);
+		}
+
 		_byQualifiedId[qualifiedId] = new FolderViewCatalogEntry(qualifiedId, ownerId, folderView);
 
 		await _publisher.Publish(new FolderViewCatalogChangedNotification(), cancellationToken);

@@ -1,3 +1,4 @@
+using MacroDeck.Sdk;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Ui.Transport;
@@ -45,6 +46,11 @@ public class SetIntegrationEnabledRequestMessageHandler
 			};
 		}
 
+		if (integration is ISystemIntegration)
+		{
+			return new SetIntegrationEnabledResponse { Success = true };
+		}
+
 		_integrationRegistry.SetEnabled(request.Id, request.Enabled);
 
 		if (request.Enabled)
@@ -53,7 +59,7 @@ public class SetIntegrationEnabledRequestMessageHandler
 		}
 		else
 		{
-			await integration.ShutdownAsync();
+			await _lifecycle.ShutdownAsync(request.Id, cancellationToken);
 			await _mediator.Publish(new IntegrationStateChangedNotification(request.Id), cancellationToken);
 		}
 

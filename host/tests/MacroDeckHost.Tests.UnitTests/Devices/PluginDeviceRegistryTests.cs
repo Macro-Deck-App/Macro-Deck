@@ -2,10 +2,12 @@ using System.Security.Claims;
 using MacroDeck.Sdk.Devices;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Devices;
+using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Layouts;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Tests.UnitTests.Auth;
+using MacroDeckHost.Tests.UnitTests.Integrations;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Triggers;
 using Mediator;
@@ -209,6 +211,38 @@ public class PluginDeviceRegistryTests
 			Assert.That(offline.Online, Is.False);
 			Assert.That(online.Online, Is.True);
 			Assert.That(online.Name, Is.EqualTo("Stream Deck XL"), "presence must not touch the metadata");
+		});
+	}
+
+	[Test]
+	public async Task A_disabled_providers_device_keeps_its_identity_but_stays_offline_until_it_is_enabled()
+	{
+		var integrations = new IntegrationRegistry(_scopeFactory,
+			new IntegrationLifecycleTests.FakeIntegrationStateStore(),
+			Serilog.Core.Logger.None);
+		var registry = new PluginDeviceRegistry(_scopeFactory,
+			_presence,
+			_tracker,
+			_sessionGuard,
+			new LayoutRegistry(new RecordingMediator()),
+			_time,
+			integrations);
+		integrations.SetEnabled(ProviderId, false);
+
+		var registration = await registry.RegisterAsync(ProviderId, Descriptor());
+		await registry.SetPresenceAsync(ProviderId, "SERIAL-1", DevicePresence.Online);
+		var whileDisabled = (await _service.GetAll()).Single();
+
+		integrations.SetEnabled(ProviderId, true);
+		var again = await registry.RegisterAsync(ProviderId, Descriptor());
+		var afterEnable = (await _service.GetAll()).Single();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(whileDisabled.Id, Is.EqualTo(registration.DeviceId));
+			Assert.That(whileDisabled.Online, Is.False);
+			Assert.That(again.DeviceId, Is.EqualTo(registration.DeviceId));
+			Assert.That(afterEnable.Online, Is.True);
 		});
 	}
 

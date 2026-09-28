@@ -5,6 +5,7 @@ using MacroDeck.Sdk.Identity;
 using MacroDeck.Sdk.Widgets;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using Mediator;
 
@@ -23,13 +24,17 @@ public sealed class WidgetTypeRegistry : IWidgetTypeRegistry
 	private readonly Dictionary<string, string> _builtInByNormalized = new(StringComparer.OrdinalIgnoreCase);
 
 	private readonly IPublisher _publisher;
+	private readonly IIntegrationRegistry? _integrations;
 
 	// The providers are optional and defaulted rather than required: a test builds a registry with none of
 	// the built-in providers around at all, and every built-in type simply reports no configuration then -
 	// the answer that is literally true until the providers themselves grow a config surface.
-	public WidgetTypeRegistry(IPublisher publisher, IEnumerable<IBuiltInWidgetUiProvider>? providers = null)
+	public WidgetTypeRegistry(IPublisher publisher,
+		IEnumerable<IBuiltInWidgetUiProvider>? providers = null,
+		IIntegrationRegistry? integrations = null)
 	{
 		_publisher = publisher;
+		_integrations = integrations;
 
 		var configurable = new HashSet<string>(StringComparer.Ordinal);
 		foreach (var provider in providers ?? [])
@@ -123,6 +128,11 @@ public sealed class WidgetTypeRegistry : IWidgetTypeRegistry
 		ValidateDataSchema(widgetType);
 
 		var qualifiedId = id.ToString();
+		if (_integrations?.IsExplicitlyDisabled(ownerId) == true)
+		{
+			return new WidgetTypeRegistration(qualifiedId, ownerId);
+		}
+
 		_byQualifiedId[qualifiedId] = new WidgetTypeCatalogEntry(qualifiedId, ownerId, widgetType);
 
 		await _publisher.Publish(new WidgetTypeCatalogChangedNotification(), cancellationToken);

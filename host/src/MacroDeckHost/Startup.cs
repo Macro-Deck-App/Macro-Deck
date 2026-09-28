@@ -396,7 +396,8 @@ public class Startup
 		services.AddSingleton<FolderViewProviderHost>();
 		services.AddSingleton<IScreenSaverRegistry>(provider => new ScreenSaverRegistry(
 			provider.GetRequiredService<IPublisher>(),
-			provider.GetRequiredService<IEnumerable<IScreenSaverProvider>>()));
+			provider.GetRequiredService<IEnumerable<IScreenSaverProvider>>(),
+			provider.GetRequiredService<IIntegrationRegistry>()));
 		services.AddSingleton<ScreenSaverProviderHost>();
 		services.AddSingleton<IScreenSaverUiSessionOpener, ScreenSaverUiSessionOpener>();
 		services.AddSingleton<WidgetTypeProviderHost>();

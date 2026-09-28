@@ -12,6 +12,9 @@ public interface IFolderViewProviderContext
 	/// Replacing is how a view's name, description or configuration flag changes: folders that selected it
 	/// pick the new descriptor up without being touched.
 	/// </summary>
+	/// <remarks>While the user has turned the integration off, the folder view is validated and its identity
+	/// returned, but Macro Deck does not keep it; the provider is initialized again when the integration is
+	/// turned back on.</remarks>
 	/// <returns>The host-assigned identity, whose
 	/// <see cref="FolderViewRegistration.FolderViewId" /> is what a folder stores.</returns>
 	/// <exception cref="ArgumentException">The descriptor's id or name is empty, or the id is not a valid

@@ -12,6 +12,9 @@ public interface IScreenSaverProviderContext
 	/// Replacing is how a screensaver's name, description or flags change: devices that selected it pick the
 	/// new descriptor up without being touched.
 	/// </summary>
+	/// <remarks>While the user has turned the integration off, the screensaver is validated and its identity
+	/// returned, but Macro Deck does not keep it; the provider is initialized again when the integration is
+	/// turned back on.</remarks>
 	/// <returns>The host-assigned identity, whose <see cref="ScreenSaverRegistration.ScreenSaverId" /> is
 	/// what a device stores. Against a host that predates screensavers the id is empty and nothing was
 	/// registered; the call does not throw.</returns>

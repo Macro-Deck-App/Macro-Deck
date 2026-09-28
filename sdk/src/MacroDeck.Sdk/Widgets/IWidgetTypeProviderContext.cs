@@ -12,6 +12,9 @@ public interface IWidgetTypeProviderContext
 	/// Replacing is how a type's name, description, default data, schema or configuration flag changes:
 	/// widgets already placed on a deck pick the new descriptor up without being touched.
 	/// </summary>
+	/// <remarks>While the user has turned the integration off, the widget type is validated and its identity
+	/// returned, but Macro Deck does not keep it; the provider is initialized again when the integration is
+	/// turned back on.</remarks>
 	/// <returns>The host-assigned identity, whose
 	/// <see cref="WidgetTypeRegistration.WidgetTypeId" /> is what a widget stores as its type.</returns>
 	/// <exception cref="ArgumentException">
