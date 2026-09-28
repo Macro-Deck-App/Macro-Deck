@@ -319,16 +319,20 @@ describe('OnboardingWizardComponent', () => {
     expect(externalLinks.open).toHaveBeenCalledWith('https://macro-deck.local:8192/admin');
   });
 
-  it('presents the native app as unavailable and offers nothing to click there', async () => {
+  it('links the native app to its App Store and Google Play listings', async () => {
     await create(true);
     authState.set('authenticated');
     connectionState.set('connected');
     const connect = await openConnectStep();
 
-    const nativeApp = connect.querySelector('.ob-option-unavailable')!;
-    expect(nativeApp.textContent).toContain('Coming soon');
-    expect(nativeApp.textContent).toContain('web client');
-    expect(nativeApp.querySelectorAll('button, a, [role="button"]').length).toBe(0);
+    expect(connect.textContent).not.toContain('Coming soon');
+    await click(buttonNamed(connect, 'App Store'));
+    await click(buttonNamed(connect, 'Google Play'));
+
+    expect(externalLinks.open.calls.allArgs()).toEqual([
+      ['https://apps.apple.com/app/id6810664560'],
+      ['https://play.google.com/store/apps/details?id=app.macrodeck.companion'],
+    ]);
   });
 
   it('stays usable when the host cannot report how it is reachable', async () => {

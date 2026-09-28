@@ -5,12 +5,15 @@ public sealed class StartupReadiness
 	private readonly TaskCompletionSource _caches = new(TaskCreationOptions.RunContinuationsAsynchronously);
 	private readonly TaskCompletionSource _variables = new(TaskCreationOptions.RunContinuationsAsynchronously);
 	private readonly TaskCompletionSource _iconPacks = new(TaskCreationOptions.RunContinuationsAsynchronously);
+	private readonly TaskCompletionSource _eventDispatch = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
 	public Task WhenReady => Task.WhenAll(_caches.Task, _variables.Task);
 
 	public Task WhenCachesReady => _caches.Task;
 
 	public Task WhenIconPacksReady => _iconPacks.Task;
+
+	public Task WhenEventDispatchReady => _eventDispatch.Task;
 
 	public bool IsReady => _caches.Task.IsCompletedSuccessfully && _variables.Task.IsCompletedSuccessfully;
 
@@ -21,4 +24,6 @@ public sealed class StartupReadiness
 	public void MarkIconPacksReady() => _iconPacks.TrySetResult();
 
 	public void MarkIconPacksFailed(Exception exception) => _iconPacks.TrySetException(exception);
+
+	public void MarkEventDispatchReady() => _eventDispatch.TrySetResult();
 }

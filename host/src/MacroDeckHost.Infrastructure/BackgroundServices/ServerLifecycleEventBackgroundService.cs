@@ -63,7 +63,9 @@ public sealed class ServerLifecycleEventBackgroundService : IHostedLifecycleServ
 	{
 		try
 		{
-			await _readiness.WhenReady.WaitAsync(_lifetime.ApplicationStopping);
+			// The bus drops events nobody subscribes to, so publishing before the dispatcher has indexed the
+			// automations would lose this one-shot event.
+			await _readiness.WhenEventDispatchReady.WaitAsync(_lifetime.ApplicationStopping);
 			_bus.Publish(Occurrence(EventIds.ServerStarted));
 		}
 		catch (OperationCanceledException)

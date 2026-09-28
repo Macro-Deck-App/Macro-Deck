@@ -58,7 +58,7 @@
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="NUnit" Version="4.6.1" />
-    <PackageVersion Include="NUnit.Analyzers" Version="4.14.0" />
+    <PackageVersion Include="NUnit.Analyzers" Version="4.15.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="5.2.0" />
     <PackageVersion Include="obs-websocket-dotnet" Version="5.0.1" />
     <PackageVersion Include="SpotifyAPI.Web" Version="7.4.2" />
