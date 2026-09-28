@@ -1,11 +1,15 @@
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Ui.Handlers;
+using MacroDeckHost.Application.Ui.Transport.Messages.Variables;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Variables.Files;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure.BackgroundServices;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
+using MacroDeckHost.Tests.UnitTests.Ui;
+using MacroDeckHost.Tests.UnitTests.Variables;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 
@@ -79,6 +83,45 @@ internal sealed class VariableInitializeBackgroundServiceTests
 		await synchronizer.WhenIdleAsync();
 
 		Assert.That(registry.GetById(stored[0].Id)!.Value, Is.EqualTo("43"));
+	}
+
+	[Test]
+	public async Task A_user_variable_shared_before_a_restart_is_reported_as_shared_after_it()
+	{
+		var deaths = new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = "deaths",
+			Scope = VariableScope.Global,
+			Type = VariableType.Numeric,
+			Classification = VariableClassification.User,
+			Value = "3"
+		};
+		var sharedStore = new InMemorySharedVariableStore();
+		sharedStore.Entries.Add(new SharedVariable { UserVariableId = deaths.Id, Name = "deaths", Type = VariableType.Numeric });
+		var registry = new VariableRegistry();
+		var mediator = new RecordingMediator();
+		var readiness = new StartupReadiness();
+		var service = new VariableInitializeBackgroundService(new RecordingHostLifetime(),
+			registry,
+			new StoredUserVariableStore([deaths]),
+			readiness,
+			Log.Logger,
+			new FileVariableSynchronizer(registry, mediator, new FakeVariableFileSystem(), Log.Logger));
+
+		await service.StartAsync(CancellationToken.None);
+		await service.ExecuteTask!;
+		readiness.MarkCachesReady();
+
+		var response = await new GetVariablesRequestMessageHandler(
+				TestVariableServices.Create(registry, new StoredUserVariableStore([deaths]), mediator),
+				registry,
+				new FakeVariableBindingService(),
+				readiness,
+				InMemorySharedVariableStore.For(registry, sharedStore))
+			.Handle(new GetVariablesRequest(), CancellationToken.None);
+
+		Assert.That(response.Variables.Single(v => v.Name == "deaths").Shared, Is.True);
 	}
 
 	private static VariableEntity FileVariable(string name, VariableType type, string path) => new()

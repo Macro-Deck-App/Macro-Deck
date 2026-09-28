@@ -423,6 +423,8 @@ public class Startup
 		services.AddSingleton<FileVariableSynchronizer>();
 		services.AddSingleton<IUserVariableStore, JsonUserVariableStore>();
 		services.AddSingleton<IVariableBindingStore, JsonVariableBindingStore>();
+		services.AddSingleton<ISharedVariableStore, JsonSharedVariableStore>();
+		services.AddSingleton<SharedVariables>();
 		services.AddSingleton<IKnownAudioDeviceStore, JsonKnownAudioDeviceStore>();
 		services.AddSingleton<VariableBindingLookup>();
 		services.AddSingleton<VariableNameFactory>();

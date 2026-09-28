@@ -19,6 +19,7 @@ public sealed class VariableBindingService : IVariableBindingService
 	private readonly IVariableSubscriptionCoordinator _coordinator;
 	private readonly IMediator _mediator;
 	private readonly VariableBindingLookup _lookup;
+	private readonly SharedVariables _sharedVariables;
 
 	// Bind/Unbind/Rename each do a load-modify-save against the same store; without a lock spanning the
 	// whole sequence, two of them interleaving can both load the same snapshot and each save over the
@@ -35,7 +36,8 @@ public sealed class VariableBindingService : IVariableBindingService
 		VariableNameFactory nameFactory,
 		IVariableSubscriptionCoordinator coordinator,
 		IMediator mediator,
-		VariableBindingLookup lookup)
+		VariableBindingLookup lookup,
+		SharedVariables sharedVariables)
 	{
 		_providers = providers;
 		_bindingStore = bindingStore;
@@ -45,6 +47,7 @@ public sealed class VariableBindingService : IVariableBindingService
 		_coordinator = coordinator;
 		_mediator = mediator;
 		_lookup = lookup;
+		_sharedVariables = sharedVariables;
 	}
 
 	public async Task<Result<VariableEntity, VariableBindingError>> BindAsync(
@@ -202,6 +205,7 @@ public sealed class VariableBindingService : IVariableBindingService
 				return Fail(VariableBindingError.StoreUnavailable, "Could not persist the unbind");
 			}
 
+			_sharedVariables.Forget(entity);
 			await _variableService.DeleteIntegrationVariable(entity.OwnerIntegrationId, variableId)
 				.ConfigureAwait(false);
 			await _coordinator.ReconcileAsync(cancellationToken).ConfigureAwait(false);

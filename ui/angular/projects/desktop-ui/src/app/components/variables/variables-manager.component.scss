@@ -133,7 +133,8 @@
 
 .vars-type-badge,
 .vars-classification,
-.vars-file-badge {
+.vars-file-badge,
+.vars-shared-badge {
   @include ds.badge;
   border-radius: var(--radius-sm);
   text-transform: uppercase;
@@ -166,6 +167,11 @@
 .vars-file-badge {
   background-color: var(--type-resource-bg);
   color: var(--type-resource-fg);
+}
+
+.vars-shared-badge {
+  background-color: var(--color-accent-muted);
+  color: var(--color-accent);
 }
 
 .read-only-icon {

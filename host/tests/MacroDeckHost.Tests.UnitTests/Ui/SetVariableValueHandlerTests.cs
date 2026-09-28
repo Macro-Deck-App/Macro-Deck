@@ -8,6 +8,7 @@ using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Localization;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
+using MacroDeckHost.Tests.UnitTests.Variables;
 using DomainVariableType = MacroDeckHost.Domain.Enums.VariableType;
 using SdkVariableType = MacroDeck.Sdk.Variables.VariableType;
 using VariableWriteCapability = MacroDeck.Sdk.Variables.VariableWriteCapability;
@@ -124,7 +125,10 @@ public class SetVariableValueHandlerTests
 			.GetAwaiter()
 			.GetResult();
 
-		var handler = new SetVariableValueRequestMessageHandler(service, new FakeHostLockState { IsLocked = false }, registry);
+		var handler = new SetVariableValueRequestMessageHandler(service,
+			new FakeHostLockState { IsLocked = false },
+			registry,
+			InMemorySharedVariableStore.For(registry));
 
 		return (handler, provider, created.Data!.Id, service);
 	}

@@ -82,6 +82,8 @@ const CLASSIFICATION_LABEL_KEYS: Record<VariableClassification, string> = {
   widget: AppStrings.Variables.Manager.ClassificationWidget,
 };
 
+const DELEGATE_INTEGRATION_ID = 'app.macro-deck.delegate';
+
 @Component({
   selector: 'shared-variables-manager',
   standalone: true,
@@ -258,6 +260,16 @@ export class VariablesManagerComponent implements OnInit {
     this.localization.translateKey(AppStrings.Variables.Manager.AllowWriteBackHint));
   readonly fileSettingsLabel = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Manager.FileSettings));
+  readonly shareActionLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Manager.ShareAction));
+  readonly stopSharingActionLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Manager.StopSharingAction));
+  readonly sharedLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Manager.Shared));
+  readonly sharedTooltip = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Manager.SharedTooltip));
+  readonly shareFailedMessage = computed(() =>
+    this.localization.translateKey(AppStrings.Errors.Variables.SharingNotSaved));
   readonly fileUnavailableLabel = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Manager.FileUnavailable));
 
@@ -285,6 +297,7 @@ export class VariablesManagerComponent implements OnInit {
   readonly editingValue = signal<string>('');
   readonly deleteCandidate = signal<Variable | null>(null);
   readonly writeFailed = signal(false);
+  readonly shareFailed = signal(false);
   readonly unbindCandidate = signal<Variable | null>(null);
   readonly unbindFailed = signal(false);
 
@@ -826,6 +839,13 @@ export class VariablesManagerComponent implements OnInit {
     this.writeFailed.set(written === null);
   }
 
+  async toggleShared(variable: Variable): Promise<void> {
+    if (!this.canShare(variable)) return;
+    this.shareFailed.set(false);
+    const result = await this.variableService.setShared(variable.id, !variable.shared);
+    this.shareFailed.set(result.variable === null);
+  }
+
   requestDelete(variable: Variable): void {
     if (!this.canManage(variable)) return;
     this.deleteCandidate.set(variable);
@@ -899,6 +919,10 @@ export class VariablesManagerComponent implements OnInit {
 
   canManage(variable: Variable): boolean {
     return variable.classification === 'user';
+  }
+
+  canShare(variable: Variable): boolean {
+    return variable.scope === 'global' && variable.ownerIntegrationId !== DELEGATE_INTEGRATION_ID;
   }
 
   formatValue(variable: Variable): string {

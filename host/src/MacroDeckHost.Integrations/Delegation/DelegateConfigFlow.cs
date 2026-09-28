@@ -66,7 +66,10 @@ public sealed class DelegateConfigFlow : IConfigFlow
 				ActionParameter.Secret(DelegateConfigKeys.Password,
 					label: AppStrings.Integrations.Delegation.Config.PasswordLabel(),
 					description: AppStrings.Integrations.Delegation.Config.PasswordDescription(),
-					required: true)
+					required: true),
+				ActionParameter.Toggle(DelegateConfigKeys.ImportSharedVariables,
+					label: AppStrings.Integrations.Delegation.Config.ImportSharedVariablesLabel(),
+					description: AppStrings.Integrations.Delegation.Config.ImportSharedVariablesDescription())
 			]
 		};
 

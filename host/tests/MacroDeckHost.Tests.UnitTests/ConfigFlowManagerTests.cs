@@ -258,6 +258,21 @@ public class ConfigFlowManagerTests
 	}
 
 	[Test]
+	public async Task Editing_an_entry_offers_a_stored_switch_as_it_was_saved()
+	{
+		var entryId = Guid.NewGuid();
+		_store.Existing.Add(new ConfigEntryRecord(entryId,
+			"cf",
+			"Existing",
+			DateTime.UtcNow,
+			Values(("importSharedVariables", JsonSerializer.SerializeToElement(true)))));
+
+		var start = await _manager.StartAsync("cf", null, entryId, CancellationToken.None);
+
+		Assert.That(start.InitialValues!["importSharedVariables"].ValueKind, Is.EqualTo(JsonValueKind.True));
+	}
+
+	[Test]
 	public async Task A_failed_secret_replacement_rolls_back_to_the_retained_reference_for_retry()
 	{
 		var secretId = SeedExistingSecretEntry();

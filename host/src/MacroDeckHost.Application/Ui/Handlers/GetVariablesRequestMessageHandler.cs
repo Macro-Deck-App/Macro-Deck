@@ -12,16 +12,19 @@ public class GetVariablesRequestMessageHandler
 	private readonly VariableRegistry _registry;
 	private readonly IVariableBindingService _dynamicBindings;
 	private readonly StartupReadiness _readiness;
+	private readonly SharedVariables _sharedVariables;
 
 	public GetVariablesRequestMessageHandler(IVariableService service,
 		VariableRegistry registry,
 		IVariableBindingService dynamicBindings,
-		StartupReadiness readiness)
+		StartupReadiness readiness,
+		SharedVariables sharedVariables)
 	{
 		_service = service;
 		_registry = registry;
 		_dynamicBindings = dynamicBindings;
 		_readiness = readiness;
+		_sharedVariables = sharedVariables;
 	}
 
 	public async ValueTask<GetVariablesResponse> Handle(
@@ -44,7 +47,8 @@ public class GetVariablesRequestMessageHandler
 			var dynamicResourceId = _dynamicBindings.FindByVariableId(entity.Id)?.LocalResourceId;
 			response.Variables.Add(VariableDtoMapper.ToDto(entity,
 				_registry.IsAvailable(entity.Id),
-				dynamicResourceId));
+				dynamicResourceId,
+				_sharedVariables.IsShared(entity)));
 		}
 
 		return response;

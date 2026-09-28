@@ -28,6 +28,8 @@ public class VariablesController : ControllerBase
 	private readonly IUiTransportMessageHandler<RenameCatalogVariableRequest, RenameCatalogVariableResponse>
 		_renameCatalogVariable;
 
+	private readonly IUiTransportMessageHandler<SetVariableSharedRequest, SetVariableSharedResponse> _setShared;
+
 	public VariablesController(
 		IUiTransportMessageHandler<GetVariablesRequest, GetVariablesResponse> getVariables,
 		IUiTransportMessageHandler<CreateVariableRequest, CreateVariableResponse> createVariable,
@@ -37,7 +39,8 @@ public class VariablesController : ControllerBase
 		IUiTransportMessageHandler<SanitizeVariableNameRequest, SanitizeVariableNameResponse> sanitizeVariableName,
 		IUiTransportMessageHandler<BindCatalogVariableRequest, BindCatalogVariableResponse> bindCatalogVariable,
 		IUiTransportMessageHandler<UnbindCatalogVariableRequest, UnbindCatalogVariableResponse> unbindCatalogVariable,
-		IUiTransportMessageHandler<RenameCatalogVariableRequest, RenameCatalogVariableResponse> renameCatalogVariable)
+		IUiTransportMessageHandler<RenameCatalogVariableRequest, RenameCatalogVariableResponse> renameCatalogVariable,
+		IUiTransportMessageHandler<SetVariableSharedRequest, SetVariableSharedResponse> setShared)
 	{
 		_getVariables = getVariables;
 		_createVariable = createVariable;
@@ -48,6 +51,7 @@ public class VariablesController : ControllerBase
 		_bindCatalogVariable = bindCatalogVariable;
 		_unbindCatalogVariable = unbindCatalogVariable;
 		_renameCatalogVariable = renameCatalogVariable;
+		_setShared = setShared;
 	}
 
 	[HttpGet]
@@ -72,6 +76,13 @@ public class VariablesController : ControllerBase
 	{
 		body.Id = id;
 		return _setVariableValue.Handle(body, ct).AsTask();
+	}
+
+	[HttpPatch("{id}/shared")]
+	public Task<SetVariableSharedResponse> SetShared(string id, SetVariableSharedRequest body, CancellationToken ct)
+	{
+		body.Id = id;
+		return _setShared.Handle(body, ct).AsTask();
 	}
 
 	[HttpPost("sanitize-name")]

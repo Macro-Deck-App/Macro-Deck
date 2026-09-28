@@ -16,12 +16,17 @@ public class SetVariableValueRequestMessageHandler
 	private readonly IVariableService _service;
 	private readonly IHostLockState _lockState;
 	private readonly VariableRegistry _registry;
+	private readonly SharedVariables _sharedVariables;
 
-	public SetVariableValueRequestMessageHandler(IVariableService service, IHostLockState lockState, VariableRegistry registry)
+	public SetVariableValueRequestMessageHandler(IVariableService service,
+		IHostLockState lockState,
+		VariableRegistry registry,
+		SharedVariables sharedVariables)
 	{
 		_service = service;
 		_lockState = lockState;
 		_registry = registry;
+		_sharedVariables = sharedVariables;
 	}
 
 	public async ValueTask<SetVariableValueResponse> Handle(
@@ -79,7 +84,8 @@ public class SetVariableValueRequestMessageHandler
 		{
 			Success = true,
 			Pending = entity.Classification == VariableClassification.Integration,
-			Variable = VariableDtoMapper.ToDto(result.Data, _registry.IsAvailable(result.Data.Id), null)
+			Variable = VariableDtoMapper.ToDto(result.Data, _registry.IsAvailable(result.Data.Id), null,
+				_sharedVariables.IsShared(result.Data))
 		};
 	}
 }

@@ -16,12 +16,17 @@ public class UpdateVariableRequestMessageHandler
 	private readonly IVariableService _service;
 	private readonly IHostLockState _lockState;
 	private readonly VariableRegistry _registry;
+	private readonly SharedVariables _sharedVariables;
 
-	public UpdateVariableRequestMessageHandler(IVariableService service, IHostLockState lockState, VariableRegistry registry)
+	public UpdateVariableRequestMessageHandler(IVariableService service,
+		IHostLockState lockState,
+		VariableRegistry registry,
+		SharedVariables sharedVariables)
 	{
 		_service = service;
 		_lockState = lockState;
 		_registry = registry;
+		_sharedVariables = sharedVariables;
 	}
 
 	public async ValueTask<UpdateVariableResponse> Handle(
@@ -93,7 +98,8 @@ public class UpdateVariableRequestMessageHandler
 		return new UpdateVariableResponse
 		{
 			Success = true,
-			Variable = VariableDtoMapper.ToDto(current, _registry.IsAvailable(current.Id), null)
+			Variable = VariableDtoMapper.ToDto(current, _registry.IsAvailable(current.Id), null,
+				_sharedVariables.IsShared(current))
 		};
 	}
 

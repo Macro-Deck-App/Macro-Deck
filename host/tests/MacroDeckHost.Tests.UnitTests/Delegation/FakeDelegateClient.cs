@@ -130,6 +130,50 @@ internal sealed class FakeDelegateClient : IDelegateClient
 		return config.RunHandler?.Invoke(scriptId) ?? new DelegateRunResult(true, null, "Succeeded");
 	}
 
+	public Task<IReadOnlyList<DelegateSharedVariable>> GetSharedVariablesAsync(Uri baseUrl,
+		string token,
+		CancellationToken cancellationToken)
+	{
+		Record("shared-variables", baseUrl);
+		var config = For(baseUrl);
+		lock (_lock)
+		{
+			if (config.SharedVariablesExceptions.Count > 0)
+			{
+				var ex = config.SharedVariablesExceptions.Dequeue();
+				return Task.FromException<IReadOnlyList<DelegateSharedVariable>>(ex);
+			}
+
+			if (config.SharedVariablesException is { } persistent)
+			{
+				return Task.FromException<IReadOnlyList<DelegateSharedVariable>>(persistent);
+			}
+
+			IReadOnlyList<DelegateSharedVariable> copy = config.SharedVariables.ToList();
+			return Task.FromResult(copy);
+		}
+	}
+
+	public Task<DelegateWriteResult> SetSharedVariableAsync(Uri baseUrl,
+		string token,
+		string name,
+		string? value,
+		CancellationToken cancellationToken)
+	{
+		Record("set-shared-variable", baseUrl);
+		var config = For(baseUrl);
+		lock (_lock)
+		{
+			config.SharedWrites.Add((name, value));
+			if (config.SharedWriteExceptions.Count > 0)
+			{
+				return Task.FromException<DelegateWriteResult>(config.SharedWriteExceptions.Dequeue());
+			}
+		}
+
+		return Task.FromResult(config.SharedWriteResult);
+	}
+
 	public void Dispose()
 	{
 	}
@@ -179,5 +223,17 @@ internal sealed class FakeDelegateClient : IDelegateClient
 		public List<string> RunScriptIds { get; } = [];
 
 		public List<IReadOnlyDictionary<string, object?>?> RunInputs { get; } = [];
+
+		public List<DelegateSharedVariable> SharedVariables { get; } = [];
+
+		public Queue<Exception> SharedVariablesExceptions { get; } = new();
+
+		public Exception? SharedVariablesException { get; set; }
+
+		public List<(string Name, string? Value)> SharedWrites { get; } = [];
+
+		public Queue<Exception> SharedWriteExceptions { get; } = new();
+
+		public DelegateWriteResult SharedWriteResult { get; set; } = new(true, null);
 	}
 }

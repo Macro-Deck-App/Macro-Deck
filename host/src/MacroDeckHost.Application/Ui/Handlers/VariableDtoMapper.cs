@@ -11,7 +11,7 @@ namespace MacroDeckHost.Application.Ui.Handlers;
 
 internal static class VariableDtoMapper
 {
-	public static Variable ToDto(VariableEntity entity, bool available, string? dynamicResourceId)
+	public static Variable ToDto(VariableEntity entity, bool available, string? dynamicResourceId, bool shared)
 	{
 		return new Variable
 		{
@@ -40,6 +40,7 @@ internal static class VariableDtoMapper
 			CommitOnRelease = entity.CommitOnRelease,
 			Available = available,
 			DynamicResourceId = dynamicResourceId,
+			Shared = shared,
 		};
 	}
 

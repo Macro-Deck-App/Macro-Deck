@@ -35,6 +35,7 @@ export interface Variable {
   attributes?: Record<string, string>;
   canWrite?: boolean;
   commitOnRelease?: boolean;
+  shared?: boolean;
   fileSource?: VariableFileSource | null;
 }
 

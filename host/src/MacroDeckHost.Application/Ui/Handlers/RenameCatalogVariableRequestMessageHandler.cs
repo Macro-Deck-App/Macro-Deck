@@ -9,12 +9,15 @@ public class RenameCatalogVariableRequestMessageHandler
 {
 	private readonly IVariableBindingService _bindings;
 	private readonly VariableRegistry _registry;
+	private readonly SharedVariables _sharedVariables;
 
 	public RenameCatalogVariableRequestMessageHandler(IVariableBindingService bindings,
-		VariableRegistry registry)
+		VariableRegistry registry,
+		SharedVariables sharedVariables)
 	{
 		_bindings = bindings;
 		_registry = registry;
+		_sharedVariables = sharedVariables;
 	}
 
 	public async ValueTask<RenameCatalogVariableResponse> Handle(
@@ -51,7 +54,8 @@ public class RenameCatalogVariableRequestMessageHandler
 
 		return new RenameCatalogVariableResponse
 		{
-			Variable = VariableDtoMapper.ToDto(entity, _registry.IsAvailable(id), dynamicResourceId),
+			Variable = VariableDtoMapper.ToDto(entity, _registry.IsAvailable(id), dynamicResourceId,
+				_sharedVariables.IsShared(entity)),
 		};
 	}
 }

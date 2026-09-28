@@ -209,7 +209,8 @@ public class VariableCatalogHandlersTests
 			OnBind = (_, _, _, _) => Result.Fail<VariableEntity, VariableBindingError>(VariableBindingError.NotBindable,
 				"'group.kitchen' is not bindable"),
 		};
-		var handler = new BindCatalogVariableRequestMessageHandler(bindings);
+		var handler = new BindCatalogVariableRequestMessageHandler(bindings,
+			InMemorySharedVariableStore.For(new VariableRegistry()));
 
 		var response = await handler.Handle(new BindCatalogVariableRequest
 				{ IntegrationId = "home-assistant", ResourceId = "group.kitchen" },

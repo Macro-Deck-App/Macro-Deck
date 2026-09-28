@@ -44,7 +44,8 @@ public class VariableBroadcastTests
 			transport,
 			new VariableBindingLookup(registry,
 				new InMemoryVariableBindingStore()),
-			Serilog.Log.Logger);
+			Serilog.Log.Logger,
+			InMemorySharedVariableStore.For(registry));
 
 		await broadcaster.Publish([a.Id, b.Id], CancellationToken.None);
 
@@ -87,7 +88,8 @@ public class VariableBroadcastTests
 			new VariableInterestTracker(),
 			transport,
 			bindings,
-			Serilog.Log.Logger);
+			Serilog.Log.Logger,
+			InMemorySharedVariableStore.For(registry));
 
 		await broadcaster.Publish([bound.Id, ordinary.Id], CancellationToken.None);
 
@@ -119,12 +121,13 @@ public class VariableBroadcastTests
 			transport,
 			new VariableBindingLookup(registry,
 				new InMemoryVariableBindingStore()),
-			Serilog.Log.Logger);
+			Serilog.Log.Logger,
+			InMemorySharedVariableStore.For(registry));
 
 		await broadcaster.Publish([a.Id], CancellationToken.None);
 
 		var broadcastDto = transport.Group().Single().Upserted.Single();
-		var readDto = VariableDtoMapper.ToDto(a, registry.IsAvailable(a.Id), null);
+		var readDto = VariableDtoMapper.ToDto(a, registry.IsAvailable(a.Id), null, shared: false);
 
 		Assert.Multiple(() =>
 		{
@@ -155,7 +158,8 @@ public class VariableBroadcastTests
 			transport,
 			new VariableBindingLookup(registry,
 				new InMemoryVariableBindingStore()),
-			Serilog.Log.Logger);
+			Serilog.Log.Logger,
+			InMemorySharedVariableStore.For(registry));
 
 		await broadcaster.Publish([a.Id, b.Id], CancellationToken.None);
 
@@ -190,7 +194,8 @@ public class VariableBroadcastTests
 			transport,
 			new VariableBindingLookup(registry,
 				new InMemoryVariableBindingStore()),
-			Serilog.Log.Logger);
+			Serilog.Log.Logger,
+			InMemorySharedVariableStore.For(registry));
 
 		await broadcaster.Publish([a.Id, b.Id, c.Id], CancellationToken.None);
 
@@ -220,7 +225,8 @@ public class VariableBroadcastTests
 				transport,
 				new VariableBindingLookup(registry,
 					new InMemoryVariableBindingStore()),
-				Serilog.Log.Logger);
+				Serilog.Log.Logger,
+				InMemorySharedVariableStore.For(registry));
 
 		var snapshot = broadcaster.Snapshot(["a", "c", "missing"]);
 
@@ -258,7 +264,8 @@ public class VariableBroadcastTests
 			transport,
 			new VariableBindingLookup(registry,
 				new InMemoryVariableBindingStore()),
-			Serilog.Log.Logger);
+			Serilog.Log.Logger,
+			InMemorySharedVariableStore.For(registry));
 
 		await broadcaster.Publish([a.Id, b.Id, c.Id], CancellationToken.None);
 
@@ -289,7 +296,8 @@ public class VariableBroadcastTests
 			transport,
 			new VariableBindingLookup(registry,
 				new InMemoryVariableBindingStore()),
-			Serilog.Log.Logger);
+			Serilog.Log.Logger,
+			InMemorySharedVariableStore.For(registry));
 
 		// WatchVariables(["a"]) always calls Snapshot(["a"]) for the initial payload, which is what lets
 		// the broadcaster still attribute "a"'s name once it is gone from the registry.
@@ -328,7 +336,8 @@ public class VariableBroadcastTests
 				transport,
 				new VariableBindingLookup(registry,
 					new InMemoryVariableBindingStore()),
-				Serilog.Log.Logger);
+				Serilog.Log.Logger,
+				InMemorySharedVariableStore.For(registry));
 
 		await broadcaster.Publish([z.Id], CancellationToken.None);
 
@@ -356,7 +365,8 @@ public class VariableBroadcastTests
 				transport,
 				new VariableBindingLookup(registry,
 					new InMemoryVariableBindingStore()),
-				Serilog.Log.Logger);
+				Serilog.Log.Logger,
+				InMemorySharedVariableStore.For(registry));
 
 		await broadcaster.Publish([a.Id, a2.Id], CancellationToken.None);
 
@@ -391,7 +401,8 @@ public class VariableBroadcastTests
 			transport,
 			new VariableBindingLookup(registry,
 				new InMemoryVariableBindingStore()),
-			Serilog.Log.Logger);
+			Serilog.Log.Logger,
+			InMemorySharedVariableStore.For(registry));
 
 		await broadcaster.Publish([a.Id], CancellationToken.None);
 
@@ -421,7 +432,8 @@ public class VariableBroadcastTests
 				transport,
 				new VariableBindingLookup(registry,
 					new InMemoryVariableBindingStore()),
-				Serilog.Log.Logger);
+				Serilog.Log.Logger,
+				InMemorySharedVariableStore.For(registry));
 
 		await broadcaster.Publish(ids, CancellationToken.None);
 
@@ -441,7 +453,8 @@ public class VariableBroadcastTests
 				transport,
 				new VariableBindingLookup(registry,
 					new InMemoryVariableBindingStore()),
-				Serilog.Log.Logger);
+				Serilog.Log.Logger,
+				InMemorySharedVariableStore.For(registry));
 
 		await broadcaster.Publish(ids, CancellationToken.None);
 
@@ -465,7 +478,8 @@ public class VariableBroadcastTests
 				transport,
 				new VariableBindingLookup(registry,
 					new InMemoryVariableBindingStore()),
-				Serilog.Log.Logger);
+				Serilog.Log.Logger,
+				InMemorySharedVariableStore.For(registry));
 
 		await broadcaster.Publish(ids, CancellationToken.None);
 
@@ -506,7 +520,8 @@ public class VariableBroadcastTests
 			transport,
 			new VariableBindingLookup(registry,
 				new InMemoryVariableBindingStore()),
-			Serilog.Log.Logger);
+			Serilog.Log.Logger,
+			InMemorySharedVariableStore.For(registry));
 
 		await broadcaster.Publish(allIds, CancellationToken.None);
 
@@ -541,7 +556,8 @@ public class VariableBroadcastTests
 			transport,
 			new VariableBindingLookup(registry,
 				new InMemoryVariableBindingStore()),
-			Serilog.Log.Logger);
+			Serilog.Log.Logger,
+			InMemorySharedVariableStore.For(registry));
 
 		await broadcaster.Publish([a.Id, b.Id], CancellationToken.None);
 
@@ -568,7 +584,8 @@ public class VariableBroadcastTests
 				transport,
 				new VariableBindingLookup(registry,
 					new InMemoryVariableBindingStore()),
-				Serilog.Log.Logger);
+				Serilog.Log.Logger,
+				InMemorySharedVariableStore.For(registry));
 
 		registry.SetAvailable(a.Id, false);
 		await broadcaster.Publish([a.Id], CancellationToken.None);
@@ -594,7 +611,8 @@ public class VariableBroadcastTests
 				transport,
 				new VariableBindingLookup(registry,
 					new InMemoryVariableBindingStore()),
-				Serilog.Log.Logger);
+				Serilog.Log.Logger,
+				InMemorySharedVariableStore.For(registry));
 		var service = NewService(channel, broadcaster);
 
 		await service.StartAsync(CancellationToken.None);
@@ -642,7 +660,8 @@ public class VariableBroadcastTests
 				transport,
 				new VariableBindingLookup(registry,
 					new InMemoryVariableBindingStore()),
-				Serilog.Log.Logger);
+				Serilog.Log.Logger,
+				InMemorySharedVariableStore.For(registry));
 		var service = NewService(channel, broadcaster);
 
 		await service.StartAsync(CancellationToken.None);
@@ -689,7 +708,8 @@ public class VariableBroadcastTests
 			transport,
 			new VariableBindingLookup(registry,
 				new InMemoryVariableBindingStore()),
-			Serilog.Log.Logger);
+			Serilog.Log.Logger,
+			InMemorySharedVariableStore.For(registry));
 		var service = NewService(channel, broadcaster);
 
 		await service.StartAsync(CancellationToken.None);
@@ -730,7 +750,8 @@ public class VariableBroadcastTests
 				transport,
 				new VariableBindingLookup(registry,
 					new InMemoryVariableBindingStore()),
-				Serilog.Log.Logger);
+				Serilog.Log.Logger,
+				InMemorySharedVariableStore.For(registry));
 		var service = NewService(channel, broadcaster);
 
 		await service.StartAsync(CancellationToken.None);
@@ -864,7 +885,8 @@ public class VariableBroadcastTests
 			new VariableInterestTracker(),
 			transport,
 			new VariableBindingLookup(registry, new InMemoryVariableBindingStore()),
-			Serilog.Log.Logger);
+			Serilog.Log.Logger,
+			InMemorySharedVariableStore.For(registry));
 
 		return (service, registry, broadcaster, transport, mediator);
 	}
@@ -984,7 +1006,8 @@ public class VariableBroadcastTests
 			transport,
 			new VariableBindingLookup(registry,
 				new InMemoryVariableBindingStore()),
-			Serilog.Log.Logger);
+			Serilog.Log.Logger,
+			InMemorySharedVariableStore.For(registry));
 		await broadcaster.Publish(ids, CancellationToken.None);
 
 		Assert.That(transport.To("c1"), Is.Empty);
@@ -1009,7 +1032,8 @@ public class VariableBroadcastTests
 			TestVariableServices.Create(registry, new NullUserVariableStore(), new FanOutMediator()),
 			registry,
 			new FakeVariableBindingService(),
-			readiness);
+			readiness,
+			InMemorySharedVariableStore.For(registry));
 
 		var response = await handler.Handle(new GetVariablesRequest(), CancellationToken.None);
 

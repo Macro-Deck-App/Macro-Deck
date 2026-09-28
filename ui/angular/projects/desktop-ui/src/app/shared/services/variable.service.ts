@@ -136,6 +136,16 @@ export class VariableService {
     return { variable: response.variable, errorCode: null };
   }
 
+  async setShared(id: string, shared: boolean): Promise<VariableSaveResult> {
+    const response = await this.ipc.setVariableShared({ id, shared });
+    if (!response.success || !response.variable) {
+      console.warn('setVariableShared failed:', response.error);
+      return { variable: null, errorCode: response.error?.code ?? null };
+    }
+    this.upsertLocal(response.variable);
+    return { variable: response.variable, errorCode: null };
+  }
+
   async delete(id: string): Promise<boolean> {
     const response = await this.ipc.deleteVariable({ id });
     if (!response.success) {

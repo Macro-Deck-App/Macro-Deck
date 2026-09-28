@@ -15,6 +15,7 @@ public sealed class VariableBroadcaster
 	private readonly IUiTransport _transport;
 	private readonly VariableBindingLookup _bindings;
 	private readonly ILogger _logger;
+	private readonly SharedVariables _sharedVariables;
 
 	// A deleted id is already gone from VariableRegistry by the time a coalesced batch reaches Publish,
 	// so gating its deletion to the connections that declared interest in its name needs the name
@@ -26,13 +27,15 @@ public sealed class VariableBroadcaster
 		VariableInterestTracker interest,
 		IUiTransport transport,
 		VariableBindingLookup bindings,
-		ILogger logger)
+		ILogger logger,
+		SharedVariables sharedVariables)
 	{
 		_registry = registry;
 		_interest = interest;
 		_transport = transport;
 		_bindings = bindings;
 		_logger = logger.ForContext<VariableBroadcaster>();
+		_sharedVariables = sharedVariables;
 	}
 
 	public VariablesChangedEvent Snapshot(IReadOnlyCollection<string> names)
@@ -49,7 +52,8 @@ public sealed class VariableBroadcaster
 
 			_lastKnownNames[entity.Id] = entity.Name;
 			var boundResourceId = _bindings.FindByVariableId(entity.Id)?.LocalResourceId;
-			evt.Upserted.Add(VariableDtoMapper.ToDto(entity, _registry.IsAvailable(entity.Id), boundResourceId));
+			evt.Upserted.Add(VariableDtoMapper.ToDto(entity, _registry.IsAvailable(entity.Id), boundResourceId,
+				_sharedVariables.IsShared(entity)));
 		}
 
 		return evt;
@@ -77,7 +81,8 @@ public sealed class VariableBroadcaster
 
 			_lastKnownNames[id] = entity.Name;
 			var boundResourceId = _bindings.FindByVariableId(id)?.LocalResourceId;
-			upserted.Add(VariableDtoMapper.ToDto(entity, _registry.IsAvailable(id), boundResourceId));
+			upserted.Add(VariableDtoMapper.ToDto(entity, _registry.IsAvailable(id), boundResourceId,
+				_sharedVariables.IsShared(entity)));
 		}
 
 		if (upserted.Count == 0 && deletedIds.Count == 0)

@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Domain.Entities;
 using MacroDeck.Localization;
@@ -158,4 +159,28 @@ internal sealed class StartedHostLifetime : Microsoft.Extensions.Hosting.IHostAp
 	public void StopApplication()
 	{
 	}
+}
+
+internal sealed class InMemorySharedVariableStore : ISharedVariableStore
+{
+	public List<SharedVariable> Entries { get; } = [];
+
+	public bool Unreadable { get; set; }
+
+	public bool TryLoad(out IReadOnlyList<SharedVariable> entries)
+	{
+		entries = Unreadable ? [] : Entries.ToList();
+		return !Unreadable;
+	}
+
+	public bool Save(IEnumerable<SharedVariable> entries)
+	{
+		var list = entries.ToList();
+		Entries.Clear();
+		Entries.AddRange(list);
+		return true;
+	}
+
+	public static SharedVariables For(VariableRegistry registry, InMemorySharedVariableStore? store = null)
+		=> new(registry, store ?? new InMemorySharedVariableStore(), Serilog.Log.Logger);
 }

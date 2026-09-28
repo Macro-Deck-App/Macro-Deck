@@ -2882,6 +2882,21 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.Variables.InvalidFilePath" xml:space="preserve">
     <value>Wprowadź pełną ścieżkę do pliku</value>
   </data>
+  <data name="Errors.Variables.OnlyGlobalCanBeShared" xml:space="preserve">
+    <value>Udostępniać można tylko zmienne globalne.</value>
+  </data>
+  <data name="Errors.Variables.ImportedCannotBeShared" xml:space="preserve">
+    <value>Zmiennej zaimportowanej z innego Macro Decka nie można udostępnić.</value>
+  </data>
+  <data name="Errors.Variables.SharingNotSaved" xml:space="preserve">
+    <value>Nie udało się zapisać ustawienia udostępniania.</value>
+  </data>
+  <data name="Errors.Variables.NotShared" xml:space="preserve">
+    <value>Ta zmienna nie jest udostępniona.</value>
+  </data>
+  <data name="Errors.Variables.ValueDoesNotFitType" xml:space="preserve">
+    <value>Wartość nie pasuje do typu zmiennej.</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>Dane widżetu muszą być obiektem JSON.</value>
   </data>
@@ -4247,6 +4262,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Delegation.Config.UsernameRequired" xml:space="preserve">
     <value>Wprowadź nazwę użytkownika używaną do logowania na drugim Macro Deck.</value>
   </data>
+  <data name="Integrations.Delegation.Config.ImportSharedVariablesLabel" xml:space="preserve">
+    <value>Importuj udostępnione zmienne</value>
+  </data>
+  <data name="Integrations.Delegation.Config.ImportSharedVariablesDescription" xml:space="preserve">
+    <value>Udostępnia tutaj zmienne udostępnione na drugim Macro Decku, nazwane według jego komputera, na przykład otherpc_obs_streaming.</value>
+  </data>
   <data name="Integrations.Delegation.Errors.Ambiguous" xml:space="preserve">
     <value>Wybierz, który Macro Deck ma uruchomić skrypt.</value>
   </data>
@@ -4255,6 +4276,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Delegation.Errors.CouldNotBeReached" xml:space="preserve">
     <value>Nie udało się połączyć z {label}.</value>
+  </data>
+  <data name="Integrations.Delegation.Errors.RemoteLocked" xml:space="preserve">
+    <value>{label} jest zablokowany i nie przyjął zmiany.</value>
+  </data>
+  <data name="Integrations.Delegation.Errors.RemoteRejectedChange" xml:space="preserve">
+    <value>{label} nie przyjął zmiany.</value>
   </data>
   <data name="Integrations.Delegation.Errors.DelegateCycle" xml:space="preserve">
     <value>Uruchomienie tego utworzyłoby cykl delegacji przez {label}.</value>
@@ -4333,6 +4360,17 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Delegation.Issues.UnreachableTitle" xml:space="preserve">
     <value>{label} jest niedostępny</value>
+  </data>
+  <data name="Integrations.Delegation.Issues.SharedImportSkippedTitle.One" xml:space="preserve">
+    <value>Nie można dodać udostępnionej zmiennej z {label} ({count})</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.Delegation.Issues.SharedImportSkippedTitle.Other" xml:space="preserve">
+    <value>Nie można dodać udostępnionych zmiennych z {label} (liczba: {count})</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.Delegation.Issues.SharedImportSkippedDescription" xml:space="preserve">
+    <value>Nazwa jest już używana przez inną zmienną, jest za długa lub udostępnionych zmiennych jest za dużo: {names}</value>
   </data>
   <data name="Integrations.Delegation.Name" xml:space="preserve">
     <value>Macro Deck Delegate</value>
@@ -16051,6 +16089,18 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Variables.Manager.VariableCount.Other" xml:space="preserve">
     <value>Liczba zmiennych: {count}</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="Variables.Manager.ShareAction" xml:space="preserve">
+    <value>Udostępnij innym Macro Deckom</value>
+  </data>
+  <data name="Variables.Manager.StopSharingAction" xml:space="preserve">
+    <value>Zatrzymaj udostępnianie</value>
+  </data>
+  <data name="Variables.Manager.Shared" xml:space="preserve">
+    <value>Udostępniona</value>
+  </data>
+  <data name="Variables.Manager.SharedTooltip" xml:space="preserve">
+    <value>Inne Macro Decki połączone przez Macro Deck Delegate mogą odczytywać i zmieniać tę zmienną</value>
   </data>
   <data name="Variables.Manager.SourceField" xml:space="preserve">
     <value>Źródło</value>

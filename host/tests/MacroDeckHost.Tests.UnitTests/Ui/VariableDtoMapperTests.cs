@@ -20,7 +20,7 @@ public class VariableDtoMapperTests
 				Classification = VariableClassification.User
 			},
 			true,
-			null);
+			null, shared: false);
 
 		Assert.Multiple(() =>
 		{
@@ -59,7 +59,7 @@ public class VariableDtoMapperTests
 				Presentation = new VariablePresentation(displayName, null, default)
 			},
 			true,
-			null);
+			null, shared: false);
 
 		Assert.That(dto.DisplayName, Is.EqualTo(displayName));
 	}
@@ -75,7 +75,7 @@ public class VariableDtoMapperTests
 				Classification = VariableClassification.Integration
 			},
 			true,
-			null);
+			null, shared: false);
 
 		Assert.Multiple(() =>
 		{
@@ -99,7 +99,7 @@ public class VariableDtoMapperTests
 				Presentation = new VariablePresentation(default, "mac", LocalizedText.FromLiteral("Mac"))
 			},
 			true,
-			null);
+			null, shared: false);
 
 		var withoutConfiguration = VariableDtoMapper.ToDto(new VariableEntity
 			{
@@ -109,7 +109,7 @@ public class VariableDtoMapperTests
 				Classification = VariableClassification.Integration
 			},
 			true,
-			null);
+			null, shared: false);
 
 		Assert.Multiple(() =>
 		{
@@ -137,7 +137,7 @@ public class VariableDtoMapperTests
 			DefinitionId = "light.kitchen",
 		};
 
-		var bound = VariableDtoMapper.ToDto(entity, available: true, dynamicResourceId: "light.kitchen");
+		var bound = VariableDtoMapper.ToDto(entity, available: true, dynamicResourceId: "light.kitchen", shared: false);
 		var ordinary = VariableDtoMapper.ToDto(new VariableEntity
 			{
 				Name = "greeting",
@@ -146,7 +146,7 @@ public class VariableDtoMapperTests
 				Classification = VariableClassification.User,
 			},
 			true,
-			null);
+			null, shared: false);
 
 		Assert.Multiple(() =>
 		{
