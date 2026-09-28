@@ -1,11 +1,15 @@
+import { currentOutdatedUi, type OutdatedUiVariant } from '@macro-deck/runtime';
+
 import {
   decideVersionAction,
+  hardRefresh,
   readUiCommit,
   runVersionCheck,
-  showOutdatedUiError,
   UI_COMMIT_META,
   withCacheBust,
   withoutCacheBust,
+  type HardRefreshEnvironment,
+  type OutdatedUiSetup,
   type VersionCheckDeps,
 } from './version-check';
 
@@ -57,6 +61,7 @@ function deps(
       rewritten.push(target);
     },
     fetchHostCommit: () => Promise.resolve(hostCommit),
+    fetchServedCommit: () => Promise.resolve(hostCommit),
     now: () => 1000,
   };
   const merged = { ...base, ...(overrides === undefined ? {} : overrides) };
@@ -160,21 +165,6 @@ describe('runVersionCheck', () => {
     expect(recorder.replaced).toEqual([]);
   });
 
-  it('shows the blocking notice with the text it was given', async () => {
-    stampCommit('abc1234');
-    const storage = memoryStorage({ 'macro-deck.reloaded-for': 'def5678' });
-    const recorder = deps('http://host/deck', 'def5678', storage, {
-      outdatedText: { heading: 'Veraltet', body: 'Cache leeren.' },
-    });
-    spyOn(console, 'error');
-
-    await runVersionCheck(() => 'http://host', recorder.deps);
-
-    const overlay = document.getElementById('macro-deck-outdated-ui');
-    expect(overlay).not.toBeNull();
-    expect((overlay as HTMLElement).textContent).toContain('Veraltet');
-  });
-
   it('leaves the page alone when the host cannot be reached', async () => {
     stampCommit('abc1234');
     const recorder = deps('http://host/deck', null);
@@ -200,16 +190,287 @@ describe('readUiCommit', () => {
   });
 });
 
-describe('showOutdatedUiError', () => {
+function outdatedSetup(refreshed: string[]): OutdatedUiSetup {
+  return {
+    text: (variant: OutdatedUiVariant, device: string, computer: string) => ({
+      title: variant + ' title',
+      body: 'body',
+      steps: ['step'],
+      action: variant + ' action',
+      versions: device + ' / ' + computer,
+    }),
+    hardRefresh: hostCommit => {
+      refreshed.push('hard ' + hostCommit);
+    },
+    reload: hostCommit => {
+      refreshed.push('reload ' + hostCommit);
+    },
+  };
+}
+
+function shownTitle(): string | null {
+  const overlay = document.getElementById('macro-deck-outdated-ui');
+  return overlay ? overlay.querySelector('h1')!.textContent : null;
+}
+
+describe('the notice when a reload did not bring the page up to date', () => {
+  beforeEach(() => spyOn(console, 'error'));
+
   afterEach(() => {
-    const overlay = document.getElementById('macro-deck-outdated-ui');
-    if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    const shown = currentOutdatedUi(document);
+    if (shown) shown.remove();
+    stampCommit(null);
   });
 
-  it('shows one notice however often it is asked', () => {
-    showOutdatedUiError(document, { heading: 'A', body: 'B' });
-    showOutdatedUiError(document, { heading: 'C', body: 'D' });
+  function alreadyReloaded(): Pick<Storage, 'getItem' | 'setItem' | 'removeItem'> {
+    return memoryStorage({ 'macro-deck.reloaded-for': 'def5678' });
+  }
 
-    expect(document.querySelectorAll('#macro-deck-outdated-ui').length).toBe(1);
+  it('blames this device when the host serves the build it reports, and its button refreshes for that build', async () => {
+    stampCommit('abc1234');
+    const refreshed: string[] = [];
+    const recorder = deps('http://host/deck', 'def5678', alreadyReloaded(), {
+      outdated: outdatedSetup(refreshed),
+      fetchServedCommit: () => Promise.resolve('DEF5678'),
+    });
+
+    await runVersionCheck(() => 'http://host', recorder.deps);
+
+    expect(shownTitle()).toBe('device title');
+    expect(document.getElementById('macro-deck-outdated-ui')!.textContent).toContain('abc1234 / def5678');
+    document.querySelector<HTMLButtonElement>('#macro-deck-outdated-ui button')!.click();
+    expect(refreshed).toEqual(['hard def5678']);
+    expect(recorder.replaced).toEqual([]);
+  });
+
+  it('blames the installation when the host serves a different build than it reports', async () => {
+    stampCommit('abc1234');
+    const recorder = deps('http://host/deck', 'def5678', alreadyReloaded(), {
+      outdated: outdatedSetup([]),
+      fetchServedCommit: () => Promise.resolve('abc1234'),
+    });
+
+    await runVersionCheck(() => 'http://host', recorder.deps);
+
+    expect(shownTitle()).toBe('installation title');
+  });
+
+  it('only reloads from the installation notice, since this device holds nothing worth dropping', async () => {
+    stampCommit('abc1234');
+    const refreshed: string[] = [];
+    const recorder = deps('http://host/deck', 'def5678', alreadyReloaded(), {
+      outdated: outdatedSetup(refreshed),
+      fetchServedCommit: () => Promise.resolve('abc1234'),
+    });
+
+    await runVersionCheck(() => 'http://host', recorder.deps);
+    document.querySelector<HTMLButtonElement>('#macro-deck-outdated-ui button')!.click();
+
+    expect(refreshed).toEqual(['reload def5678']);
+  });
+
+  it('loads the repaired build by itself once the installation serves what it reports', async () => {
+    stampCommit('abc1234');
+    const refreshed: string[] = [];
+    await runVersionCheck(() => 'http://host', deps('http://host/deck', 'def5678', alreadyReloaded(), {
+      outdated: outdatedSetup(refreshed),
+      fetchServedCommit: () => Promise.resolve('abc1234'),
+    }).deps);
+
+    await runVersionCheck(() => 'http://host', deps('http://host/deck', 'def5678', alreadyReloaded(), {
+      outdated: outdatedSetup(refreshed),
+      fetchServedCommit: () => Promise.resolve('def5678'),
+    }).deps);
+
+    expect(refreshed).toEqual(['hard def5678']);
+  });
+
+  it('falls back to this device when the served page cannot be read', async () => {
+    stampCommit('abc1234');
+    const recorder = deps('http://host/deck', 'def5678', alreadyReloaded(), {
+      outdated: outdatedSetup([]),
+      fetchServedCommit: () => Promise.resolve(null),
+    });
+
+    await runVersionCheck(() => 'http://host', recorder.deps);
+
+    expect(shownTitle()).toBe('device title');
+  });
+
+  it('stays up, and keeps its markers, when a later check cannot reach the host', async () => {
+    stampCommit('abc1234');
+    const storage = alreadyReloaded();
+    const url = 'http://host/deck?md-reload=def5678';
+    await runVersionCheck(() => 'http://host', deps(url, 'def5678', storage, { outdated: outdatedSetup([]) }).deps);
+
+    const unreachable = deps(url, null, storage, { outdated: outdatedSetup([]) });
+    await runVersionCheck(() => 'http://host', unreachable.deps);
+
+    expect(shownTitle()).toBe('device title');
+    expect(storage.getItem('macro-deck.reloaded-for')).toBe('def5678');
+    expect(unreachable.rewritten).toEqual([]);
+  });
+
+  it('goes away once the page and the host agree again', async () => {
+    stampCommit('abc1234');
+    await runVersionCheck(
+      () => 'http://host',
+      deps('http://host/deck', 'def5678', alreadyReloaded(), { outdated: outdatedSetup([]) }).deps);
+
+    await runVersionCheck(
+      () => 'http://host',
+      deps('http://host/deck', 'abc1234', alreadyReloaded(), { outdated: outdatedSetup([]) }).deps);
+
+    expect(shownTitle()).toBeNull();
+  });
+});
+
+interface FakeWorkerSetup {
+  reachable?: boolean;
+  controlled: boolean;
+  scriptURL: string;
+  cacheNames: string[];
+}
+
+function hardRefreshEnvironment(setup: FakeWorkerSetup): {
+  env: HardRefreshEnvironment;
+  unregistered: () => boolean;
+  deleted: string[];
+  replaced: string[];
+} {
+  let unregistered = false;
+  const deleted: string[] = [];
+  const replaced: string[] = [];
+  const registration = {
+    active: { scriptURL: setup.scriptURL },
+    waiting: null,
+    installing: null,
+    unregister: () => {
+      unregistered = true;
+      return Promise.resolve(true);
+    },
+  };
+  const container = {
+    controller: setup.controlled ? {} : null,
+    getRegistration: () => Promise.resolve(registration),
+  } as unknown as ServiceWorkerContainer;
+  const storage = {
+    keys: () => Promise.resolve(setup.cacheNames.slice()),
+    delete: (name: string) => {
+      deleted.push(name);
+      return Promise.resolve(true);
+    },
+  } as unknown as CacheStorage;
+  return {
+    env: {
+      serviceWorker: container,
+      caches: storage,
+      baseUri: 'https://host/',
+      hostReachable: () => Promise.resolve(setup.reachable !== false),
+      currentUrl: () => 'https://host/?md-reload=def5678',
+      replaceUrl: url => {
+        replaced.push(url);
+      },
+    },
+    unregistered: () => unregistered,
+    deleted,
+    replaced,
+  };
+}
+
+describe('hardRefresh', () => {
+  it('drops this client\'s worker and shell caches, then loads the host\'s build', async () => {
+    const fake = hardRefreshEnvironment({
+      controlled: true,
+      scriptURL: 'https://host/macro-deck-worker.js',
+      cacheNames: ['macro-deck-shell-v1', 'someone-else'],
+    });
+
+    await hardRefresh('def5678', fake.env);
+
+    expect(fake.unregistered()).toBeTrue();
+    expect(fake.deleted).toEqual(['macro-deck-shell-v1']);
+    expect(fake.replaced).toEqual(['https://host/?md-reload=def5678']);
+  });
+
+  it('keeps the worker and its shell while the host cannot be reached', async () => {
+    const fake = hardRefreshEnvironment({
+      reachable: false,
+      controlled: true,
+      scriptURL: 'https://host/macro-deck-worker.js',
+      cacheNames: ['macro-deck-shell-v1'],
+    });
+
+    await hardRefresh('def5678', fake.env);
+
+    expect(fake.unregistered()).toBeFalse();
+    expect(fake.deleted).toEqual([]);
+    expect(fake.replaced).toEqual(['https://host/?md-reload=def5678']);
+  });
+
+  it('leaves a worker that belongs to another app on the same host alone', async () => {
+    const fake = hardRefreshEnvironment({
+      controlled: true,
+      scriptURL: 'https://host/other/worker.js',
+      cacheNames: [],
+    });
+
+    await hardRefresh('def5678', fake.env);
+
+    expect(fake.unregistered()).toBeFalse();
+    expect(fake.replaced.length).toBe(1);
+  });
+
+  it('does not touch the worker when it does not control this page', async () => {
+    const fake = hardRefreshEnvironment({
+      controlled: false,
+      scriptURL: 'https://host/macro-deck-worker.js',
+      cacheNames: [],
+    });
+
+    await hardRefresh('def5678', fake.env);
+
+    expect(fake.unregistered()).toBeFalse();
+    expect(fake.replaced.length).toBe(1);
+  });
+
+  it('still reloads when the browser never finishes cleaning up', async () => {
+    jasmine.clock().install();
+    try {
+      const replaced: string[] = [];
+      const pending = hardRefresh('def5678', {
+        serviceWorker: {
+          controller: {},
+          getRegistration: () => new Promise(() => undefined),
+        } as unknown as ServiceWorkerContainer,
+        caches: null,
+        baseUri: 'https://host/',
+        hostReachable: () => Promise.resolve(true),
+        currentUrl: () => 'https://host/',
+        replaceUrl: url => {
+          replaced.push(url);
+        },
+      });
+      jasmine.clock().tick(3000);
+      await pending;
+      expect(replaced).toEqual(['https://host/?md-reload=def5678']);
+    } finally {
+      jasmine.clock().uninstall();
+    }
+  });
+
+  it('works without any service worker support', async () => {
+    const replaced: string[] = [];
+    await hardRefresh('def5678', {
+      serviceWorker: null,
+      caches: null,
+      baseUri: 'https://host/',
+      hostReachable: () => Promise.resolve(true),
+      currentUrl: () => 'https://host/',
+      replaceUrl: url => {
+        replaced.push(url);
+      },
+    });
+    expect(replaced).toEqual(['https://host/?md-reload=def5678']);
   });
 });

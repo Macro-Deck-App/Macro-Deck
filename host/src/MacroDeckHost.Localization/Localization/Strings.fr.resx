@@ -18730,4 +18730,52 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>{count} builds de test</value>
     <comment>[plural]</comment>
   </data>
+  <data name="OutdatedUi.Device.Title" xml:space="preserve">
+    <value>Ce deck doit être mis à jour</value>
+  </data>
+  <data name="OutdatedUi.Device.Body" xml:space="preserve">
+    <value>Macro Deck a été mis à jour sur ton ordinateur, mais cet appareil affiche encore la version précédente du deck.</value>
+  </data>
+  <data name="OutdatedUi.Device.Step.Update" xml:space="preserve">
+    <value>Sélectionne Mettre à jour maintenant pour charger la version actuelle.</value>
+  </data>
+  <data name="OutdatedUi.Device.Step.ClearData" xml:space="preserve">
+    <value>Si cet écran revient, efface les données du site pour cette adresse dans les réglages du navigateur, ou retire l'app de l'écran d'accueil et ajoute-la à nouveau.</value>
+  </data>
+  <data name="OutdatedUi.Installation.Title" xml:space="preserve">
+    <value>Macro Deck n'a pas été entièrement mis à jour</value>
+  </data>
+  <data name="OutdatedUi.Installation.Body" xml:space="preserve">
+    <value>Les fichiers que Macro Deck utilise pour afficher cette page ne correspondent pas à la version installée. Cela arrive quand une mise à jour a été interrompue, par exemple quand un antivirus a retenu certains fichiers.</value>
+  </data>
+  <data name="OutdatedUi.Installation.Step.Reinstall" xml:space="preserve">
+    <value>Sur l'ordinateur, télécharge la dernière version de Macro Deck et installe-la à nouveau.</value>
+  </data>
+  <data name="OutdatedUi.Installation.Step.Antivirus" xml:space="preserve">
+    <value>Si ton antivirus a signalé un fichier de Macro Deck, autorise ce fichier et recommence l'installation.</value>
+  </data>
+  <data name="OutdatedUi.Installation.Step.Retry" xml:space="preserve">
+    <value>Sélectionne ensuite Réessayer.</value>
+  </data>
+  <data name="OutdatedUi.Versions" xml:space="preserve">
+    <value>Build sur cet appareil : {device} · Build sur l'ordinateur : {computer}</value>
+  </data>
+  <data name="Shell.OutdatedUi.Device.Title" xml:space="preserve">
+    <value>Macro Deck doit être actualisé</value>
+  </data>
+  <data name="Shell.OutdatedUi.Device.Body" xml:space="preserve">
+    <value>Macro Deck a été mis à jour, mais cette fenêtre affiche encore la version précédente de son interface.</value>
+  </data>
+  <data name="Shell.OutdatedUi.Device.Step.Refresh" xml:space="preserve">
+    <value>Sélectionne Actualiser pour charger la version actuelle.</value>
+  </data>
+  <data name="Shell.OutdatedUi.Device.Step.Restart" xml:space="preserve">
+    <value>Si cet écran revient, quitte complètement Macro Deck et ouvre-le à nouveau.</value>
+  </data>
+  <data name="Shell.OutdatedUi.Installation.Step.Reinstall" xml:space="preserve">
+    <value>Télécharge la dernière version de Macro Deck et installe-la à nouveau.</value>
+  </data>
+  <data name="Shell.OutdatedUi.Versions" xml:space="preserve">
+    <value>Build de l'interface : {device} · Build de Macro Deck : {computer}</value>
+  </data>
 </root>

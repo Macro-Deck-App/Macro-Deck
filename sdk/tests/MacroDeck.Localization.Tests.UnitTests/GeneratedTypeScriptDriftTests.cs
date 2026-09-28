@@ -50,6 +50,7 @@ public class GeneratedTypeScriptDriftTests
 		"Errors.Folder.",
 		"Feedback.",
 		"KeyRing.Unlock.",
+		"OutdatedUi.",
 		"Settings.Appearance.",
 		"Settings.Network.Tls.",
 		"WebClient.",

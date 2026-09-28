@@ -2,9 +2,12 @@ import {
   ClientAppStrings,
   disablePageZoom,
   randomToken,
+  Strings,
   UiFont,
   uiResourceUrl,
   type GetSystemFontsResponse,
+  type OutdatedUiText,
+  type OutdatedUiVariant,
   type UiRenderHost,
   type WebClientTarget,
 } from '@macro-deck/runtime';
@@ -20,12 +23,37 @@ import { setupPwa } from './pwa';
 import { IconPrefetch } from './icon-prefetch';
 import { startNetworkWatch } from './network-watch';
 import { startSessionResume } from './session-resume';
-import { startVersionCheck } from './version-check';
+import { fetchHostCommit, hardRefresh, startVersionCheck, withCacheBust } from './version-check';
 
 const CLIENT_TYPE = 'web-client';
 
 function hostBaseUrl(): string {
   return window.location.origin;
+}
+
+function outdatedText(client: Client, variant: OutdatedUiVariant, device: string, computer: string): OutdatedUiText {
+  const t = (key: string): string => client.translate(key);
+  const versions = client.translate(ClientAppStrings.OutdatedUi.Versions, { device, computer });
+  if (variant === 'device') {
+    return {
+      title: t(ClientAppStrings.OutdatedUi.Device.Title),
+      body: t(ClientAppStrings.OutdatedUi.Device.Body),
+      steps: [t(ClientAppStrings.OutdatedUi.Device.Step.Update), t(ClientAppStrings.OutdatedUi.Device.Step.ClearData)],
+      action: t(ClientAppStrings.WebClient.Install.UpdateNow),
+      versions,
+    };
+  }
+  return {
+    title: t(ClientAppStrings.OutdatedUi.Installation.Title),
+    body: t(ClientAppStrings.OutdatedUi.Installation.Body),
+    steps: [
+      t(ClientAppStrings.OutdatedUi.Installation.Step.Reinstall),
+      t(ClientAppStrings.OutdatedUi.Installation.Step.Antivirus),
+      t(ClientAppStrings.OutdatedUi.Installation.Step.Retry),
+    ],
+    action: t(Strings.Common.Retry),
+    versions,
+  };
 }
 
 function clientId(): string {
@@ -93,9 +121,22 @@ export function start(root: HTMLElement, target: WebClientTarget = ACTIVE_TARGET
     connectionState: client.connection.state,
     update: pwa.update,
     deps: {
-      outdatedText: {
-        heading: client.translate(ClientAppStrings.WebClient.Outdated.Title),
-        body: client.translate(ClientAppStrings.WebClient.Outdated.Body),
+      outdated: {
+        text: (variant, device, computer) => outdatedText(client, variant, device, computer),
+        onTextChange: listener => client.localization.onChange(listener),
+        hardRefresh: hostCommit => {
+          void hardRefresh(hostCommit, {
+            serviceWorker: target.capabilities.serviceWorker && navigator.serviceWorker
+              ? navigator.serviceWorker
+              : null,
+            caches: target.capabilities.serviceWorker && typeof caches !== 'undefined' ? caches : null,
+            baseUri: document.baseURI,
+            hostReachable: () => fetchHostCommit(hostBaseUrl(), randomToken()).then(commit => commit !== null),
+            currentUrl: () => window.location.href,
+            replaceUrl: url => window.location.replace(url),
+          });
+        },
+        reload: hostCommit => window.location.replace(withCacheBust(window.location.href, hostCommit)),
       },
     },
   });

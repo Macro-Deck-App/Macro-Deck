@@ -1348,6 +1348,14 @@ export { disablePageZoom } from './util/disable-page-zoom';
 export { randomToken } from './util/random-token';
 export { scrollActiveIntoView } from './util/scroll-active-into-view';
 export { isSecureContext } from './util/secure-context';
+export {
+  currentOutdatedUi,
+  diagnoseOutdatedUi,
+  fetchServedUiCommit,
+  showOutdatedUi,
+  type OutdatedUiText,
+  type OutdatedUiVariant,
+} from './util/outdated-ui';
 
 // The framework-free widget renderer
 export { hasIntlParts, setIntlSupportForTesting } from './ui-framework/intl-support';

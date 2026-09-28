@@ -47,8 +47,8 @@ else
 fi
 
 # The client is copied, never built, so a stage after a commit pairs a fresh host with whatever dist
-# happens to be lying around - and the client then greets you with "this page is out of date"
-# instead of loading. Cheap to check, and the message beats working that out from the symptom.
+# happens to be lying around - and the client then greets you with "Macro Deck was not updated
+# completely" instead of loading. Cheap to check, and the message beats working that out from the symptom.
 staged_shell="$publish_dir/wwwroot/index.html"
 if [[ -f "$staged_shell" ]]; then
 	ui_commit=$(sed -n 's/.*macro-deck-ui-commit" content="\([^"]*\)".*/\1/p' "$staged_shell" | head -1)

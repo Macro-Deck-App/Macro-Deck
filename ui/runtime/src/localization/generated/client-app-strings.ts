@@ -90,6 +90,26 @@ export const ClientAppStrings = {
 			},
 		},
 	},
+	OutdatedUi: {
+		Versions: 'macrodeck.app:OutdatedUi.Versions',
+		Device: {
+			Body: 'macrodeck.app:OutdatedUi.Device.Body',
+			Title: 'macrodeck.app:OutdatedUi.Device.Title',
+			Step: {
+				ClearData: 'macrodeck.app:OutdatedUi.Device.Step.ClearData',
+				Update: 'macrodeck.app:OutdatedUi.Device.Step.Update',
+			},
+		},
+		Installation: {
+			Body: 'macrodeck.app:OutdatedUi.Installation.Body',
+			Title: 'macrodeck.app:OutdatedUi.Installation.Title',
+			Step: {
+				Antivirus: 'macrodeck.app:OutdatedUi.Installation.Step.Antivirus',
+				Reinstall: 'macrodeck.app:OutdatedUi.Installation.Step.Reinstall',
+				Retry: 'macrodeck.app:OutdatedUi.Installation.Step.Retry',
+			},
+		},
+	},
 	Settings: {
 		Appearance: {
 			AccentDescription: 'macrodeck.app:Settings.Appearance.AccentDescription',
@@ -399,6 +419,16 @@ export const ClientAppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:KeyRing.Unlock.Submit': 'Unlock',
 	'macrodeck.app:KeyRing.Unlock.Title': 'Enter your recovery key',
 	'macrodeck.app:KeyRing.Unlock.WebClient': 'Macro Deck is locked. Unlock it in the desktop app to continue.',
+	'macrodeck.app:OutdatedUi.Device.Body': 'Macro Deck on your computer was updated, but this device is still showing the previous version of the deck.',
+	'macrodeck.app:OutdatedUi.Device.Step.ClearData': 'If this screen comes back, clear the website data for this address in your browser settings, or remove the app from your home screen and add it again.',
+	'macrodeck.app:OutdatedUi.Device.Step.Update': 'Select Update now to load the current version.',
+	'macrodeck.app:OutdatedUi.Device.Title': 'This deck needs an update',
+	'macrodeck.app:OutdatedUi.Installation.Body': 'The files Macro Deck uses to show this page do not match the installed version. This happens when an update was interrupted, for example when antivirus software held back some of its files.',
+	'macrodeck.app:OutdatedUi.Installation.Step.Antivirus': 'If your antivirus software reported a Macro Deck file, allow the file and repeat the installation.',
+	'macrodeck.app:OutdatedUi.Installation.Step.Reinstall': 'On the computer, download the latest version of Macro Deck and install it again.',
+	'macrodeck.app:OutdatedUi.Installation.Step.Retry': 'Then select Retry.',
+	'macrodeck.app:OutdatedUi.Installation.Title': 'Macro Deck was not updated completely',
+	'macrodeck.app:OutdatedUi.Versions': 'Build on this device: {device} · Build on the computer: {computer}',
 	'macrodeck.app:Settings.Appearance.AccentDescription': 'The accent color is applied throughout the entire application.',
 	'macrodeck.app:Settings.Appearance.AccentHeading': 'Accent color',
 	'macrodeck.app:Settings.Appearance.AccentLabel': 'Accent',
