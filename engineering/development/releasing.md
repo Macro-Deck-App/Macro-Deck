@@ -45,6 +45,16 @@ The Windows signer covers `MacroDeckHost.exe`, `MacroDeck.exe`, the generated NS
 
 A release should not be considered production-ready merely because an unsigned contributor build succeeded. Check the package/signing steps for every platform and confirm the expected assets reached the GitHub release.
 
+## Install manifest
+
+Every signed package carries `host/install-manifest.json`: the version, commit, size and SHA-256 of each file it installs under `host/`, signed with the updater key into `install-manifest.json.sig`. On startup the bootstrapper checks the installation against it and tells the user when files are missing or do not match, which is what an interrupted update or antivirus software holding back files leaves behind. Builds without the updater key carry no manifest and skip the check; builds with it fail the check when the manifest itself is missing.
+
+The manifest is written after the last step that changes the host files and before bundling, and every package is verified against it after bundling. The AppImage gets its own manifest, because linuxdeploy may patch the host's libraries. A failing verify step blocks the release on purpose: shipping it would show every user of that package a damaged-installation notice.
+
+- [`ci/scripts/make-install-manifest.mjs`](../../ci/scripts/make-install-manifest.mjs) - write, rewrite and verify.
+- [`ci/scripts/sign-install-manifest.sh`](../../ci/scripts/sign-install-manifest.sh) - signing.
+- [`ui/bootstrapper/src/install_integrity.rs`](../../ui/bootstrapper/src/install_integrity.rs) - the startup check.
+
 ## Update channels
 
 Stable and beta updater metadata are generated from the normalized release version. Do not manually invent channel file contents. When update behaviour changes, update the updater implementation and manifest-generation script together.

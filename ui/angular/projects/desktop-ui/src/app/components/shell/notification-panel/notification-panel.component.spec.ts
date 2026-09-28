@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 
 import { UpdateAdbSettingsResponse, UserNotification, UserNotificationAction } from '@macro-deck/runtime';
 import { ApiService } from '@shared';
+import { ExternalLinkService } from '../../../services/external-link.service';
 import { IconPackService } from '../../../services/icon-pack.service';
 import { NotificationCenterService } from '../../../services/notification-center.service';
 import { RestartNoticeService, SettingsModalService, UpdateModalService, UpdateService } from '../../../services';
@@ -37,6 +38,7 @@ describe('NotificationPanelComponent', () => {
   let updateInstallSpy: jasmine.Spy;
   let updateCancelSpy: jasmine.Spy;
   let updateAdbSettingsSpy: jasmine.Spy;
+  let openExternalSpy: jasmine.Spy;
 
   function fireAction(notification: UserNotification, action: UserNotificationAction): void {
     fixture.componentInstance.onAction({ notification, action });
@@ -74,6 +76,7 @@ describe('NotificationPanelComponent', () => {
     updateModalOpenSpy = jasmine.createSpy('open');
     updateInstallSpy = jasmine.createSpy('install').and.returnValue(new Promise<void>(() => {}));
     updateCancelSpy = jasmine.createSpy('cancelDownload').and.resolveTo(undefined);
+    openExternalSpy = jasmine.createSpy('open');
 
     await TestBed.configureTestingModule({
       imports: [NotificationPanelComponent],
@@ -98,6 +101,7 @@ describe('NotificationPanelComponent', () => {
         { provide: UpdateModalService, useValue: { open: updateModalOpenSpy } },
         { provide: UpdateService, useValue: { install: updateInstallSpy, cancelDownload: updateCancelSpy } },
         { provide: IconPackService, useValue: { cancelBatch: cancelBatchSpy } },
+        { provide: ExternalLinkService, useValue: { open: openExternalSpy } },
         {
           provide: RestartNoticeService,
           useValue: { required: restartRequired, restartNow: restartSpy, refresh: refreshSpy },
@@ -188,6 +192,24 @@ describe('NotificationPanelComponent', () => {
     (fixture.nativeElement.querySelector('.sp-close') as HTMLButtonElement).click();
 
     expect(closedSpy).toHaveBeenCalled();
+  });
+
+  it('opens the download page in the browser for a damaged installation', () => {
+    fireAction(notification(), { kind: 'OpenDownloadPage' });
+
+    expect(openExternalSpy).toHaveBeenCalledOnceWith('https://macro-deck.app/download');
+    expect(navigateSpy).not.toHaveBeenCalled();
+  });
+
+  it('opens the troubleshooting guide at the section the notification names', () => {
+    fireAction(notification(), {
+      kind: 'OpenTroubleshootingGuide',
+      target: 'macro-deck-was-not-updated-completely',
+    });
+
+    expect(openExternalSpy).toHaveBeenCalledOnceWith(
+      'https://docs.macro-deck.app/guide/troubleshooting/#macro-deck-was-not-updated-completely',
+    );
   });
 
   it('sends OpenLogs to the Developer page Logs tab, not a standalone route', () => {

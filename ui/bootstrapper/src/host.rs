@@ -336,6 +336,18 @@ pub fn host_binary_path(app: &AppHandle) -> Option<PathBuf> {
         .find(|path| path.exists())
 }
 
+pub fn host_dir(app: &AppHandle) -> PathBuf {
+    let dirs: Vec<PathBuf> = host_binary_candidates(app)
+        .into_iter()
+        .filter_map(|binary| binary.parent().map(Path::to_path_buf))
+        .collect();
+    dirs.iter()
+        .find(|dir| dir.is_dir())
+        .or(dirs.first())
+        .cloned()
+        .unwrap_or_else(|| PathBuf::from("host"))
+}
+
 fn detect_port_conflict(log: &str) -> bool {
     let lowered = log.to_lowercase();
     lowered.contains("address already in use")
@@ -414,6 +426,7 @@ pub async fn ensure_running(app: &AppHandle) -> bool {
                 ));
                 state.ui_port.store(port, Ordering::SeqCst);
                 state.ready.store(true, Ordering::SeqCst);
+                crate::install_integrity::host_ready(app);
                 adopt_host_culture(app, port).await;
                 return true;
             }
@@ -571,6 +584,7 @@ fn launch(app: &AppHandle, state: &HostState) -> Result<Option<(u64, u16)>, Laun
         *slot = Some((generation, child));
         state.exited.store(false, Ordering::SeqCst);
         state.ready.store(false, Ordering::SeqCst);
+        crate::install_integrity::host_gone();
     }
     state.ui_port.store(port, Ordering::SeqCst);
     drop(supervisor);
@@ -757,6 +771,7 @@ fn spawn_exit_monitor(app: AppHandle, generation: u64) {
             ExitAction::Recover => {
                 logging::error(&format!("[host] exited unexpectedly with code {code:?}"));
                 state.ready.store(false, Ordering::SeqCst);
+                crate::install_integrity::host_gone();
                 let app = app.clone();
                 tauri::async_runtime::spawn(async move {
                     if supervise(&app, Some(Failure::Exited(code))).await {
@@ -835,7 +850,8 @@ async fn supervise(app: &AppHandle, first_failure: Option<Failure>) -> bool {
                         failure_reason(failure, &log),
                         failure.exit_status(),
                         log,
-                    );
+                    )
+                    .await;
                     return false;
                 }
                 Decision::Retry { attempt, delay } => {
@@ -860,7 +876,8 @@ async fn supervise(app: &AppHandle, first_failure: Option<Failure>) -> bool {
                     Some(reason),
                     ExitStatus::NotRecorded,
                     state.log_tail.joined(),
-                );
+                )
+                .await;
                 return false;
             }
         };
@@ -884,6 +901,7 @@ async fn supervise(app: &AppHandle, first_failure: Option<Failure>) -> bool {
                     })
                     .unwrap_or(false);
                 if running {
+                    crate::install_integrity::host_ready(app);
                     if restarting {
                         logging::info("[host] restart succeeded; the host is ready again");
                     }
@@ -908,7 +926,8 @@ async fn supervise(app: &AppHandle, first_failure: Option<Failure>) -> bool {
                         failure_reason(Failure::Unresponsive(timeout), &log),
                         ExitStatus::NotRecorded,
                         log,
-                    );
+                    )
+                    .await;
                     return false;
                 }
                 pending = Some(Failure::Unresponsive(timeout));
@@ -927,7 +946,8 @@ fn failure_reason(failure: Failure, log: &str) -> Option<String> {
     }
 }
 
-fn give_up(app: &AppHandle, reason: Option<String>, exit: ExitStatus, log: String) {
+async fn give_up(app: &AppHandle, reason: Option<String>, exit: ExitStatus, log: String) {
+    crate::install_integrity::settle_before_error_window().await;
     let state = app.state::<Arc<HostState>>();
     let (ever_running, attempts) = match state.supervisor.lock() {
         Ok(mut supervisor) => {
@@ -1239,6 +1259,53 @@ async fn post_update_state(port: u16, body: &UpdateStateBody<'_>) -> Result<(), 
         .send()
         .await?;
     Ok(())
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum IntegrityPostResponse {
+    NoSecret,
+    TransportError,
+    Status { code: u16, acknowledged: bool },
+}
+
+#[derive(Deserialize)]
+struct IntegrityAck {
+    accepted: bool,
+}
+
+pub async fn post_installation_integrity(
+    app: &AppHandle,
+    body: &crate::install_integrity::IntegrityReportBody,
+) -> IntegrityPostResponse {
+    let state = app.state::<Arc<HostState>>();
+    let Some(port) = managed_port(&state) else {
+        return IntegrityPostResponse::TransportError;
+    };
+    let Some(secret) = loopback_secret::secret_for(port).await else {
+        return IntegrityPostResponse::NoSecret;
+    };
+    let Ok(client) = loopback_secret::http_client(Duration::from_secs(5)) else {
+        return IntegrityPostResponse::TransportError;
+    };
+    let response = client
+        .post(format!(
+            "http://127.0.0.1:{port}/api/host/installation-integrity"
+        ))
+        .header(loopback_secret::HEADER, secret)
+        .json(body)
+        .send()
+        .await;
+    match response {
+        Ok(response) => {
+            let code = response.status().as_u16();
+            let acknowledged = response
+                .json::<IntegrityAck>()
+                .await
+                .is_ok_and(|ack| ack.accepted);
+            IntegrityPostResponse::Status { code, acknowledged }
+        }
+        Err(_) => IntegrityPostResponse::TransportError,
+    }
 }
 
 // A full-installation backup is not a three-second request like the other host calls here, so this one

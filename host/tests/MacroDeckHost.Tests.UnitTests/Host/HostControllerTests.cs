@@ -74,6 +74,9 @@ public class HostControllerTests
 			new ReportUpdateStateRequestMessageHandler(store,
 				TestLocalization.ScopeFactory,
 				TestLocalization.Resolver),
+			new ReportInstallationIntegrityRequestMessageHandler(store,
+				TestLocalization.ScopeFactory,
+				TestLocalization.Resolver),
 			new RestartApplicationRequestMessageHandler(restart),
 			new GetDataDirectoryRequestMessageHandler(macroDeckPaths),
 			new OpenDataDirectoryRequestMessageHandler(macroDeckPaths, reveal),
@@ -82,6 +85,24 @@ public class HostControllerTests
 		{
 			ControllerContext = new ControllerContext { HttpContext = httpContext }
 		};
+	}
+
+	[Test]
+	public async Task Installation_integrity_on_public_port_returns_not_found_and_raises_nothing()
+	{
+		var store = new UserNotificationStore();
+		var controller = CreateController(new FakeLifetime(), HostEndpoints.PublicPort, IPAddress.Loopback,
+			userNotificationStore: store);
+
+		var result = await controller.InstallationIntegrity(
+			new ReportInstallationIntegrityRequest { Status = "damaged", InstallKind = "windows" },
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result, Is.InstanceOf<NotFoundResult>());
+			Assert.That(store.Snapshot(), Is.Empty);
+		});
 	}
 
 	[Test]

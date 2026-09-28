@@ -36,6 +36,9 @@ getrandom = "0.3"
 sha2 = "0.10"
 hmac = "0.12"
 hex = "0.4"
+# Already locked through tauri-plugin-updater.
+minisign-verify = "0.2"
+base64 = "0.22"
 
 # Sends the forced-stop SIGKILL to the host's process group rather than just its pid - see
 # kill_child in src/host.rs.

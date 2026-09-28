@@ -1,0 +1,32 @@
+{
+  "formatVersion": 1,
+  "version": "3.1.0-beta.2",
+  "commit": "abc1234",
+  "files": [
+    {
+      "path": ".macro-deck-packaged",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "Macro Deck Host",
+      "size": 25,
+      "sha256": "41e296cf95e0888612a97a13f103daf64790e4c54b11d7f6c3672ab246bfdfbe"
+    },
+    {
+      "path": "runtime/shared/libhost.txt",
+      "size": 25,
+      "sha256": "b087bf2585f2028c26d661bd2105e88c8f18c48a0a60ea0626a269e829273858"
+    },
+    {
+      "path": "wwwroot/admin/main.js",
+      "size": 22,
+      "sha256": "99624849056e759f173fe5cefd0d9c60900debef5bb1a6a80b500f106e269620"
+    },
+    {
+      "path": "wwwroot/index.html",
+      "size": 41,
+      "sha256": "5297e8cd0c30ee566edf72ed3857750f0cb8cc80e323fd642f50c4d86997795a"
+    }
+  ]
+}

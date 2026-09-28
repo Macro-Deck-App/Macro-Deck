@@ -5,6 +5,7 @@ use tauri::http::{header, Request, Response, StatusCode};
 use tauri::webview::NewWindowResponse;
 use tauri::{AppHandle, Manager, Url, WebviewUrl, WebviewWindowBuilder};
 
+use crate::install_integrity::{self, InstallKind};
 use crate::localization::{self, keys};
 use crate::logging;
 
@@ -60,6 +61,8 @@ pub struct HostErrorTexts {
     pub title: String,
     pub heading: String,
     pub notice: Option<String>,
+    pub damage: Option<String>,
+    pub download: Option<String>,
     pub attempts: Option<String>,
     pub reason: Option<String>,
     pub help: String,
@@ -79,6 +82,12 @@ pub fn show(app: &AppHandle, report: HostErrorReport) {
     }
     RELAUNCH_FAILED.store(false, Ordering::SeqCst);
     open_off_main_thread(app);
+}
+
+pub fn refresh_installation_damage(app: &AppHandle) {
+    if app.get_webview_window(HOST_ERROR_WINDOW).is_some() {
+        open_off_main_thread(app);
+    }
 }
 
 pub fn focus(app: &AppHandle) -> bool {
@@ -190,10 +199,14 @@ pub fn navigation_action(url: &Url) -> NavigationAction {
             _ => NavigationAction::Block,
         };
     }
-    [ISSUES_URL, crate::menu::DISCORD_URL]
-        .into_iter()
-        .find(|target| Url::parse(target).is_ok_and(|target| target == *url))
-        .map_or(NavigationAction::Block, NavigationAction::Open)
+    [
+        ISSUES_URL,
+        crate::menu::DISCORD_URL,
+        crate::updater::DOWNLOAD_PAGE_URL,
+    ]
+    .into_iter()
+    .find(|target| Url::parse(target).is_ok_and(|target| target == *url))
+    .map_or(NavigationAction::Block, NavigationAction::Open)
 }
 
 fn handle_navigation(app: &AppHandle, url: &Url) -> bool {
@@ -265,6 +278,18 @@ pub fn respond(webview_label: &str, request: &Request<Vec<u8>>) -> Response<Vec<
 }
 
 fn texts(report: &HostErrorReport, relaunch_failed: bool) -> HostErrorTexts {
+    texts_with_damage(
+        report,
+        relaunch_failed,
+        crate::install_integrity::install_damage(),
+    )
+}
+
+fn texts_with_damage(
+    report: &HostErrorReport,
+    relaunch_failed: bool,
+    damage: Option<InstallKind>,
+) -> HostErrorTexts {
     let heading = match report.kind {
         HostErrorKind::Stopped => localization::t(keys::HOST_ERROR_HEADING_STOPPED),
         HostErrorKind::NotStarted => localization::t(keys::HOST_ERROR_HEADING_NOT_STARTED),
@@ -286,6 +311,10 @@ fn texts(report: &HostErrorReport, relaunch_failed: bool) -> HostErrorTexts {
         title: localization::t(keys::HOST_ERROR_WINDOW_TITLE),
         heading,
         notice: relaunch_failed.then(|| localization::t(keys::HOST_ERROR_RESTART_FAILED)),
+        damage: damage.map(install_integrity::damage_text),
+        download: damage
+            .filter(|kind| install_integrity::offers_download(*kind))
+            .map(|_| localization::t(keys::UPDATE_OPEN_DOWNLOAD_PAGE)),
         attempts,
         reason: report.reason.clone(),
         help: localization::t(keys::HOST_ERROR_HELP),
@@ -329,6 +358,18 @@ pub fn render(texts: &HostErrorTexts) -> String {
             "title" => escape(&texts.title),
             "heading" => escape(&texts.heading),
             "notice" => paragraph("notice", &texts.notice),
+            "damage" => paragraph("notice", &texts.damage),
+            "download" => texts
+                .download
+                .as_deref()
+                .map(|label| {
+                    format!(
+                        "<a href=\"{}\">{}</a>",
+                        escape(crate::updater::DOWNLOAD_PAGE_URL),
+                        escape(label)
+                    )
+                })
+                .unwrap_or_default(),
             "attempts" => paragraph("", &texts.attempts),
             "reason" => paragraph("", &texts.reason),
             "help" => escape(&texts.help),
@@ -393,6 +434,54 @@ mod tests {
         }
     }
 
+    fn not_started() -> HostErrorReport {
+        HostErrorReport {
+            kind: HostErrorKind::NotStarted,
+            attempts: 0,
+            reason: None,
+            exit: ExitStatus::NotRecorded,
+            log: String::new(),
+        }
+    }
+
+    #[test]
+    fn a_damaged_installation_says_so_and_offers_the_download() {
+        let html = render(&texts_with_damage(
+            &not_started(),
+            false,
+            Some(InstallKind::Windows),
+        ));
+        assert!(html.contains(&escape(&localization::t(
+            keys::HOST_ERROR_INSTALLATION_DAMAGED
+        ))));
+        assert!(html.contains(&format!(
+            "<a href=\"{}\">",
+            crate::updater::DOWNLOAD_PAGE_URL
+        )));
+    }
+
+    #[test]
+    fn a_damaged_linux_package_points_at_the_package_manager_instead_of_a_download() {
+        let html = render(&texts_with_damage(
+            &not_started(),
+            false,
+            Some(InstallKind::LinuxPackage),
+        ));
+        assert!(html.contains(&escape(&localization::t(
+            keys::HOST_ERROR_INSTALLATION_DAMAGED_PACKAGE
+        ))));
+        assert!(!html.contains(crate::updater::DOWNLOAD_PAGE_URL));
+    }
+
+    #[test]
+    fn an_intact_installation_adds_nothing() {
+        let html = render(&texts_with_damage(&not_started(), false, None));
+        assert!(!html.contains(&escape(&localization::t(
+            keys::HOST_ERROR_INSTALLATION_DAMAGED
+        ))));
+        assert!(!html.contains(crate::updater::DOWNLOAD_PAGE_URL));
+    }
+
     #[test]
     fn the_page_itself_loads_on_every_platform() {
         assert_eq!(
@@ -427,10 +516,14 @@ mod tests {
     }
 
     #[test]
-    fn only_the_support_links_open_in_the_browser() {
+    fn only_the_support_and_download_links_open_in_the_browser() {
         assert_eq!(
             navigation_action(&url(ISSUES_URL)),
             NavigationAction::Open(ISSUES_URL)
+        );
+        assert_eq!(
+            navigation_action(&url(crate::updater::DOWNLOAD_PAGE_URL)),
+            NavigationAction::Open(crate::updater::DOWNLOAD_PAGE_URL)
         );
         assert_eq!(
             navigation_action(&url("https://discord.macro-deck.app")),
