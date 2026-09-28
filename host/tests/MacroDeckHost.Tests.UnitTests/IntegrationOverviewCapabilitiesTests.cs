@@ -10,6 +10,9 @@ using MacroDeckHost.Application.Ui.Handlers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Integrations;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk;
+using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.VideoStreams;
+using MacroDeck.Localization;
 
 namespace MacroDeckHost.Tests.UnitTests;
 
@@ -38,6 +41,7 @@ public class IntegrationOverviewCapabilitiesTests
 	[TestCase("weather", CapabilityKinds.Weather, "Weather")]
 	[TestCase("virtual-profiles", CapabilityKinds.VirtualProfiles, "Virtual Profiles")]
 	[TestCase("migration", CapabilityKinds.Migration, "Migration")]
+	[TestCase("video-streams", CapabilityKinds.VideoStreamProvider, "Video streams")]
 	public async Task Each_provider_interface_is_reported_as_its_own_human_readable_capability(
 		string soleProvider,
 		string expectedKind,
@@ -51,6 +55,7 @@ public class IntegrationOverviewCapabilitiesTests
 			"weather" => new FakeWeatherOnlyIntegration(),
 			"virtual-profiles" => new FakeProfileProviderIntegration("fake-profile-provider-solo"),
 			"migration" => new FakeMigrationOnlyIntegration(),
+			"video-streams" => new FakeVideoStreamOnlyIntegration(),
 			_ => throw new ArgumentOutOfRangeException(nameof(soleProvider))
 		};
 
@@ -304,6 +309,7 @@ public class IntegrationOverviewCapabilitiesTests
 					(CapabilityKinds.FolderViewProvider, "Folder Views"),
 					(CapabilityKinds.WidgetTypeProvider, "Widgets"),
 					(CapabilityKinds.ScreenSaverProvider, "Screensavers"),
+					(CapabilityKinds.VideoStreamProvider, "Video streams"),
 					(CapabilityKinds.Migration, "Migration")
 				}));
 
@@ -392,5 +398,25 @@ public class IntegrationOverviewCapabilitiesTests
 	private sealed class AlwaysDisconnected : IRemotePluginConnectionState
 	{
 		public bool IsConnected(string pluginId) => false;
+	}
+
+	private sealed class FakeVideoStreamOnlyIntegration : IIntegration, IVideoStreamIntegration
+	{
+		public string Id => "fake-video-streams-only";
+
+		public LocalizedText Name => Id;
+
+		public string Version => "1.0.0";
+
+		public IReadOnlyList<IActionDefinition> Actions => [];
+
+		public bool IsInitialized => true;
+
+		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+
+		public Task ShutdownAsync() => Task.CompletedTask;
+
+		public Task InitializeAsync(IVideoStreamProviderContext context, CancellationToken cancellationToken = default)
+			=> Task.CompletedTask;
 	}
 }

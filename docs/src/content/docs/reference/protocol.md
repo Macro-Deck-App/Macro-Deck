@@ -159,7 +159,8 @@ are listed in the descriptor's `capabilityKinds`:
 
 `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`,
 `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`,
-`folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`, `messaging`.
+`folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`, `messaging`,
+`video-stream-provider`.
 
 - **Do not invent operation names inside an existing kind.** Additions to the operation vocabulary are
   compatibility-sensitive protocol changes. Exact operations and payloads are in the protocol package
@@ -256,7 +257,9 @@ keyed by `code`; localise from the code. `details` is a string-to-string map, at
 
 The list is append-only within a major. The three `ADB_*` codes answer only the `adb` host API; see
 [the WebSocket reference](/reference/websocket/#adb). A `reason` in `details` refines a deliberately generic
-code, for example `developer_mode_disabled`, `host_locked`, or one of the `adb_` reasons of `ADB_FAILED`;
+code, for example `developer_mode_disabled`, `host_locked`, one of the `adb_` reasons of `ADB_FAILED`, or
+one of the `video_stream_` reasons of `CAPABILITY_UNAVAILABLE` (see
+[`video-streams`](/reference/websocket/#video-streams));
 the values are in
 [`ProtocolErrorReasons.cs`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/protocol/src/MacroDeck.Plugin.Protocol/Errors/ProtocolErrorReasons.cs).
 A client that does not recognise a reason handles the code alone.

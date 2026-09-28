@@ -2873,6 +2873,39 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>Nieznany zakres zmiennej</value>
   </data>
+  <data name="Errors.VideoStream.Busy" xml:space="preserve">
+    <value>Źródło wideo jest teraz zajęte.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownProvider" xml:space="preserve">
+    <value>To źródło wideo jest niedostępne.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownStream" xml:space="preserve">
+    <value>Ten strumień wideo już nie istnieje.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownSession" xml:space="preserve">
+    <value>Ta sesja wideo nie jest już otwarta.</value>
+  </data>
+  <data name="Errors.VideoStream.SessionLimitReached" xml:space="preserve">
+    <value>Otwarto jednocześnie zbyt wiele strumieni wideo.</value>
+  </data>
+  <data name="Errors.VideoStream.PayloadTooLarge" xml:space="preserve">
+    <value>Dane połączenia wideo są zbyt duże.</value>
+  </data>
+  <data name="Errors.VideoStream.StreamUnavailable" xml:space="preserve">
+    <value>Ten strumień wideo jest chwilowo niedostępny.</value>
+  </data>
+  <data name="Errors.VideoStream.TransportNotAccepted" xml:space="preserve">
+    <value>Tego strumienia wideo nie można odtworzyć na tym urządzeniu.</value>
+  </data>
+  <data name="Errors.VideoStream.SignalingUnsupported" xml:space="preserve">
+    <value>Źródło wideo nie obsługuje tego rodzaju połączenia.</value>
+  </data>
+  <data name="Errors.VideoStream.ProviderUnavailable" xml:space="preserve">
+    <value>Źródło wideo jest chwilowo nieosiągalne.</value>
+  </data>
+  <data name="Errors.VideoStream.Failed" xml:space="preserve">
+    <value>Wystąpił błąd strumienia wideo.</value>
+  </data>
   <data name="Errors.Variables.WriteFailed" xml:space="preserve">
     <value>Nie udało się zastosować wartości</value>
   </data>
@@ -4080,6 +4113,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Capability.ScreenSaverProvider" xml:space="preserve">
     <value>Wygaszacze ekranu</value>
+  </data>
+  <data name="Integrations.Capability.VideoStreamProvider" xml:space="preserve">
+    <value>Strumienie wideo</value>
   </data>
   <data name="Integrations.Capability.Variables" xml:space="preserve">
     <value>Zmienne</value>

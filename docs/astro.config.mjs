@@ -123,6 +123,7 @@ export default defineConfig({
 										{ label: 'Devices', slug: 'features/devices' },
 										{ label: 'Layouts', slug: 'features/layouts' },
 										{ label: 'Android devices', slug: 'features/android-devices' },
+										{ label: 'Video streams', slug: 'features/video-streams' },
 										{ label: 'Widget types', link: '/ui/views/widget-types/' },
 										{ label: 'Folder views', link: '/ui/views/folder-views/' },
 										{ label: 'Screensavers', link: '/ui/views/screensavers/' },

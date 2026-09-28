@@ -363,6 +363,16 @@ and requests to any handled topic, and handle any topic nobody has claimed yet. 
 other input from another process: validate its payload, and check `Sender` before acting on a command
 where it matters who asked. `host:messaging` is declared, not enforced.
 
+## Video streams
+
+A [video stream provider](/features/video-streams/) hands every client signed in to Macro Deck, the
+desktop app or any paired device, a description of how to play its streams. Whatever a description
+carries, a URL, its query string, parameters or a payload, reaches that client. Put short-lived
+credentials scoped to one session into it, minted when the session opens, revoked when it closes and
+bounded by `ExpiresAt`, never the source's own password or API key. The consumer's device id, address and
+connection kind help build a reachable URL; they authorize nothing. Macro Deck relays descriptions and
+signals without interpreting them and never logs them. `host:video-streams` is declared, not enforced.
+
 ## Logging and redaction
 
 ```csharp

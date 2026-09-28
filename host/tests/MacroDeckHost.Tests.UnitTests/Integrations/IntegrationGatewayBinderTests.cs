@@ -133,6 +133,7 @@ internal sealed class IntegrationGatewayBinderTests
 			TestFolderViewProviders.Host(),
 			TestWidgetTypeProviders.Host(),
 			TestScreenSaverProviders.Host(),
+			TestVideoStreams.Host(),
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
 			new LoggerConfiguration().CreateLogger());
@@ -165,6 +166,7 @@ internal sealed class IntegrationGatewayBinderTests
 			TestFolderViewProviders.Host(),
 			TestWidgetTypeProviders.Host(),
 			TestScreenSaverProviders.Host(),
+			TestVideoStreams.Host(),
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
 			new LoggerConfiguration().CreateLogger());
@@ -231,6 +233,7 @@ internal sealed class IntegrationGatewayBinderTests
 			TestFolderViewProviders.Host(),
 			TestWidgetTypeProviders.Host(),
 			TestScreenSaverProviders.Host(),
+			TestVideoStreams.Host(),
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
 			new LoggerConfiguration().CreateLogger(),

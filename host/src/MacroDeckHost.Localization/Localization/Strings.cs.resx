@@ -2873,6 +2873,39 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>Neznámý rozsah proměnné</value>
   </data>
+  <data name="Errors.VideoStream.Busy" xml:space="preserve">
+    <value>Zdroj videa je právě vytížený.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownProvider" xml:space="preserve">
+    <value>Tento zdroj videa není k dispozici.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownStream" xml:space="preserve">
+    <value>Tento videostream už neexistuje.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownSession" xml:space="preserve">
+    <value>Tato relace videa už není otevřená.</value>
+  </data>
+  <data name="Errors.VideoStream.SessionLimitReached" xml:space="preserve">
+    <value>Současně je otevřeno příliš mnoho videí.</value>
+  </data>
+  <data name="Errors.VideoStream.PayloadTooLarge" xml:space="preserve">
+    <value>Data připojení videa jsou příliš velká.</value>
+  </data>
+  <data name="Errors.VideoStream.StreamUnavailable" xml:space="preserve">
+    <value>Tento videostream není momentálně k dispozici.</value>
+  </data>
+  <data name="Errors.VideoStream.TransportNotAccepted" xml:space="preserve">
+    <value>Tento videostream nelze na tomto zařízení přehrát.</value>
+  </data>
+  <data name="Errors.VideoStream.SignalingUnsupported" xml:space="preserve">
+    <value>Zdroj videa tento typ připojení nepodporuje.</value>
+  </data>
+  <data name="Errors.VideoStream.ProviderUnavailable" xml:space="preserve">
+    <value>Zdroj videa je momentálně nedostupný.</value>
+  </data>
+  <data name="Errors.VideoStream.Failed" xml:space="preserve">
+    <value>Ve videostreamu došlo k chybě.</value>
+  </data>
   <data name="Errors.Variables.WriteFailed" xml:space="preserve">
     <value>Hodnotu se nepodařilo použít</value>
   </data>
@@ -4080,6 +4113,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Capability.ScreenSaverProvider" xml:space="preserve">
     <value>Spořiče obrazovky</value>
+  </data>
+  <data name="Integrations.Capability.VideoStreamProvider" xml:space="preserve">
+    <value>Videostreamy</value>
   </data>
   <data name="Integrations.Capability.Variables" xml:space="preserve">
     <value>Proměnné</value>

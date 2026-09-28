@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text.Json;
+using MacroDeck.Sdk.VideoStreams;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.Licensing;
@@ -19,9 +20,11 @@ using MacroDeckHost.Application.Ui.Transport.Messages.Modals;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiPreviews;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
 using MacroDeckHost.Application.Ui.Transport.Messages.Variables;
+using MacroDeckHost.Application.Ui.Transport.Messages.VideoStreams;
 using MacroDeckHost.Application.Ui.Transport.Messages.Weather;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.VideoStreams;
 using MacroDeckHost.Integrations;
 
 namespace MacroDeckHost.Ui;
@@ -95,6 +98,9 @@ public sealed class UiWebSocketDispatcher : IDisposable
 	private readonly ICompanionLicenseService _licenses;
 	private readonly AccessTokenCutoff _accessTokenCutoff;
 	private readonly DeviceSessionGuard _deviceSessionGuard;
+	private readonly IVideoStreamSessionBroker _videoStreams;
+	private readonly VideoStreamProviderRegistry _videoStreamProviders;
+	private readonly VideoStreamConsumer _videoStreamConsumer;
 	private readonly SemaphoreSlim _dispatch = new(1, 1);
 
 	public UiWebSocketDispatcher(
@@ -141,6 +147,9 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		ICompanionLicenseService licenses,
 		AccessTokenCutoff accessTokenCutoff,
 		DeviceSessionGuard deviceSessionGuard,
+		IVideoStreamSessionBroker videoStreams,
+		VideoStreamProviderRegistry videoStreamProviders,
+		VideoStreamConsumer videoStreamConsumer,
 		CancellationToken connectionCancellation)
 	{
 		_connectionId = connectionId;
@@ -183,6 +192,9 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		_licenses = licenses;
 		_accessTokenCutoff = accessTokenCutoff;
 		_deviceSessionGuard = deviceSessionGuard;
+		_videoStreams = videoStreams;
+		_videoStreamProviders = videoStreamProviders;
+		_videoStreamConsumer = videoStreamConsumer;
 	}
 
 	public Task<bool> ConnectedAsync()
@@ -228,6 +240,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		_deviceConnections.Remove(_connectionId);
 		_uiSessions.DetachConnection(_connectionId);
 		_companions.Disconnected(_connectionId);
+		_videoStreams.CloseConnection(_connectionId, VideoStreamSessionReason.ConsumerDisconnected);
 		return Task.CompletedTask;
 	}
 
@@ -303,6 +316,17 @@ public sealed class UiWebSocketDispatcher : IDisposable
 				"ReportCompanionState" => ReportCompanionState(Arg<ReportCompanionStateRequest>(payload, 0)),
 				"SyncCompanionLicense" => await SyncCompanionLicense(Arg<SyncCompanionLicenseRequest?>(payload, 0),
 					cancellationToken),
+				"GetVideoStreams" => VideoStreamUiMapping.ToResponse(_videoStreamProviders.GetProviders()),
+				"OpenVideoStream" => OpenVideoStream(Arg<OpenVideoStreamRequest?>(payload, 0)),
+				"KeepAliveVideoStream" => VideoStream(Arg<KeepAliveVideoStreamRequest?>(payload, 0)?.SessionId,
+					_videoStreams.KeepAliveSession),
+				"SuspendVideoStream" => VideoStream(Arg<SuspendVideoStreamRequest?>(payload, 0)?.SessionId,
+					_videoStreams.SuspendSession),
+				"ResumeVideoStream" => VideoStream(Arg<ResumeVideoStreamRequest?>(payload, 0)?.SessionId,
+					_videoStreams.ResumeSession),
+				"SignalVideoStream" => SignalVideoStream(Arg<SignalVideoStreamRequest?>(payload, 0)),
+				"CloseVideoStream" => VideoStream(Arg<CloseVideoStreamRequest?>(payload, 0)?.SessionId,
+					_videoStreams.CloseSession),
 				_ when IsKnown(type) => throw new UiWebSocketDispatchException("forbidden"),
 				_ => throw new UiWebSocketDispatchException("unknown_type")
 			};
@@ -449,6 +473,51 @@ public sealed class UiWebSocketDispatcher : IDisposable
 
 		return await _licenses.SyncAsync(_connectionId, request ?? new SyncCompanionLicenseRequest(), cancellationToken);
 	}
+
+	private OpenVideoStreamResponse OpenVideoStream(OpenVideoStreamRequest? request)
+	{
+		try
+		{
+			var ticket = _videoStreams.OpenSession(_connectionId,
+				request?.ProviderId ?? string.Empty,
+				request?.StreamId ?? string.Empty,
+				request?.AcceptedTransports ?? [],
+				_videoStreamConsumer);
+			return new OpenVideoStreamResponse
+			{
+				SessionId = ticket.SessionId,
+				Revision = ticket.Revision,
+				State = VideoStreamUiMapping.WireName(ticket.State)
+			};
+		}
+		catch (VideoStreamBrokerException exception)
+		{
+			throw VideoStreamRefusal(exception);
+		}
+	}
+
+	private object? SignalVideoStream(SignalVideoStreamRequest? request)
+	{
+		var signal = request?.Signal is { } message ? new VideoStreamSignal(message.Type, message.Payload) : null;
+		return VideoStream(request?.SessionId,
+			(connectionId, sessionId) => _videoStreams.SignalSession(connectionId, sessionId, signal));
+	}
+
+	private object? VideoStream(string? sessionId, Action<string, string> operation)
+	{
+		try
+		{
+			operation(_connectionId, sessionId ?? string.Empty);
+			return null;
+		}
+		catch (VideoStreamBrokerException exception)
+		{
+			throw VideoStreamRefusal(exception);
+		}
+	}
+
+	private static UiWebSocketDispatchException VideoStreamRefusal(VideoStreamBrokerException exception)
+		=> new(VideoStreamUiMapping.WireName(exception.Error), VideoStreamUiMapping.ErrorText(exception.Error));
 
 	private bool IsAdmin => _principal.HasClaim(AuthDefaults.ScopeClaim, AuthDefaults.AdminScope);
 	private string OwnerPrincipal() => _principal.FindFirst(AuthDefaults.DeviceClaim)?.Value ?? string.Empty;

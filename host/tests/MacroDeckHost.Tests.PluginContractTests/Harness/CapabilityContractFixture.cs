@@ -145,7 +145,7 @@ internal abstract class CapabilityContractFixture
 		}
 
 		_invoker.Dispose();
-		_dispatcher.Dispose();
+		_dispatcher?.Dispose();
 	}
 
 	protected InMemoryPluginLink Link => _link;
@@ -171,6 +171,8 @@ internal abstract class CapabilityContractFixture
 	}
 
 	protected string SessionId => _sessionId;
+
+	internal PluginConnectionState PluginConnection => _pluginConnectionState;
 
 	protected async Task<IIntegration> ConnectAsync(
 		IReadOnlyList<ICapabilityHandler> handlers,

@@ -98,6 +98,7 @@ x-macrodeck-capability-kinds:
   - widget-type-provider
   - screensaver-provider
   - messaging
+  - video-stream-provider
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Compatibility.PluginCompatibilityStates.All (ascending severity)
 x-macrodeck-compatibility-states:

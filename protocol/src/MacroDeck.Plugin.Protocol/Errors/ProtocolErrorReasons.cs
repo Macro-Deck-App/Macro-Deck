@@ -79,4 +79,32 @@ public static class ProtocolErrorReasons
 
 	/// <summary>Refines <see cref="ProtocolErrorCodes.AdbFailed" />: the device cannot answer this operation.</summary>
 	public const string AdbUnsupported = "adb_unsupported";
+
+	/// <summary>Refines a <c>video-stream-provider</c> or <c>video-streams</c> error: no provider with that id is registered.</summary>
+	public const string VideoStreamUnknownProvider = "video_stream_unknown_provider";
+
+	/// <summary>Refines a <c>video-stream-provider</c> error: the provider offers no stream with that id.</summary>
+	public const string VideoStreamUnknownStream = "video_stream_unknown_stream";
+
+	/// <summary>
+	/// Refines a <c>video-stream-provider</c> or <c>video-streams</c> error: no session with that id is
+	/// open, or it was already closed. An open for a session id that was closed before it arrived is refused
+	/// with this reason too.
+	/// </summary>
+	public const string VideoStreamUnknownSession = "video_stream_unknown_session";
+
+	/// <summary>Refines a <c>video-stream-provider</c> error: the stream exists but cannot be served right now.</summary>
+	public const string VideoStreamStreamUnavailable = "video_stream_stream_unavailable";
+
+	/// <summary>Refines a <c>video-stream-provider</c> error: the provider serves none of the accepted transports.</summary>
+	public const string VideoStreamTransportNotAccepted = "video_stream_transport_not_accepted";
+
+	/// <summary>Refines a <c>video-stream-provider</c> error: the provider cannot open another session right now.</summary>
+	public const string VideoStreamCapacityReached = "video_stream_capacity_reached";
+
+	/// <summary>Refines a <c>video-stream-provider</c> error: the provider does not exchange signals.</summary>
+	public const string VideoStreamSignalingUnsupported = "video_stream_signaling_unsupported";
+
+	/// <summary>Refines a <c>video-stream-provider</c> error: the provider is busy. Retrying later can succeed.</summary>
+	public const string VideoStreamBusy = "video_stream_busy";
 }

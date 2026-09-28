@@ -50,6 +50,7 @@ public sealed class IntegrationInitializer
 	private readonly LayoutProviderHost _layoutProviders;
 	private readonly FolderViewProviderHost _folderViewProviders;
 	private readonly ScreenSaverProviderHost _screenSaverProviders;
+	private readonly VideoStreamProviderHost _videoStreamProviders;
 	private readonly WidgetTypeProviderHost _widgetTypeProviders;
 	private readonly DeviceProviderHost _deviceProviders;
 	private readonly TimeProvider _timeProvider;
@@ -81,6 +82,7 @@ public sealed class IntegrationInitializer
 		FolderViewProviderHost folderViewProviders,
 		WidgetTypeProviderHost widgetTypeProviders,
 		ScreenSaverProviderHost screenSaverProviders,
+		VideoStreamProviderHost videoStreamProviders,
 		DeviceProviderHost deviceProviders,
 		TimeProvider timeProvider,
 		ILogger logger,
@@ -108,6 +110,7 @@ public sealed class IntegrationInitializer
 		_layoutProviders = layoutProviders;
 		_folderViewProviders = folderViewProviders;
 		_screenSaverProviders = screenSaverProviders;
+		_videoStreamProviders = videoStreamProviders;
 		_widgetTypeProviders = widgetTypeProviders;
 		_deviceProviders = deviceProviders;
 		_timeProvider = timeProvider;
@@ -213,6 +216,7 @@ public sealed class IntegrationInitializer
 		await _layoutProviders.StartAsync(integration, cancellationToken);
 		await _folderViewProviders.StartAsync(integration, cancellationToken);
 		await _screenSaverProviders.StartAsync(integration, cancellationToken);
+		await _videoStreamProviders.StartAsync(integration, cancellationToken);
 		await _deviceProviders.StartAsync(integration, cancellationToken);
 		await scope.DisposeAsync();
 		return IntegrationInitializationOutcome.Initialized;

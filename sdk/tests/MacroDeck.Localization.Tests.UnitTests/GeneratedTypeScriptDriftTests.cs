@@ -48,6 +48,7 @@ public class GeneratedTypeScriptDriftTests
 		"Deck.UnavailableWidget.",
 		"Errors.Auth.",
 		"Errors.Folder.",
+		"Errors.VideoStream.",
 		"Feedback.",
 		"KeyRing.Unlock.",
 		"Settings.Appearance.",

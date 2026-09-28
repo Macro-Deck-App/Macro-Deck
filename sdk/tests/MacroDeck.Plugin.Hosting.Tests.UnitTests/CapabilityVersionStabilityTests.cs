@@ -57,6 +57,7 @@ public class CapabilityVersionStabilityTests
 			[CapabilityKinds.WidgetTypeProvider] = (1, 1),
 			[CapabilityKinds.ScreenSaverProvider] = (1, 1),
 			[CapabilityKinds.Messaging] = (1, 1),
+			[CapabilityKinds.VideoStreamProvider] = (1, 1),
 		};
 
 	/// <summary>The kinds the fixture below actually gets a declaration out of, listed so the assertion
@@ -72,6 +73,7 @@ public class CapabilityVersionStabilityTests
 		CapabilityKinds.VirtualProfiles,
 		CapabilityKinds.Issues,
 		CapabilityKinds.Messaging,
+		CapabilityKinds.VideoStreamProvider,
 	];
 
 	[Test]
@@ -117,6 +119,7 @@ public class CapabilityVersionStabilityTests
 				[new VirtualProfileDescriptor("p", "Profile", ProfileLayout.Grid(1, 1), [])]))
 			.RegisterIntegration(_ => new TestIssueIntegration(() =>
 				[new IntegrationIssue { Id = "i", Title = "Issue" }]))
+			.RegisterIntegration(_ => new TestVideoIntegration())
 			.Build();
 
 		var declared = new Dictionary<string, List<CapabilityVersionRange>>(StringComparer.Ordinal);

@@ -3,6 +3,7 @@ using MacroDeck.Plugin.Hosting.Capabilities;
 using MacroDeck.Plugin.Hosting.Capabilities.Icons;
 using MacroDeck.Plugin.Hosting.Capabilities.Localization;
 using MacroDeck.Plugin.Hosting.Capabilities.Messaging;
+using MacroDeck.Plugin.Hosting.Capabilities.VideoStreamProvider;
 using MacroDeck.Plugin.Hosting.Localization;
 using MacroDeck.Plugin.Hosting.Configuration;
 using MacroDeck.Plugin.Hosting.Credentials;
@@ -22,6 +23,7 @@ using MacroDeck.Plugin.Hosting.Capabilities.Ui;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Sdk.FolderViews;
 using MacroDeck.Sdk.ScreenSavers;
+using MacroDeck.Sdk.VideoStreams;
 using MacroDeck.Sdk.Layouts;
 using MacroDeck.Sdk.Messaging;
 using MacroDeck.Sdk.Widgets;
@@ -482,6 +484,9 @@ public sealed class PluginHostBuilder
 		Services.TryAddSingleton<ILayoutProviderContext, RemoteLayoutProviderContext>();
 		Services.TryAddSingleton<IFolderViewProviderContext, RemoteFolderViewProviderContext>();
 		Services.TryAddSingleton<IScreenSaverProviderContext, RemoteScreenSaverProviderContext>();
+		Services.TryAddSingleton<VideoStreamProviderRegistry>();
+		Services.TryAddSingleton<IVideoStreamProviderContext>(provider
+			=> provider.GetRequiredService<VideoStreamProviderRegistry>().ContextFor(null));
 		Services.TryAddSingleton<IWidgetTypeProviderContext, RemoteWidgetTypeProviderContext>();
 		Services.TryAddSingleton<ModalResultStore>();
 		Services.TryAddSingleton<IIntegrationContext, RemoteIntegrationContext>();

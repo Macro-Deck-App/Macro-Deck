@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
+using MacroDeck.Plugin.Hosting.Capabilities.VideoStreamProvider;
 using MacroDeck.Plugin.Protocol.Assets;
 using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Callbacks.IconPacks;
@@ -16,6 +17,9 @@ using MacroDeckHost.Application.Devices.Surfaces;
 using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.FolderViews;
 using MacroDeckHost.Application.ScreenSavers;
+using MacroDeckHost.Application.VideoStreams;
+using MacroDeck.Sdk.VideoStreams;
+using MacroDeck.Plugin.Protocol.Capabilities.VideoStreamProvider;
 using MacroDeck.Sdk.Ui;
 using MacroDeckHost.Application.Ui.Transport.Messages.Modals;
 using MacroDeckHost.Application.Ui.Transport;
@@ -79,6 +83,9 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	private readonly VariableUpdateChannel? _dynamicVariableChannel;
 	private readonly VariableCatalogInvalidationSignal? _dynamicVariableInvalidation;
 	private readonly HostCallbackThrottle _throttle;
+	private readonly VideoStreamCallbackThrottle _videoStreamThrottle;
+	private readonly VideoStreamProviderRegistry? _videoStreamProviders;
+	private readonly IVideoStreamSessionBroker? _videoStreamSessions;
 	private readonly IPluginUiResources? _uiResources;
 	private readonly UiResourceCallbackThrottle _uiResourceThrottle;
 	private readonly IPluginIconPackSync? _iconPackSync;
@@ -127,8 +134,14 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		IPluginIconPackSync? iconPackSync = null,
 		IPluginIconPackUploads? iconPackUploads = null,
 		IPluginIconUiResources? pluginIconResources = null,
-		IPluginIconResolver? pluginIconResolver = null)
+		IPluginIconResolver? pluginIconResolver = null,
+		VideoStreamProviderRegistry? videoStreamProviders = null,
+		IVideoStreamSessionBroker? videoStreamSessions = null,
+		VideoStreamCallbackThrottle? videoStreamThrottle = null)
 	{
+		_videoStreamProviders = videoStreamProviders;
+		_videoStreamSessions = videoStreamSessions;
+		_videoStreamThrottle = videoStreamThrottle ?? new VideoStreamCallbackThrottle(TimeProvider.System);
 		_iconPackSync = iconPackSync;
 		_iconPackUploads = iconPackUploads;
 		_pluginIconResources = pluginIconResources;
@@ -171,9 +184,18 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		CancellationToken cancellationToken)
 		=> RouteAsync(pluginId, null, correlationId, payload, cancellationToken);
 
+	public Task<HostCallbackResult> RouteAsync(
+		string pluginId,
+		string? sessionId,
+		string correlationId,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken)
+		=> RouteAsync(pluginId, sessionId, null, correlationId, payload, cancellationToken);
+
 	public async Task<HostCallbackResult> RouteAsync(
 		string pluginId,
 		string? sessionId,
+		IPluginConnection? connection,
 		string correlationId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
@@ -206,6 +228,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				HostApis.WidgetTypes => await RouteWidgetTypesAsync(pluginId, payload, cancellationToken),
 				HostApis.ScreenSavers => await RouteScreenSaversAsync(pluginId, payload, cancellationToken),
 				HostApis.IconPacks => await RouteIconPacksAsync(pluginId, sessionId, payload, cancellationToken),
+				HostApis.VideoStreams => RouteVideoStreams(pluginId, sessionId, connection, payload),
 				_ => HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
 					$"The host has no api '{payload.Api}'.")
 			};
@@ -234,6 +257,17 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		{
 			return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
 				$"The '{payload.Api}' api has no operation '{payload.Operation}'.");
+		}
+
+		// Video session traffic is signalling that a stream start depends on, so a burst of it must not
+		// starve the plugin's other callbacks; it is charged to a bucket of its own instead.
+		if (string.Equals(payload.Api, HostApis.VideoStreams, StringComparison.Ordinal))
+		{
+			return _videoStreamThrottle.TryConsume(pluginId)
+				? null
+				: HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
+					"This plugin is reporting video session changes too quickly.",
+					retryable: true);
 		}
 
 		// The ui api is deliberately exempt. Its traffic is a per-session tree and patch stream whose rate
@@ -812,6 +846,117 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload, exception.Message);
 		}
 	}
+
+	private HostCallbackResult RouteVideoStreams(string pluginId,
+		string? sessionId,
+		IPluginConnection? connection,
+		HostInvokePayload payload)
+	{
+		if (_videoStreamProviders is null || _videoStreamSessions is null)
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
+				"This host does not serve video streams.");
+		}
+
+		// The provider is always the authenticated plugin: a session id names a session only within it.
+		try
+		{
+			switch (payload.Operation)
+			{
+				case HostOperations.VideoStreams.ProvidersChanged:
+					ObserveVideoStreamPull(_videoStreamProviders.RequestProvidersPullAsync(pluginId, sessionId, connection),
+						pluginId);
+					return HostCallbackResult.Ok();
+
+				case HostOperations.VideoStreams.StreamsChanged:
+				{
+					var arguments = Deserialize<VideoStreamsStreamsChangedArguments>(payload.Arguments);
+					if (string.IsNullOrEmpty(arguments?.ProviderId))
+					{
+						return MissingArguments();
+					}
+
+					ObserveVideoStreamPull(_videoStreamProviders.RequestStreamsPullAsync(pluginId, arguments.ProviderId),
+						pluginId);
+					return HostCallbackResult.Ok();
+				}
+
+				case HostOperations.VideoStreams.SessionUpdate:
+				{
+					var arguments = Deserialize<VideoStreamsSessionUpdateArguments>(payload.Arguments);
+					if (string.IsNullOrEmpty(arguments?.SessionId))
+					{
+						return MissingArguments();
+					}
+
+					var description = arguments.Description is null
+						? null
+						: VideoStreamWire.ToDescription(arguments.Description);
+					if (description is not null && VideoStreamWire.ValidateDescription(description) is { } problem)
+					{
+						return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload, problem);
+					}
+
+					_videoStreamSessions.ApplyProviderUpdate(pluginId,
+						arguments.SessionId,
+						VideoStreamWire.ParseSessionState(arguments.State),
+						description,
+						VideoStreamWire.ParseReason(arguments.Reason),
+						arguments.Message);
+					return HostCallbackResult.Ok();
+				}
+
+				case HostOperations.VideoStreams.SessionSignal:
+				{
+					var arguments = Deserialize<VideoStreamsSessionSignalArguments>(payload.Arguments);
+					if (string.IsNullOrEmpty(arguments?.SessionId) || arguments.Signal is null)
+					{
+						return MissingArguments();
+					}
+
+					var signal = VideoStreamWire.ToSignal(arguments.Signal);
+					if (VideoStreamWire.ValidateSignal(signal) is { } problem)
+					{
+						return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload, problem);
+					}
+
+					_videoStreamSessions.ApplyProviderSignal(pluginId, arguments.SessionId, signal);
+					return HostCallbackResult.Ok();
+				}
+
+				case HostOperations.VideoStreams.SessionClose:
+				{
+					var arguments = Deserialize<VideoStreamsSessionCloseArguments>(payload.Arguments);
+					if (string.IsNullOrEmpty(arguments?.SessionId))
+					{
+						return MissingArguments();
+					}
+
+					_videoStreamSessions.ApplyProviderClose(pluginId,
+						arguments.SessionId,
+						VideoStreamWire.ParseReason(arguments.Reason),
+						arguments.Message);
+					return HostCallbackResult.Ok();
+				}
+
+				default:
+					return UnknownOperation(payload);
+			}
+		}
+		catch (VideoStreamBrokerException exception) when (exception.Error == VideoStreamError.UnknownSession)
+		{
+			var error = VideoStreamWire.ToError(VideoStreamErrorCode.UnknownSession, exception.Message);
+			return HostCallbackResult.Fail(error.Code, error.Message, error.Retryable, error.Details);
+		}
+	}
+
+	private void ObserveVideoStreamPull(Task pull, string pluginId)
+		=> _ = pull.ContinueWith(task => _logger.Warning(task.Exception,
+				"Refreshing the video streams of plugin {PluginId} failed",
+				pluginId),
+			CancellationToken.None,
+			TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+			TaskScheduler.Default);
 
 	private async Task<HostCallbackResult> RouteFolderViewsAsync(
 		string pluginId,
