@@ -1,5 +1,6 @@
 using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Dsl;
+using MacroDeck.Ui.Model.Negotiation;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Resources;
 using MacroDeck.Ui.Model.Surfaces;
@@ -42,6 +43,8 @@ public class UiComponentVocabularyTests
 
 	private static readonly string[] _expectedOverflows = ["shrink", "clip-start"];
 
+	private static readonly string[] _expectedListAnchors = ["start", "end"];
+
 	private static readonly string[] _expectedMacroDeckComponents =
 	[
 		"macrodeck.dynamic-text", "macrodeck.clock-dial", "macrodeck.progress-bar",
@@ -58,7 +61,7 @@ public class UiComponentVocabularyTests
 		"answer", "placeholder", "rotation", "originX", "originY", "shape", "cornerRadius", "strokeColor",
 		"strokeWidth", "path", "icon", "columns", "rows", "columnSpan", "rowSpan", "startAngle", "endAngle",
 		"on", "selected",
-		"modifiers", "frame", "clip", "mask", "variants", "spans", "overflow",
+		"modifiers", "frame", "clip", "mask", "variants", "spans", "overflow", "anchor",
 	];
 
 	private static readonly string[] _expectedIconsVersion1 =
@@ -201,6 +204,12 @@ public class UiComponentVocabularyTests
 	public void The_stack_overflow_set_is_frozen()
 	{
 		Assert.That(UiComponentOverflows.WellKnown, Is.EqualTo(_expectedOverflows).AsCollection);
+	}
+
+	[Test]
+	public void The_list_anchor_set_is_frozen()
+	{
+		Assert.That(UiComponentListAnchors.WellKnown, Is.EqualTo(_expectedListAnchors).AsCollection);
 	}
 
 	[Test]
@@ -616,6 +625,7 @@ public class UiComponentVocabularyTests
 					Gap = 0.015,
 					Padding = 0.02,
 					Background = "#101014",
+					Anchor = UiComponentListAnchors.End,
 					Children =
 					[
 						new UiStack
@@ -711,6 +721,70 @@ public class UiComponentVocabularyTests
 		{
 			Assert.That(lists["plain"].Properties.ContainsKey("direction"), Is.False);
 			Assert.That(lists["row"].Properties["direction"].GetString(), Is.EqualTo("horizontal"));
+		});
+	}
+
+	[Test]
+	public void A_list_emits_its_anchor_only_when_one_is_declared()
+	{
+		var tree = UiViewBuilder.Build(WidgetSurface(),
+			new UiStack
+			{
+				Key = "root",
+				Children =
+				[
+					new UiList { Key = "plain", Children = [new UiTextRun { Key = "a", Text = "a" }] },
+					new UiList
+					{
+						Key = "chat",
+						Anchor = UiComponentListAnchors.End,
+						RequiredComponentVersion = 3,
+						Fallback = new UiList { Key = "newestFirst", Children = [new UiTextRun { Key = "c", Text = "c" }] },
+						Children = [new UiTextRun { Key = "b", Text = "b" }],
+					},
+				],
+			});
+
+		var plain = tree.Root.Children[0];
+		var chat = tree.Root.Children[1];
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(plain.Properties.ContainsKey("anchor"), Is.False);
+			Assert.That(chat.Properties["anchor"].GetString(), Is.EqualTo("end"));
+			Assert.That(chat.RequiredComponentVersion, Is.EqualTo(3));
+			Assert.That(chat.Fallback!.Properties.ContainsKey("anchor"), Is.False);
+		});
+	}
+
+	[Test]
+	public void A_reader_whose_list_stops_at_version_2_draws_the_fallback_of_an_anchored_list()
+	{
+		var chat = UiViewBuilder.Build(WidgetSurface(),
+			new UiList
+			{
+				Key = "chat",
+				Anchor = UiComponentListAnchors.End,
+				RequiredComponentVersion = 3,
+				Fallback = new UiList { Key = "newestFirst", Children = [new UiTextRun { Key = "b", Text = "b" }] },
+				Children = [new UiTextRun { Key = "a", Text = "a" }],
+			}).Root;
+		var older = new UiCapabilities
+		{
+			UiProtocol = new UiVersionRange { Minimum = 3, Maximum = 4 },
+			SupportsAllComponents = false,
+			Components = new Dictionary<string, UiVersionRange>
+			{
+				["ui.list"] = new() { Minimum = 1, Maximum = 2 },
+				["ui.text"] = new() { Minimum = 1, Maximum = 1 },
+			},
+		};
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(UiCapabilityNegotiator.NegotiateComponent(chat, older).IsSupported, Is.False,
+				"a version 2 list would ignore the anchor and leave a feed scrolled away from its newest row");
+			Assert.That(UiCapabilityNegotiator.NegotiateComponent(chat.Fallback!, older).IsSupported, Is.True);
 		});
 	}
 

@@ -142,6 +142,24 @@ public static class UiComponentOverflows
 	public static readonly IReadOnlyList<string> WellKnown = [Shrink, ClipStart];
 }
 
+/// <summary>The values of a list's <see cref="UiComponentProperties.Anchor" />.</summary>
+public static class UiComponentListAnchors
+{
+	/// <summary>The view stays where the user left it, as in a list without the key. What absence
+	/// means.</summary>
+	public const string Start = "start";
+
+	/// <summary>
+	/// While the view is at the end of the list, it follows the end as children are added or removed. Once
+	/// the user has scrolled away, content changes leave the view where it is.
+	/// </summary>
+	public const string End = "end";
+
+	/// <summary>The anchors this profile ships. A reader treats one it does not know as
+	/// <see cref="Start" />, rather than failing the tree.</summary>
+	public static readonly IReadOnlyList<string> WellKnown = [Start, End];
+}
+
 /// <summary>The line styles of a <see cref="UiComponentModifiers.BorderLine" />.</summary>
 public static class UiComponentBorderLines
 {
