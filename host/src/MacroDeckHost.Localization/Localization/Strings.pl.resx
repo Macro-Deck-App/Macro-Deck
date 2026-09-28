@@ -15928,6 +15928,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="TemplateBuilder.Variables" xml:space="preserve">
     <value>Zmienne</value>
   </data>
+  <data name="Ui.List.JumpToLatest" xml:space="preserve">
+    <value>Przejdź do najnowszych</value>
+  </data>
   <data name="UiRender.AdvancedConfiguration" xml:space="preserve">
     <value>Konfiguracja zaawansowana</value>
   </data>

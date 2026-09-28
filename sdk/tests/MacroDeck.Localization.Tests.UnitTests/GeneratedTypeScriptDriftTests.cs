@@ -52,6 +52,7 @@ public class GeneratedTypeScriptDriftTests
 		"KeyRing.Unlock.",
 		"Settings.Appearance.",
 		"Settings.Network.Tls.",
+		"Ui.List.",
 		"WebClient.",
 	];
 

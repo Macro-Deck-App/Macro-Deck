@@ -15928,6 +15928,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="TemplateBuilder.Variables" xml:space="preserve">
     <value>Variables</value>
   </data>
+  <data name="Ui.List.JumpToLatest" xml:space="preserve">
+    <value>Ir a lo más reciente</value>
+  </data>
   <data name="UiRender.AdvancedConfiguration" xml:space="preserve">
     <value>Configuración avanzada</value>
   </data>

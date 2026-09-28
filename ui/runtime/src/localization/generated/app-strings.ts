@@ -6621,6 +6621,11 @@ export const AppStrings = {
 			},
 		},
 	},
+	Ui: {
+		List: {
+			JumpToLatest: 'macrodeck.app:Ui.List.JumpToLatest',
+		},
+	},
 	UiRender: {
 		AdvancedConfiguration: 'macrodeck.app:UiRender.AdvancedConfiguration',
 		ReloadOptions: 'macrodeck.app:UiRender.ReloadOptions',
@@ -12859,6 +12864,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:TemplateBuilder.Preview': 'Preview',
 	'macrodeck.app:TemplateBuilder.SearchSnippetsPlaceholder': 'Search filters and snippets',
 	'macrodeck.app:TemplateBuilder.Variables': 'Variables',
+	'macrodeck.app:Ui.List.JumpToLatest': 'Jump to latest',
 	'macrodeck.app:UiRender.AdvancedConfiguration': 'Advanced configuration',
 	'macrodeck.app:UiRender.ReloadOptions': 'Reload options',
 	'macrodeck.app:UiRender.UnsupportedField': 'This field isn\'t supported by this version of Macro Deck',

@@ -15928,6 +15928,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="TemplateBuilder.Variables" xml:space="preserve">
     <value>Proměnné</value>
   </data>
+  <data name="Ui.List.JumpToLatest" xml:space="preserve">
+    <value>Přejít na nejnovější</value>
+  </data>
   <data name="UiRender.AdvancedConfiguration" xml:space="preserve">
     <value>Pokročilé nastavení</value>
   </data>

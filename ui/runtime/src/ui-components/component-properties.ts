@@ -72,6 +72,7 @@ export const UiComponentProperties = {
   Variants: 'variants',
   Spans: 'spans',
   Overflow: 'overflow',
+  Anchor: 'anchor',
 } as const;
 
 export const UI_COMPONENT_PROPERTIES_WELL_KNOWN: readonly string[] =

@@ -15926,6 +15926,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="TemplateBuilder.Variables" xml:space="preserve">
     <value>Variablen</value>
   </data>
+  <data name="Ui.List.JumpToLatest" xml:space="preserve">
+    <value>Zu den neuesten springen</value>
+  </data>
   <data name="UiRender.AdvancedConfiguration" xml:space="preserve">
     <value>Erweiterte Einstellungen</value>
   </data>

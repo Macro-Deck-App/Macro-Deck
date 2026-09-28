@@ -302,6 +302,25 @@ test('a clip-start stack keeps its children at their own size and cuts off what 
   assert.ok(allowance >= 0 && clip > allowance, 'the clip-start child rule must come after the text allowance');
 });
 
+test('an end-anchored list keeps the engine from moving its view and floats its jump pill over the rows', () => {
+  const source = readFileSync(path.join(HERE, 'styles', 'renderer.css'), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+  const rules = topLevelRules(source);
+  const anchored = rules.find(rule => rule.selectors.includes('.widget-list.widget-list-anchor-end'));
+  const jump = rules.find(rule => rule.selectors.includes('.widget-list > .widget-list-jump'));
+  const focus = rules.find(rule => rule.selectors.includes('.widget-list > .widget-list-jump:focus-visible'));
+
+  assert.ok(anchored, 'renderer.css declares no end-anchored list rule');
+  assert.match(anchored.body, /overflow-anchor:\s*none\b/);
+  assert.ok(jump, 'renderer.css declares no .widget-list > .widget-list-jump rule');
+  assert.match(jump.body, /position:\s*sticky\b/);
+  assert.match(jump.body, /(^|[^-\w])bottom:/);
+  assert.match(jump.body, /(^|[^-\w])flex:\s*none\b/);
+  assert.match(jump.body, /(^|[^-\w])margin:\s*0 auto\b/);
+  assert.ok(focus, 'the jump pill shows focus');
+  assert.match(focus.body, /border-color:/);
+});
+
 test('an image inside a text flow is a square one line high that does not grow the line', () => {
   const source = readFileSync(path.join(HERE, 'styles', 'renderer.css'), 'utf8')
     .replace(/\/\*[\s\S]*?\*\//g, '');

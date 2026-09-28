@@ -1251,6 +1251,229 @@ describe('widget node renderer', () => {
 
       expect(emitted).toEqual([{ event: 'reveal', payload: 8 }]);
     });
+
+    describe('anchored at its end', () => {
+      const ROW = 20;
+      const PILL = 30;
+      const END = { anchor: 'end' };
+
+      const span = (from: number, to: number) => {
+        const indexes: number[] = [];
+        for (let index = from; index < to; index++) indexes.push(index);
+        return indexes;
+      };
+
+      const listOf = (indexes: number[], properties: Record<string, unknown>) => node2('ui.list', properties,
+        indexes.map(index => ({ id: `row-${index}`, type: 'ui.text', properties: { text: `row ${index}` } }) as UiNode));
+
+      const paint = (
+        handle: { update(node: UiNode, box: UiComponentBox, cross: null): void },
+        indexes: number[],
+        properties: Record<string, unknown> = END,
+      ) => handle.update(listOf(indexes, properties), { width: 200, height: 100 }, null);
+
+      const jump = () => surface().querySelector('.widget-list-jump') as HTMLElement | null;
+      const shown = (element: HTMLElement | null) => element !== null && element.style.display !== 'none';
+
+      // What a browser does with the box: rows stack at their own height, the pill takes room only
+      // while it shows, and the scroll position is clamped to what the content allows.
+      const scrollModel = (element: HTMLElement) => {
+        const view = { clientHeight: 0, scrollTop: 0 };
+        const rowsOf = () => Array.from(element.children).filter(child => !child.classList.contains('widget-list-jump'));
+        const scrollHeight = () => Math.max(view.clientHeight, rowsOf().length * ROW + (shown(jump()) ? PILL : 0));
+        Object.defineProperty(element, 'clientHeight', { get: () => view.clientHeight, configurable: true });
+        Object.defineProperty(element, 'scrollHeight', { get: scrollHeight, configurable: true });
+        Object.defineProperty(element, 'scrollTop', {
+          get: () => view.scrollTop,
+          set: (value: number) => { view.scrollTop = Math.max(0, Math.min(value, scrollHeight() - view.clientHeight)); },
+          configurable: true,
+        });
+        spyOnProperty(HTMLElement.prototype, 'offsetTop').and.callFake(function (this: HTMLElement) {
+          if (this.parentElement !== element) return 0;
+          return this.classList.contains('widget-list-jump') ? rowsOf().length * ROW : rowsOf().indexOf(this) * ROW;
+        });
+        spyOnProperty(HTMLElement.prototype, 'offsetHeight').and.callFake(function (this: HTMLElement) {
+          if (this.parentElement !== element) return 0;
+          if (this.classList.contains('widget-list-jump')) return shown(this) ? PILL : 0;
+          return ROW;
+        });
+        return view;
+      };
+
+      const firstVisibleRow = (element: HTMLElement) => Array.from(element.children)
+        .find(child => !child.classList.contains('widget-list-jump')
+          && (child as HTMLElement).offsetTop + (child as HTMLElement).offsetHeight > element.scrollTop)
+        ?.getAttribute('data-node-id');
+
+      const sizedAtEnd = (count = 10, properties: Record<string, unknown> = END) => {
+        const handle = list(count, properties);
+        const element = surface();
+        const view = scrollModel(element);
+        view.clientHeight = 60;
+        paint(handle, span(0, count), properties);
+        return { handle, element };
+      };
+
+      it('ends at the end once it has a box, even when it was first painted without one', () => {
+        const { element } = sizedAtEnd(10);
+
+        expect(element.scrollTop).toBe(10 * ROW - 60);
+        expect(element.classList.contains('widget-list-anchor-end')).toBeTrue();
+      });
+
+      it('keeps the view at the end as rows are appended while it is there', () => {
+        const { handle, element } = sizedAtEnd(10);
+
+        paint(handle, span(0, 12));
+        expect(element.scrollTop).toBe(12 * ROW - 60);
+
+        paint(handle, span(0, 13));
+        expect(element.scrollTop).toBe(13 * ROW - 60);
+      });
+
+      it('does not move the view the user scrolled up to when the next paint arrives', () => {
+        const { handle, element } = sizedAtEnd(10);
+
+        // No scroll event yet: the paint can land before the engine reports the user's scroll.
+        element.scrollTop = 40;
+        paint(handle, span(0, 12));
+
+        expect(element.scrollTop).toBe(40);
+      });
+
+      it('keeps the first visible row where it was when a row above it is evicted and another appended', () => {
+        const { handle, element } = sizedAtEnd(10);
+        scrollTo(element, 60);
+        expect(firstVisibleRow(element)).toBe('row-3');
+
+        paint(handle, span(1, 11));
+
+        expect(element.scrollTop).toBe(40);
+        expect(firstVisibleRow(element)).toBe('row-3');
+      });
+
+      it('holds on to the next surviving row when the first visible one itself is removed', () => {
+        const { handle, element } = sizedAtEnd(12);
+        // row-5 is cut off by 10px at the top, row-6 sits 10px below the top edge.
+        scrollTo(element, 110);
+
+        paint(handle, span(0, 12).filter(index => index !== 5));
+
+        const survivor = element.querySelector('[data-node-id="row-6"]') as HTMLElement;
+        expect(element.scrollTop).toBe(90);
+        expect(survivor.offsetTop - element.scrollTop).toBe(10);
+      });
+
+      it('offers a way back to the end when a new row arrives while the user is away', () => {
+        const { handle, element } = sizedAtEnd(10);
+        scrollTo(element, 20);
+        expect(shown(jump())).toBeFalse();
+
+        paint(handle, span(0, 10));
+        expect(shown(jump())).withContext('no new row, no way back').toBeFalse();
+
+        paint(handle, span(0, 11));
+        const pill = jump()!;
+        expect(shown(pill)).toBeTrue();
+        expect(pill.tagName).toBe('BUTTON');
+        expect(pill.getAttribute('aria-label')).toBe('macrodeck.app:Ui.List.JumpToLatest');
+        expect(pill.textContent).toBe('macrodeck.app:Ui.List.JumpToLatest');
+        expect(pill.querySelector('.icon.icon-arrow-down')).not.toBeNull();
+        expect(element.scrollTop).toBe(20);
+
+        pill.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(shown(jump())).toBeFalse();
+        expect(element.scrollTop).toBe(11 * ROW - 60);
+
+        paint(handle, span(0, 12));
+        expect(element.scrollTop).withContext('following again after the jump').toBe(12 * ROW - 60);
+      });
+
+      it('drops the way back once the user scrolls to the end by hand', () => {
+        const { handle, element } = sizedAtEnd(10);
+        scrollTo(element, 20);
+        paint(handle, span(0, 11));
+        expect(shown(jump())).toBeTrue();
+
+        scrollTo(element, element.scrollHeight - 60);
+
+        expect(shown(jump())).toBeFalse();
+      });
+
+      it('does not treat a press on the way back as a press on the node around the list', () => {
+        const presses: string[] = [];
+        const around = (count: number) => ({
+          id: 'around', type: 'ui.stack', properties: { events: ['press'] }, children: [listOf(span(0, count), END)],
+        }) as UiNode;
+        const handle = mount(around(10), 200, 100, testHost({ emit: (_, event) => presses.push(event) }));
+        const element = surface();
+        const view = scrollModel(element);
+        view.clientHeight = 60;
+        handle.update(around(10), { width: 200, height: 100 }, null);
+        scrollTo(element, 20);
+        handle.update(around(11), { width: 200, height: 100 }, null);
+        const pill = jump()!;
+        expect(shown(pill)).toBeTrue();
+
+        pill.dispatchEvent(pointer('pointerdown'));
+        pill.dispatchEvent(pointer('pointerup'));
+        pill.dispatchEvent(new Event('click', { bubbles: true }));
+        jasmine.clock().tick(PAST_THROTTLE_MS);
+
+        expect(presses).toEqual([]);
+        expect(shown(jump())).toBeFalse();
+      });
+
+      it('neither draws a way back nor moves the view for a list without the anchor', () => {
+        const { handle, element } = sizedAtEnd(10, {});
+        expect(element.scrollTop).toBe(0);
+
+        paint(handle, span(1, 12), {});
+
+        expect(element.scrollTop).toBe(0);
+        expect(jump()).toBeNull();
+        expect(element.classList.contains('widget-list-anchor-end')).toBeFalse();
+      });
+
+      it('neither draws a way back nor moves the view for a horizontal list', () => {
+        const sideways = { anchor: 'end', direction: 'horizontal' };
+        const { handle, element } = sizedAtEnd(10, sideways);
+
+        paint(handle, span(1, 12), sideways);
+
+        expect(element.scrollTop).toBe(0);
+        expect(jump()).toBeNull();
+      });
+
+      it('drops the way back when the anchor goes away', () => {
+        const { handle, element } = sizedAtEnd(10);
+        scrollTo(element, 20);
+        paint(handle, span(0, 11));
+        expect(shown(jump())).toBeTrue();
+
+        paint(handle, span(0, 12), {});
+
+        expect(jump()).toBeNull();
+        expect(element.scrollTop).toBe(20);
+      });
+
+      it('reports the indexes of its own rows only, never the way back', () => {
+        const withReveal = { ...END, events: ['reveal'] };
+        const handle = mount(listOf(span(0, 3), withReveal), 200, 100, testHost({
+          emit: (_, event, payload) => emitted.push({ event, payload }),
+        }));
+        const view = scrollModel(surface());
+        view.clientHeight = 200;
+        jasmine.clock().tick(PAST_THROTTLE_MS);
+        emitted.length = 0;
+
+        paint(handle, span(0, 3), withReveal);
+
+        expect(jump()).withContext('the way back is drawn, hidden, among the rows').not.toBeNull();
+        expect(emitted).toEqual([{ event: 'reveal', payload: 2 }]);
+      });
+    });
   });
 });
 
