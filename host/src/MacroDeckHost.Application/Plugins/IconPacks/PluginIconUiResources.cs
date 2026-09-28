@@ -5,7 +5,6 @@ using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Application.Widgets.Icons;
 using MacroDeckHost.Domain.Entities;
-using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
 
 namespace MacroDeckHost.Application.Plugins.IconPacks;
@@ -22,6 +21,8 @@ public sealed record PluginIconResourceResult(PluginIconResourceStatus Status, U
 public interface IPluginIconUiResources
 {
 	Task<PluginIconResourceResult> GetHandleAsync(string pluginId, string key, string name, CancellationToken cancellationToken);
+
+	Task<PluginIconResourceResult> GetHandleAsync(Guid iconId, CancellationToken cancellationToken);
 
 	Task<UiResourceContent?> TryGetAsync(string resourceId, CancellationToken cancellationToken);
 }
@@ -40,12 +41,33 @@ public sealed class PluginIconUiResources(
 		string key,
 		string name,
 		CancellationToken cancellationToken)
+		=> resolver.Resolve(pluginId, key, name) is { } icon
+			? await HandleAsync(icon, cancellationToken)
+			: new PluginIconResourceResult(PluginIconResourceStatus.NotFound);
+
+	public async Task<PluginIconResourceResult> GetHandleAsync(Guid iconId, CancellationToken cancellationToken)
+		=> FindInstalled(iconId) is { } icon
+			? await HandleAsync(icon, cancellationToken)
+			: new PluginIconResourceResult(PluginIconResourceStatus.NotFound);
+
+	public async Task<UiResourceContent?> TryGetAsync(string resourceId, CancellationToken cancellationToken)
 	{
-		if (resolver.Resolve(pluginId, key, name) is not { } icon)
+		if (!PluginIconReferences.TryParseResourceId(resourceId, out var iconId) || FindInstalled(iconId) is not { } icon)
 		{
-			return new PluginIconResourceResult(PluginIconResourceStatus.NotFound);
+			return null;
 		}
 
+		var (_, content) = await ProduceAsync(icon, cancellationToken);
+		return content;
+	}
+
+	private IconEntity? FindInstalled(Guid iconId)
+		=> iconPackCache.GetIconById(iconId) is { } icon && iconPackCache.GetPackById(icon.PackId) is not null
+			? icon
+			: null;
+
+	private async Task<PluginIconResourceResult> HandleAsync(IconEntity icon, CancellationToken cancellationToken)
+	{
 		var (status, content) = await ProduceAsync(icon, cancellationToken);
 		return status != PluginIconResourceStatus.Found
 			? new PluginIconResourceResult(status)
@@ -57,19 +79,6 @@ public sealed class PluginIconUiResources(
 					MediaType = content.MediaType,
 					ByteLength = content.Content.Length
 				});
-	}
-
-	public async Task<UiResourceContent?> TryGetAsync(string resourceId, CancellationToken cancellationToken)
-	{
-		if (!PluginIconReferences.TryParseResourceId(resourceId, out var iconId) ||
-			iconPackCache.GetIconById(iconId) is not { } icon ||
-			iconPackCache.GetPackById(icon.PackId) is not { SourceType: IconPackSourceType.Plugin })
-		{
-			return null;
-		}
-
-		var (_, content) = await ProduceAsync(icon, cancellationToken);
-		return content;
 	}
 
 	private async Task<(PluginIconResourceStatus Status, UiResourceContent? Content)> ProduceAsync(IconEntity icon,

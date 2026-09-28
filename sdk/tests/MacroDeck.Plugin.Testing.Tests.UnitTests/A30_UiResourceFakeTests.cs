@@ -161,6 +161,90 @@ public class A30_UiResourceFakeTests
 		Assert.That(exception.ErrorCode, Is.EqualTo(UiResourceErrorCode.PluginIconNotFound));
 	}
 
+	[Test]
+	public async Task A_fake_icon_is_answered_by_id_outside_the_quota()
+	{
+		var iconId = Guid.NewGuid();
+		var registry = new FakeUiResourceRegistry { MaxCount = 0 };
+		var added = registry.AddIcon(iconId, _first, "image/png");
+
+		var handle = await registry.GetIconAsync(iconId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(handle, Is.EqualTo(added));
+			Assert.That(handle.ContentHash, Is.EqualTo(AssetContentHash.Compute(_first)));
+			Assert.That(handle.MediaType, Is.EqualTo("image/png"));
+			Assert.That(registry.Resources, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task Replacing_a_fake_icon_keeps_its_resource_id_and_changes_its_content_hash()
+	{
+		var iconId = Guid.NewGuid();
+		var registry = new FakeUiResourceRegistry();
+		var first = registry.AddIcon(iconId, _first, "image/png");
+		registry.AddIcon(iconId, _second, "image/png");
+
+		var replaced = await registry.GetIconAsync(iconId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(replaced.ResourceId, Is.EqualTo(first.ResourceId));
+			Assert.That(replaced.ContentHash, Is.Not.EqualTo(first.ContentHash));
+		});
+	}
+
+	[Test]
+	public void An_unknown_icon_id_is_not_found()
+	{
+		var registry = new FakeUiResourceRegistry();
+		registry.AddIcon(Guid.NewGuid(), _first, "image/png");
+
+		var exception = Assert.ThrowsAsync<UiResourceException>(() => registry.GetIconAsync(Guid.NewGuid()));
+
+		Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.IconNotFound));
+	}
+
+	[Test]
+	public async Task Over_the_wire_the_stub_host_holds_no_icons()
+	{
+		var integration = new IconByIdIntegration();
+		await using var host = await MacroDeckTestHost.StartAsync();
+		var builder = MacroDeckPlugin.CreatePlugin();
+		builder.RegisterIntegration(_ => integration);
+		await using var plugin = await host.HostAsync(builder);
+		await host.WaitForSessionAsync();
+
+		var exception = await integration.Failure.Task.WaitAsync(TimeSpan.FromSeconds(10));
+
+		Assert.That(exception.ErrorCode, Is.EqualTo(UiResourceErrorCode.IconNotFound));
+	}
+
+	private sealed class IconByIdIntegration : IPluginIntegration
+	{
+		public TaskCompletionSource<UiResourceException> Failure { get; } =
+			new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		public IReadOnlyList<IActionDefinition> Actions => [];
+
+		public async Task InitializeAsync(IIntegrationContext context)
+		{
+			try
+			{
+				await context.UiResources.GetIconAsync(Guid.NewGuid());
+				Failure.TrySetException(new AssertionException("The stub host answered an icon."));
+			}
+			catch (UiResourceException exception)
+			{
+				Failure.TrySetResult(exception);
+			}
+		}
+
+		public Task ShutdownAsync() => Task.CompletedTask;
+	}
+
 	private sealed class PluginIconIntegration : IPluginIntegration
 	{
 		public TaskCompletionSource<UiResourceException> Failure { get; } =

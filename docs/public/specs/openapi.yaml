@@ -151,6 +151,7 @@ x-macrodeck-error-codes:
   - PLUGIN_ICON_NOT_FOUND
   - ICON_PACK_INVALID
   - ICON_PACK_SYNC_NOT_ALLOWED
+  - ICON_NOT_FOUND
 
 servers:
   - url: /
@@ -523,6 +524,7 @@ components:
         - PLUGIN_ICON_NOT_FOUND
         - ICON_PACK_INVALID
         - ICON_PACK_SYNC_NOT_ALLOWED
+        - ICON_NOT_FOUND
 
     ProtocolError:
       type: object
