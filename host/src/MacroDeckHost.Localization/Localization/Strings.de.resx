@@ -7414,9 +7414,6 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>{enabled} von {total} aktiviert</value>
     <comment>[enabled:int]</comment>
   </data>
-  <data name="Integrations.Page.ExternalTag" xml:space="preserve">
-    <value>Extern</value>
-  </data>
   <data name="Integrations.Page.FallbackIntegrationName" xml:space="preserve">
     <value>diese Integration</value>
   </data>
