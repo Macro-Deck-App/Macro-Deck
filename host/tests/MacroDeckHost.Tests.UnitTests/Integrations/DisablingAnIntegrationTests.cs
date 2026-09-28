@@ -61,6 +61,7 @@ internal sealed class DisablingAnIntegrationTests
 		var layoutHost = new LayoutProviderHost(_layouts, TimeProvider.System, Serilog.Core.Logger.None);
 		var folderViewHost = new FolderViewProviderHost(_folderViews, TimeProvider.System, Serilog.Core.Logger.None);
 		var screenSaverHost = new ScreenSaverProviderHost(_screenSavers, TimeProvider.System, Serilog.Core.Logger.None);
+		var videoStreamHost = TestVideoStreams.Host();
 		var deviceHost = TestDeviceProviders.Host();
 
 		var initializer = new IntegrationInitializer(scopeFactory,
@@ -81,6 +82,7 @@ internal sealed class DisablingAnIntegrationTests
 			folderViewHost,
 			widgetTypeHost,
 			screenSaverHost,
+			videoStreamHost,
 			deviceHost,
 			TimeProvider.System,
 			Serilog.Log.Logger,
@@ -95,6 +97,7 @@ internal sealed class DisablingAnIntegrationTests
 			folderViewHost,
 			widgetTypeHost,
 			screenSaverHost,
+			videoStreamHost,
 			deviceHost,
 			TimeProvider.System,
 			Serilog.Log.Logger);

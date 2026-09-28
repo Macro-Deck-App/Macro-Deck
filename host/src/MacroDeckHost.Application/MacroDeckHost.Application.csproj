@@ -82,6 +82,12 @@
     <ProjectReference Include="..\MacroDeckHost.Localization\MacroDeckHost.Localization.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\sdk\src\MacroDeck.Plugin.Hosting\Capabilities\VideoStreamProvider\VideoStreamSessionTable.cs"
+             Link="VideoStreams\VideoStreamSessionTable.cs" />
+    <Compile Include="..\..\..\sdk\src\MacroDeck.Plugin.Hosting\Capabilities\VideoStreamProvider\VideoStreamWire.cs"
+             Link="VideoStreams\VideoStreamWire.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <InternalsVisibleTo Include="MacroDeckHost" />
     <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests" />
     <!-- LoggingContractTests constructs a real PluginLogIngestor with a capturing logger accessor, via

@@ -188,7 +188,7 @@ Capabilities are first declared on the `POST /api/plugins/sessions` request; `ca
 
 | Shape | Field | Type | Required | Meaning |
 | --- | --- | --- | --- | --- |
-| `DeclaredCapability` | `kind` | string | yes | One of the eighteen kinds below. |
+| `DeclaredCapability` | `kind` | string | yes | One of the nineteen kinds below. |
 | | `localId` | string | yes | The capability's id within the plugin. |
 | | `versionRange` | `{minimum, maximum}` | yes | Integer capability versions the plugin serves. |
 | | `displayName` | string | no | Human-readable name. |
@@ -199,7 +199,7 @@ Capabilities are first declared on the `POST /api/plugins/sessions` request; `ca
 
 Negotiation fails **non-fatally**: an unsupported or unknown kind comes back rejected with a reason, and the session proceeds degraded.
 
-The eighteen `kind` values: `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`, `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`, `folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`, `messaging`. `operation` comes from a fixed vocabulary per kind - see [capability operations](/reference/protocol/#capability-operations). Two more captured invokes:
+The nineteen `kind` values: `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`, `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`, `folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`, `messaging`, `video-stream-provider`. `operation` comes from a fixed vocabulary per kind - see [capability operations](/reference/protocol/#capability-operations). Two more captured invokes:
 
 ```json
 {"type":"capability.invoke","id":"01a09528-bc57-7b85-bed4-952327ffedcd",
@@ -259,7 +259,7 @@ The only kind that is **item-shaped and provider-shaped at once**. The eager hal
 | `host.cancel` | plugin → host | `reason` - best-effort cancellation of a `host.invoke` |
 | `host.state` | host → plugin | `api` (required), `data` - the list a plugin's synchronous members serve from |
 
-APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `notifications`, `action-interactions`, `ui`, `devices`, `variable-values`, `layouts`, `folder-views`, `widget-types`, `screensavers`, `adb`, `messaging`, `icon-packs`, and the push-only `event-bindings`. There is no `events` api; use `event.publish`. A plugin ignores a `host.state` api it does not know.
+APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `notifications`, `action-interactions`, `ui`, `devices`, `variable-values`, `layouts`, `folder-views`, `widget-types`, `screensavers`, `adb`, `messaging`, `icon-packs`, `video-streams`, and the push-only `event-bindings`. There is no `events` api; use `event.publish`. A plugin ignores a `host.state` api it does not know.
 
 `host.state` for `config` has no `data`: it means "your config changed, re-read it". Built from the schema:
 
@@ -277,6 +277,7 @@ APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `no
 | `adb` | Gated per plugin, runs off the session's dispatch loop, at most 4 calls in flight per plugin - see [`adb`](#adb). |
 | `icon-packs` | `get-icon-resource` and `sync-bundled` reach the calling plugin's own bundled icon packs only, `get-icon` any installed icon by id; `sync-bundled` only from a self-registered development session - see [`icon-packs`](#icon-packs). |
 | `messaging` | Needs the `messaging` capability kind; own rate limit instead of the per-plugin callback throttle; `send` and `request` run off the session's dispatch loop - see [`messaging`](#messaging). |
+| `video-streams` | Only for sessions the host opened on the calling plugin's own providers; own rate limit instead of the per-plugin callback throttle - see [`video-streams`](#video-streams). |
 
 #### `widgets` by major
 
@@ -476,6 +477,105 @@ The host delivers through it:
 A plugin answers a topic it does not handle with `CAPABILITY_UNAVAILABLE` and reason
 `messaging_no_handler`, and a handler that failed with reason `messaging_handler_failed`. The kind has no
 `describe`.
+
+#### `video-streams`
+
+```json
+{"type":"host.invoke","id":"<uuid-v7>","deadlineMs":10000,
+ "payload":{"api":"video-streams","operation":"session-update",
+   "arguments":{"sessionId":"<session-id>","state":"Reconnecting","reason":"ProviderReconnecting"}}}
+```
+
+A video stream provider tells the host what changed and reports on the sessions the host opened on it. The
+host drives the providers and sessions through the
+[`video-stream-provider` capability kind](#the-video-stream-provider-capability-kind). Argument shapes are
+in
+[`VideoStreamsInvokeArguments.cs`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/protocol/src/MacroDeck.Plugin.Protocol/Callbacks/VideoStreamsInvokeArguments.cs).
+The SDK side is [Video streams](/features/video-streams/).
+
+| Operation | Arguments | Result `data` | Meaning |
+| --- | --- | --- | --- |
+| `providers-changed` | none | none | The plugin registered or withdrew a provider. The host calls `describe`. |
+| `streams-changed` | `providerId` | none | A provider's streams, their metadata or their state changed. The host calls `streams`. |
+| `session-update` | `sessionId`, `state`, `description`, `reason`, `message` | none | The session's state, optionally with a replacement description. |
+| `session-signal` | `sessionId`, `signal` (`type`, `payload`) | none | A signal for the session's consumer. |
+| `session-close` | `sessionId`, `reason`, `message` | none | The provider ended the session. The host sends no `session.close` for it. |
+
+- **The host is the only writer of the catalog.** `providers-changed` and `streams-changed` carry no
+  data; they make the host read the catalog again. Several in quick succession are coalesced into one read,
+  and a read is applied only while the plugin session it came from is still current.
+- **Session operations are scoped.** They are accepted only for a session the host opened on one of the
+  calling plugin's own providers; anything else is `CAPABILITY_UNAVAILABLE` with reason
+  `video_stream_unknown_session`. An update or signal sent while its `session.open` is still in flight is
+  held, at most 64 per session, and applied in order after the open's result.
+- **Enums travel as the SDK's member names**: `state` is a `VideoStreamSessionState`, `reason` a
+  `VideoStreamSessionReason`. A reader maps a name it does not know to `Reconnecting` and `None`.
+- **Limits.** Values past a
+  [`VideoStreamLimits`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/protocol/src/MacroDeck.Plugin.Protocol/Limits/VideoStreamLimits.cs)
+  bound are `INVALID_PAYLOAD`. The api has its own per-plugin budget of 64 calls, refilled at 32 a second,
+  separate from the callback throttle; beyond it is `RATE_LIMITED`.
+
+A host without this api answers every `video-streams` invoke with `CAPABILITY_UNSUPPORTED`, and does not
+list `video-stream-provider` in the descriptor's `capabilityKinds`.
+
+##### The `video-stream-provider` capability kind
+
+Version 1, declared at local id `provider`. DTOs are in
+[`VideoStreamProviderDtos.cs`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/protocol/src/MacroDeck.Plugin.Protocol/Capabilities/VideoStreamProvider/VideoStreamProviderDtos.cs).
+
+```json
+{"type":"capability.invoke","id":"<uuid-v7>","deadlineMs":10000,
+ "payload":{"kind":"video-stream-provider","localId":"provider","operation":"session.open",
+   "arguments":{"sessionId":"<session-id>","providerId":"door-cameras","streamId":"front",
+     "acceptedTransports":["webrtc","hls"],
+     "consumer":{"deviceId":"<device-id>","hostAddress":"http://192.168.1.20:8191/","connectionKind":"Network"}}}}
+```
+
+| Operation | Arguments | Result `data` |
+| --- | --- | --- |
+| `describe` | none | `providers`: `id`, `name`, `description`, `registrationId` |
+| `streams` | `providerId` | `streams`: `id`, `name`, `description`, `width`, `height`, `hasAudio`, `state`, `metadata` |
+| `session.open` | `sessionId`, `providerId`, `streamId`, `acceptedTransports`, `consumer` | `description` (`transport`, `url`, `parameters`, `payload`, `expiresAt`), `registrationId` |
+| `session.suspend` | `sessionId`, `providerId` | none |
+| `session.resume` | `sessionId`, `providerId` | `description`, absent when the previous one stays valid |
+| `session.signal` | `sessionId`, `providerId`, `signal` | `signal`, the provider's direct answer, or absent |
+| `session.close` | `sessionId`, `providerId`, `reason` | none |
+
+- **`registrationId` is fresh for every registration.** When the host sees it change or vanish for the
+  same provider id, it treats every session it opened on the earlier registration as closed.
+- **The host mints `sessionId`.** A `session.close` can overtake its `session.open`: answer the close with
+  success, and the open that follows with `video_stream_unknown_session` without opening anything. Closing
+  an unknown or already closed session succeeds.
+- **Exactly one close.** Every successful `session.open` is followed by one `session.close` for it, unless
+  the plugin sent `session-close` first. An open result that arrives after its consumer went away is closed
+  at once, with the reason the session ended with; one for an earlier registration of the provider is
+  closed with `ProviderRemoved`.
+- **Concurrency.** The host sends at most 8 `describe`, `streams`, `session.open`, `session.suspend`,
+  `session.resume` and `session.signal` calls at once per plugin, queues up to 256 more for at most the
+  capability invoke timeout each, and refuses the rest as busy; `session.close` has 4 slots of its own and
+  is never dropped, and one refused with `RATE_LIMITED` or `TIMEOUT` is retried up to 10 times in all,
+  backing off from 250 ms to 5 s, while the plugin session is current. After that the host gives up; the
+  plugin closes its side of the session when its connection ends. Signals of one session are sent in order.
+- **Sessions end with the plugin session.** When a plugin session ends or detaches, the host closes every
+  video session opened under it and removes the plugin's providers until the next `describe`. A plugin
+  closes its own side of those sessions with `HostDisconnected` and never sees a `session.close` for them.
+- **Enums travel as the SDK's member names.** An unknown `state` reads as `Unavailable`, an unknown
+  `connectionKind` as `Network`, and an unknown `reason` as `None`.
+
+A provider refuses an operation with `CAPABILITY_UNSUPPORTED` when it does not support it, and otherwise
+with `CAPABILITY_UNAVAILABLE` and one of these reasons in `details.reason`; a failure without a reason is
+`Failed`:
+
+| Reason | SDK error code | Retryable |
+| --- | --- | --- |
+| `video_stream_unknown_provider` | `UnknownProvider` | no |
+| `video_stream_unknown_stream` | `UnknownStream` | no |
+| `video_stream_unknown_session` | `UnknownSession` | no |
+| `video_stream_stream_unavailable` | `StreamUnavailable` | yes |
+| `video_stream_transport_not_accepted` | `TransportNotAccepted` | no |
+| `video_stream_capacity_reached` | `CapacityReached` | yes |
+| `video_stream_signaling_unsupported` | `SignalingUnsupported` | no |
+| `video_stream_busy` | `Busy` | yes |
 
 ### Events, logs and state
 

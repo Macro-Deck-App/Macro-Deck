@@ -24,6 +24,10 @@ using MacroDeckHost.Application.ScreenSavers;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Tests.UnitTests.Auth;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
+using MacroDeckHost.Tests.UnitTests.VideoStreams;
+using MacroDeckHost.Application.VideoStreams;
+using MacroDeck.Plugin.Protocol.Capabilities.VideoStreamProvider;
+using MacroDeck.Sdk.VideoStreams;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.ConfigFlow;
@@ -1168,6 +1172,109 @@ public class RemotePluginIntegrationRegistrarTests
 			Assert.That(_folderViewRegistry.TryResolve(folderView.FolderViewId, out _), Is.False);
 			Assert.That(_layoutRegistry.TryResolve(layout.LayoutId, out _), Is.False);
 			Assert.That(_screenSaverRegistry.TryResolve(screenSaver.ScreenSaverId, out _), Is.False);
+		});
+	}
+
+	private RemotePluginIntegrationRegistrar VideoRegistrar(VideoStreamWorld world)
+		=> new(world.PluginSessions,
+			_integrationRegistry,
+			_snapshotStore,
+			new RemotePluginSnapshotRefresher(_invoker, _snapshotStore),
+			_invoker,
+			new AlwaysDisconnected(),
+			_assetCache,
+			_assetReceiver,
+			_installationCatalog,
+			_manifestReader,
+			_notifications,
+			_scopeFactory,
+			_localizationCatalogs,
+			_deviceRegistry,
+			_layoutRegistry,
+			_folderViewRegistry,
+			_widgetTypeRegistry,
+			_screenSaverRegistry,
+			_time,
+			Serilog.Log.Logger,
+			videoStreamProviders: world.Registry,
+			videoStreamSessions: world.Broker);
+
+	private static async Task<(string SessionId, VideoStreamPluginConnection Connection)> ConnectVideoPluginAsync(
+		VideoStreamWorld world,
+		string pluginId)
+	{
+		var sessionId = Guid.CreateVersion7().ToString("D");
+		await world.PluginSessions.Create(new PluginSessionRecord
+		{
+			SessionId = sessionId,
+			PluginId = pluginId,
+			DisplayName = "Cameras",
+			Origin = PluginSessionOrigin.Managed,
+			NegotiatedVersion = 3,
+			Capabilities = Accepted(CapabilityKinds.VideoStreamProvider),
+			DeclaredCapabilities = [Provider(CapabilityKinds.VideoStreamProvider)],
+			State = PluginSessionState.Awaiting,
+			CreatedAt = DateTimeOffset.UtcNow
+		});
+		var connection = new VideoStreamPluginConnection();
+		world.PluginSessions.TryAttach(sessionId, connection, null);
+		return (sessionId, connection);
+	}
+
+	[Test]
+	public async Task Every_attach_reads_the_plugins_video_stream_providers_again()
+	{
+		const string pluginId = "com.example.cameras";
+		using var world = new VideoStreamWorld();
+		using var registrar = VideoRegistrar(world);
+		world.Plugin.AddProvider("front", "r1", "main");
+		var (sessionId, connection) = await ConnectVideoPluginAsync(world, pluginId);
+
+		var registered = await registrar.RegisterAsync(pluginId, sessionId, connection);
+		var afterFirstAttach = world.Registry.GetProviders().Select(entry => entry.QualifiedId).ToList();
+		world.Plugin.AddProvider("back", "b1", "main");
+		world.PluginSessions.Detach(sessionId, DateTimeOffset.UtcNow);
+		world.PluginSessions.TryAttach(sessionId, connection, null);
+		await registrar.RegisterAsync(pluginId, sessionId, connection);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(registered, Is.True);
+			Assert.That(afterFirstAttach, Is.EqualTo(new[] { pluginId + "::front" }));
+			Assert.That(world.Registry.GetProviders().Select(entry => entry.QualifiedId),
+				Is.EqualTo(new[] { pluginId + "::back", pluginId + "::front" }));
+			Assert.That(world.Plugin.Calls.Count(call => call.Operation == CapabilityOperations.VideoStreamProvider.Describe),
+				Is.EqualTo(2));
+		});
+	}
+
+	[Test]
+	public async Task Unregistering_a_plugin_withdraws_its_video_providers_and_closes_their_sessions_at_the_plugin()
+	{
+		const string pluginId = "com.example.cameras";
+		using var world = new VideoStreamWorld();
+		using var registrar = VideoRegistrar(world);
+		world.Plugin.AddProvider("front", "r1", "main");
+		var (sessionId, connection) = await ConnectVideoPluginAsync(world, pluginId);
+		await registrar.RegisterAsync(pluginId, sessionId, connection);
+		var ticket = world.Open(pluginId + "::front", "main");
+		await world.WaitForActiveAsync(ticket.SessionId);
+
+		await registrar.UnregisterAsync(pluginId);
+		await world.WaitForClosedAsync(ticket.SessionId);
+		await VideoStreamWorld.WaitForAsync(
+			() => world.Plugin.ArgumentsOf<VideoStreamSessionCloseArguments>(CapabilityOperations.VideoStreamProvider.SessionClose).Count == 1,
+			"the plugin never heard of the close");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(world.Registry.GetProviders(), Is.Empty);
+			Assert.That(world.Publisher.Of<MacroDeckHost.Application.Events.VideoStreamSessionClosedNotification>().Single().Reason,
+				Is.EqualTo(VideoStreamSessionReason.ProviderRemoved));
+			Assert.That(world.Plugin.ArgumentsOf<VideoStreamSessionCloseArguments>(CapabilityOperations.VideoStreamProvider.SessionClose)
+					.Single(),
+				Has.Property(nameof(VideoStreamSessionCloseArguments.SessionId)).EqualTo(ticket.SessionId)
+					.And.Property(nameof(VideoStreamSessionCloseArguments.Reason)).EqualTo("ProviderRemoved"));
 		});
 	}
 

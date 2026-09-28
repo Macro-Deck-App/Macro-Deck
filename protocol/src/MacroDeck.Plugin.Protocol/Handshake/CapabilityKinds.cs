@@ -1,6 +1,6 @@
 namespace MacroDeck.Plugin.Protocol.Handshake;
 
-/// <summary>The eighteen capability kinds a plugin can declare.</summary>
+/// <summary>The nineteen capability kinds a plugin can declare.</summary>
 public static class CapabilityKinds
 {
 	public const string Actions = "actions";
@@ -46,11 +46,17 @@ public static class CapabilityKinds
 	/// </summary>
 	public const string Messaging = "messaging";
 
+	/// <summary>
+	/// Offers live video streams a consumer can open a session for. Declared at
+	/// <see cref="Capabilities.ProviderCapabilityId.LocalId" />.
+	/// </summary>
+	public const string VideoStreamProvider = "video-stream-provider";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		Actions, Events, Variables, Icons, ConfigFlow, MusicPlayer, Weather, VirtualProfiles, Issues, Ui,
 		Localization, DeviceProvider, LayoutProvider, FolderViewProvider, Migration, WidgetTypeProvider,
-		ScreenSaverProvider, Messaging,
+		ScreenSaverProvider, Messaging, VideoStreamProvider,
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);

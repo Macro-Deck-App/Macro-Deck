@@ -35,6 +35,11 @@ using DomainVariableType = MacroDeckHost.Domain.Enums.VariableType;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
+using MacroDeckHost.Tests.UnitTests.VideoStreams;
+using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.VideoStreams;
+using MacroDeck.Plugin.Protocol.Capabilities.VideoStreamProvider;
+using MacroDeck.Sdk.VideoStreams;
 
 namespace MacroDeckHost.Tests.UnitTests.Plugins;
 
@@ -63,7 +68,10 @@ public class PluginCallbackRouterTests
 		IPluginIconPackSync? iconPackSync = null,
 		IPluginIconPackUploads? iconPackUploads = null,
 		IPluginIconUiResources? pluginIconResources = null,
-		IPluginIconResolver? pluginIconResolver = null)
+		IPluginIconResolver? pluginIconResolver = null,
+		VideoStreamProviderRegistry? videoStreamProviders = null,
+		IVideoStreamSessionBroker? videoStreamSessions = null,
+		VideoStreamCallbackThrottle? videoStreamThrottle = null)
 	{
 		var services = new ServiceCollection();
 		services.AddSingleton<IVariableService>(variableService);
@@ -95,7 +103,10 @@ public class PluginCallbackRouterTests
 			iconPackSync: iconPackSync,
 			iconPackUploads: iconPackUploads,
 			pluginIconResources: pluginIconResources,
-			pluginIconResolver: pluginIconResolver);
+			pluginIconResolver: pluginIconResolver,
+			videoStreamProviders: videoStreamProviders,
+			videoStreamSessions: videoStreamSessions,
+			videoStreamThrottle: videoStreamThrottle);
 	}
 
 	[SetUp]
@@ -632,6 +643,175 @@ public class PluginCallbackRouterTests
 		});
 	}
 
+	// ---- video streams -------------------------------------------------------------------------
+
+	private PluginCallbackRouter VideoRouter(VideoStreamWorld world, int sharedCapacity = 100, int videoCapacity = 100)
+		=> Router(_variableService,
+			_actionInteractions,
+			_invoker,
+			new HostCallbackThrottle(_time, sharedCapacity, refillPerSecond: 0),
+			videoStreamProviders: world.Registry,
+			videoStreamSessions: world.Broker,
+			videoStreamThrottle: new VideoStreamCallbackThrottle(_time, videoCapacity, refillPerSecond: 0));
+
+	private static HostInvokePayload Video(string operation, object? arguments = null)
+		=> new()
+		{
+			Api = HostApis.VideoStreams,
+			Operation = operation,
+			Arguments = arguments is null ? null : Arg(arguments)
+		};
+
+	private static async Task<string> OpenPluginSessionAsync(VideoStreamWorld world, string pluginId)
+	{
+		world.Plugin.AddProvider("front", "r1", "main");
+		await world.AttachPluginAsync(pluginId);
+		var ticket = world.Open(pluginId + "::front", "main");
+		await world.WaitForActiveAsync(ticket.SessionId);
+		return ticket.SessionId;
+	}
+
+	[Test]
+	public async Task Video_stream_callbacks_are_charged_to_their_own_bucket_and_leave_the_shared_one_alone()
+	{
+		using var world = new VideoStreamWorld();
+		var router = VideoRouter(world, sharedCapacity: 1, videoCapacity: 2);
+
+		var first = await router.RouteAsync("plugin.a", "c1", Video(HostOperations.VideoStreams.ProvidersChanged), CancellationToken.None);
+		var second = await router.RouteAsync("plugin.a", "c2", Video(HostOperations.VideoStreams.ProvidersChanged), CancellationToken.None);
+		var third = await router.RouteAsync("plugin.a", "c3", Video(HostOperations.VideoStreams.ProvidersChanged), CancellationToken.None);
+		var shared = await router.RouteAsync("plugin.a",
+			"c4",
+			new HostInvokePayload { Api = HostApis.Variables, Operation = HostOperations.Variables.List },
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(first.Error, Is.Null);
+			Assert.That(second.Error, Is.Null);
+			Assert.That(third.Error!.Code, Is.EqualTo(ProtocolErrorCodes.RateLimited));
+			Assert.That(third.Error.Retryable, Is.True);
+			Assert.That(shared.Error, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task Providers_changed_makes_the_host_read_the_calling_plugins_providers()
+	{
+		using var world = new VideoStreamWorld();
+		world.Plugin.AddProvider("front", "r1", "main");
+		var (sessionId, connection) = await world.ConnectPluginAsync("plugin.a");
+		var router = VideoRouter(world);
+
+		var result = await router.RouteAsync("plugin.a",
+			sessionId,
+			connection,
+			"c1",
+			Video(HostOperations.VideoStreams.ProvidersChanged),
+			CancellationToken.None);
+		await VideoStreamWorld.WaitForAsync(() => world.Registry.GetProviders().Count == 1, "the providers were never read");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.Null);
+			Assert.That(world.Registry.GetProviders().Single().QualifiedId, Is.EqualTo("plugin.a::front"));
+			Assert.That(world.Registry.GetProviders().Single().Streams.Single().Id, Is.EqualTo("main"));
+		});
+	}
+
+	[Test]
+	public async Task A_plugin_updates_signals_and_closes_its_own_video_session()
+	{
+		using var world = new VideoStreamWorld();
+		var sessionId = await OpenPluginSessionAsync(world, "plugin.a");
+		var router = VideoRouter(world);
+
+		var update = await router.RouteAsync("plugin.a",
+			"c1",
+			Video(HostOperations.VideoStreams.SessionUpdate,
+				new VideoStreamsSessionUpdateArguments
+				{
+					SessionId = sessionId, State = "Reconnecting", Reason = "SourceLost"
+				}),
+			CancellationToken.None);
+		var signal = await router.RouteAsync("plugin.a",
+			"c2",
+			Video(HostOperations.VideoStreams.SessionSignal,
+				new VideoStreamsSessionSignalArguments
+				{
+					SessionId = sessionId, Signal = new VideoStreamSignalDto { Type = "ice", Payload = "candidate" }
+				}),
+			CancellationToken.None);
+		var close = await router.RouteAsync("plugin.a",
+			"c3",
+			Video(HostOperations.VideoStreams.SessionClose,
+				new VideoStreamsSessionCloseArguments { SessionId = sessionId, Reason = "SourceLost" }),
+			CancellationToken.None);
+		await world.WaitForClosedAsync(sessionId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(new[] { update.Error, signal.Error, close.Error }, Is.All.Null);
+			Assert.That(world.Publisher.Of<VideoStreamSessionChangedNotification>()[^1],
+				Has.Property(nameof(VideoStreamSessionChangedNotification.State)).EqualTo(VideoStreamSessionState.Reconnecting)
+					.And.Property(nameof(VideoStreamSessionChangedNotification.Reason)).EqualTo(VideoStreamSessionReason.SourceLost));
+			Assert.That(world.Publisher.Of<VideoStreamSignalNotification>().Single().Signal,
+				Is.EqualTo(new VideoStreamSignal("ice", "candidate")));
+			Assert.That(world.Publisher.Of<VideoStreamSessionClosedNotification>().Single().Reason,
+				Is.EqualTo(VideoStreamSessionReason.SourceLost));
+		});
+	}
+
+	[Test]
+	public async Task A_plugin_cannot_report_on_another_plugins_video_session()
+	{
+		using var world = new VideoStreamWorld();
+		var sessionId = await OpenPluginSessionAsync(world, "plugin.a");
+		var router = VideoRouter(world);
+
+		var update = await router.RouteAsync("plugin.b",
+			"c1",
+			Video(HostOperations.VideoStreams.SessionUpdate,
+				new VideoStreamsSessionUpdateArguments { SessionId = sessionId, State = "Suspended" }),
+			CancellationToken.None);
+		var close = await router.RouteAsync("plugin.b",
+			"c2",
+			Video(HostOperations.VideoStreams.SessionClose, new VideoStreamsSessionCloseArguments { SessionId = sessionId }),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(update.Error!.Code, Is.EqualTo(ProtocolErrorCodes.CapabilityUnavailable));
+			Assert.That(update.Error.Details!["reason"], Is.EqualTo(ProtocolErrorReasons.VideoStreamUnknownSession));
+			Assert.That(close.Error, Is.Null);
+			Assert.That(world.Publisher.ForSession(sessionId), Has.Count.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task A_session_description_past_the_limits_is_an_invalid_payload()
+	{
+		using var world = new VideoStreamWorld();
+		var sessionId = await OpenPluginSessionAsync(world, "plugin.a");
+		var router = VideoRouter(world);
+
+		var result = await router.RouteAsync("plugin.a",
+			"c1",
+			Video(HostOperations.VideoStreams.SessionUpdate,
+				new VideoStreamsSessionUpdateArguments
+				{
+					SessionId = sessionId,
+					State = "Active",
+					Description = new VideoStreamSessionDescriptionDto { Transport = "WebRTC" }
+				}),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error!.Code, Is.EqualTo(ProtocolErrorCodes.InvalidPayload));
+			Assert.That(world.Publisher.ForSession(sessionId), Has.Count.EqualTo(1));
+		});
+	}
 
 	[Test]
 	public async Task A_picker_request_outside_a_live_execute_of_that_plugin_is_refused()

@@ -169,6 +169,28 @@ records every `ScreenSaverProviderCall` in order. `harness.Context.ScreenSavers`
 whole harness, and `harness.ScreenSaverProvider`, a `ScreenSaverProviderTestClient`, drives the `screensaver-provider`
 capability with `GetScreenSaversAsync`, the way the host reads your catalog after a reconnect. See [Screensavers](/ui/views/screensavers/).
 
+## Testing video streams
+
+```csharp
+var videoStreams = new FakeVideoStreamProviderContext();
+await new DoorCameraIntegration(server).InitializeAsync(videoStreams);
+
+Assert.That(videoStreams.Providers.ContainsKey("door-cameras"), Is.True);
+Assert.That(videoStreams.Calls.Last().Kind, Is.EqualTo(VideoStreamProviderCallKind.Register));
+```
+
+`FakeVideoStreamProviderContext` applies the SDK's and the host's rules: an invalid or duplicate provider
+id, a seventeenth provider, and a description or signal past a
+[documented bound](/features/video-streams/#limits) throw `ArgumentException`, and unregistering an unknown
+id is a silent no-op. `Calls` records every `VideoStreamProviderCall` in order, including the session
+updates, signals and closes your provider reports. The fake opens no sessions: in a harness,
+`harness.VideoStreamProvider`, a `VideoStreamProviderTestClient`, drives the `video-stream-provider`
+capability the way the host does, with `DescribeAsync`, `GetStreamsAsync`, `OpenSessionAsync`,
+`SuspendSessionAsync`, `ResumeSessionAsync`, `SignalAsync` and `CloseSessionAsync`, while
+`harness.Context.VideoStreams` records what the plugin sends back. Use a fresh session id per open; a
+refusal is a failed outcome whose `details.reason` is a `video_stream_` reason. See
+[Video streams](/features/video-streams/#testing).
+
 ## Time and waiting
 
 ```csharp

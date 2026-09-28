@@ -2882,6 +2882,39 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>Ambito della variabile sconosciuto</value>
   </data>
+  <data name="Errors.VideoStream.Busy" xml:space="preserve">
+    <value>La sorgente video è occupata in questo momento.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownProvider" xml:space="preserve">
+    <value>Questa sorgente video non è disponibile.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownStream" xml:space="preserve">
+    <value>Questo stream video non esiste più.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownSession" xml:space="preserve">
+    <value>Questa sessione video non è più aperta.</value>
+  </data>
+  <data name="Errors.VideoStream.SessionLimitReached" xml:space="preserve">
+    <value>Troppi video sono aperti contemporaneamente.</value>
+  </data>
+  <data name="Errors.VideoStream.PayloadTooLarge" xml:space="preserve">
+    <value>I dati di connessione del video sono troppo grandi.</value>
+  </data>
+  <data name="Errors.VideoStream.StreamUnavailable" xml:space="preserve">
+    <value>Questo stream video non è disponibile al momento.</value>
+  </data>
+  <data name="Errors.VideoStream.TransportNotAccepted" xml:space="preserve">
+    <value>Questo stream video non può essere riprodotto su questo dispositivo.</value>
+  </data>
+  <data name="Errors.VideoStream.SignalingUnsupported" xml:space="preserve">
+    <value>La sorgente video non supporta questo tipo di connessione.</value>
+  </data>
+  <data name="Errors.VideoStream.ProviderUnavailable" xml:space="preserve">
+    <value>La sorgente video non è raggiungibile al momento.</value>
+  </data>
+  <data name="Errors.VideoStream.Failed" xml:space="preserve">
+    <value>Si è verificato un problema con lo stream video.</value>
+  </data>
   <data name="Errors.Variables.WriteFailed" xml:space="preserve">
     <value>Non è stato possibile applicare il valore</value>
   </data>
@@ -4104,6 +4137,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Integrations.Capability.ScreenSaverProvider" xml:space="preserve">
     <value>Salvaschermo</value>
+  </data>
+  <data name="Integrations.Capability.VideoStreamProvider" xml:space="preserve">
+    <value>Stream video</value>
   </data>
   <data name="Integrations.Capability.Variables" xml:space="preserve">
     <value>Variabili</value>

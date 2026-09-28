@@ -9,6 +9,8 @@ using MacroDeckHost.Infrastructure.Notifications;
 using MacroDeckHost.Tests.UnitTests.Auth;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Triggers;
+using MacroDeckHost.Tests.UnitTests.VideoStreams;
+using MacroDeck.Sdk.VideoStreams;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
 using Microsoft.Extensions.DependencyInjection;
@@ -290,11 +292,52 @@ internal sealed class IntegrationInitializerTests
 		Assert.That(integration.RaisedCount, Is.EqualTo(1));
 	}
 
+	[Test]
+	public async Task An_initialized_built_in_video_integration_serves_the_providers_it_registered()
+	{
+		using var serviceProvider = BuildScopeServices();
+		using var world = new VideoStreamWorld();
+		var initializer = CreateInitializer(serviceProvider,
+			TimeProvider.System,
+			videoStreams: TestVideoStreams.Host(world));
+		var integration = new VideoIntegration();
+
+		var outcome = await initializer.InitializeAsync(integration, "Cameras");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome, Is.EqualTo(IntegrationInitializationOutcome.Initialized));
+			Assert.That(world.Registry.GetProviders().Select(entry => (entry.QualifiedId, entry.Streams.Single().Id)),
+				Is.EqualTo(new[] { ("com.example.cameras::front", "main") }));
+		});
+	}
+
+	private sealed class VideoIntegration : IIntegration, IVideoStreamIntegration
+	{
+		public string Id => "com.example.cameras";
+
+		public LocalizedText Name => "Cameras";
+
+		public string Version => "1.0.0";
+
+		public IReadOnlyList<IActionDefinition> Actions { get; } = [];
+
+		public bool IsInitialized => true;
+
+		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+
+		public Task ShutdownAsync() => Task.CompletedTask;
+
+		public Task InitializeAsync(IVideoStreamProviderContext context, CancellationToken cancellationToken = default)
+			=> context.RegisterProviderAsync(new ScriptedVideoProvider("front", "main"), cancellationToken);
+	}
+
 	private static IntegrationInitializer CreateInitializer(
 		ServiceProvider serviceProvider,
 		TimeProvider timeProvider,
 		IIntegrationHostIssueStore? hostIssueStore = null,
-		IEventBindingTracker? bindingTracker = null)
+		IEventBindingTracker? bindingTracker = null,
+		VideoStreamProviderHost? videoStreams = null)
 		=> new(serviceProvider.GetRequiredService<IServiceScopeFactory>(),
 			new FakeDeckNavigator(),
 			new FakeScriptApi(),
@@ -313,6 +356,7 @@ internal sealed class IntegrationInitializerTests
 			TestFolderViewProviders.Host(),
 			TestWidgetTypeProviders.Host(),
 			TestScreenSaverProviders.Host(),
+			videoStreams ?? TestVideoStreams.Host(),
 			TestDeviceProviders.Host(),
 			timeProvider,
 			new LoggerConfiguration().CreateLogger(),

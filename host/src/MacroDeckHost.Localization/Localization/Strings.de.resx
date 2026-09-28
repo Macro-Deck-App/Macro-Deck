@@ -2881,6 +2881,39 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>Unbekannter Geltungsbereich der Variable</value>
   </data>
+  <data name="Errors.VideoStream.Busy" xml:space="preserve">
+    <value>Die Videoquelle ist gerade ausgelastet.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownProvider" xml:space="preserve">
+    <value>Diese Videoquelle ist nicht verfügbar.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownStream" xml:space="preserve">
+    <value>Diesen Videostream gibt es nicht mehr.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownSession" xml:space="preserve">
+    <value>Diese Videositzung ist nicht mehr geöffnet.</value>
+  </data>
+  <data name="Errors.VideoStream.SessionLimitReached" xml:space="preserve">
+    <value>Zu viele Videos sind gleichzeitig geöffnet.</value>
+  </data>
+  <data name="Errors.VideoStream.PayloadTooLarge" xml:space="preserve">
+    <value>Die Verbindungsdaten des Videos sind zu groß.</value>
+  </data>
+  <data name="Errors.VideoStream.StreamUnavailable" xml:space="preserve">
+    <value>Dieser Videostream ist gerade nicht verfügbar.</value>
+  </data>
+  <data name="Errors.VideoStream.TransportNotAccepted" xml:space="preserve">
+    <value>Dieser Videostream kann auf diesem Gerät nicht abgespielt werden.</value>
+  </data>
+  <data name="Errors.VideoStream.SignalingUnsupported" xml:space="preserve">
+    <value>Die Videoquelle unterstützt diese Art der Verbindung nicht.</value>
+  </data>
+  <data name="Errors.VideoStream.ProviderUnavailable" xml:space="preserve">
+    <value>Die Videoquelle ist gerade nicht erreichbar.</value>
+  </data>
+  <data name="Errors.VideoStream.Failed" xml:space="preserve">
+    <value>Beim Videostream ist etwas schiefgelaufen.</value>
+  </data>
   <data name="Errors.Variables.WriteFailed" xml:space="preserve">
     <value>Der Wert konnte nicht übernommen werden</value>
   </data>
@@ -4103,6 +4136,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.Capability.ScreenSaverProvider" xml:space="preserve">
     <value>Bildschirmschoner</value>
+  </data>
+  <data name="Integrations.Capability.VideoStreamProvider" xml:space="preserve">
+    <value>Videostreams</value>
   </data>
   <data name="Integrations.Capability.Variables" xml:space="preserve">
     <value>Variablen</value>

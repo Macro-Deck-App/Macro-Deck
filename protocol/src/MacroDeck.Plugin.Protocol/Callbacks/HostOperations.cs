@@ -284,6 +284,27 @@ public static class HostOperations
 		public static readonly IReadOnlyList<string> All = [Publish, Send, Request, Subscriptions];
 	}
 
+	/// <summary>
+	/// The <c>video-streams</c> host api. The host is the only writer of a plugin's provider table:
+	/// <c>providers-changed</c> and <c>streams-changed</c> carry no catalog, they make the host re-read it
+	/// through the <c>video-stream-provider</c> capability.
+	/// </summary>
+	public static class VideoStreams
+	{
+		public const string ProvidersChanged = "providers-changed";
+
+		public const string StreamsChanged = "streams-changed";
+
+		public const string SessionUpdate = "session-update";
+
+		public const string SessionSignal = "session-signal";
+
+		public const string SessionClose = "session-close";
+
+		public static readonly IReadOnlyList<string> All =
+			[ProvidersChanged, StreamsChanged, SessionUpdate, SessionSignal, SessionClose];
+	}
+
 	/// <summary>The <c>event-bindings</c> host api is push-only, so it declares no operations.</summary>
 	public static class EventBindings
 	{
@@ -312,6 +333,7 @@ public static class HostOperations
 			[HostApis.Adb] = Adb.All,
 			[HostApis.Messaging] = Messaging.All,
 			[HostApis.IconPacks] = IconPacks.All,
+			[HostApis.VideoStreams] = VideoStreams.All,
 		};
 
 	public static IReadOnlyList<string> For(string api) => _byApi[api];

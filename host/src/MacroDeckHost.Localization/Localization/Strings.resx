@@ -2881,6 +2881,39 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>Unknown variable scope</value>
   </data>
+  <data name="Errors.VideoStream.Busy" xml:space="preserve">
+    <value>The video source is busy right now.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownProvider" xml:space="preserve">
+    <value>This video source is not available.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownStream" xml:space="preserve">
+    <value>This video stream no longer exists.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownSession" xml:space="preserve">
+    <value>This video session is no longer open.</value>
+  </data>
+  <data name="Errors.VideoStream.SessionLimitReached" xml:space="preserve">
+    <value>Too many videos are open at the same time.</value>
+  </data>
+  <data name="Errors.VideoStream.PayloadTooLarge" xml:space="preserve">
+    <value>The video connection data is too large.</value>
+  </data>
+  <data name="Errors.VideoStream.StreamUnavailable" xml:space="preserve">
+    <value>This video stream is unavailable right now.</value>
+  </data>
+  <data name="Errors.VideoStream.TransportNotAccepted" xml:space="preserve">
+    <value>This video stream cannot be played on this device.</value>
+  </data>
+  <data name="Errors.VideoStream.SignalingUnsupported" xml:space="preserve">
+    <value>The video source does not support this type of connection.</value>
+  </data>
+  <data name="Errors.VideoStream.ProviderUnavailable" xml:space="preserve">
+    <value>The video source cannot be reached right now.</value>
+  </data>
+  <data name="Errors.VideoStream.Failed" xml:space="preserve">
+    <value>Something went wrong with the video stream.</value>
+  </data>
   <data name="Errors.Variables.WriteFailed" xml:space="preserve">
     <value>The value could not be applied</value>
   </data>
@@ -4104,6 +4137,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.Capability.ScreenSaverProvider" xml:space="preserve">
     <value>Screensavers</value>
+  </data>
+  <data name="Integrations.Capability.VideoStreamProvider" xml:space="preserve">
+    <value>Video streams</value>
   </data>
   <data name="Integrations.Capability.Variables" xml:space="preserve">
     <value>Variables</value>
