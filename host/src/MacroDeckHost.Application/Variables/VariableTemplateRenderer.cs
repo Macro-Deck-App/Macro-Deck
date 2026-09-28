@@ -14,7 +14,7 @@ namespace MacroDeckHost.Application.Variables;
 // reads the value is unaffected.
 internal sealed class VariablesScriptObject : ScriptObject
 {
-	public override bool TryGetValue(TemplateContext context, SourceSpan span, string member, out object? value)
+	public override bool TryGetValue(TemplateContext? context, SourceSpan span, string member, out object? value)
 	{
 		if (base.TryGetValue(context, span, member, out value))
 		{

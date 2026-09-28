@@ -27,7 +27,7 @@
     <PackageVersion Include="NSec.Cryptography" Version="26.4.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.12" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
-    <PackageVersion Include="Scriban" Version="7.2.6" />
+    <PackageVersion Include="Scriban" Version="7.4.0" />
     <!-- Transitive pin: Microsoft.EntityFrameworkCore.Sqlite still floors this at a version vulnerable to GHSA-2m69-gcr7-jv3q -->
     <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
     <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.12" />
