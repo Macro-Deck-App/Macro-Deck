@@ -8798,7 +8798,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>macOS nie udostępnia użytkownikowi funkcji hibernacji.</value>
   </data>
   <data name="Integrations.System.Errors.Power.MacOsNoLockMechanism" xml:space="preserve">
-    <value>Nie znaleziono mechanizmu blokady (CGSession) w tym systemie.</value>
+    <value>Blokada ekranu nie jest dostępna w tej wersji systemu macOS.</value>
   </data>
   <data name="Integrations.System.Errors.Power.MacOsRestartDenied" xml:space="preserve">
     <value>Odmówiono ponownego uruchomienia. Przyznaj Macro Deck uprawnienia w Ustawieniach systemowych &gt; Prywatność i ochrona &gt; Automatyzacja &gt; System Events.</value>

@@ -8798,7 +8798,7 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>macOS non offre un'ibernazione visibile all'utente.</value>
   </data>
   <data name="Integrations.System.Errors.Power.MacOsNoLockMechanism" xml:space="preserve">
-    <value>Il meccanismo di blocco (CGSession) non è stato trovato su questo sistema.</value>
+    <value>Il blocco dello schermo non è disponibile su questa versione di macOS.</value>
   </data>
   <data name="Integrations.System.Errors.Power.MacOsRestartDenied" xml:space="preserve">
     <value>Riavvio negato. Concedi a Macro Deck il permesso in Impostazioni di Sistema &gt; Privacy e sicurezza &gt; Automazione &gt; Eventi di sistema.</value>

@@ -8796,7 +8796,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>macOS bietet keinen für Nutzer sichtbaren Tiefschlaf.</value>
   </data>
   <data name="Integrations.System.Errors.Power.MacOsNoLockMechanism" xml:space="preserve">
-    <value>Der Sperrmechanismus (CGSession) wurde auf diesem System nicht gefunden.</value>
+    <value>Das Sperren des Bildschirms ist auf dieser macOS-Version nicht verfügbar.</value>
   </data>
   <data name="Integrations.System.Errors.Power.MacOsRestartDenied" xml:space="preserve">
     <value>Der Neustart wurde verweigert. Erteile Macro Deck die Berechtigung unter Systemeinstellungen &gt; Datenschutz &amp; Sicherheit &gt; Automation &gt; System-Events.</value>

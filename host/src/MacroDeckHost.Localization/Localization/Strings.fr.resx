@@ -8798,7 +8798,7 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>macOS n'a pas d'hibernation accessible à l'utilisateur.</value>
   </data>
   <data name="Integrations.System.Errors.Power.MacOsNoLockMechanism" xml:space="preserve">
-    <value>Le mécanisme de verrouillage (CGSession) est introuvable sur ce système.</value>
+    <value>Le verrouillage de l'écran n'est pas disponible sur cette version de macOS.</value>
   </data>
   <data name="Integrations.System.Errors.Power.MacOsRestartDenied" xml:space="preserve">
     <value>Le redémarrage a été refusé. Accorde à Macro Deck l'autorisation dans Réglages Système &gt; Confidentialité et sécurité &gt; Automatisation &gt; Évènements système.</value>
