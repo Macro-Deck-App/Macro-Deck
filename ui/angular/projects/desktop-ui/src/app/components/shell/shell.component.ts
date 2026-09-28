@@ -1,4 +1,5 @@
-import { AfterViewInit, Component, DestroyRef, ElementRef, ViewChild, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, DestroyRef, ElementRef, ViewChild, computed, effect, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { ModalComponent } from '@shared';
 
 import { RouterOutlet } from '@angular/router';
 import { SharedStoreProgressComponent } from '../store/shared-store-progress.component';
@@ -15,6 +16,11 @@ import { SidebarComponent } from './sidebar/sidebar.component';
 import { SettingsModalComponent } from './settings-modal/settings-modal.component';
 import { UpdateModalComponent } from './update-modal/update-modal.component';
 import { WhatsNewModalComponent } from './whats-new-modal/whats-new-modal.component';
+import { AnnouncementModalComponent } from './announcement-modal/announcement-modal.component';
+import { AnnouncementService } from '../../services/announcement.service';
+import { MigrationOfferService } from '../../services/migration-offer.service';
+import { MigrationWizardService } from '../../services/migration-wizard.service';
+import { OnboardingService } from '../../services/onboarding.service';
 import { ConnectionPanelComponent } from './connection-panel/connection-panel.component';
 import { NotificationPanelComponent } from './notification-panel/notification-panel.component';
 import { FooterBarComponent } from './footer-bar/footer-bar.component';
@@ -29,6 +35,7 @@ import { FooterBarComponent } from './footer-bar/footer-bar.component';
     SettingsModalComponent,
     UpdateModalComponent,
     WhatsNewModalComponent,
+    AnnouncementModalComponent,
     ConnectionPanelComponent,
     NotificationPanelComponent,
     FooterBarComponent,
@@ -43,6 +50,24 @@ export class ShellComponent implements AfterViewInit {
   protected readonly settingsModal = inject(SettingsModalService);
   protected readonly updateModal = inject(UpdateModalService);
   protected readonly postUpdateChangelog = inject(PostUpdateChangelogService);
+  private readonly announcements = inject(AnnouncementService);
+  private readonly onboarding = inject(OnboardingService);
+  private readonly migrationOffer = inject(MigrationOfferService);
+  private readonly migrationWizard = inject(MigrationWizardService);
+
+  private readonly announcementShown = signal(false);
+
+  protected readonly announcementVisible = computed(() =>
+    this.announcements.pending() !== null
+    && (this.announcementShown() || (
+      this.postUpdateChangelog.settled()
+      && !this.postUpdateChangelog.isOpen()
+      && !this.updateModal.isOpen()
+      && !this.settingsModal.isOpen()
+      && this.onboarding.state() === 'done'
+      && !this.migrationOffer.pending()
+      && !this.migrationWizard.isOpen()
+      && ModalComponent.openCount() === 0)));
 
   protected readonly collapsedSidebarWidthCss = `${SIDEBAR_COLLAPSED_WIDTH}px`;
 
@@ -55,6 +80,8 @@ export class ShellComponent implements AfterViewInit {
   constructor() {
     inject(DestroyRef).onDestroy(() => this.resizeObserver?.disconnect());
     void this.postUpdateChangelog.load();
+    // Once on screen the announcement counts among the open modals itself, so it stays until dismissed.
+    effect(() => this.announcementShown.set(this.announcementVisible()));
   }
 
   protected readonly activeNavAction = computed(() => {

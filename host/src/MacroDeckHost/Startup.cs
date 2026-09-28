@@ -162,6 +162,8 @@ using Mediator;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Integrations.System.Notifications;
 using MacroDeckHost.Plugins.Pairing;
+using MacroDeckHost.Application.Announcements;
+using MacroDeckHost.Infrastructure.Announcements;
 
 namespace MacroDeckHost;
 
@@ -772,6 +774,12 @@ public class Startup
 		services.AddHttpClient(PlatformLicenseAccountClient.HttpClientName)
 			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
 		services.AddSingleton<IPlatformLicenseAccountClient, PlatformLicenseAccountClient>();
+		services.AddHttpClient(PlatformAnnouncementClient.HttpClientName)
+			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
+		services.AddSingleton<IPlatformAnnouncementClient, PlatformAnnouncementClient>();
+		services.AddSingleton<IAnnouncementService, AnnouncementService>();
+		services.AddHostedService<AnnouncementRefreshBackgroundService>();
+		services.AddHostedService<AnnouncementBroadcastBackgroundService>();
 		services.AddSingleton<CompanionLicenseService>();
 		services.AddSingleton<ICompanionLicenseService>(sp => sp.GetRequiredService<CompanionLicenseService>());
 		services.AddHostedService<CompanionLicenseBackgroundService>();
