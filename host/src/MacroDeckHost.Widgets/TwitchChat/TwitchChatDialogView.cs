@@ -58,6 +58,7 @@ internal static class TwitchChatDialogView
 	private static readonly UiSize _rowPadding = UiSize.FromBasis(0.012);
 	private static readonly UiSize _gap = UiSize.FromBasis(0.02);
 	private static readonly UiSize _buttonRowHeight = UiSize.FromBasis(0.1);
+	private static readonly UiSize _closeWidth = UiSize.FromBasis(0.25);
 
 	public static TwitchChatLineLayout Layout { get; } = new(line => Row(line, null),
 		line => Row(line, null, fallback: true),
@@ -176,18 +177,23 @@ internal static class TwitchChatDialogView
 					Direction = UiComponentDirections.Horizontal,
 					Align = UiComponentAlignments.Center,
 					Gap = _gap,
+					MainSize = _buttonRowHeight,
 					Children =
 					[
 						new UiTextRun
 						{
 							Key = "selected",
 							Text = UiText.From(() => state.Value.Selection?.Text),
-							Size = _textSize,
+							Size = _buttonTextSize,
 							Wrap = true,
 							MaxLines = 2,
 							Fill = true,
 						},
-						Button("close", MacroDeckStrings.Common.Close(), actions.Deselect),
+						Button("close", MacroDeckStrings.Common.Close(), actions.Deselect) with
+						{
+							Fill = false,
+							MainSize = _closeWidth,
+						},
 					],
 				},
 				new UiWhen
