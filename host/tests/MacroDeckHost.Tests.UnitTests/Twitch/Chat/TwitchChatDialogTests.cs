@@ -335,6 +335,53 @@ internal sealed class TwitchChatDialogTests
 		});
 	}
 
+	[Test]
+	public async Task Chat_updates_and_presses_arriving_together_never_block_each_other()
+	{
+		// Disposed only once both loops ended: disposing takes the same locks a deadlock would hold.
+		var widget = await OpenAsync(WidgetSurface(UiSurfaceKinds.Widget));
+		var dialog = await OpenDialogAsync();
+		var widgetRoot = widget.BuildTree().Root;
+		using var stop = new CancellationTokenSource();
+
+		var feed = Task.Run(() =>
+		{
+			for (var index = 0; !stop.IsCancellationRequested; index++)
+			{
+				_hub.Post(new TwitchChatMessageReceived(Streamer, TwitchChatHubTests.Message($"load-{index}")));
+				_hub.Tick();
+			}
+		});
+
+		var presses = Task.Run(() =>
+		{
+			for (var index = 0; index < 300; index++)
+			{
+				Press(widget, widgetRoot, Client);
+				SelectMessage(dialog);
+
+				var close = Flatten(dialog.BuildTree().Root, includeFallback: false)
+					.LastOrDefault(node => node.Type == UiComponents.Button &&
+						Texts(node).Any(text => text.Contains(".Close\"", StringComparison.Ordinal)));
+
+				if (close is not null)
+				{
+					dialog.Dispatch(new UiEvent { NodeId = close.Id, Name = UiComponentEvents.Press });
+				}
+			}
+		});
+
+		var finished = await Task.WhenAny(presses, Task.Delay(TimeSpan.FromSeconds(20)));
+		await stop.CancelAsync();
+
+		Assert.That(finished, Is.SameAs(presses), "a press never returned while the chat was updating");
+		Assert.That(await Task.WhenAny(feed, Task.Delay(TimeSpan.FromSeconds(20))), Is.SameAs(feed),
+			"the chat stopped updating while presses arrived");
+		await presses;
+		await dialog.DisposeAsync();
+		await widget.DisposeAsync();
+	}
+
 	private async Task<IUiSession> OpenAsync(UiSurface surface)
 		=> (await _provider.CreateSessionAsync(new UiSessionRequest { Surface = surface, UiModelVersion = 1 },
 			CancellationToken.None))!;
@@ -392,7 +439,7 @@ internal sealed class TwitchChatDialogTests
 	{
 		var button = Flatten(session.BuildTree().Root, includeFallback: false)
 			.Where(node => node.Type == UiComponents.Button)
-			.Last(node => Texts(node).Any(text => text.Contains("ChatDialog." + key + "\"", StringComparison.Ordinal)));
+			.Last(node => Texts(node).Any(text => text.Contains("." + key + "\"", StringComparison.Ordinal)));
 
 		session.Dispatch(new UiEvent { NodeId = button.Id, Name = UiComponentEvents.Press });
 	}

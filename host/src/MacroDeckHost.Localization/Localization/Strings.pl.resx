@@ -9348,12 +9348,6 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Twitch.ChatDialog.Banned" xml:space="preserve">
     <value>Użytkownik {name} został zbanowany.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Cancel" xml:space="preserve">
-    <value>Anuluj</value>
-  </data>
-  <data name="Integrations.Twitch.ChatDialog.Close" xml:space="preserve">
-    <value>Zamknij</value>
-  </data>
   <data name="Integrations.Twitch.ChatDialog.ConfirmBan" xml:space="preserve">
     <value>Zbanować użytkownika {name}? Do czasu odbanowania nie będzie mógł pisać na tym kanale.</value>
   </data>
@@ -9367,7 +9361,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Moderowanie jest wyłączone dla tego widżetu.</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.NotPermitted" xml:space="preserve">
-    <value>Twitch na to nie pozwolił. Konto potrzebuje uprawnień moderatora na tym kanale; może pomóc ponowne połączenie.</value>
+    <value>Twitch na to nie pozwolił. Należy ponownie połączyć konto Twitch i spróbować jeszcze raz.</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.OwnMessage" xml:space="preserve">
     <value>Wiadomości samego konta kanału nie można moderować.</value>

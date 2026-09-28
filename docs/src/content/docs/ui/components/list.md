@@ -178,9 +178,10 @@ the list's inner extent. On its own parent's main axis a list follows the ordina
     the top edge.
   - Deciding whether the view is at the end is up to the user's own scrolling: a paint, a resized box or
     children that grew are not the user leaving the end.
-  - When a new last child arrives while the user is away, offer a way back to the end, such as a control
-    that scrolls there. It must not count as a press on any node, and it goes away once the view is back
-    at the end.
+  - When a child the list did not hold before arrives last while the user is away, offer a way back to the
+    end, such as a control that scrolls there. Removing the last child is not new content. The control must
+    not count as a press on any node, and it goes away once the view is back at the end. A reader that
+    cannot keep it in view, such as an engine without sticky positioning, may leave it out.
   - A horizontal list ignores `anchor`.
   - None of this is reported to the producer.
 - Advertise `ui.list` version 3 only once you follow the end; a version 2 reader ignores `anchor`, so

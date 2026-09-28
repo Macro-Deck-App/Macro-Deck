@@ -26,6 +26,7 @@ internal sealed class TwitchChatDialogSession : IUiSession
 	private readonly Lock _sync = new();
 
 	private Dictionary<string, TwitchChatMessage> _messages = new(StringComparer.Ordinal);
+	private bool _allowed;
 	private bool _disposed;
 
 	public TwitchChatDialogSession(
@@ -67,6 +68,7 @@ internal sealed class TwitchChatDialogSession : IUiSession
 		_view.HandlerFaulted += (_, fault)
 			=> Faulted?.Invoke(this, new UiSessionFaultedEventArgs(fault.Exception.Message, fault.Exception));
 
+		_allowed = _permission() == TwitchChatWidgetPermission.Allowed;
 		Refresh();
 	}
 
@@ -78,7 +80,14 @@ internal sealed class TwitchChatDialogSession : IUiSession
 
 	public IReadOnlyList<UiPatch> DrainPatches() => _view.DrainPatches();
 
-	public void Dispatch(UiEvent uiEvent) => _view.Dispatch(uiEvent);
+	// Held across the view's dispatch so handlers and chat updates take this lock and the view's in one order.
+	public void Dispatch(UiEvent uiEvent)
+	{
+		lock (_sync)
+		{
+			_view.Dispatch(uiEvent);
+		}
+	}
 
 	public ValueTask DisposeAsync()
 	{
@@ -120,7 +129,7 @@ internal sealed class TwitchChatDialogSession : IUiSession
 				? snapshot.Messages.ToDictionary(message => TwitchChatStyle.MessageKey(message.MessageId), StringComparer.Ordinal)
 				: new Dictionary<string, TwitchChatMessage>(StringComparer.Ordinal);
 
-			var canModerate = ownChannel && snapshot.IsConnected && _permission() == TwitchChatWidgetPermission.Allowed;
+			var canModerate = ownChannel && snapshot.IsConnected && _allowed;
 
 			Update(state => state with
 			{
@@ -137,6 +146,13 @@ internal sealed class TwitchChatDialogSession : IUiSession
 		{
 			if (!_messages.TryGetValue(key, out var message) || !_state.Value.CanModerate)
 			{
+				return;
+			}
+
+			if (_permission() != TwitchChatWidgetPermission.Allowed)
+			{
+				_allowed = false;
+				Update(state => state with { CanModerate = false, Selection = null });
 				return;
 			}
 
@@ -218,7 +234,8 @@ internal sealed class TwitchChatDialogSession : IUiSession
 					.ConfigureAwait(false);
 			}
 		}
-		catch (Exception exception) when (exception is not OperationCanceledException)
+		catch (Exception exception) when (exception is not OperationCanceledException ||
+			!cancellationToken.IsCancellationRequested)
 		{
 			_logger.Warning(exception, "Twitch chat moderation from the chat dialog failed");
 			result = TwitchChatModerationResult.Failed;
@@ -233,6 +250,8 @@ internal sealed class TwitchChatDialogSession : IUiSession
 
 	private LocalizedString? Refusal()
 	{
+		_allowed = _permission() == TwitchChatWidgetPermission.Allowed;
+
 		if (_lock.IsLocked)
 		{
 			return AppStrings.Errors.Common.HostLocked();

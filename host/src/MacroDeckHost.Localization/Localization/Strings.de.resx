@@ -9346,12 +9346,6 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Twitch.ChatDialog.Banned" xml:space="preserve">
     <value>{name} ist gebannt.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Cancel" xml:space="preserve">
-    <value>Abbrechen</value>
-  </data>
-  <data name="Integrations.Twitch.ChatDialog.Close" xml:space="preserve">
-    <value>Schließen</value>
-  </data>
   <data name="Integrations.Twitch.ChatDialog.ConfirmBan" xml:space="preserve">
     <value>{name} bannen? Bis zum Entbannen kann {name} in diesem Kanal nicht mehr chatten.</value>
   </data>
@@ -9365,7 +9359,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Moderation ist für dieses Widget ausgeschaltet.</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.NotPermitted" xml:space="preserve">
-    <value>Twitch hat das nicht erlaubt. Das Konto braucht Moderationsrechte in diesem Kanal; ein erneutes Verbinden kann helfen.</value>
+    <value>Twitch hat das nicht erlaubt. Verbinde das Twitch-Konto neu und versuche es noch einmal.</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.OwnMessage" xml:space="preserve">
     <value>Nachrichten des Kanalkontos selbst lassen sich nicht moderieren.</value>

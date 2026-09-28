@@ -1389,6 +1389,34 @@ describe('widget node renderer', () => {
         expect(element.scrollTop).withContext('following again after the jump').toBe(12 * ROW - 60);
       });
 
+      it('offers no way back when the newest row is removed while scrolled away', () => {
+        const { handle, element } = sizedAtEnd(10);
+        scrollTo(element, 20);
+
+        paint(handle, span(0, 9));
+
+        expect(shown(jump())).toBeFalse();
+      });
+
+      it('offers no way back on a reader that cannot keep it in view', () => {
+        const scope = globalThis as { CSS?: unknown };
+        const previous = scope.CSS;
+        const supports = jasmine.createSpy('supports').and.returnValue(false);
+        scope.CSS = { supports };
+        try {
+          const { handle, element } = sizedAtEnd(10);
+          scrollTo(element, 20);
+
+          paint(handle, span(0, 11));
+
+          expect(supports).toHaveBeenCalled();
+          expect(shown(jump())).toBeFalse();
+          expect(element.scrollTop).withContext('the view still stays put').toBe(20);
+        } finally {
+          scope.CSS = previous;
+        }
+      });
+
       it('drops the way back once the user scrolls to the end by hand', () => {
         const { handle, element } = sizedAtEnd(10);
         scrollTo(element, 20);

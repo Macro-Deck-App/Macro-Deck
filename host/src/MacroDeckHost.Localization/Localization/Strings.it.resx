@@ -9348,12 +9348,6 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.Twitch.ChatDialog.Banned" xml:space="preserve">
     <value>{name} è stato bannato.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Cancel" xml:space="preserve">
-    <value>Annulla</value>
-  </data>
-  <data name="Integrations.Twitch.ChatDialog.Close" xml:space="preserve">
-    <value>Chiudi</value>
-  </data>
   <data name="Integrations.Twitch.ChatDialog.ConfirmBan" xml:space="preserve">
     <value>Bannare {name}? Non potrà scrivere in questo canale finché non verrà sbannato.</value>
   </data>
@@ -9367,7 +9361,7 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>La moderazione è disattivata per questo widget.</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.NotPermitted" xml:space="preserve">
-    <value>Twitch non lo ha consentito. L'account deve essere moderatore in questo canale; ricollegarlo può aiutare.</value>
+    <value>Twitch non lo ha consentito. Ricollega l'account Twitch e riprova.</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.OwnMessage" xml:space="preserve">
     <value>I messaggi dell'account del canale non si possono moderare.</value>

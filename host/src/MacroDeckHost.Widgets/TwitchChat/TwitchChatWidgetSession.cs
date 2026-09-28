@@ -61,14 +61,14 @@ internal sealed class TwitchChatWidgetSession : IUiSession, IOriginAwareUiSessio
 
 	public void Dispatch(UiEvent uiEvent) => Dispatch(uiEvent, null);
 
+	// Held across the view's dispatch so handlers and chat updates take this lock and the view's in one order.
 	public void Dispatch(UiEvent uiEvent, string? originClientId)
 	{
 		lock (_sync)
 		{
 			_pendingOriginClientId = originClientId;
+			_view.Dispatch(uiEvent);
 		}
-
-		_view.Dispatch(uiEvent);
 	}
 
 	public TwitchChatDialogRequest? DialogRequest()

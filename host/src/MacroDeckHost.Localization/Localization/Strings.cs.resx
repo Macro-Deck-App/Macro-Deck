@@ -9348,12 +9348,6 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Twitch.ChatDialog.Banned" xml:space="preserve">
     <value>Uživatel {name} je zabanován.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Cancel" xml:space="preserve">
-    <value>Zrušit</value>
-  </data>
-  <data name="Integrations.Twitch.ChatDialog.Close" xml:space="preserve">
-    <value>Zavřít</value>
-  </data>
   <data name="Integrations.Twitch.ChatDialog.ConfirmBan" xml:space="preserve">
     <value>Zabanovat uživatele {name}? Do odbanování nebude moci v tomto kanálu chatovat.</value>
   </data>
@@ -9367,7 +9361,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Moderování je pro tento widget vypnuté.</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.NotPermitted" xml:space="preserve">
-    <value>Twitch to nepovolil. Účet potřebuje v tomto kanálu moderátorská práva; může pomoci jeho opětovné připojení.</value>
+    <value>Twitch to nepovolil. Je potřeba znovu připojit účet Twitch a zkusit to znovu.</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.OwnMessage" xml:space="preserve">
     <value>Zprávy samotného účtu kanálu nelze moderovat.</value>

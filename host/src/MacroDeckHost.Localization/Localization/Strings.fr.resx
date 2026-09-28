@@ -9348,12 +9348,6 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Twitch.ChatDialog.Banned" xml:space="preserve">
     <value>{name} est banni.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Cancel" xml:space="preserve">
-    <value>Annuler</value>
-  </data>
-  <data name="Integrations.Twitch.ChatDialog.Close" xml:space="preserve">
-    <value>Fermer</value>
-  </data>
   <data name="Integrations.Twitch.ChatDialog.ConfirmBan" xml:space="preserve">
     <value>Bannir {name} ? Cette personne ne pourra plus écrire dans ce canal tant qu'elle n'est pas débannie.</value>
   </data>
@@ -9367,7 +9361,7 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>La modération est désactivée pour ce widget.</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.NotPermitted" xml:space="preserve">
-    <value>Twitch ne l'a pas autorisé. Le compte doit être modérateur de ce canal ; le reconnecter peut aider.</value>
+    <value>Twitch ne l'a pas autorisé. Reconnecte le compte Twitch et réessaie.</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.OwnMessage" xml:space="preserve">
     <value>Les messages du compte du canal lui-même ne peuvent pas être modérés.</value>

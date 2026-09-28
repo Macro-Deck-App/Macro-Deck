@@ -76,7 +76,8 @@ internal sealed class TwitchChatModerator : ITwitchChatModerator
 
 			return TwitchChatModerationResult.Refused;
 		}
-		catch (Exception exception) when (exception is not OperationCanceledException)
+		catch (Exception exception) when (exception is not OperationCanceledException ||
+			!cancellationToken.IsCancellationRequested)
 		{
 			_logger.Warning(exception, "Twitch chat moderation {Kind} failed", request.Kind);
 

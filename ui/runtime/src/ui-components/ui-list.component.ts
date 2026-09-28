@@ -21,6 +21,7 @@ export interface UiListState {
   pinned: boolean;
   unseen: boolean;
   lastChildId: string | null;
+  childIds: { [id: string]: boolean };
   measuredHeight: number;
   scrolledTo: number;
   gapPx: number;
@@ -179,7 +180,7 @@ function paintJump(element: HTMLElement, ctx: UiComponentContext<UiListState>): 
   ctx.setClassName(jump, 'widget-list-jump');
   ctx.setAttribute(jump, 'type', 'button');
   ctx.setAttribute(jump, 'aria-label', label);
-  ctx.setStyle(jump, 'display', state.unseen ? null : 'none');
+  ctx.setStyle(jump, 'display', state.unseen && canStick() ? null : 'none');
 
   const icon = ctx.part('jump-icon', 'span', undefined, jump);
   ctx.setClassName(icon, 'widget-list-jump-icon icon icon-arrow-down');
@@ -187,6 +188,12 @@ function paintJump(element: HTMLElement, ctx: UiComponentContext<UiListState>): 
   const text = ctx.part('jump-label', 'span', undefined, jump);
   ctx.setClassName(text, 'widget-list-jump-label');
   if (text.textContent !== label) text.textContent = label;
+}
+
+// Without sticky positioning the pill sits below the last row, out of view exactly while it is needed.
+function canStick(): boolean {
+  if (typeof CSS === 'undefined' || typeof CSS.supports !== 'function') return true;
+  return CSS.supports('position', 'sticky') || CSS.supports('position', '-webkit-sticky');
 }
 
 function dropJump(ctx: UiComponentContext<UiListState>): void {
@@ -198,6 +205,7 @@ function dropJump(ctx: UiComponentContext<UiListState>): void {
   state.pinned = true;
   state.unseen = false;
   state.lastChildId = null;
+  state.childIds = {};
   state.measuredHeight = 0;
   state.scrolledTo = -1;
   stopWatchingGrowth(state);
@@ -222,6 +230,7 @@ export const uiListComponent: UiComponentDefinition<UiListState> = {
       pinned: true,
       unseen: false,
       lastChildId: null,
+      childIds: {},
       measuredHeight: 0,
       scrolledTo: -1,
       gapPx: 0,
@@ -301,8 +310,12 @@ export const uiListComponent: UiComponentDefinition<UiListState> = {
 
     if (anchored) {
       const lastChildId = children.length > 0 ? children[children.length - 1].id : null;
-      if (!state.pinned && lastChildId !== null && lastChildId !== state.lastChildId) state.unseen = true;
+      if (!state.pinned && lastChildId !== null && lastChildId !== state.lastChildId
+        && !state.childIds[lastChildId]) state.unseen = true;
       state.lastChildId = lastChildId;
+      const childIds: { [id: string]: boolean } = {};
+      for (let index = 0; index < children.length; index++) childIds[children[index].id] = true;
+      state.childIds = childIds;
       state.gapPx = gap;
       paintJump(element, ctx);
 

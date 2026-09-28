@@ -45,7 +45,7 @@ asks you to confirm first. The dialog says whether the action worked, or why Twi
 
 - **Twitch did not grant Macro Deck the permission for this action**: reconnect the Twitch account in
   **Integrations** to grant the moderation permissions.
-- **Twitch did not allow this**: the account needs moderator rights in the channel.
+- **Twitch did not allow this**: reconnect the Twitch account in **Integrations** and try again.
 - **The host is locked**: unlock the computer running Macro Deck, as for any other action.
 
 Your channel's own messages, and messages that reach your chat from another channel's Shared Chat, offer no

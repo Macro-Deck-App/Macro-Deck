@@ -187,7 +187,7 @@ internal static class TwitchChatDialogView
 							MaxLines = 2,
 							Fill = true,
 						},
-						Button("close", AppStrings.Integrations.Twitch.ChatDialog.Close(), actions.Deselect),
+						Button("close", MacroDeckStrings.Common.Close(), actions.Deselect),
 					],
 				},
 				new UiWhen
@@ -251,7 +251,7 @@ internal static class TwitchChatDialogView
 							},
 							ButtonRow("confirmButtons",
 								Button("confirmBan", AppStrings.Integrations.Twitch.ChatDialog.Ban(), actions.Ban),
-								Button("cancelBan", AppStrings.Integrations.Twitch.ChatDialog.Cancel(), actions.CancelBan)),
+								Button("cancelBan", MacroDeckStrings.Common.Cancel(), actions.CancelBan)),
 						],
 					},
 				},
