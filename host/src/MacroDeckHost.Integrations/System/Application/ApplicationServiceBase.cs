@@ -51,7 +51,7 @@ internal abstract class ApplicationServiceBase : IApplicationService
 
 		try
 		{
-			Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+			StartFile(path);
 		}
 		catch (Exception exception)
 		{
@@ -69,13 +69,19 @@ internal abstract class ApplicationServiceBase : IApplicationService
 					$"{url} is not a valid website URL. Only http:// and https:// URLs are supported.");
 			}
 
-			Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+			StartWebsite(url);
 		}
 		catch (Exception exception)
 		{
 			Logger.Warning(exception, "Failed to open website '{Url}'", url);
 		}
 	}
+
+	protected virtual void StartFile(string path)
+		=> Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+
+	protected virtual void StartWebsite(string url)
+		=> Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
 
 	internal static bool IsWebsiteUrl(string url)
 		=> Uri.TryCreate(url, UriKind.Absolute, out var uri) &&

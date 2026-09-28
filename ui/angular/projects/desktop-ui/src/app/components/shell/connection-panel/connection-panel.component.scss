@@ -20,23 +20,8 @@
   font-size: var(--text-sm);
 }
 
-.cp-qr {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3125rem;
-}
 
-.cp-qr img {
-  background: #fff;
-  padding: var(--space-2);
-  border-radius: var(--radius-md);
-}
 
-.cp-qr-hint {
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-}
 
 .cp-section {
   display: flex;
@@ -53,13 +38,6 @@
   color: var(--color-text-primary);
 }
 
-.cp-pairing-code {
-  font-family: var(--font-mono);
-  font-size: var(--text-xl);
-  letter-spacing: 0.08em;
-  color: var(--color-text-primary);
-  user-select: all;
-}
 
 .cp-fingerprint {
   font-family: var(--font-mono);

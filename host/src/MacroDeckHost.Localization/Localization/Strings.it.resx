@@ -136,6 +136,9 @@
   <data name="ActionBuilder.EventTrigger.ExtraCondition" xml:space="preserve">
     <value>Condizione aggiuntiva</value>
   </data>
+  <data name="ActionBuilder.EventTrigger.NameLabel" xml:space="preserve">
+    <value>Nome</value>
+  </data>
   <data name="ActionBuilder.EventTrigger.OnlyRunWhen" xml:space="preserve">
     <value>Esegui solo quando</value>
   </data>
@@ -2779,6 +2782,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Errors.Profile.DeleteFailed" xml:space="preserve">
     <value>Eliminazione del profilo non riuscita</value>
   </data>
+  <data name="Errors.Profile.DuplicateFailed" xml:space="preserve">
+    <value>Duplicazione del profilo non riuscita</value>
+  </data>
   <data name="Errors.Profile.LoadFailed" xml:space="preserve">
     <value>Caricamento dei profili non riuscito</value>
   </data>
@@ -2796,6 +2802,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Errors.Profiles.VirtualCannotBeEdited" xml:space="preserve">
     <value>I profili virtuali non possono essere modificati</value>
+  </data>
+  <data name="Errors.Profiles.VirtualCannotBeDuplicated" xml:space="preserve">
+    <value>I profili virtuali non possono essere duplicati</value>
   </data>
   <data name="Errors.Script.CreateFailed" xml:space="preserve">
     <value>Creazione dello script non riuscita</value>
@@ -2914,6 +2923,21 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Errors.Variables.InvalidFilePath" xml:space="preserve">
     <value>Inserisci il percorso completo di un file</value>
+  </data>
+  <data name="Errors.Variables.OnlyGlobalCanBeShared" xml:space="preserve">
+    <value>Solo le variabili globali possono essere condivise.</value>
+  </data>
+  <data name="Errors.Variables.ImportedCannotBeShared" xml:space="preserve">
+    <value>Una variabile importata da un altro Macro Deck non può essere condivisa.</value>
+  </data>
+  <data name="Errors.Variables.SharingNotSaved" xml:space="preserve">
+    <value>Impossibile salvare l'impostazione di condivisione.</value>
+  </data>
+  <data name="Errors.Variables.NotShared" xml:space="preserve">
+    <value>Questa variabile non è condivisa.</value>
+  </data>
+  <data name="Errors.Variables.ValueDoesNotFitType" xml:space="preserve">
+    <value>Il valore non corrisponde al tipo della variabile.</value>
   </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>I dati del widget devono essere un oggetto JSON.</value>
@@ -4283,6 +4307,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.Delegation.Config.UsernameRequired" xml:space="preserve">
     <value>Inserisci il nome utente usato per accedere sull'altro Macro Deck.</value>
   </data>
+  <data name="Integrations.Delegation.Config.ImportSharedVariablesLabel" xml:space="preserve">
+    <value>Importa variabili condivise</value>
+  </data>
+  <data name="Integrations.Delegation.Config.ImportSharedVariablesDescription" xml:space="preserve">
+    <value>Rende disponibili qui le variabili condivise sull'altro Macro Deck, con il nome del suo computer, ad esempio otherpc_obs_streaming.</value>
+  </data>
   <data name="Integrations.Delegation.Errors.Ambiguous" xml:space="preserve">
     <value>Scegli quale Macro Deck deve eseguire lo script.</value>
   </data>
@@ -4291,6 +4321,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Integrations.Delegation.Errors.CouldNotBeReached" xml:space="preserve">
     <value>Impossibile raggiungere {label}.</value>
+  </data>
+  <data name="Integrations.Delegation.Errors.RemoteLocked" xml:space="preserve">
+    <value>{label} è bloccato e non ha accettato la modifica.</value>
+  </data>
+  <data name="Integrations.Delegation.Errors.RemoteRejectedChange" xml:space="preserve">
+    <value>{label} non ha accettato la modifica.</value>
   </data>
   <data name="Integrations.Delegation.Errors.DelegateCycle" xml:space="preserve">
     <value>L'esecuzione creerebbe un ciclo di delega attraverso {label}.</value>
@@ -4369,6 +4405,17 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Integrations.Delegation.Issues.UnreachableTitle" xml:space="preserve">
     <value>{label} non è raggiungibile</value>
+  </data>
+  <data name="Integrations.Delegation.Issues.SharedImportSkippedTitle.One" xml:space="preserve">
+    <value>Impossibile aggiungere {count} variabile condivisa da {label}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.Delegation.Issues.SharedImportSkippedTitle.Other" xml:space="preserve">
+    <value>Impossibile aggiungere {count} variabili condivise da {label}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.Delegation.Issues.SharedImportSkippedDescription" xml:space="preserve">
+    <value>Il nome è già usato da un'altra variabile, è troppo lungo oppure le variabili condivise sono troppe: {names}</value>
   </data>
   <data name="Integrations.Delegation.Name" xml:space="preserve">
     <value>Macro Deck Delegate</value>
@@ -7443,9 +7490,6 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>{enabled} di {total} attive</value>
     <comment>[enabled:int] [total:int]</comment>
   </data>
-  <data name="Integrations.Page.ExternalTag" xml:space="preserve">
-    <value>Esterno</value>
-  </data>
   <data name="Integrations.Page.FallbackIntegrationName" xml:space="preserve">
     <value>questa integrazione</value>
   </data>
@@ -8828,7 +8872,7 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>macOS non offre un'ibernazione visibile all'utente.</value>
   </data>
   <data name="Integrations.System.Errors.Power.MacOsNoLockMechanism" xml:space="preserve">
-    <value>Il meccanismo di blocco (CGSession) non è stato trovato su questo sistema.</value>
+    <value>Il blocco dello schermo non è disponibile su questa versione di macOS.</value>
   </data>
   <data name="Integrations.System.Errors.Power.MacOsRestartDenied" xml:space="preserve">
     <value>Riavvio negato. Concedi a Macro Deck il permesso in Impostazioni di Sistema &gt; Privacy e sicurezza &gt; Automazione &gt; Eventi di sistema.</value>
@@ -9324,6 +9368,48 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Integrations.Twitch.Actions.UnbanUser.Name" xml:space="preserve">
     <value>Rimuovi Ban Utente</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.AccountDescription" xml:space="preserve">
+    <value>Di quale canale mostrare la chat.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Description" xml:space="preserve">
+    <value>Mostra la chat del tuo canale in tempo reale, con emote e badge.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Empty" xml:space="preserve">
+    <value>In attesa di messaggi in chat</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.FirstAccount" xml:space="preserve">
+    <value>Primo account connesso</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Name" xml:space="preserve">
+    <value>Chat di Twitch</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.NameSeparator" xml:space="preserve">
+    <value>: </value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Title" xml:space="preserve">
+    <value>Chat di {account}</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Offline" xml:space="preserve">
+    <value>Non connesso a Twitch</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleChatter1" xml:space="preserve">
+    <value>PixelPanda</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleChatter2" xml:space="preserve">
+    <value>NightOwl</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleChatter3" xml:space="preserve">
+    <value>CozyGamer</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleMessage1" xml:space="preserve">
+    <value>Ciao a tutti!</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleMessage2" xml:space="preserve">
+    <value>Che giocata!</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleMessage3" xml:space="preserve">
+    <value>Alla prossima live</value>
   </data>
   <data name="Integrations.Twitch.Config.AccountResolutionFailed" xml:space="preserve">
     <value>Twitch ha rilasciato il token ma non ha indicato a quale account appartiene. Premi Continua per riprovare.</value>
@@ -16088,6 +16174,18 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>{count} variabili</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Variables.Manager.ShareAction" xml:space="preserve">
+    <value>Condividi con altri Macro Deck</value>
+  </data>
+  <data name="Variables.Manager.StopSharingAction" xml:space="preserve">
+    <value>Smetti di condividere</value>
+  </data>
+  <data name="Variables.Manager.Shared" xml:space="preserve">
+    <value>Condivisa</value>
+  </data>
+  <data name="Variables.Manager.SharedTooltip" xml:space="preserve">
+    <value>Altri Macro Deck collegati tramite Macro Deck Delegate possono leggere e modificare questa variabile</value>
+  </data>
   <data name="Variables.Manager.SourceField" xml:space="preserve">
     <value>Origine</value>
   </data>
@@ -17536,6 +17634,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Widgets.MusicPlayer.UnavailableHintWithStatus" xml:space="preserve">
     <value>{label} non è temporaneamente disponibile ({status}): Macro Deck continua a riprovare.</value>
   </data>
+  <data name="Widgets.Profile.CopyName" xml:space="preserve">
+    <value>{name} (copia)</value>
+  </data>
   <data name="Widgets.Profile.DefaultInheritedLabel" xml:space="preserve">
     <value>Predefinito</value>
   </data>
@@ -17545,14 +17646,8 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Widgets.Profile.DeleteConfirmNamed" xml:space="preserve">
     <value>Eliminare "{name}" con tutte le sue cartelle e i suoi widget? Questa azione non può essere annullata.</value>
   </data>
-  <data name="Widgets.Profile.DeleteNamed" xml:space="preserve">
-    <value>Elimina {name}</value>
-  </data>
   <data name="Widgets.Profile.DeleteProfileHeading" xml:space="preserve">
     <value>Elimina profilo</value>
-  </data>
-  <data name="Widgets.Profile.EditNamed" xml:space="preserve">
-    <value>Modifica {name}</value>
   </data>
   <data name="Widgets.Profile.EditProfileHeading" xml:space="preserve">
     <value>Modifica profilo</value>
@@ -17565,9 +17660,6 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Widgets.Profile.ExportHeading" xml:space="preserve">
     <value>Esporta profilo</value>
-  </data>
-  <data name="Widgets.Profile.ExportNamed" xml:space="preserve">
-    <value>Esporta {name}</value>
   </data>
   <data name="Widgets.Profile.ImportFileTitle" xml:space="preserve">
     <value>Importa profilo da un file .macroDeckProfile</value>
@@ -17587,6 +17679,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Widgets.Profile.NewProfile" xml:space="preserve">
     <value>Nuovo profilo</value>
   </data>
+  <data name="Widgets.Profile.NoMatches" xml:space="preserve">
+    <value>Nessun profilo corrisponde alla tua ricerca</value>
+  </data>
   <data name="Widgets.Profile.NoProfile" xml:space="preserve">
     <value>Nessun profilo</value>
   </data>
@@ -17595,6 +17690,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Widgets.Profile.ProfileNamePlaceholder" xml:space="preserve">
     <value>Nome del profilo</value>
+  </data>
+  <data name="Widgets.Profile.SearchPlaceholder" xml:space="preserve">
+    <value>Cerca profili</value>
   </data>
   <data name="Widgets.Profile.UpdateFailed" xml:space="preserve">
     <value>Aggiornamento del profilo non riuscito</value>
@@ -18007,10 +18105,7 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>App nativa</value>
   </data>
   <data name="Onboarding.Connect.NativeAppDescription" xml:space="preserve">
-    <value>L'app nativa non è ancora disponibile. Per ora usa il Web Client.</value>
-  </data>
-  <data name="Onboarding.Connect.NativeAppBadge" xml:space="preserve">
-    <value>In arrivo</value>
+    <value>Scansiona il codice con la fotocamera del tuo smartphone o tablet. Apre l'App Store o Google Play, oppure si connette subito se l'app è già installata.</value>
   </data>
   <data name="Onboarding.Connect.Open" xml:space="preserve">
     <value>Apri</value>
@@ -18164,6 +18259,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Integrations.Companion.Errors.NotConnected" xml:space="preserve">
     <value>Il dispositivo Companion non è connesso.</value>
+  </data>
+  <data name="Integrations.Companion.Events.DeviceReadyName" xml:space="preserve">
+    <value>Dispositivo pronto</value>
+  </data>
+  <data name="Integrations.Companion.Events.DeviceReadyDescription" xml:space="preserve">
+    <value>Un'app Companion si è connessa e ora può eseguire le azioni Companion.</value>
   </data>
   <data name="Integrations.Companion.Variables.InFocus" xml:space="preserve">
     <value>In primo piano</value>

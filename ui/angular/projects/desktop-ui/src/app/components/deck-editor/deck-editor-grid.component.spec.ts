@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, provideZonelessChangeDetection } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
@@ -91,11 +91,19 @@ describe('DeckEditorGridComponent', () => {
     editMode?: boolean;
     selectedWidgetIds?: ReadonlySet<string>;
     cutWidgetIds?: ReadonlySet<string>;
+    cols?: number;
+    rows?: number;
+    gridPx?: number;
+    borderRadius?: number;
   }
 
   function render(widgets: GridWidget[], options: RenderOptions = {}): void {
-    fixture.componentRef.setInput('cols', COLS);
-    fixture.componentRef.setInput('rows', ROWS);
+    const cols = options.cols ?? COLS;
+    const rows = options.rows ?? ROWS;
+    const gridPx = options.gridPx ?? GRID_SIZE_PX;
+    fixture.componentRef.setInput('cols', cols);
+    fixture.componentRef.setInput('rows', rows);
+    if (options.borderRadius !== undefined) fixture.componentRef.setInput('borderRadius', options.borderRadius);
     fixture.componentRef.setInput('spacing', 0);
     fixture.componentRef.setInput('outerMargin', 0);
     fixture.componentRef.setInput('editMode', options.editMode ?? true);
@@ -108,13 +116,13 @@ describe('DeckEditorGridComponent', () => {
     // solver a fixed box instead of stubbing it, so the pointer maths under test is the maths the
     // grid ships, and pin the container's viewport origin so client coordinates are grid pixels.
     const box = {
-      left: 0, top: 0, right: GRID_SIZE_PX, bottom: GRID_SIZE_PX,
-      width: GRID_SIZE_PX, height: GRID_SIZE_PX, x: 0, y: 0, toJSON: () => ({}),
+      left: 0, top: 0, right: gridPx, bottom: gridPx,
+      width: gridPx, height: gridPx, x: 0, y: 0, toJSON: () => ({}),
     } as DOMRect;
     spyOn(grid().wrapper.nativeElement, 'getBoundingClientRect').and.returnValue(box);
     spyOn(grid().gridContainer.nativeElement, 'getBoundingClientRect').and.returnValue(box);
-    grid().metrics.configure({ cols: COLS, rows: ROWS, spacing: 0, outerMargin: 0 });
-    grid().metrics.measure(GRID_SIZE_PX, GRID_SIZE_PX);
+    grid().metrics.configure({ cols, rows, spacing: 0, outerMargin: 0 });
+    grid().metrics.measure(gridPx, gridPx);
     fixture.detectChanges();
   }
 
@@ -501,6 +509,73 @@ describe('DeckEditorGridComponent', () => {
     expect(host().querySelector('.delete-btn')).toBeNull();
   });
 
+  describe('corner chrome at a large corner radius', () => {
+    const SELECTION_RING_PX = 5;
+    const LARGE_RADIUS = 60;
+
+    interface CornerProbe {
+      element: HTMLElement;
+      corner: 'top-left' | 'bottom-right';
+      clearance: number;
+    }
+
+    function layOut(): void {
+      fixture.debugElement.query(By.directive(WidgetGridComponent)).injector.get(ChangeDetectorRef).markForCheck();
+      fixture.detectChanges();
+    }
+
+    function expectInsideRoundedCorner({ element, corner, clearance }: CornerProbe): void {
+      const tile = tiles()[0].querySelector<HTMLElement>('.widget')!.getBoundingClientRect();
+      const box = element.getBoundingClientRect();
+      const radius = Math.min(LARGE_RADIUS * grid().contentScale, tile.width / 2, tile.height / 2);
+      const centreX = box.left + box.width / 2;
+      const centreY = box.top + box.height / 2;
+      const arcX = corner === 'top-left' ? tile.left + radius : tile.right - radius;
+      const arcY = corner === 'top-left' ? tile.top + radius : tile.bottom - radius;
+
+      expect(Math.hypot(centreX - arcX, centreY - arcY) + box.width / 2).toBeLessThanOrEqual(radius - clearance);
+      expect(centreX).toBeLessThan(window.innerWidth);
+      expect(centreY).toBeLessThan(window.innerHeight);
+      expect(element.contains(document.elementFromPoint(centreX, centreY))).toBeTrue();
+    }
+
+    it('keeps the resize dot inside the rounded corner and clear of the selection ring', () => {
+      render([gridWidget()], { cols: 2, rows: 2, gridPx: 480, borderRadius: LARGE_RADIUS });
+      layOut();
+
+      expect(grid().contentScale).toBeGreaterThan(1);
+      expectInsideRoundedCorner({
+        element: chrome().querySelector<HTMLElement>('.resize-dot')!,
+        corner: 'bottom-right',
+        clearance: SELECTION_RING_PX,
+      });
+    });
+
+    it('keeps the pin badge inside the rounded corner', () => {
+      render([gridWidget({ isPinned: true })], { cols: 2, rows: 2, gridPx: 480, borderRadius: LARGE_RADIUS });
+      layOut();
+
+      expectInsideRoundedCorner({
+        element: chrome().querySelector<HTMLElement>('.pin-badge')!,
+        corner: 'top-left',
+        clearance: 0,
+      });
+    });
+
+    it('leaves the resize handle in the corner at the default radius', () => {
+      render([gridWidget()], { gridPx: 480, borderRadius: 22 });
+      layOut();
+
+      const tile = tiles()[0].querySelector<HTMLElement>('.widget')!.getBoundingClientRect();
+      const handle = chrome().querySelector<HTMLElement>('.resize-handle')!.getBoundingClientRect();
+
+      expect(grid().contentScale).toBeCloseTo(1, 5);
+      expect(tile.width).toBeGreaterThan(100);
+      expect(handle.right).toBeCloseTo(tile.right, 1);
+      expect(handle.bottom).toBeCloseTo(tile.bottom, 1);
+    });
+  });
+
   // --- marquee selection (issue #213) ------------------------------------------------------------
 
   describe('marquee selection', () => {
@@ -637,6 +712,54 @@ describe('DeckEditorGridComponent', () => {
       expect(component.renderStates().size).toBe(0);
       expect(host().querySelector('.widget.is-cut')).toBeNull();
       expect(host().querySelector('.widget.drag-source')).toBeNull();
+    });
+  });
+
+  describe('running a widget from its context menu', () => {
+    const shortPress = (disabled = false) => [{
+      triggerId: 'onShortPress',
+      triggerType: 'onShortPress',
+      children: [{ id: 'b1', type: 'action', blockType: 'action', label: 'Set label', color: '', disabled }],
+    }];
+
+    function openMenuOn(widget: GridWidget): string[] {
+      component.onTileContextMenu(widget, new MouseEvent('contextmenu'));
+      fixture.detectChanges();
+      return fixture.debugElement.query(By.directive(WidgetContextMenuComponent))
+        .componentInstance.menuItems().map((item: { id: string }) => item.id);
+    }
+
+    it('offers Run for a widget whose saved Short Press has an action, and hands that widget on', () => {
+      const widget = gridWidget({ data: { flows: shortPress() } as WidgetData });
+      render([widget]);
+      const runs = collect<GridWidget>(component.widgetRun);
+
+      expect(openMenuOn(widget)).toContain('run');
+      component.onContextMenuAction('run');
+
+      expect(runs).toEqual([widget]);
+    });
+
+    it('reads flows stored as a JSON string the same way', () => {
+      const widget = gridWidget({ data: { flows: JSON.stringify(shortPress()) } as unknown as WidgetData });
+      render([widget]);
+
+      expect(openMenuOn(widget)).toContain('run');
+    });
+
+    it('offers no Run when the Short Press has nothing enabled to run', () => {
+      const disabledOnly = gridWidget({ data: { flows: shortPress(true) } as WidgetData });
+      render([disabledOnly]);
+
+      expect(openMenuOn(disabledOnly)).not.toContain('run');
+    });
+
+    it('offers no Run for a multi-widget selection', () => {
+      const a = gridWidget({ id: 'a', data: { flows: shortPress() } as WidgetData });
+      const b = gridWidget({ id: 'b', x: 1, data: { flows: shortPress() } as WidgetData });
+      render([a, b], { selectedWidgetIds: new Set(['a', 'b']) });
+
+      expect(openMenuOn(a)).not.toContain('run');
     });
   });
 });

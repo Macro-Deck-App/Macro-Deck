@@ -546,6 +546,34 @@ public class AuthPolicyMatrixTests
 	}
 
 	[Test]
+	public async Task Variable_sharing_routes_are_admin_only()
+	{
+		var variableId = Guid.NewGuid();
+		var refused = new[]
+		{
+			await Send(HttpMethod.Get, "/api/shared-variables", _clientToken),
+			await SendJson(HttpMethod.Put, "/api/shared-variables/deaths/value", new { value = "1" }, _clientToken),
+			await SendJson(HttpMethod.Patch, $"/api/variables/{variableId}/shared", new { shared = true }, _clientToken)
+		};
+		var anonymous = new[]
+		{
+			await Send(HttpMethod.Get, "/api/shared-variables", null),
+			await SendJson(HttpMethod.Put, "/api/shared-variables/deaths/value", new { value = "1" }, null),
+			await SendJson(HttpMethod.Patch, $"/api/variables/{variableId}/shared", new { shared = true }, null)
+		};
+		var adminList = await Send(HttpMethod.Get, "/api/shared-variables", _adminToken);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(refused.Select(response => response.StatusCode), Is.All.EqualTo(HttpStatusCode.Forbidden));
+			Assert.That(anonymous.Select(response => response.StatusCode),
+				Is.All.EqualTo(HttpStatusCode.Unauthorized));
+			Assert.That(adminList.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+			Assert.That(adminList.Content.Headers.ContentType?.MediaType, Is.EqualTo("application/json"));
+		});
+	}
+
+	[Test]
 	public async Task The_onboarding_state_is_admin_only()
 	{
 		var get = await Send(HttpMethod.Get, "/api/settings/onboarding", _clientToken);
@@ -606,6 +634,10 @@ public class AuthPolicyMatrixTests
 			$"/api/devices/{Guid.NewGuid()}/open-profile",
 			new { profileId = "p1" },
 			_clientToken);
+		var duplicateProfile = await SendJson(HttpMethod.Post,
+			$"/api/profiles/{Guid.NewGuid()}/duplicate",
+			new { },
+			_clientToken);
 		var logging = await Send(HttpMethod.Get, "/api/settings/logging", _clientToken);
 		var pluginTokens = await Send(HttpMethod.Get, "/api/plugin-tokens", _clientToken);
 		var pluginSessions = await Send(HttpMethod.Get, "/api/plugin-sessions", _clientToken);
@@ -638,6 +670,7 @@ public class AuthPolicyMatrixTests
 			Assert.That(applicationFocus.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 			Assert.That(runningApplications.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 			Assert.That(setFocusRule.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+			Assert.That(duplicateProfile.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 			Assert.That(deleteFocusRule.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 			Assert.That(setStartupProfile.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 			Assert.That(openProfileOnDevice.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));

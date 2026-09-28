@@ -18,6 +18,10 @@ Use the workspace-local Angular and Tauri tooling. A global Angular CLI installa
 npm install
 ```
 
+## One command
+
+The root [`Makefile`](../../Makefile) wraps the steps below. `make dev` starts the host, the desktop UI dev server and the built web client on the host's public port; `make dev-ui` leaves out the web client, and `make dev-app` opens the desktop UI in the bootstrapper window. Ctrl+C stops every process it started. `make help` lists all targets.
+
 ## Run the host
 
 From the repository root:
@@ -57,7 +61,7 @@ The web client is framework-free and has no development server: it is built, and
 npm run build
 ```
 
-The output in `dist/` reaches a running host through [`ci/scripts/stage-host.sh`](../../ci/scripts/stage-host.sh), which stages a published host with the client in its `wwwroot`. A development host started with `dotnet run` serves only its API and answers every other address with a placeholder page. The scripts in [`ui/web-client/package.json`](../../ui/web-client/package.json) cover the device-target builds and the compatibility passes; see [adding a Web Client target](web-client-targets.md).
+The output in `dist/` reaches a running host through [`ci/scripts/stage-host.sh`](../../ci/scripts/stage-host.sh), which stages a published host with the client in its `wwwroot`. A development host started with `dotnet run` serves only its API and answers every other address with a placeholder page, unless `ASPNETCORE_WEBROOT` points at `ui/web-client/dist`, which is what `make dev` and `make host-web-client` do. Rebuild with `make web-client` and reload the page. The scripts in [`ui/web-client/package.json`](../../ui/web-client/package.json) cover the device-target builds and the compatibility passes; see [adding a Web Client target](web-client-targets.md).
 
 To launch the Tauri bootstrapper against the development UI, run from `ui/bootstrapper/`:
 

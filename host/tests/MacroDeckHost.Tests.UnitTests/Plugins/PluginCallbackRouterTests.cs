@@ -1219,6 +1219,33 @@ public class PluginCallbackRouterTests
 	}
 
 	[Test]
+	public async Task A_plugin_asks_for_any_installed_icon_by_id_and_an_unknown_id_is_not_found()
+	{
+		using var host = new IconPacks.PluginIconPackTestHost();
+		await host.SyncDevelopment("com.example.other", ("logos", await host.BuildArchive("Logos", ("spotify", "green"))));
+		var foreignIconId = host.Icon(host.PluginPack("com.example.other", "logos")!, "spotify").Id;
+		var router = IconPackRouter(host);
+
+		HostInvokePayload Get(Guid iconId) => new()
+		{
+			Api = HostApis.IconPacks,
+			Operation = HostOperations.IconPacks.GetIcon,
+			Arguments = Arg(new MacroDeck.Plugin.Protocol.Callbacks.IconPacks.GetIconArguments { IconId = iconId })
+		};
+
+		var found = await router.RouteAsync(IconPluginId, "session-1", "c1", Get(foreignIconId), CancellationToken.None);
+		var missing = await router.RouteAsync(IconPluginId, "session-1", "c2", Get(Guid.NewGuid()), CancellationToken.None);
+
+		var handle = found.Data?.Deserialize<UiResourceHandleDto>(PluginProtocolJson.Options);
+		Assert.Multiple(() =>
+		{
+			Assert.That(found.Error, Is.Null);
+			Assert.That(handle?.ResourceId, Is.EqualTo(PluginIconReferences.ResourceId(foreignIconId)));
+			Assert.That(missing.Error?.Code, Is.EqualTo(ProtocolErrorCodes.IconNotFound));
+		});
+	}
+
+	[Test]
 	public async Task A_ui_snapshot_naming_a_plugin_icon_reaches_clients_as_an_icon_pack_reference()
 	{
 		using var host = new IconPacks.PluginIconPackTestHost();

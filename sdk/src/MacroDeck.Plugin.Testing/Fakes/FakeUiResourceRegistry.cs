@@ -16,6 +16,7 @@ public sealed class FakeUiResourceRegistry : IUiResourceRegistry
 	private readonly Lock _gate = new();
 	private readonly Dictionary<string, FakeUiResource> _resources = new(StringComparer.Ordinal);
 	private readonly Dictionary<(string Key, string Name), FakeUiResource> _pluginIcons = new(PluginIconComparer.Instance);
+	private readonly Dictionary<Guid, FakeUiResource> _icons = new();
 
 	/// <summary>The combined size all resources may have. Defaults to Macro Deck's per-plugin quota.</summary>
 	public int MaxTotalBytes { get; set; } = ProtocolLimits.MaxUiResourceBytesPerPlugin;
@@ -130,6 +131,51 @@ public sealed class FakeUiResourceRegistry : IUiResourceRegistry
 				? Task.FromResult(icon.Handle)
 				: Task.FromException<UiResource>(new UiResourceException(UiResourceErrorCode.PluginIconNotFound,
 					$"The plugin's bundled icon packs contain no icon '{name}' in '{key}'."));
+		}
+	}
+
+	/// <summary>
+	/// Makes <paramref name="content" /> the icon <paramref name="iconId" /> of an installed icon pack,
+	/// replacing what that id held. Like Macro Deck, it does not count against the quota and a replaced icon
+	/// gets a new <see cref="UiResource.ContentHash" />.
+	/// </summary>
+	public UiResource AddIcon(Guid iconId, byte[] content, string mediaType)
+	{
+		ArgumentNullException.ThrowIfNull(content);
+
+		if (!UiResourceRules.IsSupportedMediaType(mediaType))
+		{
+			throw new ArgumentException($"'{mediaType}' is not a supported media type.", nameof(mediaType));
+		}
+
+		var bytes = content.ToArray();
+		var handle = new UiResource
+		{
+			ResourceId = $"app.macro-deck.plugin-icon.{iconId:D}",
+			ContentHash = AssetContentHash.Compute(bytes),
+			MediaType = mediaType.ToLowerInvariant(),
+			ByteLength = bytes.Length,
+		};
+
+		lock (_gate)
+		{
+			_icons[iconId] = new FakeUiResource(handle, bytes);
+		}
+
+		return handle;
+	}
+
+	/// <inheritdoc />
+	/// <remarks>Answers the icons added through <see cref="AddIcon" />; any other id throws
+	/// <see cref="UiResourceErrorCode.IconNotFound" />.</remarks>
+	public Task<UiResource> GetIconAsync(Guid iconId, CancellationToken cancellationToken = default)
+	{
+		lock (_gate)
+		{
+			return _icons.TryGetValue(iconId, out var icon)
+				? Task.FromResult(icon.Handle)
+				: Task.FromException<UiResource>(new UiResourceException(UiResourceErrorCode.IconNotFound,
+					$"No installed icon pack contains an icon with id '{iconId}'."));
 		}
 	}
 

@@ -86,6 +86,15 @@ export interface DeleteProfileRequest {
 
 export interface DeleteProfileResponse extends ResultResponse {}
 
+export interface DuplicateProfileRequest {
+  id: string;
+  name?: string;
+}
+
+export interface DuplicateProfileResponse extends ResultResponse {
+  profile?: IpcProfile;
+}
+
 export interface ProfileCreatedEvent {
   profile: IpcProfile;
 }

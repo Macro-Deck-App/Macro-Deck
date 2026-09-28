@@ -5,7 +5,6 @@ use serde::Serialize;
 use tauri::http::{header, Method, Request, Response, StatusCode};
 use tauri::window::Color;
 use tauri::{AppHandle, Manager, Theme, UriSchemeContext, WebviewUrl, WebviewWindowBuilder, Wry};
-use tauri_plugin_opener::OpenerExt;
 
 use crate::appearance::{self, Appearance, ThemeMode};
 use crate::localization::{self, keys};
@@ -362,7 +361,7 @@ fn build(app: &AppHandle) -> bool {
                     return true;
                 }
                 if url.scheme() == "https" {
-                    let _ = opener.opener().open_url(url.as_str(), None::<&str>);
+                    let _ = crate::external_url::open(&opener, url.as_str());
                 }
                 false
             });
@@ -469,9 +468,7 @@ fn run_action(app: &AppHandle, id: ActionId) {
             tauri::async_runtime::spawn(async move { updater::cancel_update_download(app).await });
         }
         ActionId::DownloadPage => {
-            let _ = app
-                .opener()
-                .open_url(updater::DOWNLOAD_PAGE_URL, None::<&str>);
+            let _ = crate::external_url::open(app, updater::DOWNLOAD_PAGE_URL);
             close(app);
         }
     }

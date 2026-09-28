@@ -80,8 +80,11 @@ internal sealed class TwitchSubscriptionManager
 					created.Add(spec.EventId);
 					break;
 
-				case TwitchSubscriptionResult.MissingScope:
+				case TwitchSubscriptionResult.MissingScope when !spec.IsFeed:
 					missingScope.Add(spec.EventId);
+					break;
+
+				case TwitchSubscriptionResult.MissingScope:
 					break;
 
 				case TwitchSubscriptionResult.Unsupported:

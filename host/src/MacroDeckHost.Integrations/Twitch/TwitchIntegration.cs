@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Twitch.Chat;
 using MacroDeckHost.Integrations.Twitch.Actions;
 using MacroDeckHost.Integrations.Twitch.Auth;
 using MacroDeck.Localization;
@@ -9,6 +10,7 @@ using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Migration;
 using MacroDeck.Sdk.Variables;
+using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Localization;
 using Serilog;
 
@@ -24,6 +26,8 @@ public sealed class TwitchIntegration
 		IDynamicEventOptionsProvider,
 		IIntegrationIssueProvider,
 		IMigrationProvider,
+		IWidgetTypeProvider,
+		ITwitchChatSinkConsumer,
 		IDisposable
 {
 	public const string IntegrationId = "app.macro-deck.twitch";
@@ -36,6 +40,10 @@ public sealed class TwitchIntegration
 
 	private readonly TwitchAccountManager _accounts;
 
+	private const string ChatDataSchema
+		= """{"type":"object","properties":{"account":{"type":"string"}}}""";
+
+	private ITwitchChatSink? _chatSink;
 	private IVariableApi? _variables;
 	private IUserVariableApi? _userVariables;
 
@@ -100,7 +108,9 @@ public sealed class TwitchIntegration
 		_variables = context.Variables;
 		_userVariables = context.UserVariables;
 
+		_accounts.UseChatSink(_chatSink);
 		await _accounts.ReloadAsync(context.Config, new TwitchEventEmitter(context.Events));
+		_chatSink?.SetAccounts(_accounts.ChatAccounts());
 		_accounts.StartAll();
 		IsInitialized = true;
 	}
@@ -110,8 +120,26 @@ public sealed class TwitchIntegration
 		// Drains a token rotation that is still in flight. Losing it would leave the stored refresh
 		// token permanently dead, because Twitch already invalidated it when it issued the new one.
 		IsInitialized = false;
+		_chatSink?.SetAccounts([]);
 		await _accounts.ShutdownAsync();
 	}
+
+	public void UseTwitchChatSink(ITwitchChatSink sink) => _chatSink = sink;
+
+	public async Task InitializeAsync(IWidgetTypeProviderContext context, CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(context);
+
+		if (_accounts.Connections.Count == 0)
+		{
+			return;
+		}
+
+		await context.RegisterWidgetTypeAsync(ChatWidgetType(), cancellationToken);
+	}
+
+	public IReadOnlyList<WidgetTypeDescriptor> GetWidgetTypes()
+		=> _accounts.Connections.Count == 0 ? [] : [ChatWidgetType()];
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
 	{
@@ -160,6 +188,14 @@ public sealed class TwitchIntegration
 				: IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue()));
 
 	public void Dispose() => _accounts.Dispose();
+
+	private static WidgetTypeDescriptor ChatWidgetType()
+		=> new(TwitchChatWidgetType.LocalId,
+			AppStrings.Integrations.Twitch.ChatWidget.Name(),
+			AppStrings.Integrations.Twitch.ChatWidget.Description(),
+			DefaultData: """{"account":""}""",
+			DataSchema: ChatDataSchema,
+			HasConfiguration: true);
 
 	private IReadOnlyList<ActionParameterOption> RewardOptions(string? accountId)
 	{

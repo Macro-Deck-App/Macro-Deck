@@ -22,14 +22,16 @@
           </div>
         </div>
 
-        <div class="ob-option ob-option-unavailable">
+        <div class="ob-option">
           <div class="ob-option-text">
-            <span class="ob-option-title">
-              {{ appStrings.Onboarding.Connect.NativeAppTitle | translate }}
-              <span class="ob-badge">{{ appStrings.Onboarding.Connect.NativeAppBadge | translate }}</span>
-            </span>
+            <span class="ob-option-title">{{ appStrings.Onboarding.Connect.NativeAppTitle | translate }}</span>
             <span class="ob-option-description">{{ appStrings.Onboarding.Connect.NativeAppDescription | translate }}</span>
           </div>
+          @if (connection(); as info) {
+            @if (!info.publicListenerUnavailable) {
+              <app-connect-qr class="ob-qr" [info]="info" [hint]="null" />
+            }
+          }
         </div>
 
         <span class="ob-section-label">{{ appStrings.Shell.ConnectionPanel.Addresses | translate }}</span>

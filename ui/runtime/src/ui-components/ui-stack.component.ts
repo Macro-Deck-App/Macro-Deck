@@ -12,6 +12,7 @@ export interface UiStackState {
 
 export const uiStackComponent: UiComponentDefinition<UiStackState> = {
   type: UiComponents.Stack,
+  version: { minimum: 1, maximum: 2 },
 
   create(doc: Document) {
     return doc.createElement('div');

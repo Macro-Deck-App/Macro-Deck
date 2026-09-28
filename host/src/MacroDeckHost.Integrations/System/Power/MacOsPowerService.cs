@@ -17,7 +17,7 @@ internal sealed class MacOsPowerService : IPowerService
 	public bool Supports(PowerOperation operation)
 		=> operation switch
 		{
-			PowerOperation.Lock => File.Exists(MacOsPowerCommandResolver.CgSessionPath),
+			PowerOperation.Lock => MacOsScreenLock.IsAvailable,
 			PowerOperation.Hibernate => false,
 			_ => true
 		};
@@ -30,6 +30,11 @@ internal sealed class MacOsPowerService : IPowerService
 		if (!Supports(operation))
 		{
 			return PowerResult.Failed(UnsupportedReason(operation), ActionErrorCodes.Unavailable);
+		}
+
+		if (operation == PowerOperation.Lock)
+		{
+			return LockScreen();
 		}
 
 		var (fileName, arguments) = MacOsPowerCommandResolver.Resolve(operation, force);
@@ -51,6 +56,18 @@ internal sealed class MacOsPowerService : IPowerService
 		// recognized it as a requester. Either way it is a permission problem, not a generic failure.
 		var errorCode = fileName == "osascript" ? ActionErrorCodes.PermissionDenied : null;
 		return PowerResult.Failed(FailureMessage(operation), errorCode);
+	}
+
+	private static PowerResult LockScreen()
+	{
+		var result = MacOsScreenLock.Lock();
+		if (result == 0)
+		{
+			return PowerResult.Succeeded();
+		}
+
+		_logger.Warning("SACLockScreenImmediate returned {Result}", result);
+		return PowerResult.Failed(FailureMessage(PowerOperation.Lock));
 	}
 
 	private static LocalizedText UnsupportedReason(PowerOperation operation)

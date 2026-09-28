@@ -20,7 +20,8 @@ There are two ways to use a device as your deck:
 
 - **Web client:** opens in a browser on your network, with nothing to install. It also works in
   browser-based game overlays. With HTTPS enabled, you can install it as an app (PWA).
-- **Companion app:** the native app for Android 6 or later and iOS 15 or later.
+- **Companion app:** the native app for Android 6 or later and iOS 15 or later. See
+  [Companion app](/guide/companion-app/) for what it adds over the web client.
 
 Looking for specific devices? See [Recommended devices](/guide/recommended-devices/).
 

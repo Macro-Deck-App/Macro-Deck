@@ -77,7 +77,21 @@ export default defineConfig({
 										'guide/installation',
 										'guide/getting-started',
 										'guide/usb-connection',
-										'guide/companion-app',
+									],
+								},
+								{
+									label: 'Companion app',
+									items: [
+										{ label: 'Overview', slug: 'guide/companion-app' },
+										'guide/companion-app/setup',
+										'guide/companion-app/deck',
+										'guide/companion-app/settings',
+										'guide/companion-app/license',
+										'guide/companion-app/android',
+										'guide/companion-app/ios',
+										'guide/companion-app/install-over-adb',
+										'guide/companion-app/tips',
+										{ label: 'FAQ', slug: 'guide/companion-app/faq' },
 									],
 								},
 								{

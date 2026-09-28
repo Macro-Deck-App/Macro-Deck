@@ -14,6 +14,7 @@ using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
+using MacroDeckHost.Tests.UnitTests.Variables;
 using MacroDeck.Sdk.Identity;
 using MacroDeck.Sdk.Profiles;
 
@@ -96,7 +97,8 @@ public class ReadinessGuardedReadHandlersTests
 		var handler = new GetVariablesRequestMessageHandler(new StubVariableService(),
 			new VariableRegistry(),
 			new FakeVariableBindingService(),
-			readiness);
+			readiness,
+			InMemorySharedVariableStore.For(new VariableRegistry()));
 
 		var pending = handler.Handle(new GetVariablesRequest(), CancellationToken.None);
 		Assert.That(pending.IsCompleted, Is.False);

@@ -1,11 +1,11 @@
 # Connect link
 
-The QR code in the desktop app's network panel encodes a connect link that the companion app and the page
+The QR code in the desktop app's network panel and setup wizard encodes a connect link that the companion app and the page
 behind connect.macro-deck.app read. It has no reader in this repository, so this page is the reference for
 readers elsewhere. The encoder is `encodeConnectLink` in
-[connection-panel.component.ts](../../ui/angular/projects/desktop-ui/src/app/components/shell/connection-panel/connection-panel.component.ts),
+[connect-link.ts](../../ui/angular/projects/desktop-ui/src/app/components/shell/connect-qr/connect-link.ts),
 and the conformance vector below is pinned by its
-[spec](../../ui/angular/projects/desktop-ui/src/app/components/shell/connection-panel/connection-panel.component.spec.ts).
+[spec](../../ui/angular/projects/desktop-ui/src/app/components/shell/connect-qr/connect-link.spec.ts).
 When they disagree with this page, the spec wins. The decision is [ADR 0085](../decisions/0085-compact-connect-link.md).
 
 ## Link

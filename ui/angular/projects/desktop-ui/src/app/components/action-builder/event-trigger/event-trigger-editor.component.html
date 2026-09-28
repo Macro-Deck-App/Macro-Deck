@@ -17,6 +17,18 @@
     <p class="event-trigger-error">{{ message }}</p>
   }
 
+  @if (nameable) {
+    <label class="form-group form-group--dense">
+      <span class="form-label">{{ 'macrodeck.app:ActionBuilder.EventTrigger.NameLabel' | translate }}</span>
+      <shared-input
+        [ngModel]="flowName()"
+        [placeholder]="defaultName"
+        [ariaLabel]="'macrodeck.app:ActionBuilder.EventTrigger.NameLabel' | translate"
+        [inputMaxlength]="100"
+        (ngModelChange)="onNameChange($event)" />
+    </label>
+  }
+
   <div class="event-trigger-selects">
     <label class="form-group form-group--dense">
       <span class="form-label">{{ providerFieldLabel() }}</span>

@@ -7,6 +7,7 @@ using MacroDeckHost.Application.Ui.Transport.Messages.Profiles;
 using MacroDeckHost.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace MacroDeckHost.Api.Controllers;
 
@@ -18,6 +19,7 @@ public class ProfilesController : ControllerBase
 	private readonly IUiTransportMessageHandler<CreateProfileRequest, CreateProfileResponse> _createProfile;
 	private readonly IUiTransportMessageHandler<UpdateProfileRequest, UpdateProfileResponse> _updateProfile;
 	private readonly IUiTransportMessageHandler<DeleteProfileRequest, DeleteProfileResponse> _deleteProfile;
+	private readonly IUiTransportMessageHandler<DuplicateProfileRequest, DuplicateProfileResponse> _duplicateProfile;
 	private readonly IProfilePortabilityService _portability;
 
 	public ProfilesController(
@@ -25,12 +27,14 @@ public class ProfilesController : ControllerBase
 		IUiTransportMessageHandler<CreateProfileRequest, CreateProfileResponse> createProfile,
 		IUiTransportMessageHandler<UpdateProfileRequest, UpdateProfileResponse> updateProfile,
 		IUiTransportMessageHandler<DeleteProfileRequest, DeleteProfileResponse> deleteProfile,
+		IUiTransportMessageHandler<DuplicateProfileRequest, DuplicateProfileResponse> duplicateProfile,
 		IProfilePortabilityService portability)
 	{
 		_getProfiles = getProfiles;
 		_createProfile = createProfile;
 		_updateProfile = updateProfile;
 		_deleteProfile = deleteProfile;
+		_duplicateProfile = duplicateProfile;
 		_portability = portability;
 	}
 
@@ -50,6 +54,12 @@ public class ProfilesController : ControllerBase
 	[HttpDelete("{id}")]
 	public Task<DeleteProfileResponse> Delete(string id, CancellationToken ct)
 		=> _deleteProfile.Handle(new DeleteProfileRequest { Id = id }, ct).AsTask();
+
+	[HttpPost("{id}/duplicate")]
+	public Task<DuplicateProfileResponse> Duplicate(string id,
+		[FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] DuplicateProfileRequest? body,
+		CancellationToken ct)
+		=> _duplicateProfile.Handle(new DuplicateProfileRequest { Id = id, Name = body?.Name }, ct).AsTask();
 
 	[HttpPost("{id}/export")]
 	public async Task<IActionResult> Export(string id, ExportProfileRequest body, CancellationToken ct)

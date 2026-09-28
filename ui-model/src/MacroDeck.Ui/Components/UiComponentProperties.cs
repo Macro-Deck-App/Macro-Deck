@@ -297,6 +297,16 @@ public static class UiComponentProperties
 	/// with its children after the first - see <see cref="UiResponsiveVariant" />.</summary>
 	public const string Variants = "variants";
 
+	/// <summary>A text's inline runs of styled text and images, as a list of <see cref="UiTextSpan" />. A reader
+	/// that draws them draws them instead of <see cref="Text" />; one that does not know the key draws
+	/// <see cref="Text" />, which is why a producer keeps <see cref="Text" /> the plain equivalent.</summary>
+	public const string Spans = "spans";
+
+	/// <summary>What a stack does with children that do not fit its main axis - see
+	/// <see cref="UiComponentOverflows" />. Needs <see cref="UiComponents.Stack" /> component version 2;
+	/// absent means <see cref="UiComponentOverflows.Shrink" />.</summary>
+	public const string Overflow = "overflow";
+
 	/// <summary>The property keys this profile ships.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
 	[
@@ -306,6 +316,6 @@ public static class UiComponentProperties
 		Format, Seconds, Level, Step, LevelColor, Interaction, BorderStyle, BorderColor, Corner, Points, PlotTop,
 		Digits, Answer, Placeholder, Rotation, OriginX, OriginY, Shape, CornerRadius, StrokeColor,
 		StrokeWidth, Path, Icon, Columns, Rows, ColumnSpan, RowSpan, StartAngle, EndAngle, On, Selected,
-		Modifiers, Frame, Clip, Mask, Variants,
+		Modifiers, Frame, Clip, Mask, Variants, Spans, Overflow,
 	];
 }

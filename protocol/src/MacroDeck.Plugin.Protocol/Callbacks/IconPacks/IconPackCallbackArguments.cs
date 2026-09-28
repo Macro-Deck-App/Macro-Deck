@@ -35,3 +35,10 @@ public sealed record GetIconResourceArguments
 
 	public required string Name { get; init; }
 }
+
+/// <summary>Arguments for <c>host.invoke icon-packs/get-icon</c>. Answered with a
+/// <see cref="Ui.UiResourceHandleDto" />.</summary>
+public sealed record GetIconArguments
+{
+	public required Guid IconId { get; init; }
+}

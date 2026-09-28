@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 
-import { ActionFlow, findBlock, removeBlockFromFlows } from '@macro-deck/runtime';
+import { ActionFlow, findBlock, parseStoredFlows, removeBlockFromFlows } from '@macro-deck/runtime';
 import { ApiService, ProfileService } from '@shared';
 import { ActionClipboardService, ActionFlowOwner, sameActionFlowOwner } from './action-clipboard.service';
 import { AutomationService } from './automation.service';
@@ -72,7 +72,7 @@ export class ActionCutOriginService {
     const script = response.scripts?.find(s => s.id === scriptId);
     if (!script) return;
 
-    const removal = removeBlockFromFlows(parseFlows(script.flows), blockId);
+    const removal = removeBlockFromFlows(parseStoredFlows(script.flows), blockId);
     if (!removal.removed) return;
 
     await this.scripts.updateScript(scriptId, { flows: removal.flows });
@@ -83,7 +83,7 @@ export class ActionCutOriginService {
     const automation = response.automations?.find(a => a.id === automationId);
     if (!automation) return;
 
-    const removal = removeBlockFromFlows(parseFlows(automation.flows), blockId);
+    const removal = removeBlockFromFlows(parseStoredFlows(automation.flows), blockId);
     if (!removal.removed) return;
 
     await this.automations.updateAutomation(automationId, { flows: removal.flows });
@@ -109,21 +109,10 @@ export class ActionCutOriginService {
     }
 
     const stored = record['flows'];
-    const removal = removeBlockFromFlows(parseFlows(stored), blockId);
+    const removal = removeBlockFromFlows(parseStoredFlows(stored), blockId);
     if (!removal.removed) return null;
 
     record['flows'] = typeof stored === 'string' ? JSON.stringify(removal.flows) : removal.flows;
     return JSON.stringify(record);
-  }
-}
-
-function parseFlows(value: unknown): ActionFlow[] {
-  if (Array.isArray(value)) return value as ActionFlow[];
-  if (typeof value !== 'string' || value.length === 0) return [];
-  try {
-    const parsed: unknown = JSON.parse(value);
-    return Array.isArray(parsed) ? (parsed as ActionFlow[]) : [];
-  } catch {
-    return [];
   }
 }

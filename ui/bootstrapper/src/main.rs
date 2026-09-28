@@ -7,9 +7,12 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod appearance;
+#[cfg(any(target_os = "linux", all(test, unix)))]
+mod appimage;
 mod backup_download;
 mod bridge;
 mod dock_icon;
+mod external_url;
 mod host;
 mod host_error_window;
 #[cfg(windows)]

@@ -106,7 +106,7 @@ internal sealed class TwitchEventDefinitionsTests
 	public void The_subscription_catalogue_and_the_definitions_describe_the_same_events()
 	{
 		var declared = TwitchEventDefinitions.All.Select(definition => definition.Id).ToHashSet(StringComparer.Ordinal);
-		var catalogued = TwitchEventCatalog.All.Select(spec => spec.EventId).ToList();
+		var catalogued = TwitchEventCatalog.All.Where(spec => !spec.IsFeed).Select(spec => spec.EventId).ToList();
 
 		Assert.Multiple(() =>
 		{
@@ -114,6 +114,23 @@ internal sealed class TwitchEventDefinitionsTests
 
 			Assert.That(declared.Except(catalogued, StringComparer.Ordinal),
 				Is.EquivalentTo(new[] { TwitchEventIds.Connected, TwitchEventIds.Disconnected, TwitchEventIds.Any }));
+		});
+	}
+
+	[Test]
+	public void Chat_feeds_are_subscribed_but_never_offered_or_declared_as_events()
+	{
+		var feeds = TwitchEventCatalog.All.Where(spec => spec.IsFeed).ToList();
+		var declared = TwitchEventDefinitions.All.Select(definition => definition.Id).ToHashSet(StringComparer.Ordinal);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(feeds.Select(spec => spec.Type),
+				Is.EquivalentTo(new[] { "channel.chat.message", "channel.chat.clear_user_messages" }));
+			Assert.That(TwitchEventCatalog.Types,
+				Has.None.AnyOf("channel.chat.message", "channel.chat.clear_user_messages"));
+			Assert.That(feeds.Select(spec => spec.EventId), Has.None.Matches<string>(declared.Contains));
+			Assert.That(feeds.Select(spec => TwitchEventCatalog.ForEvent(spec.EventId)), Is.All.Null);
 		});
 	}
 

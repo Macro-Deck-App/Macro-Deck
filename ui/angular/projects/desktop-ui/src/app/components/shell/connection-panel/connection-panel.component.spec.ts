@@ -2,9 +2,9 @@ import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ConnectionEndpoint, GetConnectionInfoResponse } from '@macro-deck/runtime';
 import { ApiService } from '@shared';
-import { ConnectionPanelComponent, encodeConnectLink } from './connection-panel.component';
+import { ConnectionPanelComponent } from './connection-panel.component';
+import { ConnectQrComponent } from '../connect-qr/connect-qr.component';
 import { EMPTY } from 'rxjs';
-import { create } from 'qrcode';
 
 @Component({
   standalone: true,
@@ -251,81 +251,9 @@ describe('ConnectionPanelComponent', () => {
     expect(openSpy).toHaveBeenCalledWith('https://192.168.1.10:8194', '_blank', 'noopener,noreferrer');
   });
 
-  describe('connect link v3', () => {
-    const prefix = 'https://connect.macro-deck.app/';
-    const referenceHost: GetConnectionInfoResponse = {
-      ...info,
-      instanceName: 'Companion test host',
-      endpoints: [http, https],
-    };
-
-    function linkBytes(url: string): number[] {
-      const digits = url.slice(prefix.length);
-      const bytes: number[] = [];
-      for (let i = 0; i < digits.length; i += 5) {
-        const value = Number(digits.slice(i, i + 5));
-        bytes.push(...(digits.length - i === 3 ? [value] : [value >> 8, value & 0xff]));
-      }
-      return bytes;
-    }
-
-    it('matches the conformance vector in engineering/api/connect-link.md', () => {
-      expect(encodeConnectLink(referenceHost, '482915')).toBe(prefix +
-        '00787172632801624942269912819229797295560829628531296980019243009025920025600192430090259200513015881438614641053');
-    });
-
-    it('matches the conformance vector with the identity fingerprint in engineering/api/connect-link.md', () => {
-      const link = encodeConnectLink({ ...referenceHost, identityFingerprint: '3208 E004 6ED3 EE6B 4E75 1027' }, '482915');
-
-      expect(link).toBe(prefix +
-        '00787172632801624942269912819229797295560829628531296980019243009025920025600192430090259200513015881438614641136180227201134542542747029968039');
-      expect(linkBytes(link).slice(-12)).toEqual([0x32, 0x08, 0xE0, 0x04, 0x6E, 0xD3, 0xEE, 0x6B, 0x4E, 0x75, 0x10, 0x27]);
-    });
-
-    it('ends at the token while the identity key is unavailable or the fingerprint is malformed', () => {
-      const withoutKey = encodeConnectLink({ ...referenceHost, identityFingerprint: null }, '482915');
-      const malformed = encodeConnectLink({ ...referenceHost, identityFingerprint: '3208 E004' }, '482915');
-
-      expect(withoutKey).toBe(encodeConnectLink(referenceHost, '482915'));
-      expect(malformed).toBe(withoutKey);
-    });
-
-    it('fits a far smaller QR code than the version 2 link did', () => {
-      expect(create(encodeConnectLink(referenceHost, '482915'), { errorCorrectionLevel: 'L' }).version)
-        .toBeLessThanOrEqual(5);
-    });
-
-    it('writes hostnames as text and skips addresses it cannot describe, with an empty token', () => {
-      const link = encodeConnectLink({
-        ...info,
-        instanceName: 'H',
-        endpoints: [
-          { address: 'fe80::1', port: 8193, ssl: false },
-          { address: 'deck.local', port: 8194, ssl: true },
-          { address: '300.1.1.1', port: 8193, ssl: false },
-          { address: 'a'.repeat(256), port: 8193, ssl: false },
-        ],
-      }, '');
-
-      expect(link).toMatch(/^https:\/\/connect\.macro-deck\.app\/\d+$/);
-      expect(linkBytes(link)).toEqual([
-        3, 1, 0x48, 1,
-        2, 10, ...Array.from('deck.local', (c) => c.charCodeAt(0)), 0x20, 0x02, 1,
-        0,
-      ]);
-    });
-
-    it('cuts an overlong instance name on a character boundary', () => {
-      const bytes = linkBytes(encodeConnectLink({ ...info, instanceName: 'ü'.repeat(200), endpoints: [] }, ''));
-
-      expect(bytes[1]).toBe(254);
-      expect(new TextDecoder('utf-8', { fatal: true }).decode(new Uint8Array(bytes.slice(2, 2 + bytes[1]))))
-        .toBe('ü'.repeat(127));
-    });
-  });
   it('puts the code minted on open into the connect payload and shows it grouped', async () => {
     const buildConnectUrl = spyOn(
-      ConnectionPanelComponent.prototype as unknown as { buildConnectUrl: (...args: unknown[]) => string },
+      ConnectQrComponent.prototype as unknown as { buildConnectUrl: (...args: unknown[]) => string },
       'buildConnectUrl'
     ).and.callThrough();
     const rotationsBefore = api.rotatePairingCode.calls.count();
@@ -334,7 +262,7 @@ describe('ConnectionPanelComponent', () => {
 
     expect(api.rotatePairingCode.calls.count()).toBe(rotationsBefore + 1);
     expect(buildConnectUrl.calls.mostRecent().args[1]).toBe('482915');
-    expect(element.querySelector('.cp-pairing-code')?.textContent?.trim()).toBe('482 915');
+    expect(element.querySelector('.cq-pairing-code')?.textContent?.trim()).toBe('482 915');
     expect(element.textContent).toContain('Expires in');
   });
 
@@ -346,8 +274,7 @@ describe('ConnectionPanelComponent', () => {
 
     for (const open of [true, false, true]) {
       panel.componentRef.setInput('isOpen', open);
-      panel.detectChanges();
-      await panel.whenStable();
+      await settle(panel);
     }
 
     expect(api.rotatePairingCode.calls.count()).toBe(before + 2);
@@ -368,16 +295,36 @@ describe('ConnectionPanelComponent', () => {
     panel.destroy();
   });
 
+  it('stops asking the host for the pairing code once it is closed', async () => {
+    jasmine.clock().install();
+    try {
+      const panel = TestBed.createComponent(ConnectionPanelComponent);
+      panel.componentRef.setInput('isOpen', true);
+      panel.detectChanges();
+      await settle(panel);
+      panel.componentRef.setInput('isOpen', false);
+      await settle(panel);
+      const polls = api.getPairingCode.calls.count();
+
+      jasmine.clock().tick(30_000);
+      await settle(panel);
+
+      expect(api.getPairingCode.calls.count()).toBe(polls);
+    } finally {
+      jasmine.clock().uninstall();
+    }
+  });
+
   it('hides the code and keeps an empty token when the host refuses to hand one out', async () => {
     api.rotatePairingCode.and.rejectWith(new Error('403'));
     const buildConnectUrl = spyOn(
-      ConnectionPanelComponent.prototype as unknown as { buildConnectUrl: (...args: unknown[]) => string },
+      ConnectQrComponent.prototype as unknown as { buildConnectUrl: (...args: unknown[]) => string },
       'buildConnectUrl'
     ).and.callThrough();
 
     const element = await renderPanel();
 
-    expect(element.querySelector('.cp-pairing-code')).toBeNull();
+    expect(element.querySelector('.cq-pairing-code')).toBeNull();
     expect(element.querySelector('img[alt="Connect QR code"]')).not.toBeNull();
     expect(buildConnectUrl.calls.mostRecent().args[1]).toBe('');
   });
@@ -394,7 +341,7 @@ describe('ConnectionPanelComponent', () => {
       jasmine.clock().tick(5_000);
       await settle(panel);
 
-      const text = (panel.nativeElement as HTMLElement).querySelector('.cp-pairing-code')?.textContent?.trim();
+      const text = (panel.nativeElement as HTMLElement).querySelector('.cq-pairing-code')?.textContent?.trim();
       expect(text).toBe('107 233');
     } finally {
       jasmine.clock().uninstall();

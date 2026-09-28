@@ -61,6 +61,7 @@ export function layoutStackChildren(
   gap: number,
   horizontal: boolean,
   registry: UiComponentRegistry,
+  natural = false,
 ): UiComponentStackChild[] {
   const inner = (outer: number | null) => (outer === null ? null : Math.max(0, outer - 2 * padding));
   const contentWidth = inner(box.width);
@@ -72,7 +73,7 @@ export function layoutStackChildren(
   const children = node.children ?? [];
   const specs = children.map(child => {
     const mainSize = resolveLength(nodeLength(child, UiComponentProperties.MainSize), basis, crossTotal);
-    const fill = mainSize === undefined && nodeBoolean(child, UiComponentProperties.Fill) === true;
+    const fill = !natural && mainSize === undefined && nodeBoolean(child, UiComponentProperties.Fill) === true;
     const intrinsic = mainSize === undefined && !fill
       ? intrinsicMainPx(child, m, registry)
       : 0;

@@ -1,0 +1,148 @@
+using System.Text.Json;
+using MacroDeckHost.Application.Twitch.Chat;
+
+namespace MacroDeckHost.Integrations.Twitch;
+
+internal static class TwitchChatMessageParser
+{
+	public const string MessageType = "channel.chat.message";
+	public const string MessageDeleteType = "channel.chat.message_delete";
+	public const string ClearType = "channel.chat.clear";
+	public const string ClearUserMessagesType = "channel.chat.clear_user_messages";
+
+	public static TwitchChatEvent? ToChatEvent(
+		string accountId,
+		string? subscriptionType,
+		JsonElement payload,
+		TwitchChatBadgeMap badges)
+		=> subscriptionType switch
+		{
+			MessageType => Parse(payload, badges) is { } message
+				? new TwitchChatMessageReceived(accountId, message)
+				: null,
+			MessageDeleteType => ReadString(payload, "message_id") is { Length: > 0 } messageId
+				? new TwitchChatMessageDeleted(accountId, messageId)
+				: null,
+			ClearType => new TwitchChatCleared(accountId),
+			ClearUserMessagesType => ReadString(payload, "target_user_id") is { Length: > 0 } userId
+				? new TwitchChatUserCleared(accountId, userId)
+				: null,
+			_ => null
+		};
+
+	public static TwitchChatMessage? Parse(JsonElement payload, TwitchChatBadgeMap badges)
+	{
+		if (payload.ValueKind is not JsonValueKind.Object ||
+			ReadString(payload, "message_id") is not { Length: > 0 } messageId ||
+			ReadString(payload, "chatter_user_id") is not { Length: > 0 } chatterId)
+		{
+			return null;
+		}
+
+		var login = ReadString(payload, "chatter_user_login") ?? string.Empty;
+		var name = ReadString(payload, "chatter_user_name") is { Length: > 0 } displayName ? displayName : login;
+
+		return new TwitchChatMessage(messageId,
+			chatterId,
+			login,
+			name,
+			TwitchChatStyle.NormalizeColor(ReadString(payload, "color"), chatterId),
+			ReadBadges(payload, badges),
+			ReadFragments(payload));
+	}
+
+	private static List<TwitchChatBadge> ReadBadges(JsonElement payload, TwitchChatBadgeMap badges)
+	{
+		var result = new List<TwitchChatBadge>();
+
+		if (!payload.TryGetProperty("badges", out var list) || list.ValueKind is not JsonValueKind.Array)
+		{
+			return result;
+		}
+
+		foreach (var badge in list.EnumerateArray())
+		{
+			if (ReadString(badge, "set_id") is { Length: > 0 } setId && ReadString(badge, "id") is { Length: > 0 } id)
+			{
+				result.Add(new TwitchChatBadge(setId, id, badges.Find(setId, id)));
+			}
+		}
+
+		return result;
+	}
+
+	private static List<TwitchChatFragment> ReadFragments(JsonElement payload)
+	{
+		var fragments = new List<TwitchChatFragment>();
+
+		if (!payload.TryGetProperty("message", out var message) || message.ValueKind is not JsonValueKind.Object)
+		{
+			return fragments;
+		}
+
+		if (message.TryGetProperty("fragments", out var list) && list.ValueKind is JsonValueKind.Array)
+		{
+			foreach (var fragment in list.EnumerateArray())
+			{
+				if (ReadFragment(fragment) is { } parsed)
+				{
+					fragments.Add(parsed);
+				}
+			}
+		}
+
+		if (fragments.Count == 0 && ReadString(message, "text") is { Length: > 0 } text)
+		{
+			fragments.Add(new TwitchChatFragment(TwitchChatFragmentKind.Text, text));
+		}
+
+		return fragments;
+	}
+
+	private static TwitchChatFragment? ReadFragment(JsonElement fragment)
+	{
+		if (fragment.ValueKind is not JsonValueKind.Object || ReadString(fragment, "text") is not { Length: > 0 } text)
+		{
+			return null;
+		}
+
+		return ReadString(fragment, "type") switch
+		{
+			"emote" when fragment.TryGetProperty("emote", out var emote) &&
+				ReadString(emote, "id") is { Length: > 0 } emoteId
+				=> new TwitchChatFragment(TwitchChatFragmentKind.Emote, text, emoteId),
+			"mention" => new TwitchChatFragment(TwitchChatFragmentKind.Mention, text),
+			"cheermote" => new TwitchChatFragment(TwitchChatFragmentKind.Cheermote, text),
+			_ => new TwitchChatFragment(TwitchChatFragmentKind.Text, text)
+		};
+	}
+
+	private static string? ReadString(JsonElement element, string property)
+		=> element.ValueKind is JsonValueKind.Object &&
+			element.TryGetProperty(property, out var value) &&
+			value.ValueKind is JsonValueKind.String
+				? value.GetString()
+				: null;
+}
+
+internal sealed class TwitchChatBadgeMap
+{
+	public static TwitchChatBadgeMap Empty { get; } = new([], []);
+
+	private readonly Dictionary<(string SetId, string Id), string> _urls;
+
+	// Channel badges win over global ones with the same set and version, as they do on Twitch.
+	public TwitchChatBadgeMap(
+		IReadOnlyList<Protocol.TwitchChatBadgeImage> global,
+		IReadOnlyList<Protocol.TwitchChatBadgeImage> channel)
+	{
+		_urls = new Dictionary<(string, string), string>();
+
+		foreach (var badge in global.Concat(channel))
+		{
+			_urls[(badge.SetId, badge.Id)] = badge.ImageUrl;
+		}
+	}
+
+	public string? Find(string setId, string id) => _urls.GetValueOrDefault((setId, id));
+}

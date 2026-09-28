@@ -136,6 +136,9 @@
   <data name="ActionBuilder.EventTrigger.ExtraCondition" xml:space="preserve">
     <value>Dodatkowy warunek</value>
   </data>
+  <data name="ActionBuilder.EventTrigger.NameLabel" xml:space="preserve">
+    <value>Nazwa</value>
+  </data>
   <data name="ActionBuilder.EventTrigger.OnlyRunWhen" xml:space="preserve">
     <value>Uruchom tylko, gdy</value>
   </data>
@@ -2779,6 +2782,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.Profile.DeleteFailed" xml:space="preserve">
     <value>Nie udało się usunąć profilu</value>
   </data>
+  <data name="Errors.Profile.DuplicateFailed" xml:space="preserve">
+    <value>Nie udało się zduplikować profilu</value>
+  </data>
   <data name="Errors.Profile.LoadFailed" xml:space="preserve">
     <value>Nie udało się wczytać profili</value>
   </data>
@@ -2796,6 +2802,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Errors.Profiles.VirtualCannotBeEdited" xml:space="preserve">
     <value>Nie można edytować profili wirtualnych</value>
+  </data>
+  <data name="Errors.Profiles.VirtualCannotBeDuplicated" xml:space="preserve">
+    <value>Nie można duplikować profili wirtualnych</value>
   </data>
   <data name="Errors.Script.CreateFailed" xml:space="preserve">
     <value>Nie udało się utworzyć skryptu</value>
@@ -2914,6 +2923,21 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Errors.Variables.InvalidFilePath" xml:space="preserve">
     <value>Wprowadź pełną ścieżkę do pliku</value>
+  </data>
+  <data name="Errors.Variables.OnlyGlobalCanBeShared" xml:space="preserve">
+    <value>Udostępniać można tylko zmienne globalne.</value>
+  </data>
+  <data name="Errors.Variables.ImportedCannotBeShared" xml:space="preserve">
+    <value>Zmiennej zaimportowanej z innego Macro Decka nie można udostępnić.</value>
+  </data>
+  <data name="Errors.Variables.SharingNotSaved" xml:space="preserve">
+    <value>Nie udało się zapisać ustawienia udostępniania.</value>
+  </data>
+  <data name="Errors.Variables.NotShared" xml:space="preserve">
+    <value>Ta zmienna nie jest udostępniona.</value>
+  </data>
+  <data name="Errors.Variables.ValueDoesNotFitType" xml:space="preserve">
+    <value>Wartość nie pasuje do typu zmiennej.</value>
   </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>Dane widżetu muszą być obiektem JSON.</value>
@@ -4283,6 +4307,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Delegation.Config.UsernameRequired" xml:space="preserve">
     <value>Wprowadź nazwę użytkownika używaną do logowania na drugim Macro Deck.</value>
   </data>
+  <data name="Integrations.Delegation.Config.ImportSharedVariablesLabel" xml:space="preserve">
+    <value>Importuj udostępnione zmienne</value>
+  </data>
+  <data name="Integrations.Delegation.Config.ImportSharedVariablesDescription" xml:space="preserve">
+    <value>Udostępnia tutaj zmienne udostępnione na drugim Macro Decku, nazwane według jego komputera, na przykład otherpc_obs_streaming.</value>
+  </data>
   <data name="Integrations.Delegation.Errors.Ambiguous" xml:space="preserve">
     <value>Wybierz, który Macro Deck ma uruchomić skrypt.</value>
   </data>
@@ -4291,6 +4321,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Delegation.Errors.CouldNotBeReached" xml:space="preserve">
     <value>Nie udało się połączyć z {label}.</value>
+  </data>
+  <data name="Integrations.Delegation.Errors.RemoteLocked" xml:space="preserve">
+    <value>{label} jest zablokowany i nie przyjął zmiany.</value>
+  </data>
+  <data name="Integrations.Delegation.Errors.RemoteRejectedChange" xml:space="preserve">
+    <value>{label} nie przyjął zmiany.</value>
   </data>
   <data name="Integrations.Delegation.Errors.DelegateCycle" xml:space="preserve">
     <value>Uruchomienie tego utworzyłoby cykl delegacji przez {label}.</value>
@@ -4369,6 +4405,17 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Delegation.Issues.UnreachableTitle" xml:space="preserve">
     <value>{label} jest niedostępny</value>
+  </data>
+  <data name="Integrations.Delegation.Issues.SharedImportSkippedTitle.One" xml:space="preserve">
+    <value>Nie można dodać udostępnionej zmiennej z {label} ({count})</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.Delegation.Issues.SharedImportSkippedTitle.Other" xml:space="preserve">
+    <value>Nie można dodać udostępnionych zmiennych z {label} (liczba: {count})</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.Delegation.Issues.SharedImportSkippedDescription" xml:space="preserve">
+    <value>Nazwa jest już używana przez inną zmienną, jest za długa lub udostępnionych zmiennych jest za dużo: {names}</value>
   </data>
   <data name="Integrations.Delegation.Name" xml:space="preserve">
     <value>Macro Deck Delegate</value>
@@ -7443,9 +7490,6 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Włączone: {enabled} z {total}</value>
     <comment>[enabled:int] [total:int]</comment>
   </data>
-  <data name="Integrations.Page.ExternalTag" xml:space="preserve">
-    <value>Zewnętrzna</value>
-  </data>
   <data name="Integrations.Page.FallbackIntegrationName" xml:space="preserve">
     <value>ta integracja</value>
   </data>
@@ -8828,7 +8872,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>macOS nie udostępnia użytkownikowi funkcji hibernacji.</value>
   </data>
   <data name="Integrations.System.Errors.Power.MacOsNoLockMechanism" xml:space="preserve">
-    <value>Nie znaleziono mechanizmu blokady (CGSession) w tym systemie.</value>
+    <value>Blokada ekranu nie jest dostępna w tej wersji systemu macOS.</value>
   </data>
   <data name="Integrations.System.Errors.Power.MacOsRestartDenied" xml:space="preserve">
     <value>Odmówiono ponownego uruchomienia. Przyznaj Macro Deck uprawnienia w Ustawieniach systemowych &gt; Prywatność i ochrona &gt; Automatyzacja &gt; System Events.</value>
@@ -9324,6 +9368,48 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Twitch.Actions.UnbanUser.Name" xml:space="preserve">
     <value>Odbanuj użytkownika</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.AccountDescription" xml:space="preserve">
+    <value>Czat którego kanału ma zostać wyświetlony.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Description" xml:space="preserve">
+    <value>Wyświetla czat kanału na żywo, z emotkami i odznakami.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Empty" xml:space="preserve">
+    <value>Oczekiwanie na wiadomości na czacie</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.FirstAccount" xml:space="preserve">
+    <value>Pierwsze połączone konto</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Name" xml:space="preserve">
+    <value>Czat Twitch</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.NameSeparator" xml:space="preserve">
+    <value>: </value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Title" xml:space="preserve">
+    <value>Czat: {account}</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Offline" xml:space="preserve">
+    <value>Brak połączenia z Twitchem</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleChatter1" xml:space="preserve">
+    <value>PixelPanda</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleChatter2" xml:space="preserve">
+    <value>NightOwl</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleChatter3" xml:space="preserve">
+    <value>CozyGamer</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleMessage1" xml:space="preserve">
+    <value>Cześć wszystkim!</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleMessage2" xml:space="preserve">
+    <value>Świetna akcja!</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleMessage3" xml:space="preserve">
+    <value>Do zobaczenia na następnym streamie</value>
   </data>
   <data name="Integrations.Twitch.Config.AccountResolutionFailed" xml:space="preserve">
     <value>Twitch wydał token, ale nie podał, do którego konta należy. Kliknij Dalej, aby spróbować ponownie.</value>
@@ -16088,6 +16174,18 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Liczba zmiennych: {count}</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Variables.Manager.ShareAction" xml:space="preserve">
+    <value>Udostępnij innym Macro Deckom</value>
+  </data>
+  <data name="Variables.Manager.StopSharingAction" xml:space="preserve">
+    <value>Zatrzymaj udostępnianie</value>
+  </data>
+  <data name="Variables.Manager.Shared" xml:space="preserve">
+    <value>Udostępniona</value>
+  </data>
+  <data name="Variables.Manager.SharedTooltip" xml:space="preserve">
+    <value>Inne Macro Decki połączone przez Macro Deck Delegate mogą odczytywać i zmieniać tę zmienną</value>
+  </data>
   <data name="Variables.Manager.SourceField" xml:space="preserve">
     <value>Źródło</value>
   </data>
@@ -17536,6 +17634,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Widgets.MusicPlayer.UnavailableHintWithStatus" xml:space="preserve">
     <value>{label} jest tymczasowo niedostępny ({status}) - Macro Deck wciąż próbuje ponownie.</value>
   </data>
+  <data name="Widgets.Profile.CopyName" xml:space="preserve">
+    <value>{name} (kopia)</value>
+  </data>
   <data name="Widgets.Profile.DefaultInheritedLabel" xml:space="preserve">
     <value>Domyślny</value>
   </data>
@@ -17545,14 +17646,8 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Widgets.Profile.DeleteConfirmNamed" xml:space="preserve">
     <value>Usunąć „{name}” oraz wszystkie jego foldery i widżety? Tej czynności nie można cofnąć.</value>
   </data>
-  <data name="Widgets.Profile.DeleteNamed" xml:space="preserve">
-    <value>Usuń {name}</value>
-  </data>
   <data name="Widgets.Profile.DeleteProfileHeading" xml:space="preserve">
     <value>Usuń profil</value>
-  </data>
-  <data name="Widgets.Profile.EditNamed" xml:space="preserve">
-    <value>Edytuj {name}</value>
   </data>
   <data name="Widgets.Profile.EditProfileHeading" xml:space="preserve">
     <value>Edytuj profil</value>
@@ -17565,9 +17660,6 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Widgets.Profile.ExportHeading" xml:space="preserve">
     <value>Eksportuj profil</value>
-  </data>
-  <data name="Widgets.Profile.ExportNamed" xml:space="preserve">
-    <value>Eksportuj {name}</value>
   </data>
   <data name="Widgets.Profile.ImportFileTitle" xml:space="preserve">
     <value>Importuj profil z pliku .macroDeckProfile</value>
@@ -17587,6 +17679,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Widgets.Profile.NewProfile" xml:space="preserve">
     <value>Nowy profil</value>
   </data>
+  <data name="Widgets.Profile.NoMatches" xml:space="preserve">
+    <value>Brak profili pasujących do wyszukiwania</value>
+  </data>
   <data name="Widgets.Profile.NoProfile" xml:space="preserve">
     <value>Brak profilu</value>
   </data>
@@ -17595,6 +17690,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Widgets.Profile.ProfileNamePlaceholder" xml:space="preserve">
     <value>Nazwa profilu</value>
+  </data>
+  <data name="Widgets.Profile.SearchPlaceholder" xml:space="preserve">
+    <value>Szukaj profili</value>
   </data>
   <data name="Widgets.Profile.UpdateFailed" xml:space="preserve">
     <value>Nie udało się zaktualizować profilu</value>
@@ -18007,10 +18105,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Aplikacja natywna</value>
   </data>
   <data name="Onboarding.Connect.NativeAppDescription" xml:space="preserve">
-    <value>Aplikacja natywna nie jest jeszcze dostępna. Na razie użyj klienta webowego.</value>
-  </data>
-  <data name="Onboarding.Connect.NativeAppBadge" xml:space="preserve">
-    <value>Wkrótce</value>
+    <value>Kod można zeskanować aparatem telefonu lub tabletu. Otworzy App Store lub Google Play, a jeśli aplikacja jest już zainstalowana, od razu nawiąże połączenie.</value>
   </data>
   <data name="Onboarding.Connect.Open" xml:space="preserve">
     <value>Otwórz</value>
@@ -18164,6 +18259,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Companion.Errors.NotConnected" xml:space="preserve">
     <value>Urządzenie Companion nie jest połączone.</value>
+  </data>
+  <data name="Integrations.Companion.Events.DeviceReadyName" xml:space="preserve">
+    <value>Urządzenie gotowe</value>
+  </data>
+  <data name="Integrations.Companion.Events.DeviceReadyDescription" xml:space="preserve">
+    <value>Aplikacja Companion połączyła się i może teraz wykonywać akcje Companion.</value>
   </data>
   <data name="Integrations.Companion.Variables.InFocus" xml:space="preserve">
     <value>Na pierwszym planie</value>

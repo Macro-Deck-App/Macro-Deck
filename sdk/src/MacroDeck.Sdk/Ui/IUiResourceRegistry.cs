@@ -66,4 +66,25 @@ public interface IUiResourceRegistry
 	Task<UiResource> GetPluginIconAsync(string key, string name, CancellationToken cancellationToken = default)
 		=> Task.FromException<UiResource>(new UiResourceException(UiResourceErrorCode.Unsupported,
 			"This context cannot resolve bundled plugin icons."));
+
+	/// <summary>
+	/// Returns the handle of one icon from any icon pack installed in Macro Deck, named by the icon's id, to
+	/// show through an image.
+	/// </summary>
+	/// <remarks>
+	/// The id is the one Macro Deck shows for the icon (Copy icon id on the icon packs page), and the
+	/// reference an icon input returns when its type is <c>icon-pack</c>. Every installed pack is searched:
+	/// the user's own, imported, Store and plugin-bundled packs. The handle points into Macro Deck's icon
+	/// store: nothing is uploaded, nothing is held in memory for the session and nothing counts against the
+	/// quota described above. It stays valid across Macro Deck restarts. Its
+	/// <see cref="UiResource.ContentHash" /> changes when the icon is replaced, so ask again when building a
+	/// tree rather than keeping a handle for good.
+	/// </remarks>
+	/// <exception cref="UiResourceException"><see cref="UiResourceErrorCode.IconNotFound" /> when no installed
+	/// pack holds an icon with that id; <see cref="UiResourceErrorCode.Unsupported" /> from a Macro Deck, or a
+	/// context, that cannot look icons up by id; <see cref="UiResourceErrorCode.Failed" /> when the icon cannot
+	/// be served within the size one UI resource may have, or the call could not complete.</exception>
+	Task<UiResource> GetIconAsync(Guid iconId, CancellationToken cancellationToken = default)
+		=> Task.FromException<UiResource>(new UiResourceException(UiResourceErrorCode.Unsupported,
+			"This context cannot look icons up by id."));
 }

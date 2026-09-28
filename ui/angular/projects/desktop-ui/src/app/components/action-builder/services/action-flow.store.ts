@@ -531,6 +531,20 @@ export class ActionFlowStore {
     }
   }
 
+  renameEventFlow(triggerId: string, name: string): void {
+    const current = this.flows().find(flow => flow.triggerId === triggerId);
+    if (!current || (current.name ?? '').trim() === name.trim()) return;
+    this.emit(
+      this.flows().map(flow => {
+        if (flow.triggerId !== triggerId) return flow;
+        if (name.trim()) return { ...flow, name: name.trim() };
+        const unnamed = { ...flow };
+        delete unnamed.name;
+        return unnamed;
+      }),
+    );
+  }
+
   updateEventBinding(triggerId: string, binding: EventTriggerBinding): void {
     this.emit(
       this.flows().map(flow => (flow.triggerId === triggerId ? { ...flow, event: binding } : flow)),

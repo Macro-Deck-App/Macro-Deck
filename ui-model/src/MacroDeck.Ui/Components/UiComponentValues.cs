@@ -124,6 +124,24 @@ public static class UiComponentClips
 	public static readonly IReadOnlyList<string> WellKnown = [Bounds, Circle, Capsule];
 }
 
+/// <summary>The values of a stack's <see cref="UiComponentProperties.Overflow" />.</summary>
+public static class UiComponentOverflows
+{
+	/// <summary>Children share the shortfall and shrink to fit. What absence means.</summary>
+	public const string Shrink = "shrink";
+
+	/// <summary>
+	/// Children keep their natural main size, a child's fill is ignored, the
+	/// content sits against the end edge whatever the stack's justify says, and whatever does not fit is
+	/// clipped at the start edge: a vertical stack keeps its last children and loses its first ones.
+	/// </summary>
+	public const string ClipStart = "clip-start";
+
+	/// <summary>The overflow behaviours this profile ships. A reader shrinks for one it does not know, rather
+	/// than failing the tree.</summary>
+	public static readonly IReadOnlyList<string> WellKnown = [Shrink, ClipStart];
+}
+
 /// <summary>The line styles of a <see cref="UiComponentModifiers.BorderLine" />.</summary>
 public static class UiComponentBorderLines
 {

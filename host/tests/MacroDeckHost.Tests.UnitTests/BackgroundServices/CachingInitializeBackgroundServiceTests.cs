@@ -191,5 +191,8 @@ internal sealed class CachingInitializeBackgroundServiceTests
 			=> throw new NotSupportedException();
 
 		public Task<Result<ProfileError>> Delete(Guid id) => throw new NotSupportedException();
+
+		public Task<Result<ProfileEntity, ProfileError>> Duplicate(Guid id, string? name = null)
+			=> throw new NotSupportedException();
 	}
 }

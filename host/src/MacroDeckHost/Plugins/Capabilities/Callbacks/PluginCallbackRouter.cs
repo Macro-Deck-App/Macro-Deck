@@ -1452,20 +1452,25 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 					arguments.Name,
 					cancellationToken);
 
-				return resource.Status switch
+				return IconResourceResult(resource, ProtocolErrorCodes.PluginIconNotFound);
+			}
+
+			case HostOperations.IconPacks.GetIcon:
+			{
+				if (_pluginIconResources is null)
 				{
-					PluginIconResourceStatus.Found => HostCallbackResult.Ok(new UiResourceHandleDto
-					{
-						ResourceId = resource.Handle!.ResourceId,
-						ContentHash = resource.Handle.ContentHash!,
-						MediaType = resource.Handle.MediaType!,
-						ByteLength = (int)resource.Handle.ByteLength!,
-					}),
-					PluginIconResourceStatus.TooLarge => HostCallbackResult.Fail(ProtocolErrorCodes.AssetTooLarge,
-						$"No rendition of this icon fits the {ProtocolLimits.MaxUiResourceBytes} byte UI resource limit."),
-					_ => HostCallbackResult.Fail(ProtocolErrorCodes.PluginIconNotFound,
-						ProtocolErrorMessages.For(ProtocolErrorCodes.PluginIconNotFound))
-				};
+					return UnknownOperation(payload);
+				}
+
+				var arguments = Deserialize<GetIconArguments>(payload.Arguments);
+				if (arguments is null)
+				{
+					return MissingArguments();
+				}
+
+				var resource = await _pluginIconResources.GetHandleAsync(arguments.IconId, cancellationToken);
+
+				return IconResourceResult(resource, ProtocolErrorCodes.IconNotFound);
 			}
 
 			default:
@@ -1884,6 +1889,21 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	// it does not provide, and no real client ever produces this shape.
 	private static string? ClientOrigin(string? originClientId)
 		=> DeviceOrigin.TryParse(originClientId, out _) ? null : originClientId;
+
+	private static HostCallbackResult IconResourceResult(PluginIconResourceResult resource, string notFoundCode)
+		=> resource.Status switch
+		{
+			PluginIconResourceStatus.Found => HostCallbackResult.Ok(new UiResourceHandleDto
+			{
+				ResourceId = resource.Handle!.ResourceId,
+				ContentHash = resource.Handle.ContentHash!,
+				MediaType = resource.Handle.MediaType!,
+				ByteLength = (int)resource.Handle.ByteLength!,
+			}),
+			PluginIconResourceStatus.TooLarge => HostCallbackResult.Fail(ProtocolErrorCodes.AssetTooLarge,
+				$"No rendition of this icon fits the {ProtocolLimits.MaxUiResourceBytes} byte UI resource limit."),
+			_ => HostCallbackResult.Fail(notFoundCode, ProtocolErrorMessages.For(notFoundCode))
+		};
 
 	private static HostCallbackResult MissingArguments()
 		=> HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload, "This operation requires arguments.");

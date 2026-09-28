@@ -39,7 +39,12 @@ public class FolderServiceDeviceLockTests
 			new WidgetSecretScrubber(secrets),
 			new NullWidgetVariableCloner(),
 			TestFolderViewProviders.Registry());
-		_profileService = new ProfileService(_cache, _folderCache, _devices, new RecordingMediator());
+		_profileService = new ProfileService(_cache,
+			_folderCache,
+			_devices,
+			new RecordingMediator(),
+			new WidgetSecretCloner(new FakeSecretService()),
+			new NullWidgetVariableCloner());
 
 		var created = await _profileService.Create("Deck Profile", defaultRows: 4, defaultColumns: 4);
 		_profileId = created.Data!.Id;

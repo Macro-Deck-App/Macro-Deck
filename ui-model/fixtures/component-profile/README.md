@@ -31,6 +31,8 @@ Three artefacts, and the third is the one that does the work:
 | `conformance-modifier-layout.json` | what a reader writes for each of them: backgrounds, corners, the border drawn inside the edge, the accessibility attributes, the dim of a disabled region, and the wrapper's frame, padding, clip and mask resolved |
 | `conformance-responsive-tree.json` | the wire form of `ui.responsive` - the default first, four conditional layouts in order, the automatic fallback copy of the default, and a nested responsive layout inside the default |
 | `conformance-responsive-layout.json` | which layout a reader draws for each tile box, including boxes a unit in the last place off a whole cell, an unknown box and an unmeasured one, and the node a tile-level press is claimed by |
+| `conformance-chat-tree.json` | the wire form of a chat feed - `ui.text` `spans` mixing styled text, an image with alt text and a decorative one, and a `ui.stack` whose `overflow` is `clip-start`, asking for component version 2 with a fallback |
+| `conformance-chat-layout.json` | the clipping stack's box, its children at their own size, the runs a reader draws for the spans, the shrinking stacks beside it, and what a reader without `ui.stack` version 2 draws instead |
 | this README | what the fixtures deliberately contain, so they are not trimmed by accident |
 
 One tree per widget shape rather than one growing tree: the weather tree's proportions are themselves
@@ -302,3 +304,23 @@ wrong.
 - a toggle that is on and a segmented control with a selection, so the painted state is checked, not only
   the track;
 - a full-turn dial (`0` to `360`), the case the seam rule exists for.
+
+## What the chat tree deliberately contains
+
+- a `ui.text` carrying `spans` **and** a `text` that is their plain equivalent - a reader without `spans`
+  draws the text, one with them draws only the spans;
+- a text span with a literal `color` and a `weight`, one with neither, and one whose `color` is `red` -
+  not `#rrggbb`, so a reader ignores it and the run takes the node's own colour;
+- an image span with `alt` and a decorative one with none - the first draws its alt text while the image
+  is unavailable, the second draws nothing;
+- a `ui.stack` with `overflow: "clip-start"` holding a `fill` child, a `mainSize` child and a wrapping text:
+  the fill child keeps its natural size instead of taking the rest of the box, the `mainSize` child keeps
+  its declared size, and the content sits at the end even though the stack says `justify: "start"`;
+- that stack asking for `requiredComponentVersion: 2` with a shrinking fallback of the newest message in at
+  most two lines - the layout file's `withoutStackVersion2` entry states that a reader whose `ui.stack` is
+  version 1 draws that fallback and never the clipping stack;
+- an explicit `overflow: "shrink"` and an unknown `overflow: "wrap"` beside it, both laid out exactly like a
+  stack without the key.
+
+Clipping itself is not a number the layout table can state: the table pins the boxes and the end
+alignment, and the desktop client's layout spec (`widget-stack-clip-start.spec.ts`) checks the pixels.

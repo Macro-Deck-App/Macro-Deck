@@ -5,6 +5,7 @@ using MacroDeckHost.Integrations.Scripts;
 using MacroDeckHost.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.ConfigFlow;
+using MacroDeck.Sdk.Variables;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.Delegation;
@@ -14,6 +15,8 @@ internal sealed class DelegateRemote : IDisposable
 	private static readonly TimeSpan InitialProbeDelay = TimeSpan.FromSeconds(5);
 	private static readonly TimeSpan MaxProbeDelay = TimeSpan.FromMinutes(5);
 	private static readonly TimeSpan ScriptRefreshInterval = TimeSpan.FromSeconds(60);
+	internal static readonly TimeSpan SharedVariableInterval = TimeSpan.FromSeconds(2);
+	internal static readonly TimeSpan SharingUnsupportedRecheck = TimeSpan.FromMinutes(5);
 	private const int MaxConcurrentRuns = 4;
 
 	private readonly IDelegateClient _client;
@@ -22,11 +25,17 @@ internal sealed class DelegateRemote : IDisposable
 	private readonly ILogger _logger;
 	private readonly DelegateSession _session;
 	private readonly SemaphoreSlim _inFlight = new(MaxConcurrentRuns, MaxConcurrentRuns);
+	private readonly SemaphoreSlim _configWrite = new(1, 1);
 
 	private volatile IReadOnlyDictionary<string, DelegateScriptSummary> _scripts;
 	private DateTimeOffset _lastScriptRefresh = DateTimeOffset.MinValue;
 	private CancellationTokenSource? _loopCts;
 	private Task? _loopTask;
+	private Task? _sharedLoopTask;
+
+	private volatile IReadOnlyDictionary<string, DelegateSharedVariable> _shared;
+	private volatile bool _sharedFresh;
+	private DateTimeOffset _sharingUnsupportedUntil = DateTimeOffset.MinValue;
 
 	public DelegateRemote(
 		DelegateInstance instance,
@@ -35,7 +44,9 @@ internal sealed class DelegateRemote : IDisposable
 		IIntegrationConfig? config,
 		TimeProvider time,
 		ILogger logger,
-		IReadOnlyDictionary<string, DelegateScriptSummary>? initialScripts = null)
+		IReadOnlyDictionary<string, DelegateScriptSummary>? initialScripts = null,
+		bool importSharedVariables = false,
+		IReadOnlyList<DelegateSharedVariable>? knownSharedVariables = null)
 	{
 		Instance = instance;
 		_client = client;
@@ -44,11 +55,21 @@ internal sealed class DelegateRemote : IDisposable
 		_logger = logger;
 		_session = new DelegateSession(client, instance.BaseUrl, instance.Username, password, time);
 		_scripts = initialScripts ?? new Dictionary<string, DelegateScriptSummary>(StringComparer.Ordinal);
+		ImportsSharedVariables = importSharedVariables;
+		_shared = importSharedVariables
+			? (knownSharedVariables ?? []).ToDictionary(v => v.Name, StringComparer.Ordinal)
+			: new Dictionary<string, DelegateSharedVariable>(StringComparer.Ordinal);
 
 		SelfDelegationDetected = DelegateEndpoint.IsThisMachine(instance.BaseUrl, instance.MachineName);
 	}
 
 	public DelegateInstance Instance { get; }
+
+	public bool ImportsSharedVariables { get; }
+
+	public IReadOnlyCollection<DelegateSharedVariable> SharedVariables => _shared.Values.ToList();
+
+	public event Action<DelegateRemote>? SharedVariablesChanged;
 
 	public bool IsReachable { get; private set; }
 
@@ -73,6 +94,10 @@ internal sealed class DelegateRemote : IDisposable
 	{
 		_loopCts = new CancellationTokenSource();
 		_loopTask = RunProbeLoopAsync(_loopCts.Token);
+		if (ImportsSharedVariables)
+		{
+			_sharedLoopTask = RunSharedVariableLoopAsync(_loopCts.Token);
+		}
 	}
 
 	public async Task StopAsync()
@@ -85,10 +110,7 @@ internal sealed class DelegateRemote : IDisposable
 		await _loopCts.CancelAsync();
 		try
 		{
-			if (_loopTask is not null)
-			{
-				await _loopTask;
-			}
+			await Task.WhenAll(new[] { _loopTask, _sharedLoopTask }.OfType<Task>());
 		}
 		catch (OperationCanceledException)
 		{
@@ -98,6 +120,7 @@ internal sealed class DelegateRemote : IDisposable
 			_loopCts.Dispose();
 			_loopCts = null;
 			_loopTask = null;
+			_sharedLoopTask = null;
 		}
 	}
 
@@ -108,6 +131,7 @@ internal sealed class DelegateRemote : IDisposable
 		_loopCts = null;
 		_client.Dispose();
 		_inFlight.Dispose();
+		_configWrite.Dispose();
 		_session.Dispose();
 	}
 
@@ -239,6 +263,213 @@ internal sealed class DelegateRemote : IDisposable
 		return ActionResult.Success();
 	}
 
+	public DelegateSharedVariable? ReadShared(string name)
+		=> ImportsSharedVariables &&
+			IsReachable &&
+			_sharedFresh &&
+			_shared.TryGetValue(name, out var variable) &&
+			variable is { Present: true, Available: true }
+				? variable
+				: null;
+
+	public async Task<VariableWriteResult> WriteSharedAsync(string name,
+		string? value,
+		CancellationToken cancellationToken)
+	{
+		if (!ImportsSharedVariables || !_shared.ContainsKey(name))
+		{
+			return VariableWriteResult.NotFound();
+		}
+
+		if (!IsReachable)
+		{
+			return VariableWriteResult.Unavailable(
+				AppStrings.Integrations.Delegation.Errors.CouldNotBeReached(label: Instance.Label));
+		}
+
+		DelegateWriteResult result;
+		try
+		{
+			result = await WithTokenAsync(
+				token => _client.SetSharedVariableAsync(Instance.BaseUrl, token, name, value, cancellationToken),
+				cancellationToken);
+		}
+		catch (OperationCanceledException)
+		{
+			throw;
+		}
+		catch (Exception ex)
+		{
+			_logger.Debug(ex, "Delegate shared variable write failed for {Instance}", Instance.Label);
+			return VariableWriteResult.Unavailable(
+				AppStrings.Integrations.Delegation.Errors.CouldNotBeReached(label: Instance.Label));
+		}
+
+		if (result.Success)
+		{
+			return VariableWriteResult.Applied();
+		}
+
+		_logger.Debug("{Instance} refused a shared variable write: {Code}", Instance.Label, result.ErrorCode);
+		return result.ErrorCode switch
+		{
+			"HOST_LOCKED" => VariableWriteResult.Failed(
+				AppStrings.Integrations.Delegation.Errors.RemoteLocked(label: Instance.Label)),
+			"InvalidValue" => VariableWriteResult.InvalidValue(
+				AppStrings.Integrations.Delegation.Errors.RemoteRejectedChange(label: Instance.Label)),
+			"NotWritable" => VariableWriteResult.NotWritable(
+				AppStrings.Integrations.Delegation.Errors.RemoteRejectedChange(label: Instance.Label)),
+			_ => VariableWriteResult.Failed(
+				AppStrings.Integrations.Delegation.Errors.RemoteRejectedChange(label: Instance.Label))
+		};
+	}
+
+	private async Task<T> WithTokenAsync<T>(Func<string, Task<T>> call, CancellationToken cancellationToken)
+	{
+		var token = await _session.GetTokenAsync(cancellationToken);
+		try
+		{
+			return await call(token);
+		}
+		catch (DelegateUnauthorizedException)
+		{
+			return await call(await _session.RenewAfterUnauthorizedAsync(cancellationToken));
+		}
+	}
+
+	private async Task RunSharedVariableLoopAsync(CancellationToken cancellationToken)
+	{
+		while (!cancellationToken.IsCancellationRequested)
+		{
+			if (IsReachable && _time.GetUtcNow() >= _sharingUnsupportedUntil)
+			{
+				await RefreshSharedVariablesAsync(cancellationToken);
+			}
+			else if (!IsReachable)
+			{
+				_sharedFresh = false;
+			}
+
+			try
+			{
+				await Task.Delay(SharedVariableInterval, _time, cancellationToken);
+			}
+			catch (OperationCanceledException)
+			{
+				return;
+			}
+		}
+	}
+
+	internal async Task RefreshSharedVariablesAsync(CancellationToken cancellationToken)
+	{
+		IReadOnlyList<DelegateSharedVariable> fetched;
+		try
+		{
+			fetched = await WithTokenAsync(
+				token => _client.GetSharedVariablesAsync(Instance.BaseUrl, token, cancellationToken),
+				cancellationToken);
+		}
+		catch (OperationCanceledException)
+		{
+			throw;
+		}
+		catch (DelegateSharingUnsupportedException)
+		{
+			_sharingUnsupportedUntil = _time.GetUtcNow() + SharingUnsupportedRecheck;
+			fetched = [];
+		}
+		catch (Exception ex)
+		{
+			_sharedFresh = false;
+			_logger.Debug(ex, "Delegate shared variable refresh failed for {Instance}", Instance.Label);
+			return;
+		}
+
+		var previous = _shared;
+		var next = new Dictionary<string, DelegateSharedVariable>(StringComparer.Ordinal);
+		foreach (var variable in fetched)
+		{
+			next[variable.Name] = variable;
+		}
+
+		_shared = next;
+		_sharedFresh = true;
+
+		if (SameShape(previous, next))
+		{
+			return;
+		}
+
+		try
+		{
+			await StoreAsync(DelegateConfigKeys.SharedVariables,
+				JsonSerializer.Serialize(next.Values.Select(v => v with { Value = string.Empty }), DelegateJson.Options),
+				cancellationToken);
+		}
+		catch (Exception ex) when (ex is not OperationCanceledException)
+		{
+			_logger.Debug(ex, "Delegate could not store the shared variables of {Instance}", Instance.Label);
+		}
+
+		SharedVariablesChanged?.Invoke(this);
+	}
+
+	private async Task StoreAsync(string key, string value, CancellationToken cancellationToken)
+	{
+		if (_config is null)
+		{
+			return;
+		}
+
+		await _configWrite.WaitAsync(cancellationToken);
+		try
+		{
+			await _config.SetStringAsync(Instance.EntryId, key, value, cancellationToken);
+		}
+		finally
+		{
+			_configWrite.Release();
+		}
+	}
+
+	private static bool SameShape(
+		IReadOnlyDictionary<string, DelegateSharedVariable> previous,
+		Dictionary<string, DelegateSharedVariable> next)
+		=> previous.Count == next.Count &&
+			next.All(pair => previous.TryGetValue(pair.Key, out var old) && ShapeOf(old) == ShapeOf(pair.Value));
+
+	private static DelegateSharedVariable ShapeOf(DelegateSharedVariable variable)
+		=> variable with
+		{
+			Value = string.Empty,
+			Present = false,
+			Available = false,
+			Min = null,
+			Max = null,
+			Step = null
+		};
+
+	internal static IReadOnlyList<DelegateSharedVariable> ParseSharedVariables(string? stored)
+	{
+		if (string.IsNullOrWhiteSpace(stored))
+		{
+			return [];
+		}
+
+		try
+		{
+			return JsonSerializer.Deserialize<List<DelegateSharedVariable>>(stored, DelegateJson.Options)?
+				.Where(v => !string.IsNullOrEmpty(v.Name))
+				.Select(v => v with { Present = false, Available = false })
+				.ToList() ?? [];
+		}
+		catch (JsonException)
+		{
+			return [];
+		}
+	}
+
 	private string ScriptLabel(string scriptId)
 		=> _scripts.TryGetValue(scriptId, out var summary) ? summary.Name : scriptId;
 
@@ -340,13 +571,9 @@ internal sealed class DelegateRemote : IDisposable
 			_scripts = map;
 			_lastScriptRefresh = now;
 
-			if (_config is not null)
-			{
-				await _config.SetStringAsync(Instance.EntryId,
-					DelegateConfigKeys.RemoteScripts,
-					JsonSerializer.Serialize(map, DelegateJson.Options),
-					cancellationToken);
-			}
+			await StoreAsync(DelegateConfigKeys.RemoteScripts,
+				JsonSerializer.Serialize(map, DelegateJson.Options),
+				cancellationToken);
 		}
 		catch (OperationCanceledException)
 		{

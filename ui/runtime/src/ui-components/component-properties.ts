@@ -70,6 +70,8 @@ export const UiComponentProperties = {
   Clip: 'clip',
   Mask: 'mask',
   Variants: 'variants',
+  Spans: 'spans',
+  Overflow: 'overflow',
 } as const;
 
 export const UI_COMPONENT_PROPERTIES_WELL_KNOWN: readonly string[] =

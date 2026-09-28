@@ -5,8 +5,8 @@ import { Location } from '@angular/common';
 import { ActivatedRoute, Navigation, Router } from '@angular/router';
 import { Subject, EMPTY } from 'rxjs';
 
-import { ActionParameterType, CompatibilityFinding, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationIssue, IpcIntegrationVariableCapability, InstalledPlugin, PluginCompatibilityReport, Variable } from '@macro-deck/runtime';
-import { ApiService, ToastService, VariableService } from '@shared';
+import { ActionParameterType, AppStrings, CompatibilityFinding, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationIssue, IpcIntegrationVariableCapability, InstalledPlugin, PluginCompatibilityReport, Variable } from '@macro-deck/runtime';
+import { ApiService, LocalizationService, ToastService, VariableService } from '@shared';
 import { DetailPageComponent } from '../../detail-page/detail-page.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
 import { Integration, IntegrationService } from '../../../services/integration.service';
@@ -1151,6 +1151,31 @@ describe('IntegrationDetailPageComponent', () => {
       expect(routerSpy.navigate).toHaveBeenCalledWith(['/integrations']);
     });
   });
+  describe('kind badge', () => {
+    function kindBadges(fixture: ComponentFixture<IntegrationDetailPageComponent>): string[] {
+      return Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.detail-heading .kind-badge'))
+        .map(badge => badge.textContent?.trim() ?? '');
+    }
+
+    it('marks a plugin integration as a plugin', async () => {
+      integrations.set([integration({ isInternal: false })]);
+
+      const fixture = await createFixture();
+
+      expect(kindBadges(fixture)).toEqual([TestBed.inject(LocalizationService).translateKey(AppStrings.Store.KindLabel.Plugin)]);
+      fixture.destroy();
+    });
+
+    it('shows no kind badge for a built-in integration', async () => {
+      integrations.set([integration({ isInternal: true })]);
+
+      const fixture = await createFixture();
+
+      expect(kindBadges(fixture)).toEqual([]);
+      fixture.destroy();
+    });
+  });
+
   describe('back navigation', () => {
     function backButton(fixture: ComponentFixture<IntegrationDetailPageComponent>): HTMLButtonElement {
       return fixture.nativeElement.querySelector('.dp-back') as HTMLButtonElement;

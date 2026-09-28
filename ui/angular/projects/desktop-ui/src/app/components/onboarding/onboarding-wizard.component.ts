@@ -7,6 +7,7 @@ import { OnboardingService } from '../../services/onboarding.service';
 import { ConfirmationModalComponent } from '../overlay/confirmation-modal/confirmation-modal.component';
 import { LoadingStateComponent } from '../feedback/loading-state/loading-state.component';
 import { RecoveryKeyModalComponent } from '../backup/recovery-key-modal/recovery-key-modal.component';
+import { ConnectQrComponent } from '../shell/connect-qr/connect-qr.component';
 
 type OnboardingStep = 'welcome' | 'connect' | 'recovery-key' | 'links';
 
@@ -52,6 +53,7 @@ type RecoveryKeyModalState =
     LoadingStateComponent,
     ConfirmationModalComponent,
     RecoveryKeyModalComponent,
+    ConnectQrComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './onboarding-wizard.component.html',

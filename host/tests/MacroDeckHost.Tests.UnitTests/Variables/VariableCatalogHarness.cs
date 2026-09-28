@@ -85,7 +85,8 @@ internal sealed class VariableCatalogHarness
 			NameFactory,
 			Coordinator,
 			Mediator,
-			new VariableBindingLookup(Registry, BindingStore));
+			new VariableBindingLookup(Registry, BindingStore),
+			InMemorySharedVariableStore.For(Registry));
 
 		UpdateService = new VariableCatalogUpdateBackgroundService(new StartedHostLifetime(),
 			ScopeFactory,

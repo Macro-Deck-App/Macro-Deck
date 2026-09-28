@@ -57,6 +57,10 @@ existing host and Store ingestion can read it.
   and discards the user's edits to it.
 - Development packs of a plugin that is never installed remain as ordinary packs after the session.
 - Values the plugin reads back from forms and views arrive as `icon-pack` references, not as `plugin-icon`.
+- The scoping above covers naming by key and name only. A plugin that holds an icon's GUID can also get a
+  resource handle for it through `icon-packs/get-icon`, whatever pack it lives in, since that GUID already
+  reaches plugins through forms and icon providers. The handle id is opaque and uses the same
+  `app.macro-deck.plugin-icon.<icon-guid>` form for every pack.
 - `pack.json` files written with `SourceType` `Plugin` are unreadable by a host downgraded below this change,
   like any new enum value.
 

@@ -2,6 +2,7 @@ using MacroDeck.Plugin.Packaging.Artifacts;
 using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Icons.Ownership;
 using MacroDeckHost.Application.Plugins.Installation;
+using MacroDeckHost.Application.Secrets;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Store.Installation;
 using MacroDeckHost.Application.Store.Model;
@@ -68,7 +69,9 @@ internal sealed class StoreUninstallServiceTests
 		_profileService = new ProfileService(_profileCache,
 			new FolderCache(_profileCache),
 			new InMemoryDeviceRepository(),
-			_iconHarness.Mediator);
+			_iconHarness.Mediator,
+			new WidgetSecretCloner(new FakeSecretService()),
+			new NullWidgetVariableCloner());
 
 		_updateDetector = new FakeStoreUpdateDetector();
 		_operationTracker = new FakeStoreOperationTracker();

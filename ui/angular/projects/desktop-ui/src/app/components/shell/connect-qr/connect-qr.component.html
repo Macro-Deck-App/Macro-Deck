@@ -1,0 +1,16 @@
+@if (qrDataUrl(); as qr) {
+  <div class="cq-qr">
+    <img [src]="qr" [alt]="appStrings.Shell.ConnectionPanel.QrAlt | translate" width="180" height="180">
+    @if (hint(); as hint) {
+      <span class="cq-qr-hint">{{ hint | translate }}</span>
+    }
+  </div>
+}
+
+@if (groupedPairingCode(); as code) {
+  <div class="cq-section">
+    <span class="cq-label">{{ appStrings.Shell.ConnectionPanel.PairingCode | translate }}</span>
+    <span class="cq-pairing-code">{{ code }}</span>
+    <span class="cq-expiry">{{ appStrings.Shell.ConnectionPanel.PairingCodeExpiresIn | translate: { time: pairingCodeRemaining() } }}</span>
+  </div>
+}

@@ -188,6 +188,13 @@ describe('the component registry', () => {
       expect(registry.capabilities()['ui.list']).toEqual({ minimum: 1, maximum: 2 });
     });
 
+    it('advertises ui.stack up to version 2, the version that clips at the start, and ui.button at 1', () => {
+      const registry = createUiComponentRegistry(...UI_CORE_COMPONENTS);
+
+      expect(registry.capabilities()['ui.stack']).toEqual({ minimum: 1, maximum: 2 });
+      expect(registry.capabilities()['ui.button']).toEqual({ minimum: 1, maximum: 1 });
+    });
+
     it('defaults an unversioned definition to {minimum: 1, maximum: 1}', () => {
       const registry = createUiComponentRegistry(...UI_CORE_COMPONENTS, versionedDefinition(undefined));
 

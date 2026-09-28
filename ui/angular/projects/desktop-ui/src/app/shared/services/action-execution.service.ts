@@ -14,6 +14,10 @@ import { ToastService } from './toast.service';
 
 const MAX_TRACKED_EXECUTIONS = 50;
 
+export function formatRunDuration(durationMs: number): string {
+  return durationMs >= 1000 ? `${(durationMs / 1000).toFixed(1)}s` : `${durationMs}ms`;
+}
+
 function toResult(event: ActionExecutionStatusEvent): ActionExecutionResult {
   return {
     success: event.status === 'Succeeded',

@@ -1,5 +1,5 @@
 import { ActionBlock, ActionFlow } from './action-builder.interface';
-import { findFlowForTrigger, resolveLocalDeckNavigation } from './deck-navigation.util';
+import { findFlowForTrigger, parseStoredFlows, resolveLocalDeckNavigation } from './deck-navigation.util';
 
 describe('deck-navigation.util', () => {
   const targetFolderId = '22222222-2222-2222-2222-222222222222';
@@ -121,5 +121,21 @@ describe('findFlowForTrigger with event triggers', () => {
     ];
 
     expect(findFlowForTrigger(flows, 'onShortPress')?.triggerId).toBe('p');
+  });
+});
+
+describe('parseStoredFlows', () => {
+  const flows = [{ triggerId: 'onShortPress', triggerType: 'onShortPress', children: [] }];
+
+  it('reads flows stored either as an array or as a nested JSON string', () => {
+    expect(parseStoredFlows(flows)).toEqual(flows);
+    expect(parseStoredFlows(JSON.stringify(flows))).toEqual(flows);
+  });
+
+  it('treats anything unreadable as no flows', () => {
+    expect(parseStoredFlows(undefined)).toEqual([]);
+    expect(parseStoredFlows('')).toEqual([]);
+    expect(parseStoredFlows('not json')).toEqual([]);
+    expect(parseStoredFlows('{"flows":1}')).toEqual([]);
   });
 });

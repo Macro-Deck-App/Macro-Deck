@@ -12,6 +12,10 @@ A streaming setup, built up piece by piece.
 One profile per use: **Streaming**, **Work**, **Gaming**. A profile holds all its folders and
 widgets. Switch between them at the top. Each device can open with its own profile.
 
+To build a variant, for example a second streaming layout, duplicate a profile from the profile
+menu. The copy gets every folder, widget and setting, and is named like **Streaming (copy)**.
+Automatic activation stays with the original, so set it up again for the copy if you want it.
+
 ## Folders
 
 Inside **Streaming**: a start folder **Home** with **Scenes**, **Audio** and **Chat** subfolders,
@@ -29,6 +33,7 @@ The tiles in a folder:
 | History Graph | CPU load over the last minutes |
 | Weather | Today and the next days for your city |
 | Music Player | What Spotify is playing, with play and skip |
+| Twitch Chat | Your channel's chat with emotes and badges, offered once a Twitch account is connected |
 
 ## Actions and triggers
 
@@ -43,7 +48,8 @@ What a widget does, and when. The **Scenes** button runs **Change Folder to** on
 | Double Tap | Mute all audio |
 | Event | Turn the mic slider's accent red when OBS reports **Streaming Started** |
 
-Every widget with actions, sliders included, can add event triggers next to its press triggers.
+Every widget with actions, sliders included, can add event triggers next to its press triggers. Give an
+event trigger a **Name** to tell several of them apart in the **Events** list.
 
 Once a widget has a Double Tap action, its Short Press waits a moment to see whether a second tap follows,
 so a single tap runs slightly later. A double tap runs only the Double Tap action. On a slider, a double tap
@@ -108,6 +114,29 @@ Only your own variables can read from a file. To keep a file up to date with any
 example the current OBS scene or `system_cpu_usage_percent`, create an automation: the event
 **Variable Changed** watching that variable runs **Write Variable to File** for the same variable.
 Every change then lands in the file.
+
+### Share variables with another Macro Deck
+
+With **Macro Deck Delegate**, one Macro Deck can use the variables of another one, for example to show
+on your streaming PC whether OBS on your gaming PC is live. Both sides have to agree:
+
+1. On the Macro Deck that has the variable, open the variable's menu on the **Variables** page and
+   choose **Share with other Macro Decks**. Any global variable can be shared, your own and integration
+   variables alike. Shared variables are marked **Shared**; **Stop sharing** in the same menu takes it
+   back.
+2. On the other Macro Deck, add or edit the **Macro Deck Delegate** connection to it and turn on
+   **Import shared variables**. It is off by default.
+
+The shared variables then appear there under the other computer's name, so
+`obs_streaming` shared by a computer called *Gaming-PC* becomes `{{ vars.gaming_pc_obs_streaming }}`.
+Sharing and unsharing show up within a few seconds, without a restart. While the other Macro Deck is off
+or cannot be reached, its variables read as unavailable; once it is back, they catch up within a few
+minutes at most. If a name is already taken by another variable, or is longer than 64 characters with the
+computer's name in front, that variable is left out, and the connection shows a warning listing it.
+
+A shared variable that can be changed on its own Macro Deck can be changed from the other one too, for
+example with a slider or **Set Variable**, so anyone who can change variables on the importing Macro
+Deck can change it. A Macro Deck from before variable sharing simply shares nothing.
 
 ## Scripts and automations
 

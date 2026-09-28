@@ -71,6 +71,35 @@ new UiTextRun { Key = "label", Text = label, Wrap = UiValue.Of(true), MaxLines =
 A run stays on one line unless `Wrap` is true. `MaxLines` caps how many lines it may use before it
 ellipsizes.
 
+## Mixing text and images
+
+```csharp
+new UiTextRun
+{
+    Key = "message",
+    Text = "ada: hi Kappa",
+    Size = 0.08,
+    Wrap = UiValue.Of(true),
+    MaxLines = 4,
+    Spans = UiValue.Of<IReadOnlyList<UiTextSpan>>(
+    [
+        UiTextSpan.FromText("ada", color: "#9146ff", weight: UiComponentTextWeights.Bold),
+        UiTextSpan.FromText(": hi "),
+        UiTextSpan.FromImage(emote, alt: "Kappa"),
+    ]),
+}
+```
+
+`Spans` draws styled text and inline images as one paragraph, in place of `Text`. A text span may set its
+own `#rrggbb` colour and weight; anything it leaves out comes from the run. An image span is a square one
+line high, so the line height stays exactly one and the run is as tall as it is without images. While an
+image cannot be shown, its `alt` text is drawn in its place; an image without `alt` is decorative and
+draws nothing.
+
+Keep `Text` the plain equivalent of the spans - the same words, with each image as the text it stands for.
+A reader that does not know `spans` draws `Text` instead. A span's text is drawn exactly as given: it is
+never resolved as a localization reference and never read as markup.
+
 ## Colour
 
 ```csharp
@@ -105,6 +134,7 @@ A localization reference resolves in each reader's own active language.
 | `Wrap` (`wrap`) | `bool` | One line, ellipsized | Whether the run may break across lines at all. |
 | `FontFace` (`fontFace`) | Font catalogue identifier | The reader's default face | The typeface, from Macro Deck's font catalogue. |
 | `Digits` (`digits`) | `double`, digit widths | Exactly as wide as the content | How many digit widths the run reserves. |
+| `Spans` (`spans`) | List of `UiTextSpan`: `text` with optional `color` and `weight`, or `image` (`UiResource`) with optional `alt` | Draws `Text` | Inline runs of styled text and images drawn in place of `Text`. |
 | `MainSize` (`mainSize`), `Fill` (`fill`) | See [Sizing](/ui/concepts/sizing/) | Sized by the reader | The run's extent along the parent stack's main axis. |
 
 `Size` is the font, `MainSize` is the extent along the parent's main axis; setting one does not imply the
@@ -140,6 +170,11 @@ takes their width too and pushes them out of the box. See [Sizing](/ui/concepts/
   swap. If the face never arrives, or the identifier cannot be resolved, reveal the run in the default face.
 - `digits`: draw every digit on the same advance width, and centre the content in the reservation when it
   is narrower.
+- `spans`: draw the spans in one inline flow instead of `text`, bounded by `wrap` and `maxLines` like
+  `text`. Draw each image square and one line high, aligned to the top of its line, so the line height
+  stays one; draw its `alt` text while the image is unavailable, or nothing when `alt` is absent. Ignore a
+  span `color` that is not `#rrggbb` and a span that carries neither `text` nor `image`. A reader that does
+  not implement `spans` draws `text`.
 
 ## See also
 

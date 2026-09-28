@@ -67,6 +67,7 @@ describe('VariablesManagerComponent', () => {
   let unbindCatalogVariableSpy: jasmine.Spy;
   let setVariableValueSpy: jasmine.Spy;
   let updateVariableSpy: jasmine.Spy;
+  let setVariableSharedSpy: jasmine.Spy;
 
   const variables: Variable[] = [
     variable('1', 'user'),
@@ -82,6 +83,7 @@ describe('VariablesManagerComponent', () => {
       'createVariable',
       'updateVariable',
       'setVariableValue',
+      'setVariableShared',
       'unbindCatalogVariable',
       'getVariableCatalogProviders',
       'discoverCatalogVariables',
@@ -109,6 +111,7 @@ describe('VariablesManagerComponent', () => {
     unbindCatalogVariableSpy = apiSpy.unbindCatalogVariable;
     setVariableValueSpy = apiSpy.setVariableValue;
     updateVariableSpy = apiSpy.updateVariable;
+    setVariableSharedSpy = apiSpy.setVariableShared;
 
     TestBed.configureTestingModule({
       imports: [VariablesManagerComponent],
@@ -430,7 +433,11 @@ describe('VariablesManagerComponent', () => {
 
   describe('unbinding a catalog variable', () => {
     beforeEach(async () => {
-      fixture.componentRef.setInput('variables', [...variables, dynamicVariable('d1', 'home-assistant')]);
+      fixture.componentRef.setInput('variables', [
+        ...variables,
+        dynamicVariable('d1', 'home-assistant'),
+        variable('imported', 'integration', 'app.macro-deck.delegate'),
+      ]);
       await fixture.whenStable();
       await flushViewport();
     });
@@ -443,10 +450,10 @@ describe('VariablesManagerComponent', () => {
     it('renders an active menu (not the disabled read-only button) for the catalog-bound row', () => {
       const rows = Array.from(fixture.nativeElement.querySelectorAll('.vars-row')) as HTMLElement[];
       const dynamicRow = rows.find(row => row.textContent?.includes('var_d1'));
-      const ordinaryIntegrationRow = rows.find(row => row.textContent?.includes('var_3'));
+      const nothingToOfferRow = rows.find(row => row.textContent?.includes('var_imported'));
 
       expect(dynamicRow?.querySelector('.vars-dots-btn:disabled')).toBeNull();
-      expect(ordinaryIntegrationRow?.querySelector('.vars-dots-btn:disabled')).not.toBeNull();
+      expect(nothingToOfferRow?.querySelector('.vars-dots-btn:disabled')).not.toBeNull();
     });
 
     it('asks for confirmation before unbinding, and only unbinds on confirm', async () => {
@@ -491,6 +498,53 @@ describe('VariablesManagerComponent', () => {
       expect(component.groups().find(g => g.key === 'integration:home-assistant')?.variables.map(v => v.id))
         .toEqual(['d1']);
       expect(component.groups().find(g => g.key === 'dynamic')).toBeUndefined();
+    });
+  });
+
+  describe('sharing a variable', () => {
+    const shared: Variable = { ...variable('s1', 'integration', 'obs'), shared: true };
+
+    it('offers sharing for global variables but not for widget or imported ones', () => {
+      expect(component.canShare(variable('1', 'user'))).toBeTrue();
+      expect(component.canShare(variable('3', 'integration', 'spotify'))).toBeTrue();
+      expect(component.canShare(buttonVariable('b1', 'widget-1'))).toBeFalse();
+      expect(component.canShare(variable('i1', 'integration', 'app.macro-deck.delegate'))).toBeFalse();
+    });
+
+    it('turns sharing on for an unshared variable and off for a shared one', async () => {
+      setVariableSharedSpy.and.resolveTo({ success: true, variable: shared });
+
+      await component.toggleShared(variable('1', 'user'));
+      await component.toggleShared(shared);
+
+      expect(setVariableSharedSpy.calls.argsFor(0)).toEqual([{ id: '1', shared: true }]);
+      expect(setVariableSharedSpy.calls.argsFor(1)).toEqual([{ id: 's1', shared: false }]);
+      expect(component.shareFailed()).toBeFalse();
+    });
+
+    it('surfaces a refused share rather than swallowing it', async () => {
+      setVariableSharedSpy.and.resolveTo({ success: false, error: { code: 'InternalError', message: 'no' } });
+      fixture.componentRef.setInput('variables', [variable('1', 'user')]);
+      await fixture.whenStable();
+
+      await component.toggleShared(variable('1', 'user'));
+      await fixture.whenStable();
+
+      expect(component.shareFailed()).toBeTrue();
+      expect(fixture.nativeElement.querySelector('shared-error-banner')).not.toBeNull();
+    });
+
+    it('marks a shared variable in its row', async () => {
+      fixture.componentRef.setInput('variables', [shared, variable('1', 'user')]);
+      await fixture.whenStable();
+      await flushViewport();
+
+      const rows = Array.from(fixture.nativeElement.querySelectorAll('.vars-row')) as HTMLElement[];
+
+      expect(rows.find(row => row.textContent?.includes('var_s1'))?.querySelector('.vars-shared-badge'))
+        .not.toBeNull();
+      expect(rows.find(row => row.textContent?.includes('var_1'))?.querySelector('.vars-shared-badge'))
+        .toBeNull();
     });
   });
 

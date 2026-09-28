@@ -150,7 +150,7 @@ export class IntegrationsPageComponent implements OnInit {
 
   protected readonly typeFilterLabel = computed(() => this.optionLabel(this.filters.type(), {
     internal: this.localization.translateKey(AppStrings.Integrations.Page.InternalTag),
-    external: this.localization.translateKey(AppStrings.Integrations.Page.ExternalTag),
+    external: this.localization.translateKey(AppStrings.Store.KindLabel.Plugin),
   }));
 
   protected readonly issuesFilterLabel = computed(() => this.optionLabel(this.filters.issues(), {

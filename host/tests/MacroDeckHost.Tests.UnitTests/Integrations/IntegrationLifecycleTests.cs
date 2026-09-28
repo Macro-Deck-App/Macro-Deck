@@ -231,7 +231,7 @@ internal sealed class IntegrationLifecycleTests
 		}
 	}
 
-	private sealed class FakeIntegrationStateStore : IIntegrationStateStore
+	internal sealed class FakeIntegrationStateStore : IIntegrationStateStore
 	{
 		private Dictionary<string, bool> _states = new();
 
@@ -240,7 +240,7 @@ internal sealed class IntegrationLifecycleTests
 		public void Save(IReadOnlyDictionary<string, bool> states) => _states = new Dictionary<string, bool>(states);
 	}
 
-	private sealed class FakeNotificationStore : IUserNotificationStore
+	internal sealed class FakeNotificationStore : IUserNotificationStore
 	{
 		public int Capacity => 100;
 
@@ -267,7 +267,7 @@ internal sealed class IntegrationLifecycleTests
 		}
 	}
 
-	private sealed class FakeDeckNavigator : IDeckNavigator
+	internal sealed class FakeDeckNavigator : IDeckNavigator
 	{
 		public Task ChangeFolderAsync(string folderId,
 			string? originClientId = null,
@@ -288,7 +288,7 @@ internal sealed class IntegrationLifecycleTests
 		public IReadOnlyList<DeckProfile> GetProfiles() => [];
 	}
 
-	private sealed class FakeScriptApi : IScriptApi
+	internal sealed class FakeScriptApi : IScriptApi
 	{
 		public IReadOnlyList<Script> GetScripts() => [];
 
@@ -299,7 +299,7 @@ internal sealed class IntegrationLifecycleTests
 			CancellationToken cancellationToken = default) => ActionResult.SucceededTask;
 	}
 
-	private sealed class FakeWidgetApi : IWidgetApi
+	internal sealed class FakeWidgetApi : IWidgetApi
 	{
 		public IReadOnlyList<WidgetTargetInfo> GetWidgets() => [];
 

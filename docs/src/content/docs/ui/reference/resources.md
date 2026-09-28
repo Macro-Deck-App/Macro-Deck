@@ -12,8 +12,9 @@ new UiImage { Key = "icon", Source = UiValue.Of(handle), Size = 0.2 }
 The handle carries a `resourceId`, and optionally a `contentHash`, `mediaType` and `byteLength`. Macro
 Deck serves the bytes and each client caches them by hash, so an icon shown by a hundred deck widgets is
 transferred once per client rather than embedded a hundred times. A plugin gets a handle for its own bytes
-from [`UiResources`](#registering-your-own-images), and for an icon from its own bundled icon packs from
-[`GetPluginIconAsync`](#icons-from-your-bundled-icon-packs).
+from [`UiResources`](#registering-your-own-images), for an icon from its own bundled icon packs from
+[`GetPluginIconAsync`](#icons-from-your-bundled-icon-packs), and for any installed icon from
+[`GetIconAsync`](#icons-from-any-installed-icon-pack).
 
 Macro Deck's own icons need no resource at all: name one with [`ui.icon`](/ui/components/icon/) and every
 reader draws it from its own set.
@@ -72,6 +73,9 @@ one you build yourself: it carries the `contentHash` that makes clients fetch ne
   resource registration, `QuotaExceeded`, `RateLimited`, or `Failed`, for example when the connection
   dropped. Registrations run one at a time, so starting many at once is safe.
 
+A music player plugin can register its own player's cover in one call with
+[`GetArtworkAsUiResourceAsync`](/features/music-players/#showing-the-cover-in-your-own-ui).
+
 In tests, `FakeIntegrationContext.UiResources` is a `FakeUiResourceRegistry` that applies the same rules and
 exposes what was registered, and `MacroDeckTestHost` answers registrations over the wire.
 
@@ -95,7 +99,9 @@ The first argument is the pack's key in the manifest, the second the icon's name
 - **A replaced icon gets a new `contentHash`.** When an update or a development sync replaces the icon,
   the `resourceId` stays and the `contentHash` changes, so clients fetch the new bytes. Ask again when you
   build a tree rather than holding a handle for the plugin's whole lifetime.
-- **Your packs only.** The lookup is scoped to the calling plugin, so no plugin can reach another's icons.
+- **Your packs only.** The lookup by key and name is scoped to the calling plugin, so no plugin can name
+  another's icons that way. To show an icon you know by id, use
+  [`GetIconAsync`](#icons-from-any-installed-icon-pack).
 - **Errors.** `UiResourceException.ErrorCode` is `PluginIconNotFound` when your packs hold no such key or
   name, `Unsupported` on a Macro Deck that predates bundled icon packs, and `Failed` when the icon cannot
   be served within `maxUiResourceBytes` or the call could not complete.
@@ -104,6 +110,30 @@ The first argument is the pack's key in the manifest, the second the icon's name
 `UiImage` or a button's `Source`. In tests, `FakeUiResourceRegistry.AddPluginIcon(key, name, bytes,
 mediaType)` makes an icon available to `GetPluginIconAsync`, and `MacroDeckTestHost` answers the lookup
 over the wire as a plugin without bundled packs.
+
+## Icons from any installed icon pack
+
+Any icon installed in Macro Deck, from the user's own packs, imports, the Store or a plugin, can be shown
+by its id, again without uploading anything:
+
+```csharp
+UiResource icon = await context.UiResources.GetIconAsync(iconId, cancellationToken);
+var image = new UiImage { Key = "icon", Source = UiValue.Of(icon), Size = 0.2 };
+```
+
+The id is a `Guid`. Users copy it with **Copy icon id** on the icon packs page, which suits a plugin that
+reads icon ids from text the user writes. When the user picks the icon in your configuration form instead,
+the value holds the same id: a `UiIconInput` stores it as a string, and a `UiIconReferenceInput` as the
+`Reference` of a `UiIconReference` of type `icon-pack`.
+
+- **No upload, no quota, stable across restarts**, and **a replaced icon gets a new `contentHash`**, as for
+  [bundled icons](#icons-from-your-bundled-icon-packs).
+- **Errors.** `UiResourceException.ErrorCode` is `IconNotFound` when no installed pack holds an icon with
+  that id, for example because the user deleted it, `Unsupported` on a Macro Deck that predates the lookup,
+  and `Failed` when the icon cannot be served within `maxUiResourceBytes` or the call could not complete.
+
+In tests, `FakeUiResourceRegistry.AddIcon(iconId, bytes, mediaType)` makes an icon available to
+`GetIconAsync`, and `MacroDeckTestHost` answers the lookup over the wire as a Macro Deck without icons.
 
 ## Limits
 

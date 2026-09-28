@@ -17,6 +17,8 @@ Unlock the deck to edit it, lock it to press buttons.
 
 - **Select several widgets** by dragging a box around them. Hold Ctrl/Cmd to add to the selection.
 - **Paste somewhere specific:** right-click a free cell.
+- **Try a button without opening it:** right-click it and choose **Run**. It runs the Short Press actions
+  as if you pressed the button, so a button set to **Cycle states on tap** also moves to its next state.
 - **Drop an image, an app or a shortcut** on a tile to use it as the background.
 
 ## Pinned widgets

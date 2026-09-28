@@ -136,6 +136,21 @@ public sealed record UiStack : UiComponentContainer
 	/// layer.</summary>
 	public UiValue<string> Background { get; init; }
 
+	/// <summary>
+	/// What the stack does with children that do not fit its main axis - see
+	/// <see cref="UiComponentOverflows" />. Absent means <see cref="UiComponentOverflows.Shrink" />.
+	///
+	/// <para>
+	/// <see cref="UiComponentOverflows.ClipStart" /> needs <c>ui.stack</c> component version 2: a version 1
+	/// reader ignores the key and shrinks every child, so a producer using it sets
+	/// <see cref="UiElement.RequiredComponentVersion" /> to 2 and supplies a <see cref="UiElement.Fallback" />
+	/// that reads well shrunk. A clipping stack still reports the sum of its children as its own size, so it
+	/// needs its box from its parent: give it <see cref="UiComponentContainer.Fill" /> or a
+	/// <see cref="UiComponentContainer.MainSize" />.
+	/// </para>
+	/// </summary>
+	public UiValue<string> Overflow { get; init; }
+
 	/// <inheritdoc />
 	public override string Type => UiComponents.Stack;
 
@@ -152,6 +167,7 @@ public sealed record UiStack : UiComponentContainer
 		properties.Set(UiComponentProperties.Gap, Gap.Value);
 		properties.Set(UiComponentProperties.Padding, Padding.Value);
 		properties.Set(UiComponentProperties.Background, Background);
+		properties.Set(UiComponentProperties.Overflow, Overflow);
 	}
 }
 
@@ -229,6 +245,21 @@ public sealed record UiTextRun : UiComponentLeaf
 	/// </summary>
 	public UiValue<double> Digits { get; init; }
 
+	/// <summary>
+	/// Inline runs of styled text and images drawn in one flow, in place of <see cref="Text" />. Absent means
+	/// the run draws <see cref="Text" />.
+	///
+	/// <para>
+	/// A reader that does not know the key draws <see cref="Text" />, so a producer keeps
+	/// <see cref="Text" /> the plain equivalent of the spans: the same words, with each image as the text it
+	/// stands for. Every other property applies to the spans as it does to <see cref="Text" />: the size,
+	/// weight and colour are the defaults a span does not override, and <see cref="Wrap" /> and
+	/// <see cref="MaxLines" /> bound the flow. An image span is a square one line high, so the line height
+	/// stays exactly one.
+	/// </para>
+	/// </summary>
+	public UiValue<IReadOnlyList<UiTextSpan>> Spans { get; init; }
+
 	/// <inheritdoc />
 	public override string Type => UiComponents.Text;
 
@@ -250,6 +281,7 @@ public sealed record UiTextRun : UiComponentLeaf
 		properties.Set(UiComponentProperties.Wrap, Wrap);
 		properties.Set(UiComponentProperties.FontFace, FontFace);
 		properties.Set(UiComponentProperties.Digits, Digits);
+		properties.Set(UiComponentProperties.Spans, Spans);
 	}
 }
 

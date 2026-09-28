@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using MacroDeck.Sdk.Identity;
 using MacroDeck.Sdk.ScreenSavers;
 using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using Mediator;
 
@@ -13,11 +14,15 @@ public sealed class ScreenSaverRegistry : IScreenSaverRegistry
 		new(StringComparer.Ordinal);
 
 	private readonly IPublisher _publisher;
+	private readonly IIntegrationRegistry? _integrations;
 
 	// Built-ins are seeded from the catalog the provider already declares, exactly what a plugin is asked
 	// for after a reconnect, so they exist before the first request rather than after a hosted service.
-	public ScreenSaverRegistry(IPublisher publisher, IEnumerable<IScreenSaverProvider>? builtIns = null)
+	public ScreenSaverRegistry(IPublisher publisher,
+		IEnumerable<IScreenSaverProvider>? builtIns = null,
+		IIntegrationRegistry? integrations = null)
 	{
+		_integrations = integrations;
 		_publisher = publisher;
 
 		foreach (var provider in builtIns ?? [])
@@ -64,6 +69,11 @@ public sealed class ScreenSaverRegistry : IScreenSaverRegistry
 		}
 
 		var qualifiedId = id.ToString();
+		if (_integrations?.IsExplicitlyDisabled(ownerId) == true)
+		{
+			return new ScreenSaverRegistration(qualifiedId, ownerId);
+		}
+
 		_byQualifiedId[qualifiedId] = new ScreenSaverCatalogEntry(qualifiedId, ownerId, screenSaver);
 
 		await _publisher.Publish(new ScreenSaverCatalogChangedNotification(), cancellationToken);

@@ -139,7 +139,12 @@ public static class HostOperations
 		/// valid across host restarts. Unknown key or name: <c>PLUGIN_ICON_NOT_FOUND</c>.</summary>
 		public const string GetIconResource = "get-icon-resource";
 
-		public static readonly IReadOnlyList<string> All = [SyncBundled, GetIconResource];
+		/// <summary>Answers a UI resource handle for one icon of any installed icon pack, by the icon's id. The
+		/// handle is served by the host's icon store, uses no UI resource quota and stays valid across host
+		/// restarts. Unknown id: <c>ICON_NOT_FOUND</c>.</summary>
+		public const string GetIcon = "get-icon";
+
+		public static readonly IReadOnlyList<string> All = [SyncBundled, GetIconResource, GetIcon];
 	}
 
 	public static class Devices

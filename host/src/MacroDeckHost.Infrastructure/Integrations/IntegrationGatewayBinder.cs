@@ -1,10 +1,12 @@
 using MacroDeckHost.Application.Persistence;
+using MacroDeckHost.Application.Twitch.Chat;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations;
 using MacroDeckHost.Integrations.Adb;
 using MacroDeckHost.Integrations.Companion;
 using MacroDeckHost.Integrations.HomeAssistant;
 using MacroDeckHost.Integrations.System;
+using MacroDeckHost.Integrations.Twitch;
 using MacroDeck.Sdk;
 
 namespace MacroDeckHost.Infrastructure.Integrations;
@@ -17,8 +19,14 @@ internal static class IntegrationGatewayBinder
 		IVariableBindingStore bindingStore,
 		IVariableRefreshSignal refreshSignal,
 		IKnownAudioDeviceStore? knownAudioDevices = null,
-		IVariablePollingInvalidationSignal? pollingInvalidation = null)
+		IVariablePollingInvalidationSignal? pollingInvalidation = null,
+		ITwitchChatSink? twitchChatSink = null)
 	{
+		if (twitchChatSink is not null && integration is ITwitchChatSinkConsumer chatConsumer)
+		{
+			chatConsumer.UseTwitchChatSink(twitchChatSink);
+		}
+
 		if (knownAudioDevices is not null && integration is IKnownAudioDeviceStoreConsumer audioDeviceConsumer)
 		{
 			audioDeviceConsumer.UseKnownAudioDeviceStore(knownAudioDevices);

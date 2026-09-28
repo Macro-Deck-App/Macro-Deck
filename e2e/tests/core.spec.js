@@ -94,8 +94,8 @@ async function clickProfileAction(page, profileName, action) {
     has: page.getByText(profileName, { exact: true }),
   });
   await expect(profileRow).toBeVisible();
-  await profileRow.hover();
-  await profileRow.getByRole('button', { name: `${action} ${profileName}` }).click();
+  await profileRow.getByRole('button', { name: `More actions for ${profileName}` }).click();
+  await page.locator('.menu-item').filter({ hasText: new RegExp(`^\\s*${action}\\s*$`) }).click();
 }
 
 async function selectProfile(page, profileName) {

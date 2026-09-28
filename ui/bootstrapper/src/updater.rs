@@ -47,7 +47,6 @@ use semver::Version;
 use serde::Serialize;
 use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_dialog::{DialogExt, MessageDialogButtons};
-use tauri_plugin_opener::OpenerExt;
 use tauri_plugin_updater::{Error as UpdaterError, RemoteRelease, Update, UpdaterExt};
 
 use crate::host;
@@ -1260,7 +1259,7 @@ fn notify_external_download(app: &AppHandle, update: &Update) {
         ))
         .blocking_show();
     if open {
-        let _ = app.opener().open_url(DOWNLOAD_PAGE_URL, None::<&str>);
+        let _ = crate::external_url::open(app, DOWNLOAD_PAGE_URL);
     }
 }
 

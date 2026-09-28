@@ -11,7 +11,7 @@ unstable. There are two ways:
 - With ADB, the Android Debug Bridge: Android devices with the companion app or with the web client in
   the browser. This needs USB debugging on the phone, and is described first below.
 
-Once the device is connected, Macro Deck can also [install the Companion app on it](/guide/companion-app/).
+Once the device is connected, Macro Deck can also [install the Companion app on it](/guide/companion-app/install-over-adb/).
 
 ## On the computer
 

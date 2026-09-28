@@ -68,6 +68,8 @@ import {
   DeletePluginTokenResponse,
   DeleteProfileRequest,
   DeleteProfileResponse,
+  DuplicateProfileRequest,
+  DuplicateProfileResponse,
   DeleteScriptResponse,
   DeleteSecretResponse,
   DeleteVariableRequest,
@@ -253,6 +255,8 @@ import {
   RunActionFlowResponse,
   RunScriptRequest,
   RunScriptResponse,
+  SetVariableSharedRequest,
+  SetVariableSharedResponse,
   SanitizeVariableNameRequest,
   SanitizeVariableNameResponse,
   SetDeviceStartupProfileRequest,
@@ -1373,6 +1377,10 @@ export class ApiService {
     return this.http('DELETE', `/api/profiles/${encodeURIComponent(request.id)}`);
   }
 
+  duplicateProfile(request: DuplicateProfileRequest): Promise<DuplicateProfileResponse> {
+    return this.http('POST', `/api/profiles/${encodeURIComponent(request.id)}/duplicate`, { name: request.name });
+  }
+
   getScripts(): Promise<GetScriptsResponse> {
     return this.http('GET', '/api/scripts');
   }
@@ -2129,6 +2137,10 @@ export class ApiService {
 
   setVariableValue(request: SetVariableValueRequest): Promise<SetVariableValueResponse> {
     return this.http('PATCH', `/api/variables/${request.id}/value`, request);
+  }
+
+  setVariableShared(request: SetVariableSharedRequest): Promise<SetVariableSharedResponse> {
+    return this.http('PATCH', `/api/variables/${request.id}/shared`, request);
   }
 
   sanitizeVariableName(request: SanitizeVariableNameRequest): Promise<SanitizeVariableNameResponse> {

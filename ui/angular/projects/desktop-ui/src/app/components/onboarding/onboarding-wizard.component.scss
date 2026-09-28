@@ -53,8 +53,8 @@
   }
 }
 
-.ob-option-unavailable {
-  opacity: 0.6;
+.ob-qr {
+  flex-shrink: 0;
 }
 
 .ob-option-text {
@@ -116,17 +116,6 @@
   display: flex;
   flex-shrink: 0;
   gap: 8px;
-}
-
-.ob-badge {
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-secondary);
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 .ob-footer {

@@ -254,6 +254,7 @@ keyed by `code`; localise from the code. `details` is a string-to-string map, at
 | `PLUGIN_ICON_NOT_FOUND` | The plugin's bundled icon packs contain no such icon. |
 | `ICON_PACK_INVALID` | The icon pack archive is not usable. |
 | `ICON_PACK_SYNC_NOT_ALLOWED` | Only a self-registered development session can sync bundled icon packs. |
+| `ICON_NOT_FOUND` | No installed icon pack contains an icon with this id. |
 
 The list is append-only within a major. The three `ADB_*` codes answer only the `adb` host API; see
 [the WebSocket reference](/reference/websocket/#adb). A `reason` in `details` refines a deliberately generic

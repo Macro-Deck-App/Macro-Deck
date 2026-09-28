@@ -23,6 +23,12 @@ internal interface ITwitchHelixClient
 		string broadcasterId,
 		CancellationToken cancellationToken);
 
+	Task<IReadOnlyList<TwitchChatBadgeImage>> GetGlobalChatBadgesAsync(CancellationToken cancellationToken);
+
+	Task<IReadOnlyList<TwitchChatBadgeImage>> GetChannelChatBadgesAsync(
+		string broadcasterId,
+		CancellationToken cancellationToken);
+
 	Task<TwitchUserInfo?> GetUserAsync(string? userId, string? login, CancellationToken cancellationToken);
 
 	Task ModifyChannelAsync(

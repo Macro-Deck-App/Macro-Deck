@@ -111,6 +111,7 @@ assets:
       - ui/runtime/styles/icons/scissors.svg
       - ui/runtime/styles/icons/search.svg
       - ui/runtime/styles/icons/settings.svg
+      - ui/runtime/styles/icons/share-2.svg
       - ui/runtime/styles/icons/sidebar.svg
       - ui/runtime/styles/icons/sliders.svg
       - ui/runtime/styles/icons/sparkles.svg

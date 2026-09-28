@@ -56,6 +56,17 @@ internal sealed class TwitchSubscriptionManagerTests
 	}
 
 	[Test]
+	public async Task A_refused_chat_feed_names_no_event_as_missing()
+	{
+		_helix.SubscriptionResults["channel.chat.message"] = TwitchSubscriptionResult.MissingScope;
+		_helix.SubscriptionResults["channel.chat.clear_user_messages"] = TwitchSubscriptionResult.MissingScope;
+
+		var report = await Manager().SubscribeAllAsync("session-1", CancellationToken.None);
+
+		Assert.That(report.MissingScope, Is.Empty);
+	}
+
+	[Test]
 	public async Task A_duplicate_counts_as_created()
 	{
 		_helix.SubscriptionResults["channel.cheer"] = TwitchSubscriptionResult.Duplicate;

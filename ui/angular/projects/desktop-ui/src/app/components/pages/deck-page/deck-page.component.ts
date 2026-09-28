@@ -719,6 +719,10 @@ export class DeckPageComponent {
     void this.folderService.updateWidgetRuntimeData(event.widgetId, event.data);
   }
 
+  onWidgetRun(widget: GridWidget): void {
+    void this.folderService.runWidgetShortPress(widget);
+  }
+
   async onWidgetTrigger(event: { widget: GridWidget; triggerType: ActionButtonTriggerType }): Promise<void> {
     await this.folderService.executeActionButtonTrigger(event.widget, event.triggerType);
   }

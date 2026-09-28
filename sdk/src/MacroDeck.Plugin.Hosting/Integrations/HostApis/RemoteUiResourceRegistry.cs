@@ -111,6 +111,28 @@ internal sealed class RemoteUiResourceRegistry(IHostInvoker invoker, IPluginAsse
 				$"Macro Deck answered the lookup of bundled icon '{key}/{name}' without a resource.");
 	}
 
+	public async Task<UiResource> GetIconAsync(Guid iconId, CancellationToken cancellationToken = default)
+	{
+		JsonElement? result;
+		try
+		{
+			result = await invoker.InvokeAsync(Protocol.Callbacks.HostApis.IconPacks,
+					HostOperations.IconPacks.GetIcon,
+					new GetIconArguments { IconId = iconId },
+					cancellationToken)
+				.ConfigureAwait(false);
+		}
+		catch (HostInvocationException exception)
+		{
+			throw Translate(exception);
+		}
+
+		return result?.Deserialize<UiResourceHandleDto>(PluginProtocolJson.Options) is { } handle
+			? ToResource(handle)
+			: throw new UiResourceException(UiResourceErrorCode.Failed,
+				$"Macro Deck answered the lookup of icon '{iconId}' without a resource.");
+	}
+
 	public void Dispose() => _gate.Dispose();
 
 	private static UiResource ToResource(UiResourceHandleDto handle)
@@ -177,6 +199,7 @@ internal sealed class RemoteUiResourceRegistry(IHostInvoker invoker, IPluginAsse
 			ProtocolErrorCodes.UiResourceQuotaExceeded => UiResourceErrorCode.QuotaExceeded,
 			ProtocolErrorCodes.RateLimited => UiResourceErrorCode.RateLimited,
 			ProtocolErrorCodes.PluginIconNotFound => UiResourceErrorCode.PluginIconNotFound,
+			ProtocolErrorCodes.IconNotFound => UiResourceErrorCode.IconNotFound,
 			_ => UiResourceErrorCode.Failed,
 		};
 

@@ -57,6 +57,35 @@ describe('ActionFlowStore event triggers', () => {
     expect(store.selectedEventFlow()?.triggerId).toBe(triggerId);
   });
 
+  it('names an event trigger and keeps the name when a different event is picked', () => {
+    const triggerId = addBound('scene-changed');
+
+    store.renameEventFlow(triggerId, 'Go live');
+    store.updateEventBinding(triggerId, { providerId: 'obs', eventId: 'streaming-started', eventName: 'Streaming Started' });
+
+    expect(emitted.at(-1)!.find(flow => flow.triggerId === triggerId)?.name).toBe('Go live');
+  });
+
+  it('drops a blank name so the event falls back to its own label', () => {
+    const triggerId = addBound('scene-changed');
+    store.renameEventFlow(triggerId, 'Go live');
+
+    store.renameEventFlow(triggerId, '   ');
+
+    expect('name' in emitted.at(-1)!.find(flow => flow.triggerId === triggerId)!).toBeFalse();
+  });
+
+  it('stores the name without surrounding spaces and ignores an edit that changes nothing', () => {
+    const triggerId = addBound('scene-changed');
+    store.renameEventFlow(triggerId, '  Go live ');
+    const emissions = emitted.length;
+
+    store.renameEventFlow(triggerId, 'Go live  ');
+
+    expect(store.flows().find(flow => flow.triggerId === triggerId)?.name).toBe('Go live');
+    expect(emitted.length).toBe(emissions);
+  });
+
   it('keeps several event triggers apart', () => {
     const first = addBound('scene-changed');
     const second = addBound('recording-started');

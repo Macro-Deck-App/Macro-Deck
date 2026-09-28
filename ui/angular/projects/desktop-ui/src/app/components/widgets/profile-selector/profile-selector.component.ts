@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, ViewChild, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Injector, ViewChild, afterNextRender, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { FileOpenService } from '../../../services';
-import { Profile, WIDGET_REFERENCE_GAP, AppStrings } from '@macro-deck/runtime';
-import { ProfileService, ToastService, ModalComponent, ButtonComponent, ButtonGroupComponent, ErrorBannerComponent, InputComponent, dismissModal, LocalizationService, TranslatePipe } from '@shared';
+import { Profile, WIDGET_REFERENCE_GAP, AppStrings, Strings } from '@macro-deck/runtime';
+import { ProfileService, ToastService, ModalComponent, ButtonComponent, ButtonGroupComponent, ContextMenuComponent, ContextMenuItem, ErrorBannerComponent, InputComponent, dismissModal, LocalizationService, TranslatePipe } from '@shared';
 import { SelectCaretComponent } from '../../forms/select-caret/select-caret.component';
 import { GridSettingsComponent } from '../../grid-settings/grid-settings.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
@@ -27,6 +27,7 @@ import { PortabilityService, PortableExportOptions } from '../../../services/por
     ButtonComponent,
     ButtonGroupComponent,
     ConfirmationModalComponent,
+    ContextMenuComponent,
     ShellDropTargetDirective,
     ArchivePreviewModalComponent,
     ExportOptionsModalComponent,
@@ -47,11 +48,39 @@ export class ProfileSelectorComponent {
   private readonly fileOpen = inject(FileOpenService);
   private readonly toasts = inject(ToastService);
   private readonly localization = inject(LocalizationService);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
 
   @ViewChild(ModalComponent) private modal?: ModalComponent;
+  @ViewChild('rowContextMenu', { read: ElementRef }) private rowContextMenu?: ElementRef<HTMLElement>;
   @ViewChild('profileImportInput') private profileImportInput?: { nativeElement: HTMLInputElement };
 
   protected readonly dropdownOpen = signal(false);
+  protected readonly search = signal('');
+
+  protected readonly filteredProfiles = computed(() => {
+    const query = this.search().trim().toLocaleLowerCase();
+    const profiles = this.profileService.sortedProfiles();
+    return query ? profiles.filter(profile => profile.name.toLocaleLowerCase().includes(query)) : profiles;
+  });
+
+  // Rendered beside the dropdown, not inside it: the dropdown tears its panel down on the same
+  // mousedown that picks a menu item, which would destroy a nested menu before the click lands.
+  protected readonly rowMenu = signal<{ profile: Profile; x: number; y: number } | null>(null);
+
+  protected readonly rowMenuItems = computed<ContextMenuItem[]>(() => {
+    const profile = this.rowMenu()?.profile;
+    if (!profile) {
+      return [];
+    }
+    const t = (key: string) => this.localization.translateKey(key);
+    return [
+      { id: 'edit', label: t(Strings.Common.Edit), icon: 'icon-pencil', disabled: !this.canModify(profile) },
+      { id: 'duplicate', label: t(AppStrings.Widgets.Folder.Duplicate), icon: 'icon-copy', disabled: !this.canDuplicate(profile) },
+      { id: 'export', label: t(Strings.Common.Export), icon: 'icon-upload', disabled: !this.canExport(profile), dividerAfter: true },
+      { id: 'delete', label: t(Strings.Common.Delete), icon: 'icon-trash', danger: true, disabled: !this.canDelete(profile) },
+    ];
+  });
 
   protected readonly isCreating = signal(false);
   protected readonly createName = signal('');
@@ -155,9 +184,65 @@ export class ProfileSelectorComponent {
     return !profile.isVirtual;
   }
 
+  protected canDuplicate(profile: Profile): boolean {
+    return !profile.isVirtual;
+  }
+
+  protected monogram(profile: Profile): string {
+    return Array.from(profile.name.trim())[0]?.toLocaleUpperCase() ?? '';
+  }
+
+  protected onDropdownOpenChange(open: boolean): void {
+    this.dropdownOpen.set(open);
+    if (open) {
+      afterNextRender(() => this.host.nativeElement.querySelector<HTMLInputElement>('.profile-search input')?.focus(),
+        { injector: this.injector });
+    } else {
+      this.search.set('');
+    }
+  }
+
+  protected selectFirstMatch(): void {
+    const first = this.filteredProfiles()[0];
+    if (first) {
+      this.selectProfile(first.id);
+    }
+  }
+
+  protected openRowMenu(profile: Profile, event: MouseEvent): void {
+    event.stopPropagation();
+    const anchor = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    this.rowMenu.set({ profile, x: anchor.left, y: anchor.bottom + 4 });
+    if (event.detail === 0) {
+      afterNextRender(() => this.rowContextMenu?.nativeElement
+        .querySelector<HTMLButtonElement>('.menu-item:not([disabled])')?.focus(), { injector: this.injector });
+    }
+  }
+
+  protected onRowMenuAction(action: string): void {
+    const profile = this.rowMenu()?.profile;
+    if (!profile) {
+      return;
+    }
+    switch (action) {
+      case 'edit':
+        this.startEdit(profile);
+        break;
+      case 'duplicate':
+        void this.duplicate(profile);
+        break;
+      case 'export':
+        this.startExport(profile);
+        break;
+      case 'delete':
+        this.startDelete(profile);
+        break;
+    }
+  }
+
   selectProfile(id: string): void {
     this.profileService.selectProfile(id);
-    this.dropdownOpen.set(false);
+    this.onDropdownOpenChange(false);
   }
 
   startCreate(): void {
@@ -182,7 +267,7 @@ export class ProfileSelectorComponent {
   }
 
   startEdit(profile: Profile): void {
-    this.dropdownOpen.set(false);
+    this.onDropdownOpenChange(false);
     this.actionProfile.set(profile);
     this.editName.set(profile.name);
     this.editRows.set(profile.defaultRows);
@@ -223,7 +308,7 @@ export class ProfileSelectorComponent {
   }
 
   startDelete(profile: Profile): void {
-    this.dropdownOpen.set(false);
+    this.onDropdownOpenChange(false);
     this.actionProfile.set(profile);
     this.showDeleteConfirm.set(true);
   }
@@ -243,8 +328,17 @@ export class ProfileSelectorComponent {
     this.showDeleteConfirm.set(false);
   }
 
+  async duplicate(profile: Profile): Promise<void> {
+    this.onDropdownOpenChange(false);
+    const name = this.localization.translateKey(AppStrings.Widgets.Profile.CopyName, { name: profile.name });
+    const result = await this.profileService.duplicateProfile(profile.id, name);
+    if (!result.success) {
+      this.toasts.show(this.localization.translateKey(AppStrings.Errors.Profile.DuplicateFailed), { variant: 'error' });
+    }
+  }
+
   startExport(profile: Profile): void {
-    this.dropdownOpen.set(false);
+    this.onDropdownOpenChange(false);
     this.actionProfile.set(profile);
     this.exportError.set(null);
     this.showExportModal.set(true);
@@ -277,7 +371,7 @@ export class ProfileSelectorComponent {
   }
 
   startImport(): void {
-    this.dropdownOpen.set(false);
+    this.onDropdownOpenChange(false);
     this.archiveImport.dismissError();
     this.profileImportInput?.nativeElement.click();
   }
@@ -296,7 +390,7 @@ export class ProfileSelectorComponent {
   });
 
   async onArchiveDropped(drop: ShellDrop): Promise<void> {
-    this.dropdownOpen.set(false);
+    this.onDropdownOpenChange(false);
     this.archiveImport.dismissError();
     await this.archiveImport.beginPath(drop.path);
   }

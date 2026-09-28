@@ -10,10 +10,8 @@
         <h1 class="detail-name">{{ integration.name }}</h1>
         @if (!integration.isInternal) {
           <span class="detail-version">v{{ integration.version }}</span>
+          <span class="kind-badge">{{ 'macrodeck.app:Store.KindLabel.Plugin' | translate }}</span>
         }
-        <span class="kind-badge" [class.internal]="integration.isInternal">
-          {{ (integration.isInternal ? 'macrodeck.app:Integrations.Page.InternalTag' : 'macrodeck.app:Integrations.Page.ExternalTag') | translate }}
-        </span>
         <span class="status-chip" [class]="statusClass()">{{ statusLabel() }}</span>
       </div>
       <shared-toggle-switch

@@ -2,9 +2,9 @@ use serde::{Deserialize, Serialize};
 use tauri::ipc::{InvokeBody, Request};
 use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_dialog::{DialogExt, FilePath};
-use tauri_plugin_opener::OpenerExt;
 
 use crate::backup_download;
+use crate::external_url;
 use crate::host;
 use crate::localization::{self, keys};
 use crate::logging;
@@ -187,7 +187,7 @@ pub fn open_external(app: AppHandle, url: String) -> bool {
     if parsed.scheme() != "http" && parsed.scheme() != "https" {
         return false;
     }
-    app.opener().open_url(url, None::<&str>).is_ok()
+    external_url::open(&app, &url).is_ok()
 }
 
 #[tauri::command]

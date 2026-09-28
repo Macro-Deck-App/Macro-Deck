@@ -89,7 +89,7 @@ internal sealed class TakeScreenshotAction : IDynamicOptionsActionDefinition
 
 		public async Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
 		{
-			if (!_resolver.TryResolve(context.Parameters, out var deviceId, out var gateway, out var error))
+			if (!_resolver.TryResolveTarget(context.Parameters, out var deviceId, out var error))
 			{
 				return error;
 			}
@@ -110,6 +110,12 @@ internal sealed class TakeScreenshotAction : IDynamicOptionsActionDefinition
 			{
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,
 					AppStrings.Integrations.Adb.Errors.FolderRequired());
+			}
+
+			var (gateway, notConnected) = await _resolver.ConnectAsync(deviceId, context.CancellationToken);
+			if (gateway is null)
+			{
+				return notConnected!;
 			}
 
 			var capability = mode == DeckMode

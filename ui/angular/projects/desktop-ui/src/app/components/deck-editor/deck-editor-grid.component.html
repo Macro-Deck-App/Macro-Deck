@@ -101,6 +101,7 @@
     [isPinned]="menuAnyPinned()"
     [pinScope]="contextMenu().widget?.pinScope"
     [selectionCount]="menuSelectionCount()"
+    [canRun]="menuCanRun()"
     (action)="onContextMenuAction($event)"
     (closed)="closeContextMenu()">
   </shared-widget-context-menu>

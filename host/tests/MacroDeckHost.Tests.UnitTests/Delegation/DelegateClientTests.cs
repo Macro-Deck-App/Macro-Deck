@@ -6,8 +6,10 @@ using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Application.Ui.Transport.Messages.Actions;
 using MacroDeckHost.Application.Ui.Transport.Messages.Scripts;
 using MacroDeckHost.Application.Ui.Transport.Messages.System;
+using MacroDeckHost.Application.Ui.Transport.Messages.Variables;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Integrations.Delegation.Protocol;
+using MacroDeck.Sdk.Variables;
 
 namespace MacroDeckHost.Tests.UnitTests.Delegation;
 
@@ -254,6 +256,83 @@ internal sealed class DelegateClientTests
 		Assert.That(script.Inputs, Is.Empty);
 	}
 
+	[Test]
+	public async Task GetSharedVariablesAsync_reads_what_the_sharing_host_answers()
+	{
+		using var client = CreateClient(HttpStatusCode.OK,
+			new GetSharedVariablesResponse
+			{
+				Variables =
+				[
+					new SharedVariableDto
+					{
+						Name = "obs_streaming", Type = "boolean", Value = "true", Present = true, Available = true
+					},
+					new SharedVariableDto
+					{
+						Name = "volume", Type = "numeric", Value = "40", Present = true, Available = true,
+						CanWrite = true, CommitOnRelease = true, DecimalPlaces = 0, Unit = "%", Min = 0, Max = 100
+					},
+					new SharedVariableDto { Name = "scene", Type = "text", Present = false }
+				]
+			});
+
+		var variables = await client.GetSharedVariablesAsync(BaseUrl, "token", CancellationToken.None);
+
+		Assert.That(variables,
+			Is.EqualTo(new[]
+			{
+				new DelegateSharedVariable("obs_streaming", VariableType.Boolean, "true", true, true, false),
+				new DelegateSharedVariable("volume", VariableType.Numeric, "40", true, true, true, true, 0, "%", 0, 100),
+				new DelegateSharedVariable("scene", VariableType.Text, string.Empty, false, false, false)
+			}));
+	}
+
+	[TestCase(HttpStatusCode.NotFound, "application/json", "{}")]
+	[TestCase(HttpStatusCode.MethodNotAllowed, "application/json", "{}")]
+	[TestCase(HttpStatusCode.OK, "text/html", "<!doctype html><html></html>")]
+	public void GetSharedVariablesAsync_reports_a_host_from_before_sharing_as_unsupported(HttpStatusCode status,
+		string mediaType,
+		string body)
+	{
+		using var client = new DelegateClient(new HttpClient(new StubHandler(status, body, mediaType)));
+
+		Assert.ThrowsAsync<DelegateSharingUnsupportedException>(() =>
+			client.GetSharedVariablesAsync(BaseUrl, "token", CancellationToken.None));
+	}
+
+	[Test]
+	public void GetSharedVariablesAsync_reports_a_locked_host_as_a_server_error_not_as_unsupported()
+	{
+		using var client = new DelegateClient(new HttpClient(new StubHandler(HttpStatusCode.ServiceUnavailable,
+			"{\"error\":\"locked\"}")));
+
+		Assert.ThrowsAsync<DelegateServerErrorException>(() =>
+			client.GetSharedVariablesAsync(BaseUrl, "token", CancellationToken.None));
+	}
+
+	[Test]
+	public async Task SetSharedVariableAsync_reports_the_refusal_code_of_a_200_failure()
+	{
+		var handler = new StubHandler(HttpStatusCode.OK,
+			JsonSerializer.Serialize(new SetSharedVariableValueResponse
+				{
+					Success = false,
+					Error = new TransportError { Code = "HOST_LOCKED", Message = "Locked." }
+				},
+				DelegateJson.Options));
+		using var client = new DelegateClient(new HttpClient(handler));
+
+		var result = await client.SetSharedVariableAsync(BaseUrl, "token", "obs_volume", "12.5", CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result, Is.EqualTo(new DelegateWriteResult(false, "HOST_LOCKED")));
+			Assert.That(handler.LastRequestUri, Is.EqualTo("http://10.0.0.5:5000/api/shared-variables/obs_volume/value"));
+			Assert.That(handler.LastRequestBody, Is.EqualTo("{\"value\":\"12.5\"}"));
+		});
+	}
+
 	private static DelegateClient CreateClient<T>(HttpStatusCode statusCode, T body)
 	{
 		var json = JsonSerializer.Serialize(body, DelegateJson.Options);
@@ -264,11 +343,13 @@ internal sealed class DelegateClientTests
 	{
 		private readonly HttpStatusCode _statusCode;
 		private readonly string _json;
+		private readonly string _mediaType;
 
-		public StubHandler(HttpStatusCode statusCode, string json)
+		public StubHandler(HttpStatusCode statusCode, string json, string mediaType = "application/json")
 		{
 			_statusCode = statusCode;
 			_json = json;
+			_mediaType = mediaType;
 		}
 
 		public string? LastRequestBody { get; private set; }
@@ -286,7 +367,7 @@ internal sealed class DelegateClientTests
 
 			return new HttpResponseMessage(_statusCode)
 			{
-				Content = new StringContent(_json, Encoding.UTF8, "application/json")
+				Content = new StringContent(_json, Encoding.UTF8, _mediaType)
 			};
 		}
 	}

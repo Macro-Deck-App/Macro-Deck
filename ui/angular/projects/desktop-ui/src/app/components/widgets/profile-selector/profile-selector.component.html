@@ -7,15 +7,26 @@
     fill
     class="profile-dropdown"
     position="bottom-left"
-    [minWidth]="260"
-    [anchorOffset]="0"
+    [minWidth]="288"
     [isOpen]="dropdownOpen()"
-    (isOpenChange)="dropdownOpen.set($event)">
+    (isOpenChange)="onDropdownOpenChange($event)">
 
     <ng-template #triggerContent>
       <span class="profile-trigger">
-        <span class="profile-trigger-name">{{ profileService.selectedProfile()?.name ?? ('macrodeck.app:Widgets.Profile.NoProfile' | translate) }}</span>
-        @if (profileService.isCurrentProfileLocked()) {
+        @if (profileService.selectedProfile(); as selected) {
+          <span class="profile-tile profile-tile-sm" [class.profile-tile-accent]="!selected.isVirtual" aria-hidden="true">
+            @if (selected.isVirtual) {
+              <span class="icon icon-lock icon-xs"></span>
+            } @else {
+              {{ monogram(selected) }}
+            }
+          </span>
+          <span class="profile-trigger-name">{{ selected.name }}</span>
+        } @else {
+          <span class="profile-tile profile-tile-sm profile-tile-empty" aria-hidden="true"></span>
+          <span class="profile-trigger-name profile-trigger-empty">{{ 'macrodeck.app:Widgets.Profile.NoProfile' | translate }}</span>
+        }
+        @if (profileService.isCurrentProfileLocked() && !profileService.selectedProfile()?.isVirtual) {
           <span class="icon icon-lock icon-xs profile-trigger-lock"></span>
         }
         <shared-select-caret class="profile-trigger-chevron" />
@@ -23,56 +34,65 @@
     </ng-template>
 
     <ng-template #menuContent>
+      <div class="profile-search">
+        <span class="icon icon-search icon-sm profile-search-icon" aria-hidden="true"></span>
+        <shared-input
+          type="search"
+          [placeholder]="'macrodeck.app:Widgets.Profile.SearchPlaceholder' | translate"
+          [ariaLabel]="'macrodeck.app:Widgets.Profile.SearchPlaceholder' | translate"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+          (keydown.enter)="selectFirstMatch()" />
+      </div>
       <div class="profile-list">
-        @for (profile of profileService.sortedProfiles(); track profile.id) {
+        @for (profile of filteredProfiles(); track profile.id) {
           <div
             class="profile-list-item"
-            [class.active]="profile.id === profileService.selectedProfileId()">
-            <button class="profile-list-select" (click)="selectProfile(profile.id)">
-              @if (profile.isVirtual) {
-                <span class="icon icon-lock icon-xs profile-item-glyph"></span>
-              }
-              <span class="profile-list-name">{{ profile.name }}</span>
-              @if (profile.isVirtual) {
-                <span class="profile-badge">{{ profile.sourceIntegrationId }}</span>
+            [class.active]="profile.id === profileService.selectedProfileId()"
+            [class.menu-open]="rowMenu()?.profile?.id === profile.id">
+            <button
+              type="button"
+              class="profile-list-select"
+              [attr.aria-current]="profile.id === profileService.selectedProfileId() ? 'true' : null"
+              (click)="selectProfile(profile.id)">
+              <span class="profile-tile" [class.profile-tile-accent]="profile.id === profileService.selectedProfileId()" aria-hidden="true">
+                @if (profile.isVirtual) {
+                  <span class="icon icon-lock icon-sm"></span>
+                } @else {
+                  {{ monogram(profile) }}
+                }
+              </span>
+              <span class="profile-list-text">
+                <span class="profile-list-name">{{ profile.name }}</span>
+                <span class="profile-list-subtitle">
+                  @if (profile.isVirtual) {
+                    {{ profile.sourceIntegrationId }}
+                  } @else {
+                    {{ 'macrodeck.app:Deck.GridSubtitle' | translate:{ cols: profile.layout.columns, rows: profile.layout.rows } }}
+                  }
+                </span>
+              </span>
+              @if (profile.id === profileService.selectedProfileId()) {
+                <span class="icon icon-check icon-sm profile-list-check" aria-hidden="true"></span>
               }
             </button>
-            <!-- Revealed on hover and on keyboard focus, so the row stays reachable without a mouse. -->
-            <shared-button-group class="profile-item-actions" size="compact" gap="xs">
-              <shared-button
-                iconOnly
-                variant="ghost"
-                [title]="'macrodeck.app:Widgets.Profile.EditNamed' | translate:{ name: profile.name }"
-                [ariaLabel]="'macrodeck.app:Widgets.Profile.EditNamed' | translate:{ name: profile.name }"
-                [disabled]="!canModify(profile)"
-                (click)="startEdit(profile)">
-                <span class="icon icon-pencil icon-xs"></span>
-              </shared-button>
-              <shared-button
-                iconOnly
-                variant="ghost"
-                [title]="'macrodeck.app:Widgets.Profile.ExportNamed' | translate:{ name: profile.name }"
-                [ariaLabel]="'macrodeck.app:Widgets.Profile.ExportNamed' | translate:{ name: profile.name }"
-                [disabled]="!canExport(profile)"
-                (click)="startExport(profile)">
-                <span class="icon icon-upload icon-xs"></span>
-              </shared-button>
-              <shared-button
-                iconOnly
-                variant="danger-ghost"
-                [title]="'macrodeck.app:Widgets.Profile.DeleteNamed' | translate:{ name: profile.name }"
-                [ariaLabel]="'macrodeck.app:Widgets.Profile.DeleteNamed' | translate:{ name: profile.name }"
-                [disabled]="!canDelete(profile)"
-                (click)="startDelete(profile)">
-                <span class="icon icon-trash icon-xs"></span>
-              </shared-button>
-            </shared-button-group>
+            <shared-button
+              iconOnly
+              variant="ghost"
+              class="profile-item-more"
+              [title]="'macrodeck.app:Integrations.Page.MoreActionsAriaLabel' | translate:{ name: profile.name }"
+              [ariaLabel]="'macrodeck.app:Integrations.Page.MoreActionsAriaLabel' | translate:{ name: profile.name }"
+              (click)="openRowMenu(profile, $event)">
+              <span class="icon icon-dots-vertical icon-sm"></span>
+            </shared-button>
           </div>
+        } @empty {
+          <p class="profile-list-empty">{{ 'macrodeck.app:Widgets.Profile.NoMatches' | translate }}</p>
         }
       </div>
       <shared-button-group class="profile-list-footer">
         <shared-button fill variant="secondary"
-          (click)="dropdownOpen.set(false); startCreate()">
+          (click)="onDropdownOpenChange(false); startCreate()">
           <span class="icon icon-plus icon-sm"></span>
           <span>{{ 'macrodeck.app:Widgets.Profile.NewProfile' | translate }}</span>
         </shared-button>
@@ -87,6 +107,16 @@
       </shared-button-group>
     </ng-template>
   </shared-dropdown-menu>
+
+  <shared-context-menu
+    #rowContextMenu
+    [isOpen]="rowMenu() !== null"
+    [x]="rowMenu()?.x ?? 0"
+    [y]="rowMenu()?.y ?? 0"
+    [items]="rowMenuItems()"
+    (itemClick)="onRowMenuAction($event)"
+    (closed)="rowMenu.set(null)">
+  </shared-context-menu>
 </div>
 
 <input

@@ -28,6 +28,10 @@ internal sealed class FakeTwitchHelixClient : ITwitchHelixClient
 
 	public TwitchUserInfo? User { get; set; }
 
+	public IReadOnlyList<TwitchChatBadgeImage> GlobalBadges { get; set; } = [];
+
+	public IReadOnlyList<TwitchChatBadgeImage> ChannelBadges { get; set; } = [];
+
 	public string? CategoryId { get; set; }
 
 	public string? ClipId { get; set; } = "clip-1";
@@ -80,6 +84,14 @@ internal sealed class FakeTwitchHelixClient : ITwitchHelixClient
 		string broadcasterId,
 		CancellationToken cancellationToken)
 		=> Read("rewards", Rewards);
+
+	public Task<IReadOnlyList<TwitchChatBadgeImage>> GetGlobalChatBadgesAsync(CancellationToken cancellationToken)
+		=> Read("globalBadges", GlobalBadges);
+
+	public Task<IReadOnlyList<TwitchChatBadgeImage>> GetChannelChatBadgesAsync(
+		string broadcasterId,
+		CancellationToken cancellationToken)
+		=> Read("channelBadges", ChannelBadges);
 
 	public Task<TwitchUserInfo?> GetUserAsync(string? userId, string? login, CancellationToken cancellationToken)
 		=> Read("user", User);

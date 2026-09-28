@@ -40,6 +40,7 @@ public static class ProtocolErrorMessages
 			[ProtocolErrorCodes.PluginIconNotFound] = "The plugin's bundled icon packs contain no such icon.",
 			[ProtocolErrorCodes.IconPackInvalid] = "The icon pack archive is not usable.",
 			[ProtocolErrorCodes.IconPackSyncNotAllowed] = "Only a self-registered development session can sync bundled icon packs.",
+			[ProtocolErrorCodes.IconNotFound] = "No installed icon pack contains an icon with this id.",
 		};
 
 	public static string For(string code)
