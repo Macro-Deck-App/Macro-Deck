@@ -180,6 +180,37 @@ internal sealed class TwitchChatIngestionTests
 		Assert.That(message.Badges.Select(b => b.ImageUrl), Is.All.Null);
 	}
 
+	[Test]
+	public async Task Badges_that_failed_to_load_are_loaded_again_when_the_chat_reconnects()
+	{
+		_helix.GlobalBadges = [new TwitchChatBadgeImage("moderator", "1", "https://static-cdn.jtvnw.net/badges/v1/mod/2")];
+		_helix.FailingReads.Add("globalBadges");
+		await _connection.LoadBadgesAsync(CancellationToken.None);
+		_helix.FailingReads.Clear();
+
+		_connection.OnConnectionChanged(true);
+
+		var deadline = DateTime.UtcNow.AddSeconds(5);
+		TwitchChatMessage message;
+		do
+		{
+			_sink.Posted.Clear();
+			_connection.HandleNotification(FakeEventSubClient.Notification(Guid.NewGuid().ToString("N"),
+				"channel.chat.message",
+				ChatLine));
+			message = _sink.Posted.OfType<TwitchChatMessageReceived>().Single().Message;
+			if (message.Badges.Any(badge => badge.ImageUrl is not null))
+			{
+				break;
+			}
+
+			await Task.Delay(20);
+		}
+		while (DateTime.UtcNow < deadline);
+
+		Assert.That(message.Badges.Select(badge => badge.ImageUrl), Does.Contain("https://static-cdn.jtvnw.net/badges/v1/mod/2"));
+	}
+
 	private static TwitchChatMessage Parse(string json)
 		=> TwitchChatMessageParser.Parse(JsonDocument.Parse(json).RootElement,
 			TwitchChatBadgeMap.Empty)!;

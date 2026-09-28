@@ -13,8 +13,6 @@ using Serilog.Core;
 
 namespace MacroDeckHost.Tests.UnitTests.Twitch.Chat;
 
-// Opens the chat widget the way a client does: through the broker and the real provider resolver, under
-// the Twitch integration's own id, so a registration or surface mismatch fails here and not in the app.
 [TestFixture]
 internal sealed class TwitchChatWidgetSessionTests : UiSessionFixture
 {

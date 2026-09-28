@@ -65,7 +65,27 @@ public sealed class TwitchChatHub : ITwitchChatSink, ITwitchChatFeed, IDisposabl
 		}
 	}
 
-	public event EventHandler<TwitchChatChangedEventArgs>? Changed;
+	private EventHandler<TwitchChatChangedEventArgs>? _changed;
+	private volatile bool _listenerJoined;
+
+	public event EventHandler<TwitchChatChangedEventArgs>? Changed
+	{
+		add
+		{
+			lock (_accountSync)
+			{
+				_changed += value;
+				_listenerJoined = true;
+			}
+		}
+		remove
+		{
+			lock (_accountSync)
+			{
+				_changed -= value;
+			}
+		}
+	}
 
 	public IReadOnlyList<TwitchChatAccount> Accounts
 	{
@@ -178,13 +198,21 @@ public sealed class TwitchChatHub : ITwitchChatSink, ITwitchChatFeed, IDisposabl
 				PublishSnapshots(changed);
 			}
 
-			if (_images is not null && (accountsChanged || added.Count > 0 || changed.Count > 0))
-			{
-				_images.Pin([.. _histories.Values.SelectMany(history => history.Messages).SelectMany(m => m.Images())]);
+			var listenerJoined = _listenerJoined;
+			_listenerJoined = false;
 
-				foreach (var image in added.SelectMany(message => message.Images()))
+			if (_images is not null && (accountsChanged || listenerJoined || added.Count > 0 || changed.Count > 0))
+			{
+				var retained = _histories.Values.SelectMany(history => history.Messages).ToList();
+				_images.Pin([.. retained.SelectMany(message => message.Images())]);
+
+				if (_changed is not null)
 				{
-					_images.Request(image);
+					var wanted = listenerJoined || accountsChanged ? retained : added.Where(retained.Contains);
+					foreach (var image in wanted.SelectMany(message => message.Images()))
+					{
+						_images.Request(image);
+					}
 				}
 			}
 
@@ -333,7 +361,7 @@ public sealed class TwitchChatHub : ITwitchChatSink, ITwitchChatFeed, IDisposabl
 
 	private void Raise(string? accountId)
 	{
-		var handlers = Changed;
+		var handlers = _changed;
 
 		if (handlers is null)
 		{

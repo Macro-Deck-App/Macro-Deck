@@ -130,11 +130,10 @@ public sealed partial class TwitchChatImageCache : ITwitchChatImages, IDisposabl
 
 			if (TryBuildUri(image) is not { } uri)
 			{
-				_failures[key] = now + FailureLifetime;
+				RememberFailure(key, now);
 				return;
 			}
 
-			// Everything cached is on screen somewhere: fetching more could only evict what is shown.
 			if (_pinnedCount >= MaxEntries || _pinnedBytes >= MaxCachedBytes)
 			{
 				return;
@@ -267,6 +266,26 @@ public sealed partial class TwitchChatImageCache : ITwitchChatImages, IDisposabl
 		}
 	}
 
+	private void RememberFailure(string key, DateTimeOffset now)
+	{
+		_failures[key] = now + FailureLifetime;
+
+		if (_failures.Count <= MaxEntries)
+		{
+			return;
+		}
+
+		foreach (var expired in _failures.Where(failure => failure.Value <= now).Select(failure => failure.Key).ToList())
+		{
+			_failures.Remove(expired);
+		}
+
+		foreach (var oldest in _failures.OrderBy(failure => failure.Value).Take(_failures.Count - MaxEntries).ToList())
+		{
+			_failures.Remove(oldest.Key);
+		}
+	}
+
 	private bool Store(TwitchChatImage image, byte[]? bytes, string? mediaType)
 	{
 		lock (_sync)
@@ -280,7 +299,7 @@ public sealed partial class TwitchChatImageCache : ITwitchChatImages, IDisposabl
 
 			if (bytes is null || mediaType is null)
 			{
-				_failures[image.Key] = _timeProvider.GetUtcNow() + FailureLifetime;
+				RememberFailure(image.Key, _timeProvider.GetUtcNow());
 				return false;
 			}
 

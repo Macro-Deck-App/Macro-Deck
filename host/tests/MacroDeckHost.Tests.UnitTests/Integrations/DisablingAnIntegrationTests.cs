@@ -26,10 +26,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MacroDeckHost.Tests.UnitTests.Integrations;
 
-/// <summary>
-/// Turning an integration off from the integrations page or the REST route: whatever its providers offered
-/// has to leave the catalogs, stay out while it is off, and come back when it is turned on again.
-/// </summary>
 [TestFixture]
 internal sealed class DisablingAnIntegrationTests
 {

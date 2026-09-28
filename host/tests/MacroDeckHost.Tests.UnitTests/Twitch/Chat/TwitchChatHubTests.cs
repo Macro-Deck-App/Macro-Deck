@@ -231,6 +231,46 @@ internal sealed class TwitchChatHubTests
 		});
 	}
 
+	[Test]
+	public void Nothing_is_downloaded_while_no_widget_shows_the_chat_and_the_retained_images_are_once_one_does()
+	{
+		var images = new FakeTwitchChatImages();
+		using var hub = new TwitchChatHub(_time, Logger.None, images);
+		hub.SetAccounts([new TwitchChatAccount(Streamer, "Streamer")]);
+		hub.Post(new TwitchChatMessageReceived(Streamer, Message("a", emoteId: "25")));
+		hub.Tick();
+		var requestedUnwatched = images.Requested.Count;
+
+		hub.Changed += (_, _) => { };
+		hub.Tick();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(requestedUnwatched, Is.Zero);
+			Assert.That(images.Requested, Does.Contain(TwitchChatImage.Emote("25")));
+		});
+	}
+
+	[Test]
+	public void A_message_pushed_out_of_the_history_in_the_same_tick_downloads_nothing()
+	{
+		var images = new FakeTwitchChatImages();
+		using var hub = new TwitchChatHub(_time, Logger.None, images);
+		hub.Changed += (_, _) => { };
+		hub.SetAccounts([new TwitchChatAccount(Streamer, "Streamer")]);
+		hub.Tick();
+
+		hub.Post(new TwitchChatMessageReceived(Streamer, Message("old", emoteId: "1")));
+		for (var index = 0; index < TwitchChatHub.HistoryLimit; index++)
+		{
+			hub.Post(new TwitchChatMessageReceived(Streamer, Message($"m{index}")));
+		}
+
+		hub.Tick();
+
+		Assert.That(images.Requested, Does.Not.Contain(TwitchChatImage.Emote("1")));
+	}
+
 	private void Post(string accountId, params string[] ids)
 	{
 		foreach (var id in ids)

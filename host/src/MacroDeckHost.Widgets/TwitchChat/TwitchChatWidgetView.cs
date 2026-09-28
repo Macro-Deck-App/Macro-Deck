@@ -7,7 +7,6 @@ namespace MacroDeckHost.Widgets.TwitchChat;
 
 internal static class TwitchChatWidgetView
 {
-	public const int MessageMaxLines = 4;
 	public const int FallbackMaxLines = 2;
 
 	private static readonly UiLength _textSize = UiLength.Capped(0.1, 12);
@@ -64,7 +63,6 @@ internal static class TwitchChatWidgetView
 			Spans = UiValue.Of(line.Spans),
 			Size = _textSize,
 			Wrap = true,
-			MaxLines = MessageMaxLines,
 		};
 	}
 

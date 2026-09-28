@@ -18,6 +18,7 @@ internal sealed class TwitchAccountConnection : IDisposable
 	private volatile IReadOnlyList<TwitchCustomReward> _rewards = [];
 	private volatile IReadOnlyList<string> _missingScopeEvents = [];
 	private volatile TwitchChatBadgeMap _badges = TwitchChatBadgeMap.Empty;
+	private int _badgesLoading;
 
 	private TwitchEventSubSession? _session;
 	private TwitchStatePoller? _poller;
@@ -87,10 +88,7 @@ internal sealed class TwitchAccountConnection : IDisposable
 		_session.Start();
 		_poller.Start();
 
-		if (_chatSink is not null)
-		{
-			_ = LoadBadgesAsync(_stopping.Token);
-		}
+		LoadBadgesIfMissing();
 	}
 
 	public TwitchAccountState Merge(Func<TwitchAccountState, TwitchAccountState> update)
@@ -130,11 +128,31 @@ internal sealed class TwitchAccountConnection : IDisposable
 		}
 	}
 
-	private void OnConnectionChanged(bool connected)
+	internal void OnConnectionChanged(bool connected)
 	{
 		Merge(state => state with { IsConnected = connected });
 		_emitter?.PublishConnection(Account, connected);
 		_chatSink?.Post(new TwitchChatConnectionChanged(Account.UserId, connected));
+
+		if (connected)
+		{
+			LoadBadgesIfMissing();
+		}
+	}
+
+	private void LoadBadgesIfMissing()
+	{
+		if (_chatSink is null ||
+			!ReferenceEquals(_badges, TwitchChatBadgeMap.Empty) ||
+			Interlocked.Exchange(ref _badgesLoading, 1) == 1)
+		{
+			return;
+		}
+
+		_ = LoadBadgesAsync(_stopping.Token).ContinueWith(_ => Interlocked.Exchange(ref _badgesLoading, 0),
+			CancellationToken.None,
+			TaskContinuationOptions.ExecuteSynchronously,
+			TaskScheduler.Default);
 	}
 
 	internal void HandleNotification(TwitchEventSubMessage message)
