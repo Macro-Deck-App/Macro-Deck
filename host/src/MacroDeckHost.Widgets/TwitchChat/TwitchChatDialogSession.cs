@@ -25,7 +25,7 @@ internal sealed class TwitchChatDialogSession : IUiSession
 	private readonly ILogger _logger;
 	private readonly Lock _sync = new();
 
-	private IReadOnlyDictionary<string, TwitchChatMessage> _messages = new Dictionary<string, TwitchChatMessage>();
+	private Dictionary<string, TwitchChatMessage> _messages = new(StringComparer.Ordinal);
 	private bool _disposed;
 
 	public TwitchChatDialogSession(
@@ -118,7 +118,7 @@ internal sealed class TwitchChatDialogSession : IUiSession
 
 			_messages = ownChannel
 				? snapshot.Messages.ToDictionary(message => TwitchChatStyle.MessageKey(message.MessageId), StringComparer.Ordinal)
-				: new Dictionary<string, TwitchChatMessage>();
+				: new Dictionary<string, TwitchChatMessage>(StringComparer.Ordinal);
 
 			var canModerate = ownChannel && snapshot.IsConnected && _permission() == TwitchChatWidgetPermission.Allowed;
 

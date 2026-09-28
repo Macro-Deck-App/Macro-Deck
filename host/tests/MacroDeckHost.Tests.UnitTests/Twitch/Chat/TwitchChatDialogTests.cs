@@ -16,6 +16,7 @@ using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Widgets.TwitchChat;
+using MacroDeckHost.Tests.UnitTests.Delegation;
 using Serilog.Core;
 
 namespace MacroDeckHost.Tests.UnitTests.Twitch.Chat;
@@ -330,7 +331,7 @@ internal sealed class TwitchChatDialogTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(UiCanonicalJson.SerializeToUtf8Bytes(root).Length, Is.LessThanOrEqualTo(ProtocolLimits.MaxUiTreeBytes));
-			Assert.That(Flatten(root).Count(), Is.LessThanOrEqualTo(ProtocolLimits.MaxUiNodes));
+			Assert.That(Flatten(root).Count(), Is.LessThanOrEqualTo(ProtocolLimits.MaxUiNodesPerTree));
 		});
 	}
 

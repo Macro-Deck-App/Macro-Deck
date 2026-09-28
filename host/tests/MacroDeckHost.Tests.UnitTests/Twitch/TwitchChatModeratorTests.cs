@@ -40,7 +40,11 @@ internal sealed class TwitchChatModeratorTests
 	}
 
 	[TearDown]
-	public void TearDown() => _integration.Dispose();
+	public void TearDown()
+	{
+		_integration.Dispose();
+		_accounts.Dispose();
+	}
 
 	[Test]
 	public async Task Each_action_runs_against_the_chosen_account_as_broadcaster_and_moderator()
