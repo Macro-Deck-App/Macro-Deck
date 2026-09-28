@@ -57,6 +57,10 @@ export const UI_ICONS_WELL_KNOWN: readonly string[] =
 
 export const UiComponentDirections = { Vertical: 'vertical', Horizontal: 'horizontal' } as const;
 
+export const UiComponentOverflows = { Shrink: 'shrink', ClipStart: 'clip-start' } as const;
+
+export const UI_COMPONENT_OVERFLOWS_WELL_KNOWN: readonly string[] = Object.values(UiComponentOverflows);
+
 export const UiComponentJustify = {
   Start: 'start', Center: 'center', End: 'end', SpaceBetween: 'space-between',
 } as const;

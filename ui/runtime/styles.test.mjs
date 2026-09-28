@@ -282,6 +282,38 @@ test('a stack keeps content that asks for more room than it has inside its own b
   }
 });
 
+test('a clip-start stack keeps its children at their own size and cuts off what does not fit', () => {
+  const source = readFileSync(path.join(HERE, 'styles', 'renderer.css'), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+  const rules = topLevelRules(source);
+  const own = rules.find(rule => rule.selectors.includes('.widget-stack.widget-stack-clip-start'));
+  const children = rules.find(rule => rule.selectors.includes('.widget-stack.widget-stack-clip-start > *'));
+
+  assert.ok(own, 'renderer.css declares no clip-start stack rule');
+  assert.match(own.body, /overflow:\s*hidden\b/);
+  assert.ok(children, 'renderer.css declares no rule for the children of a clip-start stack');
+  assert.match(children.body, /flex-shrink:\s*0\b/);
+  assert.match(children.body, /max-height:\s*none\b/);
+  assert.match(children.body, /max-width:\s*none\b/);
+
+  // Equal weight to the text allowance on stack children, so only a later position lets it win.
+  const allowance = source.search(/\.widget-stack > \.widget-text/);
+  const clip = source.search(/\.widget-stack\.widget-stack-clip-start > \*/);
+  assert.ok(allowance >= 0 && clip > allowance, 'the clip-start child rule must come after the text allowance');
+});
+
+test('an image inside a text flow is a square one line high that does not grow the line', () => {
+  const source = readFileSync(path.join(HERE, 'styles', 'renderer.css'), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+  const rule = topLevelRules(source).find(one => one.selectors.includes('.widget-text-span-image'));
+
+  assert.ok(rule, 'renderer.css declares no .widget-text-span-image rule');
+  assert.match(rule.body, /(^|[^-\w])width:\s*1em\b/);
+  assert.match(rule.body, /(^|[^-\w])height:\s*1em\b/);
+  assert.match(rule.body, /vertical-align:\s*top\b/);
+  assert.match(rule.body, /-webkit-user-drag:\s*none/);
+});
+
 test('a long press over a widget raises no platform menu of its own', () => {
   // A deck answers a long press itself - `onLongPress` on a tile, `long-press` inside a tree. iOS
   // raises its callout sheet ("Copy" / "Share" over album artwork) from a recognizer that no

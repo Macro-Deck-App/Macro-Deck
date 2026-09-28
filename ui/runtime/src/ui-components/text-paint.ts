@@ -13,12 +13,14 @@ import {
 import type { UiComponentContext } from '../ui-framework/component-registry';
 import { textFit } from '../render/text-fit';
 import { px } from './px.util';
+import { forgetTextSpans, paintTextSpans, textSpansSignature, UiTextSpanRun } from './text-spans';
 
 export function paintTextCommon<TState>(
   node: UiNode,
   ctx: UiComponentContext<TState>,
   extraClass: string | null,
   text: string,
+  spans: UiTextSpanRun[] | null = null,
 ): void {
   const element = ctx.element as HTMLElement;
   const maxLines = textMaxLines(node);
@@ -42,16 +44,22 @@ export function paintTextCommon<TState>(
   ctx.setStyle(element, '-webkit-line-clamp', maxLines > 1 ? String(maxLines) : null);
   ctx.setStyle(element, 'min-width', digits === null ? null : `${digits}ch`);
 
-  // A final line break in pre-wrap text opens no line of its own, so a label's trailing blank line
-  // would vanish. One more break keeps it, the way a native text view lays it out.
-  const painted = wraps && text.endsWith('\n') ? `${text}\n` : text;
-  if (element.textContent !== painted) element.textContent = painted;
+  let content = text;
+  if (spans !== null) {
+    paintTextSpans(element, spans, resource => ctx.host.resourceUrl(resource));
+    content = textSpansSignature(spans);
+  } else {
+    // A final line break in pre-wrap text opens no line of its own, so a label's trailing blank line
+    // would vanish. One more break keeps it, the way a native text view lays it out.
+    const painted = wraps && text.endsWith('\n') ? `${text}\n` : text;
+    if (forgetTextSpans(element) || element.textContent !== painted) element.textContent = painted;
+  }
 
   const size = resolveLength(nodeLength(node, UiComponentProperties.Size), ctx.basis, ctx.crossExtent);
   const minSize = resolveLength(nodeLength(node, UiComponentProperties.MinSize), ctx.basis, ctx.crossExtent);
   const fontReady = faceId ? ctx.host.fontReady(faceId) : true;
   const font = faceId ? `${faceId}|${fontReady}` : `|${ctx.host.uiFontKey?.() ?? ''}`;
-  ctx.keepFit(element, textFit(element, size, minSize), `${size}|${minSize}|${text}|${font}`);
+  ctx.keepFit(element, textFit(element, size, minSize), `${size}|${minSize}|${content}|${font}`);
 }
 
 export function textIntrinsicMainPx(

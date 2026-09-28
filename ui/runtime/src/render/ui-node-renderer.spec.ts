@@ -761,6 +761,181 @@ describe('widget node renderer', () => {
     });
   });
 
+  describe('ui.text spans', () => {
+    const emote = { resourceId: 'emote-1', contentHash: 'h1' };
+    const text = () => container.querySelector('.widget-text') as HTMLElement;
+
+    it('draws the spans in place of the text, in one element', () => {
+      mount(node('ui.text', {
+        text: 'plain equivalent',
+        spans: [{ text: 'Hi ' }, { text: 'there', color: '#ff0000', weight: 'bold' }],
+      }));
+
+      expect(container.querySelectorAll('.widget-text').length).toBe(1);
+      expect(text().textContent).toBe('Hi there');
+      const runs = Array.from(text().children) as HTMLElement[];
+      expect(runs.map(run => run.tagName)).toEqual(['SPAN', 'SPAN']);
+      expect(runs[0].style.color).toBe('');
+      expect(runs[0].style.fontWeight).toBe('');
+      expect(runs[1].style.color).toBe('rgb(255, 0, 0)');
+      expect(runs[1].style.fontWeight).toBe('700');
+    });
+
+    it('ignores a span colour that is not #rrggbb', () => {
+      mount(node('ui.text', {
+        text: 'abc',
+        spans: [{ text: 'a', color: 'red' }, { text: 'b', color: '#f00' }, { text: 'c', color: 'url(x)' }],
+      }));
+
+      for (const run of Array.from(text().children) as HTMLElement[]) expect(run.style.color).toBe('');
+    });
+
+    it('draws chat text containing markup literally', () => {
+      const hostile = '<b>bold</b><img src=x onerror="alert(1)"> & &amp;';
+      mount(node('ui.text', { text: hostile, spans: [{ text: hostile }, { image: emote, alt: '<i>Kappa</i>' }] }));
+
+      expect(text().querySelector('b')).toBeNull();
+      expect(text().querySelectorAll('img').length).toBe(1);
+      expect(text().firstElementChild!.textContent).toBe(hostile);
+      const image = text().querySelector('img')!;
+      expect(image.getAttribute('onerror')).toBeNull();
+      expect(image.getAttribute('alt')).toBe('<i>Kappa</i>');
+    });
+
+    it('draws an image span inline from the host resource url', () => {
+      mount(node('ui.text', { text: 'nice Kappa', spans: [{ text: 'nice ' }, { image: emote, alt: 'Kappa' }] }));
+
+      const image = text().querySelector('img') as HTMLImageElement;
+      expect(image).not.toBeNull();
+      expect(image.parentElement).toBe(text());
+      expect(image.classList.contains('widget-text-span-image')).toBeTrue();
+      expect(image.getAttribute('src')).toBe('/api/ui/resources/emote-1');
+      expect(image.getAttribute('draggable')).toBe('false');
+    });
+
+    it('shows the alt text while the image cannot be loaded, and the image once it can', () => {
+      mount(node('ui.text', { text: 'nice Kappa', spans: [{ text: 'nice ' }, { image: emote, alt: 'Kappa' }] }));
+      const image = text().querySelector('img') as HTMLImageElement;
+
+      image.dispatchEvent(new Event('error'));
+      expect(text().textContent).toBe('nice Kappa');
+      expect(image.style.display).toBe('none');
+
+      image.dispatchEvent(new Event('load'));
+      expect(text().textContent).toBe('nice ');
+      expect(image.style.display).toBe('');
+    });
+
+    it('draws nothing for a failed image that has no alt text', () => {
+      mount(node('ui.text', { text: 'x', spans: [{ image: emote }, { text: 'x' }] }));
+      const image = text().querySelector('img') as HTMLImageElement;
+
+      image.dispatchEvent(new Event('error'));
+
+      expect(text().textContent).toBe('x');
+      expect(image.style.display).toBe('none');
+    });
+
+    it('draws the alt text when the host has no url for the image', () => {
+      mount(node('ui.text', { text: 'Kappa', spans: [{ image: emote, alt: 'Kappa' }] }), 120, 120,
+        testHost({ resourceUrl: () => null }));
+
+      expect(text().querySelector('img')).toBeNull();
+      expect(text().textContent).toBe('Kappa');
+    });
+
+    it('skips entries that are neither text nor image', () => {
+      mount(node('ui.text', { text: 'ab', spans: [{ text: 'a' }, {}, null, 'b', { image: { resourceId: '' } }] }));
+
+      expect(text().textContent).toBe('a');
+      expect(text().querySelector('img')).toBeNull();
+    });
+
+    it('bounds the flow by wrap and maxLines like plain text', () => {
+      mount(node('ui.text', { text: 'x', wrap: true, maxLines: 4, spans: [{ text: 'x' }] }));
+
+      expect(text().style.whiteSpace).toBe('pre-wrap');
+      expect(text().classList.contains('widget-text-clamp')).toBeTrue();
+      expect(text().style.webkitLineClamp).toBe('4');
+    });
+
+    it('keeps an image that did not change across repaints, and drops the spans for plain text again', () => {
+      const first = node2('ui.text', { text: 'a Kappa', spans: [{ text: 'a ' }, { image: emote, alt: 'Kappa' }] });
+      const handle = renderUiNode(container, first, { width: 120, height: 120 }, null, 120, testHost());
+      const image = text().querySelector('img');
+
+      handle.update(node2('ui.text', { text: 'a Kappa', color: '#00ff00', spans: [{ text: 'a ' }, { image: emote, alt: 'Kappa' }] }),
+        { width: 120, height: 120 }, null);
+      expect(text().querySelector('img')).toBe(image);
+
+      handle.update(node2('ui.text', { text: 'b Kappa', spans: [{ text: 'b ' }, { image: emote, alt: 'Kappa' }] }),
+        { width: 120, height: 120 }, null);
+      expect(text().textContent).toBe('b ');
+
+      handle.update(node2('ui.text', { text: 'a ' }), { width: 120, height: 120 }, null);
+      expect(text().querySelector('img')).toBeNull();
+      expect(text().children.length).toBe(0);
+      expect(text().textContent).toBe('a ');
+    });
+
+    it('draws the text of a node whose spans are not a list', () => {
+      mount(node('ui.text', { text: 'plain', spans: 'nope' }));
+
+      expect(text().textContent).toBe('plain');
+      expect(text().children.length).toBe(0);
+    });
+  });
+
+  describe('ui.stack overflow', () => {
+    const stack = () => container.querySelector('.widget-stack') as HTMLElement;
+    const inner = () => Array.from(stack().children) as HTMLElement[];
+
+    it('clip-start keeps children at their natural size, ignores fill and anchors the content at the end', () => {
+      mount(node('ui.stack', { overflow: 'clip-start', justify: 'start' }, [
+        node('ui.stack', { fill: true }, [node('ui.text', { text: 'a' })]),
+        node('ui.stack', { mainSize: { basis: 0.25 } }, [node('ui.text', { text: 'b' })]),
+        node('ui.stack', {}, [node('ui.text', { text: 'c' })]),
+      ]), 120, 120);
+
+      expect(stack().classList.contains('widget-stack-clip-start')).toBeTrue();
+      expect(stack().style.justifyContent).toBe('flex-end');
+      expect(inner()[0].style.height).toBe('');
+      expect(inner()[1].style.height).toBe('30px');
+      expect(inner()[2].style.height).toBe('');
+    });
+
+    for (const overflow of [undefined, 'shrink', 'scroll']) {
+      it(`shrinks as it always has when overflow is ${overflow ?? 'absent'}`, () => {
+        const properties: Record<string, unknown> = { justify: 'start' };
+        if (overflow !== undefined) properties['overflow'] = overflow;
+        mount(node('ui.stack', properties, [node('ui.stack', { fill: true })]), 120, 120);
+
+        expect(stack().classList.contains('widget-stack-clip-start')).toBeFalse();
+        expect(stack().style.justifyContent).toBe('flex-start');
+        expect(inner()[0].style.height).toBe('120px');
+      });
+    }
+
+    it('is ignored on a button, which stays a version 1 stack', () => {
+      mount(node('ui.button', { overflow: 'clip-start' }, [node('ui.stack', { fill: true })]), 120, 120);
+      const button = container.querySelector('.widget-button') as HTMLElement;
+
+      expect(button.classList.contains('widget-stack-clip-start')).toBeFalse();
+      expect(button.style.justifyContent).toBe('flex-start');
+      expect(stack().style.height).toBe('120px');
+    });
+
+    it('drops the clip when a repaint takes the overflow away', () => {
+      const handle = renderUiNode(container, node2('ui.stack', { overflow: 'clip-start' }, [node('ui.text', { text: 'a' })]),
+        { width: 120, height: 120 }, null, 120, testHost());
+      expect(stack().classList.contains('widget-stack-clip-start')).toBeTrue();
+
+      handle.update(node2('ui.stack', {}, [node('ui.text', { text: 'a' })]), { width: 120, height: 120 }, null);
+
+      expect(stack().classList.contains('widget-stack-clip-start')).toBeFalse();
+    });
+  });
+
   describe('ui.list', () => {
     const PAST_THROTTLE_MS = 600;
 
