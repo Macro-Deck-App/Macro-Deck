@@ -9333,6 +9333,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Twitch.Actions.UnbanUser.Name" xml:space="preserve">
     <value>Zrušit ban uživatele</value>
   </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountChanged" xml:space="preserve">
+    <value>Tento widget teď zobrazuje jiný účet Twitch. K moderování je potřeba chat otevřít znovu.</value>
+  </data>
   <data name="Integrations.Twitch.ChatDialog.AccountUnavailable" xml:space="preserve">
     <value>Účet Twitch není připojen.</value>
   </data>
@@ -9356,6 +9359,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Twitch.ChatDialog.Deleted" xml:space="preserve">
     <value>Zpráva byla smazána.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Failed" xml:space="preserve">
+    <value>Akce se nezdařila. Je potřeba zkontrolovat připojení a zkusit to znovu.</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.ModerationUnavailable" xml:space="preserve">
     <value>Moderování je pro tento widget vypnuté.</value>

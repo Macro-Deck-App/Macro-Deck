@@ -184,6 +184,47 @@ internal sealed class TwitchChatDialogTests
 	}
 
 	[Test]
+	public async Task Another_message_cannot_be_picked_while_an_action_is_still_running()
+	{
+		_hub.Post(new TwitchChatMessageReceived(Streamer, TwitchChatHubTests.Message("m2", chatterId: "43") with
+		{
+			Fragments = [new TwitchChatFragment(TwitchChatFragmentKind.Text, "second")],
+		}));
+		_hub.Tick();
+		var release = new TaskCompletionSource<TwitchChatModerationResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+		_moderator.Pending = release.Task;
+		await using var dialog = await OpenDialogAsync();
+
+		SelectMessage(dialog);
+		PressButton(dialog, "DeleteMessage");
+		await WaitForAsync(() => _moderator.Requests.Count == 1);
+		SelectMessage(dialog, index: 1);
+		release.SetResult(TwitchChatModerationResult.Succeeded);
+		await WaitForAsync(() => Texts(dialog.BuildTree().Root).Any(text => text.Contains("ChatDialog.Deleted")));
+
+		var selected = Flatten(dialog.BuildTree().Root, includeFallback: false)
+			.Single(node => node.Id.EndsWith("selected", StringComparison.Ordinal));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(selected.Properties[UiComponentProperties.Text].GetRawText(), Does.Contain("hello"));
+			Assert.That(_moderator.Requests.Single().Request, Is.EqualTo(TwitchChatModerationRequest.Delete("m1")));
+		});
+	}
+
+	[Test]
+	public async Task A_request_that_never_reached_twitch_is_not_blamed_on_twitch()
+	{
+		_moderator.Result = TwitchChatModerationResult.Failed;
+		await using var dialog = await OpenDialogAsync();
+
+		SelectMessage(dialog);
+		PressButton(dialog, "DeleteMessage");
+
+		await WaitForAsync(() => Texts(dialog.BuildTree().Root).Any(text => text.Contains("ChatDialog.Failed")));
+	}
+
+	[Test]
 	public async Task A_failure_is_reported_in_plain_words()
 	{
 		_moderator.Result = TwitchChatModerationResult.NotPermitted;
@@ -245,7 +286,7 @@ internal sealed class TwitchChatDialogTests
 		_widget.Data = """{"account":"222"}""";
 		PressButton(dialog, "DeleteMessage");
 		await WaitForAsync(() =>
-			Texts(dialog.BuildTree().Root).Any(text => text.Contains("ChatDialog.AccountUnavailable")));
+			Texts(dialog.BuildTree().Root).Any(text => text.Contains("ChatDialog.AccountChanged")));
 
 		Assert.That(_moderator.Requests, Is.Empty);
 	}
@@ -488,6 +529,8 @@ internal sealed class TwitchChatDialogTests
 
 		public TwitchChatModerationResult Result { get; set; } = TwitchChatModerationResult.Succeeded;
 
+		public Task<TwitchChatModerationResult>? Pending { get; set; }
+
 		public string Id => TwitchChatWidgetType.OwnerId;
 
 		public LocalizedText Name => "Twitch";
@@ -512,7 +555,7 @@ internal sealed class TwitchChatDialogTests
 				Requests.Add((accountId, request));
 			}
 
-			return Task.FromResult(Result);
+			return Pending ?? Task.FromResult(Result);
 		}
 	}
 }

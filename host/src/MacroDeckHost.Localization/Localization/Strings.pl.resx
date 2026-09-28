@@ -9333,6 +9333,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Twitch.Actions.UnbanUser.Name" xml:space="preserve">
     <value>Odbanuj użytkownika</value>
   </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountChanged" xml:space="preserve">
+    <value>Ten widżet pokazuje teraz inne konto Twitch. Aby je moderować, należy ponownie otworzyć czat.</value>
+  </data>
   <data name="Integrations.Twitch.ChatDialog.AccountUnavailable" xml:space="preserve">
     <value>Konto Twitch nie jest połączone.</value>
   </data>
@@ -9356,6 +9359,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Twitch.ChatDialog.Deleted" xml:space="preserve">
     <value>Wiadomość została usunięta.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Failed" xml:space="preserve">
+    <value>Akcja nie powiodła się. Należy sprawdzić połączenie i spróbować jeszcze raz.</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.ModerationUnavailable" xml:space="preserve">
     <value>Moderowanie jest wyłączone dla tego widżetu.</value>

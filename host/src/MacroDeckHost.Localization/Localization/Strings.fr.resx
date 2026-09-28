@@ -9333,6 +9333,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Twitch.Actions.UnbanUser.Name" xml:space="preserve">
     <value>Débannir un utilisateur</value>
   </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountChanged" xml:space="preserve">
+    <value>Ce widget affiche maintenant un autre compte Twitch. Rouvre le chat pour le modérer.</value>
+  </data>
   <data name="Integrations.Twitch.ChatDialog.AccountUnavailable" xml:space="preserve">
     <value>Le compte Twitch n'est pas connecté.</value>
   </data>
@@ -9356,6 +9359,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Integrations.Twitch.ChatDialog.Deleted" xml:space="preserve">
     <value>Message supprimé.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Failed" xml:space="preserve">
+    <value>L'action n'a pas abouti. Vérifie la connexion et réessaie.</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.ModerationUnavailable" xml:space="preserve">
     <value>La modération est désactivée pour ce widget.</value>

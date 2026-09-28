@@ -9331,6 +9331,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Twitch.Actions.UnbanUser.Name" xml:space="preserve">
     <value>Bann aufheben</value>
   </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountChanged" xml:space="preserve">
+    <value>Dieses Widget zeigt jetzt ein anderes Twitch-Konto. Öffne den Chat erneut, um es zu moderieren.</value>
+  </data>
   <data name="Integrations.Twitch.ChatDialog.AccountUnavailable" xml:space="preserve">
     <value>Das Twitch-Konto ist nicht verbunden.</value>
   </data>
@@ -9354,6 +9357,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.Twitch.ChatDialog.Deleted" xml:space="preserve">
     <value>Nachricht gelöscht.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Failed" xml:space="preserve">
+    <value>Die Aktion ist nicht durchgegangen. Prüfe die Verbindung und versuche es noch einmal.</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.ModerationUnavailable" xml:space="preserve">
     <value>Moderation ist für dieses Widget ausgeschaltet.</value>

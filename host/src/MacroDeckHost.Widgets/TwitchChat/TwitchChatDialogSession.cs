@@ -144,7 +144,8 @@ internal sealed class TwitchChatDialogSession : IUiSession
 	{
 		lock (_sync)
 		{
-			if (!_messages.TryGetValue(key, out var message) || !_state.Value.CanModerate)
+			if (!_messages.TryGetValue(key, out var message) || !_state.Value.CanModerate ||
+				_state.Value.Step == TwitchChatDialogStep.Busy)
 			{
 				return;
 			}
@@ -184,9 +185,7 @@ internal sealed class TwitchChatDialogSession : IUiSession
 	}
 
 	private void Deselect()
-		=> UpdateLocked(state => state.Step == TwitchChatDialogStep.Busy
-			? state
-			: state with { Selection = null, Step = TwitchChatDialogStep.Actions, Result = null });
+		=> UpdateLocked(state => state with { Selection = null, Step = TwitchChatDialogStep.Actions, Result = null });
 
 	private void AskBan()
 		=> UpdateLocked(state => state.Step == TwitchChatDialogStep.Actions
@@ -217,7 +216,12 @@ internal sealed class TwitchChatDialogSession : IUiSession
 
 			if (Refusal() is { } refusal)
 			{
-				Update(state => state with { Step = TwitchChatDialogStep.Actions, Result = refusal });
+				Update(state => state with
+				{
+					Step = TwitchChatDialogStep.Actions,
+					Result = refusal,
+					CanModerate = state.CanModerate && _allowed,
+				});
 				return;
 			}
 
@@ -245,7 +249,9 @@ internal sealed class TwitchChatDialogSession : IUiSession
 			? succeeded(selection.ChatterName)
 			: FailureText(result);
 
-		UpdateLocked(state => state with { Step = TwitchChatDialogStep.Actions, Result = text });
+		UpdateLocked(state => state.Selection is null
+			? state with { Step = TwitchChatDialogStep.Actions }
+			: state with { Step = TwitchChatDialogStep.Actions, Result = text });
 	}
 
 	private LocalizedString? Refusal()
@@ -260,7 +266,7 @@ internal sealed class TwitchChatDialogSession : IUiSession
 		return _permission() switch
 		{
 			TwitchChatWidgetPermission.Allowed => null,
-			TwitchChatWidgetPermission.AccountChanged => AppStrings.Integrations.Twitch.ChatDialog.AccountUnavailable(),
+			TwitchChatWidgetPermission.AccountChanged => AppStrings.Integrations.Twitch.ChatDialog.AccountChanged(),
 			_ => AppStrings.Integrations.Twitch.ChatDialog.ModerationUnavailable(),
 		};
 	}
@@ -272,7 +278,7 @@ internal sealed class TwitchChatDialogSession : IUiSession
 			TwitchChatModerationResult.MissingScope => AppStrings.Integrations.Twitch.Errors.MissingScopePermission(),
 			TwitchChatModerationResult.NotPermitted => AppStrings.Integrations.Twitch.ChatDialog.NotPermitted(),
 			TwitchChatModerationResult.Refused => AppStrings.Integrations.Twitch.ChatDialog.Refused(),
-			_ => AppStrings.Integrations.Twitch.Errors.RequestRejected(),
+			_ => AppStrings.Integrations.Twitch.ChatDialog.Failed(),
 		};
 
 	private void UpdateLocked(Func<TwitchChatDialogState, TwitchChatDialogState> change)

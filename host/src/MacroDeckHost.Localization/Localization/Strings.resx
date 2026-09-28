@@ -9333,6 +9333,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Twitch.Actions.UnbanUser.Name" xml:space="preserve">
     <value>Unban User</value>
   </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountChanged" xml:space="preserve">
+    <value>This widget now shows another Twitch account. Reopen the chat to moderate it.</value>
+  </data>
   <data name="Integrations.Twitch.ChatDialog.AccountUnavailable" xml:space="preserve">
     <value>The Twitch account is not connected.</value>
   </data>
@@ -9356,6 +9359,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.Twitch.ChatDialog.Deleted" xml:space="preserve">
     <value>Message deleted.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Failed" xml:space="preserve">
+    <value>The action did not go through. Check the connection and try again.</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.ModerationUnavailable" xml:space="preserve">
     <value>Moderation is turned off for this widget.</value>
