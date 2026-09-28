@@ -1354,7 +1354,6 @@ describe('widget node renderer', () => {
 
       it('holds on to the next surviving row when the first visible one itself is removed', () => {
         const { handle, element } = sizedAtEnd(12);
-        // row-5 is cut off by 10px at the top, row-6 sits 10px below the top edge.
         scrollTo(element, 110);
 
         paint(handle, span(0, 12).filter(index => index !== 5));
