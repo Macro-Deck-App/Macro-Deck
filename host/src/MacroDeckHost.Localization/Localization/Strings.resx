@@ -18133,6 +18133,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Companion.Errors.NotConnected" xml:space="preserve">
     <value>The Companion device is not connected.</value>
   </data>
+  <data name="Integrations.Companion.Events.DeviceReadyName" xml:space="preserve">
+    <value>Device Ready</value>
+  </data>
+  <data name="Integrations.Companion.Events.DeviceReadyDescription" xml:space="preserve">
+    <value>A Companion app connected and can run Companion actions now.</value>
+  </data>
   <data name="Integrations.Companion.Variables.InFocus" xml:space="preserve">
     <value>In focus</value>
   </data>

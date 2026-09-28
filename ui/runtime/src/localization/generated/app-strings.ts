@@ -1691,6 +1691,10 @@ export const AppStrings = {
 				ScreenshotFailed: 'macrodeck.app:Integrations.Companion.Errors.ScreenshotFailed',
 				ScreenshotTimedOut: 'macrodeck.app:Integrations.Companion.Errors.ScreenshotTimedOut',
 			},
+			Events: {
+				DeviceReadyDescription: 'macrodeck.app:Integrations.Companion.Events.DeviceReadyDescription',
+				DeviceReadyName: 'macrodeck.app:Integrations.Companion.Events.DeviceReadyName',
+			},
 			Options: {
 				Automatic: 'macrodeck.app:Integrations.Companion.Options.Automatic',
 				Deck: 'macrodeck.app:Integrations.Companion.Options.Deck',
@@ -8734,6 +8738,8 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Integrations.Companion.Errors.ScreenOnUnavailable': 'This device cannot turn its screen on. On Android, turn on the background connection and allow display over other apps in the Companion app\'s settings.',
 	'macrodeck.app:Integrations.Companion.Errors.ScreenshotFailed': 'The Companion device could not take the screenshot.',
 	'macrodeck.app:Integrations.Companion.Errors.ScreenshotTimedOut': 'The Companion device did not send the screenshot in time.',
+	'macrodeck.app:Integrations.Companion.Events.DeviceReadyDescription': 'A Companion app connected and can run Companion actions now.',
+	'macrodeck.app:Integrations.Companion.Events.DeviceReadyName': 'Device Ready',
 	'macrodeck.app:Integrations.Companion.Name': 'Macro Deck Companion',
 	'macrodeck.app:Integrations.Companion.Options.Automatic': 'Automatic',
 	'macrodeck.app:Integrations.Companion.Options.Deck': 'Deck',

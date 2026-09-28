@@ -18132,6 +18132,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Companion.Errors.NotConnected" xml:space="preserve">
     <value>L'appareil Companion n'est pas connecté.</value>
   </data>
+  <data name="Integrations.Companion.Events.DeviceReadyName" xml:space="preserve">
+    <value>Appareil prêt</value>
+  </data>
+  <data name="Integrations.Companion.Events.DeviceReadyDescription" xml:space="preserve">
+    <value>Une app Companion s'est connectée et peut maintenant exécuter les actions Companion.</value>
+  </data>
   <data name="Integrations.Companion.Variables.InFocus" xml:space="preserve">
     <value>Au premier plan</value>
   </data>

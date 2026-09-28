@@ -58,11 +58,18 @@ automations turn the tablet off when you lock the computer and on again when you
 stays connected while its screen is off. Automations keep running while the computer is locked, even though
 buttons on the deck do not.
 
-:::note[Turning the screen on when Macro Deck starts]
-An automation that turns the screen on when Macro Deck starts does not work yet: **Server Started** does not
-run automations at the moment, and **Client Connected** runs before a Companion device can take commands.
-Until this is fixed, use the lock and unlock automations above, or wake the device yourself.
-:::
+## Turn the screen on when Macro Deck starts
+
+When Macro Deck starts, the tablet is not connected yet, so **Server Started** is too early for it. Use the
+moment the app is back instead:
+
+| Automation | Event | Only run when | Action |
+| --- | --- | --- | --- |
+| Screen on when the tablet is back | **Macro Deck Companion > Device Ready** | **Device** set to the tablet | **Turn screen on** |
+
+**Device Ready** runs each time the app has connected and can take commands, also after a short loss of the
+network. An automation on **Macro Deck > Client Connected** works as well: a Companion action there waits a
+few seconds for the app to be ready.
 
 ## More ideas
 

@@ -34,12 +34,10 @@ internal sealed class CompanionTargetResolver
 			CacheSeconds = 0
 		};
 
-	public bool TryResolve(IReadOnlyDictionary<string, object> parameters,
+	public bool TryResolveTarget(IReadOnlyDictionary<string, object> parameters,
 		out Guid deviceId,
-		out ICompanionGateway gateway,
 		out ActionResult error)
 	{
-		gateway = null!;
 		if (!parameters.TryGetValue(ConfigurationParameter, out var raw) ||
 			raw is not string text ||
 			!Guid.TryParseExact(text, "D", out deviceId))
@@ -49,24 +47,32 @@ internal sealed class CompanionTargetResolver
 			return false;
 		}
 
-		var id = deviceId;
-		if (!_runtimes().Any(runtime => runtime.Id == id))
+		if (!HasConfiguration(deviceId))
 		{
-			error = ActionResult.Failed(ActionErrorCodes.NotFound,
-				AppStrings.Integrations.Companion.Errors.ConfigurationNotFound());
+			error = ConfigurationNotFound();
 			return false;
 		}
 
-		if (_gateway() is not { } resolved || !resolved.TryGetState(id, out _))
-		{
-			error = NotConnected();
-			return false;
-		}
-
-		gateway = resolved;
 		error = null!;
 		return true;
 	}
+
+	public async Task<(ICompanionGateway? Gateway, ActionResult? Error)> ConnectAsync(Guid deviceId,
+		CancellationToken cancellationToken)
+	{
+		if (_gateway() is not { } gateway || !await gateway.WaitForStateAsync(deviceId, cancellationToken))
+		{
+			return (null, NotConnected());
+		}
+
+		return HasConfiguration(deviceId) ? (gateway, null) : (null, ConfigurationNotFound());
+	}
+
+	private bool HasConfiguration(Guid deviceId) => _runtimes().Any(runtime => runtime.Id == deviceId);
+
+	private static ActionResult ConfigurationNotFound()
+		=> ActionResult.Failed(ActionErrorCodes.NotFound,
+			AppStrings.Integrations.Companion.Errors.ConfigurationNotFound());
 
 	public static ActionResult InvalidParameter()
 		=> ActionResult.Failed(ActionErrorCodes.InvalidParameter, AppStrings.Errors.Actions.InvalidParameter());

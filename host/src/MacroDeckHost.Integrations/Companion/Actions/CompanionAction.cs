@@ -59,7 +59,7 @@ internal sealed class CompanionAction : IDynamicOptionsActionDefinition
 
 		public async Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
 		{
-			if (!_resolver.TryResolve(context.Parameters, out var deviceId, out var gateway, out var error))
+			if (!_resolver.TryResolveTarget(context.Parameters, out var deviceId, out var error))
 			{
 				return error;
 			}
@@ -67,6 +67,12 @@ internal sealed class CompanionAction : IDynamicOptionsActionDefinition
 			if (_command(context.Parameters) is not { } command)
 			{
 				return CompanionTargetResolver.InvalidParameter();
+			}
+
+			var (gateway, notConnected) = await _resolver.ConnectAsync(deviceId, context.CancellationToken);
+			if (gateway is null)
+			{
+				return notConnected!;
 			}
 
 			if (_capability is { } capability)

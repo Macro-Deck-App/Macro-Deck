@@ -178,6 +178,14 @@ public sealed class DeviceConnectionTracker
 		return counts;
 	}
 
+	public bool HasConnection(Guid deviceId)
+	{
+		lock (_sync)
+		{
+			return _connections.Values.Any(entry => entry.DeviceId == deviceId);
+		}
+	}
+
 	public void AbortDevice(Guid deviceId)
 	{
 		Action?[] aborts;

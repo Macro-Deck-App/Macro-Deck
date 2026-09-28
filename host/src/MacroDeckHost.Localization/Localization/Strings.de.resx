@@ -18130,6 +18130,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Companion.Errors.NotConnected" xml:space="preserve">
     <value>Das Companion-Gerät ist nicht verbunden.</value>
   </data>
+  <data name="Integrations.Companion.Events.DeviceReadyName" xml:space="preserve">
+    <value>Gerät bereit</value>
+  </data>
+  <data name="Integrations.Companion.Events.DeviceReadyDescription" xml:space="preserve">
+    <value>Eine Companion-App hat sich verbunden und kann jetzt Companion-Aktionen ausführen.</value>
+  </data>
   <data name="Integrations.Companion.Variables.InFocus" xml:space="preserve">
     <value>Im Vordergrund</value>
   </data>
