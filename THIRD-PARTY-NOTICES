@@ -1079,7 +1079,7 @@ cssparser
 ctor
   License: MIT
   Declared: Apache-2.0 OR MIT
-  URL: https://github.com/mmastrac/rust-ctor
+  URL: https://github.com/mmastrac/linktime
   Texts: [108]
 
 dbus
@@ -1109,7 +1109,7 @@ digest
 dirs
   License: MIT
   Declared: MIT OR Apache-2.0
-  URL: https://github.com/soc/dirs-rs
+  URL: https://codeberg.org/dirs/dirs-rs
   Texts: [113]
 
 dirs-sys
@@ -1151,12 +1151,6 @@ dtoa-short
   License: MPL-2.0
   URL: https://github.com/upsuper/dtoa-short
   Texts: [107]
-
-dtor
-  License: MIT
-  Declared: Apache-2.0 OR MIT
-  URL: https://github.com/mmastrac/rust-ctor
-  Texts: [108]
 
 dunce
   License: MIT-0
@@ -1627,7 +1621,7 @@ jsonptr
 keyboard-types
   License: MIT
   Declared: MIT OR Apache-2.0
-  URL: https://github.com/pyfisch/keyboard-types
+  URL: https://github.com/rust-windowing/keyboard-types
   Texts: [158]
 
 libappindicator
@@ -1827,6 +1821,13 @@ objc2-io-surface
   Texts: [177]
 
 objc2-osa-kit
+  License: MIT
+  Declared: Zlib OR Apache-2.0 OR MIT
+  URL: https://github.com/madsmtm/objc2
+  Platforms: macOS
+  Texts: [177]
+
+objc2-quartz-core
   License: MIT
   Declared: Zlib OR Apache-2.0 OR MIT
   URL: https://github.com/madsmtm/objc2
@@ -2317,90 +2318,104 @@ sync_wrapper
   URL: https://github.com/Actyx/sync_wrapper
   Texts: [223]
 
+system-configuration
+  License: MIT
+  Declared: MIT OR Apache-2.0
+  URL: https://github.com/mullvad/system-configuration-rs
+  Platforms: macOS
+  Texts: [224]
+
+system-configuration-sys
+  License: MIT
+  Declared: MIT OR Apache-2.0
+  URL: https://github.com/mullvad/system-configuration-rs
+  Platforms: macOS
+  Texts: [224]
+
 tao
   License: Apache-2.0
   URL: https://github.com/tauri-apps/tao
-  Texts: [117], [224]
+  Texts: [117], [225]
 
 tar
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/composefs/tar-rs
   Platforms: Linux, macOS
-  Texts: [225]
+  Texts: [226]
 
 tauri
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/tauri
-  Texts: [226]
+  Texts: [227]
 
 tauri-plugin-dialog
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/plugins-workspace
-  Texts: [227], [226]
+  Texts: [228], [227]
 
 tauri-plugin-fs
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/plugins-workspace
-  Texts: [227], [226]
+  Texts: [228], [227]
 
 tauri-plugin-opener
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/plugins-workspace
-  Texts: [227], [226]
+  Texts: [228], [227]
 
 tauri-plugin-single-instance
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/plugins-workspace
-  Texts: [227], [228]
+  Texts: [228], [229]
 
 tauri-plugin-updater
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/plugins-workspace
-  Texts: [227], [226]
+  Texts: [228], [227]
 
 tauri-runtime
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/tauri
-  Texts: [226]
+  Texts: [227]
 
 tauri-runtime-wry
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/tauri
-  Texts: [226]
+  Texts: [227]
 
 tauri-utils
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/tauri
-  Texts: [226]
+  Texts: [227]
 
 tauri-winrt-notification
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/tauri-apps/winrt-notification
   Platforms: Windows
-  Texts: [229], [226]
+  Texts: [230], [227]
 
 tempfile
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/Stebalien/tempfile
-  Texts: [230]
+  Texts: [231]
 
 tendril
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/servo/html5ever
-  Texts: [231]
+  Texts: [232]
 
 thiserror
   License: MIT
@@ -2412,13 +2427,13 @@ time
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/time-rs/time
-  Texts: [232]
+  Texts: [233]
 
 time-core
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/time-rs/time
-  Texts: [232]
+  Texts: [233]
 
 tinystr
   License: Unicode-3.0
@@ -2435,23 +2450,23 @@ tinyvec_macros
   License: MIT
   Declared: MIT OR Apache-2.0 OR Zlib
   URL: https://github.com/Soveu/tinyvec_macros
-  Texts: [233]
+  Texts: [234]
 
 tokio
   License: MIT
   URL: https://github.com/tokio-rs/tokio
-  Texts: [234]
+  Texts: [235]
 
 tokio-rustls
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/rustls/tokio-rustls
-  Texts: [235]
+  Texts: [236]
 
 tokio-util
   License: MIT
   URL: https://github.com/tokio-rs/tokio
-  Texts: [234]
+  Texts: [235]
 
 toml
   License: MIT
@@ -2480,43 +2495,43 @@ toml_writer
 tower
   License: MIT
   URL: https://github.com/tower-rs/tower
-  Texts: [236]
+  Texts: [237]
 
 tower-http
   License: MIT
   URL: https://github.com/tower-rs/tower-http
-  Texts: [237]
+  Texts: [238]
 
 tower-layer
   License: MIT
   URL: https://github.com/tower-rs/tower
-  Texts: [236]
+  Texts: [237]
 
 tower-service
   License: MIT
   URL: https://github.com/tower-rs/tower
-  Texts: [236]
+  Texts: [237]
 
 tracing
   License: MIT
   URL: https://github.com/tokio-rs/tracing
-  Texts: [238]
+  Texts: [239]
 
 tracing-core
   License: MIT
   URL: https://github.com/tokio-rs/tracing
-  Texts: [238]
+  Texts: [239]
 
 tray-icon
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/tauri-apps/tray-icon
-  Texts: [172], [239]
+  Texts: [172], [240]
 
 try-lock
   License: MIT
   URL: https://github.com/seanmonstar/try-lock
-  Texts: [240]
+  Texts: [241]
 
 typeid
   License: MIT
@@ -2528,37 +2543,7 @@ typenum
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/paholg/typenum
-  Texts: [241], [242]
-
-unic-char-property
-  License: MIT
-  Declared: MIT/Apache-2.0
-  URL: https://github.com/open-i18n/rust-unic
-  Texts: [243]
-
-unic-char-range
-  License: MIT
-  Declared: MIT/Apache-2.0
-  URL: https://github.com/open-i18n/rust-unic
-  Texts: [243]
-
-unic-common
-  License: MIT
-  Declared: MIT/Apache-2.0
-  URL: https://github.com/open-i18n/rust-unic
-  Texts: [243]
-
-unic-ucd-ident
-  License: MIT
-  Declared: MIT/Apache-2.0
-  URL: https://github.com/open-i18n/rust-unic
-  Texts: [243]
-
-unic-ucd-version
-  License: MIT
-  Declared: MIT/Apache-2.0
-  URL: https://github.com/open-i18n/rust-unic
-  Texts: [243]
+  Texts: [242], [243]
 
 unicode-ident
   License: MIT AND Unicode-3.0
@@ -2570,6 +2555,7 @@ unicode-segmentation
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/unicode-rs/unicode-segmentation
+  Platforms: Windows
   Texts: [137]
 
 untrusted
@@ -2611,34 +2597,40 @@ want
   URL: https://github.com/seanmonstar/want
   Texts: [249]
 
-webkit2gtk
+web-time
   License: MIT
-  URL: https://github.com/tauri-apps/webkit2gtk-rs
-  Platforms: Linux
+  Declared: MIT OR Apache-2.0
+  URL: https://github.com/daxpedda/web-time
   Texts: [250]
 
-webkit2gtk-sys
+webkit2gtk
   License: MIT
   URL: https://github.com/tauri-apps/webkit2gtk-rs
   Platforms: Linux
   Texts: [251]
 
+webkit2gtk-sys
+  License: MIT
+  URL: https://github.com/tauri-apps/webkit2gtk-rs
+  Platforms: Linux
+  Texts: [252]
+
 webpki-roots
   License: CDLA-Permissive-2.0
   URL: https://github.com/rustls/webpki-roots
-  Texts: [252]
+  Texts: [253]
 
 webview2-com
   License: MIT
   URL: https://github.com/wravery/webview2-rs
   Platforms: Windows
-  Texts: [253]
+  Texts: [254]
 
 webview2-com-sys
   License: MIT
   URL: https://github.com/wravery/webview2-rs
   Platforms: Windows
-  Texts: [253], [254]
+  Texts: [254], [255]
 
 web_atoms
   License: MIT
@@ -2658,103 +2650,110 @@ window-vibrancy
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/tauri-plugin-vibrancy
   Platforms: Windows, macOS
-  Texts: [255], [256]
+  Texts: [256], [257]
 
 windows
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [257]
+  Texts: [258]
 
 windows-collections
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [257]
+  Texts: [258]
 
 windows-core
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [257]
+  Texts: [258]
 
 windows-future
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [257]
+  Texts: [258]
 
 windows-link
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [257]
+  Texts: [258]
 
 windows-numerics
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [257]
+  Texts: [258]
+
+windows-registry
+  License: MIT
+  Declared: MIT OR Apache-2.0
+  URL: https://github.com/microsoft/windows-rs
+  Platforms: Windows
+  Texts: [258]
 
 windows-result
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [257]
+  Texts: [258]
 
 windows-strings
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [257]
+  Texts: [258]
 
 windows-sys
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [257]
+  Texts: [258]
 
 windows-targets
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [257]
+  Texts: [258]
 
 windows-threading
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [257]
+  Texts: [258]
 
 windows-version
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [257]
+  Texts: [258]
 
 windows_x86_64_msvc
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
   Platforms: Windows
-  Texts: [257]
+  Texts: [258]
 
 winnow
   License: MIT
   URL: https://github.com/winnow-rs/winnow
-  Texts: [258]
+  Texts: [259]
 
 writeable
   License: Unicode-3.0
@@ -2765,7 +2764,7 @@ wry
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/tauri-apps/wry
-  Texts: [259], [260]
+  Texts: [260], [261]
 
 x11
   License: MIT
@@ -2784,7 +2783,7 @@ xattr
   Declared: MIT OR Apache-2.0
   URL: https://github.com/Stebalien/xattr
   Platforms: Linux, macOS
-  Texts: [230]
+  Texts: [231]
 
 yoke
   License: Unicode-3.0
@@ -2795,13 +2794,13 @@ zbus
   License: MIT
   URL: https://github.com/z-galaxy/zbus
   Platforms: Linux
-  Texts: [261]
+  Texts: [262]
 
 zbus_names
   License: MIT
   URL: https://github.com/z-galaxy/zbus
   Platforms: Linux
-  Texts: [261]
+  Texts: [262]
 
 zerofrom
   License: Unicode-3.0
@@ -2812,7 +2811,7 @@ zeroize
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/RustCrypto/utils
-  Texts: [262]
+  Texts: [263]
 
 zerotrie
   License: Unicode-3.0
@@ -2828,7 +2827,7 @@ zip
   License: MIT
   URL: https://github.com/zip-rs/zip2
   Platforms: Windows
-  Texts: [263]
+  Texts: [264]
 
 zmij
   License: MIT
@@ -2839,7 +2838,7 @@ zvariant
   License: MIT
   URL: https://github.com/z-galaxy/zbus
   Platforms: Linux
-  Texts: [261]
+  Texts: [262]
 
 zvariant_utils
   License: MIT
@@ -2855,34 +2854,34 @@ Bundled assets
   License: MIT
   URL: https://github.com/dotnet/dotnet
   Note: Bundled in the host's runtime folder. The runtime archive's own LICENSE.txt and ThirdPartyNotices.txt ship alongside it in that folder.
-  Texts: [264]
+  Texts: [265]
 
 Android robot
   License: CC-BY-3.0
   URL: https://developer.android.com/distribute/marketing-tools/brand-guidelines
   Note: Icon of the ADB integration, taken from Dashboard Icons. The Android robot is reproduced or modified from work created and shared by Google and used according to terms described in the Creative Commons 3.0 Attribution License.
-  Texts: [265]
+  Texts: [266]
 
 Dashboard Icons
   License: Apache-2.0
   URL: https://github.com/homarr-labs/dashboard-icons
   Note: Logos of the Discord, Home Assistant, Spotify, Twitch and YouTube Music integrations, and the Windows logo marking the platforms a Store package supports. The logos are trademarks of their respective owners and are used to identify the integration or platform only.
-  Texts: [266]
+  Texts: [267]
 
 Lucide icons
   License: ISC AND MIT
   URL: https://github.com/lucide-icons/lucide
   Note: Lucide 1.47.0 icons (MIT for the icons derived from Feather), used in the configuration UI, the web client, the music player widget and the integration icons, some recoloured or placed in a badge.
-  Texts: [267]
+  Texts: [268]
 
 Macro Deck name, logo and branding assets
   License: LicenseRef-MacroDeck-Branding
-  Texts: [268]
+  Texts: [269]
 
 Product logos of integrated applications
   License: LicenseRef-Trademark-Identification
   Note: OBS Studio, Streamer.bot, Meld, Streamlabs Desktop and SinusBot logos. Trademarks of their respective owners.
-  Texts: [269]
+  Texts: [270]
 
 Simple Icons (Discord glyph)
   License: CC0-1.0
@@ -2900,13 +2899,13 @@ Weather icons (Makin-Things/weather-icons)
   License: MIT
   URL: https://github.com/Makin-Things/weather-icons
   Note: Weather widget icons, embedded in the host. Artwork (c) ammap.com.
-  Texts: [270]
+  Texts: [271]
 
 WebNowPlaying icon
   License: MIT
   URL: https://github.com/keifufu/WebNowPlaying
   Note: The WebNowPlaying integration icon is adapted from the WebNowPlaying logo.
-  Texts: [271]
+  Texts: [272]
 
 ================================================================================
 License and notice texts
@@ -12855,7 +12854,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-[108] ctor, dtor, tinyvec
+[108] ctor, tinyvec
 --------------------------------------------------------------------------------
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -14922,7 +14921,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[177] objc2-app-kit, objc2-core-foundation, objc2-core-graphics, objc2-foundation, objc2-io-surface, objc2-osa-kit, objc2-web-kit
+[177] objc2-app-kit, objc2-core-foundation, objc2-core-graphics, objc2-foundation, objc2-io-surface, objc2-osa-kit, objc2-quartz-core, objc2-web-kit
 --------------------------------------------------------------------------------
 Copyright holders: not stated in package metadata; see https://github.com/madsmtm/objc2
 
@@ -17296,7 +17295,35 @@ SOFTWARE.
 
    END OF TERMS AND CONDITIONS
 
-[224] tao
+[224] system-configuration, system-configuration-sys
+--------------------------------------------------------------------------------
+Copyright (c) 2024 Mullvad VPN AB
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+[225] tao
 --------------------------------------------------------------------------------
 SPDXVersion: SPDX-2.1
 DataLicense: CC0-1.0
@@ -17317,7 +17344,7 @@ PackageDownloadLocation: git+https://github.com/tauri-apps/tao.git
 PackageDownloadLocation: git+ssh://github.com/tauri-apps/tao.git
 Creator: Person: Daniel Thompson-Yvetot
 
-[225] tar
+[226] tar
 --------------------------------------------------------------------------------
 Copyright (c) The tar-rs Project Contributors
 
@@ -17345,7 +17372,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[226] tauri, tauri-plugin-dialog, tauri-plugin-fs, tauri-plugin-opener, tauri-plugin-updater, tauri-runtime, tauri-runtime-wry, tauri-utils, tauri-winrt-notification
+[227] tauri, tauri-plugin-dialog, tauri-plugin-fs, tauri-plugin-opener, tauri-plugin-updater, tauri-runtime, tauri-runtime-wry, tauri-utils, tauri-winrt-notification
 --------------------------------------------------------------------------------
 MIT License
 
@@ -17369,7 +17396,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[227] tauri-plugin-dialog, tauri-plugin-fs, tauri-plugin-opener, tauri-plugin-single-instance, tauri-plugin-updater
+[228] tauri-plugin-dialog, tauri-plugin-fs, tauri-plugin-opener, tauri-plugin-single-instance, tauri-plugin-updater
 --------------------------------------------------------------------------------
 SPDXVersion: SPDX-2.1
 DataLicense: CC0-1.0
@@ -17392,7 +17419,7 @@ PackageDownloadLocation: git+https://github.com/tauri-apps/tauri.git
 PackageDownloadLocation: git+ssh://github.com/tauri-apps/tauri.git
 Creator: Person: Daniel Thompson-Yvetot
 
-[228] tauri-plugin-single-instance
+[229] tauri-plugin-single-instance
 --------------------------------------------------------------------------------
 MIT License
 
@@ -17416,7 +17443,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[229] tauri-winrt-notification
+[230] tauri-winrt-notification
 --------------------------------------------------------------------------------
 SPDXVersion: SPDX-2.1
 DataLicense: CC0-1.0
@@ -17438,7 +17465,7 @@ PackageDownloadLocation: git+https://github.com/tauri-apps/winrt-notification.gi
 PackageDownloadLocation: git+ssh://github.com/tauri-apps/winrt-notification.git
 Creator: Person: Daniel Thompson-Yvetot
 
-[230] tempfile, xattr
+[231] tempfile, xattr
 --------------------------------------------------------------------------------
 Copyright (c) 2015 Steven Allen
 
@@ -17466,7 +17493,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[231] tendril
+[232] tendril
 --------------------------------------------------------------------------------
 Copyright (c) 2015 Keegan McAllister
 
@@ -17494,7 +17521,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[232] time, time-core
+[233] time, time-core
 --------------------------------------------------------------------------------
 Copyright (c) Jacob Pratt et al.
 
@@ -17516,7 +17543,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[233] tinyvec_macros
+[234] tinyvec_macros
 --------------------------------------------------------------------------------
 MIT License
 
@@ -17540,7 +17567,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[234] tokio, tokio-util
+[235] tokio, tokio-util
 --------------------------------------------------------------------------------
 MIT License
 
@@ -17564,7 +17591,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[235] tokio-rustls
+[236] tokio-rustls
 --------------------------------------------------------------------------------
 Copyright (c) 2017 quininer kel
 
@@ -17592,7 +17619,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[236] tower, tower-layer, tower-service
+[237] tower, tower-layer, tower-service
 --------------------------------------------------------------------------------
 Copyright (c) 2019 Tower Contributors
 
@@ -17620,7 +17647,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[237] tower-http
+[238] tower-http
 --------------------------------------------------------------------------------
 Copyright (c) 2019-2021 Tower Contributors
 
@@ -17648,7 +17675,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[238] tracing, tracing-core
+[239] tracing, tracing-core
 --------------------------------------------------------------------------------
 Copyright (c) 2019 Tokio Contributors
 
@@ -17676,7 +17703,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[239] tray-icon
+[240] tray-icon
 --------------------------------------------------------------------------------
 SPDXVersion: SPDX-2.1
 DataLicense: CC0-1.0
@@ -17698,7 +17725,7 @@ PackageDownloadLocation: git+https://github.com/tauri-apps/tray-icon.git
 PackageDownloadLocation: git+ssh://github.com/tauri-apps/tray-icon.git
 Creator: Person: Daniel Thompson-Yvetot
 
-[240] try-lock
+[241] try-lock
 --------------------------------------------------------------------------------
 Copyright (c) 2018-2023 Sean McArthur
 Copyright (c) 2016 Alex Crichton
@@ -17721,39 +17748,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[241] typenum
+[242] typenum
 --------------------------------------------------------------------------------
 MIT OR Apache-2.0
 
-[242] typenum
+[243] typenum
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
 Copyright (c) 2014 Paho Lurie-Gregg
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-[243] unic-char-property, unic-char-range, unic-common, unic-ucd-ident, unic-ucd-version
---------------------------------------------------------------------------------
-Copyright holders: The UNIC Project Developers
-
-MIT License
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -17934,7 +17937,31 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[250] webkit2gtk
+[250] web-time
+--------------------------------------------------------------------------------
+MIT License
+
+Copyright (c) 2023 dAxpeDDa
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+[251] webkit2gtk
 --------------------------------------------------------------------------------
 Copyright (c) 2016 Boucher, Antoni <bouanto@zoho.com>
 Copyright (c) 2017-2021, The Gtk-rs Project Developers.
@@ -17957,7 +17984,7 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[251] webkit2gtk-sys
+[252] webkit2gtk-sys
 --------------------------------------------------------------------------------
 Copyright (c) 2016 Boucher, Antoni <bouanto@zoho.com>
 
@@ -17978,7 +18005,7 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[252] webpki-roots
+[253] webpki-roots
 --------------------------------------------------------------------------------
 # Community Data License Agreement - Permissive - Version 2.0
 
@@ -18042,7 +18069,7 @@ agreement.
 of Data, including for example machine learning models and models'
 insights.
 
-[253] webview2-com, webview2-com-sys
+[254] webview2-com, webview2-com-sys
 --------------------------------------------------------------------------------
 Copyright holders: not stated in package metadata; see https://github.com/wravery/webview2-rs
 
@@ -18066,7 +18093,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[254] webview2-com-sys
+[255] webview2-com-sys
 --------------------------------------------------------------------------------
 Microsoft WebView2 SDK loader (WebView2LoaderStatic.lib, statically linked on Windows)
 
@@ -18100,7 +18127,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-[255] window-vibrancy
+[256] window-vibrancy
 --------------------------------------------------------------------------------
 MIT License
 
@@ -18124,7 +18151,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[256] window-vibrancy
+[257] window-vibrancy
 --------------------------------------------------------------------------------
 SPDXVersion: SPDX-2.1
 DataLicense: CC0-1.0
@@ -18146,7 +18173,7 @@ PackageDownloadLocation: git+https://github.com/tauri-apps/window-vibrancy.git
 PackageDownloadLocation: git+ssh://github.com/tauri-apps/window-vibrancy.git
 Creator: Person: Daniel Thompson-Yvetot
 
-[257] windows, windows-collections, windows-core, windows-future, windows-link, windows-numerics, windows-result, windows-strings, windows-sys, windows-targets, windows-threading, windows-version, windows_x86_64_msvc
+[258] windows, windows-collections, windows-core, windows-future, windows-link, windows-numerics, windows-registry, windows-result, windows-strings, windows-sys, windows-targets, windows-threading, windows-version, windows_x86_64_msvc
 --------------------------------------------------------------------------------
     MIT License
 
@@ -18170,7 +18197,7 @@ Creator: Person: Daniel Thompson-Yvetot
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE
 
-[258] winnow
+[259] winnow
 --------------------------------------------------------------------------------
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -18191,7 +18218,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[259] wry
+[260] wry
 --------------------------------------------------------------------------------
 MIT License
 
@@ -18215,7 +18242,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[260] wry
+[261] wry
 --------------------------------------------------------------------------------
 SPDXVersion: SPDX-2.1
 DataLicense: CC0-1.0
@@ -18238,7 +18265,7 @@ PackageDownloadLocation: git+https://github.com/tauri-apps/wry.git
 PackageDownloadLocation: git+ssh://github.com/tauri-apps/wry.git
 Creator: Person: Daniel Thompson-Yvetot
 
-[261] zbus, zbus_names, zvariant
+[262] zbus, zbus_names, zvariant
 --------------------------------------------------------------------------------
 Copyright (c) 2024 Zeeshan Ali Khan & zbus contributors
 
@@ -18266,7 +18293,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[262] zeroize
+[263] zeroize
 --------------------------------------------------------------------------------
 Copyright (c) 2018-2026 The RustCrypto Project Developers
 
@@ -18294,7 +18321,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-[263] zip
+[264] zip
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -18321,7 +18348,7 @@ SOFTWARE.
 Some files in the "tests/data" subdirectory of this repository are under other
 licences; see files named LICENSE.*.txt for details.
 
-[264] .NET runtime and ASP.NET Core runtime
+[265] .NET runtime and ASP.NET Core runtime
 --------------------------------------------------------------------------------
 Copyright holders: .NET Foundation and Contributors
 
@@ -18345,7 +18372,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[265] Android robot
+[266] Android robot
 --------------------------------------------------------------------------------
 Creative Commons Legal Code
 
@@ -18666,7 +18693,7 @@ Creative Commons Notice
 
     Creative Commons may be contacted at https://creativecommons.org/.
 
-[266] Dashboard Icons
+[267] Dashboard Icons
 --------------------------------------------------------------------------------
 Copyright holders: Dashboard Icons contributors
 
@@ -18872,7 +18899,7 @@ Copyright holders: Dashboard Icons contributors
    See the License for the specific language governing permissions and
    limitations under the License.
 
-[267] Lucide icons
+[268] Lucide icons
 --------------------------------------------------------------------------------
 ISC License
 
@@ -18918,7 +18945,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[268] Macro Deck name, logo and branding assets
+[269] Macro Deck name, logo and branding assets
 --------------------------------------------------------------------------------
 Macro Deck name, logo and branding assets
 
@@ -18931,13 +18958,13 @@ project and may be used only in connection with the official Macro Deck project 
 Forks and other derived products must not use the Macro Deck name or logo and must replace the branding
 assets with their own.
 
-[269] Product logos of integrated applications
+[270] Product logos of integrated applications
 --------------------------------------------------------------------------------
 These logos are trademarks of their respective owners. Macro Deck shows them only to identify the application
 an integration connects to; no endorsement by or affiliation with the owners is implied. They are not licensed
 under the Apache License 2.0.
 
-[270] Weather icons (Makin-Things/weather-icons)
+[271] Weather icons (Makin-Things/weather-icons)
 --------------------------------------------------------------------------------
 MIT License
 
@@ -18961,7 +18988,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[271] WebNowPlaying icon
+[272] WebNowPlaying icon
 --------------------------------------------------------------------------------
 Copyright holders: keifufu (2024)
 
