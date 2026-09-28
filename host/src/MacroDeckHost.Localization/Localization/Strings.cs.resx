@@ -2886,6 +2886,39 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>Neznámý rozsah proměnné</value>
   </data>
+  <data name="Errors.VideoStream.Busy" xml:space="preserve">
+    <value>Zdroj videa je právě vytížený.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownProvider" xml:space="preserve">
+    <value>Tento zdroj videa není k dispozici.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownStream" xml:space="preserve">
+    <value>Tento videostream už neexistuje.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownSession" xml:space="preserve">
+    <value>Tato relace videa už není otevřená.</value>
+  </data>
+  <data name="Errors.VideoStream.SessionLimitReached" xml:space="preserve">
+    <value>Současně je otevřeno příliš mnoho videí.</value>
+  </data>
+  <data name="Errors.VideoStream.PayloadTooLarge" xml:space="preserve">
+    <value>Data připojení videa jsou příliš velká.</value>
+  </data>
+  <data name="Errors.VideoStream.StreamUnavailable" xml:space="preserve">
+    <value>Tento videostream není momentálně k dispozici.</value>
+  </data>
+  <data name="Errors.VideoStream.TransportNotAccepted" xml:space="preserve">
+    <value>Tento videostream nelze na tomto zařízení přehrát.</value>
+  </data>
+  <data name="Errors.VideoStream.SignalingUnsupported" xml:space="preserve">
+    <value>Zdroj videa tento typ připojení nepodporuje.</value>
+  </data>
+  <data name="Errors.VideoStream.ProviderUnavailable" xml:space="preserve">
+    <value>Zdroj videa je momentálně nedostupný.</value>
+  </data>
+  <data name="Errors.VideoStream.Failed" xml:space="preserve">
+    <value>Ve videostreamu došlo k chybě.</value>
+  </data>
   <data name="Errors.Variables.WriteFailed" xml:space="preserve">
     <value>Hodnotu se nepodařilo použít</value>
   </data>
@@ -4108,6 +4141,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Capability.ScreenSaverProvider" xml:space="preserve">
     <value>Spořiče obrazovky</value>
+  </data>
+  <data name="Integrations.Capability.VideoStreamProvider" xml:space="preserve">
+    <value>Videostreamy</value>
   </data>
   <data name="Integrations.Capability.Variables" xml:space="preserve">
     <value>Proměnné</value>
@@ -18733,5 +18769,53 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Tests.BuildCount.Other" xml:space="preserve">
     <value>Testovací sestavení: {count}</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="OutdatedUi.Device.Title" xml:space="preserve">
+    <value>Tento deck vyžaduje aktualizaci</value>
+  </data>
+  <data name="OutdatedUi.Device.Body" xml:space="preserve">
+    <value>Macro Deck v počítači byl aktualizován, ale toto zařízení stále zobrazuje předchozí verzi decku.</value>
+  </data>
+  <data name="OutdatedUi.Device.Step.Update" xml:space="preserve">
+    <value>Pro načtení aktuální verze vyberte Aktualizovat.</value>
+  </data>
+  <data name="OutdatedUi.Device.Step.ClearData" xml:space="preserve">
+    <value>Pokud se tato obrazovka znovu objeví, vymažte v nastavení prohlížeče data webu pro tuto adresu, nebo aplikaci odeberte z plochy a přidejte ji znovu.</value>
+  </data>
+  <data name="OutdatedUi.Installation.Title" xml:space="preserve">
+    <value>Macro Deck nebyl aktualizován úplně</value>
+  </data>
+  <data name="OutdatedUi.Installation.Body" xml:space="preserve">
+    <value>Soubory, které Macro Deck používá k zobrazení této stránky, neodpovídají nainstalované verzi. K tomu dochází, když byla aktualizace přerušena, například když antivirový program zadržel některé soubory.</value>
+  </data>
+  <data name="OutdatedUi.Installation.Step.Reinstall" xml:space="preserve">
+    <value>V počítači stáhněte nejnovější verzi Macro Deck a nainstalujte ji znovu.</value>
+  </data>
+  <data name="OutdatedUi.Installation.Step.Antivirus" xml:space="preserve">
+    <value>Pokud antivirový program nahlásil soubor Macro Deck, povolte jej a instalaci zopakujte.</value>
+  </data>
+  <data name="OutdatedUi.Installation.Step.Retry" xml:space="preserve">
+    <value>Poté vyberte Zkusit znovu.</value>
+  </data>
+  <data name="OutdatedUi.Versions" xml:space="preserve">
+    <value>Sestavení v tomto zařízení: {device} · Sestavení v počítači: {computer}</value>
+  </data>
+  <data name="Shell.OutdatedUi.Device.Title" xml:space="preserve">
+    <value>Macro Deck je třeba obnovit</value>
+  </data>
+  <data name="Shell.OutdatedUi.Device.Body" xml:space="preserve">
+    <value>Macro Deck byl aktualizován, ale toto okno stále zobrazuje předchozí verzi rozhraní.</value>
+  </data>
+  <data name="Shell.OutdatedUi.Device.Step.Refresh" xml:space="preserve">
+    <value>Pro načtení aktuální verze vyberte Obnovit.</value>
+  </data>
+  <data name="Shell.OutdatedUi.Device.Step.Restart" xml:space="preserve">
+    <value>Pokud se tato obrazovka znovu objeví, Macro Deck úplně ukončete a znovu otevřete.</value>
+  </data>
+  <data name="Shell.OutdatedUi.Installation.Step.Reinstall" xml:space="preserve">
+    <value>Stáhněte nejnovější verzi Macro Deck a nainstalujte ji znovu.</value>
+  </data>
+  <data name="Shell.OutdatedUi.Versions" xml:space="preserve">
+    <value>Sestavení rozhraní: {device} · Sestavení Macro Deck: {computer}</value>
   </data>
 </root>

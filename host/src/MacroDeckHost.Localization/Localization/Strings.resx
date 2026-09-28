@@ -2885,6 +2885,39 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>Unknown variable scope</value>
   </data>
+  <data name="Errors.VideoStream.Busy" xml:space="preserve">
+    <value>The video source is busy right now.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownProvider" xml:space="preserve">
+    <value>This video source is not available.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownStream" xml:space="preserve">
+    <value>This video stream no longer exists.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownSession" xml:space="preserve">
+    <value>This video session is no longer open.</value>
+  </data>
+  <data name="Errors.VideoStream.SessionLimitReached" xml:space="preserve">
+    <value>Too many videos are open at the same time.</value>
+  </data>
+  <data name="Errors.VideoStream.PayloadTooLarge" xml:space="preserve">
+    <value>The video connection data is too large.</value>
+  </data>
+  <data name="Errors.VideoStream.StreamUnavailable" xml:space="preserve">
+    <value>This video stream is unavailable right now.</value>
+  </data>
+  <data name="Errors.VideoStream.TransportNotAccepted" xml:space="preserve">
+    <value>This video stream cannot be played on this device.</value>
+  </data>
+  <data name="Errors.VideoStream.SignalingUnsupported" xml:space="preserve">
+    <value>The video source does not support this type of connection.</value>
+  </data>
+  <data name="Errors.VideoStream.ProviderUnavailable" xml:space="preserve">
+    <value>The video source cannot be reached right now.</value>
+  </data>
+  <data name="Errors.VideoStream.Failed" xml:space="preserve">
+    <value>Something went wrong with the video stream.</value>
+  </data>
   <data name="Errors.Variables.WriteFailed" xml:space="preserve">
     <value>The value could not be applied</value>
   </data>
@@ -4108,6 +4141,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.Capability.ScreenSaverProvider" xml:space="preserve">
     <value>Screensavers</value>
+  </data>
+  <data name="Integrations.Capability.VideoStreamProvider" xml:space="preserve">
+    <value>Video streams</value>
   </data>
   <data name="Integrations.Capability.Variables" xml:space="preserve">
     <value>Variables</value>
@@ -18734,5 +18770,53 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.Tests.BuildCount.Other" xml:space="preserve">
     <value>{count} test builds</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="OutdatedUi.Device.Title" xml:space="preserve">
+    <value>This deck needs an update</value>
+  </data>
+  <data name="OutdatedUi.Device.Body" xml:space="preserve">
+    <value>Macro Deck on your computer was updated, but this device is still showing the previous version of the deck.</value>
+  </data>
+  <data name="OutdatedUi.Device.Step.Update" xml:space="preserve">
+    <value>Select Update now to load the current version.</value>
+  </data>
+  <data name="OutdatedUi.Device.Step.ClearData" xml:space="preserve">
+    <value>If this screen comes back, clear the website data for this address in your browser settings, or remove the app from your home screen and add it again.</value>
+  </data>
+  <data name="OutdatedUi.Installation.Title" xml:space="preserve">
+    <value>Macro Deck was not updated completely</value>
+  </data>
+  <data name="OutdatedUi.Installation.Body" xml:space="preserve">
+    <value>The files Macro Deck uses to show this page do not match the installed version. This happens when an update was interrupted, for example when antivirus software held back some of its files.</value>
+  </data>
+  <data name="OutdatedUi.Installation.Step.Reinstall" xml:space="preserve">
+    <value>On the computer, download the latest version of Macro Deck and install it again.</value>
+  </data>
+  <data name="OutdatedUi.Installation.Step.Antivirus" xml:space="preserve">
+    <value>If your antivirus software reported a Macro Deck file, allow the file and repeat the installation.</value>
+  </data>
+  <data name="OutdatedUi.Installation.Step.Retry" xml:space="preserve">
+    <value>Then select Retry.</value>
+  </data>
+  <data name="OutdatedUi.Versions" xml:space="preserve">
+    <value>Build on this device: {device} · Build on the computer: {computer}</value>
+  </data>
+  <data name="Shell.OutdatedUi.Device.Title" xml:space="preserve">
+    <value>Macro Deck needs to refresh</value>
+  </data>
+  <data name="Shell.OutdatedUi.Device.Body" xml:space="preserve">
+    <value>Macro Deck was updated, but this window is still showing the previous version of its interface.</value>
+  </data>
+  <data name="Shell.OutdatedUi.Device.Step.Refresh" xml:space="preserve">
+    <value>Select Refresh to load the current version.</value>
+  </data>
+  <data name="Shell.OutdatedUi.Device.Step.Restart" xml:space="preserve">
+    <value>If this screen comes back, quit Macro Deck completely and open it again.</value>
+  </data>
+  <data name="Shell.OutdatedUi.Installation.Step.Reinstall" xml:space="preserve">
+    <value>Download the latest version of Macro Deck and install it again.</value>
+  </data>
+  <data name="Shell.OutdatedUi.Versions" xml:space="preserve">
+    <value>Interface build: {device} · Macro Deck build: {computer}</value>
   </data>
 </root>

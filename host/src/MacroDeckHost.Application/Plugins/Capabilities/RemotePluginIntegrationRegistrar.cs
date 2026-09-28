@@ -28,6 +28,8 @@ using MacroDeckHost.Application.Plugins.Capabilities.Mapping;
 using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Widgets;
+using MacroDeckHost.Application.VideoStreams;
+using MacroDeck.Sdk.VideoStreams;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Events;
@@ -67,6 +69,8 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 	private readonly TimeProvider _timeProvider;
 	private readonly ILogger _logger;
 	private readonly RemoteVariableSubscriptions? _variableSubscriptions;
+	private readonly VideoStreamProviderRegistry? _videoStreamProviders;
+	private readonly IVideoStreamSessionBroker? _videoStreamSessions;
 
 	private readonly ConcurrentDictionary<(string PluginId, string ContentHash), TaskCompletionSource<byte[]>>
 		_iconWaiters
@@ -93,8 +97,12 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		IScreenSaverRegistry screenSaverRegistry,
 		TimeProvider timeProvider,
 		ILogger logger,
-		RemoteVariableSubscriptions? variableSubscriptions = null)
+		RemoteVariableSubscriptions? variableSubscriptions = null,
+		VideoStreamProviderRegistry? videoStreamProviders = null,
+		IVideoStreamSessionBroker? videoStreamSessions = null)
 	{
+		_videoStreamProviders = videoStreamProviders;
+		_videoStreamSessions = videoStreamSessions;
 		_sessionRegistry = sessionRegistry;
 		_integrationRegistry = integrationRegistry;
 		_snapshotStore = snapshotStore;
@@ -232,6 +240,36 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		return true;
 	}
 
+	public async Task<bool> RegisterAsync(string pluginId,
+		string sessionId,
+		IPluginConnection connection,
+		CancellationToken cancellationToken = default)
+	{
+		if (!await RegisterAsync(pluginId, cancellationToken).ConfigureAwait(false))
+		{
+			return false;
+		}
+
+		if (_videoStreamProviders is not null &&
+			_sessionRegistry.GetCapabilities(pluginId)?.Capabilities is { } capabilities &&
+			capabilities.TryGetValue(CapabilityKinds.VideoStreamProvider, out var negotiated) &&
+			negotiated.Accepted)
+		{
+			try
+			{
+				await _videoStreamProviders.AttachRemoteAsync(pluginId, sessionId, connection).ConfigureAwait(false);
+			}
+			catch (Exception exception) when (exception is not OutOfMemoryException)
+			{
+				_logger.Warning(exception,
+					"Could not read the video stream providers of plugin '{PluginId}' after it connected",
+					pluginId);
+			}
+		}
+
+		return true;
+	}
+
 	// The localization catalog deliberately outlives the adapter: a tree still on a deck references it
 	// while the plugin is only disconnected, and a client without the scope paints raw keys.
 	public async Task UnregisterAsync(string pluginId, CancellationToken cancellationToken = default)
@@ -246,6 +284,8 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		await _folderViewRegistry.UnregisterAll(pluginId, cancellationToken).ConfigureAwait(false);
 		await _screenSaverRegistry.UnregisterAll(pluginId, cancellationToken).ConfigureAwait(false);
 		await _layoutRegistry.UnregisterAll(pluginId, cancellationToken).ConfigureAwait(false);
+		_videoStreamSessions?.CloseOwner(pluginId, VideoStreamSessionReason.ProviderRemoved, notifyProvider: true);
+		_videoStreamProviders?.RemoveOwner(pluginId);
 
 		await _integrationRegistry.UnregisterAsync(pluginId).ConfigureAwait(false);
 	}

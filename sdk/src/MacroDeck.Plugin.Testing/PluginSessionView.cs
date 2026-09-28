@@ -35,6 +35,7 @@ public sealed class PluginSessionView : ICapabilityInvoker
 		FolderViewProvider = new FolderViewProviderTestClient(this);
 		WidgetTypeProvider = new WidgetTypeProviderTestClient(this);
 		ScreenSaverProvider = new ScreenSaverProviderTestClient(this);
+		VideoStreamProvider = new VideoStreamProviderTestClient(this);
 		Issues = new IssuesTestClient(this);
 		Messaging = new MessagingTestClient(this);
 	}
@@ -92,6 +93,9 @@ public sealed class PluginSessionView : ICapabilityInvoker
 
 	/// <summary>The <c>screensaver-provider</c> capability.</summary>
 	public ScreenSaverProviderTestClient ScreenSaverProvider { get; }
+
+	/// <summary>The <c>video-stream-provider</c> capability.</summary>
+	public VideoStreamProviderTestClient VideoStreamProvider { get; }
 
 	/// <summary>The <c>issues</c> capability.</summary>
 	public IssuesTestClient Issues { get; }

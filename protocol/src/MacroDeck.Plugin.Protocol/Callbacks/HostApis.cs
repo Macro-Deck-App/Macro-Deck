@@ -69,11 +69,17 @@ public static class HostApis
 	/// </summary>
 	public const string IconPacks = "icon-packs";
 
+	/// <summary>
+	/// The <c>video-streams</c> host api: a video stream provider announces catalog changes, and reports
+	/// session state, signals and closes for the sessions the host opened on it.
+	/// </summary>
+	public const string VideoStreams = "video-streams";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		Variables, UserVariables, Config, Deck, Scripts, Widgets, Notifications, ActionInteractions, Ui,
 		Devices, VariableValues, Layouts, FolderViews, WidgetTypes, EventBindings, ScreenSavers, Adb, Messaging,
-		IconPacks,
+		IconPacks, VideoStreams,
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);

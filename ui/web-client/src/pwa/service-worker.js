@@ -15,6 +15,8 @@ var MESSAGE_SKIP_WAITING = 'macro-deck.skip-waiting';
 var MESSAGE_VERSION = 'macro-deck.version';
 var MESSAGE_UNRECOVERABLE = 'macro-deck.unrecoverable';
 
+var RELOAD_PARAM = 'md-reload';
+
 var CACHE_PREFIX = 'macro-deck-shell-';
 var CACHE_NAME = CACHE_PREFIX + MANIFEST.version;
 var SHELL_URL = new URL('index.html', self.registration.scope).href;
@@ -94,6 +96,12 @@ function isForeignRoute(pathname) {
   return false;
 }
 
+// The version check reloads with this param only after the host reported a different build, so the
+// shell this worker holds is known to be the stale one.
+function prefersNetwork(url) {
+  return url.searchParams.has(RELOAD_PARAM);
+}
+
 self.addEventListener('fetch', function (event) {
   var request = event.request;
   if (request.method !== 'GET') return;
@@ -111,6 +119,10 @@ self.addEventListener('fetch', function (event) {
   // A navigation is answered with the shell itself: the client is a single page, and every route it
   // owns is resolved in the browser.
   if (request.mode === 'navigate') {
+    if (prefersNetwork(url)) {
+      event.respondWith(fetch(request).catch(function () { return fromCache(new Request(SHELL_URL)); }));
+      return;
+    }
     event.respondWith(fromCache(new Request(SHELL_URL)).catch(function () { return fetch(request); }));
     return;
   }

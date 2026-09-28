@@ -1,3 +1,4 @@
+import { LocalizedText } from '../localization/localized-text';
 import { randomToken } from '../util/random-token';
 
 export interface WebSocketEnvelope {
@@ -7,7 +8,7 @@ export interface WebSocketEnvelope {
   id?: string;
   correlationId?: string;
   payload?: unknown;
-  error?: { code: string; message?: string };
+  error?: { code: string; message?: LocalizedText };
 }
 
 export class WebSocketTransport {

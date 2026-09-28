@@ -234,5 +234,8 @@ internal sealed class CompanionStateAndActionsTests
 			licenses: licenses!,
 			accessTokenCutoff: new AccessTokenCutoff(),
 			deviceSessionGuard: GuardFor(principal.Claims),
+			videoStreams: null!,
+			videoStreamProviders: null!,
+			videoStreamConsumer: null!,
 			connectionCancellation: CancellationToken.None);
 }

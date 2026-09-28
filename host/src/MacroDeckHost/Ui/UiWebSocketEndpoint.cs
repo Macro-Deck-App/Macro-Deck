@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Text.Json;
 using System.Threading.Channels;
+using MacroDeck.Localization;
 using MacroDeckHost.Application.Devices;
 using MacroDeckHost.WebSockets;
 using Serilog;
@@ -104,7 +105,8 @@ public sealed class UiWebSocketEndpoint(
 				connectionId,
 				principal,
 				cancellation.Token,
-				(Action)cancellation.Cancel);
+				(Action)cancellation.Cancel,
+				VideoStreamConsumerClassifier.Classify(context, principal));
 			dispatcherStarted = true;
 			if (!await dispatcher.ConnectedAsync())
 			{
@@ -295,7 +297,7 @@ public sealed class UiWebSocketEndpoint(
 		}
 		catch (UiWebSocketDispatchException exception)
 		{
-			await send(Error(request, exception.Code), CancellationToken.None);
+			await send(Error(request, exception.Code, exception.LocalizedMessage), CancellationToken.None);
 		}
 		catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
 		{
@@ -313,8 +315,14 @@ public sealed class UiWebSocketEndpoint(
 		}
 	}
 
-	private static UiWebSocketEnvelope Error(UiWebSocketEnvelope request, string code)
-		=> new(UiWebSocketProtocol.Version, "error", request.Type, null, request.Id, null, new UiWebSocketError(code));
+	private static UiWebSocketEnvelope Error(UiWebSocketEnvelope request, string code, LocalizedText? message = null)
+		=> new(UiWebSocketProtocol.Version,
+			"error",
+			request.Type,
+			null,
+			request.Id,
+			null,
+			new UiWebSocketError(code, message));
 
 	private static bool ValidId(string? value) => value is null or { Length: <= 128 };
 
@@ -481,7 +489,9 @@ public sealed class UiWebSocketEndpoint(
 	}
 }
 
-public sealed class UiWebSocketDispatchException(string code) : Exception
+public sealed class UiWebSocketDispatchException(string code, LocalizedText? localizedMessage = null) : Exception
 {
 	public string Code { get; } = code;
+
+	public LocalizedText? LocalizedMessage { get; } = localizedMessage;
 }

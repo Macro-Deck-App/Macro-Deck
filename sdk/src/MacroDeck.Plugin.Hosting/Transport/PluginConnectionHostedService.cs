@@ -358,6 +358,11 @@ internal sealed class PluginConnectionHostedService(
 			_connection = null;
 			state.ActiveConnection = null;
 			state.Status = PluginConnectionStatus.Reconnecting;
+
+			if (connection.Welcomed)
+			{
+				state.RaiseConnectionEnded();
+			}
 		}
 	}
 

@@ -66,9 +66,11 @@ app version across a host upgrade, and no update — automatic or manual — can
   cookie and the device identity do not carry over. Nothing in the client can prevent that.
 - A registered worker outlives the code that registered it, so reverting does not uninstall it. Deploying
   a no-op worker in its place is the only rollback that reaches clients already in the field.
-- The stale-shell version check has to activate a pending worker update before reloading; without that
-  its cache-busted reload is answered from the worker's cache and the check escalates against a perfectly
-  healthy host.
+- The stale-shell version check's cache-busted reload (`md-reload`) must never be answered from the
+  worker's cache, or the check escalates against a perfectly healthy host. Activating a pending update
+  before the reload was not enough: `registration.update()` resolves while the new worker is still
+  installing. The worker therefore answers such a navigation network first and falls back to its shell
+  only when the host is unreachable (amended September 2026).
 
 ## Alternatives considered
 

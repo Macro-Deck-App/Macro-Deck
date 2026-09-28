@@ -1,4 +1,5 @@
 using System.Text.Json;
+using MacroDeck.Localization;
 using System.Text.Json.Serialization;
 
 namespace MacroDeckHost.Ui;
@@ -26,4 +27,4 @@ public sealed record UiWebSocketEnvelope(
 	object? Payload,
 	UiWebSocketError? Error);
 
-public sealed record UiWebSocketError(string Code, string? Message = null);
+public sealed record UiWebSocketError(string Code, LocalizedText? Message = null);
