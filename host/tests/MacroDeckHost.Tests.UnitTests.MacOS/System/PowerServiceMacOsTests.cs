@@ -41,11 +41,10 @@ public class PowerServiceMacOsTests
 	}
 
 	[Test]
-	public void Lock_support_reflects_whether_cgsession_exists()
+	public void Lock_is_supported()
 	{
 		var power = PowerServiceFactory.Create();
 
-		Assert.That(power.Supports(PowerOperation.Lock),
-			Is.EqualTo(File.Exists(MacOsPowerCommandResolver.CgSessionPath)));
+		Assert.That(power.Supports(PowerOperation.Lock), Is.True);
 	}
 }

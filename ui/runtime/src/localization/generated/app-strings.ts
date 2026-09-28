@@ -10350,7 +10350,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Integrations.System.Errors.Power.LinuxShutDownRefused': 'The shutdown was refused, possibly by a polkit policy.',
 	'macrodeck.app:Integrations.System.Errors.Power.LockFailed': 'The session could not be locked.',
 	'macrodeck.app:Integrations.System.Errors.Power.MacOsNoHibernation': 'macOS has no user-facing hibernation.',
-	'macrodeck.app:Integrations.System.Errors.Power.MacOsNoLockMechanism': 'The lock mechanism (CGSession) was not found on this system.',
+	'macrodeck.app:Integrations.System.Errors.Power.MacOsNoLockMechanism': 'Screen locking is not available on this version of macOS.',
 	'macrodeck.app:Integrations.System.Errors.Power.MacOsRestartDenied': 'Restart was denied. Grant Macro Deck permission under System Settings > Privacy & Security > Automation > System Events.',
 	'macrodeck.app:Integrations.System.Errors.Power.MacOsScreenLockFailed': 'The screen could not be locked.',
 	'macrodeck.app:Integrations.System.Errors.Power.MacOsShutDownDenied': 'Shut down was denied. Grant Macro Deck permission under System Settings > Privacy & Security > Automation > System Events.',

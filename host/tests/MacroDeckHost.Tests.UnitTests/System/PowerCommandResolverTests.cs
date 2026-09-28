@@ -5,19 +5,6 @@ namespace MacroDeckHost.Tests.UnitTests.System;
 public class PowerCommandResolverTests
 {
 	[Test]
-	public void MacOs_resolves_lock_to_cgsession_suspend()
-	{
-		var (fileName, arguments) = MacOsPowerCommandResolver.Resolve(PowerOperation.Lock, force: false);
-		string[] expectedArguments = ["-suspend"];
-
-		Assert.Multiple(() =>
-		{
-			Assert.That(fileName, Is.EqualTo(MacOsPowerCommandResolver.CgSessionPath));
-			Assert.That(arguments, Is.EqualTo(expectedArguments));
-		});
-	}
-
-	[Test]
 	public void MacOs_resolves_sleep_to_pmset_sleepnow()
 	{
 		var (fileName, arguments) = MacOsPowerCommandResolver.Resolve(PowerOperation.Sleep, force: false);

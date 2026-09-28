@@ -8792,7 +8792,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>macOS nemá pro uživatele dostupnou hibernaci.</value>
   </data>
   <data name="Integrations.System.Errors.Power.MacOsNoLockMechanism" xml:space="preserve">
-    <value>Mechanismus uzamčení (CGSession) nebyl v tomto systému nalezen.</value>
+    <value>Uzamčení obrazovky není v této verzi macOS k dispozici.</value>
   </data>
   <data name="Integrations.System.Errors.Power.MacOsRestartDenied" xml:space="preserve">
     <value>Restart byl zamítnut. Udělte Macro Decku oprávnění v Nastavení systému &gt; Soukromí a zabezpečení &gt; Automatizace &gt; Systémové události.</value>

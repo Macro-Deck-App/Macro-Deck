@@ -8792,7 +8792,7 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>macOS no tiene hibernación visible para el usuario.</value>
   </data>
   <data name="Integrations.System.Errors.Power.MacOsNoLockMechanism" xml:space="preserve">
-    <value>No se encontró el mecanismo de bloqueo (CGSession) en este sistema.</value>
+    <value>El bloqueo de pantalla no está disponible en esta versión de macOS.</value>
   </data>
   <data name="Integrations.System.Errors.Power.MacOsRestartDenied" xml:space="preserve">
     <value>Se denegó el reinicio. Concede permiso a Macro Deck en Ajustes del Sistema &gt; Privacidad y seguridad &gt; Automatización &gt; Eventos del Sistema.</value>

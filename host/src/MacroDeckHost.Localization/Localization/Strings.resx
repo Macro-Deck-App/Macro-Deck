@@ -8792,7 +8792,7 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>macOS has no user-facing hibernation.</value>
   </data>
   <data name="Integrations.System.Errors.Power.MacOsNoLockMechanism" xml:space="preserve">
-    <value>The lock mechanism (CGSession) was not found on this system.</value>
+    <value>Screen locking is not available on this version of macOS.</value>
   </data>
   <data name="Integrations.System.Errors.Power.MacOsRestartDenied" xml:space="preserve">
     <value>Restart was denied. Grant Macro Deck permission under System Settings &gt; Privacy &amp; Security &gt; Automation &gt; System Events.</value>
