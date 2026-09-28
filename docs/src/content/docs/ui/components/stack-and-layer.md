@@ -126,6 +126,31 @@ new UiStack
 No element has a margin property. Space around one child comes from wrapping it in its own stack with
 `Padding`.
 
+## Keeping the newest children at the end
+
+```csharp
+new UiStack
+{
+    Key = "feed",
+    Fill = true,
+    Overflow = UiComponentOverflows.ClipStart,
+    Padding = UiSize.FromBasis(0.2 * textSize),
+    RequiredComponentVersion = 2,
+    Fallback = new UiStack { Key = "feedFallback", Fill = true, Children = [newestMessage] },
+    Children = messages,
+}
+```
+
+A stack shrinks its children when they need more room than it has. With `ClipStart` it keeps every child
+at its natural size instead, puts the content against its end edge and cuts off what does not fit at the
+start: a vertical feed shows its last children at the bottom and loses the first ones at the top. `fill`
+on a child is ignored, and `ClipStart` overrides `Justify`. The stack still reports the sum of its children
+as its own size, so give it its box from its parent with `Fill` or `MainSize`. A padding of 0.2 of the text
+size keeps the descenders of the last line inside the clip.
+
+`ClipStart` needs component version 2. A version 1 reader ignores `overflow` and shrinks every child into
+the box, so ask for version 2 and carry a fallback that reads well shrunk, such as the newest few messages.
+
 ## Drawing one element behind another
 
 ```csharp
@@ -168,6 +193,7 @@ padding, gap, justify or align wraps itself in a `ui.stack`, which also lets two
 | `Gap` (`gap`) | length | No gap | The gap between children. |
 | `Padding` (`padding`) | length | No padding | Inner padding on every edge. |
 | `Background` (`background`) | `#rrggbb` | Paints nothing behind its children | The stack's own fill, a literal colour rather than a theme role - see [Colours and text](/ui/concepts/theming/). |
+| `Overflow` (`overflow`) | `UiComponentOverflows.Shrink`, `.ClipStart` (`shrink`, `clip-start`) | `shrink` | What happens to children that do not fit the main axis; `clip-start` needs component version 2. |
 
 ### `ui.layer`
 
@@ -197,6 +223,11 @@ A stack divides its own main-axis extent among its children: each child's `mainS
 for that budget, and a child declaring neither is measured from what a renderer can work out without a font.
 A text needs its own `mainSize` whenever a filling sibling sits next to it.
 
+When the children ask for more than the stack has, they shrink to share the shortfall. With
+`overflow: "clip-start"` they keep their natural size instead: `fill` is ignored, a `mainSize` still holds,
+the content sits against the end edge whatever `justify` says, and what does not fit is clipped at the
+start edge.
+
 A layer gives every child the whole content box, in declaration order, first one furthest back.
 `mainSize` and `fill` mean nothing on a layer's children, because there is no axis to divide.
 
@@ -208,6 +239,11 @@ See [Sizing](/ui/concepts/sizing/) for the full model.
 - `baseline` applies to children that draw text; other children in the row align to the trailing edge.
 - A stack with no `background` paints nothing behind its children; a layer never paints a background.
 - On a layer, ignore `mainSize` and `fill` on children; every child gets the whole box.
+- `overflow` absent, `shrink` or a value you do not know: shrink the children as always. `clip-start`:
+  give each child its natural main size (its `mainSize` if declared, `fill` ignored), align the content to
+  the end edge regardless of `justify`, and clip at the stack's own box so the first children are the ones
+  cut off. Advertise `ui.stack` version 2 only once you do this.
+- `overflow` belongs to `ui.stack`; a `ui.button` does not take it.
 - A reader that does not know `ui.layer` draws the node's `fallback` - it is a type, not a third
   `direction`, so negotiation catches it.
 
