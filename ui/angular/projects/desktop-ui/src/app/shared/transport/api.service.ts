@@ -68,6 +68,8 @@ import {
   DeletePluginTokenResponse,
   DeleteProfileRequest,
   DeleteProfileResponse,
+  DuplicateProfileRequest,
+  DuplicateProfileResponse,
   DeleteScriptResponse,
   DeleteSecretResponse,
   DeleteVariableRequest,
@@ -1371,6 +1373,10 @@ export class ApiService {
 
   deleteProfile(request: DeleteProfileRequest): Promise<DeleteProfileResponse> {
     return this.http('DELETE', `/api/profiles/${encodeURIComponent(request.id)}`);
+  }
+
+  duplicateProfile(request: DuplicateProfileRequest): Promise<DuplicateProfileResponse> {
+    return this.http('POST', `/api/profiles/${encodeURIComponent(request.id)}/duplicate`, { name: request.name });
   }
 
   getScripts(): Promise<GetScriptsResponse> {

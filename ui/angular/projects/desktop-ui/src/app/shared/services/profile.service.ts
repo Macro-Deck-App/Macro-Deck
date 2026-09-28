@@ -186,6 +186,31 @@ export class ProfileService {
     }
   }
 
+  async duplicateProfile(id: string, name: string): Promise<Result<Profile>> {
+    try {
+      const response = await this.api.duplicateProfile({ id, name });
+      if (!response.success) {
+        return { success: false, error: response.error };
+      }
+      if (!response.profile) {
+        return { success: false, error: { code: 'INTERNAL_ERROR', message: this.localization.translateKey(AppStrings.Errors.Profile.NoProfileReturned) } };
+      }
+
+      const profile = this.mapIpcProfile(response.profile);
+      this.profiles.update(profiles =>
+        profiles.some(p => p.id === profile.id) ? profiles : [...profiles, profile]
+      );
+      this.selectedProfileId.set(profile.id);
+      return { success: true, data: profile };
+    } catch (error) {
+      console.error('Failed to duplicate profile:', error);
+      return {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: this.localization.translateKey(AppStrings.Errors.Profile.DuplicateFailed) }
+      };
+    }
+  }
+
   private removeFromState(id: string): void {
     this.profiles.update(profiles => profiles.filter(p => p.id !== id));
 

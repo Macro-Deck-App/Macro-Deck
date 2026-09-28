@@ -2,6 +2,9 @@ using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Layouts;
 using MacroDeckHost.Application.Persistence.Repositories;
+using MacroDeckHost.Application.Portable;
+using MacroDeckHost.Application.Secrets;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -15,17 +18,23 @@ public class ProfileService : IProfileService
 	private readonly IFolderCache _folderCache;
 	private readonly IDeviceRepository _deviceRepository;
 	private readonly IMediator _mediator;
+	private readonly IWidgetSecretCloner _widgetSecretCloner;
+	private readonly IWidgetVariableCloner _widgetVariableCloner;
 
 	public ProfileService(
 		IProfileCache profileCache,
 		IFolderCache folderCache,
 		IDeviceRepository deviceRepository,
-		IMediator mediator)
+		IMediator mediator,
+		IWidgetSecretCloner widgetSecretCloner,
+		IWidgetVariableCloner widgetVariableCloner)
 	{
 		_profileCache = profileCache;
 		_folderCache = folderCache;
 		_deviceRepository = deviceRepository;
 		_mediator = mediator;
+		_widgetSecretCloner = widgetSecretCloner;
+		_widgetVariableCloner = widgetVariableCloner;
 	}
 
 	public async Task<Result<ProfileEntity, ProfileError>> Create(
@@ -249,5 +258,135 @@ public class ProfileService : IProfileService
 		await _mediator.Publish(new ProfileDeletedNotification(id));
 
 		return Result.Ok<ProfileError>();
+	}
+
+	public async Task<Result<ProfileEntity, ProfileError>> Duplicate(Guid id, string? name = null)
+	{
+		var source = _profileCache.GetById(id);
+		if (source is null)
+		{
+			return Result.Fail<ProfileEntity, ProfileError>(ProfileError.NotFound, "Profile not found");
+		}
+
+		var sourceFolders = _folderCache.GetFoldersByProfileId(id)
+			.OrderBy(folder => folder.CreatedAt)
+			.ThenBy(folder => folder.Id)
+			.ToList();
+
+		var idMap = new Dictionary<Guid, Guid> { [source.Id] = Guid.NewGuid() };
+		foreach (var folder in sourceFolders)
+		{
+			idMap[folder.Id] = Guid.NewGuid();
+			foreach (var widget in folder.Widgets)
+			{
+				idMap[widget.Id] = Guid.NewGuid();
+			}
+		}
+
+		var existing = _profileCache.GetAll();
+		var createdAt = DateTime.UtcNow;
+		var profile = new ProfileEntity
+		{
+			Id = idMap[source.Id],
+			Name = NextCopyName(string.IsNullOrWhiteSpace(name) ? $"{source.Name} (copy)" : name.Trim(), existing),
+			Order = existing.Count > 0 ? existing.Max(p => p.Order) + 1 : 0,
+			LayoutType = source.LayoutType,
+			DefaultRows = source.DefaultRows,
+			DefaultColumns = source.DefaultColumns,
+			DefaultBackgroundColor = source.DefaultBackgroundColor,
+			DefaultWidgetSpacing = source.DefaultWidgetSpacing,
+			DefaultWidgetBorderRadius = source.DefaultWidgetBorderRadius,
+			CreatedAt = createdAt
+		};
+
+		var folders = new List<FolderEntity>(sourceFolders.Count);
+		var sourceWidgetIdsByCopyId = new Dictionary<Guid, Guid>();
+		for (var index = 0; index < sourceFolders.Count; index++)
+		{
+			var sourceFolder = sourceFolders[index];
+			var folder = new FolderEntity
+			{
+				Id = idMap[sourceFolder.Id],
+				ProfileId = profile.Id,
+				Name = sourceFolder.Name,
+				ParentId = sourceFolder.ParentId is { } parentId && idMap.TryGetValue(parentId, out var copiedParentId)
+					? copiedParentId
+					: sourceFolder.ParentId,
+				Order = sourceFolder.Order,
+				Rows = sourceFolder.Rows,
+				Columns = sourceFolder.Columns,
+				BackgroundColor = sourceFolder.BackgroundColor,
+				WidgetSpacing = sourceFolder.WidgetSpacing,
+				WidgetBorderRadius = sourceFolder.WidgetBorderRadius,
+				IsDefault = sourceFolder.IsDefault,
+				ViewId = sourceFolder.ViewId,
+				ViewConfiguration = PortableGuidRemapper.Remap(sourceFolder.ViewConfiguration, idMap),
+				// An enabled focus rule may exist only once per device and application across all
+				// profiles, so the copy starts without the original's rules.
+				FocusRules = [],
+				CreatedAt = createdAt.AddTicks(index)
+			};
+
+			foreach (var sourceWidget in sourceFolder.Widgets)
+			{
+				var widget = new WidgetEntity
+				{
+					Id = idMap[sourceWidget.Id],
+					FolderId = folder.Id,
+					Type = sourceWidget.Type,
+					PositionX = sourceWidget.PositionX,
+					PositionY = sourceWidget.PositionY,
+					Width = sourceWidget.Width,
+					Height = sourceWidget.Height,
+					Data = PortableGuidRemapper.Remap(
+						await _widgetSecretCloner.CloneReferencedSecrets(sourceWidget.Data),
+						idMap),
+					IsPinned = sourceWidget.IsPinned,
+					PinScope = sourceWidget.PinScope,
+					CreatedAt = createdAt
+				};
+				folder.Widgets.Add(widget);
+				sourceWidgetIdsByCopyId[widget.Id] = sourceWidget.Id;
+			}
+
+			folders.Add(folder);
+		}
+
+		await _profileCache.AddOrUpdateAggregate(profile, folders);
+
+		foreach (var (copyId, sourceId) in sourceWidgetIdsByCopyId)
+		{
+			await _widgetVariableCloner.Clone(sourceId, copyId);
+		}
+
+		await _mediator.Publish(new ProfileCreatedNotification(profile));
+		foreach (var folder in folders)
+		{
+			await _mediator.Publish(new FolderCreatedNotification(folder));
+			foreach (var widget in folder.Widgets)
+			{
+				await _mediator.Publish(new WidgetCreatedNotification(widget));
+			}
+		}
+
+		return Result.Ok<ProfileEntity, ProfileError>(profile);
+	}
+
+	private static string NextCopyName(string baseName, IReadOnlyCollection<ProfileEntity> existing)
+	{
+		var taken = existing.Select(profile => profile.Name).ToHashSet(StringComparer.CurrentCultureIgnoreCase);
+		if (!taken.Contains(baseName))
+		{
+			return baseName;
+		}
+
+		for (var suffix = 2;; suffix++)
+		{
+			var candidate = $"{baseName} {suffix}";
+			if (!taken.Contains(candidate))
+			{
+				return candidate;
+			}
+		}
 	}
 }

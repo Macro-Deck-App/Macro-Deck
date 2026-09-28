@@ -26,4 +26,6 @@ public interface IProfileService
 		int? defaultWidgetBorderRadius);
 
 	Task<Result<ProfileError>> Delete(Guid id);
+
+	Task<Result<ProfileEntity, ProfileError>> Duplicate(Guid id, string? name = null);
 }

@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Secrets;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure.Caching;
@@ -21,7 +22,12 @@ public class ProfileServiceTests
 		_cache = new ProfileCache(_store, new LoggerConfiguration().CreateLogger());
 		await _cache.InitializeCache();
 		var mediator = new RecordingMediator();
-		_service = new ProfileService(_cache, new FolderCache(_cache), new InMemoryDeviceRepository(), mediator);
+		_service = new ProfileService(_cache,
+			new FolderCache(_cache),
+			new InMemoryDeviceRepository(),
+			mediator,
+			new WidgetSecretCloner(new FakeSecretService()),
+			new NullWidgetVariableCloner());
 	}
 
 	[TearDown]

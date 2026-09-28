@@ -2778,6 +2778,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.Profile.DeleteFailed" xml:space="preserve">
     <value>Failed to delete profile</value>
   </data>
+  <data name="Errors.Profile.DuplicateFailed" xml:space="preserve">
+    <value>Failed to duplicate profile</value>
+  </data>
   <data name="Errors.Profile.LoadFailed" xml:space="preserve">
     <value>Failed to load profiles</value>
   </data>
@@ -2795,6 +2798,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Errors.Profiles.VirtualCannotBeEdited" xml:space="preserve">
     <value>Virtual profiles cannot be edited</value>
+  </data>
+  <data name="Errors.Profiles.VirtualCannotBeDuplicated" xml:space="preserve">
+    <value>Virtual profiles cannot be duplicated</value>
   </data>
   <data name="Errors.Script.CreateFailed" xml:space="preserve">
     <value>Failed to create script</value>
@@ -17501,6 +17507,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.MusicPlayer.UnavailableHintWithStatus" xml:space="preserve">
     <value>{label} is temporarily unavailable ({status}) - Macro Deck keeps retrying.</value>
   </data>
+  <data name="Widgets.Profile.CopyName" xml:space="preserve">
+    <value>{name} (copy)</value>
+  </data>
   <data name="Widgets.Profile.DefaultInheritedLabel" xml:space="preserve">
     <value>Default</value>
   </data>
@@ -17510,14 +17519,8 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.Profile.DeleteConfirmNamed" xml:space="preserve">
     <value>Delete "{name}" and all its folders and widgets? This action cannot be undone.</value>
   </data>
-  <data name="Widgets.Profile.DeleteNamed" xml:space="preserve">
-    <value>Delete {name}</value>
-  </data>
   <data name="Widgets.Profile.DeleteProfileHeading" xml:space="preserve">
     <value>Delete Profile</value>
-  </data>
-  <data name="Widgets.Profile.EditNamed" xml:space="preserve">
-    <value>Edit {name}</value>
   </data>
   <data name="Widgets.Profile.EditProfileHeading" xml:space="preserve">
     <value>Edit Profile</value>
@@ -17530,9 +17533,6 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Widgets.Profile.ExportHeading" xml:space="preserve">
     <value>Export profile</value>
-  </data>
-  <data name="Widgets.Profile.ExportNamed" xml:space="preserve">
-    <value>Export {name}</value>
   </data>
   <data name="Widgets.Profile.ImportFileTitle" xml:space="preserve">
     <value>Import profile from a .macroDeckProfile file</value>
@@ -17552,6 +17552,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.Profile.NewProfile" xml:space="preserve">
     <value>New Profile</value>
   </data>
+  <data name="Widgets.Profile.NoMatches" xml:space="preserve">
+    <value>No profiles match your search</value>
+  </data>
   <data name="Widgets.Profile.NoProfile" xml:space="preserve">
     <value>No Profile</value>
   </data>
@@ -17560,6 +17563,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Widgets.Profile.ProfileNamePlaceholder" xml:space="preserve">
     <value>Profile name</value>
+  </data>
+  <data name="Widgets.Profile.SearchPlaceholder" xml:space="preserve">
+    <value>Search profiles</value>
   </data>
   <data name="Widgets.Profile.UpdateFailed" xml:space="preserve">
     <value>Failed to update the profile</value>

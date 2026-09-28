@@ -1,5 +1,6 @@
 using MacroDeck.Sdk.Layouts;
 using MacroDeckHost.Application.Layouts;
+using MacroDeckHost.Application.Secrets;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -29,7 +30,12 @@ public class ProfileServiceDeviceLockTests
 		_cache = new ProfileCache(new InMemoryProfileStore(), new LoggerConfiguration().CreateLogger());
 		await _cache.InitializeCache();
 		_devices = new InMemoryDeviceRepository();
-		_service = new ProfileService(_cache, new FolderCache(_cache), _devices, new RecordingMediator());
+		_service = new ProfileService(_cache,
+			new FolderCache(_cache),
+			_devices,
+			new RecordingMediator(),
+			new WidgetSecretCloner(new FakeSecretService()),
+			new NullWidgetVariableCloner());
 
 		var created = await _service.Create("Deck Profile", defaultRows: 4, defaultColumns: 4);
 		_profileId = created.Data!.Id;

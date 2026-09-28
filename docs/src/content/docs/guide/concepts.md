@@ -12,6 +12,10 @@ A streaming setup, built up piece by piece.
 One profile per use: **Streaming**, **Work**, **Gaming**. A profile holds all its folders and
 widgets. Switch between them at the top. Each device can open with its own profile.
 
+To build a variant, for example a second streaming layout, duplicate a profile from the profile
+menu. The copy gets every folder, widget and setting, and is named like **Streaming (copy)**.
+Automatic activation stays with the original, so set it up again for the copy if you want it.
+
 ## Folders
 
 Inside **Streaming**: a start folder **Home** with **Scenes**, **Audio** and **Chat** subfolders,

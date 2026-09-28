@@ -2779,6 +2779,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Errors.Profile.DeleteFailed" xml:space="preserve">
     <value>No se pudo eliminar el perfil</value>
   </data>
+  <data name="Errors.Profile.DuplicateFailed" xml:space="preserve">
+    <value>No se pudo duplicar el perfil</value>
+  </data>
   <data name="Errors.Profile.LoadFailed" xml:space="preserve">
     <value>No se pudieron cargar los perfiles</value>
   </data>
@@ -2796,6 +2799,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Errors.Profiles.VirtualCannotBeEdited" xml:space="preserve">
     <value>Los perfiles virtuales no se pueden editar</value>
+  </data>
+  <data name="Errors.Profiles.VirtualCannotBeDuplicated" xml:space="preserve">
+    <value>Los perfiles virtuales no se pueden duplicar</value>
   </data>
   <data name="Errors.Script.CreateFailed" xml:space="preserve">
     <value>No se pudo crear el script</value>
@@ -17500,6 +17506,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Widgets.MusicPlayer.UnavailableHintWithStatus" xml:space="preserve">
     <value>{label} no está disponible temporalmente ({status}); Macro Deck sigue intentándolo.</value>
   </data>
+  <data name="Widgets.Profile.CopyName" xml:space="preserve">
+    <value>{name} (copia)</value>
+  </data>
   <data name="Widgets.Profile.DefaultInheritedLabel" xml:space="preserve">
     <value>Predeterminado</value>
   </data>
@@ -17509,14 +17518,8 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Widgets.Profile.DeleteConfirmNamed" xml:space="preserve">
     <value>¿Eliminar "{name}" y todas sus carpetas y widgets? Esta acción no se puede deshacer.</value>
   </data>
-  <data name="Widgets.Profile.DeleteNamed" xml:space="preserve">
-    <value>Eliminar {name}</value>
-  </data>
   <data name="Widgets.Profile.DeleteProfileHeading" xml:space="preserve">
     <value>Eliminar perfil</value>
-  </data>
-  <data name="Widgets.Profile.EditNamed" xml:space="preserve">
-    <value>Editar {name}</value>
   </data>
   <data name="Widgets.Profile.EditProfileHeading" xml:space="preserve">
     <value>Editar perfil</value>
@@ -17529,9 +17532,6 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Widgets.Profile.ExportHeading" xml:space="preserve">
     <value>Exportar perfil</value>
-  </data>
-  <data name="Widgets.Profile.ExportNamed" xml:space="preserve">
-    <value>Exportar {name}</value>
   </data>
   <data name="Widgets.Profile.ImportFileTitle" xml:space="preserve">
     <value>Importar perfil desde un archivo .macroDeckProfile</value>
@@ -17551,6 +17551,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Widgets.Profile.NewProfile" xml:space="preserve">
     <value>Nuevo perfil</value>
   </data>
+  <data name="Widgets.Profile.NoMatches" xml:space="preserve">
+    <value>Ningún perfil coincide con tu búsqueda</value>
+  </data>
   <data name="Widgets.Profile.NoProfile" xml:space="preserve">
     <value>Sin perfil</value>
   </data>
@@ -17559,6 +17562,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Widgets.Profile.ProfileNamePlaceholder" xml:space="preserve">
     <value>Nombre del perfil</value>
+  </data>
+  <data name="Widgets.Profile.SearchPlaceholder" xml:space="preserve">
+    <value>Buscar perfiles</value>
   </data>
   <data name="Widgets.Profile.UpdateFailed" xml:space="preserve">
     <value>No se pudo actualizar el perfil</value>

@@ -101,6 +101,63 @@ public class PortabilityEndpointsTests
 	}
 
 	[Test]
+	public async Task Profile_duplicate_without_a_body_names_the_copy_after_the_original()
+	{
+		var profileId = await CreateProfile("Original Deck");
+		var folderId = await FirstFolderId(profileId);
+		await CreateWidget(folderId);
+
+		using var request = new HttpRequestMessage(HttpMethod.Post, $"/api/profiles/{profileId}/duplicate");
+		request.Headers.Add(LoopbackHeader, "1");
+		var response = await _client.SendAsync(request);
+		var body = await ReadJson(response);
+		var copyId = body.GetProperty("profile").GetProperty("id").GetString()!;
+		var copyFolderId = await FirstFolderId(copyId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+			Assert.That(body.GetProperty("success").GetBoolean(), Is.True);
+			Assert.That(copyId, Is.Not.EqualTo(profileId));
+			Assert.That(body.GetProperty("profile").GetProperty("name").GetString(),
+				Is.EqualTo("Original Deck (copy)"));
+			Assert.That(copyFolderId, Is.Not.EqualTo(folderId));
+		});
+	}
+
+	[Test]
+	public async Task Profile_duplicate_uses_the_requested_name_for_the_profile_in_the_route()
+	{
+		var profileId = await CreateProfile("Named Source");
+
+		var response = await SendJson(HttpMethod.Post,
+			$"/api/profiles/{profileId}/duplicate",
+			new { id = Guid.NewGuid().ToString(), name = "Named Source (Kopie)" });
+		var body = await ReadJson(response);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+			Assert.That(body.GetProperty("success").GetBoolean(), Is.True);
+			Assert.That(body.GetProperty("profile").GetProperty("name").GetString(),
+				Is.EqualTo("Named Source (Kopie)"));
+		});
+	}
+
+	[Test]
+	public async Task Profile_duplicate_of_a_virtual_profile_is_refused()
+	{
+		var response = await SendJson(HttpMethod.Post, "/api/profiles/integration:board/duplicate", new { });
+		var body = await ReadJson(response);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(body.GetProperty("success").GetBoolean(), Is.False);
+			Assert.That(body.GetProperty("error").GetProperty("code").GetString(), Is.EqualTo("IsVirtual"));
+		});
+	}
+
+	[Test]
 	public async Task Profile_export_including_secrets_requires_a_password()
 	{
 		var profileId = await CreateProfile("Needs Password");
