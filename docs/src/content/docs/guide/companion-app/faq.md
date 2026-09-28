@@ -35,6 +35,17 @@ your other computers signed in to it receive it too. See [License and trial](/gu
 Yes. Every device can use the app for free for 7 days. Tap **Start 7-day trial** when you first open a deck. See
 [The 7-day trial](/guide/companion-app/license/#the-7-day-trial).
 
+## Does the app work with Macro Deck 2?
+
+No. Macro Deck Companion works with Macro Deck 3 only. If you scan the QR code Macro Deck 2 shows, or enter
+the address of a computer running Macro Deck 2, the app says that Macro Deck 2 is not supported and adds
+nothing, with a link to download Macro Deck 3. A computer you added before shows **Macro Deck 2, not
+supported**. Download Macro Deck 3 on the computer, see [Installation](/guide/installation/), then add it again
+with its new QR code.
+
+If you bought the earlier Macro Deck 2 app for iPhone or iPad, see
+[License and trial](/guide/companion-app/license/#if-you-bought-the-macro-deck-2-app).
+
 ## Can I use the app on a device without Google Play services?
 
 Yes. There is a separate version of the Android app that does not need Google Play services, for example for

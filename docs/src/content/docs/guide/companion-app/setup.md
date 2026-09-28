@@ -32,6 +32,9 @@ whether to connect over HTTPS or HTTP; choose **HTTPS (recommended)**.
 
 A device without a camera, such as some desk displays, cannot scan. Enter the address instead.
 
+The QR code of Macro Deck 2 does not work: the app says Macro Deck 2 is not supported. Update Macro Deck on the
+computer to Macro Deck 3 first; see [Does the app work with Macro Deck 2?](/guide/companion-app/faq/#does-the-app-work-with-macro-deck-2).
+
 ### Pick it from the network
 
 Computers that show themselves on the network appear under **Found on this network** on the Connections
