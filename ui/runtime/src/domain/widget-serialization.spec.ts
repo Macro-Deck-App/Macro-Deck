@@ -190,6 +190,15 @@ describe('flows normalization', () => {
     expect(JSON.parse(resultBag.flows)).toEqual([{ id: 'f1' }]);
   });
 
+  it('keeps the name a user gave an event trigger through a load and save', () => {
+    const flows = [{ triggerId: 'e1', triggerType: 'onEvent', name: 'Go live', children: [] }];
+    const data = parseWidgetData(WidgetType.ActionButton, JSON.stringify({ label: 'X', flows: JSON.stringify(flows) }));
+
+    const saved = JSON.parse(serializeWidgetData(WidgetType.ActionButton, data));
+
+    expect(JSON.parse(saved.flows)[0].name).toBe('Go live');
+  });
+
   ([
     [WidgetType.Clock, { style: 'digital' }],
     [WidgetType.MusicPlayer, { coverStyle: 'small', showHeader: true }],

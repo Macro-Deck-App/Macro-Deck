@@ -55,7 +55,7 @@ import { ApiService } from '../transport';
 import { LocalizationService } from '../localization';
 import { WidgetRegistryService } from './widget-registry.service';
 import { ProfileService } from './profile.service';
-import { ActionExecutionService } from './action-execution.service';
+import { ActionExecutionService, formatRunDuration } from './action-execution.service';
 import { ToastService } from './toast.service';
 
 interface FolderLoad {
@@ -1394,6 +1394,38 @@ export class FolderService {
       this.handleExecutionOutcome(response);
     } catch (error) {
       console.error('Failed to execute action-button trigger:', error);
+    }
+  }
+
+  async runWidgetShortPress(widget: GridWidget): Promise<void> {
+    const folderId = widget.folderId || this.selectedFolderId();
+    if (!folderId) return;
+
+    try {
+      const response = await this.api.executeActionButtonTrigger({
+        widgetId: widget.id,
+        folderId,
+        triggerType: 'onShortPress',
+        clientId: this.api.clientId
+      });
+      if (response.executionId) {
+        this.actionExecution.claim(response.executionId);
+      }
+
+      const result = response.status === 'Accepted' && response.executionId
+        ? await this.actionExecution.waitFor(response.executionId)
+        : response;
+      if (!result) return;
+
+      if (isFailureExecutionStatus(result.status) || !result.success) {
+        this.toastExecutionFailure(result.error);
+      } else if (result.actions?.length) {
+        this.toasts.show(this.localization.translateKey(AppStrings.ActionBuilder.Store.RunSucceeded, {
+          duration: formatRunDuration(result.durationMs ?? 0),
+        }));
+      }
+    } catch {
+      this.toastExecutionFailure();
     }
   }
 

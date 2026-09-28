@@ -467,3 +467,53 @@ describe('ActionBuilderComponent parameter hydration', () => {
     expect(afterParams.find(p => p.name === 'sceneName')?.label).toBe('Scene Name');
   });
 });
+
+describe('ActionBuilderComponent event menu labels', () => {
+  let fixture: ComponentFixture<ActionBuilderComponent>;
+  let component: ActionBuilderComponent;
+
+  function eventFlow(triggerId: string, eventName?: string, name?: string): ActionFlow {
+    return {
+      triggerId,
+      triggerType: 'onEvent',
+      name,
+      event: eventName ? { providerId: 'obs', eventId: triggerId, eventName } : undefined,
+      children: [],
+    };
+  }
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ActionBuilderComponent],
+      providers: [provideZonelessChangeDetection(), { provide: ApiService, useValue: fakeApiService() }],
+    })
+      .overrideComponent(ActionBuilderComponent, { set: { template: '', imports: [] } })
+      .compileComponents();
+
+    fixture = TestBed.createComponent(ActionBuilderComponent);
+    component = fixture.componentInstance;
+  });
+
+  it('lists a named event by the name the user gave it, and falls back to the event and then its position', () => {
+    component.flows = [
+      eventFlow('a', 'Streaming Started', 'Go live'),
+      eventFlow('b', 'Scene Changed', '   '),
+      eventFlow('c'),
+    ];
+    fixture.detectChanges();
+
+    expect(component.eventTabItems().map(item => item.label)).toEqual(['Go live', 'Scene Changed', 'Event 3']);
+  });
+
+  it('offers the unnamed label as the placeholder for the selected event', () => {
+    component.flows = [eventFlow('a', 'Streaming Started', 'Go live'), eventFlow('b')];
+    fixture.detectChanges();
+
+    fixture.debugElement.injector.get(ActionFlowStore).selectedTriggerId.set('a');
+    expect(component.selectedEventDefaultLabel()).toBe('Streaming Started');
+    expect(component.eventMenuLabel()).toBe('Go live');
+
+    fixture.debugElement.injector.get(ActionFlowStore).selectedTriggerId.set('b');
+    expect(component.selectedEventDefaultLabel()).toBe('Event 2');
+  });
+});

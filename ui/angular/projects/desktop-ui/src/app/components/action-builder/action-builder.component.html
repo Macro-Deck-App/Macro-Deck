@@ -166,7 +166,11 @@
              cards' column; the actions it runs are the list below, exactly as for a press trigger -
              only the activation differs. -->
         <div class="event-panel">
-          <shared-event-trigger-editor [flow]="eventFlow" [removable]="eventTriggerRemovable()" />
+          <shared-event-trigger-editor
+            [flow]="eventFlow"
+            [removable]="eventTriggerRemovable()"
+            [nameable]="eventTriggerNameable()"
+            [defaultName]="selectedEventDefaultLabel()" />
         </div>
       }
 

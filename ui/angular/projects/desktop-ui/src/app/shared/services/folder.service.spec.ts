@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Observable, Subject } from 'rxjs';
 import { ApiService, WidgetTypeInfo } from '../transport';
 import {
+  type ActionOutcome,
   ActionButtonData,
   ActionFlow,
   ClockData,
@@ -1275,6 +1276,61 @@ describe('FolderService action execution outcome', () => {
     await Promise.resolve();
 
     expect(toasts.toasts()).toEqual([]);
+  });
+
+  describe('running a widget from the deck editor', () => {
+    const outcome: ActionOutcome = { blockId: 'b1', status: 'Succeeded', durationMs: 5 };
+
+    function actionButton(): GridWidget {
+      return { id: widgetId, folderId, x: 0, y: 0, w: 1, h: 1, type: WidgetType.ActionButton, data: {} };
+    }
+
+    it('presses the saved widget on the host as a Short Press, even for an Action Button', async () => {
+      apiSpy.executeActionButtonTrigger.and.resolveTo({ success: true, status: 'Succeeded', durationMs: 12, actions: [outcome] });
+
+      await service.runWidgetShortPress(actionButton());
+
+      expect(apiSpy.executeActionButtonTrigger).toHaveBeenCalledOnceWith({
+        widgetId, folderId, triggerType: 'onShortPress', clientId: 'client-1',
+      });
+      expect(toasts.toasts()).toEqual([
+        jasmine.objectContaining({ message: 'Actions ran successfully in 12ms' }),
+      ]);
+    });
+
+    it('confirms a run the host finished after answering Accepted', async () => {
+      apiSpy.executeActionButtonTrigger.and.resolveTo({ success: true, status: 'Accepted', executionId: 'r1' });
+
+      const run = service.runWidgetShortPress(actionButton());
+      await Promise.resolve();
+      await Promise.resolve();
+      notifications.get('ActionExecutionStatusEvent')!.next({
+        executionId: 'r1', status: 'Succeeded', durationMs: 2500, actions: [outcome],
+      });
+      await run;
+
+      expect(toasts.toasts()).toEqual([
+        jasmine.objectContaining({ message: 'Actions ran successfully in 2.5s' }),
+      ]);
+    });
+
+    it('claims no success when nothing ran', async () => {
+      apiSpy.executeActionButtonTrigger.and.resolveTo({ success: true, status: 'Succeeded', durationMs: 0, actions: [] });
+
+      await service.runWidgetShortPress(actionButton());
+
+      expect(toasts.toasts()).toEqual([]);
+    });
+
+    it('shows the host error when the run fails', async () => {
+      apiSpy.executeActionButtonTrigger.and.resolveTo({
+        success: false, status: 'Failed', error: { code: 'HOST_LOCKED', message: 'locked' },
+      });
+
+      await service.runWidgetShortPress(actionButton());
+
+      expect(toasts.toasts()).toEqual([jasmine.objectContaining({ variant: 'error', message: 'locked' })]);
+    });
   });
 });
 

@@ -3,7 +3,7 @@ export { ApiService, IconPackExportError, type ConnectionState, type WidgetTypeI
 export { HOST_URL_RESOLVER } from './transport/host-url';
 
 // Angular adapter - application state and host-backed services
-export { ActionExecutionService } from './services/action-execution.service';
+export { ActionExecutionService, formatRunDuration } from './services/action-execution.service';
 export { AUTH_REQUIRED_SCOPE, AuthService, type AuthState } from './services/auth.service';
 export {
   DECK_DRAG_THRESHOLD_PX,

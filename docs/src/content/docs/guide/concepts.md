@@ -43,7 +43,8 @@ What a widget does, and when. The **Scenes** button runs **Change Folder to** on
 | Double Tap | Mute all audio |
 | Event | Turn the mic slider's accent red when OBS reports **Streaming Started** |
 
-Every widget with actions, sliders included, can add event triggers next to its press triggers.
+Every widget with actions, sliders included, can add event triggers next to its press triggers. Give an
+event trigger a **Name** to tell several of them apart in the **Events** list.
 
 Once a widget has a Double Tap action, its Short Press waits a moment to see whether a second tap follows,
 so a single tap runs slightly later. A double tap runs only the Double Tap action. On a slider, a double tap

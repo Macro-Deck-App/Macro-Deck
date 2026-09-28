@@ -19,6 +19,17 @@ export function findFlowForTrigger(flows: readonly ActionFlow[], triggerType: st
   return flows.find(f => f.triggerType.toLowerCase() === triggerType.toLowerCase());
 }
 
+export function parseStoredFlows(value: unknown): ActionFlow[] {
+  if (Array.isArray(value)) return value as ActionFlow[];
+  if (typeof value !== 'string' || value.length === 0) return [];
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return Array.isArray(parsed) ? (parsed as ActionFlow[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 export function hasRunnableFlow(flows: unknown, triggerType: string): boolean {
   if (!Array.isArray(flows)) return false;
   const flow = findFlowForTrigger(flows as ActionFlow[], triggerType);

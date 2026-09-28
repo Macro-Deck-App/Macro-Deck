@@ -8,8 +8,10 @@ import {
   GridWidget,
   PinScope,
   WidgetRenderState,
+  hasRunnableFlow,
   isApplePlatform,
   isSelectionModifierEvent,
+  parseStoredFlows,
 } from '@macro-deck/runtime';
 import {
   DECK_DRAG_THRESHOLD_PX,
@@ -26,6 +28,7 @@ import {
   WidgetGhostComponent,
   WidgetGridComponent,
 } from '@shared';
+import { DEFAULT_TRIGGER_TYPE } from '../action-builder/default-action-defs';
 
 const PINNED_MOVE_HINT = 'pinned-widget-locked';
 const PIN_SCOPE_HINT = 'pin-scope-middle-click';
@@ -72,6 +75,7 @@ export class DeckEditorGridComponent implements OnChanges, OnDestroy {
 
   @Output() widgetDelete = new EventEmitter<string>();
   @Output() widgetEdit = new EventEmitter<GridWidget>();
+  @Output() widgetRun = new EventEmitter<GridWidget>();
   @Output() widgetCopy = new EventEmitter<GridWidget>();
   @Output() widgetCut = new EventEmitter<GridWidget>();
   @Output() widgetPaste = new EventEmitter<{ x: number; y: number }>();
@@ -414,6 +418,13 @@ export class DeckEditorGridComponent implements OnChanges, OnDestroy {
     return this.selectedWidgetIds.size;
   }
 
+  menuCanRun(): boolean {
+    const widget = this.contextMenu().widget;
+    if (!widget || this.menuSelectionCount() > 1) return false;
+    const data = widget.data as { flows?: unknown };
+    return hasRunnableFlow(parseStoredFlows(data.flows), DEFAULT_TRIGGER_TYPE);
+  }
+
   menuAnyPinned(): boolean {
     const widget = this.contextMenu().widget;
     if (!widget) return false;
@@ -443,6 +454,9 @@ export class DeckEditorGridComponent implements OnChanges, OnDestroy {
     switch (action) {
       case 'edit':
         this.widgetEdit.emit(widget);
+        break;
+      case 'run':
+        this.widgetRun.emit(widget);
         break;
       case 'copy':
         this.widgetCopy.emit(widget);

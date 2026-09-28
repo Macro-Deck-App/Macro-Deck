@@ -639,4 +639,52 @@ describe('DeckEditorGridComponent', () => {
       expect(host().querySelector('.widget.drag-source')).toBeNull();
     });
   });
+
+  describe('running a widget from its context menu', () => {
+    const shortPress = (disabled = false) => [{
+      triggerId: 'onShortPress',
+      triggerType: 'onShortPress',
+      children: [{ id: 'b1', type: 'action', blockType: 'action', label: 'Set label', color: '', disabled }],
+    }];
+
+    function openMenuOn(widget: GridWidget): string[] {
+      component.onTileContextMenu(widget, new MouseEvent('contextmenu'));
+      fixture.detectChanges();
+      return fixture.debugElement.query(By.directive(WidgetContextMenuComponent))
+        .componentInstance.menuItems().map((item: { id: string }) => item.id);
+    }
+
+    it('offers Run for a widget whose saved Short Press has an action, and hands that widget on', () => {
+      const widget = gridWidget({ data: { flows: shortPress() } as WidgetData });
+      render([widget]);
+      const runs = collect<GridWidget>(component.widgetRun);
+
+      expect(openMenuOn(widget)).toContain('run');
+      component.onContextMenuAction('run');
+
+      expect(runs).toEqual([widget]);
+    });
+
+    it('reads flows stored as a JSON string the same way', () => {
+      const widget = gridWidget({ data: { flows: JSON.stringify(shortPress()) } as unknown as WidgetData });
+      render([widget]);
+
+      expect(openMenuOn(widget)).toContain('run');
+    });
+
+    it('offers no Run when the Short Press has nothing enabled to run', () => {
+      const disabledOnly = gridWidget({ data: { flows: shortPress(true) } as WidgetData });
+      render([disabledOnly]);
+
+      expect(openMenuOn(disabledOnly)).not.toContain('run');
+    });
+
+    it('offers no Run for a multi-widget selection', () => {
+      const a = gridWidget({ id: 'a', data: { flows: shortPress() } as WidgetData });
+      const b = gridWidget({ id: 'b', x: 1, data: { flows: shortPress() } as WidgetData });
+      render([a, b], { selectedWidgetIds: new Set(['a', 'b']) });
+
+      expect(openMenuOn(a)).not.toContain('run');
+    });
+  });
 });

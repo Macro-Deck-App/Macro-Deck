@@ -105,6 +105,7 @@ export {
   findFlowForTrigger,
   hasRunnableFlow,
   type LocalDeckNavigation,
+  parseStoredFlows,
   resolveLocalDeckNavigation,
 } from './domain/deck-navigation.util';
 export {
