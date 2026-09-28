@@ -114,6 +114,29 @@ example the current OBS scene or `system_cpu_usage_percent`, create an automatio
 **Variable Changed** watching that variable runs **Write Variable to File** for the same variable.
 Every change then lands in the file.
 
+### Share variables with another Macro Deck
+
+With **Macro Deck Delegate**, one Macro Deck can use the variables of another one, for example to show
+on your streaming PC whether OBS on your gaming PC is live. Both sides have to agree:
+
+1. On the Macro Deck that has the variable, open the variable's menu on the **Variables** page and
+   choose **Share with other Macro Decks**. Any global variable can be shared, your own and integration
+   variables alike. Shared variables are marked **Shared**; **Stop sharing** in the same menu takes it
+   back.
+2. On the other Macro Deck, add or edit the **Macro Deck Delegate** connection to it and turn on
+   **Import shared variables**. It is off by default.
+
+The shared variables then appear there under the other computer's name, so
+`obs_streaming` shared by a computer called *Gaming-PC* becomes `{{ vars.gaming_pc_obs_streaming }}`.
+Sharing and unsharing show up within a few seconds, without a restart. While the other Macro Deck is off
+or cannot be reached, its variables read as unavailable; once it is back, they catch up within a few
+minutes at most. If a name is already taken by another variable, or is longer than 64 characters with the
+computer's name in front, that variable is left out, and the connection shows a warning listing it.
+
+A shared variable that can be changed on its own Macro Deck can be changed from the other one too, for
+example with a slider or **Set Variable**, so anyone who can change variables on the importing Macro
+Deck can change it. A Macro Deck from before variable sharing simply shares nothing.
+
 ## Scripts and automations
 
 - **Script:** actions you reuse, for example *Go live* used by three buttons.

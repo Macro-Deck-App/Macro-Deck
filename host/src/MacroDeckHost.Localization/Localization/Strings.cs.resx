@@ -2891,6 +2891,21 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Variables.InvalidFilePath" xml:space="preserve">
     <value>Zadejte úplnou cestu k souboru</value>
   </data>
+  <data name="Errors.Variables.OnlyGlobalCanBeShared" xml:space="preserve">
+    <value>Sdílet lze pouze globální proměnné.</value>
+  </data>
+  <data name="Errors.Variables.ImportedCannotBeShared" xml:space="preserve">
+    <value>Proměnnou importovanou z jiného Macro Decku nelze sdílet.</value>
+  </data>
+  <data name="Errors.Variables.SharingNotSaved" xml:space="preserve">
+    <value>Nastavení sdílení se nepodařilo uložit.</value>
+  </data>
+  <data name="Errors.Variables.NotShared" xml:space="preserve">
+    <value>Tato proměnná není sdílena.</value>
+  </data>
+  <data name="Errors.Variables.ValueDoesNotFitType" xml:space="preserve">
+    <value>Hodnota neodpovídá typu proměnné.</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>Data widgetu musí být objekt JSON.</value>
   </data>
@@ -4256,6 +4271,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Delegation.Config.UsernameRequired" xml:space="preserve">
     <value>Zadejte uživatelské jméno použité k přihlášení na druhém Macro Deck.</value>
   </data>
+  <data name="Integrations.Delegation.Config.ImportSharedVariablesLabel" xml:space="preserve">
+    <value>Importovat sdílené proměnné</value>
+  </data>
+  <data name="Integrations.Delegation.Config.ImportSharedVariablesDescription" xml:space="preserve">
+    <value>Zpřístupní zde proměnné sdílené na druhém Macro Decku, pojmenované podle jeho počítače, například otherpc_obs_streaming.</value>
+  </data>
   <data name="Integrations.Delegation.Errors.Ambiguous" xml:space="preserve">
     <value>Vyberte, který Macro Deck má skript spustit.</value>
   </data>
@@ -4264,6 +4285,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Delegation.Errors.CouldNotBeReached" xml:space="preserve">
     <value>{label} nebyl dostupný.</value>
+  </data>
+  <data name="Integrations.Delegation.Errors.RemoteLocked" xml:space="preserve">
+    <value>{label} je uzamčen a změnu nepřijal.</value>
+  </data>
+  <data name="Integrations.Delegation.Errors.RemoteRejectedChange" xml:space="preserve">
+    <value>{label} změnu nepřijal.</value>
   </data>
   <data name="Integrations.Delegation.Errors.DelegateCycle" xml:space="preserve">
     <value>Spuštění by vytvořilo delegační cyklus přes {label}.</value>
@@ -4342,6 +4369,17 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Delegation.Issues.UnreachableTitle" xml:space="preserve">
     <value>{label} byl nedostupný</value>
+  </data>
+  <data name="Integrations.Delegation.Issues.SharedImportSkippedTitle.One" xml:space="preserve">
+    <value>Sdílenou proměnnou z {label} nelze přidat ({count})</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.Delegation.Issues.SharedImportSkippedTitle.Other" xml:space="preserve">
+    <value>Sdílené proměnné z {label} nelze přidat (počet: {count})</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.Delegation.Issues.SharedImportSkippedDescription" xml:space="preserve">
+    <value>Název už používá jiná proměnná, je příliš dlouhý nebo je sdílených proměnných příliš mnoho: {names}</value>
   </data>
   <data name="Integrations.Delegation.Name" xml:space="preserve">
     <value>Macro Deck Delegate</value>
@@ -16057,6 +16095,18 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Variables.Manager.VariableCount.Other" xml:space="preserve">
     <value>Proměnných: {count}</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="Variables.Manager.ShareAction" xml:space="preserve">
+    <value>Sdílet s dalšími Macro Decky</value>
+  </data>
+  <data name="Variables.Manager.StopSharingAction" xml:space="preserve">
+    <value>Ukončit sdílení</value>
+  </data>
+  <data name="Variables.Manager.Shared" xml:space="preserve">
+    <value>Sdíleno</value>
+  </data>
+  <data name="Variables.Manager.SharedTooltip" xml:space="preserve">
+    <value>Další Macro Decky připojené přes Macro Deck Delegate mohou tuto proměnnou číst a měnit</value>
   </data>
   <data name="Variables.Manager.SourceField" xml:space="preserve">
     <value>Zdroj</value>

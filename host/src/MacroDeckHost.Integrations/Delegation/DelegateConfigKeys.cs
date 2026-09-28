@@ -15,4 +15,8 @@ internal static class DelegateConfigKeys
 	public const string ConfiguredAt = "configuredAt";
 
 	public const string RemoteScripts = "remoteScripts";
+
+	public const string ImportSharedVariables = "importSharedVariables";
+
+	public const string SharedVariables = "sharedVariables";
 }

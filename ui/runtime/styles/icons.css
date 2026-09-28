@@ -273,6 +273,10 @@
   mask-image: url('./icons/file-text.svg');
   -webkit-mask-image: url('./icons/file-text.svg');
 }
+.icon-share {
+  mask-image: url('./icons/share-2.svg');
+  -webkit-mask-image: url('./icons/share-2.svg');
+}
 .icon-refresh {
   mask-image: url('./icons/refresh.svg');
   -webkit-mask-image: url('./icons/refresh.svg');

@@ -8,10 +8,13 @@ public class BindCatalogVariableRequestMessageHandler
 	: IUiTransportMessageHandler<BindCatalogVariableRequest, BindCatalogVariableResponse>
 {
 	private readonly IVariableBindingService _bindings;
+	private readonly SharedVariables _sharedVariables;
 
-	public BindCatalogVariableRequestMessageHandler(IVariableBindingService bindings)
+	public BindCatalogVariableRequestMessageHandler(IVariableBindingService bindings,
+		SharedVariables sharedVariables)
 	{
 		_bindings = bindings;
+		_sharedVariables = sharedVariables;
 	}
 
 	public async ValueTask<BindCatalogVariableResponse> Handle(
@@ -39,7 +42,8 @@ public class BindCatalogVariableRequestMessageHandler
 
 		return new BindCatalogVariableResponse
 		{
-			Variable = VariableDtoMapper.ToDto(result.Data, true, dynamicResourceId),
+			Variable = VariableDtoMapper.ToDto(result.Data, true, dynamicResourceId,
+				_sharedVariables.IsShared(result.Data)),
 		};
 	}
 }

@@ -57,3 +57,42 @@ internal sealed class DelegateRunResponseDto
 	[JsonExtensionData]
 	public Dictionary<string, JsonElement>? Extra { get; set; }
 }
+
+internal sealed class DelegateSharedVariablesResponseDto
+{
+	public List<DelegateSharedVariableDto>? Variables { get; set; }
+}
+
+internal sealed class DelegateSharedVariableDto
+{
+	public string? Name { get; set; }
+
+	public string? Type { get; set; }
+
+	public string? Value { get; set; }
+
+	public bool Present { get; set; }
+
+	public bool Available { get; set; }
+
+	public bool CanWrite { get; set; }
+
+	public bool CommitOnRelease { get; set; }
+
+	public int? DecimalPlaces { get; set; }
+
+	public string? Unit { get; set; }
+
+	public double? Min { get; set; }
+
+	public double? Max { get; set; }
+
+	public double? Step { get; set; }
+}
+
+internal sealed class DelegateWriteResponseDto
+{
+	public bool Success { get; set; }
+
+	public DelegateErrorDto? Error { get; set; }
+}

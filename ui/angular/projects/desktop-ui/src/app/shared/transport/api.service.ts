@@ -255,6 +255,8 @@ import {
   RunActionFlowResponse,
   RunScriptRequest,
   RunScriptResponse,
+  SetVariableSharedRequest,
+  SetVariableSharedResponse,
   SanitizeVariableNameRequest,
   SanitizeVariableNameResponse,
   SetDeviceStartupProfileRequest,
@@ -2135,6 +2137,10 @@ export class ApiService {
 
   setVariableValue(request: SetVariableValueRequest): Promise<SetVariableValueResponse> {
     return this.http('PATCH', `/api/variables/${request.id}/value`, request);
+  }
+
+  setVariableShared(request: SetVariableSharedRequest): Promise<SetVariableSharedResponse> {
+    return this.http('PATCH', `/api/variables/${request.id}/shared`, request);
   }
 
   sanitizeVariableName(request: SanitizeVariableNameRequest): Promise<SanitizeVariableNameResponse> {

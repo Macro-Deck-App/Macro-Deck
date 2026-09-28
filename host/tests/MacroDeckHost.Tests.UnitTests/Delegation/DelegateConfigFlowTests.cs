@@ -1,3 +1,4 @@
+using MacroDeck.Sdk.Actions;
 using MacroDeckHost.Integrations.Delegation;
 using MacroDeckHost.Integrations.Delegation.Protocol;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -184,6 +185,29 @@ internal sealed class DelegateConfigFlowTests
 			Assert.That(result.Kind, Is.EqualTo(ConfigFlowResultKind.Complete));
 			Assert.That(result.Values![DelegateConfigKeys.InstanceId].Value, Is.Not.EqualTo(existingInstanceId));
 		});
+	}
+
+	[Test]
+	public async Task The_connection_step_offers_importing_shared_variables_switched_off()
+	{
+		var start = await _flow.StartAsync(null!, CancellationToken.None);
+
+		var toggle = start.NextStep!.Fields.Single(f => f.Name == DelegateConfigKeys.ImportSharedVariables);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(toggle.Type, Is.EqualTo(ActionParameterType.Boolean));
+			Assert.That(toggle.DefaultValue, Is.EqualTo(false));
+		});
+	}
+
+	[Test]
+	public async Task Completing_leaves_the_submitted_import_choice_as_it_was_submitted()
+	{
+		var result = await Submit("http://10.0.0.5:5000");
+
+		Assert.That(result.Values!.Keys, Does.Not.Contain(DelegateConfigKeys.ImportSharedVariables),
+			"the stored value is the boolean the dialog submitted, which it shows again when editing");
 	}
 
 	private string AddCompletedEntry(RecordingIntegrationConfig config, Uri baseUrl, string machineName)

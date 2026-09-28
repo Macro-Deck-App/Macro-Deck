@@ -1230,6 +1230,8 @@ export {
   type RenameCatalogVariableResponse,
   type ResolveCatalogVariableRequest,
   type ResolveCatalogVariableResponse,
+  type SetVariableSharedRequest,
+  type SetVariableSharedResponse,
   type SanitizeVariableNameRequest,
   type SanitizeVariableNameResponse,
   type SetVariableValueRequest,

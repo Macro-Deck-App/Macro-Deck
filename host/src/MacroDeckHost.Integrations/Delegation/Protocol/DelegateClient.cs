@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Security.Authentication;
 using System.Text.Json;
 using MacroDeck.Sdk.Scripts;
+using MacroDeck.Sdk.Variables;
 
 namespace MacroDeckHost.Integrations.Delegation.Protocol;
 
@@ -148,6 +149,85 @@ internal sealed class DelegateClient : IDelegateClient
 
 		throw new DelegateServerErrorException();
 	}
+
+	public async Task<IReadOnlyList<DelegateSharedVariable>> GetSharedVariablesAsync(Uri baseUrl,
+		string token,
+		CancellationToken cancellationToken)
+	{
+		using var response =
+			await SendAsync(HttpMethod.Get, baseUrl, "api/shared-variables", token, null, cancellationToken);
+
+		// A host from before variable sharing has no such route: it answers 404, 405 or, through the
+		// web UI's catch-all route, 200 with an HTML page.
+		if (response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.MethodNotAllowed ||
+			(response.IsSuccessStatusCode && response.Content.Headers.ContentType?.MediaType is not "application/json"))
+		{
+			throw new DelegateSharingUnsupportedException();
+		}
+
+		await ThrowOnFailureAsync(response, cancellationToken);
+
+		DelegateSharedVariablesResponseDto dto;
+		try
+		{
+			dto = await ReadJsonAsync<DelegateSharedVariablesResponseDto>(response, cancellationToken);
+		}
+		catch (JsonException)
+		{
+			throw new DelegateSharingUnsupportedException();
+		}
+
+		var variables = new List<DelegateSharedVariable>();
+		foreach (var item in dto.Variables ?? [])
+		{
+			if (string.IsNullOrEmpty(item.Name) || TypeFromWire(item.Type) is not { } type)
+			{
+				continue;
+			}
+
+			variables.Add(new DelegateSharedVariable(item.Name,
+				type,
+				item.Value ?? string.Empty,
+				item.Present,
+				item.Available,
+				item.CanWrite,
+				item.CommitOnRelease,
+				item.DecimalPlaces,
+				item.Unit,
+				item.Min,
+				item.Max,
+				item.Step));
+		}
+
+		return variables;
+	}
+
+	public async Task<DelegateWriteResult> SetSharedVariableAsync(Uri baseUrl,
+		string token,
+		string name,
+		string? value,
+		CancellationToken cancellationToken)
+	{
+		var payload = JsonContent.Create(new { value }, options: DelegateJson.Options);
+		using var response = await SendAsync(HttpMethod.Put,
+			baseUrl,
+			$"api/shared-variables/{Uri.EscapeDataString(name)}/value",
+			token,
+			payload,
+			cancellationToken);
+		await ThrowOnFailureAsync(response, cancellationToken);
+
+		var dto = await ReadJsonAsync<DelegateWriteResponseDto>(response, cancellationToken);
+		return new DelegateWriteResult(dto.Success, dto.Success ? null : dto.Error?.Code);
+	}
+
+	private static VariableType? TypeFromWire(string? wire) => wire switch
+	{
+		"text" => VariableType.Text,
+		"numeric" => VariableType.Numeric,
+		"boolean" => VariableType.Boolean,
+		_ => null
+	};
 
 	private static List<ScriptInput> ReadInputs(JsonElement script)
 	{

@@ -2891,6 +2891,21 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Errors.Variables.InvalidFilePath" xml:space="preserve">
     <value>Introduce la ruta completa de un archivo</value>
   </data>
+  <data name="Errors.Variables.OnlyGlobalCanBeShared" xml:space="preserve">
+    <value>Solo se pueden compartir variables globales.</value>
+  </data>
+  <data name="Errors.Variables.ImportedCannotBeShared" xml:space="preserve">
+    <value>Una variable importada de otro Macro Deck no se puede compartir.</value>
+  </data>
+  <data name="Errors.Variables.SharingNotSaved" xml:space="preserve">
+    <value>No se pudo guardar el ajuste de uso compartido.</value>
+  </data>
+  <data name="Errors.Variables.NotShared" xml:space="preserve">
+    <value>Esta variable no está compartida.</value>
+  </data>
+  <data name="Errors.Variables.ValueDoesNotFitType" xml:space="preserve">
+    <value>El valor no coincide con el tipo de la variable.</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>Los datos del widget deben ser un objeto JSON.</value>
   </data>
@@ -4256,6 +4271,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.Delegation.Config.UsernameRequired" xml:space="preserve">
     <value>Introduce el nombre de usuario usado para iniciar sesión en el otro Macro Deck.</value>
   </data>
+  <data name="Integrations.Delegation.Config.ImportSharedVariablesLabel" xml:space="preserve">
+    <value>Importar variables compartidas</value>
+  </data>
+  <data name="Integrations.Delegation.Config.ImportSharedVariablesDescription" xml:space="preserve">
+    <value>Hace que las variables compartidas en el otro Macro Deck estén disponibles aquí, con el nombre de su equipo, por ejemplo otherpc_obs_streaming.</value>
+  </data>
   <data name="Integrations.Delegation.Errors.Ambiguous" xml:space="preserve">
     <value>Elige qué Macro Deck debe ejecutar el script.</value>
   </data>
@@ -4264,6 +4285,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Integrations.Delegation.Errors.CouldNotBeReached" xml:space="preserve">
     <value>No se pudo contactar con {label}.</value>
+  </data>
+  <data name="Integrations.Delegation.Errors.RemoteLocked" xml:space="preserve">
+    <value>{label} está bloqueado y no aceptó el cambio.</value>
+  </data>
+  <data name="Integrations.Delegation.Errors.RemoteRejectedChange" xml:space="preserve">
+    <value>{label} no aceptó el cambio.</value>
   </data>
   <data name="Integrations.Delegation.Errors.DelegateCycle" xml:space="preserve">
     <value>Ejecutar esto crearía un ciclo de delegación a través de {label}.</value>
@@ -4342,6 +4369,17 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Integrations.Delegation.Issues.UnreachableTitle" xml:space="preserve">
     <value>No se ha podido contactar con {label}</value>
+  </data>
+  <data name="Integrations.Delegation.Issues.SharedImportSkippedTitle.One" xml:space="preserve">
+    <value>No se pudo añadir {count} variable compartida de {label}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.Delegation.Issues.SharedImportSkippedTitle.Other" xml:space="preserve">
+    <value>No se pudieron añadir {count} variables compartidas de {label}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.Delegation.Issues.SharedImportSkippedDescription" xml:space="preserve">
+    <value>Otra variable ya usa el nombre, el nombre es demasiado largo o hay demasiadas variables compartidas: {names}</value>
   </data>
   <data name="Integrations.Delegation.Name" xml:space="preserve">
     <value>Macro Deck Delegate</value>
@@ -16057,6 +16095,18 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Variables.Manager.VariableCount.Other" xml:space="preserve">
     <value>{count} variables</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="Variables.Manager.ShareAction" xml:space="preserve">
+    <value>Compartir con otros Macro Deck</value>
+  </data>
+  <data name="Variables.Manager.StopSharingAction" xml:space="preserve">
+    <value>Dejar de compartir</value>
+  </data>
+  <data name="Variables.Manager.Shared" xml:space="preserve">
+    <value>Compartida</value>
+  </data>
+  <data name="Variables.Manager.SharedTooltip" xml:space="preserve">
+    <value>Otros Macro Deck conectados mediante Macro Deck Delegate pueden leer y cambiar esta variable</value>
   </data>
   <data name="Variables.Manager.SourceField" xml:space="preserve">
     <value>Origen</value>

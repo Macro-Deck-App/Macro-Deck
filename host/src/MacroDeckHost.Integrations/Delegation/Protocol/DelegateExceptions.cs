@@ -100,3 +100,11 @@ internal sealed class DelegateThrottledException : DelegateClientException
 
 	public TimeSpan Remaining { get; }
 }
+
+internal sealed class DelegateSharingUnsupportedException : DelegateClientException
+{
+	public DelegateSharingUnsupportedException(string message = "The remote does not share variables.")
+		: base(message)
+	{
+	}
+}

@@ -1,4 +1,5 @@
 using MacroDeck.Sdk.Scripts;
+using MacroDeck.Sdk.Variables;
 
 namespace MacroDeckHost.Integrations.Delegation.Protocol;
 
@@ -26,6 +27,16 @@ internal interface IDelegateClient : IDisposable
 		int callDepth,
 		IReadOnlyDictionary<string, object?>? inputs,
 		CancellationToken cancellationToken);
+
+	Task<IReadOnlyList<DelegateSharedVariable>> GetSharedVariablesAsync(Uri baseUrl,
+		string token,
+		CancellationToken cancellationToken);
+
+	Task<DelegateWriteResult> SetSharedVariableAsync(Uri baseUrl,
+		string token,
+		string name,
+		string? value,
+		CancellationToken cancellationToken);
 }
 
 internal sealed record DelegateLoginResult(string AccessToken, TimeSpan ExpiresIn);
@@ -47,3 +58,19 @@ internal sealed record DelegateRunResult(
 	string? Error,
 	string? Status,
 	IReadOnlyList<string>? AppliedInputs = null);
+
+internal sealed record DelegateSharedVariable(
+	string Name,
+	VariableType Type,
+	string Value,
+	bool Present,
+	bool Available,
+	bool CanWrite,
+	bool CommitOnRelease = false,
+	int? DecimalPlaces = null,
+	string? Unit = null,
+	double? Min = null,
+	double? Max = null,
+	double? Step = null);
+
+internal sealed record DelegateWriteResult(bool Success, string? ErrorCode);

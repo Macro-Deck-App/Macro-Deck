@@ -33,6 +33,8 @@ internal sealed class DelegateRemoteManager : IDisposable
 
 	public IReadOnlyList<DelegateRemote> Remotes => _remotes;
 
+	public event Action? SharedVariablesChanged;
+
 	public async Task ReloadAsync(IIntegrationConfig config, CancellationToken cancellationToken = default)
 	{
 		await StopAllAsync();
@@ -237,6 +239,10 @@ internal sealed class DelegateRemoteManager : IDisposable
 
 		var configuredAt = await config.GetStringAsync(entry.Id, DelegateConfigKeys.ConfiguredAt, cancellationToken);
 		var storedScripts = await config.GetStringAsync(entry.Id, DelegateConfigKeys.RemoteScripts, cancellationToken);
+		var importShared = await config.GetStringAsync(entry.Id,
+			DelegateConfigKeys.ImportSharedVariables,
+			cancellationToken);
+		var storedShared = await config.GetStringAsync(entry.Id, DelegateConfigKeys.SharedVariables, cancellationToken);
 
 		return new Candidate(entry.Id,
 			entry.Title,
@@ -248,6 +254,8 @@ internal sealed class DelegateRemoteManager : IDisposable
 			password,
 			DelegateRemote.ParseTimestamp(configuredAt) ?? DateTimeOffset.MinValue,
 			DelegateRemote.ParseScripts(storedScripts),
+			bool.TryParse(importShared, out var imports) && imports,
+			DelegateRemote.ParseSharedVariables(storedShared),
 			order);
 	}
 
@@ -261,13 +269,17 @@ internal sealed class DelegateRemoteManager : IDisposable
 			candidate.Username,
 			candidate.ConfiguredAt);
 
-		return new DelegateRemote(instance,
+		var remote = new DelegateRemote(instance,
 			candidate.Password,
 			_clientFactory(),
 			config,
 			_time,
 			_logger,
-			candidate.InitialScripts);
+			candidate.InitialScripts,
+			candidate.ImportSharedVariables,
+			candidate.KnownSharedVariables);
+		remote.SharedVariablesChanged += _ => SharedVariablesChanged?.Invoke();
+		return remote;
 	}
 
 	private async Task StopAllAsync()
@@ -294,6 +306,8 @@ internal sealed class DelegateRemoteManager : IDisposable
 		string Password,
 		DateTimeOffset ConfiguredAt,
 		IReadOnlyDictionary<string, DelegateScriptSummary> InitialScripts,
+		bool ImportSharedVariables,
+		IReadOnlyList<DelegateSharedVariable> KnownSharedVariables,
 		int Order)
 	{
 		public string VariableKey { get; init; } = InstanceKey;

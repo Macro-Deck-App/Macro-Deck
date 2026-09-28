@@ -26,6 +26,10 @@
     <shared-error-banner class="vars-error" [message]="writeFailedMessage()" (dismiss)="writeFailed.set(false)" />
   }
 
+  @if (shareFailed()) {
+    <shared-error-banner class="vars-error" [message]="shareFailedMessage()" (dismiss)="shareFailed.set(false)" />
+  }
+
   @if (rows().length === 0) {
     @if (hasSourceFilter()) {
       <shared-empty-state
@@ -156,6 +160,9 @@
                     @if (row.variable.fileSource; as fileSource) {
                       <span class="vars-file-badge" [title]="fileSource.path">{{ fileFieldLabel() }}</span>
                     }
+                    @if (row.variable.shared) {
+                      <span class="vars-shared-badge" [title]="sharedTooltip()">{{ sharedLabel() }}</span>
+                    }
                     @if (!canEditValue(row.variable)) {
                       <span
                         class="icon icon-lock icon-xs read-only-icon"
@@ -179,7 +186,7 @@
                 </div>
 
                 <div class="vars-actions">
-                  @if (!canEditValue(row.variable) && !canManage(row.variable) && !isBoundDynamic(row.variable)) {
+                  @if (!canEditValue(row.variable) && !canManage(row.variable) && !isBoundDynamic(row.variable) && !canShare(row.variable)) {
                     <button
                       type="button"
                       class="vars-dots-btn"
@@ -218,6 +225,12 @@
                             <button type="button" class="vars-menu-item" (click)="openFileSettings(row.variable)">
                               <span class="icon icon-file-text icon-sm"></span>
                               <span>{{ fileSettingsLabel() }}</span>
+                            </button>
+                          }
+                          @if (canShare(row.variable)) {
+                            <button type="button" class="vars-menu-item" (click)="toggleShared(row.variable)">
+                              <span class="icon icon-share icon-sm"></span>
+                              <span>{{ row.variable.shared ? stopSharingActionLabel() : shareActionLabel() }}</span>
                             </button>
                           }
                           @if (canManage(row.variable)) {

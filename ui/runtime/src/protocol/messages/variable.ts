@@ -59,6 +59,15 @@ export interface SetVariableValueResponse extends ResultResponse {
   pending?: boolean;
 }
 
+export interface SetVariableSharedRequest {
+  id: string;
+  shared: boolean;
+}
+
+export interface SetVariableSharedResponse extends ResultResponse {
+  variable?: Variable;
+}
+
 export interface SanitizeVariableNameRequest {
   input: string;
 }
