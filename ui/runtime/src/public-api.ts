@@ -970,6 +970,8 @@ export {
   type CreateProfileResponse,
   type DeleteProfileRequest,
   type DeleteProfileResponse,
+  type DuplicateProfileRequest,
+  type DuplicateProfileResponse,
   type GetProfilesResponse,
   type IpcProfile,
   type IpcProfileLayout,

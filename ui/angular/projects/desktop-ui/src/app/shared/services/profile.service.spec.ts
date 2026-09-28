@@ -28,7 +28,7 @@ describe('ProfileService', () => {
   beforeEach(() => {
     notifications = new Map();
     apiSpy = jasmine.createSpyObj<ApiService>('ApiService', [
-      'onNotification', 'getProfiles', 'createProfile', 'updateProfile', 'deleteProfile',
+      'onNotification', 'getProfiles', 'createProfile', 'updateProfile', 'deleteProfile', 'duplicateProfile',
     ]);
     apiSpy.onNotification.and.callFake(<T>(method: string): Observable<T> => {
       let subject = notifications.get(method);
@@ -74,6 +74,33 @@ describe('ProfileService', () => {
         defaultWidgetSpacing: 10,
         defaultWidgetBorderRadius: 20,
       }));
+    });
+  });
+
+  describe('duplicateProfile', () => {
+    it('sends the copy name and selects the copy the host returns', async () => {
+      apiSpy.getProfiles.and.resolveTo({ profiles: [ipcProfile()] });
+      await service.loadProfiles();
+      apiSpy.duplicateProfile.and.resolveTo({ success: true, profile: ipcProfile({ id: 'p2', name: 'Home (copy)', order: 1 }) });
+
+      const result = await service.duplicateProfile('p1', 'Home (copy)');
+
+      expect(apiSpy.duplicateProfile).toHaveBeenCalledWith({ id: 'p1', name: 'Home (copy)' });
+      expect(result.success).toBeTrue();
+      expect(service.profiles().map(p => p.name)).toEqual(['Home', 'Home (copy)']);
+      expect(service.selectedProfileId()).toBe('p2');
+    });
+
+    it('keeps the selection when the host refuses', async () => {
+      apiSpy.getProfiles.and.resolveTo({ profiles: [ipcProfile()] });
+      await service.loadProfiles();
+      apiSpy.duplicateProfile.and.resolveTo({ success: false, error: { code: 'NotFound', message: 'Profile not found' } });
+
+      const result = await service.duplicateProfile('p1', 'Home (copy)');
+
+      expect(result.success).toBeFalse();
+      expect(service.profiles().length).toBe(1);
+      expect(service.selectedProfileId()).toBe('p1');
     });
   });
 

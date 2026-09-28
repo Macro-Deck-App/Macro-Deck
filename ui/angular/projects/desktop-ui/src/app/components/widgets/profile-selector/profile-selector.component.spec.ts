@@ -149,7 +149,14 @@ describe('ProfileSelectorComponent editing', () => {
 });
 
 describe('ProfileSelectorComponent dropdown', () => {
+  let duplicateProfile: jasmine.Spy;
+  let selectProfile: jasmine.Spy;
+  let toastShow: jasmine.Spy;
+
   function createFixture(profiles: Profile[] = [profile()]): ComponentFixture<ProfileSelectorComponent> {
+    duplicateProfile = jasmine.createSpy('duplicateProfile').and.resolveTo({ success: true });
+    selectProfile = jasmine.createSpy('selectProfile');
+    toastShow = jasmine.createSpy('show');
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
@@ -162,10 +169,12 @@ describe('ProfileSelectorComponent dropdown', () => {
             sortedProfiles: () => profiles,
             profiles: () => profiles,
             isCurrentProfileLocked: () => false,
+            duplicateProfile,
+            selectProfile,
           },
         },
         { provide: PortabilityService, useValue: {} },
-        { provide: ToastService, useValue: { show: jasmine.createSpy('show') } },
+        { provide: ToastService, useValue: { show: toastShow } },
         { provide: FileOpenService, useValue: { pending: signal([]), claim: () => null } },
       ],
     });
@@ -193,34 +202,114 @@ describe('ProfileSelectorComponent dropdown', () => {
     expect(host.querySelector('.profile-list-footer .icon-upload')).toBeNull();
   });
 
-  it('gives every row its own edit, export and delete action, named after the profile', () => {
-    const row: HTMLElement = createFixture([profile({ id: 'p1', name: 'Home' }), profile({ id: 'p2', name: 'Stream' })])
-      .nativeElement.querySelectorAll('.profile-list-item')[1];
+  const rows = (fixture: ComponentFixture<ProfileSelectorComponent>): HTMLElement[] =>
+    Array.from(fixture.nativeElement.querySelectorAll('.profile-list-item'));
 
-    const labels = Array.from(row.querySelectorAll('.profile-item-actions button'))
-      .map(button => button.getAttribute('aria-label'));
-    expect(labels).toEqual(['Edit Stream', 'Export Stream', 'Delete Stream']);
-    expect(row.querySelector('.profile-item-actions .icon-upload')).not.toBeNull();
+  const menuItems = (): HTMLButtonElement[] => Array.from(document.querySelectorAll('.menu-item'));
+
+  function openRowMenu(fixture: ComponentFixture<ProfileSelectorComponent>, name: string): void {
+    fixture.nativeElement.querySelector(`button[aria-label="More actions for ${name}"]`).click();
+    fixture.detectChanges();
+  }
+
+  function clickMenuItem(fixture: ComponentFixture<ProfileSelectorComponent>, label: string): void {
+    menuItems().find(item => item.textContent?.trim() === label)!.click();
+    fixture.detectChanges();
+  }
+
+  it('shows each profile with its grid and one actions button instead of a row of icons', () => {
+    const [, row] = rows(createFixture([profile({ id: 'p1', name: 'Home' }), profile({ id: 'p2', name: 'Stream' })]));
+
+    expect(row.querySelector('.profile-list-name')?.textContent?.trim()).toBe('Stream');
+    expect(row.querySelector('.profile-list-subtitle')?.textContent?.trim()).toBe('5 × 3 Grid');
+    expect(Array.from(row.querySelectorAll('button')).map(button => button.getAttribute('aria-label')))
+      .toEqual([null, 'More actions for Stream']);
+  });
+
+  it('marks the selected profile', () => {
+    const [selected, other] = rows(createFixture([profile({ id: 'p1', name: 'Home' }), profile({ id: 'p2', name: 'Stream' })]));
+
+    expect(selected.querySelector('.profile-list-select')?.getAttribute('aria-current')).toBe('true');
+    expect(selected.querySelector('.profile-list-check')).not.toBeNull();
+    expect(other.querySelector('.profile-list-select')?.getAttribute('aria-current')).toBeNull();
+    expect(other.querySelector('.profile-list-check')).toBeNull();
+  });
+
+  it('offers edit, duplicate, export and delete in the row menu', () => {
+    const fixture = createFixture([profile({ id: 'p1', name: 'Home' }), profile({ id: 'p2', name: 'Stream' })]);
+
+    openRowMenu(fixture, 'Stream');
+
+    expect(menuItems().map(item => item.textContent?.trim())).toEqual(['Edit', 'Duplicate', 'Export', 'Delete']);
   });
 
   it('acts on the row, not on the selection', () => {
     const fixture = createFixture([profile({ id: 'p1', name: 'Home' }), profile({ id: 'p2', name: 'Stream' })]);
-    const row: HTMLElement = fixture.nativeElement.querySelectorAll('.profile-list-item')[1];
 
-    row.querySelector<HTMLButtonElement>('button[aria-label="Edit Stream"]')?.click();
+    openRowMenu(fixture, 'Stream');
+    clickMenuItem(fixture, 'Edit');
 
     expect(editState(fixture.componentInstance).isEditing()).toBeTrue();
     expect(fixture.componentInstance['editName']()).toBe('Stream');
   });
 
-  it('disables edit and export on an integration profile and delete on the last user profile', () => {
-    const rows: NodeListOf<HTMLElement> = createFixture([profile(), profile({ id: 'p2', isVirtual: true })])
-      .nativeElement.querySelectorAll('.profile-list-item');
+  it('duplicates the row it belongs to under a copy name', async () => {
+    const fixture = createFixture([profile({ id: 'p1', name: 'Home' }), profile({ id: 'p2', name: 'Stream' })]);
 
-    const disabled = (row: HTMLElement, label: string) =>
-      row.querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`)?.disabled;
-    expect(disabled(rows[1], 'Edit Home')).toBeTrue();
-    expect(disabled(rows[1], 'Export Home')).toBeTrue();
-    expect(disabled(rows[0], 'Delete Home')).toBeTrue();
+    openRowMenu(fixture, 'Stream');
+    clickMenuItem(fixture, 'Duplicate');
+    await fixture.whenStable();
+
+    expect(duplicateProfile).toHaveBeenCalledOnceWith('p2', 'Stream (copy)');
+    expect(toastShow).not.toHaveBeenCalled();
+  });
+
+  it('reports a failed duplicate without showing the host message', async () => {
+    const fixture = createFixture([profile({ id: 'p1', name: 'Home' })]);
+    duplicateProfile.and.resolveTo({ success: false, error: { code: 'NotFound', message: 'Profile not found' } });
+
+    openRowMenu(fixture, 'Home');
+    clickMenuItem(fixture, 'Duplicate');
+    await fixture.whenStable();
+
+    expect(toastShow).toHaveBeenCalledOnceWith('Failed to duplicate profile', jasmine.objectContaining({ variant: 'error' }));
+  });
+
+  it('disables edit, duplicate and export on an integration profile and delete on the last user profile', () => {
+    const fixture = createFixture([profile(), profile({ id: 'p2', name: 'Board', isVirtual: true })]);
+    const disabled = () => menuItems().filter(item => item.disabled).map(item => item.textContent?.trim());
+
+    openRowMenu(fixture, 'Board');
+    expect(disabled()).toEqual(['Edit', 'Duplicate', 'Export', 'Delete']);
+
+    fixture.componentInstance['rowMenu'].set(null);
+    fixture.detectChanges();
+    openRowMenu(fixture, 'Home');
+    expect(disabled()).toEqual(['Delete']);
+  });
+
+  it('filters the list by name and says when nothing matches', () => {
+    const fixture = createFixture([profile({ id: 'p1', name: 'Home' }), profile({ id: 'p2', name: 'Stream' })]);
+
+    fixture.componentInstance['search'].set('str');
+    fixture.detectChanges();
+    expect(rows(fixture).map(row => row.querySelector('.profile-list-name')?.textContent?.trim())).toEqual(['Stream']);
+
+    fixture.componentInstance['search'].set('zzz');
+    fixture.detectChanges();
+    expect(rows(fixture).length).toBe(0);
+    expect(fixture.nativeElement.querySelector('.profile-list-empty')?.textContent?.trim()).toBe('No profiles match your search');
+  });
+
+  it('opens the first match on enter and forgets the search when closing', () => {
+    const fixture = createFixture([profile({ id: 'p1', name: 'Home' }), profile({ id: 'p2', name: 'Stream' })]);
+    fixture.componentInstance['search'].set('str');
+    fixture.detectChanges();
+
+    fixture.nativeElement.querySelector('.profile-search input')
+      .dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+
+    expect(selectProfile).toHaveBeenCalledOnceWith('p2');
+    expect(fixture.componentInstance['search']()).toBe('');
   });
 });

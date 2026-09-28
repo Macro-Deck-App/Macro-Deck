@@ -2778,6 +2778,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Errors.Profile.DeleteFailed" xml:space="preserve">
     <value>Profil konnte nicht gelöscht werden</value>
   </data>
+  <data name="Errors.Profile.DuplicateFailed" xml:space="preserve">
+    <value>Profil konnte nicht dupliziert werden</value>
+  </data>
   <data name="Errors.Profile.LoadFailed" xml:space="preserve">
     <value>Profile konnten nicht geladen werden</value>
   </data>
@@ -2795,6 +2798,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Errors.Profiles.VirtualCannotBeEdited" xml:space="preserve">
     <value>Virtuelle Profile können nicht bearbeitet werden</value>
+  </data>
+  <data name="Errors.Profiles.VirtualCannotBeDuplicated" xml:space="preserve">
+    <value>Virtuelle Profile können nicht dupliziert werden</value>
   </data>
   <data name="Errors.Script.CreateFailed" xml:space="preserve">
     <value>Skript konnte nicht erstellt werden</value>
@@ -17498,6 +17504,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.MusicPlayer.UnavailableHintWithStatus" xml:space="preserve">
     <value>{label} ist vorübergehend nicht verfügbar ({status}) - Macro Deck versucht es weiterhin.</value>
   </data>
+  <data name="Widgets.Profile.CopyName" xml:space="preserve">
+    <value>{name} (Kopie)</value>
+  </data>
   <data name="Widgets.Profile.DefaultInheritedLabel" xml:space="preserve">
     <value>Standard</value>
   </data>
@@ -17507,14 +17516,8 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Profile.DeleteConfirmNamed" xml:space="preserve">
     <value>Sollen "{name}" und alle zugehörigen Ordner und Widgets gelöscht werden? Dieser Vorgang kann nicht rückgängig gemacht werden.</value>
   </data>
-  <data name="Widgets.Profile.DeleteNamed" xml:space="preserve">
-    <value>{name} löschen</value>
-  </data>
   <data name="Widgets.Profile.DeleteProfileHeading" xml:space="preserve">
     <value>Profil löschen</value>
-  </data>
-  <data name="Widgets.Profile.EditNamed" xml:space="preserve">
-    <value>{name} bearbeiten</value>
   </data>
   <data name="Widgets.Profile.EditProfileHeading" xml:space="preserve">
     <value>Profil bearbeiten</value>
@@ -17527,9 +17530,6 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Widgets.Profile.ExportHeading" xml:space="preserve">
     <value>Profil exportieren</value>
-  </data>
-  <data name="Widgets.Profile.ExportNamed" xml:space="preserve">
-    <value>{name} exportieren</value>
   </data>
   <data name="Widgets.Profile.ImportFileTitle" xml:space="preserve">
     <value>Profil aus einer .macroDeckProfile-Datei importieren</value>
@@ -17549,6 +17549,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Profile.NewProfile" xml:space="preserve">
     <value>Neues Profil</value>
   </data>
+  <data name="Widgets.Profile.NoMatches" xml:space="preserve">
+    <value>Keine Profile passen zu deiner Suche</value>
+  </data>
   <data name="Widgets.Profile.NoProfile" xml:space="preserve">
     <value>Kein Profil</value>
   </data>
@@ -17557,6 +17560,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Widgets.Profile.ProfileNamePlaceholder" xml:space="preserve">
     <value>Profilname</value>
+  </data>
+  <data name="Widgets.Profile.SearchPlaceholder" xml:space="preserve">
+    <value>Profile durchsuchen</value>
   </data>
   <data name="Widgets.Profile.UpdateFailed" xml:space="preserve">
     <value>Das Profil konnte nicht aktualisiert werden</value>
