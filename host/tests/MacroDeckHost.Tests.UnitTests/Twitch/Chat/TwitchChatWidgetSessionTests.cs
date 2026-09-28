@@ -2,6 +2,7 @@ using System.Text.Json;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Ui;
 using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Integrations.Twitch;
@@ -27,7 +28,11 @@ internal sealed class TwitchChatWidgetSessionTests : UiSessionFixture
 		_hub.Post(new TwitchChatMessageReceived("111", TwitchChatHubTests.Message("m1")));
 		_hub.Tick();
 
-		var provider = new TwitchChatWidgetUiProvider(_hub, new FakeTwitchChatImages(), TestLocalization.SampleText);
+		var provider = new TwitchChatWidgetUiProvider(_hub,
+			new FakeTwitchChatImages(),
+			TestLocalization.SampleText,
+			new FakeIntegrationRegistry(),
+			new UiResourceStore());
 
 		Resolver.Fallback = new UiSessionProviderResolver(
 			new RemoteUiProviderRegistry(new EmptyRemotePluginSnapshotStore(), Invoker),

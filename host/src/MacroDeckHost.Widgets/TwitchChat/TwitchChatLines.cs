@@ -30,7 +30,8 @@ internal sealed record TwitchChatLine(
 internal sealed record TwitchChatViewState(
 	TwitchChatStatus Status,
 	IReadOnlyList<TwitchChatLine> Lines,
-	IReadOnlyList<TwitchChatLine> FallbackLines)
+	IReadOnlyList<TwitchChatLine> FallbackLines,
+	string? AccountName = null)
 {
 	public static TwitchChatViewState Offline { get; } = new(TwitchChatStatus.Offline, [], []);
 
@@ -43,6 +44,8 @@ internal sealed class TwitchChatLines
 	public const int MaxBytes = 32 * 1024;
 	public const int MaxEmoteImages = 20;
 	public const int MaxBadges = 3;
+
+	private const string BadgeGap = "\u2009";
 	public const int FallbackMessages = 3;
 
 	// A measured node carries a short standalone id; its id inside the real tree is at most this much longer.
@@ -72,13 +75,13 @@ internal sealed class TwitchChatLines
 		if (snapshot.Account is null || !snapshot.IsConnected)
 		{
 			_cache = new Dictionary<string, (TwitchChatMessage, TwitchChatLine)>(StringComparer.Ordinal);
-			return TwitchChatViewState.Offline;
+			return TwitchChatViewState.Offline with { AccountName = snapshot.Account?.Label };
 		}
 
 		if (snapshot.Messages.Count == 0)
 		{
 			_cache = new Dictionary<string, (TwitchChatMessage, TwitchChatLine)>(StringComparer.Ordinal);
-			return TwitchChatViewState.Empty;
+			return TwitchChatViewState.Empty with { AccountName = snapshot.Account.Label };
 		}
 
 		var next = new Dictionary<string, (TwitchChatMessage, TwitchChatLine)>(StringComparer.Ordinal);
@@ -104,7 +107,10 @@ internal sealed class TwitchChatLines
 		_cache = next;
 		kept.Reverse();
 
-		return new TwitchChatViewState(TwitchChatStatus.Messages, kept, [.. kept.TakeLast(FallbackMessages)]);
+		return new TwitchChatViewState(TwitchChatStatus.Messages,
+			kept,
+			[.. kept.TakeLast(FallbackMessages)],
+			snapshot.Account.Label);
 	}
 
 	public static TwitchChatLine Build(TwitchChatMessage message, string separator, ITwitchChatImages? images)
@@ -119,9 +125,19 @@ internal sealed class TwitchChatLines
 			if (badge.ImageUrl is { } url &&
 				Find(images, TwitchChatImage.Badge(badge.SetId, badge.Id, url)) is { } image)
 			{
+				if (resolved > 0)
+				{
+					spans.Add(UiTextSpan.FromText(BadgeGap));
+				}
+
 				spans.Add(UiTextSpan.FromImage(image));
 				resolved++;
 			}
+		}
+
+		if (resolved > 0)
+		{
+			spans.Add(UiTextSpan.FromText(" "));
 		}
 
 		spans.Add(UiTextSpan.FromText(message.ChatterName, message.Color, UiComponentTextWeights.SemiBold));

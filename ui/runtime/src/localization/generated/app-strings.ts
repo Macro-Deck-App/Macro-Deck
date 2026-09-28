@@ -3914,6 +3914,7 @@ export const AppStrings = {
 				SampleMessage1: 'macrodeck.app:Integrations.Twitch.ChatWidget.SampleMessage1',
 				SampleMessage2: 'macrodeck.app:Integrations.Twitch.ChatWidget.SampleMessage2',
 				SampleMessage3: 'macrodeck.app:Integrations.Twitch.ChatWidget.SampleMessage3',
+				Title: 'macrodeck.app:Integrations.Twitch.ChatWidget.Title',
 			},
 			Config: {
 				AccountResolutionFailed: 'macrodeck.app:Integrations.Twitch.Config.AccountResolutionFailed',
@@ -10549,6 +10550,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Integrations.Twitch.ChatWidget.SampleMessage1': 'Hello everyone!',
 	'macrodeck.app:Integrations.Twitch.ChatWidget.SampleMessage2': 'What a play!',
 	'macrodeck.app:Integrations.Twitch.ChatWidget.SampleMessage3': 'See you next stream',
+	'macrodeck.app:Integrations.Twitch.ChatWidget.Title': '{account} chat',
 	'macrodeck.app:Integrations.Twitch.Config.AccountResolutionFailed': 'Twitch issued the token but did not say which account it belongs to. Continue to try again.',
 	'macrodeck.app:Integrations.Twitch.Config.ApproveAccessInstruction': 'Approve the access.',
 	'macrodeck.app:Integrations.Twitch.Config.ClientIdDescription': 'Leave empty to use Macro Deck\'s own Twitch application. Fill this in only to use an application you registered yourself; its Client Type has to be Public.',

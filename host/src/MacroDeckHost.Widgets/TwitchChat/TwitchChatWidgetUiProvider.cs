@@ -1,8 +1,12 @@
 using System.Text.Json;
+using MacroDeck.Sdk;
 using MacroDeck.Sdk.Ui;
+using MacroDeck.Ui.Model.Resources;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
+using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Localization;
 using MacroDeckHost.Widgets.Configuration;
@@ -15,12 +19,22 @@ public sealed class TwitchChatWidgetUiProvider : IBuiltInIntegrationUiProvider
 	private readonly ITwitchChatFeed _feed;
 	private readonly ITwitchChatImages _images;
 	private readonly IWidgetSampleTextResolver _text;
+	private readonly IIntegrationRegistry _integrations;
+	private readonly IUiResourceStore _resources;
+	private readonly Lazy<UiResource?> _icon;
 
-	public TwitchChatWidgetUiProvider(ITwitchChatFeed feed, ITwitchChatImages images, IWidgetSampleTextResolver text)
+	public TwitchChatWidgetUiProvider(ITwitchChatFeed feed,
+		ITwitchChatImages images,
+		IWidgetSampleTextResolver text,
+		IIntegrationRegistry integrations,
+		IUiResourceStore resources)
 	{
 		_feed = feed;
 		_images = images;
 		_text = text;
+		_integrations = integrations;
+		_resources = resources;
+		_icon = new Lazy<UiResource?>(RegisterIcon);
 	}
 
 	public string IntegrationId => TwitchChatWidgetType.OwnerId;
@@ -69,16 +83,33 @@ public sealed class TwitchChatWidgetUiProvider : IBuiltInIntegrationUiProvider
 			var sample = await TwitchChatWidgetSample.BuildAsync(_text, separator).ConfigureAwait(false);
 
 			return new StaticWidgetUiSession(new UiView(surface,
-				TwitchChatWidgetView.Build(new UiState<TwitchChatViewState>(sample), cornerRadius)));
+				TwitchChatWidgetView.Build(new UiState<TwitchChatViewState>(sample), cornerRadius, _icon.Value)));
 		}
 
 		var accountId = ReadAccount(surface);
 		var lines = new TwitchChatLines(separator, _images);
 		var snapshot = _feed.Snapshot(accountId);
 		var state = new UiState<TwitchChatViewState>(lines.Build(snapshot));
-		var view = new UiView(surface, TwitchChatWidgetView.Build(state, cornerRadius));
+		var view = new UiView(surface, TwitchChatWidgetView.Build(state, cornerRadius, _icon.Value));
 
 		return new TwitchChatWidgetSession(view, state, lines, _feed, accountId, snapshot.Account?.UserId);
+	}
+
+	private UiResource? RegisterIcon()
+	{
+		if (_integrations.Integrations.FirstOrDefault(integration => integration.Id == IntegrationId) is not
+			IIntegrationIconProvider provider)
+		{
+			return null;
+		}
+
+		return _resources.Register(new UiResourceRegistration
+		{
+			OwnerId = TwitchChatWidgetType.OwnerId,
+			Name = "header-icon",
+			MediaType = provider.IconMimeType,
+			Content = provider.GetIcon(),
+		});
 	}
 
 	private static string? ReadAccount(UiSurface surface)

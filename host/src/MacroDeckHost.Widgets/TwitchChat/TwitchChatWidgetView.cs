@@ -1,5 +1,6 @@
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Dsl;
+using MacroDeck.Ui.Model.Resources;
 using MacroDeck.Ui.Runtime;
 using MacroDeckHost.Localization;
 
@@ -16,9 +17,12 @@ internal static class TwitchChatWidgetView
 
 	private static readonly UiLength _lineGap = UiLength.Capped(0.015, 2);
 
+	private static readonly UiLength _headerGap = UiLength.Capped(0.03, 4);
+
 	public static UiElement Build(
 		UiState<TwitchChatViewState> state,
-		int cornerRadius = WidgetSafeArea.DefaultCornerRadius)
+		int cornerRadius = WidgetSafeArea.DefaultCornerRadius,
+		UiResource? icon = null)
 	{
 		ArgumentNullException.ThrowIfNull(state);
 
@@ -26,29 +30,66 @@ internal static class TwitchChatWidgetView
 		{
 			Key = "twitchChat",
 			Direction = UiComponentDirections.Vertical,
-			Justify = UiComponentJustify.Center,
 			Padding = WidgetSafeArea.For(cornerRadius),
+			Gap = _headerGap,
 			Children =
 			[
-				new UiWhen
+				Header(state, icon),
+				new UiStack
 				{
-					Key = "offlineGate",
-					Condition = () => state.Value.Status == TwitchChatStatus.Offline,
-					Content = () => Notice("offline", AppStrings.Integrations.Twitch.ChatWidget.Offline()),
-				},
-				new UiWhen
-				{
-					Key = "emptyGate",
-					Condition = () => state.Value.Status == TwitchChatStatus.Empty,
-					Content = () => Notice("empty", AppStrings.Integrations.Twitch.ChatWidget.Empty()),
-				},
-				new UiWhen
-				{
-					Key = "messagesGate",
-					Condition = () => state.Value.Status == TwitchChatStatus.Messages,
-					Content = () => Log(state),
+					Key = "body",
+					Direction = UiComponentDirections.Vertical,
+					Justify = UiComponentJustify.Center,
+					Fill = true,
+					Children =
+					[
+						new UiWhen
+						{
+							Key = "offlineGate",
+							Condition = () => state.Value.Status == TwitchChatStatus.Offline,
+							Content = () => Notice("offline", AppStrings.Integrations.Twitch.ChatWidget.Offline()),
+						},
+						new UiWhen
+						{
+							Key = "emptyGate",
+							Condition = () => state.Value.Status == TwitchChatStatus.Empty,
+							Content = () => Notice("empty", AppStrings.Integrations.Twitch.ChatWidget.Empty()),
+						},
+						new UiWhen
+						{
+							Key = "messagesGate",
+							Condition = () => state.Value.Status == TwitchChatStatus.Messages,
+							Content = () => Log(state),
+						},
+					],
 				},
 			],
+		};
+	}
+
+	private static UiStack Header(UiState<TwitchChatViewState> state, UiResource? icon)
+	{
+		var title = new UiTextRun
+		{
+			Key = "title",
+			Text = UiText.FromLocalized(() => state.Value.AccountName is { } account
+				? AppStrings.Integrations.Twitch.ChatWidget.Title(account: account)
+				: AppStrings.Integrations.Twitch.ChatWidget.Name()),
+			Size = _textSize,
+			Weight = UiComponentTextWeights.SemiBold,
+			Fill = true,
+		};
+
+		return new UiStack
+		{
+			Key = "header",
+			Direction = UiComponentDirections.Horizontal,
+			Align = UiComponentAlignments.Center,
+			Gap = _headerGap,
+			Padding = _logPadding,
+			Children = icon is null
+				? [title]
+				: [new UiImage { Key = "twitchIcon", Source = icon, Size = _textSize }, title],
 		};
 	}
 

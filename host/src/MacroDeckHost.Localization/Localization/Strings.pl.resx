@@ -9316,6 +9316,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Twitch.ChatWidget.NameSeparator" xml:space="preserve">
     <value>: </value>
   </data>
+  <data name="Integrations.Twitch.ChatWidget.Title" xml:space="preserve">
+    <value>Czat: {account}</value>
+  </data>
   <data name="Integrations.Twitch.ChatWidget.Offline" xml:space="preserve">
     <value>Brak połączenia z Twitchem</value>
   </data>

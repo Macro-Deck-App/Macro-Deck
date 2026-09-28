@@ -1,5 +1,8 @@
 using System.Text.Json;
+using MacroDeck.Localization;
 using MacroDeck.Plugin.Protocol.Limits;
+using MacroDeck.Sdk;
+using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Nodes;
@@ -30,7 +33,9 @@ internal sealed class TwitchChatWidgetViewTests
 		_store = new UiResourceStore();
 		_images = new FakeTwitchChatImages(_store);
 		_hub = new TwitchChatHub(new FakeTimeProvider(), Logger.None);
-		_provider = new TwitchChatWidgetUiProvider(_hub, _images, TestLocalization.SampleText);
+		var integrations = new FakeIntegrationRegistry();
+		integrations.Add(new IconIntegration());
+		_provider = new TwitchChatWidgetUiProvider(_hub, _images, TestLocalization.SampleText, integrations, _store);
 	}
 
 	[TearDown]
@@ -237,6 +242,76 @@ internal sealed class TwitchChatWidgetViewTests
 			"#ff4500",
 			[new TwitchChatBadge("subscriber", "12", null)],
 			fragments);
+	}
+
+	[Test]
+	public async Task The_tile_is_titled_with_the_twitch_mark_and_the_accounts_name()
+	{
+		Connect();
+
+		await using var session = await OpenAsync();
+
+		var root = session.BuildTree().Root;
+		var icon = Flatten(root).Single(node => node.Type == UiComponents.Image);
+		var resourceId = icon.Properties[UiComponentProperties.Source].GetProperty("resourceId").GetString()!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Texts(root), Has.Some.Contains("Integrations.Twitch.ChatWidget.Title").And.Contains("Streamer"));
+			Assert.That(_store.TryGet(resourceId, out _), Is.True);
+		});
+	}
+
+	[Test]
+	public async Task Badges_are_spaced_apart_and_from_the_name()
+	{
+		Connect();
+		_images.Resolve(TwitchChatImage.Badge("broadcaster", "1", "https://static-cdn.jtvnw.net/badges/v1/b/2"));
+		_images.Resolve(TwitchChatImage.Badge("subscriber", "12", "https://static-cdn.jtvnw.net/badges/v1/s/2"));
+		await using var session = await OpenAsync();
+
+		_hub.Post(new TwitchChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1") with
+		{
+			Badges =
+			[
+				new TwitchChatBadge("broadcaster", "1", "https://static-cdn.jtvnw.net/badges/v1/b/2"),
+				new TwitchChatBadge("subscriber", "12", "https://static-cdn.jtvnw.net/badges/v1/s/2"),
+			],
+		}));
+		_hub.Tick();
+
+		var spans = MessageNodes(session.BuildTree().Root).Single()
+			.Properties[UiComponentProperties.Spans].EnumerateArray().ToList();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(spans[0].TryGetProperty("image", out _), Is.True);
+			Assert.That(spans[1].GetProperty("text").GetString(), Is.Not.Empty.And.Matches(@"^\s+$"));
+			Assert.That(spans[2].TryGetProperty("image", out _), Is.True);
+			Assert.That(spans[3].GetProperty("text").GetString(), Is.Not.Empty.And.Matches(@"^\s+$"));
+			Assert.That(spans[4].GetProperty("text").GetString(), Is.EqualTo("Viewer"));
+		});
+	}
+
+	private sealed class IconIntegration : IIntegration, IIntegrationIconProvider
+	{
+		public string Id => TwitchChatWidgetType.OwnerId;
+
+		public LocalizedText Name => "Twitch";
+
+		public string Version => "1.0.0";
+
+		public IReadOnlyList<IActionDefinition> Actions { get; } = [];
+
+		public bool IsInitialized => true;
+
+		public string IconMimeType => "image/svg+xml";
+
+		public byte[] GetIcon() => "<svg xmlns=\"http://www.w3.org/2000/svg\"/>"u8.ToArray();
+
+		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+
+		public Task ShutdownAsync() => Task.CompletedTask;
 	}
 
 	private void Connect()

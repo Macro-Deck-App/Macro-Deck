@@ -9316,6 +9316,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Twitch.ChatWidget.NameSeparator" xml:space="preserve">
     <value> : </value>
   </data>
+  <data name="Integrations.Twitch.ChatWidget.Title" xml:space="preserve">
+    <value>Chat de {account}</value>
+  </data>
   <data name="Integrations.Twitch.ChatWidget.Offline" xml:space="preserve">
     <value>Non connecté à Twitch</value>
   </data>
