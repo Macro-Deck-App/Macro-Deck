@@ -910,6 +910,12 @@ Zamknij aplikację korzystającą z tego portu (lub wciąż działający Macro D
   <data name="Bootstrapper.HostError.Help" xml:space="preserve">
     <value>Skopiuj szczegóły i dołącz je do zgłoszenia problemu, aby można go było naprawić.</value>
   </data>
+  <data name="Bootstrapper.HostError.InstallationDamaged" xml:space="preserve">
+    <value>Brakuje niektórych plików Macro Deck lub nie pasują one do zainstalowanej wersji. Dzieje się tak, gdy aktualizacja została przerwana, na przykład gdy program antywirusowy zablokował część plików. Pobierz najnowszą wersję Macro Deck i zainstaluj ją ponownie.</value>
+  </data>
+  <data name="Bootstrapper.HostError.InstallationDamagedPackage" xml:space="preserve">
+    <value>Brakuje niektórych plików Macro Deck lub nie pasują one do zainstalowanej wersji. Dzieje się tak, gdy aktualizacja została przerwana. Zainstaluj Macro Deck ponownie za pomocą menedżera pakietów, którym został zainstalowany.</value>
+  </data>
   <data name="Bootstrapper.HostError.ReportIssue" xml:space="preserve">
     <value>Zgłoś problem w serwisie GitHub</value>
   </data>
@@ -924,6 +930,9 @@ Zamknij aplikację korzystającą z tego portu (lub wciąż działający Macro D
   </data>
   <data name="Bootstrapper.HostError.WindowTitle" xml:space="preserve">
     <value>Macro Deck zatrzymał się</value>
+  </data>
+  <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
+    <value>Aktualizacja Macro Deck nie została ukończona</value>
   </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>O Macro Deck</value>
@@ -11981,6 +11990,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Notifications.HttpsNotRunningMessage" xml:space="preserve">
     <value>Macro Deck jest dostępny przez HTTP, ale nasłuch HTTPS nie wystartował. Sprawdź port HTTPS i certyfikat w Ustawienia &gt; Sieć.</value>
   </data>
+  <data name="Notifications.InstallationDamagedMessage" xml:space="preserve">
+    <value>Brakuje niektórych plików Macro Deck lub nie pasują one do zainstalowanej wersji. Dzieje się tak, gdy aktualizacja została przerwana, na przykład gdy program antywirusowy zablokował część plików. Pobierz najnowszą wersję Macro Deck i zainstaluj ją ponownie. Pliki, których to dotyczy, są wymienione w dziennikach.</value>
+  </data>
+  <data name="Notifications.InstallationDamagedPackageMessage" xml:space="preserve">
+    <value>Brakuje niektórych plików Macro Deck lub nie pasują one do zainstalowanej wersji. Dzieje się tak, gdy aktualizacja została przerwana. Zainstaluj Macro Deck ponownie za pomocą menedżera pakietów, którym został zainstalowany. Pliki, których to dotyczy, są wymienione w dziennikach.</value>
+  </data>
   <data name="Notifications.IntegrationStartFailed" xml:space="preserve">
     <value>Nie udało się uruchomić {name}</value>
     <comment>[name:string]</comment>
@@ -14759,6 +14774,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Shell.Notifications.Action.OpenLogs" xml:space="preserve">
     <value>Otwórz dzienniki</value>
+  </data>
+  <data name="Shell.Notifications.Action.OpenTroubleshootingGuide" xml:space="preserve">
+    <value>Rozwiązywanie problemów</value>
   </data>
   <data name="Shell.Notifications.Action.OpenUpdateSettings" xml:space="preserve">
     <value>Zobacz aktualizację</value>

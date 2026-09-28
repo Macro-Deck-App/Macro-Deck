@@ -18,6 +18,7 @@ mod host_error_window;
 #[cfg(windows)]
 mod host_job;
 mod host_supervisor;
+mod install_integrity;
 mod install_state;
 mod localization;
 mod logging;
@@ -253,6 +254,7 @@ fn main() {
             window::setup_tray(&handle)?;
             menu::setup(&handle)?;
             opened_files::queue(&handle, opened_files::paths_from_args(std::env::args()));
+            install_integrity::spawn(&handle);
             tauri::async_runtime::spawn(async move { startup(handle).await });
             Ok(())
         })

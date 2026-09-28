@@ -1059,3 +1059,122 @@ fn release_dmg_styling_survives_ci() {
          the bundler compares against exactly that string, so any other value silently skips the styling"
     );
 }
+
+fn job_section<'a>(workflow: &'a str, job: &str) -> &'a str {
+    let header = format!("\n  {job}:\n");
+    let start = workflow
+        .find(&header)
+        .unwrap_or_else(|| panic!("build.yml has no {job} job"));
+    let rest = &workflow[start + header.len()..];
+    let end = rest
+        .lines()
+        .scan(0, |offset, line| {
+            let at = *offset;
+            *offset += line.len() + 1;
+            Some((at, line))
+        })
+        .find(|(_, line)| {
+            line.len() > 2
+                && line.starts_with("  ")
+                && !line.starts_with("   ")
+                && line.ends_with(':')
+        })
+        .map_or(rest.len(), |(at, _)| at);
+    &rest[..end]
+}
+
+fn step<'a>(job: &'a str, name: &str) -> (usize, &'a str) {
+    let marker = format!("- name: {name}\n");
+    let start = job
+        .find(&marker)
+        .unwrap_or_else(|| panic!("missing step: {name}"));
+    let body = &job[start + marker.len()..];
+    let end = body.find("\n      - name: ").unwrap_or(body.len());
+    (start, &body[..end])
+}
+
+fn assert_in_order(job: &str, names: &[&str]) {
+    let positions: Vec<usize> = names.iter().map(|name| step(job, name).0).collect();
+    assert!(
+        positions.windows(2).all(|pair| pair[0] < pair[1]),
+        "these steps must run in this order: {names:?}"
+    );
+}
+
+#[test]
+fn every_package_hashes_its_host_files_after_the_last_change_and_before_bundling() {
+    let workflow = repository_file(".github/workflows/build.yml");
+
+    let linux = job_section(&workflow, "package-linux");
+    assert_in_order(
+        linux,
+        &[
+            "Stage host",
+            "Install dependencies",
+            "Write install manifest",
+            "Build AppImage and DEB",
+            "Strip bundled Wayland libraries and add library notices to the AppImage",
+            "Map DEB/RPM package versions",
+            "Verify install manifests in the DEB and RPM",
+        ],
+    );
+    let (_, strip) = step(
+        linux,
+        "Strip bundled Wayland libraries and add library notices to the AppImage",
+    );
+    assert!(
+        strip.contains("TAURI_SIGNING_PRIVATE_KEY:"),
+        "the AppImage step re-signs the manifest it rewrites and needs the updater key"
+    );
+
+    assert_in_order(
+        job_section(&workflow, "package-windows"),
+        &[
+            "Install dependencies",
+            "Sign staged Windows host",
+            "Write install manifest",
+            "Bundle NSIS installer",
+            "Verify install manifest in the installer",
+        ],
+    );
+
+    assert_in_order(
+        job_section(&workflow, "package-macos"),
+        &[
+            "Sign host binaries",
+            "Install dependencies",
+            "Write install manifest",
+            "Build DMG",
+            "Verify install manifest in the app bundle",
+        ],
+    );
+}
+
+#[test]
+fn the_manifest_version_is_the_version_the_bootstrapper_compares_it_with() {
+    let workflow = repository_file(".github/workflows/build.yml");
+    for job in ["package-linux", "package-windows", "package-macos"] {
+        let section = job_section(&workflow, job);
+        let (_, write) = step(section, "Write install manifest");
+        assert!(
+            write.contains("${{ env.HAS_UPDATER_KEY == 'true' }}")
+                && write.contains("\"${{ needs.prepare.outputs.version }}\""),
+            "{job}: the manifest must be written for signed builds with the release version"
+        );
+        let compiles = section
+            .split("\n      - name: ")
+            .filter(|step| {
+                step.contains("MACRODECK_RELEASE_VERSION: ${{ needs.prepare.outputs.version }}")
+            })
+            .collect::<Vec<_>>();
+        assert!(!compiles.is_empty(), "{job}: no compile step found");
+        for compile in compiles {
+            assert!(
+                compile.contains(
+                    "MACRODECK_INSTALL_MANIFEST: ${{ env.HAS_UPDATER_KEY == 'true' && 'required' || '' }}"
+                ),
+                "{job}: a build that ships a manifest must also require one"
+            );
+        }
+    }
+}

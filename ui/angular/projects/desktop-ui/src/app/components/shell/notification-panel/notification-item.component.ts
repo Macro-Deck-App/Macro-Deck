@@ -37,6 +37,8 @@ const ACTION_LABEL: Record<Exclude<UserNotificationActionKind, 'None'>, string> 
   InstallUpdate: AppStrings.Shell.Notifications.Action.InstallUpdate,
   DismissNotification: AppStrings.Shell.Notifications.Action.DismissNotification,
   EnablePluginAdb: AppStrings.Shell.Notifications.Action.EnablePluginAdb,
+  OpenDownloadPage: AppStrings.Settings.Update.OpenDownloadPageAction,
+  OpenTroubleshootingGuide: AppStrings.Shell.Notifications.Action.OpenTroubleshootingGuide,
 };
 
 export interface NotificationActionEvent {

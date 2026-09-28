@@ -441,6 +441,19 @@ jobs:
         working-directory: ui/bootstrapper
         run: npm ci
 
+      # Hashed after every step that changes host-publish and before bundling; the bootstrapper checks
+      # installs against it (ui/bootstrapper/src/install_integrity.rs).
+      - name: Write install manifest
+        if: ${{ env.HAS_UPDATER_KEY == 'true' }}
+        shell: bash
+        run: |
+          node ci/scripts/make-install-manifest.mjs write ui/bootstrapper/host-publish \
+            "${{ needs.prepare.outputs.version }}" "${GITHUB_SHA::7}"
+          ci/scripts/sign-install-manifest.sh ui/bootstrapper/host-publish
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_UPDATER_KEY_PASSWORD }}
+
       - name: Write version override
         working-directory: ui/bootstrapper
         run: |
@@ -462,6 +475,7 @@ jobs:
           # release version rather than config.version (issue #271) - a no-op
           # here since this build's config.version already is that version.
           MACRODECK_RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+          MACRODECK_INSTALL_MANIFEST: ${{ env.HAS_UPDATER_KEY == 'true' && 'required' || '' }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_UPDATER_KEY_PASSWORD }}
           # linuxdeploy's strip step fails on the .relr.dyn ELF sections newer
@@ -478,6 +492,9 @@ jobs:
       # this runner's dpkg database and repacks with the pinned AppImage runtime.
       - name: Strip bundled Wayland libraries and add library notices to the AppImage
         run: ci/scripts/strip-appimage-wayland.sh ui/bootstrapper/target/release/bundle/appimage
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_UPDATER_KEY_PASSWORD }}
 
       # Repacking the AppImage invalidates the signature the build wrote, so
       # re-sign before the update manifest reads the .sig. The empty-password
@@ -530,6 +547,22 @@ jobs:
             "${{ needs.prepare.outputs.deb_version }}" \
             "${{ needs.prepare.outputs.rpm_version }}" \
             "${{ needs.prepare.outputs.rpm_release }}"
+
+      - name: Verify install manifests in the DEB and RPM
+        if: ${{ env.HAS_UPDATER_KEY == 'true' }}
+        run: |
+          for package in ui/bootstrapper/target/release/bundle/deb/*.deb ui/bootstrapper/target/release/bundle/rpm/*.rpm; do
+            package=$(realpath "$package")
+            work=$(mktemp -d)
+            case "$package" in
+              *.deb) dpkg-deb -x "$package" "$work" ;;
+              *.rpm) (cd "$work" && rpm2cpio "$package" | cpio -idm --quiet) ;;
+            esac
+            manifest=$(find "$work" -path '*/host/install-manifest.json' -print -quit)
+            test -n "$manifest" || { echo "error: no install manifest in $package" >&2; exit 1; }
+            node ci/scripts/make-install-manifest.mjs verify "$(dirname "$manifest")" --pubkey ui/bootstrapper/tauri.conf.json
+            rm -rf "$work"
+          done
 
       # Stable releases publish both latest and beta so beta clients can move
       # to GA; beta releases publish only beta and never reach stable clients.
@@ -633,6 +666,7 @@ jobs:
         env:
           MACRODECK_BUILD_CHANNEL: ${{ env.BUILD_CHANNEL }}
           MACRODECK_RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+          MACRODECK_INSTALL_MANIFEST: ${{ env.HAS_UPDATER_KEY == 'true' && 'required' || '' }}
 
       - name: Validate eSigner configuration
         if: ${{ inputs.sign_windows || inputs.windows_signing_dry_run }}
@@ -676,6 +710,19 @@ jobs:
           ES_CREDENTIAL_ID: ${{ secrets.ES_CREDENTIAL_ID }}
           ES_TOTP_SECRET: ${{ secrets.ES_TOTP_SECRET }}
 
+      # Hashed after every step that changes host-publish and before bundling; the bootstrapper checks
+      # installs against it (ui/bootstrapper/src/install_integrity.rs).
+      - name: Write install manifest
+        if: ${{ env.HAS_UPDATER_KEY == 'true' }}
+        shell: bash
+        run: |
+          node ci/scripts/make-install-manifest.mjs write ui/bootstrapper/host-publish \
+            "${{ needs.prepare.outputs.version }}" "${GITHUB_SHA::7}"
+          ci/scripts/sign-install-manifest.sh ui/bootstrapper/host-publish
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_UPDATER_KEY_PASSWORD }}
+
       # The custom signCommand signs the Tauri executable, generated uninstaller
       # and final installer. Calls for Tauri's five NSIS DLLs are deliberate no-ops.
       - name: Bundle NSIS installer
@@ -711,6 +758,18 @@ jobs:
           } else {
             "Windows signing used exactly $($roles.Count) eSigner signatures." >> $env:GITHUB_STEP_SUMMARY
           }
+
+      - name: Verify install manifest in the installer
+        if: ${{ env.HAS_UPDATER_KEY == 'true' }}
+        shell: bash
+        run: |
+          command -v 7z >/dev/null || { echo "error: 7z is needed to inspect the installer" >&2; exit 1; }
+          installer=$(find ui/bootstrapper/target/release/bundle/nsis -maxdepth 1 -name '*-setup.exe' | head -n 1)
+          work=$(mktemp -d)
+          7z x -y -o"$work" "${installer:?no NSIS installer found}" >/dev/null
+          manifest=$(find "$work" -path '*host/install-manifest.json' -print -quit)
+          test -n "$manifest" || { echo "error: no install manifest in $installer" >&2; exit 1; }
+          node ci/scripts/make-install-manifest.mjs verify "$(dirname "$manifest")" --pubkey ui/bootstrapper/tauri.conf.json
 
       - name: Record unsigned Windows build
         if: ${{ ! inputs.sign_windows }}
@@ -857,6 +916,19 @@ jobs:
         working-directory: ui/bootstrapper
         run: npm ci
 
+      # Hashed after every step that changes host-publish and before bundling; the bootstrapper checks
+      # installs against it (ui/bootstrapper/src/install_integrity.rs).
+      - name: Write install manifest
+        if: ${{ env.HAS_UPDATER_KEY == 'true' }}
+        shell: bash
+        run: |
+          node ci/scripts/make-install-manifest.mjs write ui/bootstrapper/host-publish \
+            "${{ needs.prepare.outputs.version }}" "${GITHUB_SHA::7}"
+          ci/scripts/sign-install-manifest.sh ui/bootstrapper/host-publish
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_UPDATER_KEY_PASSWORD }}
+
       - name: Write version override
         working-directory: ui/bootstrapper
         run: |
@@ -875,6 +947,7 @@ jobs:
           # set uniformly so the updater's comparator path isn't Linux-only and
           # untested elsewhere (issue #271).
           MACRODECK_RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+          MACRODECK_INSTALL_MANIFEST: ${{ env.HAS_UPDATER_KEY == 'true' && 'required' || '' }}
           # GitHub sets CI=true, which makes the Tauri bundler skip the AppleScript DMG
           # styling entirely (tauri-apps/tauri#592); this forces the branded layout.
           TAURI_BUNDLER_DMG_IGNORE_CI: "true"
@@ -897,6 +970,13 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Verify install manifest in the app bundle
+        if: ${{ env.HAS_UPDATER_KEY == 'true' }}
+        run: |
+          app=$(find ui/bootstrapper/target/release/bundle/macos -maxdepth 1 -name '*.app' | head -n 1)
+          node ci/scripts/make-install-manifest.mjs verify "${app:?no app bundle found}/Contents/Resources/host" \
+            --pubkey ui/bootstrapper/tauri.conf.json
 
       - name: Cleanup signing keychain
         if: always()

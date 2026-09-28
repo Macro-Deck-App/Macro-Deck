@@ -3,6 +3,7 @@ use std::env;
 const BUILD_CHANNEL_ENVIRONMENT_VARIABLE: &str = "MACRODECK_BUILD_CHANNEL";
 const DEFAULT_BUILD_CHANNEL: &str = "Development";
 const RELEASE_VERSION_ENVIRONMENT_VARIABLE: &str = "MACRODECK_RELEASE_VERSION";
+const INSTALL_MANIFEST_ENVIRONMENT_VARIABLE: &str = "MACRODECK_INSTALL_MANIFEST";
 
 fn main() {
     println!("cargo:rerun-if-env-changed={BUILD_CHANNEL_ENVIRONMENT_VARIABLE}");
@@ -23,6 +24,13 @@ fn main() {
     println!("cargo:rerun-if-env-changed={RELEASE_VERSION_ENVIRONMENT_VARIABLE}");
     let release_version = env::var(RELEASE_VERSION_ENVIRONMENT_VARIABLE).unwrap_or_default();
     println!("cargo:rustc-env={RELEASE_VERSION_ENVIRONMENT_VARIABLE}={release_version}");
+
+    println!("cargo:rerun-if-env-changed={INSTALL_MANIFEST_ENVIRONMENT_VARIABLE}");
+    let install_manifest = env::var(INSTALL_MANIFEST_ENVIRONMENT_VARIABLE).unwrap_or_default();
+    if !install_manifest.is_empty() && install_manifest != "required" {
+        panic!("{INSTALL_MANIFEST_ENVIRONMENT_VARIABLE} must be empty or required");
+    }
+    println!("cargo:rustc-env={INSTALL_MANIFEST_ENVIRONMENT_VARIABLE}={install_manifest}");
 
     tauri_build::try_build(tauri_build::Attributes::new().app_manifest(
         tauri_build::AppManifest::new().commands(&[
