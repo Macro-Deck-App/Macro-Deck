@@ -1,0 +1,85 @@
+---
+title: Companion app
+description: What the Macro Deck Companion app for Android, iPhone and iPad does, and what it adds over the web client.
+---
+
+import { Image } from 'astro:assets';
+import decks from '../../../../assets/guide/companion/mockup-decks.png';
+import connections from '../../../../assets/guide/companion/mockup-connections.png';
+
+Macro Deck Companion is an optional, paid add-on to Macro Deck: a native app for Android phones and tablets,
+iPhone and iPad. Unlike Macro Deck itself, the app is closed source. It shows the same decks as the free web
+client, but draws them natively and adds what a browser on a phone or tablet cannot do. You do not need it to
+use Macro Deck: every device with a current browser can use the web client.
+
+<Image src={decks} width={800} densities={[1, 2]} quality={90} alt="The same deck on an iPhone and an iPad: a music player, a clock, the weather, a volume slider, a CPU graph and four buttons" />
+
+## Reasons to buy
+
+| Reason | What you get |
+| --- | --- |
+| **Better performance** | The app draws the deck natively, without a browser in between. It reacts faster and uses less battery, most noticeably on older phones and tablets. See [Compatibility](/guide/compatibility/#the-web-client-is-slower-than-the-companion-app). |
+| **Easier to set up** | It finds your computers on the network, and scanning the QR code signs it in without a password. The deck fills the screen and stays on without turning on HTTPS, trusting a certificate or installing a web app. |
+| **Extra features** | Gestures, several computers at once, USB without debugging, and actions and variables for the device itself. See [the comparison below](#app-or-web-client). |
+| **Supports Macro Deck** | Macro Deck itself is free and open source. The app's license supports its active development. |
+
+## App or web client?
+
+Both show your decks exactly as you built them on the computer. The app adds:
+
+✅ yes · ☑️ partly, see the notes below the table · ➖ no
+
+| | Web client | App |
+| --- | :---: | :---: |
+| **On the deck** | | |
+| Your decks, exactly as on the computer | ✅ | ✅ |
+| Drawn natively, no browser in between | ➖ | ✅ |
+| The deck fills the screen, no browser bars<sup>\*</sup> | ☑️ | ✅ |
+| Keeps the screen on<sup>\*\*</sup> | ☑️ | ✅ |
+| Swipe through folders and profiles | ➖ | ✅ |
+| Several computers open, a swipe apart | ➖ | ✅ |
+| Haptic feedback on every press | ➖ | ✅ |
+| **Connection** | | |
+| Finds your computers on the network | ➖ | ✅ |
+| Several addresses per computer, the one that answers is used | ➖ | ✅ |
+| Connects over USB<sup>\*\*\*</sup> | ☑️ | ✅ |
+| **In Macro Deck** | | |
+| Actions for this device: brightness, rotation, vibration, screenshots, and on Android turning the screen on and off | ➖ | ✅ |
+| Battery, network, memory and on iOS CPU of this device as variables | ➖ | ✅ |
+| Supports the active development of Macro Deck | ➖ | ❤️ |
+
+\* Only where the browser supports it, usually once the web client is installed as an app (PWA).
+
+\*\* Only where the browser supports it, usually only with HTTPS turned on in Macro Deck.
+
+\*\*\* Only on Android with USB debugging: the device's browser opens `http://127.0.0.1:8193`, and ADB forwards
+it to Macro Deck. The app connects over USB on Android, iPhone and iPad, also without USB debugging. See
+[Connect over USB](/guide/usb-connection/).
+
+## Requirements
+
+- Android 6 or later, or iOS and iPadOS 15 or later. Phones and tablets both work, in portrait and landscape.
+- Macro Deck 3 on a computer in the same network, or connected by USB.
+- A license or the free 7-day trial. The license is a one-time purchase, and once one device bought it,
+  your other phones and tablets get it from your computer. See [License and trial](/guide/companion-app/license/).
+
+## Get the app
+
+<Image src={connections} width={697} densities={[1, 2]} quality={90} alt="The Connections screen on an Android phone and on an iPhone: a new computer on the USB cable and two saved computers, both connected" />
+
+- **Android:** [Macro Deck Companion on Google Play](https://play.google.com/store/apps/details?id=app.macrodeck.companion).
+  For devices without Google Play, such as Amazon Fire tablets, Macro Deck can
+  [install a version without Google Play services](/guide/companion-app/install-over-adb/).
+- **iPhone and iPad:** Macro Deck Companion in the App Store.
+
+## In this section
+
+- [Set up and connect](/guide/companion-app/setup/): add your computer, sign in, start the trial.
+- [Use the deck](/guide/companion-app/deck/): gestures, several computers, per-connection settings.
+- [App settings](/guide/companion-app/settings/): every setting in the app.
+- [License and trial](/guide/companion-app/license/): what the license covers and how it reaches your devices.
+- [Android](/guide/companion-app/android/) and [iPhone and iPad](/guide/companion-app/ios/): what is different on each.
+- [Install the Android app from Macro Deck](/guide/companion-app/install-over-adb/): the version without
+  Google Play services.
+- [Tips and automations](/guide/companion-app/tips/): turn the screen off when Macro Deck quits, and more.
+- [FAQ](/guide/companion-app/faq/): why the app costs money, and what one purchase covers.

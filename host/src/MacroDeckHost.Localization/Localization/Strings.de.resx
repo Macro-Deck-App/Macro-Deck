@@ -17972,10 +17972,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Native App</value>
   </data>
   <data name="Onboarding.Connect.NativeAppDescription" xml:space="preserve">
-    <value>Die native App gibt es noch nicht. Nutze bis dahin den Web Client.</value>
-  </data>
-  <data name="Onboarding.Connect.NativeAppBadge" xml:space="preserve">
-    <value>Bald verfügbar</value>
+    <value>Installiere die Macro-Deck-App auf deinem Android- oder iOS-Smartphone oder -Tablet.</value>
   </data>
   <data name="Onboarding.Connect.Open" xml:space="preserve">
     <value>Öffnen</value>

@@ -17974,10 +17974,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Aplikacja natywna</value>
   </data>
   <data name="Onboarding.Connect.NativeAppDescription" xml:space="preserve">
-    <value>Aplikacja natywna nie jest jeszcze dostępna. Na razie użyj klienta webowego.</value>
-  </data>
-  <data name="Onboarding.Connect.NativeAppBadge" xml:space="preserve">
-    <value>Wkrótce</value>
+    <value>Aplikację Macro Deck można zainstalować na telefonie lub tablecie z Androidem albo iOS.</value>
   </data>
   <data name="Onboarding.Connect.Open" xml:space="preserve">
     <value>Otwórz</value>

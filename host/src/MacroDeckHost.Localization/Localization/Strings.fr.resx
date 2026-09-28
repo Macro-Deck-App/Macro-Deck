@@ -17974,10 +17974,7 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>Application native</value>
   </data>
   <data name="Onboarding.Connect.NativeAppDescription" xml:space="preserve">
-    <value>L'application native n'est pas encore disponible. Utilise le Web Client en attendant.</value>
-  </data>
-  <data name="Onboarding.Connect.NativeAppBadge" xml:space="preserve">
-    <value>Bientôt disponible</value>
+    <value>Installe l'application Macro Deck sur ton téléphone ou ta tablette Android ou iOS.</value>
   </data>
   <data name="Onboarding.Connect.Open" xml:space="preserve">
     <value>Ouvrir</value>
