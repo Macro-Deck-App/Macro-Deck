@@ -7,7 +7,7 @@ import { LocalizationService } from '../../localization';
 export type WidgetContextMenuMode = 'widget' | 'empty';
 
 export type WidgetContextMenuAction =
-  'edit' | 'copy' | 'cut' | 'delete' | 'paste' | 'export' | 'import' | 'pin-profile' | 'pin-subtree' | 'unpin';
+  'edit' | 'run' | 'copy' | 'cut' | 'delete' | 'paste' | 'export' | 'import' | 'pin-profile' | 'pin-subtree' | 'unpin';
 
 @Component({
   selector: 'shared-widget-context-menu',
@@ -34,6 +34,7 @@ export class WidgetContextMenuComponent {
   readonly isPinned = input(false);
   readonly pinScope = input<PinScope | undefined>(undefined);
   readonly selectionCount = input(1);
+  readonly canRun = input(false);
 
   readonly action = output<WidgetContextMenuAction>();
   readonly closed = output<void>();
@@ -88,6 +89,7 @@ export class WidgetContextMenuComponent {
 
     return [
       { id: 'edit', label: t(AppStrings.Widgets.ContextMenu.Edit), icon: 'icon-pencil' },
+      ...(this.canRun() ? [{ id: 'run', label: t(AppStrings.ActionBuilder.Toolbar.Run), icon: 'icon-play' } as ContextMenuItem] : []),
       { id: 'copy', label: t(AppStrings.Widgets.ContextMenu.Copy), icon: 'icon-copy' },
       ...(pinned ? [] : [{ id: 'cut', label: t(AppStrings.Widgets.ContextMenu.Cut), icon: 'icon-scissors' } as ContextMenuItem]),
       pinItem,

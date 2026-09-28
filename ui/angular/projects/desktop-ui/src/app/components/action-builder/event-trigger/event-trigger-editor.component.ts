@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 
 import { ActionBlock, ActionBlockParameter, ActionFlow, AppStrings, ConditionExpression, EventDefinition, EventTriggerBinding, ParameterValue, createEmptyComparison, defaultEventConfigurationValue, eventConfigurationValues, qualifiedEventId } from '@macro-deck/runtime';
-import { LocalizationService, TranslatePipe } from '@shared';
+import { InputComponent, LocalizationService, TranslatePipe } from '@shared';
 import { refineEventConfigurationParameters } from '../../../domain/event-parameter-refinement.util';
 import { isParameterVisible } from '../../../domain/parameter-visibility.util';
 import { EventCatalogService } from '../../../services/event-catalog.service';
@@ -25,7 +25,7 @@ import { ActionFlowStore } from '../services/action-flow.store';
 @Component({
   selector: 'shared-event-trigger-editor',
   standalone: true,
-  imports: [FormsModule, SelectComponent, ParamRowComponent, ConditionBuilderComponent, TranslatePipe],
+  imports: [FormsModule, InputComponent, SelectComponent, ParamRowComponent, ConditionBuilderComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './event-trigger-editor.component.html',
   styleUrls: ['./event-trigger-editor.component.scss'],
@@ -70,6 +70,12 @@ export class EventTriggerEditorComponent implements OnDestroy {
   }
 
   @Input() removable = true;
+
+  @Input() nameable = true;
+
+  @Input() defaultName = '';
+
+  protected readonly flowName = computed(() => this.flowSignal()?.name ?? '');
 
   protected readonly loading = this.catalog.loading;
   protected readonly loadError = this.catalog.error;
@@ -176,6 +182,11 @@ export class EventTriggerEditorComponent implements OnDestroy {
   protected get leafState(): LeafStateLookup {
     const key = this.registeredKey;
     return (leafId: string) => (key ? this.conditionEval?.leafState(key, leafId) : undefined);
+  }
+
+  protected onNameChange(name: string | null): void {
+    const flow = this.flowSignal();
+    if (flow) this.store.renameEventFlow(flow.triggerId, name ?? '');
   }
 
   protected onProviderChange(providerId: string | number | null): void {

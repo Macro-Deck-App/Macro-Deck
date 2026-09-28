@@ -17,7 +17,7 @@ import {
 } from '@angular/core';
 
 import { ActionBlockDefinition, ActionFlow, AppStrings, eventConfigurationValues, eventPayloadVariables, hydrateBlockParameters, isEventFlow, isSameTriggerType, normalizeEventTriggerNames, normalizeLegacyParamTypes, qualifiedEventId, resolveLocalizedText } from '@macro-deck/runtime';
-import { ContextMenuComponent, ContextMenuItem, LocalizationService, OverlayPanelComponent, ToastService, TranslatePipe, UiFontService } from '@shared';
+import { ContextMenuComponent, ContextMenuItem, LocalizationService, formatRunDuration, OverlayPanelComponent, ToastService, TranslatePipe, UiFontService } from '@shared';
 import type { Variable, VariableScope } from '@macro-deck/runtime';
 import { ActionFlowValidationResult } from '../../domain/action-flow-validation.util';
 import { isToolbarCompact, measureToolbarNaturalWidth } from './action-builder-layout';
@@ -279,6 +279,7 @@ export class ActionBuilderComponent implements OnChanges, AfterViewInit {
   );
 
   readonly eventTriggerRemovable = computed(() => !this.singleEventTriggerInput());
+  readonly eventTriggerNameable = computed(() => !this.singleEventTriggerInput());
 
   readonly awaitingTrigger = computed(() =>
     this.singleEventTriggerInput() && this.store.eventFlows().length === 0,
@@ -371,11 +372,21 @@ export class ActionBuilderComponent implements OnChanges, AfterViewInit {
   readonly eventTabItems = computed<TabItem[]>(() =>
     this.store.eventFlows().map((flow, index) => ({
       id: flow.triggerId,
-      label: flow.event?.eventName?.trim()
-        || this.localization.translateKey(AppStrings.ActionBuilder.Toolbar.EventFallbackLabel, { index: index + 1 }),
+      label: flow.name?.trim() || this.eventDefaultLabel(flow, index),
       badge: flow.children.length > 0 ? flow.children.length : undefined,
     })),
   );
+
+  readonly selectedEventDefaultLabel = computed(() => {
+    const selected = this.selectedEventFlow();
+    if (!selected) return '';
+    return this.eventDefaultLabel(selected, this.store.eventFlows().indexOf(selected));
+  });
+
+  private eventDefaultLabel(flow: ActionFlow, index: number): string {
+    return flow.event?.eventName?.trim()
+      || this.localization.translateKey(AppStrings.ActionBuilder.Toolbar.EventFallbackLabel, { index: index + 1 });
+  }
 
   readonly eventMenuLabel = computed(() => {
     const eventsLabel = this.localization.translateKey(AppStrings.ActionBuilder.Toolbar.Events);
@@ -656,8 +667,4 @@ export class ActionBuilderComponent implements OnChanges, AfterViewInit {
         break;
     }
   }
-}
-
-function formatRunDuration(durationMs: number): string {
-  return durationMs >= 1000 ? `${(durationMs / 1000).toFixed(1)}s` : `${durationMs}ms`;
 }

@@ -24,6 +24,15 @@ describe('WidgetContextMenuComponent', () => {
     expect(component.menuItems().find(i => i.id === 'delete')?.danger).toBeTrue();
   });
 
+  it('offers Run right after Edit when the widget can be run', () => {
+    fixture.componentRef.setInput('mode', 'widget');
+    fixture.componentRef.setInput('canRun', true);
+    fixture.detectChanges();
+
+    expect(component.menuItems().map(i => i.id)).toEqual(['edit', 'run', 'copy', 'cut', 'pin', 'export', 'delete']);
+    expect(component.menuItems().find(i => i.id === 'run')?.label).toBe('Run');
+  });
+
   it('I1: offers Unpin and both scope choices, the active one matching the current scope, and drops Cut for a pinned widget', () => {
     fixture.componentRef.setInput('mode', 'widget');
     fixture.componentRef.setInput('isPinned', true);

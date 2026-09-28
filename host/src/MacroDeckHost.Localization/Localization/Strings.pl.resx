@@ -136,6 +136,9 @@
   <data name="ActionBuilder.EventTrigger.ExtraCondition" xml:space="preserve">
     <value>Dodatkowy warunek</value>
   </data>
+  <data name="ActionBuilder.EventTrigger.NameLabel" xml:space="preserve">
+    <value>Nazwa</value>
+  </data>
   <data name="ActionBuilder.EventTrigger.OnlyRunWhen" xml:space="preserve">
     <value>Uruchom tylko, gdy</value>
   </data>

@@ -282,6 +282,7 @@ export interface ActionFlow {
   triggerId: string;
   triggerType: string;
   triggerLabel?: string;
+  name?: string;
   event?: EventTriggerBinding;
   children: ActionBlock[];
 }

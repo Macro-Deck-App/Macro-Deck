@@ -191,6 +191,28 @@ describe('EventTriggerEditorComponent with the real event catalogue', () => {
 
   afterEach(() => localStorage.clear());
 
+  it('lets the user name the event, showing the unnamed label as the placeholder', () => {
+    const store = TestBed.inject(ActionFlowStore);
+    store.flows.set([flowWith('obs')]);
+    fixture.componentRef.setInput('defaultName', 'Scene Changed');
+    fixture.detectChanges();
+
+    const input = fixture.nativeElement.querySelector('.event-trigger-editor input') as HTMLInputElement;
+    expect(input.placeholder).toBe('Scene Changed');
+
+    input.value = 'Go live';
+    input.dispatchEvent(new Event('input'));
+
+    expect(store.flows()[0].name).toBe('Go live');
+  });
+
+  it('offers no name field where the event cannot be named', () => {
+    fixture.componentRef.setInput('nameable', false);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.event-trigger-editor input')).toBeNull();
+  });
+
   it('renders provider options with their resolved names, not [object Object]', () => {
     const providerOptions = (component as unknown as { providerOptions(): { value: string; label: string }[] })
       .providerOptions();
