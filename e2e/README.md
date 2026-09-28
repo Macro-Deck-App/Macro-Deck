@@ -11,6 +11,10 @@ Every workflow run uses a fresh `MACRO_DECK_DATA_DIRECTORY` and dedicated ports.
 
 The host supervisor restarts the staged host only when it exits with Macro Deck's restart exit code. This lets restart tests use the production `/api/host/restart` path without adding a test-only lifecycle implementation.
 
+## Run locally
+
+`make test-e2e` (or `make test-e2e-smoke`) performs the steps below in one go on Linux and macOS, with its own data directory and ports 5391/8392 so it does not collide with a development host. `E2E_SKIP_BUILD=1` reuses the staged host.
+
 ## Run on Linux
 
 Build the production UIs and stage the host first:
