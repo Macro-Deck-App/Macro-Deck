@@ -267,6 +267,7 @@ export const DOM_API_EXCEPTIONS = {
   'runtime/src/render/text-fit.ts:ResizeObserver':
     'Guarded on `typeof ResizeObserver`, and supplied by polyfills.legacy.js on the floor.',
   'web-client/src/modal.ts:ResizeObserver': 'As the renderer above.',
+  'runtime/src/ui-components/ui-list.component.ts:ResizeObserver': 'As the renderer above.',
   'web-client/src/folder-view.ts:ResizeObserver': 'As the renderer above.',
   'web-client/src/screensaver.ts:ResizeObserver': 'As the renderer above.',
   'runtime/src/domain/action-flow.util.ts:structuredClone':

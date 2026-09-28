@@ -22,8 +22,10 @@ export interface UiListState {
   unseen: boolean;
   lastChildId: string | null;
   measuredHeight: number;
+  scrolledTo: number;
   gapPx: number;
   jump: HTMLElement | null;
+  growth: ResizeObserver | null;
 }
 
 interface ScrollAnchor {
@@ -114,8 +116,39 @@ function restoreAnchor(element: HTMLElement, anchor: ScrollAnchor, skip: Element
   }
 }
 
-function jumpToEnd(element: HTMLElement, ctx: UiComponentContext<UiListState>): void {
+function scrollToEnd(element: HTMLElement, state: UiListState): void {
   element.scrollTop = element.scrollHeight;
+  state.scrolledTo = element.scrollTop;
+}
+
+// Rows grow after a paint while text fits and images decode, and no paint follows to catch up.
+// Only a list the user has not moved since it was last put at the end is carried along.
+function followGrowth(element: HTMLElement, ctx: UiComponentContext<UiListState>): void {
+  const state = ctx.state;
+  if (state.jump === null || !state.pinned || element.scrollTop !== state.scrolledTo) return;
+  scrollToEnd(element, state);
+}
+
+function watchGrowth(element: HTMLElement, ctx: UiComponentContext<UiListState>): void {
+  if (typeof ResizeObserver === 'undefined') return;
+  const state = ctx.state;
+  if (state.growth === null) state.growth = new ResizeObserver(() => followGrowth(element, ctx));
+  state.growth.disconnect();
+  state.growth.observe(element);
+  for (let index = 0; index < element.children.length; index++) {
+    const child = element.children[index];
+    if (child !== state.jump) state.growth.observe(child);
+  }
+}
+
+function stopWatchingGrowth(state: UiListState): void {
+  if (state.growth === null) return;
+  state.growth.disconnect();
+  state.growth = null;
+}
+
+function jumpToEnd(element: HTMLElement, ctx: UiComponentContext<UiListState>): void {
+  scrollToEnd(element, ctx.state);
   ctx.state.pinned = true;
   ctx.state.unseen = false;
   ctx.repaint();
@@ -166,6 +199,8 @@ function dropJump(ctx: UiComponentContext<UiListState>): void {
   state.unseen = false;
   state.lastChildId = null;
   state.measuredHeight = 0;
+  state.scrolledTo = -1;
+  stopWatchingGrowth(state);
 }
 
 export const uiListComponent: UiComponentDefinition<UiListState> = {
@@ -188,8 +223,10 @@ export const uiListComponent: UiComponentDefinition<UiListState> = {
       unseen: false,
       lastChildId: null,
       measuredHeight: 0,
+      scrolledTo: -1,
       gapPx: 0,
       jump: null,
+      growth: null,
     };
   },
 
@@ -197,8 +234,11 @@ export const uiListComponent: UiComponentDefinition<UiListState> = {
     const element = ctx.element as HTMLElement;
     element.addEventListener('scroll', () => {
       const state = ctx.state;
-      if (listAnchorsEnd(ctx.current()) && element.clientHeight > 0) {
+      // The echo of the list's own scroll says nothing about the user, and content that grew since
+      // would read as the user having left the end.
+      if (listAnchorsEnd(ctx.current()) && element.clientHeight > 0 && element.scrollTop !== state.scrolledTo) {
         state.pinned = distanceToEnd(element, state) <= LIST_END_TOLERANCE_PX;
+        state.scrolledTo = element.scrollTop;
         if (state.pinned && state.unseen) {
           state.unseen = false;
           ctx.repaint();
@@ -213,11 +253,12 @@ export const uiListComponent: UiComponentDefinition<UiListState> = {
     const state = ctx.state;
     const anchored = listAnchorsEnd(node);
 
-    // Measured before anything this paint writes moves the content. A box that changed since the last
-    // paint says nothing about where the user is, so the previous answer stands.
+    // Measured before anything this paint writes moves the content, and only when the user has moved
+    // the view since the list last placed it: a resized box or grown rows are not the user leaving.
     let anchor: ScrollAnchor | null = null;
     if (anchored) {
-      if (element.clientHeight > 0 && element.clientHeight === state.measuredHeight) {
+      if (element.clientHeight > 0 && element.clientHeight === state.measuredHeight
+        && element.scrollTop !== state.scrolledTo) {
         state.pinned = distanceToEnd(element, state) <= LIST_END_TOLERANCE_PX;
       }
       if (!state.pinned) anchor = captureAnchor(element, state.jump);
@@ -265,9 +306,11 @@ export const uiListComponent: UiComponentDefinition<UiListState> = {
       state.gapPx = gap;
       paintJump(element, ctx);
 
-      if (state.pinned) element.scrollTop = element.scrollHeight;
+      if (state.pinned) scrollToEnd(element, state);
       else if (anchor !== null) restoreAnchor(element, anchor, state.jump);
+      state.scrolledTo = element.scrollTop;
       state.measuredHeight = element.clientHeight;
+      watchGrowth(element, ctx);
     } else if (state.jump !== null) {
       dropJump(ctx);
     }
@@ -286,6 +329,7 @@ export const uiListComponent: UiComponentDefinition<UiListState> = {
   },
 
   release(ctx) {
+    stopWatchingGrowth(ctx.state);
     if (ctx.state.revealTimer !== null) {
       clearTimeout(ctx.state.revealTimer);
       ctx.state.revealTimer = null;
