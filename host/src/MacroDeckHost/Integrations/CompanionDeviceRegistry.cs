@@ -1,5 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
+using System.Threading.Channels;
+using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
 using MacroDeckHost.Application.Network.Discovery;
@@ -20,6 +22,8 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 	private const string IntegrationId = CompanionIntegration.IntegrationId;
 	private const int MaximumTextLength = 64;
 
+	internal static readonly TimeSpan StateReportTimeout = TimeSpan.FromSeconds(5);
+
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly Func<IIntegrationConfigMutationCoordinator> _coordinator;
 	private readonly IUiTransport _transport;
@@ -27,10 +31,14 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 	private readonly CompanionCommandRequests _requests;
 	private readonly INetworkInterfaceSnapshotProvider _interfaces;
 	private readonly IHostNameProvider _hostNames;
+	private readonly DeviceConnectionTracker _deviceConnections;
+	private readonly TimeProvider _timeProvider;
 	private readonly ILogger _logger;
 	private readonly Lock _connectionGate = new();
 	private readonly Dictionary<string, Guid> _connections = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<Guid, CompanionDeviceState> _states = new();
+	private readonly Dictionary<Guid, long> _readySequences = new();
+	private long _nextReadySequence;
 	private readonly ConcurrentDictionary<Guid, SemaphoreSlim> _deviceGates = new();
 	private readonly ConcurrentDictionary<Guid, Task> _creations = new();
 	private readonly ConcurrentDictionary<Guid, bool> _failedCreations = new();
@@ -43,9 +51,13 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 		CompanionCommandRequests requests,
 		INetworkInterfaceSnapshotProvider interfaces,
 		IHostNameProvider hostNames,
+		DeviceConnectionTracker deviceConnections,
+		TimeProvider timeProvider,
 		ILogger logger)
 	{
 		_hostNames = hostNames;
+		_deviceConnections = deviceConnections;
+		_timeProvider = timeProvider;
 		_scopeFactory = scopeFactory;
 		_coordinator = coordinator;
 		_transport = transport;
@@ -58,16 +70,31 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 
 	public event EventHandler<Guid>? StateChanged;
 
+	public event EventHandler<CompanionDeviceReady>? DeviceReady;
+
+	private event Action? ConnectionClosed;
+
 	public void Report(string connectionId, Guid deviceId, ReportCompanionStateRequest report)
 	{
 		bool firstOfConnection;
+		CompanionDeviceReady? ready = null;
 		lock (_connectionGate)
 		{
 			firstOfConnection = _connections.TryAdd(connectionId, deviceId);
+			if (!_states.ContainsKey(deviceId))
+			{
+				ready = new CompanionDeviceReady(deviceId, ++_nextReadySequence);
+				_readySequences[deviceId] = ready.Sequence;
+			}
+
 			_states[deviceId] = Sanitize(report);
 		}
 
 		StateChanged?.Invoke(this, deviceId);
+		if (ready is not null)
+		{
+			DeviceReady?.Invoke(this, ready);
+		}
 		if (firstOfConnection)
 		{
 			// Off the dispatcher's path: reading the network adapters can block.
@@ -132,24 +159,87 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 
 	public void Disconnected(string connectionId)
 	{
-		Guid deviceId;
-		lock (_connectionGate)
+		try
 		{
-			if (!_connections.Remove(connectionId, out deviceId) || _connections.ContainsValue(deviceId))
+			Guid deviceId;
+			lock (_connectionGate)
 			{
-				return;
+				if (!_connections.Remove(connectionId, out deviceId) || _connections.ContainsValue(deviceId))
+				{
+					return;
+				}
+
+				_states.TryRemove(deviceId, out _);
+				_readySequences.Remove(deviceId);
 			}
 
-			_states.TryRemove(deviceId, out _);
+			_creations.TryRemove(deviceId, out _);
+			_requests.FailDevice(deviceId, CompanionCommandFailure.NotConnected);
+			StateChanged?.Invoke(this, deviceId);
 		}
-
-		_creations.TryRemove(deviceId, out _);
-		_requests.FailDevice(deviceId, CompanionCommandFailure.NotConnected);
-		StateChanged?.Invoke(this, deviceId);
+		finally
+		{
+			// The dispatcher drops the connection from DeviceConnectionTracker before calling this,
+			// so a waiter woken here already sees a socket that never reported as gone.
+			ConnectionClosed?.Invoke();
+		}
 	}
 
 	public bool TryGetState(Guid deviceId, out CompanionDeviceState state)
 		=> _states.TryGetValue(deviceId, out state!);
+
+	public IReadOnlyList<CompanionDeviceReady> ReadyDevices()
+	{
+		lock (_connectionGate)
+		{
+			return [.. _readySequences.Select(pair => new CompanionDeviceReady(pair.Key, pair.Value))];
+		}
+	}
+
+	public async Task<bool> WaitForStateAsync(Guid deviceId, CancellationToken cancellationToken)
+	{
+		if (_states.ContainsKey(deviceId))
+		{
+			return true;
+		}
+
+		var signal = Channel.CreateUnbounded<bool>();
+		void OnStateChanged(object? sender, Guid changed)
+		{
+			if (changed == deviceId)
+			{
+				signal.Writer.TryWrite(true);
+			}
+		}
+
+		void OnConnectionClosed() => signal.Writer.TryWrite(true);
+
+		StateChanged += OnStateChanged;
+		ConnectionClosed += OnConnectionClosed;
+		try
+		{
+			using var timeout = new CancellationTokenSource(StateReportTimeout, _timeProvider);
+			using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
+			while (!_states.ContainsKey(deviceId) && _deviceConnections.HasConnection(deviceId))
+			{
+				try
+				{
+					await signal.Reader.ReadAsync(linked.Token);
+				}
+				catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+				{
+					break;
+				}
+			}
+		}
+		finally
+		{
+			StateChanged -= OnStateChanged;
+			ConnectionClosed -= OnConnectionClosed;
+		}
+
+		return _states.ContainsKey(deviceId);
+	}
 
 	public IReadOnlyList<KeyValuePair<Guid, CompanionDeviceState>> ConnectedStates() => _states.ToArray();
 
@@ -265,6 +355,7 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 				}
 
 				wasConnected = _states.TryRemove(deviceId, out _);
+				_readySequences.Remove(deviceId);
 			}
 
 			_creations.TryRemove(deviceId, out _);

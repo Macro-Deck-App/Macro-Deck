@@ -4,7 +4,13 @@ public interface ICompanionGateway
 {
 	event EventHandler<Guid>? StateChanged;
 
+	event EventHandler<CompanionDeviceReady>? DeviceReady;
+
 	bool TryGetState(Guid deviceId, out CompanionDeviceState state);
+
+	IReadOnlyList<CompanionDeviceReady> ReadyDevices();
+
+	Task<bool> WaitForStateAsync(Guid deviceId, CancellationToken cancellationToken);
 
 	Task<bool> SendAsync(Guid deviceId, CompanionCommand command, CancellationToken cancellationToken);
 
@@ -19,6 +25,8 @@ public interface ICompanionGatewayConsumer
 {
 	void UseGateway(ICompanionGateway gateway);
 }
+
+public sealed record CompanionDeviceReady(Guid DeviceId, long Sequence);
 
 public sealed record CompanionDeviceState(
 	int? BatteryLevelPercent,

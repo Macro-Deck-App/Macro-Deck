@@ -18129,6 +18129,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Companion.Errors.NotConnected" xml:space="preserve">
     <value>Zařízení Companion není připojeno.</value>
   </data>
+  <data name="Integrations.Companion.Events.DeviceReadyName" xml:space="preserve">
+    <value>Zařízení připraveno</value>
+  </data>
+  <data name="Integrations.Companion.Events.DeviceReadyDescription" xml:space="preserve">
+    <value>Aplikace Companion se připojila a nyní může provádět akce Companion.</value>
+  </data>
   <data name="Integrations.Companion.Variables.InFocus" xml:space="preserve">
     <value>V popředí</value>
   </data>

@@ -18129,6 +18129,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Companion.Errors.NotConnected" xml:space="preserve">
     <value>Urządzenie Companion nie jest połączone.</value>
   </data>
+  <data name="Integrations.Companion.Events.DeviceReadyName" xml:space="preserve">
+    <value>Urządzenie gotowe</value>
+  </data>
+  <data name="Integrations.Companion.Events.DeviceReadyDescription" xml:space="preserve">
+    <value>Aplikacja Companion połączyła się i może teraz wykonywać akcje Companion.</value>
+  </data>
   <data name="Integrations.Companion.Variables.InFocus" xml:space="preserve">
     <value>Na pierwszym planie</value>
   </data>

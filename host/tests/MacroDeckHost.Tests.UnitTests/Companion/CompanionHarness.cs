@@ -1,6 +1,8 @@
 using MacroDeckHost.Application.Variables.Files;
 using System.Text.Json;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Application.Deck;
+using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
 using MacroDeckHost.Application.MusicPlayer;
@@ -24,6 +26,7 @@ using MacroDeckHost.Integrations.Companion;
 using MacroDeckHost.Tests.UnitTests.Adb;
 using MacroDeckHost.Tests.UnitTests.Auth;
 using MacroDeckHost.Tests.UnitTests.Delegation;
+using MacroDeckHost.Tests.UnitTests.Triggers;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -79,6 +82,8 @@ internal sealed class CompanionHarness
 			Requests,
 			Interfaces,
 			HostNames,
+			Connections,
+			Time,
 			new LoggerConfiguration().WriteTo.Sink(Sink).CreateLogger());
 		UserVariables = new UserVariableWriter(ScopeFactory);
 		Context = new IntegrationContext(VariableApi,
@@ -87,7 +92,7 @@ internal sealed class CompanionHarness
 			null!,
 			null!,
 			null!,
-			null!,
+			Events,
 			null!,
 			null!);
 
@@ -118,6 +123,10 @@ internal sealed class CompanionHarness
 	public CapturingSink Sink { get; } = new();
 	public FakeTimeProvider Time { get; } = new();
 	public CompanionCommandRequests Requests { get; }
+	public RecordingPublisher Events { get; } = new();
+	public DeviceConnectionTracker Connections { get; } = new(new RecordingEventBus(),
+		TimeProvider.System,
+		new DeckClientTracker(Serilog.Core.Logger.None));
 	public RecordingVariableApi VariableApi { get; } = new();
 	public UserVariableWriter UserVariables { get; }
 	public CompanionDeviceRegistry DeviceRegistry { get; }
