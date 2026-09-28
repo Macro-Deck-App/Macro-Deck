@@ -46,6 +46,7 @@ profile's rule decides which of the two a new feature is. [Modifiers](/ui/compon
 | `spans` on `ui.text` | A property | Ignores it and draws `text`, which the producer keeps the plain equivalent of the spans: the same words, each image as its alt text, on one font and colour. |
 | `overflow` on `ui.stack` (`clip-start`), component version 2 | A property, gated by a component version | Draws the node's `fallback`, because a producer using `clip-start` asks for version 2. Without that ask a version 1 reader ignores the key and shrinks every child into the box. |
 | `ui.responsive` and its `variants` property, component version 1 | A type | Draws the node's `fallback`. Unlike `ui.modifier`, one is invented when you set none: a copy of the default layout. When it decides whether the tile's own press belongs to a control, it walks every layout, not only the one it would have drawn - see [Responsive](/ui/components/responsive/#older-readers). |
+| `macrodeck.video-stream` and its `stream` property, component version 1 | A type | Draws the node's `fallback`, and opens no session. See [Video stream](/ui/components/video-stream/#older-readers). |
 
 See [ADR 0064](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0064-components-are-a-registry-over-two-namespaces.md)
 for why the vocabulary is organized as a registry over the `ui.*`/`macrodeck.*` namespaces rather than one

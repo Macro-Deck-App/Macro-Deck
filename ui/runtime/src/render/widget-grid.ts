@@ -138,6 +138,7 @@ export function renderWidgetGrid(
       fontFamily: faceId => base.fontFamily(faceId),
       fontReady: faceId => base.fontReady(faceId),
       uiFontKey: () => base.uiFontKey?.() ?? '',
+      videoStreams: () => base.videoStreams?.() ?? null,
       emit: (node, name, data) => {
         if (options.onWidgetEvent) options.onWidgetEvent(widgetId, node, name, data);
         else base.emit(node, name, data);

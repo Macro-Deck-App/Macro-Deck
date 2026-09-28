@@ -642,6 +642,17 @@ export class ApiService {
     }
   }
 
+  request<T>(method: string, payload: unknown): Promise<T> {
+    const connection = this.connection;
+    if (!connection) return Promise.reject(new Error('The UI connection is not open.'));
+    return connection.request<T>(method, payload);
+  }
+
+  onAnyNotification(listener: (method: string, params: unknown) => void): () => void {
+    const subscription = this._notifications.subscribe(n => listener(n.method, n.params));
+    return () => subscription.unsubscribe();
+  }
+
   onNotification<T>(method: string): Observable<T> {
     return this._notifications.pipe(
       filter(n => n.method === method),

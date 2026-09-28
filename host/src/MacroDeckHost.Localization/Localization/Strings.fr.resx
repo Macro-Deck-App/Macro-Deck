@@ -1375,6 +1375,15 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Deck.Unlock" xml:space="preserve">
     <value>Déverrouiller</value>
   </data>
+  <data name="Deck.VideoStream.AccessibleLabel" xml:space="preserve">
+    <value>{stream} : {status}</value>
+  </data>
+  <data name="Deck.VideoStream.Connecting" xml:space="preserve">
+    <value>Connexion au flux vidéo…</value>
+  </data>
+  <data name="Deck.VideoStream.NoStream" xml:space="preserve">
+    <value>Aucun flux vidéo sélectionné</value>
+  </data>
   <data name="Deck.UnpinWidgetsFailed" xml:space="preserve">
     <value>Échec du désépinglage des widgets</value>
   </data>

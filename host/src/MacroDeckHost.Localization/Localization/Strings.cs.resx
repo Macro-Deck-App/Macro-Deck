@@ -1375,6 +1375,15 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Deck.Unlock" xml:space="preserve">
     <value>Odemknout</value>
   </data>
+  <data name="Deck.VideoStream.AccessibleLabel" xml:space="preserve">
+    <value>{stream}: {status}</value>
+  </data>
+  <data name="Deck.VideoStream.Connecting" xml:space="preserve">
+    <value>Připojování k videostreamu…</value>
+  </data>
+  <data name="Deck.VideoStream.NoStream" xml:space="preserve">
+    <value>Není vybrán žádný videostream</value>
+  </data>
   <data name="Deck.UnpinWidgetsFailed" xml:space="preserve">
     <value>Odepnutí widgetů se nezdařilo</value>
   </data>

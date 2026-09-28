@@ -45,7 +45,7 @@ public class UiComponentVocabularyTests
 	private static readonly string[] _expectedMacroDeckComponents =
 	[
 		"macrodeck.dynamic-text", "macrodeck.clock-dial", "macrodeck.progress-bar",
-		"macrodeck.progress-text",
+		"macrodeck.progress-text", "macrodeck.video-stream",
 	];
 
 	private static readonly string[] _expectedProperties =
@@ -58,7 +58,7 @@ public class UiComponentVocabularyTests
 		"answer", "placeholder", "rotation", "originX", "originY", "shape", "cornerRadius", "strokeColor",
 		"strokeWidth", "path", "icon", "columns", "rows", "columnSpan", "rowSpan", "startAngle", "endAngle",
 		"on", "selected",
-		"modifiers", "frame", "clip", "mask", "variants", "spans", "overflow",
+		"modifiers", "frame", "clip", "mask", "variants", "spans", "overflow", "stream",
 	];
 
 	private static readonly string[] _expectedIconsVersion1 =
@@ -89,6 +89,8 @@ public class UiComponentVocabularyTests
 	private static readonly string[] _expectedImageTransitions = ["crossfade"];
 
 	private static readonly string[] _expectedImageFits = ["contain", "cover"];
+
+	private static readonly string[] _expectedVideoStreamKeys = ["stream", "fit", "fill"];
 
 	private static readonly string[] _expectedButtonCorners = ["tile"];
 
@@ -126,14 +128,14 @@ public class UiComponentVocabularyTests
 	}
 
 	[Test]
-	public void The_macro_deck_component_set_is_the_four_reference_resolving_names()
+	public void The_macro_deck_component_set_is_the_five_reader_resolved_names()
 	{
 		Assert.Multiple(() =>
 		{
 			Assert.That(UiMacroDeckComponents.WellKnown,
 				Is.EqualTo(_expectedMacroDeckComponents).AsCollection);
 			Assert.That(UiMacroDeckComponents.WellKnown.Distinct(StringComparer.Ordinal).Count(),
-				Is.EqualTo(4));
+				Is.EqualTo(5));
 
 			foreach (var type in UiMacroDeckComponents.WellKnown)
 			{
@@ -244,6 +246,27 @@ public class UiComponentVocabularyTests
 		Assert.That(UiComponents.WellKnown.Concat(UiMacroDeckComponents.WellKnown)
 				.Intersect(UiConfigPrimitives.WellKnown, StringComparer.Ordinal),
 			Is.Empty);
+	}
+
+	[Test]
+	public void A_video_stream_puts_only_the_stream_reference_on_the_wire()
+	{
+		var tree = UiViewBuilder.Build(WidgetSurface(), new UiVideoStream
+		{
+			Key = "camera",
+			Stream = UiValue.Of(new UiVideoStreamReference { Provider = "com.example.obs::studio", Id = "Preview scene" }),
+			Fit = UiComponentImageFits.Cover,
+			Fill = true,
+		});
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(tree.Root.Type, Is.EqualTo("macrodeck.video-stream"));
+			Assert.That(tree.Root.Properties.Keys, Is.EquivalentTo(_expectedVideoStreamKeys));
+			Assert.That(tree.Root.Properties["stream"].GetRawText(),
+				Is.EqualTo("""{"provider":"com.example.obs::studio","id":"Preview scene"}"""));
+			Assert.That(tree.Root.Properties["fit"].GetString(), Is.EqualTo("cover"));
+		});
 	}
 
 	[Test]
@@ -372,6 +395,13 @@ public class UiComponentVocabularyTests
 					Value = UiValue.Of(UiTimeReference.Now()),
 					Seconds = true,
 					Fill = true,
+				},
+				new UiVideoStream
+				{
+					Key = "videoStream",
+					Stream = UiValue.Of(new UiVideoStreamReference { Provider = "com.example.obs::studio", Id = "Program" }),
+					Fit = UiComponentImageFits.Cover,
+					Size = 0.5,
 				},
 				new UiProgressBar
 				{

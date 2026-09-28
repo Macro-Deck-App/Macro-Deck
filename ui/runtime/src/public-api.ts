@@ -1274,6 +1274,12 @@ export {
   type VideoStreamState,
 } from './protocol/messages/video-stream';
 export {
+  VideoStreamClient,
+  type VideoStreamPort,
+  type VideoStreamSurface,
+} from './video-streams/video-stream-client';
+export { uiConnectionVideoStreamPort } from './video-streams/ui-connection-port';
+export {
   type GetWeatherInstancesResponse,
   type GetWeatherStateResponse,
   type WeatherForecastDayPayload,

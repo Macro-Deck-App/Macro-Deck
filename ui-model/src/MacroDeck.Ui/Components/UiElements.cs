@@ -688,6 +688,45 @@ public sealed record UiProgressText : UiComponentLeaf
 }
 
 /// <summary>
+/// A live video stream from a video stream provider. The reader opens a session on the stream while the view
+/// is shown, suspends it while the view is not visible and closes it when the view goes away; it draws its own
+/// placeholder while the stream is not playing, keeps the stream's aspect ratio, fits it into the box by
+/// <see cref="Fit" /> and plays it without sound. A reader that predates this type draws the node's
+/// <see cref="UiElement.Fallback" />.
+/// </summary>
+// Renaming this would make the type disagree with the wire name a renderer switches on.
+#pragma warning disable CA1711
+public sealed record UiVideoStream : UiComponentLeaf
+#pragma warning restore CA1711
+{
+	/// <summary>The stream to show. Absent draws the reader's placeholder.</summary>
+	public UiValue<UiVideoStreamReference> Stream { get; init; }
+
+	/// <summary>How the picture fills the box - see <see cref="UiComponentImageFits" />. Absent means
+	/// <see cref="UiComponentImageFits.Contain" />.</summary>
+	public UiValue<string> Fit { get; init; }
+
+	/// <summary>The extent along the parent stack's main axis, not a square edge. Absent, the view takes no
+	/// space on that axis unless <see cref="UiComponentLeaf.Fill" /> grows it.</summary>
+	public UiSize Size { get; init; }
+
+	/// <inheritdoc />
+	public override string Type => UiMacroDeckComponents.VideoStream;
+
+	/// <inheritdoc />
+	protected internal override void DeclareProperties(UiPropertyDeclaration properties)
+	{
+		ArgumentNullException.ThrowIfNull(properties);
+
+		base.DeclareProperties(properties);
+
+		properties.Set(UiComponentProperties.Stream, Stream);
+		properties.Set(UiComponentProperties.Fit, Fit);
+		properties.Set(UiComponentProperties.Size, Size.Value);
+	}
+}
+
+/// <summary>
 /// A draggable level: a rounded track carrying a filled span, and the interactive counterpart of
 /// <see cref="UiRangeBar" />.
 ///

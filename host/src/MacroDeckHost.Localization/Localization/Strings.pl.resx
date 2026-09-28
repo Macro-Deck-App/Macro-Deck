@@ -1375,6 +1375,15 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Deck.Unlock" xml:space="preserve">
     <value>Odblokuj</value>
   </data>
+  <data name="Deck.VideoStream.AccessibleLabel" xml:space="preserve">
+    <value>{stream}: {status}</value>
+  </data>
+  <data name="Deck.VideoStream.Connecting" xml:space="preserve">
+    <value>Łączenie ze strumieniem wideo…</value>
+  </data>
+  <data name="Deck.VideoStream.NoStream" xml:space="preserve">
+    <value>Nie wybrano strumienia wideo</value>
+  </data>
   <data name="Deck.UnpinWidgetsFailed" xml:space="preserve">
     <value>Nie udało się odpiąć widżetów</value>
   </data>

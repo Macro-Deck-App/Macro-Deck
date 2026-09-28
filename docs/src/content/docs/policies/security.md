@@ -373,6 +373,11 @@ bounded by `ExpiresAt`, never the source's own password or API key. The consumer
 connection kind help build a reachable URL; they authorize nothing. Macro Deck relays descriptions and
 signals without interpreting them and never logs them. `host:video-streams` is declared, not enforced.
 
+A tree can name any provider's stream in a [`macrodeck.video-stream`](/ui/components/video-stream/), so
+any plugin's view can make the clients that draw it open sessions on another plugin's provider. That is no
+wider than what a signed-in client can already open, but it means a stream's audience is everyone who can
+see any Macro Deck view, not only the views its own plugin draws.
+
 ## Logging and redaction
 
 ```csharp

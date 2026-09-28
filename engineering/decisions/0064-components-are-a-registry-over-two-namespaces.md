@@ -35,7 +35,10 @@ component is a definition like any other.
 ### Two namespaces, and the line is a property of the value
 
 A component is `macrodeck.*` when a reader **cannot draw it from the tree alone**, because it must
-resolve a Macro Deck-defined reference against its own clock. Everything else is `ui.*`, however
+resolve a Macro Deck-defined reference against its own clock, or ask Macro Deck for what it draws, as
+`macrodeck.video-stream` asks for a video stream session
+([ADR 0099](0099-video-streams-are-host-brokered-sessions-with-transport-neutral-descriptions.md)).
+Everything else is `ui.*`, however
 Macro Deck-flavoured its styling: a button on a deck tile is still `ui.button`, and a ring animation is a
 colour and a style name, not a domain concept. The alternative line — "shipped by Macro Deck" — coincides
 with this one today, diverges later, and would make the namespace a statement about authorship a renderer

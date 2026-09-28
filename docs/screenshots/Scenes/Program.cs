@@ -77,7 +77,7 @@ internal static partial class Scenes
 		.. RangeBarScenes(), .. StackScenes(), .. ListScenes(), .. TransformScenes(), .. ModifierScenes(),
 		.. ResponsiveScenes(),
 		.. ChartScenes(),
-		.. TimeScenes(), .. ProgressScenes(), .. ShapeScenes(), .. IconScenes(), .. GridScenes(),
+		.. TimeScenes(), .. ProgressScenes(), .. VideoStreamScenes(), .. ShapeScenes(), .. IconScenes(), .. GridScenes(),
 		.. GaugeScenes(), .. ToggleScenes(), .. SegmentedScenes(), .. DialScenes(), .. ViewScenes(),
 		.. ConceptScenes(),
 	];

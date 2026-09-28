@@ -33,6 +33,8 @@ Three artefacts, and the third is the one that does the work:
 | `conformance-responsive-layout.json` | which layout a reader draws for each tile box, including boxes a unit in the last place off a whole cell, an unknown box and an unmeasured one, and the node a tile-level press is claimed by |
 | `conformance-chat-tree.json` | the wire form of a chat feed - `ui.text` `spans` mixing styled text, an image with alt text and a decorative one, and a `ui.stack` whose `overflow` is `clip-start`, asking for component version 2 with a fallback |
 | `conformance-chat-layout.json` | the clipping stack's box, its children at their own size, the runs a reader draws for the spans, the shrinking stacks beside it, and what a reader without `ui.stack` version 2 draws instead |
+| `conformance-video-stream-tree.json` | the wire form of `macrodeck.video-stream` - the stream reference on its own key with a provider id and a stream id holding a space, `fit`, a `size` that is a main-axis extent, a view with no stream, and the fallback an older reader draws |
+| `conformance-video-stream-layout.json` | each view's box, drawn with no session: the placeholder fills the box the stack gave it |
 | this README | what the fixtures deliberately contain, so they are not trimmed by accident |
 
 One tree per widget shape rather than one growing tree: the weather tree's proportions are themselves
@@ -49,7 +51,7 @@ Trimming any of these turns the fixture into one a wrong renderer passes:
 
 - across the trees, every primitive - including `ui.stack`, `ui.text`, `ui.image`,
   `ui.range-bar`, `macrodeck.dynamic-text`, `macrodeck.clock-dial`, `macrodeck.progress-bar`,
-  `macrodeck.progress-text`, `ui.slider`, `ui.button`, `ui.layer`, `ui.chart`, `ui.transform`, `ui.shape`, `ui.icon`, `ui.grid`, `ui.gauge`, `ui.toggle`, `ui.segmented`, `ui.dial` - and every
+  `macrodeck.progress-text`, `macrodeck.video-stream`, `ui.slider`, `ui.button`, `ui.layer`, `ui.chart`, `ui.transform`, `ui.shape`, `ui.icon`, `ui.grid`, `ui.gauge`, `ui.toggle`, `ui.segmented`, `ui.dial` - and every
   property key the profile ships; coverage is a property of the fixture set, not of any one file alone;
 - a length whose `maxOfCross` **binds** (the forecast weekday, clamped by its row height) *and* one where
   `basis` binds (the range-bar thickness, in the same row) - a renderer that ignores `maxOfCross` passes a

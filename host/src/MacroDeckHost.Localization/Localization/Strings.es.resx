@@ -1375,6 +1375,15 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Deck.Unlock" xml:space="preserve">
     <value>Desbloquear</value>
   </data>
+  <data name="Deck.VideoStream.AccessibleLabel" xml:space="preserve">
+    <value>{stream}: {status}</value>
+  </data>
+  <data name="Deck.VideoStream.Connecting" xml:space="preserve">
+    <value>Conectando con la transmisión de vídeo…</value>
+  </data>
+  <data name="Deck.VideoStream.NoStream" xml:space="preserve">
+    <value>No hay ninguna transmisión de vídeo seleccionada</value>
+  </data>
   <data name="Deck.UnpinWidgetsFailed" xml:space="preserve">
     <value>No se pudieron desfijar los widgets</value>
   </data>

@@ -245,6 +245,7 @@ export class Shell {
   }
 
   private paintLockScreen(): void {
+    this.hideVideoStreamsBehind('lock', true);
     if (!this.lockScreen) {
       this.lockScreen = document.createElement('div');
       this.lockScreen.className = 'wc-lock-screen';
@@ -262,6 +263,7 @@ export class Shell {
   }
 
   private removeLockScreen(): void {
+    this.hideVideoStreamsBehind('lock', false);
     if (!this.lockScreen) return;
     this.lockScreen.remove();
     this.lockScreen = null;
@@ -447,6 +449,7 @@ export class Shell {
         host: this.host,
         onDismiss: () => {
           this.services.wakeLock.setForced(false);
+          this.hideVideoStreamsBehind('screensaver', false);
           this.armIdleTimer();
         },
       });
@@ -454,6 +457,7 @@ export class Shell {
     }
     this.idleTimer.configure(null);
     this.services.wakeLock.setForced(true);
+    this.hideVideoStreamsBehind('screensaver', true);
     this.screenSaver.show();
   }
 
@@ -461,6 +465,14 @@ export class Shell {
     if (this.screenSaver === null) return;
     this.screenSaver.hide();
     this.services.wakeLock.setForced(false);
+    this.hideVideoStreamsBehind('screensaver', false);
+  }
+
+  private hideVideoStreamsBehind(reason: string, hidden: boolean): void {
+    const client = this.host.videoStreams?.()?.client;
+    if (!client) return;
+    client.surface('deck').setHidden(reason, hidden);
+    client.surface('modal').setHidden(reason, hidden);
   }
 
 }

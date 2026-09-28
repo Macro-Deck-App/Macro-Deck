@@ -159,6 +159,8 @@ export const JS_APIS_ALLOWED_BELOW_FLOOR = {
     + 'but not `formatToParts` (Safari 10-12). Without it a clock reads the device zone and dates '
     + 'and times are formatted in digits. A polyfill would mean shipping locale data for seven '
     + 'languages to browsers that are already the slowest ones the deck runs on.',
+  IntersectionObserver: 'Feature-detected by the video stream view; without it a stream opens as soon as it is '
+    + 'mounted instead of when it is scrolled into view, and is suspended only while the page is hidden.',
   'navigator.wakeLock': 'Feature-detected before use; without it the screen sleeps on its own, '
     + 'which is a comfort the deck loses rather than a function.',
 };
@@ -264,6 +266,8 @@ export const DOM_API_EXCEPTIONS = {
   'runtime/src/render/text-fit.ts:ResizeObserver':
     'Guarded on `typeof ResizeObserver`, and supplied by polyfills.legacy.js on the floor.',
   'web-client/src/modal.ts:ResizeObserver': 'As the renderer above.',
+  'runtime/src/video-streams/video-stream-view.ts:IntersectionObserver':
+    'Read off the window and checked with `typeof` before it is constructed.',
   'web-client/src/folder-view.ts:ResizeObserver': 'As the renderer above.',
   'web-client/src/screensaver.ts:ResizeObserver': 'As the renderer above.',
   'runtime/src/domain/action-flow.util.ts:structuredClone':
