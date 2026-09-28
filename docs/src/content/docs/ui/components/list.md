@@ -97,11 +97,41 @@ new UiList
 `Horizontal` needs component version 2. A version 1 reader ignores `direction` and scrolls vertically,
 so ask for version 2 and carry a `ui.stack` fallback.
 
+## Following the end
+
+```csharp
+new UiList
+{
+    Key = "chat",
+    Fill = true,
+    Anchor = UiComponentListAnchors.End,
+    RequiredComponentVersion = 3,
+    Fallback = new UiList
+    {
+        Key = "chatNewestFirst",
+        Fill = true,
+        Children = [new UiRepeat<ChatMessage> { Key = "rows", Items = newestFirst, KeySelector = m => m.Id, Template = Row }],
+    },
+    Children = [new UiRepeat<ChatMessage> { Key = "rows", Items = oldestFirst, KeySelector = m => m.Id, Template = Row }],
+}
+```
+
+A chat or a log appends at the bottom. With `Anchor = End` the reader keeps the view at the end while the
+user is there, so each new row scrolls into view. Once the user scrolls up to read, new rows and rows removed
+above the view, such as the oldest messages dropping off a capped history, leave the view where it is, and
+the reader offers a way back to the newest row. You send nothing and receive nothing for any of this: where
+the view is belongs to the reader.
+
+Only a vertical list follows its end. `End` needs component version 3; an older reader ignores `anchor` and
+leaves the newest row below the fold, so ask for version 3 and carry a fallback that shows the newest row
+first, such as the same rows in reverse order.
+
 ## Properties
 
 | Property | Values | Default | Meaning |
 |---|---|---|---|
 | `Direction` (`direction`) | `UiComponentDirections.Vertical`, `.Horizontal` (`vertical`, `horizontal`) | `vertical` | The scroll axis; `horizontal` needs component version 2. |
+| `Anchor` (`anchor`) | `UiComponentListAnchors.Start`, `.End` (`start`, `end`) | `start` | Which end the view holds on to; `end` follows new rows at the end of a vertical list and needs component version 3. |
 | `Gap` (`gap`) | length | No gap | The gap between children. |
 | `Padding` (`padding`) | length | No padding | Inner padding on every edge. |
 | `Background` (`background`) | `#rrggbb` | Paints nothing behind its children | The list's own fill, a literal colour like every container fill - see [Colours and text](/ui/concepts/theming/). |
@@ -139,6 +169,22 @@ the list's inner extent. On its own parent's main axis a list follows the ordina
 - A version 1 reader ignores `direction` and scrolls vertically - negotiation catches unknown types, not
   unknown values, so producers pair `horizontal` with version 2 and a fallback.
 - Ignore children's `mainSize` and `fill` on the scroll axis.
+- `anchor` absent, `start` or a value you do not know: leave the view where the user put it, as always.
+  `end` on a vertical list:
+  - While the view is at the end of the list, keep it there: after a paint that adds or removes children,
+    and while children grow after one, scroll to the end.
+  - Once the user has scrolled away from the end, never move the view for a content change. When children
+    above the view are removed, keep the first visible child that is still there at the same offset from
+    the top edge.
+  - Deciding whether the view is at the end is up to the user's own scrolling: a paint, a resized box or
+    children that grew are not the user leaving the end.
+  - When a new last child arrives while the user is away, offer a way back to the end, such as a control
+    that scrolls there. It must not count as a press on any node, and it goes away once the view is back
+    at the end.
+  - A horizontal list ignores `anchor`.
+  - None of this is reported to the producer.
+- Advertise `ui.list` version 3 only once you follow the end; a version 2 reader ignores `anchor`, so
+  producers pair `end` with version 3 and a fallback.
 
 ## See also
 
