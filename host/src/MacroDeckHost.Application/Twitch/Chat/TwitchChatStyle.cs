@@ -6,7 +6,6 @@ namespace MacroDeckHost.Application.Twitch.Chat;
 
 public static class TwitchChatStyle
 {
-	// Twitch's own palette for chatters who never picked a colour.
 	private static readonly string[] _defaultColors =
 	[
 		"#ff0000", "#0000ff", "#008000", "#b22222", "#ff7f50", "#9acd32", "#ff4500", "#2e8b57", "#daa520",

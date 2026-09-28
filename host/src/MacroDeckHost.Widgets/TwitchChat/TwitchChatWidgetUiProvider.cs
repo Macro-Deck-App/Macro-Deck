@@ -10,8 +10,6 @@ using MacroDeckHost.Widgets.Preview;
 
 namespace MacroDeckHost.Widgets.TwitchChat;
 
-// The integration only registers the type: its assembly cannot reach the host's UI layer, so the chat is
-// drawn here, under the integration's id.
 public sealed class TwitchChatWidgetUiProvider : IBuiltInIntegrationUiProvider
 {
 	private readonly ITwitchChatFeed _feed;

@@ -87,7 +87,6 @@ internal sealed class TwitchChatWidgetSession : IUiSession
 			var snapshot = _feed.Snapshot(_accountId);
 			_shownAccountId = snapshot.Account?.UserId;
 
-			// One patch per hub tick, however many lines arrived or left in it.
 			using (_view.Batch())
 			{
 				_state.Set(_lines.Build(snapshot));

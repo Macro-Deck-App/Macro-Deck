@@ -126,8 +126,6 @@ public sealed class TwitchIntegration
 
 	public void UseTwitchChatSink(ITwitchChatSink sink) => _chatSink = sink;
 
-	// A configured account, not a live socket: a network blip must not blank every chat tile. Adding the
-	// first or removing the last account reinitializes the integration, which runs this again.
 	public async Task InitializeAsync(IWidgetTypeProviderContext context, CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(context);

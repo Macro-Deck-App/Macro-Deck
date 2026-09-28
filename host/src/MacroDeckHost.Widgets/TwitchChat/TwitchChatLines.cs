@@ -194,7 +194,6 @@ internal sealed class TwitchChatLines
 		return badges + Math.Min(emotes, MaxEmoteImages);
 	}
 
-	// Only the id and hash travel in a span: the reader fetches the bytes, and the size fields cost bytes per line.
 	private static UiResource? Find(ITwitchChatImages? images, TwitchChatImage image)
 		=> images?.Find(image) is { } resource
 			? new UiResource { ResourceId = resource.ResourceId, ContentHash = resource.ContentHash }

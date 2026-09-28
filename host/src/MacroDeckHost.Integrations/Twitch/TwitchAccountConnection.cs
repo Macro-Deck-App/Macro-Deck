@@ -137,7 +137,6 @@ internal sealed class TwitchAccountConnection : IDisposable
 		_chatSink?.Post(new TwitchChatConnectionChanged(Account.UserId, connected));
 	}
 
-	// Runs on the socket read loop, so the chat path only parses and posts; nothing here waits.
 	internal void HandleNotification(TwitchEventSubMessage message)
 	{
 		if (TwitchEventCatalog.ForType(message.SubscriptionType, message.SubscriptionVersion) is not { IsFeed: true })

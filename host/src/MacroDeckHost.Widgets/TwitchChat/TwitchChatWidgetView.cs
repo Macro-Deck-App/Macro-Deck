@@ -10,7 +10,6 @@ internal static class TwitchChatWidgetView
 	public const int MessageMaxLines = 4;
 	public const int FallbackMaxLines = 2;
 
-	// Capped so a large tile shows more lines instead of larger text.
 	private static readonly UiLength _textSize = UiLength.Capped(0.1, 12);
 
 	// At least a fifth of the text size, so the clipped edge never cuts the last line's descenders.
