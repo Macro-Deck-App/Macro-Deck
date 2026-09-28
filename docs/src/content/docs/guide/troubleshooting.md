@@ -60,6 +60,35 @@ If another program already uses the port, Macro Deck starts without it and devic
 **Settings > Network** then says the port could not be used. Choose a different port there and
 restart Macro Deck.
 
+## A device says the deck needs an update
+
+After Macro Deck is updated, connected devices load the new version of the deck by themselves. If a device
+keeps the old version, it shows **This deck needs an update** instead of the deck.
+
+- Select **Update now**. The device drops the copy of the deck it kept and loads the current one.
+- If the screen comes back, clear the website data for Macro Deck's address in the browser settings. If you
+  added the deck to your home screen, remove it and add it again.
+
+The desktop app shows **Macro Deck needs to refresh** for the same situation. Select **Refresh**, or quit
+Macro Deck completely and open it again.
+
+## Macro Deck was not updated completely
+
+Devices and the desktop app show **Macro Deck was not updated completely** when the files Macro Deck uses
+for its interface do not match the version that is installed. This happens when an update was
+interrupted, for example when antivirus software held back some of Macro Deck's files while they were
+being installed. Clearing the browser cache does not help here.
+
+1. Download the latest version of Macro Deck and install it again over the existing installation. Your
+   decks and settings stay in the [data folder](#where-to-find-the-logs), which the installation does not
+   replace.
+2. If your antivirus software reported a Macro Deck file during the update, allow that file, then repeat
+   the installation.
+3. Select **Retry** on the device.
+
+Both screens show the build of the interface and the build of Macro Deck on the computer. Include them
+when you ask for help.
+
 ## Buttons do nothing and devices show a lock screen
 
 Macro Deck does not run actions while the computer it runs on is locked. Unlock the computer and try

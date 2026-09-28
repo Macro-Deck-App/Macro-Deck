@@ -4993,6 +4993,26 @@ export const AppStrings = {
 			Title: 'macrodeck.app:Onboarding.Welcome.Title',
 		},
 	},
+	OutdatedUi: {
+		Versions: 'macrodeck.app:OutdatedUi.Versions',
+		Device: {
+			Body: 'macrodeck.app:OutdatedUi.Device.Body',
+			Title: 'macrodeck.app:OutdatedUi.Device.Title',
+			Step: {
+				ClearData: 'macrodeck.app:OutdatedUi.Device.Step.ClearData',
+				Update: 'macrodeck.app:OutdatedUi.Device.Step.Update',
+			},
+		},
+		Installation: {
+			Body: 'macrodeck.app:OutdatedUi.Installation.Body',
+			Title: 'macrodeck.app:OutdatedUi.Installation.Title',
+			Step: {
+				Antivirus: 'macrodeck.app:OutdatedUi.Installation.Step.Antivirus',
+				Reinstall: 'macrodeck.app:OutdatedUi.Installation.Step.Reinstall',
+				Retry: 'macrodeck.app:OutdatedUi.Installation.Step.Retry',
+			},
+		},
+	},
 	Plugins: {
 		BeforeYouInstallTitle: 'macrodeck.app:Plugins.BeforeYouInstallTitle',
 		BlockingWarningNote: 'macrodeck.app:Plugins.BlockingWarningNote',
@@ -5955,6 +5975,22 @@ export const AppStrings = {
 				OpenUpdateDetails: 'macrodeck.app:Shell.Notifications.Action.OpenUpdateDetails',
 				OpenUpdateSettings: 'macrodeck.app:Shell.Notifications.Action.OpenUpdateSettings',
 				RestartApplication: 'macrodeck.app:Shell.Notifications.Action.RestartApplication',
+			},
+		},
+		OutdatedUi: {
+			Versions: 'macrodeck.app:Shell.OutdatedUi.Versions',
+			Device: {
+				Body: 'macrodeck.app:Shell.OutdatedUi.Device.Body',
+				Title: 'macrodeck.app:Shell.OutdatedUi.Device.Title',
+				Step: {
+					Refresh: 'macrodeck.app:Shell.OutdatedUi.Device.Step.Refresh',
+					Restart: 'macrodeck.app:Shell.OutdatedUi.Device.Step.Restart',
+				},
+			},
+			Installation: {
+				Step: {
+					Reinstall: 'macrodeck.app:Shell.OutdatedUi.Installation.Step.Reinstall',
+				},
 			},
 		},
 		RestartNotice: {
@@ -11492,6 +11528,16 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Onboarding.StepProgress': 'Step {current} of {total}',
 	'macrodeck.app:Onboarding.Welcome.Body': 'Macro Deck turns a phone, tablet or browser into a control deck for this computer. Build your deck here, then open it on any device on your network.',
 	'macrodeck.app:Onboarding.Welcome.Title': 'Welcome to Macro Deck 3',
+	'macrodeck.app:OutdatedUi.Device.Body': 'Macro Deck on your computer was updated, but this device is still showing the previous version of the deck.',
+	'macrodeck.app:OutdatedUi.Device.Step.ClearData': 'If this screen comes back, clear the website data for this address in your browser settings, or remove the app from your home screen and add it again.',
+	'macrodeck.app:OutdatedUi.Device.Step.Update': 'Select Update now to load the current version.',
+	'macrodeck.app:OutdatedUi.Device.Title': 'This deck needs an update',
+	'macrodeck.app:OutdatedUi.Installation.Body': 'The files Macro Deck uses to show this page do not match the installed version. This happens when an update was interrupted, for example when antivirus software held back some of its files.',
+	'macrodeck.app:OutdatedUi.Installation.Step.Antivirus': 'If your antivirus software reported a Macro Deck file, allow the file and repeat the installation.',
+	'macrodeck.app:OutdatedUi.Installation.Step.Reinstall': 'On the computer, download the latest version of Macro Deck and install it again.',
+	'macrodeck.app:OutdatedUi.Installation.Step.Retry': 'Then select Retry.',
+	'macrodeck.app:OutdatedUi.Installation.Title': 'Macro Deck was not updated completely',
+	'macrodeck.app:OutdatedUi.Versions': 'Build on this device: {device} · Build on the computer: {computer}',
 	'macrodeck.app:Plugins.BeforeYouInstallTitle': 'Before you install',
 	'macrodeck.app:Plugins.BlockingWarningNote': 'The plugin will be installed but will not start until this is resolved.',
 	'macrodeck.app:Plugins.ClaimsKey': 'Claims key {keyId}.',
@@ -12357,6 +12403,12 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Shell.Notifications.MinutesAgo': '{count}m ago',
 	'macrodeck.app:Shell.Notifications.ProcessingCount': 'Processing {processed}',
 	'macrodeck.app:Shell.Notifications.ProcessingOfTotal': 'Processing {processed} of {total}',
+	'macrodeck.app:Shell.OutdatedUi.Device.Body': 'Macro Deck was updated, but this window is still showing the previous version of its interface.',
+	'macrodeck.app:Shell.OutdatedUi.Device.Step.Refresh': 'Select Refresh to load the current version.',
+	'macrodeck.app:Shell.OutdatedUi.Device.Step.Restart': 'If this screen comes back, quit Macro Deck completely and open it again.',
+	'macrodeck.app:Shell.OutdatedUi.Device.Title': 'Macro Deck needs to refresh',
+	'macrodeck.app:Shell.OutdatedUi.Installation.Step.Reinstall': 'Download the latest version of Macro Deck and install it again.',
+	'macrodeck.app:Shell.OutdatedUi.Versions': 'Interface build: {device} · Macro Deck build: {computer}',
 	'macrodeck.app:Shell.RestartNotice.CannotRestartHere': 'Macro Deck cannot restart itself here.',
 	'macrodeck.app:Shell.RestartNotice.HttpsChanging': 'The new HTTPS settings take effect after a restart.',
 	'macrodeck.app:Shell.RestartNotice.HttpsRetry': 'HTTPS is not running. Macro Deck tries port {port} when it restarts.',
