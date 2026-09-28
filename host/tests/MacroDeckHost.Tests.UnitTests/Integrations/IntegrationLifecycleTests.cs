@@ -18,6 +18,9 @@ using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Tests.UnitTests.Plugins;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Triggers;
+using MacroDeckHost.Tests.UnitTests.VideoStreams;
+using MacroDeckHost.Application.Events;
+using MacroDeck.Sdk.VideoStreams;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Decks;
@@ -38,6 +41,7 @@ internal sealed class IntegrationLifecycleTests
 	private PluginSessionRegistry _pluginSessionRegistry = null!;
 	private FakePluginConnection _connection = null!;
 	private IntegrationLifecycle _lifecycle = null!;
+	private VideoStreamWorld _videoStreams = null!;
 
 	[SetUp]
 	public async Task SetUp()
@@ -50,6 +54,7 @@ internal sealed class IntegrationLifecycleTests
 
 		_registry = new IntegrationRegistry(scopeFactory, new FakeIntegrationStateStore(), Serilog.Log.Logger);
 		_pluginSessionRegistry = new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None);
+		_videoStreams = new VideoStreamWorld();
 
 		var initializer = new IntegrationInitializer(scopeFactory,
 			new FakeDeckNavigator(),
@@ -69,6 +74,7 @@ internal sealed class IntegrationLifecycleTests
 			TestFolderViewProviders.Host(),
 			TestWidgetTypeProviders.Host(),
 			TestScreenSaverProviders.Host(),
+			TestVideoStreams.Host(_videoStreams),
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
 			Serilog.Log.Logger,
@@ -83,12 +89,16 @@ internal sealed class IntegrationLifecycleTests
 			TestFolderViewProviders.Host(),
 			TestWidgetTypeProviders.Host(),
 			TestScreenSaverProviders.Host(),
+			TestVideoStreams.Host(_videoStreams),
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
 			Serilog.Log.Logger);
 
 		_connection = new FakePluginConnection();
 	}
+
+	[TearDown]
+	public void TearDown() => _videoStreams.Dispose();
 
 	private async Task<TrackingIntegration> RegisterAsync(string integrationId, IntegrationOrigin origin)
 	{
@@ -145,6 +155,49 @@ internal sealed class IntegrationLifecycleTests
 			Assert.That(integration.InitializeCount, Is.EqualTo(1));
 			Assert.That(_connection.Sent.Any(envelope => envelope.Type == MessageTypes.HostState), Is.False);
 		});
+	}
+
+	[Test]
+	public async Task Re_saving_a_built_in_video_integration_closes_its_sessions_and_serves_its_providers_again()
+	{
+		var provider = new ScriptedVideoProvider("front", "main");
+		var integration = new VideoIntegration("com.example.cameras", provider);
+		await _registry.RegisterAsync(integration);
+		await _lifecycle.ReinitializeAsync(integration.Id);
+		var ticket = _videoStreams.Open("com.example.cameras::front", "main");
+		await _videoStreams.WaitForActiveAsync(ticket.SessionId);
+
+		await _lifecycle.ReinitializeAsync(integration.Id);
+		await _videoStreams.WaitForClosedAsync(ticket.SessionId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(provider.Closes, Is.EqualTo(new[] { (ticket.SessionId, VideoStreamSessionReason.ProviderRemoved) }));
+			Assert.That(_videoStreams.Publisher.Of<VideoStreamSessionClosedNotification>().Single().Reason,
+				Is.EqualTo(VideoStreamSessionReason.ProviderRemoved));
+			Assert.That(_videoStreams.Registry.GetProviders().Select(entry => entry.QualifiedId),
+				Is.EqualTo(new[] { "com.example.cameras::front" }));
+		});
+	}
+
+	private sealed class VideoIntegration(string id, IVideoStreamProvider provider) : IIntegration, IVideoStreamIntegration
+	{
+		public string Id { get; } = id;
+
+		public LocalizedText Name => "Cameras";
+
+		public string Version => "1.0.0";
+
+		public IReadOnlyList<IActionDefinition> Actions { get; } = [];
+
+		public bool IsInitialized => true;
+
+		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+
+		public Task ShutdownAsync() => Task.CompletedTask;
+
+		public Task InitializeAsync(IVideoStreamProviderContext context, CancellationToken cancellationToken = default)
+			=> context.RegisterProviderAsync(provider, cancellationToken);
 	}
 
 	private sealed class TrackingIntegration : IIntegration

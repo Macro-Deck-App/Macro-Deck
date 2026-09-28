@@ -29,6 +29,7 @@ public class HostApiStabilityTests
 		"user-variables",
 		"variable-values",
 		"variables",
+		"video-streams",
 		"widget-types",
 		"widgets",
 	];
@@ -57,6 +58,8 @@ public class HostApiStabilityTests
 				["shell", "battery", "push", "pull", "install", "uninstall", "package-installed", "connect"],
 			[HostApis.Messaging] = ["publish", "send", "request", "subscriptions"],
 			[HostApis.IconPacks] = ["sync-bundled", "get-icon-resource", "get-icon"],
+			[HostApis.VideoStreams] =
+				["providers-changed", "streams-changed", "session-update", "session-signal", "session-close"],
 		};
 
 	[Test]

@@ -459,6 +459,10 @@
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Variabili del widget</value>
   </data>
+  <data name="Announcements.PublishedOn" xml:space="preserve">
+    <value>Pubblicato il {date}</value>
+    <comment>[date:string]</comment>
+  </data>
   <data name="Auth.ForgotPasswordHint" xml:space="preserve">
     <value>Hai dimenticato la password? Reimpostala sul computer su cui è in esecuzione Macro Deck, in Impostazioni &gt; Sicurezza.</value>
   </data>
@@ -2882,6 +2886,39 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Errors.Variables.UnknownScope" xml:space="preserve">
     <value>Ambito della variabile sconosciuto</value>
   </data>
+  <data name="Errors.VideoStream.Busy" xml:space="preserve">
+    <value>La sorgente video è occupata in questo momento.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownProvider" xml:space="preserve">
+    <value>Questa sorgente video non è disponibile.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownStream" xml:space="preserve">
+    <value>Questo stream video non esiste più.</value>
+  </data>
+  <data name="Errors.VideoStream.UnknownSession" xml:space="preserve">
+    <value>Questa sessione video non è più aperta.</value>
+  </data>
+  <data name="Errors.VideoStream.SessionLimitReached" xml:space="preserve">
+    <value>Troppi video sono aperti contemporaneamente.</value>
+  </data>
+  <data name="Errors.VideoStream.PayloadTooLarge" xml:space="preserve">
+    <value>I dati di connessione del video sono troppo grandi.</value>
+  </data>
+  <data name="Errors.VideoStream.StreamUnavailable" xml:space="preserve">
+    <value>Questo stream video non è disponibile al momento.</value>
+  </data>
+  <data name="Errors.VideoStream.TransportNotAccepted" xml:space="preserve">
+    <value>Questo stream video non può essere riprodotto su questo dispositivo.</value>
+  </data>
+  <data name="Errors.VideoStream.SignalingUnsupported" xml:space="preserve">
+    <value>La sorgente video non supporta questo tipo di connessione.</value>
+  </data>
+  <data name="Errors.VideoStream.ProviderUnavailable" xml:space="preserve">
+    <value>La sorgente video non è raggiungibile al momento.</value>
+  </data>
+  <data name="Errors.VideoStream.Failed" xml:space="preserve">
+    <value>Si è verificato un problema con lo stream video.</value>
+  </data>
   <data name="Errors.Variables.WriteFailed" xml:space="preserve">
     <value>Non è stato possibile applicare il valore</value>
   </data>
@@ -4104,6 +4141,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Integrations.Capability.ScreenSaverProvider" xml:space="preserve">
     <value>Salvaschermo</value>
+  </data>
+  <data name="Integrations.Capability.VideoStreamProvider" xml:space="preserve">
+    <value>Stream video</value>
   </data>
   <data name="Integrations.Capability.Variables" xml:space="preserve">
     <value>Variabili</value>
@@ -18795,5 +18835,53 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Store.Tests.BuildCount.Other" xml:space="preserve">
     <value>{count} build di test</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="OutdatedUi.Device.Title" xml:space="preserve">
+    <value>Questo deck deve essere aggiornato</value>
+  </data>
+  <data name="OutdatedUi.Device.Body" xml:space="preserve">
+    <value>Macro Deck sul tuo computer è stato aggiornato, ma questo dispositivo mostra ancora la versione precedente del deck.</value>
+  </data>
+  <data name="OutdatedUi.Device.Step.Update" xml:space="preserve">
+    <value>Seleziona Aggiorna ora per caricare la versione attuale.</value>
+  </data>
+  <data name="OutdatedUi.Device.Step.ClearData" xml:space="preserve">
+    <value>Se questa schermata ricompare, cancella i dati del sito per questo indirizzo nelle impostazioni del browser oppure rimuovi l'app dalla schermata Home e aggiungila di nuovo.</value>
+  </data>
+  <data name="OutdatedUi.Installation.Title" xml:space="preserve">
+    <value>Macro Deck non è stato aggiornato completamente</value>
+  </data>
+  <data name="OutdatedUi.Installation.Body" xml:space="preserve">
+    <value>I file che Macro Deck usa per mostrare questa pagina non corrispondono alla versione installata. Succede quando un aggiornamento è stato interrotto, per esempio perché un antivirus ha trattenuto alcuni file.</value>
+  </data>
+  <data name="OutdatedUi.Installation.Step.Reinstall" xml:space="preserve">
+    <value>Sul computer, scarica l'ultima versione di Macro Deck e installala di nuovo.</value>
+  </data>
+  <data name="OutdatedUi.Installation.Step.Antivirus" xml:space="preserve">
+    <value>Se il tuo antivirus ha segnalato un file di Macro Deck, consenti il file e ripeti l'installazione.</value>
+  </data>
+  <data name="OutdatedUi.Installation.Step.Retry" xml:space="preserve">
+    <value>Poi seleziona Riprova.</value>
+  </data>
+  <data name="OutdatedUi.Versions" xml:space="preserve">
+    <value>Build su questo dispositivo: {device} · Build sul computer: {computer}</value>
+  </data>
+  <data name="Shell.OutdatedUi.Device.Title" xml:space="preserve">
+    <value>Macro Deck deve essere aggiornato</value>
+  </data>
+  <data name="Shell.OutdatedUi.Device.Body" xml:space="preserve">
+    <value>Macro Deck è stato aggiornato, ma questa finestra mostra ancora la versione precedente dell'interfaccia.</value>
+  </data>
+  <data name="Shell.OutdatedUi.Device.Step.Refresh" xml:space="preserve">
+    <value>Seleziona Aggiorna per caricare la versione attuale.</value>
+  </data>
+  <data name="Shell.OutdatedUi.Device.Step.Restart" xml:space="preserve">
+    <value>Se questa schermata ricompare, chiudi completamente Macro Deck e aprilo di nuovo.</value>
+  </data>
+  <data name="Shell.OutdatedUi.Installation.Step.Reinstall" xml:space="preserve">
+    <value>Scarica l'ultima versione di Macro Deck e installala di nuovo.</value>
+  </data>
+  <data name="Shell.OutdatedUi.Versions" xml:space="preserve">
+    <value>Build dell'interfaccia: {device} · Build di Macro Deck: {computer}</value>
   </data>
 </root>

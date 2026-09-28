@@ -19,6 +19,7 @@ import {
   type GetAppearanceSettingsResponse,
   type GetLocalizationResponse,
   type GetProfilesResponse,
+  type IpcFolder,
   type IpcProfile,
   LocalizationCatalog,
   type LocalizedText,
@@ -553,6 +554,11 @@ export class Client {
     this.deck.openFolder(folderId);
   }
 
+  private isOnDisplayedProfile(folder: IpcFolder): boolean {
+    // An older host sends no profileId, and the unscoped fallback deck holds every profile.
+    return !folder.profileId || this.selectedProfileId === null || folder.profileId === this.selectedProfileId;
+  }
+
   private static hasProfile(profiles: { id: string }[], id: string): boolean {
     for (let index = 0; index < profiles.length; index++) {
       if (profiles[index].id === id) return true;
@@ -990,9 +996,11 @@ export class Client {
 
     switch (type) {
       case 'FolderCreatedEvent':
-      case 'FolderUpdatedEvent':
-        if (body['folder']) this.deck.folderUpserted(folderFromWire(body['folder'] as never));
+      case 'FolderUpdatedEvent': {
+        const folder = body['folder'] as IpcFolder | undefined;
+        if (folder && this.isOnDisplayedProfile(folder)) this.deck.folderUpserted(folderFromWire(folder));
         break;
+      }
       case 'FolderDeletedEvent':
         if (typeof body['folderId'] === 'string') this.deck.folderDeleted(body['folderId']);
         break;
@@ -1009,6 +1017,13 @@ export class Client {
         }
         break;
       }
+      case 'ProfileDeletedEvent':
+        if (body['profileId'] === this.selectedProfileId && this.selectedProfileId !== null) {
+          // Cleared rather than kept: if the profiles cannot be read, the unscoped deck beats an empty one.
+          this.selectedProfileId = null;
+          void this.loadDeck();
+        }
+        break;
       case 'WidgetCreatedEvent':
       case 'WidgetUpdatedEvent':
         if (typeof body['folderId'] === 'string' && body['widget']) {

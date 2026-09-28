@@ -41,5 +41,7 @@
     <app-whats-new-modal></app-whats-new-modal>
   } @else if (updateModal.isOpen()) {
     <app-update-modal></app-update-modal>
+  } @else if (announcementVisible()) {
+    <app-announcement-modal></app-announcement-modal>
   }
 </div>

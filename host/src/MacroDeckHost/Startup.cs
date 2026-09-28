@@ -27,6 +27,7 @@ using MacroDeckHost.Application.Devices;
 using MacroDeck.Sdk.ScreenSavers;
 using MacroDeckHost.Application.FolderViews;
 using MacroDeckHost.Application.ScreenSavers;
+using MacroDeckHost.Application.VideoStreams;
 using MacroDeckHost.Application.Ui.Modals;
 using MacroDeckHost.Application.Layouts;
 using MacroDeckHost.Application.Devices.Surfaces;
@@ -161,6 +162,8 @@ using Mediator;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Integrations.System.Notifications;
 using MacroDeckHost.Plugins.Pairing;
+using MacroDeckHost.Application.Announcements;
+using MacroDeckHost.Infrastructure.Announcements;
 
 namespace MacroDeckHost;
 
@@ -415,6 +418,13 @@ public class Startup
 			provider.GetRequiredService<IIntegrationRegistry>()));
 		services.AddSingleton<ScreenSaverProviderHost>();
 		services.AddSingleton<IScreenSaverUiSessionOpener, ScreenSaverUiSessionOpener>();
+		services.AddSingleton<VideoStreamProviderRegistry>();
+		services.AddSingleton<VideoStreamSessionBroker>();
+		services.AddSingleton<IVideoStreamSessionBroker>(provider => provider.GetRequiredService<VideoStreamSessionBroker>());
+		services.AddSingleton<VideoStreamPluginSessions>();
+		services.AddHostedService(provider => provider.GetRequiredService<VideoStreamPluginSessions>());
+		services.AddSingleton<VideoStreamProviderHost>();
+		services.AddHostedService<VideoStreamShutdownService>();
 		services.AddSingleton<WidgetTypeProviderHost>();
 		services.AddSingleton<DeviceLayoutConstraintTracker>();
 		services.AddSingleton<IPluginDeviceRegistry, PluginDeviceRegistry>();
@@ -764,6 +774,12 @@ public class Startup
 		services.AddHttpClient(PlatformLicenseAccountClient.HttpClientName)
 			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
 		services.AddSingleton<IPlatformLicenseAccountClient, PlatformLicenseAccountClient>();
+		services.AddHttpClient(PlatformAnnouncementClient.HttpClientName)
+			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
+		services.AddSingleton<IPlatformAnnouncementClient, PlatformAnnouncementClient>();
+		services.AddSingleton<IAnnouncementService, AnnouncementService>();
+		services.AddHostedService<AnnouncementRefreshBackgroundService>();
+		services.AddHostedService<AnnouncementBroadcastBackgroundService>();
 		services.AddSingleton<CompanionLicenseService>();
 		services.AddSingleton<ICompanionLicenseService>(sp => sp.GetRequiredService<CompanionLicenseService>());
 		services.AddHostedService<CompanionLicenseBackgroundService>();

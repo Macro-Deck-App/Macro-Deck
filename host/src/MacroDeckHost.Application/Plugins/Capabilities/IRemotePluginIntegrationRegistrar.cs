@@ -4,6 +4,12 @@ public interface IRemotePluginIntegrationRegistrar
 {
 	Task<bool> RegisterAsync(string pluginId, CancellationToken cancellationToken = default);
 
+	Task<bool> RegisterAsync(string pluginId,
+		string sessionId,
+		IPluginConnection connection,
+		CancellationToken cancellationToken = default)
+		=> RegisterAsync(pluginId, cancellationToken);
+
 	Task UnregisterAsync(string pluginId, CancellationToken cancellationToken = default);
 
 	Task ForgetAsync(string pluginId, CancellationToken cancellationToken = default);

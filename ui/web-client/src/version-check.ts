@@ -1,17 +1,30 @@
+import {
+  currentOutdatedUi,
+  diagnoseOutdatedUi,
+  fetchServedUiCommit,
+  showOutdatedUi,
+  type OutdatedUiText,
+  type OutdatedUiVariant,
+} from '@macro-deck/runtime';
+
 export const UI_COMMIT_META = 'macro-deck-ui-commit';
 
 export const RELOAD_PARAM = 'md-reload';
 
 const MARKER_KEY = 'macro-deck.reloaded-for';
-const OVERLAY_ID = 'macro-deck-outdated-ui';
+const WORKER_FILE = 'macro-deck-worker.js';
+const SHELL_CACHE_PREFIX = 'macro-deck-shell-';
 
 const PREPARE_RELOAD_TIMEOUT_MS = 3000;
+const HARD_REFRESH_TIMEOUT_MS = 3000;
 
 export type VersionCheckAction = 'ok' | 'reload' | 'report';
 
-export interface OutdatedUiText {
-  heading: string;
-  body: string;
+export interface OutdatedUiSetup {
+  text(variant: OutdatedUiVariant, deviceCommit: string, hostCommit: string): OutdatedUiText;
+  onTextChange?(listener: () => void): () => void;
+  hardRefresh(hostCommit: string): void;
+  reload(hostCommit: string): void;
 }
 
 export interface VersionCheckDeps {
@@ -21,9 +34,10 @@ export interface VersionCheckDeps {
   replaceUrl(url: string): void;
   replaceUrlInPlace(url: string): void;
   fetchHostCommit(baseUrl: string, nonce: string): Promise<string | null>;
+  fetchServedCommit(nonce: string): Promise<string | null>;
   now(): number;
   prepareReload?(): Promise<void>;
-  outdatedText?: OutdatedUiText;
+  outdated?: OutdatedUiSetup;
 }
 
 export interface UpdatePreparation {
@@ -94,40 +108,57 @@ export function withoutCacheBust(url: string): string {
   return parsed.toString();
 }
 
-export function showOutdatedUiError(doc: Document, text: OutdatedUiText): void {
-  if (doc.getElementById(OVERLAY_ID)) return;
+export interface HardRefreshEnvironment {
+  serviceWorker: ServiceWorkerContainer | null;
+  caches: CacheStorage | null;
+  baseUri: string;
+  hostReachable(): Promise<boolean>;
+  currentUrl(): string;
+  replaceUrl(url: string): void;
+}
 
-  const overlay = doc.createElement('div');
-  overlay.id = OVERLAY_ID;
-  overlay.setAttribute('role', 'alert');
-  overlay.style.cssText = [
-    'position:fixed', 'top:0', 'right:0', 'bottom:0', 'left:0', 'z-index:2147483647', 'display:flex',
-    'align-items:center', 'justify-content:center', 'padding:24px',
-    'background:#101014', 'color:#f5f5f7',
-    'font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif', 'text-align:center',
-  ].join(';');
+function dropOwnWorker(env: HardRefreshEnvironment): Promise<void> {
+  const container = env.serviceWorker;
+  if (!container || !container.controller) return Promise.resolve();
+  const ownScript = new URL(WORKER_FILE, env.baseUri).href;
+  return container.getRegistration().then(registration => {
+    if (!registration) return undefined;
+    const worker = registration.active || registration.waiting || registration.installing;
+    if (!worker || worker.scriptURL !== ownScript) return undefined;
+    return registration.unregister().then(() => undefined);
+  });
+}
 
-  const message = doc.createElement('div');
-  message.style.cssText = 'max-width:32rem';
+function dropShellCaches(env: HardRefreshEnvironment): Promise<void> {
+  const storage = env.caches;
+  if (!storage) return Promise.resolve();
+  return storage.keys().then(names => {
+    const drops: Array<Promise<boolean>> = [];
+    for (let index = 0; index < names.length; index++) {
+      if (names[index].indexOf(SHELL_CACHE_PREFIX) === 0) drops.push(storage.delete(names[index]));
+    }
+    return Promise.all(drops).then(() => undefined);
+  });
+}
 
-  const heading = doc.createElement('h1');
-  heading.textContent = text.heading;
-  heading.style.cssText = 'margin:0 0 12px;font-size:1.35rem;font-weight:600';
-
-  const body = doc.createElement('p');
-  body.textContent = text.body;
-  body.style.cssText = 'margin:0';
-
-  message.appendChild(heading);
-  message.appendChild(body);
-  overlay.appendChild(message);
-
-  const children = doc.body.children;
-  for (let index = 0; index < children.length; index++) {
-    (children[index] as HTMLElement).inert = true;
+export function hardRefresh(hostCommit: string, env: HardRefreshEnvironment): Promise<void> {
+  const target = withCacheBust(env.currentUrl(), hostCommit);
+  // Without a reachable host the worker's shell is the only thing that can still paint this page.
+  let cleanup: Promise<void>;
+  try {
+    cleanup = env.hostReachable().then(
+      reachable => (reachable
+        ? dropOwnWorker(env).catch(() => undefined).then(() => dropShellCaches(env)).catch(() => undefined)
+        : undefined),
+      () => undefined,
+    );
+  } catch {
+    cleanup = Promise.resolve();
   }
-
-  doc.body.appendChild(overlay);
+  const cap = new Promise<void>(resolve => {
+    setTimeout(resolve, HARD_REFRESH_TIMEOUT_MS);
+  });
+  return Promise.race([cleanup, cap]).then(() => env.replaceUrl(target));
 }
 
 function runPrepareReload(hook: (() => Promise<void>) | undefined): Promise<void> {
@@ -168,10 +199,14 @@ export async function runVersionCheck(
   const attempts = [deps.storage.getItem(MARKER_KEY), readCacheBust(currentUrl)];
 
   switch (decideVersionAction(uiCommit, hostCommit, attempts)) {
-    case 'ok':
+    case 'ok': {
+      if (hostCommit === null) return;
       deps.storage.removeItem(MARKER_KEY);
+      const shown = currentOutdatedUi(deps.doc);
+      if (shown) shown.remove();
       if (attempts[1] !== null) deps.replaceUrlInPlace(withoutCacheBust(currentUrl));
       return;
+    }
     case 'reload': {
       const commit = hostCommit === null ? '' : hostCommit;
       // Built before the marker is stored so a browser without URL support cannot end up marked as
@@ -182,13 +217,31 @@ export async function runVersionCheck(
       deps.replaceUrl(target);
       return;
     }
-    default:
+    default: {
+      const staleFor = hostCommit === null ? '' : hostCommit;
+      const servedCommit = await deps.fetchServedCommit(uiCommit + '-' + deps.now());
+      const variant = diagnoseOutdatedUi(staleFor, servedCommit);
       console.error(
-        'Macro Deck UI is stale: built from ' + uiCommit + ', host runs ' + hostCommit
-        + '. A reload did not fix it.',
+        'Macro Deck UI is stale: built from ' + uiCommit + ', host runs ' + staleFor
+        + ', host serves ' + servedCommit + '. A reload did not fix it.',
       );
-      if (deps.outdatedText) showOutdatedUiError(deps.doc, deps.outdatedText);
+      const outdated = deps.outdated;
+      if (!outdated) return;
+      const shown = currentOutdatedUi(deps.doc);
+      if (shown && shown.variant === 'installation' && variant === 'device') {
+        outdated.hardRefresh(staleFor);
+        return;
+      }
+      showOutdatedUi(deps.doc, {
+        variant,
+        text: shownVariant => outdated.text(shownVariant, uiCommit, staleFor),
+        onAction: variant === 'device'
+          ? () => outdated.hardRefresh(staleFor)
+          : () => outdated.reload(staleFor),
+        onTextChange: outdated.onTextChange,
+      });
       return;
+    }
   }
 }
 
@@ -229,6 +282,7 @@ function browserDeps(deps: Partial<VersionCheckDeps> | undefined): VersionCheckD
     replaceUrl: url => window.location.replace(url),
     replaceUrlInPlace: url => window.history.replaceState(window.history.state, '', url),
     fetchHostCommit: fetchHostCommit,
+    fetchServedCommit: nonce => fetchServedUiCommit(document.baseURI, nonce),
     now: () => Date.now(),
   };
   const target = base as unknown as Record<string, unknown>;

@@ -1,0 +1,125 @@
+<ng-template #inlines let-runs>
+  @for (run of runs; track $index) {
+    @switch (run.kind) {
+      @case ('strong') {
+        <strong><ng-container *ngTemplateOutlet="inlines; context: { $implicit: run.children }" /></strong>
+      }
+      @case ('em') {
+        <em><ng-container *ngTemplateOutlet="inlines; context: { $implicit: run.children }" /></em>
+      }
+      @case ('del') {
+        <del><ng-container *ngTemplateOutlet="inlines; context: { $implicit: run.children }" /></del>
+      }
+      @case ('code') {
+        <code class="md-inline-code">{{ run.text }}</code>
+      }
+      @case ('br') {
+        <br>
+      }
+      @case ('link') {
+        <a [href]="run.href" [attr.title]="run.title" rel="noopener noreferrer"
+           (click)="openLink($event, run.href)" (auxclick)="openLink($event, run.href)"><ng-container *ngTemplateOutlet="inlines; context: { $implicit: run.children }" /></a>
+      }
+      @case ('image') {
+        @if (failedMedia().has(run.src)) {
+          <span>{{ run.alt }}</span>
+        } @else {
+          <img class="md-media" [src]="run.src" [alt]="run.alt" (error)="mediaFailed(run.src)">
+        }
+      }
+      @case ('video') {
+        @if (failedMedia().has(run.src)) {
+          <span>{{ run.alt }}</span>
+        } @else {
+          <video class="md-media" [src]="run.src" controls preload="metadata" [muted]="true"
+                 [attr.aria-label]="run.alt" (error)="mediaFailed(run.src)"></video>
+        }
+      }
+      @default {
+        <span>{{ run.text }}</span>
+      }
+    }
+  }
+</ng-template>
+
+<ng-template #blockList let-items>
+  @for (block of items; track $index) {
+    @switch (block.kind) {
+      @case ('heading') {
+        @switch (block.level) {
+          @case (1) {
+            <h3 class="md-heading"><ng-container *ngTemplateOutlet="inlines; context: { $implicit: block.inlines }" /></h3>
+          }
+          @case (2) {
+            <h4 class="md-heading"><ng-container *ngTemplateOutlet="inlines; context: { $implicit: block.inlines }" /></h4>
+          }
+          @default {
+            <h5 class="md-heading"><ng-container *ngTemplateOutlet="inlines; context: { $implicit: block.inlines }" /></h5>
+          }
+        }
+      }
+      @case ('paragraph') {
+        <p class="md-paragraph"><ng-container *ngTemplateOutlet="inlines; context: { $implicit: block.inlines }" /></p>
+      }
+      @case ('quote') {
+        <blockquote class="md-quote"><ng-container *ngTemplateOutlet="blockList; context: { $implicit: block.blocks }" /></blockquote>
+      }
+      @case ('list') {
+        @if (block.ordered) {
+          <ol class="md-list" [attr.start]="block.start">
+            <ng-container *ngTemplateOutlet="listItems; context: { $implicit: block.items }" />
+          </ol>
+        } @else {
+          <ul class="md-list">
+            <ng-container *ngTemplateOutlet="listItems; context: { $implicit: block.items }" />
+          </ul>
+        }
+      }
+      @case ('code') {
+        <div class="md-code-block">
+          <pre class="md-code"><code>{{ block.text }}</code></pre>
+        </div>
+      }
+      @case ('table') {
+        <div class="md-table-scroll">
+          <table class="md-table">
+            <thead>
+              <tr>
+                @for (cell of block.header; track $index) {
+                  <th [style.text-align]="block.align[$index]"><ng-container *ngTemplateOutlet="inlines; context: { $implicit: cell }" /></th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of block.rows; track $index) {
+                <tr>
+                  @for (cell of row; track $index) {
+                    <td [style.text-align]="block.align[$index]"><ng-container *ngTemplateOutlet="inlines; context: { $implicit: cell }" /></td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+      @case ('rule') {
+        <hr class="md-rule">
+      }
+    }
+  }
+</ng-template>
+
+<ng-template #listItems let-items>
+  @for (item of items; track $index) {
+    <li [class.md-task]="item.task">
+      @if (item.task) {
+        <input class="md-task__checkbox" type="checkbox" disabled [checked]="item.checked">
+      }
+      <div class="md-list-item"><ng-container *ngTemplateOutlet="blockList; context: { $implicit: item.blocks }" /></div>
+    </li>
+  }
+</ng-template>
+
+<div class="md">
+  <ng-container *ngTemplateOutlet="blockList; context: { $implicit: blocks() }" />
+</div>

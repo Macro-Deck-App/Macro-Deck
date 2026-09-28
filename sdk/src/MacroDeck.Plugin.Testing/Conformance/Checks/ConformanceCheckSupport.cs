@@ -55,6 +55,8 @@ internal static class ConformanceCheckSupport
 			CapabilityOperations.WidgetTypeProvider.Describe,
 		_ when string.Equals(kind, CapabilityKinds.ScreenSaverProvider, StringComparison.Ordinal) =>
 			CapabilityOperations.ScreenSaverProvider.Describe,
+		_ when string.Equals(kind, CapabilityKinds.VideoStreamProvider, StringComparison.Ordinal) =>
+			CapabilityOperations.VideoStreamProvider.Describe,
 		_ => null
 	};
 

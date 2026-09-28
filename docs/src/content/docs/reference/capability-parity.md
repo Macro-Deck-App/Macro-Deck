@@ -35,6 +35,7 @@ A plugin implements the same SDK contracts as an in-process integration, but the
 | Migrations | Yes | Same | `describe`, `migrate-action` and `migrate-configuration` work; the declared list is snapshot-backed - see [Migrations](#migrations). |
 | Integration issues | Yes | Same | Listing and resolving are live calls. |
 | Android devices (`IAndroidDeviceManager`) | No | Differs | Plugin-only: a built-in integration reaches ADB through the host's own services, and gets no `IAndroidDeviceManager`. A plugin needs `host:adb` and the user's consent - see [Android devices](/features/android-devices/). |
+| Video stream providers | Yes | Differs | Same contract and exactly-one-close rule; a plugin's sessions end with its connection and are never carried across a reconnect - see [Video stream sessions](#video-stream-sessions). |
 | Messaging (`IIntegrationContext.Messages`) | Yes | Same | Plugins and built-in integrations share one broker and one set of topics; a plugin's handlers are unreachable while it reconnects - see [Messaging between plugins](/features/messaging/). |
 | Host callbacks (`IIntegrationContext`) | Yes | Same | Host APIs cross the protocol or use pushed snapshots instead of object references - see [Host callbacks](#host-callbacks). |
 | Synchronous catalogs | Yes | Differs | Serve the last `describe` snapshot until `state.update` refreshes it. |
@@ -135,6 +136,19 @@ Folder view, screensaver, widget type and layout providers register and withdraw
 | Screensaver | Devices keep their stored screensaver id and configuration and show Macro Deck's clock until the screensaver returns. | Same as losing the session. |
 | Widget type | The catalogue entry stays, so widgets keep their name and default data while the plugin restarts. | Only uninstalling or stopping the integration withdraws a type, and never deletes a placed widget. |
 | Layout | Devices using its layouts keep their last-resolved geometry instead of becoming unconstrained. | - |
+
+## Video stream sessions
+
+A plugin's [video stream providers](/features/video-streams/) behave as a built-in integration's do, except
+where a plugin crosses a connection:
+
+| Event | Built-in integration | Plugin |
+| --- | --- | --- |
+| The connection to Macro Deck drops, resumed or not | - | The plugin's side closes every open session with `HostDisconnected`; consumers see `ProviderRemoved`, and the providers are listed again once the host has read them back. |
+| Stream catalogue | Read from the provider object | Read over `describe` and `streams`, coalesced, after `providers-changed` and `streams-changed` |
+| Call bounds | Every call bounded by ten seconds; an open that returns later is closed at once | At most 8 calls at a time and 4 closes, up to 256 more queued, each bounded by the capability invoke timeout |
+
+Sessions are never resumed across a reconnect: consumers open new ones.
 
 ## Migrations
 

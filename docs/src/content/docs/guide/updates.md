@@ -109,6 +109,17 @@ and plugins installed from a URL or file send none of this.
 The first time Macro Deck starts after an update installed from within the app, it shows the release notes
 of the new version once. An update installed by running a downloaded installer yourself shows nothing.
 
+## Announcements
+
+The Macro Deck team occasionally publishes news, for example about a new release or a change you should know
+about. Macro Deck looks for it when it starts and every few hours, and shows each announcement once, after
+**What's new** and never in front of a dialog you opened. **Got it**, or closing it any other way, marks it as
+seen, and it does not come back, not even after restoring a backup. Links in an announcement open in your
+browser.
+
+A new installation only shows an announcement published in the last two weeks. If Macro Deck cannot reach the
+Macro Deck servers, nothing is shown and it tries again later.
+
 ## Release notes
 
 Macro Deck loads the release notes from the version's

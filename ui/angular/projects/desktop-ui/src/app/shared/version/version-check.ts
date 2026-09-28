@@ -1,7 +1,26 @@
-import { DestroyRef, EnvironmentProviders, InjectionToken, inject, isDevMode, provideAppInitializer } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable, distinctUntilChanged, filter, map } from 'rxjs';
+import {
+  DestroyRef,
+  EnvironmentProviders,
+  InjectionToken,
+  Injector,
+  inject,
+  isDevMode,
+  provideAppInitializer,
+} from '@angular/core';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import {
+  AppStrings,
+  Strings,
+  currentOutdatedUi,
+  diagnoseOutdatedUi,
+  fetchServedUiCommit,
+  showOutdatedUi,
+  type OutdatedUiText,
+  type OutdatedUiVariant,
+} from '@macro-deck/runtime';
+import { Observable, distinctUntilChanged, filter, map, skip } from 'rxjs';
 
+import { LocalizationService } from '../localization/localization.service';
 import { ApiService, ConnectionState, HOST_URL_RESOLVER, HostUrlResolver } from '../transport';
 
 export const UI_COMMIT_META = 'macro-deck-ui-commit';
@@ -9,9 +28,14 @@ export const UI_COMMIT_META = 'macro-deck-ui-commit';
 export const RELOAD_PARAM = 'md-reload';
 
 const MARKER_KEY = 'macro-deck.reloaded-for';
-const OVERLAY_ID = 'macro-deck-outdated-ui';
 
 export type VersionCheckAction = 'ok' | 'reload' | 'report';
+
+export interface OutdatedUiSetup {
+  text: (variant: OutdatedUiVariant, deviceCommit: string, hostCommit: string) => OutdatedUiText;
+  onTextChange?: (listener: () => void) => () => void;
+  refresh: (hostCommit: string) => void;
+}
 
 export interface VersionCheckDeps {
   doc: Document;
@@ -20,8 +44,10 @@ export interface VersionCheckDeps {
   replaceUrl: (url: string) => void;
   replaceUrlInPlace: (url: string) => void;
   fetchHostCommit: (baseUrl: string, nonce: string) => Promise<string | null>;
+  fetchServedCommit: (nonce: string) => Promise<string | null>;
   now: () => number;
   prepareReload?: () => Promise<void>;
+  outdated?: OutdatedUiSetup;
 }
 
 const PREPARE_RELOAD_TIMEOUT_MS = 3000;
@@ -112,44 +138,6 @@ export function withoutCacheBust(url: string): string {
   return parsed.toString();
 }
 
-export function showOutdatedUiError(doc: Document): void {
-  if (doc.getElementById(OVERLAY_ID)) {
-    return;
-  }
-
-  const overlay = doc.createElement('div');
-  overlay.id = OVERLAY_ID;
-  overlay.setAttribute('role', 'alert');
-  overlay.style.cssText = [
-    'position:fixed', 'top:0', 'right:0', 'bottom:0', 'left:0', 'z-index:2147483647', 'display:flex',
-    'align-items:center', 'justify-content:center', 'padding:24px',
-    'background:#101014', 'color:#f5f5f7',
-    'font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif', 'text-align:center',
-  ].join(';');
-
-  const message = doc.createElement('div');
-  message.style.cssText = 'max-width:32rem';
-
-  const heading = doc.createElement('h1');
-  heading.textContent = 'This page is out of date';
-  heading.style.cssText = 'margin:0 0 12px;font-size:1.35rem;font-weight:600';
-
-  const body = doc.createElement('p');
-  body.textContent =
-    'Your browser is still using an older version of the Macro Deck interface than the one this ' +
-    'host runs. Reloading did not replace it, so please clear the browser cache and reload the page.';
-  body.style.cssText = 'margin:0';
-
-  message.append(heading, body);
-  overlay.append(message);
-
-  for (const child of Array.from(doc.body.children)) {
-    (child as HTMLElement).inert = true;
-  }
-
-  doc.body.append(overlay);
-}
-
 export async function runVersionCheck(
   resolveBaseUrl: HostUrlResolver,
   deps: VersionCheckDeps
@@ -175,7 +163,11 @@ export async function runVersionCheck(
 
   switch (decideVersionAction(uiCommit, hostCommit, attempts)) {
     case 'ok':
+      if (hostCommit === null) {
+        return;
+      }
       deps.storage.removeItem(MARKER_KEY);
+      currentOutdatedUi(deps.doc)?.remove();
       if (attempts[1] !== null) {
         deps.replaceUrlInPlace(withoutCacheBust(currentUrl));
       }
@@ -190,12 +182,30 @@ export async function runVersionCheck(
       deps.replaceUrl(target);
       return;
     }
-    case 'report':
+    case 'report': {
+      const staleFor = hostCommit ?? '';
+      const servedCommit = await deps.fetchServedCommit(`${uiCommit}-${deps.now()}`);
       console.error(
-        `Macro Deck UI is stale: built from ${uiCommit}, host runs ${hostCommit}. A reload did not fix it.`
+        `Macro Deck UI is stale: built from ${uiCommit}, host runs ${staleFor}, host serves ${servedCommit}. `
+          + 'A reload did not fix it.'
       );
-      showOutdatedUiError(deps.doc);
+      const outdated = deps.outdated;
+      if (!outdated) {
+        return;
+      }
+      const variant = diagnoseOutdatedUi(staleFor, servedCommit);
+      if (currentOutdatedUi(deps.doc)?.variant === 'installation' && variant === 'device') {
+        outdated.refresh(staleFor);
+        return;
+      }
+      showOutdatedUi(deps.doc, {
+        variant,
+        text: variant => outdated.text(variant, uiCommit, staleFor),
+        onAction: () => outdated.refresh(staleFor),
+        onTextChange: outdated.onTextChange,
+      });
       return;
+    }
   }
 }
 
@@ -230,7 +240,37 @@ export function createVersionCheckRunner(
   };
 }
 
-function browserDeps(prepareReload: () => Promise<void>): VersionCheckDeps {
+export function outdatedUiText(
+  localization: Pick<LocalizationService, 'translateKey'>,
+  variant: OutdatedUiVariant,
+  device: string,
+  computer: string,
+): OutdatedUiText {
+  const t = (key: string): string => localization.translateKey(key);
+  const versions = localization.translateKey(AppStrings.Shell.OutdatedUi.Versions, { device, computer });
+  if (variant === 'device') {
+    return {
+      title: t(AppStrings.Shell.OutdatedUi.Device.Title),
+      body: t(AppStrings.Shell.OutdatedUi.Device.Body),
+      steps: [t(AppStrings.Shell.OutdatedUi.Device.Step.Refresh), t(AppStrings.Shell.OutdatedUi.Device.Step.Restart)],
+      action: t(Strings.Common.Refresh),
+      versions,
+    };
+  }
+  return {
+    title: t(AppStrings.OutdatedUi.Installation.Title),
+    body: t(AppStrings.OutdatedUi.Installation.Body),
+    steps: [
+      t(AppStrings.Shell.OutdatedUi.Installation.Step.Reinstall),
+      t(AppStrings.OutdatedUi.Installation.Step.Antivirus),
+      t(AppStrings.OutdatedUi.Installation.Step.Retry),
+    ],
+    action: t(Strings.Common.Retry),
+    versions,
+  };
+}
+
+function browserDeps(prepareReload: () => Promise<void>, outdated: OutdatedUiSetup): VersionCheckDeps {
   return {
     doc: document,
     storage: sessionStorage,
@@ -238,8 +278,10 @@ function browserDeps(prepareReload: () => Promise<void>): VersionCheckDeps {
     replaceUrl: (url) => window.location.replace(url),
     replaceUrlInPlace: (url) => window.history.replaceState(window.history.state, '', url),
     fetchHostCommit,
+    fetchServedCommit: (nonce) => fetchServedUiCommit(document.baseURI, nonce),
     now: () => Date.now(),
     prepareReload,
+    outdated,
   };
 }
 
@@ -254,7 +296,19 @@ export function provideVersionCheck(): EnvironmentProviders[] {
       const api = inject(ApiService);
       const destroyRef = inject(DestroyRef);
       const prepareReload = inject(VERSION_CHECK_PREPARE_RELOAD);
-      const check = createVersionCheckRunner(resolveBaseUrl, browserDeps(prepareReload));
+      const localization = inject(LocalizationService);
+      const injector = inject(Injector);
+      const outdated: OutdatedUiSetup = {
+        text: (variant, device, computer) => outdatedUiText(localization, variant, device, computer),
+        onTextChange: (listener) => {
+          const subscription = toObservable(localization.catalogVersion, { injector })
+            .pipe(skip(1))
+            .subscribe(() => listener());
+          return () => subscription.unsubscribe();
+        },
+        refresh: (hostCommit) => window.location.replace(withCacheBust(window.location.href, hostCommit)),
+      };
+      const check = createVersionCheckRunner(resolveBaseUrl, browserDeps(prepareReload, outdated));
 
       check();
       connectionEstablished(api.connectionState$)

@@ -328,7 +328,8 @@ installed, the packs stay as ordinary icon packs after the developer stops it.
 ## Devices
 
 Every phone, tablet or browser that connects shows up in **Settings > Devices**. Choose there which
-profile each device opens with.
+profile each device opens with. If you delete the profile a device is showing, the device switches to
+the profile it opens with, or to your first profile if that one is gone too.
 
 When you are signed in under **Settings > Account**, a Companion app license this computer got from a
 purchase is saved to your Macro Deck account, and your other computers signed in to it that have no

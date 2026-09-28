@@ -1,4 +1,5 @@
 using MacroDeck.Plugin.Hosting.Capabilities.Variables;
+using MacroDeck.Plugin.Hosting.Capabilities.VideoStreamProvider;
 using MacroDeck.Plugin.Hosting.Integrations.HostApis;
 using MacroDeck.Plugin.Hosting.Logging;
 using MacroDeck.Plugin.Hosting.Transport;
@@ -8,6 +9,7 @@ using MacroDeck.Sdk.FolderViews;
 using MacroDeck.Sdk.ScreenSavers;
 using MacroDeck.Sdk.Layouts;
 using MacroDeck.Sdk.Variables;
+using MacroDeck.Sdk.VideoStreams;
 using MacroDeck.Sdk.Widgets;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -85,6 +87,7 @@ internal sealed class IntegrationLifecycleHostedService(
 		await _gate.WaitAsync(CancellationToken.None);
 		try
 		{
+			await ReleaseVideoStreamsAsync(videoStreams => videoStreams.ReleaseAllAsync(notifyHost: false));
 			await ShutdownAllAsync();
 		}
 		finally
@@ -120,6 +123,7 @@ internal sealed class IntegrationLifecycleHostedService(
 			// Before ShutdownAsync: an integration disposing its registrations there must not hand
 			// its topics to another plugin while it is about to register them again.
 			messages?.ReleaseLifecycleRegistrations();
+			await ReleaseVideoStreamsAsync(videoStreams => videoStreams.ReleaseAllAsync(notifyHost: true));
 
 			if (_initialized.Count > 0)
 			{
@@ -163,6 +167,12 @@ internal sealed class IntegrationLifecycleHostedService(
 						await screenSaverProvider.InitializeAsync(screenSaverContext);
 					}
 
+					if (integration is IVideoStreamIntegration videoStreamIntegration &&
+						services.GetService<VideoStreamProviderRegistry>() is { } videoStreams)
+					{
+						await videoStreamIntegration.InitializeAsync(videoStreams.ContextFor(integration));
+					}
+
 					// A device provider starts after the integration it belongs to: discovery may well
 					// depend on whatever InitializeAsync configured.
 					if (integration is IDeviceProvider provider)
@@ -191,6 +201,7 @@ internal sealed class IntegrationLifecycleHostedService(
 				catch (Exception exception) when (exception is not OutOfMemoryException)
 				{
 					_logger.IntegrationInitializationFailed(metadata.Id, integration.GetType().Name, exception);
+					await ReleaseVideoStreamsAsync(videoStreams => videoStreams.ReleaseAsync(integration, notifyHost: true));
 				}
 			}
 
@@ -231,6 +242,23 @@ internal sealed class IntegrationLifecycleHostedService(
 		}
 
 		_initialized.Clear();
+	}
+
+	private async Task ReleaseVideoStreamsAsync(Func<VideoStreamProviderRegistry, Task> release)
+	{
+		if (services.GetService<VideoStreamProviderRegistry>() is not { } videoStreams)
+		{
+			return;
+		}
+
+		try
+		{
+			await release(videoStreams);
+		}
+		catch (Exception exception) when (exception is not OutOfMemoryException)
+		{
+			_logger.Debug(exception, "Releasing video stream providers of {PluginId} failed", metadata.Id);
+		}
 	}
 
 	private async Task CompleteMessagingReleaseAsync(RemoteMessageChannel messages)

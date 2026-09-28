@@ -10,12 +10,14 @@ using MacroDeck.Plugin.Protocol.Capabilities.FolderViewProvider;
 using MacroDeck.Plugin.Protocol.Capabilities.LayoutProvider;
 using MacroDeck.Plugin.Protocol.Capabilities.Variables;
 using MacroDeck.Plugin.Protocol.Capabilities.ScreenSaverProvider;
+using MacroDeck.Plugin.Protocol.Capabilities.VideoStreamProvider;
 using MacroDeck.Plugin.Protocol.Capabilities.WidgetTypeProvider;
 using MacroDeck.Sdk.Devices;
 using MacroDeck.Sdk.FolderViews;
 using MacroDeck.Sdk.Layouts;
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.ScreenSavers;
+using MacroDeck.Sdk.VideoStreams;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
 using MacroDeck.Sdk.Ui;
@@ -93,6 +95,8 @@ internal static class HostInvokeDispatcher
 				HostApis.WidgetTypes => await WidgetTypesAsync(context, payload, cancellationToken)
 					.ConfigureAwait(false),
 				HostApis.ScreenSavers => await ScreenSaversAsync(context, payload, cancellationToken)
+					.ConfigureAwait(false),
+				HostApis.VideoStreams => await VideoStreamsAsync(context, payload, cancellationToken)
 					.ConfigureAwait(false),
 				HostApis.Messaging when messaging is not null && pluginId is not null => messaging.Dispatch(pluginId, payload),
 				HostApis.IconPacks when payload.Operation == HostOperations.IconPacks.GetIconResource
@@ -393,6 +397,72 @@ internal static class HostInvokeDispatcher
 
 		return HostInvokeOutcome.Ok((JsonElement?)null);
 	}
+
+	private static async Task<HostInvokeOutcome> VideoStreamsAsync(
+		FakeIntegrationContext context,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken)
+	{
+		var videoStreams = context.VideoStreams;
+		switch (payload.Operation)
+		{
+			case HostOperations.VideoStreams.ProvidersChanged:
+				videoStreams.RecordProvidersChanged();
+				break;
+
+			case HostOperations.VideoStreams.StreamsChanged:
+				await videoStreams
+					.NotifyStreamsChangedAsync(Require<VideoStreamsStreamsChangedArguments>(payload).ProviderId,
+						cancellationToken)
+					.ConfigureAwait(false);
+				break;
+
+			case HostOperations.VideoStreams.SessionUpdate:
+			{
+				var update = Require<VideoStreamsSessionUpdateArguments>(payload);
+				await videoStreams.UpdateSessionAsync(update.SessionId,
+						WireEnum(update.State, VideoStreamSessionState.Reconnecting),
+						update.Description is { } description ? ToDescription(description) : null,
+						WireEnum(update.Reason, VideoStreamSessionReason.None),
+						update.Message,
+						cancellationToken)
+					.ConfigureAwait(false);
+				break;
+			}
+
+			case HostOperations.VideoStreams.SessionSignal:
+			{
+				var signal = Require<VideoStreamsSessionSignalArguments>(payload);
+				await videoStreams.SendSignalAsync(signal.SessionId,
+						new VideoStreamSignal(signal.Signal.Type, signal.Signal.Payload),
+						cancellationToken)
+					.ConfigureAwait(false);
+				break;
+			}
+
+			default:
+			{
+				var close = Require<VideoStreamsSessionCloseArguments>(payload);
+				await videoStreams.CloseSessionAsync(close.SessionId,
+						WireEnum(close.Reason, VideoStreamSessionReason.None),
+						close.Message,
+						cancellationToken)
+					.ConfigureAwait(false);
+				break;
+			}
+		}
+
+		return HostInvokeOutcome.Ok((JsonElement?)null);
+	}
+
+	private static VideoStreamSessionDescription ToDescription(VideoStreamSessionDescriptionDto dto)
+		=> new(dto.Transport, dto.Url, dto.Parameters, dto.Payload, dto.ExpiresAt);
+
+	private static T WireEnum<T>(string? value, T fallback)
+		where T : struct, Enum
+		=> value is not null && Enum.GetNames<T>().Contains(value, StringComparer.Ordinal)
+			? Enum.Parse<T>(value)
+			: fallback;
 
 	private static ScreenSaverDescriptor ToDescriptor(ScreenSaverDescriptorDto dto)
 		=> new(dto.Id, dto.Name, dto.Description, dto.HasConfiguration, dto.Interactive, dto.Metadata);
