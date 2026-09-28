@@ -38,6 +38,13 @@ internal sealed record TwitchChatViewState(
 	public static TwitchChatViewState Empty { get; } = new(TwitchChatStatus.Empty, [], []);
 }
 
+internal sealed record TwitchChatLineLayout(
+	Func<TwitchChatLine, UiElement> Message,
+	Func<TwitchChatLine, UiElement> FallbackMessage,
+	int MaxMessages,
+	int MaxBytes,
+	int FallbackMessages);
+
 internal sealed class TwitchChatLines
 {
 	public const int MaxMessages = 50;
@@ -56,16 +63,24 @@ internal sealed class TwitchChatLines
 		Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared,
 	};
 
+	public static readonly TwitchChatLineLayout Widget = new(TwitchChatWidgetView.Message,
+		TwitchChatWidgetView.FallbackMessage,
+		MaxMessages,
+		MaxBytes,
+		FallbackMessages);
+
 	private readonly string _separator;
 	private readonly ITwitchChatImages? _images;
+	private readonly TwitchChatLineLayout _layout;
 
 	private Dictionary<string, (TwitchChatMessage Message, TwitchChatLine Line)> _cache
 		= new(StringComparer.Ordinal);
 
-	public TwitchChatLines(string separator, ITwitchChatImages? images)
+	public TwitchChatLines(string separator, ITwitchChatImages? images, TwitchChatLineLayout? layout = null)
 	{
 		_separator = separator;
 		_images = images;
+		_layout = layout ?? Widget;
 	}
 
 	public TwitchChatViewState Build(TwitchChatSnapshot snapshot)
@@ -88,13 +103,13 @@ internal sealed class TwitchChatLines
 		var kept = new List<TwitchChatLine>();
 		var total = 0;
 
-		for (var index = snapshot.Messages.Count - 1; index >= 0 && kept.Count < MaxMessages; index--)
+		for (var index = snapshot.Messages.Count - 1; index >= 0 && kept.Count < _layout.MaxMessages; index--)
 		{
 			var message = snapshot.Messages[index];
 			var line = LineFor(message);
-			var cost = line.Bytes + (kept.Count < FallbackMessages ? line.FallbackBytes : 0);
+			var cost = line.Bytes + (kept.Count < _layout.FallbackMessages ? line.FallbackBytes : 0);
 
-			if (total + cost > MaxBytes)
+			if (total + cost > _layout.MaxBytes)
 			{
 				break;
 			}
@@ -109,13 +124,19 @@ internal sealed class TwitchChatLines
 
 		return new TwitchChatViewState(TwitchChatStatus.Messages,
 			kept,
-			[.. kept.TakeLast(FallbackMessages)],
+			[.. kept.TakeLast(_layout.FallbackMessages)],
 			snapshot.Account.Label);
 	}
 
-	public static TwitchChatLine Build(TwitchChatMessage message, string separator, ITwitchChatImages? images)
+	public static TwitchChatLine Build(
+		TwitchChatMessage message,
+		string separator,
+		ITwitchChatImages? images,
+		TwitchChatLineLayout? layout = null)
 	{
 		ArgumentNullException.ThrowIfNull(message);
+
+		layout ??= Widget;
 
 		var spans = new List<UiTextSpan>();
 		var resolved = 0;
@@ -175,8 +196,8 @@ internal sealed class TwitchChatLines
 
 		return line with
 		{
-			Bytes = Measure(TwitchChatWidgetView.Message(line)),
-			FallbackBytes = Measure(TwitchChatWidgetView.FallbackMessage(line)),
+			Bytes = Measure(layout.Message(line)),
+			FallbackBytes = Measure(layout.FallbackMessage(line)),
 		};
 	}
 
@@ -189,7 +210,7 @@ internal sealed class TwitchChatLines
 			return cached.Line;
 		}
 
-		return Build(message, _separator, _images);
+		return Build(message, _separator, _images, _layout);
 	}
 
 	private int CountResolved(TwitchChatMessage message)

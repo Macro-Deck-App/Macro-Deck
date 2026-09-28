@@ -9331,6 +9331,69 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Twitch.Actions.UnbanUser.Name" xml:space="preserve">
     <value>Bann aufheben</value>
   </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountUnavailable" xml:space="preserve">
+    <value>Das Twitch-Konto ist nicht verbunden.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AllowModeration" xml:space="preserve">
+    <value>Moderation im Chat-Dialog erlauben</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AllowModerationDescription" xml:space="preserve">
+    <value>Ein Druck auf das Widget öffnet den Chat. Ist dies an, kann jeder, der dieses Deck bedient, dort eine Nachricht antippen, um sie zu löschen oder den Absender zu timeouten oder zu bannen.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Ban" xml:space="preserve">
+    <value>Bannen</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Banned" xml:space="preserve">
+    <value>{name} ist gebannt.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Cancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Close" xml:space="preserve">
+    <value>Schließen</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.ConfirmBan" xml:space="preserve">
+    <value>{name} bannen? Bis zum Entbannen kann {name} in diesem Kanal nicht mehr chatten.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.DeleteMessage" xml:space="preserve">
+    <value>Nachricht löschen</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Deleted" xml:space="preserve">
+    <value>Nachricht gelöscht.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.ModerationUnavailable" xml:space="preserve">
+    <value>Moderation ist für dieses Widget ausgeschaltet.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.NotPermitted" xml:space="preserve">
+    <value>Twitch hat das nicht erlaubt. Das Konto braucht Moderationsrechte in diesem Kanal; ein erneutes Verbinden kann helfen.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.OwnMessage" xml:space="preserve">
+    <value>Nachrichten des Kanalkontos selbst lassen sich nicht moderieren.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Refused" xml:space="preserve">
+    <value>Twitch hat diese Aktion abgelehnt, zum Beispiel weil sie auf diese Person nicht mehr zutrifft.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.SharedChat" xml:space="preserve">
+    <value>Diese Nachricht stammt aus dem Chat von {channel}. Moderiere sie dort.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.TimedOut" xml:space="preserve">
+    <value>{name} hat einen Timeout.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout10Minutes" xml:space="preserve">
+    <value>Timeout 10 Min.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout1Hour" xml:space="preserve">
+    <value>Timeout 1 Std.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout1Minute" xml:space="preserve">
+    <value>Timeout 1 Min.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Unban" xml:space="preserve">
+    <value>Entbannen</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Unbanned" xml:space="preserve">
+    <value>{name} ist entbannt.</value>
+  </data>
   <data name="Integrations.Twitch.ChatWidget.AccountDescription" xml:space="preserve">
     <value>Wessen Kanal-Chat angezeigt wird.</value>
   </data>

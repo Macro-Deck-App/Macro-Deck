@@ -35,7 +35,8 @@ internal sealed class TwitchChatWidgetViewTests
 		_hub = new TwitchChatHub(new FakeTimeProvider(), Logger.None);
 		var integrations = new FakeIntegrationRegistry();
 		integrations.Add(new IconIntegration());
-		_provider = new TwitchChatWidgetUiProvider(_hub, _images, TestLocalization.SampleText, integrations, _store);
+		_provider = new TwitchChatWidgetUiProvider(_hub, _images, TestLocalization.SampleText, integrations, _store,
+			new RecordingUiInteractions(), new FakeFolderCache(), new FakeHostLockState(), Logger.None);
 	}
 
 	[TearDown]
