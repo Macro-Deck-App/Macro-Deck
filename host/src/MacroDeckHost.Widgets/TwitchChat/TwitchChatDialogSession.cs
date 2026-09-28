@@ -185,7 +185,12 @@ internal sealed class TwitchChatDialogSession : IUiSession
 	}
 
 	private void Deselect()
-		=> UpdateLocked(state => state with { Selection = null, Step = TwitchChatDialogStep.Actions, Result = null });
+		=> UpdateLocked(state => state with
+		{
+			Selection = null,
+			Step = state.Step == TwitchChatDialogStep.Busy ? TwitchChatDialogStep.Busy : TwitchChatDialogStep.Actions,
+			Result = null,
+		});
 
 	private void AskBan()
 		=> UpdateLocked(state => state.Step == TwitchChatDialogStep.Actions
@@ -249,9 +254,9 @@ internal sealed class TwitchChatDialogSession : IUiSession
 			? succeeded(selection.ChatterName)
 			: FailureText(result);
 
-		UpdateLocked(state => state.Selection is null
-			? state with { Step = TwitchChatDialogStep.Actions }
-			: state with { Step = TwitchChatDialogStep.Actions, Result = text });
+		UpdateLocked(state => state.Selection?.MessageId == selection.MessageId
+			? state with { Step = TwitchChatDialogStep.Actions, Result = text }
+			: state with { Step = TwitchChatDialogStep.Actions });
 	}
 
 	private LocalizedString? Refusal()

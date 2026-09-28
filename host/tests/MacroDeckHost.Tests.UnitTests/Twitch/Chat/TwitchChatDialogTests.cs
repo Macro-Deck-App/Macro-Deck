@@ -213,6 +213,37 @@ internal sealed class TwitchChatDialogTests
 	}
 
 	[Test]
+	public async Task Closing_during_an_action_does_not_let_its_result_land_on_another_message()
+	{
+		_hub.Post(new TwitchChatMessageReceived(Streamer, TwitchChatHubTests.Message("m2", chatterId: "43")));
+		_hub.Tick();
+		var release = new TaskCompletionSource<TwitchChatModerationResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+		_moderator.Pending = release.Task;
+		await using var dialog = await OpenDialogAsync();
+
+		SelectMessage(dialog);
+		PressButton(dialog, "DeleteMessage");
+		await WaitForAsync(() => _moderator.Requests.Count == 1);
+		PressButton(dialog, "Close");
+		SelectMessage(dialog, index: 1);
+		var reselectedWhileBusy = Texts(dialog.BuildTree().Root).Any(text => text.Contains("ChatDialog.DeleteMessage"));
+
+		release.SetResult(TwitchChatModerationResult.Succeeded);
+		await WaitForAsync(() =>
+		{
+			SelectMessage(dialog, index: 1);
+			return Texts(dialog.BuildTree().Root).Any(text => text.Contains("ChatDialog.DeleteMessage"));
+		});
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(reselectedWhileBusy, Is.False);
+			Assert.That(Texts(dialog.BuildTree().Root), Has.None.Contains("ChatDialog.Deleted"));
+			Assert.That(_moderator.Requests, Has.Count.EqualTo(1));
+		});
+	}
+
+	[Test]
 	public async Task A_request_that_never_reached_twitch_is_not_blamed_on_twitch()
 	{
 		_moderator.Result = TwitchChatModerationResult.Failed;
