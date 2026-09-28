@@ -178,7 +178,7 @@ public sealed class VariableTemplateValue : IScriptObject, IScriptCustomBinaryOp
 	// The delegation at the end is what keeps the container transparent. Scriban asks an IScriptObject for
 	// a member before it falls back to a member accessor, so without it wrapping would swallow everything
 	// the accessor serves on the bare value - a string's "size" among them.
-	public bool TryGetValue(TemplateContext context, SourceSpan span, string member, out object? value)
+	public bool TryGetValue(TemplateContext? context, SourceSpan span, string member, out object? value)
 	{
 		if (member == StateMemberName)
 		{
@@ -191,7 +191,7 @@ public sealed class VariableTemplateValue : IScriptObject, IScriptCustomBinaryOp
 			return true;
 		}
 
-		if (Value is null)
+		if (Value is null || context is null)
 		{
 			value = null;
 			return false;
@@ -202,7 +202,7 @@ public sealed class VariableTemplateValue : IScriptObject, IScriptCustomBinaryOp
 
 	public bool CanWrite(string member) => false;
 
-	public bool TrySetValue(TemplateContext context, SourceSpan span, string member, object? value, bool readOnly)
+	public bool TrySetValue(TemplateContext? context, SourceSpan span, string member, object? value, bool readOnly)
 		=> false;
 
 	public bool Remove(string member) => false;
