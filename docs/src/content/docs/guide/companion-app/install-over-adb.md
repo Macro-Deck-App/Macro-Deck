@@ -1,6 +1,6 @@
 ---
-title: Install the Companion app over ADB
-description: Install and update the Macro Deck Companion app on an Android device from Macro Deck, and what the license means for it.
+title: Install the Android app from Macro Deck
+description: Install and update the version of the Companion app without Google Play services on an Android device from Macro Deck, and what the license means for it.
 ---
 
 The Macro Deck Companion app turns an Android phone or tablet into a deck. You can get it from Google
@@ -15,10 +15,13 @@ Play copy already on the device has to be uninstalled before Macro Deck can inst
 
 The page first shows whether this computer holds a Companion license. A license can currently only be
 bought in the App Store or on Google Play. Once one of your devices bought it, Macro Deck keeps the
-license and hands it to every Companion app that connects.
+license and hands it to every Companion app that connects, including this version. See
+[License and trial](/guide/companion-app/license/).
 
 Without a license you can still install the app over ADB, but it then runs as a 7-day trial. The install
 section says so at the top.
+
+![Settings > Companion App: the License section and the notices at the top of Install on a device](../../../../assets/guide/companion/desktop-companion-app-license.png)
 
 ## Install the app
 
