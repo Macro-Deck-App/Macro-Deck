@@ -45,7 +45,7 @@ internal sealed class TwitchChatLines
 	public const int MaxEmoteImages = 20;
 	public const int MaxBadges = 3;
 
-	private const string BadgeGap = "\u2009";
+	private const string BadgeGap = "\u202F";
 	public const int FallbackMessages = 3;
 
 	// A measured node carries a short standalone id; its id inside the real tree is at most this much longer.
