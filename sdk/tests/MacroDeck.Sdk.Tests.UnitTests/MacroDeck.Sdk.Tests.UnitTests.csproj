@@ -23,6 +23,7 @@
 		     `is IUiConfigurableActionDefinition`/`is IUiConfigFlowProvider` checks as a second copy that could
 		     drift from it. -->
 		<ProjectReference Include="..\..\src\MacroDeck.Plugin.Hosting\MacroDeck.Plugin.Hosting.csproj" />
+		<ProjectReference Include="..\..\src\MacroDeck.Plugin.Testing\MacroDeck.Plugin.Testing.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

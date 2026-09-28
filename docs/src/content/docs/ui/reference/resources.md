@@ -72,6 +72,9 @@ one you build yourself: it carries the `contentHash` that makes clients fetch ne
   resource registration, `QuotaExceeded`, `RateLimited`, or `Failed`, for example when the connection
   dropped. Registrations run one at a time, so starting many at once is safe.
 
+A music player plugin can register its own player's cover in one call with
+[`GetArtworkAsUiResourceAsync`](/features/music-players/#showing-the-cover-in-your-own-ui).
+
 In tests, `FakeIntegrationContext.UiResources` is a `FakeUiResourceRegistry` that applies the same rules and
 exposes what was registered, and `MacroDeckTestHost` answers registrations over the wire.
 

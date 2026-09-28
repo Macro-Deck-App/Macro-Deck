@@ -138,6 +138,35 @@ had gone.
 `ArtworkId` is an opaque key that the host passes back to `GetArtworkAsync`, never a URL. The UI only
 ever asks the host for artwork.
 
+### Showing the cover in your own UI
+
+The deck's music player widget fetches artwork from the host on its own. When your plugin also draws the
+cover in a tree of its own, `GetArtworkAsUiResourceAsync` resolves the artwork and registers it as a
+[UI resource](/ui/reference/resources/#registering-your-own-images) in one call:
+
+```csharp
+UiResource? cover = await player.GetArtworkAsUiResourceAsync(
+	context.UiResources,
+	resourceName: "now-playing-cover",
+	artworkId: state.ArtworkId,
+	cancellationToken);
+```
+
+- It returns `null` when `artworkId` is null or empty or `GetArtworkAsync` has none. Nothing is registered
+  or removed then, so the name keeps the previous cover until you drop it from the tree.
+- Use one fixed name per place the cover appears, not one per track. Registering the name again replaces
+  its bytes, while a name per track keeps every cover in your quota for the whole session.
+- The registry's rules apply to the artwork. An invalid name, empty data, more than 2 MiB, or a media type
+  Macro Deck does not accept is an `ArgumentException`. Only PNG, JPEG, WebP and GIF are accepted, so SVG
+  is refused. The deck widget copes with some of these by re-encoding on the host, so a cover that shows
+  there can still be refused here.
+- Exceptions from your own `GetArtworkAsync`, including an `OperationCanceledException`, reach the caller
+  unchanged.
+- Await one call before starting the next for the same name. Two overlapping calls can finish out of
+  order, and the older cover would then replace the newer one.
+- An [in-process integration](/reference/capability-parity/) has no `UiResources`; the call throws
+  `UiResourceException` with `Unsupported`.
+
 ### `MusicPlayerState`
 
 | Property | Meaning |
