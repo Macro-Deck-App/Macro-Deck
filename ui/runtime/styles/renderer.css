@@ -222,6 +222,25 @@
   max-height: calc(100% + 0.4em);
 }
 
+.widget-stack.widget-stack-clip-start {
+  overflow: hidden;
+}
+
+.widget-stack.widget-stack-clip-start > * {
+  flex-shrink: 0;
+  max-width: none;
+  max-height: none;
+}
+
+.widget-text-span-image {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: top;
+  object-fit: contain;
+  -webkit-user-drag: none;
+}
+
 .widget-transform {
   position: relative;
   box-sizing: border-box;

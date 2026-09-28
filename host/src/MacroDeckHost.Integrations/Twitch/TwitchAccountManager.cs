@@ -1,4 +1,5 @@
 using System.Globalization;
+using MacroDeckHost.Application.Twitch.Chat;
 using MacroDeckHost.Integrations.Twitch.Auth;
 using MacroDeckHost.Integrations.Twitch.Protocol;
 using MacroDeck.Sdk.Actions;
@@ -20,6 +21,7 @@ internal sealed class TwitchAccountManager : IDisposable
 	private readonly ILogger _logger;
 
 	private TwitchEventEmitter? _emitter;
+	private ITwitchChatSink? _chatSink;
 
 	private volatile List<TwitchAccountConnection> _connections = [];
 	private volatile List<StaleEntry> _staleEntries = [];
@@ -39,6 +41,11 @@ internal sealed class TwitchAccountManager : IDisposable
 	}
 
 	public IReadOnlyList<TwitchAccountConnection> Connections => _connections;
+
+	public void UseChatSink(ITwitchChatSink? chatSink) => _chatSink = chatSink;
+
+	public IReadOnlyList<TwitchChatAccount> ChatAccounts()
+		=> [.. _connections.Select(c => new TwitchChatAccount(c.Account.UserId, c.Account.Label))];
 
 	public async Task ReloadAsync(
 		IIntegrationConfig config,
@@ -253,7 +260,8 @@ internal sealed class TwitchAccountManager : IDisposable
 			oauthClient,
 			_helixFactory(account, tokens),
 			_emitter,
-			_logger);
+			_logger,
+			_chatSink);
 	}
 
 	public void StartAll()

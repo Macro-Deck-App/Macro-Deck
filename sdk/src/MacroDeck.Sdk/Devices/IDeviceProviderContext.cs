@@ -25,6 +25,9 @@ public interface IDeviceProviderContext
 	Task UpdateDeviceAsync(DeviceDescriptor device, CancellationToken cancellationToken = default);
 
 	/// <summary>Reports whether a registered device is currently reachable.</summary>
+	/// <remarks>While the user has turned the integration off, its devices stay offline whatever is reported
+	/// here or on registration; they keep their identity and come online once the integration is turned
+	/// back on and reports them again.</remarks>
 	Task SetDevicePresenceAsync(
 		string deviceId,
 		DevicePresence presence,

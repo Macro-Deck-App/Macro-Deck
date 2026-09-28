@@ -145,6 +145,26 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 			},
 			cancellationToken);
 
+	public Task<IReadOnlyList<TwitchChatBadgeImage>> GetGlobalChatBadgesAsync(CancellationToken cancellationToken)
+		=> CallAsync<IReadOnlyList<TwitchChatBadgeImage>>(async token =>
+			{
+				var response = await _api.Helix.Chat.GetGlobalChatBadgesAsync(token);
+
+				return ToBadgeImages(response?.EmoteSet);
+			},
+			cancellationToken);
+
+	public Task<IReadOnlyList<TwitchChatBadgeImage>> GetChannelChatBadgesAsync(
+		string broadcasterId,
+		CancellationToken cancellationToken)
+		=> CallAsync<IReadOnlyList<TwitchChatBadgeImage>>(async token =>
+			{
+				var response = await _api.Helix.Chat.GetChannelChatBadgesAsync(broadcasterId, token);
+
+				return ToBadgeImages(response?.EmoteSet);
+			},
+			cancellationToken);
+
 	public Task<TwitchUserInfo?> GetUserAsync(string? userId, string? login, CancellationToken cancellationToken)
 		=> CallAsync<TwitchUserInfo?>(async token =>
 			{
@@ -650,6 +670,15 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 			}
 		}
 	}
+
+	private static List<TwitchChatBadgeImage> ToBadgeImages(
+		IEnumerable<TwitchLib.Api.Helix.Models.Chat.Badges.BadgeEmoteSet>? sets)
+		=>
+		[
+			.. (sets ?? []).SelectMany(set => (set.Versions ?? [])
+				.Where(version => !string.IsNullOrEmpty(version.ImageUrl2x))
+				.Select(version => new TwitchChatBadgeImage(set.SetId, version.Id, version.ImageUrl2x)))
+		];
 
 	private static AnnouncementColors ParseAnnouncementColor(string color)
 		=> color.ToLowerInvariant() switch

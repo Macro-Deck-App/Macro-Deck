@@ -9333,6 +9333,48 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Twitch.Actions.UnbanUser.Name" xml:space="preserve">
     <value>Unban User</value>
   </data>
+  <data name="Integrations.Twitch.ChatWidget.AccountDescription" xml:space="preserve">
+    <value>Whose channel chat to show.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Description" xml:space="preserve">
+    <value>Shows your channel's chat as it happens, with emotes and badges.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Empty" xml:space="preserve">
+    <value>Waiting for chat messages</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.FirstAccount" xml:space="preserve">
+    <value>First connected account</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Name" xml:space="preserve">
+    <value>Twitch Chat</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.NameSeparator" xml:space="preserve">
+    <value>: </value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Title" xml:space="preserve">
+    <value>{account} chat</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.Offline" xml:space="preserve">
+    <value>Not connected to Twitch</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleChatter1" xml:space="preserve">
+    <value>PixelPanda</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleChatter2" xml:space="preserve">
+    <value>NightOwl</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleChatter3" xml:space="preserve">
+    <value>CozyGamer</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleMessage1" xml:space="preserve">
+    <value>Hello everyone!</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleMessage2" xml:space="preserve">
+    <value>What a play!</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.SampleMessage3" xml:space="preserve">
+    <value>See you next stream</value>
+  </data>
   <data name="Integrations.Twitch.Config.AccountResolutionFailed" xml:space="preserve">
     <value>Twitch issued the token but did not say which account it belongs to. Continue to try again.</value>
   </data>

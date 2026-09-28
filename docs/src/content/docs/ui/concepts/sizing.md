@@ -82,6 +82,15 @@ picture without it, bottom with it.
 
 `Size` (the font) and `MainSize` (the slot) are different properties; set both on a text in a row.
 
+## When the children do not fit
+
+A stack whose children ask for more than its box shrinks them to share the shortfall, so nothing leaves
+the box. A stack that should keep its newest children whole instead - a chat feed, a log - sets
+`Overflow = UiComponentOverflows.ClipStart`: its children keep their natural size, `Fill` on them is
+ignored, and the first ones are cut off at the start. It still reports the sum of its children as its own
+size, so give it `Fill` or a `MainSize` from its parent. It needs component version 2 and a fallback - see
+[Stack and layer](/ui/components/stack-and-layer/#keeping-the-newest-children-at-the-end).
+
 ## Gap and padding
 
 ```csharp

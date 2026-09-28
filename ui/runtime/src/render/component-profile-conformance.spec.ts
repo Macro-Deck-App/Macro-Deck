@@ -4,6 +4,7 @@ import { UiRenderHost } from './ui-render-host';
 import { PRESS_FEEDBACK_MIN_VISIBLE_MS } from './press-feedback';
 import { DEFAULT_WIDGET_BORDER_COLOR, WIDGET_BORDER_WIDTH } from '../domain/widget.interface';
 import { activationClaim, findInteractiveNode } from '../ui-framework/node-gestures';
+import { createUiComponentRegistry, UI_CORE_COMPONENTS } from '../ui-framework/component-registry';
 
 interface UiTreeFixture {
   root: UiNode;
@@ -1084,6 +1085,7 @@ describe('component-profile conformance fixtures: coverage', () => {
       'conformance-action-button-tree.json', 'conformance-music-player-tree.json',
       'conformance-history-graph-tree.json', 'conformance-gauge-tree.json',
       'conformance-building-blocks-tree.json', 'conformance-modifier-tree.json',
+      'conformance-chat-tree.json',
     ];
     for (const name of exercised) expect(() => loadTree(name)).not.toThrow();
   });
@@ -1132,4 +1134,75 @@ describe('component-profile conformance fixtures: responsive tree', () => {
       });
     });
   }
+});
+
+describe('component-profile conformance fixtures: chat tree', () => {
+  type Run = { text?: string; color?: string | null; weight?: number | null; image?: string; alt?: string | null };
+  interface ChatCase {
+    basis: number;
+    tile: { width: number; height: number };
+    nodes: Record<string, {
+      width?: number; height?: number | null; padding?: number; gap?: number; clipsStart?: boolean;
+      justifyContent?: string; fontSize?: number; lines?: number; runs?: Run[];
+    }>;
+  }
+
+  const tree = loadTree('conformance-chat-tree.json');
+  const layout = loadJson<{ cases: ChatCase[]; withoutStackVersion2: { draws: string; notDrawn: string } }>(
+    'conformance-chat-layout.json');
+
+  for (const testCase of layout.cases) {
+    describe(`basis ${testCase.basis}`, () => {
+      beforeEach(() => mount(tree, testCase.tile, testCase.basis));
+
+      for (const [id, spec] of Object.entries(testCase.nodes)) {
+        it(`resolves ${id}`, () => {
+          const el = byId(id);
+          if (spec.width !== undefined) expect(num(el.style.width)).withContext(`${id}.width`).toBeCloseTo(spec.width, 2);
+          if (spec.height === null) expect(el.style.height).withContext(`${id}.height`).toBe('');
+          else if (spec.height !== undefined) expect(num(el.style.height)).withContext(`${id}.height`).toBeCloseTo(spec.height, 2);
+          if (spec.padding !== undefined) expect(num(el.style.padding)).withContext(`${id}.padding`).toBeCloseTo(spec.padding, 2);
+          if (spec.gap !== undefined) expect(num(el.style.gap)).withContext(`${id}.gap`).toBeCloseTo(spec.gap, 2);
+          if (spec.clipsStart !== undefined) {
+            expect(el.classList.contains('widget-stack-clip-start')).withContext(`${id}.clipsStart`).toBe(spec.clipsStart);
+          }
+          if (spec.justifyContent !== undefined) {
+            expect(el.style.justifyContent).withContext(`${id}.justifyContent`).toBe(spec.justifyContent);
+          }
+          if (spec.fontSize !== undefined) {
+            expect(num(el.style.fontSize)).withContext(`${id}.fontSize`).toBeCloseTo(spec.fontSize, 2);
+          }
+          if (spec.lines !== undefined) expect(el.style.webkitLineClamp).withContext(`${id}.lines`).toBe(String(spec.lines));
+          if (spec.runs !== undefined) {
+            const drawn = Array.from(el.children) as HTMLElement[];
+            expect(drawn.length).withContext(`${id} runs`).toBe(spec.runs.length);
+            spec.runs.forEach((run, index) => {
+              const element = drawn[index];
+              if (run.image !== undefined) {
+                expect(element.tagName).toBe('IMG');
+                expect(element.getAttribute('src')).toBe(`/api/ui/resources/${run.image}`);
+                expect(element.getAttribute('alt')).toBe(run.alt ?? '');
+                return;
+              }
+              expect(element.tagName).toBe('SPAN');
+              expect(element.textContent).toBe(run.text!);
+              if (run.color === null) expect(element.style.color).withContext(`${id} run ${index} color`).toBe('');
+              else expect(sameColor(element.style.color, run.color!)).withContext(`${id} run ${index} color`).toBeTrue();
+              expect(element.style.fontWeight).withContext(`${id} run ${index} weight`)
+                .toBe(run.weight === null || run.weight === undefined ? '' : String(run.weight));
+            });
+          }
+        });
+      }
+    });
+  }
+
+  it('draws the fallback in place of the clipping stack on a reader without stack version 2', () => {
+    const registry = createUiComponentRegistry(...UI_CORE_COMPONENTS.map(definition =>
+      definition.type === 'ui.stack' ? { ...definition, version: { minimum: 1, maximum: 1 } } : definition));
+    renderUiNode(container, tree, { width: 240, height: 240 }, null, 240, testHost(), { registry });
+
+    expect(has(layout.withoutStackVersion2.notDrawn)).toBeFalse();
+    expect(has(layout.withoutStackVersion2.draws)).toBeTrue();
+  });
 });

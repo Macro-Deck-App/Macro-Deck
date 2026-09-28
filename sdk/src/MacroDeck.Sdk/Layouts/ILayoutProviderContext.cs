@@ -12,6 +12,9 @@ public interface ILayoutProviderContext
 	/// is how a layout changes: devices that reference it pick the new descriptor up without
 	/// re-registering.
 	/// </summary>
+	/// <remarks>While the user has turned the integration off, the layout is validated and its identity
+	/// returned, but Macro Deck does not keep it; the provider is initialized again when the integration is
+	/// turned back on.</remarks>
 	/// <returns>The host-assigned identity, whose <see cref="LayoutRegistration.LayoutId" /> is what a
 	/// device's <c>LayoutReference</c> must carry.</returns>
 	/// <exception cref="ArgumentException">The descriptor's id or name is empty, or a region id is empty

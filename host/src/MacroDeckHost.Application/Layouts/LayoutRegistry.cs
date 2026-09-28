@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using MacroDeck.Sdk.Identity;
 using MacroDeck.Sdk.Layouts;
 using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.Integrations;
 using Mediator;
 
 namespace MacroDeckHost.Application.Layouts;
@@ -10,9 +11,11 @@ public sealed class LayoutRegistry : ILayoutRegistry
 {
 	private readonly ConcurrentDictionary<string, LayoutDescriptor> _byQualifiedId = new(StringComparer.Ordinal);
 	private readonly IPublisher _publisher;
+	private readonly IIntegrationRegistry? _integrations;
 
-	public LayoutRegistry(IPublisher publisher)
+	public LayoutRegistry(IPublisher publisher, IIntegrationRegistry? integrations = null)
 	{
+		_integrations = integrations;
 		_publisher = publisher;
 	}
 
@@ -51,6 +54,11 @@ public sealed class LayoutRegistry : ILayoutRegistry
 		}
 
 		var qualifiedId = id.ToString();
+		if (_integrations?.IsExplicitlyDisabled(ownerId) == true)
+		{
+			return new LayoutRegistration(qualifiedId, ownerId);
+		}
+
 		_byQualifiedId[qualifiedId] = layout;
 
 		await _publisher.Publish(new LayoutCatalogChangedNotification(), cancellationToken);

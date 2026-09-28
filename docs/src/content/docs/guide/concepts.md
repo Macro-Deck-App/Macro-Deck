@@ -33,6 +33,7 @@ The tiles in a folder:
 | History Graph | CPU load over the last minutes |
 | Weather | Today and the next days for your city |
 | Music Player | What Spotify is playing, with play and skip |
+| Twitch Chat | Your channel's chat with emotes and badges, offered once a Twitch account is connected |
 
 ## Actions and triggers
 

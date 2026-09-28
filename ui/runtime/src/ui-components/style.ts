@@ -10,6 +10,7 @@ import {
   UiComponentImageFits,
   UiComponentImageTransitions,
   UiComponentJustify,
+  UiComponentOverflows,
   UiComponentTextRoles,
   UiComponentTextWeights,
 } from './ui-component-types';
@@ -27,6 +28,10 @@ export function nodeDirection(node: UiNode): string {
 
 export function nodeIsHorizontal(node: UiNode): boolean {
   return nodeDirection(node) === UiComponentDirections.Horizontal;
+}
+
+export function stackClipsStart(node: UiNode): boolean {
+  return nodeString(node, UiComponentProperties.Overflow) === UiComponentOverflows.ClipStart;
 }
 
 export function nodeJustify(node: UiNode): string {
@@ -128,7 +133,11 @@ export function textWraps(node: UiNode): boolean {
 }
 
 export function textFontWeight(node: UiNode): number {
-  switch (nodeString(node, UiComponentProperties.Weight)) {
+  return textWeightValue(nodeString(node, UiComponentProperties.Weight));
+}
+
+export function textWeightValue(weight: string | undefined): number {
+  switch (weight) {
     case UiComponentTextWeights.Medium: return 500;
     case UiComponentTextWeights.SemiBold: return 600;
     case UiComponentTextWeights.Bold: return 700;

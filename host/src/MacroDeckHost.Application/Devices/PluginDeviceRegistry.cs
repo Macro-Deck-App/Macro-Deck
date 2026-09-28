@@ -1,6 +1,7 @@
 using System.Text.Json;
 using MacroDeck.Sdk.Devices;
 using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Layouts;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Domain.Entities;
@@ -24,6 +25,7 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 	private readonly DeviceSessionGuard _sessionGuard;
 	private readonly ILayoutRegistry _layoutRegistry;
 	private readonly TimeProvider _timeProvider;
+	private readonly IIntegrationRegistry? _integrations;
 
 	public PluginDeviceRegistry(
 		IServiceScopeFactory scopeFactory,
@@ -31,8 +33,10 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 		DeviceConnectionTracker connectionTracker,
 		DeviceSessionGuard sessionGuard,
 		ILayoutRegistry layoutRegistry,
-		TimeProvider timeProvider)
+		TimeProvider timeProvider,
+		IIntegrationRegistry? integrations = null)
 	{
+		_integrations = integrations;
 		_scopeFactory = scopeFactory;
 		_presence = presence;
 		_connectionTracker = connectionTracker;
@@ -87,15 +91,12 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 			await repository.Update(existing);
 		}
 
-		var presenceChanged = _presence.Set(existing.Id, device.Presence == DevicePresence.Online);
+		var online = device.Presence == DevicePresence.Online && !IsDisabled(providerId);
+		var presenceChanged = _presence.Set(existing.Id, online);
 		_connectionTracker.SetDeviceName(existing.Id, existing.Name);
 
 		await Publish(scope, existing.Id, cancellationToken);
-		await PublishPresence(scope,
-			existing.Id,
-			device.Presence == DevicePresence.Online,
-			presenceChanged,
-			cancellationToken);
+		await PublishPresence(scope, existing.Id, online, presenceChanged, cancellationToken);
 
 		return new DeviceRegistration(existing.Id.ToString(), localId);
 	}
@@ -124,15 +125,12 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 		Apply(existing, device, name, _timeProvider.GetUtcNow().UtcDateTime);
 		await repository.Update(existing);
 
-		var presenceChanged = _presence.Set(existing.Id, device.Presence == DevicePresence.Online);
+		var online = device.Presence == DevicePresence.Online && !IsDisabled(providerId);
+		var presenceChanged = _presence.Set(existing.Id, online);
 		_connectionTracker.SetDeviceName(existing.Id, existing.Name);
 
 		await Publish(scope, existing.Id, cancellationToken);
-		await PublishPresence(scope,
-			existing.Id,
-			device.Presence == DevicePresence.Online,
-			presenceChanged,
-			cancellationToken);
+		await PublishPresence(scope, existing.Id, online, presenceChanged, cancellationToken);
 	}
 
 	public async Task SetPresenceAsync(
@@ -154,7 +152,7 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 			return;
 		}
 
-		var online = presence == DevicePresence.Online;
+		var online = presence == DevicePresence.Online && !IsDisabled(providerId);
 		if (online)
 		{
 			existing.LastSeenAt = _timeProvider.GetUtcNow().UtcDateTime;
@@ -241,6 +239,8 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 		entity.ClientType = DeviceClientType.Provider;
 		entity.LastSeenAt = now;
 	}
+
+	private bool IsDisabled(string providerId) => _integrations?.IsExplicitlyDisabled(providerId) == true;
 
 	private static string? Serialize(DeviceDescriptor device)
 	{

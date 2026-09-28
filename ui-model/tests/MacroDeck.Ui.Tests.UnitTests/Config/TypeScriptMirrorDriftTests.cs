@@ -73,6 +73,10 @@ public class TypeScriptMirrorDriftTests
 		=> AssertMirrors(_componentTypesPath, "UiComponents", UiComponents.WellKnown);
 
 	[Test]
+	public void The_client_mirrors_the_stack_overflows_in_declaration_order()
+		=> AssertMirrors(_componentTypesPath, "UiComponentOverflows", UiComponentOverflows.WellKnown);
+
+	[Test]
 	public void The_client_chooses_a_responsive_layout_with_the_same_tolerance()
 		=> Assert.That(ReadTopLevelNumber(_responsivePath, "UI_RESPONSIVE_TOLERANCE"),
 			Is.EqualTo(UiResponsiveSelection.Tolerance));

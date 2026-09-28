@@ -18,6 +18,7 @@ import {
   nodeJustify,
   nodePaddingPx,
   stackBackground,
+  stackClipsStart,
 } from './style';
 import type { UiComponentContext } from '../ui-framework/component-registry';
 import { renderWidgetBorder, WidgetBorderHandle } from '../render/widget-border';
@@ -66,13 +67,15 @@ export function paintStackLayout<TState>(node: UiNode, ctx: UiComponentContext<T
       isButton && !ctx.isTreeRoot && !tileCorner ? px(buttonCornerPx(element, ctx.box.height)) : null);
   }
   ctx.setStyle(element, 'flex-direction', horizontal ? 'row' : 'column');
-  ctx.setStyle(element, 'justify-content', nodeJustify(node));
+  const clipStart = !isButton && stackClipsStart(node);
+  ctx.setClass(element, 'widget-stack-clip-start', clipStart);
+  ctx.setStyle(element, 'justify-content', clipStart ? 'flex-end' : nodeJustify(node));
   ctx.setStyle(element, 'align-items', nodeAlign(node));
   ctx.setStyle(element, 'gap', px(gap));
   ctx.setStyle(element, 'padding', px(padding));
   ctx.sizeTo(element, ctx.box);
 
-  const entries = layoutStackChildren(node, ctx.box, ctx.basis, padding, gap, horizontal, ctx.registry);
+  const entries = layoutStackChildren(node, ctx.box, ctx.basis, padding, gap, horizontal, ctx.registry, clipStart);
   ctx.syncChildren(element, entries);
   ctx.pressTint(node);
 }
