@@ -844,6 +844,20 @@ describe('widget node renderer', () => {
       expect(text().textContent).toBe('Kappa');
     });
 
+    it('draws the image once the host can resolve its url', () => {
+      let base: string | null = null;
+      const host = testHost({ resourceUrl: resource => (base === null || !resource ? null : `${base}/${resource.resourceId}`) });
+      const tree = node2('ui.text', { text: 'Kappa', spans: [{ image: emote, alt: 'Kappa' }] });
+      const handle = renderUiNode(container, tree, { width: 120, height: 120 }, null, 120, host);
+      expect(text().querySelector('img')).toBeNull();
+
+      base = 'http://host';
+      handle.update(tree, { width: 120, height: 120 }, null);
+
+      expect(text().querySelector('img')!.getAttribute('src')).toBe('http://host/emote-1');
+      expect(text().textContent).toBe('');
+    });
+
     it('skips entries that are neither text nor image', () => {
       mount(node('ui.text', { text: 'ab', spans: [{ text: 'a' }, {}, null, 'b', { image: { resourceId: '' } }] }));
 

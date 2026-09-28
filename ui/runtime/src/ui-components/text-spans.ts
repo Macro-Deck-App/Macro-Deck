@@ -89,21 +89,22 @@ export function paintTextSpans(
   resourceUrl: (resource: UiResource) => string | null,
 ): void {
   const carrier = element as SpanCarrier;
-  const signature = textSpansSignature(runs);
+  const sources = runs.map(run => (run.kind === 'image' ? resourceUrl(run.image) : null));
+  const signature = `${textSpansSignature(runs)}|${JSON.stringify(sources)}`;
   if (carrier.__mdSpansSignature === signature) return;
   carrier.__mdSpansSignature = signature;
 
   while (element.firstChild) element.removeChild(element.firstChild);
   const doc = element.ownerDocument;
-  for (const run of runs) {
+  runs.forEach((run, index) => {
     if (run.kind === 'text') {
       element.appendChild(textSpan(doc, run.text, run.color, run.weight));
-      continue;
+      return;
     }
-    const src = resourceUrl(run.image);
+    const src = sources[index];
     if (src !== null) element.appendChild(imageSpan(doc, src, run.alt));
     else if (run.alt !== undefined) element.appendChild(textSpan(doc, run.alt));
-  }
+  });
 }
 
 export function forgetTextSpans(element: HTMLElement): boolean {
