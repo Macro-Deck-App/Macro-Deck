@@ -46,6 +46,8 @@ libc = "0.2"
 # the Wayland title bar needs its buttons handed back - see src/wayland_titlebar.rs.
 [target.'cfg(target_os = "linux")'.dependencies]
 gtk = "0.18"
+# Already locked through tauri-plugin-opener; its launcher list is reused for AppImage links.
+open = "5"
 
 # Same story as semver/url: tauri already pulls it in (locked at 0.61.3), declared directly because
 # the Windows file picker has to be opened through IFileOpenDialog by hand - see

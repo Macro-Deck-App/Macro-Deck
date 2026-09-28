@@ -4,7 +4,6 @@ use std::sync::Mutex;
 use tauri::http::{header, Request, Response, StatusCode};
 use tauri::webview::NewWindowResponse;
 use tauri::{AppHandle, Manager, Url, WebviewUrl, WebviewWindowBuilder};
-use tauri_plugin_opener::OpenerExt;
 
 use crate::localization::{self, keys};
 use crate::logging;
@@ -201,7 +200,7 @@ fn handle_navigation(app: &AppHandle, url: &Url) -> bool {
     match navigation_action(url) {
         NavigationAction::Load => true,
         NavigationAction::Open(target) => {
-            if let Err(error) = app.opener().open_url(target, None::<&str>) {
+            if let Err(error) = crate::external_url::open(app, target) {
                 logging::warn(&format!("[host-error] could not open {target}: {error}"));
             }
             false

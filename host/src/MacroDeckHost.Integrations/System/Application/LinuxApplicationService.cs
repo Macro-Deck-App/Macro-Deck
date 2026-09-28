@@ -51,9 +51,59 @@ internal sealed class LinuxApplicationService : ApplicationServiceBase
 			return;
 		}
 
-		var startInfo = new ProcessStartInfo("xdg-open") { UseShellExecute = false };
-		startInfo.ArgumentList.Add(path);
+		var startInfo = AppImageEnvironment.TryCreateOpener(path);
+		if (startInfo is null)
+		{
+			startInfo = new ProcessStartInfo("xdg-open") { UseShellExecute = false };
+			startInfo.ArgumentList.Add(path);
+		}
+
 		Process.Start(startInfo);
+	}
+
+	protected override void StartFile(string path)
+	{
+		var opener = OpensWithDefaultApplication(path) ? AppImageEnvironment.TryCreateOpener(path) : null;
+		if (opener is null)
+		{
+			base.StartFile(path);
+			return;
+		}
+
+		Process.Start(opener);
+	}
+
+	protected override void StartWebsite(string url)
+	{
+		var opener = AppImageEnvironment.TryCreateOpener(url);
+		if (opener is null)
+		{
+			base.StartWebsite(url);
+			return;
+		}
+
+		Process.Start(opener);
+	}
+
+	internal static bool OpensWithDefaultApplication(string target)
+	{
+		var path = target;
+		if (!Path.IsPathRooted(target))
+		{
+			if (!Uri.TryCreate(target, UriKind.Absolute, out var uri))
+			{
+				return false;
+			}
+
+			if (!uri.IsFile)
+			{
+				return true;
+			}
+
+			path = uri.LocalPath;
+		}
+
+		return !AppImageEnvironment.IsExecutableFile(path);
 	}
 
 	protected override Task FocusAsync(string path, CancellationToken cancellationToken)

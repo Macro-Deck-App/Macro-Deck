@@ -262,9 +262,7 @@ fn import_archive(app: &AppHandle) {
 }
 
 fn open_url(app: &AppHandle, url: &str) {
-    use tauri_plugin_opener::OpenerExt;
-
-    if let Err(error) = app.opener().open_url(url, None::<&str>) {
+    if let Err(error) = crate::external_url::open(app, url) {
         logging::error(&format!("[menu] could not open {url}: {error}"));
     }
 }
