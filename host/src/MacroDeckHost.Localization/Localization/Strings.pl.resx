@@ -17977,7 +17977,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Aplikacja natywna</value>
   </data>
   <data name="Onboarding.Connect.NativeAppDescription" xml:space="preserve">
-    <value>Aplikację Macro Deck można zainstalować na telefonie lub tablecie z Androidem albo iOS.</value>
+    <value>Kod można zeskanować aparatem telefonu lub tabletu. Otworzy App Store lub Google Play, a jeśli aplikacja jest już zainstalowana, od razu nawiąże połączenie.</value>
   </data>
   <data name="Onboarding.Connect.Open" xml:space="preserve">
     <value>Otwórz</value>

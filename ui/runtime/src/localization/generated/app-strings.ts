@@ -11396,7 +11396,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Notifications.UpdateReady': 'Macro Deck {version} is ready to install',
 	'macrodeck.app:Onboarding.Back': 'Back',
 	'macrodeck.app:Onboarding.Connect.DesktopUiDescription': 'Open this configuration UI in a browser to build and edit your decks from another computer.',
-	'macrodeck.app:Onboarding.Connect.NativeAppDescription': 'Install the Macro Deck app on your Android or iOS phone or tablet.',
+	'macrodeck.app:Onboarding.Connect.NativeAppDescription': 'Scan the code with the camera of your phone or tablet. It opens the App Store or Google Play, or connects right away if the app is already installed.',
 	'macrodeck.app:Onboarding.Connect.NativeAppTitle': 'Native app',
 	'macrodeck.app:Onboarding.Connect.Open': 'Open',
 	'macrodeck.app:Onboarding.Connect.Subtitle': 'Here is how you can reach this Macro Deck from another device.',

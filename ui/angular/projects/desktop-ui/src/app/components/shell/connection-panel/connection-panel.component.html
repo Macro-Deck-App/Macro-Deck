@@ -13,19 +13,8 @@
           {{ appStrings.Shell.ConnectionPanel.PublicListenerUnavailable | translate }}
         </div>
       } @else {
-        @if (qrDataUrl(); as qr) {
-          <div class="cp-qr">
-            <img [src]="qr" [alt]="appStrings.Shell.ConnectionPanel.QrAlt | translate" width="180" height="180">
-            <span class="cp-qr-hint">{{ appStrings.Shell.ConnectionPanel.ScanHint | translate }}</span>
-          </div>
-        }
-
-        @if (groupedPairingCode(); as code) {
-          <div class="cp-section">
-            <span class="cp-label">{{ appStrings.Shell.ConnectionPanel.PairingCode | translate }}</span>
-            <span class="cp-pairing-code">{{ code }}</span>
-            <span class="cp-value cp-muted">{{ appStrings.Shell.ConnectionPanel.PairingCodeExpiresIn | translate: { time: pairingCodeRemaining() } }}</span>
-          </div>
+        @if (isOpen()) {
+          <app-connect-qr [info]="info" />
         }
 
         <div class="cp-section cp-identity">

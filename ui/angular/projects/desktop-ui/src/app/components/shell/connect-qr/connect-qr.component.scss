@@ -1,0 +1,49 @@
+@use '../../../../styles/index' as ds;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.cq-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3125rem;
+}
+
+.cq-qr img {
+  background: #fff;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+}
+
+.cq-qr-hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.cq-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.cq-label {
+  @include ds.section-label;
+}
+
+.cq-pairing-code {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  letter-spacing: 0.08em;
+  color: var(--color-text-primary);
+  user-select: all;
+}
+
+.cq-expiry {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
