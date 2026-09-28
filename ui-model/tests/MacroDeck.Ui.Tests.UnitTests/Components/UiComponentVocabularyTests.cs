@@ -40,6 +40,8 @@ public class UiComponentVocabularyTests
 
 	private static readonly string[] _expectedBorderLines = ["solid", "dashed", "dotted"];
 
+	private static readonly string[] _expectedOverflows = ["shrink", "clip-start"];
+
 	private static readonly string[] _expectedMacroDeckComponents =
 	[
 		"macrodeck.dynamic-text", "macrodeck.clock-dial", "macrodeck.progress-bar",
@@ -56,7 +58,7 @@ public class UiComponentVocabularyTests
 		"answer", "placeholder", "rotation", "originX", "originY", "shape", "cornerRadius", "strokeColor",
 		"strokeWidth", "path", "icon", "columns", "rows", "columnSpan", "rowSpan", "startAngle", "endAngle",
 		"on", "selected",
-		"modifiers", "frame", "clip", "mask", "variants",
+		"modifiers", "frame", "clip", "mask", "variants", "spans", "overflow",
 	];
 
 	private static readonly string[] _expectedIconsVersion1 =
@@ -196,6 +198,12 @@ public class UiComponentVocabularyTests
 	}
 
 	[Test]
+	public void The_stack_overflow_set_is_frozen()
+	{
+		Assert.That(UiComponentOverflows.WellKnown, Is.EqualTo(_expectedOverflows).AsCollection);
+	}
+
+	[Test]
 	public void The_border_style_set_is_frozen()
 	{
 		Assert.That(UiComponentBorderStyles.WellKnown, Is.EqualTo(_expectedBorderStyles).AsCollection);
@@ -302,6 +310,7 @@ public class UiComponentVocabularyTests
 			Gap = 0.02,
 			Padding = 0.06,
 			Background = "#101014",
+			Overflow = UiComponentOverflows.ClipStart,
 			MainSize = 0.42,
 			Fill = true,
 			Children =
@@ -310,6 +319,11 @@ public class UiComponentVocabularyTests
 				{
 					Key = "text",
 					Text = "Partly cloudy",
+					Spans = UiValue.Of<IReadOnlyList<UiTextSpan>>(
+					[
+						UiTextSpan.FromText("Partly ", "#ffcc00", UiComponentTextWeights.Bold),
+						UiTextSpan.FromText("cloudy"),
+					]),
 					Size = 0.11,
 					MinSize = 0.078,
 					Weight = UiComponentTextWeights.SemiBold,
@@ -697,6 +711,53 @@ public class UiComponentVocabularyTests
 		{
 			Assert.That(lists["plain"].Properties.ContainsKey("direction"), Is.False);
 			Assert.That(lists["row"].Properties["direction"].GetString(), Is.EqualTo("horizontal"));
+		});
+	}
+
+	[Test]
+	public void Text_spans_and_stack_overflow_reach_the_wire_only_when_declared()
+	{
+		var emote = new UiResource
+		{
+			ResourceId = "acme.emote-25",
+			ContentHash = "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+		};
+		var tree = UiViewBuilder.Build(WidgetSurface(),
+			new UiStack
+			{
+				Key = "root",
+				Overflow = UiComponentOverflows.ClipStart,
+				Children =
+				[
+					new UiStack { Key = "plainStack", Children = [new UiTextRun { Key = "plain", Text = "a" }] },
+					new UiTextRun
+					{
+						Key = "rich",
+						Text = "hi Kappa",
+						Spans = UiValue.Of<IReadOnlyList<UiTextSpan>>(
+						[
+							UiTextSpan.FromText("hi ", "#9146ff", UiComponentTextWeights.Bold),
+							UiTextSpan.FromImage(emote, "Kappa"),
+							UiTextSpan.FromImage(emote),
+						]),
+					},
+				],
+			});
+
+		var plainStack = tree.Root.Children[0];
+		var plain = plainStack.Children[0];
+		var rich = tree.Root.Children[1];
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(tree.Root.Properties["overflow"].GetString(), Is.EqualTo("clip-start"));
+			Assert.That(plainStack.Properties.ContainsKey("overflow"), Is.False);
+			Assert.That(plain.Properties.ContainsKey("spans"), Is.False);
+			Assert.That(rich.Properties["text"].GetString(), Is.EqualTo("hi Kappa"));
+			Assert.That(rich.Properties["spans"].GetRawText(), Is.EqualTo(
+				"""[{"text":"hi ","color":"#9146ff","weight":"bold"},""" +
+				"""{"image":{"resourceId":"acme.emote-25","contentHash":"sha256:0000000000000000000000000000000000000000000000000000000000000000"},"alt":"Kappa"},""" +
+				"""{"image":{"resourceId":"acme.emote-25","contentHash":"sha256:0000000000000000000000000000000000000000000000000000000000000000"}}]"""));
 		});
 	}
 

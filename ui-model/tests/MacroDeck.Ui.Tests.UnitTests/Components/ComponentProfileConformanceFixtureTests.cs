@@ -52,7 +52,10 @@ public class ComponentProfileConformanceFixtureTests
 		yield return "conformance-building-blocks-tree.json";
 		yield return "conformance-modifier-tree.json";
 		yield return "conformance-responsive-tree.json";
+		yield return "conformance-chat-tree.json";
 	}
+
+	private static readonly bool[] _chatSpanIsImage = [false, false, true, true, false];
 
 	private static readonly string[] _transformKeys = ["rotation", "originX", "originY", "zoom", "offsetX", "offsetY"];
 
@@ -477,6 +480,41 @@ public class ComponentProfileConformanceFixtureTests
 			Assert.That(artworkLayer.Type, Is.EqualTo(UiComponents.Button));
 			Assert.That(artworkLayer.Properties.ContainsKey("events"), Is.False);
 			Assert.That(artworkLayer.Properties.ContainsKey("source"), Is.True);
+		});
+	}
+
+	[Test]
+	public void The_chat_fixture_pins_the_spans_the_clipping_stack_and_its_version_two_fallback()
+	{
+		var tree = JsonSerializer.Deserialize<UiTree>(ReadTree("conformance-chat-tree.json"), UiCanonicalJson.Options)!;
+		var nodes = Walk(tree.Root).ToDictionary(node => node.Id, StringComparer.Ordinal);
+
+		var feed = nodes["conformance.feed"];
+		var last = nodes["conformance.feed.last"];
+		var spans = last.Properties["spans"].EnumerateArray().ToList();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(feed.Properties["overflow"].GetString(), Is.EqualTo(UiComponentOverflows.ClipStart));
+			Assert.That(feed.RequiredComponentVersion, Is.EqualTo(2),
+				"a version 1 reader ignores overflow, so the clipping stack has to ask for version 2");
+			Assert.That(feed.Fallback?.Type, Is.EqualTo(UiComponents.Stack));
+			Assert.That(feed.Fallback!.Properties.ContainsKey("overflow"), Is.False);
+			Assert.That(nodes["conformance.feed.first"].Properties["fill"].GetBoolean(), Is.True,
+				"a fill child inside a clipping stack is the case a reader that shares the box would get wrong");
+			Assert.That(nodes["conformance.shrinking"].Properties["overflow"].GetString(), Is.EqualTo(UiComponentOverflows.Shrink));
+			Assert.That(UiComponentOverflows.WellKnown, Does.Not.Contain(nodes["conformance.unknown"].Properties["overflow"].GetString()),
+				"an unknown overflow value is what a reader has to treat as shrink");
+
+			Assert.That(last.Properties["text"].GetString(), Is.EqualTo("ada: hi Kappa !"),
+				"text stays the plain equivalent a reader without spans draws");
+			Assert.That(spans.Select(span => span.TryGetProperty("image", out _)),
+				Is.EqualTo(_chatSpanIsImage).AsCollection);
+			Assert.That(spans[2].GetProperty("alt").GetString(), Is.EqualTo("Kappa"));
+			Assert.That(spans[3].TryGetProperty("alt", out _), Is.False, "a decorative image carries no alt at all");
+			Assert.That(spans[0].GetProperty("color").GetString(), Is.EqualTo("#9146ff"));
+			Assert.That(spans[4].GetProperty("color").GetString(), Is.EqualTo("red"),
+				"a colour that is not #rrggbb is the case a reader has to ignore");
 		});
 	}
 

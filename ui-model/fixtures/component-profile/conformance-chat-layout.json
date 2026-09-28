@@ -1,0 +1,151 @@
+{
+  "cases": [
+    {
+      "basis": 240,
+      "tile": {
+        "width": 240,
+        "height": 240
+      },
+      "nodes": {
+        "conformance.feed": {
+          "width": 240.0,
+          "height": 80.0,
+          "padding": 4.8,
+          "gap": 2.4,
+          "clipsStart": true,
+          "justifyContent": "flex-end"
+        },
+        "conformance.feed.first": {
+          "width": 230.4,
+          "height": null
+        },
+        "conformance.feed.fixed": {
+          "width": 230.4,
+          "height": 24.0
+        },
+        "conformance.feed.last": {
+          "width": 230.4,
+          "fontSize": 19.2,
+          "lines": 4,
+          "runs": [
+            {
+              "text": "ada",
+              "color": "#9146ff",
+              "weight": 700
+            },
+            {
+              "text": ": hi ",
+              "color": null,
+              "weight": null
+            },
+            {
+              "image": "conformance.emote.kappa",
+              "alt": "Kappa"
+            },
+            {
+              "image": "conformance.badge.moderator",
+              "alt": null
+            },
+            {
+              "text": " !",
+              "color": null,
+              "weight": null
+            }
+          ]
+        },
+        "conformance.shrinking": {
+          "height": 80.0,
+          "clipsStart": false,
+          "justifyContent": "flex-start"
+        },
+        "conformance.shrinking.child": {
+          "height": 80.0
+        },
+        "conformance.unknown": {
+          "height": 80.0,
+          "clipsStart": false,
+          "justifyContent": "flex-start"
+        },
+        "conformance.unknown.child": {
+          "height": 80.0
+        }
+      }
+    },
+    {
+      "basis": 120,
+      "tile": {
+        "width": 120,
+        "height": 120
+      },
+      "nodes": {
+        "conformance.feed": {
+          "width": 120.0,
+          "height": 40.0,
+          "padding": 2.4,
+          "gap": 1.2,
+          "clipsStart": true,
+          "justifyContent": "flex-end"
+        },
+        "conformance.feed.first": {
+          "width": 115.2,
+          "height": null
+        },
+        "conformance.feed.fixed": {
+          "width": 115.2,
+          "height": 12.0
+        },
+        "conformance.feed.last": {
+          "width": 115.2,
+          "fontSize": 9.6,
+          "lines": 4,
+          "runs": [
+            {
+              "text": "ada",
+              "color": "#9146ff",
+              "weight": 700
+            },
+            {
+              "text": ": hi ",
+              "color": null,
+              "weight": null
+            },
+            {
+              "image": "conformance.emote.kappa",
+              "alt": "Kappa"
+            },
+            {
+              "image": "conformance.badge.moderator",
+              "alt": null
+            },
+            {
+              "text": " !",
+              "color": null,
+              "weight": null
+            }
+          ]
+        },
+        "conformance.shrinking": {
+          "height": 40.0,
+          "clipsStart": false,
+          "justifyContent": "flex-start"
+        },
+        "conformance.shrinking.child": {
+          "height": 40.0
+        },
+        "conformance.unknown": {
+          "height": 40.0,
+          "clipsStart": false,
+          "justifyContent": "flex-start"
+        },
+        "conformance.unknown.child": {
+          "height": 40.0
+        }
+      }
+    }
+  ],
+  "withoutStackVersion2": {
+    "draws": "conformance.feedFallback",
+    "notDrawn": "conformance.feed",
+    "note": "A reader whose ui.stack is version 1 never draws conformance.feed: it asks for version 2, so the reader draws its fallback, a shrinking stack holding the newest message in at most two lines. Had the producer not asked for version 2, that reader would ignore overflow and squash every message into the box."
+  }
+}
