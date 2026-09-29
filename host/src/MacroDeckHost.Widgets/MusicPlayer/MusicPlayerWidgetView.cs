@@ -99,6 +99,9 @@ internal static class MusicPlayerWidgetView
 		{
 			Key = "musicPlayer",
 			Direction = UiComponentDirections.Vertical,
+			Background = UiValue.Optional(() => config.Value.BackgroundColor is { } background
+				? UiValue.Of(background)
+				: UiValue.None<string>()),
 			Children =
 			[
 				new UiWhen
@@ -129,7 +132,7 @@ internal static class MusicPlayerWidgetView
 			Direction = UiComponentDirections.Vertical,
 			Padding = safeArea,
 			Gap = _gap,
-			Background = BackgroundColor(state),
+			Background = PaletteBackground(state, config),
 			Children =
 			[
 				new UiWhen
@@ -209,7 +212,7 @@ internal static class MusicPlayerWidgetView
 			Key = "fullCover",
 			Fill = true,
 			Direction = UiComponentDirections.Vertical,
-			Background = BackgroundColor(state),
+			Background = PaletteBackground(state, config),
 			Children =
 			[
 				new UiWhen
@@ -229,7 +232,7 @@ internal static class MusicPlayerWidgetView
 						Padding = safeArea,
 						// Never absent on this branch: absence on a button means the reader's accent colour,
 						// and black behind an artwork drawn to cover is invisible anyway.
-						Background = UiValue.From(() => state.Value.Background ?? "#000000"),
+						Background = UiValue.From(() => ArtworkBackground(state, config)),
 						Source = UiValue.Optional(() => state.Value.Artwork is { } artwork
 							? UiValue.Of(artwork)
 							: UiValue.None<UiResource>()),
@@ -598,10 +601,17 @@ internal static class MusicPlayerWidgetView
 			? UiValue.Of(_pausedSaturation)
 			: UiValue.None<double>());
 
-	private static UiValue<string> BackgroundColor(UiState<MusicPlayerViewState> state)
-		=> UiValue.Optional(() => state.Value.Background is { } background
+	private static UiValue<string> PaletteBackground(UiState<MusicPlayerViewState> state,
+		UiState<MusicPlayerWidgetData> config)
+		=> UiValue.Optional(() => config.Value.BackgroundColor is null && state.Value.Background is { } background
 			? UiValue.Of(background)
 			: UiValue.None<string>());
+
+	// A transparent tile still needs an opaque face behind artwork drawn at reduced opacity.
+	private static string ArtworkBackground(UiState<MusicPlayerViewState> state, UiState<MusicPlayerWidgetData> config)
+		=> config.Value.BackgroundColor is { } configured && configured != WidgetColor.Transparent
+			? configured
+			: state.Value.Background ?? "#000000";
 
 	/// <summary>The timeline's colour: the artwork's accent while playing, a flat grey while paused, and
 	/// absent - the reader's own accent - when there is no artwork to borrow a colour from.</summary>

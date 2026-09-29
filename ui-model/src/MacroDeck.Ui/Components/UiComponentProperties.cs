@@ -42,7 +42,9 @@ public static class UiComponentProperties
 	/// reason <see cref="Color" /> gives. Absent means a <see cref="UiComponents.Stack" /> paints no
 	/// background and a <see cref="UiComponents.Button" /> paints the reader's own accent colour - a
 	/// button always has a face, and spelling that face's default as a role would freeze it against the
-	/// reader's theme, which is the split <see cref="LevelColor" /> already makes.</summary>
+	/// reader's theme, which is the split <see cref="LevelColor" /> already makes. A stack and a button
+	/// also accept the literal <c>transparent</c>: nothing is painted, and on a widget's root node the
+	/// reader drops the tile face behind the widget as well.</summary>
 	public const string Background = "background";
 
 	/// <summary>A text's content. Either a literal string or a localization reference the reader resolves in

@@ -161,6 +161,27 @@ public class UiConfigVocabularyTests
 	}
 
 	[Test]
+	public void A_colour_input_authored_without_the_transparent_flag_emits_the_same_node_as_before()
+	{
+		var tree = UiViewBuilder.Build(ConfigSurface(), Configure(new UiColorInput { Key = "color" }));
+
+		var node = Walk(tree.Root).Single(n => n.Type == UiConfigPrimitives.Color);
+
+		Assert.That(node.Properties.Keys, Does.Not.Contain(UiConfigProperties.AllowTransparent));
+	}
+
+	[Test]
+	public void A_colour_input_offering_transparent_carries_the_flag()
+	{
+		var tree = UiViewBuilder.Build(ConfigSurface(),
+			Configure(new UiColorInput { Key = "color", AllowTransparent = true }));
+
+		var node = Walk(tree.Root).Single(n => n.Type == UiConfigPrimitives.Color);
+
+		Assert.That(node.Properties[UiConfigProperties.AllowTransparent].GetBoolean(), Is.True);
+	}
+
+	[Test]
 	public void A_button_authored_without_a_confirmation_emits_the_same_node_as_before()
 	{
 		var tree = UiViewBuilder.Build(ConfigSurface(),
@@ -289,6 +310,7 @@ public class UiConfigVocabularyTests
 						Configure(
 							WithOptions(new UiMultiSelectInput { Key = "orderedMultiSelect", Reorderable = true })),
 						Configure(new UiColorInput { Key = "color" }),
+						Configure(new UiColorInput { Key = "background", AllowTransparent = true }),
 						Configure(new UiFileInput
 							{ Key = "file", FileExtensions = UiValue.Of<IReadOnlyList<string>>(["txt"]) }),
 						Configure(new UiFolderInput { Key = "folder" }),

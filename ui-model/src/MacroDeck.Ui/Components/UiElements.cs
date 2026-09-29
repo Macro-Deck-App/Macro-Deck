@@ -130,9 +130,10 @@ public sealed record UiStack : UiComponentContainer
 	/// <summary>Inner padding on every edge. Absent means none.</summary>
 	public UiSize Padding { get; init; }
 
-	/// <summary>The stack's own background, as <c>#rrggbb</c>. A literal colour rather than a role, for the
-	/// reason <see cref="UiTextRun.Color" /> gives. Absent means the stack paints nothing behind its
-	/// children. A reader rejects any other spelling rather than passing it through to its styling
+	/// <summary>The stack's own background, as <c>#rrggbb</c> or the literal <c>transparent</c>. A literal
+	/// colour rather than a role, for the reason <see cref="UiTextRun.Color" /> gives. Absent means the stack
+	/// paints nothing behind its children. On a widget's root, <c>transparent</c> also removes the tile face
+	/// behind the widget. A reader rejects any other spelling rather than passing it through to its styling
 	/// layer.</summary>
 	public UiValue<string> Background { get; init; }
 
@@ -964,8 +965,9 @@ public sealed record UiButton : UiComponentContainer
 	/// <summary>Inner padding on every edge. Absent means none.</summary>
 	public UiSize Padding { get; init; }
 
-	/// <summary>The button's face, as <c>#rrggbb</c>. <b>Absent means the reader's own accent colour</b>,
-	/// not a transparent face - see <see cref="UiComponentProperties.Background" />.</summary>
+	/// <summary>The button's face, as <c>#rrggbb</c> or the literal <c>transparent</c>. <b>Absent means the
+	/// reader's own accent colour</b>, not a transparent face - see
+	/// <see cref="UiComponentProperties.Background" />.</summary>
 	public UiValue<string> Background { get; init; }
 
 	/// <summary>Artwork drawn across the whole box behind the children. Absent means none.</summary>

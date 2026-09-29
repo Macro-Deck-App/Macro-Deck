@@ -3,8 +3,12 @@ using System.Text.Json.Nodes;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeck.Sdk.Widgets;
+using MacroDeckHost.Widgets.Clock;
 using MacroDeckHost.Widgets.HistoryGraph;
+using MacroDeckHost.Widgets.MusicPlayer;
 using MacroDeckHost.Widgets.Slider;
+using MacroDeckHost.Widgets.Timers;
+using MacroDeckHost.Widgets.Weather;
 
 namespace MacroDeckHost.Tests.UnitTests.Widgets;
 
@@ -404,6 +408,53 @@ public class WidgetAppearanceJsonTests
 		});
 	}
 
+	[TestCase(WidgetTypeIds.Clock, "#123456")]
+	[TestCase(WidgetTypeIds.Weather, "#123456")]
+	[TestCase(WidgetTypeIds.HistoryGraph, "#123456")]
+	[TestCase(WidgetTypeIds.MusicPlayer, "#123456")]
+	[TestCase(WidgetTypeIds.Clock, "transparent")]
+	[TestCase(WidgetTypeIds.Weather, "transparent")]
+	[TestCase(WidgetTypeIds.HistoryGraph, "transparent")]
+	[TestCase(WidgetTypeIds.MusicPlayer, "transparent")]
+	[TestCase(WidgetTypeIds.Countdown, "#123456")]
+	[TestCase(WidgetTypeIds.Stopwatch, "transparent")]
+	public void BackgroundColor_IsStoredWhereTheWidgetPaintsItFrom(string type, string color)
+	{
+		var data = Parse("""{"border":{"style":"static"}}""");
+
+		var changed = WidgetAppearanceJson.Apply(data, type,
+			new WidgetAppearancePatch { BackgroundColor = color }, _offOnly);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(WidgetAppearanceJson.SupportedProperties(type), Does.Contain(WidgetAppearanceProperty.BackgroundColor));
+			Assert.That(changed, Is.True);
+			Assert.That(PaintedBackground(type, data), Is.EqualTo(color));
+			Assert.That(data["border"]!["style"]!.GetValue<string>(), Is.EqualTo("static"));
+		});
+	}
+
+	[TestCase(WidgetTypeIds.Clock)]
+	[TestCase(WidgetTypeIds.Weather)]
+	[TestCase(WidgetTypeIds.HistoryGraph)]
+	[TestCase(WidgetTypeIds.MusicPlayer)]
+	[TestCase(WidgetTypeIds.Countdown)]
+	[TestCase(WidgetTypeIds.Stopwatch)]
+	public void ResettingTheBackgroundColor_ReturnsTheWidgetToItsDefault(string type)
+	{
+		var data = Parse("""{"backgroundColor":"transparent","border":{"style":"static"}}""");
+
+		var cleared = WidgetAppearanceJson.ClearProperty(data, type, WidgetAppearanceProperty.BackgroundColor, "off");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(cleared, Is.True);
+			Assert.That(data["backgroundColor"], Is.Null);
+			Assert.That(PaintedBackground(type, data), Is.Null);
+			Assert.That(data["border"], Is.Not.Null);
+		});
+	}
+
 	[Test]
 	public void HistoryGraph_TakesItsLabelAsTheCardTitle()
 	{
@@ -601,4 +652,15 @@ public class WidgetAppearanceJsonTests
 			.OfType<JsonObject>()
 			.FirstOrDefault(entry => entry["id"]!.GetValue<string>() == stateId)?["appearance"]
 			?.AsObject();
+
+	private static string? PaintedBackground(string type, JsonObject data)
+		=> type switch
+		{
+			WidgetTypeIds.Clock => ClockWidgetData.Parse(Element(data)).BackgroundColor,
+			WidgetTypeIds.Weather => WeatherWidgetData.Parse(Element(data)).BackgroundColor,
+			WidgetTypeIds.HistoryGraph => HistoryGraphWidgetData.Parse(Element(data)).BackgroundColor,
+			WidgetTypeIds.MusicPlayer => MusicPlayerWidgetData.Parse(Element(data)).BackgroundColor,
+			WidgetTypeIds.Countdown or WidgetTypeIds.Stopwatch => TimerWidgetSettings.Parse(Element(data)).BackgroundColor,
+			_ => throw new ArgumentOutOfRangeException(nameof(type)),
+		};
 }

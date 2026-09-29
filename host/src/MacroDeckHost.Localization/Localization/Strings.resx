@@ -17704,6 +17704,15 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.GridSettings.CornerRadius" xml:space="preserve">
     <value>Corner radius</value>
   </data>
+  <data name="Widgets.GridSettings.EmptyCells" xml:space="preserve">
+    <value>Empty cells</value>
+  </data>
+  <data name="Widgets.GridSettings.EmptyCellsTransparent" xml:space="preserve">
+    <value>Transparent</value>
+  </data>
+  <data name="Widgets.GridSettings.EmptyCellsVisible" xml:space="preserve">
+    <value>Visible</value>
+  </data>
   <data name="Widgets.GridSettings.FixedByDevice" xml:space="preserve">
     <value>Fixed by {device}</value>
   </data>

@@ -122,6 +122,48 @@ public class UiWidgetAppearanceTests
 	}
 
 	[Test]
+	public void The_background_field_offers_transparent_only_when_the_widget_opts_in()
+	{
+		var plain = Node(View("{}", UiWidgetAppearanceFields.BackgroundColor), UiWidgetAppearanceKeys.BackgroundColor);
+		var optedIn = Node(View("{}", UiWidgetAppearanceFields.BackgroundColor | UiWidgetAppearanceFields.TransparentBackground),
+			UiWidgetAppearanceKeys.BackgroundColor);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(plain.Properties.ContainsKey(UiConfigProperties.AllowTransparent), Is.False);
+			Assert.That(optedIn.Properties[UiConfigProperties.AllowTransparent].GetBoolean(), Is.True);
+		});
+	}
+
+	[Test]
+	public void A_stored_transparent_background_shows_in_its_field()
+	{
+		var view = View("""{"backgroundColor":"transparent"}""",
+			UiWidgetAppearanceFields.BackgroundColor | UiWidgetAppearanceFields.TransparentBackground);
+
+		Assert.That(Value(view, UiWidgetAppearanceKeys.BackgroundColor).GetString(), Is.EqualTo("transparent"));
+	}
+
+	[Test]
+	public void The_transparent_option_on_its_own_builds_no_field_and_no_heading()
+	{
+		var view = View("{}", UiWidgetAppearanceFields.Border | UiWidgetAppearanceFields.TransparentBackground);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Find(view.Tree.Root, "appearance-heading"), Is.Null);
+			Assert.That(Find(view.Tree.Root, UiWidgetAppearanceKeys.BackgroundColor), Is.Null);
+			Assert.That(Find(view.Tree.Root, UiWidgetAppearanceKeys.Border), Is.Not.Null);
+		});
+	}
+
+	[Test]
+	public void All_does_not_offer_transparent()
+	{
+		Assert.That(UiWidgetAppearanceFields.All.HasFlag(UiWidgetAppearanceFields.TransparentBackground), Is.False);
+	}
+
+	[Test]
 	public void Read_returns_the_stored_values_and_null_for_missing_or_mistyped_ones()
 	{
 		using var document = JsonDocument.Parse("""

@@ -90,6 +90,24 @@ internal static class WidgetConfigFragments
 		return labelled ? border with { Label = AppStrings.Widgets.Editor.Border() } : border;
 	}
 
+	public static UiColorInput Background(UiState<string> color)
+	{
+		ArgumentNullException.ThrowIfNull(color);
+
+		return Background(Bind.To(color));
+	}
+
+	public static UiColorInput Background(UiBinding<string> color)
+		=> new()
+		{
+			Key = "backgroundColor",
+			Label = AppStrings.Widgets.Editor.BackgroundColor(),
+			Binding = color,
+			SupportsReset = true,
+			DefaultValue = string.Empty,
+			AllowTransparent = true,
+		};
+
 	/// <summary>The widget's specialized region, holding only the press-trigger flows editor - the room every
 	/// widget but Slider needs and nothing more.</summary>
 	public static UiWidgetEditor FlowsEditor(UiState<JsonElement> flows)

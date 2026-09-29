@@ -1,14 +1,16 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AppStrings, WIDGET_REFERENCE_BORDER_RADIUS } from '@macro-deck/runtime';
-import { LocalizationService } from '@shared';
+import { AppStrings, type EmptyCellStyle, isEmptyCellStyle, WIDGET_REFERENCE_BORDER_RADIUS } from '@macro-deck/runtime';
+import { LocalizationService, SegmentedControlComponent, type SegmentedOption } from '@shared';
 import { ColorPickerComponent, ColorPreset } from '../forms/color-picker/color-picker.component';
 import { InheritableSettingComponent } from '../forms/inheritable-setting/inheritable-setting.component';
+
+const INHERIT_EMPTY_CELL_STYLE = 'inherit';
 
 @Component({
   selector: 'shared-grid-settings',
   standalone: true,
-  imports: [FormsModule, ColorPickerComponent, InheritableSettingComponent],
+  imports: [FormsModule, ColorPickerComponent, InheritableSettingComponent, SegmentedControlComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './grid-settings.component.html',
   styleUrls: ['./grid-settings.component.scss']
@@ -42,11 +44,18 @@ export class GridSettingsComponent {
   @Input() effectiveSpacing = 12;
   @Input() effectiveBorderRadius: number | null = null;
 
+  @Input() emptyCellStyle: EmptyCellStyle | null = null;
+  @Input() inheritedEmptyCellStyle: EmptyCellStyle = 'visible';
+  private readonly emptyCellStyleInheritableState = signal(true);
+  @Input() set emptyCellStyleInheritable(value: boolean) { this.emptyCellStyleInheritableState.set(value); }
+  get emptyCellStyleInheritable(): boolean { return this.emptyCellStyleInheritableState(); }
+
   @Output() colsChange = new EventEmitter<number | null>();
   @Output() rowsChange = new EventEmitter<number | null>();
   @Output() backgroundChange = new EventEmitter<string>();
   @Output() spacingChange = new EventEmitter<number | null>();
   @Output() borderRadiusChange = new EventEmitter<number | null>();
+  @Output() emptyCellStyleChange = new EventEmitter<EmptyCellStyle | null>();
 
   private readonly localization = inject(LocalizationService);
 
@@ -64,6 +73,33 @@ export class GridSettingsComponent {
     this.localization.translateKey(AppStrings.Widgets.GridSettings.CornerRadius));
   readonly backgroundLabel = computed(() =>
     this.localization.translateKey(AppStrings.Widgets.GridSettings.Background));
+
+  readonly emptyCellsLabel = computed(() => this.localization.translateKey(AppStrings.Widgets.GridSettings.EmptyCells));
+
+  readonly emptyCellOptions = computed<SegmentedOption[]>(() => {
+    const styles: SegmentedOption[] = [
+      { value: 'visible', label: this.emptyCellStyleLabel('visible') },
+      { value: 'transparent', label: this.emptyCellStyleLabel('transparent') },
+    ];
+    return this.emptyCellStyleInheritableState()
+      ? [{ value: INHERIT_EMPTY_CELL_STYLE, label: this.inheritedLabelState() }, ...styles]
+      : styles;
+  });
+
+  protected get selectedEmptyCellOption(): string {
+    if (this.emptyCellStyle !== null) return this.emptyCellStyle;
+    return this.emptyCellStyleInheritable ? INHERIT_EMPTY_CELL_STYLE : 'visible';
+  }
+
+  protected get emptyCellStyleSummary(): string {
+    return this.emptyCellStyleLabel(this.inheritedEmptyCellStyle);
+  }
+
+  private emptyCellStyleLabel(style: EmptyCellStyle): string {
+    return this.localization.translateKey(style === 'transparent'
+      ? AppStrings.Widgets.GridSettings.EmptyCellsTransparent
+      : AppStrings.Widgets.GridSettings.EmptyCellsVisible);
+  }
 
   readonly backgroundPresets = computed<ColorPreset[]>(() => [
     { label: this.localization.translateKey(AppStrings.Widgets.GridSettings.ColorDark), value: 'rgba(0, 0, 0, 0.7)' },
@@ -112,5 +148,11 @@ export class GridSettingsComponent {
 
   onBorderRadiusReset(): void {
     this.borderRadiusChange.emit(null);
+  }
+
+  onEmptyCellOptionChange(value: string): void {
+    const style = isEmptyCellStyle(value) ? value : null;
+    this.emptyCellStyle = style;
+    this.emptyCellStyleChange.emit(style);
   }
 }

@@ -18,6 +18,10 @@
   opacity: 0.35;
 }
 
+.deck-grid-empty-transparent .deck-grid-cell {
+  opacity: 0;
+}
+
 .deck-grid-tile {
   position: absolute;
   overflow: hidden;
@@ -76,6 +80,14 @@
    * without this the platform menu covers the gesture the tile is in the middle of.
    */
   -webkit-touch-callout: none;
+}
+
+.deck-grid-tile-transparent {
+  box-shadow: none;
+}
+
+.deck-grid-tile-transparent .deck-grid-tile-surface {
+  background-color: transparent;
 }
 
 /* The tint the tile paints for a press it owns itself - a tree that claims the gesture tints its own. */

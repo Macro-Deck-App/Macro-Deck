@@ -38,6 +38,10 @@
       "type": "boolean",
       "description": "Show the progress bar and times."
     },
+    "backgroundColor": {
+      "type": ["string", "null"],
+      "description": "Widget background color, as #rrggbb or transparent. It replaces the artwork's palette behind the player; the full cover's artwork keeps its own backdrop for transparent. Absent or null keeps today's palette background; transparent also removes the deck's tile behind the widget."
+    },
     "showSource": {
       "type": "boolean",
       "description": "Show where playback is happening (device, app or browser source) and the provider's short badge, such as 2/3, in the header."

@@ -2,7 +2,7 @@ import { Component, HostListener, ViewChild, computed, effect, inject, signal, C
 import { Router } from '@angular/router';
 
 import { FileOpenService, FolderService } from '../../../services';
-import { ActionButtonTriggerType, AppStrings, GridRect, GridWidget, PinScope, WidgetType, WidgetClipboardEntry, collectIconPrefetchTargets, rectsOverlap, canPlaceGroup, LocalizedText, resolveLocalizedText, WIDGET_GRID_VIEW_ID } from '@macro-deck/runtime';
+import { ActionButtonTriggerType, AppStrings, type EmptyCellStyle, GridRect, GridWidget, PinScope, WidgetType, WidgetClipboardEntry, collectIconPrefetchTargets, rectsOverlap, canPlaceGroup, LocalizedText, resolveLocalizedText, WIDGET_GRID_VIEW_ID } from '@macro-deck/runtime';
 import { LocalizationService, ButtonComponent, ModalComponent, ProfileService, WidgetClipboardService, IconPrefetchService, ErrorBannerComponent, ToastService, TranslatePipe, FolderViewHostComponent, FolderViewService, WidgetTypeFavoritesService } from '@shared';
 import { DeckEditorGridComponent } from '../../deck-editor/deck-editor-grid.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
@@ -222,6 +222,10 @@ export class DeckPageComponent {
 
   async onBorderRadiusChange(borderRadius: number | null): Promise<void> {
     await this.folderService.setWidgetBorderRadius(borderRadius);
+  }
+
+  async onEmptyCellStyleChange(emptyCellStyle: EmptyCellStyle | null): Promise<void> {
+    await this.folderService.setEmptyCellStyle(emptyCellStyle);
   }
 
   onCellClick(position: { x: number; y: number }): void {

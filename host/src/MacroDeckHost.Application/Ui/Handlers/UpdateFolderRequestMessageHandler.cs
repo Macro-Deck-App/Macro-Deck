@@ -37,7 +37,8 @@ public class UpdateFolderRequestMessageHandler : IUiTransportMessageHandler<Upda
 			request.WidgetBorderRadius,
 			request.IsDefault,
 			request.FolderViewId,
-			request.FolderViewConfiguration);
+			request.FolderViewConfiguration,
+			request.EmptyCellStyle);
 
 		var response = new UpdateFolderResponse { Success = result.Success };
 

@@ -49,7 +49,9 @@ internal static class TwitchChatWidgetConfigView
 						Description = AppStrings.Integrations.Twitch.ChatDialog.AllowModerationDescription(),
 						Binding = Bind.To(allowModeration),
 					},
-					UiWidgetAppearance.Section(data, UiWidgetAppearanceFields.Border),
+					UiWidgetAppearance.Section(data,
+						UiWidgetAppearanceFields.Border | UiWidgetAppearanceFields.BackgroundColor |
+						UiWidgetAppearanceFields.TransparentBackground),
 				],
 			},
 		};

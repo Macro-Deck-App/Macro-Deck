@@ -53,6 +53,12 @@
 		0 0 0 2px var(--color-border-light);
 }
 
+.cp-transparent {
+	background:
+		repeating-conic-gradient(#c8c8c8 0% 25%, #ffffff 0% 50%)
+		50% / 0.5rem 0.5rem;
+}
+
 .cp-selected {
 	border-color: var(--color-text-primary);
 	box-shadow: 0 0 0 1px var(--color-bg-primary);
@@ -64,6 +70,11 @@
 	color: #fff;
 	filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45));
 	pointer-events: none;
+}
+
+.cp-transparent .cp-check {
+	color: #111;
+	filter: none;
 }
 
 .cp-reset,

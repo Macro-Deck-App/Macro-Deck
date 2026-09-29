@@ -379,6 +379,40 @@ describe('Shell', () => {
     });
   });
 
+  describe('empty cells', () => {
+    const styled = (id: string, emptyCellStyle: string | null) =>
+      ({ ...(folder(id) as unknown as Record<string, unknown>), emptyCellStyle }) as never;
+
+    const showDeck = () => client.app.set({ probed: true, authenticated: true, connected: true });
+    const hidden = () =>
+      (root.querySelector('.deck-grid') as HTMLElement).classList.contains('deck-grid-empty-transparent');
+
+    it('follows the style of each folder the deck walks into', () => {
+      mount();
+      client.deck.load([styled('root', 'transparent'), styled('other', 'visible')]);
+      showDeck();
+      const onRoot = hidden();
+
+      client.deck.openFolder('other');
+      const onOther = hidden();
+      client.deck.openFolder('root');
+
+      expect(onRoot).toBeTrue();
+      expect(onOther).toBeFalse();
+      expect(hidden()).toBeTrue();
+    });
+
+    it('does not carry a transparent style into a folder that states none', () => {
+      mount();
+      client.deck.load([styled('root', 'transparent'), styled('other', null)]);
+      showDeck();
+
+      client.deck.openFolder('other');
+
+      expect(hidden()).toBeFalse();
+    });
+  });
+
   it('puts the settings entry on screen, which is the only way to sign out', () => {
     mount();
 

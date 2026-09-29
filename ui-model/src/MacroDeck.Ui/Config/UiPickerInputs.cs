@@ -42,8 +42,24 @@ public sealed record UiBooleanInput : UiInput<bool>
 /// picker and which is the one type whose reset affordance the existing schema makes opt-in.</summary>
 public sealed record UiColorInput : UiInput<string>
 {
+	/// <summary>Offers a Transparent choice next to the colours, which stores the literal <c>transparent</c>
+	/// instead of a <c>#rrggbb</c> value. Only set it for a value the reader accepts <c>transparent</c> for;
+	/// absent or false keeps the picker to opaque colours. A renderer that does not know the flag ignores it.
+	/// </summary>
+	public UiValue<bool> AllowTransparent { get; init; }
+
 	/// <inheritdoc />
 	public override string Type => UiConfigPrimitives.Color;
+
+	/// <inheritdoc />
+	protected internal override void DeclareProperties(UiPropertyDeclaration properties)
+	{
+		ArgumentNullException.ThrowIfNull(properties);
+
+		base.DeclareProperties(properties);
+
+		properties.Set(UiConfigProperties.AllowTransparent, AllowTransparent);
+	}
 }
 
 /// <summary>A date and time. Counterpart of the <c>DateTime</c> parameter type, which the editor renders as its

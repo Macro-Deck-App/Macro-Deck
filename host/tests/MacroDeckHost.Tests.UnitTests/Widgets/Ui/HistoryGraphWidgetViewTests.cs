@@ -154,6 +154,37 @@ public class HistoryGraphWidgetViewTests
 		});
 	}
 
+	[Test]
+	public void A_configured_background_sits_behind_a_chart_that_still_fills_the_card_edge_to_edge()
+	{
+		var host = Render(new { valueVariable = Metric, backgroundColor = "#263238" });
+		var layer = host.Root.Children.Single();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.Root.Type, Is.EqualTo(UiComponents.Stack));
+			Assert.That(host.Root.Text(UiComponentProperties.Background), Is.EqualTo("#263238"));
+			Assert.That(host.Root.HasProperty(UiComponentProperties.Padding), Is.False);
+			Assert.That(layer.Type, Is.EqualTo(UiComponents.Layer));
+			Assert.That(layer.Flag(UiComponentProperties.Fill), Is.True);
+			Assert.That(layer.Children.Select(child => child.Type), Is.EqualTo(_expectedLayers).AsCollection);
+		});
+	}
+
+	[Test]
+	public void A_transparent_background_is_carried_to_the_card()
+	{
+		var host = Render(new { valueVariable = Metric, backgroundColor = "transparent" });
+
+		Assert.That(host.Root.Text(UiComponentProperties.Background), Is.EqualTo("transparent"));
+	}
+
+	[Test]
+	public void Without_a_background_the_card_keeps_its_layer_root()
+	{
+		Assert.That(Render(_default).Root.Type, Is.EqualTo(UiComponents.Layer));
+	}
+
 	private static UiTestHost Render(object data, string? unit = null)
 	{
 		var config = Config(data);

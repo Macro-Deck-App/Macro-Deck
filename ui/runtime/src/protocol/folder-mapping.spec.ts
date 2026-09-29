@@ -45,6 +45,16 @@ describe('folder mapping', () => {
     expect(folderFromWire(wireFolder({ backgroundColor: '#101820' })).background).toBe('#101820');
   });
 
+  it('reads the empty cell style the host states', () => {
+    expect(folderFromWire(wireFolder({ emptyCellStyle: 'transparent' })).emptyCellStyle).toBe('transparent');
+    expect(folderFromWire(wireFolder({ emptyCellStyle: 'visible' })).emptyCellStyle).toBe('visible');
+  });
+
+  it('leaves an absent or unknown empty cell style to inheritance', () => {
+    expect(folderFromWire(wireFolder()).emptyCellStyle).toBeNull();
+    expect(folderFromWire(wireFolder({ emptyCellStyle: 'frosted' })).emptyCellStyle).toBeNull();
+  });
+
   it('falls an absent or empty view back to the built-in grid', () => {
     expect(folderFromWire(wireFolder()).viewId).toBe(WIDGET_GRID_VIEW_ID);
     expect(folderFromWire(wireFolder({ viewId: '' })).viewId).toBe(WIDGET_GRID_VIEW_ID);

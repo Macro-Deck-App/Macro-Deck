@@ -27,6 +27,15 @@ const DEFAULT_PRESET_VALUES: { key: string; value: string }[] = [
   { key: AppStrings.Forms.ColorPicker.Pink, value: '#ec4899' },
 ];
 
+export const TRANSPARENT_COLOR = 'transparent';
+
+export function defaultColorPresets(localization: LocalizationService): ColorPreset[] {
+  return DEFAULT_PRESET_VALUES.map(preset => ({
+    label: localization.translateKey(preset.key),
+    value: preset.value,
+  }));
+}
+
 const CUSTOM_FALLBACK = '#22c55e';
 const CUSTOM_FALLBACK_HSV: Hsv = hexToHsv(CUSTOM_FALLBACK) ?? { h: 0, s: 0, v: 0 };
 
@@ -55,10 +64,9 @@ export class ColorPickerComponent implements ControlValueAccessor {
   public readonly presets = input<ColorPreset[] | undefined>(undefined);
 
   protected readonly effectivePresets = computed<ColorPreset[]>(() =>
-    this.presets() ?? DEFAULT_PRESET_VALUES.map(preset => ({
-      label: this.localization.translateKey(preset.key),
-      value: preset.value,
-    })));
+    this.presets() ?? defaultColorPresets(this.localization));
+
+  protected readonly transparentColor = TRANSPARENT_COLOR;
 
   protected readonly pickerAriaLabel = computed(() =>
     this.label() || this.localization.translateKey(AppStrings.Forms.ColorPicker.ColorPickerLabel));

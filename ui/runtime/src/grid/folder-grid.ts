@@ -1,3 +1,4 @@
+import { DEFAULT_EMPTY_CELL_STYLE, EmptyCellStyle, isEmptyCellStyle } from '../domain/folder.interface';
 import { WIDGET_REFERENCE_BORDER_RADIUS, WIDGET_REFERENCE_GAP } from '../domain/widget.interface';
 import { DEFAULT_GRID_GEOMETRY } from './grid-metrics';
 
@@ -6,6 +7,7 @@ export interface ProfileGridDefaults {
   rows?: number;
   spacing?: number;
   borderRadius?: number;
+  emptyCellStyle?: EmptyCellStyle | null;
 }
 
 export interface FolderGridSettings {
@@ -13,6 +15,7 @@ export interface FolderGridSettings {
   rows: number | null;
   spacing: number | null;
   borderRadius: number | null;
+  emptyCellStyle?: EmptyCellStyle | null;
 }
 
 export interface ResolvedFolderGrid {
@@ -20,22 +23,28 @@ export interface ResolvedFolderGrid {
   rows: number;
   spacing: number;
   borderRadius: number;
+  emptyCellStyle: EmptyCellStyle;
 }
 
-function inherited(
+function inherited<T>(
   chain: readonly (FolderGridSettings | null | undefined)[],
-  pick: (folder: FolderGridSettings) => number | null,
-  profile: number | undefined,
-  fallback: number,
-): number {
+  pick: (folder: FolderGridSettings) => unknown,
+  profile: unknown,
+  fallback: T,
+  accepts: (value: unknown) => value is T,
+): T {
   for (let index = 0; index < chain.length; index++) {
     const folder = chain[index];
     if (!folder) continue;
     const stated = pick(folder);
-    if (typeof stated === 'number') return stated;
+    if (accepts(stated)) return stated;
   }
-  if (typeof profile === 'number') return profile;
+  if (accepts(profile)) return profile;
   return fallback;
+}
+
+function isNumber(value: unknown): value is number {
+  return typeof value === 'number';
 }
 
 export function resolveFolderGrid(
@@ -45,10 +54,12 @@ export function resolveFolderGrid(
 ): ResolvedFolderGrid {
   const chain = [folder as FolderGridSettings | null | undefined].concat(ancestors);
   return {
-    cols: inherited(chain, stated => stated.cols, profile?.columns, DEFAULT_GRID_GEOMETRY.cols),
-    rows: inherited(chain, stated => stated.rows, profile?.rows, DEFAULT_GRID_GEOMETRY.rows),
-    spacing: inherited(chain, stated => stated.spacing, profile?.spacing, WIDGET_REFERENCE_GAP),
+    cols: inherited(chain, stated => stated.cols, profile?.columns, DEFAULT_GRID_GEOMETRY.cols, isNumber),
+    rows: inherited(chain, stated => stated.rows, profile?.rows, DEFAULT_GRID_GEOMETRY.rows, isNumber),
+    spacing: inherited(chain, stated => stated.spacing, profile?.spacing, WIDGET_REFERENCE_GAP, isNumber),
     borderRadius: inherited(
-      chain, stated => stated.borderRadius, profile?.borderRadius, WIDGET_REFERENCE_BORDER_RADIUS),
+      chain, stated => stated.borderRadius, profile?.borderRadius, WIDGET_REFERENCE_BORDER_RADIUS, isNumber),
+    emptyCellStyle: inherited(
+      chain, stated => stated.emptyCellStyle, profile?.emptyCellStyle, DEFAULT_EMPTY_CELL_STYLE, isEmptyCellStyle),
   };
 }

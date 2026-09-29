@@ -23,7 +23,8 @@ internal static class TwitchChatWidgetView
 		UiState<TwitchChatViewState> state,
 		int cornerRadius = WidgetSafeArea.DefaultCornerRadius,
 		UiResource? icon = null,
-		IReadOnlyList<UiEventHandler>? events = null)
+		IReadOnlyList<UiEventHandler>? events = null,
+		string? backgroundColor = null)
 	{
 		ArgumentNullException.ThrowIfNull(state);
 
@@ -33,6 +34,7 @@ internal static class TwitchChatWidgetView
 			Events = events ?? [],
 			Direction = UiComponentDirections.Vertical,
 			Padding = WidgetSafeArea.For(cornerRadius),
+			Background = backgroundColor is { } background ? UiValue.Of(background) : UiValue.None<string>(),
 			Gap = _headerGap,
 			Children =
 			[

@@ -27,6 +27,7 @@ internal static class WeatherWidgetView
 			Key = "weather",
 			Direction = UiComponentDirections.Vertical,
 			Padding = WidgetSafeArea.For(cornerRadius),
+			Background = config.BackgroundColor is { } background ? UiValue.Of(background) : UiValue.None<string>(),
 			Children =
 			[
 				new UiWhen

@@ -253,6 +253,30 @@ appearance actions to reach them.
   resolves that source for your tree; it is the only host source it resolves for a provider's tree.
 - On a Macro Deck release older than these fields, the font list stays empty and the field labels show as
   `[[macrodeck:...]]` keys, because Macro Deck resolves the `macrodeck` catalog from its own copy.
+- Transparency is opt-in. Add `UiWidgetAppearanceFields.TransparentBackground` next to `BackgroundColor`
+  and the background field also offers **Transparent**, which stores the literal `transparent`. Add it only
+  when your view passes that value on to its root node (see
+  [widget types](/ui/views/widget-types/#standard-appearance)). `All` does not include it, and on its own it
+  builds nothing.
+
+## Offering a transparent colour
+
+```csharp
+new UiColorInput
+{
+    Key = "backgroundColor",
+    Label = Strings.Background(),
+    Binding = Bind.To(background),
+    SupportsReset = true,
+    DefaultValue = "",
+    AllowTransparent = true,
+}
+```
+
+`AllowTransparent` puts a **Transparent** swatch after the picker's colours. Choosing it stores the literal
+`transparent` instead of a `#rrggbb` value. Set it only for a value your widget knows how to read: a stack or
+button `background` accepts it, a modifier's does not. Without the flag, or on a Macro Deck release that
+does not know it, the picker offers colours only and the node is serialised exactly as before.
 
 ## Declining
 

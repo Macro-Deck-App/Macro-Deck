@@ -9,12 +9,12 @@ describe('folder grid inheritance', () => {
 
   it('prefers what the folder states', () => {
     expect(resolveFolderGrid(stated, profile))
-      .toEqual({ cols: 8, rows: 4, spacing: 20, borderRadius: 30 });
+      .toEqual({ cols: 8, rows: 4, spacing: 20, borderRadius: 30, emptyCellStyle: 'visible' });
   });
 
   it('falls back to the profile for everything the folder leaves out', () => {
     expect(resolveFolderGrid(nothing, profile))
-      .toEqual({ cols: 6, rows: 5, spacing: 18, borderRadius: 26 });
+      .toEqual({ cols: 6, rows: 5, spacing: 18, borderRadius: 26, emptyCellStyle: 'visible' });
   });
 
   it('takes the nearest ancestor that states one, ahead of the profile', () => {
@@ -37,7 +37,7 @@ describe('folder grid inheritance', () => {
     const parent = { cols: 6, rows: null, spacing: null, borderRadius: null };
 
     expect(resolveFolderGrid(nothing, profile, [parent]))
-      .toEqual({ cols: 6, rows: 5, spacing: 18, borderRadius: 26 });
+      .toEqual({ cols: 6, rows: 5, spacing: 18, borderRadius: 26, emptyCellStyle: 'visible' });
   });
 
   it('lets what the folder states win over an ancestor that states one too', () => {
@@ -56,12 +56,13 @@ describe('folder grid inheritance', () => {
       rows: DEFAULT_GRID_GEOMETRY.rows,
       spacing: WIDGET_REFERENCE_GAP,
       borderRadius: WIDGET_REFERENCE_BORDER_RADIUS,
+      emptyCellStyle: 'visible',
     });
   });
 
   it('inherits field by field', () => {
     expect(resolveFolderGrid({ ...nothing, cols: 8 }, profile))
-      .toEqual({ cols: 8, rows: 5, spacing: 18, borderRadius: 26 });
+      .toEqual({ cols: 8, rows: 5, spacing: 18, borderRadius: 26, emptyCellStyle: 'visible' });
   });
 
   it('treats a stated zero as stated', () => {
@@ -70,5 +71,34 @@ describe('folder grid inheritance', () => {
 
   it('resolves a folder it has never heard of', () => {
     expect(resolveFolderGrid(null).cols).toBe(DEFAULT_GRID_GEOMETRY.cols);
+  });
+
+  describe('empty cells', () => {
+    const transparent = { ...nothing, emptyCellStyle: 'transparent' as const };
+    const visible = { ...nothing, emptyCellStyle: 'visible' as const };
+
+    it('prefers what the folder states over the profile default', () => {
+      expect(resolveFolderGrid(visible, { emptyCellStyle: 'transparent' }).emptyCellStyle).toBe('visible');
+    });
+
+    it('takes the nearest ancestor that states one, ahead of the profile', () => {
+      expect(resolveFolderGrid(nothing, { emptyCellStyle: 'visible' }, [nothing, transparent]).emptyCellStyle)
+        .toBe('transparent');
+    });
+
+    it('falls back to the profile default when no folder in the chain states one', () => {
+      expect(resolveFolderGrid(nothing, { emptyCellStyle: 'transparent' }, [nothing]).emptyCellStyle)
+        .toBe('transparent');
+    });
+
+    it('shows empty cells when neither the folders nor the profile say otherwise', () => {
+      expect(resolveFolderGrid(nothing, profile).emptyCellStyle).toBe('visible');
+    });
+
+    it('treats a folder and profile from a host without the setting as visible', () => {
+      const legacyFolder = { cols: null, rows: null, spacing: null, borderRadius: null };
+
+      expect(resolveFolderGrid(legacyFolder, { columns: 5, rows: 3 }).emptyCellStyle).toBe('visible');
+    });
   });
 });

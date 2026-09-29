@@ -456,12 +456,13 @@ export class Shell {
           void this.client.executeTrigger(widgetId, triggerType),
         geometry,
         borderRadius: grid.borderRadius,
+        emptyCellStyle: grid.emptyCellStyle,
       });
     }
 
     // Re-applied on every paint, not only at creation: a folder carries its own grid size, corner
     // radius and background, so walking into one keeps the previous folder's otherwise.
-    this.grid.configure(geometry, grid.borderRadius);
+    this.grid.configure(geometry, grid.borderRadius, grid.emptyCellStyle);
     // Never on the grid as well: a translucent colour would stack there.
     this.root.style.background = folder && folder.background ? folder.background : '';
     this.grid.setFocusedWidget(this.deckInput.focusedWidgetId());

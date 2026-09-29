@@ -64,3 +64,10 @@ export function nodeHexColor(node: UiNode | null | undefined, key: string): stri
 export function asHexColor(raw: unknown): string | undefined {
   return typeof raw === 'string' && HEX_COLOR.test(raw) ? raw : undefined;
 }
+
+export const TRANSPARENT_BACKGROUND = 'transparent';
+
+export function nodeBackgroundColor(node: UiNode | null | undefined, key: string): string | undefined {
+  const raw = nodeRaw(node, key);
+  return raw === TRANSPARENT_BACKGROUND ? TRANSPARENT_BACKGROUND : asHexColor(raw);
+}

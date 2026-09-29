@@ -254,6 +254,7 @@
       @case (types.Color) {
         <shared-color-picker
           [defaultColor]="colorDefaultValue()"
+          [presets]="colorPresets()"
           [ngModel]="stringValue()"
           (ngModelChange)="onChange($event)" />
       }

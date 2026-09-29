@@ -107,6 +107,25 @@
 
   <div class="form-group form-group--section">
     <label>
+      <span>{{ emptyCellsLabel() }}</span>
+      @if (emptyCellStyleInheritable && emptyCellStyle === null) {
+        <span class="setting-value setting-value-muted">{{ emptyCellStyleSummary }}</span>
+      }
+    </label>
+    <shared-segmented-control
+      [options]="emptyCellOptions()"
+      [value]="selectedEmptyCellOption"
+      [ariaLabel]="emptyCellsLabel()"
+      (valueChange)="onEmptyCellOptionChange($event)" />
+    @if (noEffectNote) {
+      <div class="lock-note">{{ noEffectNote }}</div>
+    }
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="form-group form-group--section">
+    <label>
       <span>{{ backgroundLabel() }}</span>
     </label>
     <shared-color-picker

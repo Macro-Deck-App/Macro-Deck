@@ -141,6 +141,27 @@ public class WeatherWidgetConfigTests
 		Assert.That(session, Is.Null);
 	}
 
+	[Test]
+	public void The_background_offers_transparent_and_saves_it_as_the_schema_allows()
+	{
+		var host = Render(new { });
+		var field = host.ById("backgroundColor");
+
+		field.Change("transparent");
+
+		var composed = Compose(host);
+		var provider = new WidgetDataSchemaProvider(new WidgetTypeRegistry(new RecordingMediator()));
+		Assert.That(provider.TryGet(WidgetTypeIds.Weather, out var schema), Is.True);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(field.Flag(UiConfigProperties.AllowTransparent), Is.True);
+			Assert.That(field.Flag(UiConfigProperties.SupportsReset), Is.True);
+			Assert.That(composed.GetProperty("backgroundColor").GetString(), Is.EqualTo("transparent"));
+			Assert.That(WidgetDataSchema.Validate(schema!, composed), Is.Empty);
+		});
+	}
+
 	private static UiTestHost Render(object data)
 		=> UiTestHost.Render(WeatherWidgetConfigView.Build(JsonSerializer.SerializeToElement(data),
 			new StubWeatherRegistry([
@@ -173,6 +194,7 @@ public class WeatherWidgetConfigTests
 
 		var data = new Dictionary<string, object?>
 		{
+			["backgroundColor"] = host.ById("backgroundColor").Text(UiConfigProperties.Value),
 			["instanceId"] = host.ById("instanceId").Text(UiConfigProperties.Value),
 			["showIcon"] = host.ById("showIcon").Flag(UiConfigProperties.Value),
 			["showTemperature"] = host.ById("showTemperature").Flag(UiConfigProperties.Value),

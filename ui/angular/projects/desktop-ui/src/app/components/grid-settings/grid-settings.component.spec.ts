@@ -227,4 +227,69 @@ describe('GridSettingsComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain('Default');
   });
+
+  describe('empty cells', () => {
+    function emptyCellOptions(
+      fixture: ReturnType<typeof TestBed.createComponent<GridSettingsComponent>>,
+    ): HTMLButtonElement[] {
+      const group = fixture.nativeElement.querySelector('shared-segmented-control') as HTMLElement;
+      return Array.from(group.querySelectorAll('.seg-option'));
+    }
+
+    const labels = (buttons: HTMLButtonElement[]) => buttons.map(button => button.textContent!.trim());
+    const active = (buttons: HTMLButtonElement[]) =>
+      buttons.filter(button => button.classList.contains('active')).map(button => button.textContent!.trim());
+
+    it('offers a folder inherit, visible and transparent, and shows what it inherits', async () => {
+      const { fixture } = create();
+      fixture.componentRef.setInput('emptyCellStyle', null);
+      fixture.componentRef.setInput('inheritedEmptyCellStyle', 'transparent');
+      await fixture.whenStable();
+
+      const buttons = emptyCellOptions(fixture);
+      expect(labels(buttons)).toEqual(['Inherited', 'Visible', 'Transparent']);
+      expect(active(buttons)).toEqual(['Inherited']);
+      expect(Array.from(fixture.nativeElement.querySelectorAll('.form-group--section > label > .setting-value'))
+        .map(node => (node as HTMLElement).textContent!.trim())).toEqual(['Transparent']);
+    });
+
+    it('emits the picked style, and null when the folder goes back to inheriting', async () => {
+      const { component, fixture } = create();
+      const emitted: (string | null)[] = [];
+      component.emptyCellStyleChange.subscribe(value => emitted.push(value));
+      fixture.componentRef.setInput('emptyCellStyle', null);
+      await fixture.whenStable();
+
+      emptyCellOptions(fixture)[2].click();
+      await fixture.whenStable();
+      emptyCellOptions(fixture)[0].click();
+
+      expect(emitted).toEqual(['transparent', null]);
+    });
+
+    it('offers a profile only visible and transparent, with visible as the default', async () => {
+      const { component, fixture } = create();
+      const emitted: (string | null)[] = [];
+      component.emptyCellStyleChange.subscribe(value => emitted.push(value));
+      fixture.componentRef.setInput('emptyCellStyleInheritable', false);
+      fixture.componentRef.setInput('emptyCellStyle', null);
+      await fixture.whenStable();
+
+      const buttons = emptyCellOptions(fixture);
+      expect(labels(buttons)).toEqual(['Visible', 'Transparent']);
+      expect(active(buttons)).toEqual(['Visible']);
+
+      buttons[1].click();
+      expect(emitted).toEqual(['transparent']);
+    });
+
+    it('says a device the profile runs on ignores the setting', async () => {
+      const { fixture } = create();
+      fixture.componentRef.setInput('noEffectNote', 'No effect on Stream Deck XL');
+      await fixture.whenStable();
+
+      const group = fixture.nativeElement.querySelector('shared-segmented-control') as HTMLElement;
+      expect(group.parentElement!.textContent).toContain('No effect on Stream Deck XL');
+    });
+  });
 });

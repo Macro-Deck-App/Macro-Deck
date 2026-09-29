@@ -69,11 +69,14 @@
               [borderRadius]="folderService.selectedFolder()?.borderRadius ?? null"
               [effectiveSpacing]="folderService.currentSpacing()"
               [effectiveBorderRadius]="folderService.currentBorderRadius()"
+              [emptyCellStyle]="folderService.selectedFolder()?.emptyCellStyle ?? null"
+              [inheritedEmptyCellStyle]="folderService.currentInheritedEmptyCellStyle()"
               (colsChange)="onColsChange($event)"
               (rowsChange)="onRowsChange($event)"
               (backgroundChange)="onBackgroundChange($event)"
               (spacingChange)="onSpacingChange($event)"
-              (borderRadiusChange)="onBorderRadiusChange($event)">
+              (borderRadiusChange)="onBorderRadiusChange($event)"
+              (emptyCellStyleChange)="onEmptyCellStyleChange($event)">
           </app-grid-settings-menu>
         }
       </div>
@@ -106,6 +109,7 @@
         [background]="folderService.currentBackground()"
         [spacing]="folderService.currentSpacing()"
         [borderRadius]="folderService.currentBorderRadius()"
+        [emptyCellStyle]="folderService.currentEmptyCellStyle()"
         [editMode]="editMode()"
         [canPaste]="clipboard.hasContent()"
         [cutWidgetIds]="clipboard.cutWidgetIds()"

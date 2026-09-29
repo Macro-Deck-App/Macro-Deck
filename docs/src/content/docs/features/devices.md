@@ -167,6 +167,11 @@ device stays registration-only forever.
   byte for byte.
 - **`Widgets`** holds every widget in the folder plus any foreign pinned widget whose scope reaches it, each
   once. Labels are already resolved and localized - render them as-is.
+- **A widget with a transparent background arrives without one.** When the user makes a widget's
+  background transparent, its `Appearance.BackgroundColor` is null, the same as a widget with no colour of
+  its own: draw the folder background behind that key, or your own default where there is none.
+  `Layout.BackgroundColor` carries the folder background as the user stored it, which can be a CSS colour
+  such as `rgba(...)` or the literal `transparent` rather than `#rrggbb`.
 
 ## Reporting interactions
 

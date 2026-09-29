@@ -2,6 +2,7 @@ using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Persistence.Profiles;
 using MacroDeckHost.Application.Portable;
+using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -298,6 +299,7 @@ public sealed class FolderPortabilityService : IFolderPortabilityService
 				BackgroundColor = source.BackgroundColor,
 				WidgetSpacing = source.WidgetSpacing,
 				WidgetBorderRadius = source.WidgetBorderRadius,
+				EmptyCellStyle = EmptyCellStyleText.Parse(source.EmptyCellStyle),
 				IsDefault = false,
 				// Imported as-is, never validated against the live catalog: an archive may well name a
 				// view whose integration is not installed here yet, and dropping it would lose the very

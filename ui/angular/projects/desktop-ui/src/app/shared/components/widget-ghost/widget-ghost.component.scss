@@ -19,6 +19,11 @@
   opacity: 0.95;
 }
 
+.ghost-inner.transparent-face,
+:host(.settling) .ghost-inner.transparent-face {
+  box-shadow: none;
+}
+
 /* Same reference-size layout + uniform scale as .widget-content in widget-item.component.scss;
    the transform carries the deck scale, so reset --widget-scale to 1 so descendant corner radii
    and ring widths don't double-scale (see widget-item.component.scss for the full rationale). */

@@ -15,7 +15,10 @@ namespace MacroDeck.Ui.Config;
 /// </summary>
 public static class UiWidgetAppearanceKeys
 {
-	/// <summary>Background colour as <c>#rrggbb</c>.</summary>
+	/// <summary>Background colour as <c>#rrggbb</c>, or the literal <c>transparent</c>. The appearance actions
+	/// store whatever value they are given; <see cref="UiWidgetAppearance.Section" /> offers Transparent only
+	/// with <see cref="UiWidgetAppearanceFields.TransparentBackground" />. A widget that paints
+	/// <c>transparent</c> on its root node gets no tile face behind it.</summary>
 	public const string BackgroundColor = "backgroundColor";
 
 	/// <summary>Caption text, stored as entered. It may contain a <c>{{ ... }}</c> variable template, which
@@ -86,8 +89,14 @@ public enum UiWidgetAppearanceFields
 	/// <summary>The border style and colour.</summary>
 	Border = 32,
 
-	/// <summary>Every field.</summary>
-	All = BackgroundColor | Label | LabelColor | Font | AccentColor | Border
+	/// <summary>Every field. Does not include <see cref="TransparentBackground" />, which is an opt-in.</summary>
+	All = BackgroundColor | Label | LabelColor | Font | AccentColor | Border,
+
+	/// <summary>With <see cref="BackgroundColor" />, the background field also offers Transparent, stored as the
+	/// literal <c>transparent</c>. Set it only when the widget's view accepts that value. A presentation option
+	/// of the section with no <c>MacroDeck.Sdk.Widgets.WidgetAppearanceProperty</c> counterpart; on its own it
+	/// builds nothing.</summary>
+	TransparentBackground = 64,
 }
 
 /// <summary>A widget's standard appearance values as read from its stored data. Null means not set.</summary>
@@ -155,7 +164,8 @@ public static class UiWidgetAppearance
 	{
 		var children = new List<UiElement>();
 
-		if ((fields & ~UiWidgetAppearanceFields.Border) != UiWidgetAppearanceFields.None)
+		if ((fields & ~(UiWidgetAppearanceFields.Border | UiWidgetAppearanceFields.TransparentBackground)) !=
+			UiWidgetAppearanceFields.None)
 		{
 			children.Add(new UiHeading { Key = "appearance-heading", Text = MacroDeckStrings.Widgets.Appearance.Heading() });
 		}
@@ -172,7 +182,12 @@ public static class UiWidgetAppearance
 
 		if (fields.HasFlag(UiWidgetAppearanceFields.BackgroundColor))
 		{
-			children.Add(Color(data, UiWidgetAppearanceKeys.BackgroundColor, MacroDeckStrings.Widgets.Appearance.BackgroundColor()));
+			var background = Color(data, UiWidgetAppearanceKeys.BackgroundColor,
+				MacroDeckStrings.Widgets.Appearance.BackgroundColor());
+
+			children.Add(fields.HasFlag(UiWidgetAppearanceFields.TransparentBackground)
+				? background with { AllowTransparent = true }
+				: background);
 		}
 
 		if (fields.HasFlag(UiWidgetAppearanceFields.LabelColor))

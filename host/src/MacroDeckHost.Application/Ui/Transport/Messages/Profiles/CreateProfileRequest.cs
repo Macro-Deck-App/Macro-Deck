@@ -8,4 +8,5 @@ public class CreateProfileRequest
 	public string? DefaultBackgroundColor { get; set; }
 	public int? DefaultWidgetSpacing { get; set; }
 	public int? DefaultWidgetBorderRadius { get; set; }
+	public string? DefaultEmptyCellStyle { get; set; }
 }

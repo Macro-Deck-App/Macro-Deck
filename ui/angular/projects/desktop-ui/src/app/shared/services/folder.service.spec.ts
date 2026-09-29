@@ -912,6 +912,57 @@ describe('FolderService widget layout', () => {
     });
   });
 
+  describe('empty cell style', () => {
+    const parentId = '22222222-2222-2222-2222-222222222222';
+
+    function folderWith(overrides: Partial<Folder>): Folder {
+      return { ...folder(), widgets: [], ...overrides };
+    }
+
+    it('uses the style the folder states over its parent and the profile', () => {
+      currentProfile = stubProfile({ defaultEmptyCellStyle: 'transparent' });
+      service.folders.set([
+        folderWith({ id: parentId, emptyCellStyle: 'transparent' }),
+        folderWith({ parentId, emptyCellStyle: 'visible' }),
+      ]);
+
+      expect(service.currentEmptyCellStyle()).toBe('visible');
+      expect(service.currentInheritedEmptyCellStyle()).toBe('transparent');
+    });
+
+    it('inherits from the parent chain, then from the profile', () => {
+      currentProfile = stubProfile({ defaultEmptyCellStyle: 'visible' });
+      service.folders.set([folderWith({ id: parentId, emptyCellStyle: 'transparent' }), folderWith({ parentId })]);
+      const fromParent = service.currentEmptyCellStyle();
+
+      currentProfile = stubProfile({ defaultEmptyCellStyle: 'transparent' });
+      service.folders.set([folderWith({ id: parentId }), folderWith({ parentId })]);
+
+      expect(fromParent).toBe('transparent');
+      expect(service.currentEmptyCellStyle()).toBe('transparent');
+    });
+
+    it('shows empty cells when nothing in the chain or the profile states a style', () => {
+      currentProfile = stubProfile();
+      service.folders.set([folderWith({})]);
+
+      expect(service.currentEmptyCellStyle()).toBe('visible');
+      expect(service.currentInheritedEmptyCellStyle()).toBe('visible');
+    });
+
+    it('sends the picked style, and an empty string to go back to inheriting', async () => {
+      apiSpy.updateFolder.and.resolveTo({ success: true });
+
+      await service.setEmptyCellStyle('transparent');
+      expect(service.folders()[0].emptyCellStyle).toBe('transparent');
+      expect(apiSpy.updateFolder).toHaveBeenCalledWith({ id: folderId, emptyCellStyle: 'transparent' });
+
+      await service.setEmptyCellStyle(null);
+      expect(service.folders()[0].emptyCellStyle).toBeNull();
+      expect(apiSpy.updateFolder).toHaveBeenCalledWith({ id: folderId, emptyCellStyle: '' });
+    });
+  });
+
   describe('grid inheritance', () => {
     const parentId = '22222222-2222-2222-2222-222222222222';
 

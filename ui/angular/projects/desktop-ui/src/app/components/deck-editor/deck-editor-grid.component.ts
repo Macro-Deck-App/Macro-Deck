@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import {
   ActionButtonTriggerType,
   AppStrings,
+  type EmptyCellStyle,
   GridRect,
   GridWidget,
   PinScope,
@@ -66,6 +67,7 @@ export class DeckEditorGridComponent implements OnChanges, OnDestroy {
   @Input() outerMargin = 16;
   @Input() spacing = 12;
   @Input() borderRadius: number | null = null;
+  @Input() emptyCellStyle: EmptyCellStyle = 'visible';
   @Input() canPaste = false;
   @Input() cutWidgetIds: ReadonlySet<string> = new Set();
   @Input() dropTargetCell: { x: number; y: number } | null = null;

@@ -12,7 +12,7 @@ internal sealed record TimerWidgetSettings(string? Label, bool ShowLabel, string
 		=> new(Trimmed(WidgetConfigJson.ReadString(data, "label")),
 			WidgetConfigJson.ReadBool(data, "showLabel") ?? false,
 			Trimmed(WidgetConfigJson.ReadString(data, "accentColor")),
-			Trimmed(WidgetConfigJson.ReadString(data, "backgroundColor")));
+			WidgetColor.NormalizeBackground(WidgetConfigJson.ReadString(data, "backgroundColor")));
 
 	private static string? Trimmed(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }

@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 
+import { type EmptyCellStyle } from '@macro-deck/runtime';
 import { TranslatePipe } from '@shared';
 import { GridSettingsComponent } from '../../grid-settings/grid-settings.component';
 import { DropdownMenuComponent } from '../../overlay/dropdown-menu/dropdown-menu.component';
@@ -33,10 +34,13 @@ export class GridSettingsMenuComponent {
   @Input() borderRadius: number | null = null;
   @Input() effectiveSpacing = 12;
   @Input() effectiveBorderRadius: number | null = null;
+  @Input() emptyCellStyle: EmptyCellStyle | null = null;
+  @Input() inheritedEmptyCellStyle: EmptyCellStyle = 'visible';
 
   @Output() colsChange = new EventEmitter<number | null>();
   @Output() rowsChange = new EventEmitter<number | null>();
   @Output() backgroundChange = new EventEmitter<string>();
   @Output() spacingChange = new EventEmitter<number | null>();
   @Output() borderRadiusChange = new EventEmitter<number | null>();
+  @Output() emptyCellStyleChange = new EventEmitter<EmptyCellStyle | null>();
 }

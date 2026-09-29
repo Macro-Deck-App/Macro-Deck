@@ -289,6 +289,19 @@ public class ClockWidgetViewTests
 	}
 
 	[Test]
+	public void A_named_or_transparent_background_reaches_the_clock_as_a_colour_it_can_paint()
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(Render(new { backgroundColor = "Navy" }).Root.Text("background"), Is.EqualTo("#000080"));
+			Assert.That(Render(new { backgroundColor = "transparent" }).Root.Text("background"),
+				Is.EqualTo("transparent"));
+			Assert.That(Render(new { backgroundColor = "var(--color-accent)" }).Root.HasProperty("background"),
+				Is.False);
+		});
+	}
+
+	[Test]
 	public void The_chosen_colours_reach_every_line_and_the_dial()
 	{
 		var digital = Render(new

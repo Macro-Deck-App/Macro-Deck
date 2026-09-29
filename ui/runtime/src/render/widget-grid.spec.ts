@@ -310,6 +310,20 @@ describe('runtime widget grid', () => {
     expect(container.querySelector('.deck-grid-tile-surface')).not.toBeNull();
   });
 
+  it('drops the face of a tile whose widget root asks for a transparent background, and gives it back', () => {
+    const handle = mount();
+    const stack = (background?: string): UiNode =>
+      ({ id: 'root', type: 'ui.stack', properties: background === undefined ? {} : { background } }) as UiNode;
+    const tile = (): HTMLElement => container.querySelector('[data-widget-id="a"]') as HTMLElement;
+
+    handle.update([widget('a', 0, 0), widget('b', 1, 0)], id => (id === 'a' ? stack('transparent') : stack()));
+    expect(tile().classList.contains('deck-grid-tile-transparent')).toBeTrue();
+    expect(container.querySelectorAll('.deck-grid-tile-transparent').length).toBe(1);
+
+    handle.update([widget('a', 0, 0)], () => stack('#101010'));
+    expect(tile().classList.contains('deck-grid-tile-transparent')).toBeFalse();
+  });
+
   it('runs its own press lifecycle for a tree that claims no gesture', () => {
     const fired: string[] = [];
     const handle = renderWidgetGrid(container, {
@@ -714,6 +728,46 @@ describe('runtime widget grid', () => {
 
     expect(before).toBe(14);
     expect(container.querySelectorAll('.deck-grid-cell').length).toBe(7);
+  });
+
+  describe('empty cells', () => {
+    const surface = () => container.querySelector('.deck-grid') as HTMLElement;
+    const hidden = () => surface().classList.contains('deck-grid-empty-transparent');
+
+    it('shows empty cells unless the folder asks for transparent ones', () => {
+      mount();
+
+      expect(hidden()).toBeFalse();
+    });
+
+    it('hides empty cells from the first paint when created transparent', () => {
+      renderWidgetGrid(container, { host, geometry: { cols: 5, rows: 3 }, emptyCellStyle: 'transparent' });
+
+      expect(hidden()).toBeTrue();
+    });
+
+    it('switches the style for a folder with the same grid, without redrawing its cells', () => {
+      const handle = mount();
+      handle.update([widget('a', 0, 0)], () => undefined);
+      const firstCell = container.querySelector('.deck-grid-cell');
+
+      handle.configure({ cols: 5, rows: 3 }, undefined, 'transparent');
+      const afterTransparent = hidden();
+      handle.configure({ cols: 5, rows: 3 }, undefined, 'visible');
+
+      expect(afterTransparent).toBeTrue();
+      expect(hidden()).toBeFalse();
+      expect(container.querySelector('.deck-grid-cell')).toBe(firstCell);
+      expect(container.querySelectorAll('.deck-grid-cell').length).toBe(14);
+    });
+
+    it('goes back to visible cells when a later folder states no style', () => {
+      const handle = renderWidgetGrid(container, { host, geometry: { cols: 5, rows: 3 }, emptyCellStyle: 'transparent' });
+
+      handle.configure({ cols: 5, rows: 3 }, undefined);
+
+      expect(hidden()).toBeFalse();
+    });
   });
 
   describe('updateWidget', () => {

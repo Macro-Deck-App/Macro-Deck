@@ -71,6 +71,7 @@ export const UiConfigProperties = {
   ConfirmLabel: 'confirmLabel',
   ConfirmDanger: 'confirmDanger',
   PromptValue: 'promptValue',
+  AllowTransparent: 'allowTransparent',
 } as const;
 
 export interface UiNodeOption {

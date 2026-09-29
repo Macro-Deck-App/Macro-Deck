@@ -20,6 +20,11 @@ internal static partial class WidgetColor
 	[GeneratedRegex(@"\A\s*rgba?\s*\((?<body>[^)]*)\)\s*\z", RegexOptions.IgnoreCase)]
 	private static partial Regex FunctionalPattern();
 
+	public const string Transparent = "transparent";
+
+	public static string? NormalizeBackground(string? raw)
+		=> string.Equals(raw?.Trim(), Transparent, StringComparison.OrdinalIgnoreCase) ? Transparent : Normalize(raw);
+
 	public static string? Normalize(string? raw)
 	{
 		if (string.IsNullOrWhiteSpace(raw))

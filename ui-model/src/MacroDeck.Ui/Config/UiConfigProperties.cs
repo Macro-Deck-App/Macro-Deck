@@ -257,6 +257,10 @@ public static class UiConfigProperties
 	/// what makes the dialog ask for text.</summary>
 	public const string PromptValue = "promptValue";
 
+	/// <summary>Whether a colour input offers a Transparent choice, stored as the literal <c>transparent</c>.
+	/// </summary>
+	public const string AllowTransparent = "allowTransparent";
+
 #pragma warning restore CA1720
 
 	/// <summary>The property keys this package ships names for, in declaration order. Not exhaustive - see the
@@ -271,6 +275,6 @@ public static class UiConfigProperties
 		IntegrationId, VariableTypes, WritableOnly, Capability, ConfigurationEntries, Segmented, Cards, Icon,
 		AspectRatio, Background, Tint, States, FalseLabel, TrueLabel, RowWeight, Wrap, HideLabel,
 		Reorderable, OffersStateProvider, OffersIconProvider, StateProviderBlockId, IconProviderBlockId,
-		ConfirmTitle, ConfirmMessage, ConfirmLabel, ConfirmDanger, PromptValue,
+		ConfirmTitle, ConfirmMessage, ConfirmLabel, ConfirmDanger, PromptValue, AllowTransparent,
 	];
 }

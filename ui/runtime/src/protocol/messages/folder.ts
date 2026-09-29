@@ -13,6 +13,7 @@ export interface IpcFolder {
   backgroundColor?: string;
   widgetSpacing?: number;
   widgetBorderRadius?: number;
+  emptyCellStyle?: string;
   isDefault?: boolean;
   viewId?: string;
   viewConfiguration?: string;
@@ -39,6 +40,7 @@ export interface UpdateFolderRequest {
   backgroundColor?: string;
   widgetSpacing?: number;
   widgetBorderRadius?: number;
+  emptyCellStyle?: string;
   isDefault?: boolean;
   folderViewId?: string;
   folderViewConfiguration?: string;

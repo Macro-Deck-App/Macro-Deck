@@ -67,7 +67,7 @@ public sealed record SliderWidgetData
 			IsRelative = string.Equals(ReadString(data, "interaction"), "relative", StringComparison.Ordinal),
 			Color = WidgetColor.Normalize(ReadString(data, "color")),
 			LabelColor = WidgetColor.Normalize(ReadString(data, "labelColor")),
-			BackgroundColor = WidgetColor.Normalize(ReadString(data, "backgroundColor")),
+			BackgroundColor = WidgetColor.NormalizeBackground(ReadString(data, "backgroundColor")),
 			Icon = ReadIcon(data),
 			ShowLabel = ReadBool(data, "showLabel") ?? true,
 			ShowValue = ReadBool(data, "showValue") ?? false,

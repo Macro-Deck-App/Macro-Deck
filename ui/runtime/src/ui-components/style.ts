@@ -1,7 +1,9 @@
 import { WidgetBorder, WidgetData, WidgetType } from '../domain/widget.interface';
 import { nodeBoolean, nodeNumber, nodeRaw, nodeString } from '../ui-framework/node-properties.util';
 import { UiNode } from '../ui-framework/ui-node.interface';
-import { nodeHexColor, nodeLength, resolveLength } from '../ui-framework/length';
+import { nodeBackgroundColor, nodeHexColor, nodeLength, resolveLength, TRANSPARENT_BACKGROUND } from '../ui-framework/length';
+import { UiComponentBox } from '../ui-framework/layout';
+import { effectiveTreeRoot } from '../ui-framework/responsive';
 import {
   UI_COMPONENT_BORDER_STYLES_WELL_KNOWN,
   UiComponentAlignments,
@@ -14,6 +16,7 @@ import {
   UiComponentOverflows,
   UiComponentTextRoles,
   UiComponentTextWeights,
+  UiComponents,
 } from './ui-component-types';
 import { UiComponentProperties } from './component-properties';
 
@@ -75,11 +78,17 @@ export function nodeThicknessPx(node: UiNode, basis: number, crossExtent: number
 }
 
 export function stackBackground(node: UiNode): string | undefined {
-  return nodeHexColor(node, UiComponentProperties.Background);
+  return nodeBackgroundColor(node, UiComponentProperties.Background);
 }
 
 export function buttonBackground(node: UiNode): string {
-  return nodeHexColor(node, UiComponentProperties.Background) ?? 'var(--color-accent)';
+  return nodeBackgroundColor(node, UiComponentProperties.Background) ?? 'var(--color-accent)';
+}
+
+export function widgetTileTransparent(root: UiNode | null | undefined, box: UiComponentBox | null = null): boolean {
+  const node = effectiveTreeRoot(root, box);
+  if (node === null || (node.type !== UiComponents.Stack && node.type !== UiComponents.Button)) return false;
+  return nodeBackgroundColor(node, UiComponentProperties.Background) === TRANSPARENT_BACKGROUND;
 }
 
 export function buttonTakesTileCorner(node: UiNode): boolean {

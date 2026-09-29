@@ -121,12 +121,16 @@ export {
   resolveEventPayloadParameter,
 } from './domain/event-definition.interface';
 export {
+  DEFAULT_EMPTY_CELL_STYLE,
+  type EmptyCellStyle,
+  emptyCellStyleFromWire,
   type Folder,
   type FolderContextMenu,
   type FolderDragState,
   type FolderDropPosition,
   type FolderMoveDirection,
   type FolderMoveRequest,
+  isEmptyCellStyle,
   isWidgetGridView,
   WIDGET_GRID_VIEW_ID,
 } from './domain/folder.interface';
@@ -412,6 +416,7 @@ export {
   buttonBackground,
   buttonBorder,
   widgetTileBorder,
+  widgetTileTransparent,
   buttonFit,
   buttonOpacity,
   buttonZoom,

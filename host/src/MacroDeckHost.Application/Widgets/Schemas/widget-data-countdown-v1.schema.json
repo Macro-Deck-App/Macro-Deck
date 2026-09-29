@@ -42,7 +42,7 @@
     },
     "backgroundColor": {
       "type": ["string", "null"],
-      "description": "Widget background color. Absent or null uses the deck's own tile color."
+      "description": "Widget background color, as #rrggbb or transparent. Absent or null uses the deck's own tile color; transparent also removes that tile."
     },
     "border": {
       "$ref": "#/$defs/widgetBorder",

@@ -13,7 +13,8 @@ public interface IProfileService
 		int? defaultColumns = null,
 		string? defaultBackgroundColor = null,
 		int? defaultWidgetSpacing = null,
-		int? defaultWidgetBorderRadius = null);
+		int? defaultWidgetBorderRadius = null,
+		string? defaultEmptyCellStyle = null);
 
 	Task<Result<ProfileEntity, ProfileError>> Update(
 		Guid id,
@@ -23,7 +24,8 @@ public interface IProfileService
 		int? defaultColumns,
 		string? defaultBackgroundColor,
 		int? defaultWidgetSpacing,
-		int? defaultWidgetBorderRadius);
+		int? defaultWidgetBorderRadius,
+		string? defaultEmptyCellStyle = null);
 
 	Task<Result<ProfileError>> Delete(Guid id);
 

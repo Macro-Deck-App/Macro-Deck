@@ -3,6 +3,7 @@ using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Layouts;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Portable;
+using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Secrets;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Common;
@@ -44,7 +45,8 @@ public class ProfileService : IProfileService
 		int? defaultColumns = null,
 		string? defaultBackgroundColor = null,
 		int? defaultWidgetSpacing = null,
-		int? defaultWidgetBorderRadius = null)
+		int? defaultWidgetBorderRadius = null,
+		string? defaultEmptyCellStyle = null)
 	{
 		if (string.IsNullOrWhiteSpace(name))
 		{
@@ -75,6 +77,14 @@ public class ProfileService : IProfileService
 				"Default widget border radius must be between 0 and 60");
 		}
 
+		EmptyCellStyle? emptyCellStyle = null;
+		if (defaultEmptyCellStyle is not null &&
+			!EmptyCellStyleText.TryParseUpdate(defaultEmptyCellStyle, out emptyCellStyle))
+		{
+			return Result.Fail<ProfileEntity, ProfileError>(ProfileError.ValidationError,
+				"Default empty cell style must be visible or transparent");
+		}
+
 		var existing = _profileCache.GetAll();
 		var nextOrder = existing.Count > 0 ? existing.Max(p => p.Order) + 1 : 0;
 
@@ -89,6 +99,7 @@ public class ProfileService : IProfileService
 			DefaultBackgroundColor = string.IsNullOrEmpty(defaultBackgroundColor) ? null : defaultBackgroundColor,
 			DefaultWidgetSpacing = defaultWidgetSpacing,
 			DefaultWidgetBorderRadius = defaultWidgetBorderRadius,
+			DefaultEmptyCellStyle = emptyCellStyle,
 			CreatedAt = DateTime.UtcNow
 		};
 
@@ -123,7 +134,8 @@ public class ProfileService : IProfileService
 		int? defaultColumns,
 		string? defaultBackgroundColor,
 		int? defaultWidgetSpacing,
-		int? defaultWidgetBorderRadius)
+		int? defaultWidgetBorderRadius,
+		string? defaultEmptyCellStyle = null)
 	{
 		var profile = _profileCache.GetById(id);
 		if (profile is null)
@@ -162,6 +174,14 @@ public class ProfileService : IProfileService
 		{
 			return Result.Fail<ProfileEntity, ProfileError>(ProfileError.ValidationError,
 				"Default widget border radius must be between 0 and 60");
+		}
+
+		EmptyCellStyle? emptyCellStyle = null;
+		if (defaultEmptyCellStyle is not null &&
+			!EmptyCellStyleText.TryParseUpdate(defaultEmptyCellStyle, out emptyCellStyle))
+		{
+			return Result.Fail<ProfileEntity, ProfileError>(ProfileError.ValidationError,
+				"Default empty cell style must be visible or transparent");
 		}
 
 		if (defaultRows.HasValue || defaultColumns.HasValue)
@@ -233,6 +253,11 @@ public class ProfileService : IProfileService
 				defaultWidgetBorderRadius.Value == -1 ? null : defaultWidgetBorderRadius.Value;
 		}
 
+		if (defaultEmptyCellStyle is not null)
+		{
+			profile.DefaultEmptyCellStyle = emptyCellStyle;
+		}
+
 		await _profileCache.AddOrUpdate(profile);
 
 		await _mediator.Publish(new ProfileUpdatedNotification(profile));
@@ -296,6 +321,7 @@ public class ProfileService : IProfileService
 			DefaultBackgroundColor = source.DefaultBackgroundColor,
 			DefaultWidgetSpacing = source.DefaultWidgetSpacing,
 			DefaultWidgetBorderRadius = source.DefaultWidgetBorderRadius,
+			DefaultEmptyCellStyle = source.DefaultEmptyCellStyle,
 			CreatedAt = createdAt
 		};
 
@@ -318,6 +344,7 @@ public class ProfileService : IProfileService
 				BackgroundColor = sourceFolder.BackgroundColor,
 				WidgetSpacing = sourceFolder.WidgetSpacing,
 				WidgetBorderRadius = sourceFolder.WidgetBorderRadius,
+				EmptyCellStyle = sourceFolder.EmptyCellStyle,
 				IsDefault = sourceFolder.IsDefault,
 				ViewId = sourceFolder.ViewId,
 				ViewConfiguration = PortableGuidRemapper.Remap(sourceFolder.ViewConfiguration, idMap),

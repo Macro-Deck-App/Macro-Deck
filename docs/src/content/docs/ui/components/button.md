@@ -87,7 +87,7 @@ tile.
 | `Align` (`align`) | `UiComponentAlignments` | `stretch` | How children align on the cross axis. |
 | `Gap` (`gap`) | length | No gap | The gap between children. |
 | `Padding` (`padding`) | length | No padding | Inner padding on every edge. |
-| `Background` (`background`) | `#rrggbb` | The reader's own accent colour | The button's face - unlike a stack, a button always has one. |
+| `Background` (`background`) | `#rrggbb` or `transparent` | The reader's own accent colour | The button's face - unlike a stack, a button always has one. `transparent` asks for no face at all, and on the widget's root also removes the tile face behind it. |
 | `Source` (`source`) | resource | None | Artwork drawn across the whole box behind the children. |
 | `Transition` (`transition`) | `crossfade` | The new artwork replaces the old | How a change of `Source` is drawn. |
 | `Fit` (`fit`) | `contain`, `cover` | `contain` | How the artwork fills the box. |
@@ -145,6 +145,10 @@ box among its children. On its parent's main axis a button follows the ordinary 
 - **Press feedback is local and immediate:** tint the whole element white at `0.2` alpha, fade in over
   `20 ms`, out over `140 ms`, visible at least `60 ms`. Never wait for the producer before painting.
 - **Paint order:** `background`, artwork, children, press feedback, ring.
+- **Transparent face:** a `background` of `transparent` paints nothing instead of the accent colour. On a
+  button that is the widget's root, draw the tile without its face fill and shadow too. Any other value
+  that is not `#rrggbb` still falls back to the accent colour, and a modifier's `background` stays
+  `#rrggbb` only.
 - **Ring:** a fixed `2` device-independent units along the inner edge, following the corner radius - the
   one length not relative to the basis. Looping styles are phase-locked to Macro Deck's shared clock and
   keep animating regardless of the viewer's reduced-motion preference.

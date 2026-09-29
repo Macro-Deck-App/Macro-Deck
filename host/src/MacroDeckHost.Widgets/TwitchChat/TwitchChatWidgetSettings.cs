@@ -11,6 +11,9 @@ internal static class TwitchChatWidgetSettings
 			? account
 			: null;
 
+	public static string? BackgroundColor(JsonElement data)
+		=> WidgetColor.NormalizeBackground(WidgetConfigJson.ReadString(data, "backgroundColor"));
+
 	public static bool AllowsModeration(JsonElement data)
 		=> WidgetConfigJson.ReadBool(data, TwitchChatWidgetType.AllowModerationKey) ?? true;
 }

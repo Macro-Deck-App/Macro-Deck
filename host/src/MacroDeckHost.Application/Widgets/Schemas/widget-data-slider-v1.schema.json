@@ -28,7 +28,7 @@
     },
     "backgroundColor": {
       "type": ["string", "null"],
-      "description": "Widget background color behind the slider body. Defaults to transparent when absent or null."
+      "description": "Widget background color behind the slider body, as #rrggbb or transparent. Absent or null paints nothing, leaving the deck's own tile behind the slider; transparent also removes that tile."
     },
     "icon": {
       "$ref": "#/$defs/widgetIcon",

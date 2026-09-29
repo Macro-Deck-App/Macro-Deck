@@ -70,6 +70,18 @@ public class ActionButtonWidgetViewTests
 	}
 
 	[Test]
+	public void A_stored_transparent_background_renders_a_transparent_face_instead_of_the_accent()
+	{
+		var host = Render(new { backgroundColor = "transparent" });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.ById("actionButton").Text("background"), Is.EqualTo("transparent"));
+			Assert.That(host.ById("actionButton").Fallback!.Text("background"), Is.EqualTo("transparent"));
+		});
+	}
+
+	[Test]
 	public void A_state_with_no_icon_never_falls_back_to_the_root_icon()
 	{
 		var host = Render(new
