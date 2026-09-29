@@ -1,7 +1,10 @@
+using System.Collections.Concurrent;
 using MacroDeckHost.Application.Integrations;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Identity;
+using MacroDeck.Sdk.Actions;
+using MacroDeck.Plugin.Hosting.Capabilities.MusicPlayer;
 using MacroDeck.Sdk.MusicPlayer;
 using Serilog;
 
@@ -13,6 +16,9 @@ public sealed class MusicPlayerRegistry : IMusicPlayerRegistry
 
 	private readonly IIntegrationRegistry _integrations;
 	private readonly ILogger _logger;
+
+	// GetInstances runs on every poll tick, so a skipped option is reported once, not every two seconds.
+	private readonly ConcurrentDictionary<string, byte> _reportedSkippedOptions = new(StringComparer.Ordinal);
 
 	public MusicPlayerRegistry(IIntegrationRegistry integrations, ILogger logger)
 	{
@@ -58,7 +64,7 @@ public sealed class MusicPlayerRegistry : IMusicPlayerRegistry
 					integration.Id,
 					ProviderDisplayName.Resolve(provider.ProviderName, integration),
 					instance.DisplayName,
-					hasIcon));
+					hasIcon) { Options = SupportedOptions(instanceId, instance) });
 			}
 		}
 
@@ -66,6 +72,20 @@ public sealed class MusicPlayerRegistry : IMusicPlayerRegistry
 	}
 
 	public IMusicPlayer? GetPlayer(string instanceId)
+		=> Resolve(instanceId, (provider, localId) => provider.GetPlayer(localId));
+
+	public IMusicPlayer? GetPlayerWithOptions(string instanceId, IReadOnlyDictionary<string, object> options)
+	{
+		ArgumentNullException.ThrowIfNull(options);
+
+		return Resolve(instanceId,
+			(provider, localId) => provider.GetPlayerWithOptions(new MusicPlayerOptionsRequest
+			{
+				InstanceId = localId, Options = options
+			}));
+	}
+
+	private IMusicPlayer? Resolve(string instanceId, Func<IMusicPlayerProvider, string, IMusicPlayer?> resolve)
 	{
 		if (!QualifiedId.TryParse(instanceId, out var id))
 		{
@@ -81,10 +101,33 @@ public sealed class MusicPlayerRegistry : IMusicPlayerRegistry
 		if (id.LocalId == DefaultLocalId && IsSingleConfiguration(integration))
 		{
 			var providerInstances = provider.GetInstances();
-			return providerInstances.Count > 0 ? provider.GetPlayer(providerInstances[0].Id) : null;
+			return providerInstances.Count > 0 ? resolve(provider, providerInstances[0].Id) : null;
 		}
 
-		return provider.GetPlayer(id.LocalId);
+		return resolve(provider, id.LocalId);
+	}
+
+	private IReadOnlyList<ActionParameter> SupportedOptions(string instanceId, MusicPlayerInstance instance)
+	{
+		var supported = MusicPlayerOptionValues.Supported(instance.Options);
+
+		if (supported.Count != instance.Options.Count)
+		{
+			var skipped = instance.Options.Where(option => !supported.Contains(option))
+				.Select(option => option?.Name ?? string.Empty)
+				.ToList();
+
+			if (_reportedSkippedOptions.TryAdd($"{instanceId}\n{string.Join('\n', skipped)}", 0))
+			{
+				_logger.Warning(
+					"Music player instance {InstanceId} declares options {Options} with an invalid or duplicate name " +
+					"or an unsupported kind; skipping them",
+					instanceId,
+					skipped);
+			}
+		}
+
+		return supported;
 	}
 
 	public IMusicPlayer? DefaultPlayer

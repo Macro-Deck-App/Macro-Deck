@@ -1,3 +1,6 @@
+using System.Text.Json;
+using MacroDeck.Plugin.Protocol.Capabilities.Actions;
+
 namespace MacroDeck.Plugin.Protocol.Capabilities.MusicPlayer;
 
 /// <summary>
@@ -17,6 +20,13 @@ public sealed record MusicPlayerInstanceDto
 	public bool HasCatalog { get; init; }
 
 	public bool HasDevices { get; init; }
+
+	/// <summary>
+	/// Mirrors the SDK's <c>MusicPlayerInstance.Options</c>: the options each consumer, such as a Music
+	/// Player widget, sets for itself when it shows this instance. Empty when a plugin declares none or
+	/// predates the field.
+	/// </summary>
+	public IReadOnlyList<ActionParameterDto> Options { get; init; } = [];
 }
 
 /// <summary>The full result of the <c>music-player</c> capability's <c>describe</c> operation - what
@@ -49,6 +59,22 @@ public sealed record MusicPlayerInstancesResult
 public sealed record MusicPlayerInstanceArguments
 {
 	public required string InstanceId { get; init; }
+}
+
+/// <summary>
+/// Arguments for the <c>state</c> operation: <see cref="MusicPlayerInstanceArguments" /> plus the values a
+/// consumer chose for the instance's declared options. A plugin that predates <see cref="Options" /> reads
+/// the same payload as <see cref="MusicPlayerInstanceArguments" /> and ignores them.
+/// </summary>
+public sealed record MusicPlayerStateArguments
+{
+	public required string InstanceId { get; init; }
+
+	/// <summary>
+	/// The consumer's values keyed by option name, or <c>null</c> for the plain instance. The plugin
+	/// resolves the player through <c>IMusicPlayerProvider.GetPlayerWithOptions</c> when set.
+	/// </summary>
+	public IReadOnlyDictionary<string, JsonElement>? Options { get; init; }
 }
 
 /// <summary>
@@ -99,6 +125,10 @@ public sealed record MusicPlayerArtworkArguments
 	public required string InstanceId { get; init; }
 
 	public required string ArtworkId { get; init; }
+
+	/// <summary>Same meaning as <see cref="MusicPlayerStateArguments.Options" />: the artwork id came from the
+	/// state of the player resolved with these values.</summary>
+	public IReadOnlyDictionary<string, JsonElement>? Options { get; init; }
 }
 
 /// <summary>

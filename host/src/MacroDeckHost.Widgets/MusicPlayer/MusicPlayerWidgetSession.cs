@@ -174,6 +174,7 @@ internal sealed class MusicPlayerWidgetSession : IUiSession
 			}
 		}
 
+		_resolver.ReleaseDemand();
 		_lifetime.Dispose();
 	}
 

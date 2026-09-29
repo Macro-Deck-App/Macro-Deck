@@ -12,12 +12,12 @@ namespace MacroDeck.Plugin.Testing;
 ///
 /// <para>
 /// Arguments stay <see cref="object" /> here rather than a typed parameter per operation, unlike this
-/// package's other capability clients: with 17 operations spread across nine distinct argument shapes -
-/// <c>MusicPlayerInstanceArguments</c>, <c>MusicPlayerArtworkArguments</c>,
+/// package's other capability clients: with 17 operations spread across ten distinct argument shapes -
+/// <c>MusicPlayerInstanceArguments</c>, <c>MusicPlayerStateArguments</c>, <c>MusicPlayerArtworkArguments</c>,
 /// <c>MusicPlayerPlayItemArguments</c>, <c>MusicPlayerSeekArguments</c>, <c>MusicPlayerVolumeArguments</c>,
 /// <c>MusicPlayerShuffleArguments</c>, <c>MusicPlayerRepeatArguments</c>, <c>MusicPlayerCatalogArguments</c>
 /// and <c>MusicPlayerTransferArguments</c> - a typed parameter per method would not buy the polymorphism
-/// protection it does for a single-shape kind; it would just be nine near-identical method signatures.
+/// protection it does for a single-shape kind; it would just be ten near-identical method signatures.
 /// </para>
 /// </summary>
 public sealed class MusicPlayerTestClient

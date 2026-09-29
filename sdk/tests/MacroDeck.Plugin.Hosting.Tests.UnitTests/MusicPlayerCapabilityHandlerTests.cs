@@ -108,7 +108,7 @@ public class MusicPlayerCapabilityHandlerTests
 			Assert.That(payload.Instances.Select(i => i.HasDevices), Is.All.False);
 
 			var dtoProperties = typeof(MusicPlayerInstanceDto).GetProperties().Select(p => p.Name).ToArray();
-			Assert.That(dtoProperties, Is.EquivalentTo(new[] { "Id", "DisplayName", "HasCatalog", "HasDevices" }));
+			Assert.That(dtoProperties, Is.EquivalentTo(new[] { "Id", "DisplayName", "HasCatalog", "HasDevices", "Options" }));
 		});
 	}
 

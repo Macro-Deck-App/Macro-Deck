@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Globalization;
+using MacroDeck.Sdk.MusicPlayer;
 using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Application.MusicPlayer;
@@ -45,13 +46,35 @@ public sealed class MusicPlayerArtworkService : IMusicPlayerArtworkService
 		return $"\"{artworkId}-{variant}\"";
 	}
 
-	public async Task<ArtworkImageResult?> GetImage(string instanceId,
+	public Task<ArtworkImageResult?> GetImage(string instanceId,
+		string artworkId,
+		int? size,
+		CancellationToken cancellationToken)
+		=> GetImage(instanceId, () => _registry.GetPlayer(instanceId), artworkId, size, cancellationToken);
+
+	public Task<ArtworkImageResult?> GetImage(MusicPlayerVariant variant,
+		string artworkId,
+		int? size,
+		CancellationToken cancellationToken)
+	{
+		ArgumentNullException.ThrowIfNull(variant);
+
+		return GetImage(variant.InstanceId,
+			() => _registry.GetPlayerWithOptions(variant.InstanceId, variant.Options),
+			artworkId,
+			size,
+			cancellationToken);
+	}
+
+	private async Task<ArtworkImageResult?> GetImage(string instanceId,
+		Func<IMusicPlayer?> resolvePlayer,
 		string artworkId,
 		int? size,
 		CancellationToken cancellationToken)
 	{
 		var key = $"{instanceId}\n{artworkId}";
-		var entry = TryGetCached(key) ?? await FetchDeduplicated(key, instanceId, artworkId, cancellationToken);
+		var entry = TryGetCached(key) ??
+			await FetchDeduplicated(key, instanceId, resolvePlayer, artworkId, cancellationToken);
 		if (entry is null)
 		{
 			return null;
@@ -64,25 +87,30 @@ public sealed class MusicPlayerArtworkService : IMusicPlayerArtworkService
 
 	private Task<CacheEntry?> FetchDeduplicated(string key,
 		string instanceId,
+		Func<IMusicPlayer?> resolvePlayer,
 		string artworkId,
 		CancellationToken cancellationToken)
 	{
 		var lazy = _inFlight.GetOrAdd(key,
-			cacheKey => new Lazy<Task<CacheEntry?>>(() => FetchAndCache(cacheKey, instanceId, artworkId)));
+			cacheKey => new Lazy<Task<CacheEntry?>>(()
+				=> FetchAndCache(cacheKey, instanceId, resolvePlayer, artworkId)));
 		return lazy.Value.WaitAsync(cancellationToken);
 	}
 
-	private async Task<CacheEntry?> FetchAndCache(string key, string instanceId, string artworkId)
+	private async Task<CacheEntry?> FetchAndCache(string key,
+		string instanceId,
+		Func<IMusicPlayer?> resolvePlayer,
+		string artworkId)
 	{
 		try
 		{
-			var player = _registry.GetPlayer(instanceId);
+			var player = resolvePlayer();
 			if (player is null)
 			{
 				return null;
 			}
 
-			MacroDeck.Sdk.MusicPlayer.MusicPlayerArtwork? artwork;
+			MusicPlayerArtwork? artwork;
 			try
 			{
 				artwork = await player.GetArtworkAsync(artworkId, CancellationToken.None);

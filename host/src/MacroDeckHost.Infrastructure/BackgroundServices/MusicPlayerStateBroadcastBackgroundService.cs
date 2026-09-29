@@ -6,6 +6,7 @@ using MacroDeckHost.Application.Triggers.Providers;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.MusicPlayer;
 using MacroDeck.Sdk.Logging;
+using MacroDeck.Sdk.MusicPlayer;
 using Microsoft.Extensions.Hosting;
 using ILogger = Serilog.ILogger;
 
@@ -33,6 +34,7 @@ public sealed class MusicPlayerStateBroadcastBackgroundService : HostReadyBackgr
 	private readonly IMusicPlayerPollNudge _pollNudge;
 	private readonly IMusicPlayerInstancesSnapshot _instancesSnapshot;
 	private readonly IMusicPlayerStateNotifier _notifier;
+	private readonly IMusicPlayerVariants _variants;
 	private readonly ILogger _logger;
 	private readonly TimeSpan _interval;
 
@@ -47,6 +49,7 @@ public sealed class MusicPlayerStateBroadcastBackgroundService : HostReadyBackgr
 	private readonly TimeSpan? _failureSummaryInterval;
 
 	private string _lastInstancesJson = "[]";
+	private string _lastOptionsFingerprint = string.Empty;
 	private int _consecutiveEmptyTicks;
 	private int _ticksUntilResync = ResyncTicks;
 
@@ -59,6 +62,7 @@ public sealed class MusicPlayerStateBroadcastBackgroundService : HostReadyBackgr
 		IMusicPlayerPollNudge pollNudge,
 		IMusicPlayerInstancesSnapshot instancesSnapshot,
 		IMusicPlayerStateNotifier notifier,
+		IMusicPlayerVariants variants,
 		ILogger logger,
 		TimeSpan? failureSummaryInterval = null,
 		TimeSpan? pollInterval = null)
@@ -71,6 +75,7 @@ public sealed class MusicPlayerStateBroadcastBackgroundService : HostReadyBackgr
 		_pollNudge = pollNudge;
 		_instancesSnapshot = instancesSnapshot;
 		_notifier = notifier;
+		_variants = variants;
 		_logger = logger.ForContext<MusicPlayerStateBroadcastBackgroundService>();
 		_failureSummaryInterval = failureSummaryInterval;
 		_interval = pollInterval ?? _defaultInterval;
@@ -173,28 +178,59 @@ public sealed class MusicPlayerStateBroadcastBackgroundService : HostReadyBackgr
 
 		_events.Forget(seen);
 		_stateCache.Forget(seen);
+
+		await PollVariants(seen, ct);
+	}
+
+	private async Task PollVariants(HashSet<string> instanceIds, CancellationToken ct)
+	{
+		var variants = _variants.Demanded().Where(variant => instanceIds.Contains(variant.InstanceId)).ToList();
+
+		var reads = variants.Select(variant => ReadState(variant.Key,
+			variant.InstanceId,
+			() => _registry.GetPlayerWithOptions(variant.InstanceId, variant.Options),
+			ct));
+		var results = await Task.WhenAll(reads);
+
+		for (var index = 0; index < variants.Count; index++)
+		{
+			if (results[index].Payload is { } payload && _variants.Record(variants[index].Key, payload))
+			{
+				_notifier.Publish(variants[index].InstanceId, payload);
+			}
+		}
+
+		foreach (var released in _variants.Sweep())
+		{
+			_readFailures.TryRemove(released.Key, out _);
+		}
 	}
 
 	private async Task<IReadOnlyList<(string InstanceId, MusicPlayerStatePayload Payload)>> PollStates(
 		IReadOnlyList<MusicPlayerInstanceDescriptor> instances,
 		CancellationToken ct)
 	{
-		var reads = instances.Select(instance => ReadState(instance.InstanceId, ct));
+		var reads = instances.Select(instance => ReadState(instance.InstanceId,
+			instance.InstanceId,
+			() => _registry.GetPlayer(instance.InstanceId),
+			ct));
 		var results = await Task.WhenAll(reads);
 
 		return results.Where(r => r.Payload is not null)
-			.Select(r => (r.InstanceId, Payload: r.Payload!))
+			.Select(r => (InstanceId: r.Key, Payload: r.Payload!))
 			.ToList();
 	}
 
-	private async Task<(string InstanceId, MusicPlayerStatePayload? Payload)> ReadState(
+	private async Task<(string Key, MusicPlayerStatePayload? Payload)> ReadState(
+		string key,
 		string instanceId,
+		Func<IMusicPlayer?> resolvePlayer,
 		CancellationToken ct)
 	{
-		var player = _registry.GetPlayer(instanceId);
+		var player = resolvePlayer();
 		if (player is null)
 		{
-			return (instanceId, MusicPlayerStatePayload.Disconnected(instanceId));
+			return (key, MusicPlayerStatePayload.Disconnected(instanceId));
 		}
 
 		using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
@@ -204,8 +240,8 @@ public sealed class MusicPlayerStateBroadcastBackgroundService : HostReadyBackgr
 		try
 		{
 			var payload = MusicPlayerStatePayload.From(await player.GetStateAsync(timeout.Token), instanceId);
-			NoteReadRecovered(instanceId);
-			return (instanceId, payload);
+			NoteReadRecovered(key);
+			return (key, payload);
 		}
 		catch (OperationCanceledException) when (ct.IsCancellationRequested)
 		{
@@ -213,29 +249,29 @@ public sealed class MusicPlayerStateBroadcastBackgroundService : HostReadyBackgr
 		}
 		catch (OperationCanceledException)
 		{
-			if (NoteReadFailure(instanceId, $"no answer within {_pollTimeout}"))
+			if (NoteReadFailure(key, $"no answer within {_pollTimeout}"))
 			{
 				_logger.Debug(
 					"Music player instance {InstanceId} did not answer within {Timeout} (gave up after {ElapsedMs} ms); " +
 					"keeping last state",
-					instanceId,
+					key,
 					_pollTimeout,
 					(long)Stopwatch.GetElapsedTime(started).TotalMilliseconds);
 			}
 
-			return (instanceId, null);
+			return (key, null);
 		}
 		catch (Exception ex)
 		{
-			if (NoteReadFailure(instanceId, ex.Message))
+			if (NoteReadFailure(key, ex.Message))
 			{
 				_logger.Debug(ex,
 					"Failed to read music player state for {InstanceId} after {ElapsedMs} ms; keeping last state",
-					instanceId,
+					key,
 					(long)Stopwatch.GetElapsedTime(started).TotalMilliseconds);
 			}
 
-			return (instanceId, null);
+			return (key, null);
 		}
 	}
 
@@ -285,6 +321,17 @@ public sealed class MusicPlayerStateBroadcastBackgroundService : HostReadyBackgr
 		var dtos = instances.Select(MusicPlayerInstanceDto.From).ToList();
 		var json = JsonSerializer.Serialize(dtos);
 		var changed = json != _lastInstancesJson;
+
+		var optionsFingerprint = OptionsFingerprint(instances);
+		if (!string.Equals(optionsFingerprint, _lastOptionsFingerprint, StringComparison.Ordinal))
+		{
+			_lastOptionsFingerprint = optionsFingerprint;
+			if (!changed)
+			{
+				_notifier.PublishInstancesChanged();
+			}
+		}
+
 		if (!changed && !force)
 		{
 			return;
@@ -302,6 +349,25 @@ public sealed class MusicPlayerStateBroadcastBackgroundService : HostReadyBackgr
 				dtos.Select(d => d.InstanceId).ToList());
 		}
 	}
+
+	private static string OptionsFingerprint(IReadOnlyList<MusicPlayerInstanceDescriptor> instances)
+		=> JsonSerializer.Serialize(instances.Select(instance => new
+		{
+			instance.InstanceId,
+			Options = instance.Options.Select(option => new
+			{
+				option.Name,
+				Type = option.Type.ToString(),
+				Label = option.Label.ToString(),
+				Description = option.Description.ToString(),
+				option.DefaultValue,
+				option.Min,
+				option.Max,
+				option.Step,
+				option.ShowSlider,
+				Choices = option.Options?.Select(choice => new { choice.Value, Label = choice.Label.ToString() })
+			})
+		}));
 
 	private async Task BroadcastIfChanged(
 		string instanceId,

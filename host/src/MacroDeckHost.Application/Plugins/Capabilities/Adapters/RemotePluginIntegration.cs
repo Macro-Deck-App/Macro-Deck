@@ -356,7 +356,19 @@ public abstract class RemotePluginIntegration :
 
 	public IReadOnlyList<MusicPlayerInstance> GetInstances() => Snapshot.MusicPlayerInstances;
 
-	public IMusicPlayer? GetPlayer(string instanceId)
+	public IMusicPlayer? GetPlayer(string instanceId) => CreateMusicPlayer(instanceId, options: null);
+
+	IMusicPlayer? IMusicPlayerProvider.GetPlayerWithOptions(MusicPlayerOptionsRequest request)
+	{
+		ArgumentNullException.ThrowIfNull(request);
+
+		return CreateMusicPlayer(request.InstanceId,
+			request.Options.ToDictionary(pair => pair.Key,
+				pair => JsonSerializer.SerializeToElement(pair.Value, PluginProtocolJson.Options),
+				StringComparer.Ordinal));
+	}
+
+	private RemoteMusicPlayer? CreateMusicPlayer(string instanceId, IReadOnlyDictionary<string, JsonElement>? options)
 	{
 		if (!Snapshot.MusicPlayerInstances.Any(instance =>
 			string.Equals(instance.Id, instanceId, StringComparison.Ordinal)))
@@ -369,7 +381,8 @@ public abstract class RemotePluginIntegration :
 			_invoker,
 			_assetCache,
 			Snapshot.MusicPlayerCatalogInstanceIds.Contains(instanceId),
-			Snapshot.MusicPlayerDeviceInstanceIds.Contains(instanceId));
+			Snapshot.MusicPlayerDeviceInstanceIds.Contains(instanceId),
+			options);
 	}
 
 	protected IConfigFlow CreateConfigFlowCore() => new RemoteConfigFlow(Id, _invoker);

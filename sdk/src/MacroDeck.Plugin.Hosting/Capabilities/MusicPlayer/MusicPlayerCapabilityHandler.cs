@@ -136,7 +136,14 @@ internal sealed class MusicPlayerCapabilityHandler(
 	private async Task<CapabilityInvocationResult> StateAsync(CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
-		if (!TryResolvePlayer(invocation, out var player, out var failure))
+		var arguments = invocation.Arguments?.Deserialize<MusicPlayerStateArguments>(PluginProtocolJson.Options);
+		if (arguments is null)
+		{
+			return CapabilityInvocationResult.Failed(ProtocolErrorCodes.InvalidPayload,
+				"The state operation requires arguments.");
+		}
+
+		if (!TryResolvePlayer(arguments.InstanceId, arguments.Options, out var player, out var failure))
 		{
 			return failure!;
 		}
@@ -155,7 +162,7 @@ internal sealed class MusicPlayerCapabilityHandler(
 				"The artwork operation requires arguments.");
 		}
 
-		if (!TryResolvePlayer(arguments.InstanceId, out var player, out var failure))
+		if (!TryResolvePlayer(arguments.InstanceId, arguments.Options, out var player, out var failure))
 		{
 			return failure!;
 		}
@@ -430,31 +437,28 @@ internal sealed class MusicPlayerCapabilityHandler(
 		return CapabilityInvocationResult.Ok();
 	}
 
+	private bool TryResolvePlayer(string instanceId, out IMusicPlayer player, out CapabilityInvocationResult? failure)
+		=> TryResolvePlayer(instanceId, options: null, out player, out failure);
+
 	private bool TryResolvePlayer(
-		CapabilityInvocation invocation,
+		string instanceId,
+		IReadOnlyDictionary<string, JsonElement>? options,
 		out IMusicPlayer player,
 		out CapabilityInvocationResult? failure)
 	{
-		var arguments = invocation.Arguments?.Deserialize<MusicPlayerInstanceArguments>(PluginProtocolJson.Options);
-		if (arguments is null)
-		{
-			player = null!;
-			failure = CapabilityInvocationResult.Failed(ProtocolErrorCodes.InvalidPayload,
-				$"The {invocation.Operation} operation requires arguments.");
-			return false;
-		}
-
-		return TryResolvePlayer(arguments.InstanceId, out player, out failure);
-	}
-
-	private bool TryResolvePlayer(string instanceId, out IMusicPlayer player, out CapabilityInvocationResult? failure)
-	{
 		foreach (var provider in _providers)
 		{
-			if (provider.GetInstances()
-				.Any(instance => string.Equals(instance.Id, instanceId, StringComparison.Ordinal)))
+			var instance = provider.GetInstances()
+				.FirstOrDefault(candidate => string.Equals(candidate.Id, instanceId, StringComparison.Ordinal));
+			if (instance is not null)
 			{
-				var resolved = provider.GetPlayer(instanceId);
+				var declared = MusicPlayerOptionValues.Supported(instance.Options);
+				var resolved = options is null || declared.Count == 0
+					? provider.GetPlayer(instanceId)
+					: provider.GetPlayerWithOptions(new MusicPlayerOptionsRequest
+					{
+						InstanceId = instanceId, Options = MusicPlayerOptionValues.Normalize(declared, options)
+					});
 				if (resolved is not null)
 				{
 					player = resolved;

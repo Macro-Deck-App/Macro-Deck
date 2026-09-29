@@ -3,6 +3,7 @@ using MacroDeckHost.Application.Triggers.Providers;
 using MacroDeckHost.Application.Ui.Transport.Messages.MusicPlayer;
 using MacroDeckHost.Infrastructure.BackgroundServices;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
+using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.MusicPlayer;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -300,6 +301,10 @@ internal sealed class MusicPlayerStateBroadcastBackgroundServiceTests
 		{
 		}
 
+		public void Nudge()
+		{
+		}
+
 		public void Rearm() => _due = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 	}
 
@@ -353,6 +358,94 @@ internal sealed class MusicPlayerStateBroadcastBackgroundServiceTests
 		});
 	}
 
+	[Test]
+	public async Task A_variant_a_widget_shows_is_polled_with_its_options_and_never_reaches_clients_or_the_cache()
+	{
+		var registry = new FakeMusicPlayerRegistry();
+		registry.Add("system-media::any", "System Media").State = Playing("Current app");
+		registry.PlayersWithOptions["system-media::any"] = options
+			=> new FakeMusicPlayer { State = Playing($"Cycling every {options["cycleSeconds"]}") };
+		var transport = new RecordingUiTransport();
+		var cache = new MusicPlayerStateCache();
+		var notifier = new MusicPlayerStateNotifier();
+		var published = new List<string?>();
+		notifier.StateChanged += (_, args) => published.Add(args.State.TrackName);
+		var variants = new MusicPlayerVariants(new NeverNudge());
+		var variant = MusicPlayerVariant.Create("system-media::any",
+			new Dictionary<string, object> { ["cycleSeconds"] = 10d });
+		using var handle = variants.Acquire(variant);
+		var service = CreateService(registry, transport, cache, notifier: notifier, variants: variants);
+
+		await service.Tick(CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(variants.GetState(variant.Key)?.TrackName, Is.EqualTo("Cycling every 10"));
+			Assert.That(variants.GetState(variant.Key)?.InstanceId, Is.EqualTo("system-media::any"));
+			Assert.That(cache.GetState("system-media::any")?.TrackName, Is.EqualTo("Current app"));
+			Assert.That(StateBroadcasts(transport).Select(n => n.State.TrackName), Is.EqualTo(new[] { "Current app" }));
+			Assert.That(published, Does.Contain("Cycling every 10"));
+		});
+	}
+
+	[Test]
+	public async Task A_variant_nobody_shows_any_more_is_dropped_after_one_tick_of_grace()
+	{
+		var registry = new FakeMusicPlayerRegistry();
+		registry.Add("system-media::any", "System Media");
+		var variantPlayer = new FakeMusicPlayer { State = Playing("Cycling") };
+		registry.PlayersWithOptions["system-media::any"] = _ => variantPlayer;
+		var variants = new MusicPlayerVariants(new NeverNudge());
+		var released = new List<MusicPlayerVariant>();
+		variants.Released += (_, variant) => released.Add(variant);
+		var variant = MusicPlayerVariant.Create("system-media::any",
+			new Dictionary<string, object> { ["cycleSeconds"] = 10d });
+		var service = CreateService(registry, new RecordingUiTransport(), variants: variants);
+		var handle = variants.Acquire(variant);
+		await service.Tick(CancellationToken.None);
+
+		handle.Dispose();
+		await service.Tick(CancellationToken.None);
+		var stateDuringGrace = variants.GetState(variant.Key);
+		var releasedDuringGrace = released.Count;
+		await service.Tick(CancellationToken.None);
+		var pollsAfterRelease = variantPlayer.Polls;
+		await service.Tick(CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(stateDuringGrace?.TrackName, Is.EqualTo("Cycling"));
+			Assert.That(releasedDuringGrace, Is.Zero);
+			Assert.That(released, Is.EqualTo(new[] { variant }));
+			Assert.That(variants.GetState(variant.Key), Is.Null);
+			Assert.That(variantPlayer.Polls, Is.EqualTo(pollsAfterRelease));
+		});
+	}
+
+	[Test]
+	public async Task Options_that_change_on_their_own_tell_widgets_but_not_clients()
+	{
+		var registry = new FakeMusicPlayerRegistry();
+		registry.Add("system-media::any", "System Media");
+		var transport = new RecordingUiTransport();
+		var notifier = new MusicPlayerStateNotifier();
+		var instancesChanged = 0;
+		notifier.InstancesChanged += (_, _) => instancesChanged++;
+		var service = CreateService(registry, transport, notifier: notifier);
+		await service.Tick(CancellationToken.None);
+		var announcedBefore = InstanceBroadcasts(transport).Count;
+		var changedBefore = instancesChanged;
+
+		registry.DeclareOptions("system-media::any", [ActionParameter.Number("cycleSeconds", defaultValue: 10)]);
+		await service.Tick(CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(instancesChanged, Is.EqualTo(changedBefore + 1));
+			Assert.That(InstanceBroadcasts(transport), Has.Count.EqualTo(announcedBefore));
+		});
+	}
+
 	private static MusicPlayerState Playing(string trackName)
 		=> new()
 		{
@@ -369,7 +462,8 @@ internal sealed class MusicPlayerStateBroadcastBackgroundServiceTests
 		IMusicPlayerPollNudge? pollNudge = null,
 		TimeSpan? pollInterval = null,
 		IMusicPlayerInstancesSnapshot? instancesSnapshot = null,
-		IMusicPlayerStateNotifier? notifier = null)
+		IMusicPlayerStateNotifier? notifier = null,
+		IMusicPlayerVariants? variants = null)
 		=> new(new StartedHostLifetime(),
 			registry,
 			transport,
@@ -378,6 +472,7 @@ internal sealed class MusicPlayerStateBroadcastBackgroundServiceTests
 			pollNudge ?? new NeverNudge(),
 			instancesSnapshot ?? new MusicPlayerInstancesSnapshot(),
 			notifier ?? new MusicPlayerStateNotifier(),
+			variants ?? new MusicPlayerVariants(new NeverNudge()),
 			logger ?? SilentLogger(),
 			pollInterval: pollInterval);
 
@@ -386,6 +481,10 @@ internal sealed class MusicPlayerStateBroadcastBackgroundServiceTests
 		public Task Due { get; } = new TaskCompletionSource().Task;
 
 		public void NoteActionExecuted(string integrationId)
+		{
+		}
+
+		public void Nudge()
 		{
 		}
 
@@ -431,6 +530,12 @@ internal sealed class MusicPlayerStateBroadcastBackgroundServiceTests
 			return player;
 		}
 
+		public void DeclareOptions(string instanceId, IReadOnlyList<ActionParameter> options)
+		{
+			var index = _descriptors.FindIndex(descriptor => descriptor.InstanceId == instanceId);
+			_descriptors[index] = _descriptors[index] with { Options = options };
+		}
+
 		public void Clear()
 		{
 			_descriptors.Clear();
@@ -440,6 +545,12 @@ internal sealed class MusicPlayerStateBroadcastBackgroundServiceTests
 		public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances() => _descriptors.ToList();
 
 		public IMusicPlayer? GetPlayer(string instanceId) => _players.GetValueOrDefault(instanceId);
+
+		public Dictionary<string, Func<IReadOnlyDictionary<string, object>, FakeMusicPlayer>> PlayersWithOptions { get; }
+			= new(StringComparer.Ordinal);
+
+		public IMusicPlayer? GetPlayerWithOptions(string instanceId, IReadOnlyDictionary<string, object> options)
+			=> PlayersWithOptions.TryGetValue(instanceId, out var resolve) ? resolve(options) : GetPlayer(instanceId);
 	}
 
 	private sealed class FakeMusicPlayer : IMusicPlayer

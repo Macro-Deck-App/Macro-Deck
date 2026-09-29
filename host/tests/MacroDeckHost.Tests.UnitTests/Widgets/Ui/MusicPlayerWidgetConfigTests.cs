@@ -115,6 +115,7 @@ public class MusicPlayerWidgetConfigTests
 	{
 		var provider = new MusicPlayerWidgetUiProvider(new StubMusicPlayerRegistry([]),
 			new NullStateCache(),
+			new MusicPlayerVariants(new MusicPlayerPollNudge(new FakeIntegrationRegistry())),
 			new NullArtworkService(),
 			new NullPaletteExtractor(),
 			new MusicPlayerStateNotifier(),
@@ -198,6 +199,9 @@ public class MusicPlayerWidgetConfigTests
 
 		public IMusicPlayer? GetPlayer(string instanceId) => null;
 
+		public IMusicPlayer? GetPlayerWithOptions(string instanceId, IReadOnlyDictionary<string, object> options)
+			=> GetPlayer(instanceId);
+
 		public IMusicPlayer? DefaultPlayer => null;
 	}
 
@@ -221,6 +225,12 @@ public class MusicPlayerWidgetConfigTests
 	private sealed class NullArtworkService : IMusicPlayerArtworkService
 	{
 		public string GetETag(string artworkId, int? size) => string.Empty;
+
+		public Task<ArtworkImageResult?> GetImage(MusicPlayerVariant variant,
+			string artworkId,
+			int? size,
+			CancellationToken cancellationToken)
+			=> GetImage(variant.InstanceId, artworkId, size, cancellationToken);
 
 		public Task<ArtworkImageResult?> GetImage(string instanceId,
 			string artworkId,

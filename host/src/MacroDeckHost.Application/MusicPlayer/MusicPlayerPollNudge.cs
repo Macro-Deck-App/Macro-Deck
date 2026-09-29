@@ -9,6 +9,8 @@ public interface IMusicPlayerPollNudge
 
 	void NoteActionExecuted(string integrationId);
 
+	void Nudge();
+
 	void Rearm();
 }
 
@@ -47,6 +49,11 @@ public sealed class MusicPlayerPollNudge : IMusicPlayerPollNudge
 			return;
 		}
 
+		Nudge();
+	}
+
+	public void Nudge()
+	{
 		if (Interlocked.CompareExchange(ref _scheduled, 1, 0) != 0)
 		{
 			return;

@@ -32,7 +32,7 @@ The tiles in a folder:
 | Clock | The current time and date |
 | History Graph | CPU load over the last minutes |
 | Weather | Today and the next days for your city |
-| Music Player | What Spotify is playing, with play and skip |
+| Music Player | What Spotify is playing, with play and skip. Some players offer extra settings for each widget below the player choice |
 | Twitch Chat | Your channel's chat with emotes and badges, offered once a Twitch account is connected |
 | Countdown | A pizza timer that counts down and alerts you when it runs out |
 | Stopwatch | How long the current segment of your stream has been running |

@@ -29,6 +29,7 @@ internal sealed class BuiltInScreenSaverProviderTests
 	public void SetUp()
 		=> _provider = new BuiltInScreenSaverProvider(new StubRegistry(),
 			new StubStateCache(),
+			new MusicPlayerVariants(new MusicPlayerPollNudge(new FakeIntegrationRegistry())),
 			new StubArtworkService(),
 			new StubPaletteExtractor(),
 			new MusicPlayerStateNotifier(),
@@ -124,6 +125,7 @@ internal sealed class BuiltInScreenSaverProviderTests
 			});
 		var provider = new BuiltInScreenSaverProvider(new StubRegistry(),
 			cache,
+			new MusicPlayerVariants(new MusicPlayerPollNudge(new FakeIntegrationRegistry())),
 			new StubArtworkService(),
 			new StubPaletteExtractor(),
 			new MusicPlayerStateNotifier(),

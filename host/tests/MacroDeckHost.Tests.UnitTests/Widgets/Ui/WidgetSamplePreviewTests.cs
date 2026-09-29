@@ -75,6 +75,8 @@ public class WidgetSamplePreviewTests
 	{
 		var provider = new MacroDeckHost.Widgets.MusicPlayer.MusicPlayerWidgetUiProvider(new StubRegistry(),
 			new StubStateCache(),
+			new MacroDeckHost.Application.MusicPlayer.MusicPlayerVariants(
+				new MacroDeckHost.Application.MusicPlayer.MusicPlayerPollNudge(new FakeIntegrationRegistry())),
 			new StubArtworkService(),
 			new StubPaletteExtractor(),
 			new MacroDeckHost.Application.MusicPlayer.MusicPlayerStateNotifier(),

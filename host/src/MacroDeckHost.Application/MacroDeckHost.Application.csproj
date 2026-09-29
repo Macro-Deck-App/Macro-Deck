@@ -90,6 +90,8 @@
              Link="VideoStreams\VideoStreamSessionTable.cs" />
     <Compile Include="..\..\..\sdk\src\MacroDeck.Plugin.Hosting\Capabilities\VideoStreamProvider\VideoStreamWire.cs"
              Link="VideoStreams\VideoStreamWire.cs" />
+    <Compile Include="..\..\..\sdk\src\MacroDeck.Plugin.Hosting\Capabilities\MusicPlayer\MusicPlayerOptionValues.cs"
+             Link="MusicPlayer\MusicPlayerOptionValues.cs" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="MacroDeckHost" />

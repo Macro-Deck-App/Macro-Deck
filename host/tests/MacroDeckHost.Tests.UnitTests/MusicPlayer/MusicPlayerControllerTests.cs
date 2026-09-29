@@ -26,6 +26,12 @@ public class MusicPlayerControllerTests
 		public string GetETag(string artworkId, int? size)
 			=> $"\"{artworkId}-{(size is null ? "master" : size.Value.ToString(CultureInfo.InvariantCulture))}\"";
 
+		public Task<ArtworkImageResult?> GetImage(MusicPlayerVariant variant,
+			string artworkId,
+			int? size,
+			CancellationToken cancellationToken)
+			=> GetImage(variant.InstanceId, artworkId, size, cancellationToken);
+
 		public Task<ArtworkImageResult?> GetImage(string instanceId,
 			string artworkId,
 			int? size,

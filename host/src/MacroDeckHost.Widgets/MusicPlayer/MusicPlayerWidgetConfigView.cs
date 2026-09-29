@@ -1,4 +1,9 @@
+using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
+using MacroDeck.Localization;
+using MacroDeck.Sdk.Actions;
 using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Config.Options;
 using MacroDeck.Ui.Dsl;
@@ -32,6 +37,10 @@ internal static class MusicPlayerWidgetConfigView
 
 		var flows = new UiState<JsonElement>(WidgetConfigJson.ReadFlows(data));
 
+		var storedOptions = MusicPlayerWidgetData.Parse(data).ReadInstanceOptions();
+		var optionFields = new UiState<IReadOnlyList<InstanceOptionFields>>(
+			InstanceOptionFields.For(registry, instanceId.Peek(), storedOptions));
+
 		// Reloaded whenever the picked instance changes, so a stale selection's synthetic "unavailable"
 		// entry - added below for exactly the id currently bound - never lingers once a real one replaces
 		// it, and a freshly-missing one appears without the user reopening the editor.
@@ -49,7 +58,14 @@ internal static class MusicPlayerWidgetConfigView
 				Children =
 				[
 					new UiHeading { Key = "binding-heading", Text = AppStrings.Widgets.Editor.Binding() },
-					PlayerPicker(registry, instanceId, instanceOptions),
+					PlayerPicker(registry, instanceId, instanceOptions, optionFields),
+					new UiRepeat<InstanceOptionFields>
+					{
+						Key = "instance-options",
+						Items = UiValue.From(() => optionFields.Value),
+						KeySelector = fields => fields.ItemKey,
+						Template = (fields, _) => fields.Build(),
+					},
 					new UiHeading { Key = "style-heading", Text = AppStrings.Widgets.Editor.Style() },
 					new UiChoiceInput
 					{
@@ -133,7 +149,8 @@ internal static class MusicPlayerWidgetConfigView
 	private static UiDynamicChoiceInput PlayerPicker(
 		IMusicPlayerRegistry registry,
 		UiState<string> instanceId,
-		UiOptionsState instanceOptions)
+		UiOptionsState instanceOptions,
+		UiState<IReadOnlyList<InstanceOptionFields>> optionFields)
 	{
 		var picker = new UiDynamicChoiceInput
 		{
@@ -142,6 +159,13 @@ internal static class MusicPlayerWidgetConfigView
 			Binding = Bind.Custom(() => instanceId.Value,
 				value =>
 				{
+					// The new fields start from the new instance's defaults, and exist before the selection
+					// changes, so the fields are never built for one instance from another's cells.
+					if (!string.Equals(value, instanceId.Peek(), StringComparison.Ordinal))
+					{
+						optionFields.Value = InstanceOptionFields.For(registry, value, stored: null);
+					}
+
 					instanceId.Value = value;
 					instanceOptions.Reload();
 				}),
@@ -172,5 +196,98 @@ internal static class MusicPlayerWidgetConfigView
 		}
 
 		return options;
+	}
+
+	internal sealed class InstanceOptionFields
+	{
+		private readonly IReadOnlyList<ActionParameter> _options;
+		private readonly Dictionary<string, object> _cells;
+
+		private InstanceOptionFields(
+			string instanceId,
+			IReadOnlyList<ActionParameter> options,
+			IReadOnlyDictionary<string, object> values)
+		{
+			InstanceId = instanceId;
+			_options = options;
+			_cells = options.ToDictionary(option => option.Name,
+				option => values[option.Name] switch
+				{
+					double number => (object)new UiState<double>(number),
+					bool flag => new UiState<bool>(flag),
+					var other => new UiState<string>(Convert.ToString(other, CultureInfo.InvariantCulture) ?? string.Empty),
+				},
+				StringComparer.Ordinal);
+		}
+
+		public string InstanceId { get; }
+
+		// Instance ids contain separators an item key may not, so the key is a digest of the id.
+		public string ItemKey => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(InstanceId)).AsSpan(0, 8))
+			.ToLowerInvariant();
+
+		public static IReadOnlyList<InstanceOptionFields> For(
+			IMusicPlayerRegistry registry,
+			string instanceId,
+			IReadOnlyDictionary<string, JsonElement>? stored)
+		{
+			var descriptor = registry.GetInstances()
+				.FirstOrDefault(instance => string.Equals(instance.InstanceId, instanceId, StringComparison.Ordinal));
+
+			return descriptor is not null && MusicPlayerVariant.For(descriptor, stored) is { } variant
+				? [new InstanceOptionFields(descriptor.InstanceId, descriptor.Options, variant.Options)]
+				: [];
+		}
+
+		public UiElement Build()
+			=> new UiObjectInput
+			{
+				Key = "instanceOptions",
+				HideLabel = true,
+				Children = [.. _options.Select(Field)],
+			};
+
+		private UiElement Field(ActionParameter option)
+		{
+			var label = option.Label.IsEmpty ? LocalizedText.FromLiteral(option.Name) : option.Label;
+
+			return _cells[option.Name] switch
+			{
+				UiState<double> number => new UiNumberInput
+				{
+					Key = option.Name,
+					Label = label,
+					Description = option.Description,
+					Binding = Bind.To(number),
+					Min = option.Min is { } min ? min : default(UiValue<double>),
+					Max = option.Max is { } max ? max : default(UiValue<double>),
+					Step = option.Step is { } step ? step : default(UiValue<double>),
+					ShowSlider = option.ShowSlider,
+				},
+				UiState<bool> flag => new UiBooleanInput
+				{
+					Key = option.Name, Label = label, Description = option.Description, Binding = Bind.To(flag),
+				},
+				UiState<string> text when option.Type == ActionParameterType.Choice => new UiChoiceInput
+				{
+					Key = option.Name,
+					Label = label,
+					Description = option.Description,
+					Binding = Bind.To(text),
+					Options = UiValue.Of<IReadOnlyList<UiOption>>([
+						.. option.Options!.Select(choice => new UiOption
+						{
+							Value = choice.Value,
+							Label = choice.Label.IsEmpty ? LocalizedText.FromLiteral(choice.Value) : choice.Label,
+						}),
+					]),
+				},
+				UiState<string> text => new UiStringInput
+				{
+					Key = option.Name, Label = label, Description = option.Description, Binding = Bind.To(text),
+				},
+				_ => throw new InvalidOperationException($"No field for music player option '{option.Name}'."),
+			};
+		}
 	}
 }

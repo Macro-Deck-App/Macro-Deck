@@ -10,4 +10,10 @@ public interface IMusicPlayerArtworkService
 		string artworkId,
 		int? size,
 		CancellationToken cancellationToken);
+
+	// Shares the plain instance's cache: MusicPlayerState.ArtworkId documents one image per id whatever the options.
+	Task<ArtworkImageResult?> GetImage(MusicPlayerVariant variant,
+		string artworkId,
+		int? size,
+		CancellationToken cancellationToken);
 }

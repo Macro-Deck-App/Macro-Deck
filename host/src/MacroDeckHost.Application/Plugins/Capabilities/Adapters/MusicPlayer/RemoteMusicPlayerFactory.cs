@@ -1,3 +1,4 @@
+using System.Text.Json;
 using MacroDeckHost.Application.Plugins.Assets;
 
 namespace MacroDeckHost.Application.Plugins.Capabilities.Adapters.MusicPlayer;
@@ -10,7 +11,8 @@ public static class RemoteMusicPlayerFactory
 		IPluginCapabilityInvoker invoker,
 		IPluginAssetCache assetCache,
 		bool hasCatalog,
-		bool hasDevices)
+		bool hasDevices,
+		IReadOnlyDictionary<string, JsonElement>? options = null)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(pluginId);
 		ArgumentException.ThrowIfNullOrEmpty(instanceId);
@@ -19,10 +21,10 @@ public static class RemoteMusicPlayerFactory
 
 		return (hasCatalog, hasDevices) switch
 		{
-			(false, false) => new RemoteMusicPlayerPlain(pluginId, instanceId, invoker, assetCache),
-			(true, false) => new RemoteMusicPlayerWithCatalog(pluginId, instanceId, invoker, assetCache),
-			(false, true) => new RemoteMusicPlayerWithDevices(pluginId, instanceId, invoker, assetCache),
-			(true, true) => new RemoteMusicPlayerWithCatalogAndDevices(pluginId, instanceId, invoker, assetCache)
+			(false, false) => new RemoteMusicPlayerPlain(pluginId, instanceId, invoker, assetCache) { Options = options },
+			(true, false) => new RemoteMusicPlayerWithCatalog(pluginId, instanceId, invoker, assetCache) { Options = options },
+			(false, true) => new RemoteMusicPlayerWithDevices(pluginId, instanceId, invoker, assetCache) { Options = options },
+			(true, true) => new RemoteMusicPlayerWithCatalogAndDevices(pluginId, instanceId, invoker, assetCache) { Options = options }
 		};
 	}
 }

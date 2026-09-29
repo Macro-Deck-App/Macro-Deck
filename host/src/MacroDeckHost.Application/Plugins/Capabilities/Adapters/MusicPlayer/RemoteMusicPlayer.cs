@@ -25,6 +25,8 @@ public abstract class RemoteMusicPlayer(
 
 	protected string InstanceId { get; } = instanceId;
 
+	public IReadOnlyDictionary<string, JsonElement>? Options { get; init; }
+
 	public async Task<MusicPlayerState> GetStateAsync(CancellationToken cancellationToken = default)
 	{
 		try
@@ -35,7 +37,7 @@ public abstract class RemoteMusicPlayer(
 						Kind = CapabilityKinds.MusicPlayer,
 						LocalId = ProviderCapabilityId.LocalId,
 						Operation = CapabilityOperations.MusicPlayer.State,
-						Arguments = new MusicPlayerInstanceArguments { InstanceId = InstanceId }
+						Arguments = new MusicPlayerStateArguments { InstanceId = InstanceId, Options = Options }
 					},
 					cancellationToken)
 				.ConfigureAwait(false);
@@ -60,7 +62,10 @@ public abstract class RemoteMusicPlayer(
 						Kind = CapabilityKinds.MusicPlayer,
 						LocalId = ProviderCapabilityId.LocalId,
 						Operation = CapabilityOperations.MusicPlayer.Artwork,
-						Arguments = new MusicPlayerArtworkArguments { InstanceId = InstanceId, ArtworkId = artworkId }
+						Arguments = new MusicPlayerArtworkArguments
+						{
+							InstanceId = InstanceId, ArtworkId = artworkId, Options = Options
+						}
 					},
 					cancellationToken)
 				.ConfigureAwait(false);

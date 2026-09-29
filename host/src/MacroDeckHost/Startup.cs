@@ -844,6 +844,7 @@ public class Startup
 		services.AddSingleton<IMusicPlayerInstancesSnapshot, MusicPlayerInstancesSnapshot>();
 		services.AddSingleton<IMusicPlayerClientSync, MusicPlayerClientSync>();
 		services.AddSingleton<IMusicPlayerStateNotifier, MusicPlayerStateNotifier>();
+		services.AddSingleton<IMusicPlayerVariants, MusicPlayerVariants>();
 		services.AddSingleton<IWeatherRegistry, WeatherRegistry>();
 		services.AddSingleton<IWeatherBroadcastTrigger, WeatherBroadcastTrigger>();
 		services.AddSingleton<IArtworkProcessor, ImageSharpArtworkProcessor>();

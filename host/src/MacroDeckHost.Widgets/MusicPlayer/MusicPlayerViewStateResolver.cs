@@ -34,6 +34,7 @@ internal sealed class MusicPlayerViewStateResolver
 
 	private readonly IMusicPlayerRegistry _registry;
 	private readonly IMusicPlayerStateCache _stateCache;
+	private readonly IMusicPlayerVariants _variants;
 	private readonly IMusicPlayerArtworkService _artworkService;
 	private readonly IArtworkPaletteExtractor _paletteExtractor;
 	private readonly IIntegrationRegistry _integrations;
@@ -42,6 +43,7 @@ internal sealed class MusicPlayerViewStateResolver
 	private readonly ILogger _logger;
 
 	// The cover this resolver last registered, so an unchanged track never refetches it.
+	private string? _artworkSlot;
 	private string? _artworkKey;
 	private UiResource? _artwork;
 	private ArtworkPalette? _palette;
@@ -52,9 +54,15 @@ internal sealed class MusicPlayerViewStateResolver
 	private string? _providerIconKey;
 	private UiResource? _providerIcon;
 
+	private readonly Lock _demandSync = new();
+	private MusicPlayerVariant? _demanded;
+	private IDisposable? _demand;
+	private bool _released;
+
 	public MusicPlayerViewStateResolver(
 		IMusicPlayerRegistry registry,
 		IMusicPlayerStateCache stateCache,
+		IMusicPlayerVariants variants,
 		IMusicPlayerArtworkService artworkService,
 		IArtworkPaletteExtractor paletteExtractor,
 		IIntegrationRegistry integrations,
@@ -64,6 +72,7 @@ internal sealed class MusicPlayerViewStateResolver
 	{
 		_registry = registry;
 		_stateCache = stateCache;
+		_variants = variants;
 		_artworkService = artworkService;
 		_paletteExtractor = paletteExtractor;
 		_integrations = integrations;
@@ -95,7 +104,24 @@ internal sealed class MusicPlayerViewStateResolver
 			: instances.FirstOrDefault(instance
 				=> string.Equals(instance.InstanceId, instanceId, StringComparison.Ordinal));
 
-		var payload = instanceId is null ? null : _stateCache.GetState(instanceId);
+		var variant = missing || configured is null || descriptor is null
+			? null
+			: MusicPlayerVariant.For(descriptor, config.ReadInstanceOptions());
+		Demand(variant);
+
+		// A cover belongs to one slot: kept across a switch it could point at a slot released and removed since.
+		var slot = variant?.Key ?? instanceId;
+		if (!string.Equals(slot, _artworkSlot, StringComparison.Ordinal))
+		{
+			_artworkSlot = slot;
+			_artworkKey = null;
+			_artwork = null;
+			_palette = null;
+		}
+
+		var payload = instanceId is null ? null
+			: variant is null ? _stateCache.GetState(instanceId)
+			: _variants.GetState(variant.Key);
 
 		if (payload is null)
 		{
@@ -110,7 +136,7 @@ internal sealed class MusicPlayerViewStateResolver
 			};
 		}
 
-		await ResolveArtworkAsync(instanceId!, payload, cancellationToken).ConfigureAwait(false);
+		await ResolveArtworkAsync(instanceId!, variant, payload, cancellationToken).ConfigureAwait(false);
 
 		return new MusicPlayerViewState
 		{
@@ -175,11 +201,53 @@ internal sealed class MusicPlayerViewStateResolver
 			: UiProgressReference.Halted(reported, now, duration);
 	}
 
+	public void ReleaseDemand()
+	{
+		lock (_demandSync)
+		{
+			_released = true;
+			_demand?.Dispose();
+			_demand = null;
+			_demanded = null;
+		}
+	}
+
+	private void Demand(MusicPlayerVariant? variant)
+	{
+		lock (_demandSync)
+		{
+			if (_released || Equals(variant, _demanded))
+			{
+				return;
+			}
+
+			// Acquired before the old one is let go, so switching back and forth never lets a shared variant idle.
+			var previous = _demand;
+			_demand = variant is null ? null : _variants.Acquire(variant);
+			_demanded = variant;
+			previous?.Dispose();
+		}
+	}
+
+	internal static void RemoveArtworkOnRelease(IMusicPlayerVariants variants, IUiResourceStore resources)
+	{
+		ArgumentNullException.ThrowIfNull(variants);
+		ArgumentNullException.ThrowIfNull(resources);
+
+		variants.Released += (_, variant)
+			=> resources.Remove($"{MusicPlayerWidgetIcons.OwnerId}.{ArtworkResourceName(variant.Key)}");
+	}
+
+	private static string ArtworkResourceName(string slot) => $"artwork.{Slug(slot)}";
+
 	private async Task ResolveArtworkAsync(
 		string instanceId,
+		MusicPlayerVariant? variant,
 		MusicPlayerStatePayload payload,
 		CancellationToken cancellationToken)
 	{
+		var slot = variant?.Key ?? instanceId;
+
 		if (payload.ArtworkId is not { Length: > 0 } artworkId)
 		{
 			_artworkKey = null;
@@ -189,14 +257,14 @@ internal sealed class MusicPlayerViewStateResolver
 			return;
 		}
 
-		var key = $"{instanceId}\n{artworkId}";
+		var key = $"{slot}\n{artworkId}";
 
 		if (string.Equals(_artworkKey, key, StringComparison.Ordinal))
 		{
 			return;
 		}
 
-		var image = await LoadArtworkAsync(instanceId, artworkId, cancellationToken).ConfigureAwait(false);
+		var image = await LoadArtworkAsync(instanceId, variant, artworkId, cancellationToken).ConfigureAwait(false);
 
 		if (image is null)
 		{
@@ -208,13 +276,13 @@ internal sealed class MusicPlayerViewStateResolver
 		}
 
 		_artworkKey = key;
-		// One slot per instance rather than per cover: an instance shows one track at a time, so the slot
+		// One slot per instance or variant rather than per cover: each shows one track at a time, so the slot
 		// is overwritten instead of accumulating, and the URL a renderer builds carries the content hash -
 		// so replacing the bytes under one id still busts its cache.
 		_artwork = _resources.Register(new UiResourceRegistration
 		{
 			OwnerId = MusicPlayerWidgetIcons.OwnerId,
-			Name = $"artwork.{Slug(instanceId)}",
+			Name = ArtworkResourceName(slot),
 			MediaType = image.ContentType,
 			Content = image.Content,
 		});
@@ -223,12 +291,15 @@ internal sealed class MusicPlayerViewStateResolver
 
 	private async Task<ArtworkImageResult?> LoadArtworkAsync(
 		string instanceId,
+		MusicPlayerVariant? variant,
 		string artworkId,
 		CancellationToken cancellationToken)
 	{
 		try
 		{
-			return await _artworkService.GetImage(instanceId, artworkId, ArtworkSize, cancellationToken)
+			return await (variant is null
+					? _artworkService.GetImage(instanceId, artworkId, ArtworkSize, cancellationToken)
+					: _artworkService.GetImage(variant, artworkId, ArtworkSize, cancellationToken))
 				.ConfigureAwait(false);
 		}
 		catch (OperationCanceledException)

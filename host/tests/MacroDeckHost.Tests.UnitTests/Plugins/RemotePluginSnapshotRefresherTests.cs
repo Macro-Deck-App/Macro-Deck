@@ -1,5 +1,6 @@
 using System.Text.Json;
 using MacroDeck.Plugin.Protocol.Capabilities;
+using MacroDeck.Plugin.Protocol.Capabilities.Actions;
 using MacroDeck.Plugin.Protocol.Capabilities.Migration;
 using MacroDeck.Plugin.Protocol.Capabilities.MusicPlayer;
 using MacroDeck.Plugin.Protocol.Capabilities.VirtualProfiles;
@@ -60,6 +61,40 @@ public class RemotePluginSnapshotRefresherTests
 
 			// instances carries no provider name (unlike describe) - a targeted refresh must not clobber it.
 			Assert.That(result.Snapshot.MusicPlayerProviderName, Is.EqualTo("Spotify"));
+		});
+	}
+
+	[Test]
+	public async Task A_music_player_option_of_a_kind_this_host_does_not_know_costs_only_that_option()
+	{
+		var invoker = new RecordingInvoker
+		{
+			Result = new MusicPlayerInstancesResult
+			{
+				Instances =
+				[
+					new MusicPlayerInstanceDto
+					{
+						Id = "any",
+						DisplayName = "Any app",
+						Options =
+						[
+							new ActionParameterDto { Name = "cycleSeconds", Type = "Number" },
+							new ActionParameterDto { Name = "hologram", Type = "Hologram" }
+						]
+					}
+				]
+			}
+		};
+		var refresher = new RemotePluginSnapshotRefresher(invoker, new InMemorySnapshotStore());
+
+		var result = await refresher.RefreshKindAsync(PluginId, CapabilityKinds.MusicPlayer, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.AllSucceeded, Is.True);
+			Assert.That(result.Snapshot.MusicPlayerInstances.Single().Options.Select(option => option.Name),
+				Is.EqualTo(new[] { "cycleSeconds" }));
 		});
 	}
 
