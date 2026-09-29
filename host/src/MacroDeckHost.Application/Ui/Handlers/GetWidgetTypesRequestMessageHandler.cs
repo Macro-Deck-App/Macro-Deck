@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
 using MacroDeckHost.Application.Widgets;
@@ -8,10 +9,12 @@ public class GetWidgetTypesRequestMessageHandler
 	: IUiTransportMessageHandler<GetWidgetTypesRequest, GetWidgetTypesResponse>
 {
 	private readonly IWidgetTypeRegistry _widgetTypes;
+	private readonly IIntegrationRegistry _integrations;
 
-	public GetWidgetTypesRequestMessageHandler(IWidgetTypeRegistry widgetTypes)
+	public GetWidgetTypesRequestMessageHandler(IWidgetTypeRegistry widgetTypes, IIntegrationRegistry integrations)
 	{
 		_widgetTypes = widgetTypes;
+		_integrations = integrations;
 	}
 
 	public ValueTask<GetWidgetTypesResponse> Handle(
@@ -19,6 +22,6 @@ public class GetWidgetTypesRequestMessageHandler
 		CancellationToken cancellationToken)
 		=> ValueTask.FromResult(new GetWidgetTypesResponse
 		{
-			Types = WidgetTypeDtoMapper.MapToDto(_widgetTypes.All)
+			Types = WidgetTypeDtoMapper.MapToDto(_widgetTypes.All, _integrations)
 		});
 }

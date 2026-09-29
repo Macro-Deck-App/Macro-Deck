@@ -91,6 +91,7 @@ assets:
       - ui/runtime/styles/icons/info.svg
       - ui/runtime/styles/icons/layers.svg
       - ui/runtime/styles/icons/list-play.svg
+      - ui/runtime/styles/icons/list.svg
       - ui/runtime/styles/icons/lock.svg
       - ui/runtime/styles/icons/log-out.svg
       - ui/runtime/styles/icons/message-square.svg

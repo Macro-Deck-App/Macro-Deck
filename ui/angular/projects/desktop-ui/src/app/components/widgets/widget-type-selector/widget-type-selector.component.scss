@@ -1,8 +1,16 @@
-.subtitle {
-  margin: 0;
-  font-size: var(--text-md);
-  color: var(--color-text-secondary);
-  text-align: center;
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.toolbar .search {
+  flex: 1;
+  min-width: 0;
+}
+
+.type-card[hidden] {
+  display: none;
 }
 
 .widget-types {
@@ -12,7 +20,8 @@
   gap: var(--space-3);
   /* The grid grows with every widget a future release or an integration adds, so it scrolls rather
      than pushing the dialog past the viewport. */
-  max-height: min(60vh, 34rem);
+  height: min(60vh, 34rem);
+  align-content: start;
   overflow-y: auto;
 }
 
@@ -29,6 +38,11 @@
 }
 
 .type-card {
+  position: relative;
+  display: flex;
+}
+
+.type-card .type-select {
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -43,14 +57,70 @@
   width: 100%;
 }
 
-.type-card:hover,
-.type-card:focus-visible {
+.type-card .type-select:hover,
+.type-card .type-select:focus-visible {
   background-color: var(--color-accent-muted);
   border-color: var(--color-accent);
 }
 
-.type-card:active {
+.type-card .type-select:active {
   transform: scale(0.98);
+}
+
+.type-favorite {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.type-favorite svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.type-favorite:hover,
+.type-favorite:focus-visible {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.type-favorite.active {
+  color: var(--color-accent);
+}
+
+.type-card .type-favorite {
+  position: absolute;
+  top: calc(var(--space-3) + var(--space-1));
+  right: calc(var(--space-3) + var(--space-1));
+}
+
+@media (hover: hover) {
+  .type-card .type-favorite:not(.active) {
+    opacity: 0;
+  }
+
+  .type-card:hover .type-favorite,
+  .type-card:focus-within .type-favorite {
+    opacity: 1;
+  }
+}
+
+.type-card .type-provider {
+  position: absolute;
+  top: calc(var(--space-3) + var(--space-1) + 0.375rem);
+  left: calc(var(--space-3) + var(--space-1));
+  max-width: calc(100% - 2 * (var(--space-3) + var(--space-1)) - 2rem - var(--space-2));
+  z-index: 1;
 }
 
 /* A square stage the tile sits on with room around it, the way a widget sits in a deck cell rather
@@ -109,4 +179,81 @@
 .type-description {
   font-size: var(--text-base);
   color: var(--color-text-secondary);
+}
+
+.type-provider {
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 0.0625rem var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--type-integration-fg);
+  background-color: var(--type-integration-bg);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.no-matches {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: var(--space-4) 0;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.widget-types.list {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+}
+
+.widget-types.list .type-select {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  padding-right: calc(2rem + 2 * var(--space-3));
+  border-radius: var(--radius-md);
+}
+
+.widget-types.list .type-preview {
+  flex: none;
+  width: 4.5rem;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+}
+
+.widget-types.list .type-preview-placeholder {
+  font-size: var(--text-xs);
+}
+
+.widget-types.list .type-info {
+  flex: 1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--space-2);
+  row-gap: 0.125rem;
+}
+
+.widget-types.list .type-name {
+  font-size: var(--text-md);
+}
+
+.widget-types.list .type-provider {
+  position: static;
+  justify-self: start;
+  max-width: 100%;
+}
+
+.widget-types.list .type-description {
+  grid-column: 1 / -1;
+  font-size: var(--text-sm);
+}
+
+.widget-types.list .type-favorite {
+  top: 50%;
+  right: var(--space-3);
+  transform: translateY(-50%);
 }

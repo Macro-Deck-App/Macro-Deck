@@ -21,6 +21,13 @@ Unlock the deck to edit it, lock it to press buttons.
   as if you pressed the button, so a button set to **Cycle states on tap** also moves to its next state.
 - **Drop an image, an app or a shortcut** on a tile to use it as the background.
 
+## Finding a widget type
+
+When you add a widget, type in the search field to filter by name, description or integration. Widgets
+from an integration or plugin show its name as a badge. Click the **star** on a widget type to keep it at
+the top of the list for everyone who edits this Macro Deck, and switch between tiles and a compact list
+next to the search field.
+
 ## Pinned widgets
 
 Pin a widget to show it in **every folder of the profile**, or in **a folder and its subfolders**.

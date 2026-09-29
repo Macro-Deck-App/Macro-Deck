@@ -1,7 +1,11 @@
 using MacroDeck.Localization;
+using MacroDeck.Sdk;
+using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Widgets;
 using MacroDeck.Ui.Model.Versioning;
 using MacroDeckHost.Api.Controllers;
+using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.Events.Handlers;
 using MacroDeckHost.Application.Ui.Handlers;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
@@ -19,7 +23,7 @@ public class WidgetTypesEndpointTests
 {
 	private static WidgetsController CreateController(
 		IUiTransportMessageHandler<GetWidgetTypesRequest, GetWidgetTypesResponse> handler)
-		=> new(null!, null!, null!, null!, null!, null!, null!, null!, null!, handler, null!, null!, null!, null!);
+		=> new(null!, null!, null!, null!, null!, null!, null!, null!, null!, handler, null!, null!, null!, null!, null!, null!);
 
 	[Test]
 	public async Task GetTypes_returns_one_entry_per_registered_type_carrying_its_id_and_isBuiltIn()
@@ -30,7 +34,7 @@ public class WidgetTypesEndpointTests
 			new WidgetTypeCatalogEntry("com.example::gauge",
 				"com.example",
 				new WidgetTypeDescriptor("gauge", LocalizedText.FromLiteral("Gauge"))));
-		var controller = CreateController(new GetWidgetTypesRequestMessageHandler(registry));
+		var controller = CreateController(new GetWidgetTypesRequestMessageHandler(registry, new FakeIntegrationRegistry()));
 
 		var response = await controller.GetTypes(CancellationToken.None);
 
@@ -59,7 +63,7 @@ public class WidgetTypesEndpointTests
 			new WidgetTypeCatalogEntry(WidgetTypeIds.Clock,
 				string.Empty,
 				new WidgetTypeDescriptor(WidgetTypeIds.Clock, LocalizedText.FromLiteral("Clock"))));
-		var controller = CreateController(new GetWidgetTypesRequestMessageHandler(registry));
+		var controller = CreateController(new GetWidgetTypesRequestMessageHandler(registry, new FakeIntegrationRegistry()));
 
 		var response = await controller.GetTypes(CancellationToken.None);
 
@@ -88,7 +92,7 @@ public class WidgetTypesEndpointTests
 			new WidgetTypeCatalogEntry("com.example.gauges::gauge",
 				"com.example.gauges",
 				new WidgetTypeDescriptor("gauge", LocalizedText.FromLiteral("Gauge"))));
-		var controller = CreateController(new GetWidgetTypesRequestMessageHandler(registry));
+		var controller = CreateController(new GetWidgetTypesRequestMessageHandler(registry, new FakeIntegrationRegistry()));
 
 		var response = await controller.GetTypes(CancellationToken.None);
 
@@ -99,6 +103,84 @@ public class WidgetTypesEndpointTests
 			Assert.That(gauge.IsBuiltIn, Is.False);
 			Assert.That(response.Types.Any(type => type.Id == WidgetTypeIds.ActionButton), Is.True);
 		});
+	}
+
+	[Test]
+	public async Task GetTypes_names_the_integration_behind_a_provided_type_and_none_for_a_built_in()
+	{
+		var integrations = new FakeIntegrationRegistry();
+		integrations.Add(new FakeIntegration { Id = "com.example.gauges" });
+		var registry = new FakeWidgetTypeRegistry(new WidgetTypeCatalogEntry(WidgetTypeIds.Clock,
+				string.Empty,
+				new WidgetTypeDescriptor(WidgetTypeIds.Clock, LocalizedText.FromLiteral("Clock"))),
+			new WidgetTypeCatalogEntry("com.example.gauges::gauge",
+				"com.example.gauges",
+				new WidgetTypeDescriptor("gauge", LocalizedText.FromLiteral("Gauge"))),
+			new WidgetTypeCatalogEntry("com.example.orphan::dial",
+				"com.example.orphan",
+				new WidgetTypeDescriptor("dial", LocalizedText.FromLiteral("Dial"))));
+		var controller = CreateController(new GetWidgetTypesRequestMessageHandler(registry, integrations));
+
+		var response = await controller.GetTypes(CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Types.Single(type => type.Id == "com.example.gauges::gauge").ProviderName,
+				Is.EqualTo((LocalizedText)"Test Integration"));
+			Assert.That(response.Types.Single(type => type.Id == WidgetTypeIds.Clock).ProviderName.IsEmpty, Is.True);
+			Assert.That(response.Types.Single(type => type.Id == "com.example.orphan::dial").ProviderName,
+				Is.EqualTo((LocalizedText)"com.example.orphan"),
+				"a provider the integration registry does not know still gets a label rather than none");
+		});
+	}
+
+	[Test]
+	public async Task GetTypes_prefers_the_name_the_widget_type_provider_gives_itself_over_the_integration_name()
+	{
+		var integrations = new FakeIntegrationRegistry();
+		integrations.Add(new NamedWidgetTypeProviderIntegration());
+		var registry = new FakeWidgetTypeRegistry(new WidgetTypeCatalogEntry("com.example.home::sensor",
+			"com.example.home",
+			new WidgetTypeDescriptor("sensor", LocalizedText.FromLiteral("Sensor"))));
+		var controller = CreateController(new GetWidgetTypesRequestMessageHandler(registry, integrations));
+
+		var response = await controller.GetTypes(CancellationToken.None);
+
+		Assert.That(response.Types.Single().ProviderName, Is.EqualTo((LocalizedText)"Home Assistant"));
+	}
+
+	[Test]
+	public async Task The_live_catalog_update_names_the_integration_the_same_way_as_the_endpoint()
+	{
+		var integrations = new FakeIntegrationRegistry();
+		integrations.Add(new FakeIntegration { Id = "com.example.gauges" });
+		var registry = new FakeWidgetTypeRegistry(new WidgetTypeCatalogEntry("com.example.gauges::gauge",
+			"com.example.gauges",
+			new WidgetTypeDescriptor("gauge", LocalizedText.FromLiteral("Gauge"))));
+		var transport = new Auth.RecordingUiTransport();
+
+		await new WidgetTypeCatalogChangedNotificationHandler(registry, transport, integrations)
+			.Handle(new WidgetTypeCatalogChangedNotification(), CancellationToken.None);
+
+		var evt = transport.Sent.OfType<WidgetTypeCatalogChangedEvent>().Single();
+		Assert.That(evt.Types.Single().ProviderName, Is.EqualTo((LocalizedText)"Test Integration"));
+	}
+
+	private sealed class NamedWidgetTypeProviderIntegration : IIntegration, IWidgetTypeProvider
+	{
+		public string Id => "com.example.home";
+		public LocalizedText Name => "Home Integration";
+		public string Version => "1.0.0";
+		public IReadOnlyList<IActionDefinition> Actions => [];
+		public bool IsInitialized => true;
+		public string ProviderName => "Home Assistant";
+
+		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+
+		public Task InitializeAsync(IWidgetTypeProviderContext context, CancellationToken cancellationToken = default)
+			=> Task.CompletedTask;
+
+		public Task ShutdownAsync() => Task.CompletedTask;
 	}
 
 	private sealed class FakeWidgetTypeRegistry : IWidgetTypeRegistry

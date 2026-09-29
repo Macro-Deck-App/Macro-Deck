@@ -360,6 +360,7 @@ import {
   WebClientTargetProvisioningResultDto,
   WebSocketTransport,
   WidgetTypeCatalogChangedEvent,
+  WidgetTypeFavoritesChangedEvent,
 } from '@macro-deck/runtime';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -369,6 +370,7 @@ export interface WidgetTypeInfo {
   id: string;
   providerId: string;
   isBuiltIn: boolean;
+  providerName?: LocalizedText | null;
   name?: LocalizedText;
   description?: LocalizedText;
   defaultData: Record<string, unknown>;
@@ -380,6 +382,12 @@ export interface GetWidgetTypesResponse {
   success: boolean;
   error?: ApiError;
   types: WidgetTypeInfo[];
+}
+
+export interface WidgetTypeFavoritesResponse {
+  success: boolean;
+  error?: ApiError;
+  typeIds: string[];
 }
 
 const UI_SOCKET_PATH = '/ws/ui';
@@ -1736,6 +1744,14 @@ export class ApiService {
     return this.http('GET', '/api/widgets/types');
   }
 
+  getWidgetTypeFavorites(): Promise<WidgetTypeFavoritesResponse> {
+    return this.http('GET', '/api/widgets/types/favorites');
+  }
+
+  setWidgetTypeFavorite(widgetTypeId: string, favorite: boolean): Promise<WidgetTypeFavoritesResponse> {
+    return this.http('PUT', '/api/widgets/types/favorites', { widgetTypeId, favorite });
+  }
+
   getActions(): Promise<GetActionsResponse> {
     return this.http('GET', '/api/actions');
   }
@@ -1894,6 +1910,10 @@ export class ApiService {
 
   onWidgetTypeCatalogChanged(): Observable<WidgetTypeCatalogChangedEvent> {
     return this.onNotification<WidgetTypeCatalogChangedEvent>('WidgetTypeCatalogChangedEvent');
+  }
+
+  onWidgetTypeFavoritesChanged(): Observable<WidgetTypeFavoritesChangedEvent> {
+    return this.onNotification<WidgetTypeFavoritesChangedEvent>('WidgetTypeFavoritesChangedEvent');
   }
 
   attachUiSession(sessionId: string): Promise<UiAttachSessionResponse | null> {

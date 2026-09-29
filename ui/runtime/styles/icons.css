@@ -157,6 +157,10 @@
   mask-image: url('./icons/grid.svg');
   -webkit-mask-image: url('./icons/grid.svg');
 }
+.icon-list {
+  mask-image: url('./icons/list.svg');
+  -webkit-mask-image: url('./icons/list.svg');
+}
 .icon-layers {
   mask-image: url('./icons/layers.svg');
   -webkit-mask-image: url('./icons/layers.svg');

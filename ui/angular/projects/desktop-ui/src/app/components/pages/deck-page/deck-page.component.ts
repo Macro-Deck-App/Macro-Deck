@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 
 import { FileOpenService, FolderService } from '../../../services';
 import { ActionButtonTriggerType, AppStrings, GridRect, GridWidget, PinScope, WidgetType, WidgetClipboardEntry, collectIconPrefetchTargets, rectsOverlap, canPlaceGroup, LocalizedText, resolveLocalizedText, WIDGET_GRID_VIEW_ID } from '@macro-deck/runtime';
-import { LocalizationService, ButtonComponent, ModalComponent, ProfileService, WidgetClipboardService, IconPrefetchService, ErrorBannerComponent, ToastService, TranslatePipe, FolderViewHostComponent, FolderViewService } from '@shared';
+import { LocalizationService, ButtonComponent, ModalComponent, ProfileService, WidgetClipboardService, IconPrefetchService, ErrorBannerComponent, ToastService, TranslatePipe, FolderViewHostComponent, FolderViewService, WidgetTypeFavoritesService } from '@shared';
 import { DeckEditorGridComponent } from '../../deck-editor/deck-editor-grid.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
 import { ArchivePreviewModalComponent } from '../../portable/archive-preview-modal/archive-preview-modal.component';
@@ -116,6 +116,9 @@ export class DeckPageComponent {
     [this.profileService.selectedProfileId(), ...this.folderService.folders().map(folder => folder.id)].join('|'));
 
   constructor() {
+    // Loads the favorites before the widget selector first opens, so its order does not jump on open.
+    inject(WidgetTypeFavoritesService);
+
     effect(() => {
       if (this.profileService.isCurrentProfileLocked()) {
         this.editMode.set(false);
