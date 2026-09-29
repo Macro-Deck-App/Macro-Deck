@@ -33,6 +33,7 @@ See [License and trial](/guide/companion-app/license/).
 | Haptic feedback | Vibrates when you press a widget. On by default. |
 | Navigation gestures | Swipe with one finger to change folder, with two to change profile and with three to change computer. On by default. |
 | Keep screen on | **Never**, **While a deck is open** or **Always**. **Never** is the default. The app warns about burn-in first: on OLED screens a deck that never changes can leave a permanent ghost image. A dark theme and lower brightness reduce the risk. |
+| Icon resolution | The size deck icons are loaded in: **Automatic**, **128 px**, **256 px** or **512 px**. **Automatic** is the default and picks the size from how large each icon is drawn, so a phone usually gets 128 px and a tablet or a large widget 256 px or 512 px. A smaller size loads faster, a larger one looks sharper. With **Automatic** the row shows the sizes the deck you last opened used. Only icons change, not artwork such as album covers. A Macro Deck version without this feature always sends 256 px. |
 
 ## Device
 
