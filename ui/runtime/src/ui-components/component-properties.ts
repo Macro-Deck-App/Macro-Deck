@@ -73,6 +73,7 @@ export const UiComponentProperties = {
   Spans: 'spans',
   Overflow: 'overflow',
   Anchor: 'anchor',
+  Stream: 'stream',
 } as const;
 
 export const UI_COMPONENT_PROPERTIES_WELL_KNOWN: readonly string[] =

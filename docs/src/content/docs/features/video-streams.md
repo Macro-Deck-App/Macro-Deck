@@ -229,6 +229,8 @@ public async Task<VideoStreamSignal?> SignalAsync(string sessionId, VideoStreamS
 - The signals of one session arrive in the order they were sent, in both directions.
 - A transport that needs no signaling, such as HLS or WHEP, where the consumer talks to your URL itself,
   keeps the default `SignalAsync`.
+- The signal types above are the ones Macro Deck's clients use for `webrtc` - see
+  [What Macro Deck's clients play](#what-macro-decks-clients-play).
 
 ## The consumer
 
@@ -247,6 +249,64 @@ a consumer a network address when the device can also reach the computer over th
 refuse with `StreamUnavailable`.
 
 The consumer context is a hint for building reachable URLs. Never authorize anything by it.
+
+## Showing a stream in Macro Deck UI
+
+Put a [`macrodeck.video-stream`](/ui/components/video-stream/) in any tree you draw - a widget type, a folder
+view, a modal - and name the stream by your provider's qualified id and the stream's id:
+
+```csharp
+new UiVideoStream
+{
+    Key = "preview",
+    Stream = UiValue.Of(new UiVideoStreamReference { Provider = registration.QualifiedId, Id = "Preview" }),
+    Fill = true,
+}
+```
+
+The client that draws the tree opens, suspends and closes the session itself. The view can name any
+provider's stream, not only your own.
+
+## What Macro Deck's clients play
+
+Macro Deck's web client and desktop app list, most preferred first, the transports the device they run on
+can play:
+
+| Transport | Offered when | What the client does |
+| --- | --- | --- |
+| `webrtc` | The engine has `RTCPeerConnection` | Takes `Payload` as the offer, answers with the convention below, plays the received track. |
+| `whep` | Same | POSTs a receive-only offer as `application/sdp` to `Url`, applies the answer, and DELETEs the resource named by the `Location` header when it stops. |
+| `hls` | The engine plays HLS natively and inline | Plays `Url` in a muted `<video>`. No HLS library is loaded, so most desktop browsers do not offer it. |
+| `mjpeg` | Always | Shows `Url` as an image that keeps updating, a `multipart/x-mixed-replace` stream. |
+
+**Serve `mjpeg` as well.** It is the one transport a client can play on every device Macro Deck supports,
+old tablets included. Offer `webrtc` or `whep` for low latency, and the client falls back to
+`mjpeg` where they are not available. A client that cannot play the transport you picked, for example because
+autoplay is blocked, closes the session and opens a new one without that transport.
+
+**The `webrtc` convention.** Macro Deck's clients speak this, and it does not change:
+
+- `Payload` is the offer as a raw SDP string.
+- The client answers with a signal of type `answer` whose payload is the raw SDP answer.
+- Both sides send ICE candidates as signals of type `candidate`, each payload an `RTCIceCandidateInit` as
+  JSON.
+
+An offer can be answered only once. When the client suspends a `webrtc` session it closes its peer, so return a
+fresh offer from `ResumeAsync`. A resume that returns no new description makes the client close the session and
+open a new one.
+
+**`whep`.** The endpoint is called from the client's own origin, so it has to allow that with CORS, including
+`Access-Control-Expose-Headers: Location`. When `Parameters` has an `authorization` entry, the client sends it
+as the `Authorization` header of both requests.
+
+**Suspending.** The client stops playing as soon as it suspends: an `mjpeg` or `hls` client stops downloading, a
+`whep` or `webrtc` client closes its peer. Your `SuspendAsync` can release what is expensive on your side. A
+suspend can reach you up to about a minute late, or not at all when the session is closed first.
+
+**Reachability.** A web client loaded over HTTPS cannot load an `http:` media URL; serve `https:` URLs to such
+a consumer, or `http:` ones only on a local network the client reaches over HTTP.
+
+Clients play every stream without sound.
 
 ## Limits
 

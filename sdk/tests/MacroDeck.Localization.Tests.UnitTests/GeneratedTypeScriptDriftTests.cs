@@ -46,6 +46,7 @@ public class GeneratedTypeScriptDriftTests
 		"Deck.FolderView.",
 		"Deck.ScreenSaver.",
 		"Deck.UnavailableWidget.",
+		"Deck.VideoStream.",
 		"Errors.Auth.",
 		"Errors.Folder.",
 		"Errors.VideoStream.",

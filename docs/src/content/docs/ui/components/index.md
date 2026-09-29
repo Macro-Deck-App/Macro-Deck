@@ -40,7 +40,8 @@ Any node can also carry a `modifiers` object - background, border, radius, acces
 A component belongs here when a reader cannot draw it from the tree alone, because it must resolve a
 Macro Deck-defined reference - a time or a media position
 ([ADR 0065](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0065-the-component-profile-authoring-contracts.md))
-- against its own clock. Everything else is `ui.*`, however Macro Deck-flavoured its styling.
+- against its own clock, or ask Macro Deck for a video stream session itself. Everything else is `ui.*`,
+however Macro Deck-flavoured its styling.
 
 | Type | Purpose | Page |
 |---|---|---|
@@ -48,3 +49,4 @@ Macro Deck-defined reference - a time or a media position
 | `macrodeck.clock-dial` | An analogue clock face drawn from the same kind of reference | [Time and clock](/ui/components/time/) |
 | `macrodeck.progress-bar` | A track whose filled span follows a position that keeps moving | [Progress](/ui/components/progress/) |
 | `macrodeck.progress-text` | A run of text derived from that same moving position | [Progress](/ui/components/progress/) |
+| `macrodeck.video-stream` | A live video stream from a provider, played from a session the reader opens | [Video stream](/ui/components/video-stream/) |

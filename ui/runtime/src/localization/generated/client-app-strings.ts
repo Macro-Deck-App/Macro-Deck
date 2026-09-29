@@ -31,6 +31,11 @@ export const ClientAppStrings = {
 		UnavailableWidget: {
 			Tile: 'macrodeck.app:Deck.UnavailableWidget.Tile',
 		},
+		VideoStream: {
+			AccessibleLabel: 'macrodeck.app:Deck.VideoStream.AccessibleLabel',
+			Connecting: 'macrodeck.app:Deck.VideoStream.Connecting',
+			NoStream: 'macrodeck.app:Deck.VideoStream.NoStream',
+		},
 	},
 	Errors: {
 		Auth: {
@@ -393,6 +398,9 @@ export const ClientAppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Deck.FolderView.UnavailableHeading': 'This folder view is unavailable',
 	'macrodeck.app:Deck.ScreenSaver.Announcement': 'Screensaver. Touch the screen to return to the deck.',
 	'macrodeck.app:Deck.UnavailableWidget.Tile': 'Provided by {plugin}, currently unavailable',
+	'macrodeck.app:Deck.VideoStream.AccessibleLabel': '{stream}: {status}',
+	'macrodeck.app:Deck.VideoStream.Connecting': 'Connecting to the video stream…',
+	'macrodeck.app:Deck.VideoStream.NoStream': 'No video stream selected',
 	'macrodeck.app:Errors.Auth.ChangePasswordFailed': 'Changing the password failed',
 	'macrodeck.app:Errors.Auth.ChangeUsernameFailed': 'Changing the username failed',
 	'macrodeck.app:Errors.Auth.LoginFailed': 'Login failed',

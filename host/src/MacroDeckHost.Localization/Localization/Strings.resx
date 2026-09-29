@@ -1387,6 +1387,15 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Deck.Unlock" xml:space="preserve">
     <value>Unlock</value>
   </data>
+  <data name="Deck.VideoStream.AccessibleLabel" xml:space="preserve">
+    <value>{stream}: {status}</value>
+  </data>
+  <data name="Deck.VideoStream.Connecting" xml:space="preserve">
+    <value>Connecting to the video stream…</value>
+  </data>
+  <data name="Deck.VideoStream.NoStream" xml:space="preserve">
+    <value>No video stream selected</value>
+  </data>
   <data name="Deck.UnpinWidgetsFailed" xml:space="preserve">
     <value>Failed to unpin the widgets</value>
   </data>

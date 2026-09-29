@@ -13,6 +13,7 @@ import { LocalizationService } from '../../localization';
 import { RenderingModeService } from '../../services/rendering-mode.service';
 import { ServerClockService } from '../../services/server-clock.service';
 import { UiFontService } from '../../services/theme.service';
+import { VideoStreamService } from '../../services/video-stream.service';
 import { UiNodeEventBus } from './ui-node-event-bus';
 import { UiWidgetResourceBaseUrl } from './ui-widget-resource-base-url';
 import { UiWidgetTimeService } from './ui-widget-time.service';
@@ -25,6 +26,7 @@ export class UiWidgetRenderHostFactory {
   private readonly renderingMode = inject(RenderingModeService);
   private readonly fontLoader = inject(FontLoaderService);
   private readonly uiFonts = inject(UiFontService);
+  private readonly videoStreams = inject(VideoStreamService);
 
   private readonly baseUrl = signal<string | null>(this.resourceBaseUrl.current);
 
@@ -51,6 +53,7 @@ export class UiWidgetRenderHostFactory {
       // back once the face lands (issue #457 findings 7/8).
       fontReady: faceId => this.fontLoader.ensureFace(faceId)() !== 'loading',
       uiFontKey: () => String(this.uiFonts.version()),
+      videoStreams: () => this.videoStreams.surface(),
       emit: (node, name, data) => bus.emit(node, name, data),
       setPressed: (node, pressed) => bus.setPressed(node, pressed),
       ownsRootWidgetBorder,

@@ -54,6 +54,7 @@ public class ComponentProfileConformanceFixtureTests
 		yield return "conformance-responsive-tree.json";
 		yield return "conformance-chat-tree.json";
 		yield return "conformance-anchored-list-tree.json";
+		yield return "conformance-video-stream-tree.json";
 	}
 
 	private static readonly bool[] _chatSpanIsImage = [false, false, true, true, false];
@@ -263,6 +264,30 @@ public class ComponentProfileConformanceFixtureTests
 			// but knows a dynamic text still shows the right time.
 			Assert.That(dial.Fallback!.Type, Is.EqualTo(UiMacroDeckComponents.DynamicText));
 			Assert.That(dial.Fallback!.Fallback!.Type, Is.EqualTo(UiComponents.Text));
+		});
+	}
+
+	[Test]
+	public void The_video_stream_fixture_pins_the_reference_shape_an_empty_view_and_the_fallback()
+	{
+		var tree = JsonSerializer.Deserialize<UiTree>(ReadTree("conformance-video-stream-tree.json"),
+			UiCanonicalJson.Options)!;
+		var nodes = Walk(tree.Root).ToDictionary(node => node.Id, StringComparer.Ordinal);
+
+		var video = nodes["conformance.video"];
+		var sized = nodes["conformance.videoSized"];
+		var empty = nodes["conformance.videoEmpty"];
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(video.Properties["stream"].GetRawText(),
+				Is.EqualTo("""{"provider":"com.example.obs::studio","id":"Program"}"""));
+			Assert.That(sized.Properties["stream"].GetRawText(),
+				Is.EqualTo("""{"provider":"com.example.obs::studio","id":"Preview scene"}"""));
+			Assert.That(video.Properties["fit"].GetString(), Is.EqualTo(UiComponentImageFits.Cover));
+			Assert.That(sized.Properties.ContainsKey("fit"), Is.False);
+			Assert.That(empty.Properties.ContainsKey("stream"), Is.False);
+			Assert.That(video.Fallback!.Type, Is.EqualTo(UiComponents.Text));
 		});
 	}
 

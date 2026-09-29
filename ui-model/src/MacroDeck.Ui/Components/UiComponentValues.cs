@@ -522,7 +522,7 @@ public static class UiComponentSliderInteractions
 	public static readonly IReadOnlyList<string> WellKnown = [Relative];
 }
 
-/// <summary>How a button's artwork fills its box.</summary>
+/// <summary>How a button's artwork or a video stream fills its box.</summary>
 public static class UiComponentImageFits
 {
 	/// <summary>The whole artwork is visible, letterboxed where its shape differs from the box.</summary>

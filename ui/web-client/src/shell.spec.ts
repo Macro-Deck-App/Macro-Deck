@@ -1,5 +1,6 @@
 import {
-  ClientAppStrings, DEFAULT_WEB_CLIENT_TARGET, WidgetType, type GridWidget, type UiNode, type UiRenderHost,
+  ClientAppStrings, DEFAULT_WEB_CLIENT_TARGET, VideoStreamClient, WidgetType, type GridWidget, type UiNode,
+  type UiRenderHost,
 } from '@macro-deck/runtime';
 import { Appearance } from './appearance';
 import { Client } from './client';
@@ -650,6 +651,50 @@ describe('Shell', () => {
 
       expect((root.querySelector('.wc-screensaver') as HTMLElement).hidden).toBeTrue();
       expect(root.querySelector('.wc-lock-screen')).not.toBeNull();
+    });
+
+    describe('with video streams', () => {
+      let videoStreams: VideoStreamClient;
+
+      const mountWithVideo = () => {
+        videoStreams = new VideoStreamClient({
+          request: () => new Promise(() => undefined),
+          onNotification: () => () => undefined,
+          onConnectionChanged: () => () => undefined,
+          connected: () => true,
+        });
+        const videoHost: UiRenderHost = { ...host, videoStreams: () => videoStreams.surface('deck') };
+        return new Shell(root, client, videoHost, { ...services(), wakeLock: lock, idleClock });
+      };
+
+      it('covers the deck and any dialog while it shows, but not its own streams', async () => {
+        mountWithVideo();
+        showDeck();
+        settings(true, 60);
+        fire();
+        await settle();
+
+        expect(videoStreams.surface('deck').hidden()).toBeTrue();
+        expect(videoStreams.surface('modal').hidden()).toBeTrue();
+        expect(videoStreams.surface('screensaver').hidden()).toBeFalse();
+
+        settings(false);
+
+        expect(videoStreams.surface('deck').hidden()).toBeFalse();
+        expect(videoStreams.surface('modal').hidden()).toBeFalse();
+      });
+
+      it('covers the deck and any dialog behind the host lock screen', () => {
+        mountWithVideo();
+        showDeck();
+
+        client.hostLock.apply({ locked: true, lockScreenEnabled: true, supported: true });
+        expect(videoStreams.surface('deck').hidden()).toBeTrue();
+        expect(videoStreams.surface('modal').hidden()).toBeTrue();
+
+        client.hostLock.apply({ locked: false, lockScreenEnabled: true, supported: true });
+        expect(videoStreams.surface('deck').hidden()).toBeFalse();
+      });
     });
   });
 

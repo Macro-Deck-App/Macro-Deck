@@ -1,6 +1,7 @@
 import { LocalizationTranslator } from '../localization/localized-text';
 import { UiNode } from '../ui-framework/ui-node.interface';
 import { UiResource } from '../ui-framework/ui-resource';
+import type { VideoStreamSurface } from '../video-streams/video-stream-client';
 
 export interface UiRenderHost {
   localization: LocalizationTranslator;
@@ -36,4 +37,6 @@ export interface UiRenderHost {
    * own: only the root's ring has a tile to hand it to.
    */
   ownsRootWidgetBorder?(): boolean;
+
+  videoStreams?(): VideoStreamSurface | null;
 }

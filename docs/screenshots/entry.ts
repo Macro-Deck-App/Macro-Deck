@@ -1,1 +1,1 @@
-export { bundledTranslator, renderUiNode } from '../../ui/runtime/src/public-api';
+export { bundledTranslator, renderUiNode, VideoStreamClient } from '../../ui/runtime/src/public-api';

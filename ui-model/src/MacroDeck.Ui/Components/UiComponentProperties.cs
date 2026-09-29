@@ -93,8 +93,8 @@ public static class UiComponentProperties
 	/// type: ignoring it still draws the right picture, only without the movement.</summary>
 	public const string Transition = "transition";
 
-	/// <summary>How a button's artwork fills its box - see <see cref="UiComponentImageFits" />. Absent means
-	/// <see cref="UiComponentImageFits.Contain" />.</summary>
+	/// <summary>How a button's artwork or a video stream fills its box - see <see cref="UiComponentImageFits" />.
+	/// Absent means <see cref="UiComponentImageFits.Contain" />.</summary>
 	public const string Fit = "fit";
 
 	/// <summary>A multiplier scaling a button's artwork about its own centre, or a
@@ -311,6 +311,9 @@ public static class UiComponentProperties
 	/// <see cref="UiComponentListAnchors" />. Needs <see cref="UiComponents.List" /> component version 3;
 	/// absent means <see cref="UiComponentListAnchors.Start" />.</summary>
 	public const string Anchor = "anchor";
+	/// <summary>The video stream a <see cref="UiMacroDeckComponents.VideoStream" /> shows, as a
+	/// <see cref="Model.References.UiVideoStreamReference" />.</summary>
+	public const string Stream = "stream";
 
 	/// <summary>The property keys this profile ships.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
@@ -321,6 +324,6 @@ public static class UiComponentProperties
 		Format, Seconds, Level, Step, LevelColor, Interaction, BorderStyle, BorderColor, Corner, Points, PlotTop,
 		Digits, Answer, Placeholder, Rotation, OriginX, OriginY, Shape, CornerRadius, StrokeColor,
 		StrokeWidth, Path, Icon, Columns, Rows, ColumnSpan, RowSpan, StartAngle, EndAngle, On, Selected,
-		Modifiers, Frame, Clip, Mask, Variants, Spans, Overflow, Anchor,
+		Modifiers, Frame, Clip, Mask, Variants, Spans, Overflow, Anchor, Stream,
 	];
 }

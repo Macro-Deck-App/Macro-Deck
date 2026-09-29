@@ -255,6 +255,7 @@ export class ScreenSaver {
       fontFamily: faceId => base.fontFamily(faceId),
       fontReady: faceId => base.fontReady(faceId),
       uiFontKey: () => base.uiFontKey?.() ?? '',
+      videoStreams: () => base.videoStreams?.()?.client.surface('screensaver') ?? null,
       emit: (node, name, data) => {
         if (sessionId === null) return;
         void connection.request('SendUiEvent', [{

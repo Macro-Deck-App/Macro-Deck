@@ -20,7 +20,7 @@
 </style>
 <div id="box"></div>
 <script type="module">
-  import { bundledTranslator, renderUiNode } from './runtime.js';
+  import { bundledTranslator, renderUiNode, VideoStreamClient } from './runtime.js';
 
   const name = new URLSearchParams(location.search).get('scene');
   const scene = await (await fetch(`scenes/${name}.json`)).json();
@@ -32,8 +32,26 @@
 
   // A fixed clock keeps time and progress components identical on every run.
   const fixedNow = Date.UTC(2026, 8, 12, 14, 5, 30);
+
+  const listeners = [];
+  let sessions = 0;
+  const videoStreams = new VideoStreamClient({
+    request(type, payload) {
+      if (type === 'GetVideoStreams') return new Promise(() => {});
+      if (type !== 'OpenVideoStream') return Promise.resolve(null);
+      const sessionId = `session-${++sessions}`;
+      setTimeout(() => listeners.forEach(listener => listener('VideoStreamSessionChangedEvent', {
+        sessionId, revision: 1, state: 'active', reason: 'none',
+        description: { transport: 'mjpeg', url: scene.resources?.[`stream:${payload.streamId}`] },
+      })));
+      return Promise.resolve({ sessionId, revision: 0, state: 'opening' });
+    },
+    onNotification: listener => { listeners.push(listener); return () => {}; },
+    onConnectionChanged: () => () => {},
+    connected: () => true,
+  });
   const host = {
-    localization: bundledTranslator,
+    localization: { translate: (scope, key, args) => bundledTranslator(`${scope}:${key}`, args) },
     resourceUrl: resource => scene.resources?.[resource?.resourceId] ?? null,
     now: () => fixedNow,
     culture: () => 'en-US',
@@ -43,6 +61,7 @@
     fontReady: () => true,
     uiFontKey: () => '',
     emit: () => {},
+    videoStreams: () => videoStreams.surface('deck'),
   };
 
   const scale = scene.scale ?? 1;
