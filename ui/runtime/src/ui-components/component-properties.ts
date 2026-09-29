@@ -72,6 +72,7 @@ export const UiComponentProperties = {
   Variants: 'variants',
   Spans: 'spans',
   Overflow: 'overflow',
+  Anchor: 'anchor',
   Stream: 'stream',
 } as const;
 

@@ -85,6 +85,32 @@ internal sealed class TwitchChatIngestionTests
 	}
 
 	[Test]
+	public void A_shared_chat_line_names_the_channel_it_came_from()
+	{
+		var shared = ChatLine.Replace("\"message_type\": \"text\"",
+			"""
+			"message_type": "text",
+			"source_broadcaster_user_id": "777",
+			"source_broadcaster_user_login": "partnerchannel",
+			"source_broadcaster_user_name": "PartnerChannel"
+			""",
+			StringComparison.Ordinal);
+
+		_connection.HandleNotification(FakeEventSubClient.Notification("n1", "channel.chat.message", ChatLine));
+		_connection.HandleNotification(FakeEventSubClient.Notification("n2", "channel.chat.message",
+			shared.Replace("cc106a89", "dd106a89", StringComparison.Ordinal)));
+
+		var messages = _sink.Posted.OfType<TwitchChatMessageReceived>().Select(received => received.Message).ToList();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(messages[0].SourceChannelId, Is.Null);
+			Assert.That(messages[1].SourceChannelId, Is.EqualTo("777"));
+			Assert.That(messages[1].SourceChannelName, Is.EqualTo("PartnerChannel"));
+		});
+	}
+
+	[Test]
 	public void Chat_lines_are_not_automation_events()
 	{
 		_connection.HandleNotification(FakeEventSubClient.Notification("n1", "channel.chat.message", ChatLine));

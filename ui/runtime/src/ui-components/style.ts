@@ -10,6 +10,7 @@ import {
   UiComponentImageFits,
   UiComponentImageTransitions,
   UiComponentJustify,
+  UiComponentListAnchors,
   UiComponentOverflows,
   UiComponentTextRoles,
   UiComponentTextWeights,
@@ -32,6 +33,10 @@ export function nodeIsHorizontal(node: UiNode): boolean {
 
 export function stackClipsStart(node: UiNode): boolean {
   return nodeString(node, UiComponentProperties.Overflow) === UiComponentOverflows.ClipStart;
+}
+
+export function listAnchorsEnd(node: UiNode): boolean {
+  return !nodeIsHorizontal(node) && nodeString(node, UiComponentProperties.Anchor) === UiComponentListAnchors.End;
 }
 
 export function nodeJustify(node: UiNode): string {

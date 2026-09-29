@@ -22,6 +22,9 @@
 # It also writes the bundled Ubuntu libraries' notices (appimage-library-notices.mjs) and
 # repacks with the pinned runtime, so it always repacks.
 #
+# linuxdeploy may patch the host's ELF files, so an install manifest in the AppImage is rewritten
+# from what it actually ships and signed again (needs TAURI_SIGNING_PRIVATE_KEY), then verified.
+#
 # Repacking invalidates the updater signature `tauri build` wrote, so the caller
 # must re-sign the AppImage afterwards (see .github/workflows/build.yml).
 #
@@ -33,7 +36,10 @@ set -euo pipefail
 
 appimage_dir=${1:?usage: strip-appimage-wayland.sh <appimageDir>}
 arch=${ARCH:-x86_64}
-notices_tool="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/appimage-library-notices.mjs"
+scripts_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+notices_tool="$scripts_dir/appimage-library-notices.mjs"
+manifest_tool="$scripts_dir/make-install-manifest.mjs"
+public_key_config="$scripts_dir/../../ui/bootstrapper/tauri.conf.json"
 notices_path=usr/share/doc/macro-deck/THIRD-PARTY-NOTICES-LINUX-LIBRARIES
 
 mapfile -t images < <(find "$appimage_dir" -maxdepth 1 -name '*.AppImage')
@@ -60,6 +66,17 @@ for lib in "${libs[@]}"; do
 	echo "Removing ${lib#"$appdir"/}"
 done
 find "$appdir" -name 'libwayland*' -delete
+
+mapfile -t manifests < <(find "$appdir" -path '*/host/install-manifest.json')
+if [ "${#manifests[@]}" -gt 1 ]; then
+	echo "error: expected at most one install manifest in $(basename "$appimage"), found ${#manifests[@]}" >&2
+	exit 1
+fi
+if [ "${#manifests[@]}" -eq 1 ]; then
+	host_dir=$(dirname "${manifests[0]}")
+	node "$manifest_tool" rewrite "$host_dir"
+	"$scripts_dir/sign-install-manifest.sh" "$host_dir"
+fi
 
 runtime="$work/runtime-$arch"
 node "$notices_tool" fetch-runtime "$runtime"
@@ -118,5 +135,13 @@ if ! cmp -s "$appdir/$notices_path" "$verify_appdir/$notices_path"; then
 	exit 1
 fi
 node "$notices_tool" check-runtime "$appimage"
+if [ "${#manifests[@]}" -eq 1 ]; then
+	verify_manifest=$(find "$verify_appdir" -path '*/host/install-manifest.json' -print -quit)
+	if [ -z "$verify_manifest" ]; then
+		echo "error: repacked AppImage lost its install manifest" >&2
+		exit 1
+	fi
+	node "$manifest_tool" verify "$(dirname "$verify_manifest")" --pubkey "$public_key_config"
+fi
 
 echo "Stripped ${#libs[@]} libwayland* file(s), added $notices_path and repacked $(basename "$appimage")"

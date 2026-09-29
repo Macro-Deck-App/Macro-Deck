@@ -458,6 +458,10 @@
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Widget-Variablen</value>
   </data>
+  <data name="Announcements.PublishedOn" xml:space="preserve">
+    <value>Veröffentlicht am {date}</value>
+    <comment>[date:string]</comment>
+  </data>
   <data name="Auth.ForgotPasswordHint" xml:space="preserve">
     <value>Passwort vergessen? Setze es auf dem Computer, auf dem Macro Deck läuft, unter Einstellungen &gt; Sicherheit zurück.</value>
   </data>
@@ -905,6 +909,12 @@ Beende die Anwendung, die den Port belegt (oder ein noch laufendes Macro Deck), 
   <data name="Bootstrapper.HostError.Help" xml:space="preserve">
     <value>Kopiere die Details und füge sie deiner Fehlermeldung bei, damit das Problem behoben werden kann.</value>
   </data>
+  <data name="Bootstrapper.HostError.InstallationDamaged" xml:space="preserve">
+    <value>Einige Dateien von Macro Deck fehlen oder passen nicht zur installierten Version. Das passiert, wenn ein Update unterbrochen wurde, zum Beispiel weil ein Virenschutzprogramm einige Dateien zurückgehalten hat. Lade die neueste Version von Macro Deck herunter und installiere sie erneut.</value>
+  </data>
+  <data name="Bootstrapper.HostError.InstallationDamagedPackage" xml:space="preserve">
+    <value>Einige Dateien von Macro Deck fehlen oder passen nicht zur installierten Version. Das passiert, wenn ein Update unterbrochen wurde. Installiere Macro Deck erneut mit dem Paketmanager, mit dem du es installiert hast.</value>
+  </data>
   <data name="Bootstrapper.HostError.ReportIssue" xml:space="preserve">
     <value>Problem auf GitHub melden</value>
   </data>
@@ -919,6 +929,9 @@ Beende die Anwendung, die den Port belegt (oder ein noch laufendes Macro Deck), 
   </data>
   <data name="Bootstrapper.HostError.WindowTitle" xml:space="preserve">
     <value>Macro Deck wurde beendet</value>
+  </data>
+  <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
+    <value>Macro Deck wurde nicht vollständig aktualisiert</value>
   </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>Über Macro Deck</value>
@@ -9376,6 +9389,69 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Twitch.Actions.UnbanUser.Name" xml:space="preserve">
     <value>Bann aufheben</value>
   </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountChanged" xml:space="preserve">
+    <value>Dieses Widget zeigt jetzt ein anderes Twitch-Konto. Öffne den Chat erneut, um es zu moderieren.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountUnavailable" xml:space="preserve">
+    <value>Das Twitch-Konto ist nicht verbunden.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AllowModeration" xml:space="preserve">
+    <value>Moderation im Chat-Dialog erlauben</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AllowModerationDescription" xml:space="preserve">
+    <value>Ein Druck auf das Widget öffnet den Chat. Ist dies an, kann jeder, der dieses Deck bedient, dort eine Nachricht antippen, um sie zu löschen oder den Absender zu timeouten oder zu bannen.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Ban" xml:space="preserve">
+    <value>Bannen</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Banned" xml:space="preserve">
+    <value>{name} ist gebannt.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.ConfirmBan" xml:space="preserve">
+    <value>{name} bannen? Bis zum Entbannen kann {name} in diesem Kanal nicht mehr chatten.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.DeleteMessage" xml:space="preserve">
+    <value>Nachricht löschen</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Deleted" xml:space="preserve">
+    <value>Nachricht gelöscht.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Failed" xml:space="preserve">
+    <value>Die Aktion ist nicht durchgegangen. Prüfe die Verbindung und versuche es noch einmal.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.ModerationUnavailable" xml:space="preserve">
+    <value>Moderation ist für dieses Widget ausgeschaltet.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.NotPermitted" xml:space="preserve">
+    <value>Twitch hat das nicht erlaubt. Verbinde das Twitch-Konto neu und versuche es noch einmal.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.OwnMessage" xml:space="preserve">
+    <value>Nachrichten des Kanalkontos selbst lassen sich nicht moderieren.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Refused" xml:space="preserve">
+    <value>Twitch hat diese Aktion abgelehnt, zum Beispiel weil sie auf diese Person nicht mehr zutrifft.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.SharedChat" xml:space="preserve">
+    <value>Diese Nachricht stammt aus dem Chat von {channel}. Moderiere sie dort.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.TimedOut" xml:space="preserve">
+    <value>{name} hat einen Timeout.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout10Minutes" xml:space="preserve">
+    <value>Timeout 10 Min.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout1Hour" xml:space="preserve">
+    <value>Timeout 1 Std.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout1Minute" xml:space="preserve">
+    <value>Timeout 1 Min.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Unban" xml:space="preserve">
+    <value>Entbannen</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Unbanned" xml:space="preserve">
+    <value>{name} ist entbannt.</value>
+  </data>
   <data name="Integrations.Twitch.ChatWidget.AccountDescription" xml:space="preserve">
     <value>Wessen Kanal-Chat angezeigt wird.</value>
   </data>
@@ -11920,6 +11996,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Notifications.HttpsNotRunningMessage" xml:space="preserve">
     <value>Macro Deck ist über HTTP erreichbar, aber der HTTPS-Listener wurde nicht gestartet. Prüfe HTTPS-Port und Zertifikat unter Einstellungen &gt; Netzwerk.</value>
+  </data>
+  <data name="Notifications.InstallationDamagedMessage" xml:space="preserve">
+    <value>Einige Dateien von Macro Deck fehlen oder passen nicht zur installierten Version. Das passiert, wenn ein Update unterbrochen wurde, zum Beispiel weil ein Virenschutzprogramm einige Dateien zurückgehalten hat. Lade die neueste Version von Macro Deck herunter und installiere sie erneut. In den Logs stehen die betroffenen Dateien.</value>
+  </data>
+  <data name="Notifications.InstallationDamagedPackageMessage" xml:space="preserve">
+    <value>Einige Dateien von Macro Deck fehlen oder passen nicht zur installierten Version. Das passiert, wenn ein Update unterbrochen wurde. Installiere Macro Deck erneut mit dem Paketmanager, mit dem du es installiert hast. In den Logs stehen die betroffenen Dateien.</value>
   </data>
   <data name="Notifications.IntegrationStartFailed" xml:space="preserve">
     <value>{name} konnte nicht gestartet werden</value>
@@ -14700,6 +14782,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Shell.Notifications.Action.OpenLogs" xml:space="preserve">
     <value>Logs öffnen</value>
   </data>
+  <data name="Shell.Notifications.Action.OpenTroubleshootingGuide" xml:space="preserve">
+    <value>Fehlerbehebung</value>
+  </data>
   <data name="Shell.Notifications.Action.OpenUpdateSettings" xml:space="preserve">
     <value>Update ansehen</value>
   </data>
@@ -15907,6 +15992,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="TemplateBuilder.Variables" xml:space="preserve">
     <value>Variablen</value>
+  </data>
+  <data name="Ui.List.JumpToLatest" xml:space="preserve">
+    <value>Zu den neuesten springen</value>
   </data>
   <data name="UiRender.AdvancedConfiguration" xml:space="preserve">
     <value>Erweiterte Einstellungen</value>

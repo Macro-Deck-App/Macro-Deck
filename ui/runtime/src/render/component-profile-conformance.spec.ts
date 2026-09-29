@@ -77,6 +77,7 @@ const ASSERTED_KEYS = new Set([
   'renders',
   'transform', 'transformOrigin',
   'borderRadius', 'borderWidth', 'borderStyle', 'borderColor', 'opacity',
+  'followsEnd',
   'ariaLabel', 'ariaDescription', 'ariaRole', 'ariaDisabled', 'overflow', 'clipPath', 'maskImage',
   'touchAction', 'refusesEvents',
   'cell', 'cornerRadius', 'glyphEdge', 'arcRadius', 'arcStrokeWidth', 'toggleTrack', 'knobLeft', 'segmentFace',
@@ -1072,6 +1073,7 @@ describe('component-profile conformance fixtures: coverage', () => {
     'conformance-gauge-layout.json',
     'conformance-building-blocks-layout.json',
     'conformance-modifier-layout.json',
+    'conformance-anchored-list-layout.json',
     'conformance-video-stream-layout.json',
   ];
 
@@ -1101,7 +1103,8 @@ describe('component-profile conformance fixtures: coverage', () => {
       'conformance-action-button-tree.json', 'conformance-music-player-tree.json',
       'conformance-history-graph-tree.json', 'conformance-gauge-tree.json',
       'conformance-building-blocks-tree.json', 'conformance-modifier-tree.json',
-      'conformance-chat-tree.json', 'conformance-video-stream-tree.json',
+      'conformance-chat-tree.json', 'conformance-anchored-list-tree.json',
+      'conformance-video-stream-tree.json',
     ];
     for (const name of exercised) expect(() => loadTree(name)).not.toThrow();
   });
@@ -1220,5 +1223,45 @@ describe('component-profile conformance fixtures: chat tree', () => {
 
     expect(has(layout.withoutStackVersion2.notDrawn)).toBeFalse();
     expect(has(layout.withoutStackVersion2.draws)).toBeTrue();
+  });
+});
+
+describe('component-profile conformance fixtures: anchored list tree', () => {
+  interface AnchoredCase {
+    basis: number;
+    tile: { width: number; height: number };
+    nodes: Record<string, { width?: number; height?: number; padding?: number; gap?: number; followsEnd?: boolean }>;
+  }
+
+  const tree = loadTree('conformance-anchored-list-tree.json');
+  const layout = loadJson<{ cases: AnchoredCase[]; withoutListVersion3: { draws: string; notDrawn: string } }>(
+    'conformance-anchored-list-layout.json');
+
+  for (const testCase of layout.cases) {
+    describe(`basis ${testCase.basis}`, () => {
+      beforeEach(() => mount(tree, testCase.tile, testCase.basis));
+
+      for (const [id, spec] of Object.entries(testCase.nodes)) {
+        it(`resolves ${id}`, () => {
+          const el = byId(id);
+          if (spec.width !== undefined) expect(num(el.style.width)).withContext(`${id}.width`).toBeCloseTo(spec.width, 2);
+          if (spec.height !== undefined) expect(num(el.style.height)).withContext(`${id}.height`).toBeCloseTo(spec.height, 2);
+          if (spec.padding !== undefined) expect(num(el.style.padding)).withContext(`${id}.padding`).toBeCloseTo(spec.padding, 2);
+          if (spec.gap !== undefined) expect(num(el.style.gap)).withContext(`${id}.gap`).toBeCloseTo(spec.gap, 2);
+          if (spec.followsEnd !== undefined) {
+            expect(el.classList.contains('widget-list-anchor-end')).withContext(`${id}.followsEnd`).toBe(spec.followsEnd);
+          }
+        });
+      }
+    });
+  }
+
+  it('draws the fallback in place of the anchored list on a reader without list version 3', () => {
+    const registry = createUiComponentRegistry(...UI_CORE_COMPONENTS.map(definition =>
+      definition.type === 'ui.list' ? { ...definition, version: { minimum: 1, maximum: 2 } } : definition));
+    renderUiNode(container, tree, { width: 240, height: 240 }, null, 240, testHost(), { registry });
+
+    expect(has(layout.withoutListVersion3.notDrawn)).toBeFalse();
+    expect(has(layout.withoutListVersion3.draws)).toBeTrue();
   });
 });

@@ -74,10 +74,11 @@ Macro Deck completely and open it again.
 
 ## Macro Deck was not updated completely
 
-Devices and the desktop app show **Macro Deck was not updated completely** when the files Macro Deck uses
-for its interface do not match the version that is installed. This happens when an update was
-interrupted, for example when antivirus software held back some of Macro Deck's files while they were
-being installed. Clearing the browser cache does not help here.
+Macro Deck shows **Macro Deck was not updated completely** when some of its files are missing or do not
+match the version that is installed. This happens when an update was interrupted, for example when
+antivirus software held back some of Macro Deck's files while they were being installed. Devices and the
+desktop app show it when the files for the interface are affected, and the desktop app also shows it as a
+notification when Macro Deck checks its own files on startup. Clearing the browser cache does not help here.
 
 1. Download the latest version of Macro Deck and install it again over the existing installation. Your
    decks and settings stay in the [data folder](#where-to-find-the-logs), which the installation does not
@@ -88,6 +89,14 @@ being installed. Clearing the browser cache does not help here.
 
 Both screens show the build of the interface and the build of Macro Deck on the computer. Include them
 when you ask for help.
+
+If the notification appears in the desktop app, install Macro Deck again the same way: select **Open
+download page** in the notification, install the download over the existing installation, and start
+Macro Deck again. **Open logs** lists the files that were missing or did not match. If Macro Deck no
+longer starts at all, the **Macro Deck stopped** window says the same and links to the download page.
+
+If you installed Macro Deck with a Linux package manager (APT, the DEB or RPM package, or the AUR), install
+it again with that package manager instead, for example `sudo apt install --reinstall macro-deck`.
 
 ## Buttons do nothing and devices show a lock screen
 

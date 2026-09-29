@@ -459,6 +459,10 @@
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Proměnné widgetu</value>
   </data>
+  <data name="Announcements.PublishedOn" xml:space="preserve">
+    <value>Zveřejněno {date}</value>
+    <comment>[date:string]</comment>
+  </data>
   <data name="Auth.ForgotPasswordHint" xml:space="preserve">
     <value>Zapomenuté heslo? Lze ho obnovit na počítači, na kterém běží Macro Deck, v Nastavení &gt; Zabezpečení.</value>
   </data>
@@ -906,6 +910,12 @@ Zavřete aplikaci používající tento port (nebo stále běžící Macro Deck)
   <data name="Bootstrapper.HostError.Help" xml:space="preserve">
     <value>Zkopírujte podrobnosti a přiložte je k hlášení problému, aby jej bylo možné opravit.</value>
   </data>
+  <data name="Bootstrapper.HostError.InstallationDamaged" xml:space="preserve">
+    <value>Některé soubory Macro Deck chybí nebo neodpovídají nainstalované verzi. K tomu dochází, když byla aktualizace přerušena, například když antivirový program zadržel některé soubory. Stáhněte nejnovější verzi Macro Deck a nainstalujte ji znovu.</value>
+  </data>
+  <data name="Bootstrapper.HostError.InstallationDamagedPackage" xml:space="preserve">
+    <value>Některé soubory Macro Deck chybí nebo neodpovídají nainstalované verzi. K tomu dochází, když byla aktualizace přerušena. Nainstalujte Macro Deck znovu pomocí správce balíčků, kterým byl nainstalován.</value>
+  </data>
   <data name="Bootstrapper.HostError.ReportIssue" xml:space="preserve">
     <value>Nahlásit problém na GitHubu</value>
   </data>
@@ -920,6 +930,9 @@ Zavřete aplikaci používající tento port (nebo stále běžící Macro Deck)
   </data>
   <data name="Bootstrapper.HostError.WindowTitle" xml:space="preserve">
     <value>Macro Deck se zastavil</value>
+  </data>
+  <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
+    <value>Macro Deck nebyl aktualizován úplně</value>
   </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>O aplikaci Macro Deck</value>
@@ -9378,6 +9391,69 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Twitch.Actions.UnbanUser.Name" xml:space="preserve">
     <value>Zrušit ban uživatele</value>
   </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountChanged" xml:space="preserve">
+    <value>Tento widget teď zobrazuje jiný účet Twitch. K moderování je potřeba chat otevřít znovu.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountUnavailable" xml:space="preserve">
+    <value>Účet Twitch není připojen.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AllowModeration" xml:space="preserve">
+    <value>Povolit moderování v dialogu chatu</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AllowModerationDescription" xml:space="preserve">
+    <value>Stisknutím widgetu se otevře chat. Pokud je tato volba zapnutá, může kdokoli, kdo používá tento deck, klepnout na zprávu a smazat ji nebo autorovi udělit timeout či ban.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Ban" xml:space="preserve">
+    <value>Zabanovat</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Banned" xml:space="preserve">
+    <value>Uživatel {name} je zabanován.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.ConfirmBan" xml:space="preserve">
+    <value>Zabanovat uživatele {name}? Do odbanování nebude moci v tomto kanálu chatovat.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.DeleteMessage" xml:space="preserve">
+    <value>Smazat zprávu</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Deleted" xml:space="preserve">
+    <value>Zpráva byla smazána.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Failed" xml:space="preserve">
+    <value>Akce se nezdařila. Je potřeba zkontrolovat připojení a zkusit to znovu.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.ModerationUnavailable" xml:space="preserve">
+    <value>Moderování je pro tento widget vypnuté.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.NotPermitted" xml:space="preserve">
+    <value>Twitch to nepovolil. Je potřeba znovu připojit účet Twitch a zkusit to znovu.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.OwnMessage" xml:space="preserve">
+    <value>Zprávy samotného účtu kanálu nelze moderovat.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Refused" xml:space="preserve">
+    <value>Twitch tuto akci odmítl, například proto, že se na tohoto uživatele už nevztahuje.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.SharedChat" xml:space="preserve">
+    <value>Tato zpráva pochází z chatu kanálu {channel}. Moderovat ji lze tam.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.TimedOut" xml:space="preserve">
+    <value>Uživatel {name} má timeout.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout10Minutes" xml:space="preserve">
+    <value>Timeout 10 min</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout1Hour" xml:space="preserve">
+    <value>Timeout 1 h</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout1Minute" xml:space="preserve">
+    <value>Timeout 1 min</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Unban" xml:space="preserve">
+    <value>Odbanovat</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Unbanned" xml:space="preserve">
+    <value>Uživatel {name} je odbanován.</value>
+  </data>
   <data name="Integrations.Twitch.ChatWidget.AccountDescription" xml:space="preserve">
     <value>Chat kterého kanálu se má zobrazit.</value>
   </data>
@@ -11922,6 +11998,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Notifications.HttpsNotRunningMessage" xml:space="preserve">
     <value>Macro Deck je dostupný přes HTTP, ale naslouchací port HTTPS se nespustil. Zkontrolujte HTTPS port a certifikát v Nastavení &gt; Síť.</value>
+  </data>
+  <data name="Notifications.InstallationDamagedMessage" xml:space="preserve">
+    <value>Některé soubory Macro Deck chybí nebo neodpovídají nainstalované verzi. K tomu dochází, když byla aktualizace přerušena, například když antivirový program zadržel některé soubory. Stáhněte nejnovější verzi Macro Deck a nainstalujte ji znovu. Dotčené soubory jsou uvedeny v protokolech.</value>
+  </data>
+  <data name="Notifications.InstallationDamagedPackageMessage" xml:space="preserve">
+    <value>Některé soubory Macro Deck chybí nebo neodpovídají nainstalované verzi. K tomu dochází, když byla aktualizace přerušena. Nainstalujte Macro Deck znovu pomocí správce balíčků, kterým byl nainstalován. Dotčené soubory jsou uvedeny v protokolech.</value>
   </data>
   <data name="Notifications.IntegrationStartFailed" xml:space="preserve">
     <value>{name} se nepodařilo spustit</value>
@@ -14702,6 +14784,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Shell.Notifications.Action.OpenLogs" xml:space="preserve">
     <value>Otevřít protokoly</value>
   </data>
+  <data name="Shell.Notifications.Action.OpenTroubleshootingGuide" xml:space="preserve">
+    <value>Řešení problémů</value>
+  </data>
   <data name="Shell.Notifications.Action.OpenUpdateSettings" xml:space="preserve">
     <value>Zobrazit aktualizaci</value>
   </data>
@@ -15909,6 +15994,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="TemplateBuilder.Variables" xml:space="preserve">
     <value>Proměnné</value>
+  </data>
+  <data name="Ui.List.JumpToLatest" xml:space="preserve">
+    <value>Přejít na nejnovější</value>
   </data>
   <data name="UiRender.AdvancedConfiguration" xml:space="preserve">
     <value>Pokročilé nastavení</value>

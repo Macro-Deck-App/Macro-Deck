@@ -130,6 +130,7 @@ import {
   UpdateExtensionSettingsRequest,
   UpdateExtensionSettingsResponse,
   GetOnboardingStateResponse,
+  GetPendingAnnouncementResponse,
   GetDeviceSetupResponse,
   GetDevicesResponse,
   GetVariableCatalogProvidersResponse,
@@ -207,6 +208,7 @@ import {
   LocalizedText,
   LoginRequest,
   LogoutDeviceResponse,
+  MarkAnnouncementSeenRequest,
   MigrationImportResponse,
   MigrationPreviewResponse,
   MigrationRequestBody,
@@ -2116,6 +2118,14 @@ export class ApiService {
 
   getLogSources(): Promise<GetLogSourcesResponse> {
     return this.http('GET', '/api/logs/sources');
+  }
+
+  getPendingAnnouncement(): Promise<GetPendingAnnouncementResponse> {
+    return this.http('GET', '/api/announcements/pending');
+  }
+
+  markAnnouncementSeen(request: MarkAnnouncementSeenRequest): Promise<void> {
+    return this.http('POST', '/api/announcements/seen', request);
   }
 
   getNotifications(): Promise<GetUserNotificationsResponse> {

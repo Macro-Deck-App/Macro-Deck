@@ -27,6 +27,10 @@ public class HostController : ControllerBase
 	private readonly IUiTransportMessageHandler<ReportUpdateStateRequest, ReportUpdateStateResponse>
 		_reportUpdateState;
 
+	private readonly
+		IUiTransportMessageHandler<ReportInstallationIntegrityRequest, ReportInstallationIntegrityResponse>
+		_reportInstallationIntegrity;
+
 	private readonly IUiTransportMessageHandler<RestartApplicationRequest, RestartApplicationResponse>
 		_restartApplication;
 
@@ -42,6 +46,8 @@ public class HostController : ControllerBase
 		ILogger logger,
 		IHostApplicationLifetime lifetime,
 		IUiTransportMessageHandler<ReportUpdateStateRequest, ReportUpdateStateResponse> reportUpdateState,
+		IUiTransportMessageHandler<ReportInstallationIntegrityRequest, ReportInstallationIntegrityResponse>
+			reportInstallationIntegrity,
 		IUiTransportMessageHandler<RestartApplicationRequest, RestartApplicationResponse> restartApplication,
 		IUiTransportMessageHandler<GetDataDirectoryRequest, GetDataDirectoryResponse> getDataDirectory,
 		IUiTransportMessageHandler<OpenDataDirectoryRequest, OpenDataDirectoryResponse> openDataDirectory,
@@ -52,6 +58,7 @@ public class HostController : ControllerBase
 		_shellNotifications = shellNotifications;
 		_lifetime = lifetime;
 		_reportUpdateState = reportUpdateState;
+		_reportInstallationIntegrity = reportInstallationIntegrity;
 		_restartApplication = restartApplication;
 		_getDataDirectory = getDataDirectory;
 		_openDataDirectory = openDataDirectory;
@@ -89,6 +96,18 @@ public class HostController : ControllerBase
 
 		await _reportUpdateState.Handle(body, ct);
 		return Ok();
+	}
+
+	[HttpPost("installation-integrity")]
+	public async Task<IActionResult> InstallationIntegrity(ReportInstallationIntegrityRequest body,
+		CancellationToken ct)
+	{
+		if (!LoopbackConnection.IsTrusted(HttpContext))
+		{
+			return NotFound();
+		}
+
+		return Ok(await _reportInstallationIntegrity.Handle(body, ct));
 	}
 
 	[HttpGet("shell-notifications")]

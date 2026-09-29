@@ -22,13 +22,15 @@ internal static class TwitchChatWidgetView
 	public static UiElement Build(
 		UiState<TwitchChatViewState> state,
 		int cornerRadius = WidgetSafeArea.DefaultCornerRadius,
-		UiResource? icon = null)
+		UiResource? icon = null,
+		IReadOnlyList<UiEventHandler>? events = null)
 	{
 		ArgumentNullException.ThrowIfNull(state);
 
 		return new UiStack
 		{
 			Key = "twitchChat",
+			Events = events ?? [],
 			Direction = UiComponentDirections.Vertical,
 			Padding = WidgetSafeArea.For(cornerRadius),
 			Gap = _headerGap,

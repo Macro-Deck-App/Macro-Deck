@@ -307,6 +307,10 @@ public static class UiComponentProperties
 	/// absent means <see cref="UiComponentOverflows.Shrink" />.</summary>
 	public const string Overflow = "overflow";
 
+	/// <summary>Which end of a vertical list the view holds on to while the reader is there - see
+	/// <see cref="UiComponentListAnchors" />. Needs <see cref="UiComponents.List" /> component version 3;
+	/// absent means <see cref="UiComponentListAnchors.Start" />.</summary>
+	public const string Anchor = "anchor";
 	/// <summary>The video stream a <see cref="UiMacroDeckComponents.VideoStream" /> shows, as a
 	/// <see cref="Model.References.UiVideoStreamReference" />.</summary>
 	public const string Stream = "stream";
@@ -320,6 +324,6 @@ public static class UiComponentProperties
 		Format, Seconds, Level, Step, LevelColor, Interaction, BorderStyle, BorderColor, Corner, Points, PlotTop,
 		Digits, Answer, Placeholder, Rotation, OriginX, OriginY, Shape, CornerRadius, StrokeColor,
 		StrokeWidth, Path, Icon, Columns, Rows, ColumnSpan, RowSpan, StartAngle, EndAngle, On, Selected,
-		Modifiers, Frame, Clip, Mask, Variants, Spans, Overflow, Stream,
+		Modifiers, Frame, Clip, Mask, Variants, Spans, Overflow, Anchor, Stream,
 	];
 }

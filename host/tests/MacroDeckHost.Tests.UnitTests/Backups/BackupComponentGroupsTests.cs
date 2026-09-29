@@ -31,4 +31,10 @@ public class BackupComponentGroupsTests
 			Assert.That(BackupComponentGroups.IsRestorablePreferenceKey("lock.clientLockScreen"), Is.True);
 		});
 	}
+
+	[Test]
+	public void The_last_seen_announcement_is_never_restored()
+	{
+		Assert.That(BackupComponentGroups.IsRestorablePreferenceKey("announcements.lastSeenNumber"), Is.False);
+	}
 }

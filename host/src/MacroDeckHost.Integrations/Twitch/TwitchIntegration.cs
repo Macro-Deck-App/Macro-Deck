@@ -28,6 +28,7 @@ public sealed class TwitchIntegration
 		IMigrationProvider,
 		IWidgetTypeProvider,
 		ITwitchChatSinkConsumer,
+		ITwitchChatModerator,
 		IDisposable
 {
 	public const string IntegrationId = "app.macro-deck.twitch";
@@ -39,9 +40,10 @@ public sealed class TwitchIntegration
 		TwitchVariables.Declare(VariableNameTemplate.Placeholder("account"));
 
 	private readonly TwitchAccountManager _accounts;
+	private readonly TwitchChatModerator _moderator;
 
 	private const string ChatDataSchema
-		= """{"type":"object","properties":{"account":{"type":"string"}}}""";
+		= """{"type":"object","properties":{"account":{"type":"string"},"allowModeration":{"type":"boolean"}}}""";
 
 	private ITwitchChatSink? _chatSink;
 	private IVariableApi? _variables;
@@ -55,6 +57,7 @@ public sealed class TwitchIntegration
 	internal TwitchIntegration(TwitchAccountManager accounts)
 	{
 		_accounts = accounts;
+		_moderator = new TwitchChatModerator(() => _accounts);
 		Actions = TwitchActions.Create(() => _accounts, () => _variables, userVariables: () => _userVariables);
 	}
 
@@ -126,6 +129,12 @@ public sealed class TwitchIntegration
 
 	public void UseTwitchChatSink(ITwitchChatSink sink) => _chatSink = sink;
 
+	public Task<TwitchChatModerationResult> ModerateAsync(
+		string accountId,
+		TwitchChatModerationRequest request,
+		CancellationToken cancellationToken)
+		=> _moderator.ModerateAsync(accountId, request, cancellationToken);
+
 	public async Task InitializeAsync(IWidgetTypeProviderContext context, CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(context);
@@ -193,7 +202,7 @@ public sealed class TwitchIntegration
 		=> new(TwitchChatWidgetType.LocalId,
 			AppStrings.Integrations.Twitch.ChatWidget.Name(),
 			AppStrings.Integrations.Twitch.ChatWidget.Description(),
-			DefaultData: """{"account":""}""",
+			DefaultData: """{"account":"","allowModeration":true}""",
 			DataSchema: ChatDataSchema,
 			HasConfiguration: true);
 

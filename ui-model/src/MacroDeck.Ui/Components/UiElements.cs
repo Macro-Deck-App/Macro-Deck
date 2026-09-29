@@ -1331,6 +1331,26 @@ public sealed record UiList : UiComponentContainer
 	/// </para></summary>
 	public UiValue<string> Direction { get; init; }
 
+	/// <summary>
+	/// Which end of the list the view holds on to - see <see cref="UiComponentListAnchors" />. Absent means
+	/// <see cref="UiComponentListAnchors.Start" />.
+	///
+	/// <para>
+	/// <see cref="UiComponentListAnchors.End" /> keeps the view at the end of the list while it is at the end,
+	/// so appended children scroll into view. Once the user has scrolled away, content changes do not move the
+	/// view, not even children removed above it, and the reader offers a way back to the end when new
+	/// children arrive. Where the view is, and whether it follows, is the reader's own state and is never
+	/// reported to the producer. Only a vertical list follows; a horizontal list ignores the key.
+	/// </para>
+	///
+	/// <para>
+	/// The key needs <c>ui.list</c> component version 3: an older reader ignores it and leaves the view where
+	/// the user put it, so a producer using it sets <see cref="Dsl.UiElement.RequiredComponentVersion" /> to 3
+	/// and supplies a <see cref="Dsl.UiElement.Fallback" />, typically the same rows newest first.
+	/// </para>
+	/// </summary>
+	public UiValue<string> Anchor { get; init; }
+
 	/// <inheritdoc />
 	public override string Type => UiComponents.List;
 
@@ -1345,6 +1365,7 @@ public sealed record UiList : UiComponentContainer
 		properties.Set(UiComponentProperties.Padding, Padding.Value);
 		properties.Set(UiComponentProperties.Background, Background);
 		properties.Set(UiComponentProperties.Direction, Direction);
+		properties.Set(UiComponentProperties.Anchor, Anchor);
 	}
 }
 

@@ -459,6 +459,10 @@
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Zmienne widżetu</value>
   </data>
+  <data name="Announcements.PublishedOn" xml:space="preserve">
+    <value>Opublikowano {date}</value>
+    <comment>[date:string]</comment>
+  </data>
   <data name="Auth.ForgotPasswordHint" xml:space="preserve">
     <value>Zapomniane hasło? Można je zresetować na komputerze, na którym działa Macro Deck, w Ustawienia &gt; Bezpieczeństwo.</value>
   </data>
@@ -906,6 +910,12 @@ Zamknij aplikację korzystającą z tego portu (lub wciąż działający Macro D
   <data name="Bootstrapper.HostError.Help" xml:space="preserve">
     <value>Skopiuj szczegóły i dołącz je do zgłoszenia problemu, aby można go było naprawić.</value>
   </data>
+  <data name="Bootstrapper.HostError.InstallationDamaged" xml:space="preserve">
+    <value>Brakuje niektórych plików Macro Deck lub nie pasują one do zainstalowanej wersji. Dzieje się tak, gdy aktualizacja została przerwana, na przykład gdy program antywirusowy zablokował część plików. Pobierz najnowszą wersję Macro Deck i zainstaluj ją ponownie.</value>
+  </data>
+  <data name="Bootstrapper.HostError.InstallationDamagedPackage" xml:space="preserve">
+    <value>Brakuje niektórych plików Macro Deck lub nie pasują one do zainstalowanej wersji. Dzieje się tak, gdy aktualizacja została przerwana. Zainstaluj Macro Deck ponownie za pomocą menedżera pakietów, którym został zainstalowany.</value>
+  </data>
   <data name="Bootstrapper.HostError.ReportIssue" xml:space="preserve">
     <value>Zgłoś problem w serwisie GitHub</value>
   </data>
@@ -920,6 +930,9 @@ Zamknij aplikację korzystającą z tego portu (lub wciąż działający Macro D
   </data>
   <data name="Bootstrapper.HostError.WindowTitle" xml:space="preserve">
     <value>Macro Deck zatrzymał się</value>
+  </data>
+  <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
+    <value>Aktualizacja Macro Deck nie została ukończona</value>
   </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>O Macro Deck</value>
@@ -9378,6 +9391,69 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Twitch.Actions.UnbanUser.Name" xml:space="preserve">
     <value>Odbanuj użytkownika</value>
   </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountChanged" xml:space="preserve">
+    <value>Ten widżet pokazuje teraz inne konto Twitch. Aby je moderować, należy ponownie otworzyć czat.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountUnavailable" xml:space="preserve">
+    <value>Konto Twitch nie jest połączone.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AllowModeration" xml:space="preserve">
+    <value>Zezwalaj na moderowanie w oknie czatu</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AllowModerationDescription" xml:space="preserve">
+    <value>Naciśnięcie widżetu otwiera czat. Gdy ta opcja jest włączona, każdy, kto używa tego decku, może dotknąć tam wiadomości, aby ją usunąć albo nałożyć na autora timeout lub bana.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Ban" xml:space="preserve">
+    <value>Zbanuj</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Banned" xml:space="preserve">
+    <value>Użytkownik {name} został zbanowany.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.ConfirmBan" xml:space="preserve">
+    <value>Zbanować użytkownika {name}? Do czasu odbanowania nie będzie mógł pisać na tym kanale.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.DeleteMessage" xml:space="preserve">
+    <value>Usuń wiadomość</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Deleted" xml:space="preserve">
+    <value>Wiadomość została usunięta.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Failed" xml:space="preserve">
+    <value>Akcja nie powiodła się. Należy sprawdzić połączenie i spróbować jeszcze raz.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.ModerationUnavailable" xml:space="preserve">
+    <value>Moderowanie jest wyłączone dla tego widżetu.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.NotPermitted" xml:space="preserve">
+    <value>Twitch na to nie pozwolił. Należy ponownie połączyć konto Twitch i spróbować jeszcze raz.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.OwnMessage" xml:space="preserve">
+    <value>Wiadomości samego konta kanału nie można moderować.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Refused" xml:space="preserve">
+    <value>Twitch odrzucił tę akcję, na przykład dlatego, że nie dotyczy już tego użytkownika.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.SharedChat" xml:space="preserve">
+    <value>Ta wiadomość pochodzi z czatu kanału {channel}. Moderować ją można tam.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.TimedOut" xml:space="preserve">
+    <value>Użytkownik {name} otrzymał timeout.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout10Minutes" xml:space="preserve">
+    <value>Timeout 10 min</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout1Hour" xml:space="preserve">
+    <value>Timeout 1 godz.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout1Minute" xml:space="preserve">
+    <value>Timeout 1 min</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Unban" xml:space="preserve">
+    <value>Odbanuj</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Unbanned" xml:space="preserve">
+    <value>Użytkownik {name} został odbanowany.</value>
+  </data>
   <data name="Integrations.Twitch.ChatWidget.AccountDescription" xml:space="preserve">
     <value>Czat którego kanału ma zostać wyświetlony.</value>
   </data>
@@ -11922,6 +11998,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Notifications.HttpsNotRunningMessage" xml:space="preserve">
     <value>Macro Deck jest dostępny przez HTTP, ale nasłuch HTTPS nie wystartował. Sprawdź port HTTPS i certyfikat w Ustawienia &gt; Sieć.</value>
+  </data>
+  <data name="Notifications.InstallationDamagedMessage" xml:space="preserve">
+    <value>Brakuje niektórych plików Macro Deck lub nie pasują one do zainstalowanej wersji. Dzieje się tak, gdy aktualizacja została przerwana, na przykład gdy program antywirusowy zablokował część plików. Pobierz najnowszą wersję Macro Deck i zainstaluj ją ponownie. Pliki, których to dotyczy, są wymienione w dziennikach.</value>
+  </data>
+  <data name="Notifications.InstallationDamagedPackageMessage" xml:space="preserve">
+    <value>Brakuje niektórych plików Macro Deck lub nie pasują one do zainstalowanej wersji. Dzieje się tak, gdy aktualizacja została przerwana. Zainstaluj Macro Deck ponownie za pomocą menedżera pakietów, którym został zainstalowany. Pliki, których to dotyczy, są wymienione w dziennikach.</value>
   </data>
   <data name="Notifications.IntegrationStartFailed" xml:space="preserve">
     <value>Nie udało się uruchomić {name}</value>
@@ -14702,6 +14784,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Shell.Notifications.Action.OpenLogs" xml:space="preserve">
     <value>Otwórz dzienniki</value>
   </data>
+  <data name="Shell.Notifications.Action.OpenTroubleshootingGuide" xml:space="preserve">
+    <value>Rozwiązywanie problemów</value>
+  </data>
   <data name="Shell.Notifications.Action.OpenUpdateSettings" xml:space="preserve">
     <value>Zobacz aktualizację</value>
   </data>
@@ -15909,6 +15994,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="TemplateBuilder.Variables" xml:space="preserve">
     <value>Zmienne</value>
+  </data>
+  <data name="Ui.List.JumpToLatest" xml:space="preserve">
+    <value>Przejdź do najnowszych</value>
   </data>
   <data name="UiRender.AdvancedConfiguration" xml:space="preserve">
     <value>Konfiguracja zaawansowana</value>

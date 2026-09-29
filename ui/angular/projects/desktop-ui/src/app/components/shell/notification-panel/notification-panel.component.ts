@@ -5,10 +5,14 @@ import { AppStrings, UserNotification } from '@macro-deck/runtime';
 import { ButtonComponent, LocalizationService, SidePanelComponent, TranslatePipe } from '@shared';
 import { EmptyStateComponent } from '../../feedback/empty-state/empty-state.component';
 import { IconPackService } from '../../../services/icon-pack.service';
+import { ExternalLinkService } from '../../../services/external-link.service';
 import { NotificationCenterService } from '../../../services/notification-center.service';
 import { PluginAdbConsentService } from '../../../services/plugin-adb-consent.service';
 import { RestartNoticeService, SettingsModalService, UpdateModalService, UpdateService } from '../../../services';
 import { NotificationActionEvent, NotificationItemComponent } from './notification-item.component';
+
+const DOWNLOAD_PAGE_URL = 'https://macro-deck.app/download';
+const TROUBLESHOOTING_GUIDE_URL = 'https://docs.macro-deck.app/guide/troubleshooting/';
 
 @Component({
   selector: 'app-notification-panel',
@@ -29,6 +33,7 @@ export class NotificationPanelComponent {
   private readonly iconPacks = inject(IconPackService);
   private readonly restartNotice = inject(RestartNoticeService);
   private readonly adbConsent = inject(PluginAdbConsentService);
+  private readonly externalLinks = inject(ExternalLinkService);
 
   readonly isOpen = input(false);
 
@@ -80,6 +85,14 @@ export class NotificationPanelComponent {
       case 'EnablePluginAdb':
         void this.allowPluginsToUseAdb(notification.id);
         return;
+      case 'OpenDownloadPage':
+        this.externalLinks.open(DOWNLOAD_PAGE_URL);
+        break;
+      case 'OpenTroubleshootingGuide':
+        this.externalLinks.open(
+          action.target ? `${TROUBLESHOOTING_GUIDE_URL}#${encodeURIComponent(action.target)}` : TROUBLESHOOTING_GUIDE_URL,
+        );
+        break;
       case 'None':
         break;
     }

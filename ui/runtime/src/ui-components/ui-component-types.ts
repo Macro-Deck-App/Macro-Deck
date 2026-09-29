@@ -61,6 +61,10 @@ export const UiComponentOverflows = { Shrink: 'shrink', ClipStart: 'clip-start' 
 
 export const UI_COMPONENT_OVERFLOWS_WELL_KNOWN: readonly string[] = Object.values(UiComponentOverflows);
 
+export const UiComponentListAnchors = { Start: 'start', End: 'end' } as const;
+
+export const UI_COMPONENT_LIST_ANCHORS_WELL_KNOWN: readonly string[] = Object.values(UiComponentListAnchors);
+
 export const UiComponentJustify = {
   Start: 'start', Center: 'center', End: 'end', SpaceBetween: 'space-between',
 } as const;

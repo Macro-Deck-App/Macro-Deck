@@ -458,6 +458,10 @@
   <data name="ActionBuilder.WidgetVariablesHeading" xml:space="preserve">
     <value>Widget variables</value>
   </data>
+  <data name="Announcements.PublishedOn" xml:space="preserve">
+    <value>Published {date}</value>
+    <comment>[date:string]</comment>
+  </data>
   <data name="Auth.ForgotPasswordHint" xml:space="preserve">
     <value>Forgot your password? Reset it on the computer running Macro Deck, under Settings &gt; Security.</value>
   </data>
@@ -905,6 +909,12 @@ Close the application using the port (or a still-running Macro Deck) and try aga
   <data name="Bootstrapper.HostError.Help" xml:space="preserve">
     <value>Copy the details and include them when you report the problem, so it can be fixed.</value>
   </data>
+  <data name="Bootstrapper.HostError.InstallationDamaged" xml:space="preserve">
+    <value>Some of Macro Deck's files are missing or do not match the installed version. This happens when an update was interrupted, for example when antivirus software held back some of its files. Download the latest version of Macro Deck and install it again.</value>
+  </data>
+  <data name="Bootstrapper.HostError.InstallationDamagedPackage" xml:space="preserve">
+    <value>Some of Macro Deck's files are missing or do not match the installed version. This happens when an update was interrupted. Install Macro Deck again with the package manager you installed it with.</value>
+  </data>
   <data name="Bootstrapper.HostError.ReportIssue" xml:space="preserve">
     <value>Report the problem on GitHub</value>
   </data>
@@ -919,6 +929,9 @@ Close the application using the port (or a still-running Macro Deck) and try aga
   </data>
   <data name="Bootstrapper.HostError.WindowTitle" xml:space="preserve">
     <value>Macro Deck stopped</value>
+  </data>
+  <data name="Bootstrapper.InstallationDamaged.Title" xml:space="preserve">
+    <value>Macro Deck was not updated completely</value>
   </data>
   <data name="Bootstrapper.Menu.About" xml:space="preserve">
     <value>About Macro Deck</value>
@@ -9378,6 +9391,69 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Twitch.Actions.UnbanUser.Name" xml:space="preserve">
     <value>Unban User</value>
   </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountChanged" xml:space="preserve">
+    <value>This widget now shows another Twitch account. Reopen the chat to moderate it.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AccountUnavailable" xml:space="preserve">
+    <value>The Twitch account is not connected.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AllowModeration" xml:space="preserve">
+    <value>Allow moderation in the chat dialog</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.AllowModerationDescription" xml:space="preserve">
+    <value>Pressing the widget opens the chat. With this on, anyone using this deck can tap a message there to delete it or to time out or ban the chatter.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Ban" xml:space="preserve">
+    <value>Ban</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Banned" xml:space="preserve">
+    <value>{name} is banned.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.ConfirmBan" xml:space="preserve">
+    <value>Ban {name}? They can't chat in this channel until they are unbanned.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.DeleteMessage" xml:space="preserve">
+    <value>Delete message</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Deleted" xml:space="preserve">
+    <value>Message deleted.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Failed" xml:space="preserve">
+    <value>The action did not go through. Check the connection and try again.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.ModerationUnavailable" xml:space="preserve">
+    <value>Moderation is turned off for this widget.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.NotPermitted" xml:space="preserve">
+    <value>Twitch did not allow this. Reconnect the Twitch account and try again.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.OwnMessage" xml:space="preserve">
+    <value>Messages from the channel's own account can't be moderated.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Refused" xml:space="preserve">
+    <value>Twitch refused this action, for example because it no longer applies to this chatter.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.SharedChat" xml:space="preserve">
+    <value>This message came from {channel}'s chat. Moderate it there.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.TimedOut" xml:space="preserve">
+    <value>{name} is timed out.</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout10Minutes" xml:space="preserve">
+    <value>Time out 10 min</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout1Hour" xml:space="preserve">
+    <value>Time out 1 h</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Timeout1Minute" xml:space="preserve">
+    <value>Time out 1 min</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Unban" xml:space="preserve">
+    <value>Unban</value>
+  </data>
+  <data name="Integrations.Twitch.ChatDialog.Unbanned" xml:space="preserve">
+    <value>{name} is unbanned.</value>
+  </data>
   <data name="Integrations.Twitch.ChatWidget.AccountDescription" xml:space="preserve">
     <value>Whose channel chat to show.</value>
   </data>
@@ -11922,6 +11998,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Notifications.HttpsNotRunningMessage" xml:space="preserve">
     <value>Macro Deck is reachable over HTTP, but the HTTPS listener did not start. Check the HTTPS port and certificate in Settings &gt; Network.</value>
+  </data>
+  <data name="Notifications.InstallationDamagedMessage" xml:space="preserve">
+    <value>Some of Macro Deck's files are missing or do not match the installed version. This happens when an update was interrupted, for example when antivirus software held back some of its files. Download the latest version of Macro Deck and install it again. The logs list the affected files.</value>
+  </data>
+  <data name="Notifications.InstallationDamagedPackageMessage" xml:space="preserve">
+    <value>Some of Macro Deck's files are missing or do not match the installed version. This happens when an update was interrupted. Install Macro Deck again with the package manager you installed it with. The logs list the affected files.</value>
   </data>
   <data name="Notifications.IntegrationStartFailed" xml:space="preserve">
     <value>{name} failed to start</value>
@@ -14702,6 +14784,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Shell.Notifications.Action.OpenLogs" xml:space="preserve">
     <value>Open logs</value>
   </data>
+  <data name="Shell.Notifications.Action.OpenTroubleshootingGuide" xml:space="preserve">
+    <value>Troubleshooting</value>
+  </data>
   <data name="Shell.Notifications.Action.OpenUpdateSettings" xml:space="preserve">
     <value>View update</value>
   </data>
@@ -15909,6 +15994,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="TemplateBuilder.Variables" xml:space="preserve">
     <value>Variables</value>
+  </data>
+  <data name="Ui.List.JumpToLatest" xml:space="preserve">
+    <value>Jump to latest</value>
   </data>
   <data name="UiRender.AdvancedConfiguration" xml:space="preserve">
     <value>Advanced configuration</value>

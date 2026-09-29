@@ -35,6 +35,25 @@ The tiles in a folder:
 | Music Player | What Spotify is playing, with play and skip |
 | Twitch Chat | Your channel's chat with emotes and badges, offered once a Twitch account is connected |
 
+### Moderating from the Twitch Chat widget
+
+Press the **Twitch Chat** widget to open the chat in a larger dialog. It stays at the newest message while
+you are at the bottom. Scroll up to read, and the chat stops moving; **Jump to latest** takes you back.
+
+Tap a message to delete it, time out its sender for 1 minute, 10 minutes or 1 hour, ban or unban them. A ban
+asks you to confirm first. The dialog says whether the action worked, or why Twitch refused it:
+
+- **Twitch did not grant Macro Deck the permission for this action**: reconnect the Twitch account in
+  **Integrations** to grant the moderation permissions.
+- **Twitch did not allow this**: reconnect the Twitch account in **Integrations** and try again.
+- **The host is locked**: unlock the computer running Macro Deck, as for any other action.
+
+Your channel's own messages, and messages that reach your chat from another channel's Shared Chat, offer no
+actions; moderate those on Twitch. Anyone who can use your deck can moderate through the dialog. To only
+show the chat, turn off **Allow moderation in the chat dialog** in the widget's settings. Widgets that a
+plugin places in its own profiles open the chat without moderation. The dialog opens on the device you
+pressed the widget on, so a press on a hardware deck does not open it.
+
 ## Actions and triggers
 
 What a widget does, and when. The **Scenes** button runs **Change Folder to** on a short press:

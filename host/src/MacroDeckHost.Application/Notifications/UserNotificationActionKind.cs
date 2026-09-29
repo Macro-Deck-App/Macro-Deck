@@ -19,5 +19,8 @@ public enum UserNotificationActionKind
 	InstallUpdate,
 	DismissNotification,
 
-	EnablePluginAdb
+	EnablePluginAdb,
+
+	OpenDownloadPage,
+	OpenTroubleshootingGuide
 }

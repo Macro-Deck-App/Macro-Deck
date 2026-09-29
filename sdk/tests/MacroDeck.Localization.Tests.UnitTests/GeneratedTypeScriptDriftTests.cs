@@ -55,6 +55,7 @@ public class GeneratedTypeScriptDriftTests
 		"OutdatedUi.",
 		"Settings.Appearance.",
 		"Settings.Network.Tls.",
+		"Ui.List.",
 		"WebClient.",
 	];
 
