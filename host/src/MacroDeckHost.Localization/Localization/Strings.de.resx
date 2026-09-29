@@ -4586,6 +4586,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Detail.SingleConfigurationHint" xml:space="preserve">
     <value>Diese Integration unterstützt nur eine einzelne Konfiguration. Eine Neukonfiguration ersetzt sie, sodass Widgets weiter funktionieren.</value>
   </data>
+  <data name="Integrations.Detail.OptionalConfigurationHint" xml:space="preserve">
+    <value>Diese Integration funktioniert auch ohne Konfiguration. Richte sie nur ein, wenn du ihre Einstellungen ändern möchtest.</value>
+  </data>
   <data name="Integrations.Detail.StatusDisabled" xml:space="preserve">
     <value>Deaktiviert</value>
   </data>

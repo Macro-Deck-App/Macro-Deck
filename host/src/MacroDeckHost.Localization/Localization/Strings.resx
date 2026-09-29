@@ -4587,6 +4587,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Detail.SingleConfigurationHint" xml:space="preserve">
     <value>This integration supports only a single configuration. Reconfiguring replaces it, so widgets keep working.</value>
   </data>
+  <data name="Integrations.Detail.OptionalConfigurationHint" xml:space="preserve">
+    <value>This integration works without a configuration. Set it up only to change its settings.</value>
+  </data>
   <data name="Integrations.Detail.StatusDisabled" xml:space="preserve">
     <value>Disabled</value>
   </data>

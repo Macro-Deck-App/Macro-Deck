@@ -156,7 +156,7 @@ public sealed class PortableAssetManager : IPortableAssetManager
 				Id = integration.Id,
 				Name = _localization.Resolve(integration.Name, culture) ?? integration.Id,
 				Version = integration.Version,
-				RequiresConfiguration = integration is IConfigFlowProvider
+				RequiresConfiguration = integration.RequiresConfiguration()
 			})
 			.ToList();
 	}

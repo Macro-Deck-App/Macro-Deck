@@ -97,7 +97,8 @@ internal sealed class ConfigFlowCapabilityHandler : ICapabilityHandler
 		=> CapabilityInvocationResult.Ok(new ConfigFlowDescribePayload
 		{
 			AllowsMultipleConfigurations = _provider?.AllowsMultipleConfigurations ?? true,
-			ServesConfigUiTree = _provider is IUiConfigFlowProvider { ServesConfigUiTree: true }
+			ServesConfigUiTree = _provider is IUiConfigFlowProvider { ServesConfigUiTree: true },
+			RequiresConfiguration = _provider?.RequiresConfiguration ?? true
 		});
 
 	private async Task<CapabilityInvocationResult> FlowStartAsync(CapabilityInvocation invocation,

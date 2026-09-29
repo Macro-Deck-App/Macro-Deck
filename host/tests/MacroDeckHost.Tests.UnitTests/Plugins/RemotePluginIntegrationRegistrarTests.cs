@@ -194,6 +194,24 @@ public class RemotePluginIntegrationRegistrarTests
 	}
 
 	[Test]
+	public async Task A_detached_plugin_keeps_its_cached_optional_configuration()
+	{
+		var pluginId = "com.example.plugin";
+		_installationCatalog.Plugins.Add(Installed(pluginId));
+		await _snapshotStore.SaveAsync(RemotePluginCapabilitySnapshot.Empty(pluginId) with
+		{
+			AcceptedKinds = [CapabilityKinds.ConfigFlow],
+			RequiresConfiguration = false
+		});
+
+		await _registrar.RegisterInstalledDetachedAsync(pluginId);
+
+		var adapter = _integrationRegistry.Registered.Single(i => i.Id == pluginId);
+		Assert.That(adapter, Is.InstanceOf<IConfigFlowProvider>()
+			.With.Property(nameof(IConfigFlowProvider.RequiresConfiguration)).False);
+	}
+
+	[Test]
 	public async Task Re_declaring_capabilities_never_announces_a_removal()
 	{
 		var pluginId = "com.example.plugin";

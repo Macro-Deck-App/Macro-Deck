@@ -13,6 +13,7 @@ export interface IpcIntegration {
   variableCount: number;
   supportsConfigFlow: boolean;
   allowsMultipleConfigurations: boolean;
+  requiresConfiguration?: boolean;
   configuredEntryCount: number;
   hasIcon: boolean;
   iconVersion?: string | null;

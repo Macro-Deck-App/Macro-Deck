@@ -4587,6 +4587,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.Detail.SingleConfigurationHint" xml:space="preserve">
     <value>Esta integración solo admite una configuración. Reconfigurarla la reemplaza, así que los widgets siguen funcionando.</value>
   </data>
+  <data name="Integrations.Detail.OptionalConfigurationHint" xml:space="preserve">
+    <value>Esta integración funciona sin configuración. Configúrala solo si quieres cambiar sus ajustes.</value>
+  </data>
   <data name="Integrations.Detail.StatusDisabled" xml:space="preserve">
     <value>Deshabilitada</value>
   </data>

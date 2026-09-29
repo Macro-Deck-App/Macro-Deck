@@ -4587,6 +4587,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Detail.SingleConfigurationHint" xml:space="preserve">
     <value>Ta integracja obsługuje tylko jedną konfigurację. Ponowna konfiguracja zastępuje ją, więc widżety nadal działają.</value>
   </data>
+  <data name="Integrations.Detail.OptionalConfigurationHint" xml:space="preserve">
+    <value>Ta integracja działa bez konfiguracji. Konfiguracja służy tylko do zmiany jej ustawień.</value>
+  </data>
   <data name="Integrations.Detail.StatusDisabled" xml:space="preserve">
     <value>Wyłączona</value>
   </data>

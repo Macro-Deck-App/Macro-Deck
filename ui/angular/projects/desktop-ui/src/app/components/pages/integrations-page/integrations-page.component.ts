@@ -330,7 +330,7 @@ export class IntegrationsPageComponent implements OnInit {
       return;
     }
 
-    if (integration.supportsConfigFlow && integration.configuredEntryCount === 0) {
+    if (integration.supportsConfigFlow && integration.requiresConfiguration && integration.configuredEntryCount === 0) {
       toggle.checked = false;
       this.configuringId.set(integration.id);
       return;

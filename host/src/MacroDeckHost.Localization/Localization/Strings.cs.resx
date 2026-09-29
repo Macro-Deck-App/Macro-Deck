@@ -4587,6 +4587,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Detail.SingleConfigurationHint" xml:space="preserve">
     <value>Tato integrace podporuje pouze jednu konfiguraci. Rekonfigurace ji nahradí, takže widgety budou dál fungovat.</value>
   </data>
+  <data name="Integrations.Detail.OptionalConfigurationHint" xml:space="preserve">
+    <value>Tato integrace funguje i bez konfigurace. Konfigurace slouží jen ke změně jejích nastavení.</value>
+  </data>
   <data name="Integrations.Detail.StatusDisabled" xml:space="preserve">
     <value>Vypnuto</value>
   </data>
