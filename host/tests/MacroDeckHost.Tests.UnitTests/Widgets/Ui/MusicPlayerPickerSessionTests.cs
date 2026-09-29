@@ -622,6 +622,9 @@ public class MusicPlayerPickerSessionTests
 		public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances() => [];
 
 		public IMusicPlayer? GetPlayer(string instanceId) => _player;
+
+		public IMusicPlayer? GetPlayerWithOptions(string instanceId, IReadOnlyDictionary<string, object> options)
+			=> GetPlayer(instanceId);
 	}
 
 	private sealed class FakeCatalogPlayer : IMusicPlayer, IMusicPlayerCatalogProvider
@@ -682,6 +685,12 @@ public class MusicPlayerPickerSessionTests
 		private readonly object _gate = new();
 
 		public string GetETag(string artworkId, int? size) => $"\"{artworkId}\"";
+
+		public Task<ArtworkImageResult?> GetImage(MusicPlayerVariant variant,
+			string artworkId,
+			int? size,
+			CancellationToken cancellationToken)
+			=> GetImage(variant.InstanceId, artworkId, size, cancellationToken);
 
 		public Task<ArtworkImageResult?> GetImage(
 			string instanceId,

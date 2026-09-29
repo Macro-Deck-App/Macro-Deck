@@ -28,10 +28,14 @@ internal sealed class MusicPlayerTestHarness
 	private readonly StubArtworkService _artwork = new();
 	private readonly MusicPlayerViewStateResolver _resolver;
 
+	public MusicPlayerVariants Variants { get; } =
+		new(new MusicPlayerPollNudge(new FakeIntegrationRegistry()));
+
 	public MusicPlayerTestHarness()
 	{
 		_resolver = new MusicPlayerViewStateResolver(_registry,
 			_stateCache,
+			Variants,
 			_artwork,
 			new StubPaletteExtractor(),
 			new FakeIntegrationRegistry(),
@@ -92,6 +96,9 @@ internal sealed class StubRegistry : IMusicPlayerRegistry
 
 	public IMusicPlayer? GetPlayer(string instanceId) => null;
 
+	public IMusicPlayer? GetPlayerWithOptions(string instanceId, IReadOnlyDictionary<string, object> options)
+		=> GetPlayer(instanceId);
+
 	public IMusicPlayer? DefaultPlayer => null;
 }
 
@@ -118,6 +125,12 @@ internal sealed class StubArtworkService : IMusicPlayerArtworkService
 	public int Fetches { get; private set; }
 
 	public string GetETag(string artworkId, int? size) => $"\"{artworkId}\"";
+
+	public Task<ArtworkImageResult?> GetImage(MusicPlayerVariant variant,
+		string artworkId,
+		int? size,
+		CancellationToken cancellationToken)
+		=> GetImage(variant.InstanceId, artworkId, size, cancellationToken);
 
 	public Task<ArtworkImageResult?> GetImage(string instanceId,
 		string artworkId,

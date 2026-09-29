@@ -30,6 +30,9 @@ public sealed record MusicPlayerWidgetData
 
 	public bool ShowTimeline { get; init; } = true;
 
+	// Canonical JSON rather than an element, so an unrelated save still parses to an equal record.
+	public string? InstanceOptionsJson { get; init; }
+
 	/// <summary>Whether the tile is filled with artwork rather than stacking a square cover.</summary>
 	public bool IsFullCover => string.Equals(CoverStyle, FullCoverStyle, StringComparison.Ordinal);
 
@@ -77,7 +80,37 @@ public sealed record MusicPlayerWidgetData
 			ShowArtist = ReadBool(data, "showArtist") ?? true,
 			ShowAlbum = ReadBool(data, "showAlbum") ?? true,
 			ShowTimeline = ReadBool(data, "showTimeline") ?? true,
+			InstanceOptionsJson = CanonicalObject(data, "instanceOptions"),
 		};
+	}
+
+	public IReadOnlyDictionary<string, JsonElement> ReadInstanceOptions()
+	{
+		if (InstanceOptionsJson is null)
+		{
+			return new Dictionary<string, JsonElement>(StringComparer.Ordinal);
+		}
+
+		using var document = JsonDocument.Parse(InstanceOptionsJson);
+
+		return document.RootElement.EnumerateObject()
+			.ToDictionary(property => property.Name, property => property.Value.Clone(), StringComparer.Ordinal);
+	}
+
+	private static string? CanonicalObject(JsonElement data, string name)
+	{
+		if (!data.TryGetProperty(name, out var value) || value.ValueKind != JsonValueKind.Object)
+		{
+			return null;
+		}
+
+		var sorted = new SortedDictionary<string, JsonElement>(StringComparer.Ordinal);
+		foreach (var property in value.EnumerateObject())
+		{
+			sorted[property.Name] = property.Value;
+		}
+
+		return JsonSerializer.Serialize(sorted);
 	}
 
 	private static string? ReadString(JsonElement data, string name)

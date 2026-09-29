@@ -18,6 +18,7 @@ public sealed class MusicPlayerWidgetUiProvider : IBuiltInWidgetUiProvider
 {
 	private readonly IMusicPlayerRegistry _registry;
 	private readonly IMusicPlayerStateCache _stateCache;
+	private readonly IMusicPlayerVariants _variants;
 	private readonly IMusicPlayerArtworkService _artworkService;
 	private readonly IArtworkPaletteExtractor _paletteExtractor;
 	private readonly IMusicPlayerStateNotifier _notifier;
@@ -31,6 +32,7 @@ public sealed class MusicPlayerWidgetUiProvider : IBuiltInWidgetUiProvider
 	public MusicPlayerWidgetUiProvider(
 		IMusicPlayerRegistry registry,
 		IMusicPlayerStateCache stateCache,
+		IMusicPlayerVariants variants,
 		IMusicPlayerArtworkService artworkService,
 		IArtworkPaletteExtractor paletteExtractor,
 		IMusicPlayerStateNotifier notifier,
@@ -43,6 +45,7 @@ public sealed class MusicPlayerWidgetUiProvider : IBuiltInWidgetUiProvider
 	{
 		_registry = registry;
 		_stateCache = stateCache;
+		_variants = variants;
 		_artworkService = artworkService;
 		_paletteExtractor = paletteExtractor;
 		_notifier = notifier;
@@ -52,6 +55,8 @@ public sealed class MusicPlayerWidgetUiProvider : IBuiltInWidgetUiProvider
 		_sampleText = sampleText;
 		_timeProvider = timeProvider;
 		_logger = logger;
+
+		MusicPlayerViewStateResolver.RemoveArtworkOnRelease(variants, resources);
 	}
 
 	public string WidgetTypeId => WidgetTypeIds.MusicPlayer;
@@ -103,6 +108,7 @@ public sealed class MusicPlayerWidgetUiProvider : IBuiltInWidgetUiProvider
 
 		var resolver = new MusicPlayerViewStateResolver(_registry,
 			_stateCache,
+			_variants,
 			_artworkService,
 			_paletteExtractor,
 			_integrations,
@@ -112,9 +118,18 @@ public sealed class MusicPlayerWidgetUiProvider : IBuiltInWidgetUiProvider
 
 		// Resolved before the view exists so the very first tree a client receives already shows the
 		// player rather than flashing the loading state and correcting itself one patch later.
-		var initial = await resolver
-			.ResolveAsync(config, MusicPlayerViewState.Loading, cancellationToken)
-			.ConfigureAwait(false);
+		MusicPlayerViewState initial;
+		try
+		{
+			initial = await resolver
+				.ResolveAsync(config, MusicPlayerViewState.Loading, cancellationToken)
+				.ConfigureAwait(false);
+		}
+		catch
+		{
+			resolver.ReleaseDemand();
+			throw;
+		}
 
 		var state = new UiState<MusicPlayerViewState>(initial);
 		var configState = new UiState<MusicPlayerWidgetData>(config);

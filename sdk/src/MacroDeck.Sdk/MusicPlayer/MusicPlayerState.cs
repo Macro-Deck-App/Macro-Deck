@@ -33,7 +33,9 @@ public sealed record MusicPlayerState
 
 	/// <summary>
 	/// Opaque id the host resolves to artwork bytes via <see cref="IMusicPlayer.GetArtworkAsync"/>.
-	/// Never a provider URL - the UI requests artwork from the host.
+	/// Never a provider URL - the UI requests artwork from the host. An id must name the same image whichever
+	/// player of an instance reported it, including players from <see cref="IMusicPlayerProvider.GetPlayerWithOptions"/>:
+	/// the host caches artwork per instance and id.
 	/// </summary>
 	public string? ArtworkId { get; init; }
 

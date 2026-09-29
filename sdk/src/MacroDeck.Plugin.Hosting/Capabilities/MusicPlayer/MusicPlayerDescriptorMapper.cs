@@ -1,3 +1,4 @@
+using MacroDeck.Plugin.Hosting.Capabilities.Actions;
 using MacroDeck.Plugin.Protocol.Capabilities.MusicPlayer;
 using MacroDeck.Sdk.MusicPlayer;
 
@@ -12,7 +13,8 @@ internal static class MusicPlayerDescriptorMapper
 			Id = instance.Id,
 			DisplayName = instance.DisplayName,
 			HasCatalog = player is IMusicPlayerCatalogProvider,
-			HasDevices = player is IMusicPlayerDeviceProvider
+			HasDevices = player is IMusicPlayerDeviceProvider,
+			Options = [.. MusicPlayerOptionValues.Supported(instance.Options).Select(ActionParameterMapper.ToDto)]
 		};
 
 	public static MusicPlayerStateDto ToDto(MusicPlayerState state)

@@ -97,6 +97,40 @@ internal sealed class MusicPlayerRegistryTests
 		Assert.That(registry.GetInstances().Select(i => i.InstanceId), Is.EqualTo(_multiInstanceIds));
 	}
 
+	[Test]
+	public void An_instance_offers_only_the_options_a_widget_can_show()
+	{
+		var registry = Registry(new OptionsMusicIntegration(
+		[
+			ActionParameter.Number("cycleSeconds", "Cycle every", defaultValue: 10),
+			ActionParameter.Text("bad.name", "Dotted"),
+			ActionParameter.Color("tint", "Tint"),
+			ActionParameter.Toggle("cycleSeconds", "Duplicate"),
+			ActionParameter.DynamicChoice("app", "App"),
+		]));
+
+		var options = registry.GetInstances().Single().Options;
+
+		Assert.That(options.Select(option => option.Name), Is.EqualTo(new[] { "cycleSeconds" }));
+	}
+
+	[Test]
+	public void A_request_with_options_reaches_the_provider_under_its_local_id()
+	{
+		var integration = new OptionsMusicIntegration([ActionParameter.Number("cycleSeconds", defaultValue: 10)]);
+		var registry = Registry(integration);
+		var options = new Dictionary<string, object> { ["cycleSeconds"] = 30d };
+
+		var player = registry.GetPlayerWithOptions("music.options::any", options);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(player, Is.SameAs(integration.PlayerWithOptions));
+			Assert.That(integration.Requests.Single().InstanceId, Is.EqualTo("any"));
+			Assert.That(integration.Requests.Single().Options, Is.SameAs(options));
+		});
+	}
+
 	private static MusicPlayerRegistry Registry(IIntegration integration)
 		=> new(new FakeIntegrationRegistry(integration), new LoggerConfiguration().CreateLogger());
 
@@ -190,6 +224,35 @@ internal sealed class MusicPlayerRegistryTests
 		public IReadOnlyList<MusicPlayerInstance> GetInstances() => [new(_localId, "Account")];
 
 		public IMusicPlayer? GetPlayer(string instanceId) => instanceId == _localId ? Player : null;
+	}
+
+	private sealed class OptionsMusicIntegration(IReadOnlyList<ActionParameter> options)
+		: IIntegration, IMusicPlayerProvider
+	{
+		public FakePlayer PlayerWithOptions { get; } = new();
+
+		public List<MusicPlayerOptionsRequest> Requests { get; } = [];
+
+		public string Id => "music.options";
+		public LocalizedText Name => "Options";
+		public string Version => "1.0.0";
+		public IReadOnlyList<IActionDefinition> Actions => [];
+		public bool IsInitialized => true;
+
+		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+
+		public Task ShutdownAsync() => Task.CompletedTask;
+
+		public IReadOnlyList<MusicPlayerInstance> GetInstances() => [new("any", "Any app") { Options = options }];
+
+		public IMusicPlayer? GetPlayer(string instanceId) => null;
+
+		public IMusicPlayer? GetPlayerWithOptions(MusicPlayerOptionsRequest request)
+		{
+			Requests.Add(request);
+
+			return PlayerWithOptions;
+		}
 	}
 
 	private sealed class MultiConfigMusicIntegration : IIntegration, IMusicPlayerProvider

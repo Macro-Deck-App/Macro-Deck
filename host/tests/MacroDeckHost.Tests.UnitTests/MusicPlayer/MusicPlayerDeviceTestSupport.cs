@@ -21,6 +21,9 @@ internal sealed class SinglePlayerRegistry : IMusicPlayerRegistry
 	public IMusicPlayer? GetPlayer(string instanceId)
 		=> string.Equals(instanceId, _instanceId, StringComparison.Ordinal) ? _player : null;
 
+	public IMusicPlayer? GetPlayerWithOptions(string instanceId, IReadOnlyDictionary<string, object> options)
+		=> GetPlayer(instanceId);
+
 	public IMusicPlayer? DefaultPlayer => _player;
 }
 

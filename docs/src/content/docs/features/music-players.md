@@ -1,6 +1,6 @@
 ---
 title: Music players
-description: Expose a music player with IMusicPlayerProvider and IMusicPlayer - instances, playback state, artwork, the standard actions, library browsing and device switching.
+description: Expose a music player with IMusicPlayerProvider and IMusicPlayer - instances, playback state, artwork, per-widget options, the standard actions, library browsing and device switching.
 ---
 
 An integration exposes a music player by implementing `IMusicPlayerProvider`. It lists one
@@ -285,6 +285,74 @@ because the object is already one instance. `MusicPlayerDevice.Type` is a free-f
 throws on failure, and `TransferPlaybackAsync` logs and returns. A player without this interface fails
 the device actions with `Unavailable`.
 
+## Per-widget options
+
+An instance can declare options that each Music Player widget sets for itself. One widget can then cycle
+through the apps that are playing every 10 seconds while another widget on the same deck follows the app
+the system calls current, without a second instance cluttering the player picker.
+
+```csharp
+using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.MusicPlayer;
+
+public IReadOnlyList<MusicPlayerInstance> GetInstances()
+	=>
+	[
+		new MusicPlayerInstance("any", "Any app")
+		{
+			Options =
+			[
+				ActionParameter.Toggle("cycle", "Cycle between apps", defaultValue: false),
+				ActionParameter.Number("cycleSeconds", "Cycle every (seconds)", min: 5, max: 60, defaultValue: 10)
+			]
+		},
+		.. _sessions.Select(app => new MusicPlayerInstance(app.Id, app.Name))
+	];
+
+public IMusicPlayer? GetPlayerWithOptions(MusicPlayerOptionsRequest request)
+{
+	if (request.InstanceId != "any" || request.Options["cycle"] is not true)
+	{
+		return GetPlayer(request.InstanceId);
+	}
+
+	var seconds = (double)request.Options["cycleSeconds"];
+	return new CyclingPlayer(_sessions, TimeSpan.FromSeconds(seconds));
+}
+```
+
+The widget editor shows the options of the picked player below the player picker, and each widget stores
+its own values. The host resolves the player with `GetPlayerWithOptions` and polls it separately from the
+plain instance, so two widgets with different values show different tracks and covers.
+
+- **Supported kinds.** `String`, `Number` (with `Min`, `Max`, `Step` and the slider), `Boolean`, and
+  `Choice` with static `Options`. Any other kind, a `Choice` with dynamic options, an invalid name or a
+  duplicate name is skipped with a warning in the host log. A kind the host does not know at all, from a
+  newer SDK, is skipped as well.
+- **Names.** 1 to 64 letters, digits, hyphens or underscores, starting with a letter or digit. The name is
+  the key in the widget's stored data, so keep it stable.
+- **Labels.** `Label` and `Description` are shown, localized like any other `LocalizedText`. Set a label:
+  without one, the editor shows the raw name. `VisibleWhen`, `Required` and `Placeholder` are ignored.
+- **Values.** `request.Options` always has one entry per supported option: the widget's value, or your
+  default when the widget stored none or an invalid one. Values are `string` for String and Choice,
+  `double` for Number (clamped to `Min` and `Max`), and `bool` for Boolean. A Choice value is always one of
+  your option values.
+- **Only for instances with options.** `GetPlayerWithOptions` is called only for an instance that declares
+  options, and only for a widget that picked that instance. A widget set to "Active player" uses
+  `GetPlayer`. The Now Playing screen saver has no option fields and shows the instance with your defaults.
+- **Keep it cheap.** The host may call `GetPlayerWithOptions` for the same values again and again, and it
+  never tells you when a set of values is no longer shown. Return a cached or lightweight object, and derive
+  time-based behaviour such as cycling from the clock when `GetStateAsync` runs, not from a timer per set of
+  values.
+- **Display only.** The host reads state and artwork from this player and sends it no commands. Actions in
+  a widget's flows keep addressing the instance through their own `instance` parameter, so a Next action on
+  a cycling widget acts on the plain "Any app" player.
+- **Artwork ids.** The host caches covers by instance and artwork id, shared across option values. An
+  artwork id must name the same image whichever values produced it.
+- **Default.** `GetPlayerWithOptions` defaults to `GetPlayer(request.InstanceId)`. Providers without options
+  do not implement it.
+- **Older hosts** ignore `Options` and show the plain instance.
+
 ## Volume and position variables
 
 ```csharp
@@ -324,12 +392,17 @@ player answers `Unavailable`. See [Writable variables](/features/variables/#writ
 - **`ProviderName`** is optional. Leave it out and the integration's name (the manifest name for a plugin)
   is used.
 - **A disabled integration** has no instances.
+- **Options change.** Widgets pick up a changed `Options` list on their own; an editor that is already open
+  shows the new fields when it is opened again. Values a widget stored for an option that no longer exists
+  are ignored.
 
 ## Over the plugin protocol
 
 Music players are fully supported out of process (capability kind `music-player`). The instance list is
-a snapshot, so after `GetInstances` changes (an account was added in your config flow), call
-`CatalogChanged(CapabilityKinds.MusicPlayer)` on an injected `IPluginCatalogNotifier`. State reads from
+a snapshot, so after `GetInstances` changes (an account was added in your config flow, or an instance's
+`Options` changed), call `CatalogChanged(CapabilityKinds.MusicPlayer)` on an injected `IPluginCatalogNotifier`.
+Options travel as optional fields within `music-player` version 1: the instance list carries them, and
+only the `state` and `artwork` operations carry a widget's values. State reads from
 an unreachable plugin degrade to unavailable. Library and device failures stay real failures, so an
 unreachable plugin never looks like an empty library. See
 [Capability parity](/reference/capability-parity/) and

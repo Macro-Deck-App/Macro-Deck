@@ -132,6 +132,9 @@ internal sealed class GetMusicPlayerStateRequestMessageHandlerTests
 		public IMusicPlayer? GetPlayer(string instanceId)
 			=> instanceId == _instanceId || instanceId == _secondInstanceId ? _player : null;
 
+		public IMusicPlayer? GetPlayerWithOptions(string instanceId, IReadOnlyDictionary<string, object> options)
+			=> GetPlayer(instanceId);
+
 		public IMusicPlayer? DefaultPlayer => _player;
 	}
 

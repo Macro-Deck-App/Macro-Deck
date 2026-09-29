@@ -10,6 +10,10 @@
       "type": ["string", "null"],
       "description": "Which music player instance this widget displays. Empty or null means the player that most recently started playing or changed track, otherwise the first available instance."
     },
+    "instanceOptions": {
+      "type": ["object", "null"],
+      "description": "This widget's values for the options the selected instance declares, keyed by option name. A missing or invalid value means the option's default; keys the instance does not declare are ignored."
+    },
     "coverStyle": {
       "enum": ["small", "full", null],
       "description": "'small' shows a stacked cover + text; 'full' fills the widget with artwork and overlays the text."
