@@ -17695,6 +17695,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Widgets.Music.SmallCoverDesc" xml:space="preserve">
     <value>Copertina con dettagli sotto</value>
   </data>
+  <data name="Widgets.Music.Source" xml:space="preserve">
+    <value>Sorgente</value>
+  </data>
   <data name="Widgets.Music.Timeline" xml:space="preserve">
     <value>Sequenza temporale</value>
   </data>

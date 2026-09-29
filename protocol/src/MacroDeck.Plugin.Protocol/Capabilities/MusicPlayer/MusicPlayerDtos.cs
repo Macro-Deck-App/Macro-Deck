@@ -89,6 +89,8 @@ public sealed record MusicPlayerStateDto
 	public string? DeviceName { get; init; }
 
 	public string? DeviceType { get; init; }
+
+	public string? Badge { get; init; }
 }
 
 /// <summary>Arguments for the <c>artwork</c> operation.</summary>

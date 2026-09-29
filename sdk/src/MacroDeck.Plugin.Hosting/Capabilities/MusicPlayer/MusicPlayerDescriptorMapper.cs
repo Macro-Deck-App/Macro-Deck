@@ -32,7 +32,8 @@ internal static class MusicPlayerDescriptorMapper
 			ShuffleEnabled = state.ShuffleEnabled,
 			RepeatMode = state.RepeatMode.ToString(),
 			DeviceName = state.DeviceName,
-			DeviceType = state.DeviceType
+			DeviceType = state.DeviceType,
+			Badge = state.Badge
 		};
 
 	public static MusicPlayerCatalogItemDto ToDto(MusicPlayerCatalogItem item)

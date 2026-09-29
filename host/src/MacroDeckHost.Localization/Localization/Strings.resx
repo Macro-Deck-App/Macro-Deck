@@ -17696,6 +17696,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.Music.SmallCoverDesc" xml:space="preserve">
     <value>Cover with details below</value>
   </data>
+  <data name="Widgets.Music.Source" xml:space="preserve">
+    <value>Source</value>
+  </data>
   <data name="Widgets.Music.Timeline" xml:space="preserve">
     <value>Timeline</value>
   </data>

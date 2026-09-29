@@ -17693,6 +17693,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Music.SmallCoverDesc" xml:space="preserve">
     <value>Cover mit Details darunter</value>
   </data>
+  <data name="Widgets.Music.Source" xml:space="preserve">
+    <value>Quelle</value>
+  </data>
   <data name="Widgets.Music.Timeline" xml:space="preserve">
     <value>Zeitleiste</value>
   </data>

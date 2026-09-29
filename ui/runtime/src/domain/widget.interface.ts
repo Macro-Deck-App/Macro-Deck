@@ -178,6 +178,7 @@ export interface MusicPlayerData {
   showArtist?: boolean;
   showAlbum?: boolean;
   showTimeline?: boolean;
+  showSource?: boolean;
   border?: WidgetBorder;
   flows?: ActionFlow[];
 }

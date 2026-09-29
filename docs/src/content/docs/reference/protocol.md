@@ -167,6 +167,8 @@ are listed in the descriptor's `capabilityKinds`:
   and AsyncAPI.
 - `state.update` is an invalidation signal: the peer refreshes that capability's state. It is not a
   second per-capability diff protocol.
+- `music-player` state gained `badge`, additively in major `1`. A plugin that does not send it shows no
+  badge, and a host that predates it skips the field.
 - `actions` gained `state`, additively in major `1`, for actions that supply an Action Button's states.
   It is keyed by the action's configured parameters, so the host **polls** it: `state.update` is keyed
   by the declared capability id (the action type) and cannot name which configured instance changed.

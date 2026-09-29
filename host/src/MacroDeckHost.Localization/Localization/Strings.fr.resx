@@ -17695,6 +17695,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.Music.SmallCoverDesc" xml:space="preserve">
     <value>Pochette avec détails en dessous</value>
   </data>
+  <data name="Widgets.Music.Source" xml:space="preserve">
+    <value>Source</value>
+  </data>
   <data name="Widgets.Music.Timeline" xml:space="preserve">
     <value>Progression</value>
   </data>

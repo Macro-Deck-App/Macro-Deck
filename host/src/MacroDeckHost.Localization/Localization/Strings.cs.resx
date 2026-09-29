@@ -17695,6 +17695,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.Music.SmallCoverDesc" xml:space="preserve">
     <value>Obal s údaji pod ním</value>
   </data>
+  <data name="Widgets.Music.Source" xml:space="preserve">
+    <value>Zdroj</value>
+  </data>
   <data name="Widgets.Music.Timeline" xml:space="preserve">
     <value>Časová osa</value>
   </data>
