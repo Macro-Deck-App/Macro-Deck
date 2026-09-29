@@ -3008,8 +3008,14 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>Ningún proveedor gestionó el widget</value>
   </data>
+  <data name="Errors.Widgets.TooManyFavorites" xml:space="preserve">
+    <value>Como máximo {max} widgets pueden ser favoritos.</value>
+  </data>
   <data name="Errors.Widgets.TooManyStates" xml:space="preserve">
     <value>Un botón puede tener como máximo {max} estados.</value>
+  </data>
+  <data name="Errors.Widgets.UnknownType" xml:space="preserve">
+    <value>Este tipo de widget no está disponible.</value>
   </data>
   <data name="Errors.Widgets.UnsupportedActionTriggers" xml:space="preserve">
     <value>El widget no admite disparadores de acción</value>
@@ -18017,11 +18023,35 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Widgets.Timer.LabelPlaceholderExample" xml:space="preserve">
     <value>Pizza</value>
   </data>
+  <data name="Widgets.TypeSelector.AddFavorite" xml:space="preserve">
+    <value>Añade {name} a favoritos</value>
+  </data>
+  <data name="Widgets.TypeSelector.FavoriteFailed" xml:space="preserve">
+    <value>No se ha podido guardar el favorito.</value>
+  </data>
   <data name="Widgets.TypeSelector.Heading" xml:space="preserve">
     <value>Seleccionar tipo de widget</value>
   </data>
-  <data name="Widgets.TypeSelector.Subtitle" xml:space="preserve">
-    <value>Elige el tipo de widget que quieres crear</value>
+  <data name="Widgets.TypeSelector.NoMatches" xml:space="preserve">
+    <value>Ningún widget coincide con tu búsqueda</value>
+  </data>
+  <data name="Widgets.TypeSelector.RemoveFavorite" xml:space="preserve">
+    <value>Quita {name} de favoritos</value>
+  </data>
+  <data name="Widgets.TypeSelector.SearchAriaLabel" xml:space="preserve">
+    <value>Buscar tipos de widget</value>
+  </data>
+  <data name="Widgets.TypeSelector.SearchPlaceholder" xml:space="preserve">
+    <value>Busca widgets…</value>
+  </data>
+  <data name="Widgets.TypeSelector.ViewGrid" xml:space="preserve">
+    <value>Mosaico</value>
+  </data>
+  <data name="Widgets.TypeSelector.ViewLabel" xml:space="preserve">
+    <value>Vista</value>
+  </data>
+  <data name="Widgets.TypeSelector.ViewList" xml:space="preserve">
+    <value>Lista</value>
   </data>
   <data name="Widgets.Weather.ConditionIcon" xml:space="preserve">
     <value>Icono de condición</value>

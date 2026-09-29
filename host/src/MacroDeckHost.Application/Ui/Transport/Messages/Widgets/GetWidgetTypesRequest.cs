@@ -26,6 +26,8 @@ public class WidgetTypeDto
 
 	public bool IsBuiltIn { get; set; }
 
+	public LocalizedText ProviderName { get; set; }
+
 	/// <summary>The type's name as the picker shows it. Localized rather than resolved here, so a language
 	/// change is a client-side re-render rather than a refetch.</summary>
 	public LocalizedText Name { get; set; }

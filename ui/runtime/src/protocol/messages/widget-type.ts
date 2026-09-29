@@ -4,6 +4,7 @@ export interface WidgetTypeDto {
   id: string;
   providerId: string;
   isBuiltIn: boolean;
+  providerName?: LocalizedText | null;
   name?: LocalizedText;
   description?: LocalizedText;
   defaultData: Record<string, unknown>;
@@ -19,4 +20,8 @@ export interface GetWidgetTypesResponse {
 
 export interface WidgetTypeCatalogChangedEvent {
   types: WidgetTypeDto[];
+}
+
+export interface WidgetTypeFavoritesChangedEvent {
+  typeIds: string[];
 }

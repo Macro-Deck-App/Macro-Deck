@@ -1,5 +1,6 @@
 export * from './widget-registry.service';
 export * from './widget-type-catalog.service';
+export * from './widget-type-favorites.service';
 export * from './ui-session.service';
 export * from './action-execution.service';
 export * from './icon-image.service';

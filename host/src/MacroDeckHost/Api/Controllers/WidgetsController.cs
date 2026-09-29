@@ -40,6 +40,12 @@ public class WidgetsController : ControllerBase
 	private readonly IUiTransportMessageHandler<SetWidgetsPinnedRequest, SetWidgetsPinnedResponse>
 		_setWidgetsPinned;
 
+	private readonly IUiTransportMessageHandler<GetWidgetTypeFavoritesRequest, GetWidgetTypeFavoritesResponse>
+		_getWidgetTypeFavorites;
+
+	private readonly IUiTransportMessageHandler<SetWidgetTypeFavoriteRequest, SetWidgetTypeFavoriteResponse>
+		_setWidgetTypeFavorite;
+
 	private readonly IWidgetPortabilityService _portability;
 
 	public WidgetsController(
@@ -57,7 +63,9 @@ public class WidgetsController : ControllerBase
 		IUiTransportMessageHandler<CreateWidgetsRequest, CreateWidgetsResponse> createWidgets,
 		IUiTransportMessageHandler<DeleteWidgetsRequest, DeleteWidgetsResponse> deleteWidgets,
 		IUiTransportMessageHandler<SetWidgetsPinnedRequest, SetWidgetsPinnedResponse> setWidgetsPinned,
-		IWidgetPortabilityService portability)
+		IWidgetPortabilityService portability,
+		IUiTransportMessageHandler<GetWidgetTypeFavoritesRequest, GetWidgetTypeFavoritesResponse> getWidgetTypeFavorites,
+		IUiTransportMessageHandler<SetWidgetTypeFavoriteRequest, SetWidgetTypeFavoriteResponse> setWidgetTypeFavorite)
 	{
 		_createWidget = createWidget;
 		_createWidgetFromApplication = createWidgetFromApplication;
@@ -73,6 +81,8 @@ public class WidgetsController : ControllerBase
 		_deleteWidgets = deleteWidgets;
 		_setWidgetsPinned = setWidgetsPinned;
 		_portability = portability;
+		_getWidgetTypeFavorites = getWidgetTypeFavorites;
+		_setWidgetTypeFavorite = setWidgetTypeFavorite;
 	}
 
 	[HttpGet("schemas")]
@@ -82,6 +92,14 @@ public class WidgetsController : ControllerBase
 	[HttpGet("types")]
 	public Task<GetWidgetTypesResponse> GetTypes(CancellationToken ct)
 		=> _getWidgetTypes.Handle(new GetWidgetTypesRequest(), ct).AsTask();
+
+	[HttpGet("types/favorites")]
+	public Task<GetWidgetTypeFavoritesResponse> GetTypeFavorites(CancellationToken ct)
+		=> _getWidgetTypeFavorites.Handle(new GetWidgetTypeFavoritesRequest(), ct).AsTask();
+
+	[HttpPut("types/favorites")]
+	public Task<SetWidgetTypeFavoriteResponse> SetTypeFavorite(SetWidgetTypeFavoriteRequest body, CancellationToken ct)
+		=> _setWidgetTypeFavorite.Handle(body, ct).AsTask();
 
 	[HttpPost]
 	public Task<CreateWidgetResponse> Create(CreateWidgetRequest body, CancellationToken ct)

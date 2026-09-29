@@ -3008,8 +3008,14 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>Żaden dostawca nie obsłużył widżetu</value>
   </data>
+  <data name="Errors.Widgets.TooManyFavorites" xml:space="preserve">
+    <value>Maksymalna liczba ulubionych widżetów: {max}.</value>
+  </data>
   <data name="Errors.Widgets.TooManyStates" xml:space="preserve">
     <value>Maksymalna liczba stanów przycisku: {max}.</value>
+  </data>
+  <data name="Errors.Widgets.UnknownType" xml:space="preserve">
+    <value>Ten typ widżetu jest niedostępny.</value>
   </data>
   <data name="Errors.Widgets.UnsupportedActionTriggers" xml:space="preserve">
     <value>Widżet nie obsługuje wyzwalaczy akcji</value>
@@ -18017,11 +18023,35 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Widgets.Timer.LabelPlaceholderExample" xml:space="preserve">
     <value>Pizza</value>
   </data>
+  <data name="Widgets.TypeSelector.AddFavorite" xml:space="preserve">
+    <value>Dodaj {name} do ulubionych</value>
+  </data>
+  <data name="Widgets.TypeSelector.FavoriteFailed" xml:space="preserve">
+    <value>Nie udało się zapisać ulubionego.</value>
+  </data>
   <data name="Widgets.TypeSelector.Heading" xml:space="preserve">
     <value>Wybierz typ widżetu</value>
   </data>
-  <data name="Widgets.TypeSelector.Subtitle" xml:space="preserve">
-    <value>Wybierz typ widżetu do utworzenia</value>
+  <data name="Widgets.TypeSelector.NoMatches" xml:space="preserve">
+    <value>Brak widżetów pasujących do wyszukiwania</value>
+  </data>
+  <data name="Widgets.TypeSelector.RemoveFavorite" xml:space="preserve">
+    <value>Usuń {name} z ulubionych</value>
+  </data>
+  <data name="Widgets.TypeSelector.SearchAriaLabel" xml:space="preserve">
+    <value>Szukaj typów widżetów</value>
+  </data>
+  <data name="Widgets.TypeSelector.SearchPlaceholder" xml:space="preserve">
+    <value>Szukaj widżetów…</value>
+  </data>
+  <data name="Widgets.TypeSelector.ViewGrid" xml:space="preserve">
+    <value>Kafelki</value>
+  </data>
+  <data name="Widgets.TypeSelector.ViewLabel" xml:space="preserve">
+    <value>Widok</value>
+  </data>
+  <data name="Widgets.TypeSelector.ViewList" xml:space="preserve">
+    <value>Lista</value>
   </data>
   <data name="Widgets.Weather.ConditionIcon" xml:space="preserve">
     <value>Ikona warunków pogodowych</value>

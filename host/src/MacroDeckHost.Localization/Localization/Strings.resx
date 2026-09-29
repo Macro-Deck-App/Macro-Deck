@@ -3007,9 +3007,16 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>No provider handled the widget</value>
   </data>
+  <data name="Errors.Widgets.TooManyFavorites" xml:space="preserve">
+    <value>At most {max} widgets can be favorites.</value>
+    <comment>[max:int]</comment>
+  </data>
   <data name="Errors.Widgets.TooManyStates" xml:space="preserve">
     <value>A button can have at most {max} states.</value>
     <comment>[max:int]</comment>
+  </data>
+  <data name="Errors.Widgets.UnknownType" xml:space="preserve">
+    <value>This widget type is not available.</value>
   </data>
   <data name="Errors.Widgets.UnsupportedActionTriggers" xml:space="preserve">
     <value>Widget does not support action triggers</value>
@@ -18018,11 +18025,37 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.Timer.LabelPlaceholderExample" xml:space="preserve">
     <value>Pizza</value>
   </data>
+  <data name="Widgets.TypeSelector.AddFavorite" xml:space="preserve">
+    <value>Add {name} to favorites</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Widgets.TypeSelector.FavoriteFailed" xml:space="preserve">
+    <value>The favorite could not be saved.</value>
+  </data>
   <data name="Widgets.TypeSelector.Heading" xml:space="preserve">
     <value>Select Widget Type</value>
   </data>
-  <data name="Widgets.TypeSelector.Subtitle" xml:space="preserve">
-    <value>Choose the type of widget to create</value>
+  <data name="Widgets.TypeSelector.NoMatches" xml:space="preserve">
+    <value>No widgets match your search</value>
+  </data>
+  <data name="Widgets.TypeSelector.RemoveFavorite" xml:space="preserve">
+    <value>Remove {name} from favorites</value>
+    <comment>[name:string]</comment>
+  </data>
+  <data name="Widgets.TypeSelector.SearchAriaLabel" xml:space="preserve">
+    <value>Search widget types</value>
+  </data>
+  <data name="Widgets.TypeSelector.SearchPlaceholder" xml:space="preserve">
+    <value>Search widgets…</value>
+  </data>
+  <data name="Widgets.TypeSelector.ViewGrid" xml:space="preserve">
+    <value>Tiles</value>
+  </data>
+  <data name="Widgets.TypeSelector.ViewLabel" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="Widgets.TypeSelector.ViewList" xml:space="preserve">
+    <value>List</value>
   </data>
   <data name="Widgets.Weather.ConditionIcon" xml:space="preserve">
     <value>Condition icon</value>
