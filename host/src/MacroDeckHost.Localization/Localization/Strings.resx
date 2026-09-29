@@ -13771,6 +13771,18 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Settings.Devices.ScreenSaver.Unavailable" xml:space="preserve">
     <value>Unavailable</value>
   </data>
+  <data name="Settings.Devices.SettingsButton.HiddenLine" xml:space="preserve">
+    <value>Settings button hidden: swipe in from the left edge</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.HideAction" xml:space="preserve">
+    <value>Hide settings button</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.SaveFailed" xml:space="preserve">
+    <value>Could not change the settings button</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.ShowAction" xml:space="preserve">
+    <value>Show settings button</value>
+  </data>
   <data name="Settings.Devices.SignedOutMarker" xml:space="preserve">
     <value>Signed out</value>
   </data>
@@ -16619,6 +16631,15 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="WebClient.Settings.DisplaySection" xml:space="preserve">
     <value>Display</value>
   </data>
+  <data name="WebClient.Settings.HideSettingsButton.Description" xml:space="preserve">
+    <value>Open the settings with a swipe in from the left edge</value>
+  </data>
+  <data name="WebClient.Settings.HideSettingsButton.Label" xml:space="preserve">
+    <value>Hide settings button</value>
+  </data>
+  <data name="WebClient.Settings.HideSettingsButton.SaveFailed" xml:space="preserve">
+    <value>Could not change the settings button</value>
+  </data>
   <data name="WebClient.Settings.Licenses.Button" xml:space="preserve">
     <value>Open source licenses</value>
   </data>
@@ -16630,6 +16651,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="WebClient.Settings.OpenSettings" xml:space="preserve">
     <value>Open Macro Deck settings</value>
+  </data>
+  <data name="WebClient.Settings.Sidebar" xml:space="preserve">
+    <value>Side panel</value>
   </data>
   <data name="WebClient.Setup.Body" xml:space="preserve">
     <value>Finish the first-time setup in the Macro Deck desktop app, then reload this page.</value>

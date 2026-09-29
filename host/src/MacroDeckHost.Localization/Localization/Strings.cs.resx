@@ -13771,6 +13771,18 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.Devices.ScreenSaver.Unavailable" xml:space="preserve">
     <value>Není k dispozici</value>
   </data>
+  <data name="Settings.Devices.SettingsButton.HiddenLine" xml:space="preserve">
+    <value>Tlačítko nastavení skryto: přejetím od levého okraje</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.HideAction" xml:space="preserve">
+    <value>Skrýt tlačítko nastavení</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.SaveFailed" xml:space="preserve">
+    <value>Tlačítko nastavení se nepodařilo změnit</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.ShowAction" xml:space="preserve">
+    <value>Zobrazit tlačítko nastavení</value>
+  </data>
   <data name="Settings.Devices.SignedOutMarker" xml:space="preserve">
     <value>Odhlášeno</value>
   </data>
@@ -16619,6 +16631,15 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="WebClient.Settings.DisplaySection" xml:space="preserve">
     <value>Zobrazení</value>
   </data>
+  <data name="WebClient.Settings.HideSettingsButton.Description" xml:space="preserve">
+    <value>Nastavení se otevře přejetím od levého okraje</value>
+  </data>
+  <data name="WebClient.Settings.HideSettingsButton.Label" xml:space="preserve">
+    <value>Skrýt tlačítko nastavení</value>
+  </data>
+  <data name="WebClient.Settings.HideSettingsButton.SaveFailed" xml:space="preserve">
+    <value>Tlačítko nastavení se nepodařilo změnit</value>
+  </data>
   <data name="WebClient.Settings.Licenses.Button" xml:space="preserve">
     <value>Licence open source</value>
   </data>
@@ -16630,6 +16651,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="WebClient.Settings.OpenSettings" xml:space="preserve">
     <value>Otevřít nastavení Macro Deck</value>
+  </data>
+  <data name="WebClient.Settings.Sidebar" xml:space="preserve">
+    <value>Postranní panel</value>
   </data>
   <data name="WebClient.Setup.Body" xml:space="preserve">
     <value>Dokončete prvotní nastavení v desktopové aplikaci Macro Deck a poté tuto stránku znovu načtěte.</value>

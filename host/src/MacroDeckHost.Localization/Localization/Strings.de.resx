@@ -13769,6 +13769,18 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.Devices.ScreenSaver.Unavailable" xml:space="preserve">
     <value>Nicht verfügbar</value>
   </data>
+  <data name="Settings.Devices.SettingsButton.HiddenLine" xml:space="preserve">
+    <value>Einstellungs-Schaltfläche ausgeblendet: vom linken Rand hineinwischen</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.HideAction" xml:space="preserve">
+    <value>Einstellungs-Schaltfläche ausblenden</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.SaveFailed" xml:space="preserve">
+    <value>Die Einstellungs-Schaltfläche konnte nicht geändert werden</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.ShowAction" xml:space="preserve">
+    <value>Einstellungs-Schaltfläche einblenden</value>
+  </data>
   <data name="Settings.Devices.SignedOutMarker" xml:space="preserve">
     <value>Abgemeldet</value>
   </data>
@@ -16617,6 +16629,15 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="WebClient.Settings.DisplaySection" xml:space="preserve">
     <value>Darstellung</value>
   </data>
+  <data name="WebClient.Settings.HideSettingsButton.Description" xml:space="preserve">
+    <value>Öffne die Einstellungen mit einem Wisch vom linken Rand</value>
+  </data>
+  <data name="WebClient.Settings.HideSettingsButton.Label" xml:space="preserve">
+    <value>Einstellungs-Schaltfläche ausblenden</value>
+  </data>
+  <data name="WebClient.Settings.HideSettingsButton.SaveFailed" xml:space="preserve">
+    <value>Die Einstellungs-Schaltfläche konnte nicht geändert werden</value>
+  </data>
   <data name="WebClient.Settings.Licenses.Button" xml:space="preserve">
     <value>Open-Source-Lizenzen</value>
   </data>
@@ -16628,6 +16649,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="WebClient.Settings.OpenSettings" xml:space="preserve">
     <value>Macro-Deck-Einstellungen öffnen</value>
+  </data>
+  <data name="WebClient.Settings.Sidebar" xml:space="preserve">
+    <value>Seitenleiste</value>
   </data>
   <data name="WebClient.Setup.Body" xml:space="preserve">
     <value>Schließe die Ersteinrichtung in der Macro-Deck-Desktop-App ab und lade diese Seite anschließend neu.</value>

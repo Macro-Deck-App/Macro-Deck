@@ -326,6 +326,12 @@ export const ClientAppStrings = {
 		Settings: {
 			DisplaySection: 'macrodeck.app:WebClient.Settings.DisplaySection',
 			OpenSettings: 'macrodeck.app:WebClient.Settings.OpenSettings',
+			Sidebar: 'macrodeck.app:WebClient.Settings.Sidebar',
+			HideSettingsButton: {
+				Description: 'macrodeck.app:WebClient.Settings.HideSettingsButton.Description',
+				Label: 'macrodeck.app:WebClient.Settings.HideSettingsButton.Label',
+				SaveFailed: 'macrodeck.app:WebClient.Settings.HideSettingsButton.SaveFailed',
+			},
 			Licenses: {
 				Button: 'macrodeck.app:WebClient.Settings.Licenses.Button',
 				LoadFailed: 'macrodeck.app:WebClient.Settings.Licenses.LoadFailed',
@@ -629,10 +635,14 @@ export const ClientAppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:WebClient.Rendering.Simple': 'Simple',
 	'macrodeck.app:WebClient.Rendering.Standard': 'Standard',
 	'macrodeck.app:WebClient.Settings.DisplaySection': 'Display',
+	'macrodeck.app:WebClient.Settings.HideSettingsButton.Description': 'Open the settings with a swipe in from the left edge',
+	'macrodeck.app:WebClient.Settings.HideSettingsButton.Label': 'Hide settings button',
+	'macrodeck.app:WebClient.Settings.HideSettingsButton.SaveFailed': 'Could not change the settings button',
 	'macrodeck.app:WebClient.Settings.Licenses.Button': 'Open source licenses',
 	'macrodeck.app:WebClient.Settings.Licenses.LoadFailed': 'Could not load the open source licenses.',
 	'macrodeck.app:WebClient.Settings.Licenses.Title': 'Open source licenses',
 	'macrodeck.app:WebClient.Settings.OpenSettings': 'Open Macro Deck settings',
+	'macrodeck.app:WebClient.Settings.Sidebar': 'Side panel',
 	'macrodeck.app:WebClient.Setup.Body': 'Finish the first-time setup in the Macro Deck desktop app, then reload this page.',
 	'macrodeck.app:WebClient.Update.ApplyFailed': 'The update could not be installed. Reload this page to try again.',
 	'macrodeck.app:WebClient.Update.Applying': 'Installing the update…',

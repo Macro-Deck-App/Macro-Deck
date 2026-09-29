@@ -51,6 +51,9 @@
               @if (canHaveScreenSaver(device)) {
                 <span class="devices-startup-line devices-screensaver-line">{{ screenSaverLabel(device) }}</span>
               }
+              @if (canHideSettingsButton(device) && device.settingsButtonHidden) {
+                <span class="devices-startup-line devices-settings-button-line">{{ 'macrodeck.app:Settings.Devices.SettingsButton.HiddenLine' | translate }}</span>
+              }
             </div>
 
             <span
@@ -85,6 +88,12 @@
                       <button type="button" class="devices-menu-item devices-menu-screensaver" (click)="openScreenSaverSettings(device)">
                         <span class="icon icon-device-desktop icon-sm"></span>
                         <span>{{ 'macrodeck.app:Settings.Devices.ScreenSaver.MenuAction' | translate }}</span>
+                      </button>
+                    }
+                    @if (canHideSettingsButton(device)) {
+                      <button type="button" class="devices-menu-item devices-menu-settings-button" (click)="toggleSettingsButton(device)">
+                        <span class="icon icon-settings icon-sm"></span>
+                        <span>{{ (device.settingsButtonHidden ? 'macrodeck.app:Settings.Devices.SettingsButton.ShowAction' : 'macrodeck.app:Settings.Devices.SettingsButton.HideAction') | translate }}</span>
                       </button>
                     }
                     <button

@@ -234,6 +234,8 @@ internal sealed class VideoStreamUiDispatchTests : UiSessionFixture
 			getFolderViews: null!,
 			getScreenSavers: null!,
 			getDeviceScreenSaver: null!,
+			getDeviceClientSettings: null!,
+			setDeviceClientSettings: null!,
 			screenSaverUiSessions: null!,
 			modalUiSessions: null!,
 			lifetime: null!,

@@ -12,6 +12,8 @@ public record OpenProfileOnDeviceBody(string ProfileId);
 
 public record SetDeviceScreenSaverBody(bool Enabled, int IdleSeconds, string? ScreenSaverId, string? Configuration);
 
+public record SetDeviceSettingsButtonBody(bool Hidden);
+
 [ApiController]
 [Route("api/devices")]
 public class DevicesController : ControllerBase
@@ -33,6 +35,9 @@ public class DevicesController : ControllerBase
 	private readonly IUiTransportMessageHandler<ShowDeviceScreenSaverRequest, ShowDeviceScreenSaverResponse>
 		_showScreenSaver;
 
+	private readonly IUiTransportMessageHandler<SetDeviceSettingsButtonRequest, SetDeviceSettingsButtonResponse>
+		_setSettingsButton;
+
 	public DevicesController(
 		IUiTransportMessageHandler<GetDevicesRequest, GetDevicesResponse> getDevices,
 		IUiTransportMessageHandler<RenameDeviceRequest, RenameDeviceResponse> renameDevice,
@@ -41,7 +46,8 @@ public class DevicesController : ControllerBase
 		IUiTransportMessageHandler<SetDeviceStartupProfileRequest, SetDeviceStartupProfileResponse> setStartupProfile,
 		IUiTransportMessageHandler<OpenProfileOnDeviceRequest, OpenProfileOnDeviceResponse> openProfileOnDevice,
 		IUiTransportMessageHandler<SetDeviceScreenSaverRequest, SetDeviceScreenSaverResponse> setScreenSaver,
-		IUiTransportMessageHandler<ShowDeviceScreenSaverRequest, ShowDeviceScreenSaverResponse> showScreenSaver)
+		IUiTransportMessageHandler<ShowDeviceScreenSaverRequest, ShowDeviceScreenSaverResponse> showScreenSaver,
+		IUiTransportMessageHandler<SetDeviceSettingsButtonRequest, SetDeviceSettingsButtonResponse> setSettingsButton)
 	{
 		_getDevices = getDevices;
 		_renameDevice = renameDevice;
@@ -51,6 +57,7 @@ public class DevicesController : ControllerBase
 		_openProfileOnDevice = openProfileOnDevice;
 		_setScreenSaver = setScreenSaver;
 		_showScreenSaver = showScreenSaver;
+		_setSettingsButton = setSettingsButton;
 	}
 
 	[HttpGet]
@@ -87,6 +94,14 @@ public class DevicesController : ControllerBase
 	[HttpPost("{id:guid}/screensaver/show")]
 	public Task<ShowDeviceScreenSaverResponse> ShowScreenSaver(Guid id, CancellationToken ct)
 		=> _showScreenSaver.Handle(new ShowDeviceScreenSaverRequest { Id = id }, ct).AsTask();
+
+	[HttpPatch("{id:guid}/settings-button")]
+	public Task<SetDeviceSettingsButtonResponse> SetSettingsButton(
+		Guid id,
+		SetDeviceSettingsButtonBody body,
+		CancellationToken ct)
+		=> _setSettingsButton.Handle(new SetDeviceSettingsButtonRequest { Id = id, Hidden = body.Hidden }, ct)
+			.AsTask();
 
 	[HttpPost("{id:guid}/open-profile")]
 	public Task<OpenProfileOnDeviceResponse> OpenProfileOnDevice(

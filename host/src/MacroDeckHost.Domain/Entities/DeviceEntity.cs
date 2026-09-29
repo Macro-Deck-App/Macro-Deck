@@ -43,6 +43,8 @@ public class DeviceEntity : BaseEntity
 
 	public string? ScreenSaverConfiguration { get; set; }
 
+	public bool SettingsButtonHidden { get; set; }
+
 	/// <summary>The integration or plugin id that registered this device; null for a client device.</summary>
 	public string? ProviderId { get; set; }
 

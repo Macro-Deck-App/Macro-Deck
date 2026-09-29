@@ -210,6 +210,8 @@ internal sealed class CompanionStateAndActionsTests
 			getFolderViews: null!,
 			getScreenSavers: null!,
 			getDeviceScreenSaver: null!,
+			getDeviceClientSettings: null!,
+			setDeviceClientSettings: null!,
 			screenSaverUiSessions: null!,
 			getWeatherState: null!,
 			getVariableCatalogProviders: null!,

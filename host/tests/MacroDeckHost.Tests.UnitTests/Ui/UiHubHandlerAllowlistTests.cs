@@ -1,5 +1,6 @@
 using System.Reflection;
 using MacroDeckHost.Application.Ui.Transport;
+using MacroDeckHost.Application.Ui.Transport.Messages.Devices;
 using MacroDeckHost.Application.Ui.Transport.Messages.FolderViews;
 using MacroDeckHost.Application.Ui.Transport.Messages.ScreenSavers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Folders;
@@ -39,6 +40,10 @@ public class UiHubHandlerAllowlistTests
 		// Same for IScreenSaverRegistry's catalog, and a device's own stored settings.
 		typeof(GetScreenSaversRequest),
 		typeof(GetDeviceScreenSaverRequest),
+		typeof(GetDeviceClientSettingsRequest),
+
+		// A device writes one column of its own row, the id taken from its claim, never from the payload.
+		typeof(SetDeviceClientSettingsRequest),
 
 		// Reads the first-party preview scan and the per-connection plugin capability snapshots, both
 		// host-local. No provider is consulted and no scenario is built - a plugin's previews arrived with

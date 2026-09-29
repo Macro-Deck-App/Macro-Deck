@@ -13771,6 +13771,18 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Settings.Devices.ScreenSaver.Unavailable" xml:space="preserve">
     <value>Indisponible</value>
   </data>
+  <data name="Settings.Devices.SettingsButton.HiddenLine" xml:space="preserve">
+    <value>Bouton des paramètres masqué : balaie depuis le bord gauche</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.HideAction" xml:space="preserve">
+    <value>Masquer le bouton des paramètres</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.SaveFailed" xml:space="preserve">
+    <value>Impossible de modifier le bouton des paramètres</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.ShowAction" xml:space="preserve">
+    <value>Afficher le bouton des paramètres</value>
+  </data>
   <data name="Settings.Devices.SignedOutMarker" xml:space="preserve">
     <value>Déconnecté</value>
   </data>
@@ -16619,6 +16631,15 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="WebClient.Settings.DisplaySection" xml:space="preserve">
     <value>Affichage</value>
   </data>
+  <data name="WebClient.Settings.HideSettingsButton.Description" xml:space="preserve">
+    <value>Ouvre les paramètres en balayant depuis le bord gauche</value>
+  </data>
+  <data name="WebClient.Settings.HideSettingsButton.Label" xml:space="preserve">
+    <value>Masquer le bouton des paramètres</value>
+  </data>
+  <data name="WebClient.Settings.HideSettingsButton.SaveFailed" xml:space="preserve">
+    <value>Impossible de modifier le bouton des paramètres</value>
+  </data>
   <data name="WebClient.Settings.Licenses.Button" xml:space="preserve">
     <value>Licences open source</value>
   </data>
@@ -16630,6 +16651,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="WebClient.Settings.OpenSettings" xml:space="preserve">
     <value>Ouvrir les paramètres de Macro Deck</value>
+  </data>
+  <data name="WebClient.Settings.Sidebar" xml:space="preserve">
+    <value>Panneau latéral</value>
   </data>
   <data name="WebClient.Setup.Body" xml:space="preserve">
     <value>Termine la configuration initiale dans l'application de bureau Macro Deck, puis recharge cette page.</value>

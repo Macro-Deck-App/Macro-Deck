@@ -20,6 +20,8 @@ public interface IDeviceRepository
 
 	Task Delete(Guid id);
 
+	Task<bool> SetSettingsButtonHidden(Guid id, bool hidden);
+
 	Task TouchLastSeen(IReadOnlyCollection<Guid> ids, DateTime seenAt);
 
 	Task<IReadOnlyList<DeviceEntity>> GetStale(DateTime lastSeenBefore);
