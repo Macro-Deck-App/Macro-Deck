@@ -3116,6 +3116,7 @@ export const AppStrings = {
 			Params: {
 				Configuration: 'macrodeck.app:Integrations.Obs.Params.Configuration',
 				Filter: 'macrodeck.app:Integrations.Obs.Params.Filter',
+				GroupOption: 'macrodeck.app:Integrations.Obs.Params.GroupOption',
 				Input: 'macrodeck.app:Integrations.Obs.Params.Input',
 				Mode: 'macrodeck.app:Integrations.Obs.Params.Mode',
 				ModeToggle: 'macrodeck.app:Integrations.Obs.Params.ModeToggle',
@@ -10001,6 +10002,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Integrations.Obs.Events.VirtualCameraCategory': 'Virtual camera',
 	'macrodeck.app:Integrations.Obs.Params.Configuration': 'Configuration',
 	'macrodeck.app:Integrations.Obs.Params.Filter': 'Filter',
+	'macrodeck.app:Integrations.Obs.Params.GroupOption': '{name} (group)',
 	'macrodeck.app:Integrations.Obs.Params.Input': 'Input',
 	'macrodeck.app:Integrations.Obs.Params.Mode': 'Mode',
 	'macrodeck.app:Integrations.Obs.Params.ModeToggle': 'Toggle',

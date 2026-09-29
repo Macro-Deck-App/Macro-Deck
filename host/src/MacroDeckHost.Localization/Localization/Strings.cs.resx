@@ -7446,6 +7446,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Obs.Params.Filter" xml:space="preserve">
     <value>Filtr</value>
   </data>
+  <data name="Integrations.Obs.Params.GroupOption" xml:space="preserve">
+    <value>{name} (skupina)</value>
+  </data>
   <data name="Integrations.Obs.Params.Input" xml:space="preserve">
     <value>Vstup</value>
   </data>

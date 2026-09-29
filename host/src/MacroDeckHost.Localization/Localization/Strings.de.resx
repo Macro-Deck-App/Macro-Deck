@@ -7444,6 +7444,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Obs.Params.Filter" xml:space="preserve">
     <value>Filter</value>
   </data>
+  <data name="Integrations.Obs.Params.GroupOption" xml:space="preserve">
+    <value>{name} (Gruppe)</value>
+  </data>
   <data name="Integrations.Obs.Params.Input" xml:space="preserve">
     <value>Eingang</value>
   </data>
