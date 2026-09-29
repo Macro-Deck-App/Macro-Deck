@@ -17,6 +17,7 @@ export interface MusicPlayerStatePayload {
   repeatMode: string;
   deviceName?: string;
   deviceType?: string;
+  badge?: string;
 }
 
 export interface MusicPlayerInstanceDto {

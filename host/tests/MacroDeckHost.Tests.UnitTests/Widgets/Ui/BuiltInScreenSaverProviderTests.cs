@@ -5,6 +5,7 @@ using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Runtime;
 using MacroDeckHost.Widgets.MusicPlayer;
+using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Resources;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Testing;
@@ -13,6 +14,7 @@ using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.ScreenSavers;
 using MacroDeckHost.Application.Ui.Resources;
+using MacroDeckHost.Application.Ui.Transport.Messages.MusicPlayer;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Widgets.ScreenSavers;
 
@@ -105,6 +107,46 @@ internal sealed class BuiltInScreenSaverProviderTests
 	}
 
 	[Test]
+	public async Task Now_playing_leaves_out_the_players_source_and_badge()
+	{
+		var cache = new StubStateCache();
+		cache.Record(MusicPlayerTestHarness.InstanceId,
+			new MusicPlayerStatePayload
+			{
+				InstanceId = MusicPlayerTestHarness.InstanceId,
+				IsConnected = true,
+				IsPlaying = true,
+				PlaybackState = "playing",
+				TrackName = "Windowlicker",
+				ArtistName = "Aphex Twin",
+				DeviceName = "Kitchen",
+				Badge = "2/3",
+			});
+		var provider = new BuiltInScreenSaverProvider(new StubRegistry(),
+			cache,
+			new StubArtworkService(),
+			new StubPaletteExtractor(),
+			new MusicPlayerStateNotifier(),
+			new RecordingRenderSignals(),
+			new FakeIntegrationRegistry(),
+			new NullResourceStore(),
+			TimeProvider.System,
+			Serilog.Core.Logger.None);
+
+		await using var session = await provider.CreateSessionAsync(
+			ScreenSaverRequest(BuiltInScreenSavers.NowPlaying, "{}"),
+			CancellationToken.None);
+		var ids = Ids(session!.BuildTree().Root).ToList();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ids, Has.Some.EndsWith(".title"));
+			Assert.That(ids, Has.None.EndsWith(".source"));
+			Assert.That(ids, Has.None.EndsWith(".badgeText"));
+		});
+	}
+
+	[Test]
 	public async Task The_clock_configuration_offers_the_three_options()
 	{
 		var surface = new UiSurface
@@ -131,6 +173,24 @@ internal sealed class BuiltInScreenSaverProviderTests
 			Assert.That(host.FindById("showSeconds"), Is.Not.Null);
 			Assert.That(host.FindById("showDate")?.Flag(UiConfigProperties.Value), Is.False);
 		});
+	}
+
+	private static IEnumerable<string> Ids(UiNode node)
+	{
+		yield return node.Id;
+
+		foreach (var id in node.Children.SelectMany(Ids))
+		{
+			yield return id;
+		}
+
+		if (node.Fallback is not null)
+		{
+			foreach (var id in Ids(node.Fallback))
+			{
+				yield return id;
+			}
+		}
 	}
 
 	private static UiSessionRequest ScreenSaverRequest(string screenSaverId, string configuration)

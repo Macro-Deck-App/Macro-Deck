@@ -38,6 +38,8 @@ public class MusicPlayerStatePayload
 
 	public string? DeviceType { get; set; }
 
+	public string? Badge { get; set; }
+
 	public static MusicPlayerStatePayload From(MusicPlayerState state, string? instanceId = null)
 		=> new()
 		{
@@ -57,7 +59,8 @@ public class MusicPlayerStatePayload
 			ShuffleEnabled = state.ShuffleEnabled,
 			RepeatMode = state.RepeatMode.ToString().ToLowerInvariant(),
 			DeviceName = state.DeviceName,
-			DeviceType = state.DeviceType
+			DeviceType = state.DeviceType,
+			Badge = state.Badge
 		};
 
 	public static MusicPlayerStatePayload Disconnected(string? instanceId = null)

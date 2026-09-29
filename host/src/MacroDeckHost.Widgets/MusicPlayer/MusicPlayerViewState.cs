@@ -69,6 +69,10 @@ internal sealed record MusicPlayerViewState
 	/// <summary>Whatever the provider said about why it is unreachable.</summary>
 	public string? StatusMessage { get; init; }
 
+	public string? SourceName { get; init; }
+
+	public string? Badge { get; init; }
+
 	/// <summary>Where playback had reached and how fast it is moving, for the reader to carry forward.
 	/// Absent when there is nothing to advance.</summary>
 	public UiProgressReference? Position { get; init; }

@@ -138,6 +138,33 @@ had gone.
 `ArtworkId` is an opaque key that the host passes back to `GetArtworkAsync`, never a URL. The UI only
 ever asks the host for artwork.
 
+### Source and badge
+
+The widget's header shows where playback is happening on a second line under the player's name, and a
+short badge of yours at the right, beside the playback icon:
+
+```csharp
+return new MusicPlayerState
+{
+	IsConnected = true,
+	PlaybackState = PlaybackState.Playing,
+	TrackName = track.Title,
+	Artists = [track.Artist],
+	DeviceName = session.AppName,               // "Firefox"
+	Badge = $"{index + 1}/{sessions.Count}"     // "2/3"
+};
+```
+
+- Both show only while `IsConnected` is true. A disconnected or unavailable state shows neither.
+- `DeviceName` is left out when the player's name in the header already contains it as a whole word,
+  so an instance named "SinusBot (Kitchen)" with the device "Kitchen" does not say it twice. A name that
+  comes from `ProviderName` as a localized string is never compared.
+- Keep `Badge` to a few characters. The widget reserves room for about 8, then shrinks and cuts off longer
+  text. `null` or blank shows nothing.
+- Users can hide both with the widget's **Source** option. The now-playing screen saver never shows them.
+- A host older than `Badge` ignores it, so setting it is safe on every host. Don't put the badge into
+  `Artists` or `TrackName` as a fallback: it would be read as part of the metadata by variables and triggers.
+
 ### Showing the cover in your own UI
 
 The deck's music player widget fetches artwork from the host on its own. When your plugin also draws the
@@ -179,7 +206,8 @@ UiResource? cover = await player.GetArtworkAsUiResourceAsync(
 | `Position`, `Duration` | Playback position and track length. `null` when unknown. |
 | `VolumePercent` | 0-100, or `null` when the player does not report it. |
 | `ShuffleEnabled`, `RepeatMode` | `RepeatMode` is `Off`, `Track` or `Context` (album, playlist or queue). |
-| `DeviceName`, `DeviceType` | Where playback is happening. |
+| `DeviceName`, `DeviceType` | Where playback is happening. The widget shows `DeviceName` as the source. |
+| `Badge` | Short text beside the playback badge, such as `2/3`. See [Source and badge](#source-and-badge). |
 
 ## Actions
 

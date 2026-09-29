@@ -161,7 +161,7 @@ public class MusicPlayerCapabilityHandlerTests
 		var player = new TestMusicPlayer
 		{
 			StateToReturn = new MusicPlayerState
-				{ IsConnected = true, PlaybackState = PlaybackState.Playing, TrackName = "Song" }
+				{ IsConnected = true, PlaybackState = PlaybackState.Playing, TrackName = "Song", Badge = "2/3" }
 		};
 		var integration
 			= new TestMusicPlayerIntegration("Spotify", new Dictionary<string, IMusicPlayer> { ["a1"] = player });
@@ -177,6 +177,7 @@ public class MusicPlayerCapabilityHandlerTests
 		{
 			Assert.That(dto!.TrackName, Is.EqualTo("Song"));
 			Assert.That(dto.PlaybackState, Is.EqualTo("Playing"));
+			Assert.That(dto.Badge, Is.EqualTo("2/3"));
 		});
 	}
 

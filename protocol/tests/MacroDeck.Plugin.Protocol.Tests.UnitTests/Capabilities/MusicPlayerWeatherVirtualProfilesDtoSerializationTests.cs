@@ -61,7 +61,8 @@ public class MusicPlayerWeatherVirtualProfilesDtoSerializationTests
 			ShuffleEnabled = true,
 			RepeatMode = "Context",
 			DeviceName = "Living Room",
-			DeviceType = "Speaker"
+			DeviceType = "Speaker",
+			Badge = "2/3"
 		};
 
 		var json = JsonSerializer.Serialize(dto, PluginProtocolJson.Options);
@@ -75,6 +76,21 @@ public class MusicPlayerWeatherVirtualProfilesDtoSerializationTests
 			Assert.That(actual.RepeatMode, Is.EqualTo("Context"));
 			Assert.That(actual.Artists, Is.EqualTo(_singleArtist));
 			Assert.That(actual.VolumePercent, Is.EqualTo(80));
+			Assert.That(actual.Badge, Is.EqualTo("2/3"));
+		});
+	}
+
+	[Test]
+	public void Music_player_state_from_a_plugin_that_predates_the_badge_reads_as_no_badge()
+	{
+		const string json = """{"isConnected":true,"playbackState":"Playing","repeatMode":"Off","deviceName":"Firefox"}""";
+
+		var actual = JsonSerializer.Deserialize<MusicPlayerStateDto>(json, PluginProtocolJson.Options);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(actual!.DeviceName, Is.EqualTo("Firefox"));
+			Assert.That(actual.Badge, Is.Null);
 		});
 	}
 

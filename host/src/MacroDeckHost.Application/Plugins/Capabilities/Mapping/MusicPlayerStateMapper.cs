@@ -33,7 +33,8 @@ public static class MusicPlayerStateMapper
 			ShuffleEnabled = dto.ShuffleEnabled,
 			RepeatMode = repeatMode,
 			DeviceName = dto.DeviceName,
-			DeviceType = dto.DeviceType
+			DeviceType = dto.DeviceType,
+			Badge = dto.Badge
 		};
 	}
 }
