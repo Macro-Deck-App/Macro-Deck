@@ -1413,7 +1413,8 @@ describe('widget node renderer', () => {
           expect(shown(jump())).toBeFalse();
           expect(element.scrollTop).withContext('the view still stays put').toBe(20);
         } finally {
-          scope.CSS = previous;
+          if (previous === undefined) delete scope.CSS;
+          else scope.CSS = previous;
         }
       });
 
