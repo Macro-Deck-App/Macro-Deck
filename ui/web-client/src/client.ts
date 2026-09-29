@@ -75,6 +75,13 @@ const DEVICE_ID_KEY = 'md.device.web-client.id';
 const DEVICE_SECRET_KEY = 'md.device.web-client.secret';
 const DEVICE_CLIENT_TYPE = 'web-client';
 
+const TREE_GESTURE_TYPES: readonly string[] = [
+  WidgetType.ActionButton,
+  WidgetType.Slider,
+  WidgetType.Countdown,
+  WidgetType.Stopwatch,
+];
+
 export interface SignInResult {
   ok: boolean;
   message?: string;
@@ -617,9 +624,9 @@ export class Client {
     const widget = this.deck.widget(widgetId);
     if (!widget) return;
 
-    // The two types whose tree claims the press fire through the widget-tree event pipeline instead,
+    // The types whose tree claims the press fire through the widget-tree event pipeline instead,
     // and would run their flows twice if they also came through here.
-    if (widget.type === WidgetType.ActionButton || widget.type === WidgetType.Slider) return;
+    if (TREE_GESTURE_TYPES.includes(widget.type)) return;
 
     const flows = (widget.data as { flows?: ActionFlow[] }).flows;
     if (Array.isArray(flows)) {

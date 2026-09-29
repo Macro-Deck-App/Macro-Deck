@@ -78,6 +78,27 @@ internal sealed class DeviceSurfaceProjectionTests
 	}
 
 	[Test]
+	public async Task A_countdown_and_a_stopwatch_accept_presses_without_any_flow_of_their_own()
+	{
+		var countdown = DeviceSurfaceFixture.Button("countdown", 0, 0, withFlows: false);
+		countdown.Type = WidgetTypeIds.Countdown;
+		var stopwatch = DeviceSurfaceFixture.Button("stopwatch", 1, 0, withFlows: false);
+		stopwatch.Type = WidgetTypeIds.Stopwatch;
+		_fixture.Home.Widgets.AddRange([countdown, stopwatch]);
+
+		var deviceId = await _fixture.OpenDeviceAsync();
+
+		var widgets = _fixture.Provider.Latest(deviceId).Widgets;
+		Assert.Multiple(() =>
+		{
+			Assert.That(widgets[0].SupportedInteractions,
+				Does.Contain(DeviceInteractionKind.ShortPress).And.Contains(DeviceInteractionKind.LongPress));
+			Assert.That(widgets[1].SupportedInteractions,
+				Does.Contain(DeviceInteractionKind.ShortPress).And.Contains(DeviceInteractionKind.LongPress));
+		});
+	}
+
+	[Test]
 	public async Task A_folder_with_no_grid_of_its_own_inherits_its_parents_rather_than_the_profile_default()
 	{
 		var deviceId = await _fixture.OpenDeviceAsync();

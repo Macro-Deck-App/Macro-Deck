@@ -411,6 +411,12 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>Proměnné tohoto widgetu</value>
   </data>
+  <data name="ActionBuilder.Trigger.CountdownDismissed" xml:space="preserve">
+    <value>Potvrzeno</value>
+  </data>
+  <data name="ActionBuilder.Trigger.CountdownFinished" xml:space="preserve">
+    <value>Čas vypršel</value>
+  </data>
   <data name="ActionBuilder.Trigger.DoublePress" xml:space="preserve">
     <value>Dvojité klepnutí</value>
   </data>
@@ -422,6 +428,15 @@
   </data>
   <data name="ActionBuilder.Trigger.ShortPress" xml:space="preserve">
     <value>Krátké stisknutí</value>
+  </data>
+  <data name="ActionBuilder.Trigger.TimerPaused" xml:space="preserve">
+    <value>Pozastaveno</value>
+  </data>
+  <data name="ActionBuilder.Trigger.TimerReset" xml:space="preserve">
+    <value>Vynulováno</value>
+  </data>
+  <data name="ActionBuilder.Trigger.TimerStarted" xml:space="preserve">
+    <value>Spuštěno</value>
   </data>
   <data name="ActionBuilder.Trigger.TouchEnd" xml:space="preserve">
     <value>Uvolnění dotyku</value>
@@ -16664,6 +16679,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="WebClient.Widgets.Clock.Name" xml:space="preserve">
     <value>Hodiny</value>
   </data>
+  <data name="WebClient.Widgets.Countdown.Description" xml:space="preserve">
+    <value>Časovač odpočítávající od nastaveného času, který upozorní na jeho uplynutí</value>
+  </data>
+  <data name="WebClient.Widgets.Countdown.Name" xml:space="preserve">
+    <value>Odpočet</value>
+  </data>
   <data name="WebClient.Widgets.HistoryGraph.Description" xml:space="preserve">
     <value>Karta s živým grafem pro číselnou proměnnou (CPU, RAM, GPU…) s posuvným grafem</value>
   </data>
@@ -16684,6 +16705,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="WebClient.Widgets.Slider.Name" xml:space="preserve">
     <value>Posuvník</value>
+  </data>
+  <data name="WebClient.Widgets.Stopwatch.Description" xml:space="preserve">
+    <value>Stopky, které se spouštějí, pozastavují a nulují stisknutím</value>
+  </data>
+  <data name="WebClient.Widgets.Stopwatch.Name" xml:space="preserve">
+    <value>Stopky</value>
   </data>
   <data name="WebClient.Widgets.Weather.Description" xml:space="preserve">
     <value>Aktuální počasí a několikadenní předpověď pro dané místo</value>
@@ -17051,6 +17078,55 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Widgets.ContextMenu.UnpinWidgets" xml:space="preserve">
     <value>Odepnout widgety</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.AlreadyRunning" xml:space="preserve">
+    <value>Tento odpočet již běží.</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.Hours" xml:space="preserve">
+    <value>Hodiny</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.Minutes" xml:space="preserve">
+    <value>Minuty</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.PresetHours.One" xml:space="preserve">
+    <value>{count} hod.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Countdown.Dialog.PresetHours.Other" xml:space="preserve">
+    <value>{count} hod.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Countdown.Dialog.PresetMinutes.One" xml:space="preserve">
+    <value>{count} min</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Countdown.Dialog.PresetMinutes.Other" xml:space="preserve">
+    <value>{count} min</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Countdown.Dialog.Start" xml:space="preserve">
+    <value>Spustit</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.Title" xml:space="preserve">
+    <value>Nastavení odpočtu</value>
+  </data>
+  <data name="Widgets.Countdown.Mode" xml:space="preserve">
+    <value>Při spuštění</value>
+  </data>
+  <data name="Widgets.Countdown.ModeAsk" xml:space="preserve">
+    <value>Dotaz na dobu</value>
+  </data>
+  <data name="Widgets.Countdown.ModeFixed" xml:space="preserve">
+    <value>Nastavená doba</value>
+  </data>
+  <data name="Widgets.Countdown.ModeHint" xml:space="preserve">
+    <value>Dotaz otevře dialog na zařízení, na kterém byl odpočet stisknut. Hardwarový deck použije naposledy zadanou dobu.</value>
+  </data>
+  <data name="Widgets.Countdown.TapToDismiss" xml:space="preserve">
+    <value>Klepnutím potvrdit</value>
+  </data>
+  <data name="Widgets.Countdown.TapToSet" xml:space="preserve">
+    <value>Klepnutím nastavit</value>
   </data>
   <data name="Widgets.CursorPositionTooltip" xml:space="preserve">
     <value>Pozice myši na obrazovce</value>
@@ -17886,6 +17962,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Widgets.Slider.Vertical" xml:space="preserve">
     <value>Svisle</value>
+  </data>
+  <data name="Widgets.Timer.LabelPlaceholderExample" xml:space="preserve">
+    <value>Pizza</value>
   </data>
   <data name="Widgets.TypeSelector.Heading" xml:space="preserve">
     <value>Vybrat typ widgetu</value>

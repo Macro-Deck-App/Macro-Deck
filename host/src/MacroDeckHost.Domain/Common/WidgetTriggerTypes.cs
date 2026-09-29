@@ -15,4 +15,20 @@ public static class WidgetTriggerTypes
 	public const string StateChange = "onStateChange";
 
 	public const string Event = "onEvent";
+
+	public const string CountdownStarted = "onCountdownStarted";
+
+	public const string CountdownPaused = "onCountdownPaused";
+
+	public const string CountdownReset = "onCountdownReset";
+
+	public const string CountdownFinished = "onCountdownFinished";
+
+	public const string CountdownDismissed = "onCountdownDismissed";
+
+	public const string StopwatchStarted = "onStopwatchStarted";
+
+	public const string StopwatchPaused = "onStopwatchPaused";
+
+	public const string StopwatchReset = "onStopwatchReset";
 }

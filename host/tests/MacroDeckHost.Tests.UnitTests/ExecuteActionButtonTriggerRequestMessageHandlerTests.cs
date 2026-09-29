@@ -209,21 +209,31 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 		FakeFolderCache folders,
 		FakeActionExecutionCoordinator coordinator,
 		IActionButtonStateService stateService)
-		=> new(folders,
+	{
+		var triggers = CreateTriggerService(coordinator, stateService);
+
+		return new(folders,
 			_profiles,
 			_lockState,
-			CreateTriggerService(coordinator, stateService),
-			new WidgetTypeRegistry(new RecordingMediator()));
+			triggers,
+			new WidgetTypeRegistry(new RecordingMediator()),
+			TestTimerCoordinators.Unused(folders, triggers));
+	}
 
 	private static ExecuteActionButtonTriggerRequestMessageHandler CreateStandaloneHandler(
 		FakeFolderCache folders,
 		FakeActionExecutionCoordinator coordinator,
 		IActionButtonStateService stateService)
-		=> new(folders,
+	{
+		var triggers = CreateTriggerService(coordinator, stateService);
+
+		return new(folders,
 			new FakeProfileRegistry(),
 			new FakeHostLockState(),
-			CreateTriggerService(coordinator, stateService),
-			new WidgetTypeRegistry(new RecordingMediator()));
+			triggers,
+			new WidgetTypeRegistry(new RecordingMediator()),
+			TestTimerCoordinators.Unused(folders, triggers));
+	}
 
 	// WidgetTriggerService resolves its scoped IActionButtonStateService through a scope it opens itself
 	// (see the type's own doc comment) - built against a tiny real ServiceProvider here rather than a
@@ -310,11 +320,14 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 		widget.Data = ProviderWidgetData;
 		_folders = new FakeFolderCache(widget);
 
+		var triggers = CreateTriggerService(_coordinator, new NoOpActionButtonStateService());
+
 		return new ExecuteActionButtonTriggerRequestMessageHandler(_folders,
 			_profiles,
 			_lockState,
-			CreateTriggerService(_coordinator, new NoOpActionButtonStateService()),
-			registry);
+			triggers,
+			registry,
+			TestTimerCoordinators.Unused(_folders, triggers));
 	}
 
 	private static WidgetEntity ActionButtonWidget(string type = WidgetTypeIds.ActionButton)

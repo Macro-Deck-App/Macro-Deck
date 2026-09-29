@@ -10,6 +10,8 @@ const WIRE_TYPE_NAMES: Record<WidgetType, string> = {
   [WidgetType.Weather]: 'Weather',
   [WidgetType.HistoryGraph]: 'HistoryGraph',
   [WidgetType.Clock]: 'Clock',
+  [WidgetType.Countdown]: 'Countdown',
+  [WidgetType.Stopwatch]: 'Stopwatch',
 };
 
 @Injectable({ providedIn: 'root' })

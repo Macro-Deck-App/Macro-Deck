@@ -71,6 +71,10 @@
                        LogicalName="widget-data-history-graph-v1.schema.json" />
     <EmbeddedResource Include="Widgets\Schemas\widget-data-clock-v1.schema.json"
                        LogicalName="widget-data-clock-v1.schema.json" />
+    <EmbeddedResource Include="Widgets\Schemas\widget-data-countdown-v1.schema.json"
+                       LogicalName="widget-data-countdown-v1.schema.json" />
+    <EmbeddedResource Include="Widgets\Schemas\widget-data-stopwatch-v1.schema.json"
+                       LogicalName="widget-data-stopwatch-v1.schema.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MacroDeckHost.Domain\MacroDeckHost.Domain.csproj" />
