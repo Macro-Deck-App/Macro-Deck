@@ -150,6 +150,7 @@ export class ModalHost {
       fontFamily: faceId => base.fontFamily(faceId),
       fontReady: faceId => base.fontReady(faceId),
       uiFontKey: () => base.uiFontKey?.() ?? '',
+      videoStreams: () => base.videoStreams?.()?.client.surface('modal') ?? null,
       emit: (node: UiNode, name: string, data?: unknown) => this.onTreeEvent(node, name, data),
     };
   }

@@ -4,7 +4,9 @@ import {
   randomToken,
   Strings,
   UiFont,
+  uiConnectionVideoStreamPort,
   uiResourceUrl,
+  VideoStreamClient,
   type GetSystemFontsResponse,
   type OutdatedUiText,
   type OutdatedUiVariant,
@@ -87,6 +89,7 @@ export function start(root: HTMLElement, target: WebClientTarget = ACTIVE_TARGET
   const rendering = new RenderingModeStore();
   const wakeLock = new WakeLock(CLIENT_TYPE, target.capabilities.wakeLock ? undefined : null);
   const pwa = setupPwa(target.capabilities.serviceWorker ? {} : { devMode: true });
+  const videoStreams = new VideoStreamClient(uiConnectionVideoStreamPort(client.connection));
 
   const host: UiRenderHost = {
     // The host's catalogue once it has answered, and the one compiled into the package until then.
@@ -103,6 +106,7 @@ export function start(root: HTMLElement, target: WebClientTarget = ACTIVE_TARGET
     fontFamily: faceId => (faceId ? `MacroDeckFont_${faceId}` : null),
     fontReady: faceId => fonts.ready(faceId),
     uiFontKey: () => String(uiFont.version()),
+    videoStreams: () => videoStreams.surface('deck'),
     // Replaced per tile by the grid, which knows which widget a node belongs to.
     emit: () => undefined,
   };

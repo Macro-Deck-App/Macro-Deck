@@ -1,0 +1,47 @@
+{
+  "note": "Every video stream view is drawn without a session here, so each box holds only the reader's placeholder. The size property is the extent along the vertical stack's main axis, not a square edge: the views keep the full cross extent.",
+  "cases": [
+    {
+      "basis": 200,
+      "tile": {
+        "width": 200,
+        "height": 400
+      },
+      "nodes": {
+        "conformance.video": {
+          "width": 200.0,
+          "height": 300.0
+        },
+        "conformance.videoSized": {
+          "width": 200.0,
+          "height": 60.0
+        },
+        "conformance.videoEmpty": {
+          "width": 200.0,
+          "height": 40.0
+        }
+      }
+    },
+    {
+      "basis": 100,
+      "tile": {
+        "width": 100,
+        "height": 400
+      },
+      "nodes": {
+        "conformance.video": {
+          "width": 100.0,
+          "height": 350.0
+        },
+        "conformance.videoSized": {
+          "width": 100.0,
+          "height": 30.0
+        },
+        "conformance.videoEmpty": {
+          "width": 100.0,
+          "height": 20.0
+        }
+      }
+    }
+  ]
+}

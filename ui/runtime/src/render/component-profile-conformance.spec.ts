@@ -1046,6 +1046,21 @@ describe('component-profile conformance fixtures: modifier tree', () => {
   }
 });
 
+describe('component-profile conformance fixtures: video stream tree', () => {
+  const tree = loadTree('conformance-video-stream-tree.json');
+  const layout = loadJson<LayoutFixture>('conformance-video-stream-layout.json');
+
+  for (const testCase of layout.cases) {
+    describe(`basis ${testCase.basis}`, () => {
+      beforeEach(() => mount(tree, testCase.tile, testCase.basis));
+
+      for (const id of Object.keys(testCase.nodes)) {
+        it(`resolves ${id}`, () => assertCommon(id, testCase.nodes[id]));
+      }
+    });
+  }
+});
+
 describe('component-profile conformance fixtures: coverage', () => {
   const LAYOUT_FILES = [
     'conformance-layout.json',
@@ -1059,6 +1074,7 @@ describe('component-profile conformance fixtures: coverage', () => {
     'conformance-building-blocks-layout.json',
     'conformance-modifier-layout.json',
     'conformance-anchored-list-layout.json',
+    'conformance-video-stream-layout.json',
   ];
 
   it('records every fixture key exactly once, as asserted or as a documented omission', () => {
@@ -1088,6 +1104,7 @@ describe('component-profile conformance fixtures: coverage', () => {
       'conformance-history-graph-tree.json', 'conformance-gauge-tree.json',
       'conformance-building-blocks-tree.json', 'conformance-modifier-tree.json',
       'conformance-chat-tree.json', 'conformance-anchored-list-tree.json',
+      'conformance-video-stream-tree.json',
     ];
     for (const name of exercised) expect(() => loadTree(name)).not.toThrow();
   });

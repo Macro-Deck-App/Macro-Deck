@@ -1388,6 +1388,15 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Deck.Unlock" xml:space="preserve">
     <value>Sblocca</value>
   </data>
+  <data name="Deck.VideoStream.AccessibleLabel" xml:space="preserve">
+    <value>{stream}: {status}</value>
+  </data>
+  <data name="Deck.VideoStream.Connecting" xml:space="preserve">
+    <value>Connessione allo stream video…</value>
+  </data>
+  <data name="Deck.VideoStream.NoStream" xml:space="preserve">
+    <value>Nessuno stream video selezionato</value>
+  </data>
   <data name="Deck.UnpinWidgetsFailed" xml:space="preserve">
     <value>Impossibile rimuovere il fissaggio dei widget</value>
   </data>

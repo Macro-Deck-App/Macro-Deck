@@ -178,6 +178,7 @@ export default defineConfig({
 												'ui/components/chart',
 												'ui/components/time',
 												'ui/components/progress',
+												'ui/components/video-stream',
 											],
 										},
 										{

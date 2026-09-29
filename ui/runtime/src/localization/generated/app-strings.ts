@@ -577,6 +577,11 @@ export const AppStrings = {
 		UnavailableWidget: {
 			Tile: 'macrodeck.app:Deck.UnavailableWidget.Tile',
 		},
+		VideoStream: {
+			AccessibleLabel: 'macrodeck.app:Deck.VideoStream.AccessibleLabel',
+			Connecting: 'macrodeck.app:Deck.VideoStream.Connecting',
+			NoStream: 'macrodeck.app:Deck.VideoStream.NoStream',
+		},
 	},
 	Developer: {
 		ActionCount: 'macrodeck.app:Developer.ActionCount',
@@ -7944,6 +7949,9 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Deck.UnavailableWidget.Tile': 'Provided by {plugin}, currently unavailable',
 	'macrodeck.app:Deck.Unlock': 'Unlock',
 	'macrodeck.app:Deck.UnpinWidgetsFailed': 'Failed to unpin the widgets',
+	'macrodeck.app:Deck.VideoStream.AccessibleLabel': '{stream}: {status}',
+	'macrodeck.app:Deck.VideoStream.Connecting': 'Connecting to the video stream…',
+	'macrodeck.app:Deck.VideoStream.NoStream': 'No video stream selected',
 	'macrodeck.app:Deck.WidgetExported': 'Widget exported',
 	'macrodeck.app:Developer.ActionCount.One': '{count} action',
 	'macrodeck.app:Developer.ActionCount.Other': '{count} actions',
