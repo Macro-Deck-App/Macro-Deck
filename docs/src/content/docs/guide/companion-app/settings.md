@@ -33,6 +33,7 @@ See [License and trial](/guide/companion-app/license/).
 | Haptic feedback | Vibrates when you press a widget. On by default. |
 | Navigation gestures | Swipe with one finger to change folder, with two to change profile and with three to change computer. On by default. |
 | Keep screen on | **Never**, **While a deck is open** or **Always**. **Never** is the default. The app warns about burn-in first: on OLED screens a deck that never changes can leave a permanent ghost image. A dark theme and lower brightness reduce the risk. |
+| Icon resolution | The size deck icons are loaded in: **Automatic**, **128 px**, **256 px** or **512 px**. **Automatic** is the default and picks the size from how large each icon is drawn, so a phone usually gets 128 px and a tablet or a large widget 256 px or 512 px. A smaller size loads faster, a larger one looks sharper. With **Automatic** the row shows the sizes the deck you last opened used. Only icons change, not artwork such as album covers. A Macro Deck version without this feature always sends 256 px. |
 
 ## Device
 
@@ -46,6 +47,16 @@ list of automations. A computer shows the new name the next time this device sig
 | Find hosts on the network | Looks for Macro Deck on the local network and lists it under **Found on this network**. Without it, you add a computer by QR code or address. |
 | Detect USB connection | Lets the app reach Macro Deck through a USB cable. See [Connect over USB](/guide/usb-connection/). |
 | Connect on opening | The computers the app opens by itself when it starts, in order: it opens the first that answers. **USB connection** can be one of them. |
+
+## Automation
+
+| Setting | Does |
+| --- | --- |
+| Allow external automation | Lets other apps run your scripts with an Android intent or a run-script link. Off by default. |
+| Automation key | The key every request has to carry. **Show**, **Copy key** and **Generate new key**, which stops every automation that uses the old key. |
+| Scripts | Each computer's scripts with their IDs. Tap a script to copy its link or, on Android, its intent details, or to add it to the home screen. |
+
+See [Run scripts from other apps](/guide/companion-app/automation/).
 
 ## Only on Android: Device control
 

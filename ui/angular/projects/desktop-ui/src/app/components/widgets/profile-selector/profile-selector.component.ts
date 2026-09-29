@@ -123,9 +123,9 @@ export class ProfileSelectorComponent {
 
   private readonly editConstraint = computed(() => this.actionProfile()?.layout.constraint ?? null);
 
-  protected readonly editMaxColumns = computed(() => this.editConstraint()?.maxColumns ?? 12);
+  protected readonly editMaxColumns = computed(() => this.editConstraint()?.maxColumns ?? 16);
 
-  protected readonly editMaxRows = computed(() => this.editConstraint()?.maxRows ?? 8);
+  protected readonly editMaxRows = computed(() => this.editConstraint()?.maxRows ?? 16);
 
   protected readonly editColumnsLocked = computed(() => this.editConstraint()?.columnsLocked ?? false);
 

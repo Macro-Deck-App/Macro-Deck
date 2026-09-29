@@ -453,6 +453,7 @@ export function serializeWidgetData(type: WidgetType, data: WidgetData): string 
         showArtist: d.showArtist,
         showAlbum: d.showAlbum,
         showTimeline: d.showTimeline,
+        showSource: d.showSource,
         border: d.border,
         flows: JSON.stringify(d.flows ?? [])
       });

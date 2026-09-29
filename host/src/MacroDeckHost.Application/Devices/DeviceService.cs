@@ -242,6 +242,26 @@ public class DeviceService : IDeviceService
 		return Result.Ok<DeviceEntity, DeviceError>(device);
 	}
 
+	public async Task<Result<DeviceEntity, DeviceError>> SetSettingsButtonHidden(Guid id, bool hidden)
+	{
+		if (!await _deviceRepository.SetSettingsButtonHidden(id, hidden))
+		{
+			return Result.Fail<DeviceEntity, DeviceError>(DeviceError.NotFound, "Device not found.");
+		}
+
+		await _uiTransport.SendToGroup(UiDeviceGroups.For(id),
+			new DeviceClientSettingsChangedEvent { SettingsButtonHidden = hidden });
+		await _mediator.Publish(new DeviceChangedNotification(id));
+
+		var device = await _deviceRepository.GetById(id);
+		if (device is null)
+		{
+			return Result.Fail<DeviceEntity, DeviceError>(DeviceError.NotFound, "Device not found.");
+		}
+
+		return Result.Ok<DeviceEntity, DeviceError>(device);
+	}
+
 	public async Task<string?> ResolveStartupProfileId(Guid deviceId)
 	{
 		var device = await _deviceRepository.GetById(deviceId);
@@ -534,6 +554,7 @@ public class DeviceService : IDeviceService
 			ScreenSaverIdleSeconds = entity.ScreenSaverIdleSeconds,
 			ScreenSaverId = entity.ScreenSaverId,
 			ScreenSaverConfiguration = entity.ScreenSaverConfiguration,
+			SettingsButtonHidden = entity.SettingsButtonHidden,
 			LastSeenAt = DateTime.SpecifyKind(online ? now : entity.LastSeenAt, DateTimeKind.Utc),
 			CreatedAt = DateTime.SpecifyKind(entity.CreatedAt, DateTimeKind.Utc),
 			ProviderId = entity.ProviderId,

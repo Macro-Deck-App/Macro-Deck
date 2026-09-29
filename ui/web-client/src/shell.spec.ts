@@ -1,6 +1,6 @@
 import {
   ClientAppStrings, DEFAULT_WEB_CLIENT_TARGET, VideoStreamClient, WidgetType, type GridWidget, type UiNode,
-  type UiRenderHost,
+  type UiRenderHost, type WebClientTarget,
 } from '@macro-deck/runtime';
 import { Appearance } from './appearance';
 import { Client } from './client';
@@ -955,6 +955,410 @@ describe('Shell', () => {
 
       expect(root.querySelectorAll('.deck-grid-tile-focused').length).toBe(1);
       expect(w1Tile().classList.contains('deck-grid-tile-focused')).toBeTrue();
+    });
+  });
+
+  describe('a device whose settings button is hidden', () => {
+    const SETTINGS_KEY = 'md.device.web-client.settings-button-hidden';
+    let clients: Client[];
+    let sent: string[];
+    let triggers: string[];
+
+    const notify = (target: Client, type: string, body: unknown) =>
+      (target as unknown as { onNotification(type: string, payload: unknown): void }).onNotification(type, body);
+    const setHidden = (hidden: boolean, target: Client = client) =>
+      notify(target, 'DeviceClientSettingsChangedEvent', { settingsButtonHidden: hidden });
+
+    const connectionFor = () => ({
+      request: (type: string, args?: unknown) => {
+        if (type === 'SendUiEvent') sent.push(JSON.stringify(args));
+        if (type === 'OpenWidgetUiSession') return Promise.resolve({ accepted: true, sessionId: 's1' });
+        if (type === 'OpenModalUiSession') return Promise.resolve({ accepted: true, sessionId: 'modal-1' });
+        if (type === 'OpenScreenSaverUiSession') {
+          return Promise.resolve({ accepted: true, sessionId: 'ss1', screenSaverId: 'x::clock', interactive: false });
+        }
+        if (type === 'AttachUiSession') return Promise.resolve({ accepted: true });
+        return Promise.resolve(undefined);
+      },
+      state: { subscribe: () => () => undefined, get: () => 'connected' },
+    });
+
+    const useFakeConnection = (target: Client) => {
+      const connection = connectionFor();
+      (target as unknown as { connection: unknown }).connection = connection;
+      (target as unknown as { widgetSessions: WidgetSessions }).widgetSessions =
+        new WidgetSessions(connection as never, target.sessions);
+    };
+
+    const pressableTile = (id: string, x: number): GridWidget => ({
+      ...gridWidget(id, x, 0),
+      data: { flows: [{ triggerType: 'onShortPress', children: [{ id: 'a1', disabled: false }] }] },
+    }) as GridWidget;
+
+    const showDeck = (target: Client = client) => {
+      target.deck.load([{
+        ...(folder('root') as unknown as Record<string, unknown>),
+        widgets: [pressableTile('w1', 0), pressableTile('w2', 2)],
+      } as never]);
+      target.app.set({ probed: true, authenticated: true, connected: true, deckRendered: true });
+    };
+
+    const mountWith = (target: WebClientTarget = DEFAULT_WEB_CLIENT_TARGET, into: HTMLElement = root) =>
+      new Shell(into, client, host, { ...services(), target });
+
+    const gear = (within: HTMLElement = root) =>
+      within.querySelector('.wc-client-settings-trigger') as HTMLElement;
+    const gearHidden = (within: HTMLElement = root) => gear(within).hasAttribute('hidden');
+    const sidebar = (within: HTMLElement = root) => within.querySelector('.wc-edge-sidebar');
+    const tileSurface = (widgetId = 'w1') =>
+      root.querySelector(`[data-widget-id="${widgetId}"] .deck-grid-tile-surface`) as HTMLElement;
+
+    const touchEvent = (type: string, target: EventTarget, x: number, y: number): Event => {
+      const event = document.createEvent('Event');
+      event.initEvent(type, true, true);
+      const point = { identifier: 0, target, clientX: x, clientY: y, screenX: x, screenY: y };
+      const ended = type === 'touchend' || type === 'touchcancel';
+      Object.defineProperty(event, 'changedTouches', { value: [point] });
+      Object.defineProperty(event, 'touches', { value: ended ? [] : [point] });
+      return event;
+    };
+
+    const pointer = (type: string, x: number, y: number, pointerType: string, pointerId: number): Event =>
+      new PointerEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y, pointerId, pointerType, button: 0 });
+
+    const touchDrag = (target: EventTarget, from: { x: number; y: number }, to: { x: number; y: number }) => {
+      target.dispatchEvent(pointer('pointerdown', from.x, from.y, 'touch', 7));
+      target.dispatchEvent(touchEvent('touchstart', target, from.x, from.y));
+      const middle = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 };
+      for (const point of [middle, to]) {
+        target.dispatchEvent(pointer('pointermove', point.x, point.y, 'touch', 7));
+        target.dispatchEvent(touchEvent('touchmove', target, point.x, point.y));
+      }
+      target.dispatchEvent(touchEvent('touchend', target, to.x, to.y));
+      target.dispatchEvent(pointer('pointerup', to.x, to.y, 'touch', 7));
+    };
+
+    const swipe = (target: EventTarget = tileSurface(), fromX = 10, travel = 80, dy = 0) =>
+      touchDrag(target, { x: fromX, y: 100 }, { x: fromX + travel, y: 100 + dy });
+
+    beforeEach(() => {
+      clients = [client];
+      sent = [];
+      triggers = [];
+      useFakeConnection(client);
+      spyOn(Client.prototype, 'executeTrigger').and.callFake((_widgetId: string, triggerType: string) => {
+        triggers.push(triggerType);
+        return Promise.resolve() as never;
+      });
+    });
+
+    // Every shell outlives its spec, so each one is told to show its gear again, which removes its
+    // document listeners.
+    afterEach(() => {
+      for (const each of clients) {
+        notify(each, 'DeviceScreenSaverChangedEvent', { enabled: true, idleSeconds: 60 });
+        notify(each, 'DeviceScreenSaverChangedEvent', { enabled: false, idleSeconds: 0 });
+        setHidden(false, each);
+      }
+      localStorage.removeItem(SETTINGS_KEY);
+    });
+
+    it('keeps the gear and answers no swipe while the setting is off', () => {
+      mountWith();
+      showDeck();
+
+      swipe();
+
+      expect(gearHidden()).toBeFalse();
+      expect(sidebar()).toBeNull();
+    });
+
+    it('hides the gear on the deck when the host says so and shows it again when told otherwise', () => {
+      mountWith();
+      showDeck();
+
+      setHidden(true);
+      expect(gearHidden()).toBeTrue();
+
+      setHidden(false);
+      expect(gearHidden()).toBeFalse();
+      swipe();
+      expect(sidebar()).toBeNull();
+    });
+
+    it('starts hidden from the last known value after a reload, before the host has answered', () => {
+      mountWith();
+      showDeck();
+      setHidden(true);
+
+      const reloadedRoot = document.createElement('div');
+      document.body.appendChild(reloadedRoot);
+      try {
+        client = new Client(() => 'http://host', 'client-1');
+        clients.push(client);
+        useFakeConnection(client);
+        mountWith(DEFAULT_WEB_CLIENT_TARGET, reloadedRoot);
+
+        client.app.set({ probed: true, authenticated: true });
+        expect(client.app.screen.get()).toBe('connecting');
+        expect(gearHidden(reloadedRoot)).toBeTrue();
+
+        client.app.set({ connected: true });
+        expect(gearHidden(reloadedRoot)).toBeTrue();
+      } finally {
+        reloadedRoot.remove();
+      }
+    });
+
+    it('shows the gear on the sign-in and setup screens even when the device hides it', () => {
+      localStorage.setItem(SETTINGS_KEY, 'true');
+      client = new Client(() => 'http://host', 'client-1');
+      clients.push(client);
+      mountWith();
+
+      client.app.set({ probed: true, setupRequired: true });
+      expect(gearHidden()).toBeFalse();
+
+      client.app.set({ setupRequired: false });
+      expect(client.app.screen.get()).toBe('signedOut');
+      expect(gearHidden()).toBeFalse();
+
+      client.app.set({ authenticated: true });
+      expect(gearHidden()).toBeTrue();
+    });
+
+    it('opens a sidebar on a swipe in from the left edge, whose one button opens the settings', () => {
+      mountWith();
+      showDeck();
+      setHidden(true);
+
+      swipe(tileSurface(), 10, 48);
+
+      const panel = sidebar() as HTMLElement;
+      expect(panel).withContext('the sidebar').not.toBeNull();
+      expect(panel.getAttribute('aria-label')).toBe(text(ClientAppStrings.WebClient.Settings.Sidebar));
+      const buttons = panel.querySelectorAll('button');
+      expect(buttons.length).toBe(1);
+      expect(buttons[0].getAttribute('aria-label')).toBe(text(ClientAppStrings.WebClient.Settings.OpenSettings));
+
+      (buttons[0] as HTMLElement).click();
+
+      expect(document.querySelector('.wc-client-settings-backdrop')).withContext('the settings dialog').not.toBeNull();
+      expect(sidebar()).toBeNull();
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    });
+
+    it('opens the sidebar on a mouse drag from the left edge as well', () => {
+      mountWith();
+      showDeck();
+      setHidden(true);
+      const surface = tileSurface();
+
+      surface.dispatchEvent(pointer('pointerdown', 5, 100, 'mouse', 1));
+      surface.dispatchEvent(pointer('pointermove', 60, 110, 'mouse', 1));
+      surface.dispatchEvent(pointer('pointerup', 60, 110, 'mouse', 1));
+
+      expect(sidebar()).not.toBeNull();
+      expect(triggers).not.toContain('onShortPress');
+    });
+
+    it('does not press the tile the swipe started on', () => {
+      mountWith();
+      showDeck();
+      setHidden(true);
+
+      swipe();
+
+      expect(sidebar()).not.toBeNull();
+      expect(triggers).not.toContain('onShortPress');
+      expect(triggers).not.toContain('onLongPress');
+    });
+
+    it('still presses a tile near the edge that is tapped rather than swiped', () => {
+      mountWith();
+      showDeck();
+      setHidden(true);
+
+      touchDrag(tileSurface(), { x: 10, y: 100 }, { x: 10, y: 100 });
+
+      expect(sidebar()).toBeNull();
+      expect(triggers).toContain('onShortPress');
+    });
+
+    it('does nothing for a swipe that starts too far in, runs up the screen, or stops short', () => {
+      mountWith();
+      showDeck();
+      setHidden(true);
+
+      swipe(tileSurface('w2'), 57, 120);
+      swipe(tileSurface(), 10, 60, 40);
+      swipe(tileSurface(), 10, 47);
+
+      expect(sidebar()).toBeNull();
+    });
+
+    it('does nothing for a swipe slower than half a second', () => {
+      jasmine.clock().install();
+      jasmine.clock().mockDate(new Date(0));
+      try {
+        mountWith();
+        showDeck();
+        setHidden(true);
+        const surface = tileSurface();
+
+        surface.dispatchEvent(touchEvent('touchstart', surface, 10, 100));
+        jasmine.clock().tick(501);
+        surface.dispatchEvent(touchEvent('touchmove', surface, 90, 100));
+        surface.dispatchEvent(touchEvent('touchend', surface, 90, 100));
+
+        expect(sidebar()).toBeNull();
+      } finally {
+        jasmine.clock().uninstall();
+      }
+    });
+
+    it('leaves a drag that starts on a slider at the left edge to the slider', async () => {
+      client.deck.load([{
+        ...(folder('root') as unknown as Record<string, unknown>),
+        widgets: [gridWidget('w1', 0, 0)],
+      } as never]);
+      const scheduler = new SyncScheduler();
+      new Shell(root, client, host, { ...services(), schedule: scheduler.schedule });
+      client.app.set({ probed: true, authenticated: true, connected: true, deckRendered: true });
+      client.widgetSessions.sync([gridWidget('w1', 0, 0)]);
+      await settle();
+      client.sessions.treeUpdated('s1', 1,
+        { id: 'root', type: 'ui.slider', properties: { events: ['adjust', 'change'], level: 0.5 } } as UiNode);
+      scheduler.flush();
+      setHidden(true);
+      const slider = root.querySelector('[data-widget-id="w1"] .widget-slider') as HTMLElement;
+      expect(slider).withContext('the slider').not.toBeNull();
+      slider.getBoundingClientRect = () => ({ left: 0, top: 90, right: 200, bottom: 110, width: 200, height: 20 }) as DOMRect;
+
+      touchDrag(slider, { x: 10, y: 100 }, { x: 150, y: 100 });
+
+      expect(sidebar()).toBeNull();
+      expect(sent.length).withContext('what the slider sent the host').toBeGreaterThan(0);
+    });
+
+    it('closes the sidebar on Escape without taking the deck back', () => {
+      const back = spyOn(client.deck, 'back');
+      mountWith({ ...DEFAULT_WEB_CLIENT_TARGET, hardwareInput: { keys: [{ key: 'Escape', event: { kind: 'back' as const } }] } });
+      showDeck();
+      setHidden(true);
+      swipe();
+      expect(sidebar()).not.toBeNull();
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+
+      expect(sidebar()).toBeNull();
+      expect(back).not.toHaveBeenCalled();
+    });
+
+    it('closes the sidebar when the screen changes', () => {
+      mountWith();
+      showDeck();
+      setHidden(true);
+      swipe();
+      expect(sidebar()).not.toBeNull();
+
+      client.app.set({ authenticated: false, deckRendered: false });
+
+      expect(sidebar()).toBeNull();
+      expect(gearHidden()).toBeFalse();
+    });
+
+    it('ignores a swipe while a dialog from the host is open', async () => {
+      mountWith();
+      showDeck();
+      setHidden(true);
+      notify(client, 'UiModalOpenedEvent', { modalId: 'm1' });
+      await settle();
+
+      swipe();
+
+      expect(sidebar()).toBeNull();
+      client.completeModal('m1', true);
+    });
+
+    it('only wakes the deck when the swipe lands on the screensaver', async () => {
+      mountWith();
+      showDeck();
+      setHidden(true);
+      notify(client, 'ShowDeviceScreenSaverEvent', {});
+      await settle();
+      const overlay = root.querySelector('.wc-screensaver') as HTMLElement;
+      expect(overlay.hidden).toBeFalse();
+
+      swipe(overlay);
+
+      expect(overlay.classList).toContain('wc-screensaver-deaf');
+      expect(sidebar()).toBeNull();
+    });
+
+    it('ignores a swipe while the reconnecting notice covers the deck', () => {
+      jasmine.clock().install();
+      try {
+        mountWith();
+        showDeck();
+        setHidden(true);
+        client.app.set({ connected: false });
+        jasmine.clock().tick(4000);
+        expect(root.querySelector('.wc-reconnecting')).not.toBeNull();
+
+        swipe();
+
+        expect(sidebar()).toBeNull();
+      } finally {
+        client.app.set({ connected: true });
+        jasmine.clock().uninstall();
+      }
+    });
+
+    describe('on a browser without Pointer Events', () => {
+      const shim = require('../legacy/pointer-events.legacy.js') as { installPointerEvents(doc: Document): () => void };
+      let uninstall: () => void;
+      let original: unknown;
+
+      beforeEach(() => {
+        original = (globalThis as { PointerEvent?: unknown }).PointerEvent;
+        delete (globalThis as { PointerEvent?: unknown }).PointerEvent;
+        uninstall = shim.installPointerEvents(document);
+      });
+
+      afterEach(() => {
+        uninstall();
+        (globalThis as { PointerEvent?: unknown }).PointerEvent = original;
+      });
+
+      it('opens the sidebar from a tile without pressing it', () => {
+        mountWith();
+        showDeck();
+        setHidden(true);
+        const surface = tileSurface();
+
+        surface.dispatchEvent(touchEvent('touchstart', surface, 10, 100));
+        surface.dispatchEvent(touchEvent('touchmove', surface, 40, 102));
+        surface.dispatchEvent(touchEvent('touchmove', surface, 80, 104));
+        surface.dispatchEvent(touchEvent('touchend', surface, 80, 104));
+
+        expect(sidebar()).not.toBeNull();
+        expect(triggers).toContain('onTouchStart');
+        expect(triggers).not.toContain('onShortPress');
+      });
+
+      it('still presses the tile on a tap', () => {
+        mountWith();
+        showDeck();
+        setHidden(true);
+        const surface = tileSurface();
+
+        surface.dispatchEvent(touchEvent('touchstart', surface, 10, 100));
+        surface.dispatchEvent(touchEvent('touchend', surface, 10, 100));
+
+        expect(sidebar()).toBeNull();
+        expect(triggers).toContain('onShortPress');
+      });
     });
   });
 });

@@ -410,6 +410,12 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>Variables of this widget</value>
   </data>
+  <data name="ActionBuilder.Trigger.CountdownDismissed" xml:space="preserve">
+    <value>Dismissed</value>
+  </data>
+  <data name="ActionBuilder.Trigger.CountdownFinished" xml:space="preserve">
+    <value>Time's Up</value>
+  </data>
   <data name="ActionBuilder.Trigger.DoublePress" xml:space="preserve">
     <value>Double Tap</value>
   </data>
@@ -421,6 +427,15 @@
   </data>
   <data name="ActionBuilder.Trigger.ShortPress" xml:space="preserve">
     <value>Short Press</value>
+  </data>
+  <data name="ActionBuilder.Trigger.TimerPaused" xml:space="preserve">
+    <value>Paused</value>
+  </data>
+  <data name="ActionBuilder.Trigger.TimerReset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="ActionBuilder.Trigger.TimerStarted" xml:space="preserve">
+    <value>Started</value>
   </data>
   <data name="ActionBuilder.Trigger.TouchEnd" xml:space="preserve">
     <value>Touch End</value>
@@ -4587,6 +4602,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Detail.SingleConfigurationHint" xml:space="preserve">
     <value>This integration supports only a single configuration. Reconfiguring replaces it, so widgets keep working.</value>
   </data>
+  <data name="Integrations.Detail.OptionalConfigurationHint" xml:space="preserve">
+    <value>This integration works without a configuration. Set it up only to change its settings.</value>
+  </data>
   <data name="Integrations.Detail.StatusDisabled" xml:space="preserve">
     <value>Disabled</value>
   </data>
@@ -7454,6 +7472,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.Obs.Params.Filter" xml:space="preserve">
     <value>Filter</value>
+  </data>
+  <data name="Integrations.Obs.Params.GroupOption" xml:space="preserve">
+    <value>{name} (group)</value>
   </data>
   <data name="Integrations.Obs.Params.Input" xml:space="preserve">
     <value>Input</value>
@@ -13768,6 +13789,18 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Settings.Devices.ScreenSaver.Unavailable" xml:space="preserve">
     <value>Unavailable</value>
   </data>
+  <data name="Settings.Devices.SettingsButton.HiddenLine" xml:space="preserve">
+    <value>Settings button hidden: swipe in from the left edge</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.HideAction" xml:space="preserve">
+    <value>Hide settings button</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.SaveFailed" xml:space="preserve">
+    <value>Could not change the settings button</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.ShowAction" xml:space="preserve">
+    <value>Show settings button</value>
+  </data>
   <data name="Settings.Devices.SignedOutMarker" xml:space="preserve">
     <value>Signed out</value>
   </data>
@@ -16634,6 +16667,15 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="WebClient.Settings.DisplaySection" xml:space="preserve">
     <value>Display</value>
   </data>
+  <data name="WebClient.Settings.HideSettingsButton.Description" xml:space="preserve">
+    <value>Open the settings with a swipe in from the left edge</value>
+  </data>
+  <data name="WebClient.Settings.HideSettingsButton.Label" xml:space="preserve">
+    <value>Hide settings button</value>
+  </data>
+  <data name="WebClient.Settings.HideSettingsButton.SaveFailed" xml:space="preserve">
+    <value>Could not change the settings button</value>
+  </data>
   <data name="WebClient.Settings.Licenses.Button" xml:space="preserve">
     <value>Open source licenses</value>
   </data>
@@ -16645,6 +16687,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="WebClient.Settings.OpenSettings" xml:space="preserve">
     <value>Open Macro Deck settings</value>
+  </data>
+  <data name="WebClient.Settings.Sidebar" xml:space="preserve">
+    <value>Side panel</value>
   </data>
   <data name="WebClient.Setup.Body" xml:space="preserve">
     <value>Finish the first-time setup in the Macro Deck desktop app, then reload this page.</value>
@@ -16682,6 +16727,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="WebClient.Widgets.Clock.Name" xml:space="preserve">
     <value>Clock</value>
   </data>
+  <data name="WebClient.Widgets.Countdown.Description" xml:space="preserve">
+    <value>Timer that counts down from a set time and signals when it runs out</value>
+  </data>
+  <data name="WebClient.Widgets.Countdown.Name" xml:space="preserve">
+    <value>Countdown</value>
+  </data>
   <data name="WebClient.Widgets.HistoryGraph.Description" xml:space="preserve">
     <value>Live graph card for a numeric variable (CPU, RAM, GPU…) with a rolling chart</value>
   </data>
@@ -16702,6 +16753,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="WebClient.Widgets.Slider.Name" xml:space="preserve">
     <value>Slider</value>
+  </data>
+  <data name="WebClient.Widgets.Stopwatch.Description" xml:space="preserve">
+    <value>Stopwatch you start, pause and reset with a press</value>
+  </data>
+  <data name="WebClient.Widgets.Stopwatch.Name" xml:space="preserve">
+    <value>Stopwatch</value>
   </data>
   <data name="WebClient.Widgets.Weather.Description" xml:space="preserve">
     <value>Current conditions and a multi-day forecast for a location</value>
@@ -17069,6 +17126,55 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Widgets.ContextMenu.UnpinWidgets" xml:space="preserve">
     <value>Unpin widgets</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.AlreadyRunning" xml:space="preserve">
+    <value>This countdown is already running.</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.Hours" xml:space="preserve">
+    <value>Hours</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.Minutes" xml:space="preserve">
+    <value>Minutes</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.PresetHours.One" xml:space="preserve">
+    <value>{count} h</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Countdown.Dialog.PresetHours.Other" xml:space="preserve">
+    <value>{count} h</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Countdown.Dialog.PresetMinutes.One" xml:space="preserve">
+    <value>{count} min</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Countdown.Dialog.PresetMinutes.Other" xml:space="preserve">
+    <value>{count} min</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Countdown.Dialog.Start" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.Title" xml:space="preserve">
+    <value>Set countdown</value>
+  </data>
+  <data name="Widgets.Countdown.Mode" xml:space="preserve">
+    <value>When started</value>
+  </data>
+  <data name="Widgets.Countdown.ModeAsk" xml:space="preserve">
+    <value>Ask for the duration</value>
+  </data>
+  <data name="Widgets.Countdown.ModeFixed" xml:space="preserve">
+    <value>Use the set duration</value>
+  </data>
+  <data name="Widgets.Countdown.ModeHint" xml:space="preserve">
+    <value>Asking opens a dialog on the device the countdown was pressed on. A hardware deck reuses the last entered duration.</value>
+  </data>
+  <data name="Widgets.Countdown.TapToDismiss" xml:space="preserve">
+    <value>Tap to dismiss</value>
+  </data>
+  <data name="Widgets.Countdown.TapToSet" xml:space="preserve">
+    <value>Tap to set</value>
   </data>
   <data name="Widgets.CursorPositionTooltip" xml:space="preserve">
     <value>Mouse position on the screen</value>
@@ -17714,6 +17820,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.Music.SmallCoverDesc" xml:space="preserve">
     <value>Cover with details below</value>
   </data>
+  <data name="Widgets.Music.Source" xml:space="preserve">
+    <value>Source</value>
+  </data>
   <data name="Widgets.Music.Timeline" xml:space="preserve">
     <value>Timeline</value>
   </data>
@@ -17905,6 +18014,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Widgets.Slider.Vertical" xml:space="preserve">
     <value>Vertical</value>
+  </data>
+  <data name="Widgets.Timer.LabelPlaceholderExample" xml:space="preserve">
+    <value>Pizza</value>
   </data>
   <data name="Widgets.TypeSelector.Heading" xml:space="preserve">
     <value>Select Widget Type</value>

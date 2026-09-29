@@ -106,6 +106,7 @@ public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore
 			PluginId = pluginId,
 			Actions = persisted.Actions is { } actions ? ActionCatalogMapper.ToDomain(actions) : [],
 			AllowsMultipleConfigurations = persisted.AllowsMultipleConfigurations,
+			RequiresConfiguration = persisted.RequiresConfiguration ?? true,
 			AcceptedKinds = acceptedKinds,
 			DeclaredVariables = ToDefinitions(pluginId, variables.Declared),
 			Variables = ToDefinitions(pluginId, variables.Eager),
@@ -234,6 +235,7 @@ public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore
 			Version = CurrentVersion,
 			Actions = ActionCatalogMapper.ToDto(snapshot.Actions),
 			AllowsMultipleConfigurations = snapshot.AllowsMultipleConfigurations,
+			RequiresConfiguration = snapshot.RequiresConfiguration,
 			AcceptedKinds = [.. snapshot.AcceptedKinds],
 			Variables = new VariableCatalogPayload
 			{
@@ -310,6 +312,8 @@ public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore
 		public ActionCatalogPayload? Actions { get; init; }
 
 		public bool AllowsMultipleConfigurations { get; init; }
+
+		public bool? RequiresConfiguration { get; init; }
 
 		public IReadOnlyList<string>? AcceptedKinds { get; init; }
 

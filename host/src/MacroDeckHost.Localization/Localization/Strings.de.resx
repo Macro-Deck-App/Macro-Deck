@@ -410,6 +410,12 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>Variablen dieses Widgets</value>
   </data>
+  <data name="ActionBuilder.Trigger.CountdownDismissed" xml:space="preserve">
+    <value>Bestätigt</value>
+  </data>
+  <data name="ActionBuilder.Trigger.CountdownFinished" xml:space="preserve">
+    <value>Zeit abgelaufen</value>
+  </data>
   <data name="ActionBuilder.Trigger.DoublePress" xml:space="preserve">
     <value>Doppeltippen</value>
   </data>
@@ -421,6 +427,15 @@
   </data>
   <data name="ActionBuilder.Trigger.ShortPress" xml:space="preserve">
     <value>Kurzer Druck</value>
+  </data>
+  <data name="ActionBuilder.Trigger.TimerPaused" xml:space="preserve">
+    <value>Pausiert</value>
+  </data>
+  <data name="ActionBuilder.Trigger.TimerReset" xml:space="preserve">
+    <value>Zurückgesetzt</value>
+  </data>
+  <data name="ActionBuilder.Trigger.TimerStarted" xml:space="preserve">
+    <value>Gestartet</value>
   </data>
   <data name="ActionBuilder.Trigger.TouchEnd" xml:space="preserve">
     <value>Berührung Ende</value>
@@ -4586,6 +4601,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Detail.SingleConfigurationHint" xml:space="preserve">
     <value>Diese Integration unterstützt nur eine einzelne Konfiguration. Eine Neukonfiguration ersetzt sie, sodass Widgets weiter funktionieren.</value>
   </data>
+  <data name="Integrations.Detail.OptionalConfigurationHint" xml:space="preserve">
+    <value>Diese Integration funktioniert auch ohne Konfiguration. Richte sie nur ein, wenn du ihre Einstellungen ändern möchtest.</value>
+  </data>
   <data name="Integrations.Detail.StatusDisabled" xml:space="preserve">
     <value>Deaktiviert</value>
   </data>
@@ -7452,6 +7470,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.Obs.Params.Filter" xml:space="preserve">
     <value>Filter</value>
+  </data>
+  <data name="Integrations.Obs.Params.GroupOption" xml:space="preserve">
+    <value>{name} (Gruppe)</value>
   </data>
   <data name="Integrations.Obs.Params.Input" xml:space="preserve">
     <value>Eingang</value>
@@ -13766,6 +13787,18 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.Devices.ScreenSaver.Unavailable" xml:space="preserve">
     <value>Nicht verfügbar</value>
   </data>
+  <data name="Settings.Devices.SettingsButton.HiddenLine" xml:space="preserve">
+    <value>Einstellungs-Schaltfläche ausgeblendet: vom linken Rand hineinwischen</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.HideAction" xml:space="preserve">
+    <value>Einstellungs-Schaltfläche ausblenden</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.SaveFailed" xml:space="preserve">
+    <value>Die Einstellungs-Schaltfläche konnte nicht geändert werden</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.ShowAction" xml:space="preserve">
+    <value>Einstellungs-Schaltfläche einblenden</value>
+  </data>
   <data name="Settings.Devices.SignedOutMarker" xml:space="preserve">
     <value>Abgemeldet</value>
   </data>
@@ -16632,6 +16665,15 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="WebClient.Settings.DisplaySection" xml:space="preserve">
     <value>Darstellung</value>
   </data>
+  <data name="WebClient.Settings.HideSettingsButton.Description" xml:space="preserve">
+    <value>Öffne die Einstellungen mit einem Wisch vom linken Rand</value>
+  </data>
+  <data name="WebClient.Settings.HideSettingsButton.Label" xml:space="preserve">
+    <value>Einstellungs-Schaltfläche ausblenden</value>
+  </data>
+  <data name="WebClient.Settings.HideSettingsButton.SaveFailed" xml:space="preserve">
+    <value>Die Einstellungs-Schaltfläche konnte nicht geändert werden</value>
+  </data>
   <data name="WebClient.Settings.Licenses.Button" xml:space="preserve">
     <value>Open-Source-Lizenzen</value>
   </data>
@@ -16643,6 +16685,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="WebClient.Settings.OpenSettings" xml:space="preserve">
     <value>Macro-Deck-Einstellungen öffnen</value>
+  </data>
+  <data name="WebClient.Settings.Sidebar" xml:space="preserve">
+    <value>Seitenleiste</value>
   </data>
   <data name="WebClient.Setup.Body" xml:space="preserve">
     <value>Schließe die Ersteinrichtung in der Macro-Deck-Desktop-App ab und lade diese Seite anschließend neu.</value>
@@ -16680,6 +16725,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="WebClient.Widgets.Clock.Name" xml:space="preserve">
     <value>Uhr</value>
   </data>
+  <data name="WebClient.Widgets.Countdown.Description" xml:space="preserve">
+    <value>Timer, der von einer eingestellten Zeit herunterzählt und das Ende anzeigt</value>
+  </data>
+  <data name="WebClient.Widgets.Countdown.Name" xml:space="preserve">
+    <value>Countdown</value>
+  </data>
   <data name="WebClient.Widgets.HistoryGraph.Description" xml:space="preserve">
     <value>Live-Diagrammkarte für eine numerische Variable (CPU, RAM, GPU …) mit fortlaufendem Diagramm</value>
   </data>
@@ -16700,6 +16751,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="WebClient.Widgets.Slider.Name" xml:space="preserve">
     <value>Schieberegler</value>
+  </data>
+  <data name="WebClient.Widgets.Stopwatch.Description" xml:space="preserve">
+    <value>Stoppuhr, die du per Tippen startest, pausierst und zurücksetzt</value>
+  </data>
+  <data name="WebClient.Widgets.Stopwatch.Name" xml:space="preserve">
+    <value>Stoppuhr</value>
   </data>
   <data name="WebClient.Widgets.Weather.Description" xml:space="preserve">
     <value>Aktuelle Bedingungen und eine mehrtägige Vorhersage für einen Ort</value>
@@ -17067,6 +17124,55 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Widgets.ContextMenu.UnpinWidgets" xml:space="preserve">
     <value>Widgets loslösen</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.AlreadyRunning" xml:space="preserve">
+    <value>Dieser Countdown läuft bereits.</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.Hours" xml:space="preserve">
+    <value>Stunden</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.Minutes" xml:space="preserve">
+    <value>Minuten</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.PresetHours.One" xml:space="preserve">
+    <value>{count} Std.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Countdown.Dialog.PresetHours.Other" xml:space="preserve">
+    <value>{count} Std.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Countdown.Dialog.PresetMinutes.One" xml:space="preserve">
+    <value>{count} Min.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Countdown.Dialog.PresetMinutes.Other" xml:space="preserve">
+    <value>{count} Min.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Countdown.Dialog.Start" xml:space="preserve">
+    <value>Starten</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.Title" xml:space="preserve">
+    <value>Countdown einstellen</value>
+  </data>
+  <data name="Widgets.Countdown.Mode" xml:space="preserve">
+    <value>Beim Start</value>
+  </data>
+  <data name="Widgets.Countdown.ModeAsk" xml:space="preserve">
+    <value>Nach der Dauer fragen</value>
+  </data>
+  <data name="Widgets.Countdown.ModeFixed" xml:space="preserve">
+    <value>Eingestellte Dauer verwenden</value>
+  </data>
+  <data name="Widgets.Countdown.ModeHint" xml:space="preserve">
+    <value>Das Fragen öffnet einen Dialog auf dem Gerät, auf dem du den Countdown gedrückt hast. Ein Hardware-Deck verwendet die zuletzt eingegebene Dauer.</value>
+  </data>
+  <data name="Widgets.Countdown.TapToDismiss" xml:space="preserve">
+    <value>Tippen zum Bestätigen</value>
+  </data>
+  <data name="Widgets.Countdown.TapToSet" xml:space="preserve">
+    <value>Tippen zum Einstellen</value>
   </data>
   <data name="Widgets.CursorPositionTooltip" xml:space="preserve">
     <value>Mausposition auf dem Bildschirm</value>
@@ -17711,6 +17817,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Music.SmallCoverDesc" xml:space="preserve">
     <value>Cover mit Details darunter</value>
   </data>
+  <data name="Widgets.Music.Source" xml:space="preserve">
+    <value>Quelle</value>
+  </data>
   <data name="Widgets.Music.Timeline" xml:space="preserve">
     <value>Zeitleiste</value>
   </data>
@@ -17902,6 +18011,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Widgets.Slider.Vertical" xml:space="preserve">
     <value>Vertikal</value>
+  </data>
+  <data name="Widgets.Timer.LabelPlaceholderExample" xml:space="preserve">
+    <value>Pizza</value>
   </data>
   <data name="Widgets.TypeSelector.Heading" xml:space="preserve">
     <value>Widget-Typ auswählen</value>

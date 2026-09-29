@@ -62,7 +62,7 @@ internal sealed class GetSourceVisibilityActionDefinition : IDynamicOptionsActio
 		}
 
 		var connection = _resolver.ForOptions(context.CurrentParameters);
-		IReadOnlyList<string> values = [];
+		IReadOnlyList<ActionParameterOption> options = [];
 
 		if (connection is not null)
 		{
@@ -70,17 +70,17 @@ internal sealed class GetSourceVisibilityActionDefinition : IDynamicOptionsActio
 				context.CurrentParameters.GetValueOrDefault(SceneParameter) is string scene &&
 				!string.IsNullOrWhiteSpace(scene))
 			{
-				values = await connection.GetSceneItemNamesAsync(scene);
+				options = await ObsSceneItemOptions.ItemsAsync(connection, scene);
 			}
 			else if (context.ParameterName == SceneParameter)
 			{
-				values = await connection.GetSceneNamesAsync();
+				options = await ObsSceneItemOptions.ScenesAndGroupsAsync(connection);
 			}
 		}
 
 		return new DynamicOptionsResult
 		{
-			Options = values.Select(v => new ActionParameterOption { Value = v, Label = v }).ToList(),
+			Options = options,
 			CacheSeconds = 5
 		};
 	}

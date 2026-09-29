@@ -226,6 +226,24 @@ public class PortableArchiveDeclarationTests
 	}
 
 	[Test]
+	public async Task Inspect_ReportsAnIntegrationWhoseConfigFlowIsOptionalAsReady_WithoutAnEntry()
+	{
+		var archive = await ArchiveRequiring(ObsId);
+		var optional = new ConfigurableIntegrationRegistry([
+			new FakeConfigurableVariableProviderIntegration { Id = ObsId, RequiresConfiguration = false }
+		]);
+
+		var info = (await new PortableArchiveInspector(optional, new StubConfigStore())
+			.Inspect(archive, CancellationToken.None)).Data!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(info.Integrations[0].RequiresConfiguration, Is.False);
+			Assert.That(info.Integrations[0].Availability, Is.EqualTo(PortableIntegrationAvailability.Ready));
+		});
+	}
+
+	[Test]
 	public async Task Inspect_ReportsAnIntegrationWithoutAConfigFlowAsReady()
 	{
 		var archive = await ArchiveRequiring(KeyboardId);

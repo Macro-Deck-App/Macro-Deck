@@ -33,6 +33,8 @@ public class Device
 
 	public string? ScreenSaverConfiguration { get; set; }
 
+	public bool SettingsButtonHidden { get; set; }
+
 	public DateTime LastSeenAt { get; set; }
 
 	public DateTime CreatedAt { get; set; }

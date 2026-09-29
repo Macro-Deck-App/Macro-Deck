@@ -24,6 +24,7 @@ internal static class MusicPlayerWidgetConfigView
 		var showArtist = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showArtist") ?? true);
 		var showAlbum = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showAlbum") ?? true);
 		var showTimeline = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showTimeline") ?? true);
+		var showSource = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showSource") ?? true);
 
 		var border = WidgetConfigJson.ReadObject(data, "border");
 		var borderStyle = new UiState<string>(WidgetConfigJson.ReadString(border, "style") ?? "off");
@@ -78,6 +79,12 @@ internal static class MusicPlayerWidgetConfigView
 						Key = "showHeader",
 						Label = AppStrings.Widgets.Music.HeaderProvider(),
 						Binding = Bind.To(showHeader),
+					},
+					new UiBooleanInput
+					{
+						Key = "showSource",
+						Label = AppStrings.Widgets.Music.Source(),
+						Binding = Bind.To(showSource),
 					},
 					new UiBooleanInput
 					{

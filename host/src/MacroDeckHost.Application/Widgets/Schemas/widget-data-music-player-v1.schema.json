@@ -34,6 +34,10 @@
       "type": "boolean",
       "description": "Show the progress bar and times."
     },
+    "showSource": {
+      "type": "boolean",
+      "description": "Show where playback is happening (device, app or browser source) and the provider's short badge, such as 2/3, in the header."
+    },
     "border": {
       "$ref": "#/$defs/widgetBorder",
       "description": "Outline drawn along the widget edge."

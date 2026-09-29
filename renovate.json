@@ -3,7 +3,8 @@
   "extends": [
     "config:recommended",
     ":dependencyDashboard",
-    ":semanticCommitsDisabled"
+    ":semanticCommitsDisabled",
+    "helpers:pinGitHubActionDigests"
   ],
   "timezone": "Europe/Berlin",
   "schedule": [
@@ -29,6 +30,20 @@
       "security"
     ]
   },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "The Rust toolchain CI and release builds use.",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/.+\\.yml$/"
+      ],
+      "matchStrings": [
+        "RUST_TOOLCHAIN: '(?<currentValue>\\d+\\.\\d+\\.\\d+)'"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "rust-lang/rust"
+    }
+  ],
   "packageRules": [
     {
       "description": "The .NET SDK pin in global.json moves on its own, never bundled with packages.",

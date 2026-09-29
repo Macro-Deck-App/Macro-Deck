@@ -1,6 +1,6 @@
 ---
 title: Setup flows
-description: Guide users through connecting an integration with IConfigFlowProvider - steps, fields, validation errors, secrets, OAuth and reconfiguring an entry.
+description: Guide users through connecting an integration with IConfigFlowProvider - steps, fields, validation errors, secrets, OAuth, reconfiguring an entry and optional settings.
 ---
 
 A setup flow (config flow) walks the user through connecting your integration: a few form steps, then a
@@ -76,6 +76,9 @@ Things to know:
   later.
 - **More than one entry is allowed by default.** Return `false` from `AllowsMultipleConfigurations` when
   a second one makes no sense (a single account).
+- **A flow has to be completed before the integration runs.** Until the user saves an entry, the
+  integration is off, shown as needing setup, and turning it on opens the flow. For a flow that only
+  changes settings with defaults, see [Optional settings](#optional-settings).
 
 ## Outcomes
 
@@ -279,6 +282,53 @@ When the user edits an existing entry, the same flow runs again, pre-filled with
 - **A secret field left empty keeps its stored secret**, and a `ConfigFlowValue.Secret` for that field is
   ignored unless the user typed a new one.
 
+## Optional settings
+
+A flow can also be the settings page of an integration that already works without it: a few switches
+that are off by default, an interval with a sensible default. Return `false` from
+`RequiresConfiguration`, and `false` from `AllowsMultipleConfigurations` so there is only ever one
+settings entry:
+
+```csharp
+public sealed class SystemMediaIntegration : IPluginIntegration, IConfigFlowProvider
+{
+	public bool RequiresConfiguration => false;
+
+	public bool AllowsMultipleConfigurations => false;
+
+	public IConfigFlow CreateConfigFlow() => new SystemMediaSettingsFlow();
+
+	public async Task InitializeAsync(IIntegrationContext context)
+	{
+		var entry = (await context.Config.GetEntriesAsync()).FirstOrDefault();
+		var cycleApps = entry is not null &&
+			await context.Config.GetStringAsync(entry.Id, "cycle_apps") is "true";
+		// No entry yet: run with the defaults.
+	}
+
+	// Other IPluginIntegration members omitted.
+}
+```
+
+With `RequiresConfiguration` set to `false`:
+
+- **The integration runs with no config entry.** It starts enabled like any integration without a flow,
+  unless its metadata opts out of that. `GetEntriesAsync` returns an empty list until the user saves the
+  flow, so read your defaults then. Nothing creates an entry for you.
+- **It is never shown as needing setup.** Turning it on just turns it on, its actions and variables are
+  available right away, and the flow stays on the integration page to change the settings.
+- **Saving the flow enables and reinitializes the integration**, as it does for every flow, so
+  `InitializeAsync` reads the new values. That also turns it back on if the user had turned it off.
+- **Removing the entry keeps the integration running** and reinitializes it, so it falls back to the
+  defaults. A required flow instead turns the integration off when its last entry goes.
+- **Several entries are possible if you allow them.** With `AllowsMultipleConfigurations` left at `true`
+  the user can add more than one, and `GetEntriesAsync` returns all of them; for settings that is rarely
+  what you want.
+
+`RequiresConfiguration` is read when the integration is discovered, so keep it side-effect free. Hosts up
+to 3.0.0-beta.14 ignore it and treat every flow as required, so on those the integration still waits for
+the flow to be completed once.
+
 ## Rendering the flow as a UI tree
 
 Implement `IUiConfigFlowProvider` on the integration and `IUiConfigFlow` on the flow to draw the flow as a
@@ -290,6 +340,8 @@ which of its values are secret - return those as `ConfigFlowValue.Secret` on com
 ## Over the plugin protocol
 
 A config flow is one `config-flow` capability, driven by `flow.start`, `flow.submit` and `flow.abandon`.
+Its `describe` result carries `allowsMultipleConfigurations`, `servesConfigUiTree` and
+`requiresConfiguration`; a plugin that sends no `requiresConfiguration` has a required flow.
 `MacroDeck.Plugin.Hosting` keeps one `IConfigFlow` per host-minted session id, resolves secrets to
 plaintext before `flow.submit`, and forwards OAuth state and `EntryTitle`. `PluginTestHarness.ConfigFlow`
 drives the same operations in tests - see [Testing](/features/testing/) and

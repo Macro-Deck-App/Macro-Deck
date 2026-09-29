@@ -30,6 +30,8 @@ public sealed record MusicPlayerWidgetData
 
 	public bool ShowTimeline { get; init; } = true;
 
+	public bool ShowSource { get; init; } = true;
+
 	/// <summary>Whether the tile is filled with artwork rather than stacking a square cover.</summary>
 	public bool IsFullCover => string.Equals(CoverStyle, FullCoverStyle, StringComparison.Ordinal);
 
@@ -77,6 +79,7 @@ public sealed record MusicPlayerWidgetData
 			ShowArtist = ReadBool(data, "showArtist") ?? true,
 			ShowAlbum = ReadBool(data, "showAlbum") ?? true,
 			ShowTimeline = ReadBool(data, "showTimeline") ?? true,
+			ShowSource = ReadBool(data, "showSource") ?? true,
 		};
 	}
 

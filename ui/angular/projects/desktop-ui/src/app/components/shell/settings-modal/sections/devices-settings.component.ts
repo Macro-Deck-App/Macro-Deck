@@ -110,6 +110,26 @@ export class DevicesSettingsComponent implements OnInit {
     return device.clientType !== 'provider' && device.clientType !== 'admin-ui';
   }
 
+  canHideSettingsButton(device: Device): boolean {
+    return device.clientType === 'web-client';
+  }
+
+  async toggleSettingsButton(device: Device): Promise<void> {
+    this.openMenuDeviceId.set(null);
+    const failed = () => this.toastService.show(
+      this.localization.translateKey(AppStrings.Settings.Devices.SettingsButton.SaveFailed),
+      { variant: 'error' },
+    );
+    try {
+      const response = await this.deviceService.setSettingsButtonHidden(device.id, !device.settingsButtonHidden);
+      if (!response.success) {
+        failed();
+      }
+    } catch {
+      failed();
+    }
+  }
+
   screenSaverLabel(device: Device): string {
     const value = device.screenSaverEnabled
       ? this.localization.translateKey(AppStrings.Settings.Devices.ScreenSaver.Summary, {

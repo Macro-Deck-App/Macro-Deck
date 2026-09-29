@@ -334,6 +334,12 @@ export const ClientAppStrings = {
 		Settings: {
 			DisplaySection: 'macrodeck.app:WebClient.Settings.DisplaySection',
 			OpenSettings: 'macrodeck.app:WebClient.Settings.OpenSettings',
+			Sidebar: 'macrodeck.app:WebClient.Settings.Sidebar',
+			HideSettingsButton: {
+				Description: 'macrodeck.app:WebClient.Settings.HideSettingsButton.Description',
+				Label: 'macrodeck.app:WebClient.Settings.HideSettingsButton.Label',
+				SaveFailed: 'macrodeck.app:WebClient.Settings.HideSettingsButton.SaveFailed',
+			},
 			Licenses: {
 				Button: 'macrodeck.app:WebClient.Settings.Licenses.Button',
 				LoadFailed: 'macrodeck.app:WebClient.Settings.Licenses.LoadFailed',
@@ -362,6 +368,10 @@ export const ClientAppStrings = {
 				Description: 'macrodeck.app:WebClient.Widgets.Clock.Description',
 				Name: 'macrodeck.app:WebClient.Widgets.Clock.Name',
 			},
+			Countdown: {
+				Description: 'macrodeck.app:WebClient.Widgets.Countdown.Description',
+				Name: 'macrodeck.app:WebClient.Widgets.Countdown.Name',
+			},
 			HistoryGraph: {
 				Description: 'macrodeck.app:WebClient.Widgets.HistoryGraph.Description',
 				Name: 'macrodeck.app:WebClient.Widgets.HistoryGraph.Name',
@@ -373,6 +383,10 @@ export const ClientAppStrings = {
 			Slider: {
 				Description: 'macrodeck.app:WebClient.Widgets.Slider.Description',
 				Name: 'macrodeck.app:WebClient.Widgets.Slider.Name',
+			},
+			Stopwatch: {
+				Description: 'macrodeck.app:WebClient.Widgets.Stopwatch.Description',
+				Name: 'macrodeck.app:WebClient.Widgets.Stopwatch.Name',
 			},
 			Weather: {
 				Description: 'macrodeck.app:WebClient.Widgets.Weather.Description',
@@ -643,10 +657,14 @@ export const ClientAppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:WebClient.Rendering.Simple': 'Simple',
 	'macrodeck.app:WebClient.Rendering.Standard': 'Standard',
 	'macrodeck.app:WebClient.Settings.DisplaySection': 'Display',
+	'macrodeck.app:WebClient.Settings.HideSettingsButton.Description': 'Open the settings with a swipe in from the left edge',
+	'macrodeck.app:WebClient.Settings.HideSettingsButton.Label': 'Hide settings button',
+	'macrodeck.app:WebClient.Settings.HideSettingsButton.SaveFailed': 'Could not change the settings button',
 	'macrodeck.app:WebClient.Settings.Licenses.Button': 'Open source licenses',
 	'macrodeck.app:WebClient.Settings.Licenses.LoadFailed': 'Could not load the open source licenses.',
 	'macrodeck.app:WebClient.Settings.Licenses.Title': 'Open source licenses',
 	'macrodeck.app:WebClient.Settings.OpenSettings': 'Open Macro Deck settings',
+	'macrodeck.app:WebClient.Settings.Sidebar': 'Side panel',
 	'macrodeck.app:WebClient.Setup.Body': 'Finish the first-time setup in the Macro Deck desktop app, then reload this page.',
 	'macrodeck.app:WebClient.Update.ApplyFailed': 'The update could not be installed. Reload this page to try again.',
 	'macrodeck.app:WebClient.Update.Applying': 'Installing the update…',
@@ -659,6 +677,8 @@ export const ClientAppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:WebClient.Widgets.ActionButton.Name': 'Action Button',
 	'macrodeck.app:WebClient.Widgets.Clock.Description': 'Digital or analog clock showing device or host time',
 	'macrodeck.app:WebClient.Widgets.Clock.Name': 'Clock',
+	'macrodeck.app:WebClient.Widgets.Countdown.Description': 'Timer that counts down from a set time and signals when it runs out',
+	'macrodeck.app:WebClient.Widgets.Countdown.Name': 'Countdown',
 	'macrodeck.app:WebClient.Widgets.HistoryGraph.Description': 'Live graph card for a numeric variable (CPU, RAM, GPU…) with a rolling chart',
 	'macrodeck.app:WebClient.Widgets.HistoryGraph.Name': 'History Graph',
 	'macrodeck.app:WebClient.Widgets.MusicPlayer.Description': 'Show what\'s playing on a connected music provider',
@@ -666,6 +686,8 @@ export const ClientAppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:WebClient.Widgets.NoPreview': 'No preview available',
 	'macrodeck.app:WebClient.Widgets.Slider.Description': 'Adjustable value slider (horizontal or vertical)',
 	'macrodeck.app:WebClient.Widgets.Slider.Name': 'Slider',
+	'macrodeck.app:WebClient.Widgets.Stopwatch.Description': 'Stopwatch you start, pause and reset with a press',
+	'macrodeck.app:WebClient.Widgets.Stopwatch.Name': 'Stopwatch',
 	'macrodeck.app:WebClient.Widgets.Weather.Description': 'Current conditions and a multi-day forecast for a location',
 	'macrodeck.app:WebClient.Widgets.Weather.Name': 'Weather',
 };

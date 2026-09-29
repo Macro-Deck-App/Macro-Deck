@@ -411,6 +411,12 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>Variables de ce widget</value>
   </data>
+  <data name="ActionBuilder.Trigger.CountdownDismissed" xml:space="preserve">
+    <value>Acquitté</value>
+  </data>
+  <data name="ActionBuilder.Trigger.CountdownFinished" xml:space="preserve">
+    <value>Temps écoulé</value>
+  </data>
   <data name="ActionBuilder.Trigger.DoublePress" xml:space="preserve">
     <value>Double appui</value>
   </data>
@@ -422,6 +428,15 @@
   </data>
   <data name="ActionBuilder.Trigger.ShortPress" xml:space="preserve">
     <value>Appui court</value>
+  </data>
+  <data name="ActionBuilder.Trigger.TimerPaused" xml:space="preserve">
+    <value>En pause</value>
+  </data>
+  <data name="ActionBuilder.Trigger.TimerReset" xml:space="preserve">
+    <value>Réinitialisé</value>
+  </data>
+  <data name="ActionBuilder.Trigger.TimerStarted" xml:space="preserve">
+    <value>Démarré</value>
   </data>
   <data name="ActionBuilder.Trigger.TouchEnd" xml:space="preserve">
     <value>Fin du contact</value>
@@ -4587,6 +4602,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Detail.SingleConfigurationHint" xml:space="preserve">
     <value>Cette intégration ne prend en charge qu'une seule configuration. La reconfigurer la remplace, les widgets continuent donc de fonctionner.</value>
   </data>
+  <data name="Integrations.Detail.OptionalConfigurationHint" xml:space="preserve">
+    <value>Cette intégration fonctionne sans configuration. Configure-la uniquement si tu veux modifier ses paramètres.</value>
+  </data>
   <data name="Integrations.Detail.StatusDisabled" xml:space="preserve">
     <value>Désactivée</value>
   </data>
@@ -7454,6 +7472,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Integrations.Obs.Params.Filter" xml:space="preserve">
     <value>Filtre</value>
+  </data>
+  <data name="Integrations.Obs.Params.GroupOption" xml:space="preserve">
+    <value>{name} (groupe)</value>
   </data>
   <data name="Integrations.Obs.Params.Input" xml:space="preserve">
     <value>Entrée</value>
@@ -13768,6 +13789,18 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Settings.Devices.ScreenSaver.Unavailable" xml:space="preserve">
     <value>Indisponible</value>
   </data>
+  <data name="Settings.Devices.SettingsButton.HiddenLine" xml:space="preserve">
+    <value>Bouton des paramètres masqué : balaie depuis le bord gauche</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.HideAction" xml:space="preserve">
+    <value>Masquer le bouton des paramètres</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.SaveFailed" xml:space="preserve">
+    <value>Impossible de modifier le bouton des paramètres</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.ShowAction" xml:space="preserve">
+    <value>Afficher le bouton des paramètres</value>
+  </data>
   <data name="Settings.Devices.SignedOutMarker" xml:space="preserve">
     <value>Déconnecté</value>
   </data>
@@ -16634,6 +16667,15 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="WebClient.Settings.DisplaySection" xml:space="preserve">
     <value>Affichage</value>
   </data>
+  <data name="WebClient.Settings.HideSettingsButton.Description" xml:space="preserve">
+    <value>Ouvre les paramètres en balayant depuis le bord gauche</value>
+  </data>
+  <data name="WebClient.Settings.HideSettingsButton.Label" xml:space="preserve">
+    <value>Masquer le bouton des paramètres</value>
+  </data>
+  <data name="WebClient.Settings.HideSettingsButton.SaveFailed" xml:space="preserve">
+    <value>Impossible de modifier le bouton des paramètres</value>
+  </data>
   <data name="WebClient.Settings.Licenses.Button" xml:space="preserve">
     <value>Licences open source</value>
   </data>
@@ -16645,6 +16687,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="WebClient.Settings.OpenSettings" xml:space="preserve">
     <value>Ouvrir les paramètres de Macro Deck</value>
+  </data>
+  <data name="WebClient.Settings.Sidebar" xml:space="preserve">
+    <value>Panneau latéral</value>
   </data>
   <data name="WebClient.Setup.Body" xml:space="preserve">
     <value>Termine la configuration initiale dans l'application de bureau Macro Deck, puis recharge cette page.</value>
@@ -16682,6 +16727,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="WebClient.Widgets.Clock.Name" xml:space="preserve">
     <value>Horloge</value>
   </data>
+  <data name="WebClient.Widgets.Countdown.Description" xml:space="preserve">
+    <value>Minuteur qui décompte à partir d'une durée définie et signale la fin</value>
+  </data>
+  <data name="WebClient.Widgets.Countdown.Name" xml:space="preserve">
+    <value>Compte à rebours</value>
+  </data>
   <data name="WebClient.Widgets.HistoryGraph.Description" xml:space="preserve">
     <value>Carte graphique en direct pour une variable numérique (CPU, RAM, GPU…) avec un graphique déroulant</value>
   </data>
@@ -16702,6 +16753,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="WebClient.Widgets.Slider.Name" xml:space="preserve">
     <value>Curseur</value>
+  </data>
+  <data name="WebClient.Widgets.Stopwatch.Description" xml:space="preserve">
+    <value>Chronomètre que tu démarres, mets en pause et réinitialises d'une pression</value>
+  </data>
+  <data name="WebClient.Widgets.Stopwatch.Name" xml:space="preserve">
+    <value>Chronomètre</value>
   </data>
   <data name="WebClient.Widgets.Weather.Description" xml:space="preserve">
     <value>Conditions actuelles et prévisions sur plusieurs jours pour un lieu</value>
@@ -17069,6 +17126,55 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Widgets.ContextMenu.UnpinWidgets" xml:space="preserve">
     <value>Détacher les widgets</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.AlreadyRunning" xml:space="preserve">
+    <value>Ce compte à rebours est déjà en cours.</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.Hours" xml:space="preserve">
+    <value>Heures</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.Minutes" xml:space="preserve">
+    <value>Minutes</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.PresetHours.One" xml:space="preserve">
+    <value>{count} h</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Countdown.Dialog.PresetHours.Other" xml:space="preserve">
+    <value>{count} h</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Countdown.Dialog.PresetMinutes.One" xml:space="preserve">
+    <value>{count} min</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Countdown.Dialog.PresetMinutes.Other" xml:space="preserve">
+    <value>{count} min</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Countdown.Dialog.Start" xml:space="preserve">
+    <value>Démarrer</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.Title" xml:space="preserve">
+    <value>Régler le compte à rebours</value>
+  </data>
+  <data name="Widgets.Countdown.Mode" xml:space="preserve">
+    <value>Au démarrage</value>
+  </data>
+  <data name="Widgets.Countdown.ModeAsk" xml:space="preserve">
+    <value>Demander la durée</value>
+  </data>
+  <data name="Widgets.Countdown.ModeFixed" xml:space="preserve">
+    <value>Utiliser la durée définie</value>
+  </data>
+  <data name="Widgets.Countdown.ModeHint" xml:space="preserve">
+    <value>La demande ouvre une fenêtre sur l'appareil où tu as appuyé sur le compte à rebours. Un deck matériel réutilise la dernière durée saisie.</value>
+  </data>
+  <data name="Widgets.Countdown.TapToDismiss" xml:space="preserve">
+    <value>Appuie pour acquitter</value>
+  </data>
+  <data name="Widgets.Countdown.TapToSet" xml:space="preserve">
+    <value>Appuie pour régler</value>
   </data>
   <data name="Widgets.CursorPositionTooltip" xml:space="preserve">
     <value>Position de la souris à l'écran</value>
@@ -17713,6 +17819,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.Music.SmallCoverDesc" xml:space="preserve">
     <value>Pochette avec détails en dessous</value>
   </data>
+  <data name="Widgets.Music.Source" xml:space="preserve">
+    <value>Source</value>
+  </data>
   <data name="Widgets.Music.Timeline" xml:space="preserve">
     <value>Progression</value>
   </data>
@@ -17904,6 +18013,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Widgets.Slider.Vertical" xml:space="preserve">
     <value>Vertical</value>
+  </data>
+  <data name="Widgets.Timer.LabelPlaceholderExample" xml:space="preserve">
+    <value>Pizza</value>
   </data>
   <data name="Widgets.TypeSelector.Heading" xml:space="preserve">
     <value>Sélectionner le type de widget</value>

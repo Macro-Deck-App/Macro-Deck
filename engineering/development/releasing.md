@@ -43,6 +43,8 @@ All signing, notarization and deployment credentials remain in the manually prot
 
 The Windows signer covers `MacroDeckHost.exe`, `MacroDeck.exe`, the generated NSIS uninstaller, and the final NSIS installer. Its wrapper refuses unexpected file types and skips Tauri's NSIS plugin DLLs so they do not consume signing quota. The job fails unless exactly those four signing roles were recorded and successfully verified.
 
+Code that runs in these jobs is pinned, because every step of a job shares one runner user and a secret is only as safe as the least trusted thing that ran before it. Every GitHub Action is referenced by commit SHA. The tools the packaging steps fetch at build time (Tauri's linuxdeploy tools, the AppImage runtime and SSL.com's CodeSignTool with its bundled JDK) come only from the URLs and SHA-256 hashes in [`ci/scripts/pinned-tools.mjs`](../../ci/scripts/pinned-tools.mjs) and [`ci/scripts/appimage-library-notices.mjs`](../../ci/scripts/appimage-library-notices.mjs). Tauri would otherwise download its linuxdeploy tools unverified, so the Linux job seeds them into Tauri's tools cache before building. A hash mismatch fails the job on purpose. Re-pinning means reviewing the new upstream file first, never just copying the new hash.
+
 A release should not be considered production-ready merely because an unsigned contributor build succeeded. Check the package/signing steps for every platform and confirm the expected assets reached the GitHub release.
 
 ## Install manifest

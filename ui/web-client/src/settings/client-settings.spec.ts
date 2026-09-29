@@ -85,6 +85,43 @@ function wakeLock(status: WakeLockStatus = 'off', on = false) {
   };
 }
 
+function settingsButton(hidden = false) {
+  const listeners: Array<() => void> = [];
+  let answer: ((saved: boolean) => void) | null = null;
+  const surface = {
+    isOffered: true,
+    isConnected: true,
+    hidden: hidden,
+    stopped: 0,
+    set: jasmine.createSpy('set').and.callFake(() => new Promise<boolean>(resolve => {
+      answer = resolve;
+    })),
+    offered() {
+      return surface.isOffered;
+    },
+    connected() {
+      return surface.isConnected;
+    },
+    get() {
+      return surface.hidden;
+    },
+    onChange: (listener: () => void) => {
+      listeners.push(listener);
+      return () => {
+        surface.stopped++;
+      };
+    },
+    notify: () => listeners.forEach(listener => listener()),
+    answer: async (saved: boolean) => {
+      const pending = answer;
+      answer = null;
+      if (pending !== null) pending(saved);
+      await flush();
+    },
+  };
+  return surface;
+}
+
 function appUpdate(phase: AppUpdatePhase = 'idle') {
   const listeners: Array<(phase: AppUpdatePhase) => void> = [];
   return {
@@ -288,6 +325,98 @@ describe('client settings', () => {
       fixture.handle.open();
 
       expect(text()).not.toContain(english(ClientAppStrings.WebClient.DeviceSetup.SectionTitle));
+    });
+  });
+
+  describe('hiding the settings button', () => {
+    const label = () => english(ClientAppStrings.WebClient.Settings.HideSettingsButton.Label);
+    const toggle = () =>
+      dialog().querySelector<HTMLInputElement>(`.wc-toggle-input[aria-label="${label()}"]`);
+    const flip = (on: boolean) => {
+      const input = toggle()!;
+      input.checked = on;
+      input.dispatchEvent(new Event('change'));
+    };
+    const failure = () => english(ClientAppStrings.WebClient.Settings.HideSettingsButton.SaveFailed);
+
+    it('is offered in the display section while the device is signed in', () => {
+      const surface = settingsButton(true);
+      create({ settingsButton: surface }).handle.open();
+
+      expect(text()).toContain(label());
+      expect(text()).toContain(english(ClientAppStrings.WebClient.Settings.HideSettingsButton.Description));
+      expect(toggle()!.checked).toBeTrue();
+      expect(toggle()!.disabled).toBeFalse();
+    });
+
+    it('is not offered before the device is signed in, decided again on every open', () => {
+      const surface = settingsButton();
+      surface.isOffered = false;
+      const fixture = create({ settingsButton: surface });
+      fixture.handle.open();
+      expect(text()).not.toContain(label());
+      fixture.handle.close();
+
+      surface.isOffered = true;
+      fixture.handle.open();
+
+      expect(toggle()).not.toBeNull();
+    });
+
+    it('cannot be switched while the host is not connected', () => {
+      const surface = settingsButton();
+      surface.isConnected = false;
+      create({ settingsButton: surface }).handle.open();
+      expect(toggle()!.disabled).toBeTrue();
+
+      surface.isConnected = true;
+      surface.notify();
+
+      expect(toggle()!.disabled).toBeFalse();
+    });
+
+    it('asks the host with the chosen value and keeps the dialog open', async () => {
+      const surface = settingsButton();
+      create({ settingsButton: surface }).handle.open();
+
+      flip(true);
+      surface.hidden = true;
+      surface.notify();
+      await surface.answer(true);
+
+      expect(surface.set).toHaveBeenCalledOnceWith(true);
+      expect(toggle()!.checked).toBeTrue();
+      expect(statusLines()).not.toContain(failure());
+    });
+
+    it('follows a change the host pushes while the dialog is open', () => {
+      const surface = settingsButton();
+      create({ settingsButton: surface }).handle.open();
+
+      surface.hidden = true;
+      surface.notify();
+
+      expect(toggle()!.checked).toBeTrue();
+    });
+
+    it('says so and shows the stored value again when the change fails', async () => {
+      const surface = settingsButton();
+      create({ settingsButton: surface }).handle.open();
+
+      flip(true);
+      await surface.answer(false);
+
+      expect(statusLines()).toContain(failure());
+      expect(toggle()!.checked).toBeFalse();
+    });
+
+    it('stops listening once destroyed', () => {
+      const surface = settingsButton();
+      const fixture = create({ settingsButton: surface });
+
+      fixture.handle.destroy();
+
+      expect(surface.stopped).toBe(1);
     });
   });
 

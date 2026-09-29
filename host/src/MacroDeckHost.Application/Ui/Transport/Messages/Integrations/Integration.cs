@@ -26,6 +26,8 @@ public class Integration
 
 	public bool AllowsMultipleConfigurations { get; set; } = true;
 
+	public bool RequiresConfiguration { get; set; } = true;
+
 	public int ConfiguredEntryCount { get; set; }
 
 	public bool HasIcon { get; set; }

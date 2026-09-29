@@ -74,6 +74,30 @@ public class MacroDeck2MigrationSourceTests
 		});
 	}
 
+	[TestCase(16, 16, 16, 16)]
+	[TestCase(20, 24, 16, 16)]
+	public async Task Read_KeepsAGridUpTo16By16AndClampsALargerOne(int rows,
+		int columns,
+		int expectedRows,
+		int expectedColumns)
+	{
+		_fixture.WithConfig()
+			.WithProfile("0",
+				"Big",
+				rows,
+				columns,
+				folders: [MacroDeck2Fixture.Folder("root", "*Root*", [MacroDeck2Fixture.Button(0, 0)])])
+			.Build();
+
+		var profile = (await Read()).Profiles.Single().Profile!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(profile.DefaultRows, Is.EqualTo(expectedRows));
+			Assert.That(profile.DefaultColumns, Is.EqualTo(expectedColumns));
+		});
+	}
+
 	/// <summary>
 	/// Macro Deck 2's radius is a percentage of the button height and names the corner arc's diameter, so
 	/// its default of 40 drew a corner a fifth of the height across. Macro Deck 3 stores pixels against a
