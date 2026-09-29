@@ -371,7 +371,7 @@ export {
 } from './ui-framework/node-resolution.util';
 export { type UiNode, type UiNodeEvent } from './ui-framework/ui-node.interface';
 export { applyUiPatch, type UiPatch, type UiPatchOperation, UiPatchOperations } from './ui-framework/ui-patch';
-export { nodeResource, type UiResource } from './ui-framework/ui-resource';
+export { isIconUiResource, nodeResource, type UiResource, type UiResourceHint } from './ui-framework/ui-resource';
 export { UI_COMPONENT_EVENTS_WELL_KNOWN, UiComponentEvents } from './ui-components/component-events';
 export {
   nodeHexColor,

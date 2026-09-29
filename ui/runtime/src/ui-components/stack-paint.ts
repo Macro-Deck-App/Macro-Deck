@@ -12,6 +12,7 @@ import {
   buttonFit,
   buttonOpacity,
   buttonTakesTileCorner,
+  buttonZoom,
   nodeAlign,
   nodeGapPx,
   nodeIsHorizontal,
@@ -111,7 +112,10 @@ export function paintButtonArtwork<TState>(
   ctx: UiComponentContext<TState>,
   state: StackButtonState,
 ): void {
-  const artwork = ctx.host.resourceUrl(nodeResource(node, UiComponentProperties.Source));
+  const edge = Math.max(ctx.box.width ?? 0, ctx.box.height ?? 0);
+  const artwork = ctx.host.resourceUrl(
+    nodeResource(node, UiComponentProperties.Source),
+    edge > 0 ? { displayPx: edge * buttonZoom(node) } : undefined);
   const tint = supportsMasks() ? nodeHexColor(node, UiComponentProperties.Tint) ?? null : null;
 
   const repaintArtwork = () => {

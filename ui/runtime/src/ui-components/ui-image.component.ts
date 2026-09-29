@@ -2,7 +2,7 @@ import { UiComponents } from './ui-component-types';
 import { nodeResource } from '../ui-framework/ui-resource';
 import { nodeLength, resolveLength } from '../ui-framework/length';
 import { UiComponentProperties } from './component-properties';
-import { artworkCrossfades, artworkFilter, buttonArtworkTransform, buttonOpacity } from './style';
+import { artworkCrossfades, artworkFilter, buttonArtworkTransform, buttonOpacity, buttonZoom } from './style';
 import type { UiComponentDefinition } from '../ui-framework/component-registry';
 import {
   ArtworkCrossfadeState,
@@ -34,8 +34,10 @@ export const uiImageComponent: UiComponentDefinition<UiImageState> = {
     ctx.setClass(element, 'widget-artwork-eased', artworkCrossfades(node));
     ctx.sizeTo(element, ctx.box);
 
-    const source = ctx.host.resourceUrl(nodeResource(node, UiComponentProperties.Source));
     const edge = resolveLength(nodeLength(node, UiComponentProperties.Size), ctx.basis, ctx.crossExtent);
+    const source = ctx.host.resourceUrl(
+      nodeResource(node, UiComponentProperties.Source),
+      edge !== undefined && edge > 0 ? { displayPx: edge * buttonZoom(node) } : undefined);
     const state = ctx.state.artwork;
 
     const repaintArtwork = () => {

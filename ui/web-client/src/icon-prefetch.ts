@@ -14,6 +14,7 @@ export interface IconPrefetchOptions {
   currentFolderId(): string | null;
   resolveGrid(folder: Folder): { cols: number; rows: number; spacing: number };
   outerMargin: number;
+  fixedSize?(): number | undefined;
   load?(url: string): Promise<void>;
   schedule?(work: () => void): void;
 }
@@ -91,7 +92,8 @@ export class IconPrefetch {
       viewportWidth: window.innerWidth,
       viewportHeight: window.innerHeight,
       outerMargin: this.options.outerMargin,
-      devicePixelRatio: window.devicePixelRatio || 1,
+      devicePixelRatio: 1,
+      fixedSize: this.options.fixedSize?.(),
       resolveGrid: folder => this.options.resolveGrid(folder),
     });
   }

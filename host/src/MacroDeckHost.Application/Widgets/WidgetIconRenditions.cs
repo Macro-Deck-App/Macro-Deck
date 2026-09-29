@@ -1,4 +1,5 @@
 using MacroDeck.Plugin.Protocol.Limits;
+using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Widgets.Icons;
 
 namespace MacroDeckHost.Application.Widgets;
@@ -10,29 +11,34 @@ public enum WidgetIconRenditionStatus
 	TooLarge
 }
 
-public sealed record WidgetIconRendition(WidgetIconRenditionStatus Status, byte[]? Content = null, string? MediaType = null);
+public sealed record WidgetIconRendition(WidgetIconRenditionStatus Status,
+	byte[]? Content = null,
+	string? MediaType = null,
+	bool Stable = true);
 
 public static class WidgetIconRenditions
 {
-	// A deck tile never needs a sharper icon than this, and the retired Slider component used the same
-	// rendition size. The further candidates only come into play when the first is too large to register.
-	private static readonly (int Size, bool StaticFrame)[] _candidates =
-	[
-		(256, false),
-		(128, false),
-		(128, true)
-	];
+	public const int DefaultSize = 256;
+
+	public static int Bucket(int requestedSize)
+		=> IconVariants.TargetSizes.Where(size => size >= requestedSize).DefaultIfEmpty(IconVariants.TargetSizes.Max()).Min();
+
+	public static Task<WidgetIconRendition> ProduceAsync(IWidgetIconSource source,
+		string reference,
+		CancellationToken cancellationToken)
+		=> ProduceAsync(source, reference, DefaultSize, cancellationToken);
 
 	public static async Task<WidgetIconRendition> ProduceAsync(IWidgetIconSource source,
 		string reference,
+		int size,
 		CancellationToken cancellationToken)
 	{
 		// Never WebP: one rendition goes to every client and Safari before 14 draws WebP blank. An animated
 		// GIF over the UI resource limit steps down in size and finally to its first frame.
-		foreach (var (size, staticFrame) in _candidates)
+		foreach (var (candidate, staticFrame) in Candidates(Bucket(size)))
 		{
 			var image = await source
-				.GetImageAsync(reference, size, acceptWebp: false, staticFrame, cancellationToken)
+				.GetImageAsync(reference, candidate, acceptWebp: false, staticFrame, cancellationToken)
 				.ConfigureAwait(false);
 
 			if (image is null)
@@ -54,10 +60,20 @@ public static class WidgetIconRenditions
 
 			if (content.Length <= ProtocolLimits.MaxUiResourceBytes)
 			{
-				return new WidgetIconRendition(WidgetIconRenditionStatus.Rendered, content, image.MediaType);
+				return new WidgetIconRendition(WidgetIconRenditionStatus.Rendered, content, image.MediaType, image.Stable);
 			}
 		}
 
 		return new WidgetIconRendition(WidgetIconRenditionStatus.TooLarge);
+	}
+
+	private static IEnumerable<(int Size, bool StaticFrame)> Candidates(int size)
+	{
+		foreach (var candidate in IconVariants.TargetSizes.Where(target => target <= size).OrderDescending())
+		{
+			yield return (candidate, false);
+		}
+
+		yield return (IconVariants.TargetSizes.Min(), true);
 	}
 }

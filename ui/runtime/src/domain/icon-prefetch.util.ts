@@ -38,6 +38,7 @@ export interface IconPrefetchMetrics {
   viewportHeight: number;
   outerMargin: number;
   devicePixelRatio: number;
+  fixedSize?: number;
   resolveGrid: (folder: Folder) => { cols: number; rows: number; spacing: number };
 }
 
@@ -71,7 +72,7 @@ export function collectIconPrefetchTargets(
       const widthPx = widget.w * cell.cellWidth + (widget.w - 1) * cell.gap;
       const heightPx = widget.h * cell.cellHeight + (widget.h - 1) * cell.gap;
       const rendered = Math.max(widthPx, heightPx, 1) * metrics.devicePixelRatio;
-      const size = iconSizeBucket(rendered * widgetIconZoomFactor(widget));
+      const size = metrics.fixedSize ?? iconSizeBucket(rendered * widgetIconZoomFactor(widget));
 
       for (const iconId of widgetIconIds(widget)) {
         targets.set(`${iconId}|${size}`, { iconId, size });

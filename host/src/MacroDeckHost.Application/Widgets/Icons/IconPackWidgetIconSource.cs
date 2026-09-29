@@ -56,6 +56,6 @@ public sealed class IconPackWidgetIconSource : IWidgetIconSource
 			return null;
 		}
 
-		return new WidgetIconImage(result.Data!.Content, result.Data.ContentType);
+		return new WidgetIconImage(result.Data!.Content, result.Data.ContentType, result.Data.Version is not null);
 	}
 }

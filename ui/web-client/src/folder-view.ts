@@ -248,7 +248,7 @@ export class FolderView {
 
     return {
       localization: base.localization,
-      resourceUrl: resource => base.resourceUrl(resource),
+      resourceUrl: (resource, hint) => base.resourceUrl(resource, hint),
       now: () => base.now(),
       culture: () => base.culture(),
       hourCycle: () => base.hourCycle?.(),

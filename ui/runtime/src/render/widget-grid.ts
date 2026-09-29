@@ -130,7 +130,9 @@ export function renderWidgetGrid(
     const base = options.host;
     const host: UiRenderHost = {
       localization: base.localization,
-      resourceUrl: resource => base.resourceUrl(resource),
+      resourceUrl: (resource, hint) => base.resourceUrl(resource, hint?.displayPx === undefined
+        ? hint
+        : { ...hint, displayPx: hint.displayPx * metrics.contentScale, widgetId }),
       now: () => base.now(),
       culture: () => base.culture(),
       hourCycle: () => base.hourCycle?.(),

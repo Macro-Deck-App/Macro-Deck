@@ -23,6 +23,7 @@ import {
   type PwaInstallOutcome,
 } from '../pwa';
 import { type RenderingMode } from '../rendering-mode';
+import { ICON_RESOLUTIONS, type IconResolution, type IconSizeRange } from '../icon-resolution';
 import { type WakeLockStatus } from '../wake-lock';
 
 const INSTALL_DISMISSED_HINT_MS = 4000;
@@ -49,6 +50,13 @@ export interface RenderingModeSurface {
   get(): RenderingMode;
   set(mode: RenderingMode): void;
   onChange(listener: () => void): () => void;
+}
+
+export interface IconResolutionSurface {
+  get(): IconResolution;
+  set(resolution: IconResolution): void;
+  onChange(listener: () => void): () => void;
+  inUse(): IconSizeRange | null;
 }
 
 export interface WakeLockSurface {
@@ -93,6 +101,7 @@ export interface ClientSettingsOptions {
   client: SettingsTranslator;
   appearance: AppearanceSurface;
   renderingMode: RenderingModeSurface;
+  iconResolution?: IconResolutionSurface;
   wakeLock: WakeLockSurface;
   settingsButton?: SettingsButtonSurface;
   update: AppUpdateSurface;
@@ -196,6 +205,8 @@ interface OpenModal {
   licenses: LicensesViewer;
   themeMode: { setValue(value: string | null): void };
   renderMode: { setValue(value: string | null): void };
+  iconResolution: { setValue(value: string | null): void } | null;
+  iconResolutionDescription: HTMLElement | null;
   wakeLockControl: HTMLElement;
   wakeLockStatus: HTMLElement;
   settingsButtonToggle: ToggleHandle | null;
@@ -244,6 +255,23 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
       { value: 'standard', label: text(ClientAppStrings.WebClient.Rendering.Standard) },
       { value: 'simple', label: text(ClientAppStrings.WebClient.Rendering.Simple) },
     ];
+  }
+
+  function iconResolutionOptions(): SegmentedOption[] {
+    return ICON_RESOLUTIONS.map(resolution => ({
+      value: String(resolution),
+      label: resolution === 'auto'
+        ? text(ClientAppStrings.WebClient.IconResolution.Automatic)
+        : text(ClientAppStrings.WebClient.IconResolution.SizeOption, { size: resolution }),
+    }));
+  }
+
+  function iconResolutionText(surface: IconResolutionSurface): string {
+    const inUse = surface.get() === 'auto' ? surface.inUse() : null;
+    if (inUse === null) return text(ClientAppStrings.WebClient.IconResolution.Description);
+    return inUse.min === inUse.max
+      ? text(ClientAppStrings.WebClient.IconResolution.InUse, { size: inUse.min })
+      : text(ClientAppStrings.WebClient.IconResolution.InUseRange, { min: inUse.min, max: inUse.max });
   }
 
   function description(row: HTMLElement): HTMLElement | null {
@@ -360,6 +388,14 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
       onChange: value => options.renderingMode.set(value as RenderingMode),
     });
 
+    const iconSurface = options.iconResolution;
+    const iconResolution = iconSurface === undefined ? null : createSegmentedControl({
+      ariaLabel: text(ClientAppStrings.WebClient.IconResolution.Label),
+      options: iconResolutionOptions(),
+      value: String(iconSurface.get()),
+      onChange: value => iconSurface.set(value === 'auto' ? 'auto' : Number(value) as IconResolution),
+    });
+
     const themeMode = createSegmentedControl({
       ariaLabel: text(ClientAppStrings.Settings.Appearance.ThemeModeLabel),
       options: themeOptions(),
@@ -385,6 +421,16 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
           control: themeMode.element,
         }),
     );
+
+    let iconResolutionRow: HTMLElement | null = null;
+    if (iconSurface !== undefined && iconResolution !== null) {
+      iconResolutionRow = createSettingsRow({
+        label: text(ClientAppStrings.WebClient.IconResolution.Label),
+        description: iconResolutionText(iconSurface),
+        control: iconResolution.element,
+      });
+      displayRows.push(iconResolutionRow);
+    }
 
     const keepAwakeOffered = options.capabilities.wakeLock;
     if (keepAwakeOffered) {
@@ -479,6 +525,8 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
       licenses: licenses,
       themeMode: themeMode,
       renderMode: renderMode,
+      iconResolution: iconResolution,
+      iconResolutionDescription: iconResolutionRow === null ? null : description(iconResolutionRow),
       wakeLockControl: wakeLockControl,
       wakeLockStatus: wakeLockStatus,
       settingsButtonToggle: settingsButtonToggle,
@@ -614,6 +662,13 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
     if (modal === null) return;
 
     modal.renderMode.setValue(options.renderingMode.get());
+    const iconSurface = options.iconResolution;
+    if (iconSurface !== undefined) {
+      if (modal.iconResolution !== null) modal.iconResolution.setValue(String(iconSurface.get()));
+      if (modal.iconResolutionDescription !== null) {
+        modal.iconResolutionDescription.textContent = iconResolutionText(iconSurface);
+      }
+    }
     modal.themeMode.setValue(options.appearance.themeMode());
     renderWakeLock(modal);
     renderSettingsButton(modal);
@@ -730,6 +785,7 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
   const unsubscribeAppearance = options.appearance.onChange(() => render());
   const unsubscribeRendering = options.renderingMode.onChange(() => render());
   const unsubscribeWakeLock = options.wakeLock.onChange(() => render());
+  const unsubscribeIconResolution = options.iconResolution?.onChange(() => render());
   const unsubscribeSettingsButton = options.settingsButton === undefined
     ? () => undefined
     : options.settingsButton.onChange(() => render());
@@ -751,6 +807,7 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
       unsubscribeAppearance();
       unsubscribeRendering();
       unsubscribeWakeLock();
+      if (unsubscribeIconResolution !== undefined) unsubscribeIconResolution();
       unsubscribeSettingsButton();
       if (trigger.parentNode !== null) trigger.parentNode.removeChild(trigger);
     },

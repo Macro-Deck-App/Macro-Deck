@@ -16541,6 +16541,24 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="WebClient.DeviceSetup.WhyHeading" xml:space="preserve">
     <value>Dlaczego jest to potrzebne</value>
   </data>
+  <data name="WebClient.IconResolution.Automatic" xml:space="preserve">
+    <value>Automatycznie</value>
+  </data>
+  <data name="WebClient.IconResolution.Description" xml:space="preserve">
+    <value>Tryb automatyczny dobiera rozmiar do wielkości wyświetlanej ikony. Mniejszy wczytuje się szybciej, większy jest ostrzejszy.</value>
+  </data>
+  <data name="WebClient.IconResolution.InUse" xml:space="preserve">
+    <value>Obecnie: {size} px.</value>
+  </data>
+  <data name="WebClient.IconResolution.InUseRange" xml:space="preserve">
+    <value>Obecnie: od {min} do {max} px.</value>
+  </data>
+  <data name="WebClient.IconResolution.Label" xml:space="preserve">
+    <value>Rozdzielczość ikon</value>
+  </data>
+  <data name="WebClient.IconResolution.SizeOption" xml:space="preserve">
+    <value>{size} px</value>
+  </data>
   <data name="WebClient.Install.CanInstall" xml:space="preserve">
     <value>Zainstaluj Macro Deck z menu tej przeglądarki, aby uzyskać pełnoekranową aplikację uruchomioną cały czas.</value>
   </data>

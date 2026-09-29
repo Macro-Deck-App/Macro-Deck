@@ -16541,6 +16541,24 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="WebClient.DeviceSetup.WhyHeading" xml:space="preserve">
     <value>Proč je to potřeba</value>
   </data>
+  <data name="WebClient.IconResolution.Automatic" xml:space="preserve">
+    <value>Automaticky</value>
+  </data>
+  <data name="WebClient.IconResolution.Description" xml:space="preserve">
+    <value>Při automatickém nastavení se velikost volí podle toho, jak velká je ikona zobrazena. Menší se načte rychleji, větší je ostřejší.</value>
+  </data>
+  <data name="WebClient.IconResolution.InUse" xml:space="preserve">
+    <value>Aktuálně: {size} px.</value>
+  </data>
+  <data name="WebClient.IconResolution.InUseRange" xml:space="preserve">
+    <value>Aktuálně: {min} až {max} px.</value>
+  </data>
+  <data name="WebClient.IconResolution.Label" xml:space="preserve">
+    <value>Rozlišení ikon</value>
+  </data>
+  <data name="WebClient.IconResolution.SizeOption" xml:space="preserve">
+    <value>{size} px</value>
+  </data>
   <data name="WebClient.Install.CanInstall" xml:space="preserve">
     <value>Nainstalujte Macro Deck z nabídky tohoto prohlížeče pro aplikaci na celou obrazovku, která je vždy k dispozici.</value>
   </data>

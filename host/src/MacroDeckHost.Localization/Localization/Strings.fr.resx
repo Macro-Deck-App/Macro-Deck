@@ -16541,6 +16541,24 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="WebClient.DeviceSetup.WhyHeading" xml:space="preserve">
     <value>Pourquoi c'est nécessaire</value>
   </data>
+  <data name="WebClient.IconResolution.Automatic" xml:space="preserve">
+    <value>Automatique</value>
+  </data>
+  <data name="WebClient.IconResolution.Description" xml:space="preserve">
+    <value>Automatique choisit la taille selon la taille d'affichage de chaque icône. Plus petite, elle se charge plus vite ; plus grande, elle est plus nette.</value>
+  </data>
+  <data name="WebClient.IconResolution.InUse" xml:space="preserve">
+    <value>Actuellement : {size} px.</value>
+  </data>
+  <data name="WebClient.IconResolution.InUseRange" xml:space="preserve">
+    <value>Actuellement : de {min} à {max} px.</value>
+  </data>
+  <data name="WebClient.IconResolution.Label" xml:space="preserve">
+    <value>Résolution des icônes</value>
+  </data>
+  <data name="WebClient.IconResolution.SizeOption" xml:space="preserve">
+    <value>{size} px</value>
+  </data>
   <data name="WebClient.Install.CanInstall" xml:space="preserve">
     <value>Installe Macro Deck depuis le menu de ce navigateur pour une application plein écran, toujours active.</value>
   </data>

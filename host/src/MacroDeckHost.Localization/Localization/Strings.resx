@@ -16541,6 +16541,24 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="WebClient.DeviceSetup.WhyHeading" xml:space="preserve">
     <value>Why this is needed</value>
   </data>
+  <data name="WebClient.IconResolution.Automatic" xml:space="preserve">
+    <value>Automatic</value>
+  </data>
+  <data name="WebClient.IconResolution.Description" xml:space="preserve">
+    <value>Automatic picks the size from how large each icon is drawn. A smaller size loads faster, a larger one looks sharper.</value>
+  </data>
+  <data name="WebClient.IconResolution.InUse" xml:space="preserve">
+    <value>Currently {size} px.</value>
+  </data>
+  <data name="WebClient.IconResolution.InUseRange" xml:space="preserve">
+    <value>Currently {min} to {max} px.</value>
+  </data>
+  <data name="WebClient.IconResolution.Label" xml:space="preserve">
+    <value>Icon resolution</value>
+  </data>
+  <data name="WebClient.IconResolution.SizeOption" xml:space="preserve">
+    <value>{size} px</value>
+  </data>
   <data name="WebClient.Install.CanInstall" xml:space="preserve">
     <value>Install Macro Deck from this browser's menu for a full-screen, always-on app.</value>
   </data>
