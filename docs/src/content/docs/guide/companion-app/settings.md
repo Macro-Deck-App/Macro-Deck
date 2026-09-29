@@ -47,6 +47,16 @@ list of automations. A computer shows the new name the next time this device sig
 | Detect USB connection | Lets the app reach Macro Deck through a USB cable. See [Connect over USB](/guide/usb-connection/). |
 | Connect on opening | The computers the app opens by itself when it starts, in order: it opens the first that answers. **USB connection** can be one of them. |
 
+## Automation
+
+| Setting | Does |
+| --- | --- |
+| Allow external automation | Lets other apps run your scripts with an Android intent or a run-script link. Off by default. |
+| Automation key | The key every request has to carry. **Show**, **Copy key** and **Generate new key**, which stops every automation that uses the old key. |
+| Scripts | Each computer's scripts with their IDs. Tap a script to copy its link or, on Android, its intent details, or to add it to the home screen. |
+
+See [Run scripts from other apps](/guide/companion-app/automation/).
+
 ## Only on Android: Device control
 
 These let Macro Deck control the phone or tablet beyond the deck. Each one asks Android for a permission; see
