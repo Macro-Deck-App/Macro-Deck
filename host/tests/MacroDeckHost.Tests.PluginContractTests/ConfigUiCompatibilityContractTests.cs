@@ -74,6 +74,26 @@ internal sealed class ConfigUiCompatibilityContractTests : Harness.CapabilityCon
 		});
 	}
 
+	[Test]
+	public async Task A_plugin_that_predates_optional_configuration_still_has_to_be_set_up_first()
+	{
+		var integration = await ConnectAsync(
+			[new LegacyHandler(CapabilityKinds.ConfigFlow, ConfigFlowDescribeJson, [])],
+			[
+				new DeclaredCapability
+				{
+					Kind = CapabilityKinds.ConfigFlow, LocalId = ProviderCapabilityId.LocalId, VersionRange = _v1
+				}
+			],
+			[CapabilityKinds.ConfigFlow]);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(((MacroDeck.Sdk.ConfigFlow.IConfigFlowProvider)integration).RequiresConfiguration, Is.True);
+			Assert.That(IntegrationRegistry.IsEnabled(PluginId), Is.False);
+		});
+	}
+
 	private const string ConfigFlowDescribeJson = """{"allowsMultipleConfigurations":true}""";
 
 	private const string ActionsDescribeJson =

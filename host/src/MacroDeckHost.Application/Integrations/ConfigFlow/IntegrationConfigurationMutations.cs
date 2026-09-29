@@ -322,7 +322,7 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 				await store.Delete(entryId);
 				var remaining = await LoadRecords(store, integrationId);
 				await SynchronizeVariables(integrationId, remaining, cancellationToken);
-				if (!remaining.Any(entry => IsUsable(integrationId, entry)))
+				if (RequiresConfiguration(integrationId) && !remaining.Any(entry => IsUsable(integrationId, entry)))
 				{
 					if (storeDisabled)
 					{
@@ -450,6 +450,11 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 		=> _adapters.TryGetValue(integrationId, out var adapter)
 			? adapter.GetStatus(entry)
 			: IntegrationConfigEntryStatus.Ready;
+
+	private bool RequiresConfiguration(string integrationId)
+		=> _registry.Integrations.FirstOrDefault(candidate =>
+				string.Equals(candidate.Id, integrationId, StringComparison.Ordinal)) is not { } integration ||
+			integration.RequiresConfiguration();
 
 	private bool IsUsable(string integrationId, ConfigEntryRecord entry)
 		=> !_adapters.TryGetValue(integrationId, out var adapter) || adapter.IsUsable(entry);

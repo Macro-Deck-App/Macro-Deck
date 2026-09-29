@@ -26,6 +26,7 @@ export interface Device {
   screenSaverIdleSeconds?: number;
   screenSaverId?: string;
   screenSaverConfiguration?: string;
+  settingsButtonHidden?: boolean;
 
   providerId?: string;
   providerName?: LocalizedText;
@@ -63,6 +64,14 @@ export interface SetDeviceScreenSaverRequest {
 }
 
 export interface SetDeviceScreenSaverResponse extends ResultResponse {
+  device?: Device;
+}
+
+export interface SetDeviceSettingsButtonRequest {
+  hidden: boolean;
+}
+
+export interface SetDeviceSettingsButtonResponse extends ResultResponse {
   device?: Device;
 }
 

@@ -32,6 +32,7 @@ env:
   # The Angular CLI declares a node floor of 22.22.3, and a bare major can resolve below it.
   NODE_VERSION: '^22.22.3'
   DOTNET_VERSION: 10.0.x
+  RUST_TOOLCHAIN: '1.98.1'
   # Release artifacts always use the production host and bootstrapper identity.
   # Beta is derived from the normalized version below, not a separate build mode.
   BUILD_CHANNEL: Production
@@ -51,9 +52,9 @@ jobs:
       rpm_version: ${{ steps.version.outputs.rpm_version }}
       rpm_release: ${{ steps.version.outputs.rpm_release }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -91,7 +92,7 @@ jobs:
             --jq .body > release-notes.md
 
       - name: Upload release notes
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: release-notes
           path: release-notes.md
@@ -101,14 +102,14 @@ jobs:
     name: Test host
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      - uses: actions/setup-dotnet@v6
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Cache NuGet packages
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.nuget/packages
           key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
@@ -118,7 +119,7 @@ jobs:
         run: dotnet test MacroDeck.slnx -c Release -p:BuildChannel=${{ env.BUILD_CHANNEL }} --logger trx --results-directory TestResults
 
       - name: Report test results
-        uses: dorny/test-reporter@v3
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
         if: always()
         with:
           name: .NET tests (Linux)
@@ -131,14 +132,14 @@ jobs:
     name: Test host (Windows)
     runs-on: blacksmith-2vcpu-windows-2025
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      - uses: actions/setup-dotnet@v6
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Cache NuGet packages
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.nuget/packages
           key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
@@ -148,7 +149,7 @@ jobs:
         run: dotnet test host/tests/MacroDeckHost.Tests.UnitTests.Windows -c Release -p:BuildChannel=${{ env.BUILD_CHANNEL }} --logger trx --results-directory TestResults
 
       - name: Report test results
-        uses: dorny/test-reporter@v3
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
         if: always()
         with:
           name: .NET tests (Windows)
@@ -161,14 +162,14 @@ jobs:
     name: Test host (macOS)
     runs-on: blacksmith-6vcpu-macos-26
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      - uses: actions/setup-dotnet@v6
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Cache NuGet packages
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.nuget/packages
           key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
@@ -178,7 +179,7 @@ jobs:
         run: dotnet test host/tests/MacroDeckHost.Tests.UnitTests.MacOS -c Release -p:BuildChannel=${{ env.BUILD_CHANNEL }} --logger trx --results-directory TestResults
 
       - name: Report test results
-        uses: dorny/test-reporter@v3
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
         if: always()
         with:
           name: .NET tests (macOS)
@@ -204,9 +205,9 @@ jobs:
     name: Build Angular UI
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -221,7 +222,7 @@ jobs:
       # Pin it so a new runner image cannot move the suite.
       - name: Pin Chrome
         id: chrome
-        uses: browser-actions/setup-chrome@v2
+        uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
         with:
           chrome-version: '151'
           install-dependencies: true
@@ -265,7 +266,7 @@ jobs:
         run: node ci/scripts/verify-worker-manifest.mjs ui/web-client/dist ui/web-client/dist-carthing
 
       - name: Upload Angular dist
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: angular-dist
           path: ui/angular/dist/
@@ -276,7 +277,7 @@ jobs:
       # the publish job - a separate runner that only checks out the repo - has nothing to copy
       # into wwwroot unless its builds travel with it.
       - name: Upload web client dist
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: web-client-dist
           path: |
@@ -290,33 +291,33 @@ jobs:
     runs-on: blacksmith-2vcpu-ubuntu-2404
     needs: [prepare, build-ui]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       # stage-dotnet-runtime.sh uses Node to resolve and validate the runtime
       # archives, even though dotnet publish itself does not need it.
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - uses: actions/setup-dotnet@v6
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Cache NuGet packages
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.nuget/packages
           key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
           restore-keys: nuget-${{ runner.os }}-
 
       - name: Download Angular dist
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: angular-dist
           path: ui/angular/dist
 
       - name: Download web client dist
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: web-client-dist
           path: ui/web-client
@@ -360,7 +361,7 @@ jobs:
           done
 
       - name: Upload Windows host
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: host-win-x64
           path: host-win-x64.tar.gz
@@ -368,7 +369,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload Linux host
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: host-linux-x64
           path: host-linux-x64.tar.gz
@@ -376,7 +377,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload macOS host
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: host-osx-arm64
           path: host-osx-arm64.tar.gz
@@ -394,21 +395,23 @@ jobs:
     environment: production
     needs: [prepare, publish-host]
     env:
-      # Without the updater key the bundle is built without updater artifacts and
-      # no channel file is generated (mirrors the signing gates).
+      # Without the updater key no updater signature and no channel file is
+      # generated (mirrors the signing gates).
       HAS_UPDATER_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY != '' }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: ui/bootstrapper/package-lock.json
 
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
 
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: ui/bootstrapper
 
@@ -419,7 +422,7 @@ jobs:
             librsvg2-dev patchelf libxdo-dev file dpkg-dev rpm
 
       - name: Download host publish
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: host-linux-x64
 
@@ -454,12 +457,21 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_UPDATER_KEY_PASSWORD }}
 
+      # The AppImage is repacked and signed for the updater afterwards, so the build itself never
+      # needs the updater key.
       - name: Write version override
         working-directory: ui/bootstrapper
         run: |
-          printf '{"version":"%s","bundle":{"createUpdaterArtifacts":%s},"plugins":{"updater":{"endpoints":["https://updater.macro-deck.app/releases/%s-{{target}}.json"]}}}\n' \
-            "${{ needs.prepare.outputs.version }}" "${{ env.HAS_UPDATER_KEY == 'true' && 'true' || 'false' }}" "${{ needs.prepare.outputs.updater_channel }}" \
+          printf '{"version":"%s","bundle":{"createUpdaterArtifacts":false},"plugins":{"updater":{"endpoints":["https://updater.macro-deck.app/releases/%s-{{target}}.json"]}}}\n' \
+            "${{ needs.prepare.outputs.version }}" "${{ needs.prepare.outputs.updater_channel }}" \
             > version-override.json
+
+      # Tauri downloads its linuxdeploy tools only when they are missing and never checks them, so
+      # the build must find the pinned copies. The runtime replaces the one appimagetool would fetch.
+      - name: Seed pinned AppImage tooling
+        run: |
+          node ci/scripts/pinned-tools.mjs fetch linuxdeploy-x86_64 "${XDG_CACHE_HOME:-$HOME/.cache}/tauri"
+          node ci/scripts/appimage-library-notices.mjs fetch-runtime "$RUNNER_TEMP/appimage-runtime"
 
       # The release identity and the file associations live in the checked-in
       # release.conf.json, so tests/installer_config.rs can assert them; only
@@ -476,12 +488,16 @@ jobs:
           # here since this build's config.version already is that version.
           MACRODECK_RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
           MACRODECK_INSTALL_MANIFEST: ${{ env.HAS_UPDATER_KEY == 'true' && 'required' || '' }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_UPDATER_KEY_PASSWORD }}
+          LDAI_RUNTIME_FILE: ${{ runner.temp }}/appimage-runtime
           # linuxdeploy's strip step fails on the .relr.dyn ELF sections newer
           # glibc/binutils emit (hits the ubuntu-24.04 runner), collapsing into a
           # bare "failed to run linuxdeploy". Skip stripping - see tauri-apps/tauri#14796.
           NO_STRIP: 'true'
+
+      # The strip step below holds the signing key and runs the built AppImage, so its runtime is
+      # checked first, in a step without secrets.
+      - name: Check the AppImage runtime
+        run: node ci/scripts/appimage-library-notices.mjs check-runtime "$(find ui/bootstrapper/target/release/bundle/appimage -maxdepth 1 -name '*.AppImage')"
 
       # linuxdeploy bundles the runner's libwayland* into the AppImage, which the
       # host's Mesa then loads ahead of its own and the app never starts on newer
@@ -496,8 +512,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_UPDATER_KEY_PASSWORD }}
 
-      # Repacking the AppImage invalidates the signature the build wrote, so
-      # re-sign before the update manifest reads the .sig. The empty-password
+      # Signed only after the repack, before the update manifest reads the .sig. The empty-password
       # fallback mirrors what the bundler's own signing path does in CI.
       - name: Re-sign the AppImage
         if: ${{ env.HAS_UPDATER_KEY == 'true' }}
@@ -595,7 +610,7 @@ jobs:
           done
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: staging-macro-deck-linux
           path: |
@@ -620,22 +635,24 @@ jobs:
     env:
       HAS_UPDATER_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY != '' }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: ui/bootstrapper/package-lock.json
 
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
 
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: ui/bootstrapper
 
       - name: Download host publish
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: host-win-x64
 
@@ -688,15 +705,12 @@ jobs:
             throw "Windows signing was requested but these signing-environment secrets are missing: $($missing -join ', ')"
           }
 
-      # Pinned instead of using @develop. This initializes SSL.com's official
-      # CodeSignTool (including its runtime) and exports CODE_SIGN_TOOL_PATH for
-      # the Tauri signCommand. `--version` performs no signing operation.
+      # Installs SSL.com's CodeSignTool, bundled JDK included, from a SHA-256 pinned archive
+      # and exports CODE_SIGN_TOOL_PATH for the Tauri signCommand.
       - name: Prepare SSL.com CodeSignTool
         if: ${{ inputs.sign_windows || inputs.windows_signing_dry_run }}
-        uses: sslcom/esigner-codesign@cf5f6c1d38ad10f47e3ed9aca873f429b1a8d85b # v1.3.2
-        with:
-          command: --version
-          environment_name: PROD
+        shell: pwsh
+        run: ci/signing/install-codesigntool.ps1
 
       - name: Sign staged Windows host
         if: ${{ inputs.sign_windows || inputs.windows_signing_dry_run }}
@@ -790,7 +804,7 @@ jobs:
           done
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: staging-macro-deck-windows
           path: |
@@ -811,22 +825,24 @@ jobs:
       HAS_NOTARY_KEY: ${{ secrets.APPLE_API_KEY_P8_BASE64 != '' && secrets.APPLE_API_KEY_ID != '' && secrets.APPLE_API_ISSUER_ID != '' && secrets.MACOS_SIGN_CERT_P12_BASE64 != '' }}
       HAS_UPDATER_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY != '' }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: ui/bootstrapper/package-lock.json
 
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
 
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: ui/bootstrapper
 
       - name: Download host publish
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: host-osx-arm64
 
@@ -1006,7 +1022,7 @@ jobs:
           done
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: staging-macro-deck-macos
           path: |
@@ -1049,17 +1065,17 @@ jobs:
     runs-on: blacksmith-2vcpu-ubuntu-2404
     needs: [prepare, package-linux, package-macos, package-windows]
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: staging-macro-deck-linux
           path: release-artifacts/linux
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: staging-macro-deck-macos
           path: release-artifacts/macos
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: staging-macro-deck-windows
           path: release-artifacts/windows
@@ -1073,7 +1089,7 @@ jobs:
           find release-artifacts/windows -type f -name '*.exe' | grep -q .
 
       - name: Upload final Linux artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: macro-deck-linux
           path: release-artifacts/linux/
@@ -1081,7 +1097,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload final macOS artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: macro-deck-macos
           path: release-artifacts/macos/
@@ -1089,7 +1105,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload final Windows artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: macro-deck-windows
           path: release-artifacts/windows/
@@ -1107,7 +1123,7 @@ jobs:
             > release-metadata.json
 
       - name: Upload release metadata
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: release-metadata
           path: release-metadata.json

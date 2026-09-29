@@ -8,6 +8,7 @@ using MacroDeck.Ui.Runtime;
 using MacroDeck.Ui.Testing;
 using MacroDeck.Ui.Components;
 using MacroDeckHost.Application.Ui.Resources;
+using MacroDeckHost.Localization;
 using MacroDeckHost.Widgets;
 using MacroDeckHost.Widgets.MusicPlayer;
 
@@ -481,6 +482,174 @@ public class MusicPlayerWidgetViewTests
 				Is.EqualTo(WidgetSafeArea.LengthFor(WidgetSafeArea.DefaultCornerRadius).MaxOfCell!.Value)
 					.Within(1e-9),
 				"anchored to the cell, or it would grow with the widget and over-pad a large tile");
+		});
+	}
+
+	[TestCase(false)]
+	[TestCase(true)]
+	public void A_connected_player_shows_its_source_and_badge_in_the_header(bool fullCover)
+	{
+		var host = Render(Playing() with { SourceName = "Kitchen", Badge = "2/3" },
+			fullCover ? FullCover() : null);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Node(host, "source").Property("text")!.Value.GetString(), Is.EqualTo("Kitchen"));
+			Assert.That(Node(host, "badgeText").Property("text")!.Value.GetString(), Is.EqualTo("2/3"));
+			Assert.That(BadgeResourceId(host), Does.EndWith(".playing"));
+		});
+	}
+
+	[Test]
+	public void The_source_sits_on_its_own_line_below_the_players_name()
+	{
+		var host = Render(Playing() with { SourceName = "Kitchen" });
+		var labels = Node(host, "labels");
+		var keys = Walk(labels).Select(node => node.Id.Split('.')[^1]).ToList();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(labels.Property("direction")!.Value.GetString(), Is.EqualTo(UiComponentDirections.Vertical));
+			Assert.That(keys.IndexOf("providerName"), Is.GreaterThanOrEqualTo(0));
+			Assert.That(keys.IndexOf("providerName"), Is.LessThan(keys.IndexOf("source")));
+		});
+	}
+
+	[Test]
+	public void The_badge_reserves_its_own_width_beside_the_playback_badge()
+	{
+		var host = Render(Playing() with { Badge = "2/3" });
+		var trailing = Node(host, "trailing");
+		var keys = Walk(trailing).Select(node => node.Id.Split('.')[^1]).ToList();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Basis(Node(host, "badgeText"), "mainSize"), Is.GreaterThan(0));
+			Assert.That(keys.IndexOf("badgeText"), Is.LessThan(keys.IndexOf("badge")));
+			Assert.That(FindNode(host, "badgeText")!.Id, Does.StartWith(trailing.Id));
+		});
+	}
+
+	[Test]
+	public void A_longer_badge_reserves_more_room_but_stops_growing()
+	{
+		var shortBadge = Basis(Node(Render(Playing() with { Badge = "2/3" }), "badgeText"), "mainSize");
+		var eight = Basis(Node(Render(Playing() with { Badge = "12345678" }), "badgeText"), "mainSize");
+		var long_ = Basis(Node(Render(Playing() with { Badge = "Track 12 of 30" }), "badgeText"), "mainSize");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(eight, Is.GreaterThan(shortBadge));
+			Assert.That(long_, Is.EqualTo(eight));
+		});
+	}
+
+	[Test]
+	public void Turning_the_source_off_hides_both_the_source_and_the_badge()
+	{
+		var host = Render(Playing() with { SourceName = "Kitchen", Badge = "2/3" },
+			new MusicPlayerWidgetData { ShowSource = false });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(FindNode(host, "source"), Is.Null);
+			Assert.That(FindNode(host, "badgeText"), Is.Null);
+			Assert.That(Node(host, "providerName").Property("text")!.Value.GetString(), Is.EqualTo("Spotify"));
+		});
+	}
+
+	[Test]
+	public void A_player_that_is_not_connected_shows_no_source_and_no_badge()
+	{
+		var unavailable = Render(new MusicPlayerViewState
+		{
+			IsLoading = false,
+			IsUnavailable = true,
+			Label = LocalizedText.FromLiteral("SinusBot"),
+			SourceName = "Kitchen",
+			Badge = "2/3",
+		});
+		var disconnected = Render(new MusicPlayerViewState
+		{
+			IsLoading = false,
+			SourceName = "Kitchen",
+			Badge = "2/3",
+		}, new MusicPlayerWidgetData { ShowHeader = false });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(FindNode(unavailable, "source"), Is.Null);
+			Assert.That(FindNode(unavailable, "badgeText"), Is.Null);
+			Assert.That(FindNode(disconnected, "header"), Is.Null);
+		});
+	}
+
+	[Test]
+	public void A_header_with_neither_badge_keeps_no_trailing_group()
+	{
+		var host = Render(Playing() with { IsPlaying = false, IsPaused = false, SourceName = "Kitchen" });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(FindNode(host, "trailing"), Is.Null);
+			Assert.That(FindNode(host, "source"), Is.Not.Null);
+		});
+	}
+
+	[TestCase("SinusBot (Kitchen)", "Kitchen", false)]
+	[TestCase("YouTube Music Desktop App", "YouTube Music Desktop App", false)]
+	[TestCase("Kitchenette / Kitchen", "kitchen", false)]
+	[TestCase("Any app", "Firefox", true)]
+	[TestCase("WebNowPlaying", "YouTube", true)]
+	[TestCase("Spotify (Manuel)", "Manuel's MacBook", true)]
+	[TestCase("SinusBot (Kitchen)", "Kitchen Radio", true)]
+	[TestCase("SinusBot (Kitchenette)", "Kitchen", true)]
+	[TestCase("SinusBot (Cafe\u0301)", "Cafe", true)]
+	public void The_source_is_left_out_only_where_the_players_name_already_says_it(
+		string label,
+		string source,
+		bool shown)
+	{
+		var host = Render(Playing() with { Label = LocalizedText.FromLiteral(label), SourceName = source });
+
+		Assert.That(FindNode(host, "source") is not null, Is.EqualTo(shown));
+	}
+
+	[Test]
+	public void A_name_already_carrying_the_source_does_not_hide_it_once_the_name_itself_is_hidden()
+	{
+		var host = Render(Playing() with { Label = LocalizedText.FromLiteral("SinusBot (Kitchen)"), SourceName = "Kitchen" },
+			new MusicPlayerWidgetData { ShowHeader = false });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Node(host, "source").Property("text")!.Value.GetString(), Is.EqualTo("Kitchen"));
+			Assert.That(FindNode(host, "providerName"), Is.Null);
+		});
+	}
+
+	[Test]
+	public void A_localized_player_name_never_hides_the_source()
+	{
+		var host = Render(Playing() with
+		{
+			Label = LocalizedText.FromLocalized(AppStrings.Widgets.Music.MusicPlayer()),
+			SourceName = "Music Player",
+		});
+
+		Assert.That(FindNode(host, "source"), Is.Not.Null);
+	}
+
+	[Test]
+	public void A_stale_selection_still_names_the_source_of_the_player_shown_in_its_place()
+	{
+		var host = Render(Playing() with { InstanceMissing = true, SourceName = "Kitchen", Badge = "2/3" });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(BadgeResourceId(host), Does.EndWith(".warning"));
+			Assert.That(FindNode(host, "source"), Is.Not.Null);
+			Assert.That(FindNode(host, "badgeText"), Is.Not.Null);
 		});
 	}
 

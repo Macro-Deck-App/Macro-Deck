@@ -8,6 +8,7 @@ using MacroDeckHost.Infrastructure.Auth;
 using Microsoft.AspNetCore.DataProtection;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Security.KeyRing;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Infrastructure.Persistence;
 using MacroDeckHost.Infrastructure.Security.KeyRing;
 using MacroDeckHost.Infrastructure.Security.KeyRing.KeyStore;
@@ -153,6 +154,20 @@ public class LockedHostGateTests
 		{
 			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 			Assert.That(body.GetProperty("setupComplete").ValueKind, Is.AnyOf(JsonValueKind.True, JsonValueKind.False));
+		});
+	}
+
+	[Test]
+	public async Task The_auth_status_names_the_versions_the_companion_app_compares_while_locked()
+	{
+		var response = await _client.GetAsync(new Uri("/api/auth/status", UriKind.Relative));
+		var body = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(body.GetProperty("version").GetString(), Is.EqualTo(HostVersion.Current));
+			Assert.That(body.GetProperty("minimumCompanionVersion").GetString(),
+				Is.EqualTo(CompanionCompatibility.MinimumCompanionVersion));
 		});
 	}
 

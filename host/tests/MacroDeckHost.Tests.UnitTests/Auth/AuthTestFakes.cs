@@ -179,6 +179,18 @@ internal sealed class InMemoryDeviceRepository : IDeviceRepository
 		return Task.CompletedTask;
 	}
 
+	public Task<bool> SetSettingsButtonHidden(Guid id, bool hidden)
+	{
+		var device = Devices.FirstOrDefault(d => d.Id == id);
+		if (device is null)
+		{
+			return Task.FromResult(false);
+		}
+
+		device.SettingsButtonHidden = hidden;
+		return Task.FromResult(true);
+	}
+
 	public Task TouchLastSeen(IReadOnlyCollection<Guid> ids, DateTime seenAt)
 	{
 		foreach (var device in Devices.Where(d => ids.Contains(d.Id)))

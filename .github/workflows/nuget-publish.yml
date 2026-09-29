@@ -72,16 +72,16 @@ jobs:
           fi
           echo "::warning::NUGET_USER is not configured - skipping the NuGet push. The packages remain available as a workflow artifact."
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         if: ${{ steps.credentials.outputs.configured == 'true' }}
 
-      - uses: actions/setup-dotnet@v6
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         if: ${{ steps.credentials.outputs.configured == 'true' }}
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       # For ci/scripts/verify-nuget-packages.mjs below.
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         if: ${{ steps.credentials.outputs.configured == 'true' }}
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -90,7 +90,7 @@ jobs:
         id: download
         if: ${{ steps.credentials.outputs.configured == 'true' }}
         continue-on-error: ${{ inputs.allow_failure }}
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: ${{ inputs.artifact }}
           path: ${{ runner.temp }}/packages
@@ -111,7 +111,7 @@ jobs:
         id: login
         if: ${{ steps.credentials.outputs.configured == 'true' && steps.verify.outcome == 'success' }}
         continue-on-error: ${{ inputs.allow_failure }}
-        uses: NuGet/login@v1
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
         with:
           user: ${{ secrets.NUGET_USER }}
 

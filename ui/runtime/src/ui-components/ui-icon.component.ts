@@ -24,7 +24,15 @@ export const uiIconComponent: UiComponentDefinition = {
   paint(node, ctx) {
     const element = ctx.element as HTMLElement;
     ctx.setClassName(element, 'widget-icon');
-    ctx.sizeTo(element, ctx.box);
+
+    // A stack leaves an axis open for a child that declares no main size of its own; the icon then takes
+    // its own square there, as the contract draws it, rather than the whole basis.
+    const known = [ctx.box.width, ctx.box.height].filter((value): value is number => value !== null);
+    const edge = resolveLength(nodeLength(node, UiComponentProperties.Size), ctx.basis, ctx.crossExtent)
+      ?? (known.length > 0 ? Math.min(...known) : ctx.basis);
+    const width = ctx.box.width ?? edge;
+    const height = ctx.box.height ?? edge;
+    ctx.sizeTo(element, { width, height });
 
     const name = knownIconName(node);
     if (name === null) {
@@ -32,10 +40,6 @@ export const uiIconComponent: UiComponentDefinition = {
       return;
     }
 
-    const width = ctx.box.width ?? ctx.basis;
-    const height = ctx.box.height ?? ctx.basis;
-    const edge = resolveLength(nodeLength(node, UiComponentProperties.Size), ctx.basis, ctx.crossExtent)
-      ?? Math.min(width, height);
     const glyph = ctx.part('glyph', 'span');
     ctx.setClassName(glyph, `widget-icon-glyph icon icon-${name}`);
     ctx.setStyle(glyph, 'width', px(edge));

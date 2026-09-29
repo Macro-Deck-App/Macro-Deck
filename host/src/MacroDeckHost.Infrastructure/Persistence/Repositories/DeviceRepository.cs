@@ -44,6 +44,23 @@ public class DeviceRepository : IDeviceRepository
 	public Task Delete(Guid id)
 		=> _context.Devices.Where(d => d.Id == id).ExecuteDeleteAsync();
 
+	public async Task<bool> SetSettingsButtonHidden(Guid id, bool hidden)
+	{
+		var updated = await _context.Devices
+			.Where(d => d.Id == id)
+			.ExecuteUpdateAsync(s => s.SetProperty(d => d.SettingsButtonHidden, hidden));
+
+		// ExecuteUpdate bypasses the change tracker, so a copy this context already tracks is reloaded rather
+		// than left stale for a later SaveChanges in the same long-lived scope to write back.
+		var tracked = _context.Devices.Local.FirstOrDefault(d => d.Id == id);
+		if (tracked is not null)
+		{
+			await _context.Entry(tracked).ReloadAsync();
+		}
+
+		return updated > 0;
+	}
+
 	public Task TouchLastSeen(IReadOnlyCollection<Guid> ids, DateTime seenAt)
 	{
 		if (ids.Count == 0)

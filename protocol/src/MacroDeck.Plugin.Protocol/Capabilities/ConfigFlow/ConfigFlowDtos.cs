@@ -21,6 +21,14 @@ public sealed record ConfigFlowDescribePayload
 	/// historic behaviour of offering no tree.
 	/// </summary>
 	public bool ServesConfigUiTree { get; init; }
+
+	/// <summary>
+	/// Mirrors <c>IConfigFlowProvider.RequiresConfiguration</c>: <c>false</c> when the integration runs
+	/// without a config entry and the flow only changes optional settings. Additive within protocol v1
+	/// and never gated on the negotiated version; a plugin that predates it sends nothing, which reads
+	/// as <c>true</c>, the historic behaviour of a flow that must be completed first.
+	/// </summary>
+	public bool RequiresConfiguration { get; init; } = true;
 }
 
 /// <summary>Mirrors the SDK's <c>ConfigFlowCopyValue</c>.</summary>

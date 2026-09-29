@@ -30,6 +30,8 @@ interface EditState {
   editColumns(): number;
   editSpacing(): number | null;
   editBorderRadius(): number | null;
+  editMaxRows(): number;
+  editMaxColumns(): number;
   isEditing(): boolean;
   editError(): string | null;
 }
@@ -75,6 +77,16 @@ describe('ProfileSelectorComponent editing', () => {
     expect(state.editColumns()).toBe(8);
     expect(state.editSpacing()).toBe(20);
     expect(state.editBorderRadius()).toBe(30);
+  });
+
+  it('lets the default grid grow to 16 rows and 16 columns when no device constrains the profile', () => {
+    const component = createComponent();
+
+    component.startEdit(profile());
+
+    const state = editState(component);
+    expect(state.editMaxRows()).toBe(16);
+    expect(state.editMaxColumns()).toBe(16);
   });
 
   it('sends -1 for a fully inherited (null) spacing/radius default on save', async () => {

@@ -46,6 +46,22 @@ with its new QR code.
 If you bought the earlier Macro Deck 2 app for iPhone or iPad, see
 [License and trial](/guide/companion-app/license/#if-you-bought-the-macro-deck-2-app).
 
+## The app says it needs an update
+
+The computer runs a newer Macro Deck, which needs a newer version of the app. When you add the computer or open
+its deck, the app says so and names the version it needs, and the computer shows **App update required** in the
+list. Nothing is added or opened until you update. Update the app from Google Play or the App Store. The version
+without Google Play services is updated by Macro Deck itself, see
+[Install the Android app from Macro Deck](/guide/companion-app/install-over-adb/).
+
+## The app says Macro Deck needs an update
+
+The computer runs a Macro Deck that is older than this version of the app works with. When you add the computer
+or open its deck, the app says so and names both versions. Update Macro Deck on the computer, see
+[Updates](/guide/updates/). The deck keeps trying on its own while Macro Deck restarts and opens as soon as the
+computer is updated. For a computer with a Macro Deck from before this check, the list can still show **Online**;
+its deck says so when you open it.
+
 ## Can I use the app on a device without Google Play services?
 
 Yes. There is a separate version of the Android app that does not need Google Play services, for example for

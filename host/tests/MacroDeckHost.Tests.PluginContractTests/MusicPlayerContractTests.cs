@@ -71,13 +71,20 @@ internal sealed class MusicPlayerContractTests : CapabilityContractFixture
 
 		catalogDevicePlayer.StateToReturn = new MusicPlayerState
 		{
-			IsConnected = true, PlaybackState = PlaybackState.Playing, TrackName = "Song", ArtworkId = "art-1"
+			IsConnected = true,
+			PlaybackState = PlaybackState.Playing,
+			TrackName = "Song",
+			ArtworkId = "art-1",
+			DeviceName = "Firefox",
+			Badge = "2/3"
 		};
 		var state = await player!.GetStateAsync(CancellationToken.None);
 		Assert.Multiple(() =>
 		{
 			Assert.That(state.TrackName, Is.EqualTo("Song"));
 			Assert.That(state.PlaybackState, Is.EqualTo(PlaybackState.Playing));
+			Assert.That(state.DeviceName, Is.EqualTo("Firefox"));
+			Assert.That(state.Badge, Is.EqualTo("2/3"));
 		});
 
 		catalogDevicePlayer.ArtworkToReturn = new MusicPlayerArtwork([1, 2, 3], "image/png");

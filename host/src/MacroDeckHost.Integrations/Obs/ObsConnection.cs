@@ -106,6 +106,11 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 	public Task<IReadOnlyList<string>> GetSceneItemNamesAsync(string sceneName)
 		=> QueryAsync(() => _client.GetSceneItemNames(sceneName));
 
+	public Task<IReadOnlyList<string>> GetGroupNamesAsync() => QueryAsync(_client.GetGroupNames);
+
+	public Task<IReadOnlyList<string>> GetGroupItemNamesAsync(string groupName)
+		=> QueryAsync(() => _client.GetGroupItemNames(groupName));
+
 	public Task<IReadOnlyList<string>> GetInputNamesAsync() => QueryAsync(_client.GetInputNames);
 
 	public Task<IReadOnlyList<string>> GetSourceNamesAsync() => QueryAsync(_client.GetSourceNames);

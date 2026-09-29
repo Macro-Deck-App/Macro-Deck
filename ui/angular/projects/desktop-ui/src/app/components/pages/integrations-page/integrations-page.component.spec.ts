@@ -132,6 +132,17 @@ describe('IntegrationsPageComponent enable toggle', () => {
     expect(toggleLabel().classList).not.toContain('ts-checked');
   });
 
+  it('enables an integration whose configuration is optional without opening setup', async () => {
+    await setup([integrationDto({ supportsConfigFlow: true, requiresConfiguration: false })]);
+
+    toggleInput().click();
+    await fixture.whenStable();
+
+    expect(access().configuringId()).toBeNull();
+    expect(apiSpy.setIntegrationEnabled).toHaveBeenCalledWith({ id: 'app.test.integration', enabled: true });
+    expect(toggleLabel().classList).toContain('ts-checked');
+  });
+
   it('enables a configured integration directly through the host', async () => {
     await setup([integrationDto({})]);
 

@@ -24,6 +24,10 @@ internal interface IObsClient
 
 	IReadOnlyList<string> GetSceneItemNames(string sceneName);
 
+	IReadOnlyList<string> GetGroupNames();
+
+	IReadOnlyList<string> GetGroupItemNames(string groupName);
+
 	IReadOnlyList<string> GetInputNames();
 
 	IReadOnlyList<string> GetSourceNames();

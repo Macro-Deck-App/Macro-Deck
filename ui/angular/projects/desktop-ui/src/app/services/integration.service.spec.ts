@@ -161,6 +161,7 @@ function ipcIntegrationAsIntegration(dto: IpcIntegration) {
     variableCount: dto.variableCount,
     supportsConfigFlow: dto.supportsConfigFlow,
     allowsMultipleConfigurations: dto.allowsMultipleConfigurations,
+    requiresConfiguration: dto.requiresConfiguration ?? true,
     configuredEntryCount: dto.configuredEntryCount,
     hasIcon: dto.hasIcon,
     iconVersion: dto.iconVersion ?? null,

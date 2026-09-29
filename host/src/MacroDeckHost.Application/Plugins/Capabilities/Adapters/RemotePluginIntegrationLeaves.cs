@@ -53,6 +53,8 @@ internal sealed class RemotePluginIntegrationWithConfigFlow(
 {
 	public bool AllowsMultipleConfigurations => Snapshot.AllowsMultipleConfigurations;
 
+	public bool RequiresConfiguration => Snapshot.RequiresConfiguration;
+
 	public IConfigFlow CreateConfigFlow() => CreateConfigFlowCore();
 }
 
@@ -88,6 +90,8 @@ internal sealed class RemotePluginIntegrationWithIconAndConfigFlow(
 	public byte[] GetIcon() => Snapshot.IconBytes;
 
 	public bool AllowsMultipleConfigurations => Snapshot.AllowsMultipleConfigurations;
+
+	public bool RequiresConfiguration => Snapshot.RequiresConfiguration;
 
 	public IConfigFlow CreateConfigFlow() => CreateConfigFlowCore();
 }
@@ -125,6 +129,8 @@ internal sealed class RemotePluginIntegrationWithConfigFlowAndDynamicEventOption
 {
 	public bool AllowsMultipleConfigurations => Snapshot.AllowsMultipleConfigurations;
 
+	public bool RequiresConfiguration => Snapshot.RequiresConfiguration;
+
 	public IConfigFlow CreateConfigFlow() => CreateConfigFlowCore();
 
 	public Task<DynamicOptionsResult> GetEventOptionsAsync(EventOptionsContext context,
@@ -148,6 +154,8 @@ internal sealed class RemotePluginIntegrationWithIconConfigFlowAndDynamicEventOp
 	public byte[] GetIcon() => Snapshot.IconBytes;
 
 	public bool AllowsMultipleConfigurations => Snapshot.AllowsMultipleConfigurations;
+
+	public bool RequiresConfiguration => Snapshot.RequiresConfiguration;
 
 	public IConfigFlow CreateConfigFlow() => CreateConfigFlowCore();
 

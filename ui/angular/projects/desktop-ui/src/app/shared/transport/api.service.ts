@@ -265,6 +265,8 @@ import {
   SetDeviceStartupProfileResponse,
   SetDeviceScreenSaverRequest,
   SetDeviceScreenSaverResponse,
+  SetDeviceSettingsButtonRequest,
+  SetDeviceSettingsButtonResponse,
   ShowDeviceScreenSaverResponse,
   SetFolderFocusRuleRequest,
   SetFolderFocusRuleResponse,
@@ -800,6 +802,11 @@ export class ApiService {
 
   setDeviceScreenSaver(id: string, request: SetDeviceScreenSaverRequest): Promise<SetDeviceScreenSaverResponse> {
     return this.http('PATCH', `/api/devices/${encodeURIComponent(id)}/screensaver`, request);
+  }
+
+  setDeviceSettingsButton(id: string, hidden: boolean): Promise<SetDeviceSettingsButtonResponse> {
+    const request: SetDeviceSettingsButtonRequest = { hidden };
+    return this.http('PATCH', `/api/devices/${encodeURIComponent(id)}/settings-button`, request);
   }
 
   showDeviceScreenSaver(id: string): Promise<ShowDeviceScreenSaverResponse> {

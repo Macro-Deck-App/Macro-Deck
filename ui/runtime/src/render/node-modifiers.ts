@@ -1,6 +1,6 @@
 import { asLocalizedRef, LocalizationTranslator } from '../localization/localized-text';
 import { asHexColor, asUiLength, resolveLength } from '../ui-framework/length';
-import { nodeClaimsGesture, nodeDeclaresGesture } from '../ui-framework/node-gestures';
+import { nodeClaimsGesture, nodeDeclaresGesture, ownsItsPointer } from '../ui-framework/node-gestures';
 import { nodeRecord } from '../ui-framework/node-properties.util';
 import { UiNode } from '../ui-framework/ui-node.interface';
 import {
@@ -30,6 +30,18 @@ export interface UiModifierPlan {
 }
 
 export const MODIFIER_BORDER_PART = 'modifier-border';
+
+export const UI_OWNS_POINTER_ATTRIBUTE = 'data-md-owns-pointer';
+
+export function ownsPointerAt(target: EventTarget | null, boundary: Node | null): boolean {
+  let current = target as Node | null;
+  while (current !== null && current !== undefined && current !== boundary) {
+    const element = current as Element;
+    if (current.nodeType === 1 && element.hasAttribute(UI_OWNS_POINTER_ATTRIBUTE)) return true;
+    current = current.parentNode;
+  }
+  return false;
+}
 
 export interface UiModifierScope {
   readonly basis: number;
@@ -146,6 +158,7 @@ export function planNodeModifiers(
   else if (inputs?.radius !== undefined && !scope.isTreeRoot) plan.styles['border-radius'] = inputs.radius;
 
   if (nodeDeclaresGesture(node)) plan.styles['touch-action'] = 'none';
+  if (ownsItsPointer(node)) plan.attributes[UI_OWNS_POINTER_ATTRIBUTE] = '';
 
   if (modifiers === undefined) return plan;
 

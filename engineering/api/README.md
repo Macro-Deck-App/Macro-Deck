@@ -6,7 +6,7 @@ The host is authoritative for application state. First-party Angular clients use
 
 REST controllers live under `host/src/MacroDeckHost/Api/Controllers/`. The first-party UI socket is `/ws/ui`; a one-time ticket is minted at `/api/ui-websocket/tickets`. Transport code should validate/translate transport concerns and delegate business logic to Application handlers.
 
-Two readers outside this repository depend on exact answers documented here: the [connect link](connect-link.md) and the [Macro Deck 2 app](macro-deck-2-app.md).
+Readers outside this repository depend on exact answers documented here: the [connect link](connect-link.md), the [Macro Deck 2 app](macro-deck-2-app.md) and the [Companion version check](companion-compatibility.md).
 
 Out-of-process plugins use a separate versioned HTTP/WebSocket JSON protocol. That protocol is a public compatibility surface and is documented in the [developer documentation](https://docs.macro-deck.app/reference/protocol/) and [ADR 0026](../decisions/0026-plugin-protocol-and-sdk-boundary.md).
 

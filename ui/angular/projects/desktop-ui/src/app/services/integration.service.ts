@@ -12,6 +12,7 @@ export interface Integration {
   variableCount: number;
   supportsConfigFlow: boolean;
   allowsMultipleConfigurations: boolean;
+  requiresConfiguration: boolean;
   configuredEntryCount: number;
   hasIcon: boolean;
   iconVersion: string | null;
@@ -181,6 +182,7 @@ export class IntegrationService {
     variableCount: integration.variableCount ?? 0,
     supportsConfigFlow: integration.supportsConfigFlow ?? false,
     allowsMultipleConfigurations: integration.allowsMultipleConfigurations ?? true,
+    requiresConfiguration: integration.requiresConfiguration ?? true,
     configuredEntryCount: integration.configuredEntryCount ?? 0,
     hasIcon: integration.hasIcon ?? false,
     iconVersion: integration.iconVersion ?? null,

@@ -17,9 +17,9 @@ export class GridSettingsMenuComponent {
   @Input() rows: number | null = 3;
   @Input() background = '';
   @Input() minCols = 1;
-  @Input() maxCols = 12;
+  @Input() maxCols = 16;
   @Input() minRows = 1;
-  @Input() maxRows = 8;
+  @Input() maxRows = 16;
   @Input() effectiveCols = 5;
   @Input() effectiveRows = 3;
   @Input() colsLocked = false;

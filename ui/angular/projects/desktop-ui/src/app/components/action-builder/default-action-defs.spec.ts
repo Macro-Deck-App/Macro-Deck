@@ -1,5 +1,5 @@
 import { AppStrings } from '@macro-deck/runtime';
-import { comparisonOperatorOptions, fixedTriggerTabsFor } from './default-action-defs';
+import { comparisonOperatorOptions, fixedTriggerTabsFor, interactionTriggerTabsFor } from './default-action-defs';
 
 describe('fixedTriggerTabsFor', () => {
   const t = (key: string): string => key;
@@ -16,6 +16,38 @@ describe('fixedTriggerTabsFor', () => {
     expect(fixedTriggerTabsFor([], t)).toBeNull();
     expect(fixedTriggerTabsFor(['onPluginGesture'], t)).toBeNull();
     expect(fixedTriggerTabsFor(['onShortPress', 'onLongPress', 'onTouchStart', 'onTouchEnd', 'onDoublePress'], t)).toBeNull();
+  });
+});
+
+describe('interactionTriggerTabsFor', () => {
+  const t = (key: string): string => key;
+  const T = AppStrings.ActionBuilder.Trigger;
+
+  it('gives a countdown its own labelled triggers with the one the widget names first as the default', () => {
+    expect(interactionTriggerTabsFor([
+      'onCountdownFinished', 'onCountdownStarted', 'onCountdownPaused', 'onCountdownReset', 'onCountdownDismissed',
+    ], t)).toEqual([
+      { triggerType: 'onCountdownFinished', label: T.CountdownFinished },
+      { triggerType: 'onCountdownStarted', label: T.TimerStarted },
+      { triggerType: 'onCountdownPaused', label: T.TimerPaused },
+      { triggerType: 'onCountdownReset', label: T.TimerReset },
+      { triggerType: 'onCountdownDismissed', label: T.CountdownDismissed },
+    ]);
+  });
+
+  it('gives a stopwatch its started, paused and reset triggers', () => {
+    expect(interactionTriggerTabsFor(['onStopwatchStarted', 'onStopwatchPaused', 'onStopwatchReset'], t)!
+      .map(tab => tab.triggerType)).toEqual(['onStopwatchStarted', 'onStopwatchPaused', 'onStopwatchReset']);
+  });
+
+  it('leaves every other widget to the press triggers', () => {
+    expect(interactionTriggerTabsFor(undefined, t)).toBeNull();
+    expect(interactionTriggerTabsFor(['onDoublePress'], t)).toBeNull();
+    expect(interactionTriggerTabsFor(['onShortPress', 'onLongPress'], t)).toBeNull();
+  });
+
+  it('keeps the timer triggers out of the fixed tabs', () => {
+    expect(fixedTriggerTabsFor(['onStopwatchStarted', 'onStopwatchPaused', 'onStopwatchReset'], t)).toBeNull();
   });
 });
 

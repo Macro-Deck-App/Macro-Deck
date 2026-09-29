@@ -3,6 +3,7 @@ import { createUiComponentRegistry, DEFAULT_UI_COMPONENT_REGISTRY, UI_CORE_COMPO
 import { renderUiNode } from './ui-node-renderer';
 import { UiRenderHost } from './ui-render-host';
 import { PRESS_FEEDBACK_MIN_VISIBLE_MS } from './press-feedback';
+import { ownsPointerAt, UI_OWNS_POINTER_ATTRIBUTE } from './node-modifiers';
 
 let nextId = 0;
 function node(type: string, properties: Record<string, unknown> = {}, children?: UiNode[], id?: string): UiNode {
@@ -571,6 +572,70 @@ describe('node modifiers', () => {
       expect(names()).toEqual(['press-start', 'press-end', 'drag', 'drag-end']);
       jasmine.clock().tick(PRESS_FEEDBACK_MIN_VISIBLE_MS);
       expect(button.querySelector('.widget-press-tint-active')).toBeNull();
+    });
+  });
+
+  describe('pointer ownership marker', () => {
+    const owns = (id: string) => byId(id).hasAttribute(UI_OWNS_POINTER_ATTRIBUTE);
+
+    it('marks every node that moves its own value or tracks its own pointer', () => {
+      mount(node('ui.stack', {}, [
+        node('ui.slider', { events: ['adjust'], level: 0.5 }, [], 'slider'),
+        node('ui.dial', { events: ['adjust'], level: 0.5 }, [], 'dial'),
+        node('ui.segmented', { events: ['change'] }, [node('ui.text', { text: 'a' }), node('ui.text', { text: 'b' })], 'segmented'),
+        node('ui.toggle', { events: ['change'] }, [], 'toggle'),
+        node('ui.list', {}, [node('ui.text', { text: 'row' })], 'list'),
+        node('ui.modifier', { events: ['drag'] }, [node('ui.stack')], 'drag'),
+        node('ui.modifier', { events: ['pointer-move'] }, [node('ui.stack')], 'pointer'),
+        node('ui.modifier', { events: ['tap'] }, [node('ui.stack')], 'tap'),
+      ]));
+
+      for (const id of ['slider', 'dial', 'segmented', 'toggle', 'list', 'drag', 'pointer', 'tap']) {
+        expect(owns(id)).withContext(id).toBeTrue();
+      }
+    });
+
+    it('leaves a button that only presses and plain text unmarked', () => {
+      mount(node('ui.stack', {}, [
+        node('ui.button', { events: ['press', 'long-press'] }, [], 'button'),
+        node('ui.text', { text: 'label' }, [], 'text'),
+      ]));
+
+      expect(owns('button')).toBeFalse();
+      expect(owns('text')).toBeFalse();
+    });
+
+    it('drops the marker once a repaint no longer declares the events', () => {
+      const handle = mount(node('ui.stack', {}, [node('ui.slider', { events: ['adjust', 'change'], level: 0.5 }, [], 'slider')]));
+      expect(owns('slider')).toBeTrue();
+
+      handle.update(node('ui.stack', {}, [node('ui.slider', { level: 0.5 }, [], 'slider')]), { width: 120, height: 120 }, null);
+
+      expect(owns('slider')).toBeFalse();
+    });
+
+    it('is found from a text node or an svg element inside the owner, and not past the boundary', () => {
+      mount(node('ui.stack', {}, [
+        node('ui.modifier', { events: ['drag'] }, [node('ui.text', { text: 'drag me' }, [], 'label')], 'drag'),
+        node('ui.dial', { events: ['adjust'], level: 0.5 }, [], 'dial'),
+        node('ui.text', { text: 'free' }, [], 'free'),
+      ]));
+      const textNode = (function firstText(from: Node): Node | null {
+        for (let child = from.firstChild; child !== null; child = child.nextSibling) {
+          const found = child.nodeType === 3 ? child : firstText(child);
+          if (found !== null) return found;
+        }
+        return null;
+      })(byId('label'));
+      const svgChild = byId('dial').firstElementChild;
+
+      expect(textNode).not.toBeNull();
+      expect(svgChild).not.toBeNull();
+      expect(ownsPointerAt(textNode, container)).toBeTrue();
+      expect(ownsPointerAt(svgChild, container)).toBeTrue();
+      expect(ownsPointerAt(byId('free'), container)).toBeFalse();
+      expect(ownsPointerAt(textNode, byId('drag'))).toBeFalse();
+      expect(ownsPointerAt(null, container)).toBeFalse();
     });
   });
 });

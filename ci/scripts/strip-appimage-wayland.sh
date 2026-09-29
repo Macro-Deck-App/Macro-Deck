@@ -25,8 +25,8 @@
 # linuxdeploy may patch the host's ELF files, so an install manifest in the AppImage is rewritten
 # from what it actually ships and signed again (needs TAURI_SIGNING_PRIVATE_KEY), then verified.
 #
-# Repacking invalidates the updater signature `tauri build` wrote, so the caller
-# must re-sign the AppImage afterwards (see .github/workflows/build.yml).
+# The caller signs the repacked AppImage for the updater afterwards (see
+# .github/workflows/build.yml).
 #
 # Usage: strip-appimage-wayland.sh <appimageDir>
 #   appimageDir: tauri's AppImage bundle output
@@ -83,18 +83,11 @@ node "$notices_tool" fetch-runtime "$runtime"
 # Generated after the strip so the removed libraries are not attributed.
 node "$notices_tool" generate "$appdir"
 
-# Repack with the very tool Tauri used so the squashfs settings match; only the runtime is the
-# pinned one the notices name. Tauri caches the tool; fall back to the URL it fetches from.
+# Repack with the pinned plugin the build job seeded for Tauri, so the squashfs settings match. It is
+# verified again here because this step holds the signing key.
 tools_dir="${XDG_CACHE_HOME:-$HOME/.cache}/tauri"
-# The unsuffixed name is what the bundler caches the plugin under; downloading
-# into the same slot when it is missing also primes it for the next build.
 plugin="$tools_dir/linuxdeploy-plugin-appimage.AppImage"
-if [ ! -f "$plugin" ]; then
-	mkdir -p "$tools_dir"
-	curl -fsSL -o "$plugin" \
-		"https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-$arch.AppImage"
-fi
-chmod +x "$plugin"
+node "$scripts_dir/pinned-tools.mjs" fetch "linuxdeploy-$arch" "$tools_dir" linuxdeploy-plugin-appimage.AppImage
 
 out="$work/$(basename "$appimage")"
 env APPIMAGE_EXTRACT_AND_RUN=1 ARCH="$arch" OUTPUT="$out" LDAI_RUNTIME_FILE="$runtime" "$plugin" --appdir "$appdir"

@@ -212,6 +212,9 @@ public class ReadinessGuardedReadHandlersTests
 			string? configuration)
 			=> throw new NotSupportedException();
 
+		public Task<Result<DeviceEntity, DeviceError>> SetSettingsButtonHidden(Guid id, bool hidden)
+			=> throw new NotSupportedException();
+
 		public Task<string?> ResolveStartupProfileId(Guid deviceId) => throw new NotSupportedException();
 
 		public Task<Result<DeviceError>> OpenProfileOnDevice(Guid id, string profileId) =>

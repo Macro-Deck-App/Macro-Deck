@@ -352,7 +352,8 @@ public sealed class RemotePluginSnapshotRefresher
 			: snapshot with
 			{
 				AllowsMultipleConfigurations = payload.AllowsMultipleConfigurations,
-				ServesConfigUiTree = payload.ServesConfigUiTree
+				ServesConfigUiTree = payload.ServesConfigUiTree,
+				RequiresConfiguration = payload.RequiresConfiguration
 			};
 	}
 

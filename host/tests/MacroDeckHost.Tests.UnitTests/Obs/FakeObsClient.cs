@@ -31,6 +31,8 @@ internal sealed class FakeObsClient : IObsClient
 
 	public Dictionary<string, IReadOnlyList<string>> SceneItems { get; } = new();
 
+	public Dictionary<string, IReadOnlyList<string>> Groups { get; } = new(StringComparer.Ordinal);
+
 	public IReadOnlyList<string> InputNames { get; set; } = [];
 
 	public IReadOnlyList<string> ProfileNames { get; set; } = [];
@@ -106,7 +108,11 @@ internal sealed class FakeObsClient : IObsClient
 	public IReadOnlyList<string> GetSceneNames() => SceneNames;
 
 	public IReadOnlyList<string> GetSceneItemNames(string sceneName)
-		=> SceneItems.GetValueOrDefault(sceneName, []);
+		=> Groups.ContainsKey(sceneName) ? [] : SceneItems.GetValueOrDefault(sceneName, []);
+
+	public IReadOnlyList<string> GetGroupNames() => Groups.Keys.ToList();
+
+	public IReadOnlyList<string> GetGroupItemNames(string groupName) => Groups.GetValueOrDefault(groupName, []);
 
 	public IReadOnlyList<string> GetInputNames() => InputNames;
 

@@ -1,4 +1,5 @@
 using MacroDeck.Sdk.Logging;
+using Newtonsoft.Json.Linq;
 using OBSWebsocketDotNet;
 using OBSWebsocketDotNet.Communication;
 using Serilog;
@@ -141,6 +142,19 @@ internal sealed class ObsClient : IObsClient
 	{
 		var items = Try(() => _obs.GetSceneItemList(sceneName), null);
 		return items?.Select(i => i.SourceName).ToList() ?? [];
+	}
+
+	public IReadOnlyList<string> GetGroupNames()
+		=> Try(() => _obs.GetGroupList(), null) ?? [];
+
+	public IReadOnlyList<string> GetGroupItemNames(string groupName)
+	{
+		// The library's typed GetGroupSceneItemList throws on every response, so read the raw request.
+		var response = Try(() => _obs.SendRequest("GetGroupSceneItemList", new JObject { ["sceneName"] = groupName }),
+			null);
+		return response?["sceneItems"] is JArray items
+			? items.Select(i => i.Value<string>("sourceName")).OfType<string>().ToList()
+			: [];
 	}
 
 	public IReadOnlyList<string> GetInputNames()
