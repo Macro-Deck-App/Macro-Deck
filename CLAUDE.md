@@ -23,6 +23,17 @@ package tests, and add a regression test from the old consumer's point of view.
 
 See [`docs/`](docs/) and [ADR 0026](engineering/decisions/0026-plugin-protocol-and-sdk-boundary.md).
 
+## Dependencies
+
+Never install or add a third-party package just because it looks useful or because a name was
+suggested or generated during implementation: hallucinated and typosquatted names are an active
+supply-chain attack on coding agents. Restoring what the existing manifests and lockfiles declare is
+fine. A new dependency in any ecosystem (npm, NuGet, Cargo, Swift Package Manager, Gradle/Maven, Python,
+brew, apt and the like) needs a reason the existing dependencies and the platform cannot cover, a check
+that the exact name exists on the official registry and is the legitimate package, and the user's
+explicit approval before any install or manifest or lockfile change. When asking, name the package,
+its purpose, its registry and why the existing dependencies are not enough.
+
 ## Testing
 
 Derive expectations from the requirement or contract, never from the current implementation. When a

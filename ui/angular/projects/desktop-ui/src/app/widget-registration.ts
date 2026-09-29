@@ -38,6 +38,16 @@ function registerWidgets(registry: WidgetRegistryService): () => void {
       type: WidgetType.Clock,
       component: UiTreeWidgetComponent,
     });
+
+    registry.register({
+      type: WidgetType.Countdown,
+      component: UiTreeWidgetComponent,
+    });
+
+    registry.register({
+      type: WidgetType.Stopwatch,
+      component: UiTreeWidgetComponent,
+    });
   };
 }
 

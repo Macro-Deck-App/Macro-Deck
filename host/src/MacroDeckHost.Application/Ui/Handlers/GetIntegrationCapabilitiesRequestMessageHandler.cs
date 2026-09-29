@@ -66,7 +66,7 @@ public class GetIntegrationCapabilitiesRequestMessageHandler
 				? (await _configStore.List(integration.Id)).Count
 				: (await _mutations.DescribeAsync(integration.Id, cancellationToken)).Count(entry => entry.Usable);
 
-		var requiresSetup = supportsConfigFlow && configuredEntryCount == 0;
+		var requiresSetup = integration.RequiresConfiguration() && configuredEntryCount == 0;
 		var culture = (await _preferences.GetLocalization()).Culture;
 
 		var variableProvider = integration as IVariableProvider;

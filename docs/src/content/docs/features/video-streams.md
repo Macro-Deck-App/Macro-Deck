@@ -279,6 +279,11 @@ can play:
 | `hls` | The engine plays HLS natively and inline | Plays `Url` in a muted `<video>`. No HLS library is loaded, so most desktop browsers do not offer it. |
 | `mjpeg` | Always | Shows `Url` as an image that keeps updating, a `multipart/x-mixed-replace` stream. |
 
+The [Companion app](/guide/companion-app/) offers `hls`, played by the phone's own video player, then
+`mjpeg`. It does not offer `webrtc` or `whep`. The phone fetches the URL itself over the network it shares
+with the computer, so hand it an address it can reach there. On iPhone and iPad an `http:` URL plays only when
+its host is an IP address, a name without a domain or a `.local` name.
+
 **Serve `mjpeg` as well.** It is the one transport a client can play on every device Macro Deck supports,
 old tablets included. Offer `webrtc` or `whep` for low latency, and the client falls back to
 `mjpeg` where they are not available. A client that cannot play the transport you picked, for example because

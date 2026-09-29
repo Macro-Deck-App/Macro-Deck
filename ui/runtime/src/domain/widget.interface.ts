@@ -14,6 +14,8 @@ export const WidgetType = {
   Weather: 'Weather',
   HistoryGraph: 'HistoryGraph',
   Clock: 'Clock',
+  Countdown: 'Countdown',
+  Stopwatch: 'Stopwatch',
 } as const;
 
 export type WidgetType = string;
@@ -178,6 +180,7 @@ export interface MusicPlayerData {
   showArtist?: boolean;
   showAlbum?: boolean;
   showTimeline?: boolean;
+  showSource?: boolean;
   border?: WidgetBorder;
   flows?: ActionFlow[];
 }

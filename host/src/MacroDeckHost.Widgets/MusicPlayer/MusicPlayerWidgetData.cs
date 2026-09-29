@@ -30,6 +30,8 @@ public sealed record MusicPlayerWidgetData
 
 	public bool ShowTimeline { get; init; } = true;
 
+	public bool ShowSource { get; init; } = true;
+
 	// Canonical JSON rather than an element, so an unrelated save still parses to an equal record.
 	public string? InstanceOptionsJson { get; init; }
 
@@ -80,6 +82,7 @@ public sealed record MusicPlayerWidgetData
 			ShowArtist = ReadBool(data, "showArtist") ?? true,
 			ShowAlbum = ReadBool(data, "showAlbum") ?? true,
 			ShowTimeline = ReadBool(data, "showTimeline") ?? true,
+			ShowSource = ReadBool(data, "showSource") ?? true,
 			InstanceOptionsJson = CanonicalObject(data, "instanceOptions"),
 		};
 	}

@@ -101,7 +101,7 @@ public class IntegrationRegistry : IIntegrationRegistry
 		var metadata = _metadata.TryGetValue(integrationId, out var registered)
 			? registered
 			: IntegrationMetadata.Default;
-		return metadata.EnabledByDefault && integration is not IConfigFlowProvider;
+		return metadata.EnabledByDefault && !integration.RequiresConfiguration();
 	}
 
 	public IntegrationOrigin GetOrigin(string integrationId)

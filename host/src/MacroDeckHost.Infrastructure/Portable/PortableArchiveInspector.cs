@@ -70,7 +70,7 @@ public sealed class PortableArchiveInspector : IPortableArchiveInspector
 				PortableIntegrationAvailability.Missing);
 		}
 
-		var needsConfiguration = installed is IConfigFlowProvider;
+		var needsConfiguration = installed.RequiresConfiguration();
 		var availability = await Availability(installed, needsConfiguration);
 		return new PortableIntegrationInfo(installed.Id,
 			installed.Name,

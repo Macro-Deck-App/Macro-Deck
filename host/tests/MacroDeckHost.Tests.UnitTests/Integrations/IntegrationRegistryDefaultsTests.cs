@@ -65,6 +65,22 @@ internal sealed class IntegrationRegistryDefaultsTests
 	}
 
 	[Test]
+	public async Task An_integration_whose_config_flow_is_optional_starts_enabled()
+	{
+		await _registry.RegisterAsync(new OptionallyConfiguredIntegration());
+
+		Assert.That(_registry.IsEnabled(OptionallyConfiguredIntegration.IntegrationId), Is.True);
+	}
+
+	[Test]
+	public async Task An_optional_config_flow_does_not_override_an_opt_out()
+	{
+		await _registry.RegisterAsync(new OptedOutOptionallyConfiguredIntegration());
+
+		Assert.That(_registry.IsEnabled(OptedOutOptionallyConfiguredIntegration.IntegrationId), Is.False);
+	}
+
+	[Test]
 	public async Task Origin_reflects_how_the_integration_was_registered()
 	{
 		await _registry.RegisterAsync(new PlainIntegration());
@@ -139,6 +155,44 @@ internal sealed class IntegrationRegistryDefaultsTests
 		public string Version => "1.0.0";
 		public bool IsInitialized => true;
 		public IReadOnlyList<IActionDefinition> Actions => [];
+
+		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+
+		public Task ShutdownAsync() => Task.CompletedTask;
+
+		public IConfigFlow CreateConfigFlow() => throw new NotSupportedException();
+	}
+
+	[MacroDeckIntegration]
+	private sealed class OptionallyConfiguredIntegration : IIntegration, IConfigFlowProvider
+	{
+		public const string IntegrationId = "test.optionally-configured";
+
+		public string Id => IntegrationId;
+		public LocalizedText Name => "Optionally configured";
+		public string Version => "1.0.0";
+		public bool IsInitialized => true;
+		public IReadOnlyList<IActionDefinition> Actions => [];
+		public bool RequiresConfiguration => false;
+
+		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+
+		public Task ShutdownAsync() => Task.CompletedTask;
+
+		public IConfigFlow CreateConfigFlow() => throw new NotSupportedException();
+	}
+
+	[MacroDeckIntegration(EnabledByDefault = false)]
+	private sealed class OptedOutOptionallyConfiguredIntegration : IIntegration, IConfigFlowProvider
+	{
+		public const string IntegrationId = "test.opted-out-optionally-configured";
+
+		public string Id => IntegrationId;
+		public LocalizedText Name => "Opted out, optionally configured";
+		public string Version => "1.0.0";
+		public bool IsInitialized => true;
+		public IReadOnlyList<IActionDefinition> Actions => [];
+		public bool RequiresConfiguration => false;
 
 		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
 

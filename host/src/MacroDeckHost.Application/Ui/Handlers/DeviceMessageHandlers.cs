@@ -115,6 +115,35 @@ public class SetDeviceScreenSaverRequestMessageHandler
 	}
 }
 
+public class SetDeviceSettingsButtonRequestMessageHandler
+	: IUiTransportMessageHandler<SetDeviceSettingsButtonRequest, SetDeviceSettingsButtonResponse>
+{
+	private readonly IDeviceService _service;
+
+	public SetDeviceSettingsButtonRequestMessageHandler(IDeviceService service)
+	{
+		_service = service;
+	}
+
+	public async ValueTask<SetDeviceSettingsButtonResponse> Handle(
+		SetDeviceSettingsButtonRequest request,
+		CancellationToken cancellationToken)
+	{
+		var result = await _service.SetSettingsButtonHidden(request.Id, request.Hidden);
+		if (!result.Success || result.Data is null)
+		{
+			return new SetDeviceSettingsButtonResponse
+			{
+				Success = false,
+				Error = new TransportError
+					{ Code = result.Error!.Value.ToString(), Message = result.ErrorMessage ?? string.Empty }
+			};
+		}
+
+		return new SetDeviceSettingsButtonResponse { Success = true, Device = await _service.ToDto(result.Data) };
+	}
+}
+
 public class ShowDeviceScreenSaverRequestMessageHandler
 	: IUiTransportMessageHandler<ShowDeviceScreenSaverRequest, ShowDeviceScreenSaverResponse>
 {

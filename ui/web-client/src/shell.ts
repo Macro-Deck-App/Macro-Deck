@@ -21,8 +21,21 @@ import { RenderingModeStore } from './rendering-mode';
 import { ServerClock } from './server-clock';
 import { WakeLock } from './wake-lock';
 import { createLoginForm } from './login';
-import { createClientSettings, type ClientSettingsHandle } from './settings';
-import { createDeviceSetupWizard, createSetupBanner, DeviceSetupService, DismissibleHints } from './setup';
+import {
+  createClientSettings,
+  createEdgeSidebar,
+  installEdgeSwipe,
+  type ClientSettingsHandle,
+  type EdgeSidebarHandle,
+  type EdgeSwipeHandle,
+} from './settings';
+import {
+  createDeviceSetupWizard,
+  createSetupBanner,
+  DeviceSetupService,
+  DismissibleHints,
+  type DeviceSetupWizardHandle,
+} from './setup';
 import { dismissAllToasts, mountToastHost, showToast } from './ui';
 import type { Pwa } from './pwa';
 
@@ -55,6 +68,9 @@ export class Shell {
   private screenSaver: ScreenSaver | null = null;
   private readonly idleTimer: IdleTimer;
   private readonly settings: ClientSettingsHandle | null;
+  private readonly sidebar: EdgeSidebarHandle | null;
+  private edgeSwipe: EdgeSwipeHandle | null = null;
+  private wizard: DeviceSetupWizardHandle | null = null;
   private lockScreen: HTMLElement | null = null;
   private reconnectingPanel: HTMLElement | null = null;
   private reconnectingTimer: ReturnType<typeof setTimeout> | null = null;
@@ -85,7 +101,9 @@ export class Shell {
           void this.client.executeTrigger(widget.id, 'onShortPress');
         },
         goBack: () => this.client.deck.back(),
-        modalOpen: () => this.modals.isOpen(),
+        modalOpen: () => this.modals.isOpen()
+          || (this.sidebar ? this.sidebar.isOpen() : false)
+          || (this.settings ? this.settings.isOpen() : false),
         focusChanged: widgetId => {
           if (this.grid) this.grid.setFocusedWidget(widgetId);
         },
@@ -148,6 +166,23 @@ export class Shell {
       appearance: services.appearance,
       renderingMode: services.rendering,
       wakeLock: services.wakeLock,
+      settingsButton: {
+        offered: () => {
+          const screen = client.app.screen.get();
+          return screen === 'connecting' || screen === 'deck';
+        },
+        connected: () => client.app.conditions.get().connected,
+        get: () => client.deviceClientSettings.get().settingsButtonHidden,
+        set: hidden => client.setSettingsButtonHidden(hidden),
+        onChange: listener => {
+          const stopSettings = client.deviceClientSettings.subscribe(() => listener());
+          const stopConditions = client.app.conditions.subscribe(() => listener());
+          return () => {
+            stopSettings();
+            stopConditions();
+          };
+        },
+      },
       update: services.pwa.update,
       install: services.pwa.install,
       capabilities: services.target.capabilities,
@@ -159,6 +194,13 @@ export class Shell {
       },
     });
     if (this.settings !== null) this.root.appendChild(this.settings.element);
+    const settings = this.settings;
+    this.sidebar = settings === null ? null : createEdgeSidebar({
+      container: this.root,
+      translate: key => client.translate(key),
+      openSettings: () => settings.open(),
+    });
+    this.client.deviceClientSettings.subscribe(() => this.paintSettingsEntry());
 
     if (services.target.capabilities.deviceSetupPrompts) {
       this.root.appendChild(createSetupBanner({
@@ -177,12 +219,46 @@ export class Shell {
   }
 
   private openDeviceSetup(): void {
-    const wizard = createDeviceSetupWizard({
+    this.wizard = createDeviceSetupWizard({
       deviceSetup: this.deviceSetup,
       localization: this.client.localization,
       pwaInstall: this.services.pwa.install,
     });
-    this.root.appendChild(wizard.element);
+    this.root.appendChild(this.wizard.element);
+  }
+
+  private paintSettingsEntry(): void {
+    if (this.settings === null || this.sidebar === null) return;
+    const screen = this.client.app.screen.get();
+    const hidden = (screen === 'connecting' || screen === 'deck')
+      && this.client.deviceClientSettings.get().settingsButtonHidden;
+    this.settings.setButtonHidden(hidden);
+    if (hidden) {
+      if (this.edgeSwipe === null) {
+        const sidebar = this.sidebar;
+        this.edgeSwipe = installEdgeSwipe({
+          root: this.root,
+          blocked: () => this.edgeSwipeBlocked(),
+          onSwipe: () => sidebar.open(),
+        });
+      }
+      return;
+    }
+    this.sidebar.close();
+    if (this.edgeSwipe !== null) {
+      this.edgeSwipe.destroy();
+      this.edgeSwipe = null;
+    }
+  }
+
+  private edgeSwipeBlocked(): boolean {
+    return (this.screenSaver !== null && (this.screenSaver.isShowing() || this.screenSaver.isDismissing()))
+      || this.client.hostLock.showLockScreen()
+      || this.reconnectingPanel !== null
+      || this.modals.isOpen()
+      || (this.wizard !== null && this.wizard.element.parentNode !== null)
+      || (this.settings !== null && this.settings.isOpen())
+      || (this.sidebar !== null && this.sidebar.isOpen());
   }
 
   resize(): void {
@@ -246,6 +322,7 @@ export class Shell {
 
   private paintLockScreen(): void {
     this.hideVideoStreamsBehind('lock', true);
+    if (this.sidebar !== null) this.sidebar.close();
     if (!this.lockScreen) {
       this.lockScreen = document.createElement('div');
       this.lockScreen.className = 'wc-lock-screen';
@@ -312,6 +389,8 @@ export class Shell {
     // leave it standing on top of the sign-in card, where its backdrop swallowed every press: the
     // form was on screen, looked ready, and could not be signed in with.
     if (this.settings !== null) this.settings.close();
+    if (this.sidebar !== null) this.sidebar.close();
+    this.paintSettingsEntry();
 
     if (screen === 'deck') this.paintDeck();
   }
@@ -456,6 +535,7 @@ export class Shell {
       this.root.appendChild(this.screenSaver.element);
     }
     this.idleTimer.configure(null);
+    if (this.sidebar !== null) this.sidebar.close();
     this.services.wakeLock.setForced(true);
     this.hideVideoStreamsBehind('screensaver', true);
     this.screenSaver.show();

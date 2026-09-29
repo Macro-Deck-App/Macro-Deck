@@ -177,7 +177,7 @@ describe('UiPreviewsTabComponent', () => {
 
     TestBed.inject(IntegrationService).integrations.set([{
       id: 'plugin.example', name: 'Example Plugin', version: '1.0.0', isInternal: false, enabled: true,
-      actionCount: 0, variableCount: 0, supportsConfigFlow: false, allowsMultipleConfigurations: false,
+      actionCount: 0, variableCount: 0, supportsConfigFlow: false, allowsMultipleConfigurations: false, requiresConfiguration: true,
       configuredEntryCount: 0, hasIcon: false, iconVersion: null, issueCount: 0, issueSeverity: null,
       isInitialized: true, variablesDependOnConfiguration: false, providedCapabilities: [],
     }]);

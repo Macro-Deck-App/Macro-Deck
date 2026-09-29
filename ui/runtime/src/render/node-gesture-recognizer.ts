@@ -1,6 +1,6 @@
 import type { UiComponentContext } from '../ui-framework/component-registry';
 import { emitsEvent } from '../ui-framework/node-properties.util';
-import { nodeClaimsValue, nodeDeclaresGesture, nodeDeclaresPointerFamily } from '../ui-framework/node-gestures';
+import { nodeDeclaresGesture, nodeDeclaresPointerFamily, ownsItsPointer } from '../ui-framework/node-gestures';
 import { UiNode } from '../ui-framework/ui-node.interface';
 import { UiComponentEvents } from '../ui-components/component-events';
 import {
@@ -9,8 +9,9 @@ import {
   UI_SWIPE_MAX_DURATION_MS,
   UI_SWIPE_MIN_DISTANCE,
 } from '../ui-components/component-modifiers';
-import { UiComponents } from '../ui-components/ui-component-types';
 import { capturePointer, descendantsOnPath, measureBasisUnit } from './node-pointer-path';
+
+export { ownsItsPointer };
 
 export const WIDGET_GESTURE_CANCEL_EVENT = 'widget-gesture-cancel';
 
@@ -23,10 +24,6 @@ interface TrackedPointer {
 }
 
 type Phase = 'idle' | 'pending' | 'drag' | 'pinch';
-
-export function ownsItsPointer(node: UiNode): boolean {
-  return nodeClaimsValue(node) || nodeDeclaresGesture(node) || node.type === UiComponents.List;
-}
 
 export function bindNodeGestures(element: HTMLElement | SVGElement, ctx: UiComponentContext<unknown>): () => void {
   let pointers: TrackedPointer[] = [];

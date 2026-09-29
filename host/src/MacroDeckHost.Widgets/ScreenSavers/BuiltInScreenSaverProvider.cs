@@ -189,6 +189,7 @@ public sealed class BuiltInScreenSaverProvider : IScreenSaverProvider, IBuiltInI
 			showArtist = true,
 			showAlbum = false,
 			showTimeline = false,
+			showSource = false,
 		});
 
 	private static string? LocalId(string? qualified)

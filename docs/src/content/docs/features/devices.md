@@ -218,6 +218,11 @@ first, right before `onLongPress`. Navigation, the device going offline and the 
 once and keeps its verdict, so hardware that reports whole presses never produces `onDoublePress`. A widget
 whose only press action is a Double Tap advertises `Press` and `Release` only.
 
+The built-in Countdown and Stopwatch widgets always advertise `Press`, `Release`, `ShortPress` and
+`LongPress`, flows or not: a short press starts, pauses, resumes or dismisses the timer and a long press
+resets it, and each change runs the widget's own timer flows. Their surface carries the label and colours
+only, not the running time.
+
 A tile that a plugin or integration serves, rather than a built-in one, answers a press from its own UI tree
 first, exactly as it does on screen: a [disabled region](/ui/components/modifier/) absorbs the press, and a
 control that declares the press receives it instead of the tile's flows. A press the tree does not claim

@@ -42,6 +42,8 @@ public static class BuiltInWidgetTypes
 		WidgetTypeIds.Weather => AppStrings.WebClient.Widgets.Weather.Name(),
 		WidgetTypeIds.HistoryGraph => AppStrings.WebClient.Widgets.HistoryGraph.Name(),
 		WidgetTypeIds.Clock => AppStrings.WebClient.Widgets.Clock.Name(),
+		WidgetTypeIds.Countdown => AppStrings.WebClient.Widgets.Countdown.Name(),
+		WidgetTypeIds.Stopwatch => AppStrings.WebClient.Widgets.Stopwatch.Name(),
 		_ => default,
 	};
 
@@ -53,6 +55,8 @@ public static class BuiltInWidgetTypes
 		WidgetTypeIds.Weather => AppStrings.WebClient.Widgets.Weather.Description(),
 		WidgetTypeIds.HistoryGraph => AppStrings.WebClient.Widgets.HistoryGraph.Description(),
 		WidgetTypeIds.Clock => AppStrings.WebClient.Widgets.Clock.Description(),
+		WidgetTypeIds.Countdown => AppStrings.WebClient.Widgets.Countdown.Description(),
+		WidgetTypeIds.Stopwatch => AppStrings.WebClient.Widgets.Stopwatch.Description(),
 		_ => default,
 	};
 
@@ -69,6 +73,8 @@ public static class BuiltInWidgetTypes
 		WidgetTypeIds.HistoryGraph =>
 			"""{"valueVariable":"system_cpu_usage_percent","title":"CPU Load","subtitle":"{{ vars.system_cpu_name }}","showSubtitle":true,"unit":"%","maxValue":100}""",
 		WidgetTypeIds.Clock => """{"style":"digital","showSeconds":true,"showDate":true}""",
+		WidgetTypeIds.Countdown => """{"mode":"fixed","durationHours":0,"durationMinutes":5,"durationSeconds":0}""",
+		WidgetTypeIds.Stopwatch => "{}",
 		_ => "{}",
 	};
 }

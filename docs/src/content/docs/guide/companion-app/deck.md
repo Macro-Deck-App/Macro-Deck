@@ -61,6 +61,16 @@ Macro Deck decides a few things for each device, under **Settings > Devices** on
 Automations and buttons can also act on the device itself: change its brightness, rotate it, vibrate it, take a
 screenshot and, on Android, turn the screen on and off. See [Tips and automations](/guide/companion-app/tips/).
 
+## Live video
+
+A widget that shows a live video, such as a camera or an OBS preview from a plugin, plays in the app as it
+does in Macro Deck, always without sound. The video pauses while you look at another folder or while the
+screensaver shows, and stops while the app is in the background; it starts again when you come back. Until the
+first picture arrives, the widget says it is connecting, or why the video is not available.
+
+The phone loads the video from the address the plugin gives it, so the phone has to reach that address on
+your network. A video a plugin serves only on the computer itself does not play on a phone connected over USB.
+
 ## When the computer is locked
 
 While the computer running Macro Deck is locked, the deck shows a lock screen and the connection reads

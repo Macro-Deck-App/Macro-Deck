@@ -214,6 +214,17 @@ internal sealed class ContractDeviceRepository : IDeviceRepository
 		return Task.CompletedTask;
 	}
 
+	public Task<bool> SetSettingsButtonHidden(Guid id, bool hidden)
+	{
+		var device = Devices.FirstOrDefault(device => device.Id == id);
+		if (device is not null)
+		{
+			device.SettingsButtonHidden = hidden;
+		}
+
+		return Task.FromResult(device is not null);
+	}
+
 	public Task TouchLastSeen(IReadOnlyCollection<Guid> ids, DateTime seenAt) => Task.CompletedTask;
 
 	public Task<IReadOnlyList<DeviceEntity>> GetStale(DateTime lastSeenBefore)

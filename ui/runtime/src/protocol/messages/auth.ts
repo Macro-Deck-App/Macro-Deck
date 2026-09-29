@@ -8,6 +8,8 @@ export interface AuthStatusResponse {
   trusted: boolean;
   scope?: AuthScope | null;
   username?: string | null;
+  version?: string;
+  minimumCompanionVersion?: string;
 }
 
 export interface SetupRequest {

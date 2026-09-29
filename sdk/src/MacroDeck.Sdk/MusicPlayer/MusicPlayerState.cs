@@ -50,9 +50,21 @@ public sealed record MusicPlayerState
 
 	public RepeatMode RepeatMode { get; init; }
 
+	/// <summary>
+	/// Where playback is happening: the device, app or browser source. The Music Player widget shows it
+	/// next to the player's name while connected, unless that name already contains it.
+	/// </summary>
 	public string? DeviceName { get; init; }
 
 	public string? DeviceType { get; init; }
+
+	/// <summary>
+	/// Short provider text the Music Player widget shows beside its playback badge while connected, for
+	/// example "2/3" for the second of three sources. Keep it to a few characters: the widget reserves room
+	/// for about 8 and shrinks or cuts off longer text. <c>null</c> shows nothing. Hosts older than this
+	/// property ignore it.
+	/// </summary>
+	public string? Badge { get; init; }
 
 	/// <summary>A disconnected/idle state with no track information.</summary>
 	public static MusicPlayerState Disconnected { get; } = new();

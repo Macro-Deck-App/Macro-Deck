@@ -138,7 +138,7 @@ There are two distinct stores, and it is worth keeping them apart:
 The default enabled state, when the user has made no explicit choice, is computed in `IntegrationRegistry.IsEnabled`:
 
 - An `ISystemIntegration` derives its state from `IsActive` (it is never toggled or persisted).
-- Otherwise, an integration that implements `IConfigFlowProvider` starts disabled (it needs setup first); an integration without a config flow starts enabled.
+- Otherwise, an integration that implements `IConfigFlowProvider` starts disabled (it needs setup first), unless it returns `false` from `RequiresConfiguration` because its flow only changes optional settings; every other integration starts enabled.
 - An integration can opt out of that with `[MacroDeckIntegration(EnabledByDefault = false)]`. Use it when the integration needs no configuration but still cannot work unless something else is installed on the machine - Voicemeeter, which would otherwise report "not available" as an error on every Windows machine that does not run it. The opt-out only decides the default; once the user has enabled it, the stored choice wins.
 
 ### Enable and disable at runtime

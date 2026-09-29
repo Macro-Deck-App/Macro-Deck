@@ -65,6 +65,7 @@ public class GetIntegrationsRequestMessageHandler
 				VariablesDependOnConfiguration = variableProvider?.VariablesDependOnConfiguration ?? false,
 				SupportsConfigFlow = supportsConfigFlow,
 				AllowsMultipleConfigurations = configProvider?.AllowsMultipleConfigurations ?? true,
+				RequiresConfiguration = integration.RequiresConfiguration(),
 				ConfiguredEntryCount = configuredEntryCount,
 				HasIcon = integration is IIntegrationIconProvider,
 				IconVersion = IntegrationIconVersion.For(integration),

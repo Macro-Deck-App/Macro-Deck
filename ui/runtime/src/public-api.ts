@@ -493,6 +493,7 @@ export {
 } from './ui-components/component-modifiers';
 export { resolveFrame, type UiResolvedFrame } from './ui-framework/frame';
 export { WIDGET_GESTURE_CANCEL_EVENT } from './render/node-gesture-recognizer';
+export { UI_OWNS_POINTER_ATTRIBUTE, ownsPointerAt } from './render/node-modifiers';
 export { chartPaths, type UiChartPaths } from './ui-components/chart';
 export {
   arcMetrics,
@@ -718,6 +719,8 @@ export {
   type SetDeviceStartupProfileResponse,
   type SetDeviceScreenSaverRequest,
   type SetDeviceScreenSaverResponse,
+  type SetDeviceSettingsButtonRequest,
+  type SetDeviceSettingsButtonResponse,
   type ShowDeviceScreenSaverResponse,
 } from './protocol/messages/device';
 export {
@@ -767,6 +770,12 @@ export {
   type GetFolderViewsResponse,
   type IpcFolderView,
 } from './protocol/messages/folder-view';
+export type {
+  DeviceClientSettingsChangedEvent,
+  GetDeviceClientSettingsResponse,
+  SetDeviceClientSettingsRequest,
+  SetDeviceClientSettingsResponse,
+} from './protocol/messages/device-client-settings';
 export { BUILT_IN_CLOCK_SCREENSAVER_ID } from './protocol/messages/screensaver';
 export type {
   IpcScreenSaver,

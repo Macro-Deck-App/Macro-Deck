@@ -147,6 +147,11 @@
                     }
                   </div>
                 }
+                @if (configurationOptional()) {
+                  <p class="detail-hint">
+                    {{ 'macrodeck.app:Integrations.Detail.OptionalConfigurationHint' | translate }}
+                  </p>
+                }
                 @if (canSetUp()) {
                   <shared-button variant="primary" (click)="onConfigure()">
                     <span>{{ setUpLabel() }}</span>

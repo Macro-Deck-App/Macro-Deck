@@ -227,6 +227,68 @@ public class MusicPlayerViewStateResolverTests
 		Assert.That(state.TrackName, Is.EqualTo("Windowlicker"));
 	}
 
+	[Test]
+	public async Task The_providers_source_and_badge_reach_the_view()
+	{
+		var harness = new MusicPlayerTestHarness();
+		var payload = Playing(positionMs: 1_000);
+		payload.DeviceName = "Firefox";
+		payload.Badge = "2/3";
+		harness.Record(payload);
+
+		var state = await harness.ResolveAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(state.SourceName, Is.EqualTo("Firefox"));
+			Assert.That(state.Badge, Is.EqualTo("2/3"));
+		});
+	}
+
+	[Test]
+	public async Task A_blank_source_or_badge_is_no_source_or_badge()
+	{
+		var harness = new MusicPlayerTestHarness();
+		var payload = Playing(positionMs: 1_000);
+		payload.DeviceName = "  ";
+		payload.Badge = "";
+		harness.Record(payload);
+
+		var state = await harness.ResolveAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(state.SourceName, Is.Null);
+			Assert.That(state.Badge, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task An_oversized_badge_is_bounded_without_splitting_a_character()
+	{
+		var harness = new MusicPlayerTestHarness();
+		var payload = Playing(positionMs: 1_000);
+		payload.Badge = string.Concat(Enumerable.Repeat("e\u0301", 40));
+		harness.Record(payload);
+
+		var state = await harness.ResolveAsync();
+
+		Assert.That(state.Badge, Is.EqualTo(string.Concat(Enumerable.Repeat("e\u0301", 32))));
+	}
+
+	[Test]
+	public async Task A_badge_longer_than_the_widget_shows_is_passed_on_unchanged()
+	{
+		var harness = new MusicPlayerTestHarness();
+		var payload = Playing(positionMs: 1_000);
+		payload.Badge = "Track 12 of 30";
+		harness.Record(payload);
+
+		var state = await harness.ResolveAsync();
+
+		Assert.That(state.Badge, Is.EqualTo("Track 12 of 30"));
+	}
+
 	private static MusicPlayerStatePayload Playing(
 		long positionMs,
 		string trackName = "Windowlicker",

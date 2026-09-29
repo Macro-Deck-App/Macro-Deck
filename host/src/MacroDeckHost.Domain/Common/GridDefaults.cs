@@ -14,9 +14,9 @@ public static class GridDefaults
 	/// Angular client's own grid-size controls predate this and hardcoded the same range.</summary>
 	public const int MinRows = 1;
 
-	public const int MaxRows = 8;
+	public const int MaxRows = 16;
 
 	public const int MinColumns = 1;
 
-	public const int MaxColumns = 12;
+	public const int MaxColumns = 16;
 }

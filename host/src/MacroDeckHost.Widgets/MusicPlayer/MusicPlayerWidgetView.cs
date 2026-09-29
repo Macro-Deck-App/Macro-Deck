@@ -1,3 +1,6 @@
+using System.Buffers;
+using System.Globalization;
+using System.Text;
 using MacroDeck.Localization;
 using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Model.Resources;
@@ -306,19 +309,89 @@ internal static class MusicPlayerWidgetView
 						},
 						new UiWhen
 						{
-							Key = "providerNameGate",
-							Condition = () => config.Value.ShowHeader && HasLabel(state.Value.Label),
-							Content = () => new UiTextRun
+							Key = "labelsGate",
+							Condition = () => (config.Value.ShowHeader && HasLabel(state.Value.Label)) ||
+								VisibleSource(state, config) is not null,
+							Content = () => new UiStack
 							{
-								Key = "providerName",
-								Size = 0.044,
-								MinSize = 0.034,
-								Weight = UiComponentTextWeights.SemiBold,
-								Role = UiComponentTextRoles.Secondary,
-								Text = UiText.Optional(() => state.Value.Label),
+								Key = "labels",
+								Fill = true,
+								Direction = UiComponentDirections.Vertical,
+								Gap = _infoGap,
+								Children =
+								[
+									new UiWhen
+									{
+										Key = "providerNameGate",
+										Condition = () => config.Value.ShowHeader && HasLabel(state.Value.Label),
+										Content = () => new UiTextRun
+										{
+											Key = "providerName",
+											Size = 0.044,
+											MinSize = 0.034,
+											Weight = UiComponentTextWeights.SemiBold,
+											Role = UiComponentTextRoles.Secondary,
+											Text = UiText.Optional(() => state.Value.Label),
+										},
+									},
+									new UiWhen
+									{
+										Key = "sourceGate",
+										Condition = () => VisibleSource(state, config) is not null,
+										Content = () => new UiTextRun
+										{
+											Key = "source",
+											Size = 0.038,
+											MinSize = 0.03,
+											Role = UiComponentTextRoles.Muted,
+											Text = UiText.From(() => VisibleSource(state, config)),
+										},
+									},
+								],
 							},
 						},
 					],
+				},
+				new UiWhen
+				{
+					Key = "trailingGate",
+					Condition = () => VisibleBadge(state, config) is not null || BadgeIcon(state, icons) is not null,
+					Content = () => BuildTrailing(state, config, icons),
+				},
+			],
+		};
+
+	private static UiStack BuildTrailing(
+		UiState<MusicPlayerViewState> state,
+		UiState<MusicPlayerWidgetData> config,
+		MusicPlayerIconResources icons)
+		=> new()
+		{
+			Key = "trailing",
+			Direction = UiComponentDirections.Horizontal,
+			Align = UiComponentAlignments.Center,
+			Gap = _rowGap,
+			Children =
+			[
+				new UiWhen
+				{
+					Key = "badgeTextGate",
+					Condition = () => VisibleBadge(state, config) is not null,
+					Content = () => new UiTextRun
+					{
+						Key = "badgeText",
+						// A horizontal text run has no intrinsic width, so without a declared one the
+						// provider stack's fill would claim the row and squeeze the badge.
+						MainSize = UiSize.Optional(() => VisibleBadge(state, config) is { } badge
+							? UiSize.FromBasis(BadgeWidth(badge))
+							: UiSize.None()),
+						Size = 0.044,
+						MinSize = 0.034,
+						Weight = UiComponentTextWeights.SemiBold,
+						Role = UiComponentTextRoles.Secondary,
+						Align = UiComponentAlignments.End,
+						Text = UiText.From(() => VisibleBadge(state, config)),
+					},
 				},
 				new UiWhen
 				{
@@ -548,7 +621,10 @@ internal static class MusicPlayerWidgetView
 	{
 		var value = state.Value;
 
-		if (value.ShowWarningBadge || value.ShowPlaybackBadge)
+		if (value.ShowWarningBadge ||
+			value.ShowPlaybackBadge ||
+			VisibleSource(state, config) is not null ||
+			VisibleBadge(state, config) is not null)
 		{
 			return true;
 		}
@@ -564,6 +640,60 @@ internal static class MusicPlayerWidgetView
 		=> config.Value.ShowTitle ||
 			config.Value.ShowArtist ||
 			(config.Value.ShowAlbum && !config.Value.IsFullCover && !string.IsNullOrEmpty(state.Value.AlbumName));
+
+	// Hidden when the shown name already says it: a SinusBot entry is titled "SinusBot (Kitchen)" for source
+	// "Kitchen". A localized name is never compared, the host does not know what each reader resolves it to.
+	private static string? VisibleSource(UiState<MusicPlayerViewState> state,
+		UiState<MusicPlayerWidgetData> config)
+	{
+		var value = state.Value;
+
+		if (!config.Value.ShowSource || !value.IsConnected || value.SourceName is not { Length: > 0 } source)
+		{
+			return null;
+		}
+
+		return config.Value.ShowHeader && value.Label.Literal is { Length: > 0 } label && ContainsWord(label, source)
+			? null
+			: source;
+	}
+
+	private static string? VisibleBadge(UiState<MusicPlayerViewState> state,
+		UiState<MusicPlayerWidgetData> config)
+	{
+		var value = state.Value;
+
+		return config.Value.ShowSource && value.IsConnected && value.Badge is { Length: > 0 } badge ? badge : null;
+	}
+
+	private static double BadgeWidth(string badge)
+		=> (Math.Min(new StringInfo(badge).LengthInTextElements, 8) * 0.03) + 0.01;
+
+	private static bool ContainsWord(string text, string word)
+	{
+		for (var index = text.IndexOf(word, StringComparison.OrdinalIgnoreCase);
+			index >= 0;
+			index = text.IndexOf(word, index + 1, StringComparison.OrdinalIgnoreCase))
+		{
+			var before = Rune.DecodeLastFromUtf16(text.AsSpan(0, index), out var previous, out _) == OperationStatus.Done &&
+				IsWordRune(previous);
+			var after = Rune.DecodeFromUtf16(text.AsSpan(index + word.Length), out var next, out _) == OperationStatus.Done &&
+				IsWordRune(next);
+
+			if (!before && !after)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private static bool IsWordRune(Rune rune)
+		=> Rune.IsLetterOrDigit(rune) ||
+			Rune.GetUnicodeCategory(rune) is UnicodeCategory.NonSpacingMark
+				or UnicodeCategory.SpacingCombiningMark
+				or UnicodeCategory.EnclosingMark;
 
 	/// <summary>The badge in the header's trailing corner. A stale selection is the more specific problem,
 	/// so it wins over the outage hint, and both win over the playback badge.</summary>

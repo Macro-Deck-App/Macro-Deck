@@ -126,6 +126,34 @@ internal sealed class RemotePluginSnapshotStoreTests
 	}
 
 	[Test]
+	public async Task An_optional_configuration_survives_a_fresh_store()
+	{
+		var store = new RemotePluginSnapshotStore(_paths, Log.Logger);
+
+		await store.SaveAsync(RemotePluginCapabilitySnapshot.Empty("com.example.plugin") with
+		{
+			AcceptedKinds = [CapabilityKinds.ConfigFlow],
+			RequiresConfiguration = false
+		});
+
+		var reloaded = new RemotePluginSnapshotStore(_paths, Log.Logger).GetSnapshot("com.example.plugin");
+
+		Assert.That(reloaded.RequiresConfiguration, Is.False);
+	}
+
+	[Test]
+	public void A_document_written_before_optional_configurations_still_requires_configuration()
+	{
+		Directory.CreateDirectory(_paths.ConfigDirectory);
+		File.WriteAllText(Path.Combine(_paths.ConfigDirectory, "plugin-capability-snapshots.json"),
+			PreAdr0081Document);
+
+		var snapshot = new RemotePluginSnapshotStore(_paths, Log.Logger).GetSnapshot("com.example.plugin");
+
+		Assert.That(snapshot.RequiresConfiguration, Is.True);
+	}
+
+	[Test]
 	public void A_persisted_file_with_no_accepted_kinds_field_loads_without_throwing()
 	{
 		Directory.CreateDirectory(_paths.ConfigDirectory);

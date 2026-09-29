@@ -411,6 +411,12 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>Zmienne tego widżetu</value>
   </data>
+  <data name="ActionBuilder.Trigger.CountdownDismissed" xml:space="preserve">
+    <value>Potwierdzono</value>
+  </data>
+  <data name="ActionBuilder.Trigger.CountdownFinished" xml:space="preserve">
+    <value>Czas minął</value>
+  </data>
   <data name="ActionBuilder.Trigger.DoublePress" xml:space="preserve">
     <value>Podwójne dotknięcie</value>
   </data>
@@ -422,6 +428,15 @@
   </data>
   <data name="ActionBuilder.Trigger.ShortPress" xml:space="preserve">
     <value>Krótkie naciśnięcie</value>
+  </data>
+  <data name="ActionBuilder.Trigger.TimerPaused" xml:space="preserve">
+    <value>Wstrzymano</value>
+  </data>
+  <data name="ActionBuilder.Trigger.TimerReset" xml:space="preserve">
+    <value>Wyzerowano</value>
+  </data>
+  <data name="ActionBuilder.Trigger.TimerStarted" xml:space="preserve">
+    <value>Uruchomiono</value>
   </data>
   <data name="ActionBuilder.Trigger.TouchEnd" xml:space="preserve">
     <value>Koniec dotyku</value>
@@ -4587,6 +4602,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Detail.SingleConfigurationHint" xml:space="preserve">
     <value>Ta integracja obsługuje tylko jedną konfigurację. Ponowna konfiguracja zastępuje ją, więc widżety nadal działają.</value>
   </data>
+  <data name="Integrations.Detail.OptionalConfigurationHint" xml:space="preserve">
+    <value>Ta integracja działa bez konfiguracji. Konfiguracja służy tylko do zmiany jej ustawień.</value>
+  </data>
   <data name="Integrations.Detail.StatusDisabled" xml:space="preserve">
     <value>Wyłączona</value>
   </data>
@@ -7454,6 +7472,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Obs.Params.Filter" xml:space="preserve">
     <value>Filtr</value>
+  </data>
+  <data name="Integrations.Obs.Params.GroupOption" xml:space="preserve">
+    <value>{name} (grupa)</value>
   </data>
   <data name="Integrations.Obs.Params.Input" xml:space="preserve">
     <value>Wejście</value>
@@ -13768,6 +13789,18 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Settings.Devices.ScreenSaver.Unavailable" xml:space="preserve">
     <value>Niedostępny</value>
   </data>
+  <data name="Settings.Devices.SettingsButton.HiddenLine" xml:space="preserve">
+    <value>Przycisk ustawień ukryty: przesuń od lewej krawędzi</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.HideAction" xml:space="preserve">
+    <value>Ukryj przycisk ustawień</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.SaveFailed" xml:space="preserve">
+    <value>Nie udało się zmienić przycisku ustawień</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.ShowAction" xml:space="preserve">
+    <value>Pokaż przycisk ustawień</value>
+  </data>
   <data name="Settings.Devices.SignedOutMarker" xml:space="preserve">
     <value>Wylogowano</value>
   </data>
@@ -16616,6 +16649,15 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="WebClient.Settings.DisplaySection" xml:space="preserve">
     <value>Wyświetlacz</value>
   </data>
+  <data name="WebClient.Settings.HideSettingsButton.Description" xml:space="preserve">
+    <value>Ustawienia otwiera się przesunięciem od lewej krawędzi</value>
+  </data>
+  <data name="WebClient.Settings.HideSettingsButton.Label" xml:space="preserve">
+    <value>Ukryj przycisk ustawień</value>
+  </data>
+  <data name="WebClient.Settings.HideSettingsButton.SaveFailed" xml:space="preserve">
+    <value>Nie udało się zmienić przycisku ustawień</value>
+  </data>
   <data name="WebClient.Settings.Licenses.Button" xml:space="preserve">
     <value>Licencje open source</value>
   </data>
@@ -16627,6 +16669,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="WebClient.Settings.OpenSettings" xml:space="preserve">
     <value>Otwórz ustawienia Macro Deck</value>
+  </data>
+  <data name="WebClient.Settings.Sidebar" xml:space="preserve">
+    <value>Panel boczny</value>
   </data>
   <data name="WebClient.Setup.Body" xml:space="preserve">
     <value>Dokończ pierwszą konfigurację w aplikacji Macro Deck na komputerze, a następnie odśwież tę stronę.</value>
@@ -16664,6 +16709,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="WebClient.Widgets.Clock.Name" xml:space="preserve">
     <value>Zegar</value>
   </data>
+  <data name="WebClient.Widgets.Countdown.Description" xml:space="preserve">
+    <value>Minutnik odliczający od ustawionego czasu i sygnalizujący jego upływ</value>
+  </data>
+  <data name="WebClient.Widgets.Countdown.Name" xml:space="preserve">
+    <value>Odliczanie</value>
+  </data>
   <data name="WebClient.Widgets.HistoryGraph.Description" xml:space="preserve">
     <value>Karta z wykresem na żywo dla zmiennej liczbowej (CPU, RAM, GPU…) z przewijanym wykresem</value>
   </data>
@@ -16684,6 +16735,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="WebClient.Widgets.Slider.Name" xml:space="preserve">
     <value>Suwak</value>
+  </data>
+  <data name="WebClient.Widgets.Stopwatch.Description" xml:space="preserve">
+    <value>Stoper uruchamiany, wstrzymywany i zerowany naciśnięciem</value>
+  </data>
+  <data name="WebClient.Widgets.Stopwatch.Name" xml:space="preserve">
+    <value>Stoper</value>
   </data>
   <data name="WebClient.Widgets.Weather.Description" xml:space="preserve">
     <value>Bieżące warunki i wielodniowa prognoza pogody dla lokalizacji</value>
@@ -17051,6 +17108,55 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Widgets.ContextMenu.UnpinWidgets" xml:space="preserve">
     <value>Odepnij widżety</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.AlreadyRunning" xml:space="preserve">
+    <value>To odliczanie już trwa.</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.Hours" xml:space="preserve">
+    <value>Godziny</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.Minutes" xml:space="preserve">
+    <value>Minuty</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.PresetHours.One" xml:space="preserve">
+    <value>{count} godz.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Countdown.Dialog.PresetHours.Other" xml:space="preserve">
+    <value>{count} godz.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Countdown.Dialog.PresetMinutes.One" xml:space="preserve">
+    <value>{count} min</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Countdown.Dialog.PresetMinutes.Other" xml:space="preserve">
+    <value>{count} min</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Countdown.Dialog.Start" xml:space="preserve">
+    <value>Uruchom</value>
+  </data>
+  <data name="Widgets.Countdown.Dialog.Title" xml:space="preserve">
+    <value>Ustawienie odliczania</value>
+  </data>
+  <data name="Widgets.Countdown.Mode" xml:space="preserve">
+    <value>Przy uruchomieniu</value>
+  </data>
+  <data name="Widgets.Countdown.ModeAsk" xml:space="preserve">
+    <value>Pytanie o czas</value>
+  </data>
+  <data name="Widgets.Countdown.ModeFixed" xml:space="preserve">
+    <value>Ustawiony czas</value>
+  </data>
+  <data name="Widgets.Countdown.ModeHint" xml:space="preserve">
+    <value>Pytanie otwiera okno na urządzeniu, na którym naciśnięto odliczanie. Sprzętowy deck używa ostatnio wprowadzonego czasu.</value>
+  </data>
+  <data name="Widgets.Countdown.TapToDismiss" xml:space="preserve">
+    <value>Dotknięcie potwierdza</value>
+  </data>
+  <data name="Widgets.Countdown.TapToSet" xml:space="preserve">
+    <value>Dotknięcie ustawia czas</value>
   </data>
   <data name="Widgets.CursorPositionTooltip" xml:space="preserve">
     <value>Pozycja kursora na ekranie</value>
@@ -17695,6 +17801,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Widgets.Music.SmallCoverDesc" xml:space="preserve">
     <value>Okładka ze szczegółami poniżej</value>
   </data>
+  <data name="Widgets.Music.Source" xml:space="preserve">
+    <value>Źródło</value>
+  </data>
   <data name="Widgets.Music.Timeline" xml:space="preserve">
     <value>Oś czasu</value>
   </data>
@@ -17886,6 +17995,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Widgets.Slider.Vertical" xml:space="preserve">
     <value>Pionowo</value>
+  </data>
+  <data name="Widgets.Timer.LabelPlaceholderExample" xml:space="preserve">
+    <value>Pizza</value>
   </data>
   <data name="Widgets.TypeSelector.Heading" xml:space="preserve">
     <value>Wybierz typ widżetu</value>

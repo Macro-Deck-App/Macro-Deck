@@ -27,6 +27,9 @@ says it started and is still running.
 With the Shortcuts app's own automations, a script can run when you arrive home, at a time of day, when a Focus
 turns on or when you tap an NFC tag, for example to start your stream setup on the computer.
 
+Other apps can run a script with a `macrodeck-companion://run-script` link once you allow it in the settings under
+**Automation**. See [Run scripts from other apps](/guide/companion-app/automation/).
+
 ## Home Screen
 
 - **Quick actions:** touch and hold the app icon to open one of up to four saved computers directly.
@@ -35,6 +38,9 @@ turns on or when you tap an NFC tag, for example to start your stream setup on t
 
 ## Differences from Android
 
+- **Automation apps use a link.** Android automation apps send an intent, and Android can put a script on the home
+  screen. On iPhone and iPad, use the **Run Script** action in Shortcuts, or the run-script link; see
+  [Run scripts from other apps](/guide/companion-app/automation/).
 - **The screen cannot be turned on or off by Macro Deck.** iOS does not allow apps to do this, so the **Turn screen
   on**, **Turn screen off** and **Bring to front** actions do not work on iPhone and iPad. Full-screen screenshots
   are not possible either; **Take screenshot** captures the deck.

@@ -34,6 +34,7 @@ public class MusicPlayerWidgetConfigTests
 		showArtist = true,
 		showAlbum = true,
 		showTimeline = true,
+		showSource = true,
 		border = new { style = "static", color = "#ff0000" },
 	};
 
@@ -48,6 +49,7 @@ public class MusicPlayerWidgetConfigTests
 		host.ById("showTitle").Change(false);
 		host.ById("showArtist").Change(false);
 		host.ById("showTimeline").Change(false);
+		host.ById("showSource").Change(false);
 		host.ById("border.style").Change("comet");
 		host.ById("border.color").Change("#00ff00");
 
@@ -61,7 +63,24 @@ public class MusicPlayerWidgetConfigTests
 			Assert.That(WidgetDataSchema.Validate(schema!, composed), Is.Empty);
 			Assert.That(composed.GetProperty("instanceId").GetString(), Is.EqualTo("spotify.2"));
 			Assert.That(composed.GetProperty("coverStyle").GetString(), Is.EqualTo("full"));
+			Assert.That(composed.GetProperty("showSource").GetBoolean(), Is.False);
 			Assert.That(composed.GetProperty("border").GetProperty("style").GetString(), Is.EqualTo("comet"));
+		});
+	}
+
+	[Test]
+	public void The_source_is_shown_unless_a_widget_turned_it_off()
+	{
+		var stored = Render(new { showSource = false }, "spotify.1");
+		var older = Render(new { coverStyle = "small" }, "spotify.1");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(stored.ById("showSource").Flag(UiConfigProperties.Value), Is.False);
+			Assert.That(older.ById("showSource").Flag(UiConfigProperties.Value), Is.True);
+			Assert.That(MusicPlayerWidgetData.Parse(JsonSerializer.SerializeToElement(new { showSource = false })).ShowSource,
+				Is.False);
+			Assert.That(MusicPlayerWidgetData.Parse(JsonSerializer.SerializeToElement(new { })).ShowSource, Is.True);
 		});
 	}
 
@@ -166,6 +185,7 @@ public class MusicPlayerWidgetConfigTests
 			["showArtist"] = host.ById("showArtist").Flag(UiConfigProperties.Value),
 			["showAlbum"] = host.ById("showAlbum").Flag(UiConfigProperties.Value),
 			["showTimeline"] = host.ById("showTimeline").Flag(UiConfigProperties.Value),
+			["showSource"] = host.ById("showSource").Flag(UiConfigProperties.Value),
 			["border"] = border,
 		};
 

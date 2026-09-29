@@ -56,6 +56,30 @@ public class ConfigUiSourceCompatibilityTests
 	}
 
 	[Test]
+	public async Task An_old_style_config_flow_provider_still_requires_configuration()
+	{
+		var integration = new PreExistingConfigFlowIntegration();
+		var handler = new ConfigFlowCapabilityHandler([integration], new PluginConfigFlowSessions(TimeProvider.System));
+
+		var result = await handler.InvokeAsync(new CapabilityInvocation
+			{
+				Kind = CapabilityKinds.ConfigFlow,
+				LocalId = ProviderCapabilityId.LocalId,
+				Operation = CapabilityOperations.ConfigFlow.Describe,
+				CorrelationId = "correlation-1",
+				Services = new ServiceCollection().BuildServiceProvider()
+			},
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(((IConfigFlowProvider)integration).RequiresConfiguration, Is.True);
+			Assert.That(result.Data!.Value.Deserialize<ConfigFlowDescribePayload>(PluginProtocolJson.Options)!
+				.RequiresConfiguration, Is.True);
+		});
+	}
+
+	[Test]
 	public async Task An_old_style_action_describes_ConfiguresWithUiTree_as_false_through_the_real_mapper()
 	{
 		var action = new PreExistingAction();

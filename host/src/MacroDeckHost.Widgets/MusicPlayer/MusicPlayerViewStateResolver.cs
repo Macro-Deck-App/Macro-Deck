@@ -29,6 +29,9 @@ internal sealed class MusicPlayerViewStateResolver
 	// would spend a patch to change nothing - which is the whole point of the reference (#749).
 	private const double DriftToleranceMs = 1500;
 
+	// Bounds what a plugin can push through every patch; the widget itself cuts off far earlier.
+	private const int MaxBadgeTextElements = 32;
+
 	private readonly IMusicPlayerRegistry _registry;
 	private readonly IMusicPlayerStateCache _stateCache;
 	private readonly IMusicPlayerVariants _variants;
@@ -153,6 +156,8 @@ internal sealed class MusicPlayerViewStateResolver
 			ArtistName = payload.ArtistName,
 			AlbumName = payload.AlbumName,
 			StatusMessage = payload.StatusMessage,
+			SourceName = string.IsNullOrWhiteSpace(payload.DeviceName) ? null : payload.DeviceName.Trim(),
+			Badge = CapBadge(payload.Badge),
 			Position = ResolvePosition(payload, previous),
 		};
 	}
@@ -357,6 +362,21 @@ internal sealed class MusicPlayerViewStateResolver
 		});
 
 		return _providerIcon;
+	}
+
+	private static string? CapBadge(string? badge)
+	{
+		if (string.IsNullOrWhiteSpace(badge))
+		{
+			return null;
+		}
+
+		var trimmed = badge.Trim();
+		var info = new StringInfo(trimmed);
+
+		return info.LengthInTextElements <= MaxBadgeTextElements
+			? trimmed
+			: info.SubstringByTextElements(0, MaxBadgeTextElements);
 	}
 
 	private static LocalizedText LabelFor(MusicPlayerInstanceDescriptor? descriptor)
