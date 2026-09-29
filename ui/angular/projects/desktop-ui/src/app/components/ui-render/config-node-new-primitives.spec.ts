@@ -54,6 +54,7 @@ function makeIntegration(id: string, name: string, capabilities: string[] = []):
     variableCount: 0,
     supportsConfigFlow: false,
     allowsMultipleConfigurations: false,
+    requiresConfiguration: true,
     configuredEntryCount: 0,
     hasIcon: false,
     iconVersion: null,

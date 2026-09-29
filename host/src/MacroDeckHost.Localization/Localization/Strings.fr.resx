@@ -4587,6 +4587,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Detail.SingleConfigurationHint" xml:space="preserve">
     <value>Cette intégration ne prend en charge qu'une seule configuration. La reconfigurer la remplace, les widgets continuent donc de fonctionner.</value>
   </data>
+  <data name="Integrations.Detail.OptionalConfigurationHint" xml:space="preserve">
+    <value>Cette intégration fonctionne sans configuration. Configure-la uniquement si tu veux modifier ses paramètres.</value>
+  </data>
   <data name="Integrations.Detail.StatusDisabled" xml:space="preserve">
     <value>Désactivée</value>
   </data>

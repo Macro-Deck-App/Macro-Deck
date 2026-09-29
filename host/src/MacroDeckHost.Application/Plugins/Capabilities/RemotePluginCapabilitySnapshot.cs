@@ -61,6 +61,8 @@ public sealed record RemotePluginCapabilitySnapshot
 
 	public bool ServesConfigUiTree { get; init; }
 
+	public bool RequiresConfiguration { get; init; } = true;
+
 	public IReadOnlyList<RemoteUiSurfaceDescriptor> UiSurfaces { get; init; } = [];
 
 	/// <summary>

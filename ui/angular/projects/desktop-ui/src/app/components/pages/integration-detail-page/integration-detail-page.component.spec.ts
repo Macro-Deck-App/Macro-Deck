@@ -303,6 +303,26 @@ describe('IntegrationDetailPageComponent', () => {
     fixture.destroy();
   });
 
+  it('reports an integration whose configuration is optional as ready without an entry', async () => {
+    integrations.set([integration({ requiresConfiguration: false })]);
+    const fixture = await createFixture();
+
+    const status = fixture.nativeElement.querySelector('.status-chip');
+    expect(status.textContent).not.toContain('Setup required');
+    expect(status.textContent).toContain('Ready');
+    expect(fixture.nativeElement.textContent).toContain('This integration works without a configuration.');
+    expect(fixture.nativeElement.querySelector('shared-button').textContent).toContain('Set up');
+    fixture.destroy();
+  });
+
+  it('reports an integration that needs a configuration as needing setup without an entry', async () => {
+    const fixture = await createFixture();
+
+    expect(fixture.nativeElement.querySelector('.status-chip').textContent).toContain('Setup required');
+    expect(fixture.nativeElement.textContent).not.toContain('This integration works without a configuration.');
+    fixture.destroy();
+  });
+
   it('offers reconfiguration once a single-configuration integration is set up', async () => {
     // Hiding the action here was what left re-authentication with no entry point at all, so a user
     // had to delete and re-add - which minted a new config entry id (issue #152).

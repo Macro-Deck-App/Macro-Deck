@@ -284,7 +284,12 @@ export class IntegrationDetailPageComponent implements OnInit {
     (this.integration()?.providedCapabilities ?? []).filter(c => !COUNTED_CAPABILITY_KINDS.includes(c.kind)));
 
   protected readonly requiresSetup = computed(() =>
-    this.canSetUp() && !this.configEntries().some(entry => entry.usable !== false)
+    this.canSetUp() && this.integration()?.requiresConfiguration !== false
+      && !this.configEntries().some(entry => entry.usable !== false)
+  );
+
+  protected readonly configurationOptional = computed(() =>
+    this.canSetUp() && this.integration()?.requiresConfiguration === false && this.configEntries().length === 0
   );
 
   private readonly statusKind = computed<'setup' | 'disabled' | 'starting' | 'ready' | ''>(() => {
@@ -534,7 +539,7 @@ export class IntegrationDetailPageComponent implements OnInit {
       return;
     }
 
-    if (integration.supportsConfigFlow && !this.configEntries().some(entry => entry.usable !== false)) {
+    if (this.requiresSetup()) {
       toggle.checked = false;
       const legacy = this.configEntries().find(entry => entry.usable === false);
       if (legacy) {

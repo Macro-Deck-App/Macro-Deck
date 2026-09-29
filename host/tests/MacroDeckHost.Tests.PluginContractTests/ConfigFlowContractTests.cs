@@ -58,6 +58,25 @@ internal sealed class ConfigFlowContractTests : CapabilityContractFixture
 	}
 
 	[Test]
+	public async Task A_plugin_whose_configuration_is_optional_is_enabled_without_an_entry()
+	{
+		var integration = await ConnectAsync([
+				new ConfigFlowCapabilityHandler([
+						new TestConfigFlowIntegration(() => new TestConfigFlow(), requiresConfiguration: false)
+					],
+					new PluginConfigFlowSessions(TimeProvider.System))
+			],
+			[Provider()],
+			[CapabilityKinds.ConfigFlow]);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(((IConfigFlowProvider)integration).RequiresConfiguration, Is.False);
+			Assert.That(IntegrationRegistry.IsEnabled(PluginId), Is.True);
+		});
+	}
+
+	[Test]
 	public async Task A_multi_step_flow_round_trips_with_state_held_on_the_plugin_side()
 	{
 		var pluginFlow = new TestConfigFlow

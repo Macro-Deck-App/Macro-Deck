@@ -8,6 +8,7 @@ using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeck.Plugin.Testing;
+using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.ConfigFlow;
 using Microsoft.Extensions.DependencyInjection;
@@ -78,6 +79,49 @@ public class ConfigFlowCapabilityHandlerTests
 		Assert.That(result.IsFailure, Is.False);
 		var payload = result.Data!.Value.Deserialize<ConfigFlowDescribePayload>(PluginProtocolJson.Options);
 		Assert.That(payload!.AllowsMultipleConfigurations, Is.False);
+	}
+
+	[Test]
+	public async Task Describe_reports_a_provider_that_does_not_say_as_requiring_configuration()
+	{
+		var handler = new ConfigFlowCapabilityHandler([new TestConfigFlowIntegration(() => new TestConfigFlow())],
+			new PluginConfigFlowSessions(TimeProvider.System));
+
+		var payload = await DescribeAsync(handler);
+
+		Assert.That(payload.RequiresConfiguration, Is.True);
+	}
+
+	[Test]
+	public async Task Describe_reports_an_optional_configuration()
+	{
+		var handler = new ConfigFlowCapabilityHandler([new OptionalSettingsIntegration()],
+			new PluginConfigFlowSessions(TimeProvider.System));
+
+		var payload = await DescribeAsync(handler);
+
+		Assert.That(payload.RequiresConfiguration, Is.False);
+	}
+
+	private static async Task<ConfigFlowDescribePayload> DescribeAsync(ConfigFlowCapabilityHandler handler)
+	{
+		var result = await handler.InvokeAsync(
+			Invocation(ProviderCapabilityId.LocalId, CapabilityOperations.ConfigFlow.Describe),
+			CancellationToken.None);
+		return result.Data!.Value.Deserialize<ConfigFlowDescribePayload>(PluginProtocolJson.Options)!;
+	}
+
+	private sealed class OptionalSettingsIntegration : IPluginIntegration, IConfigFlowProvider
+	{
+		public IReadOnlyList<IActionDefinition> Actions { get; } = [];
+
+		public bool RequiresConfiguration => false;
+
+		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+
+		public Task ShutdownAsync() => Task.CompletedTask;
+
+		public IConfigFlow CreateConfigFlow() => new TestConfigFlow();
 	}
 
 	[Test]

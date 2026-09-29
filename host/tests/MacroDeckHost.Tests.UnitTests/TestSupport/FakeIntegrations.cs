@@ -435,6 +435,8 @@ internal class FakeVariableProviderIntegration : IIntegration, IVariableProvider
 
 internal sealed class FakeConfigurableVariableProviderIntegration : FakeVariableProviderIntegration, IConfigFlowProvider
 {
+	public bool RequiresConfiguration { get; init; } = true;
+
 	public IConfigFlow CreateConfigFlow() => throw new NotSupportedException();
 }
 

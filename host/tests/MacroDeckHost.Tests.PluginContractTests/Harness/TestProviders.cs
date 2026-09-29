@@ -431,7 +431,10 @@ internal sealed class ThrowingTestConfigFlow : IConfigFlow
 		=> throw new InvalidOperationException("boom: token=abc123");
 }
 
-internal sealed class TestConfigFlowIntegration(Func<IConfigFlow> factory, bool allowsMultipleConfigurations = true)
+internal sealed class TestConfigFlowIntegration(
+	Func<IConfigFlow> factory,
+	bool allowsMultipleConfigurations = true,
+	bool requiresConfiguration = true)
 	: IPluginIntegration, IConfigFlowProvider
 {
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
@@ -441,6 +444,8 @@ internal sealed class TestConfigFlowIntegration(Func<IConfigFlow> factory, bool 
 	public Task ShutdownAsync() => Task.CompletedTask;
 
 	public bool AllowsMultipleConfigurations { get; } = allowsMultipleConfigurations;
+
+	public bool RequiresConfiguration { get; } = requiresConfiguration;
 
 	public IConfigFlow CreateConfigFlow() => factory();
 }

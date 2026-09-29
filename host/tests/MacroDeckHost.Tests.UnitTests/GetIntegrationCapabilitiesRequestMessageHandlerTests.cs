@@ -63,6 +63,33 @@ public class GetIntegrationCapabilitiesRequestMessageHandlerTests
 	}
 
 	[Test]
+	public async Task An_optional_config_flow_without_entries_does_not_require_setup()
+	{
+		var integration = new FakeConfigurableVariableProviderIntegration
+		{
+			Id = "int-optional",
+			IsInitialized = true,
+			RequiresConfiguration = false,
+			Actions = [new CapturingActionDefinition()],
+			Variables = []
+		};
+		var registry = new ConfigurableIntegrationRegistry([integration]);
+		var configStore = new FakeIntegrationConfigStore();
+		configStore.SetConfiguredCount(integration.Id, 0);
+		var handler = CreateHandler(registry, configStore, new VariableRegistry());
+
+		var response = await handler.Handle(new GetIntegrationCapabilitiesRequest { IntegrationId = integration.Id },
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.SupportsConfigFlow, Is.True);
+			Assert.That(response.RequiresSetup, Is.False);
+			Assert.That(response.Actions.Single().Availability, Is.EqualTo(CapabilityAvailability.Ready));
+		});
+	}
+
+	[Test]
 	public async Task Configured_but_disabled_reports_IntegrationDisabled()
 	{
 		var integration = new FakeConfigurableVariableProviderIntegration

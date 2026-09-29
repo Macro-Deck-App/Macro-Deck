@@ -301,6 +301,31 @@ public class CapabilityDtoSerializationTests
 	}
 
 	[Test]
+	public void ConfigFlowDescribePayload_without_RequiresConfiguration_still_requires_configuration()
+	{
+		var payload = JsonSerializer.Deserialize<ConfigFlowDescribePayload>("{\"allowsMultipleConfigurations\":true}",
+			PluginProtocolJson.Options);
+
+		Assert.That(payload!.RequiresConfiguration, Is.True);
+	}
+
+	[Test]
+	public void ConfigFlowDescribePayload_writes_an_optional_configuration_on_the_wire()
+	{
+		var json = JsonSerializer.Serialize(
+			new ConfigFlowDescribePayload { AllowsMultipleConfigurations = false, RequiresConfiguration = false },
+			PluginProtocolJson.Options);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(JsonDocument.Parse(json).RootElement.GetProperty("requiresConfiguration").GetBoolean(),
+				Is.False);
+			Assert.That(JsonSerializer.Deserialize<ConfigFlowDescribePayload>(json, PluginProtocolJson.Options)!
+				.RequiresConfiguration, Is.False);
+		});
+	}
+
+	[Test]
 	public void FlowStartArguments_keep_entry_title_additive_and_optional()
 	{
 		const string oldPayload =
