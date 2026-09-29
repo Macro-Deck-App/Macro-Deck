@@ -8,6 +8,17 @@ export interface UiResource {
   byteLength?: number;
 }
 
+export interface UiResourceHint {
+  displayPx?: number;
+  widgetId?: string;
+}
+
+const ICON_RESOURCE_PREFIXES = ['app.macro-deck.widget-icon.', 'app.macro-deck.plugin-icon.'];
+
+export function isIconUiResource(resource: UiResource | undefined): boolean {
+  return !!resource && ICON_RESOURCE_PREFIXES.some(prefix => resource.resourceId.startsWith(prefix));
+}
+
 export function nodeResource(
   node: UiNode | null | undefined,
   key: string,
@@ -26,9 +37,12 @@ export function nodeResource(
   };
 }
 
-export function uiResourceUrl(baseUrl: string, resource: UiResource | undefined): string | null {
+export function uiResourceUrl(baseUrl: string, resource: UiResource | undefined, size?: number): string | null {
   if (!resource || !baseUrl) return null;
 
   const path = `${baseUrl}/api/ui/resources/${encodeURIComponent(resource.resourceId)}`;
-  return resource.contentHash ? `${path}?v=${encodeURIComponent(resource.contentHash)}` : path;
+  const query: string[] = [];
+  if (resource.contentHash) query.push(`v=${encodeURIComponent(resource.contentHash)}`);
+  if (size !== undefined) query.push(`size=${size}`);
+  return query.length > 0 ? `${path}?${query.join('&')}` : path;
 }

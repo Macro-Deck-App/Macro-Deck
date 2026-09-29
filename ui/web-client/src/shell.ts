@@ -18,10 +18,11 @@ import { IdleTimer, type IdleTimerClock } from './idle-timer';
 import { ScreenSaver } from './screensaver';
 import { ModalHost } from './modal';
 import { RenderingModeStore } from './rendering-mode';
+import { IconResolutionStore } from './icon-resolution';
 import { ServerClock } from './server-clock';
 import { WakeLock } from './wake-lock';
 import { createLoginForm } from './login';
-import { createClientSettings, type ClientSettingsHandle } from './settings';
+import { createClientSettings, type ClientSettingsHandle, type IconResolutionSurface } from './settings';
 import { createDeviceSetupWizard, createSetupBanner, DeviceSetupService, DismissibleHints } from './setup';
 import { dismissAllToasts, mountToastHost, showToast } from './ui';
 import type { Pwa } from './pwa';
@@ -34,6 +35,7 @@ export interface ShellServices {
   target: WebClientTarget;
   appearance: Appearance;
   rendering: RenderingModeStore;
+  iconResolution?: IconResolutionStore;
   wakeLock: WakeLock;
   pwa: Pwa;
   clock: ServerClock;
@@ -147,6 +149,8 @@ export class Shell {
       client,
       appearance: services.appearance,
       renderingMode: services.rendering,
+      iconResolution: services.iconResolution && iconResolutionSurface(services.iconResolution,
+        () => this.client.deck.displayedWidgets.map(widget => widget.id)),
       wakeLock: services.wakeLock,
       update: services.pwa.update,
       install: services.pwa.install,
@@ -498,4 +502,20 @@ function panel(title: string, detail: string): HTMLElement {
   element.appendChild(body);
 
   return element;
+}
+
+function iconResolutionSurface(store: IconResolutionStore, displayedWidgetIds: () => string[]): IconResolutionSurface {
+  return {
+    get: () => store.get(),
+    set: resolution => store.set(resolution),
+    onChange: listener => {
+      const offPreference = store.onChange(listener);
+      const offObserved = store.onObservedChange(listener);
+      return () => {
+        offPreference();
+        offObserved();
+      };
+    },
+    inUse: () => store.observedRange(displayedWidgetIds()),
+  };
 }

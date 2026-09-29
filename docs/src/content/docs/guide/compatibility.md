@@ -52,6 +52,11 @@ If the web client feels sluggish, set **Rendering** to **Simple** in its setting
 shadows, animations and the history graph, and hides the forecast bars. On devices that support
 it, the companion app is the better choice.
 
+**Icon resolution** in the same settings decides how sharp the icons on the deck are loaded.
+**Automatic** picks 128, 256 or 512 px from how large each icon is shown and says which size it is
+using. A phone usually gets 128 px, a tablet 256 px. Choose a fixed size if icons look blurry or a
+slow network loads them too slowly. The desktop app always uses 256 px.
+
 ### HTTPS is needed for some web client features
 
 Installing the web client as an app (PWA) and **Keep display awake** only work when the web client

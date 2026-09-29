@@ -18,6 +18,7 @@ import { Appearance } from './appearance';
 import { Client } from './client';
 import { FontLoader } from './fonts';
 import { RenderingModeStore } from './rendering-mode';
+import { IconResolutionStore } from './icon-resolution';
 import { ServerClock } from './server-clock';
 import { Shell } from './shell';
 import { WakeLock } from './wake-lock';
@@ -87,6 +88,7 @@ export function start(root: HTMLElement, target: WebClientTarget = ACTIVE_TARGET
     () => client.http.get<GetSystemFontsResponse>('/api/system/fonts').then(response => response.faces ?? []),
     faceId => `${hostBaseUrl()}/api/system/fonts/${encodeURIComponent(faceId)}/file`);
   const rendering = new RenderingModeStore();
+  const iconResolution = new IconResolutionStore();
   const wakeLock = new WakeLock(CLIENT_TYPE, target.capabilities.wakeLock ? undefined : null);
   const pwa = setupPwa(target.capabilities.serviceWorker ? {} : { devMode: true });
   const videoStreams = new VideoStreamClient(uiConnectionVideoStreamPort(client.connection));
@@ -94,7 +96,7 @@ export function start(root: HTMLElement, target: WebClientTarget = ACTIVE_TARGET
   const host: UiRenderHost = {
     // The host's catalogue once it has answered, and the one compiled into the package until then.
     localization: client.localization,
-    resourceUrl: resource => uiResourceUrl(hostBaseUrl(), resource),
+    resourceUrl: (resource, hint) => uiResourceUrl(hostBaseUrl(), resource, iconResolution.sizeFor(resource, hint)),
     // The host's clock, not the device's: the looping border animations are phase-locked to it, and
     // two clients an unsynchronised second apart run visibly out of step.
     now: () => clock.now(),
@@ -115,6 +117,7 @@ export function start(root: HTMLElement, target: WebClientTarget = ACTIVE_TARGET
     target,
     appearance,
     rendering,
+    iconResolution,
     wakeLock,
     pwa,
     clock,
@@ -160,6 +163,10 @@ export function start(root: HTMLElement, target: WebClientTarget = ACTIVE_TARGET
     currentFolderId: () => client.deck.location.get().folderId,
     resolveGrid: folder => client.gridFor(folder),
     outerMargin: 0,
+    fixedSize: () => {
+      const resolution = iconResolution.get();
+      return resolution === 'auto' ? undefined : resolution;
+    },
   });
   client.deck.folders.subscribe(() => icons.warm());
   client.deck.location.subscribe(() => icons.warm());
@@ -174,6 +181,10 @@ export function start(root: HTMLElement, target: WebClientTarget = ACTIVE_TARGET
   fonts.onChange(() => shell.repaint());
   uiFont.onChange(() => shell.repaint());
   rendering.onChange(() => shell.repaint());
+  iconResolution.onChange(() => {
+    shell.repaint();
+    icons.warm();
+  });
   appearance.onChange(() => shell.repaint());
   appearance.setPersistence((mode, accent) => void client.saveAppearance(mode, accent));
 

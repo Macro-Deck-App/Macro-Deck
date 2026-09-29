@@ -1,12 +1,12 @@
 import { LocalizationTranslator } from '../localization/localized-text';
 import { UiNode } from '../ui-framework/ui-node.interface';
-import { UiResource } from '../ui-framework/ui-resource';
+import { UiResource, UiResourceHint } from '../ui-framework/ui-resource';
 import type { VideoStreamSurface } from '../video-streams/video-stream-client';
 
 export interface UiRenderHost {
   localization: LocalizationTranslator;
 
-  resourceUrl(resource: UiResource | undefined): string | null;
+  resourceUrl(resource: UiResource | undefined, hint?: UiResourceHint): string | null;
 
   now(): number;
 

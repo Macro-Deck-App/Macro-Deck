@@ -274,6 +274,7 @@ public class Startup
 		services.AddSingleton<IBuiltInWidgetUiProvider, ClockWidgetUiProvider>();
 		services.AddSingleton<IWidgetIconSourceRegistry, WidgetIconSourceRegistry>();
 		services.AddSingleton<IWidgetIconResources, WidgetIconResources>();
+		services.AddSingleton<IIconUiResourceRenditions, IconUiResourceRenditions>();
 		services.AddSingleton<IWidgetIconProviderResources, WidgetIconProviderResources>();
 		services.AddScoped<IWidgetIconService, WidgetIconService>();
 		services.AddSingleton<IBuiltInWidgetUiProvider, SliderWidgetUiProvider>();

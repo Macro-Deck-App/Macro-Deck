@@ -142,7 +142,7 @@ export class ModalHost {
     const base = this.host;
     return {
       localization: base.localization,
-      resourceUrl: resource => base.resourceUrl(resource),
+      resourceUrl: (resource, hint) => base.resourceUrl(resource, hint),
       now: () => base.now(),
       culture: () => base.culture(),
       hourCycle: () => base.hourCycle?.(),

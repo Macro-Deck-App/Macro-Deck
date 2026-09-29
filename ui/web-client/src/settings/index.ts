@@ -5,6 +5,7 @@ export {
   type ClientSettingsHandle,
   type ClientSettingsOptions,
   type HintTimer,
+  type IconResolutionSurface,
   type PwaInstallSurface,
   type RenderingModeSurface,
   type SettingsTranslator,

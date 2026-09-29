@@ -7,6 +7,7 @@ import {
 } from '@macro-deck/runtime';
 import { type AppUpdatePhase, type PwaAvailability, type PwaInstallOutcome } from '../pwa';
 import { type RenderingMode } from '../rendering-mode';
+import { type IconResolution, type IconSizeRange } from '../icon-resolution';
 import { type WakeLockStatus } from '../wake-lock';
 import {
   createClientSettings,
@@ -532,6 +533,72 @@ describe('client settings', () => {
       option(english(ClientAppStrings.WebClient.Rendering.Simple)).click();
 
       expect(fixture.renderingMode.set).toHaveBeenCalledWith('simple');
+    });
+
+    function iconResolution(current: IconResolution = 'auto', inUse: IconSizeRange | null = null) {
+      const listeners: Array<() => void> = [];
+      return {
+        current: current,
+        inUseNow: inUse,
+        set: jasmine.createSpy('set'),
+        get() {
+          return this.current;
+        },
+        inUse() {
+          return this.inUseNow;
+        },
+        onChange: (listener: () => void) => {
+          listeners.push(listener);
+          return () => undefined;
+        },
+        notify: () => listeners.forEach(listener => listener()),
+      };
+    }
+
+    function iconResolutionDescription(): string {
+      const label = english(ClientAppStrings.WebClient.IconResolution.Label);
+      const rows = dialog().querySelectorAll<HTMLElement>('.wc-settings-row');
+      for (let index = 0; index < rows.length; index++) {
+        if (rows[index].textContent!.indexOf(label) === 0) {
+          return rows[index].querySelector('.wc-settings-row-desc')!.textContent as string;
+        }
+      }
+      throw new Error('no icon resolution row');
+    }
+
+    it('offers automatic and the three icon resolutions, and applies the one picked', () => {
+      const surface = iconResolution();
+      const fixture = create({ iconResolution: surface });
+      fixture.handle.open();
+
+      expect(activeOptions()).toContain(english(ClientAppStrings.WebClient.IconResolution.Automatic));
+      option('128 px').click();
+      option('512 px').click();
+      option(english(ClientAppStrings.WebClient.IconResolution.Automatic)).click();
+
+      expect(surface.set.calls.allArgs()).toEqual([[128], [512], ['auto']]);
+    });
+
+    it('says which resolution automatic is using, and follows it while open', () => {
+      const surface = iconResolution('auto', { min: 128, max: 128 });
+      const fixture = create({ iconResolution: surface });
+      fixture.handle.open();
+
+      expect(iconResolutionDescription()).toBe('Currently 128 px.');
+
+      surface.inUseNow = { min: 128, max: 256 };
+      surface.notify();
+
+      expect(iconResolutionDescription()).toBe('Currently 128 to 256 px.');
+    });
+
+    it('explains the setting instead when a fixed resolution is chosen', () => {
+      const surface = iconResolution(256, { min: 128, max: 128 });
+      const fixture = create({ iconResolution: surface });
+      fixture.handle.open();
+
+      expect(activeOptions()).toContain('256 px');
+      expect(iconResolutionDescription()).toBe(english(ClientAppStrings.WebClient.IconResolution.Description));
     });
 
     it('follows a theme changed elsewhere into the open dialog', () => {

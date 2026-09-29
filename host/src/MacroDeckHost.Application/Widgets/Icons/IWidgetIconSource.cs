@@ -1,7 +1,7 @@
 namespace MacroDeckHost.Application.Widgets.Icons;
 
 /// <summary>The bytes behind one resolved widget icon.</summary>
-public sealed record WidgetIconImage(Stream Content, string MediaType);
+public sealed record WidgetIconImage(Stream Content, string MediaType, bool Stable = true);
 
 /// <summary>
 /// Resolves a <see cref="MacroDeckHost.Domain.Widgets.WidgetIconReference" />'s <c>Reference</c> to an
