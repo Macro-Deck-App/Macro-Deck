@@ -1,5 +1,8 @@
 using System.Text.Json;
+using MacroDeck.Localization;
+using MacroDeck.Sdk.Widgets;
 using MacroDeck.Ui.Model.Versioning;
+using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
 using MacroDeckHost.Application.Widgets;
 
@@ -10,10 +13,11 @@ public static class WidgetTypeDtoMapper
 {
 	private static readonly JsonElement _emptyObject = JsonDocument.Parse("{}").RootElement;
 
-	public static List<WidgetTypeDto> MapToDto(IEnumerable<WidgetTypeCatalogEntry> entries)
-		=> [.. entries.Select(MapToDto)];
+	public static List<WidgetTypeDto> MapToDto(IEnumerable<WidgetTypeCatalogEntry> entries,
+		IIntegrationRegistry integrations)
+		=> [.. entries.Select(entry => MapToDto(entry, integrations))];
 
-	public static WidgetTypeDto MapToDto(WidgetTypeCatalogEntry entry)
+	public static WidgetTypeDto MapToDto(WidgetTypeCatalogEntry entry, IIntegrationRegistry integrations)
 	{
 		var supportsConfigUi = entry.Descriptor.HasConfiguration;
 
@@ -22,12 +26,33 @@ public static class WidgetTypeDtoMapper
 			Id = entry.WidgetTypeId,
 			ProviderId = entry.ProviderId,
 			IsBuiltIn = entry.IsBuiltIn,
+			ProviderName = ProviderNameOf(entry, integrations),
 			Name = entry.Descriptor.Name,
 			Description = entry.Descriptor.Description ?? default,
 			DefaultData = ParseDefaultData(entry.Descriptor.DefaultData),
 			SupportsConfigUi = supportsConfigUi,
 			ConfigUiModelVersion = supportsConfigUi ? UiModelVersions.Current : 0
 		};
+	}
+
+	private static LocalizedText ProviderNameOf(WidgetTypeCatalogEntry entry, IIntegrationRegistry integrations)
+	{
+		if (entry.IsBuiltIn)
+		{
+			return default;
+		}
+
+		var integration = integrations.Integrations.FirstOrDefault(candidate =>
+			string.Equals(candidate.Id, entry.ProviderId, StringComparison.Ordinal));
+		if (integration is null)
+		{
+			return entry.ProviderId;
+		}
+
+		var name = integration is IWidgetTypeProvider provider
+			? ProviderDisplayName.Resolve(provider.ProviderName, integration)
+			: integration.Name;
+		return name.IsEmpty ? entry.ProviderId : name;
 	}
 
 	// A descriptor that declares nothing, or declares something unreadable, reports an empty object rather

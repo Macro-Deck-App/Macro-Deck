@@ -1354,6 +1354,7 @@ export {
   type GetWidgetTypesResponse,
   type WidgetTypeCatalogChangedEvent,
   type WidgetTypeDto,
+  type WidgetTypeFavoritesChangedEvent,
 } from './protocol/messages/widget-type';
 export { TransportError } from './protocol/transport-error';
 export { type RefreshOutcome, isUnreachable } from './protocol/refresh-outcome';

@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Ui.Handlers;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
@@ -11,11 +12,15 @@ public sealed class WidgetTypeCatalogChangedNotificationHandler
 {
 	private readonly IWidgetTypeRegistry _registry;
 	private readonly IUiTransport _uiTransport;
+	private readonly IIntegrationRegistry _integrations;
 
-	public WidgetTypeCatalogChangedNotificationHandler(IWidgetTypeRegistry registry, IUiTransport uiTransport)
+	public WidgetTypeCatalogChangedNotificationHandler(IWidgetTypeRegistry registry,
+		IUiTransport uiTransport,
+		IIntegrationRegistry integrations)
 	{
 		_registry = registry;
 		_uiTransport = uiTransport;
+		_integrations = integrations;
 	}
 
 	public async ValueTask Handle(
@@ -24,7 +29,7 @@ public sealed class WidgetTypeCatalogChangedNotificationHandler
 	{
 		var evt = new WidgetTypeCatalogChangedEvent
 		{
-			Types = WidgetTypeDtoMapper.MapToDto(_registry.All)
+			Types = WidgetTypeDtoMapper.MapToDto(_registry.All, _integrations)
 		};
 
 		await _uiTransport.Send(evt, cancellationToken);

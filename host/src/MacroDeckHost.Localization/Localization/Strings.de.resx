@@ -3007,8 +3007,14 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>Kein Anbieter hat das Widget verarbeitet</value>
   </data>
+  <data name="Errors.Widgets.TooManyFavorites" xml:space="preserve">
+    <value>Höchstens {max} Widgets können Favoriten sein.</value>
+  </data>
   <data name="Errors.Widgets.TooManyStates" xml:space="preserve">
     <value>Ein Button kann höchstens {max} Zustände haben.</value>
+  </data>
+  <data name="Errors.Widgets.UnknownType" xml:space="preserve">
+    <value>Dieser Widget-Typ ist nicht verfügbar.</value>
   </data>
   <data name="Errors.Widgets.UnsupportedActionTriggers" xml:space="preserve">
     <value>Das Widget unterstützt keine Aktionsauslöser</value>
@@ -18024,11 +18030,35 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Timer.LabelPlaceholderExample" xml:space="preserve">
     <value>Pizza</value>
   </data>
+  <data name="Widgets.TypeSelector.AddFavorite" xml:space="preserve">
+    <value>{name} zu Favoriten hinzufügen</value>
+  </data>
+  <data name="Widgets.TypeSelector.FavoriteFailed" xml:space="preserve">
+    <value>Der Favorit konnte nicht gespeichert werden.</value>
+  </data>
   <data name="Widgets.TypeSelector.Heading" xml:space="preserve">
     <value>Widget-Typ auswählen</value>
   </data>
-  <data name="Widgets.TypeSelector.Subtitle" xml:space="preserve">
-    <value>Wähle den zu erstellenden Widget-Typ</value>
+  <data name="Widgets.TypeSelector.NoMatches" xml:space="preserve">
+    <value>Keine Widgets passen zu deiner Suche</value>
+  </data>
+  <data name="Widgets.TypeSelector.RemoveFavorite" xml:space="preserve">
+    <value>{name} aus Favoriten entfernen</value>
+  </data>
+  <data name="Widgets.TypeSelector.SearchAriaLabel" xml:space="preserve">
+    <value>Widget-Typen durchsuchen</value>
+  </data>
+  <data name="Widgets.TypeSelector.SearchPlaceholder" xml:space="preserve">
+    <value>Widgets durchsuchen…</value>
+  </data>
+  <data name="Widgets.TypeSelector.ViewGrid" xml:space="preserve">
+    <value>Kacheln</value>
+  </data>
+  <data name="Widgets.TypeSelector.ViewLabel" xml:space="preserve">
+    <value>Ansicht</value>
+  </data>
+  <data name="Widgets.TypeSelector.ViewList" xml:space="preserve">
+    <value>Liste</value>
   </data>
   <data name="Widgets.Weather.ConditionIcon" xml:space="preserve">
     <value>Wettersymbol</value>

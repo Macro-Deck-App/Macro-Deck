@@ -818,6 +818,7 @@ public class Startup
 		services.AddSingleton<IWidgetApi, WidgetApi>();
 		services.AddSingleton<IWidgetDataSchemaProvider, WidgetDataSchemaProvider>();
 		services.AddSingleton<IWidgetTypeRegistry, WidgetTypeRegistry>();
+		services.AddSingleton<IWidgetTypeFavoritesService, WidgetTypeFavoritesService>();
 		services.AddSingleton<IUserVariableApi, UserVariableWriter>();
 		services.AddSingleton<IAutomationStore, JsonAutomationStore>();
 		services.AddSingleton<AutomationCache>();

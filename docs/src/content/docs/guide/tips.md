@@ -35,6 +35,12 @@ Unlock the deck to edit it, lock it to press buttons.
   **Visible** or **Transparent**; **Inherited** takes the value from the parent folder, then the profile.
   While you edit the deck, hidden empty cells show a dashed outline, so you can still place widgets. The setting
   does not apply to hardware devices.
+## Finding a widget type
+
+When you add a widget, type in the search field to filter by name, description or integration. Widgets
+from an integration or plugin show its name as a badge. Click the **star** on a widget type to keep it at
+the top of the list for everyone who edits this Macro Deck, and switch between tiles and a compact list
+next to the search field.
 
 ## Pinned widgets
 

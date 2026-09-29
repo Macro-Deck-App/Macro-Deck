@@ -20,7 +20,7 @@ public class WidgetSchemaEndpointTests
 
 	private static WidgetsController CreateController(
 		IUiTransportMessageHandler<GetWidgetDataSchemasRequest, GetWidgetDataSchemasResponse> handler)
-		=> new(null!, null!, null!, null!, null!, null!, null!, null!, handler, null!, null!, null!, null!, null!);
+		=> new(null!, null!, null!, null!, null!, null!, null!, null!, handler, null!, null!, null!, null!, null!, null!, null!);
 
 	[Test]
 	public async Task GetDataSchemas_serves_a_schema_for_every_built_in_type()

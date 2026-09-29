@@ -3008,8 +3008,14 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>Žádný poskytovatel widget nezpracoval</value>
   </data>
+  <data name="Errors.Widgets.TooManyFavorites" xml:space="preserve">
+    <value>Maximální počet oblíbených widgetů: {max}.</value>
+  </data>
   <data name="Errors.Widgets.TooManyStates" xml:space="preserve">
     <value>Maximální počet stavů tlačítka: {max}.</value>
+  </data>
+  <data name="Errors.Widgets.UnknownType" xml:space="preserve">
+    <value>Tento typ widgetu není k dispozici.</value>
   </data>
   <data name="Errors.Widgets.UnsupportedActionTriggers" xml:space="preserve">
     <value>Widget nepodporuje triggery akcí</value>
@@ -18026,11 +18032,35 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.Timer.LabelPlaceholderExample" xml:space="preserve">
     <value>Pizza</value>
   </data>
+  <data name="Widgets.TypeSelector.AddFavorite" xml:space="preserve">
+    <value>Přidat {name} do oblíbených</value>
+  </data>
+  <data name="Widgets.TypeSelector.FavoriteFailed" xml:space="preserve">
+    <value>Oblíbenou položku se nepodařilo uložit.</value>
+  </data>
   <data name="Widgets.TypeSelector.Heading" xml:space="preserve">
     <value>Vybrat typ widgetu</value>
   </data>
-  <data name="Widgets.TypeSelector.Subtitle" xml:space="preserve">
-    <value>Vyberte typ widgetu, který vytvořit</value>
+  <data name="Widgets.TypeSelector.NoMatches" xml:space="preserve">
+    <value>Hledání neodpovídá žádný widget</value>
+  </data>
+  <data name="Widgets.TypeSelector.RemoveFavorite" xml:space="preserve">
+    <value>Odebrat {name} z oblíbených</value>
+  </data>
+  <data name="Widgets.TypeSelector.SearchAriaLabel" xml:space="preserve">
+    <value>Hledat typy widgetů</value>
+  </data>
+  <data name="Widgets.TypeSelector.SearchPlaceholder" xml:space="preserve">
+    <value>Hledat widgety…</value>
+  </data>
+  <data name="Widgets.TypeSelector.ViewGrid" xml:space="preserve">
+    <value>Dlaždice</value>
+  </data>
+  <data name="Widgets.TypeSelector.ViewLabel" xml:space="preserve">
+    <value>Zobrazení</value>
+  </data>
+  <data name="Widgets.TypeSelector.ViewList" xml:space="preserve">
+    <value>Seznam</value>
   </data>
   <data name="Widgets.Weather.ConditionIcon" xml:space="preserve">
     <value>Ikona počasí</value>
