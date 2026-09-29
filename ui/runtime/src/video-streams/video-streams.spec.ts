@@ -879,6 +879,38 @@ describe('macrodeck.video-stream', () => {
     expect(frame.style.height).toBe('200px');
   });
 
+  it('says the source is not available while its provider is gone, and plays once it is back', async () => {
+    const root = mount();
+    await answerOpen();
+    port.catalog = [];
+    port.push('VideoStreamSessionClosedEvent', { sessionId: 's1', reason: 'provider_removed' });
+    port.push('VideoStreamCatalogChangedEvent', {});
+    await flush();
+    jasmine.clock().tick(VIDEO_RETRY_MIN_MS);
+
+    expect(root.getAttribute('data-status')).toBe('no-source');
+    expect(root.textContent).toContain('Errors.VideoStream.UnknownProvider');
+    expect(port.sent('OpenVideoStream').length).toBe(1);
+
+    port.catalog = [{ id: PROVIDER, name: 'Door', streams: [
+      { id: 'front', name: 'Front door', width: 1920, height: 1080, hasAudio: false, state: 'connected' },
+    ] }];
+    port.push('VideoStreamCatalogChangedEvent', {});
+    await flush();
+    expect(port.sent('OpenVideoStream').length).toBe(2);
+  });
+
+  it('drops a message from an earlier failure when it shows another state', async () => {
+    const root = mount();
+    port.last('OpenVideoStream').reject({ code: 'transport_not_accepted', message: 'refused by the provider' });
+    await flush();
+    port.catalog = [];
+    port.push('VideoStreamCatalogChangedEvent', {});
+    await flush();
+
+    expect(root.textContent).not.toContain('refused by the provider');
+  });
+
   it('draws the fallback on a reader that does not know the type', () => {
     const registry = createUiComponentRegistry(...UI_CORE_COMPONENTS);
     const tree = {

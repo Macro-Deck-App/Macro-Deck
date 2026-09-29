@@ -16,7 +16,8 @@ export interface VideoStreamReference {
 
 export type VideoStreamFit = 'contain' | 'cover';
 
-export type VideoStreamStatus = 'none' | 'connecting' | 'playing' | 'unavailable' | 'not-found' | 'unsupported' | 'error';
+export type VideoStreamStatus =
+  'none' | 'connecting' | 'playing' | 'unavailable' | 'no-source' | 'not-found' | 'unsupported' | 'error';
 
 export const VIDEO_VISIBILITY_DEBOUNCE_MS = 300;
 export const VIDEO_OFF_SCREEN_CLOSE_MS = 30_000;
@@ -233,13 +234,15 @@ export class VideoStreamView {
     }
 
     const stream = this.catalogStream();
-    if (stream === 'missing') {
+    if (stream === 'no-provider' || stream === 'missing') {
       this.waiting = 'catalog';
-      this.setStatus('not-found');
+      this.statusMessage = null;
+      this.setStatus(stream === 'no-provider' ? 'no-source' : 'not-found');
       return;
     }
     if (stream !== null && (stream.state === 'unavailable' || stream.state === 'disconnected')) {
       this.waiting = 'catalog';
+      this.statusMessage = null;
       this.setStatus('unavailable');
       return;
     }
@@ -365,7 +368,8 @@ export class VideoStreamView {
     if (code !== null && WAIT_FOR_CATALOG.has(code)) {
       this.waiting = 'catalog';
       this.statusMessage = message;
-      this.setStatus(code === 'transport_not_accepted' || code === 'signaling_unsupported' ? 'unsupported' : 'not-found');
+      this.setStatus(code === 'transport_not_accepted' || code === 'signaling_unsupported' ? 'unsupported'
+        : code === 'unknown_provider' ? 'no-source' : 'not-found');
       return;
     }
 
@@ -434,12 +438,13 @@ export class VideoStreamView {
     this.visibilityTimer = null;
   }
 
-  private catalogStream(): VideoStreamItem | 'missing' | null {
+  private catalogStream(): VideoStreamItem | 'no-provider' | 'missing' | null {
     const reference = this.reference;
     const catalog = this.surface?.client.catalog() ?? null;
     if (reference === null || catalog === null) return null;
     const provider = catalog.find(candidate => candidate.id === reference.provider);
-    if (provider !== undefined && provider.streams.length === 0) return null;
+    if (provider === undefined) return 'no-provider';
+    if (provider.streams.length === 0) return null;
     const stream = provider?.streams.find(candidate => candidate.id === reference.id);
     return stream ?? 'missing';
   }
@@ -447,7 +452,7 @@ export class VideoStreamView {
   private setStatus(status: VideoStreamStatus): void {
     this.state = status;
     if (status !== 'error' && status !== 'unavailable' && status !== 'connecting' && status !== 'unsupported'
-      && status !== 'not-found') {
+      && status !== 'not-found' && status !== 'no-source') {
       this.statusMessage = null;
     }
     this.paintStatus();
@@ -471,6 +476,7 @@ export class VideoStreamView {
       case 'connecting': return this.translate(ClientAppStrings.Deck.VideoStream.Connecting);
       case 'unavailable':
       case 'error': return this.translate(ClientAppStrings.Errors.VideoStream.StreamUnavailable);
+      case 'no-source': return this.translate(ClientAppStrings.Errors.VideoStream.UnknownProvider);
       case 'not-found': return this.translate(ClientAppStrings.Errors.VideoStream.UnknownStream);
       case 'unsupported': return this.translate(ClientAppStrings.Errors.VideoStream.TransportNotAccepted);
       default: return '';
@@ -479,7 +485,7 @@ export class VideoStreamView {
 
   private paintAccessibility(): void {
     const stream = this.catalogStream();
-    const name = stream !== null && stream !== 'missing' ? resolveLocalizedText(stream.name, this.localization) : '';
+    const name = stream !== null && stream !== 'missing' && stream !== 'no-provider' ? resolveLocalizedText(stream.name, this.localization) : '';
     const status = this.state === 'playing' ? '' : this.statusText();
     const label = name !== '' && status !== ''
       ? this.translate(ClientAppStrings.Deck.VideoStream.AccessibleLabel, { stream: name, status })
@@ -512,7 +518,7 @@ export class VideoStreamView {
 
   private catalogSize(): { width: number; height: number } | null {
     const stream = this.catalogStream();
-    if (stream === null || stream === 'missing' || !stream.width || !stream.height) return null;
+    if (stream === null || stream === 'missing' || stream === 'no-provider' || !stream.width || !stream.height) return null;
     return { width: stream.width, height: stream.height };
   }
 }
