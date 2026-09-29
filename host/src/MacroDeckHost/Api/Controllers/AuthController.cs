@@ -12,7 +12,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MacroDeckHost.Api.Controllers;
 
-public record AuthStatusResponse(bool SetupComplete, bool Authenticated, bool Trusted, string? Scope, string? Username);
+public record AuthStatusResponse(
+	bool SetupComplete,
+	bool Authenticated,
+	bool Trusted,
+	string? Scope,
+	string? Username,
+	string Version,
+	string MinimumCompanionVersion);
 
 public record SetupRequest(string Username, string Password);
 
@@ -119,7 +126,9 @@ public class AuthController : ControllerBase
 			authenticated,
 			trusted,
 			authenticated ? User.FindFirst(AuthDefaults.ScopeClaim)?.Value : null,
-			authenticated ? username : null);
+			authenticated ? username : null,
+			HostVersion.Current,
+			CompanionCompatibility.MinimumCompanionVersion);
 	}
 
 	[HttpPost("setup")]

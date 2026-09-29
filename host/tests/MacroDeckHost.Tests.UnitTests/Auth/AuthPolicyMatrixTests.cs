@@ -155,6 +155,9 @@ public class AuthPolicyMatrixTests
 		{
 			Assert.That(publicStatus.GetProperty("setupComplete").GetBoolean(), Is.True);
 			Assert.That(publicStatus.GetProperty("authenticated").GetBoolean(), Is.False);
+			Assert.That(publicStatus.GetProperty("version").GetString(), Is.EqualTo(HostVersion.Current));
+			Assert.That(publicStatus.GetProperty("minimumCompanionVersion").GetString(),
+				Is.EqualTo(CompanionCompatibility.MinimumCompanionVersion));
 			Assert.That(loopbackStatus.GetProperty("authenticated").GetBoolean(), Is.True);
 			Assert.That(loopbackStatus.GetProperty("trusted").GetBoolean(), Is.True);
 			Assert.That(loopbackStatus.GetProperty("scope").GetString(), Is.EqualTo("admin"));
