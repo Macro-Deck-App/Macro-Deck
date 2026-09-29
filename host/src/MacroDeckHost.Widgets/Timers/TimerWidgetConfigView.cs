@@ -84,13 +84,7 @@ internal static class TimerWidgetConfigView
 				Binding = Bind.To(accentColor),
 				SupportsReset = true,
 			},
-			new UiColorInput
-			{
-				Key = "backgroundColor",
-				Label = AppStrings.Widgets.Editor.BackgroundColor(),
-				Binding = Bind.To(backgroundColor),
-				SupportsReset = true,
-			},
+			WidgetConfigFragments.Background(backgroundColor),
 			new UiBooleanInput
 			{
 				Key = "showLabel",

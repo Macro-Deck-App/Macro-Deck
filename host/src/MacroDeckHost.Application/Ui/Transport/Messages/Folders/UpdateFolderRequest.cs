@@ -17,6 +17,8 @@ public class UpdateFolderRequest
 
 	public int? WidgetBorderRadius { get; set; }
 
+	public string? EmptyCellStyle { get; set; }
+
 	public bool? IsDefault { get; set; }
 
 	/// <summary>Absent leaves the view unchanged. Switching views drops the previous view's

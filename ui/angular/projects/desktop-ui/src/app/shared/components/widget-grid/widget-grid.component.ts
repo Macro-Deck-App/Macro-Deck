@@ -4,6 +4,7 @@ import {
   ActionButtonTriggerType,
   CellDimensions,
   DEFAULT_WIDGET_RENDER_STATE,
+  type EmptyCellStyle,
   GridMetrics,
   GridRect,
   GridWidget,
@@ -35,6 +36,7 @@ export class WidgetGridComponent implements AfterViewInit, OnDestroy, OnChanges 
   @Input() outerMargin = 16;
   @Input() spacing = WIDGET_REFERENCE_GAP;
   @Input() borderRadius: number | null = null;
+  @Input() emptyCellStyle: EmptyCellStyle = 'visible';
   @Input() dropTargetCell: { x: number; y: number } | null = null;
   @Input() busyCell: { x: number; y: number } | null = null;
   @Input() busyCellLabel = '';
@@ -58,6 +60,14 @@ export class WidgetGridComponent implements AfterViewInit, OnDestroy, OnChanges 
 
   protected get isLayoutMode(): boolean {
     return this.mode === 'layout';
+  }
+
+  protected get hidesEmptyCells(): boolean {
+    return !this.isLayoutMode && this.emptyCellStyle === 'transparent';
+  }
+
+  protected get outlinesOnlyEmptyCells(): boolean {
+    return this.isLayoutMode && this.emptyCellStyle === 'transparent';
   }
 
   get gridWidth(): number {

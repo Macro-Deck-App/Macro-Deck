@@ -36,6 +36,9 @@ internal static class HistoryGraphWidgetConfigView
 		var minValue = new UiState<double>(WidgetConfigJson.ReadDouble(data, "minValue") ?? 0);
 		var accentColor = new UiState<string>(WidgetConfigJson.ReadString(data, "accentColor") ?? string.Empty);
 
+		var backgroundColor =
+			new UiState<string>(WidgetConfigJson.ReadString(data, "backgroundColor") ?? string.Empty);
+
 		var border = WidgetConfigJson.ReadObject(data, "border");
 		var borderStyle = new UiState<string>(WidgetConfigJson.ReadString(border, "style") ?? "off");
 		var borderColor = new UiState<string>(WidgetConfigJson.ReadString(border, "color") ?? string.Empty);
@@ -154,6 +157,8 @@ internal static class HistoryGraphWidgetConfigView
 						DefaultValue = string.Empty,
 					},
 					new UiProse { Key = "press-hint", Text = AppStrings.Widgets.History.PressHint() },
+					new UiHeading { Key = "appearance-heading", Text = AppStrings.Widgets.Editor.Appearance() },
+					WidgetConfigFragments.Background(backgroundColor),
 					new UiHeading { Key = "border-heading", Text = AppStrings.Widgets.Editor.Border() },
 					WidgetConfigFragments.Border(borderStyle, borderColor, labelled: false),
 				],

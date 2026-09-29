@@ -1,6 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import {
   AppStrings,
+  emptyCellStyleFromWire,
   type IpcProfile,
   Profile,
   type ProfileCreatedEvent,
@@ -110,6 +111,7 @@ export class ProfileService {
       defaultBackgroundColor?: string;
       defaultWidgetSpacing?: number;
       defaultWidgetBorderRadius?: number;
+      defaultEmptyCellStyle?: string;
     }
   ): Promise<Result<Profile>> {
     try {
@@ -146,6 +148,7 @@ export class ProfileService {
       defaultBackgroundColor?: string;
       defaultWidgetSpacing?: number;
       defaultWidgetBorderRadius?: number;
+      defaultEmptyCellStyle?: string;
     }
   ): Promise<Result<Profile>> {
     try {
@@ -242,7 +245,8 @@ export class ProfileService {
         ? null
         : (ipc.defaultBackgroundColor ?? null),
       defaultSpacing: ipc.defaultWidgetSpacing ?? null,
-      defaultBorderRadius: ipc.defaultWidgetBorderRadius ?? null
+      defaultBorderRadius: ipc.defaultWidgetBorderRadius ?? null,
+      defaultEmptyCellStyle: emptyCellStyleFromWire(ipc.defaultEmptyCellStyle)
     };
   }
 }

@@ -40,6 +40,27 @@ describe('shared-ui-node every configuration primitive', () => {
     });
   }
 
+  it('offers a transparent swatch after the default colours only for a colour input that allows it', async () => {
+    const plain = el(await renderTree({ id: 'n', type: 'color', properties: { value: '' } }));
+    const rendered = await renderTree({
+      id: 'bg',
+      type: 'color',
+      properties: { value: '', allowTransparent: true, events: ['change'] },
+    });
+    const host = el(rendered);
+    const swatches = Array.from(host.querySelectorAll<HTMLButtonElement>('.cp-swatch'));
+
+    expect(plain.querySelectorAll('.cp-transparent').length).toBe(0);
+    expect(swatches.length).toBe(plain.querySelectorAll('.cp-swatch').length + 1);
+    expect(swatches[swatches.length - 1].classList).toContain('cp-transparent');
+    expect(host.querySelector('.cp-custom')).not.toBeNull();
+
+    swatches[swatches.length - 1].click();
+    await tick(rendered);
+
+    expect(rendered.events).toEqual([{ nodeId: 'bg', name: 'change', data: 'transparent' }]);
+  });
+
   it('renders a textarea for a multiline literal-only string and no single-line input', async () => {
     const rendered = await renderTree({
       id: 'n',

@@ -6,7 +6,9 @@ import {
   canPlaceGroup,
   collectDisplayedWidgets,
   computePasteRect,
+  DEFAULT_EMPTY_CELL_STYLE,
   defaultWidgetData,
+  type EmptyCellStyle,
   type ExecuteActionButtonTriggerResponse,
   findFlowForTrigger,
   Folder as DomainFolder,
@@ -474,6 +476,17 @@ export class FolderService {
   readonly currentBorderRadius = computed(() =>
     this.resolveInherited(this.selectedFolder(), f => f.borderRadius, p => p.defaultBorderRadius));
 
+  readonly currentEmptyCellStyle = computed<EmptyCellStyle>(() =>
+    this.resolveInherited(this.selectedFolder(), f => f.emptyCellStyle ?? null, p => p.defaultEmptyCellStyle ?? null)
+      ?? DEFAULT_EMPTY_CELL_STYLE);
+
+  readonly currentInheritedEmptyCellStyle = computed<EmptyCellStyle>(() => {
+    const parentId = this.selectedFolder()?.parentId ?? null;
+    const parent = parentId !== null ? this.folders().find(f => f.id === parentId) : undefined;
+    return this.resolveInherited(parent, f => f.emptyCellStyle ?? null, p => p.defaultEmptyCellStyle ?? null)
+      ?? DEFAULT_EMPTY_CELL_STYLE;
+  });
+
   readonly currentViewId = computed(() => this.selectedFolder()?.viewId ?? WIDGET_GRID_VIEW_ID);
 
   readonly currentIsWidgetGrid = computed(() => isWidgetGridView(this.currentViewId()));
@@ -490,11 +503,11 @@ export class FolderService {
     return this.resolveInherited(folder, f => f.rows, p => p.defaultRows) ?? this.DEFAULT_ROWS;
   }
 
-  private resolveInherited(
+  private resolveInherited<T>(
     folder: DomainFolder | undefined,
-    pick: (f: DomainFolder) => number | null,
-    pickProfile: (p: Profile) => number | null
-  ): number | null {
+    pick: (f: DomainFolder) => T | null,
+    pickProfile: (p: Profile) => T | null
+  ): T | null {
     const folders = this.folders();
     const visited = new Set<string>();
     let current = folder;
@@ -680,6 +693,21 @@ export class FolderService {
       await this.api.updateFolder({ id: folderId, widgetSpacing: spacing ?? -1 });
     } catch (error) {
       console.error(`Failed to persist widget spacing for folder ${folderId}:`, error);
+    }
+  }
+
+  async setEmptyCellStyle(emptyCellStyle: EmptyCellStyle | null): Promise<void> {
+    const folderId = this.selectedFolderId();
+    if (!folderId) return;
+
+    this.folders.update(folders =>
+      folders.map(f => f.id === folderId ? { ...f, emptyCellStyle } : f)
+    );
+
+    try {
+      await this.api.updateFolder({ id: folderId, emptyCellStyle: emptyCellStyle ?? '' });
+    } catch (error) {
+      console.error(`Failed to persist empty cell style for folder ${folderId}:`, error);
     }
   }
 

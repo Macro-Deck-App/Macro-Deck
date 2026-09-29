@@ -71,13 +71,7 @@ internal static class ClockWidgetConfigView
 					{
 						Key = "appearance-heading", Text = AppStrings.Widgets.Editor.Appearance(),
 					},
-					new UiColorInput
-					{
-						Key = "backgroundColor",
-						Label = AppStrings.Widgets.Editor.BackgroundColor(),
-						Binding = Bind.To(backgroundColor),
-						SupportsReset = true,
-					},
+					WidgetConfigFragments.Background(backgroundColor),
 					new UiColorInput
 					{
 						Key = "textColor",

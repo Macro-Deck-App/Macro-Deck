@@ -17696,6 +17696,15 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.GridSettings.CornerRadius" xml:space="preserve">
     <value>Zaoblení rohů</value>
   </data>
+  <data name="Widgets.GridSettings.EmptyCells" xml:space="preserve">
+    <value>Prázdné buňky</value>
+  </data>
+  <data name="Widgets.GridSettings.EmptyCellsTransparent" xml:space="preserve">
+    <value>Průhledné</value>
+  </data>
+  <data name="Widgets.GridSettings.EmptyCellsVisible" xml:space="preserve">
+    <value>Viditelné</value>
+  </data>
   <data name="Widgets.GridSettings.FixedByDevice" xml:space="preserve">
     <value>Určeno zařízením {device}</value>
   </data>

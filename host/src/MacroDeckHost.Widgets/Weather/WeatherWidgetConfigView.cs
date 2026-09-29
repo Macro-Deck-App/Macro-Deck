@@ -29,6 +29,9 @@ internal static class WeatherWidgetConfigView
 		var forecastDays = new UiState<double>(
 			Math.Clamp(WidgetConfigJson.ReadDouble(data, "forecastDays") ?? 5, 1, 7));
 
+		var backgroundColor =
+			new UiState<string>(WidgetConfigJson.ReadString(data, "backgroundColor") ?? string.Empty);
+
 		var border = WidgetConfigJson.ReadObject(data, "border");
 		var borderStyle = new UiState<string>(WidgetConfigJson.ReadString(border, "style") ?? "off");
 		var borderColor = new UiState<string>(WidgetConfigJson.ReadString(border, "color") ?? string.Empty);
@@ -107,6 +110,8 @@ internal static class WeatherWidgetConfigView
 					{
 						Key = "live-update-hint", Text = AppStrings.Widgets.Weather.LiveUpdateHint(),
 					},
+					new UiHeading { Key = "appearance-heading", Text = AppStrings.Widgets.Editor.Appearance() },
+					WidgetConfigFragments.Background(backgroundColor),
 					new UiHeading { Key = "border-heading", Text = AppStrings.Widgets.Editor.Border() },
 					WidgetConfigFragments.Border(borderStyle, borderColor, labelled: false),
 				],

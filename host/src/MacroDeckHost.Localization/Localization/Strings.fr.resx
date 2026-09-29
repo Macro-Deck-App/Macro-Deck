@@ -17696,6 +17696,15 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.GridSettings.CornerRadius" xml:space="preserve">
     <value>Rayon des coins</value>
   </data>
+  <data name="Widgets.GridSettings.EmptyCells" xml:space="preserve">
+    <value>Cellules vides</value>
+  </data>
+  <data name="Widgets.GridSettings.EmptyCellsTransparent" xml:space="preserve">
+    <value>Transparentes</value>
+  </data>
+  <data name="Widgets.GridSettings.EmptyCellsVisible" xml:space="preserve">
+    <value>Visibles</value>
+  </data>
   <data name="Widgets.GridSettings.FixedByDevice" xml:space="preserve">
     <value>Défini par {device}</value>
   </data>

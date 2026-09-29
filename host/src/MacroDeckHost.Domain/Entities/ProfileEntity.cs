@@ -20,4 +20,6 @@ public class ProfileEntity : BaseEntity
 	public int? DefaultWidgetSpacing { get; set; }
 
 	public int? DefaultWidgetBorderRadius { get; set; }
+
+	public EmptyCellStyle? DefaultEmptyCellStyle { get; set; }
 }

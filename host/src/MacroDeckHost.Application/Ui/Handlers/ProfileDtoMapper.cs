@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Layouts;
+using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Ui.Transport.Messages.Profiles;
 using MacroDeckHost.Domain.Entities;
 
@@ -30,7 +31,8 @@ public static class ProfileDtoMapper
 			DefaultColumns = entity.DefaultColumns,
 			DefaultBackgroundColor = entity.DefaultBackgroundColor,
 			DefaultWidgetSpacing = entity.DefaultWidgetSpacing,
-			DefaultWidgetBorderRadius = entity.DefaultWidgetBorderRadius
+			DefaultWidgetBorderRadius = entity.DefaultWidgetBorderRadius,
+			DefaultEmptyCellStyle = EmptyCellStyleText.Format(entity.DefaultEmptyCellStyle)
 		};
 
 	private static ProfileLayoutConstraint? MapConstraint(DeviceGridConstraint? constraint)

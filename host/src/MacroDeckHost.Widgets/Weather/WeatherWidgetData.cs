@@ -20,6 +20,8 @@ public sealed record WeatherWidgetData
 
 	public int ForecastDays { get; init; } = 5;
 
+	public string? BackgroundColor { get; init; }
+
 	public static WeatherWidgetData Parse(JsonElement data)
 	{
 		if (data.ValueKind != JsonValueKind.Object)
@@ -39,6 +41,7 @@ public sealed record WeatherWidgetData
 			ShowForecast = ReadBool(data, "showForecast") ?? true,
 			AnimateIcon = ReadBool(data, "animateIcon") ?? true,
 			ForecastDays = Math.Clamp(ReadInt(data, "forecastDays") ?? 5, 1, 7),
+			BackgroundColor = WidgetColor.NormalizeBackground(ReadString(data, "backgroundColor")),
 		};
 	}
 

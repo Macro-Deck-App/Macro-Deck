@@ -73,6 +73,43 @@ public class WidgetDataSchemaTests
 	[TestCase(WidgetTypeIds.HistoryGraph)]
 	[TestCase(WidgetTypeIds.Clock)]
 	[TestCase(WidgetTypeIds.Slider)]
+	[TestCase(WidgetTypeIds.Countdown)]
+	[TestCase(WidgetTypeIds.Stopwatch)]
+	public void A_transparent_a_hex_or_a_cleared_background_validates(string type)
+	{
+		Assert.Multiple(() =>
+		{
+			foreach (var value in new[] { "\"transparent\"", "\"#1e88e5\"", "null" })
+			{
+				var problems = Validate(type, $$"""{"backgroundColor":{{value}}}""");
+				Assert.That(problems, Is.Empty, $"{value}: {Describe(problems)}");
+			}
+		});
+	}
+
+	[TestCase(WidgetTypeIds.MusicPlayer)]
+	[TestCase(WidgetTypeIds.Weather)]
+	[TestCase(WidgetTypeIds.HistoryGraph)]
+	public void The_background_is_a_declared_key_so_a_non_string_is_rejected(string type)
+	{
+		Assert.That(Validate(type, """{"backgroundColor":5}"""), Is.Not.Empty);
+	}
+
+	[Test]
+	public void The_per_state_action_button_background_accepts_transparent()
+	{
+		var problems = Validate(WidgetTypeIds.ActionButton,
+			"""{"stateMode":true,"states":[{"id":"off","label":"Off","appearance":{"backgroundColor":"transparent"}}]}""");
+
+		Assert.That(problems, Is.Empty, Describe(problems));
+	}
+
+	[TestCase(WidgetTypeIds.ActionButton)]
+	[TestCase(WidgetTypeIds.MusicPlayer)]
+	[TestCase(WidgetTypeIds.Weather)]
+	[TestCase(WidgetTypeIds.HistoryGraph)]
+	[TestCase(WidgetTypeIds.Clock)]
+	[TestCase(WidgetTypeIds.Slider)]
 	public void Flows_as_a_nested_JSON_string_validates(string type)
 	{
 		var problems = Validate(type, """{"flows":"[{\"triggerType\":\"onShortPress\",\"children\":[]}]"}""");

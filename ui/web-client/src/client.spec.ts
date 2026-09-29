@@ -23,6 +23,7 @@ const wireFolder = (id: string, parentId: string | null, isDefault = false) => (
   // `columns` is the field on the wire; `folderFromWire` reads it into the domain's `cols`. Typed
   // nullable so a test can give a parent folder a width and exercise the inheritance chain.
   columns: null as number | null,
+  emptyCellStyle: undefined as string | undefined,
   cols: null, rows: null, background: '', spacing: null, borderRadius: null,
   viewId: 'macrodeck.widget-grid', viewConfiguration: null, widgets: [],
 });
@@ -50,7 +51,7 @@ class FakeHost {
   profiles: {
     id: string; name: string; order: number;
     defaultColumns?: number; defaultRows?: number;
-    defaultWidgetSpacing?: number; defaultWidgetBorderRadius?: number;
+    defaultWidgetSpacing?: number; defaultWidgetBorderRadius?: number; defaultEmptyCellStyle?: string;
   }[] = [];
   profilesFail = false;
   foldersFailFor: string | null = null;
@@ -943,6 +944,28 @@ describe('Client', () => {
             });
 
           expect(client.gridFor(inheriting).cols).toBe(8);
+        });
+    });
+
+    it('hides empty cells when the profile says so and a folder states nothing', () => {
+      host.profiles = [{
+        id: 'profile-a', name: 'Desk', order: 0, defaultColumns: 5, defaultRows: 3,
+        defaultEmptyCellStyle: 'transparent',
+      }];
+      host.foldersByProfile = {
+        'profile-a': [wireFolder('a-root', null, true), { ...wireFolder('a-other', null), emptyCellStyle: 'visible' }],
+      };
+      const client = build();
+
+      return client.probe()
+        .then(() => client.signIn('owner', 'secret'))
+        .then(() => settle())
+        .then(() => {
+          const folders = client.deck.folders.get();
+          const byId = (id: string) => folders.filter(folder => folder.id === id)[0];
+
+          expect(client.gridFor(byId('a-root')).emptyCellStyle).toBe('transparent');
+          expect(client.gridFor(byId('a-other')).emptyCellStyle).toBe('visible');
         });
     });
   });

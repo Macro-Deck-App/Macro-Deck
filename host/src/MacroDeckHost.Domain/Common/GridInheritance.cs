@@ -84,6 +84,7 @@ public static class GridInheritance
 			BackgroundColor = folder.BackgroundColor,
 			WidgetSpacing = folder.WidgetSpacing,
 			WidgetBorderRadius = folder.WidgetBorderRadius,
+			EmptyCellStyle = folder.EmptyCellStyle,
 			IsDefault = folder.IsDefault,
 			CreatedAt = folder.CreatedAt,
 			Widgets = folder.Widgets

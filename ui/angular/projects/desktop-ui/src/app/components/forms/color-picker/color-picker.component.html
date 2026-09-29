@@ -29,6 +29,7 @@
     <button
       class="cp-cell cp-swatch"
       type="button"
+      [class.cp-transparent]="preset.value === transparentColor"
       [class.cp-selected]="value() === preset.value"
       [style.--cp-fill]="preset.value"
       [title]="preset.label"

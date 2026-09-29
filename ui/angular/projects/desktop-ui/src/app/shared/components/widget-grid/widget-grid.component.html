@@ -19,6 +19,8 @@
         [style.height.px]="cellDimensions.cellHeight"
         [class.occupied]="isCellOccupied($index)"
         [class.edit-mode]="isLayoutMode"
+        [class.transparent]="hidesEmptyCells"
+        [class.outline-only]="outlinesOnlyEmptyCells"
         [class.drop-target]="isCell(dropTargetCell, $index)"
         (click)="isLayoutMode && !isCellOccupied($index) && onCellClick($index, $event)">
         @if (isCell(busyCell, $index)) {

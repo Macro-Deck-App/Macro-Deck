@@ -46,6 +46,7 @@ export interface IpcProfile {
   defaultBackgroundColor?: string;
   defaultWidgetSpacing?: number;
   defaultWidgetBorderRadius?: number;
+  defaultEmptyCellStyle?: string;
 }
 
 export interface GetProfilesResponse {
@@ -59,6 +60,7 @@ export interface CreateProfileRequest {
   defaultBackgroundColor?: string;
   defaultWidgetSpacing?: number;
   defaultWidgetBorderRadius?: number;
+  defaultEmptyCellStyle?: string;
 }
 
 export interface CreateProfileResponse extends ResultResponse {
@@ -74,6 +76,7 @@ export interface UpdateProfileRequest {
   defaultBackgroundColor?: string;
   defaultWidgetSpacing?: number;
   defaultWidgetBorderRadius?: number;
+  defaultEmptyCellStyle?: string;
 }
 
 export interface UpdateProfileResponse extends ResultResponse {

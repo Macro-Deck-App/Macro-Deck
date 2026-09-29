@@ -55,7 +55,7 @@ internal static class HistoryGraphWidgetView
 		// its rows: an element is an immutable description, and only one of the two is ever drawn.
 		var value = Value(state);
 
-		return new UiLayer
+		var layer = new UiLayer
 		{
 			Key = "historyGraph",
 			Children = [Chart(state, accent), Labels(state, config, safeArea), value],
@@ -63,6 +63,18 @@ internal static class HistoryGraphWidgetView
 			// An older reader that cannot layer draws the card's substance - the value - rather than a
 			// placeholder: the labels and the chart are context for a number, not the point of the widget.
 			Fallback = value,
+		};
+
+		if (config.BackgroundColor is not { } background)
+		{
+			return layer;
+		}
+
+		return new UiStack
+		{
+			Key = "historyGraphBackground",
+			Background = background,
+			Children = [layer with { Fill = true }],
 		};
 	}
 

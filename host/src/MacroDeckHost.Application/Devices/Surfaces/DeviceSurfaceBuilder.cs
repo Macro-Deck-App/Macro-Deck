@@ -185,6 +185,10 @@ public sealed class DeviceSurfaceBuilder
 	private static double? ReadDouble(JsonObject? data, string key)
 		=> data?[key] is JsonValue value && value.TryGetValue<double>(out var number) ? number : null;
 
+	// Providers predate transparent widget backgrounds and may parse this as a colour, so it arrives as no colour.
+	private static string? DeviceBackground(string? value)
+		=> string.Equals(value?.Trim(), "transparent", StringComparison.OrdinalIgnoreCase) ? null : value;
+
 	private static string? Pick(JsonObject? state, JsonObject root, string key)
 		=> ReadString(state, key) is { Length: > 0 } value ? value : ReadString(root, key);
 
@@ -273,7 +277,7 @@ public sealed class DeviceSurfaceBuilder
 		{
 			Label = label ?? Pick(state, root, "label"),
 			LabelColor = Pick(state, root, "labelColor"),
-			BackgroundColor = Pick(state, root, "backgroundColor"),
+			BackgroundColor = DeviceBackground(Pick(state, root, "backgroundColor")),
 			IconId = iconPackReference,
 			// Carried so that re-rendering an icon under the same id (or the same provider) still changes
 			// the projected surface: without it the push rule sees an identical surface and the device

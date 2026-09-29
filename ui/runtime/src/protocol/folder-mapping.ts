@@ -1,4 +1,4 @@
-import { Folder, WIDGET_GRID_VIEW_ID } from '../domain/folder.interface';
+import { emptyCellStyleFromWire, Folder, WIDGET_GRID_VIEW_ID } from '../domain/folder.interface';
 import { GridWidget } from '../domain/widget.interface';
 import { parseWidgetData } from '../domain/widget-serialization';
 import { IpcFolder } from './messages/folder';
@@ -24,6 +24,7 @@ export function folderFromWire(ipc: IpcFolder): Folder {
       : (ipc.backgroundColor ?? DEFAULT_BACKGROUND),
     spacing: ipc.widgetSpacing ?? null,
     borderRadius: ipc.widgetBorderRadius ?? null,
+    emptyCellStyle: emptyCellStyleFromWire(ipc.emptyCellStyle),
     viewId: ipc.viewId || WIDGET_GRID_VIEW_ID,
     viewConfiguration: ipc.viewConfiguration ?? null,
     widgets: (ipc.widgets ?? []).map(widget => widgetFromWire(widget, ipc.id)),

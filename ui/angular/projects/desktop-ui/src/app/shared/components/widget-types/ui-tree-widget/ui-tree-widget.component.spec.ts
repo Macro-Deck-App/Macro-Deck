@@ -134,6 +134,34 @@ describe('UiTreeWidgetComponent', () => {
     });
   });
 
+  describe('tile face', () => {
+    it('drops its own face behind a tree whose root asks for a transparent background, and restores it', async () => {
+      const fixture = createFixture({ widgetId: 'w-1' });
+      const stack = (background?: string): UiNode => ({
+        id: 'root',
+        type: UiComponents.Stack,
+        properties: background === undefined ? {} : { [UiComponentProperties.Background]: background },
+        children: [],
+      });
+
+      handles[0].root.set(stack());
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(tile(fixture).classList).not.toContain('transparent-face');
+
+      handles[0].root.set(stack('transparent'));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(tile(fixture).classList).toContain('transparent-face');
+      expect(getComputedStyle(tile(fixture)).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+
+      handles[0].root.set(stack('#101010'));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(tile(fixture).classList).not.toContain('transparent-face');
+    });
+  });
+
   describe('session lifecycle', () => {
     it('opens a widget session with the widget id on init', () => {
       createFixture({ widgetId: 'w1' });

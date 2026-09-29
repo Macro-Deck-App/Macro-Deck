@@ -16,4 +16,6 @@ public class Profile
 	public int? DefaultWidgetSpacing { get; set; }
 
 	public int? DefaultWidgetBorderRadius { get; set; }
+
+	public string? DefaultEmptyCellStyle { get; set; }
 }

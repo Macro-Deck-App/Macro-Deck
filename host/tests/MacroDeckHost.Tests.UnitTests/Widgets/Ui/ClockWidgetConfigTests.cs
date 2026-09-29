@@ -87,6 +87,27 @@ public class ClockWidgetConfigTests
 		Assert.That(session, Is.Null);
 	}
 
+	[Test]
+	public void The_background_offers_transparent_and_saves_it_as_the_schema_allows()
+	{
+		var host = Render(new { });
+		var field = host.ById("backgroundColor");
+
+		field.Change("transparent");
+
+		var composed = Compose(host);
+		var provider = new WidgetDataSchemaProvider(new WidgetTypeRegistry(new RecordingMediator()));
+		Assert.That(provider.TryGet(WidgetTypeIds.Clock, out var schema), Is.True);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(field.Flag(UiConfigProperties.AllowTransparent), Is.True);
+			Assert.That(field.Flag(UiConfigProperties.SupportsReset), Is.True);
+			Assert.That(composed.GetProperty("backgroundColor").GetString(), Is.EqualTo("transparent"));
+			Assert.That(WidgetDataSchema.Validate(schema!, composed), Is.Empty);
+		});
+	}
+
 	private static UiTestHost Render(object data)
 		=> UiTestHost.Render(ClockWidgetConfigView.Build(JsonSerializer.SerializeToElement(data)));
 
@@ -118,6 +139,7 @@ public class ClockWidgetConfigTests
 
 		var data = new Dictionary<string, object?>
 		{
+			["backgroundColor"] = host.ById("backgroundColor").Text(UiConfigProperties.Value),
 			["style"] = host.ById("style").Text(UiConfigProperties.Value),
 			["timeZone"] = host.ById("timeZone").Text(UiConfigProperties.Value),
 			["showLabel"] = host.ById("showLabel").Flag(UiConfigProperties.Value),

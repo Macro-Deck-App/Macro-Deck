@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, Injector, computed, effect, forwardRef, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { UiConfigEvents, UiConfigPrimitives, UiConfigProperties, UiNode, UiNodeOption, resolveLocalizedText, WidgetIconDisplay, WidgetIconRef, emitsEvent, iconPackRef, iconPackReferenceOf, isIconPackRef, nodeBoolean, nodeNumber, nodeOptions, nodeRaw, nodeString, nodeStringArray, nodeText, readWidgetIconRef } from '@macro-deck/runtime';
+import { AppStrings, UiConfigEvents, UiConfigPrimitives, UiConfigProperties, UiNode, UiNodeOption, resolveLocalizedText, WidgetIconDisplay, WidgetIconRef, emitsEvent, iconPackRef, iconPackReferenceOf, isIconPackRef, nodeBoolean, nodeNumber, nodeOptions, nodeRaw, nodeString, nodeStringArray, nodeText, readWidgetIconRef } from '@macro-deck/runtime';
 import { ButtonComponent, IconImageService, InputComponent, LocalizationService, SegmentedControlComponent, SegmentedOption, ToggleSwitchComponent, TranslatePipe } from '@shared';
 import type { ActionFlow, HotkeyValue, KeyboardComboValue, KeyboardSequenceValue, VariableType } from '@macro-deck/runtime';
 import { normalizeHttpsUrl } from '../../domain/url-input.util';
@@ -9,7 +9,7 @@ import { SelectComponent, SelectOption } from '../forms/select/select.component'
 import { ComboboxComponent, ComboboxOption } from '../forms/combobox/combobox.component';
 import { MultiSelectComponent, MultiSelectOption } from '../forms/multi-select/multi-select.component';
 import { ReorderableListComponent } from '../forms/reorderable-list/reorderable-list.component';
-import { ColorPickerComponent } from '../forms/color-picker/color-picker.component';
+import { ColorPickerComponent, ColorPreset, TRANSPARENT_COLOR, defaultColorPresets } from '../forms/color-picker/color-picker.component';
 import { FilePathInputComponent, FilePathKind } from '../forms/file-path-input/file-path-input.component';
 import { HotkeyRecorderComponent } from '../forms/hotkey-recorder/hotkey-recorder.component';
 import { DurationInputComponent } from '../forms/duration-input/duration-input.component';
@@ -152,6 +152,17 @@ export class UiInputComponent {
   protected readonly supportsReset = computed(() => nodeBoolean(this.node(), Properties.SupportsReset) === true);
   protected readonly colorDefaultValue = computed(() =>
     this.supportsReset() ? (nodeString(this.node(), Properties.DefaultValue) ?? '') : undefined,
+  );
+  protected readonly colorPresets = computed<ColorPreset[] | undefined>(() =>
+    nodeBoolean(this.node(), Properties.AllowTransparent) === true
+      ? [
+          ...defaultColorPresets(this.localization),
+          {
+            label: this.localization.translateKey(AppStrings.Widgets.GridSettings.ColorTransparent),
+            value: TRANSPARENT_COLOR,
+          },
+        ]
+      : undefined,
   );
 
   protected readonly disabled = computed(

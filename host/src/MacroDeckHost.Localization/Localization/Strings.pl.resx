@@ -17696,6 +17696,15 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Widgets.GridSettings.CornerRadius" xml:space="preserve">
     <value>Promień zaokrąglenia</value>
   </data>
+  <data name="Widgets.GridSettings.EmptyCells" xml:space="preserve">
+    <value>Puste komórki</value>
+  </data>
+  <data name="Widgets.GridSettings.EmptyCellsTransparent" xml:space="preserve">
+    <value>Przezroczyste</value>
+  </data>
+  <data name="Widgets.GridSettings.EmptyCellsVisible" xml:space="preserve">
+    <value>Widoczne</value>
+  </data>
   <data name="Widgets.GridSettings.FixedByDevice" xml:space="preserve">
     <value>Określone przez urządzenie {device}</value>
   </data>

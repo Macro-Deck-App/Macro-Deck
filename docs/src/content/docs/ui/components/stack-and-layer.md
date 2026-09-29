@@ -192,7 +192,7 @@ padding, gap, justify or align wraps itself in a `ui.stack`, which also lets two
 | `Align` (`align`) | `UiComponentAlignments.Start`, `.Center`, `.End`, `.Stretch`, `.Baseline` (`start`, `center`, `end`, `stretch`, `baseline`) | `stretch` | How children are aligned on the cross axis. |
 | `Gap` (`gap`) | length | No gap | The gap between children. |
 | `Padding` (`padding`) | length | No padding | Inner padding on every edge. |
-| `Background` (`background`) | `#rrggbb` | Paints nothing behind its children | The stack's own fill, a literal colour rather than a theme role - see [Colours and text](/ui/concepts/theming/). |
+| `Background` (`background`) | `#rrggbb` or `transparent` | Paints nothing behind its children | The stack's own fill, a literal colour rather than a theme role - see [Colours and text](/ui/concepts/theming/). `transparent` paints nothing; on the widget's root it also removes the tile face behind the widget. |
 | `Overflow` (`overflow`) | `UiComponentOverflows.Shrink`, `.ClipStart` (`shrink`, `clip-start`) | `shrink` | What happens to children that do not fit the main axis; `clip-start` needs component version 2. |
 
 ### `ui.layer`
@@ -238,6 +238,10 @@ See [Sizing](/ui/concepts/sizing/) for the full model.
 - A stack with no `direction` lays out vertically, no `justify` means `start`, no `align` means `stretch`.
 - `baseline` applies to children that draw text; other children in the row align to the trailing edge.
 - A stack with no `background` paints nothing behind its children; a layer never paints a background.
+- A `background` of `transparent` paints nothing either. When the widget's root stack (after resolving a
+  `ui.responsive` root to its drawn variant) carries it, draw the tile without its face fill and shadow, so
+  the folder background shows through; keep the border ring. Reject any other value that is not `#rrggbb`.
+  A modifier's `background` stays `#rrggbb` only.
 - On a layer, ignore `mainSize` and `fill` on children; every child gets the whole box.
 - `overflow` absent, `shrink` or a value you do not know: shrink the children as always. `clip-start`:
   give each child its natural main size (its `mainSize` if declared, `fill` ignored), align the content to

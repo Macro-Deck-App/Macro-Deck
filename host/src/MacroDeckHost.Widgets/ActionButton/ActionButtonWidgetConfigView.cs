@@ -919,16 +919,7 @@ internal static class ActionButtonWidgetConfigView
 						Label = AppStrings.Widgets.Editor.BackgroundTab(),
 						Children =
 						[
-							new UiColorInput
-							{
-								Key = "backgroundColor",
-								Label = AppStrings.Widgets.Editor.BackgroundColor(),
-								Binding = backgroundColorBinding,
-								// Same unset-means-default rule as the label colour above (issue #896): the
-								// button's own default background is a theme surface, not a literal colour.
-								SupportsReset = true,
-								DefaultValue = string.Empty,
-							},
+							WidgetConfigFragments.Background(backgroundColorBinding),
 							new UiIconReferenceInput
 							{
 								Key = "icon",

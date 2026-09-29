@@ -40,6 +40,10 @@
       "maximum": 7,
       "description": "Number of forecast rows to show."
     },
+    "backgroundColor": {
+      "type": ["string", "null"],
+      "description": "Widget background color, as #rrggbb or transparent. Absent or null keeps the widget's default background; transparent also removes the deck's tile behind the widget."
+    },
     "border": {
       "$ref": "#/$defs/widgetBorder",
       "description": "Outline drawn along the widget edge."

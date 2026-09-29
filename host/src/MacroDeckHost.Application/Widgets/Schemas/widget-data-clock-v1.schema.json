@@ -40,7 +40,7 @@
     },
     "backgroundColor": {
       "type": ["string", "null"],
-      "description": "Widget background color. Absent or null paints nothing, leaving the deck's own tile behind the clock."
+      "description": "Widget background color, as #rrggbb or transparent. Absent or null paints nothing, leaving the deck's own tile behind the clock; transparent also removes that tile."
     },
     "textColor": {
       "type": ["string", "null"],

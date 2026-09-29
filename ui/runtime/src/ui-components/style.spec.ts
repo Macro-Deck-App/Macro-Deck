@@ -17,6 +17,7 @@ import {
   textFontWeight,
   textRoleColor,
   textWraps,
+  widgetTileTransparent,
 } from './style';
 
 let nextId = 0;
@@ -85,6 +86,42 @@ describe('widget node presentation', () => {
     it('ignores a colour that is not a six-digit hex', () => {
       expect(stackBackground(node({ background: 'red' }))).toBeUndefined();
       expect(stackBackground(node({ background: '#fff' }))).toBeUndefined();
+      expect(stackBackground(node({ background: 'rgba(0, 0, 0, 0)' }))).toBeUndefined();
+      expect(buttonBackground(node({ background: 'Transparent' }))).toBe('var(--color-accent)');
+    });
+
+    it('paints nothing for a stack or a button asked for transparent, rather than the button accent', () => {
+      expect(stackBackground(node({ background: 'transparent' }))).toBe('transparent');
+      expect(buttonBackground(node({ background: 'transparent' }))).toBe('transparent');
+    });
+  });
+
+  describe('transparent tile face', () => {
+    const typed = (type: string, properties: Record<string, unknown>, children: UiNode[] = []): UiNode =>
+      ({ id: `n${++nextId}`, type, properties, children }) as UiNode;
+
+    it('drops the face when the root stack or button is transparent', () => {
+      expect(widgetTileTransparent(typed('ui.stack', { background: 'transparent' }))).toBeTrue();
+      expect(widgetTileTransparent(typed('ui.button', { background: 'transparent' }))).toBeTrue();
+    });
+
+    it('keeps the face for no tree, a coloured or bare root, or a transparent node below the root', () => {
+      expect(widgetTileTransparent(null)).toBeFalse();
+      expect(widgetTileTransparent(undefined)).toBeFalse();
+      expect(widgetTileTransparent(typed('ui.stack', { background: '#101010' }))).toBeFalse();
+      expect(widgetTileTransparent(typed('ui.button', {}))).toBeFalse();
+      expect(widgetTileTransparent(typed('ui.layer', {}, [typed('ui.stack', { background: 'transparent' })])))
+        .toBeFalse();
+    });
+
+    it('looks through a responsive root to the variant that is drawn', () => {
+      const responsive = typed('ui.responsive', { variants: [{ minWidth: 2 }] }, [
+        typed('ui.stack', { background: '#101010' }),
+        typed('ui.stack', { background: 'transparent' }),
+      ]);
+
+      expect(widgetTileTransparent(responsive, { width: 240, height: 120 })).toBeTrue();
+      expect(widgetTileTransparent(responsive, { width: 120, height: 120 })).toBeFalse();
     });
   });
 

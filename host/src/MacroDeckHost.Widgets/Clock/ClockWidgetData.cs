@@ -48,7 +48,7 @@ public sealed record ClockWidgetData
 			ShowSeconds = ReadBool(data, "showSeconds") ?? true,
 			ShowDate = ReadBool(data, "showDate") ?? true,
 			ShowOffset = ReadBool(data, "showOffset") ?? false,
-			BackgroundColor = Trimmed(ReadString(data, "backgroundColor")),
+			BackgroundColor = WidgetColor.NormalizeBackground(ReadString(data, "backgroundColor")),
 			TextColor = Trimmed(ReadString(data, "textColor")),
 			HourCycle = ReadString(data, "hourCycle") switch
 			{

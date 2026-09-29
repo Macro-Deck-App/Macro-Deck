@@ -54,6 +54,25 @@ internal sealed class TwitchChatWidgetViewTests
 	}
 
 	[Test]
+	public async Task A_configured_background_is_painted_behind_the_chat()
+	{
+		Connect();
+
+		await using var colored = await OpenAsync(new { account = "", backgroundColor = "#9146FF" });
+		await using var transparent = await OpenAsync(new { account = "", backgroundColor = "transparent" });
+		await using var plain = await OpenAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(colored.BuildTree().Root.Properties[UiComponentProperties.Background].GetString(),
+				Is.EqualTo("#9146ff"));
+			Assert.That(transparent.BuildTree().Root.Properties[UiComponentProperties.Background].GetString(),
+				Is.EqualTo("transparent"));
+			Assert.That(plain.BuildTree().Root.Properties.ContainsKey(UiComponentProperties.Background), Is.False);
+		});
+	}
+
+	[Test]
 	public async Task A_connected_chat_without_messages_says_it_is_waiting()
 	{
 		Connect();
@@ -322,18 +341,18 @@ internal sealed class TwitchChatWidgetViewTests
 		_hub.Tick();
 	}
 
-	private async Task<IUiSession> OpenAsync()
+	private async Task<IUiSession> OpenAsync(object? data = null)
 		=> (await _provider.CreateSessionAsync(
-			new UiSessionRequest { Surface = Surface(UiSurfaceKinds.Widget), UiModelVersion = 1 },
+			new UiSessionRequest { Surface = Surface(UiSurfaceKinds.Widget, data: data), UiModelVersion = 1 },
 			CancellationToken.None))!;
 
-	private static UiSurface Surface(string kind, bool sample = false)
+	private static UiSurface Surface(string kind, bool sample = false, object? data = null)
 	{
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
 			[UiWidgetSurfaceAttributes.WidgetType]
 				= JsonSerializer.SerializeToElement(TwitchChatWidgetType.QualifiedId),
-			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new { account = "" }),
+			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data ?? new { account = "" }),
 		};
 
 		if (sample)

@@ -482,6 +482,34 @@ public class WeatherWidgetViewTests
 	}
 
 	[Test]
+	public void A_configured_background_colour_is_painted_behind_the_whole_card()
+	{
+		var config = WeatherWidgetData.Parse(JsonSerializer.SerializeToElement(new { backgroundColor = "#1E88E5" }));
+
+		var host = RenderState(Sample(), config);
+
+		Assert.That(host.Root.Text("background"), Is.EqualTo("#1e88e5"));
+	}
+
+	[Test]
+	public void A_transparent_background_is_carried_to_the_card()
+	{
+		var config = WeatherWidgetData.Parse(JsonSerializer.SerializeToElement(new { backgroundColor = "transparent" }));
+
+		var host = RenderState(Sample(), config);
+
+		Assert.That(host.Root.Text("background"), Is.EqualTo("transparent"));
+	}
+
+	[Test]
+	public void Without_a_background_the_card_paints_none()
+	{
+		var host = RenderState(Sample(), WeatherWidgetData.Parse(JsonSerializer.SerializeToElement(new { })));
+
+		Assert.That(host.Root.HasProperty("background"), Is.False);
+	}
+
+	[Test]
 	public void S9_ForecastDays_out_of_range_clamps_to_1_and_7_without_throwing()
 	{
 		Assert.Multiple(() =>

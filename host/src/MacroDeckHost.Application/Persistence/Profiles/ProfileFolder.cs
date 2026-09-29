@@ -24,6 +24,9 @@ public sealed class ProfileFolder
 
 	public int? WidgetBorderRadius { get; set; }
 
+	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+	public string? EmptyCellStyle { get; set; }
+
 	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
 	public bool IsDefault { get; set; }
 

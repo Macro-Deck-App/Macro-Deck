@@ -38,7 +38,7 @@
     },
     "backgroundColor": {
       "type": ["string", "null"],
-      "description": "Button background color. With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own background color is unset - it is not a duplicate of the per-state color."
+      "description": "Button background color, as #rrggbb or transparent (no face and no tile behind the button). With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own background color is unset - it is not a duplicate of the per-state color."
     },
     "labelColor": {
       "type": ["string", "null"],
@@ -284,7 +284,7 @@
         },
         "backgroundColor": {
           "type": ["string", "null"],
-          "description": "Background color for this state."
+          "description": "Background color for this state, as #rrggbb or transparent."
         },
         "label": {
           "type": ["string", "null"],

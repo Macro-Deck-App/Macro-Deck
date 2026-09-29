@@ -12,9 +12,23 @@ export interface Folder {
   background: string;
   spacing: number | null;
   borderRadius: number | null;
+  emptyCellStyle?: EmptyCellStyle | null;
   viewId: string;
   viewConfiguration: string | null;
   widgets: GridWidget[];
+}
+
+export type EmptyCellStyle = 'visible' | 'transparent';
+
+export const DEFAULT_EMPTY_CELL_STYLE: EmptyCellStyle = 'visible';
+
+export function isEmptyCellStyle(value: unknown): value is EmptyCellStyle {
+  return value === 'visible' || value === 'transparent';
+}
+
+export function emptyCellStyleFromWire(value: string | null | undefined): EmptyCellStyle | null {
+  const normalized = value?.toLowerCase();
+  return isEmptyCellStyle(normalized) ? normalized : null;
 }
 
 export const WIDGET_GRID_VIEW_ID = 'macrodeck.widget-grid';

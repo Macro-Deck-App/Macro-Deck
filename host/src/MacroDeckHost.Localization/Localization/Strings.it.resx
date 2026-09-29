@@ -17696,6 +17696,15 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Widgets.GridSettings.CornerRadius" xml:space="preserve">
     <value>Raggio degli angoli</value>
   </data>
+  <data name="Widgets.GridSettings.EmptyCells" xml:space="preserve">
+    <value>Celle vuote</value>
+  </data>
+  <data name="Widgets.GridSettings.EmptyCellsTransparent" xml:space="preserve">
+    <value>Trasparenti</value>
+  </data>
+  <data name="Widgets.GridSettings.EmptyCellsVisible" xml:space="preserve">
+    <value>Visibili</value>
+  </data>
   <data name="Widgets.GridSettings.FixedByDevice" xml:space="preserve">
     <value>Definito da {device}</value>
   </data>

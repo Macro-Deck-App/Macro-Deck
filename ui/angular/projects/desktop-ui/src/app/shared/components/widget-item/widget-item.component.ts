@@ -13,6 +13,7 @@ import {
   WidgetGridMode,
   WidgetRenderState,
   widgetTileBorder,
+  widgetTileTransparent,
 } from '@macro-deck/runtime';
 import { IWidgetComponent } from '../../widget-definition.interface';
 import { WidgetRegistryService } from '../../services/widget-registry.service';
@@ -109,6 +110,13 @@ export class WidgetItemComponent implements OnChanges, OnDestroy {
       this.widget.type,
       this.widget.data,
       this.componentRef?.instance.treeRoot?.() ?? null,
+    );
+  }
+
+  get transparentFace(): boolean {
+    return widgetTileTransparent(
+      this.componentRef?.instance.treeRoot?.() ?? null,
+      { width: this.contentWidth, height: this.contentHeight },
     );
   }
 

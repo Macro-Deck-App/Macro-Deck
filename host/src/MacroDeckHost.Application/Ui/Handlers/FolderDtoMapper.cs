@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.FolderViews;
+using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Ui.Transport.Messages.Folders;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
 using MacroDeckHost.Domain.Entities;
@@ -19,6 +20,7 @@ public static class FolderDtoMapper
 			Columns = entity.Columns,
 			WidgetSpacing = entity.WidgetSpacing,
 			WidgetBorderRadius = entity.WidgetBorderRadius,
+			EmptyCellStyle = EmptyCellStyleText.Format(entity.EmptyCellStyle),
 			IsDefault = entity.IsDefault,
 			// Normalized rather than passed through: a folder stored before folder views existed has no
 			// id at all, and every client would otherwise need the same "absent means grid" rule.

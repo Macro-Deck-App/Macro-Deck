@@ -239,6 +239,27 @@ public class HistoryGraphWidgetConfigTests
 		});
 	}
 
+	[Test]
+	public void The_background_offers_transparent_and_saves_it_as_the_schema_allows()
+	{
+		var host = Render(new { });
+		var field = host.ById("backgroundColor");
+
+		field.Change("transparent");
+
+		var composed = Compose(host);
+		var provider = new WidgetDataSchemaProvider(new WidgetTypeRegistry(new RecordingMediator()));
+		Assert.That(provider.TryGet(WidgetTypeIds.HistoryGraph, out var schema), Is.True);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(field.Flag(UiConfigProperties.AllowTransparent), Is.True);
+			Assert.That(field.Flag(UiConfigProperties.SupportsReset), Is.True);
+			Assert.That(composed.GetProperty("backgroundColor").GetString(), Is.EqualTo("transparent"));
+			Assert.That(WidgetDataSchema.Validate(schema!, composed), Is.Empty);
+		});
+	}
+
 	private static UiTestHost Render(object data)
 		=> UiTestHost.Render(HistoryGraphWidgetConfigView.Build(JsonSerializer.SerializeToElement(data)));
 
@@ -267,6 +288,7 @@ public class HistoryGraphWidgetConfigTests
 
 		var data = new Dictionary<string, object?>
 		{
+			["backgroundColor"] = host.ById("backgroundColor").Text(UiConfigProperties.Value),
 			["valueVariable"] = host.ById("valueVariable").Text(UiConfigProperties.Value),
 			["title"] = host.ById("title").Text(UiConfigProperties.Value),
 			["showSubtitle"] = host.ById("showSubtitle").Flag(UiConfigProperties.Value),

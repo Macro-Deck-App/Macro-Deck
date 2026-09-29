@@ -1,4 +1,6 @@
+using System.Text.Json;
 using MacroDeck.Sdk.Devices;
+using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
 
@@ -55,6 +57,26 @@ internal sealed class DeviceSurfaceProjectionTests
 					=> (widget.Id, widget.Type, widget.PositionX, widget.PositionY, widget.Width, widget.Height)),
 				Is.EqualTo(_expectedPlacements));
 			Assert.That(surface.Widgets.Select(widget => widget.Appearance?.Label), Is.EqualTo(_expectedLabels));
+		});
+	}
+
+	[Test]
+	public async Task A_transparent_widget_background_reaches_a_provider_as_no_colour_while_a_colour_passes_through()
+	{
+		_fixture.Home.Widgets.AddRange([
+			Weather("colored", 0, 0, "#1e88e5"),
+			Weather("clear", 1, 0, "transparent")
+		]);
+
+		var deviceId = await _fixture.OpenDeviceAsync();
+
+		var widgets = _fixture.Provider.Latest(deviceId).Widgets;
+		Assert.Multiple(() =>
+		{
+			Assert.That(widgets.Single(widget => widget.Id == "colored").Appearance?.BackgroundColor,
+				Is.EqualTo("#1e88e5"));
+			Assert.That(widgets.Single(widget => widget.Id == "clear").Appearance?.BackgroundColor,
+				Is.Null);
 		});
 	}
 
@@ -277,4 +299,16 @@ internal sealed class DeviceSurfaceProjectionTests
 			Assert.That(surface.Widgets, Is.Empty);
 		});
 	}
+
+	private static Widget Weather(string id, int x, int y, string backgroundColor)
+		=> new()
+		{
+			Id = id,
+			Type = WidgetTypeIds.Weather,
+			PositionX = x,
+			PositionY = y,
+			Width = 1,
+			Height = 1,
+			Data = JsonSerializer.Serialize(new { backgroundColor })
+		};
 }

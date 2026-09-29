@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Persistence.Profiles;
+using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Domain.Entities;
 
 namespace MacroDeckHost.Infrastructure.Caching;
@@ -17,6 +18,7 @@ internal static class ProfileFileMapper
 			DefaultBackgroundColor = profile.DefaultBackgroundColor,
 			DefaultWidgetSpacing = profile.DefaultWidgetSpacing,
 			DefaultWidgetBorderRadius = profile.DefaultWidgetBorderRadius,
+			DefaultEmptyCellStyle = EmptyCellStyleText.Format(profile.DefaultEmptyCellStyle),
 			Folders = folders
 				.OrderBy(f => f.Order)
 				.ThenBy(f => f.Id)
@@ -35,7 +37,8 @@ internal static class ProfileFileMapper
 			DefaultColumns = file.DefaultColumns,
 			DefaultBackgroundColor = file.DefaultBackgroundColor,
 			DefaultWidgetSpacing = file.DefaultWidgetSpacing,
-			DefaultWidgetBorderRadius = file.DefaultWidgetBorderRadius
+			DefaultWidgetBorderRadius = file.DefaultWidgetBorderRadius,
+			DefaultEmptyCellStyle = EmptyCellStyleText.Parse(file.DefaultEmptyCellStyle)
 		};
 
 	public static IEnumerable<FolderEntity> ToFolderEntities(ProfileFile file)
@@ -53,6 +56,7 @@ internal static class ProfileFileMapper
 			BackgroundColor = folder.BackgroundColor,
 			WidgetSpacing = folder.WidgetSpacing,
 			WidgetBorderRadius = folder.WidgetBorderRadius,
+			EmptyCellStyle = EmptyCellStyleText.Format(folder.EmptyCellStyle),
 			IsDefault = folder.IsDefault,
 			ViewId = folder.ViewId,
 			ViewConfiguration = folder.ViewConfiguration,
@@ -101,6 +105,7 @@ internal static class ProfileFileMapper
 			BackgroundColor = folder.BackgroundColor,
 			WidgetSpacing = folder.WidgetSpacing,
 			WidgetBorderRadius = folder.WidgetBorderRadius,
+			EmptyCellStyle = EmptyCellStyleText.Parse(folder.EmptyCellStyle),
 			IsDefault = folder.IsDefault,
 			ViewId = folder.ViewId,
 			ViewConfiguration = folder.ViewConfiguration,

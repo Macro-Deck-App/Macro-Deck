@@ -413,6 +413,88 @@ public class MusicPlayerWidgetViewTests
 	}
 
 	[Test]
+	public void A_background_saved_in_the_editor_replaces_the_artwork_palette_in_an_open_session()
+	{
+		var state = new UiState<MusicPlayerViewState>(Playing());
+		var config = new UiState<MusicPlayerWidgetData>(new MusicPlayerWidgetData());
+		var host = UiTestHost.Render(MusicPlayerWidgetView.Build(state, config, Icons()), WidgetSurface());
+
+		string? Background(string key) => Node(host, key).Property("background")?.GetString();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Background("musicPlayer"), Is.Null, "unset keeps today's tree");
+			Assert.That(Background("smallCover"), Is.EqualTo("#241832"));
+		});
+
+		config.Value = new MusicPlayerWidgetData { BackgroundColor = "#101010" };
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Background("musicPlayer"), Is.EqualTo("#101010"));
+			Assert.That(Background("smallCover"), Is.Null, "a configured colour wins over the palette");
+		});
+
+		config.Value = new MusicPlayerWidgetData { BackgroundColor = "transparent" };
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Background("musicPlayer"), Is.EqualTo("transparent"));
+			Assert.That(Background("smallCover"), Is.Null);
+		});
+
+		config.Value = new MusicPlayerWidgetData();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Background("musicPlayer"), Is.Null);
+			Assert.That(Background("smallCover"), Is.EqualTo("#241832"));
+		});
+	}
+
+	[Test]
+	public void The_full_cover_artwork_takes_a_configured_colour_but_keeps_an_opaque_backdrop_when_transparent()
+	{
+		var state = new UiState<MusicPlayerViewState>(Playing());
+		var config = new UiState<MusicPlayerWidgetData>(FullCover());
+		var host = UiTestHost.Render(MusicPlayerWidgetView.Build(state, config, Icons()), WidgetSurface());
+
+		string? Background(string key) => Node(host, key).Property("background")?.GetString();
+
+		Assert.That(Background("artworkLayer"), Is.EqualTo("#241832"));
+
+		config.Value = FullCover() with { BackgroundColor = "#101010" };
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Background("musicPlayer"), Is.EqualTo("#101010"));
+			Assert.That(Background("fullCover"), Is.Null);
+			Assert.That(Background("artworkLayer"), Is.EqualTo("#101010"));
+		});
+
+		config.Value = FullCover() with { BackgroundColor = "transparent" };
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Background("musicPlayer"), Is.EqualTo("transparent"));
+			Assert.That(Background("artworkLayer"), Is.EqualTo("#241832"),
+				"artwork drawn at reduced opacity still needs an opaque backdrop");
+		});
+
+		state.Value = Playing() with { Background = null };
+
+		Assert.That(Background("artworkLayer"), Is.EqualTo("#000000"));
+	}
+
+	[Test]
+	public void The_stored_background_is_read_from_the_widget_data()
+	{
+		var parsed = MusicPlayerWidgetData.Parse(JsonSerializer.SerializeToElement(new { backgroundColor = " Transparent " }));
+
+		Assert.That(parsed.BackgroundColor, Is.EqualTo("transparent"));
+	}
+
+	[Test]
 	public void Hiding_a_row_from_the_editor_reaches_an_open_session_too()
 	{
 		var state = new UiState<MusicPlayerViewState>(Playing());

@@ -12,7 +12,11 @@ using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Widgets.ActionButton;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Ui.Config;
+using MacroDeckHost.Integrations.Twitch;
+using MacroDeckHost.Tests.UnitTests.Twitch;
+using MacroDeckHost.Tests.UnitTests.Twitch.Chat;
 using Serilog;
+using Serilog.Core;
 
 namespace MacroDeckHost.Tests.UnitTests.Widgets;
 
@@ -430,7 +434,11 @@ public class WidgetAppearanceServiceTests
 			Assert.That(slider.Service.GetWidgets().Single().AppearanceProperties,
 				Does.Contain(WidgetAppearanceProperty.Icon).And.Not.Contain(WidgetAppearanceProperty.IconDisplay));
 			Assert.That(clock.Service.GetWidgets().Single().AppearanceProperties,
-				Is.EqualTo(new[] { WidgetAppearanceProperty.Border, WidgetAppearanceProperty.BorderColor }));
+				Is.EqualTo(new[]
+				{
+					WidgetAppearanceProperty.BackgroundColor, WidgetAppearanceProperty.Border,
+					WidgetAppearanceProperty.BorderColor
+				}));
 		});
 	}
 
@@ -554,6 +562,42 @@ public class WidgetAppearanceServiceTests
 			Assert.That(data[UiWidgetAppearanceKeys.TextAlign]!.GetValue<string>(), Is.EqualTo("left"));
 			Assert.That(data[UiWidgetAppearanceKeys.LabelPosition]!.GetValue<string>(), Is.EqualTo("bottom"));
 			Assert.That(UiWidgetAppearanceKeys.FontsOptionsSource, Is.EqualTo(WidgetOptionsSources.Fonts));
+		});
+	}
+
+	[Test]
+	public async Task TwitchChat_SetBackgroundColor_WritesTheKeyItsViewPaints_AndResetRemovesIt()
+	{
+		var config = new Twitch.RecordingIntegrationConfig();
+		TwitchChatTestSupport.AddAccount(config, "111", "streamer");
+		using var accounts = new TwitchAccountManager(() => new FakeTwitchOAuthClient(),
+			Logger.None,
+			(_, _) => new FakeTwitchHelixClient());
+		await accounts.ReloadAsync(config);
+		using var integration = new TwitchIntegration(accounts);
+		var fixture = await Fixture.ForProviderType(integration.GetWidgetTypes().Single(), """{"account":""}""");
+
+		var set = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch
+		{
+			BackgroundColor = "transparent"
+		}));
+		var stored = JsonNode.Parse(fixture.Widget.Data!)![UiWidgetAppearanceKeys.BackgroundColor]?.GetValue<string>();
+
+		var reset = await fixture.Service.ApplyWithOutcomeAsync(new WidgetAppearanceRequest
+		{
+			WidgetId = _widgetId.ToString(),
+			Patch = new WidgetAppearancePatch(),
+			ClearProperties = [WidgetAppearanceProperty.BackgroundColor]
+		});
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(fixture.Service.GetWidgets().Single().AppearanceProperties,
+				Does.Contain(WidgetAppearanceProperty.BackgroundColor));
+			Assert.That(set, Is.EqualTo(WidgetAppearanceOutcome.Changed));
+			Assert.That(stored, Is.EqualTo("transparent"));
+			Assert.That(reset, Is.EqualTo(WidgetAppearanceOutcome.Changed));
+			Assert.That(fixture.Widget.Data, Is.EqualTo("""{"account":""}"""));
 		});
 	}
 

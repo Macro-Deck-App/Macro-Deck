@@ -34,10 +34,19 @@
   transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
+.empty-cell.transparent {
+  border-color: transparent;
+}
+
 .empty-cell.edit-mode {
   background-color: color-mix(in srgb, var(--color-text-primary) 2%, transparent);
   border-color: var(--color-border);
   cursor: pointer;
+}
+
+.empty-cell.edit-mode.outline-only:not(.drop-target) {
+  background-color: transparent;
+  border-style: dashed;
 }
 
 .empty-cell.occupied {

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, Injector, ViewChild, af
 import { FormsModule } from '@angular/forms';
 
 import { FileOpenService } from '../../../services';
-import { Profile, WIDGET_REFERENCE_GAP, AppStrings, Strings } from '@macro-deck/runtime';
+import { type EmptyCellStyle, Profile, WIDGET_REFERENCE_GAP, AppStrings, Strings } from '@macro-deck/runtime';
 import { ProfileService, ToastService, ModalComponent, ButtonComponent, ButtonGroupComponent, ContextMenuComponent, ContextMenuItem, ErrorBannerComponent, InputComponent, dismissModal, LocalizationService, TranslatePipe } from '@shared';
 import { SelectCaretComponent } from '../../forms/select-caret/select-caret.component';
 import { GridSettingsComponent } from '../../grid-settings/grid-settings.component';
@@ -98,6 +98,7 @@ export class ProfileSelectorComponent {
   protected readonly editBackground = signal('');
   protected readonly editSpacing = signal<number | null>(null);
   protected readonly editBorderRadius = signal<number | null>(null);
+  protected readonly editEmptyCellStyle = signal<EmptyCellStyle | null>(null);
   protected readonly editError = signal<string | null>(null);
 
   protected readonly showDeleteConfirm = signal(false);
@@ -275,6 +276,7 @@ export class ProfileSelectorComponent {
     this.editBackground.set(profile.defaultBackground ?? '');
     this.editSpacing.set(profile.defaultSpacing);
     this.editBorderRadius.set(profile.defaultBorderRadius);
+    this.editEmptyCellStyle.set(profile.defaultEmptyCellStyle ?? null);
     this.editError.set(null);
     this.isEditing.set(true);
   }
@@ -291,7 +293,8 @@ export class ProfileSelectorComponent {
       defaultColumns: this.editColumns(),
       defaultBackgroundColor: this.editBackground().trim() || undefined,
       defaultWidgetSpacing: this.editSpacing() ?? -1,
-      defaultWidgetBorderRadius: this.editBorderRadius() ?? -1
+      defaultWidgetBorderRadius: this.editBorderRadius() ?? -1,
+      defaultEmptyCellStyle: this.editEmptyCellStyle() ?? ''
     });
     if (!result.success) {
       this.editError.set(result.error?.message || this.localization.translateKey(AppStrings.Widgets.Profile.UpdateFailed));

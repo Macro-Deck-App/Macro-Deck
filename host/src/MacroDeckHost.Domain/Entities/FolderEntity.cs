@@ -1,3 +1,5 @@
+using MacroDeckHost.Domain.Enums;
+
 namespace MacroDeckHost.Domain.Entities;
 
 public class FolderEntity : BaseEntity
@@ -19,6 +21,8 @@ public class FolderEntity : BaseEntity
 	public int? WidgetSpacing { get; set; }
 
 	public int? WidgetBorderRadius { get; set; }
+
+	public EmptyCellStyle? EmptyCellStyle { get; set; }
 
 	public bool IsDefault { get; set; }
 

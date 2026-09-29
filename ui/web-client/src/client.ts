@@ -27,6 +27,7 @@ import {
   foldersFromWire,
   type GetFoldersResponse,
   type GetKeyRingStatusResponse,
+  emptyCellStyleFromWire,
   type ProfileGridDefaults,
   type ReadableStore,
   type ResolvedFolderGrid,
@@ -518,6 +519,7 @@ export class Client {
         rows: profile.defaultRows,
         spacing: profile.defaultWidgetSpacing,
         borderRadius: profile.defaultWidgetBorderRadius,
+        emptyCellStyle: emptyCellStyleFromWire(profile.defaultEmptyCellStyle),
       };
       return;
     }

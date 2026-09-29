@@ -30,6 +30,8 @@ public sealed record MusicPlayerWidgetData
 
 	public bool ShowTimeline { get; init; } = true;
 
+	public string? BackgroundColor { get; init; }
+
 	public bool ShowSource { get; init; } = true;
 
 	// Canonical JSON rather than an element, so an unrelated save still parses to an equal record.
@@ -82,6 +84,7 @@ public sealed record MusicPlayerWidgetData
 			ShowArtist = ReadBool(data, "showArtist") ?? true,
 			ShowAlbum = ReadBool(data, "showAlbum") ?? true,
 			ShowTimeline = ReadBool(data, "showTimeline") ?? true,
+			BackgroundColor = WidgetColor.NormalizeBackground(ReadString(data, "backgroundColor")),
 			ShowSource = ReadBool(data, "showSource") ?? true,
 			InstanceOptionsJson = CanonicalObject(data, "instanceOptions"),
 		};

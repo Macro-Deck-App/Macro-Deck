@@ -33,7 +33,8 @@ public interface IFolderService
 		int? widgetBorderRadius,
 		bool? isDefault,
 		string? folderViewId = null,
-		string? folderViewConfiguration = null);
+		string? folderViewConfiguration = null,
+		string? emptyCellStyle = null);
 
 	Task<Result<FolderError>> Delete(Guid id);
 	Task<Result<FolderEntity, FolderError>> Duplicate(Guid id);

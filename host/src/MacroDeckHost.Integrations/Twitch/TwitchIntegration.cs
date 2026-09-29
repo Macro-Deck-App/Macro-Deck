@@ -43,7 +43,7 @@ public sealed class TwitchIntegration
 	private readonly TwitchChatModerator _moderator;
 
 	private const string ChatDataSchema
-		= """{"type":"object","properties":{"account":{"type":"string"},"allowModeration":{"type":"boolean"}}}""";
+		= """{"type":"object","properties":{"account":{"type":"string"},"allowModeration":{"type":"boolean"},"backgroundColor":{"type":["string","null"],"description":"#rrggbb or transparent"}}}""";
 
 	private ITwitchChatSink? _chatSink;
 	private IVariableApi? _variables;
@@ -204,7 +204,10 @@ public sealed class TwitchIntegration
 			AppStrings.Integrations.Twitch.ChatWidget.Description(),
 			DefaultData: """{"account":"","allowModeration":true}""",
 			DataSchema: ChatDataSchema,
-			HasConfiguration: true);
+			HasConfiguration: true)
+		{
+			AppearanceProperties = [WidgetAppearanceProperty.BackgroundColor],
+		};
 
 	private IReadOnlyList<ActionParameterOption> RewardOptions(string? accountId)
 	{

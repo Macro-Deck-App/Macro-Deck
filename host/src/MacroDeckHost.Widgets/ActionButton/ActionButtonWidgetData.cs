@@ -294,8 +294,8 @@ public sealed class ActionButtonWidgetData
 		return new ActionButtonResolvedAppearance
 		{
 			Label = ReadString(appearance, "label") ?? ReadString(root, "label"),
-			BackgroundColor = WidgetColor.Normalize(ReadString(appearance, "backgroundColor")) ??
-				WidgetColor.Normalize(ReadString(root, "backgroundColor")),
+			BackgroundColor = WidgetColor.NormalizeBackground(ReadString(appearance, "backgroundColor")) ??
+				WidgetColor.NormalizeBackground(ReadString(root, "backgroundColor")),
 			LabelColor = WidgetColor.Normalize(ReadString(appearance, "labelColor")) ??
 				WidgetColor.Normalize(ReadString(root, "labelColor")) ?? "#ffffff",
 			FontFace = Trimmed(ReadString(appearance, "fontFaceId")) ?? Trimmed(ReadString(root, "fontFaceId")),

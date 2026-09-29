@@ -143,6 +143,42 @@ describe('ColorPickerComponent', () => {
     expect(custom.classList).not.toContain('cp-selected');
   });
 
+  it('draws a transparent preset as a pattern rather than a blank cell and never counts it as custom', async () => {
+    fixture.componentInstance.presets.set([
+      { label: 'Red', value: '#ef4444' },
+      { label: 'Transparent', value: 'transparent' },
+    ]);
+    fixture.detectChanges();
+
+    await fixture.whenStable();
+
+    swatches()[1].click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.value()).toBe('transparent');
+
+    expect(swatches()[1].classList).toContain('cp-transparent');
+    expect(swatches()[1].classList).toContain('cp-selected');
+    expect(swatches()[0].classList).not.toContain('cp-transparent');
+    expect(customCell().classList).not.toContain('cp-selected');
+  });
+
+  it('keeps the custom picker on the last real colour after transparent was chosen', async () => {
+    fixture.componentInstance.presets.set([{ label: 'Transparent', value: 'transparent' }]);
+    fixture.componentInstance.value.set('#123456');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    swatches()[0].click();
+    fixture.detectChanges();
+
+    openCustomPicker();
+
+    expect(query<HTMLInputElement>('.cp-hex')!.value).toBe('#123456');
+  });
+
   it('omits the custom cell when allowCustom is false', () => {
     fixture.componentInstance.allowCustom.set(false);
     fixture.detectChanges();

@@ -25,6 +25,10 @@
   transition: transform var(--transition-press-in);
 }
 
+.widget.transparent-face {
+  box-shadow: none;
+}
+
 /* Laid out at the reference cell size and scaled to the real size, so widget content shrinks
    and grows like a pre-rendered image instead of reflowing per pixel size. The transform already
    carries the deck scale, so reset --widget-scale to 1 for everything inside: descendants that

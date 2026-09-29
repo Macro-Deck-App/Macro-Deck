@@ -122,7 +122,8 @@ public class FolderService : IFolderService
 		int? widgetBorderRadius,
 		bool? isDefault,
 		string? folderViewId = null,
-		string? folderViewConfiguration = null)
+		string? folderViewConfiguration = null,
+		string? emptyCellStyle = null)
 	{
 		var folder = _folderCache.GetFolderById(id);
 		if (folder is null)
@@ -252,6 +253,13 @@ public class FolderService : IFolderService
 				"Widget border radius must be between 0 and 60");
 		}
 
+		EmptyCellStyle? parsedEmptyCellStyle = null;
+		if (emptyCellStyle is not null && !EmptyCellStyleText.TryParseUpdate(emptyCellStyle, out parsedEmptyCellStyle))
+		{
+			return Result.Fail<FolderEntity, FolderError>(FolderError.ValidationError,
+				"Empty cell style must be visible or transparent");
+		}
+
 		// Switching the view drops the previous view's configuration unless this call supplies a new one:
 		// a configuration belongs to the view that wrote it and means nothing to the next one.
 		var viewChanged = folderViewId is not null;
@@ -338,6 +346,11 @@ public class FolderService : IFolderService
 		}
 
 		var cornerRadiusChanged = folder.WidgetBorderRadius != radiusBefore;
+
+		if (emptyCellStyle is not null)
+		{
+			folder.EmptyCellStyle = parsedEmptyCellStyle;
+		}
 
 
 		var changedStartFolders = isDefault is true
@@ -455,6 +468,7 @@ public class FolderService : IFolderService
 			BackgroundColor = originalFolder.BackgroundColor,
 			WidgetSpacing = originalFolder.WidgetSpacing,
 			WidgetBorderRadius = originalFolder.WidgetBorderRadius,
+			EmptyCellStyle = originalFolder.EmptyCellStyle,
 			// Copied verbatim, including an id nothing currently provides: a copy of a folder whose
 			// integration is stopped must come back with the original when it starts again.
 			ViewId = originalFolder.ViewId,

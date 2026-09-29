@@ -3,12 +3,13 @@ import {
   GridWidget,
   WIDGET_REFERENCE_BORDER_RADIUS,
 } from '../domain/widget.interface';
+import { DEFAULT_EMPTY_CELL_STYLE, EmptyCellStyle } from '../domain/folder.interface';
 import { GridGeometry, GridMetrics } from '../grid/grid-metrics';
 import { UiNode } from '../ui-framework/ui-node.interface';
 import { treeClaimsGesture } from '../ui-framework/node-gestures';
 import { effectiveTreeRoot } from '../ui-framework/responsive';
 import { UiComponentBox } from '../ui-framework/layout';
-import { widgetTileBorder } from '../ui-components/style';
+import { widgetTileBorder, widgetTileTransparent } from '../ui-components/style';
 import { PressFeedback } from './press-feedback';
 import { TapSequencer } from '../ui-components/tap-sequencer';
 import { hasRunnableFlow } from '../domain/deck-navigation.util';
@@ -48,7 +49,11 @@ export interface WidgetGridHandle {
 
   updateWidget(widgetId: string): boolean;
 
-  configure(geometry: Partial<GridGeometry> | undefined, borderRadius: number | undefined): void;
+  configure(
+    geometry: Partial<GridGeometry> | undefined,
+    borderRadius: number | undefined,
+    emptyCellStyle?: EmptyCellStyle,
+  ): void;
 
   setBackground(background: string | null): void;
 
@@ -71,6 +76,7 @@ export interface WidgetGridOptions {
 
   geometry?: Partial<GridGeometry>;
   borderRadius?: number;
+  emptyCellStyle?: EmptyCellStyle;
   background?: string | null;
   focusedWidgetId?: string | null;
 }
@@ -109,6 +115,14 @@ export function renderWidgetGrid(
   surface.style.background = background === null ? '' : background;
   disableContextMenu(surface);
   container.appendChild(surface);
+
+  function applyEmptyCellStyle(style: EmptyCellStyle | undefined): void {
+    const transparent = (style ?? DEFAULT_EMPTY_CELL_STYLE) === 'transparent';
+    if (transparent) surface.classList.add('deck-grid-empty-transparent');
+    else surface.classList.remove('deck-grid-empty-transparent');
+  }
+
+  applyEmptyCellStyle(options.emptyCellStyle);
 
   const applyRadiusFallback = radiusFallbackFor(surface);
 
@@ -368,6 +382,9 @@ export function renderWidgetGrid(
 
     const tree = trees(widget.id);
     tile.border.update(widgetTileBorder(widget.type, widget.data, tree ?? null));
+    const box = { width: width / scale, height: height / scale };
+    if (widgetTileTransparent(tree, box)) tile.element.classList.add('deck-grid-tile-transparent');
+    else tile.element.classList.remove('deck-grid-tile-transparent');
 
     if (tree === undefined) {
       if (tile.mounted) {
@@ -378,7 +395,6 @@ export function renderWidgetGrid(
       return;
     }
 
-    const box = { width: width / scale, height: height / scale };
     const basis = Math.min(width, height) / scale;
     if (tile.mounted === null || tile.mountedType !== tree.type) {
       if (tile.mounted) tile.mounted.destroy();
@@ -463,7 +479,12 @@ export function renderWidgetGrid(
       return true;
     },
 
-    configure(geometry: Partial<GridGeometry> | undefined, radius: number | undefined): void {
+    configure(
+      geometry: Partial<GridGeometry> | undefined,
+      radius: number | undefined,
+      emptyCellStyle?: EmptyCellStyle,
+    ): void {
+      applyEmptyCellStyle(emptyCellStyle);
       const key = geometryKeyOf(geometry, radius);
       if (key === geometryKey) return;
       geometryKey = key;

@@ -191,7 +191,7 @@ type and write the value to the stored data, under these keys:
 | Key | Property | Value |
 | --- | --- | --- |
 | `border` | `Border`, `BorderColor` | `{ "style": "...", "color": "#rrggbb" }`. `style` is `off`, `static`, `heartbeat`, `breathing`, `blink`, `comet`, `ants`, `hue-shift` or `rgb`; without `color` the ring uses its default colour |
-| `backgroundColor` | `BackgroundColor` | `#rrggbb` |
+| `backgroundColor` | `BackgroundColor` | `#rrggbb`, or `transparent` |
 | `label` | `Label` | The text as entered |
 | `labelColor` | `LabelColor` | `#rrggbb` |
 | `fontFaceId` | `Font` | A face id from the host's font catalogue (the `macrodeck.fonts` option source) |
@@ -243,6 +243,13 @@ instead of storing data your configuration could no longer save:
 The [widget configuration view](/ui/views/widget-configuration/#standard-appearance-fields) has ready-made
 fields for the same keys.
 
+- **A background can be `transparent`.** The Set Background Color action stores whatever value it is given,
+  and the configuration field offers Transparent when you opt in with
+  [`TransparentBackground`](/ui/views/widget-configuration/#standard-appearance-fields). Pass the value to
+  your root `ui.stack` or `ui.button` `background` as it is: when the root node's background is
+  `transparent`, Macro Deck also leaves out the tile's own face and shadow, so the folder background shows
+  through. The border ring is still drawn. A background of `transparent` on any node below the root, or a
+  root that is not a stack or button, keeps the tile face.
 - **The label is stored as entered.** It may contain a `{{ ... }}` variable template, which Macro Deck
   renders only for its own Action Button. Show the text as it is, or render it yourself.
 - **Hardware devices read these keys too.** A device plugin receives `label`, `labelColor`,

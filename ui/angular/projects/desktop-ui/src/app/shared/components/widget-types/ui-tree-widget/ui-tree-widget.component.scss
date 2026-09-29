@@ -23,6 +23,10 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.widget-tile.transparent-face {
+  background-color: transparent;
+}
+
 // The tree fills the tile rather than sitting centred in it: the root node is given the widget's real
 // box, so a non-square cell is covered edge to edge the way the previous renderer covered it.
 .widget-tile > shared-ui-tree {

@@ -51,6 +51,9 @@ public static class WidgetAppearanceJson
 				WidgetTypeIds.ActionButton => ApplyToActionButton(data, patch, stateId),
 				WidgetTypeIds.Slider => ApplyToSlider(data, patch),
 				WidgetTypeIds.HistoryGraph => ApplyToHistoryGraph(data, patch),
+				WidgetTypeIds.Clock or WidgetTypeIds.Weather or WidgetTypeIds.MusicPlayer or WidgetTypeIds.Countdown
+					or WidgetTypeIds.Stopwatch =>
+					SetIfPresent(data, "backgroundColor", patch.BackgroundColor) | ApplyBorder(data, patch),
 				_ => ApplyBorder(data, patch)
 			};
 		}
@@ -125,8 +128,14 @@ public static class WidgetAppearanceJson
 			],
 			WidgetTypeIds.HistoryGraph =>
 			[
-				WidgetAppearanceProperty.Label, WidgetAppearanceProperty.Border,
+				WidgetAppearanceProperty.Label, WidgetAppearanceProperty.BackgroundColor, WidgetAppearanceProperty.Border,
 				WidgetAppearanceProperty.BorderColor, WidgetAppearanceProperty.AccentColor
+			],
+			WidgetTypeIds.Clock or WidgetTypeIds.Weather or WidgetTypeIds.MusicPlayer or WidgetTypeIds.Countdown
+					or WidgetTypeIds.Stopwatch =>
+			[
+				WidgetAppearanceProperty.BackgroundColor, WidgetAppearanceProperty.Border,
+				WidgetAppearanceProperty.BorderColor
 			],
 			_ => [WidgetAppearanceProperty.Border, WidgetAppearanceProperty.BorderColor]
 		};
@@ -490,6 +499,7 @@ public static class WidgetAppearanceJson
 
 	private static bool ApplyToHistoryGraph(JsonObject data, WidgetAppearancePatch patch)
 		=> SetIfPresent(data, "title", patch.Label) |
+			SetIfPresent(data, "backgroundColor", patch.BackgroundColor) |
 			SetIfPresent(data, "accentColor", patch.AccentColor) |
 			ApplyBorder(data, patch);
 

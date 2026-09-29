@@ -206,11 +206,14 @@
         [borderRadius]="editBorderRadius()"
         [effectiveSpacing]="BUILT_IN_SPACING"
         [effectiveBorderRadius]="null"
+        [emptyCellStyle]="editEmptyCellStyle()"
+        [emptyCellStyleInheritable]="false"
         (colsChange)="editColumns.set($event ?? DEFAULT_COLUMNS)"
         (rowsChange)="editRows.set($event ?? DEFAULT_ROWS)"
         (backgroundChange)="editBackground.set($event)"
         (spacingChange)="editSpacing.set($event)"
-        (borderRadiusChange)="editBorderRadius.set($event)">
+        (borderRadiusChange)="editBorderRadius.set($event)"
+        (emptyCellStyleChange)="editEmptyCellStyle.set($event)">
       </shared-grid-settings>
 
       @if (layoutWarning()) {

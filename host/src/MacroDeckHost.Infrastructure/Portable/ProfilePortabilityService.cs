@@ -2,6 +2,7 @@ using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Persistence.Profiles;
 using MacroDeckHost.Application.Portable;
+using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -194,6 +195,7 @@ public sealed class ProfilePortabilityService : IProfilePortabilityService
 			DefaultBackgroundColor = source.DefaultBackgroundColor,
 			DefaultWidgetSpacing = source.DefaultWidgetSpacing,
 			DefaultWidgetBorderRadius = source.DefaultWidgetBorderRadius,
+			DefaultEmptyCellStyle = EmptyCellStyleText.Parse(source.DefaultEmptyCellStyle),
 			CreatedAt = importedAt
 		};
 
@@ -211,6 +213,7 @@ public sealed class ProfilePortabilityService : IProfilePortabilityService
 				BackgroundColor = folder.BackgroundColor,
 				WidgetSpacing = folder.WidgetSpacing,
 				WidgetBorderRadius = folder.WidgetBorderRadius,
+				EmptyCellStyle = EmptyCellStyleText.Parse(folder.EmptyCellStyle),
 				IsDefault = folder.Id == importedStartFolderId,
 				CreatedAt = importedCreatedAt[folder.Id],
 				Widgets = folder.Widgets.Select(widget => new WidgetEntity

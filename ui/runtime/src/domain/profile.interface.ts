@@ -1,3 +1,5 @@
+import { EmptyCellStyle } from './folder.interface';
+
 export interface ProfileLayoutConstraint {
   rows: number;
   columns: number;
@@ -44,4 +46,5 @@ export interface Profile {
   defaultBackground: string | null;
   defaultSpacing: number | null;
   defaultBorderRadius: number | null;
+  defaultEmptyCellStyle?: EmptyCellStyle | null;
 }

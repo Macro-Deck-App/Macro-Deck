@@ -17694,6 +17694,15 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.GridSettings.CornerRadius" xml:space="preserve">
     <value>Eckenradius</value>
   </data>
+  <data name="Widgets.GridSettings.EmptyCells" xml:space="preserve">
+    <value>Leere Zellen</value>
+  </data>
+  <data name="Widgets.GridSettings.EmptyCellsTransparent" xml:space="preserve">
+    <value>Transparent</value>
+  </data>
+  <data name="Widgets.GridSettings.EmptyCellsVisible" xml:space="preserve">
+    <value>Sichtbar</value>
+  </data>
   <data name="Widgets.GridSettings.FixedByDevice" xml:space="preserve">
     <value>Von {device} vorgegeben</value>
   </data>

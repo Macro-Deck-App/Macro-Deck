@@ -19,6 +19,8 @@ public sealed record HistoryGraphWidgetData
 	/// <summary>The chart colour, as <c>#rrggbb</c>. Absent means the reader's own accent.</summary>
 	public string? AccentColor { get; init; }
 
+	public string? BackgroundColor { get; init; }
+
 	/// <summary>A fixed upper bound for the chart's scale. Absent scales to the retained window.</summary>
 	public double? MaxValue { get; init; }
 
@@ -44,6 +46,7 @@ public sealed record HistoryGraphWidgetData
 			Subtitle = SubtitleTextOf(ReadString(data, "subtitle"), ReadString(data, "subtitleVariable")),
 			ShowSubtitle = ReadBool(data, "showSubtitle") ?? true,
 			AccentColor = ReadHexColor(data, "accentColor"),
+			BackgroundColor = WidgetColor.NormalizeBackground(ReadString(data, "backgroundColor")),
 			MaxValue = ReadDouble(data, "maxValue"),
 			MinValue = ReadDouble(data, "minValue"),
 

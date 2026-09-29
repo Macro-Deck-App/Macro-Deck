@@ -199,14 +199,7 @@ internal static class SliderWidgetConfigView
 						SupportsReset = true,
 						DefaultValue = string.Empty,
 					},
-					new UiColorInput
-					{
-						Key = "backgroundColor",
-						Label = AppStrings.Widgets.Editor.BackgroundColor(),
-						Binding = Bind.To(backgroundColor),
-						SupportsReset = true,
-						DefaultValue = string.Empty,
-					},
+					WidgetConfigFragments.Background(backgroundColor),
 					new UiHeading { Key = "border-heading", Text = AppStrings.Widgets.Editor.Border() },
 					WidgetConfigFragments.Border(borderStyle, borderColor, labelled: false),
 				],

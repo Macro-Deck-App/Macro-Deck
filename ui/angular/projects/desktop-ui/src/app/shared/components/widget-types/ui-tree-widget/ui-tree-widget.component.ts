@@ -29,6 +29,7 @@ import {
   type UiComponentBox,
   UiComponentEvents,
   WidgetData,
+  widgetTileTransparent,
 } from '@macro-deck/runtime';
 import { ApiService, ConnectionState } from '../../../transport';
 import { UiSessionHandle, UiSessionOpenRequest, UiSessionService } from '../../../services/ui-session.service';
@@ -95,6 +96,8 @@ export class UiTreeWidgetComponent implements OnInit, OnChanges, OnDestroy {
   readonly rejected = computed(() => this.handleSignal()?.rejection() != null);
 
   protected readonly treeClaimsGesture = computed(() => treeClaimsGesture(this.renderedRoot(), this.treeBox()));
+
+  protected readonly transparentFace = computed(() => widgetTileTransparent(this.renderedRoot(), this.treeBox()));
 
   private openedForWidgetId: string | undefined;
   private previewDebounceTimer: ReturnType<typeof setTimeout> | null = null;

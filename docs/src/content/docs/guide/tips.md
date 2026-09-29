@@ -21,6 +21,21 @@ Unlock the deck to edit it, lock it to press buttons.
   as if you pressed the button, so a button set to **Cycle states on tap** also moves to its next state.
 - **Drop an image, an app or a shortcut** on a tile to use it as the background.
 
+## Backgrounds
+
+- **Color a widget's background:** open the widget and pick a **Background Color**.
+  Action Button, Slider, Clock, Countdown, Stopwatch, Weather, History Graph, Music Player and Twitch Chat
+  all have one.
+  **Reset** returns to the default look; on a Music Player that is the album art's color.
+- **Let the folder background show through:** choose the checkered **Transparent** swatch. The tile loses
+  its own background and shadow, the border stays.
+- **Set Background Color** changes it from an action, and **Reset** there clears it again.
+- **Hide empty cells:** set **Empty cells** to **Transparent** in the profile's settings, and the running
+  deck shows only its widgets on the folder background. A folder's grid settings can override it with
+  **Visible** or **Transparent**; **Inherited** takes the value from the parent folder, then the profile.
+  While you edit the deck, hidden empty cells show a dashed outline, so you can still place widgets. The setting
+  does not apply to hardware devices.
+
 ## Pinned widgets
 
 Pin a widget to show it in **every folder of the profile**, or in **a folder and its subfolders**.

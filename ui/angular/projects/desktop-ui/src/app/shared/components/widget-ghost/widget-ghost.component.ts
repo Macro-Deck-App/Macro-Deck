@@ -12,7 +12,7 @@ import {
   inject,
 } from '@angular/core';
 
-import { GridWidget, WidgetBorder, widgetTileBorder } from '@macro-deck/runtime';
+import { GridWidget, WidgetBorder, widgetTileBorder, widgetTileTransparent } from '@macro-deck/runtime';
 import { IWidgetComponent } from '../../widget-definition.interface';
 import { WidgetRegistryService } from '../../services/widget-registry.service';
 import { WidgetBorderOverlayComponent } from '../widget-border-overlay/widget-border-overlay.component';
@@ -45,6 +45,13 @@ export class WidgetGhostComponent implements OnChanges, OnDestroy {
       this.widget.type,
       this.widget.data,
       this.componentRef?.instance.treeRoot?.() ?? null,
+    );
+  }
+
+  get transparentFace(): boolean {
+    return widgetTileTransparent(
+      this.componentRef?.instance.treeRoot?.() ?? null,
+      { width: this.widthPx / this.contentScale, height: this.heightPx / this.contentScale },
     );
   }
 

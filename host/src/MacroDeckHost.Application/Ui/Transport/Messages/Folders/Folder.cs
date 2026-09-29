@@ -20,6 +20,8 @@ public class Folder
 
 	public int? WidgetBorderRadius { get; set; }
 
+	public string? EmptyCellStyle { get; set; }
+
 	public bool IsDefault { get; set; }
 
 	/// <summary>The folder view rendering this folder. Always written, never absent, so a client never has

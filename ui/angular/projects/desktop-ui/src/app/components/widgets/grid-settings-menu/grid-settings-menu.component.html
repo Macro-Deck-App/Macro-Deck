@@ -26,11 +26,14 @@
       [borderRadius]="borderRadius"
       [effectiveSpacing]="effectiveSpacing"
       [effectiveBorderRadius]="effectiveBorderRadius"
+      [emptyCellStyle]="emptyCellStyle"
+      [inheritedEmptyCellStyle]="inheritedEmptyCellStyle"
       (colsChange)="colsChange.emit($event)"
       (rowsChange)="rowsChange.emit($event)"
       (backgroundChange)="backgroundChange.emit($event)"
       (spacingChange)="spacingChange.emit($event)"
-      (borderRadiusChange)="borderRadiusChange.emit($event)">
+      (borderRadiusChange)="borderRadiusChange.emit($event)"
+      (emptyCellStyleChange)="emptyCellStyleChange.emit($event)">
     </shared-grid-settings>
   </ng-template>
 </shared-dropdown-menu>

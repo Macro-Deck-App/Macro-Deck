@@ -102,6 +102,73 @@ describe('WidgetGridComponent empty-cell clicks', () => {
   });
 });
 
+describe('WidgetGridComponent transparent empty cells', () => {
+  let fixture: ComponentFixture<WidgetGridComponent>;
+
+  function createFixture(mode: WidgetGridMode, emptyCellStyle: 'visible' | 'transparent'): void {
+    TestBed.configureTestingModule({
+      imports: [WidgetGridComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: ApiService, useValue: fakeApiService() },
+        { provide: IconImageService, useValue: {} },
+      ],
+    });
+
+    fixture = TestBed.createComponent(WidgetGridComponent);
+    fixture.componentRef.setInput('cols', 2);
+    fixture.componentRef.setInput('rows', 1);
+    fixture.componentRef.setInput('mode', mode);
+    fixture.componentRef.setInput('widgets', []);
+    fixture.componentRef.setInput('emptyCellStyle', emptyCellStyle);
+    fixture.detectChanges();
+  }
+
+  afterEach(() => TestBed.resetTestingModule());
+
+  function styleOfFirstCell(): { backgroundColor: string; borderTopStyle: string } {
+    const cell = (fixture.nativeElement as HTMLElement).querySelector('.empty-cell') as HTMLElement;
+    const { backgroundColor, borderTopStyle } = getComputedStyle(cell);
+    return { backgroundColor, borderTopStyle };
+  }
+
+  function outlineOfFirstCell(): string {
+    const cell = (fixture.nativeElement as HTMLElement).querySelector('.empty-cell') as HTMLElement;
+    return getComputedStyle(cell).borderTopColor;
+  }
+
+  it('draws no outline around empty cells on the running deck', () => {
+    createFixture('runtime', 'transparent');
+
+    expect(outlineOfFirstCell()).toBe('rgba(0, 0, 0, 0)');
+  });
+
+  it('keeps the outline on the running deck when empty cells are visible', () => {
+    createFixture('runtime', 'visible');
+
+    expect(outlineOfFirstCell()).not.toBe('rgba(0, 0, 0, 0)');
+  });
+
+  it('keeps every empty cell outlined while the deck is being edited', () => {
+    createFixture('layout', 'transparent');
+
+    expect(outlineOfFirstCell()).not.toBe('rgba(0, 0, 0, 0)');
+  });
+
+  it('tells transparent empty cells apart from visible ones while the deck is being edited', () => {
+    createFixture('layout', 'transparent');
+    const transparent = styleOfFirstCell();
+    TestBed.resetTestingModule();
+    createFixture('layout', 'visible');
+    const visible = styleOfFirstCell();
+
+    expect(transparent.backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    expect(transparent.borderTopStyle).toBe('dashed');
+    expect(visible.borderTopStyle).toBe('solid');
+    expect(visible.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+  });
+});
+
 describe('WidgetGridComponent empty-cell placement', () => {
   let fixture: ComponentFixture<WidgetGridComponent>;
   let component: WidgetGridComponent;
