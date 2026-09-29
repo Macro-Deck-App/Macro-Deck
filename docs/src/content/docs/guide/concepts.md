@@ -34,6 +34,8 @@ The tiles in a folder:
 | Weather | Today and the next days for your city |
 | Music Player | What Spotify is playing, with play and skip |
 | Twitch Chat | Your channel's chat with emotes and badges, offered once a Twitch account is connected |
+| Countdown | A pizza timer that counts down and alerts you when it runs out |
+| Stopwatch | How long the current segment of your stream has been running |
 
 ### Moderating from the Twitch Chat widget
 
@@ -53,6 +55,40 @@ actions; moderate those on Twitch. Anyone who can use your deck can moderate thr
 show the chat, turn off **Allow moderation in the chat dialog** in the widget's settings. Widgets that a
 plugin places in its own profiles open the chat without moderation. The dialog opens on the device you
 pressed the widget on, so a press on a hardware deck does not open it.
+
+### Countdown and Stopwatch
+
+A **Countdown** counts down from a duration you set in its settings. Tap it to start, tap again to pause
+and again to continue; hold it to reset it. When the time runs out the widget turns red with a pulsing
+ring until you tap it, which also resets it.
+
+Set **When started** to **Ask for the duration** to choose the time each time instead. Tapping the idle
+countdown then opens a dialog with quick choices from 1 minute to 1 hour, or hours, minutes and seconds
+to set yourself. After a reset, or once a finished countdown was tapped, the next tap asks again. The
+dialog opens on the device you tapped. A hardware deck cannot show it, so a press there starts the
+duration entered last and does nothing until one was entered.
+
+A **Stopwatch** starts on a tap, pauses on the next and continues on the one after. Hold it to set it back
+to zero. Its ring goes round once a minute.
+
+Both widgets offer their own triggers in the widget editor, so actions can run when something happens:
+
+| Widget | Triggers |
+| --- | --- |
+| Countdown | **Started** (also when it continues), **Paused**, **Reset**, **Time's Up**, **Dismissed** |
+| Stopwatch | **Started** (also when it continues), **Paused**, **Reset** |
+
+They also keep variables of their own, which the widget's own actions can use, for example in **If / Else**
+or a **Set Variable** that copies the time into one of your variables:
+
+| Widget | Variables |
+| --- | --- |
+| Countdown | `countdown_remaining_seconds`, `countdown_running`, `countdown_finished` |
+| Stopwatch | `stopwatch_elapsed_seconds`, `stopwatch_running` |
+
+These change every second while a timer runs, so an automation on **Variable Changed** without a filter
+runs every second too. A running countdown or stopwatch starts over when Macro Deck restarts. On a
+hardware deck, the key shows the widget's label and colors but not the time.
 
 ## Actions and triggers
 

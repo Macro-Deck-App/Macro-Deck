@@ -1352,8 +1352,12 @@ export class FolderService {
     // Types whose tree claims the press itself fire through the generic widget-tree event pipeline
     // instead (#748), and would run their flows twice if they also came through here. Everything else
     // - including a type this client has never heard of - takes the tile's own trigger lifecycle.
-    const claimsOwnGesture: readonly DomainWidgetType[] =
-      [DomainWidgetType.ActionButton, DomainWidgetType.Slider];
+    const claimsOwnGesture: readonly DomainWidgetType[] = [
+      DomainWidgetType.ActionButton,
+      DomainWidgetType.Slider,
+      DomainWidgetType.Countdown,
+      DomainWidgetType.Stopwatch,
+    ];
     if (claimsOwnGesture.includes(widget.type)) return;
 
     const data = widget.data as { flows?: ActionFlow[] };

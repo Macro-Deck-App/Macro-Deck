@@ -1783,6 +1783,16 @@ describe('Client', () => {
 
     const generic = (client: Client) => client.translate(ClientAppStrings.Errors.Folder.ActionRunFailed);
 
+    it('leaves a timer widget\'s press to its own tree rather than running it a second time', async () => {
+      const client = build();
+      deckWith(client, 'Countdown');
+      await client.executeTrigger('w1', 'onShortPress');
+      deckWith(client, 'Stopwatch');
+      await client.executeTrigger('w1', 'onLongPress');
+
+      expect(host.pathsFor('POST', '/api/actions/execute')).toEqual([]);
+    });
+
     it('says what the host said was wrong', async () => {
       const client = build();
       deckWith(client, 'clock');

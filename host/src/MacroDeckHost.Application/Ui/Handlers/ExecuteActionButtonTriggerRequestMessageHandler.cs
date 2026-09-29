@@ -2,6 +2,7 @@ using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Profiles;
+using MacroDeckHost.Application.Timers;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Application.Ui.Transport.Messages.Actions;
@@ -21,19 +22,22 @@ public sealed class ExecuteActionButtonTriggerRequestMessageHandler
 	private readonly IHostLockState _lockState;
 	private readonly IWidgetTriggerService _triggerService;
 	private readonly IWidgetTypeRegistry _widgetTypes;
+	private readonly TimerWidgetCoordinator _timers;
 
 	public ExecuteActionButtonTriggerRequestMessageHandler(
 		IFolderCache folderCache,
 		IProfileRegistry profileRegistry,
 		IHostLockState lockState,
 		IWidgetTriggerService triggerService,
-		IWidgetTypeRegistry widgetTypes)
+		IWidgetTypeRegistry widgetTypes,
+		TimerWidgetCoordinator timers)
 	{
 		_folderCache = folderCache;
 		_profileRegistry = profileRegistry;
 		_lockState = lockState;
 		_triggerService = triggerService;
 		_widgetTypes = widgetTypes;
+		_timers = timers;
 	}
 
 	public async ValueTask<ExecuteActionButtonTriggerResponse> Handle(
@@ -129,6 +133,12 @@ public sealed class ExecuteActionButtonTriggerRequestMessageHandler
 			};
 		}
 
+		// Hardware decks and the REST endpoint press a timer here, since built-in types get no tree claim.
+		if (TimerWidgetConfig.IsTimerType(widget.Type))
+		{
+			return await HandleTimerPressAsync(widget.Id, request).ConfigureAwait(false);
+		}
+
 		var isProviderType = _widgetTypes.TryResolve(widget.Type, out var entry) && !entry.IsBuiltIn;
 
 		// Clients send every unclaimed press of a provider's tile here, so one whose type did not opt in to
@@ -180,5 +190,35 @@ public sealed class ExecuteActionButtonTriggerRequestMessageHandler
 			DurationMs = result.DurationMs,
 			Actions = result.Actions
 		};
+	}
+
+	private async Task<ExecuteActionButtonTriggerResponse> HandleTimerPressAsync(Guid widgetId,
+		ExecuteActionButtonTriggerRequest request)
+	{
+		TimerGesture? gesture = null;
+
+		if (string.Equals(request.TriggerType, WidgetTriggerTypes.ShortPress, StringComparison.OrdinalIgnoreCase))
+		{
+			gesture = TimerGesture.Press;
+		}
+		else if (string.Equals(request.TriggerType, WidgetTriggerTypes.LongPress, StringComparison.OrdinalIgnoreCase))
+		{
+			gesture = TimerGesture.LongPress;
+		}
+
+		if (gesture is { } pressed &&
+			!await _timers.HandleGestureAsync(widgetId, pressed, request.ClientId, request.OriginDeviceId)
+				.ConfigureAwait(false))
+		{
+			return new ExecuteActionButtonTriggerResponse
+			{
+				Success = false,
+				Status = ActionExecutionStatus.Failed,
+				Error = new TransportError
+					{ Code = ActionExecutionErrorCodes.HostLocked, Message = AppStrings.Errors.Common.HostLocked() }
+			};
+		}
+
+		return new ExecuteActionButtonTriggerResponse { Success = true, Status = ActionExecutionStatus.Accepted };
 	}
 }

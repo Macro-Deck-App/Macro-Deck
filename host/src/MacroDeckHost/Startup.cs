@@ -66,6 +66,7 @@ using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Application.Triggers.Providers;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Variables.Files;
+using MacroDeckHost.Application.Timers;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Application.Widgets.Icons;
 using MacroDeckHost.Application.Weather;
@@ -148,6 +149,7 @@ using MacroDeckHost.Widgets.ScreenSavers;
 using MacroDeckHost.Widgets.DeveloperPreviews;
 using MacroDeckHost.Widgets.Preview;
 using MacroDeckHost.Widgets.Slider;
+using MacroDeckHost.Widgets.Timers;
 using MacroDeckHost.Widgets.Weather;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -281,6 +283,16 @@ public class Startup
 		services.AddSingleton<IBuiltInWidgetUiProvider, ActionButtonWidgetUiProvider>();
 		services.AddSingleton<IBuiltInWidgetUiProvider, MusicPlayerWidgetUiProvider>();
 		services.AddSingleton<IBuiltInWidgetUiProvider, HistoryGraphWidgetUiProvider>();
+		services.AddSingleton<TimerWidgetStore>();
+		services.AddSingleton<TimerWidgetVariableWriter>();
+		services.AddSingleton<CountdownDurationDrafts>();
+		services.AddSingleton<ICountdownDurationPrompt, CountdownDurationPrompt>();
+		services.AddSingleton<TimerWidgetCoordinator>();
+		services.AddSingleton<TimerWidgetSessionFactory>();
+		services.AddSingleton<CountdownWidgetUiProvider>();
+		services.AddSingleton<IBuiltInWidgetUiProvider>(provider => provider.GetRequiredService<CountdownWidgetUiProvider>());
+		services.AddSingleton<IBuiltInIntegrationUiProvider>(provider => provider.GetRequiredService<CountdownWidgetUiProvider>());
+		services.AddSingleton<IBuiltInWidgetUiProvider, StopwatchWidgetUiProvider>();
 		services.AddSingleton(provider => new WidgetUiProviderRegistry(provider.GetRequiredService<IFolderCache>(),
 			provider.GetRequiredService<IEnumerable<IBuiltInWidgetUiProvider>>(),
 			provider.GetRequiredService<IUiSessionSink>,
@@ -345,6 +357,7 @@ public class Startup
 		services.AddHostedService<VariableBroadcastBackgroundService>();
 		services.AddHostedService<WidgetStateEvalBackgroundService>();
 		services.AddHostedService<WidgetIconProviderPollService>();
+		services.AddHostedService<TimerWidgetBackgroundService>();
 		services.AddHostedService<EventDispatchBackgroundService>();
 		services.AddHostedService<ServerLifecycleEventBackgroundService>();
 		services.AddHostedService<ScheduledEventBackgroundService>();

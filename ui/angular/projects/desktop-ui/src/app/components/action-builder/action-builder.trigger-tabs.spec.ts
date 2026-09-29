@@ -32,6 +32,33 @@ describe('ActionBuilderComponent configured trigger tabs', () => {
     fixture.detectChanges();
   });
 
+  it('shows only a countdown\'s default Time\'s Up tab and offers its other triggers to add', () => {
+    fixture.componentRef.setInput('interactionTriggerTabs', [
+      { triggerType: 'onCountdownFinished', label: 'Time\'s Up' },
+      { triggerType: 'onCountdownStarted', label: 'Started' },
+      { triggerType: 'onCountdownPaused', label: 'Paused' },
+    ]);
+    fixture.componentRef.setInput('flows', []);
+    fixture.detectChanges();
+
+    expect(component.triggerTabItems().map(t => t.id)).toEqual(['onCountdownFinished']);
+    expect(component.addableTriggerTabs().map(t => t.triggerType)).toEqual(['onCountdownStarted', 'onCountdownPaused']);
+  });
+
+  it('keeps the default tab when another widget trigger is added to a countdown', () => {
+    fixture.componentRef.setInput('interactionTriggerTabs', [
+      { triggerType: 'onCountdownFinished', label: 'Time\'s Up' },
+      { triggerType: 'onCountdownStarted', label: 'Started' },
+    ]);
+    fixture.componentRef.setInput('flows', []);
+    fixture.detectChanges();
+
+    component.addTrigger('onCountdownStarted');
+    fixture.detectChanges();
+
+    expect(store.flows().map(f => f.triggerType)).toEqual(['onCountdownFinished', 'onCountdownStarted']);
+  });
+
   it('shows only Short Press for a widget with no flows', () => {
     fixture.componentRef.setInput('flows', []);
     fixture.detectChanges();

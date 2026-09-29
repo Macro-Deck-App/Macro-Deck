@@ -6,7 +6,7 @@ import { UiRenderContext } from '../ui-render/ui-render-context';
 import { ActionService } from '../../services/action.service';
 import { IntegrationService } from '../../services/integration.service';
 import { ActionBuilderComponent } from './action-builder.component';
-import { TOGGLE_TRIGGER_TYPE, fixedTriggerTabsFor } from './default-action-defs';
+import { TOGGLE_TRIGGER_TYPE, fixedTriggerTabsFor, interactionTriggerTabsFor } from './default-action-defs';
 
 export interface ProviderChangeRequest {
   capability: 'state' | 'icon';
@@ -34,6 +34,7 @@ export interface ProviderChangeRequest {
       [previewScopeStates]="previewScopeStates()"
       [showToggleTriggers]="showToggleTriggers()"
       [triggerTabs]="fixedTriggerTabs()"
+      [interactionTriggerTabs]="interactionTriggerTabs()"
       [alwaysShowTabRow]="!!fixedTriggerTabs()"
       [allowRun]="canRun()"
       [unsavedChanges]="unsavedChanges()"
@@ -73,6 +74,8 @@ export class NodeActionBuilderComponent {
   protected readonly showToggleTriggers = computed(() => !!this.triggers()?.includes(TOGGLE_TRIGGER_TYPE));
 
   protected readonly fixedTriggerTabs = computed(() => fixedTriggerTabsFor(this.triggers(), this.translate));
+
+  protected readonly interactionTriggerTabs = computed(() => interactionTriggerTabsFor(this.triggers(), this.translate));
 
   // The states the editor is drafting right now, which the host's own options endpoint cannot see until
   // the widget is saved - a state picker inside these flows merges them in.

@@ -14,6 +14,8 @@ export const WidgetType = {
   Weather: 'Weather',
   HistoryGraph: 'HistoryGraph',
   Clock: 'Clock',
+  Countdown: 'Countdown',
+  Stopwatch: 'Stopwatch',
 } as const;
 
 export type WidgetType = string;

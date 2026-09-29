@@ -7,6 +7,7 @@ using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Rendering;
+using MacroDeckHost.Application.Timers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Common;
@@ -153,7 +154,7 @@ public sealed class DeviceSurfaceBuilder
 	private static IReadOnlyList<DeviceInteractionKind> SupportedInteractions(Widget widget)
 	{
 		var triggerTypes = WidgetFlowsJson.TriggerTypes(widget.Data);
-		var hasPressFlow = triggerTypes.Any(type =>
+		var hasPressFlow = TimerWidgetConfig.IsTimerType(widget.Type) || triggerTypes.Any(type =>
 			string.Equals(type, WidgetTriggerTypes.ShortPress, StringComparison.OrdinalIgnoreCase) ||
 			string.Equals(type, WidgetTriggerTypes.LongPress, StringComparison.OrdinalIgnoreCase) ||
 			string.Equals(type, WidgetTriggerTypes.TouchStart, StringComparison.OrdinalIgnoreCase) ||

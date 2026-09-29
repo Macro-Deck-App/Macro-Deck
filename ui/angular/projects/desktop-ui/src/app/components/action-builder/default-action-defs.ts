@@ -32,11 +32,33 @@ export function toggleTriggerTab(t: Translator): TriggerTab {
 
 export const TOGGLE_TRIGGER_TYPE = 'onStateChange';
 
+export function timerTriggerTabs(t: Translator): readonly TriggerTab[] {
+  const T = AppStrings.ActionBuilder.Trigger;
+  return [
+    { triggerType: 'onCountdownStarted', label: t(T.TimerStarted) },
+    { triggerType: 'onCountdownPaused', label: t(T.TimerPaused) },
+    { triggerType: 'onCountdownReset', label: t(T.TimerReset) },
+    { triggerType: 'onCountdownFinished', label: t(T.CountdownFinished) },
+    { triggerType: 'onCountdownDismissed', label: t(T.CountdownDismissed) },
+    { triggerType: 'onStopwatchStarted', label: t(T.TimerStarted) },
+    { triggerType: 'onStopwatchPaused', label: t(T.TimerPaused) },
+    { triggerType: 'onStopwatchReset', label: t(T.TimerReset) },
+  ];
+}
+
 export function widgetTriggerCatalog(t: Translator): readonly TriggerTab[] {
   return [
     ...defaultTriggerTabs(t),
     toggleTriggerTab(t),
   ];
+}
+
+export function interactionTriggerTabsFor(triggers: readonly string[] | undefined, t: Translator): TriggerTab[] | null {
+  const named = triggers ?? [];
+  const known = timerTriggerTabs(t);
+  if (named.length === 0 || named.some(trigger => !known.some(tab => tab.triggerType === trigger))) return null;
+
+  return named.map(trigger => known.find(tab => tab.triggerType === trigger)!);
 }
 
 export function fixedTriggerTabsFor(triggers: readonly string[] | undefined, t: Translator): TriggerTab[] | null {

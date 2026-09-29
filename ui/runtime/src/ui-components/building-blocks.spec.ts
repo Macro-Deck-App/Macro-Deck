@@ -113,6 +113,19 @@ describe('the building-block components', () => {
   });
 
   describe('ui.icon', () => {
+    it('takes a square of its own size in a stack that leaves its height open', () => {
+      mount(node('s', 'ui.stack', { direction: 'vertical', fill: true }, [
+        node('i', 'ui.icon', { icon: 'pause', size: { basis: 0.25 } }),
+        node('t', 'ui.text', { text: '4:00' }),
+      ]));
+
+      const icon = find('.widget-icon') as HTMLElement;
+      const glyph = find('.widget-icon-glyph')!;
+      expect(icon.style.height).toBe('30px');
+      expect(glyph.style.top).toBe('0px');
+      expect(glyph.style.height).toBe('30px');
+    });
+
     it('draws a published glyph centred at its size in the resolved colour', () => {
       mount(node('i', 'ui.icon', { icon: 'play', size: { basis: 0.25 }, role: 'secondary' }));
 

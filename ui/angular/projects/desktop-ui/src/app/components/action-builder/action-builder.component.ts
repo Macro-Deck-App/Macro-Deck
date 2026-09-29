@@ -78,7 +78,11 @@ export class ActionBuilderComponent implements OnChanges, AfterViewInit {
   private readonly uiFonts = inject(UiFontService);
   private readonly translate = (key: string): string => this.localization.translateKey(key);
 
-  protected readonly builtInTriggerTabs = computed<readonly TriggerTab[]>(() => defaultTriggerTabs(this.translate));
+  protected readonly builtInTriggerTabs = computed<readonly TriggerTab[]>(() =>
+    this.interactionTriggerTabsInput() ?? defaultTriggerTabs(this.translate));
+
+  private readonly defaultTriggerType = computed(() =>
+    this.interactionTriggerTabsInput()?.[0]?.triggerType ?? DEFAULT_TRIGGER_TYPE);
 
   protected readonly addTriggerLabel = computed(() =>
     this.localization.translateKey(AppStrings.ActionBuilder.Toolbar.AddTrigger));
@@ -180,6 +184,11 @@ export class ActionBuilderComponent implements OnChanges, AfterViewInit {
   }
 
   @Input()
+  set interactionTriggerTabs(value: TriggerTab[] | null | undefined) {
+    this.interactionTriggerTabsInput.set(value?.length ? [...value] : null);
+  }
+
+  @Input()
   set allowEventTriggers(value: boolean) {
     this.allowEventTriggersInput.set(value);
   }
@@ -243,6 +252,7 @@ export class ActionBuilderComponent implements OnChanges, AfterViewInit {
 
   private readonly showToggleTriggersInput = signal(false);
   private readonly triggerTabsInput = signal<TriggerTab[] | null>(null);
+  private readonly interactionTriggerTabsInput = signal<TriggerTab[] | null>(null);
   private readonly alwaysShowTabRowInput = signal(false);
   private readonly allowEventTriggersInput = signal(true);
   private readonly singleEventTriggerInput = signal(false);
@@ -333,7 +343,7 @@ export class ActionBuilderComponent implements OnChanges, AfterViewInit {
     }
 
     const configured = this.configuredTriggerTypes();
-    const fallback = this.hasInteractionTrigger() ? '' : DEFAULT_TRIGGER_TYPE;
+    const fallback = this.hasInteractionTrigger() ? '' : this.defaultTriggerType();
     return this.effectiveTriggerTabs().filter(
       t => t.triggerType === TOGGLE_TRIGGER_TYPE
         || t.triggerType === fallback
@@ -558,10 +568,11 @@ export class ActionBuilderComponent implements OnChanges, AfterViewInit {
 
   addTrigger(triggerType: string): void {
     this.addTriggerMenuOpen.set(false);
-    // The stand-in Short Press tab owns no flow, so adding a second trigger would make it vanish.
+    // The stand-in default tab owns no flow, so adding a second trigger would make it vanish.
     // Give it one first: adding a trigger must not take one away (#480).
-    if (!this.hasInteractionTrigger() && triggerType !== DEFAULT_TRIGGER_TYPE) {
-      this.store.addTrigger(DEFAULT_TRIGGER_TYPE);
+    const fallback = this.defaultTriggerType();
+    if (!this.hasInteractionTrigger() && triggerType !== fallback) {
+      this.store.addTrigger(fallback);
     }
     this.store.addTrigger(triggerType);
     this.store.closePicker();
