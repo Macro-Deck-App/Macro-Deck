@@ -60,6 +60,12 @@ public sealed class UiWebSocketDispatcher : IDisposable
 	private readonly IUiTransportMessageHandler<GetDeviceScreenSaverRequest, GetDeviceScreenSaverResponse>
 		_getDeviceScreenSaver;
 
+	private readonly IUiTransportMessageHandler<GetDeviceClientSettingsRequest, GetDeviceClientSettingsResponse>
+		_getDeviceClientSettings;
+
+	private readonly IUiTransportMessageHandler<SetDeviceClientSettingsRequest, SetDeviceClientSettingsResponse>
+		_setDeviceClientSettings;
+
 	private readonly IScreenSaverUiSessionOpener _screenSaverUiSessions;
 
 	private readonly IUiTransportMessageHandler<GetVariableCatalogProvidersRequest, GetVariableCatalogProvidersResponse>
@@ -120,6 +126,10 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		IUiTransportMessageHandler<GetFolderViewsRequest, GetFolderViewsResponse> getFolderViews,
 		IUiTransportMessageHandler<GetScreenSaversRequest, GetScreenSaversResponse> getScreenSavers,
 		IUiTransportMessageHandler<GetDeviceScreenSaverRequest, GetDeviceScreenSaverResponse> getDeviceScreenSaver,
+		IUiTransportMessageHandler<GetDeviceClientSettingsRequest, GetDeviceClientSettingsResponse>
+			getDeviceClientSettings,
+		IUiTransportMessageHandler<SetDeviceClientSettingsRequest, SetDeviceClientSettingsResponse>
+			setDeviceClientSettings,
 		IScreenSaverUiSessionOpener screenSaverUiSessions,
 		IUiTransportMessageHandler<GetWeatherStateRequest, GetWeatherStateResponse> getWeatherState,
 		IUiTransportMessageHandler<GetVariableCatalogProvidersRequest, GetVariableCatalogProvidersResponse>
@@ -168,6 +178,8 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		_getFolderViews = getFolderViews;
 		_getScreenSavers = getScreenSavers;
 		_getDeviceScreenSaver = getDeviceScreenSaver;
+		_getDeviceClientSettings = getDeviceClientSettings;
+		_setDeviceClientSettings = setDeviceClientSettings;
 		_screenSaverUiSessions = screenSaverUiSessions;
 		_getWeatherState = getWeatherState;
 		_getVariableCatalogProviders = getVariableCatalogProviders;
@@ -274,6 +286,12 @@ public sealed class UiWebSocketDispatcher : IDisposable
 				"GetScreenSavers" => await _getScreenSavers.Handle(new(), cancellationToken),
 				"GetDeviceScreenSaver" => await _getDeviceScreenSaver.Handle(
 					new GetDeviceScreenSaverRequest { DeviceId = DeviceId() },
+					cancellationToken),
+				"GetDeviceClientSettings" => await _getDeviceClientSettings.Handle(
+					new GetDeviceClientSettingsRequest { DeviceId = DeviceId() },
+					cancellationToken),
+				"SetDeviceClientSettings" => await SetDeviceClientSettings(
+					Arg<DeviceClientSettingsChange?>(payload, 0),
 					cancellationToken),
 				"OpenScreenSaverUiSession" => await _screenSaverUiSessions.OpenAsync(DeviceId(), cancellationToken),
 				"GetWeatherState" => await _getWeatherState.Handle(new() { InstanceId = Arg<string?>(payload, 0) },
@@ -461,6 +479,24 @@ public sealed class UiWebSocketDispatcher : IDisposable
 
 		_companions.Report(_connectionId, deviceId, request);
 		return null;
+	}
+
+	private async Task<SetDeviceClientSettingsResponse> SetDeviceClientSettings(DeviceClientSettingsChange? change,
+		CancellationToken cancellationToken)
+	{
+		if (DeviceId() is not { } deviceId)
+		{
+			throw new UiWebSocketDispatchException("forbidden");
+		}
+
+		if (change is null)
+		{
+			return new SetDeviceClientSettingsResponse { Success = false };
+		}
+
+		return await _setDeviceClientSettings.Handle(
+			new SetDeviceClientSettingsRequest { DeviceId = deviceId, SettingsButtonHidden = change.SettingsButtonHidden },
+			cancellationToken);
 	}
 
 	private async Task<SyncCompanionLicenseResponse> SyncCompanionLicense(SyncCompanionLicenseRequest? request,

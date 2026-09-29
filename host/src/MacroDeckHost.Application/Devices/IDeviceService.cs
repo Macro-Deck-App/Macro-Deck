@@ -37,6 +37,8 @@ public interface IDeviceService
 		string? screenSaverId,
 		string? configuration);
 
+	Task<Result<DeviceEntity, DeviceError>> SetSettingsButtonHidden(Guid id, bool hidden);
+
 	Task<string?> ResolveStartupProfileId(Guid deviceId);
 
 	Task<Result<DeviceError>> OpenProfileOnDevice(Guid id, string profileId);

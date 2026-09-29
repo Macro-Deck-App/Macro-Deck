@@ -1330,6 +1330,112 @@ describe('Client', () => {
     });
   });
 
+  describe('whether the device shows its settings button', () => {
+    const signedIn = async (answer: (type: string) => Promise<unknown>) => {
+      twoProfiles();
+      const client = build();
+      await client.probe();
+      spyOn(client.connection, 'connect');
+      spyOn(client.connection, 'request').and.callFake(((type: string) => answer(type)) as never);
+      await client.signIn('owner', 'secret');
+      return client;
+    };
+    const hiddenOnConnect = (hidden: boolean) => (type: string) =>
+      Promise.resolve(type === 'GetDeviceClientSettings' ? { settingsButtonHidden: hidden } : undefined);
+    const hidden = (client: Client) => client.deviceClientSettings.get().settingsButtonHidden;
+
+    it('shows it until the host says otherwise', () => {
+      expect(hidden(build())).toBeFalse();
+    });
+
+    it('asks the host on every connect', async () => {
+      let answer = true;
+      const client = await signedIn(type =>
+        Promise.resolve(type === 'GetDeviceClientSettings' ? { settingsButtonHidden: answer } : undefined));
+
+      client.connection.state.set('connected');
+      await settle();
+      expect(hidden(client)).toBeTrue();
+
+      answer = false;
+      client.connection.state.set('disconnected');
+      client.connection.state.set('connected');
+      await settle();
+      expect(hidden(client)).toBeFalse();
+    });
+
+    it('follows a change the host pushes', async () => {
+      const client = await signedIn(hiddenOnConnect(false));
+      client.connection.state.set('connected');
+      await settle();
+
+      (client as never as { onNotification(type: string, body: unknown): void })
+        .onNotification('DeviceClientSettingsChangedEvent', { settingsButtonHidden: true });
+
+      expect(hidden(client)).toBeTrue();
+    });
+
+    it('keeps the button for a host that does not know the setting', async () => {
+      const client = await signedIn(type =>
+        type === 'GetDeviceClientSettings' ? Promise.reject(new Error('Unknown method')) : Promise.resolve(undefined));
+
+      client.connection.state.set('connected');
+      await settle();
+
+      expect(hidden(client)).toBeFalse();
+    });
+
+    it('remembers the last answer for the next load, so the button does not flash in', async () => {
+      const client = await signedIn(hiddenOnConnect(true));
+      client.connection.state.set('connected');
+      await settle();
+
+      expect(hidden(build())).toBeTrue();
+    });
+
+    it('forgets it when the session ends', async () => {
+      const client = await signedIn(hiddenOnConnect(true));
+      client.connection.state.set('connected');
+      await settle();
+
+      await client.signOut();
+
+      expect(hidden(client)).toBeFalse();
+      expect(hidden(build())).toBeFalse();
+    });
+
+    it('asks the host to change it and waits for the host to say it did', async () => {
+      const sent: Array<{ type: string; payload: unknown }> = [];
+      twoProfiles();
+      const client = build();
+      await client.probe();
+      spyOn(client.connection, 'connect');
+      spyOn(client.connection, 'request').and.callFake(((type: string, payload: unknown) => {
+        sent.push({ type, payload });
+        return Promise.resolve(type === 'SetDeviceClientSettings' ? { success: true } : undefined);
+      }) as never);
+      await client.signIn('owner', 'secret');
+
+      const saved = await client.setSettingsButtonHidden(true);
+
+      expect(saved).toBeTrue();
+      expect(sent.filter(call => call.type === 'SetDeviceClientSettings').map(call => call.payload))
+        .toEqual([[{ settingsButtonHidden: true }]]);
+      expect(hidden(client)).toBeFalse();
+    });
+
+    it('reports a change the host refused or never answered', async () => {
+      const refused = await signedIn(type =>
+        Promise.resolve(type === 'SetDeviceClientSettings' ? { success: false } : undefined));
+      const failed = await signedIn(type =>
+        type === 'SetDeviceClientSettings' ? Promise.reject(new Error('offline')) : Promise.resolve(undefined));
+
+      expect(await refused.setSettingsButtonHidden(true)).toBeFalse();
+      expect(await failed.setSettingsButtonHidden(true)).toBeFalse();
+      expect(hidden(refused)).toBeFalse();
+    });
+  });
+
   describe('the device this client signs in as', () => {
     it('presents the identity it was given last time, so its assignment sticks', async () => {
       twoProfiles();

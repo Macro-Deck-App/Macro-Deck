@@ -23,6 +23,10 @@
   transition: opacity 120ms ease, color 120ms ease;
 }
 
+.wc-client-settings-trigger[hidden] {
+  display: none;
+}
+
 .wc-client-settings-trigger:hover,
 .wc-client-settings-trigger:focus-visible {
   opacity: 1;
@@ -34,6 +38,42 @@
   display: block;
   width: 22px;
   height: 22px;
+}
+
+.wc-edge-sidebar-backdrop {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 105;
+  background: var(--color-scrim);
+}
+
+.wc-edge-sidebar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: calc(68px + env(safe-area-inset-left, 0px));
+  padding: calc(var(--space-3) + env(safe-area-inset-top, 0px)) 12px var(--space-3)
+    calc(12px + env(safe-area-inset-left, 0px));
+  background: var(--color-bg-elevated);
+  box-shadow: var(--shadow-dialog);
+}
+
+.wc-edge-sidebar-button {
+  display: block;
+  width: 44px;
+  height: 44px;
+  box-sizing: border-box;
+  padding: 11px;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
 }
 
 /* Everything this dialog looks like comes from the shared modal chrome in `styles.css`. Only its

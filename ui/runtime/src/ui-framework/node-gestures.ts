@@ -35,6 +35,10 @@ export function nodeDeclaresGesture(node: UiNode): boolean {
     || nodeDeclaresPointerFamily(node);
 }
 
+export function ownsItsPointer(node: UiNode): boolean {
+  return nodeClaimsValue(node) || nodeDeclaresGesture(node) || node.type === UiComponents.List;
+}
+
 export function nodeIsDisabledRegion(node: UiNode | null | undefined): boolean {
   return nodeRecord(node, UiComponentProperties.Modifiers)?.[UiComponentModifiers.Disabled] === true;
 }

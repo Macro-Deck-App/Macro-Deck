@@ -13768,6 +13768,18 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Settings.Devices.ScreenSaver.Unavailable" xml:space="preserve">
     <value>Non disponibile</value>
   </data>
+  <data name="Settings.Devices.SettingsButton.HiddenLine" xml:space="preserve">
+    <value>Pulsante delle impostazioni nascosto: scorri dal bordo sinistro</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.HideAction" xml:space="preserve">
+    <value>Nascondi il pulsante delle impostazioni</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.SaveFailed" xml:space="preserve">
+    <value>Impossibile modificare il pulsante delle impostazioni</value>
+  </data>
+  <data name="Settings.Devices.SettingsButton.ShowAction" xml:space="preserve">
+    <value>Mostra il pulsante delle impostazioni</value>
+  </data>
   <data name="Settings.Devices.SignedOutMarker" xml:space="preserve">
     <value>Disconnesso</value>
   </data>
@@ -16616,6 +16628,15 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="WebClient.Settings.DisplaySection" xml:space="preserve">
     <value>Schermo</value>
   </data>
+  <data name="WebClient.Settings.HideSettingsButton.Description" xml:space="preserve">
+    <value>Apri le impostazioni scorrendo dal bordo sinistro</value>
+  </data>
+  <data name="WebClient.Settings.HideSettingsButton.Label" xml:space="preserve">
+    <value>Nascondi il pulsante delle impostazioni</value>
+  </data>
+  <data name="WebClient.Settings.HideSettingsButton.SaveFailed" xml:space="preserve">
+    <value>Impossibile modificare il pulsante delle impostazioni</value>
+  </data>
   <data name="WebClient.Settings.Licenses.Button" xml:space="preserve">
     <value>Licenze open source</value>
   </data>
@@ -16627,6 +16648,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="WebClient.Settings.OpenSettings" xml:space="preserve">
     <value>Apri le impostazioni di Macro Deck</value>
+  </data>
+  <data name="WebClient.Settings.Sidebar" xml:space="preserve">
+    <value>Pannello laterale</value>
   </data>
   <data name="WebClient.Setup.Body" xml:space="preserve">
     <value>Completa la configurazione iniziale nell'app desktop di Macro Deck, poi ricarica questa pagina.</value>

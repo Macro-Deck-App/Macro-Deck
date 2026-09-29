@@ -249,6 +249,72 @@ public class DeviceServiceTests
 	}
 
 	[Test]
+	public async Task A_new_device_keeps_its_settings_button()
+	{
+		var device = await SeedDevice(withLiveToken: false);
+
+		var dto = await _service.ToDto(device);
+
+		Assert.That(dto.SettingsButtonHidden, Is.False);
+	}
+
+	[Test]
+	public async Task SetSettingsButtonHidden_stores_it_and_tells_only_that_device()
+	{
+		var device = await SeedDevice(withLiveToken: false);
+		var other = await SeedDevice(withLiveToken: false);
+
+		var result = await _service.SetSettingsButtonHidden(device.Id, true);
+
+		var stored = await _devices.GetById(device.Id);
+		var pushed = _transport.GroupMessages
+			.Where(sent => sent.Message is DeviceClientSettingsChangedEvent)
+			.ToList();
+		var dto = await _service.ToDto(stored!);
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True);
+			Assert.That(stored!.SettingsButtonHidden, Is.True);
+			Assert.That(dto.SettingsButtonHidden, Is.True);
+			Assert.That(pushed.Select(sent => sent.Group), Is.EqualTo(new[] { UiDeviceGroups.For(device.Id) }));
+			Assert.That(((DeviceClientSettingsChangedEvent)pushed.Single().Message).SettingsButtonHidden, Is.True);
+			Assert.That(_transport.GroupMessages.Select(sent => sent.Group),
+				Does.Not.Contain(UiDeviceGroups.For(other.Id)));
+			Assert.That(_mediator.Published.OfType<DeviceChangedNotification>(), Is.Not.Empty);
+		});
+	}
+
+	[Test]
+	public async Task SetSettingsButtonHidden_false_shows_the_button_again()
+	{
+		var device = await SeedDevice(withLiveToken: false);
+		await _service.SetSettingsButtonHidden(device.Id, true);
+
+		await _service.SetSettingsButtonHidden(device.Id, false);
+
+		var stored = await _devices.GetById(device.Id);
+		Assert.Multiple(() =>
+		{
+			Assert.That(stored!.SettingsButtonHidden, Is.False);
+			Assert.That(((DeviceClientSettingsChangedEvent)_transport.GroupMessages.Last().Message)
+					.SettingsButtonHidden,
+				Is.False);
+		});
+	}
+
+	[Test]
+	public async Task SetSettingsButtonHidden_of_a_missing_device_fails_with_not_found()
+	{
+		var result = await _service.SetSettingsButtonHidden(Guid.NewGuid(), true);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.EqualTo(DeviceError.NotFound));
+			Assert.That(_transport.GroupMessages, Is.Empty);
+		});
+	}
+
+	[Test]
 	public async Task SetStartupProfile_of_a_missing_id_fails_with_not_found()
 	{
 		var result = await _service.SetStartupProfile(Guid.NewGuid(), "p1");

@@ -11,6 +11,7 @@ import {
   createSettingsSection,
   createToggle,
   type SegmentedOption,
+  type ToggleHandle,
 } from '../ui';
 import {
   installHintKey,
@@ -57,6 +58,14 @@ export interface WakeLockSurface {
   onChange(listener: () => void): () => void;
 }
 
+export interface SettingsButtonSurface {
+  offered(): boolean;
+  connected(): boolean;
+  get(): boolean;
+  set(hidden: boolean): Promise<boolean>;
+  onChange(listener: () => void): () => void;
+}
+
 export interface AppUpdateSurface {
   phase(): AppUpdatePhase;
   onPhaseChange(listener: (phase: AppUpdatePhase) => void): void;
@@ -85,6 +94,7 @@ export interface ClientSettingsOptions {
   appearance: AppearanceSurface;
   renderingMode: RenderingModeSurface;
   wakeLock: WakeLockSurface;
+  settingsButton?: SettingsButtonSurface;
   update: AppUpdateSurface;
   install: PwaInstallSurface;
   capabilities: WebClientTargetCapabilities;
@@ -98,6 +108,8 @@ export interface ClientSettingsHandle {
   readonly element: HTMLElement;
   open(): void;
   close(): void;
+  isOpen(): boolean;
+  setButtonHidden(hidden: boolean): void;
   destroy(): void;
 }
 
@@ -125,7 +137,7 @@ function show(node: HTMLElement, visible: boolean): void {
   else node.setAttribute('hidden', '');
 }
 
-function gearIcon(): SVGElement {
+export function gearIcon(): SVGElement {
   const svg = document.createElementNS(SVG_NS, 'svg');
   svg.setAttribute('class', 'wc-client-settings-icon');
   svg.setAttribute('viewBox', '0 0 24 24');
@@ -186,6 +198,8 @@ interface OpenModal {
   renderMode: { setValue(value: string | null): void };
   wakeLockControl: HTMLElement;
   wakeLockStatus: HTMLElement;
+  settingsButtonToggle: ToggleHandle | null;
+  settingsButtonStatus: HTMLElement;
   installDescription: HTMLElement | null;
   installControl: HTMLElement;
   installNote: HTMLElement;
@@ -211,6 +225,9 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
   let dismissedHintVisible = false;
   let dismissedHintTimer: unknown = null;
   let destroyed = false;
+  let settingsButtonPending: boolean | null = null;
+  let settingsButtonFailed = false;
+  let settingsButtonRequest = 0;
 
   function themeOptions(): SegmentedOption[] {
     // The deck runs on tablets whose OS may have no colour-scheme preference to follow at all - iOS
@@ -378,11 +395,30 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
       }));
     }
 
+    const settingsButton = options.settingsButton;
+    const settingsButtonStatus = paragraph('wc-client-settings-status', '');
+    let settingsButtonToggle: ToggleHandle | null = null;
+    if (settingsButton !== undefined && settingsButton.offered()) {
+      settingsButtonToggle = createToggle({
+        ariaLabel: text(ClientAppStrings.WebClient.Settings.HideSettingsButton.Label),
+        checked: settingsButton.get(),
+        onChange: hidden => {
+          void saveSettingsButton(settingsButton, hidden);
+        },
+      });
+      displayRows.push(createSettingsRow({
+        label: text(ClientAppStrings.WebClient.Settings.HideSettingsButton.Label),
+        description: text(ClientAppStrings.WebClient.Settings.HideSettingsButton.Description),
+        control: settingsButtonToggle.element,
+      }));
+    }
+
     const display = createSettingsSection({
       heading: text(ClientAppStrings.WebClient.Settings.DisplaySection),
       rows: displayRows,
     });
     if (keepAwakeOffered) display.body.appendChild(wakeLockStatus);
+    if (settingsButtonToggle !== null) display.body.appendChild(settingsButtonStatus);
     body.appendChild(display.element);
 
     const installControl = element('div', 'wc-client-settings-control');
@@ -445,6 +481,8 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
       renderMode: renderMode,
       wakeLockControl: wakeLockControl,
       wakeLockStatus: wakeLockStatus,
+      settingsButtonToggle: settingsButtonToggle,
+      settingsButtonStatus: settingsButtonStatus,
       installDescription: description(installRow),
       installControl: installControl,
       installNote: installNote,
@@ -477,6 +515,40 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
     const key = wakeLockStatusKey(status);
     modal.wakeLockStatus.textContent = key === null ? '' : text(key);
     show(modal.wakeLockStatus, key !== null);
+  }
+
+  function renderSettingsButton(modal: OpenModal): void {
+    const surface = options.settingsButton;
+    const toggle = modal.settingsButtonToggle;
+    if (surface === undefined || toggle === null) return;
+
+    toggle.setChecked(settingsButtonPending === null ? surface.get() : settingsButtonPending);
+    toggle.setBusy(settingsButtonPending !== null);
+    toggle.setDisabled(!surface.connected());
+    modal.settingsButtonStatus.textContent = settingsButtonFailed
+      ? text(ClientAppStrings.WebClient.Settings.HideSettingsButton.SaveFailed)
+      : '';
+    show(modal.settingsButtonStatus, settingsButtonFailed);
+  }
+
+  async function saveSettingsButton(surface: SettingsButtonSurface, hidden: boolean): Promise<void> {
+    const modal = open;
+    const request = ++settingsButtonRequest;
+    settingsButtonPending = hidden;
+    settingsButtonFailed = false;
+    render();
+
+    let saved = false;
+    try {
+      saved = await surface.set(hidden);
+    } catch {
+      saved = false;
+    }
+    if (open !== modal || request !== settingsButtonRequest) return;
+
+    settingsButtonPending = null;
+    settingsButtonFailed = !saved;
+    render();
   }
 
   function renderInstall(modal: OpenModal): void {
@@ -544,6 +616,7 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
     modal.renderMode.setValue(options.renderingMode.get());
     modal.themeMode.setValue(options.appearance.themeMode());
     renderWakeLock(modal);
+    renderSettingsButton(modal);
     renderInstall(modal);
     renderUpdate(modal);
   }
@@ -636,6 +709,8 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
 
   function openModal(): void {
     if (open !== null || destroyed) return;
+    settingsButtonPending = null;
+    settingsButtonFailed = false;
     open = build();
     document.body.appendChild(open.backdrop);
     document.addEventListener('keydown', onKeydown);
@@ -655,6 +730,9 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
   const unsubscribeAppearance = options.appearance.onChange(() => render());
   const unsubscribeRendering = options.renderingMode.onChange(() => render());
   const unsubscribeWakeLock = options.wakeLock.onChange(() => render());
+  const unsubscribeSettingsButton = options.settingsButton === undefined
+    ? () => undefined
+    : options.settingsButton.onChange(() => render());
   // Neither of these hands back an unsubscribe, so they are taken once here rather than per open,
   // and answered with nothing once the modal is closed.
   options.update.onPhaseChange(() => render());
@@ -664,6 +742,8 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
     element: trigger,
     open: () => openModal(),
     close: () => close(),
+    isOpen: () => open !== null,
+    setButtonHidden: (hidden: boolean) => show(trigger, !hidden),
     destroy: () => {
       destroyed = true;
       close();
@@ -671,6 +751,7 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
       unsubscribeAppearance();
       unsubscribeRendering();
       unsubscribeWakeLock();
+      unsubscribeSettingsButton();
       if (trigger.parentNode !== null) trigger.parentNode.removeChild(trigger);
     },
   };

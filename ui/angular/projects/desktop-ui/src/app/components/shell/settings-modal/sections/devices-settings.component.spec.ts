@@ -54,7 +54,7 @@ describe('DevicesSettingsComponent', () => {
     profiles: Profile[] = [],
   ): void {
     deviceServiceSpy = jasmine.createSpyObj<DeviceService>(
-      'DeviceService', ['load', 'rename', 'logout', 'remove', 'setStartupProfile', 'openProfile', 'setScreenSaver', 'showScreenSaver']);
+      'DeviceService', ['load', 'rename', 'logout', 'remove', 'setStartupProfile', 'openProfile', 'setScreenSaver', 'showScreenSaver', 'setSettingsButtonHidden']);
     authServiceSpy = jasmine.createSpyObj<AuthService>('AuthService', ['logout']);
     devicesSignal = signal<Device[]>(devices);
     loadErrorSignal = signal<string | null>(null);
@@ -69,6 +69,7 @@ describe('DevicesSettingsComponent', () => {
     deviceServiceSpy.openProfile.and.resolveTo({ success: true });
     deviceServiceSpy.setScreenSaver.and.resolveTo({ success: true });
     deviceServiceSpy.showScreenSaver.and.resolveTo({ success: true });
+    deviceServiceSpy.setSettingsButtonHidden.and.resolveTo({ success: true });
 
     TestBed.configureTestingModule({
       imports: [DevicesSettingsComponent],
@@ -653,6 +654,90 @@ describe('DevicesSettingsComponent', () => {
         screenSaverId: CLOCK.id,
         configuration: '{"showSeconds":true}',
       });
+    });
+  });
+
+  describe('settings button', () => {
+    async function openMenu(deviceId: string): Promise<HTMLButtonElement | null> {
+      fixture.componentInstance.setMenuOpen(deviceId, true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      return fixture.nativeElement.querySelector('.devices-menu-settings-button');
+    }
+
+    it('is offered only for a browser deck', async () => {
+      configure([
+        device('web', { clientType: 'web-client' }),
+        device('native', { clientType: 'native' }),
+        device('admin', { clientType: 'admin-ui' }),
+        device('provided', { clientType: 'provider', providerId: 'p' }),
+      ]);
+      fixture = await create();
+
+      expect(await openMenu('web')).not.toBeNull();
+      expect(await openMenu('native')).toBeNull();
+      expect(await openMenu('admin')).toBeNull();
+      expect(await openMenu('provided')).toBeNull();
+    });
+
+    it('hides a shown button straight from the menu', async () => {
+      configure([device('d1')]);
+      fixture = await create();
+
+      const item = await openMenu('d1');
+      expect(item?.textContent).toContain('Hide settings button');
+      item!.click();
+      await fixture.whenStable();
+
+      expect(deviceServiceSpy.setSettingsButtonHidden).toHaveBeenCalledOnceWith('d1', true);
+      expect(fixture.componentInstance.openMenuDeviceId()).toBeNull();
+    });
+
+    it('shows a hidden button again and says on the row that it is hidden', async () => {
+      configure([device('d1', { settingsButtonHidden: true })]);
+      fixture = await create();
+
+      const line = fixture.nativeElement.querySelector('.devices-settings-button-line')?.textContent as string;
+      expect(line).toContain('Settings button hidden: swipe in from the left edge');
+
+      const item = await openMenu('d1');
+      expect(item?.textContent).toContain('Show settings button');
+      item!.click();
+      await fixture.whenStable();
+
+      expect(deviceServiceSpy.setSettingsButtonHidden).toHaveBeenCalledOnceWith('d1', false);
+    });
+
+    it('says nothing on the row while the button is shown', async () => {
+      configure([device('d1')]);
+      fixture = await create();
+
+      expect(fixture.nativeElement.querySelector('.devices-settings-button-line')).toBeNull();
+    });
+
+    it('toasts its own localized failure instead of the host message', async () => {
+      configure([device('d1')]);
+      deviceServiceSpy.setSettingsButtonHidden.and.resolveTo({
+        success: false,
+        error: { code: 'NotFound', message: 'Device not found.' },
+      });
+      fixture = await create();
+      const toastSpy = spyOn(TestBed.inject(ToastService), 'show');
+
+      await fixture.componentInstance.toggleSettingsButton(fixture.componentInstance.devices()[0]);
+
+      expect(toastSpy).toHaveBeenCalledOnceWith('Could not change the settings button', { variant: 'error' });
+    });
+
+    it('toasts the localized failure when the request itself fails', async () => {
+      configure([device('d1')]);
+      deviceServiceSpy.setSettingsButtonHidden.and.rejectWith(new Error('offline'));
+      fixture = await create();
+      const toastSpy = spyOn(TestBed.inject(ToastService), 'show');
+
+      await fixture.componentInstance.toggleSettingsButton(fixture.componentInstance.devices()[0]);
+
+      expect(toastSpy).toHaveBeenCalledOnceWith('Could not change the settings button', { variant: 'error' });
     });
   });
 });

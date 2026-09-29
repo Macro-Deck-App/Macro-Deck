@@ -42,6 +42,10 @@ import {
   type ThemeMode,
   type TokenResponse,
   type DeviceScreenSaverChangedEvent,
+  type DeviceClientSettingsChangedEvent,
+  type GetDeviceClientSettingsResponse,
+  type SetDeviceClientSettingsRequest,
+  type SetDeviceClientSettingsResponse,
   type UiModalOpenedEvent,
   widgetFromWire,
   WidgetType,
@@ -74,6 +78,7 @@ const MAX_SESSION_RETRY_DELAY_MS = 60000;
 const DEVICE_ID_KEY = 'md.device.web-client.id';
 const DEVICE_SECRET_KEY = 'md.device.web-client.secret';
 const DEVICE_CLIENT_TYPE = 'web-client';
+const DEVICE_CLIENT_SETTINGS_KEY = 'md.device.web-client.settings-button-hidden';
 
 export interface SignInResult {
   ok: boolean;
@@ -121,6 +126,14 @@ function writeStored(key: string, value: string): void {
   }
 }
 
+function removeStored(key: string): void {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // Nothing was stored where storage is refused.
+  }
+}
+
 export class Client {
   readonly app = new AppState();
   readonly deck = new DeckState();
@@ -131,6 +144,9 @@ export class Client {
   private readonly deviceScreenSaverStore: WritableStore<DeviceScreenSaverChangedEvent> =
     store<DeviceScreenSaverChangedEvent>({ enabled: false, idleSeconds: 0 });
   readonly deviceScreenSaver: ReadableStore<DeviceScreenSaverChangedEvent> = this.deviceScreenSaverStore;
+  private readonly deviceClientSettingsStore: WritableStore<DeviceClientSettingsChangedEvent> =
+    store<DeviceClientSettingsChangedEvent>({ settingsButtonHidden: readStored(DEVICE_CLIENT_SETTINGS_KEY) === 'true' });
+  readonly deviceClientSettings: ReadableStore<DeviceClientSettingsChangedEvent> = this.deviceClientSettingsStore;
   private readonly screenSaverRequestStore: WritableStore<number> = store<number>(0);
   readonly screenSaverRequests: ReadableStore<number> = this.screenSaverRequestStore;
   readonly executionFeedback = new ExecutionFeedback(
@@ -242,6 +258,7 @@ export class Client {
         // received, so the state is re-read rather than assumed.
         void this.hostLock.load();
         void this.loadDeviceScreenSaver();
+        void this.loadDeviceClientSettings();
         // Everything that changed while this client was away arrived as events nobody received, so a
         // reconnect re-reads the deck rather than trusting what is on screen. The first connect is not
         // one of those, unless `start()`'s own read never landed - a folder read that failed leaves
@@ -695,6 +712,28 @@ export class Client {
     this.deviceScreenSaverStore.set({ enabled, idleSeconds });
   }
 
+  private loadDeviceClientSettings(): Promise<void> {
+    return this.connection.request<GetDeviceClientSettingsResponse>('GetDeviceClientSettings', []).then(
+      settings => {
+        if (settings) this.applyDeviceClientSettings(settings.settingsButtonHidden === true);
+      },
+      () => undefined);
+  }
+
+  setSettingsButtonHidden(hidden: boolean): Promise<boolean> {
+    const request: SetDeviceClientSettingsRequest = { settingsButtonHidden: hidden };
+    return this.connection.request<SetDeviceClientSettingsResponse>('SetDeviceClientSettings', [request]).then(
+      response => response !== undefined && response !== null && response.success === true,
+      () => false);
+  }
+
+  private applyDeviceClientSettings(settingsButtonHidden: boolean): void {
+    if (settingsButtonHidden) writeStored(DEVICE_CLIENT_SETTINGS_KEY, 'true');
+    else removeStored(DEVICE_CLIENT_SETTINGS_KEY);
+    if (this.deviceClientSettingsStore.get().settingsButtonHidden === settingsButtonHidden) return;
+    this.deviceClientSettingsStore.set({ settingsButtonHidden });
+  }
+
   translate(qualifiedKey: string, args?: Record<string, unknown>): string {
     const separator = qualifiedKey.indexOf(':');
     if (separator < 0) return `[[${qualifiedKey}]]`;
@@ -917,6 +956,7 @@ export class Client {
 
   private endSession(): void {
     this.clearSession();
+    this.applyDeviceClientSettings(false);
     this.widgetSessions.forgetAll();
     this.app.set({ authenticated: false, deckRendered: false });
     this.connection.disconnect();
@@ -1125,6 +1165,9 @@ export class Client {
       case 'DeviceScreenSaverChangedEvent':
         this.applyDeviceScreenSaver(body['enabled'] === true,
           typeof body['idleSeconds'] === 'number' ? body['idleSeconds'] : 0);
+        break;
+      case 'DeviceClientSettingsChangedEvent':
+        this.applyDeviceClientSettings(body['settingsButtonHidden'] === true);
         break;
       case 'DeviceSessionRevokedEvent':
         // Only ever pushed to the device being signed out. Treated as a lost session rather than a

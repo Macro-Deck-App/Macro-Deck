@@ -331,6 +331,14 @@ Every phone, tablet or browser that connects shows up in **Settings > Devices**.
 profile each device opens with. If you delete the profile a device is showing, the device switches to
 the profile it opens with, or to your first profile if that one is gone too.
 
+For a deck in a browser, choose **Hide settings button** in its menu there to take the settings button
+off its screen, and **Show settings button** to bring it back. The deck's own settings have the same
+**Hide settings button** switch under **Display**, and both change the same setting. The device then
+reaches its settings with a swipe in from the left edge of the screen, which slides in a panel with the
+settings button. The swipe can start a little in from the edge, which helps where the system uses a
+swipe from the left edge for Back, such as Android gesture navigation or a Safari tab. Hiding the button
+is not a lock: anyone at the device can still swipe.
+
 When you are signed in under **Settings > Account**, a Companion app license this computer got from a
 purchase is saved to your Macro Deck account, and your other computers signed in to it that have no
 license yet receive it within about a minute (see
