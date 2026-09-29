@@ -524,9 +524,9 @@ export class FolderService {
     return Math.max(widgetMin, this.gridConstraint()?.minRows ?? 1);
   });
 
-  readonly maxCols = computed(() => this.gridConstraint()?.maxColumns ?? 12);
+  readonly maxCols = computed(() => this.gridConstraint()?.maxColumns ?? 16);
 
-  readonly maxRows = computed(() => this.gridConstraint()?.maxRows ?? 8);
+  readonly maxRows = computed(() => this.gridConstraint()?.maxRows ?? 16);
 
   readonly colsLocked = computed(() => this.gridConstraint()?.columnsLocked ?? false);
 

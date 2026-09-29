@@ -18,9 +18,9 @@ export class GridSettingsComponent {
   @Input() rows: number | null = 3;
   @Input() background = '';
   @Input() minCols = 1;
-  @Input() maxCols = 12;
+  @Input() maxCols = 16;
   @Input() minRows = 1;
-  @Input() maxRows = 8;
+  @Input() maxRows = 16;
   @Input() colsLocked = false;
   @Input() rowsLocked = false;
   @Input() lockNote = '';

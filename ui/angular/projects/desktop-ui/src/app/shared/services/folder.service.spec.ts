@@ -128,6 +128,30 @@ describe('FolderService widget layout', () => {
     return { x: w.x, y: w.y, w: w.w, h: w.h };
   }
 
+  describe('grid size bounds', () => {
+    it('allows up to 16 rows and 16 columns when no device constrains the profile', () => {
+      currentProfile = stubProfile();
+
+      expect(service.maxRows()).toBe(16);
+      expect(service.maxCols()).toBe(16);
+    });
+
+    it('uses the bounds a claiming device declares instead', () => {
+      currentProfile = stubProfile({
+        layout: {
+          rows: 3, columns: 5, rowsLocked: false, columnsLocked: false,
+          constraint: {
+            rows: 3, columns: 5, minRows: 1, maxRows: 4, minColumns: 1, maxColumns: 6,
+            rowsLocked: false, columnsLocked: false,
+          },
+        },
+      });
+
+      expect(service.maxRows()).toBe(4);
+      expect(service.maxCols()).toBe(6);
+    });
+  });
+
   describe('commitWidgetLayout', () => {
     it('applies the changed rects optimistically and sends one batch request', async () => {
       const changes = new Map<string, GridRect>([
