@@ -7455,6 +7455,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Obs.Params.Filter" xml:space="preserve">
     <value>Filtr</value>
   </data>
+  <data name="Integrations.Obs.Params.GroupOption" xml:space="preserve">
+    <value>{name} (grupa)</value>
+  </data>
   <data name="Integrations.Obs.Params.Input" xml:space="preserve">
     <value>Wejście</value>
   </data>

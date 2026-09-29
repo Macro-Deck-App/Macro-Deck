@@ -7455,6 +7455,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Obs.Params.Filter" xml:space="preserve">
     <value>Filtre</value>
   </data>
+  <data name="Integrations.Obs.Params.GroupOption" xml:space="preserve">
+    <value>{name} (groupe)</value>
+  </data>
   <data name="Integrations.Obs.Params.Input" xml:space="preserve">
     <value>Entrée</value>
   </data>

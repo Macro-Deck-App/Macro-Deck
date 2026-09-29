@@ -1,6 +1,8 @@
 using System.Text.Json;
 using MacroDeckHost.Integrations.Obs;
+using MacroDeck.Localization;
 using MacroDeckHost.Integrations.Obs.Actions;
+using MacroDeckHost.Localization;
 using MacroDeckHost.Tests.UnitTests.System;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;
@@ -176,6 +178,102 @@ internal sealed class ObsActionsTests
 
 			Assert.That(result.Options.Select(o => o.Value), Is.EqualTo(_expectedSourceOptions));
 		}
+	}
+
+	[TestCase("set-source-visibility")]
+	[TestCase("get-source-visibility")]
+	public async Task SourceVisibility_SceneOptions_ListGroupsAfterScenes_MarkedAsGroups(string actionId)
+	{
+		var (connection, client) = ConnectedConnection();
+		client.SceneNames = ["Intro", "Gameplay"];
+		client.Groups["Overlay"] = ["Alert"];
+		using (connection)
+		{
+			var action = (IDynamicOptionsActionDefinition)ObsActions.Create(() => connection, new VariableApiAccessor())
+				.Single(a => a.Id == actionId);
+
+			var result = await action.GetDynamicOptionsAsync(new DynamicOptionsContext
+				{
+					ParameterName = SourceVisibilityActionDefinition.SceneParameter,
+					CurrentParameters = new Dictionary<string, object?>()
+				},
+				CancellationToken.None);
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(result.Options.Select(o => o.Value), Is.EqualTo(new[] { "Intro", "Gameplay", "Overlay" }));
+				Assert.That(result.Options[0].Label, Is.EqualTo((LocalizedText)"Intro"));
+				Assert.That(result.Options[2].Label,
+					Is.EqualTo((LocalizedText)AppStrings.Integrations.Obs.Params.GroupOption(name: "Overlay")));
+			});
+		}
+	}
+
+	[TestCase("set-source-visibility")]
+	[TestCase("get-source-visibility")]
+	public async Task SourceVisibility_SourceOptions_ForGroup_ListGroupChildren(string actionId)
+	{
+		var (connection, client) = ConnectedConnection();
+		client.SceneItems["Gameplay"] = ["Webcam", "Overlay"];
+		client.Groups["Overlay"] = ["Alert", "Chat Box"];
+		using (connection)
+		{
+			var action = (IDynamicOptionsActionDefinition)ObsActions.Create(() => connection, new VariableApiAccessor())
+				.Single(a => a.Id == actionId);
+
+			var result = await action.GetDynamicOptionsAsync(new DynamicOptionsContext
+				{
+					ParameterName = SourceVisibilityActionDefinition.SourceParameter,
+					CurrentParameters = new Dictionary<string, object?>
+					{
+						[SourceVisibilityActionDefinition.SceneParameter] = "Overlay"
+					}
+				},
+				CancellationToken.None);
+
+			Assert.That(result.Options.Select(o => o.Value), Is.EqualTo(new[] { "Alert", "Chat Box" }));
+		}
+	}
+
+	[Test]
+	public async Task SetScene_DynamicOptions_DoNotOfferGroups()
+	{
+		var (connection, client) = ConnectedConnection();
+		client.SceneNames = ["Intro", "Gameplay"];
+		client.Groups["Overlay"] = ["Alert"];
+		using (connection)
+		{
+			var action = new SceneActionDefinition("set-scene", "Set Scene", "", preview: false, () => connection);
+
+			var result = await action.GetDynamicOptionsAsync(new DynamicOptionsContext
+				{
+					ParameterName = SceneActionDefinition.SceneParameter,
+					CurrentParameters = new Dictionary<string, object?>()
+				},
+				CancellationToken.None);
+
+			Assert.That(result.Options.Select(o => o.Value), Is.EqualTo(new[] { "Intro", "Gameplay" }));
+		}
+	}
+
+	[Test]
+	public async Task SourceVisibility_GroupChild_ExecutesAgainstTheGroup()
+	{
+		var (connection, client) = ConnectedConnection();
+		client.Groups["Overlay"] = ["Alert"];
+		using (connection)
+		{
+			var action = new SourceVisibilityActionDefinition(() => connection);
+
+			await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				[SourceVisibilityActionDefinition.SceneParameter] = "Overlay",
+				[SourceVisibilityActionDefinition.SourceParameter] = "Alert",
+				[SourceVisibilityActionDefinition.ModeParameter] = "show"
+			}));
+		}
+
+		Assert.That(client.Calls, Does.Contain("SetSourceVisible:Overlay:Alert:True"));
 	}
 
 	[Test]
