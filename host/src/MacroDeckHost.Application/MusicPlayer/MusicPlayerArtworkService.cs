@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Globalization;
 using MacroDeck.Sdk.MusicPlayer;
+using MacroDeckHost.Application.Logging;
 using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Application.MusicPlayer;
@@ -117,7 +118,10 @@ public sealed class MusicPlayerArtworkService : IMusicPlayerArtworkService
 			}
 			catch (Exception ex)
 			{
-				_logger.Warning(ex, "Failed to resolve artwork {ArtworkId} for {InstanceId}", artworkId, instanceId);
+				_logger.Warning(ex,
+					"Failed to resolve artwork {ArtworkId} for {InstanceId}",
+					LogText.Neutralize(artworkId),
+					LogText.Neutralize(instanceId));
 				return null;
 			}
 
