@@ -39,7 +39,12 @@ public sealed class WidgetIconService : IWidgetIconService
 		_readiness = readiness;
 	}
 
-	public async Task<WidgetIconResolution> Resolve(Guid widgetId, CancellationToken cancellationToken = default)
+	public Task<WidgetIconResolution> Resolve(Guid widgetId, CancellationToken cancellationToken = default)
+		=> Resolve(widgetId, WidgetIconLimit.Host, cancellationToken);
+
+	public async Task<WidgetIconResolution> Resolve(Guid widgetId,
+		WidgetIconLimit limit,
+		CancellationToken cancellationToken = default)
 	{
 		await _readiness.WhenReady.WaitAsync(cancellationToken);
 
@@ -85,7 +90,7 @@ public sealed class WidgetIconService : IWidgetIconService
 			// renders as no icon without this host ever fetching it (issue #425 decision on request
 			// forgery, mirroring issue #748 for widget trees).
 			var image = await _iconResources
-				.ResolveAsync(new WidgetIconReference(reference.Type, reference.Reference), cancellationToken)
+				.ResolveAsync(new WidgetIconReference(reference.Type, reference.Reference), limit, cancellationToken)
 				.ConfigureAwait(false);
 			return image is null ? WidgetIconResolution.Blank : WidgetIconResolution.Active(image);
 		}

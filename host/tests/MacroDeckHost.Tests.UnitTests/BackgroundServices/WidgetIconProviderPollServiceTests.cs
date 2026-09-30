@@ -210,6 +210,11 @@ internal sealed class WidgetIconProviderPollServiceTests
 
 	private sealed class FakeWidgetIconServiceForPoll : IWidgetIconService
 	{
+		public Task<WidgetIconResolution> Resolve(Guid widgetId,
+			MacroDeckHost.Application.Widgets.WidgetIconLimit limit,
+			CancellationToken cancellationToken = default)
+			=> Resolve(widgetId, cancellationToken);
+
 		public Dictionary<Guid, TimeSpan> PollIntervalByWidget { get; } = new();
 		public Dictionary<Guid, int> ResolveCallCounts { get; } = new();
 

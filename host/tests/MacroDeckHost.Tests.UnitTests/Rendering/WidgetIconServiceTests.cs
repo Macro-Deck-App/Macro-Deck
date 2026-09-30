@@ -532,6 +532,11 @@ public class WidgetIconServiceTests
 
 	private sealed class FakeWidgetIconResources : IWidgetIconResources
 	{
+		public Task<MacroDeck.Ui.Model.Resources.UiResource?> ResolveAsync(WidgetIconReference? reference,
+			MacroDeckHost.Application.Widgets.WidgetIconLimit limit,
+			CancellationToken cancellationToken)
+			=> ResolveAsync(reference, cancellationToken);
+
 		private readonly Dictionary<WidgetIconReference, UiResource> _byReference = new();
 
 		public void Register(WidgetIconReference reference, UiResource resource) => _byReference[reference] = resource;

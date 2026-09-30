@@ -1,4 +1,5 @@
 using MacroDeck.Ui.Model.Resources;
+using MacroDeckHost.Application.Widgets;
 
 namespace MacroDeckHost.Application.Rendering;
 
@@ -35,6 +36,8 @@ public interface IWidgetIconService
 	/// rather than an exception.
 	/// </summary>
 	Task<WidgetIconResolution> Resolve(Guid widgetId, CancellationToken cancellationToken = default);
+
+	Task<WidgetIconResolution> Resolve(Guid widgetId, WidgetIconLimit limit, CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// How often the widget's icon-provider action asked to be polled, or null when the widget has no

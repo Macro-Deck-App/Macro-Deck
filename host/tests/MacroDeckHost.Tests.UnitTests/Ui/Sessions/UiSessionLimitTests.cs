@@ -1,5 +1,8 @@
 using System.Text;
+using System.Text.Json;
 using MacroDeck.Plugin.Protocol.Limits;
+using MacroDeck.Ui.Model.Nodes;
+using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
 
@@ -371,6 +374,35 @@ internal sealed class UiSessionLimitTests : UiSessionFixture
 	}
 
 	[Test]
+	public async Task A_Macro_Deck_view_may_declare_an_icon_larger_than_a_plugin_may()
+	{
+		AddInProcessProvider(() => TreeWithIcon(1, ProtocolLimits.MaxUiResourceBytes * 2));
+		var sessionId = await OpenAsync(ProviderId);
+
+		Attach(sessionId, "c1");
+		await WaitForAsync(() => MessagesFor<UiSessionTreeUpdatedEvent>("c1").Count == 1,
+			"A built-in view declaring a long animated icon never reached the client.");
+		await SettleAsync();
+
+		Assert.That(MessagesFor<UiSessionInvalidatedEvent>("c1"), Is.Empty);
+	}
+
+	[Test]
+	public async Task A_Macro_Deck_view_declaring_an_icon_over_the_host_limit_is_never_served()
+	{
+		AddInProcessProvider(() => TreeWithIcon(1, HostUiResourceLimits.MaxHostIconResourceBytes + 1));
+
+		var ticket = await Broker.OpenAsync(ProviderId, Surface(), DeviceA, CancellationToken.None);
+		var ready = await ticket.Ready;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ready.Accepted, Is.False);
+			Assert.That(ready.Code, Is.EqualTo(UiSessionErrorCodes.PayloadTooLarge));
+		});
+	}
+
+	[Test]
 	public async Task An_oversize_declared_resource_inside_a_patch_insert_is_never_delivered()
 	{
 		var provider = AddProvider();
@@ -465,6 +497,21 @@ internal sealed class UiSessionLimitTests : UiSessionFixture
 		return UiPayloads.Patch(fromRevision,
 			toRevision,
 			"{\"op\":\"set-properties\",\"nodeId\":\"root\",\"properties\":{\"pad\":\"" + padding + "\"}}");
+	}
+
+	private static UiTree TreeWithIcon(int revision, long byteLength)
+	{
+		var tree = TreeAt(revision);
+		using var document = JsonDocument.Parse("{\"resourceId\":\"r1\",\"byteLength\":" + byteLength + "}");
+		var source = document.RootElement.Clone();
+		var icon = new UiNode
+		{
+			Id = "icon",
+			Type = "image",
+			Properties = new Dictionary<string, JsonElement> { ["source"] = source }
+		};
+
+		return tree with { Root = tree.Root with { Children = [icon] } };
 	}
 
 	private static byte[] TreeWithResource(int revision, long byteLength, bool inFallback)

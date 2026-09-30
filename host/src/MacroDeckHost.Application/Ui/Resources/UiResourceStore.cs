@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using MacroDeck.Plugin.Protocol.Assets;
-using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Ui.Model.Identity;
 using MacroDeck.Ui.Model.Resources;
 using MacroDeckHost.Application.Plugins.IconPacks;
@@ -31,10 +30,11 @@ public sealed class UiResourceStore : IUiResourceStore
 				nameof(registration));
 		}
 
-		if (registration.Content.Length > ProtocolLimits.MaxUiResourceBytes)
+		var maxBytes = Math.Min(registration.MaxBytes, HostUiResourceLimits.MaxHostIconResourceBytes);
+		if (registration.Content.Length > maxBytes)
 		{
 			throw new ArgumentException($"The resource is {registration.Content.Length} bytes, over the " +
-				$"{ProtocolLimits.MaxUiResourceBytes} byte limit.",
+				$"{maxBytes} byte limit.",
 				nameof(registration));
 		}
 

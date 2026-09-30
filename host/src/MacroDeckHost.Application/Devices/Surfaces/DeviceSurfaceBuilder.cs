@@ -265,7 +265,7 @@ public sealed class DeviceSurfaceBuilder
 		// checked first: it decides IconId/IconVersion/HasProviderIcon together, so the three can never
 		// disagree about who currently owns the icon.
 		var providerIcon = isPersisted
-			? await _widgetIcons.Resolve(widgetId, cancellationToken)
+			? await _widgetIcons.Resolve(widgetId, WidgetIconLimit.Protocol, cancellationToken)
 			: WidgetIconResolution.Inactive;
 
 		// IconId never carries anything but an icon-pack GUID, so an active provider forces it null here
