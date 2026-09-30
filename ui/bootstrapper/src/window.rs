@@ -255,6 +255,7 @@ fn ensure_main_window_capability(app: &AppHandle, url: &tauri::Url) {
         .permission("allow-save-file")
         .permission("allow-save-backup")
         .permission("allow-take-opened-files")
+        .permission("allow-take-deep-links")
         .permission("allow-take-menu-action")
         .permission("allow-set-hotkey-capture")
         .permission("allow-check-for-update")

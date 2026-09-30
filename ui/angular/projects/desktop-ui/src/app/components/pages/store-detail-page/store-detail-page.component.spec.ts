@@ -11,6 +11,8 @@ import { IntegrationService } from '../../../services/integration.service';
 import { PluginRuntimeService } from '../../../services/plugin-runtime.service';
 import { ExternalLinkService } from '../../../services/external-link.service';
 import { StoreOperationService } from '../../../services/store-operation.service';
+import { TextClipboardService } from '../../../services/text-clipboard.service';
+import { STORE_SHARE_LINKS_ENABLED } from '../../../util/store-share-link';
 import { StoreDetailPageComponent } from './store-detail-page.component';
 import { Observable, Subject } from 'rxjs';
 
@@ -95,6 +97,7 @@ describe('StoreDetailPageComponent', () => {
     extensionOverrides: Partial<StoreExtensionDetailBody> = {},
     reviewsAvailable = false,
     installs: Record<string, number> = {},
+    shareLinksEnabled = true,
   ): Promise<void> {
     notifications = new Map();
     api = jasmine.createSpyObj<ApiService>('ApiService', [
@@ -145,6 +148,7 @@ describe('StoreDetailPageComponent', () => {
       providers: [
         provideZonelessChangeDetection(),
         { provide: ApiService, useValue: api },
+        { provide: STORE_SHARE_LINKS_ENABLED, useValue: shareLinksEnabled },
         { provide: StoreOperationService, useValue: operationsSpy },
         { provide: PluginRuntimeService, useValue: { plugins: signal([]) } },
         { provide: IntegrationService, useValue: { integrations, loadIntegrations: async () => undefined } },
@@ -221,6 +225,28 @@ describe('StoreDetailPageComponent', () => {
     fixture.detectChanges();
 
     expect((fixture.nativeElement as HTMLElement).querySelector('app-store-report-dialog')).not.toBeNull();
+  });
+
+  it('copies the public https address of the item with Copy link', async () => {
+    await createFixture(null);
+    const copyText = spyOn(TestBed.inject(TextClipboardService), 'copyText')
+      .and.resolveTo({ status: 'copied', via: 'clipboard-api' });
+
+    (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.copy-link button')!.click();
+
+    expect(copyText).toHaveBeenCalledOnceWith('https://store.macro-deck.app/app.example.plugin');
+  });
+
+  it('offers no Copy link while the Store website is not live', async () => {
+    await createFixture(null, {}, false, {}, false);
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('.copy-link')).toBeNull();
+  });
+
+  it('offers no Copy link for a withdrawn item, whose shared address would not open', async () => {
+    await createFixture(null, { withdrawal: { reason: 'Malware' } });
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('.copy-link')).toBeNull();
   });
 
   it('renders progress instead of an Install button when an operation is already in flight at construction', async () => {

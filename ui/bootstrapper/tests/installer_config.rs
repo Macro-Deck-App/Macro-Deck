@@ -874,7 +874,7 @@ fn every_release_build_applies_the_release_config() {
 }
 
 #[test]
-fn the_desktop_entry_passes_the_opened_files_to_the_app() {
+fn the_desktop_entry_passes_opened_files_and_links_to_the_app() {
     let template = repository_file("ui/bootstrapper/packaging/linux/main.desktop");
     let exec = template
         .lines()
@@ -882,8 +882,8 @@ fn the_desktop_entry_passes_the_opened_files_to_the_app() {
         .expect("the desktop template must define Exec");
 
     assert!(
-        exec.contains("%F") || exec.contains("%U"),
-        "Exec needs a field code or the opened file never reaches the app: {exec}"
+        exec.ends_with(" %U"),
+        "Exec needs %U: a launcher passes macrodeck:// links only to %u/%U entries, and files then arrive as file:// URIs: {exec}"
     );
     let wm_class = template
         .lines()
@@ -893,6 +893,56 @@ fn the_desktop_entry_passes_the_opened_files_to_the_app() {
         !wm_class.contains('%'),
         "StartupWMClass must stay the plain binary name: {wm_class}"
     );
+}
+
+#[test]
+fn every_linux_package_uses_the_one_desktop_template() {
+    let cfg = load("tauri.linux.conf.json");
+    for packaging in ["deb", "rpm"] {
+        assert_eq!(
+            cfg["bundle"]["linux"][packaging]["desktopTemplate"].as_str(),
+            Some("packaging/linux/main.desktop"),
+            "{packaging} must use the shared desktop template, or its launcher never receives the links"
+        );
+    }
+}
+
+#[test]
+fn release_config_registers_the_macrodeck_scheme() {
+    let protocol = &load("release.conf.json")["plugins"]["deep-link"]["desktop"];
+
+    assert_eq!(
+        protocol["schemes"],
+        serde_json::json!(["macrodeck"]),
+        "the bundler reads the scheme from plugins > deep-link > desktop: the Windows registry entry, the macOS URL type and the Linux x-scheme-handler MimeType"
+    );
+}
+
+#[test]
+fn release_config_does_not_replace_the_updater_configuration() {
+    let release = load("release.conf.json");
+    let development = load("tauri.conf.json");
+
+    assert!(
+        release["plugins"]["updater"].is_null(),
+        "release.conf.json is merged over tauri.conf.json; it must not redeclare the updater"
+    );
+    assert!(development["plugins"]["updater"]["pubkey"].is_string());
+}
+
+#[test]
+fn development_configs_do_not_claim_the_macrodeck_scheme() {
+    for config in [
+        "tauri.conf.json",
+        "tauri.linux.conf.json",
+        "tauri.macos.conf.json",
+        "tauri.windows.conf.json",
+    ] {
+        assert!(
+            load(config)["plugins"]["deep-link"].is_null(),
+            "{config} must not register a URL scheme - a development build would steal macrodeck:// from the installed app"
+        );
+    }
 }
 
 // --- macOS DMG styling and install flow (issue #355) ---

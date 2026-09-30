@@ -294,6 +294,9 @@ installed icon pack's page has **Open in Library**. The other way round, a plugi
 description and release notes. An installed plugin is uninstalled from the **General** details of its page
 under **Integrations**, or from its Store page.
 
+A `macrodeck://` link to an item opens its page in Macro Deck, and a message appears if the item is no longer
+in the Store. See [Store links](/reference/store-links/) for the details, including the AppImage limitation.
+
 The Store footer links to the **Creator Portal**, where you can publish your own plugins and icon packs, and to
 the imprint and privacy policy.
 

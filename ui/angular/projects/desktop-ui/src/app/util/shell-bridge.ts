@@ -45,6 +45,11 @@ export interface ShellCursorPosition {
   y: number;
 }
 
+export interface ShellDeepLinkTarget {
+  kind: 'store';
+  packageId: string;
+}
+
 export interface ShellBridge {
   getCursorPosition?: () => Promise<ShellCursorPosition | null>;
   openExternal?: (url: string) => Promise<boolean>;
@@ -52,6 +57,8 @@ export interface ShellBridge {
   onFileDrop?: (callback: (event: ShellFileDropEvent) => void) => Promise<() => void>;
   onFileOpen?: (callback: () => void) => Promise<() => void>;
   takeOpenedFiles?: () => Promise<string[]>;
+  onDeepLink?: (callback: () => void) => Promise<() => void>;
+  takeDeepLinks?: () => Promise<ShellDeepLinkTarget[]>;
   onMenuAction?: (callback: (event: ShellMenuActionEvent) => void) => Promise<() => void>;
   takeMenuAction?: () => Promise<string | null>;
   onHostStopping?: (callback: () => void) => Promise<() => void>;

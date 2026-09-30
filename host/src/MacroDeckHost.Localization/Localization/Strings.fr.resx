@@ -15179,6 +15179,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Store.Page.CompatibilityField" xml:space="preserve">
     <value>Compatibilité</value>
   </data>
+  <data name="Store.Page.CopyLinkAction" xml:space="preserve">
+    <value>Copier le lien</value>
+  </data>
   <data name="Store.Page.DetailsHeading" xml:space="preserve">
     <value>Détails</value>
   </data>
@@ -15302,6 +15305,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Store.Page.Link.Wiki" xml:space="preserve">
     <value>Wiki</value>
+  </data>
+  <data name="Store.Page.LinkCopied" xml:space="preserve">
+    <value>Lien copié.</value>
+  </data>
+  <data name="Store.Page.LinkRegistryUnavailable" xml:space="preserve">
+    <value>Le Store n'est pas disponible pour le moment. Vérifie ta connexion Internet et rouvre le lien.</value>
   </data>
   <data name="Store.Page.LinksHeading" xml:space="preserve">
     <value>Liens</value>

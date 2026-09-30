@@ -82,12 +82,17 @@ pub fn forget(app: &AppHandle) {
     clear(&config_dir(app));
 }
 
+fn relaunched_by_installer(arguments: &[String]) -> bool {
+    !crate::deep_links::is_link_invocation(arguments)
+        && arguments.iter().any(|argument| argument == RELAUNCH_ARG)
+}
+
 pub fn take_for_launch(app: &AppHandle) -> bool {
     take(
         &config_dir(app),
         &updater::current_version(app),
         updater::now_secs(),
-        std::env::args().any(|argument| argument == RELAUNCH_ARG),
+        relaunched_by_installer(&crate::deep_links::launch_arguments()),
     )
 }
 
@@ -102,6 +107,16 @@ mod tests {
         ));
         let _ = fs::remove_dir_all(&dir);
         dir
+    }
+
+    #[test]
+    fn the_installer_relaunch_marker_is_ignored_next_to_a_link() {
+        let marker = ["MacroDeck", RELAUNCH_ARG].map(str::to_string);
+        let smuggled =
+            ["MacroDeck", "macrodeck://store/acme.obs", RELAUNCH_ARG].map(str::to_string);
+
+        assert!(relaunched_by_installer(&marker));
+        assert!(!relaunched_by_installer(&smuggled));
     }
 
     #[test]

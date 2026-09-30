@@ -19,6 +19,7 @@ use std::sync::Mutex;
 
 use tauri::{AppHandle, Emitter, Manager};
 
+use crate::deep_links;
 use crate::logging;
 use crate::window;
 
@@ -75,10 +76,38 @@ pub fn accepts(path: &str) -> bool {
 
 pub fn paths_from_args(args: impl Iterator<Item = String>) -> Vec<String> {
     args.skip(1)
-        .filter(|argument| !argument.starts_with('-'))
-        .filter(|argument| accepts(argument))
-        .map(|argument| canonicalize(&argument))
+        .filter_map(|argument| path_from_argument(&argument))
         .collect()
+}
+
+// Only a Linux desktop entry with %U hands local files over as file:// URIs. Any other URL,
+// macrodeck:// links included, is never a path, however its last characters look.
+fn path_from_argument(argument: &str) -> Option<String> {
+    if argument.starts_with('-') || deep_links::is_link_argument(argument) {
+        return None;
+    }
+
+    let path = if cfg!(target_os = "linux") && is_file_url(argument) {
+        url::Url::parse(argument)
+            .ok()?
+            .to_file_path()
+            .ok()?
+            .to_str()?
+            .to_string()
+    } else if argument.contains("://") {
+        return None;
+    } else {
+        argument.to_string()
+    };
+
+    accepts(&path).then(|| canonicalize(&path))
+}
+
+fn is_file_url(argument: &str) -> bool {
+    argument
+        .as_bytes()
+        .get(..5)
+        .is_some_and(|prefix| prefix.eq_ignore_ascii_case(b"file:"))
 }
 
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
@@ -247,6 +276,78 @@ mod tests {
             paths_from_args(args.into_iter()),
             vec!["/tmp/MyPlugin.macroDeckPlugin".to_string()]
         );
+    }
+
+    #[test]
+    fn a_deep_link_is_never_a_file_even_when_it_ends_in_an_openable_extension() {
+        for link in [
+            "macrodeck://store/com.foo.macrodeckplugin",
+            "MACRODECK://STORE/com.foo.macrodeckplugin",
+            "MacroDeck://store/com.foo.macroDeckPlugin",
+            "macrodeck://store/x.macrodeckprofile",
+            "macrodeck:store/x.macrodeckprofile",
+            "macrodeck:x.macrodeckwidget",
+        ] {
+            let args = ["MacroDeck", link].map(str::to_string);
+
+            assert!(
+                paths_from_args(args.into_iter()).is_empty(),
+                "{link} must not be queued as a file"
+            );
+        }
+    }
+
+    #[test]
+    fn other_urls_are_never_files() {
+        for link in [
+            "https://macro-deck.app/Default.macroDeckProfile",
+            "http://localhost/MyPlugin.macroDeckPlugin",
+            "ftp://host/a.macrodeckfolder",
+            "custom://x/a.macrodeckiconpack",
+        ] {
+            let args = ["MacroDeck", link].map(str::to_string);
+
+            assert!(paths_from_args(args.into_iter()).is_empty(), "{link}");
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn paths_from_args_converts_file_urls_to_decoded_paths() {
+        let args = [
+            "MacroDeck",
+            "file:///tmp/My%20Deck.macroDeckFolder",
+            "FILE:///tmp/Plain.macroDeckProfile",
+            "file:///tmp/notes.txt",
+        ]
+        .map(str::to_string);
+
+        assert_eq!(
+            paths_from_args(args.into_iter()),
+            vec![
+                "/tmp/My Deck.macroDeckFolder".to_string(),
+                "/tmp/Plain.macroDeckProfile".to_string()
+            ]
+        );
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn paths_from_args_rejects_file_urls_naming_another_host() {
+        let args = [
+            "MacroDeck",
+            "file://evil.example/share/Default.macroDeckProfile",
+        ]
+        .map(str::to_string);
+
+        assert!(paths_from_args(args.into_iter()).is_empty());
+    }
+
+    #[test]
+    fn paths_from_args_rejects_file_urls_without_an_openable_path() {
+        let args = ["MacroDeck", "file:", "file://", "file:///tmp/notes.txt"].map(str::to_string);
+
+        assert!(paths_from_args(args.into_iter()).is_empty());
     }
 
     #[test]

@@ -18,6 +18,7 @@
     "allow-save-file",
     "allow-save-backup",
     "allow-take-opened-files",
+    "allow-take-deep-links",
     "allow-take-menu-action",
     "allow-set-hotkey-capture",
     "allow-check-for-update",

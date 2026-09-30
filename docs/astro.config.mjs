@@ -253,6 +253,7 @@ export default defineConfig({
 										{ label: 'SDK packages', slug: 'reference/sdk-packages' },
 										'reference/plugin-hosting',
 										'reference/manifest',
+										'reference/store-links',
 										'reference/capability-parity',
 										'reference/authentication',
 										'reference/protocol',

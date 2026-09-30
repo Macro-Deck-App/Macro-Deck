@@ -1111,6 +1111,7 @@ export {
 export {
   type GetStoreCatalogResponse,
   type GetStoreExtensionResponse,
+  type ResolveStoreLinkResponse,
   type GetStoreOperationsResponse,
   type GetStoreSimilarResponse,
   type GetStoreCategoriesResponse,

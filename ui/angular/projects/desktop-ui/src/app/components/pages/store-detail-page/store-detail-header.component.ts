@@ -2,11 +2,13 @@ import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, injec
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AppStrings, StoreExtensionDetailBody, StoreOperationBody } from '@macro-deck/runtime';
-import { ApiService, LocalizationService, TranslatePipe } from '@shared';
+import { ApiService, ButtonComponent, LocalizationService, TranslatePipe } from '@shared';
 import { SelectComponent, SelectOption } from '../../forms/select/select.component';
 import { StoreInstallButtonComponent, StoreManageAction } from '../../store/store-install-button.component';
 import { StoreRatingStarsComponent } from '../../store/store-rating-stars.component';
 import { StoreRatingsService } from '../../../services/store-ratings.service';
+import { StoreShareService } from '../../../services/store-share.service';
+import { STORE_SHARE_LINKS_ENABLED } from '../../../util/store-share-link';
 import { storeFreshness } from '../../../util/store-badges';
 import { formatStoreCount, formatStoreRating } from '../../../util/store-rating-format';
 import { storeKindIcon, storeKindLabelKey } from '../../../util/store-operation-display';
@@ -15,7 +17,7 @@ import { StoreTrustBadgeComponent } from './store-trust-badge.component';
 @Component({
   selector: 'app-store-detail-header',
   standalone: true,
-  imports: [FormsModule, RouterLink, SelectComponent, StoreInstallButtonComponent, StoreRatingStarsComponent, StoreTrustBadgeComponent, TranslatePipe],
+  imports: [ButtonComponent, FormsModule, RouterLink, SelectComponent, StoreInstallButtonComponent, StoreRatingStarsComponent, StoreTrustBadgeComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './store-detail-header.component.html',
   styleUrls: ['./store-detail-header.component.scss'],
@@ -24,6 +26,8 @@ export class StoreDetailHeaderComponent {
   private readonly api = inject(ApiService);
   private readonly localization = inject(LocalizationService);
   private readonly ratings = inject(StoreRatingsService);
+  private readonly share = inject(StoreShareService);
+  protected readonly shareLinksEnabled = inject(STORE_SHARE_LINKS_ENABLED);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   readonly extension = input.required<StoreExtensionDetailBody>();
@@ -105,6 +109,10 @@ export class StoreDetailHeaderComponent {
       this.iconUrl();
       this.iconFailed.set(false);
     });
+  }
+
+  protected copyLink(): void {
+    void this.share.copyLink(this.extension().id);
   }
 
   protected onIconError(): void {

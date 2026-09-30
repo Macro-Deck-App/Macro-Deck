@@ -15179,6 +15179,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Store.Page.CompatibilityField" xml:space="preserve">
     <value>Kompatibilita</value>
   </data>
+  <data name="Store.Page.CopyLinkAction" xml:space="preserve">
+    <value>Kopírovat odkaz</value>
+  </data>
   <data name="Store.Page.DetailsHeading" xml:space="preserve">
     <value>Podrobnosti</value>
   </data>
@@ -15302,6 +15305,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Store.Page.Link.Wiki" xml:space="preserve">
     <value>Wiki</value>
+  </data>
+  <data name="Store.Page.LinkCopied" xml:space="preserve">
+    <value>Odkaz zkopírován.</value>
+  </data>
+  <data name="Store.Page.LinkRegistryUnavailable" xml:space="preserve">
+    <value>Store momentálně není k dispozici. Je potřeba zkontrolovat připojení k internetu a znovu otevřít odkaz.</value>
   </data>
   <data name="Store.Page.LinksHeading" xml:space="preserve">
     <value>Odkazy</value>

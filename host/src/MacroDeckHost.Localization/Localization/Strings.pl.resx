@@ -15179,6 +15179,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.Page.CompatibilityField" xml:space="preserve">
     <value>Zgodność</value>
   </data>
+  <data name="Store.Page.CopyLinkAction" xml:space="preserve">
+    <value>Kopiuj link</value>
+  </data>
   <data name="Store.Page.DetailsHeading" xml:space="preserve">
     <value>Szczegóły</value>
   </data>
@@ -15302,6 +15305,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Store.Page.Link.Wiki" xml:space="preserve">
     <value>Wiki</value>
+  </data>
+  <data name="Store.Page.LinkCopied" xml:space="preserve">
+    <value>Skopiowano link.</value>
+  </data>
+  <data name="Store.Page.LinkRegistryUnavailable" xml:space="preserve">
+    <value>Store jest obecnie niedostępny. Należy sprawdzić połączenie z internetem i ponownie otworzyć link.</value>
   </data>
   <data name="Store.Page.LinksHeading" xml:space="preserve">
     <value>Linki</value>
