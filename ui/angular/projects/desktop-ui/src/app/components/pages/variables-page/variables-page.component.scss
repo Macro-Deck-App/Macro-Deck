@@ -25,8 +25,7 @@
 // The manager fills the detail pane as a bounded flex column so its inner
 // `.vars-list` owns the scroll (title and search stay pinned). Matches the
 // variable browser modal, which styles the same `shared-variables-manager` host.
-shared-variables-manager,
-shared-variable-catalog-tree {
+shared-variables-manager {
   display: flex;
   flex-direction: column;
   min-height: 0;

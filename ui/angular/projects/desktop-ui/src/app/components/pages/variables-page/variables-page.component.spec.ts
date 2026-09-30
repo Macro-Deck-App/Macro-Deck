@@ -273,9 +273,6 @@ describe('VariablesPageComponent', () => {
 
     expect(component.catalogIntegrationId()).toBe('home-assistant');
     expect(fixture.nativeElement.querySelector('shared-variables-manager')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('shared-variable-catalog-tree'))
-      .withContext('the catalog belongs in the manager\'s own list')
-      .toBeNull();
   });
 
   it('lists no catalog for an integration that offers none', async () => {

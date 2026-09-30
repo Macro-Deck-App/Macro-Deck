@@ -193,23 +193,38 @@ describe('VariableBrowserModalComponent', () => {
     }
   }
 
-  it('lists an integration catalog inside the variable list, not beside it', async () => {
-    // The catalog used to be a browser of its own next to the list; its entries now belong to the
-    // same list, so what proves it arrived is the query going out, not a second component existing.
+  function manager(): VariablesManagerComponent {
+    return fixture.debugElement.query(By.directive(VariablesManagerComponent)).componentInstance;
+  }
+
+  it('queries an integration catalog from the variable list once its unbound group is opened', async () => {
     component.selectIntegration('home-assistant');
     await settleCatalog();
+    expect(discoverCatalogVariablesSpy).not.toHaveBeenCalled();
 
-    expect(fixture.nativeElement.querySelector('shared-variables-manager')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('shared-variable-catalog-tree')).toBeNull();
-    expect(discoverCatalogVariablesSpy).toHaveBeenCalled();
+    manager().toggleUnbound('home-assistant');
+    await settleCatalog();
+
+    expect(discoverCatalogVariablesSpy).toHaveBeenCalledWith(jasmine.objectContaining({ integrationId: 'home-assistant' }));
+  });
+
+  it('opens the unbound group right away when only catalogs are browsed', async () => {
+    fixture.componentRef.setInput('catalogOnly', true);
+    await settleCatalog();
+
+    expect(discoverCatalogVariablesSpy).toHaveBeenCalledWith(jasmine.objectContaining({ integrationId: 'home-assistant' }));
   });
 
   it('re-queries the new catalog when the integration is switched', async () => {
     component.selectIntegration('home-assistant');
     await settleCatalog();
+    manager().toggleUnbound('home-assistant');
+    await settleCatalog();
     discoverCatalogVariablesSpy.calls.reset();
 
     component.selectIntegration('adb');
+    await settleCatalog();
+    manager().toggleUnbound('adb');
     await settleCatalog();
 
     expect(discoverCatalogVariablesSpy).toHaveBeenCalledWith(jasmine.objectContaining({ integrationId: 'adb' }));
