@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Subject } from 'rxjs';
-import { GridWidget, WidgetData, WidgetGridMode, WidgetType } from '@macro-deck/runtime';
+import { GridWidget, WidgetData, WidgetGridMode, WidgetRenderState, WidgetType } from '@macro-deck/runtime';
 
 import { IWidgetComponent } from '../../widget-definition.interface';
 import { IconImageService } from '../../services/icon-image.service';
@@ -311,5 +311,86 @@ describe('WidgetGridComponent empty-cell placement', () => {
     fixture.componentRef.setInput('shadows', true);
     fixture.detectChanges();
     expect(container.style.getPropertyValue('--widget-shadow')).toBe('');
+  });
+});
+
+describe('WidgetGridComponent empty cells during a live layout preview', () => {
+  let fixture: ComponentFixture<WidgetGridComponent>;
+
+  function sized(id: string, x: number, y: number, w: number, h: number): GridWidget {
+    return { ...widget(id, x, y), w, h };
+  }
+
+  function live(x: number, y: number, w: number, h: number): WidgetRenderState {
+    return { liveRect: { x, y, w, h }, hidden: false, dimmed: false, landing: false };
+  }
+
+  function render(widgets: GridWidget[], renderStates: Map<string, WidgetRenderState>): void {
+    TestBed.configureTestingModule({
+      imports: [WidgetGridComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: ApiService, useValue: fakeApiService() },
+        { provide: IconImageService, useValue: {} },
+      ],
+    });
+
+    TestBed.inject(WidgetRegistryService).register({
+      type: WidgetType.Weather,
+      component: TestWidgetComponent,
+      loadEditorComponent: () => Promise.resolve(TestWidgetComponent as never),
+    });
+
+    fixture = TestBed.createComponent(WidgetGridComponent);
+    fixture.componentRef.setInput('cols', 3);
+    fixture.componentRef.setInput('rows', 2);
+    fixture.componentRef.setInput('mode', 'layout');
+    fixture.componentRef.setInput('widgets', widgets);
+    fixture.componentRef.setInput('renderStates', renderStates);
+    fixture.detectChanges();
+  }
+
+  function coveredCells(): number[] {
+    const cells = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.empty-cell'));
+    return cells.flatMap((cell, index) => (cell.classList.contains('occupied') ? [index] : []));
+  }
+
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('shows the cells a shrinking widget leaves as empty cells while it is still being resized', () => {
+    render([sized('a', 0, 0, 2, 2)], new Map([['a', live(0, 0, 1, 1)]]));
+
+    expect(coveredCells()).toEqual([0]);
+  });
+
+  it('keeps the empty cells a growing widget reaches into until the widget itself covers them', () => {
+    render([sized('a', 0, 0, 1, 1)], new Map([['a', live(0, 0, 2, 2)]]));
+
+    expect(coveredCells()).toEqual([0]);
+  });
+
+  it('shows the cell a pushed neighbour leaves as empty, without hiding the cell it moves into', () => {
+    render(
+      [sized('a', 0, 0, 1, 1), sized('b', 1, 0, 1, 1)],
+      new Map([['b', live(2, 1, 1, 1)]]),
+    );
+
+    expect(coveredCells()).toEqual([0]);
+  });
+
+  it('keeps the committed cells of a widget without a live rect, such as a hidden drag source', () => {
+    const hidden: WidgetRenderState = { liveRect: null, hidden: true, dimmed: false, landing: false };
+    render([sized('a', 0, 0, 2, 1)], new Map([['a', hidden]]));
+
+    expect(coveredCells()).toEqual([0, 1]);
+  });
+
+  it('returns to the committed layout once the live rect is gone', () => {
+    render([sized('a', 0, 0, 2, 2)], new Map([['a', live(0, 0, 1, 1)]]));
+
+    fixture.componentRef.setInput('renderStates', new Map());
+    fixture.detectChanges();
+
+    expect(coveredCells()).toEqual([0, 1, 3, 4]);
   });
 });
