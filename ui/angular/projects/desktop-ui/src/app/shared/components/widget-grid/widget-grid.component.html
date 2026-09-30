@@ -19,7 +19,7 @@
         [style.top.px]="cellTop(cellRect($index))"
         [style.width.px]="cellDimensions.cellWidth"
         [style.height.px]="cellDimensions.cellHeight"
-        [class.occupied]="isCellOccupied($index)"
+        [class.occupied]="isCellCoveredLive($index)"
         [class.edit-mode]="isLayoutMode"
         [class.transparent]="hidesEmptyCells"
         [class.outline-only]="outlinesOnlyEmptyCells"
