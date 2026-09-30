@@ -1,6 +1,5 @@
 using MacroDeck.Sdk.Identity;
 using MacroDeck.Sdk.Issues;
-using MacroDeckHost.Application.Logging;
 using Serilog;
 using ILogger = Serilog.ILogger;
 
@@ -99,8 +98,8 @@ public sealed class IntegrationIssueService : IIntegrationIssueService
 		}
 
 		_logger.Warning("Ignoring issue '{IssueId}' from integration {IntegrationId}: not a usable id",
-			LogText.Neutralize(issueId),
-			LogText.Neutralize(integrationId));
+			issueId,
+			integrationId);
 		return false;
 	}
 

@@ -3,7 +3,6 @@ using System.Text;
 using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Plugin.Protocol.Logging;
 using MacroDeck.Sdk.Logging;
-using MacroDeckHost.Application.Logging;
 using Serilog.Events;
 using Serilog.Parsing;
 
@@ -174,15 +173,15 @@ public static class PluginLogEventFactory
 
 	private static void AppendException(StringBuilder builder, LogExceptionDto exception, int maxDepth, int depth)
 	{
-		builder.Append(LogText.Neutralize(Truncate(exception.Type, 256)))
+		builder.Append(Truncate(exception.Type, 256))
 			.Append(": ")
-			.Append(LogText.Neutralize(Truncate(exception.Message, ProtocolLimits.MaxLogMessageLength)));
+			.Append(Truncate(exception.Message, ProtocolLimits.MaxLogMessageLength));
 
 		if (!string.IsNullOrEmpty(exception.StackTrace))
 		{
 			foreach (var line in Truncate(exception.StackTrace, ProtocolLimits.MaxLogExceptionLength).Split('\n'))
 			{
-				builder.Append('\n').Append("   at ").Append(LogText.Neutralize(line.TrimEnd('\r')));
+				builder.Append('\n').Append("   at ").Append(line.TrimEnd('\r'));
 			}
 		}
 

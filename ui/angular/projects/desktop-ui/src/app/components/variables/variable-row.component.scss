@@ -1,0 +1,155 @@
+@use '../../../styles/index' as ds;
+
+:host {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding-inline-end: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color var(--transition-fast);
+}
+
+:host(:has(.vr-button):hover),
+:host(:has(.vr-button:focus-visible)) {
+  background-color: var(--color-bg-hover);
+}
+
+.vr-main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0 0 0 var(--space-3);
+}
+
+.vr-button {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.vr-chevron {
+  flex: 0 0 auto;
+  color: var(--color-text-muted);
+  transition: transform var(--transition-fast, 120ms) ease;
+}
+
+.vr-chevron-open {
+  transform: rotate(90deg);
+}
+
+.vr-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1875rem;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.vr-primary {
+  @include ds.truncate;
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+}
+
+.vr-mono {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+}
+
+.vr-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+  font-size: var(--text-xs);
+}
+
+.vr-type {
+  @include ds.badge;
+  flex: 0 0 auto;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background-color: var(--type-string-bg);
+  color: var(--type-string-fg);
+}
+
+.vr-type.type-numeric { background-color: var(--type-numeric-bg); color: var(--type-numeric-fg); }
+.vr-type.type-boolean { background-color: var(--type-boolean-bg); color: var(--type-boolean-fg); }
+
+.vr-secondary {
+  @include ds.truncate;
+  flex: 0 1 auto;
+  min-width: 0;
+  color: var(--color-text-muted);
+}
+
+.vr-side {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  flex: 0 0 auto;
+  min-width: 0;
+  max-width: 40%;
+}
+
+.vr-side:empty {
+  display: none;
+}
+
+.vr-value {
+  @include ds.truncate;
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+}
+
+.vr-unavailable {
+  padding: 0.0625rem 0.3125rem;
+  border-radius: 0.1875rem;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-warning);
+  background-color: var(--color-warning-muted);
+  border: 1px solid var(--color-warning);
+}
+
+.vr-action {
+  flex: 0 0 auto;
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-accent);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+:host(:hover) .vr-action,
+.vr-button:focus-visible .vr-action {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .vr-action {
+    opacity: 1;
+  }
+}
+
+:host(.vr-unbound) .vr-primary {
+  color: var(--color-text-secondary);
+}
+
+:host(.vr-dimmed) .vr-main {
+  opacity: 0.6;
+}

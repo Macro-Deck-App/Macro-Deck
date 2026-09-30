@@ -1,6 +1,5 @@
 using System.Security.Cryptography.X509Certificates;
 using MacroDeckHost.Application.Configuration;
-using MacroDeckHost.Application.Logging;
 using MacroDeckHost.Application.Network.Tls;
 using MacroDeckHost.Application.Ui.Transport.Messages.System;
 using Microsoft.AspNetCore.Authorization;
@@ -111,7 +110,7 @@ public class DeviceSetupController : ControllerBase
 			return string.Empty;
 		}
 
-		return LogText.Neutralize(value.Length <= MaxReportedFieldLength ? value : value[..MaxReportedFieldLength])!;
+		return value.Length <= MaxReportedFieldLength ? value : value[..MaxReportedFieldLength];
 	}
 
 	private List<string> ReadHostCertificateNames()

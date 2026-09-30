@@ -16151,6 +16151,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Variables.Dynamic.EmptyMessage" xml:space="preserve">
     <value>Esta integración no tiene nada que mostrar por ahora.</value>
   </data>
+  <data name="Variables.Dynamic.GroupHeading" xml:space="preserve">
+    <value>Variables sin vincular</value>
+  </data>
+  <data name="Variables.Dynamic.GroupHeadingCount" xml:space="preserve">
+    <value>Variables sin vincular: {count}</value>
+  </data>
   <data name="Variables.Dynamic.Loading" xml:space="preserve">
     <value>Cargando…</value>
   </data>

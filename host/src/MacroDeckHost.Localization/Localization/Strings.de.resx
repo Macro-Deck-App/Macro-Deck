@@ -16149,6 +16149,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Variables.Dynamic.EmptyMessage" xml:space="preserve">
     <value>Diese Integration hat gerade nichts zu zeigen.</value>
   </data>
+  <data name="Variables.Dynamic.GroupHeading" xml:space="preserve">
+    <value>Nicht gebundene Variablen</value>
+  </data>
+  <data name="Variables.Dynamic.GroupHeadingCount" xml:space="preserve">
+    <value>Nicht gebundene Variablen: {count}</value>
+  </data>
   <data name="Variables.Dynamic.Loading" xml:space="preserve">
     <value>Wird geladen…</value>
   </data>

@@ -1,10 +1,10 @@
 ---
 title: iPhone and iPad
-description: What the Companion app does differently on iPhone and iPad, including Shortcuts, Siri and the Home Screen and Lock Screen widgets.
+description: What the Companion app does differently on iPhone and iPad, including Shortcuts, Siri and the Home Screen widget.
 ---
 
 The app runs on iPhone and iPad with iOS or iPadOS 15 or later, in portrait and landscape. Shortcuts and Siri
-need iOS 16, and the script widget needs iOS 17.
+need iOS 16.
 
 ![The Connections screen on iPhone with the Streaming Computer connected](../../../../assets/guide/companion/ios-connections.png)
 
@@ -30,42 +30,11 @@ turns on or when you tap an NFC tag, for example to start your stream setup on t
 Other apps can run a script with a `macrodeck-companion://run-script` link once you allow it in the settings under
 **Automation**. See [Run scripts from other apps](/guide/companion-app/automation/).
 
-## Home Screen and Lock Screen
+## Home Screen
 
 - **Quick actions:** touch and hold the app icon to open one of up to four saved computers directly.
-- **Macro Deck host widget:** in small and medium size, it opens the deck of the computer you choose for it. Touch
-  and hold the widget and choose **Edit Widget** to pick the computer.
-- **Macro Deck scripts widget:** runs scripts of one saved computer with a tap, without opening the app. It needs
-  iOS 17.
-
-### Macro Deck scripts widget
-
-![The Macro Deck scripts widget with two scripts, the first showing that the computer was offline](../../../../assets/guide/companion/ios-script-widget.png)
-
-Add **Macro Deck scripts** to the Home Screen in small or medium size, or to the Lock Screen as a circular or
-rectangular widget, then touch and hold it and choose **Edit Widget**:
-
-1. Choose the **Host**. Only computers you saved are offered, and not those connected over USB.
-2. Choose **Script 1** to **Script 4**. Each list holds the scripts of that computer.
-3. If a script takes inputs, write their values in **Input Values** beside it, one `name=value` per line. Leave it
-   empty to use the script's own defaults.
-
-A small widget shows two scripts, a medium one four, a circular Lock Screen widget the first script and a
-rectangular one the first two. Scripts that do not fit are left out, and a small note counts them.
-
-Tapping a script runs it through the Macro Deck app in the background, the same way the **Run Script** action of
-Shortcuts does. It needs a license or a running trial, and the computer reachable over the network. The script
-shows **Running**, then **Done**, or **Started** when the computer took it and it is still running.
-
-If a script did not run, it says why: **Offline**, **No answer**, **Computer locked**, **Sign in needed**,
-**License needed**, **Update host**, **Script missing** or **Check values**, and how long ago that was. This is what
-the app found out the last time it contacted the computer, not a live check: the widget never contacts your
-computer itself. A computer that went offline while you never opened the app still looks fine until you tap a
-script. Tapping always tries again.
-
-The widget offers the scripts the app last listed for each computer. The app refreshes them when you open it, at
-most once an hour for each computer. If a computer has never answered, the editor says **open Macro Deck to load its
-scripts**. Input values are saved in the widget's settings on your phone and are not a place for secrets.
+- **Widget:** the **Macro Deck host** widget, in small and medium size, opens the deck of the computer you choose
+  for it. Touch and hold the widget and choose **Edit Widget** to pick the computer.
 
 ## Differences from Android
 

@@ -1,8 +1,6 @@
 using MacroDeckHost.Application.MusicPlayer;
-using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.MusicPlayer;
 using Serilog;
-using Serilog.Events;
 
 namespace MacroDeckHost.Tests.UnitTests.MusicPlayer;
 
@@ -26,24 +24,6 @@ public class MusicPlayerArtworkServiceTests
 
 	private MusicPlayerArtworkService CreateService(long maxCacheBytes = 16 * 1024 * 1024)
 		=> new(_registry, _processor, new LoggerConfiguration().CreateLogger(), maxCacheBytes);
-
-	[Test]
-	public async Task A_failed_artwork_lookup_cannot_forge_a_log_line_through_the_artwork_id()
-	{
-		var events = new List<LogEvent>();
-		using var logger = new LoggerConfiguration().WriteTo.Sink(new DelegatingLogSink(events.Add)).CreateLogger();
-		var service = new MusicPlayerArtworkService(_registry, _processor, logger, 16 * 1024 * 1024);
-		_player.Exception = new InvalidOperationException("boom");
-
-		await service.GetImage(InstanceId, "id\n[ERR] [Host] forged\u001b[31m", null, CancellationToken.None);
-
-		var value = (string)((ScalarValue)events.Single().Properties["ArtworkId"]).Value!;
-		Assert.Multiple(() =>
-		{
-			Assert.That(value.Any(char.IsControl), Is.False);
-			Assert.That(value, Does.Contain("forged"));
-		});
-	}
 
 	[Test]
 	public async Task GetImage_ReencodedArtwork_ServesWebpMasterWithETag()

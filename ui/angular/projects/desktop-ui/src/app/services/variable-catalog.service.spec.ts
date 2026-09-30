@@ -82,4 +82,35 @@ describe('VariableCatalogService', () => {
 
     expect(rootLoaded()).toBeFalse();
   });
+
+  describe('the unbound count the provider list carries', () => {
+    const provider = (unboundCount: number) => ({
+      providers: [{ integrationId: 'ha', name: 'Home', supportsSearch: true, supportsManualIds: false, unboundCount }],
+    });
+
+    it('follows a bind by asking for the provider list again', async () => {
+      api.getVariableCatalogProviders.and.resolveTo(provider(3) as never);
+      await service.loadProviders();
+      api.getVariableCatalogProviders.and.resolveTo(provider(2) as never);
+
+      events.next({ upserted: [boundVariable('power', '10')], deletedIds: [] });
+      await flush();
+
+      expect(service.providers()[0].unboundCount).toBe(2);
+    });
+
+    it('does not settle for a provider list that was already on its way when the bind happened', async () => {
+      let release!: (value: unknown) => void;
+      api.getVariableCatalogProviders.and.returnValue(new Promise(resolve => { release = resolve; }) as never);
+      const loading = service.loadProviders();
+      api.getVariableCatalogProviders.and.resolveTo(provider(2) as never);
+
+      events.next({ upserted: [boundVariable('power', '10')], deletedIds: [] });
+      release(provider(3));
+      await loading;
+      await flush();
+
+      expect(service.providers()[0].unboundCount).toBe(2);
+    });
+  });
 });

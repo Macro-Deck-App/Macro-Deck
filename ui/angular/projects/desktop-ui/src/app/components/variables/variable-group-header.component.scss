@@ -1,0 +1,63 @@
+@use '../../../styles/index' as ds;
+
+:host {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-bg-tertiary);
+}
+
+.vgh {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0 var(--space-3);
+}
+
+.vgh-toggle {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.vgh-toggle:hover,
+.vgh-toggle:focus-visible {
+  background-color: var(--color-bg-hover);
+}
+
+.vgh-chevron {
+  flex: 0 0 auto;
+  color: var(--color-text-muted);
+  transition: transform var(--transition-fast, 120ms) ease;
+}
+
+.vgh-chevron-open {
+  transform: rotate(90deg);
+}
+
+.vgh-label {
+  @include ds.truncate;
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-secondary);
+}
+
+:host(.vgh-section) .vgh-label {
+  @include ds.section-label;
+}
+
+.vgh-count {
+  @include ds.badge;
+  flex: 0 0 auto;
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-secondary);
+}

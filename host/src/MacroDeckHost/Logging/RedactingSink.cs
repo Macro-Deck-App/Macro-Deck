@@ -48,7 +48,7 @@ public sealed class RedactingSink(ILogEventSink inner) : ILogEventSink
 				continue;
 			}
 
-			var redacted = Sanitize(text.Text);
+			var redacted = LogRedactor.Redact(text.Text);
 			if (string.Equals(redacted, text.Text, StringComparison.Ordinal))
 			{
 				tokens.Add(token);
@@ -91,7 +91,7 @@ public sealed class RedactingSink(ILogEventSink inner) : ILogEventSink
 		}
 
 		var text = exception.ToString();
-		var redacted = LogText.NeutralizeControls(LogRedactor.Redact(text))!;
+		var redacted = LogRedactor.Redact(text);
 		if (string.Equals(redacted, text, StringComparison.Ordinal))
 		{
 			return exception;
@@ -108,11 +108,9 @@ public sealed class RedactingSink(ILogEventSink inner) : ILogEventSink
 		{
 			case ScalarValue { Value: string text }:
 			{
-				var redacted = Sanitize(text);
+				var redacted = LogRedactor.Redact(text);
 				return string.Equals(redacted, text, StringComparison.Ordinal) ? value : new ScalarValue(redacted);
 			}
-			case ScalarValue { Value: char or Uri } scalar:
-				return NeutralizeScalar(scalar);
 			case SequenceValue sequence:
 			{
 				var elements = RedactMany(sequence.Elements, out var changed);
@@ -124,67 +122,22 @@ public sealed class RedactingSink(ILogEventSink inner) : ILogEventSink
 				return changed ? new StructureValue(properties, structure.TypeTag) : value;
 			}
 			case DictionaryValue dictionary:
-				return RedactDictionary(dictionary);
+			{
+				var changed = false;
+				var entries = new List<KeyValuePair<ScalarValue, LogEventPropertyValue>>(dictionary.Elements.Count);
+				foreach (var entry in dictionary.Elements)
+				{
+					var redacted = Redact(entry.Value);
+					changed |= !ReferenceEquals(redacted, entry.Value);
+					entries.Add(new KeyValuePair<ScalarValue, LogEventPropertyValue>(entry.Key, redacted));
+				}
+
+				return changed ? new DictionaryValue(entries) : value;
+			}
 			default:
 				return value;
 		}
 	}
-
-	private static DictionaryValue RedactDictionary(DictionaryValue dictionary)
-	{
-		var source = dictionary.Elements.ToList();
-		var neutralizedKeys = source
-			.Select(entry => entry.Key.Value is string or char or Uri ? NeutralizeKey(entry.Key) : entry.Key)
-			.ToList();
-		var taken = new HashSet<ScalarValue>();
-		for (var i = 0; i < source.Count; i++)
-		{
-			if (ReferenceEquals(neutralizedKeys[i], source[i].Key))
-			{
-				taken.Add(neutralizedKeys[i]);
-			}
-		}
-
-		var changed = false;
-		var entries = new List<KeyValuePair<ScalarValue, LogEventPropertyValue>>(source.Count);
-		var index = 0;
-		foreach (var entry in source)
-		{
-			var redacted = Redact(entry.Value);
-			var key = neutralizedKeys[index++];
-			if (!ReferenceEquals(key, entry.Key))
-			{
-				var text = (string)key.Value!;
-				for (var suffix = 2; !taken.Add(key); suffix++)
-				{
-					key = new ScalarValue($"{text}#{suffix}");
-				}
-			}
-
-			changed |= !ReferenceEquals(redacted, entry.Value) || !ReferenceEquals(key, entry.Key);
-			entries.Add(new KeyValuePair<ScalarValue, LogEventPropertyValue>(key, redacted));
-		}
-
-		return changed ? new DictionaryValue(entries) : dictionary;
-	}
-
-	// Redact before neutralising: the secret patterns allow whitespace after the separator,
-	// which neutralising would rewrite.
-	private static string Sanitize(string text) => LogText.Neutralize(LogRedactor.Redact(text))!;
-
-	private static ScalarValue NeutralizeScalar(ScalarValue scalar)
-	{
-		var text = scalar.Value is Uri uri ? uri.ToString() : scalar.Value!.ToString()!;
-		var neutralized = LogText.Neutralize(text)!;
-		return string.Equals(neutralized, text, StringComparison.Ordinal) ? scalar : new ScalarValue(neutralized);
-	}
-
-	private static ScalarValue NeutralizeKey(ScalarValue key)
-		=> key.Value is string text
-			? LogText.Neutralize(text) is { } neutralized && !string.Equals(neutralized, text, StringComparison.Ordinal)
-				? new ScalarValue(neutralized)
-				: key
-			: NeutralizeScalar(key);
 
 	private static List<LogEventPropertyValue> RedactMany(
 		IReadOnlyList<LogEventPropertyValue> values,

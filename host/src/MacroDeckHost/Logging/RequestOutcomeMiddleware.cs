@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using MacroDeckHost.Application.Logging;
 using Serilog.Events;
 using ILogger = Serilog.ILogger;
 
@@ -59,7 +58,7 @@ public sealed class RequestOutcomeMiddleware
 		_logger.Write(level,
 			"HTTP {Method} {Path} responded {Status} in {ElapsedMs} ms",
 			context.Request.Method,
-			LogText.Neutralize(context.Request.Path.Value),
+			context.Request.Path.Value,
 			status,
 			(long)Stopwatch.GetElapsedTime(started).TotalMilliseconds);
 	}

@@ -19,6 +19,7 @@ export class VariableCatalogService {
   readonly providers = signal<VariableCatalogProvider[]>([]);
   private loadedProviders = false;
   private loadingProviders: Promise<void> | null = null;
+  private providersStale = false;
 
   private readonly pages = new Map<string, WritableSignal<VariableCatalogPage>>();
 
@@ -46,11 +47,24 @@ export class VariableCatalogService {
 
   private async runLoadProviders(): Promise<void> {
     try {
-      const response = await this.api.getVariableCatalogProviders();
-      this.providers.set(response?.providers ?? []);
-      this.loadedProviders = true;
+      do {
+        this.providersStale = false;
+        const response = await this.api.getVariableCatalogProviders();
+        this.providers.set(response?.providers ?? []);
+        this.loadedProviders = true;
+      } while (this.providersStale);
     } catch (error) {
       console.error('Failed to load variable catalog providers:', error);
+    }
+  }
+
+  // A bind or unbind changes the unbound count the provider list carries. A load already in flight
+  // may predate the change, so it is repeated once instead of being trusted.
+  private refreshProviders(): void {
+    if (this.loadingProviders) {
+      this.providersStale = true;
+    } else if (this.loadedProviders) {
+      void this.loadProviders();
     }
   }
 
@@ -187,6 +201,7 @@ export class VariableCatalogService {
       }
     }
     this.revision.update(r => r + 1);
+    this.refreshProviders();
   }
 
   private recordLeaves(integrationId: string, nodes: readonly VariableCatalogNode[]): void {

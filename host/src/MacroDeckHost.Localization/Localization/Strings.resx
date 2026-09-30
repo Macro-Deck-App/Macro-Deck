@@ -16152,6 +16152,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Variables.Dynamic.EmptyMessage" xml:space="preserve">
     <value>This integration has nothing to show right now.</value>
   </data>
+  <data name="Variables.Dynamic.GroupHeading" xml:space="preserve">
+    <value>Unbound variables</value>
+  </data>
+  <data name="Variables.Dynamic.GroupHeadingCount" xml:space="preserve">
+    <value>Unbound variables: {count}</value>
+  </data>
   <data name="Variables.Dynamic.Loading" xml:space="preserve">
     <value>Loading…</value>
   </data>

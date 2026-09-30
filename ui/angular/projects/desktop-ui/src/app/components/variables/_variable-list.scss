@@ -1,0 +1,46 @@
+@use '../../../styles/index' as ds;
+
+@mixin surface {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+@mixin state-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0 var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--text-base);
+  color: var(--color-text-muted);
+
+  > span {
+    @include ds.truncate;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
+@mixin link-row {
+  @include state-row;
+  background: none;
+  border-width: 0 0 1px;
+  font: inherit;
+  font-size: var(--text-base);
+  color: var(--color-accent);
+  text-align: left;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--color-bg-hover);
+  }
+}
