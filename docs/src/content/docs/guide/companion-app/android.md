@@ -43,6 +43,10 @@ in the app or with a notification such as **Streaming Computer wants to turn off
 
 **Turn screen off** needs either the device admin or the accessibility service; one is enough.
 
+The connection settings can use the same permissions without an automation: **Turn screen on when connected** needs
+**Background connection** and **Display over other apps**, **Turn screen off when disconnected** needs **Background connection** and the device
+admin or the accessibility service. See [Connection settings](/guide/companion-app/deck/#connection-settings).
+
 Turning the screen on does not unlock the device. If it has a screen lock, the deck asks you to unlock the device
 before you can use it.
 

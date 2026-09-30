@@ -47,7 +47,26 @@ deletes its saved sign-in from this device.
 | Deck rotation | Portrait, landscape or automatic for this computer's deck, or **Use app setting**. |
 | Brightness | Appears once Macro Deck set this device's brightness. **Follow system** gives the brightness back to the device. |
 | Wake this computer when connecting | Sends a Wake-on-LAN packet first when the computer does not answer, and opens the deck once it is awake. The computer and its network card must support Wake-on-LAN. |
+| Turn screen on when connected | Android only. Turns the screen on and opens this computer's deck when the computer comes online. Needs **Background connection** and **Display over other apps** under **Device control** in the app settings. |
+| Turn screen off when disconnected | Android only. Turns the screen off when the computer has been gone for 30 seconds. Needs **Background connection** and **Turn screen off** or, from Android 9, the **Accessibility service** under **Device control** in the app settings. |
 | Identity | The computer's identity, to compare with **Identity** in Macro Deck. **Forget identity** makes the app ask again next time. |
+
+### The screen follows the connection
+
+The two screen settings are off by default, and each connection has its own. While what one needs is not turned on
+yet, it cannot be turned on and says what to turn on first under **Device control** in the app settings. A switch that
+is already on can always be turned off.
+
+- A loss shorter than 30 seconds, such as a Wi-Fi roam or Macro Deck restarting, changes nothing: the screen is not
+  turned off, and not turned on again when the computer is back.
+- The first time the computer answers after the app started turns the screen on, and so does the computer coming back
+  after it was gone for more than 30 seconds. That is how a tablet wakes when the computer starts. The screen is left
+  alone while the app is in front.
+- Signing out, being signed out from Macro Deck, or closing the connection in the app is not a loss, and the screen stays as it is.
+- Scripts run from a shortcut, a tile or a widget do not count as an open connection, so they never turn the screen on or off.
+- Turning the screen on does not unlock the device. With a screen lock, the deck asks you to unlock it first. After **Turn screen off** as device admin, Android can ask for the PIN instead of your fingerprint.
+
+iPhone and iPad cannot turn the screen on or off, so these settings do not appear there.
 
 ## What the computer controls
 

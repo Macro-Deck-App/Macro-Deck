@@ -71,6 +71,11 @@ moment the app is back instead:
 network. An automation on **Macro Deck > Client Connected** works as well: a Companion action there waits a
 few seconds for the app to be ready.
 
+On Android, **Turn screen on when connected** in the
+[connection settings](/guide/companion-app/deck/#connection-settings) does this without an automation, and
+**Turn screen off when disconnected** turns the screen off again when the computer shuts down, which no automation can
+do: a computer that is off cannot send **Turn screen off**.
+
 ## More ideas
 
 - **Brightness by time of day:** a **Schedule** event at 22:00 runs **Set screen brightness** at 20%, another one at
