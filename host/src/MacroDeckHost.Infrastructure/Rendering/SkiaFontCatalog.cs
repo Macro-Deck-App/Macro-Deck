@@ -22,11 +22,22 @@ public sealed class SkiaFontCatalog : IFontCatalog
 	}
 
 	internal SkiaFontCatalog(IReadOnlyList<string> additionalFontDirectories)
+		: this(additionalFontDirectories, EnumerateSystemFaces)
 	{
-		_catalog = new Lazy<Catalog>(() => Load(additionalFontDirectories), LazyThreadSafetyMode.ExecutionAndPublication);
+	}
+
+	internal SkiaFontCatalog(
+		IReadOnlyList<string> additionalFontDirectories,
+		Func<IEnumerable<SystemFaceEntry>> systemFaces)
+	{
+		_catalog = new Lazy<Catalog>(() => Load(additionalFontDirectories, systemFaces()),
+			LazyThreadSafetyMode.ExecutionAndPublication);
 	}
 
 	public IReadOnlyList<FontFaceInfo> GetFaces() => _catalog.Value.Faces;
+
+	public string ResolveFaceId(string faceId) =>
+		_catalog.Value.Aliases.TryGetValue(faceId, out var canonical) ? canonical : faceId;
 
 	public byte[]? GetFaceFile(string faceId)
 	{
@@ -66,12 +77,67 @@ public sealed class SkiaFontCatalog : IFontCatalog
 		return typeface is null ? null : SfntFaceExtractor.Extract(typeface);
 	}
 
-	private static Catalog Load(IReadOnlyList<string> additionalFontDirectories)
+	private static Catalog Load(IReadOnlyList<string> additionalFontDirectories, IEnumerable<SystemFaceEntry> systemFaces)
 	{
-		var manager = SKFontManager.Default;
 		var faces = new List<FontFaceInfo>();
 		var sources = new Dictionary<string, FaceSource>(StringComparer.Ordinal);
+		var aliases = new Dictionary<string, string>(StringComparer.Ordinal);
 
+		// Fingerprints reach back into the family's native style set, so nothing survives a family change.
+		var listed = new Dictionary<FaceKey, List<(string FaceId, Lazy<string?> Fingerprint)>>();
+		string? currentFamily = null;
+
+		foreach (var entry in systemFaces)
+		{
+			if (!string.Equals(entry.Family, currentFamily, StringComparison.Ordinal))
+			{
+				currentFamily = entry.Family;
+				listed.Clear();
+			}
+
+			using var style = new SKFontStyle(entry.Weight, entry.Width, entry.Slant);
+			var faceId = ReserveFaceId(sources, entry.Family, style);
+			sources[faceId] = new FaceSource(entry.Family, entry.StyleIndex, entry.Weight, entry.Width, entry.Slant);
+
+			var key = new FaceKey(entry.Family.ToUpperInvariant(), entry.Weight, entry.Width, SlantId(entry.Slant));
+			var fingerprint = new Lazy<string?>(entry.Fingerprint);
+			if (listed.TryGetValue(key, out var sameStyle))
+			{
+				var hash = fingerprint.Value;
+				var twin = hash is null
+					? default
+					: sameStyle.FirstOrDefault(other => other.Fingerprint.Value == hash);
+				if (twin.FaceId is not null)
+				{
+					// A stored fontFaceId may still name the duplicate, so it stays servable and maps to its twin.
+					aliases[faceId] = twin.FaceId;
+					continue;
+				}
+
+				sameStyle.Add((faceId, fingerprint));
+			}
+			else
+			{
+				listed[key] = [(faceId, fingerprint)];
+			}
+
+			faces.Add(new FontFaceInfo(faceId,
+				entry.Family,
+				entry.Weight,
+				entry.Width,
+				SlantId(entry.Slant),
+				StyleName(style),
+				entry.RemoteRenderable));
+		}
+
+		AddFontFiles(additionalFontDirectories, faces, sources);
+
+		return new Catalog(faces, sources, aliases);
+	}
+
+	internal static IEnumerable<SystemFaceEntry> EnumerateSystemFaces()
+	{
+		var manager = SKFontManager.Default;
 		var families = manager.FontFamilies
 			.Where(family => !string.IsNullOrWhiteSpace(family))
 			.Distinct(StringComparer.OrdinalIgnoreCase)
@@ -82,24 +148,30 @@ public sealed class SkiaFontCatalog : IFontCatalog
 			using var styles = manager.GetFontStyles(family);
 			for (var index = 0; index < styles.Count; index++)
 			{
-				using var style = styles[index];
-				using var typeface = styles.CreateTypeface(index);
+				var styleIndex = index;
+				using var style = styles[styleIndex];
+				using var typeface = styles.CreateTypeface(styleIndex);
 
-				var faceId = ReserveFaceId(sources, family, style);
-				sources[faceId] = new FaceSource(family, index, style.Weight, style.Width, style.Slant);
-				faces.Add(new FontFaceInfo(faceId,
-					family,
+				yield return new SystemFaceEntry(family,
+					styleIndex,
 					style.Weight,
 					style.Width,
-					SlantId(style.Slant),
-					StyleName(style),
-					typeface is not null && SfntFaceExtractor.CanExtract(typeface)));
+					style.Slant,
+					typeface is not null && SfntFaceExtractor.CanExtract(typeface),
+					() => FingerprintOf(styles, styleIndex));
 			}
 		}
+	}
 
-		AddFontFiles(additionalFontDirectories, faces, sources);
+	private static string? FingerprintOf(SKFontStyleSet styles, int styleIndex)
+	{
+		if (styleIndex >= styles.Count)
+		{
+			return null;
+		}
 
-		return new Catalog(faces, sources);
+		using var typeface = styles.CreateTypeface(styleIndex);
+		return typeface is null ? null : SfntFaceExtractor.Fingerprint(typeface);
 	}
 
 	// System faces are minted first and untouched: their ids are persisted in widget configuration.
@@ -284,5 +356,17 @@ public sealed class SkiaFontCatalog : IFontCatalog
 
 	private readonly record struct FaceKey(string Family, int Weight, int Width, string Slant);
 
-	private sealed record Catalog(IReadOnlyList<FontFaceInfo> Faces, IReadOnlyDictionary<string, FaceSource> Sources);
+	internal sealed record SystemFaceEntry(
+		string Family,
+		int StyleIndex,
+		int Weight,
+		int Width,
+		SKFontStyleSlant Slant,
+		bool RemoteRenderable,
+		Func<string?> Fingerprint);
+
+	private sealed record Catalog(
+		IReadOnlyList<FontFaceInfo> Faces,
+		IReadOnlyDictionary<string, FaceSource> Sources,
+		IReadOnlyDictionary<string, string> Aliases);
 }

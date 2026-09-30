@@ -28,11 +28,19 @@ public static class WidgetFontFaceMigration
 
 		var data = WidgetAppearanceJson.ParseDataBag(widget.Data);
 		var changed = MigrateNode(data, fontCatalog);
+		changed |= ResolveAlias(data, fontCatalog);
 
 		if (data["states"] is JsonObject states)
 		{
-			changed |= states["off"] is JsonObject off && MigrateNode(off, fontCatalog);
-			changed |= states["on"] is JsonObject on && MigrateNode(on, fontCatalog);
+			changed |= states["off"] is JsonObject off && MigrateNode(off, fontCatalog) | ResolveAlias(off, fontCatalog);
+			changed |= states["on"] is JsonObject on && MigrateNode(on, fontCatalog) | ResolveAlias(on, fontCatalog);
+		}
+		else if (data["states"] is JsonArray entries)
+		{
+			foreach (var entry in entries)
+			{
+				changed |= entry?["appearance"] is JsonObject appearance && ResolveAlias(appearance, fontCatalog);
+			}
 		}
 
 		if (!changed)
@@ -41,6 +49,24 @@ public static class WidgetFontFaceMigration
 		}
 
 		widget.Data = data.ToJsonString();
+		return true;
+	}
+
+	private static bool ResolveAlias(JsonObject node, IFontCatalog fontCatalog)
+	{
+		var stored = ReadString(node, "fontFaceId");
+		if (string.IsNullOrEmpty(stored))
+		{
+			return false;
+		}
+
+		var resolved = fontCatalog.ResolveFaceId(stored);
+		if (string.IsNullOrEmpty(resolved) || string.Equals(resolved, stored, StringComparison.Ordinal))
+		{
+			return false;
+		}
+
+		node["fontFaceId"] = JsonValue.Create(resolved);
 		return true;
 	}
 

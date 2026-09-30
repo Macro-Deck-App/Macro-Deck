@@ -53,6 +53,60 @@ public class WidgetFontFaceMigrationTests
 	}
 
 	[Test]
+	public void Normalize_StoredIdOfAHiddenDuplicateFace_IsRewrittenEverywhereAFontCanBeStored()
+	{
+		var catalog = new FakeFontCatalog();
+		catalog.Aliases["ubuntu-400-5-upright-3"] = "ubuntu-400-5-upright";
+		catalog.Aliases["ubuntu-400-5-italic-2"] = "ubuntu-400-5-italic";
+
+		var widget = ActionButtonWidget("""
+										{"fontFaceId":"ubuntu-400-5-upright-3",
+										"states":[{"id":"a","label":"A","appearance":{"fontFaceId":"ubuntu-400-5-italic-2"}},
+										{"id":"b","label":"B","appearance":{"fontFaceId":"ubuntu-400-5-upright"}},
+										{"id":"c","label":"C"}]}
+										""");
+		var legacy = ActionButtonWidget("""
+										{"states":{"off":{"fontFaceId":"ubuntu-400-5-upright-3"},"on":{"fontFaceId":"other-400-5-upright"}}}
+										""");
+
+		var changed = WidgetFontFaceMigration.Normalize(widget, catalog);
+		var legacyChanged = WidgetFontFaceMigration.Normalize(legacy, catalog);
+
+		var data = JsonNode.Parse(widget.Data!)!.AsObject();
+		var legacyData = JsonNode.Parse(legacy.Data!)!.AsObject();
+		Assert.Multiple(() =>
+		{
+			Assert.That(changed, Is.True);
+			Assert.That(data["fontFaceId"]!.GetValue<string>(), Is.EqualTo("ubuntu-400-5-upright"));
+			Assert.That(data["states"]![0]!["appearance"]!["fontFaceId"]!.GetValue<string>(),
+				Is.EqualTo("ubuntu-400-5-italic"));
+			Assert.That(data["states"]![1]!["appearance"]!["fontFaceId"]!.GetValue<string>(),
+				Is.EqualTo("ubuntu-400-5-upright"));
+			Assert.That(data["states"]![2]!.AsObject().ContainsKey("appearance"), Is.False);
+			Assert.That(legacyChanged, Is.True);
+			Assert.That(legacyData["states"]!["off"]!["fontFaceId"]!.GetValue<string>(), Is.EqualTo("ubuntu-400-5-upright"));
+			Assert.That(legacyData["states"]!["on"]!["fontFaceId"]!.GetValue<string>(), Is.EqualTo("other-400-5-upright"));
+		});
+
+		Assert.That(WidgetFontFaceMigration.Normalize(widget, catalog), Is.False, "a second pass has nothing left to rewrite");
+	}
+
+	[Test]
+	public void Normalize_StoredIdThatIsNotAnAlias_LeavesTheWidgetUntouched()
+	{
+		var widget = ActionButtonWidget("""{"fontFaceId":"roboto-400-5-upright"}""");
+		var before = widget.Data;
+
+		var changed = WidgetFontFaceMigration.Normalize(widget, new FakeFontCatalog());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(changed, Is.False);
+			Assert.That(widget.Data, Is.EqualTo(before));
+		});
+	}
+
+	[Test]
 	public void Normalize_BoldRequestedButOnlyOneWeightExists_ResolvesToTheAvailableFaceNotAStampedWeight()
 	{
 		var catalog = new FakeFontCatalog(new FontFaceInfo("singleweightfamily-400-5-upright",
@@ -167,6 +221,10 @@ public class WidgetFontFaceMigrationTests
 		{
 			_faces = faces.ToList();
 		}
+
+		public Dictionary<string, string> Aliases { get; } = [];
+
+		public string ResolveFaceId(string faceId) => Aliases.GetValueOrDefault(faceId, faceId);
 
 		public IReadOnlyList<FontFaceInfo> GetFaces() => _faces;
 
