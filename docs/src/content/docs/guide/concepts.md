@@ -151,6 +151,24 @@ integration in the variable browser and search for an entity by name or variable
 to see its state and attributes. If you know the entity id, for example `light.office_lamp` or
 `light.office_lamp/brightness`, type it under **Enter a resource ID** instead.
 
+A Slider can control Home Assistant too. In the slider's **Variable** field, open the entity and pick
+the value to adjust:
+
+| Entity | Value to pick |
+| --- | --- |
+| Light | `brightness_pct`, the brightness in percent, or `color_temp_kelvin` |
+| Fan | `percentage` |
+| Cover, valve | `current_position`, and `current_tilt_position` for a cover |
+| Media player | `volume_level` |
+| Thermostat, water heater | `temperature` |
+| Thermostat, humidifier | `humidity` |
+| Number, number helper | `state` |
+
+The slider shows the value Home Assistant reports and sends the new one when you let go. Dragging a
+light to zero turns it off, and dragging a light that is off turns it on. An entity with nothing to
+adjust right now, such as a media player in standby, ignores the slider. A value you bound before as
+**Text** is not offered: remove that variable and bind the value again.
+
 ![The Variables page with the user variable deaths and system variables](../../../assets/guide/variables.png)
 
 A user variable can also **read from a file**, like OBS's *Read from file*: choose **Read from file** as

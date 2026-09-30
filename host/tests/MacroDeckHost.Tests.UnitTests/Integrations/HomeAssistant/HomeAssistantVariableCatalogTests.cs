@@ -24,7 +24,7 @@ internal sealed class HomeAssistantVariableCatalogTests
 		var page = await provider.DiscoverAsync(new VariableCatalogQuery { ParentId = "entity/light.living_room" });
 
 		Assert.That(page.Items.Select(item => item.DisplayName.Literal),
-			Is.EquivalentTo(["state", "brightness", "color_temp", "friendly_name", "attributes"]));
+			Is.EqualTo(["state", "brightness", "color_temp", "friendly_name", "brightness_pct", "attributes"]));
 	}
 
 	[Test]

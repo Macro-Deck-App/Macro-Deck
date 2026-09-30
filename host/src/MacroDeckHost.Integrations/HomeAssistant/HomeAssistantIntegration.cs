@@ -55,7 +55,8 @@ public sealed class HomeAssistantIntegration
 	{
 		Actions = HomeAssistantActions.Create(() => _connection, _variableAccessor);
 		_dynamicVariables = new HomeAssistantVariableCatalog(() => _connection?.Catalog ?? HomeAssistantCatalog.Empty,
-			entityIds => _connection?.UpdateWatchedEntities(entityIds));
+			entityIds => _connection?.UpdateWatchedEntities(entityIds),
+			() => _connection);
 	}
 
 	public string Id => IntegrationId;
@@ -227,6 +228,12 @@ public sealed class HomeAssistantIntegration
 			_ => _dynamicVariables.ReadAsync(localId, cancellationToken)
 		};
 	}
+
+	public ValueTask<VariableWriteResult> SetValueAsync(
+		string localId,
+		object? value,
+		CancellationToken cancellationToken = default)
+		=> _dynamicVariables.SetValueAsync(localId, value, cancellationToken);
 
 	public Task<DynamicOptionsResult> GetEventOptionsAsync(
 		EventOptionsContext context,
