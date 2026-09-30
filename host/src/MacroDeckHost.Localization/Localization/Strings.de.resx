@@ -13412,12 +13412,6 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.ClientTargets.Description" xml:space="preserve">
     <value>Richte ein Gerät ein, das eine eigene Variante des Macro-Deck-Webclients ausführt.</value>
   </data>
-  <data name="Settings.ClientTargets.Experimental" xml:space="preserve">
-    <value>Experimentell. Die Geräteeinrichtung funktioniert, ist aber noch nicht fertig und deckt noch nicht jede Firmware ab. Rechne mit Ecken und Kanten.</value>
-  </data>
-  <data name="Settings.ClientTargets.Heading" xml:space="preserve">
-    <value>Geräte-Clients</value>
-  </data>
   <data name="Settings.ClientTargets.Retry" xml:space="preserve">
     <value>Erneut versuchen</value>
   </data>
@@ -13832,6 +13826,15 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Settings.Devices.ThisDeviceMarker" xml:space="preserve">
     <value>Dieses Gerät</value>
+  </data>
+  <data name="Settings.Experiments.CarThingNote" xml:space="preserve">
+    <value>Noch nicht fertig und deckt nicht jede Firmware ab. Rechne mit Ecken und Kanten.</value>
+  </data>
+  <data name="Settings.Experiments.Description" xml:space="preserve">
+    <value>Frühe Funktionen, die noch nicht fertig sind. Sie können sich jederzeit ändern oder wegfallen. Wird nur angezeigt, solange der Entwicklermodus aktiviert ist.</value>
+  </data>
+  <data name="Settings.Experiments.Heading" xml:space="preserve">
+    <value>Experimente</value>
   </data>
   <data name="Settings.Extensions.AutoUpdate" xml:space="preserve">
     <value>Erweiterungen automatisch aktualisieren</value>

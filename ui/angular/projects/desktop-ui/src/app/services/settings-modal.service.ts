@@ -8,7 +8,6 @@ export type SettingsCategory =
   | 'security'
   | 'network'
   | 'devices'
-  | 'client-targets'
   | 'license'
   | 'extensions'
   | 'adb'
@@ -17,6 +16,7 @@ export type SettingsCategory =
   | 'migration'
   | 'logging'
   | 'developer'
+  | 'experiments'
   | 'about';
 
 const DEFAULT_CATEGORY: SettingsCategory = 'appearance';

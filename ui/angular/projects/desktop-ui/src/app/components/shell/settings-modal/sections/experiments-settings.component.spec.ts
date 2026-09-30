@@ -10,9 +10,9 @@ import {
   ApiService,
 } from '@shared';
 
-import { ClientTargetsSettingsComponent } from './client-targets-settings.component';
+import { ExperimentsSettingsComponent } from './experiments-settings.component';
 
-describe('ClientTargetsSettingsComponent', () => {
+describe('ExperimentsSettingsComponent', () => {
   let api: jasmine.SpyObj<ApiService>;
   let adbStateChanged: Subject<AdbStateChangedEvent>;
 
@@ -71,13 +71,13 @@ describe('ClientTargetsSettingsComponent', () => {
     api.advanceWebClientTargetProvisioning.and.resolveTo(configureStep);
 
     await TestBed.configureTestingModule({
-      imports: [ClientTargetsSettingsComponent],
+      imports: [ExperimentsSettingsComponent],
       providers: [provideZonelessChangeDetection(), { provide: ApiService, useValue: api }],
     }).compileComponents();
   });
 
-  async function create(): Promise<ComponentFixture<ClientTargetsSettingsComponent>> {
-    const fixture = TestBed.createComponent(ClientTargetsSettingsComponent);
+  async function create(): Promise<ComponentFixture<ExperimentsSettingsComponent>> {
+    const fixture = TestBed.createComponent(ExperimentsSettingsComponent);
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -96,10 +96,24 @@ describe('ClientTargetsSettingsComponent', () => {
     fixture.detectChanges();
   }
 
-  it('says the feature is not finished, before anyone starts a device setup', async () => {
+  it('offers the Car Thing as a card with a set-up button', async () => {
     const fixture = await create();
 
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Experimental');
+    const cards = (fixture.nativeElement as HTMLElement).querySelectorAll('.experiments__card');
+
+    expect(cards.length).toBe(1);
+    expect(cards[0].textContent).toContain('Spotify Car Thing');
+    expect(button(fixture, 'Set up')).toBeTruthy();
+  });
+
+  it('keeps the card in place of the list while a setup walkthrough runs', async () => {
+    const fixture = await create();
+
+    await click(fixture, 'Set up');
+
+    const cards = (fixture.nativeElement as HTMLElement).querySelectorAll('.experiments__card');
+    expect(cards.length).toBe(1);
+    expect(cards[0].textContent).toContain('Find the Car Thing');
   });
 
   it('starts the walkthrough when the set-up button is pressed', async () => {

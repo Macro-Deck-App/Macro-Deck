@@ -13414,12 +13414,6 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.ClientTargets.Description" xml:space="preserve">
     <value>Nastavení zařízení, které používá vlastní sestavení webového klienta Macro Deck.</value>
   </data>
-  <data name="Settings.ClientTargets.Experimental" xml:space="preserve">
-    <value>Experimentální funkce. Nastavení zařízení funguje, ale ještě není hotové a nepokrývá každý firmware. Je třeba počítat s nedostatky.</value>
-  </data>
-  <data name="Settings.ClientTargets.Heading" xml:space="preserve">
-    <value>Klienti na zařízeních</value>
-  </data>
   <data name="Settings.ClientTargets.Retry" xml:space="preserve">
     <value>Zkusit znovu</value>
   </data>
@@ -13834,6 +13828,15 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Settings.Devices.ThisDeviceMarker" xml:space="preserve">
     <value>Toto zařízení</value>
+  </data>
+  <data name="Settings.Experiments.CarThingNote" xml:space="preserve">
+    <value>Ještě nedokončeno, nepokrývá všechny verze firmwaru. Možné drobné nedostatky.</value>
+  </data>
+  <data name="Settings.Experiments.Description" xml:space="preserve">
+    <value>Rané funkce, které ještě nejsou dokončené. Mohou se kdykoli změnit nebo zmizet. Zobrazují se pouze při zapnutém režimu pro vývojáře.</value>
+  </data>
+  <data name="Settings.Experiments.Heading" xml:space="preserve">
+    <value>Experimenty</value>
   </data>
   <data name="Settings.Extensions.AutoUpdate" xml:space="preserve">
     <value>Automaticky aktualizovat rozšíření</value>
