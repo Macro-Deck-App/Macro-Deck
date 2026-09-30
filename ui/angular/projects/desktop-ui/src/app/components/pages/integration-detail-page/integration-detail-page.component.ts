@@ -4,6 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, EMPTY, exhaustMap, from, timer } from 'rxjs';
+import type { Variable } from '@macro-deck/runtime';
 import { AppStrings, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IpcProvidedCapability, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationVariableCapability, VariableCatalogNode, IpcIntegrationIssue, PLUGIN_PERMISSION_HOST_ADB, PluginCompatibilityReport, resolveLocalizedText } from '@macro-deck/runtime';
 import { ApiService, CheckboxComponent, ErrorBannerComponent, InputComponent, LocalizationService, LocalizedTextPipe, ModalComponent, ToastService, ToggleSwitchComponent, ButtonComponent, TranslatePipe, VariableService } from '@shared';
 import { ConfigFlowDialogComponent } from '../../config-flow/config-flow-dialog.component';
@@ -21,19 +22,25 @@ import { PluginInstallationService } from '../../../services/plugin-installation
 import { isStoreDetailUrl } from '../../../services/store-browse-state.service';
 import { VariableCatalogService } from '../../../services/variable-catalog.service';
 import { VariableBindDialogComponent } from '../../variables/variable-bind-dialog.component';
+import { VariableCatalogRow, createVariableCatalogRows } from '../../variables/variable-catalog-rows';
+import { VariableGroupHeaderComponent } from '../../variables/variable-group-header.component';
+import { VARIABLE_ROW_HEIGHT, VariableRowComponent } from '../../variables/variable-row.component';
 import { ActionCapabilityRowComponent } from './action-capability-row.component';
-import { VariableCapabilityRowComponent } from './variable-capability-row.component';
 import { IntegrationCompatibilityCardComponent } from './integration-compatibility-card.component';
 import { IntegrationIssuesCardComponent } from './integration-issues-card.component';
 import { IntegrationStatusBadge, IntegrationStatusStripComponent } from './integration-status-strip.component';
 
 type DetailTab = 'overview' | 'actions' | 'variables';
 
-type CatalogRow =
-  | { kind: 'leaf'; key: string; node: VariableCatalogNode }
-  | { kind: 'more'; key: string; parentId: string | undefined };
+type VariableTabRow =
+  | { kind: 'unbound-header'; key: string; count: number | null; expanded: boolean; collapsible: boolean }
+  | { kind: 'catalog-state'; key: string; state: 'loading' | 'offline' | 'empty' }
+  | { kind: 'catalog-grow'; key: string }
+  | { kind: 'declared'; key: string; variable: IpcIntegrationVariableCapability }
+  | { kind: 'bound'; key: string; variable: Variable }
+  | VariableCatalogRow;
 
-const MAX_CATALOG_LEAVES = 200;
+const TEMPLATE_PLACEHOLDER = /<([^<>]+)>/;
 
 const TAB_ID_PREFIX = 'integration-detail';
 
@@ -55,7 +62,8 @@ const TAB_ID_PREFIX = 'integration-detail';
     InputComponent,
     TabBarComponent,
     ActionCapabilityRowComponent,
-    VariableCapabilityRowComponent,
+    VariableGroupHeaderComponent,
+    VariableRowComponent,
     VariableBindDialogComponent,
     IntegrationIssuesCardComponent,
     IntegrationCompatibilityCardComponent,
@@ -206,62 +214,159 @@ export class IntegrationDetailPageComponent implements OnInit {
 
   protected readonly catalogBindNode = signal<VariableCatalogNode | null>(null);
 
-  protected readonly catalogRows = computed<CatalogRow[]>(() => {
+  private readonly catalogIds = computed<string[]>(() => {
     const id = this.integration()?.id;
-    if (!id || !this.offersCatalog()) {
-      return [];
-    }
-    const out: CatalogRow[] = [];
-    this.appendCatalogRows(id, undefined, out);
-    return out;
+    return id && this.offersCatalog() ? [id] : [];
   });
 
-  private appendCatalogRows(integrationId: string, parentId: string | undefined, out: CatalogRow[]): void {
-    if (out.filter(r => r.kind === 'leaf').length >= MAX_CATALOG_LEAVES) {
-      return;
+  private readonly unboundExpanded = signal(false);
+
+  private readonly catalog = createVariableCatalogRows({
+    integrationIds: this.catalogIds,
+    search: this.variableSearch,
+    isExpanded: () => this.unboundExpanded(),
+  });
+
+  protected readonly variableRowHeight = VARIABLE_ROW_HEIGHT;
+
+  private readonly unboundRows = computed<VariableTabRow[]>(() => {
+    const id = this.catalogIds()[0];
+    const group = id ? this.catalog.group(id) : null;
+    if (!group) {
+      return [];
     }
 
-    const page = this.variableCatalog.pageFor(integrationId, parentId, undefined)();
-    if (!page.available) {
-      return;
+    const rows: VariableTabRow[] = [{
+      kind: 'unbound-header',
+      key: 'unbound',
+      count: group.count,
+      expanded: group.expanded,
+      collapsible: group.collapsible,
+    }];
+    if (group.expanded && group.state !== 'ready') {
+      rows.push({ kind: 'catalog-state', key: 'unbound-state', state: group.state });
     }
-
-    for (const node of page.nodes) {
-      if (node.hasChildren) {
-        this.appendCatalogRows(integrationId, node.id, out);
-      }
-      if (!node.boundVariableId && node.type) {
-        out.push({ kind: 'leaf', key: node.id, node });
-      }
-      if (out.filter(r => r.kind === 'leaf').length >= MAX_CATALOG_LEAVES) {
-        return;
-      }
+    rows.push(...group.rows);
+    if (group.canGrow) {
+      rows.push({ kind: 'catalog-grow', key: 'unbound-grow' });
     }
+    return rows;
+  });
 
-    if (page.hasMore) {
-      out.push({ kind: 'more', key: `more:${parentId ?? 'root'}`, parentId });
+  protected readonly variableRows = computed<VariableTabRow[]>(() => {
+    const variables: VariableTabRow[] = [
+      ...this.filteredVariables().map(variable =>
+        ({ kind: 'declared' as const, key: `declared:${variable.name}`, variable })),
+      ...this.filteredBoundVariables().map(variable =>
+        ({ kind: 'bound' as const, key: `bound:${variable.id}`, variable })),
+    ];
+    return this.catalog.searching()
+      ? [...variables, ...this.unboundRows()]
+      : [...this.unboundRows(), ...variables];
+  });
+
+  protected readonly listedVariableCount = computed(() =>
+    this.filteredVariables().length + this.filteredBoundVariables().length);
+
+  protected readonly totalVariableCount = computed(() =>
+    this.declaredVariables().length + this.boundVariables().length);
+
+  protected toggleUnbound(): void {
+    this.unboundExpanded.update(expanded => !expanded);
+  }
+
+  protected toggleCatalogBranch(node: VariableCatalogNode): void {
+    const id = this.integration()?.id;
+    if (id) {
+      this.catalog.toggleBranch(id, node);
     }
   }
 
-  protected typeLabel(type: 'text' | 'numeric' | 'boolean'): string {
-    const S = AppStrings.Scripts;
-    const key = type === 'text' ? S.InputTypeText : type === 'numeric' ? S.InputTypeNumeric : S.InputTypeBoolean;
-    return this.localization.translateKey(key);
+  protected growCatalog(): void {
+    const id = this.integration()?.id;
+    if (id) {
+      this.catalog.grow(id);
+    }
   }
 
-  protected catalogLabel(node: VariableCatalogNode): string {
-    return node.suggestedName ?? resolveLocalizedText(node.displayName, this.localization) ?? node.name;
+  protected retryCatalog(): void {
+    const id = this.integration()?.id;
+    if (id) {
+      this.catalog.retry(id);
+    }
   }
+
+  protected isCatalogBindable(node: VariableCatalogNode): boolean {
+    return this.catalog.isBindable(node);
+  }
+
+  protected catalogPrimary(node: VariableCatalogNode): string {
+    return this.catalog.reference(node) ?? this.catalog.displayName(node);
+  }
+
+  protected catalogSecondary(node: VariableCatalogNode): string | null {
+    return this.catalog.reference(node) ? this.catalog.displayName(node) : null;
+  }
+
+  protected catalogStateLabel(state: 'loading' | 'offline' | 'empty'): string {
+    const S = AppStrings.Variables.Dynamic;
+    switch (state) {
+      case 'loading':
+        return this.localization.translateKey(S.Loading);
+      case 'offline':
+        return this.localization.translateKey(S.OfflineMessage, { integration: this.integration()?.name ?? '' });
+      case 'empty':
+        return this.localization.translateKey(S.EmptyMessage);
+    }
+  }
+
+  protected catalogNoteLabel(note: 'loading' | 'not-bindable'): string {
+    const S = AppStrings.Variables.Dynamic;
+    return this.localization.translateKey(note === 'loading' ? S.Loading : S.NotBindable);
+  }
+
+  protected unboundAriaLabel(count: number | null): string | null {
+    return count === null
+      ? null
+      : this.localization.translateKey(AppStrings.Variables.Dynamic.GroupHeadingCount, { count });
+  }
+
+  protected templateChipLabel(name: string): string {
+    const placeholder = TEMPLATE_PLACEHOLDER.exec(name)?.[1];
+    return placeholder
+      ? this.localization.translateKey(AppStrings.Integrations.Detail.OnePerConfiguredPlaceholder, { placeholder })
+      : this.localization.translateKey(AppStrings.Integrations.Detail.OnePerConfiguration);
+  }
+
+  protected boundValue(variable: Variable): string {
+    const value = variable.value ?? '';
+    return variable.unit
+      ? this.localization.translateKey(AppStrings.Variables.Format.ValueWithUnit, { value, unit: variable.unit })
+      : value;
+  }
+
+  protected boundDisplayName(variable: Variable): string | null {
+    return resolveLocalizedText(variable.displayName, this.localization) || null;
+  }
+
+  protected readonly resourceUnavailableLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Dynamic.ResourceUnavailable));
 
   protected loadMoreCatalog(parentId: string | undefined): void {
     const id = this.integration()?.id;
     if (id) {
-      void this.variableCatalog.loadMore(id, parentId, undefined);
+      this.catalog.loadMore(id, parentId);
     }
   }
 
-  protected readonly dynamicBadgeLabel = computed(() =>
-    this.localization.translateKey(AppStrings.Variables.Dynamic.Badge));
+  protected readonly bindActionLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Dynamic.BindAction));
+
+  protected readonly unboundHeading = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Dynamic.GroupHeading));
+
+  protected readonly retryLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Dynamic.Retry));
 
   protected readonly loadMoreLabel = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Dynamic.LoadMore));
@@ -380,7 +485,21 @@ export class IntegrationDetailPageComponent implements OnInit {
     const query = this.variableSearch().trim().toLowerCase();
     const variables = this.declaredVariables();
     if (!query) return variables;
-    return variables.filter(v => v.name.toLowerCase().includes(query));
+    return variables.filter(v => `vars.${v.name}`.toLowerCase().includes(query));
+  });
+
+  protected readonly boundVariables = computed<Variable[]>(() => {
+    const id = this.integrationId();
+    const declared = new Set(this.declaredVariables().map(v => v.name));
+    return this.variableService.variables().filter(v =>
+      v.ownerIntegrationId === id && !!v.dynamicResourceId && v.scope === 'global' && !declared.has(v.name));
+  });
+
+  protected readonly filteredBoundVariables = computed<Variable[]>(() => {
+    const query = this.variableSearch().trim().toLowerCase();
+    const variables = this.boundVariables();
+    if (!query) return variables;
+    return variables.filter(v => `vars.${v.name}`.toLowerCase().includes(query));
   });
 
   constructor() {

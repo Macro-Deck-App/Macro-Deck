@@ -1,4 +1,5 @@
 @use '../../../../styles/index' as ds;
+@use '../../variables/variable-list' as list;
 
 :host {
   display: flex;
@@ -269,45 +270,42 @@
   .detail-heading { flex-wrap: wrap; flex-basis: 100%; }
 }
 
-// Catalog entries sit in the same list as the declared variables: the difference is that these have
-// nothing to show yet, which the badge says instead of a value.
-.capability-catalog-main {
+.variable-capability-list {
+  @include list.surface;
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  @include ds.overlay-scrollbar-clearance;
+}
+
+.variable-capability-slot {
   display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  width: 100%;
-  background: none;
-  border: 0;
-  text-align: left;
-  cursor: pointer;
-  color: inherit;
-  font: inherit;
+  flex: 0 0 auto;
+  align-items: stretch;
+  box-sizing: border-box;
 }
 
-.capability-catalog-twisty {
-  flex: none;
-  width: 1rem;
+.variable-capability-slot:last-child > * {
+  border-bottom: 0;
 }
 
-.capability-catalog-chevron {
-  flex: none;
-  width: 1rem;
-  transition: transform var(--transition-fast);
+.variable-state-row {
+  @include list.state-row;
 }
 
-.capability-catalog-chevron-open {
-  transform: rotate(90deg);
+.variable-link-row {
+  @include list.link-row;
 }
 
-.capability-dynamic-badge {
-  @include ds.badge;
-  border-radius: var(--radius-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  background-color: var(--color-bg-tertiary);
+.template-chip {
+  @include ds.chip;
+  background-color: var(--color-bg-hover);
   color: var(--color-text-secondary);
 }
 
-.capability-catalog-more .capability-row-name {
-  color: var(--color-accent);
-}
+.availability-pill { @include ds.badge; border: 1px solid transparent; white-space: nowrap; }
+.availability-Ready { color: var(--color-success); background-color: var(--color-success-muted); }
+.availability-SetupRequired,
+.availability-AvailableAfterSetup { color: var(--color-warning); background-color: var(--color-warning-muted); }
+.availability-IntegrationDisabled { color: var(--color-text-muted); background-color: var(--color-bg-hover); }
+.availability-Unavailable { color: var(--color-danger); background-color: var(--color-danger-muted); }
