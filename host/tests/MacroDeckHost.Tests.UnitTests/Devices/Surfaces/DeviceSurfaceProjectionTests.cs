@@ -1,3 +1,5 @@
+using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.Events.Handlers;
 using System.Text.Json;
 using MacroDeck.Sdk.Devices;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
@@ -98,6 +100,24 @@ internal sealed class DeviceSurfaceProjectionTests
 			Assert.That(widgets[0].SupportedInteractions, Does.Contain(DeviceInteractionKind.ShortPress));
 			Assert.That(widgets[1].SupportedInteractions, Is.Empty);
 		});
+	}
+
+	[Test]
+	public async Task A_widget_type_registered_after_the_deck_connected_still_gets_its_press_offered()
+	{
+		var lamp = DeviceSurfaceFixture.Button("lamp", 0, 0, withFlows: false);
+		lamp.Type = "com.example.lights::lamp";
+		_fixture.Home.Widgets.Add(lamp);
+		var deviceId = await _fixture.OpenDeviceAsync();
+		Assert.That(_fixture.Provider.Latest(deviceId).Widgets[0].SupportedInteractions, Is.Empty);
+
+		_fixture.DefaultShortPress.TypesWithADeviceDefault.Add(lamp.Type);
+		await new WidgetTypeCatalogChangedDeviceSurfaceHandler(_fixture.Service)
+			.Handle(new WidgetTypeCatalogChangedNotification(), CancellationToken.None);
+		await _fixture.SettleAsync();
+
+		Assert.That(_fixture.Provider.Latest(deviceId).Widgets[0].SupportedInteractions,
+			Does.Contain(DeviceInteractionKind.ShortPress));
 	}
 
 	[Test]
