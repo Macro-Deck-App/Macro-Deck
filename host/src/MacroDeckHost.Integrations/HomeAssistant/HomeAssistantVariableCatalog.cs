@@ -78,14 +78,13 @@ internal sealed class HomeAssistantVariableCatalog
 			return ValueTask.FromResult<VariableDefinition?>(null);
 		}
 
-		var catalog = _catalog();
 		var control = parsed.Child is { } leaf ? HomeAssistantControls.Find(parsed.EntityId, leaf) : null;
-		var state = catalog.Entity(parsed.EntityId);
+		var state = _catalog().Entity(parsed.EntityId);
 		if (state is null)
 		{
-			// Bindings are restored before the first snapshot arrives and nothing resolves them again
-			// afterwards, so a control has to keep its write capability from the id alone.
-			return ValueTask.FromResult<VariableDefinition?>(canonical is not null && control is not null && catalog.Entities.Count == 0
+			// Bindings are restored before Home Assistant has reported every entity and nothing resolves
+			// them again afterwards, so a control has to keep its write capability from the id alone.
+			return ValueTask.FromResult(canonical is not null && control is not null
 				? ControlLeaf(parsed.EntityId, control)
 				: null);
 		}
@@ -157,8 +156,8 @@ internal sealed class HomeAssistantVariableCatalog
 			return VariableWriteResult.InvalidValue();
 		}
 
-		// Without a current value the host never learned the real range, so the number was picked on a
-		// fallback scale and clamping it would send something the user did not choose.
+		// An entity reporting no value has nothing to adjust right now, and where its range never
+		// reached the host the number was picked on another scale than the one it would be clamped to.
 		if (control.Value(state) is null)
 		{
 			return VariableWriteResult.Unavailable();

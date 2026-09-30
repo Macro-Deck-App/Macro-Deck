@@ -159,13 +159,39 @@ internal sealed class HomeAssistantControlsTests
 	}
 
 	[Test]
-	public async Task A_control_of_an_entity_home_assistant_does_not_have_does_not_resolve()
+	public async Task A_control_stays_writable_while_home_assistant_has_not_reported_its_entity_yet()
 	{
 		var provider = CatalogOf(DeskLamp);
 
-		var result = await provider.ResolveAsync("entity/light.never_seen/brightness_pct");
+		var control = await provider.ResolveAsync("entity/light.still_loading/brightness_pct");
+		var attribute = await provider.ResolveAsync("entity/light.still_loading/brightness");
+		var typed = await provider.ResolveAsync("light.still_loading/brightness_pct");
 
-		Assert.That(result, Is.Null);
+		Assert.Multiple(() =>
+		{
+			Assert.That(control?.CanWrite, Is.True);
+			Assert.That(attribute, Is.Null);
+			Assert.That(typed, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task A_fan_that_is_off_reads_zero_and_can_be_started_from_its_speed()
+	{
+		await using var home = await ConnectedAsync(
+			"""{ "entity_id": "fan.ceiling", "state": "off", "attributes": { "percentage": null, "percentage_step": 1 } }""");
+
+		var reading = await home.Provider.ReadAsync("entity/fan.ceiling/percentage");
+		var result = await home.Provider.SetValueAsync("entity/fan.ceiling/percentage", 40d);
+
+		var call = home.LastCall();
+		Assert.Multiple(() =>
+		{
+			Assert.That(reading.Value, Is.EqualTo(0));
+			Assert.That(result.Status, Is.EqualTo(VariableWriteStatus.Applied));
+			Assert.That(call?["service"], Is.EqualTo("set_percentage"));
+			Assert.That(Data(call)?["percentage"], Is.EqualTo(40));
+		});
 	}
 
 	[Test]

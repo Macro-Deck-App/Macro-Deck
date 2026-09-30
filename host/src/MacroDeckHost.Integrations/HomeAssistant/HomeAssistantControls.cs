@@ -50,12 +50,14 @@ internal sealed record HomeAssistantControl(string Domain, string Leaf, string S
 
 	public string? ZeroService { get; init; }
 
+	public bool ZeroWhenOff { get; init; }
+
 	public double? Value(HomeAssistantEntityState state)
 		=> Source switch
 		{
 			HomeAssistantControlSource.State => Parse(state.State),
 			HomeAssistantControlSource.BrightnessPercent => BrightnessPercent(state),
-			_ => Attribute(state, Leaf)
+			_ => Attribute(state, Leaf) ?? (ZeroWhenOff && IsOff(state) ? 0 : null)
 		};
 
 	public bool IsOffered(HomeAssistantEntityState state)
@@ -67,7 +69,7 @@ internal sealed record HomeAssistantControl(string Domain, string Leaf, string S
 		};
 
 	public VariableReading Reading(HomeAssistantEntityState state, object? value)
-		=> VariableReading.Of(Source == HomeAssistantControlSource.BrightnessPercent ? Value(state) : value,
+		=> VariableReading.Of(Source == HomeAssistantControlSource.BrightnessPercent ? Value(state) : value ?? Value(state),
 			Attribute(state, MinAttribute) ?? Min,
 			Attribute(state, MaxAttribute) ?? Max,
 			Attribute(state, StepAttribute) is { } step and > 0 ? step : Step);
@@ -104,8 +106,11 @@ internal sealed record HomeAssistantControl(string Domain, string Leaf, string S
 			return brightness > 0 ? Math.Max(1, percent) : 0;
 		}
 
-		return string.Equals(state.State, "off", StringComparison.Ordinal) ? 0 : null;
+		return IsOff(state) ? 0 : null;
 	}
+
+	private static bool IsOff(HomeAssistantEntityState state)
+		=> string.Equals(state.State, "off", StringComparison.Ordinal);
 
 	private static bool IsDimmable(HomeAssistantEntityState state)
 		=> state.ReadStringList("supported_color_modes")
@@ -164,6 +169,7 @@ internal static class HomeAssistantControls
 			Max = 100,
 			Step = 1,
 			StepAttribute = "percentage_step",
+			ZeroWhenOff = true,
 			Unit = Percent,
 			SemanticKind = VariableSemanticKinds.Percentage,
 			DecimalPlaces = 0
