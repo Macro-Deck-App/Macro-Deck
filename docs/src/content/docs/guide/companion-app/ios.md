@@ -1,10 +1,10 @@
 ---
 title: iPhone and iPad
-description: What the Companion app does differently on iPhone and iPad, including Shortcuts, Siri and the Home Screen and Lock Screen widgets.
+description: What the Companion app does differently on iPhone and iPad, including Shortcuts, Siri, the Home Screen and Lock Screen widgets and the Control Center control.
 ---
 
 The app runs on iPhone and iPad with iOS or iPadOS 15 or later, in portrait and landscape. Shortcuts and Siri
-need iOS 16, and the script widget needs iOS 17.
+need iOS 16, the script widget needs iOS 17, and the Control Center control needs iOS 18.
 
 ![The Connections screen on iPhone with the Streaming Computer connected](../../../../assets/guide/companion/ios-connections.png)
 
@@ -37,6 +37,8 @@ Other apps can run a script with a `macrodeck-companion://run-script` link once 
   and hold the widget and choose **Edit Widget** to pick the computer.
 - **Macro Deck scripts widget:** runs scripts of one saved computer with a tap, without opening the app. It needs
   iOS 17.
+- **Macro Deck script control:** runs one script from Control Center. It needs iOS 18; see
+  [Macro Deck script control](#macro-deck-script-control).
 
 ### Macro Deck scripts widget
 
@@ -66,6 +68,41 @@ script. Tapping always tries again.
 The widget offers the scripts the app last listed for each computer. The app refreshes them when you open it, at
 most once an hour for each computer. If a computer has never answered, the editor says **open Macro Deck to load its
 scripts**. Input values are saved in the widget's settings on your phone and are not a place for secrets.
+
+## Control Center
+
+### Macro Deck script control
+
+On iOS 18 and later, a control in Control Center runs one script of one saved computer, without opening the app.
+It uses the same route as the scripts widget and the **Run Script** action.
+
+To add it, swipe down from the top right corner to open Control Center, tap the **+** button at the top left, choose
+**Add a Control** and pick **Macro Deck script** under Macro Deck. The app then asks you to set it up:
+
+1. Choose the **Host**. Only computers you saved are offered, and not those connected over USB.
+2. Choose the **Script**. The list holds the scripts of that computer.
+3. If the script takes inputs, write their values in **Input Values**, one `name=value` per line. Leave it empty to
+   use the script's own defaults.
+
+Add the control once for every script you want to run.
+
+Tapping the control runs the script through the Macro Deck app in the background, the same way the **Run Script**
+action of Shortcuts does, and the app does not come to the front. It needs a license or a running trial, and the
+computer reachable over the network. If a script did not run, the control changes its symbol, for example to a
+crossed-out Wi-Fi symbol when the computer was offline, and names the reason where it has room for text, in the
+words of the scripts widget: **Offline**, **No answer**, **Computer locked**, **Sign in needed**, **License
+needed**, **Update host**, **Script missing** or **Check values**. This is what the app found out the last time it
+contacted the computer, not a live check, and tapping always tries again.
+
+A control that is not set up yet, or whose computer you removed, cannot be tapped and shows a gear symbol.
+
+Some limits:
+
+- **The control does not show whether a script is on or off.** Macro Deck cannot tell the app what a script
+  switched, so a script that toggles something cannot be shown as a switch. The control only runs it.
+- **The control offers the scripts the app last listed.** The app refreshes them when you open it, at most once an
+  hour for each computer, so open Macro Deck once after you add a script on the computer.
+- Input values are saved in the control's settings on your phone and are not a place for secrets.
 
 ## Differences from Android
 
