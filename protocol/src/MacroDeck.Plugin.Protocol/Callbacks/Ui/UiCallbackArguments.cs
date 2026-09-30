@@ -76,6 +76,24 @@ public sealed record UiResourceHandleDto
 	public required int ByteLength { get; init; }
 }
 
+/// <summary>Arguments for <c>host.invoke ui/register-music-player-artwork</c>. <see cref="InstanceId" /> is the
+/// qualified id, <c>integrationId::instanceId</c>, that a music player's album-art URL carries.</summary>
+public sealed record UiRegisterMusicPlayerArtworkArguments
+{
+	public required string Name { get; init; }
+
+	public required string InstanceId { get; init; }
+
+	public required string ArtworkId { get; init; }
+}
+
+/// <summary>Result of <c>host.invoke ui/register-music-player-artwork</c>. <see cref="Resource" /> is absent when
+/// no such music player or artwork exists.</summary>
+public sealed record UiRegisterMusicPlayerArtworkResult
+{
+	public UiResourceHandleDto? Resource { get; init; }
+}
+
 /// <summary>Arguments for <c>host.invoke ui/remove-resource</c>.</summary>
 public sealed record UiRemoveResourceArguments
 {

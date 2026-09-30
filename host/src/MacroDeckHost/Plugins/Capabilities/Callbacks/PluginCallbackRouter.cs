@@ -16,6 +16,7 @@ using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.Devices.Surfaces;
 using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.FolderViews;
+using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.ScreenSavers;
 using MacroDeckHost.Application.VideoStreams;
 using MacroDeck.Sdk.VideoStreams;
@@ -57,6 +58,8 @@ namespace MacroDeckHost.Plugins.Capabilities.Callbacks;
 public sealed class PluginCallbackRouter : IPluginCallbackRouter
 {
 	private const int MaxConcurrentIconTransfers = 4;
+	private const int MaxMusicPlayerArtworkIdLength = 512;
+	private static readonly TimeSpan MusicPlayerArtworkTimeout = TimeSpan.FromSeconds(20);
 
 	private readonly IPluginSessionRegistry _sessionRegistry;
 	private readonly IPluginCapabilityInvoker _invoker;
@@ -88,6 +91,9 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	private readonly IVideoStreamSessionBroker? _videoStreamSessions;
 	private readonly IPluginUiResources? _uiResources;
 	private readonly UiResourceCallbackThrottle _uiResourceThrottle;
+	private readonly IMusicPlayerArtworkService? _musicPlayerArtwork;
+	private readonly MusicPlayerArtworkCallbackThrottle _musicPlayerArtworkThrottle;
+	private readonly TimeSpan _musicPlayerArtworkTimeout;
 	private readonly IPluginIconPackSync? _iconPackSync;
 	private readonly IPluginIconPackUploads? _iconPackUploads;
 	private readonly IPluginIconUiResources? _pluginIconResources;
@@ -137,8 +143,12 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		IPluginIconResolver? pluginIconResolver = null,
 		VideoStreamProviderRegistry? videoStreamProviders = null,
 		IVideoStreamSessionBroker? videoStreamSessions = null,
-		VideoStreamCallbackThrottle? videoStreamThrottle = null)
+		VideoStreamCallbackThrottle? videoStreamThrottle = null,
+		IMusicPlayerArtworkService? musicPlayerArtwork = null,
+		MusicPlayerArtworkCallbackThrottle? musicPlayerArtworkThrottle = null,
+		TimeSpan? musicPlayerArtworkTimeout = null)
 	{
+		_musicPlayerArtworkTimeout = musicPlayerArtworkTimeout ?? MusicPlayerArtworkTimeout;
 		_videoStreamProviders = videoStreamProviders;
 		_videoStreamSessions = videoStreamSessions;
 		_videoStreamThrottle = videoStreamThrottle ?? new VideoStreamCallbackThrottle(TimeProvider.System);
@@ -148,6 +158,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		_pluginIconResolver = pluginIconResolver;
 		_uiResources = uiResources;
 		_uiResourceThrottle = uiResourceThrottle ?? new UiResourceCallbackThrottle(TimeProvider.System);
+		_musicPlayerArtwork = musicPlayerArtwork;
+		_musicPlayerArtworkThrottle = musicPlayerArtworkThrottle ?? new MusicPlayerArtworkCallbackThrottle(TimeProvider.System);
 		_deviceSurfaces = deviceSurfaces;
 		_deviceSessions = deviceSessions;
 		_assets = assets;
@@ -220,6 +232,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				HostApis.Widgets => await RouteWidgetsAsync(pluginId, payload, cancellationToken),
 				HostApis.Notifications => RouteNotifications(pluginId, payload),
 				HostApis.ActionInteractions => RouteActionInteractions(pluginId, correlationId, payload),
+				HostApis.Ui when payload.Operation == HostOperations.Ui.RegisterMusicPlayerArtwork
+					=> await RouteMusicPlayerArtworkAsync(pluginId, sessionId, payload, cancellationToken),
 				HostApis.Ui => RouteUi(pluginId, sessionId, payload),
 				HostApis.Devices => await RouteDevicesAsync(pluginId, payload, cancellationToken),
 				HostApis.VariableValues => RouteVariableValues(pluginId, payload),
@@ -1669,6 +1683,90 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			: FromUiResource(_uiResources.Remove(pluginId, sessionId, removal.Name));
 	}
 
+	private async Task<HostCallbackResult> RouteMusicPlayerArtworkAsync(string pluginId,
+		string? sessionId,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken)
+	{
+		if (_uiResources is null || _musicPlayerArtwork is null)
+		{
+			return UnknownOperation(payload);
+		}
+
+		if (sessionId is null)
+		{
+			return FromUiResource(new PluginUiResourceResult(PluginUiResourceOutcome.SessionNotCurrent));
+		}
+
+		var arguments = Deserialize<UiRegisterMusicPlayerArtworkArguments>(payload.Arguments);
+		if (arguments is null)
+		{
+			return MissingArguments();
+		}
+
+		if (string.IsNullOrEmpty(arguments.InstanceId) ||
+			string.IsNullOrEmpty(arguments.ArtworkId) ||
+			arguments.InstanceId.Length > MaxMusicPlayerArtworkIdLength ||
+			arguments.ArtworkId.Length > MaxMusicPlayerArtworkIdLength)
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
+				$"A music player instance id and an artwork id are 1 to {MaxMusicPlayerArtworkIdLength} characters.");
+		}
+
+		if (!UiResourceRules.IsValidName(arguments.Name))
+		{
+			return FromUiResource(new PluginUiResourceResult(PluginUiResourceOutcome.InvalidName));
+		}
+
+		if (!_uiResourceThrottle.TryConsume(pluginId) || !_musicPlayerArtworkThrottle.TryConsume(pluginId))
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
+				"This plugin is registering music player artwork too quickly.",
+				retryable: true);
+		}
+
+		ArtworkImageResult? image;
+		using (var lookup = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
+		{
+			lookup.CancelAfter(_musicPlayerArtworkTimeout);
+
+			try
+			{
+				image = await _musicPlayerArtwork.GetImage(arguments.InstanceId, arguments.ArtworkId, null, lookup.Token);
+			}
+			catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+			{
+				return HostCallbackResult.Fail(ProtocolErrorCodes.Timeout,
+					"The music player did not answer the artwork lookup in time.",
+					retryable: true);
+			}
+		}
+
+		if (image is null || image.Content.Length == 0)
+		{
+			return HostCallbackResult.Ok(new UiRegisterMusicPlayerArtworkResult());
+		}
+
+		var result = _uiResources.RegisterContent(pluginId, sessionId, arguments.Name, image.Content, image.ContentType);
+
+		return result.Outcome switch
+		{
+			PluginUiResourceOutcome.Registered => HostCallbackResult.Ok(new UiRegisterMusicPlayerArtworkResult
+			{
+				Resource = new UiResourceHandleDto
+				{
+					ResourceId = result.Resource!.ResourceId,
+					ContentHash = result.Resource.ContentHash!,
+					MediaType = result.Resource.MediaType!,
+					ByteLength = (int)result.Resource.ByteLength!,
+				}
+			}),
+			PluginUiResourceOutcome.UnsupportedMediaType => HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
+				$"The artwork is of media type '{image.ContentType}', which is not a supported UI resource type."),
+			_ => FromUiResource(result)
+		};
+	}
+
 	private static HostCallbackResult FromUiResource(PluginUiResourceResult result) => result.Outcome switch
 	{
 		PluginUiResourceOutcome.Registered => HostCallbackResult.Ok(new UiRegisterResourceResult
@@ -1692,6 +1790,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			"The media type differs from the one the upload declared."),
 		PluginUiResourceOutcome.QuotaExceeded => HostCallbackResult.Fail(ProtocolErrorCodes.UiResourceQuotaExceeded,
 			ProtocolErrorMessages.For(ProtocolErrorCodes.UiResourceQuotaExceeded)),
+		PluginUiResourceOutcome.TooLarge => HostCallbackResult.Fail(ProtocolErrorCodes.AssetTooLarge,
+			$"A UI resource is 1 to {ProtocolLimits.MaxUiResourceBytes} bytes."),
 		_ => HostCallbackResult.Fail(ProtocolErrorCodes.SessionNotFound,
 			"This session is no longer the plugin's current session.",
 			retryable: true),

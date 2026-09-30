@@ -21,6 +21,12 @@ internal sealed class UnsupportedUiResourceRegistry : IUiResourceRegistry
 	public Task<UiResource> GetIconAsync(Guid iconId, CancellationToken cancellationToken = default)
 		=> Task.FromException<UiResource>(Unsupported());
 
+	public Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
+		string instanceId,
+		string artworkId,
+		CancellationToken cancellationToken = default)
+		=> Task.FromException<UiResource?>(Unsupported());
+
 	private static UiResourceException Unsupported()
 		=> new(UiResourceErrorCode.Unsupported, "This context cannot register UI resources.");
 }

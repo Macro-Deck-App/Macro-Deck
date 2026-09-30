@@ -24,7 +24,9 @@ public enum PluginUiResourceOutcome
 
 	SessionNotCurrent,
 
-	QuotaExceeded
+	QuotaExceeded,
+
+	TooLarge
 }
 
 public sealed record PluginUiResourceResult(PluginUiResourceOutcome Outcome, UiResource? Resource = null);
@@ -35,6 +37,12 @@ public interface IPluginUiResources
 		string sessionId,
 		string name,
 		string contentHash,
+		string mediaType);
+
+	PluginUiResourceResult RegisterContent(string pluginId,
+		string sessionId,
+		string name,
+		byte[] content,
 		string mediaType);
 
 	PluginUiResourceResult Remove(string pluginId, string sessionId, string name);
@@ -99,30 +107,89 @@ public sealed class PluginUiResources : IPluginUiResources, IDisposable
 				return new PluginUiResourceResult(PluginUiResourceOutcome.MediaTypeMismatch);
 			}
 
-			var replacedBytes = existing?.ByteLength ?? 0;
-			var bytes = plugin.Bytes - replacedBytes + upload.Bytes.Length;
-			var count = plugin.Entries.Count - (existing is null ? 0 : 1) + 1;
-
-			if (bytes > ProtocolLimits.MaxUiResourceBytesPerPlugin || count > ProtocolLimits.MaxUiResourcesPerPlugin)
+			var committed = Commit(pluginId, plugin, name, upload.Bytes, contentHash, mediaType);
+			if (committed.Outcome != PluginUiResourceOutcome.Registered)
 			{
-				return new PluginUiResourceResult(PluginUiResourceOutcome.QuotaExceeded);
+				return committed;
 			}
 
-			var handle = _store.Register(new UiResourceRegistration
-			{
-				OwnerId = OwnerId(pluginId),
-				Name = name,
-				MediaType = mediaType.ToLowerInvariant(),
-				Content = upload.Bytes,
-			});
-
-			plugin.Entries[name] = new Entry(handle, upload.Bytes.Length);
-			plugin.Bytes = bytes;
 			plugin.Pending.Remove(contentHash);
 			plugin.PendingBytes -= upload.Bytes.Length;
 
-			return new PluginUiResourceResult(PluginUiResourceOutcome.Registered, handle);
+			return committed;
 		}
+	}
+
+	public PluginUiResourceResult RegisterContent(string pluginId,
+		string sessionId,
+		string name,
+		byte[] content,
+		string mediaType)
+	{
+		if (!UiResourceRules.IsValidName(name))
+		{
+			return new PluginUiResourceResult(PluginUiResourceOutcome.InvalidName);
+		}
+
+		if (!UiResourceRules.IsSupportedMediaType(mediaType))
+		{
+			return new PluginUiResourceResult(PluginUiResourceOutcome.UnsupportedMediaType);
+		}
+
+		if (content.Length == 0 || content.Length > ProtocolLimits.MaxUiResourceBytes)
+		{
+			return new PluginUiResourceResult(PluginUiResourceOutcome.TooLarge);
+		}
+
+		lock (_lock)
+		{
+			return IsCurrentSession(pluginId, sessionId)
+				? Commit(pluginId,
+					ForSession(pluginId, sessionId),
+					name,
+					content,
+					AssetContentHash.Compute(content),
+					mediaType)
+				: new PluginUiResourceResult(PluginUiResourceOutcome.SessionNotCurrent);
+		}
+	}
+
+	private PluginUiResourceResult Commit(string pluginId,
+		PluginResources plugin,
+		string name,
+		byte[] content,
+		string contentHash,
+		string mediaType)
+	{
+		plugin.Entries.TryGetValue(name, out var existing);
+
+		if (existing is not null &&
+			string.Equals(existing.Handle.ContentHash, contentHash, StringComparison.Ordinal) &&
+			string.Equals(existing.Handle.MediaType, mediaType, StringComparison.OrdinalIgnoreCase))
+		{
+			return new PluginUiResourceResult(PluginUiResourceOutcome.Registered, existing.Handle);
+		}
+
+		var bytes = plugin.Bytes - (existing?.ByteLength ?? 0) + content.Length;
+		var count = plugin.Entries.Count - (existing is null ? 0 : 1) + 1;
+
+		if (bytes > ProtocolLimits.MaxUiResourceBytesPerPlugin || count > ProtocolLimits.MaxUiResourcesPerPlugin)
+		{
+			return new PluginUiResourceResult(PluginUiResourceOutcome.QuotaExceeded);
+		}
+
+		var handle = _store.Register(new UiResourceRegistration
+		{
+			OwnerId = OwnerId(pluginId),
+			Name = name,
+			MediaType = mediaType.ToLowerInvariant(),
+			Content = content,
+		});
+
+		plugin.Entries[name] = new Entry(handle, content.Length);
+		plugin.Bytes = bytes;
+
+		return new PluginUiResourceResult(PluginUiResourceOutcome.Registered, handle);
 	}
 
 	public PluginUiResourceResult Remove(string pluginId, string sessionId, string name)

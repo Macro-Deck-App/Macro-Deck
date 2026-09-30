@@ -1,4 +1,5 @@
 using System.Reflection;
+using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Plugins.Capabilities.Callbacks;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,8 +28,12 @@ internal sealed class StartupUiResourceWiringTests
 		{
 			Assert.That(singletons, Does.Contain(typeof(IPluginUiResources)));
 			Assert.That(singletons, Does.Contain(typeof(UiResourceCallbackThrottle)));
+			Assert.That(singletons, Does.Contain(typeof(MusicPlayerArtworkCallbackThrottle)));
 			Assert.That(parameters.Select(parameter => parameter.ParameterType),
-				Does.Contain(typeof(IPluginUiResources)).And.Contain(typeof(UiResourceCallbackThrottle)));
+				Does.Contain(typeof(IPluginUiResources))
+					.And.Contain(typeof(UiResourceCallbackThrottle))
+					.And.Contain(typeof(MusicPlayerArtworkCallbackThrottle))
+					.And.Contain(typeof(IMusicPlayerArtworkService)));
 			Assert.That(parameters.Count(parameter => parameter.ParameterType == typeof(HostCallbackThrottle)),
 				Is.EqualTo(1),
 				"a second HostCallbackThrottle parameter would be handed the shared instance");

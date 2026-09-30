@@ -87,4 +87,37 @@ public interface IUiResourceRegistry
 	Task<UiResource> GetIconAsync(Guid iconId, CancellationToken cancellationToken = default)
 		=> Task.FromException<UiResource>(new UiResourceException(UiResourceErrorCode.Unsupported,
 			"This context cannot look icons up by id."));
+
+	/// <summary>
+	/// Registers the current artwork of any music player, named by the player's qualified instance id and the
+	/// artwork id its state reports, under <paramref name="name" />, replacing what the name held, and returns
+	/// the handle to put into a tree. Returns <c>null</c> when Macro Deck knows no such player or the player
+	/// has no artwork for the id; nothing is registered or removed then.
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// <paramref name="instanceId" /> is the <c>integrationId::instanceId</c> form the <c>instanceId</c> query
+	/// parameter of a player's album-art URL carries, for example <c>net.example.jukebox::default</c>. The
+	/// artwork is registered like <see cref="RegisterAsync" /> content: it counts against the quota, lives
+	/// for the session and follows the naming rules described on this interface, so use one fixed name per
+	/// place the cover is shown. Macro Deck may re-encode the image, so the handle's media type can differ
+	/// from the player's.
+	/// </para>
+	/// <para>
+	/// Any plugin may ask for the artwork of any player Macro Deck shows to its clients. Too many calls in
+	/// quick succession are refused with <see cref="UiResourceErrorCode.RateLimited" />.
+	/// </para>
+	/// </remarks>
+	/// <exception cref="ArgumentException">The name is not valid. Nothing was sent.</exception>
+	/// <exception cref="UiResourceException"><see cref="UiResourceErrorCode.Unsupported" /> from a Macro Deck, or
+	/// a context, that cannot do this; <see cref="UiResourceErrorCode.QuotaExceeded" /> when the artwork would
+	/// exceed the plugin's quota; <see cref="UiResourceErrorCode.Failed" /> when the artwork is larger than one
+	/// resource may be or of a media type Macro Deck does not accept, which retrying does not change, or when
+	/// the call could not complete. What the name held before is unchanged.</exception>
+	Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
+		string instanceId,
+		string artworkId,
+		CancellationToken cancellationToken = default)
+		=> Task.FromException<UiResource?>(new UiResourceException(UiResourceErrorCode.Unsupported,
+			"This context cannot register the artwork of another music player."));
 }

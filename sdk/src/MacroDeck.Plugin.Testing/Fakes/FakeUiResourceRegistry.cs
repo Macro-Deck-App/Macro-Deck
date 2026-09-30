@@ -17,6 +17,7 @@ public sealed class FakeUiResourceRegistry : IUiResourceRegistry
 	private readonly Dictionary<string, FakeUiResource> _resources = new(StringComparer.Ordinal);
 	private readonly Dictionary<(string Key, string Name), FakeUiResource> _pluginIcons = new(PluginIconComparer.Instance);
 	private readonly Dictionary<Guid, FakeUiResource> _icons = new();
+	private readonly Dictionary<(string InstanceId, string ArtworkId), FakeMusicPlayerArtwork> _artworks = new();
 
 	/// <summary>The combined size all resources may have. Defaults to Macro Deck's per-plugin quota.</summary>
 	public int MaxTotalBytes { get; set; } = ProtocolLimits.MaxUiResourceBytesPerPlugin;
@@ -179,6 +180,69 @@ public sealed class FakeUiResourceRegistry : IUiResourceRegistry
 		}
 	}
 
+	/// <summary>
+	/// Makes <paramref name="content" /> the artwork <paramref name="artworkId" /> of the music player
+	/// <paramref name="instanceId" />, as if that player, of any integration, reported it, replacing what the
+	/// pair held. <paramref name="instanceId" /> is the qualified <c>integrationId::instanceId</c> form. Any
+	/// media type and size may be seeded, so a test can exercise what Macro Deck refuses on registration.
+	/// </summary>
+	public void AddMusicPlayerArtwork(string instanceId, string artworkId, byte[] content, string mediaType)
+	{
+		ArgumentException.ThrowIfNullOrEmpty(instanceId);
+		ArgumentException.ThrowIfNullOrEmpty(artworkId);
+		ArgumentNullException.ThrowIfNull(content);
+		ArgumentException.ThrowIfNullOrEmpty(mediaType);
+
+		lock (_gate)
+		{
+			_artworks[(instanceId, artworkId)] = new FakeMusicPlayerArtwork(content.ToArray(), mediaType);
+		}
+	}
+
+	/// <inheritdoc />
+	/// <remarks>Answers the artwork added through <see cref="AddMusicPlayerArtwork" /> and returns <c>null</c>
+	/// for any other pair. Artwork of a media type Macro Deck does not accept, or larger than one resource may
+	/// be, throws <see cref="UiResourceErrorCode.Failed" />, and the registration counts against the quota like
+	/// <see cref="RegisterAsync" />.</remarks>
+	public async Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
+		string instanceId,
+		string artworkId,
+		CancellationToken cancellationToken = default)
+	{
+		if (!UiResourceRules.IsValidName(name))
+		{
+			throw new ArgumentException($"'{name}' is not a valid UI resource name.", nameof(name));
+		}
+
+		var artwork = FindMusicPlayerArtwork(instanceId, artworkId);
+		if (artwork is null)
+		{
+			return null;
+		}
+
+		if (!UiResourceRules.IsSupportedMediaType(artwork.MediaType))
+		{
+			throw new UiResourceException(UiResourceErrorCode.Failed,
+				$"The artwork is of media type '{artwork.MediaType}', which Macro Deck does not accept.");
+		}
+
+		if (artwork.Content.Length > ProtocolLimits.MaxUiResourceBytes)
+		{
+			throw new UiResourceException(UiResourceErrorCode.Failed,
+				$"The artwork is {artwork.Content.Length} bytes; a UI resource is at most {ProtocolLimits.MaxUiResourceBytes}.");
+		}
+
+		return await RegisterAsync(name, artwork.Content, artwork.MediaType, cancellationToken).ConfigureAwait(false);
+	}
+
+	internal FakeMusicPlayerArtwork? FindMusicPlayerArtwork(string instanceId, string artworkId)
+	{
+		lock (_gate)
+		{
+			return _artworks.GetValueOrDefault((instanceId, artworkId));
+		}
+	}
+
 	/// <inheritdoc />
 	public Task RemoveAsync(string name, CancellationToken cancellationToken = default)
 	{
@@ -211,3 +275,5 @@ public sealed class FakeUiResourceRegistry : IUiResourceRegistry
 /// <summary>One resource held by <see cref="FakeUiResourceRegistry" />: the handle it answered and the
 /// bytes behind it.</summary>
 public sealed record FakeUiResource(UiResource Handle, byte[] Content);
+
+internal sealed record FakeMusicPlayerArtwork(byte[] Content, string MediaType);

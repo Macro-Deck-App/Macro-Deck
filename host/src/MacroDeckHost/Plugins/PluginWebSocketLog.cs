@@ -7,6 +7,9 @@ internal static class PluginWebSocketLog
 	public static void ProtocolErrorDeliveryFailed(ILogger logger, Exception exception)
 		=> logger.Debug(exception, "Could not deliver a protocol.error to a plugin connection.");
 
+	public static void HostResultNotDelivered(ILogger logger, string pluginId, Exception exception)
+		=> logger.Debug(exception, "Could not deliver a host.result to plugin '{PluginId}'.", pluginId);
+
 	public static void ConnectionFaulted(ILogger logger, Exception exception)
 		=> logger.Warning(exception, "A plugin WebSocket connection ended unexpectedly.");
 

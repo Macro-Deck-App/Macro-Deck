@@ -37,6 +37,7 @@ using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.VideoStreams;
 using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.VideoStreams;
 using MacroDeck.Plugin.Protocol.Capabilities.VideoStreamProvider;
 using MacroDeck.Sdk.VideoStreams;
@@ -71,7 +72,10 @@ public class PluginCallbackRouterTests
 		IPluginIconResolver? pluginIconResolver = null,
 		VideoStreamProviderRegistry? videoStreamProviders = null,
 		IVideoStreamSessionBroker? videoStreamSessions = null,
-		VideoStreamCallbackThrottle? videoStreamThrottle = null)
+		VideoStreamCallbackThrottle? videoStreamThrottle = null,
+		IMusicPlayerArtworkService? musicPlayerArtwork = null,
+		MusicPlayerArtworkCallbackThrottle? musicPlayerArtworkThrottle = null,
+		TimeSpan? musicPlayerArtworkTimeout = null)
 	{
 		var services = new ServiceCollection();
 		services.AddSingleton<IVariableService>(variableService);
@@ -106,7 +110,10 @@ public class PluginCallbackRouterTests
 			pluginIconResolver: pluginIconResolver,
 			videoStreamProviders: videoStreamProviders,
 			videoStreamSessions: videoStreamSessions,
-			videoStreamThrottle: videoStreamThrottle);
+			videoStreamThrottle: videoStreamThrottle,
+			musicPlayerArtwork: musicPlayerArtwork,
+			musicPlayerArtworkThrottle: musicPlayerArtworkThrottle,
+			musicPlayerArtworkTimeout: musicPlayerArtworkTimeout);
 	}
 
 	[SetUp]
@@ -287,6 +294,293 @@ public class PluginCallbackRouterTests
 		});
 	}
 
+	private PluginCallbackRouter ArtworkRouter(RecordingUiResources resources,
+		FakeMusicPlayerArtworkService? artwork,
+		int artworkCapacity = 100)
+		=> Router(_variableService,
+			_actionInteractions,
+			_invoker,
+			new HostCallbackThrottle(_time, 1, refillPerSecond: 0),
+			uiResources: resources,
+			uiResourceThrottle: new UiResourceCallbackThrottle(_time, 100, refillPerSecond: 0),
+			musicPlayerArtwork: artwork,
+			musicPlayerArtworkThrottle: new MusicPlayerArtworkCallbackThrottle(_time, artworkCapacity, refillPerSecond: 0));
+
+	private PluginCallbackRouter TimeoutArtworkRouter(RecordingUiResources resources, IMusicPlayerArtworkService artwork)
+		=> Router(_variableService,
+			_actionInteractions,
+			_invoker,
+			new HostCallbackThrottle(_time, 1, refillPerSecond: 0),
+			uiResources: resources,
+			musicPlayerArtwork: artwork,
+			musicPlayerArtworkTimeout: TimeSpan.FromMilliseconds(50));
+
+	private static HostInvokePayload RegisterArtwork(string name = "cover",
+		string instanceId = "net.example.jukebox::default",
+		string artworkId = "cover-1")
+		=> new()
+		{
+			Api = HostApis.Ui,
+			Operation = HostOperations.Ui.RegisterMusicPlayerArtwork,
+			Arguments = Arg(new UiRegisterMusicPlayerArtworkArguments
+				{ Name = name, InstanceId = instanceId, ArtworkId = artworkId })
+		};
+
+	[Test]
+	public async Task Artwork_of_another_plugins_player_is_registered_for_the_calling_plugins_session()
+	{
+		var resources = new RecordingUiResources();
+		var artwork = new FakeMusicPlayerArtworkService { Image = new ArtworkImageResult([1, 2, 3], "image/webp", "\"e\"") };
+		var router = ArtworkRouter(resources, artwork);
+
+		var result = await router.RouteAsync("plugin.a", "session-1", "c1", RegisterArtwork(), CancellationToken.None);
+
+		var answer = result.Data?.Deserialize<UiRegisterMusicPlayerArtworkResult>(PluginProtocolJson.Options);
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.Null);
+			Assert.That(artwork.Requests, Is.EqualTo(new[] { ("net.example.jukebox::default", "cover-1", (int?)null) }));
+			Assert.That(resources.ContentCalls, Has.Count.EqualTo(1));
+			Assert.That(resources.ContentCalls[0].PluginId, Is.EqualTo("plugin.a"));
+			Assert.That(resources.ContentCalls[0].SessionId, Is.EqualTo("session-1"));
+			Assert.That(resources.ContentCalls[0].Name, Is.EqualTo("cover"));
+			Assert.That(resources.ContentCalls[0].Content, Is.EqualTo(new byte[] { 1, 2, 3 }));
+			Assert.That(resources.ContentCalls[0].MediaType, Is.EqualTo("image/webp"));
+			Assert.That(answer?.Resource?.ResourceId, Is.EqualTo("plugin-x.cover"));
+		});
+	}
+
+	[Test]
+	public async Task Artwork_the_host_does_not_have_answers_no_resource_and_registers_nothing()
+	{
+		var resources = new RecordingUiResources();
+		var router = ArtworkRouter(resources, new FakeMusicPlayerArtworkService());
+
+		var result = await router.RouteAsync("plugin.a", "session-1", "c1", RegisterArtwork(), CancellationToken.None);
+
+		var answer = result.Data?.Deserialize<UiRegisterMusicPlayerArtworkResult>(PluginProtocolJson.Options);
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.Null);
+			Assert.That(answer, Is.Not.Null);
+			Assert.That(answer!.Resource, Is.Null);
+			Assert.That(resources.ContentCalls, Is.Empty);
+		});
+	}
+
+	[TestCase(PluginUiResourceOutcome.QuotaExceeded, ProtocolErrorCodes.UiResourceQuotaExceeded)]
+	[TestCase(PluginUiResourceOutcome.TooLarge, ProtocolErrorCodes.AssetTooLarge)]
+	[TestCase(PluginUiResourceOutcome.UnsupportedMediaType, ProtocolErrorCodes.InvalidPayload)]
+	[TestCase(PluginUiResourceOutcome.SessionNotCurrent, ProtocolErrorCodes.SessionNotFound)]
+	public async Task Artwork_that_cannot_be_registered_answers_its_protocol_error(PluginUiResourceOutcome outcome, string code)
+	{
+		var artwork = new FakeMusicPlayerArtworkService { Image = new ArtworkImageResult([1], "image/svg+xml", "\"e\"") };
+		var router = ArtworkRouter(new RecordingUiResources { Outcome = outcome }, artwork);
+
+		var result = await router.RouteAsync("plugin.a", "session-1", "c1", RegisterArtwork(), CancellationToken.None);
+
+		Assert.That(result.Error?.Code, Is.EqualTo(code));
+	}
+
+	[Test]
+	public async Task Artwork_of_an_unsupported_type_is_refused_as_permanent_and_names_the_type()
+	{
+		var artwork = new FakeMusicPlayerArtworkService { Image = new ArtworkImageResult([1], "image/svg+xml", "\"e\"") };
+		var router = ArtworkRouter(new RecordingUiResources { Outcome = PluginUiResourceOutcome.UnsupportedMediaType }, artwork);
+
+		var result = await router.RouteAsync("plugin.a", "session-1", "c1", RegisterArtwork(), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error?.Retryable, Is.Not.True);
+			Assert.That(result.Error?.Message, Does.Contain("image/svg+xml"));
+		});
+	}
+
+	[TestCase("not a name!", "net.example.jukebox::default", "cover-1")]
+	[TestCase("cover", "", "cover-1")]
+	[TestCase("cover", "net.example.jukebox::default", "")]
+	public async Task An_invalid_artwork_request_is_refused_before_the_host_looks_anything_up(string name,
+		string instanceId,
+		string artworkId)
+	{
+		var artwork = new FakeMusicPlayerArtworkService { Image = new ArtworkImageResult([1], "image/png", "\"e\"") };
+		var router = ArtworkRouter(new RecordingUiResources(), artwork);
+
+		var result = await router.RouteAsync("plugin.a",
+			"session-1",
+			"c1",
+			RegisterArtwork(name, instanceId, artworkId),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error?.Code, Is.EqualTo(ProtocolErrorCodes.InvalidPayload));
+			Assert.That(artwork.Requests, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task An_artwork_id_beyond_the_length_limit_is_refused()
+	{
+		var artwork = new FakeMusicPlayerArtworkService();
+		var router = ArtworkRouter(new RecordingUiResources(), artwork);
+
+		var result = await router.RouteAsync("plugin.a",
+			"session-1",
+			"c1",
+			RegisterArtwork(artworkId: new string('a', 513)),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error?.Code, Is.EqualTo(ProtocolErrorCodes.InvalidPayload));
+			Assert.That(artwork.Requests, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task Artwork_requests_beyond_their_own_budget_are_rate_limited_before_reaching_the_player()
+	{
+		var artwork = new FakeMusicPlayerArtworkService { Image = new ArtworkImageResult([1], "image/png", "\"e\"") };
+		var router = ArtworkRouter(new RecordingUiResources(), artwork, artworkCapacity: 2);
+
+		await router.RouteAsync("plugin.a", "session-1", "c1", RegisterArtwork(), CancellationToken.None);
+		await router.RouteAsync("plugin.a", "session-1", "c2", RegisterArtwork(), CancellationToken.None);
+		var third = await router.RouteAsync("plugin.a", "session-1", "c3", RegisterArtwork(), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(third.Error?.Code, Is.EqualTo(ProtocolErrorCodes.RateLimited));
+			Assert.That(third.Error?.Retryable, Is.True);
+			Assert.That(artwork.Requests, Has.Count.EqualTo(2));
+		});
+	}
+
+	[Test]
+	public async Task Artwork_requests_do_not_spend_the_plugins_shared_callback_budget()
+	{
+		var artwork = new FakeMusicPlayerArtworkService { Image = new ArtworkImageResult([1], "image/png", "\"e\"") };
+		var router = ArtworkRouter(new RecordingUiResources(), artwork);
+
+		for (var index = 0; index < 10; index++)
+		{
+			await router.RouteAsync("plugin.a", "session-1", "c" + index, RegisterArtwork(), CancellationToken.None);
+		}
+
+		Assert.That(router.Admit("plugin.a", new HostInvokePayload
+			{
+				Api = HostApis.Variables, Operation = HostOperations.Variables.List
+			}),
+			Is.Null);
+	}
+
+	[Test]
+	public async Task An_artwork_lookup_the_player_never_answers_ends_as_a_retryable_timeout_and_registers_nothing()
+	{
+		var resources = new RecordingUiResources();
+		var router = TimeoutArtworkRouter(resources, new NeverAnsweringArtworkService());
+
+		var result = await router.RouteAsync("plugin.a", "session-1", "c1", RegisterArtwork(), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error?.Code, Is.EqualTo(ProtocolErrorCodes.Timeout));
+			Assert.That(result.Error?.Retryable, Is.True);
+			Assert.That(resources.ContentCalls, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task Artwork_that_arrives_empty_is_treated_as_no_artwork()
+	{
+		var resources = new RecordingUiResources();
+		var artwork = new FakeMusicPlayerArtworkService { Image = new ArtworkImageResult([], "image/png", "\"e\"") };
+		var router = ArtworkRouter(resources, artwork);
+
+		var result = await router.RouteAsync("plugin.a", "session-1", "c1", RegisterArtwork(), CancellationToken.None);
+
+		var answer = result.Data?.Deserialize<UiRegisterMusicPlayerArtworkResult>(PluginProtocolJson.Options);
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.Null);
+			Assert.That(answer!.Resource, Is.Null);
+			Assert.That(resources.ContentCalls, Is.Empty);
+		});
+	}
+
+	private sealed class NeverAnsweringArtworkService : IMusicPlayerArtworkService
+	{
+		public string GetETag(string artworkId, int? size) => "\"" + artworkId + "\"";
+
+		public async Task<ArtworkImageResult?> GetImage(string instanceId,
+			string artworkId,
+			int? size,
+			CancellationToken cancellationToken)
+		{
+			await Task.Delay(Timeout.Infinite, cancellationToken);
+
+			return null;
+		}
+
+		public Task<ArtworkImageResult?> GetImage(MusicPlayerVariant variant,
+			string artworkId,
+			int? size,
+			CancellationToken cancellationToken)
+			=> throw new NotSupportedException();
+	}
+
+	[Test]
+	public async Task A_host_without_an_artwork_service_answers_the_operation_as_unsupported()
+	{
+		var router = ArtworkRouter(new RecordingUiResources(), artwork: null);
+
+		var result = await router.RouteAsync("plugin.a", "session-1", "c1", RegisterArtwork(), CancellationToken.None);
+
+		Assert.That(result.Error?.Code, Is.EqualTo(ProtocolErrorCodes.CapabilityUnsupported));
+	}
+
+	[Test]
+	public async Task Artwork_registration_without_a_session_is_refused_as_retryable()
+	{
+		var artwork = new FakeMusicPlayerArtworkService { Image = new ArtworkImageResult([1], "image/png", "\"e\"") };
+		var router = ArtworkRouter(new RecordingUiResources(), artwork);
+
+		var result = await router.RouteAsync("plugin.a", "c1", RegisterArtwork(), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error?.Code, Is.EqualTo(ProtocolErrorCodes.SessionNotFound));
+			Assert.That(result.Error?.Retryable, Is.True);
+			Assert.That(artwork.Requests, Is.Empty);
+		});
+	}
+
+	private sealed class FakeMusicPlayerArtworkService : IMusicPlayerArtworkService
+	{
+		public ArtworkImageResult? Image { get; init; }
+
+		public List<(string InstanceId, string ArtworkId, int? Size)> Requests { get; } = [];
+
+		public string GetETag(string artworkId, int? size) => "\"" + artworkId + "\"";
+
+		public Task<ArtworkImageResult?> GetImage(string instanceId,
+			string artworkId,
+			int? size,
+			CancellationToken cancellationToken)
+		{
+			Requests.Add((instanceId, artworkId, size));
+
+			return Task.FromResult(Image);
+		}
+
+		public Task<ArtworkImageResult?> GetImage(MusicPlayerVariant variant,
+			string artworkId,
+			int? size,
+			CancellationToken cancellationToken)
+			=> throw new NotSupportedException();
+	}
+
 	private sealed class RecordingUiResources : IPluginUiResources
 	{
 		public List<(string PluginId, string SessionId, string Name)> Calls { get; } = [];
@@ -307,6 +601,24 @@ public class PluginCallbackRouterTests
 				? new PluginUiResourceResult(Outcome, new MacroDeck.Ui.Model.Resources.UiResource
 				{
 					ResourceId = "plugin-x." + name, ContentHash = contentHash, MediaType = mediaType, ByteLength = 3
+				})
+				: new PluginUiResourceResult(Outcome);
+		}
+
+		public List<(string PluginId, string SessionId, string Name, byte[] Content, string MediaType)> ContentCalls { get; } = [];
+
+		public PluginUiResourceResult RegisterContent(string pluginId,
+			string sessionId,
+			string name,
+			byte[] content,
+			string mediaType)
+		{
+			ContentCalls.Add((pluginId, sessionId, name, content, mediaType));
+
+			return Outcome == PluginUiResourceOutcome.Registered
+				? new PluginUiResourceResult(Outcome, new MacroDeck.Ui.Model.Resources.UiResource
+				{
+					ResourceId = "plugin-x." + name, ContentHash = "sha256:art", MediaType = mediaType, ByteLength = content.Length
 				})
 				: new PluginUiResourceResult(Outcome);
 		}

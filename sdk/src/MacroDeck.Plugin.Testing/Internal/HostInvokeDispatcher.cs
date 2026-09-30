@@ -1,8 +1,10 @@
 using System.Text.Json;
+using MacroDeck.Plugin.Protocol.Assets;
 using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Callbacks.IconPacks;
 using MacroDeck.Plugin.Protocol.Callbacks.Ui;
 using MacroDeck.Plugin.Protocol.Errors;
+using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeck.Plugin.Testing.Fakes;
 using MacroDeck.Plugin.Protocol.Capabilities.DeviceProvider;
@@ -103,6 +105,8 @@ internal static class HostInvokeDispatcher
 					=> await PluginIconAsync(context, payload, cancellationToken).ConfigureAwait(false),
 				HostApis.IconPacks when payload.Operation == HostOperations.IconPacks.GetIcon
 					=> await IconAsync(context, payload, cancellationToken).ConfigureAwait(false),
+				HostApis.Ui when payload.Operation == HostOperations.Ui.RegisterMusicPlayerArtwork
+					=> await MusicPlayerArtworkAsync(context, payload, cancellationToken).ConfigureAwait(false),
 				HostApis.Ui when uiResourceUploads is not null &&
 					payload.Operation is HostOperations.Ui.RegisterResource or HostOperations.Ui.RemoveResource
 					=> await UiResourcesAsync(context, payload, uiResourceUploads, cancellationToken)
@@ -167,6 +171,54 @@ internal static class HostInvokeDispatcher
 		catch (ArgumentException exception)
 		{
 			return HostInvokeOutcome.Failed(ProtocolErrorCodes.InvalidPayload, exception.Message);
+		}
+	}
+
+	private static async Task<HostInvokeOutcome> MusicPlayerArtworkAsync(
+		FakeIntegrationContext context,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken)
+	{
+		var arguments = Require<UiRegisterMusicPlayerArtworkArguments>(payload);
+
+		if (!UiResourceRules.IsValidName(arguments.Name))
+		{
+			return HostInvokeOutcome.Failed(ProtocolErrorCodes.InvalidPayload,
+				"A UI resource name is a letter or digit followed by up to 63 letters, digits, hyphens or underscores.");
+		}
+
+		var artwork = context.UiResources.FindMusicPlayerArtwork(arguments.InstanceId, arguments.ArtworkId);
+		if (artwork is null)
+		{
+			return HostInvokeOutcome.Ok(new UiRegisterMusicPlayerArtworkResult());
+		}
+
+		if (artwork.Content.Length > ProtocolLimits.MaxUiResourceBytes)
+		{
+			return HostInvokeOutcome.Failed(ProtocolErrorCodes.AssetTooLarge,
+				$"The artwork does not fit the {ProtocolLimits.MaxUiResourceBytes} byte UI resource limit.");
+		}
+
+		if (!UiResourceRules.IsSupportedMediaType(artwork.MediaType))
+		{
+			return HostInvokeOutcome.Failed(ProtocolErrorCodes.InvalidPayload,
+				$"The artwork is of media type '{artwork.MediaType}', which is not a supported UI resource type.");
+		}
+
+		try
+		{
+			var handle = await context.UiResources
+				.RegisterMusicPlayerArtworkAsync(arguments.Name, arguments.InstanceId, arguments.ArtworkId, cancellationToken)
+				.ConfigureAwait(false);
+
+			return HostInvokeOutcome.Ok(new UiRegisterMusicPlayerArtworkResult
+			{
+				Resource = handle is null ? null : ToDto(handle)
+			});
+		}
+		catch (UiResourceException exception) when (exception.ErrorCode == UiResourceErrorCode.QuotaExceeded)
+		{
+			return HostInvokeOutcome.Failed(ProtocolErrorCodes.UiResourceQuotaExceeded, exception.Message);
 		}
 	}
 
