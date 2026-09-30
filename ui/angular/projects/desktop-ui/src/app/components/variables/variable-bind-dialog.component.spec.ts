@@ -85,4 +85,17 @@ describe('VariableBindDialogComponent', () => {
       type: 'text',
     });
   });
+
+  it('wraps the preview of a long variable name instead of scrolling the dialog sideways', async () => {
+    component.onNameInput('ha_automation_arbeitszimmer_heizung_automatisch_ausschalten_wenn_fenster_geoeffnet_friendly_name');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const form = fixture.nativeElement.querySelector('.dvb-form') as HTMLElement;
+    const body = form.parentElement as HTMLElement;
+
+    expect(fixture.nativeElement.querySelector('.form-preview')?.textContent).toContain('friendly_name');
+    expect(form.scrollWidth).toBeLessThanOrEqual(form.clientWidth);
+    expect(body.scrollWidth).toBeLessThanOrEqual(body.clientWidth);
+  });
 });

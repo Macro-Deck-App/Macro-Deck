@@ -192,6 +192,7 @@
   font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
   color: var(--color-text-secondary);
   margin-top: 0.1875rem;
+  overflow-wrap: anywhere;
 }
 .form-preview .invalid {
   color: var(--color-danger);
