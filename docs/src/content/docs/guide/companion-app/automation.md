@@ -23,8 +23,11 @@ not run on a widget are offered.
 Every request from another app has to carry the automation key. An app that does not have it cannot run
 anything, and learns nothing about your computers or scripts. Keep the key private like a password:
 
-- **Generate new key** replaces it. Every automation that uses the old key stops working until you give it the
-  new one. Do this if a key or a link with the key was ever shared.
+- **Generate new key** replaces it and shows the new key, so you can copy it right away. Every automation that
+  uses the old key stops working until you give it the new one. Do this if a key or a link with the key was ever
+  shared.
+- If the device would not keep the new key, the app says so instead of showing one. Until a key is stored, no
+  request runs. Choose **Generate new key** again to retry.
 - Turning **Allow external automation** off stops every request at once and keeps the key for later.
 
 On Android, a run can start while the phone is locked, so an automation can run a script when you arrive home or
