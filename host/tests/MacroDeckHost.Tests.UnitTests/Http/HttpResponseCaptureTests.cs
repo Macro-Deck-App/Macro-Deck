@@ -5,6 +5,7 @@ using MacroDeckHost.Integrations.Http.Client;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Serilog;
 using Serilog.Core;
+using DomainVariableType = MacroDeckHost.Domain.Enums.VariableType;
 
 namespace MacroDeckHost.Tests.UnitTests.Http;
 
@@ -152,6 +153,52 @@ internal sealed class HttpResponseCaptureTests
 			Assert.That(await _targets.ValueOf("status"), Is.EqualTo(200m));
 			Assert.That(await _targets.ValueOf("body"), Is.EqualTo("not json at all"));
 		});
+	}
+
+	[TestCase("SWIT\n", "SWIT")]
+	[TestCase("SWIT\r\n", "SWIT")]
+	[TestCase("  SWIT \t", "SWIT")]
+	[TestCase("\uFEFFSWIT", "SWIT")]
+	[TestCase("\uFEFF SWIT\n", "SWIT")]
+	[TestCase(" \r\n ", "")]
+	[TestCase("line one\nline two\n", "line one\nline two")]
+	public async Task The_body_token_is_captured_without_surrounding_whitespace_or_a_byte_order_mark(
+		string body,
+		string expected)
+	{
+		await HttpResponseCapture.ApplyAsync(_accessor,
+			new Dictionary<string, string>(StringComparer.Ordinal) { ["body"] = "$body" },
+			Snapshot(body: body),
+			statusExpected: true,
+			SilentLogger());
+
+		Assert.That(await _targets.ValueOf("body"), Is.EqualTo(expected));
+	}
+
+	[Test]
+	public async Task The_body_token_fills_an_existing_number_variable_from_a_body_with_a_byte_order_mark_and_newline()
+	{
+		await _targets.CreateUserVariable("count", DomainVariableType.Numeric, 0m);
+
+		await HttpResponseCapture.ApplyAsync(_accessor,
+			new Dictionary<string, string>(StringComparer.Ordinal) { ["count"] = "$body" },
+			Snapshot(body: "\uFEFF42\n"),
+			statusExpected: true,
+			SilentLogger());
+
+		Assert.That(await _targets.ValueOf("count"), Is.EqualTo(42m));
+	}
+
+	[Test]
+	public async Task A_json_path_string_value_keeps_its_own_whitespace()
+	{
+		await HttpResponseCapture.ApplyAsync(_accessor,
+			new Dictionary<string, string>(StringComparer.Ordinal) { ["v"] = "name" },
+			Snapshot(body: """{"name":"SWIT\n"}"""),
+			statusExpected: true,
+			SilentLogger());
+
+		Assert.That(await _targets.ValueOf("v"), Is.EqualTo("SWIT\n"));
 	}
 
 	[Test]

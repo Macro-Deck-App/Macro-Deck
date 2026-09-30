@@ -9619,7 +9619,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Integrations.Http.Actions.GetJsonValuePathDescription': 'e.g. data.items[0].name, [0].id, or a bare "$" for the whole document. A property named "status" is addressed the same way: "$.status".',
 	'macrodeck.app:Integrations.Http.Actions.GetJsonValuePathLabel': 'JSON path',
 	'macrodeck.app:Integrations.Http.Actions.SendRequestBodyTypeLabel': 'Body type',
-	'macrodeck.app:Integrations.Http.Actions.SendRequestCapturesDescription': 'Variable name -> selector. Reserved selectors: $status, $ok, $duration, $body, $truncated, $headers, $header:<name>. Anything else is a JSON path (e.g. data.items[0].name). Reserved selectors win, so a body field literally named "status" must be addressed as "$.status".',
+	'macrodeck.app:Integrations.Http.Actions.SendRequestCapturesDescription': 'Variable name -> selector. Reserved selectors: $status, $ok, $duration, $body, $truncated, $headers, $header:<name>. Anything else is a JSON path (e.g. data.items[0].name). Reserved selectors win, so a body field literally named "status" must be addressed as "$.status". $body is stored without leading or trailing whitespace.',
 	'macrodeck.app:Integrations.Http.Actions.SendRequestCapturesLabel': 'Captures',
 	'macrodeck.app:Integrations.Http.Actions.SendRequestContentTypeDescription': 'Optional. Replaces the content type the body type would use.',
 	'macrodeck.app:Integrations.Http.Actions.SendRequestContentTypeLabel': 'Content type override',

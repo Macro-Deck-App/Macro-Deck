@@ -6054,7 +6054,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Body-Typ</value>
   </data>
   <data name="Integrations.Http.Actions.SendRequestCapturesDescription" xml:space="preserve">
-    <value>Variablenname -&gt; Selektor. Reservierte Selektoren: $status, $ok, $duration, $body, $truncated, $headers, $header:&lt;name&gt;. Alles andere ist ein JSON-Pfad (z. B. data.items[0].name). Reservierte Selektoren haben Vorrang, ein Feld, das tatsächlich "status" heißt, muss daher als "$.status" adressiert werden.</value>
+    <value>Variablenname -&gt; Selektor. Reservierte Selektoren: $status, $ok, $duration, $body, $truncated, $headers, $header:&lt;name&gt;. Alles andere ist ein JSON-Pfad (z. B. data.items[0].name). Reservierte Selektoren haben Vorrang, ein Feld, das tatsächlich "status" heißt, muss daher als "$.status" adressiert werden. $body wird ohne Leerraum am Anfang und Ende gespeichert.</value>
   </data>
   <data name="Integrations.Http.Actions.SendRequestCapturesLabel" xml:space="preserve">
     <value>Erfassungen</value>

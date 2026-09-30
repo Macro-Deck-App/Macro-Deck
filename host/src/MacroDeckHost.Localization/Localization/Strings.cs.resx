@@ -6055,7 +6055,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Typ těla požadavku</value>
   </data>
   <data name="Integrations.Http.Actions.SendRequestCapturesDescription" xml:space="preserve">
-    <value>Název proměnné -&gt; selektor. Vyhrazené selektory: $status, $ok, $duration, $body, $truncated, $headers, $header:&lt;name&gt;. Cokoli jiného je cesta JSON (např. data.items[0].name). Vyhrazené selektory mají přednost, takže pole těla doslova nazvané "status" musí být adresováno jako "$.status".</value>
+    <value>Název proměnné -&gt; selektor. Vyhrazené selektory: $status, $ok, $duration, $body, $truncated, $headers, $header:&lt;name&gt;. Cokoli jiného je cesta JSON (např. data.items[0].name). Vyhrazené selektory mají přednost, takže pole těla doslova nazvané "status" musí být adresováno jako "$.status". $body se ukládá bez úvodních a koncových bílých znaků.</value>
   </data>
   <data name="Integrations.Http.Actions.SendRequestCapturesLabel" xml:space="preserve">
     <value>Zachycené hodnoty</value>

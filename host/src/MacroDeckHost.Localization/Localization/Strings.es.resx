@@ -6055,7 +6055,7 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>Tipo de cuerpo</value>
   </data>
   <data name="Integrations.Http.Actions.SendRequestCapturesDescription" xml:space="preserve">
-    <value>Nombre de variable -&gt; selector. Selectores reservados: $status, $ok, $duration, $body, $truncated, $headers, $header:&lt;name&gt;. Cualquier otra cosa es una ruta JSON (p. ej. data.items[0].name). Los selectores reservados tienen prioridad, así que un campo del cuerpo llamado literalmente "status" debe referenciarse como "$.status".</value>
+    <value>Nombre de variable -&gt; selector. Selectores reservados: $status, $ok, $duration, $body, $truncated, $headers, $header:&lt;name&gt;. Cualquier otra cosa es una ruta JSON (p. ej. data.items[0].name). Los selectores reservados tienen prioridad, así que un campo del cuerpo llamado literalmente "status" debe referenciarse como "$.status". $body se guarda sin espacios en blanco al principio ni al final.</value>
   </data>
   <data name="Integrations.Http.Actions.SendRequestCapturesLabel" xml:space="preserve">
     <value>Capturas</value>
