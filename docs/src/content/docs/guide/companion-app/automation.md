@@ -1,6 +1,6 @@
 ---
 title: Run scripts from other apps
-description: Run Macro Deck scripts from Tasker, MacroDroid, other apps and home screen shortcuts, with an Android intent or a run-script link, and the automation key that protects it.
+description: Run Macro Deck scripts from Tasker, MacroDroid, other apps, home screen shortcuts and a scripts widget, with an Android intent or a run-script link, and the automation key that protects it.
 ---
 
 The Companion app can run a Macro Deck [script](/guide/concepts/#scripts-and-automations) on one of your computers when another app asks
@@ -119,3 +119,40 @@ shortcuts, and it is offered only for scripts that need no input values.
 
 A home screen shortcut is yours, so it works without the key and with **Allow external automation** turned off.
 If you remove the computer from the app, its shortcuts say so and stop running.
+
+## Android: scripts widget
+
+The **Macro Deck scripts** widget puts several scripts on the home screen, each one a button that runs it. A widget
+holds up to eight scripts of one computer, and you can place as many widgets as you like.
+
+1. Touch and hold an empty spot on the home screen, choose **Widgets** and add **Macro Deck scripts**.
+2. Choose the computer. The app then lists its scripts.
+3. Tap a script to add it. Change its name if you like, and fill in its input values if it has any. You can add the
+   same script again with different values, such as one button per scene.
+4. Tap **Save**.
+
+![The setup screen of the Macro Deck scripts widget on Android, with the computer chosen and Go live on the widget twice with different scenes](../../../../assets/guide/companion/android-scripts-widget-setup.png)
+
+![The Macro Deck scripts widget on the Android home screen with three buttons, the second one saying Done after a run](../../../../assets/guide/companion/android-scripts-widget.png)
+
+Tap a button to run its script. The button shows **Running** until the computer answers, and then **Done** or why
+the script did not run, such as **Offline**, **Computer locked** or **Connect first**, and a few seconds later it shows
+the computer's name again. You can tap it again at any time.
+
+The widget follows its size: the wider it is, the more columns it has, and the taller it is, the more rows. When the
+widget is too small for all its scripts, the last button says how many more there are, such as **+3 more**. Make the
+widget larger to see them.
+
+The computer's name under a button is replaced by **Offline** or **Computer locked** when the computer does not
+answer. That is only a hint, taken when you place the widget, when the phone starts and about every 30 minutes, so
+the app contacts the computer now and then in the background even while it is closed. After the computer is back, the
+hint can stay for up to 30 minutes. You can still tap the button, which always tries to run the script, and a script
+that ran clears the hint at once.
+
+To change a widget's scripts, touch and hold it and choose the settings on Android 12 or later. On older versions
+remove the widget and place it again. If you remove the computer from the app, its widgets say so, and tapping one
+lets you choose another computer.
+
+A widget is yours, so it works without the key and with **Allow external automation** turned off. The input values
+are saved with the widget on this device. The widget shows only whether a script ran: a script that switches
+something on or off does not make the button show that state.
