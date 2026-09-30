@@ -4,6 +4,7 @@ import {
   WIDGET_REFERENCE_BORDER_RADIUS,
 } from '../domain/widget.interface';
 import { DEFAULT_EMPTY_CELL_STYLE, EmptyCellStyle } from '../domain/folder.interface';
+import { paintOrder } from '../grid/grid-layout.util';
 import { GridGeometry, GridMetrics } from '../grid/grid-metrics';
 import { UiNode } from '../ui-framework/ui-node.interface';
 import { treeClaimsGesture } from '../ui-framework/node-gestures';
@@ -57,6 +58,8 @@ export interface WidgetGridHandle {
 
   setBackground(background: string | null): void;
 
+  setShadows(enabled: boolean): void;
+
   setFocusedWidget(widgetId: string | null): void;
 
   tileBox(widgetId: string): UiComponentBox | null;
@@ -78,6 +81,7 @@ export interface WidgetGridOptions {
   borderRadius?: number;
   emptyCellStyle?: EmptyCellStyle;
   background?: string | null;
+  shadows?: boolean;
   focusedWidgetId?: string | null;
 }
 
@@ -123,6 +127,9 @@ export function renderWidgetGrid(
   }
 
   applyEmptyCellStyle(options.emptyCellStyle);
+
+  let shadows = options.shadows !== false;
+  paintShadows();
 
   const applyRadiusFallback = radiusFallbackFor(surface);
 
@@ -345,6 +352,24 @@ export function renderWidgetGrid(
     }
   }
 
+  function paintShadows(): void {
+    if (shadows) surface.classList.remove('deck-grid-flat');
+    else surface.classList.add('deck-grid-flat');
+  }
+
+  function orderTiles(ordered: Tile[]): void {
+    const current: Element[] = [];
+    for (let child = surface.firstChild; child !== null; child = child.nextSibling) {
+      if (child.nodeType === 1 && (child as HTMLElement).classList.contains('deck-grid-tile')) {
+        current.push(child as Element);
+      }
+    }
+
+    let differsFrom = 0;
+    while (differsFrom < ordered.length && current[differsFrom] === ordered[differsFrom].element) differsFrom++;
+    for (let index = differsFrom; index < ordered.length; index++) surface.appendChild(ordered[index].element);
+  }
+
   function paintFocus(): void {
     for (const widgetId in tiles) {
       if (!Object.prototype.hasOwnProperty.call(tiles, widgetId)) continue;
@@ -441,8 +466,10 @@ export function renderWidgetGrid(
     // font or rendering-mode change repaints through here with no widget's own tree touched at all,
     // and it is this loop that has to reach every tile for that. `placeTile`/`paintTile` are already
     // dirty-checked underneath, so a widget nothing moved for costs no write once it is redrawn.
-    for (let index = 0; index < widgets.length; index++) {
-      const widget = widgets[index];
+    const ordered: Tile[] = [];
+    const drawing = paintOrder(widgets);
+    for (let index = 0; index < drawing.length; index++) {
+      const widget = drawing[index];
 
       let tile = tiles[widget.id];
       if (tile === undefined) {
@@ -450,10 +477,12 @@ export function renderWidgetGrid(
         tiles[widget.id] = tile;
       }
       tile.widget = widget;
+      ordered.push(tile);
 
       placeTile(tile);
       paintTile(tile);
     }
+    orderTiles(ordered);
 
     paintFocus();
   }
@@ -501,6 +530,12 @@ export function renderWidgetGrid(
       // Empty rather than a literal colour: the stylesheet's own background is the fallback, and an
       // inline one would outrank a theme switch.
       setStyle(surface, 'background', next);
+    },
+
+    setShadows(enabled: boolean): void {
+      if (enabled === shadows) return;
+      shadows = enabled;
+      paintShadows();
     },
 
     setFocusedWidget(widgetId: string | null): void {

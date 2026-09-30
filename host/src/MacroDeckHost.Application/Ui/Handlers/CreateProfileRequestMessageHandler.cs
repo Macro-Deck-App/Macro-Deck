@@ -26,7 +26,8 @@ public class
 			request.DefaultBackgroundColor,
 			request.DefaultWidgetSpacing,
 			request.DefaultWidgetBorderRadius,
-			request.DefaultEmptyCellStyle);
+			request.DefaultEmptyCellStyle,
+			request.DefaultWidgetShadows);
 
 		var response = new CreateProfileResponse { Success = result.Success };
 

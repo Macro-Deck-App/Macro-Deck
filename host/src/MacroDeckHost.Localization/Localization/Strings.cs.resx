@@ -17723,6 +17723,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.GridSettings.Rows" xml:space="preserve">
     <value>Řádky</value>
   </data>
+  <data name="Widgets.GridSettings.WidgetShadows" xml:space="preserve">
+    <value>Stíny widgetů</value>
+  </data>
   <data name="Widgets.GridSettings.WidgetSpacing" xml:space="preserve">
     <value>Rozestupy widgetů</value>
   </data>

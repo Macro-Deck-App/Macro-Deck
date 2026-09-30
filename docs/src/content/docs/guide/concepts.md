@@ -16,6 +16,9 @@ To build a variant, for example a second streaming layout, duplicate a profile f
 menu. The copy gets every folder, widget and setting, and is named like **Streaming (copy)**.
 Automatic activation stays with the original, so set it up again for the copy if you want it.
 
+Edit a profile from the profile menu to set its default grid size, widget spacing and corner radius.
+Turn **Widget shadows** off there for a flat deck, which also looks cleaner with very small spacing.
+
 ## Folders
 
 Inside **Streaming**: a start folder **Home** with **Scenes**, **Audio** and **Chat** subfolders,

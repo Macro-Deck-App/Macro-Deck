@@ -9,4 +9,6 @@ public class CreateProfileRequest
 	public int? DefaultWidgetSpacing { get; set; }
 	public int? DefaultWidgetBorderRadius { get; set; }
 	public string? DefaultEmptyCellStyle { get; set; }
+
+	public bool? DefaultWidgetShadows { get; set; }
 }

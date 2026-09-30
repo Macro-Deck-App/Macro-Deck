@@ -198,6 +198,38 @@ public class JsonProfileStoreTests
 			Assert.That(loaded[0].Folders[0].WidgetBorderRadius, Is.Null);
 			Assert.That(loaded[0].DefaultWidgetSpacing, Is.Null);
 			Assert.That(loaded[0].DefaultWidgetBorderRadius, Is.Null);
+			Assert.That(loaded[0].DefaultWidgetShadows, Is.Null);
+		});
+	}
+
+	[TestCase(false)]
+	[TestCase(true)]
+	public void Save_ThenLoadAll_ProfileWidgetShadowsRoundTripsAnExplicitValue(bool shadows)
+	{
+		var profile = new ProfileFile { Id = Guid.NewGuid(), Name = "Gaming", DefaultWidgetShadows = shadows };
+
+		_store.Save(profile);
+
+		var json = File.ReadAllText(Path.Combine(_paths.ProfilesDirectory, profile.Id + ".json"));
+		Assert.Multiple(() =>
+		{
+			Assert.That(json, Does.Contain("\"defaultWidgetShadows\": " + (shadows ? "true" : "false")));
+			Assert.That(_store.LoadAll().Profiles.Single().DefaultWidgetShadows, Is.EqualTo(shadows));
+		});
+	}
+
+	[Test]
+	public void Save_ThenLoadAll_UnsetProfileWidgetShadowsIsAbsentFromTheJsonAndReadsBackAsNull()
+	{
+		var profile = new ProfileFile { Id = Guid.NewGuid(), Name = "Gaming", DefaultWidgetShadows = null };
+
+		_store.Save(profile);
+
+		var json = File.ReadAllText(Path.Combine(_paths.ProfilesDirectory, profile.Id + ".json"));
+		Assert.Multiple(() =>
+		{
+			Assert.That(json, Does.Not.Contain("defaultWidgetShadows"));
+			Assert.That(_store.LoadAll().Profiles.Single().DefaultWidgetShadows, Is.Null);
 		});
 	}
 

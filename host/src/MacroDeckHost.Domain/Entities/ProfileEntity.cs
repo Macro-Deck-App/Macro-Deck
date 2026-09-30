@@ -22,4 +22,6 @@ public class ProfileEntity : BaseEntity
 	public int? DefaultWidgetBorderRadius { get; set; }
 
 	public EmptyCellStyle? DefaultEmptyCellStyle { get; set; }
+
+	public bool? DefaultWidgetShadows { get; set; }
 }

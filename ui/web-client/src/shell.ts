@@ -457,12 +457,14 @@ export class Shell {
         geometry,
         borderRadius: grid.borderRadius,
         emptyCellStyle: grid.emptyCellStyle,
+        shadows: grid.shadows,
       });
     }
 
     // Re-applied on every paint, not only at creation: a folder carries its own grid size, corner
     // radius and background, so walking into one keeps the previous folder's otherwise.
     this.grid.configure(geometry, grid.borderRadius, grid.emptyCellStyle);
+    this.grid.setShadows(grid.shadows);
     // Never on the grid as well: a translucent colour would stack there.
     this.root.style.background = folder && folder.background ? folder.background : '';
     this.grid.setFocusedWidget(this.deckInput.focusedWidgetId());

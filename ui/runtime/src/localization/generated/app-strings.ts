@@ -7381,6 +7381,7 @@ export const AppStrings = {
 			Inherited: 'macrodeck.app:Widgets.GridSettings.Inherited',
 			NoEffectOnDevice: 'macrodeck.app:Widgets.GridSettings.NoEffectOnDevice',
 			Rows: 'macrodeck.app:Widgets.GridSettings.Rows',
+			WidgetShadows: 'macrodeck.app:Widgets.GridSettings.WidgetShadows',
 			WidgetSpacing: 'macrodeck.app:Widgets.GridSettings.WidgetSpacing',
 		},
 		History: {
@@ -13648,6 +13649,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Widgets.GridSettings.Inherited': 'Inherited',
 	'macrodeck.app:Widgets.GridSettings.NoEffectOnDevice': 'No effect on {device}',
 	'macrodeck.app:Widgets.GridSettings.Rows': 'Rows',
+	'macrodeck.app:Widgets.GridSettings.WidgetShadows': 'Widget shadows',
 	'macrodeck.app:Widgets.GridSettings.WidgetSpacing': 'Widget spacing',
 	'macrodeck.app:Widgets.History.AccentColor': 'Accent color',
 	'macrodeck.app:Widgets.History.ChartMaximum': 'Chart maximum',

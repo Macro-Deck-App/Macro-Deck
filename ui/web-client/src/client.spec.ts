@@ -52,6 +52,7 @@ class FakeHost {
     id: string; name: string; order: number;
     defaultColumns?: number; defaultRows?: number;
     defaultWidgetSpacing?: number; defaultWidgetBorderRadius?: number; defaultEmptyCellStyle?: string;
+    defaultWidgetShadows?: boolean | null;
   }[] = [];
   profilesFail = false;
   foldersFailFor: string | null = null;
@@ -920,6 +921,29 @@ describe('Client', () => {
           expect(child.cols).toBeNull();
           expect(client.gridFor(child).cols).toBe(6);
         });
+    });
+
+    it('follows the profile switching widget shadows off and back on', async () => {
+      host.profiles = [{ id: 'profile-a', name: 'Desk', order: 0, defaultColumns: 5, defaultRows: 3, defaultWidgetShadows: null }];
+      host.foldersByProfile = { 'profile-a': [wireFolder('a-root', null, true)] };
+      const client = build();
+      const inheriting = { cols: null, rows: null, spacing: null, borderRadius: null };
+      const update = (defaultWidgetShadows: boolean) =>
+        (client as never as { onNotification(type: string, body: unknown): void })
+          .onNotification('ProfileUpdatedEvent', {
+            profile: { id: 'profile-a', name: 'Desk', order: 0, defaultColumns: 5, defaultRows: 3, defaultWidgetShadows },
+          });
+
+      await client.probe();
+      await client.signIn('owner', 'secret');
+      await settle();
+      expect(client.gridFor(inheriting).shadows).toBeTrue();
+
+      update(false);
+      expect(client.gridFor(inheriting).shadows).toBeFalse();
+
+      update(true);
+      expect(client.gridFor(inheriting).shadows).toBeTrue();
     });
 
     it('re-resolves the deck when the profile it inherits from changes', () => {

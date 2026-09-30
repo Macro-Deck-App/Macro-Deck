@@ -21,6 +21,7 @@ function profile(overrides: Partial<Profile> = {}): Profile {
     defaultBackground: null,
     defaultSpacing: null,
     defaultBorderRadius: null,
+    defaultShadows: null,
     ...overrides,
   };
 }
@@ -29,6 +30,7 @@ interface EditState {
   editRows(): number;
   editColumns(): number;
   editSpacing(): number | null;
+  editShadows(): boolean;
   editBorderRadius(): number | null;
   editMaxRows(): number;
   editMaxColumns(): number;
@@ -111,6 +113,21 @@ describe('ProfileSelectorComponent editing', () => {
       defaultWidgetSpacing: 18,
       defaultWidgetBorderRadius: 24,
     }));
+  });
+
+  it('keeps widget shadows on for a profile that never chose, and saves the choice either way', async () => {
+    const component = createComponent();
+    component.startEdit(profile());
+    expect(editState(component).editShadows()).toBeTrue();
+
+    await component.confirmEdit();
+    expect(profileServiceStub.updateProfile).toHaveBeenCalledWith('p1', jasmine.objectContaining({ defaultWidgetShadows: true }));
+
+    component.startEdit(profile({ defaultShadows: false }));
+    expect(editState(component).editShadows()).toBeFalse();
+
+    await component.confirmEdit();
+    expect(profileServiceStub.updateProfile).toHaveBeenCalledWith('p1', jasmine.objectContaining({ defaultWidgetShadows: false }));
   });
 
   it('closes the modal and clears the edit state on success', async () => {

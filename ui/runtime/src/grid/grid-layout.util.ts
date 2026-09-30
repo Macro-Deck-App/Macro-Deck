@@ -17,6 +17,14 @@ export interface ReflowResult {
   placements: ReadonlyMap<string, GridRect>;
 }
 
+export function paintOrder<T extends { id: string; x: number; y: number }>(widgets: readonly T[]): T[] {
+  return widgets.slice().sort((a, b) => {
+    if (a.y !== b.y) return b.y - a.y;
+    if (a.x !== b.x) return b.x - a.x;
+    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+  });
+}
+
 export const DEFAULT_CELL_GAP_RATIO = WIDGET_REFERENCE_GAP / WIDGET_REFERENCE_CELL_SIZE;
 
 export function widgetAspectRatio(w: number, h: number, gapRatio = DEFAULT_CELL_GAP_RATIO): number {

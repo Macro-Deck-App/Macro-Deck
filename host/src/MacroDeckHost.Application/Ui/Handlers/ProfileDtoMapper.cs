@@ -32,7 +32,8 @@ public static class ProfileDtoMapper
 			DefaultBackgroundColor = entity.DefaultBackgroundColor,
 			DefaultWidgetSpacing = entity.DefaultWidgetSpacing,
 			DefaultWidgetBorderRadius = entity.DefaultWidgetBorderRadius,
-			DefaultEmptyCellStyle = EmptyCellStyleText.Format(entity.DefaultEmptyCellStyle)
+			DefaultEmptyCellStyle = EmptyCellStyleText.Format(entity.DefaultEmptyCellStyle),
+			DefaultWidgetShadows = entity.DefaultWidgetShadows
 		};
 
 	private static ProfileLayoutConstraint? MapConstraint(DeviceGridConstraint? constraint)

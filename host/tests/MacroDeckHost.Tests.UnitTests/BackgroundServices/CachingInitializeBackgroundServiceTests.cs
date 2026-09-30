@@ -168,7 +168,8 @@ internal sealed class CachingInitializeBackgroundServiceTests
 			string? defaultBackgroundColor = null,
 			int? defaultWidgetSpacing = null,
 			int? defaultWidgetBorderRadius = null,
-			string? defaultEmptyCellStyle = null)
+			string? defaultEmptyCellStyle = null,
+			bool? defaultWidgetShadows = null)
 		{
 			if (Fail)
 			{
@@ -189,7 +190,8 @@ internal sealed class CachingInitializeBackgroundServiceTests
 			string? defaultBackgroundColor,
 			int? defaultWidgetSpacing,
 			int? defaultWidgetBorderRadius,
-			string? defaultEmptyCellStyle = null)
+			string? defaultEmptyCellStyle = null,
+			bool? defaultWidgetShadows = null)
 			=> throw new NotSupportedException();
 
 		public Task<Result<ProfileError>> Delete(Guid id) => throw new NotSupportedException();
