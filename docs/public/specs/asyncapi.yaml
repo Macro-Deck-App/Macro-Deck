@@ -87,7 +87,7 @@ x-macrodeck-host-operations:
   widgets: [apply, invalidate-icon]
   notifications: [notify, dismiss]
   action-interactions: [request-item-picker, request-device-picker, show-modal]
-  ui: [snapshot, patch, fault, reload, register-resource, remove-resource]
+  ui: [snapshot, patch, fault, reload, register-resource, remove-resource, register-music-player-artwork]
   devices: [register, update, presence, unregister, interaction, icon, widget-icon, close]
   variable-values: [value, invalidate]
   layouts: [register, unregister]

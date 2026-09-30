@@ -194,6 +194,44 @@ UiResource? cover = await player.GetArtworkAsUiResourceAsync(
 - An [in-process integration](/reference/capability-parity/) has no `UiResources`; the call throws
   `UiResourceException` with `Unsupported`.
 
+### Showing another player's cover
+
+`GetArtworkAsUiResourceAsync` needs an `IMusicPlayer` of your own. To show the cover of a player that
+belongs to another integration, ask Macro Deck to register it for you with `UiResources.RegisterMusicPlayerArtworkAsync`:
+
+```csharp
+UiResource? cover = await context.UiResources.RegisterMusicPlayerArtworkAsync(
+	name: "now-playing-cover",
+	instanceId: "net.example.jukebox::default",
+	artworkId: "c0ffee",
+	cancellationToken);
+```
+
+- **Where the two ids come from.** Nothing in the SDK lists other integrations' players. Both ids appear in
+  the URL that a player's `*-album-art-url` variable holds, for example
+  `/api/music-player/artwork/c0ffee?instanceId=net.example.jukebox%3A%3Adefault`: the last path segment is
+  the `artworkId` and the `instanceId` query value is the qualified instance id, both URL-encoded, so decode
+  them first. A plugin that parses text the user writes, with such a variable in it, reads the pair from
+  there. For an integration that allows only one configuration, `integrationId::default` resolves to its
+  first player.
+- **What you get.** The handle of the current artwork registered under `name`, as if you had registered the
+  bytes yourself: it counts against the [quota](/ui/reference/resources/#registering-your-own-images), is
+  released with the session, and registering the name again replaces it. Macro Deck may re-encode the image,
+  so the media type can differ from the player's. Use one fixed name per place the cover is shown.
+- **`null`** when Macro Deck knows no such player or the player has no artwork for that id. Nothing is
+  registered or removed then, so the name keeps its previous picture.
+- **Errors.** `ArgumentException` for an invalid name, before anything is sent. `UiResourceException` with
+  `QuotaExceeded`; `RateLimited`, because this call has a tighter budget than other registrations and at most
+  four run at once; `Unsupported` on a Macro Deck that predates it or an
+  [in-process integration](/reference/capability-parity/); or `Failed`. `Failed` covers a player that does
+  not answer within 20 seconds, where retrying can succeed, and artwork larger than `maxUiResourceBytes` or
+  of a media type Macro Deck does not accept, where it cannot.
+- Any plugin can ask for the artwork of any player, the same images the deck shows to every client. Listing
+  players is not part of this call.
+
+In tests, `FakeUiResourceRegistry.AddMusicPlayerArtwork(instanceId, artworkId, bytes, mediaType)` seeds what
+the call finds, and `MacroDeckTestHost` answers it over the wire as a Macro Deck without other players.
+
 ### `MusicPlayerState`
 
 | Property | Meaning |

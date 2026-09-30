@@ -74,7 +74,9 @@ one you build yourself: it carries the `contentHash` that makes clients fetch ne
   dropped. Registrations run one at a time, so starting many at once is safe.
 
 A music player plugin can register its own player's cover in one call with
-[`GetArtworkAsUiResourceAsync`](/features/music-players/#showing-the-cover-in-your-own-ui).
+[`GetArtworkAsUiResourceAsync`](/features/music-players/#showing-the-cover-in-your-own-ui), and the cover of
+any other player with
+[`RegisterMusicPlayerArtworkAsync`](/features/music-players/#showing-another-players-cover).
 
 In tests, `FakeIntegrationContext.UiResources` is a `FakeUiResourceRegistry` that applies the same rules and
 exposes what was registered, and `MacroDeckTestHost` answers registrations over the wire.

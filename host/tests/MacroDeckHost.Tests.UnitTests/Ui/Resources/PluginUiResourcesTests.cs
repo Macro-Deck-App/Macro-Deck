@@ -95,6 +95,80 @@ public class PluginUiResourcesTests
 	}
 
 	[Test]
+	public async Task Content_registered_directly_is_served_and_replaced_under_the_same_id_like_an_upload()
+	{
+		await StartSessionAsync(PluginA, "s1");
+
+		var first = _resources.RegisterContent(PluginA, "s1", "cover", _first, "image/webp").Resource!;
+		var second = _resources.RegisterContent(PluginA, "s1", "cover", _second, "image/webp").Resource!;
+
+		_store.TryGet(second.ResourceId, out var served);
+		Assert.Multiple(() =>
+		{
+			Assert.That(second.ResourceId, Is.EqualTo(first.ResourceId));
+			Assert.That(second.ContentHash, Is.EqualTo(AssetContentHash.Compute(_second)));
+			Assert.That(served.Content.ToArray(), Is.EqualTo(_second));
+		});
+	}
+
+	[Test]
+	public async Task Content_registered_directly_counts_against_the_same_quota_as_an_upload()
+	{
+		await StartSessionAsync(PluginA, "s1");
+		for (var index = 0; index < ProtocolLimits.MaxUiResourcesPerPlugin - 1; index++)
+		{
+			Assert.That(RegisterSmall(index).Outcome, Is.EqualTo(PluginUiResourceOutcome.Registered));
+		}
+
+		var last = _resources.RegisterContent(PluginA, "s1", "cover", _first, "image/png");
+		var refused = _resources.RegisterContent(PluginA, "s1", "one-too-many", _second, "image/png");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(last.Outcome, Is.EqualTo(PluginUiResourceOutcome.Registered));
+			Assert.That(refused.Outcome, Is.EqualTo(PluginUiResourceOutcome.QuotaExceeded));
+		});
+	}
+
+	[Test]
+	public async Task Content_registered_directly_is_released_when_the_session_is_replaced()
+	{
+		await StartSessionAsync(PluginA, "s1");
+		var handle = _resources.RegisterContent(PluginA, "s1", "cover", _first, "image/png").Resource!;
+
+		await StartSessionAsync(PluginA, "s2");
+		_resources.RegisterContent(PluginA, "s2", "other", _second, "image/png");
+
+		Assert.That(_store.TryGet(handle.ResourceId, out _), Is.False);
+	}
+
+	[Test]
+	public async Task Content_over_the_resource_limit_or_of_an_unsupported_type_is_refused_without_registering()
+	{
+		await StartSessionAsync(PluginA, "s1");
+
+		var tooLarge = _resources.RegisterContent(PluginA, "s1", "cover", new byte[ProtocolLimits.MaxUiResourceBytes + 1], "image/png");
+		var svg = _resources.RegisterContent(PluginA, "s1", "cover", _first, "image/svg+xml");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(tooLarge.Outcome, Is.EqualTo(PluginUiResourceOutcome.TooLarge));
+			Assert.That(svg.Outcome, Is.EqualTo(PluginUiResourceOutcome.UnsupportedMediaType));
+			Assert.That(_store.TryGet(PluginUiResources.OwnerId(PluginA) + ".cover", out _), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task Content_registered_for_a_session_that_is_not_current_is_refused()
+	{
+		await StartSessionAsync(PluginA, "s2");
+
+		var result = _resources.RegisterContent(PluginA, "s1", "cover", _first, "image/png");
+
+		Assert.That(result.Outcome, Is.EqualTo(PluginUiResourceOutcome.SessionNotCurrent));
+	}
+
+	[Test]
 	public async Task Registering_the_same_bytes_under_the_same_name_needs_no_new_upload()
 	{
 		await StartSessionAsync(PluginA, "s1");

@@ -7,7 +7,7 @@ public enum UiResourceErrorCode
 	Failed = 0,
 
 	/// <summary>This Macro Deck, or this context, cannot register UI resources, cannot resolve bundled
-	/// plugin icons, or cannot look icons up by id.</summary>
+	/// plugin icons, cannot look icons up by id, or cannot register the artwork of a music player.</summary>
 	Unsupported = 1,
 
 	/// <summary>The plugin's resources would exceed their combined size or count. Remove resources, register

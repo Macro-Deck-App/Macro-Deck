@@ -123,7 +123,14 @@ public static class HostOperations
 		/// <summary>Removes a resource this plugin registered. An unknown name is not an error.</summary>
 		public const string RemoveResource = "remove-resource";
 
-		public static readonly IReadOnlyList<string> All = [Snapshot, Patch, Fault, Reload, RegisterResource, RemoveResource];
+		/// <summary>Registers the artwork of any music player, named by its qualified instance id and artwork id,
+		/// as a resource of this plugin under a plugin-chosen name, and answers the resource handle. Counts
+		/// against the plugin's UI resource quota like <c>register-resource</c>. An unknown instance or artwork
+		/// answers no <c>resource</c>. A host that predates the operation answers <c>CAPABILITY_UNSUPPORTED</c>.</summary>
+		public const string RegisterMusicPlayerArtwork = "register-music-player-artwork";
+
+		public static readonly IReadOnlyList<string> All =
+			[Snapshot, Patch, Fault, Reload, RegisterResource, RemoveResource, RegisterMusicPlayerArtwork];
 	}
 
 	public static class IconPacks

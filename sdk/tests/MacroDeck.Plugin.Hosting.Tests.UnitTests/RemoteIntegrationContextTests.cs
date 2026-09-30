@@ -477,6 +477,7 @@ public class RemoteIntegrationContextTests
 		// upload-then-register exchange the recording invoker here cannot answer.
 		covered.Add((HostApis.Ui, HostOperations.Ui.RegisterResource));
 		covered.Add((HostApis.Ui, HostOperations.Ui.RemoveResource));
+		covered.Add((HostApis.Ui, HostOperations.Ui.RegisterMusicPlayerArtwork));
 
 		covered.Add((HostApis.IconPacks, HostOperations.IconPacks.GetIconResource));
 		covered.Add((HostApis.IconPacks, HostOperations.IconPacks.GetIcon));
