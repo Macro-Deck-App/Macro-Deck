@@ -146,12 +146,15 @@ example `system_audio_input_usb_mic_volume_percent`. An unplugged device keeps i
 read as unavailable until it is back. The volume actions can control the default output, the default
 input or one specific device.
 
-Some integrations, such as Home Assistant, offer far more values than they list up front. Pick the
-integration in the variable browser and search for an entity by name or variable name, then open it
-to see its state and attributes. If you know the entity id, for example `light.office_lamp` or
-`light.office_lamp/brightness`, type it under **Enter a resource ID** instead.
+Some integrations, such as Home Assistant, offer far more values than they list up front. These wait
+in a collapsed **Unbound variables** group at the top of the integration's variables, on the Variables
+page, in every variable picker and on the integration's own page. Open the group, or search for an
+entity by name or variable name, then open an entity to see its state and attributes and choose
+**Bind** on the one you want: it becomes a normal variable. If you know the entity id, for example
+`light.office_lamp` or `light.office_lamp/brightness`, pick the integration in the variable browser and
+type it under **Enter a resource ID** instead.
 
-![The Variables page with the user variable deaths and system variables](../../../assets/guide/variables.png)
+![The Variables page with the user variable deaths and Home Assistant's variables below a collapsed Unbound variables group](../../../assets/guide/variables.png)
 
 A user variable can also **read from a file**, like OBS's *Read from file*: choose **Read from file** as
 its source when you create it and pick the file. The variable shows the file's content and follows every
