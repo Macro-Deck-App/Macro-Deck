@@ -53,7 +53,7 @@ list of automations. A computer shows the new name the next time this device sig
 | Setting | Does |
 | --- | --- |
 | Allow external automation | Lets other apps run your scripts with an Android intent or a run-script link. Off by default. |
-| Automation key | The key every request has to carry. **Show**, **Copy key** and **Generate new key**, which stops every automation that uses the old key. |
+| Automation key | The key every request has to carry. **Show**, **Copy key** and **Generate new key**, which shows the new key and stops every automation that uses the old key. |
 | Scripts | Each computer's scripts with their IDs. Tap a script to copy its link or, on Android, its intent details, or to add it to the home screen. |
 
 See [Run scripts from other apps](/guide/companion-app/automation/).
