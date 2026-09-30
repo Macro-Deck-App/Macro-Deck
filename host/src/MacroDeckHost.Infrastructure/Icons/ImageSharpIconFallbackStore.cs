@@ -3,7 +3,6 @@ using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Icons;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using ILogger = Serilog.ILogger;
@@ -13,6 +12,7 @@ namespace MacroDeckHost.Infrastructure.Icons;
 public sealed class ImageSharpIconFallbackStore : IIconImageFallbackStore, IDisposable
 {
 	private const string CacheDirectoryName = "fallback-cache";
+	private const string TranscodeVersion = "t2";
 
 	private readonly IIconStorage _storage;
 	private readonly IMacroDeckPaths _paths;
@@ -36,7 +36,7 @@ public sealed class ImageSharpIconFallbackStore : IIconImageFallbackStore, IDisp
 		var extension = animated ? ".gif" : ".png";
 		var contentType = animated ? "image/gif" : "image/png";
 		// The master hash is part of the name because an icon's bytes can be replaced under the same id.
-		var identity = $"{icon.Id:N}-{MasterToken(icon)}";
+		var identity = $"{icon.Id:N}-{TranscodeVersion}-{MasterToken(icon)}";
 		var cacheName = icon.IsAnimated && staticFrame
 			? $"{identity}-{variant}-static{extension}"
 			: $"{identity}-{variant}{extension}";
@@ -112,8 +112,7 @@ public sealed class ImageSharpIconFallbackStore : IIconImageFallbackStore, IDisp
 			{
 				if (animated)
 				{
-					AnimatedGifTranscode.PrepareForGif(image);
-					await image.SaveAsGifAsync(output, new GifEncoder(), cancellationToken);
+					await AnimatedGifTranscode.SaveAsGifAsync(image, output, cancellationToken);
 				}
 				else if (image.Frames.Count > 1)
 				{
