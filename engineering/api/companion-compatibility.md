@@ -12,7 +12,7 @@ never refuses an app for its version. Both fields are pinned by
 
 - `version`: `HostVersion.Current`, the host's version without build metadata, for example `3.0.0-beta.15`.
 - `minimumCompanionVersion`: `CompanionCompatibility.MinimumCompanionVersion`, the oldest Companion release
-  this host works with, for example `26.1.1`.
+  this host works with, for example `26.2.0`.
 
 Both are answered anonymously and while the key ring is locked, because an app too old may not get far enough to
 sign in. An older app ignores them. The version was already public on the LAN through the mDNS TXT record; this
