@@ -6049,7 +6049,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Typ treści</value>
   </data>
   <data name="Integrations.Http.Actions.SendRequestCapturesDescription" xml:space="preserve">
-    <value>Nazwa zmiennej -&gt; selektor. Zarezerwowane selektory: $status, $ok, $duration, $body, $truncated, $headers, $header:&lt;nazwa&gt;. Wszystko inne jest ścieżką JSON (np. data.items[0].name). Zarezerwowane selektory mają pierwszeństwo, więc pole treści o dosłownej nazwie „status” trzeba adresować jako „$.status”.</value>
+    <value>Nazwa zmiennej -&gt; selektor. Zarezerwowane selektory: $status, $ok, $duration, $body, $truncated, $headers, $header:&lt;nazwa&gt;. Wszystko inne jest ścieżką JSON (np. data.items[0].name). Zarezerwowane selektory mają pierwszeństwo, więc pole treści o dosłownej nazwie „status” trzeba adresować jako „$.status”. $body jest zapisywane bez białych znaków na początku i na końcu.</value>
   </data>
   <data name="Integrations.Http.Actions.SendRequestCapturesLabel" xml:space="preserve">
     <value>Przechwycenia</value>

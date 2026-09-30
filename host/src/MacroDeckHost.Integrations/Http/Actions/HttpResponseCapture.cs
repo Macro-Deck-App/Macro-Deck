@@ -119,8 +119,9 @@ internal static class HttpResponseCapture
 
 		if (selector.Equals(BodyToken, StringComparison.OrdinalIgnoreCase))
 		{
+			// Decoding keeps a UTF-8 BOM and Trim does not count it as whitespace, so it is trimmed first.
 			type = VariableType.Text;
-			value = response.Body;
+			value = response.Body.Trim('\uFEFF').Trim();
 			return true;
 		}
 
