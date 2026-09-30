@@ -68,6 +68,7 @@ export class DeckEditorGridComponent implements OnChanges, OnDestroy {
   @Input() spacing = 12;
   @Input() borderRadius: number | null = null;
   @Input() emptyCellStyle: EmptyCellStyle = 'visible';
+  @Input() shadows = true;
   @Input() canPaste = false;
   @Input() cutWidgetIds: ReadonlySet<string> = new Set();
   @Input() dropTargetCell: { x: number; y: number } | null = null;

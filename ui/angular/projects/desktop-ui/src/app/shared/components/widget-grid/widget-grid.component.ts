@@ -9,6 +9,7 @@ import {
   GridRect,
   GridWidget,
   isCellOccupied,
+  paintOrder,
   WIDGET_REFERENCE_GAP,
   WidgetGridMode,
   WidgetRenderState,
@@ -31,12 +32,14 @@ export class WidgetGridComponent implements AfterViewInit, OnDestroy, OnChanges 
   @Input() cols = 5;
   @Input() rows = 3;
   @Input() widgets: GridWidget[] = [];
+  protected paintOrdered: GridWidget[] = [];
   @Input() background: string | null = '';
   @Input() mode: WidgetGridMode = 'runtime';
   @Input() outerMargin = 16;
   @Input() spacing = WIDGET_REFERENCE_GAP;
   @Input() borderRadius: number | null = null;
   @Input() emptyCellStyle: EmptyCellStyle = 'visible';
+  @Input() shadows = true;
   @Input() dropTargetCell: { x: number; y: number } | null = null;
   @Input() busyCell: { x: number; y: number } | null = null;
   @Input() busyCellLabel = '';
@@ -131,6 +134,9 @@ export class WidgetGridComponent implements AfterViewInit, OnDestroy, OnChanges 
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['widgets']) {
+      this.paintOrdered = paintOrder(this.widgets);
+    }
     if (changes['cols'] || changes['rows'] || changes['outerMargin'] || changes['spacing']) {
       // The shape is pushed into the metrics before the view renders, because the template derives
       // its cell count and every cell rect from them. Measuring needs the wrapper and so waits for

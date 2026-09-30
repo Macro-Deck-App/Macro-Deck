@@ -1,4 +1,5 @@
 using MacroDeck.Plugin.Protocol.Assets;
+using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Plugins.IconPacks;
 using MacroDeckHost.Application.Widgets;
@@ -37,7 +38,7 @@ public sealed class IconUiResourceRenditions : IIconUiResourceRenditions
 		CancellationToken cancellationToken)
 	{
 		var size = WidgetIconRenditions.Bucket(requestedSize);
-		if (size == WidgetIconRenditions.DefaultSize || Resolve(resourceId) is not var (source, reference))
+		if (size == WidgetIconRenditions.DefaultSize || Resolve(resourceId) is not var (source, reference, maxBytes))
 		{
 			return null;
 		}
@@ -49,7 +50,7 @@ public sealed class IconUiResourceRenditions : IIconUiResourceRenditions
 			return new SizedIconResource(cached, true);
 		}
 
-		var rendition = await WidgetIconRenditions.ProduceAsync(source, reference, size, cancellationToken)
+		var rendition = await WidgetIconRenditions.ProduceAsync(source, reference, size, maxBytes, cancellationToken)
 			.ConfigureAwait(false);
 		if (rendition.Status != WidgetIconRenditionStatus.Rendered)
 		{
@@ -71,19 +72,20 @@ public sealed class IconUiResourceRenditions : IIconUiResourceRenditions
 		return new SizedIconResource(content, rendition.Stable);
 	}
 
-	private (IWidgetIconSource Source, string Reference)? Resolve(string resourceId)
+	private (IWidgetIconSource Source, string Reference, int MaxBytes)? Resolve(string resourceId)
 	{
 		if (PluginIconReferences.TryParseResourceId(resourceId, out var iconId))
 		{
 			return _iconPackCache.GetIconById(iconId) is { } icon &&
 				_iconPackCache.GetPackById(icon.PackId) is not null &&
 				FindSource(WidgetIconReference.IconPackType) is { } iconPackSource
-					? (iconPackSource, iconId.ToString())
+					? (iconPackSource, iconId.ToString(), ProtocolLimits.MaxUiResourceBytes)
 					: null;
 		}
 
 		var prefix = WidgetIconResources.OwnerId + ".";
-		if (!resourceId.StartsWith(prefix, StringComparison.Ordinal))
+		if (!resourceId.StartsWith(prefix, StringComparison.Ordinal) ||
+			resourceId.EndsWith(WidgetIconResources.ProtocolNameSuffix, StringComparison.Ordinal))
 		{
 			return null;
 		}
@@ -93,7 +95,7 @@ public sealed class IconUiResourceRenditions : IIconUiResourceRenditions
 			var typePrefix = prefix + source.Type + ".";
 			if (resourceId.Length > typePrefix.Length && resourceId.StartsWith(typePrefix, StringComparison.Ordinal))
 			{
-				return (source, resourceId[typePrefix.Length..]);
+				return (source, resourceId[typePrefix.Length..], HostUiResourceLimits.MaxHostIconResourceBytes);
 			}
 		}
 

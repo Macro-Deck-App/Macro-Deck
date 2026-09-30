@@ -14,4 +14,6 @@ public interface IFontCatalog
 	IReadOnlyList<FontFaceInfo> GetFaces();
 
 	byte[]? GetFaceFile(string faceId);
+
+	string ResolveFaceId(string faceId) => faceId;
 }

@@ -10,6 +10,7 @@ using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport.Messages.Folders;
 using MacroDeckHost.Application.Ui.Transport.Messages.Profiles;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
+using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
@@ -180,6 +181,11 @@ internal sealed class ContractWidgetIcons : IWidgetIconService
 
 	public Task<WidgetIconResolution> Resolve(Guid widgetId, CancellationToken cancellationToken = default)
 		=> Task.FromResult(_resolutions.GetValueOrDefault(widgetId, WidgetIconResolution.Inactive));
+
+	public Task<WidgetIconResolution> Resolve(Guid widgetId,
+		WidgetIconLimit limit,
+		CancellationToken cancellationToken = default)
+		=> Resolve(widgetId, cancellationToken);
 
 	public TimeSpan? GetProviderPollInterval(Guid widgetId) => null;
 }

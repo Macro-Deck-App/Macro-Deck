@@ -103,6 +103,15 @@
     </shared-inheritable-setting>
   }
 
+  @if (showShadowsToggle) {
+    <div class="form-group form-group--section">
+      <shared-toggle-switch
+        [label]="widgetShadowsLabel()"
+        [checked]="shadows"
+        (changed)="onShadowsChange($event)" />
+    </div>
+  }
+
   <div class="divider"></div>
 
   <div class="form-group form-group--section">

@@ -1,3 +1,4 @@
+using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Ui.Model.Resources;
 
 namespace MacroDeckHost.Application.Ui.Resources;
@@ -11,6 +12,8 @@ public sealed record UiResourceRegistration
 	public required string MediaType { get; init; }
 
 	public required ReadOnlyMemory<byte> Content { get; init; }
+
+	public int MaxBytes { get; init; } = ProtocolLimits.MaxUiResourceBytes;
 }
 
 public sealed record UiResourceContent

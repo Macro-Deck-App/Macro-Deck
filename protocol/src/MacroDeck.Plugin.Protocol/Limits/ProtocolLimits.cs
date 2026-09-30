@@ -121,9 +121,9 @@ public static class ProtocolLimits
 
 	public const int MaxUiUpdateBurst = 90;
 
-	/// <summary>Bounds a <c>UiResource</c>'s declared <c>byteLength</c>, and the bytes the host's own
-	/// resource store accepts for one resource - capped on registration so a declaration inside a tree can
-	/// never promise more than the host would actually serve.</summary>
+	/// <summary>Bounds a <c>UiResource</c>'s declared <c>byteLength</c> in a plugin's tree, and the bytes the
+	/// host's resource store accepts for one resource a plugin registers - capped on registration so a
+	/// declaration inside a tree can never promise more than the host would actually serve.</summary>
 	public const int MaxUiResourceBytes = 2 * 1024 * 1024;
 
 	/// <summary>Bounds the bytes all of one plugin's registered UI resources hold together. Registering

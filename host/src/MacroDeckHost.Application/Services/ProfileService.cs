@@ -46,7 +46,8 @@ public class ProfileService : IProfileService
 		string? defaultBackgroundColor = null,
 		int? defaultWidgetSpacing = null,
 		int? defaultWidgetBorderRadius = null,
-		string? defaultEmptyCellStyle = null)
+		string? defaultEmptyCellStyle = null,
+		bool? defaultWidgetShadows = null)
 	{
 		if (string.IsNullOrWhiteSpace(name))
 		{
@@ -100,6 +101,7 @@ public class ProfileService : IProfileService
 			DefaultWidgetSpacing = defaultWidgetSpacing,
 			DefaultWidgetBorderRadius = defaultWidgetBorderRadius,
 			DefaultEmptyCellStyle = emptyCellStyle,
+			DefaultWidgetShadows = defaultWidgetShadows,
 			CreatedAt = DateTime.UtcNow
 		};
 
@@ -135,7 +137,8 @@ public class ProfileService : IProfileService
 		string? defaultBackgroundColor,
 		int? defaultWidgetSpacing,
 		int? defaultWidgetBorderRadius,
-		string? defaultEmptyCellStyle = null)
+		string? defaultEmptyCellStyle = null,
+		bool? defaultWidgetShadows = null)
 	{
 		var profile = _profileCache.GetById(id);
 		if (profile is null)
@@ -258,6 +261,11 @@ public class ProfileService : IProfileService
 			profile.DefaultEmptyCellStyle = emptyCellStyle;
 		}
 
+		if (defaultWidgetShadows.HasValue)
+		{
+			profile.DefaultWidgetShadows = defaultWidgetShadows.Value;
+		}
+
 		await _profileCache.AddOrUpdate(profile);
 
 		await _mediator.Publish(new ProfileUpdatedNotification(profile));
@@ -322,6 +330,7 @@ public class ProfileService : IProfileService
 			DefaultWidgetSpacing = source.DefaultWidgetSpacing,
 			DefaultWidgetBorderRadius = source.DefaultWidgetBorderRadius,
 			DefaultEmptyCellStyle = source.DefaultEmptyCellStyle,
+			DefaultWidgetShadows = source.DefaultWidgetShadows,
 			CreatedAt = createdAt
 		};
 

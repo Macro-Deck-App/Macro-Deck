@@ -520,6 +520,7 @@ export class Client {
         spacing: profile.defaultWidgetSpacing,
         borderRadius: profile.defaultWidgetBorderRadius,
         emptyCellStyle: emptyCellStyleFromWire(profile.defaultEmptyCellStyle),
+        shadows: profile.defaultWidgetShadows,
       };
       return;
     }

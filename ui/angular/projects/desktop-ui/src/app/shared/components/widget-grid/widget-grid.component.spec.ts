@@ -265,4 +265,51 @@ describe('WidgetGridComponent empty-cell placement', () => {
 
     expect(boxOf(cells[COLS * ROWS - 1])).toEqual(boxOf(widgetEl as Element));
   });
+
+  function paintedCells(): number[] {
+    const root = fixture.nativeElement as HTMLElement;
+    const cells = Array.from(root.querySelectorAll('.empty-cell')).map(boxOf);
+    return Array.from(root.querySelectorAll('shared-widget-item')).map(item => {
+      const box = boxOf(item);
+      return cells.findIndex(cell => cell.left === box.left && cell.top === box.top);
+    });
+  }
+
+  it('paints widgets in position order whatever order they are handed over in', () => {
+    render([widget('a', 0, 0), widget('b', 1, 0), widget('c', 0, 1)]);
+    expect(paintedCells()).toEqual([COLS, 1, 0]);
+
+    fixture.componentRef.setInput('widgets', [widget('c', 0, 1), widget('a', 0, 0), widget('b', 1, 0)]);
+    fixture.detectChanges();
+    expect(paintedCells()).toEqual([COLS, 1, 0]);
+
+    fixture.componentRef.setInput('widgets', [widget('b', 1, 0), widget('c', 0, 1), widget('a', 0, 0)]);
+    fixture.detectChanges();
+    expect(paintedCells()).toEqual([COLS, 1, 0]);
+  });
+
+  it('follows a widget that moves to another cell', () => {
+    render([widget('a', 0, 0), widget('b', 1, 0)]);
+    expect(paintedCells()).toEqual([1, 0]);
+
+    fixture.componentRef.setInput('widgets', [widget('a', 2, 1), widget('b', 1, 0)]);
+    fixture.detectChanges();
+
+    expect(paintedCells()).toEqual([COLS * ROWS - 1, 1]);
+  });
+
+  it('switches the widget shadow off for the whole grid and back on', () => {
+    render([widget('a', 0, 0)]);
+    const container = component.gridContainer.nativeElement as HTMLElement;
+    expect(container.style.getPropertyValue('--widget-shadow')).toBe('');
+
+    fixture.componentRef.setInput('shadows', false);
+    fixture.detectChanges();
+    expect(container.style.getPropertyValue('--widget-shadow')).toBe('none');
+    expect(container.style.getPropertyValue('--widget-shadow-lift')).toBe('none');
+
+    fixture.componentRef.setInput('shadows', true);
+    fixture.detectChanges();
+    expect(container.style.getPropertyValue('--widget-shadow')).toBe('');
+  });
 });

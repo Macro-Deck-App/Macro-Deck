@@ -54,6 +54,14 @@ describe('runtime widget grid', () => {
   const mount = (geometry = { cols: 5, rows: 3 }) =>
     renderWidgetGrid(container, { host, geometry });
 
+  const tileOf = (id: string) =>
+    container.querySelector(`.deck-grid-tile[data-widget-id="${id}"]`) as HTMLElement;
+
+  const paintedIds = () =>
+    Array.from(container.querySelectorAll('.deck-grid-tile'))
+      .map(tile => tile.getAttribute('data-widget-id'))
+      .join(' ');
+
   it('paints the folder background and gives it back to the theme when the folder has none', () => {
     const handle = renderWidgetGrid(container, { host, geometry: { cols: 5, rows: 3 }, background: '#101820' });
     const surface = container.querySelector('.deck-grid') as HTMLElement;
@@ -139,9 +147,8 @@ describe('runtime widget grid', () => {
     const handle = mount();
     handle.update([widget('a', 0, 0, 1, 1), widget('b', 1, 0, 2, 1)], () => undefined);
 
-    const tiles = Array.from(container.querySelectorAll('.deck-grid-tile')) as HTMLElement[];
-    const single = parseFloat(tiles[0].style.width);
-    const double = parseFloat(tiles[1].style.width);
+    const single = parseFloat(tileOf('a').style.width);
+    const double = parseFloat(tileOf('b').style.width);
 
     // Two cells plus the gap they straddle, so more than twice one cell.
     expect(double).toBeGreaterThan(single * 2);
@@ -167,10 +174,8 @@ describe('runtime widget grid', () => {
     handle.update([widget('a', 0, 0), widget('b', 1, 0)],
       id => tree(id === 'a' ? 'first' : 'second'));
 
-    const tiles = Array.from(container.querySelectorAll('.deck-grid-tile')) as HTMLElement[];
-
-    expect(tiles[0].querySelector('.widget-text')!.textContent).toBe('first');
-    expect(tiles[1].querySelector('.widget-text')!.textContent).toBe('second');
+    expect(tileOf('a').querySelector('.widget-text')!.textContent).toBe('first');
+    expect(tileOf('b').querySelector('.widget-text')!.textContent).toBe('second');
   });
 
   it('leaves a tile empty when no tree has arrived for it yet', () => {
@@ -300,6 +305,66 @@ describe('runtime widget grid', () => {
     // restart every animation and re-decode every cover, several times a second, across the deck.
     expect(container.querySelector('.deck-grid-tile')).toBe(tile);
     expect(container.querySelector('.widget-text')).toBe(text);
+  });
+
+  it('paints tiles in position order, not in the order the widgets were handed over', () => {
+    const handle = mount({ cols: 2, rows: 2 });
+    handle.update([widget('d', 1, 1), widget('a', 0, 0), widget('c', 0, 1), widget('b', 1, 0)], () => undefined);
+
+    expect(paintedIds()).toBe('d c b a');
+
+    handle.update([widget('b', 1, 0), widget('c', 0, 1), widget('a', 0, 0), widget('d', 1, 1)], () => undefined);
+
+    expect(paintedIds()).toBe('d c b a');
+  });
+
+  it('reorders the tiles it already has when a widget moves, without rebuilding them', () => {
+    const handle = mount({ cols: 2, rows: 2 });
+    handle.update([widget('a', 0, 0), widget('b', 1, 1)], () => undefined);
+    const a = tileOf('a');
+    const b = tileOf('b');
+    expect(paintedIds()).toBe('b a');
+
+    handle.update([widget('a', 1, 1), widget('b', 0, 0)], () => undefined);
+
+    expect(paintedIds()).toBe('a b');
+    expect(tileOf('a')).toBe(a);
+    expect(tileOf('b')).toBe(b);
+  });
+
+  it('does not touch the tiles when an update keeps every position', () => {
+    const handle = mount({ cols: 2, rows: 2 });
+    const widgets = [widget('a', 0, 0), widget('b', 1, 0), widget('c', 0, 1)];
+    handle.update(widgets, () => undefined);
+    const surface = container.querySelector('.deck-grid') as HTMLElement;
+    const moves: MutationRecord[] = [];
+    const observer = new MutationObserver(records => moves.push(...records));
+    observer.observe(surface, { childList: true });
+
+    handle.update(widgets.slice().reverse(), () => tree('again'));
+    const seen = observer.takeRecords();
+    observer.disconnect();
+
+    expect(moves.length + seen.length).toBe(0);
+  });
+
+  it('turns the shadows off and back on', () => {
+    const handle = mount();
+    const surface = container.querySelector('.deck-grid') as HTMLElement;
+    handle.update([widget('a', 0, 0)], () => undefined);
+    expect(surface.classList.contains('deck-grid-flat')).toBeFalse();
+
+    handle.setShadows(false);
+    expect(surface.classList.contains('deck-grid-flat')).toBeTrue();
+
+    handle.setShadows(true);
+    expect(surface.classList.contains('deck-grid-flat')).toBeFalse();
+  });
+
+  it('starts flat when it is created with shadows off', () => {
+    renderWidgetGrid(container, { host, geometry: { cols: 5, rows: 3 }, shadows: false });
+
+    expect((container.querySelector('.deck-grid') as HTMLElement).classList.contains('deck-grid-flat')).toBeTrue();
   });
 
   it('gives every tile an opaque face of its own', () => {

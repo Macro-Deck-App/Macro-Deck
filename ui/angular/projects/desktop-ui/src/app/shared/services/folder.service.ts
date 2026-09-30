@@ -487,6 +487,8 @@ export class FolderService {
       ?? DEFAULT_EMPTY_CELL_STYLE;
   });
 
+  readonly currentShadows = computed(() => this.profileService.selectedProfile()?.defaultShadows !== false);
+
   readonly currentViewId = computed(() => this.selectedFolder()?.viewId ?? WIDGET_GRID_VIEW_ID);
 
   readonly currentIsWidgetGrid = computed(() => isWidgetGridView(this.currentViewId()));

@@ -9,12 +9,12 @@ describe('folder grid inheritance', () => {
 
   it('prefers what the folder states', () => {
     expect(resolveFolderGrid(stated, profile))
-      .toEqual({ cols: 8, rows: 4, spacing: 20, borderRadius: 30, emptyCellStyle: 'visible' });
+      .toEqual({ cols: 8, rows: 4, spacing: 20, borderRadius: 30, emptyCellStyle: 'visible', shadows: true });
   });
 
   it('falls back to the profile for everything the folder leaves out', () => {
     expect(resolveFolderGrid(nothing, profile))
-      .toEqual({ cols: 6, rows: 5, spacing: 18, borderRadius: 26, emptyCellStyle: 'visible' });
+      .toEqual({ cols: 6, rows: 5, spacing: 18, borderRadius: 26, emptyCellStyle: 'visible', shadows: true });
   });
 
   it('takes the nearest ancestor that states one, ahead of the profile', () => {
@@ -37,7 +37,7 @@ describe('folder grid inheritance', () => {
     const parent = { cols: 6, rows: null, spacing: null, borderRadius: null };
 
     expect(resolveFolderGrid(nothing, profile, [parent]))
-      .toEqual({ cols: 6, rows: 5, spacing: 18, borderRadius: 26, emptyCellStyle: 'visible' });
+      .toEqual({ cols: 6, rows: 5, spacing: 18, borderRadius: 26, emptyCellStyle: 'visible', shadows: true });
   });
 
   it('lets what the folder states win over an ancestor that states one too', () => {
@@ -57,16 +57,25 @@ describe('folder grid inheritance', () => {
       spacing: WIDGET_REFERENCE_GAP,
       borderRadius: WIDGET_REFERENCE_BORDER_RADIUS,
       emptyCellStyle: 'visible',
+      shadows: true,
     });
   });
 
   it('inherits field by field', () => {
     expect(resolveFolderGrid({ ...nothing, cols: 8 }, profile))
-      .toEqual({ cols: 8, rows: 5, spacing: 18, borderRadius: 26, emptyCellStyle: 'visible' });
+      .toEqual({ cols: 8, rows: 5, spacing: 18, borderRadius: 26, emptyCellStyle: 'visible', shadows: true });
   });
 
   it('treats a stated zero as stated', () => {
     expect(resolveFolderGrid({ ...nothing, spacing: 0 }, profile).spacing).toBe(0);
+  });
+
+  it('keeps widget shadows on unless the profile switches them off', () => {
+    expect(resolveFolderGrid(nothing, profile).shadows).toBeTrue();
+    expect(resolveFolderGrid(nothing, { ...profile, shadows: null }).shadows).toBeTrue();
+    expect(resolveFolderGrid(nothing, { ...profile, shadows: true }).shadows).toBeTrue();
+    expect(resolveFolderGrid(nothing, { ...profile, shadows: false }).shadows).toBeFalse();
+    expect(resolveFolderGrid(null).shadows).toBeTrue();
   });
 
   it('resolves a folder it has never heard of', () => {

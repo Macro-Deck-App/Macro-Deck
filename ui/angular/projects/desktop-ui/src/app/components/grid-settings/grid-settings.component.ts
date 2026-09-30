@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AppStrings, type EmptyCellStyle, isEmptyCellStyle, WIDGET_REFERENCE_BORDER_RADIUS } from '@macro-deck/runtime';
-import { LocalizationService, SegmentedControlComponent, type SegmentedOption } from '@shared';
+import { LocalizationService, SegmentedControlComponent, type SegmentedOption, ToggleSwitchComponent } from '@shared';
 import { ColorPickerComponent, ColorPreset } from '../forms/color-picker/color-picker.component';
 import { InheritableSettingComponent } from '../forms/inheritable-setting/inheritable-setting.component';
 
@@ -10,7 +10,7 @@ const INHERIT_EMPTY_CELL_STYLE = 'inherit';
 @Component({
   selector: 'shared-grid-settings',
   standalone: true,
-  imports: [FormsModule, ColorPickerComponent, InheritableSettingComponent, SegmentedControlComponent],
+  imports: [FormsModule, ColorPickerComponent, InheritableSettingComponent, SegmentedControlComponent, ToggleSwitchComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './grid-settings.component.html',
   styleUrls: ['./grid-settings.component.scss']
@@ -41,6 +41,8 @@ export class GridSettingsComponent {
   @Input() showWidgetAppearance = false;
   @Input() spacing: number | null = null;
   @Input() borderRadius: number | null = null;
+  @Input() showShadowsToggle = false;
+  @Input() shadows = true;
   @Input() effectiveSpacing = 12;
   @Input() effectiveBorderRadius: number | null = null;
 
@@ -56,6 +58,7 @@ export class GridSettingsComponent {
   @Output() spacingChange = new EventEmitter<number | null>();
   @Output() borderRadiusChange = new EventEmitter<number | null>();
   @Output() emptyCellStyleChange = new EventEmitter<EmptyCellStyle | null>();
+  @Output() shadowsChange = new EventEmitter<boolean>();
 
   private readonly localization = inject(LocalizationService);
 
@@ -71,6 +74,8 @@ export class GridSettingsComponent {
     this.localization.translateKey(AppStrings.Widgets.GridSettings.WidgetSpacing));
   readonly cornerRadiusLabel = computed(() =>
     this.localization.translateKey(AppStrings.Widgets.GridSettings.CornerRadius));
+  readonly widgetShadowsLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Widgets.GridSettings.WidgetShadows));
   readonly backgroundLabel = computed(() =>
     this.localization.translateKey(AppStrings.Widgets.GridSettings.Background));
 
@@ -154,5 +159,9 @@ export class GridSettingsComponent {
     const style = isEmptyCellStyle(value) ? value : null;
     this.emptyCellStyle = style;
     this.emptyCellStyleChange.emit(style);
+  }
+
+  onShadowsChange(value: boolean): void {
+    this.shadowsChange.emit(value);
   }
 }

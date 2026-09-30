@@ -171,6 +171,45 @@ public class ProfileServiceGridTests
 		});
 	}
 
+	[Test]
+	public async Task Create_WithShadowsOff_StoresIt()
+	{
+		var result = await _profileService.Create("Quiet", defaultWidgetShadows: false);
+
+		Assert.That(result.Data!.DefaultWidgetShadows, Is.False);
+		Assert.That(_cache.GetById(result.Data.Id)!.DefaultWidgetShadows, Is.False);
+	}
+
+	[Test]
+	public async Task Create_WithoutShadowsArgument_LeavesItUnset()
+	{
+		var result = await _profileService.Create("Plain");
+
+		Assert.That(result.Data!.DefaultWidgetShadows, Is.Null);
+	}
+
+	[Test]
+	public async Task Update_NullLeavesDefaultWidgetShadowsUnchanged()
+	{
+		await _profileService.Update(_profileId, null, null, null, null, null, null, null, defaultWidgetShadows: false);
+
+		var result = await _profileService.Update(_profileId, null, null, null, null, null, null, null, defaultWidgetShadows: null);
+
+		Assert.That(result.Success, Is.True);
+		Assert.That(result.Data!.DefaultWidgetShadows, Is.False);
+	}
+
+	[TestCase(false)]
+	[TestCase(true)]
+	public async Task Update_StoresAnExplicitDefaultWidgetShadowsValue(bool shadows)
+	{
+		var result = await _profileService.Update(_profileId, null, null, null, null, null, null, null, defaultWidgetShadows: shadows);
+
+		Assert.That(result.Success, Is.True);
+		Assert.That(result.Data!.DefaultWidgetShadows, Is.EqualTo(shadows));
+		Assert.That(_cache.GetById(_profileId)!.DefaultWidgetShadows, Is.EqualTo(shadows));
+	}
+
 	[TestCase(-2)]
 	[TestCase(41)]
 	public async Task Update_RejectsOutOfRangeDefaultWidgetSpacing(int value)

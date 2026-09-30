@@ -852,6 +852,11 @@ public class ActionButtonWidgetSessionTests
 	/// <see cref="WidgetIconResolution.Inactive" />, matching a button with no icon-provider assignment.</summary>
 	internal sealed class FakeWidgetIconService : IWidgetIconService
 	{
+		public Task<WidgetIconResolution> Resolve(Guid widgetId,
+			MacroDeckHost.Application.Widgets.WidgetIconLimit limit,
+			CancellationToken cancellationToken = default)
+			=> Resolve(widgetId, cancellationToken);
+
 		public WidgetIconResolution Resolution { get; set; } = WidgetIconResolution.Inactive;
 
 		public TimeSpan? PollInterval { get; set; }
@@ -873,6 +878,11 @@ public class ActionButtonWidgetSessionTests
 	/// or DI-scope machinery.</summary>
 	private sealed class FakeWidgetIconResources : IWidgetIconResources
 	{
+		public Task<MacroDeck.Ui.Model.Resources.UiResource?> ResolveAsync(WidgetIconReference? reference,
+			MacroDeckHost.Application.Widgets.WidgetIconLimit limit,
+			CancellationToken cancellationToken)
+			=> ResolveAsync(reference, cancellationToken);
+
 		public HashSet<string> FailingIconIds { get; } = new(StringComparer.Ordinal);
 
 		public List<string> ResolvedIconIds { get; } = [];

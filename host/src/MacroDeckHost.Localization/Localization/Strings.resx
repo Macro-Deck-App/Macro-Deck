@@ -6056,7 +6056,7 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Body type</value>
   </data>
   <data name="Integrations.Http.Actions.SendRequestCapturesDescription" xml:space="preserve">
-    <value>Variable name -&gt; selector. Reserved selectors: $status, $ok, $duration, $body, $truncated, $headers, $header:&lt;name&gt;. Anything else is a JSON path (e.g. data.items[0].name). Reserved selectors win, so a body field literally named "status" must be addressed as "$.status".</value>
+    <value>Variable name -&gt; selector. Reserved selectors: $status, $ok, $duration, $body, $truncated, $headers, $header:&lt;name&gt;. Anything else is a JSON path (e.g. data.items[0].name). Reserved selectors win, so a body field literally named "status" must be addressed as "$.status". $body is stored without leading or trailing whitespace.</value>
   </data>
   <data name="Integrations.Http.Actions.SendRequestCapturesLabel" xml:space="preserve">
     <value>Captures</value>
@@ -17724,6 +17724,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Widgets.GridSettings.Rows" xml:space="preserve">
     <value>Rows</value>
+  </data>
+  <data name="Widgets.GridSettings.WidgetShadows" xml:space="preserve">
+    <value>Widget shadows</value>
   </data>
   <data name="Widgets.GridSettings.WidgetSpacing" xml:space="preserve">
     <value>Widget spacing</value>

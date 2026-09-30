@@ -217,6 +217,20 @@ play:
   plugin hands out a plain `http` address, which a browser refuses on a secure page. Open the web client over
   http on your local network, or ask the plugin's creator to serve the stream over https.
 
+## An animated icon shows a still image
+
+What decides whether an animated icon, such as a GIF, plays is how large the animation is at the button's
+size, not how long it runs. That is why one long GIF plays while a shorter, more detailed one does not:
+
+- On Macro Deck's own buttons and sliders, an icon from an icon pack that would be larger than 8 MB plays
+  at a smaller resolution instead. Only an animation too large even at the smallest resolution shows its
+  first frame.
+- Widgets from plugins, images an action draws itself for a button, and action icons on hardware devices
+  keep a limit of 2 MB, so the same GIF can animate on one button and show a still image on another.
+
+To make a large animation play, shorten it, crop it to the part that matters, lower its frame rate, or
+reduce its colors before importing it again.
+
 ## Installing on Linux
 
 - **The stable APT suite is empty:** there is no stable release of Macro Deck 3 yet. Use the beta

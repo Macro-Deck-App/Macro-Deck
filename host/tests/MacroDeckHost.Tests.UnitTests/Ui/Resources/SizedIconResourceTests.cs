@@ -1,4 +1,5 @@
 using System.Text;
+using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeckHost.Api.Controllers;
 using MacroDeckHost.Application.Plugins.IconPacks;
 using MacroDeckHost.Application.Ui.Resources;
@@ -211,6 +212,37 @@ internal sealed class SizedIconResourceTests
 		Assert.That(EdgeOf(served), Is.EqualTo(256));
 	}
 
+	[Test]
+	public async Task A_long_animation_on_a_Macro_Deck_button_is_served_at_the_requested_resolution()
+	{
+		var animationBytes = ProtocolLimits.MaxUiResourceBytes * 2;
+		var source = new FakeSource { OversizedAtOrAbove = 512, OversizedBytes = animationBytes };
+		var store = new UiResourceStore();
+		var handle = await RegisterFake(store, source);
+
+		var served = await Controller(store, sources: [source]).Get(handle.ResourceId, handle.ContentHash, "512")
+			as FileContentResult;
+
+		Assert.That(served?.FileContents.Length, Is.EqualTo(animationBytes));
+	}
+
+	[Test]
+	public async Task A_plugin_icon_over_the_plugin_limit_still_steps_down_to_a_smaller_resolution()
+	{
+		var handle = await LargeIcon(1024);
+		var source = new FakeSource
+		{
+			Type = WidgetIconReference.IconPackType,
+			OversizedAtOrAbove = 512,
+			OversizedBytes = ProtocolLimits.MaxUiResourceBytes * 2
+		};
+
+		var served = await Controller(sources: [source]).Get(handle.ResourceId, handle.ContentHash, "512")
+			as FileContentResult;
+
+		Assert.That(EdgeOf(served), Is.EqualTo(256));
+	}
+
 	private async Task<MacroDeck.Ui.Model.Resources.UiResource> LargeIcon(int edge)
 	{
 		var pack = await _host.Icons.CreatePack();
@@ -266,7 +298,9 @@ internal sealed class SizedIconResourceTests
 
 		public int OversizedAtOrAbove { get; init; } = int.MaxValue;
 
-		public string Type => SourceType;
+		public int OversizedBytes { get; init; } = HostUiResourceLimits.MaxHostIconResourceBytes + 1;
+
+		public string Type { get; init; } = SourceType;
 
 		public string? GetVersion(string reference) => "v1";
 
@@ -277,7 +311,7 @@ internal sealed class SizedIconResourceTests
 			CancellationToken cancellationToken)
 		{
 			var bytes = size >= OversizedAtOrAbove
-				? new byte[MacroDeck.Plugin.Protocol.Limits.ProtocolLimits.MaxUiResourceBytes + 1]
+				? new byte[OversizedBytes]
 				: await Png(size);
 			return new WidgetIconImage(new MemoryStream(bytes), "image/png", Stable);
 		}

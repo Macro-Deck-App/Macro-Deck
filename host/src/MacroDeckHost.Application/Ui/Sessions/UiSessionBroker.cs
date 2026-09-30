@@ -5,6 +5,8 @@ using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Model.Versioning;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Plugins;
+using MacroDeckHost.Application.Ui.Resources;
+using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
 using Serilog;
@@ -313,16 +315,20 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 				"That session is not open for this provider.");
 		}
 
-		var scan = UiPayloadValidator.Scan(payload.Utf8.Span, shape);
-		var decision = shape == UiPayloadShape.Tree
-			? _registry.EvaluateSnapshot(sessionId, scan)
-			: _registry.EvaluatePatch(sessionId, scan);
-
 		if (!_contexts.TryGetValue(sessionId, out var context))
 		{
 			return UiSessionIngestResult.Reject(UiSessionErrorCodes.SessionNotFound,
 				"That session is not open for this provider.");
 		}
+
+		// Only the host's own providers may declare host-sized icons; plugin trees keep the protocol limit.
+		var maxResourceBytes = context.Provider is InProcessUiSessionProvider
+			? HostUiResourceLimits.MaxHostIconResourceBytes
+			: ProtocolLimits.MaxUiResourceBytes;
+		var scan = UiPayloadValidator.Scan(payload.Utf8.Span, shape, maxResourceBytes);
+		var decision = shape == UiPayloadShape.Tree
+			? _registry.EvaluateSnapshot(sessionId, scan)
+			: _registry.EvaluatePatch(sessionId, scan);
 
 		switch (decision.Action)
 		{

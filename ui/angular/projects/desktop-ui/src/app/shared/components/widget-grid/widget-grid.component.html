@@ -8,7 +8,9 @@
     [style.padding.px]="PADDING"
     [style.--widget-scale]="contentScale"
     [style.--deck-scale]="contentScale"
-    [style.--widget-radius]="borderRadius !== null ? borderRadius + 'px' : null">
+    [style.--widget-radius]="borderRadius !== null ? borderRadius + 'px' : null"
+    [style.--widget-shadow]="shadows ? null : 'none'"
+    [style.--widget-shadow-lift]="shadows ? null : 'none'">
 
     @for (_ of emptyCells; track $index) {
       <div
@@ -31,7 +33,7 @@
       </div>
     }
 
-    @for (widget of widgets; track widget.id) {
+    @for (widget of paintOrdered; track widget.id) {
       <shared-widget-item
         [widget]="widget"
         [mode]="mode"

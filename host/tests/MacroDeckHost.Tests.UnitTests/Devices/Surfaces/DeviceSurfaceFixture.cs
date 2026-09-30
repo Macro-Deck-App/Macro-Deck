@@ -533,12 +533,24 @@ internal sealed class FakeWidgetStateService : IWidgetStateService
 /// provider-capable action configured at all.</summary>
 internal sealed class FakeWidgetIconService : IWidgetIconService
 {
-	private readonly Dictionary<Guid, WidgetIconResolution> _resolutions = [];
+	private readonly Dictionary<(Guid WidgetId, WidgetIconLimit Limit), WidgetIconResolution> _resolutions = [];
 
-	public void Set(Guid widgetId, WidgetIconResolution resolution) => _resolutions[widgetId] = resolution;
+	public void Set(Guid widgetId, WidgetIconResolution resolution)
+	{
+		Set(widgetId, WidgetIconLimit.Host, resolution);
+		Set(widgetId, WidgetIconLimit.Protocol, resolution);
+	}
+
+	public void Set(Guid widgetId, WidgetIconLimit limit, WidgetIconResolution resolution)
+		=> _resolutions[(widgetId, limit)] = resolution;
 
 	public Task<WidgetIconResolution> Resolve(Guid widgetId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(_resolutions.GetValueOrDefault(widgetId, WidgetIconResolution.Inactive));
+		=> Resolve(widgetId, WidgetIconLimit.Host, cancellationToken);
+
+	public Task<WidgetIconResolution> Resolve(Guid widgetId,
+		WidgetIconLimit limit,
+		CancellationToken cancellationToken = default)
+		=> Task.FromResult(_resolutions.GetValueOrDefault((widgetId, limit), WidgetIconResolution.Inactive));
 
 	public TimeSpan? GetProviderPollInterval(Guid widgetId) => null;
 }

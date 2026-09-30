@@ -29,5 +29,8 @@ public sealed class ProfileFile
 	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 	public string? DefaultEmptyCellStyle { get; set; }
 
+	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+	public bool? DefaultWidgetShadows { get; set; }
+
 	public List<ProfileFolder> Folders { get; set; } = [];
 }

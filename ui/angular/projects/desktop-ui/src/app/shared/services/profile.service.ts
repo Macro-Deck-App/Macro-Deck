@@ -112,6 +112,7 @@ export class ProfileService {
       defaultWidgetSpacing?: number;
       defaultWidgetBorderRadius?: number;
       defaultEmptyCellStyle?: string;
+      defaultWidgetShadows?: boolean;
     }
   ): Promise<Result<Profile>> {
     try {
@@ -149,6 +150,7 @@ export class ProfileService {
       defaultWidgetSpacing?: number;
       defaultWidgetBorderRadius?: number;
       defaultEmptyCellStyle?: string;
+      defaultWidgetShadows?: boolean;
     }
   ): Promise<Result<Profile>> {
     try {
@@ -246,7 +248,8 @@ export class ProfileService {
         : (ipc.defaultBackgroundColor ?? null),
       defaultSpacing: ipc.defaultWidgetSpacing ?? null,
       defaultBorderRadius: ipc.defaultWidgetBorderRadius ?? null,
-      defaultEmptyCellStyle: emptyCellStyleFromWire(ipc.defaultEmptyCellStyle)
+      defaultEmptyCellStyle: emptyCellStyleFromWire(ipc.defaultEmptyCellStyle),
+      defaultShadows: ipc.defaultWidgetShadows ?? null
     };
   }
 }

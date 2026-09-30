@@ -6055,7 +6055,7 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>Type de corps</value>
   </data>
   <data name="Integrations.Http.Actions.SendRequestCapturesDescription" xml:space="preserve">
-    <value>Nom de variable -&gt; sélecteur. Sélecteurs réservés: $status, $ok, $duration, $body, $truncated, $headers, $header:&lt;name&gt;. Tout le reste est un chemin JSON (p. ex. data.items[0].name). Les sélecteurs réservés sont prioritaires, donc un champ du corps nommé littéralement "status" doit être adressé comme "$.status".</value>
+    <value>Nom de variable -&gt; sélecteur. Sélecteurs réservés: $status, $ok, $duration, $body, $truncated, $headers, $header:&lt;name&gt;. Tout le reste est un chemin JSON (p. ex. data.items[0].name). Les sélecteurs réservés sont prioritaires, donc un champ du corps nommé littéralement "status" doit être adressé comme "$.status". $body est enregistré sans espaces blancs au début ni à la fin.</value>
   </data>
   <data name="Integrations.Http.Actions.SendRequestCapturesLabel" xml:space="preserve">
     <value>Captures</value>
@@ -17722,6 +17722,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Widgets.GridSettings.Rows" xml:space="preserve">
     <value>Lignes</value>
+  </data>
+  <data name="Widgets.GridSettings.WidgetShadows" xml:space="preserve">
+    <value>Ombres des widgets</value>
   </data>
   <data name="Widgets.GridSettings.WidgetSpacing" xml:space="preserve">
     <value>Espacement des widgets</value>

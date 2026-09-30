@@ -950,6 +950,18 @@ describe('FolderService widget layout', () => {
       expect(service.currentInheritedEmptyCellStyle()).toBe('visible');
     });
 
+    it('keeps widget shadows on when the profile never chose', () => {
+      currentProfile = stubProfile();
+
+      expect(service.currentShadows()).toBeTrue();
+    });
+
+    it('turns widget shadows off when the profile does', () => {
+      currentProfile = stubProfile({ defaultShadows: false });
+
+      expect(service.currentShadows()).toBeFalse();
+    });
+
     it('sends the picked style, and an empty string to go back to inheriting', async () => {
       apiSpy.updateFolder.and.resolveTo({ success: true });
 

@@ -10,7 +10,7 @@
   // Radius scales with the cell size (--widget-scale set by the grid container), so corners
   // keep the same visual proportion as the transform-scaled widget content.
   border-radius: calc(var(--widget-radius, 22px) * var(--widget-scale, 1));
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--widget-shadow, 0 4px 6px -1px rgba(0, 0, 0, 0.3));
   overflow: hidden;
   cursor: default;
   position: relative;
@@ -77,12 +77,12 @@
 @keyframes widget-land {
   0% {
     transform: scale(1.03);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--widget-shadow-lift, 0 12px 24px rgba(0, 0, 0, 0.35));
   }
 
   100% {
     transform: scale(1);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--widget-shadow, 0 4px 6px -1px rgba(0, 0, 0, 0.3));
   }
 }
 
