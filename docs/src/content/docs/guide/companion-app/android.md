@@ -67,6 +67,8 @@ brightness.
 - **Shortcuts:** long-press the app icon to run one of your scripts, if you added it there, or to open one of your
   saved computers directly.
 - **Widget:** the **Macro Deck host** widget opens the deck of the computer you choose for it.
+- **Scripts widget:** the **Macro Deck scripts** widget holds up to eight scripts of one computer and runs each with a
+  tap. See [Run scripts from other apps](/guide/companion-app/automation/#android-scripts-widget).
 - **Script shortcuts:** put a script, with the values it runs with, on the home screen or in the menu of the app
   icon, which runs it with a tap. See [Run scripts from other apps](/guide/companion-app/automation/#android-shortcuts).
 
