@@ -327,8 +327,8 @@ describe('VariablesManagerComponent', () => {
     await fixture.whenStable();
     await flushViewport();
 
-    const name = fixture.nativeElement.querySelector('.vars-public-name') as HTMLElement;
-    const value = fixture.nativeElement.querySelector('.vars-value') as HTMLElement;
+    const name = fixture.nativeElement.querySelector('.vars-row .vr-primary') as HTMLElement;
+    const value = fixture.nativeElement.querySelector('.vars-row .vr-value') as HTMLElement;
 
     expect(name.title).toBe('vars.spotify_currently_playing_track_album_artist_name');
     expect(value.title).toBe('A value long enough that the row has to truncate it as well');
@@ -564,7 +564,7 @@ describe('VariablesManagerComponent', () => {
       const picked: Variable[] = [];
       component.pick.subscribe(v => picked.push(v));
 
-      const row = fixture.nativeElement.querySelector('.vars-row-pick') as HTMLButtonElement;
+      const row = fixture.nativeElement.querySelector('.vars-row-pick button') as HTMLButtonElement;
       row.click();
 
       expect(picked.map(v => v.id)).toEqual(['1']);
@@ -590,7 +590,7 @@ describe('VariablesManagerComponent', () => {
       await flushViewport();
 
       expect(component.listed().length).toBe(1);
-      const names = Array.from(fixture.nativeElement.querySelectorAll('.vars-public-name'))
+      const names = Array.from(fixture.nativeElement.querySelectorAll('.vars-row .vr-primary'))
         .map(el => (el as HTMLElement).textContent?.trim());
       expect(names).toContain('vars.var_4999');
     });
@@ -609,7 +609,7 @@ describe('VariablesManagerComponent', () => {
         'integration:int-b',
         'integration:int-c',
       ]);
-      expect(fixture.nativeElement.querySelector('.vars-group-header')).not.toBeNull();
+      expect(fixture.nativeElement.querySelector('shared-variable-group-header')).not.toBeNull();
       expect(fixture.nativeElement.querySelectorAll('.vars-row').length).toBeLessThan(200);
     });
 
@@ -631,13 +631,25 @@ describe('VariablesManagerComponent', () => {
 
       const picked: Variable[] = [];
       component.pick.subscribe(v => picked.push(v));
-      const row = fixture.nativeElement.querySelector('.vars-row-pick') as HTMLButtonElement;
-      const renderedName = row.querySelector('.vars-public-name')?.textContent?.trim();
+      const row = fixture.nativeElement.querySelector('.vars-row-pick button') as HTMLButtonElement;
+      const renderedName = row.querySelector('.vr-primary')?.textContent?.trim();
       row.click();
 
       expect(renderedName).toBeTruthy();
       expect(picked.length).toBe(1);
       expect(component.publicName(picked[0])).toBe(renderedName!);
+    });
+
+    it('lets the user scroll a list longer than its pane', async () => {
+      fixture.componentRef.setInput('variables', flatVariables(200));
+      fixture.componentRef.setInput('source', { kind: 'user' });
+      await fixture.whenStable();
+      await flushViewport();
+
+      const list = fixture.nativeElement.querySelector('.vars-list') as HTMLElement;
+
+      expect(list.scrollHeight).toBeGreaterThan(list.clientHeight);
+      expect(['auto', 'scroll']).toContain(getComputedStyle(list).overflowY);
     });
 
     it('shows the empty state and zero rows for an empty list', async () => {
@@ -654,73 +666,14 @@ describe('VariablesManagerComponent', () => {
     });
   });
 
-  describe('an integration catalog', () => {
-    it('lists its unbound entries in the same run as the variables, marked instead of valued', async () => {
-      // The point of the merge: to the user these are the same integration's variables, one lot with
-      // a value and one lot still to be bound - not a separate browser sitting under the list.
-      component.source = { kind: 'integration', integrationId: 'obs' };
-      await fixture.whenStable();
-      fixture.detectChanges();
-      await fixture.whenStable();
-      fixture.detectChanges();
-
-      const rows = component.rows();
-      const leaf = rows.find(r => r.kind === 'catalog-leaf');
-
-      expect(leaf).withContext('an unbound catalog entry belongs in the list').toBeTruthy();
-      expect((leaf as { node: { name: string } }).node.name).toBe('volume');
-    });
-
-    it('narrows catalog entries by the search box, like the variables beside them', async () => {
-      // They are listed as one list, so a search that filtered only half of it would leave entries
-      // on screen that plainly do not match what was typed.
-      component.source = { kind: 'integration', integrationId: 'obs' };
-      await fixture.whenStable();
-      fixture.detectChanges();
-      await fixture.whenStable();
-
-      expect(component.rows().some(r => r.kind === 'catalog-leaf')).toBeTrue();
-
-      component.search.set('nothing-matches-this');
-      fixture.detectChanges();
-
-      expect(component.rows().some(r => r.kind === 'catalog-leaf')).toBeFalse();
-    });
-
-    it('counts the unbound entries beside the variables, and one fewer once one is bound', async () => {
-      // The fixture's catalog holds two leaves: `volume` unbound and `muted` already bound. What the
-      // user is told is how many are still to be bound, so binding one has to move it by exactly one -
-      // a count taken from whatever pages happen to be cached jumps instead, because binding
-      // refetches them.
-      component.source = { kind: 'integration', integrationId: 'obs' };
-      await fixture.whenStable();
-      fixture.detectChanges();
-      await fixture.whenStable();
-
-      expect(component.unboundCount()).toBe(1);
-    });
-
-    it('does not list an entry that is already bound, which the list shows as a real variable', async () => {
-      // `muted` carries a boundVariableId, so it is already above as the variable it became; listing
-      // it again as a catalog entry would show one resource twice, once with a value and once without.
-      component.source = { kind: 'integration', integrationId: 'obs' };
-      await fixture.whenStable();
-      fixture.detectChanges();
-      await fixture.whenStable();
-      fixture.detectChanges();
-
-      const names = component.rows()
-        .filter(r => r.kind === 'catalog-leaf')
-        .map(r => (r as { node: { name: string } }).node.name);
-
-      expect(names).not.toContain('muted');
-    });
-  });
-
   interface CatalogRowView {
     kind: string;
     depth?: number;
-    text?: string;
+    note?: string;
+    count?: number | null;
+    expanded?: boolean;
+    integrationId?: string;
+    variable?: Variable;
     node?: VariableCatalogNode;
   }
 
@@ -748,6 +701,15 @@ describe('VariablesManagerComponent', () => {
     await TestBed.inject(VariableCatalogService).loadProviders();
   }
 
+  async function openUnbound(integrationId: string): Promise<void> {
+    component.toggleUnbound(integrationId);
+    await settle();
+  }
+
+  function unboundHeader(integrationId: string): CatalogRowView | undefined {
+    return catalogRows().find(r => r.kind === 'unbound-header' && r.integrationId === integrationId);
+  }
+
   async function afterSearchDebounce(): Promise<void> {
     await new Promise(resolve => setTimeout(resolve, 600));
   }
@@ -755,6 +717,160 @@ describe('VariablesManagerComponent', () => {
   function discoverCalls(): DiscoverCatalogVariablesRequest[] {
     return api().discoverCatalogVariables.calls.allArgs().map(args => args[0] as DiscoverCatalogVariablesRequest);
   }
+
+  describe('an integration catalog', () => {
+    beforeEach(async () => {
+      component.source = { kind: 'integration', integrationId: 'obs' };
+      await settle();
+    });
+
+    it('keeps its unbound entries out of the list until their group is opened', async () => {
+      expect(unboundHeader('obs')?.expanded).toBeFalse();
+      expect(catalogRows().some(r => r.kind === 'catalog-leaf')).toBeFalse();
+
+      await openUnbound('obs');
+
+      const leaf = catalogRows().find(r => r.kind === 'catalog-leaf');
+      expect(leaf?.node?.name).toBe('volume');
+    });
+
+    it('leaves the bound variables in view under one collapsed header', () => {
+      const kinds = catalogRows().map(r => r.kind);
+
+      expect(kinds).toEqual(['unbound-header', 'row']);
+      expect(fixture.nativeElement.querySelector('.vars-unbound-header button')?.getAttribute('aria-expanded'))
+        .toBe('false');
+    });
+
+    it('explains what the group holds next to its label', () => {
+      const header = fixture.nativeElement.querySelector('.vars-unbound-header') as HTMLElement;
+
+      expect(header.querySelector('.vgh-hint')?.getAttribute('title')).toBe(component.unboundHint());
+      expect(header.querySelector('button')?.getAttribute('aria-description')).toBe(component.unboundHint());
+      expect(component.unboundHint().length).toBeGreaterThan(20);
+    });
+
+    it('opens and closes the group from its header', async () => {
+      const toggle = fixture.nativeElement.querySelector('.vars-unbound-header button') as HTMLButtonElement;
+
+      toggle.click();
+      await settle();
+      expect(fixture.nativeElement.querySelector('.vars-catalog-leaf')).not.toBeNull();
+
+      (fixture.nativeElement.querySelector('.vars-unbound-header button') as HTMLButtonElement).click();
+      await settle();
+      expect(fixture.nativeElement.querySelector('.vars-catalog-leaf')).toBeNull();
+    });
+
+    it('counts a fully loaded catalog in the header and leaves the subtitle to the variables', () => {
+      expect(unboundHeader('obs')?.count).toBe(1);
+      expect(fixture.nativeElement.querySelector('.vars-subtitle')?.textContent?.trim()).toBe('1 variable');
+    });
+
+    it('shows no count while a type or writable filter narrows what is listed', async () => {
+      component.mode = 'pick';
+      component.acceptedTypes = ['numeric'];
+      await settle();
+
+      expect(unboundHeader('obs')).toBeTruthy();
+      expect(unboundHeader('obs')?.count).toBeNull();
+    });
+
+    it('does not list an entry that is already bound, which the list shows as a real variable', async () => {
+      await openUnbound('obs');
+
+      const names = catalogRows().filter(r => r.kind === 'catalog-leaf').map(r => r.node!.name);
+
+      expect(names).not.toContain('muted');
+    });
+
+    it('asks for a bind when an unbound entry is activated', async () => {
+      await openUnbound('obs');
+      const requested = spyOn(component.catalogBindRequested, 'emit');
+
+      (fixture.nativeElement.querySelector('.vars-catalog-leaf button') as HTMLButtonElement).click();
+
+      expect(requested).toHaveBeenCalledWith(jasmine.objectContaining({ integrationId: 'obs' }));
+    });
+
+    it('starts opened where the host asks for it', async () => {
+      fixture.componentRef.setInput('unboundExpanded', true);
+      await settle();
+
+      expect(catalogRows().some(r => r.kind === 'catalog-leaf')).toBeTrue();
+    });
+
+    it('drops the group when everything the catalog offers is bound', async () => {
+      api().discoverCatalogVariables.and.resolveTo({
+        nodes: [{ id: 'input/mic/muted', name: 'muted', displayName: null, hasChildren: false, type: 'boolean', boundVariableId: '4' }],
+        hasMore: false,
+        available: true,
+      } as never);
+      TestBed.inject(VariableCatalogService).invalidateIntegration('obs');
+      await settle();
+
+      expect(unboundHeader('obs')).toBeUndefined();
+    });
+
+    it('brings an entry back once it is unbound, even if the provider reported none left', async () => {
+      await useProvider({ integrationId: 'obs', unboundCount: 0 });
+      api().discoverCatalogVariables.and.resolveTo({ nodes: [], hasMore: false, available: true } as never);
+      TestBed.inject(VariableCatalogService).invalidateIntegration('obs');
+      await settle();
+      expect(catalogRows().some(r => r.kind === 'catalog-leaf')).toBeFalse();
+
+      api().discoverCatalogVariables.and.resolveTo({
+        nodes: [{ id: 'input/mic/muted', name: 'muted', displayName: null, hasChildren: false, type: 'boolean' }],
+        hasMore: false,
+        available: true,
+      } as never);
+      TestBed.inject(VariableCatalogService).invalidateIntegration('obs');
+      await settle();
+
+      expect(unboundHeader('obs')?.count).withContext('what is listed wins over a stale report').toBe(1);
+      await openUnbound('obs');
+      expect(catalogRows().filter(r => r.kind === 'catalog-leaf').map(r => r.node!.name)).toEqual(['muted']);
+    });
+
+    it('says so when the integration cannot be reached', async () => {
+      api().discoverCatalogVariables.and.resolveTo({ nodes: [], hasMore: false, available: false } as never);
+      TestBed.inject(VariableCatalogService).invalidateIntegration('obs');
+      await settle();
+      await openUnbound('obs');
+      await flushViewport();
+
+      const state = fixture.nativeElement.querySelector('.vars-state-row') as HTMLElement;
+      expect(state.textContent).toContain('obs');
+      expect(state.querySelector('shared-button')).not.toBeNull();
+    });
+
+    describe('while searching', () => {
+      it('lists matching variables before matching unbound entries', async () => {
+        component.search.set('v');
+        await afterSearchDebounce();
+        await settle();
+
+        expect(catalogRows().map(r => r.kind)).toEqual(['row', 'unbound-header', 'catalog-leaf']);
+      });
+
+      it('shows the group only when it has a match', async () => {
+        component.search.set('var_4');
+        await afterSearchDebounce();
+        await settle();
+
+        expect(catalogRows().map(r => r.kind)).toEqual(['row']);
+      });
+
+      it('falls back to the empty state when nothing matches anywhere', async () => {
+        component.search.set('nothing-matches-this');
+        await afterSearchDebounce();
+        await settle();
+
+        expect(component.rows().length).toBe(0);
+        expect(fixture.nativeElement.querySelector('shared-empty-state')).not.toBeNull();
+      });
+    });
+  });
 
   describe('a searchable catalog of containers', () => {
     const entityCount = 500;
@@ -799,13 +915,35 @@ describe('VariablesManagerComponent', () => {
       await settle();
     });
 
+    async function open(): Promise<void> {
+      await openUnbound('ha');
+    }
+
     function expand(nodeId: string): void {
       const row = catalogRows().find(r => r.kind === 'catalog-branch' && r.node?.id === nodeId);
       expect(row).withContext(`${nodeId} is listed as a container`).toBeTruthy();
       component.toggleCatalogBranch('ha', row!.node!);
     }
 
-    it('asks only for the first root page and lists the containers without opening them', () => {
+    it('asks the host for nothing while the group is closed', () => {
+      expect(unboundHeader('ha')).toBeTruthy();
+      expect(discoverCalls().length).toBe(0);
+    });
+
+    it('never shows the empty state while a search that only the catalog can answer is on its way', async () => {
+      searchResults['Kitchen'] = [entity(499)];
+
+      component.search.set('Kitchen');
+      fixture.detectChanges();
+      expect(component.rows().length).withContext('before the debounce').toBeGreaterThan(0);
+
+      await afterSearchDebounce();
+      await settle();
+      expect(catalogRows().filter(r => r.kind === 'catalog-branch').map(r => r.node!.id)).toEqual(['entity/light.e499']);
+    });
+
+    it('asks only for the first root page and lists the containers without opening them', async () => {
+      await open();
       const calls = discoverCalls();
 
       expect(calls.length).toBeGreaterThan(0);
@@ -815,7 +953,21 @@ describe('VariablesManagerComponent', () => {
       expect(catalogRows().some(r => r.kind === 'catalog-leaf')).toBeFalse();
     });
 
+    it('pages through every entry of a catalog larger than a host page with the load more row', async () => {
+      await open();
+      const counts: number[] = [];
+      for (let step = 0; step < 10 && catalogRows().some(r => r.kind === 'catalog-grow'); step++) {
+        counts.push(catalogRows().filter(r => r.kind === 'catalog-branch').length);
+        component.growCatalog('ha');
+        await settle();
+      }
+
+      expect(counts).toEqual([100, 200, 300, 400]);
+      expect(catalogRows().filter(r => r.kind === 'catalog-branch').length).toBe(entityCount);
+    });
+
     it('fetches a container\'s children once when it is opened and lists them beneath it', async () => {
+      await open();
       expand('entity/light.e0');
       await settle();
 
@@ -878,6 +1030,8 @@ describe('VariablesManagerComponent', () => {
       await settle();
       component.source = { kind: 'integration', integrationId: 'ha' };
       await settle();
+      await open();
+      await flushViewport();
 
       const requested = spyOn(component.catalogBindRequested, 'emit');
       const bind = fixture.debugElement.query(By.css('.vars-catalog-bind'));
@@ -889,15 +1043,17 @@ describe('VariablesManagerComponent', () => {
 
     it('says an opened container has nothing usable when the filter removes all of its children', async () => {
       component.writableOnly = true;
+      await open();
       expand('entity/light.e0');
       await settle();
 
       const notes = catalogRows().filter(r => r.kind === 'catalog-note');
       expect(notes.length).toBe(1);
-      expect(notes[0].text).toBe(component.notBindableLabel());
+      expect(notes[0].note).toBe('not-bindable');
     });
 
     it('lists the children of the last container within the budget', async () => {
+      await open();
       const branches = catalogRows().filter(r => r.kind === 'catalog-branch');
       const last = branches[branches.length - 1];
       expand(last.node!.id);
@@ -907,13 +1063,12 @@ describe('VariablesManagerComponent', () => {
     });
 
     it('shows no unbound count for a searchable provider that reports none, and the reported one when it does', async () => {
-      expand('entity/light.e0');
-      await settle();
-      expect(component.unboundCount()).toBeNull();
+      await open();
+      expect(unboundHeader('ha')?.count).toBeNull();
 
       await useProvider({ integrationId: 'ha', supportsSearch: true, supportsManualIds: true, unboundCount: 42 });
       await settle();
-      expect(component.unboundCount()).toBe(42);
+      expect(unboundHeader('ha')?.count).toBe(42);
     });
 
     it('offers manual id entry with the picker\'s filters and picks what gets bound through it', async () => {
@@ -964,7 +1119,8 @@ describe('VariablesManagerComponent', () => {
       await settle();
     });
 
-    it('lists leaves below nested containers inline, without opening anything', () => {
+    it('lists leaves below nested containers inline, without opening anything', async () => {
+      await openUnbound('obs2');
       const leaves = catalogRows().filter(r => r.kind === 'catalog-leaf').map(r => r.node!.id);
 
       expect(leaves).toEqual(['conn/input/volume', 'conn/input/balance']);
@@ -980,6 +1136,34 @@ describe('VariablesManagerComponent', () => {
       expect(discoverCalls().every(call => call.search === undefined)).toBeTrue();
     });
 
+    it('gives no count while more of the catalog is still to be loaded', async () => {
+      const many = Array.from({ length: 300 }, (_, i) => leaf(`conn/input/l${i}`, `obs_l${i}`));
+      tree = { root: many };
+      await useProvider({ integrationId: 'obs4', supportsSearch: false, supportsManualIds: false });
+      component.source = { kind: 'integration', integrationId: 'obs4' };
+      await settle();
+
+      expect(unboundHeader('obs4')).toBeTruthy();
+      expect(unboundHeader('obs4')?.count).toBeNull();
+    });
+
+    it('reaches the rest of a long catalog through a load more row, whatever the window height', async () => {
+      const many = Array.from({ length: 150 }, (_, i) => leaf(`conn/input/l${i}`, `obs_l${i}`));
+      tree = { root: many };
+      await useProvider({ integrationId: 'obs5', supportsSearch: false, supportsManualIds: false });
+      component.source = { kind: 'integration', integrationId: 'obs5' };
+      await settle();
+      await openUnbound('obs5');
+      expect(catalogRows().filter(r => r.kind === 'catalog-leaf').length).toBe(100);
+      expect(catalogRows()[catalogRows().length - 1].kind).toBe('catalog-grow');
+
+      component.growCatalog('obs5');
+      await settle();
+
+      expect(catalogRows().filter(r => r.kind === 'catalog-leaf').length).toBe(150);
+      expect(catalogRows().some(r => r.kind === 'catalog-grow')).toBeFalse();
+    });
+
     it('stops walking nested containers once the budget is full', async () => {
       const many = (prefix: string) => Array.from({ length: 1000 }, (_, i) => leaf(`${prefix}/l${i}`, `${prefix}_l${i}`));
       tree = { root: [container('c1'), container('c2'), container('c3')], c1: many('c1'), c2: many('c2'), c3: many('c3') };
@@ -987,11 +1171,40 @@ describe('VariablesManagerComponent', () => {
       api().discoverCatalogVariables.calls.reset();
       component.source = { kind: 'integration', integrationId: 'obs3' };
       await settle();
+      await openUnbound('obs3');
 
       const leaves = catalogRows().filter(r => r.kind === 'catalog-leaf');
       expect(leaves.length).toBeGreaterThan(0);
       expect(leaves.length).toBeLessThanOrEqual(1000);
       expect(discoverCalls().some(call => call.parentId === 'c2' || call.parentId === 'c3')).toBeFalse();
+    });
+  });
+
+  describe('two catalogs side by side', () => {
+    it('loads the one that is opened although a closed one already holds a full page of entries', async () => {
+      const big = Array.from({ length: 150 }, (_, i) => ({
+        id: `a/${i}`, name: `a_${i}`, suggestedName: `a_${i}`, displayName: null, hasChildren: false, type: 'text',
+      })) as VariableCatalogNode[];
+      const entity = { id: 'entity/light.one', name: 'light_one', suggestedName: 'ha_light_one', displayName: null, hasChildren: true } as VariableCatalogNode;
+      api().discoverCatalogVariables.and.callFake(async (request: DiscoverCatalogVariablesRequest) => ({
+        nodes: request.integrationId === 'aaa' ? big : request.parentId ? [] : [entity],
+        hasMore: false,
+        available: true,
+      }));
+      api().getVariableCatalogProviders.and.resolveTo({
+        providers: [
+          { integrationId: 'aaa', name: 'aaa', supportsSearch: false, supportsManualIds: false },
+          { integrationId: 'zzz', name: 'zzz', supportsSearch: true, supportsManualIds: false },
+        ],
+      } as never);
+      await TestBed.inject(VariableCatalogService).loadProviders();
+      component.source = { kind: 'all' };
+      await settle();
+      expect(discoverCalls().some(call => call.integrationId === 'zzz')).toBeFalse();
+
+      await openUnbound('zzz');
+
+      expect(catalogRows().filter(r => r.kind === 'catalog-branch').map(r => r.node!.id)).toEqual(['entity/light.one']);
     });
   });
 

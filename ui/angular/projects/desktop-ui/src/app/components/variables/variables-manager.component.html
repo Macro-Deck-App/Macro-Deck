@@ -51,141 +51,133 @@
       maxBufferPx="800"
       class="vars-list"
       (scroll)="closeOpenMenu()"
-      (scrolledIndexChange)="onCatalogScroll($event + 12)">
+      (scrolledIndexChange)="onCatalogScroll()">
       <div
         class="vars-row-slot"
         *cdkVirtualFor="let row of rows(); trackBy: trackRow"
         [style.height.px]="rowHeight">
-        @if (row.kind === 'header') {
-          <div class="vars-group-header" aria-hidden="true">{{ row.label }}</div>
-        } @else if (row.kind === 'catalog-branch') {
-          <li class="vars-row vars-catalog-branch-row" [style.padding-left.px]="row.depth * catalogIndent">
+        @switch (row.kind) {
+          @case ('header') {
+            <shared-variable-group-header [label]="row.label" [section]="true" />
+          }
+          @case ('unbound-header') {
+            <shared-variable-group-header
+              class="vars-unbound-header"
+              [label]="unboundHeading()"
+              [count]="row.count"
+              [collapsible]="row.collapsible"
+              [card]="row.collapsible"
+              [section]="!row.collapsible"
+              [expanded]="row.expanded"
+              [ariaLabel]="unboundAriaLabel(row.count)"
+              [hint]="unboundHint()"
+              (toggle)="toggleUnbound(row.integrationId)" />
+          }
+          @case ('catalog-state') {
+            <div class="vars-state-row" [style.margin-inline-start.px]="catalogIndent">
+              <span [title]="catalogStateLabel(row.integrationId, row.state)">{{ catalogStateLabel(row.integrationId, row.state) }}</span>
+              @if (row.state === 'offline') {
+                <shared-button variant="secondary" size="compact" (click)="retryCatalog(row.integrationId)">{{ retryLabel() }}</shared-button>
+              }
+            </div>
+          }
+          @case ('catalog-branch') {
+            <shared-variable-row
+              class="vars-catalog-branch"
+              [primary]="catalogPrimary(row.node)"
+              [primaryMono]="!!row.node.suggestedName"
+              [secondary]="catalogSecondary(row.node)"
+              [type]="row.node.type"
+              [depth]="row.depth + 1"
+              [unbound]="true"
+              [interactive]="true"
+              [branch]="true"
+              [expanded]="row.expanded"
+              (activate)="toggleCatalogBranch(row.integrationId, row.node)">
+              @if (isCatalogBindable(row.node)) {
+                <shared-button
+                  row-actions
+                  class="vars-catalog-bind"
+                  variant="secondary"
+                  size="compact"
+                  (click)="activateCatalogLeaf(row.integrationId, row.node)">{{ bindActionLabel() }}</shared-button>
+              }
+            </shared-variable-row>
+          }
+          @case ('catalog-leaf') {
+            <shared-variable-row
+              class="vars-catalog-leaf"
+              [primary]="catalogPrimary(row.node)"
+              [primaryMono]="!!row.node.suggestedName"
+              [secondary]="catalogSecondary(row.node)"
+              [type]="row.node.type"
+              [depth]="row.depth + 1"
+              [unbound]="true"
+              [interactive]="true"
+              [actionLabel]="bindActionLabel()"
+              (activate)="activateCatalogLeaf(row.integrationId, row.node)" />
+          }
+          @case ('catalog-note') {
+            <div class="vars-state-row" [style.margin-inline-start.px]="(row.depth + 1) * catalogIndent">
+              <span>{{ catalogNoteLabel(row.note) }}</span>
+            </div>
+          }
+          @case ('catalog-more') {
             <button
               type="button"
-              class="vars-row-main vars-catalog-main vars-catalog-branch"
-              [attr.aria-expanded]="row.expanded"
-              (click)="toggleCatalogBranch(row.integrationId, row.node)">
-              <div class="vars-name-col">
-                <span class="vars-public-name">
-                  <span
-                    class="icon icon-xs icon-chevron-right vars-catalog-chevron"
-                    [class.vars-catalog-chevron-open]="row.expanded"
-                    aria-hidden="true"></span>
-                  {{ catalogLabel(row.node) }}
-                </span>
-                <span class="vars-meta">
-                  @if (row.node.type) {
-                    <span class="vars-type-badge type-{{ row.node.type }}">{{ typeLabels()[row.node.type] }}</span>
-                  }
-                </span>
-              </div>
-              <div class="vars-value-col">
-                <span class="vars-dynamic-badge">{{ dynamicBadgeLabel() }}</span>
-              </div>
-            </button>
-            @if (isCatalogBindable(row.node)) {
-              <shared-button
-                class="vars-catalog-bind"
-                variant="secondary"
-                (click)="activateCatalogLeaf(row.integrationId, row.node)">{{ bindActionLabel() }}</shared-button>
-            }
-          </li>
-        } @else if (row.kind === 'catalog-note') {
-          <li class="vars-row vars-catalog-note" [style.padding-left.px]="row.depth * catalogIndent">
-            <span class="vars-public-name">{{ row.text }}</span>
-          </li>
-        } @else if (row.kind === 'catalog-leaf') {
-          <li class="vars-row" [style.padding-left.px]="row.depth * catalogIndent">
-            <button
-              type="button"
-              class="vars-row-main vars-catalog-main"
-              (click)="activateCatalogLeaf(row.integrationId, row.node)">
-              <div class="vars-name-col">
-                <span class="vars-public-name">{{ catalogLabel(row.node) }}</span>
-                <span class="vars-meta">
-                  @if (row.node.type) {
-                    <span class="vars-type-badge type-{{ row.node.type }}">{{ typeLabels()[row.node.type] }}</span>
-                  }
-                </span>
-              </div>
-              <div class="vars-value-col">
-                <span class="vars-dynamic-badge">{{ dynamicBadgeLabel() }}</span>
-              </div>
-            </button>
-          </li>
-        } @else if (row.kind === 'catalog-more') {
-          <li class="vars-row" [style.padding-left.px]="row.depth * catalogIndent">
-            <button
-              type="button"
-              class="vars-row-main vars-catalog-main vars-catalog-more"
+              class="vars-catalog-more"
+              [style.margin-inline-start.px]="(row.depth + 1) * catalogIndent"
               (click)="loadMoreCatalog(row.integrationId, row.parentId)">
-              <span class="vars-public-name">{{ loadMoreLabel() }}</span>
+              <span>{{ loadMoreLabel() }}</span>
             </button>
-          </li>
-        } @else {
-          <li class="vars-row" [class.read-only]="!isPickMode() && !canEditValue(row.variable)">
+          }
+          @case ('catalog-grow') {
+            <button
+              type="button"
+              class="vars-catalog-more vars-catalog-grow"
+              [style.margin-inline-start.px]="catalogIndent"
+              (click)="growCatalog(row.integrationId)">
+              <span>{{ loadMoreLabel() }}</span>
+            </button>
+          }
+          @case ('row') {
             @if (isPickMode()) {
-              <button
-                type="button"
-                class="vars-row-main vars-row-pick"
-                role="option"
-                (click)="selectVariable(row.variable)">
-                <div class="vars-name-col">
-                  <span class="vars-public-name" [title]="publicName(row.variable)">{{ publicName(row.variable) }}</span>
-                  <span class="vars-meta">
-                    <span class="vars-type-badge type-{{ row.variable.type }}">{{ typeLabels()[row.variable.type] }}</span>
-                  </span>
-                </div>
-                <div class="vars-value-col">
-                  @if (row.variable.available === false) {
-                    <span
-                      class="vars-unavailable"
-                      role="img"
-                      [title]="unavailableTooltip(row.variable)"
-                      [attr.aria-label]="unavailableTooltip(row.variable)">n/v</span>
-                  } @else {
-                    <span class="vars-value" [title]="formatValue(row.variable)">{{ formatValue(row.variable) }}</span>
-                  }
-                </div>
-              </button>
+              <shared-variable-row
+                class="vars-row vars-row-pick"
+                [role]="'option'"
+                [primary]="publicName(row.variable)"
+                [secondary]="displayNameOf(row.variable)"
+                [type]="row.variable.type"
+                [value]="row.variable.available === false ? null : formatValue(row.variable)"
+                [unavailable]="row.variable.available === false ? unavailableTooltip(row.variable) : null"
+                [interactive]="true"
+                (activate)="selectVariable(row.variable)" />
             } @else {
-              <div class="vars-row-main">
-                <div class="vars-name-col">
-                  <span class="vars-public-name" [title]="publicName(row.variable)">{{ publicName(row.variable) }}</span>
-                  <span class="vars-meta">
-                    <span class="vars-type-badge type-{{ row.variable.type }}">{{ typeLabels()[row.variable.type] }}</span>
-                    <span class="vars-classification class-{{ row.variable.classification }}">
-                      {{ classificationLabels()[row.variable.classification] }}
-                    </span>
-                    @if (row.variable.fileSource; as fileSource) {
-                      <span class="vars-file-badge" [title]="fileSource.path">{{ fileFieldLabel() }}</span>
-                    }
-                    @if (row.variable.shared) {
-                      <span class="vars-shared-badge" [title]="sharedTooltip()">{{ sharedLabel() }}</span>
-                    }
-                    @if (!canEditValue(row.variable)) {
-                      <span
-                        class="icon icon-lock icon-xs read-only-icon"
-                        role="img"
-                        [title]="readOnlyLabel()"
-                        [attr.aria-label]="readOnlyLabel()"></span>
-                    }
-                  </span>
-                </div>
-
-                <div class="vars-value-col">
-                  @if (row.variable.available === false) {
-                    <span
-                      class="vars-unavailable"
-                      role="img"
-                      [title]="unavailableTooltip(row.variable)"
-                      [attr.aria-label]="unavailableTooltip(row.variable)">n/v</span>
-                  } @else {
-                    <span class="vars-value" [title]="formatValue(row.variable)">{{ formatValue(row.variable) }}</span>
-                  }
-                </div>
-
-                <div class="vars-actions">
+              <shared-variable-row
+                class="vars-row"
+                [primary]="publicName(row.variable)"
+                [secondary]="displayNameOf(row.variable)"
+                [type]="row.variable.type"
+                [value]="row.variable.available === false ? null : formatValue(row.variable)"
+                [unavailable]="row.variable.available === false ? unavailableTooltip(row.variable) : null">
+                <span row-meta class="vars-classification class-{{ row.variable.classification }}">
+                  {{ classificationLabels()[row.variable.classification] }}
+                </span>
+                @if (row.variable.fileSource; as fileSource) {
+                  <span row-meta class="vars-file-badge" [title]="fileSource.path">{{ fileFieldLabel() }}</span>
+                }
+                @if (row.variable.shared) {
+                  <span row-meta class="vars-shared-badge" [title]="sharedTooltip()">{{ sharedLabel() }}</span>
+                }
+                @if (!canEditValue(row.variable)) {
+                  <span
+                    row-meta
+                    class="icon icon-lock icon-xs read-only-icon"
+                    role="img"
+                    [title]="readOnlyLabel()"
+                    [attr.aria-label]="readOnlyLabel()"></span>
+                }
+                <div row-actions class="vars-actions">
                   @if (!canEditValue(row.variable) && !canManage(row.variable) && !isBoundDynamic(row.variable) && !canShare(row.variable)) {
                     <button
                       type="button"
@@ -250,9 +242,9 @@
                     </shared-dropdown-menu>
                   }
                 </div>
-              </div>
+              </shared-variable-row>
             }
-          </li>
+          }
         }
       </div>
     </cdk-virtual-scroll-viewport>

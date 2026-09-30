@@ -5,7 +5,7 @@ import { Location } from '@angular/common';
 import { ActivatedRoute, Navigation, Router } from '@angular/router';
 import { Subject, EMPTY } from 'rxjs';
 
-import { ActionParameterType, AppStrings, CompatibilityFinding, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationIssue, IpcIntegrationVariableCapability, InstalledPlugin, PluginCompatibilityReport, Variable } from '@macro-deck/runtime';
+import { VariableCatalogNode, ActionParameterType, AppStrings, CompatibilityFinding, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationIssue, IpcIntegrationVariableCapability, InstalledPlugin, PluginCompatibilityReport, Variable } from '@macro-deck/runtime';
 import { ApiService, LocalizationService, ToastService, VariableService } from '@shared';
 import { DetailPageComponent } from '../../detail-page/detail-page.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
@@ -28,6 +28,8 @@ describe('IntegrationDetailPageComponent', () => {
   let getIntegrationIssues: jasmine.Spy;
   let getIntegrationCapabilities: jasmine.Spy;
   let resolveIntegrationIssue: jasmine.Spy;
+  let getVariableCatalogProviders: jasmine.Spy;
+  let discoverCatalogVariables: jasmine.Spy;
   let getStoreExtension: jasmine.Spy;
   let uninstallPlugin: jasmine.Spy;
   let deleteConfigEntry: jasmine.Spy;
@@ -191,6 +193,9 @@ describe('IntegrationDetailPageComponent', () => {
     resolveIntegrationIssue = jasmine
       .createSpy('resolveIntegrationIssue')
       .and.resolveTo({ success: true, followUp: 'None' });
+    getVariableCatalogProviders = jasmine.createSpy('getVariableCatalogProviders').and.resolveTo({ providers: [] });
+    discoverCatalogVariables = jasmine.createSpy('discoverCatalogVariables')
+      .and.resolveTo({ nodes: [], hasMore: false, available: true });
     deleteConfigEntry = jasmine.createSpy('deleteConfigEntry').and.resolveTo({ success: true });
     getStoreExtension = jasmine.createSpy('getStoreExtension').and.resolveTo({ extension: null });
     uninstallPlugin = jasmine.createSpy('uninstallPlugin').and.resolveTo({ success: true });
@@ -236,6 +241,8 @@ describe('IntegrationDetailPageComponent', () => {
             getIntegrationIssues: (...args: unknown[]) => getIntegrationIssues(...args),
             getIntegrationCapabilities: (...args: unknown[]) => getIntegrationCapabilities(...args),
             resolveIntegrationIssue: (...args: unknown[]) => resolveIntegrationIssue(...args),
+            getVariableCatalogProviders: (...args: unknown[]) => getVariableCatalogProviders(...args),
+            discoverCatalogVariables: (...args: unknown[]) => discoverCatalogVariables(...args),
             getIntegrationIconUrl: () => null,
             getStoreExtension: (...args: unknown[]) => getStoreExtension(...args),
             // Keyed by name, the way the real transport is: handing every subscriber the issues
@@ -260,7 +267,14 @@ describe('IntegrationDetailPageComponent', () => {
             getPluginCompatibility: async () => ({ plugins: [] }),
           },
         },
-        { provide: VariableService, useValue: { variables: liveVariables } },
+        {
+          provide: VariableService,
+          useValue: {
+            variables: liveVariables,
+            globalVariables: liveVariables,
+            sanitizeNameLocal: (raw: string) => ({ sanitized: raw, isValid: raw.length > 0 }),
+          },
+        },
         {
           provide: PluginCompatibilityService,
           useValue: {
@@ -888,7 +902,7 @@ describe('IntegrationDetailPageComponent', () => {
       await fixture.whenStable();
       fixture.detectChanges();
 
-      expect(fixture.nativeElement.querySelector('.capability-value').textContent).toContain('42');
+      expect(fixture.nativeElement.querySelector('.variable-declared .vr-value').textContent).toContain('42');
       fixture.destroy();
     });
 
@@ -902,13 +916,13 @@ describe('IntegrationDetailPageComponent', () => {
       selectTab(fixture, 'variables');
       await fixture.whenStable();
       fixture.detectChanges();
-      expect(fixture.nativeElement.querySelector('.capability-value').textContent).toContain('13');
+      expect(fixture.nativeElement.querySelector('.variable-declared .vr-value').textContent).toContain('13');
 
       liveVariables.set([liveVariable({ name: 'system_volume_percent', value: '77' })]);
       await fixture.whenStable();
       fixture.detectChanges();
 
-      expect(fixture.nativeElement.querySelector('.capability-value').textContent).toContain('77');
+      expect(fixture.nativeElement.querySelector('.variable-declared .vr-value').textContent).toContain('77');
       expect(getIntegrationCapabilities).toHaveBeenCalledTimes(1);
       fixture.destroy();
     });
@@ -924,7 +938,7 @@ describe('IntegrationDetailPageComponent', () => {
       await fixture.whenStable();
       fixture.detectChanges();
 
-      expect(fixture.nativeElement.querySelector('.capability-value')).toBeNull();
+      expect(fixture.nativeElement.querySelector('.variable-declared .vr-value')).toBeNull();
       expect(fixture.nativeElement.querySelector('.availability-pill').textContent).toContain('Unavailable');
       fixture.destroy();
     });
@@ -941,7 +955,7 @@ describe('IntegrationDetailPageComponent', () => {
       await fixture.whenStable();
       fixture.detectChanges();
 
-      expect(fixture.nativeElement.querySelector('.capability-value').textContent).toContain('13');
+      expect(fixture.nativeElement.querySelector('.variable-declared .vr-value').textContent).toContain('13');
       fixture.destroy();
     });
 
@@ -997,6 +1011,141 @@ describe('IntegrationDetailPageComponent', () => {
     });
   });
 
+  describe('unbound catalog entries on the variables tab', () => {
+    const id = 'app.macro-deck.spotify';
+
+    function node(index: number): VariableCatalogNode {
+      return {
+        id: `track/${index}`, name: `track_${index}`, suggestedName: `spotify_track_${index}`,
+        displayName: `Track ${index}`, hasChildren: false, type: 'text',
+      } as VariableCatalogNode;
+    }
+
+    async function settle(fixture: ComponentFixture<IntegrationDetailPageComponent>): Promise<void> {
+      for (let i = 0; i < 6; i++) {
+        await new Promise(resolve => setTimeout(resolve));
+        await fixture.whenStable();
+        fixture.detectChanges();
+      }
+    }
+
+    async function openVariables(
+      nodes: VariableCatalogNode[],
+      variables: IpcIntegrationVariableCapability[] = [variableCapability({ name: 'spotify_volume' })],
+    ): Promise<ComponentFixture<IntegrationDetailPageComponent>> {
+      getVariableCatalogProviders.and.resolveTo({
+        providers: [{ integrationId: id, name: 'Spotify', supportsSearch: false, supportsManualIds: false }],
+      });
+      discoverCatalogVariables.and.resolveTo({ nodes, hasMore: false, available: true });
+      getIntegrationCapabilities.and.resolveTo(capabilitiesResponse({ variables }));
+      const fixture = await createFixture();
+      selectTab(fixture, 'variables');
+      await settle(fixture);
+      return fixture;
+    }
+
+    const header = (fixture: ComponentFixture<IntegrationDetailPageComponent>) =>
+      fixture.nativeElement.querySelector('.variable-unbound-header button') as HTMLButtonElement | null;
+
+    const leaves = (fixture: ComponentFixture<IntegrationDetailPageComponent>) =>
+      fixture.nativeElement.querySelectorAll('.variable-catalog-leaf').length as number;
+
+    it('keeps them in a closed group above the declared variables', async () => {
+      const fixture = await openVariables([node(1), node(2)]);
+
+      expect(header(fixture)?.getAttribute('aria-expanded')).toBe('false');
+      expect(header(fixture)?.textContent).toContain('2');
+      expect(leaves(fixture)).toBe(0);
+      expect(fixture.nativeElement.querySelectorAll('.variable-declared').length).toBe(1);
+
+      header(fixture)!.click();
+      await settle(fixture);
+
+      expect(leaves(fixture)).toBe(2);
+      fixture.destroy();
+    });
+
+    it('shows the group for a catalog integration that declares no variables', async () => {
+      const fixture = await openVariables([node(1)], []);
+
+      expect(header(fixture)).not.toBeNull();
+      expect(fixture.nativeElement.querySelector('shared-empty-state')).toBeNull();
+      fixture.destroy();
+    });
+
+    it('says there are no variables, not that a search failed, when the catalog is empty too', async () => {
+      const fixture = await openVariables([], []);
+
+      const empty = fixture.nativeElement.querySelector('shared-empty-state') as HTMLElement;
+      const translate = (key: string) => TestBed.inject(LocalizationService).translateKey(key);
+      expect(empty.textContent).toContain(translate(AppStrings.Integrations.Detail.NoVariablesHeading));
+      expect(empty.textContent).not.toContain(translate(AppStrings.Integrations.Detail.NoMatchingVariablesHeading));
+      fixture.destroy();
+    });
+
+    it('counts a bound variable on the tab as well as in the list', async () => {
+      liveVariables.set([liveVariable({
+        id: 'bound-1', name: 'spotify_track_1', type: 'text', value: 'Song', dynamicResourceId: 'track/1',
+      })]);
+      const fixture = await openVariables([]);
+
+      const tab = fixture.nativeElement.querySelector(`#${'integration-detail'}-tab-variables`) as HTMLElement;
+      expect(tab.textContent).toContain('2');
+      expect(fixture.nativeElement.querySelector('.capability-result-count').textContent).toContain('2 of 2');
+      fixture.destroy();
+    });
+
+    it('lists a variable bound from the group although no capability declares it', async () => {
+      const fixture = await openVariables([node(1)]);
+      header(fixture)!.click();
+      await settle(fixture);
+
+      (fixture.nativeElement.querySelector('.variable-catalog-leaf button') as HTMLButtonElement).click();
+      await settle(fixture);
+      expect(fixture.nativeElement.querySelector('shared-variable-bind-dialog')).not.toBeNull();
+
+      liveVariables.set([liveVariable({
+        id: 'bound-1', name: 'spotify_track_1', type: 'text', value: 'Song', dynamicResourceId: 'track/1',
+      })]);
+      discoverCatalogVariables.and.resolveTo({ nodes: [], hasMore: false, available: true });
+      await settle(fixture);
+
+      const bound = fixture.nativeElement.querySelector('.variable-bound') as HTMLElement;
+      expect(bound.textContent).toContain('vars.spotify_track_1');
+      expect(bound.textContent).toContain('Song');
+      expect(fixture.nativeElement.querySelector('.capability-result-count').textContent).toContain('2 of 2');
+      fixture.destroy();
+    });
+
+    it('searches the catalog with the variables and counts only the variables listed', async () => {
+      const fixture = await openVariables([node(1), node(2)]);
+
+      typeInSearch(fixture, '.capability-search .control', 'track_2');
+      await new Promise(resolve => setTimeout(resolve, 400));
+      await settle(fixture);
+
+      expect(fixture.nativeElement.querySelectorAll('.variable-declared').length).toBe(0);
+      expect(leaves(fixture)).toBe(1);
+      expect(fixture.nativeElement.querySelector('.capability-result-count').textContent).toContain('0 of 1');
+      expect(fixture.nativeElement.querySelector('shared-empty-state')).toBeNull();
+      fixture.destroy();
+    });
+
+    it('pages a long catalog with an explicit load more row', async () => {
+      const fixture = await openVariables(Array.from({ length: 150 }, (_, i) => node(i)));
+      header(fixture)!.click();
+      await settle(fixture);
+      expect(leaves(fixture)).toBe(100);
+
+      (fixture.nativeElement.querySelector('.variable-catalog-grow') as HTMLButtonElement).click();
+      await settle(fixture);
+
+      expect(leaves(fixture)).toBe(150);
+      expect(fixture.nativeElement.querySelector('.variable-catalog-grow')).toBeNull();
+      fixture.destroy();
+    });
+  });
+
   describe('when the host announces an integration change', () => {
     const settle = async (fixture: ComponentFixture<IntegrationDetailPageComponent>) => {
       await new Promise(resolve => setTimeout(resolve));
@@ -1005,7 +1154,7 @@ describe('IntegrationDetailPageComponent', () => {
     };
 
     const variableRows = (fixture: ComponentFixture<IntegrationDetailPageComponent>): string[] =>
-      Array.from(fixture.nativeElement.querySelectorAll('app-variable-capability-row') as NodeListOf<HTMLElement>)
+      Array.from(fixture.nativeElement.querySelectorAll('.variable-declared') as NodeListOf<HTMLElement>)
         .map(row => row.textContent ?? '');
 
     async function openVariables(): Promise<ComponentFixture<IntegrationDetailPageComponent>> {

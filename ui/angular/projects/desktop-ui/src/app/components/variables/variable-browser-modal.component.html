@@ -67,6 +67,7 @@
         [heading]="managerTitle()"
         [acceptedTypes]="acceptedTypeList()"
         [writableOnly]="writableOnlyState()"
+        [unboundExpanded]="catalogOnlyState()"
         (pick)="onPick($event)"
         (catalogBindRequested)="onCatalogBindRequested($event)" />
     </div>

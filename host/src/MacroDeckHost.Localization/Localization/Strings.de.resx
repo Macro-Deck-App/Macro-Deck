@@ -16140,9 +16140,6 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Variables.Browser.UserVariables" xml:space="preserve">
     <value>Benutzervariablen</value>
   </data>
-  <data name="Variables.Dynamic.Badge" xml:space="preserve">
-    <value>Nicht gebunden</value>
-  </data>
   <data name="Variables.Dynamic.BindAction" xml:space="preserve">
     <value>Verknüpfen</value>
   </data>
@@ -16152,14 +16149,17 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Variables.Dynamic.BindHeading" xml:space="preserve">
     <value>Mit Variable verknüpfen</value>
   </data>
-  <data name="Variables.Dynamic.BoundLabel" xml:space="preserve">
-    <value>Verknüpft</value>
-  </data>
-  <data name="Variables.Dynamic.EmptyHeading" xml:space="preserve">
-    <value>Keine Ressourcen</value>
-  </data>
   <data name="Variables.Dynamic.EmptyMessage" xml:space="preserve">
     <value>Diese Integration hat gerade nichts zu zeigen.</value>
+  </data>
+  <data name="Variables.Dynamic.GroupHeading" xml:space="preserve">
+    <value>Nicht verknüpfte Variablen</value>
+  </data>
+  <data name="Variables.Dynamic.GroupHeadingCount" xml:space="preserve">
+    <value>Nicht verknüpfte Variablen: {count}</value>
+  </data>
+  <data name="Variables.Dynamic.GroupHint" xml:space="preserve">
+    <value>Werte, die diese Integration anbietet, die aber noch keine Variablen sind. Verknüpfe einen, um ihn als Variable zu nutzen.</value>
   </data>
   <data name="Variables.Dynamic.Loading" xml:space="preserve">
     <value>Wird geladen…</value>
@@ -16182,9 +16182,6 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Variables.Dynamic.NotBindable" xml:space="preserve">
     <value>Diese Ressource lässt sich hier nicht verwenden</value>
   </data>
-  <data name="Variables.Dynamic.OfflineHeading" xml:space="preserve">
-    <value>Keine Verbindung</value>
-  </data>
   <data name="Variables.Dynamic.OfflineMessage" xml:space="preserve">
     <value>{integration} ist nicht erreichbar. Prüfe die Verbindung und versuch es erneut.</value>
   </data>
@@ -16199,9 +16196,6 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Variables.Dynamic.Retry" xml:space="preserve">
     <value>Erneut versuchen</value>
-  </data>
-  <data name="Variables.Dynamic.SearchPlaceholder" xml:space="preserve">
-    <value>Ressourcen durchsuchen…</value>
   </data>
   <data name="Variables.Format.ValueWithUnit" xml:space="preserve">
     <value>{value} {unit}</value>
@@ -16311,6 +16305,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Variables.Manager.ValueUnavailable" xml:space="preserve">
     <value>Wert derzeit nicht verfügbar (Anbieter hat nichts zurückgegeben oder der Wert ist veraltet)</value>
+  </data>
+  <data name="Variables.Manager.ValueUnavailableShort" xml:space="preserve">
+    <value>n. v.</value>
   </data>
   <data name="Variables.Manager.VariableCount.One" xml:space="preserve">
     <value>{count} Variable</value>

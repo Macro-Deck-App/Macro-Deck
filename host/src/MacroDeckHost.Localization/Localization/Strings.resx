@@ -16143,9 +16143,6 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Variables.Browser.UserVariables" xml:space="preserve">
     <value>User variables</value>
   </data>
-  <data name="Variables.Dynamic.Badge" xml:space="preserve">
-    <value>Unbound</value>
-  </data>
   <data name="Variables.Dynamic.BindAction" xml:space="preserve">
     <value>Bind</value>
   </data>
@@ -16155,14 +16152,17 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Variables.Dynamic.BindHeading" xml:space="preserve">
     <value>Bind to variable</value>
   </data>
-  <data name="Variables.Dynamic.BoundLabel" xml:space="preserve">
-    <value>Bound</value>
-  </data>
-  <data name="Variables.Dynamic.EmptyHeading" xml:space="preserve">
-    <value>No resources</value>
-  </data>
   <data name="Variables.Dynamic.EmptyMessage" xml:space="preserve">
     <value>This integration has nothing to show right now.</value>
+  </data>
+  <data name="Variables.Dynamic.GroupHeading" xml:space="preserve">
+    <value>Unbound variables</value>
+  </data>
+  <data name="Variables.Dynamic.GroupHeadingCount" xml:space="preserve">
+    <value>Unbound variables: {count}</value>
+  </data>
+  <data name="Variables.Dynamic.GroupHint" xml:space="preserve">
+    <value>Values this integration offers that are not variables yet. Bind one to use it as a variable.</value>
   </data>
   <data name="Variables.Dynamic.Loading" xml:space="preserve">
     <value>Loading…</value>
@@ -16185,9 +16185,6 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Variables.Dynamic.NotBindable" xml:space="preserve">
     <value>This resource cannot be used here</value>
   </data>
-  <data name="Variables.Dynamic.OfflineHeading" xml:space="preserve">
-    <value>Couldn't connect</value>
-  </data>
   <data name="Variables.Dynamic.OfflineMessage" xml:space="preserve">
     <value>Couldn't reach {integration}. Check the connection and try again.</value>
   </data>
@@ -16202,9 +16199,6 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Variables.Dynamic.Retry" xml:space="preserve">
     <value>Retry</value>
-  </data>
-  <data name="Variables.Dynamic.SearchPlaceholder" xml:space="preserve">
-    <value>Search resources…</value>
   </data>
   <data name="Variables.Format.ValueWithUnit" xml:space="preserve">
     <value>{value} {unit}</value>
@@ -16314,6 +16308,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Variables.Manager.ValueUnavailable" xml:space="preserve">
     <value>Value currently unavailable (provider returned nothing or value is stale)</value>
+  </data>
+  <data name="Variables.Manager.ValueUnavailableShort" xml:space="preserve">
+    <value>n/a</value>
   </data>
   <data name="Variables.Manager.VariableCount.One" xml:space="preserve">
     <value>{count} variable</value>

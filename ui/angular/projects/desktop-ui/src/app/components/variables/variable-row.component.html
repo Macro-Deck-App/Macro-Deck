@@ -1,0 +1,44 @@
+<ng-template #body>
+  @if (branch()) {
+    <span class="icon icon-xs icon-chevron-right vr-chevron" [class.vr-chevron-open]="expanded()" aria-hidden="true"></span>
+  }
+  <span class="vr-text">
+    <span class="vr-primary" [class.vr-mono]="primaryMono()" [title]="primary()">{{ primary() }}</span>
+    <span class="vr-meta">
+      @if (typeLabel(); as label) {
+        <span class="vr-type type-{{ type() }}">{{ label }}</span>
+      }
+      <ng-content select="[row-meta]" />
+      @if (secondary(); as text) {
+        <span class="vr-secondary" [class.vr-mono]="secondaryMono()" [title]="text">{{ text }}</span>
+      }
+    </span>
+  </span>
+  <span class="vr-side">
+    @if (unavailable(); as reason) {
+      <span class="vr-unavailable" role="img" [title]="reason" [attr.aria-label]="reason">{{ unavailableLabel() }}</span>
+    } @else if (value() !== null) {
+      <span class="vr-value" [title]="value()">{{ value() }}</span>
+    } @else if (actionLabel(); as label) {
+      <span class="vr-action">{{ label }}</span>
+    }
+    <ng-content select="[row-side]" />
+  </span>
+</ng-template>
+
+@if (interactive()) {
+  <button
+    type="button"
+    class="vr-main vr-button"
+    [attr.role]="role()"
+    [attr.title]="title()"
+    [attr.aria-expanded]="branch() ? expanded() : null"
+    (click)="activate.emit()">
+    <ng-container [ngTemplateOutlet]="body" />
+  </button>
+} @else {
+  <div class="vr-main">
+    <ng-container [ngTemplateOutlet]="body" />
+  </div>
+}
+<ng-content select="[row-actions]" />

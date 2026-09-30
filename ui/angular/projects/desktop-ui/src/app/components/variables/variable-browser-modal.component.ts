@@ -139,9 +139,6 @@ export class VariableBrowserModalComponent implements OnInit {
     return this.catalogIntegrationIds().includes(source.integrationId) ? source.integrationId : null;
   });
 
-  readonly catalogTreeMode = computed<'browse' | 'pick'>(() =>
-    this.modeState() === 'pick' ? 'pick' : 'browse');
-
   readonly totalCount = computed(() => this.effectiveVariables().length);
 
   readonly userCount = computed(() =>

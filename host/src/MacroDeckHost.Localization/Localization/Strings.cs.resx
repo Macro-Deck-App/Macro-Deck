@@ -16142,9 +16142,6 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Variables.Browser.UserVariables" xml:space="preserve">
     <value>Uživatelské proměnné</value>
   </data>
-  <data name="Variables.Dynamic.Badge" xml:space="preserve">
-    <value>Nenavázáno</value>
-  </data>
   <data name="Variables.Dynamic.BindAction" xml:space="preserve">
     <value>Propojit</value>
   </data>
@@ -16154,14 +16151,17 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Variables.Dynamic.BindHeading" xml:space="preserve">
     <value>Propojte s proměnnou</value>
   </data>
-  <data name="Variables.Dynamic.BoundLabel" xml:space="preserve">
-    <value>Propojeno</value>
-  </data>
-  <data name="Variables.Dynamic.EmptyHeading" xml:space="preserve">
-    <value>Žádné položky</value>
-  </data>
   <data name="Variables.Dynamic.EmptyMessage" xml:space="preserve">
     <value>Tato integrace teď nemá nic k zobrazení.</value>
+  </data>
+  <data name="Variables.Dynamic.GroupHeading" xml:space="preserve">
+    <value>Nepropojené proměnné</value>
+  </data>
+  <data name="Variables.Dynamic.GroupHeadingCount" xml:space="preserve">
+    <value>Nepropojené proměnné: {count}</value>
+  </data>
+  <data name="Variables.Dynamic.GroupHint" xml:space="preserve">
+    <value>Hodnoty, které tato integrace nabízí, ale zatím nejsou proměnnými. Po propojení se hodnota stane proměnnou.</value>
   </data>
   <data name="Variables.Dynamic.Loading" xml:space="preserve">
     <value>Načítání…</value>
@@ -16184,9 +16184,6 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Variables.Dynamic.NotBindable" xml:space="preserve">
     <value>Tento zdroj zde nelze použít</value>
   </data>
-  <data name="Variables.Dynamic.OfflineHeading" xml:space="preserve">
-    <value>Nepodařilo se připojit</value>
-  </data>
   <data name="Variables.Dynamic.OfflineMessage" xml:space="preserve">
     <value>Nepodařilo se spojit s {integration}. Zkontrolujte připojení a zkuste to znovu.</value>
   </data>
@@ -16201,9 +16198,6 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Variables.Dynamic.Retry" xml:space="preserve">
     <value>Zkusit znovu</value>
-  </data>
-  <data name="Variables.Dynamic.SearchPlaceholder" xml:space="preserve">
-    <value>Hledat položky…</value>
   </data>
   <data name="Variables.Format.ValueWithUnit" xml:space="preserve">
     <value>{value} {unit}</value>
@@ -16313,6 +16307,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Variables.Manager.ValueUnavailable" xml:space="preserve">
     <value>Hodnota momentálně není k dispozici (poskytovatel nevrátil žádnou hodnotu nebo je neaktuální)</value>
+  </data>
+  <data name="Variables.Manager.ValueUnavailableShort" xml:space="preserve">
+    <value>n/a</value>
   </data>
   <data name="Variables.Manager.VariableCount.One" xml:space="preserve">
     <value>{count} proměnná</value>

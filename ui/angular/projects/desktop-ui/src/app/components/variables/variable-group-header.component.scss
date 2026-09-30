@@ -1,0 +1,82 @@
+@use '../../../styles/index' as ds;
+
+:host {
+  display: flex;
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+:host(.vgh-card) {
+  @include ds.card($padding: 0);
+  transition: border-color var(--transition-fast);
+}
+
+:host(.vgh-card:has(.vgh-toggle:hover)),
+:host(.vgh-card:has(.vgh-toggle:focus-visible)) {
+  border-color: var(--color-accent);
+}
+
+.vgh {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0 var(--space-1);
+}
+
+:host(.vgh-card) .vgh {
+  padding: 0 var(--space-3);
+}
+
+:host(.vgh-section) .vgh {
+  align-items: flex-end;
+}
+
+.vgh-toggle {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.vgh-chevron {
+  flex: 0 0 auto;
+  color: var(--color-text-muted);
+  transition: transform var(--transition-fast, 120ms) ease;
+}
+
+.vgh-chevron-open {
+  transform: rotate(90deg);
+}
+
+.vgh-label {
+  @include ds.truncate;
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  color: var(--color-text-secondary);
+}
+
+:host(.vgh-section) .vgh-label {
+  @include ds.section-label;
+}
+
+.vgh-toggle:hover .vgh-label {
+  color: var(--color-text-primary);
+}
+
+.vgh-hint {
+  flex: 0 0 auto;
+  color: var(--color-text-muted);
+}
+
+.vgh-count {
+  @include ds.badge;
+  flex: 0 0 auto;
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-secondary);
+}

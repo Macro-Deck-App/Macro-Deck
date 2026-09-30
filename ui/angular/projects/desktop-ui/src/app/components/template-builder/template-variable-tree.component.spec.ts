@@ -2,8 +2,11 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Subject } from 'rxjs';
 
-import { ApiService } from '@shared';
-import type { Variable } from '@macro-deck/runtime';
+import { ApiService, VariableService } from '@shared';
+import type { DiscoverCatalogVariablesRequest, Variable, VariableCatalogNode } from '@macro-deck/runtime';
+import { VariableBindDialogComponent } from '../variables/variable-bind-dialog.component';
+import { By } from '@angular/platform-browser';
+import { SnippetInsertion } from './template-snippet-list.component';
 import { TemplateVariableTreeComponent } from './template-variable-tree.component';
 
 function variable(overrides: Partial<Variable>): Variable {
@@ -35,13 +38,16 @@ const macCpuVar = variable({
 describe('TemplateVariableTreeComponent', () => {
   let fixture: ComponentFixture<TemplateVariableTreeComponent>;
   let component: TemplateVariableTreeComponent;
+  let apiSpy: jasmine.SpyObj<ApiService>;
 
   beforeEach(async () => {
-    const apiSpy = jasmine.createSpyObj<ApiService>('ApiService', [
-      'getVariables', 'getIntegrations', 'onNotification',
+    apiSpy = jasmine.createSpyObj<ApiService>('ApiService', [
+      'getVariables', 'getIntegrations', 'onNotification', 'getVariableCatalogProviders', 'discoverCatalogVariables',
     ]);
     apiSpy.getVariables.and.resolveTo({ variables: [] });
     apiSpy.getIntegrations.and.resolveTo({ integrations: [] });
+    apiSpy.getVariableCatalogProviders.and.resolveTo({ providers: [] });
+    apiSpy.discoverCatalogVariables.and.resolveTo({ nodes: [], hasMore: false, available: true } as never);
     apiSpy.onNotification.and.callFake(() => new Subject());
     Object.defineProperty(apiSpy, 'connectionStateSignal', { value: signal('disconnected') });
 
@@ -60,11 +66,16 @@ describe('TemplateVariableTreeComponent', () => {
     await fixture.whenStable();
   }
 
+  function emptyStateHeading(): string | undefined {
+    return fixture.nativeElement.querySelector('shared-empty-state')?.textContent ?? undefined;
+  }
+
   describe('empty states', () => {
     it('shows the distinct "no variables" state for an empty list', async () => {
       await setVariables([]);
-      expect(component.hasAnyVariables()).toBeFalse();
-      expect(component.hasSearchResults()).toBeFalse();
+
+      expect(component.rows().length).toBe(0);
+      expect(emptyStateHeading()).toContain(component.noVariablesHeading());
     });
 
     it('shows the distinct "no search results" state when a query matches nothing', async () => {
@@ -73,8 +84,8 @@ describe('TemplateVariableTreeComponent', () => {
       fixture.detectChanges();
       await fixture.whenStable();
 
-      expect(component.hasAnyVariables()).toBeTrue();
-      expect(component.hasSearchResults()).toBeFalse();
+      expect(component.rows().length).toBe(0);
+      expect(emptyStateHeading()).toContain(component.noResultsHeading());
     });
   });
 
@@ -207,16 +218,24 @@ describe('TemplateVariableTreeComponent', () => {
 
     it('marks a value the provider currently cannot supply rather than showing it as empty', () => {
       const v = variable({ id: 'v', name: 'obs_current_scene', value: '', available: false });
-      const unavailable = component.valueOf(v);
 
-      expect(unavailable).not.toBe('');
-      expect(unavailable).toBe(component.valueOf(variable({ id: 'w', name: 'other', available: false })));
+      expect(component.valueOf(v)).toBeNull();
+      expect(component.unavailableOf(v)).toBeTruthy();
+      expect(component.unavailableOf(variable({ id: 'w', name: 'other', value: '1' }))).toBeNull();
     });
 
-    it('labels each type distinctly', () => {
-      const labels = (['text', 'numeric', 'boolean'] as const)
-        .map(type => component.typeLabel(variable({ id: type, name: type, type })));
+    it('labels each type distinctly', async () => {
+      fixture.nativeElement.style.width = '260px';
+      fixture.nativeElement.style.height = '400px';
+      await setVariables((['text', 'numeric', 'boolean'] as const)
+        .map(type => variable({ id: type, name: type, type })));
+      fixture.detectChanges();
+      await fixture.whenStable();
 
+      const labels = Array.from(fixture.nativeElement.querySelectorAll('.vr-type'))
+        .map(el => (el as HTMLElement).textContent?.trim() ?? '');
+
+      expect(labels.length).toBe(3);
       expect(new Set(labels).size).toBe(3);
       expect(labels.every(l => l.length > 0)).toBeTrue();
     });
@@ -245,6 +264,19 @@ describe('TemplateVariableTreeComponent', () => {
       expect(visibleRight - copy.getBoundingClientRect().right).toBeGreaterThanOrEqual(15);
     });
 
+    it('lets the user scroll a list longer than the pane', async () => {
+      fixture.nativeElement.style.width = '260px';
+      fixture.nativeElement.style.height = '400px';
+      await setVariables(Array.from({ length: 60 }, (_, i) => variable({ id: `v${i}`, name: `counter_${i}` })));
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const viewport = fixture.nativeElement.querySelector('cdk-virtual-scroll-viewport') as HTMLElement;
+
+      expect(viewport.scrollHeight).toBeGreaterThan(viewport.clientHeight);
+      expect(['auto', 'scroll']).toContain(getComputedStyle(viewport).overflowY);
+    });
+
     it('never widens the list past its scrollport, however long an identifier is', async () => {
       fixture.nativeElement.style.width = '260px';
       fixture.nativeElement.style.height = '400px';
@@ -257,6 +289,117 @@ describe('TemplateVariableTreeComponent', () => {
 
       const viewport = fixture.nativeElement.querySelector('cdk-virtual-scroll-viewport') as HTMLElement;
       expect(viewport.scrollWidth).toBeLessThanOrEqual(viewport.clientWidth);
+    });
+  });
+
+  describe('unbound catalog entries', () => {
+    const entry: VariableCatalogNode = {
+      id: 'entity/light.desk', name: 'light.desk', suggestedName: 'ha_light_desk', displayName: 'Desk lamp',
+      hasChildren: false, type: 'text',
+    } as VariableCatalogNode;
+    const haVar = variable({
+      id: 'h1', name: 'ha_connected', classification: 'integration', ownerIntegrationId: 'ha',
+    });
+
+    async function settle(): Promise<void> {
+      for (let i = 0; i < 8; i++) {
+        fixture.detectChanges();
+        await fixture.whenStable();
+        await new Promise(resolve => setTimeout(resolve, 0));
+      }
+      fixture.detectChanges();
+    }
+
+    async function useCatalog(supportsSearch: boolean, nodes: VariableCatalogNode[] = [entry]): Promise<void> {
+      apiSpy.getVariableCatalogProviders.and.resolveTo({
+        providers: [{ integrationId: 'ha', name: 'Home', supportsSearch, supportsManualIds: false }],
+      } as never);
+      apiSpy.discoverCatalogVariables.and.callFake(async (request: DiscoverCatalogVariablesRequest) => ({
+        nodes: request.search && !'desk lamp'.includes(request.search.toLowerCase()) ? [] : nodes,
+        hasMore: false,
+        available: true,
+      }));
+    }
+
+    function kinds(): string[] {
+      return component.rows().map(r => r.kind);
+    }
+
+    it('offers them in a closed group under their integration, ahead of its variables', async () => {
+      await useCatalog(false);
+      await setVariables([haVar]);
+      await settle();
+
+      expect(kinds()).toEqual(['group-header', 'unbound-header', 'variable']);
+
+      component.toggleUnbound('ha');
+      await settle();
+
+      expect(kinds()).toEqual(['group-header', 'unbound-header', 'catalog-leaf', 'variable']);
+    });
+
+    it('lists an integration that has nothing bound yet instead of the empty state', async () => {
+      await useCatalog(true);
+      await setVariables([]);
+      await settle();
+
+      expect(kinds()).toEqual(['group-header', 'unbound-header']);
+      expect(fixture.nativeElement.querySelector('shared-empty-state')).toBeNull();
+    });
+
+    it('finds an entry that only the catalog knows', async () => {
+      await useCatalog(true);
+      await setVariables([spotifyVar]);
+      await settle();
+
+      component.search.set('desk');
+      await new Promise(resolve => setTimeout(resolve, 600));
+      await settle();
+
+      expect(kinds()).toEqual(['group-header', 'unbound-header', 'catalog-leaf']);
+      expect(fixture.nativeElement.querySelector('shared-empty-state')).toBeNull();
+    });
+
+    it('binds an entry in place, inserts its reference and lists it as a variable', async () => {
+      fixture.nativeElement.style.width = '260px';
+      fixture.nativeElement.style.height = '400px';
+      await useCatalog(false);
+      await setVariables([haVar]);
+      await settle();
+      component.toggleUnbound('ha');
+      await settle();
+      const inserted: SnippetInsertion[] = [];
+      component.insert.subscribe(insertion => inserted.push(insertion));
+
+      (fixture.nativeElement.querySelector('.tvt-catalog-leaf button') as HTMLButtonElement).click();
+      await settle();
+      const dialog = fixture.debugElement.query(By.directive(VariableBindDialogComponent));
+      expect(dialog).withContext('the bind dialog opens from the pane').not.toBeNull();
+
+      const bound = variable({
+        id: 'b1', name: 'ha_light_desk', classification: 'integration', ownerIntegrationId: 'ha',
+        dynamicResourceId: 'entity/light.desk',
+      });
+      TestBed.inject(VariableService).variables.set([bound]);
+      dialog.triggerEventHandler('bound', bound);
+      await settle();
+
+      expect(inserted.map(i => i.text)).toEqual(['{{ vars.ha_light_desk }}']);
+      expect(component.rows().filter(r => r.kind === 'variable').map(r => r.variable.id)).toEqual(['h1', 'b1']);
+      expect(fixture.debugElement.query(By.directive(VariableBindDialogComponent))).toBeNull();
+    });
+
+    it('does not repeat a global that a variable of the same name already shadows', async () => {
+      await useCatalog(false);
+      const local = variable({ id: 'w1', name: 'ha_light_desk', scope: 'widget', scopeRefId: 'widget-1' });
+      TestBed.inject(VariableService).variables.set([variable({
+        id: 'b1', name: 'ha_light_desk', classification: 'integration', ownerIntegrationId: 'ha',
+        dynamicResourceId: 'entity/light.desk',
+      })]);
+      await setVariables([local]);
+      await settle();
+
+      expect(component.rows().filter(r => r.kind === 'variable').map(r => r.variable.id)).toEqual(['w1']);
     });
   });
 });

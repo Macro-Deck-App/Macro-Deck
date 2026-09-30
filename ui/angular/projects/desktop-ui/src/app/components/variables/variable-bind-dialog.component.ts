@@ -34,6 +34,8 @@ export class VariableBindDialogComponent implements OnInit {
 
   readonly acceptedTypes = input<readonly VariableType[]>([]);
 
+  readonly zIndex = input<number | null>(null);
+
   @Output() bound = new EventEmitter<Variable>();
   @Output() close = new EventEmitter<void>();
 

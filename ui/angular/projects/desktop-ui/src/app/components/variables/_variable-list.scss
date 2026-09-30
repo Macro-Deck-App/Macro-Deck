@@ -1,0 +1,52 @@
+@use '../../../styles/index' as ds;
+
+@mixin list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+@mixin slot {
+  display: flex;
+  align-items: stretch;
+  box-sizing: border-box;
+  padding-bottom: var(--space-2);
+}
+
+@mixin state-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1 1 auto;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 0 var(--space-3);
+  font-size: var(--text-base);
+  color: var(--color-text-muted);
+
+  > span {
+    @include ds.truncate;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
+@mixin link-row {
+  @include ds.card($padding: 0 var(--space-3));
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: var(--text-base);
+  color: var(--color-accent);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--color-accent);
+  }
+}

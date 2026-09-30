@@ -228,7 +228,7 @@
               (ngModelChange)="variableSearch.set($event)" />
             @if (!capabilitiesLoading() && !capabilitiesError()) {
               <p class="capability-result-count" aria-live="polite">
-                {{ 'macrodeck.app:Integrations.Detail.ResultCountOf' | translate:{ shown: filteredVariables().length, total: declaredVariables().length } }}
+                {{ 'macrodeck.app:Integrations.Detail.ResultCountOf' | translate:{ shown: listedVariableCount(), total: totalVariableCount() } }}
               </p>
             }
 
@@ -236,45 +236,127 @@
               <shared-loading-state [message]="'macrodeck.app:Integrations.Detail.LoadingVariables' | translate" />
             } @else if (capabilitiesError(); as error) {
               <shared-error-banner [message]="error" (dismiss)="capabilitiesError.set(null)" />
-            } @else if (declaredVariables().length === 0) {
+            } @else if (variableRows().length === 0 && !variableSearch().trim()) {
               <shared-empty-state
                 icon="code"
                 [heading]="'macrodeck.app:Integrations.Detail.NoVariablesHeading' | translate"
                 [message]="'macrodeck.app:Integrations.Detail.NoVariablesMessage' | translate" />
-            } @else if (filteredVariables().length === 0) {
+            } @else if (variableRows().length === 0) {
               <shared-empty-state
                 icon="code"
                 [heading]="'macrodeck.app:Integrations.Detail.NoMatchingVariablesHeading' | translate"
                 [message]="'macrodeck.app:Integrations.Detail.NoMatchingSearchMessage' | translate" />
             } @else {
-              <ul class="capability-list">
-                @for (row of catalogRows(); track row.key) {
-                  <li class="capability-row capability-catalog-row">
-                    @if (row.kind === 'leaf') {
-                      <button
-                        type="button"
-                        class="capability-row-main capability-catalog-main"
-                        (click)="onCatalogBindRequested(row.node)">
-                        <span class="capability-row-name">{{ catalogLabel(row.node) }}</span>
-                        @if (row.node.type) {
-                          <span class="vars-type-badge type-{{ row.node.type }}">{{ typeLabel(row.node.type) }}</span>
-                        }
-                      </button>
-                      <div class="capability-row-side">
-                        <span class="capability-dynamic-badge">{{ dynamicBadgeLabel() }}</span>
-                      </div>
-                    } @else {
-                      <button
-                        type="button"
-                        class="capability-row-main capability-catalog-main capability-catalog-more"
-                        (click)="loadMoreCatalog(row.parentId)">
-                        <span class="capability-row-name">{{ loadMoreLabel() }}</span>
-                      </button>
+              <ul class="variable-capability-list">
+                @for (row of variableRows(); track row.key) {
+                  <li class="variable-capability-slot" [style.height.px]="variableRowHeight">
+                    @switch (row.kind) {
+                      @case ('unbound-header') {
+                        <shared-variable-group-header
+                          class="variable-unbound-header"
+                          [label]="unboundHeading()"
+                          [count]="row.count"
+                          [collapsible]="row.collapsible"
+                          [card]="row.collapsible"
+                          [section]="!row.collapsible"
+                          [expanded]="row.expanded"
+                          [ariaLabel]="unboundAriaLabel(row.count)"
+                          [hint]="unboundHint()"
+                          (toggle)="toggleUnbound()" />
+                      }
+                      @case ('catalog-state') {
+                        <div class="variable-state-row" [style.margin-inline-start.px]="catalogIndent">
+                          <span [title]="catalogStateLabel(row.state)">{{ catalogStateLabel(row.state) }}</span>
+                          @if (row.state === 'offline') {
+                            <shared-button variant="secondary" size="compact" (click)="retryCatalog()">{{ retryLabel() }}</shared-button>
+                          }
+                        </div>
+                      }
+                      @case ('catalog-branch') {
+                        <shared-variable-row
+                          [primary]="catalogPrimary(row.node)"
+                          [primaryMono]="!!row.node.suggestedName"
+                          [secondary]="catalogSecondary(row.node)"
+                          [type]="row.node.type"
+                          [depth]="row.depth + 1"
+                          [unbound]="true"
+                          [interactive]="true"
+                          [branch]="true"
+                          [expanded]="row.expanded"
+                          (activate)="toggleCatalogBranch(row.node)">
+                          @if (isCatalogBindable(row.node)) {
+                            <shared-button
+                              row-actions
+                              variant="secondary"
+                              size="compact"
+                              (click)="onCatalogBindRequested(row.node)">{{ bindActionLabel() }}</shared-button>
+                          }
+                        </shared-variable-row>
+                      }
+                      @case ('catalog-leaf') {
+                        <shared-variable-row
+                          class="variable-catalog-leaf"
+                          [primary]="catalogPrimary(row.node)"
+                          [primaryMono]="!!row.node.suggestedName"
+                          [secondary]="catalogSecondary(row.node)"
+                          [type]="row.node.type"
+                          [depth]="row.depth + 1"
+                          [unbound]="true"
+                          [interactive]="true"
+                          [actionLabel]="bindActionLabel()"
+                          (activate)="onCatalogBindRequested(row.node)" />
+                      }
+                      @case ('catalog-note') {
+                        <div class="variable-state-row" [style.margin-inline-start.px]="(row.depth + 1) * catalogIndent">
+                          <span>{{ catalogNoteLabel(row.note) }}</span>
+                        </div>
+                      }
+                      @case ('catalog-more') {
+                        <button
+                          type="button"
+                          class="variable-link-row"
+                          [style.margin-inline-start.px]="(row.depth + 1) * catalogIndent"
+                          (click)="loadMoreCatalog(row.parentId)">
+                          <span>{{ loadMoreLabel() }}</span>
+                        </button>
+                      }
+                      @case ('catalog-grow') {
+                        <button
+                          type="button"
+                          class="variable-link-row variable-catalog-grow"
+                          [style.margin-inline-start.px]="catalogIndent"
+                          (click)="growCatalog()">
+                          <span>{{ loadMoreLabel() }}</span>
+                        </button>
+                      }
+                      @case ('declared') {
+                        <shared-variable-row
+                          class="variable-declared"
+                          [primary]="'vars.' + row.variable.name"
+                          [type]="row.variable.type"
+                          [value]="row.variable.valueAvailable ? (row.variable.value ?? '') : null"
+                          [dimmed]="row.variable.availability !== 'Ready'">
+                          @if (row.variable.isTemplate) {
+                            <span row-meta class="template-chip">{{ templateChipLabel(row.variable.name) }}</span>
+                          }
+                          @if (!row.variable.valueAvailable) {
+                            <span row-side class="availability-pill" [class]="'availability-' + row.variable.availability">
+                              {{ row.variable.availabilityReason }}
+                            </span>
+                          }
+                        </shared-variable-row>
+                      }
+                      @case ('bound') {
+                        <shared-variable-row
+                          class="variable-bound"
+                          [primary]="'vars.' + row.variable.name"
+                          [secondary]="boundDisplayName(row.variable)"
+                          [type]="row.variable.type"
+                          [value]="row.variable.available === false ? null : boundValue(row.variable)"
+                          [unavailable]="row.variable.available === false ? resourceUnavailableLabel() : null" />
+                      }
                     }
                   </li>
-                }
-                @for (variable of filteredVariables(); track variable.name) {
-                  <app-variable-capability-row [variable]="variable" />
                 }
               </ul>
             }
