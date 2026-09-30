@@ -1,6 +1,6 @@
 ---
 title: Run scripts from other apps
-description: Run Macro Deck scripts from Tasker, MacroDroid, other apps and home screen shortcuts, with an Android intent or a run-script link, and the automation key that protects it.
+description: Run Macro Deck scripts from Tasker, MacroDroid, other apps, Android shortcuts, Quick Settings tiles and a scripts widget, with an Android intent or a run-script link, and the automation key that protects it.
 ---
 
 The Companion app can run a Macro Deck [script](/guide/concepts/#scripts-and-automations) on one of your computers when another app asks
@@ -114,11 +114,104 @@ an app lets you, so the link cannot reach another app. On iPhone and iPad, any a
 so the key is what protects it. Another app could also claim the `macrodeck-companion` link for itself and receive
 the key: generate a new key if you ever suspect that.
 
-## Android: home screen shortcuts
+## Android: shortcuts
 
-Tap a script in the **Automation** settings and choose **Add to home screen** to put it on the home screen. Tapping
-it runs the script and says whether it ran. This needs Android 8 or later and a launcher that supports pinned
-shortcuts, and it is offered only for scripts that need no input values.
+Tap a script in the **Automation** settings and choose **Create shortcut**. The sheet asks for:
 
-A home screen shortcut is yours, so it works without the key and with **Allow external automation** turned off.
+- **Name:** what the shortcut is called. It starts as the script's name. Give two shortcuts of the same script
+  different names when you run them with different values.
+- **The script's inputs:** one field for each, such as a scene name, a number or a switch. An input with a default
+  starts with it. An input the script requires needs a value. An input you leave empty uses the script's own
+  default. A number takes `3`, `2.5` or `2,5`.
+
+![The New shortcut sheet on Android: a name, the script's three inputs with values, and the buttons Add to home screen and Add to app icon menu](../../../../assets/guide/companion/android-script-shortcut.png)
+
+Then choose where it goes:
+
+- **Add to home screen:** a shortcut icon on the home screen. This needs Android 8 or later and a launcher that
+  supports pinned shortcuts.
+- **Add to app icon menu:** a line in the menu that opens when you press and hold the Macro Deck icon, above your
+  saved computers. This needs Android 7.1 or later. The menu holds at most half of the lines your launcher allows,
+  often two, so your computers keep their place there. When it is full, remove a script under **App icon menu** in
+  the **Automation** settings first.
+
+Tapping a shortcut runs the script with the values you set, without opening Macro Deck, and a short message says
+whether it ran. If the computer is off, unreachable or locked, the message says so and the script does not run.
+
+The values are saved with the shortcut on your device. Do not put a password or a token into an input. To change
+the values, remove the shortcut and create it again. Remove a home screen shortcut on the home screen, and a line
+of the app icon menu in the **Automation** settings. A home screen copy that was dragged out of the app icon menu
+stops running when you remove the line.
+
+![The Automation settings on Android with a script in the App icon menu section and a computer's scripts below](../../../../assets/guide/companion/android-automation-shortcuts.png)
+
+A shortcut is yours, so it works without the key and with **Allow external automation** turned off.
 If you remove the computer from the app, its shortcuts say so and stop running.
+
+## Android: Quick Settings tiles
+
+A Quick Settings tile runs a script from the panel you pull down from the top of the screen, without opening the
+app. This needs Android 7 or later. You can have up to five tiles.
+
+1. Open the app settings and choose **Automation**.
+2. Open one of your computers, tap a script and choose **Add to Quick Settings**.
+3. Give the tile a name, fill in the script's input values if it has any, and tap **Add to Quick Settings**.
+
+![The Automation settings on Android with two Quick Settings tiles, each with its name in the tile list and the switch Run while the device is locked](../../../../assets/guide/companion/android-quick-settings-tiles.png)
+
+On Android 13 and later, Android then asks whether to add the tile to the panel. On older versions, or if you
+declined, edit the Quick Settings panel and drag the tile in yourself. In the list of available tiles it is called
+**Macro Deck script** with a number from 1 to 5; the **Automation** settings show that name under each of your
+tiles. Some devices, such as Fire tablets, do not let you add tiles to the panel.
+
+![The Quick Settings panel on Android with a Macro Deck script tile that shows the script and its computer](../../../../assets/guide/companion/android-quick-settings-panel.png)
+
+Tap the tile to run the script. The tile shows **Running** until the computer answers, and then **Done**, or why
+the script did not run, such as **Offline** or **Computer locked**. When you open the panel, a tile whose computer
+does not answer already says **Offline** under its name. You can still tap it. On Android 7 to 9 a tile has no
+second line, so it says how a run went in place of its name until you close the panel, and shows nothing before you tap.
+
+A tile is yours, so it works without the key and with **Allow external automation** turned off. Because the
+panel can be opened on the lock screen, a tile asks you to unlock the device first. To let a tile run while the
+device is locked, turn on **Run while the device is locked** for that tile, when you add it or later under
+**Quick Settings tiles** in the **Automation** settings.
+
+To remove a tile, tap the bin next to it under **Quick Settings tiles**. It leaves the panel, and its input values
+are deleted. If you remove the computer from the app, its tiles are removed as well.
+
+## Android: scripts widget
+
+The **Macro Deck scripts** widget puts several scripts on the home screen, each one a button that runs it. A widget
+holds up to eight scripts of one computer, and you can place as many widgets as you like.
+
+1. Touch and hold an empty spot on the home screen, choose **Widgets** and add **Macro Deck scripts**.
+2. Choose the computer. The app then lists its scripts.
+3. Tap a script to add it. Change its name if you like, and fill in its input values if it has any. You can add the
+   same script again with different values, such as one button per scene.
+4. Tap **Save**.
+
+![The setup screen of the Macro Deck scripts widget on Android, with the computer chosen and Go live on the widget twice with different scenes](../../../../assets/guide/companion/android-scripts-widget-setup.png)
+
+![The Macro Deck scripts widget on the Android home screen with three buttons, the second one saying Done after a run](../../../../assets/guide/companion/android-scripts-widget.png)
+
+Tap a button to run its script. The button shows **Running** until the computer answers, and then **Done** or why
+the script did not run, such as **Offline**, **Computer locked** or **Connect first**, and a few seconds later it shows
+the computer's name again. You can tap it again at any time.
+
+The widget follows its size: the wider it is, the more columns it has, and the taller it is, the more rows. When the
+widget is too small for all its scripts, the last button says how many more there are, such as **+3 more**. Make the
+widget larger to see them.
+
+The computer's name under a button is replaced by **Offline** or **Computer locked** when the computer does not
+answer. That is only a hint, taken when you place the widget, when the phone starts and about every 30 minutes, so
+the app contacts the computer now and then in the background even while it is closed. After the computer is back, the
+hint can stay for up to 30 minutes. You can still tap the button, which always tries to run the script, and a script
+that ran clears the hint at once.
+
+To change a widget's scripts, touch and hold it and choose the settings on Android 12 or later. On older versions
+remove the widget and place it again. If you remove the computer from the app, its widgets say so, and tapping one
+lets you choose another computer.
+
+A widget is yours, so it works without the key and with **Allow external automation** turned off. The input values
+are saved with the widget on this device. The widget shows only whether a script ran: a script that switches
+something on or off does not make the button show that state.

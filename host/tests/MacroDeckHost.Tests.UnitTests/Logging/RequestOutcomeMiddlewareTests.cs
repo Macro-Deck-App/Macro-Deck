@@ -70,7 +70,20 @@ public class RequestOutcomeMiddlewareTests
 		});
 	}
 
-	private static async Task<List<LogEvent>> Run(int status, LogEventLevel minimum)
+	[Test]
+	public async Task A_request_path_cannot_forge_a_log_line_or_carry_a_terminal_escape()
+	{
+		var events = await Run(404, LogEventLevel.Information, "/nope\n2026-09-30 [ERR] [Host] forged\u001b[31m");
+
+		var rendered = events.Single().RenderMessage(CultureInfo.InvariantCulture);
+		Assert.Multiple(() =>
+		{
+			Assert.That(rendered.Any(char.IsControl), Is.False);
+			Assert.That(rendered, Does.Contain("/nope").And.Contain("forged"));
+		});
+	}
+
+	private static async Task<List<LogEvent>> Run(int status, LogEventLevel minimum, string path = "/api/thing")
 	{
 		var sink = new CollectingSink();
 		using var logger = new LoggerConfiguration().MinimumLevel.Is(minimum).WriteTo.Sink(sink).CreateLogger();
@@ -84,7 +97,7 @@ public class RequestOutcomeMiddlewareTests
 
 		var httpContext = new DefaultHttpContext();
 		httpContext.Request.Method = "GET";
-		httpContext.Request.Path = "/api/thing";
+		httpContext.Request.Path = path;
 
 		await middleware.Invoke(httpContext);
 
