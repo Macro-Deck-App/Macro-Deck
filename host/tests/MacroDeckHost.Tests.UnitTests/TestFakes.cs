@@ -7,6 +7,8 @@ using MacroDeckHost.Application.Network.Tls;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Secrets;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Widgets;
+using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
@@ -412,4 +414,11 @@ internal sealed class NullWidgetVariableCloner : IWidgetVariableCloner
 	public Task Restore(Guid widgetId, IReadOnlyList<WidgetVariableSnapshot> variables) => Task.CompletedTask;
 
 	public Task Clone(Guid sourceWidgetId, Guid targetWidgetId) => Task.CompletedTask;
+}
+
+internal sealed class NoDefaultShortPress : IWidgetDefaultShortPress
+{
+	public string? FlowsSourceFor(WidgetEntity widget, bool fromDevice) => null;
+
+	public bool RunsOnDevices(string widgetType) => false;
 }

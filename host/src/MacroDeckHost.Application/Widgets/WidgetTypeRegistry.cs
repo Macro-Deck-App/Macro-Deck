@@ -127,6 +127,12 @@ public sealed class WidgetTypeRegistry : IWidgetTypeRegistry
 		ValidateDefaultData(widgetType);
 		ValidateDataSchema(widgetType);
 
+		if (widgetType.DefaultShortPressAction is { } defaultAction && string.IsNullOrWhiteSpace(defaultAction.ActionId))
+		{
+			throw new ArgumentException("The widget type's default short press action must name an action.",
+				nameof(widgetType));
+		}
+
 		var qualifiedId = id.ToString();
 		if (_integrations?.IsExplicitlyDisabled(ownerId) == true)
 		{

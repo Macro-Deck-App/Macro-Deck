@@ -660,7 +660,9 @@ export class Client {
           else this.deck.back();
           return;
         }
-      } else {
+      } else if (triggerType !== 'onShortPress') {
+        // A short press always reaches the host, which runs the widget type's default action when no
+        // Short Press flow of the widget's own would run anything.
         const flow = findFlowForTrigger(flows, triggerType);
         if (!flow || flow.children.length === 0) return;
       }

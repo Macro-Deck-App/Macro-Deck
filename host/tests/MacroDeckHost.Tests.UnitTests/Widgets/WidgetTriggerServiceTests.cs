@@ -23,12 +23,14 @@ public class WidgetTriggerServiceTests
 	private static WidgetTriggerService CreateService(
 		RecordingCoordinator coordinator,
 		RecordingStateService stateService,
-		out ServiceProvider services)
+		out ServiceProvider services,
+		IWidgetDefaultShortPress? defaultShortPress = null)
 	{
 		services = new ServiceCollection().AddSingleton<IActionButtonStateService>(stateService).BuildServiceProvider();
 
 		return new WidgetTriggerService(services.GetRequiredService<IServiceScopeFactory>(),
 			coordinator,
+			defaultShortPress ?? new NoDefaultShortPress(),
 			Serilog.Log.Logger);
 	}
 
@@ -216,6 +218,73 @@ public class WidgetTriggerServiceTests
 
 			return Task.FromResult(WidgetStateWriteResult.Succeeded("b"));
 		}
+	}
+
+	private const string DefaultSource = "{\"flows\":[]}";
+
+	private static WidgetEntity WeatherWidget()
+		=> new() { Id = _widgetId, FolderId = Guid.NewGuid(), Type = WidgetTypeIds.Weather, Data = "{}" };
+
+	[Test]
+	public async Task A_short_press_from_a_client_runs_the_widgets_default_when_there_is_one()
+	{
+		var coordinator = new RecordingCoordinator();
+		var service = CreateService(coordinator, new RecordingStateService(), out var services, new FixedDefault(DefaultSource));
+		using var _ = services;
+
+		await service.ExecuteAsync(WeatherWidget(), WidgetTriggerTypes.ShortPress, "client-1", null, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(coordinator.LastRequest?.FlowsSource, Is.EqualTo(DefaultSource));
+			Assert.That(coordinator.LastRequest?.OwnerWidgetId, Is.EqualTo(_widgetId));
+			Assert.That(coordinator.LastRequest?.OriginClientId, Is.EqualTo("client-1"));
+		});
+	}
+
+	[Test]
+	public async Task A_short_press_from_a_hardware_deck_asks_for_a_default_a_deck_can_run()
+	{
+		var coordinator = new RecordingCoordinator();
+		var defaults = new FixedDefault(DefaultSource);
+		var service = CreateService(coordinator, new RecordingStateService(), out var services, defaults);
+		using var _ = services;
+		var deviceId = Guid.NewGuid();
+
+		await service.ExecuteAsync(WeatherWidget(), WidgetTriggerTypes.ShortPress, null, deviceId, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(defaults.AskedFromDevice, Is.True);
+			Assert.That(coordinator.LastRequest?.FlowsSource, Is.EqualTo(DefaultSource));
+			Assert.That(coordinator.LastRequest?.OriginDeviceId, Is.EqualTo(deviceId));
+		});
+	}
+
+	[Test]
+	public async Task A_long_press_never_runs_the_widgets_default()
+	{
+		var coordinator = new RecordingCoordinator();
+		var service = CreateService(coordinator, new RecordingStateService(), out var services, new FixedDefault(DefaultSource));
+		using var _ = services;
+		var widget = WeatherWidget();
+
+		await service.ExecuteAsync(widget, WidgetTriggerTypes.LongPress, "client-1", null, CancellationToken.None);
+
+		Assert.That(coordinator.LastRequest?.FlowsSource, Is.EqualTo(widget.Data));
+	}
+
+	private sealed class FixedDefault(string? source) : IWidgetDefaultShortPress
+	{
+		public bool? AskedFromDevice { get; private set; }
+
+		public string? FlowsSourceFor(WidgetEntity widget, bool fromDevice)
+		{
+			AskedFromDevice = fromDevice;
+			return source;
+		}
+
+		public bool RunsOnDevices(string widgetType) => false;
 	}
 
 	private sealed class RecordingCoordinator : IActionExecutionCoordinator

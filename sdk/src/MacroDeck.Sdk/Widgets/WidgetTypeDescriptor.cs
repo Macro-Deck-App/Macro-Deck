@@ -45,8 +45,8 @@ public sealed record WidgetTypeDescriptor(
 {
 	/// <summary>
 	/// Whether Macro Deck runs a widget's own action flows when its tile is pressed, as it does for its
-	/// built-in widgets. Default false: a press runs nothing on the host, and the tile only reacts to the
-	/// events its tree declares.
+	/// built-in widgets. Default false: a press runs nothing on the host apart from
+	/// <see cref="DefaultShortPressAction" />, and the tile only reacts to the events its tree declares.
 	/// </summary>
 	/// <remarks>
 	/// <para>
@@ -63,6 +63,27 @@ public sealed record WidgetTypeDescriptor(
 	/// </para>
 	/// </remarks>
 	public bool SupportsFlows { get; init; }
+
+	/// <summary>
+	/// The action Macro Deck runs when a widget of this type is short-pressed and has no Short Press action of
+	/// the user's own. Absent means none.
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// A Short Press action the user configured always wins. The default runs only when the widget's Short
+	/// Press flow is missing, empty or has every action disabled, or when <see cref="SupportsFlows" /> is false.
+	/// A press the widget's tree claims goes to the tree and never runs the default.
+	/// </para>
+	/// <para>
+	/// The action runs like one from the widget's own flow: <c>ActionExecutionContext.OwnerWidgetId</c> names
+	/// the pressed widget and <c>OriginClientId</c> the client that pressed it, so a default can open a modal
+	/// there. A press on a hardware deck runs the default as well, and such a deck is offered a press for the
+	/// widget even without a flow; it has no screen for a modal, so <c>OriginClientId</c> names the device and
+	/// a modal opened for it is shown nowhere. Nothing runs while the provider is disabled or does not declare
+	/// the action. A Macro Deck release older than this property ignores it.
+	/// </para>
+	/// </remarks>
+	public WidgetDefaultAction? DefaultShortPressAction { get; init; }
 
 	/// <summary>
 	/// The standard appearance properties a widget of this type draws from its stored data, beyond

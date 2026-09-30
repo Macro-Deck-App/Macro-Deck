@@ -31,7 +31,7 @@ The tiles in a folder:
 | Slider | Mic volume |
 | Clock | The current time and date |
 | History Graph | CPU load over the last minutes |
-| Weather | Today and the next days for your city |
+| Weather | Today and the next days for your city. Press it for the full details |
 | Music Player | What Spotify is playing, with play and skip. Some players offer extra settings for each widget below the player choice |
 | Twitch Chat | Your channel's chat with emotes and badges, offered once a Twitch account is connected |
 | Countdown | A pizza timer that counts down and alerts you when it runs out |
@@ -102,6 +102,10 @@ What a widget does, and when. The **Scenes** button runs **Change Folder to** on
 | Long Press | Start the stream |
 | Double Tap | Mute all audio |
 | Event | Turn the mic slider's accent red when OBS reports **Streaming Started** |
+
+Some widgets already do something on a short press before you add anything: pressing a **Weather** widget
+opens its details. Give such a widget a Short Press action of your own and yours runs instead. A hardware
+deck has no screen for the weather details, so the Weather widget does nothing there until you add an action.
 
 Every widget with actions, sliders included, can add event triggers next to its press triggers. Give an
 event trigger a **Name** to tell several of them apart in the **Events** list.

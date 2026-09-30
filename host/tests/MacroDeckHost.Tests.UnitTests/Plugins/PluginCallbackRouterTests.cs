@@ -424,6 +424,58 @@ public class PluginCallbackRouterTests
 		});
 	}
 
+	[TestCase("""{"widgetType":{"id":"panel","name":"Panel"}}""", null)]
+	[TestCase("""{"widgetType":{"id":"panel","name":"Panel","defaultShortPressAction":{"actionId":"open"}}}""", "open")]
+	public async Task A_widget_type_has_a_default_short_press_action_only_when_its_registration_names_one(
+		string arguments,
+		string? expected)
+	{
+		var widgetTypes = new WidgetTypeRegistry(new RecordingMediator());
+		var router = Router(widgetTypes: widgetTypes);
+
+		var registered = await router.RouteAsync("plugin.a",
+			"c1",
+			new HostInvokePayload
+			{
+				Api = HostApis.WidgetTypes,
+				Operation = HostOperations.WidgetTypes.Register,
+				Arguments = JsonDocument.Parse(arguments).RootElement.Clone()
+			},
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(registered.Error, Is.Null);
+			Assert.That(widgetTypes.TryResolve("plugin.a::panel", out var entry), Is.True);
+			Assert.That(entry.Descriptor.DefaultShortPressAction?.ActionId, Is.EqualTo(expected));
+		});
+	}
+
+	[Test]
+	public async Task A_widget_type_whose_default_short_press_action_names_no_action_is_not_registered()
+	{
+		var widgetTypes = new WidgetTypeRegistry(new RecordingMediator());
+		var router = Router(widgetTypes: widgetTypes);
+
+		var registered = await router.RouteAsync("plugin.a",
+			"c1",
+			new HostInvokePayload
+			{
+				Api = HostApis.WidgetTypes,
+				Operation = HostOperations.WidgetTypes.Register,
+				Arguments = JsonDocument.Parse(
+					"""{"widgetType":{"id":"panel","name":"Panel","defaultShortPressAction":{"actionId":""}}}""")
+					.RootElement.Clone()
+			},
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(registered.Error, Is.Not.Null);
+			Assert.That(widgetTypes.TryResolve("plugin.a::panel", out _), Is.False);
+		});
+	}
+
 	[TestCase("""{"widgetType":{"id":"panel","name":"Panel"}}""", new int[0])]
 	[TestCase("""{"widgetType":{"id":"panel","name":"Panel","appearanceProperties":[0,1]}}""", new[] { 0, 1 })]
 	public async Task A_widget_type_declares_its_appearance_properties_only_when_its_registration_lists_them(

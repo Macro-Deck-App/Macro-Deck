@@ -81,6 +81,26 @@ internal sealed class DeviceSurfaceProjectionTests
 	}
 
 	[Test]
+	public async Task A_widget_whose_type_has_a_default_short_press_a_deck_can_run_offers_a_press_without_any_flow()
+	{
+		var withDefault = DeviceSurfaceFixture.Button("lamp", 0, 0, withFlows: false);
+		withDefault.Type = "com.example.lights::lamp";
+		var without = DeviceSurfaceFixture.Button("meter", 1, 0, withFlows: false);
+		without.Type = "com.example.lights::meter";
+		_fixture.DefaultShortPress.TypesWithADeviceDefault.Add(withDefault.Type);
+		_fixture.Home.Widgets.AddRange([withDefault, without]);
+
+		var deviceId = await _fixture.OpenDeviceAsync();
+
+		var widgets = _fixture.Provider.Latest(deviceId).Widgets;
+		Assert.Multiple(() =>
+		{
+			Assert.That(widgets[0].SupportedInteractions, Does.Contain(DeviceInteractionKind.ShortPress));
+			Assert.That(widgets[1].SupportedInteractions, Is.Empty);
+		});
+	}
+
+	[Test]
 	public async Task A_widget_declares_the_interactions_the_host_will_accept_for_it()
 	{
 		_fixture.Home.Widgets.AddRange([

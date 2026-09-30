@@ -1993,6 +1993,25 @@ describe('Client', () => {
       expect(client.deck.location.get().folderId).toBe('root');
     });
 
+    it('lets the host answer a short press the widget has no Short Press action for', async () => {
+      const client = build();
+      deckWith(client, 'Weather', {
+        flows: [
+          { triggerId: 'onShortPress', triggerType: 'onShortPress', children: [] },
+          { triggerId: 'onLongPress', triggerType: 'onLongPress', children: [] },
+        ],
+      });
+      const messages = reported(client);
+      host.executeAnswer = { success: true, status: 'Succeeded', executionId: 'e4', durationMs: 3 };
+
+      await client.executeTrigger('w1', 'onShortPress');
+      await client.executeTrigger('w1', 'onLongPress');
+
+      expect(host.pathsFor('POST', '/api/actions/execute').length)
+        .withContext('only the short press, which may run the widget type\'s default').toBe(1);
+      expect(messages).toEqual([]);
+    });
+
     it('says it in the language the client is in now, not the one it started in', async () => {
       const client = build();
       deckWith(client, 'clock');

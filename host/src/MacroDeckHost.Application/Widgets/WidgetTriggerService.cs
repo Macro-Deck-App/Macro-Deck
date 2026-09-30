@@ -20,7 +20,8 @@ public interface IWidgetTriggerService
 	/// <summary>
 	/// Advances the widget's active state first when <paramref name="triggerType" /> is
 	/// <see cref="WidgetTriggerTypes.ShortPress" /> and the button has not turned cycling off, then runs
-	/// the widget's flow for that trigger, bounded to 5 seconds. The advance never links to
+	/// the widget's flow for that trigger - or, for a short press that the widget has no
+	/// runnable flow for, its type's default action - bounded to 5 seconds. The advance never links to
 	/// <paramref name="cancellationToken" /> and never escapes - a failure is logged and the flow still
 	/// runs - so a press is always dispatched even if the state write threw.
 	/// </summary>
@@ -46,15 +47,18 @@ public sealed class WidgetTriggerService : IWidgetTriggerService
 
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly IActionExecutionCoordinator _coordinator;
+	private readonly IWidgetDefaultShortPress _defaultShortPress;
 	private readonly ILogger _logger;
 
 	public WidgetTriggerService(
 		IServiceScopeFactory scopeFactory,
 		IActionExecutionCoordinator coordinator,
+		IWidgetDefaultShortPress defaultShortPress,
 		ILogger logger)
 	{
 		_scopeFactory = scopeFactory;
 		_coordinator = coordinator;
+		_defaultShortPress = defaultShortPress;
 		_logger = logger.ForContext<WidgetTriggerService>();
 	}
 
@@ -94,9 +98,13 @@ public sealed class WidgetTriggerService : IWidgetTriggerService
 			}
 		}
 
+		var flowsSource = IsShortPress(triggerType)
+			? _defaultShortPress.FlowsSourceFor(widget, fromDevice: originDeviceId is not null) ?? widget.Data
+			: widget.Data;
+
 		return await _coordinator.RunBoundedAsync(new FlowExecutionRequest
 			{
-				FlowsSource = widget.Data,
+				FlowsSource = flowsSource,
 				Trigger = TriggerSelector.ByType(triggerType),
 				Scope = VariableScope.Widget,
 				ScopeRefId = widget.Id.ToString(),
@@ -107,6 +115,9 @@ public sealed class WidgetTriggerService : IWidgetTriggerService
 			_pressBound,
 			cancellationToken).ConfigureAwait(false);
 	}
+
+	internal static bool IsShortPress(string triggerType)
+		=> string.Equals(triggerType, WidgetTriggerTypes.ShortPress, StringComparison.OrdinalIgnoreCase);
 
 	/// <summary>
 	/// Whether this press is the button's own way of stepping to its next state. Mirrors

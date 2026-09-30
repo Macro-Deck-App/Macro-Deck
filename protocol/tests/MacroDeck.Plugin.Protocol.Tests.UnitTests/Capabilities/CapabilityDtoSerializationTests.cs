@@ -63,6 +63,36 @@ public class CapabilityDtoSerializationTests
 	}
 
 	[Test]
+	public void Widget_type_default_short_press_action_round_trips_and_is_absent_from_an_older_plugin()
+	{
+		var declared = new WidgetTypeDescriptorDto
+		{
+			Id = "panel",
+			Name = LocalizedText.FromLiteral("Panel"),
+			DefaultShortPressAction = new WidgetDefaultActionDto
+			{
+				ActionId = "open", Parameters = new Dictionary<string, string> { ["room"] = "kitchen" }
+			}
+		};
+
+		var json = JsonSerializer.Serialize(declared, PluginProtocolJson.Options);
+		var roundTripped = JsonSerializer.Deserialize<WidgetTypeDescriptorDto>(json, PluginProtocolJson.Options);
+		var undeclaredJson = JsonSerializer.Serialize(declared with { DefaultShortPressAction = null },
+			PluginProtocolJson.Options);
+		var fromOlderPlugin = JsonSerializer.Deserialize<WidgetTypeDescriptorDto>(
+			"""{"id":"panel","name":"Panel","supportsFlows":true}""", PluginProtocolJson.Options);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(json, Does.Contain("\"defaultShortPressAction\":{\"actionId\":\"open\""));
+			Assert.That(roundTripped!.DefaultShortPressAction?.ActionId, Is.EqualTo("open"));
+			Assert.That(roundTripped.DefaultShortPressAction?.Parameters?["room"], Is.EqualTo("kitchen"));
+			Assert.That(undeclaredJson, Does.Not.Contain("defaultShortPressAction"));
+			Assert.That(fromOlderPlugin!.DefaultShortPressAction, Is.Null);
+		});
+	}
+
+	[Test]
 	public void Host_result_payload_round_trips_and_tolerates_unknown_fields()
 	{
 		var payload = new HostResultPayload { Data = JsonDocument.Parse("{\"value\":1}").RootElement };

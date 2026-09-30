@@ -217,6 +217,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 			_lockState,
 			triggers,
 			new WidgetTypeRegistry(new RecordingMediator()),
+			new NoDefaultShortPress(),
 			TestTimerCoordinators.Unused(folders, triggers));
 	}
 
@@ -232,6 +233,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 			new FakeHostLockState(),
 			triggers,
 			new WidgetTypeRegistry(new RecordingMediator()),
+			new NoDefaultShortPress(),
 			TestTimerCoordinators.Unused(folders, triggers));
 	}
 
@@ -242,12 +244,14 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 	// registration holds no unmanaged state.
 	private static WidgetTriggerService CreateTriggerService(
 		FakeActionExecutionCoordinator coordinator,
-		IActionButtonStateService stateService)
+		IActionButtonStateService stateService,
+		IWidgetDefaultShortPress? defaultShortPress = null)
 	{
 		var services = new ServiceCollection().AddSingleton(stateService).BuildServiceProvider();
 
 		return new WidgetTriggerService(services.GetRequiredService<IServiceScopeFactory>(),
 			coordinator,
+			defaultShortPress ?? new NoDefaultShortPress(),
 			Serilog.Log.Logger);
 	}
 
@@ -310,23 +314,39 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 	private const string ProviderWidgetData =
 		"{\"flows\":[{\"triggerId\":\"t1\",\"triggerType\":\"onShortPress\",\"children\":[]}]}";
 
-	private async Task<ExecuteActionButtonTriggerRequestMessageHandler> CreateHandlerForProviderType(bool supportsFlows)
+	private const string ProviderId = "com.example.battery";
+
+	private async Task<ExecuteActionButtonTriggerRequestMessageHandler> CreateHandlerForProviderType(
+		bool supportsFlows,
+		WidgetDefaultAction? defaultShortPressAction = null,
+		CapturingActionDefinition? providerAction = null)
 	{
 		var registry = new WidgetTypeRegistry(new RecordingMediator());
-		var registration = await registry.Register("com.example.battery",
-			new WidgetTypeDescriptor("panel", "Battery panel") { SupportsFlows = supportsFlows });
+		var registration = await registry.Register(ProviderId,
+			new WidgetTypeDescriptor("panel", "Battery panel")
+			{
+				SupportsFlows = supportsFlows, DefaultShortPressAction = defaultShortPressAction
+			});
 
 		var widget = ActionButtonWidget(registration.WidgetTypeId);
 		widget.Data = ProviderWidgetData;
 		_folders = new FakeFolderCache(widget);
 
-		var triggers = CreateTriggerService(_coordinator, new NoOpActionButtonStateService());
+		var integrations = new FakeIntegrationRegistry();
+		if (providerAction is not null)
+		{
+			integrations.Add(new FakeIntegration { Id = ProviderId, Actions = [providerAction] });
+		}
+
+		var defaults = new WidgetDefaultShortPress(() => registry, integrations, TestLocalization.Resolver);
+		var triggers = CreateTriggerService(_coordinator, new NoOpActionButtonStateService(), defaults);
 
 		return new ExecuteActionButtonTriggerRequestMessageHandler(_folders,
 			_profiles,
 			_lockState,
 			triggers,
 			registry,
+			defaults,
 			TestTimerCoordinators.Unused(_folders, triggers));
 	}
 
@@ -559,6 +579,57 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(response.Success, Is.True);
+			Assert.That(response.Status, Is.EqualTo(ActionExecutionStatus.Accepted));
+			Assert.That(_coordinator.Runs, Is.Zero);
+		});
+	}
+
+	[Test]
+	public async Task A_short_press_on_a_provider_widget_without_flows_runs_the_types_default_action()
+	{
+		var handler = await CreateHandlerForProviderType(supportsFlows: false,
+			new WidgetDefaultAction("open"),
+			new CapturingActionDefinition { Id = "open" });
+
+		var response = await handler.Handle(Request(), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Success, Is.True);
+			Assert.That(_coordinator.Runs, Is.EqualTo(1));
+			Assert.That(_coordinator.LastRequest?.FlowsSource, Does.Contain("\"actionId\":\"open\""));
+		});
+	}
+
+	[Test]
+	public async Task A_short_press_from_a_hardware_deck_runs_a_provider_types_default_action_too()
+	{
+		var handler = await CreateHandlerForProviderType(supportsFlows: false,
+			new WidgetDefaultAction("open"),
+			new CapturingActionDefinition { Id = "open" });
+		var request = Request();
+		request.OriginDeviceId = Guid.NewGuid();
+
+		await handler.Handle(request, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_coordinator.Runs, Is.EqualTo(1));
+			Assert.That(_coordinator.LastRequest?.FlowsSource, Does.Contain("\"actionId\":\"open\""));
+		});
+	}
+
+	[Test]
+	public async Task A_long_press_on_a_provider_widget_without_flows_ignores_the_types_default_action()
+	{
+		var handler = await CreateHandlerForProviderType(supportsFlows: false,
+			new WidgetDefaultAction("open"),
+			new CapturingActionDefinition { Id = "open" });
+
+		var response = await handler.Handle(Request(triggerType: WidgetTriggerTypes.LongPress), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
 			Assert.That(response.Status, Is.EqualTo(ActionExecutionStatus.Accepted));
 			Assert.That(_coordinator.Runs, Is.Zero);
 		});
