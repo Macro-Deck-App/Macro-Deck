@@ -1,5 +1,6 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
+import { AppStrings } from '@macro-deck/runtime';
 import { LocalizationService } from '@shared';
 import type { VariableType } from '@macro-deck/runtime';
 import { variableTypeLabels } from '../../domain/variable-source.util';
@@ -44,6 +45,9 @@ export class VariableRowComponent {
   readonly activate = output<void>();
 
   protected readonly indent = computed(() => this.depth() * DEPTH_INDENT_PX);
+
+  protected readonly unavailableLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Manager.ValueUnavailableShort));
 
   protected readonly typeLabel = computed(() => {
     const type = this.type();

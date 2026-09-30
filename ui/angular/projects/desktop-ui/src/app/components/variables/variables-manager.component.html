@@ -51,7 +51,7 @@
       maxBufferPx="800"
       class="vars-list"
       (scroll)="closeOpenMenu()"
-      (scrolledIndexChange)="onCatalogScroll($event + 12)">
+      (scrolledIndexChange)="onCatalogScroll()">
       <div
         class="vars-row-slot"
         *cdkVirtualFor="let row of rows(); trackBy: trackRow"
@@ -129,11 +129,16 @@
               <span>{{ loadMoreLabel() }}</span>
             </button>
           }
+          @case ('catalog-grow') {
+            <button type="button" class="vars-catalog-more vars-catalog-grow" (click)="growCatalog(row.integrationId)">
+              <span>{{ loadMoreLabel() }}</span>
+            </button>
+          }
           @case ('row') {
             @if (isPickMode()) {
               <shared-variable-row
                 class="vars-row vars-row-pick"
-                role="option"
+                [role]="'option'"
                 [primary]="publicName(row.variable)"
                 [secondary]="displayNameOf(row.variable)"
                 [type]="row.variable.type"
@@ -144,7 +149,6 @@
             } @else {
               <shared-variable-row
                 class="vars-row"
-                [class.read-only]="!canEditValue(row.variable)"
                 [primary]="publicName(row.variable)"
                 [secondary]="displayNameOf(row.variable)"
                 [type]="row.variable.type"

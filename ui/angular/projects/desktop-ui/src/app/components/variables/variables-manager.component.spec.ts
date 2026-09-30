@@ -806,10 +806,9 @@ describe('VariablesManagerComponent', () => {
       } as never);
       TestBed.inject(VariableCatalogService).invalidateIntegration('obs');
       await settle();
-      if (!unboundHeader('obs')?.expanded) {
-        await openUnbound('obs');
-      }
 
+      expect(unboundHeader('obs')?.count).withContext('what is listed wins over a stale report').toBe(1);
+      await openUnbound('obs');
       expect(catalogRows().filter(r => r.kind === 'catalog-leaf').map(r => r.node!.name)).toEqual(['muted']);
     });
 
@@ -1113,6 +1112,23 @@ describe('VariablesManagerComponent', () => {
 
       expect(unboundHeader('obs4')).toBeTruthy();
       expect(unboundHeader('obs4')?.count).toBeNull();
+    });
+
+    it('reaches the rest of a long catalog through a load more row, whatever the window height', async () => {
+      const many = Array.from({ length: 150 }, (_, i) => leaf(`conn/input/l${i}`, `obs_l${i}`));
+      tree = { root: many };
+      await useProvider({ integrationId: 'obs5', supportsSearch: false, supportsManualIds: false });
+      component.source = { kind: 'integration', integrationId: 'obs5' };
+      await settle();
+      await openUnbound('obs5');
+      expect(catalogRows().filter(r => r.kind === 'catalog-leaf').length).toBe(100);
+      expect(catalogRows()[catalogRows().length - 1].kind).toBe('catalog-grow');
+
+      component.growCatalog('obs5');
+      await settle();
+
+      expect(catalogRows().filter(r => r.kind === 'catalog-leaf').length).toBe(150);
+      expect(catalogRows().some(r => r.kind === 'catalog-grow')).toBeFalse();
     });
 
     it('stops walking nested containers once the budget is full', async () => {

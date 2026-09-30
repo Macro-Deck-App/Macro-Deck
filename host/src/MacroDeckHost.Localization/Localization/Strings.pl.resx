@@ -16130,9 +16130,6 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Variables.Browser.UserVariables" xml:space="preserve">
     <value>Zmienne użytkownika</value>
   </data>
-  <data name="Variables.Dynamic.Badge" xml:space="preserve">
-    <value>Niepowiązane</value>
-  </data>
   <data name="Variables.Dynamic.BindAction" xml:space="preserve">
     <value>Powiąż</value>
   </data>
@@ -16141,12 +16138,6 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Variables.Dynamic.BindHeading" xml:space="preserve">
     <value>Powiąż ze zmienną</value>
-  </data>
-  <data name="Variables.Dynamic.BoundLabel" xml:space="preserve">
-    <value>Powiązano</value>
-  </data>
-  <data name="Variables.Dynamic.EmptyHeading" xml:space="preserve">
-    <value>Brak zasobów</value>
   </data>
   <data name="Variables.Dynamic.EmptyMessage" xml:space="preserve">
     <value>Ta integracja nie ma teraz nic do pokazania.</value>
@@ -16178,9 +16169,6 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Variables.Dynamic.NotBindable" xml:space="preserve">
     <value>Tego zasobu nie można tu użyć</value>
   </data>
-  <data name="Variables.Dynamic.OfflineHeading" xml:space="preserve">
-    <value>Nie udało się połączyć</value>
-  </data>
   <data name="Variables.Dynamic.OfflineMessage" xml:space="preserve">
     <value>Nie udało się połączyć z {integration}. Sprawdź połączenie i spróbuj ponownie.</value>
   </data>
@@ -16195,9 +16183,6 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Variables.Dynamic.Retry" xml:space="preserve">
     <value>Ponów próbę</value>
-  </data>
-  <data name="Variables.Dynamic.SearchPlaceholder" xml:space="preserve">
-    <value>Szukaj zasobów…</value>
   </data>
   <data name="Variables.Format.ValueWithUnit" xml:space="preserve">
     <value>{value} {unit}</value>
@@ -16307,6 +16292,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Variables.Manager.ValueUnavailable" xml:space="preserve">
     <value>Wartość obecnie niedostępna (dostawca nie zwrócił danych lub wartość jest nieaktualna)</value>
+  </data>
+  <data name="Variables.Manager.ValueUnavailableShort" xml:space="preserve">
+    <value>n/d</value>
   </data>
   <data name="Variables.Manager.VariableCount.One" xml:space="preserve">
     <value>{count} zmienna</value>

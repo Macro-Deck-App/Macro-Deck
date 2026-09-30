@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, computed, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ScrollingModule } from '@angular/cdk/scrolling';
+import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 
 import { AppStrings, resolveLocalizedText, variableTokenKind, variableTokenLabel, variableTokenText } from '@macro-deck/runtime';
 import { ButtonComponent, InputComponent, LocalizationService, VariableService } from '@shared';
@@ -73,7 +73,7 @@ const BIND_DIALOG_Z_INDEX = 1100;
         minBufferPx="300"
         maxBufferPx="600"
         class="tvt-list"
-        (scrolledIndexChange)="onScrolled($event + 12)">
+        (scrolledIndexChange)="onScrolled()">
         <div class="tvt-row-slot" *cdkVirtualFor="let row of rows(); trackBy: trackRow" [style.height.px]="rowHeight">
           @switch (row.kind) {
             @case ('group-header') {
@@ -178,6 +178,11 @@ const BIND_DIALOG_Z_INDEX = 1100;
               <div class="tvt-state-row" [style.padding-inline-start.px]="row.depth * 20 + 12">
                 <span>{{ catalogNoteLabel(row.note) }}</span>
               </div>
+            }
+            @case ('catalog-grow') {
+              <button type="button" class="tvt-link-row tvt-catalog-grow" (click)="catalog.grow(row.integrationId)">
+                <span>{{ loadMoreLabel() }}</span>
+              </button>
             }
             @case ('catalog-more') {
               <button
@@ -400,18 +405,15 @@ export class TemplateVariableTreeComponent {
     this.insert.emit(this.insertionFor(variable));
   }
 
-  onScrolled(lastVisibleIndex: number): void {
-    const tails = new Map<string, number>();
-    this.rows().forEach((row, index) => {
-      if (row.kind === 'catalog-leaf' || row.kind === 'catalog-branch') {
-        tails.set(row.integrationId, index);
+  private readonly viewport = viewChild(CdkVirtualScrollViewport);
+
+  onScrolled(): void {
+    const renderedEnd = this.viewport()?.getRenderedRange().end ?? 0;
+    this.rows().slice(0, renderedEnd).forEach(row => {
+      if (row.kind === 'catalog-grow') {
+        this.catalog.grow(row.integrationId);
       }
     });
-    for (const [integrationId, index] of tails) {
-      if (index <= lastVisibleIndex) {
-        this.catalog.grow(integrationId);
-      }
-    }
   }
 
   readonly unboundHeading = computed(() =>

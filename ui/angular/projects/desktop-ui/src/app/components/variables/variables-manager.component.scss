@@ -42,8 +42,6 @@
   padding: var(--space-8) var(--space-4);
 }
 
-// Rows stack at a fixed itemSize (VARIABLE_ROW_HEIGHT), so spacing between them must live inside
-// the slot: a flex gap here would drift every row away from where the viewport assumes it is.
 .vars-list {
   @include list.surface;
   flex: 1 1 auto;

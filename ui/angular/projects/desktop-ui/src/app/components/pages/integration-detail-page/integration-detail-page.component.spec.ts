@@ -1073,6 +1073,28 @@ describe('IntegrationDetailPageComponent', () => {
       fixture.destroy();
     });
 
+    it('says there are no variables, not that a search failed, when the catalog is empty too', async () => {
+      const fixture = await openVariables([], []);
+
+      const empty = fixture.nativeElement.querySelector('shared-empty-state') as HTMLElement;
+      const translate = (key: string) => TestBed.inject(LocalizationService).translateKey(key);
+      expect(empty.textContent).toContain(translate(AppStrings.Integrations.Detail.NoVariablesHeading));
+      expect(empty.textContent).not.toContain(translate(AppStrings.Integrations.Detail.NoMatchingVariablesHeading));
+      fixture.destroy();
+    });
+
+    it('counts a bound variable on the tab as well as in the list', async () => {
+      liveVariables.set([liveVariable({
+        id: 'bound-1', name: 'spotify_track_1', type: 'text', value: 'Song', dynamicResourceId: 'track/1',
+      })]);
+      const fixture = await openVariables([]);
+
+      const tab = fixture.nativeElement.querySelector(`#${'integration-detail'}-tab-variables`) as HTMLElement;
+      expect(tab.textContent).toContain('2');
+      expect(fixture.nativeElement.querySelector('.capability-result-count').textContent).toContain('2 of 2');
+      fixture.destroy();
+    });
+
     it('lists a variable bound from the group although no capability declares it', async () => {
       const fixture = await openVariables([node(1)]);
       header(fixture)!.click();

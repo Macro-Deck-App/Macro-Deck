@@ -35,7 +35,6 @@ type DetailTab = 'overview' | 'actions' | 'variables';
 type VariableTabRow =
   | { kind: 'unbound-header'; key: string; count: number | null; expanded: boolean; collapsible: boolean }
   | { kind: 'catalog-state'; key: string; state: 'loading' | 'offline' | 'empty' }
-  | { kind: 'catalog-grow'; key: string }
   | { kind: 'declared'; key: string; variable: IpcIntegrationVariableCapability }
   | { kind: 'bound'; key: string; variable: Variable }
   | VariableCatalogRow;
@@ -247,9 +246,6 @@ export class IntegrationDetailPageComponent implements OnInit {
       rows.push({ kind: 'catalog-state', key: 'unbound-state', state: group.state });
     }
     rows.push(...group.rows);
-    if (group.canGrow) {
-      rows.push({ kind: 'catalog-grow', key: 'unbound-grow' });
-    }
     return rows;
   });
 
@@ -464,7 +460,7 @@ export class IntegrationDetailPageComponent implements OnInit {
     this.capabilities()?.actions.length ?? this.integration()?.actionCount ?? 0);
 
   protected readonly variablesCount = computed(() =>
-    this.capabilities()?.variables.length ?? this.integration()?.variableCount ?? 0);
+    (this.capabilities()?.variables.length ?? this.integration()?.variableCount ?? 0) + this.boundVariables().length);
 
   protected readonly tabs = computed<TabItem[]>(() => [
     { id: 'overview', label: this.localization.translateKey(AppStrings.Integrations.Detail.OverviewTab) },

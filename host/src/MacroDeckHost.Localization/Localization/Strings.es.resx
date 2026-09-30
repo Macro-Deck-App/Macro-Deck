@@ -16130,9 +16130,6 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Variables.Browser.UserVariables" xml:space="preserve">
     <value>Variables de usuario</value>
   </data>
-  <data name="Variables.Dynamic.Badge" xml:space="preserve">
-    <value>Sin vincular</value>
-  </data>
   <data name="Variables.Dynamic.BindAction" xml:space="preserve">
     <value>Vincular</value>
   </data>
@@ -16141,12 +16138,6 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Variables.Dynamic.BindHeading" xml:space="preserve">
     <value>Vincula con una variable</value>
-  </data>
-  <data name="Variables.Dynamic.BoundLabel" xml:space="preserve">
-    <value>Vinculado</value>
-  </data>
-  <data name="Variables.Dynamic.EmptyHeading" xml:space="preserve">
-    <value>Sin recursos</value>
   </data>
   <data name="Variables.Dynamic.EmptyMessage" xml:space="preserve">
     <value>Esta integración no tiene nada que mostrar por ahora.</value>
@@ -16178,9 +16169,6 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Variables.Dynamic.NotBindable" xml:space="preserve">
     <value>Este recurso no se puede usar aquí</value>
   </data>
-  <data name="Variables.Dynamic.OfflineHeading" xml:space="preserve">
-    <value>No se pudo conectar</value>
-  </data>
   <data name="Variables.Dynamic.OfflineMessage" xml:space="preserve">
     <value>No se pudo conectar con {integration}. Comprueba la conexión e inténtalo de nuevo.</value>
   </data>
@@ -16195,9 +16183,6 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Variables.Dynamic.Retry" xml:space="preserve">
     <value>Reintentar</value>
-  </data>
-  <data name="Variables.Dynamic.SearchPlaceholder" xml:space="preserve">
-    <value>Buscar recursos…</value>
   </data>
   <data name="Variables.Format.ValueWithUnit" xml:space="preserve">
     <value>{value} {unit}</value>
@@ -16307,6 +16292,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Variables.Manager.ValueUnavailable" xml:space="preserve">
     <value>Valor no disponible por ahora (el proveedor no devolvió nada o el valor está obsoleto)</value>
+  </data>
+  <data name="Variables.Manager.ValueUnavailableShort" xml:space="preserve">
+    <value>n/d</value>
   </data>
   <data name="Variables.Manager.VariableCount.One" xml:space="preserve">
     <value>{count} variable</value>

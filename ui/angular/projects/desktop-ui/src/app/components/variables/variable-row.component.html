@@ -16,7 +16,7 @@
   </span>
   <span class="vr-side">
     @if (unavailable(); as reason) {
-      <span class="vr-unavailable" role="img" [title]="reason" [attr.aria-label]="reason">n/v</span>
+      <span class="vr-unavailable" role="img" [title]="reason" [attr.aria-label]="reason">{{ unavailableLabel() }}</span>
     } @else if (value() !== null) {
       <span class="vr-value" [title]="value()">{{ value() }}</span>
     } @else if (actionLabel(); as label) {

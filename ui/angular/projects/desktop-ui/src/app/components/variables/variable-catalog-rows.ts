@@ -8,14 +8,16 @@ export type VariableCatalogRow =
   | { kind: 'catalog-leaf'; key: string; integrationId: string; node: VariableCatalogNode; depth: number }
   | { kind: 'catalog-branch'; key: string; integrationId: string; node: VariableCatalogNode; depth: number; expanded: boolean }
   | { kind: 'catalog-note'; key: string; note: 'loading' | 'not-bindable'; depth: number }
-  | { kind: 'catalog-more'; key: string; integrationId: string; parentId: string | undefined; depth: number };
+  | { kind: 'catalog-more'; key: string; integrationId: string; parentId: string | undefined; depth: number }
+  | { kind: 'catalog-grow'; key: string; integrationId: string };
 
 export type VariableCatalogState = 'loading' | 'offline' | 'empty' | 'ready';
 
 interface VariableCatalogSection {
   rows: VariableCatalogRow[];
   state: VariableCatalogState;
-  hasMore: boolean;
+  complete: boolean;
+  truncated: boolean;
   entryCount: number;
 }
 
@@ -26,7 +28,6 @@ export interface VariableCatalogGroup {
   count: number | null;
   state: VariableCatalogState;
   rows: VariableCatalogRow[];
-  canGrow: boolean;
 }
 
 export interface VariableCatalogRowsOptions {
@@ -53,7 +54,7 @@ const PAGE_ENTRIES = 100;
 
 const QUERY_DEBOUNCE_MS = 250;
 
-const INACTIVE_SECTION: VariableCatalogSection = { rows: [], state: 'ready', hasMore: false, entryCount: 0 };
+const INACTIVE_SECTION: VariableCatalogSection = { rows: [], state: 'ready', complete: false, truncated: false, entryCount: 0 };
 
 interface CatalogRequest {
   integrationId: string;
@@ -277,7 +278,8 @@ export function createVariableCatalogRows(options: VariableCatalogRowsOptions): 
       map.set(walk.integrationId, {
         rows: walk.rows,
         state,
-        hasMore: walk.truncated || walk.requests.length > 0,
+        complete: !walk.truncated && walk.requests.length === 0 && !pending,
+        truncated: walk.truncated,
         entryCount: walk.entries,
       });
     }
@@ -303,12 +305,16 @@ export function createVariableCatalogRows(options: VariableCatalogRowsOptions): 
     if (options.writableOnly?.() || (options.acceptedTypes?.() ?? []).length > 0) {
       return null;
     }
-    const reported = catalog.providersFor()().find(p => p.integrationId === integrationId)?.unboundCount;
-    if (reported !== undefined && reported !== null) {
-      return reported;
+    if (!onHost && section.complete) {
+      return section.entryCount;
     }
-    return !onHost && section.state !== 'loading' && !section.hasMore ? section.entryCount : null;
+    return catalog.providersFor()().find(p => p.integrationId === integrationId)?.unboundCount ?? null;
   };
+
+  const listed = (integrationId: string, section: VariableCatalogSection): VariableCatalogRow[] =>
+    section.truncated
+      ? [...section.rows, { kind: 'catalog-grow', key: `grow:${integrationId}`, integrationId }]
+      : section.rows;
 
   const group = (integrationId: string): VariableCatalogGroup | null => {
     const section = sections().get(integrationId);
@@ -332,8 +338,7 @@ export function createVariableCatalogRows(options: VariableCatalogRowsOptions): 
       collapsible: !isSearching,
       count: isSearching ? null : unboundCount(integrationId, section, onHost),
       state: section.state,
-      rows: expanded && section.state === 'ready' ? section.rows : [],
-      canGrow: expanded && section.state === 'ready' && section.hasMore,
+      rows: expanded && section.state === 'ready' ? listed(integrationId, section) : [],
     };
   };
 

@@ -9,9 +9,10 @@ import {
   computed,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ScrollingModule } from '@angular/cdk/scrolling';
+import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { AppStrings, VariableCatalogNode, resolveLocalizedText } from '@macro-deck/runtime';
 import { ButtonComponent, ButtonGroupComponent, ErrorBannerComponent, InputComponent, LocalizationService, ModalComponent, ToggleSwitchComponent, TranslatePipe, VariableService, dismissModal } from '@shared';
 import type { Variable, VariableClassification, VariableScope, VariableType } from '@macro-deck/runtime';
@@ -53,8 +54,6 @@ type VariableRow =
   | { kind: 'catalog-state'; key: string; integrationId: string; state: 'loading' | 'offline' | 'empty' }
   | { kind: 'row'; key: string; variable: Variable }
   | VariableCatalogRow;
-
-const SCROLL_LOOKAHEAD_ROWS = 5;
 
 const CLASSIFICATION_LABEL_KEYS: Record<VariableClassification, string> = {
   user: AppStrings.Variables.Manager.ClassificationUser,
@@ -531,18 +530,19 @@ export class VariablesManagerComponent implements OnInit {
 
   @Output() catalogBindRequested = new EventEmitter<{ integrationId: string; node: VariableCatalogNode }>();
 
-  onCatalogScroll(lastVisibleIndex: number): void {
-    const tails = new Map<string, number>();
-    this.rows().forEach((row, index) => {
-      if (row.kind === 'catalog-leaf' || row.kind === 'catalog-branch') {
-        tails.set(row.integrationId, index);
+  private readonly viewport = viewChild(CdkVirtualScrollViewport);
+
+  onCatalogScroll(): void {
+    const renderedEnd = this.viewport()?.getRenderedRange().end ?? 0;
+    this.rows().slice(0, renderedEnd).forEach(row => {
+      if (row.kind === 'catalog-grow') {
+        this.catalog.grow(row.integrationId);
       }
     });
-    for (const [integrationId, index] of tails) {
-      if (index <= lastVisibleIndex + SCROLL_LOOKAHEAD_ROWS) {
-        this.catalog.grow(integrationId);
-      }
-    }
+  }
+
+  growCatalog(integrationId: string): void {
+    this.catalog.grow(integrationId);
   }
 
   readonly openMenuKey = signal<string | null>(null);

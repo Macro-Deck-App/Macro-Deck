@@ -236,7 +236,7 @@
               <shared-loading-state [message]="'macrodeck.app:Integrations.Detail.LoadingVariables' | translate" />
             } @else if (capabilitiesError(); as error) {
               <shared-error-banner [message]="error" (dismiss)="capabilitiesError.set(null)" />
-            } @else if (totalVariableCount() === 0 && !offersCatalog()) {
+            } @else if (variableRows().length === 0 && !variableSearch().trim()) {
               <shared-empty-state
                 icon="code"
                 [heading]="'macrodeck.app:Integrations.Detail.NoVariablesHeading' | translate"
