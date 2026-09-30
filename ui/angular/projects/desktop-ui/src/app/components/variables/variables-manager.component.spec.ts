@@ -742,6 +742,14 @@ describe('VariablesManagerComponent', () => {
         .toBe('false');
     });
 
+    it('explains what the group holds next to its label', () => {
+      const header = fixture.nativeElement.querySelector('.vars-unbound-header') as HTMLElement;
+
+      expect(header.querySelector('.vgh-hint')?.getAttribute('title')).toBe(component.unboundHint());
+      expect(header.querySelector('button')?.getAttribute('aria-description')).toBe(component.unboundHint());
+      expect(component.unboundHint().length).toBeGreaterThan(20);
+    });
+
     it('opens and closes the group from its header', async () => {
       const toggle = fixture.nativeElement.querySelector('.vars-unbound-header button') as HTMLButtonElement;
 

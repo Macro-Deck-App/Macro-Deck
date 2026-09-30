@@ -338,6 +338,8 @@ export class VariablesManagerComponent implements OnInit {
     this.localization.translateKey(AppStrings.Variables.Dynamic.BindAction));
   readonly unboundHeading = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Dynamic.GroupHeading));
+  readonly unboundHint = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Dynamic.GroupHint));
   readonly catalogEmptyLabel = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Dynamic.EmptyMessage));
   readonly retryLabel = computed(() =>

@@ -359,6 +359,9 @@ export class IntegrationDetailPageComponent implements OnInit {
   protected readonly bindActionLabel = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Dynamic.BindAction));
 
+  protected readonly unboundHint = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Dynamic.GroupHint));
+
   protected readonly unboundHeading = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Dynamic.GroupHeading));
 

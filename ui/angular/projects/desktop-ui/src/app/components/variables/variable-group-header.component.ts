@@ -12,16 +12,23 @@ import { VARIABLE_ROW_INDENT } from './variable-row.component';
         class="vgh vgh-toggle"
         [attr.aria-expanded]="expanded()"
         [attr.aria-label]="ariaLabel()"
+        [attr.aria-description]="hint()"
         (click)="toggle.emit()">
         <span class="icon icon-xs icon-chevron-right vgh-chevron" [class.vgh-chevron-open]="expanded()" aria-hidden="true"></span>
         <span class="vgh-label">{{ label() }}</span>
         @if (count() !== null) {
           <span class="vgh-count">{{ count() }}</span>
         }
+        @if (hint(); as text) {
+          <span class="icon icon-info icon-xs vgh-hint" [title]="text" aria-hidden="true"></span>
+        }
       </button>
     } @else {
-      <div class="vgh" aria-hidden="true">
+      <div class="vgh" [attr.aria-hidden]="hint() ? null : true">
         <span class="vgh-label">{{ label() }}</span>
+        @if (hint(); as text) {
+          <span class="icon icon-info icon-xs vgh-hint" role="img" [title]="text" [attr.aria-label]="text"></span>
+        }
       </div>
     }
   `,
@@ -40,6 +47,7 @@ export class VariableGroupHeaderComponent {
   readonly card = input(false);
   readonly expanded = input(false);
   readonly ariaLabel = input<string | null>(null);
+  readonly hint = input<string | null>(null);
   readonly depth = input(0);
 
   readonly toggle = output<void>();

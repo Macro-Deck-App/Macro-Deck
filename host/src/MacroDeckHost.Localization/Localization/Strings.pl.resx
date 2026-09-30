@@ -16148,6 +16148,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Variables.Dynamic.GroupHeadingCount" xml:space="preserve">
     <value>Niepowiązane zmienne: {count}</value>
   </data>
+  <data name="Variables.Dynamic.GroupHint" xml:space="preserve">
+    <value>Wartości oferowane przez tę integrację, które nie są jeszcze zmiennymi. Po powiązaniu wartość staje się zmienną.</value>
+  </data>
   <data name="Variables.Dynamic.Loading" xml:space="preserve">
     <value>Wczytywanie…</value>
   </data>

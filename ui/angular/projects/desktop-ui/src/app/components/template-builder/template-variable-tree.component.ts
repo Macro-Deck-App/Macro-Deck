@@ -129,6 +129,7 @@ const BIND_DIALOG_Z_INDEX = 1100;
                 [section]="!row.collapsible"
                 [expanded]="row.expanded"
                 [ariaLabel]="unboundAriaLabel(row.count)"
+                [hint]="unboundHint()"
                 (toggle)="toggleUnbound(row.integrationId)" />
             }
             @case ('catalog-state') {
@@ -422,6 +423,8 @@ export class TemplateVariableTreeComponent {
     });
   }
 
+  readonly unboundHint = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Dynamic.GroupHint));
   readonly unboundHeading = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Dynamic.GroupHeading));
   readonly bindActionLabel = computed(() =>

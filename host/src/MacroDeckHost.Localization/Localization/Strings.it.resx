@@ -16143,10 +16143,13 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>Questa integrazione non ha nulla da mostrare al momento.</value>
   </data>
   <data name="Variables.Dynamic.GroupHeading" xml:space="preserve">
-    <value>Variabili non associate</value>
+    <value>Variabili non collegate</value>
   </data>
   <data name="Variables.Dynamic.GroupHeadingCount" xml:space="preserve">
-    <value>Variabili non associate: {count}</value>
+    <value>Variabili non collegate: {count}</value>
+  </data>
+  <data name="Variables.Dynamic.GroupHint" xml:space="preserve">
+    <value>Valori offerti da questa integrazione che non sono ancora variabili. Collegane uno per usarlo come variabile.</value>
   </data>
   <data name="Variables.Dynamic.Loading" xml:space="preserve">
     <value>Caricamento…</value>

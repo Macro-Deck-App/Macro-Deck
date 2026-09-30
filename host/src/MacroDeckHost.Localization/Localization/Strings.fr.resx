@@ -16148,6 +16148,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Variables.Dynamic.GroupHeadingCount" xml:space="preserve">
     <value>Variables non liées : {count}</value>
   </data>
+  <data name="Variables.Dynamic.GroupHint" xml:space="preserve">
+    <value>Valeurs proposées par cette intégration qui ne sont pas encore des variables. Lie-en une pour l'utiliser comme variable.</value>
+  </data>
   <data name="Variables.Dynamic.Loading" xml:space="preserve">
     <value>Chargement…</value>
   </data>

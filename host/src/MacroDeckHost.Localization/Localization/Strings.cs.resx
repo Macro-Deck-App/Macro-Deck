@@ -16143,10 +16143,13 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Tato integrace teď nemá nic k zobrazení.</value>
   </data>
   <data name="Variables.Dynamic.GroupHeading" xml:space="preserve">
-    <value>Nenavázané proměnné</value>
+    <value>Nepropojené proměnné</value>
   </data>
   <data name="Variables.Dynamic.GroupHeadingCount" xml:space="preserve">
-    <value>Nenavázané proměnné: {count}</value>
+    <value>Nepropojené proměnné: {count}</value>
+  </data>
+  <data name="Variables.Dynamic.GroupHint" xml:space="preserve">
+    <value>Hodnoty, které tato integrace nabízí, ale zatím nejsou proměnnými. Po propojení se hodnota stane proměnnou.</value>
   </data>
   <data name="Variables.Dynamic.Loading" xml:space="preserve">
     <value>Načítání…</value>

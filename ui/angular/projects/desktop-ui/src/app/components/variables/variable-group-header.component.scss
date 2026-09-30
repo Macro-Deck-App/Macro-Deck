@@ -69,6 +69,11 @@
   color: var(--color-text-primary);
 }
 
+.vgh-hint {
+  flex: 0 0 auto;
+  color: var(--color-text-muted);
+}
+
 .vgh-count {
   @include ds.badge;
   flex: 0 0 auto;

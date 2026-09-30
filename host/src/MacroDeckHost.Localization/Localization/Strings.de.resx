@@ -16141,10 +16141,13 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Diese Integration hat gerade nichts zu zeigen.</value>
   </data>
   <data name="Variables.Dynamic.GroupHeading" xml:space="preserve">
-    <value>Nicht gebundene Variablen</value>
+    <value>Nicht verknüpfte Variablen</value>
   </data>
   <data name="Variables.Dynamic.GroupHeadingCount" xml:space="preserve">
-    <value>Nicht gebundene Variablen: {count}</value>
+    <value>Nicht verknüpfte Variablen: {count}</value>
+  </data>
+  <data name="Variables.Dynamic.GroupHint" xml:space="preserve">
+    <value>Werte, die diese Integration anbietet, die aber noch keine Variablen sind. Verknüpfe einen, um ihn als Variable zu nutzen.</value>
   </data>
   <data name="Variables.Dynamic.Loading" xml:space="preserve">
     <value>Wird geladen…</value>

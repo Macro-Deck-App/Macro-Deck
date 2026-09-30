@@ -261,6 +261,7 @@
                           [section]="!row.collapsible"
                           [expanded]="row.expanded"
                           [ariaLabel]="unboundAriaLabel(row.count)"
+                          [hint]="unboundHint()"
                           (toggle)="toggleUnbound()" />
                       }
                       @case ('catalog-state') {
