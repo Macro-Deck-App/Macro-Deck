@@ -408,8 +408,8 @@ export class TemplateVariableTreeComponent {
   private readonly viewport = viewChild(CdkVirtualScrollViewport);
 
   onScrolled(): void {
-    const renderedEnd = this.viewport()?.getRenderedRange().end ?? 0;
-    this.rows().slice(0, renderedEnd).forEach(row => {
+    const rendered = this.viewport()?.getRenderedRange() ?? { start: 0, end: 0 };
+    this.rows().slice(rendered.start, rendered.end).forEach(row => {
       if (row.kind === 'catalog-grow') {
         this.catalog.grow(row.integrationId);
       }

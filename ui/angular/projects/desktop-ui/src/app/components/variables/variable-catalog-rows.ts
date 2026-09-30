@@ -279,7 +279,7 @@ export function createVariableCatalogRows(options: VariableCatalogRowsOptions): 
         rows: walk.rows,
         state,
         complete: !walk.truncated && walk.requests.length === 0 && !pending,
-        truncated: walk.truncated,
+        truncated: walk.truncated || (full(walk) && walk.requests.length > 0),
         entryCount: walk.entries,
       });
     }

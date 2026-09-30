@@ -933,6 +933,19 @@ describe('VariablesManagerComponent', () => {
       expect(catalogRows().some(r => r.kind === 'catalog-leaf')).toBeFalse();
     });
 
+    it('pages through every entry of a catalog larger than a host page with the load more row', async () => {
+      await open();
+      const counts: number[] = [];
+      for (let step = 0; step < 10 && catalogRows().some(r => r.kind === 'catalog-grow'); step++) {
+        counts.push(catalogRows().filter(r => r.kind === 'catalog-branch').length);
+        component.growCatalog('ha');
+        await settle();
+      }
+
+      expect(counts).toEqual([100, 200, 300, 400]);
+      expect(catalogRows().filter(r => r.kind === 'catalog-branch').length).toBe(entityCount);
+    });
+
     it('fetches a container\'s children once when it is opened and lists them beneath it', async () => {
       await open();
       expand('entity/light.e0');
