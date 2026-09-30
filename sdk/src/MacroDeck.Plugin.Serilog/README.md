@@ -26,6 +26,12 @@ Serilog feature still works:
 
 Calling `UseMacroDeckLogging` more than once is safe - the second call is a no-op.
 
+Request lines are quiet by default: the ASP.NET request pipeline categories (such as
+`Microsoft.AspNetCore.Hosting.Diagnostics`) and `System.Net.Http.HttpClient` start at `Warning`, so the
+host's health polls and other successful requests are not logged. Bring a category back with
+`.MinimumLevel.Override("Microsoft.AspNetCore.Hosting.Diagnostics", LogEventLevel.Information)` in the
+callback; a lower global minimum alone does not.
+
 ## Behaviour worth knowing
 
 - **Warnings, errors and fatals are never dropped in favor of informational noise.** Events queue on

@@ -110,6 +110,35 @@ Calling `UseMacroDeckLogging` twice is a no-op.
 
 `Warning` and above are never dropped to make room for informational noise.
 
+## Request lines are not logged
+
+The categories that log a line per request start at `Warning`, the same way the host quiets its own request
+logging, so the host's health polls and other successful requests do not fill the console and the log viewer:
+
+- `Microsoft.AspNetCore.Hosting.Diagnostics`: `Request starting` and `Request finished`, for every request to
+  the plugin, including `/_macrodeck/health`.
+- `Microsoft.AspNetCore.Routing.EndpointMiddleware`, `Microsoft.AspNetCore.Http.Result`,
+  `Microsoft.AspNetCore.Mvc`, `Microsoft.AspNetCore.Cors.Infrastructure.CorsService` and
+  `Microsoft.AspNetCore.StaticFiles`: the endpoint, result and middleware lines of each request.
+- `System.Net.Http.HttpClient`: the request and response lines of every `HttpClient` created through
+  `IHttpClientFactory`, including the SDK's own calls to the host and your own.
+
+This drops every `Information` line of these categories, not only the `200` ones, so a `404` or a `500` that
+did not throw is not logged either. An unhandled exception is still logged at `Error`, and other ASP.NET
+categories such as Kestrel or authentication are not affected. To log your own HTTP calls, write the line
+yourself.
+
+A lower global minimum does not bring them back, because a category setting is more specific. Override the
+category in the callback:
+
+```csharp
+.UseMacroDeckLogging(cfg => cfg
+	.MinimumLevel.Override("Microsoft.AspNetCore.Hosting.Diagnostics", LogEventLevel.Information))
+```
+
+There is no configuration key for this: `MinimumLevel` under `MacroDeck:Plugin:Logging` only decides what
+is forwarded to the host.
+
 ## Structured properties
 
 ```csharp

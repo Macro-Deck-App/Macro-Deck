@@ -7,35 +7,37 @@ namespace MacroDeck.Plugin.Serilog.Tests.UnitTests.Support;
 /// console.</summary>
 internal sealed class CapturingLoggerProvider : ILoggerProvider
 {
-	private readonly List<string> _messages = [];
+	private readonly List<CapturedLogEntry> _entries = [];
 	private readonly Lock _gate = new();
 
-	public IReadOnlyList<string> Messages
+	public IReadOnlyList<CapturedLogEntry> Entries
 	{
 		get
 		{
 			lock (_gate)
 			{
-				return [.. _messages];
+				return [.. _entries];
 			}
 		}
 	}
 
-	public ILogger CreateLogger(string categoryName) => new CapturingLogger(this);
+	public IReadOnlyList<string> Messages => [.. Entries.Select(entry => entry.Message)];
+
+	public ILogger CreateLogger(string categoryName) => new CapturingLogger(this, categoryName);
 
 	public void Dispose()
 	{
 	}
 
-	private void Add(string message)
+	private void Add(CapturedLogEntry entry)
 	{
 		lock (_gate)
 		{
-			_messages.Add(message);
+			_entries.Add(entry);
 		}
 	}
 
-	private sealed class CapturingLogger(CapturingLoggerProvider provider) : ILogger
+	private sealed class CapturingLogger(CapturingLoggerProvider provider, string category) : ILogger
 	{
 		public IDisposable? BeginScope<TState>(TState state)
 			where TState : notnull => null;
@@ -46,6 +48,9 @@ internal sealed class CapturingLoggerProvider : ILoggerProvider
 			EventId eventId,
 			TState state,
 			Exception? exception,
-			Func<TState, Exception?, string> formatter) => provider.Add(formatter(state, exception));
+			Func<TState, Exception?, string> formatter) =>
+			provider.Add(new CapturedLogEntry(category, logLevel, formatter(state, exception)));
 	}
 }
+
+internal sealed record CapturedLogEntry(string Category, LogLevel Level, string Message);
