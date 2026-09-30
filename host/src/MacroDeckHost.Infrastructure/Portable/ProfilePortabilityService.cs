@@ -196,6 +196,7 @@ public sealed class ProfilePortabilityService : IProfilePortabilityService
 			DefaultWidgetSpacing = source.DefaultWidgetSpacing,
 			DefaultWidgetBorderRadius = source.DefaultWidgetBorderRadius,
 			DefaultEmptyCellStyle = EmptyCellStyleText.Parse(source.DefaultEmptyCellStyle),
+			DefaultWidgetShadows = source.DefaultWidgetShadows,
 			CreatedAt = importedAt
 		};
 

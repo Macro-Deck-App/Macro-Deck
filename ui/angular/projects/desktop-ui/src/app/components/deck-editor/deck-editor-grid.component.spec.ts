@@ -357,18 +357,22 @@ describe('DeckEditorGridComponent', () => {
       expect(chrome().querySelector('.resize-handle')).toBeNull();
     });
 
-    it('distinguishes a subtree pin\'s reach from a profile pin in the badge tooltip', () => {
-      render([
-        gridWidget({ id: 'subtree', isPinned: true, pinScope: 'Subtree' }),
-        gridWidget({ id: 'profile', x: 1, isPinned: true, pinScope: 'Profile' }),
-      ]);
+    it('names the reach of a subtree pin in the badge tooltip', () => {
+      render([gridWidget({ isPinned: true, pinScope: 'Subtree' })]);
 
-      const subtree = chrome(0).querySelector<HTMLElement>('.pin-badge')!;
-      const profile = chrome(1).querySelector<HTMLElement>('.pin-badge')!;
+      const tooltip = chrome().querySelector<HTMLElement>('.pin-badge')!.title;
 
-      expect(subtree.title).toContain('this folder and its subfolders');
-      expect(profile.title).toContain('every folder of this profile');
-      expect(subtree.title).not.toBe(profile.title);
+      expect(tooltip).toContain('this folder and its subfolders');
+      expect(tooltip).not.toContain('every folder of this profile');
+    });
+
+    it('names the reach of a profile pin in the badge tooltip', () => {
+      render([gridWidget({ isPinned: true, pinScope: 'Profile' })]);
+
+      const tooltip = chrome().querySelector<HTMLElement>('.pin-badge')!.title;
+
+      expect(tooltip).toContain('every folder of this profile');
+      expect(tooltip).not.toContain('this folder and its subfolders');
     });
 
     it('falls back to the profile-wide tooltip when the scope is absent', () => {

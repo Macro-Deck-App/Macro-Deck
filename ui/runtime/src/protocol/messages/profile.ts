@@ -47,6 +47,7 @@ export interface IpcProfile {
   defaultWidgetSpacing?: number;
   defaultWidgetBorderRadius?: number;
   defaultEmptyCellStyle?: string;
+  defaultWidgetShadows?: boolean | null;
 }
 
 export interface GetProfilesResponse {
@@ -61,6 +62,7 @@ export interface CreateProfileRequest {
   defaultWidgetSpacing?: number;
   defaultWidgetBorderRadius?: number;
   defaultEmptyCellStyle?: string;
+  defaultWidgetShadows?: boolean | null;
 }
 
 export interface CreateProfileResponse extends ResultResponse {
@@ -77,6 +79,7 @@ export interface UpdateProfileRequest {
   defaultWidgetSpacing?: number;
   defaultWidgetBorderRadius?: number;
   defaultEmptyCellStyle?: string;
+  defaultWidgetShadows?: boolean | null;
 }
 
 export interface UpdateProfileResponse extends ResultResponse {

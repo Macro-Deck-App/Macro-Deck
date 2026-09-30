@@ -47,4 +47,5 @@ export interface Profile {
   defaultSpacing: number | null;
   defaultBorderRadius: number | null;
   defaultEmptyCellStyle?: EmptyCellStyle | null;
+  defaultShadows?: boolean | null;
 }

@@ -17723,6 +17723,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Widgets.GridSettings.Rows" xml:space="preserve">
     <value>Filas</value>
   </data>
+  <data name="Widgets.GridSettings.WidgetShadows" xml:space="preserve">
+    <value>Sombras de los widgets</value>
+  </data>
   <data name="Widgets.GridSettings.WidgetSpacing" xml:space="preserve">
     <value>Espaciado entre widgets</value>
   </data>

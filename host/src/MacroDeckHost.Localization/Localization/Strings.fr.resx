@@ -17723,6 +17723,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.GridSettings.Rows" xml:space="preserve">
     <value>Lignes</value>
   </data>
+  <data name="Widgets.GridSettings.WidgetShadows" xml:space="preserve">
+    <value>Ombres des widgets</value>
+  </data>
   <data name="Widgets.GridSettings.WidgetSpacing" xml:space="preserve">
     <value>Espacement des widgets</value>
   </data>

@@ -19,6 +19,7 @@ internal static class ProfileFileMapper
 			DefaultWidgetSpacing = profile.DefaultWidgetSpacing,
 			DefaultWidgetBorderRadius = profile.DefaultWidgetBorderRadius,
 			DefaultEmptyCellStyle = EmptyCellStyleText.Format(profile.DefaultEmptyCellStyle),
+			DefaultWidgetShadows = profile.DefaultWidgetShadows,
 			Folders = folders
 				.OrderBy(f => f.Order)
 				.ThenBy(f => f.Id)
@@ -38,7 +39,8 @@ internal static class ProfileFileMapper
 			DefaultBackgroundColor = file.DefaultBackgroundColor,
 			DefaultWidgetSpacing = file.DefaultWidgetSpacing,
 			DefaultWidgetBorderRadius = file.DefaultWidgetBorderRadius,
-			DefaultEmptyCellStyle = EmptyCellStyleText.Parse(file.DefaultEmptyCellStyle)
+			DefaultEmptyCellStyle = EmptyCellStyleText.Parse(file.DefaultEmptyCellStyle),
+			DefaultWidgetShadows = file.DefaultWidgetShadows
 		};
 
 	public static IEnumerable<FolderEntity> ToFolderEntities(ProfileFile file)

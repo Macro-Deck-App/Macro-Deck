@@ -25,6 +25,19 @@ public class ProfileDtoMapperTests
 		});
 	}
 
+	[TestCase(null)]
+	[TestCase(false)]
+	[TestCase(true)]
+	public void TheProfileWidgetShadowsSettingReachesTheWire(bool? shadows)
+	{
+		var entity = Profile(rows: 4, columns: 4);
+		entity.DefaultWidgetShadows = shadows;
+
+		var dto = ProfileDtoMapper.MapJsonProfile(entity);
+
+		Assert.That(dto.DefaultWidgetShadows, Is.EqualTo(shadows));
+	}
+
 	[Test]
 	public void ACurrentGridLargerThanALockedLayout_IsReportedAsExceedsLayout_WithoutResizingTheDto()
 	{

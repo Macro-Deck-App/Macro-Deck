@@ -30,6 +30,10 @@
   transition: transform var(--transition-press-out);
 }
 
+.deck-grid-flat .deck-grid-tile {
+  box-shadow: none;
+}
+
 /*
  * Press feedback scales the whole tile - surface, ring and shadow included. A scale applied further
  * in would leave the border ring and the shadow at full size while the face shrinks.

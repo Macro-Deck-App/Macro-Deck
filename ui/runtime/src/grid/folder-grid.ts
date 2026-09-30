@@ -8,6 +8,7 @@ export interface ProfileGridDefaults {
   spacing?: number;
   borderRadius?: number;
   emptyCellStyle?: EmptyCellStyle | null;
+  shadows?: boolean | null;
 }
 
 export interface FolderGridSettings {
@@ -24,6 +25,7 @@ export interface ResolvedFolderGrid {
   spacing: number;
   borderRadius: number;
   emptyCellStyle: EmptyCellStyle;
+  shadows: boolean;
 }
 
 function inherited<T>(
@@ -61,5 +63,6 @@ export function resolveFolderGrid(
       chain, stated => stated.borderRadius, profile?.borderRadius, WIDGET_REFERENCE_BORDER_RADIUS, isNumber),
     emptyCellStyle: inherited(
       chain, stated => stated.emptyCellStyle, profile?.emptyCellStyle, DEFAULT_EMPTY_CELL_STYLE, isEmptyCellStyle),
+    shadows: !profile || profile.shadows !== false,
   };
 }

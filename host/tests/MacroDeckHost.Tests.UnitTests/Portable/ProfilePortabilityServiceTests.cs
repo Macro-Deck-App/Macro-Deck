@@ -105,6 +105,7 @@ public class ProfilePortabilityServiceTests
 		var sourceProfile = _harness.ProfileCache.GetById(source.Id)!;
 		sourceProfile.DefaultWidgetSpacing = 12;
 		sourceProfile.DefaultWidgetBorderRadius = 18;
+		sourceProfile.DefaultWidgetShadows = false;
 		await _harness.ProfileCache.AddOrUpdate(sourceProfile);
 		root.Rows = null;
 		root.Columns = null;
@@ -125,6 +126,7 @@ public class ProfilePortabilityServiceTests
 			Assert.That(importedFolder.Columns, Is.Null);
 			Assert.That(import.Data!.DefaultWidgetSpacing, Is.EqualTo(12));
 			Assert.That(import.Data!.DefaultWidgetBorderRadius, Is.EqualTo(18));
+			Assert.That(import.Data!.DefaultWidgetShadows, Is.False);
 		});
 	}
 

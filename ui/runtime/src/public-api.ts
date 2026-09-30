@@ -311,6 +311,7 @@ export {
   computeCellDimensions,
   computePasteRect,
   DEFAULT_CELL_GAP_RATIO,
+  paintOrder,
   type GridPlacement,
   type GridRect,
   rectsEqual,

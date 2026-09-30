@@ -17725,6 +17725,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.GridSettings.Rows" xml:space="preserve">
     <value>Rows</value>
   </data>
+  <data name="Widgets.GridSettings.WidgetShadows" xml:space="preserve">
+    <value>Widget shadows</value>
+  </data>
   <data name="Widgets.GridSettings.WidgetSpacing" xml:space="preserve">
     <value>Widget spacing</value>
   </data>

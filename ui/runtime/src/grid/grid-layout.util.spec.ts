@@ -8,6 +8,7 @@ import {
   computePasteRect,
   GridPlacement,
   GridRect,
+  paintOrder,
   rectsOverlap,
   reflowLayout,
   snapDrag,
@@ -481,5 +482,34 @@ describe('widgetAspectRatio', () => {
 
   it('treats a missing span as a single cell', () => {
     expect(widgetAspectRatio(0, 0)).toBe(1);
+  });
+});
+
+describe('paintOrder', () => {
+  const at = (id: string, x: number, y: number, w = 1, h = 1) => ({ id, x, y, w, h });
+  const ids = (list: { id: string }[]) => list.map(item => item.id).join(' ');
+
+  it('puts the widget that comes first in reading order on top, whatever order it is given in', () => {
+    const grid = [at('a', 0, 0), at('b', 1, 0), at('c', 0, 1), at('d', 1, 1)];
+
+    expect(ids(paintOrder(grid))).toBe('d c b a');
+    expect(ids(paintOrder([grid[2], grid[0], grid[3], grid[1]]))).toBe('d c b a');
+    expect(ids(paintOrder(grid.slice().reverse()))).toBe('d c b a');
+  });
+
+  it('orders by the top-left cell of a widget that spans several', () => {
+    const tall = at('tall', 0, 0, 1, 3);
+    const wide = at('wide', 1, 0, 2, 1);
+    const below = at('below', 1, 1);
+    const beside = at('beside', 2, 1);
+
+    expect(ids(paintOrder([beside, below, wide, tall]))).toBe('beside below wide tall');
+  });
+
+  it('breaks a tie on the id and leaves its input alone', () => {
+    const input = [at('b', 0, 0), at('a', 0, 0)];
+
+    expect(ids(paintOrder(input))).toBe('a b');
+    expect(ids(input)).toBe('b a');
   });
 });

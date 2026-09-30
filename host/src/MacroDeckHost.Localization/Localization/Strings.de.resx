@@ -17721,6 +17721,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.GridSettings.Rows" xml:space="preserve">
     <value>Zeilen</value>
   </data>
+  <data name="Widgets.GridSettings.WidgetShadows" xml:space="preserve">
+    <value>Widget-Schatten</value>
+  </data>
   <data name="Widgets.GridSettings.WidgetSpacing" xml:space="preserve">
     <value>Widget-Abstand</value>
   </data>

@@ -71,7 +71,8 @@ public class ProfileServiceDuplicateTests
 			DefaultColumns = 5,
 			DefaultBackgroundColor = "#101010",
 			DefaultWidgetSpacing = 8,
-			DefaultWidgetBorderRadius = 12
+			DefaultWidgetBorderRadius = 12,
+			DefaultWidgetShadows = false
 		});
 
 		_homeId = Guid.NewGuid();
@@ -191,6 +192,7 @@ public class ProfileServiceDuplicateTests
 			Assert.That(copy.DefaultBackgroundColor, Is.EqualTo("#101010"));
 			Assert.That(copy.DefaultWidgetSpacing, Is.EqualTo(8));
 			Assert.That(copy.DefaultWidgetBorderRadius, Is.EqualTo(12));
+			Assert.That(copy.DefaultWidgetShadows, Is.False);
 			Assert.That(_cache.GetAll().Select(profile => profile.Id), Does.Contain(copy.Id));
 		});
 	}

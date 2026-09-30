@@ -94,6 +94,24 @@ describe('GridSettingsComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Corner radius');
   });
 
+  it('offers the widget shadows switch only when asked to, and reports the choice', async () => {
+    const { component, fixture } = create();
+    const emitted: boolean[] = [];
+    component.shadowsChange.subscribe(value => emitted.push(value));
+    fixture.componentRef.setInput('showWidgetAppearance', true);
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('shared-toggle-switch')).toBeNull();
+
+    fixture.componentRef.setInput('showShadowsToggle', true);
+    await fixture.whenStable();
+    const toggle = fixture.nativeElement.querySelector('shared-toggle-switch input') as HTMLInputElement;
+    expect(fixture.nativeElement.textContent).toContain('Widget shadows');
+    expect(toggle.checked).toBeTrue();
+
+    toggle.click();
+    expect(emitted).toEqual([false]);
+  });
+
   it('shows a reset control for columns and rows by default', async () => {
     const { fixture } = create();
     await fixture.whenStable();

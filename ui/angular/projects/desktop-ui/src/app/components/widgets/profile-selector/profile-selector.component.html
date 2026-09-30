@@ -202,6 +202,8 @@
         [gridInheritable]="false"
         [inheritedLabel]="'macrodeck.app:Widgets.Profile.DefaultInheritedLabel' | translate"
         [showWidgetAppearance]="true"
+        [showShadowsToggle]="true"
+        [shadows]="editShadows()"
         [spacing]="editSpacing()"
         [borderRadius]="editBorderRadius()"
         [effectiveSpacing]="BUILT_IN_SPACING"
@@ -213,7 +215,8 @@
         (backgroundChange)="editBackground.set($event)"
         (spacingChange)="editSpacing.set($event)"
         (borderRadiusChange)="editBorderRadius.set($event)"
-        (emptyCellStyleChange)="editEmptyCellStyle.set($event)">
+        (emptyCellStyleChange)="editEmptyCellStyle.set($event)"
+        (shadowsChange)="editShadows.set($event)">
       </shared-grid-settings>
 
       @if (layoutWarning()) {
