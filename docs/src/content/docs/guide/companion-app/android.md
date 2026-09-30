@@ -69,6 +69,11 @@ brightness.
 - **Script shortcuts:** put a script on the home screen, which runs it with a tap. See
   [Run scripts from other apps](/guide/companion-app/automation/#android-home-screen-shortcuts).
 
+## Quick Settings
+
+Put a script in the Quick Settings panel as a tile and run it with a tap, from any app and, if you allow it, from
+the lock screen. See [Run scripts from other apps](/guide/companion-app/automation/#android-quick-settings-tiles).
+
 ## Tasker, MacroDroid and other apps
 
 Automation apps can run Macro Deck scripts with an intent, once you allow it in the settings under

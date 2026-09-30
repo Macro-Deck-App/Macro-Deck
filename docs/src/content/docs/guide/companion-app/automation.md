@@ -1,6 +1,6 @@
 ---
 title: Run scripts from other apps
-description: Run Macro Deck scripts from Tasker, MacroDroid, other apps and home screen shortcuts, with an Android intent or a run-script link, and the automation key that protects it.
+description: Run Macro Deck scripts from Tasker, MacroDroid, other apps, home screen shortcuts and Quick Settings tiles, with an Android intent or a run-script link, and the automation key that protects it.
 ---
 
 The Companion app can run a Macro Deck [script](/guide/concepts/#scripts-and-automations) on one of your computers when another app asks
@@ -119,3 +119,34 @@ shortcuts, and it is offered only for scripts that need no input values.
 
 A home screen shortcut is yours, so it works without the key and with **Allow external automation** turned off.
 If you remove the computer from the app, its shortcuts say so and stop running.
+
+## Android: Quick Settings tiles
+
+A Quick Settings tile runs a script from the panel you pull down from the top of the screen, without opening the
+app. This needs Android 7 or later. You can have up to five tiles.
+
+1. Open the app settings and choose **Automation**.
+2. Open one of your computers, tap a script and choose **Add to Quick Settings**.
+3. Give the tile a name, fill in the script's input values if it has any, and tap **Add to Quick Settings**.
+
+![The Automation settings on Android with two Quick Settings tiles, each with its name in the tile list and the switch Run while the device is locked](../../../../assets/guide/companion/android-quick-settings-tiles.png)
+
+On Android 13 and later, Android then asks whether to add the tile to the panel. On older versions, or if you
+declined, edit the Quick Settings panel and drag the tile in yourself. In the list of available tiles it is called
+**Macro Deck script** with a number from 1 to 5; the **Automation** settings show that name under each of your
+tiles. Some devices, such as Fire tablets, do not let you add tiles to the panel.
+
+![The Quick Settings panel on Android with a Macro Deck script tile that shows the script and its computer](../../../../assets/guide/companion/android-quick-settings-panel.png)
+
+Tap the tile to run the script. The tile shows **Running** until the computer answers, and then **Done**, or why
+the script did not run, such as **Offline** or **Computer locked**. When you open the panel, a tile whose computer
+does not answer already says **Offline** under its name. You can still tap it. On Android 7 to 9 a tile has no
+second line, so it says how a run went in place of its name until you close the panel, and shows nothing before you tap.
+
+A tile is yours, so it works without the key and with **Allow external automation** turned off. Because the
+panel can be opened on the lock screen, a tile asks you to unlock the device first. To let a tile run while the
+device is locked, turn on **Run while the device is locked** for that tile, when you add it or later under
+**Quick Settings tiles** in the **Automation** settings.
+
+To remove a tile, tap the bin next to it under **Quick Settings tiles**. It leaves the panel, and its input values
+are deleted. If you remove the computer from the app, its tiles are removed as well.
