@@ -35,7 +35,23 @@ public sealed record WidgetTypeDescriptorDto
 	/// only.</summary>
 	public IReadOnlyList<int>? AppearanceProperties { get; init; }
 
+	/// <summary>The provider's own action the host runs on an unconfigured short press. Absent reads as
+	/// none.</summary>
+	public WidgetDefaultActionDto? DefaultShortPressAction { get; init; }
+
 	public IReadOnlyDictionary<string, string>? Metadata { get; init; }
+}
+
+/// <summary>
+/// Mirrors the SDK's <c>WidgetDefaultAction</c>.
+/// </summary>
+public sealed record WidgetDefaultActionDto
+{
+	/// <summary>The id of an action the same plugin declares.</summary>
+	public required string ActionId { get; init; }
+
+	/// <summary>Parameter values by parameter name, as text. Absent reads as none.</summary>
+	public IReadOnlyDictionary<string, string>? Parameters { get; init; }
 }
 
 /// <summary>Result of the <c>describe</c> operation.</summary>

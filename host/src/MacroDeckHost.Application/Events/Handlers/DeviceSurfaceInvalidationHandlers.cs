@@ -72,6 +72,9 @@ public sealed class IconUpdatedDeviceSurfaceHandler(IDeviceSurfaceService surfac
 public sealed class IconDeletedDeviceSurfaceHandler(IDeviceSurfaceService surfaces)
 	: DeviceSurfaceInvalidationHandler<IconDeletedNotification>(surfaces);
 
+public sealed class WidgetTypeCatalogChangedDeviceSurfaceHandler(IDeviceSurfaceService surfaces)
+	: DeviceSurfaceInvalidationHandler<WidgetTypeCatalogChangedNotification>(surfaces);
+
 /// <summary>
 /// Opens the session once a provider device is registered, and rebuilds an open one - a startup
 /// profile reassigned elsewhere reaches a device only through this.

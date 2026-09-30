@@ -199,6 +199,13 @@ internal sealed class ContractLabelText : ILabelTextService
 		=> Task.FromResult<string?>(null);
 }
 
+internal sealed class ContractNoDefaultShortPress : MacroDeckHost.Application.Widgets.IWidgetDefaultShortPress
+{
+	public string? FlowsSourceFor(WidgetEntity widget, bool fromDevice) => null;
+
+	public bool RunsOnDevices(string widgetType) => false;
+}
+
 internal sealed class ContractIconPacks : IIconPackCache
 {
 	public Task InitializeCache() => Task.CompletedTask;
@@ -381,7 +388,8 @@ internal static class ContractDeck
 			new ContractLabelText(),
 			new LocalizationResolver(new LocalizationCatalogRegistry()),
 			new ContractAppPreferences(),
-			new ContractIconPacks());
+			new ContractIconPacks(),
+			new ContractNoDefaultShortPress());
 	}
 
 	/// <summary>The deck itself: a Studio profile whose default grid is 3x5, a Home folder that inherits

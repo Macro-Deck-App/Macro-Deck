@@ -505,6 +505,9 @@ internal static class HostInvokeDispatcher
 			SupportsFlows = dto.SupportsFlows,
 			AppearanceProperties = dto.AppearanceProperties is { } properties
 				? [.. properties.Select(property => (WidgetAppearanceProperty)property)]
+				: null,
+			DefaultShortPressAction = dto.DefaultShortPressAction is { } action
+				? new WidgetDefaultAction(action.ActionId, action.Parameters)
 				: null
 		};
 

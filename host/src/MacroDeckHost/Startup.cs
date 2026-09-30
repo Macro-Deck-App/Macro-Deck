@@ -280,6 +280,10 @@ public class Startup
 		services.AddSingleton<IWidgetIconProviderResources, WidgetIconProviderResources>();
 		services.AddScoped<IWidgetIconService, WidgetIconService>();
 		services.AddSingleton<IBuiltInWidgetUiProvider, SliderWidgetUiProvider>();
+		services.AddSingleton<IWidgetDefaultShortPress>(provider => new WidgetDefaultShortPress(
+			provider.GetRequiredService<IWidgetTypeRegistry>,
+			provider.GetRequiredService<IIntegrationRegistry>(),
+			provider.GetRequiredService<ILocalizationResolver>()));
 		services.AddSingleton<IWidgetTriggerService, WidgetTriggerService>();
 		services.AddSingleton<IBuiltInWidgetUiProvider, ActionButtonWidgetUiProvider>();
 		services.AddSingleton<IBuiltInWidgetUiProvider, MusicPlayerWidgetUiProvider>();

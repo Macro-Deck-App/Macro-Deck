@@ -228,6 +228,12 @@ The built-in Countdown and Stopwatch widgets always advertise `Press`, `Release`
 resets it, and each change runs the widget's own timer flows. Their surface carries the label and colours
 only, not the running time.
 
+A widget whose type declares a
+[default Short Press action](/ui/views/widget-types/#a-default-short-press-action) advertises `Press`,
+`Release`, `ShortPress` and `LongPress` without any flow, and a short press runs that default unless the
+user gave the widget a Short Press action of their own. The built-in Weather widget is the exception: its
+default opens a dialog, which a hardware deck cannot show, so that default is neither advertised nor run.
+
 A tile that a plugin or integration serves, rather than a built-in one, answers a press from its own UI tree
 first, exactly as it does on screen: a [disabled region](/ui/components/modifier/) absorbs the press, and a
 control that declares the press receives it instead of the tile's flows. A press the tree does not claim

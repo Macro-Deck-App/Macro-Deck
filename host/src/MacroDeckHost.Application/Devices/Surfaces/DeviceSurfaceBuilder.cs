@@ -68,6 +68,7 @@ public sealed class DeviceSurfaceBuilder
 	private readonly ILocalizationResolver _localization;
 	private readonly IAppPreferenceService _preferences;
 	private readonly IIconPackCache _icons;
+	private readonly IWidgetDefaultShortPress _defaultShortPress;
 
 	public DeviceSurfaceBuilder(
 		IProfileRegistry profiles,
@@ -76,9 +77,11 @@ public sealed class DeviceSurfaceBuilder
 		ILabelTextService labelText,
 		ILocalizationResolver localization,
 		IAppPreferenceService preferences,
-		IIconPackCache icons)
+		IIconPackCache icons,
+		IWidgetDefaultShortPress defaultShortPress)
 	{
 		_icons = icons;
+		_defaultShortPress = defaultShortPress;
 		_profiles = profiles;
 		_widgetStates = widgetStates;
 		_widgetIcons = widgetIcons;
@@ -151,14 +154,16 @@ public sealed class DeviceSurfaceBuilder
 		};
 	}
 
-	private static IReadOnlyList<DeviceInteractionKind> SupportedInteractions(Widget widget)
+	private IReadOnlyList<DeviceInteractionKind> SupportedInteractions(Widget widget)
 	{
 		var triggerTypes = WidgetFlowsJson.TriggerTypes(widget.Data);
-		var hasPressFlow = TimerWidgetConfig.IsTimerType(widget.Type) || triggerTypes.Any(type =>
-			string.Equals(type, WidgetTriggerTypes.ShortPress, StringComparison.OrdinalIgnoreCase) ||
-			string.Equals(type, WidgetTriggerTypes.LongPress, StringComparison.OrdinalIgnoreCase) ||
-			string.Equals(type, WidgetTriggerTypes.TouchStart, StringComparison.OrdinalIgnoreCase) ||
-			string.Equals(type, WidgetTriggerTypes.TouchEnd, StringComparison.OrdinalIgnoreCase));
+		var hasPressFlow = TimerWidgetConfig.IsTimerType(widget.Type) ||
+			_defaultShortPress.RunsOnDevices(widget.Type) ||
+			triggerTypes.Any(type =>
+				string.Equals(type, WidgetTriggerTypes.ShortPress, StringComparison.OrdinalIgnoreCase) ||
+				string.Equals(type, WidgetTriggerTypes.LongPress, StringComparison.OrdinalIgnoreCase) ||
+				string.Equals(type, WidgetTriggerTypes.TouchStart, StringComparison.OrdinalIgnoreCase) ||
+				string.Equals(type, WidgetTriggerTypes.TouchEnd, StringComparison.OrdinalIgnoreCase));
 
 		if (hasPressFlow)
 		{

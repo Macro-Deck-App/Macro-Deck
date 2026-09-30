@@ -1193,6 +1193,18 @@ describe('FolderService deck-navigation triggers', () => {
     expect(apiSpy.executeActionButtonTrigger).not.toHaveBeenCalled();
   });
 
+  it('still sends a short press without a Short Press action, for the widget type\'s default', async () => {
+    const widget = navWidget([
+      { triggerId: 'onShortPress', triggerType: 'onShortPress', children: [] },
+    ]);
+    service.folders.set([makeFolder(folderAId, [widget])]);
+    service.selectedFolderId.set(folderAId);
+
+    await service.executeActionButtonTrigger(widget, 'onShortPress');
+
+    expect(apiSpy.executeActionButtonTrigger).toHaveBeenCalled();
+  });
+
   it('still sends the trigger when the flows are unknown', async () => {
     const widget = navWidget(undefined);
     service.folders.set([makeFolder(folderAId, [widget])]);

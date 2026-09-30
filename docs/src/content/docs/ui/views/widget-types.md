@@ -105,7 +105,8 @@ One session is opened per widget per viewer, so each tile sees only its own `dat
 session to update it; events its tree declares come back to that same session. Saved and draft data
 arrive the same way, because you cannot read Macro Deck's stored widgets. By default a press runs nothing on
 the host - a tile whose tree declares no events does nothing when pressed - unless the type
-[runs the user's actions](#running-the-users-actions).
+[runs the user's actions](#running-the-users-actions) or has a
+[default Short Press action](#a-default-short-press-action).
 
 ## The picker card
 
@@ -167,6 +168,39 @@ control, as without the flag, and runs no flow.
   that the type opted in, and a press of its widget is refused as it is for any unknown type.
 
 The default is `false`, and a type that leaves it unset behaves exactly as described above.
+
+## A default Short Press action
+
+```csharp
+new WidgetTypeDescriptor("lamp", MyStrings.LampName())
+{
+    DefaultShortPressAction = new WidgetDefaultAction("toggle",
+        new Dictionary<string, string> { ["room"] = "kitchen" }),
+}
+```
+
+A widget can come with a useful primary interaction before the user configures anything. With
+`DefaultShortPressAction`, Macro Deck runs one of your own actions when the widget is short-pressed and the
+user has not given it a Short Press action of their own. The built-in Weather widget works this way: a short
+press opens its details.
+
+- **The user's action wins.** The default runs only while the widget's Short Press flow is missing, empty
+  or has every action disabled. A type without `SupportsFlows` has no such flow, so its default always runs.
+  A press that your tree claims goes to the tree and never runs the default.
+- **Only your own action.** `ActionId` names an action your plugin declares; another integration's action
+  cannot be named, because a default runs without the user choosing it. A blank `ActionId` gets the type
+  rejected at registration.
+- **Parameters are text**, typed from the action's declared parameters and rendered like a value the user
+  stored, so a template in one is resolved. A parameter you leave out gets its declared default.
+- **The action runs like one from the widget's own flow**: `ActionExecutionContext.OwnerWidgetId` names the
+  pressed widget and `OriginClientId` the client that pressed it, so the default can open a
+  [modal](/ui/views/modal/) on that screen.
+- **Every client runs it**: the desktop app, the web client, the Companion app and hardware decks. A
+  hardware deck is offered a press for a tile of your type even when the widget has no flow. It has no screen
+  for a modal, so keep a default that opens one for widgets meant for a screen: the built-in Weather default
+  is the one exception Macro Deck makes itself, and it does not run from a hardware deck.
+- **Nothing runs** while your plugin is disabled or does not declare the action.
+- **An older Macro Deck ignores the property**, and short presses of your widget run nothing there, as before.
 
 ## Standard appearance
 

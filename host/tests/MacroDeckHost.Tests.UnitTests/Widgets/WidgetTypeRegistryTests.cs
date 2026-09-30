@@ -44,6 +44,16 @@ public class WidgetTypeRegistryTests
 	}
 
 	[Test]
+	public void A_default_short_press_action_without_an_action_id_is_rejected()
+	{
+		Assert.ThrowsAsync<ArgumentException>(() => _registry.Register("com.example.gauges",
+			new WidgetTypeDescriptor("gauge", LocalizedText.FromLiteral("Gauge"))
+			{
+				DefaultShortPressAction = new WidgetDefaultAction(" ")
+			}));
+	}
+
+	[Test]
 	public async Task A_provider_registered_type_is_as_real_as_one_that_shipped()
 	{
 		var registration = await _registry.Register("com.example.gauges",

@@ -22,6 +22,9 @@ internal static class WidgetTypeDescriptorMapper
 			AppearanceProperties = widgetType.AppearanceProperties is { } properties
 				? [.. properties.Select(property => (int)property)]
 				: null,
+			DefaultShortPressAction = widgetType.DefaultShortPressAction is { } action
+				? new WidgetDefaultActionDto { ActionId = action.ActionId, Parameters = action.Parameters }
+				: null,
 			Metadata = widgetType.Metadata
 		};
 	}
