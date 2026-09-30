@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
+using MacroDeckHost.Integrations.HomeAssistant.Actions;
 using MacroDeckHost.Integrations.HomeAssistant.Protocol;
 using MacroDeck.Sdk.Variables;
 
@@ -19,6 +20,7 @@ internal sealed class HomeAssistantVariableCatalog
 
 	private readonly Func<HomeAssistantCatalog> _catalog;
 	private readonly Action<IReadOnlyCollection<string>>? _onSubscriptionChanged;
+	private readonly Func<HomeAssistantConnection?>? _connection;
 	private readonly Lock _lock = new();
 
 	private HashSet<string> _subscribed = new(StringComparer.Ordinal);
@@ -26,10 +28,12 @@ internal sealed class HomeAssistantVariableCatalog
 
 	public HomeAssistantVariableCatalog(
 		Func<HomeAssistantCatalog> catalog,
-		Action<IReadOnlyCollection<string>>? onSubscriptionChanged = null)
+		Action<IReadOnlyCollection<string>>? onSubscriptionChanged = null,
+		Func<HomeAssistantConnection?>? connection = null)
 	{
 		_catalog = catalog;
 		_onSubscriptionChanged = onSubscriptionChanged;
+		_connection = connection;
 	}
 
 	public static string CatalogName => "Home Assistant";
@@ -68,20 +72,31 @@ internal sealed class HomeAssistantVariableCatalog
 		string id,
 		CancellationToken cancellationToken = default)
 	{
-		if ((ParseId(id) ?? ParseEntityIdTypedByUser(id)) is not { } parsed)
+		var canonical = ParseId(id);
+		if ((canonical ?? ParseEntityIdTypedByUser(id)) is not { } parsed)
 		{
 			return ValueTask.FromResult<VariableDefinition?>(null);
 		}
 
+		var control = parsed.Child is { } leaf ? HomeAssistantControls.Find(parsed.EntityId, leaf) : null;
 		var state = _catalog().Entity(parsed.EntityId);
 		if (state is null)
 		{
-			return ValueTask.FromResult<VariableDefinition?>(null);
+			// Bindings are restored before Home Assistant has reported every entity and nothing resolves
+			// them again afterwards, so a control has to keep its write capability from the id alone.
+			return ValueTask.FromResult(canonical is not null && control is not null
+				? ControlLeaf(parsed.EntityId, control)
+				: null);
 		}
 
 		if (parsed.Child is null)
 		{
 			return ValueTask.FromResult<VariableDefinition?>(EntityContainer(state));
+		}
+
+		if (control is not null)
+		{
+			return ValueTask.FromResult<VariableDefinition?>(ControlLeaf(state.EntityId, control));
 		}
 
 		if (parsed.Child == StateChild)
@@ -112,7 +127,51 @@ internal sealed class HomeAssistantVariableCatalog
 		var state = _catalog().Entity(parsed.EntityId);
 		return ValueTask.FromResult(state is null
 			? VariableReading.Unavailable
-			: VariableReading.Of(ReadValue(state, child)));
+			: ReadingOf(state, child));
+	}
+
+	public async ValueTask<VariableWriteResult> SetValueAsync(
+		string id,
+		object? value,
+		CancellationToken cancellationToken = default)
+	{
+		if (ParseId(id) is not { Child: { } child } parsed ||
+			HomeAssistantControls.Find(parsed.EntityId, child) is not { } control)
+		{
+			return VariableWriteResult.NotWritable();
+		}
+
+		if (_connection?.Invoke() is not { IsConnected: true } connection)
+		{
+			return VariableWriteResult.Unavailable();
+		}
+
+		if (connection.Entity(parsed.EntityId) is not { } state)
+		{
+			return VariableWriteResult.NotFound();
+		}
+
+		if (!HomeAssistantControls.TryReadNumber(value, out var number))
+		{
+			return VariableWriteResult.InvalidValue();
+		}
+
+		// An entity reporting no value has nothing to adjust right now, and where its range never
+		// reached the host the number was picked on another scale than the one it would be clamped to.
+		if (control.Value(state) is null)
+		{
+			return VariableWriteResult.Unavailable();
+		}
+
+		var request = control.Request(state, number);
+		var error = await connection.CallServiceAsync(control.Domain,
+				request.Service,
+				HomeAssistantServiceCall.Target(state.EntityId),
+				request.Data,
+				cancellationToken)
+			.ConfigureAwait(false);
+
+		return error is { } message ? VariableWriteResult.Failed(message) : VariableWriteResult.Applied();
 	}
 
 	public ValueTask<IReadOnlyList<VariableValue>> SubscribeAsync(
@@ -141,7 +200,7 @@ internal sealed class HomeAssistantVariableCatalog
 			var state = catalog.Entity(parsed.EntityId);
 			values.Add(state is null
 				? VariableValue.Unavailable(id)
-				: VariableValue.Of(id, ReadValue(state, child)));
+				: VariableValue.Of(id, ReadingOf(state, child)));
 		}
 
 		_onSubscriptionChanged?.Invoke(entityIds);
@@ -182,19 +241,27 @@ internal sealed class HomeAssistantVariableCatalog
 		var containerId = EntityPrefix + state.EntityId;
 		var values = new List<VariableValue>();
 
-		void Consider(string resourceId, string child)
+		var considered = new HashSet<string>(StringComparer.Ordinal);
+
+		void Consider(string child)
 		{
-			if (subscribed.Contains(resourceId))
+			var resourceId = containerId + "/" + child;
+			if (considered.Add(child) && subscribed.Contains(resourceId))
 			{
-				values.Add(VariableValue.Of(resourceId, ReadValue(state, child)));
+				values.Add(VariableValue.Of(resourceId, ReadingOf(state, child)));
 			}
 		}
 
-		Consider(containerId + "/" + StateChild, StateChild);
-		Consider(containerId + "/" + AttributesChild, AttributesChild);
+		Consider(StateChild);
+		Consider(AttributesChild);
 		foreach (var attributeName in state.AttributeNames())
 		{
-			Consider(containerId + "/" + attributeName, attributeName);
+			Consider(attributeName);
+		}
+
+		foreach (var control in HomeAssistantControls.For(state.Domain))
+		{
+			Consider(control.Leaf);
 		}
 
 		if (values.Count > 0)
@@ -241,7 +308,7 @@ internal sealed class HomeAssistantVariableCatalog
 			var state = catalog.Entity(parsed.EntityId);
 			values.Add(state is null
 				? VariableValue.Unavailable(id)
-				: VariableValue.Of(id, ReadValue(state, child)));
+				: VariableValue.Of(id, ReadingOf(state, child)));
 		}
 
 		if (values.Count > 0)
@@ -295,10 +362,22 @@ internal sealed class HomeAssistantVariableCatalog
 			return VariableCatalogPage.Empty;
 		}
 
-		var items = new List<VariableDefinition> { StateLeaf(state) };
+		var listed = new HashSet<string>(StringComparer.Ordinal) { StateChild };
+		var items = new List<VariableDefinition> { Leaf(state, StateChild) };
 		foreach (var attributeName in state.AttributeNames())
 		{
-			items.Add(AttributeLeaf(state, attributeName));
+			if (listed.Add(attributeName))
+			{
+				items.Add(Leaf(state, attributeName));
+			}
+		}
+
+		foreach (var control in HomeAssistantControls.For(state.Domain))
+		{
+			if (control.IsOffered(state) && listed.Add(control.Leaf))
+			{
+				items.Add(ControlLeaf(state.EntityId, control));
+			}
 		}
 
 		// Compatibility leaf carrying the whole attribute set as one JSON-text value, matching what the
@@ -372,6 +451,39 @@ internal sealed class HomeAssistantVariableCatalog
 				DisplayName = name,
 				ParentId = EntityPrefix + state.EntityId
 			};
+
+	private static VariableDefinition Leaf(HomeAssistantEntityState state, string child)
+	{
+		if (HomeAssistantControls.Find(state.EntityId, child) is { } control)
+		{
+			return ControlLeaf(state.EntityId, control);
+		}
+
+		return child == StateChild ? StateLeaf(state) : AttributeLeaf(state, child);
+	}
+
+	private static VariableDefinition ControlLeaf(string entityId, HomeAssistantControl control)
+		=> VariableDefinition.OnDemand(EntityPrefix + entityId + "/" + control.Leaf, VariableType.Numeric) with
+		{
+			Name = control.Leaf == StateChild
+				? SuggestedEntityName(entityId)
+				: SuggestedEntityName(entityId) + "_" + Sanitize(control.Leaf),
+			DisplayName = control.Leaf,
+			ParentId = EntityPrefix + entityId,
+			DecimalPlaces = control.DecimalPlaces,
+			Unit = control.Unit,
+			SemanticKind = control.SemanticKind,
+			Write = new VariableWriteCapability { CommitOnRelease = true }
+		};
+
+	private static VariableReading ReadingOf(HomeAssistantEntityState state, string child)
+	{
+		var value = ReadValue(state, child);
+
+		return HomeAssistantControls.Find(state.EntityId, child) is { } control
+			? control.Reading(state, value)
+			: VariableReading.Of(value);
+	}
 
 	private static object? ReadValue(HomeAssistantEntityState state, string child)
 	{
