@@ -502,6 +502,11 @@ public class SliderWidgetConfigTests
 	internal sealed class FakeWidgetIconResources : IWidgetIconResources
 	{
 		public Task<MacroDeck.Ui.Model.Resources.UiResource?> ResolveAsync(WidgetIconReference? reference,
+			MacroDeckHost.Application.Widgets.WidgetIconLimit limit,
+			CancellationToken cancellationToken)
+			=> ResolveAsync(reference, cancellationToken);
+
+		public Task<MacroDeck.Ui.Model.Resources.UiResource?> ResolveAsync(WidgetIconReference? reference,
 			CancellationToken cancellationToken)
 			=> Task.FromResult<MacroDeck.Ui.Model.Resources.UiResource?>(null);
 

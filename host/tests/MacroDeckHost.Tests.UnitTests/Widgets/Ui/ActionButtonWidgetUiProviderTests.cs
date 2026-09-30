@@ -586,6 +586,11 @@ public class ActionButtonWidgetUiProviderTests
 	private sealed class FakeWidgetIconResources : IWidgetIconResources
 	{
 		public Task<MacroDeck.Ui.Model.Resources.UiResource?> ResolveAsync(WidgetIconReference? reference,
+			MacroDeckHost.Application.Widgets.WidgetIconLimit limit,
+			CancellationToken cancellationToken)
+			=> ResolveAsync(reference, cancellationToken);
+
+		public Task<MacroDeck.Ui.Model.Resources.UiResource?> ResolveAsync(WidgetIconReference? reference,
 			CancellationToken cancellationToken)
 			=> Task.FromResult<MacroDeck.Ui.Model.Resources.UiResource?>(null);
 
@@ -596,6 +601,11 @@ public class ActionButtonWidgetUiProviderTests
 
 	private sealed class FakeWidgetIconService : IWidgetIconService
 	{
+		public Task<WidgetIconResolution> Resolve(Guid widgetId,
+			MacroDeckHost.Application.Widgets.WidgetIconLimit limit,
+			CancellationToken cancellationToken = default)
+			=> Resolve(widgetId, cancellationToken);
+
 		public Task<WidgetIconResolution> Resolve(Guid widgetId, CancellationToken cancellationToken = default)
 			=> Task.FromResult(WidgetIconResolution.Inactive);
 

@@ -241,6 +241,11 @@ public class WidgetSamplePreviewTests
 
 	private sealed class NoWidgetIcons : MacroDeckHost.Application.Widgets.IWidgetIconResources
 	{
+		public Task<MacroDeck.Ui.Model.Resources.UiResource?> ResolveAsync(MacroDeckHost.Domain.Widgets.WidgetIconReference? reference,
+			MacroDeckHost.Application.Widgets.WidgetIconLimit limit,
+			CancellationToken cancellationToken)
+			=> ResolveAsync(reference, cancellationToken);
+
 		public Task<MacroDeck.Ui.Model.Resources.UiResource?> ResolveAsync(
 			MacroDeckHost.Domain.Widgets.WidgetIconReference? reference,
 			CancellationToken cancellationToken)

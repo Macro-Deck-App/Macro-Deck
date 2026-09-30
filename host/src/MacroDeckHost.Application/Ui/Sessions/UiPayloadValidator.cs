@@ -65,7 +65,9 @@ public static class UiPayloadValidator
 		ByteLength
 	}
 
-	public static UiPayloadScan Scan(ReadOnlySpan<byte> utf8, UiPayloadShape shape)
+	public static UiPayloadScan Scan(ReadOnlySpan<byte> utf8,
+		UiPayloadShape shape,
+		int maxResourceBytes = ProtocolLimits.MaxUiResourceBytes)
 	{
 		var sizeLimit = shape == UiPayloadShape.Tree
 			? ProtocolLimits.MaxUiTreeBytes
@@ -79,7 +81,7 @@ public static class UiPayloadValidator
 
 		try
 		{
-			return ScanTokens(utf8, shape);
+			return ScanTokens(utf8, shape, maxResourceBytes);
 		}
 		catch (JsonException)
 		{
@@ -87,7 +89,7 @@ public static class UiPayloadValidator
 		}
 	}
 
-	private static UiPayloadScan ScanTokens(ReadOnlySpan<byte> utf8, UiPayloadShape shape)
+	private static UiPayloadScan ScanTokens(ReadOnlySpan<byte> utf8, UiPayloadShape shape, int maxResourceBytes)
 	{
 		var reader = new Utf8JsonReader(utf8,
 			new JsonReaderOptions
@@ -168,7 +170,7 @@ public static class UiPayloadValidator
 				{
 					depth--;
 
-					if (hasResourceId[depth] && declaredBytes[depth] > ProtocolLimits.MaxUiResourceBytes)
+					if (hasResourceId[depth] && declaredBytes[depth] > maxResourceBytes)
 					{
 						return UiPayloadScan.Failed(UiSessionErrorCodes.PayloadTooLarge);
 					}

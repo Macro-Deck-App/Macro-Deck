@@ -125,7 +125,7 @@ protocol descriptor and the session response - read them from there, never hard-
 | Tree and patch size | UTF-8 bytes of the serialized payload. |
 | Node count | Every node, including `fallback` subtrees. |
 | Update rate and burst | Per session, not per provider - one busy view cannot starve another. |
-| `maxUiResourceBytes` | Both a `UiResource`'s declared `byteLength` and the bytes the host's resource store accepts for one resource. A `byteLength` of `null` is accepted. |
+| `maxUiResourceBytes` | Both a `UiResource`'s declared `byteLength` in a plugin's tree and the bytes the host's resource store accepts for one resource a plugin registers. A `byteLength` of `null` is accepted. |
 | `maxUiResourceBytesPerPlugin` / `maxUiResourcesPerPlugin` | The bytes and the number of [resources](/ui/reference/resources/#registering-your-own-images) one plugin may have registered at once. |
 
 ## What a refused update looks like

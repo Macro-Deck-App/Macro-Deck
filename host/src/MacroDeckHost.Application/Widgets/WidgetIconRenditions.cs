@@ -28,13 +28,20 @@ public static class WidgetIconRenditions
 		CancellationToken cancellationToken)
 		=> ProduceAsync(source, reference, DefaultSize, cancellationToken);
 
-	public static async Task<WidgetIconRendition> ProduceAsync(IWidgetIconSource source,
+	public static Task<WidgetIconRendition> ProduceAsync(IWidgetIconSource source,
 		string reference,
 		int size,
 		CancellationToken cancellationToken)
+		=> ProduceAsync(source, reference, size, ProtocolLimits.MaxUiResourceBytes, cancellationToken);
+
+	public static async Task<WidgetIconRendition> ProduceAsync(IWidgetIconSource source,
+		string reference,
+		int size,
+		int maxBytes,
+		CancellationToken cancellationToken)
 	{
 		// Never WebP: one rendition goes to every client and Safari before 14 draws WebP blank. An animated
-		// GIF over the UI resource limit steps down in size and finally to its first frame.
+		// GIF over maxBytes steps down in size and finally to its first frame.
 		foreach (var (candidate, staticFrame) in Candidates(Bucket(size)))
 		{
 			var image = await source
@@ -58,7 +65,7 @@ public static class WidgetIconRenditions
 				await image.Content.DisposeAsync().ConfigureAwait(false);
 			}
 
-			if (content.Length <= ProtocolLimits.MaxUiResourceBytes)
+			if (content.Length <= maxBytes)
 			{
 				return new WidgetIconRendition(WidgetIconRenditionStatus.Rendered, content, image.MediaType, image.Stable);
 			}

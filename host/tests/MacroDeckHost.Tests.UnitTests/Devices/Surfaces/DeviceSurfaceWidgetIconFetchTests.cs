@@ -1,6 +1,8 @@
+using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Ui.Model.Resources;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Ui.Resources;
+using MacroDeckHost.Application.Widgets;
 
 namespace MacroDeckHost.Tests.UnitTests.Devices.Surfaces;
 
@@ -117,5 +119,32 @@ internal sealed class DeviceSurfaceWidgetIconFetchTests
 		var icon = await _fixture.Service.GetWidgetIconAsync(Guid.NewGuid(), _widgetId.ToString());
 
 		Assert.That(icon, Is.Null);
+	}
+
+	[Test]
+	public async Task A_device_is_handed_an_icon_within_the_plugin_limit_even_when_the_deck_shows_a_larger_one()
+	{
+		var deckIcon = _fixture.Resources.Register(new UiResourceRegistration
+		{
+			OwnerId = "test",
+			Name = "deck",
+			MediaType = "image/gif",
+			Content = new byte[ProtocolLimits.MaxUiResourceBytes * 2],
+			MaxBytes = HostUiResourceLimits.MaxHostIconResourceBytes
+		});
+		var deviceIcon = Register("image/png", _bytes);
+		_fixture.WidgetIcons.Set(_widgetId, WidgetIconLimit.Host, WidgetIconResolution.Active(deckIcon));
+		_fixture.WidgetIcons.Set(_widgetId, WidgetIconLimit.Protocol, WidgetIconResolution.Active(deviceIcon));
+		var deviceId = await _fixture.OpenDeviceAsync("DeckB");
+
+		var icon = await _fixture.Service.GetWidgetIconAsync(deviceId, _widgetId.ToString());
+		var appearance = _fixture.Provider.Latest(deviceId).Widgets.Single().Appearance!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(icon!.Content.ToArray(), Is.EqualTo(_bytes));
+			Assert.That(icon.ETag, Is.EqualTo(deviceIcon.ContentHash));
+			Assert.That(appearance.IconVersion, Is.EqualTo(icon.ETag));
+		});
 	}
 }

@@ -15,6 +15,10 @@ public interface IWidgetIconResources
 	/// exception.</summary>
 	Task<UiResource?> ResolveAsync(WidgetIconReference? reference, CancellationToken cancellationToken);
 
+	Task<UiResource?> ResolveAsync(WidgetIconReference? reference,
+		WidgetIconLimit limit,
+		CancellationToken cancellationToken);
+
 	/// <summary>Forgets <paramref name="iconId" />'s cached <see cref="UiResource" /> handle in this
 	/// bridge's own LRU, if any, so the next <see cref="ResolveAsync" /> re-reads the icon's bytes and
 	/// registers a fresh handle for them. Called when the icon's bytes changed or the icon was deleted.
@@ -23,6 +27,12 @@ public interface IWidgetIconResources
 	/// serving a handle from before the evict keeps drawing the old bytes until it re-resolves the icon
 	/// itself; the eviction only stops a <i>future</i> resolve from handing out the stale handle.</summary>
 	void Evict(Guid iconId);
+}
+
+public enum WidgetIconLimit
+{
+	Host,
+	Protocol
 }
 
 /// <summary>
@@ -55,9 +65,9 @@ public sealed class WidgetIconResources : IWidgetIconResources
 	// poison every later poll for a reference that is perfectly fine, the way caching the failed task would.
 	// _order tracks recency (most-recently-used at the end) for the bound above; both are guarded by _sync
 	// since an LRU touch on a read has to move a node without racing an insert or an Evict.
-	private readonly Dictionary<WidgetIconReference, LinkedListNode<WidgetIconReference>> _order = new();
-	private readonly LinkedList<WidgetIconReference> _recency = new();
-	private readonly Dictionary<WidgetIconReference, UiResource> _registered = new();
+	private readonly Dictionary<CacheKey, LinkedListNode<CacheKey>> _order = new();
+	private readonly LinkedList<CacheKey> _recency = new();
+	private readonly Dictionary<CacheKey, UiResource> _registered = new();
 	private readonly Lock _sync = new();
 
 	public WidgetIconResources(IWidgetIconSourceRegistry sources, IUiResourceStore resourceStore, ILogger logger)
@@ -72,27 +82,37 @@ public sealed class WidgetIconResources : IWidgetIconResources
 		// The icon-pack notification handler only ever knows a Guid, never the reference string it was
 		// stored as - constructing the reference this way (never Guid.TryParse) keeps this bridge itself
 		// out of the business of parsing provider-specific reference formats.
-		var key = WidgetIconReference.IconPack(iconId.ToString());
+		var reference = WidgetIconReference.IconPack(iconId.ToString());
 
 		lock (_sync)
 		{
-			if (_order.Remove(key, out var node))
+			foreach (var limit in Enum.GetValues<WidgetIconLimit>())
 			{
-				_recency.Remove(node);
-			}
+				var key = new CacheKey(reference, limit);
+				if (_order.Remove(key, out var node))
+				{
+					_recency.Remove(node);
+				}
 
-			_registered.Remove(key);
+				_registered.Remove(key);
+			}
 		}
 	}
 
-	public async Task<UiResource?> ResolveAsync(WidgetIconReference? reference, CancellationToken cancellationToken)
+	public Task<UiResource?> ResolveAsync(WidgetIconReference? reference, CancellationToken cancellationToken)
+		=> ResolveAsync(reference, WidgetIconLimit.Host, cancellationToken);
+
+	public async Task<UiResource?> ResolveAsync(WidgetIconReference? reference,
+		WidgetIconLimit limit,
+		CancellationToken cancellationToken)
 	{
 		if (reference is not { } value || string.IsNullOrEmpty(value.Reference))
 		{
 			return null;
 		}
 
-		if (TryGetCached(value, out var cached))
+		var key = new CacheKey(value, limit);
+		if (TryGetCached(key, out var cached))
 		{
 			return cached;
 		}
@@ -104,7 +124,12 @@ public sealed class WidgetIconResources : IWidgetIconResources
 
 		try
 		{
-			var rendition = await WidgetIconRenditions.ProduceAsync(source, value.Reference, cancellationToken)
+			var maxBytes = MaxBytes(limit);
+			var rendition = await WidgetIconRenditions.ProduceAsync(source,
+					value.Reference,
+					WidgetIconRenditions.DefaultSize,
+					maxBytes,
+					cancellationToken)
 				.ConfigureAwait(false);
 
 			switch (rendition.Status)
@@ -114,12 +139,13 @@ public sealed class WidgetIconResources : IWidgetIconResources
 					var resource = _resourceStore.Register(new UiResourceRegistration
 					{
 						OwnerId = OwnerId,
-						Name = $"{value.Type}.{value.Reference}",
+						Name = ResourceName(value, limit),
 						MediaType = rendition.MediaType!,
 						Content = rendition.Content!,
+						MaxBytes = maxBytes,
 					});
 
-					Store(value, resource);
+					Store(key, resource);
 
 					return resource;
 				}
@@ -129,7 +155,7 @@ public sealed class WidgetIconResources : IWidgetIconResources
 						"Widget icon '{Type}:{Reference}' was not registered: no rendition fits the {Limit} byte limit",
 						value.Type,
 						value.Reference,
-						ProtocolLimits.MaxUiResourceBytes);
+						maxBytes);
 
 					return null;
 
@@ -150,7 +176,19 @@ public sealed class WidgetIconResources : IWidgetIconResources
 		}
 	}
 
-	private bool TryGetCached(WidgetIconReference reference, out UiResource resource)
+	internal static string ResourceName(WidgetIconReference reference, WidgetIconLimit limit)
+		=> limit == WidgetIconLimit.Protocol
+			? $"{reference.Type}.{reference.Reference}{ProtocolNameSuffix}"
+			: $"{reference.Type}.{reference.Reference}";
+
+	internal const string ProtocolNameSuffix = ".protocol";
+
+	private static int MaxBytes(WidgetIconLimit limit)
+		=> limit == WidgetIconLimit.Protocol
+			? ProtocolLimits.MaxUiResourceBytes
+			: HostUiResourceLimits.MaxHostIconResourceBytes;
+
+	private bool TryGetCached(CacheKey reference, out UiResource resource)
 	{
 		lock (_sync)
 		{
@@ -171,7 +209,7 @@ public sealed class WidgetIconResources : IWidgetIconResources
 		}
 	}
 
-	private void Store(WidgetIconReference reference, UiResource resource)
+	private void Store(CacheKey reference, UiResource resource)
 	{
 		lock (_sync)
 		{
@@ -192,4 +230,6 @@ public sealed class WidgetIconResources : IWidgetIconResources
 			}
 		}
 	}
+
+	private readonly record struct CacheKey(WidgetIconReference Reference, WidgetIconLimit Limit);
 }

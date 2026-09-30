@@ -66,6 +66,31 @@ public class UiResourceStoreTests
 	}
 
 	[Test]
+	public void A_host_icon_may_exceed_the_protocol_limit_up_to_the_host_limit()
+	{
+		var store = new UiResourceStore();
+		UiResourceRegistration Of(int bytes, int maxBytes) => new()
+		{
+			OwnerId = "app.macro-deck.widget-icon",
+			Name = $"icon-{bytes}",
+			MediaType = "image/gif",
+			Content = new byte[bytes],
+			MaxBytes = maxBytes,
+		};
+
+		var large = ProtocolLimits.MaxUiResourceBytes * 2;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(store.Register(Of(large, HostUiResourceLimits.MaxHostIconResourceBytes)).ByteLength,
+				Is.EqualTo(large));
+			Assert.That(() => store.Register(Of(HostUiResourceLimits.MaxHostIconResourceBytes + 1, int.MaxValue)),
+				Throws.ArgumentException,
+				"a caller asking for more than the host limit must still be bounded by it");
+		});
+	}
+
+	[Test]
 	public void An_owner_and_name_that_cannot_form_a_valid_identifier_are_refused()
 	{
 		var store = new UiResourceStore();

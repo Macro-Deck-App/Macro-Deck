@@ -190,7 +190,7 @@ public class WidgetIconResourcesTests
 	{
 		var (resources, source, store) = Create();
 		var iconId = Guid.NewGuid();
-		var oversized = new byte[ProtocolLimits.MaxUiResourceBytes + 1];
+		var oversized = new byte[HostUiResourceLimits.MaxHostIconResourceBytes + 1];
 		var smaller = "small-animated-gif"u8.ToArray();
 		source.OnGetRendition = (_, size, _) => Task.FromResult<WidgetIconImage?>(
 			new WidgetIconImage(new MemoryStream(size == 256 ? oversized : smaller), "image/gif"));
@@ -211,7 +211,7 @@ public class WidgetIconResourcesTests
 	{
 		var (resources, source, store) = Create();
 		var iconId = Guid.NewGuid();
-		var oversized = new byte[ProtocolLimits.MaxUiResourceBytes + 1];
+		var oversized = new byte[HostUiResourceLimits.MaxHostIconResourceBytes + 1];
 		var firstFrame = "first-frame-png"u8.ToArray();
 		source.OnGetRendition = (_, _, staticFrame) => Task.FromResult<WidgetIconImage?>(staticFrame
 			? new WidgetIconImage(new MemoryStream(firstFrame), "image/png")
@@ -232,12 +232,76 @@ public class WidgetIconResourcesTests
 	public async Task An_icon_that_fits_no_rendition_at_all_yields_no_image_instead_of_faulting()
 	{
 		var (resources, source, _) = Create();
-		var oversized = new byte[ProtocolLimits.MaxUiResourceBytes + 1];
+		var oversized = new byte[HostUiResourceLimits.MaxHostIconResourceBytes + 1];
 		source.OnGetRendition = (_, _, _) => Task.FromResult<WidgetIconImage?>(
 			new WidgetIconImage(new MemoryStream(oversized), "image/png"));
 
 		var resource = await resources.ResolveAsync(IconPack(Guid.NewGuid()), CancellationToken.None);
 
 		Assert.That(resource, Is.Null);
+	}
+
+	[Test]
+	public async Task A_long_animation_over_the_plugin_limit_still_animates_on_the_deck()
+	{
+		var (resources, source, store) = Create();
+		var animation = new byte[ProtocolLimits.MaxUiResourceBytes * 2];
+		source.OnGetRendition = (_, _, _) => Task.FromResult<WidgetIconImage?>(
+			new WidgetIconImage(new MemoryStream(animation), "image/gif"));
+
+		var resource = await resources.ResolveAsync(IconPack(Guid.NewGuid()), CancellationToken.None);
+
+		Assert.That(resource, Is.Not.Null);
+		Assert.Multiple(() =>
+		{
+			Assert.That(resource!.MediaType, Is.EqualTo("image/gif"));
+			Assert.That(resource.ByteLength, Is.EqualTo(animation.Length));
+			Assert.That(store.TryGet(resource.ResourceId, out _), Is.True);
+			Assert.That(source.Requests, Is.EqualTo(new[] { (256, false) }));
+		});
+	}
+
+	[Test]
+	public async Task An_icon_handed_to_a_plugin_stays_within_the_plugin_limit_under_its_own_resource()
+	{
+		var (resources, source, store) = Create();
+		var iconId = Guid.NewGuid();
+		var animation = new byte[ProtocolLimits.MaxUiResourceBytes * 2];
+		var firstFrame = "first-frame-png"u8.ToArray();
+		source.OnGetRendition = (_, _, staticFrame) => Task.FromResult<WidgetIconImage?>(staticFrame
+			? new WidgetIconImage(new MemoryStream(firstFrame), "image/png")
+			: new WidgetIconImage(new MemoryStream(animation), "image/gif"));
+
+		var deck = await resources.ResolveAsync(IconPack(iconId), CancellationToken.None);
+		var plugin = await resources.ResolveAsync(IconPack(iconId), WidgetIconLimit.Protocol, CancellationToken.None);
+
+		Assert.That(deck, Is.Not.Null);
+		Assert.That(plugin, Is.Not.Null);
+		Assert.Multiple(() =>
+		{
+			Assert.That(plugin!.ResourceId, Is.Not.EqualTo(deck!.ResourceId));
+			Assert.That(plugin.ByteLength, Is.LessThanOrEqualTo(ProtocolLimits.MaxUiResourceBytes));
+			Assert.That(store.TryGet(plugin.ResourceId, out var content), Is.True);
+			Assert.That(content.Content.ToArray(), Is.EqualTo(firstFrame));
+			Assert.That(store.TryGet(deck.ResourceId, out var deckContent), Is.True);
+			Assert.That(deckContent.Content.Length, Is.EqualTo(animation.Length));
+		});
+	}
+
+	[Test]
+	public async Task Evicting_an_icon_refreshes_the_rendition_handed_to_plugins_too()
+	{
+		var (resources, source, _) = Create();
+		var iconId = Guid.NewGuid();
+		var bytes = "old-icon"u8.ToArray();
+		source.OnGetImage = _ => Task.FromResult<WidgetIconImage?>(
+			new WidgetIconImage(new MemoryStream(bytes), "image/png"));
+
+		var before = await resources.ResolveAsync(IconPack(iconId), WidgetIconLimit.Protocol, CancellationToken.None);
+		bytes = "new-icon"u8.ToArray();
+		resources.Evict(iconId);
+		var after = await resources.ResolveAsync(IconPack(iconId), WidgetIconLimit.Protocol, CancellationToken.None);
+
+		Assert.That(after!.ContentHash, Is.Not.EqualTo(before!.ContentHash));
 	}
 }

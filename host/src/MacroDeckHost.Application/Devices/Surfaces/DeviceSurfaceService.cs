@@ -10,6 +10,7 @@ using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Application.Triggers.Providers;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Ui.Transport.Messages.Folders;
+using MacroDeckHost.Application.Widgets;
 using Microsoft.Extensions.DependencyInjection;
 using ILogger = Serilog.ILogger;
 
@@ -269,7 +270,8 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 		var icons = scope.ServiceProvider.GetRequiredService<IWidgetIconService>();
 		var resources = scope.ServiceProvider.GetRequiredService<IUiResourceStore>();
 
-		var resolution = await icons.Resolve(id, cancellationToken);
+		// Device plugins keep receiving provider icons no larger than they always did.
+		var resolution = await icons.Resolve(id, WidgetIconLimit.Protocol, cancellationToken);
 		if (resolution is not { IsActive: true, Resource: { } resource } ||
 			!resources.TryGet(resource.ResourceId, out var content))
 		{
