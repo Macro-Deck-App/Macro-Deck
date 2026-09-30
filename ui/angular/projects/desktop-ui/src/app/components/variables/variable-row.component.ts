@@ -5,9 +5,9 @@ import { LocalizationService } from '@shared';
 import type { VariableType } from '@macro-deck/runtime';
 import { variableTypeLabels } from '../../domain/variable-source.util';
 
-export const VARIABLE_ROW_HEIGHT = 52;
+export const VARIABLE_ROW_HEIGHT = 60;
 
-const DEPTH_INDENT_PX = 20;
+export const VARIABLE_ROW_INDENT = 20;
 
 @Component({
   selector: 'shared-variable-row',
@@ -19,7 +19,7 @@ const DEPTH_INDENT_PX = 20;
   host: {
     '[class.vr-unbound]': 'unbound()',
     '[class.vr-dimmed]': 'dimmed()',
-    '[style.padding-inline-start.px]': 'indent()',
+    '[style.margin-inline-start.px]': 'indent()',
   },
 })
 export class VariableRowComponent {
@@ -44,7 +44,7 @@ export class VariableRowComponent {
 
   readonly activate = output<void>();
 
-  protected readonly indent = computed(() => this.depth() * DEPTH_INDENT_PX);
+  protected readonly indent = computed(() => this.depth() * VARIABLE_ROW_INDENT);
 
   protected readonly unavailableLabel = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Manager.ValueUnavailableShort));

@@ -43,7 +43,7 @@
 }
 
 .vars-list {
-  @include list.surface;
+  @include list.list;
   flex: 1 1 auto;
   min-height: 0;
   @include ds.overlay-scrollbar-clearance;
@@ -54,9 +54,7 @@
 }
 
 .vars-row-slot {
-  display: flex;
-  align-items: stretch;
-  box-sizing: border-box;
+  @include list.slot;
 }
 
 .vars-state-row {

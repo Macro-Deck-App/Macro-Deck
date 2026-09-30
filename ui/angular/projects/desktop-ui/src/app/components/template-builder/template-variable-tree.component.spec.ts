@@ -264,6 +264,19 @@ describe('TemplateVariableTreeComponent', () => {
       expect(visibleRight - copy.getBoundingClientRect().right).toBeGreaterThanOrEqual(15);
     });
 
+    it('lets the user scroll a list longer than the pane', async () => {
+      fixture.nativeElement.style.width = '260px';
+      fixture.nativeElement.style.height = '400px';
+      await setVariables(Array.from({ length: 60 }, (_, i) => variable({ id: `v${i}`, name: `counter_${i}` })));
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const viewport = fixture.nativeElement.querySelector('cdk-virtual-scroll-viewport') as HTMLElement;
+
+      expect(viewport.scrollHeight).toBeGreaterThan(viewport.clientHeight);
+      expect(['auto', 'scroll']).toContain(getComputedStyle(viewport).overflowY);
+    });
+
     it('never widens the list past its scrollport, however long an identifier is', async () => {
       fixture.nativeElement.style.width = '260px';
       fixture.nativeElement.style.height = '400px';

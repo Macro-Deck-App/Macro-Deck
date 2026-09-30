@@ -3,11 +3,19 @@
 :host {
   display: flex;
   align-items: stretch;
-  width: 100%;
-  height: 100%;
+  flex: 1 1 auto;
+  min-width: 0;
   box-sizing: border-box;
-  border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-bg-tertiary);
+}
+
+:host(.vgh-card) {
+  @include ds.card($padding: 0);
+  transition: border-color var(--transition-fast);
+}
+
+:host(.vgh-card:has(.vgh-toggle:hover)),
+:host(.vgh-card:has(.vgh-toggle:focus-visible)) {
+  border-color: var(--color-accent);
 }
 
 .vgh {
@@ -16,7 +24,15 @@
   gap: var(--space-2);
   flex: 1 1 auto;
   min-width: 0;
+  padding: 0 var(--space-1);
+}
+
+:host(.vgh-card) .vgh {
   padding: 0 var(--space-3);
+}
+
+:host(.vgh-section) .vgh {
+  align-items: flex-end;
 }
 
 .vgh-toggle {
@@ -26,12 +42,6 @@
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: background-color var(--transition-fast);
-}
-
-.vgh-toggle:hover,
-.vgh-toggle:focus-visible {
-  background-color: var(--color-bg-hover);
 }
 
 .vgh-chevron {
@@ -47,12 +57,16 @@
 .vgh-label {
   @include ds.truncate;
   font-size: var(--text-base);
-  font-weight: var(--font-semibold);
+  font-weight: var(--font-medium);
   color: var(--color-text-secondary);
 }
 
 :host(.vgh-section) .vgh-label {
   @include ds.section-label;
+}
+
+.vgh-toggle:hover .vgh-label {
+  color: var(--color-text-primary);
 }
 
 .vgh-count {

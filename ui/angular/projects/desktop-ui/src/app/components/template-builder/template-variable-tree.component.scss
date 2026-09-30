@@ -19,7 +19,7 @@
 }
 
 .tvt-list {
-  @include list.surface;
+  @include list.list;
   flex: 1 1 auto;
   min-height: 0;
 }
@@ -34,9 +34,7 @@
 }
 
 .tvt-row-slot {
-  display: flex;
-  align-items: stretch;
-  box-sizing: border-box;
+  @include list.slot;
 }
 
 .tvt-state-row {

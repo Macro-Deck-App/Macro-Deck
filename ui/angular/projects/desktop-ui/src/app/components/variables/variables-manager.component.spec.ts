@@ -640,6 +640,18 @@ describe('VariablesManagerComponent', () => {
       expect(component.publicName(picked[0])).toBe(renderedName!);
     });
 
+    it('lets the user scroll a list longer than its pane', async () => {
+      fixture.componentRef.setInput('variables', flatVariables(200));
+      fixture.componentRef.setInput('source', { kind: 'user' });
+      await fixture.whenStable();
+      await flushViewport();
+
+      const list = fixture.nativeElement.querySelector('.vars-list') as HTMLElement;
+
+      expect(list.scrollHeight).toBeGreaterThan(list.clientHeight);
+      expect(['auto', 'scroll']).toContain(getComputedStyle(list).overflowY);
+    });
+
     it('shows the empty state and zero rows for an empty list', async () => {
       // A source with no catalog behind it, so "nothing to show" really is nothing: under a source
       // that offers one, an empty variable list is not an empty list - the catalog is still there.

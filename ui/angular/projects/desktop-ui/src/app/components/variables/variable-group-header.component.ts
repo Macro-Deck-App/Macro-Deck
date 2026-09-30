@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { VARIABLE_ROW_INDENT } from './variable-row.component';
 
 @Component({
   selector: 'shared-variable-group-header',
@@ -27,7 +28,8 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
   styleUrls: ['./variable-group-header.component.scss'],
   host: {
     '[class.vgh-section]': 'section()',
-    '[style.padding-inline-start.px]': 'depth() * 16',
+    '[class.vgh-card]': 'card()',
+    '[style.margin-inline-start.px]': 'depth() * indent',
   },
 })
 export class VariableGroupHeaderComponent {
@@ -35,9 +37,12 @@ export class VariableGroupHeaderComponent {
   readonly count = input<number | null>(null);
   readonly collapsible = input(false);
   readonly section = input(false);
+  readonly card = input(false);
   readonly expanded = input(false);
   readonly ariaLabel = input<string | null>(null);
   readonly depth = input(0);
 
   readonly toggle = output<void>();
+
+  protected readonly indent = VARIABLE_ROW_INDENT;
 }

@@ -271,7 +271,7 @@
 }
 
 .variable-capability-list {
-  @include list.surface;
+  @include list.list;
   flex: 0 1 auto;
   min-height: 0;
   overflow-y: auto;
@@ -279,14 +279,8 @@
 }
 
 .variable-capability-slot {
-  display: flex;
+  @include list.slot;
   flex: 0 0 auto;
-  align-items: stretch;
-  box-sizing: border-box;
-}
-
-.variable-capability-slot:last-child > * {
-  border-bottom: 0;
 }
 
 .variable-state-row {

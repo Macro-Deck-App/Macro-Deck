@@ -1142,6 +1142,8 @@ describe('IntegrationDetailPageComponent', () => {
 
       expect(leaves(fixture)).toBe(150);
       expect(fixture.nativeElement.querySelector('.variable-catalog-grow')).toBeNull();
+      const list = fixture.nativeElement.querySelector('.variable-capability-list') as HTMLElement;
+      expect(['auto', 'scroll']).toContain(getComputedStyle(list).overflowY);
       fixture.destroy();
     });
   });

@@ -14,7 +14,7 @@ import { VariableCatalogService } from '../../services/variable-catalog.service'
 import { VariableBindDialogComponent } from '../variables/variable-bind-dialog.component';
 import { VariableCatalogRow, createVariableCatalogRows } from '../variables/variable-catalog-rows';
 import { VariableGroupHeaderComponent } from '../variables/variable-group-header.component';
-import { VARIABLE_ROW_HEIGHT, VariableRowComponent } from '../variables/variable-row.component';
+import { VARIABLE_ROW_HEIGHT, VARIABLE_ROW_INDENT, VariableRowComponent } from '../variables/variable-row.component';
 
 type TreeRow =
   | { kind: 'group-header'; key: string; label: string; collapsed: boolean }
@@ -125,13 +125,14 @@ const BIND_DIALOG_Z_INDEX = 1100;
                 [label]="unboundHeading()"
                 [count]="row.count"
                 [collapsible]="row.collapsible"
+                [card]="row.collapsible"
                 [section]="!row.collapsible"
                 [expanded]="row.expanded"
                 [ariaLabel]="unboundAriaLabel(row.count)"
                 (toggle)="toggleUnbound(row.integrationId)" />
             }
             @case ('catalog-state') {
-              <div class="tvt-state-row">
+              <div class="tvt-state-row" [style.margin-inline-start.px]="catalogIndent">
                 <span [title]="catalogStateLabel(row.integrationId, row.state)">{{ catalogStateLabel(row.integrationId, row.state) }}</span>
                 @if (row.state === 'offline') {
                   <shared-button variant="secondary" size="compact" (click)="catalog.retry(row.integrationId)">{{ retryLabel() }}</shared-button>
@@ -145,7 +146,7 @@ const BIND_DIALOG_Z_INDEX = 1100;
                 [secondary]="catalog.reference(row.node)"
                 [secondaryMono]="true"
                 [type]="row.node.type"
-                [depth]="row.depth"
+                [depth]="row.depth + 1"
                 [unbound]="true"
                 [interactive]="true"
                 [branch]="true"
@@ -168,19 +169,23 @@ const BIND_DIALOG_Z_INDEX = 1100;
                 [secondary]="catalog.reference(row.node)"
                 [secondaryMono]="true"
                 [type]="row.node.type"
-                [depth]="row.depth"
+                [depth]="row.depth + 1"
                 [unbound]="true"
                 [interactive]="true"
                 [actionLabel]="bindActionLabel()"
                 (activate)="requestBind(row.integrationId, row.node)" />
             }
             @case ('catalog-note') {
-              <div class="tvt-state-row" [style.padding-inline-start.px]="row.depth * 20 + 12">
+              <div class="tvt-state-row" [style.margin-inline-start.px]="(row.depth + 1) * catalogIndent">
                 <span>{{ catalogNoteLabel(row.note) }}</span>
               </div>
             }
             @case ('catalog-grow') {
-              <button type="button" class="tvt-link-row tvt-catalog-grow" (click)="catalog.grow(row.integrationId)">
+              <button
+                type="button"
+                class="tvt-link-row tvt-catalog-grow"
+                [style.margin-inline-start.px]="catalogIndent"
+                (click)="catalog.grow(row.integrationId)">
                 <span>{{ loadMoreLabel() }}</span>
               </button>
             }
@@ -188,7 +193,7 @@ const BIND_DIALOG_Z_INDEX = 1100;
               <button
                 type="button"
                 class="tvt-link-row"
-                [style.padding-inline-start.px]="row.depth * 20 + 12"
+                [style.margin-inline-start.px]="(row.depth + 1) * catalogIndent"
                 (click)="catalog.loadMore(row.integrationId, row.parentId)">
                 <span>{{ loadMoreLabel() }}</span>
               </button>
@@ -242,6 +247,7 @@ export class TemplateVariableTreeComponent {
   private readonly unboundGroups = signal<ReadonlySet<string>>(new Set());
 
   readonly rowHeight = VARIABLE_ROW_HEIGHT;
+  readonly catalogIndent = VARIABLE_ROW_INDENT;
   readonly bindDialogZIndex = BIND_DIALOG_Z_INDEX;
 
   readonly bindRequest = signal<{ integrationId: string; node: VariableCatalogNode } | null>(null);

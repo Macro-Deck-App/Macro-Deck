@@ -27,7 +27,7 @@ import { IntegrationService } from '../../services/integration.service';
 import { VariableCatalogIdInputComponent } from './variable-catalog-id-input.component';
 import { VariableCatalogRow, createVariableCatalogRows } from './variable-catalog-rows';
 import { VariableGroupHeaderComponent } from './variable-group-header.component';
-import { VARIABLE_ROW_HEIGHT, VariableRowComponent } from './variable-row.component';
+import { VARIABLE_ROW_HEIGHT, VARIABLE_ROW_INDENT, VariableRowComponent } from './variable-row.component';
 
 type VariableSource = 'value' | 'file';
 
@@ -328,6 +328,7 @@ export class VariablesManagerComponent implements OnInit {
   readonly showGroupHeaders = computed(() => this.sourceState().kind === 'all');
 
   readonly rowHeight = VARIABLE_ROW_HEIGHT;
+  readonly catalogIndent = VARIABLE_ROW_INDENT;
 
   readonly loadingLabel = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Dynamic.Loading));

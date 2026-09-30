@@ -24,7 +24,7 @@ import { VariableCatalogService } from '../../../services/variable-catalog.servi
 import { VariableBindDialogComponent } from '../../variables/variable-bind-dialog.component';
 import { VariableCatalogRow, createVariableCatalogRows } from '../../variables/variable-catalog-rows';
 import { VariableGroupHeaderComponent } from '../../variables/variable-group-header.component';
-import { VARIABLE_ROW_HEIGHT, VariableRowComponent } from '../../variables/variable-row.component';
+import { VARIABLE_ROW_HEIGHT, VARIABLE_ROW_INDENT, VariableRowComponent } from '../../variables/variable-row.component';
 import { ActionCapabilityRowComponent } from './action-capability-row.component';
 import { IntegrationCompatibilityCardComponent } from './integration-compatibility-card.component';
 import { IntegrationIssuesCardComponent } from './integration-issues-card.component';
@@ -227,6 +227,7 @@ export class IntegrationDetailPageComponent implements OnInit {
   });
 
   protected readonly variableRowHeight = VARIABLE_ROW_HEIGHT;
+  protected readonly catalogIndent = VARIABLE_ROW_INDENT;
 
   private readonly unboundRows = computed<VariableTabRow[]>(() => {
     const id = this.catalogIds()[0];

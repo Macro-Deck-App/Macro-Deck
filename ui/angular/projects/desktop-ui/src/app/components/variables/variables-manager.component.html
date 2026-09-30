@@ -66,13 +66,14 @@
               [label]="unboundHeading()"
               [count]="row.count"
               [collapsible]="row.collapsible"
+              [card]="row.collapsible"
               [section]="!row.collapsible"
               [expanded]="row.expanded"
               [ariaLabel]="unboundAriaLabel(row.count)"
               (toggle)="toggleUnbound(row.integrationId)" />
           }
           @case ('catalog-state') {
-            <div class="vars-state-row">
+            <div class="vars-state-row" [style.margin-inline-start.px]="catalogIndent">
               <span [title]="catalogStateLabel(row.integrationId, row.state)">{{ catalogStateLabel(row.integrationId, row.state) }}</span>
               @if (row.state === 'offline') {
                 <shared-button variant="secondary" size="compact" (click)="retryCatalog(row.integrationId)">{{ retryLabel() }}</shared-button>
@@ -86,7 +87,7 @@
               [primaryMono]="!!row.node.suggestedName"
               [secondary]="catalogSecondary(row.node)"
               [type]="row.node.type"
-              [depth]="row.depth"
+              [depth]="row.depth + 1"
               [unbound]="true"
               [interactive]="true"
               [branch]="true"
@@ -109,14 +110,14 @@
               [primaryMono]="!!row.node.suggestedName"
               [secondary]="catalogSecondary(row.node)"
               [type]="row.node.type"
-              [depth]="row.depth"
+              [depth]="row.depth + 1"
               [unbound]="true"
               [interactive]="true"
               [actionLabel]="bindActionLabel()"
               (activate)="activateCatalogLeaf(row.integrationId, row.node)" />
           }
           @case ('catalog-note') {
-            <div class="vars-state-row" [style.padding-inline-start.px]="row.depth * 20 + 12">
+            <div class="vars-state-row" [style.margin-inline-start.px]="(row.depth + 1) * catalogIndent">
               <span>{{ catalogNoteLabel(row.note) }}</span>
             </div>
           }
@@ -124,13 +125,17 @@
             <button
               type="button"
               class="vars-catalog-more"
-              [style.padding-inline-start.px]="row.depth * 20 + 12"
+              [style.margin-inline-start.px]="(row.depth + 1) * catalogIndent"
               (click)="loadMoreCatalog(row.integrationId, row.parentId)">
               <span>{{ loadMoreLabel() }}</span>
             </button>
           }
           @case ('catalog-grow') {
-            <button type="button" class="vars-catalog-more vars-catalog-grow" (click)="growCatalog(row.integrationId)">
+            <button
+              type="button"
+              class="vars-catalog-more vars-catalog-grow"
+              [style.margin-inline-start.px]="catalogIndent"
+              (click)="growCatalog(row.integrationId)">
               <span>{{ loadMoreLabel() }}</span>
             </button>
           }
