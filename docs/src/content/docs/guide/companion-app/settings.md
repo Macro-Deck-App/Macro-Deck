@@ -76,10 +76,23 @@ These let Macro Deck control the phone or tablet beyond the deck. Each one asks 
 While Low Power Mode is on, the settings say so: iOS then reduces performance and network activity, which can
 slow a deck down. Turn Low Power Mode off in Control Center or under **Battery** in the Settings app.
 
+## What's new
+
+After an update that changes the first or second number of the version, for example from 26.1.3 to 26.2.0, the
+app shows a sheet with what is new, once. It waits until nothing else is open over the Connections screen, so it
+never covers a deck. A new install, and an update that only changes the last number such as 26.2.0 to 26.2.1, show
+nothing. Tap **Continue**, drag the sheet down or go back to close it.
+
+To read it again, open **What's new** (**What's New** on iPhone and iPad) under **About** in the settings.
+
+![The What's new sheet on Android after an update](../../../../assets/guide/companion/android-whats-new.png)
+
+![The What's New sheet on iPhone after an update](../../../../assets/guide/companion/ios-whats-new.png)
+
 ## Feedback, About and Legal
 
 - **Discord** and **GitHub Issues**: ask the community and report bugs.
 - **Share diagnostics**: shares recent connection events and the addresses of your computers, for a bug report.
   It never contains passwords or tokens.
-- **About**: version, build and **Open source licenses**.
+- **About**: version, build, [**What's new**](#whats-new) and **Open source licenses**.
 - **Legal**: imprint, privacy policy and terms of service.
