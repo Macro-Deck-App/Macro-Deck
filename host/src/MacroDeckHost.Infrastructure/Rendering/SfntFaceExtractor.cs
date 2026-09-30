@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using System.Security.Cryptography;
 using SkiaSharp;
 
 namespace MacroDeckHost.Infrastructure.Rendering;
@@ -71,6 +72,36 @@ internal static class SfntFaceExtractor
 		tables[headIndex].AsSpan(HeadCheckSumAdjustmentOffset, 4).Clear();
 
 		return Assemble(tags, tables, headIndex);
+	}
+
+	public static string? Fingerprint(SKTypeface typeface)
+	{
+		if (!CanExtract(typeface) || !TryGetTags(typeface, out var tags))
+		{
+			return null;
+		}
+
+		using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+		Span<byte> header = stackalloc byte[8];
+		foreach (var tag in tags)
+		{
+			if (!typeface.TryGetTableData(tag, out var data) || data is null)
+			{
+				return null;
+			}
+
+			if (tag == HeadTag && data.Length >= MinimumHeadLength)
+			{
+				data.AsSpan(HeadCheckSumAdjustmentOffset, 4).Clear();
+			}
+
+			BinaryPrimitives.WriteUInt32BigEndian(header, tag);
+			BinaryPrimitives.WriteUInt32BigEndian(header[4..], (uint)data.Length);
+			hash.AppendData(header);
+			hash.AppendData(data);
+		}
+
+		return Convert.ToHexString(hash.GetHashAndReset());
 	}
 
 	private static byte[] Assemble(uint[] tags, byte[][] tables, int headIndex)
