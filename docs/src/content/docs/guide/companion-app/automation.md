@@ -1,6 +1,6 @@
 ---
 title: Run scripts from other apps
-description: Run Macro Deck scripts from Tasker, MacroDroid, other apps, home screen shortcuts and Quick Settings tiles, with an Android intent or a run-script link, and the automation key that protects it.
+description: Run Macro Deck scripts from Tasker, MacroDroid, other apps, Android shortcuts and Quick Settings tiles, with an Android intent or a run-script link, and the automation key that protects it.
 ---
 
 The Companion app can run a Macro Deck [script](/guide/concepts/#scripts-and-automations) on one of your computers when another app asks
@@ -111,13 +111,38 @@ an app lets you, so the link cannot reach another app. On iPhone and iPad, any a
 so the key is what protects it. Another app could also claim the `macrodeck-companion` link for itself and receive
 the key: generate a new key if you ever suspect that.
 
-## Android: home screen shortcuts
+## Android: shortcuts
 
-Tap a script in the **Automation** settings and choose **Add to home screen** to put it on the home screen. Tapping
-it runs the script and says whether it ran. This needs Android 8 or later and a launcher that supports pinned
-shortcuts, and it is offered only for scripts that need no input values.
+Tap a script in the **Automation** settings and choose **Create shortcut**. The sheet asks for:
 
-A home screen shortcut is yours, so it works without the key and with **Allow external automation** turned off.
+- **Name:** what the shortcut is called. It starts as the script's name. Give two shortcuts of the same script
+  different names when you run them with different values.
+- **The script's inputs:** one field for each, such as a scene name, a number or a switch. An input with a default
+  starts with it. An input the script requires needs a value. An input you leave empty uses the script's own
+  default. A number takes `3`, `2.5` or `2,5`.
+
+![The New shortcut sheet on Android: a name, the script's three inputs with values, and the buttons Add to home screen and Add to app icon menu](../../../../assets/guide/companion/android-script-shortcut.png)
+
+Then choose where it goes:
+
+- **Add to home screen:** a shortcut icon on the home screen. This needs Android 8 or later and a launcher that
+  supports pinned shortcuts.
+- **Add to app icon menu:** a line in the menu that opens when you press and hold the Macro Deck icon, above your
+  saved computers. This needs Android 7.1 or later. The menu holds at most half of the lines your launcher allows,
+  often two, so your computers keep their place there. When it is full, remove a script under **App icon menu** in
+  the **Automation** settings first.
+
+Tapping a shortcut runs the script with the values you set, without opening Macro Deck, and a short message says
+whether it ran. If the computer is off, unreachable or locked, the message says so and the script does not run.
+
+The values are saved with the shortcut on your device. Do not put a password or a token into an input. To change
+the values, remove the shortcut and create it again. Remove a home screen shortcut on the home screen, and a line
+of the app icon menu in the **Automation** settings. A home screen copy that was dragged out of the app icon menu
+stops running when you remove the line.
+
+![The Automation settings on Android with a script in the App icon menu section and a computer's scripts below](../../../../assets/guide/companion/android-automation-shortcuts.png)
+
+A shortcut is yours, so it works without the key and with **Allow external automation** turned off.
 If you remove the computer from the app, its shortcuts say so and stop running.
 
 ## Android: Quick Settings tiles
