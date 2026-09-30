@@ -280,6 +280,10 @@ public class Startup
 		services.AddSingleton<IWidgetIconProviderResources, WidgetIconProviderResources>();
 		services.AddScoped<IWidgetIconService, WidgetIconService>();
 		services.AddSingleton<IBuiltInWidgetUiProvider, SliderWidgetUiProvider>();
+		services.AddSingleton<IWidgetDefaultShortPress>(provider => new WidgetDefaultShortPress(
+			provider.GetRequiredService<IWidgetTypeRegistry>,
+			provider.GetRequiredService<IIntegrationRegistry>(),
+			provider.GetRequiredService<ILocalizationResolver>()));
 		services.AddSingleton<IWidgetTriggerService, WidgetTriggerService>();
 		services.AddSingleton<IBuiltInWidgetUiProvider, ActionButtonWidgetUiProvider>();
 		services.AddSingleton<IBuiltInWidgetUiProvider, MusicPlayerWidgetUiProvider>();
@@ -545,6 +549,7 @@ public class Startup
 		services.AddSingleton<HostCallbackThrottle>();
 		services.AddSingleton<IPluginUiResources, PluginUiResources>();
 		services.AddSingleton<UiResourceCallbackThrottle>();
+		services.AddSingleton<MusicPlayerArtworkCallbackThrottle>();
 		services.AddSingleton<IPluginCallbackRouter, PluginCallbackRouter>();
 		services.AddSingleton<IPluginAdbAccessPolicy, PluginAdbAccessPolicy>();
 		services.AddSingleton<IPluginAdbConsentNotifier, PluginAdbConsentNotifier>();
@@ -745,6 +750,7 @@ public class Startup
 		services.AddSingleton<IStorePlatformClient, StorePlatformClient>();
 		services.AddSingleton<IStoreReviewAvatarProxy, StoreReviewAvatarProxy>();
 		services.AddSingleton<IStoreOfficialPackages, StoreOfficialPackages>();
+		services.AddSingleton<IStoreLinkResolver, StoreLinkResolver>();
 		services.AddSingleton<IStoreReviewService, StoreReviewService>();
 		services.AddSingleton<StoreCatalogPopularity>();
 		services.AddSingleton<StoreSimilarPackages>();

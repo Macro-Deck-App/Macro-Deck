@@ -27,6 +27,7 @@ public class TimerWidgetPressPathTests
 			_harness.LockState,
 			_harness.Triggers,
 			new WidgetTypeRegistry(new RecordingMediator()),
+			new NoDefaultShortPress(),
 			_harness.Coordinator);
 	}
 

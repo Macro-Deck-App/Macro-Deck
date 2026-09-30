@@ -123,7 +123,10 @@ static CURSOR_ERROR_LOGGED: std::sync::atomic::AtomicBool =
     std::sync::atomic::AtomicBool::new(false);
 
 pub fn should_start_hidden(_app: &AppHandle) -> bool {
-    host::is_packaged() && has_launch_flags(std::env::args())
+    let arguments = crate::deep_links::launch_arguments();
+    host::is_packaged()
+        && !crate::deep_links::is_link_invocation(&arguments)
+        && has_launch_flags(arguments.into_iter())
 }
 
 pub fn has_launch_flags(args: impl Iterator<Item = String>) -> bool {
@@ -553,7 +556,7 @@ mod tests {
         assert!(script.contains("encodeURIComponent"));
     }
 
-    const SHARED_COMMANDS: [&str; 21] = [
+    const SHARED_COMMANDS: [&str; 22] = [
         "get_host_port",
         "reauthenticate",
         "get_shell_info",
@@ -563,6 +566,7 @@ mod tests {
         "save_file",
         "save_backup",
         "take_opened_files",
+        "take_deep_links",
         // Only the macOS menu ever parks an action, but the grant is shared:
         // the UI drains the slot on every platform rather than branching on one.
         "take_menu_action",

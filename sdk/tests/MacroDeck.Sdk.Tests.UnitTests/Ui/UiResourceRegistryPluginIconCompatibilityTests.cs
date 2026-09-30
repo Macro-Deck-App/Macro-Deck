@@ -64,6 +64,28 @@ public class UiResourceRegistryPluginIconCompatibilityTests
 		Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.Unsupported));
 	}
 
+	[Test]
+	public void A_registry_written_before_music_player_artwork_existed_still_builds_and_reports_it_unsupported()
+	{
+		IUiResourceRegistry registry = new RegistryWrittenBeforeBundledIcons();
+
+		var exception = Assert.ThrowsAsync<UiResourceException>(
+			() => registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
+
+		Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.Unsupported));
+	}
+
+	[Test]
+	public void A_context_written_before_ui_resources_existed_reports_music_player_artwork_unsupported()
+	{
+		IIntegrationContext context = new ContextWrittenBeforeUiResources();
+
+		var exception = Assert.ThrowsAsync<UiResourceException>(
+			() => context.UiResources.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
+
+		Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.Unsupported));
+	}
+
 	private sealed class RegistryWrittenBeforeBundledIcons : IUiResourceRegistry
 	{
 		public Task<UiResource> RegisterAsync(string name,

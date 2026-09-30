@@ -243,6 +243,123 @@ public class RemoteUiResourceRegistryTests
 		Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.Failed));
 	}
 
+	[Test]
+	public async Task Another_players_artwork_is_registered_by_the_host_and_answers_its_handle_without_an_upload()
+	{
+		var host = new FakeArtworkHost
+		{
+			Answer = new UiRegisterMusicPlayerArtworkResult
+			{
+				Resource = new UiResourceHandleDto
+				{
+					ResourceId = "plugin-x.cover", ContentHash = "hash-1", MediaType = "image/webp", ByteLength = 9,
+				}
+			}
+		};
+		var uploader = new FakeResourceHost();
+		var registry = new RemoteUiResourceRegistry(host, uploader);
+
+		var handle = await registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.Calls,
+				Is.EqualTo((List<(string, string)>)[(HostApis.Ui, HostOperations.Ui.RegisterMusicPlayerArtwork)]));
+			Assert.That(host.LastArguments,
+				Is.EqualTo(new UiRegisterMusicPlayerArtworkArguments
+				{
+					Name = "cover", InstanceId = "net.example.jukebox::default", ArtworkId = "cover-1"
+				}));
+			Assert.That(handle!.ResourceId, Is.EqualTo("plugin-x.cover"));
+			Assert.That(handle.ContentHash, Is.EqualTo("hash-1"));
+			Assert.That(handle.MediaType, Is.EqualTo("image/webp"));
+			Assert.That(handle.ByteLength, Is.EqualTo(9));
+			Assert.That(uploader.Uploads, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task Artwork_the_host_does_not_have_is_answered_as_null()
+	{
+		var registry = new RemoteUiResourceRegistry(
+			new FakeArtworkHost { Answer = new UiRegisterMusicPlayerArtworkResult() },
+			new FakeResourceHost());
+
+		var handle = await registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1");
+
+		Assert.That(handle, Is.Null);
+	}
+
+	[TestCase(ProtocolErrorCodes.CapabilityUnsupported, UiResourceErrorCode.Unsupported)]
+	[TestCase(ProtocolErrorCodes.UiResourceQuotaExceeded, UiResourceErrorCode.QuotaExceeded)]
+	[TestCase(ProtocolErrorCodes.RateLimited, UiResourceErrorCode.RateLimited)]
+	[TestCase(ProtocolErrorCodes.AssetTooLarge, UiResourceErrorCode.Failed)]
+	[TestCase(ProtocolErrorCodes.InvalidPayload, UiResourceErrorCode.Failed)]
+	public void Refused_artwork_surfaces_as_its_error_code(string wireCode, UiResourceErrorCode expected)
+	{
+		var registry = new RemoteUiResourceRegistry(new FakeArtworkHost { RefuseWith = wireCode }, new FakeResourceHost());
+
+		var exception = Assert.ThrowsAsync<UiResourceException>(
+			() => registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
+
+		Assert.That(exception!.ErrorCode, Is.EqualTo(expected));
+	}
+
+	[Test]
+	public void An_invalid_artwork_name_is_refused_before_anything_is_sent()
+	{
+		var host = new FakeArtworkHost { Answer = new UiRegisterMusicPlayerArtworkResult() };
+		var registry = new RemoteUiResourceRegistry(host, new FakeResourceHost());
+
+		Assert.Throws<ArgumentException>(() => registry
+			.RegisterMusicPlayerArtworkAsync("not a name!", "net.example.jukebox::default", "cover-1")
+			.GetAwaiter()
+			.GetResult());
+		Assert.That(host.Calls, Is.Empty);
+	}
+
+	[Test]
+	public void An_artwork_answered_without_a_result_fails()
+	{
+		var registry = new RemoteUiResourceRegistry(new FakeArtworkHost(), new FakeResourceHost());
+
+		var exception = Assert.ThrowsAsync<UiResourceException>(
+			() => registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
+
+		Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.Failed));
+	}
+
+	private sealed class FakeArtworkHost : IHostInvoker
+	{
+		public List<(string Api, string Operation)> Calls { get; } = [];
+
+		public object? LastArguments { get; private set; }
+
+		public UiRegisterMusicPlayerArtworkResult? Answer { get; init; }
+
+		public string? RefuseWith { get; init; }
+
+		public Task<JsonElement?> InvokeAsync(string api,
+			string operation,
+			object? arguments,
+			CancellationToken cancellationToken)
+		{
+			Calls.Add((api, operation));
+			LastArguments = arguments;
+
+			if (RefuseWith is { } code)
+			{
+				throw HostInvocationException.CreateNonRetryable(code, "refused");
+			}
+
+			return Task.FromResult<JsonElement?>(Answer is null
+				? null
+				: JsonSerializer.SerializeToElement(Answer, PluginProtocolJson.Options));
+		}
+
+		public bool TryComplete(ProtocolEnvelope result) => false;
+	}
+
 	private sealed class FakeIconHost : IHostInvoker
 	{
 		public List<(string Api, string Operation)> Calls { get; } = [];

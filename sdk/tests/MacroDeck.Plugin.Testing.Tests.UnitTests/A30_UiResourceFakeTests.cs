@@ -222,6 +222,105 @@ public class A30_UiResourceFakeTests
 		Assert.That(exception.ErrorCode, Is.EqualTo(UiResourceErrorCode.IconNotFound));
 	}
 
+	[Test]
+	public async Task Seeded_music_player_artwork_registers_under_the_plugins_name_and_counts_against_the_quota()
+	{
+		var registry = new FakeUiResourceRegistry();
+		registry.AddMusicPlayerArtwork("net.example.jukebox::default", "cover-1", _first, "image/png");
+
+		var handle = await registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(handle!.ContentHash, Is.EqualTo(AssetContentHash.Compute(_first)));
+			Assert.That(handle.MediaType, Is.EqualTo("image/png"));
+			Assert.That(registry.Resources["cover"].Content, Is.EqualTo(_first));
+		});
+	}
+
+	[Test]
+	public async Task Music_player_artwork_nobody_seeded_is_null_and_registers_nothing()
+	{
+		var registry = new FakeUiResourceRegistry();
+		registry.AddMusicPlayerArtwork("net.example.jukebox::default", "cover-1", _first, "image/png");
+
+		var handle = await registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "other");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(handle, Is.Null);
+			Assert.That(registry.Resources, Is.Empty);
+		});
+	}
+
+	[Test]
+	public void Music_player_artwork_past_the_quota_is_refused()
+	{
+		var registry = new FakeUiResourceRegistry { MaxCount = 0 };
+		registry.AddMusicPlayerArtwork("net.example.jukebox::default", "cover-1", _first, "image/png");
+
+		var exception = Assert.ThrowsAsync<UiResourceException>(
+			() => registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
+
+		Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.QuotaExceeded));
+	}
+
+	[TestCase("image/svg+xml", 3)]
+	[TestCase("application/octet-stream", 3)]
+	[TestCase("image/png", 2 * 1024 * 1024 + 1)]
+	public void Music_player_artwork_a_real_host_would_refuse_is_a_permanent_failure(string mediaType, int length)
+	{
+		var registry = new FakeUiResourceRegistry();
+		registry.AddMusicPlayerArtwork("net.example.jukebox::default", "cover-1", new byte[length], mediaType);
+
+		var exception = Assert.ThrowsAsync<UiResourceException>(
+			() => registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.Failed));
+			Assert.That(registry.Resources, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task Over_the_wire_the_stub_host_holds_no_music_player_artwork()
+	{
+		var integration = new MusicPlayerArtworkIntegration();
+		await using var host = await MacroDeckTestHost.StartAsync();
+		var builder = MacroDeckPlugin.CreatePlugin();
+		builder.RegisterIntegration(_ => integration);
+		await using var plugin = await host.HostAsync(builder);
+		await host.WaitForSessionAsync();
+
+		var handle = await integration.Handle.Task.WaitAsync(TimeSpan.FromSeconds(10));
+
+		Assert.That(handle, Is.Null);
+	}
+
+	private sealed class MusicPlayerArtworkIntegration : IPluginIntegration
+	{
+		public TaskCompletionSource<UiResource?> Handle { get; } =
+			new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		public IReadOnlyList<IActionDefinition> Actions => [];
+
+		public async Task InitializeAsync(IIntegrationContext context)
+		{
+			try
+			{
+				Handle.TrySetResult(await context.UiResources
+					.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
+			}
+			catch (Exception exception)
+			{
+				Handle.TrySetException(exception);
+			}
+		}
+
+		public Task ShutdownAsync() => Task.CompletedTask;
+	}
+
 	private sealed class IconByIdIntegration : IPluginIntegration
 	{
 		public TaskCompletionSource<UiResourceException> Failure { get; } =

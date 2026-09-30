@@ -80,6 +80,7 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 		services.AddSingleton(TestLocalization.Preferences);
 		services.AddSingleton<IIconPackCache>(Icons);
 		services.AddSingleton<IUiResourceStore>(Resources);
+		services.AddSingleton<IWidgetDefaultShortPress>(DefaultShortPress);
 		services.AddSingleton<DeviceSurfaceBuilder>();
 		if (icons is not null)
 		{
@@ -143,6 +144,8 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 	public RecordingWidgetUiSessionOpener UiOpener { get; } = new();
 
 	public DeviceSurfaceService Service { get; }
+
+	public DeviceDefaultShortPress DefaultShortPress { get; } = new();
 
 	public Folder Home { get; private set; } = null!;
 
@@ -608,4 +611,13 @@ internal sealed class StubIconPackCache : IIconPackCache
 	public Task RemoveIcons(Guid packId, IReadOnlyList<Guid> iconIds) => Task.CompletedTask;
 
 	public Task FlushPendingWrites() => Task.CompletedTask;
+}
+
+internal sealed class DeviceDefaultShortPress : IWidgetDefaultShortPress
+{
+	public HashSet<string> TypesWithADeviceDefault { get; } = new(StringComparer.Ordinal);
+
+	public string? FlowsSourceFor(WidgetEntity widget, bool fromDevice) => null;
+
+	public bool RunsOnDevices(string widgetType) => TypesWithADeviceDefault.Contains(widgetType);
 }

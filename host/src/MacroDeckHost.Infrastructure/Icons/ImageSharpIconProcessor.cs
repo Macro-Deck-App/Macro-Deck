@@ -126,7 +126,7 @@ public sealed class ImageSharpIconProcessor : IIconProcessor
 		var isAnimated = image.Frames.Count > 1;
 		if (isAnimated)
 		{
-			CopyAnimationMetadata(image);
+			CopyAnimationMetadata(image, decodeBytes);
 		}
 
 		if (Math.Max(image.Width, image.Height) > MaxMasterEdge)
@@ -249,12 +249,12 @@ public sealed class ImageSharpIconProcessor : IIconProcessor
 	private static bool LooksLikeGif(byte[] bytes)
 		=> bytes.Length > 3 && bytes[0] == (byte)'G' && bytes[1] == (byte)'I' && bytes[2] == (byte)'F';
 
-	private static void CopyAnimationMetadata(Image image)
+	private static void CopyAnimationMetadata(Image image, byte[] bytes)
 	{
 		var isGif = image.Metadata.DecodedImageFormat is GifFormat;
 		if (isGif)
 		{
-			image.Metadata.GetWebpMetadata().RepeatCount = image.Metadata.GetGifMetadata().RepeatCount;
+			image.Metadata.GetWebpMetadata().RepeatCount = AnimatedGifTranscode.ReadPlays(bytes);
 		}
 
 		foreach (var frame in image.Frames)

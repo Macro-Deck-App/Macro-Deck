@@ -31,6 +31,7 @@ public class StoreController : ControllerBase
 	private readonly IStoreUpdateBatchInstaller _updateInstaller;
 	private readonly StoreCatalogPopularity _popularity;
 	private readonly StoreSimilarPackages _similar;
+	private readonly IStoreLinkResolver _linkResolver;
 
 	public StoreController(IStoreCatalogQueryService catalogQuery,
 		IStoreRegistryRefresher refresher,
@@ -46,7 +47,8 @@ public class StoreController : ControllerBase
 		IStoreRegistryRefreshTracker refreshTracker,
 		IStoreUpdateBatchInstaller updateInstaller,
 		StoreCatalogPopularity popularity,
-		StoreSimilarPackages similar)
+		StoreSimilarPackages similar,
+		IStoreLinkResolver linkResolver)
 	{
 		_catalogQuery = catalogQuery;
 		_refresher = refresher;
@@ -63,6 +65,7 @@ public class StoreController : ControllerBase
 		_updateInstaller = updateInstaller;
 		_popularity = popularity;
 		_similar = similar;
+		_linkResolver = linkResolver;
 	}
 
 	[HttpGet("status")]
@@ -165,6 +168,26 @@ public class StoreController : ControllerBase
 		}
 
 		return new GetStoreExtensionResponse { Extension = ToDetailBody(result.Data!) };
+	}
+
+	[HttpGet("resolve/{packageId}")]
+	public ResolveStoreLinkResponse ResolveLink(string packageId)
+	{
+		var resolution = _linkResolver.Resolve(packageId);
+		if (resolution.Outcome is StoreLinkOutcome.Found)
+		{
+			return new ResolveStoreLinkResponse { Kind = resolution.Kind, Id = resolution.Id };
+		}
+
+		var unavailable = resolution.Outcome is StoreLinkOutcome.RegistryUnavailable;
+		return new ResolveStoreLinkResponse
+		{
+			Error = new TransportError
+			{
+				Code = ToErrorCode(unavailable ? StoreCatalogError.RegistryUnavailable : StoreCatalogError.NotFound),
+				Message = unavailable ? "The Store registry has not loaded yet." : "The extension could not be found."
+			}
+		};
 	}
 
 	[HttpGet("catalog/{kind}/{id}/similar")]

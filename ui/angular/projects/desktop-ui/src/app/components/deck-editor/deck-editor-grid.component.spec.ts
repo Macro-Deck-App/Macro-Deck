@@ -719,6 +719,38 @@ describe('DeckEditorGridComponent', () => {
     });
   });
 
+  describe('resizing a widget', () => {
+    function coveredCells(): number[] {
+      const cells = Array.from(host().querySelectorAll('.empty-cell'));
+      return cells.flatMap((cell, index) => (cell.classList.contains('occupied') ? [index] : []));
+    }
+
+    function nextFrame(): Promise<void> {
+      return new Promise(resolve => requestAnimationFrame(() => resolve()));
+    }
+
+    it('shows the freed cells as empty cells before the resize is dropped, and matches the grid after it', async () => {
+      render([gridWidget({ w: 2, h: 2 })]);
+      const commits = collect<ReadonlyMap<string, GridRect>>(component.layoutCommit);
+      expect(coveredCells()).toEqual([0, 1, 4, 5]);
+
+      const handle = chrome().querySelector<HTMLElement>('.resize-handle')!;
+      pointer(handle, 'pointerdown', 2 * CELL_PX - 10, 2 * CELL_PX - 10);
+      pointer(document, 'pointermove', CELL_PX - 10, CELL_PX - 10);
+      await nextFrame();
+      fixture.detectChanges();
+
+      expect(coveredCells()).toEqual([0]);
+
+      pointer(document, 'pointerup', CELL_PX - 10, CELL_PX - 10);
+      const committed = commits.at(-1)!;
+      fixture.componentRef.setInput('widgets', [gridWidget({ ...committed.get('w1')! })]);
+      fixture.detectChanges();
+
+      expect(coveredCells()).toEqual([0]);
+    });
+  });
+
   describe('running a widget from its context menu', () => {
     const shortPress = (disabled = false) => [{
       triggerId: 'onShortPress',

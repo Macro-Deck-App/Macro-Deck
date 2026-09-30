@@ -133,6 +133,47 @@ internal sealed class RemoteUiResourceRegistry(IHostInvoker invoker, IPluginAsse
 				$"Macro Deck answered the lookup of icon '{iconId}' without a resource.");
 	}
 
+	public async Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
+		string instanceId,
+		string artworkId,
+		CancellationToken cancellationToken = default)
+	{
+		ThrowIfInvalidName(name);
+		ArgumentException.ThrowIfNullOrEmpty(instanceId);
+		ArgumentException.ThrowIfNullOrEmpty(artworkId);
+
+		await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+		try
+		{
+			JsonElement? result;
+			try
+			{
+				result = await invoker.InvokeAsync(Protocol.Callbacks.HostApis.Ui,
+						HostOperations.Ui.RegisterMusicPlayerArtwork,
+						new UiRegisterMusicPlayerArtworkArguments
+						{
+							Name = name, InstanceId = instanceId, ArtworkId = artworkId
+						},
+						cancellationToken)
+					.ConfigureAwait(false);
+			}
+			catch (HostInvocationException exception)
+			{
+				throw Translate(exception);
+			}
+
+			var answer = result?.Deserialize<UiRegisterMusicPlayerArtworkResult>(PluginProtocolJson.Options) ??
+				throw new UiResourceException(UiResourceErrorCode.Failed,
+					$"Macro Deck answered the registration of UI resource '{name}' without a result.");
+
+			return answer.Resource is { } handle ? ToResource(handle) : null;
+		}
+		finally
+		{
+			_gate.Release();
+		}
+	}
+
 	public void Dispose() => _gate.Dispose();
 
 	private static UiResource ToResource(UiResourceHandleDto handle)

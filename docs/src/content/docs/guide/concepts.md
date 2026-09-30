@@ -34,7 +34,7 @@ The tiles in a folder:
 | Slider | Mic volume |
 | Clock | The current time and date |
 | History Graph | CPU load over the last minutes |
-| Weather | Today and the next days for your city |
+| Weather | Today and the next days for your city. Press it for the full details |
 | Music Player | What Spotify is playing, with play and skip. Some players offer extra settings for each widget below the player choice |
 | Twitch Chat | Your channel's chat with emotes and badges, offered once a Twitch account is connected |
 | Countdown | A pizza timer that counts down and alerts you when it runs out |
@@ -106,6 +106,10 @@ What a widget does, and when. The **Scenes** button runs **Change Folder to** on
 | Double Tap | Mute all audio |
 | Event | Turn the mic slider's accent red when OBS reports **Streaming Started** |
 
+Some widgets already do something on a short press before you add anything: pressing a **Weather** widget
+opens its details. Give such a widget a Short Press action of your own and yours runs instead. A hardware
+deck has no screen for the weather details, so the Weather widget does nothing there until you add an action.
+
 Every widget with actions, sliders included, can add event triggers next to its press triggers. Give an
 event trigger a **Name** to tell several of them apart in the **Events** list.
 
@@ -153,6 +157,24 @@ entity by name or variable name, then open an entity to see its state and attrib
 **Bind** on the one you want: it becomes a normal variable. If you know the entity id, for example
 `light.office_lamp` or `light.office_lamp/brightness`, pick the integration in the variable browser and
 type it under **Enter a resource ID** instead.
+
+A Slider can control Home Assistant too. In the slider's **Variable** field, open **Unbound variables**
+under Home Assistant, then the entity, and pick the value to adjust:
+
+| Entity | Value to pick |
+| --- | --- |
+| Light | `brightness_pct`, the brightness in percent, or `color_temp_kelvin` |
+| Fan | `percentage` |
+| Cover, valve | `current_position`, and `current_tilt_position` for a cover |
+| Media player | `volume_level` |
+| Thermostat, water heater | `temperature` |
+| Thermostat, humidifier | `humidity` |
+| Number, number helper | `state` |
+
+The slider shows the value Home Assistant reports and sends the new one when you let go. Dragging a
+light to zero turns it off, and dragging a light that is off turns it on. An entity with nothing to
+adjust right now, such as a media player in standby, ignores the slider. A value you bound before as
+**Text** is not offered: remove that variable and bind the value again.
 
 ![The Variables page with the user variable deaths and Home Assistant's variables below a collapsed Unbound variables group](../../../assets/guide/variables.png)
 
@@ -296,6 +318,9 @@ installed icon pack's page has **Open in Library**. The other way round, a plugi
 **Integrations** and a Store icon pack under **Library > Icon Packs** have **View in Store**, for the
 description and release notes. An installed plugin is uninstalled from the **General** details of its page
 under **Integrations**, or from its Store page.
+
+A `macrodeck://` link to an item opens its page in Macro Deck, and a message appears if the item is no longer
+in the Store. See [Store links](/reference/store-links/) for the details, including the AppImage limitation.
 
 The Store footer links to the **Creator Portal**, where you can publish your own plugins and icon packs, and to
 the imprint and privacy policy.

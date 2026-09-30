@@ -18,6 +18,12 @@ namespace MacroDeckHost.Infrastructure.Icons;
 /// </summary>
 internal static class AnimatedGifTranscode
 {
+	private static readonly byte[] LoopBlockStart =
+	[
+		0x21, 0xFF, 0x0B, (byte)'N', (byte)'E', (byte)'T', (byte)'S', (byte)'C', (byte)'A', (byte)'P', (byte)'E',
+		(byte)'2', (byte)'.', (byte)'0', 0x03, 0x01
+	];
+
 	/// <summary>
 	/// Says that each frame starts from a clear canvas, which is what makes a composited frame mean the
 	/// same thing in a GIF as it does in the WebP it came from - and carries the timing across with it.
@@ -30,12 +36,8 @@ internal static class AnimatedGifTranscode
 	/// reader clamps to a floor of its own - the animation came out several times too slow.
 	/// </para>
 	/// </summary>
-	public static void PrepareForGif(Image<Rgba32> image)
+	private static void PrepareForGif(Image<Rgba32> image)
 	{
-		ArgumentNullException.ThrowIfNull(image);
-
-		var webp = image.Metadata.GetWebpMetadata();
-
 		foreach (var frame in image.Frames)
 		{
 			SnapToSingleBitAlpha(frame);
@@ -48,8 +50,59 @@ internal static class AnimatedGifTranscode
 			// a frame that asked to be shown at all must not ask to be shown for no time.
 			gif.FrameDelay = delayMs == 0 ? gif.FrameDelay : Math.Max(1, (int)Math.Round(delayMs / 10d));
 		}
+	}
 
-		image.Metadata.GetGifMetadata().RepeatCount = webp.RepeatCount;
+	public static ushort ReadPlays(ReadOnlySpan<byte> gif)
+	{
+		var at = FindLoopCount(gif);
+		if (at < 0)
+		{
+			return 1;
+		}
+
+		var repeats = gif[at] | (gif[at + 1] << 8);
+		return repeats == 0 ? (ushort)0 : (ushort)Math.Min(repeats + 1, ushort.MaxValue);
+	}
+
+	public static async Task SaveAsGifAsync(Image<Rgba32> image, Stream output, CancellationToken cancellationToken)
+	{
+		ArgumentNullException.ThrowIfNull(image);
+		ArgumentNullException.ThrowIfNull(output);
+
+		var plays = image.Metadata.GetWebpMetadata().RepeatCount;
+		PrepareForGif(image);
+		image.Metadata.GetGifMetadata().RepeatCount = plays == 1 ? (ushort)1 : (ushort)0;
+
+		using var encoded = new MemoryStream();
+		await image.SaveAsGifAsync(encoded, new GifEncoder(), cancellationToken);
+		var gif = encoded.ToArray();
+
+		if (plays >= 2)
+		{
+			// The encoder writes no loop extension for a repeat count of 1, so the count is patched
+			// into the block it wrote for 0.
+			var at = FindLoopCount(gif);
+			if (at >= 0)
+			{
+				var repeats = plays - 1;
+				gif[at] = (byte)repeats;
+				gif[at + 1] = (byte)(repeats >> 8);
+			}
+		}
+
+		await output.WriteAsync(gif, cancellationToken);
+	}
+
+	private static int FindLoopCount(ReadOnlySpan<byte> gif)
+	{
+		var start = gif.IndexOf(LoopBlockStart);
+		if (start < 0)
+		{
+			return -1;
+		}
+
+		var count = start + LoopBlockStart.Length;
+		return count + 2 < gif.Length && gif[count + 2] == 0 ? count : -1;
 	}
 
 	// The GIF quantizer keeps only an all-zero pixel transparent: a transparent pixel that still carries

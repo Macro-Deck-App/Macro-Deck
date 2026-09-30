@@ -1,7 +1,7 @@
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { EMPTY } from 'rxjs';
-import { LogEntryLevel } from '@macro-deck/runtime';
+import { EMPTY, Subject } from 'rxjs';
+import { DeveloperSettingsChangedEvent, LogEntryLevel } from '@macro-deck/runtime';
 import { ApiService, LocalizationService } from '@shared';
 import { SettingsModalService } from '../../../services/settings-modal.service';
 import { SETTINGS_RAIL_COLLAPSED_KEY, SettingsModalComponent } from './settings-modal.component';
@@ -92,6 +92,9 @@ describe('SettingsModalComponent', () => {
       'restartApplication',
       'onNotification',
       'getDeveloperSettings',
+      'getStoreStatus',
+      'getWebClientTargets',
+      'onAdbStateChanged',
       'updateDeveloperSettings',
       'getBackups',
       'getBackupSettings',
@@ -109,6 +112,8 @@ describe('SettingsModalComponent', () => {
     Object.defineProperty(api, 'connectionStateSignal', { value: signal('disconnected') });
     api.onNotification.and.returnValue(EMPTY);
     api.onConnectSessionChanged.and.returnValue(EMPTY);
+    api.onAdbStateChanged.and.returnValue(EMPTY);
+    api.getWebClientTargets.and.resolveTo([]);
     api.getBackups.and.resolveTo({ backups: [], retentionKeepLatest: 7 });
     api.getBackupSettings.and.resolveTo({
       scheduleFrequency: 'off',
@@ -151,6 +156,7 @@ describe('SettingsModalComponent', () => {
     api.getLoggingSettings.and.resolveTo(loggingSettings);
     api.updateLoggingSettings.and.resolveTo(loggingSettings);
     api.getDeveloperSettings.and.resolveTo({ enabled: false });
+    api.getStoreStatus.and.resolveTo({ developerMode: false } as Awaited<ReturnType<ApiService['getStoreStatus']>>);
     api.updateDeveloperSettings.and.resolveTo({ enabled: false });
     api.getConnectSession.and.resolveTo({
       status: 'signedOut',
@@ -186,7 +192,7 @@ describe('SettingsModalComponent', () => {
 
   it('renders the category rail and the appearance section by default', () => {
     const railButtons = fixture.nativeElement.querySelectorAll('.settings-nav__item');
-    expect(railButtons.length).toBe(16);
+    expect(railButtons.length).toBe(15);
     expect(fixture.nativeElement.querySelector('app-appearance-settings')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.settings-modal__title')?.textContent).toContain('Appearance');
   });
@@ -311,7 +317,7 @@ describe('SettingsModalComponent', () => {
       .map(item => item.textContent?.trim())))
       .toEqual([
         ['Appearance', 'Startup', 'Language', 'Extensions'],
-        ['Network', 'Devices', 'Device clients', 'USB connections', 'Companion App'],
+        ['Network', 'Devices', 'USB connections', 'Companion App'],
         ['Security'],
         ['Backups', 'Migration'],
         ['ADB', 'Logging', 'Developer'],
@@ -334,6 +340,82 @@ describe('SettingsModalComponent', () => {
 
     expect(component.activeLabel()).toBe('Logging');
     expect(fixture.nativeElement.querySelector('app-logging-settings')).toBeTruthy();
+  });
+
+  describe('Experiments', () => {
+    let developerModeChanged: Subject<DeveloperSettingsChangedEvent>;
+
+    function advancedItems(): string[] {
+      const groups = Array.from(fixture.nativeElement.querySelectorAll('.settings-nav__group')) as HTMLElement[];
+      return Array.from(groups[4].querySelectorAll('.settings-nav__item')).map(item => item.textContent?.trim() ?? '');
+    }
+
+    async function settle(): Promise<void> {
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+    }
+
+    beforeEach(() => {
+      developerModeChanged = new Subject<DeveloperSettingsChangedEvent>();
+      api.onNotification.and.callFake(((name: string) =>
+        name === 'DeveloperSettingsChangedEvent' ? developerModeChanged.asObservable() : EMPTY) as never);
+    });
+
+    async function createWithDeveloperMode(enabled: boolean): Promise<void> {
+      api.getStoreStatus.and.resolveTo({ developerMode: enabled } as Awaited<ReturnType<ApiService['getStoreStatus']>>);
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({
+        imports: [SettingsModalComponent],
+        providers: [provideZonelessChangeDetection(), { provide: ApiService, useValue: api }],
+      }).compileComponents();
+      service = TestBed.inject(SettingsModalService);
+      service.open('appearance');
+      fixture = TestBed.createComponent(SettingsModalComponent);
+      component = fixture.componentInstance;
+      await settle();
+    }
+
+    it('is hidden from Advanced while Developer mode is off', async () => {
+      await createWithDeveloperMode(false);
+
+      expect(advancedItems()).toEqual(['ADB', 'Logging', 'Developer']);
+    });
+
+    it('is listed last in Advanced while Developer mode is on and shows the Car Thing card', async () => {
+      await createWithDeveloperMode(true);
+
+      expect(advancedItems()).toEqual(['ADB', 'Logging', 'Developer', 'Experiments']);
+
+      component.selectCategory('experiments');
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('app-experiments-settings')).toBeTruthy();
+    });
+
+    it('appears and disappears as Developer mode is toggled', async () => {
+      await createWithDeveloperMode(false);
+
+      developerModeChanged.next({ enabled: true });
+      await settle();
+      expect(advancedItems()).toContain('Experiments');
+
+      developerModeChanged.next({ enabled: false });
+      await settle();
+      expect(advancedItems()).not.toContain('Experiments');
+    });
+
+    it('leaves the Experiments pane for Developer when Developer mode is turned off', async () => {
+      await createWithDeveloperMode(true);
+      component.selectCategory('experiments');
+      await settle();
+
+      developerModeChanged.next({ enabled: false });
+      await settle();
+
+      expect(service.activeCategory()).toBe('developer');
+      expect(fixture.nativeElement.querySelector('app-experiments-settings')).toBeFalsy();
+    });
   });
 
   it('renders the developer section when its category is selected', () => {
@@ -504,7 +586,7 @@ describe('SettingsModalComponent', () => {
   });
 
   it('switches to the account pane and labels it, without adding it to the category rail', () => {
-    expect(fixture.nativeElement.querySelectorAll('.settings-nav__item').length).toBe(16);
+    expect(fixture.nativeElement.querySelectorAll('.settings-nav__item').length).toBe(15);
 
     component.selectAccount();
     fixture.detectChanges();

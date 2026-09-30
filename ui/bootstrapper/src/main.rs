@@ -11,6 +11,7 @@ mod appearance;
 mod appimage;
 mod backup_download;
 mod bridge;
+mod deep_links;
 mod dock_icon;
 mod external_url;
 mod host;
@@ -157,8 +158,12 @@ fn main() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
-            window::show_main_window(app);
-            opened_files::queue(app, opened_files::paths_from_args(argv.into_iter()));
+            let launch = deep_links::classify(argv);
+            if launch.wants_window {
+                window::show_main_window(app);
+            }
+            opened_files::queue(app, launch.files);
+            deep_links::queue(app, launch.links);
         }))
         .plugin(tauri_plugin_dialog::init())
         .plugin(opener_plugin())
@@ -176,6 +181,7 @@ fn main() {
         .register_uri_scheme_protocol(update_window::SCHEME, update_window::handle_request)
         .manage(Arc::new(host::HostState::new()))
         .manage(opened_files::PendingOpenFiles::default())
+        .manage(deep_links::PendingDeepLinks::default())
         .invoke_handler(tauri::generate_handler![
             bridge::get_host_port,
             bridge::reauthenticate,
@@ -191,6 +197,7 @@ fn main() {
             menu::set_hotkey_capture,
             menu::take_menu_action,
             opened_files::take_opened_files,
+            deep_links::take_deep_links,
             updater::check_for_update,
             updater::install_update,
             updater::get_update_state,
@@ -218,6 +225,7 @@ fn main() {
                     }
                 }
                 opened_files::notify(app);
+                deep_links::notify(app);
             }
         })
         .setup(|app| {
@@ -253,7 +261,9 @@ fn main() {
             }
             window::setup_tray(&handle)?;
             menu::setup(&handle)?;
-            opened_files::queue(&handle, opened_files::paths_from_args(std::env::args()));
+            let launch = deep_links::classify(deep_links::launch_arguments());
+            opened_files::queue(&handle, launch.files);
+            deep_links::queue(&handle, launch.links);
             install_integrity::spawn(&handle);
             tauri::async_runtime::spawn(async move { startup(handle).await });
             Ok(())
@@ -285,8 +295,16 @@ fn main() {
             }
             #[cfg(target_os = "macos")]
             RunEvent::Opened { urls } => {
-                window::show_main_window(app);
-                opened_files::queue(app, opened_files::paths_from_urls(&urls));
+                let files = opened_files::paths_from_urls(&urls);
+                let links = deep_links::from_urls(&urls);
+                let only_rejected_links = files.is_empty()
+                    && links.is_empty()
+                    && urls.iter().any(deep_links::is_link_url);
+                if !only_rejected_links {
+                    window::show_main_window(app);
+                }
+                opened_files::queue(app, files);
+                deep_links::queue(app, links);
             }
             // Launching an already-running app from Finder, Spotlight or the
             // dock icon: macOS reopens this instance instead of starting a

@@ -248,6 +248,143 @@ public class PluginWebSocketEndpointDispatchTests
 	}
 
 	[Test]
+	public async Task An_artwork_lookup_waiting_on_a_player_does_not_hold_the_dispatch_loop_and_is_answered_when_it_finishes()
+	{
+		var router = new BlockingArtworkRouter();
+		var endpoint = EndpointWith(router);
+		var connection = new FakePluginConnection();
+
+		await endpoint.HandleHostInvokeAsync(connection, "com.example.plugin", "session-1", ArtworkInvoke("1"), CancellationToken.None);
+
+		Assert.That(connection.Sent, Is.Empty, "the invoke returned to the dispatch loop before the lookup finished");
+
+		router.Release.SetResult();
+		await WaitForAsync(() => connection.Sent.Count == 1);
+		Assert.Multiple(() =>
+		{
+			Assert.That(connection.Sent[0].Type, Is.EqualTo(MessageTypes.HostResult));
+			Assert.That(connection.Sent[0].CorrelationId, Is.EqualTo("1"));
+			Assert.That(connection.Sent[0].Error, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task A_plugin_with_four_artwork_lookups_waiting_is_told_to_retry_the_fifth()
+	{
+		var router = new BlockingArtworkRouter();
+		var endpoint = EndpointWith(router);
+		var connection = new FakePluginConnection();
+
+		for (var index = 1; index <= 5; index++)
+		{
+			await endpoint.HandleHostInvokeAsync(connection,
+				"com.example.plugin",
+				"session-1",
+				ArtworkInvoke(index.ToString(CultureInfo.InvariantCulture)),
+				CancellationToken.None);
+		}
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(connection.Sent, Has.Count.EqualTo(1));
+			Assert.That(connection.Sent[0].CorrelationId, Is.EqualTo("5"));
+			Assert.That(connection.Sent[0].Error?.Code, Is.EqualTo(ProtocolErrorCodes.RateLimited));
+			Assert.That(connection.Sent[0].Error?.Retryable, Is.True);
+		});
+
+		router.Release.SetResult();
+		await WaitForAsync(() => connection.Sent.Count == 5);
+	}
+
+	[Test]
+	public async Task A_finished_artwork_lookup_frees_its_slot_even_when_the_router_threw()
+	{
+		var router = new BlockingArtworkRouter { ThrowOnRelease = true };
+		var endpoint = EndpointWith(router);
+		var connection = new FakePluginConnection();
+
+		for (var index = 1; index <= 4; index++)
+		{
+			await endpoint.HandleHostInvokeAsync(connection,
+				"com.example.plugin",
+				"session-1",
+				ArtworkInvoke(index.ToString(CultureInfo.InvariantCulture)),
+				CancellationToken.None);
+		}
+
+		router.Release.SetResult();
+		await Task.Delay(200);
+		var router2Attempt = new FakePluginConnection();
+		router.Reset();
+		await endpoint.HandleHostInvokeAsync(router2Attempt, "com.example.plugin", "session-1", ArtworkInvoke("9"), CancellationToken.None);
+
+		Assert.That(router2Attempt.Sent, Is.Empty, "the fifth call was admitted after the first four ended");
+
+		router.ThrowOnRelease = false;
+		router.Release.SetResult();
+		await WaitForAsync(() => router2Attempt.Sent.Count == 1);
+		Assert.That(router2Attempt.Sent[0].Error, Is.Null);
+	}
+
+	private static ProtocolEnvelope ArtworkInvoke(string id)
+		=> new()
+		{
+			Type = MessageTypes.HostInvoke,
+			Id = id,
+			Payload = JsonSerializer.SerializeToElement(
+				new HostInvokePayload { Api = HostApis.Ui, Operation = HostOperations.Ui.RegisterMusicPlayerArtwork },
+				PluginProtocolJson.Options)
+		};
+
+	private static PluginWebSocketEndpoint EndpointWith(IPluginCallbackRouter router)
+	{
+		var registry = new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None);
+
+		return new PluginWebSocketEndpoint(registry,
+			new FakePluginCapabilityInvoker(),
+			new FakeRemotePluginIntegrationRegistrar(),
+			new RemotePluginSnapshotRefresher(new FakePluginCapabilityInvoker(), new InMemorySnapshotStore()),
+			router,
+			new PluginAssetReceiver(new InMemoryPluginAssetCache()),
+			new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), new MacroDeckHost.Tests.UnitTests.Adb.FakeAdbManager(), new MacroDeckHost.Tests.UnitTests.TestSupport.FixedAdbAccessPolicy(), Serilog.Core.Logger.None),
+			new FakeEventBus(),
+			new LoginThrottle(TimeProvider.System),
+			TimeProvider.System,
+			new RecordingMediator(),
+			new NeverStoppingLifetime(),
+			CreateLogIngestor(registry),
+			Serilog.Core.Logger.None);
+	}
+
+	private sealed class BlockingArtworkRouter : IPluginCallbackRouter
+	{
+		public TaskCompletionSource Release { get; private set; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		public bool ThrowOnRelease { get; set; }
+
+		public void Reset() => Release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		public Task<HostCallbackResult> RouteAsync(string pluginId,
+			string correlationId,
+			HostInvokePayload payload,
+			CancellationToken cancellationToken)
+			=> RouteAsync(pluginId, null, correlationId, payload, cancellationToken);
+
+		public async Task<HostCallbackResult> RouteAsync(string pluginId,
+			string? sessionId,
+			string correlationId,
+			HostInvokePayload payload,
+			CancellationToken cancellationToken)
+		{
+			await Release.Task.WaitAsync(cancellationToken);
+
+			return ThrowOnRelease ? throw new InvalidOperationException("boom") : HostCallbackResult.Ok();
+		}
+
+		public HostCallbackResult? Admit(string pluginId, HostInvokePayload payload) => null;
+	}
+
+	[Test]
 	public async Task HandleCapabilityResultAsync_Sends_Malformed_Envelope_When_The_Correlation_Id_Is_Missing()
 	{
 		var (endpoint, connection, invoker) = CreateEndpoint();

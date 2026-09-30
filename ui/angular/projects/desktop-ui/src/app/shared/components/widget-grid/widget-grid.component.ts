@@ -33,6 +33,7 @@ export class WidgetGridComponent implements AfterViewInit, OnDestroy, OnChanges 
   @Input() rows = 3;
   @Input() widgets: GridWidget[] = [];
   protected paintOrdered: GridWidget[] = [];
+  private livePlacements: { committed: GridRect; live: GridRect }[] = [];
   @Input() background: string | null = '';
   @Input() mode: WidgetGridMode = 'runtime';
   @Input() outerMargin = 16;
@@ -110,6 +111,12 @@ export class WidgetGridComponent implements AfterViewInit, OnDestroy, OnChanges 
     return this.isCellTaken(rect.x, rect.y);
   }
 
+  isCellCoveredLive(index: number): boolean {
+    const rect = this.metrics.cellRect(index);
+    return this.livePlacements.some(({ committed, live }) =>
+      isCellOccupied([committed], rect.x, rect.y) && isCellOccupied([live], rect.x, rect.y));
+  }
+
   isCell(cell: { x: number; y: number } | null, index: number): boolean {
     return !!cell && this.metrics.cellIndex(cell.x, cell.y) === index;
   }
@@ -136,6 +143,12 @@ export class WidgetGridComponent implements AfterViewInit, OnDestroy, OnChanges 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['widgets']) {
       this.paintOrdered = paintOrder(this.widgets);
+    }
+    if (changes['widgets'] || changes['renderStates']) {
+      this.livePlacements = this.widgets.map(widget => ({
+        committed: widget,
+        live: this.renderStates.get(widget.id)?.liveRect ?? widget,
+      }));
     }
     if (changes['cols'] || changes['rows'] || changes['outerMargin'] || changes['spacing']) {
       // The shape is pushed into the metrics before the view renders, because the template derives

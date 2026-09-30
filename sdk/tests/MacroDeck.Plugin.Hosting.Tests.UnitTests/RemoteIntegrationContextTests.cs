@@ -399,6 +399,25 @@ public class RemoteIntegrationContextTests
 	}
 
 	[Test]
+	public async Task A_widget_type_registers_its_default_short_press_action()
+	{
+		var widgetTypes = new RemoteWidgetTypeProviderContext(_invoker);
+
+		await widgetTypes.RegisterWidgetTypeAsync(new WidgetTypeDescriptor("panel", LocalizedText.FromLiteral("Panel"))
+		{
+			DefaultShortPressAction =
+				new WidgetDefaultAction("open", new Dictionary<string, string> { ["room"] = "kitchen" })
+		});
+
+		var sent = ((WidgetTypesRegisterArguments)_invoker.LastArguments!).WidgetType.DefaultShortPressAction;
+		Assert.Multiple(() =>
+		{
+			Assert.That(sent?.ActionId, Is.EqualTo("open"));
+			Assert.That(sent?.Parameters?["room"], Is.EqualTo("kitchen"));
+		});
+	}
+
+	[Test]
 	public async Task A_widget_type_that_supports_flows_registers_with_the_flag_set()
 	{
 		var widgetTypes = new RemoteWidgetTypeProviderContext(_invoker);
@@ -458,6 +477,7 @@ public class RemoteIntegrationContextTests
 		// upload-then-register exchange the recording invoker here cannot answer.
 		covered.Add((HostApis.Ui, HostOperations.Ui.RegisterResource));
 		covered.Add((HostApis.Ui, HostOperations.Ui.RemoveResource));
+		covered.Add((HostApis.Ui, HostOperations.Ui.RegisterMusicPlayerArtwork));
 
 		covered.Add((HostApis.IconPacks, HostOperations.IconPacks.GetIconResource));
 		covered.Add((HostApis.IconPacks, HostOperations.IconPacks.GetIcon));

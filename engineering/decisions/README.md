@@ -15,6 +15,7 @@ code, protocol schemas, issue discussions or exhaustive option lists.
 - [0015 - Installation and update delivery are bounded by each platform's ownership model](0015-installation-and-update-delivery.md)
 - [0024 - The log files are the log viewer's source of truth, and their format is a contract](0024-log-files-are-the-source-of-truth.md)
 - [0078 - The macOS host pumps a CoreFoundation run loop on the main thread](0078-macos-host-pumps-a-core-foundation-run-loop-on-the-main-thread.md)
+- [0100 - Store entries are shared as https links, and `macrodeck://` carries only a package id](0100-store-entries-are-shared-as-https-links-and-opened-through-a-macrodeck-url.md)
 
 ## Networking, trust and secrets
 

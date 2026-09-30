@@ -27,6 +27,8 @@ declare global {
       onFileDrop?: (callback: (event: ShellFileDropEvent) => void) => Promise<() => void>;
       onFileOpen?: (callback: () => void) => Promise<() => void>;
       takeOpenedFiles?: () => Promise<string[]>;
+      onDeepLink?: (callback: () => void) => Promise<() => void>;
+      takeDeepLinks?: () => Promise<{ kind: 'store'; packageId: string }[]>;
       onMenuAction?: (callback: (event: ShellMenuActionEvent) => void) => Promise<() => void>;
       takeMenuAction?: () => Promise<string | null>;
       onHostStopping?: (callback: () => void) => Promise<() => void>;

@@ -42,6 +42,7 @@ internal sealed class DeviceSurfaceWorld : IDisposable
 		services.AddSingleton<ILocalizationResolver>(new LocalizationResolver(new LocalizationCatalogRegistry()));
 		services.AddSingleton<IAppPreferenceService>(new ContractAppPreferences());
 		services.AddSingleton<IIconPackCache>(new ContractIconPacks());
+		services.AddSingleton<MacroDeckHost.Application.Widgets.IWidgetDefaultShortPress>(new ContractNoDefaultShortPress());
 		services.AddSingleton<DeviceSurfaceBuilder>();
 		services
 			.AddSingleton<IUiTransportMessageHandler<ExecuteActionButtonTriggerRequest,

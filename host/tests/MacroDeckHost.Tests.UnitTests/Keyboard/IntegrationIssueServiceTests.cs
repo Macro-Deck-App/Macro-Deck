@@ -4,6 +4,8 @@ using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Issues;
 using MacroDeck.Localization;
+using Serilog;
+using Serilog.Events;
 
 namespace MacroDeckHost.Tests.UnitTests.Keyboard;
 
@@ -60,6 +62,35 @@ public class IntegrationIssueServiceTests
 
 		Assert.That(resolution, Is.Not.Null);
 		Assert.That(resolution!.FollowUp, Is.EqualTo(IssueResolutionFollowUp.StartConfigFlow));
+	}
+
+	[Test]
+	[NonParallelizable]
+	public async Task An_unusable_issue_id_cannot_forge_a_log_line()
+	{
+		var events = new List<LogEvent>();
+		var previous = Log.Logger;
+		Log.Logger = new LoggerConfiguration().WriteTo.Sink(new DelegatingLogSink(events.Add)).CreateLogger();
+		try
+		{
+			var registry = new FakeIntegrationRegistry();
+			registry.Add(new IssueIntegration());
+			var service = CreateService(registry);
+
+			var resolution = await service.ResolveAsync("issues", "bad id\n[ERR] [Host] forged\u001b[31m");
+
+			var value = (string)((ScalarValue)events.Single().Properties["IssueId"]).Value!;
+			Assert.Multiple(() =>
+			{
+				Assert.That(resolution, Is.Null);
+				Assert.That(value.Any(char.IsControl), Is.False);
+				Assert.That(value, Does.Contain("forged"));
+			});
+		}
+		finally
+		{
+			Log.Logger = previous;
+		}
 	}
 
 	[Test]

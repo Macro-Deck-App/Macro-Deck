@@ -13414,12 +13414,6 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Settings.ClientTargets.Description" xml:space="preserve">
     <value>Configure un appareil qui exécute sa propre version du client web Macro Deck.</value>
   </data>
-  <data name="Settings.ClientTargets.Experimental" xml:space="preserve">
-    <value>Fonction expérimentale. La configuration d’appareils fonctionne, mais elle n’est pas terminée et ne couvre pas encore tous les firmwares. Attends-toi à des imperfections.</value>
-  </data>
-  <data name="Settings.ClientTargets.Heading" xml:space="preserve">
-    <value>Clients sur appareils</value>
-  </data>
   <data name="Settings.ClientTargets.Retry" xml:space="preserve">
     <value>Réessayer</value>
   </data>
@@ -13834,6 +13828,15 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Settings.Devices.ThisDeviceMarker" xml:space="preserve">
     <value>Cet appareil</value>
+  </data>
+  <data name="Settings.Experiments.CarThingNote" xml:space="preserve">
+    <value>Pas encore terminé et ne couvre pas tous les firmwares. Attends-toi à quelques imperfections.</value>
+  </data>
+  <data name="Settings.Experiments.Description" xml:space="preserve">
+    <value>Fonctionnalités préliminaires, pas encore terminées. Elles peuvent changer ou disparaître à tout moment. Affichées uniquement lorsque le mode développeur est activé.</value>
+  </data>
+  <data name="Settings.Experiments.Heading" xml:space="preserve">
+    <value>Expérimentations</value>
   </data>
   <data name="Settings.Extensions.AutoUpdate" xml:space="preserve">
     <value>Mettre à jour les extensions automatiquement</value>
@@ -15179,6 +15182,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Store.Page.CompatibilityField" xml:space="preserve">
     <value>Compatibilité</value>
   </data>
+  <data name="Store.Page.CopyLinkAction" xml:space="preserve">
+    <value>Copier le lien</value>
+  </data>
   <data name="Store.Page.DetailsHeading" xml:space="preserve">
     <value>Détails</value>
   </data>
@@ -15302,6 +15308,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Store.Page.Link.Wiki" xml:space="preserve">
     <value>Wiki</value>
+  </data>
+  <data name="Store.Page.LinkCopied" xml:space="preserve">
+    <value>Lien copié.</value>
+  </data>
+  <data name="Store.Page.LinkRegistryUnavailable" xml:space="preserve">
+    <value>Le Store n'est pas disponible pour le moment. Vérifie ta connexion Internet et rouvre le lien.</value>
   </data>
   <data name="Store.Page.LinksHeading" xml:space="preserve">
     <value>Liens</value>

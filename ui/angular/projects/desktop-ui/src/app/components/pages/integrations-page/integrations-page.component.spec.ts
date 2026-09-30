@@ -510,7 +510,7 @@ interface FilterAccess {
 
 interface InstallAccess {
   onArtifactPicked(input: HTMLInputElement): Promise<void>;
-  confirmInstall(force?: boolean): Promise<void>;
+  confirmInstall(force?: boolean, allowUnsigned?: boolean): Promise<void>;
   pendingInstall(): unknown;
   replaceTarget(): unknown;
 }
@@ -649,6 +649,36 @@ describe('IntegrationsPageComponent plugin installation', () => {
     await access().confirmInstall(true);
 
     expect(apiSpy.installPluginArtifact.calls.mostRecent().args[1]).toBeTrue();
+  });
+
+  it('keeps the unsigned consent given for an already installed plugin when it is reinstalled', async () => {
+    await setup([]);
+    apiSpy.installPluginArtifact.and.resolveTo(
+      installResponse({ success: false, error: { code: 'already_installed', message: 'Already installed.' } }));
+
+    await access().onArtifactPicked(pickedInput());
+    await access().confirmInstall(false, true);
+
+    apiSpy.installPluginArtifact.and.resolveTo(installResponse());
+    await access().confirmInstall(true);
+
+    const [, force, allowUnsigned] = apiSpy.installPluginArtifact.calls.mostRecent().args;
+    expect(force).toBeTrue();
+    expect(allowUnsigned).toBeTrue();
+  });
+
+  it('never adds unsigned consent to the reinstall of a plugin that was not consented as unsigned', async () => {
+    await setup([]);
+    apiSpy.installPluginArtifact.and.resolveTo(
+      installResponse({ success: false, error: { code: 'already_installed', message: 'Already installed.' } }));
+
+    await access().onArtifactPicked(pickedInput());
+    await access().confirmInstall(false, false);
+
+    apiSpy.installPluginArtifact.and.resolveTo(installResponse());
+    await access().confirmInstall(true);
+
+    expect(apiSpy.installPluginArtifact.calls.mostRecent().args[2]).toBeFalsy();
   });
 });
 

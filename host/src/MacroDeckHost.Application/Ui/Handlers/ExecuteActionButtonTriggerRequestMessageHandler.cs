@@ -22,6 +22,7 @@ public sealed class ExecuteActionButtonTriggerRequestMessageHandler
 	private readonly IHostLockState _lockState;
 	private readonly IWidgetTriggerService _triggerService;
 	private readonly IWidgetTypeRegistry _widgetTypes;
+	private readonly IWidgetDefaultShortPress _defaultShortPress;
 	private readonly TimerWidgetCoordinator _timers;
 
 	public ExecuteActionButtonTriggerRequestMessageHandler(
@@ -30,6 +31,7 @@ public sealed class ExecuteActionButtonTriggerRequestMessageHandler
 		IHostLockState lockState,
 		IWidgetTriggerService triggerService,
 		IWidgetTypeRegistry widgetTypes,
+		IWidgetDefaultShortPress defaultShortPress,
 		TimerWidgetCoordinator timers)
 	{
 		_folderCache = folderCache;
@@ -37,6 +39,7 @@ public sealed class ExecuteActionButtonTriggerRequestMessageHandler
 		_lockState = lockState;
 		_triggerService = triggerService;
 		_widgetTypes = widgetTypes;
+		_defaultShortPress = defaultShortPress;
 		_timers = timers;
 	}
 
@@ -142,8 +145,10 @@ public sealed class ExecuteActionButtonTriggerRequestMessageHandler
 		var isProviderType = _widgetTypes.TryResolve(widget.Type, out var entry) && !entry.IsBuiltIn;
 
 		// Clients send every unclaimed press of a provider's tile here, so one whose type did not opt in to
-		// flows is nothing to do rather than an error the user cannot act on.
-		if (isProviderType && !entry.Descriptor.SupportsFlows)
+		// flows and has no default to run is nothing to do rather than an error the user cannot act on.
+		if (isProviderType && !entry.Descriptor.SupportsFlows &&
+			!(WidgetTriggerService.IsShortPress(request.TriggerType) &&
+				_defaultShortPress.FlowsSourceFor(widget, request.OriginDeviceId is not null) is not null))
 		{
 			return new ExecuteActionButtonTriggerResponse
 			{

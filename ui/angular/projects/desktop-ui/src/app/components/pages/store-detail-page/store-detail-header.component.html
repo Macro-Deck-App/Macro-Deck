@@ -79,6 +79,13 @@
     (checkForUpdates)="checkForUpdates.emit()"
     (chooseVersion)="focusVersionSelect()" />
 
+  @if (shareLinksEnabled && !extension().withdrawal) {
+    <shared-button class="copy-link" variant="ghost" size="compact" (click)="copyLink()">
+      <span class="icon icon-share-2 icon-xs" aria-hidden="true"></span>
+      {{ 'macrodeck.app:Store.Page.CopyLinkAction' | translate }}
+    </shared-button>
+  }
+
   @if (showVersionSelect()) {
     <label class="version-picker">
       <span class="version-picker-label">{{ 'macrodeck.app:Store.Page.VersionField' | translate }}</span>

@@ -13,7 +13,7 @@ import { MigrationOfferModalComponent } from './components/migration/migration-o
 import { OnboardingWizardComponent } from './components/onboarding/onboarding-wizard.component';
 import { MigrationWizardComponent } from './components/migration/migration-wizard/migration-wizard.component';
 import { ProfileService } from '@shared';
-import { FileOpenService, MenuActionService, NavigationService, FolderService, UpdateService } from './services';
+import { DeepLinkService, FileOpenService, MenuActionService, NavigationService, FolderService, UpdateService } from './services';
 import { MigrationWizardService } from './services/migration-wizard.service';
 
 const BOOTSTRAP_RETRY_MS = 1500;
@@ -87,6 +87,7 @@ export class AppComponent implements OnInit, OnDestroy {
   protected readonly keyRing = inject(KeyRingService);
   private readonly navigationService = inject(NavigationService);
   private readonly fileOpen = inject(FileOpenService);
+  private readonly deepLinks = inject(DeepLinkService);
   private readonly menuActions = inject(MenuActionService);
   private readonly hostSession = inject(HostSessionService);
   private readonly profileService = inject(ProfileService);
@@ -130,6 +131,7 @@ export class AppComponent implements OnInit, OnDestroy {
         // Only now: a file the OS opened during startup waits in the shell's queue until something
         // can actually import it, so this must never run against a host that cannot answer yet.
         this.fileOpen.start();
+        this.deepLinks.start();
       }
     });
   }

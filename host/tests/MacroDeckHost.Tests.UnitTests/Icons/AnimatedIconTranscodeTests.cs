@@ -97,8 +97,7 @@ public class AnimatedIconTranscodeTests
 			Is.EqualTo(new[] { 64, 64, 64 }),
 			"the stored WebP itself must decode faithfully, or the GIF step is not what is being tested");
 		using var gif = new MemoryStream();
-		AnimatedGifTranscode.PrepareForGif(stored);
-		await stored.SaveAsGifAsync(gif, new GifEncoder());
+		await AnimatedGifTranscode.SaveAsGifAsync(stored, gif, CancellationToken.None);
 
 		gif.Position = 0;
 		using var transcoded = await Image.LoadAsync<Rgba32>(gif);
@@ -138,8 +137,7 @@ public class AnimatedIconTranscodeTests
 		webp.Position = 0;
 		using var stored = await Image.LoadAsync<Rgba32>(webp);
 		using var gif = new MemoryStream();
-		AnimatedGifTranscode.PrepareForGif(stored);
-		await stored.SaveAsGifAsync(gif, new GifEncoder());
+		await AnimatedGifTranscode.SaveAsGifAsync(stored, gif, CancellationToken.None);
 
 		gif.Position = 0;
 		using var transcoded = await Image.LoadAsync<Rgba32>(gif);

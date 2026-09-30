@@ -8,12 +8,14 @@ using MacroDeckHost.Application.Network.Tls;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Infrastructure.Persistence;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using Serilog.Events;
 
 namespace MacroDeckHost.Tests.UnitTests.Api;
 
@@ -132,6 +134,34 @@ public class DeviceSetupEndpointTests
 		await host.StopAsync();
 	}
 
+	[Test]
+	public async Task A_Diagnostics_Report_Cannot_Forge_Log_Lines_Or_Carry_Terminal_Escapes()
+	{
+		var events = new List<LogEvent>();
+		using var logger = new LoggerConfiguration().WriteTo.Sink(new DelegatingLogSink(events.Add)).CreateLogger();
+		using var host = await StartHost(new FakeCertificateStore(Now), logger);
+		using var client = host.GetTestClient();
+		const string forged = "x\n2026-09-30 00:00:00.000 +00:00 [ERR] [Host] forged\u001b[31m";
+		var body = JsonSerializer.Serialize(new { stage = forged, userAgent = forged, url = forged, message = forged });
+
+		var response = await client.PostAsync("/api/device-setup/diagnostics",
+			new StringContent(body, Encoding.UTF8, "application/json"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
+			var reported = events.Single(e => e.Properties.ContainsKey("Stage"));
+			foreach (var name in new[] { "Stage", "UserAgent", "Url", "Message" })
+			{
+				var value = (string)((ScalarValue)reported.Properties[name]).Value!;
+				Assert.That(value.Any(c => char.IsControl(c)), Is.False, name);
+				Assert.That(value, Does.Contain("forged"), name);
+			}
+		});
+
+		await host.StopAsync();
+	}
+
 	// The anonymous route must not have widened its neighbours.
 	[Test]
 	public async Task The_Network_Settings_Endpoint_Still_Requires_An_Administrator()
@@ -146,7 +176,8 @@ public class DeviceSetupEndpointTests
 		await host.StopAsync();
 	}
 
-	private static async Task<IHost> StartHost(IPublicTlsCertificateStore certificateStore)
+	private static async Task<IHost> StartHost(IPublicTlsCertificateStore certificateStore,
+		Serilog.ILogger? logger = null)
 	{
 		var listenerState = new FakeHostListenerState
 		{
@@ -163,7 +194,7 @@ public class DeviceSetupEndpointTests
 				builder.ConfigureTestServices(services =>
 				{
 					services.RemoveAll<IHostedService>();
-					services.AddSingleton(Log.Logger);
+					services.AddSingleton(logger ?? Log.Logger);
 					services.RemoveAll<StartupReadiness>();
 					services.AddSingleton(CompletedStartupReadiness());
 					services.RemoveAll<IHostListenerState>();

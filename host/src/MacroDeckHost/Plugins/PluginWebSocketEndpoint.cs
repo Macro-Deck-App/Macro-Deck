@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.Net.WebSockets;
 using System.Text.Json;
@@ -48,6 +49,8 @@ public static class PluginWebSocketEndpointExtensions
 
 public sealed class PluginWebSocketEndpoint
 {
+	private const int MaxArtworkInvokesPerPlugin = 4;
+
 	private readonly IPluginSessionRegistry _sessionRegistry;
 	private readonly IPluginCapabilityInvoker _invoker;
 	private readonly IRemotePluginIntegrationRegistrar _registrar;
@@ -55,6 +58,7 @@ public sealed class PluginWebSocketEndpoint
 	private readonly IPluginCallbackRouter _callbackRouter;
 	private readonly PluginAdbInvokeRunner? _adbInvokes;
 	private readonly PluginMessagingInvokeRunner? _messagingInvokes;
+	private readonly ConcurrentDictionary<string, int> _artworkInvokesInFlight = new(StringComparer.Ordinal);
 	private readonly IPluginAssetReceiver _assetReceiver;
 	private readonly IPluginHostAssetSender? _hostAssetSender;
 	private readonly HostStatePusher _statePusher;
@@ -898,6 +902,13 @@ public sealed class PluginWebSocketEndpoint
 			return;
 		}
 
+		if (string.Equals(payload.Api, HostApis.Ui, StringComparison.Ordinal) &&
+			string.Equals(payload.Operation, HostOperations.Ui.RegisterMusicPlayerArtwork, StringComparison.Ordinal))
+		{
+			await StartArtworkInvokeAsync(connection, pluginId, sessionId, envelope, payload, cancellationToken);
+			return;
+		}
+
 		var result = await _callbackRouter.RouteAsync(pluginId,
 			sessionId,
 			connection,
@@ -905,11 +916,18 @@ public sealed class PluginWebSocketEndpoint
 			payload,
 			cancellationToken);
 
-		await connection.Send(new ProtocolEnvelope
+		await SendHostResultAsync(connection, envelope.Id, result, cancellationToken);
+	}
+
+	private static Task SendHostResultAsync(IPluginConnection connection,
+		string correlationId,
+		HostCallbackResult result,
+		CancellationToken cancellationToken)
+		=> connection.Send(new ProtocolEnvelope
 			{
 				Type = MessageTypes.HostResult,
 				Id = NewId(),
-				CorrelationId = envelope.Id,
+				CorrelationId = correlationId,
 				Error = result.Error,
 				Payload = result.Error is null
 					? JsonSerializer.SerializeToElement(new HostResultPayload { Data = result.Data },
@@ -917,7 +935,84 @@ public sealed class PluginWebSocketEndpoint
 					: null
 			},
 			cancellationToken);
+
+	// Off the session's dispatch loop: the lookup can wait on another plugin's player, possibly this same plugin,
+	// and the loop must stay free to serve that plugin's own callbacks meanwhile.
+	private async Task StartArtworkInvokeAsync(IPluginConnection connection,
+		string pluginId,
+		string sessionId,
+		ProtocolEnvelope envelope,
+		HostInvokePayload payload,
+		CancellationToken connectionToken)
+	{
+		if (_callbackRouter.Admit(pluginId, payload) is { } refused)
+		{
+			await SendHostResultAsync(connection, envelope.Id, refused, connectionToken);
+			return;
+		}
+
+		if (!TryEnterArtworkInvoke(pluginId))
+		{
+			await SendHostResultAsync(connection,
+				envelope.Id,
+				HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
+					$"This plugin is already waiting on {MaxArtworkInvokesPerPlugin} music player artwork lookups.",
+					retryable: true),
+				connectionToken);
+			return;
+		}
+
+		_ = RunArtworkInvokeAsync(connection, pluginId, sessionId, envelope.Id, payload, connectionToken);
 	}
+
+	private async Task RunArtworkInvokeAsync(IPluginConnection connection,
+		string pluginId,
+		string sessionId,
+		string correlationId,
+		HostInvokePayload payload,
+		CancellationToken connectionToken)
+	{
+		try
+		{
+			await Task.Yield();
+			var result = await _callbackRouter.RouteAsync(pluginId,
+				sessionId,
+				connection,
+				correlationId,
+				payload,
+				connectionToken);
+
+			await SendHostResultAsync(connection, correlationId, result, CancellationToken.None);
+		}
+		catch (Exception exception) when (exception is not OutOfMemoryException)
+		{
+			PluginWebSocketLog.HostResultNotDelivered(_logger, pluginId, exception);
+		}
+		finally
+		{
+			LeaveArtworkInvoke(pluginId);
+		}
+	}
+
+	private bool TryEnterArtworkInvoke(string pluginId)
+	{
+		while (true)
+		{
+			var current = _artworkInvokesInFlight.GetOrAdd(pluginId, 0);
+			if (current >= MaxArtworkInvokesPerPlugin)
+			{
+				return false;
+			}
+
+			if (_artworkInvokesInFlight.TryUpdate(pluginId, current + 1, current))
+			{
+				return true;
+			}
+		}
+	}
+
+	private void LeaveArtworkInvoke(string pluginId)
+		=> _artworkInvokesInFlight.AddOrUpdate(pluginId, 0, (_, count) => Math.Max(0, count - 1));
 
 	private async Task ProcessLogQueueAsync(
 		PluginWebSocketConnection connection,

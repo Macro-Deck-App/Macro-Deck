@@ -64,10 +64,18 @@ brightness.
 
 ## Home screen
 
-- **Shortcuts:** long-press the app icon to open one of your saved computers directly.
+- **Shortcuts:** long-press the app icon to run one of your scripts, if you added it there, or to open one of your
+  saved computers directly.
 - **Widget:** the **Macro Deck host** widget opens the deck of the computer you choose for it.
-- **Script shortcuts:** put a script on the home screen, which runs it with a tap. See
-  [Run scripts from other apps](/guide/companion-app/automation/#android-home-screen-shortcuts).
+- **Scripts widget:** the **Macro Deck scripts** widget holds up to eight scripts of one computer and runs each with a
+  tap. See [Run scripts from other apps](/guide/companion-app/automation/#android-scripts-widget).
+- **Script shortcuts:** put a script, with the values it runs with, on the home screen or in the menu of the app
+  icon, which runs it with a tap. See [Run scripts from other apps](/guide/companion-app/automation/#android-shortcuts).
+
+## Quick Settings
+
+Put a script in the Quick Settings panel as a tile and run it with a tap, from any app and, if you allow it, from
+the lock screen. See [Run scripts from other apps](/guide/companion-app/automation/#android-quick-settings-tiles).
 
 ## Tasker, MacroDroid and other apps
 

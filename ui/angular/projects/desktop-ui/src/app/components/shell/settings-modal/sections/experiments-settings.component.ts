@@ -10,8 +10,12 @@ const TARGET_NAME_KEYS: Record<string, string> = {
   carthing: AppStrings.Settings.ClientTargets.CarThingName,
 };
 
+const TARGET_NOTE_KEYS: Record<string, string> = {
+  carthing: AppStrings.Settings.Experiments.CarThingNote,
+};
+
 @Component({
-  selector: 'app-client-targets-settings',
+  selector: 'app-experiments-settings',
   standalone: true,
   imports: [
     FormsModule,
@@ -25,10 +29,10 @@ const TARGET_NAME_KEYS: Record<string, string> = {
     LocalizedTextPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './client-targets-settings.component.html',
-  styleUrls: ['./client-targets-settings.component.scss'],
+  templateUrl: './experiments-settings.component.html',
+  styleUrls: ['./experiments-settings.component.scss'],
 })
-export class ClientTargetsSettingsComponent {
+export class ExperimentsSettingsComponent {
   private readonly api = inject(ApiService);
   private readonly localization = inject(LocalizationService);
 
@@ -62,6 +66,11 @@ export class ClientTargetsSettingsComponent {
   protected targetName(target: WebClientTargetDto): string {
     const key = TARGET_NAME_KEYS[target.targetId];
     return key ? this.localization.translateKey(key) : target.targetId;
+  }
+
+  protected targetNote(target: WebClientTargetDto): string {
+    const key = TARGET_NOTE_KEYS[target.targetId];
+    return key ? this.localization.translateKey(key) : '';
   }
 
   protected async start(target: WebClientTargetDto): Promise<void> {

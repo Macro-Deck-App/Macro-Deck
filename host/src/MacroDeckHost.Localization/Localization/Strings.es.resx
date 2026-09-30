@@ -13414,12 +13414,6 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Settings.ClientTargets.Description" xml:space="preserve">
     <value>Configura un dispositivo que ejecuta su propia versión del cliente web de Macro Deck.</value>
   </data>
-  <data name="Settings.ClientTargets.Experimental" xml:space="preserve">
-    <value>Función experimental. La configuración de dispositivos funciona, pero aún no está terminada ni cubre todos los firmwares. Cuenta con algún fallo.</value>
-  </data>
-  <data name="Settings.ClientTargets.Heading" xml:space="preserve">
-    <value>Clientes en dispositivos</value>
-  </data>
   <data name="Settings.ClientTargets.Retry" xml:space="preserve">
     <value>Inténtalo de nuevo</value>
   </data>
@@ -13834,6 +13828,15 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Settings.Devices.ThisDeviceMarker" xml:space="preserve">
     <value>Este dispositivo</value>
+  </data>
+  <data name="Settings.Experiments.CarThingNote" xml:space="preserve">
+    <value>Aún no está terminado y no cubre todos los firmwares. Espera algunos fallos.</value>
+  </data>
+  <data name="Settings.Experiments.Description" xml:space="preserve">
+    <value>Funciones en fase temprana que aún no están terminadas. Pueden cambiar o desaparecer en cualquier momento. Solo se muestran mientras el modo desarrollador está activado.</value>
+  </data>
+  <data name="Settings.Experiments.Heading" xml:space="preserve">
+    <value>Experimentos</value>
   </data>
   <data name="Settings.Extensions.AutoUpdate" xml:space="preserve">
     <value>Actualizar extensiones automáticamente</value>
@@ -15179,6 +15182,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Store.Page.CompatibilityField" xml:space="preserve">
     <value>Compatibilidad</value>
   </data>
+  <data name="Store.Page.CopyLinkAction" xml:space="preserve">
+    <value>Copiar enlace</value>
+  </data>
   <data name="Store.Page.DetailsHeading" xml:space="preserve">
     <value>Detalles</value>
   </data>
@@ -15302,6 +15308,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Store.Page.Link.Wiki" xml:space="preserve">
     <value>Wiki</value>
+  </data>
+  <data name="Store.Page.LinkCopied" xml:space="preserve">
+    <value>Enlace copiado.</value>
+  </data>
+  <data name="Store.Page.LinkRegistryUnavailable" xml:space="preserve">
+    <value>La Store no está disponible en este momento. Revisa tu conexión a Internet y vuelve a abrir el enlace.</value>
   </data>
   <data name="Store.Page.LinksHeading" xml:space="preserve">
     <value>Enlaces</value>

@@ -127,6 +127,59 @@ public class PluginLogEventFactoryTests
 	}
 
 	[Test]
+	public void A_plugin_exception_message_cannot_open_a_fake_line_in_the_forwarded_exception_text()
+	{
+		var dto = new LogEventDto
+		{
+			Timestamp = DateTimeOffset.UtcNow,
+			Level = LogLevels.Error,
+			MessageTemplate = "failed",
+			RenderedMessage = "failed",
+			Exception = new LogExceptionDto
+			{
+				Type = "System.Exception",
+				Message = "boom\n2026-08-11 10:11:12.345 +02:00 [ERR] [Host/Kernel] fabricated\u001b[31m",
+				StackTrace = "A()\n2026-08-11 10:11:12.345 +02:00 [ERR] [Host/Kernel] fabricated2"
+			}
+		};
+
+		var text = PluginLogEventFactory
+			.Create("com.example.obs", "session-1", null, null, dto, TimeProvider.System)
+			.Exception!.ToString();
+
+		var lines = text.Split('\n');
+		Assert.Multiple(() =>
+		{
+			Assert.That(text.Any(c => char.IsControl(c) && c != '\n'), Is.False);
+			Assert.That(lines[0], Does.StartWith("System.Exception: boom"));
+			Assert.That(lines.Skip(1), Is.All.StartsWith("   at "));
+		});
+	}
+
+	[Test]
+	public void A_maximum_length_message_made_only_of_control_characters_is_still_forwarded()
+	{
+		var dto = new LogEventDto
+		{
+			Timestamp = DateTimeOffset.UtcNow,
+			Level = LogLevels.Error,
+			MessageTemplate = "failed",
+			RenderedMessage = "failed",
+			Exception = new LogExceptionDto
+			{
+				Type = "System.Exception",
+				Message = new string('\u001b', ProtocolLimits.MaxLogMessageLength)
+			}
+		};
+
+		var text = PluginLogEventFactory
+			.Create("com.example.obs", "session-1", null, null, dto, TimeProvider.System)
+			.Exception!.ToString();
+
+		Assert.That(text, Has.Length.LessThanOrEqualTo(ProtocolLimits.MaxLogExceptionLength));
+	}
+
+	[Test]
 	public void An_origin_segment_forged_through_property_text_cannot_split_a_log_line_into_a_second_entry()
 	{
 		const string renderedMessage = "ok\n2026-08-11 10:11:12.345 +02:00 [ERR] [Host/Kernel] fabricated";

@@ -13415,12 +13415,6 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Settings.ClientTargets.Description" xml:space="preserve">
     <value>Set up a device that runs its own build of the Macro Deck web client.</value>
   </data>
-  <data name="Settings.ClientTargets.Experimental" xml:space="preserve">
-    <value>Experimental. Device setup works, but it is not finished and does not cover every firmware yet. Expect rough edges.</value>
-  </data>
-  <data name="Settings.ClientTargets.Heading" xml:space="preserve">
-    <value>Device clients</value>
-  </data>
   <data name="Settings.ClientTargets.Retry" xml:space="preserve">
     <value>Try again</value>
   </data>
@@ -13835,6 +13829,15 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Settings.Devices.ThisDeviceMarker" xml:space="preserve">
     <value>This device</value>
+  </data>
+  <data name="Settings.Experiments.CarThingNote" xml:space="preserve">
+    <value>Not finished yet and does not cover every firmware. Expect rough edges.</value>
+  </data>
+  <data name="Settings.Experiments.Description" xml:space="preserve">
+    <value>Early features that are not finished yet. They can change or disappear at any time. Only shown while Developer mode is on.</value>
+  </data>
+  <data name="Settings.Experiments.Heading" xml:space="preserve">
+    <value>Experiments</value>
   </data>
   <data name="Settings.Extensions.AutoUpdate" xml:space="preserve">
     <value>Update extensions automatically</value>
@@ -15180,6 +15183,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.Page.CompatibilityField" xml:space="preserve">
     <value>Compatibility</value>
   </data>
+  <data name="Store.Page.CopyLinkAction" xml:space="preserve">
+    <value>Copy link</value>
+  </data>
   <data name="Store.Page.DetailsHeading" xml:space="preserve">
     <value>Details</value>
   </data>
@@ -15303,6 +15309,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Store.Page.Link.Wiki" xml:space="preserve">
     <value>Wiki</value>
+  </data>
+  <data name="Store.Page.LinkCopied" xml:space="preserve">
+    <value>Link copied.</value>
+  </data>
+  <data name="Store.Page.LinkRegistryUnavailable" xml:space="preserve">
+    <value>The Store is not available right now. Check your internet connection and open the link again.</value>
   </data>
   <data name="Store.Page.LinksHeading" xml:space="preserve">
     <value>Links</value>

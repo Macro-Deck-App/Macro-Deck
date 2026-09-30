@@ -85,7 +85,8 @@ internal sealed class StoreControllerTests
 			refreshTracker,
 			new StoreUpdateBatchInstaller(_installCoordinator),
 			new StoreCatalogPopularity(_catalogQuery, _reviews),
-			new StoreSimilarPackages(_catalogQuery, _reviews))
+			new StoreSimilarPackages(_catalogQuery, _reviews),
+			new StoreLinkResolver(_catalog, StoreRegistryOptions.Default))
 		{
 			ControllerContext = new ControllerContext
 			{
@@ -318,6 +319,32 @@ internal sealed class StoreControllerTests
 			CancellationToken.None);
 
 		Assert.That(result, Is.TypeOf<NotFoundResult>());
+	}
+
+	[Test]
+	public void A_share_link_resolves_a_listed_package_to_its_kind_and_a_missing_one_to_not_found()
+	{
+		SeedPlugin();
+
+		var found = _controller.ResolveLink(PluginId);
+		var missing = _controller.ResolveLink("com.acme.missing");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(found.Error, Is.Null);
+			Assert.That(found.Kind, Is.EqualTo(StoreExtensionKind.Plugin));
+			Assert.That(found.Id, Is.EqualTo(PluginId));
+			Assert.That(missing.Kind, Is.Null);
+			Assert.That(missing.Error!.Code, Is.EqualTo("not_found"));
+		});
+	}
+
+	[Test]
+	public void A_share_link_before_the_registry_has_loaded_answers_registry_unavailable()
+	{
+		var response = _controller.ResolveLink(PluginId);
+
+		Assert.That(response.Error!.Code, Is.EqualTo("registry_unavailable"));
 	}
 
 	[Test]

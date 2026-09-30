@@ -69,9 +69,7 @@ internal static class SkiaAnimatedGifDecoder
 				}
 			}
 
-			var repetitions = codec.RepetitionCount;
-			image!.Metadata.GetWebpMetadata().RepeatCount
-				= repetitions <= 0 ? (ushort)0 : (ushort)Math.Min(repetitions, ushort.MaxValue);
+			image!.Metadata.GetWebpMetadata().RepeatCount = AnimatedGifTranscode.ReadPlays(bytes);
 			return image;
 		}
 		catch (Exception)

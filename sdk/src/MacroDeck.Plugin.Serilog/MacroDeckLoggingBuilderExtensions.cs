@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Serilog;
+using Serilog.Events;
 
 namespace MacroDeck.Plugin.Serilog;
 
@@ -13,6 +14,17 @@ namespace MacroDeck.Plugin.Serilog;
 /// </summary>
 public static class MacroDeckLoggingBuilderExtensions
 {
+	private static readonly string[] RequestNoiseCategories =
+	[
+		"Microsoft.AspNetCore.Hosting.Diagnostics",
+		"Microsoft.AspNetCore.Routing.EndpointMiddleware",
+		"Microsoft.AspNetCore.Http.Result",
+		"Microsoft.AspNetCore.Mvc",
+		"Microsoft.AspNetCore.Cors.Infrastructure.CorsService",
+		"Microsoft.AspNetCore.StaticFiles",
+		"System.Net.Http.HttpClient"
+	];
+
 	/// <summary>
 	/// Installs Serilog as the plugin's logging pipeline and attaches the Macro Deck sink to it.
 	///
@@ -30,10 +42,14 @@ public static class MacroDeckLoggingBuilderExtensions
 	/// </summary>
 	/// <param name="configure">
 	/// Runs before the Macro Deck sink is attached, so ordinary Serilog configuration -
-	/// <c>MinimumLevel.Debug()</c>, <c>Enrich.With(...)</c>, <c>WriteTo.File(...)</c> - behaves exactly
-	/// as it would without this call. Adding a console sink here is the one exception: plugin logging
-	/// already reaches the console through the logging providers the web builder registered, so a
-	/// <c>WriteTo.Console(...)</c> added here prints every line twice.
+	/// <c>MinimumLevel.Debug()</c>, <c>Enrich.With(...)</c>, <c>WriteTo.File(...)</c> - keeps working.
+	/// The request pipeline categories (<c>Microsoft.AspNetCore.Hosting.Diagnostics</c> and its siblings) and
+	/// <c>System.Net.Http.HttpClient</c> start at <see cref="LogEventLevel.Warning" />, so a health poll or
+	/// any other successful request logs no line. A global minimum does not lift them; a
+	/// <c>MinimumLevel.Override</c> for the category here does. A console sink added here is the one
+	/// thing that does not keep working: plugin logging already reaches the console through the logging
+	/// providers the web builder registered, so a <c>WriteTo.Console(...)</c> added here prints every line
+	/// twice.
 	/// </param>
 	public static PluginHostBuilder UseMacroDeckLogging(
 		this PluginHostBuilder builder,
@@ -61,6 +77,11 @@ public static class MacroDeckLoggingBuilderExtensions
 
 		builder.WebApplicationBuilder.Host.UseSerilog((_, services, cfg) =>
 			{
+				foreach (var category in RequestNoiseCategories)
+				{
+					cfg.MinimumLevel.Override(category, LogEventLevel.Warning);
+				}
+
 				configure?.Invoke(cfg);
 
 				var minimumLevel = services.GetRequiredService<IOptions<MacroDeckLoggingOptions>>().Value.MinimumLevel;

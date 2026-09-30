@@ -68,6 +68,42 @@ public static class WidgetFlowsJson
 					children.ValueKind == JsonValueKind.Array &&
 					children.EnumerateArray().Any(IsEnabledBlock));
 
+	public static bool SelectedFlowIsRunnable(string? widgetData, string triggerType)
+	{
+		if (!TryExtract(widgetData, out var flowsJson))
+		{
+			return false;
+		}
+
+		try
+		{
+			using var document = JsonDocument.Parse(flowsJson);
+			if (document.RootElement.ValueKind != JsonValueKind.Array)
+			{
+				return false;
+			}
+
+			foreach (var flow in document.RootElement.EnumerateArray())
+			{
+				if (flow.ValueKind == JsonValueKind.Object &&
+					TryGetProperty(flow, "triggerType", out var type) &&
+					type.ValueKind == JsonValueKind.String &&
+					string.Equals(type.GetString(), triggerType, StringComparison.OrdinalIgnoreCase))
+				{
+					return TryGetProperty(flow, "children", out var children) &&
+						children.ValueKind == JsonValueKind.Array &&
+						children.EnumerateArray().Any(IsEnabledBlock);
+				}
+			}
+
+			return false;
+		}
+		catch (JsonException)
+		{
+			return false;
+		}
+	}
+
 	private static bool IsEnabledBlock(JsonElement block)
 		=> block.ValueKind == JsonValueKind.Object &&
 			!(block.TryGetProperty("disabled", out var disabled) && disabled.ValueKind == JsonValueKind.True);
