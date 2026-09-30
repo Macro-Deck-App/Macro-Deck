@@ -1,4 +1,4 @@
-<shared-modal [heading]="heading()" size="small" [showFooter]="false" (close)="cancel()">
+<shared-modal [heading]="heading()" size="small" [showFooter]="false" [zIndex]="zIndex()" (close)="cancel()">
   <form class="dvb-form" (ngSubmit)="submit()">
     <label class="form-group">
       <span class="form-label">{{ nameFieldLabel() }}</span>
