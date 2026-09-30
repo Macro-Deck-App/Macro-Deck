@@ -745,6 +745,7 @@ public class Startup
 		services.AddSingleton<IStorePlatformClient, StorePlatformClient>();
 		services.AddSingleton<IStoreReviewAvatarProxy, StoreReviewAvatarProxy>();
 		services.AddSingleton<IStoreOfficialPackages, StoreOfficialPackages>();
+		services.AddSingleton<IStoreLinkResolver, StoreLinkResolver>();
 		services.AddSingleton<IStoreReviewService, StoreReviewService>();
 		services.AddSingleton<StoreCatalogPopularity>();
 		services.AddSingleton<StoreSimilarPackages>();

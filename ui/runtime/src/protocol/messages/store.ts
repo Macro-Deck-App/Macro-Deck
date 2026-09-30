@@ -218,6 +218,12 @@ export interface GetStoreExtensionResponse {
   error?: ApiError | null;
 }
 
+export interface ResolveStoreLinkResponse {
+  kind?: StoreExtensionKind | null;
+  id?: string | null;
+  error?: ApiError | null;
+}
+
 export interface GetStoreSimilarResponse {
   items: StoreCatalogItemBody[];
   error?: ApiError | null;

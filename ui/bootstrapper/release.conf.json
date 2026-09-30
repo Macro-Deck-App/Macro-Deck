@@ -71,5 +71,14 @@
         "startMenuFolder": "Macro Deck"
       }
     }
+  },
+  "plugins": {
+    "deep-link": {
+      "desktop": {
+        "schemes": ["macrodeck"],
+        "name": "Macro Deck",
+        "role": "Viewer"
+      }
+    }
   }
 }

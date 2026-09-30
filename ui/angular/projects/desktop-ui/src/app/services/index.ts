@@ -1,4 +1,5 @@
 export * from './data-directory.service';
+export * from './deep-link.service';
 export * from './file-open.service';
 export * from './integration-filter.service';
 export * from './menu-action.service';

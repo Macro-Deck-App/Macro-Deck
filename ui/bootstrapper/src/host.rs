@@ -2,6 +2,7 @@
 // spawns the sibling MacroDeckHost binary, waits until it answers and stops it
 // again on quit (graceful shutdown endpoint first, kill as fallback).
 
+use std::ffi::OsString;
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
@@ -13,6 +14,7 @@ use serde::{Deserialize, Serialize};
 use tauri::AppHandle;
 use tauri::Manager;
 
+use crate::deep_links;
 use crate::host_error_window::{self, ExitStatus, HostErrorKind, HostErrorReport};
 use crate::host_supervisor::{Decision, ExitAction, Supervisor, MAX_RESTART_ATTEMPTS};
 use crate::localization::{self, keys};
@@ -656,6 +658,12 @@ pub fn relaunch_target(appimage: Option<PathBuf>, current_exe: Option<PathBuf>) 
     appimage.or(current_exe)
 }
 
+pub fn relaunch_arguments(args: impl Iterator<Item = OsString>) -> Vec<OsString> {
+    args.skip(1)
+        .filter(|argument| !argument.to_str().is_some_and(deep_links::is_link_argument))
+        .collect()
+}
+
 pub(crate) fn relaunch(app: &AppHandle) -> bool {
     let Some(binary) = relaunch_target(
         std::env::var_os("APPIMAGE").map(PathBuf::from),
@@ -666,7 +674,7 @@ pub(crate) fn relaunch(app: &AppHandle) -> bool {
     };
 
     match Command::new(&binary)
-        .args(std::env::args_os().skip(1))
+        .args(relaunch_arguments(std::env::args_os()))
         .env(RELAUNCH_MARKER_ENVIRONMENT_VARIABLE, "1")
         .spawn()
     {
@@ -1759,6 +1767,29 @@ mod tests {
         assert_eq!(
             relaunch_target(Some(appimage.clone()), Some(current_exe)),
             Some(appimage)
+        );
+    }
+
+    #[test]
+    fn relaunch_forwards_everything_but_deep_links() {
+        let args = [
+            "MacroDeck",
+            "--autostart",
+            "/tmp/Default.macroDeckProfile",
+            "macrodeck://store/acme.obs",
+            "MACRODECK://STORE/acme.other",
+            "--minimized",
+        ]
+        .map(OsString::from);
+
+        assert_eq!(
+            relaunch_arguments(args.into_iter()),
+            [
+                "--autostart",
+                "/tmp/Default.macroDeckProfile",
+                "--minimized"
+            ]
+            .map(OsString::from)
         );
     }
 

@@ -46,6 +46,7 @@ fn main() {
             "set_hide_dock_icon",
             "set_appearance",
             "take_opened_files",
+            "take_deep_links",
             "take_menu_action",
             "set_hotkey_capture",
             "check_for_update",

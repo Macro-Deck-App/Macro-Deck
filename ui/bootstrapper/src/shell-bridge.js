@@ -79,6 +79,9 @@
     onFileOpen: function (callback) {
       return listen('file-open', callback);
     },
+    onDeepLink: function (callback) {
+      return listen('deep-link', callback);
+    },
     onMenuAction: function (callback) {
       return listen('menu-action', callback);
     },
@@ -90,6 +93,9 @@
     },
     takeOpenedFiles: function () {
       return invoke('take_opened_files');
+    },
+    takeDeepLinks: function () {
+      return invoke('take_deep_links');
     },
     saveFile: function (options) {
       // The file content is the raw request body (an ArrayBuffer stays binary

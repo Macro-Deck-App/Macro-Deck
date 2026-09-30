@@ -15180,6 +15180,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Store.Page.CompatibilityField" xml:space="preserve">
     <value>Kompatibilität</value>
   </data>
+  <data name="Store.Page.CopyLinkAction" xml:space="preserve">
+    <value>Link kopieren</value>
+  </data>
   <data name="Store.Page.DetailsHeading" xml:space="preserve">
     <value>Details</value>
   </data>
@@ -15303,6 +15306,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Store.Page.Link.Wiki" xml:space="preserve">
     <value>Wiki</value>
+  </data>
+  <data name="Store.Page.LinkCopied" xml:space="preserve">
+    <value>Link kopiert.</value>
+  </data>
+  <data name="Store.Page.LinkRegistryUnavailable" xml:space="preserve">
+    <value>Der Store ist gerade nicht erreichbar. Prüfe deine Internetverbindung und öffne den Link erneut.</value>
   </data>
   <data name="Store.Page.LinksHeading" xml:space="preserve">
     <value>Links</value>

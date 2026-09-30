@@ -3,12 +3,9 @@ Categories={{categories}}
 {{#if comment}}
 Comment={{comment}}
 {{/if}}
-# %F on Exec is what makes the file associations below actually work. The bundler's own template
-# emits a bare Exec, and a desktop entry with no field code is launched with NO arguments - so a
-# double-clicked .macroDeckProfile would open Macro Deck without the file. Harmless when no
-# associations are configured: the launcher simply has no files to substitute. Never put it on
-# StartupWMClass, which has to stay the plain binary name for window matching.
-Exec={{exec}} %F
+# %U is what makes the file and macrodeck:// associations work: a bare Exec gets no arguments, and only %u/%U
+# receives non-file URIs. Never on StartupWMClass, which stays the plain binary name.
+Exec={{exec}} %U
 StartupWMClass={{exec}}
 Icon={{icon}}
 Name={{name}}
