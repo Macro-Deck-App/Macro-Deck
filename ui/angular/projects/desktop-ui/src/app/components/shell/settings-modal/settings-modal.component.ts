@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, ViewChild, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import { AppStrings, Strings } from '@macro-deck/runtime';
 import { ButtonComponent, ModalComponent, LocalizationService, TranslatePipe, dismissModal } from '@shared';
 import { AvatarComponent } from '../../account/avatar.component';
@@ -7,15 +7,16 @@ import { TooltipDirective } from '../../overlay/tooltip/tooltip.directive';
 import { SettingsNavComponent } from '../../settings/settings-nav/settings-nav.component';
 import { NavItem, NavItemGroup } from '../../../domain/navigation.interface';
 import { ConnectAccountService } from '../../../services/connect-account.service';
+import { DeveloperModeService } from '../../../services/developer-mode.service';
 import { RestartNoticeService } from '../../../services/restart-notice.service';
 import { SettingsCategory, SettingsModalService } from '../../../services/settings-modal.service';
 import { AboutSettingsComponent } from './sections/about-settings.component';
 import { AccountSettingsComponent } from './sections/account-settings.component';
 import { AdbSettingsComponent } from './sections/adb-settings.component';
-import { ClientTargetsSettingsComponent } from './sections/client-targets-settings.component';
 import { AppearanceSettingsComponent } from './sections/appearance-settings.component';
 import { BackupsSettingsComponent } from './sections/backups-settings.component';
 import { DeveloperSettingsComponent } from './sections/developer-settings.component';
+import { ExperimentsSettingsComponent } from './sections/experiments-settings.component';
 import { ExtensionsSettingsComponent } from './sections/extensions-settings.component';
 import { DevicesSettingsComponent } from './sections/devices-settings.component';
 import { LanguageSettingsComponent } from './sections/language-settings.component';
@@ -67,9 +68,9 @@ const PINNED_CATEGORY_LABEL_KEYS: Partial<Record<SettingsCategory, string>> = {
     StartupSettingsComponent, LanguageSettingsComponent,
     SecuritySettingsComponent, NetworkSettingsComponent, DevicesSettingsComponent, AdbSettingsComponent,
     UsbSettingsComponent,
-    ClientTargetsSettingsComponent, CompanionAppSettingsComponent,
+    CompanionAppSettingsComponent,
     BackupsSettingsComponent, MigrationSettingsComponent,
-    LoggingSettingsComponent, DeveloperSettingsComponent, ExtensionsSettingsComponent, AboutSettingsComponent],
+    LoggingSettingsComponent, DeveloperSettingsComponent, ExperimentsSettingsComponent, ExtensionsSettingsComponent, AboutSettingsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './settings-modal.component.html',
   styleUrls: ['./settings-modal.component.scss'],
@@ -78,6 +79,7 @@ export class SettingsModalComponent {
   private readonly settingsModal = inject(SettingsModalService);
   protected readonly restartNotice = inject(RestartNoticeService);
   protected readonly connect = inject(ConnectAccountService);
+  private readonly developerMode = inject(DeveloperModeService);
 
   @ViewChild(ModalComponent) private readonly modal?: ModalComponent;
 
@@ -95,6 +97,9 @@ export class SettingsModalComponent {
 
   readonly categoryGroups = computed<SettingsCategoryGroup[]>(() => {
     const text = (key: string): string => this.localization.translateKey(key);
+    const experiments: SettingsCategoryItem[] = this.developerMode.enabled()
+      ? [{ id: 'experiments', label: text(AppStrings.Settings.Experiments.Heading), icon: 'sparkles' }]
+      : [];
 
     return [
       {
@@ -111,7 +116,6 @@ export class SettingsModalComponent {
         items: [
           { id: 'network', label: text(Strings.Settings.Network), icon: 'wifi' },
           { id: 'devices', label: text(Strings.Settings.Devices), icon: 'device-desktop' },
-          { id: 'client-targets', label: text(AppStrings.Settings.ClientTargets.Heading), icon: 'monitor-smartphone' },
           { id: 'usb', label: text(AppStrings.Settings.Usb.Heading), icon: 'usb' },
           { id: 'license', label: text(AppStrings.Settings.CompanionApp.Heading), icon: 'device-tablet' },
         ],
@@ -136,6 +140,7 @@ export class SettingsModalComponent {
           { id: 'adb', label: text(Strings.Settings.Adb), icon: 'device-phone' },
           { id: 'logging', label: text(Strings.Settings.Logging), icon: 'file-text' },
           { id: 'developer', label: text(Strings.Settings.Developer), icon: 'code' },
+          ...experiments,
         ],
       },
       {
@@ -159,6 +164,13 @@ export class SettingsModalComponent {
 
   constructor() {
     void this.restartNotice.refresh();
+    void this.developerMode.ensureLoaded();
+
+    effect(() => {
+      if (this.activeCategory() === 'experiments' && !this.developerMode.enabled()) {
+        this.settingsModal.setCategory('developer');
+      }
+    });
 
     const query = window.matchMedia(RAIL_CONSTRAINED_QUERY);
     const destroyRef = inject(DestroyRef);
