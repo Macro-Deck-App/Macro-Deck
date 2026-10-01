@@ -324,6 +324,13 @@
       "groupName": "github actions"
     },
     {
+      "description": "Lock file maintenance for every workspace and manager lands in one PR; this has to come after the file-scoped groups above so it overrides them.",
+      "matchUpdateTypes": [
+        "lockFileMaintenance"
+      ],
+      "groupName": "lock file maintenance"
+    },
+    {
       "description": "The windows crate major is dictated by whatever tauri locks; bump it with tauri, not on its own.",
       "matchManagers": [
         "cargo"

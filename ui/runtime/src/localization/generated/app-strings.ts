@@ -3913,6 +3913,8 @@ export const AppStrings = {
 					ModeUniqueChat: 'macrodeck.app:Integrations.Twitch.Actions.SetChatMode.ModeUniqueChat',
 					Name: 'macrodeck.app:Integrations.Twitch.Actions.SetChatMode.Name',
 					OnLabel: 'macrodeck.app:Integrations.Twitch.Actions.SetChatMode.OnLabel',
+					ToggleDescription: 'macrodeck.app:Integrations.Twitch.Actions.SetChatMode.ToggleDescription',
+					ToggleLabel: 'macrodeck.app:Integrations.Twitch.Actions.SetChatMode.ToggleLabel',
 				},
 				SetRedemptionStatus: {
 					Description: 'macrodeck.app:Integrations.Twitch.Actions.SetRedemptionStatus.Description',
@@ -10738,6 +10740,8 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Integrations.Twitch.Actions.SetChatMode.ModeUniqueChat': 'Unique chat',
 	'macrodeck.app:Integrations.Twitch.Actions.SetChatMode.Name': 'Set Chat Mode',
 	'macrodeck.app:Integrations.Twitch.Actions.SetChatMode.OnLabel': 'On',
+	'macrodeck.app:Integrations.Twitch.Actions.SetChatMode.ToggleDescription': 'Switches the mode to the opposite of its current state on Twitch. The On setting is ignored.',
+	'macrodeck.app:Integrations.Twitch.Actions.SetChatMode.ToggleLabel': 'Toggle',
 	'macrodeck.app:Integrations.Twitch.Actions.SetRedemptionStatus.Description': 'Marks a channel point redemption as completed or refunds it. Twitch only allows this for rewards created by this application - rewards made in the Twitch dashboard cannot be resolved through the API.',
 	'macrodeck.app:Integrations.Twitch.Actions.SetRedemptionStatus.Name': 'Resolve Reward Redemption',
 	'macrodeck.app:Integrations.Twitch.Actions.SetRedemptionStatus.RedemptionIdDescription': 'Usually a { "$event": "redemptionId" } reference.',
