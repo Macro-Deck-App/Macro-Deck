@@ -15,6 +15,8 @@ internal interface ITwitchHelixClient
 
 	Task<int?> GetFollowerCountAsync(string broadcasterId, CancellationToken cancellationToken);
 
+	Task<int?> GetChatterCountAsync(string broadcasterId, CancellationToken cancellationToken);
+
 	Task<TwitchSubscriberInfo> GetSubscriberInfoAsync(string broadcasterId, CancellationToken cancellationToken);
 
 	Task<TwitchChatSettings> GetChatSettingsAsync(string broadcasterId, CancellationToken cancellationToken);

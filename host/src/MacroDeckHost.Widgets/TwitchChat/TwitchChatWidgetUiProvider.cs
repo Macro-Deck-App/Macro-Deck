@@ -16,6 +16,7 @@ using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Localization;
 using MacroDeckHost.Widgets.Configuration;
 using MacroDeckHost.Widgets.Preview;
+using MacroDeckHost.Widgets.TwitchStats;
 using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Widgets.TwitchChat;
@@ -35,6 +36,7 @@ public sealed class TwitchChatWidgetUiProvider : IBuiltInIntegrationUiProvider
 	private readonly IFolderCache _folders;
 	private readonly IHostLockState _hostLock;
 	private readonly ILogger _logger;
+	private readonly TwitchStatsWidgetUiProvider? _stats;
 	private readonly Lazy<UiResource?> _icon;
 
 	public TwitchChatWidgetUiProvider(ITwitchChatFeed feed,
@@ -45,7 +47,8 @@ public sealed class TwitchChatWidgetUiProvider : IBuiltInIntegrationUiProvider
 		IUiInteractionsFactory interactions,
 		IFolderCache folders,
 		IHostLockState hostLock,
-		ILogger logger)
+		ILogger logger,
+		TwitchStatsWidgetUiProvider? stats = null)
 	{
 		_feed = feed;
 		_images = images;
@@ -56,6 +59,7 @@ public sealed class TwitchChatWidgetUiProvider : IBuiltInIntegrationUiProvider
 		_folders = folders;
 		_hostLock = hostLock;
 		_logger = logger.ForContext<TwitchChatWidgetUiProvider>();
+		_stats = stats;
 		_icon = new Lazy<UiResource?>(RegisterIcon);
 	}
 
@@ -78,6 +82,11 @@ public sealed class TwitchChatWidgetUiProvider : IBuiltInIntegrationUiProvider
 		ArgumentNullException.ThrowIfNull(request);
 
 		var surface = request.Surface;
+
+		if (_stats is not null && TwitchStatsWidgetUiProvider.Serves(surface))
+		{
+			return await _stats.CreateSessionAsync(request, cancellationToken).ConfigureAwait(false);
+		}
 
 		if (surface.Kind == UiSurfaceKinds.Config)
 		{

@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.Twitch.Stats;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations;
 using MacroDeckHost.Integrations.Adb;
@@ -20,8 +21,14 @@ internal static class IntegrationGatewayBinder
 		IVariableRefreshSignal refreshSignal,
 		IKnownAudioDeviceStore? knownAudioDevices = null,
 		IVariablePollingInvalidationSignal? pollingInvalidation = null,
-		ITwitchChatSink? twitchChatSink = null)
+		ITwitchChatSink? twitchChatSink = null,
+		ITwitchStatsSink? twitchStatsSink = null)
 	{
+		if (twitchStatsSink is not null && integration is ITwitchStatsSinkConsumer statsConsumer)
+		{
+			statsConsumer.UseTwitchStatsSink(twitchStatsSink);
+		}
+
 		if (twitchChatSink is not null && integration is ITwitchChatSinkConsumer chatConsumer)
 		{
 			chatConsumer.UseTwitchChatSink(twitchChatSink);

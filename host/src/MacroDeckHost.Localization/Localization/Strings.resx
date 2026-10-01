@@ -9524,6 +9524,90 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Twitch.ChatWidget.SampleMessage3" xml:space="preserve">
     <value>See you next stream</value>
   </data>
+  <data name="Integrations.Twitch.StatsWidget.Description" xml:space="preserve">
+    <value>Shows your live status, viewers, chatters, followers and subscribers at a glance.</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Name" xml:space="preserve">
+    <value>Twitch Stream Stats</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Heading" xml:space="preserve">
+    <value>Twitch</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Live" xml:space="preserve">
+    <value>Live</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Offline" xml:space="preserve">
+    <value>Offline</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Viewers" xml:space="preserve">
+    <value>Viewers</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Chatters" xml:space="preserve">
+    <value>Chatters</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Followers" xml:space="preserve">
+    <value>Followers</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Subscribers" xml:space="preserve">
+    <value>Subscribers</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Style" xml:space="preserve">
+    <value>Style</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.StyleDescription" xml:space="preserve">
+    <value>Decides what the widget shows. The size in brackets is the one the style is designed for; it adapts to any other size.</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.StyleOverview" xml:space="preserve">
+    <value>Overview (3x2)</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.StyleStatsRow" xml:space="preserve">
+    <value>Stats row (3x1)</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.StyleLiveRow" xml:space="preserve">
+    <value>Live status row (3x1)</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.StyleValueGraph" xml:space="preserve">
+    <value>Single value with graph (2x2)</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.StyleValue" xml:space="preserve">
+    <value>Single value (1x1)</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Metric" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.MetricDescription" xml:space="preserve">
+    <value>Which number the widget shows.</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.OfflineHint" xml:space="preserve">
+    <value>Not live right now</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Tiles" xml:space="preserve">
+    <value>Stats</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.TilesDescription" xml:space="preserve">
+    <value>Which numbers the tiles show, in this order. Four tiles fit best in a widget one column wider than recommended.</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Details" xml:space="preserve">
+    <value>Stream details</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.DetailsDescription" xml:space="preserve">
+    <value>Which details the overview shows next to the thumbnail, in this order.</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Uptime" xml:space="preserve">
+    <value>Uptime</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.ShowThumbnail" xml:space="preserve">
+    <value>Show thumbnail</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.AccountDescription" xml:space="preserve">
+    <value>Whose channel stats to show.</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.SampleTitle" xml:space="preserve">
+    <value>Exploring Night City</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.SampleCategory" xml:space="preserve">
+    <value>Cyberpunk 2077</value>
+  </data>
   <data name="Integrations.Twitch.Config.AccountResolutionFailed" xml:space="preserve">
     <value>Twitch issued the token but did not say which account it belongs to. Continue to try again.</value>
   </data>
@@ -10200,6 +10284,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Twitch.Issues.DuplicateAccountTitle" xml:space="preserve">
     <value>Twitch account connected twice</value>
   </data>
+  <data name="Integrations.Twitch.Issues.MissingChattersScopeDescription" xml:space="preserve">
+    <value>This account has not granted permission to read the chatter count, so chatter_count stays empty. Connect the account again to grant it.</value>
+  </data>
+  <data name="Integrations.Twitch.Issues.MissingChattersScopeTitle" xml:space="preserve">
+    <value>Chatter count unavailable for {account}</value>
+  </data>
   <data name="Integrations.Twitch.Issues.MissingScopeDescription" xml:space="preserve">
     <value>Twitch did not grant every permission Macro Deck asked for, so these events will not fire: {events}. Connect the account again to grant them.</value>
   </data>
@@ -10226,6 +10316,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.Twitch.Variables.FollowerCount" xml:space="preserve">
     <value>Follower count</value>
+  </data>
+  <data name="Integrations.Twitch.Variables.ChatterCount" xml:space="preserve">
+    <value>Chatters in chat</value>
   </data>
   <data name="Integrations.Twitch.Variables.FollowersOnly" xml:space="preserve">
     <value>Followers only</value>
@@ -10259,6 +10352,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.Twitch.Variables.StreamCategory" xml:space="preserve">
     <value>Stream category</value>
+  </data>
+  <data name="Integrations.Twitch.Variables.StreamThumbnailUrl" xml:space="preserve">
+    <value>Stream thumbnail URL</value>
   </data>
   <data name="Integrations.Twitch.Variables.StreamTitle" xml:space="preserve">
     <value>Stream title</value>

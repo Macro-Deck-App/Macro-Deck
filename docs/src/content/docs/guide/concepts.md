@@ -37,6 +37,7 @@ The tiles in a folder:
 | Weather | Today and the next days for your city. Press it for the full details |
 | Music Player | What Spotify is playing, with play and skip. Some players offer extra settings for each widget below the player choice |
 | Twitch Chat | Your channel's chat with emotes and badges, offered once a Twitch account is connected |
+| Twitch Stream Stats | Whether you are live, your viewers, chatters, followers and subscribers, the stream title, category and uptime, and a small graph, in a style you choose, offered once a Twitch account is connected |
 | Countdown | A pizza timer that counts down and alerts you when it runs out |
 | Stopwatch | How long the current segment of your stream has been running |
 
@@ -58,6 +59,38 @@ actions; moderate those on Twitch. Anyone who can use your deck can moderate thr
 show the chat, turn off **Allow moderation in the chat dialog** in the widget's settings. Widgets that a
 plugin places in its own profiles open the chat without moderation. The dialog opens on the device you
 pressed the widget on, so a press on a hardware deck does not open it.
+
+### The Twitch Stream Stats widget
+
+Pick what the widget shows with **Style** in its settings. Each style names the size it is designed for, and
+keeps the same content at any other size, only larger or smaller:
+
+| Style | Shows |
+| --- | --- |
+| **Overview (3x2)** | Your channel name and live status, the stream thumbnail, title, category and uptime, and a row of stat tiles |
+| **Stats row (3x1)** | A row of stat tiles |
+| **Live status row (3x1)** | The live status and category, with one number beside them |
+| **Single value with graph (2x2)** | One number, the live status and a graph of that number |
+| **Single value (1x1)** | One number with a live dot |
+
+For the Overview and the Stats row, **Stats** chooses which tiles appear, out of viewers, chatters, followers
+and subscribers, and in which order: drag a row or use its arrows. Viewers, chatters and followers are on by
+default. Four tiles fit best in a widget one column wider than the style's size. The Overview also has
+**Stream details**, which chooses and orders the title, category and uptime next to the thumbnail, and
+**Show thumbnail**. For the other three styles, **Value** chooses the number they show.
+
+The graph follows the chosen number. It starts when the widget is first shown and begins again after Macro
+Deck restarts, so it fills over time; followers and subscribers change slowly, so their graph often stays
+flat. Offline, viewers and chatters show a dash, while followers and subscribers stay. Subscribers also show a
+dash while Twitch does not report them to Macro Deck.
+
+Everything the widget shows is also a regular variable of the Twitch integration, named
+`twitch_<account>_viewer_count`, `twitch_<account>_chatter_count`, `twitch_<account>_follower_count`,
+`twitch_<account>_subscriber_count`, `twitch_<account>_display_name`, `twitch_<account>_stream_title`,
+`twitch_<account>_stream_category`, `twitch_<account>_uptime_seconds`, `twitch_<account>_is_live` and
+`twitch_<account>_stream_thumbnail_url`. Use them in your own widgets, actions
+and conditions. The chatter count is everyone in your chat, including you and bots, and needs one more
+permission: if **Integrations** shows that the account lacks it, reconnect the Twitch account.
 
 ### Countdown and Stopwatch
 

@@ -9523,6 +9523,90 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Twitch.ChatWidget.SampleMessage3" xml:space="preserve">
     <value>Na viděnou u dalšího streamu</value>
   </data>
+  <data name="Integrations.Twitch.StatsWidget.Description" xml:space="preserve">
+    <value>Zobrazuje stav vysílání, diváky, lidi v chatu, sledující a odběratele na první pohled.</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Name" xml:space="preserve">
+    <value>Statistiky vysílání na Twitchi</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Heading" xml:space="preserve">
+    <value>Twitch</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Live" xml:space="preserve">
+    <value>Živě</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Offline" xml:space="preserve">
+    <value>Offline</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Viewers" xml:space="preserve">
+    <value>Diváci</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Chatters" xml:space="preserve">
+    <value>V chatu</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Followers" xml:space="preserve">
+    <value>Sledující</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Subscribers" xml:space="preserve">
+    <value>Odběratelé</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Style" xml:space="preserve">
+    <value>Styl</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.StyleDescription" xml:space="preserve">
+    <value>Určuje, co widget zobrazuje. Velikost v závorce je ta, pro kterou je styl navržen; přizpůsobí se i jiné velikosti.</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.StyleOverview" xml:space="preserve">
+    <value>Přehled (3x2)</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.StyleStatsRow" xml:space="preserve">
+    <value>Řádek statistik (3x1)</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.StyleLiveRow" xml:space="preserve">
+    <value>Řádek stavu vysílání (3x1)</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.StyleValueGraph" xml:space="preserve">
+    <value>Jedna hodnota s grafem (2x2)</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.StyleValue" xml:space="preserve">
+    <value>Jedna hodnota (1x1)</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Metric" xml:space="preserve">
+    <value>Hodnota</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.MetricDescription" xml:space="preserve">
+    <value>Které číslo widget zobrazuje.</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.OfflineHint" xml:space="preserve">
+    <value>Právě se nevysílá</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Tiles" xml:space="preserve">
+    <value>Statistiky</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.TilesDescription" xml:space="preserve">
+    <value>Která čísla dlaždice zobrazují, v tomto pořadí. Čtyři dlaždice se nejlépe vejdou do widgetu o jeden sloupec širšího, než je doporučeno.</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Details" xml:space="preserve">
+    <value>Podrobnosti vysílání</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.DetailsDescription" xml:space="preserve">
+    <value>Které podrobnosti přehled zobrazuje vedle náhledu, v tomto pořadí.</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Uptime" xml:space="preserve">
+    <value>Doba vysílání</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.ShowThumbnail" xml:space="preserve">
+    <value>Zobrazit náhled</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.AccountDescription" xml:space="preserve">
+    <value>Statistiky kterého kanálu zobrazit.</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.SampleTitle" xml:space="preserve">
+    <value>Průzkum Night City</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.SampleCategory" xml:space="preserve">
+    <value>Cyberpunk 2077</value>
+  </data>
   <data name="Integrations.Twitch.Config.AccountResolutionFailed" xml:space="preserve">
     <value>Twitch vydal token, ale neuvedl, ke kterému účtu patří. Pokračujte a zkuste to znovu.</value>
   </data>
@@ -10199,6 +10283,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Twitch.Issues.DuplicateAccountTitle" xml:space="preserve">
     <value>Účet Twitch připojen dvakrát</value>
   </data>
+  <data name="Integrations.Twitch.Issues.MissingChattersScopeDescription" xml:space="preserve">
+    <value>Tento účet neudělil oprávnění ke čtení počtu lidí v chatu, takže chatter_count zůstane prázdný. Pro udělení oprávnění připojte účet znovu.</value>
+  </data>
+  <data name="Integrations.Twitch.Issues.MissingChattersScopeTitle" xml:space="preserve">
+    <value>Počet lidí v chatu není pro {account} dostupný</value>
+  </data>
   <data name="Integrations.Twitch.Issues.MissingScopeDescription" xml:space="preserve">
     <value>Twitch neudělil všechna oprávnění, o která Macro Deck požádal, takže se tyto události nespustí: {events}. Pro jejich udělení připojte účet znovu.</value>
   </data>
@@ -10225,6 +10315,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Twitch.Variables.FollowerCount" xml:space="preserve">
     <value>Počet sledujících</value>
+  </data>
+  <data name="Integrations.Twitch.Variables.ChatterCount" xml:space="preserve">
+    <value>Počet lidí v chatu</value>
   </data>
   <data name="Integrations.Twitch.Variables.FollowersOnly" xml:space="preserve">
     <value>Pouze sledující</value>
@@ -10258,6 +10351,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Twitch.Variables.StreamCategory" xml:space="preserve">
     <value>Kategorie vysílání</value>
+  </data>
+  <data name="Integrations.Twitch.Variables.StreamThumbnailUrl" xml:space="preserve">
+    <value>Adresa náhledu vysílání</value>
   </data>
   <data name="Integrations.Twitch.Variables.StreamTitle" xml:space="preserve">
     <value>Název vysílání</value>

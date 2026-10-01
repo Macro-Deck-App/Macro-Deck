@@ -2,6 +2,7 @@ using System.Text.Json;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Previews;
+using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Widgets.Clock;
@@ -18,13 +19,14 @@ public sealed class WidgetUiPreviewSource : IUiPreviewSource
 	private readonly Lazy<UiPreviewScanResult> _scan
 		= new(() => UiPreviewCatalog.Scan(typeof(ClockWidgetView).Assembly));
 
-	public WidgetUiPreviewSource(IUiResourceStore resources)
+	public WidgetUiPreviewSource(IUiResourceStore resources, IIntegrationRegistry integrations)
 	{
 		ArgumentNullException.ThrowIfNull(resources);
+		ArgumentNullException.ThrowIfNull(integrations);
 
 		// Before any scenario can be built: a scenario registers its icons in this store, and one
 		// registered anywhere else is never served to the client.
-		WidgetPreviewResources.Use(resources);
+		WidgetPreviewResources.Use(resources, integrations);
 	}
 
 	public IReadOnlyList<UiSurfaceDeclaration> Surfaces { get; } =
