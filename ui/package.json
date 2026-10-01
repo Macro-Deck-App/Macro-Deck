@@ -17,6 +17,7 @@
     "start:angular": "npm start -w macro-deck-ui-angular",
     "test:runtime": "npm test -w @macro-deck/runtime",
     "build:web-client": "npm run build -w @macro-deck/runtime && npm run build -w @macro-deck/web-client",
-    "test:web-client": "npm test -w @macro-deck/web-client"
+    "test:web-client": "npm test -w @macro-deck/web-client",
+    "build:preview-renderer": "node scripts/build-preview-renderer.mjs"
   }
 }

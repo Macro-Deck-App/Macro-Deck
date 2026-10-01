@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using MacroDeckHost.Application.Connect;
@@ -128,6 +129,113 @@ internal sealed class PlatformLicenseAccountClientTests
 			Assert.That(text, Does.Not.Contain("secret.license.token"));
 		});
 	}
+
+	[Test]
+	public async Task A_promo_code_is_posted_as_typed_with_the_account_token()
+	{
+		var handler = new ScriptedHandler(_ => Json(HttpStatusCode.OK, """{ "license": "a.b.c", "revision": 1 }"""));
+		using var client = Client(handler, out _);
+
+		var result = await client.RedeemPromoCodeAsync("abcd-efgh-jkmn-pqrs", default);
+
+		var request = handler.Requests.Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(result, Is.EqualTo(new PlatformPromoCodeResult.Redeemed("a.b.c")));
+			Assert.That(request.Method, Is.EqualTo(HttpMethod.Post));
+			Assert.That(request.RequestUri!.PathAndQuery, Is.EqualTo("/api/v1/companion-licenses/promo-code"));
+			Assert.That(request.Headers.Authorization?.ToString(), Is.EqualTo("Bearer access-token"));
+			Assert.That(JsonDocument.Parse(handler.Bodies.Single()).RootElement.GetProperty("code").GetString(),
+				Is.EqualTo("abcd-efgh-jkmn-pqrs"));
+		});
+	}
+
+	[Test]
+	public async Task A_signed_out_host_does_not_send_a_promo_code()
+	{
+		var handler = new ScriptedHandler(_ => Json(HttpStatusCode.OK, "{}"));
+		using var client = new PlatformLicenseAccountClient(handler,
+			Options,
+			new FakeConnectSessionService(),
+			new LoggerConfiguration().CreateLogger());
+
+		var result = await client.RedeemPromoCodeAsync("ABCD", default);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result, Is.InstanceOf<PlatformPromoCodeResult.SignedOut>());
+			Assert.That(handler.Requests, Is.Empty);
+		});
+	}
+
+	[TestCase(HttpStatusCode.NotFound, """{ "code": "invalid-promo-code" }""", "rejected:Invalid")]
+	[TestCase(HttpStatusCode.BadRequest, """{ "title": "bad" }""", "rejected:Invalid")]
+	[TestCase(HttpStatusCode.Gone, """{ "code": "promo-code-expired" }""", "rejected:Expired")]
+	[TestCase(HttpStatusCode.Conflict, """{ "code": "promo-code-redeemed" }""", "rejected:AlreadyRedeemed")]
+	[TestCase(HttpStatusCode.Conflict,
+		"""{ "code": "account-license-exists", "license": "x.y.z", "revision": 2 }""",
+		"exists:x.y.z")]
+	[TestCase(HttpStatusCode.Forbidden, """{ "code": "license-revoked" }""", "rejected:Revoked")]
+	[TestCase(HttpStatusCode.Forbidden, """{ "title": "suspended" }""", "suspended")]
+	[TestCase(HttpStatusCode.Unauthorized, "", "signedOut")]
+	[TestCase(HttpStatusCode.TooManyRequests, "", "limited:")]
+	[TestCase(HttpStatusCode.ServiceUnavailable, """{ "code": "promo-codes-not-configured" }""", "unavailable")]
+	[TestCase(HttpStatusCode.ServiceUnavailable, """{ "code": "licensing-not-configured" }""", "unavailable")]
+	[TestCase(HttpStatusCode.NotFound, "", "unavailable")]
+	[TestCase(HttpStatusCode.OK, """{ "revision": 1 }""", "unavailable")]
+	[TestCase(HttpStatusCode.OK, "not json", "unavailable")]
+	[TestCase(HttpStatusCode.Conflict, """{ "code": "account-license-exists" }""", "unavailable")]
+	public async Task Every_promo_code_answer_maps_to_an_outcome_the_ui_can_explain(HttpStatusCode status,
+		string body,
+		string expected)
+	{
+		using var client = Client(new ScriptedHandler(_ => Json(status, body)), out _);
+
+		var result = await client.RedeemPromoCodeAsync("ABCD", default);
+
+		Assert.That(DescribePromo(result), Is.EqualTo(expected));
+	}
+
+	[Test]
+	public async Task A_rate_limited_promo_code_carries_the_retry_after_delay()
+	{
+		var response = Json(HttpStatusCode.TooManyRequests, "");
+		response.Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(120));
+		using var client = Client(new ScriptedHandler(_ => response), out _);
+
+		var result = await client.RedeemPromoCodeAsync("ABCD", default);
+
+		Assert.That(result, Is.EqualTo(new PlatformPromoCodeResult.RateLimited(TimeSpan.FromSeconds(120))));
+	}
+
+	[Test]
+	public async Task A_promo_code_never_reaches_the_log()
+	{
+		using var client = Client(new ScriptedHandler(_ => Json(HttpStatusCode.ServiceUnavailable, "")), out var sink);
+
+		await client.RedeemPromoCodeAsync("SECRET-PROMO-CODE", default);
+
+		var text = string.Join('\n', sink.Events.Select(logEvent => logEvent.RenderMessage(CultureInfo.InvariantCulture)));
+		Assert.Multiple(() =>
+		{
+			Assert.That(sink.Events, Is.Not.Empty);
+			Assert.That(text, Does.Not.Contain("SECRET-PROMO-CODE"));
+			Assert.That(text, Does.Not.Contain("access-token"));
+		});
+	}
+
+	private static string DescribePromo(PlatformPromoCodeResult result)
+		=> result switch
+		{
+			PlatformPromoCodeResult.Redeemed redeemed => $"redeemed:{redeemed.License}",
+			PlatformPromoCodeResult.AccountLicenseExists existing => $"exists:{existing.License}",
+			PlatformPromoCodeResult.Rejected rejected => $"rejected:{rejected.Reason}",
+			PlatformPromoCodeResult.AccountSuspended => "suspended",
+			PlatformPromoCodeResult.SignedOut => "signedOut",
+			PlatformPromoCodeResult.RateLimited limited => $"limited:{limited.RetryAfter}",
+			PlatformPromoCodeResult.Unavailable => "unavailable",
+			_ => result.ToString()!
+		};
 
 	private static string Describe(PlatformAccountLicenseResult result)
 		=> result switch

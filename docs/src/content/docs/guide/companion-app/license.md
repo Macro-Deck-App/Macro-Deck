@@ -1,6 +1,6 @@
 ---
 title: License and trial
-description: How the Companion app license works, how it reaches all your devices, the 7-day trial and the version without Google Play.
+description: How the Companion app license works, how it reaches all your devices, redeeming a promo code, the 7-day trial and the version without Google Play.
 ---
 
 The Companion app needs a license to open a deck. Every device can try it for free for 7 days first, and one
@@ -20,13 +20,33 @@ one itself.
    Deck servers, which needs an internet connection on the computer.
 3. Every other device that connects to this computer receives the license within moments.
 
-**Settings > Companion App** in Macro Deck shows whether the computer holds a license, and where it came from.
+**Settings > Companion App** in Macro Deck shows whether the computer holds a license. **Show details** reveals where it came
+from, the license ID and when it was issued.
 
 ![Settings > Companion App in Macro Deck: the License section reads Not licensed, and the install section notes that the app then runs as a 7-day trial](../../../../assets/guide/companion/desktop-companion-app-license.png)
 
 When you are signed in under **Settings > Account**, Macro Deck also saves the license to your Macro Deck
 account, and your other computers signed in to it receive it within about a minute. If a license does not show
 up, see [The Companion app stays unlicensed after a purchase](/guide/troubleshooting/#the-companion-app-stays-unlicensed-after-a-purchase).
+
+### Redeem a promo code
+
+Got a promo code for the Companion app? Redeem it in Macro Deck instead of buying the license:
+
+1. Sign in under **Settings > Account**. Without an account the **Redeem** button stays disabled and the License section says to sign in.
+2. Open **Settings > Companion App** and select **Redeem** in the License section.
+3. Enter the code in the dialog and select **Redeem**. Capitals, dashes and spaces do not matter.
+
+The license is then linked to your Macro Deck account and shows **Promo code** as its source. It reaches your
+other devices the same way a purchased license does. Macro Deck needs an internet connection to redeem a code, and
+the Companion app itself needs no change.
+
+Codes from Google Play or the App Store are not promo codes: Macro Deck does not accept them. Redeem those in the
+respective store.
+
+If the code does not work, Macro Deck says why: it is not valid, has expired or was already redeemed, or your
+account is suspended. After too many attempts in a row, wait for the time Macro Deck names and try again. The
+**Redeem** button is not shown while the computer already holds a purchased license, and a code is then not used up.
 
 ### Giving the license to another computer
 

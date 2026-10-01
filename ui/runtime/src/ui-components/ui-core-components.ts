@@ -19,6 +19,7 @@ import { uiToggleComponent } from './ui-toggle.component';
 import { uiSegmentedComponent } from './ui-segmented.component';
 import { uiDialComponent } from './ui-dial.component';
 import { uiResponsiveComponent } from './ui-responsive.component';
+import { uiFirstFitComponent } from './ui-first-fit.component';
 
 export const UI_CORE_COMPONENTS: readonly UiComponentDefinition[] = [
   uiStackComponent,
@@ -41,4 +42,5 @@ export const UI_CORE_COMPONENTS: readonly UiComponentDefinition[] = [
   uiDialComponent,
   uiModifierComponent,
   uiResponsiveComponent,
+  uiFirstFitComponent,
 ];

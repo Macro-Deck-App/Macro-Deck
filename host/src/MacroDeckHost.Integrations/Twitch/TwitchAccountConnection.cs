@@ -57,6 +57,10 @@ internal sealed class TwitchAccountConnection : IDisposable
 
 	public IReadOnlyList<string> MissingScopeEvents => _missingScopeEvents;
 
+	public bool MissesChattersScope
+		=> Tokens.Scopes is { Count: > 0 } granted &&
+			!granted.Contains(TwitchScopes.ModeratorReadChatters, StringComparer.Ordinal);
+
 	public bool NeedsReauthorization => Tokens.NeedsReauthorization || _authorizationLost;
 
 	public void Start(TwitchEventSubOptions? options = null, TwitchStatePollerOptions? pollerOptions = null)

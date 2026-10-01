@@ -273,7 +273,7 @@ persisted. See
 New component types and properties are additive. The [modifiers](/ui/components/modifier/) added a
 `modifiers` property an older reader ignores, five gesture event names it never sends, and the `ui.modifier`
 type it answers with the node's `fallback`; `UiModelVersions` did not move. [Responsive layouts](/ui/components/responsive/)
-added the `ui.responsive` type the same way. See
+added the `ui.responsive` type the same way, and [first-fit layouts](/ui/components/first-fit/) the `ui.first-fit` type. See
 [UI model compatibility](/ui/reference/compatibility/#additions-that-moved-no-version).
 
 ### What "maintained per major" means in practice

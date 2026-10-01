@@ -38,6 +38,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <EmbeddedResource Include="Rendering\Assets\*.gz" />
+    </ItemGroup>
+
+    <ItemGroup>
         <InternalsVisibleTo Include="MacroDeck.Plugin.Cli.Tests.UnitTests" />
     </ItemGroup>
 

@@ -27,6 +27,7 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 	public const int MaximumPendingLegacyAppProofs = 2;
 	public const string RefusedProofKeysKey = "license.refusedProofKeys";
 	public const int MaximumRefusedProofKeys = 64;
+	public const int MaximumPromoCodeLength = 64;
 	public const string PlatformRevokedIdsKey = "license.platformRevokedIds";
 	public const string AccountEligibleIdKey = "license.accountEligibleId";
 	public const string NoAccountEligibleId = "none";
@@ -57,6 +58,7 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 	private readonly CompanionLicenseTokens _tokens;
 	private readonly CompanionDeviceRegistry _companions;
 	private readonly IUiTransport _ui;
+	private readonly IPlatformLicenseAccountClient _accounts;
 	private readonly IUserNotificationStore _notifications;
 	private readonly ILocalizationResolver _localization;
 	private readonly IDataProtector _proofProtector;
@@ -82,6 +84,7 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 
 	public CompanionLicenseService(IServiceScopeFactory scopeFactory,
 		IPlatformLicenseClient platform,
+		IPlatformLicenseAccountClient accounts,
 		CompanionLicenseTokens tokens,
 		CompanionDeviceRegistry companions,
 		IUiTransport ui,
@@ -90,13 +93,14 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 		IDataProtectionProvider dataProtection,
 		TimeProvider time,
 		ILogger logger)
-		: this(scopeFactory, platform, tokens, companions, ui, notifications, localization, dataProtection, time,
+		: this(scopeFactory, platform, accounts, tokens, companions, ui, notifications, localization, dataProtection, time,
 			Random.Shared.NextDouble, logger)
 	{
 	}
 
 	internal CompanionLicenseService(IServiceScopeFactory scopeFactory,
 		IPlatformLicenseClient platform,
+		IPlatformLicenseAccountClient accounts,
 		CompanionLicenseTokens tokens,
 		CompanionDeviceRegistry companions,
 		IUiTransport ui,
@@ -109,6 +113,7 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 	{
 		_scopeFactory = scopeFactory;
 		_platform = platform;
+		_accounts = accounts;
 		_tokens = tokens;
 		_companions = companions;
 		_ui = ui;
@@ -200,6 +205,81 @@ public sealed class CompanionLicenseService : ICompanionLicenseService, IDisposa
 				}
 			}
 		}
+	}
+
+	public async Task<PromoCodeRedemptionResult> RedeemPromoCodeAsync(string? code, CancellationToken cancellationToken)
+	{
+		var trimmed = code?.Trim();
+		if (string.IsNullOrEmpty(trimmed) || trimmed.Length > MaximumPromoCodeLength)
+		{
+			return new PromoCodeRedemptionResult(PromoCodeRedemptionStatus.Invalid);
+		}
+
+		bool developerMode;
+		await using (var scope = _scopeFactory.CreateAsyncScope())
+		{
+			developerMode = await DeveloperModeAsync(scope.ServiceProvider);
+		}
+
+		var holdsLicense = await LockedAsync(
+			async preferences => await _tokens.VerifyAsync(await StoredTokenAsync(preferences), developerMode) is { IsTest: false },
+			cancellationToken);
+		if (holdsLicense)
+		{
+			return new PromoCodeRedemptionResult(PromoCodeRedemptionStatus.AlreadyLicensed);
+		}
+
+		var answer = await _accounts.RedeemPromoCodeAsync(trimmed, cancellationToken);
+		switch (answer)
+		{
+			case PlatformPromoCodeResult.Redeemed redeemed:
+				return await AdoptRedeemedAsync(redeemed.License, PromoCodeRedemptionStatus.Redeemed, developerMode, cancellationToken);
+			case PlatformPromoCodeResult.AccountLicenseExists existing:
+				return await AdoptRedeemedAsync(existing.License,
+					PromoCodeRedemptionStatus.AccountLicenseExists,
+					developerMode,
+					cancellationToken);
+			case PlatformPromoCodeResult.Rejected rejected:
+				return new PromoCodeRedemptionResult(rejected.Reason switch
+				{
+					PromoCodeRejection.Expired => PromoCodeRedemptionStatus.Expired,
+					PromoCodeRejection.AlreadyRedeemed => PromoCodeRedemptionStatus.AlreadyRedeemed,
+					PromoCodeRejection.Revoked => PromoCodeRedemptionStatus.Revoked,
+					_ => PromoCodeRedemptionStatus.Invalid
+				});
+			case PlatformPromoCodeResult.AccountSuspended:
+				return new PromoCodeRedemptionResult(PromoCodeRedemptionStatus.AccountSuspended);
+			case PlatformPromoCodeResult.RateLimited limited:
+				return new PromoCodeRedemptionResult(PromoCodeRedemptionStatus.RateLimited,
+					limited.RetryAfter is { } wait ? (int)Math.Ceiling(Math.Max(0, wait.TotalSeconds)) : null);
+			case PlatformPromoCodeResult.SignedOut:
+				return new PromoCodeRedemptionResult(PromoCodeRedemptionStatus.SignedOut);
+			default:
+				return new PromoCodeRedemptionResult(PromoCodeRedemptionStatus.Unavailable);
+		}
+	}
+
+	private async Task<PromoCodeRedemptionResult> AdoptRedeemedAsync(string token,
+		string success,
+		bool developerMode,
+		CancellationToken cancellationToken)
+	{
+		var verified = await _tokens.VerifyAsync(token, developerMode);
+		if (verified is null)
+		{
+			_logger.Warning("The Macro Deck Platform answered a promo code redemption with a license this host cannot verify");
+			return new PromoCodeRedemptionResult(PromoCodeRedemptionStatus.Unavailable);
+		}
+
+		var stored = await AdoptAsync(token, cancellationToken);
+		if (stored?.LicenseId == verified.LicenseId)
+		{
+			return new PromoCodeRedemptionResult(success);
+		}
+
+		return new PromoCodeRedemptionResult(stored is null
+			? PromoCodeRedemptionStatus.Revoked
+			: PromoCodeRedemptionStatus.AlreadyLicensed);
 	}
 
 	internal async Task<AccountReconcileResult> ReconcileAccountAsync(string? accountToken,

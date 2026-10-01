@@ -71,6 +71,10 @@ internal sealed class PluginConnection : IAsyncDisposable
 
 	public string SessionId => _session.SessionId;
 
+	public UiPreviewSink UiPreviews { get; } = new();
+
+	public FakeUiResourceRegistry UiResources => _context.UiResources;
+
 	public int NegotiatedVersion => _session.NegotiatedVersion;
 
 	public bool Resumed { get; }
@@ -425,7 +429,8 @@ internal sealed class PluginConnection : IAsyncDisposable
 					cancellationToken,
 					_messaging,
 					_session.PluginId,
-					_uiResourceUploads)
+					_uiResourceUploads,
+					UiPreviews)
 				.ConfigureAwait(false);
 		}
 

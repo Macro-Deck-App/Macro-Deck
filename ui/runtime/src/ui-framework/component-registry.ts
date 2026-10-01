@@ -49,6 +49,8 @@ export interface UiComponentContext<TState = unknown> {
 
   keepFit(element: Element, fit: TextFit, signature: string): void;
 
+  onSettled(listener: () => void): () => void;
+
   emit(node: UiNode, name: string, payload?: unknown): void;
 
   pressTint(node: UiNode): void;

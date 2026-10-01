@@ -9523,6 +9523,90 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.Twitch.ChatWidget.SampleMessage3" xml:space="preserve">
     <value>Alla prossima live</value>
   </data>
+  <data name="Integrations.Twitch.StatsWidget.Description" xml:space="preserve">
+    <value>Mostra a colpo d'occhio stato live, spettatori, utenti in chat, follower e abbonati.</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Name" xml:space="preserve">
+    <value>Statistiche stream di Twitch</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Heading" xml:space="preserve">
+    <value>Twitch</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Live" xml:space="preserve">
+    <value>In diretta</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Offline" xml:space="preserve">
+    <value>Offline</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Viewers" xml:space="preserve">
+    <value>Spettatori</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Chatters" xml:space="preserve">
+    <value>In chat</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Followers" xml:space="preserve">
+    <value>Follower</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Subscribers" xml:space="preserve">
+    <value>Abbonati</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Style" xml:space="preserve">
+    <value>Stile</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.StyleDescription" xml:space="preserve">
+    <value>Decide cosa mostra il widget. La dimensione tra parentesi è quella per cui è pensato lo stile; si adatta a qualsiasi altra dimensione.</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.StyleOverview" xml:space="preserve">
+    <value>Panoramica (3x2)</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.StyleStatsRow" xml:space="preserve">
+    <value>Riga statistiche (3x1)</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.StyleLiveRow" xml:space="preserve">
+    <value>Riga stato live (3x1)</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.StyleValueGraph" xml:space="preserve">
+    <value>Valore singolo con grafico (2x2)</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.StyleValue" xml:space="preserve">
+    <value>Valore singolo (1x1)</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Metric" xml:space="preserve">
+    <value>Valore</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.MetricDescription" xml:space="preserve">
+    <value>Quale numero mostra il widget.</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.OfflineHint" xml:space="preserve">
+    <value>Non in diretta ora</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Tiles" xml:space="preserve">
+    <value>Statistiche</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.TilesDescription" xml:space="preserve">
+    <value>Quali numeri mostrano i riquadri, in questo ordine. Quattro riquadri stanno meglio in un widget più largo di una colonna rispetto a quanto consigliato.</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Details" xml:space="preserve">
+    <value>Dettagli dello stream</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.DetailsDescription" xml:space="preserve">
+    <value>Quali dettagli mostra la panoramica accanto all'anteprima, in questo ordine.</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.Uptime" xml:space="preserve">
+    <value>Durata della diretta</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.ShowThumbnail" xml:space="preserve">
+    <value>Mostra anteprima</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.AccountDescription" xml:space="preserve">
+    <value>Di quale canale mostrare le statistiche.</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.SampleTitle" xml:space="preserve">
+    <value>Esplorando Night City</value>
+  </data>
+  <data name="Integrations.Twitch.StatsWidget.SampleCategory" xml:space="preserve">
+    <value>Cyberpunk 2077</value>
+  </data>
   <data name="Integrations.Twitch.Config.AccountResolutionFailed" xml:space="preserve">
     <value>Twitch ha rilasciato il token ma non ha indicato a quale account appartiene. Premi Continua per riprovare.</value>
   </data>
@@ -10199,6 +10283,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.Twitch.Issues.DuplicateAccountTitle" xml:space="preserve">
     <value>Account Twitch connesso due volte</value>
   </data>
+  <data name="Integrations.Twitch.Issues.MissingChattersScopeDescription" xml:space="preserve">
+    <value>Questo account non ha concesso il permesso di leggere il numero di utenti in chat, quindi chatter_count resta vuoto. Connetti di nuovo l'account per concederlo.</value>
+  </data>
+  <data name="Integrations.Twitch.Issues.MissingChattersScopeTitle" xml:space="preserve">
+    <value>Numero di utenti in chat non disponibile per {account}</value>
+  </data>
   <data name="Integrations.Twitch.Issues.MissingScopeDescription" xml:space="preserve">
     <value>Twitch non ha concesso tutti i permessi richiesti da Macro Deck, quindi questi eventi non verranno attivati: {events}. Connetti di nuovo l'account per concederli.</value>
   </data>
@@ -10225,6 +10315,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Integrations.Twitch.Variables.FollowerCount" xml:space="preserve">
     <value>Numero follower</value>
+  </data>
+  <data name="Integrations.Twitch.Variables.ChatterCount" xml:space="preserve">
+    <value>Utenti in chat</value>
   </data>
   <data name="Integrations.Twitch.Variables.FollowersOnly" xml:space="preserve">
     <value>Solo follower</value>
@@ -10258,6 +10351,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Integrations.Twitch.Variables.StreamCategory" xml:space="preserve">
     <value>Categoria stream</value>
+  </data>
+  <data name="Integrations.Twitch.Variables.StreamThumbnailUrl" xml:space="preserve">
+    <value>URL dell'anteprima dello stream</value>
   </data>
   <data name="Integrations.Twitch.Variables.StreamTitle" xml:space="preserve">
     <value>Titolo stream</value>
@@ -13887,6 +13983,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Settings.License.Description" xml:space="preserve">
     <value>La licenza di Macro Deck Companion posseduta da questo host. L'host la consegna a ogni app Companion che si connette.</value>
   </data>
+  <data name="Settings.License.HideDetails" xml:space="preserve">
+    <value>Nascondi dettagli</value>
+  </data>
   <data name="Settings.License.Heading" xml:space="preserve">
     <value>Licenza</value>
   </data>
@@ -13895,9 +13994,6 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Settings.License.IssuedAtLabel" xml:space="preserve">
     <value>Emessa il</value>
-  </data>
-  <data name="Settings.License.KeyIdLabel" xml:space="preserve">
-    <value>Chiave di firma</value>
   </data>
   <data name="Settings.License.LicenseIdLabel" xml:space="preserve">
     <value>ID licenza</value>
@@ -13920,6 +14016,63 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Settings.License.PurchasedAtLabel" xml:space="preserve">
     <value>Acquistata il</value>
   </data>
+  <data name="Settings.License.Redeem.Heading" xml:space="preserve">
+    <value>Riscatta un codice promozionale</value>
+  </data>
+  <data name="Settings.License.Redeem.Description" xml:space="preserve">
+    <value>Hai un codice promozionale per l'app Companion? Inseriscilo qui per sbloccare la licenza per il tuo account Macro Deck.</value>
+  </data>
+  <data name="Settings.License.Redeem.CodeLabel" xml:space="preserve">
+    <value>Codice promozionale</value>
+  </data>
+  <data name="Settings.License.Redeem.CodePlaceholder" xml:space="preserve">
+    <value>XXXX-XXXX-XXXX-XXXX</value>
+  </data>
+  <data name="Settings.License.Redeem.Button" xml:space="preserve">
+    <value>Riscatta</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Redeemed" xml:space="preserve">
+    <value>Codice promozionale riscattato. La licenza Companion è sbloccata.</value>
+  </data>
+  <data name="Settings.License.Redeem.StoreCodesNote" xml:space="preserve">
+    <value>I codici di Google Play e dell'App Store non sono accettati qui. Riscattali in Google Play o nell'App Store.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.AccountLicenseExists" xml:space="preserve">
+    <value>Il tuo account Macro Deck ha già una licenza Companion. Ora viene usata qui.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.AlreadyLicensed" xml:space="preserve">
+    <value>Questo computer ha già una licenza Companion, quindi il codice non è stato usato.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Invalid" xml:space="preserve">
+    <value>Questo codice promozionale non è valido. Controlla il codice e riprova.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Expired" xml:space="preserve">
+    <value>Questo codice promozionale è scaduto.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.AlreadyRedeemed" xml:space="preserve">
+    <value>Questo codice promozionale è già stato riscattato.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Revoked" xml:space="preserve">
+    <value>La licenza associata a questo codice promozionale non è più valida.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.AccountSuspended" xml:space="preserve">
+    <value>Il tuo account Macro Deck è sospeso, quindi non è possibile riscattare codici promozionali.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.RateLimited" xml:space="preserve">
+    <value>Troppi tentativi. Riprova dopo {time}.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.RateLimitedSoon" xml:space="preserve">
+    <value>Troppi tentativi. Riprova tra qualche minuto.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Unavailable" xml:space="preserve">
+    <value>Al momento non è possibile riscattare codici promozionali. Riprova più tardi.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.SignedOut" xml:space="preserve">
+    <value>Accedi con il tuo account Macro Deck per riscattare un codice promozionale.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Failed" xml:space="preserve">
+    <value>Impossibile riscattare il codice promozionale. Riprova.</value>
+  </data>
   <data name="Settings.License.Source.AppStore" xml:space="preserve">
     <value>App Store</value>
   </data>
@@ -13929,11 +14082,17 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Settings.License.Source.GooglePlay" xml:space="preserve">
     <value>Google Play</value>
   </data>
+  <data name="Settings.License.Source.PromoCode" xml:space="preserve">
+    <value>Codice promozionale</value>
+  </data>
   <data name="Settings.License.Source.Test" xml:space="preserve">
     <value>Prova</value>
   </data>
   <data name="Settings.License.SourceLabel" xml:space="preserve">
     <value>Acquistata tramite</value>
+  </data>
+  <data name="Settings.License.ShowDetails" xml:space="preserve">
+    <value>Mostra dettagli</value>
   </data>
   <data name="Settings.License.StatusLabel" xml:space="preserve">
     <value>Stato</value>

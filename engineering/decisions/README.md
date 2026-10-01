@@ -59,6 +59,7 @@ code, protocol schemas, issue discussions or exhaustive option lists.
 - [0097 - Plugin-bundled icon packs are owned by declaration and named by key and icon name](0097-plugin-bundled-icon-packs.md)
 - [0099 - Video streams are host-brokered sessions with transport-neutral descriptions](0099-video-streams-are-host-brokered-sessions-with-transport-neutral-descriptions.md) (partially superseded by 0101)
 - [0101 - The host relays video stream media, and clients play only HLS and MJPEG](0101-the-host-relays-video-stream-media-and-clients-play-hls-and-mjpeg.md)
+- [0102 - The plugin CLI renders previews with an embedded runtime and a local browser](0102-the-plugin-cli-renders-previews-with-an-embedded-runtime-and-a-local-browser.md)
 
 ## Macro Deck UI
 
@@ -71,3 +72,4 @@ code, protocol schemas, issue discussions or exhaustive option lists.
 - [0068 - Device sessions push full surface snapshots, and layouts are provider-registered descriptors](0068-device-sessions-and-layouts.md)
 - [0075 - Widget types, folder views and modals are provider-registered and served through one provider](0075-provider-registered-surfaces.md)
 - [0094 - Responsive layouts are chosen by the reader](0094-responsive-layouts-are-chosen-by-the-reader.md)
+- [0102 - First-fit layouts are chosen by measured text](0102-first-fit-layouts-are-chosen-by-measured-text.md)

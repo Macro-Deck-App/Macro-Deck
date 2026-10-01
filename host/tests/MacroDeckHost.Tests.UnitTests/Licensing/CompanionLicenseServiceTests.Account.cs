@@ -583,6 +583,14 @@ internal sealed partial class CompanionLicenseServiceTests
 		public bool AnswerLicenseNullOnFirstGet { get; set; }
 		public PlatformAccountLicenseResult? GetAnswer { get; set; }
 		public Func<string, PlatformAccountLicenseResult>? PutAnswer { get; set; }
+		public ConcurrentQueue<string> RedeemLog { get; } = new();
+		public Func<string, PlatformPromoCodeResult> RedeemAnswer { get; set; } = _ => new PlatformPromoCodeResult.Unavailable();
+
+		public Task<PlatformPromoCodeResult> RedeemPromoCodeAsync(string code, CancellationToken cancellationToken)
+		{
+			RedeemLog.Enqueue(code);
+			return Task.FromResult(RedeemAnswer(code));
+		}
 
 		public void Store(string license)
 		{

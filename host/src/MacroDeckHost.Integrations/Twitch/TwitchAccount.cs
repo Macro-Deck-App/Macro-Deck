@@ -32,6 +32,10 @@ internal sealed record TwitchAccountState
 
 	public int? FollowerCount { get; init; }
 
+	public int? ChatterCount { get; init; }
+
+	public string? StreamThumbnailUrl { get; init; }
+
 	public int? SubscriberCount { get; init; }
 
 	public int? SubscriberPoints { get; init; }

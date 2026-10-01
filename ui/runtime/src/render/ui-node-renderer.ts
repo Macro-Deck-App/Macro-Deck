@@ -352,6 +352,7 @@ function renderInScope(
     dropPart,
     syncChildren,
     keepFit,
+    onSettled: listener => scope.onSettled(listener),
     emit,
     pressTint,
     isDisabled,

@@ -2,6 +2,7 @@ using System.CommandLine;
 using System.CommandLine.Help;
 using MacroDeck.Plugin.Cli.Building;
 using MacroDeck.Plugin.Cli.Commands;
+using MacroDeck.Plugin.Cli.Rendering;
 using MacroDeck.Plugin.Cli.Runtime;
 using MacroDeck.Plugin.Cli.Scaffolding;
 
@@ -17,7 +18,8 @@ internal static class CliEntryPoint
 	public static Command CreateRootCommand(CliPromptReader? prompt = null,
 		IPluginScaffoldGenerator? scaffoldGenerator = null,
 		IPluginBuildRunner? buildRunner = null,
-		IHostPairingProbe? pairingProbe = null)
+		IHostPairingProbe? pairingProbe = null,
+		Func<string, CancellationToken, Task<IPreviewScreenshotter>>? screenshotterFactory = null)
 	{
 		// A plain Command, not RootCommand: RootCommand's usage line takes its name from
 		// RootCommand.ExecutableName, which is the entry assembly's name (MacroDeck.Plugin.Cli) even when
@@ -25,7 +27,7 @@ internal static class CliEntryPoint
 		// MacroDeck.Plugin.Testing's InternalsVisibleTo. A Command constructed with an explicit name renders
 		// that name instead, for both the root and every subcommand's own usage line.
 		var rootCommand = new Command("macrodeck-plugin",
-			"macrodeck-plugin: build, validate, inspect, pack, merge, run, test, sign and verify Macro Deck plugins " +
+			"macrodeck-plugin: build, validate, inspect, pack, merge, run, test, preview, sign and verify Macro Deck plugins " +
 			"without a running host.");
 
 		// Only RootCommand adds --help/--version for you; a plain Command needs them added explicitly.
@@ -42,6 +44,7 @@ internal static class CliEntryPoint
 		rootCommand.Add(MergeCommand.Create());
 		rootCommand.Add(IconPackCommand.Create());
 		rootCommand.Add(RunCommand.Create(pairingProbe));
+		rootCommand.Add(PreviewCommand.Create(screenshotterFactory));
 		rootCommand.Add(TestCommand.Create());
 		rootCommand.Add(KeygenCommand.Create());
 		rootCommand.Add(SignCommand.Create());
@@ -57,9 +60,10 @@ internal static class CliEntryPoint
 		IPluginScaffoldGenerator? scaffoldGenerator = null,
 		IPluginBuildRunner? buildRunner = null,
 		IHostPairingProbe? pairingProbe = null,
+		Func<string, CancellationToken, Task<IPreviewScreenshotter>>? screenshotterFactory = null,
 		CancellationToken ct = default)
 	{
-		var rootCommand = CreateRootCommand(prompt, scaffoldGenerator, buildRunner, pairingProbe);
+		var rootCommand = CreateRootCommand(prompt, scaffoldGenerator, buildRunner, pairingProbe, screenshotterFactory);
 		var parseResult = rootCommand.Parse(args);
 		var console = ConsoleFactory.From(parseResult, output, error);
 

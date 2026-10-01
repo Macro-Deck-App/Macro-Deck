@@ -37,6 +37,8 @@ internal abstract class UiPropertyCell : UiDependent
 	/// evaluation produces.</summary>
 	internal UiMaterializedNode? Owner { get; private set; }
 
+	internal string NodeId { get; set; } = string.Empty;
+
 	/// <summary>Whether this cell is already in the view's dirty queue, so a state written twice before a
 	/// flush queues it once.</summary>
 	internal bool IsDirty { get; set; }
@@ -154,8 +156,28 @@ internal sealed class UiPropertyCell<T> : UiPropertyCell
 			return;
 		}
 
+		if (current is JsonElement { ValueKind: JsonValueKind.Undefined })
+		{
+			throw new UiViewException($"The property '{Key}' of the node '{NodeId}' holds an undefined JsonElement " +
+				"(default(JsonElement)), which has no JSON form. Use a defined value such as an empty array: " +
+				"JsonSerializer.SerializeToElement(Array.Empty<object>()).");
+		}
+
+		JsonElement element;
+
+		try
+		{
+			element = UiCanonicalJson.ToElement(current);
+		}
+		catch (InvalidOperationException exception)
+		{
+			throw new UiViewException($"The property '{Key}' of the node '{NodeId}' could not be serialized. " +
+				"An undefined JsonElement (default(JsonElement)) nested inside the value is the usual cause.",
+				exception);
+		}
+
 		_lastValue = current;
 		_lastPresent = true;
-		_lastElement = UiCanonicalJson.ToElement(current);
+		_lastElement = element;
 	}
 }

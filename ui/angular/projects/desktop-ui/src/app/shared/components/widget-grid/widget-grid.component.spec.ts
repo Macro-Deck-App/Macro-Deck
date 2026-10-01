@@ -378,9 +378,26 @@ describe('WidgetGridComponent empty cells during a live layout preview', () => {
     expect(coveredCells()).toEqual([0]);
   });
 
-  it('keeps the committed cells of a widget without a live rect, such as a hidden drag source', () => {
+  it('shows the cells of a hidden drag source as empty cells, since its visuals moved to the ghost', () => {
     const hidden: WidgetRenderState = { liveRect: null, hidden: true, dimmed: false, landing: false };
-    render([sized('a', 0, 0, 2, 1)], new Map([['a', hidden]]));
+    render([sized('a', 0, 0, 2, 1), sized('b', 0, 1, 1, 1)], new Map([['a', hidden]]));
+
+    expect(coveredCells()).toEqual([3]);
+  });
+
+  it('frees the cells of every hidden member of a group drag', () => {
+    const hidden: WidgetRenderState = { liveRect: null, hidden: true, dimmed: false, landing: false };
+    render(
+      [sized('a', 0, 0, 1, 1), sized('b', 1, 0, 1, 1), sized('c', 2, 0, 1, 1)],
+      new Map([['a', hidden], ['b', hidden]]),
+    );
+
+    expect(coveredCells()).toEqual([2]);
+  });
+
+  it('keeps the committed cells of a visible widget without a live rect, such as a dimmed one', () => {
+    const dimmed: WidgetRenderState = { liveRect: null, hidden: false, dimmed: true, landing: false };
+    render([sized('a', 0, 0, 2, 1)], new Map([['a', dimmed]]));
 
     expect(coveredCells()).toEqual([0, 1]);
   });

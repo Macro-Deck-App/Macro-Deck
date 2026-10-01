@@ -192,6 +192,27 @@ returns: Macro Deck's relay does that, and the harness has none. Use a fresh ses
 refusal is a failed outcome whose `details.reason` is a `video_stream_` reason. See
 [Video streams](/features/video-streams/#testing).
 
+## Testing previews
+
+`session.Ui`, a `UiTestClient` on the session `MacroDeckTestHost` returns, lists the plugin's
+[`[UiPreview]`](/ui/views/developer-preview/) scenarios and opens them the way Developer Tools does:
+
+```csharp
+var previews = await session.Ui.GetPreviewsAsync();
+var outcome = await session.Ui.OpenPreviewAsync(previews[0].Id, previews[0].Profile);
+
+Assert.That(outcome.Accepted, Is.True, outcome.FailureReason);
+Assert.That(outcome.Tree!.Value.GetProperty("root").GetProperty("id").GetString(), Is.EqualTo("station"));
+
+await session.Ui.CloseAsync(outcome.SessionId!);
+```
+
+`OpenPreviewAsync` waits for the first full tree. A scenario that throws, or an id the plugin does not
+declare, comes back with `Accepted` false and the plugin's reason in `FailureReason`. Later patches are not
+applied. `FindResource` returns the bytes of a resource the plugin registered, by the `resourceId` a tree
+references. The host side of the tree exists only for sessions this client opens: a plugin that pushes a tree
+on its own is still refused, as before. `macrodeck-plugin preview render` is built on this.
+
 ## Time and waiting
 
 ```csharp

@@ -100,6 +100,66 @@ internal sealed class TwitchStatePollerTests
 	}
 
 	[Test]
+	public async Task A_live_stream_reports_its_chatters_and_a_sized_thumbnail()
+	{
+		_helix.Stream = new TwitchStreamInfo(true,
+			120,
+			"Playing Hades",
+			"Hades",
+			DateTimeOffset.UtcNow,
+			"https://static-cdn.jtvnw.net/previews-ttv/live_user_streamer-440x248.jpg");
+		_helix.ChatterCount = 37;
+
+		await _poller.PollOnceAsync(includeRewards: false, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_state.ChatterCount, Is.EqualTo(37));
+			Assert.That(_state.StreamThumbnailUrl, Does.Contain("440x248"));
+		});
+	}
+
+	[Test]
+	public async Task Going_offline_clears_the_chatters_and_the_thumbnail_without_asking_for_chatters()
+	{
+		_helix.Stream = new TwitchStreamInfo(true, 120, "t", "c", DateTimeOffset.UtcNow, "https://x/a.jpg");
+		_helix.ChatterCount = 37;
+		await _poller.PollOnceAsync(includeRewards: false, CancellationToken.None);
+
+		_helix.Calls.Clear();
+		_helix.Stream = new TwitchStreamInfo(false, 0, null, null, null);
+		await _poller.PollOnceAsync(includeRewards: false, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_state.ChatterCount, Is.Null);
+			Assert.That(_state.StreamThumbnailUrl, Is.Null);
+			Assert.That(_helix.Calls, Does.Not.Contain("chatters"));
+		});
+	}
+
+	[Test]
+	public async Task A_missing_chatters_permission_empties_the_count_but_not_the_other_stats()
+	{
+		_helix.Stream = new TwitchStreamInfo(true, 120, "t", "c", DateTimeOffset.UtcNow);
+		_helix.ChatterCount = 37;
+		_helix.FollowerCount = 7;
+		await _poller.PollOnceAsync(includeRewards: false, CancellationToken.None);
+
+		_helix.FailingReads.Add("chatters");
+		_helix.FailingReadExceptions["chatters"] = new TwitchScopeException();
+		_helix.FollowerCount = 8;
+		await _poller.PollOnceAsync(includeRewards: false, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_state.ChatterCount, Is.Null, "a stale count must not outlive a refused read");
+			Assert.That(_state.ViewerCount, Is.EqualTo(120));
+			Assert.That(_state.FollowerCount, Is.EqualTo(8));
+		});
+	}
+
+	[Test]
 	public async Task Rewards_are_only_fetched_when_asked_for()
 	{
 		_helix.Rewards = [new TwitchCustomReward("r1", "Hydrate")];

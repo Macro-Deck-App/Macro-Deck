@@ -20,6 +20,8 @@ internal sealed class FakeTwitchHelixClient : ITwitchHelixClient
 
 	public int? FollowerCount { get; set; }
 
+	public int? ChatterCount { get; set; }
+
 	public TwitchSubscriberInfo Subscribers { get; set; } = new(null, null);
 
 	public TwitchChatSettings ChatSettings { get; set; } = new(null, null, null, null, null, null, null);
@@ -75,6 +77,9 @@ internal sealed class FakeTwitchHelixClient : ITwitchHelixClient
 
 	public Task<int?> GetFollowerCountAsync(string broadcasterId, CancellationToken cancellationToken)
 		=> Read("followers", FollowerCount);
+
+	public Task<int?> GetChatterCountAsync(string broadcasterId, CancellationToken cancellationToken)
+		=> Read("chatters", ChatterCount);
 
 	public Task<TwitchSubscriberInfo> GetSubscriberInfoAsync(string broadcasterId, CancellationToken cancellationToken)
 		=> Read("subscribers", Subscribers);

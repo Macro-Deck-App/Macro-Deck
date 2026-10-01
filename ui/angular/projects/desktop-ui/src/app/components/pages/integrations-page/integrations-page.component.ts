@@ -88,7 +88,7 @@ export class IntegrationsPageComponent implements OnInit {
   private inspectToken = 0;
 
   protected readonly replaceTarget =
-    signal<{ source: ArchiveSource; version: string | null; allowUnsigned: boolean } | null>(null);
+    signal<{ source: ArchiveSource; inspection: PluginInstallActionResponse; version: string | null; allowUnsigned: boolean } | null>(null);
 
 
   protected readonly disableMessage = computed(() => {
@@ -274,6 +274,14 @@ export class IntegrationsPageComponent implements OnInit {
     }
 
     const consented = replacing?.allowUnsigned ?? allowUnsigned;
+    const inspection = replacing?.inspection ?? this.pendingInstall()?.inspection;
+    if (!inspection) {
+      return;
+    }
+
+    if (replacing) {
+      this.pendingInstall.set({ source, inspection });
+    }
 
     this.installBusy.set(true);
     const result = await this.installation.install(source, force, consented).catch(() => null);
@@ -281,7 +289,7 @@ export class IntegrationsPageComponent implements OnInit {
 
     if (!force && result?.error?.code === PLUGIN_INSTALL_ERROR_ALREADY_INSTALLED) {
       this.pendingInstall.set(null);
-      this.replaceTarget.set({ source, version: result.version ?? null, allowUnsigned: consented });
+      this.replaceTarget.set({ source, inspection, version: result.version ?? null, allowUnsigned: consented });
       return;
     }
 

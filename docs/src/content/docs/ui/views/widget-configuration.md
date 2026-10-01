@@ -46,7 +46,7 @@ public static class GaugeConfigView
         var variable = new UiState<string>(ReadString(data, "variable") ?? string.Empty);
         var maximum = new UiState<double>(100);
         var flows = new UiState<JsonElement>(data.ValueKind == JsonValueKind.Object &&
-            data.TryGetProperty("flows", out var f) ? f : default);
+            data.TryGetProperty("flows", out var f) ? f : JsonSerializer.SerializeToElement(Array.Empty<object>()));
 
         return new UiWidgetConfiguration
         {
@@ -81,6 +81,9 @@ public static class GaugeConfigView
            v.ValueKind == JsonValueKind.String ? v.GetString() : null;
 }
 ```
+
+A `UiState<JsonElement>` must hold a defined value: `default(JsonElement)` has no JSON form, so building the
+view throws a `UiViewException` that names the node and property. Start from an empty array, as above.
 
 `ViewSession` is the adapter from [Serving a view](/ui/views/sessions/#example). The built-in Clock widget
 (`host/src/MacroDeckHost.Widgets/Clock/ClockWidgetConfigView.cs`) is a complete, larger example.

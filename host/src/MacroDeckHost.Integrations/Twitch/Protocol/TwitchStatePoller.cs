@@ -70,8 +70,30 @@ internal sealed class TwitchStatePoller : IDisposable
 					ViewerCount = stream.ViewerCount ?? state.ViewerCount,
 					StreamStartedAt = stream.StartedAt ?? (stream.IsLive ? state.StreamStartedAt : null),
 					StreamTitle = stream.Title ?? state.StreamTitle,
-					StreamCategory = stream.CategoryName ?? state.StreamCategory
+					StreamCategory = stream.CategoryName ?? state.StreamCategory,
+					StreamThumbnailUrl = stream.IsLive ? stream.ThumbnailUrl ?? state.StreamThumbnailUrl : null
 				});
+			});
+
+		await TryAsync("chatters",
+			async () =>
+			{
+				if (_merge(state => state).IsLive != true)
+				{
+					_merge(state => state with { ChatterCount = null });
+					return;
+				}
+
+				try
+				{
+					var chatters = await _helix.GetChatterCountAsync(_account.UserId, cancellationToken);
+					_merge(state => state with { ChatterCount = chatters });
+				}
+				catch (TwitchScopeException)
+				{
+					_merge(state => state with { ChatterCount = null });
+					throw;
+				}
 			});
 
 		await TryAsync("channel",

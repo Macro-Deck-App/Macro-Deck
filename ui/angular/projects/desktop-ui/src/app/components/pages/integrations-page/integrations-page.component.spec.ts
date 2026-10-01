@@ -651,6 +651,27 @@ describe('IntegrationsPageComponent plugin installation', () => {
     expect(apiSpy.installPluginArtifact.calls.mostRecent().args[1]).toBeTrue();
   });
 
+  it('shows the install dialog busy again while the forced reinstall runs and clears it afterwards', async () => {
+    await setup([]);
+    apiSpy.installPluginArtifact.and.resolveTo(
+      installResponse({ success: false, error: { code: 'already_installed', message: 'Already installed.' } }));
+    await access().onArtifactPicked(pickedInput());
+    await access().confirmInstall();
+    expect(access().pendingInstall()).toBeNull();
+
+    let release!: (value: PluginInstallActionResponse) => void;
+    apiSpy.installPluginArtifact.and.returnValue(new Promise(resolve => (release = resolve)));
+    const running = access().confirmInstall(true);
+
+    expect(access().pendingInstall()).not.toBeNull();
+
+    release(installResponse({ success: false, error: { code: 'failed', message: 'Nope.' } }));
+    await running;
+
+    expect(access().pendingInstall()).toBeNull();
+    expect(access().replaceTarget()).toBeNull();
+  });
+
   it('keeps the unsigned consent given for an already installed plugin when it is reinstalled', async () => {
     await setup([]);
     apiSpy.installPluginArtifact.and.resolveTo(

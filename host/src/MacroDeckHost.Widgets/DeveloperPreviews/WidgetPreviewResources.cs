@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Ui.Resources;
 
 namespace MacroDeckHost.Widgets.DeveloperPreviews;
@@ -19,5 +20,11 @@ internal static class WidgetPreviewResources
 
 	public static IUiResourceStore Store => _store;
 
-	public static void Use(IUiResourceStore store) => _store = store;
+	public static IIntegrationRegistry? Integrations { get; private set; }
+
+	public static void Use(IUiResourceStore store, IIntegrationRegistry? integrations = null)
+	{
+		_store = store;
+		Integrations = integrations;
+	}
 }

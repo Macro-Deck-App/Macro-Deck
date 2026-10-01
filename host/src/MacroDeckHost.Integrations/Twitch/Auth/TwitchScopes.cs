@@ -6,6 +6,7 @@ internal static class TwitchScopes
 	public const string UserWriteChat = "user:write:chat";
 	public const string ChannelReadSubscriptions = "channel:read:subscriptions";
 	public const string ModeratorReadFollowers = "moderator:read:followers";
+	public const string ModeratorReadChatters = "moderator:read:chatters";
 	public const string BitsRead = "bits:read";
 	public const string ChannelReadAds = "channel:read:ads";
 	public const string ChannelReadHypeTrain = "channel:read:hype_train";
@@ -33,6 +34,7 @@ internal static class TwitchScopes
 		UserWriteChat,
 		ChannelReadSubscriptions,
 		ModeratorReadFollowers,
+		ModeratorReadChatters,
 		BitsRead,
 		ChannelReadAds,
 		ChannelReadHypeTrain,
