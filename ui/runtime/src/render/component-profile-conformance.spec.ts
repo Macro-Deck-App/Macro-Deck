@@ -1104,9 +1104,22 @@ describe('component-profile conformance fixtures: coverage', () => {
       'conformance-history-graph-tree.json', 'conformance-gauge-tree.json',
       'conformance-building-blocks-tree.json', 'conformance-modifier-tree.json',
       'conformance-chat-tree.json', 'conformance-anchored-list-tree.json',
-      'conformance-video-stream-tree.json',
+      'conformance-video-stream-tree.json', 'conformance-first-fit-tree.json',
     ];
     for (const name of exercised) expect(() => loadTree(name)).not.toThrow();
+  });
+});
+
+describe('component-profile conformance fixtures: first-fit tree', () => {
+  it('paints every layout in order and shows the last one while nothing can be measured', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    renderUiNode(container, loadTree('conformance-first-fit-tree.json'), { width: 240, height: 240 }, null, 120, testHost());
+
+    const group = container.querySelector('[data-node-id="conformance.group"]')!;
+    const drawn = Array.from(group.children).map(child => child.getAttribute('data-node-id'));
+    expect(drawn).toEqual(['conformance.group.inline', 'conformance.group.stacked']);
+    container.remove();
   });
 });
 

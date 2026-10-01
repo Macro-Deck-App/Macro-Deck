@@ -19,6 +19,7 @@ export const UiComponents = {
   Dial: 'ui.dial',
   Modifier: 'ui.modifier',
   Responsive: 'ui.responsive',
+  FirstFit: 'ui.first-fit',
 } as const;
 
 export const UI_COMPONENTS_WELL_KNOWN: readonly string[] = [
@@ -27,6 +28,7 @@ export const UI_COMPONENTS_WELL_KNOWN: readonly string[] = [
   UiComponents.TextField, UiComponents.List, UiComponents.Transform, UiComponents.Shape,
   UiComponents.Icon, UiComponents.Grid, UiComponents.Gauge, UiComponents.Toggle,
   UiComponents.Segmented, UiComponents.Dial, UiComponents.Modifier, UiComponents.Responsive,
+  UiComponents.FirstFit,
 ];
 
 export const UiComponentShapes = {

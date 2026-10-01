@@ -488,7 +488,12 @@ public sealed class UiTestHost
 
 		if (node.Fallback is not null)
 		{
-			wrapper.SetFallback(BuildNode(node.Fallback, wrapper, path, drawn && !responsive, null, null));
+			wrapper.SetFallback(BuildNode(node.Fallback,
+				wrapper,
+				path,
+				drawn && !responsive && !string.Equals(node.Type, UiComponents.FirstFit, StringComparison.Ordinal),
+				null,
+				null));
 		}
 
 		return wrapper;

@@ -38,6 +38,8 @@ export interface TextFitScope {
   leave(): void;
 
   settle(): void;
+
+  onSettled(listener: () => void): () => void;
 }
 
 function elementWidth(element: Element): number {
@@ -55,6 +57,17 @@ function availableTextWidth(element: HTMLElement): number {
 // Deliberately not scrollWidth: an element that clips and ellipsizes reports a scroll width equal to
 // its client width, so it always answers "no overflow" and the fit leaves the declared size in place
 // while the browser cuts the text off. Only an unconstrained copy can disagree with the element.
+// Deliberately not scrollWidth: an element that clips and ellipsizes reports a scroll width equal to
+// its client width, so it always answers "no overflow" and the fit leaves the declared size in place
+// while the browser cuts the text off. Only an unconstrained copy can disagree with the element.
+export function naturalTextWidth(element: HTMLElement): number | null {
+  const view = element.ownerDocument.defaultView;
+  const measure = textMeasurer(element);
+  if (view === null || measure === null) return null;
+  const size = parseFloat(view.getComputedStyle(element).fontSize);
+  return Number.isFinite(size) ? measure(size) : null;
+}
+
 function textMeasurer(element: HTMLElement): ((fontSizePx: number) => number) | null {
   const owner = element.ownerDocument;
   const view = owner.defaultView;
@@ -178,11 +191,13 @@ export function createTextFitScope(): TextFitScope {
   let depth = 0;
   let dirty = false;
   let observer: ResizeObserver | null = null;
+  const listeners: Array<() => void> = [];
 
   function settleIfDirty(): void {
     if (!dirty) return;
     dirty = false;
     runSettle(fits);
+    for (const listener of [...listeners]) listener();
   }
 
   function checkWidths(): void {
@@ -258,5 +273,13 @@ export function createTextFitScope(): TextFitScope {
     },
 
     settle: settleIfDirty,
+
+    onSettled(listener: () => void): () => void {
+      listeners.push(listener);
+      return () => {
+        const at = listeners.indexOf(listener);
+        if (at >= 0) listeners.splice(at, 1);
+      };
+    },
   };
 }

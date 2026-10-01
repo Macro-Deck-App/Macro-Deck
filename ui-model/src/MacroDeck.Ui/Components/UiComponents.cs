@@ -99,12 +99,17 @@ public static class UiComponents
 	/// fallback, which <see cref="UiResponsive" /> fills with its default layout when none is set.</summary>
 	public const string Responsive = "ui.responsive";
 
+	/// <summary>A container that draws the first of its children whose text fits the box it is given, else the
+	/// last - see <see cref="UiFirstFit" />. Component version 1. A reader that does not know it draws the node's
+	/// fallback, which <see cref="UiFirstFit" /> fills with a copy of its last child when none is set.</summary>
+	public const string FirstFit = "ui.first-fit";
+
 	/// <summary>The types the core framework ships. Not exhaustive of what a renderer may meet - see the
 	/// type's remarks.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
 	[
 		Stack, Text, Image, RangeBar, Slider, Button, Layer, Chart, TextField, List, Transform,
 		Shape, Icon, Grid, Gauge, Toggle, Segmented, Dial,
-		Modifier, Responsive,
+		Modifier, Responsive, FirstFit,
 	];
 }

@@ -205,6 +205,16 @@ internal sealed class UiElementMaterializer
 
 				return;
 
+			case UiFirstFit firstFit:
+				region.AddNode(MaterializeFirstFit(firstFit,
+					structuralPrefix,
+					inputScope,
+					parentDeclarationPath,
+					disabled,
+					modifiers));
+
+				return;
+
 			case UiResponsive responsive:
 				region.AddNode(MaterializeResponsive(responsive,
 					structuralPrefix,
@@ -394,8 +404,8 @@ internal sealed class UiElementMaterializer
 		if (InAutomaticFallback)
 		{
 			throw new UiViewException($"The input keyed '{input.Key}' declared near '{parentDeclarationPath}' sits " +
-				"inside a UiResponsive's Default, which is copied as the fallback an older reader draws, and an " +
-				"input's id cannot appear twice. Give the UiResponsive an explicit Fallback.");
+				"inside a UiResponsive's Default or a UiFirstFit's last layout, which is copied as the fallback an " +
+				"older reader draws, and an input's id cannot appear twice. Give it an explicit Fallback.");
 		}
 	}
 
@@ -464,6 +474,56 @@ internal sealed class UiElementMaterializer
 		return BuildNode(responsive, id, childRegion, fallback, disabled, modifiers);
 	}
 
+	private UiMaterializedNode MaterializeFirstFit(
+		UiFirstFit firstFit,
+		string? structuralPrefix,
+		string? inputScope,
+		string parentDeclarationPath,
+		IReadOnlyList<UiValue<bool>>? disabled,
+		IReadOnlyList<UiModifier>? modifiers)
+	{
+		var where = $"The first-fit layout keyed '{firstFit.Key}' declared near '{parentDeclarationPath}'";
+		var layouts = firstFit.Children;
+
+		foreach (var layout in layouts)
+		{
+			if (layout is UiWhen or UiFragment or IUiRepeatElement)
+			{
+				throw new UiViewException($"{where} needs a single element as each layout, not a conditional, a " +
+					"repeat or a fragment, which can produce other than one node.");
+			}
+
+			if (string.Equals(layout.Key, _automaticFallbackSegment, StringComparison.Ordinal))
+			{
+				throw new UiViewException($"{where} has a layout keyed '{_automaticFallbackSegment}', which is " +
+					"reserved for the copy of its last layout an older reader draws.");
+			}
+
+			if (SizesItselfInParent(layout))
+			{
+				throw new UiViewException($"{where} draws its chosen layout across its whole box, so the layout " +
+					$"keyed '{layout.Key}' cannot set MainSize, Fill, ColumnSpan or RowSpan. Set them on the " +
+					"UiFirstFit instead.");
+			}
+		}
+
+		var (id, declarationPath) = ComposeAndValidate(structuralPrefix, firstFit.Key, parentDeclarationPath);
+
+		var childRegion = new UiChildRegion(parent: null, scope: null);
+		foreach (var layout in layouts)
+		{
+			MaterializeInto(layout, childRegion, id, inputScope, declarationPath, disabled, null);
+		}
+
+		var fallback = firstFit.Fallback is not null
+			? MaterializeFallback(firstFit, structuralPrefix, inputScope, parentDeclarationPath, disabled)
+			: layouts.Count == 0
+				? null
+				: MaterializeAutomaticFallback(layouts[^1], id, inputScope, declarationPath, disabled, where, "UiFirstFit");
+
+		return BuildNode(firstFit, id, childRegion, fallback, disabled, modifiers);
+	}
+
 	private UiMaterializedNode MaterializeAutomaticFallback(
 		UiResponsive responsive,
 		string id,
@@ -471,13 +531,23 @@ internal sealed class UiElementMaterializer
 		string declarationPath,
 		IReadOnlyList<UiValue<bool>>? disabled,
 		string where)
+		=> MaterializeAutomaticFallback(responsive.Default, id, inputScope, declarationPath, disabled, where, "UiResponsive");
+
+	private UiMaterializedNode MaterializeAutomaticFallback(
+		UiElement copied,
+		string id,
+		string? inputScope,
+		string declarationPath,
+		IReadOnlyList<UiValue<bool>>? disabled,
+		string where,
+		string owner)
 	{
 		var outer = InAutomaticFallback;
 		InAutomaticFallback = true;
 
 		try
 		{
-			return MaterializeSingle(responsive.Default,
+			return MaterializeSingle(copied,
 				Compose(id, _automaticFallbackSegment),
 				inputScope,
 				Extend(declarationPath, _automaticFallbackSegment),
@@ -485,8 +555,9 @@ internal sealed class UiElementMaterializer
 		}
 		catch (UiViewException exception) when (!outer)
 		{
-			throw new UiViewException($"{where} copies its Default as the fallback an older reader draws, and the " +
-				$"copy failed: {exception.Message} Give the UiResponsive an explicit Fallback.", exception);
+			throw new UiViewException($"{where} copies its {(owner == "UiFirstFit" ? "last layout" : "Default")} as the " +
+				$"fallback an older reader draws, and the copy failed: {exception.Message} Give the {owner} an " +
+				"explicit Fallback.", exception);
 		}
 		finally
 		{

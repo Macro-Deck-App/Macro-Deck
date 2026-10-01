@@ -163,6 +163,7 @@ export default defineConfig({
 												'ui/components/transform',
 												'ui/components/modifier',
 												'ui/components/responsive',
+												'ui/components/first-fit',
 												'ui/components/list',
 												'ui/components/text',
 												'ui/components/image',

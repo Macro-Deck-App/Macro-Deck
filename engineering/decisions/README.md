@@ -71,3 +71,4 @@ code, protocol schemas, issue discussions or exhaustive option lists.
 - [0068 - Device sessions push full surface snapshots, and layouts are provider-registered descriptors](0068-device-sessions-and-layouts.md)
 - [0075 - Widget types, folder views and modals are provider-registered and served through one provider](0075-provider-registered-surfaces.md)
 - [0094 - Responsive layouts are chosen by the reader](0094-responsive-layouts-are-chosen-by-the-reader.md)
+- [0102 - First-fit layouts are chosen by measured text](0102-first-fit-layouts-are-chosen-by-measured-text.md)
