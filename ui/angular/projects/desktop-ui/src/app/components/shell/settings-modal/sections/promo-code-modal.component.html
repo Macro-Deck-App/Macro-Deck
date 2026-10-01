@@ -1,0 +1,52 @@
+<shared-modal
+  [heading]="'macrodeck.app:Settings.License.Redeem.Heading' | translate"
+  size="small"
+  [zIndex]="1100"
+  (close)="close()">
+  <div class="promo-code">
+    <p class="promo-code__text">{{ 'macrodeck.app:Settings.License.Redeem.Description' | translate }}</p>
+    <p class="promo-code__text" data-testid="promo-code-store-note">
+      {{ 'macrodeck.app:Settings.License.Redeem.StoreCodesNote' | translate }}
+    </p>
+    @if (!signedIn()) {
+      <p class="promo-code__hint" data-testid="promo-code-sign-in-hint" role="status">
+        <span class="icon icon-user icon-sm" aria-hidden="true"></span>
+        {{ 'macrodeck.app:Settings.License.Redeem.Result.SignedOut' | translate }}
+      </p>
+    }
+    @if (!outcome()?.success) {
+      <shared-input
+        class="promo-code__field"
+        [ariaLabel]="'macrodeck.app:Settings.License.Redeem.CodeLabel' | translate"
+        [placeholder]="'macrodeck.app:Settings.License.Redeem.CodePlaceholder' | translate"
+        [inputMaxlength]="64"
+        [autofocus]="true"
+        [invalid]="outcome()?.success === false"
+        [disabled]="!signedIn() || redeeming()"
+        [ngModel]="code()"
+        (ngModelChange)="code.set($event)"
+        (keydown.enter)="redeem()">
+      </shared-input>
+    }
+    @if (outcome(); as result) {
+      <p
+        class="promo-code__result"
+        [class.promo-code__result--success]="result.success"
+        [class.promo-code__result--error]="!result.success"
+        data-testid="promo-code-result"
+        role="status">
+        {{ result.message }}
+      </p>
+    }
+  </div>
+  <div modal-footer class="promo-code__footer">
+    <shared-button variant="secondary" (click)="close()">
+      {{ 'macrodeck:Common.Close' | translate }}
+    </shared-button>
+    @if (!outcome()?.success) {
+      <shared-button variant="primary" [disabled]="!canRedeem()" [loading]="redeeming()" (click)="redeem()">
+        {{ 'macrodeck.app:Settings.License.Redeem.Button' | translate }}
+      </shared-button>
+    }
+  </div>
+</shared-modal>

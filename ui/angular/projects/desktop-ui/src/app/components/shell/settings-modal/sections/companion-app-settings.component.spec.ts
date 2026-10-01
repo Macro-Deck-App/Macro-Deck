@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CompanionAppDevice, CompanionAppStatus, CompanionLicenseStatus, TransportError } from '@macro-deck/runtime';
 import { ApiService } from '@shared';
 import { EMPTY } from 'rxjs';
+import { ConnectAccountService } from '../../../../services/connect-account.service';
 import { DeveloperModeService } from '../../../../services/developer-mode.service';
 import { FileSaveService } from '../../../../services/file-save.service';
 import { SettingsModalService } from '../../../../services/settings-modal.service';
@@ -87,6 +88,7 @@ describe('CompanionAppSettingsComponent', () => {
         provideZonelessChangeDetection(),
         { provide: ApiService, useValue: api },
         { provide: DeveloperModeService, useValue: { enabled: signal(false) } },
+        { provide: ConnectAccountService, useValue: { isSignedIn: signal(true) } },
         { provide: FileSaveService, useValue: fileSave },
       ],
     }).compileComponents();

@@ -13888,6 +13888,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Settings.License.Description" xml:space="preserve">
     <value>The Macro Deck Companion license this host holds. The host hands it to every Companion app that connects.</value>
   </data>
+  <data name="Settings.License.HideDetails" xml:space="preserve">
+    <value>Hide details</value>
+  </data>
   <data name="Settings.License.Heading" xml:space="preserve">
     <value>License</value>
   </data>
@@ -13896,9 +13899,6 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Settings.License.IssuedAtLabel" xml:space="preserve">
     <value>Issued</value>
-  </data>
-  <data name="Settings.License.KeyIdLabel" xml:space="preserve">
-    <value>Signing key</value>
   </data>
   <data name="Settings.License.LicenseIdLabel" xml:space="preserve">
     <value>License ID</value>
@@ -13921,6 +13921,63 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Settings.License.PurchasedAtLabel" xml:space="preserve">
     <value>Purchased</value>
   </data>
+  <data name="Settings.License.Redeem.Heading" xml:space="preserve">
+    <value>Redeem a promo code</value>
+  </data>
+  <data name="Settings.License.Redeem.Description" xml:space="preserve">
+    <value>Have a promo code for the Companion app? Enter it here to unlock the license for your Macro Deck account.</value>
+  </data>
+  <data name="Settings.License.Redeem.CodeLabel" xml:space="preserve">
+    <value>Promo code</value>
+  </data>
+  <data name="Settings.License.Redeem.CodePlaceholder" xml:space="preserve">
+    <value>XXXX-XXXX-XXXX-XXXX</value>
+  </data>
+  <data name="Settings.License.Redeem.Button" xml:space="preserve">
+    <value>Redeem</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Redeemed" xml:space="preserve">
+    <value>Promo code redeemed. The Companion license is unlocked.</value>
+  </data>
+  <data name="Settings.License.Redeem.StoreCodesNote" xml:space="preserve">
+    <value>Google Play and App Store codes are not accepted here. Redeem them in Google Play or the App Store.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.AccountLicenseExists" xml:space="preserve">
+    <value>Your Macro Deck account already has a Companion license. It is now used here.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.AlreadyLicensed" xml:space="preserve">
+    <value>This computer already has a Companion license, so the code was not used.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Invalid" xml:space="preserve">
+    <value>This promo code is not valid. Check the code and try again.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Expired" xml:space="preserve">
+    <value>This promo code has expired.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.AlreadyRedeemed" xml:space="preserve">
+    <value>This promo code has already been redeemed.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Revoked" xml:space="preserve">
+    <value>The license behind this promo code is no longer valid.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.AccountSuspended" xml:space="preserve">
+    <value>Your Macro Deck account is suspended, so promo codes cannot be redeemed.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.RateLimited" xml:space="preserve">
+    <value>Too many attempts. Try again after {time}.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.RateLimitedSoon" xml:space="preserve">
+    <value>Too many attempts. Try again in a few minutes.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Unavailable" xml:space="preserve">
+    <value>Promo codes cannot be redeemed right now. Try again later.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.SignedOut" xml:space="preserve">
+    <value>Sign in to your Macro Deck account to redeem a promo code.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Failed" xml:space="preserve">
+    <value>The promo code could not be redeemed. Try again.</value>
+  </data>
   <data name="Settings.License.Source.AppStore" xml:space="preserve">
     <value>App Store</value>
   </data>
@@ -13930,11 +13987,17 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Settings.License.Source.GooglePlay" xml:space="preserve">
     <value>Google Play</value>
   </data>
+  <data name="Settings.License.Source.PromoCode" xml:space="preserve">
+    <value>Promo code</value>
+  </data>
   <data name="Settings.License.Source.Test" xml:space="preserve">
     <value>Test</value>
   </data>
   <data name="Settings.License.SourceLabel" xml:space="preserve">
     <value>Purchased through</value>
+  </data>
+  <data name="Settings.License.ShowDetails" xml:space="preserve">
+    <value>Show details</value>
   </data>
   <data name="Settings.License.StatusLabel" xml:space="preserve">
     <value>Status</value>

@@ -17,6 +17,7 @@ public sealed partial class PlatformLicenseAccountClient : IPlatformLicenseAccou
 	public const int MaximumResponseBytes = 64 * 1024;
 
 	private const string AccountPath = "api/v1/companion-licenses/account";
+	private const string PromoCodePath = "api/v1/companion-licenses/promo-code";
 	private const string AccountLicenseExists = "account-license-exists";
 
 	private static readonly TimeSpan RequestTimeoutMargin = TimeSpan.FromSeconds(20);
@@ -84,6 +85,40 @@ public sealed partial class PlatformLicenseAccountClient : IPlatformLicenseAccou
 		}
 	}
 
+	public async Task<PlatformPromoCodeResult> RedeemPromoCodeAsync(string code, CancellationToken cancellationToken)
+	{
+		using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(_baseUrl, PromoCodePath))
+		{
+			Content = JsonContent.Create(new { code }, options: Json)
+		};
+		var authorization = await AuthorizeAsync(request, cancellationToken);
+		switch (authorization.Kind)
+		{
+			case AuthorizationKind.SignedOut:
+				return new PlatformPromoCodeResult.SignedOut();
+			case AuthorizationKind.Suspended:
+				return new PlatformPromoCodeResult.AccountSuspended();
+			case AuthorizationKind.Transient:
+				return new PlatformPromoCodeResult.Unavailable();
+		}
+
+		return await ExecuteAsync(request,
+			TimeSpan.Zero,
+			(response, body) =>
+			{
+				var result = InterpretPromoCode(response, body);
+				if (result is PlatformPromoCodeResult.Unavailable)
+				{
+					_logger.Warning("The Macro Deck Platform answered {Status} to a promo code redemption",
+						(int)response.StatusCode);
+				}
+
+				return result;
+			},
+			new PlatformPromoCodeResult.Unavailable(),
+			cancellationToken);
+	}
+
 	private async Task<PlatformAccountLicenseResult> SendAsync(HttpMethod method,
 		string path,
 		HttpContent? content,
@@ -91,47 +126,110 @@ public sealed partial class PlatformLicenseAccountClient : IPlatformLicenseAccou
 		CancellationToken cancellationToken)
 	{
 		using var request = new HttpRequestMessage(method, new Uri(_baseUrl, path)) { Content = content };
+		var authorization = await AuthorizeAsync(request, cancellationToken);
+		switch (authorization.Kind)
+		{
+			case AuthorizationKind.SignedOut:
+			case AuthorizationKind.Suspended:
+				return new PlatformAccountLicenseResult.SignedOut();
+			case AuthorizationKind.Transient:
+				return new PlatformAccountLicenseResult.Unavailable(authorization.RetryAfter);
+		}
+
+		return await ExecuteAsync(request,
+			wait,
+			(response, body) =>
+			{
+				var result = Interpret(response, body);
+				if (result is PlatformAccountLicenseResult.Unavailable)
+				{
+					_logger.Warning("The Macro Deck Platform answered {Status} to {Method} on the account Companion license",
+						(int)response.StatusCode,
+						method.Method);
+				}
+
+				return result;
+			},
+			new PlatformAccountLicenseResult.Unavailable(null),
+			cancellationToken);
+	}
+
+	private async Task<Authorization> AuthorizeAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+	{
 		if (_session.Current.Status != ConnectAccountStatus.SignedIn)
 		{
-			return new PlatformAccountLicenseResult.SignedOut();
+			return new Authorization(AuthorizationKind.SignedOut, null);
 		}
 
 		try
 		{
 			request.Headers.Authorization =
 				new AuthenticationHeaderValue("Bearer", await _session.GetAccessToken(cancellationToken));
+			return new Authorization(AuthorizationKind.Authorized, null);
 		}
-		catch (Exception ex) when (ex is ConnectAuthRejectedException or ConnectAccountSuspendedException)
+		catch (ConnectAuthRejectedException)
 		{
-			return new PlatformAccountLicenseResult.SignedOut();
+			return new Authorization(AuthorizationKind.SignedOut, null);
+		}
+		catch (ConnectAccountSuspendedException)
+		{
+			return new Authorization(AuthorizationKind.Suspended, null);
 		}
 		catch (ConnectAuthTransientException ex)
 		{
-			return new PlatformAccountLicenseResult.Unavailable(ex.RetryAfter);
+			return new Authorization(AuthorizationKind.Transient, ex.RetryAfter);
 		}
+	}
 
+	private async Task<T> ExecuteAsync<T>(HttpRequestMessage request,
+		TimeSpan wait,
+		Func<HttpResponseMessage, JsonElement?, T> interpret,
+		T failed,
+		CancellationToken cancellationToken)
+	{
 		using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 		timeout.CancelAfter(wait + RequestTimeoutMargin);
 		try
 		{
 			using var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, timeout.Token);
-			var result = Interpret(response, await ReadBodyAsync(response, timeout.Token));
-			if (result is PlatformAccountLicenseResult.Unavailable)
-			{
-				_logger.Warning("The Macro Deck Platform answered {Status} to {Method} on the account Companion license",
-					(int)response.StatusCode,
-					method.Method);
-			}
-
-			return result;
+			return interpret(response, await ReadBodyAsync(response, timeout.Token));
 		}
 		catch (Exception ex) when (ex is HttpRequestException or IOException or NotSupportedException ||
 			ex is OperationCanceledException && !cancellationToken.IsCancellationRequested)
 		{
-			_logger.Warning("The account Companion license request {Method} failed: {Error}",
-				method.Method,
+			_logger.Warning("The Companion license request {Method} failed: {Error}",
+				request.Method.Method,
 				ex.GetType().Name);
-			return new PlatformAccountLicenseResult.Unavailable(null);
+			return failed;
+		}
+	}
+
+	private static PlatformPromoCodeResult InterpretPromoCode(HttpResponseMessage response, JsonElement? body)
+	{
+		var code = Code(body);
+		switch (response.StatusCode)
+		{
+			case HttpStatusCode.OK when ReadState(body) is { License: { Length: > 0 } license }:
+				return new PlatformPromoCodeResult.Redeemed(license);
+			case HttpStatusCode.Conflict when code == AccountLicenseExists && ReadState(body) is { License: { Length: > 0 } existing }:
+				return new PlatformPromoCodeResult.AccountLicenseExists(existing);
+			case HttpStatusCode.Conflict when code == "promo-code-redeemed":
+				return new PlatformPromoCodeResult.Rejected(PromoCodeRejection.AlreadyRedeemed);
+			case HttpStatusCode.NotFound when code == "invalid-promo-code":
+			case HttpStatusCode.BadRequest:
+				return new PlatformPromoCodeResult.Rejected(PromoCodeRejection.Invalid);
+			case HttpStatusCode.Gone when code == "promo-code-expired":
+				return new PlatformPromoCodeResult.Rejected(PromoCodeRejection.Expired);
+			case HttpStatusCode.Forbidden when code == "license-revoked":
+				return new PlatformPromoCodeResult.Rejected(PromoCodeRejection.Revoked);
+			case HttpStatusCode.Forbidden:
+				return new PlatformPromoCodeResult.AccountSuspended();
+			case HttpStatusCode.Unauthorized:
+				return new PlatformPromoCodeResult.SignedOut();
+			case HttpStatusCode.TooManyRequests:
+				return new PlatformPromoCodeResult.RateLimited(RetryAfter(response));
+			default:
+				return new PlatformPromoCodeResult.Unavailable();
 		}
 	}
 
@@ -230,6 +328,16 @@ public sealed partial class PlatformLicenseAccountClient : IPlatformLicenseAccou
 
 		return header.Date is { } date ? date - DateTimeOffset.UtcNow : null;
 	}
+
+	private enum AuthorizationKind
+	{
+		Authorized,
+		SignedOut,
+		Suspended,
+		Transient
+	}
+
+	private readonly record struct Authorization(AuthorizationKind Kind, TimeSpan? RetryAfter);
 
 	[GeneratedRegex("^[a-z][a-z-]{0,63}$")]
 	private static partial Regex ProblemCode();

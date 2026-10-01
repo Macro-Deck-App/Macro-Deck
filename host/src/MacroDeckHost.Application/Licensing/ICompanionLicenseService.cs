@@ -12,4 +12,6 @@ public interface ICompanionLicenseService
 
 	Task<LegacyPurchaseTransferResult> TransferLegacyPurchaseAsync(CompanionLicenseProof proof,
 		CancellationToken cancellationToken);
+
+	Task<PromoCodeRedemptionResult> RedeemPromoCodeAsync(string? code, CancellationToken cancellationToken);
 }

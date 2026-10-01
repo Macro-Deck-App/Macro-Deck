@@ -7,6 +7,37 @@ public interface IPlatformLicenseAccountClient
 		CancellationToken cancellationToken);
 
 	Task<PlatformAccountLicenseResult> StoreAccountLicenseAsync(string license, CancellationToken cancellationToken);
+
+	Task<PlatformPromoCodeResult> RedeemPromoCodeAsync(string code, CancellationToken cancellationToken);
+}
+
+public enum PromoCodeRejection
+{
+	Invalid,
+	Expired,
+	AlreadyRedeemed,
+	Revoked
+}
+
+public abstract record PlatformPromoCodeResult
+{
+	private PlatformPromoCodeResult()
+	{
+	}
+
+	public sealed record Redeemed(string License) : PlatformPromoCodeResult;
+
+	public sealed record AccountLicenseExists(string License) : PlatformPromoCodeResult;
+
+	public sealed record Rejected(PromoCodeRejection Reason) : PlatformPromoCodeResult;
+
+	public sealed record AccountSuspended : PlatformPromoCodeResult;
+
+	public sealed record RateLimited(TimeSpan? RetryAfter) : PlatformPromoCodeResult;
+
+	public sealed record Unavailable : PlatformPromoCodeResult;
+
+	public sealed record SignedOut : PlatformPromoCodeResult;
 }
 
 public abstract record PlatformAccountLicenseResult

@@ -123,6 +123,7 @@ import {
   GetDataDirectoryResponse,
   CompleteOnboardingResponse,
   CompanionLicenseStatus,
+  RedeemCompanionPromoCodeResponse,
   CompanionAppStatus,
   InstallCompanionAppResponse,
   GetDeveloperSettingsResponse,
@@ -1348,6 +1349,10 @@ export class ApiService {
 
   getCompanionLicense(): Promise<CompanionLicenseStatus> {
     return this.http('GET', '/api/settings/license');
+  }
+
+  redeemCompanionPromoCode(code: string): Promise<RedeemCompanionPromoCodeResponse> {
+    return this.http('POST', '/api/settings/license/promo-code', { code });
   }
 
   getCompanionApp(): Promise<CompanionAppStatus> {

@@ -1,7 +1,8 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { WritableSignal, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CompanionLicenseStatus } from '@macro-deck/runtime';
 import { ApiService } from '@shared';
+import { ConnectAccountService } from '../../../../services/connect-account.service';
 import { EMPTY, Subject } from 'rxjs';
 import { LicenseSettingsComponent } from './license-settings.component';
 
@@ -45,10 +46,12 @@ const PURCHASED: CompanionLicenseStatus = {
 
 describe('LicenseSettingsComponent', () => {
   let api: jasmine.SpyObj<ApiService>;
+  let signedIn: WritableSignal<boolean>;
 
   beforeEach(async () => {
-    api = jasmine.createSpyObj<ApiService>('ApiService', ['getCompanionLicense', 'onNotification']);
+    api = jasmine.createSpyObj<ApiService>('ApiService', ['getCompanionLicense', 'redeemCompanionPromoCode', 'onNotification']);
     api.getCompanionLicense.and.resolveTo(UNLICENSED);
+    signedIn = signal(true);
     api.onNotification.and.returnValue(EMPTY);
 
     await TestBed.configureTestingModule({
@@ -56,6 +59,7 @@ describe('LicenseSettingsComponent', () => {
       providers: [
         provideZonelessChangeDetection(),
         { provide: ApiService, useValue: api },
+        { provide: ConnectAccountService, useValue: { isSignedIn: signedIn } },
       ],
     }).compileComponents();
   });
@@ -72,11 +76,17 @@ describe('LicenseSettingsComponent', () => {
     return fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
   }
 
+  function openDetails(fixture: ComponentFixture<LicenseSettingsComponent>): void {
+    (find(fixture, 'license-details-toggle') as HTMLElement).click();
+    fixture.detectChanges();
+  }
+
   it('offers no way to issue or revoke a test license', async () => {
     const fixture = await create();
 
     expect(fixture.componentInstance.status()?.licensed).toBeFalse();
-    expect(fixture.nativeElement.querySelectorAll('button').length).toBe(0);
+    expect(fixture.nativeElement.querySelectorAll('button').length).toBe(1);
+    expect(find(fixture, 'license-redeem')?.querySelectorAll('button').length).toBe(1);
     expect(find(fixture, 'license-test-marker')).toBeNull();
   });
 
@@ -85,13 +95,45 @@ describe('LicenseSettingsComponent', () => {
     const fixture = await create();
 
     expect(find(fixture, 'license-test-marker')).not.toBeNull();
+    openDetails(fixture);
     expect(fixture.nativeElement.textContent).toContain('abc123');
-    expect(fixture.nativeElement.textContent).toContain('test-2026');
+  });
+
+  it('shows only the license status until the details are opened', async () => {
+    api.getCompanionLicense.and.resolveTo({ ...PURCHASED, accountSync: 'synced' });
+    const fixture = await create();
+    const toggle = find(fixture, 'license-details-toggle') as HTMLElement;
+
+    const collapsed = { details: find(fixture, 'license-details'), expanded: toggle.getAttribute('aria-expanded') };
+    openDetails(fixture);
+    const text = fixture.nativeElement.textContent as string;
+    openDetails(fixture);
+
+    expect(collapsed).toEqual({ details: null, expanded: 'false' });
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(text).toContain('0190f3a2b4c64d8e9f0a1b2c3d4e5f60');
+    expect(find(fixture, 'license-details')).toBeNull();
+    expect(fixture.nativeElement.textContent).not.toContain('0190f3a2b4c64d8e9f0a1b2c3d4e5f60');
+  });
+
+  it('never shows the signing key', async () => {
+    api.getCompanionLicense.and.resolveTo(PURCHASED);
+    const fixture = await create();
+    openDetails(fixture);
+
+    expect(fixture.nativeElement.textContent).not.toContain('prod-2026');
+  });
+
+  it('offers no details toggle without a license', async () => {
+    const fixture = await create();
+
+    expect(find(fixture, 'license-details-toggle')).toBeNull();
   });
 
   it('says a license is saved to the Macro Deck account', async () => {
     api.getCompanionLicense.and.resolveTo({ ...PURCHASED, accountSync: 'synced' });
     const fixture = await create();
+    openDetails(fixture);
 
     expect(find(fixture, 'license-account-synced')).not.toBeNull();
     expect(find(fixture, 'license-account-signed-out')).toBeNull();
@@ -100,6 +142,7 @@ describe('LicenseSettingsComponent', () => {
   it('asks a signed-out owner to sign in to use the license elsewhere', async () => {
     api.getCompanionLicense.and.resolveTo({ ...PURCHASED, accountSync: 'signedOut' });
     const fixture = await create();
+    openDetails(fixture);
 
     expect(find(fixture, 'license-account-signed-out')).not.toBeNull();
     expect(find(fixture, 'license-account-synced')).toBeNull();
@@ -108,6 +151,7 @@ describe('LicenseSettingsComponent', () => {
   it('says nothing about the account when the host cannot tell', async () => {
     api.getCompanionLicense.and.resolveTo(PURCHASED);
     const fixture = await create();
+    openDetails(fixture);
 
     expect(find(fixture, 'license-account-synced')).toBeNull();
     expect(find(fixture, 'license-account-signed-out')).toBeNull();
@@ -116,6 +160,7 @@ describe('LicenseSettingsComponent', () => {
   it('shows the purchase details of a purchased license', async () => {
     api.getCompanionLicense.and.resolveTo(PURCHASED);
     const fixture = await create();
+    openDetails(fixture);
 
     expect(find(fixture, 'license-purchased-at')?.textContent?.trim()).toBeTruthy();
     expect(find(fixture, 'license-billing-id')?.textContent).toContain('GPA.3344-5566');
@@ -125,6 +170,7 @@ describe('LicenseSettingsComponent', () => {
   it('leaves out purchase details the license does not carry', async () => {
     api.getCompanionLicense.and.resolveTo({ ...PURCHASED, purchasedAt: null, billingId: null });
     const fixture = await create();
+    openDetails(fixture);
 
     expect(find(fixture, 'license-purchased-at')).toBeNull();
     expect(find(fixture, 'license-billing-id')).toBeNull();
@@ -193,5 +239,67 @@ describe('LicenseSettingsComponent', () => {
     await fixture.whenStable();
 
     expect(fixture.componentInstance.status()).toEqual(PURCHASED);
+  });
+
+  describe('promo codes', () => {
+    it('offers the redeem button to a host without a license or with only a test license', async () => {
+      const unlicensed = await create();
+      api.getCompanionLicense.and.resolveTo(TEST_LICENSE);
+      const test = await create();
+
+      expect(find(unlicensed, 'license-redeem')).not.toBeNull();
+      expect(find(test, 'license-redeem')).not.toBeNull();
+    });
+
+    it('disables the redeem button and says to sign in while signed out', async () => {
+      signedIn.set(false);
+      const fixture = await create();
+      const button = find(fixture, 'license-redeem')!.querySelector('button')!;
+
+      button.click();
+      fixture.detectChanges();
+
+      expect(button.disabled).toBeTrue();
+      expect(fixture.nativeElement.querySelector('app-promo-code-modal')).toBeNull();
+      expect(fixture.nativeElement.textContent).toContain(
+        fixture.componentInstance['localization'].translateKey('macrodeck.app:Settings.License.Redeem.Result.SignedOut'),
+      );
+    });
+
+    it('hides the redeem button while a real license is held', async () => {
+      api.getCompanionLicense.and.resolveTo(PURCHASED);
+      const fixture = await create();
+
+      expect(find(fixture, 'license-redeem')).toBeNull();
+    });
+
+    it('opens the promo code dialog from the button and reloads the status when it closes', async () => {
+      const fixture = await create();
+
+      const heightBefore = fixture.nativeElement.offsetHeight;
+      (find(fixture, 'license-redeem') as HTMLElement).querySelector('button')!.click();
+      fixture.detectChanges();
+      const opened = fixture.nativeElement.querySelector('app-promo-code-modal');
+      const heightOpen = fixture.nativeElement.offsetHeight;
+      api.getCompanionLicense.calls.reset();
+      api.getCompanionLicense.and.resolveTo(PURCHASED);
+      fixture.componentInstance.closeRedeem();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(opened).not.toBeNull();
+      expect(heightOpen).toBe(heightBefore);
+      expect(fixture.nativeElement.querySelector('app-promo-code-modal')).toBeNull();
+      expect(api.getCompanionLicense).toHaveBeenCalledTimes(1);
+      expect(fixture.componentInstance.status()).toEqual(PURCHASED);
+    });
+
+    it('labels a promo code license by its source', async () => {
+      api.getCompanionLicense.and.resolveTo({ ...PURCHASED, source: 'promo-code' });
+      const fixture = await create();
+
+      expect(fixture.componentInstance.sourceLabel()).not.toBe('promo-code');
+      expect(fixture.componentInstance.sourceLabel()).not.toBe('-');
+    });
   });
 });
