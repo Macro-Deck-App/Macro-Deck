@@ -102,9 +102,6 @@ public static class ProtocolErrorReasons
 	/// <summary>Refines a <c>video-stream-provider</c> error: the provider cannot open another session right now.</summary>
 	public const string VideoStreamCapacityReached = "video_stream_capacity_reached";
 
-	/// <summary>Refines a <c>video-stream-provider</c> error: the provider does not exchange signals.</summary>
-	public const string VideoStreamSignalingUnsupported = "video_stream_signaling_unsupported";
-
 	/// <summary>Refines a <c>video-stream-provider</c> error: the provider is busy. Retrying later can succeed.</summary>
 	public const string VideoStreamBusy = "video_stream_busy";
 }

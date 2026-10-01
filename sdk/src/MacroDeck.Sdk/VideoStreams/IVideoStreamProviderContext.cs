@@ -46,10 +46,10 @@ public interface IVideoStreamProviderContext
 	/// <summary>
 	/// Reports a session's state, for example <see cref="VideoStreamSessionState.Reconnecting" /> while the
 	/// source recovers and <see cref="VideoStreamSessionState.Active" /> once it has, optionally with a new
-	/// description the consumer switches to. Ignored for a session that is no longer open.
+	/// description, which Macro Deck fetches the media from instead. Ignored for a session that is no longer
+	/// open.
 	/// </summary>
 	/// <param name="message">Text the consumer may show, in the reader's own language.</param>
-	/// <exception cref="ArgumentException">The description exceeds a documented bound.</exception>
 	/// <exception cref="VideoStreamException">With <see cref="VideoStreamErrorCode.Busy" /> when Macro Deck
 	/// still rate limits the session's messages after a few short, spaced retries.</exception>
 	Task UpdateSessionAsync(
@@ -61,23 +61,13 @@ public interface IVideoStreamProviderContext
 		CancellationToken cancellationToken = default);
 
 	/// <summary>
-	/// Sends a signal to the session's consumer, for example a trickled ICE candidate. Signals of one
-	/// session arrive in the order they were sent.
-	/// </summary>
-	/// <exception cref="ArgumentException">The signal exceeds a documented bound.</exception>
-	/// <exception cref="VideoStreamException">With <see cref="VideoStreamErrorCode.Busy" /> when Macro Deck
-	/// still rate limits the session's messages after a few short, spaced retries.</exception>
-	Task SendSignalAsync(string sessionId, VideoStreamSignal signal, CancellationToken cancellationToken = default);
-
-	/// <summary>
 	/// Ends a session from the provider's side. Macro Deck does not call
 	/// <see cref="IVideoStreamProvider.CloseAsync" /> for a session the provider closed itself. Unknown or
 	/// already closed sessions are ignored.
 	/// </summary>
 	/// <remarks>
-	/// The close waits behind the session's earlier updates and signals. The session accepts no further
-	/// updates or signals once this is called, even when the close then fails; calling it again retries
-	/// the close.
+	/// The close waits behind the session's earlier updates. The session accepts no further updates once
+	/// this is called, even when the close then fails; calling it again retries the close.
 	/// </remarks>
 	/// <exception cref="VideoStreamException">With <see cref="VideoStreamErrorCode.Busy" /> when Macro Deck
 	/// still rate limits the session's messages after a few short, spaced retries.</exception>

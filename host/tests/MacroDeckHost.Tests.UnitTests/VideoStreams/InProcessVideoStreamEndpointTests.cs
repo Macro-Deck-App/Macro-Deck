@@ -21,10 +21,7 @@ public class InProcessVideoStreamEndpointTests
 			endpoint.Add(original);
 			var sessionId = "s" + round;
 			await endpoint.OpenAsync("cam",
-				new VideoStreamOpenRequest(sessionId,
-					"main",
-					["hls"],
-					new VideoStreamConsumer(null, null, VideoStreamConnectionKind.Local)),
+				new VideoStreamOpenRequest(sessionId, "main", ["hls"]),
 				() => true,
 				CancellationToken.None);
 

@@ -501,7 +501,6 @@ The SDK side is [Video streams](/features/video-streams/).
 | `providers-changed` | none | none | The plugin registered or withdrew a provider. The host calls `describe`. |
 | `streams-changed` | `providerId` | none | A provider's streams, their metadata or their state changed. The host calls `streams`. |
 | `session-update` | `sessionId`, `state`, `description`, `reason`, `message` | none | The session's state, optionally with a replacement description. |
-| `session-signal` | `sessionId`, `signal` (`type`, `payload`) | none | A signal for the session's consumer. |
 | `session-close` | `sessionId`, `reason`, `message` | none | The provider ended the session. The host sends no `session.close` for it. |
 
 - **The host is the only writer of the catalog.** `providers-changed` and `streams-changed` carry no
@@ -509,7 +508,7 @@ The SDK side is [Video streams](/features/video-streams/).
   and a read is applied only while the plugin session it came from is still current.
 - **Session operations are scoped.** They are accepted only for a session the host opened on one of the
   calling plugin's own providers; anything else is `CAPABILITY_UNAVAILABLE` with reason
-  `video_stream_unknown_session`. An update or signal sent while its `session.open` is still in flight is
+  `video_stream_unknown_session`. An update sent while its `session.open` is still in flight is
   held, at most 64 per session, and applied in order after the open's result.
 - **Enums travel as the SDK's member names**: `state` is a `VideoStreamSessionState`, `reason` a
   `VideoStreamSessionReason`. A reader maps a name it does not know to `Reconnecting` and `None`.
@@ -530,20 +529,26 @@ Version 1, declared at local id `provider`. DTOs are in
 {"type":"capability.invoke","id":"<uuid-v7>","deadlineMs":10000,
  "payload":{"kind":"video-stream-provider","localId":"provider","operation":"session.open",
    "arguments":{"sessionId":"<session-id>","providerId":"door-cameras","streamId":"front",
-     "acceptedTransports":["webrtc","hls"],
-     "consumer":{"deviceId":"<device-id>","hostAddress":"http://192.168.1.20:8191/","connectionKind":"Network"}}}}
+     "acceptedTransports":["hls","mjpeg"]}}}
 ```
 
 | Operation | Arguments | Result `data` |
 | --- | --- | --- |
 | `describe` | none | `providers`: `id`, `name`, `description`, `registrationId` |
 | `streams` | `providerId` | `streams`: `id`, `name`, `description`, `width`, `height`, `hasAudio`, `state`, `metadata` |
-| `session.open` | `sessionId`, `providerId`, `streamId`, `acceptedTransports`, `consumer` | `description` (`transport`, `url`, `parameters`, `payload`, `expiresAt`), `registrationId` |
+| `session.open` | `sessionId`, `providerId`, `streamId`, `acceptedTransports` | `description` (`transport`, `url`), `registrationId` |
 | `session.suspend` | `sessionId`, `providerId` | none |
 | `session.resume` | `sessionId`, `providerId` | `description`, absent when the previous one stays valid |
-| `session.signal` | `sessionId`, `providerId`, `signal` | `signal`, the provider's direct answer, or absent |
 | `session.close` | `sessionId`, `providerId`, `reason` | none |
 
+- **The description is where the host fetches the media.** `transport` is `hls` or `mjpeg`, one of
+  `acceptedTransports`, and `url` an absolute `http` or `https` URL without user info and without an encoded
+  slash in its path; `url` is required for both. The host relays the media to its clients and never passes
+  the URL on, so a provider can listen on loopback only. A reader ignores description members it does not
+  know, so the description can gain members additively. A description the host refuses, on `session.open`,
+  `session.resume` or `session-update`, fails the session: the consumer is told, with `TransportNotAccepted`
+  for a transport it did not accept, and the provider gets its one `session.close` with the reason `Failed`.
+  The [video streams guide](/features/video-streams/#the-relay) lists what the relay checks.
 - **`registrationId` is fresh for every registration.** When the host sees it change or vanish for the
   same provider id, it treats every session it opened on the earlier registration as closed.
 - **The host mints `sessionId`.** A `session.close` can overtake its `session.open`: answer the close with
@@ -554,16 +559,16 @@ Version 1, declared at local id `provider`. DTOs are in
   at once, with the reason the session ended with; one for an earlier registration of the provider is
   closed with `ProviderRemoved`.
 - **Concurrency.** The host sends at most 8 `describe`, `streams`, `session.open`, `session.suspend`,
-  `session.resume` and `session.signal` calls at once per plugin, queues up to 256 more for at most the
+  `session.resume` calls at once per plugin, queues up to 256 more for at most the
   capability invoke timeout each, and refuses the rest as busy; `session.close` has 4 slots of its own and
   is never dropped, and one refused with `RATE_LIMITED` or `TIMEOUT` is retried up to 10 times in all,
   backing off from 250 ms to 5 s, while the plugin session is current. After that the host gives up; the
-  plugin closes its side of the session when its connection ends. Signals of one session are sent in order.
+  plugin closes its side of the session when its connection ends.
 - **Sessions end with the plugin session.** When a plugin session ends or detaches, the host closes every
   video session opened under it and removes the plugin's providers until the next `describe`. A plugin
   closes its own side of those sessions with `HostDisconnected` and never sees a `session.close` for them.
-- **Enums travel as the SDK's member names.** An unknown `state` reads as `Unavailable`, an unknown
-  `connectionKind` as `Network`, and an unknown `reason` as `None`.
+- **Enums travel as the SDK's member names.** An unknown `state` reads as `Unavailable` and an unknown
+  `reason` as `None`.
 
 A provider refuses an operation with `CAPABILITY_UNSUPPORTED` when it does not support it, and otherwise
 with `CAPABILITY_UNAVAILABLE` and one of these reasons in `details.reason`; a failure without a reason is
@@ -577,7 +582,6 @@ with `CAPABILITY_UNAVAILABLE` and one of these reasons in `details.reason`; a fa
 | `video_stream_stream_unavailable` | `StreamUnavailable` | yes |
 | `video_stream_transport_not_accepted` | `TransportNotAccepted` | no |
 | `video_stream_capacity_reached` | `CapacityReached` | yes |
-| `video_stream_signaling_unsupported` | `SignalingUnsupported` | no |
 | `video_stream_busy` | `Busy` | yes |
 
 ### Events, logs and state

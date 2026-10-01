@@ -10,12 +10,9 @@ public sealed record VideoStreamSessionChangedNotification(
 	string SessionId,
 	long Revision,
 	VideoStreamSessionState State,
-	VideoStreamSessionDescription? Description,
+	VideoStreamRelayDescription? Description,
 	VideoStreamSessionReason Reason,
 	LocalizedText? Message) : INotification;
-
-public sealed record VideoStreamSignalNotification(string ConnectionId, string SessionId, VideoStreamSignal Signal)
-	: INotification;
 
 public sealed record VideoStreamSessionClosedNotification(
 	string ConnectionId,

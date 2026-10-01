@@ -20,10 +20,8 @@ public static class VideoStreamUiMapping
 			VideoStreamError.UnknownStream => AppStrings.Errors.VideoStream.UnknownStream(),
 			VideoStreamError.UnknownSession => AppStrings.Errors.VideoStream.UnknownSession(),
 			VideoStreamError.SessionLimitReached => AppStrings.Errors.VideoStream.SessionLimitReached(),
-			VideoStreamError.PayloadTooLarge => AppStrings.Errors.VideoStream.PayloadTooLarge(),
 			VideoStreamError.StreamUnavailable => AppStrings.Errors.VideoStream.StreamUnavailable(),
 			VideoStreamError.TransportNotAccepted => AppStrings.Errors.VideoStream.TransportNotAccepted(),
-			VideoStreamError.SignalingUnsupported => AppStrings.Errors.VideoStream.SignalingUnsupported(),
 			VideoStreamError.ProviderUnavailable => AppStrings.Errors.VideoStream.ProviderUnavailable(),
 			_ => AppStrings.Errors.VideoStream.Failed()
 		};
@@ -55,18 +53,8 @@ public static class VideoStreamUiMapping
 			]
 		};
 
-	public static VideoStreamSignalMessage ToMessage(VideoStreamSignal signal)
-		=> new() { Type = signal.Type, Payload = signal.Payload };
-
-	public static VideoStreamDescriptionMessage? ToMessage(VideoStreamSessionDescription? description)
+	public static VideoStreamDescriptionMessage? ToMessage(VideoStreamRelayDescription? description)
 		=> description is null
 			? null
-			: new VideoStreamDescriptionMessage
-			{
-				Transport = description.Transport,
-				Url = description.Url,
-				Parameters = description.Parameters,
-				Payload = description.Payload,
-				ExpiresAt = description.ExpiresAt
-			};
+			: new VideoStreamDescriptionMessage { Transport = description.Transport, Url = description.Url };
 }

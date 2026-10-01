@@ -124,6 +124,23 @@ public class AuthPolicyMatrixTests
 	}
 
 	[Test]
+	public async Task The_video_stream_relay_is_anonymous_and_only_serves_a_token_the_host_issued()
+	{
+		var unknown = await Send(HttpMethod.Get, "/api/video-streams/relay/" + new string('A', 43) + "/live/index.m3u8");
+		var malformed = await Send(HttpMethod.Get, "/api/video-streams/relay/not-a-token/live/index.m3u8");
+		var asAdmin = await Send(HttpMethod.Get,
+			"/api/video-streams/relay/" + new string('A', 43) + "/live/index.m3u8",
+			_adminToken);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(unknown.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+			Assert.That(malformed.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+			Assert.That(asAdmin.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+		});
+	}
+
+	[Test]
 	public async Task Third_party_notices_text_is_public_and_the_structured_view_is_admin_only()
 	{
 		var anonymousText = await Send(HttpMethod.Get, "/api/system/third-party-notices.txt");

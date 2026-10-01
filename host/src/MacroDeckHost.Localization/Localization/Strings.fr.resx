@@ -2934,17 +2934,11 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Errors.VideoStream.SessionLimitReached" xml:space="preserve">
     <value>Trop de vidéos sont ouvertes en même temps.</value>
   </data>
-  <data name="Errors.VideoStream.PayloadTooLarge" xml:space="preserve">
-    <value>Les données de connexion de la vidéo sont trop volumineuses.</value>
-  </data>
   <data name="Errors.VideoStream.StreamUnavailable" xml:space="preserve">
     <value>Ce flux vidéo n'est pas disponible pour le moment.</value>
   </data>
   <data name="Errors.VideoStream.TransportNotAccepted" xml:space="preserve">
     <value>Ce flux vidéo ne peut pas être lu sur cet appareil.</value>
-  </data>
-  <data name="Errors.VideoStream.SignalingUnsupported" xml:space="preserve">
-    <value>La source vidéo ne prend pas en charge ce type de connexion.</value>
   </data>
   <data name="Errors.VideoStream.ProviderUnavailable" xml:space="preserve">
     <value>La source vidéo est injoignable pour le moment.</value>

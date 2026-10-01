@@ -16,9 +16,6 @@ internal static class VideoStreamWire
 
 	public static VideoStreamSessionReason ParseReason(string? value) => Parse(value, VideoStreamSessionReason.None);
 
-	public static VideoStreamConnectionKind ParseConnectionKind(string? value)
-		=> Parse(value, VideoStreamConnectionKind.Network);
-
 	public static VideoStreamDescriptorDto ToDto(VideoStreamDescriptor stream)
 		=> new()
 		{
@@ -43,37 +40,11 @@ internal static class VideoStreamWire
 			dto.Metadata);
 
 	public static VideoStreamSessionDescriptionDto ToDto(VideoStreamSessionDescription description)
-		=> new()
-		{
-			Transport = description.Transport,
-			Url = description.Url,
-			Parameters = description.Parameters,
-			Payload = description.Payload,
-			ExpiresAt = description.ExpiresAt
-		};
+		=> new() { Transport = description.Transport, Url = description.Url };
 
 	public static VideoStreamSessionDescription ToDescription(VideoStreamSessionDescriptionDto dto)
-		=> new(dto.Transport, dto.Url, dto.Parameters, dto.Payload, dto.ExpiresAt);
-
-	public static VideoStreamSignalDto ToDto(VideoStreamSignal signal)
-		=> new() { Type = signal.Type, Payload = signal.Payload };
-
-	public static VideoStreamSignal ToSignal(VideoStreamSignalDto dto) => new(dto.Type, dto.Payload);
-
-	public static VideoStreamConsumerDto ToDto(VideoStreamConsumer consumer)
-		=> new()
-		{
-			DeviceId = consumer.DeviceId,
-			HostAddress = consumer.HostAddress?.ToString(),
-			ConnectionKind = consumer.ConnectionKind.ToString()
-		};
-
-	public static VideoStreamConsumer ToConsumer(VideoStreamConsumerDto? dto)
-		=> dto is null
-			? new VideoStreamConsumer(null, null, VideoStreamConnectionKind.Network)
-			: new VideoStreamConsumer(dto.DeviceId,
-				Uri.TryCreate(dto.HostAddress, UriKind.Absolute, out var address) ? address : null,
-				ParseConnectionKind(dto.ConnectionKind));
+		=> VideoStreamSessionDescription.FromUrl(dto.Transport,
+			dto.Url ?? throw new ArgumentException("The description has no url.", nameof(dto)));
 
 	public static string? ValidateDescriptor(VideoStreamDescriptor? stream)
 	{
@@ -100,7 +71,9 @@ internal static class VideoStreamWire
 		return ValidateMap(stream.Metadata, "Metadata");
 	}
 
-	public static string? ValidateDescription(VideoStreamSessionDescription? description)
+	// Structural only: whether a transport is one the host plays is the host's call, so a new transport
+	// needs no SDK release. Hls and mjpeg are named only because they cannot work without a Url.
+	public static string? ValidateDescription(VideoStreamSessionDescriptionDto? description)
 	{
 		if (description is null)
 		{
@@ -112,37 +85,14 @@ internal static class VideoStreamWire
 			return $"The transport must be 1 to {VideoStreamLimits.MaxTransportLength} characters of a-z, 0-9, '.', '+' and '-'.";
 		}
 
-		if (description.Url is { Length: > VideoStreamLimits.MaxUrlLength })
+		if (description.Url is null)
 		{
-			return $"The url must be at most {VideoStreamLimits.MaxUrlLength} characters.";
+			return description.Transport is "hls" or "mjpeg"
+				? $"The {description.Transport} transport requires a url."
+				: null;
 		}
 
-		if (description.Payload is { Length: > VideoStreamLimits.MaxDescriptionPayloadLength })
-		{
-			return $"The payload must be at most {VideoStreamLimits.MaxDescriptionPayloadLength} characters.";
-		}
-
-		return ValidateMap(description.Parameters, "Parameters");
-	}
-
-	public static string? ValidateSignal(VideoStreamSignal? signal)
-	{
-		if (signal is null)
-		{
-			return "A signal must not be null.";
-		}
-
-		if (string.IsNullOrEmpty(signal.Type) || signal.Type.Length > VideoStreamLimits.MaxSignalTypeLength)
-		{
-			return $"A signal type must be 1 to {VideoStreamLimits.MaxSignalTypeLength} characters.";
-		}
-
-		if (signal.Payload is null || signal.Payload.Length > VideoStreamLimits.MaxSignalPayloadLength)
-		{
-			return $"A signal payload must be present and at most {VideoStreamLimits.MaxSignalPayloadLength} characters.";
-		}
-
-		return null;
+		return ValidateUrl(description.Url);
 	}
 
 	public static ProtocolError ToError(VideoStreamErrorCode code, string message)
@@ -177,7 +127,6 @@ internal static class VideoStreamWire
 			ProtocolErrorReasons.VideoStreamStreamUnavailable => VideoStreamErrorCode.StreamUnavailable,
 			ProtocolErrorReasons.VideoStreamTransportNotAccepted => VideoStreamErrorCode.TransportNotAccepted,
 			ProtocolErrorReasons.VideoStreamCapacityReached => VideoStreamErrorCode.CapacityReached,
-			ProtocolErrorReasons.VideoStreamSignalingUnsupported => VideoStreamErrorCode.SignalingUnsupported,
 			ProtocolErrorReasons.VideoStreamBusy => VideoStreamErrorCode.Busy,
 			_ when string.Equals(code, ProtocolErrorCodes.CapabilityUnsupported, StringComparison.Ordinal) =>
 				VideoStreamErrorCode.Unsupported,
@@ -196,10 +145,41 @@ internal static class VideoStreamWire
 			VideoStreamErrorCode.StreamUnavailable => ProtocolErrorReasons.VideoStreamStreamUnavailable,
 			VideoStreamErrorCode.TransportNotAccepted => ProtocolErrorReasons.VideoStreamTransportNotAccepted,
 			VideoStreamErrorCode.CapacityReached => ProtocolErrorReasons.VideoStreamCapacityReached,
-			VideoStreamErrorCode.SignalingUnsupported => ProtocolErrorReasons.VideoStreamSignalingUnsupported,
 			VideoStreamErrorCode.Busy => ProtocolErrorReasons.VideoStreamBusy,
 			_ => null
 		};
+
+	private static string? ValidateUrl(string url)
+	{
+		if (url.Length > VideoStreamLimits.MaxUrlLength)
+		{
+			return $"The url must be at most {VideoStreamLimits.MaxUrlLength} characters.";
+		}
+
+		var schemeLength = url.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ? 8
+			: url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ? 7
+			: 0;
+		if (schemeLength == 0 || !Uri.TryCreate(url, UriKind.Absolute, out var uri))
+		{
+			return "The url must be an absolute http or https URL.";
+		}
+
+		var authorityEnd = url.AsSpan(schemeLength).IndexOfAny('/', '?', '#');
+		var authority = authorityEnd < 0 ? url.AsSpan(schemeLength) : url.AsSpan(schemeLength, authorityEnd);
+		if (authority.Contains('@') || uri.UserInfo.Length > 0)
+		{
+			return "The url must not contain user info.";
+		}
+
+		var pathEnd = url.AsSpan().IndexOfAny('?', '#');
+		var beforeQuery = pathEnd < 0 ? url.AsSpan() : url.AsSpan(0, pathEnd);
+		if (beforeQuery.Contains('\\') || beforeQuery.Contains("%2f", StringComparison.OrdinalIgnoreCase))
+		{
+			return "The url path must not contain a backslash or an encoded slash (%2F).";
+		}
+
+		return null;
+	}
 
 	private static string? ValidateMap(IReadOnlyDictionary<string, string>? map, string name)
 	{

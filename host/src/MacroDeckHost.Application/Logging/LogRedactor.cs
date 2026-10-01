@@ -14,6 +14,7 @@ public static partial class LogRedactor
 		}
 
 		var result = UserPathRedactor.Current.Redact(text);
+		result = VideoStreamRelayPathRegex().Replace(result, "${prefix}" + Placeholder);
 		result = SensitivePairRegex().Replace(result, "${key}${separator}${quote}" + Placeholder);
 		result = UrlUserInfoRegex().Replace(result, $"${{scheme}}{Placeholder}:{Placeholder}@");
 		result = AuthorizationSchemeRegex().Replace(result, $"${{scheme}} {Placeholder}");
@@ -21,6 +22,12 @@ public static partial class LogRedactor
 		result = PrivateKeyPemRegex().Replace(result, Placeholder);
 		return result;
 	}
+
+	// The relay token is the whole credential of a media URL, so it never reaches a log line. Routing
+	// logs the path without its leading slash and a malformed request may repeat any slash.
+	[GeneratedRegex("""(?<prefix>api/+video-streams/+relay/+)[A-Za-z0-9_\-]+""",
+		RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+	private static partial Regex VideoStreamRelayPathRegex();
 
 	[GeneratedRegex(
 		"""(?<![A-Za-z0-9_])(?:(?<key>access_token|refresh_token|id_token|client_secret|private_key|api_key|api_token|apikey|apitoken|pluginSecret|sessionToken|enrollmentToken|ticket|authorization|credentials|credential|signature|password|passwd|token|secret|jwt|auth|pwd|key)(?<separator>["']?\s*[:=]\s*)|(?<key>code)(?<separator>["']?\s*=\s*))(?<quote>["']?)(?:(?:Bearer|Basic|Digest)\s+)?[^\s&"'{}\\]+""",

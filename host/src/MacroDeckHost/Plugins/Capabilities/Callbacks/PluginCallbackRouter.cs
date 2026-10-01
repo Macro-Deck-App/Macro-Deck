@@ -903,10 +903,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 						return MissingArguments();
 					}
 
-					var description = arguments.Description is null
-						? null
-						: VideoStreamWire.ToDescription(arguments.Description);
-					if (description is not null && VideoStreamWire.ValidateDescription(description) is { } problem)
+					if (arguments.Description is not null &&
+						VideoStreamWire.ValidateDescription(arguments.Description) is { } problem)
 					{
 						return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload, problem);
 					}
@@ -914,27 +912,9 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 					_videoStreamSessions.ApplyProviderUpdate(pluginId,
 						arguments.SessionId,
 						VideoStreamWire.ParseSessionState(arguments.State),
-						description,
+						arguments.Description,
 						VideoStreamWire.ParseReason(arguments.Reason),
 						arguments.Message);
-					return HostCallbackResult.Ok();
-				}
-
-				case HostOperations.VideoStreams.SessionSignal:
-				{
-					var arguments = Deserialize<VideoStreamsSessionSignalArguments>(payload.Arguments);
-					if (string.IsNullOrEmpty(arguments?.SessionId) || arguments.Signal is null)
-					{
-						return MissingArguments();
-					}
-
-					var signal = VideoStreamWire.ToSignal(arguments.Signal);
-					if (VideoStreamWire.ValidateSignal(signal) is { } problem)
-					{
-						return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload, problem);
-					}
-
-					_videoStreamSessions.ApplyProviderSignal(pluginId, arguments.SessionId, signal);
 					return HostCallbackResult.Ok();
 				}
 

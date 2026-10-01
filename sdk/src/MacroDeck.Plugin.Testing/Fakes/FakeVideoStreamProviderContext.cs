@@ -25,9 +25,6 @@ public enum VideoStreamProviderCallKind
 	/// <summary>Recorded by <see cref="IVideoStreamProviderContext.UpdateSessionAsync" />.</summary>
 	SessionUpdate,
 
-	/// <summary>Recorded by <see cref="IVideoStreamProviderContext.SendSignalAsync" />.</summary>
-	Signal,
-
 	/// <summary>Recorded by <see cref="IVideoStreamProviderContext.CloseSessionAsync" />.</summary>
 	SessionClose
 }
@@ -57,16 +54,12 @@ public sealed record VideoStreamProviderCall
 
 	/// <summary>The message the consumer may show, when the call carried one.</summary>
 	public LocalizedText? Message { get; init; }
-
-	/// <summary>The signal, for <see cref="VideoStreamProviderCallKind.Signal" />.</summary>
-	public VideoStreamSignal? Signal { get; init; }
 }
 
 /// <summary>
 /// In-memory <see cref="IVideoStreamProviderContext" /> that records every call and applies the same
-/// registration and size rules the SDK and the host apply: an invalid or duplicate provider id, a
-/// seventeenth provider, and a description or signal past a documented bound are rejected with an
-/// <see cref="ArgumentException" />. Unregistering an unknown id is a silent no-op.
+/// registration rules the SDK and the host apply: an invalid or duplicate provider id and a seventeenth
+/// provider are rejected with an <see cref="ArgumentException" />. Unregistering an unknown id is a silent no-op.
 /// </summary>
 /// <remarks>
 /// It does not open sessions: drive a provider's sessions through
@@ -177,11 +170,6 @@ public sealed class FakeVideoStreamProviderContext : IVideoStreamProviderContext
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(sessionId);
-		if (description is not null)
-		{
-			ValidateDescription(description);
-		}
-
 		Record(new VideoStreamProviderCall
 		{
 			Kind = VideoStreamProviderCallKind.SessionUpdate,
@@ -190,31 +178,6 @@ public sealed class FakeVideoStreamProviderContext : IVideoStreamProviderContext
 			Description = description,
 			Reason = reason,
 			Message = message
-		});
-		return Task.CompletedTask;
-	}
-
-	/// <inheritdoc />
-	public Task SendSignalAsync(string sessionId, VideoStreamSignal signal, CancellationToken cancellationToken = default)
-	{
-		ArgumentException.ThrowIfNullOrEmpty(sessionId);
-		ArgumentNullException.ThrowIfNull(signal);
-		if (string.IsNullOrEmpty(signal.Type) || signal.Type.Length > VideoStreamLimits.MaxSignalTypeLength)
-		{
-			throw new ArgumentException(
-				$"A signal type must be 1 to {VideoStreamLimits.MaxSignalTypeLength} characters.", nameof(signal));
-		}
-
-		if (signal.Payload is null || signal.Payload.Length > VideoStreamLimits.MaxSignalPayloadLength)
-		{
-			throw new ArgumentException(
-				$"A signal payload must be present and at most {VideoStreamLimits.MaxSignalPayloadLength} characters.",
-				nameof(signal));
-		}
-
-		Record(new VideoStreamProviderCall
-		{
-			Kind = VideoStreamProviderCallKind.Signal, SessionId = sessionId, Signal = signal
 		});
 		return Task.CompletedTask;
 	}
@@ -236,31 +199,6 @@ public sealed class FakeVideoStreamProviderContext : IVideoStreamProviderContext
 
 	internal void RecordProvidersChanged()
 		=> Record(new VideoStreamProviderCall { Kind = VideoStreamProviderCallKind.ProvidersChanged });
-
-	private static void ValidateDescription(VideoStreamSessionDescription description)
-	{
-		if (!VideoStreamLimits.IsValidTransport(description.Transport))
-		{
-			throw new ArgumentException($"'{description.Transport}' is not a valid transport token.",
-				nameof(description));
-		}
-
-		if (description.Url is { Length: > VideoStreamLimits.MaxUrlLength } ||
-			description.Payload is { Length: > VideoStreamLimits.MaxDescriptionPayloadLength })
-		{
-			throw new ArgumentException("The description's url or payload is too long.", nameof(description));
-		}
-
-		if (description.Parameters is { } parameters &&
-			(parameters.Count > VideoStreamLimits.MaxMapEntries ||
-				parameters.Any(pair => string.IsNullOrEmpty(pair.Key) ||
-					pair.Key.Length > VideoStreamLimits.MaxMapKeyLength ||
-					pair.Value is null ||
-					pair.Value.Length > VideoStreamLimits.MaxMapValueLength)))
-		{
-			throw new ArgumentException("The description's parameters exceed a documented bound.", nameof(description));
-		}
-	}
 
 	private void Record(VideoStreamProviderCall call)
 	{

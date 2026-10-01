@@ -29,7 +29,7 @@ describe('VideoStreamService', () => {
   });
 
   function listener() {
-    return jasmine.createSpyObj('listener', ['changed', 'signal', 'closed']);
+    return jasmine.createSpyObj('listener', ['changed', 'closed']);
   }
 
   it('hands the host refusal code to the view', async () => {

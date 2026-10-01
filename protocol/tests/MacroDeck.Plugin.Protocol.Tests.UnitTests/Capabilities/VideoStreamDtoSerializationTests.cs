@@ -11,18 +11,14 @@ namespace MacroDeck.Plugin.Protocol.Tests.UnitTests.Capabilities;
 public class VideoStreamDtoSerializationTests
 {
 	[Test]
-	public void An_open_travels_with_camel_case_keys_and_its_enums_as_member_names()
+	public void An_open_travels_with_camel_case_keys()
 	{
 		var arguments = new VideoStreamSessionOpenArguments
 		{
 			SessionId = "session",
 			ProviderId = "obs",
 			StreamId = "Scene 1",
-			AcceptedTransports = ["whep", "mjpeg"],
-			Consumer = new VideoStreamConsumerDto
-			{
-				DeviceId = "device", HostAddress = "http://192.168.1.2:8191/", ConnectionKind = "UsbTunnel"
-			}
+			AcceptedTransports = ["hls", "mjpeg"]
 		};
 
 		var json = JsonSerializer.Serialize(arguments, PluginProtocolJson.Options);
@@ -30,12 +26,10 @@ public class VideoStreamDtoSerializationTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(json, Does.Contain("\"acceptedTransports\":[\"whep\",\"mjpeg\"]"));
-			Assert.That(json, Does.Contain("\"connectionKind\":\"UsbTunnel\""));
+			Assert.That(json, Does.Contain("\"acceptedTransports\":[\"hls\",\"mjpeg\"]"));
 			Assert.That(actual, Is.Not.Null);
 			Assert.That(actual!.StreamId, Is.EqualTo("Scene 1"));
 			Assert.That(actual.AcceptedTransports, Is.EqualTo(arguments.AcceptedTransports));
-			Assert.That(actual.Consumer, Is.EqualTo(arguments.Consumer));
 		});
 	}
 
@@ -88,43 +82,56 @@ public class VideoStreamDtoSerializationTests
 	{
 		var stream = JsonSerializer.Deserialize<VideoStreamDescriptorDto>(
 			"""{"id":"cam","name":"Camera"}""", PluginProtocolJson.Options);
-		var consumer = JsonSerializer.Deserialize<VideoStreamConsumerDto>("{}", PluginProtocolJson.Options);
 		var resume = JsonSerializer.Deserialize<VideoStreamSessionResumeResult>("{}", PluginProtocolJson.Options);
-		var signal = JsonSerializer.Deserialize<VideoStreamSessionSignalResult>("{}", PluginProtocolJson.Options);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(stream!.State, Is.EqualTo("Connected"));
 			Assert.That(stream.HasAudio, Is.False);
 			Assert.That(stream.Width, Is.Null);
-			Assert.That(consumer!.ConnectionKind, Is.EqualTo("Network"));
 			Assert.That(resume!.Description, Is.Null);
-			Assert.That(signal!.Signal, Is.Null);
 		});
 	}
 
 	[Test]
-	public void A_session_description_keeps_its_opaque_values_unchanged()
+	public void A_session_description_carries_only_the_transport_and_the_url()
 	{
-		var description = new VideoStreamSessionDescriptionDto
-		{
-			Transport = "webrtc",
-			Payload = "v=0\r\no=- 1 1 IN IP4 127.0.0.1",
-			Parameters = new Dictionary<string, string> { ["iceServers"] = "[]" },
-			ExpiresAt = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero)
-		};
-
 		var json = JsonSerializer.Serialize(new VideoStreamSessionOpenResult
 		{
-			Description = description, RegistrationId = "registration"
+			Description = new VideoStreamSessionDescriptionDto { Transport = "hls", Url = "http://127.0.0.1:9/a.m3u8" },
+			RegistrationId = "registration"
 		}, PluginProtocolJson.Options);
-		var actual = JsonSerializer.Deserialize<VideoStreamSessionOpenResult>(json, PluginProtocolJson.Options);
+
+		Assert.That(json,
+			Does.Contain("""{"transport":"hls","url":"http://127.0.0.1:9/a.m3u8"}"""));
+	}
+
+	[Test]
+	public void An_older_peers_description_and_open_with_members_that_no_longer_exist_still_deserialize()
+	{
+		var result = JsonSerializer.Deserialize<VideoStreamSessionOpenResult>(
+			"""
+			{"registrationId":"r","description":{"transport":"mjpeg","url":"http://127.0.0.1:9/cam.mjpg",
+			"parameters":{"room":"kitchen"},"payload":"v=0","expiresAt":"2026-01-01T00:00:00+00:00"}}
+			""",
+			PluginProtocolJson.Options);
+		var open = JsonSerializer.Deserialize<VideoStreamSessionOpenArguments>(
+			"""
+			{"sessionId":"s","providerId":"cam","streamId":"main","acceptedTransports":["hls"],
+			"consumer":{"deviceId":"phone","hostAddress":"http://10.0.0.2:8191/","connectionKind":"UsbTunnel"}}
+			""",
+			PluginProtocolJson.Options);
+		var update = JsonSerializer.Deserialize<VideoStreamsSessionUpdateArguments>(
+			"""{"sessionId":"s","state":"Active","description":{"transport":"hls","url":"http://h/a.m3u8","payload":"x"}}""",
+			PluginProtocolJson.Options);
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(actual!.Description.Payload, Is.EqualTo(description.Payload));
-			Assert.That(actual.Description.Parameters, Is.EqualTo(description.Parameters));
-			Assert.That(actual.Description.ExpiresAt, Is.EqualTo(description.ExpiresAt));
+			Assert.That(result!.Description.Transport, Is.EqualTo("mjpeg"));
+			Assert.That(result.Description.Url, Is.EqualTo("http://127.0.0.1:9/cam.mjpg"));
+			Assert.That(open!.SessionId, Is.EqualTo("s"));
+			Assert.That(open.AcceptedTransports.Single(), Is.EqualTo("hls"));
+			Assert.That(update!.Description!.Url, Is.EqualTo("http://h/a.m3u8"));
 		});
 	}
 

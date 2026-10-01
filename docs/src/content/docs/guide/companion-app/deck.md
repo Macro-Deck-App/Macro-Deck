@@ -87,8 +87,8 @@ does in Macro Deck, always without sound. The video pauses while you look at ano
 screensaver shows, and stops while the app is in the background; it starts again when you come back. Until the
 first picture arrives, the widget says it is connecting, or why the video is not available.
 
-The phone loads the video from the address the plugin gives it, so the phone has to reach that address on
-your network. A video a plugin serves only on the computer itself does not play on a phone connected over USB.
+The phone loads the video through your computer, from Macro Deck, so the plugin's video source does not
+need to be reachable from the phone, and a video works the same over the network and over USB.
 
 ## When the computer is locked
 

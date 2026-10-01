@@ -84,7 +84,6 @@ internal sealed class RecordingPublisher : IPublisher
 			.. _published.Where(notification => notification switch
 			{
 				VideoStreamSessionChangedNotification changed => changed.SessionId == sessionId,
-				VideoStreamSignalNotification signal => signal.SessionId == sessionId,
 				VideoStreamSessionClosedNotification closed => closed.SessionId == sessionId,
 				_ => false
 			})
@@ -119,8 +118,6 @@ internal sealed class ScriptedVideoProvider(string id, params string[] streamIds
 
 	public ConcurrentQueue<(string SessionId, VideoStreamSessionReason Reason)> Closes { get; } = new();
 
-	public ConcurrentQueue<(string SessionId, VideoStreamSignal Signal)> Signals { get; } = new();
-
 	public ConcurrentQueue<string> Suspends { get; } = new();
 
 	public ConcurrentQueue<string> Resumes { get; } = new();
@@ -133,7 +130,7 @@ internal sealed class ScriptedVideoProvider(string id, params string[] streamIds
 	{
 		Opens.Enqueue(request);
 		return OnOpen?.Invoke(request, cancellationToken) ??
-			Task.FromResult(new VideoStreamSessionDescription("hls", "https://camera.local/" + request.StreamId));
+			Task.FromResult(VideoStreamSessionDescription.Hls("https://camera.local/" + request.StreamId));
 	}
 
 	public Task SuspendAsync(string sessionId, CancellationToken cancellationToken)
@@ -146,15 +143,7 @@ internal sealed class ScriptedVideoProvider(string id, params string[] streamIds
 	{
 		Resumes.Enqueue(sessionId);
 		return Task.FromResult<VideoStreamSessionDescription?>(
-			new VideoStreamSessionDescription("hls", "https://camera.local/resumed"));
-	}
-
-	public Task<VideoStreamSignal?> SignalAsync(string sessionId,
-		VideoStreamSignal signal,
-		CancellationToken cancellationToken)
-	{
-		Signals.Enqueue((sessionId, signal));
-		return Task.FromResult<VideoStreamSignal?>(signal.Type == "offer" ? new VideoStreamSignal("answer", "sdp") : null);
+			VideoStreamSessionDescription.Hls("https://camera.local/resumed"));
 	}
 
 	public Task CloseAsync(string sessionId, VideoStreamSessionReason reason, CancellationToken cancellationToken)
@@ -242,7 +231,6 @@ internal sealed class ScriptedVideoPlugin : IPluginCapabilityInvoker
 			},
 			CapabilityOperations.VideoStreamProvider.SessionOpen => OpenResult(arguments),
 			CapabilityOperations.VideoStreamProvider.SessionResume => new VideoStreamSessionResumeResult(),
-			CapabilityOperations.VideoStreamProvider.SessionSignal => new VideoStreamSessionSignalResult(),
 			_ => null
 		};
 
@@ -308,6 +296,7 @@ internal sealed class VideoStreamWorld : IDisposable
 		Broker = new VideoStreamSessionBroker(Registry,
 			PluginSessions,
 			Publisher,
+			Relay,
 			Time,
 			Serilog.Core.Logger.None,
 			TimeSpan.FromMilliseconds(5));
@@ -329,18 +318,17 @@ internal sealed class VideoStreamWorld : IDisposable
 
 	public VideoStreamProviderRegistry Registry { get; }
 
+	public VideoStreamRelay Relay { get; } = new();
+
 	public VideoStreamSessionBroker Broker { get; }
 
 	public VideoStreamPluginSessions Sessions { get; }
-
-	public static VideoStreamConsumer Consumer { get; } =
-		new("device-1", new Uri("http://192.168.1.2:8191"), VideoStreamConnectionKind.Network);
 
 	public IntegrationVideoStreamProviderContext Context(string integrationId = BuiltIn)
 		=> new(integrationId, Registry, Broker);
 
 	public VideoStreamOpenTicket Open(string providerId, string streamId, string connectionId = "ui-1")
-		=> Broker.OpenSession(connectionId, providerId, streamId, ["webrtc", "hls"], Consumer);
+		=> Broker.OpenSession(connectionId, providerId, streamId, ["hls", "mjpeg"]);
 
 	public async Task<(string SessionId, VideoStreamPluginConnection Connection)> ConnectPluginAsync(
 		string pluginId = PluginId)

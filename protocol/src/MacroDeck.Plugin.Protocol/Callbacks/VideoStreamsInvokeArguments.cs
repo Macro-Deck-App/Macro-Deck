@@ -34,14 +34,6 @@ public sealed record VideoStreamsSessionUpdateArguments
 	public LocalizedText? Message { get; init; }
 }
 
-/// <summary>Arguments for the <c>session-signal</c> operation: a signal from the provider to the consumer.</summary>
-public sealed record VideoStreamsSessionSignalArguments
-{
-	public required string SessionId { get; init; }
-
-	public required VideoStreamSignalDto Signal { get; init; }
-}
-
 /// <summary>Arguments for the <c>session-close</c> operation: the provider ended the session itself.</summary>
 public sealed record VideoStreamsSessionCloseArguments
 {

@@ -15,7 +15,7 @@ public static class VideoStreamLimits
 
 	public const int MaxStreamIdLength = 256;
 
-	/// <summary>Per <c>Metadata</c> or <c>Parameters</c> dictionary.</summary>
+	/// <summary>Per <c>Metadata</c> dictionary.</summary>
 	public const int MaxMapEntries = 32;
 
 	public const int MaxMapKeyLength = 64;
@@ -25,13 +25,6 @@ public static class VideoStreamLimits
 	public const int MaxTransportLength = 32;
 
 	public const int MaxUrlLength = 2 * 1024;
-
-	/// <summary>A session description's <c>Payload</c>.</summary>
-	public const int MaxDescriptionPayloadLength = 64 * 1024;
-
-	public const int MaxSignalTypeLength = 64;
-
-	public const int MaxSignalPayloadLength = 32 * 1024;
 
 	/// <summary>A transport token: 1 to <see cref="MaxTransportLength" /> of <c>a-z</c>, <c>0-9</c>,
 	/// <c>.</c>, <c>+</c> and <c>-</c>.</summary>

@@ -5,7 +5,7 @@ description: Shows a live video stream from a video stream provider, played from
 
 A live video stream that a [video stream provider](/features/video-streams/) offers: an OBS scene, a camera,
 a capture device. The tree names the stream and nothing else. The client showing it asks Macro Deck for a
-session, plays whatever transport the provider answers with, and releases it again, so you never write a
+session, plays it over a transport it supports, and releases it again, so you never write a
 player, a reconnect loop or a placeholder yourself.
 
 `macrodeck.video-stream`
@@ -68,9 +68,11 @@ the reader reserves the width and height the provider declared for the stream, s
 - **Recovery.** A session that ended because the provider restarted, the connection to Macro Deck dropped or
   the source went away is opened again on its own, with a growing delay. A stream that does not exist is
   tried again when the provider's streams change.
-- **Transports.** The client offers the transports it can play and uses the first one the provider serves.
-  A transport that fails to play on this device is dropped for the next attempt while another is left.
-  See [What Macro Deck's clients play](/features/video-streams/#what-macro-decks-clients-play).
+- **Transports.** The client offers `hls`, only where the device plays it natively, and `mjpeg`, which every
+  device plays, and uses the first one the provider serves. A transport that fails to play on this device,
+  for example because the browser blocks autoplay, is dropped for the next attempt while another is left.
+  The media comes from Macro Deck itself, never from the provider. See
+  [What Macro Deck's clients play](/features/video-streams/#what-macro-decks-clients-play).
 - **Sound.** The stream always plays muted.
 
 The reader names the view after the stream for assistive technology.

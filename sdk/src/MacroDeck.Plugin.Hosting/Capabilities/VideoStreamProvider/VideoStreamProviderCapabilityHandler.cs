@@ -74,9 +74,6 @@ internal sealed class VideoStreamProviderCapabilityHandler(
 				CapabilityOperations.VideoStreamProvider.SessionResume =>
 					await ResumeAsync(Arguments<VideoStreamSessionArguments>(invocation), cancellationToken)
 						.ConfigureAwait(false),
-				CapabilityOperations.VideoStreamProvider.SessionSignal =>
-					await SignalAsync(Arguments<VideoStreamSessionSignalArguments>(invocation), cancellationToken)
-						.ConfigureAwait(false),
 				CapabilityOperations.VideoStreamProvider.SessionClose =>
 					await CloseAsync(Arguments<VideoStreamSessionCloseArguments>(invocation)).ConfigureAwait(false),
 				_ => CapabilityInvocationResult.Failed(ProtocolErrorCodes.CapabilityUnsupported,
@@ -196,8 +193,7 @@ internal sealed class VideoStreamProviderCapabilityHandler(
 		{
 			description = await registration.Provider.OpenAsync(new VideoStreamOpenRequest(arguments.SessionId,
 						arguments.StreamId,
-						accepted,
-						VideoStreamWire.ToConsumer(arguments.Consumer)),
+						accepted),
 					cancellationToken)
 				.ConfigureAwait(false);
 		}
@@ -207,7 +203,8 @@ internal sealed class VideoStreamProviderCapabilityHandler(
 			throw;
 		}
 
-		var (problemCode, problem) = Check(description, accepted);
+		var wire = description is null ? null : VideoStreamWire.ToDto(description);
+		var (problemCode, problem) = Check(wire, accepted);
 		var completion = sessions.CompleteOpen(arguments.SessionId);
 
 		switch (completion.Outcome)
@@ -215,7 +212,7 @@ internal sealed class VideoStreamProviderCapabilityHandler(
 			case VideoStreamOpenOutcome.Open when problem is null:
 				return CapabilityInvocationResult.Ok(new VideoStreamSessionOpenResult
 				{
-					Description = VideoStreamWire.ToDto(description),
+					Description = wire!,
 					RegistrationId = registration.RegistrationId
 				});
 
@@ -263,7 +260,8 @@ internal sealed class VideoStreamProviderCapabilityHandler(
 		}
 
 		var description = await provider.ResumeAsync(arguments!.SessionId, cancellationToken).ConfigureAwait(false);
-		if (description is not null && VideoStreamWire.ValidateDescription(description) is { } problem)
+		var wire = description is null ? null : VideoStreamWire.ToDto(description);
+		if (wire is not null && VideoStreamWire.ValidateDescription(wire) is { } problem)
 		{
 			_logger.Warning("Provider {ProviderId} resumed session {SessionId} with an unusable description: {Problem}",
 				arguments.ProviderId,
@@ -274,42 +272,7 @@ internal sealed class VideoStreamProviderCapabilityHandler(
 
 		return CapabilityInvocationResult.Ok(new VideoStreamSessionResumeResult
 		{
-			Description = description is null ? null : VideoStreamWire.ToDto(description)
-		});
-	}
-
-	private async Task<CapabilityInvocationResult> SignalAsync(
-		VideoStreamSessionSignalArguments? arguments,
-		CancellationToken cancellationToken)
-	{
-		if (arguments?.Signal is null)
-		{
-			return InvalidPayload("session.signal requires a signal.");
-		}
-
-		var signal = VideoStreamWire.ToSignal(arguments.Signal);
-		if (VideoStreamWire.ValidateSignal(signal) is { } invalid)
-		{
-			return InvalidPayload(invalid);
-		}
-
-		if (!TryResolveOpenSession(arguments.SessionId, arguments.ProviderId, out var provider, out var failure))
-		{
-			return failure;
-		}
-
-		var answer = await provider.SignalAsync(arguments.SessionId, signal, cancellationToken).ConfigureAwait(false);
-		if (answer is not null && VideoStreamWire.ValidateSignal(answer) is { } problem)
-		{
-			_logger.Warning("Provider {ProviderId} answered a signal with an unusable one: {Problem}",
-				arguments.ProviderId,
-				problem);
-			return Failure(VideoStreamErrorCode.Failed, problem);
-		}
-
-		return CapabilityInvocationResult.Ok(new VideoStreamSessionSignalResult
-		{
-			Signal = answer is null ? null : VideoStreamWire.ToDto(answer)
+			Description = wire
 		});
 	}
 
@@ -370,7 +333,7 @@ internal sealed class VideoStreamProviderCapabilityHandler(
 	}
 
 	private static (VideoStreamErrorCode Code, string? Problem) Check(
-		VideoStreamSessionDescription? description,
+		VideoStreamSessionDescriptionDto? description,
 		IReadOnlyList<string> accepted)
 	{
 		if (VideoStreamWire.ValidateDescription(description) is { } problem)

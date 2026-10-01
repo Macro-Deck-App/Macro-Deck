@@ -1281,7 +1281,6 @@ export {
   type OpenVideoStreamRequest,
   type OpenVideoStreamResponse,
   type ResumeVideoStreamRequest,
-  type SignalVideoStreamRequest,
   type SuspendVideoStreamRequest,
   type VideoStreamCatalogChangedEvent,
   type VideoStreamDescriptionMessage,
@@ -1293,8 +1292,6 @@ export {
   type VideoStreamSessionReason,
   type VideoStreamSessionRevision,
   type VideoStreamSessionState,
-  type VideoStreamSignalEvent,
-  type VideoStreamSignalMessage,
   type VideoStreamState,
 } from './protocol/messages/video-stream';
 export {
