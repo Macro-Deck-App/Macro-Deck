@@ -24,6 +24,7 @@ using MacroDeckHost.Application.ScreenSavers;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Tests.UnitTests.Auth;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
+using MacroDeckHost.Tests.UnitTests.Ui;
 using MacroDeckHost.Tests.UnitTests.VideoStreams;
 using MacroDeckHost.Application.VideoStreams;
 using MacroDeck.Plugin.Protocol.Capabilities.VideoStreamProvider;
@@ -63,6 +64,7 @@ public class RemotePluginIntegrationRegistrarTests
 	private FolderViewRegistry _folderViewRegistry = null!;
 	private WidgetTypeRegistry _widgetTypeRegistry = null!;
 	private ScreenSaverRegistry _screenSaverRegistry = null!;
+	private FakeVariableBindingService _variableBindings = null!;
 	private RemotePluginIntegrationRegistrar _registrar = null!;
 
 	[SetUp]
@@ -90,6 +92,8 @@ public class RemotePluginIntegrationRegistrarTests
 		var services = new ServiceCollection();
 		services.AddSingleton<IMediator>(_mediator);
 		services.AddSingleton<IAppPreferenceService>(_preferences);
+		_variableBindings = new FakeVariableBindingService();
+		services.AddSingleton<MacroDeckHost.Application.Variables.IVariableBindingService>(_variableBindings);
 		_scopeFactory = services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
 
 		_registrar = new RemotePluginIntegrationRegistrar(_sessionRegistry,
@@ -244,6 +248,20 @@ public class RemotePluginIntegrationRegistrarTests
 			Assert.That(_integrationRegistry.Registered.Select(i => i.Id), Does.Not.Contain(pluginId));
 			Assert.That(CatalogChanges(), Is.EqualTo(new[] { pluginId }));
 		});
+	}
+
+	[Test]
+	public async Task Forgetting_a_plugin_removes_its_variables_but_unregistering_it_does_not()
+	{
+		var pluginId = "com.example.plugin";
+		_installationCatalog.Plugins.Add(Installed(pluginId));
+		await _registrar.RegisterInstalledDetachedAsync(pluginId);
+
+		await _registrar.UnregisterAsync(pluginId);
+		Assert.That(_variableBindings.RemovedIntegrations, Is.Empty);
+
+		await _registrar.ForgetAsync(pluginId);
+		Assert.That(_variableBindings.RemovedIntegrations, Is.EqualTo(new[] { pluginId }));
 	}
 
 	[Test]

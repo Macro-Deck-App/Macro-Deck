@@ -9343,6 +9343,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.Twitch.Actions.SetChatMode.OnLabel" xml:space="preserve">
     <value>Attiva</value>
   </data>
+  <data name="Integrations.Twitch.Actions.SetChatMode.ToggleDescription" xml:space="preserve">
+    <value>Imposta la modalità sul contrario del suo stato attuale su Twitch. L'impostazione Attiva viene ignorata.</value>
+  </data>
+  <data name="Integrations.Twitch.Actions.SetChatMode.ToggleLabel" xml:space="preserve">
+    <value>Alterna</value>
+  </data>
   <data name="Integrations.Twitch.Actions.SetRedemptionStatus.Description" xml:space="preserve">
     <value>Contrassegna un riscatto di punti canale come completato o lo rimborsa. Twitch lo consente solo per le ricompense create da questa applicazione: le ricompense create nella dashboard di Twitch non possono essere gestite tramite l'API.</value>
   </data>
