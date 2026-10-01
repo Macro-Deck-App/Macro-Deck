@@ -21,7 +21,8 @@ function show(element: Element, chosen: number): void {
   const all = candidates(element);
   const index = chosen < 0 || chosen >= all.length ? all.length - 1 : chosen;
   for (let at = 0; at < all.length; at++) {
-    all[at].toggleAttribute(LAST_ATTRIBUTE, at === all.length - 1);
+    if (at === all.length - 1) all[at].setAttribute(LAST_ATTRIBUTE, '');
+    else all[at].removeAttribute(LAST_ATTRIBUTE);
     if (at === index) {
       all[at].removeAttribute(HIDDEN_ATTRIBUTE);
       all[at].removeAttribute('aria-hidden');
