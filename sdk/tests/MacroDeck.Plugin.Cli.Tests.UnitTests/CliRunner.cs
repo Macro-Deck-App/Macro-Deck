@@ -1,4 +1,5 @@
 using MacroDeck.Plugin.Cli.Building;
+using MacroDeck.Plugin.Cli.Rendering;
 using MacroDeck.Plugin.Cli.Runtime;
 using MacroDeck.Plugin.Cli.Scaffolding;
 using Spectre.Console.Testing;
@@ -143,6 +144,21 @@ internal static class CliRunner
 		var output = new StringWriter();
 		var error = new StringWriter();
 		var exitCode = await CliEntryPoint.RunAsync(args, output, error, prompt, generator);
+		return (output.ToString(), error.ToString(), exitCode);
+	}
+
+	/// <summary>As <see cref="Run(string[])" />, but with a fake screenshotter in place of a real browser.</summary>
+	public static async Task<(string Output, string Error, int ExitCode)> RunPreview(
+		Func<string, CancellationToken, Task<IPreviewScreenshotter>> screenshotterFactory,
+		params string[] args)
+	{
+		var output = new StringWriter();
+		var error = new StringWriter();
+		var exitCode = await CliEntryPoint.RunAsync(args,
+			output,
+			error,
+			_nonInteractivePrompt,
+			screenshotterFactory: screenshotterFactory);
 		return (output.ToString(), error.ToString(), exitCode);
 	}
 }
