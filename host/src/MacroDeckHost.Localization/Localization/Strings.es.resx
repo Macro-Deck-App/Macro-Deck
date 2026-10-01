@@ -9343,6 +9343,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.Twitch.Actions.SetChatMode.OnLabel" xml:space="preserve">
     <value>Activado</value>
   </data>
+  <data name="Integrations.Twitch.Actions.SetChatMode.ToggleDescription" xml:space="preserve">
+    <value>Cambia el modo al contrario de su estado actual en Twitch. El ajuste Activado se ignora.</value>
+  </data>
+  <data name="Integrations.Twitch.Actions.SetChatMode.ToggleLabel" xml:space="preserve">
+    <value>Alternar</value>
+  </data>
   <data name="Integrations.Twitch.Actions.SetRedemptionStatus.Description" xml:space="preserve">
     <value>Marca un canje de puntos de canal como completado o lo reembolsa. Twitch solo permite esto para recompensas creadas por esta aplicación; las recompensas creadas en el panel de Twitch no se pueden resolver mediante la API.</value>
   </data>

@@ -9343,6 +9343,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Twitch.Actions.SetChatMode.OnLabel" xml:space="preserve">
     <value>Activé</value>
   </data>
+  <data name="Integrations.Twitch.Actions.SetChatMode.ToggleDescription" xml:space="preserve">
+    <value>Passe le mode à l'inverse de son état actuel sur Twitch. Le réglage Activé est ignoré.</value>
+  </data>
+  <data name="Integrations.Twitch.Actions.SetChatMode.ToggleLabel" xml:space="preserve">
+    <value>Basculer</value>
+  </data>
   <data name="Integrations.Twitch.Actions.SetRedemptionStatus.Description" xml:space="preserve">
     <value>Marque une récompense en points de chaîne comme complétée ou la rembourse. Twitch ne l'autorise que pour les récompenses créées par cette application - les récompenses créées dans le tableau de bord Twitch ne peuvent pas être résolues via l'API.</value>
   </data>
