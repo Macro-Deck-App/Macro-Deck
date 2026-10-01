@@ -66,3 +66,35 @@
     background-color: currentColor;
   }
 }
+
+.license-settings__toggle {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: var(--space-1);
+  padding: var(--space-1) 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--color-text-primary);
+  }
+}
+
+.license-settings__chevron {
+  background-color: currentColor;
+  transition: transform var(--transition-fast);
+}
+
+.license-settings__chevron--open {
+  transform: rotate(90deg);
+}
+
+.license-settings__details {
+  display: flex;
+  flex-direction: column;
+}

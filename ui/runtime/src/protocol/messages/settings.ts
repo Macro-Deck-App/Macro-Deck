@@ -332,6 +332,28 @@ export type CompanionLicenseAccountSync = 'unknown' | 'synced' | 'signedOut';
 
 export interface CompanionLicenseChangedEvent {}
 
+export interface RedeemCompanionPromoCodeRequest {
+  code: string;
+}
+
+export type CompanionPromoCodeStatus =
+  | 'redeemed'
+  | 'accountLicenseExists'
+  | 'alreadyLicensed'
+  | 'invalid'
+  | 'expired'
+  | 'alreadyRedeemed'
+  | 'revoked'
+  | 'accountSuspended'
+  | 'rateLimited'
+  | 'unavailable'
+  | 'signedOut';
+
+export interface RedeemCompanionPromoCodeResponse {
+  status: CompanionPromoCodeStatus;
+  retryAfterSeconds: number | null;
+}
+
 export type CompanionAppDeviceState =
   | 'NotAuthorized'
   | 'Checking'

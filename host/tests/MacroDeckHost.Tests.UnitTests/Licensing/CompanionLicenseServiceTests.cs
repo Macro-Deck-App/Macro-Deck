@@ -1242,6 +1242,7 @@ internal sealed partial class CompanionLicenseServiceTests
 		public FakeDeveloperModePreferences Preferences { get; } = new();
 		public FakeTimeProvider Time { get; } = new() { Now = Now };
 		public ScriptedPlatform Platform { get; } = new();
+		public ScriptedAccount Accounts { get; } = new();
 		public UserNotificationStore Notifications { get; } = new();
 		public EphemeralDataProtectionProvider Protection { get; } = new();
 		public CompanionHarness.CapturingSink Sink { get; } = new();
@@ -1264,6 +1265,7 @@ internal sealed partial class CompanionLicenseServiceTests
 		private CompanionLicenseService Create()
 			=> new(ScopeFactory,
 				Platform,
+				Accounts,
 				new CompanionLicenseTokens(TrustedKeys),
 				Harness.DeviceRegistry,
 				Harness.Transport,

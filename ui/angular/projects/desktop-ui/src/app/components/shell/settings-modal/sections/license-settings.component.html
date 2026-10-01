@@ -7,6 +7,15 @@
         {{ (status()?.licensed ? 'macrodeck.app:Settings.License.Licensed' : 'macrodeck.app:Settings.License.NotLicensed') | translate }}
       </span>
     </shared-settings-row>
+    @if (canRedeemEntry()) {
+      <shared-settings-row
+        [label]="'macrodeck.app:Settings.License.Redeem.Heading' | translate"
+        [description]="(signedIn() ? 'macrodeck.app:Settings.License.Redeem.Description' : 'macrodeck.app:Settings.License.Redeem.Result.SignedOut') | translate">
+        <shared-button variant="secondary" data-testid="license-redeem" [disabled]="!signedIn()" (click)="redeemOpen.set(true)">
+          {{ 'macrodeck.app:Settings.License.Redeem.Button' | translate }}
+        </shared-button>
+      </shared-settings-row>
+    }
     @if (status()?.issuePending) {
       <div class="license-settings__pending" data-testid="license-issue-pending" role="status">
         <span class="icon icon-refresh icon-sm" aria-hidden="true"></span>
@@ -29,38 +38,52 @@
           {{ 'macrodeck.app:Settings.License.TestMarker' | translate }}
         </p>
       }
-      <shared-settings-row [label]="'macrodeck.app:Settings.License.LicenseIdLabel' | translate">
-        <span class="license-settings__value license-settings__value--mono">{{ status()?.licenseId ?? '-' }}</span>
-      </shared-settings-row>
-      <shared-settings-row [label]="'macrodeck.app:Settings.License.SourceLabel' | translate">
-        <span class="license-settings__value">{{ sourceLabel() }}</span>
-      </shared-settings-row>
-      @if (purchasedAt(); as purchased) {
-        <shared-settings-row [label]="'macrodeck.app:Settings.License.PurchasedAtLabel' | translate">
-          <span class="license-settings__value" data-testid="license-purchased-at">{{ purchased }}</span>
-        </shared-settings-row>
-      }
-      @if (status()?.billingId; as billingId) {
-        <shared-settings-row [label]="'macrodeck.app:Settings.License.BillingIdLabel' | translate">
-          <span class="license-settings__value license-settings__value--mono" data-testid="license-billing-id">{{ billingId }}</span>
-        </shared-settings-row>
-      }
-      <shared-settings-row [label]="'macrodeck.app:Settings.License.KeyIdLabel' | translate">
-        <span class="license-settings__value license-settings__value--mono">{{ status()?.keyId ?? '-' }}</span>
-      </shared-settings-row>
-      <shared-settings-row [label]="'macrodeck.app:Settings.License.IssuedAtLabel' | translate">
-        <span class="license-settings__value">{{ issuedAt() }}</span>
-      </shared-settings-row>
-      @if (status()?.accountSync === 'synced') {
-        <p class="license-settings__account" data-testid="license-account-synced">
-          <span class="icon icon-user icon-sm" aria-hidden="true"></span>
-          {{ 'macrodeck.app:Settings.License.AccountSynced' | translate }}
-        </p>
-      } @else if (status()?.accountSync === 'signedOut') {
-        <p class="license-settings__account" data-testid="license-account-signed-out">
-          <span class="icon icon-user icon-sm" aria-hidden="true"></span>
-          {{ 'macrodeck.app:Settings.License.AccountSignedOut' | translate }}
-        </p>
+      <button
+        type="button"
+        class="license-settings__toggle"
+        data-testid="license-details-toggle"
+        [attr.aria-expanded]="detailsOpen()"
+        aria-controls="license-details"
+        (click)="detailsOpen.set(!detailsOpen())">
+        <span
+          class="icon icon-chevron-right icon-sm license-settings__chevron"
+          [class.license-settings__chevron--open]="detailsOpen()"
+          aria-hidden="true"></span>
+        {{ (detailsOpen() ? 'macrodeck.app:Settings.License.HideDetails' : 'macrodeck.app:Settings.License.ShowDetails') | translate }}
+      </button>
+      @if (detailsOpen()) {
+        <div id="license-details" class="license-settings__details" data-testid="license-details">
+          <shared-settings-row [label]="'macrodeck.app:Settings.License.LicenseIdLabel' | translate">
+            <span class="license-settings__value license-settings__value--mono">{{ status()?.licenseId ?? '-' }}</span>
+          </shared-settings-row>
+          <shared-settings-row [label]="'macrodeck.app:Settings.License.SourceLabel' | translate">
+            <span class="license-settings__value">{{ sourceLabel() }}</span>
+          </shared-settings-row>
+          @if (purchasedAt(); as purchased) {
+            <shared-settings-row [label]="'macrodeck.app:Settings.License.PurchasedAtLabel' | translate">
+              <span class="license-settings__value" data-testid="license-purchased-at">{{ purchased }}</span>
+            </shared-settings-row>
+          }
+          @if (status()?.billingId; as billingId) {
+            <shared-settings-row [label]="'macrodeck.app:Settings.License.BillingIdLabel' | translate">
+              <span class="license-settings__value license-settings__value--mono" data-testid="license-billing-id">{{ billingId }}</span>
+            </shared-settings-row>
+          }
+          <shared-settings-row [label]="'macrodeck.app:Settings.License.IssuedAtLabel' | translate">
+            <span class="license-settings__value">{{ issuedAt() }}</span>
+          </shared-settings-row>
+          @if (status()?.accountSync === 'synced') {
+            <p class="license-settings__account" data-testid="license-account-synced">
+              <span class="icon icon-user icon-sm" aria-hidden="true"></span>
+              {{ 'macrodeck.app:Settings.License.AccountSynced' | translate }}
+            </p>
+          } @else if (status()?.accountSync === 'signedOut') {
+            <p class="license-settings__account" data-testid="license-account-signed-out">
+              <span class="icon icon-user icon-sm" aria-hidden="true"></span>
+              {{ 'macrodeck.app:Settings.License.AccountSignedOut' | translate }}
+            </p>
+          }
+        </div>
       }
     }
   </shared-settings-section>
@@ -69,3 +92,7 @@
     <p class="license-settings__error">{{ 'macrodeck.app:Settings.License.LoadFailed' | translate }}</p>
   }
 </div>
+
+@if (redeemOpen()) {
+  <app-promo-code-modal (closed)="closeRedeem()" />
+}

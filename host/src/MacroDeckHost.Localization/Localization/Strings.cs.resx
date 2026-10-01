@@ -13887,6 +13887,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.License.Description" xml:space="preserve">
     <value>Licence Macro Deck Companion, kterou tento hostitel má. Hostitel ji předává každé připojené aplikaci Companion.</value>
   </data>
+  <data name="Settings.License.HideDetails" xml:space="preserve">
+    <value>Skrýt podrobnosti</value>
+  </data>
   <data name="Settings.License.Heading" xml:space="preserve">
     <value>Licence</value>
   </data>
@@ -13895,9 +13898,6 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Settings.License.IssuedAtLabel" xml:space="preserve">
     <value>Vydáno</value>
-  </data>
-  <data name="Settings.License.KeyIdLabel" xml:space="preserve">
-    <value>Podpisový klíč</value>
   </data>
   <data name="Settings.License.LicenseIdLabel" xml:space="preserve">
     <value>ID licence</value>
@@ -13920,6 +13920,63 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.License.PurchasedAtLabel" xml:space="preserve">
     <value>Zakoupeno</value>
   </data>
+  <data name="Settings.License.Redeem.Heading" xml:space="preserve">
+    <value>Uplatnit promo kód</value>
+  </data>
+  <data name="Settings.License.Redeem.Description" xml:space="preserve">
+    <value>Máte promo kód pro aplikaci Companion? Zadejte ho zde a odemkněte licenci pro svůj účet Macro Deck.</value>
+  </data>
+  <data name="Settings.License.Redeem.CodeLabel" xml:space="preserve">
+    <value>Promo kód</value>
+  </data>
+  <data name="Settings.License.Redeem.CodePlaceholder" xml:space="preserve">
+    <value>XXXX-XXXX-XXXX-XXXX</value>
+  </data>
+  <data name="Settings.License.Redeem.Button" xml:space="preserve">
+    <value>Uplatnit</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Redeemed" xml:space="preserve">
+    <value>Promo kód byl uplatněn. Licence Companion je odemčena.</value>
+  </data>
+  <data name="Settings.License.Redeem.StoreCodesNote" xml:space="preserve">
+    <value>Kódy z Google Play a App Store se zde nepřijímají. Uplatňují se přímo v Google Play nebo v App Store.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.AccountLicenseExists" xml:space="preserve">
+    <value>Účet Macro Deck již má licenci Companion. Nyní se používá zde.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.AlreadyLicensed" xml:space="preserve">
+    <value>Tento počítač již má licenci Companion, kód proto nebyl použit.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Invalid" xml:space="preserve">
+    <value>Tento promo kód není platný. Zkontrolujte kód a zkuste to znovu.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Expired" xml:space="preserve">
+    <value>Platnost tohoto promo kódu vypršela.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.AlreadyRedeemed" xml:space="preserve">
+    <value>Tento promo kód již byl uplatněn.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Revoked" xml:space="preserve">
+    <value>Licence k tomuto promo kódu již není platná.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.AccountSuspended" xml:space="preserve">
+    <value>Účet Macro Deck je pozastaven, promo kódy proto nelze uplatnit.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.RateLimited" xml:space="preserve">
+    <value>Příliš mnoho pokusů. Zkuste to znovu po {time}.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.RateLimitedSoon" xml:space="preserve">
+    <value>Příliš mnoho pokusů. Zkuste to znovu za několik minut.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Unavailable" xml:space="preserve">
+    <value>Promo kódy se právě nedají uplatnit. Zkuste to později.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.SignedOut" xml:space="preserve">
+    <value>Pro uplatnění promo kódu se přihlaste k účtu Macro Deck.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Failed" xml:space="preserve">
+    <value>Promo kód se nepodařilo uplatnit. Zkuste to znovu.</value>
+  </data>
   <data name="Settings.License.Source.AppStore" xml:space="preserve">
     <value>App Store</value>
   </data>
@@ -13929,11 +13986,17 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.License.Source.GooglePlay" xml:space="preserve">
     <value>Google Play</value>
   </data>
+  <data name="Settings.License.Source.PromoCode" xml:space="preserve">
+    <value>Promo kód</value>
+  </data>
   <data name="Settings.License.Source.Test" xml:space="preserve">
     <value>Test</value>
   </data>
   <data name="Settings.License.SourceLabel" xml:space="preserve">
     <value>Zakoupeno přes</value>
+  </data>
+  <data name="Settings.License.ShowDetails" xml:space="preserve">
+    <value>Zobrazit podrobnosti</value>
   </data>
   <data name="Settings.License.StatusLabel" xml:space="preserve">
     <value>Stav</value>

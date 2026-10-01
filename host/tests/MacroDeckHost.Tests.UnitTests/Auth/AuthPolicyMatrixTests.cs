@@ -503,6 +503,25 @@ public class AuthPolicyMatrixTests
 	}
 
 	[Test]
+	public async Task Redeeming_a_promo_code_is_admin_only_and_answers_with_a_status()
+	{
+		var client = await SendJson(HttpMethod.Post, "/api/settings/license/promo-code", new { code = "ABCD" }, _clientToken);
+		var blank = await SendJson(HttpMethod.Post, "/api/settings/license/promo-code", new { code = " " }, _adminToken);
+		var signedOut = await SendJson(HttpMethod.Post, "/api/settings/license/promo-code", new { code = "ABCD" }, _adminToken);
+		using var blankBody = JsonDocument.Parse(await blank.Content.ReadAsStringAsync());
+		using var signedOutBody = JsonDocument.Parse(await signedOut.Content.ReadAsStringAsync());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(client.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+			Assert.That(blank.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+			Assert.That(blankBody.RootElement.GetProperty("status").GetString(), Is.EqualTo("invalid"));
+			Assert.That(signedOutBody.RootElement.GetProperty("status").GetString(), Is.EqualTo("signedOut"));
+			Assert.That(signedOutBody.RootElement.GetProperty("retryAfterSeconds").ValueKind, Is.EqualTo(JsonValueKind.Null));
+		});
+	}
+
+	[Test]
 	public async Task The_companion_app_routes_are_admin_only()
 	{
 		var clientResponses = new[]

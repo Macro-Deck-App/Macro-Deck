@@ -15,7 +15,7 @@ Ed25519 is not available on Android below API 33, and Kotlin/Native on iOS canno
 
 **Token.** A license is a compact JWS, `alg` ES256, with a `kid` header. Its claims are `iss`
 `https://platform.macro-deck.app`, `aud` `macrodeck-companion`, `sub` (the license id), `product`
-`companion_app_license`, `source` (`google-play`, `app-store`, `app-store-legacy`, or `test` on licenses an
+`companion_app_license`, `source` (`google-play`, `app-store`, `app-store-legacy`, `promo-code`, or `test` on licenses an
 earlier host version issued itself) and `iat` in seconds. There is no `exp`, because the license does not
 expire. The optional display claims `purchased_at`
 (epoch seconds) and `billing_id` (store order or original transaction id) are shown when present; a malformed
@@ -38,6 +38,9 @@ license per user, not per device.
 `api.macro-deck.app` (`POST api/v1/companion-licenses`). `google-play` and `app-store` proofs are sent, and
 `app-store-legacy` proofs of kind `appTransaction` (with `legacyKind`), which only the Macro Deck 2 app submits. The base URL can be redirected with `MACRO_DECK_PLATFORM_URL` in
 Development-channel builds only, for example to Platform mock mode or staging, which sign with `test-2026`.
+A promo code is redeemed in the desktop app: the host posts it to `POST api/v1/companion-licenses/promo-code` with the
+signed-in account's token and stores the returned `promo-code` license like any other. The host does not call it while a
+purchased license is stored, so a code is never spent without effect.
 The host issues no license itself; there is no test license button. A `test-2026` license only comes from
 Platform mock mode or staging, and only works in developer mode (the `developer.mode` preference):
 

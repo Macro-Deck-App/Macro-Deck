@@ -13885,6 +13885,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.License.Description" xml:space="preserve">
     <value>Die Lizenz für Macro Deck Companion, die dieser Host besitzt. Der Host gibt sie an jede Companion-App weiter, die sich verbindet.</value>
   </data>
+  <data name="Settings.License.HideDetails" xml:space="preserve">
+    <value>Details ausblenden</value>
+  </data>
   <data name="Settings.License.Heading" xml:space="preserve">
     <value>Lizenz</value>
   </data>
@@ -13893,9 +13896,6 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Settings.License.IssuedAtLabel" xml:space="preserve">
     <value>Ausgestellt</value>
-  </data>
-  <data name="Settings.License.KeyIdLabel" xml:space="preserve">
-    <value>Signaturschlüssel</value>
   </data>
   <data name="Settings.License.LicenseIdLabel" xml:space="preserve">
     <value>Lizenz-ID</value>
@@ -13918,6 +13918,63 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.License.PurchasedAtLabel" xml:space="preserve">
     <value>Gekauft am</value>
   </data>
+  <data name="Settings.License.Redeem.Heading" xml:space="preserve">
+    <value>Promo-Code einlösen</value>
+  </data>
+  <data name="Settings.License.Redeem.Description" xml:space="preserve">
+    <value>Du hast einen Promo-Code für die Companion-App? Gib ihn hier ein, um die Lizenz für dein Macro Deck-Konto freizuschalten.</value>
+  </data>
+  <data name="Settings.License.Redeem.CodeLabel" xml:space="preserve">
+    <value>Promo-Code</value>
+  </data>
+  <data name="Settings.License.Redeem.CodePlaceholder" xml:space="preserve">
+    <value>XXXX-XXXX-XXXX-XXXX</value>
+  </data>
+  <data name="Settings.License.Redeem.Button" xml:space="preserve">
+    <value>Einlösen</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Redeemed" xml:space="preserve">
+    <value>Promo-Code eingelöst. Die Companion-Lizenz ist freigeschaltet.</value>
+  </data>
+  <data name="Settings.License.Redeem.StoreCodesNote" xml:space="preserve">
+    <value>Google-Play- und App-Store-Codes werden hier nicht akzeptiert. Löse sie in Google Play bzw. im App Store ein.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.AccountLicenseExists" xml:space="preserve">
+    <value>Dein Macro Deck-Konto hat bereits eine Companion-Lizenz. Sie wird jetzt hier verwendet.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.AlreadyLicensed" xml:space="preserve">
+    <value>Dieser Computer hat bereits eine Companion-Lizenz, deshalb wurde der Code nicht verwendet.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Invalid" xml:space="preserve">
+    <value>Dieser Promo-Code ist ungültig. Prüfe den Code und versuche es erneut.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Expired" xml:space="preserve">
+    <value>Dieser Promo-Code ist abgelaufen.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.AlreadyRedeemed" xml:space="preserve">
+    <value>Dieser Promo-Code wurde bereits eingelöst.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Revoked" xml:space="preserve">
+    <value>Die Lizenz zu diesem Promo-Code ist nicht mehr gültig.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.AccountSuspended" xml:space="preserve">
+    <value>Dein Macro Deck-Konto ist gesperrt, deshalb können keine Promo-Codes eingelöst werden.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.RateLimited" xml:space="preserve">
+    <value>Zu viele Versuche. Versuche es nach {time} erneut.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.RateLimitedSoon" xml:space="preserve">
+    <value>Zu viele Versuche. Versuche es in ein paar Minuten erneut.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Unavailable" xml:space="preserve">
+    <value>Promo-Codes können gerade nicht eingelöst werden. Versuche es später erneut.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.SignedOut" xml:space="preserve">
+    <value>Melde dich mit deinem Macro Deck-Konto an, um einen Promo-Code einzulösen.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Failed" xml:space="preserve">
+    <value>Der Promo-Code konnte nicht eingelöst werden. Versuche es erneut.</value>
+  </data>
   <data name="Settings.License.Source.AppStore" xml:space="preserve">
     <value>App Store</value>
   </data>
@@ -13927,11 +13984,17 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.License.Source.GooglePlay" xml:space="preserve">
     <value>Google Play</value>
   </data>
+  <data name="Settings.License.Source.PromoCode" xml:space="preserve">
+    <value>Promo-Code</value>
+  </data>
   <data name="Settings.License.Source.Test" xml:space="preserve">
     <value>Test</value>
   </data>
   <data name="Settings.License.SourceLabel" xml:space="preserve">
     <value>Gekauft über</value>
+  </data>
+  <data name="Settings.License.ShowDetails" xml:space="preserve">
+    <value>Details anzeigen</value>
   </data>
   <data name="Settings.License.StatusLabel" xml:space="preserve">
     <value>Status</value>

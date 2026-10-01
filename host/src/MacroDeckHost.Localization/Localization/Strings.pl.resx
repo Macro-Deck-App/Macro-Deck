@@ -13887,6 +13887,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Settings.License.Description" xml:space="preserve">
     <value>Licencja Macro Deck Companion posiadana przez tego hosta. Host przekazuje ją każdej łączącej się aplikacji Companion.</value>
   </data>
+  <data name="Settings.License.HideDetails" xml:space="preserve">
+    <value>Ukryj szczegóły</value>
+  </data>
   <data name="Settings.License.Heading" xml:space="preserve">
     <value>Licencja</value>
   </data>
@@ -13895,9 +13898,6 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Settings.License.IssuedAtLabel" xml:space="preserve">
     <value>Wystawiono</value>
-  </data>
-  <data name="Settings.License.KeyIdLabel" xml:space="preserve">
-    <value>Klucz podpisu</value>
   </data>
   <data name="Settings.License.LicenseIdLabel" xml:space="preserve">
     <value>Identyfikator licencji</value>
@@ -13920,6 +13920,63 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Settings.License.PurchasedAtLabel" xml:space="preserve">
     <value>Zakupiono</value>
   </data>
+  <data name="Settings.License.Redeem.Heading" xml:space="preserve">
+    <value>Zrealizuj kod promocyjny</value>
+  </data>
+  <data name="Settings.License.Redeem.Description" xml:space="preserve">
+    <value>Kod promocyjny do aplikacji Companion? Wpisz go tutaj, aby odblokować licencję dla konta Macro Deck.</value>
+  </data>
+  <data name="Settings.License.Redeem.CodeLabel" xml:space="preserve">
+    <value>Kod promocyjny</value>
+  </data>
+  <data name="Settings.License.Redeem.CodePlaceholder" xml:space="preserve">
+    <value>XXXX-XXXX-XXXX-XXXX</value>
+  </data>
+  <data name="Settings.License.Redeem.Button" xml:space="preserve">
+    <value>Zrealizuj</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Redeemed" xml:space="preserve">
+    <value>Kod promocyjny został zrealizowany. Licencja Companion jest odblokowana.</value>
+  </data>
+  <data name="Settings.License.Redeem.StoreCodesNote" xml:space="preserve">
+    <value>Kody z Google Play i App Store nie są tutaj akceptowane. Realizuje się je w Google Play lub w App Store.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.AccountLicenseExists" xml:space="preserve">
+    <value>Konto Macro Deck ma już licencję Companion. Jest ona teraz używana tutaj.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.AlreadyLicensed" xml:space="preserve">
+    <value>Ten komputer ma już licencję Companion, więc kod nie został użyty.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Invalid" xml:space="preserve">
+    <value>Ten kod promocyjny jest nieprawidłowy. Sprawdź kod i spróbuj ponownie.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Expired" xml:space="preserve">
+    <value>Ten kod promocyjny wygasł.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.AlreadyRedeemed" xml:space="preserve">
+    <value>Ten kod promocyjny został już zrealizowany.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Revoked" xml:space="preserve">
+    <value>Licencja powiązana z tym kodem promocyjnym nie jest już ważna.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.AccountSuspended" xml:space="preserve">
+    <value>Konto Macro Deck jest zawieszone, więc nie można realizować kodów promocyjnych.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.RateLimited" xml:space="preserve">
+    <value>Zbyt wiele prób. Spróbuj ponownie po {time}.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.RateLimitedSoon" xml:space="preserve">
+    <value>Zbyt wiele prób. Spróbuj ponownie za kilka minut.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Unavailable" xml:space="preserve">
+    <value>Kodów promocyjnych nie można teraz realizować. Spróbuj ponownie później.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.SignedOut" xml:space="preserve">
+    <value>Zaloguj się na konto Macro Deck, aby zrealizować kod promocyjny.</value>
+  </data>
+  <data name="Settings.License.Redeem.Result.Failed" xml:space="preserve">
+    <value>Nie udało się zrealizować kodu promocyjnego. Spróbuj ponownie.</value>
+  </data>
   <data name="Settings.License.Source.AppStore" xml:space="preserve">
     <value>App Store</value>
   </data>
@@ -13929,11 +13986,17 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Settings.License.Source.GooglePlay" xml:space="preserve">
     <value>Google Play</value>
   </data>
+  <data name="Settings.License.Source.PromoCode" xml:space="preserve">
+    <value>Kod promocyjny</value>
+  </data>
   <data name="Settings.License.Source.Test" xml:space="preserve">
     <value>Test</value>
   </data>
   <data name="Settings.License.SourceLabel" xml:space="preserve">
     <value>Kupiono przez</value>
+  </data>
+  <data name="Settings.License.ShowDetails" xml:space="preserve">
+    <value>Pokaż szczegóły</value>
   </data>
   <data name="Settings.License.StatusLabel" xml:space="preserve">
     <value>Stan</value>
