@@ -216,6 +216,10 @@ jobs:
       - name: Verify app icons
         run: node ci/scripts/verify-app-icons.mjs
 
+      - name: Verify the plugin CLI preview renderer is current
+        working-directory: ui
+        run: node scripts/build-preview-renderer.mjs --check
+
       - name: Build the framework-free runtime
         working-directory: ui/runtime
         run: npm run build

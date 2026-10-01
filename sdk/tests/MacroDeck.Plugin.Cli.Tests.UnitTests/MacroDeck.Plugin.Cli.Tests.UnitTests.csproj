@@ -19,6 +19,10 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\MacroDeck.Plugin.Cli\MacroDeck.Plugin.Cli.csproj" />
         <ProjectReference Include="..\support\MacroDeck.Signing.TestSupport\MacroDeck.Signing.TestSupport.csproj" />
+        <ProjectReference Include="..\fixtures\MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin\MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin.csproj"
+                           ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\fixtures\MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin\MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin.csproj"
+                           ReferenceOutputAssembly="false" />
     </ItemGroup>
 
     <ItemGroup>

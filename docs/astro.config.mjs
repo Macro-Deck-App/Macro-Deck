@@ -234,6 +234,7 @@ export default defineConfig({
 										{ label: 'merge', slug: 'cli/merge' },
 										{ label: 'icon-pack', slug: 'cli/icon-pack' },
 										{ label: 'run', slug: 'cli/run' },
+										{ label: 'preview', slug: 'cli/preview' },
 										{ label: 'test', slug: 'cli/test' },
 										'cli/signing',
 										'cli/ci',

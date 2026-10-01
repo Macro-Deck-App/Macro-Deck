@@ -1,0 +1,21 @@
+@import '../runtime/styles/tokens.css';
+@import '../runtime/styles/reset.css';
+@import '../runtime/styles/animations.css';
+@import '../runtime/styles/icons.css';
+@import '../runtime/styles/widget-metrics.css';
+@import '../runtime/styles/renderer.css';
+@import '../runtime/styles/widget-border.css';
+
+html,
+body {
+  margin: 0;
+  overflow: hidden;
+}
+
+#tile {
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}

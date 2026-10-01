@@ -54,7 +54,8 @@ internal static class HostInvokeDispatcher
 		CancellationToken cancellationToken,
 		TestHostMessaging? messaging = null,
 		string? pluginId = null,
-		UiResourceUploads? uiResourceUploads = null)
+		UiResourceUploads? uiResourceUploads = null,
+		UiPreviewSink? uiPreviews = null)
 	{
 		ArgumentNullException.ThrowIfNull(context);
 		ArgumentNullException.ThrowIfNull(interactions);
@@ -105,6 +106,10 @@ internal static class HostInvokeDispatcher
 					=> await PluginIconAsync(context, payload, cancellationToken).ConfigureAwait(false),
 				HostApis.IconPacks when payload.Operation == HostOperations.IconPacks.GetIcon
 					=> await IconAsync(context, payload, cancellationToken).ConfigureAwait(false),
+				HostApis.Ui when uiPreviews is { Attached: true } && payload.Operation is
+						HostOperations.Ui.Snapshot or HostOperations.Ui.Patch or HostOperations.Ui.Fault
+						or HostOperations.Ui.Reload
+					=> uiPreviews.Dispatch(payload),
 				HostApis.Ui when payload.Operation == HostOperations.Ui.RegisterMusicPlayerArtwork
 					=> await MusicPlayerArtworkAsync(context, payload, cancellationToken).ConfigureAwait(false),
 				HostApis.Ui when uiResourceUploads is not null &&

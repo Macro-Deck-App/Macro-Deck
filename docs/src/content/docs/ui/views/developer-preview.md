@@ -114,6 +114,12 @@ anything you typed or selected inside the preview. Put the state you want to loo
 A plugin whose first-ever scenario is added by Hot Reload does not declare a UI yet, so that scenario appears
 after the next restart.
 
+## Rendering previews to PNG
+
+`macrodeck-plugin preview render --project <path> --size 200x200 --output previews` draws every widget
+scenario to a PNG without a running Macro Deck, which is how store images are regenerated after a redesign. See
+[`preview`](/cli/preview/). Configuration views are not drawn.
+
 ## Real views
 
 A preview is not the only view that follows Hot Reload. Every view your plugin serves in the running app is
@@ -152,5 +158,6 @@ changes for a plugin that is not being hot reloaded.
 
 ## See also
 
+- [`macrodeck-plugin preview`](/cli/preview/) - render the widget scenarios to PNG
 - [Custom views](/ui/views/custom/) - a view with previews and tests
 - [Views and surfaces](/ui/views/)
