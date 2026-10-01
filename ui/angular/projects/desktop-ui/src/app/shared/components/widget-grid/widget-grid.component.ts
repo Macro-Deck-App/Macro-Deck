@@ -145,10 +145,13 @@ export class WidgetGridComponent implements AfterViewInit, OnDestroy, OnChanges 
       this.paintOrdered = paintOrder(this.widgets);
     }
     if (changes['widgets'] || changes['renderStates']) {
-      this.livePlacements = this.widgets.map(widget => ({
-        committed: widget,
-        live: this.renderStates.get(widget.id)?.liveRect ?? widget,
-      }));
+      // A hidden drag source has moved to the ghost, so the cells it left show as empty cells.
+      this.livePlacements = this.widgets
+        .filter(widget => !this.renderStates.get(widget.id)?.hidden)
+        .map(widget => ({
+          committed: widget,
+          live: this.renderStates.get(widget.id)?.liveRect ?? widget,
+        }));
     }
     if (changes['cols'] || changes['rows'] || changes['outerMargin'] || changes['spacing']) {
       // The shape is pushed into the metrics before the view renders, because the template derives

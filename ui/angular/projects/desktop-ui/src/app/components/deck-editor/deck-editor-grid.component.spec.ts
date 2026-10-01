@@ -692,6 +692,35 @@ describe('DeckEditorGridComponent', () => {
       expect(host().querySelector('shared-widget-item .widget.drag-source')).not.toBeNull();
     });
 
+    describe('moving a widget', () => {
+      function coveredCells(): number[] {
+        const cells = Array.from(host().querySelectorAll('.empty-cell'));
+        return cells.flatMap((cell, index) => (cell.classList.contains('occupied') ? [index] : []));
+      }
+
+      it('shows the cells the dragged widget leaves as empty cells, and covers them again once the drag is cancelled', () => {
+        render([gridWidget({ w: 2, h: 1 })]);
+        expect(coveredCells()).toEqual([0, 1]);
+
+        dragTile(0);
+        expect(coveredCells()).toEqual([]);
+
+        pointer(document, 'pointercancel', 100, 100);
+        fixture.detectChanges();
+        expect(coveredCells()).toEqual([0, 1]);
+      });
+
+      it('keeps the widget cells while a press has not moved past the drag threshold', () => {
+        render([gridWidget({ w: 2, h: 1 })]);
+
+        pointer(chrome(0), 'pointerdown', 100, 100);
+        fixture.detectChanges();
+
+        expect(coveredCells()).toEqual([0, 1]);
+        pointer(document, 'pointerup', 100, 100);
+      });
+    });
+
     it('re-dims a cut widget after the deck it lives on comes back', () => {
       // Navigating away and back changes the widget list without the clipboard or any drag changing.
       // A render state derived from the plain input rather than a signal would stay on the map it
