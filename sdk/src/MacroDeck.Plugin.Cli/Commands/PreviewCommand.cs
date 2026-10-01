@@ -4,7 +4,6 @@ using MacroDeck.Plugin.Cli.Rendering;
 
 namespace MacroDeck.Plugin.Cli.Commands;
 
-/// <summary><c>macrodeck-plugin preview render</c>: renders a plugin's <c>[UiPreview]</c> scenarios to PNG files.</summary>
 internal static class PreviewCommand
 {
 	public static Command Create(Func<string, CancellationToken, Task<IPreviewScreenshotter>>? screenshotterFactory = null)
