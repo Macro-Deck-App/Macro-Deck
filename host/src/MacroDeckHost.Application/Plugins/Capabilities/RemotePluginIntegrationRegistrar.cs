@@ -27,6 +27,7 @@ using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Variables;
 using MacroDeckHost.Application.Plugins.Capabilities.Mapping;
 using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Application.VideoStreams;
 using MacroDeck.Sdk.VideoStreams;
@@ -293,11 +294,32 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 	public async Task ForgetAsync(string pluginId, CancellationToken cancellationToken = default)
 	{
 		await UnregisterForGoodAsync(pluginId, cancellationToken).ConfigureAwait(false);
+		await RemoveVariablesAsync(pluginId, cancellationToken).ConfigureAwait(false);
 
 		var scope = LocalizationScope.ForPlugin(pluginId);
 		if (_localizationCatalogs.Unregister(scope))
 		{
 			await PublishLocalizationCatalogChangedAsync(scope, cancellationToken).ConfigureAwait(false);
+		}
+	}
+
+	private async Task RemoveVariablesAsync(string pluginId, CancellationToken cancellationToken)
+	{
+		try
+		{
+			await using var scope = _serviceScopeFactory.CreateAsyncScope();
+			var bindings = scope.ServiceProvider.GetRequiredService<IVariableBindingService>();
+			var result = await bindings.RemoveIntegrationAsync(pluginId, cancellationToken).ConfigureAwait(false);
+			if (!result.Success)
+			{
+				_logger.Warning("Removed the variables of uninstalled plugin '{PluginId}' but not all of its bindings: {Error}",
+					pluginId,
+					result.ErrorMessage);
+			}
+		}
+		catch (Exception exception) when (exception is not OutOfMemoryException && !cancellationToken.IsCancellationRequested)
+		{
+			_logger.Error(exception, "Failed to remove the variables of uninstalled plugin '{PluginId}'", pluginId);
 		}
 	}
 

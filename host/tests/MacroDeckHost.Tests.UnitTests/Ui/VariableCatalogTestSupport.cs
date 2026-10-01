@@ -103,6 +103,15 @@ internal sealed class FakeVariableBindingService : IVariableBindingService
 		=> Task.FromResult(OnRename?.Invoke(variableId, name) ??
 			Result.Fail(VariableBindingError.NotFound, "not found"));
 
+	public Task<Result<VariableBindingError>> RemoveIntegrationAsync(string integrationId,
+		CancellationToken cancellationToken = default)
+	{
+		RemovedIntegrations.Add(integrationId);
+		return Task.FromResult(Result.Ok<VariableBindingError>());
+	}
+
+	public List<string> RemovedIntegrations { get; } = [];
+
 	public IReadOnlyList<VariableBinding> GetBindings() => Bindings;
 
 	public VariableBinding? FindByVariableId(Guid variableId)
