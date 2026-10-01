@@ -1,0 +1,38 @@
+name: Release Legacy Patch (temporary)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Version From API
+        uses: Macro-Deck-App/Actions/fetch-version@main
+        id: fetch_version
+        with:
+          release-type: patch
+
+      - name: Checkout legacy branch
+        uses: actions/checkout@v4
+        with:
+          ref: legacy/macro-deck-2
+          token: ${{ secrets.PAT }}
+
+      - name: Update CSProj Version
+        run: |
+          sed -i 's/<Version>.*<\/Version>/<Version>${{ steps.fetch_version.outputs.version }}<\/Version>/' ./src/MacroDeck/MacroDeck.csproj
+          git add ./src/MacroDeck/MacroDeck.csproj
+
+      - name: Commit Changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Bump Version to ${{ steps.fetch_version.outputs.version }}
+
+      - name: Create Release
+        uses: Macro-Deck-App/Actions/create-github-release@main
+        with:
+          github-token: ${{ secrets.PAT }}
+          is-beta: false
+          version: ${{ steps.fetch_version.outputs.version }}
+          target-commitish: legacy/macro-deck-2
