@@ -1,11 +1,19 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PluginInstallActionResponse, PluginInstallWarning, PluginSignatureVerification } from '@macro-deck/runtime';
+import { BackupService } from '../../../services/backup.service';
 import { PluginInstallConfirmModalComponent } from './plugin-install-confirm-modal.component';
 import { provideLocalizationTesting } from '../../../../testing/localization-test-support';
 
 describe('PluginInstallConfirmModalComponent', () => {
   let fixture: ComponentFixture<PluginInstallConfirmModalComponent>;
+  const backupOperation = signal<{ stage: string; trigger: string } | null>(null);
+  const backupFake = {
+    operation: backupOperation,
+    running: () => ['Preparing', 'CreatingSnapshot', 'Encrypting', 'Saving'].includes(backupOperation()?.stage ?? ''),
+  };
+
+  beforeEach(() => backupOperation.set(null));
 
   function inspection(overrides: Partial<PluginInstallActionResponse> = {}): PluginInstallActionResponse {
     return {
@@ -29,7 +37,8 @@ describe('PluginInstallConfirmModalComponent', () => {
   async function setup(result: PluginInstallActionResponse): Promise<void> {
     TestBed.configureTestingModule({
       imports: [PluginInstallConfirmModalComponent],
-      providers: [provideZonelessChangeDetection(), ...provideLocalizationTesting()],
+      providers: [provideZonelessChangeDetection(), ...provideLocalizationTesting(),
+        { provide: BackupService, useValue: backupFake }],
     });
     fixture = TestBed.createComponent(PluginInstallConfirmModalComponent);
     fixture.componentRef.setInput('inspectionResult', result);
@@ -184,6 +193,60 @@ describe('PluginInstallConfirmModalComponent', () => {
 
     expect(fixture.nativeElement.querySelector('.sb-spinner')).not.toBeNull();
     expect(installButton().disabled).toBeTrue();
+  });
+
+  function primaryLabel(): string {
+    const buttons = Array.from(fixture.nativeElement.querySelectorAll('shared-modal [modal-footer] button')) as HTMLButtonElement[];
+    return (buttons[buttons.length - 1].textContent ?? '').trim();
+  }
+
+  it('says the install is running while busy', async () => {
+    await setup(inspection());
+    expect(primaryLabel()).toBe('Install');
+
+    fixture.componentRef.setInput('busy', true);
+    fixture.detectChanges();
+
+    expect(primaryLabel()).toBe('Installing…');
+  });
+
+  it('says a backup is being created while the pre-update backup runs, then returns to installing', async () => {
+    await setup(inspection());
+    fixture.componentRef.setInput('busy', true);
+    backupOperation.set({ stage: 'CreatingSnapshot', trigger: 'BeforePluginUpdate' });
+    fixture.detectChanges();
+
+    expect(primaryLabel()).toBe('Backing up…');
+
+    backupOperation.set({ stage: 'Completed', trigger: 'BeforePluginUpdate' });
+    fixture.detectChanges();
+
+    expect(primaryLabel()).toBe('Installing…');
+
+    backupOperation.set({ stage: 'Failed', trigger: 'BeforePluginUpdate' });
+    fixture.detectChanges();
+
+    expect(primaryLabel()).toBe('Installing…');
+  });
+
+  it('ignores a backup that was not started for a plugin update', async () => {
+    await setup(inspection());
+    fixture.componentRef.setInput('busy', true);
+    backupOperation.set({ stage: 'Saving', trigger: 'Manual' });
+    fixture.detectChanges();
+
+    expect(primaryLabel()).toBe('Installing…');
+  });
+
+  it('shows the plain label again once the install is no longer busy', async () => {
+    await setup(inspection());
+    fixture.componentRef.setInput('busy', true);
+    backupOperation.set({ stage: 'Saving', trigger: 'BeforePluginUpdate' });
+    fixture.detectChanges();
+    fixture.componentRef.setInput('busy', false);
+    fixture.detectChanges();
+
+    expect(primaryLabel()).toBe('Install');
   });
 
   it('cannot be dismissed while the install is running', async () => {
