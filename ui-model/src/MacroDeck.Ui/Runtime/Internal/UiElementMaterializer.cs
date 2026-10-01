@@ -614,6 +614,7 @@ internal sealed class UiElementMaterializer
 		foreach (var cell in cells)
 		{
 			cell.BindTo(_view);
+			cell.NodeId = id;
 
 			var value = cell.EvaluateInitial();
 			if (value is not null)
