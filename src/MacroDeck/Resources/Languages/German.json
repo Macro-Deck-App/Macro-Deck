@@ -326,5 +326,17 @@
   "Deny": "Ablehnen",
   "VersionBuild": "Build",
   "OpenExtensionManager": "Extension Manager öffnen",
-  "OpenSettings": "Einstellungen öffnen"
+  "OpenSettings": "Einstellungen öffnen",
+  "MacroDeck3IsHere": "Macro Deck 3 ist da!",
+  "MacroDeck3Intro": "Die nächste Generation von Macro Deck ist da. Von Grund auf neu entwickelt, schneller, flexibler und schöner als je zuvor.",
+  "MacroDeck3FeatureCrossPlatform": "Läuft auf Windows, macOS und Linux",
+  "MacroDeck3FeatureWidgets": "Widgets wie Button-, Wetter- und Musikplayer-Widgets, Slider und mehr",
+  "MacroDeck3FeaturePluginWidgets": "Plugins können eigene Widgets bereitstellen",
+  "MacroDeck3FeatureSdk": "Ein neues, deutlich besseres Plugin SDK",
+  "MacroDeck3FeatureMore": "…und vieles mehr",
+  "MacroDeck3SideBySideHint": "Macro Deck 2 und Macro Deck 3 können gleichzeitig installiert sein und einige Daten lassen sich migrieren. So kannst du Macro Deck 3 erst einmal in Ruhe testen.",
+  "MacroDeck3LearnMore": "Macro Deck 3 holen",
+  "MacroDeck3Documentation": "Dokumentation",
+  "DontShowThisAgain": "Nicht mehr anzeigen",
+  "StoreShutdownBadge": "Dieser Store wird am 31.12.2026 abgeschaltet und es erscheinen hier keine neuen Plugins mehr. Bitte upgrade auf Macro Deck 3."
 }

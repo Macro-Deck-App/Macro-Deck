@@ -34,6 +34,13 @@ public partial class ExtensionStoreView : UserControl
         _searchDebounce.Tick += SearchDebounce_Tick;
 
         pagination.PageUpdated += Pagination_PageUpdated;
+
+        lblShutdownBadge.Text = LanguageManager.Strings.StoreShutdownBadge;
+    }
+
+    private void LblShutdownBadge_Click(object? sender, EventArgs e)
+    {
+        Process.Start(new ProcessStartInfo("https://macro-deck.app") { UseShellExecute = true });
     }
 
     private async void Pagination_PageUpdated(int page)

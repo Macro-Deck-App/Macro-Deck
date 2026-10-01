@@ -10,6 +10,7 @@ using SuchByte.MacroDeck.Plugins;
 using SuchByte.MacroDeck.Server;
 using SuchByte.MacroDeck.Services;
 using System.Diagnostics;
+using SuchByte.MacroDeck.StartupConfig;
 using SuchByte.MacroDeck.GUI.CustomControls.Notifications;
 using Form = SuchByte.MacroDeck.GUI.CustomControls.Form;
 using MessageBox = SuchByte.MacroDeck.GUI.CustomControls.MessageBox;
@@ -141,6 +142,25 @@ public partial class MainWindow : Form
         {
             using var updateAvailableDialog = new UpdateAvailableDialog(updateApiVersionInfo);
             updateAvailableDialog.ShowDialog();
+        }
+
+        ShowMacroDeck3Notice();
+    }
+
+    private void ShowMacroDeck3Notice()
+    {
+        if (MacroDeck.SafeMode || MacroDeck.Configuration.HideMacroDeck3Notice)
+        {
+            return;
+        }
+
+        using var dialog = new MacroDeck3NoticeDialog();
+        dialog.ShowDialog(this);
+
+        if (dialog.DoNotShowAgain)
+        {
+            MacroDeck.Configuration.HideMacroDeck3Notice = true;
+            MacroDeck.Configuration.Save(ApplicationPaths.MainConfigFilePath);
         }
     }
 
