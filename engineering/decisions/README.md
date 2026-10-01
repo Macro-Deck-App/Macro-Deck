@@ -59,6 +59,7 @@ code, protocol schemas, issue discussions or exhaustive option lists.
 - [0097 - Plugin-bundled icon packs are owned by declaration and named by key and icon name](0097-plugin-bundled-icon-packs.md)
 - [0099 - Video streams are host-brokered sessions with transport-neutral descriptions](0099-video-streams-are-host-brokered-sessions-with-transport-neutral-descriptions.md) (partially superseded by 0101)
 - [0101 - The host relays video stream media, and clients play only HLS and MJPEG](0101-the-host-relays-video-stream-media-and-clients-play-hls-and-mjpeg.md)
+- [0102 - The plugin CLI renders previews with an embedded runtime and a local browser](0102-the-plugin-cli-renders-previews-with-an-embedded-runtime-and-a-local-browser.md)
 
 ## Macro Deck UI
 

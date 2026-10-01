@@ -1,6 +1,6 @@
 ---
 title: Plugin CLI
-description: 'macrodeck-plugin: scaffold, build, validate, inspect, pack, merge, bundle icon packs, run, test and sign a Macro Deck plugin without installing a host.'
+description: 'macrodeck-plugin: scaffold, build, validate, inspect, pack, merge, bundle icon packs, run, preview, test and sign a Macro Deck plugin without installing a host.'
 ---
 
 `macrodeck-plugin` scaffolds, builds, checks, runs and packages a Macro Deck plugin without Macro Deck
@@ -50,6 +50,7 @@ own infrastructure.
 | [`merge`](/cli/merge/) | Merge packages built for different runtime identifiers into one package. |
 | [`icon-pack`](/cli/icon-pack/) | Bundle icon packs with the plugin project, list them and remove them. |
 | [`run`](/cli/run/) | Run a plugin against the running host or a disposable stub host. |
+| [`preview`](/cli/preview/) | Render a plugin's widget previews to PNG files, for store images. |
 | [`test`](/cli/test/) | Run the [conformance suite](/reference/conformance/) and write a text, JSON or Markdown report. |
 | [`keygen` / `sign` / `verify`](/cli/signing/) | Creator key pairs and package signatures, for artifacts distributed outside the Store. |
 
