@@ -26,7 +26,9 @@ dotnet run --project tools/src/MacroDeck.LicenseTool
 The tool also needs `cargo` on the `PATH` (it runs `cargo metadata`). `--check` reports whether the committed
 files are current without writing them. The CI job `Third-party notices & license policy` in
 [`ci.yml`](../../.github/workflows/ci.yml) runs the same steps and fails when the files differ or the policy is
-violated, so Renovate pull requests that add or remove packages need a regeneration commit.
+violated, so Renovate pull requests that add or remove packages need a regeneration commit. Run the manual
+[`Update third-party notices`](../../.github/workflows/update-third-party-notices.yml) workflow on the
+branch to regenerate and commit both files without a local toolchain.
 
 ## What counts as shipped
 
