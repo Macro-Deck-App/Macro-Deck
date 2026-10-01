@@ -32,30 +32,27 @@ internal sealed class VideoStreamParityContractTests : CapabilityContractFixture
 	private static readonly string[] _expected =
 	[
 		"catalog back[main] front[main,sub]",
-		"front opened main for device-1 over Network accepting webrtc,hls",
-		"rev1 Active None webrtc offer",
-		"rev2 Reconnecting SourceLost webrtc offer",
+		"front opened main accepting hls,mjpeg",
+		"rev1 Active None hls /front/main",
+		"rev2 Reconnecting SourceLost hls /front/main",
 		"front suspended",
-		"rev3 Suspended None webrtc offer",
+		"rev3 Suspended None hls /front/main",
 		"front resumed",
-		"rev4 Active None webrtc resumed",
-		"front got signal offer consumer-offer",
-		"signal answer provider-answer",
-		"signal ice provider-candidate",
+		"rev4 Active None mjpeg /front/resumed",
+		"token stable",
 		"front closed ConsumerClosed",
 		"closed ConsumerClosed",
-		"back opened main for device-1 over Network accepting webrtc,hls",
+		"token revoked",
+		"back opened main accepting hls,mjpeg",
 		"back closed ProviderRemoved",
 		"closed ProviderRemoved",
 		"catalog front[main,sub]",
 		"catalog back[main] front[main,sub]",
-		"rev1 Active None hls back",
+		"rev1 Active None hls /back/main",
 		"closed ProviderRemoved",
-		"catalog "
+		"catalog ",
+		"provider url never published"
 	];
-
-	private static readonly VideoStreamConsumer _consumer =
-		new("device-1", new Uri("http://192.168.1.2:8191"), VideoStreamConnectionKind.Network);
 
 	private static DeclaredCapability Provider()
 		=> new()
@@ -68,6 +65,7 @@ internal sealed class VideoStreamParityContractTests : CapabilityContractFixture
 	private static async Task<IReadOnlyList<string>> WalkAsync(
 		VideoStreamProviderRegistry providers,
 		VideoStreamSessionBroker broker,
+		VideoStreamRelay relay,
 		ConcurrentPublisher published,
 		IVideoStreamProviderContext context,
 		Cameras cameras,
@@ -80,7 +78,7 @@ internal sealed class VideoStreamParityContractTests : CapabilityContractFixture
 		await WaitForAsync(() => Catalog(providers) == "back[main] front[main,sub]", "both providers never listed");
 		log.Add("catalog " + Catalog(providers));
 
-		var first = broker.OpenSession("ui-1", Front, "main", ["webrtc", "hls"], _consumer).SessionId;
+		var first = broker.OpenSession("ui-1", Front, "main", ["hls", "mjpeg"]).SessionId;
 		await WaitForAsync(() => published.Changes(first).Count == 1, "the session never became active");
 		log.Add(cameras.Log.Single());
 		log.Add(Describe(published.Changes(first)[0]));
@@ -100,21 +98,16 @@ internal sealed class VideoStreamParityContractTests : CapabilityContractFixture
 		log.Add(cameras.Log.Last());
 		log.Add(Describe(published.Changes(first)[3]));
 
-		broker.SignalSession("ui-1", first, new VideoStreamSignal("offer", "consumer-offer"));
-		await WaitForAsync(() => published.Signals(first).Count == 1, "the provider's answer never arrived");
-		log.Add(cameras.Log.Last());
-		log.Add(Describe(published.Signals(first)[0]));
-
-		await context.SendSignalAsync(first, new VideoStreamSignal("ice", "provider-candidate"));
-		await WaitForAsync(() => published.Signals(first).Count == 2, "the provider's signal never arrived");
-		log.Add(Describe(published.Signals(first)[1]));
+		var tokens = published.Changes(first).Select(changed => TokenOf(changed.Description!.Url)).Distinct().ToList();
+		log.Add(tokens.Count == 1 ? "token stable" : "token changed: " + string.Join(",", tokens));
 
 		broker.CloseSession("ui-1", first);
-		await WaitForAsync(() => cameras.Log.Count == 5 && published.Closed(first) is not null, "the close never completed");
+		await WaitForAsync(() => cameras.Log.Count == 4 && published.Closed(first) is not null, "the close never completed");
 		log.Add(cameras.Log.Last());
 		log.Add("closed " + published.Closed(first)!.Reason);
+		log.Add(relay.Acquire(tokens[0], out _) == VideoStreamRelayAcquisition.NotFound ? "token revoked" : "token alive");
 
-		var second = broker.OpenSession("ui-1", Back, "main", ["webrtc", "hls"], _consumer).SessionId;
+		var second = broker.OpenSession("ui-1", Back, "main", ["hls", "mjpeg"]).SessionId;
 		await WaitForAsync(() => published.Changes(second).Count == 1, "the second session never became active");
 		log.Add(cameras.Log.Last());
 
@@ -129,7 +122,7 @@ internal sealed class VideoStreamParityContractTests : CapabilityContractFixture
 		await WaitForAsync(() => Catalog(providers) == "back[main] front[main,sub]", "re-registering never listed");
 		log.Add("catalog " + Catalog(providers));
 
-		var third = broker.OpenSession("ui-1", Back, "main", ["hls"], _consumer).SessionId;
+		var third = broker.OpenSession("ui-1", Back, "main", ["hls"]).SessionId;
 		await WaitForAsync(() => published.Changes(third).Count == 1, "the re-registered provider never opened");
 		log.Add(Describe(published.Changes(third)[0]));
 
@@ -138,6 +131,7 @@ internal sealed class VideoStreamParityContractTests : CapabilityContractFixture
 			"ending the provider never closed its session");
 		log.Add("closed " + published.Closed(third)!.Reason);
 		log.Add("catalog " + Catalog(providers));
+		log.Add(published.AnyUrlContains("camera.local") ? "provider url leaked" : "provider url never published");
 
 		return log;
 	}
@@ -152,15 +146,18 @@ internal sealed class VideoStreamParityContractTests : CapabilityContractFixture
 			published,
 			TimeProvider.System,
 			Serilog.Core.Logger.None);
+		var relay = new VideoStreamRelay();
 		using var broker = new VideoStreamSessionBroker(providers,
 			SessionRegistry,
 			published,
+			relay,
 			TimeProvider.System,
 			Serilog.Core.Logger.None);
 		var cameras = new Cameras();
 
 		var log = await WalkAsync(providers,
 			broker,
+			relay,
 			published,
 			new IntegrationVideoStreamProviderContext(PluginId, providers, broker),
 			cameras,
@@ -179,9 +176,11 @@ internal sealed class VideoStreamParityContractTests : CapabilityContractFixture
 			published,
 			TimeProvider.System,
 			Serilog.Core.Logger.None);
+		var relay = new VideoStreamRelay();
 		using var broker = new VideoStreamSessionBroker(providers,
 			SessionRegistry,
 			published,
+			relay,
 			TimeProvider.System,
 			Serilog.Core.Logger.None);
 		var pluginSessions = new VideoStreamPluginSessions(SessionRegistry, providers, broker);
@@ -205,6 +204,7 @@ internal sealed class VideoStreamParityContractTests : CapabilityContractFixture
 
 			var log = await WalkAsync(providers,
 				broker,
+				relay,
 				published,
 				pluginRegistry.ContextFor(cameras),
 				cameras,
@@ -256,10 +256,11 @@ internal sealed class VideoStreamParityContractTests : CapabilityContractFixture
 				.Select(entry => $"{entry.ProviderId}[{string.Join(",", entry.Streams.Select(stream => stream.Id))}]"));
 
 	private static string Describe(VideoStreamSessionChangedNotification changed)
-		=> $"rev{changed.Revision} {changed.State} {changed.Reason} {changed.Description?.Transport} {changed.Description?.Payload}";
+		=> $"rev{changed.Revision} {changed.State} {changed.Reason} {changed.Description?.Transport} " +
+			changed.Description?.Url[(VideoStreamRelay.PathPrefix.Length + TokenOf(changed.Description.Url).Length)..];
 
-	private static string Describe(VideoStreamSignalNotification signal)
-		=> $"signal {signal.Signal.Type} {signal.Signal.Payload}";
+	private static string TokenOf(string relayUrl)
+		=> relayUrl[VideoStreamRelay.PathPrefix.Length..].Split('/')[0];
 
 	private sealed class ConcurrentPublisher : IPublisher
 	{
@@ -268,8 +269,9 @@ internal sealed class VideoStreamParityContractTests : CapabilityContractFixture
 		public IReadOnlyList<VideoStreamSessionChangedNotification> Changes(string sessionId)
 			=> [.. _published.OfType<VideoStreamSessionChangedNotification>().Where(changed => changed.SessionId == sessionId)];
 
-		public IReadOnlyList<VideoStreamSignalNotification> Signals(string sessionId)
-			=> [.. _published.OfType<VideoStreamSignalNotification>().Where(signal => signal.SessionId == sessionId)];
+		public bool AnyUrlContains(string text)
+			=> _published.OfType<VideoStreamSessionChangedNotification>()
+				.Any(changed => changed.Description?.Url.Contains(text, StringComparison.OrdinalIgnoreCase) == true);
 
 		public VideoStreamSessionClosedNotification? Closed(string sessionId)
 			=> _published.OfType<VideoStreamSessionClosedNotification>().SingleOrDefault(closed => closed.SessionId == sessionId);
@@ -331,11 +333,8 @@ internal sealed class VideoStreamParityContractTests : CapabilityContractFixture
 		public Task<VideoStreamSessionDescription> OpenAsync(VideoStreamOpenRequest request,
 			CancellationToken cancellationToken)
 		{
-			log.Enqueue($"{Id} opened {request.StreamId} for {request.Consumer.DeviceId} over " +
-				$"{request.Consumer.ConnectionKind} accepting {string.Join(",", request.AcceptedTransports)}");
-			return Task.FromResult(request.AcceptedTransports[0] == "webrtc"
-				? new VideoStreamSessionDescription("webrtc", Payload: "offer")
-				: new VideoStreamSessionDescription("hls", "https://camera.local/" + Id, Payload: Id));
+			log.Enqueue($"{Id} opened {request.StreamId} accepting {string.Join(",", request.AcceptedTransports)}");
+			return Task.FromResult(VideoStreamSessionDescription.Hls($"https://camera.local/{Id}/{request.StreamId}"));
 		}
 
 		public Task SuspendAsync(string sessionId, CancellationToken cancellationToken)
@@ -348,15 +347,7 @@ internal sealed class VideoStreamParityContractTests : CapabilityContractFixture
 		{
 			log.Enqueue($"{Id} resumed");
 			return Task.FromResult<VideoStreamSessionDescription?>(
-				new VideoStreamSessionDescription("webrtc", Payload: "resumed"));
-		}
-
-		public Task<VideoStreamSignal?> SignalAsync(string sessionId,
-			VideoStreamSignal signal,
-			CancellationToken cancellationToken)
-		{
-			log.Enqueue($"{Id} got signal {signal.Type} {signal.Payload}");
-			return Task.FromResult<VideoStreamSignal?>(new VideoStreamSignal("answer", "provider-answer"));
+				VideoStreamSessionDescription.Mjpeg($"https://camera.local/{Id}/resumed"));
 		}
 
 		public Task CloseAsync(string sessionId, VideoStreamSessionReason reason, CancellationToken cancellationToken)

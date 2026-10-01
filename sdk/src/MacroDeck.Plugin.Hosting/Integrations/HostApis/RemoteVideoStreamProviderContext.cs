@@ -62,7 +62,8 @@ internal sealed class RemoteVideoStreamProviderContext(VideoStreamProviderRegist
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(sessionId);
-		if (description is not null && VideoStreamWire.ValidateDescription(description) is { } problem)
+		var wire = description is null ? null : VideoStreamWire.ToDto(description);
+		if (wire is not null && VideoStreamWire.ValidateDescription(wire) is { } problem)
 		{
 			throw new ArgumentException(problem, nameof(description));
 		}
@@ -78,32 +79,10 @@ internal sealed class RemoteVideoStreamProviderContext(VideoStreamProviderRegist
 				{
 					SessionId = sessionId,
 					State = state.ToString(),
-					Description = description is null ? null : VideoStreamWire.ToDto(description),
+					Description = wire,
 					Reason = reason.ToString(),
 					Message = message
 				},
-				cancellationToken)
-			.ConfigureAwait(false);
-	}
-
-	public async Task SendSignalAsync(string sessionId,
-		VideoStreamSignal signal,
-		CancellationToken cancellationToken = default)
-	{
-		ArgumentException.ThrowIfNullOrEmpty(sessionId);
-		if (VideoStreamWire.ValidateSignal(signal) is { } problem)
-		{
-			throw new ArgumentException(problem, nameof(signal));
-		}
-
-		if (!IsLive(sessionId))
-		{
-			return;
-		}
-
-		await registry.SendToSessionAsync(sessionId,
-				HostOperations.VideoStreams.SessionSignal,
-				new VideoStreamsSessionSignalArguments { SessionId = sessionId, Signal = VideoStreamWire.ToDto(signal) },
 				cancellationToken)
 			.ConfigureAwait(false);
 	}

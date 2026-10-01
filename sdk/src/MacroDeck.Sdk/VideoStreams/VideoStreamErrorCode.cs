@@ -22,9 +22,6 @@ public enum VideoStreamErrorCode
 	/// <summary>The provider cannot open another session right now.</summary>
 	CapacityReached,
 
-	/// <summary>The provider does not exchange signals.</summary>
-	SignalingUnsupported,
-
 	/// <summary>The provider is busy. Retrying later can succeed.</summary>
 	Busy,
 

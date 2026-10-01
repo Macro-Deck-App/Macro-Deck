@@ -28,7 +28,7 @@ internal sealed class TestVideoProvider(string id = "cam") : IVideoStreamProvide
 		[new VideoStreamDescriptor("main", LocalizedText.FromLiteral("Main"))];
 
 	public Func<VideoStreamOpenRequest, CancellationToken, Task<VideoStreamSessionDescription>> Open { get; set; } =
-		(_, _) => Task.FromResult(new VideoStreamSessionDescription("hls", "http://camera.local/main.m3u8"));
+		(_, _) => Task.FromResult(VideoStreamSessionDescription.Hls("http://camera.local/main.m3u8"));
 
 	public Func<string, VideoStreamSessionReason, Task> OnClose { get; set; } = (_, _) => Task.CompletedTask;
 
@@ -47,6 +47,12 @@ internal sealed class TestVideoProvider(string id = "cam") : IVideoStreamProvide
 		Interlocked.Increment(ref _openCount);
 		return Open(request, cancellationToken);
 	}
+
+	public Func<string, Task<VideoStreamSessionDescription?>> Resume { get; set; } =
+		_ => Task.FromResult<VideoStreamSessionDescription?>(null);
+
+	public Task<VideoStreamSessionDescription?> ResumeAsync(string sessionId, CancellationToken cancellationToken)
+		=> Resume(sessionId);
 
 	public Task CloseAsync(string sessionId, VideoStreamSessionReason reason, CancellationToken cancellationToken)
 	{
@@ -180,8 +186,7 @@ internal sealed class VideoStreamFixture : IDisposable
 				SessionId = sessionId,
 				ProviderId = providerId,
 				StreamId = "main",
-				AcceptedTransports = transports.Length == 0 ? ["hls"] : transports,
-				Consumer = new Protocol.Capabilities.VideoStreamProvider.VideoStreamConsumerDto()
+				AcceptedTransports = transports.Length == 0 ? ["hls"] : transports
 			});
 
 	public Task<CapabilityInvocationResult> CloseAsync(string sessionId, string providerId = "cam",
@@ -190,6 +195,13 @@ internal sealed class VideoStreamFixture : IDisposable
 			new Protocol.Capabilities.VideoStreamProvider.VideoStreamSessionCloseArguments
 			{
 				SessionId = sessionId, ProviderId = providerId, Reason = reason
+			});
+
+	public Task<CapabilityInvocationResult> ResumeAsync(string sessionId, string providerId = "cam")
+		=> InvokeAsync(CapabilityOperations.VideoStreamProvider.SessionResume,
+			new Protocol.Capabilities.VideoStreamProvider.VideoStreamSessionArguments
+			{
+				SessionId = sessionId, ProviderId = providerId
 			});
 
 	public Task<CapabilityInvocationResult> SuspendAsync(string sessionId, string providerId = "cam")

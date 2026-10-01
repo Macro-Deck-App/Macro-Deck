@@ -31,6 +31,10 @@ public interface IVariableBindingService
 		string name,
 		CancellationToken cancellationToken = default);
 
+	// Live variables go even when the binding store cannot be updated; that is reported as StoreUnavailable.
+	Task<Result<VariableBindingError>> RemoveIntegrationAsync(string integrationId,
+		CancellationToken cancellationToken = default);
+
 	IReadOnlyList<VariableBinding> GetBindings();
 
 	VariableBinding? FindByVariableId(Guid variableId);

@@ -180,14 +180,15 @@ Assert.That(videoStreams.Calls.Last().Kind, Is.EqualTo(VideoStreamProviderCallKi
 ```
 
 `FakeVideoStreamProviderContext` applies the SDK's and the host's rules: an invalid or duplicate provider
-id, a seventeenth provider, and a description or signal past a
+id, a seventeenth provider, and a stream or metadata value past a
 [documented bound](/features/video-streams/#limits) throw `ArgumentException`, and unregistering an unknown
 id is a silent no-op. `Calls` records every `VideoStreamProviderCall` in order, including the session
-updates, signals and closes your provider reports. The fake opens no sessions: in a harness,
+updates and closes your provider reports. The fake opens no sessions: in a harness,
 `harness.VideoStreamProvider`, a `VideoStreamProviderTestClient`, drives the `video-stream-provider`
 capability the way the host does, with `DescribeAsync`, `GetStreamsAsync`, `OpenSessionAsync`,
-`SuspendSessionAsync`, `ResumeSessionAsync`, `SignalAsync` and `CloseSessionAsync`, while
-`harness.Context.VideoStreams` records what the plugin sends back. Use a fresh session id per open; a
+`SuspendSessionAsync`, `ResumeSessionAsync` and `CloseSessionAsync`, while
+`harness.Context.VideoStreams` records what the plugin sends back. Neither fetches the URL your provider
+returns: Macro Deck's relay does that, and the harness has none. Use a fresh session id per open; a
 refusal is a failed outcome whose `details.reason` is a `video_stream_` reason. See
 [Video streams](/features/video-streams/#testing).
 

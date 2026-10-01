@@ -1,6 +1,8 @@
 # ADR 0099: Video streams are host-brokered sessions with transport-neutral descriptions
 
-Status: Accepted
+Status: Accepted. Partially superseded by [ADR 0101](0101-the-host-relays-video-stream-media-and-clients-play-hls-and-mjpeg.md):
+the host now relays the media, the description is `{transport, url}` for `hls` and `mjpeg` only, and
+signaling and the consumer context are removed.
 
 ## Context
 

@@ -254,7 +254,6 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			deviceSessionGuard: GuardFor(claims),
 			videoStreams: null!,
 			videoStreamProviders: null!,
-			videoStreamConsumer: null!,
 			connectionCancellation: CancellationToken.None);
 
 	private sealed class RunningLifetime : IHostApplicationLifetime
@@ -317,7 +316,6 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			deviceSessionGuard: GuardFor(claims),
 			videoStreams: null!,
 			videoStreamProviders: null!,
-			videoStreamConsumer: null!,
 			connectionCancellation: CancellationToken.None);
 
 	private UiWebSocketDispatcher DispatcherFor(
@@ -367,7 +365,6 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			deviceSessionGuard: GuardFor(claims),
 			videoStreams: null!,
 			videoStreamProviders: null!,
-			videoStreamConsumer: null!,
 			connectionCancellation: CancellationToken.None);
 
 	/// <summary>Stands in for the real catalog handler: this test asserts the route exists, not what the

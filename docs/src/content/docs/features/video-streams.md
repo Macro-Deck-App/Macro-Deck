@@ -1,16 +1,18 @@
 ---
 title: Video streams
-description: Offer live video to Macro Deck with IVideoStreamIntegration and IVideoStreamProvider - streams and their state, sessions, updates and signaling, consumer context, limits, reconnects, older hosts, security and testing.
+description: Offer live video to Macro Deck with IVideoStreamIntegration and IVideoStreamProvider - streams and their state, sessions, the relay that carries the media, updates, limits, reconnects, older hosts, security and testing.
 ---
 
 A video stream provider offers live video to Macro Deck: the scenes of an OBS instance, the cameras of
 a video recorder, a capture device. You list the streams you have; when a consumer wants to show one,
-Macro Deck opens a **session** on your provider, and you answer with a description of how that consumer
-plays the stream, such as an HLS URL or a WebRTC offer.
+Macro Deck opens a **session** on your provider, and you answer with the URL where the stream can be
+fetched, as HLS or as MJPEG.
 
-Macro Deck never carries video itself. It brokers the session: it opens it for the consumer, passes
-your description on unchanged, relays signals in both directions and makes sure every session you opened
-is closed exactly once. The media travels directly from your source to the consumer.
+Macro Deck fetches the media itself and relays it to the consumer. The consumer only ever talks to Macro
+Deck, never to your source: your URL never leaves the computer, so your source can listen on `127.0.0.1`
+only, needs no firewall rule, has no address to guess per consumer and mints no credentials for clients.
+Macro Deck also opens every session for the consumer and makes sure each one you opened is closed
+exactly once.
 
 ## Quick start
 
@@ -44,7 +46,7 @@ public sealed class DoorCameras(CameraServer server) : IVideoStreamProvider
 				State: server.IsOnline("garage") ? VideoStreamState.Connected : VideoStreamState.Disconnected)
 		]);
 
-	public async Task<VideoStreamSessionDescription> OpenAsync(
+	public Task<VideoStreamSessionDescription> OpenAsync(
 		VideoStreamOpenRequest request,
 		CancellationToken cancellationToken)
 	{
@@ -53,16 +55,13 @@ public sealed class DoorCameras(CameraServer server) : IVideoStreamProvider
 			throw new VideoStreamException(VideoStreamErrorCode.TransportNotAccepted, "Only HLS is served.");
 		}
 
-		var token = await server.IssueTokenAsync(request.SessionId, request.StreamId, TimeSpan.FromMinutes(10));
-		var host = request.Consumer.ConnectionKind == VideoStreamConnectionKind.Local ? "127.0.0.1" : server.LanAddress;
-
-		return new VideoStreamSessionDescription("hls",
-			Url: $"http://{host}:{server.Port}/{request.StreamId}/index.m3u8?token={token.Value}",
-			ExpiresAt: token.ExpiresAt);
+		// The server listens on 127.0.0.1 only: Macro Deck, not the consumer, fetches this URL.
+		return Task.FromResult(
+			VideoStreamSessionDescription.Hls($"http://127.0.0.1:{server.Port}/{request.StreamId}/index.m3u8"));
 	}
 
 	public Task CloseAsync(string sessionId, VideoStreamSessionReason reason, CancellationToken cancellationToken)
-		=> server.RevokeTokenAsync(sessionId);
+		=> Task.CompletedTask;
 }
 ```
 
@@ -85,7 +84,7 @@ Things to know:
 | `RegisterProviderAsync` | Registers a provider. Returns `VideoStreamProviderRegistration(QualifiedId, ProviderId)`; the qualified id is `plugin.id::provider-id`. Throws `ArgumentException` for an invalid or duplicate id, or a seventeenth provider. |
 | `UnregisterProviderAsync` | Withdraws a provider. Its open sessions are closed first, each with one `CloseAsync` and `ProviderRemoved`; a session whose open is still running is closed as soon as the open returns. Unknown ids are ignored. |
 | `NotifyStreamsChangedAsync` | Tells Macro Deck the provider's streams changed. Macro Deck calls `GetStreamsAsync` again. |
-| `UpdateSessionAsync`, `SendSignalAsync`, `CloseSessionAsync` | Session calls from your side - see [Updates from the provider](#updates-from-the-provider). |
+| `UpdateSessionAsync`, `CloseSessionAsync` | Session calls from your side - see [Updates from the provider](#updates-from-the-provider). |
 
 | `IVideoStreamProvider` member | Meaning |
 | --- | --- |
@@ -125,7 +124,6 @@ A session is one consumer showing one stream. Macro Deck mints its id and passes
 | `OpenAsync` | A consumer starts showing a stream. | A `VideoStreamSessionDescription` whose transport is one of `AcceptedTransports`, or a `VideoStreamException`. |
 | `SuspendAsync` | The consumer stopped showing the stream for now, for example because its page is hidden. | Pause whatever is expensive. The default does nothing and keeps the session running. |
 | `ResumeAsync` | The consumer shows a suspended stream again. | A new description, or null when the previous one still works (the default). |
-| `SignalAsync` | The consumer sent a signal. | The direct answer, or null. The default refuses with `SignalingUnsupported`. |
 | `CloseAsync` | The session ended. | Release everything the session holds. |
 
 **Exactly one close.** Every `OpenAsync` that returned a description is followed by exactly one
@@ -143,7 +141,7 @@ open's return. An `OpenAsync` that threw gets no `CloseAsync`.
 | `ProviderRemoved` | You withdrew the provider, or the integration stopped, was disabled or is initializing again. |
 | `HostDisconnected` | Your plugin lost its connection to Macro Deck; the session was opened on the earlier connection. |
 | `HostShutdown` | Macro Deck is shutting down. |
-| `Failed` | The session failed, for example because a relayed signal could not be delivered. |
+| `Failed` | The session failed, for example because Macro Deck refused a description you returned. |
 
 Calls for different sessions can run concurrently. Macro Deck bounds every call by a timeout, the
 capability invoke timeout for a plugin and ten seconds for a built-in integration, and treats one that
@@ -152,19 +150,71 @@ times out as failed. A late `OpenAsync` that returns after its timeout still get
 
 ### Choosing a transport
 
-`VideoStreamSessionDescription.Transport` is a lowercase token that names how the stream is delivered:
-`webrtc`, `whep`, `hls`, `mjpeg` or any other. The vocabulary is open. A consumer lists the transports it
-can play in `AcceptedTransports`, most preferred first; pick the first one you serve, or refuse with
-`TransportNotAccepted`. The rest of the description is for that transport:
+A consumer lists the transports it can play in `AcceptedTransports`, most preferred first: `hls` when its
+device plays HLS natively, and `mjpeg` always. Pick the first one you serve, or refuse with
+`TransportNotAccepted`. Macro Deck refuses any other transport the same way.
 
-| Member | Meaning |
+Build the description with a factory:
+
+| Factory | Meaning |
 | --- | --- |
-| `Url` | Where the consumer fetches the stream, for transports that use one. It must be reachable from the consumer - see [The consumer](#the-consumer). |
-| `Parameters` | Transport-specific settings. |
-| `Payload` | A transport-specific document, for example a WebRTC offer. |
-| `ExpiresAt` | When `Url` or `Payload` stops working. Send a replacement with `UpdateSessionAsync` before then. |
+| `VideoStreamSessionDescription.Hls(url)` | The URL of an HLS playlist. Every segment, key and map the playlist names must be on the same origin as the playlist. |
+| `VideoStreamSessionDescription.Mjpeg(url)` | The URL of a `multipart/x-mixed-replace` stream of JPEG frames. |
+| `VideoStreamSessionDescription.FromUrl(transport, url)` | Any transport delivered from a URL. Macro Deck plays `hls` and `mjpeg` only. |
 
-Macro Deck never interprets a description; it hands it to the consumer as it is.
+The `Url` is an absolute `http` or `https` URL of at most 2048 characters, with no user info and no encoded
+slash (`%2F`) in its path. It is required for `hls` and `mjpeg`; a `null` Url is reserved for source kinds
+added later, and the description can gain members without breaking a plugin built against an earlier SDK.
+A description that breaks a rule throws `ArgumentException` when you build it.
+
+**Serve `mjpeg` as well.** It is the one transport every device Macro Deck supports can play, old tablets
+included. Desktop browsers do not play HLS natively, so a stream that offers only HLS shows "cannot be
+played on this device" there. See [What Macro Deck's clients play](#what-macro-decks-clients-play).
+
+## The relay
+
+Macro Deck fetches your URL and passes the bytes on. Consumers get a URL on Macro Deck itself, of the form
+`/api/video-streams/relay/<token>/...`, so they never learn where your source is. What to rely on:
+
+- **Bind to `127.0.0.1`.** The fetch starts on the computer that runs Macro Deck. Nothing needs to be
+  reachable from the network, and there is no consumer address to work out.
+- **The origin of your URL is pinned.** Macro Deck fetches only from that origin, using `GET` and `HEAD`. A
+  redirect is followed only within the origin, at most three times; one to another origin fails.
+- **HLS playlists are rewritten.** Every URI in a playlist, such as segments, `EXT-X-MAP` and `EXT-X-KEY`, is
+  resolved against the playlist's own URL and sent through the relay, so relative, root-relative and
+  absolute URIs all work. A URI on another origin fails the request with a 502, and so does the same host
+  spelled differently, such as `localhost` in the playlist and `127.0.0.1` in your URL. Only `data:` and
+  `skd:` URIs pass through untouched; any other scheme, such as `file:` or `javascript:`, fails the request
+  with a 502.
+- **Content types are checked.** A response that does not fit the session's transport fails with a 502:
+  `multipart/x-mixed-replace` or `image/jpeg` for `mjpeg`; a playlist, `video/mp2t`, `video/mp4`,
+  `video/iso.segment`, `audio/*`, `text/vtt` or `application/octet-stream` for `hls`. A playlist is found by
+  its `.m3u8` path, its `mpegurl` type or, for a response typed `application/octet-stream`, `text/plain` or
+  not at all, by `#EXTM3U` as its first line; it must start with that line and stay under 1 MiB, or the
+  request fails with a 502. An error status from your source passes through, without its body, only when
+  its content type is acceptable or missing. Responses carry `Cache-Control: no-store`,
+  `X-Content-Type-Options: nosniff` and a sandboxing Content-Security-Policy.
+- **Timeouts.** Your source has 15 seconds to start a response (a 504 otherwise), and media is cut when it
+  sends nothing for 30 seconds; a playlist is exempt from the 30 seconds, because a live playlist may wait
+  before it answers. A paused, static camera that sends no frame for that long is disconnected, and the
+  client reconnects on its own; keep-alive frames avoid that.
+- **Malformed requests never reach your source.** A path with an encoded slash or backslash (`%2F`,
+  `%5C`, and a double-encoded `%252F`), a literal backslash or a control character gets a 404, as does a
+  query with a raw line break or NUL, and so does a URL whose session has ended or is suspended. Your source
+  is not contacted for any of them. Macro Deck's web server collapses dot segments (`.` and `..`) before the
+  relay sees the path, so they cannot climb above your origin; a percent-encoded line break in a query is
+  ordinary data and is forwarded as written.
+- **Bounded concurrency.** At most 8 relayed requests run at once per session and 64 in all; beyond that
+  the client is refused and retries.
+- **One URL per session.** It stays the same while you change the URL or transport with
+  `UpdateSessionAsync` or `ResumeAsync`, and stops working the moment the session ends or is suspended,
+  which also aborts any request in flight.
+
+**Browser connection limit.** Macro Deck's own listener speaks HTTP/1.1, and a browser opens about six
+connections to one origin. Every live MJPEG widget holds one for as long as it plays, so a page with more
+than a handful of live streams can starve its other requests. Streams that are scrolled out of sight or
+covered suspend and release theirs. Serving Macro Deck over HTTPS lifts the limit, because HTTP/2 shares
+one connection.
 
 ## Updates from the provider
 
@@ -176,79 +226,22 @@ await context.UpdateSessionAsync(sessionId, VideoStreamSessionState.Reconnecting
 	reason: VideoStreamSessionReason.ProviderReconnecting,
 	message: Strings.Status.ObsReconnecting());
 
-// Once the source is back, optionally with a new description the consumer switches to:
+// Once the source is back, optionally with a new description Macro Deck fetches from instead:
 await context.UpdateSessionAsync(sessionId, VideoStreamSessionState.Active, freshDescription,
 	VideoStreamSessionReason.SourceRecovered);
 ```
 
 `Reconnecting` means the session is interrupted and you are recovering it; `Active` means the consumer can
-play from the current description. Use `SourceLost` when the source stopped delivering and
-`SourceRecovered` when it delivers again. `message` is text the consumer may show, in the reader's own
-language. An update for a session that is no longer open is ignored.
+play again. Use `SourceLost` when the source stopped delivering and `SourceRecovered` when it delivers
+again. `message` is text the consumer may show, in the reader's own language. An update for a session that
+is no longer open is ignored. A new description is checked like the one from `OpenAsync`: a transport the
+consumer did not accept, or a URL Macro Deck refuses, closes the session with `Failed`.
 
 `CloseSessionAsync` ends a session from your side, with `ProviderClosed` unless you name another reason.
 Macro Deck does not call `CloseAsync` for a session you closed yourself.
 
-Updates and signals you send while `OpenAsync` is still running are held and delivered in order after the
-open returns. At most 64 are held per session; beyond that the session fails.
-
-## Signaling
-
-Some transports need messages in both directions after the description, such as a WebRTC answer and
-trickled ICE candidates. A `VideoStreamSignal` is a `Type` and a `Payload`, both agreed between you and the
-consumer; Macro Deck relays them unchanged and defines no types of its own.
-
-```csharp
-public async Task<VideoStreamSessionDescription> OpenAsync(VideoStreamOpenRequest request, CancellationToken cancellationToken)
-{
-	var peer = await _webRtc.CreatePeerAsync(request.SessionId, request.StreamId, cancellationToken);
-	peer.CandidateFound += candidate => _ = _context.SendSignalAsync(request.SessionId,
-		new VideoStreamSignal("candidate", candidate.ToJson()));
-
-	return new VideoStreamSessionDescription("webrtc", Payload: peer.CreateOffer());
-}
-
-public async Task<VideoStreamSignal?> SignalAsync(string sessionId, VideoStreamSignal signal, CancellationToken cancellationToken)
-{
-	switch (signal.Type)
-	{
-		case "answer":
-			await _webRtc.Peer(sessionId).SetAnswerAsync(signal.Payload, cancellationToken);
-			return null;
-		case "candidate":
-			await _webRtc.Peer(sessionId).AddCandidateAsync(signal.Payload, cancellationToken);
-			return null;
-		default:
-			throw new VideoStreamException(VideoStreamErrorCode.Failed, $"Unknown signal type {signal.Type}.");
-	}
-}
-```
-
-- The consumer's signals arrive in `SignalAsync`. Return a direct answer, or null and send later signals
-  with `SendSignalAsync`.
-- The signals of one session arrive in the order they were sent, in both directions.
-- A transport that needs no signaling, such as HLS or WHEP, where the consumer talks to your URL itself,
-  keeps the default `SignalAsync`.
-- The signal types above are the ones Macro Deck's clients use for `webrtc` - see
-  [What Macro Deck's clients play](#what-macro-decks-clients-play).
-
-## The consumer
-
-`VideoStreamOpenRequest.Consumer` says who the session is for, so you can hand out a URL that consumer
-can reach:
-
-| Member | Meaning |
-| --- | --- |
-| `ConnectionKind` | `Local`: on the same computer as Macro Deck, so a loopback address reaches you. `Network`: over the network, so the consumer needs an address it can reach there, such as the computer's LAN address. `UsbTunnel`: a device tethered by USB whose traffic Macro Deck tunnels. |
-| `HostAddress` | The address the consumer used to reach Macro Deck, when known. A source running next to Macro Deck can serve from the same host name. |
-| `DeviceId` | Macro Deck's id of the device showing the stream, when the consumer is one. |
-
-A `UsbTunnel` consumer connects through a loopback address on the device itself, so a `localhost` URL
-points at the device, not at the computer, and only ports Macro Deck tunnels reach the computer. Hand such
-a consumer a network address when the device can also reach the computer over the network, and otherwise
-refuse with `StreamUnavailable`.
-
-The consumer context is a hint for building reachable URLs. Never authorize anything by it.
+Updates you send while `OpenAsync` is still running are held and delivered in order after the open
+returns. At most 64 are held per session; beyond that the session fails.
 
 ## Showing a stream in Macro Deck UI
 
@@ -269,49 +262,23 @@ provider's stream, not only your own.
 
 ## What Macro Deck's clients play
 
-Macro Deck's web client and desktop app list, most preferred first, the transports the device they run on
-can play:
+Macro Deck's web client and desktop app, and the Companion app, offer two transports, most preferred first:
 
 | Transport | Offered when | What the client does |
 | --- | --- | --- |
-| `webrtc` | The engine has `RTCPeerConnection` | Takes `Payload` as the offer, answers with the convention below, plays the received track. |
-| `whep` | Same | POSTs a receive-only offer as `application/sdp` to `Url`, applies the answer, and DELETEs the resource named by the `Location` header when it stops. |
-| `hls` | The engine plays HLS natively and inline | Plays `Url` in a muted `<video>`. No HLS library is loaded, so most desktop browsers do not offer it. |
-| `mjpeg` | Always | Shows `Url` as an image that keeps updating, a `multipart/x-mixed-replace` stream. |
+| `hls` | The engine plays HLS natively and inline: Safari, iPhone and iPad, and the Android player. Desktop Chrome and Firefox do not. | Plays the relayed playlist in a muted video element. No HLS library is loaded. |
+| `mjpeg` | Always | Shows the relayed stream as an image that keeps updating. |
 
-The [Companion app](/guide/companion-app/) offers `hls`, played by the phone's own video player, then
-`mjpeg`. It does not offer `webrtc` or `whep`. The phone fetches the URL itself over the network it shares
-with the computer, so hand it an address it can reach there. On iPhone and iPad an `http:` URL plays only when
-its host is an IP address, a name without a domain or a `.local` name.
+**Every client resolves the relay URL against the origin it already uses for Macro Deck.** The `url` a
+client receives is host-relative (or absolute) and never your URL, so a client implementer must not assume
+a full address. The [Companion app](/guide/companion-app/) has to resolve it against its host address
+for video to play on a phone.
 
-**Serve `mjpeg` as well.** It is the one transport a client can play on every device Macro Deck supports,
-old tablets included. Offer `webrtc` or `whep` for low latency, and the client falls back to
-`mjpeg` where they are not available. A client that cannot play the transport you picked, for example because
-autoplay is blocked, closes the session and opens a new one without that transport.
-
-**The `webrtc` convention.** Macro Deck's clients speak this, and it does not change:
-
-- `Payload` is the offer as a raw SDP string.
-- The client answers with a signal of type `answer` whose payload is the raw SDP answer.
-- Both sides send ICE candidates as signals of type `candidate`, each payload an `RTCIceCandidateInit` as
-  JSON.
-
-An offer can be answered only once. When the client suspends a `webrtc` session it closes its peer, so return a
-fresh offer from `ResumeAsync`. A resume that returns no new description makes the client close the session and
-open a new one.
-
-**`whep`.** The endpoint is called from the client's own origin, so it has to allow that with CORS, including
-`Access-Control-Expose-Headers: Location`. When `Parameters` has an `authorization` entry, the client sends it
-as the `Authorization` header of both requests.
-
-**Suspending.** The client stops playing as soon as it suspends: an `mjpeg` or `hls` client stops downloading, a
-`whep` or `webrtc` client closes its peer. Your `SuspendAsync` can release what is expensive on your side. A
-suspend can reach you up to about a minute late, or not at all when the session is closed first.
-
-**Reachability.** A web client loaded over HTTPS cannot load an `http:` media URL; serve `https:` URLs to such
-a consumer, or `http:` ones only on a local network the client reaches over HTTP.
-
-Clients play every stream without sound.
+A client that cannot play the transport you picked, for example because autoplay is blocked, closes the
+session and opens a new one without that transport. Clients play every stream without sound, and a
+client stops downloading as soon as it suspends, so your `SuspendAsync` can release what is expensive on
+your side. A suspend can reach you up to about a minute late, or not at all when the session is closed
+first.
 
 ## Limits
 
@@ -322,19 +289,19 @@ the ones you are most likely to meet:
 
 - At most **16 providers** per plugin.
 - At most **256 streams** per provider. Macro Deck keeps the first 256 of a longer list and logs a warning.
-- `Metadata` and `Parameters`: at most **32 entries**, keys up to 64 and values up to 2048 characters.
-- A description's `Url` up to **2048** characters and `Payload` up to **65536**.
-- A signal's `Type` up to **64** characters and `Payload` up to **32768**.
+- `Metadata`: at most **32 entries**, keys up to 64 and values up to 2048 characters.
+- A description's `Url` up to **2048** characters.
 
-Macro Deck also bounds what it asks of one plugin at once. Opens, suspends, resumes, signals and stream
-reads run at most eight at a time per plugin, and up to 256 more wait, each for at most the capability
-invoke timeout; beyond that, the consumer is told the provider is busy. Closes have their own slots and are never dropped. `video-streams` calls from your
-plugin have their own rate limit, apart from other host calls, so a burst of signals cannot delay a button
-press. When Macro Deck rate limits a `RegisterProviderAsync`, `NotifyStreamsChangedAsync`,
-`UpdateSessionAsync`, `SendSignalAsync` or `CloseSessionAsync`, the SDK retries it a few times over about a
-second and a half, keeping the session's messages in order, and then throws a `VideoStreamException` with
-`Busy`. A session accepts no further updates or signals once you call `CloseSessionAsync`; if that close
-throws `Busy`, call it again to retry the close.
+Macro Deck also bounds what it asks of one plugin at once. Opens, suspends, resumes and stream reads run
+at most eight at a time per plugin, and up to 256 more wait, each for at most the capability invoke
+timeout; beyond that, the consumer is told the provider is busy. Closes have their own slots and are never
+dropped. `video-streams` calls from your plugin have their own rate limit, apart from other host calls, so
+a burst of updates cannot delay a button press. When Macro Deck rate limits a `RegisterProviderAsync`,
+`NotifyStreamsChangedAsync`, `UpdateSessionAsync` or `CloseSessionAsync`, the SDK retries it a few times
+over about a second and a half, keeping the session's messages in order, and then throws a
+`VideoStreamException` with `Busy`. A session accepts no further updates once you call
+`CloseSessionAsync`; if that close throws `Busy`, call it again to retry the close. The relay has its own
+bounds, listed in [The relay](#the-relay).
 
 ## Errors
 
@@ -344,9 +311,8 @@ throws `Busy`, call it again to retry the close.
 | `UnknownProvider`, `UnknownStream` | No provider or stream with that id. | No |
 | `UnknownSession` | No session with that id is open, or it was already closed. | No |
 | `StreamUnavailable` | The stream exists but cannot be served right now. | Yes |
-| `TransportNotAccepted` | You serve none of the transports the consumer accepts. | No |
+| `TransportNotAccepted` | You serve none of the transports the consumer accepts, or Macro Deck does not play the one you returned. | No |
 | `CapacityReached` | You cannot open another session right now. | Yes |
-| `SignalingUnsupported` | You do not exchange signals. | No |
 | `Busy` | You are busy. | Yes |
 | `Failed` | Anything else. | No |
 
@@ -365,6 +331,8 @@ Your sessions end whenever the thing they depend on goes away:
 | The plugin is uninstalled | `CloseAsync(ProviderRemoved)` per session | The session closed with `ProviderRemoved` |
 | Macro Deck shuts down | `CloseAsync(HostShutdown)` per session, for at most two seconds | - |
 
+Whenever a session ends, the relay URL stops working and any media still flowing for it is cut.
+
 **Sessions do not survive a reconnect**, not even one that resumes the same plugin session. Your
 registrations survive a resumed one: the SDK keeps your providers registered, and Macro Deck reads them back
 once your plugin is connected again. A reconnect that does not resume initializes your integrations again,
@@ -374,14 +342,14 @@ a session across a connection it did not see end.
 ## Security
 
 Any client that is signed in to Macro Deck, the desktop app or a paired device, can list your streams and
-open a session on them. What you put in a description reaches that client, so:
+open a session on them, and then receives the media through the relay. So:
 
-- Prefer short-lived credentials scoped to the one session over long-lived secrets: a token minted in
-  `OpenAsync`, revoked in `CloseAsync`, with `ExpiresAt` set and renewed through `UpdateSessionAsync`.
-- Never put your source's own password or API key into a `Url`, `Parameters` or `Payload`.
-- Treat signals from the consumer like any other input and validate them.
-
-Macro Deck never logs descriptions or signal payloads.
+- Whatever your source serves is shown to every such client. Do not serve anything you would not show them.
+- The client never sees your URL, so credentials in its query string stay with Macro Deck. Put a short-lived
+  token in a URL only when your source needs one, scoped to the session and revoked in `CloseAsync`; never
+  the source's own password or API key. Macro Deck never logs a description.
+- The relay reaches whatever your URL points at, including other services on the computer or the local
+  network. Point it only at your own source. See [the security model](/policies/security/#video-streams).
 
 Declare `host:video-streams` in `manifest.json` so that people installing your plugin can see it offers
 video streams:
@@ -390,7 +358,7 @@ video streams:
 "permissions": ["host:video-streams"]
 ```
 
-Macro Deck does not enforce it today. See [the security model](/policies/security/#video-streams).
+Macro Deck does not enforce it today.
 
 ## Built-in integrations
 
@@ -434,7 +402,8 @@ await harness.VideoStreamProvider.CloseSessionAsync("session-1", "door-cameras")
 Use a fresh session id per open: an id that was closed before is refused, as it would be by Macro Deck.
 A refusal arrives as a failed outcome whose `details.reason` is one of the `video_stream_` reasons.
 `harness.Context.VideoStreams` is the fake behind the harness; it records what your plugin reports, such as
-`SessionUpdate`, `Signal` and `SessionClose`. See [Testing](/features/testing/#testing-video-streams).
+`SessionUpdate` and `SessionClose`. The harness does not relay anything: it shows the description you
+returned, not what a client would fetch. See [Testing](/features/testing/#testing-video-streams).
 
 ## Over the plugin protocol
 
@@ -445,8 +414,8 @@ it when to read again.
 
 | Direction | Name | Operations |
 | --- | --- | --- |
-| Host to plugin | `video-stream-provider` capability | `describe`, `streams`, `session.open`, `session.suspend`, `session.resume`, `session.signal`, `session.close` |
-| Plugin to host | `video-streams` host API | `providers-changed`, `streams-changed`, `session-update`, `session-signal`, `session-close` |
+| Host to plugin | `video-stream-provider` capability | `describe`, `streams`, `session.open`, `session.suspend`, `session.resume`, `session.close` |
+| Plugin to host | `video-streams` host API | `providers-changed`, `streams-changed`, `session-update`, `session-close` |
 
 Failures are `CAPABILITY_UNSUPPORTED` for `Unsupported`, and otherwise `CAPABILITY_UNAVAILABLE` refined by
 a `video_stream_` reason. Payloads, reasons and rules are in the
@@ -458,10 +427,10 @@ a `video_stream_` reason. Payloads, reasons and rules are in the
 | --- | --- | --- |
 | `IVideoStreamIntegration` | SDK | Implemented by an integration that offers video streams. |
 | `IVideoStreamProvider` | SDK | One source of streams: lists them and serves sessions. |
-| `IVideoStreamProviderContext` | SDK | Registers providers and reports streams, session updates, signals and closes. |
+| `IVideoStreamProviderContext` | SDK | Registers providers and reports streams, session updates and closes. |
 | `VideoStreamDescriptor`, `VideoStreamState` | SDK | One stream and its state at the source. |
-| `VideoStreamOpenRequest`, `VideoStreamConsumer`, `VideoStreamConnectionKind` | SDK | What `OpenAsync` receives. |
-| `VideoStreamSessionDescription`, `VideoStreamSignal` | SDK | How the consumer plays a session, and a signal for it. |
+| `VideoStreamOpenRequest` | SDK | What `OpenAsync` receives: session id, stream id and accepted transports. |
+| `VideoStreamSessionDescription` | SDK | Where Macro Deck fetches a session's media: `Hls`, `Mjpeg` or `FromUrl`. |
 | `VideoStreamSessionState`, `VideoStreamSessionReason` | SDK | A session's state and why it changed or closed. |
 | `VideoStreamException`, `VideoStreamErrorCode` | SDK | Refusing an operation. |
 | `VideoStreamLimits` | Protocol | Every size bound. |

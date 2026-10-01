@@ -40,30 +40,10 @@ public sealed class IntegrationVideoStreamProviderContext : IVideoStreamProvider
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(sessionId);
-		if (description is not null && VideoStreamWire.ValidateDescription(description) is { } problem)
-		{
-			throw new ArgumentException(problem, nameof(description));
-		}
-
 		if (IsLive(sessionId))
 		{
-			Forward(() => _broker.ApplyProviderUpdate(_integrationId, sessionId, state, description, reason, message));
-		}
-
-		return Task.CompletedTask;
-	}
-
-	public Task SendSignalAsync(string sessionId, VideoStreamSignal signal, CancellationToken cancellationToken = default)
-	{
-		ArgumentException.ThrowIfNullOrEmpty(sessionId);
-		if (VideoStreamWire.ValidateSignal(signal) is { } problem)
-		{
-			throw new ArgumentException(problem, nameof(signal));
-		}
-
-		if (IsLive(sessionId))
-		{
-			Forward(() => _broker.ApplyProviderSignal(_integrationId, sessionId, signal));
+			var dto = description is null ? null : VideoStreamWire.ToDto(description);
+			Forward(() => _broker.ApplyProviderUpdate(_integrationId, sessionId, state, dto, reason, message));
 		}
 
 		return Task.CompletedTask;

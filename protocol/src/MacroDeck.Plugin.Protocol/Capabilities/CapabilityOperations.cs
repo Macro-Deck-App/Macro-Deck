@@ -368,12 +368,10 @@ public static class CapabilityOperations
 
 		public const string SessionResume = "session.resume";
 
-		public const string SessionSignal = "session.signal";
-
 		public const string SessionClose = "session.close";
 
 		public static readonly IReadOnlyList<string> All =
-			[Describe, Streams, SessionOpen, SessionSuspend, SessionResume, SessionSignal, SessionClose];
+			[Describe, Streams, SessionOpen, SessionSuspend, SessionResume, SessionClose];
 	}
 
 	private static readonly Dictionary<string, IReadOnlyList<string>> _byKind =

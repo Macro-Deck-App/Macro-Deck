@@ -44,7 +44,7 @@ public class CapabilityOperationStabilityTests
 			[CapabilityKinds.Messaging] = ["event", "command", "request"],
 			[CapabilityKinds.VideoStreamProvider] =
 			[
-				"describe", "streams", "session.open", "session.suspend", "session.resume", "session.signal",
+				"describe", "streams", "session.open", "session.suspend", "session.resume",
 				"session.close",
 			],
 		};

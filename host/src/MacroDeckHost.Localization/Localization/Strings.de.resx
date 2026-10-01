@@ -2933,17 +2933,11 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Errors.VideoStream.SessionLimitReached" xml:space="preserve">
     <value>Zu viele Videos sind gleichzeitig geöffnet.</value>
   </data>
-  <data name="Errors.VideoStream.PayloadTooLarge" xml:space="preserve">
-    <value>Die Verbindungsdaten des Videos sind zu groß.</value>
-  </data>
   <data name="Errors.VideoStream.StreamUnavailable" xml:space="preserve">
     <value>Dieser Videostream ist gerade nicht verfügbar.</value>
   </data>
   <data name="Errors.VideoStream.TransportNotAccepted" xml:space="preserve">
     <value>Dieser Videostream kann auf diesem Gerät nicht abgespielt werden.</value>
-  </data>
-  <data name="Errors.VideoStream.SignalingUnsupported" xml:space="preserve">
-    <value>Die Videoquelle unterstützt diese Art der Verbindung nicht.</value>
   </data>
   <data name="Errors.VideoStream.ProviderUnavailable" xml:space="preserve">
     <value>Die Videoquelle ist gerade nicht erreichbar.</value>
@@ -9346,6 +9340,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.Twitch.Actions.SetChatMode.OnLabel" xml:space="preserve">
     <value>Aktiv</value>
+  </data>
+  <data name="Integrations.Twitch.Actions.SetChatMode.ToggleDescription" xml:space="preserve">
+    <value>Schaltet den Modus auf das Gegenteil seines aktuellen Zustands auf Twitch um. Die Einstellung Aktiv wird ignoriert.</value>
+  </data>
+  <data name="Integrations.Twitch.Actions.SetChatMode.ToggleLabel" xml:space="preserve">
+    <value>Umschalten</value>
   </data>
   <data name="Integrations.Twitch.Actions.SetRedemptionStatus.Description" xml:space="preserve">
     <value>Markiert eine Kanalpunkte-Einlösung als abgeschlossen oder erstattet sie. Twitch erlaubt dies nur für Belohnungen, die von dieser Anwendung erstellt wurden – im Twitch-Dashboard erstellte Belohnungen können nicht über die API bearbeitet werden.</value>

@@ -7,10 +7,8 @@ public enum VideoStreamError
 	UnknownStream,
 	UnknownSession,
 	SessionLimitReached,
-	PayloadTooLarge,
 	StreamUnavailable,
 	TransportNotAccepted,
-	SignalingUnsupported,
 	ProviderUnavailable,
 	Failed
 }

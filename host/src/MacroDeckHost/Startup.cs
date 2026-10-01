@@ -448,6 +448,19 @@ public class Startup
 		services.AddSingleton<ScreenSaverProviderHost>();
 		services.AddSingleton<IScreenSaverUiSessionOpener, ScreenSaverUiSessionOpener>();
 		services.AddSingleton<VideoStreamProviderRegistry>();
+		services.AddSingleton<IVideoStreamRelay, VideoStreamRelay>();
+		services.AddSingleton(new VideoStreamRelayOptions());
+		// The provider URL may carry per-session secrets, so no handler logs it; the body is a stream, so
+		// the client timeout is off and the relay bounds header and idle time itself.
+		services.AddHttpClient(VideoStreamRelay.HttpClientName)
+			.ConfigureHttpClient(client => client.Timeout = Timeout.InfiniteTimeSpan)
+			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+			{
+				UseProxy = false,
+				AllowAutoRedirect = false,
+				ConnectTimeout = TimeSpan.FromSeconds(10)
+			})
+			.RemoveAllLoggers();
 		services.AddSingleton<VideoStreamSessionBroker>();
 		services.AddSingleton<IVideoStreamSessionBroker>(provider => provider.GetRequiredService<VideoStreamSessionBroker>());
 		services.AddSingleton<VideoStreamPluginSessions>();

@@ -20,11 +20,9 @@ internal sealed class VideoStreamUiPushHandlerTests
 				"s-1",
 				3,
 				VideoStreamSessionState.Reconnecting,
-				new VideoStreamSessionDescription("hls", "https://camera.local/live"),
+				new VideoStreamRelayDescription("hls", "/api/video-streams/relay/token/live"),
 				VideoStreamSessionReason.ProviderReconnecting,
 				LocalizedText.FromLiteral("OBS is reconnecting")),
-			CancellationToken.None);
-		await handler.Handle(new VideoStreamSignalNotification("ui-1", "s-1", new VideoStreamSignal("answer", "sdp")),
 			CancellationToken.None);
 		await handler.Handle(new VideoStreamSessionClosedNotification("ui-1",
 				"s-1",
@@ -34,7 +32,6 @@ internal sealed class VideoStreamUiPushHandlerTests
 			CancellationToken.None);
 
 		var changed = transport.ConnectionMessages.Select(sent => sent.Message).OfType<VideoStreamSessionChangedEvent>().Single();
-		var signal = transport.ConnectionMessages.Select(sent => sent.Message).OfType<VideoStreamSignalEvent>().Single();
 		var closed = transport.ConnectionMessages.Select(sent => sent.Message).OfType<VideoStreamSessionClosedEvent>().Single();
 		Assert.Multiple(() =>
 		{
@@ -43,9 +40,9 @@ internal sealed class VideoStreamUiPushHandlerTests
 			Assert.That(changed.Revision, Is.EqualTo(3));
 			Assert.That(changed.State, Is.EqualTo("reconnecting"));
 			Assert.That(changed.Reason, Is.EqualTo("provider_reconnecting"));
-			Assert.That(changed.Description!.Url, Is.EqualTo("https://camera.local/live"));
+			Assert.That(changed.Description!.Transport, Is.EqualTo("hls"));
+			Assert.That(changed.Description.Url, Is.EqualTo("/api/video-streams/relay/token/live"));
 			Assert.That(changed.Message!.Value.Literal, Is.EqualTo("OBS is reconnecting"));
-			Assert.That(signal.Signal.Type, Is.EqualTo("answer"));
 			Assert.That(closed.Reason, Is.EqualTo("provider_removed"));
 			Assert.That(closed.Error, Is.Null);
 			Assert.That(closed.Message, Is.Null);

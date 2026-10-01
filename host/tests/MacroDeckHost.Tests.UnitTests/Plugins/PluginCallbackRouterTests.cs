@@ -1084,7 +1084,7 @@ public class PluginCallbackRouterTests
 	}
 
 	[Test]
-	public async Task A_plugin_updates_signals_and_closes_its_own_video_session()
+	public async Task A_plugin_updates_and_closes_its_own_video_session()
 	{
 		using var world = new VideoStreamWorld();
 		var sessionId = await OpenPluginSessionAsync(world, "plugin.a");
@@ -1098,14 +1098,6 @@ public class PluginCallbackRouterTests
 					SessionId = sessionId, State = "Reconnecting", Reason = "SourceLost"
 				}),
 			CancellationToken.None);
-		var signal = await router.RouteAsync("plugin.a",
-			"c2",
-			Video(HostOperations.VideoStreams.SessionSignal,
-				new VideoStreamsSessionSignalArguments
-				{
-					SessionId = sessionId, Signal = new VideoStreamSignalDto { Type = "ice", Payload = "candidate" }
-				}),
-			CancellationToken.None);
 		var close = await router.RouteAsync("plugin.a",
 			"c3",
 			Video(HostOperations.VideoStreams.SessionClose,
@@ -1115,14 +1107,39 @@ public class PluginCallbackRouterTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(new[] { update.Error, signal.Error, close.Error }, Is.All.Null);
+			Assert.That(new[] { update.Error, close.Error }, Is.All.Null);
 			Assert.That(world.Publisher.Of<VideoStreamSessionChangedNotification>()[^1],
 				Has.Property(nameof(VideoStreamSessionChangedNotification.State)).EqualTo(VideoStreamSessionState.Reconnecting)
 					.And.Property(nameof(VideoStreamSessionChangedNotification.Reason)).EqualTo(VideoStreamSessionReason.SourceLost));
-			Assert.That(world.Publisher.Of<VideoStreamSignalNotification>().Single().Signal,
-				Is.EqualTo(new VideoStreamSignal("ice", "candidate")));
 			Assert.That(world.Publisher.Of<VideoStreamSessionClosedNotification>().Single().Reason,
 				Is.EqualTo(VideoStreamSessionReason.SourceLost));
+		});
+	}
+
+	[Test]
+	public async Task A_video_update_with_an_unusable_description_is_refused_before_the_session_hears_of_it()
+	{
+		using var world = new VideoStreamWorld();
+		var sessionId = await OpenPluginSessionAsync(world, "plugin.a");
+		var router = VideoRouter(world);
+
+		var refused = await router.RouteAsync("plugin.a",
+			"c1",
+			Video(HostOperations.VideoStreams.SessionUpdate,
+				new VideoStreamsSessionUpdateArguments
+				{
+					SessionId = sessionId,
+					State = "Active",
+					Description = new VideoStreamSessionDescriptionDto { Transport = "hls", Url = "ftp://camera.local/live" }
+				}),
+			CancellationToken.None);
+		await Task.Delay(50);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(refused.Error!.Code, Is.EqualTo(ProtocolErrorCodes.InvalidPayload));
+			Assert.That(world.Publisher.Of<VideoStreamSessionChangedNotification>(), Has.Count.EqualTo(1));
+			Assert.That(world.Publisher.Of<VideoStreamSessionClosedNotification>(), Is.Empty);
 		});
 	}
 

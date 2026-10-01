@@ -82,8 +82,7 @@ internal sealed class RemoteVideoStreamEndpoint : IVideoStreamEndpoint, IDisposa
 					SessionId = request.SessionId,
 					ProviderId = providerId,
 					StreamId = request.StreamId,
-					AcceptedTransports = request.AcceptedTransports,
-					Consumer = VideoStreamWire.ToDto(request.Consumer)
+					AcceptedTransports = request.AcceptedTransports
 				},
 				proceed,
 				cancellationToken)
@@ -96,7 +95,7 @@ internal sealed class RemoteVideoStreamEndpoint : IVideoStreamEndpoint, IDisposa
 				"The provider answered session.open without a description.");
 		}
 
-		return new VideoStreamOpenResult(VideoStreamWire.ToDescription(result.Description), result.RegistrationId);
+		return new VideoStreamOpenResult(result.Description, result.RegistrationId);
 	}
 
 	public Task SuspendAsync(string providerId, string sessionId, Func<bool> proceed, CancellationToken cancellationToken)
@@ -105,7 +104,7 @@ internal sealed class RemoteVideoStreamEndpoint : IVideoStreamEndpoint, IDisposa
 			proceed,
 			cancellationToken);
 
-	public async Task<VideoStreamSessionDescription?> ResumeAsync(string providerId,
+	public async Task<VideoStreamSessionDescriptionDto?> ResumeAsync(string providerId,
 		string sessionId,
 		Func<bool> proceed,
 		CancellationToken cancellationToken)
@@ -117,26 +116,7 @@ internal sealed class RemoteVideoStreamEndpoint : IVideoStreamEndpoint, IDisposa
 				cancellationToken)
 			.ConfigureAwait(false);
 
-		return result?.Description is { } description ? VideoStreamWire.ToDescription(description) : null;
-	}
-
-	public async Task<VideoStreamSignal?> SignalAsync(string providerId,
-		string sessionId,
-		VideoStreamSignal signal,
-		Func<bool> proceed,
-		CancellationToken cancellationToken)
-	{
-		var result = await InvokeAsync<VideoStreamSessionSignalResult>(
-				CapabilityOperations.VideoStreamProvider.SessionSignal,
-				new VideoStreamSessionSignalArguments
-				{
-					SessionId = sessionId, ProviderId = providerId, Signal = VideoStreamWire.ToDto(signal)
-				},
-				proceed,
-				cancellationToken)
-			.ConfigureAwait(false);
-
-		return result?.Signal is { } answer ? VideoStreamWire.ToSignal(answer) : null;
+		return result?.Description;
 	}
 
 	public async Task CloseAsync(string providerId,

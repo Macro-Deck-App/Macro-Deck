@@ -2934,17 +2934,11 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Errors.VideoStream.SessionLimitReached" xml:space="preserve">
     <value>Troppi video sono aperti contemporaneamente.</value>
   </data>
-  <data name="Errors.VideoStream.PayloadTooLarge" xml:space="preserve">
-    <value>I dati di connessione del video sono troppo grandi.</value>
-  </data>
   <data name="Errors.VideoStream.StreamUnavailable" xml:space="preserve">
     <value>Questo stream video non è disponibile al momento.</value>
   </data>
   <data name="Errors.VideoStream.TransportNotAccepted" xml:space="preserve">
     <value>Questo stream video non può essere riprodotto su questo dispositivo.</value>
-  </data>
-  <data name="Errors.VideoStream.SignalingUnsupported" xml:space="preserve">
-    <value>La sorgente video non supporta questo tipo di connessione.</value>
   </data>
   <data name="Errors.VideoStream.ProviderUnavailable" xml:space="preserve">
     <value>La sorgente video non è raggiungibile al momento.</value>
@@ -9348,6 +9342,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Integrations.Twitch.Actions.SetChatMode.OnLabel" xml:space="preserve">
     <value>Attiva</value>
+  </data>
+  <data name="Integrations.Twitch.Actions.SetChatMode.ToggleDescription" xml:space="preserve">
+    <value>Imposta la modalità sul contrario del suo stato attuale su Twitch. L'impostazione Attiva viene ignorata.</value>
+  </data>
+  <data name="Integrations.Twitch.Actions.SetChatMode.ToggleLabel" xml:space="preserve">
+    <value>Alterna</value>
   </data>
   <data name="Integrations.Twitch.Actions.SetRedemptionStatus.Description" xml:space="preserve">
     <value>Contrassegna un riscatto di punti canale come completato o lo rimborsa. Twitch lo consente solo per le ricompense create da questa applicazione: le ricompense create nella dashboard di Twitch non possono essere gestite tramite l'API.</value>

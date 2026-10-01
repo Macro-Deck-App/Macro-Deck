@@ -140,6 +140,11 @@ internal static class TwitchActions
 
 			public static LocalizedText OnLabel() => AppStrings.Integrations.Twitch.Actions.SetChatMode.OnLabel();
 
+			public static LocalizedText ToggleLabel() => AppStrings.Integrations.Twitch.Actions.SetChatMode.ToggleLabel();
+
+			public static LocalizedText ToggleDescription() =>
+				AppStrings.Integrations.Twitch.Actions.SetChatMode.ToggleDescription();
+
 			public static LocalizedText DurationLabel() =>
 				AppStrings.Integrations.Twitch.Actions.SetChatMode.DurationLabel();
 
@@ -550,18 +555,34 @@ internal static class TwitchActions
 						label: Strings.SetChatMode.ModeLabel(),
 						defaultValue: "emote-only",
 						required: true),
-					ActionParameter.Toggle("enabled", label: Strings.SetChatMode.OnLabel(), defaultValue: true),
+					ActionParameter.Toggle("toggle",
+						label: Strings.SetChatMode.ToggleLabel(),
+						description: Strings.SetChatMode.ToggleDescription(),
+						defaultValue: false),
+					ActionParameter.Toggle("enabled", label: Strings.SetChatMode.OnLabel(), defaultValue: true)
+						.OnlyWhen("toggle", "false", ""),
 					ActionParameter.Number("duration",
 						label: Strings.SetChatMode.DurationLabel(),
 						description: Strings.SetChatMode.DurationDescription(),
 						min: 0)
 				],
-				scope => scope.Helix.SetChatModeAsync(scope.UserId,
-					scope.UserId,
-					ParseChatMode(TwitchActionValues.ReadText(scope.Parameters, "mode")),
-					TwitchActionValues.ReadBool(scope.Parameters, "enabled", fallback: true),
-					TwitchActionValues.ReadInt(scope.Parameters, "duration"),
-					scope.CancellationToken)),
+				async scope =>
+				{
+					var mode = ParseChatMode(TwitchActionValues.ReadText(scope.Parameters, "mode"));
+					var enabled = TwitchActionValues.ReadBool(scope.Parameters, "enabled", fallback: true);
+					if (TwitchActionValues.ReadBool(scope.Parameters, "toggle"))
+					{
+						var current = await scope.Helix.GetChatSettingsAsync(scope.UserId, scope.CancellationToken);
+						enabled = !IsChatModeOn(current, mode);
+					}
+
+					await scope.Helix.SetChatModeAsync(scope.UserId,
+						scope.UserId,
+						mode,
+						enabled,
+						TwitchActionValues.ReadInt(scope.Parameters, "duration"),
+						scope.CancellationToken);
+				}),
 
 			Action("run-commercial",
 				Strings.RunCommercial.Name(),
@@ -931,6 +952,16 @@ internal static class TwitchActions
 		var user = await scope.Helix.GetUserAsync(null, login, scope.CancellationToken);
 		return user?.Id;
 	}
+
+	private static bool IsChatModeOn(TwitchChatSettings settings, TwitchChatMode mode)
+		=> mode switch
+		{
+			TwitchChatMode.FollowersOnly => settings.FollowersOnly,
+			TwitchChatMode.SlowMode => settings.SlowMode,
+			TwitchChatMode.SubscribersOnly => settings.SubscriberOnly,
+			TwitchChatMode.UniqueChat => settings.UniqueChat,
+			_ => settings.EmoteOnly
+		} == true;
 
 	private static TwitchChatMode ParseChatMode(string? mode)
 		=> mode switch

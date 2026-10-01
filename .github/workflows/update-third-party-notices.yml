@@ -1,0 +1,72 @@
+name: Update third-party notices
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: update-third-party-notices-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  NODE_VERSION: '^22.22.3'
+  DOTNET_VERSION: 10.0.x
+  RUST_TOOLCHAIN: '1.98.1'
+
+jobs:
+  update:
+    name: Regenerate notices and commit
+    if: github.ref_type == 'branch'
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          ref: ${{ github.ref }}
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Install npm packages
+        working-directory: ui
+        run: npm ci --ignore-scripts
+
+      - name: Restore the host for every shipped runtime
+        run: dotnet restore host/src/MacroDeckHost/MacroDeckHost.csproj '-p:RuntimeIdentifiers="win-x64;linux-x64;osx-arm64"'
+
+      - name: Generate third-party notices
+        run: dotnet run --project tools/src/MacroDeck.LicenseTool -c Release
+
+      - name: Commit and push changes
+        run: |
+          if git diff --quiet NOTICE THIRD-PARTY-NOTICES; then
+            echo "The notices were already up to date." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add NOTICE THIRD-PARTY-NOTICES
+          git commit -m "Update third-party notices"
+          git push origin "HEAD:${GITHUB_REF}"
+
+          echo "Committed regenerated notices. Push or re-run checks to validate the branch." >> "$GITHUB_STEP_SUMMARY"

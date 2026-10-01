@@ -260,6 +260,59 @@ internal sealed class TwitchActionsTests
 	}
 
 	[Test]
+	public async Task Toggling_a_chat_mode_flips_what_twitch_reports()
+	{
+		_first.ChatSettings = new TwitchChatSettings(null, false, 15, true, 5, null, false);
+
+		await Run("set-chat-mode", ("mode", "followers-only"), ("toggle", true), ("duration", 30));
+		await Run("set-chat-mode", ("mode", "slow"), ("toggle", true), ("duration", 10));
+		await Run("set-chat-mode", ("mode", "unique-chat"), ("toggle", true));
+		await Run("set-chat-mode", ("mode", "emote-only"), ("toggle", true));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_first.Calls, Does.Contain("chatMode:FollowersOnly|True|30"));
+			Assert.That(_first.Calls, Does.Contain("chatMode:SlowMode|False|10"));
+			Assert.That(_first.Calls, Does.Contain("chatMode:UniqueChat|True|"));
+			Assert.That(_first.Calls, Does.Contain("chatMode:EmoteOnly|True|"), "an unreported mode counts as off");
+		});
+	}
+
+	[Test]
+	public async Task Toggle_ignores_the_stored_on_setting()
+	{
+		_first.ChatSettings = new TwitchChatSettings(true, null, null, null, null, null, null);
+
+		await Run("set-chat-mode", ("mode", "emote-only"), ("toggle", true), ("enabled", true));
+
+		Assert.That(_first.Calls, Does.Contain("chatMode:EmoteOnly|False|"));
+	}
+
+	[Test]
+	public async Task A_chat_mode_without_toggle_keeps_using_the_on_setting()
+	{
+		_first.ChatSettings = new TwitchChatSettings(true, null, null, null, null, null, null);
+
+		await Run("set-chat-mode", ("mode", "emote-only"), ("enabled", true));
+
+		Assert.That(_first.Calls, Does.Contain("chatMode:EmoteOnly|True|"));
+	}
+
+	[Test]
+	public async Task Toggling_sends_nothing_when_twitch_cannot_report_the_current_mode()
+	{
+		_first.FailingReads.Add("chatSettings");
+
+		var result = await Run("set-chat-mode", ("mode", "slow"), ("toggle", true));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
+			Assert.That(_first.Calls, Has.None.StartsWith("chatMode:"));
+		});
+	}
+
+	[Test]
 	public async Task Each_chat_mode_maps_onto_the_right_setting()
 	{
 		await Run("set-chat-mode", ("mode", "followers-only"), ("enabled", true), ("duration", 30));

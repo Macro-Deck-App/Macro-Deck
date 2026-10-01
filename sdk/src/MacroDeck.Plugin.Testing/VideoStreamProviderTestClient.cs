@@ -7,7 +7,7 @@ namespace MacroDeck.Plugin.Testing;
 
 /// <summary>
 /// The <c>video-stream-provider</c> capability, driven the way the host drives it: list the providers and
-/// their streams, then open, suspend, resume, signal and close sessions. Results deserialize to the
+/// their streams, then open, suspend, resume and close sessions. Results deserialize to the
 /// <c>MacroDeck.Plugin.Protocol.Capabilities.VideoStreamProvider</c> DTOs, and a rejection arrives as a
 /// capability failure whose <c>reason</c> detail is one of the <c>video_stream_</c> values of
 /// <c>ProtocolErrorReasons</c>.
@@ -35,13 +35,11 @@ public sealed class VideoStreamProviderTestClient
 	/// <param name="sessionId">Pick a fresh one per open: an id that was closed before is refused, exactly
 	/// as a real host's reuse would be.</param>
 	/// <param name="acceptedTransports">The transports the pretend consumer plays, most preferred first.</param>
-	/// <param name="consumer">The pretend consumer; a network consumer without a device when omitted.</param>
 	public Task<CapabilityInvocationOutcome> OpenSessionAsync(
 		string sessionId,
 		string providerId,
 		string streamId,
 		IReadOnlyList<string> acceptedTransports,
-		VideoStreamConsumerDto? consumer = null,
 		CapabilityInvokeOptions? options = null)
 		=> Invoke(CapabilityOperations.VideoStreamProvider.SessionOpen,
 			new VideoStreamSessionOpenArguments
@@ -49,8 +47,7 @@ public sealed class VideoStreamProviderTestClient
 				SessionId = sessionId,
 				ProviderId = providerId,
 				StreamId = streamId,
-				AcceptedTransports = acceptedTransports,
-				Consumer = consumer ?? new VideoStreamConsumerDto()
+				AcceptedTransports = acceptedTransports
 			},
 			options);
 
@@ -70,16 +67,6 @@ public sealed class VideoStreamProviderTestClient
 		CapabilityInvokeOptions? options = null)
 		=> Invoke(CapabilityOperations.VideoStreamProvider.SessionResume,
 			new VideoStreamSessionArguments { SessionId = sessionId, ProviderId = providerId },
-			options);
-
-	/// <summary>Sends a consumer signal. Deserializes to <see cref="VideoStreamSessionSignalResult" />.</summary>
-	public Task<CapabilityInvocationOutcome> SignalAsync(
-		string sessionId,
-		string providerId,
-		VideoStreamSignalDto signal,
-		CapabilityInvokeOptions? options = null)
-		=> Invoke(CapabilityOperations.VideoStreamProvider.SessionSignal,
-			new VideoStreamSessionSignalArguments { SessionId = sessionId, ProviderId = providerId, Signal = signal },
 			options);
 
 	/// <summary>Closes a session. Closing one that is already closed, or not open yet, succeeds; a close

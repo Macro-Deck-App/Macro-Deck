@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Globalization;
 using System.Text.Json;
 using MacroDeck.Localization;
 using MacroDeck.Plugin.Protocol.Capabilities;
@@ -44,7 +43,7 @@ internal sealed class VideoStreamSessionBrokerTests
 	}
 
 	[Test]
-	public async Task An_open_answers_at_once_and_the_session_turns_active_with_the_providers_description()
+	public async Task An_open_answers_at_once_and_the_session_turns_active_with_a_host_url_for_the_providers_stream()
 	{
 		var (world, provider) = await BuiltInAsync();
 		using var _ = world;
@@ -59,9 +58,10 @@ internal sealed class VideoStreamSessionBrokerTests
 			Assert.That(ticket.State, Is.EqualTo(VideoStreamSessionState.Opening));
 			Assert.That(active.ConnectionId, Is.EqualTo("ui-1"));
 			Assert.That(active.Revision, Is.EqualTo(1));
-			Assert.That(active.Description!.Url, Is.EqualTo("https://camera.local/main"));
-			Assert.That(provider.Opens.Single().Consumer, Is.EqualTo(VideoStreamWorld.Consumer));
-			Assert.That(provider.Opens.Single().AcceptedTransports, Is.EqualTo(new[] { "webrtc", "hls" }));
+			Assert.That(active.Description!.Transport, Is.EqualTo("hls"));
+			Assert.That(active.Description.Url, Does.StartWith(VideoStreamRelay.PathPrefix).And.EndsWith("/main"));
+			Assert.That(active.Description.Url, Does.Not.Contain("camera.local"));
+			Assert.That(provider.Opens.Single().AcceptedTransports, Is.EqualTo(new[] { "hls", "mjpeg" }));
 		});
 	}
 
@@ -114,7 +114,7 @@ internal sealed class VideoStreamSessionBrokerTests
 		var unknownProvider = Assert.Throws<VideoStreamBrokerException>(() => world.Open(VideoStreamWorld.BuiltIn + "::back", "main"));
 		var unknownStream = Assert.Throws<VideoStreamBrokerException>(() => world.Open(Front, "side"));
 		var noTransport = Assert.Throws<VideoStreamBrokerException>(() =>
-			world.Broker.OpenSession("ui-1", Front, "main", [], VideoStreamWorld.Consumer));
+			world.Broker.OpenSession("ui-1", Front, "main", []));
 
 		Assert.Multiple(() =>
 		{
@@ -193,7 +193,7 @@ internal sealed class VideoStreamSessionBrokerTests
 	}
 
 	[Test]
-	public async Task Updates_and_signals_the_provider_sends_while_opening_arrive_in_order_after_the_open()
+	public async Task Updates_the_provider_sends_while_opening_arrive_in_order_after_the_open()
 	{
 		var (world, provider) = await BuiltInAsync();
 		using var _ = world;
@@ -203,7 +203,7 @@ internal sealed class VideoStreamSessionBrokerTests
 		{
 			opened.SetResult(request.SessionId);
 			await release.Task;
-			return new VideoStreamSessionDescription("webrtc", Payload: "offer");
+			return VideoStreamSessionDescription.Hls("https://camera.local/offer");
 		};
 		var context = world.Context();
 
@@ -211,21 +211,18 @@ internal sealed class VideoStreamSessionBrokerTests
 		var sessionId = await opened.Task.WaitAsync(TimeSpan.FromSeconds(10));
 		await context.UpdateSessionAsync(sessionId, VideoStreamSessionState.Reconnecting,
 			reason: VideoStreamSessionReason.SourceLost);
-		await context.SendSignalAsync(sessionId, new VideoStreamSignal("ice", "1"));
 		await context.UpdateSessionAsync(sessionId, VideoStreamSessionState.Active,
-			new VideoStreamSessionDescription("webrtc", Payload: "renegotiated"),
+			VideoStreamSessionDescription.Hls("https://camera.local/renegotiated"),
 			VideoStreamSessionReason.SourceRecovered);
-		await context.SendSignalAsync(sessionId, new VideoStreamSignal("ice", "2"));
 		var beforeOpen = world.Publisher.ForSession(sessionId).Count;
 		release.SetResult();
-		await VideoStreamWorld.WaitForAsync(() => world.Publisher.ForSession(sessionId).Count == 5,
+		await VideoStreamWorld.WaitForAsync(() => world.Publisher.ForSession(sessionId).Count == 3,
 			"the buffered provider traffic never arrived");
 
 		var log = world.Publisher.ForSession(sessionId).Select(notification => notification switch
 		{
 			VideoStreamSessionChangedNotification changed =>
-				$"rev{changed.Revision} {changed.State} {changed.Reason} {changed.Description?.Payload}",
-			VideoStreamSignalNotification signal => $"signal {signal.Signal.Type} {signal.Signal.Payload}",
+				$"rev{changed.Revision} {changed.State} {changed.Reason} {changed.Description?.Url.Split('/').Last()}",
 			_ => notification.ToString()
 		});
 		Assert.Multiple(() =>
@@ -236,9 +233,7 @@ internal sealed class VideoStreamSessionBrokerTests
 			{
 				"rev1 Active None offer",
 				"rev2 Reconnecting SourceLost offer",
-				"signal ice 1",
-				"rev3 Active SourceRecovered renegotiated",
-				"signal ice 2"
+				"rev3 Active SourceRecovered renegotiated"
 			}));
 		});
 	}
@@ -254,14 +249,14 @@ internal sealed class VideoStreamSessionBrokerTests
 		{
 			opened.SetResult(request.SessionId);
 			await release.Task;
-			return new VideoStreamSessionDescription("hls");
+			return VideoStreamSessionDescription.Hls("https://camera.local/main");
 		};
 
 		world.Open(Front, "main");
 		var sessionId = await opened.Task.WaitAsync(TimeSpan.FromSeconds(10));
 		for (var i = 0; i <= VideoStreamSessionBroker.MaxBufferedProviderOperations; i++)
 		{
-			await world.Context().SendSignalAsync(sessionId, new VideoStreamSignal("ice", i.ToString(CultureInfo.InvariantCulture)));
+			await world.Context().UpdateSessionAsync(sessionId, VideoStreamSessionState.Reconnecting);
 		}
 
 		release.SetResult();
@@ -272,7 +267,7 @@ internal sealed class VideoStreamSessionBrokerTests
 		{
 			Assert.That(world.Publisher.Of<VideoStreamSessionClosedNotification>().Single().Reason,
 				Is.EqualTo(VideoStreamSessionReason.Failed));
-			Assert.That(world.Publisher.Of<VideoStreamSignalNotification>(), Is.Empty);
+			Assert.That(world.Publisher.Of<VideoStreamSessionChangedNotification>(), Is.Empty);
 		});
 	}
 
@@ -287,7 +282,7 @@ internal sealed class VideoStreamSessionBrokerTests
 		{
 			opened.SetResult(request.SessionId);
 			await release.Task;
-			return new VideoStreamSessionDescription("hls");
+			return VideoStreamSessionDescription.Hls("https://camera.local/main");
 		};
 
 		var ticket = world.Open(Front, "main");
@@ -350,7 +345,7 @@ internal sealed class VideoStreamSessionBrokerTests
 		provider.OnOpen = async (_, _) =>
 		{
 			await Task.Delay(400, CancellationToken.None);
-			return new VideoStreamSessionDescription("hls");
+			return VideoStreamSessionDescription.Hls("https://camera.local/main");
 		};
 
 		var ticket = world.Open(Front, "main");
@@ -374,48 +369,18 @@ internal sealed class VideoStreamSessionBrokerTests
 		var never = new TaskCompletionSource<VideoStreamSessionDescription>();
 		provider.OnOpen = (request, _) => request.StreamId == "hung"
 			? never.Task
-			: Task.FromResult(new VideoStreamSessionDescription("hls"));
+			: Task.FromResult(VideoStreamSessionDescription.Hls("https://camera.local/main"));
 
 		var hung = world.Open(Front, "hung");
 		var live = await OpenActiveAsync(world);
-		world.Broker.SignalSession("ui-1", live, new VideoStreamSignal("offer", "sdp"));
-		await VideoStreamWorld.WaitForAsync(() => world.Publisher.Of<VideoStreamSignalNotification>().Count == 1,
-			"the answer to the signal never arrived");
 		world.Broker.KeepAliveSession("ui-1", hung.SessionId);
 		world.Broker.CloseSession("ui-1", live);
 		await VideoStreamWorld.WaitForAsync(() => provider.Closes.Count == 1, "the live session never closed");
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(provider.Signals.Single().SessionId, Is.EqualTo(live));
-			Assert.That(world.Publisher.Of<VideoStreamSignalNotification>().Single().Signal,
-				Is.EqualTo(new VideoStreamSignal("answer", "sdp")));
+			Assert.That(provider.Closes.Single().SessionId, Is.EqualTo(live));
 			Assert.That(world.Publisher.ForSession(hung.SessionId), Is.Empty);
-		});
-	}
-
-	[Test]
-	public async Task A_malformed_signal_is_refused_as_failed_and_an_oversized_one_as_too_large()
-	{
-		var (world, provider) = await BuiltInAsync();
-		using var _ = world;
-		var sessionId = await OpenActiveAsync(world);
-
-		VideoStreamError Refusal(VideoStreamSignal? signal)
-			=> Assert.Throws<VideoStreamBrokerException>(() => world.Broker.SignalSession("ui-1", sessionId, signal))!
-				.Error;
-
-		Assert.Multiple(() =>
-		{
-			Assert.That(Refusal(null), Is.EqualTo(VideoStreamError.Failed));
-			Assert.That(Refusal(new VideoStreamSignal("", "sdp")), Is.EqualTo(VideoStreamError.Failed));
-			Assert.That(Refusal(new VideoStreamSignal("  ", "sdp")), Is.EqualTo(VideoStreamError.Failed));
-			Assert.That(Refusal(new VideoStreamSignal("offer", null!)), Is.EqualTo(VideoStreamError.Failed));
-			Assert.That(Refusal(new VideoStreamSignal(new string('t', VideoStreamLimits.MaxSignalTypeLength + 1), "sdp")),
-				Is.EqualTo(VideoStreamError.PayloadTooLarge));
-			Assert.That(Refusal(new VideoStreamSignal("offer", new string('p', VideoStreamLimits.MaxSignalPayloadLength + 1))),
-				Is.EqualTo(VideoStreamError.PayloadTooLarge));
-			Assert.That(provider.Signals, Is.Empty);
 		});
 	}
 
@@ -477,41 +442,6 @@ internal sealed class VideoStreamSessionBrokerTests
 		}
 
 		Assert.That(Closes(), Is.EqualTo(VideoStreamSessionBroker.MaxCloseAttempts));
-	}
-
-	[Test]
-	public async Task Thirty_signals_reach_the_plugin_in_order_while_it_rate_limits_some_of_them()
-	{
-		using var world = new VideoStreamWorld();
-		world.Plugin.AddProvider("front", "r1", "main");
-		var delivered = new ConcurrentQueue<string>();
-		var calls = 0;
-		world.Plugin.Handler = (operation, arguments) =>
-		{
-			if (operation == CapabilityOperations.VideoStreamProvider.SessionSignal)
-			{
-				if (Interlocked.Increment(ref calls) % 3 == 0)
-				{
-					throw ScriptedVideoPlugin.Error(ProtocolErrorCodes.RateLimited);
-				}
-
-				delivered.Enqueue(arguments.Deserialize<VideoStreamSessionSignalArguments>(PluginProtocolJson.Options)!
-					.Signal.Payload);
-			}
-
-			return Task.FromResult(world.Plugin.Default(operation, arguments));
-		};
-		await world.AttachPluginAsync();
-		var sessionId = await OpenActiveAsync(world, VideoStreamWorld.PluginId + "::front");
-
-		for (var i = 0; i < 30; i++)
-		{
-			world.Broker.SignalSession("ui-1", sessionId, new VideoStreamSignal("ice", i.ToString(CultureInfo.InvariantCulture)));
-		}
-
-		await VideoStreamWorld.WaitForAsync(() => delivered.Count == 30, "not every signal was delivered");
-
-		Assert.That(delivered, Is.EqualTo(Enumerable.Range(0, 30).Select(i => i.ToString(CultureInfo.InvariantCulture))));
 	}
 
 	[Test]
@@ -845,7 +775,8 @@ internal sealed class VideoStreamSessionBrokerTests
 				case CapabilityOperations.VideoStreamProvider.SessionOpen when AnswerOpens:
 					Reply(envelope, new VideoStreamSessionOpenResult
 					{
-						Description = new VideoStreamSessionDescriptionDto { Transport = "hls" }, RegistrationId = "r1"
+						Description = new VideoStreamSessionDescriptionDto { Transport = "hls", Url = "https://camera.local/live" },
+						RegistrationId = "r1"
 					});
 					break;
 				case CapabilityOperations.VideoStreamProvider.SessionClose:

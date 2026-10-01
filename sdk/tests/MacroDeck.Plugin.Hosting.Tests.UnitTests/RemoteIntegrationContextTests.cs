@@ -325,7 +325,6 @@ public class RemoteIntegrationContextTests
 			Serilog.Core.Logger.None);
 		var videoStreams = registry.ContextFor(null);
 		registry.Sessions.TryBeginOpen("s1", "cam", new Support.TestVideoProvider(), registry.Sessions.CurrentEpoch);
-		var signal = new MacroDeck.Sdk.VideoStreams.VideoStreamSignal("candidate", "{}");
 
 		var expected = new (Func<Task> Call, string Operation)[]
 		{
@@ -334,7 +333,6 @@ public class RemoteIntegrationContextTests
 			(() => videoStreams.NotifyStreamsChangedAsync("cam"), HostOperations.VideoStreams.StreamsChanged),
 			(() => videoStreams.UpdateSessionAsync("s1", MacroDeck.Sdk.VideoStreams.VideoStreamSessionState.Active),
 				HostOperations.VideoStreams.SessionUpdate),
-			(() => videoStreams.SendSignalAsync("s1", signal), HostOperations.VideoStreams.SessionSignal),
 			(() => videoStreams.CloseSessionAsync("s1"), HostOperations.VideoStreams.SessionClose)
 		};
 

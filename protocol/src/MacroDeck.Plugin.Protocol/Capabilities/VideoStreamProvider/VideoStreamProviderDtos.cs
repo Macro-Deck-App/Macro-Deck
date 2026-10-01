@@ -64,40 +64,17 @@ public sealed record VideoStreamProviderStreamsResult
 	public IReadOnlyList<VideoStreamDescriptorDto> Streams { get; init; } = [];
 }
 
-/// <summary>Mirrors the SDK's <c>VideoStreamSessionDescription</c>. Opaque to the host.</summary>
+/// <summary>
+/// Mirrors the SDK's <c>VideoStreamSessionDescription</c>. The host relays the media itself, so the
+/// description never reaches a consumer. A reader ignores members it does not know, which is how a
+/// description grows.
+/// </summary>
 public sealed record VideoStreamSessionDescriptionDto
 {
-	/// <summary>A lowercase transport token, for example <c>webrtc</c> or <c>hls</c>.</summary>
+	/// <summary>A lowercase transport token, for example <c>hls</c> or <c>mjpeg</c>.</summary>
 	public required string Transport { get; init; }
 
 	public string? Url { get; init; }
-
-	public IReadOnlyDictionary<string, string>? Parameters { get; init; }
-
-	public string? Payload { get; init; }
-
-	public DateTimeOffset? ExpiresAt { get; init; }
-}
-
-/// <summary>Mirrors the SDK's <c>VideoStreamSignal</c>. Opaque to the host.</summary>
-public sealed record VideoStreamSignalDto
-{
-	public required string Type { get; init; }
-
-	public required string Payload { get; init; }
-}
-
-/// <summary>Mirrors the SDK's <c>VideoStreamConsumer</c>.</summary>
-public sealed record VideoStreamConsumerDto
-{
-	public string? DeviceId { get; init; }
-
-	/// <summary>The absolute host address the consumer used to reach Macro Deck, when known.</summary>
-	public string? HostAddress { get; init; }
-
-	/// <summary>One of the SDK's <c>VideoStreamConnectionKind</c> member names. A reader maps a value it
-	/// does not know to <c>Network</c>.</summary>
-	public string ConnectionKind { get; init; } = "Network";
 }
 
 /// <summary>Arguments for the <c>session.open</c> operation.</summary>
@@ -112,8 +89,6 @@ public sealed record VideoStreamSessionOpenArguments
 
 	/// <summary>The transports the consumer can play, most preferred first.</summary>
 	public IReadOnlyList<string> AcceptedTransports { get; init; } = [];
-
-	public required VideoStreamConsumerDto Consumer { get; init; }
 }
 
 /// <summary>Result of the <c>session.open</c> operation.</summary>
@@ -138,23 +113,6 @@ public sealed record VideoStreamSessionResumeResult
 {
 	/// <summary>A new description, or absent when the previous one is still valid.</summary>
 	public VideoStreamSessionDescriptionDto? Description { get; init; }
-}
-
-/// <summary>Arguments for the <c>session.signal</c> operation: a signal from the consumer.</summary>
-public sealed record VideoStreamSessionSignalArguments
-{
-	public required string SessionId { get; init; }
-
-	public required string ProviderId { get; init; }
-
-	public required VideoStreamSignalDto Signal { get; init; }
-}
-
-/// <summary>Result of the <c>session.signal</c> operation.</summary>
-public sealed record VideoStreamSessionSignalResult
-{
-	/// <summary>The provider's direct answer, or absent when it has none.</summary>
-	public VideoStreamSignalDto? Signal { get; init; }
 }
 
 /// <summary>Arguments for the <c>session.close</c> operation.</summary>

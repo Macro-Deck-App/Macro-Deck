@@ -46,7 +46,7 @@ internal sealed class VideoStreamPluginInProcessSuiteTests : ConformanceFixture
 
 		public Task<VideoStreamSessionDescription> OpenAsync(VideoStreamOpenRequest request,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(new VideoStreamSessionDescription("hls", "http://camera.local/main.m3u8"));
+			=> Task.FromResult(VideoStreamSessionDescription.Hls("http://camera.local/main.m3u8"));
 
 		public Task CloseAsync(string sessionId, VideoStreamSessionReason reason, CancellationToken cancellationToken)
 			=> Task.CompletedTask;

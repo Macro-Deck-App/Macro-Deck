@@ -24,10 +24,8 @@ export type VideoStreamErrorCode =
   | 'unknown_stream'
   | 'unknown_session'
   | 'session_limit_reached'
-  | 'payload_too_large'
   | 'stream_unavailable'
   | 'transport_not_accepted'
-  | 'signaling_unsupported'
   | 'provider_unavailable'
   | 'failed';
 
@@ -52,17 +50,9 @@ export interface VideoStreamProviderItem {
   streams: VideoStreamItem[];
 }
 
-export interface VideoStreamSignalMessage {
-  type: string;
-  payload: string;
-}
-
 export interface VideoStreamDescriptionMessage {
   transport: string;
   url?: string;
-  parameters?: Record<string, string>;
-  payload?: string;
-  expiresAt?: string;
 }
 
 export interface GetVideoStreamsRequest {}
@@ -95,11 +85,6 @@ export interface ResumeVideoStreamRequest {
   sessionId: string;
 }
 
-export interface SignalVideoStreamRequest {
-  sessionId: string;
-  signal: VideoStreamSignalMessage;
-}
-
 export interface CloseVideoStreamRequest {
   sessionId: string;
 }
@@ -113,11 +98,6 @@ export interface VideoStreamSessionChangedEvent {
   description?: VideoStreamDescriptionMessage;
   reason: VideoStreamSessionReason;
   message?: LocalizedText;
-}
-
-export interface VideoStreamSignalEvent {
-  sessionId: string;
-  signal: VideoStreamSignalMessage;
 }
 
 export interface VideoStreamSessionClosedEvent {

@@ -2934,17 +2934,11 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Errors.VideoStream.SessionLimitReached" xml:space="preserve">
     <value>Hay demasiados vídeos abiertos a la vez.</value>
   </data>
-  <data name="Errors.VideoStream.PayloadTooLarge" xml:space="preserve">
-    <value>Los datos de conexión del vídeo son demasiado grandes.</value>
-  </data>
   <data name="Errors.VideoStream.StreamUnavailable" xml:space="preserve">
     <value>Esta transmisión de vídeo no está disponible en este momento.</value>
   </data>
   <data name="Errors.VideoStream.TransportNotAccepted" xml:space="preserve">
     <value>Esta transmisión de vídeo no se puede reproducir en este dispositivo.</value>
-  </data>
-  <data name="Errors.VideoStream.SignalingUnsupported" xml:space="preserve">
-    <value>La fuente de vídeo no admite este tipo de conexión.</value>
   </data>
   <data name="Errors.VideoStream.ProviderUnavailable" xml:space="preserve">
     <value>No se puede acceder a la fuente de vídeo en este momento.</value>
@@ -9348,6 +9342,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Integrations.Twitch.Actions.SetChatMode.OnLabel" xml:space="preserve">
     <value>Activado</value>
+  </data>
+  <data name="Integrations.Twitch.Actions.SetChatMode.ToggleDescription" xml:space="preserve">
+    <value>Cambia el modo al contrario de su estado actual en Twitch. El ajuste Activado se ignora.</value>
+  </data>
+  <data name="Integrations.Twitch.Actions.SetChatMode.ToggleLabel" xml:space="preserve">
+    <value>Alternar</value>
   </data>
   <data name="Integrations.Twitch.Actions.SetRedemptionStatus.Description" xml:space="preserve">
     <value>Marca un canje de puntos de canal como completado o lo reembolsa. Twitch solo permite esto para recompensas creadas por esta aplicación; las recompensas creadas en el panel de Twitch no se pueden resolver mediante la API.</value>

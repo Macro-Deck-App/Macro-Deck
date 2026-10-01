@@ -106,7 +106,6 @@ public sealed class UiWebSocketDispatcher : IDisposable
 	private readonly DeviceSessionGuard _deviceSessionGuard;
 	private readonly IVideoStreamSessionBroker _videoStreams;
 	private readonly VideoStreamProviderRegistry _videoStreamProviders;
-	private readonly VideoStreamConsumer _videoStreamConsumer;
 	private readonly SemaphoreSlim _dispatch = new(1, 1);
 
 	public UiWebSocketDispatcher(
@@ -159,7 +158,6 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		DeviceSessionGuard deviceSessionGuard,
 		IVideoStreamSessionBroker videoStreams,
 		VideoStreamProviderRegistry videoStreamProviders,
-		VideoStreamConsumer videoStreamConsumer,
 		CancellationToken connectionCancellation)
 	{
 		_connectionId = connectionId;
@@ -206,7 +204,6 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		_deviceSessionGuard = deviceSessionGuard;
 		_videoStreams = videoStreams;
 		_videoStreamProviders = videoStreamProviders;
-		_videoStreamConsumer = videoStreamConsumer;
 	}
 
 	public Task<bool> ConnectedAsync()
@@ -342,7 +339,6 @@ public sealed class UiWebSocketDispatcher : IDisposable
 					_videoStreams.SuspendSession),
 				"ResumeVideoStream" => VideoStream(Arg<ResumeVideoStreamRequest?>(payload, 0)?.SessionId,
 					_videoStreams.ResumeSession),
-				"SignalVideoStream" => SignalVideoStream(Arg<SignalVideoStreamRequest?>(payload, 0)),
 				"CloseVideoStream" => VideoStream(Arg<CloseVideoStreamRequest?>(payload, 0)?.SessionId,
 					_videoStreams.CloseSession),
 				_ when IsKnown(type) => throw new UiWebSocketDispatchException("forbidden"),
@@ -517,8 +513,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 			var ticket = _videoStreams.OpenSession(_connectionId,
 				request?.ProviderId ?? string.Empty,
 				request?.StreamId ?? string.Empty,
-				request?.AcceptedTransports ?? [],
-				_videoStreamConsumer);
+				request?.AcceptedTransports ?? []);
 			return new OpenVideoStreamResponse
 			{
 				SessionId = ticket.SessionId,
@@ -530,13 +525,6 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		{
 			throw VideoStreamRefusal(exception);
 		}
-	}
-
-	private object? SignalVideoStream(SignalVideoStreamRequest? request)
-	{
-		var signal = request?.Signal is { } message ? new VideoStreamSignal(message.Type, message.Payload) : null;
-		return VideoStream(request?.SessionId,
-			(connectionId, sessionId) => _videoStreams.SignalSession(connectionId, sessionId, signal));
 	}
 
 	private object? VideoStream(string? sessionId, Action<string, string> operation)

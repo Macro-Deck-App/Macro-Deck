@@ -350,7 +350,7 @@ plugin's page has **Open settings**, which opens its integration; its back arrow
 installed icon pack's page has **Open in Library**. The other way round, a plugin's page under
 **Integrations** and a Store icon pack under **Library > Icon Packs** have **View in Store**, for the
 description and release notes. An installed plugin is uninstalled from the **General** details of its page
-under **Integrations**, or from its Store page.
+under **Integrations**, or from its Store page. Uninstalling a plugin also removes the variables it provided.
 
 A `macrodeck://` link to an item opens its page in Macro Deck, and a message appears if the item is no longer
 in the Store. See [Store links](/reference/store-links/) for the details, including the AppImage limitation.

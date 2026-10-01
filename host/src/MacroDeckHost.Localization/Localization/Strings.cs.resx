@@ -2934,17 +2934,11 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.VideoStream.SessionLimitReached" xml:space="preserve">
     <value>Současně je otevřeno příliš mnoho videí.</value>
   </data>
-  <data name="Errors.VideoStream.PayloadTooLarge" xml:space="preserve">
-    <value>Data připojení videa jsou příliš velká.</value>
-  </data>
   <data name="Errors.VideoStream.StreamUnavailable" xml:space="preserve">
     <value>Tento videostream není momentálně k dispozici.</value>
   </data>
   <data name="Errors.VideoStream.TransportNotAccepted" xml:space="preserve">
     <value>Tento videostream nelze na tomto zařízení přehrát.</value>
-  </data>
-  <data name="Errors.VideoStream.SignalingUnsupported" xml:space="preserve">
-    <value>Zdroj videa tento typ připojení nepodporuje.</value>
   </data>
   <data name="Errors.VideoStream.ProviderUnavailable" xml:space="preserve">
     <value>Zdroj videa je momentálně nedostupný.</value>
@@ -9348,6 +9342,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Twitch.Actions.SetChatMode.OnLabel" xml:space="preserve">
     <value>Zapnuto</value>
+  </data>
+  <data name="Integrations.Twitch.Actions.SetChatMode.ToggleDescription" xml:space="preserve">
+    <value>Přepne režim na opak jeho aktuálního stavu na Twitchi. Nastavení Zapnuto se ignoruje.</value>
+  </data>
+  <data name="Integrations.Twitch.Actions.SetChatMode.ToggleLabel" xml:space="preserve">
+    <value>Přepnout</value>
   </data>
   <data name="Integrations.Twitch.Actions.SetRedemptionStatus.Description" xml:space="preserve">
     <value>Označí uplatnění kanálových bodů jako dokončené, nebo body vrátí. Twitch to umožňuje pouze u odměn vytvořených touto aplikací - odměny vytvořené na Twitch dashboardu nelze přes API vyřešit.</value>

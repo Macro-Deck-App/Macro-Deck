@@ -482,16 +482,6 @@ internal static class HostInvokeDispatcher
 				break;
 			}
 
-			case HostOperations.VideoStreams.SessionSignal:
-			{
-				var signal = Require<VideoStreamsSessionSignalArguments>(payload);
-				await videoStreams.SendSignalAsync(signal.SessionId,
-						new VideoStreamSignal(signal.Signal.Type, signal.Signal.Payload),
-						cancellationToken)
-					.ConfigureAwait(false);
-				break;
-			}
-
 			default:
 			{
 				var close = Require<VideoStreamsSessionCloseArguments>(payload);
@@ -508,7 +498,8 @@ internal static class HostInvokeDispatcher
 	}
 
 	private static VideoStreamSessionDescription ToDescription(VideoStreamSessionDescriptionDto dto)
-		=> new(dto.Transport, dto.Url, dto.Parameters, dto.Payload, dto.ExpiresAt);
+		=> VideoStreamSessionDescription.FromUrl(dto.Transport,
+			dto.Url ?? throw new ArgumentException("The description has no url.", nameof(dto)));
 
 	private static T WireEnum<T>(string? value, T fallback)
 		where T : struct, Enum
