@@ -122,7 +122,8 @@ space it gives up is not redistributed to its siblings.
 Everything above scales one layout. When a 2x1 tile should put the icon beside the text instead of above it,
 or a folder view should show more on a tablet than on a phone, give each size its own layout with
 [`UiResponsive`](/ui/components/responsive/): the reader draws the one whose condition holds for the box, and
-switches when the box changes.
+switches when the box changes. To choose by what the text needs rather than by the box, use
+[`UiFirstFit`](/ui/components/first-fit/): the reader draws the first layout whose texts fit.
 
 ## Reference
 

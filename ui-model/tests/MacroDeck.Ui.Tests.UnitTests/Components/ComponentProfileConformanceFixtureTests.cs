@@ -52,10 +52,13 @@ public class ComponentProfileConformanceFixtureTests
 		yield return "conformance-building-blocks-tree.json";
 		yield return "conformance-modifier-tree.json";
 		yield return "conformance-responsive-tree.json";
+		yield return "conformance-first-fit-tree.json";
 		yield return "conformance-chat-tree.json";
 		yield return "conformance-anchored-list-tree.json";
 		yield return "conformance-video-stream-tree.json";
 	}
+
+	private static readonly string[] _firstFitLayouts = ["conformance.group.inline", "conformance.group.stacked"];
 
 	private static readonly bool[] _chatSpanIsImage = [false, false, true, true, false];
 
@@ -125,6 +128,22 @@ public class ComponentProfileConformanceFixtureTests
 			Assert.That(nodes["conformance"].Properties.ContainsKey("rows"),
 				Is.True,
 				"a declared row count is what makes the grid drop children that do not fit");
+		});
+	}
+
+	[Test]
+	public void The_first_fit_fixture_carries_its_layouts_in_order_and_the_last_one_again_as_the_fallback()
+	{
+		var tree = JsonSerializer.Deserialize<UiTree>(ReadTree("conformance-first-fit-tree.json"), UiCanonicalJson.Options)!;
+		var node = Walk(tree.Root).Single(candidate => candidate.Type == UiComponents.FirstFit);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(node.Children.Select(child => child.Id),
+				Is.EqualTo(_firstFitLayouts));
+			Assert.That(node.Fallback!.Id, Is.EqualTo("conformance.group._fallback.stacked"));
+			Assert.That(node.Fallback.Children.Select(child => child.Type),
+				Is.EqualTo(node.Children[^1].Children.Select(child => child.Type)));
 		});
 	}
 

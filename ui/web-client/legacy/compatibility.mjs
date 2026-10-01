@@ -187,7 +187,7 @@ export const FLOOR_SAFE_CSS = new Set([
     'outline', 'overflow', 'overflow-wrap', 'overflow-x', 'overflow-y', 'padding', 'padding-bottom',
     'padding-left', 'padding-right', 'padding-top', 'pointer-events', 'position', 'right', 'stroke', 'stroke-linecap',
     'stroke-linejoin', 'text-align', 'text-decoration', 'text-overflow', 'text-shadow', 'top',
-    'vertical-align', 'white-space', 'width', 'word-break', 'z-index',
+    'vertical-align', 'visibility', 'white-space', 'width', 'word-break', 'z-index',
     // Flexbox longhands travel with `flex`, which is checked; autoprefixer emits the old syntax.
     'align-items', 'flex-direction', 'flex-shrink', 'flex-wrap', 'justify-content',
     // Longhands of a checked shorthand.
@@ -268,6 +268,7 @@ export const DOM_API_EXCEPTIONS = {
     'Feature-detected before it is called, falling back to setTimeout.',
   'runtime/src/render/text-fit.ts:ResizeObserver':
     'Guarded on `typeof ResizeObserver`, and supplied by polyfills.legacy.js on the floor.',
+  'runtime/src/ui-components/ui-first-fit.component.ts:ResizeObserver': 'As the renderer above.',
   'web-client/src/modal.ts:ResizeObserver': 'As the renderer above.',
   'runtime/src/ui-components/ui-list.component.ts:ResizeObserver': 'As the renderer above.',
   'runtime/src/video-streams/video-stream-view.ts:IntersectionObserver':

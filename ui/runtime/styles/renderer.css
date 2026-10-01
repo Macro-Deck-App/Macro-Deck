@@ -95,6 +95,7 @@
 .widget-segmented,
 .widget-modifier,
 .widget-responsive,
+.widget-first-fit,
 .widget-list,
 .widget-text,
 .widget-image {
@@ -218,7 +219,8 @@
 .widget-stack > .widget-text,
 .widget-button > .widget-text,
 .widget-modifier > .widget-text,
-.widget-responsive > .widget-text {
+.widget-responsive > .widget-text,
+.widget-first-fit > .widget-text {
   max-height: calc(100% + 0.4em);
 }
 
@@ -308,6 +310,28 @@
   min-height: 0;
   max-width: 100%;
   max-height: 100%;
+}
+
+.widget-first-fit {
+  position: relative;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+}
+
+.widget-first-fit > * {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.widget-first-fit > [data-first-fit-last] {
+  position: relative;
+}
+
+.widget-first-fit > [data-first-fit-hidden] {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .widget-modifier-fill-width > * {

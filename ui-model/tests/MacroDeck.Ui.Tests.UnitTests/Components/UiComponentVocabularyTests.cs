@@ -28,7 +28,7 @@ public class UiComponentVocabularyTests
 		"ui.stack", "ui.text", "ui.image", "ui.range-bar", "ui.slider", "ui.button", "ui.layer",
 		"ui.chart", "ui.text-field", "ui.list", "ui.transform", "ui.shape", "ui.icon", "ui.grid", "ui.gauge",
 		"ui.toggle", "ui.segmented", "ui.dial",
-		"ui.modifier", "ui.responsive",
+		"ui.modifier", "ui.responsive", "ui.first-fit",
 	];
 
 	private static readonly string[] _expectedModifierMembers =
@@ -114,12 +114,12 @@ public class UiComponentVocabularyTests
 		=> new() { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared };
 
 	[Test]
-	public void The_core_component_set_is_the_twenty_ui_names()
+	public void The_core_component_set_is_the_twenty_one_ui_names()
 	{
 		Assert.Multiple(() =>
 		{
 			Assert.That(UiComponents.WellKnown, Is.EqualTo(_expectedCoreComponents).AsCollection);
-			Assert.That(UiComponents.WellKnown.Distinct(StringComparer.Ordinal).Count(), Is.EqualTo(20));
+			Assert.That(UiComponents.WellKnown.Distinct(StringComparer.Ordinal).Count(), Is.EqualTo(21));
 
 			foreach (var type in UiComponents.WellKnown)
 			{
@@ -640,6 +640,15 @@ public class UiComponentVocabularyTests
 							MinWidth = 1.5,
 							Content = new UiTextRun { Key = "wideLabel", Text = "21° Sunny" },
 						},
+					],
+				},
+				new UiFirstFit
+				{
+					Key = "fitting",
+					Children =
+					[
+						new UiTextRun { Key = "longLabel", Text = "21° Sunny" },
+						new UiTextRun { Key = "shortLabel", Text = "21°" },
 					],
 				},
 				new UiTextField
