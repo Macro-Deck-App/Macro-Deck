@@ -26,7 +26,7 @@
     "@angular/core": "^22.1.5",
     "@angular/forms": "^22.1.5",
     "@angular/platform-browser": "^22.1.5",
-    "@angular/router": "^22.1.5",
+    "@angular/router": "^22.2.0",
     "@codemirror/autocomplete": "^6.20.3",
     "@codemirror/commands": "^6.11.0",
     "@codemirror/lang-json": "^6.0.2",
