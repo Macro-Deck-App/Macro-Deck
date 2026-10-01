@@ -30,7 +30,6 @@ async function main(): Promise<void> {
     const tile = document.getElementById('tile') as HTMLElement;
     tile.style.width = `${scene.width}px`;
     tile.style.height = `${scene.height}px`;
-    tile.style.borderRadius = `${scene.radius}px`;
 
     // Only the widget profile is drawn by the framework-free runtime; configuration views need the Angular renderer.
     if (!isComponentProfileType(scene.root.type)) {
@@ -38,8 +37,8 @@ async function main(): Promise<void> {
       return;
     }
 
-    // A widget is laid out in the 120px reference cell and scaled to the requested size, as on a deck.
     const scale = Math.min(scene.width, scene.height) / WIDGET_REFERENCE_CELL;
+    tile.style.borderRadius = `${scene.radius * scale}px`;
     const width = scene.width / scale;
     const height = scene.height / scale;
     const surface = tile.appendChild(document.createElement('div'));

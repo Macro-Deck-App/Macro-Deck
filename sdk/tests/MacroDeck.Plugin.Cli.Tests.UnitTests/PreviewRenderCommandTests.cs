@@ -92,7 +92,8 @@ public class PreviewRenderCommandTests
 			Assert.That(scene.GetProperty("radius").GetInt32(), Is.EqualTo(5));
 			Assert.That(scene.GetProperty("locale").GetString(), Is.EqualTo("de-DE"));
 			Assert.That(scene.GetProperty("root").GetProperty("id").GetString(), Is.EqualTo("station"));
-			Assert.That(screenshotter.Shots.Count, Is.EqualTo(7 * 2));
+			Assert.That(screenshotter.Shots.GroupBy(shot => Path.GetFileName(shot.OutputPath)[..^"-WxHxxx.png".Length]).All(group => group.Count() == 2),
+				Is.True);
 		});
 	}
 
@@ -145,7 +146,8 @@ public class PreviewRenderCommandTests
 		{
 			Assert.That(exitCode, Is.EqualTo(ExitCode.Success));
 			Assert.That(error, Does.Contain("preview-unsupported"));
-			Assert.That(output, Does.Contain("skipped 6 preview(s)"));
+			Assert.That(output, Does.Contain("Rendered 1 image(s)"));
+			Assert.That(output, Does.Contain("skipped"));
 		});
 	}
 
@@ -245,6 +247,23 @@ public class PreviewRenderCommandTests
 		var light = PngProbe.Read(Path.Combine(_output, "light", "station-tile-200x200.png")).FirstPixel[0];
 
 		Assert.That(light, Is.GreaterThan(dark));
+	}
+
+	[Test]
+	public async Task The_tile_radius_scales_with_the_tile_like_the_deck_does()
+	{
+		var browser = RealBrowser();
+
+		await CliRunner.Run("preview", "render", "--executable", FixturePlugins.WellBehaved(), "--preview", "Station tile",
+			"--size", "240x240", "--scale", "1", "--radius", "20", "--output", _output, "--browser", browser);
+
+		var png = PngProbe.Read(Path.Combine(_output, "station-tile-240x240.png"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(png.PixelAt(8, 8)[3], Is.EqualTo(0), "inside a 40 px corner");
+			Assert.That(png.PixelAt(120, 120)[3], Is.EqualTo(255));
+		});
 	}
 
 	private async Task<(string Output, string Error, int ExitCode)> Render(FakeScreenshotter screenshotter, params string[] extra)

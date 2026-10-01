@@ -172,7 +172,6 @@ internal sealed class ChromeScreenshotter : IPreviewScreenshotter
 		}
 		catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
 		{
-			// A browser that is still releasing its profile must not fail a finished run.
 		}
 	}
 }

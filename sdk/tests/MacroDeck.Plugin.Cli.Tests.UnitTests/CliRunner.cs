@@ -147,7 +147,6 @@ internal static class CliRunner
 		return (output.ToString(), error.ToString(), exitCode);
 	}
 
-	/// <summary>As <see cref="Run(string[])" />, but with a fake screenshotter in place of a real browser.</summary>
 	public static async Task<(string Output, string Error, int ExitCode)> RunPreview(
 		Func<string, CancellationToken, Task<IPreviewScreenshotter>> screenshotterFactory,
 		params string[] args)

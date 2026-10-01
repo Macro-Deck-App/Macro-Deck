@@ -54,7 +54,7 @@ Pick exactly one of `--project`, `--executable` or `--artifact`, as for [`run`](
 | `--scale <n>` | Device pixels per pixel, greater than 0 and at most 8. Defaults to `2`, so `200x200` is a 400 by 400 image. |
 | `--theme dark\|light` | Defaults to `dark`. |
 | `--background <color>` | `transparent` (the default), a color name or a `#hex` color. |
-| `--radius <px>` | The tile's corner radius. Defaults to `22`, the deck's default. |
+| `--radius <px>` | The tile's corner radius in the 120 px reference cell, scaled with the tile as on the deck. Defaults to `22`, the deck's default. |
 | `--locale <culture>` | The culture dates and numbers are formatted in. Defaults to `en-US`. |
 | `--output <dir>` | Where the files go. Defaults to `./previews`. |
 | `--browser <path>` | The browser to use, see below. |

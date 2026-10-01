@@ -111,7 +111,18 @@ internal static class PreviewRenderSession
 
 		foreach (var preview in selected)
 		{
-			var outcome = await session.Ui.OpenPreviewAsync(preview.Id, preview.Profile).ConfigureAwait(false);
+			UiPreviewOutcome outcome;
+
+			try
+			{
+				outcome = await session.Ui.OpenPreviewAsync(preview.Id, preview.Profile).ConfigureAwait(false);
+			}
+			catch (Exception exception) when (exception is PluginTestTimeoutException or PluginProcessExitedException)
+			{
+				console.WriteError("preview-failed", $"'{preview.Scenario}' could not be rendered: {exception.Message}");
+				failures++;
+				continue;
+			}
 
 			if (!outcome.Accepted)
 			{
@@ -154,7 +165,13 @@ internal static class PreviewRenderSession
 			}
 			finally
 			{
-				await session.Ui.CloseAsync(outcome.SessionId!).ConfigureAwait(false);
+				try
+				{
+					await session.Ui.CloseAsync(outcome.SessionId!).ConfigureAwait(false);
+				}
+				catch (PluginProcessExitedException)
+				{
+				}
 			}
 		}
 

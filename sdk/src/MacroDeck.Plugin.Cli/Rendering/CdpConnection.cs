@@ -63,6 +63,7 @@ internal sealed partial class CdpConnection : IAsyncDisposable
 			using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 			timeout.CancelAfter(_startTimeout);
 			var endpoint = await ReadEndpointAsync(process, timeout.Token).ConfigureAwait(false);
+			_ = process.StandardError.ReadToEndAsync(CancellationToken.None);
 
 			var socket = new ClientWebSocket();
 			await socket.ConnectAsync(new Uri(endpoint), timeout.Token).ConfigureAwait(false);
@@ -113,7 +114,6 @@ internal sealed partial class CdpConnection : IAsyncDisposable
 		}
 		catch (InvalidOperationException)
 		{
-			// The browser already exited on its own.
 		}
 
 		_socket.Dispose();
@@ -177,7 +177,6 @@ internal sealed partial class CdpConnection : IAsyncDisposable
 		}
 		catch (Exception exception) when (exception is OperationCanceledException or WebSocketException or ObjectDisposedException)
 		{
-			// Disposal and a browser that went away both end the loop.
 		}
 
 		foreach (var completion in _pending.Values)

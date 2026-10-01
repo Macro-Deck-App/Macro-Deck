@@ -38,7 +38,7 @@ internal static class PreviewCommand
 		};
 		var radiusOption = new Option<int>("--radius")
 		{
-			Description = "The tile's corner radius in pixels. Defaults to the deck's 22.",
+			Description = "The tile's corner radius in the 120 px reference cell, scaled with the tile. Defaults to the deck's 22.",
 			DefaultValueFactory = _ => PreviewMetrics.DefaultRadius
 		};
 		var localeOption = new Option<string>("--locale")
