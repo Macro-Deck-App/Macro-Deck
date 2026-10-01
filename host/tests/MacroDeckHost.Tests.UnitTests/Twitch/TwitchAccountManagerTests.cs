@@ -1,4 +1,5 @@
 using System.Globalization;
+using MacroDeck.Sdk.Issues;
 using MacroDeckHost.Integrations.Twitch;
 using MacroDeckHost.Integrations.Twitch.Auth;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -187,13 +188,35 @@ internal sealed class TwitchAccountManagerTests
 		manager.Dispose();
 	}
 
+	[Test]
+	public async Task An_account_without_the_chatters_permission_gets_its_own_reconnect_issue()
+	{
+		var withoutChatters = string.Join(' ',
+			TwitchScopes.All.Where(scope => scope != TwitchScopes.ModeratorReadChatters));
+		AddAccount("111", "streamer", displayName: "Streamer", scopes: withoutChatters);
+		AddAccount("222", "botaccount");
+
+		await _manager.ReloadAsync(_config);
+
+		var issues = _manager.Issues();
+		Assert.Multiple(() =>
+		{
+			Assert.That(issues, Has.Count.EqualTo(1), "only the account lacking the scope is reported");
+			Assert.That(issues[0].Id, Is.EqualTo("missing-chatters-scope:111"));
+			Assert.That(issues[0].Severity, Is.EqualTo(IntegrationIssueSeverity.Warning));
+			Assert.That(TestLocalization.Resolve(issues[0].Title), Does.Contain("Streamer"));
+			Assert.That(TestLocalization.Resolve(issues[0].ActionLabel), Is.EqualTo("Reconnect"));
+		});
+	}
+
 	private Guid AddAccount(
 		string userId,
 		string login,
 		string? displayName = null,
 		string? title = null,
 		DateTimeOffset? connectedAt = null,
-		DateTimeOffset? expiresAt = null)
+		DateTimeOffset? expiresAt = null,
+		string? scopes = null)
 	{
 		var values = new Dictionary<string, string?>(StringComparer.Ordinal)
 		{
@@ -201,7 +224,7 @@ internal sealed class TwitchAccountManagerTests
 			[TwitchConfigKeys.UserId] = userId,
 			[TwitchConfigKeys.Login] = login,
 			[TwitchConfigKeys.DisplayName] = displayName ?? login,
-			[TwitchConfigKeys.Scopes] = TwitchScopes.Requested,
+			[TwitchConfigKeys.Scopes] = scopes ?? TwitchScopes.Requested,
 			[TwitchConfigKeys.ExpiresAt] =
 				(expiresAt ?? DateTimeOffset.UtcNow.AddHours(4)).ToString("o", CultureInfo.InvariantCulture)
 		};

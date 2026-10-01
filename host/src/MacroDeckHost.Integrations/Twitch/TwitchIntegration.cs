@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.Twitch.Stats;
 using MacroDeckHost.Integrations.Twitch.Actions;
 using MacroDeckHost.Integrations.Twitch.Auth;
 using MacroDeck.Localization;
@@ -28,6 +29,7 @@ public sealed class TwitchIntegration
 		IMigrationProvider,
 		IWidgetTypeProvider,
 		ITwitchChatSinkConsumer,
+		ITwitchStatsSinkConsumer,
 		ITwitchChatModerator,
 		IDisposable
 {
@@ -45,7 +47,11 @@ public sealed class TwitchIntegration
 	private const string ChatDataSchema
 		= """{"type":"object","properties":{"account":{"type":"string"},"allowModeration":{"type":"boolean"},"backgroundColor":{"type":["string","null"],"description":"#rrggbb or transparent"}}}""";
 
+	private const string StatsDataSchema
+		= """{"type":"object","properties":{"account":{"type":"string"},"style":{"type":"string","enum":["overview","statsRow","liveRow","valueGraph","value"]},"metric":{"type":"string","enum":["viewers","chatters","followers","subscribers"]},"tiles":{"type":"array","items":{"type":"string","enum":["viewers","chatters","followers","subscribers"]}},"details":{"type":"array","items":{"type":"string","enum":["title","category","uptime"]}},"showThumbnail":{"type":"boolean"},"backgroundColor":{"type":["string","null"],"description":"#rrggbb or transparent"}}}""";
+
 	private ITwitchChatSink? _chatSink;
+	private ITwitchStatsSink? _statsSink;
 	private IVariableApi? _variables;
 	private IUserVariableApi? _userVariables;
 
@@ -114,6 +120,7 @@ public sealed class TwitchIntegration
 		_accounts.UseChatSink(_chatSink);
 		await _accounts.ReloadAsync(context.Config, new TwitchEventEmitter(context.Events));
 		_chatSink?.SetAccounts(_accounts.ChatAccounts());
+		_statsSink?.SetAccounts(_accounts.StatsAccounts());
 		_accounts.StartAll();
 		IsInitialized = true;
 	}
@@ -124,10 +131,13 @@ public sealed class TwitchIntegration
 		// token permanently dead, because Twitch already invalidated it when it issued the new one.
 		IsInitialized = false;
 		_chatSink?.SetAccounts([]);
+		_statsSink?.SetAccounts([]);
 		await _accounts.ShutdownAsync();
 	}
 
 	public void UseTwitchChatSink(ITwitchChatSink sink) => _chatSink = sink;
+
+	public void UseTwitchStatsSink(ITwitchStatsSink sink) => _statsSink = sink;
 
 	public Task<TwitchChatModerationResult> ModerateAsync(
 		string accountId,
@@ -145,10 +155,11 @@ public sealed class TwitchIntegration
 		}
 
 		await context.RegisterWidgetTypeAsync(ChatWidgetType(), cancellationToken);
+		await context.RegisterWidgetTypeAsync(StatsWidgetType(), cancellationToken);
 	}
 
 	public IReadOnlyList<WidgetTypeDescriptor> GetWidgetTypes()
-		=> _accounts.Connections.Count == 0 ? [] : [ChatWidgetType()];
+		=> _accounts.Connections.Count == 0 ? [] : [ChatWidgetType(), StatsWidgetType()];
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
 	{
@@ -191,7 +202,8 @@ public sealed class TwitchIntegration
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
 		=> Task.FromResult(issueId.StartsWith(TwitchAccountManager.TokenIssuePrefix, StringComparison.Ordinal) ||
-			issueId.StartsWith(TwitchAccountManager.MissingScopeIssuePrefix, StringComparison.Ordinal)
+			issueId.StartsWith(TwitchAccountManager.MissingScopeIssuePrefix, StringComparison.Ordinal) ||
+			issueId.StartsWith(TwitchAccountManager.MissingChattersScopeIssuePrefix, StringComparison.Ordinal)
 				? IssueResolution.Ok(AppStrings.Integrations.Twitch.Issues.ReconnectAccountResolution(),
 					IssueResolutionFollowUp.StartConfigFlow)
 				: IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue()));
@@ -204,6 +216,17 @@ public sealed class TwitchIntegration
 			AppStrings.Integrations.Twitch.ChatWidget.Description(),
 			DefaultData: """{"account":"","allowModeration":true}""",
 			DataSchema: ChatDataSchema,
+			HasConfiguration: true)
+		{
+			AppearanceProperties = [WidgetAppearanceProperty.BackgroundColor],
+		};
+
+	private static WidgetTypeDescriptor StatsWidgetType()
+		=> new(TwitchStatsWidgetType.LocalId,
+			AppStrings.Integrations.Twitch.StatsWidget.Name(),
+			AppStrings.Integrations.Twitch.StatsWidget.Description(),
+			DefaultData: $$"""{"account":"","style":"{{TwitchStatsWidgetType.DefaultStyle}}","metric":"{{TwitchStatsWidgetType.DefaultMetric}}","tiles":["viewers","chatters","followers"],"details":["title","category","uptime"],"showThumbnail":true}""",
+			DataSchema: StatsDataSchema,
 			HasConfiguration: true)
 		{
 			AppearanceProperties = [WidgetAppearanceProperty.BackgroundColor],

@@ -71,8 +71,10 @@ using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Application.Widgets.Icons;
 using MacroDeckHost.Application.Weather;
 using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.Twitch.Stats;
 using MacroDeckHost.Infrastructure.Twitch;
 using MacroDeckHost.Widgets.TwitchChat;
+using MacroDeckHost.Widgets.TwitchStats;
 using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Icons.Ownership;
 using MacroDeckHost.Application.Migration;
@@ -322,6 +324,12 @@ public class Startup
 		services.AddHttpClient(TwitchChatImageCache.HttpClientName)
 			.ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(15))
 			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
+		services.AddHttpClient(TwitchStreamThumbnailCache.HttpClientName)
+			.ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(15))
+			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
+		services.AddSingleton<TwitchStreamThumbnailCache>();
+		services.AddSingleton<ITwitchStreamThumbnails>(provider => provider.GetRequiredService<TwitchStreamThumbnailCache>());
+		services.AddSingleton<TwitchStatsWidgetUiProvider>();
 		services.AddSingleton<TwitchChatImageCache>();
 		services.AddSingleton<ITwitchChatImages>(provider => provider.GetRequiredService<TwitchChatImageCache>());
 		services.AddSingleton(provider => new TwitchChatHub(provider.GetRequiredService<TimeProvider>(),
@@ -330,6 +338,9 @@ public class Startup
 		services.AddSingleton<ITwitchChatSink>(provider => provider.GetRequiredService<TwitchChatHub>());
 		services.AddSingleton<ITwitchChatFeed>(provider => provider.GetRequiredService<TwitchChatHub>());
 		services.AddSingleton<IBuiltInIntegrationUiProvider, TwitchChatWidgetUiProvider>();
+		services.AddSingleton<TwitchStatsAccountsHub>();
+		services.AddSingleton<ITwitchStatsSink>(provider => provider.GetRequiredService<TwitchStatsAccountsHub>());
+		services.AddSingleton<ITwitchStatsAccounts>(provider => provider.GetRequiredService<TwitchStatsAccountsHub>());
 		services.AddSingleton<BuiltInScreenSaverProvider>();
 		services.AddSingleton<IBuiltInIntegrationUiProvider>(provider => provider.GetRequiredService<BuiltInScreenSaverProvider>());
 		services.AddSingleton<IScreenSaverProvider>(provider => provider.GetRequiredService<BuiltInScreenSaverProvider>());

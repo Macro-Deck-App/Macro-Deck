@@ -49,6 +49,36 @@ internal sealed class TwitchVariablesTests
 		});
 	}
 
+	[TestCase("twitch_streamer_chatter_count", "streamer", "chatter_count")]
+	[TestCase("twitch_my_bot_stream_thumbnail_url", "my_bot", "stream_thumbnail_url")]
+	public void The_stream_stats_variables_are_declared_under_the_convention_and_split_back(
+		string variable,
+		string key,
+		string name)
+	{
+		var declared = TwitchVariables.Declare(key).Select(definition => definition.Name);
+		var split = TwitchVariables.Split(variable);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(declared, Has.Member(variable));
+			Assert.That(split!.Value.VariableKey, Is.EqualTo(key));
+			Assert.That(split.Value.Name, Is.EqualTo(name));
+		});
+	}
+
+	[Test]
+	public void The_stream_stats_variables_read_from_the_account_state()
+	{
+		var state = new TwitchAccountState { ChatterCount = 42, StreamThumbnailUrl = "https://x/y.jpg" };
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(TwitchVariables.Read(_account, state, "chatter_count"), Is.EqualTo(42));
+			Assert.That(TwitchVariables.Read(_account, state, "stream_thumbnail_url"), Is.EqualTo("https://x/y.jpg"));
+		});
+	}
+
 	[TestCase("nonsense")]
 	[TestCase("twitch_streamer")]
 	[TestCase("twitch_is_live")]

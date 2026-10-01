@@ -17,6 +17,8 @@ internal static class TwitchVariables
 		"viewer_count",
 		"uptime_seconds",
 		"follower_count",
+		"chatter_count",
+		"stream_thumbnail_url",
 		"subscriber_count",
 		"subscriber_points",
 		"display_name",
@@ -87,6 +89,20 @@ internal static class TwitchVariables
 				with
 				{
 					DisplayName = AppStrings.Integrations.Twitch.Variables.FollowerCount(),
+					Configuration = configuration
+				},
+			VariableDefinition.Eager($"{prefix}chatter_count", VariableType.Numeric, 0, TimeSpan.FromSeconds(30))
+				with
+				{
+					DisplayName = AppStrings.Integrations.Twitch.Variables.ChatterCount(),
+					Configuration = configuration
+				},
+			VariableDefinition.Eager($"{prefix}stream_thumbnail_url",
+					VariableType.Text,
+					refreshInterval: TimeSpan.FromSeconds(30))
+				with
+				{
+					DisplayName = AppStrings.Integrations.Twitch.Variables.StreamThumbnailUrl(),
 					Configuration = configuration
 				},
 			VariableDefinition.Eager($"{prefix}subscriber_count", VariableType.Numeric, 0, TimeSpan.FromSeconds(60))
@@ -214,6 +230,8 @@ internal static class TwitchVariables
 			"viewer_count" => state.ViewerCount,
 			"uptime_seconds" => Uptime(state),
 			"follower_count" => state.FollowerCount,
+			"chatter_count" => state.ChatterCount,
+			"stream_thumbnail_url" => state.StreamThumbnailUrl,
 			"subscriber_count" => state.SubscriberCount,
 			"subscriber_points" => state.SubscriberPoints,
 			"display_name" => account.DisplayName,

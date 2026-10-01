@@ -67,6 +67,12 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 		CancellationToken cancellationToken)
 		=> CreateSubscriptionAsync(type, version, condition, sessionId, cancellationToken);
 
+	private static string? ResolveThumbnail(string? template)
+		=> string.IsNullOrEmpty(template)
+			? null
+			: template.Replace("{width}", "440", StringComparison.Ordinal)
+				.Replace("{height}", "248", StringComparison.Ordinal);
+
 	public Task<TwitchStreamInfo> GetStreamAsync(string broadcasterId, CancellationToken cancellationToken)
 		=> CallAsync(async token =>
 			{
@@ -79,7 +85,8 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 						stream.ViewerCount,
 						stream.Title,
 						stream.GameName,
-						stream.StartedAt);
+						stream.StartedAt,
+						ResolveThumbnail(stream.ThumbnailUrl));
 			},
 			cancellationToken);
 
@@ -100,6 +107,18 @@ internal sealed class TwitchHelixClient : ITwitchHelixClient
 		=> CallAsync<int?>(async token =>
 			{
 				var response = await _api.Helix.Channels.GetChannelFollowersAsync(broadcasterId,
+					first: 1,
+					accessToken: token);
+
+				return response?.Total;
+			},
+			cancellationToken);
+
+	public Task<int?> GetChatterCountAsync(string broadcasterId, CancellationToken cancellationToken)
+		=> CallAsync<int?>(async token =>
+			{
+				var response = await _api.Helix.Chat.GetChattersAsync(broadcasterId,
+					broadcasterId,
 					first: 1,
 					accessToken: token);
 

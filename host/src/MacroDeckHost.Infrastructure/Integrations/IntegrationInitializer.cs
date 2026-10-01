@@ -6,6 +6,7 @@ using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.Twitch.Stats;
 using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Infrastructure.Variables;
@@ -59,6 +60,7 @@ public sealed class IntegrationInitializer
 	private readonly IKnownAudioDeviceStore? _knownAudioDevices;
 	private readonly IVariablePollingInvalidationSignal? _pollingInvalidation;
 	private readonly ITwitchChatSink? _twitchChatSink;
+	private readonly ITwitchStatsSink? _twitchStatsSink;
 
 	private readonly ConcurrentDictionary<string, byte> _attempted = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, IntegrationEventPublisher> _eventPublishers = new(StringComparer.Ordinal);
@@ -91,9 +93,11 @@ public sealed class IntegrationInitializer
 		IMessageBroker messageBroker,
 		IKnownAudioDeviceStore? knownAudioDevices = null,
 		IVariablePollingInvalidationSignal? pollingInvalidation = null,
-		ITwitchChatSink? twitchChatSink = null)
+		ITwitchChatSink? twitchChatSink = null,
+		ITwitchStatsSink? twitchStatsSink = null)
 	{
 		_twitchChatSink = twitchChatSink;
+		_twitchStatsSink = twitchStatsSink;
 		_messageBroker = messageBroker;
 		_knownAudioDevices = knownAudioDevices;
 		_pollingInvalidation = pollingInvalidation;
@@ -131,7 +135,8 @@ public sealed class IntegrationInitializer
 			_refreshSignal,
 			_knownAudioDevices,
 			_pollingInvalidation,
-			_twitchChatSink);
+			_twitchChatSink,
+			_twitchStatsSink);
 
 	public async Task<IntegrationInitializationOutcome> InitializeAsync(
 		IIntegration integration,

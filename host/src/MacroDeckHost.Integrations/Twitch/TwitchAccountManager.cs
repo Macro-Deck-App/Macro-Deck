@@ -1,5 +1,6 @@
 using System.Globalization;
 using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.Twitch.Stats;
 using MacroDeckHost.Integrations.Twitch.Auth;
 using MacroDeckHost.Integrations.Twitch.Protocol;
 using MacroDeck.Sdk.Actions;
@@ -15,6 +16,7 @@ internal sealed class TwitchAccountManager : IDisposable
 	internal const string DuplicateIssuePrefix = "duplicate-account:";
 	internal const string TokenIssuePrefix = "token-invalid:";
 	internal const string MissingScopeIssuePrefix = "missing-scopes:";
+	internal const string MissingChattersScopeIssuePrefix = "missing-chatters-scope:";
 
 	private readonly Func<ITwitchOAuthClient> _oauthClientFactory;
 	private readonly Func<TwitchAccount, TwitchTokenProvider, ITwitchHelixClient> _helixFactory;
@@ -46,6 +48,9 @@ internal sealed class TwitchAccountManager : IDisposable
 
 	public IReadOnlyList<TwitchChatAccount> ChatAccounts()
 		=> [.. _connections.Select(c => new TwitchChatAccount(c.Account.UserId, c.Account.Label))];
+
+	public IReadOnlyList<TwitchStatsAccount> StatsAccounts()
+		=> [.. _connections.Select(c => new TwitchStatsAccount(c.Account.UserId, c.Account.Label, c.Account.VariableKey))];
 
 	public async Task ReloadAsync(
 		IIntegrationConfig config,
@@ -132,6 +137,19 @@ internal sealed class TwitchAccountManager : IDisposable
 				Id = MissingScopeIssuePrefix + connection.Account.UserId,
 				Title = AppStrings.Integrations.Twitch.Issues.MissingScopeTitle(account: connection.Account.Label),
 				Description = AppStrings.Integrations.Twitch.Issues.MissingScopeDescription(events: ids),
+				Severity = IntegrationIssueSeverity.Warning,
+				ActionLabel = AppStrings.Integrations.Twitch.Issues.ReconnectAction()
+			});
+		}
+
+		foreach (var connection in _connections.Where(c => c.MissesChattersScope))
+		{
+			issues.Add(new IntegrationIssue
+			{
+				Id = MissingChattersScopeIssuePrefix + connection.Account.UserId,
+				Title = AppStrings.Integrations.Twitch.Issues.MissingChattersScopeTitle(
+					account: connection.Account.Label),
+				Description = AppStrings.Integrations.Twitch.Issues.MissingChattersScopeDescription(),
 				Severity = IntegrationIssueSeverity.Warning,
 				ActionLabel = AppStrings.Integrations.Twitch.Issues.ReconnectAction()
 			});

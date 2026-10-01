@@ -182,6 +182,10 @@ internal sealed class TwitchEventDefinitionsTests
 			TwitchScopes.ModeratorManageBannedUsers
 		};
 
-		Assert.That(TwitchScopes.All.Except(usedByEvents.Concat(usedByActions), StringComparer.Ordinal), Is.Empty);
+		var usedByPolling = new[] { TwitchScopes.ModeratorReadChatters };
+
+		Assert.That(TwitchScopes.All.Except(usedByEvents.Concat(usedByActions).Concat(usedByPolling),
+				StringComparer.Ordinal),
+			Is.Empty);
 	}
 }

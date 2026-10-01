@@ -5,7 +5,8 @@ internal sealed record TwitchStreamInfo(
 	int? ViewerCount,
 	string? Title,
 	string? CategoryName,
-	DateTimeOffset? StartedAt);
+	DateTimeOffset? StartedAt,
+	string? ThumbnailUrl = null);
 
 internal sealed record TwitchChannelInfo(string? Title, string? CategoryId, string? CategoryName, string? Language);
 
