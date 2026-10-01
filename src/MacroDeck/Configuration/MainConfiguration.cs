@@ -74,6 +74,9 @@ public class MainConfiguration
     [JsonProperty("Privacy.SendAnonymousErrorReports")]
     public bool SendAnonymousErrorReports { get; set; } = true;
 
+    [JsonProperty("Hints.HideMacroDeck3Notice")]
+    public bool HideMacroDeck3Notice { get; set; }
+
     public void Save(string path)
     {
         var serializer = new JsonSerializer

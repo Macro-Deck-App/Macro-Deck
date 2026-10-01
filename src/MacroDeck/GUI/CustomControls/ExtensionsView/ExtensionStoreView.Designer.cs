@@ -43,6 +43,7 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             extensionsGrid = new ExtensionGrid();
             checkPlugins = new CheckBox();
             checkIconPacks = new CheckBox();
+            lblShutdownBadge = new Label();
             SuspendLayout();
             //
             // label1
@@ -128,10 +129,25 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
             checkIconPacks.UseVisualStyleBackColor = true;
             checkIconPacks.CheckedChanged += CheckIconPacks_CheckedChanged;
             //
+            // lblShutdownBadge
+            //
+            lblShutdownBadge.BackColor = Color.FromArgb(176, 96, 0);
+            lblShutdownBadge.Cursor = Cursors.Hand;
+            lblShutdownBadge.Font = new Font("Tahoma", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            lblShutdownBadge.ForeColor = Color.White;
+            lblShutdownBadge.Location = new Point(9, 140);
+            lblShutdownBadge.Name = "lblShutdownBadge";
+            lblShutdownBadge.Padding = new Padding(8);
+            lblShutdownBadge.Size = new Size(161, 170);
+            lblShutdownBadge.TabIndex = 8;
+            lblShutdownBadge.UseMnemonic = false;
+            lblShutdownBadge.Click += LblShutdownBadge_Click;
+            //
             // ExtensionStoreView
             //
             AutoScaleMode = AutoScaleMode.None;
             BackColor = Color.FromArgb(45, 45, 45);
+            Controls.Add(lblShutdownBadge);
             Controls.Add(checkIconPacks);
             Controls.Add(checkPlugins);
             Controls.Add(extensionsGrid);
@@ -155,5 +171,6 @@ namespace SuchByte.MacroDeck.GUI.CustomControls.ExtensionsView
         private ExtensionGrid extensionsGrid;
         private CheckBox checkPlugins;
         private CheckBox checkIconPacks;
+        private Label lblShutdownBadge;
     }
 }
