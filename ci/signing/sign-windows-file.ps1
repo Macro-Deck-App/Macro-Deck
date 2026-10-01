@@ -42,6 +42,10 @@ if (-not $java -or -not $jar) {
 	throw "SSL.com CodeSignTool was not found under $env:CODE_SIGN_TOOL_PATH"
 }
 
+# The bundled JDK's cacerts can lag behind the CA chain SSL.com serves (PKIX path building
+# failed), so trust the runner's Windows certificate store instead.
+$javaTrust = @('-Djavax.net.ssl.trustStoreType=Windows-ROOT', '-Djavax.net.ssl.trustStore=NONE')
+
 $manifest = Join-Path $env:RUNNER_TEMP 'macro-deck-esigner-signatures.txt'
 $completedRoles = if (Test-Path -LiteralPath $manifest) {
 	@(Get-Content -LiteralPath $manifest | ForEach-Object { ($_ -split '\|', 2)[0] })
@@ -99,7 +103,7 @@ if ($file.Extension -ieq '.tmp') {
 # only reads the credential, so it proves the setup without spending quota.
 if ($env:ESIGNER_DRY_RUN -eq 'true') {
 	Write-Host "[sign] Dry run: checking eSigner credential instead of signing $role executable: $($file.FullName)"
-	$output = @(& $java.FullName -Xmx1024M -jar $jar.FullName credential_info `
+	$output = @(& $java.FullName -Xmx1024M @javaTrust -jar $jar.FullName credential_info `
 		"-username=$env:ES_USERNAME" `
 		"-password=$env:ES_PASSWORD" `
 		"-credential_id=$env:ES_CREDENTIAL_ID" 2>&1 | ForEach-Object { "$_" })
@@ -117,7 +121,7 @@ if ($env:ESIGNER_DRY_RUN -eq 'true') {
 }
 
 Write-Host "[sign] Signing $role executable: $($file.FullName)"
-& $java.FullName -Xmx1024M -jar $jar.FullName sign `
+& $java.FullName -Xmx1024M @javaTrust -jar $jar.FullName sign `
 	"-username=$env:ES_USERNAME" `
 	"-password=$env:ES_PASSWORD" `
 	"-credential_id=$env:ES_CREDENTIAL_ID" `
