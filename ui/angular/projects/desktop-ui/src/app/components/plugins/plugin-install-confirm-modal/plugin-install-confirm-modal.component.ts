@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild, computed, inject, signal } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { AppStrings, PLUGIN_WARNING_ARTIFACT_UNSIGNED, PLUGIN_WARNING_SIGNATURE_UNVERIFIED, PLUGIN_WARNING_USES_ADB, PluginInstallActionResponse, PluginInstallWarning, PluginSignatureVerification } from '@macro-deck/runtime';
+import { AppStrings, AppStringsKey, PLUGIN_WARNING_ARTIFACT_UNSIGNED, PLUGIN_WARNING_SIGNATURE_UNVERIFIED, PLUGIN_WARNING_USES_ADB, PluginInstallActionResponse, PluginInstallWarning, PluginSignatureVerification } from '@macro-deck/runtime';
 import { ButtonComponent, LocalizationService, ModalComponent, TranslatePipe, dismissModal } from '@shared';
+import { BackupService } from '../../../services/backup.service';
 import { LoadingStateComponent } from '../../feedback/loading-state/loading-state.component';
 
 const TRUST_REFUSALS: Record<string, string> = {
@@ -157,7 +158,7 @@ interface WarningEntry {
           [loading]="busy"
           [disabled]="loading || blockedReason() !== null || !consentSatisfied() || busy"
           (click)="onConfirm()">
-          {{ 'macrodeck.app:Plugins.InstallButton' | translate }}
+          {{ buttonLabelKey() | translate }}
         </shared-button>
       </div>
     </shared-modal>
@@ -186,6 +187,7 @@ export class PluginInstallConfirmModalComponent {
 
   private readonly sanitizer = inject(DomSanitizer);
   private readonly localization = inject(LocalizationService);
+  private readonly backup = inject(BackupService);
 
   protected readonly inspection = signal<PluginInstallActionResponse | null>(null);
 
@@ -303,6 +305,15 @@ export class PluginInstallConfirmModalComponent {
         blocking: warning.severity === 'blocking'
       }))
   );
+
+  protected buttonLabelKey(): AppStringsKey {
+    if (!this.busy) {
+      return AppStrings.Plugins.InstallButton;
+    }
+
+    const backingUp = this.backup.running() && this.backup.operation()?.trigger === 'BeforePluginUpdate';
+    return backingUp ? AppStrings.Store.BackingUpEllipsis : AppStrings.Store.InstallingEllipsis;
+  }
 
   protected onUnsignedAcceptedChange(event: Event): void {
     this.unsignedAccepted.set((event.target as HTMLInputElement).checked);
