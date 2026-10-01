@@ -9347,6 +9347,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Twitch.Actions.SetChatMode.OnLabel" xml:space="preserve">
     <value>Aktiv</value>
   </data>
+  <data name="Integrations.Twitch.Actions.SetChatMode.ToggleDescription" xml:space="preserve">
+    <value>Schaltet den Modus auf das Gegenteil seines aktuellen Zustands auf Twitch um. Die Einstellung Aktiv wird ignoriert.</value>
+  </data>
+  <data name="Integrations.Twitch.Actions.SetChatMode.ToggleLabel" xml:space="preserve">
+    <value>Umschalten</value>
+  </data>
   <data name="Integrations.Twitch.Actions.SetRedemptionStatus.Description" xml:space="preserve">
     <value>Markiert eine Kanalpunkte-Einlösung als abgeschlossen oder erstattet sie. Twitch erlaubt dies nur für Belohnungen, die von dieser Anwendung erstellt wurden – im Twitch-Dashboard erstellte Belohnungen können nicht über die API bearbeitet werden.</value>
   </data>

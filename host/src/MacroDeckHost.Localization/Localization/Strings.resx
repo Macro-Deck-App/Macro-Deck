@@ -9350,6 +9350,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Twitch.Actions.SetChatMode.OnLabel" xml:space="preserve">
     <value>On</value>
   </data>
+  <data name="Integrations.Twitch.Actions.SetChatMode.ToggleDescription" xml:space="preserve">
+    <value>Switches the mode to the opposite of its current state on Twitch. The On setting is ignored.</value>
+  </data>
+  <data name="Integrations.Twitch.Actions.SetChatMode.ToggleLabel" xml:space="preserve">
+    <value>Toggle</value>
+  </data>
   <data name="Integrations.Twitch.Actions.SetRedemptionStatus.Description" xml:space="preserve">
     <value>Marks a channel point redemption as completed or refunds it. Twitch only allows this for rewards created by this application - rewards made in the Twitch dashboard cannot be resolved through the API.</value>
   </data>

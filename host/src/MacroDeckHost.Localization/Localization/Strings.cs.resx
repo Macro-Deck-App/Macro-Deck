@@ -9349,6 +9349,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Twitch.Actions.SetChatMode.OnLabel" xml:space="preserve">
     <value>Zapnuto</value>
   </data>
+  <data name="Integrations.Twitch.Actions.SetChatMode.ToggleDescription" xml:space="preserve">
+    <value>Přepne režim na opak jeho aktuálního stavu na Twitchi. Nastavení Zapnuto se ignoruje.</value>
+  </data>
+  <data name="Integrations.Twitch.Actions.SetChatMode.ToggleLabel" xml:space="preserve">
+    <value>Přepnout</value>
+  </data>
   <data name="Integrations.Twitch.Actions.SetRedemptionStatus.Description" xml:space="preserve">
     <value>Označí uplatnění kanálových bodů jako dokončené, nebo body vrátí. Twitch to umožňuje pouze u odměn vytvořených touto aplikací - odměny vytvořené na Twitch dashboardu nelze přes API vyřešit.</value>
   </data>
