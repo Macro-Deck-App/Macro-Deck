@@ -38,6 +38,7 @@ public sealed class PluginSessionView : ICapabilityInvoker
 		VideoStreamProvider = new VideoStreamProviderTestClient(this);
 		Issues = new IssuesTestClient(this);
 		Messaging = new MessagingTestClient(this);
+		Ui = new UiTestClient(this, connection);
 	}
 
 	/// <summary>The session id the host issued, stable across a resume.</summary>
@@ -102,6 +103,9 @@ public sealed class PluginSessionView : ICapabilityInvoker
 
 	/// <summary>The <c>messaging</c> capability.</summary>
 	public MessagingTestClient Messaging { get; }
+
+	/// <summary>The <c>ui</c> capability: developer previews.</summary>
+	public UiTestClient Ui { get; }
 
 	/// <summary>
 	/// Sends a <c>capability.invoke</c> and returns exactly what the plugin replied with - a real
