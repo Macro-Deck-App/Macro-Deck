@@ -274,6 +274,45 @@ public sealed class VariableBindingService : IVariableBindingService
 		}
 	}
 
+	public async Task<Result<VariableBindingError>> RemoveIntegrationAsync(
+		string integrationId,
+		CancellationToken cancellationToken = default)
+	{
+		await _mutationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+		try
+		{
+			var bindingsRemoved = true;
+			if (!_bindingStore.TryLoad(out var current))
+			{
+				bindingsRemoved = false;
+			}
+			else
+			{
+				var remaining = current
+					.Where(b => !string.Equals(b.IntegrationId, integrationId, StringComparison.Ordinal))
+					.ToList();
+				bindingsRemoved = remaining.Count == current.Count || _bindingStore.Save(remaining);
+			}
+
+			foreach (var variable in _registry.GetByOwnerIntegration(integrationId))
+			{
+				_sharedVariables.Forget(variable);
+				await _variableService.DeleteIntegrationVariable(integrationId, variable.Id).ConfigureAwait(false);
+			}
+
+			await _coordinator.ReconcileAsync(cancellationToken).ConfigureAwait(false);
+
+			return bindingsRemoved
+				? Result.Ok<VariableBindingError>()
+				: Fail(VariableBindingError.StoreUnavailable,
+					"Could not remove the persisted bindings; they will be restored at the next start");
+		}
+		finally
+		{
+			_mutationLock.Release();
+		}
+	}
+
 	public IReadOnlyList<VariableBinding> GetBindings() => _bindingStore.Load();
 
 	public VariableBinding? FindByVariableId(Guid variableId) => _lookup.FindByVariableId(variableId);

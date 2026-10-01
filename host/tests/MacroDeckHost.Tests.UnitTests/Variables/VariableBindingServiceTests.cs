@@ -1,3 +1,5 @@
+using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Enums;
 using SdkVariableType = MacroDeck.Sdk.Variables.VariableType;
 using VariableDefinition = MacroDeck.Sdk.Variables.VariableDefinition;
@@ -238,6 +240,71 @@ internal sealed class VariableBindingServiceTests
 			Assert.That(harness.Registry.IsAvailable(variable!.Id), Is.True);
 			Assert.That(variable.Value, Is.EqualTo("42"));
 			Assert.That(provider.GetValueCalls, Does.Not.Contain(BrightnessId));
+		});
+	}
+
+	[Test]
+	public async Task Removing_an_integration_removes_its_declared_and_bound_variables_and_bindings_and_nothing_else()
+	{
+		const string otherId = "com.example.other";
+		var provider = new FakeVariableProviderIntegration { Id = IntegrationId };
+		provider.AddDefinition(Brightness);
+		var other = new FakeVariableProviderIntegration { Id = otherId };
+		other.AddDefinition(Brightness);
+		var harness = new VariableCatalogHarness(provider, other);
+		var service = harness.BindingService;
+
+		var bound = await service.BindAsync(IntegrationId, BrightnessId, null, null);
+		var otherBound = await service.BindAsync(otherId, BrightnessId, null, null);
+		var declared = await harness.VariableService.CreateIntegrationVariable(IntegrationId,
+			"declared_one",
+			VariableScope.Global,
+			null,
+			VariableType.Text,
+			"x",
+			null);
+		var user = await harness.VariableService.CreateUserVariable("mine",
+			VariableScope.Global,
+			null,
+			VariableType.Text,
+			"y",
+			null);
+		harness.Mediator.Published.Clear();
+
+		var removed = await service.RemoveIntegrationAsync(IntegrationId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(removed.Success, Is.True);
+			Assert.That(harness.Registry.GetById(bound.Data!.Id), Is.Null);
+			Assert.That(harness.Registry.GetById(declared.Data!.Id), Is.Null);
+			Assert.That(harness.Registry.GetById(otherBound.Data!.Id), Is.Not.Null);
+			Assert.That(harness.Registry.GetById(user.Data!.Id), Is.Not.Null);
+			Assert.That(harness.BindingStore.Load().Select(b => b.IntegrationId), Is.EqualTo(new[] { otherId }));
+			Assert.That(harness.Mediator.Published.OfType<VariableDeletedNotification>().Count(), Is.EqualTo(2));
+		});
+
+		await harness.BindingBackgroundService.RestoreBindingsAsync(CancellationToken.None);
+		Assert.That(harness.Registry.GetByOwnerIntegration(IntegrationId), Is.Empty,
+			"a removed integration's binding must not come back on restart");
+	}
+
+	[Test]
+	public async Task Removing_an_integration_still_removes_its_live_variables_when_the_binding_store_is_unreadable()
+	{
+		var provider = new FakeVariableProviderIntegration { Id = IntegrationId };
+		provider.AddDefinition(Brightness);
+		var harness = new VariableCatalogHarness(provider);
+		var bound = await harness.BindingService.BindAsync(IntegrationId, BrightnessId, null, null);
+		harness.BindingStore.FailNextLoad = true;
+
+		var removed = await harness.BindingService.RemoveIntegrationAsync(IntegrationId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(removed.Success, Is.False);
+			Assert.That(removed.Error, Is.EqualTo(VariableBindingError.StoreUnavailable));
+			Assert.That(harness.Registry.GetById(bound.Data!.Id), Is.Null);
 		});
 	}
 }
