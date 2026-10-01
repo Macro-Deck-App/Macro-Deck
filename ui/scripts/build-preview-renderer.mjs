@@ -1,8 +1,8 @@
 // Bundles the framework-free UI runtime and its styles into the two files the plugin CLI embeds to render
 // [UiPreview] scenarios. Deterministic: the output only changes when ui/runtime or preview-renderer/ does.
 import { createRequire } from 'node:module';
-import { mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
-import { gzipSync } from 'node:zlib';
+import { existsSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { gunzipSync, gzipSync } from 'node:zlib';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -25,7 +25,17 @@ await esbuild.build({
 	logLevel: 'warning',
 });
 
+const check = process.argv.includes('--check');
+let stale = false;
 for (const [name, source] of [['preview-renderer.js', 'preview-renderer.js'], ['preview-renderer.css', 'preview-renderer-css.css']]) {
-	writeFileSync(path.join(target, `${name}.gz`), gzipSync(readFileSync(path.join(scratch, source)), { level: 9 }));
+	const fresh = readFileSync(path.join(scratch, source));
+	const file = path.join(target, `${name}.gz`);
+	// The bundle is compared decompressed: the compressed bytes depend on the zlib build.
+	if (check) stale ||= !existsSync(file) || !gunzipSync(readFileSync(file)).equals(fresh);
+	else writeFileSync(file, gzipSync(fresh, { level: 9 }));
 }
 rmSync(scratch, { recursive: true, force: true });
+if (stale) {
+	console.error('The embedded preview renderer is stale: run npm run build:preview-renderer in ui and commit the result.');
+	process.exit(1);
+}
