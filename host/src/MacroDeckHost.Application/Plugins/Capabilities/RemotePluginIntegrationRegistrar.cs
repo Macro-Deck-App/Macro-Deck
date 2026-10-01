@@ -305,6 +305,7 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 
 	private async Task RemoveVariablesAsync(string pluginId, CancellationToken cancellationToken)
 	{
+		var loggedId = pluginId.Replace("\r", string.Empty).Replace("\n", string.Empty);
 		try
 		{
 			await using var scope = _serviceScopeFactory.CreateAsyncScope();
@@ -313,13 +314,13 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 			if (!result.Success)
 			{
 				_logger.Warning("Removed the variables of uninstalled plugin '{PluginId}' but not all of its bindings: {Error}",
-					pluginId,
+					loggedId,
 					result.ErrorMessage);
 			}
 		}
 		catch (Exception exception) when (exception is not OutOfMemoryException && !cancellationToken.IsCancellationRequested)
 		{
-			_logger.Error(exception, "Failed to remove the variables of uninstalled plugin '{PluginId}'", pluginId);
+			_logger.Error(exception, "Failed to remove the variables of uninstalled plugin '{PluginId}'", loggedId);
 		}
 	}
 
