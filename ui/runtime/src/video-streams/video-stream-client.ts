@@ -9,8 +9,6 @@ import {
   VideoStreamSessionClosedEvent,
   VideoStreamSessionReason,
   VideoStreamSessionState,
-  VideoStreamSignalEvent,
-  VideoStreamSignalMessage,
 } from '../protocol/messages/video-stream';
 
 export interface VideoStreamPort {
@@ -25,8 +23,6 @@ export interface VideoStreamPort {
 
 export interface VideoStreamSessionListener {
   changed(session: VideoStreamSession): void;
-
-  signal(signal: VideoStreamSignalMessage): void;
 
   closed(reason: VideoStreamSessionReason, error: VideoStreamErrorCode | null, message: LocalizedText | null): void;
 }
@@ -62,11 +58,6 @@ export class VideoStreamSession {
     if (this.wantVisible === visible) return;
     this.wantVisible = visible;
     this.client.reconcile(this);
-  }
-
-  signal(signal: VideoStreamSignalMessage): Promise<void> {
-    if (this.closed || this.sessionId === null) return Promise.resolve();
-    return this.client.request<void>('SignalVideoStream', { sessionId: this.sessionId, signal }).catch(() => undefined);
   }
 
   close(): void {
@@ -235,7 +226,6 @@ export class VideoStreamClient {
         this.catalogOutdated();
         return;
       case 'VideoStreamSessionChangedEvent':
-      case 'VideoStreamSignalEvent':
       case 'VideoStreamSessionClosedEvent':
         this.route(type, payload as { sessionId?: string });
         return;
@@ -266,8 +256,6 @@ export class VideoStreamClient {
       }
       session.listener.changed(session);
       this.reconcile(session);
-    } else if (type === 'VideoStreamSignalEvent') {
-      session.listener.signal((payload as VideoStreamSignalEvent).signal);
     } else {
       const closed = payload as VideoStreamSessionClosedEvent;
       this.live.delete(session);

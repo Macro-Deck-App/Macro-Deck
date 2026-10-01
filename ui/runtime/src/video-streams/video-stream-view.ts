@@ -4,10 +4,9 @@ import {
   VideoStreamErrorCode,
   VideoStreamItem,
   VideoStreamSessionReason,
-  VideoStreamSignalMessage,
 } from '../protocol/messages/video-stream';
 import { VideoStreamSession, VideoStreamSurface } from './video-stream-client';
-import { createVideoPlayer, playableTransports, VideoPlayer, VideoStreamTransports } from './video-players';
+import { createVideoPlayer, playableTransports, VideoPlayer } from './video-players';
 
 export interface VideoStreamReference {
   provider: string;
@@ -25,7 +24,7 @@ export const VIDEO_RETRY_MIN_MS = 1_000;
 export const VIDEO_RETRY_MAX_MS = 30_000;
 
 const WAIT_FOR_CATALOG: ReadonlySet<string> = new Set([
-  'unknown_provider', 'unknown_stream', 'transport_not_accepted', 'signaling_unsupported',
+  'unknown_provider', 'unknown_stream', 'transport_not_accepted',
 ]);
 
 type Waiting = 'nothing' | 'visible' | 'catalog' | 'connection' | 'backoff';
@@ -197,10 +196,7 @@ export class VideoStreamView {
     if (this.player !== null && !this.player.playing()) {
       this.shown = false;
       this.setStatus('connecting');
-      if (this.session.state === 'active') {
-        if (this.player.transport === VideoStreamTransports.WebRtc) this.reopen();
-        else this.startPlayer();
-      }
+      if (this.session.state === 'active') this.startPlayer();
     }
   }
 
@@ -253,7 +249,6 @@ export class VideoStreamView {
     this.setStatus('connecting');
     this.session = surface.client.open(reference.provider, reference.id, transports, {
       changed: session => this.sessionChanged(session),
-      signal: signal => this.player?.signal(signal),
       closed: (reason, error, message) => this.sessionClosed(reason, error, message),
     });
   }
@@ -288,10 +283,6 @@ export class VideoStreamView {
       if (this.shown) this.setStatus('playing');
       return;
     }
-    if (description.transport === VideoStreamTransports.WebRtc && signature === this.negotiated) {
-      this.reopen();
-      return;
-    }
     this.startPlayer();
   }
 
@@ -309,7 +300,6 @@ export class VideoStreamView {
       firstFrame: () => this.firstFrame(),
       resized: () => this.layout(),
       failed: () => this.failTransport(transport),
-      sendSignal: (signal: VideoStreamSignalMessage) => void this.session?.signal(signal),
     });
     if (this.player) {
       this.player.element.className = 'widget-video-stream-media';
@@ -340,11 +330,6 @@ export class VideoStreamView {
     this.scheduleRetry('unavailable', null);
   }
 
-  private reopen(): void {
-    this.closeSession();
-    this.pump();
-  }
-
   private sessionClosed(reason: VideoStreamSessionReason, error: VideoStreamErrorCode | null, message: LocalizedText | null): void {
     this.session = null;
     this.disposePlayer();
@@ -368,7 +353,7 @@ export class VideoStreamView {
     if (code !== null && WAIT_FOR_CATALOG.has(code)) {
       this.waiting = 'catalog';
       this.statusMessage = message;
-      this.setStatus(code === 'transport_not_accepted' || code === 'signaling_unsupported' ? 'unsupported'
+      this.setStatus(code === 'transport_not_accepted' ? 'unsupported'
         : code === 'unknown_provider' ? 'no-source' : 'not-found');
       return;
     }
@@ -545,6 +530,6 @@ function sameReference(a: VideoStreamReference | null, b: VideoStreamReference |
   return a === b || (a !== null && b !== null && a.provider === b.provider && a.id === b.id);
 }
 
-function describe(description: { transport: string; url?: string; payload?: string }): string {
-  return `${description.transport}\n${description.url ?? ''}\n${description.payload ?? ''}`;
+function describe(description: { transport: string; url?: string }): string {
+  return `${description.transport}\n${description.url ?? ''}`;
 }

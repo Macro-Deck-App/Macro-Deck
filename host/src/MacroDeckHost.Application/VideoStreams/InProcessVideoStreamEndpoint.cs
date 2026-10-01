@@ -1,4 +1,5 @@
 using MacroDeck.Plugin.Hosting.Capabilities.VideoStreamProvider;
+using MacroDeck.Plugin.Protocol.Capabilities.VideoStreamProvider;
 using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Sdk.Identity;
 using MacroDeck.Sdk.VideoStreams;
@@ -168,7 +169,7 @@ internal sealed class InProcessVideoStreamEndpoint : IVideoStreamEndpoint
 		switch (completion.Outcome)
 		{
 			case VideoStreamOpenOutcome.Open when problem is null:
-				return new VideoStreamOpenResult(description, registration.RegistrationId);
+				return new VideoStreamOpenResult(VideoStreamWire.ToDto(description), registration.RegistrationId);
 
 			case VideoStreamOpenOutcome.Open:
 				_logger.Warning("Video stream provider {ProviderId} opened a session with an unusable description: {Problem}",
@@ -205,7 +206,7 @@ internal sealed class InProcessVideoStreamEndpoint : IVideoStreamEndpoint
 			.ConfigureAwait(false);
 	}
 
-	public async Task<VideoStreamSessionDescription?> ResumeAsync(string providerId,
+	public async Task<VideoStreamSessionDescriptionDto?> ResumeAsync(string providerId,
 		string sessionId,
 		Func<bool> proceed,
 		CancellationToken cancellationToken)
@@ -213,29 +214,7 @@ internal sealed class InProcessVideoStreamEndpoint : IVideoStreamEndpoint
 		var provider = ResolveOpenSession(providerId, sessionId, proceed);
 		var description = await CallAsync(token => provider.ResumeAsync(sessionId, token), cancellationToken)
 			.ConfigureAwait(false);
-		if (description is not null && VideoStreamWire.ValidateDescription(description) is { } problem)
-		{
-			throw Rejected(VideoStreamErrorCode.Failed, problem);
-		}
-
-		return description;
-	}
-
-	public async Task<VideoStreamSignal?> SignalAsync(string providerId,
-		string sessionId,
-		VideoStreamSignal signal,
-		Func<bool> proceed,
-		CancellationToken cancellationToken)
-	{
-		var provider = ResolveOpenSession(providerId, sessionId, proceed);
-		var answer = await CallAsync(token => provider.SignalAsync(sessionId, signal, token), cancellationToken)
-			.ConfigureAwait(false);
-		if (answer is not null && VideoStreamWire.ValidateSignal(answer) is { } problem)
-		{
-			throw Rejected(VideoStreamErrorCode.Failed, problem);
-		}
-
-		return answer;
+		return description is null ? null : VideoStreamWire.ToDto(description);
 	}
 
 	public async Task CloseAsync(string providerId,
@@ -391,12 +370,12 @@ internal sealed class InProcessVideoStreamEndpoint : IVideoStreamEndpoint
 		VideoStreamSessionDescription? description,
 		IReadOnlyList<string> accepted)
 	{
-		if (VideoStreamWire.ValidateDescription(description) is { } problem)
+		if (description is null)
 		{
-			return (VideoStreamErrorCode.Failed, problem);
+			return (VideoStreamErrorCode.Failed, "A session description must not be null.");
 		}
 
-		return accepted.Contains(description!.Transport, StringComparer.Ordinal)
+		return accepted.Contains(description.Transport, StringComparer.Ordinal)
 			? (VideoStreamErrorCode.Failed, null)
 			: (VideoStreamErrorCode.TransportNotAccepted,
 				$"The provider answered with transport '{description.Transport}', which the consumer does not accept.");

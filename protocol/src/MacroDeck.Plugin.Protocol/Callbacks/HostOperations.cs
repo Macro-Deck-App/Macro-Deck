@@ -304,12 +304,10 @@ public static class HostOperations
 
 		public const string SessionUpdate = "session-update";
 
-		public const string SessionSignal = "session-signal";
-
 		public const string SessionClose = "session-close";
 
 		public static readonly IReadOnlyList<string> All =
-			[ProvidersChanged, StreamsChanged, SessionUpdate, SessionSignal, SessionClose];
+			[ProvidersChanged, StreamsChanged, SessionUpdate, SessionClose];
 	}
 
 	/// <summary>The <c>event-bindings</c> host api is push-only, so it declares no operations.</summary>

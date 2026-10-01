@@ -2933,17 +2933,11 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.VideoStream.SessionLimitReached" xml:space="preserve">
     <value>Too many videos are open at the same time.</value>
   </data>
-  <data name="Errors.VideoStream.PayloadTooLarge" xml:space="preserve">
-    <value>The video connection data is too large.</value>
-  </data>
   <data name="Errors.VideoStream.StreamUnavailable" xml:space="preserve">
     <value>This video stream is unavailable right now.</value>
   </data>
   <data name="Errors.VideoStream.TransportNotAccepted" xml:space="preserve">
     <value>This video stream cannot be played on this device.</value>
-  </data>
-  <data name="Errors.VideoStream.SignalingUnsupported" xml:space="preserve">
-    <value>The video source does not support this type of connection.</value>
   </data>
   <data name="Errors.VideoStream.ProviderUnavailable" xml:space="preserve">
     <value>The video source cannot be reached right now.</value>

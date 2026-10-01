@@ -202,7 +202,9 @@ What did **not** need a major:
 - [Video streams](/features/video-streams/) added a capability kind, `video-stream-provider`, a host API,
   `video-streams`, and `video_stream_` error reasons under the existing `CAPABILITY_UNAVAILABLE` code, all
   within major `3`. An older host rejects the kind non-fatally, and a plugin that does not implement
-  `IVideoStreamIntegration` never declares it.
+  `IVideoStreamIntegration` never declares it. The surface was reshaped before any release: Macro Deck now
+  relays the media itself, and signaling, the consumer context and the `webrtc` and `whep` transports are
+  gone. A development build written against the earlier, unreleased shape must be updated.
 - Localization moved the **UI model** major, not this one - see [the localization major](#the-localization-major).
 
 **Negotiation happens exactly once**, in `POST /api/plugins/sessions`:

@@ -1,3 +1,4 @@
+using System.Globalization;
 using MacroDeckHost.Application.Logging;
 
 namespace MacroDeckHost.Tests.UnitTests.Logging;
@@ -14,6 +15,25 @@ public class LogRedactorTests
 		var redacted = LogRedactor.Redact("?id=abc&ticket=one-time-secret");
 
 		Assert.That(redacted, Is.EqualTo("?id=abc&ticket=***"));
+	}
+
+	[TestCase("GET /api/video-streams/relay/{0}/live/index.m3u8?x=1", "GET /api/video-streams/relay/***/live/index.m3u8?x=1")]
+	[TestCase("with value 'api/video-streams/relay/{0}/cam.jpg'", "with value 'api/video-streams/relay/***/cam.jpg'")]
+	[TestCase("GET /api/video-streams/relay//{0}/live/seg1.ts", "GET /api/video-streams/relay//***/live/seg1.ts")]
+	[TestCase("GET /api/video-streams//relay/{0}/live/seg1.ts", "GET /api/video-streams//relay/***/live/seg1.ts")]
+	[TestCase("GET //api///video-streams//relay///{0}/live/seg1.ts", "GET //api///video-streams//relay///***/live/seg1.ts")]
+	[TestCase("GET /API/Video-Streams/Relay/{0}", "GET /API/Video-Streams/Relay/***")]
+	public void Redacts_The_Video_Stream_Relay_Token_Whatever_The_Slashes_Around_It(string line, string expected)
+	{
+		const string token = "qUIut8suF2-e0poJliO7Oe3o5ahQd78HJN9UJWNKXz4";
+
+		var redacted = LogRedactor.Redact(string.Format(CultureInfo.InvariantCulture, line, token));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(redacted, Is.EqualTo(expected));
+			Assert.That(redacted, Does.Not.Contain(token));
+		});
 	}
 
 	[Test]

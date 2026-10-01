@@ -13,7 +13,6 @@ public static class VideoStreamMapping
 			VideoStreamErrorCode.StreamUnavailable => VideoStreamError.StreamUnavailable,
 			VideoStreamErrorCode.TransportNotAccepted => VideoStreamError.TransportNotAccepted,
 			VideoStreamErrorCode.CapacityReached => VideoStreamError.Busy,
-			VideoStreamErrorCode.SignalingUnsupported => VideoStreamError.SignalingUnsupported,
 			VideoStreamErrorCode.Busy => VideoStreamError.Busy,
 			VideoStreamErrorCode.Unsupported => VideoStreamError.ProviderUnavailable,
 			_ => VideoStreamError.Failed

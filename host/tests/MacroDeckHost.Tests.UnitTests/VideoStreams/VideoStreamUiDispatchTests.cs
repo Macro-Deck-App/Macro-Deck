@@ -35,14 +35,14 @@ internal sealed class VideoStreamUiDispatchTests : UiSessionFixture
 			TaskCreationOptions.RunContinuationsAsynchronously);
 		_provider.OnOpen = (request, _) => request.StreamId == "hung"
 			? _hungOpen.Task
-			: Task.FromResult(new VideoStreamSessionDescription("hls", "https://camera.local/" + request.StreamId));
+			: Task.FromResult(VideoStreamSessionDescription.Hls("https://camera.local/" + request.StreamId));
 		await _world.Context().RegisterProviderAsync(_provider);
 	}
 
 	[TearDown]
 	public void TearDownWorld()
 	{
-		_hungOpen.TrySetResult(new VideoStreamSessionDescription("hls", "https://camera.local/late"));
+		_hungOpen.TrySetResult(VideoStreamSessionDescription.Hls("https://camera.local/late"));
 		_world.Dispose();
 	}
 
@@ -113,24 +113,6 @@ internal sealed class VideoStreamUiDispatchTests : UiSessionFixture
 	}
 
 	[Test]
-	public async Task A_signal_request_without_a_signal_is_refused_as_malformed_not_as_too_large()
-	{
-		using var dispatcher = DispatcherFor("ui-1");
-		var open = await OpenAsync(dispatcher, "main");
-		await _world.WaitForActiveAsync(open.SessionId);
-
-		var refused = Assert.ThrowsAsync<UiWebSocketDispatchException>(() => DispatchAsync(dispatcher,
-			"SignalVideoStream",
-			new SignalVideoStreamRequest { SessionId = open.SessionId }));
-
-		Assert.Multiple(() =>
-		{
-			Assert.That(refused!.Code, Is.EqualTo("failed"));
-			Assert.That(_provider.Signals, Is.Empty);
-		});
-	}
-
-	[Test]
 	public void Every_refusal_has_its_own_text_in_every_shipped_language()
 	{
 		string[] cultures = ["en", "de", "it", "cs", "pl", "es", "fr"];
@@ -182,7 +164,7 @@ internal sealed class VideoStreamUiDispatchTests : UiSessionFixture
 	{
 		var result = await DispatchAsync(dispatcher,
 			"OpenVideoStream",
-			new OpenVideoStreamRequest { ProviderId = Front, StreamId = streamId, AcceptedTransports = ["webrtc", "hls"] })
+			new OpenVideoStreamRequest { ProviderId = Front, StreamId = streamId, AcceptedTransports = ["hls", "mjpeg"] })
 			.WaitAsync(TimeSpan.FromSeconds(10));
 		return result!.Value.Deserialize<OpenVideoStreamResponse>(UiWebSocketProtocol.Json)!;
 	}
@@ -247,6 +229,5 @@ internal sealed class VideoStreamUiDispatchTests : UiSessionFixture
 			deviceSessionGuard: new DeviceSessionGuard(),
 			videoStreams: _world.Broker,
 			videoStreamProviders: _world.Registry,
-			videoStreamConsumer: VideoStreamWorld.Consumer,
 			connectionCancellation: CancellationToken.None);
 }

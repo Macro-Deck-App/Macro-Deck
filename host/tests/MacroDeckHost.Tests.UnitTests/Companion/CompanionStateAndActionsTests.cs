@@ -238,6 +238,5 @@ internal sealed class CompanionStateAndActionsTests
 			deviceSessionGuard: GuardFor(principal.Claims),
 			videoStreams: null!,
 			videoStreamProviders: null!,
-			videoStreamConsumer: null!,
 			connectionCancellation: CancellationToken.None);
 }

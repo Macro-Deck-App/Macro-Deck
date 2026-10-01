@@ -59,7 +59,7 @@ public class HostApiStabilityTests
 			[HostApis.Messaging] = ["publish", "send", "request", "subscriptions"],
 			[HostApis.IconPacks] = ["sync-bundled", "get-icon-resource", "get-icon"],
 			[HostApis.VideoStreams] =
-				["providers-changed", "streams-changed", "session-update", "session-signal", "session-close"],
+				["providers-changed", "streams-changed", "session-update", "session-close"],
 		};
 
 	[Test]

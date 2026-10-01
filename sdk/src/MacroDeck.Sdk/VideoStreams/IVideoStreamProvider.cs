@@ -5,8 +5,9 @@ namespace MacroDeck.Sdk.VideoStreams;
 /// <summary>
 /// One source of video streams, registered through
 /// <see cref="IVideoStreamProviderContext.RegisterProviderAsync" />. Macro Deck lists its streams and opens
-/// a session per consumer that shows one; the provider hands back a description of how to play the stream
-/// and never carries media through Macro Deck itself.
+/// a session per consumer that shows one; the provider hands back a description of where its media is. Macro
+/// Deck fetches the media from there and relays it to the consumer, so the source only has to be reachable
+/// from the computer Macro Deck runs on: it can bind to loopback and needs no credentials for consumers.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -42,7 +43,7 @@ public interface IVideoStreamProvider
 	Task<IReadOnlyList<VideoStreamDescriptor>> GetStreamsAsync(CancellationToken cancellationToken);
 
 	/// <summary>
-	/// Opens a session on a stream for one consumer and describes how the consumer plays it. The
+	/// Opens a session on a stream for one consumer and describes where Macro Deck fetches its media. The
 	/// description's transport must be one of <see cref="VideoStreamOpenRequest.AcceptedTransports" />.
 	/// </summary>
 	/// <exception cref="VideoStreamException">The session cannot be opened. The code tells the consumer
@@ -61,17 +62,6 @@ public interface IVideoStreamProvider
 	/// </summary>
 	Task<VideoStreamSessionDescription?> ResumeAsync(string sessionId, CancellationToken cancellationToken)
 		=> Task.FromResult<VideoStreamSessionDescription?>(null);
-
-	/// <summary>
-	/// A signal from the consumer, for example a WebRTC answer or ICE candidate. Returns the provider's
-	/// direct answer, or null; further signals go through
-	/// <see cref="IVideoStreamProviderContext.SendSignalAsync" />.
-	/// </summary>
-	/// <exception cref="VideoStreamException">By default, with
-	/// <see cref="VideoStreamErrorCode.SignalingUnsupported" />.</exception>
-	Task<VideoStreamSignal?> SignalAsync(string sessionId, VideoStreamSignal signal, CancellationToken cancellationToken)
-		=> throw new VideoStreamException(VideoStreamErrorCode.SignalingUnsupported,
-			"This video stream provider does not exchange signals.");
 
 	/// <summary>
 	/// Ends a session and releases whatever it holds. Called exactly once per opened session; see the

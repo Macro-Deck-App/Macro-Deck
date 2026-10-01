@@ -207,15 +207,18 @@ Folders**, or keep the file in another folder.
 A video stream in a widget or a folder view shows a short message instead of the picture when it cannot
 play:
 
-- **This video stream cannot be played on this device**: the plugin serves the stream only in a format this
-  device cannot play. Try the stream in the web client on a newer browser or in the desktop app, and ask
-  the plugin's creator to also offer MJPEG, which every device plays.
+- **This video stream cannot be played on this device**: the plugin serves the stream only as HLS, which
+  many desktop browsers cannot play. Try a phone or tablet, Safari, or another device, and ask the plugin's
+  creator to also offer MJPEG, which every device plays.
 - **This video stream is unavailable right now** or **This video stream no longer exists**: the source is
   offline, or the plugin or its integration is not running. Check the integration's settings; the picture
   comes back on its own once the source is.
-- The picture stays blank in the web client opened over **https**, while it plays in the desktop app: the
-  plugin hands out a plain `http` address, which a browser refuses on a secure page. Open the web client over
-  http on your local network, or ask the plugin's creator to serve the stream over https.
+- **The picture stops after a moment and starts again**, or freezes on a camera that shows a still scene:
+  Macro Deck disconnects a stream that sends nothing for 30 seconds, and the widget reconnects on its own.
+  If it keeps happening, ask the plugin's creator to keep sending frames.
+- **Some streams are blank while others play**, when many live video widgets are visible at once in a web
+  browser: a browser loads only a few things at a time from Macro Deck over plain http. Show fewer live
+  videos on one page, or open the web client over https.
 
 ## An animated icon shows a still image
 

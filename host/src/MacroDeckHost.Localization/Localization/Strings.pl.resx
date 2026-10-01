@@ -2934,17 +2934,11 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.VideoStream.SessionLimitReached" xml:space="preserve">
     <value>Otwarto jednocześnie zbyt wiele strumieni wideo.</value>
   </data>
-  <data name="Errors.VideoStream.PayloadTooLarge" xml:space="preserve">
-    <value>Dane połączenia wideo są zbyt duże.</value>
-  </data>
   <data name="Errors.VideoStream.StreamUnavailable" xml:space="preserve">
     <value>Ten strumień wideo jest chwilowo niedostępny.</value>
   </data>
   <data name="Errors.VideoStream.TransportNotAccepted" xml:space="preserve">
     <value>Tego strumienia wideo nie można odtworzyć na tym urządzeniu.</value>
-  </data>
-  <data name="Errors.VideoStream.SignalingUnsupported" xml:space="preserve">
-    <value>Źródło wideo nie obsługuje tego rodzaju połączenia.</value>
   </data>
   <data name="Errors.VideoStream.ProviderUnavailable" xml:space="preserve">
     <value>Źródło wideo jest chwilowo nieosiągalne.</value>

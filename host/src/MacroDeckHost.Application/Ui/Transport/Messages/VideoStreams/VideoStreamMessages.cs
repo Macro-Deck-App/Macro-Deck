@@ -70,23 +70,9 @@ public sealed record ResumeVideoStreamRequest
 	public string SessionId { get; init; } = string.Empty;
 }
 
-public sealed record SignalVideoStreamRequest
-{
-	public string SessionId { get; init; } = string.Empty;
-
-	public VideoStreamSignalMessage? Signal { get; init; }
-}
-
 public sealed record CloseVideoStreamRequest
 {
 	public string SessionId { get; init; } = string.Empty;
-}
-
-public sealed record VideoStreamSignalMessage
-{
-	public string Type { get; init; } = string.Empty;
-
-	public string Payload { get; init; } = string.Empty;
 }
 
 public sealed record VideoStreamDescriptionMessage
@@ -94,12 +80,6 @@ public sealed record VideoStreamDescriptionMessage
 	public string Transport { get; init; } = string.Empty;
 
 	public string? Url { get; init; }
-
-	public IReadOnlyDictionary<string, string>? Parameters { get; init; }
-
-	public string? Payload { get; init; }
-
-	public DateTimeOffset? ExpiresAt { get; init; }
 }
 
 public sealed record VideoStreamCatalogChangedEvent;
@@ -117,13 +97,6 @@ public sealed record VideoStreamSessionChangedEvent
 	public string Reason { get; init; } = string.Empty;
 
 	public LocalizedText? Message { get; init; }
-}
-
-public sealed record VideoStreamSignalEvent
-{
-	public string SessionId { get; init; } = string.Empty;
-
-	public VideoStreamSignalMessage Signal { get; init; } = new();
 }
 
 public sealed record VideoStreamSessionClosedEvent

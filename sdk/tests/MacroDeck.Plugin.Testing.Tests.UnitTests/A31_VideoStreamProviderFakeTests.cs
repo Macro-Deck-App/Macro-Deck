@@ -10,7 +10,7 @@ using MacroDeck.Sdk.VideoStreams;
 namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 
 /// <summary>
-/// A31 - <see cref="FakeVideoStreamProviderContext" /> applies the registration and size rules the SDK and
+/// A31 - <see cref="FakeVideoStreamProviderContext" /> applies the registration rules the SDK and
 /// the host apply, and <see cref="VideoStreamProviderTestClient" /> drives a plugin's providers the way the
 /// host does.
 /// </summary>
@@ -64,23 +64,6 @@ public class A31_VideoStreamProviderFakeTests
 	}
 
 	[Test]
-	public void A_description_or_signal_past_a_documented_bound_is_rejected()
-	{
-		var context = new FakeVideoStreamProviderContext();
-
-		Assert.Multiple(() =>
-		{
-			Assert.That(() => context.UpdateSessionAsync("s1",
-					VideoStreamSessionState.Active,
-					new VideoStreamSessionDescription("HLS")),
-				Throws.ArgumentException);
-			Assert.That(() => context.SendSignalAsync("s1", new VideoStreamSignal("candidate", new string('x', 32 * 1024 + 1))),
-				Throws.ArgumentException);
-			Assert.That(context.Calls, Is.Empty);
-		});
-	}
-
-	[Test]
 	public async Task Every_call_is_recorded_in_order()
 	{
 		var context = new FakeVideoStreamProviderContext();
@@ -88,7 +71,6 @@ public class A31_VideoStreamProviderFakeTests
 		await context.RegisterProviderAsync(new Camera("cam"));
 		await context.NotifyStreamsChangedAsync("cam");
 		await context.UpdateSessionAsync("s1", VideoStreamSessionState.Reconnecting, reason: VideoStreamSessionReason.SourceLost);
-		await context.SendSignalAsync("s1", new VideoStreamSignal("candidate", "{}"));
 		await context.CloseSessionAsync("s1");
 		await context.UnregisterProviderAsync("cam");
 
@@ -98,11 +80,11 @@ public class A31_VideoStreamProviderFakeTests
 				Is.EqualTo(new[]
 				{
 					VideoStreamProviderCallKind.Register, VideoStreamProviderCallKind.StreamsChanged,
-					VideoStreamProviderCallKind.SessionUpdate, VideoStreamProviderCallKind.Signal,
-					VideoStreamProviderCallKind.SessionClose, VideoStreamProviderCallKind.Unregister
+					VideoStreamProviderCallKind.SessionUpdate, VideoStreamProviderCallKind.SessionClose,
+					VideoStreamProviderCallKind.Unregister
 				}));
 			Assert.That(context.Calls[2].Reason, Is.EqualTo(VideoStreamSessionReason.SourceLost));
-			Assert.That(context.Calls[4].Reason, Is.EqualTo(VideoStreamSessionReason.ProviderClosed));
+			Assert.That(context.Calls[3].Reason, Is.EqualTo(VideoStreamSessionReason.ProviderClosed));
 			Assert.That(context.Providers, Is.Empty);
 		});
 	}
@@ -126,7 +108,7 @@ public class A31_VideoStreamProviderFakeTests
 		}
 		var streams = (await session.VideoStreamProvider.GetStreamsAsync("cam"))
 			.DataAs<VideoStreamProviderStreamsResult>();
-		var opened = (await session.VideoStreamProvider.OpenSessionAsync("s1", "cam", "main", ["webrtc", "hls"]))
+		var opened = (await session.VideoStreamProvider.OpenSessionAsync("s1", "cam", "main", ["mjpeg", "hls"]))
 			.DataAs<VideoStreamSessionOpenResult>();
 		var closed = await session.VideoStreamProvider.CloseSessionAsync("s1", "cam");
 		await session.VideoStreamProvider.CloseSessionAsync("s1", "cam");
@@ -135,6 +117,7 @@ public class A31_VideoStreamProviderFakeTests
 		{
 			Assert.That(streams!.Streams.Single().Id, Is.EqualTo("main"));
 			Assert.That(opened!.Description.Transport, Is.EqualTo("hls"));
+			Assert.That(opened.Description.Url, Is.EqualTo("http://camera.local/main.m3u8"));
 			Assert.That(opened.RegistrationId, Is.EqualTo(described!.Providers[0].RegistrationId));
 			Assert.That(closed.Succeeded, Is.True);
 			Assert.That(camera.Closes, Is.EqualTo(new[] { ("s1", VideoStreamSessionReason.ConsumerClosed) }));
@@ -157,7 +140,7 @@ public class A31_VideoStreamProviderFakeTests
 
 		public Task<VideoStreamSessionDescription> OpenAsync(VideoStreamOpenRequest request,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(new VideoStreamSessionDescription("hls", "http://camera.local/main.m3u8"));
+			=> Task.FromResult(VideoStreamSessionDescription.Hls("http://camera.local/main.m3u8"));
 
 		public Task CloseAsync(string sessionId, VideoStreamSessionReason reason, CancellationToken cancellationToken)
 		{

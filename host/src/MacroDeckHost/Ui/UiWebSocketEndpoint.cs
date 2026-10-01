@@ -105,8 +105,7 @@ public sealed class UiWebSocketEndpoint(
 				connectionId,
 				principal,
 				cancellation.Token,
-				(Action)cancellation.Cancel,
-				VideoStreamConsumerClassifier.Classify(context, principal));
+				(Action)cancellation.Cancel);
 			dispatcherStarted = true;
 			if (!await dispatcher.ConnectedAsync())
 			{

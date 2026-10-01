@@ -146,6 +146,7 @@ where a plugin crosses a connection:
 | --- | --- | --- |
 | The connection to Macro Deck drops, resumed or not | - | The plugin's side closes every open session with `HostDisconnected`; consumers see `ProviderRemoved`, and the providers are listed again once the host has read them back. |
 | Stream catalogue | Read from the provider object | Read over `describe` and `streams`, coalesced, after `providers-changed` and `streams-changed` |
+| Media | The description's URL is fetched by the host's [relay](/features/video-streams/#the-relay) | The same: the URL is fetched by the host, so a plugin's source can listen on loopback only |
 | Call bounds | Every call bounded by ten seconds; an open that returns later is closed at once | At most 8 calls at a time and 4 closes, up to 256 more queued, each bounded by the capability invoke timeout |
 
 Sessions are never resumed across a reconnect: consumers open new ones.

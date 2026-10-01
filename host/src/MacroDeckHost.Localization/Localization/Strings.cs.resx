@@ -2934,17 +2934,11 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.VideoStream.SessionLimitReached" xml:space="preserve">
     <value>Současně je otevřeno příliš mnoho videí.</value>
   </data>
-  <data name="Errors.VideoStream.PayloadTooLarge" xml:space="preserve">
-    <value>Data připojení videa jsou příliš velká.</value>
-  </data>
   <data name="Errors.VideoStream.StreamUnavailable" xml:space="preserve">
     <value>Tento videostream není momentálně k dispozici.</value>
   </data>
   <data name="Errors.VideoStream.TransportNotAccepted" xml:space="preserve">
     <value>Tento videostream nelze na tomto zařízení přehrát.</value>
-  </data>
-  <data name="Errors.VideoStream.SignalingUnsupported" xml:space="preserve">
-    <value>Zdroj videa tento typ připojení nepodporuje.</value>
   </data>
   <data name="Errors.VideoStream.ProviderUnavailable" xml:space="preserve">
     <value>Zdroj videa je momentálně nedostupný.</value>

@@ -29,7 +29,7 @@ class FakePort implements VideoStreamPort {
   catalog: VideoStreamProviderItem[] = [];
   private readonly notificationListeners: Array<(type: string, payload: unknown) => void> = [];
   private readonly connectionListeners: Array<(connected: boolean) => void> = [];
-  readonly answered = new Set(['KeepAliveVideoStream', 'CloseVideoStream', 'SignalVideoStream']);
+  readonly answered = new Set(['KeepAliveVideoStream', 'CloseVideoStream']);
   catalogFails = false;
 
   request<T>(type: string, payload: unknown): Promise<T> {
@@ -91,7 +91,6 @@ function recorder(): VideoStreamSessionListener & { changes: VideoStreamSession[
     changes,
     closes,
     changed: session => changes.push(session),
-    signal: () => undefined,
     closed: (reason, error, message) => closes.push([reason, error, message]),
   };
 }
@@ -117,10 +116,10 @@ describe('VideoStreamClient', () => {
   afterEach(() => jasmine.clock().uninstall());
 
   it('asks the host for a session on the referenced stream with the transports this client plays', () => {
-    client.open('com.example.obs::studio', 'Program', ['webrtc', 'mjpeg'], recorder());
+    client.open('com.example.obs::studio', 'Program', ['hls', 'mjpeg'], recorder());
 
     expect(port.last('OpenVideoStream').payload).toEqual({
-      providerId: 'com.example.obs::studio', streamId: 'Program', acceptedTransports: ['webrtc', 'mjpeg'],
+      providerId: 'com.example.obs::studio', streamId: 'Program', acceptedTransports: ['hls', 'mjpeg'],
     });
   });
 
@@ -632,88 +631,55 @@ describe('macrodeck.video-stream', () => {
       expect(port.last('OpenVideoStream').payload['acceptedTransports']).toEqual(['hls', 'mjpeg']);
     });
 
-    describe('over webrtc', () => {
+    it('never offers webrtc or whep, even where the browser can do them', () => {
       class FakePeer {
-        static created: FakePeer[] = [];
-        ontrack: unknown = null;
-        onicecandidate: unknown = null;
-        oniceconnectionstatechange: unknown = null;
-        iceConnectionState = 'new';
-        iceGatheringState = 'complete';
-        localDescription: unknown = null;
-        remote: { sdp?: string } | null = null;
-        closed = false;
-        constructor() { FakePeer.created.push(this); }
-        setRemoteDescription(description: { sdp?: string }) { this.remote = description; return Promise.resolve(); }
-        createAnswer() { return Promise.resolve({ type: 'answer', sdp: 'answer-sdp' }); }
-        setLocalDescription(description: unknown) { this.localDescription = description; return Promise.resolve(); }
-        addIceCandidate() { return Promise.resolve(); }
-        addTransceiver() {}
-        addEventListener() {}
-        removeEventListener() {}
-        close() { this.closed = true; }
+        addTransceiver(): void {}
       }
+      patch(document.defaultView!, 'RTCPeerConnection', FakePeer);
+      patch(document.defaultView!, 'fetch', () => Promise.reject(new Error('offline')));
+      patch(document.defaultView!.HTMLVideoElement.prototype, 'canPlayType', () => 'maybe');
+      patch(document.defaultView!.HTMLVideoElement.prototype, 'playsInline', true);
 
-      function offer(revision: number, state = 'active', sdp = 'offer-1') {
-        return {
-          sessionId: 's1', revision, state, reason: 'none',
-          description: { transport: 'webrtc', payload: sdp },
-        };
-      }
+      mount();
 
-      beforeEach(() => {
-        FakePeer.created = [];
-        patch(document.defaultView!, 'RTCPeerConnection', FakePeer);
-        patch(document.defaultView!, 'fetch', () => Promise.reject(new Error('offline')));
-        patch(document.defaultView!.HTMLMediaElement.prototype, 'pause', () => undefined);
+      expect(port.last('OpenVideoStream').payload['acceptedTransports']).toEqual(['hls', 'mjpeg']);
+    });
+
+    it('offers only mjpeg where the browser cannot play hls natively', () => {
+      patch(document.defaultView!.HTMLVideoElement.prototype, 'canPlayType', () => '');
+
+      mount();
+
+      expect(port.last('OpenVideoStream').payload['acceptedTransports']).toEqual(['mjpeg']);
+    });
+
+    it('sets a host-relative description url as the media source without rewriting it', async () => {
+      const root = mount();
+      await answerOpen();
+
+      port.push('VideoStreamSessionChangedEvent', changed('s1', 1, 'active', '/api/video-streams/relay/tok/live.mjpg?q=1'));
+
+      expect((root.querySelector('img') as HTMLImageElement).getAttribute('src'))
+        .toBe('/api/video-streams/relay/tok/live.mjpg?q=1');
+    });
+
+    it('sets a host-relative hls url on the video element as is', async () => {
+      const video = document.defaultView!.HTMLVideoElement.prototype;
+      patch(video, 'canPlayType', () => 'maybe');
+      patch(video, 'playsInline', true);
+      patch(document.defaultView!.HTMLMediaElement.prototype, 'play', () => Promise.resolve());
+      patch(document.defaultView!.HTMLMediaElement.prototype, 'load', () => undefined);
+      patch(document.defaultView!.HTMLMediaElement.prototype, 'pause', () => undefined);
+
+      const root = mount();
+      await answerOpen();
+      port.push('VideoStreamSessionChangedEvent', {
+        sessionId: 's1', revision: 1, state: 'active', reason: 'none',
+        description: { transport: 'hls', url: '/api/video-streams/relay/tok/index.m3u8' },
       });
 
-      it('answers the provider offer through the session', async () => {
-        mount();
-        expect(port.last('OpenVideoStream').payload['acceptedTransports']).toEqual(['webrtc', 'whep', 'mjpeg']);
-        await answerOpen();
-
-        port.push('VideoStreamSessionChangedEvent', offer(1));
-        await flush();
-
-        expect(FakePeer.created[0].remote?.sdp).toBe('offer-1');
-        expect(port.last('SignalVideoStream').payload).toEqual({
-          sessionId: 's1', signal: { type: 'answer', payload: 'answer-sdp' },
-        });
-      });
-
-      it('opens a new session when a resume brings back the offer it already answered', async () => {
-        mount();
-        await answerOpen();
-        port.push('VideoStreamSessionChangedEvent', offer(1));
-        await flush();
-
-        surface.setHidden('screensaver', true);
-        jasmine.clock().tick(VIDEO_VISIBILITY_DEBOUNCE_MS);
-        expect(FakePeer.created[0].closed).toBeTrue();
-        port.push('VideoStreamSessionChangedEvent', offer(2, 'suspended'));
-
-        surface.setHidden('screensaver', false);
-        jasmine.clock().tick(VIDEO_VISIBILITY_DEBOUNCE_MS);
-        port.push('VideoStreamSessionChangedEvent', offer(3));
-
-        expect(port.sent('CloseVideoStream').length).toBe(1);
-        expect(port.sent('OpenVideoStream').length).toBe(2);
-      });
-
-      it('opens a new session when shown again after a suspend the host never applied', async () => {
-        mount();
-        await answerOpen();
-        port.push('VideoStreamSessionChangedEvent', offer(1));
-        await flush();
-
-        surface.setHidden('screensaver', true);
-        jasmine.clock().tick(VIDEO_VISIBILITY_DEBOUNCE_MS);
-        surface.setHidden('screensaver', false);
-        jasmine.clock().tick(VIDEO_VISIBILITY_DEBOUNCE_MS);
-
-        expect(port.sent('OpenVideoStream').length).toBe(2);
-      });
+      expect((root.querySelector('video') as HTMLVideoElement).getAttribute('src'))
+        .toBe('/api/video-streams/relay/tok/index.m3u8');
     });
   });
 

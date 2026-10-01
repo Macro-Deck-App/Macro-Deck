@@ -1,4 +1,5 @@
 using MacroDeck.Localization;
+using MacroDeck.Plugin.Protocol.Capabilities.VideoStreamProvider;
 using MacroDeck.Sdk.VideoStreams;
 
 namespace MacroDeckHost.Application.VideoStreams;
@@ -9,7 +10,7 @@ internal sealed record VideoStreamProviderInfo(
 	LocalizedText? Description,
 	string RegistrationId);
 
-internal sealed record VideoStreamOpenResult(VideoStreamSessionDescription Description, string RegistrationId);
+internal sealed record VideoStreamOpenResult(VideoStreamSessionDescriptionDto Description, string RegistrationId);
 
 internal interface IVideoStreamEndpoint
 {
@@ -24,14 +25,8 @@ internal interface IVideoStreamEndpoint
 
 	Task SuspendAsync(string providerId, string sessionId, Func<bool> proceed, CancellationToken cancellationToken);
 
-	Task<VideoStreamSessionDescription?> ResumeAsync(string providerId,
+	Task<VideoStreamSessionDescriptionDto?> ResumeAsync(string providerId,
 		string sessionId,
-		Func<bool> proceed,
-		CancellationToken cancellationToken);
-
-	Task<VideoStreamSignal?> SignalAsync(string providerId,
-		string sessionId,
-		VideoStreamSignal signal,
 		Func<bool> proceed,
 		CancellationToken cancellationToken);
 

@@ -365,13 +365,30 @@ where it matters who asked. `host:messaging` is declared, not enforced.
 
 ## Video streams
 
-A [video stream provider](/features/video-streams/) hands every client signed in to Macro Deck, the
-desktop app or any paired device, a description of how to play its streams. Whatever a description
-carries, a URL, its query string, parameters or a payload, reaches that client. Put short-lived
-credentials scoped to one session into it, minted when the session opens, revoked when it closes and
-bounded by `ExpiresAt`, never the source's own password or API key. The consumer's device id, address and
-connection kind help build a reachable URL; they authorize nothing. Macro Deck relays descriptions and
-signals without interpreting them and never logs them. `host:video-streams` is declared, not enforced.
+A [video stream provider](/features/video-streams/) gives Macro Deck the URL of a stream, and Macro Deck
+relays the media to every client signed in to Macro Deck, the desktop app or any paired device. The
+provider's URL never reaches a client, so credentials in it stay on the computer; a provider still must
+not serve anything it would not show every signed-in client, and never puts the source's own password or
+API key in a URL. Macro Deck never logs a description. `host:video-streams` is declared, not enforced.
+
+The relay is a deliberate, bounded fetch on behalf of a plugin:
+
+- **The relay URL is a capability.** `/api/video-streams/relay/<token>/...` carries an unguessable token that
+  is bound to one session, sent only over the authenticated UI WebSocket to the connection that owns the
+  session, and dead once the session ends. The route is anonymous by design, because an image or video
+  element cannot send an authorization header. Anyone who holds the URL can read that one stream until it
+  ends, which is no more than the client it was sent to could. Macro Deck redacts the token from its logs.
+- **It pins the origin of the provider's URL and nothing else.** Redirects and HLS playlist URIs stay on that
+  origin (apart from `data:` and `skd:` URIs, which are passed on untouched), and only `GET` and `HEAD` are sent. The provider chooses the origin, so a plugin can point the
+  relay at any service on the computer or the local network, or at Macro Deck itself. A plugin could make
+  those requests without the relay, so this adds no capability, but the relay returns the response to a
+  client, which is why only responses that look like the session's media are passed on.
+- **Plugin bytes cannot run as a page.** Content types are checked against the session's transport,
+  responses carry `X-Content-Type-Options: nosniff` and a sandboxing Content-Security-Policy, and a
+  response that does not fit is refused, so a plugin cannot serve a script or an HTML page from Macro
+  Deck's own origin.
+- **It is bounded.** Eight concurrent relayed requests per session, 64 in all, a header timeout and an
+  idle timeout on media.
 
 A tree can name any provider's stream in a [`macrodeck.video-stream`](/ui/components/video-stream/), so
 any plugin's view can make the clients that draw it open sessions on another plugin's provider. That is no

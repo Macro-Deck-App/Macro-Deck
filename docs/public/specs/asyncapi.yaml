@@ -98,7 +98,7 @@ x-macrodeck-host-operations:
   adb: [shell, battery, push, pull, install, uninstall, package-installed, connect]
   messaging: [publish, send, request, subscriptions]
   icon-packs: [sync-bundled, get-icon-resource, get-icon]
-  video-streams: [providers-changed, streams-changed, session-update, session-signal, session-close]
+  video-streams: [providers-changed, streams-changed, session-update, session-close]
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Assets.AssetKinds.All - the kind values an asset.begin may carry.
 x-macrodeck-asset-kinds:

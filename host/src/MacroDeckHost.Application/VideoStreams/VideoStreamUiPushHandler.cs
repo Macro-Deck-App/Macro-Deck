@@ -9,7 +9,6 @@ namespace MacroDeckHost.Application.VideoStreams;
 public sealed class VideoStreamUiPushHandler :
 	INotificationHandler<VideoStreamCatalogChangedNotification>,
 	INotificationHandler<VideoStreamSessionChangedNotification>,
-	INotificationHandler<VideoStreamSignalNotification>,
 	INotificationHandler<VideoStreamSessionClosedNotification>
 {
 	private readonly IUiTransport _transport;
@@ -31,14 +30,6 @@ public sealed class VideoStreamUiPushHandler :
 				Description = VideoStreamUiMapping.ToMessage(notification.Description),
 				Reason = VideoStreamUiMapping.WireName(notification.Reason),
 				Message = notification.Message
-			},
-			cancellationToken);
-
-	public async ValueTask Handle(VideoStreamSignalNotification notification, CancellationToken cancellationToken)
-		=> await _transport.SendToConnection(notification.ConnectionId,
-			new VideoStreamSignalEvent
-			{
-				SessionId = notification.SessionId, Signal = VideoStreamUiMapping.ToMessage(notification.Signal)
 			},
 			cancellationToken);
 
