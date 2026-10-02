@@ -13,6 +13,10 @@ Use Macro Deck from your phone, tablet or compatible hardware to control applica
 
 Macro Deck 3 is currently under active development and may contain incomplete or unstable functionality.
 
+<p align="center">
+  <img src=".github/images/deck.webp" alt="The Macro Deck 3 deck editor with buttons, a clock, a volume slider, the weather, a music player and a CPU usage graph" width="900" />
+</p>
+
 ## Platforms
 
 The Macro Deck host runs on:
@@ -58,6 +62,17 @@ Macro Deck is built around a web-based architecture. Configure and control your 
 The web client can be used directly as a macro pad without installing a native companion app. With HTTPS enabled, it can also be installed as a PWA, providing an alternative for devices where a native companion app is not available.
 
 Native companion apps and compatible hardware can connect to the same Macro Deck host.
+
+### Companion app
+
+The Macro Deck companion app is optional. It is a native alternative to the web client that offers better performance and additional features.
+
+The companion app is available for a one-time license fee. Buying it directly supports the ongoing development of Macro Deck.
+
+| Platform | Download |
+| --- | --- |
+| Android | [Get it on Google Play](https://play.google.com/store/apps/details?id=app.macrodeck.companion) |
+| iOS | Coming soon |
 
 ### Security-first plugin ecosystem
 
