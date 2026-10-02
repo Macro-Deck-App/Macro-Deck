@@ -166,6 +166,9 @@ export class Client {
   private readonly reopenableSessionStore: WritableStore<{ sessionId: string } | null> =
     store<{ sessionId: string } | null>(null);
   readonly reopenableSessions: ReadableStore<{ sessionId: string } | null> = this.reopenableSessionStore;
+  private readonly endedSessionStore: WritableStore<{ sessionId: string; code?: string } | null> =
+    store<{ sessionId: string; code?: string } | null>(null);
+  readonly endedSessions: ReadableStore<{ sessionId: string; code?: string } | null> = this.endedSessionStore;
 
   private readonly usernameStore: WritableStore<string | null> = store<string | null>(null);
   readonly signedInAs: ReadableStore<string | null> = this.usernameStore;
@@ -1128,6 +1131,10 @@ export class Client {
           if (type === 'UiSessionInvalidatedEvent' && body['retryable'] === true) {
             this.reopenableSessionStore.set({ sessionId: body['sessionId'] });
           }
+          this.endedSessionStore.set({
+            sessionId: body['sessionId'],
+            code: typeof body['code'] === 'string' ? body['code'] : undefined,
+          });
         }
         break;
       case 'FolderNavigationEvent':

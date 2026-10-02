@@ -195,6 +195,25 @@ body,
   overflow: hidden;
 }
 
+.wc-modal-unavailable {
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.wc-modal-unavailable h3 {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text-primary);
+}
+
+.wc-modal-unavailable p {
+  margin: 0 0 var(--space-3);
+}
+
+.wc-modal-unavailable-code {
+  font-size: var(--text-sm);
+}
+
 /*
  * 7-inch decks and anything smaller: a dialog takes the whole display instead of floating in the
  * middle of it (issue #873). The condition is width *or* height because the panels this covers are

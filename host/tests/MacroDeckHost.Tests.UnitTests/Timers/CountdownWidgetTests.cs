@@ -215,6 +215,38 @@ public class CountdownWidgetTests
 	}
 
 	[Test]
+	public async Task Taps_from_two_devices_within_the_repeat_window_both_count()
+	{
+		var widget = await _harness.AddCountdownAsync(seconds: 10);
+
+		await _harness.PressAsync(widget, clientId: "phone");
+		_harness.Time.Now += TimeSpan.FromMilliseconds(120);
+		await _harness.PressAsync(widget, clientId: "tablet");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_harness.Phase(widget), Is.EqualTo(TimerWidgetPhase.Paused));
+			Assert.That(_harness.Triggers.Calls, Has.Count.EqualTo(2));
+		});
+	}
+
+	[Test]
+	public async Task A_tap_whose_origin_is_unknown_still_counts_as_the_same_tap()
+	{
+		var widget = await _harness.AddCountdownAsync(seconds: 10);
+
+		await _harness.PressAsync(widget, clientId: "phone");
+		_harness.Time.Now += TimeSpan.FromMilliseconds(120);
+		await _harness.PressAsync(widget);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_harness.Phase(widget), Is.EqualTo(TimerWidgetPhase.Running));
+			Assert.That(_harness.Triggers.Calls, Has.Count.EqualTo(1));
+		});
+	}
+
+	[Test]
 	public async Task A_second_tap_after_the_first_one_has_settled_pauses_the_countdown()
 	{
 		var widget = await _harness.AddCountdownAsync(seconds: 10);

@@ -6,7 +6,7 @@ namespace MacroDeckHost.Application.Timers;
 public sealed class TimerWidgetStore
 {
 	// One tap can reach the host twice, through the widget's tree and a client's older trigger request; an
-	// identical gesture this soon after the last one is that same tap.
+	// identical gesture from the same client this soon after the last one is that same tap.
 	public static readonly TimeSpan RepeatWindow = TimeSpan.FromMilliseconds(300);
 
 	private readonly TimeProvider _time;
@@ -99,7 +99,7 @@ public sealed class TimerWidgetStore
 		return true;
 	}
 
-	public IReadOnlyList<TimerWidgetTransition> Gesture(Guid widgetId, TimerGesture gesture)
+	public IReadOnlyList<TimerWidgetTransition> Gesture(Guid widgetId, TimerGesture gesture, string? originClientId)
 	{
 		if (!_entries.TryGetValue(widgetId, out var entry))
 		{
@@ -112,13 +112,10 @@ public sealed class TimerWidgetStore
 		{
 			var now = _time.GetUtcNow();
 
-			if (entry.LastGesture == gesture && now - entry.LastGestureAt < RepeatWindow)
+			if (entry.IsRepeat(gesture, originClientId, now))
 			{
 				return [];
 			}
-
-			entry.LastGesture = gesture;
-			entry.LastGestureAt = now;
 
 			// A press can land between the countdown reaching zero and the next tick noticing it: it has
 			// finished for the user already, so it finishes first and the press then dismisses it.
@@ -286,6 +283,11 @@ public sealed class TimerWidgetStore
 
 	private sealed class Entry
 	{
+		private readonly Dictionary<string, (TimerGesture Gesture, DateTimeOffset At)> _lastGestureByClient =
+			new(StringComparer.Ordinal);
+
+		private (string? ClientId, TimerGesture Gesture, DateTimeOffset At)? _lastGesture;
+
 		public Entry(Guid widgetId, TimerWidgetConfig config, DateTimeOffset now, long version)
 		{
 			WidgetId = widgetId;
@@ -312,10 +314,6 @@ public sealed class TimerWidgetStore
 
 		public long LastShownSecond { get; set; }
 
-		public TimerGesture? LastGesture { get; set; }
-
-		public DateTimeOffset LastGestureAt { get; set; }
-
 		public long Version { get; set; }
 
 		public TimerWidgetSnapshot Snapshot => new()
@@ -329,6 +327,40 @@ public sealed class TimerWidgetStore
 			LastEnteredSeconds = LastEnteredSeconds,
 			Version = Version,
 		};
+
+		// A gesture of unknown origin may be either path of another client's tap, so it is compared with the
+		// widget's last gesture whoever made it; two known clients never swallow each other's taps.
+		public bool IsRepeat(TimerGesture gesture, string? clientId, DateTimeOffset now)
+		{
+			bool Matches(TimerGesture last, DateTimeOffset at) => last == gesture && now - at < RepeatWindow;
+
+			var repeat = (clientId is null || _lastGesture is { ClientId: null }) &&
+				_lastGesture is { } last && Matches(last.Gesture, last.At);
+
+			foreach (var (stale, _) in _lastGestureByClient.Where(pair => now - pair.Value.At >= RepeatWindow).ToList())
+			{
+				_lastGestureByClient.Remove(stale);
+			}
+
+			if (!repeat && clientId is not null && _lastGestureByClient.TryGetValue(clientId, out var own))
+			{
+				repeat = Matches(own.Gesture, own.At);
+			}
+
+			if (repeat)
+			{
+				return true;
+			}
+
+			_lastGesture = (clientId, gesture, now);
+
+			if (clientId is not null)
+			{
+				_lastGestureByClient[clientId] = (gesture, now);
+			}
+
+			return false;
+		}
 
 		public void Start(DateTimeOffset now)
 		{

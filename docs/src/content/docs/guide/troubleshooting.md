@@ -107,6 +107,16 @@ Connected devices show a lock screen for as long as the computer is locked. You 
 visible instead by turning off **Lock clients when this computer is locked** in
 **Settings > Security**. Actions stay blocked either way.
 
+## A dialog says it cannot be shown
+
+Some buttons ask a question first, for example a countdown that asks for its duration. If that dialog
+could not be opened, or was closed before it showed anything, it says **This dialog cannot be shown**
+and an error code instead. Close it and press the button again; the action that asked is cancelled,
+not left waiting.
+
+If it keeps happening, report it with the error code and your [logs](#where-to-find-the-logs). The log
+records which dialog was refused and why.
+
 ## The Companion app stays unlicensed after a purchase
 
 When a Companion app that was bought connects, Macro Deck exchanges the purchase for a license with the

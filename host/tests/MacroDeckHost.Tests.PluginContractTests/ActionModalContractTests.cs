@@ -65,7 +65,7 @@ internal sealed class ActionModalContractTests : UiContractFixture
 			});
 		Assert.That(modalId, Is.Not.Null, "The modal was refused before any provider was consulted.");
 
-		var opener = new ModalUiSessionOpener(Modals, Broker);
+		var opener = new ModalUiSessionOpener(Modals, Broker, Serilog.Core.Logger.None);
 		var opened = opener.Open(new OpenModalUiSessionRequest { ModalId = modalId! }, OwnerPrincipal);
 		Assert.That(opened.Accepted, Is.True, $"The modal's session was refused: {opened.Code} {opened.Message}");
 

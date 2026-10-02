@@ -50,6 +50,7 @@ describe('ModalHost', () => {
   let root: HTMLElement;
   let client: Client;
   let calls: Array<{ type: string; payload: unknown }>;
+  let modals: ModalHost;
 
   beforeEach(() => {
     root = document.createElement('div');
@@ -67,7 +68,7 @@ describe('ModalHost', () => {
         return Promise.resolve(undefined);
       };
 
-    new ModalHost(root, client, host);
+    modals = new ModalHost(root, client, host);
   });
 
   afterEach(() => root.remove());
@@ -195,5 +196,80 @@ describe('ModalHost', () => {
 
     const heading = root.querySelector('.wc-modal-title')!.textContent ?? '';
     expect(heading).toBe(english(ClientAppStrings.WebClient.Lock.Title));
+  });
+
+  describe('when its session cannot be opened', () => {
+    const refuse = (type: string, answer: unknown) => {
+      const request = (client.connection as unknown as { request(type: string, payload?: unknown): Promise<unknown> })
+        .request;
+      (client.connection as unknown as { request(type: string, payload?: unknown): Promise<unknown> })
+        .request = (requested: string, payload?: unknown) =>
+          requested === type ? Promise.resolve(answer) : request(requested, payload);
+    };
+    const notice = () => root.querySelector('.wc-modal-content [role="status"]');
+
+    it('explains the refusal with its code instead of staying empty', async () => {
+      refuse('OpenModalUiSession', { accepted: false, sessionId: '', code: 'SESSION_NOT_FOUND' });
+      await open();
+
+      expect(notice()?.textContent).toContain(english(ClientAppStrings.Ui.Modal.UnavailableHeading));
+      expect(notice()?.textContent).toContain('SESSION_NOT_FOUND');
+    });
+
+    it('explains a refused attach the same way', async () => {
+      refuse('AttachUiSession', { accepted: false, code: 'SESSION_CLOSED' });
+      await open();
+
+      expect(notice()?.textContent).toContain('SESSION_CLOSED');
+    });
+
+    it('still counts as an open dialog, so the deck behind it stays blocked', async () => {
+      refuse('OpenModalUiSession', { accepted: false, sessionId: '' });
+      await open();
+
+      expect(modals.isOpen()).toBeTrue();
+    });
+
+    it('still settles the waiting action as cancelled when closed', async () => {
+      refuse('OpenModalUiSession', { accepted: false, sessionId: '' });
+      await open();
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      await settle();
+
+      expect(calls).toContain(jasmine.objectContaining({
+        type: 'CompleteUiModal',
+        payload: [{ modalId: 'm1', cancelled: true, value: undefined }],
+      }));
+      expect(backdrop().hasAttribute('hidden')).toBeTrue();
+    });
+  });
+
+  it('explains a dialog whose session ends after it was drawn', async () => {
+    await open();
+    client.sessions.treeUpdated('s1', 1, tree());
+
+    client.sessions.invalidated('s1');
+
+    expect(root.querySelector('.wc-modal-content .widget-text')).toBeNull();
+    expect(root.querySelector('.wc-modal-content [role="status"]')?.textContent)
+      .toContain(english(ClientAppStrings.Ui.Modal.UnavailableHeading));
+  });
+
+  it('explains a dialog whose session ends before its first tree, with the code', async () => {
+    await open();
+
+    (client as unknown as { onNotification(type: string, payload: unknown): void })
+      .onNotification('UiSessionInvalidatedEvent', { sessionId: 's1', code: 'PROVIDER_TIMEOUT', retryable: true });
+
+    const notice = root.querySelector('.wc-modal-content [role="status"]');
+    expect(notice?.textContent).toContain(english(ClientAppStrings.Ui.Modal.UnavailableHeading));
+    expect(notice?.textContent).toContain('PROVIDER_TIMEOUT');
+  });
+
+  it('shows no notice while the tree is still on its way', async () => {
+    await open();
+
+    expect(root.querySelector('.wc-modal-content [role="status"]')).toBeNull();
   });
 });

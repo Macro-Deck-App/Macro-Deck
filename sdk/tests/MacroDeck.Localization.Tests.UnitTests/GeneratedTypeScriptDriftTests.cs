@@ -56,6 +56,7 @@ public class GeneratedTypeScriptDriftTests
 		"Settings.Appearance.",
 		"Settings.Network.Tls.",
 		"Ui.List.",
+		"Ui.Modal.",
 		"WebClient.",
 	];
 

@@ -16209,6 +16209,16 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Ui.List.JumpToLatest" xml:space="preserve">
     <value>Jump to latest</value>
   </data>
+  <data name="Ui.Modal.ErrorCode" xml:space="preserve">
+    <value>Error code: {code}</value>
+    <comment>[code:string]</comment>
+  </data>
+  <data name="Ui.Modal.UnavailableBody" xml:space="preserve">
+    <value>It could not be opened, or it was closed before it could show anything. Close it and try again. If this keeps happening, the log has the details.</value>
+  </data>
+  <data name="Ui.Modal.UnavailableHeading" xml:space="preserve">
+    <value>This dialog cannot be shown</value>
+  </data>
   <data name="UiRender.AdvancedConfiguration" xml:space="preserve">
     <value>Advanced configuration</value>
   </data>

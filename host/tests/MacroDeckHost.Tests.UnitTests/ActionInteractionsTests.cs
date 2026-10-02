@@ -310,6 +310,8 @@ internal sealed class RecordingModalCoordinator : IModalInteractionCoordinator
 		return false;
 	}
 
+	public PendingModal? Find(string modalId) => null;
+
 	public void BindSession(string modalId, string sessionId)
 	{
 	}
@@ -322,15 +324,11 @@ internal sealed class RecordingModalCoordinator : IModalInteractionCoordinator
 	{
 	}
 
-	public void CancelForSession(string sessionId)
-	{
-	}
+	public IReadOnlyList<PendingModal> CancelForSession(string sessionId) => [];
 
 	public void CancelForClient(string clientId)
 	{
 	}
 
-	public void SweepExpired()
-	{
-	}
+	public IReadOnlyList<PendingModal> SweepExpired() => [];
 }

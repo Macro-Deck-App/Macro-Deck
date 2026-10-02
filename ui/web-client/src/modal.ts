@@ -1,4 +1,5 @@
 import {
+  ClientAppStrings,
   nodeString,
   renderUiNode,
   resolveLocalizedText,
@@ -22,9 +23,11 @@ export class ModalHost {
   private sessionId: string | null = null;
 
   isOpen(): boolean {
-    return this.sessionId !== null;
+    return this.modalId !== null;
   }
 
+  private hadTree = false;
+  private unavailable = false;
   private mounted: UiNodeRenderHandle | null = null;
   private mountedType: string | null = null;
   private observer: ResizeObserver | null = null;
@@ -76,6 +79,9 @@ export class ModalHost {
     this.client.sessions.onChange(sessionId => {
       if (sessionId === null || sessionId === this.sessionId) this.paint();
     });
+    this.client.endedSessions.subscribe(ended => {
+      if (ended !== null && ended.sessionId === this.sessionId) this.paintUnavailable(ended.code);
+    });
   }
 
   private onModal(event: UiModalOpenedEvent | null): void {
@@ -91,6 +97,9 @@ export class ModalHost {
     }
 
     this.modalId = event.modalId;
+    this.sessionId = null;
+    this.hadTree = false;
+    this.clearContent();
     this.heading.textContent = event.title === undefined
       ? ''
       : resolveLocalizedText(event.title, this.host.localization) ?? '';
@@ -101,21 +110,28 @@ export class ModalHost {
 
   private async openSession(modalId: string): Promise<void> {
     try {
-      const opened = await this.client.connection.request<{ accepted?: boolean; sessionId?: string }>(
+      const opened = await this.client.connection.request<{ accepted?: boolean; sessionId?: string; code?: string }>(
         'OpenModalUiSession', [{ modalId }]);
-      if (!opened || opened.accepted !== true || typeof opened.sessionId !== 'string') return;
       if (this.modalId !== modalId) return;
+      if (!opened || opened.accepted !== true || typeof opened.sessionId !== 'string') {
+        this.paintUnavailable(opened?.code);
+        return;
+      }
 
       // Opening a session does not subscribe to it: until it is attached the host pushes nothing,
       // which is a dialog that opens empty and stays empty.
-      const attached = await this.client.connection.request<{ accepted?: boolean }>(
+      const attached = await this.client.connection.request<{ accepted?: boolean; code?: string }>(
         'AttachUiSession', [{ sessionId: opened.sessionId }]);
-      if (!attached || attached.accepted !== true || this.modalId !== modalId) return;
+      if (this.modalId !== modalId) return;
+      if (!attached || attached.accepted !== true) {
+        this.paintUnavailable(attached?.code);
+        return;
+      }
 
       this.sessionId = opened.sessionId;
       this.paint();
     } catch {
-      // A refused session leaves the dialog empty; closing it still settles the waiting action.
+      if (this.modalId === modalId) this.paintUnavailable();
     }
   }
 
@@ -127,7 +143,13 @@ export class ModalHost {
     if (this.modalId === null || this.sessionId === null) return;
 
     const tree = this.client.sessions.tree(this.sessionId);
-    if (tree === undefined) return;
+    if (tree === undefined) {
+      if (this.hadTree && !this.unavailable) this.paintUnavailable();
+      return;
+    }
+
+    if (this.unavailable) this.clearContent();
+    this.hadTree = true;
 
     if (this.mounted === null || this.mountedType !== tree.type) {
       if (this.mounted) this.mounted.destroy();
@@ -136,6 +158,47 @@ export class ModalHost {
       return;
     }
     this.mounted.update(tree, this.box, null, this.basis);
+  }
+
+  private paintUnavailable(code?: string): void {
+    const t = (key: string, args?: Record<string, unknown>) => {
+      const separator = key.indexOf(':');
+      return this.host.localization.translate(key.slice(0, separator), key.slice(separator + 1), args);
+    };
+
+    this.clearContent();
+    this.unavailable = true;
+
+    const placeholder = document.createElement('div');
+    placeholder.className = 'wc-modal-unavailable';
+    placeholder.setAttribute('role', 'status');
+
+    const heading = document.createElement('h3');
+    heading.textContent = t(ClientAppStrings.Ui.Modal.UnavailableHeading);
+    placeholder.appendChild(heading);
+
+    const body = document.createElement('p');
+    body.textContent = t(ClientAppStrings.Ui.Modal.UnavailableBody);
+    placeholder.appendChild(body);
+
+    if (code) {
+      const codeLine = document.createElement('p');
+      codeLine.className = 'wc-modal-unavailable-code';
+      codeLine.textContent = t(ClientAppStrings.Ui.Modal.ErrorCode, { code });
+      placeholder.appendChild(codeLine);
+    }
+
+    this.content.appendChild(placeholder);
+  }
+
+  private clearContent(): void {
+    if (this.mounted) {
+      this.mounted.destroy();
+      this.mounted = null;
+      this.mountedType = null;
+    }
+    this.content.textContent = '';
+    this.unavailable = false;
   }
 
   private treeHost(): UiRenderHost {
@@ -201,11 +264,8 @@ export class ModalHost {
     }
     this.modalId = null;
     this.sessionId = null;
-    if (this.mounted) {
-      this.mounted.destroy();
-      this.mounted = null;
-      this.mountedType = null;
-    }
+    this.hadTree = false;
+    this.clearContent();
     if (this.observer !== null) {
       this.observer.disconnect();
       this.observer = null;

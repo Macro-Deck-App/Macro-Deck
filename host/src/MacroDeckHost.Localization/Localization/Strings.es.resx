@@ -16208,6 +16208,16 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Ui.List.JumpToLatest" xml:space="preserve">
     <value>Ir a lo más reciente</value>
   </data>
+  <data name="Ui.Modal.ErrorCode" xml:space="preserve">
+    <value>Código de error: {code}</value>
+    <comment>[code:string]</comment>
+  </data>
+  <data name="Ui.Modal.UnavailableBody" xml:space="preserve">
+    <value>No se pudo abrir o se cerró antes de poder mostrar nada. Ciérralo y vuelve a intentarlo. Si sigue pasando, encontrarás los detalles en el registro.</value>
+  </data>
+  <data name="Ui.Modal.UnavailableHeading" xml:space="preserve">
+    <value>No se puede mostrar este diálogo</value>
+  </data>
   <data name="UiRender.AdvancedConfiguration" xml:space="preserve">
     <value>Configuración avanzada</value>
   </data>

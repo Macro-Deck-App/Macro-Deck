@@ -16208,6 +16208,16 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Ui.List.JumpToLatest" xml:space="preserve">
     <value>Vai ai più recenti</value>
   </data>
+  <data name="Ui.Modal.ErrorCode" xml:space="preserve">
+    <value>Codice di errore: {code}</value>
+    <comment>[code:string]</comment>
+  </data>
+  <data name="Ui.Modal.UnavailableBody" xml:space="preserve">
+    <value>Non è stato possibile aprirla, oppure è stata chiusa prima di poter mostrare qualcosa. Chiudila e riprova. Se succede di nuovo, trovi i dettagli nel log.</value>
+  </data>
+  <data name="Ui.Modal.UnavailableHeading" xml:space="preserve">
+    <value>Impossibile mostrare questa finestra</value>
+  </data>
   <data name="UiRender.AdvancedConfiguration" xml:space="preserve">
     <value>Configurazione avanzata</value>
   </data>

@@ -6794,6 +6794,11 @@ export const AppStrings = {
 		List: {
 			JumpToLatest: 'macrodeck.app:Ui.List.JumpToLatest',
 		},
+		Modal: {
+			ErrorCode: 'macrodeck.app:Ui.Modal.ErrorCode',
+			UnavailableBody: 'macrodeck.app:Ui.Modal.UnavailableBody',
+			UnavailableHeading: 'macrodeck.app:Ui.Modal.UnavailableHeading',
+		},
 	},
 	UiRender: {
 		AdvancedConfiguration: 'macrodeck.app:UiRender.AdvancedConfiguration',
@@ -13217,6 +13222,9 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:TemplateBuilder.SearchSnippetsPlaceholder': 'Search filters and snippets',
 	'macrodeck.app:TemplateBuilder.Variables': 'Variables',
 	'macrodeck.app:Ui.List.JumpToLatest': 'Jump to latest',
+	'macrodeck.app:Ui.Modal.ErrorCode': 'Error code: {code}',
+	'macrodeck.app:Ui.Modal.UnavailableBody': 'It could not be opened, or it was closed before it could show anything. Close it and try again. If this keeps happening, the log has the details.',
+	'macrodeck.app:Ui.Modal.UnavailableHeading': 'This dialog cannot be shown',
 	'macrodeck.app:UiRender.AdvancedConfiguration': 'Advanced configuration',
 	'macrodeck.app:UiRender.ReloadOptions': 'Reload options',
 	'macrodeck.app:UiRender.UnsupportedField': 'This field isn\'t supported by this version of Macro Deck',

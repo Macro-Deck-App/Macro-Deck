@@ -84,6 +84,13 @@ internal static class UiSessionLog
 			code,
 			message ?? "(no message)");
 
+	public static void ProviderDeclinedOpen(ILogger logger, string sessionId, string providerId, string surfaceKind, string code)
+		=> logger.Warning("The UI provider '{ProviderId}' declined to open session '{SessionId}' for a '{SurfaceKind}' surface: {Code}",
+			providerId,
+			sessionId,
+			surfaceKind,
+			code);
+
 	public static void ProviderReloaded(ILogger logger, string sessionId, string providerId)
 		=> logger.Information("The UI provider '{ProviderId}' was updated and reloads session '{SessionId}'",
 			providerId,
