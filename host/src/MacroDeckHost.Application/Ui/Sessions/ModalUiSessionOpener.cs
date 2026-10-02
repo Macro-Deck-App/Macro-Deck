@@ -2,6 +2,7 @@ using System.Text.Json;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Ui.Modals;
 using MacroDeckHost.Application.Ui.Transport.Messages.Modals;
+using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Application.Ui.Sessions;
 
@@ -22,11 +23,13 @@ public sealed class ModalUiSessionOpener : IModalUiSessionOpener
 {
 	private readonly IModalInteractionCoordinator _coordinator;
 	private readonly IUiSessionBroker _broker;
+	private readonly ILogger _logger;
 
-	public ModalUiSessionOpener(IModalInteractionCoordinator coordinator, IUiSessionBroker broker)
+	public ModalUiSessionOpener(IModalInteractionCoordinator coordinator, IUiSessionBroker broker, ILogger logger)
 	{
 		_coordinator = coordinator;
 		_broker = broker;
+		_logger = logger.ForContext<ModalUiSessionOpener>();
 	}
 
 	public OpenModalUiSessionResponse Open(OpenModalUiSessionRequest request, string ownerPrincipal)
@@ -38,6 +41,23 @@ public sealed class ModalUiSessionOpener : IModalUiSessionOpener
 		{
 			// One answer for "no such modal" and "not yours", so this cannot be used to discover that a
 			// modal exists on another device.
+			if (_coordinator.Find(request.ModalId) is { } foreign)
+			{
+				_logger.Information(
+					"Refused to open modal {ModalId} of integration {IntegrationId} (view {ViewId}): {Code}, " +
+					"another client already claimed it",
+					foreign.ModalId,
+					foreign.IntegrationId,
+					foreign.ViewId,
+					UiSessionErrorCodes.SessionNotFound);
+			}
+			else
+			{
+				_logger.Information("Refused to open modal {ModalId}: {Code}, it is no longer registered",
+					request.ModalId,
+					UiSessionErrorCodes.SessionNotFound);
+			}
+
 			return new OpenModalUiSessionResponse
 			{
 				Accepted = false,
@@ -65,6 +85,13 @@ public sealed class ModalUiSessionOpener : IModalUiSessionOpener
 		{
 			// The provider could not serve the dialog, so nobody will ever answer it. Cancelling here is
 			// what keeps the waiting action from sitting until its run budget runs out.
+			_logger.Warning(
+				"Refused to open modal {ModalId} of integration {IntegrationId} (view {ViewId}): {Code} {Message}",
+				modal.ModalId,
+				modal.IntegrationId,
+				modal.ViewId,
+				ticket.Code,
+				ticket.Message);
 			_coordinator.CancelInternal(request.ModalId);
 
 			return new OpenModalUiSessionResponse

@@ -51,6 +51,14 @@ public sealed class UiInteractions : IUiInteractions
 		var outcome = await _coordinator.AwaitAsync(modalId, cancellationToken).ConfigureAwait(false);
 		if (outcome.Cancelled)
 		{
+			if (cancellationToken.IsCancellationRequested)
+			{
+				_logger.Information("Modal {ModalId} of integration {IntegrationId} (view {ViewId}) was withdrawn by its caller",
+					modalId,
+					_integrationId,
+					modal.ViewId);
+			}
+
 			return ModalResult.FromCancellation<T>();
 		}
 

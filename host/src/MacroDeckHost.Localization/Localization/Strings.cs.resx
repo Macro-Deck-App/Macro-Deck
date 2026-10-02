@@ -16208,6 +16208,16 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Ui.List.JumpToLatest" xml:space="preserve">
     <value>Přejít na nejnovější</value>
   </data>
+  <data name="Ui.Modal.ErrorCode" xml:space="preserve">
+    <value>Kód chyby: {code}</value>
+    <comment>[code:string]</comment>
+  </data>
+  <data name="Ui.Modal.UnavailableBody" xml:space="preserve">
+    <value>Dialog se nepodařilo otevřít, nebo byl zavřen dřív, než mohl cokoli zobrazit. Zavřete jej a zkuste to znovu. Pokud se to opakuje, podrobnosti jsou v protokolu.</value>
+  </data>
+  <data name="Ui.Modal.UnavailableHeading" xml:space="preserve">
+    <value>Tento dialog nelze zobrazit</value>
+  </data>
   <data name="UiRender.AdvancedConfiguration" xml:space="preserve">
     <value>Pokročilé nastavení</value>
   </data>

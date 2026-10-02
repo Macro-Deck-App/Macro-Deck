@@ -3,8 +3,8 @@ import {
 } from '@angular/core';
 
 import { ApiService } from '../../transport';
-import { LocalizationService } from '../../localization';
-import { UiSessionHandle, UiSessionService } from '../../services/ui-session.service';
+import { LocalizationService, TranslatePipe } from '../../localization';
+import { UiSessionHandle, UiSessionRejection, UiSessionService } from '../../services/ui-session.service';
 import {
   nodeString,
   resolveLocalizedText,
@@ -19,6 +19,7 @@ import { UiWidgetTreeComponent } from '../ui-render/ui-widget-tree.component';
 import { UiWidgetTreeContext } from '../ui-render/ui-widget-tree-context';
 
 const COMPLETE_EVENT = 'modal.complete';
+const SESSION_NOT_FOUND = 'SESSION_NOT_FOUND';
 
 function findNode(root: UiNode | null, nodeId: string): UiNode | null {
   if (root === null) return null;
@@ -34,7 +35,7 @@ function findNode(root: UiNode | null, nodeId: string): UiNode | null {
 @Component({
   selector: 'shared-ui-modal-host',
   standalone: true,
-  imports: [ModalComponent, UiWidgetTreeComponent],
+  imports: [ModalComponent, UiWidgetTreeComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [UiWidgetTreeContext],
   template: `
@@ -47,7 +48,18 @@ function findNode(root: UiNode | null, nodeId: string): UiNode | null {
         [flush]="true"
         (close)="cancel()">
         <div #content class="ui-modal-content">
-          <shared-ui-widget-tree [root]="root()" [box]="box()" (nodeEvent)="onTreeEvent($event)" />
+          @if (problem(); as problem) {
+            <div class="ui-modal-unavailable" role="status">
+              <span class="icon icon-alert-triangle icon-lg" aria-hidden="true"></span>
+              <h2 class="ui-modal-unavailable-heading">{{ 'macrodeck.app:Ui.Modal.UnavailableHeading' | translate }}</h2>
+              <p class="ui-modal-unavailable-body">{{ 'macrodeck.app:Ui.Modal.UnavailableBody' | translate }}</p>
+              @if (errorCode(); as code) {
+                <p class="ui-modal-unavailable-code">{{ 'macrodeck.app:Ui.Modal.ErrorCode' | translate:{ code } }}</p>
+              }
+            </div>
+          } @else {
+            <shared-ui-widget-tree [root]="root()" [box]="box()" (nodeEvent)="onTreeEvent($event)" />
+          }
         </div>
       </shared-modal>
     }
@@ -60,6 +72,35 @@ function findNode(root: UiNode | null, nodeId: string): UiNode | null {
       flex: 1 1 0;
       min-height: 0;
       overflow: hidden;
+    }
+
+    .ui-modal-unavailable {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      height: 100%;
+      padding: 2rem;
+      box-sizing: border-box;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    .ui-modal-unavailable-heading {
+      margin: 0;
+      font-size: 1.125rem;
+      color: var(--text-primary);
+    }
+
+    .ui-modal-unavailable-body,
+    .ui-modal-unavailable-code {
+      margin: 0;
+      max-width: 42ch;
+    }
+
+    .ui-modal-unavailable-code {
+      font-size: 0.8125rem;
     }
   `],
 })
@@ -78,6 +119,19 @@ export class UiModalHostComponent {
   private readonly title = signal<unknown>(null);
 
   protected readonly root = computed<UiNode | null>(() => this.handle()?.root() ?? null);
+
+  protected readonly problem = computed<UiSessionRejection | null>(() => {
+    const handle = this.handle();
+    return handle?.fault?.() ?? handle?.rejection() ?? null;
+  });
+
+  // A re-open after a retryable invalidation finds the modal already cancelled, so its refusal is
+  // SESSION_NOT_FOUND; the invalidation that started the re-open is the code worth reporting.
+  protected readonly errorCode = computed<string | null>(() => {
+    const code = this.problem()?.code ?? null;
+    const reopenReason = this.handle()?.reopenReason?.() ?? null;
+    return code === SESSION_NOT_FOUND && reopenReason !== null ? reopenReason : code;
+  });
 
   protected readonly heading = computed(() => resolveLocalizedText(this.title() as never, this.localization));
 

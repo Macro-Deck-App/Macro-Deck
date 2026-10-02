@@ -16208,6 +16208,16 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Ui.List.JumpToLatest" xml:space="preserve">
     <value>Aller aux plus récents</value>
   </data>
+  <data name="Ui.Modal.ErrorCode" xml:space="preserve">
+    <value>Code d'erreur : {code}</value>
+    <comment>[code:string]</comment>
+  </data>
+  <data name="Ui.Modal.UnavailableBody" xml:space="preserve">
+    <value>Elle n'a pas pu s'ouvrir ou a été fermée avant de pouvoir afficher quoi que ce soit. Ferme-la et réessaie. Si cela se reproduit, le journal contient les détails.</value>
+  </data>
+  <data name="Ui.Modal.UnavailableHeading" xml:space="preserve">
+    <value>Impossible d'afficher cette boîte de dialogue</value>
+  </data>
   <data name="UiRender.AdvancedConfiguration" xml:space="preserve">
     <value>Configuration avancée</value>
   </data>

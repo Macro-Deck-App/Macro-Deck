@@ -89,7 +89,7 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 			return UiSessionOpenTicket.Rejected(created.Code!, created.Message!);
 		}
 
-		context.ProviderPump.Enqueue(_ => OpenOnProviderAsync(context, sessionId, surface));
+		context.ProviderPump.Enqueue(_ => OpenOnProviderAsync(context, providerId, sessionId, surface));
 		_ = ArmOpenDeadlineAsync(context);
 
 		return new UiSessionOpenTicket { Accepted = true, SessionId = sessionId, Ready = context.Ready.Task };
@@ -497,7 +497,7 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 		}
 	}
 
-	private async Task OpenOnProviderAsync(SessionContext context, string sessionId, UiSurface surface)
+	private async Task OpenOnProviderAsync(SessionContext context, string providerId, string sessionId, UiSurface surface)
 	{
 		try
 		{
@@ -510,6 +510,12 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 
 			if (!outcome.Accepted)
 			{
+				UiSessionLog.ProviderDeclinedOpen(_logger,
+					sessionId,
+					providerId,
+					surface.Kind,
+					outcome.RejectionCode ?? UiSessionErrorCodes.ProviderRejected);
+
 				context.Ready.TrySetResult(UiSessionOpenTicket.Rejected(
 					outcome.RejectionCode ?? UiSessionErrorCodes.ProviderRejected,
 					"The provider declined to serve that surface."));

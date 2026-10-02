@@ -16206,6 +16206,16 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Ui.List.JumpToLatest" xml:space="preserve">
     <value>Zu den neuesten springen</value>
   </data>
+  <data name="Ui.Modal.ErrorCode" xml:space="preserve">
+    <value>Fehlercode: {code}</value>
+    <comment>[code:string]</comment>
+  </data>
+  <data name="Ui.Modal.UnavailableBody" xml:space="preserve">
+    <value>Er konnte nicht geöffnet werden oder wurde geschlossen, bevor er etwas anzeigen konnte. Schließe ihn und versuche es erneut. Passiert das immer wieder, findest du die Details im Log.</value>
+  </data>
+  <data name="Ui.Modal.UnavailableHeading" xml:space="preserve">
+    <value>Dieser Dialog kann nicht angezeigt werden</value>
+  </data>
   <data name="UiRender.AdvancedConfiguration" xml:space="preserve">
     <value>Erweiterte Einstellungen</value>
   </data>

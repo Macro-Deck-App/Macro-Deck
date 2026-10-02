@@ -78,7 +78,7 @@ public sealed class TimerWidgetCoordinator
 		}
 
 		_store.Ensure(widgetId, config);
-		var transitions = _store.Gesture(widgetId, gesture);
+		var transitions = _store.Gesture(widgetId, gesture, originClientId);
 
 		// The widget may have been deleted while this press was on its way.
 		if (FindWidget(widgetId) is null)

@@ -16208,6 +16208,16 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Ui.List.JumpToLatest" xml:space="preserve">
     <value>Przejdź do najnowszych</value>
   </data>
+  <data name="Ui.Modal.ErrorCode" xml:space="preserve">
+    <value>Kod błędu: {code}</value>
+    <comment>[code:string]</comment>
+  </data>
+  <data name="Ui.Modal.UnavailableBody" xml:space="preserve">
+    <value>Nie udało się go otworzyć albo zostało zamknięte, zanim cokolwiek wyświetliło. Zamknij je i spróbuj ponownie. Jeśli to się powtarza, szczegóły znajdują się w dzienniku.</value>
+  </data>
+  <data name="Ui.Modal.UnavailableHeading" xml:space="preserve">
+    <value>Nie można wyświetlić tego okna dialogowego</value>
+  </data>
   <data name="UiRender.AdvancedConfiguration" xml:space="preserve">
     <value>Konfiguracja zaawansowana</value>
   </data>

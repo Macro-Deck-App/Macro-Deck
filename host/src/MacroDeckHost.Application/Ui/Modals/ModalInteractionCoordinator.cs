@@ -42,6 +42,10 @@ public interface IModalInteractionCoordinator
 	/// A second principal gets nothing, so one device cannot open another device's dialog.</summary>
 	bool TryClaim(string modalId, string principal, out PendingModal modal);
 
+	/// <summary>The registered modal with that id, whoever it is bound to. For the host's own diagnostics
+	/// only: never let its answer reach a client.</summary>
+	PendingModal? Find(string modalId);
+
 	/// <summary>Records the session a claimed modal is being served through, so closing the modal can close
 	/// the session.</summary>
 	void BindSession(string modalId, string sessionId);
@@ -58,8 +62,8 @@ public interface IModalInteractionCoordinator
 	/// disconnecting client, leaves behind.</summary>
 	void CancelInternal(string modalId);
 
-	/// <summary>Cancels every modal bound to a session id.</summary>
-	void CancelForSession(string sessionId);
+	/// <summary>Cancels every modal bound to a session id and returns the modals it cancelled.</summary>
+	IReadOnlyList<PendingModal> CancelForSession(string sessionId);
 
 	/// <summary>Cancels every modal addressed to a client - what a client going away leaves behind.</summary>
 	void CancelForClient(string clientId);
@@ -69,7 +73,7 @@ public interface IModalInteractionCoordinator
 	/// waiting on them. Without this a fire-and-forget modal whose client never opened it would sit in the
 	/// map for the lifetime of the process: nobody awaits it, so nothing else ever removes it.
 	/// </summary>
-	void SweepExpired();
+	IReadOnlyList<PendingModal> SweepExpired();
 }
 
 public sealed class ModalInteractionCoordinator : IModalInteractionCoordinator
@@ -162,6 +166,9 @@ public sealed class ModalInteractionCoordinator : IModalInteractionCoordinator
 		return true;
 	}
 
+	public PendingModal? Find(string modalId)
+		=> _byModalId.TryGetValue(modalId, out var entry) ? entry.Modal : null;
+
 	public void BindSession(string modalId, string sessionId)
 	{
 		if (_byModalId.TryGetValue(modalId, out var entry))
@@ -197,12 +204,14 @@ public sealed class ModalInteractionCoordinator : IModalInteractionCoordinator
 		}
 	}
 
-	public void CancelForSession(string sessionId)
+	public IReadOnlyList<PendingModal> CancelForSession(string sessionId)
 	{
 		if (string.IsNullOrEmpty(sessionId))
 		{
-			return;
+			return [];
 		}
+
+		var cancelled = new List<PendingModal>();
 
 		foreach (var (modalId, entry) in _byModalId)
 		{
@@ -210,8 +219,11 @@ public sealed class ModalInteractionCoordinator : IModalInteractionCoordinator
 			{
 				_byModalId.TryRemove(modalId, out _);
 				entry.Cancel();
+				cancelled.Add(entry.Modal);
 			}
 		}
+
+		return cancelled;
 	}
 
 	public void CancelForClient(string clientId)
@@ -231,9 +243,10 @@ public sealed class ModalInteractionCoordinator : IModalInteractionCoordinator
 		}
 	}
 
-	public void SweepExpired()
+	public IReadOnlyList<PendingModal> SweepExpired()
 	{
 		var deadline = _timeProvider.GetUtcNow() - _lifetime;
+		var expired = new List<PendingModal>();
 
 		foreach (var (modalId, entry) in _byModalId)
 		{
@@ -241,8 +254,11 @@ public sealed class ModalInteractionCoordinator : IModalInteractionCoordinator
 			{
 				_byModalId.TryRemove(modalId, out _);
 				entry.Cancel();
+				expired.Add(entry.Modal);
 			}
 		}
+
+		return expired;
 	}
 
 	private int CountFor(string clientId)

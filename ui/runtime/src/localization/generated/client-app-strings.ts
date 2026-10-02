@@ -214,6 +214,11 @@ export const ClientAppStrings = {
 		List: {
 			JumpToLatest: 'macrodeck.app:Ui.List.JumpToLatest',
 		},
+		Modal: {
+			ErrorCode: 'macrodeck.app:Ui.Modal.ErrorCode',
+			UnavailableBody: 'macrodeck.app:Ui.Modal.UnavailableBody',
+			UnavailableHeading: 'macrodeck.app:Ui.Modal.UnavailableHeading',
+		},
 	},
 	WebClient: {
 		Connecting: 'macrodeck.app:WebClient.Connecting',
@@ -561,6 +566,9 @@ export const ClientAppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Settings.Network.Tls.ValidFromLabel': 'Valid from',
 	'macrodeck.app:Settings.Network.Tls.ValidUntilLabel': 'Valid until',
 	'macrodeck.app:Ui.List.JumpToLatest': 'Jump to latest',
+	'macrodeck.app:Ui.Modal.ErrorCode': 'Error code: {code}',
+	'macrodeck.app:Ui.Modal.UnavailableBody': 'It could not be opened, or it was closed before it could show anything. Close it and try again. If this keeps happening, the log has the details.',
+	'macrodeck.app:Ui.Modal.UnavailableHeading': 'This dialog cannot be shown',
 	'macrodeck.app:WebClient.Account.SectionTitle': 'Account',
 	'macrodeck.app:WebClient.Account.SignOut': 'Sign out',
 	'macrodeck.app:WebClient.Account.SignedInLabel': 'Signed in',
