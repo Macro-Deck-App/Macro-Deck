@@ -47,8 +47,10 @@ The connection settings can use the same permissions without an automation: **Tu
 **Background connection** and **Display over other apps**, **Turn screen off when disconnected** needs **Background connection** and the device
 admin or the accessibility service. See [Connection settings](/guide/companion-app/deck/#connection-settings).
 
-Turning the screen on does not unlock the device. If it has a screen lock, the deck asks you to unlock the device
-before you can use it.
+Turning the screen on does not bypass a PIN, pattern, password or biometric lock. The deck asks you to unlock
+the device before you can use it when authentication is required. With no screen lock or only a swipe screen,
+you can use the deck as soon as the screen wakes. If Android is still finishing the wake transition, the app
+checks again and removes the unlock message once authentication is no longer required.
 
 ### The accessibility service
 
