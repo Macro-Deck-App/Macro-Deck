@@ -133,9 +133,10 @@ Strings.Status.Scenes(3);  // one member at the base key, count first
 
 The rule is `count == 1` for every culture. It is not CLDR: the host, the Angular clients and the
 bootstrapper must all pick the same form. The rule is exact for English, German, Italian, Spanish and
-French. Czech and Polish need `few`/`many` forms that this model does not have. For those, phrase `Other`
-so that it avoids noun-count agreement: use a count-agnostic label rather than a declined noun. A language
-that cannot be phrased that way needs the closed set of forms extended first.
+French. Chinese has no plural forms, so `One` and `Other` carry the same wording. Czech and Polish need
+`few`/`many` forms that this model does not have. For those, phrase `Other` so that it avoids noun-count
+agreement: use a count-agnostic label rather than a declined noun. A language that cannot be phrased that
+way needs the closed set of forms extended first.
 
 ## Adding a language
 

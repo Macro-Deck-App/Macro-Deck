@@ -35,6 +35,7 @@
     <string>pl</string>
     <string>es</string>
     <string>fr</string>
+    <string>zh-Hans</string>
   </array>
   <key>NSAppleEventsUsageDescription</key>
   <string>Macro Deck uses Apple Events to perform supported macOS system actions.</string>

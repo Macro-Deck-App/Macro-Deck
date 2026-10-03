@@ -49,7 +49,7 @@ tooltips, aria-labels, placeholders, dialog and toast text, validation and error
 status text, integration action and parameter names, native menu and dialog text) comes from a
 localization resource, and ships with a translation in **every** language the app already carries. English
 is the default and the fallback; a new key missing a value in any other shipped language (German, Italian,
-Czech, Polish, Spanish, French) is an incomplete change, not a follow-up.
+Czech, Polish, Spanish, French, Simplified Chinese) is an incomplete change, not a follow-up.
 
 Internal strings are exempt and stay as they are: `ILogger` messages, exception text that is only ever
 diagnostic, protocol and enum values, error *codes*, identifiers, config keys, routes, storage keys, CSS
@@ -76,6 +76,8 @@ across the whole catalog:
   (`Wähle ein Ereignis`, not `Wählen Sie ein Ereignis`), lowercase mid-sentence for German.
 - Czech, Polish: impersonal phrasing, meaning imperative verb forms for actions and impersonal statuses/errors
   rather than direct `ty` address, matching each language's own desktop-software convention.
+- Simplified Chinese (`Strings.zh.resx`): no pronoun where it can be avoided, `你` where it cannot,
+  mainland desktop-software terminology, and `One` and `Other` forms with the same wording.
 
 Czech and Polish also need a plural-form adjustment the other languages don't: the localization compiler
 only distinguishes `count == 1` from every other count (see
