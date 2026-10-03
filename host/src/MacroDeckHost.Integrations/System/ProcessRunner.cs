@@ -60,17 +60,7 @@ internal static class ProcessRunner
 			startInfo.ArgumentList.Add(argument);
 		}
 
-		foreach (var (key, value) in environment ?? new Dictionary<string, string?>())
-		{
-			if (value is null)
-			{
-				startInfo.Environment.Remove(key);
-			}
-			else
-			{
-				startInfo.Environment[key] = value;
-			}
-		}
+		ApplyEnvironment(startInfo, environment);
 
 		using var process = Process.Start(startInfo) ??
 			throw new InvalidOperationException($"Failed to start '{fileName}'.");
@@ -97,6 +87,43 @@ internal static class ProcessRunner
 		}
 
 		return new ProcessResult(process.ExitCode, outputTask.Result, errorTask.Result);
+	}
+
+	public static Process StartStreaming(
+		string fileName,
+		IReadOnlyList<string> arguments,
+		IReadOnlyDictionary<string, string?>? environment)
+	{
+		var startInfo = new ProcessStartInfo(fileName)
+		{
+			RedirectStandardOutput = true,
+			RedirectStandardError = true,
+			UseShellExecute = false,
+			CreateNoWindow = true
+		};
+
+		foreach (var argument in arguments)
+		{
+			startInfo.ArgumentList.Add(argument);
+		}
+
+		ApplyEnvironment(startInfo, environment);
+		return Process.Start(startInfo) ?? throw new InvalidOperationException($"Failed to start '{fileName}'.");
+	}
+
+	private static void ApplyEnvironment(ProcessStartInfo startInfo, IReadOnlyDictionary<string, string?>? environment)
+	{
+		foreach (var (key, value) in environment ?? new Dictionary<string, string?>())
+		{
+			if (value is null)
+			{
+				startInfo.Environment.Remove(key);
+			}
+			else
+			{
+				startInfo.Environment[key] = value;
+			}
+		}
 	}
 
 	public static bool CommandExists(string command)

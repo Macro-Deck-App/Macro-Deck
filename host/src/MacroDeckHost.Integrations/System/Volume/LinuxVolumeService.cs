@@ -4,7 +4,7 @@ using System.Runtime.Versioning;
 namespace MacroDeckHost.Integrations.System.Volume;
 
 [SupportedOSPlatform("linux")]
-internal sealed class LinuxVolumeService : IVolumeService
+internal sealed class LinuxVolumeService : IVolumeService, IDisposable
 {
 	private const long SnapshotLifetimeMs = 1000;
 
@@ -19,12 +19,41 @@ internal sealed class LinuxVolumeService : IVolumeService
 	private readonly object _snapshotGate = new();
 	private Task<PactlSnapshot>? _snapshot;
 
+	private readonly object _monitorGate = new();
+	private Action? _changed;
+	private PactlEventMonitor? _monitor;
+
 	public bool IsSupported => _hasPactl || _hasAmixer;
 
 	public event Action? Changed
 	{
-		add { }
-		remove { }
+		add
+		{
+			lock (_monitorGate)
+			{
+				_changed += value;
+				if (_hasPactl && _monitor is null && _changed is not null)
+				{
+					_monitor = new PactlEventMonitor(OnAudioEvent, _pactlEnvironment);
+					_monitor.Start();
+				}
+			}
+		}
+		remove
+		{
+			PactlEventMonitor? stopped = null;
+			lock (_monitorGate)
+			{
+				_changed -= value;
+				if (_monitor is not null && _changed is null)
+				{
+					stopped = _monitor;
+					_monitor = null;
+				}
+			}
+
+			stopped?.Dispose();
+		}
 	}
 
 	public async Task<IReadOnlyList<AudioDevice>> GetDevicesAsync(CancellationToken cancellationToken = default)
@@ -90,6 +119,34 @@ internal sealed class LinuxVolumeService : IVolumeService
 
 		var switchValue = target.Flow == AudioFlow.Output ? mute ? "mute" : "unmute" : mute ? "nocap" : "cap";
 		return await AmixerAsync(target, ["set"], cancellationToken, switchValue) is not null;
+	}
+
+	public void Dispose()
+	{
+		PactlEventMonitor? stopped;
+		lock (_monitorGate)
+		{
+			stopped = _monitor;
+			_monitor = null;
+		}
+
+		stopped?.Dispose();
+	}
+
+	private void OnAudioEvent()
+	{
+		lock (_snapshotGate)
+		{
+			_snapshot = null;
+		}
+
+		Action? changed;
+		lock (_monitorGate)
+		{
+			changed = _changed;
+		}
+
+		changed?.Invoke();
 	}
 
 	// Every device variable is polled on its own, so reads share one listing instead of each spawning
