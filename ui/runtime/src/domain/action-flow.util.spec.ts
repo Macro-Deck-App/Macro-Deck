@@ -1,6 +1,7 @@
 import { ActionBlock, ActionBlockDefinition, ActionBlockParameter, ActionFlow } from './action-builder.interface';
 import {
   cloneBlockWithNewIds,
+  createBlockFromDefinition,
   collectSecretIds,
   hydrateBlockParameters,
   insertAfterBlock,
@@ -377,5 +378,64 @@ describe('hydrateBlockParameters', () => {
     const folder = params.find(p => p.name === 'folderId')!;
     expect(folder.valueLabel).toBe('Living Room');
     expect(folder.value as string).toBe('guid-123');
+  });
+});
+
+describe('switch blocks', () => {
+  const switchDef: ActionBlockDefinition = {
+    blockType: 'switch',
+    type: 'switch',
+    label: 'Switch',
+    color: '#000',
+    category: 'Logic',
+    hasCases: true,
+  };
+
+  it('a new switch starts with an empty subject, one empty case and a default', () => {
+    const block = createBlockFromDefinition(switchDef);
+
+    expect(block.type).toBe('switch');
+    expect(block.subject as unknown).toBe('');
+    expect(block.branches!.map(b => b.kind)).toEqual(['case', 'else']);
+    expect(block.branches![0].value as unknown).toBe('');
+  });
+
+  it('cloning keeps the subject and every case value but gives them fresh ids', () => {
+    const source = makeBlock({
+      id: 'sw',
+      type: 'switch',
+      blockType: 'switch',
+      subject: { $var: 'repeat' },
+      branches: [
+        { id: 'c1', kind: 'case', value: 'all', children: [] },
+        { id: 'c2', kind: 'case', value: 'one', children: [] },
+        { id: 'd', kind: 'else', children: [] },
+      ],
+    });
+
+    const clone = cloneBlockWithNewIds(source);
+
+    expect(clone.subject as unknown).toEqual({ $var: 'repeat' });
+    expect(clone.branches!.map(b => b.value as unknown)).toEqual(['all', 'one', undefined]);
+    expect(clone.branches!.map(b => b.id)).not.toContain('c1');
+  });
+
+  it('hydrating keeps the subject and case values', () => {
+    const flows: ActionFlow[] = [{
+      triggerId: 't',
+      triggerType: 'onShortPress',
+      children: [makeBlock({
+        id: 'sw',
+        type: 'switch',
+        blockType: 'switch',
+        subject: 'x',
+        branches: [{ id: 'c1', kind: 'case', value: 'y', children: [makeBlock({ id: 'inner' })] }],
+      })],
+    }];
+
+    const [hydrated] = hydrateBlockParameters(flows, () => undefined);
+
+    expect(hydrated.children[0].subject as unknown).toBe('x');
+    expect(hydrated.children[0].branches![0].value as unknown).toBe('y');
   });
 });

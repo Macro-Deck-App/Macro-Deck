@@ -449,6 +449,31 @@ export class ActionFlowStore {
     this.emit(this.flows().map(flow => ({ ...flow, children: updateList(flow.children) })));
   }
 
+  updateSwitchSubject(blockId: string, subject: ParameterValue): void {
+    const updateList = (list: ActionBlock[]): ActionBlock[] =>
+      list.map(block => {
+        const updated = mapDescendants(block, updateList);
+        return updated.id === blockId ? { ...updated, subject } : updated;
+      });
+
+    this.emit(this.flows().map(flow => ({ ...flow, children: updateList(flow.children) })));
+  }
+
+  updateCaseValue(blockId: string, branchId: string, value: ParameterValue): void {
+    this.mutateBranches(blockId, branches =>
+      branches.map(branch => (branch.id === branchId ? { ...branch, value } : branch)),
+    );
+  }
+
+  addCase(blockId: string): void {
+    this.mutateBranches(blockId, branches => {
+      const newBranch: ActionBranch = { id: generateBlockId(), kind: 'case', value: '', children: [] };
+      const elseIdx = branches.findIndex(b => b.kind === 'else');
+      if (elseIdx === -1) return [...branches, newBranch];
+      return [...branches.slice(0, elseIdx), newBranch, ...branches.slice(elseIdx)];
+    });
+  }
+
   addElseIf(blockId: string): void {
     this.mutateBranches(blockId, branches => {
       const newBranch: ActionBranch = {
@@ -473,6 +498,12 @@ export class ActionFlowStore {
   removeBranch(blockId: string, branchId: string): void {
     this.mutateBranches(blockId, branches =>
       branches.filter((b, i) => !(b.id === branchId && i !== 0)),
+    );
+  }
+
+  removeCase(blockId: string, branchId: string): void {
+    this.mutateBranches(blockId, branches =>
+      branches.filter(b => !(b.id === branchId && branches.filter(other => other.kind === 'case').length > 1)),
     );
   }
 
