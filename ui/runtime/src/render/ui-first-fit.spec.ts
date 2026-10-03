@@ -150,4 +150,51 @@ describe('contentFits', () => {
     metrics(label, { scrollHeight: 20, clientHeight: 20 });
     expect(contentFits(root)).toBeTrue();
   });
+
+  describe('a single-line text', () => {
+    let natural = 0;
+    let root: HTMLElement | undefined;
+    let original: typeof Element.prototype.getBoundingClientRect;
+
+    beforeEach(() => {
+      original = Element.prototype.getBoundingClientRect;
+      Element.prototype.getBoundingClientRect = function (this: Element): DOMRect {
+        const width = this.getAttribute('aria-hidden') === 'true' && this.parentElement === document.body ? natural : 0;
+        return { width, height: 0, top: 0, left: 0, right: width, bottom: 0, x: 0, y: 0, toJSON: () => ({}) };
+      };
+    });
+
+    afterEach(() => {
+      Element.prototype.getBoundingClientRect = original;
+      root?.remove();
+    });
+
+    function row(): HTMLElement {
+      root = element();
+      const label = document.createElement('div');
+      label.className = 'widget-text';
+      label.style.whiteSpace = 'nowrap';
+      label.style.width = '100px';
+      label.textContent = 'Mouse';
+      root.appendChild(label);
+      document.body.appendChild(root);
+      metrics(root, { scrollWidth: 100, clientWidth: 100, scrollHeight: 20, clientHeight: 20 });
+      metrics(label, { scrollHeight: 20, clientHeight: 20 });
+      return root;
+    }
+
+    it('does not fit as soon as it needs an ellipsis, even by a fraction of a pixel', () => {
+      const root = row();
+      natural = 100.3;
+      expect(contentFits(root)).toBeFalse();
+    });
+
+    it('fits when it is exactly as wide as its room, give or take float noise', () => {
+      const root = row();
+      natural = 100;
+      expect(contentFits(root)).toBeTrue();
+      natural = 100.005;
+      expect(contentFits(root)).toBeTrue();
+    });
+  });
 });

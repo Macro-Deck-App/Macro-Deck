@@ -1,7 +1,10 @@
 import { naturalTextWidth } from './text-fit';
 
-// An overflow this small is sub-pixel rounding, not a cut-off letter, so it still counts as fitting.
+// A box overflow this small is sub-pixel rounding of integer DOM metrics, not a cut-off letter.
 const CONTENT_FIT_TOLERANCE_PX = 0.5;
+
+// A text is ellipsized on any overflow, so its width gets only float noise (a layout unit is 1/64 px).
+const TEXT_WIDTH_TOLERANCE_PX = 0.01;
 
 function computedWidth(element: HTMLElement): number {
   const view = element.ownerDocument.defaultView;
@@ -17,7 +20,7 @@ function textFits(text: HTMLElement): boolean {
   if (!singleLine) return true;
 
   const natural = naturalTextWidth(text);
-  return natural === null || natural <= computedWidth(text) + CONTENT_FIT_TOLERANCE_PX;
+  return natural === null || natural <= computedWidth(text) + TEXT_WIDTH_TOLERANCE_PX;
 }
 
 // A text box may reach 0.4em past its parent so descenders are not clipped (renderer.css), so a layout

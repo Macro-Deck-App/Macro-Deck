@@ -10,6 +10,11 @@ const TEXT_FIT_EPSILON_PX = 0.05;
 // an ellipsis. Each step only measures the copy, so none of them disturbs the layout being fitted.
 const TEXT_FIT_STEPS = 3;
 
+// A text still wider than its room after those steps is nudged down a little past the estimate, so a
+// shrunk text is never left a hair too wide, which the browser would cut off with an ellipsis.
+const TEXT_FIT_NUDGE_STEPS = 4;
+const TEXT_FIT_NUDGE_FACTOR = 0.995;
+
 export interface TextFit {
   declare(): void;
 
@@ -57,15 +62,34 @@ function availableTextWidth(element: HTMLElement): number {
 // Deliberately not scrollWidth: an element that clips and ellipsizes reports a scroll width equal to
 // its client width, so it always answers "no overflow" and the fit leaves the declared size in place
 // while the browser cuts the text off. Only an unconstrained copy can disagree with the element.
-// Deliberately not scrollWidth: an element that clips and ellipsizes reports a scroll width equal to
-// its client width, so it always answers "no overflow" and the fit leaves the declared size in place
-// while the browser cuts the text off. Only an unconstrained copy can disagree with the element.
 export function naturalTextWidth(element: HTMLElement): number | null {
   const view = element.ownerDocument.defaultView;
+  const own = view === null ? null : ownNaturalWidth(element, view);
+  if (own !== null) return own;
+
   const measure = textMeasurer(element);
   if (view === null || measure === null) return null;
   const size = parseFloat(view.getComputedStyle(element).fontSize);
   return Number.isFinite(size) ? measure(size) : null;
+}
+
+// A copy of the element itself, so the width follows every style the browser paints with. The copy
+// goes in the same parent and is read by its computed width, which no ancestor transform changes.
+function ownNaturalWidth(element: HTMLElement, view: Window, fontSizePx?: number): number | null {
+  const parent = element.parentElement;
+  if (parent === null) return null;
+
+  const copy = element.cloneNode(true) as HTMLElement;
+  copy.removeAttribute('id');
+  copy.removeAttribute('data-node-id');
+  copy.setAttribute('aria-hidden', 'true');
+  copy.style.cssText += ';position:absolute;visibility:hidden;pointer-events:none;flex:none;'
+    + 'width:max-content;min-width:0;max-width:none;overflow:visible;text-overflow:clip';
+  if (fontSizePx !== undefined) copy.style.fontSize = `${fontSizePx}px`;
+  parent.appendChild(copy);
+  const width = parseFloat(view.getComputedStyle(copy).width);
+  parent.removeChild(copy);
+  return Number.isFinite(width) ? width : null;
 }
 
 function textMeasurer(element: HTMLElement): ((fontSizePx: number) => number) | null {
@@ -95,6 +119,10 @@ function textMeasurer(element: HTMLElement): ((fontSizePx: number) => number) | 
   measurer.textContent = element.textContent;
 
   return (fontSizePx: number): number => {
+    // Fit and first-fit must measure the same styled copy. An isolated span can have different
+    // glyph advances (e.g. inherited text-rendering or font features), leaving the fitted text clipped.
+    const own = ownNaturalWidth(element, view, fontSizePx);
+    if (own !== null) return own;
     measurer.style.fontSize = `${fontSizePx}px`;
     return measurer.getBoundingClientRect().width;
   };
@@ -139,6 +167,15 @@ export function textFit(
           if (natural <= available) break;
 
           const next = Math.max(minimum!, size! * available / natural);
+          if (next >= size!) break;
+          size = next;
+        }
+
+        for (let step = 0; step < TEXT_FIT_NUDGE_STEPS; step++) {
+          const natural = measure(size!);
+          if (natural <= available) break;
+
+          const next = Math.max(minimum!, size! * available / natural * TEXT_FIT_NUDGE_FACTOR);
           if (next >= size!) break;
           size = next;
         }

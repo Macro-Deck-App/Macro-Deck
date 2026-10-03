@@ -40,7 +40,8 @@ A layout fits when, in the box the node is given:
   is allowed;
 - the layout itself does not overflow the box. A text may reach slightly past its parent, as it always may so
   descenders are not clipped; overflow beyond that makes a layout not fit, and a rounding difference of half a
-  pixel does not.
+  pixel in the box does not. A single-line text has no such allowance: it is cut off as soon as it needs an
+  ellipsis.
 
 A text that shrinks to its `MinSize` to fit counts as fitting. Images, shapes and other non-text content are
 not measured.

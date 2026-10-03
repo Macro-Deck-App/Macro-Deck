@@ -524,6 +524,10 @@ describe('DeckEditorGridComponent', () => {
     }
 
     function layOut(): void {
+      // Keep the hit-test probes in the viewport even when Karma's reporter grows above the fixture.
+      host().style.position = 'fixed';
+      host().style.left = '0';
+      host().style.top = '0';
       fixture.debugElement.query(By.directive(WidgetGridComponent)).injector.get(ChangeDetectorRef).markForCheck();
       fixture.detectChanges();
     }
