@@ -1,4 +1,4 @@
-import { bundledTranslator, isComponentProfileType, renderUiNode } from '../runtime/src/public-api';
+import { asLocalizedRef, bundledTranslator, formatTemplate, isComponentProfileType, pluralForm, renderUiNode } from '../runtime/src/public-api';
 
 interface Scene {
   width: number;
@@ -8,12 +8,28 @@ interface Scene {
   background: string;
   locale: string;
   resources: Record<string, string>;
+  translations: Record<string, string>;
   root: Parameters<typeof renderUiNode>[1];
 }
 
 const WIDGET_REFERENCE_CELL = 120;
 // A fixed clock keeps time and progress components identical on every run.
 const FIXED_NOW = Date.UTC(2026, 8, 12, 14, 5, 30);
+
+function translate(translations: Record<string, string>, scope: string, key: string, args?: Record<string, unknown>, depth = 0): string {
+  const qualified = `${scope}:${key}`;
+  const count = args?.['count'];
+  const template = translations[qualified]
+    ?? (count === undefined ? undefined : translations[`${qualified}.${pluralForm(count)}`] ?? translations[`${qualified}.Other`]);
+  if (template === undefined) return bundledTranslator(qualified, args);
+
+  const resolved: Record<string, unknown> = { ...args };
+  for (const name in args) {
+    const ref = depth < 4 ? asLocalizedRef(args[name]) : undefined;
+    if (ref) resolved[name] = translate(translations, ref.scope, ref.key, ref.arguments, depth + 1);
+  }
+  return formatTemplate(template, resolved);
+}
 
 async function report(id: string, status: string): Promise<void> {
   await fetch(`/status/${id}`, { method: 'POST', body: status });
@@ -48,7 +64,7 @@ async function main(): Promise<void> {
     surface.style.transformOrigin = '0 0';
 
     const host = {
-      localization: { translate: (scope: string, key: string, args?: Record<string, unknown>) => bundledTranslator(`${scope}:${key}`, args) },
+      localization: { translate: (scope: string, key: string, args?: Record<string, unknown>) => translate(scene.translations ?? {}, scope, key, args) },
       resourceUrl: (resource?: { resourceId?: string }) => scene.resources[resource?.resourceId ?? ''] ?? null,
       now: () => FIXED_NOW,
       culture: () => scene.locale,

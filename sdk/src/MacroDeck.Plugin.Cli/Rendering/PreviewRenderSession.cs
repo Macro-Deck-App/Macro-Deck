@@ -105,6 +105,7 @@ internal static class PreviewRenderSession
 		Directory.CreateDirectory(options.Output);
 		await using var screenshotter = await (screenshotterFactory ?? StartChromeAsync)(browser, cancellationToken)
 			.ConfigureAwait(false);
+		var translations = await PreviewPluginCatalog.LoadAsync(console, session, options.Locale).ConfigureAwait(false);
 		var failures = 0;
 		var written = 0;
 		var skipped = 0;
@@ -144,7 +145,7 @@ internal static class PreviewRenderSession
 					try
 					{
 						await screenshotter.CaptureAsync(
-							new PreviewShot(PreviewScene.Build(root, size, options, resources), size, options.Scale, target),
+							new PreviewShot(PreviewScene.Build(root, size, options, resources, translations), size, options.Scale, target),
 							cancellationToken).ConfigureAwait(false);
 						console.Info($"Wrote {CliText.DisplayPath(target)}");
 						written++;

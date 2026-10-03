@@ -1,6 +1,10 @@
 using System.Text.Json;
 using MacroDeck.Plugin.Cli.Rendering;
+using MacroDeck.Plugin.Cli.Runtime;
 using MacroDeck.Plugin.Cli.Tests.UnitTests.Support;
+using MacroDeck.Plugin.Protocol.Handshake;
+using MacroDeck.Plugin.Protocol.Versioning;
+using MacroDeck.Plugin.Testing;
 
 namespace MacroDeck.Plugin.Cli.Tests.UnitTests;
 
@@ -128,6 +132,53 @@ public class PreviewRenderCommandTests
 
 		Assert.That(screenshotter.Shots.Select(shot => Path.GetFileName(shot.OutputPath)),
 			Is.EquivalentTo(_defaultViews));
+	}
+
+	[TestCase("en-US", "Connect", "{count} devices found")]
+	[TestCase("de-DE", "Verbinden", "{count} Geräte gefunden")]
+	[TestCase("de", "Verbinden", "{count} Geräte gefunden")]
+	[TestCase("fr-FR", "Connect", "{count} devices found")]
+	public async Task The_plugin_text_is_resolved_for_the_requested_locale_and_falls_back_to_the_plugin_default(
+		string locale, string connect, string devices)
+	{
+		var screenshotter = new FakeScreenshotter();
+
+		var (_, error, exitCode) = await Render(screenshotter, "--preview", "Localized label", "--locale", locale);
+
+		var translations = JsonDocument.Parse(screenshotter.Shots.Single().SceneJson).RootElement.GetProperty("translations")
+			.EnumerateObject().ToDictionary(property => property.Name, property => property.Value.GetString());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(exitCode, Is.EqualTo(ExitCode.Success), error);
+			Assert.That(translations.Single(pair => pair.Key.EndsWith(":Connect", StringComparison.Ordinal)).Value, Is.EqualTo(connect));
+			Assert.That(translations.Where(pair => pair.Key.Contains(":DeviceCount", StringComparison.Ordinal)).Select(pair => pair.Value),
+				Does.Contain(devices));
+			Assert.That(translations.Keys, Is.All.StartsWith("plugin:"));
+		});
+	}
+
+	[Test]
+	public async Task A_plugin_that_did_not_get_its_localization_capability_accepted_still_renders_with_no_translations()
+	{
+		var options = new MacroDeckTestHostOptions
+		{
+			NegotiateCapability = capability => capability.Kind == CapabilityKinds.Localization
+				? CapabilityNegotiationResult.Reject(capability.Kind, "not offered")
+				: CapabilityNegotiationResult.Accept(capability.Kind, 1)
+		};
+		await using var host = await MacroDeckTestHost.StartAsync(options);
+		await using var plugin = await host.LaunchAsync(PluginSubjectResolver.ResolveExecutable(FixturePlugins.WellBehaved()));
+		var session = await host.WaitForSessionAsync(TimeSpan.FromSeconds(60));
+		var error = new StringWriter();
+
+		var translations = await PreviewPluginCatalog.LoadAsync(new CliConsole(Verbosity.Normal, true, error: error), session, "de-DE");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(translations, Is.Empty);
+			Assert.That(error.ToString(), Is.Empty);
+		});
 	}
 
 	[Test]
