@@ -23,14 +23,16 @@ public readonly record struct LocalizedString
 	public LocalizedString(LocalizationKey key, IReadOnlyDictionary<string, object?>? arguments)
 	{
 		Key = key;
-		Arguments = arguments ?? _noArguments;
+		_arguments = arguments ?? _noArguments;
 	}
+
+	private readonly IReadOnlyDictionary<string, object?>? _arguments;
 
 	/// <summary>The key to resolve.</summary>
 	public LocalizationKey Key { get; }
 
 	/// <summary>Values for the key's named placeholders, keyed by placeholder name. Never null.</summary>
-	public IReadOnlyDictionary<string, object?> Arguments { get; }
+	public IReadOnlyDictionary<string, object?> Arguments => _arguments ?? _noArguments;
 
 	/// <summary>Value equality over the key and the argument contents.</summary>
 	/// <remarks>Written out rather than left to the compiler: the generated record equality would compare

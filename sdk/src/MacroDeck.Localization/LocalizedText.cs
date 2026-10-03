@@ -39,8 +39,11 @@ public readonly record struct LocalizedText
 	public static LocalizedText FromLiteral(string? literal)
 		=> literal is null ? default : new LocalizedText(literal, null);
 
-	/// <summary>Wraps a reference to be resolved in the reader's culture.</summary>
-	public static LocalizedText FromLocalized(LocalizedString localized) => new(null, localized);
+	/// <summary>Wraps a reference to be resolved in the reader's culture. A default reference with no key is absent.</summary>
+	public static LocalizedText FromLocalized(LocalizedString localized)
+		=> string.IsNullOrWhiteSpace(localized.Key.Scope) || string.IsNullOrWhiteSpace(localized.Key.Name)
+			? default
+			: new LocalizedText(null, localized);
 
 	/// <summary>Converts literal text.</summary>
 	public static implicit operator LocalizedText(string? literal) => FromLiteral(literal);
