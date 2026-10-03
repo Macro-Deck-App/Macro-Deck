@@ -1901,9 +1901,10 @@ describe('widget text inside the box its stack has', () => {
     Element.prototype.getBoundingClientRect = function (this: Element) {
       const element = this as HTMLElement;
       const natural = naturalWidth(element);
+      if (element.getAttribute('aria-hidden') === 'true') return { width: natural, height: 0 } as DOMRect;
       if (!element.classList.contains('widget-text')) return { width: natural, height: 0 } as DOMRect;
 
-      const row = Array.from(container.querySelectorAll('.widget-text')) as HTMLElement[];
+      const row = Array.from(container.querySelectorAll('.widget-text:not([aria-hidden="true"])')) as HTMLElement[];
       const asked = row.reduce((total, sibling) => total + naturalWidth(sibling), 0);
       return { width: asked > roomPx ? natural * roomPx / asked : natural, height: 0 } as DOMRect;
     };
