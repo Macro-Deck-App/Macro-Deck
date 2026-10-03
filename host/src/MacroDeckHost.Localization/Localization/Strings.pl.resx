@@ -4205,6 +4205,15 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>Zmień profil na</value>
   </data>
+  <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
+    <value>Opcjonalne. Nawiguje tylko to urządzenie. Puste pole oznacza urządzenie, które uruchomiło akcję, a gdy żadne jej nie uruchomiło, wszystkie urządzenia.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.DeviceLabel" xml:space="preserve">
+    <value>Urządzenie</value>
+  </data>
+  <data name="Integrations.Deck.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>Urządzenie uruchamiające, w przeciwnym razie wszystkie</value>
+  </data>
   <data name="Integrations.Deck.Actions.FolderDescription" xml:space="preserve">
     <value>Folder, na który ma nastąpić przełączenie.</value>
   </data>
@@ -4228,6 +4237,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>Profil</value>
+  </data>
+  <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
+    <value>Urządzenie „{deviceId}” nie jest połączone.</value>
   </data>
   <data name="Integrations.Deck.Errors.FolderNotFound" xml:space="preserve">
     <value>Folder „{folderId}” nie istnieje.</value>

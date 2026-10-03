@@ -23,7 +23,8 @@ internal sealed class ChangeProfileActionDefinition : IDynamicOptionsActionDefin
 		ActionParameter.DynamicChoice("profileId",
 			label: AppStrings.Integrations.Deck.Actions.ProfileLabel(),
 			description: AppStrings.Integrations.Deck.Actions.ProfileDescription(),
-			required: true)
+			required: true),
+		DeckDeviceTarget.Parameter()
 	];
 
 	public IActionExecutor CreateExecutor() => new Executor(_navigator);
@@ -83,7 +84,12 @@ internal sealed class ChangeProfileActionDefinition : IDynamicOptionsActionDefin
 					AppStrings.Integrations.Deck.Errors.ProfileNotFound(profileId: profileId));
 			}
 
-			await navigator.ChangeProfileAsync(profileId, context.OriginClientId, context.CancellationToken);
+			if (!DeckDeviceTarget.TryResolve(navigator, context, out var originClientId, out var failure))
+			{
+				return failure!;
+			}
+
+			await navigator.ChangeProfileAsync(profileId, originClientId, context.CancellationToken);
 			return ActionResult.Success();
 		}
 	}

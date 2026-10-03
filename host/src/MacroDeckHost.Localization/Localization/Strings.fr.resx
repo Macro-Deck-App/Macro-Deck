@@ -4205,6 +4205,15 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>Changer de profil vers</value>
   </data>
+  <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
+    <value>Facultatif. Seul cet appareil navigue. Laisse vide pour utiliser l'appareil qui a lancé l'action, ou tous les appareils si aucun ne l'a lancée.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.DeviceLabel" xml:space="preserve">
+    <value>Appareil</value>
+  </data>
+  <data name="Integrations.Deck.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>Appareil déclencheur, sinon tous</value>
+  </data>
   <data name="Integrations.Deck.Actions.FolderDescription" xml:space="preserve">
     <value>Le dossier vers lequel basculer.</value>
   </data>
@@ -4228,6 +4237,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>Profil</value>
+  </data>
+  <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
+    <value>L'appareil « {deviceId} » n'est pas connecté.</value>
   </data>
   <data name="Integrations.Deck.Errors.FolderNotFound" xml:space="preserve">
     <value>Le dossier « {folderId} » n'existe pas.</value>
