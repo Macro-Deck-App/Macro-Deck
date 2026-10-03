@@ -38,6 +38,10 @@ size, exactly as a tile on the deck is, so a size that is not a whole number of 
 Configuration views, such as an action editor or a configuration flow, are drawn by the desktop app and are
 skipped with a `preview-unsupported` warning. A skipped preview does not fail the run.
 
+Text from the plugin's own localization catalog is drawn in the `--locale` language. When the catalog cannot be
+read, the run continues with a `preview-localization-unavailable` warning and the plugin's strings show as
+placeholders.
+
 The image is the tile: its background and rounded corners are part of the picture. `--background` is what shows
 behind the corners.
 
@@ -55,7 +59,7 @@ Pick exactly one of `--project`, `--executable` or `--artifact`, as for [`run`](
 | `--theme dark\|light` | Defaults to `dark`. |
 | `--background <color>` | `transparent` (the default), a color name or a `#hex` color. |
 | `--radius <px>` | The tile's corner radius in the 120 px reference cell, scaled with the tile as on the deck. Defaults to `22`, the deck's default. |
-| `--locale <culture>` | The culture dates and numbers are formatted in. Defaults to `en-US`. |
+| `--locale <culture>` | The culture dates and numbers are formatted in, and the language of the plugin's own text. Plugin text falls back to the plugin's default language when it has no resources for the culture. Defaults to `en-US`. |
 | `--output <dir>` | Where the files go. Defaults to `./previews`. |
 | `--browser <path>` | The browser to use, see below. |
 

@@ -7,7 +7,8 @@ internal static class PreviewScene
 	public static string Build(JsonElement root,
 		PreviewSize size,
 		PreviewRenderOptions options,
-		IReadOnlyDictionary<string, string> resources)
+		IReadOnlyDictionary<string, string> resources,
+		IReadOnlyDictionary<string, string> translations)
 	{
 		using var stream = new MemoryStream();
 
@@ -25,6 +26,14 @@ internal static class PreviewScene
 			foreach (var (id, url) in resources)
 			{
 				writer.WriteString(id, url);
+			}
+
+			writer.WriteEndObject();
+			writer.WriteStartObject("translations");
+
+			foreach (var (key, template) in translations)
+			{
+				writer.WriteString(key, template);
 			}
 
 			writer.WriteEndObject();
