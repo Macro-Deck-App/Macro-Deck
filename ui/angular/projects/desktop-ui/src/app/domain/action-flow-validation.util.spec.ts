@@ -289,3 +289,36 @@ describe('isConditionComplete vs validateActionFlows agreement (issue #876, D5)'
     expect(isValid(expr)).toBeFalse();
   });
 });
+
+describe('validateActionFlows for switch blocks', () => {
+  function switchFlow(subject: ActionBlock['subject'], ...caseValues: ActionBranch['value'][]): ActionFlow {
+    return flow(block({
+      id: 'sw',
+      type: 'switch',
+      blockType: 'switch',
+      parameters: [],
+      subject,
+      branches: [
+        ...caseValues.map((value, i) => ({ id: `case-${i}`, kind: 'case' as const, value, children: [] })),
+        { id: 'else', kind: 'else' as const, children: [] },
+      ],
+    }));
+  }
+
+  it('accepts a subject with filled cases and a default', () => {
+    expect(validateActionFlows([switchFlow({ $var: 'repeat' }, 'all', 'one')]).valid).toBeTrue();
+  });
+
+  it('flags an empty subject', () => {
+    const result = validateActionFlows([switchFlow('', 'all')]);
+
+    expect(result.valid).toBeFalse();
+    expect(result.errors.map(e => e.blockId)).toEqual(['sw']);
+  });
+
+  it('flags only the case whose value is empty', () => {
+    const result = validateActionFlows([switchFlow('x', 'all', '')]);
+
+    expect(result.errors.map(e => e.branchId)).toEqual(['case-1']);
+  });
+});
