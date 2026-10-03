@@ -17,6 +17,7 @@ import {
   textFontWeight,
   textRoleColor,
   textWraps,
+  widgetTileFilled,
   widgetTileTransparent,
 } from './style';
 
@@ -93,6 +94,25 @@ describe('widget node presentation', () => {
     it('paints nothing for a stack or a button asked for transparent, rather than the button accent', () => {
       expect(stackBackground(node({ background: 'transparent' }))).toBe('transparent');
       expect(buttonBackground(node({ background: 'transparent' }))).toBe('transparent');
+    });
+  });
+
+  describe('filled tile face', () => {
+    const typed = (type: string, properties: Record<string, unknown>): UiNode =>
+      ({ id: `f${++nextId}`, type, properties, children: [] }) as UiNode;
+
+    it('is filled when the root paints an opaque colour, including a button with no colour of its own', () => {
+      expect(widgetTileFilled(typed('ui.stack', { background: '#ff0000' }))).toBeTrue();
+      expect(widgetTileFilled(typed('ui.button', { background: '#ff0000' }))).toBeTrue();
+      expect(widgetTileFilled(typed('ui.button', {}))).toBeTrue();
+    });
+
+    it('is not filled when the root paints nothing opaque of its own', () => {
+      expect(widgetTileFilled(null)).toBeFalse();
+      expect(widgetTileFilled(typed('ui.stack', {}))).toBeFalse();
+      expect(widgetTileFilled(typed('ui.stack', { background: 'transparent' }))).toBeFalse();
+      expect(widgetTileFilled(typed('ui.button', { background: 'transparent' }))).toBeFalse();
+      expect(widgetTileFilled(typed('ui.text', { background: '#ff0000' }))).toBeFalse();
     });
   });
 

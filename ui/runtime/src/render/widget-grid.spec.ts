@@ -389,6 +389,19 @@ describe('runtime widget grid', () => {
     expect(tile().classList.contains('deck-grid-tile-transparent')).toBeFalse();
   });
 
+  it('marks a tile whose widget paints an opaque fill, and unmarks it when the fill goes', () => {
+    const handle = mount();
+    const stack = (background?: string): UiNode =>
+      ({ id: 'root', type: 'ui.stack', properties: background === undefined ? {} : { background } }) as UiNode;
+    const tile = (): HTMLElement => container.querySelector('[data-widget-id="a"]') as HTMLElement;
+
+    handle.update([widget('a', 0, 0)], () => stack('#ff0000'));
+    expect(tile().classList.contains('deck-grid-tile-filled')).toBeTrue();
+
+    handle.update([widget('a', 0, 0)], () => stack());
+    expect(tile().classList.contains('deck-grid-tile-filled')).toBeFalse();
+  });
+
   it('runs its own press lifecycle for a tree that claims no gesture', () => {
     const fired: string[] = [];
     const handle = renderWidgetGrid(container, {
