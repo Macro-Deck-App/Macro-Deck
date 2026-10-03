@@ -8,14 +8,14 @@ namespace MacroDeckHost.Integrations.Deck;
 internal sealed class DeckActionDefinition : IActionDefinition
 {
 	private readonly Func<IDeckNavigator?> _navigator;
-	private readonly Func<IDeckNavigator, ActionExecutionContext, Task> _invoke;
+	private readonly Func<IDeckNavigator, string?, CancellationToken, Task> _invoke;
 
 	public DeckActionDefinition(
 		string id,
 		LocalizedText name,
 		LocalizedText description,
 		Func<IDeckNavigator?> navigator,
-		Func<IDeckNavigator, ActionExecutionContext, Task> invoke)
+		Func<IDeckNavigator, string?, CancellationToken, Task> invoke)
 	{
 		Id = id;
 		Name = name;
@@ -27,16 +27,16 @@ internal sealed class DeckActionDefinition : IActionDefinition
 	public string Id { get; }
 	public LocalizedText Name { get; }
 	public LocalizedText Description { get; }
-	public IReadOnlyList<ActionParameter> Parameters { get; } = [];
+	public IReadOnlyList<ActionParameter> Parameters { get; } = [DeckDeviceTarget.Parameter()];
 
 	public IActionExecutor CreateExecutor() => new Executor(_navigator, _invoke);
 
 	private sealed class Executor : IActionExecutor
 	{
 		private readonly Func<IDeckNavigator?> _navigator;
-		private readonly Func<IDeckNavigator, ActionExecutionContext, Task> _invoke;
+		private readonly Func<IDeckNavigator, string?, CancellationToken, Task> _invoke;
 
-		public Executor(Func<IDeckNavigator?> navigator, Func<IDeckNavigator, ActionExecutionContext, Task> invoke)
+		public Executor(Func<IDeckNavigator?> navigator, Func<IDeckNavigator, string?, CancellationToken, Task> invoke)
 		{
 			_navigator = navigator;
 			_invoke = invoke;
@@ -51,7 +51,12 @@ internal sealed class DeckActionDefinition : IActionDefinition
 					AppStrings.Integrations.Deck.Errors.NavigationUnavailable());
 			}
 
-			await _invoke(navigator, context);
+			if (!DeckDeviceTarget.TryResolve(navigator, context, out var originClientId, out var failure))
+			{
+				return failure!;
+			}
+
+			await _invoke(navigator, originClientId, context.CancellationToken);
 			return ActionResult.Success();
 		}
 	}

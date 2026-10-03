@@ -23,7 +23,8 @@ internal sealed class ChangeFolderActionDefinition : IDynamicOptionsActionDefini
 		ActionParameter.DynamicChoice("folderId",
 			label: AppStrings.Integrations.Deck.Actions.FolderLabel(),
 			description: AppStrings.Integrations.Deck.Actions.FolderDescription(),
-			required: true)
+			required: true),
+		DeckDeviceTarget.Parameter()
 	];
 
 	public IActionExecutor CreateExecutor() => new Executor(_navigator);
@@ -81,7 +82,12 @@ internal sealed class ChangeFolderActionDefinition : IDynamicOptionsActionDefini
 					AppStrings.Integrations.Deck.Errors.FolderNotFound(folderId: folderId));
 			}
 
-			await navigator.ChangeFolderAsync(folderId, context.OriginClientId, context.CancellationToken);
+			if (!DeckDeviceTarget.TryResolve(navigator, context, out var originClientId, out var failure))
+			{
+				return failure!;
+			}
+
+			await navigator.ChangeFolderAsync(folderId, originClientId, context.CancellationToken);
 			return ActionResult.Success();
 		}
 	}
