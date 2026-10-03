@@ -26,6 +26,8 @@ public sealed class IntegrationIssueBroadcastBackgroundService : HostReadyBackgr
 
 	private readonly Dictionary<string, string> _lastByIntegration = new(StringComparer.Ordinal);
 
+	private readonly Dictionary<string, string> _failureSignatureByIntegration = new(StringComparer.Ordinal);
+
 	private readonly Dictionary<string, HashSet<string>> _notifiedErrorIssueIdsByIntegration =
 		new(StringComparer.Ordinal);
 
@@ -58,10 +60,11 @@ public sealed class IntegrationIssueBroadcastBackgroundService : HostReadyBackgr
 				try
 				{
 					await Tick(stoppingToken);
+					_failureSignatureByIntegration.Remove(string.Empty);
 				}
 				catch (Exception ex)
 				{
-					_logger.Error(ex, "Integration issue broadcast tick failed");
+					ReportFailure(string.Empty, ex, () => string.Empty);
 				}
 
 				await _trigger.WaitAsync(_interval, stoppingToken);
@@ -84,17 +87,56 @@ public sealed class IntegrationIssueBroadcastBackgroundService : HostReadyBackgr
 			}
 
 			seen.Add(integration.Id);
-			// IIntegrationIssueService.GetIssuesAsync already catches a misbehaving provider and
-			// answers empty, so no per-integration try/catch is needed here; one provider throwing
-			// cannot take the rest of this tick down.
-			var issues = await _issueService.GetIssuesAsync(integration.Id, ct);
-			await BroadcastIfChanged(integration.Id, issues, ct);
+			IReadOnlyList<IntegrationIssue> issues = [];
+			await BroadcastGuarded(integration.Id,
+				() => issues,
+				async () =>
+				{
+					issues = await _issueService.GetIssuesAsync(integration.Id, ct);
+					await BroadcastIfChanged(integration.Id, issues, ct);
+				});
 		}
 
 		foreach (var goneId in _lastByIntegration.Keys.Where(id => !seen.Contains(id)).ToList())
 		{
-			await BroadcastIfChanged(goneId, [], ct);
+			await BroadcastGuarded(goneId, () => [], () => BroadcastIfChanged(goneId, [], ct));
 		}
+	}
+
+	private async Task BroadcastGuarded(
+		string integrationId,
+		Func<IReadOnlyList<IntegrationIssue>> currentIssues,
+		Func<Task> broadcast)
+	{
+		try
+		{
+			await broadcast();
+			_failureSignatureByIntegration.Remove(integrationId);
+		}
+		catch (OperationCanceledException)
+		{
+			throw;
+		}
+		catch (Exception ex)
+		{
+			ReportFailure(integrationId, ex, () => string.Join(", ", currentIssues().Select(i => i.Id)));
+		}
+	}
+
+	private void ReportFailure(string key, Exception ex, Func<string> issueIds)
+	{
+		// The message is left out of the signature: it can carry a changing value such as an elapsed time.
+		var signature = $"{ex.GetType().FullName}@{ex.TargetSite?.DeclaringType?.FullName}.{ex.TargetSite?.Name}";
+		if (_failureSignatureByIntegration.TryGetValue(key, out var previous) && previous == signature)
+		{
+			return;
+		}
+
+		_failureSignatureByIntegration[key] = signature;
+		_logger.Error(ex,
+			"Integration issue broadcast failed for {IntegrationId} (issues: {IssueIds}); repeats are not logged until it recovers",
+			key,
+			issueIds());
 	}
 
 	private async Task BroadcastIfChanged(

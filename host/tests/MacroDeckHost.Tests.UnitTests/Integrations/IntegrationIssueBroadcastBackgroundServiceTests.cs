@@ -1,3 +1,4 @@
+using System.Globalization;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Ui.Transport.Messages.Integrations;
@@ -11,6 +12,7 @@ using MacroDeck.Sdk.Issues;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Core;
+using Serilog.Events;
 using MacroDeck.Localization;
 
 namespace MacroDeckHost.Tests.UnitTests.Integrations;
@@ -224,6 +226,87 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 			"filters on IIntegrationIssueProvider");
 	}
 
+	[Test]
+	public async Task A_failing_integration_does_not_stop_the_next_one_from_broadcasting()
+	{
+		var registry = new FakeIssueRegistry();
+		registry.Add("app.test.broken", enabled: true);
+		registry.Add("app.test.fine", enabled: true);
+		var issueService = new FakeIssueService { FailingIntegrationId = "app.test.broken" };
+		issueService.Set("app.test.fine", Issue("a", IntegrationIssueSeverity.Warning));
+		var transport = new RecordingUiTransport();
+		var service = CreateService(registry, issueService, transport);
+
+		await service.Tick(CancellationToken.None);
+
+		Assert.That(Events(transport).Select(e => e.IntegrationId), Is.EqualTo(new[] { "app.test.fine" }));
+	}
+
+	[Test]
+	public async Task A_repeating_failure_is_logged_once_per_integration_until_it_recovers()
+	{
+		var registry = new FakeIssueRegistry();
+		registry.Add("app.test.broken", enabled: true);
+		registry.Add("app.test.other", enabled: true);
+		var issueService = new FakeIssueService { FailingIntegrationId = "app.test.broken" };
+		var logged = new List<LogEvent>();
+		var service = CreateService(registry, issueService, new RecordingUiTransport(), logger: LoggerInto(logged));
+
+		for (var i = 0; i < 5; i++)
+		{
+			await service.Tick(CancellationToken.None);
+		}
+
+		Assert.That(logged.Count(e => e.Level == LogEventLevel.Error), Is.EqualTo(1),
+			"five identical failing ticks must not write five error entries");
+
+		issueService.FailingIntegrationId = null;
+		await service.Tick(CancellationToken.None);
+		issueService.FailingIntegrationId = "app.test.broken";
+		await service.Tick(CancellationToken.None);
+
+		Assert.That(logged.Count(e => e.Level == LogEventLevel.Error), Is.EqualTo(2),
+			"a failure after a recovery is news again");
+	}
+
+	[Test]
+	public async Task The_failure_log_names_the_integration()
+	{
+		var registry = new FakeIssueRegistry();
+		registry.Add("app.test.broken", enabled: true);
+		var issueService = new FakeIssueService { FailingIntegrationId = "app.test.broken" };
+		var logged = new List<LogEvent>();
+		var service = CreateService(registry, issueService, new RecordingUiTransport(), logger: LoggerInto(logged));
+
+		await service.Tick(CancellationToken.None);
+
+		Assert.That(logged.Single().RenderMessage(CultureInfo.InvariantCulture), Does.Contain("app.test.broken"));
+	}
+
+	[Test]
+	public async Task An_issue_whose_text_is_a_default_localized_reference_is_broadcast_instead_of_failing()
+	{
+		var registry = new FakeIssueRegistry();
+		registry.Add("app.test.one", enabled: true);
+		var issueService = new FakeIssueService();
+		issueService.Set("app.test.one",
+			new IntegrationIssue { Id = "a", Title = default(LocalizedString), Severity = IntegrationIssueSeverity.Warning });
+		var transport = new RecordingUiTransport();
+		var logged = new List<LogEvent>();
+		var service = CreateService(registry, issueService, transport, logger: LoggerInto(logged));
+
+		await service.Tick(CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Events(transport), Has.Count.EqualTo(1));
+			Assert.That(logged, Is.Empty);
+		});
+	}
+
+	private static Logger LoggerInto(List<LogEvent> logged)
+		=> new LoggerConfiguration().WriteTo.Sink(new DelegatingLogSink(logged.Add)).CreateLogger();
+
 	private static IntegrationIssue Issue(string id, IntegrationIssueSeverity severity)
 		=> new() { Id = id, Title = id, Severity = severity };
 
@@ -234,7 +317,8 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 		IIntegrationRegistry registry,
 		IIntegrationIssueService issueService,
 		RecordingUiTransport transport,
-		IUserNotificationStore? userNotificationStore = null)
+		IUserNotificationStore? userNotificationStore = null,
+		Logger? logger = null)
 		=> new(new StartedHostLifetime(),
 			registry,
 			issueService,
@@ -242,7 +326,7 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 			transport,
 			userNotificationStore ?? new UserNotificationStore(),
 			TestLocalization.ScopeFactory,
-			SilentLogger());
+			logger ?? SilentLogger());
 
 	private static Logger SilentLogger() => new LoggerConfiguration().CreateLogger();
 
@@ -250,12 +334,16 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 	{
 		private readonly Dictionary<string, IReadOnlyList<IntegrationIssue>> _issues = new(StringComparer.Ordinal);
 
+		public string? FailingIntegrationId { get; set; }
+
 		public void Set(string integrationId, params IntegrationIssue[] issues) => _issues[integrationId] = issues;
 
 		public Task<IReadOnlyList<IntegrationIssue>> GetIssuesAsync(
 			string integrationId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(_issues.GetValueOrDefault(integrationId, []));
+			=> integrationId == FailingIntegrationId
+				? throw new InvalidOperationException("provider exploded")
+				: Task.FromResult(_issues.GetValueOrDefault(integrationId, []));
 
 		public Task<IssueResolution?> ResolveAsync(
 			string integrationId,
