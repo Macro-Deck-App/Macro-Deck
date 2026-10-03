@@ -418,6 +418,7 @@ export {
   buttonBorder,
   widgetTileBorder,
   widgetTileTransparent,
+  widgetTileFilled,
   buttonFit,
   buttonOpacity,
   buttonZoom,

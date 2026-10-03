@@ -10,7 +10,7 @@ import { UiNode } from '../ui-framework/ui-node.interface';
 import { treeClaimsGesture } from '../ui-framework/node-gestures';
 import { effectiveTreeRoot } from '../ui-framework/responsive';
 import { UiComponentBox } from '../ui-framework/layout';
-import { widgetTileBorder, widgetTileTransparent } from '../ui-components/style';
+import { widgetTileBorder, widgetTileFilled, widgetTileTransparent } from '../ui-components/style';
 import { PressFeedback } from './press-feedback';
 import { TapSequencer } from '../ui-components/tap-sequencer';
 import { hasRunnableFlow } from '../domain/deck-navigation.util';
@@ -410,6 +410,8 @@ export function renderWidgetGrid(
     const box = { width: width / scale, height: height / scale };
     if (widgetTileTransparent(tree, box)) tile.element.classList.add('deck-grid-tile-transparent');
     else tile.element.classList.remove('deck-grid-tile-transparent');
+    if (widgetTileFilled(tree, box)) tile.element.classList.add('deck-grid-tile-filled');
+    else tile.element.classList.remove('deck-grid-tile-filled');
 
     if (tree === undefined) {
       if (tile.mounted) {

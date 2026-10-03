@@ -90,6 +90,28 @@
   box-shadow: none;
 }
 
+/*
+ * A widget that paints its own opaque fill keeps the dark face 1.5px inside the edge, so the
+ * antialiased edge pixels of a fractional tile blend with the deck and not with the face.
+ */
+.deck-grid-tile-filled .deck-grid-tile-surface {
+  background-color: transparent;
+  isolation: isolate;
+}
+
+.deck-grid-tile-filled .deck-grid-tile-surface::before {
+  content: '';
+  position: absolute;
+  top: 1.5px;
+  right: 1.5px;
+  bottom: 1.5px;
+  left: 1.5px;
+  z-index: -1;
+  border-radius: inherit;
+  background-color: var(--color-bg-secondary);
+  pointer-events: none;
+}
+
 .deck-grid-tile-transparent .deck-grid-tile-surface {
   background-color: transparent;
 }

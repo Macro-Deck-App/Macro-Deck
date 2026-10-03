@@ -27,6 +27,26 @@
   background-color: transparent;
 }
 
+// A widget with its own opaque fill keeps the dark face 1.5px inside the edge, so antialiased edge
+// pixels of a fractional tile blend with the deck and not with the face.
+.widget-tile.filled-face {
+  background-color: transparent;
+  isolation: isolate;
+}
+
+.widget-tile.filled-face::before {
+  content: '';
+  position: absolute;
+  top: 1.5px;
+  right: 1.5px;
+  bottom: 1.5px;
+  left: 1.5px;
+  z-index: -1;
+  border-radius: inherit;
+  background-color: var(--color-bg-secondary);
+  pointer-events: none;
+}
+
 // The tree fills the tile rather than sitting centred in it: the root node is given the widget's real
 // box, so a non-square cell is covered edge to edge the way the previous renderer covered it.
 .widget-tile > shared-ui-tree {

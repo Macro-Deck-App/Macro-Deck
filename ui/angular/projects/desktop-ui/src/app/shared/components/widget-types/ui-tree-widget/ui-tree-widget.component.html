@@ -2,6 +2,7 @@
   class="widget-tile"
   [class.disabled]="disabled"
   [class.transparent-face]="transparentFace()"
+  [class.filled-face]="filledFace()"
   [class.pressed]="pressFeedback.isPressed() || treeNodePressed()"
   (pointerdown)="onPressStart($event)"
   (pointerup)="onPressEnd($event)"
