@@ -111,6 +111,10 @@ internal static partial class PactlOutputParser
 		return new PactlDefaults(sink, source);
 	}
 
+	// A subscribe line reads "Event 'change' on sink #52". Only devices and the defaults matter here;
+	// clients, modules, cards and streams come and go with every pactl call, our own included.
+	public static bool IsAudioEvent(string line) => EventRegex().IsMatch(line);
+
 	public static bool? ParseMute(string output)
 	{
 		var match = MuteRegex().Match(output);
@@ -127,6 +131,9 @@ internal static partial class PactlOutputParser
 
 	[GeneratedRegex(@"\A(Sink|Source) #\d+\z")]
 	private static partial Regex SectionRegex();
+
+	[GeneratedRegex(@"\AEvent '(?:new|change|remove)' on (?:sink|source|server) #\d+\z")]
+	private static partial Regex EventRegex();
 
 	[GeneratedRegex(@"Mute:\s*(yes|no)\b")]
 	private static partial Regex MuteRegex();

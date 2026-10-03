@@ -103,4 +103,19 @@ public class PactlOutputParserTests
 
 		Assert.That(environment.ContainsKey("LC_CTYPE"), Is.False);
 	}
+
+	[TestCase("Event 'change' on sink #1")]
+	[TestCase("Event 'remove' on sink #62")]
+	[TestCase("Event 'new' on source #62")]
+	[TestCase("Event 'change' on server #4294967295")]
+	public void A_device_or_default_event_is_recognised(string line)
+		=> Assert.That(PactlOutputParser.IsAudioEvent(line), Is.True);
+
+	[TestCase("Event 'new' on client #3")]
+	[TestCase("Event 'change' on sink-input #12")]
+	[TestCase("Event 'new' on module #536870917")]
+	[TestCase("")]
+	[TestCase("Connection failure: Connection refused")]
+	public void Client_module_stream_and_unrelated_lines_are_not_audio_events(string line)
+		=> Assert.That(PactlOutputParser.IsAudioEvent(line), Is.False);
 }
