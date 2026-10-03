@@ -322,7 +322,7 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 		return string.IsNullOrWhiteSpace(label) ? DescribeType(widget.Type) : label;
 	}
 
-	private static string DescribeType(string type) => type switch
+	public static string DescribeType(string type) => type switch
 	{
 		WidgetTypeIds.ActionButton => "Button",
 		WidgetTypeIds.MusicPlayer => "Music Player",
