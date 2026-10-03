@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using MacroDeck.Localization.Compiler;
 
 namespace MacroDeck.Localization.Tests.UnitTests;
@@ -92,6 +93,55 @@ public class ShippedCatalogTests
 			}
 		});
 	}
+
+	[TestCaseSource(nameof(Catalogs))]
+	public void Every_chinese_text_keeps_the_placeholders_of_the_default_text(string scope, string[] directory)
+	{
+		var result = Compile(scope, directory);
+		var byDefault = result.Catalog[result.DefaultCulture];
+		var chinese = result.Catalog["zh"];
+
+		Assert.Multiple(() =>
+		{
+			foreach (var (key, defaultText) in byDefault)
+			{
+				Assert.That(chinese.TryGetValue(key, out var text) ? Placeholders(text) : [],
+					Is.EqualTo(Placeholders(defaultText)),
+					$"'{scope}:{key}' in zh must use the same placeholders as the default text");
+			}
+		});
+	}
+
+	[TestCase("zh")]
+	[TestCase("zh-CN")]
+	[TestCase("zh-SG")]
+	[TestCase("zh-Hans-CN")]
+	public void A_simplified_chinese_system_culture_reaches_the_chinese_catalog_before_english(string systemCulture)
+	{
+		foreach (var catalog in _catalogs)
+		{
+			var result = Compile(catalog.Scope, catalog.Directory);
+			var served = LocalizationCultureChain.For(systemCulture, result.DefaultCulture)
+				.First(culture => result.Cultures.Contains(culture, StringComparer.OrdinalIgnoreCase));
+
+			Assert.That(served, Is.EqualTo("zh"), $"'{catalog.Scope}' must serve {systemCulture} in Chinese");
+		}
+	}
+
+	[Test]
+	public void The_chinese_catalog_carries_chinese_text()
+	{
+		var result = Compile(LocalizationScope.MacroDeck, _catalogs[0].Directory);
+
+		Assert.That(result.Catalog["zh"]["Common.Cancel"], Is.EqualTo("取消"));
+	}
+
+	private static string[] Placeholders(string text)
+		=> Regex.Matches(text, @"\{([A-Za-z_][A-Za-z0-9_]*)\}")
+			.Select(match => match.Groups[1].Value)
+			.Distinct()
+			.Order(StringComparer.Ordinal)
+			.ToArray();
 
 	private static bool IsPluralFamily(Dictionary<string, string> templates, string baseKey)
 		=> templates.ContainsKey(baseKey + ".Other");

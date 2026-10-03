@@ -11,7 +11,8 @@
       "packaging/macos/cs.lproj/InfoPlist.strings": "cs.lproj/InfoPlist.strings",
       "packaging/macos/pl.lproj/InfoPlist.strings": "pl.lproj/InfoPlist.strings",
       "packaging/macos/es.lproj/InfoPlist.strings": "es.lproj/InfoPlist.strings",
-      "packaging/macos/fr.lproj/InfoPlist.strings": "fr.lproj/InfoPlist.strings"
+      "packaging/macos/fr.lproj/InfoPlist.strings": "fr.lproj/InfoPlist.strings",
+      "packaging/macos/zh-Hans.lproj/InfoPlist.strings": "zh-Hans.lproj/InfoPlist.strings"
     },
     "macOS": {
       "minimumSystemVersion": "11.0",

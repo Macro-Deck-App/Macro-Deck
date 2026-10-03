@@ -353,24 +353,24 @@ fn macos_ships_the_apple_events_prompt_in_every_declared_language() {
         "macOS only looks in an .lproj for a bundle that declares its localizations"
     );
 
-    for culture in ["en", "de", "it", "cs", "pl", "es", "fr"] {
-        let source = format!("packaging/macos/{culture}.lproj/InfoPlist.strings");
-        let target = format!("{culture}.lproj/InfoPlist.strings");
+    for lproj in ["en", "de", "it", "cs", "pl", "es", "fr", "zh-Hans"] {
+        let source = format!("packaging/macos/{lproj}.lproj/InfoPlist.strings");
+        let target = format!("{lproj}.lproj/InfoPlist.strings");
         assert_eq!(
             cfg["bundle"]["resources"][&source].as_str(),
             Some(target.as_str()),
-            "the {culture} usage description must land in Contents/Resources/{culture}.lproj"
+            "the {lproj} usage description must land in Contents/Resources/{lproj}.lproj"
         );
         assert!(
-            plist.contains(&format!("<string>{culture}</string>")),
-            "Info.plist must declare the {culture} localization"
+            plist.contains(&format!("<string>{lproj}</string>")),
+            "Info.plist must declare the {lproj} localization"
         );
 
         let strings = std::fs::read_to_string(manifest_dir().join(&source))
             .unwrap_or_else(|e| panic!("failed to read {source}: {e}"));
         assert!(
             strings.contains("NSAppleEventsUsageDescription"),
-            "the {culture} strings file must override the usage description"
+            "the {lproj} strings file must override the usage description"
         );
         assert!(
             !strings.to_ascii_lowercase().contains("spotify"),
