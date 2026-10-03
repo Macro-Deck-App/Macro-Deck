@@ -300,7 +300,7 @@ a few seconds after it starts and then once an hour. While a refresh runs, the S
 **Refreshing…** in every window, and choosing **Refresh Store** again opens the log of that refresh instead of
 starting a second one. If the store registry is being updated while a refresh runs, the log says so and Macro
 Deck tries again a few times over about five minutes before it reports a failure. **Store settings** opens
-**Settings > Extensions**.
+**Settings > Store**.
 
 **Installed** at the top of the Store lists the Store's plugins and icon packs you have installed, with their
 version and any update waiting for them. While updates are waiting, **Installed** shows how many. Update one
@@ -366,6 +366,14 @@ with Macro Deck Connect under **Settings > Account** and install the item first:
 installed can be rated. When you sign in, and whenever you install something while signed in, Macro
 Deck records your installed Store items for your account so you can rate them. If ratings or install
 counts cannot be reached, the Store keeps working without them.
+
+While you are signed in, Macro Deck occasionally asks you to rate one of your installed Store items. The
+dialog shows the item and five stars; choose a star and **Submit** to send the rating, or add a written
+review if you like. **Not now** closes it without rating, and the item can come up again later. Macro
+Deck only asks about items you installed at least 7 days ago and have not rated yet, asks about one
+item at a time, and waits at least 5 days after a prompt was shown before it asks again. Updating an
+item does not restart the 7 days. Turn the prompt off with **Ask me to rate installed extensions** in
+**Settings > Store**.
 
 To report a Store item, open its page and choose **Report this item** below the details.
 To report a review, choose **Report** next to it. Pick a reason and, if you like, add details;

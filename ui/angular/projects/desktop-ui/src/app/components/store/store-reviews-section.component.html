@@ -248,31 +248,12 @@
     <form class="reviews-form" (ngSubmit)="save()">
       <div class="reviews-field">
         <span class="reviews-label" id="store-review-rating-label">{{ 'macrodeck.app:Store.Reviews.RatingFieldLabel' | translate }}</span>
-        <div
-          class="reviews-star-picker"
-          role="radiogroup"
-          aria-labelledby="store-review-rating-label"
-          [attr.aria-disabled]="busy() || null"
-          [attr.aria-invalid]="visibleErrors().rating ? 'true' : null">
-          @for (value of starValues; track value) {
-            <button
-              type="button"
-              class="reviews-star-option"
-              role="radio"
-              [attr.data-star]="value"
-              [class.is-lit]="(formRating() ?? 0) >= value"
-              [attr.aria-checked]="formRating() === value"
-              [attr.aria-label]="starCountLabel(value)"
-              [attr.tabindex]="starTabIndex(value)"
-              [disabled]="busy()"
-              (click)="selectRating(value)"
-              (keydown)="onStarKeydown($event, formRating() ?? 0)">
-              <svg class="reviews-star-glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path [attr.d]="starPath" />
-              </svg>
-            </button>
-          }
-        </div>
+        <app-store-star-picker
+          labelledBy="store-review-rating-label"
+          [value]="formRating()"
+          [disabled]="busy()"
+          [invalid]="!!visibleErrors().rating"
+          (valueChange)="selectRating($event)" />
         @if (visibleErrors().rating; as error) {
           <p class="reviews-field-error">{{ error }}</p>
         }

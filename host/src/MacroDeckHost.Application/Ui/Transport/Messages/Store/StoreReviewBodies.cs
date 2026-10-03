@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using MacroDeckHost.Application.Store.Model;
 
 namespace MacroDeckHost.Application.Ui.Transport.Messages.Store;
 
@@ -180,4 +181,31 @@ public class StoreReportResponse
 	public bool Success { get; set; }
 
 	public StoreReviewWriteError? Error { get; set; }
+}
+
+public class StoreRatingPromptCandidateBody
+{
+	public StoreExtensionKind Kind { get; set; }
+
+	public string Id { get; set; } = string.Empty;
+
+	public string Name { get; set; } = string.Empty;
+
+	public bool HasIcon { get; set; }
+
+	public string? IconSha256 { get; set; }
+}
+
+public class GetStoreRatingPromptResponse
+{
+	public bool Ready { get; set; }
+
+	public StoreRatingPromptCandidateBody? Candidate { get; set; }
+}
+
+public class MarkStoreRatingPromptShownRequest
+{
+	public StoreExtensionKind Kind { get; set; }
+
+	public string Id { get; set; } = string.Empty;
 }

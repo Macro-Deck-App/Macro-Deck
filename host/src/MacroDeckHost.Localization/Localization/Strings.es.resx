@@ -13934,6 +13934,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Settings.Experiments.Heading" xml:space="preserve">
     <value>Experimentos</value>
   </data>
+  <data name="Settings.Extensions.AskForRatings" xml:space="preserve">
+    <value>Pedirme que valore las extensiones instaladas</value>
+  </data>
+  <data name="Settings.Extensions.AskForRatingsDescription" xml:space="preserve">
+    <value>De vez en cuando te pide valorar una extensión que llevas un tiempo usando. Como máximo una vez cada 5 días.</value>
+  </data>
   <data name="Settings.Extensions.AutoUpdate" xml:space="preserve">
     <value>Actualizar extensiones automáticamente</value>
   </data>
@@ -13941,13 +13947,16 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>Instala las nuevas versiones de los complementos y paquetes de iconos que instalaste desde la Store en cuanto están disponibles y después te avisa.</value>
   </data>
   <data name="Settings.Extensions.Heading" xml:space="preserve">
-    <value>Extensiones</value>
+    <value>Store</value>
   </data>
   <data name="Settings.Extensions.NotifyOnUpdates" xml:space="preserve">
     <value>Avisar de actualizaciones</value>
   </data>
   <data name="Settings.Extensions.NotifyOnUpdatesDescription" xml:space="preserve">
     <value>Muestra una notificación cuando hay una nueva versión de una extensión instalada.</value>
+  </data>
+  <data name="Settings.Extensions.RatingsSection" xml:space="preserve">
+    <value>Valoraciones</value>
   </data>
   <data name="Settings.Extensions.UpdatesSection" xml:space="preserve">
     <value>Actualizaciones</value>
@@ -15729,6 +15738,21 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Store.Queued" xml:space="preserve">
     <value>En cola</value>
+  </data>
+  <data name="Store.RatingPrompt.Heading" xml:space="preserve">
+    <value>¿Qué te parece {name}?</value>
+  </data>
+  <data name="Store.RatingPrompt.Hint" xml:space="preserve">
+    <value>Selecciona las estrellas para valorar. Tu valoración ayuda a otros a elegir.</value>
+  </data>
+  <data name="Store.RatingPrompt.NotNowAction" xml:space="preserve">
+    <value>Ahora no</value>
+  </data>
+  <data name="Store.RatingPrompt.SubmitAction" xml:space="preserve">
+    <value>Enviar</value>
+  </data>
+  <data name="Store.RatingPrompt.Thanks" xml:space="preserve">
+    <value>Gracias por tu valoración.</value>
   </data>
   <data name="Store.RegistryRefresh.Error.BudgetExceeded" xml:space="preserve">
     <value>El registro es más grande de lo que Macro Deck descarga.</value>

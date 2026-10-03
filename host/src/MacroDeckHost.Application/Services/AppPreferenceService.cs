@@ -99,6 +99,7 @@ public partial class AppPreferenceService : IAppPreferenceService
 	public const string ExtensionsNotifyOnUpdatesKey = "extensions.notifyOnUpdates";
 	public const string ExtensionsRefreshIntervalMinutesKey = "extensions.refreshIntervalMinutes";
 	public const string ExtensionsAutoUpdateKey = "extensions.autoUpdate";
+	public const string ExtensionsAskForRatingsKey = "extensions.askForRatings";
 	public const string AnnouncementLastSeenNumberKey = "announcements.lastSeenNumber";
 	public const string WidgetTypeFavoritesKey = "widgets.favoriteTypes";
 
@@ -107,6 +108,7 @@ public partial class AppPreferenceService : IAppPreferenceService
 	public const bool DefaultExtensionsNotifyOnUpdates = true;
 	public const int DefaultExtensionsRefreshIntervalMinutes = 60;
 	public const bool DefaultExtensionsAutoUpdate = false;
+	public const bool DefaultExtensionsAskForRatings = true;
 
 	// The issue requires the store to check for updates at least hourly, so a longer interval must never
 	// be settable - only the lower bound protects the registry from being polled too aggressively.
@@ -450,19 +452,22 @@ public partial class AppPreferenceService : IAppPreferenceService
 		var notifyOnUpdates = (await _repository.GetByKey(ExtensionsNotifyOnUpdatesKey))?.Value;
 		var refreshIntervalMinutes = (await _repository.GetByKey(ExtensionsRefreshIntervalMinutesKey))?.Value;
 		var autoUpdate = (await _repository.GetByKey(ExtensionsAutoUpdateKey))?.Value;
+		var askForRatings = (await _repository.GetByKey(ExtensionsAskForRatingsKey))?.Value;
 
 		return new ExtensionSettings(NormalizeExtensionsFlag(storeEnabled, DefaultExtensionsStoreEnabled),
 			NormalizeExtensionsFlag(checkForUpdates, DefaultExtensionsCheckForUpdates),
 			NormalizeExtensionsFlag(notifyOnUpdates, DefaultExtensionsNotifyOnUpdates),
 			NormalizeRefreshIntervalMinutes(refreshIntervalMinutes),
-			NormalizeExtensionsFlag(autoUpdate, DefaultExtensionsAutoUpdate));
+			NormalizeExtensionsFlag(autoUpdate, DefaultExtensionsAutoUpdate),
+			NormalizeExtensionsFlag(askForRatings, DefaultExtensionsAskForRatings));
 	}
 
 	public async Task<ExtensionSettings> SetExtensions(bool? storeEnabled,
 		bool? checkForUpdates,
 		bool? notifyOnUpdates,
 		int? refreshIntervalMinutes,
-		bool? autoUpdate = null)
+		bool? autoUpdate = null,
+		bool? askForRatings = null)
 	{
 		var current = await GetExtensions();
 		var resolved = new ExtensionSettings(storeEnabled ?? current.StoreEnabled,
@@ -471,7 +476,8 @@ public partial class AppPreferenceService : IAppPreferenceService
 			refreshIntervalMinutes is { } minutes
 				? NormalizeRefreshIntervalMinutes(minutes.ToString(CultureInfo.InvariantCulture))
 				: current.RefreshIntervalMinutes,
-			autoUpdate ?? current.AutoUpdate);
+			autoUpdate ?? current.AutoUpdate,
+			askForRatings ?? current.AskForRatings);
 
 		await _repository.SetValue(ExtensionsStoreEnabledKey, resolved.StoreEnabled.ToString());
 		await _repository.SetValue(ExtensionsCheckForUpdatesKey, resolved.CheckForUpdates.ToString());
@@ -479,6 +485,7 @@ public partial class AppPreferenceService : IAppPreferenceService
 		await _repository.SetValue(ExtensionsRefreshIntervalMinutesKey,
 			resolved.RefreshIntervalMinutes.ToString(CultureInfo.InvariantCulture));
 		await _repository.SetValue(ExtensionsAutoUpdateKey, resolved.AutoUpdate.ToString());
+		await _repository.SetValue(ExtensionsAskForRatingsKey, resolved.AskForRatings.ToString());
 
 		return resolved;
 	}

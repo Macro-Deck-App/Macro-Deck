@@ -22,7 +22,6 @@ import {
   StoreOwnReviewWriteResponse,
   StoreReviewBody,
   StoreReviewSortOrder,
-  StoreReviewWriteError,
 } from '@macro-deck/runtime';
 import { ApiService, ButtonComponent, InputComponent, LocalizationService, ModalComponent, TranslatePipe } from '@shared';
 import { AvatarComponent } from '../account/avatar.component';
@@ -32,7 +31,9 @@ import { ConnectAccountService } from '../../services/connect-account.service';
 import { SettingsModalService } from '../../services/settings-modal.service';
 import { StoreRatingsService } from '../../services/store-ratings.service';
 import { formatStoreRating } from '../../util/store-rating-format';
-import { STORE_STAR_PATH, StoreRatingStarsComponent } from './store-rating-stars.component';
+import { storeReviewErrorMessage } from '../../util/store-review-error';
+import { StoreRatingStarsComponent } from './store-rating-stars.component';
+import { StoreStarPickerComponent } from './store-star-picker.component';
 import { StoreReportDialogComponent, StoreReportTarget } from './store-report-dialog.component';
 
 export const STORE_REVIEWS_PAGE_SIZE = 20;
@@ -41,7 +42,6 @@ export const STORE_REVIEW_BODY_MIN = 3;
 export const STORE_REVIEW_BODY_MAX = 2000;
 
 const MODERATED_VISIBILITIES = ['hidden', 'removed'];
-const STAR_VALUES = [1, 2, 3, 4, 5] as const;
 const LONG_REVIEW_CHARACTERS = 420;
 const LONG_REVIEW_LINES = 6;
 
@@ -65,6 +65,7 @@ type ComposeMode = 'signIn' | 'suspended' | 'notEntitled' | 'unavailable' | 'for
     SelectComponent,
     StoreRatingStarsComponent,
     StoreReportDialogComponent,
+    StoreStarPickerComponent,
     TranslatePipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -87,9 +88,6 @@ export class StoreReviewsSectionComponent {
   readonly id = input.required<string>();
   readonly repository = input<string | null>(null);
   readonly publisher = input<string | null>(null);
-
-  protected readonly starValues = STAR_VALUES;
-  protected readonly starPath = STORE_STAR_PATH;
 
   protected readonly aggregate = signal<GetStoreRatingResponse | null>(null);
   readonly available = computed(() => this.aggregate()?.available === true);
@@ -272,6 +270,11 @@ export class StoreReviewsSectionComponent {
     return review.authorAvatarUrl ? this.api.getStoreReviewAvatarUrl(review.authorAvatarUrl) : null;
   }
 
+  protected selectRating(value: number | null): void {
+    this.formRating.set(value);
+    this.writeStatus.set(null);
+  }
+
   protected starCountLabel(stars: number): string {
     return this.localization.translateKey(AppStrings.Store.Reviews.StarCount, { count: stars });
   }
@@ -342,41 +345,6 @@ export class StoreReviewsSectionComponent {
     }
   }
 
-  protected selectRating(value: number): void {
-    if (this.busy()) {
-      return;
-    }
-    this.formRating.set(value);
-    this.writeStatus.set(null);
-  }
-
-  protected onStarKeydown(event: KeyboardEvent, current: number): void {
-    const step = event.key === 'ArrowRight' || event.key === 'ArrowUp' ? 1
-      : event.key === 'ArrowLeft' || event.key === 'ArrowDown' ? -1
-        : 0;
-    let next: number | null = null;
-    if (step !== 0) {
-      next = ((current - 1 + step + STAR_VALUES.length) % STAR_VALUES.length) + 1;
-    } else if (event.key === 'Home') {
-      next = 1;
-    } else if (event.key === 'End') {
-      next = STAR_VALUES.length;
-    }
-    if (next === null) {
-      return;
-    }
-
-    event.preventDefault();
-    this.selectRating(next);
-    const group = (event.currentTarget as HTMLElement).parentElement;
-    group?.querySelector<HTMLElement>(`[data-star="${next}"]`)?.focus();
-  }
-
-  protected starTabIndex(value: number): number {
-    const selected = this.formRating();
-    return (selected ?? 1) === value ? 0 : -1;
-  }
-
   protected async save(): Promise<void> {
     this.submitted.set(true);
     this.writeError.set(null);
@@ -424,12 +392,12 @@ export class StoreReviewsSectionComponent {
         response = await request();
       } catch (error) {
         console.error('Failed to write the store review:', error);
-        this.writeError.set(this.errorMessage(null));
+        this.writeError.set(storeReviewErrorMessage(this.localization, null));
         return;
       }
 
       if (!response.success) {
-        this.writeError.set(this.errorMessage(response.error ?? null));
+        this.writeError.set(storeReviewErrorMessage(this.localization, response.error ?? null));
         return;
       }
 
@@ -440,47 +408,6 @@ export class StoreReviewsSectionComponent {
       await Promise.all([this.loadAggregate(kind, id), this.loadReviews(true), this.loadOwn(kind, id)]);
     } finally {
       this.busy.set(false);
-    }
-  }
-
-  private errorMessage(error: StoreReviewWriteError | null): string {
-    const strings = AppStrings.Store.Reviews;
-    const seconds = error?.retryAfterSeconds;
-    const hasSeconds = typeof seconds === 'number' && seconds > 0;
-    switch (error?.code) {
-      case 'sign_in_required':
-        return this.localization.translateKey(strings.Error.SignInRequired);
-      case 'download_required':
-        return this.localization.translateKey(strings.Error.DownloadRequired);
-      case 'account_suspended':
-        return this.localization.translateKey(strings.Error.AccountSuspended);
-      case 'forbidden':
-        return this.localization.translateKey(strings.Error.Forbidden);
-      case 'moderated':
-        return this.localization.translateKey(strings.Error.Moderated);
-      case 'gone':
-        return this.localization.translateKey(strings.Error.Gone);
-      case 'cooldown':
-        return hasSeconds
-          ? this.localization.translateKey(strings.Error.CooldownSeconds, { count: Math.ceil(seconds) })
-          : this.localization.translateKey(strings.Error.Cooldown);
-      case 'retry_later':
-        return hasSeconds
-          ? this.localization.translateKey(strings.Error.RetryLaterSeconds, { count: Math.ceil(seconds) })
-          : this.localization.translateKey(strings.Error.RetryLater);
-      case 'validation':
-        switch (error.field) {
-          case 'Rating':
-            return this.localization.translateKey(strings.Validation.RatingRequired);
-          case 'Title':
-            return this.localization.translateKey(strings.Error.InvalidTitle);
-          default:
-            return this.localization.translateKey(strings.Error.Validation);
-        }
-      case 'not_found':
-        return this.localization.translateKey(strings.Error.NotFound);
-      default:
-        return this.localization.translateKey(strings.Error.PlatformUnavailable);
     }
   }
 

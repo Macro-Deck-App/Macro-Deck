@@ -14,6 +14,7 @@ describe('ExtensionsSettingsComponent', () => {
     notifyOnUpdates: true,
     refreshIntervalMinutes: 60,
     autoUpdate: false,
+    askForRatings: true,
   };
 
   async function render(api: jasmine.SpyObj<ApiService>) {
@@ -52,6 +53,22 @@ describe('ExtensionsSettingsComponent', () => {
     const fixture = await render(api);
 
     const toggles = fixture.debugElement.queryAll(By.directive(ToggleSwitchComponent));
-    expect(toggles.map(toggle => toggle.componentInstance.checkedState())).toEqual([true, false]);
+    expect(toggles.map(toggle => toggle.componentInstance.checkedState())).toEqual([true, false, true]);
+  });
+
+  it('turns the rating prompt off without touching the other extension settings', async () => {
+    const api = jasmine.createSpyObj<ApiService>('ApiService',
+      ['getExtensionSettings', 'updateExtensionSettings', 'onNotification']);
+    api.onNotification.and.returnValue(new Subject<never>().asObservable());
+    api.getExtensionSettings.and.resolveTo(stored);
+    api.updateExtensionSettings.and.resolveTo({ ...stored, askForRatings: false });
+    const fixture = await render(api);
+
+    const toggles = fixture.debugElement.queryAll(By.directive(ToggleSwitchComponent));
+    toggles[2].componentInstance.changed.emit(false);
+    await fixture.whenStable();
+
+    expect(api.updateExtensionSettings).toHaveBeenCalledOnceWith({ askForRatings: false });
+    expect(fixture.componentInstance.settings()?.askForRatings).toBeFalse();
   });
 });

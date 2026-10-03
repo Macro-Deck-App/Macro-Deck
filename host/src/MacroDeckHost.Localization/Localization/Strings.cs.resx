@@ -13934,6 +13934,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.Experiments.Heading" xml:space="preserve">
     <value>Experimenty</value>
   </data>
+  <data name="Settings.Extensions.AskForRatings" xml:space="preserve">
+    <value>Vyzývat k hodnocení nainstalovaných rozšíření</value>
+  </data>
+  <data name="Settings.Extensions.AskForRatingsDescription" xml:space="preserve">
+    <value>Občas se zobrazí výzva k ohodnocení rozšíření, které se už nějakou dobu používá. Nejvýše jednou za 5 dní.</value>
+  </data>
   <data name="Settings.Extensions.AutoUpdate" xml:space="preserve">
     <value>Automaticky aktualizovat rozšíření</value>
   </data>
@@ -13941,13 +13947,16 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Nové verze pluginů a sad ikon nainstalovaných ze Store se nainstalují, jakmile jsou k dispozici, a poté se zobrazí oznámení.</value>
   </data>
   <data name="Settings.Extensions.Heading" xml:space="preserve">
-    <value>Rozšíření</value>
+    <value>Store</value>
   </data>
   <data name="Settings.Extensions.NotifyOnUpdates" xml:space="preserve">
     <value>Upozorňovat na aktualizace</value>
   </data>
   <data name="Settings.Extensions.NotifyOnUpdatesDescription" xml:space="preserve">
     <value>Zobrazí oznámení, když je k dispozici nová verze nainstalovaného rozšíření.</value>
+  </data>
+  <data name="Settings.Extensions.RatingsSection" xml:space="preserve">
+    <value>Hodnocení</value>
   </data>
   <data name="Settings.Extensions.UpdatesSection" xml:space="preserve">
     <value>Aktualizace</value>
@@ -15729,6 +15738,21 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Store.Queued" xml:space="preserve">
     <value>Ve frontě</value>
+  </data>
+  <data name="Store.RatingPrompt.Heading" xml:space="preserve">
+    <value>Ohodnotit {name}</value>
+  </data>
+  <data name="Store.RatingPrompt.Hint" xml:space="preserve">
+    <value>Hodnocení se zadá výběrem hvězdiček. Pomáhá ostatním při výběru.</value>
+  </data>
+  <data name="Store.RatingPrompt.NotNowAction" xml:space="preserve">
+    <value>Nyní ne</value>
+  </data>
+  <data name="Store.RatingPrompt.SubmitAction" xml:space="preserve">
+    <value>Odeslat</value>
+  </data>
+  <data name="Store.RatingPrompt.Thanks" xml:space="preserve">
+    <value>Děkujeme za hodnocení.</value>
   </data>
   <data name="Store.RegistryRefresh.Error.BudgetExceeded" xml:space="preserve">
     <value>Registr je větší, než kolik Macro Deck stáhne.</value>

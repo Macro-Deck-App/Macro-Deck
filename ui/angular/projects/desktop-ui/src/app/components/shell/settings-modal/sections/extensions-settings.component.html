@@ -21,4 +21,16 @@
         (changed)="setAutoUpdate($event)" />
     </shared-settings-row>
   </shared-settings-section>
+  <shared-settings-section [heading]="'macrodeck.app:Settings.Extensions.RatingsSection' | translate">
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Extensions.AskForRatings' | translate"
+      [description]="'macrodeck.app:Settings.Extensions.AskForRatingsDescription' | translate">
+      <shared-toggle-switch
+        [ariaLabel]="'macrodeck.app:Settings.Extensions.AskForRatings' | translate"
+        [busy]="busy()"
+        [disabled]="busy() || !settings()"
+        [checked]="settings()?.askForRatings ?? true"
+        (changed)="setAskForRatings($event)" />
+    </shared-settings-row>
+  </shared-settings-section>
 </div>

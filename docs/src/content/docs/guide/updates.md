@@ -63,7 +63,7 @@ installs. See [Backups](/guide/backups/).
 
 ## Extension updates
 
-Plugins and icon packs from the Store have their own updates, set in **Settings > Extensions**.
+Plugins and icon packs from the Store have their own updates, set in **Settings > Store**.
 
 - **Notify about updates** shows a notification when a new version of an installed plugin or icon pack
   is out. It is on by default. Macro Deck tells you about each version once per session; a notification

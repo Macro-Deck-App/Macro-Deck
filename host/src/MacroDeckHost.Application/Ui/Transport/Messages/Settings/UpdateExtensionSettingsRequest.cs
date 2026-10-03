@@ -11,4 +11,6 @@ public class UpdateExtensionSettingsRequest
 	public int? RefreshIntervalMinutes { get; set; }
 
 	public bool? AutoUpdate { get; set; }
+
+	public bool? AskForRatings { get; set; }
 }

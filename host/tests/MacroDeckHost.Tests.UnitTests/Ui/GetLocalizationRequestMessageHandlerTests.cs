@@ -93,7 +93,8 @@ public class GetLocalizationRequestMessageHandlerTests
 			bool? checkForUpdates,
 			bool? notifyOnUpdates,
 			int? refreshIntervalMinutes,
-		bool? autoUpdate = null)
+		bool? autoUpdate = null,
+		bool? askForRatings = null)
 			=> throw new NotSupportedException();
 	}
 

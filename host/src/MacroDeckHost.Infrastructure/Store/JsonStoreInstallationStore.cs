@@ -50,8 +50,12 @@ public sealed class JsonStoreInstallationStore : IStoreInstallationStore
 		lock (_gate)
 		{
 			var records = Read();
+			var previous = records.FirstOrDefault(existing => Same(existing, record.Kind, record.PackageId));
 			records.RemoveAll(existing => Same(existing, record.Kind, record.PackageId));
-			records.Add(record);
+			// An update keeps the first install time, so it cannot restart the rating prompt wait.
+			records.Add(previous is not null && string.Equals(previous.Origin, record.Origin, StringComparison.OrdinalIgnoreCase)
+				? record with { InstalledAt = previous.InstalledAt }
+				: record);
 			_files.Write(_path, records);
 		}
 	}
