@@ -13935,6 +13935,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Settings.Experiments.Heading" xml:space="preserve">
     <value>实验功能</value>
   </data>
+  <data name="Settings.Extensions.AskForRatings" xml:space="preserve">
+    <value>邀请我为已安装的扩展评分</value>
+  </data>
+  <data name="Settings.Extensions.AskForRatingsDescription" xml:space="preserve">
+    <value>偶尔会邀请你为已使用一段时间的扩展评分，最多每 5 天一次。</value>
+  </data>
   <data name="Settings.Extensions.AutoUpdate" xml:space="preserve">
     <value>自动更新扩展</value>
   </data>
@@ -13942,13 +13948,16 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>对于你从商店安装的插件和图标包，新版本一旦可用就会立即安装，并在之后通知你。</value>
   </data>
   <data name="Settings.Extensions.Heading" xml:space="preserve">
-    <value>扩展</value>
+    <value>Store</value>
   </data>
   <data name="Settings.Extensions.NotifyOnUpdates" xml:space="preserve">
     <value>通知更新</value>
   </data>
   <data name="Settings.Extensions.NotifyOnUpdatesDescription" xml:space="preserve">
     <value>已安装的扩展有新版本可用时显示通知。</value>
+  </data>
+  <data name="Settings.Extensions.RatingsSection" xml:space="preserve">
+    <value>评分</value>
   </data>
   <data name="Settings.Extensions.UpdatesSection" xml:space="preserve">
     <value>更新</value>
@@ -15730,6 +15739,21 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Store.Queued" xml:space="preserve">
     <value>已排队</value>
+  </data>
+  <data name="Store.RatingPrompt.Heading" xml:space="preserve">
+    <value>你觉得 {name} 怎么样？</value>
+  </data>
+  <data name="Store.RatingPrompt.Hint" xml:space="preserve">
+    <value>选择星级即可评分。你的评分能帮助其他人做出选择。</value>
+  </data>
+  <data name="Store.RatingPrompt.NotNowAction" xml:space="preserve">
+    <value>暂不</value>
+  </data>
+  <data name="Store.RatingPrompt.SubmitAction" xml:space="preserve">
+    <value>提交</value>
+  </data>
+  <data name="Store.RatingPrompt.Thanks" xml:space="preserve">
+    <value>感谢你的评分。</value>
   </data>
   <data name="Store.RegistryRefresh.Error.BudgetExceeded" xml:space="preserve">
     <value>注册表大于 Macro Deck 愿意下载的大小。</value>

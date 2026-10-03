@@ -325,7 +325,8 @@ internal sealed class ContractAppPreferences : IAppPreferenceService
 		bool? checkForUpdates,
 		bool? notifyOnUpdates,
 		int? refreshIntervalMinutes,
-		bool? autoUpdate = null) => throw new NotSupportedException();
+		bool? autoUpdate = null,
+		bool? askForRatings = null) => throw new NotSupportedException();
 }
 
 /// <summary>The deck the contract tests project: one profile, one folder, and a widget whose stored data

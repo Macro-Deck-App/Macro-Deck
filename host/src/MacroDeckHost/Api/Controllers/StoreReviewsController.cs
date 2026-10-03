@@ -10,11 +10,15 @@ namespace MacroDeckHost.Api.Controllers;
 public class StoreReviewsController : ControllerBase
 {
 	private readonly IStoreReviewService _reviews;
+	private readonly IStoreRatingPromptService _ratingPrompt;
 	private readonly IStoreReviewAvatarProxy _avatars;
 
-	public StoreReviewsController(IStoreReviewService reviews, IStoreReviewAvatarProxy avatars)
+	public StoreReviewsController(IStoreReviewService reviews,
+		IStoreRatingPromptService ratingPrompt,
+		IStoreReviewAvatarProxy avatars)
 	{
 		_reviews = reviews;
+		_ratingPrompt = ratingPrompt;
 		_avatars = avatars;
 	}
 
@@ -89,6 +93,17 @@ public class StoreReviewsController : ControllerBase
 		ReportStoreContentRequest body,
 		CancellationToken ct) =>
 		_reviews.ReportReview(kind, id, reviewId, body, ct);
+
+	[HttpGet("rating-prompt")]
+	public Task<GetStoreRatingPromptResponse> GetRatingPrompt(CancellationToken ct) =>
+		_ratingPrompt.GetPrompt(ct);
+
+	[HttpPost("rating-prompt/shown")]
+	public async Task<IActionResult> MarkRatingPromptShown(MarkStoreRatingPromptShownRequest body, CancellationToken ct)
+	{
+		await _ratingPrompt.MarkShown(body.Kind, body.Id, ct);
+		return NoContent();
+	}
 
 	[HttpGet("creator-guidelines")]
 	public Task<GetStoreCreatorGuidelinesResponse> GetCreatorGuidelines(CancellationToken ct) =>

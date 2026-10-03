@@ -2,9 +2,10 @@ import { NO_ERRORS_SCHEMA, provideZonelessChangeDetection, signal } from '@angul
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
-import { Announcement } from '@macro-deck/runtime';
+import { Announcement, StoreRatingPromptCandidateBody } from '@macro-deck/runtime';
 import { NotificationCenterService } from '../../services/notification-center.service';
 import { AnnouncementService } from '../../services/announcement.service';
+import { StoreRatingPromptService } from '../../services/store-rating-prompt.service';
 import { MigrationOfferService } from '../../services/migration-offer.service';
 import { OnboardingService } from '../../services/onboarding.service';
 import { PostUpdateChangelogService } from '../../services/post-update-changelog.service';
@@ -51,6 +52,10 @@ const announcementStub = {
   pending: signal<Announcement | null>(null),
 };
 
+const ratingPromptStub = {
+  pending: signal<StoreRatingPromptCandidateBody | null>(null),
+};
+
 describe('ShellComponent', () => {
   let fixture: ComponentFixture<ShellComponent>;
   let navigationService: NavigationService;
@@ -71,6 +76,7 @@ describe('ShellComponent', () => {
         ...provideLocalizationTesting(),
         { provide: NotificationCenterService, useValue: notificationCenterStub },
         { provide: AnnouncementService, useValue: announcementStub },
+        { provide: StoreRatingPromptService, useValue: ratingPromptStub },
       ],
     })
       .overrideComponent(ShellComponent, { set: { imports: [], schemas: [NO_ERRORS_SCHEMA] } })
@@ -226,6 +232,7 @@ describe('ShellComponent announcement', () => {
         ...provideLocalizationTesting(),
         { provide: NotificationCenterService, useValue: notificationCenterStub },
         { provide: AnnouncementService, useValue: announcementStub },
+        { provide: StoreRatingPromptService, useValue: ratingPromptStub },
       ],
     })
       .overrideComponent(ShellComponent, { set: { imports: [], schemas: [NO_ERRORS_SCHEMA] } })
@@ -240,6 +247,7 @@ describe('ShellComponent announcement', () => {
   afterEach(() => {
     window.ResizeObserver = originalResizeObserver;
     announcementStub.pending.set(null);
+    ratingPromptStub.pending.set(null);
     delete (window as { macroDeckShell?: unknown }).macroDeckShell;
   });
 
@@ -323,5 +331,50 @@ describe('ShellComponent announcement', () => {
     expect(shown()).toBeFalse();
     migrationOffer.pending.set(false);
     expect(shown()).toBeTrue();
+  });
+
+  describe('rating prompt', () => {
+    const candidate: StoreRatingPromptCandidateBody = {
+      kind: 'Plugin',
+      id: 'com.acme.hue',
+      name: 'Hue Bridge',
+      hasIcon: false,
+    };
+
+    it('appears once nothing else is open', async () => {
+      ratingPromptStub.pending.set(candidate);
+      expect(shown('app-store-rating-prompt-modal')).toBeFalse();
+
+      await settle(null);
+
+      expect(shown('app-store-rating-prompt-modal')).toBeTrue();
+    });
+
+    it('waits for an announcement and never shows together with it', async () => {
+      await settle(null);
+      announcementStub.pending.set(announcement);
+      ratingPromptStub.pending.set(candidate);
+
+      expect(shown()).toBeTrue();
+      expect(shown('app-store-rating-prompt-modal')).toBeFalse();
+
+      announcementStub.pending.set(null);
+      expect(shown('app-store-rating-prompt-modal')).toBeTrue();
+    });
+
+    it('never covers a dialog the user opened and stays once shown', async () => {
+      await settle(null);
+      const settingsModal = TestBed.inject(SettingsModalService);
+      settingsModal.open();
+      ratingPromptStub.pending.set(candidate);
+
+      expect(shown('app-store-rating-prompt-modal')).toBeFalse();
+
+      settingsModal.close();
+      expect(shown('app-store-rating-prompt-modal')).toBeTrue();
+
+      settingsModal.open();
+      expect(shown('app-store-rating-prompt-modal')).toBeTrue();
+    });
   });
 });

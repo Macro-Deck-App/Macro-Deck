@@ -27,6 +27,8 @@ internal sealed class FakeStorePlatformClient : IStorePlatformClient
 
 	public StorePlatformOwnReview? OwnReview { get; set; }
 
+	public Dictionary<string, StorePlatformOwnReview> OwnReviews { get; } = new(StringComparer.OrdinalIgnoreCase);
+
 	public Queue<StorePlatformResult<StorePlatformOwnReview>> PutResults { get; } = new();
 
 	public Queue<StorePlatformResult<bool>> DeleteResults { get; } = new();
@@ -88,7 +90,7 @@ internal sealed class FakeStorePlatformClient : IStorePlatformClient
 		CancellationToken cancellationToken = default)
 	{
 		GetOwnReviewCalls++;
-		return Task.FromResult(StorePlatformResult.Ok(OwnReview));
+		return Task.FromResult(StorePlatformResult.Ok(OwnReviews.GetValueOrDefault(packageId) ?? OwnReview));
 	}
 
 	public Task<StorePlatformResult<StorePlatformOwnReview>> PutOwnReview(string packageId,

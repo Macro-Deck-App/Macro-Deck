@@ -292,6 +292,8 @@ import {
   GetStoreRatingResponse,
   GetStoreReviewsResponse,
   GetStoreOwnReviewResponse,
+  GetStoreRatingPromptResponse,
+  MarkStoreRatingPromptShownRequest,
   PutStoreOwnReviewRequest,
   StoreOwnReviewWriteResponse,
   ReportStoreContentRequest,
@@ -1107,6 +1109,14 @@ export class ApiService {
       query.set('rating', String(options.rating));
     }
     return this.http('GET', `${this.storeReviewsPath(kind, packageId)}/reviews?${query}`);
+  }
+
+  getStoreRatingPrompt(): Promise<GetStoreRatingPromptResponse> {
+    return this.http('GET', '/api/store/rating-prompt');
+  }
+
+  markStoreRatingPromptShown(request: MarkStoreRatingPromptShownRequest): Promise<void> {
+    return this.http('POST', '/api/store/rating-prompt/shown', request);
   }
 
   getOwnStoreReview(kind: StoreExtensionKind, packageId: string): Promise<GetStoreOwnReviewResponse> {

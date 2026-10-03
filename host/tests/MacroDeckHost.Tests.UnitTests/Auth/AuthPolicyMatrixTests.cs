@@ -563,7 +563,12 @@ public class AuthPolicyMatrixTests
 				new { category = "Spam" },
 				_clientToken),
 			await Send(HttpMethod.Get, "/api/store/review-avatars?src=x", _clientToken),
-			await Send(HttpMethod.Get, "/api/store/creator-guidelines", _clientToken)
+			await Send(HttpMethod.Get, "/api/store/creator-guidelines", _clientToken),
+			await Send(HttpMethod.Get, "/api/store/rating-prompt", _clientToken),
+			await SendJson(HttpMethod.Post,
+				"/api/store/rating-prompt/shown",
+				new { kind = "Plugin", id = "com.acme.hue" },
+				_clientToken)
 		};
 
 		Assert.That(responses.Select(response => response.StatusCode), Is.All.EqualTo(HttpStatusCode.Forbidden));

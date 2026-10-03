@@ -1,0 +1,56 @@
+@if (candidate(); as candidate) {
+  <shared-modal [heading]="heading()" size="small" (close)="onModalClose()">
+    <div class="rating-prompt">
+      <div class="rating-prompt__icon" aria-hidden="true">
+        @if (iconUrl(); as icon) {
+          @if (!iconFailed()) {
+            <img [src]="icon" alt="" (error)="iconFailed.set(true)">
+          } @else {
+            <span class="icon icon-{{ kindIcon() }} icon-lg"></span>
+          }
+        } @else {
+          <span class="icon icon-{{ kindIcon() }} icon-lg"></span>
+        }
+      </div>
+      <p class="rating-prompt__name">{{ candidate.name }}</p>
+      <p class="rating-prompt__hint">{{ appStrings.Store.RatingPrompt.Hint | translate }}</p>
+      <app-store-star-picker
+        [value]="rating()"
+        [disabled]="busy()"
+        [labelledBy]="null"
+        (valueChange)="selectRating($event)" />
+
+      @if (rating() !== null) {
+        @if (reviewOpen()) {
+          <label class="rating-prompt__review">
+            <span class="rating-prompt__review-label">{{ appStrings.Store.Reviews.BodyFieldLabel | translate }}</span>
+            <shared-input
+              name="body"
+              [multiline]="true"
+              [rows]="4"
+              [disabled]="busy()"
+              [ngModel]="body()"
+              (ngModelChange)="body.set($event)" />
+          </label>
+        } @else {
+          <shared-button variant="ghost" [disabled]="busy()" (click)="reviewOpen.set(true)">
+            {{ appStrings.Store.Reviews.WriteAction | translate }}
+          </shared-button>
+        }
+      }
+
+      @if (error(); as message) {
+        <p class="rating-prompt__error" role="alert">{{ message }}</p>
+      }
+    </div>
+
+    <div modal-footer class="rating-prompt__actions">
+      <shared-button variant="ghost" [disabled]="busy()" (click)="notNow()">
+        {{ appStrings.Store.RatingPrompt.NotNowAction | translate }}
+      </shared-button>
+      <shared-button variant="primary" [disabled]="rating() === null || busy()" (click)="submit()">
+        {{ appStrings.Store.RatingPrompt.SubmitAction | translate }}
+      </shared-button>
+    </div>
+  </shared-modal>
+}

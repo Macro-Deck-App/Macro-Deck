@@ -26,7 +26,8 @@ public class GetExtensionSettingsRequestMessageHandler
 			CheckForUpdates = settings.CheckForUpdates,
 			NotifyOnUpdates = settings.NotifyOnUpdates,
 			RefreshIntervalMinutes = settings.RefreshIntervalMinutes,
-			AutoUpdate = settings.AutoUpdate
+			AutoUpdate = settings.AutoUpdate,
+			AskForRatings = settings.AskForRatings
 		};
 	}
 }

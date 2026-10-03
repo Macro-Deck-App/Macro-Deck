@@ -171,43 +171,8 @@
   color: var(--color-text-secondary);
 }
 
-.reviews-star-picker {
-  display: inline-flex;
-  gap: var(--space-1);
-}
-
-.reviews-star-option {
-  @include ds.flex-center;
-  padding: var(--space-1);
-  border: none;
-  border-radius: var(--radius-sm);
-  background: none;
-  color: var(--color-border-light);
-  cursor: pointer;
-
-  &.is-lit {
-    color: var(--color-warning);
-  }
-
-  &:focus-visible {
-    @include ds.focus-ring;
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.55;
-  }
-}
-
 .reviews-counter {
   align-self: flex-end;
-}
-
-.reviews-star-glyph {
-  display: block;
-  width: 26px;
-  height: 26px;
-  fill: currentColor;
 }
 
 .reviews-distribution-star {

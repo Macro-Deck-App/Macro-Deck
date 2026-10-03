@@ -28,6 +28,10 @@ export class ExtensionsSettingsComponent {
     void this.apply({ autoUpdate: value });
   }
 
+  setAskForRatings(value: boolean): void {
+    void this.apply({ askForRatings: value });
+  }
+
   private async apply(request: UpdateExtensionSettingsRequest): Promise<void> {
     const previous = this.settings();
     if (!previous || this.busy()) {

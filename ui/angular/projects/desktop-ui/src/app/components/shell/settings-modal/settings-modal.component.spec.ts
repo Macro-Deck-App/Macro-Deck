@@ -316,7 +316,7 @@ describe('SettingsModalComponent', () => {
     expect(groups.map(group => Array.from(group.querySelectorAll('.settings-nav__item'))
       .map(item => item.textContent?.trim())))
       .toEqual([
-        ['Appearance', 'Startup', 'Language', 'Extensions'],
+        ['Appearance', 'Startup', 'Language', 'Store'],
         ['Network', 'Devices', 'USB connections', 'Companion App'],
         ['Security'],
         ['Backups', 'Migration'],

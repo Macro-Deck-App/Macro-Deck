@@ -78,7 +78,8 @@ internal sealed class FakeAdbPreferenceService : IAppPreferenceService
 		bool? checkForUpdates,
 		bool? notifyOnUpdates,
 		int? refreshIntervalMinutes,
-		bool? autoUpdate = null)
+		bool? autoUpdate = null,
+		bool? askForRatings = null)
 		=> throw new NotSupportedException();
 
 	// Answered rather than refused: anything resolving a localized string reaches this, and refusing

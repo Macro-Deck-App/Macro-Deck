@@ -455,3 +455,21 @@ export interface StoreReportResponse {
   success: boolean;
   error?: StoreReviewWriteError | null;
 }
+
+export interface StoreRatingPromptCandidateBody {
+  kind: StoreExtensionKind;
+  id: string;
+  name: string;
+  hasIcon: boolean;
+  iconSha256?: string | null;
+}
+
+export interface GetStoreRatingPromptResponse {
+  ready: boolean;
+  candidate?: StoreRatingPromptCandidateBody | null;
+}
+
+export interface MarkStoreRatingPromptShownRequest {
+  kind: StoreExtensionKind;
+  id: string;
+}

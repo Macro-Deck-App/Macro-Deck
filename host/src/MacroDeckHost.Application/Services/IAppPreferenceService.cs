@@ -77,7 +77,8 @@ public record ExtensionSettings(
 	bool CheckForUpdates,
 	bool NotifyOnUpdates,
 	int RefreshIntervalMinutes,
-	bool AutoUpdate = false);
+	bool AutoUpdate = false,
+	bool AskForRatings = true);
 
 /// <param name="Culture">The culture in effect - either the stored choice, or the operating system's.</param>
 /// <param name="FollowSystem">
@@ -156,7 +157,8 @@ public interface IAppPreferenceService
 		bool? checkForUpdates,
 		bool? notifyOnUpdates,
 		int? refreshIntervalMinutes,
-		bool? autoUpdate = null);
+		bool? autoUpdate = null,
+		bool? askForRatings = null);
 
 	Task<LocalizationSettings> GetLocalization();
 

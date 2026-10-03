@@ -26,7 +26,8 @@ public class UpdateExtensionSettingsRequestMessageHandler
 			request.CheckForUpdates,
 			request.NotifyOnUpdates,
 			request.RefreshIntervalMinutes,
-			request.AutoUpdate);
+			request.AutoUpdate,
+			request.AskForRatings);
 		_updateDetector.Check();
 
 		return new UpdateExtensionSettingsResponse
@@ -35,7 +36,8 @@ public class UpdateExtensionSettingsRequestMessageHandler
 			CheckForUpdates = settings.CheckForUpdates,
 			NotifyOnUpdates = settings.NotifyOnUpdates,
 			RefreshIntervalMinutes = settings.RefreshIntervalMinutes,
-			AutoUpdate = settings.AutoUpdate
+			AutoUpdate = settings.AutoUpdate,
+			AskForRatings = settings.AskForRatings
 		};
 	}
 }

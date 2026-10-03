@@ -533,6 +533,26 @@ public class AppPreferenceServiceTests
 	}
 
 	[Test]
+	public async Task Extensions_ask_for_ratings_until_the_user_turns_it_off_and_keep_the_other_settings()
+	{
+		var service = CreateService();
+		var initial = await service.GetExtensions();
+
+		await service.SetExtensions(null, null, null, 30, askForRatings: false);
+		var off = await service.GetExtensions();
+		await service.SetExtensions(null, null, null, null, autoUpdate: true);
+		var stillOff = await service.GetExtensions();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(initial.AskForRatings, Is.True);
+			Assert.That(off.AskForRatings, Is.False);
+			Assert.That(stillOff.AskForRatings, Is.False);
+			Assert.That(stillOff.RefreshIntervalMinutes, Is.EqualTo(30));
+		});
+	}
+
+	[Test]
 	public async Task Extensions_do_not_update_automatically_until_the_user_turns_it_on()
 	{
 		var service = CreateService();

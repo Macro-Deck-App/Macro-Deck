@@ -776,6 +776,7 @@ public class Startup
 		services.AddSingleton<IStoreOfficialPackages, StoreOfficialPackages>();
 		services.AddSingleton<IStoreLinkResolver, StoreLinkResolver>();
 		services.AddSingleton<IStoreReviewService, StoreReviewService>();
+		services.AddSingleton<IStoreRatingPromptService, StoreRatingPromptService>();
 		services.AddSingleton<StoreCatalogPopularity>();
 		services.AddSingleton<StoreSimilarPackages>();
 		services.AddSingleton<MacroDeckHost.Application.Store.Testing.IStoreTestService, MacroDeckHost.Application.Store.Testing.StoreTestService>();

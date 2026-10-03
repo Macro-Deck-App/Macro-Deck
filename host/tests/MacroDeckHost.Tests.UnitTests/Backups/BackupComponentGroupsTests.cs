@@ -33,6 +33,12 @@ public class BackupComponentGroupsTests
 	}
 
 	[Test]
+	public void The_rating_prompt_history_is_never_restored()
+	{
+		Assert.That(BackupComponentGroups.IsRestorablePreferenceKey("storeRatingPrompt.history"), Is.False);
+	}
+
+	[Test]
 	public void The_last_seen_announcement_is_never_restored()
 	{
 		Assert.That(BackupComponentGroups.IsRestorablePreferenceKey("announcements.lastSeenNumber"), Is.False);

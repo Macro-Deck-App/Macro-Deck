@@ -445,6 +445,7 @@ export interface ExtensionSettingsBody {
   notifyOnUpdates: boolean;
   refreshIntervalMinutes: number;
   autoUpdate: boolean;
+  askForRatings: boolean;
 }
 
 export type GetExtensionSettingsResponse = ExtensionSettingsBody;
@@ -457,6 +458,7 @@ export interface UpdateExtensionSettingsRequest {
   notifyOnUpdates?: boolean;
   refreshIntervalMinutes?: number;
   autoUpdate?: boolean;
+  askForRatings?: boolean;
 }
 
 export interface GetLockScreenSettingsResponse {
