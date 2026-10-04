@@ -46,6 +46,7 @@ export class BranchListComponent {
     switch (branch.kind) {
       case 'if':     return this.localization.translateKey(B.If);
       case 'elseif': return this.localization.translateKey(B.ElseIf);
+      case 'case':   return this.localization.translateKey(B.Case);
       case 'else':   return this.localization.translateKey(B.Otherwise);
     }
   }

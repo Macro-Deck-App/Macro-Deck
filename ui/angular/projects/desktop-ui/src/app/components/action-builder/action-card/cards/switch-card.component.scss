@@ -1,0 +1,30 @@
+.block-section-condition {
+  grid-template-columns: 6rem minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.block-section-condition > .block-section-label {
+  padding-top: 0;
+}
+
+.block-section-condition > .block-section-remove {
+  align-self: center;
+  margin-top: 0;
+}
+
+.block-section-condition > .switch-operand {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+}
+
+.switch-operand-input {
+  flex: 1 1 0;
+  min-width: 4ch;
+  font-family: var(--font-mono);
+}
+
+.switch-operand-picker {
+  flex: 0 0 auto;
+}

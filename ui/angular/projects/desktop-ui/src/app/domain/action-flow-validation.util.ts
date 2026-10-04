@@ -111,12 +111,23 @@ function validateBlock(
     validateExpression(block.condition, block.id, undefined, errors, t);
   }
 
+  if (block.type === 'switch' && isConditionOperandEmpty(block.subject)) {
+    errors.push({ blockId: block.id, message: t(AppStrings.ActionBuilder.Validation.SwitchSubjectEmpty) });
+  }
+
   if (block.children) {
     for (const child of block.children) validateBlock(child, errors, context, t);
   }
 
   if (block.branches) {
     for (const branch of block.branches) {
+      if (branch.kind === 'case' && isConditionOperandEmpty(branch.value)) {
+        errors.push({
+          blockId: block.id,
+          branchId: branch.id,
+          message: t(AppStrings.ActionBuilder.Validation.SwitchCaseValueEmpty),
+        });
+      }
       if (branch.kind !== 'else' && branch.condition) {
         validateExpression(branch.condition, block.id, branch.id, errors, t);
       }

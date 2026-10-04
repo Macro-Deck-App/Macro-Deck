@@ -124,6 +124,8 @@ internal sealed class ActionBlock
 
 	public JsonElement Condition { get; set; }
 
+	public JsonElement Subject { get; set; }
+
 	public List<ActionBlock> Children { get; set; } = [];
 
 	public List<ActionBranch>? Branches { get; set; }
@@ -136,6 +138,8 @@ internal sealed class ActionBranch
 	public string Kind { get; set; } = "if";
 
 	public JsonElement Condition { get; set; }
+
+	public JsonElement Value { get; set; }
 
 	public List<ActionBlock> Children { get; set; } = [];
 }
