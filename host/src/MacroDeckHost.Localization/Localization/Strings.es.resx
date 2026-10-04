@@ -4232,6 +4232,15 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>Cambiar a perfil</value>
   </data>
+  <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
+    <value>Opcional. Solo navega este dispositivo. Déjalo vacío para usar el dispositivo que ejecutó la acción, o todos los dispositivos si ninguno la ejecutó.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.DeviceLabel" xml:space="preserve">
+    <value>Dispositivo</value>
+  </data>
+  <data name="Integrations.Deck.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>Dispositivo que la ejecuta, si no todos</value>
+  </data>
   <data name="Integrations.Deck.Actions.FolderDescription" xml:space="preserve">
     <value>La carpeta a la que cambiar.</value>
   </data>
@@ -4255,6 +4264,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>Perfil</value>
+  </data>
+  <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
+    <value>El dispositivo '{deviceId}' no está conectado.</value>
   </data>
   <data name="Integrations.Deck.Errors.FolderNotFound" xml:space="preserve">
     <value>La carpeta '{folderId}' no existe.</value>

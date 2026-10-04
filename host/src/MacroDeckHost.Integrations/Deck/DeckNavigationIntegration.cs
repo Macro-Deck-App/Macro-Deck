@@ -23,12 +23,14 @@ public sealed class DeckNavigationIntegration : IIntegration, ISystemIntegration
 				AppStrings.Integrations.Deck.Actions.GoToParentName(),
 				AppStrings.Integrations.Deck.Actions.GoToParentDescription(),
 				() => _navigator,
-				(navigator, context) => navigator.GoToParentAsync(context.OriginClientId, context.CancellationToken)),
+				(navigator, originClientId, cancellationToken) =>
+					navigator.GoToParentAsync(originClientId, cancellationToken)),
 			new DeckActionDefinition("go-back",
 				AppStrings.Integrations.Deck.Actions.GoBackName(),
 				AppStrings.Integrations.Deck.Actions.GoBackDescription(),
 				() => _navigator,
-				(navigator, context) => navigator.GoBackAsync(context.OriginClientId, context.CancellationToken))
+				(navigator, originClientId, cancellationToken) =>
+					navigator.GoBackAsync(originClientId, cancellationToken))
 		];
 	}
 

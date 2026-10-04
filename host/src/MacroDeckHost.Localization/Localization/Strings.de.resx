@@ -4231,6 +4231,15 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>Profil wechseln zu</value>
   </data>
+  <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
+    <value>Optional. Nur dieses Gerät navigiert. Leer lassen, um das Gerät zu steuern, das die Aktion ausgelöst hat, oder alle Geräte, wenn keines sie ausgelöst hat.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.DeviceLabel" xml:space="preserve">
+    <value>Gerät</value>
+  </data>
+  <data name="Integrations.Deck.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>Auslösendes Gerät, sonst alle</value>
+  </data>
   <data name="Integrations.Deck.Actions.FolderDescription" xml:space="preserve">
     <value>Der Ordner, zu dem gewechselt werden soll.</value>
   </data>
@@ -4254,6 +4263,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>Profil</value>
+  </data>
+  <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
+    <value>Das Gerät '{deviceId}' ist nicht verbunden.</value>
   </data>
   <data name="Integrations.Deck.Errors.FolderNotFound" xml:space="preserve">
     <value>Der Ordner '{folderId}' existiert nicht.</value>

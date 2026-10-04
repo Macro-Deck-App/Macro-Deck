@@ -24,6 +24,11 @@ Turn **Widget shadows** off there for a flat deck, which also looks cleaner with
 Inside **Streaming**: a start folder **Home** with **Scenes**, **Audio** and **Chat** subfolders,
 listed on the right. A button with **Change Folder to** opens a subfolder, **Go Back** returns.
 
+**Change Folder to**, **Change Profile to**, **Go to Parent Folder** and **Go Back** have an optional
+**Device** setting. A button pressed on a device only moves that device. An automation has no device
+behind it, so with **Device** empty it moves every connected device. Pick a device there to move only
+that one. If it is not connected at that moment, the action reports an error instead of moving the others.
+
 ## Widgets
 
 The tiles in a folder:

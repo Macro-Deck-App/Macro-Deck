@@ -4233,6 +4233,15 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>Change Profile to</value>
   </data>
+  <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
+    <value>Optional. Only this device navigates. Leave empty to navigate the device that ran the action, or all devices when none did.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.DeviceLabel" xml:space="preserve">
+    <value>Device</value>
+  </data>
+  <data name="Integrations.Deck.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>Triggering device, otherwise all</value>
+  </data>
   <data name="Integrations.Deck.Actions.FolderDescription" xml:space="preserve">
     <value>The folder to switch to.</value>
   </data>
@@ -4256,6 +4265,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>Profile</value>
+  </data>
+  <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
+    <value>The device '{deviceId}' is not connected.</value>
   </data>
   <data name="Integrations.Deck.Errors.FolderNotFound" xml:space="preserve">
     <value>The folder '{folderId}' does not exist.</value>
