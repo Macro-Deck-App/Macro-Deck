@@ -18,7 +18,7 @@ public class ActionButtonWidgetViewTests
 	{
 		var host = Render(new { });
 		var button = host.ById("actionButton");
-		var label = host.ById("actionButton.label");
+		var label = host.ById("actionButton.labelRow.labelBox.label");
 
 		Assert.Multiple(() =>
 		{
@@ -39,13 +39,79 @@ public class ActionButtonWidgetViewTests
 	}
 
 	[Test]
+	public void An_unset_label_box_draws_no_box_and_keeps_the_label_full_width()
+	{
+		var host = Render(new { labelColor = "#112233" });
+		var button = host.ById("actionButton");
+		var row = host.ById("actionButton.labelRow");
+		var box = host.ById("actionButton.labelRow.labelBox");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(button.HasProperty("align"), Is.False);
+			Assert.That(row.HasProperty("justify"), Is.False);
+			Assert.That(box.Flag("fill"), Is.True);
+			Assert.That(BoxBackground(box), Is.Null);
+		});
+	}
+
+	[Test]
+	public void A_label_box_colour_paints_behind_the_label_and_places_the_hugging_box_by_text_alignment()
+	{
+		var left = Render(new { labelBoxColor = "#ffaa00", textAlign = "left" });
+		var centre = Render(new { labelBoxColor = "#ffaa00" });
+		var right = Render(new { labelBoxColor = "#ffaa00", textAlign = "right" });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(BoxBackground(centre.ById("actionButton.labelRow.labelBox")), Is.EqualTo("#ffaa00"));
+			Assert.That(centre.ById("actionButton.labelRow.labelBox").HasProperty("fill"), Is.False);
+			Assert.That(left.ById("actionButton.labelRow").Text("justify"), Is.EqualTo(UiComponentJustify.Start));
+			Assert.That(centre.ById("actionButton.labelRow").Text("justify"), Is.EqualTo(UiComponentJustify.Center));
+			Assert.That(right.ById("actionButton.labelRow").Text("justify"), Is.EqualTo(UiComponentJustify.End));
+		});
+	}
+
+	[Test]
+	public void An_invalid_label_box_colour_is_treated_as_unset()
+	{
+		var host = Render(new { labelBoxColor = "not-a-colour" });
+
+		Assert.That(host.ById("actionButton.labelRow.labelBox").Flag("fill"), Is.True);
+	}
+
+	[Test]
+	public void A_state_label_box_colour_wins_and_an_unset_state_falls_back_to_the_root_colour()
+	{
+		var data = new
+		{
+			stateMode = true,
+			labelBoxColor = "#111111",
+			states = new object[]
+			{
+				new { id = "a", appearance = new { labelBoxColor = "#222222" } },
+				new { id = "b", appearance = new { label = "B" } },
+			},
+		};
+
+		var stateA = Render(data, activeStateId: "a");
+		var stateB = Render(data, activeStateId: "b");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(BoxBackground(stateA.ById("actionButton.labelRow.labelBox")), Is.EqualTo("#222222"));
+			Assert.That(BoxBackground(stateB.ById("actionButton.labelRow.labelBox")), Is.EqualTo("#111111"));
+		});
+	}
+
+	[Test]
 	public void The_label_wraps_with_no_line_cap_matching_the_retired_component()
 	{
 		// The retired ActionButtonWidgetComponent's label CSS was `white-space: pre-wrap;
 		// overflow-wrap: anywhere` with no line clamp at all - wrap:true and no maxLines is what
 		// reproduces that (see UiComponentProperties.MaxLines: absent + wrap resolves to uncapped).
 		var host = Render(new { });
-		var label = host.ById("actionButton.label");
+		var label = host.ById("actionButton.labelRow.labelBox.label");
 
 		Assert.Multiple(() =>
 		{
@@ -129,7 +195,7 @@ public class ActionButtonWidgetViewTests
 		});
 
 		var button = host.ById("actionButton");
-		var label = host.ById("actionButton.label");
+		var label = host.ById("actionButton.labelRow.labelBox.label");
 
 		Assert.Multiple(() =>
 		{
@@ -306,9 +372,11 @@ public class ActionButtonWidgetViewTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(bottomLeft.ById("actionButton").Text("justify"), Is.EqualTo(UiComponentJustify.End));
-			Assert.That(bottomLeft.ById("actionButton.label").Text("align"), Is.EqualTo(UiComponentAlignments.Start));
+			Assert.That(bottomLeft.ById("actionButton.labelRow.labelBox.label").Text("align"),
+				Is.EqualTo(UiComponentAlignments.Start));
 			Assert.That(topRight.ById("actionButton").Text("justify"), Is.EqualTo(UiComponentJustify.Start));
-			Assert.That(topRight.ById("actionButton.label").Text("align"), Is.EqualTo(UiComponentAlignments.End));
+			Assert.That(topRight.ById("actionButton.labelRow.labelBox.label").Text("align"),
+				Is.EqualTo(UiComponentAlignments.End));
 		});
 	}
 
@@ -362,6 +430,12 @@ public class ActionButtonWidgetViewTests
 	}
 
 	private static UiResource Icon() => new() { ResourceId = "res-1" };
+
+	private static string? BoxBackground(UiTestNode box)
+		=> box.Property("modifiers") is { ValueKind: JsonValueKind.Object } modifiers &&
+			modifiers.TryGetProperty("background", out var background)
+				? background.GetString()
+				: null;
 
 	private static UiTestHost Render(object data,
 		IReadOnlyDictionary<WidgetIconReference, UiResource>? icons = null,

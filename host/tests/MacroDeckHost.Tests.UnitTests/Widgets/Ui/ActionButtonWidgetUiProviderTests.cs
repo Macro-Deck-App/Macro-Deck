@@ -71,7 +71,7 @@ public class ActionButtonWidgetUiProviderTests
 
 		Assert.That(session, Is.Not.Null);
 
-		var label = FindById(session!.BuildTree().Root, "actionButton.label")!;
+		var label = FindById(session!.BuildTree().Root, "actionButton.labelRow.labelBox.label")!;
 		// The text comes from ILabelTextService, never from the raw stored label, so a Liquid template
 		// can never reach the wire unrendered. An absent key here is a button with no label at all.
 		Assert.That(label.Properties.ContainsKey("text"), Is.True, "the label node carried no text at all");
@@ -270,7 +270,7 @@ public class ActionButtonWidgetUiProviderTests
 
 		Assert.That(session, Is.Not.Null);
 
-		var label = FindById(session!.BuildTree().Root, "actionButton.label");
+		var label = FindById(session!.BuildTree().Root, "actionButton.labelRow.labelBox.label");
 
 		Assert.That(label, Is.Not.Null, "the sample tile carried no label node at all");
 		Assert.That(label!.Properties.ContainsKey("text"), Is.True, "the sample tile's label carried no text");
@@ -422,7 +422,7 @@ public class ActionButtonWidgetUiProviderTests
 	};
 
 	private static string? LabelText(IUiSession session)
-		=> FindById(session.BuildTree().Root, "actionButton.label") is { } label &&
+		=> FindById(session.BuildTree().Root, "actionButton.labelRow.labelBox.label") is { } label &&
 			label.Properties.TryGetValue("text", out var text)
 				? text.ToString()
 				: null;

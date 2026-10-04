@@ -17531,6 +17531,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Libellé</value>
   </data>
+  <data name="Widgets.Editor.LabelBoxColor" xml:space="preserve">
+    <value>Couleur du cadre du libellé</value>
+  </data>
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Couleur du libellé</value>
   </data>

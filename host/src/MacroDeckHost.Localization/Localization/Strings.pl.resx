@@ -17531,6 +17531,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Etykieta</value>
   </data>
+  <data name="Widgets.Editor.LabelBoxColor" xml:space="preserve">
+    <value>Kolor ramki etykiety</value>
+  </data>
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Kolor etykiety</value>
   </data>

@@ -17532,6 +17532,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>标签</value>
   </data>
+  <data name="Widgets.Editor.LabelBoxColor" xml:space="preserve">
+    <value>标签框颜色</value>
+  </data>
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>标签颜色</value>
   </data>

@@ -17531,6 +17531,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Popisek</value>
   </data>
+  <data name="Widgets.Editor.LabelBoxColor" xml:space="preserve">
+    <value>Barva pozadí popisku</value>
+  </data>
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Barva popisku</value>
   </data>

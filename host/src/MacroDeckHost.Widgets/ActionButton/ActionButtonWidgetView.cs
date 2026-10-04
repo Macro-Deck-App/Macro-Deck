@@ -18,6 +18,8 @@ internal static class ActionButtonWidgetView
 	// The retired ActionButtonWidgetComponent's fixed 5px label inset, expressed as a basis fraction
 	// (issue's resolved decision: "the 5 px label padding becomes a 0.05 basis fraction").
 	private const double _labelPadding = 0.05;
+	private const double _labelBoxPadding = 0.03;
+	private const double _labelBoxRadius = 0.03;
 
 	public static UiElement Build(
 		UiState<ActionButtonWidgetData> config,
@@ -58,6 +60,33 @@ internal static class ActionButtonWidgetView
 			// default - MaxLines is deliberately left unset so `wrap: true` alone resolves to the
 			// renderer's uncapped line count, matching that parity exactly.
 			Wrap = UiValue.Of(true),
+		};
+
+		var labelBox = new UiModifier
+		{
+			Key = "labelBox",
+			Padding = UiSize.From(() => UiLength.OfBasis(
+				Appearance(config, activeState).LabelBoxColor is null ? 0 : _labelBoxPadding)),
+			Background = UiValue.Optional(() =>
+				Appearance(config, activeState).LabelBoxColor is { } color
+					? UiValue.Of(UiBackground.Solid(color))
+					: UiValue.None<UiBackground>()),
+			Radius = UiSize.From(() => UiLength.OfBasis(
+				Appearance(config, activeState).LabelBoxColor is null ? 0 : _labelBoxRadius)),
+			Fill = UiValue.Optional(() =>
+				Appearance(config, activeState).LabelBoxColor is null ? UiValue.Of(true) : UiValue.None<bool>()),
+			Child = label,
+		};
+
+		var labelRow = new UiStack
+		{
+			Key = "labelRow",
+			Direction = UiComponentDirections.Horizontal,
+			Justify = UiValue.Optional(() =>
+				Appearance(config, activeState) is { LabelBoxColor: not null } appearance
+					? UiValue.Of(JustifyForAlign(appearance.TextAlign))
+					: UiValue.None<string>()),
+			Children = [labelBox],
 		};
 
 		return new UiButton
@@ -115,7 +144,7 @@ internal static class ActionButtonWidgetView
 				return color is null ? UiValue.None<string>() : UiValue.Of(color);
 			}),
 			Events = events,
-			Children = [label],
+			Children = [labelRow],
 			Fallback = new UiStack
 			{
 				Key = "actionButtonFallback",
@@ -192,6 +221,13 @@ internal static class ActionButtonWidgetView
 	{
 		"top" => UiComponentJustify.Start,
 		"bottom" => UiComponentJustify.End,
+		_ => UiComponentJustify.Center,
+	};
+
+	private static string JustifyForAlign(string textAlign) => textAlign switch
+	{
+		"left" => UiComponentJustify.Start,
+		"right" => UiComponentJustify.End,
 		_ => UiComponentJustify.Center,
 	};
 

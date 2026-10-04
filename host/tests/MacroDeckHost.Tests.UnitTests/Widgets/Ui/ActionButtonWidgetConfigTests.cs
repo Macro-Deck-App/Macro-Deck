@@ -45,6 +45,7 @@ public class ActionButtonWidgetConfigTests
 		host.ById("textAlign").Change("left");
 		host.ById("labelPosition").Change("top");
 		host.ById("labelColor").Change("#111111");
+		host.ById("labelBoxColor").Change("#444444");
 		host.ById("backgroundColor").Change("#222222");
 		host.ById("icon").Change(new { type = "icon-pack", reference = "bolt" });
 		host.ById("iconDisplay")
@@ -65,6 +66,7 @@ public class ActionButtonWidgetConfigTests
 			Assert.That(composed.GetProperty("textAlign").GetString(), Is.EqualTo("left"));
 			Assert.That(composed.GetProperty("labelPosition").GetString(), Is.EqualTo("top"));
 			Assert.That(composed.GetProperty("labelColor").GetString(), Is.EqualTo("#111111"));
+			Assert.That(composed.GetProperty("labelBoxColor").GetString(), Is.EqualTo("#444444"));
 			Assert.That(composed.GetProperty("backgroundColor").GetString(), Is.EqualTo("#222222"));
 			Assert.That(composed.GetProperty("icon").GetProperty("reference").GetString(), Is.EqualTo("bolt"));
 			Assert.That(composed.GetProperty("iconDisplay").GetProperty("zoom").GetDouble(), Is.EqualTo(150));
@@ -631,7 +633,10 @@ public class ActionButtonWidgetConfigTests
 
 			var labelIds = DescendantIds(labelTab);
 			Assert.That(labelIds,
-				Is.SupersetOf(new[] { "label", "fontFaceId", "fontSize", "textAlign", "labelPosition", "labelColor" }));
+				Is.SupersetOf(new[]
+				{
+					"label", "fontFaceId", "fontSize", "textAlign", "labelPosition", "labelColor", "labelBoxColor",
+				}));
 			Assert.That(labelIds, Has.No.Member("backgroundColor"));
 			Assert.That(labelIds, Has.No.Member("icon"));
 			Assert.That(labelIds, Has.No.Member("border"));
@@ -791,8 +796,8 @@ public class ActionButtonWidgetConfigTests
 		Assert.That(composed.EnumerateObject().Select(p => p.Name),
 			Is.EquivalentTo(new[]
 			{
-				"label", "fontFaceId", "fontSize", "textAlign", "labelPosition", "labelColor", "backgroundColor",
-				"icon",
+				"label", "fontFaceId", "fontSize", "textAlign", "labelPosition", "labelColor", "labelBoxColor",
+				"backgroundColor", "icon",
 				"iconDisplay", "iconColor", "border",
 			}),
 			"Only real schema keys should appear in the draft - no heading or tab contributed one.");
@@ -1083,6 +1088,21 @@ public class ActionButtonWidgetConfigTests
 	}
 
 	[Test]
+	public void Label_box_color_sits_in_the_label_tab_and_supports_reset_to_unset()
+	{
+		var host = Render(new { labelBoxColor = "#123456" });
+
+		var labelBoxColor = host.ById("labelBoxColor");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(labelBoxColor.Text(UiConfigProperties.Value), Is.EqualTo("#123456"));
+			Assert.That(labelBoxColor.Flag(UiConfigProperties.SupportsReset), Is.True);
+			Assert.That(labelBoxColor.Text(UiConfigProperties.DefaultValue), Is.EqualTo(string.Empty));
+		});
+	}
+
+	[Test]
 	public void Background_and_border_colours_support_reset_to_unset()
 	{
 		var host = Render(new { backgroundColor = "#123456", border = new { style = "static", color = "#654321" } });
@@ -1259,6 +1279,7 @@ public class ActionButtonWidgetConfigTests
 			["textAlign"] = host.ById("textAlign").Text(UiConfigProperties.Value),
 			["labelPosition"] = host.ById("labelPosition").Text(UiConfigProperties.Value),
 			["labelColor"] = host.ById("labelColor").Text(UiConfigProperties.Value),
+			["labelBoxColor"] = host.ById("labelBoxColor").Text(UiConfigProperties.Value),
 			["backgroundColor"] = host.ById("backgroundColor").Text(UiConfigProperties.Value),
 			["icon"] = host.ById("icon").Property(UiConfigProperties.Value),
 			["iconDisplay"] = host.FindById("iconDisplay")?.Property(UiConfigProperties.Value),
