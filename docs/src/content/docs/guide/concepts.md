@@ -155,8 +155,14 @@ Once a widget has a Double Tap action, its Short Press waits a moment to see whe
 so a single tap runs slightly later. A double tap runs only the Double Tap action. On a slider, a double tap
 still moves the level with each tap.
 
-Actions run top to bottom. **If / Else**, **Repeat** and **Wait** build longer flows, for example:
+Actions run top to bottom. **If / Else**, **Switch**, **Repeat** and **Wait** build longer flows, for example:
 *mute the mic, wait 3 seconds, switch the scene*. **Run** tries them out right away.
+
+**Switch** picks one path by a value, so a single block replaces a chain of **If / Else** blocks. Put the value
+to look at in **Switch on**, usually a variable, then add a **Case** for each value you care about and the
+actions to run for it. The cases are checked from top to bottom and only the first match runs. **Otherwise**
+runs when no case matches or the variable you picked has no value. Matching works like **If / Else** with *is*: text must match exactly, so
+`all` does not match `All`, while numbers compare by value.
 
 ## Button states
 

@@ -295,6 +295,9 @@ public sealed class FlowExecutor : IFlowExecutor
 			case "condition":
 				await ExecuteConditionAsync(block, run, cancellationToken);
 				break;
+			case "switch":
+				await ExecuteSwitchAsync(block, run, cancellationToken);
+				break;
 			case "loop":
 				await ExecuteLoopAsync(block, run, cancellationToken);
 				break;
@@ -554,6 +557,25 @@ public sealed class FlowExecutor : IFlowExecutor
 					await ExecuteBlocksAsync(branch.Children, run, cancellationToken);
 					return;
 				}
+			}
+		}
+	}
+
+	private async Task ExecuteSwitchAsync(
+		ActionBlock block,
+		FlowRun run,
+		CancellationToken cancellationToken)
+	{
+		var subjectAvailable = _conditionEvaluator.ResolveSide(block.Subject, run.Variables).Value is not null;
+		foreach (var branch in block.Branches ?? [])
+		{
+			var kind = branch.Kind.ToLowerInvariant();
+			if (kind == "else" ||
+				(kind == "case" && subjectAvailable &&
+				 _conditionEvaluator.Evaluate(block.Subject, "==", branch.Value, run.Variables)))
+			{
+				await ExecuteBlocksAsync(branch.Children, run, cancellationToken);
+				return;
 			}
 		}
 	}

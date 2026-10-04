@@ -34,11 +34,20 @@
   <data name="ActionBuilder.AddAction" xml:space="preserve">
     <value>+ Dodaj akcję</value>
   </data>
+  <data name="ActionBuilder.Branch.AddCase" xml:space="preserve">
+    <value>+ przypadek</value>
+  </data>
   <data name="ActionBuilder.Branch.AddElseIf" xml:space="preserve">
     <value>+ w przeciwnym razie jeśli</value>
   </data>
   <data name="ActionBuilder.Branch.AddOtherwise" xml:space="preserve">
     <value>+ w pozostałych przypadkach</value>
+  </data>
+  <data name="ActionBuilder.Branch.Case" xml:space="preserve">
+    <value>Przypadek</value>
+  </data>
+  <data name="ActionBuilder.Branch.CaseValueAriaLabel" xml:space="preserve">
+    <value>Wartość przypadku</value>
   </data>
   <data name="ActionBuilder.Branch.ElseIf" xml:space="preserve">
     <value>W przeciwnym razie jeśli</value>
@@ -48,6 +57,9 @@
   </data>
   <data name="ActionBuilder.Branch.Otherwise" xml:space="preserve">
     <value>W pozostałych przypadkach</value>
+  </data>
+  <data name="ActionBuilder.Branch.RemoveCaseAriaLabel" xml:space="preserve">
+    <value>Usuń przypadek</value>
   </data>
   <data name="ActionBuilder.Branch.RemoveOtherwiseAriaLabel" xml:space="preserve">
     <value>Usuń gałąź „W pozostałych przypadkach”</value>
@@ -108,6 +120,9 @@
   </data>
   <data name="ActionBuilder.Defaults.Repeat" xml:space="preserve">
     <value>Powtórz</value>
+  </data>
+  <data name="ActionBuilder.Defaults.Switch" xml:space="preserve">
+    <value>Przełącznik</value>
   </data>
   <data name="ActionBuilder.Defaults.Times" xml:space="preserve">
     <value>Razy</value>
@@ -372,6 +387,12 @@
     <value>Liczba kroków: {count}</value>
     <comment>[plural]</comment>
   </data>
+  <data name="ActionBuilder.Switch.SubjectAriaLabel" xml:space="preserve">
+    <value>Wartość, według której wybierana jest gałąź</value>
+  </data>
+  <data name="ActionBuilder.Switch.SubjectLabel" xml:space="preserve">
+    <value>Według wartości</value>
+  </data>
   <data name="ActionBuilder.Toolbar.AddActionToRunTooltip" xml:space="preserve">
     <value>Dodaj włączoną akcję, aby je uruchomić</value>
   </data>
@@ -455,6 +476,12 @@
   </data>
   <data name="ActionBuilder.Validation.PickEvent" xml:space="preserve">
     <value>Wybierz zdarzenie dla tego wyzwalacza</value>
+  </data>
+  <data name="ActionBuilder.Validation.SwitchCaseValueEmpty" xml:space="preserve">
+    <value>Wartość przypadku nie może być pusta</value>
+  </data>
+  <data name="ActionBuilder.Validation.SwitchSubjectEmpty" xml:space="preserve">
+    <value>Wartość przełącznika nie może być pusta</value>
   </data>
   <data name="ActionBuilder.WidgetAppearance.ButtonLabelPlaceholder" xml:space="preserve">
     <value>Etykieta przycisku</value>

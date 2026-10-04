@@ -34,11 +34,20 @@
   <data name="ActionBuilder.AddAction" xml:space="preserve">
     <value>+ Ajouter une action</value>
   </data>
+  <data name="ActionBuilder.Branch.AddCase" xml:space="preserve">
+    <value>+ cas</value>
+  </data>
   <data name="ActionBuilder.Branch.AddElseIf" xml:space="preserve">
     <value>+ sinon si</value>
   </data>
   <data name="ActionBuilder.Branch.AddOtherwise" xml:space="preserve">
     <value>+ sinon</value>
+  </data>
+  <data name="ActionBuilder.Branch.Case" xml:space="preserve">
+    <value>Cas</value>
+  </data>
+  <data name="ActionBuilder.Branch.CaseValueAriaLabel" xml:space="preserve">
+    <value>Valeur du cas</value>
   </data>
   <data name="ActionBuilder.Branch.ElseIf" xml:space="preserve">
     <value>Sinon si</value>
@@ -48,6 +57,9 @@
   </data>
   <data name="ActionBuilder.Branch.Otherwise" xml:space="preserve">
     <value>Sinon</value>
+  </data>
+  <data name="ActionBuilder.Branch.RemoveCaseAriaLabel" xml:space="preserve">
+    <value>Supprime le cas</value>
   </data>
   <data name="ActionBuilder.Branch.RemoveOtherwiseAriaLabel" xml:space="preserve">
     <value>Retirer la branche Sinon</value>
@@ -108,6 +120,9 @@
   </data>
   <data name="ActionBuilder.Defaults.Repeat" xml:space="preserve">
     <value>Répéter</value>
+  </data>
+  <data name="ActionBuilder.Defaults.Switch" xml:space="preserve">
+    <value>Switch</value>
   </data>
   <data name="ActionBuilder.Defaults.Times" xml:space="preserve">
     <value>Fois</value>
@@ -372,6 +387,12 @@
     <value>{count} étapes</value>
     <comment>[plural]</comment>
   </data>
+  <data name="ActionBuilder.Switch.SubjectAriaLabel" xml:space="preserve">
+    <value>Valeur à tester</value>
+  </data>
+  <data name="ActionBuilder.Switch.SubjectLabel" xml:space="preserve">
+    <value>Évalue</value>
+  </data>
   <data name="ActionBuilder.Toolbar.AddActionToRunTooltip" xml:space="preserve">
     <value>Ajoute une action activée pour les exécuter</value>
   </data>
@@ -455,6 +476,12 @@
   </data>
   <data name="ActionBuilder.Validation.PickEvent" xml:space="preserve">
     <value>Choisis un événement pour ce déclencheur</value>
+  </data>
+  <data name="ActionBuilder.Validation.SwitchCaseValueEmpty" xml:space="preserve">
+    <value>La valeur d'un cas ne peut pas être vide</value>
+  </data>
+  <data name="ActionBuilder.Validation.SwitchSubjectEmpty" xml:space="preserve">
+    <value>La valeur du switch ne peut pas être vide</value>
   </data>
   <data name="ActionBuilder.WidgetAppearance.ButtonLabelPlaceholder" xml:space="preserve">
     <value>Libellé du bouton</value>

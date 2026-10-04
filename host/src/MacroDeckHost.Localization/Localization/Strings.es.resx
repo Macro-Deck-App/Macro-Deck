@@ -34,11 +34,20 @@
   <data name="ActionBuilder.AddAction" xml:space="preserve">
     <value>+ Añadir acción</value>
   </data>
+  <data name="ActionBuilder.Branch.AddCase" xml:space="preserve">
+    <value>+ caso</value>
+  </data>
   <data name="ActionBuilder.Branch.AddElseIf" xml:space="preserve">
     <value>+ si no, si</value>
   </data>
   <data name="ActionBuilder.Branch.AddOtherwise" xml:space="preserve">
     <value>+ en cualquier otro caso</value>
+  </data>
+  <data name="ActionBuilder.Branch.Case" xml:space="preserve">
+    <value>Caso</value>
+  </data>
+  <data name="ActionBuilder.Branch.CaseValueAriaLabel" xml:space="preserve">
+    <value>Valor del caso</value>
   </data>
   <data name="ActionBuilder.Branch.ElseIf" xml:space="preserve">
     <value>Si no, si</value>
@@ -48,6 +57,9 @@
   </data>
   <data name="ActionBuilder.Branch.Otherwise" xml:space="preserve">
     <value>En cualquier otro caso</value>
+  </data>
+  <data name="ActionBuilder.Branch.RemoveCaseAriaLabel" xml:space="preserve">
+    <value>Quita el caso</value>
   </data>
   <data name="ActionBuilder.Branch.RemoveOtherwiseAriaLabel" xml:space="preserve">
     <value>Quitar rama Otherwise</value>
@@ -108,6 +120,9 @@
   </data>
   <data name="ActionBuilder.Defaults.Repeat" xml:space="preserve">
     <value>Repetir</value>
+  </data>
+  <data name="ActionBuilder.Defaults.Switch" xml:space="preserve">
+    <value>Switch</value>
   </data>
   <data name="ActionBuilder.Defaults.Times" xml:space="preserve">
     <value>Veces</value>
@@ -372,6 +387,12 @@
     <value>{count} pasos</value>
     <comment>[plural]</comment>
   </data>
+  <data name="ActionBuilder.Switch.SubjectAriaLabel" xml:space="preserve">
+    <value>Valor por el que se ramifica</value>
+  </data>
+  <data name="ActionBuilder.Switch.SubjectLabel" xml:space="preserve">
+    <value>Evalúa</value>
+  </data>
   <data name="ActionBuilder.Toolbar.AddActionToRunTooltip" xml:space="preserve">
     <value>Añade una acción habilitada para ejecutar esto</value>
   </data>
@@ -455,6 +476,12 @@
   </data>
   <data name="ActionBuilder.Validation.PickEvent" xml:space="preserve">
     <value>Elige un evento para este disparador</value>
+  </data>
+  <data name="ActionBuilder.Validation.SwitchCaseValueEmpty" xml:space="preserve">
+    <value>El valor de un caso no puede estar vacío</value>
+  </data>
+  <data name="ActionBuilder.Validation.SwitchSubjectEmpty" xml:space="preserve">
+    <value>El valor del switch no puede estar vacío</value>
   </data>
   <data name="ActionBuilder.WidgetAppearance.ButtonLabelPlaceholder" xml:space="preserve">
     <value>Etiqueta del botón</value>

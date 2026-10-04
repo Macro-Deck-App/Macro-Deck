@@ -33,11 +33,20 @@
   <data name="ActionBuilder.AddAction" xml:space="preserve">
     <value>+ 添加动作</value>
   </data>
+  <data name="ActionBuilder.Branch.AddCase" xml:space="preserve">
+    <value>+ 情况</value>
+  </data>
   <data name="ActionBuilder.Branch.AddElseIf" xml:space="preserve">
     <value>+ 否则如果</value>
   </data>
   <data name="ActionBuilder.Branch.AddOtherwise" xml:space="preserve">
     <value>+ 否则</value>
+  </data>
+  <data name="ActionBuilder.Branch.Case" xml:space="preserve">
+    <value>情况</value>
+  </data>
+  <data name="ActionBuilder.Branch.CaseValueAriaLabel" xml:space="preserve">
+    <value>情况的值</value>
   </data>
   <data name="ActionBuilder.Branch.ElseIf" xml:space="preserve">
     <value>否则如果</value>
@@ -47,6 +56,9 @@
   </data>
   <data name="ActionBuilder.Branch.Otherwise" xml:space="preserve">
     <value>否则</value>
+  </data>
+  <data name="ActionBuilder.Branch.RemoveCaseAriaLabel" xml:space="preserve">
+    <value>移除情况</value>
   </data>
   <data name="ActionBuilder.Branch.RemoveOtherwiseAriaLabel" xml:space="preserve">
     <value>移除“否则”分支</value>
@@ -107,6 +119,9 @@
   </data>
   <data name="ActionBuilder.Defaults.Repeat" xml:space="preserve">
     <value>重复</value>
+  </data>
+  <data name="ActionBuilder.Defaults.Switch" xml:space="preserve">
+    <value>多分支</value>
   </data>
   <data name="ActionBuilder.Defaults.Times" xml:space="preserve">
     <value>次数</value>
@@ -371,6 +386,12 @@
     <value>{count} 个步骤</value>
     <comment>[plural]</comment>
   </data>
+  <data name="ActionBuilder.Switch.SubjectAriaLabel" xml:space="preserve">
+    <value>用于分支判断的值</value>
+  </data>
+  <data name="ActionBuilder.Switch.SubjectLabel" xml:space="preserve">
+    <value>判断值</value>
+  </data>
   <data name="ActionBuilder.Toolbar.AddActionToRunTooltip" xml:space="preserve">
     <value>添加一个已启用的动作以运行这些内容</value>
   </data>
@@ -454,6 +475,12 @@
   </data>
   <data name="ActionBuilder.Validation.PickEvent" xml:space="preserve">
     <value>请为此触发器选择一个事件</value>
+  </data>
+  <data name="ActionBuilder.Validation.SwitchCaseValueEmpty" xml:space="preserve">
+    <value>情况的值不能为空</value>
+  </data>
+  <data name="ActionBuilder.Validation.SwitchSubjectEmpty" xml:space="preserve">
+    <value>多分支的判断值不能为空</value>
   </data>
   <data name="ActionBuilder.WidgetAppearance.ButtonLabelPlaceholder" xml:space="preserve">
     <value>按钮标签</value>

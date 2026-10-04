@@ -343,6 +343,13 @@ export function createBlockFromDefinition(def: ActionBlockDefinition): ActionBlo
   if (def.hasCondition) {
     block.condition = createEmptyComparison();
   }
+  if (def.hasCases) {
+    block.subject = '';
+    block.branches = [
+      { id: generateBlockId(), kind: 'case', value: '', children: [] },
+      { id: generateBlockId(), kind: 'else', children: [] },
+    ];
+  }
   if (def.hasBranches) {
     block.branches = [
       {

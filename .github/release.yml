@@ -18,7 +18,6 @@ changelog:
     - title: 🛠 Breaking Changes
       labels:
         - breaking-change
-        - compat:protocol
 
     - title: ⚠️ Deprecations
       labels:
