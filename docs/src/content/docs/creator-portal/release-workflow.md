@@ -95,7 +95,7 @@ A rule of thumb: if `macrodeck-plugin build` succeeds on Ubuntu, leave this off.
 | File | Content |
 | --- | --- |
 | `.macroDeckPlugin` | The built, unsigned package. |
-| `build-metadata.json` | Package id (from `manifest.json`), version, build and changelog. |
+| `build-metadata.json` | Package id (from `manifest.json`), version, build, changelog and the MacroDeck.Plugin.Cli version that made the package. |
 | `dependencies.json` | The NuGet packages the build restored, with known vulnerabilities. |
 | `conformance.json` | Optional. The conformance suite's report from the stub host run; see [Conformance report](/creator-portal/conformance/). |
 
@@ -111,4 +111,5 @@ Commit, tag, repository and workflow are read from GitHub's signed token, never 
 | `400` | The package or its metadata is unreadable. | Check the build step's log. |
 | `409` | The run was not started from a tag. | Trigger the workflow with a published release. |
 | `409` | The Project is in review. | Withdraw the submission and re-run. |
+| `422` | The plugin CLI is older than the minimum the Store requires, or the workflow did not report it. | Set `cli-version` to a newer version or leave it empty, and call `publish-plugin.yml@v1`. The minimum is published at `/api/v1/public/dependency-policy/sdk` as `minimumCliVersion`. |
 | `503` | GitHub's signing keys were unreachable. | Nothing was stored. Re-run the workflow. |

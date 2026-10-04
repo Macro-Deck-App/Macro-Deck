@@ -45,7 +45,7 @@ or to upload a new plugin build.
 ## Release by hand
 
 Turn off **Release automatically once approved** before submitting. After approval the version waits
-as **Ready to release**; release it from **Versions** when you are ready.
+as **Ready to release**; release it from **Releases** when you are ready.
 
 ## After publishing
 
