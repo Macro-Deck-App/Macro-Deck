@@ -15,6 +15,7 @@
 !include LogicLib.nsh
 
 Var MacroDeckLockedFile
+Var MacroDeckLockedError
 Var MacroDeckKillStatus
 Var MacroDeckStopResult
 Var MacroDeckStopElapsed
@@ -24,6 +25,37 @@ Var MacroDeckStopElapsed
 !define MACRODECK_STOP_LOCKED 2
 !define MACRODECK_STOP_KILL_REFUSED 3
 
+; Sharing or lock violation, or access denied on a non-read-only file, sets $MacroDeckLockedError
+; to the Win32 code. Scratch is $R8/$R9, so callers keep $0-$3.
+!macro MacroDeckProbeFile Path
+	Push $R8
+	Push $R9
+
+	System::Call 'kernel32::CreateFileW(w "${Path}", i 0xC0000000, i 1, p 0, i 3, i 0, p 0) i.R8 ?e'
+	Pop $R9
+	${If} $R8 == -1
+		${If} $R9 = 32
+		${OrIf} $R9 = 33
+			StrCpy $MacroDeckLockedError $R9
+		${ElseIf} $R9 = 5
+			System::Call 'kernel32::GetFileAttributesW(w "${Path}") i.R8'
+			${If} $R8 == -1
+				StrCpy $MacroDeckLockedError $R9
+			${Else}
+				IntOp $R8 $R8 & 1
+				${If} $R8 = 0
+					StrCpy $MacroDeckLockedError $R9
+				${EndIf}
+			${EndIf}
+		${EndIf}
+	${Else}
+		System::Call 'kernel32::CloseHandle(i R8)'
+	${EndIf}
+
+	Pop $R9
+	Pop $R8
+!macroend
+
 ; Top level only: wwwroot holds thousands of files that are never locked. The runtime subtree,
 ; which plugin dotnet processes map, is walked by MacroDeckProbeTreeWritable instead.
 !macro MacroDeckProbeDirectoryWritable Directory
@@ -32,22 +64,20 @@ Var MacroDeckStopElapsed
 	Push $2
 
 	StrCpy $MacroDeckLockedFile ""
+	StrCpy $MacroDeckLockedError 0
 	${If} ${FileExists} "${Directory}\*.*"
 		FindFirst $0 $1 "${Directory}\*"
 		${DoWhile} $1 != ""
 			${If} $1 != "."
 			${AndIf} $1 != ".."
 			${AndIfNot} ${FileExists} "${Directory}\$1\*.*"
-				; "a" opens for read/write with the contents preserved; "w" would truncate the
-				; very files the installer is about to replace. A running image file is held
-				; without FILE_SHARE_WRITE, so this fails for exactly as long as the process
-				; that owns it is still being torn down.
-				FileOpen $2 "${Directory}\$1" a
-				${If} $2 == ""
+				; A running image file is held without FILE_SHARE_WRITE, so the write open fails
+				; for as long as the owning process is still being torn down.
+				!insertmacro MacroDeckProbeFile "${Directory}\$1"
+				${If} $MacroDeckLockedError <> 0
 					StrCpy $MacroDeckLockedFile $1
 					${ExitDo}
 				${EndIf}
-				FileClose $2
 			${EndIf}
 			FindNext $0 $1
 		${Loop}
@@ -68,6 +98,7 @@ Var MacroDeckStopElapsed
 	Push $3
 
 	StrCpy $MacroDeckLockedFile ""
+	StrCpy $MacroDeckLockedError 0
 	${If} ${FileExists} "${Directory}\${Subdirectory}\*.*"
 		Push "|MacroDeckProbeEnd|"
 		Push "${Subdirectory}"
@@ -86,12 +117,11 @@ Var MacroDeckStopElapsed
 					${If} ${FileExists} "${Directory}\$3\$1\*.*"
 						Push "$3\$1"
 					${Else}
-						FileOpen $2 "${Directory}\$3\$1" a
-						${If} $2 == ""
+						!insertmacro MacroDeckProbeFile "${Directory}\$3\$1"
+						${If} $MacroDeckLockedError <> 0
 							StrCpy $MacroDeckLockedFile "$3\$1"
 							${ExitDo}
 						${EndIf}
-						FileClose $2
 					${EndIf}
 				${EndIf}
 				FindNext $0 $1
@@ -124,6 +154,7 @@ Var MacroDeckStopElapsed
 	StrCpy $2 0
 	StrCpy $MacroDeckStopResult ${MACRODECK_STOP_RUNNING}
 	StrCpy $MacroDeckLockedFile ""
+	StrCpy $MacroDeckLockedError 0
 
 	${Do}
 		!if "${CurrentUserOnly}" == "1"

@@ -84,7 +84,10 @@ macrodeck_host_attempt_${MDHOOK}:
 	${If} $MacroDeckStopResult = ${MACRODECK_STOP_KILL_REFUSED}
 		StrCpy $0 "Windows refused to end ${MACRODECK_HOST_BINARY}."
 	${ElseIf} $MacroDeckStopResult = ${MACRODECK_STOP_LOCKED}
-		StrCpy $0 "$INSTDIR\host\$MacroDeckLockedFile is still in use by another process."
+	${AndIf} $MacroDeckLockedError = 5
+		StrCpy $0 "$INSTDIR\host\$MacroDeckLockedFile cannot be written (access denied)."
+	${ElseIf} $MacroDeckStopResult = ${MACRODECK_STOP_LOCKED}
+		StrCpy $0 "$INSTDIR\host\$MacroDeckLockedFile is still in use by another process (error $MacroDeckLockedError)."
 	${Else}
 		StrCpy $0 "${MACRODECK_HOST_BINARY} is still running."
 	${EndIf}
