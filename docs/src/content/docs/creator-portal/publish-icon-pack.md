@@ -46,7 +46,7 @@ Upload the **Icon** under **Images**; an icon pack cannot be submitted without o
 
 ## 3. Start a version
 
-Open **Versions**.
+Open **Releases**.
 
 ![Next version with Version and Changelog fields and Start this version](../../../assets/creator-portal/iconpack-versions-empty.png)
 

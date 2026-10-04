@@ -21,9 +21,9 @@ Before you start:
 Open **Builds** and select **Connect GitHub**. Install the Macro Deck Platform App on your account or
 organization if GitHub asks for it.
 
-![The Repository panel with a repository picker and New repository from the template](../../../assets/creator-portal/builds-repository.png)
+![The Repository panel searching for hello, with mock-creator/hello-deck matching](../../../assets/creator-portal/builds-repository.png)
 
-- **Choose a repository** and select **Connect**, or
+- **Search your repositories**: type any part of the name, pick the repository and select **Connect**, or
 - **New repository from the template** creates a public repository from the plugin template.
 
 One repository per Project, one Project per repository. Private repositories are not offered.
@@ -100,19 +100,34 @@ restored, including known vulnerabilities.
 
 ## 4. Create a release
 
-Select **Create release** on the build.
+Install the build in Macro Deck and try it first. Then select **Create release** on the build.
 
-![The Create release 1.0.0 dialog with a changelog](../../../assets/creator-portal/create-release.png)
+The dialog has two steps. **Changelog** comes first; the version number comes from the build and
+cannot be changed, and the changelog can still be edited on **Releases**.
 
-The version number comes from the build and cannot be changed. The changelog can still be edited on
-**Versions**.
+![The Create release 1.0.0 dialog, first step: the changelog](../../../assets/creator-portal/create-release.png)
+
+**Testing** asks how you tested the build. The moderator reads it with your submission.
+
+![The Create release 1.0.0 dialog, second step: tested by hand, Macro Deck 3.0.0, Windows 11 24H2 x64, macOS 15.1 arm64 and OBS Studio 31.0](../../../assets/creator-portal/create-release-testing.png)
+
+| Field | |
+| --- | --- |
+| I installed this build in Macro Deck and tested it by hand | Required. |
+| Macro Deck version | Required. The version you tested with, for example `3.0.0`. |
+| Tested on | At least one operating system and architecture, with the operating system's version. Only the platforms the build ships are offered. |
+| Third-party software | Optional. Programs the plugin talks to, with their version, for example OBS Studio. |
+| Additional information for the reviewer | Optional. Anything that helps the review: an account it needs, a setting to turn on. Not shown in the Store. |
+
+**Create release** becomes available once the first box and a platform are ticked.
 
 ## 5. Submit for review
 
-On **Versions**, check the release and select **Add to submission**.
+On **Releases**, check the release and select **Add to submission**.
 
-![Version 1.0.0 in preparation with dependencies, changelog and Add to submission](../../../assets/creator-portal/versions.png)
+![Version 1.0.0 in preparation with how it was tested, dependencies and the changelog](../../../assets/creator-portal/versions.png)
 
+- **How you tested it**: **Edit** changes the test report until you submit.
 - **Release automatically once approved**: turn it off to publish the approved version yourself later.
 - **Discard version** removes the release. The build stays in the library.
 
@@ -121,7 +136,8 @@ moderator; **Revert** removes one.
 
 ![The Submit for Review dialog listing Summary, Tags, Images and Version 1.0.0](../../../assets/creator-portal/submit.png)
 
-Submitting needs the current Creator Guidelines accepted; the portal asks when they are not. Continue with
+Submitting needs the current Creator Guidelines accepted; the portal asks when they are not. A release
+created before test reports were asked for needs one first: **Add test report** on **Releases**. Continue with
 [Review and release](/creator-portal/review/).
 
 ## Release an update
@@ -145,6 +161,7 @@ published one.
 | `403`, repository does not match | The repository connected to the Project is not the one the workflow ran in, or `manifest.json` has a different `id`. |
 | `409`, not a tag | The workflow ran from a branch. Trigger it with a published release. |
 | `409`, in review | Withdraw the submission, then re-run the workflow. |
+| `422`, plugin CLI | The build was made with a MacroDeck.Plugin.Cli older than the Store accepts. Raise `cli-version`, or leave it empty for the workflow's default. |
 | Repository no longer offered | It is private. Only public repositories can publish. |
 
 See all refusals in the [release workflow reference](/creator-portal/release-workflow/#errors).
