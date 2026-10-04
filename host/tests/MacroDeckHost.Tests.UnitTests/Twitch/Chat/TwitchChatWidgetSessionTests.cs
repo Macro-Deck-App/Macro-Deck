@@ -106,6 +106,31 @@ internal sealed class TwitchChatWidgetSessionTests : UiSessionFixture
 	}
 
 	[Test]
+	public async Task The_configuration_offers_the_stored_text_size()
+	{
+		var surface = new UiSurface
+		{
+			Kind = UiSurfaceKinds.Config,
+			SessionMode = UiSessionModes.Exclusive,
+			Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
+			{
+				[UiConfigSurfaceAttributes.EntryPoint] = Json(UiConfigEntryPoints.WidgetConfig),
+				[UiConfigSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(Guid.NewGuid().ToString()),
+				[UiConfigSurfaceAttributes.WidgetType] = Json(TwitchChatWidgetType.QualifiedId),
+				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.SerializeToElement(new { account = "", textSize = 150 }),
+			}
+		};
+
+		var tree = await OpenTreeAsync(surface);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(tree, Does.Contain("\"textSize\""));
+			Assert.That(tree, Does.Contain("150"));
+		});
+	}
+
+	[Test]
 	public async Task A_surface_for_another_widget_type_is_declined()
 	{
 		var surface = WidgetSurface(UiSurfaceKinds.Widget) with

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using MacroDeck.Localization;
 using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Config.Options;
 using MacroDeck.Ui.Dsl;
@@ -18,6 +19,7 @@ internal static class TwitchChatWidgetConfigView
 		var account = new UiState<string>(WidgetConfigJson.ReadString(data, TwitchChatWidgetType.AccountKey) ??
 			string.Empty);
 		var allowModeration = new UiState<bool>(TwitchChatWidgetSettings.AllowsModeration(data));
+		var fontSize = new UiState<double>(TwitchChatWidgetSettings.FontScale(data) * 100);
 
 		return new UiWidgetConfiguration
 		{
@@ -48,6 +50,15 @@ internal static class TwitchChatWidgetConfigView
 						Label = AppStrings.Integrations.Twitch.ChatDialog.AllowModeration(),
 						Description = AppStrings.Integrations.Twitch.ChatDialog.AllowModerationDescription(),
 						Binding = Bind.To(allowModeration),
+					},
+					new UiNumberInput
+					{
+						Key = TwitchChatWidgetSettings.FontSizeKey,
+						Label = MacroDeckStrings.Widgets.Appearance.FontSize(),
+						Min = TwitchChatWidgetSettings.MinFontSizePercent,
+						Max = TwitchChatWidgetSettings.MaxFontSizePercent,
+						Step = 5,
+						Binding = Bind.To(fontSize),
 					},
 					UiWidgetAppearance.Section(data,
 						UiWidgetAppearanceFields.Border | UiWidgetAppearanceFields.BackgroundColor |

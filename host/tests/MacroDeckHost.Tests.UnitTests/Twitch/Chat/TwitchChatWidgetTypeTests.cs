@@ -61,6 +61,25 @@ internal sealed class TwitchChatWidgetTypeTests
 	}
 
 	[Test]
+	public async Task The_chat_widget_data_schema_offers_a_font_size_between_25_and_300_percent()
+	{
+		TwitchChatTestSupport.AddAccount(_config, "111", "streamer");
+		await _manager.ReloadAsync(_config);
+		await _host.StartAsync(_integration);
+
+		Assert.That(_registry.TryResolve(TwitchChatWidgetType.QualifiedId, out var entry), Is.True);
+
+		using var schema = global::System.Text.Json.JsonDocument.Parse(entry.Descriptor.DataSchema!);
+		var fontSize = schema.RootElement.GetProperty("properties").GetProperty("textSize");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(fontSize.GetProperty("minimum").GetDouble(), Is.EqualTo(25));
+			Assert.That(fontSize.GetProperty("maximum").GetDouble(), Is.EqualTo(300));
+		});
+	}
+
+	[Test]
 	public async Task Removing_the_last_account_withdraws_the_chat_widget_on_reinitialization()
 	{
 		TwitchChatTestSupport.AddAccount(_config, "111", "streamer");
