@@ -116,6 +116,15 @@ export function defaultActionDefs(t: Translator): ActionBlockDefinition[] {
       hasBranches: true,
     },
     {
+      blockType: 'switch',
+      type: 'switch',
+      label: t(A.Switch),
+      color: '#f59e0b',
+      category: t(A.CategoryLogic),
+      categoryId: 'Logic',
+      hasCases: true,
+    },
+    {
       blockType: 'repeatLoop',
       type: 'loop',
       label: t(A.Repeat),
