@@ -60,7 +60,7 @@
     <PackageVersion Include="NUnit" Version="4.6.1" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.15.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="5.2.0" />
-    <PackageVersion Include="obs-websocket-dotnet" Version="5.0.1" />
+    <PackageVersion Include="obs-websocket-dotnet" Version="5.7.0" />
     <PackageVersion Include="SpotifyAPI.Web" Version="7.4.2" />
     <PackageVersion Include="TwitchLib.Api" Version="3.10.2" />
     <PackageVersion Include="YamlDotNet" Version="16.3.0" />
