@@ -17532,6 +17532,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Label</value>
   </data>
+  <data name="Widgets.Editor.LabelBoxColor" xml:space="preserve">
+    <value>Label Box Color</value>
+  </data>
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Label Color</value>
   </data>

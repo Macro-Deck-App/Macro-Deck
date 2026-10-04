@@ -44,6 +44,10 @@
       "type": ["string", "null"],
       "description": "Label text color. With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own label color is unset - it is not a duplicate of the per-state color."
     },
+    "labelBoxColor": {
+      "type": ["string", "null"],
+      "description": "Color of a box drawn behind the label, as #rrggbb. Unset draws no box. With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own label box color is unset."
+    },
     "mode": {
       "enum": ["momentary", "toggle", null],
       "deprecated": true,
@@ -297,6 +301,10 @@
         "labelColor": {
           "type": ["string", "null"],
           "description": "Label text color for this state."
+        },
+        "labelBoxColor": {
+          "type": ["string", "null"],
+          "description": "Color of a box drawn behind the label for this state, as #rrggbb. Unset falls back to the root labelBoxColor."
         },
         "fontFaceId": {
           "type": ["string", "null"],

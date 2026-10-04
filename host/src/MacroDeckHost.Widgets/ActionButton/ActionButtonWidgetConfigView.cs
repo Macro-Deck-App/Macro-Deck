@@ -106,6 +106,7 @@ internal static class ActionButtonWidgetConfigView
 		var backgroundColor =
 			new UiState<string>(WidgetConfigJson.ReadString(data, "backgroundColor") ?? string.Empty);
 		var labelColor = new UiState<string>(WidgetConfigJson.ReadString(data, "labelColor") ?? string.Empty);
+		var labelBoxColor = new UiState<string>(WidgetConfigJson.ReadString(data, "labelBoxColor") ?? string.Empty);
 		var fontFaceId = new UiState<string>(WidgetConfigJson.ReadString(data, "fontFaceId") ?? string.Empty);
 		var fontSize = new UiState<double>(WidgetConfigJson.ReadDouble(data, "fontSize") ?? 14);
 		var textAlign = new UiState<string>(WidgetConfigJson.ReadString(data, "textAlign") ?? "center");
@@ -739,6 +740,7 @@ internal static class ActionButtonWidgetConfigView
 			UiBinding<string> textAlignBinding,
 			UiBinding<string> labelPositionBinding,
 			UiBinding<string> labelColorBinding,
+			UiBinding<string> labelBoxColorBinding,
 			UiBinding<string> backgroundColorBinding,
 			UiBinding<UiIconReference> iconBinding,
 			UiBinding<UiIconDisplay> iconDisplayBinding,
@@ -908,6 +910,14 @@ internal static class ActionButtonWidgetConfigView
 								// A reset affordance ahead of the swatches (issue #837), returning to unset -
 								// which is the button's own real default (a computed contrast colour), not a
 								// literal one this tree would have to know - see "keep an unset colour unset".
+								SupportsReset = true,
+								DefaultValue = string.Empty,
+							},
+							new UiColorInput
+							{
+								Key = "labelBoxColor",
+								Label = AppStrings.Widgets.Editor.LabelBoxColor(),
+								Binding = labelBoxColorBinding,
 								SupportsReset = true,
 								DefaultValue = string.Empty,
 							},
@@ -1207,6 +1217,7 @@ internal static class ActionButtonWidgetConfigView
 						textAlignBinding: StateStringBinding(states, stateId, "textAlign", fallback: "center"),
 						labelPositionBinding: StateStringBinding(states, stateId, "labelPosition", fallback: "center"),
 						labelColorBinding: StateStringBinding(states, stateId, "labelColor"),
+						labelBoxColorBinding: StateStringBinding(states, stateId, "labelBoxColor"),
 						backgroundColorBinding: StateStringBinding(states, stateId, "backgroundColor"),
 						iconBinding: iconBinding,
 						iconDisplayBinding: iconDisplayBinding,
@@ -1614,6 +1625,7 @@ internal static class ActionButtonWidgetConfigView
 			textAlignBinding: Bind.To(textAlign),
 			labelPositionBinding: Bind.To(labelPosition),
 			labelColorBinding: Bind.To(labelColor),
+			labelBoxColorBinding: Bind.To(labelBoxColor),
 			backgroundColorBinding: Bind.To(backgroundColor),
 			iconBinding: Bind.To(icon),
 			iconDisplayBinding: Bind.Custom(() => new UiIconDisplay(iconFit.Value,

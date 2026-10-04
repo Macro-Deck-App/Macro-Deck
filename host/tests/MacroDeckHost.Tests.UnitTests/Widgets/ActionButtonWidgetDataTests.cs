@@ -77,6 +77,23 @@ public class ActionButtonWidgetDataTests
 		});
 	}
 
+	[Test]
+	public void LabelBoxColor_IsAbsentForStoredDataWithoutTheKey_AndCascadesStateThenRoot()
+	{
+		var legacy = ActionButtonWidgetData.Parse(JsonDocument.Parse("""{"label":"Old","labelColor":"#eeeeee"}""").RootElement);
+		var staged = ActionButtonWidgetData.Parse(JsonDocument.Parse("""
+			{"stateMode":true,"labelBoxColor":"#111111",
+			 "states":[{"id":"a","appearance":{"labelBoxColor":"#222222"}},{"id":"b","appearance":{"label":"B"}}]}
+			""").RootElement);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(legacy.Resolve(null).LabelBoxColor, Is.Null);
+			Assert.That(staged.Resolve("a").LabelBoxColor, Is.EqualTo("#222222"));
+			Assert.That(staged.Resolve("b").LabelBoxColor, Is.EqualTo("#111111"));
+		});
+	}
+
 	// An absent key advances: a button saved before the flag existed keeps cycling, and only an
 	// explicit false turns it off.
 	[TestCase("""{"stateMode":true,"states":[{"id":"a"},{"id":"b"}]}""", true)]

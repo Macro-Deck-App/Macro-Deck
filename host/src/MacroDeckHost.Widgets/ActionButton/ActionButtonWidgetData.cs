@@ -111,6 +111,8 @@ public sealed record ActionButtonResolvedAppearance
 
 	public required string LabelColor { get; init; }
 
+	public string? LabelBoxColor { get; init; }
+
 	public string? FontFace { get; init; }
 
 	public required string TextAlign { get; init; }
@@ -298,6 +300,8 @@ public sealed class ActionButtonWidgetData
 				WidgetColor.NormalizeBackground(ReadString(root, "backgroundColor")),
 			LabelColor = WidgetColor.Normalize(ReadString(appearance, "labelColor")) ??
 				WidgetColor.Normalize(ReadString(root, "labelColor")) ?? "#ffffff",
+			LabelBoxColor = WidgetColor.Normalize(ReadString(appearance, "labelBoxColor")) ??
+				WidgetColor.Normalize(ReadString(root, "labelBoxColor")),
 			FontFace = Trimmed(ReadString(appearance, "fontFaceId")) ?? Trimmed(ReadString(root, "fontFaceId")),
 			TextAlign = ReadString(appearance, "textAlign") ?? ReadString(root, "textAlign") ?? "center",
 			LabelPosition = ReadString(appearance, "labelPosition") ?? ReadString(root, "labelPosition") ?? "center",

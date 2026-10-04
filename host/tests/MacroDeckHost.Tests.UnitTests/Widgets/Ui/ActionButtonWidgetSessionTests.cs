@@ -67,7 +67,7 @@ public class ActionButtonWidgetSessionTests
 		{
 			Assert.That(ops, Is.Not.Empty);
 			Assert.That(ops, Has.All.EqualTo(UiPatchOperations.SetProperties), "a state flip must never be structural");
-			Assert.That(fixture.Host.ById("actionButton.label").Text("text"), Is.EqualTo("On"));
+			Assert.That(fixture.Host.ById("actionButton.labelRow.labelBox.label").Text("text"), Is.EqualTo("On"));
 			Assert.That(fixture.Host.ById("actionButton").Text("background"), Is.EqualTo("#222222"));
 			Assert.That(fixture.Trigger.Calls.Single().TriggerType, Is.EqualTo("onShortPress"));
 		});
@@ -93,7 +93,7 @@ public class ActionButtonWidgetSessionTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(persistedNext, Is.EqualTo("a"), "sanity: the persisted rule itself stays on state a");
-			Assert.That(fixture.Host.ById("actionButton.label").Text("text"), Is.EqualTo("Off"), "state a's label");
+			Assert.That(fixture.Host.ById("actionButton.labelRow.labelBox.label").Text("text"), Is.EqualTo("Off"), "state a's label");
 			Assert.That(fixture.Host.ById("actionButton").Text("background"),
 				Is.EqualTo("#111111"),
 				"state a's background");
@@ -115,7 +115,7 @@ public class ActionButtonWidgetSessionTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.IsAccepted, Is.True);
-			Assert.That(fixture.Host.ById("actionButton.label").Text("text"),
+			Assert.That(fixture.Host.ById("actionButton.labelRow.labelBox.label").Text("text"),
 				Is.EqualTo("Off"),
 				"no advance on a long press");
 			Assert.That(fixture.Trigger.Calls.Single().TriggerType, Is.EqualTo("onLongPress"));
@@ -156,7 +156,7 @@ public class ActionButtonWidgetSessionTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.IsAccepted, Is.True);
-			Assert.That(fixture.Host.ById("actionButton.label").Text("text"), Is.EqualTo("Off"));
+			Assert.That(fixture.Host.ById("actionButton.labelRow.labelBox.label").Text("text"), Is.EqualTo("Off"));
 			Assert.That(fixture.Trigger.Calls.Single().TriggerType, Is.EqualTo("onDoublePress"));
 		});
 
@@ -174,7 +174,7 @@ public class ActionButtonWidgetSessionTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.IsAccepted, Is.False);
-			Assert.That(fixture.Host.ById("actionButton.label").Text("text"), Is.EqualTo("Off"));
+			Assert.That(fixture.Host.ById("actionButton.labelRow.labelBox.label").Text("text"), Is.EqualTo("Off"));
 			Assert.That(fixture.Trigger.Calls, Is.Empty);
 		});
 
@@ -270,7 +270,7 @@ public class ActionButtonWidgetSessionTests
 		var fixture = Build(TwoStateData, interactive: true);
 
 		var unknown = fixture.Host.ById("actionButton").Raise("double-press");
-		var atLabel = fixture.Host.ById("actionButton.label").Raise(UiComponentEvents.Press);
+		var atLabel = fixture.Host.ById("actionButton.labelRow.labelBox.label").Raise(UiComponentEvents.Press);
 		await fixture.Host.SettleAsync();
 
 		Assert.Multiple(() =>
@@ -343,7 +343,7 @@ public class ActionButtonWidgetSessionTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(fixture.Host.ById("actionButton.label").Text("text"), Is.EqualTo("Fresh Label"));
+			Assert.That(fixture.Host.ById("actionButton.labelRow.labelBox.label").Text("text"), Is.EqualTo("Fresh Label"));
 			Assert.That(fixture.Host.Patches.SelectMany(p => p.Operations).Select(o => o.Op),
 				Has.All.EqualTo(UiPatchOperations.SetProperties));
 		});
@@ -502,7 +502,7 @@ public class ActionButtonWidgetSessionTests
 	{
 		var fixture = Build(LiquidLabelData, interactive: true, initialLabel: "Vol: 30%");
 
-		Assert.That(fixture.Host.ById("actionButton.label").Text("text"), Is.EqualTo("Vol: 30%"));
+		Assert.That(fixture.Host.ById("actionButton.labelRow.labelBox.label").Text("text"), Is.EqualTo("Vol: 30%"));
 		Assert.That(fixture.Host.ToCanonicalJson(), Does.Not.Contain("{{"));
 		Assert.That(fixture.LabelSubscriptions.HasSubscribers(_widgetId.ToString(), "off"),
 			Is.True,
@@ -522,7 +522,7 @@ public class ActionButtonWidgetSessionTests
 			Assert.That(ops, Has.Count.EqualTo(2));
 			Assert.That(ops, Has.All.Matches<UiPatchOperation>(op => op.Op == UiPatchOperations.SetProperties));
 			Assert.That(ops, Has.All.Matches<UiPatchOperation>(op => op.Properties!.Keys.SequenceEqual(_textOnly)));
-			Assert.That(fixture.Host.ById("actionButton.label").Text("text"), Is.EqualTo("Vol: 40%"));
+			Assert.That(fixture.Host.ById("actionButton.labelRow.labelBox.label").Text("text"), Is.EqualTo("Vol: 40%"));
 		});
 
 		await fixture.Session.DisposeAsync();
@@ -610,7 +610,7 @@ public class ActionButtonWidgetSessionTests
 		{
 			await Task.Delay(20);
 			await fixture.Host.SettleAsync();
-			shown = fixture.Host.ById("actionButton.label").Text("text");
+			shown = fixture.Host.ById("actionButton.labelRow.labelBox.label").Text("text");
 		} while (shown != "Strip3 On" && DateTime.UtcNow < deadline);
 
 		Assert.That(shown, Is.EqualTo("Strip3 On"));
