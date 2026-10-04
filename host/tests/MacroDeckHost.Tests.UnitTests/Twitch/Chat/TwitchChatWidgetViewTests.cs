@@ -73,6 +73,86 @@ internal sealed class TwitchChatWidgetViewTests
 	}
 
 	[Test]
+	public async Task The_font_size_scales_the_chat_text_and_leaves_an_unset_widget_as_it_was()
+	{
+		Connect();
+		_hub.Post(new TwitchChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1")));
+		_hub.Tick();
+
+		await using var unset = await OpenAsync();
+		await using var hundred = await OpenAsync(new { account = "", textSize = 100 });
+		await using var doubled = await OpenAsync(new { account = "", textSize = 200 });
+		await using var invalid = await OpenAsync(new { account = "", textSize = "big" });
+		await using var cleared = await OpenAsync(new { account = "", textSize = (double?)null });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(TextSize(hundred), Is.EqualTo(TextSize(unset)));
+			Assert.That(TextSize(invalid), Is.EqualTo(TextSize(unset)));
+			Assert.That(TextSize(cleared), Is.EqualTo(TextSize(unset)));
+			Assert.That(TextSize(doubled), Is.EqualTo(TextSize(unset) * 2).Within(1e-9));
+		});
+	}
+
+	[Test]
+	public async Task The_font_size_is_limited_to_25_and_300_percent()
+	{
+		Connect();
+		_hub.Post(new TwitchChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1")));
+		_hub.Tick();
+
+		await using var unset = await OpenAsync();
+		await using var tiny = await OpenAsync(new { account = "", textSize = 1 });
+		await using var huge = await OpenAsync(new { account = "", textSize = 5000 });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(TextSize(tiny), Is.EqualTo(TextSize(unset) / 4).Within(1e-9));
+			Assert.That(TextSize(huge), Is.EqualTo(TextSize(unset) * 3).Within(1e-9));
+		});
+	}
+
+	[Test]
+	public async Task A_larger_font_size_keeps_the_chat_within_its_size_budget()
+	{
+		Connect();
+
+		for (var index = 0; index < TwitchChatLines.MaxMessages; index++)
+		{
+			_hub.Post(new TwitchChatMessageReceived(Streamer,
+				TwitchChatHubTests.Message("m" + index) with
+				{
+					Fragments = [new TwitchChatFragment(TwitchChatFragmentKind.Text, new string('x', 400))],
+				}));
+		}
+
+		_hub.Tick();
+
+		await using var session = await OpenAsync(new { account = "", textSize = 300 });
+
+		var size = UiCanonicalJson.SerializeToUtf8Bytes(session.BuildTree().Root).Length;
+
+		Assert.That(size, Is.LessThan(ProtocolLimits.MaxUiTreeBytes));
+	}
+
+	[Test]
+	public async Task The_sample_preview_follows_the_font_size()
+	{
+		await using var plain = await _provider.CreateSessionAsync(
+			new UiSessionRequest { Surface = Surface(UiSurfaceKinds.Preview, sample: true), UiModelVersion = 1 },
+			CancellationToken.None);
+		await using var large = await _provider.CreateSessionAsync(
+			new UiSessionRequest
+			{
+				Surface = Surface(UiSurfaceKinds.Preview, sample: true, data: new { account = "", textSize = 200 }),
+				UiModelVersion = 1,
+			},
+			CancellationToken.None);
+
+		Assert.That(TextSize(large!), Is.EqualTo(TextSize(plain!) * 2).Within(1e-9));
+	}
+
+	[Test]
 	public async Task A_connected_chat_without_messages_says_it_is_waiting()
 	{
 		Connect();
@@ -384,6 +464,11 @@ internal sealed class TwitchChatWidgetViewTests
 			}
 		}
 	}
+
+	private static double TextSize(IUiSession session)
+		=> Flatten(session.BuildTree().Root)
+			.First(node => node.Type == UiComponents.Text && node.Properties.ContainsKey(UiComponentProperties.Size))
+			.Properties[UiComponentProperties.Size].GetProperty("basis").GetDouble();
 
 	private static List<string> Texts(UiNode root)
 		=> [.. Flatten(root).Where(node => node.Properties.ContainsKey(UiComponentProperties.Text))

@@ -45,7 +45,7 @@ public sealed class TwitchIntegration
 	private readonly TwitchChatModerator _moderator;
 
 	private const string ChatDataSchema
-		= """{"type":"object","properties":{"account":{"type":"string"},"allowModeration":{"type":"boolean"},"backgroundColor":{"type":["string","null"],"description":"#rrggbb or transparent"}}}""";
+		= """{"type":"object","properties":{"account":{"type":"string"},"allowModeration":{"type":"boolean"},"backgroundColor":{"type":["string","null"],"description":"#rrggbb or transparent"},"textSize":{"type":["number","null"],"minimum":25,"maximum":300,"description":"Chat text size in percent, 100 when unset"}}}""";
 
 	private const string StatsDataSchema
 		= """{"type":"object","properties":{"account":{"type":"string"},"style":{"type":"string","enum":["overview","statsRow","liveRow","valueGraph","value"]},"metric":{"type":"string","enum":["viewers","chatters","followers","subscribers"]},"tiles":{"type":"array","items":{"type":"string","enum":["viewers","chatters","followers","subscribers"]}},"details":{"type":"array","items":{"type":"string","enum":["title","category","uptime"]}},"showThumbnail":{"type":"boolean"},"backgroundColor":{"type":["string","null"],"description":"#rrggbb or transparent"}}}""";

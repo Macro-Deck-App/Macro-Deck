@@ -65,6 +65,10 @@ show the chat, turn off **Allow moderation in the chat dialog** in the widget's 
 plugin places in its own profiles open the chat without moderation. The dialog opens on the device you
 pressed the widget on, so a press on a hardware deck does not open it.
 
+On a small device or a large widget, change **Size (%)** in the widget's settings to make the chat text bigger or
+smaller. 100 is the default and values from 25 to 300 are accepted. The size applies to the widget; the chat
+dialog keeps its own.
+
 ### The Twitch Stream Stats widget
 
 Pick what the widget shows with **Style** in its settings. Each style names the size it is designed for, and

@@ -10,23 +10,28 @@ internal static class TwitchChatWidgetView
 {
 	public const int FallbackMaxLines = 2;
 
-	private static readonly UiLength _textSize = UiLength.Capped(0.1, 12);
-
-	// At least a fifth of the text size, so the clipped edge never cuts the last line's descenders.
-	private static readonly UiLength _logPadding = UiLength.Capped(0.025, 3);
-
-	private static readonly UiLength _lineGap = UiLength.Capped(0.015, 2);
-
-	private static readonly UiLength _headerGap = UiLength.Capped(0.03, 4);
+	private sealed record Metrics(UiLength TextSize, UiLength LogPadding, UiLength LineGap, UiLength HeaderGap)
+	{
+		// The padding stays at least a fifth of the text size, so the clipped edge
+		// never cuts the last line's descenders.
+		public static Metrics For(double scale) => new(
+			UiLength.Capped(0.1 * scale, 12 * scale),
+			UiLength.Capped(0.025 * scale, 3 * scale),
+			UiLength.Capped(0.015 * scale, 2 * scale),
+			UiLength.Capped(0.03 * scale, 4 * scale));
+	}
 
 	public static UiElement Build(
 		UiState<TwitchChatViewState> state,
 		int cornerRadius = WidgetSafeArea.DefaultCornerRadius,
 		UiResource? icon = null,
 		IReadOnlyList<UiEventHandler>? events = null,
-		string? backgroundColor = null)
+		string? backgroundColor = null,
+		double scale = 1)
 	{
 		ArgumentNullException.ThrowIfNull(state);
+
+		var metrics = Metrics.For(scale);
 
 		return new UiStack
 		{
@@ -35,10 +40,10 @@ internal static class TwitchChatWidgetView
 			Direction = UiComponentDirections.Vertical,
 			Padding = WidgetSafeArea.For(cornerRadius),
 			Background = backgroundColor is { } background ? UiValue.Of(background) : UiValue.None<string>(),
-			Gap = _headerGap,
+			Gap = metrics.HeaderGap,
 			Children =
 			[
-				Header(state, icon),
+				Header(state, icon, metrics),
 				new UiStack
 				{
 					Key = "body",
@@ -51,19 +56,19 @@ internal static class TwitchChatWidgetView
 						{
 							Key = "offlineGate",
 							Condition = () => state.Value.Status == TwitchChatStatus.Offline,
-							Content = () => Notice("offline", AppStrings.Integrations.Twitch.ChatWidget.Offline()),
+							Content = () => Notice("offline", AppStrings.Integrations.Twitch.ChatWidget.Offline(), metrics),
 						},
 						new UiWhen
 						{
 							Key = "emptyGate",
 							Condition = () => state.Value.Status == TwitchChatStatus.Empty,
-							Content = () => Notice("empty", AppStrings.Integrations.Twitch.ChatWidget.Empty()),
+							Content = () => Notice("empty", AppStrings.Integrations.Twitch.ChatWidget.Empty(), metrics),
 						},
 						new UiWhen
 						{
 							Key = "messagesGate",
 							Condition = () => state.Value.Status == TwitchChatStatus.Messages,
-							Content = () => Log(state),
+							Content = () => Log(state, metrics),
 						},
 					],
 				},
@@ -71,7 +76,7 @@ internal static class TwitchChatWidgetView
 		};
 	}
 
-	private static UiStack Header(UiState<TwitchChatViewState> state, UiResource? icon)
+	private static UiStack Header(UiState<TwitchChatViewState> state, UiResource? icon, Metrics metrics)
 	{
 		var title = new UiTextRun
 		{
@@ -79,7 +84,7 @@ internal static class TwitchChatWidgetView
 			Text = UiText.FromLocalized(() => state.Value.AccountName is { } account
 				? AppStrings.Integrations.Twitch.ChatWidget.Title(account: account)
 				: AppStrings.Integrations.Twitch.ChatWidget.Name()),
-			Size = _textSize,
+			Size = metrics.TextSize,
 			Weight = UiComponentTextWeights.SemiBold,
 			Fill = true,
 		};
@@ -89,15 +94,20 @@ internal static class TwitchChatWidgetView
 			Key = "header",
 			Direction = UiComponentDirections.Horizontal,
 			Align = UiComponentAlignments.Center,
-			Gap = _headerGap,
-			Padding = _logPadding,
+			Gap = metrics.HeaderGap,
+			Padding = metrics.LogPadding,
 			Children = icon is null
 				? [title]
-				: [new UiImage { Key = "twitchIcon", Source = icon, Size = _textSize }, title],
+				: [new UiImage { Key = "twitchIcon", Source = icon, Size = metrics.TextSize }, title],
 		};
 	}
 
-	public static UiTextRun Message(TwitchChatLine line)
+	public static UiTextRun Message(TwitchChatLine line, double scale = 1) => Message(line, Metrics.For(scale));
+
+	public static UiTextRun FallbackMessage(TwitchChatLine line, double scale = 1)
+		=> FallbackMessage(line, Metrics.For(scale));
+
+	private static UiTextRun Message(TwitchChatLine line, Metrics metrics)
 	{
 		ArgumentNullException.ThrowIfNull(line);
 
@@ -106,12 +116,12 @@ internal static class TwitchChatWidgetView
 			Key = line.Key,
 			Text = line.Text,
 			Spans = UiValue.Of(line.Spans),
-			Size = _textSize,
+			Size = metrics.TextSize,
 			Wrap = true,
 		};
 	}
 
-	public static UiTextRun FallbackMessage(TwitchChatLine line)
+	private static UiTextRun FallbackMessage(TwitchChatLine line, Metrics metrics)
 	{
 		ArgumentNullException.ThrowIfNull(line);
 
@@ -119,13 +129,13 @@ internal static class TwitchChatWidgetView
 		{
 			Key = line.FallbackKey,
 			Text = line.Text,
-			Size = _textSize,
+			Size = metrics.TextSize,
 			Wrap = true,
 			MaxLines = FallbackMaxLines,
 		};
 	}
 
-	private static UiStack Log(UiState<TwitchChatViewState> state)
+	private static UiStack Log(UiState<TwitchChatViewState> state, Metrics metrics)
 		=> new()
 		{
 			Key = "log",
@@ -133,8 +143,8 @@ internal static class TwitchChatWidgetView
 			Fill = true,
 			Overflow = UiComponentOverflows.ClipStart,
 			RequiredComponentVersion = 2,
-			Padding = _logPadding,
-			Gap = _lineGap,
+			Padding = metrics.LogPadding,
+			Gap = metrics.LineGap,
 			Children =
 			[
 				new UiRepeat<TwitchChatLine>
@@ -142,7 +152,7 @@ internal static class TwitchChatWidgetView
 					Key = "messages",
 					Items = UiValue.From(() => state.Value.Lines),
 					KeySelector = line => line.Key,
-					Template = (line, _) => Message(line),
+					Template = (line, _) => Message(line, metrics),
 				},
 			],
 			Fallback = new UiStack
@@ -151,8 +161,8 @@ internal static class TwitchChatWidgetView
 				Direction = UiComponentDirections.Vertical,
 				Fill = true,
 				Justify = UiComponentJustify.End,
-				Padding = _logPadding,
-				Gap = _lineGap,
+				Padding = metrics.LogPadding,
+				Gap = metrics.LineGap,
 				Children =
 				[
 					new UiRepeat<TwitchChatLine>
@@ -160,18 +170,18 @@ internal static class TwitchChatWidgetView
 						Key = "fallbackMessages",
 						Items = UiValue.From(() => state.Value.FallbackLines),
 						KeySelector = line => line.FallbackKey,
-						Template = (line, _) => FallbackMessage(line),
+						Template = (line, _) => FallbackMessage(line, metrics),
 					},
 				],
 			},
 		};
 
-	private static UiTextRun Notice(string key, UiText text)
+	private static UiTextRun Notice(string key, UiText text, Metrics metrics)
 		=> new()
 		{
 			Key = key,
 			Text = text,
-			Size = _textSize,
+			Size = metrics.TextSize,
 			Role = UiComponentTextRoles.Secondary,
 			Align = UiComponentAlignments.Center,
 			Wrap = true,

@@ -63,11 +63,14 @@ internal sealed class TwitchChatLines
 		Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared,
 	};
 
-	public static readonly TwitchChatLineLayout Widget = new(TwitchChatWidgetView.Message,
-		TwitchChatWidgetView.FallbackMessage,
-		MaxMessages,
-		MaxBytes,
-		FallbackMessages);
+	public static readonly TwitchChatLineLayout Widget = WidgetLayout(1);
+
+	public static TwitchChatLineLayout WidgetLayout(double scale)
+		=> new(line => TwitchChatWidgetView.Message(line, scale),
+			line => TwitchChatWidgetView.FallbackMessage(line, scale),
+			MaxMessages,
+			MaxBytes,
+			FallbackMessages);
 
 	private readonly string _separator;
 	private readonly ITwitchChatImages? _images;

@@ -14,7 +14,10 @@ internal static class TwitchChatWidgetSample
 		(Strings.SampleChatter3, Strings.SampleMessage3),
 	];
 
-	public static async Task<TwitchChatViewState> BuildAsync(IWidgetSampleTextResolver text, string separator)
+	public static async Task<TwitchChatViewState> BuildAsync(
+		IWidgetSampleTextResolver text,
+		string separator,
+		TwitchChatLineLayout? layout = null)
 	{
 		ArgumentNullException.ThrowIfNull(text);
 
@@ -34,7 +37,8 @@ internal static class TwitchChatWidgetSample
 					[],
 					[new TwitchChatFragment(TwitchChatFragmentKind.Text, message)]),
 				separator,
-				images: null));
+				images: null,
+				layout));
 		}
 
 		return new TwitchChatViewState(TwitchChatStatus.Messages, lines, lines);
