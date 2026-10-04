@@ -42,7 +42,7 @@ internal sealed record VoicemeeterChannelCatalog
 	private static VoicemeeterChannelCatalog FromLayout(VoicemeeterLayout layout) => new()
 	{
 		Strips = Enumerable.Range(0, layout.Strips)
-			.Select(index => new VoicemeeterChannelOption(index, $"Strip {index + 1}"))
+			.Select(index => new VoicemeeterChannelOption(index, $"Strip {index}"))
 			.ToList(),
 		Buses = Enumerable.Range(0, layout.Buses)
 			.Select(index => new VoicemeeterChannelOption(index, $"Bus {layout.BusAssignmentName(index)}"))

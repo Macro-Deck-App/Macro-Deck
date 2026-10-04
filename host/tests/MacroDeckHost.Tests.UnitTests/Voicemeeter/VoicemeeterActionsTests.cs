@@ -514,7 +514,7 @@ internal sealed class VoicemeeterActionsTests
 		{
 			Assert.That(TestLocalization.Resolve(options.Options[0].Label), Is.EqualTo("Mic"));
 			Assert.That(options.Options[0].Value, Is.EqualTo("0"));
-			Assert.That(TestLocalization.Resolve(options.Options[1].Label), Is.EqualTo("Strip 2"));
+			Assert.That(TestLocalization.Resolve(options.Options[1].Label), Is.EqualTo("Strip 1"));
 			Assert.That(options.Options, Has.Count.EqualTo(5));
 		});
 	}

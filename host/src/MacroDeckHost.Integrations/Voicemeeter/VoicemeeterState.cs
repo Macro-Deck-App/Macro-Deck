@@ -20,7 +20,7 @@ internal sealed record VoicemeeterChannel(
 	IReadOnlyDictionary<string, bool> Assignments)
 {
 	public string DefaultName(VoicemeeterLayout layout) => Kind == VoicemeeterChannelKind.Strip
-		? $"Strip {Index + 1}"
+		? $"Strip {Index}"
 		: $"Bus {layout.BusAssignmentName(Index) ?? (Index + 1).ToString(CultureInfo.InvariantCulture)}";
 
 	public string DisplayName(VoicemeeterLayout layout)
