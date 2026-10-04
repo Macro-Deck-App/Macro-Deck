@@ -125,6 +125,19 @@ internal sealed class VoicemeeterLayoutTests
 	}
 
 	[Test]
+	public void The_unconnected_strip_picker_labels_strips_by_their_Voicemeeter_index()
+	{
+		var strips = VoicemeeterChannelCatalog.Unknown.Strips;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(strips[0].Label, Is.EqualTo("Strip 0"));
+			Assert.That(strips[0].Value, Is.EqualTo("0"));
+			Assert.That(strips[^1].Label, Is.EqualTo("Strip 7"));
+		});
+	}
+
+	[Test]
 	public void The_fade_argument_is_culture_invariant()
 	{
 		var original = CultureInfo.CurrentCulture;

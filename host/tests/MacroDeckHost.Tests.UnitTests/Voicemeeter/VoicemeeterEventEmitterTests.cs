@@ -56,7 +56,7 @@ internal sealed class VoicemeeterEventEmitterTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_publisher.Published[0].Parameters?["name"], Is.EqualTo("Strip 3"));
+			Assert.That(_publisher.Published[0].Parameters?["name"], Is.EqualTo("Strip 2"));
 			Assert.That(_publisher.Published[0].Parameters?["strip"], Is.EqualTo(2));
 		});
 	}
