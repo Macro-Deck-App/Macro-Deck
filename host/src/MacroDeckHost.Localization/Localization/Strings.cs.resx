@@ -34,11 +34,20 @@
   <data name="ActionBuilder.AddAction" xml:space="preserve">
     <value>+ Přidat akci</value>
   </data>
+  <data name="ActionBuilder.Branch.AddCase" xml:space="preserve">
+    <value>+ případ</value>
+  </data>
   <data name="ActionBuilder.Branch.AddElseIf" xml:space="preserve">
     <value>+ jinak když</value>
   </data>
   <data name="ActionBuilder.Branch.AddOtherwise" xml:space="preserve">
     <value>+ jinak</value>
+  </data>
+  <data name="ActionBuilder.Branch.Case" xml:space="preserve">
+    <value>Případ</value>
+  </data>
+  <data name="ActionBuilder.Branch.CaseValueAriaLabel" xml:space="preserve">
+    <value>Hodnota případu</value>
   </data>
   <data name="ActionBuilder.Branch.ElseIf" xml:space="preserve">
     <value>Jinak když</value>
@@ -48,6 +57,9 @@
   </data>
   <data name="ActionBuilder.Branch.Otherwise" xml:space="preserve">
     <value>Jinak</value>
+  </data>
+  <data name="ActionBuilder.Branch.RemoveCaseAriaLabel" xml:space="preserve">
+    <value>Odebrat případ</value>
   </data>
   <data name="ActionBuilder.Branch.RemoveOtherwiseAriaLabel" xml:space="preserve">
     <value>Odebrat větev Jinak</value>
@@ -108,6 +120,9 @@
   </data>
   <data name="ActionBuilder.Defaults.Repeat" xml:space="preserve">
     <value>Opakovat</value>
+  </data>
+  <data name="ActionBuilder.Defaults.Switch" xml:space="preserve">
+    <value>Přepínač</value>
   </data>
   <data name="ActionBuilder.Defaults.Times" xml:space="preserve">
     <value>Počet opakování</value>
@@ -372,6 +387,12 @@
     <value>Kroků: {count}</value>
     <comment>[plural]</comment>
   </data>
+  <data name="ActionBuilder.Switch.SubjectAriaLabel" xml:space="preserve">
+    <value>Hodnota, podle které se větví</value>
+  </data>
+  <data name="ActionBuilder.Switch.SubjectLabel" xml:space="preserve">
+    <value>Podle hodnoty</value>
+  </data>
   <data name="ActionBuilder.Toolbar.AddActionToRunTooltip" xml:space="preserve">
     <value>Přidejte zapnutou akci, kterou lze spustit</value>
   </data>
@@ -455,6 +476,12 @@
   </data>
   <data name="ActionBuilder.Validation.PickEvent" xml:space="preserve">
     <value>Vyberte událost pro tento trigger</value>
+  </data>
+  <data name="ActionBuilder.Validation.SwitchCaseValueEmpty" xml:space="preserve">
+    <value>Hodnota případu nesmí být prázdná</value>
+  </data>
+  <data name="ActionBuilder.Validation.SwitchSubjectEmpty" xml:space="preserve">
+    <value>Hodnota přepínače nesmí být prázdná</value>
   </data>
   <data name="ActionBuilder.WidgetAppearance.ButtonLabelPlaceholder" xml:space="preserve">
     <value>Popisek tlačítka</value>

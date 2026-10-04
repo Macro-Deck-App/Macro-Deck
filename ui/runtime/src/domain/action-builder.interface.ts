@@ -2,6 +2,7 @@ export type ActionBlockType =
   | 'trigger'
   | 'action'
   | 'condition'
+  | 'switch'
   | 'loop'
   | 'delay'
   | 'flow-control';
@@ -220,8 +221,9 @@ export function isLogicalExpression(value: unknown): value is LogicalExpression 
 
 export interface ActionBranch {
   id: string;
-  kind: 'if' | 'elseif' | 'else';
+  kind: 'if' | 'elseif' | 'case' | 'else';
   condition?: ConditionExpression;
+  value?: ParameterValue;
   children: ActionBlock[];
 }
 
@@ -240,6 +242,8 @@ export interface ActionBlock {
   comment?: string;
 
   condition?: ConditionExpression;
+
+  subject?: ParameterValue;
 
   children?: ActionBlock[];
 
@@ -264,6 +268,7 @@ export interface ActionBlockDefinition {
   providesWidgetIcon?: boolean;
   hasChildren?: boolean;
   hasBranches?: boolean;
+  hasCases?: boolean;
   hasCondition?: boolean;
   loopOnly?: boolean;
 }
