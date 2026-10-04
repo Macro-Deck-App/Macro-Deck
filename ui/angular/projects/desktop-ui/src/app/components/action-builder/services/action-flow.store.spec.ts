@@ -995,3 +995,60 @@ describe('ActionFlowStore copy/cut/paste', () => {
     expect(emitted.length).toBe(0);
   });
 });
+
+describe('ActionFlowStore switch blocks', () => {
+  let store: ActionFlowStore;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        ActionFlowStore,
+        { provide: ApiService, useValue: fakeApiService() },
+      ],
+    });
+    store = TestBed.inject(ActionFlowStore);
+    store.flows.set([{
+      triggerId: 't',
+      triggerType: 'onShortPress',
+      children: [{
+        id: 'sw',
+        type: 'switch',
+        blockType: 'switch',
+        label: 'Switch',
+        color: '#000',
+        subject: '',
+        branches: [
+          { id: 'c1', kind: 'case', value: '', children: [] },
+          { id: 'else', kind: 'else', children: [] },
+        ],
+      }],
+    }]);
+  });
+
+  const current = () => store.flows()[0].children[0];
+
+  it('stores the subject and each case value on its own branch', () => {
+    store.updateSwitchSubject('sw', { $var: 'repeat' });
+    store.updateCaseValue('sw', 'c1', 'all');
+
+    expect(current().subject as unknown).toEqual({ $var: 'repeat' });
+    expect(current().branches![0].value as unknown).toBe('all');
+  });
+
+  it('adds a new case before the default', () => {
+    store.addCase('sw');
+
+    expect(current().branches!.map(b => b.kind)).toEqual(['case', 'case', 'else']);
+  });
+
+  it('removes a case but never the last one', () => {
+    store.addCase('sw');
+    const second = current().branches![1].id;
+
+    store.removeCase('sw', second);
+    store.removeCase('sw', 'c1');
+
+    expect(current().branches!.map(b => b.id)).toEqual(['c1', 'else']);
+  });
+});
