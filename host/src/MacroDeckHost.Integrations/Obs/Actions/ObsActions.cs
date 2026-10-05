@@ -110,6 +110,10 @@ internal static class ObsActions
 			resolver,
 			c => c.SaveReplayBufferAsync()),
 
+		new SplitRecordFileActionDefinition(resolver),
+		new CreateRecordChapterActionDefinition(resolver),
+		new SetRecordDirectoryActionDefinition(resolver),
+
 		new SourceVisibilityActionDefinition(resolver),
 		new MuteInputActionDefinition(resolver),
 		new SetInputVolumeActionDefinition(resolver),

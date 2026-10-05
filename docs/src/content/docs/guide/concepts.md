@@ -448,6 +448,26 @@ once more and any changes you made to it in the meantime are replaced by the plu
 While a plugin developer runs a plugin from its project, its packs appear the same way. If that plugin is never
 installed, the packs stay as ordinary icon packs after the developer stops it.
 
+## Managing OBS recordings
+
+Besides starting and stopping a recording, the OBS Studio integration can manage one while it runs:
+
+- **Split Recording File** starts a new file and keeps recording.
+- **Create Recording Chapter** adds a chapter marker, optionally with a name. OBS supports chapters only for
+  the **Hybrid MP4** format.
+- **Set Recording Directory** changes the folder OBS saves new recordings to. Enter the path as OBS sees it:
+  when OBS runs on another computer, that is a folder on that computer.
+
+Split and chapter only work while OBS is recording. Otherwise the action fails and says that OBS is not
+recording. If OBS refuses a request, for example a chapter in a format without chapter support or a folder it
+cannot use, the action fails and shows OBS's reason.
+
+Use the events **Recording File Changed** (when a recording starts, moves to a new file or stops) and
+**Screenshot Saved** as triggers, for example to move a finished file or to send yourself a notification. Both
+carry the file's path. The variables **Last Recording File** and **Last Screenshot** hold the latest of these
+paths. They keep their value across splits and when OBS disconnects, and start empty again when Macro Deck
+restarts or you edit the OBS configuration.
+
 ## Devices
 
 Every phone, tablet or browser that connects shows up in **Settings > Devices**. Choose there which

@@ -28,6 +28,10 @@ internal static class ObsEventIds
 
 	public const string ReplayBufferSaved = "replay-buffer-saved";
 
+	public const string RecordFileChanged = "record-file-changed";
+
+	public const string ScreenshotSaved = "screenshot-saved";
+
 	public const string VirtualCamStarted = "virtual-cam-started";
 
 	public const string VirtualCamStopped = "virtual-cam-stopped";

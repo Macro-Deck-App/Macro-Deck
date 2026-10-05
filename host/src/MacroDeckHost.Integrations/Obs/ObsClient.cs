@@ -32,6 +32,8 @@ internal sealed class ObsClient : IObsClient
 		_obs.InputMuteStateChanged += (_, args) =>
 			InputMuteChanged?.Invoke(this, new ObsInputMuteChange(args.InputName, args.InputMuted));
 		_obs.ReplayBufferSaved += (_, args) => ReplayBufferSaved?.Invoke(this, args.SavedReplayPath);
+		_obs.RecordFileChanged += (_, args) => RecordFileChanged?.Invoke(this, args.NewOutputPath);
+		_obs.ScreenshotSaved += (_, args) => ScreenshotSaved?.Invoke(this, args.SavedScreenshotPath);
 
 		// Deliberately not subscribed: InputVolumeMeters fires at the audio meter refresh rate
 		// (tens of times a second). Nothing downstream should ever be driven by it.
@@ -46,6 +48,10 @@ internal sealed class ObsClient : IObsClient
 	public event EventHandler<ObsInputMuteChange>? InputMuteChanged;
 
 	public event EventHandler<string>? ReplayBufferSaved;
+
+	public event EventHandler<string>? RecordFileChanged;
+
+	public event EventHandler<string>? ScreenshotSaved;
 
 	public bool IsConnected => _obs.IsConnected;
 
@@ -212,6 +218,13 @@ internal sealed class ObsClient : IObsClient
 
 	public void SaveReplayBuffer() => _obs.SaveReplayBuffer();
 
+	public void SplitRecordFile() => Request(_obs.SplitRecordFile);
+
+	public void CreateRecordChapter(string? chapterName) => Request(() => _obs.SendRequest("CreateRecordChapter",
+		string.IsNullOrWhiteSpace(chapterName) ? null : new JObject { ["chapterName"] = chapterName }));
+
+	public void SetRecordDirectory(string directory) => Request(() => _obs.SetRecordDirectory(directory));
+
 	public bool GetSourceVisible(string sceneName, string sourceName)
 		=> _obs.GetSceneItemEnabled(sceneName, _obs.GetSceneItemId(sceneName, sourceName, 0));
 
@@ -317,6 +330,18 @@ internal sealed class ObsClient : IObsClient
 		=> Disconnected?.Invoke(this, e.DisconnectReason);
 
 	private void RaiseStateChanged() => StateChanged?.Invoke(this, EventArgs.Empty);
+
+	private static void Request(Action request)
+	{
+		try
+		{
+			request();
+		}
+		catch (ErrorResponseException ex)
+		{
+			throw new ObsRequestException(ex.ErrorCode, ex.Message);
+		}
+	}
 
 	private T Try<T>(Func<T> read, T fallback)
 	{

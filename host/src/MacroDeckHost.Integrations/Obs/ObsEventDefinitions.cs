@@ -53,6 +53,14 @@ internal static class ObsEventDefinitions
 				ActionParameter.Text("path", label: AppStrings.Integrations.Obs.Events.PathLabel())
 			]
 		},
+		PathEvent(ObsEventIds.RecordFileChanged,
+			AppStrings.Integrations.Obs.Events.RecordFileChangedName(),
+			AppStrings.Integrations.Obs.Events.RecordFileChangedDescription(),
+			AppStrings.Integrations.Obs.Events.RecordingCategory()),
+		PathEvent(ObsEventIds.ScreenshotSaved,
+			AppStrings.Integrations.Obs.Events.ScreenshotSavedName(),
+			AppStrings.Integrations.Obs.Events.ScreenshotSavedDescription(),
+			AppStrings.Integrations.Obs.Events.ScreenshotsCategory()),
 		Simple(ObsEventIds.VirtualCamStarted,
 			AppStrings.Integrations.Obs.Events.VirtualCamStartedName(),
 			AppStrings.Integrations.Obs.Events.VirtualCameraCategory()),
@@ -118,6 +126,23 @@ internal static class ObsEventDefinitions
 			ActionParameter.DynamicChoice("sceneName", label: AppStrings.Integrations.Obs.Params.Scene()),
 			ActionParameter.DynamicChoice("previousSceneName",
 				label: AppStrings.Integrations.Obs.Events.PreviousSceneLabel())
+		]
+	};
+
+	private static EventDefinition PathEvent(string id,
+		LocalizedText name,
+		LocalizedText description,
+		LocalizedText category) => new()
+	{
+		Id = id,
+		Name = name,
+		Description = description,
+		Category = category,
+		ConfigurationParameters = [ConfigurationParameter()],
+		PayloadParameters =
+		[
+			ConfigurationPayload(),
+			ActionParameter.Text("path", label: AppStrings.Integrations.Obs.Events.PathLabel())
 		]
 	};
 

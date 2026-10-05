@@ -165,7 +165,7 @@ public sealed class ObsIntegration
 	{
 		var runtimes = RuntimeSnapshot();
 		return ObsVariables.TrySplit(localId, runtimes, out var runtime, out var slot)
-			? ValueTask.FromResult(VariableReading.Of(ObsVariables.Read(runtime.Connection.State, slot)))
+			? ValueTask.FromResult(VariableReading.Of(ObsVariables.Read(runtime.Connection, slot)))
 			: _dynamicVariables.ReadAsync(localId, cancellationToken);
 	}
 
