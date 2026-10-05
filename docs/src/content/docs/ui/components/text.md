@@ -135,10 +135,25 @@ A localization reference resolves in each reader's own active language.
 | `FontFace` (`fontFace`) | Font catalogue identifier | The reader's default face | The typeface, from Macro Deck's font catalogue. |
 | `Digits` (`digits`) | `double`, digit widths | Exactly as wide as the content | How many digit widths the run reserves. |
 | `Spans` (`spans`) | List of `UiTextSpan`: `text` with optional `color` and `weight`, or `image` (`UiResource`) with optional `alt` | Draws `Text` | Inline runs of styled text and images drawn in place of `Text`. |
+| `Shadow` (`shadow`) | `bool` | The reader decides | `false` turns off the legibility shadow a reader draws behind text, such as Macro Deck's shadow behind text on a button. |
+| `StrokeColor` (`strokeColor`) | `#rrggbb` | No outline | The colour of an outline around the glyphs. |
+| `StrokeWidth` (`strokeWidth`) | `UiSize` length | No outline | How far the outline reaches outside each glyph. Drawn only with `StrokeColor` and a width above zero. |
 | `MainSize` (`mainSize`), `Fill` (`fill`) | See [Sizing](/ui/concepts/sizing/) | Sized by the reader | The run's extent along the parent stack's main axis. |
 
 `Size` is the font, `MainSize` is the extent along the parent's main axis; setting one does not imply the
 other.
+
+A label that sits on artwork can drop the shadow and carry an outline instead:
+
+```csharp
+new UiTextRun
+{
+    Text = "Play",
+    Shadow = false,
+    StrokeColor = "#000000",
+    StrokeWidth = UiSize.FromBasis(0.01),
+}
+```
 
 ## Events
 
@@ -175,6 +190,15 @@ takes their width too and pushes them out of the box. See [Sizing](/ui/concepts/
   stays one; draw its `alt` text while the image is unavailable, or nothing when `alt` is absent. Ignore a
   span `color` that is not `#rrggbb` and a span that carries neither `text` nor `image`. A reader that does
   not implement `spans` draws `text`.
+- `shadow`: when `false`, draw no legibility shadow behind the run. Absent or `true` keeps the reader's
+  default. A reader that does not know the key keeps its default.
+- `strokeColor` and `strokeWidth`: draw an outline of that colour around every glyph, reaching `strokeWidth`
+  outside the glyph edge and never eating into the glyph. The outline does not change the run's box or its
+  fit; give it room to paint instead of clipping it. Draw nothing when either key is missing or invalid, or
+  the width is zero. A reader that does not know the keys draws no outline. Macro Deck's renderer draws at
+  most a tenth of the cell basis, keeps the legibility shadow of a run on a button around its outline unless
+  `shadow` is `false`, and shows an outlined run without outline or shadow where the browser cannot apply
+  SVG filters to HTML.
 
 ## See also
 

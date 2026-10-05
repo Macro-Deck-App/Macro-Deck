@@ -48,6 +48,30 @@
       "type": ["string", "null"],
       "description": "Color of a box drawn behind the label, as #rrggbb. Unset draws no box. With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own label box color is unset."
     },
+    "labelShadow": {
+      "type": ["boolean", "null"],
+      "description": "Whether the label keeps the renderer's legibility shadow. Unset means true. With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own value is unset."
+    },
+    "labelOutlineColor": {
+      "type": ["string", "null"],
+      "description": "Color of an outline drawn around the label's glyphs, as #rrggbb. Unset draws no outline. With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own value is unset."
+    },
+    "labelOutlineWidth": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 3,
+      "description": "Width of the label outline as a percentage of the cell basis. Unset means 1; 0 draws no outline. With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own value is unset."
+    },
+    "labelBoxBorderColor": {
+      "type": ["string", "null"],
+      "description": "Color of a border around the label box, as #rrggbb. Unset draws no border; a border alone also draws the box without a fill. With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own value is unset."
+    },
+    "labelBoxBorderWidth": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 5,
+      "description": "Width of the label box border as a percentage of the cell basis. Unset means 1; 0 draws no border. With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own value is unset."
+    },
     "mode": {
       "enum": ["momentary", "toggle", null],
       "deprecated": true,
@@ -305,6 +329,30 @@
         "labelBoxColor": {
           "type": ["string", "null"],
           "description": "Color of a box drawn behind the label for this state, as #rrggbb. Unset falls back to the root labelBoxColor."
+        },
+        "labelShadow": {
+          "type": ["boolean", "null"],
+          "description": "Whether this state's label keeps the legibility shadow. Unset falls back to the root labelShadow."
+        },
+        "labelOutlineColor": {
+          "type": ["string", "null"],
+          "description": "Label outline color for this state, as #rrggbb. Unset falls back to the root labelOutlineColor."
+        },
+        "labelOutlineWidth": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 3,
+          "description": "Label outline width for this state, as a percentage of the cell basis. Unset falls back to the root labelOutlineWidth."
+        },
+        "labelBoxBorderColor": {
+          "type": ["string", "null"],
+          "description": "Label box border color for this state, as #rrggbb. Unset falls back to the root labelBoxBorderColor."
+        },
+        "labelBoxBorderWidth": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Label box border width for this state, as a percentage of the cell basis. Unset falls back to the root labelBoxBorderWidth."
         },
         "fontFaceId": {
           "type": ["string", "null"],

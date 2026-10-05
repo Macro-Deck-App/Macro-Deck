@@ -17531,11 +17531,26 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Libellé</value>
   </data>
+  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
+    <value>Couleur de la bordure du cadre</value>
+  </data>
+  <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
+    <value>Épaisseur de la bordure du cadre (%)</value>
+  </data>
   <data name="Widgets.Editor.LabelBoxColor" xml:space="preserve">
     <value>Couleur du cadre du libellé</value>
   </data>
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Couleur du libellé</value>
+  </data>
+  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
+    <value>Couleur du contour du libellé</value>
+  </data>
+  <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
+    <value>Épaisseur du contour (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelShadow" xml:space="preserve">
+    <value>Ombre du libellé</value>
   </data>
   <data name="Widgets.Editor.Live" xml:space="preserve">
     <value>en direct</value>

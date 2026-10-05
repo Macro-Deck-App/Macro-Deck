@@ -215,6 +215,9 @@ artwork and its own ring, so this tree pins three things no other fixture exerci
 - text children spanning `wrap`'s three states - `true` alone, `true` together with `maxLines`, and the
   key left out entirely - plus one child with `fontFace` and one without, reusing the same properties
   `ui.text` already ships rather than inventing button-only ones;
+- one button label with `shadow: false` and a glyph outline (`strokeColor` + `strokeWidth`) next to
+  labels with none of the three: a reader without the keys keeps its own legibility shadow and draws no
+  outline, and one with them must not draw either default on the label that declared otherwise;
 - a `justify: "start"` + `align: "end"` layer next to a centred one, so a renderer that conflates the
   button's own main and cross axis cannot reproduce both from one fixture;
 - a **one-step** fallback to `ui.stack` on the fully-declared button, carrying the same layout,
