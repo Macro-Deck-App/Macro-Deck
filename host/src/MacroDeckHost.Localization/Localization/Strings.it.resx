@@ -2852,6 +2852,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Errors.Profile.LoadFailed" xml:space="preserve">
     <value>Caricamento dei profili non riuscito</value>
   </data>
+  <data name="Errors.Profile.MoveFailed" xml:space="preserve">
+    <value>Spostamento del profilo non riuscito</value>
+  </data>
   <data name="Errors.Profile.NoProfileReturned" xml:space="preserve">
     <value>Nessun profilo restituito</value>
   </data>
@@ -2860,6 +2863,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Errors.Profiles.GridLockedByDevice" xml:space="preserve">
     <value>{deviceName} blocca questa griglia su {columns} x {rows}.</value>
+  </data>
+  <data name="Errors.Profiles.InvalidMovePosition" xml:space="preserve">
+    <value>La posizione deve essere 'before' o 'after'</value>
+  </data>
+  <data name="Errors.Profiles.MoveIdsRequired" xml:space="preserve">
+    <value>Sono obbligatori un id di profilo e un id di destinazione validi</value>
   </data>
   <data name="Errors.Profiles.VirtualCannotBeDeleted" xml:space="preserve">
     <value>I profili virtuali non possono essere eliminati</value>

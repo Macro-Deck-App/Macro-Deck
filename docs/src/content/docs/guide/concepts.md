@@ -19,6 +19,10 @@ Automatic activation stays with the original, so set it up again for the copy if
 Edit a profile from the profile menu to set its default grid size, widget spacing and corner radius.
 Turn **Widget shadows** off there for a flat deck, which also looks cleaner with very small spacing.
 
+To change the order of your profiles, open the profile menu and drag a profile by its handle, or choose
+**Move Up** or **Move Down** from its **More actions** menu. A device without a profile of its own opens
+the first one, and the Companion app's two-finger swipe follows this order once the app reconnects.
+
 ## Folders
 
 Inside **Streaming**: a start folder **Home** with **Scenes**, **Audio** and **Chat** subfolders,

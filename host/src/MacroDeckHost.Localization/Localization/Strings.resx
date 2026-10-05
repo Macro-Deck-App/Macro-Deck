@@ -2851,6 +2851,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.Profile.LoadFailed" xml:space="preserve">
     <value>Failed to load profiles</value>
   </data>
+  <data name="Errors.Profile.MoveFailed" xml:space="preserve">
+    <value>Failed to move the profile</value>
+  </data>
   <data name="Errors.Profile.NoProfileReturned" xml:space="preserve">
     <value>No profile returned</value>
   </data>
@@ -2859,6 +2862,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Errors.Profiles.GridLockedByDevice" xml:space="preserve">
     <value>{deviceName} locks this grid to {columns} x {rows}.</value>
+  </data>
+  <data name="Errors.Profiles.InvalidMovePosition" xml:space="preserve">
+    <value>Position must be 'before' or 'after'</value>
+  </data>
+  <data name="Errors.Profiles.MoveIdsRequired" xml:space="preserve">
+    <value>A valid profile id and target id are required</value>
   </data>
   <data name="Errors.Profiles.VirtualCannotBeDeleted" xml:space="preserve">
     <value>Virtual profiles cannot be deleted</value>
