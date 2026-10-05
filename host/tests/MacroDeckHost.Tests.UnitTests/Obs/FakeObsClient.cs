@@ -80,6 +80,34 @@ internal sealed class FakeObsClient : IObsClient
 
 	public event EventHandler<string>? ScreenshotSaved;
 
+	public event EventHandler<ObsInputSettingsChange>? InputSettingsChanged;
+
+	public event EventHandler<ObsFilterChange>? SourceFilterChanged;
+
+	public event EventHandler<ObsInputFlagChange>? InputActiveChanged;
+
+	public event EventHandler<ObsInputFlagChange>? InputShowingChanged;
+
+	public event EventHandler<string>? CustomEventReceived;
+
+	public int QueryStatusCount { get; private set; }
+
+	public Dictionary<string, int> Reads { get; } = new(StringComparer.Ordinal);
+
+	public void RaiseInputSettingsChanged(string inputName, params string[] keys)
+		=> InputSettingsChanged?.Invoke(this, new ObsInputSettingsChange(inputName, keys));
+
+	public void RaiseSourceFilterChanged(string sourceName, string filterName)
+		=> SourceFilterChanged?.Invoke(this, new ObsFilterChange(sourceName, filterName));
+
+	public void RaiseInputActiveChanged(string inputName, bool active)
+		=> InputActiveChanged?.Invoke(this, new ObsInputFlagChange(inputName, active));
+
+	public void RaiseInputShowingChanged(string inputName, bool showing)
+		=> InputShowingChanged?.Invoke(this, new ObsInputFlagChange(inputName, showing));
+
+	public void RaiseCustomEvent(string json) => CustomEventReceived?.Invoke(this, json);
+
 	public void RaiseInputMuteChanged(string inputName, bool muted)
 		=> InputMuteChanged?.Invoke(this, new ObsInputMuteChange(inputName, muted));
 
@@ -113,7 +141,11 @@ internal sealed class FakeObsClient : IObsClient
 		Calls.Add("Disconnect");
 	}
 
-	public ObsStatus QueryStatus() => QueryStatusHandler?.Invoke() ?? Status;
+	public ObsStatus QueryStatus()
+	{
+		QueryStatusCount++;
+		return QueryStatusHandler?.Invoke() ?? Status;
+	}
 
 	public IReadOnlyList<string> GetSceneNames() => SceneNames;
 
@@ -235,6 +267,7 @@ internal sealed class FakeObsClient : IObsClient
 
 	public bool GetSourceFilterEnabled(string sourceName, string filterName)
 	{
+		CountRead("filter:" + sourceName + "::" + filterName);
 		EnsureExists(sourceName);
 		return FilterStates.GetValueOrDefault(FilterKey(sourceName, filterName), false);
 	}
@@ -274,12 +307,14 @@ internal sealed class FakeObsClient : IObsClient
 
 	public ObsSourceActivity GetSourceActive(string sourceName)
 	{
+		CountRead("active:" + sourceName);
 		EnsureExists(sourceName);
 		return SourceActivity.GetValueOrDefault(sourceName, _inactive);
 	}
 
 	public string GetInputSettings(string inputName)
 	{
+		CountRead("settings:" + inputName);
 		EnsureExists(inputName);
 		return InputSettingsJson.GetValueOrDefault(inputName, "{}");
 	}
@@ -289,6 +324,8 @@ internal sealed class FakeObsClient : IObsClient
 	public void RaiseDisconnected(string? reason) => Disconnected?.Invoke(this, reason);
 
 	public void RaiseStateChanged() => StateChanged?.Invoke(this, EventArgs.Empty);
+
+	private void CountRead(string key) => Reads[key] = Reads.GetValueOrDefault(key) + 1;
 
 	private static string FilterKey(string sourceName, string filterName) => $"{sourceName}::{filterName}";
 

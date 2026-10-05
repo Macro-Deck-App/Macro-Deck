@@ -39,4 +39,14 @@ internal static class ObsEventIds
 	public const string StudioModeChanged = "studio-mode-changed";
 
 	public const string InputMuteChanged = "input-mute-changed";
+
+	public const string InputBecameActive = "input-became-active";
+
+	public const string InputBecameInactive = "input-became-inactive";
+
+	public const string InputStartedShowing = "input-started-showing";
+
+	public const string InputStoppedShowing = "input-stopped-showing";
+
+	public const string CustomEvent = "custom-event";
 }

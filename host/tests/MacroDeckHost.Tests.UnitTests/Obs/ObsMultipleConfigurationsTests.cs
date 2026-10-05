@@ -38,7 +38,9 @@ internal sealed class ObsMultipleConfigurationsTests
 		"recording-paused", "recording-resumed", "streaming-started", "streaming-stopped",
 		"replay-buffer-started", "replay-buffer-stopped", "replay-buffer-saved", "record-file-changed",
 		"screenshot-saved", "virtual-cam-started",
-		"virtual-cam-stopped", "studio-mode-changed", "input-mute-changed", "connected", "disconnected"
+		"virtual-cam-stopped", "studio-mode-changed", "input-mute-changed", "connected", "disconnected",
+		"input-became-active", "input-became-inactive", "input-started-showing", "input-stopped-showing",
+		"custom-event"
 	];
 
 	private static readonly string[] _bScene = ["B scene"];

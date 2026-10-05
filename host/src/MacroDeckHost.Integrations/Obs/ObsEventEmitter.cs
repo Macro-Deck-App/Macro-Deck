@@ -104,6 +104,12 @@ internal sealed class ObsEventEmitter
 				["muted"] = muted
 			});
 
+	public void PublishInputActivity(string eventId, string inputName)
+		=> Publish(eventId,
+			new Dictionary<string, object?>(StringComparer.Ordinal) { ["inputName"] = inputName });
+
+	public void PublishCustomEvent(IReadOnlyDictionary<string, object?> payload) => Publish(ObsEventIds.CustomEvent, payload);
+
 	public void PublishReplayBufferSaved(string path)
 		=> Publish(ObsEventIds.ReplayBufferSaved,
 			new Dictionary<string, object?>(StringComparer.Ordinal) { ["path"] = path });

@@ -120,6 +120,14 @@ public sealed class ObsIntegration
 
 	private void RequestVariableRefresh() => _refreshSignal?.RequestEagerRefresh(IntegrationId);
 
+	private void RequestDefinitionRefresh(Guid runtimeId, IReadOnlyList<ObsTargetChange> changes)
+	{
+		foreach (var id in ObsVariableCatalog.DefinitionIdsFor(runtimeId, changes))
+		{
+			_refreshSignal?.RequestDefinitionRefresh(IntegrationId, id);
+		}
+	}
+
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
 		_context = context;
@@ -244,6 +252,7 @@ public sealed class ObsIntegration
 					item.Settings.Password,
 					events: events,
 					onVariablesChanged: RequestVariableRefresh,
+					onTargetsChanged: changes => RequestDefinitionRefresh(item.Id, changes),
 					pollInterval: _pollInterval);
 				connection.Start();
 				next.Add(new ObsRuntime(item.Id, item.Title, item.Identity, item.Settings, connection));
