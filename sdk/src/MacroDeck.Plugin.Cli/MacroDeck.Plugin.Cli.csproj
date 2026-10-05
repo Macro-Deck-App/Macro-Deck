@@ -37,9 +37,36 @@
         <PackageReference Include="Spectre.Console" />
     </ItemGroup>
 
+    <PropertyGroup>
+        <PreviewRendererUi>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', '..', '..', 'ui'))</PreviewRendererUi>
+        <PreviewRendererOutput>$([System.IO.Path]::Combine('$(MSBuildProjectDirectory)', '$(BaseIntermediateOutputPath)', 'preview-renderer'))</PreviewRendererOutput>
+        <PreviewRendererAvailable Condition="Exists('$(PreviewRendererUi)node_modules/esbuild')">true</PreviewRendererAvailable>
+    </PropertyGroup>
+
     <ItemGroup>
-        <EmbeddedResource Include="Rendering\Assets\*.gz" />
+        <PreviewRendererInput Include="$(PreviewRendererUi)preview-renderer/**/*;$(PreviewRendererUi)runtime/src/**/*;$(PreviewRendererUi)runtime/styles/**/*;$(PreviewRendererUi)scripts/build-preview-renderer.mjs;$(PreviewRendererUi)package-lock.json" />
     </ItemGroup>
+
+    <Target Name="BuildPreviewRenderer"
+            Condition="'$(PreviewRendererAvailable)' == 'true' and '$(DesignTimeBuild)' != 'true'"
+            Inputs="@(PreviewRendererInput)"
+            Outputs="$(PreviewRendererOutput)/preview-renderer.js.gz;$(PreviewRendererOutput)/preview-renderer.css.gz">
+        <Exec Command="node &quot;$(PreviewRendererUi)scripts/build-preview-renderer.mjs&quot; &quot;$(PreviewRendererOutput)&quot;" />
+    </Target>
+
+    <Target Name="EmbedPreviewRenderer" BeforeTargets="BeforeBuild" DependsOnTargets="BuildPreviewRenderer">
+        <Message Importance="high" Condition="'$(PreviewRendererAvailable)' != 'true'"
+                 Text="MacroDeck.Plugin.Cli: ui/node_modules is missing, building without the preview renderer. Run npm ci in ui to embed it." />
+        <ItemGroup Condition="'$(PreviewRendererAvailable)' == 'true'">
+            <EmbeddedResource Include="$(PreviewRendererOutput)/preview-renderer.js.gz" LogicalName="preview-renderer.js.gz" />
+            <EmbeddedResource Include="$(PreviewRendererOutput)/preview-renderer.css.gz" LogicalName="preview-renderer.css.gz" />
+        </ItemGroup>
+    </Target>
+
+    <Target Name="RequirePreviewRenderer" BeforeTargets="GenerateNuspec">
+        <Error Condition="!Exists('$(PreviewRendererOutput)/preview-renderer.js.gz')"
+               Text="MacroDeck.Plugin.Cli cannot be packed without the preview renderer: run npm ci in ui and build again." />
+    </Target>
 
     <ItemGroup>
         <InternalsVisibleTo Include="MacroDeck.Plugin.Cli.Tests.UnitTests" />

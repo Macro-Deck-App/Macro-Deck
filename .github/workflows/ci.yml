@@ -37,10 +37,17 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      # For ci/scripts/verify-nuget-packages.mjs below.
+      # For ci/scripts/verify-nuget-packages.mjs below, and for the preview renderer the plugin CLI
+      # bundles from ui/runtime on build.
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+
+      - name: Install UI dependencies
+        working-directory: ui
+        run: npm ci --ignore-scripts
 
       - name: Cache NuGet packages
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -215,10 +222,6 @@ jobs:
 
       - name: Verify app icons
         run: node ci/scripts/verify-app-icons.mjs
-
-      - name: Verify the plugin CLI preview renderer is current
-        working-directory: ui
-        run: node scripts/build-preview-renderer.mjs --check
 
       - name: Build the framework-free runtime
         working-directory: ui/runtime
