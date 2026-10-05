@@ -7449,6 +7449,54 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Obs.Events.ConnectionCategory" xml:space="preserve">
     <value>Connexion</value>
   </data>
+  <data name="Integrations.Obs.Events.CustomCategory" xml:space="preserve">
+    <value>Personnalisé</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomEventDescription" xml:space="preserve">
+    <value>Un événement envoyé à OBS par un script ou un plugin. Il contient le JSON diffusé par l'expéditeur.</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomEventName" xml:space="preserve">
+    <value>Événement personnalisé</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomEventNameConfigDescription" xml:space="preserve">
+    <value>Réagis uniquement aux événements portant ce nom. Laisse vide pour réagir à tout événement personnalisé.</value>
+  </data>
+  <data name="Integrations.Obs.Events.EventDataLabel" xml:space="preserve">
+    <value>Données de l'événement (JSON)</value>
+  </data>
+  <data name="Integrations.Obs.Events.EventNameLabel" xml:space="preserve">
+    <value>Nom de l'événement</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputActivityConfigDescription" xml:space="preserve">
+    <value>Réagis uniquement à cette entrée. Laisse vide pour réagir à toutes les entrées.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameActiveDescription" xml:space="preserve">
+    <value>Une entrée est maintenant rendue dans la sortie programme, par exemple une webcam qui passe en direct.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameActiveName" xml:space="preserve">
+    <value>Entrée devenue active</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameInactiveDescription" xml:space="preserve">
+    <value>Une entrée n'est plus rendue dans la sortie programme.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameInactiveName" xml:space="preserve">
+    <value>Entrée devenue inactive</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStartedShowingDescription" xml:space="preserve">
+    <value>Une entrée est maintenant rendue dans la sortie programme ou l'aperçu.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStartedShowingName" xml:space="preserve">
+    <value>Entrée affichée</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStoppedShowingDescription" xml:space="preserve">
+    <value>Une entrée n'est plus rendue dans la sortie programme ni dans l'aperçu.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStoppedShowingName" xml:space="preserve">
+    <value>Entrée masquée</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputsCategory" xml:space="preserve">
+    <value>Entrées</value>
+  </data>
   <data name="Integrations.Obs.Events.InputMuteChangedDescription" xml:space="preserve">
     <value>Une entrée audio a été coupée ou réactivée.</value>
   </data>

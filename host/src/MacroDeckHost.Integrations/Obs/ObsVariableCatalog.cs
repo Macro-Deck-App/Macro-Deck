@@ -103,11 +103,35 @@ internal sealed class ObsVariableCatalog
 		_runtimes = runtimes;
 	}
 
+	public static IEnumerable<string> DefinitionIdsFor(Guid runtimeId, IEnumerable<ObsTargetChange> changes)
+	{
+		foreach (var change in changes)
+		{
+			switch (change.Kind)
+			{
+				case ObsTargetKind.InputSettings:
+					foreach (var key in change.Keys ?? [])
+					{
+						yield return InputSettingId(runtimeId, change.Name, key);
+					}
+
+					break;
+				case ObsTargetKind.SourceActivity:
+					yield return InputLeafId(runtimeId, change.Name, _activeSpec.Segment);
+					yield return InputLeafId(runtimeId, change.Name, _showingSpec.Segment);
+					break;
+				default:
+					yield return InputFilterEnabledId(runtimeId, change.Name, change.Child!);
+					yield return SceneFilterEnabledId(runtimeId, change.Name, change.Child!);
+					break;
+			}
+		}
+	}
+
 	public static string CatalogName => "OBS Studio";
 
-	// OBS has no event stream for volume, input settings, audio tracks or monitor type, and SupportsPush is
-	// all-or-nothing per provider: reporting true here would turn off polling for the whole provider, not
-	// just the resources OBS happens to push, freezing every event-less one at its first value forever.
+	// OBS has no event stream for volume, audio tracks or monitor type, and SupportsPush is all-or-nothing
+	// per provider: true would stop polling for every resource, freezing the event-less ones forever.
 	public static bool SupportsPush => false;
 
 	// A single OBS install has dozens of resources, not thousands; the host then correctly omits the
