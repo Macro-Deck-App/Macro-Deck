@@ -9,6 +9,7 @@ import { VideoStreamReference, VideoStreamView } from '../video-streams/video-st
 
 interface VideoStreamState {
   view: VideoStreamView | null;
+  still: HTMLImageElement | null;
 }
 
 export function nodeVideoStreamReference(node: UiNode | null | undefined): VideoStreamReference | null {
@@ -22,6 +23,24 @@ export function nodeVideoStreamReference(node: UiNode | null | undefined): Video
   return { provider: candidate.provider, id: candidate.id };
 }
 
+function paintStill(state: VideoStreamState, element: HTMLElement, src: string, fit: 'contain' | 'cover'): void {
+  if (state.view !== null) {
+    state.view.dispose();
+    state.view.root.remove();
+    state.view = null;
+  }
+  let image = state.still;
+  if (image === null) {
+    image = element.ownerDocument.createElement('img');
+    image.className = 'widget-video-stream-still';
+    image.alt = '';
+    element.appendChild(image);
+    state.still = image;
+  }
+  if (image.getAttribute('src') !== src) image.src = src;
+  image.style.objectFit = fit;
+}
+
 export const macrodeckVideoStreamComponent: UiComponentDefinition<VideoStreamState> = {
   type: UiMacroDeckComponents.VideoStream,
 
@@ -30,7 +49,7 @@ export const macrodeckVideoStreamComponent: UiComponentDefinition<VideoStreamSta
   },
 
   createState(): VideoStreamState {
-    return { view: null };
+    return { view: null, still: null };
   },
 
   paint(node, ctx) {
@@ -39,6 +58,12 @@ export const macrodeckVideoStreamComponent: UiComponentDefinition<VideoStreamSta
     const box = { width: ctx.box.width ?? extent, height: ctx.box.height ?? extent };
     ctx.setClassName(element, 'widget-video-stream-host');
     ctx.sizeTo(element, box);
+
+    const still = ctx.host.videoStreamStill?.() ?? null;
+    if (still !== null) {
+      paintStill(ctx.state, element, still, buttonFit(node) === 'cover' ? 'cover' : 'contain');
+      return;
+    }
 
     let view = ctx.state.view;
     if (view === null) {
@@ -59,6 +84,8 @@ export const macrodeckVideoStreamComponent: UiComponentDefinition<VideoStreamSta
   release(ctx) {
     ctx.state.view?.dispose();
     ctx.state.view = null;
+    ctx.state.still?.remove();
+    ctx.state.still = null;
   },
 
   intrinsicMainPx(node, m) {
