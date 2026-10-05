@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 using MacroDeckHost.Integrations.Obs;
+using OBSWebsocketDotNet.Types;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -71,6 +72,38 @@ internal sealed class ObsClientTests
 			Assert.That(completed, Is.SameAs(allDisconnected.Task), "Disconnected events were not raised");
 			Assert.That(sink.Events, Is.Empty);
 		});
+	}
+
+	[Test]
+	public async Task Subscriptions_are_the_minimum_set_and_never_include_the_per_frame_events()
+	{
+		var listener = new TcpListener(IPAddress.Loopback, 0);
+		listener.Start();
+		var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+		listener.Stop();
+		var client = new ObsClient();
+		var disconnected = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		client.Disconnected += (_, _) => disconnected.TrySetResult();
+
+		client.Connect($"ws://127.0.0.1:{port}", null);
+		await Task.WhenAny(disconnected.Task, Task.Delay(TimeSpan.FromSeconds(5)));
+
+		var mask = client.EventSubscriptions;
+		Assert.Multiple(() =>
+		{
+			Assert.That(mask.HasFlag(EventSubscription.InputActiveStateChanged), Is.True);
+			Assert.That(mask.HasFlag(EventSubscription.InputShowStateChanged), Is.True);
+			Assert.That(mask.HasFlag(EventSubscription.InputVolumeMeters), Is.False);
+			Assert.That(mask.HasFlag(EventSubscription.SceneItemTransformChanged), Is.False);
+			Assert.That(mask & (EventSubscription.Transitions | EventSubscription.SceneItems |
+				EventSubscription.MediaInputs | EventSubscription.Vendors | EventSubscription.Canvases),
+				Is.EqualTo(EventSubscription.None));
+		});
+
+		var required = EventSubscription.General | EventSubscription.Config | EventSubscription.Scenes |
+			EventSubscription.Inputs | EventSubscription.Filters | EventSubscription.Outputs | EventSubscription.Ui;
+		Assert.That(mask & required, Is.EqualTo(required),
+			"CustomEvent (General), profile (Config), scenes, mute and settings (Inputs), filters, outputs and studio mode (Ui)");
 	}
 
 	private sealed class CollectingSink : ILogEventSink

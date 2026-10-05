@@ -97,7 +97,7 @@ export default defineConfig({
 								},
 								{
 									label: 'Using Macro Deck',
-									items: ['guide/concepts', 'guide/fonts', 'guide/tips', 'guide/updates', 'guide/backups', 'guide/troubleshooting'],
+									items: ['guide/concepts', 'guide/fonts', 'guide/tips', 'guide/obs-studio', 'guide/updates', 'guide/backups', 'guide/troubleshooting'],
 								},
 								{
 									label: 'Reference',

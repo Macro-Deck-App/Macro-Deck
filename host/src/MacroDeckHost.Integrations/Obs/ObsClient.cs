@@ -2,6 +2,7 @@ using MacroDeck.Sdk.Logging;
 using Newtonsoft.Json.Linq;
 using OBSWebsocketDotNet;
 using OBSWebsocketDotNet.Communication;
+using OBSWebsocketDotNet.Types;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.Obs;
@@ -11,12 +12,24 @@ internal sealed class ObsClient : IObsClient
 	private readonly ILogger _logger;
 	private readonly TimeSpan _reachabilityTimeout;
 
+	// Every category a handler below needs and nothing else. The library default is All, which also
+	// carries SceneItems, MediaInputs, Vendors and Canvases traffic nothing here reads.
+	internal const EventSubscription BaseSubscriptions = EventSubscription.General |
+		EventSubscription.Config |
+		EventSubscription.Scenes |
+		EventSubscription.Inputs |
+		EventSubscription.Filters |
+		EventSubscription.Outputs |
+		EventSubscription.Ui;
+
 	private readonly OBSWebsocket _obs = new();
+	private int _activityHandlersAttached;
 
 	internal ObsClient(ILogger? logger = null, TimeSpan? reachabilityTimeout = null)
 	{
 		_logger = logger ?? IntegrationLog.For<ObsClient>(ObsIntegration.IntegrationId);
 		_reachabilityTimeout = reachabilityTimeout ?? TimeSpan.FromSeconds(2);
+		_obs.EventSubscriptions = BaseSubscriptions;
 		_obs.Connected += OnConnected;
 		_obs.Disconnected += OnDisconnected;
 
@@ -33,8 +46,20 @@ internal sealed class ObsClient : IObsClient
 			InputMuteChanged?.Invoke(this, new ObsInputMuteChange(args.InputName, args.InputMuted));
 		_obs.ReplayBufferSaved += (_, args) => ReplayBufferSaved?.Invoke(this, args.SavedReplayPath);
 
-		// Deliberately not subscribed: InputVolumeMeters fires at the audio meter refresh rate
-		// (tens of times a second). Nothing downstream should ever be driven by it.
+		_obs.InputSettingsChanged += (_, args) => Raise(() =>
+		{
+			var keys = args.InputSettings?.Properties().Select(property => property.Name).ToList() ?? [];
+			InputSettingsChanged?.Invoke(this, new ObsInputSettingsChange(args.InputName, keys));
+		});
+		_obs.SourceFilterSettingsChanged += (_, args) =>
+			SourceFilterChanged?.Invoke(this, new ObsFilterChange(args.SourceName, args.FilterName));
+		_obs.SourceFilterEnableStateChanged += (_, args) =>
+			SourceFilterChanged?.Invoke(this, new ObsFilterChange(args.SourceName, args.FilterName));
+		_obs.CustomEvent += (_, args) => Raise(() =>
+			CustomEventReceived?.Invoke(this, ObsCustomEvent.Serialize(args.EventData)));
+
+		// Deliberately never subscribed: InputVolumeMeters and SceneItemTransformChanged fire at audio
+		// meter and frame rate. Nothing downstream should ever be driven by them.
 	}
 
 	public event EventHandler? Connected;
@@ -46,6 +71,18 @@ internal sealed class ObsClient : IObsClient
 	public event EventHandler<ObsInputMuteChange>? InputMuteChanged;
 
 	public event EventHandler<string>? ReplayBufferSaved;
+
+	public event EventHandler<ObsInputSettingsChange>? InputSettingsChanged;
+
+	public event EventHandler<ObsFilterChange>? SourceFilterChanged;
+
+	public event EventHandler<ObsInputFlagChange>? InputActiveChanged;
+
+	public event EventHandler<ObsInputFlagChange>? InputShowingChanged;
+
+	public event EventHandler<string>? CustomEventReceived;
+
+	internal EventSubscription EventSubscriptions => _obs.EventSubscriptions;
 
 	public bool IsConnected => _obs.IsConnected;
 
@@ -296,6 +333,8 @@ internal sealed class ObsClient : IObsClient
 	{
 		try
 		{
+			AttachActivityHandlers();
+
 			if (!await ObsReachabilityProbe.IsReachableAsync(url, _reachabilityTimeout).ConfigureAwait(false))
 			{
 				Disconnected?.Invoke(this, "unreachable");
@@ -308,6 +347,33 @@ internal sealed class ObsClient : IObsClient
 		{
 			_logger.Debug(ex, "OBS connect attempt failed");
 			Disconnected?.Invoke(this, ex.Message);
+		}
+	}
+
+	// These two are high-volume in obs-websocket: attaching a handler is what opts in, so it happens once
+	// and only when a connection is actually attempted.
+	private void AttachActivityHandlers()
+	{
+		if (Interlocked.Exchange(ref _activityHandlersAttached, 1) != 0)
+		{
+			return;
+		}
+
+		_obs.InputActiveStateChanged += (_, args) =>
+			InputActiveChanged?.Invoke(this, new ObsInputFlagChange(args.InputName, args.VideoActive));
+		_obs.InputShowStateChanged += (_, args) =>
+			InputShowingChanged?.Invoke(this, new ObsInputFlagChange(args.InputName, args.VideoShowing));
+	}
+
+	private void Raise(Action raise)
+	{
+		try
+		{
+			raise();
+		}
+		catch (Exception ex)
+		{
+			_logger.Debug(ex, "OBS event handler failed");
 		}
 	}
 
