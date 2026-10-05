@@ -86,9 +86,7 @@ internal sealed class YouTubeActionDefinition : IDynamicOptionsActionDefinition
 
 			if (connection is null)
 			{
-				_logger.Warning("YouTube action '{Action}' skipped: no channel {Channel}",
-					_definition.Id,
-					accountId ?? "configured");
+				_logger.Warning("YouTube action '{Action}' skipped: its channel is not connected", _definition.Id);
 
 				return ActionResult.Failed(ActionErrorCodes.NotConfigured,
 					AppStrings.Integrations.YouTube.Errors.AccountNotFound());
