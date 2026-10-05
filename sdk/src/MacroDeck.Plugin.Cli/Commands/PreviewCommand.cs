@@ -43,6 +43,10 @@ internal static class PreviewCommand
 		};
 		var localeOption = new Option<string>("--locale")
 			{ Description = "The culture dates and numbers format in. Defaults to en-US.", DefaultValueFactory = _ => "en-US" };
+		var videoStreamImageOption = new Option<string?>("--video-stream-image")
+		{
+			Description = "A PNG, JPEG or WebP (up to 8 MB) drawn in place of every video stream, which a preview cannot play."
+		};
 		var outputOption = new Option<string>("--output")
 			{ Description = "The directory the PNG files go to. Defaults to ./previews.", DefaultValueFactory = _ => "previews" };
 		var browserOption = new Option<string?>("--browser")
@@ -55,7 +59,7 @@ internal static class PreviewCommand
 		foreach (var symbol in new Option[]
 			{
 				projectOption, executableOption, artifactOption, sizeOption, cellsOption, previewOption, scaleOption,
-				themeOption, backgroundOption, radiusOption, localeOption, outputOption, browserOption
+				themeOption, backgroundOption, radiusOption, localeOption, videoStreamImageOption, outputOption, browserOption
 			})
 		{
 			render.Add(symbol);
@@ -78,6 +82,7 @@ internal static class PreviewCommand
 				Background = parseResult.GetValue(backgroundOption) ?? "transparent",
 				Radius = parseResult.GetValue(radiusOption),
 				Locale = parseResult.GetValue(localeOption) ?? "en-US",
+				VideoStreamImage = parseResult.GetValue(videoStreamImageOption),
 				Output = parseResult.GetValue(outputOption) ?? "previews",
 				Browser = parseResult.GetValue(browserOption)
 			};

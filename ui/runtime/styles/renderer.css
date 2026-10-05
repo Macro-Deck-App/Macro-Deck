@@ -433,6 +433,12 @@
   opacity: 0;
 }
 
+.widget-video-stream-still {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .widget-video-stream-status {
   position: absolute;
   left: 0;
