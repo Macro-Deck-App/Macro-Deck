@@ -7157,17 +7157,38 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Obs.Actions.SaveReplayBuffer.Name" xml:space="preserve">
     <value>Enregistrer le tampon de relecture</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelStepDescription" xml:space="preserve">
+    <value>Nombre de dB dont le volume monte ou descend à chaque appui</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelStepLabel" xml:space="preserve">
+    <value>Pas (dB)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelsDescription" xml:space="preserve">
+    <value>Volume cible en dB (-100 correspond au silence, 0 au volume maximal)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelsLabel" xml:space="preserve">
+    <value>Volume (dB)</value>
+  </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.Description" xml:space="preserve">
     <value>Définit, augmente ou diminue le volume d'une entrée audio</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeDecrease" xml:space="preserve">
-    <value>Diminuer de</value>
+    <value>Diminuer de (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeDecreaseDecibels" xml:space="preserve">
+    <value>Diminuer de (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeIncrease" xml:space="preserve">
-    <value>Augmenter de</value>
+    <value>Augmenter de (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeIncreaseDecibels" xml:space="preserve">
+    <value>Augmenter de (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeSet" xml:space="preserve">
-    <value>Définir à</value>
+    <value>Définir à (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeSetDecibels" xml:space="preserve">
+    <value>Définir à (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.Name" xml:space="preserve">
     <value>Définir le volume de l'entrée</value>

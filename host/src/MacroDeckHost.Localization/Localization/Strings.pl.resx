@@ -7157,17 +7157,38 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Obs.Actions.SaveReplayBuffer.Name" xml:space="preserve">
     <value>Zapisz bufor powtórek</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelStepDescription" xml:space="preserve">
+    <value>O ile dB zmienia się głośność przy każdym naciśnięciu</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelStepLabel" xml:space="preserve">
+    <value>Krok (dB)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelsDescription" xml:space="preserve">
+    <value>Docelowa głośność w dB (-100 to cisza, 0 to pełna głośność)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelsLabel" xml:space="preserve">
+    <value>Głośność (dB)</value>
+  </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.Description" xml:space="preserve">
     <value>Ustawia, zwiększa lub zmniejsza głośność wejścia audio</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeDecrease" xml:space="preserve">
-    <value>Zmniejsz o</value>
+    <value>Zmniejsz o (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeDecreaseDecibels" xml:space="preserve">
+    <value>Zmniejsz o (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeIncrease" xml:space="preserve">
-    <value>Zwiększ o</value>
+    <value>Zwiększ o (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeIncreaseDecibels" xml:space="preserve">
+    <value>Zwiększ o (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeSet" xml:space="preserve">
-    <value>Ustaw na</value>
+    <value>Ustaw na (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeSetDecibels" xml:space="preserve">
+    <value>Ustaw na (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.Name" xml:space="preserve">
     <value>Ustaw głośność wejścia</value>

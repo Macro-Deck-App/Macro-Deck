@@ -7157,17 +7157,38 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.Obs.Actions.SaveReplayBuffer.Name" xml:space="preserve">
     <value>Salva buffer di replay</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelStepDescription" xml:space="preserve">
+    <value>Di quanti dB il volume sale o scende a ogni pressione</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelStepLabel" xml:space="preserve">
+    <value>Incremento (dB)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelsDescription" xml:space="preserve">
+    <value>Volume di destinazione in dB (-100 è il silenzio, 0 è il volume massimo)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelsLabel" xml:space="preserve">
+    <value>Volume (dB)</value>
+  </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.Description" xml:space="preserve">
     <value>Imposta, aumenta o diminuisce il volume di un input audio</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeDecrease" xml:space="preserve">
-    <value>Diminuisci di</value>
+    <value>Diminuisci di (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeDecreaseDecibels" xml:space="preserve">
+    <value>Diminuisci di (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeIncrease" xml:space="preserve">
-    <value>Aumenta di</value>
+    <value>Aumenta di (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeIncreaseDecibels" xml:space="preserve">
+    <value>Aumenta di (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeSet" xml:space="preserve">
-    <value>Imposta a</value>
+    <value>Imposta a (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeSetDecibels" xml:space="preserve">
+    <value>Imposta a (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.Name" xml:space="preserve">
     <value>Imposta volume input</value>

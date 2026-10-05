@@ -7157,17 +7157,38 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Obs.Actions.SaveReplayBuffer.Name" xml:space="preserve">
     <value>Uložit vyrovnávací paměť opakování</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelStepDescription" xml:space="preserve">
+    <value>O kolik dB se hlasitost změní při každém stisku</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelStepLabel" xml:space="preserve">
+    <value>Krok (dB)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelsDescription" xml:space="preserve">
+    <value>Cílová hlasitost v dB (-100 je ticho, 0 je plná hlasitost)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelsLabel" xml:space="preserve">
+    <value>Hlasitost (dB)</value>
+  </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.Description" xml:space="preserve">
     <value>Nastaví, zvýší nebo sníží hlasitost audio vstupu</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeDecrease" xml:space="preserve">
-    <value>Snížit o</value>
+    <value>Snížit o (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeDecreaseDecibels" xml:space="preserve">
+    <value>Snížit o (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeIncrease" xml:space="preserve">
-    <value>Zvýšit o</value>
+    <value>Zvýšit o (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeIncreaseDecibels" xml:space="preserve">
+    <value>Zvýšit o (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeSet" xml:space="preserve">
-    <value>Nastavit na</value>
+    <value>Nastavit na (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeSetDecibels" xml:space="preserve">
+    <value>Nastavit na (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.Name" xml:space="preserve">
     <value>Nastavit hlasitost vstupu</value>

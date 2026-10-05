@@ -7158,17 +7158,38 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Obs.Actions.SaveReplayBuffer.Name" xml:space="preserve">
     <value>Save Replay Buffer</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelStepDescription" xml:space="preserve">
+    <value>How many dB each press raises or lowers the volume</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelStepLabel" xml:space="preserve">
+    <value>Step (dB)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelsDescription" xml:space="preserve">
+    <value>Target level in dB (-100 is silent, 0 is full volume)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelsLabel" xml:space="preserve">
+    <value>Volume (dB)</value>
+  </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.Description" xml:space="preserve">
     <value>Sets, increases or decreases an audio input's volume</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeDecrease" xml:space="preserve">
-    <value>Decrease by</value>
+    <value>Decrease by (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeDecreaseDecibels" xml:space="preserve">
+    <value>Decrease by (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeIncrease" xml:space="preserve">
-    <value>Increase by</value>
+    <value>Increase by (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeIncreaseDecibels" xml:space="preserve">
+    <value>Increase by (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeSet" xml:space="preserve">
-    <value>Set to</value>
+    <value>Set to (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeSetDecibels" xml:space="preserve">
+    <value>Set to (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.Name" xml:space="preserve">
     <value>Set Input Volume</value>
