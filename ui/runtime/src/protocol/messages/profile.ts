@@ -101,6 +101,25 @@ export interface DuplicateProfileResponse extends ResultResponse {
   profile?: IpcProfile;
 }
 
+export interface IpcProfilePlacement {
+  id: string;
+  order: number;
+}
+
+export interface MoveProfileRequest {
+  id: string;
+  targetId: string;
+  position: 'before' | 'after';
+}
+
+export interface MoveProfileResponse extends ResultResponse {
+  profiles?: IpcProfilePlacement[];
+}
+
+export interface ProfilesReorderedEvent {
+  profiles: IpcProfilePlacement[];
+}
+
 export interface ProfileCreatedEvent {
   profile: IpcProfile;
 }

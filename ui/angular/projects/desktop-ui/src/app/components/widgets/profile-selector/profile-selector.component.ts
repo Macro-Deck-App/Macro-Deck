@@ -1,3 +1,4 @@
+import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList } from '@angular/cdk/drag-drop';
 import { ChangeDetectionStrategy, Component, ElementRef, Injector, ViewChild, afterNextRender, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
@@ -21,6 +22,9 @@ import { PortabilityService, PortableExportOptions } from '../../../services/por
   selector: 'app-profile-selector',
   standalone: true,
   imports: [
+    CdkDrag,
+    CdkDragHandle,
+    CdkDropList,
     FormsModule,
     DropdownMenuComponent,
     ModalComponent,
@@ -64,6 +68,12 @@ export class ProfileSelectorComponent {
     return query ? profiles.filter(profile => profile.name.toLocaleLowerCase().includes(query)) : profiles;
   });
 
+  protected readonly reorderEnabled = computed(() => this.search().trim() === '');
+
+  private readonly movableProfiles = computed(() => this.profileService.sortedProfiles().filter(profile => !profile.isVirtual));
+
+  protected readonly keepDropAboveVirtualProfiles = (index: number): boolean => index < this.movableProfiles().length;
+
   // Rendered beside the dropdown, not inside it: the dropdown tears its panel down on the same
   // mousedown that picks a menu item, which would destroy a nested menu before the click lands.
   protected readonly rowMenu = signal<{ profile: Profile; x: number; y: number } | null>(null);
@@ -78,6 +88,8 @@ export class ProfileSelectorComponent {
       { id: 'edit', label: t(Strings.Common.Edit), icon: 'icon-pencil', disabled: !this.canModify(profile) },
       { id: 'duplicate', label: t(AppStrings.Widgets.Folder.Duplicate), icon: 'icon-copy', disabled: !this.canDuplicate(profile) },
       { id: 'export', label: t(Strings.Common.Export), icon: 'icon-upload', disabled: !this.canExport(profile), dividerAfter: true },
+      { id: 'moveUp', label: t(AppStrings.Widgets.Folder.MoveUp), icon: 'icon-arrow-up', disabled: !this.neighbour(profile, -1) },
+      { id: 'moveDown', label: t(AppStrings.Widgets.Folder.MoveDown), icon: 'icon-arrow-down', disabled: !this.neighbour(profile, 1), dividerAfter: true },
       { id: 'delete', label: t(Strings.Common.Delete), icon: 'icon-trash', danger: true, disabled: !this.canDelete(profile) },
     ];
   });
@@ -239,6 +251,47 @@ export class ProfileSelectorComponent {
       case 'delete':
         this.startDelete(profile);
         break;
+      case 'moveUp':
+        void this.moveByMenu(profile, -1);
+        break;
+      case 'moveDown':
+        void this.moveByMenu(profile, 1);
+        break;
+    }
+  }
+
+  protected onProfileDropped(event: CdkDragDrop<unknown>): void {
+    const profiles = this.filteredProfiles();
+    const moving = profiles[event.previousIndex];
+    const target = profiles[event.currentIndex];
+    if (event.previousIndex === event.currentIndex || !moving || !target || moving.isVirtual || target.isVirtual) {
+      return;
+    }
+    void this.move(moving, target, event.currentIndex > event.previousIndex ? 'after' : 'before');
+  }
+
+  private neighbour(profile: Profile, step: -1 | 1): Profile | null {
+    const profiles = this.movableProfiles();
+    const index = profiles.findIndex(candidate => candidate.id === profile.id);
+    return index < 0 ? null : profiles[index + step] ?? null;
+  }
+
+  private async moveByMenu(profile: Profile, step: -1 | 1): Promise<void> {
+    const target = this.neighbour(profile, step);
+    if (!target) {
+      return;
+    }
+    await this.move(profile, target, step < 0 ? 'before' : 'after');
+    this.dropdownOpen.set(true);
+    afterNextRender(() => this.host.nativeElement
+      .querySelector<HTMLElement>(`[data-profile-id="${profile.id}"] .profile-item-more button`)?.focus(),
+      { injector: this.injector });
+  }
+
+  private async move(profile: Profile, target: Profile, position: 'before' | 'after'): Promise<void> {
+    const result = await this.profileService.moveProfile(profile.id, target.id, position);
+    if (!result.success) {
+      this.toasts.show(this.localization.translateKey(AppStrings.Errors.Profile.MoveFailed), { variant: 'error' });
     }
   }
 

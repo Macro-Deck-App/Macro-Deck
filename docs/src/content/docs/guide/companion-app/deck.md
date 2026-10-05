@@ -12,7 +12,7 @@ Connections screen.
 | --- | --- |
 | One finger sideways | The folder next to this one, among the folders at the same level. |
 | One finger up or down | Up to the parent folder, or back down into the folder you came from. |
-| Two fingers sideways | The next profile. |
+| Two fingers sideways | The next profile, in the order your [profile list](/guide/concepts/#profiles) had when the app connected. |
 | Three fingers sideways | The next computer this device is connected to. |
 | One finger from the edge of the screen | Back to the Connections screen. On Android, the system's back gesture does this. |
 
