@@ -120,6 +120,15 @@ browser.
 A new installation only shows an announcement published in the last two weeks. If Macro Deck cannot reach the
 Macro Deck servers, nothing is shown and it tries again later.
 
+## Do you like Macro Deck?
+
+Once Macro Deck has been installed for 7 days, it asks you one time whether you like it. The question appears
+when you open Macro Deck, after **What's new**, any announcement and any Store rating request, and never in front
+of a dialog you opened. Answer **Yes!** and you can give Macro Deck a star on GitHub; answer **Not really** and
+you can give feedback on GitHub. Whatever you choose, including closing the dialog, Macro Deck does not
+ask again. Restoring a backup does not bring the question back, but a new installation that you restore a backup
+into asks once more after its own 7 days.
+
 ## Release notes
 
 Macro Deck loads the release notes from the version's
