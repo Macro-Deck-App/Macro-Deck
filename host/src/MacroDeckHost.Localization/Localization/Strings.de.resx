@@ -7426,6 +7426,54 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Obs.Events.ConnectionCategory" xml:space="preserve">
     <value>Verbindung</value>
   </data>
+  <data name="Integrations.Obs.Events.CustomCategory" xml:space="preserve">
+    <value>Benutzerdefiniert</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomEventDescription" xml:space="preserve">
+    <value>Ein Ereignis, das ein Skript oder Plugin an OBS gesendet hat. Es enthält das vom Absender gesendete JSON.</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomEventName" xml:space="preserve">
+    <value>Benutzerdefiniertes Ereignis</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomEventNameConfigDescription" xml:space="preserve">
+    <value>Reagiere nur auf Ereignisse mit diesem Namen. Leer lassen, um auf jedes benutzerdefinierte Ereignis zu reagieren.</value>
+  </data>
+  <data name="Integrations.Obs.Events.EventDataLabel" xml:space="preserve">
+    <value>Ereignisdaten (JSON)</value>
+  </data>
+  <data name="Integrations.Obs.Events.EventNameLabel" xml:space="preserve">
+    <value>Ereignisname</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputActivityConfigDescription" xml:space="preserve">
+    <value>Reagiere nur auf diesen Eingang. Leer lassen, um auf jeden Eingang zu reagieren.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameActiveDescription" xml:space="preserve">
+    <value>Ein Eingang wird jetzt im Programmausgang dargestellt, zum Beispiel eine Webcam, die live geht.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameActiveName" xml:space="preserve">
+    <value>Eingang wurde aktiv</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameInactiveDescription" xml:space="preserve">
+    <value>Ein Eingang wird nicht mehr im Programmausgang dargestellt.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameInactiveName" xml:space="preserve">
+    <value>Eingang wurde inaktiv</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStartedShowingDescription" xml:space="preserve">
+    <value>Ein Eingang wird jetzt im Programm- oder Vorschauausgang dargestellt.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStartedShowingName" xml:space="preserve">
+    <value>Eingang wird angezeigt</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStoppedShowingDescription" xml:space="preserve">
+    <value>Ein Eingang wird nicht mehr im Programm- oder Vorschauausgang dargestellt.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStoppedShowingName" xml:space="preserve">
+    <value>Eingang wird nicht mehr angezeigt</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputsCategory" xml:space="preserve">
+    <value>Eingänge</value>
+  </data>
   <data name="Integrations.Obs.Events.InputMuteChangedDescription" xml:space="preserve">
     <value>Ein Audioeingang wurde stumm- oder wieder freigeschaltet.</value>
   </data>
