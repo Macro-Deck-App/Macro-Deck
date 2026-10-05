@@ -71,6 +71,18 @@ describe('ArchivePreviewModalComponent', () => {
     expect(text()).toContain('3 widget variables');
   });
 
+  it('shows the font count only when the archive carries imported fonts', async () => {
+    await render(summary());
+    expect(text()).not.toContain('font');
+
+    await render(summary({ fontCount: 2 }));
+    expect(text()).toContain('2 fonts');
+
+    await render(summary({ fontCount: 1 }));
+    expect(text()).toContain('1 font');
+    expect(text()).not.toContain('1 fonts');
+  });
+
   it('omits the folder count for a widget archive, which has no folders', async () => {
     await render(summary({ kind: 'Widgets', folderCount: 0, widgetCount: 3 }));
 

@@ -8,7 +8,9 @@ public sealed record PortableAssetBundle(
 	IReadOnlyList<PortableScript> Scripts,
 	IReadOnlyList<PortableSecret> Secrets,
 	IReadOnlyList<PortableIntegrationRequirement> Integrations,
-	IReadOnlyList<PortableVariable> Variables);
+	IReadOnlyList<PortableVariable> Variables,
+	IReadOnlyList<PortableFont> Fonts,
+	IReadOnlyList<PortableFontFile> FontFiles);
 
 public interface IPortableAssetManager
 {
@@ -20,6 +22,7 @@ public interface IPortableAssetManager
 
 	Task<IReadOnlyDictionary<Guid, Guid>> Import(PortableContent content,
 		IReadOnlyList<PortableIconFile> iconFiles,
+		IReadOnlyList<PortableFontFile> fontFiles,
 		CancellationToken cancellationToken);
 
 	Task RestoreWidgetVariables(PortableContent content,

@@ -56,6 +56,18 @@ describe('FontService picker (issue #457)', () => {
     expect(service.facesForFamily('PingFang HK')).toEqual([]);
   });
 
+  it('keeps imported fonts out of the families the app interface may use', async () => {
+    const { service } = configure([
+      face({ faceId: 'inter-400-5-upright', family: 'Inter' }),
+      face({ faceId: 'brand-400-5-upright', family: 'Brand Sans', userImported: true }),
+    ]);
+
+    await service.loadSystemFonts();
+
+    expect(service.systemFamilies().map(f => f.family)).toEqual(['Inter']);
+    expect(service.families().map(f => f.family)).toEqual(['Brand Sans', 'Inter']);
+  });
+
   it('groups faces by family and sorts each family by weight then slant', async () => {
     const { service } = configure([
       face({ faceId: 'a-700-5-italic', family: 'Acme', weight: 700, slant: 'italic', styleName: 'Bold Italic' }),

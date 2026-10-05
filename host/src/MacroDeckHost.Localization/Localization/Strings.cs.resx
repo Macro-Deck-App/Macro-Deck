@@ -658,10 +658,10 @@
     <value>Automatizace</value>
   </data>
   <data name="Backup.Group.Icons.Description" xml:space="preserve">
-    <value>Nainstalované sady ikon a importované ikony.</value>
+    <value>Nainstalované sady ikon, importované ikony a importovaná písma.</value>
   </data>
   <data name="Backup.Group.Icons.Label" xml:space="preserve">
-    <value>Ikony a sady ikon</value>
+    <value>Ikony, sady ikon a písma</value>
   </data>
   <data name="Backup.Group.Integrations.Description" xml:space="preserve">
     <value>Nastavení integrací a všechna uložená hesla či tokeny.</value>
@@ -12518,6 +12518,14 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Proměnných widgetu: {count}</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Portable.ArchivePreview.FontCount.One" xml:space="preserve">
+    <value>{count} písmo</value>
+    <comment>[plural] Number of fonts in an archive, shown in the import preview.</comment>
+  </data>
+  <data name="Portable.ArchivePreview.FontCount.Other" xml:space="preserve">
+    <value>Písma: {count}</value>
+    <comment>[plural] Number of fonts in an archive, shown in the import preview.</comment>
+  </data>
   <data name="Portable.ArchivePreview.WidgetCount.One" xml:space="preserve">
     <value>{count} widget</value>
     <comment>[plural]</comment>
@@ -18579,6 +18587,79 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Library.Page.ContentTypeAriaLabel" xml:space="preserve">
     <value>Obsah knihovny</value>
+  </data>
+  <data name="Nav.Fonts" xml:space="preserve">
+    <value>Písma</value>
+  </data>
+  <data name="Library.Page.FontsDescription" xml:space="preserve">
+    <value>Importované soubory písem pro popisky a texty.</value>
+  </data>
+  <data name="Library.Page.FontCount.One" xml:space="preserve">
+    <value>{count} písmo</value>
+    <comment>[plural] Shown on a content type card in the library.</comment>
+  </data>
+  <data name="Library.Page.FontCount.Other" xml:space="preserve">
+    <value>Písma: {count}</value>
+    <comment>[plural] Shown on a content type card in the library.</comment>
+  </data>
+  <data name="Library.Fonts.ImportAction" xml:space="preserve">
+    <value>Importovat písma</value>
+  </data>
+  <data name="Library.Fonts.EmptyTitle" xml:space="preserve">
+    <value>Zatím nejsou importována žádná písma</value>
+  </data>
+  <data name="Library.Fonts.EmptyDescription" xml:space="preserve">
+    <value>Importujte soubory TTF nebo OTF a použijte je na tlačítkách a textových widgetech, nebo je sem přetáhněte.</value>
+  </data>
+  <data name="Library.Fonts.LicenseNote" xml:space="preserve">
+    <value>Importujte jen písma, jejichž licence takové použití povoluje. Písma použitá na tlačítkách jsou součástí exportu profilů, složek a widgetů, takže sdílením exportu se sdílí i písmo.</value>
+  </data>
+  <data name="Library.Fonts.Sample" xml:space="preserve">
+    <value>Aa Bb Cc 0123456789</value>
+  </data>
+  <data name="Library.Fonts.RemoveAriaLabel" xml:space="preserve">
+    <value>Odebrat {name}</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmHeading" xml:space="preserve">
+    <value>Odebrat písmo?</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmMessage" xml:space="preserve">
+    <value>Písmo {name} bude odebráno. Tlačítka, která ho používají, přejdou na výchozí písmo.</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmAction" xml:space="preserve">
+    <value>Odebrat</value>
+  </data>
+  <data name="Library.Fonts.RemoveFailed" xml:space="preserve">
+    <value>Písmo se nepodařilo odebrat.</value>
+  </data>
+  <data name="Library.Fonts.ImportFailed" xml:space="preserve">
+    <value>Písma se nepodařilo importovat.</value>
+  </data>
+  <data name="Library.Fonts.Imported.One" xml:space="preserve">
+    <value>{count} písmo importováno</value>
+    <comment>[plural] Toast after a successful import.</comment>
+  </data>
+  <data name="Library.Fonts.Imported.Other" xml:space="preserve">
+    <value>Importovaná písma: {count}</value>
+    <comment>[plural] Toast after a successful import.</comment>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyPresent" xml:space="preserve">
+    <value>Soubor {fileName} je už importován.</value>
+  </data>
+  <data name="Library.Fonts.Status.UnsupportedFormat" xml:space="preserve">
+    <value>{fileName}: podporovány jsou jen soubory TTF a OTF.</value>
+  </data>
+  <data name="Library.Fonts.Status.TooLarge" xml:space="preserve">
+    <value>Soubor {fileName} je větší než 32 MB.</value>
+  </data>
+  <data name="Library.Fonts.Status.InvalidFont" xml:space="preserve">
+    <value>Soubor {fileName} není použitelný soubor písma.</value>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyInstalled" xml:space="preserve">
+    <value>{fileName}: tato rodina písem je už v tomto počítači nainstalována, proto ji nelze importovat.</value>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyImported" xml:space="preserve">
+    <value>{fileName}: písmo se stejnou rodinou a stylem je už importováno. Pro nahrazení ho nejprve odeberte.</value>
   </data>
   <data name="Onboarding.Back" xml:space="preserve">
     <value>Zpět</value>

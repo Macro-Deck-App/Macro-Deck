@@ -10,6 +10,7 @@ export interface FontFaceHandle {
 export interface FontFaceBackend {
   create(family: string, source: string, descriptors: FontFaceDescriptors): FontFaceHandle;
   add(face: FontFaceHandle): void;
+  delete(face: FontFaceHandle): void;
 }
 
 function createBrowserFontFaceBackend(): FontFaceBackend | null {
@@ -19,6 +20,7 @@ function createBrowserFontFaceBackend(): FontFaceBackend | null {
   return {
     create: (family, source, descriptors) => new FontFace(family, source, descriptors),
     add: face => document.fonts.add(face as unknown as FontFace),
+    delete: face => document.fonts.delete(face as unknown as FontFace),
   };
 }
 
@@ -44,8 +46,12 @@ function descriptorsFor(faceId: string): FontFaceDescriptors {
 
 const READY_STATUS: Signal<FontFaceLoadStatus> = signal<FontFaceLoadStatus>('ready').asReadonly();
 
+const RETRY_AFTER_MS = 30_000;
+
 interface CachedFace {
   status: WritableSignal<FontFaceLoadStatus>;
+  handle?: FontFaceHandle;
+  failedAt?: number;
 }
 
 // Faces are always fetched from the host, desktop app included (issue #457): the desktop cost is one
@@ -66,19 +72,39 @@ export class FontLoaderService {
 
     const cached = this.cache.get(faceId);
     if (cached) {
+      // A failed face stays failed and is retried in the background at most every RETRY_AFTER_MS, so
+      // text in a missing face neither refetches on each paint nor blinks while a retry runs.
+      if (cached.failedAt !== undefined && Date.now() - cached.failedAt >= RETRY_AFTER_MS) {
+        cached.failedAt = Date.now();
+        void this.load(faceId, cached);
+      }
       return cached.status.asReadonly();
     }
 
-    const status = signal<FontFaceLoadStatus>('loading');
-    this.cache.set(faceId, { status });
-    void this.load(faceId, status);
-    return status.asReadonly();
+    const entry: CachedFace = { status: signal<FontFaceLoadStatus>('loading') };
+    this.cache.set(faceId, entry);
+    void this.load(faceId, entry);
+    return entry.status.asReadonly();
   }
 
-  private async load(faceId: string, status: WritableSignal<FontFaceLoadStatus>): Promise<void> {
-    if (!this.backend) {
-      status.set('failed');
+  evict(faceIds: readonly string[]): void {
+    for (const faceId of faceIds) {
+      const cached = this.cache.get(faceId);
+      if (!cached) {
+        continue;
+      }
       this.cache.delete(faceId);
+      if (cached.handle) {
+        this.backend?.delete(cached.handle);
+      }
+    }
+  }
+
+  private async load(faceId: string, entry: CachedFace): Promise<void> {
+    const status = entry.status;
+    if (!this.backend) {
+      entry.failedAt = Date.now();
+      status.set('failed');
       return;
     }
 
@@ -87,13 +113,18 @@ export class FontLoaderService {
       const source = `url(${this.api.getFontFileUrl(faceId)})`;
       const face = this.backend.create(family, source, descriptorsFor(faceId));
       const loaded = await face.load();
+      // An eviction while the file was in flight means the face is gone; registering it would revive it.
+      if (this.cache.get(faceId) !== entry) {
+        return;
+      }
+      entry.handle = loaded;
       this.backend.add(loaded);
       status.set('ready');
     } catch (err) {
       this.errorHandler.handleError(
         new Error(`Failed to load font face '${faceId}': ${err instanceof Error ? err.message : String(err)}`),
       );
-      this.cache.delete(faceId);
+      entry.failedAt = Date.now();
       status.set('failed');
     }
   }

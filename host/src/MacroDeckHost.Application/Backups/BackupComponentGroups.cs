@@ -38,7 +38,7 @@ public static class BackupComponentGroups
 
 	public static readonly IReadOnlyList<BackupComponentGroupDefinition> All =
 	[
-		new(BackupComponentGroup.Icons, [], [Dir("data/icons")], []),
+		new(BackupComponentGroup.Icons, [], [Dir("data/icons"), Dir("data/fonts")], []),
 		// The binding file travels with the variables it materializes: a restored profile whose Slider is
 		// bound to a catalog variable would otherwise come back permanently unbound.
 		new(BackupComponentGroup.Variables,

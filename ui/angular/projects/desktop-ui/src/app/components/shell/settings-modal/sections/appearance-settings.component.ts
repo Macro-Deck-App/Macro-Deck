@@ -33,7 +33,7 @@ export class AppearanceSettingsComponent {
 
   readonly fontOptions = computed<SelectOption[]>(() => [
     { value: '', label: this.localization.translateKey(AppStrings.Settings.Appearance.FontSystemDefault) },
-    ...this.fonts.families().map(({ family }) => ({ value: family, label: family })),
+    ...this.fonts.systemFamilies().map(({ family }) => ({ value: family, label: family })),
   ]);
 
   constructor() {

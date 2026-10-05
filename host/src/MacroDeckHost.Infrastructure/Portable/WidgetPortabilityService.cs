@@ -82,7 +82,7 @@ public sealed class WidgetPortabilityService : IWidgetPortabilityService
 			assets,
 			folder.Name,
 			portableWidgets.Count);
-		var bytes = PortableArchive.Write(manifest, content, assets.Files, options.Password);
+		var bytes = PortableArchive.Write(manifest, content, assets.Files, options.Password, assets.FontFiles);
 		return Result.Ok<byte[], PortabilityError>(bytes);
 	}
 
@@ -137,7 +137,7 @@ public sealed class WidgetPortabilityService : IWidgetPortabilityService
 
 		try
 		{
-			var assetIdMap = await _assetManager.Import(content, outcome.Icons, cancellationToken);
+			var assetIdMap = await _assetManager.Import(content, outcome.Icons, outcome.Fonts, cancellationToken);
 
 			var created = new List<WidgetEntity>();
 			var widgetIdMap = new Dictionary<Guid, Guid>();

@@ -657,10 +657,10 @@
     <value>Automationen</value>
   </data>
   <data name="Backup.Group.Icons.Description" xml:space="preserve">
-    <value>Installierte Symbolpakete und importierte Symbole.</value>
+    <value>Installierte Symbolpakete, importierte Symbole und importierte Schriften.</value>
   </data>
   <data name="Backup.Group.Icons.Label" xml:space="preserve">
-    <value>Symbole und Symbolpakete</value>
+    <value>Symbole, Symbolpakete und Schriften</value>
   </data>
   <data name="Backup.Group.Integrations.Description" xml:space="preserve">
     <value>Integrationseinstellungen sowie alle gespeicherten Passwörter und Token.</value>
@@ -12516,6 +12516,14 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>{count} Widget-Variablen</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Portable.ArchivePreview.FontCount.One" xml:space="preserve">
+    <value>{count} Schrift</value>
+    <comment>[plural] Number of fonts in an archive, shown in the import preview.</comment>
+  </data>
+  <data name="Portable.ArchivePreview.FontCount.Other" xml:space="preserve">
+    <value>{count} Schriften</value>
+    <comment>[plural] Number of fonts in an archive, shown in the import preview.</comment>
+  </data>
   <data name="Portable.ArchivePreview.WidgetCount.One" xml:space="preserve">
     <value>{count} Widget</value>
     <comment>[plural]</comment>
@@ -18577,6 +18585,79 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Library.Page.ContentTypeAriaLabel" xml:space="preserve">
     <value>Bibliotheksinhalte</value>
+  </data>
+  <data name="Nav.Fonts" xml:space="preserve">
+    <value>Schriften</value>
+  </data>
+  <data name="Library.Page.FontsDescription" xml:space="preserve">
+    <value>Schriftdateien, die du für Beschriftungen und Texte importiert hast.</value>
+  </data>
+  <data name="Library.Page.FontCount.One" xml:space="preserve">
+    <value>{count} Schrift</value>
+    <comment>[plural] Shown on a content type card in the library.</comment>
+  </data>
+  <data name="Library.Page.FontCount.Other" xml:space="preserve">
+    <value>{count} Schriften</value>
+    <comment>[plural] Shown on a content type card in the library.</comment>
+  </data>
+  <data name="Library.Fonts.ImportAction" xml:space="preserve">
+    <value>Schriften importieren</value>
+  </data>
+  <data name="Library.Fonts.EmptyTitle" xml:space="preserve">
+    <value>Noch keine Schriften importiert</value>
+  </data>
+  <data name="Library.Fonts.EmptyDescription" xml:space="preserve">
+    <value>Importiere TTF- oder OTF-Dateien, um sie auf Schaltflächen und Text-Widgets zu verwenden, oder zieh sie hierher.</value>
+  </data>
+  <data name="Library.Fonts.LicenseNote" xml:space="preserve">
+    <value>Importiere nur Schriften, deren Lizenz diese Nutzung erlaubt. Schriften, die du auf Schaltflächen verwendest, werden beim Export von Profilen, Ordnern oder Widgets mitgeliefert. Wenn du einen Export teilst, teilst du also auch die Schrift.</value>
+  </data>
+  <data name="Library.Fonts.Sample" xml:space="preserve">
+    <value>Aa Bb Cc 0123456789</value>
+  </data>
+  <data name="Library.Fonts.RemoveAriaLabel" xml:space="preserve">
+    <value>{name} entfernen</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmHeading" xml:space="preserve">
+    <value>Schrift entfernen?</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmMessage" xml:space="preserve">
+    <value>{name} wird entfernt. Schaltflächen, die sie verwenden, wechseln zur Standardschrift.</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmAction" xml:space="preserve">
+    <value>Entfernen</value>
+  </data>
+  <data name="Library.Fonts.RemoveFailed" xml:space="preserve">
+    <value>Die Schrift konnte nicht entfernt werden.</value>
+  </data>
+  <data name="Library.Fonts.ImportFailed" xml:space="preserve">
+    <value>Die Schriften konnten nicht importiert werden.</value>
+  </data>
+  <data name="Library.Fonts.Imported.One" xml:space="preserve">
+    <value>{count} Schrift importiert</value>
+    <comment>[plural] Toast after a successful import.</comment>
+  </data>
+  <data name="Library.Fonts.Imported.Other" xml:space="preserve">
+    <value>{count} Schriften importiert</value>
+    <comment>[plural] Toast after a successful import.</comment>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyPresent" xml:space="preserve">
+    <value>{fileName} ist bereits importiert.</value>
+  </data>
+  <data name="Library.Fonts.Status.UnsupportedFormat" xml:space="preserve">
+    <value>{fileName}: Nur TTF- und OTF-Dateien werden unterstützt.</value>
+  </data>
+  <data name="Library.Fonts.Status.TooLarge" xml:space="preserve">
+    <value>{fileName} ist größer als 32 MB.</value>
+  </data>
+  <data name="Library.Fonts.Status.InvalidFont" xml:space="preserve">
+    <value>{fileName} ist keine verwendbare Schriftdatei.</value>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyInstalled" xml:space="preserve">
+    <value>{fileName}: Diese Schriftfamilie ist auf diesem Computer bereits installiert und kann deshalb nicht importiert werden.</value>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyImported" xml:space="preserve">
+    <value>{fileName}: Eine Schrift mit derselben Familie und demselben Stil ist bereits importiert. Entferne sie zuerst, um sie zu ersetzen.</value>
   </data>
   <data name="Onboarding.Back" xml:space="preserve">
     <value>Zurück</value>

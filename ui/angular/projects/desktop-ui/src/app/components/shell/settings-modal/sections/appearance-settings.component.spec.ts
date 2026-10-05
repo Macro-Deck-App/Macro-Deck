@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { EMPTY } from 'rxjs';
 import { ApiService } from '@shared';
 import { SelectComponent } from '../../../forms/select/select.component';
+import { FontService } from '../../../../services/font.service';
 import { AppearanceSettingsComponent } from './appearance-settings.component';
 
 describe('AppearanceSettingsComponent', () => {
@@ -77,6 +78,27 @@ describe('AppearanceSettingsComponent', () => {
 
   it('offers the system default and every installed family as the global font', async () => {
     await fixture.whenStable();
+    fixture.detectChanges();
+
+    const select = fixture.debugElement.query(By.directive(SelectComponent)).componentInstance as SelectComponent;
+
+    expect(select.options.map(option => option.value)).toEqual(['', 'Inter']);
+  });
+
+  it('does not offer an imported font as the global font', async () => {
+    api.getSystemFonts.and.resolveTo({
+      faces: [
+        {
+          faceId: 'inter-400', family: 'Inter', weight: 400, width: 5, slant: 'upright', styleName: 'Regular',
+          remoteRenderable: true,
+        },
+        {
+          faceId: 'brand-400', family: 'Brand Sans', weight: 400, width: 5, slant: 'upright', styleName: 'Regular',
+          remoteRenderable: true, userImported: true,
+        },
+      ],
+    });
+    await TestBed.inject(FontService).loadSystemFonts();
     fixture.detectChanges();
 
     const select = fixture.debugElement.query(By.directive(SelectComponent)).componentInstance as SelectComponent;
