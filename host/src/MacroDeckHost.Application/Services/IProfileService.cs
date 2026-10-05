@@ -29,6 +29,8 @@ public interface IProfileService
 		string? defaultEmptyCellStyle = null,
 		bool? defaultWidgetShadows = null);
 
+	Task<Result<IReadOnlyList<ProfileEntity>, ProfileError>> Move(Guid id, Guid targetId, ProfileMovePosition position);
+
 	Task<Result<ProfileError>> Delete(Guid id);
 
 	Task<Result<ProfileEntity, ProfileError>> Duplicate(Guid id, string? name = null);

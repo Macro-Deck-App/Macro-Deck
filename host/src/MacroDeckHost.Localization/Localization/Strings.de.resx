@@ -2851,6 +2851,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Errors.Profile.LoadFailed" xml:space="preserve">
     <value>Profile konnten nicht geladen werden</value>
   </data>
+  <data name="Errors.Profile.MoveFailed" xml:space="preserve">
+    <value>Das Profil konnte nicht verschoben werden</value>
+  </data>
   <data name="Errors.Profile.NoProfileReturned" xml:space="preserve">
     <value>Kein Profil zurückgegeben</value>
   </data>
@@ -2859,6 +2862,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Errors.Profiles.GridLockedByDevice" xml:space="preserve">
     <value>{deviceName} legt dieses Raster auf {columns} x {rows} fest.</value>
+  </data>
+  <data name="Errors.Profiles.InvalidMovePosition" xml:space="preserve">
+    <value>Die Position muss „before“ oder „after“ sein</value>
+  </data>
+  <data name="Errors.Profiles.MoveIdsRequired" xml:space="preserve">
+    <value>Eine gültige Profil-ID und Ziel-ID sind erforderlich</value>
   </data>
   <data name="Errors.Profiles.VirtualCannotBeDeleted" xml:space="preserve">
     <value>Virtuelle Profile können nicht gelöscht werden</value>
@@ -15036,6 +15045,36 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Shell.Footer.Version" xml:space="preserve">
     <value>Version {version}</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.Heading" xml:space="preserve">
+    <value>Gefällt dir Macro Deck?</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.AskText" xml:space="preserve">
+    <value>Du nutzt Macro Deck jetzt schon eine Weile.</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.YesAction" xml:space="preserve">
+    <value>Ja!</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.NoAction" xml:space="preserve">
+    <value>Nicht wirklich</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.StarText" xml:space="preserve">
+    <value>Ein Stern auf GitHub hilft anderen, Macro Deck zu finden, und unterstützt das Projekt.</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.StarAction" xml:space="preserve">
+    <value>Stern auf GitHub geben</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.NoThanksAction" xml:space="preserve">
+    <value>Nein danke</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.FeedbackText" xml:space="preserve">
+    <value>Teile auf GitHub, was dir fehlt oder was dich stört, und hilf so, Macro Deck zu verbessern.</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.FeedbackAction" xml:space="preserve">
+    <value>Feedback geben</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.CloseAction" xml:space="preserve">
+    <value>Schließen</value>
   </data>
   <data name="Shell.Notifications.Action.EnablePluginAdb" xml:space="preserve">
     <value>Erlauben</value>

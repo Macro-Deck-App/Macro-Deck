@@ -132,6 +132,7 @@ import {
   UpdateExtensionSettingsResponse,
   GetOnboardingStateResponse,
   GetPendingAnnouncementResponse,
+  GetGitHubStarPromptResponse,
   GetDeviceSetupResponse,
   GetDevicesResponse,
   GetVariableCatalogProvidersResponse,
@@ -216,6 +217,8 @@ import {
   MigrationRequestBody,
   MigrationSourcesResponse,
   MoveFolderRequest,
+  MoveProfileRequest,
+  MoveProfileResponse,
   MoveFolderResponse,
   OpenConfigUiSessionRequest,
   OpenConfigUiSessionResponse,
@@ -1111,6 +1114,14 @@ export class ApiService {
     return this.http('GET', `${this.storeReviewsPath(kind, packageId)}/reviews?${query}`);
   }
 
+  getGitHubStarPrompt(): Promise<GetGitHubStarPromptResponse> {
+    return this.http('GET', '/api/github-star-prompt');
+  }
+
+  markGitHubStarPromptShown(): Promise<void> {
+    return this.http('POST', '/api/github-star-prompt/shown');
+  }
+
   getStoreRatingPrompt(): Promise<GetStoreRatingPromptResponse> {
     return this.http('GET', '/api/store/rating-prompt');
   }
@@ -1423,6 +1434,13 @@ export class ApiService {
 
   deleteProfile(request: DeleteProfileRequest): Promise<DeleteProfileResponse> {
     return this.http('DELETE', `/api/profiles/${encodeURIComponent(request.id)}`);
+  }
+
+  moveProfile(request: MoveProfileRequest): Promise<MoveProfileResponse> {
+    return this.http('POST', `/api/profiles/${encodeURIComponent(request.id)}/move`, {
+      targetId: request.targetId,
+      position: request.position
+    });
   }
 
   duplicateProfile(request: DuplicateProfileRequest): Promise<DuplicateProfileResponse> {

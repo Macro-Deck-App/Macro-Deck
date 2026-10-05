@@ -65,6 +65,22 @@ public class ProfileRegistryTests
 	}
 
 	[Test]
+	public async Task GetProfiles_ListsEqualOrdersByName_AndPluginProfilesLast()
+	{
+		var alpha = Guid.NewGuid();
+		var beta = Guid.NewGuid();
+		var store = new InMemoryProfileStore(
+			new ProfileFile { Id = beta, Name = "beta", Order = 3 },
+			new ProfileFile { Id = alpha, Name = "Alpha", Order = 3 });
+		var registry = await BuildRegistry(store, new FakeProfileProviderIntegration("spotify", CarThing(out _, out _)));
+
+		var profiles = registry.GetProfiles();
+
+		Assert.That(profiles.Select(p => p.Id),
+			Is.EqualTo(new[] { alpha.ToString(), beta.ToString(), "spotify::car-thing" }));
+	}
+
+	[Test]
 	public async Task GetProfiles_ExcludesDisabledProviders()
 	{
 		var store = new InMemoryProfileStore();

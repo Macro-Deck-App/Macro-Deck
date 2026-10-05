@@ -2852,6 +2852,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.Profile.LoadFailed" xml:space="preserve">
     <value>Nie udało się wczytać profili</value>
   </data>
+  <data name="Errors.Profile.MoveFailed" xml:space="preserve">
+    <value>Nie udało się przenieść profilu</value>
+  </data>
   <data name="Errors.Profile.NoProfileReturned" xml:space="preserve">
     <value>Nie zwrócono żadnego profilu</value>
   </data>
@@ -2860,6 +2863,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Errors.Profiles.GridLockedByDevice" xml:space="preserve">
     <value>Siatka jest zablokowana przez urządzenie {deviceName} na {columns} x {rows}.</value>
+  </data>
+  <data name="Errors.Profiles.InvalidMovePosition" xml:space="preserve">
+    <value>Pozycja musi mieć wartość „before” lub „after”</value>
+  </data>
+  <data name="Errors.Profiles.MoveIdsRequired" xml:space="preserve">
+    <value>Wymagany jest prawidłowy identyfikator profilu i celu</value>
   </data>
   <data name="Errors.Profiles.VirtualCannotBeDeleted" xml:space="preserve">
     <value>Nie można usuwać profili wirtualnych</value>
@@ -15038,6 +15047,36 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Shell.Footer.Version" xml:space="preserve">
     <value>Wersja {version}</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.Heading" xml:space="preserve">
+    <value>Podoba się Macro Deck?</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.AskText" xml:space="preserve">
+    <value>Macro Deck jest już używany od jakiegoś czasu.</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.YesAction" xml:space="preserve">
+    <value>Tak!</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.NoAction" xml:space="preserve">
+    <value>Nie bardzo</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.StarText" xml:space="preserve">
+    <value>Gwiazdka na GitHubie pomaga innym znaleźć Macro Deck i wspiera projekt.</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.StarAction" xml:space="preserve">
+    <value>Daj gwiazdkę na GitHubie</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.NoThanksAction" xml:space="preserve">
+    <value>Nie, dziękuję</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.FeedbackText" xml:space="preserve">
+    <value>Opinia na GitHubie o tym, czego brakuje lub co przeszkadza, pomoże ulepszyć Macro Deck.</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.FeedbackAction" xml:space="preserve">
+    <value>Prześlij opinię</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.CloseAction" xml:space="preserve">
+    <value>Zamknij</value>
   </data>
   <data name="Shell.Notifications.Action.EnablePluginAdb" xml:space="preserve">
     <value>Zezwól</value>

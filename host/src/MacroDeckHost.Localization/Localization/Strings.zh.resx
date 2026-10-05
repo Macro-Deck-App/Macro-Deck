@@ -2851,6 +2851,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Errors.Profile.LoadFailed" xml:space="preserve">
     <value>无法加载配置文件</value>
   </data>
+  <data name="Errors.Profile.MoveFailed" xml:space="preserve">
+    <value>无法移动配置文件</value>
+  </data>
   <data name="Errors.Profile.NoProfileReturned" xml:space="preserve">
     <value>未返回配置文件</value>
   </data>
@@ -2859,6 +2862,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Errors.Profiles.GridLockedByDevice" xml:space="preserve">
     <value>{deviceName}将此网格锁定为 {columns} x {rows}。</value>
+  </data>
+  <data name="Errors.Profiles.InvalidMovePosition" xml:space="preserve">
+    <value>位置必须是“before”或“after”</value>
+  </data>
+  <data name="Errors.Profiles.MoveIdsRequired" xml:space="preserve">
+    <value>需要有效的配置文件 ID 和目标 ID</value>
   </data>
   <data name="Errors.Profiles.VirtualCannotBeDeleted" xml:space="preserve">
     <value>虚拟配置文件无法删除</value>
@@ -15039,6 +15048,36 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Shell.Footer.Version" xml:space="preserve">
     <value>版本 {version}</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.Heading" xml:space="preserve">
+    <value>喜欢 Macro Deck 吗？</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.AskText" xml:space="preserve">
+    <value>已经使用 Macro Deck 一段时间了。</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.YesAction" xml:space="preserve">
+    <value>喜欢！</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.NoAction" xml:space="preserve">
+    <value>不太喜欢</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.StarText" xml:space="preserve">
+    <value>在 GitHub 上点个星标，可以帮助更多人发现 Macro Deck，也是对项目的支持。</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.StarAction" xml:space="preserve">
+    <value>在 GitHub 上点星标</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.NoThanksAction" xml:space="preserve">
+    <value>不用了</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.FeedbackText" xml:space="preserve">
+    <value>欢迎在 GitHub 上反馈缺少的功能或不满意的地方，帮助改进 Macro Deck。</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.FeedbackAction" xml:space="preserve">
+    <value>提交反馈</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.CloseAction" xml:space="preserve">
+    <value>关闭</value>
   </data>
   <data name="Shell.Notifications.Action.EnablePluginAdb" xml:space="preserve">
     <value>允许</value>

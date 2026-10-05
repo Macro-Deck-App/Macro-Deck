@@ -911,6 +911,7 @@ export {
   type GetPendingAnnouncementResponse,
   type MarkAnnouncementSeenRequest,
 } from './protocol/messages/announcements';
+export { type GetGitHubStarPromptResponse } from './protocol/messages/feedback';
 export {
   type GetUserNotificationsResponse,
   type UserNotification,
@@ -1005,8 +1006,12 @@ export {
   type IpcProfileLayoutCompatibility,
   type IpcProfileLayoutCompatibilityStatus,
   type IpcProfileLayoutConstraint,
+  type IpcProfilePlacement,
+  type MoveProfileRequest,
+  type MoveProfileResponse,
   type ProfileCreatedEvent,
   type ProfileDeletedEvent,
+  type ProfilesReorderedEvent,
   type ProfileUpdatedEvent,
   type UpdateProfileRequest,
   type UpdateProfileResponse,

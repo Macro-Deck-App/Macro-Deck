@@ -1,0 +1,10 @@
+.github-star-prompt__text {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.github-star-prompt__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
