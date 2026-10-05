@@ -52,6 +52,28 @@ public class ProfileCacheTests
 	}
 
 	[Test]
+	public async Task ApplyOrders_does_not_bring_back_a_profile_deleted_in_the_meantime()
+	{
+		var kept = Guid.NewGuid();
+		var deleted = Guid.NewGuid();
+		var store = new InMemoryProfileStore(
+			new ProfileFile { Id = kept, Name = "Kept", Order = 1 },
+			new ProfileFile { Id = deleted, Name = "Deleted", Order = 0 });
+		var cache = NewCache(store);
+		await cache.InitializeCache();
+		await cache.Remove(deleted);
+
+		var changed = await cache.ApplyOrders(new Dictionary<Guid, int> { [deleted] = 1, [kept] = 0 });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(changed.Select(profile => profile.Id), Is.EqualTo(new[] { kept }));
+			Assert.That(cache.GetById(deleted), Is.Null);
+			Assert.That(store.LoadAll().Profiles.Select(file => file.Id), Is.EquivalentTo(new[] { kept }));
+		});
+	}
+
+	[Test]
 	public async Task InitializeCache_RepairsInvalidStartMarkersWithTheOldestRoot()
 	{
 		var profileId = Guid.NewGuid();

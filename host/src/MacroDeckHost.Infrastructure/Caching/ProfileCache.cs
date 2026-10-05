@@ -108,6 +108,30 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 		}
 	}
 
+	public async Task<IReadOnlyList<ProfileEntity>> ApplyOrders(IReadOnlyDictionary<Guid, int> orders)
+	{
+		await _updateLock.WaitAsync();
+		try
+		{
+			var changed = new List<ProfileEntity>();
+			foreach (var (id, order) in orders)
+			{
+				if (_profiles.TryGetValue(id, out var profile) && profile.Order != order)
+				{
+					profile.Order = order;
+					TryPersist(id);
+					changed.Add(profile);
+				}
+			}
+
+			return changed;
+		}
+		finally
+		{
+			_updateLock.Release();
+		}
+	}
+
 	public async Task AddOrUpdateAggregate(ProfileEntity profile, IReadOnlyCollection<FolderEntity> folders)
 	{
 		await _updateLock.WaitAsync();
