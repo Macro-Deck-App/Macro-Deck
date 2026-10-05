@@ -8,7 +8,8 @@ internal static class PreviewScene
 		PreviewSize size,
 		PreviewRenderOptions options,
 		IReadOnlyDictionary<string, string> resources,
-		IReadOnlyDictionary<string, string> translations)
+		IReadOnlyDictionary<string, string> translations,
+		string? videoStreamImage = null)
 	{
 		using var stream = new MemoryStream();
 
@@ -21,6 +22,12 @@ internal static class PreviewScene
 			writer.WriteString("theme", options.Theme == PreviewTheme.Light ? "light" : "dark");
 			writer.WriteString("background", options.Background);
 			writer.WriteString("locale", options.Locale);
+
+			if (videoStreamImage is not null)
+			{
+				writer.WriteString("videoStreamImage", videoStreamImage);
+			}
+
 			writer.WriteStartObject("resources");
 
 			foreach (var (id, url) in resources)
