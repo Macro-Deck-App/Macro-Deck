@@ -69,6 +69,12 @@ Deaths: {{ vars.deaths }}
   button that does something different for each repeat mode of a music player.
 - **Set Accent Color** recolors a slider or history graph. Put it inside an **If / Else** on a value, for
   example to turn a graph red above a limit and back to blue below it. **Reset** returns to your theme color.
+- **Control any OBS output:** **Start Output**, **Stop Output** and **Toggle Output** work on every output OBS
+  lists by name, including the ones OBS plugins add, such as a multi-RTMP stream or a second recording.
+  **Get Output State** writes whether an output is active into a variable, and **Toggle Output** can drive the
+  button's states. An output you chose that OBS does not list right now stays selected and is marked
+  unavailable, and running the action then reports that the output does not exist. These actions need an OBS
+  whose obs-websocket is version 5.7 or newer; with an older one they report that.
 
 ## Share and back up
 

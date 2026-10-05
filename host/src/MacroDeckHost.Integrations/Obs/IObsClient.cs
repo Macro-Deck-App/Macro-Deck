@@ -36,6 +36,8 @@ internal interface IObsClient
 
 	IReadOnlyList<string> GetProfileNames();
 
+	IReadOnlyList<string> GetOutputNames();
+
 	void SetCurrentScene(string sceneName);
 
 	void SetPreviewScene(string sceneName);
@@ -69,6 +71,14 @@ internal interface IObsClient
 	void ToggleReplayBuffer();
 
 	void SaveReplayBuffer();
+
+	void StartOutput(string outputName);
+
+	void StopOutput(string outputName);
+
+	void ToggleOutput(string outputName);
+
+	bool GetOutputActive(string outputName);
 
 	bool GetSourceVisible(string sceneName, string sourceName);
 
