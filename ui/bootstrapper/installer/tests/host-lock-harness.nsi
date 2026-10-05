@@ -53,6 +53,7 @@ Section Install
 	FileWrite $MDTestLogHandle "result=$MacroDeckStopResult$\r$\n"
 	FileWrite $MDTestLogHandle "locked=$MacroDeckLockedFile$\r$\n"
 	FileWrite $MDTestLogHandle "kill=$MacroDeckKillStatus$\r$\n"
+	FileWrite $MDTestLogHandle "error=$MacroDeckLockedError$\r$\n"
 	FileWrite $MDTestLogHandle "elapsed=$MacroDeckStopElapsed$\r$\n"
 	FileClose $MDTestLogHandle
 

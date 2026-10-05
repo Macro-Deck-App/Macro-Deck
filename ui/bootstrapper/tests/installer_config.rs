@@ -531,14 +531,26 @@ fn host_lock_verifies_the_probe_instead_of_sleeping() {
             "host-lock.nsh must call {needle} to verify the process/lock state itself"
         );
     }
+    for needle in [
+        "kernel32::CreateFileW",
+        "i 3, i 0, p 0",
+        "$R9 = 32",
+        "$R9 = 33",
+        "kernel32::GetFileAttributesW",
+    ] {
+        assert!(
+            script.contains(needle),
+            "host-lock.nsh must probe with a non-creating write open and classify the Win32 error \
+             ({needle}): a failure that is not a sharing or lock violation is not a lock"
+        );
+    }
     assert!(
-        script.contains("FileOpen $2 \"${Directory}\\$1\" a"),
-        "host-lock.nsh must probe each file by opening it for append (read/write, no truncation)"
+        !script.contains("FileOpen"),
+        "host-lock.nsh must not probe with FileOpen: it cannot tell a lock from an access error"
     );
     assert!(
-        !script.contains("FileOpen $2 \"${Directory}\\$1\" w"),
-        "host-lock.nsh must never open a probed file for write: \"w\" truncates it, destroying \
-         the very file the installer is about to replace"
+        repository_file("ui/bootstrapper/installer/hooks.nsh").contains("$MacroDeckLockedError"),
+        "the in-use message must name the Win32 error so a report identifies the cause"
     );
 }
 
@@ -556,8 +568,8 @@ fn host_lock_probes_the_runtime_subtree() {
         "MacroDeckStopProcessAndWait must probe the runtime subtree of the host directory"
     );
     assert!(
-        script.contains("FileOpen $2 \"${Directory}\\$3\\$1\" a"),
-        "the runtime probe must open each file for append (read/write, no truncation)"
+        script.contains("!insertmacro MacroDeckProbeFile \"${Directory}\\$3\\$1\""),
+        "the runtime probe must use the shared file probe"
     );
     assert!(
         script.contains("StrCpy $MacroDeckLockedFile \"$3\\$1\""),
@@ -1227,4 +1239,16 @@ fn the_manifest_version_is_the_version_the_bootstrapper_compares_it_with() {
             );
         }
     }
+}
+
+#[test]
+fn packaged_host_does_not_ship_the_git_placeholder() {
+    let workflow = repository_file(".github/workflows/build.yml");
+    let removals = workflow
+        .matches("rm -f ui/bootstrapper/host-publish/.gitkeep")
+        .count();
+    assert_eq!(
+        removals, 3,
+        "the Linux, Windows and macOS jobs must each delete host-publish/.gitkeep after staging the host"
+    );
 }

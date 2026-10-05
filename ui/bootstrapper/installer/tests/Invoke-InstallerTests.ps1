@@ -533,6 +533,23 @@ Invoke-Scenario 'TopLevelOnly' {
     }
 }
 
+Invoke-Scenario 'ReadOnlyFileIsNotALock' {
+    $dir = New-ScenarioDir 'ReadOnlyFileIsNotALock'
+    $readOnly = Join-Path $dir 'read-only.bin'
+    Set-Content -LiteralPath $readOnly -Value 'stub' -NoNewline
+    Set-ItemProperty -LiteralPath $readOnly -Name IsReadOnly -Value $true
+    try {
+        $log = Join-Path $script:LogsDir 'ReadOnlyFileIsNotALock.log'
+        $fields = Invoke-HostLockHarness -HarnessExe $script:HostLockHarnessNormalExe `
+            -ProcessName 'MacroDeckHostNotRunning.exe' -Directory $dir -Scope '1' -LogPath $log
+        Assert-Field $fields 'result' '0'
+        Assert-Field $fields 'locked' ''
+        Assert-Field $fields 'error' '0'
+    } finally {
+        Set-ItemProperty -LiteralPath $readOnly -Name IsReadOnly -Value $false
+    }
+}
+
 Invoke-Scenario 'RuntimeSubtreeLocked' {
     $dir = New-ScenarioDir 'RuntimeSubtreeLocked'
     $runtimeDir = Join-Path $dir 'runtime\shared\x'
@@ -548,6 +565,7 @@ Invoke-Scenario 'RuntimeSubtreeLocked' {
             -ProcessName 'MacroDeckHostNotRunning.exe' -Directory $dir -Scope '1' -LogPath $log
         Assert-Field $fields 'result' '2'
         Assert-Field $fields 'locked' 'runtime\shared\x\coreclr.dll'
+        Assert-Field $fields 'error' '32'
     } finally {
         Stop-ProcessSafely $holder
     }

@@ -430,6 +430,8 @@ jobs:
         run: |
           mkdir -p ui/bootstrapper/host-publish
           tar xzf host-linux-x64.tar.gz -C ui/bootstrapper/host-publish
+          # The tracked placeholder only keeps the directory in git; it must not ship.
+          rm -f ui/bootstrapper/host-publish/.gitkeep
 
           # linuxdeploy cannot scan the LTTng provider on 22.04 (no liblttng-ust.so.0);
           # stage-dotnet-runtime.sh deletes it, so assert it reached no packaged tree.
@@ -661,6 +663,7 @@ jobs:
         run: |
           mkdir -p ui/bootstrapper/host-publish
           tar xzf host-win-x64.tar.gz -C ui/bootstrapper/host-publish
+          rm -f ui/bootstrapper/host-publish/.gitkeep
 
       - name: Install dependencies
         working-directory: ui/bootstrapper
@@ -850,6 +853,7 @@ jobs:
         run: |
           mkdir -p ui/bootstrapper/host-publish
           tar xzf host-osx-arm64.tar.gz -C ui/bootstrapper/host-publish
+          rm -f ui/bootstrapper/host-publish/.gitkeep
 
       - name: Prepare signing keychain
         if: ${{ env.HAS_MAC_CERT == 'true' }}
