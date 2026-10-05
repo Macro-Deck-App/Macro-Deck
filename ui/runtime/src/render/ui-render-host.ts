@@ -39,4 +39,6 @@ export interface UiRenderHost {
   ownsRootWidgetBorder?(): boolean;
 
   videoStreams?(): VideoStreamSurface | null;
+
+  videoStreamStill?(): string | null;
 }
