@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
-using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.StreamChat;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Infrastructure.Twitch;
 using MacroDeckHost.Tests.UnitTests.Delegation;

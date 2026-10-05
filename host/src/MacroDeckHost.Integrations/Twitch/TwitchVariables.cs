@@ -36,10 +36,12 @@ internal static class TwitchVariables
 		"last_raider"
 	];
 
+	public static string AccountPrefix(string variableKey) => $"{Prefix}{variableKey}_";
+
 	public static IReadOnlyList<VariableDefinition> Declare(string variableKey,
 		VariableConfiguration? configuration = null)
 	{
-		var prefix = $"{Prefix}{variableKey}_";
+		var prefix = AccountPrefix(variableKey);
 
 		return
 		[

@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using MacroDeck.Ui.Model.Resources;
-using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.StreamChat;
 using MacroDeckHost.Application.Ui.Resources;
 using ILogger = Serilog.ILogger;
 
@@ -310,7 +310,7 @@ public sealed partial class TwitchChatImageCache : ITwitchChatImages, IDisposabl
 
 			var resource = _resources.Register(new UiResourceRegistration
 			{
-				OwnerId = TwitchChatWidgetType.OwnerId,
+				OwnerId = StreamPlatforms.Twitch.OwnerId,
 				Name = image.ResourceName,
 				MediaType = mediaType,
 				Content = bytes,

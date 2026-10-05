@@ -6,13 +6,14 @@ using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Surfaces;
-using MacroDeckHost.Application.Twitch.Stats;
+using MacroDeckHost.Application.StreamChat;
+using MacroDeckHost.Application.StreamStats;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
-using MacroDeckHost.Widgets.TwitchStats;
+using MacroDeckHost.Widgets.StreamStats;
 using DomainEnums = MacroDeckHost.Domain.Enums;
 
 namespace MacroDeckHost.Tests.UnitTests.Twitch.Stats;
@@ -26,10 +27,10 @@ internal sealed class TwitchStatsWidgetTests
 	private UiResourceStore _store = null!;
 	private VariableRegistry _variables = null!;
 	private VariableChangeNotifier _notifier = null!;
-	private TwitchStatsAccountsHub _accounts = null!;
+	private StreamStatsAccountsHub _accounts = null!;
 	private FakeThumbnails _thumbnails = null!;
 	private FakeHistory _history = null!;
-	private TwitchStatsWidgetUiProvider _provider = null!;
+	private StreamStatsWidgetUiProvider _provider = null!;
 	private CultureScope _culture = null!;
 
 	[SetUp]
@@ -39,12 +40,12 @@ internal sealed class TwitchStatsWidgetTests
 		_store = new UiResourceStore();
 		_variables = new VariableRegistry();
 		_notifier = new VariableChangeNotifier();
-		_accounts = new TwitchStatsAccountsHub();
+		_accounts = new StreamStatsAccountsHub();
 		_thumbnails = new FakeThumbnails();
 		_history = new FakeHistory();
 		var integrations = new FakeIntegrationRegistry();
 		integrations.Add(new IconIntegration());
-		_provider = new TwitchStatsWidgetUiProvider(_accounts,
+		_provider = new StreamStatsWidgetUiProvider(StreamPlatforms.Twitch, _accounts,
 			_thumbnails,
 			_variables,
 			_history,
@@ -66,12 +67,12 @@ internal sealed class TwitchStatsWidgetTests
 	[TestCase("abc", "-")]
 	public void Counts_read_the_way_the_concept_shows_them(string? value, string expected)
 	{
-		Assert.That(TwitchStatsResolver.Count(value), Is.EqualTo(expected));
+		Assert.That(StreamStatsResolver.Count(value), Is.EqualTo(expected));
 	}
 
 	[Test]
 	public void Uptime_reads_as_hours_minutes_seconds()
-		=> Assert.That(TwitchStatsResolver.Uptime("8066"), Is.EqualTo("02:14:26"));
+		=> Assert.That(StreamStatsResolver.Uptime("8066"), Is.EqualTo("02:14:26"));
 
 	[Test]
 	public async Task Widget_data_without_a_style_shows_the_default_overview()
@@ -296,11 +297,11 @@ internal sealed class TwitchStatsWidgetTests
 	public void The_stats_widget_is_served_for_its_own_surfaces_only()
 		=> Assert.Multiple(() =>
 		{
-			Assert.That(TwitchStatsWidgetUiProvider.Serves(Surface(UiSurfaceKinds.Widget)), Is.True);
-			Assert.That(TwitchStatsWidgetUiProvider.Serves(Surface(UiSurfaceKinds.Dialog)), Is.False);
+			Assert.That(_provider.Serves(Surface(UiSurfaceKinds.Widget)), Is.True);
+			Assert.That(_provider.Serves(Surface(UiSurfaceKinds.Dialog)), Is.False);
 		});
 
-	private void Connect() => _accounts.SetAccounts([new TwitchStatsAccount(UserId, "Streamer", Key)]);
+	private void Connect() => _accounts.SetAccounts([new StreamStatsAccount(UserId, "Streamer", $"twitch_{Key}_")]);
 
 	private void SetLive()
 	{
@@ -328,7 +329,7 @@ internal sealed class TwitchStatsWidgetTests
 				Scope = DomainEnums.VariableScope.Global,
 				Type = DomainEnums.VariableType.Text,
 				Classification = DomainEnums.VariableClassification.Integration,
-				OwnerIntegrationId = TwitchStatsWidgetType.OwnerId,
+				OwnerIntegrationId = StreamPlatforms.Twitch.OwnerId,
 				Value = value,
 				UpdatedAt = DateTime.UtcNow,
 			}
@@ -344,7 +345,7 @@ internal sealed class TwitchStatsWidgetTests
 	{
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
-			[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(TwitchStatsWidgetType.QualifiedId),
+			[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(StreamPlatforms.Twitch.StatsWidgetTypeId),
 			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data ?? new { account = "" }),
 		};
 
@@ -379,7 +380,7 @@ internal sealed class TwitchStatsWidgetTests
 		public void Dispose() => global::System.Globalization.CultureInfo.CurrentCulture = _previous;
 	}
 
-	private sealed class FakeThumbnails : ITwitchStreamThumbnails
+	private sealed class FakeThumbnails : IStreamThumbnails
 	{
 		public List<(string UserId, string? Url)> Tracked { get; } = [];
 
@@ -437,7 +438,7 @@ internal sealed class TwitchStatsWidgetTests
 
 	private sealed class IconIntegration : IIntegration, IIntegrationIconProvider
 	{
-		public string Id => TwitchStatsWidgetType.OwnerId;
+		public string Id => StreamPlatforms.Twitch.OwnerId;
 
 		public LocalizedText Name => "Twitch";
 

@@ -1,6 +1,8 @@
+using MacroDeckHost.Application.StreamChat;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Integrations.Twitch;
+using MacroDeckHost.Tests.UnitTests.Streaming;
 using MacroDeckHost.Tests.UnitTests.Variables;
 
 namespace MacroDeckHost.Tests.UnitTests.Twitch.Chat;
@@ -19,7 +21,8 @@ internal sealed class TwitchChatSinkBindingTests
 			null!,
 			new InMemoryVariableBindingStore(),
 			new VariableRefreshSignal(),
-			twitchChatSink: sink);
+			streamPlatforms: StreamPlatformTestSupport.Services(
+				StreamPlatformTestSupport.Set(StreamPlatforms.Twitch, chatSink: sink)));
 		await integration.ShutdownAsync();
 
 		Assert.That(sink.AccountLists, Has.Count.EqualTo(1));

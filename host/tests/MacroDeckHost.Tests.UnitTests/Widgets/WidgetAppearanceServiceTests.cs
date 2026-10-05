@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Rendering;
-using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.StreamChat;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Common;
@@ -576,7 +576,7 @@ public class WidgetAppearanceServiceTests
 			(_, _) => new FakeTwitchHelixClient());
 		await accounts.ReloadAsync(config);
 		using var integration = new TwitchIntegration(accounts);
-		var chat = integration.GetWidgetTypes().Single(type => type.Id == TwitchChatWidgetType.LocalId);
+		var chat = integration.GetWidgetTypes().Single(type => type.Id == StreamChatWidgetType.LocalId);
 		var fixture = await Fixture.ForProviderType(chat, """{"account":""}""");
 
 		var set = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch
