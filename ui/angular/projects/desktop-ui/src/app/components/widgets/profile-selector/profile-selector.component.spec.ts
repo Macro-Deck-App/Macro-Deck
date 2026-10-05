@@ -1,5 +1,7 @@
+import { CdkDropList } from '@angular/cdk/drag-drop';
 import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 
 import { Profile } from '@macro-deck/runtime';
 import { ProfileService, ToastService } from '@shared';
@@ -181,11 +183,13 @@ describe('ProfileSelectorComponent dropdown', () => {
   let duplicateProfile: jasmine.Spy;
   let selectProfile: jasmine.Spy;
   let toastShow: jasmine.Spy;
+  let moveProfile: jasmine.Spy;
 
   function createFixture(profiles: Profile[] = [profile()]): ComponentFixture<ProfileSelectorComponent> {
     duplicateProfile = jasmine.createSpy('duplicateProfile').and.resolveTo({ success: true });
     selectProfile = jasmine.createSpy('selectProfile');
     toastShow = jasmine.createSpy('show');
+    moveProfile = jasmine.createSpy('moveProfile').and.resolveTo({ success: true });
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
@@ -200,6 +204,7 @@ describe('ProfileSelectorComponent dropdown', () => {
             isCurrentProfileLocked: () => false,
             duplicateProfile,
             selectProfile,
+            moveProfile,
           },
         },
         { provide: PortabilityService, useValue: {} },
@@ -264,12 +269,13 @@ describe('ProfileSelectorComponent dropdown', () => {
     expect(other.querySelector('.profile-list-check')).toBeNull();
   });
 
-  it('offers edit, duplicate, export and delete in the row menu', () => {
+  it('offers edit, duplicate, export, moving and delete in the row menu', () => {
     const fixture = createFixture([profile({ id: 'p1', name: 'Home' }), profile({ id: 'p2', name: 'Stream' })]);
 
     openRowMenu(fixture, 'Stream');
 
-    expect(menuItems().map(item => item.textContent?.trim())).toEqual(['Edit', 'Duplicate', 'Export', 'Delete']);
+    expect(menuItems().map(item => item.textContent?.trim()))
+      .toEqual(['Edit', 'Duplicate', 'Export', 'Move Up', 'Move Down', 'Delete']);
   });
 
   it('acts on the row, not on the selection', () => {
@@ -309,12 +315,12 @@ describe('ProfileSelectorComponent dropdown', () => {
     const disabled = () => menuItems().filter(item => item.disabled).map(item => item.textContent?.trim());
 
     openRowMenu(fixture, 'Board');
-    expect(disabled()).toEqual(['Edit', 'Duplicate', 'Export', 'Delete']);
+    expect(disabled()).toEqual(['Edit', 'Duplicate', 'Export', 'Move Up', 'Move Down', 'Delete']);
 
     fixture.componentInstance['rowMenu'].set(null);
     fixture.detectChanges();
     openRowMenu(fixture, 'Home');
-    expect(disabled()).toEqual(['Delete']);
+    expect(disabled()).toEqual(['Move Up', 'Move Down', 'Delete']);
   });
 
   it('filters the list by name and says when nothing matches', () => {
@@ -340,5 +346,89 @@ describe('ProfileSelectorComponent dropdown', () => {
 
     expect(selectProfile).toHaveBeenCalledOnceWith('p2');
     expect(fixture.componentInstance['search']()).toBe('');
+  });
+
+  describe('reordering', () => {
+    const three = () => [
+      profile({ id: 'p1', name: 'Home' }),
+      profile({ id: 'p2', name: 'Stream', order: 1 }),
+      profile({ id: 'p3', name: 'Work', order: 2 }),
+    ];
+
+    const dropList = (fixture: ComponentFixture<ProfileSelectorComponent>): CdkDropList =>
+      fixture.debugElement.query(By.directive(CdkDropList)).injector.get(CdkDropList);
+
+    const drop = (fixture: ComponentFixture<ProfileSelectorComponent>, previousIndex: number, currentIndex: number) =>
+      dropList(fixture).dropped.emit({ previousIndex, currentIndex } as never);
+
+    it('moves a profile up or down one place from its row menu', async () => {
+      const fixture = createFixture(three());
+
+      openRowMenu(fixture, 'Stream');
+      clickMenuItem(fixture, 'Move Up');
+      await fixture.whenStable();
+      openRowMenu(fixture, 'Stream');
+      clickMenuItem(fixture, 'Move Down');
+      await fixture.whenStable();
+
+      expect(moveProfile.calls.allArgs()).toEqual([['p2', 'p1', 'before'], ['p2', 'p3', 'after']]);
+    });
+
+    it('cannot move the first profile up or the last one down', () => {
+      const fixture = createFixture(three());
+      const disabled = () => menuItems().filter(item => item.disabled).map(item => item.textContent?.trim());
+
+      openRowMenu(fixture, 'Home');
+      expect(disabled()).toContain('Move Up');
+      expect(disabled()).not.toContain('Move Down');
+
+      fixture.componentInstance['rowMenu'].set(null);
+      fixture.detectChanges();
+      openRowMenu(fixture, 'Work');
+      expect(disabled()).toContain('Move Down');
+      expect(disabled()).not.toContain('Move Up');
+    });
+
+    it('drops a dragged profile before the one it was dropped on when moving up, after it when moving down', () => {
+      const fixture = createFixture(three());
+
+      drop(fixture, 2, 0);
+      drop(fixture, 0, 1);
+
+      expect(moveProfile.calls.allArgs()).toEqual([['p3', 'p1', 'before'], ['p1', 'p2', 'after']]);
+    });
+
+    it('keeps integration profiles out of the drag order', () => {
+      const fixture = createFixture([...three(), profile({ id: 'v1', name: 'Board', order: 3, isVirtual: true })]);
+      const canDropAt = (index: number) => dropList(fixture).sortPredicate(index, null as never, null as never);
+
+      drop(fixture, 0, 3);
+
+      expect(moveProfile).not.toHaveBeenCalled();
+      expect(canDropAt(2)).toBeTrue();
+      expect(canDropAt(3)).toBeFalse();
+      expect(rows(fixture)[3].querySelector('.profile-drag-handle')).toBeNull();
+      expect(rows(fixture)[0].querySelector('.profile-drag-handle')).not.toBeNull();
+    });
+
+    it('offers no drag handles while the list is filtered', () => {
+      const fixture = createFixture(three());
+
+      fixture.componentInstance['search'].set('o');
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('.profile-drag-handle')).toBeNull();
+    });
+
+    it('reports a failed move without showing the host message', async () => {
+      const fixture = createFixture(three());
+      moveProfile.and.resolveTo({ success: false, error: { code: 'NotFound', message: 'Profile not found' } });
+
+      openRowMenu(fixture, 'Work');
+      clickMenuItem(fixture, 'Move Up');
+      await fixture.whenStable();
+
+      expect(toastShow).toHaveBeenCalledOnceWith('Failed to move the profile', jasmine.objectContaining({ variant: 'error' }));
+    });
   });
 });

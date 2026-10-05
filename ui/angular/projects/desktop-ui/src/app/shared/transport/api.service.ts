@@ -220,6 +220,8 @@ import {
   MigrationRequestBody,
   MigrationSourcesResponse,
   MoveFolderRequest,
+  MoveProfileRequest,
+  MoveProfileResponse,
   MoveFolderResponse,
   OpenConfigUiSessionRequest,
   OpenConfigUiSessionResponse,
@@ -1435,6 +1437,13 @@ export class ApiService {
 
   deleteProfile(request: DeleteProfileRequest): Promise<DeleteProfileResponse> {
     return this.http('DELETE', `/api/profiles/${encodeURIComponent(request.id)}`);
+  }
+
+  moveProfile(request: MoveProfileRequest): Promise<MoveProfileResponse> {
+    return this.http('POST', `/api/profiles/${encodeURIComponent(request.id)}/move`, {
+      targetId: request.targetId,
+      position: request.position
+    });
   }
 
   duplicateProfile(request: DuplicateProfileRequest): Promise<DuplicateProfileResponse> {

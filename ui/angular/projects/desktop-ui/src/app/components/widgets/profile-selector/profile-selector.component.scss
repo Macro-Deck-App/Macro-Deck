@@ -147,6 +147,29 @@
   color: var(--color-text-primary);
 }
 
+.profile-drag-handle {
+  display: flex;
+  flex-shrink: 0;
+  margin-left: var(--space-1);
+  color: var(--color-text-muted);
+  cursor: grab;
+  touch-action: none;
+}
+
+.profile-list-item.cdk-drag-preview {
+  background-color: var(--color-bg-elevated);
+  box-shadow: var(--shadow-md);
+}
+
+.profile-list-item.cdk-drag-placeholder {
+  opacity: 0.4;
+}
+
+.profile-list.cdk-drop-list-dragging .profile-list-item:not(.cdk-drag-placeholder),
+.profile-list-item.cdk-drag-animating {
+  transition: transform 150ms ease;
+}
+
 .profile-list-select {
   display: flex;
   align-items: center;
