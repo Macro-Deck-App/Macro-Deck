@@ -132,6 +132,7 @@ import {
   UpdateExtensionSettingsResponse,
   GetOnboardingStateResponse,
   GetPendingAnnouncementResponse,
+  GetGitHubStarPromptResponse,
   GetDeviceSetupResponse,
   GetDevicesResponse,
   GetVariableCatalogProvidersResponse,
@@ -1111,6 +1112,14 @@ export class ApiService {
       query.set('rating', String(options.rating));
     }
     return this.http('GET', `${this.storeReviewsPath(kind, packageId)}/reviews?${query}`);
+  }
+
+  getGitHubStarPrompt(): Promise<GetGitHubStarPromptResponse> {
+    return this.http('GET', '/api/github-star-prompt');
+  }
+
+  markGitHubStarPromptShown(): Promise<void> {
+    return this.http('POST', '/api/github-star-prompt/shown');
   }
 
   getStoreRatingPrompt(): Promise<GetStoreRatingPromptResponse> {

@@ -1,0 +1,42 @@
+<shared-modal [heading]="appStrings.Shell.GitHubStarPrompt.Heading | translate" size="small" (close)="onModalClose()">
+  @switch (step()) {
+    @case ('ask') {
+      <p class="github-star-prompt__text">{{ appStrings.Shell.GitHubStarPrompt.AskText | translate }}</p>
+    }
+    @case ('like') {
+      <p class="github-star-prompt__text">{{ appStrings.Shell.GitHubStarPrompt.StarText | translate }}</p>
+    }
+    @case ('dislike') {
+      <p class="github-star-prompt__text">{{ appStrings.Shell.GitHubStarPrompt.FeedbackText | translate }}</p>
+    }
+  }
+
+  <div modal-footer class="github-star-prompt__actions">
+    @switch (step()) {
+      @case ('ask') {
+        <shared-button variant="ghost" (click)="step.set('dislike')">
+          {{ appStrings.Shell.GitHubStarPrompt.NoAction | translate }}
+        </shared-button>
+        <shared-button variant="primary" (click)="step.set('like')">
+          {{ appStrings.Shell.GitHubStarPrompt.YesAction | translate }}
+        </shared-button>
+      }
+      @case ('like') {
+        <shared-button variant="ghost" (click)="close()">
+          {{ appStrings.Shell.GitHubStarPrompt.NoThanksAction | translate }}
+        </shared-button>
+        <shared-button variant="primary" (click)="star()">
+          {{ appStrings.Shell.GitHubStarPrompt.StarAction | translate }}
+        </shared-button>
+      }
+      @case ('dislike') {
+        <shared-button variant="ghost" (click)="close()">
+          {{ appStrings.Shell.GitHubStarPrompt.CloseAction | translate }}
+        </shared-button>
+        <shared-button variant="primary" (click)="giveFeedback()">
+          {{ appStrings.Shell.GitHubStarPrompt.FeedbackAction | translate }}
+        </shared-button>
+      }
+    }
+  </div>
+</shared-modal>

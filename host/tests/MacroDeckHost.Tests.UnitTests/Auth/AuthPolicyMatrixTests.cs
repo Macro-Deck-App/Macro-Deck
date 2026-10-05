@@ -575,6 +575,18 @@ public class AuthPolicyMatrixTests
 	}
 
 	[Test]
+	public async Task The_github_star_prompt_is_admin_only()
+	{
+		var responses = new[]
+		{
+			await Send(HttpMethod.Get, "/api/github-star-prompt", _clientToken),
+			await Send(HttpMethod.Post, "/api/github-star-prompt/shown", _clientToken)
+		};
+
+		Assert.That(responses.Select(response => response.StatusCode), Is.All.EqualTo(HttpStatusCode.Forbidden));
+	}
+
+	[Test]
 	public async Task Store_tests_and_installing_a_test_build_are_admin_only()
 	{
 		var responses = new[]

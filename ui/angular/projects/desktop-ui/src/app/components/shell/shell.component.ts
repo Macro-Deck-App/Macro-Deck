@@ -18,8 +18,10 @@ import { UpdateModalComponent } from './update-modal/update-modal.component';
 import { WhatsNewModalComponent } from './whats-new-modal/whats-new-modal.component';
 import { AnnouncementModalComponent } from './announcement-modal/announcement-modal.component';
 import { StoreRatingPromptModalComponent } from './store-rating-prompt-modal/store-rating-prompt-modal.component';
+import { GitHubStarPromptModalComponent } from './github-star-prompt-modal/github-star-prompt-modal.component';
 import { AnnouncementService } from '../../services/announcement.service';
 import { StoreRatingPromptService } from '../../services/store-rating-prompt.service';
+import { GitHubStarPromptService } from '../../services/github-star-prompt.service';
 import { MigrationOfferService } from '../../services/migration-offer.service';
 import { MigrationWizardService } from '../../services/migration-wizard.service';
 import { OnboardingService } from '../../services/onboarding.service';
@@ -39,6 +41,7 @@ import { FooterBarComponent } from './footer-bar/footer-bar.component';
     WhatsNewModalComponent,
     AnnouncementModalComponent,
     StoreRatingPromptModalComponent,
+    GitHubStarPromptModalComponent,
     ConnectionPanelComponent,
     NotificationPanelComponent,
     FooterBarComponent,
@@ -55,12 +58,14 @@ export class ShellComponent implements AfterViewInit {
   protected readonly postUpdateChangelog = inject(PostUpdateChangelogService);
   private readonly announcements = inject(AnnouncementService);
   private readonly ratingPrompt = inject(StoreRatingPromptService);
+  private readonly githubStarPrompt = inject(GitHubStarPromptService);
   private readonly onboarding = inject(OnboardingService);
   private readonly migrationOffer = inject(MigrationOfferService);
   private readonly migrationWizard = inject(MigrationWizardService);
 
   private readonly announcementShown = signal(false);
   private readonly ratingPromptShown = signal(false);
+  private readonly githubStarPromptShown = signal(false);
 
   private readonly shellIdle = computed(() =>
     this.postUpdateChangelog.settled()
@@ -79,6 +84,11 @@ export class ShellComponent implements AfterViewInit {
     this.ratingPrompt.pending() !== null
     && (this.ratingPromptShown() || (this.announcements.pending() === null && this.shellIdle())));
 
+  protected readonly githubStarPromptVisible = computed(() =>
+    this.githubStarPrompt.pending()
+    && (this.githubStarPromptShown()
+      || (this.announcements.pending() === null && this.ratingPrompt.pending() === null && this.shellIdle())));
+
   protected readonly collapsedSidebarWidthCss = `${SIDEBAR_COLLAPSED_WIDTH}px`;
 
   // The full sidebar+main row: its width does not depend on the sidebar's own collapsed state,
@@ -93,6 +103,7 @@ export class ShellComponent implements AfterViewInit {
     // Once on screen the announcement counts among the open modals itself, so it stays until dismissed.
     effect(() => this.announcementShown.set(this.announcementVisible()));
     effect(() => this.ratingPromptShown.set(this.ratingPromptVisible()));
+    effect(() => this.githubStarPromptShown.set(this.githubStarPromptVisible()));
   }
 
   protected readonly activeNavAction = computed(() => {

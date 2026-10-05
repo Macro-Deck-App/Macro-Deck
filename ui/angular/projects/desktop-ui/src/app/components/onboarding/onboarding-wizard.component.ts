@@ -8,6 +8,7 @@ import { ConfirmationModalComponent } from '../overlay/confirmation-modal/confir
 import { LoadingStateComponent } from '../feedback/loading-state/loading-state.component';
 import { RecoveryKeyModalComponent } from '../backup/recovery-key-modal/recovery-key-modal.component';
 import { ConnectQrComponent } from '../shell/connect-qr/connect-qr.component';
+import { MACRO_DECK_REPOSITORY_URL } from '../../util/macro-deck-links';
 
 type OnboardingStep = 'welcome' | 'connect' | 'recovery-key' | 'links';
 
@@ -15,7 +16,7 @@ const STEPS: OnboardingStep[] = ['welcome', 'connect', 'recovery-key', 'links'];
 
 const LINKS = [
   {
-    url: 'https://github.com/Macro-Deck-App/Macro-Deck',
+    url: MACRO_DECK_REPOSITORY_URL,
     title: AppStrings.Onboarding.Links.GitHub,
     description: AppStrings.Onboarding.Links.GitHubDescription,
   },
