@@ -99,9 +99,9 @@ public static class BackupComponentGroups
 	/// archive would either point this installation at a secret row it does not have - orphaning every
 	/// backup it owns - or give it the installation identity of the machine the archive came from, which
 	/// is what the key ring's KEK store is keyed by.
-	/// The onboarding flag, the last seen announcement and the rating prompt history are excluded for the same
-	/// reason: they track what this installation has already shown its user, so a restore must neither resurrect
-	/// a finished wizard, a seen announcement or a shown prompt nor erase one still owed.
+	/// The onboarding flag, the last seen announcement, the rating prompt history and the GitHub star prompt flag
+	/// are excluded for the same reason: they track what this installation has already shown its user, so a restore
+	/// must neither resurrect a finished wizard, a seen announcement or a shown prompt nor erase one still owed.
 	/// The identity flag records whether this installation ever issued a host identity key.
 	/// </summary>
 	public static readonly IReadOnlyList<string> PreferenceKeyDenyPrefixes =
@@ -111,6 +111,7 @@ public static class BackupComponentGroups
 		"onboarding.",
 		"announcements.",
 		"storeRatingPrompt.",
+		"githubStarPrompt.",
 		"identity.",
 		"connect."
 	];

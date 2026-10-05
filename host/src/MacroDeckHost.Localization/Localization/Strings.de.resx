@@ -15024,6 +15024,36 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Shell.Footer.Version" xml:space="preserve">
     <value>Version {version}</value>
   </data>
+  <data name="Shell.GitHubStarPrompt.Heading" xml:space="preserve">
+    <value>Gefällt dir Macro Deck?</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.AskText" xml:space="preserve">
+    <value>Du nutzt Macro Deck jetzt schon eine Weile.</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.YesAction" xml:space="preserve">
+    <value>Ja!</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.NoAction" xml:space="preserve">
+    <value>Nicht wirklich</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.StarText" xml:space="preserve">
+    <value>Ein Stern auf GitHub hilft anderen, Macro Deck zu finden, und unterstützt das Projekt.</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.StarAction" xml:space="preserve">
+    <value>Stern auf GitHub geben</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.NoThanksAction" xml:space="preserve">
+    <value>Nein danke</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.FeedbackText" xml:space="preserve">
+    <value>Teile auf GitHub, was dir fehlt oder was dich stört, und hilf so, Macro Deck zu verbessern.</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.FeedbackAction" xml:space="preserve">
+    <value>Feedback geben</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.CloseAction" xml:space="preserve">
+    <value>Schließen</value>
+  </data>
   <data name="Shell.Notifications.Action.EnablePluginAdb" xml:space="preserve">
     <value>Erlauben</value>
   </data>
