@@ -911,6 +911,7 @@ export {
   type GetPendingAnnouncementResponse,
   type MarkAnnouncementSeenRequest,
 } from './protocol/messages/announcements';
+export { type GetGitHubStarPromptResponse } from './protocol/messages/feedback';
 export {
   type GetUserNotificationsResponse,
   type UserNotification,
