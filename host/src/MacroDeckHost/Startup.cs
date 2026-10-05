@@ -7,6 +7,7 @@ using MacroDeckHost.Infrastructure.Backups;
 using MacroDeckHost.Application.Backups.Storage;
 using MacroDeckHost.Application.Backups.Retention;
 using MacroDeckHost.Application.Backups;
+using MacroDeckHost.Application.Feedback;
 using MacroDeckHost.Application.Messaging;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
@@ -777,6 +778,7 @@ public class Startup
 		services.AddSingleton<IStoreLinkResolver, StoreLinkResolver>();
 		services.AddSingleton<IStoreReviewService, StoreReviewService>();
 		services.AddSingleton<IStoreRatingPromptService, StoreRatingPromptService>();
+		services.AddSingleton<IGitHubStarPromptService, GitHubStarPromptService>();
 		services.AddSingleton<StoreCatalogPopularity>();
 		services.AddSingleton<StoreSimilarPackages>();
 		services.AddSingleton<MacroDeckHost.Application.Store.Testing.IStoreTestService, MacroDeckHost.Application.Store.Testing.StoreTestService>();
