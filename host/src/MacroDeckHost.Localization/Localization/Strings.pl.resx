@@ -7419,6 +7419,54 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Obs.Events.ConnectionCategory" xml:space="preserve">
     <value>Połączenie</value>
   </data>
+  <data name="Integrations.Obs.Events.CustomCategory" xml:space="preserve">
+    <value>Niestandardowe</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomEventDescription" xml:space="preserve">
+    <value>Zdarzenie wysłane do OBS przez skrypt lub wtyczkę. Zawiera JSON nadany przez nadawcę.</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomEventName" xml:space="preserve">
+    <value>Zdarzenie niestandardowe</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomEventNameConfigDescription" xml:space="preserve">
+    <value>Reagowanie tylko na zdarzenia o tej nazwie. Puste pole oznacza dowolne zdarzenie niestandardowe.</value>
+  </data>
+  <data name="Integrations.Obs.Events.EventDataLabel" xml:space="preserve">
+    <value>Dane zdarzenia (JSON)</value>
+  </data>
+  <data name="Integrations.Obs.Events.EventNameLabel" xml:space="preserve">
+    <value>Nazwa zdarzenia</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputActivityConfigDescription" xml:space="preserve">
+    <value>Reagowanie tylko na to wejście. Puste pole oznacza dowolne wejście.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameActiveDescription" xml:space="preserve">
+    <value>Wejście zaczęło być renderowane w wyjściu programu, na przykład kamera internetowa rozpoczynająca transmisję.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameActiveName" xml:space="preserve">
+    <value>Wejście stało się aktywne</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameInactiveDescription" xml:space="preserve">
+    <value>Wejście przestało być renderowane w wyjściu programu.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameInactiveName" xml:space="preserve">
+    <value>Wejście stało się nieaktywne</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStartedShowingDescription" xml:space="preserve">
+    <value>Wejście zaczęło być renderowane w wyjściu programu lub podglądu.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStartedShowingName" xml:space="preserve">
+    <value>Wejście jest wyświetlane</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStoppedShowingDescription" xml:space="preserve">
+    <value>Wejście nie jest już renderowane w wyjściu programu ani podglądu.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStoppedShowingName" xml:space="preserve">
+    <value>Wejście przestało być wyświetlane</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputsCategory" xml:space="preserve">
+    <value>Wejścia</value>
+  </data>
   <data name="Integrations.Obs.Events.InputMuteChangedDescription" xml:space="preserve">
     <value>Wejście audio zostało wyciszone lub wyłączono jego wyciszenie.</value>
   </data>

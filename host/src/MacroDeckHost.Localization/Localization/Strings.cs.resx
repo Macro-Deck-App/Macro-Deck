@@ -7419,6 +7419,54 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Obs.Events.ConnectionCategory" xml:space="preserve">
     <value>Připojení</value>
   </data>
+  <data name="Integrations.Obs.Events.CustomCategory" xml:space="preserve">
+    <value>Vlastní</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomEventDescription" xml:space="preserve">
+    <value>Událost, kterou do OBS odeslal skript nebo plugin. Obsahuje JSON vysílaný odesílatelem.</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomEventName" xml:space="preserve">
+    <value>Vlastní událost</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomEventNameConfigDescription" xml:space="preserve">
+    <value>Reagovat pouze na události s tímto názvem. Prázdné pole znamená libovolnou vlastní událost.</value>
+  </data>
+  <data name="Integrations.Obs.Events.EventDataLabel" xml:space="preserve">
+    <value>Data události (JSON)</value>
+  </data>
+  <data name="Integrations.Obs.Events.EventNameLabel" xml:space="preserve">
+    <value>Název události</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputActivityConfigDescription" xml:space="preserve">
+    <value>Reagovat pouze na tento vstup. Prázdné pole znamená libovolný vstup.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameActiveDescription" xml:space="preserve">
+    <value>Vstup se začal vykreslovat ve výstupu programu, například webkamera, která jde živě.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameActiveName" xml:space="preserve">
+    <value>Vstup se stal aktivním</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameInactiveDescription" xml:space="preserve">
+    <value>Vstup se přestal vykreslovat ve výstupu programu.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameInactiveName" xml:space="preserve">
+    <value>Vstup se stal neaktivním</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStartedShowingDescription" xml:space="preserve">
+    <value>Vstup se začal vykreslovat ve výstupu programu nebo náhledu.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStartedShowingName" xml:space="preserve">
+    <value>Vstup se zobrazuje</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStoppedShowingDescription" xml:space="preserve">
+    <value>Vstup se již nevykresluje ve výstupu programu ani náhledu.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStoppedShowingName" xml:space="preserve">
+    <value>Vstup se přestal zobrazovat</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputsCategory" xml:space="preserve">
+    <value>Vstupy</value>
+  </data>
   <data name="Integrations.Obs.Events.InputMuteChangedDescription" xml:space="preserve">
     <value>Audio vstup byl ztlumen nebo bylo ztlumení zrušeno.</value>
   </data>

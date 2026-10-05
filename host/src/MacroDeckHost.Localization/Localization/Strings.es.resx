@@ -7419,6 +7419,54 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.Obs.Events.ConnectionCategory" xml:space="preserve">
     <value>Conexión</value>
   </data>
+  <data name="Integrations.Obs.Events.CustomCategory" xml:space="preserve">
+    <value>Personalizado</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomEventDescription" xml:space="preserve">
+    <value>Un evento que un script o plugin envió a OBS. Contiene el JSON que difundió el remitente.</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomEventName" xml:space="preserve">
+    <value>Evento personalizado</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomEventNameConfigDescription" xml:space="preserve">
+    <value>Reacciona solo a eventos con este nombre. Déjalo vacío para reaccionar a cualquier evento personalizado.</value>
+  </data>
+  <data name="Integrations.Obs.Events.EventDataLabel" xml:space="preserve">
+    <value>Datos del evento (JSON)</value>
+  </data>
+  <data name="Integrations.Obs.Events.EventNameLabel" xml:space="preserve">
+    <value>Nombre del evento</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputActivityConfigDescription" xml:space="preserve">
+    <value>Reacciona solo a esta entrada. Déjalo vacío para reaccionar a cualquier entrada.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameActiveDescription" xml:space="preserve">
+    <value>Una entrada empezó a mostrarse en la salida de programa, por ejemplo una cámara web que sale en directo.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameActiveName" xml:space="preserve">
+    <value>Entrada activada</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameInactiveDescription" xml:space="preserve">
+    <value>Una entrada dejó de mostrarse en la salida de programa.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameInactiveName" xml:space="preserve">
+    <value>Entrada desactivada</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStartedShowingDescription" xml:space="preserve">
+    <value>Una entrada empezó a mostrarse en la salida de programa o de vista previa.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStartedShowingName" xml:space="preserve">
+    <value>Entrada visible</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStoppedShowingDescription" xml:space="preserve">
+    <value>Una entrada ya no se muestra en la salida de programa ni de vista previa.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStoppedShowingName" xml:space="preserve">
+    <value>Entrada oculta</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputsCategory" xml:space="preserve">
+    <value>Entradas</value>
+  </data>
   <data name="Integrations.Obs.Events.InputMuteChangedDescription" xml:space="preserve">
     <value>Se silenció o reactivó una entrada de audio.</value>
   </data>
