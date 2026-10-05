@@ -273,6 +273,39 @@ public class ProfileService : IProfileService
 		return Result.Ok<ProfileEntity, ProfileError>(profile);
 	}
 
+	public async Task<Result<IReadOnlyList<ProfileEntity>, ProfileError>> Move(Guid id,
+		Guid targetId,
+		ProfileMovePosition position)
+	{
+		var profile = _profileCache.GetById(id);
+		var target = _profileCache.GetById(targetId);
+		if (profile is null || target is null)
+		{
+			return Result.Fail<IReadOnlyList<ProfileEntity>, ProfileError>(ProfileError.NotFound, "Profile not found");
+		}
+
+		if (id == targetId)
+		{
+			return Result.Fail<IReadOnlyList<ProfileEntity>, ProfileError>(ProfileError.ValidationError,
+				"Profile cannot be moved relative to itself");
+		}
+
+		var ordered = ProfileOrdering.Sort(_profileCache.GetAll());
+		ordered.RemoveAll(existing => existing.Id == id);
+		var targetIndex = ordered.FindIndex(existing => existing.Id == targetId);
+		ordered.Insert(position == ProfileMovePosition.After ? targetIndex + 1 : targetIndex, profile);
+
+		var changed = await _profileCache.ApplyOrders(
+			ordered.Select((existing, index) => (existing.Id, index)).ToDictionary(entry => entry.Id, entry => entry.index));
+
+		if (changed.Count > 0)
+		{
+			await _mediator.Publish(new ProfilesReorderedNotification(changed));
+		}
+
+		return Result.Ok<IReadOnlyList<ProfileEntity>, ProfileError>(changed);
+	}
+
 	public async Task<Result<ProfileError>> Delete(Guid id)
 	{
 		var profile = _profileCache.GetById(id);
