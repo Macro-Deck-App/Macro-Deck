@@ -29,6 +29,7 @@ describe('ProfileService', () => {
     notifications = new Map();
     apiSpy = jasmine.createSpyObj<ApiService>('ApiService', [
       'onNotification', 'getProfiles', 'createProfile', 'updateProfile', 'deleteProfile', 'duplicateProfile',
+      'moveProfile',
     ]);
     apiSpy.onNotification.and.callFake(<T>(method: string): Observable<T> => {
       let subject = notifications.get(method);
@@ -226,6 +227,78 @@ describe('ProfileService', () => {
 
       expect(service.profiles()[0].defaultSpacing).toBe(8);
       expect(service.profiles()[0].defaultBorderRadius).toBe(12);
+    });
+  });
+
+  describe('moveProfile', () => {
+    const names = () => service.sortedProfiles().map(profile => profile.name);
+
+    async function loadThree(): Promise<void> {
+      apiSpy.getProfiles.and.resolveTo({
+        profiles: [
+          ipcProfile({ id: 'a', name: 'Gaming', order: 0 }),
+          ipcProfile({ id: 'b', name: 'Streaming', order: 1 }),
+          ipcProfile({ id: 'c', name: 'Work', order: 2 }),
+          ipcProfile({ id: 'v', name: 'Board', order: 3, isVirtual: true }),
+        ],
+      });
+      await service.loadProfiles();
+    }
+
+    it('shows the new order immediately and keeps it once the host confirms', async () => {
+      await loadThree();
+      let confirm!: (response: { success: boolean; profiles?: { id: string; order: number }[] }) => void;
+      apiSpy.moveProfile.and.returnValue(new Promise(resolve => confirm = resolve));
+
+      const pending = service.moveProfile('c', 'a', 'before');
+      expect(names()).toEqual(['Work', 'Gaming', 'Streaming', 'Board']);
+
+      confirm({ success: true, profiles: [{ id: 'c', order: 0 }, { id: 'a', order: 1 }, { id: 'b', order: 2 }] });
+      expect((await pending).success).toBeTrue();
+      expect(names()).toEqual(['Work', 'Gaming', 'Streaming', 'Board']);
+      expect(apiSpy.moveProfile).toHaveBeenCalledOnceWith({ id: 'c', targetId: 'a', position: 'before' });
+    });
+
+    it('restores the previous order when the host rejects the move', async () => {
+      await loadThree();
+      apiSpy.moveProfile.and.resolveTo({ success: false, error: { code: 'NotFound', message: 'gone' } });
+
+      const result = await service.moveProfile('a', 'c', 'after');
+
+      expect(result.success).toBeFalse();
+      expect(names()).toEqual(['Gaming', 'Streaming', 'Work', 'Board']);
+    });
+
+    it('follows a reorder made in another window', async () => {
+      await loadThree();
+
+      notifications.get('ProfilesReorderedEvent')!.next({
+        profiles: [{ id: 'b', order: 0 }, { id: 'a', order: 1 }],
+      });
+
+      expect(names()).toEqual(['Streaming', 'Gaming', 'Work', 'Board']);
+    });
+
+    it('keeps integration profiles after every own profile, even one created after they loaded', async () => {
+      apiSpy.getProfiles.and.resolveTo({
+        profiles: [ipcProfile({ id: 'a', name: 'Gaming', order: 0 }), ipcProfile({ id: 'v', name: 'Board', order: 1, isVirtual: true })],
+      });
+      await service.loadProfiles();
+
+      notifications.get('ProfileCreatedEvent')!.next({ profile: ipcProfile({ id: 'n', name: 'Zoom', order: 1 }) });
+
+      expect(names()).toEqual(['Gaming', 'Zoom', 'Board']);
+    });
+
+    it('lists profiles that share an order by name, like the host', async () => {
+      apiSpy.getProfiles.and.resolveTo({
+        profiles: [ipcProfile({ id: 'x', name: 'work', order: 0 }), ipcProfile({ id: 'y', name: 'Gaming', order: 0 })],
+      });
+
+      await service.loadProfiles();
+
+      expect(names()).toEqual(['Gaming', 'work']);
+      expect(service.selectedProfileId()).toBe('y');
     });
   });
 });
