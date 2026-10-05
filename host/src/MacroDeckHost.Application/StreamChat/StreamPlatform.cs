@@ -19,7 +19,7 @@ public sealed class StreamChatTexts
 
 	public required Func<string, LocalizedString> Title { get; init; }
 
-	public required Func<string, LocalizedString> SharedChat { get; init; }
+	public Func<string, LocalizedString>? SharedChat { get; init; }
 
 	public required Func<LocalizedString> AccountChanged { get; init; }
 

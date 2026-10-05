@@ -8,7 +8,7 @@ namespace MacroDeckHost.Infrastructure.StreamStats;
 
 public sealed class StreamThumbnailCache : IStreamThumbnails, IDisposable
 {
-	public const string HttpClientName = "twitch-stream-thumbnails";
+	public const string HttpClientName = "stream-thumbnails";
 
 	internal const int MaxImageBytes = 512 * 1024;
 

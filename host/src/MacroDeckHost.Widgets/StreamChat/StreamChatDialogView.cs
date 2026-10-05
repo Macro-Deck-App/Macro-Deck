@@ -283,7 +283,8 @@ internal static class StreamChatDialogView
 		=> selection?.Note switch
 		{
 			StreamChatSelectionNote.OwnMessage => AppStrings.Integrations.StreamChat.Dialog.OwnMessage(),
-			StreamChatSelectionNote.SharedChat => platform.Chat.SharedChat(selection.SourceChannel ?? string.Empty),
+			StreamChatSelectionNote.SharedChat when platform.Chat.SharedChat is { } sharedChat
+				=> sharedChat(selection.SourceChannel ?? string.Empty),
 			_ => null,
 		};
 

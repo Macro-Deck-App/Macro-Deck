@@ -1005,11 +1005,6 @@ public class Startup
 		}
 	}
 
-	/// <summary>
-	/// A locked host serves the unlock gate and nothing else. Every background service but the loopback
-	/// port file reads the database, a secret, a plugin or an integration - all of which are unreadable
-	/// until the key encryption key is back, and several of which would write something in the attempt.
-	/// </summary>
 	private static ITwitchChatImages? ChatImagesFor(IServiceProvider provider, StreamPlatform platform)
 		=> platform == StreamPlatforms.Twitch ? provider.GetRequiredService<ITwitchChatImages>() : null;
 
@@ -1038,6 +1033,11 @@ public class Startup
 				provider.GetRequiredService<IUiResourceStore>()));
 	}
 
+	/// <summary>
+	/// A locked host serves the unlock gate and nothing else. Every background service but the loopback
+	/// port file reads the database, a secret, a plugin or an integration - all of which are unreadable
+	/// until the key encryption key is back, and several of which would write something in the attempt.
+	/// </summary>
 	private static void FreezeBackgroundWork(IServiceCollection services)
 	{
 		foreach (var descriptor in services
