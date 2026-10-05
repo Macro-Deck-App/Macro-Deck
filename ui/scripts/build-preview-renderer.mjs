@@ -1,16 +1,16 @@
 // Bundles the framework-free UI runtime and its styles into the two files the plugin CLI embeds to render
-// [UiPreview] scenarios. Deterministic: the output only changes when ui/runtime or preview-renderer/ does.
+// [UiPreview] scenarios. MacroDeck.Plugin.Cli.csproj runs this on build and passes its obj directory.
 import { createRequire } from 'node:module';
-import { existsSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
-import { gunzipSync, gzipSync } from 'node:zlib';
+import { mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { gzipSync } from 'node:zlib';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const ui = path.resolve(here, '..');
-const target = path.resolve(ui, '../sdk/src/MacroDeck.Plugin.Cli/Rendering/Assets');
+const target = path.resolve(process.argv[2] ?? path.join(ui, '../sdk/src/MacroDeck.Plugin.Cli/obj/preview-renderer'));
 const esbuild = createRequire(import.meta.url)('esbuild');
-const scratch = path.join(ui, 'preview-renderer/.out');
+const scratch = path.join(target, '.esbuild');
 
 mkdirSync(target, { recursive: true });
 await esbuild.build({
@@ -25,17 +25,7 @@ await esbuild.build({
 	logLevel: 'warning',
 });
 
-const check = process.argv.includes('--check');
-let stale = false;
 for (const [name, source] of [['preview-renderer.js', 'preview-renderer.js'], ['preview-renderer.css', 'preview-renderer-css.css']]) {
-	const fresh = readFileSync(path.join(scratch, source));
-	const file = path.join(target, `${name}.gz`);
-	// The bundle is compared decompressed: the compressed bytes depend on the zlib build.
-	if (check) stale ||= !existsSync(file) || !gunzipSync(readFileSync(file)).equals(fresh);
-	else writeFileSync(file, gzipSync(fresh, { level: 9 }));
+	writeFileSync(path.join(target, `${name}.gz`), gzipSync(readFileSync(path.join(scratch, source)), { level: 9 }));
 }
 rmSync(scratch, { recursive: true, force: true });
-if (stale) {
-	console.error('The embedded preview renderer is stale: run npm run build:preview-renderer in ui and commit the result.');
-	process.exit(1);
-}

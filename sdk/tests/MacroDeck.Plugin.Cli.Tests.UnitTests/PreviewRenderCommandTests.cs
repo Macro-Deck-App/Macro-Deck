@@ -495,7 +495,9 @@ public class PreviewRenderCommandTests
 			[.. new[] { "preview", "render", "--executable", FixturePlugins.WellBehaved(), "--browser", FixturePlugins.WellBehaved(), "--output", _output }, .. extra]);
 
 	private static string RealBrowser()
-		=> BrowserLocator.Find(null, Environment.GetEnvironmentVariable, File.Exists) ??
+		=> !RendererAssets.IsEmbedded
+			? throw new IgnoreException("The CLI was built without the preview renderer: run npm ci in ui to run the real-browser preview tests.")
+			: BrowserLocator.Find(null, Environment.GetEnvironmentVariable, File.Exists) ??
 			Environment.GetEnvironmentVariable("CHROME_BIN") ??
 			throw new IgnoreException("No Chrome, Chromium or Edge found: set MACRODECK_BROWSER to run the real-browser preview tests.");
 }
