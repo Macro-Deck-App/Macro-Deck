@@ -30,6 +30,8 @@ internal sealed record PreviewRenderOptions
 
 	public string Locale { get; init; } = "en-US";
 
+	public string? VideoStreamImage { get; init; }
+
 	public string Output { get; init; } = "previews";
 
 	public string? Browser { get; init; }

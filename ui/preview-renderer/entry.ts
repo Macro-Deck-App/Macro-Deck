@@ -7,6 +7,7 @@ interface Scene {
   theme: 'dark' | 'light';
   background: string;
   locale: string;
+  videoStreamImage?: string;
   resources: Record<string, string>;
   translations: Record<string, string>;
   root: Parameters<typeof renderUiNode>[1];
@@ -75,10 +76,12 @@ async function main(): Promise<void> {
       uiFontKey: () => '',
       emit: () => {},
       videoStreams: () => null,
+      videoStreamStill: () => scene.videoStreamImage ?? null,
     };
 
     renderUiNode(surface, scene.root, { width, height }, null, Math.min(width, height), host as never);
     await document.fonts.ready;
+    await Promise.all(Array.from(surface.querySelectorAll('img.widget-video-stream-still'), image => (image as HTMLImageElement).decode().catch(() => undefined)));
     await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
     await report(id, 'ready');
   } catch (error) {
