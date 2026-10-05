@@ -325,7 +325,7 @@ describe('macrodeck.video-stream', () => {
   let handle: UiNodeRenderHandle | null;
   let hidden: boolean;
 
-  function host(withVideoStreams = true): UiRenderHost {
+  function host(withVideoStreams = true, still: string | null = null): UiRenderHost {
     return {
       localization: {
         translate: (scope, key, args) => args ? `${key}(${Object.values(args).join(' / ')})` : `${scope}:${key}`,
@@ -338,6 +338,7 @@ describe('macrodeck.video-stream', () => {
       fontReady: () => true,
       emit: () => undefined,
       ...(withVideoStreams ? { videoStreams: () => surface } : {}),
+      ...(still === null ? {} : { videoStreamStill: () => still }),
     };
   }
 
@@ -405,6 +406,28 @@ describe('macrodeck.video-stream', () => {
 
     expect(port.sent('OpenVideoStream')).toEqual([]);
     expect(root.getAttribute('data-status')).toBe('none');
+  });
+
+  it('draws a still image instead of a stream when the host supplies one', () => {
+    const renderHost = host(true, 'data:image/png;base64,AAAA');
+    mount(node(), renderHost);
+
+    const images = container.querySelectorAll('img.widget-video-stream-still');
+    expect(images.length).toBe(1);
+    expect((images[0] as HTMLImageElement).getAttribute('src')).toBe('data:image/png;base64,AAAA');
+    expect((images[0] as HTMLImageElement).style.objectFit).toBe('contain');
+    expect(container.querySelector('.widget-video-stream')).toBeNull();
+    expect(port.sent('OpenVideoStream')).toEqual([]);
+  });
+
+  it('frames the still by the component fit and repaints it in place', () => {
+    const renderHost = host(true, 'data:image/png;base64,AAAA');
+    mount(node({ stream: { provider: PROVIDER, id: 'front' }, fit: 'cover' }), renderHost);
+    handle!.update(node({ stream: { provider: PROVIDER, id: 'front' }, fit: 'contain' }), { width: 200, height: 200 }, 200);
+
+    const images = container.querySelectorAll('img.widget-video-stream-still');
+    expect(images.length).toBe(1);
+    expect((images[0] as HTMLImageElement).style.objectFit).toBe('contain');
   });
 
   it('plays the description the provider answered with', async () => {
