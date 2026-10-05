@@ -6,6 +6,7 @@ import { Announcement, StoreRatingPromptCandidateBody } from '@macro-deck/runtim
 import { NotificationCenterService } from '../../services/notification-center.service';
 import { AnnouncementService } from '../../services/announcement.service';
 import { StoreRatingPromptService } from '../../services/store-rating-prompt.service';
+import { GitHubStarPromptService } from '../../services/github-star-prompt.service';
 import { MigrationOfferService } from '../../services/migration-offer.service';
 import { OnboardingService } from '../../services/onboarding.service';
 import { PostUpdateChangelogService } from '../../services/post-update-changelog.service';
@@ -56,6 +57,10 @@ const ratingPromptStub = {
   pending: signal<StoreRatingPromptCandidateBody | null>(null),
 };
 
+const githubStarPromptStub = {
+  pending: signal(false),
+};
+
 describe('ShellComponent', () => {
   let fixture: ComponentFixture<ShellComponent>;
   let navigationService: NavigationService;
@@ -77,6 +82,7 @@ describe('ShellComponent', () => {
         { provide: NotificationCenterService, useValue: notificationCenterStub },
         { provide: AnnouncementService, useValue: announcementStub },
         { provide: StoreRatingPromptService, useValue: ratingPromptStub },
+        { provide: GitHubStarPromptService, useValue: githubStarPromptStub },
       ],
     })
       .overrideComponent(ShellComponent, { set: { imports: [], schemas: [NO_ERRORS_SCHEMA] } })
@@ -233,6 +239,7 @@ describe('ShellComponent announcement', () => {
         { provide: NotificationCenterService, useValue: notificationCenterStub },
         { provide: AnnouncementService, useValue: announcementStub },
         { provide: StoreRatingPromptService, useValue: ratingPromptStub },
+        { provide: GitHubStarPromptService, useValue: githubStarPromptStub },
       ],
     })
       .overrideComponent(ShellComponent, { set: { imports: [], schemas: [NO_ERRORS_SCHEMA] } })
@@ -248,6 +255,7 @@ describe('ShellComponent announcement', () => {
     window.ResizeObserver = originalResizeObserver;
     announcementStub.pending.set(null);
     ratingPromptStub.pending.set(null);
+    githubStarPromptStub.pending.set(false);
     delete (window as { macroDeckShell?: unknown }).macroDeckShell;
   });
 
@@ -375,6 +383,80 @@ describe('ShellComponent announcement', () => {
 
       settingsModal.open();
       expect(shown('app-store-rating-prompt-modal')).toBeTrue();
+    });
+  });
+
+  describe('GitHub star prompt', () => {
+    const starPrompt = 'app-github-star-prompt-modal';
+    const candidate: StoreRatingPromptCandidateBody = {
+      kind: 'Plugin',
+      id: 'com.acme.hue',
+      name: 'Hue Bridge',
+      hasIcon: false,
+    };
+
+    it('appears once nothing else is open', async () => {
+      githubStarPromptStub.pending.set(true);
+      expect(shown(starPrompt)).toBeFalse();
+
+      await settle(null);
+
+      expect(shown(starPrompt)).toBeTrue();
+    });
+
+    it('does not appear while onboarding is still running', async () => {
+      await settle(null);
+      const onboarding = TestBed.inject(OnboardingService);
+      onboarding.state.set('pending');
+      githubStarPromptStub.pending.set(true);
+
+      expect(shown(starPrompt)).toBeFalse();
+
+      onboarding.state.set('done');
+      expect(shown(starPrompt)).toBeTrue();
+    });
+
+    it('follows the What\'s New modal of an installed update in the same session', async () => {
+      githubStarPromptStub.pending.set(true);
+      await settle({ version: '3.2.0', notes: 'notes', notesUrl: null, publishedAt: null });
+
+      expect(shown(starPrompt)).toBeFalse();
+
+      TestBed.inject(PostUpdateChangelogService).dismiss();
+
+      expect(shown(starPrompt)).toBeTrue();
+    });
+
+    it('waits for an announcement and a rating prompt and never shows together with them', async () => {
+      await settle(null);
+      announcementStub.pending.set(announcement);
+      ratingPromptStub.pending.set(candidate);
+      githubStarPromptStub.pending.set(true);
+
+      expect(shown()).toBeTrue();
+      expect(shown(starPrompt)).toBeFalse();
+
+      announcementStub.pending.set(null);
+      expect(shown('app-store-rating-prompt-modal')).toBeTrue();
+      expect(shown(starPrompt)).toBeFalse();
+
+      ratingPromptStub.pending.set(null);
+      expect(shown(starPrompt)).toBeTrue();
+    });
+
+    it('never covers a dialog the user opened and stays once shown', async () => {
+      await settle(null);
+      const settingsModal = TestBed.inject(SettingsModalService);
+      settingsModal.open();
+      githubStarPromptStub.pending.set(true);
+
+      expect(shown(starPrompt)).toBeFalse();
+
+      settingsModal.close();
+      expect(shown(starPrompt)).toBeTrue();
+
+      settingsModal.open();
+      expect(shown(starPrompt)).toBeTrue();
     });
   });
 });
