@@ -194,6 +194,11 @@ internal sealed class CachingInitializeBackgroundServiceTests
 			bool? defaultWidgetShadows = null)
 			=> throw new NotSupportedException();
 
+		public Task<Result<IReadOnlyList<ProfileEntity>, ProfileError>> Move(Guid id,
+			Guid targetId,
+			ProfileMovePosition position)
+			=> throw new NotSupportedException();
+
 		public Task<Result<ProfileError>> Delete(Guid id) => throw new NotSupportedException();
 
 		public Task<Result<ProfileEntity, ProfileError>> Duplicate(Guid id, string? name = null)
