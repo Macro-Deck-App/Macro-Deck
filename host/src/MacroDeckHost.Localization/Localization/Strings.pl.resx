@@ -2852,6 +2852,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.Profile.LoadFailed" xml:space="preserve">
     <value>Nie udało się wczytać profili</value>
   </data>
+  <data name="Errors.Profile.MoveFailed" xml:space="preserve">
+    <value>Nie udało się przenieść profilu</value>
+  </data>
   <data name="Errors.Profile.NoProfileReturned" xml:space="preserve">
     <value>Nie zwrócono żadnego profilu</value>
   </data>
@@ -2860,6 +2863,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Errors.Profiles.GridLockedByDevice" xml:space="preserve">
     <value>Siatka jest zablokowana przez urządzenie {deviceName} na {columns} x {rows}.</value>
+  </data>
+  <data name="Errors.Profiles.InvalidMovePosition" xml:space="preserve">
+    <value>Pozycja musi mieć wartość „before” lub „after”</value>
+  </data>
+  <data name="Errors.Profiles.MoveIdsRequired" xml:space="preserve">
+    <value>Wymagany jest prawidłowy identyfikator profilu i celu</value>
   </data>
   <data name="Errors.Profiles.VirtualCannotBeDeleted" xml:space="preserve">
     <value>Nie można usuwać profili wirtualnych</value>

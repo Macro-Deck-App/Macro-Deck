@@ -14,6 +14,8 @@ public interface IProfileCache
 
 	Task AddOrUpdate(ProfileEntity profile);
 
+	Task<IReadOnlyList<ProfileEntity>> ApplyOrders(IReadOnlyDictionary<Guid, int> orders);
+
 	Task AddOrUpdateAggregate(ProfileEntity profile, IReadOnlyCollection<FolderEntity> folders);
 
 	Task Remove(Guid id);
