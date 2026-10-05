@@ -12,6 +12,16 @@ internal interface IObsClient
 
 	event EventHandler<string>? ReplayBufferSaved;
 
+	event EventHandler<ObsInputSettingsChange>? InputSettingsChanged;
+
+	event EventHandler<ObsFilterChange>? SourceFilterChanged;
+
+	event EventHandler<ObsInputFlagChange>? InputActiveChanged;
+
+	event EventHandler<ObsInputFlagChange>? InputShowingChanged;
+
+	event EventHandler<string>? CustomEventReceived;
+
 	bool IsConnected { get; }
 
 	void Connect(string url, string? password);
@@ -117,6 +127,12 @@ internal interface IObsClient
 }
 
 internal readonly record struct ObsInputMuteChange(string InputName, bool Muted);
+
+internal sealed record ObsInputSettingsChange(string InputName, IReadOnlyList<string> ChangedKeys);
+
+internal readonly record struct ObsFilterChange(string SourceName, string FilterName);
+
+internal readonly record struct ObsInputFlagChange(string InputName, bool Value);
 
 /// <summary>Which of OBS's six audio tracks an input is assigned to, in track order 1..6.</summary>
 internal sealed record ObsAudioTracks(IReadOnlyList<bool> Tracks);

@@ -38,6 +38,9 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 	private readonly ObsEventEmitter? _events;
 	private readonly FailureEpisodeTracker _failures;
 	private readonly object _publicationGate = new();
+	private readonly ObsChangeCoalescer _changes;
+	private readonly ObsCustomEventLimiter _customEventLimiter;
+	private readonly Action<IReadOnlyList<ObsTargetChange>>? _onTargetsChanged;
 
 	private readonly Lock _targetReadGate = new();
 
@@ -66,7 +69,9 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		ILogger? logger = null,
 		TimeSpan? failureSummaryInterval = null,
 		Action? onVariablesChanged = null,
-		TimeSpan? pollInterval = null)
+		TimeSpan? pollInterval = null,
+		Action<IReadOnlyList<ObsTargetChange>>? onTargetsChanged = null,
+		TimeProvider? timeProvider = null)
 	{
 		_client = client;
 		_logger = logger ?? IntegrationLog.For<ObsConnection>(ObsIntegration.IntegrationId);
@@ -77,12 +82,20 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		_onVariablesChanged = onVariablesChanged;
 		_pollInterval = pollInterval ?? TimeSpan.FromSeconds(1);
 		_failures = new FailureEpisodeTracker(failureSummaryInterval);
+		_onTargetsChanged = onTargetsChanged;
+		_changes = new ObsChangeCoalescer(FlushTargetChanges, TimeSpan.FromMilliseconds(100), timeProvider);
+		_customEventLimiter = new ObsCustomEventLimiter(timeProvider);
 
 		_client.Connected += OnConnected;
 		_client.Disconnected += OnDisconnected;
 		_client.StateChanged += OnStateChanged;
 		_client.InputMuteChanged += OnInputMuteChanged;
 		_client.ReplayBufferSaved += OnReplayBufferSaved;
+		_client.InputSettingsChanged += OnInputSettingsChanged;
+		_client.SourceFilterChanged += OnSourceFilterChanged;
+		_client.InputActiveChanged += OnInputActiveChanged;
+		_client.InputShowingChanged += OnInputShowingChanged;
+		_client.CustomEventReceived += OnCustomEventReceived;
 	}
 
 	public ObsState State => _state;
@@ -347,6 +360,12 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		_client.InputMuteChanged -= OnInputMuteChanged;
 		_client.ReplayBufferSaved -= OnReplayBufferSaved;
 		_client.StateChanged -= OnStateChanged;
+		_client.InputSettingsChanged -= OnInputSettingsChanged;
+		_client.SourceFilterChanged -= OnSourceFilterChanged;
+		_client.InputActiveChanged -= OnInputActiveChanged;
+		_client.InputShowingChanged -= OnInputShowingChanged;
+		_client.CustomEventReceived -= OnCustomEventReceived;
+		_changes.Dispose();
 		StopPolling();
 
 		try
@@ -525,6 +544,103 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 			{
 				_events?.PublishInputMuteChanged(change.InputName, change.Muted);
 			}
+		}
+	}
+
+	private void OnInputSettingsChanged(object? sender, ObsInputSettingsChange change)
+		=> _changes.Add(new ObsTargetChange(ObsTargetKind.InputSettings, change.InputName, null, change.ChangedKeys));
+
+	private void OnSourceFilterChanged(object? sender, ObsFilterChange change)
+		=> _changes.Add(new ObsTargetChange(ObsTargetKind.Filter, change.SourceName, change.FilterName));
+
+	private void OnInputActiveChanged(object? sender, ObsInputFlagChange change)
+	{
+		_changes.Add(new ObsTargetChange(ObsTargetKind.SourceActivity, change.InputName));
+		PublishInputActivity(change.Value ? ObsEventIds.InputBecameActive : ObsEventIds.InputBecameInactive,
+			change.InputName);
+	}
+
+	private void OnInputShowingChanged(object? sender, ObsInputFlagChange change)
+	{
+		_changes.Add(new ObsTargetChange(ObsTargetKind.SourceActivity, change.InputName));
+		PublishInputActivity(change.Value ? ObsEventIds.InputStartedShowing : ObsEventIds.InputStoppedShowing,
+			change.InputName);
+	}
+
+	private void PublishInputActivity(string eventId, string inputName)
+	{
+		lock (_publicationGate)
+		{
+			if (!_cts.IsCancellationRequested && Volatile.Read(ref _disposed) == 0)
+			{
+				_events?.PublishInputActivity(eventId, inputName);
+			}
+		}
+	}
+
+	private void OnCustomEventReceived(object? sender, string json)
+	{
+		try
+		{
+			if (!_customEventLimiter.TryAcquire(out var droppedBefore))
+			{
+				return;
+			}
+
+			if (droppedBefore > 0)
+			{
+				_logger.Warning("Dropped {Count} OBS custom events that arrived faster than the allowed rate",
+					droppedBefore);
+			}
+
+			var payload = ObsCustomEvent.Parse(json);
+			if (payload is null)
+			{
+				_logger.Debug("Ignored an OBS custom event that is oversized or not valid JSON");
+				return;
+			}
+
+			lock (_publicationGate)
+			{
+				if (!_cts.IsCancellationRequested && Volatile.Read(ref _disposed) == 0)
+				{
+					_events?.PublishCustomEvent(payload);
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			_logger.Debug(ex, "Failed to process an OBS custom event");
+		}
+	}
+
+	private void FlushTargetChanges(IReadOnlyList<ObsTargetChange> changes)
+	{
+		try
+		{
+			if (_cts.IsCancellationRequested || Volatile.Read(ref _disposed) != 0)
+			{
+				return;
+			}
+
+			lock (_targetReadGate)
+			{
+				foreach (var change in changes)
+				{
+					_targetReads.Remove(change.Kind switch
+					{
+						ObsTargetKind.InputSettings => $"settings:{change.Name}",
+						ObsTargetKind.SourceActivity => $"source-active:{change.Name}",
+						_ => $"filter:{change.Name}\u0000{change.Child}"
+					});
+				}
+			}
+
+			_onTargetsChanged?.Invoke(changes);
+		}
+		catch (Exception ex)
+		{
+			_logger.Debug(ex, "Failed to apply OBS change notifications");
 		}
 	}
 
