@@ -19640,4 +19640,34 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Obs.Errors.OutputsNeedNewerObs" xml:space="preserve">
     <value>Controlling outputs needs an OBS version with obs-websocket 5.7 or newer.</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Name" xml:space="preserve">
+    <value>Set Input Setting</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Description" xml:space="preserve">
+    <value>Changes one setting of an OBS source, for example the text of a text source, the file of an image or media source, or the URL of a browser source.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingLabel" xml:space="preserve">
+    <value>Setting</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingDescription" xml:space="preserve">
+    <value>Name of the setting as OBS stores it, for example text, file, local_file or url. Pick it from the list or type it.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueLabel" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueDescription" xml:space="preserve">
+    <value>The new value. Enter true or false for an on/off setting, a number for a numeric setting and JSON for a setting that holds a group or a list.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NoSettingSelected" xml:space="preserve">
+    <value>No setting was selected.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsBoolean" xml:space="preserve">
+    <value>The setting {setting} expects true or false.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsNumber" xml:space="preserve">
+    <value>The setting {setting} expects a number.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsJson" xml:space="preserve">
+    <value>The setting {setting} expects JSON in the same form as its current value.</value>
+  </data>
 </root>

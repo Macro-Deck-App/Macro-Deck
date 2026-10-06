@@ -19634,4 +19634,34 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Obs.Errors.OutputsNeedNewerObs" xml:space="preserve">
     <value>Zum Steuern von Ausgaben braucht es eine OBS-Version mit obs-websocket 5.7 oder neuer.</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Name" xml:space="preserve">
+    <value>Eingangseinstellung festlegen</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Description" xml:space="preserve">
+    <value>Ändert eine Einstellung einer OBS-Quelle, zum Beispiel den Text einer Textquelle, die Datei einer Bild- oder Medienquelle oder die URL einer Browserquelle.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingLabel" xml:space="preserve">
+    <value>Einstellung</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingDescription" xml:space="preserve">
+    <value>Name der Einstellung, wie OBS sie speichert, zum Beispiel text, file, local_file oder url. Wähle sie aus der Liste oder tippe sie ein.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueLabel" xml:space="preserve">
+    <value>Wert</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueDescription" xml:space="preserve">
+    <value>Der neue Wert. Gib true oder false für eine Ein/Aus-Einstellung ein, eine Zahl für eine numerische Einstellung und JSON für eine Einstellung, die eine Gruppe oder Liste enthält.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NoSettingSelected" xml:space="preserve">
+    <value>Es wurde keine Einstellung ausgewählt.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsBoolean" xml:space="preserve">
+    <value>Die Einstellung {setting} erwartet true oder false.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsNumber" xml:space="preserve">
+    <value>Die Einstellung {setting} erwartet eine Zahl.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsJson" xml:space="preserve">
+    <value>Die Einstellung {setting} erwartet JSON in derselben Form wie ihr aktueller Wert.</value>
+  </data>
 </root>

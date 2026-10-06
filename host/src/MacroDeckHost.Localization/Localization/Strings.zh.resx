@@ -19640,4 +19640,34 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.Obs.Errors.OutputsNeedNewerObs" xml:space="preserve">
     <value>控制输出需要内置 obs-websocket 5.7 或更高版本的 OBS。</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Name" xml:space="preserve">
+    <value>更改输入设置</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Description" xml:space="preserve">
+    <value>更改 OBS 来源的一项设置，例如文本来源的文本、图像或媒体来源的文件，或浏览器来源的 URL。</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingLabel" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingDescription" xml:space="preserve">
+    <value>OBS 保存的设置名称，例如 text、file、local_file 或 url。从列表中选择或直接输入。</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueLabel" xml:space="preserve">
+    <value>值</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueDescription" xml:space="preserve">
+    <value>新值。开关类设置请输入 true 或 false，数值类设置请输入数字，包含组或列表的设置请输入 JSON。</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NoSettingSelected" xml:space="preserve">
+    <value>未选择设置。</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsBoolean" xml:space="preserve">
+    <value>设置 {setting} 需要 true 或 false。</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsNumber" xml:space="preserve">
+    <value>设置 {setting} 需要一个数字。</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsJson" xml:space="preserve">
+    <value>设置 {setting} 需要与其当前值形式相同的 JSON。</value>
+  </data>
 </root>

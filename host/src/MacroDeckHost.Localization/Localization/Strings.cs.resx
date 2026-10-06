@@ -19636,4 +19636,34 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Obs.Errors.OutputsNeedNewerObs" xml:space="preserve">
     <value>Ovládání výstupů vyžaduje verzi OBS s obs-websocket 5.7 nebo novějším.</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Name" xml:space="preserve">
+    <value>Nastavit nastavení vstupu</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Description" xml:space="preserve">
+    <value>Změní jedno nastavení zdroje OBS, například text textového zdroje, soubor obrázkového nebo mediálního zdroje nebo URL zdroje prohlížeče.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingLabel" xml:space="preserve">
+    <value>Nastavení</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingDescription" xml:space="preserve">
+    <value>Název nastavení tak, jak ho ukládá OBS, například text, file, local_file nebo url. Vyberte ho ze seznamu nebo ho zadejte.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueLabel" xml:space="preserve">
+    <value>Hodnota</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueDescription" xml:space="preserve">
+    <value>Nová hodnota. Pro nastavení zapnuto/vypnuto zadejte true nebo false, pro číselné nastavení číslo a pro nastavení obsahující skupinu nebo seznam JSON.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NoSettingSelected" xml:space="preserve">
+    <value>Nebylo vybráno žádné nastavení.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsBoolean" xml:space="preserve">
+    <value>Nastavení {setting} očekává true nebo false.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsNumber" xml:space="preserve">
+    <value>Nastavení {setting} očekává číslo.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsJson" xml:space="preserve">
+    <value>Nastavení {setting} očekává JSON ve stejném tvaru jako jeho aktuální hodnota.</value>
+  </data>
 </root>
