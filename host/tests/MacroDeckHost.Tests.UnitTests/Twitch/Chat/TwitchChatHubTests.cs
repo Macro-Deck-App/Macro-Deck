@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.StreamChat;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using Serilog.Core;
 
@@ -12,19 +12,19 @@ internal sealed class TwitchChatHubTests
 	private const string Bot = "222";
 
 	private FakeTimeProvider _time = null!;
-	private TwitchChatHub _hub = null!;
+	private StreamChatHub _hub = null!;
 	private List<string?> _changes = null!;
 
 	[SetUp]
 	public void SetUp()
 	{
 		_time = new FakeTimeProvider();
-		_hub = new TwitchChatHub(_time, Logger.None);
+		_hub = new StreamChatHub(_time, Logger.None);
 		_changes = [];
 		_hub.Changed += (_, args) => _changes.Add(args.AccountId);
-		_hub.SetAccounts([new TwitchChatAccount(Streamer, "Streamer"), new TwitchChatAccount(Bot, "Bot")]);
-		_hub.Post(new TwitchChatConnectionChanged(Streamer, true));
-		_hub.Post(new TwitchChatConnectionChanged(Bot, true));
+		_hub.SetAccounts([new ChatAccount(Streamer, "Streamer"), new ChatAccount(Bot, "Bot")]);
+		_hub.Post(new ChatConnectionChanged(Streamer, true));
+		_hub.Post(new ChatConnectionChanged(Bot, true));
 		_hub.Tick();
 		_changes.Clear();
 	}
@@ -37,7 +37,7 @@ internal sealed class TwitchChatHubTests
 	{
 		for (var index = 0; index < 10_000; index++)
 		{
-			_hub.Post(new TwitchChatMessageReceived(index % 2 == 0 ? Streamer : Bot, Message("m" + index)));
+			_hub.Post(new ChatMessageReceived(index % 2 == 0 ? Streamer : Bot, Message("m" + index)));
 		}
 
 		_hub.Tick();
@@ -46,8 +46,8 @@ internal sealed class TwitchChatHubTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(_changes, Is.EquivalentTo(new[] { Streamer, Bot }));
-			Assert.That(streamer, Has.Count.EqualTo(TwitchChatHub.HistoryLimit));
-			Assert.That(_hub.Snapshot(Bot).Messages, Has.Count.EqualTo(TwitchChatHub.HistoryLimit));
+			Assert.That(streamer, Has.Count.EqualTo(StreamChatHub.HistoryLimit));
+			Assert.That(_hub.Snapshot(Bot).Messages, Has.Count.EqualTo(StreamChatHub.HistoryLimit));
 			Assert.That(streamer[^1].MessageId, Is.EqualTo("m9998"), "the newest line is last");
 			Assert.That(streamer[0].MessageId, Is.EqualTo("m9800"), "the oldest lines are the ones dropped");
 		});
@@ -60,7 +60,7 @@ internal sealed class TwitchChatHubTests
 
 		for (var index = 0; index < 50_000; index++)
 		{
-			_hub.Post(new TwitchChatMessageReceived(Streamer, Message("m" + index)));
+			_hub.Post(new ChatMessageReceived(Streamer, Message("m" + index)));
 		}
 
 		Assert.That(watch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(5)));
@@ -69,15 +69,15 @@ internal sealed class TwitchChatHubTests
 	[Test]
 	public void Moderation_arriving_behind_a_full_queue_of_chat_is_still_applied()
 	{
-		_hub.Post(new TwitchChatMessageReceived(Streamer, Message("keep")));
+		_hub.Post(new ChatMessageReceived(Streamer, Message("keep")));
 		_hub.Tick();
 
 		for (var index = 0; index < 20_000; index++)
 		{
-			_hub.Post(new TwitchChatMessageReceived(Bot, Message("flood" + index)));
+			_hub.Post(new ChatMessageReceived(Bot, Message("flood" + index)));
 		}
 
-		_hub.Post(new TwitchChatCleared(Streamer));
+		_hub.Post(new ChatCleared(Streamer));
 		_hub.Tick();
 
 		Assert.That(_hub.Snapshot(Streamer).Messages, Is.Empty);
@@ -86,10 +86,10 @@ internal sealed class TwitchChatHubTests
 	[Test]
 	public void The_same_message_twice_is_shown_once()
 	{
-		_hub.Post(new TwitchChatMessageReceived(Streamer, Message("dup")));
-		_hub.Post(new TwitchChatMessageReceived(Streamer, Message("dup")));
+		_hub.Post(new ChatMessageReceived(Streamer, Message("dup")));
+		_hub.Post(new ChatMessageReceived(Streamer, Message("dup")));
 		_hub.Tick();
-		_hub.Post(new TwitchChatMessageReceived(Streamer, Message("dup")));
+		_hub.Post(new ChatMessageReceived(Streamer, Message("dup")));
 		_hub.Tick();
 
 		Assert.That(_hub.Snapshot(Streamer).Messages.Select(m => m.MessageId), Is.EqualTo(new[] { "dup" }));
@@ -101,7 +101,7 @@ internal sealed class TwitchChatHubTests
 		Post(Streamer, "a", "b", "c");
 		_hub.Tick();
 
-		_hub.Post(new TwitchChatMessageDeleted(Streamer, "b"));
+		_hub.Post(new ChatMessageDeleted(Streamer, "b"));
 		_hub.Tick();
 
 		Assert.That(_hub.Snapshot(Streamer).Messages.Select(m => m.MessageId), Is.EqualTo(new[] { "a", "c" }));
@@ -110,8 +110,8 @@ internal sealed class TwitchChatHubTests
 	[Test]
 	public void A_delete_posted_after_its_message_in_the_same_tick_removes_it()
 	{
-		_hub.Post(new TwitchChatMessageReceived(Streamer, Message("late")));
-		_hub.Post(new TwitchChatMessageDeleted(Streamer, "late"));
+		_hub.Post(new ChatMessageReceived(Streamer, Message("late")));
+		_hub.Post(new ChatMessageDeleted(Streamer, "late"));
 		_hub.Tick();
 
 		Assert.That(_hub.Snapshot(Streamer).Messages, Is.Empty);
@@ -124,7 +124,7 @@ internal sealed class TwitchChatHubTests
 		Post(Bot, "b");
 		_hub.Tick();
 
-		_hub.Post(new TwitchChatCleared(Streamer));
+		_hub.Post(new ChatCleared(Streamer));
 		_hub.Tick();
 
 		Assert.Multiple(() =>
@@ -137,12 +137,12 @@ internal sealed class TwitchChatHubTests
 	[Test]
 	public void Clearing_a_user_removes_only_their_messages()
 	{
-		_hub.Post(new TwitchChatMessageReceived(Streamer, Message("a", chatterId: "troll")));
-		_hub.Post(new TwitchChatMessageReceived(Streamer, Message("b", chatterId: "fan")));
-		_hub.Post(new TwitchChatMessageReceived(Streamer, Message("c", chatterId: "troll")));
+		_hub.Post(new ChatMessageReceived(Streamer, Message("a", chatterId: "troll")));
+		_hub.Post(new ChatMessageReceived(Streamer, Message("b", chatterId: "fan")));
+		_hub.Post(new ChatMessageReceived(Streamer, Message("c", chatterId: "troll")));
 		_hub.Tick();
 
-		_hub.Post(new TwitchChatUserCleared(Streamer, "troll"));
+		_hub.Post(new ChatUserCleared(Streamer, "troll"));
 		_hub.Tick();
 
 		Assert.That(_hub.Snapshot(Streamer).Messages.Select(m => m.MessageId), Is.EqualTo(new[] { "b" }));
@@ -156,9 +156,9 @@ internal sealed class TwitchChatHubTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_hub.Snapshot(null).Account?.UserId, Is.EqualTo(Streamer));
+			Assert.That(_hub.Snapshot(null).Account?.AccountId, Is.EqualTo(Streamer));
 			Assert.That(_hub.Snapshot(string.Empty).Messages, Has.Count.EqualTo(1));
-			Assert.That(_hub.Snapshot("unknown"), Is.SameAs(TwitchChatSnapshot.None));
+			Assert.That(_hub.Snapshot("unknown"), Is.SameAs(ChatSnapshot.None));
 		});
 	}
 
@@ -212,11 +212,11 @@ internal sealed class TwitchChatHubTests
 	public void A_resolved_image_refreshes_the_account_showing_it()
 	{
 		var images = new FakeTwitchChatImages();
-		using var hub = new TwitchChatHub(_time, Logger.None, images);
+		using var hub = new StreamChatHub(_time, Logger.None, images);
 		var changes = new List<string?>();
 		hub.Changed += (_, args) => changes.Add(args.AccountId);
-		hub.SetAccounts([new TwitchChatAccount(Streamer, "Streamer")]);
-		hub.Post(new TwitchChatMessageReceived(Streamer, Message("a", emoteId: "25")));
+		hub.SetAccounts([new ChatAccount(Streamer, "Streamer")]);
+		hub.Post(new ChatMessageReceived(Streamer, Message("a", emoteId: "25")));
 		hub.Tick();
 		changes.Clear();
 
@@ -235,9 +235,9 @@ internal sealed class TwitchChatHubTests
 	public void Nothing_is_downloaded_while_no_widget_shows_the_chat_and_the_retained_images_are_once_one_does()
 	{
 		var images = new FakeTwitchChatImages();
-		using var hub = new TwitchChatHub(_time, Logger.None, images);
-		hub.SetAccounts([new TwitchChatAccount(Streamer, "Streamer")]);
-		hub.Post(new TwitchChatMessageReceived(Streamer, Message("a", emoteId: "25")));
+		using var hub = new StreamChatHub(_time, Logger.None, images);
+		hub.SetAccounts([new ChatAccount(Streamer, "Streamer")]);
+		hub.Post(new ChatMessageReceived(Streamer, Message("a", emoteId: "25")));
 		hub.Tick();
 		var requestedUnwatched = images.Requested.Count;
 
@@ -255,15 +255,15 @@ internal sealed class TwitchChatHubTests
 	public void A_message_pushed_out_of_the_history_in_the_same_tick_downloads_nothing()
 	{
 		var images = new FakeTwitchChatImages();
-		using var hub = new TwitchChatHub(_time, Logger.None, images);
+		using var hub = new StreamChatHub(_time, Logger.None, images);
 		hub.Changed += (_, _) => { };
-		hub.SetAccounts([new TwitchChatAccount(Streamer, "Streamer")]);
+		hub.SetAccounts([new ChatAccount(Streamer, "Streamer")]);
 		hub.Tick();
 
-		hub.Post(new TwitchChatMessageReceived(Streamer, Message("old", emoteId: "1")));
-		for (var index = 0; index < TwitchChatHub.HistoryLimit; index++)
+		hub.Post(new ChatMessageReceived(Streamer, Message("old", emoteId: "1")));
+		for (var index = 0; index < StreamChatHub.HistoryLimit; index++)
 		{
-			hub.Post(new TwitchChatMessageReceived(Streamer, Message($"m{index}")));
+			hub.Post(new ChatMessageReceived(Streamer, Message($"m{index}")));
 		}
 
 		hub.Tick();
@@ -275,11 +275,11 @@ internal sealed class TwitchChatHubTests
 	{
 		foreach (var id in ids)
 		{
-			_hub.Post(new TwitchChatMessageReceived(accountId, Message(id)));
+			_hub.Post(new ChatMessageReceived(accountId, Message(id)));
 		}
 	}
 
-	internal static TwitchChatMessage Message(string id, string chatterId = "42", string? emoteId = null)
+	internal static ChatMessage Message(string id, string chatterId = "42", string? emoteId = null)
 		=> new(id,
 			chatterId,
 			"viewer",
@@ -287,10 +287,10 @@ internal sealed class TwitchChatHubTests
 			"#1e90ff",
 			[],
 			emoteId is null
-				? [new TwitchChatFragment(TwitchChatFragmentKind.Text, "hello")]
+				? [new ChatFragment(ChatFragmentKind.Text, "hello")]
 				:
 				[
-					new TwitchChatFragment(TwitchChatFragmentKind.Text, "hello "),
-					new TwitchChatFragment(TwitchChatFragmentKind.Emote, "Kappa", emoteId),
+					new ChatFragment(ChatFragmentKind.Text, "hello "),
+					new ChatFragment(ChatFragmentKind.Emote, "Kappa", emoteId),
 				]);
 }
