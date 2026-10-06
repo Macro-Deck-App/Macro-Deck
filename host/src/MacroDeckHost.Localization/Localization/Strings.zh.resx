@@ -9542,37 +9542,37 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.Twitch.ChatDialog.AccountUnavailable" xml:space="preserve">
     <value>该 Twitch 账户未连接。</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.AllowModeration" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.AllowModeration" xml:space="preserve">
     <value>允许在聊天对话框中进行管理</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.AllowModerationDescription" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.AllowModerationDescription" xml:space="preserve">
     <value>按下该组件会打开聊天。开启后，任何使用此面板的人都可以点击其中的消息来删除它，或对发言者禁言或封禁。</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Ban" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Ban" xml:space="preserve">
     <value>封禁</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Banned" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Banned" xml:space="preserve">
     <value>{name}已被封禁。</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.ConfirmBan" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.ConfirmBan" xml:space="preserve">
     <value>要封禁{name}吗？在解封之前，他们无法在此频道发言。</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.DeleteMessage" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.DeleteMessage" xml:space="preserve">
     <value>删除消息</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Deleted" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Deleted" xml:space="preserve">
     <value>消息已删除。</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Failed" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Failed" xml:space="preserve">
     <value>操作未能完成。请检查连接后重试。</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.ModerationUnavailable" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.ModerationUnavailable" xml:space="preserve">
     <value>此组件已关闭管理功能。</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.NotPermitted" xml:space="preserve">
     <value>Twitch 不允许此操作。请重新连接 Twitch 账户后重试。</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.OwnMessage" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.OwnMessage" xml:space="preserve">
     <value>无法管理频道自己账户发出的消息。</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.Refused" xml:space="preserve">
@@ -9581,64 +9581,64 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.Twitch.ChatDialog.SharedChat" xml:space="preserve">
     <value>此消息来自{channel}的聊天。请在那里进行管理。</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.TimedOut" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.TimedOut" xml:space="preserve">
     <value>{name}已被禁言。</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Timeout10Minutes" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Timeout10Minutes" xml:space="preserve">
     <value>禁言 10 分钟</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Timeout1Hour" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Timeout1Hour" xml:space="preserve">
     <value>禁言 1 小时</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Timeout1Minute" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Timeout1Minute" xml:space="preserve">
     <value>禁言 1 分钟</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Unban" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Unban" xml:space="preserve">
     <value>解封</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Unbanned" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Unbanned" xml:space="preserve">
     <value>{name}已被解封。</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.AccountDescription" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.AccountDescription" xml:space="preserve">
     <value>显示谁的频道聊天。</value>
   </data>
   <data name="Integrations.Twitch.ChatWidget.Description" xml:space="preserve">
     <value>实时显示你频道的聊天，包含表情和徽章。</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.Empty" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.Empty" xml:space="preserve">
     <value>正在等待聊天消息</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.FirstAccount" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.FirstAccount" xml:space="preserve">
     <value>第一个已连接的账户</value>
   </data>
   <data name="Integrations.Twitch.ChatWidget.Name" xml:space="preserve">
     <value>Twitch 聊天</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.NameSeparator" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.NameSeparator" xml:space="preserve">
     <value>：</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.Title" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.Title" xml:space="preserve">
     <value>{account}的聊天</value>
   </data>
   <data name="Integrations.Twitch.ChatWidget.Offline" xml:space="preserve">
     <value>未连接到 Twitch</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleChatter1" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleChatter1" xml:space="preserve">
     <value>PixelPanda</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleChatter2" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleChatter2" xml:space="preserve">
     <value>NightOwl</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleChatter3" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleChatter3" xml:space="preserve">
     <value>CozyGamer</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleMessage1" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleMessage1" xml:space="preserve">
     <value>大家好！</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleMessage2" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleMessage2" xml:space="preserve">
     <value>太精彩了！</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleMessage3" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleMessage3" xml:space="preserve">
     <value>下次直播见</value>
   </data>
   <data name="Integrations.Twitch.StatsWidget.Description" xml:space="preserve">
@@ -9650,13 +9650,13 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.Twitch.StatsWidget.Heading" xml:space="preserve">
     <value>Twitch</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Live" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Live" xml:space="preserve">
     <value>直播中</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Offline" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Offline" xml:space="preserve">
     <value>离线</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Viewers" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Viewers" xml:space="preserve">
     <value>观众</value>
   </data>
   <data name="Integrations.Twitch.StatsWidget.Chatters" xml:space="preserve">
@@ -9665,61 +9665,61 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.Twitch.StatsWidget.Followers" xml:space="preserve">
     <value>关注者</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Subscribers" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Subscribers" xml:space="preserve">
     <value>订阅者</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Style" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Style" xml:space="preserve">
     <value>样式</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleDescription" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleDescription" xml:space="preserve">
     <value>决定组件显示的内容。括号中的尺寸是该样式的设计尺寸；它会自适应其他任何尺寸。</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleOverview" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleOverview" xml:space="preserve">
     <value>概览 (3x2)</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleStatsRow" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleStatsRow" xml:space="preserve">
     <value>数据行 (3x1)</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleLiveRow" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleLiveRow" xml:space="preserve">
     <value>直播状态行 (3x1)</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleValueGraph" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleValueGraph" xml:space="preserve">
     <value>单个数值与图表 (2x2)</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleValue" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleValue" xml:space="preserve">
     <value>单个数值 (1x1)</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Metric" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Metric" xml:space="preserve">
     <value>数值</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.MetricDescription" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.MetricDescription" xml:space="preserve">
     <value>组件显示哪个数字。</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.OfflineHint" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.OfflineHint" xml:space="preserve">
     <value>当前未在直播</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Tiles" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Tiles" xml:space="preserve">
     <value>数据</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.TilesDescription" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.TilesDescription" xml:space="preserve">
     <value>磁贴按此顺序显示哪些数字。四个磁贴放在比推荐尺寸宽一列的组件中效果最佳。</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Details" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Details" xml:space="preserve">
     <value>直播详情</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.DetailsDescription" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.DetailsDescription" xml:space="preserve">
     <value>概览在缩略图旁按此顺序显示哪些详情。</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Uptime" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Uptime" xml:space="preserve">
     <value>已直播时长</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.ShowThumbnail" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.ShowThumbnail" xml:space="preserve">
     <value>显示缩略图</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.AccountDescription" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.AccountDescription" xml:space="preserve">
     <value>显示谁的频道数据。</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.SampleTitle" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.SampleTitle" xml:space="preserve">
     <value>探索夜之城</value>
   </data>
   <data name="Integrations.Twitch.StatsWidget.SampleCategory" xml:space="preserve">
@@ -19534,6 +19534,499 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Shell.OutdatedUi.Versions" xml:space="preserve">
     <value>界面构建：{device} · Macro Deck 构建：{computer}</value>
+  </data>
+  <data name="Integrations.YouTube.ChatWidget.Name" xml:space="preserve">
+    <value>YouTube 聊天</value>
+  </data>
+  <data name="Integrations.YouTube.ChatWidget.Description" xml:space="preserve">
+    <value>实时显示当前直播的聊天内容，包括 Super Chat 和新会员。</value>
+  </data>
+  <data name="Integrations.YouTube.ChatWidget.Offline" xml:space="preserve">
+    <value>YouTube 当前没有直播聊天</value>
+  </data>
+  <data name="Integrations.YouTube.ChatDialog.AccountChanged" xml:space="preserve">
+    <value>此小组件现在显示的是另一个 YouTube 频道。请重新打开聊天以进行管理。</value>
+  </data>
+  <data name="Integrations.YouTube.ChatDialog.AccountUnavailable" xml:space="preserve">
+    <value>该 YouTube 频道当前未在直播，因此无法管理其聊天。</value>
+  </data>
+  <data name="Integrations.YouTube.ChatDialog.NotPermitted" xml:space="preserve">
+    <value>YouTube 不允许此操作。请重新连接 YouTube 频道后重试。</value>
+  </data>
+  <data name="Integrations.YouTube.ChatDialog.Refused" xml:space="preserve">
+    <value>YouTube 拒绝了此操作，例如因为该发言者是频道所有者或管理员。</value>
+  </data>
+  <data name="Integrations.YouTube.ChatDialog.Unsupported" xml:space="preserve">
+    <value>Macro Deck 只能解除它在本次直播中设置的封禁。请在 YouTube 工作室中解除此封禁。</value>
+  </data>
+  <data name="Integrations.YouTube.StatsWidget.Name" xml:space="preserve">
+    <value>YouTube 直播统计</value>
+  </data>
+  <data name="Integrations.YouTube.StatsWidget.Description" xml:space="preserve">
+    <value>一目了然地显示直播状态、观众、点赞和订阅者。</value>
+  </data>
+  <data name="Integrations.YouTube.StatsWidget.Heading" xml:space="preserve">
+    <value>YouTube</value>
+  </data>
+  <data name="Integrations.YouTube.StatsWidget.Likes" xml:space="preserve">
+    <value>点赞</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.DisplayName" xml:space="preserve">
+    <value>频道名称</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.IsLive" xml:space="preserve">
+    <value>直播中</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.StreamTitle" xml:space="preserve">
+    <value>直播标题</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.ViewerCount" xml:space="preserve">
+    <value>观众数量</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.LikeCount" xml:space="preserve">
+    <value>点赞数量</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.SubscriberCount" xml:space="preserve">
+    <value>订阅者数量</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.UptimeSeconds" xml:space="preserve">
+    <value>已直播时长（秒）</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.StreamThumbnailUrl" xml:space="preserve">
+    <value>直播缩略图 URL</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.AccountLabel" xml:space="preserve">
+    <value>频道</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.AccountDescription" xml:space="preserve">
+    <value>以哪个已连接的 YouTube 频道执行操作。</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.FirstAccountPlaceholder" xml:space="preserve">
+    <value>第一个频道</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SendChatMessage.Name" xml:space="preserve">
+    <value>发送聊天消息</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SendChatMessage.Description" xml:space="preserve">
+    <value>在当前直播的聊天中发布一条消息。</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SendChatMessage.MessageLabel" xml:space="preserve">
+    <value>消息</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SendChatMessage.MessageDescription" xml:space="preserve">
+    <value>最多 200 个字符。YouTube 仅在直播期间接受聊天消息。</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTitle.Name" xml:space="preserve">
+    <value>设置直播标题</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTitle.Description" xml:space="preserve">
+    <value>更改当前直播的标题；未在直播时，更改下一场已安排直播的标题。</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTitle.TitleLabel" xml:space="preserve">
+    <value>标题</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetDescription.Name" xml:space="preserve">
+    <value>设置直播说明</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetDescription.Description" xml:space="preserve">
+    <value>更改当前直播的说明；未在直播时，更改下一场已安排直播的说明。</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetDescription.DescriptionLabel" xml:space="preserve">
+    <value>说明</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTags.Name" xml:space="preserve">
+    <value>设置直播标签</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTags.Description" xml:space="preserve">
+    <value>替换当前直播的标签；未在直播时，替换下一场已安排直播的标签。</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTags.TagsLabel" xml:space="preserve">
+    <value>标签</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTags.TagsDescription" xml:space="preserve">
+    <value>用逗号或换行分隔标签。留空则移除所有标签。</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Name" xml:space="preserve">
+    <value>开始插播广告</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Description" xml:space="preserve">
+    <value>请求 YouTube 在直播期间插播广告。是否真正播放广告由 YouTube 决定。</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.DurationLabel" xml:space="preserve">
+    <value>时长</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Duration30Seconds" xml:space="preserve">
+    <value>30 秒</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Duration60Seconds" xml:space="preserve">
+    <value>1 分钟</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Duration90Seconds" xml:space="preserve">
+    <value>90 秒</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Duration2Minutes" xml:space="preserve">
+    <value>2 分钟</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Duration3Minutes" xml:space="preserve">
+    <value>3 分钟</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.GoLive.Name" xml:space="preserve">
+    <value>开始直播</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.GoLive.Description" xml:space="preserve">
+    <value>开始下一场已就绪的已安排直播。请先启动编码器。</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.EndStream.Name" xml:space="preserve">
+    <value>结束直播</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.EndStream.Description" xml:space="preserve">
+    <value>结束当前的直播。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.AccountNotFound" xml:space="preserve">
+    <value>此动作所使用的 YouTube 频道已不再连接。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.SignInExpired" xml:space="preserve">
+    <value>YouTube 登录已过期。请重新连接频道后再使用。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.MissingPermission" xml:space="preserve">
+    <value>YouTube 未授予 Macro Deck 执行此操作的权限。请重新连接频道以授予权限。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.Unreachable" xml:space="preserve">
+    <value>无法连接 YouTube。请检查网络连接后重试。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.RequestRejected" xml:space="preserve">
+    <value>YouTube 拒绝了该请求。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.QuotaExhausted" xml:space="preserve">
+    <value>Google Cloud 项目的 YouTube 每日配额已用完。配额会在太平洋时间午夜重置。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.RateLimited" xml:space="preserve">
+    <value>YouTube 收到的请求过多。请稍候再试。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.StreamInactive" xml:space="preserve">
+    <value>YouTube 尚未收到视频信号。请先启动编码器。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.InvalidTransition" xml:space="preserve">
+    <value>YouTube 目前无法将直播切换到此状态。请先开始推流或其测试阶段。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.TestStillStarting" xml:space="preserve">
+    <value>YouTube 仍在启动此直播的测试阶段。请稍后重试。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.LiveStreamingNotEnabled" xml:space="preserve">
+    <value>此 YouTube 频道未启用直播功能。请先在 YouTube 工作室中启用。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.InsufficientLivePermissions" xml:space="preserve">
+    <value>此 YouTube 频道无权管理该直播。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.NoLiveChat" xml:space="preserve">
+    <value>当前没有直播聊天。只有在直播期间才能发送聊天消息。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.NoBroadcast" xml:space="preserve">
+    <value>没有可更改的当前或已安排的 YouTube 直播。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.NotLive" xml:space="preserve">
+    <value>该 YouTube 频道当前未在直播。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.NoReadyBroadcast" xml:space="preserve">
+    <value>没有可开始的已安排直播。请在 YouTube 工作室中创建一场，并启动编码器。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.AutoStart" xml:space="preserve">
+    <value>编码器一开始发送视频，YouTube 就会自动开始此直播，因此无法从这里开始。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.MessageEmpty" xml:space="preserve">
+    <value>请输入要发送的消息。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.MessageTooLong" xml:space="preserve">
+    <value>消息超过了 200 个字符。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.TitleRequired" xml:space="preserve">
+    <value>请输入标题。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.TitleInvalid" xml:space="preserve">
+    <value>标题最多 100 个字符，且不能包含 &lt; 或 &gt;。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.DescriptionInvalid" xml:space="preserve">
+    <value>说明最多 5000 字节，且不能包含 &lt; 或 &gt;。</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.TagsInvalid" xml:space="preserve">
+    <value>标签总计最多 500 个字符，且不能包含 &lt; 或 &gt;。</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.SignInExpiredTitle" xml:space="preserve">
+    <value>{account}的 YouTube 登录已过期</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.SignInExpiredDescription" xml:space="preserve">
+    <value>Macro Deck 已无法使用此 YouTube 频道。Google Cloud 项目处于 Testing 状态时，Google 会在 7 天后结束登录。请使用相同的客户端 ID 和客户端密钥重新连接以恢复。</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ReconnectAction" xml:space="preserve">
+    <value>重新连接</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ReconnectResolution" xml:space="preserve">
+    <value>请重新连接 YouTube 频道。</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.QuotaExhaustedTitle" xml:space="preserve">
+    <value>YouTube 配额已用完</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
+    <value>Google Cloud 项目已用完 YouTube 每日配额，因此 Macro Deck 已暂停更新直播状态和聊天。太平洋时间午夜 Google 重置配额后会恢复更新。</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
+    <value>YouTube 频道被重复连接</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.DuplicateChannelDescription" xml:space="preserve">
+    <value>“{title}”是同一个 YouTube 频道的旧连接，不会被使用。请在下方的配置列表中将其移除。</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StreamCategory" xml:space="preserve">
+    <value>直播</value>
+  </data>
+  <data name="Integrations.YouTube.Events.SuperChatCategory" xml:space="preserve">
+    <value>Super Chat</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MembershipsCategory" xml:space="preserve">
+    <value>会员</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AdvancedCategory" xml:space="preserve">
+    <value>高级</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StreamOnlineName" xml:space="preserve">
+    <value>直播已上线</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StreamOnlineDescription" xml:space="preserve">
+    <value>频道开始直播。</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StreamOfflineName" xml:space="preserve">
+    <value>直播已下线</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StreamOfflineDescription" xml:space="preserve">
+    <value>频道的直播已结束。</value>
+  </data>
+  <data name="Integrations.YouTube.Events.SuperChatName" xml:space="preserve">
+    <value>Super Chat</value>
+  </data>
+  <data name="Integrations.YouTube.Events.SuperChatDescription" xml:space="preserve">
+    <value>有人发送了 Super Chat。</value>
+  </data>
+  <data name="Integrations.YouTube.Events.SuperStickerName" xml:space="preserve">
+    <value>Super Sticker</value>
+  </data>
+  <data name="Integrations.YouTube.Events.SuperStickerDescription" xml:space="preserve">
+    <value>有人发送了 Super Sticker。</value>
+  </data>
+  <data name="Integrations.YouTube.Events.NewMemberName" xml:space="preserve">
+    <value>新会员</value>
+  </data>
+  <data name="Integrations.YouTube.Events.NewMemberDescription" xml:space="preserve">
+    <value>有人成为频道会员或升级了会员等级。</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MemberMilestoneName" xml:space="preserve">
+    <value>会员里程碑</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MemberMilestoneDescription" xml:space="preserve">
+    <value>一位会员在聊天中分享了会员里程碑。</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MembershipGiftName" xml:space="preserve">
+    <value>赠送的会员</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MembershipGiftDescription" xml:space="preserve">
+    <value>有人向其他观众赠送了会员。</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AnyName" xml:space="preserve">
+    <value>YouTube 事件（高级）</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AnyDescription" xml:space="preserve">
+    <value>在一个触发器中接收此列表中的所有 YouTube 事件。可按类型筛选。</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Channel" xml:space="preserve">
+    <value>频道</value>
+  </data>
+  <data name="Integrations.YouTube.Events.ChannelDescription" xml:space="preserve">
+    <value>可选。仅对此 YouTube 频道运行。</value>
+  </data>
+  <data name="Integrations.YouTube.Events.FirstChannelPlaceholder" xml:space="preserve">
+    <value>第一个频道</value>
+  </data>
+  <data name="Integrations.YouTube.Events.ChannelId" xml:space="preserve">
+    <value>频道 ID</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Title" xml:space="preserve">
+    <value>标题</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StartedAt" xml:space="preserve">
+    <value>开始时间</value>
+  </data>
+  <data name="Integrations.YouTube.Events.BroadcastId" xml:space="preserve">
+    <value>直播 ID</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MessageId" xml:space="preserve">
+    <value>消息 ID</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AuthorChannelId" xml:space="preserve">
+    <value>发送者频道 ID</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AuthorName" xml:space="preserve">
+    <value>发送者</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Amount" xml:space="preserve">
+    <value>金额</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AmountMicros" xml:space="preserve">
+    <value>金额（微单位）</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Currency" xml:space="preserve">
+    <value>货币</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Tier" xml:space="preserve">
+    <value>等级</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Comment" xml:space="preserve">
+    <value>评论</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Sticker" xml:space="preserve">
+    <value>贴纸</value>
+  </data>
+  <data name="Integrations.YouTube.Events.LevelName" xml:space="preserve">
+    <value>会员等级</value>
+  </data>
+  <data name="Integrations.YouTube.Events.IsUpgrade" xml:space="preserve">
+    <value>升级</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Months" xml:space="preserve">
+    <value>月数</value>
+  </data>
+  <data name="Integrations.YouTube.Events.GiftCount" xml:space="preserve">
+    <value>赠送的会员数</value>
+  </data>
+  <data name="Integrations.YouTube.Events.EventType" xml:space="preserve">
+    <value>事件类型</value>
+  </data>
+  <data name="Integrations.YouTube.Events.EventTypeDescription" xml:space="preserve">
+    <value>可选。仅对此类事件运行，例如 super-chat。</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AnyEventPlaceholder" xml:space="preserve">
+    <value>任意事件</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Message" xml:space="preserve">
+    <value>消息</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientTitle" xml:space="preserve">
+    <value>连接 YouTube 频道</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientDescription" xml:space="preserve">
+    <value>Macro Deck 通过自己的 Google Cloud 项目连接 YouTube。设置只需几分钟，且只需进行一次。</value>
+  </data>
+  <data name="Integrations.YouTube.Config.CreateProjectInstruction" xml:space="preserve">
+    <value>在 Google Cloud 控制台中创建一个项目，并为其启用 YouTube Data API v3。</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ConsentScreenInstruction" xml:space="preserve">
+    <value>设置 OAuth 同意屏幕，并将拥有该频道的 Google 账户添加为测试用户。</value>
+  </data>
+  <data name="Integrations.YouTube.Config.CreateClientInstruction" xml:space="preserve">
+    <value>创建一个应用类型为 TVs and Limited Input devices 的 OAuth 客户端 ID。</value>
+  </data>
+  <data name="Integrations.YouTube.Config.CopyCredentialsInstruction" xml:space="preserve">
+    <value>将其客户端 ID 和客户端密钥复制到下方字段中。</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ApiLibraryLinkLabel" xml:space="preserve">
+    <value>YouTube Data API v3</value>
+  </data>
+  <data name="Integrations.YouTube.Config.CredentialsLinkLabel" xml:space="preserve">
+    <value>Google Cloud 凭据</value>
+  </data>
+  <data name="Integrations.YouTube.Config.GuideLinkLabel" xml:space="preserve">
+    <value>分步指南</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientIdLabel" xml:space="preserve">
+    <value>客户端 ID</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientIdPlaceholder" xml:space="preserve">
+    <value>123456789012-abc.apps.googleusercontent.com</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientSecretLabel" xml:space="preserve">
+    <value>客户端密钥</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientSecretDescription" xml:space="preserve">
+    <value>加密保存在此计算机上，仅发送给 Google。</value>
+  </data>
+  <data name="Integrations.YouTube.Config.DailyQuotaLabel" xml:space="preserve">
+    <value>每日配额（单位）</value>
+  </data>
+  <data name="Integrations.YouTube.Config.DailyQuotaDescription" xml:space="preserve">
+    <value>Google Cloud 项目每天可使用的配额单位数。Google 默认提供 10,000；仅在 Google 为你提供了更多配额时才修改此值。</value>
+  </data>
+  <data name="Integrations.YouTube.Config.DailyQuotaInvalid" xml:space="preserve">
+    <value>请输入不小于 1 的整数。</value>
+  </data>
+  <data name="Integrations.YouTube.Config.EnterClientId" xml:space="preserve">
+    <value>请输入客户端 ID。</value>
+  </data>
+  <data name="Integrations.YouTube.Config.EnterClientSecret" xml:space="preserve">
+    <value>请输入客户端密钥。</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientRejected" xml:space="preserve">
+    <value>Google 未接受此客户端。请检查客户端 ID 和客户端密钥，并确认客户端类型为 TVs and Limited Input devices。</value>
+  </data>
+  <data name="Integrations.YouTube.Config.CouldNotBeReached" xml:space="preserve">
+    <value>无法连接 Google。请检查网络连接，然后点击继续以重试。</value>
+  </data>
+  <data name="Integrations.YouTube.Config.LinkTitle" xml:space="preserve">
+    <value>在 Google 上批准访问</value>
+  </data>
+  <data name="Integrations.YouTube.Config.LinkDescription.One" xml:space="preserve">
+    <value>该代码在 {count} 分钟内有效。</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.YouTube.Config.LinkDescription.Other" xml:space="preserve">
+    <value>该代码在 {count} 分钟内有效。</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.YouTube.Config.LinkDescriptionExpired.One" xml:space="preserve">
+    <value>之前的代码已过期，这是新代码。该代码在 {count} 分钟内有效。</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.YouTube.Config.LinkDescriptionExpired.Other" xml:space="preserve">
+    <value>之前的代码已过期，这是新代码。该代码在 {count} 分钟内有效。</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.YouTube.Config.OpenGoogleInstruction" xml:space="preserve">
+    <value>点击下方按钮打开 Google，并使用拥有该频道的账户登录。</value>
+  </data>
+  <data name="Integrations.YouTube.Config.EnterCodeInstruction" xml:space="preserve">
+    <value>输入此代码：</value>
+  </data>
+  <data name="Integrations.YouTube.Config.DeviceCodeLabel" xml:space="preserve">
+    <value>设备代码</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ApproveAccessInstruction" xml:space="preserve">
+    <value>选择频道并允许访问。项目处于 Testing 状态时，Google 会提示应用未经验证；仍然继续即可。</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ComeBackPressContinueInstruction" xml:space="preserve">
+    <value>回到这里并点击继续。</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ThenPressContinueInstruction" xml:space="preserve">
+    <value>然后点击继续。</value>
+  </data>
+  <data name="Integrations.YouTube.Config.OpenGoogleLinkLabel" xml:space="preserve">
+    <value>打开 Google 并批准</value>
+  </data>
+  <data name="Integrations.YouTube.Config.WaitingTitle" xml:space="preserve">
+    <value>正在等待 Google</value>
+  </data>
+  <data name="Integrations.YouTube.Config.WaitingDescription" xml:space="preserve">
+    <value>还没有人批准该请求。</value>
+  </data>
+  <data name="Integrations.YouTube.Config.PollingFailed" xml:space="preserve">
+    <value>无法连接 Google。点击继续以重试。</value>
+  </data>
+  <data name="Integrations.YouTube.Config.RequestDeclined" xml:space="preserve">
+    <value>你在 Google 上拒绝了该请求。请使用下方的新代码批准以重试。</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ChannelLookupFailed" xml:space="preserve">
+    <value>Google 已批准访问，但 YouTube 未说明其所属的频道。点击继续以重试。</value>
+  </data>
+  <data name="Integrations.YouTube.Config.NoChannel" xml:space="preserve">
+    <value>此 Google 账户没有 YouTube 频道。请使用拥有该频道的账户批准下方的新代码。</value>
+  </data>
+  <data name="Integrations.YouTube.Config.UnknownStep" xml:space="preserve">
+    <value>未知步骤</value>
   </data>
   <data name="Integrations.Obs.Actions.SplitRecordFile.Name" xml:space="preserve">
     <value>分割录制文件</value>

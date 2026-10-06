@@ -1,14 +1,14 @@
 using System.Text.Json;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Ui;
-using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.StreamChat;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Integrations.Twitch;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Ui.Sessions;
-using MacroDeckHost.Widgets.TwitchChat;
+using MacroDeckHost.Widgets.StreamChat;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using Serilog.Core;
 
@@ -17,18 +17,18 @@ namespace MacroDeckHost.Tests.UnitTests.Twitch.Chat;
 [TestFixture]
 internal sealed class TwitchChatWidgetSessionTests : UiSessionFixture
 {
-	private TwitchChatHub _hub = null!;
+	private StreamChatHub _hub = null!;
 
 	[SetUp]
 	public void SetUpTwitchChat()
 	{
-		_hub = new TwitchChatHub(new FakeTimeProvider(), Logger.None);
-		_hub.SetAccounts([new TwitchChatAccount("111", "Streamer (@streamer)")]);
-		_hub.Post(new TwitchChatConnectionChanged("111", true));
-		_hub.Post(new TwitchChatMessageReceived("111", TwitchChatHubTests.Message("m1")));
+		_hub = new StreamChatHub(new FakeTimeProvider(), Logger.None);
+		_hub.SetAccounts([new ChatAccount("111", "Streamer (@streamer)")]);
+		_hub.Post(new ChatConnectionChanged("111", true));
+		_hub.Post(new ChatMessageReceived("111", TwitchChatHubTests.Message("m1")));
 		_hub.Tick();
 
-		var provider = new TwitchChatWidgetUiProvider(_hub,
+		var provider = new StreamChatWidgetUiProvider(StreamPlatforms.Twitch, _hub,
 			new FakeTwitchChatImages(),
 			TestLocalization.SampleText,
 			new FakeIntegrationRegistry(),
@@ -90,7 +90,7 @@ internal sealed class TwitchChatWidgetSessionTests : UiSessionFixture
 			{
 				[UiConfigSurfaceAttributes.EntryPoint] = Json(UiConfigEntryPoints.WidgetConfig),
 				[UiConfigSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(Guid.NewGuid().ToString()),
-				[UiConfigSurfaceAttributes.WidgetType] = Json(TwitchChatWidgetType.QualifiedId),
+				[UiConfigSurfaceAttributes.WidgetType] = Json(StreamPlatforms.Twitch.ChatWidgetTypeId),
 				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.SerializeToElement(new { account = "" }),
 			}
 		};
@@ -101,7 +101,7 @@ internal sealed class TwitchChatWidgetSessionTests : UiSessionFixture
 		{
 			Assert.That(tree, Does.Contain("\"111\""));
 			Assert.That(tree, Does.Contain("Streamer (@streamer)"));
-			Assert.That(tree, Does.Contain("Integrations.Twitch.ChatWidget.FirstAccount"));
+			Assert.That(tree, Does.Contain("Integrations.StreamChat.Widget.FirstAccount"));
 		});
 	}
 
@@ -116,7 +116,7 @@ internal sealed class TwitchChatWidgetSessionTests : UiSessionFixture
 			{
 				[UiConfigSurfaceAttributes.EntryPoint] = Json(UiConfigEntryPoints.WidgetConfig),
 				[UiConfigSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(Guid.NewGuid().ToString()),
-				[UiConfigSurfaceAttributes.WidgetType] = Json(TwitchChatWidgetType.QualifiedId),
+				[UiConfigSurfaceAttributes.WidgetType] = Json(StreamPlatforms.Twitch.ChatWidgetTypeId),
 				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.SerializeToElement(new { account = "", textSize = 150 }),
 			}
 		};
@@ -164,7 +164,7 @@ internal sealed class TwitchChatWidgetSessionTests : UiSessionFixture
 	{
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
-			[UiWidgetSurfaceAttributes.WidgetType] = Json(TwitchChatWidgetType.QualifiedId),
+			[UiWidgetSurfaceAttributes.WidgetType] = Json(StreamPlatforms.Twitch.ChatWidgetTypeId),
 			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new { account = "" }),
 		};
 

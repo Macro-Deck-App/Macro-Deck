@@ -1,13 +1,12 @@
 using MacroDeckHost.Application.Persistence;
-using MacroDeckHost.Application.Twitch.Chat;
-using MacroDeckHost.Application.Twitch.Stats;
+using MacroDeckHost.Application.StreamChat;
+using MacroDeckHost.Application.StreamStats;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations;
 using MacroDeckHost.Integrations.Adb;
 using MacroDeckHost.Integrations.Companion;
 using MacroDeckHost.Integrations.HomeAssistant;
 using MacroDeckHost.Integrations.System;
-using MacroDeckHost.Integrations.Twitch;
 using MacroDeck.Sdk;
 
 namespace MacroDeckHost.Infrastructure.Integrations;
@@ -21,17 +20,18 @@ internal static class IntegrationGatewayBinder
 		IVariableRefreshSignal refreshSignal,
 		IKnownAudioDeviceStore? knownAudioDevices = null,
 		IVariablePollingInvalidationSignal? pollingInvalidation = null,
-		ITwitchChatSink? twitchChatSink = null,
-		ITwitchStatsSink? twitchStatsSink = null)
+		IStreamPlatformServices? streamPlatforms = null)
 	{
-		if (twitchStatsSink is not null && integration is ITwitchStatsSinkConsumer statsConsumer)
+		var platform = streamPlatforms?.Find(integration.Id);
+
+		if (platform is not null && integration is IStreamStatsSinkConsumer statsConsumer)
 		{
-			statsConsumer.UseTwitchStatsSink(twitchStatsSink);
+			statsConsumer.UseStreamStatsSink(platform.StatsSink);
 		}
 
-		if (twitchChatSink is not null && integration is ITwitchChatSinkConsumer chatConsumer)
+		if (platform is not null && integration is IStreamChatSinkConsumer chatConsumer)
 		{
-			chatConsumer.UseTwitchChatSink(twitchChatSink);
+			chatConsumer.UseStreamChatSink(platform.ChatSink);
 		}
 
 		if (knownAudioDevices is not null && integration is IKnownAudioDeviceStoreConsumer audioDeviceConsumer)
