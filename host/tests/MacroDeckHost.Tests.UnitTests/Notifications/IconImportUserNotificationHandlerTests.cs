@@ -5,7 +5,10 @@ using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Icons;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Infrastructure.Notifications;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MacroDeckHost.Tests.UnitTests.Notifications;
 
@@ -115,6 +118,31 @@ public class IconImportUserNotificationHandlerTests
 			Assert.That(notifications[0].Severity, Is.EqualTo(UserNotificationSeverity.Info));
 			Assert.That(notifications[0].Title, Is.EqualTo("Nothing to import into My Pack"));
 			Assert.That(notifications[0].Message, Does.Contain("3 files"));
+		});
+	}
+
+	[Test]
+	public async Task Notifications_are_written_in_the_active_language_with_the_right_plural()
+	{
+		var store = new UserNotificationStore();
+		var cache = new FakeIconPackCache();
+		cache.AddPack(_packId, "Mein Paket");
+		var handler = CreateHandler(store, cache, "de");
+
+		var skippedOne = Batch(IconImportBatchState.Completed);
+		skippedOne.Skipped = 1;
+		await handler.Handle(Notification(skippedOne, processed: 0, failed: 0), CancellationToken.None);
+
+		var importing = Batch(IconImportBatchState.Processing);
+		await handler.Handle(Notification(importing, processed: 1, failed: 0), CancellationToken.None);
+
+		var notifications = store.Snapshot();
+		Assert.Multiple(() =>
+		{
+			Assert.That(notifications.Select(n => n.Title),
+				Is.EquivalentTo(new[] { "Nichts in Mein Paket zu importieren", "Symbole werden in Mein Paket importiert" }));
+			Assert.That(notifications.Select(n => n.Message),
+				Does.Contain("1 Datei war schon in diesem Paket und wurde übersprungen."));
 		});
 	}
 
@@ -298,7 +326,20 @@ public class IconImportUserNotificationHandlerTests
 	}
 
 	private static IconImportUserNotificationHandler CreateHandler(UserNotificationStore store, FakeIconPackCache cache)
-		=> new(store, cache);
+		=> new(store, cache, TestLocalization.ScopeFactory, TestLocalization.Resolver);
+
+	private static IconImportUserNotificationHandler CreateHandler(UserNotificationStore store,
+		FakeIconPackCache cache,
+		string culture)
+	{
+		var services = new ServiceCollection();
+		services.AddSingleton(TestLocalization.Resolver);
+		services.AddSingleton<IAppPreferenceService>(new FakeLocalizationPreferences { Culture = culture });
+		return new IconImportUserNotificationHandler(store,
+			cache,
+			services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>(),
+			TestLocalization.Resolver);
+	}
 
 	private static IconImportBatchEntity Batch(IconImportBatchState state) => new()
 	{
@@ -330,6 +371,8 @@ public class IconImportUserNotificationHandlerTests
 		public Task RemovePack(Guid id) => throw new NotSupportedException();
 
 		public IconEntity? GetIconById(Guid iconId) => throw new NotSupportedException();
+
+		public IReadOnlyList<IconEntity> GetAppearances(Guid parentId) => [];
 
 		public List<IconEntity> GetIconsByPackId(Guid packId) => throw new NotSupportedException();
 

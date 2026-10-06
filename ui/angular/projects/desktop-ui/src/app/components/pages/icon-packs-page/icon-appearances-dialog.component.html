@@ -1,0 +1,156 @@
+<shared-modal [heading]="title()" maxWidth="520px" [showFooter]="false" (close)="closed.emit()">
+  <div class="appearances">
+    <p class="hint">{{ 'macrodeck.app:IconPacks.Appearances.AutoHint' | translate }}</p>
+    @if (readOnly()) {
+      <p class="read-only">
+        <span class="icon icon-lock icon-xs" aria-hidden="true"></span>
+        {{ 'macrodeck.app:IconPacks.Appearances.ReadOnly' | translate }}
+      </p>
+    }
+
+    <ul class="rows">
+      <li class="row" data-appearance="default">
+        @let defaultLabel = 'macrodeck.app:IconPacks.Appearances.Default' | translate;
+        <span class="thumb">
+          @if (icon().processingState === 'Ready') {
+            <img [src]="defaultImageUrl()" [alt]="previewAlt(defaultLabel)" decoding="async" />
+          } @else {
+            <span class="shimmer" role="img"
+              [title]="'macrodeck.app:IconPacks.Tile.Processing' | translate"
+              [attr.aria-label]="'macrodeck.app:IconPacks.Tile.Processing' | translate"></span>
+          }
+        </span>
+        <span class="label">{{ defaultLabel }}</span>
+      </li>
+
+      @for (appearance of appearances(); track appearance.id) {
+        @let kind = kindLabel(appearance.key);
+        <li class="row" [attr.data-appearance]="appearance.key">
+          <span class="thumb">
+            @switch (appearance.processingState) {
+              @case ('Ready') {
+                <img [src]="appearanceImageUrl(appearance)" [alt]="previewAlt(kind)" decoding="async" />
+              }
+              @case ('Failed') {
+                <span class="failed" role="img" [title]="failedLabel(appearance)" [attr.aria-label]="failedLabel(appearance)">
+                  <span class="icon icon-x icon-md"></span>
+                </span>
+              }
+              @default {
+                <span class="shimmer" role="img"
+                  [title]="'macrodeck.app:IconPacks.Tile.Processing' | translate"
+                  [attr.aria-label]="'macrodeck.app:IconPacks.Tile.Processing' | translate"></span>
+              }
+            }
+          </span>
+          <span class="label" [id]="'appearance-' + appearance.id">{{ kind }}</span>
+          @if (!readOnly()) {
+            <span class="row-actions" role="group" [attr.aria-labelledby]="'appearance-' + appearance.id">
+              <shared-button
+                class="replace"
+                variant="ghost"
+                size="compact"
+                [disabled]="busy()"
+                (click)="pickFile(appearance.key)">
+                {{ 'macrodeck.app:IconPacks.Appearances.Replace' | translate }}
+              </shared-button>
+              <shared-button
+                class="remove"
+                variant="ghost"
+                size="compact"
+                [disabled]="busy()"
+                (click)="pendingRemoval.set(appearance)">
+                {{ 'macrodeck:Common.Remove' | translate }}
+              </shared-button>
+            </span>
+          }
+        </li>
+      }
+    </ul>
+
+    @if (appearances().length === 0) {
+      <p class="empty">{{ 'macrodeck.app:IconPacks.Appearances.Empty' | translate }}</p>
+    }
+
+    @if (!readOnly()) {
+      <shared-button-group class="actions">
+        <shared-button
+          class="add"
+          variant="secondary"
+          [disabled]="busy() || missingKinds().length === 0"
+          (click)="openAddMenu($event)">
+          <span class="icon icon-plus icon-sm" aria-hidden="true"></span>
+          {{ 'macrodeck.app:IconPacks.Appearances.Add' | translate }}
+        </shared-button>
+        <shared-button
+          class="merge"
+          variant="secondary"
+          [disabled]="busy() || missingKinds().length === 0"
+          (click)="openMerge()">
+          <span class="icon icon-layers icon-sm" aria-hidden="true"></span>
+          {{ 'macrodeck.app:IconPacks.Appearances.Merge' | translate }}
+        </shared-button>
+      </shared-button-group>
+    }
+  </div>
+</shared-modal>
+
+<input #fileInput type="file" hidden
+  accept=".png,.jpg,.jpeg,.gif,.webp,.svg,.lottie,.json"
+  (change)="onFilePicked(fileInput)" />
+
+<shared-context-menu
+  [isOpen]="addMenu() !== null"
+  [x]="addMenu()?.x ?? 0"
+  [y]="addMenu()?.y ?? 0"
+  [items]="addMenuItems()"
+  (itemClick)="onAddMenuAction($event)"
+  (closed)="addMenu.set(null)" />
+
+@if (pendingRemoval(); as appearance) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:IconPacks.Appearances.RemoveConfirmTitle' | translate"
+    [message]="removeMessage(appearance)"
+    [confirmText]="'macrodeck:Common.Remove' | translate"
+    [danger]="true"
+    (confirm)="confirmRemove()"
+    (cancel)="pendingRemoval.set(null)" />
+}
+
+@if (merging()) {
+  <shared-modal #mergeDialog [heading]="'macrodeck.app:IconPacks.Appearances.MergeTitle' | translate" size="medium" [showFooter]="false" (close)="merging.set(false)">
+    <div class="merge-form">
+      <p class="hint">{{ mergeHint() }}</p>
+      <label class="field">
+        <span class="field-label">{{ 'macrodeck.app:IconPacks.Appearances.MergeKindLabel' | translate }}</span>
+        <shared-select
+          [options]="mergeKindOptions()"
+          [ngModel]="mergeKey()"
+          (ngModelChange)="mergeKey.set($event)"
+          name="mergeKind" />
+      </label>
+      <div class="merge-grid">
+        @if (mergeCandidates().length === 0) {
+          <p class="empty">{{ 'macrodeck.app:IconPacks.NoMatchingIconsHeading' | translate }}</p>
+        } @else {
+          <shared-icon-grid
+            [icons]="mergeCandidates()"
+            [tileSize]="72"
+            [selectable]="true"
+            [selectedIconId]="mergeSourceId()"
+            (iconClick)="mergeSourceId.set($event.icon.id)" />
+        }
+      </div>
+      <shared-button-group class="actions">
+        <shared-button variant="secondary" (click)="cancelMerge()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+        <shared-button
+          class="confirm-merge"
+          variant="primary"
+          [disabled]="busy() || !mergeSourceId() || !mergeKey()"
+          (click)="confirmMerge()">
+          {{ 'macrodeck.app:IconPacks.Appearances.MergeConfirm' | translate }}
+        </shared-button>
+      </shared-button-group>
+    </div>
+  </shared-modal>
+}

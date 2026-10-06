@@ -3648,6 +3648,98 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="IconPacks.AiNotDeclared" xml:space="preserve">
     <value>Neuvedeno</value>
   </data>
+  <data name="IconPacks.Appearances.Add" xml:space="preserve">
+    <value>Přidat vzhled</value>
+  </data>
+  <data name="IconPacks.Appearances.AddFailed" xml:space="preserve">
+    <value>Vzhled se nepodařilo přidat.</value>
+  </data>
+  <data name="IconPacks.Appearances.AutoHint" xml:space="preserve">
+    <value>Macro Deck zobrazí vzhled odpovídající aktuálnímu motivu a nastavení pohybu, jinak výchozí.</value>
+  </data>
+  <data name="IconPacks.Appearances.Badge.One" xml:space="preserve">
+    <value>Další vzhled: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="IconPacks.Appearances.Badge.Other" xml:space="preserve">
+    <value>Další vzhledy: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="IconPacks.Appearances.Default" xml:space="preserve">
+    <value>Výchozí</value>
+  </data>
+  <data name="IconPacks.Appearances.DialogTitle" xml:space="preserve">
+    <value>Vzhledy ikony „{name}“</value>
+  </data>
+  <data name="IconPacks.Appearances.Empty" xml:space="preserve">
+    <value>Zatím žádné další vzhledy.</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Animated" xml:space="preserve">
+    <value>Animovaný</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Custom" xml:space="preserve">
+    <value>Vlastní ({traits})</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Dark" xml:space="preserve">
+    <value>Tmavý</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.DarkAnimated" xml:space="preserve">
+    <value>Tmavý, animovaný</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.DarkStatic" xml:space="preserve">
+    <value>Tmavý, statický</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Light" xml:space="preserve">
+    <value>Světlý</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.LightAnimated" xml:space="preserve">
+    <value>Světlý, animovaný</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.LightStatic" xml:space="preserve">
+    <value>Světlý, statický</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Static" xml:space="preserve">
+    <value>Statický</value>
+  </data>
+  <data name="IconPacks.Appearances.MenuItem" xml:space="preserve">
+    <value>Vzhledy…</value>
+  </data>
+  <data name="IconPacks.Appearances.Merge" xml:space="preserve">
+    <value>Použít existující ikonu…</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeConfirm" xml:space="preserve">
+    <value>Použít jako vzhled</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeFailed" xml:space="preserve">
+    <value>Ikonu se nepodařilo použít jako vzhled.</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeHint" xml:space="preserve">
+    <value>Ikona se stane součástí ikony „{name}“. Tlačítka a akce, které ji používaly, přejdou na „{name}“.</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeKindLabel" xml:space="preserve">
+    <value>Použít jako</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeTitle" xml:space="preserve">
+    <value>Použít existující ikonu</value>
+  </data>
+  <data name="IconPacks.Appearances.PreviewAlt" xml:space="preserve">
+    <value>Vzhled „{kind}“ ikony „{name}“</value>
+  </data>
+  <data name="IconPacks.Appearances.ReadOnly" xml:space="preserve">
+    <value>Tato sada je jen pro čtení, její vzhledy proto nelze měnit.</value>
+  </data>
+  <data name="IconPacks.Appearances.RemoveConfirmMessage" xml:space="preserve">
+    <value>Odebrat vzhled „{kind}“ z ikony „{name}“? Tlačítka, která ho používají, přejdou na jiný vzhled.</value>
+  </data>
+  <data name="IconPacks.Appearances.RemoveConfirmTitle" xml:space="preserve">
+    <value>Odebrat vzhled</value>
+  </data>
+  <data name="IconPacks.Appearances.RemoveFailed" xml:space="preserve">
+    <value>Vzhled se nepodařilo odebrat.</value>
+  </data>
+  <data name="IconPacks.Appearances.Replace" xml:space="preserve">
+    <value>Nahradit</value>
+  </data>
   <data name="IconPacks.AuthorFieldLabel" xml:space="preserve">
     <value>Autor</value>
   </data>
@@ -11306,6 +11398,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Widgets.Actions.FontSizeLabel" xml:space="preserve">
     <value>Velikost</value>
   </data>
+  <data name="Integrations.Widgets.Actions.IconAppearanceDescription" xml:space="preserve">
+    <value>Možnost Automaticky vybere vzhled vhodný pro obrazovku, možnost Výchozí vždy zobrazí vlastní obrázek ikony. Pokud ikona zvolený vzhled nemá, vybere se vzhled automaticky.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.IconAppearanceLabel" xml:space="preserve">
+    <value>Vzhled</value>
+  </data>
   <data name="Integrations.Widgets.Actions.IconDescription" xml:space="preserve">
     <value>Ponechat prázdné pro odebrání ikony.</value>
   </data>
@@ -11404,6 +11502,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Widgets.Actions.SetFontName" xml:space="preserve">
     <value>Nastavit písmo popisku</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconAppearanceDescription" xml:space="preserve">
+    <value>Určí, který vzhled ikony widgetu se zobrazí, například tmavá nebo statická verze.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconAppearanceName" xml:space="preserve">
+    <value>Nastavit vzhled ikony</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetIconDescription" xml:space="preserve">
     <value>Změní ikonu, kterou widget zobrazuje.</value>
@@ -12238,6 +12342,40 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Notifications.HttpsNotRunningMessage" xml:space="preserve">
     <value>Macro Deck je dostupný přes HTTP, ale naslouchací port HTTPS se nespustil. Zkontrolujte HTTPS port a certifikát v Nastavení &gt; Síť.</value>
+  </data>
+  <data name="Notifications.IconImport.CompletedWithWarnings.One" xml:space="preserve">
+    <value>{count} ikona importována do {pack} s upozorněními</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.IconImport.CompletedWithWarnings.Other" xml:space="preserve">
+    <value>Import do {pack} s upozorněními, importované ikony: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.IconImport.DefaultPackName" xml:space="preserve">
+    <value>sada ikon</value>
+  </data>
+  <data name="Notifications.IconImport.Failed" xml:space="preserve">
+    <value>Ikony se nepodařilo importovat do {pack}</value>
+  </data>
+  <data name="Notifications.IconImport.Importing" xml:space="preserve">
+    <value>Importování ikon do {pack}</value>
+  </data>
+  <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
+    <value>Nic z toho nebylo možné importovat jako ikonu.</value>
+  </data>
+  <data name="Notifications.IconImport.NothingImported" xml:space="preserve">
+    <value>Do {pack} není co importovat</value>
+  </data>
+  <data name="Notifications.IconImport.PartlyFailed" xml:space="preserve">
+    <value>Import do {pack}: importováno {imported}, selhalo {failed}</value>
+  </data>
+  <data name="Notifications.IconImport.Skipped.One" xml:space="preserve">
+    <value>{count} soubor už v této sadě byl a byl přeskočen.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.IconImport.Skipped.Other" xml:space="preserve">
+    <value>Přeskočené soubory, které už v této sadě byly: {count}.</value>
+    <comment>[plural]</comment>
   </data>
   <data name="Notifications.InstallationDamagedMessage" xml:space="preserve">
     <value>Některé soubory Macro Deck chybí nebo neodpovídají nainstalované verzi. K tomu dochází, když byla aktualizace přerušena, například když antivirový program zadržel některé soubory. Stáhněte nejnovější verzi Macro Deck a nainstalujte ji znovu. Dotčené soubory jsou uvedeny v protokolech.</value>
@@ -17281,6 +17419,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Widgets.Appearance.Font.Unchanged" xml:space="preserve">
     <value>Beze změny</value>
+  </data>
+  <data name="Widgets.Appearance.Icon.Appearance" xml:space="preserve">
+    <value>Vzhled ikony</value>
+  </data>
+  <data name="Widgets.Appearance.Icon.AppearanceAutomatic" xml:space="preserve">
+    <value>Automaticky</value>
   </data>
   <data name="Widgets.Appearance.Icon.ChangeIcon" xml:space="preserve">
     <value>Změnit ikonu</value>

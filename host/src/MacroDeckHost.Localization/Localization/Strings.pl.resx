@@ -3648,6 +3648,98 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="IconPacks.AiNotDeclared" xml:space="preserve">
     <value>Nie podano</value>
   </data>
+  <data name="IconPacks.Appearances.Add" xml:space="preserve">
+    <value>Dodaj wygląd</value>
+  </data>
+  <data name="IconPacks.Appearances.AddFailed" xml:space="preserve">
+    <value>Nie udało się dodać wyglądu.</value>
+  </data>
+  <data name="IconPacks.Appearances.AutoHint" xml:space="preserve">
+    <value>Macro Deck pokazuje wygląd pasujący do bieżącego motywu i ustawienia ruchu, a w przeciwnym razie domyślny.</value>
+  </data>
+  <data name="IconPacks.Appearances.Badge.One" xml:space="preserve">
+    <value>Dodatkowy wygląd: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="IconPacks.Appearances.Badge.Other" xml:space="preserve">
+    <value>Dodatkowe wyglądy: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="IconPacks.Appearances.Default" xml:space="preserve">
+    <value>Domyślny</value>
+  </data>
+  <data name="IconPacks.Appearances.DialogTitle" xml:space="preserve">
+    <value>Wyglądy ikony „{name}”</value>
+  </data>
+  <data name="IconPacks.Appearances.Empty" xml:space="preserve">
+    <value>Brak innych wyglądów.</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Animated" xml:space="preserve">
+    <value>Animowany</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Custom" xml:space="preserve">
+    <value>Niestandardowy ({traits})</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Dark" xml:space="preserve">
+    <value>Ciemny</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.DarkAnimated" xml:space="preserve">
+    <value>Ciemny, animowany</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.DarkStatic" xml:space="preserve">
+    <value>Ciemny, statyczny</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Light" xml:space="preserve">
+    <value>Jasny</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.LightAnimated" xml:space="preserve">
+    <value>Jasny, animowany</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.LightStatic" xml:space="preserve">
+    <value>Jasny, statyczny</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Static" xml:space="preserve">
+    <value>Statyczny</value>
+  </data>
+  <data name="IconPacks.Appearances.MenuItem" xml:space="preserve">
+    <value>Wyglądy…</value>
+  </data>
+  <data name="IconPacks.Appearances.Merge" xml:space="preserve">
+    <value>Użyj istniejącej ikony…</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeConfirm" xml:space="preserve">
+    <value>Użyj jako wyglądu</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeFailed" xml:space="preserve">
+    <value>Nie udało się użyć ikony jako wyglądu.</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeHint" xml:space="preserve">
+    <value>Ikona stanie się częścią ikony „{name}”. Przyciski i akcje, które jej używały, przejdą na „{name}”.</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeKindLabel" xml:space="preserve">
+    <value>Użyj jako</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeTitle" xml:space="preserve">
+    <value>Użyj istniejącej ikony</value>
+  </data>
+  <data name="IconPacks.Appearances.PreviewAlt" xml:space="preserve">
+    <value>Wygląd „{kind}” ikony „{name}”</value>
+  </data>
+  <data name="IconPacks.Appearances.ReadOnly" xml:space="preserve">
+    <value>Ten pakiet jest tylko do odczytu, więc nie można zmienić jego wyglądów.</value>
+  </data>
+  <data name="IconPacks.Appearances.RemoveConfirmMessage" xml:space="preserve">
+    <value>Usunąć wygląd „{kind}” z ikony „{name}”? Przyciski, które go używają, przejdą na inny wygląd.</value>
+  </data>
+  <data name="IconPacks.Appearances.RemoveConfirmTitle" xml:space="preserve">
+    <value>Usuń wygląd</value>
+  </data>
+  <data name="IconPacks.Appearances.RemoveFailed" xml:space="preserve">
+    <value>Nie udało się usunąć wyglądu.</value>
+  </data>
+  <data name="IconPacks.Appearances.Replace" xml:space="preserve">
+    <value>Zastąp</value>
+  </data>
   <data name="IconPacks.AuthorFieldLabel" xml:space="preserve">
     <value>Autor</value>
   </data>
@@ -11306,6 +11398,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Widgets.Actions.FontSizeLabel" xml:space="preserve">
     <value>Rozmiar</value>
   </data>
+  <data name="Integrations.Widgets.Actions.IconAppearanceDescription" xml:space="preserve">
+    <value>Opcja Automatycznie wybiera wygląd dopasowany do ekranu, opcja Domyślny zawsze pokazuje własny obraz ikony. Jeśli ikona nie ma wybranego wyglądu, wygląd zostanie wybrany automatycznie.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.IconAppearanceLabel" xml:space="preserve">
+    <value>Wygląd</value>
+  </data>
   <data name="Integrations.Widgets.Actions.IconDescription" xml:space="preserve">
     <value>Pozostaw puste, aby usunąć ikonę.</value>
   </data>
@@ -11404,6 +11502,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Widgets.Actions.SetFontName" xml:space="preserve">
     <value>Ustaw czcionkę etykiety</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconAppearanceDescription" xml:space="preserve">
+    <value>Określa, który wygląd ikony widżetu jest wyświetlany, na przykład wersja ciemna lub statyczna.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconAppearanceName" xml:space="preserve">
+    <value>Ustaw wygląd ikony</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetIconDescription" xml:space="preserve">
     <value>Zmienia ikonę wyświetlaną przez widżet.</value>
@@ -12238,6 +12342,40 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Notifications.HttpsNotRunningMessage" xml:space="preserve">
     <value>Macro Deck jest dostępny przez HTTP, ale nasłuch HTTPS nie wystartował. Sprawdź port HTTPS i certyfikat w Ustawienia &gt; Sieć.</value>
+  </data>
+  <data name="Notifications.IconImport.CompletedWithWarnings.One" xml:space="preserve">
+    <value>{count} ikona zaimportowana do {pack} z ostrzeżeniami</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.IconImport.CompletedWithWarnings.Other" xml:space="preserve">
+    <value>Import do {pack} z ostrzeżeniami, zaimportowane ikony: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.IconImport.DefaultPackName" xml:space="preserve">
+    <value>pakiet ikon</value>
+  </data>
+  <data name="Notifications.IconImport.Failed" xml:space="preserve">
+    <value>Nie udało się zaimportować ikon do {pack}</value>
+  </data>
+  <data name="Notifications.IconImport.Importing" xml:space="preserve">
+    <value>Importowanie ikon do {pack}</value>
+  </data>
+  <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
+    <value>Nic z tego nie dało się zaimportować jako ikony.</value>
+  </data>
+  <data name="Notifications.IconImport.NothingImported" xml:space="preserve">
+    <value>Brak elementów do zaimportowania do {pack}</value>
+  </data>
+  <data name="Notifications.IconImport.PartlyFailed" xml:space="preserve">
+    <value>Import do {pack}: zaimportowano {imported}, niepowodzenia: {failed}</value>
+  </data>
+  <data name="Notifications.IconImport.Skipped.One" xml:space="preserve">
+    <value>{count} plik był już w tym pakiecie i został pominięty.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.IconImport.Skipped.Other" xml:space="preserve">
+    <value>Pominięte pliki, które już były w tym pakiecie: {count}.</value>
+    <comment>[plural]</comment>
   </data>
   <data name="Notifications.InstallationDamagedMessage" xml:space="preserve">
     <value>Brakuje niektórych plików Macro Deck lub nie pasują one do zainstalowanej wersji. Dzieje się tak, gdy aktualizacja została przerwana, na przykład gdy program antywirusowy zablokował część plików. Pobierz najnowszą wersję Macro Deck i zainstaluj ją ponownie. Pliki, których to dotyczy, są wymienione w dziennikach.</value>
@@ -17281,6 +17419,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Widgets.Appearance.Font.Unchanged" xml:space="preserve">
     <value>Bez zmian</value>
+  </data>
+  <data name="Widgets.Appearance.Icon.Appearance" xml:space="preserve">
+    <value>Wygląd ikony</value>
+  </data>
+  <data name="Widgets.Appearance.Icon.AppearanceAutomatic" xml:space="preserve">
+    <value>Automatycznie</value>
   </data>
   <data name="Widgets.Appearance.Icon.ChangeIcon" xml:space="preserve">
     <value>Zmień ikonę</value>

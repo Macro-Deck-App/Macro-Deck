@@ -1,0 +1,14 @@
+namespace MacroDeckHost.Application.Ui.Transport.Messages.Icons;
+
+public class IconAppearance
+{
+	public string Id { get; set; } = string.Empty;
+	public string Key { get; set; } = string.Empty;
+	public Dictionary<string, string> Traits { get; set; } = [];
+	public string? ContentHash { get; set; }
+	public bool IsAnimated { get; set; }
+	public int? Width { get; set; }
+	public int? Height { get; set; }
+	public string ProcessingState { get; set; } = string.Empty;
+	public string? ProcessingError { get; set; }
+}

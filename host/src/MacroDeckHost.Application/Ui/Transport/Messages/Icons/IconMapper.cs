@@ -60,7 +60,8 @@ public static class IconMapper
 		return response;
 	}
 
-	public static ImportSingleIconResponse ToSingleImportResponse(Result<SingleIconImportResult, IconError> result)
+	public static ImportSingleIconResponse ToSingleImportResponse(Result<SingleIconImportResult, IconError> result,
+		IIconPackCache iconPackCache)
 	{
 		if (!result.Success)
 		{
@@ -78,7 +79,7 @@ public static class IconMapper
 		return new ImportSingleIconResponse
 		{
 			Success = true,
-			Icon = ToDto(result.Data!.Icon),
+			Icon = ToDto(result.Data!.Icon, iconPackCache),
 			Reused = result.Data!.Reused
 		};
 	}
@@ -131,7 +132,10 @@ public static class IconMapper
 			Error = entity.Error
 		};
 
-	public static Icon ToDto(IconEntity entity)
+	public static Icon ToDto(IconEntity entity, IIconPackCache iconPackCache)
+		=> ToDto(entity, iconPackCache.GetAppearances(entity.Id));
+
+	public static Icon ToDto(IconEntity entity, IReadOnlyList<IconEntity> appearances)
 		=> new()
 		{
 			Id = entity.Id.ToString(),
@@ -143,8 +147,26 @@ public static class IconMapper
 			ProcessingState = entity.ProcessingState.ToString(),
 			ProcessingError = entity.ProcessingError,
 			AvailableSizes = entity.AvailableSizes.ToList(),
-			ContentHash = IconImageVersion.Of(entity),
+			ContentHash = IconImageVersion.Of(entity, appearances),
 			OriginalFileName = entity.OriginalFileName,
-			CreatedAt = entity.CreatedAt
+			CreatedAt = entity.CreatedAt,
+			Appearances = appearances.Select(ToAppearanceDto).ToList()
 		};
+
+	private static IconAppearance ToAppearanceDto(IconEntity asset)
+	{
+		var traits = asset.AppearanceTraits ?? new Dictionary<string, string>();
+		return new IconAppearance
+		{
+			Id = asset.Id.ToString(),
+			Key = IconAppearanceTraits.ToKey(traits),
+			Traits = new Dictionary<string, string>(traits, StringComparer.Ordinal),
+			ContentHash = IconImageVersion.Of(asset),
+			IsAnimated = asset.IsAnimated,
+			Width = asset.Width,
+			Height = asset.Height,
+			ProcessingState = asset.ProcessingState.ToString(),
+			ProcessingError = asset.ProcessingError
+		};
+	}
 }

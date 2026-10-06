@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, computed, inject } from '@angular/core';
 import { AppStrings } from '@macro-deck/runtime';
-import { IconImageService, LocalizationService } from '@shared';
+import { IconAppearanceContextService, IconImageService, LocalizationService } from '@shared';
 import { IconModel } from '../../services/icon-pack.service';
 
 export interface IconTileClick {
@@ -19,6 +19,7 @@ export interface IconTileClick {
 export class IconTileComponent {
   private readonly iconImage = inject(IconImageService);
   private readonly localization = inject(LocalizationService);
+  private readonly appearanceContext = inject(IconAppearanceContextService);
 
   @Input({ required: true }) icon!: IconModel;
   @Input() size = 96;
@@ -28,6 +29,7 @@ export class IconTileComponent {
 
   @Output() tileClick = new EventEmitter<IconTileClick>();
   @Output() tileContextMenu = new EventEmitter<{ icon: IconModel; x: number; y: number }>();
+  @Output() tileOpen = new EventEmitter<IconModel>();
 
   readonly animatedIconLabel = computed(() =>
     this.localization.translateKey(AppStrings.IconPacks.Tile.AnimatedIcon));
@@ -35,7 +37,16 @@ export class IconTileComponent {
     this.localization.translateKey(AppStrings.IconPacks.Tile.Processing));
 
   get imageUrl(): string | null {
-    return this.iconImage.getIconUrl(this.icon.id, 128, this.icon.contentHash);
+    const context = this.appearanceCount > 0 ? this.appearanceContext.current() : undefined;
+    return this.iconImage.getIconUrl(this.icon.id, 128, this.icon.contentHash, context);
+  }
+
+  get appearanceCount(): number {
+    return this.icon.appearances?.length ?? 0;
+  }
+
+  get appearancesLabel(): string {
+    return this.localization.translateKey(AppStrings.IconPacks.Appearances.Badge, { count: this.appearanceCount });
   }
 
   get failedTooltip(): string {
@@ -59,6 +70,10 @@ export class IconTileComponent {
   onCheckboxClick(event: MouseEvent): void {
     event.stopPropagation();
     this.tileClick.emit({ icon: this.icon, toggle: true, range: false });
+  }
+
+  onDoubleClick(): void {
+    this.tileOpen.emit(this.icon);
   }
 
   onContextMenu(event: MouseEvent): void {

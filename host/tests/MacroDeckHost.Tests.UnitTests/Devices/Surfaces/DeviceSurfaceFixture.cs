@@ -576,6 +576,9 @@ internal sealed class StubIconPackCache : IIconPackCache
 
 	public IconEntity? GetIconById(Guid iconId) => _icons.GetValueOrDefault(iconId);
 
+	public IReadOnlyList<IconEntity> GetAppearances(Guid parentId)
+		=> _icons.Values.Where(icon => icon.AppearanceOfId == parentId).ToList();
+
 	public Task InitializeCache() => Task.CompletedTask;
 
 	public IconPackEntity? GetPackById(Guid id) => null;

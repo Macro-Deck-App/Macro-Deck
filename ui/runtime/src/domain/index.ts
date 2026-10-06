@@ -25,3 +25,4 @@ export * from './button-state-variable.util';
 export * from './user-agent.util';
 export * from './liquid.util';
 export * from './backup-component-groups';
+export * from './icon-appearance-kind';

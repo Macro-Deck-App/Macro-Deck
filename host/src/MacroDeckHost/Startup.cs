@@ -905,6 +905,9 @@ public class Startup
 		services.AddScoped<IIconImportService, IconImportService>();
 		services.AddScoped<IIconPackService, IconPackService>();
 		services.AddScoped<IIconService, IconService>();
+		services.AddSingleton<IconAppearanceEditLocks>();
+		services.AddScoped<IIconAppearanceService, IconAppearanceService>();
+		services.AddScoped<IIconReferenceRewriter, IconReferenceRewriter>();
 		services.AddScoped<IIconPackExportService, IconPackExportService>();
 		services.AddScoped<IIconPackRestoreService, IconPackRestoreService>();
 		services.AddSingleton<IIconPackOwner, StoreIconPackOwner>();

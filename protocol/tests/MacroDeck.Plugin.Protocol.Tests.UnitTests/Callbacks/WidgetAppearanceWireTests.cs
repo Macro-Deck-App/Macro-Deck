@@ -38,4 +38,35 @@ public class WidgetAppearanceWireTests
 			Assert.That(roundTripped.IconColor, Is.EqualTo("#ef4444"));
 		});
 	}
+
+	[Test]
+	public void A_patch_from_a_plugin_that_predates_the_icon_appearance_leaves_it_unchanged()
+	{
+		var args = JsonSerializer.Deserialize<WidgetsApplyArgumentsV2>(
+			"""{"widgetId":"w1","patch":{"iconId":"i1","iconColor":"#ef4444"},"stateIds":["current"],"clearProperties":[]}""",
+			PluginProtocolJson.Options)!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(args.Patch.IconId, Is.EqualTo("i1"));
+			Assert.That(args.Patch.IconColor, Is.EqualTo("#ef4444"));
+			Assert.That(args.Patch.IconAppearance, Is.Null);
+		});
+	}
+
+	[Test]
+	public void The_icon_appearance_travels_under_its_frozen_wire_name()
+	{
+		var json = JsonSerializer.SerializeToElement(
+			new WidgetAppearancePatchDto { IconAppearance = "colorScheme=dark;motion=static" },
+			PluginProtocolJson.Options);
+
+		var roundTripped = json.Deserialize<WidgetAppearancePatchDto>(PluginProtocolJson.Options)!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(json.GetProperty("iconAppearance").GetString(), Is.EqualTo("colorScheme=dark;motion=static"));
+			Assert.That(roundTripped.IconAppearance, Is.EqualTo("colorScheme=dark;motion=static"));
+		});
+	}
 }

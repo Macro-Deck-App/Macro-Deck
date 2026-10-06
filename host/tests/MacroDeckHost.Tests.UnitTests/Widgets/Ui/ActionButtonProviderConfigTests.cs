@@ -541,6 +541,7 @@ public class ActionButtonProviderConfigTests
 			TestLocalization.Resolver,
 			"en",
 			_time,
+			new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache(),
 			CancellationToken.None);
 		var view = new UiView(new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
 			ActionButtonWidgetConfigView.Build(JsonSerializer.SerializeToElement(data), 1, _registry, new NoFonts(), liveState, context));

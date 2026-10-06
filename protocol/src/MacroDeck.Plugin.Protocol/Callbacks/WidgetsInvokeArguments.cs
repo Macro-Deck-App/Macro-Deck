@@ -89,6 +89,9 @@ public sealed record WidgetAppearancePatchDto
 
 	/// <summary>Optional and additive: a host that predates it ignores the field.</summary>
 	public string? AccentColor { get; init; }
+
+	/// <summary>Optional and additive: a host that predates it ignores the field.</summary>
+	public string? IconAppearance { get; init; }
 }
 
 /// <summary>

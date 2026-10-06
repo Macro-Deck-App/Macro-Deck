@@ -180,6 +180,35 @@ belongs to the targeted state, like the icon itself.
   `ApplyAsync` return `false` there. `WidgetTargetInfo.AppearanceProperties` lists `IconColor` for a
   button on a host that supports it.
 
+## Choosing the icon's appearance
+
+An icon can have [appearances](/guide/concepts/#icon-appearances), such as a dark or a static version, and
+Macro Deck normally picks the one that fits the screen. A button or slider can be pinned to one of them
+instead. The user picks it under **Icon appearance** in the editor, and a flow sets it with the **Set Icon
+Appearance** action.
+
+```csharp
+await context.Widgets.ApplyAsync(new WidgetAppearanceRequest
+{
+	WidgetId = widgetId,
+	Patch = new WidgetAppearancePatch { IconAppearance = "colorScheme=dark;motion=static" },
+});
+```
+
+`IconAppearance` takes an appearance key, its traits joined by `;`, or `default` for the icon's own image.
+To return to automatic selection, send `ClearProperties = [WidgetAppearanceProperty.IconAppearance]` or an
+empty string. In state mode the pin belongs to the icon of the targeted state, like the icon itself.
+
+- The pin belongs to the icon, so it needs one: on a widget without an icon the call changes nothing, and
+  **Set Icon** with a different icon drops the pin.
+- A key that is not a valid appearance key is rejected and `ApplyAsync` returns `false`. A valid key the
+  icon has no appearance for is kept, and the icon is shown as if it were not pinned.
+- Like **Set Icon**, the call changes nothing on a button with an assigned icon provider, and the action
+  fails there.
+- A host that predates `IconAppearance` ignores the field, so a patch that changes only the appearance makes
+  `ApplyAsync` return `false` there. `WidgetTargetInfo.AppearanceProperties` lists `IconAppearance` for a
+  button or slider on a host that supports it.
+
 ## Over the plugin protocol
 
 | Operation | SDK member |

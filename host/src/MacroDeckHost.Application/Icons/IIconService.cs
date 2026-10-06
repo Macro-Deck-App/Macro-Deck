@@ -27,5 +27,6 @@ public interface IIconService
 		int? size,
 		bool acceptWebp,
 		bool staticFrame,
-		CancellationToken cancellationToken);
+		CancellationToken cancellationToken,
+		IconAppearanceContext? context = null);
 }

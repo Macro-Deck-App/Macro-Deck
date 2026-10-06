@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace MacroDeckHost.Application.Portable;
 
 public sealed class PortableIcon
@@ -25,4 +27,7 @@ public sealed class PortableIcon
 	public string? OriginalFormat { get; set; }
 
 	public List<int> AvailableSizes { get; set; } = [];
+
+	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+	public List<PortableIconAppearance>? Appearances { get; set; }
 }

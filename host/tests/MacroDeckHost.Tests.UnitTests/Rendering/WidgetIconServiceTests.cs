@@ -390,7 +390,10 @@ public class WidgetIconServiceTests
 		// No source is registered for "url" - exactly as production registers none - so resolution must
 		// fall through to nothing without ever dereferencing the reference as a URL.
 		var noSources
-			= new WidgetIconResources(new WidgetIconSourceRegistry([]), new UiResourceStore(), Serilog.Log.Logger);
+			= new WidgetIconResources(new WidgetIconSourceRegistry([]),
+				new UiResourceStore(),
+				Serilog.Log.Logger,
+				new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache());
 		var fixture = new Fixture(widget, iconResources: noSources);
 		fixture.Integrations.Add(new FakeIntegration { Id = "spotify", Actions = [action] });
 

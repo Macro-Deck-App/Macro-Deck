@@ -2,6 +2,7 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Widgets;
+using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Widgets;
@@ -31,6 +32,27 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 		new() { Value = "cover", Label = AppStrings.Integrations.Widgets.Actions.IconFitCover() }
 	];
 
+	private static readonly IReadOnlyList<ActionParameterOption> _iconAppearances =
+	[
+		new()
+		{
+			Value = WidgetAppearanceValues.Reset,
+			Label = AppStrings.Widgets.Appearance.Icon.AppearanceAutomatic()
+		},
+		new() { Value = WidgetIconReference.DefaultAppearance, Label = AppStrings.IconPacks.Appearances.Default() },
+		new() { Value = "colorScheme=light", Label = AppStrings.IconPacks.Appearances.Kind.Light() },
+		new() { Value = "colorScheme=dark", Label = AppStrings.IconPacks.Appearances.Kind.Dark() },
+		new() { Value = "motion=static", Label = AppStrings.IconPacks.Appearances.Kind.Static() },
+		new() { Value = "motion=animated", Label = AppStrings.IconPacks.Appearances.Kind.Animated() },
+		new() { Value = "colorScheme=light;motion=static", Label = AppStrings.IconPacks.Appearances.Kind.LightStatic() },
+		new()
+		{
+			Value = "colorScheme=light;motion=animated", Label = AppStrings.IconPacks.Appearances.Kind.LightAnimated()
+		},
+		new() { Value = "colorScheme=dark;motion=static", Label = AppStrings.IconPacks.Appearances.Kind.DarkStatic() },
+		new() { Value = "colorScheme=dark;motion=animated", Label = AppStrings.IconPacks.Appearances.Kind.DarkAnimated() }
+	];
+
 	private static readonly IReadOnlyList<ActionParameterOption> _textAlignments =
 	[
 		new() { Value = WidgetActionParameters.Unchanged, Label = AppStrings.Integrations.Widgets.Actions.Unchanged() },
@@ -52,6 +74,7 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			SetIcon(),
 			SetIconDisplay(),
 			SetIconColor(),
+			SetIconAppearance(),
 			SetFont(),
 			SetBorder(),
 			new SetButtonStateActionDefinition(() => _widgets),
@@ -176,6 +199,36 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 				? [WidgetAppearanceProperty.IconColor]
 				: []);
 
+	private WidgetAppearanceActionDefinition SetIconAppearance()
+		=> new("set-icon-appearance",
+			AppStrings.Integrations.Widgets.Actions.SetIconAppearanceName(),
+			AppStrings.Integrations.Widgets.Actions.SetIconAppearanceDescription(),
+			WidgetAppearanceProperty.IconAppearance,
+			[
+				ActionParameter.Choice("iconAppearance",
+					_iconAppearances,
+					label: AppStrings.Integrations.Widgets.Actions.IconAppearanceLabel(),
+					description: AppStrings.Integrations.Widgets.Actions.IconAppearanceDescription(),
+					defaultValue: WidgetAppearanceValues.Reset)
+			],
+			() => _widgets,
+			context => new WidgetAppearancePatch
+			{
+				IconAppearance = WidgetActionParameters.IsReset(context, "iconAppearance")
+					? null
+					: WidgetActionParameters.ReadOptional(context, "iconAppearance")
+			},
+			context => WidgetActionParameters.IsReset(context, "iconAppearance")
+				? [WidgetAppearanceProperty.IconAppearance]
+				: [],
+			IconControlledByProvider);
+
+	private static ActionResult? IconControlledByProvider(IWidgetApi widgets, string widgetId)
+		=> widgets.GetWidgets().FirstOrDefault(w => w.Id == widgetId) is { HasActiveIconProvider: true }
+			? ActionResult.Failed(ActionErrorCodes.PermissionDenied,
+				AppStrings.Integrations.Widgets.Errors.IconControlledByProvider())
+			: null;
+
 	private WidgetAppearanceActionDefinition SetIcon()
 		=> new("set-icon",
 			AppStrings.Integrations.Widgets.Actions.SetIconName(),
@@ -188,11 +241,7 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			],
 			() => _widgets,
 			context => new WidgetAppearancePatch { IconId = ReadText(context, "iconId") },
-			onApplyFailed: (widgets, widgetId) =>
-				widgets.GetWidgets().FirstOrDefault(w => w.Id == widgetId) is { HasActiveIconProvider: true }
-					? ActionResult.Failed(ActionErrorCodes.PermissionDenied,
-						AppStrings.Integrations.Widgets.Errors.IconControlledByProvider())
-					: null);
+			onApplyFailed: IconControlledByProvider);
 
 	private WidgetAppearanceActionDefinition SetIconDisplay()
 		=> new("set-icon-display",

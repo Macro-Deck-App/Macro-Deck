@@ -101,6 +101,10 @@ The first argument is the pack's key in the manifest, the second the icon's name
 - **A replaced icon gets a new `contentHash`.** When an update or a development sync replaces the icon,
   the `resourceId` stays and the `contentHash` changes, so clients fetch the new bytes. Ask again when you
   build a tree rather than holding a handle for the plugin's whole lifetime.
+- **Appearances are chosen by the client.** For an icon with
+  [appearances](/guide/concepts/#icon-appearances), the handle's `resourceId` carries a marker and each
+  client fetches the light, dark, static or animated image that fits it. The `contentHash` changes when any
+  appearance changes. Treat `resourceId` as opaque: it changes when an icon gains or loses its appearances.
 - **Your packs only.** The lookup by key and name is scoped to the calling plugin, so no plugin can name
   another's icons that way. To show an icon you know by id, use
   [`GetIconAsync`](#icons-from-any-installed-icon-pack).
