@@ -56,6 +56,7 @@ export class UiWidgetRenderHostFactory {
       videoStreams: () => this.videoStreams.surface(),
       emit: (node, name, data) => bus.emit(node, name, data),
       setPressed: (node, pressed) => bus.setPressed(node, pressed),
+      flashPressed: node => bus.flashPressed(node),
       ownsRootWidgetBorder,
     };
   }

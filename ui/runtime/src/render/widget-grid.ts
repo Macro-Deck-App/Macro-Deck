@@ -7,7 +7,7 @@ import { DEFAULT_EMPTY_CELL_STYLE, EmptyCellStyle } from '../domain/folder.inter
 import { paintOrder } from '../grid/grid-layout.util';
 import { GridGeometry, GridMetrics } from '../grid/grid-metrics';
 import { UiNode } from '../ui-framework/ui-node.interface';
-import { treeClaimsGesture } from '../ui-framework/node-gestures';
+import { findInteractiveNode, treeClaimsGesture } from '../ui-framework/node-gestures';
 import { effectiveTreeRoot } from '../ui-framework/responsive';
 import { UiComponentBox } from '../ui-framework/layout';
 import { widgetTileBorder, widgetTileFilled, widgetTileTransparent } from '../ui-components/style';
@@ -174,6 +174,14 @@ export function renderWidgetGrid(
           paintPressed(tile);
         }
         if (base.setPressed) base.setPressed(node, pressed);
+      },
+      flashPressed: node => {
+        const tile = tiles[widgetId];
+        if (tile && node.id === findInteractiveNode(trees(widgetId), boxOfTile(tile))?.id) {
+          tile.press.press();
+          tile.press.release();
+        }
+        if (base.flashPressed) base.flashPressed(node);
       },
       // The tile draws the root button's ring itself, beside the scaled content - see `tile.border`.
       ownsRootWidgetBorder: () => true,

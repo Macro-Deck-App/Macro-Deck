@@ -611,6 +611,84 @@ describe('UiTreeWidgetComponent', () => {
     });
   });
 
+  describe('a slider double tap', () => {
+    const DOUBLE_TAP = ['adjust', 'change', 'double-press'];
+
+    function sliderNode(events: string[]): UiNode {
+      return { id: 'slider', type: UiComponents.Slider, properties: { [UiComponentProperties.Events]: events } };
+    }
+
+    function stackOf(...children: UiNode[]): UiNode {
+      return { id: 'root', type: UiComponents.Stack, properties: {}, children };
+    }
+
+    async function mountTree(root: UiNode, disabled = false) {
+      const fixture = createFixture({ widgetId: 'w1', disabled });
+      const pressed: boolean[] = [];
+      fixture.componentInstance.pressedChange.subscribe(p => pressed.push(p));
+      handles[0].root.set(root);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const slider = tile(fixture).querySelector('[data-node-id="slider"]') as HTMLElement;
+      expect(slider).withContext('the slider should render').toBeTruthy();
+      return { pressed, slider };
+    }
+
+    function tap(slider: HTMLElement): void {
+      const rect = slider.getBoundingClientRect();
+      const init = {
+        bubbles: true, cancelable: true, pointerId: 1,
+        clientX: rect.left + rect.width / 2, clientY: rect.top + rect.height / 2,
+      };
+      slider.dispatchEvent(new PointerEvent('pointerdown', init));
+      slider.dispatchEvent(new PointerEvent('pointerup', init));
+    }
+
+    async function doubleTap(root: UiNode, disabled = false): Promise<boolean[]> {
+      const { pressed, slider } = await mountTree(root, disabled);
+      jasmine.clock().install();
+      jasmine.clock().mockDate(new Date(2026, 0, 1));
+      try {
+        tap(slider);
+        jasmine.clock().tick(200);
+        tap(slider);
+        jasmine.clock().tick(PRESS_FEEDBACK_MIN_VISIBLE_MS);
+      } finally {
+        jasmine.clock().uninstall();
+      }
+      return pressed;
+    }
+
+    it('flashes the tile like a button press when the double tap is recognised', async () => {
+      const lead: UiNode = { id: 'lead', type: UiComponents.Text, properties: { text: 'Volume' } };
+
+      expect(await doubleTap(stackOf(lead, sliderNode(DOUBLE_TAP)))).toEqual([true, false]);
+    });
+
+    it('does not flash for a single tap', async () => {
+      const { pressed, slider } = await mountTree(stackOf(sliderNode(DOUBLE_TAP)));
+
+      tap(slider);
+
+      expect(pressed).toEqual([]);
+    });
+
+    it('does not flash a slider that has no double tap action', async () => {
+      expect(await doubleTap(stackOf(sliderNode(['adjust', 'change'])))).toEqual([]);
+    });
+
+    it('leaves the tile alone for a slider nested after another control of the tile', async () => {
+      const button: UiNode =
+        { id: 'nested', type: UiComponents.Button, properties: { [UiComponentProperties.Events]: ['press'] } };
+
+      expect(await doubleTap(stackOf(button, sliderNode(DOUBLE_TAP)))).toEqual([]);
+    });
+
+    it('does not flash a disabled tile', async () => {
+      expect(await doubleTap(stackOf(sliderNode(DOUBLE_TAP)), true)).toEqual([]);
+    });
+  });
+
   describe('a responsive tree', () => {
     function responsiveRoot(): UiNode {
       return {
