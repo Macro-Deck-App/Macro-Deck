@@ -137,7 +137,7 @@ public static class UiComponentProperties
 	/// normative result.</summary>
 	public const string Saturation = "saturation";
 
-	/// <summary>A button's artwork drawn as a silhouette in this colour, as <c>#rrggbb</c>: every pixel
+	/// <summary>A button's or image's artwork drawn as a silhouette in this colour, as <c>#rrggbb</c>: every pixel
 	/// takes the colour and keeps its own alpha, so a transparent icon is recoloured and an opaque image
 	/// becomes a solid rectangle. Absent means the artwork's own colours, which is also what a reader that
 	/// does not implement the key draws. Unrelated to the press feedback tint.</summary>

@@ -20024,6 +20024,66 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.YouTube.Config.UnknownStep" xml:space="preserve">
     <value>Neznámý krok</value>
   </data>
+  <data name="Integrations.Obs.Actions.SplitRecordFile.Name" xml:space="preserve">
+    <value>Rozdělit soubor nahrávky</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SplitRecordFile.Description" xml:space="preserve">
+    <value>Zahájí nový soubor nahrávky, zatímco nahrávání pokračuje</value>
+  </data>
+  <data name="Integrations.Obs.Actions.CreateRecordChapter.Name" xml:space="preserve">
+    <value>Vytvořit kapitolu nahrávky</value>
+  </data>
+  <data name="Integrations.Obs.Actions.CreateRecordChapter.Description" xml:space="preserve">
+    <value>Přidá do nahrávaného souboru značku kapitoly. OBS to podporuje pouze ve formátu Hybrid MP4.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.CreateRecordChapter.ChapterNameLabel" xml:space="preserve">
+    <value>Název kapitoly</value>
+  </data>
+  <data name="Integrations.Obs.Actions.CreateRecordChapter.ChapterNameDescription" xml:space="preserve">
+    <value>Volitelné. Ponechte prázdné a název kapitoly určí OBS.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetRecordDirectory.Name" xml:space="preserve">
+    <value>Nastavit složku nahrávek</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetRecordDirectory.Description" xml:space="preserve">
+    <value>Nastaví složku, do které OBS ukládá nové nahrávky</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetRecordDirectory.DirectoryLabel" xml:space="preserve">
+    <value>Složka</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetRecordDirectory.DirectoryDescription" xml:space="preserve">
+    <value>Cesta ke složce v počítači, na kterém běží OBS</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NotRecording" xml:space="preserve">
+    <value>OBS nenahrává.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.RequestRejected" xml:space="preserve">
+    <value>OBS požadavek odmítl: {message}</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NoDirectorySelected" xml:space="preserve">
+    <value>Zadejte složku nahrávek.</value>
+  </data>
+  <data name="Integrations.Obs.Events.RecordFileChangedName" xml:space="preserve">
+    <value>Soubor nahrávky změněn</value>
+  </data>
+  <data name="Integrations.Obs.Events.RecordFileChangedDescription" xml:space="preserve">
+    <value>Nahrávání bylo zahájeno, přešlo do nového souboru nebo skončilo. Cesta je soubor, který OBS nahlásil.</value>
+  </data>
+  <data name="Integrations.Obs.Events.ScreenshotSavedName" xml:space="preserve">
+    <value>Snímek obrazovky uložen</value>
+  </data>
+  <data name="Integrations.Obs.Events.ScreenshotSavedDescription" xml:space="preserve">
+    <value>OBS uložil snímek obrazovky na disk.</value>
+  </data>
+  <data name="Integrations.Obs.Events.ScreenshotsCategory" xml:space="preserve">
+    <value>Snímky obrazovky</value>
+  </data>
+  <data name="Integrations.Obs.Variables.LastRecordingFile" xml:space="preserve">
+    <value>Poslední soubor nahrávky</value>
+  </data>
+  <data name="Integrations.Obs.Variables.LastScreenshot" xml:space="preserve">
+    <value>Poslední snímek obrazovky</value>
+  </data>
   <data name="Integrations.Obs.Actions.StartOutput.Name" xml:space="preserve">
     <value>Spustit výstup</value>
   </data>

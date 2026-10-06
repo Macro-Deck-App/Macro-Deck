@@ -39,6 +39,10 @@
       "deprecated": true,
       "description": "Legacy bare icon-pack id, superseded by icon. No longer written by a save - upgraded to icon the next time this widget is read, and dropped from the payload on save."
     },
+    "iconColor": {
+      "type": ["string", "null"],
+      "description": "The colour the icon is drawn in, as #rrggbb, every pixel keeping its own transparency. Absent or null draws the icon's own colours."
+    },
     "showLabel": {
       "type": "boolean",
       "description": "Show the text label."

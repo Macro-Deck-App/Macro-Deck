@@ -45,6 +45,8 @@ internal sealed class ObsClient : IObsClient
 		_obs.InputMuteStateChanged += (_, args) =>
 			InputMuteChanged?.Invoke(this, new ObsInputMuteChange(args.InputName, args.InputMuted));
 		_obs.ReplayBufferSaved += (_, args) => ReplayBufferSaved?.Invoke(this, args.SavedReplayPath);
+		_obs.RecordFileChanged += (_, args) => RecordFileChanged?.Invoke(this, args.NewOutputPath);
+		_obs.ScreenshotSaved += (_, args) => ScreenshotSaved?.Invoke(this, args.SavedScreenshotPath);
 
 		_obs.InputSettingsChanged += (_, args) => Raise(() =>
 		{
@@ -71,6 +73,10 @@ internal sealed class ObsClient : IObsClient
 	public event EventHandler<ObsInputMuteChange>? InputMuteChanged;
 
 	public event EventHandler<string>? ReplayBufferSaved;
+
+	public event EventHandler<string>? RecordFileChanged;
+
+	public event EventHandler<string>? ScreenshotSaved;
 
 	public event EventHandler<ObsInputSettingsChange>? InputSettingsChanged;
 
@@ -258,6 +264,13 @@ internal sealed class ObsClient : IObsClient
 
 	public void SaveReplayBuffer() => _obs.SaveReplayBuffer();
 
+	public void SplitRecordFile() => Request(_obs.SplitRecordFile);
+
+	public void CreateRecordChapter(string? chapterName) => Request(() => _obs.SendRequest("CreateRecordChapter",
+		string.IsNullOrWhiteSpace(chapterName) ? null : new JObject { ["chapterName"] = chapterName }));
+
+	public void SetRecordDirectory(string directory) => Request(() => _obs.SetRecordDirectory(directory));
+
 	public void StartOutput(string outputName)
 		=> TranslateOutputErrors("StartOutput", outputName, () => _obs.StartOutput(outputName));
 
@@ -404,6 +417,18 @@ internal sealed class ObsClient : IObsClient
 		=> Disconnected?.Invoke(this, e.DisconnectReason);
 
 	private void RaiseStateChanged() => StateChanged?.Invoke(this, EventArgs.Empty);
+
+	private static void Request(Action request)
+	{
+		try
+		{
+			request();
+		}
+		catch (ErrorResponseException ex)
+		{
+			throw new ObsRequestException(ex.ErrorCode, ex.Message);
+		}
+	}
 
 	// obs-websocket answers 204 to a request type it does not know (a server older than 5.7) and 600 to a
 	// name it cannot find.

@@ -13,6 +13,25 @@ internal enum ObsConnectionStatus
 	Disconnected
 }
 
+internal enum ObsCommandOutcome
+{
+	Success,
+	NotConnected,
+	NotRecording,
+	Rejected
+}
+
+internal readonly record struct ObsCommandResult(ObsCommandOutcome Outcome, string? Message = null)
+{
+	public static ObsCommandResult Success { get; } = new(ObsCommandOutcome.Success);
+
+	public static ObsCommandResult NotConnected { get; } = new(ObsCommandOutcome.NotConnected);
+
+	public static ObsCommandResult NotRecording { get; } = new(ObsCommandOutcome.NotRecording);
+
+	public static ObsCommandResult Rejected(string message) => new(ObsCommandOutcome.Rejected, message);
+}
+
 internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 {
 	private static readonly TimeSpan _maxReconnectDelay = TimeSpan.FromMinutes(1);
@@ -59,6 +78,8 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 	private int _disconnectedLogged;
 	private int _reconnectFailures;
 	private volatile string? _lastError;
+	private volatile string? _lastRecordingFilePath;
+	private volatile string? _lastScreenshotPath;
 
 	internal ObsConnection(
 		IObsClient client,
@@ -91,6 +112,8 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		_client.StateChanged += OnStateChanged;
 		_client.InputMuteChanged += OnInputMuteChanged;
 		_client.ReplayBufferSaved += OnReplayBufferSaved;
+		_client.RecordFileChanged += OnRecordFileChanged;
+		_client.ScreenshotSaved += OnScreenshotSaved;
 		_client.InputSettingsChanged += OnInputSettingsChanged;
 		_client.SourceFilterChanged += OnSourceFilterChanged;
 		_client.InputActiveChanged += OnInputActiveChanged;
@@ -101,6 +124,10 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 	public ObsState State => _state;
 
 	public ObsConnectionStatus Status => _status;
+
+	public string? LastRecordingFilePath => _lastRecordingFilePath;
+
+	public string? LastScreenshotPath => _lastScreenshotPath;
 
 	public bool IsConnected => _client.IsConnected;
 
@@ -171,6 +198,13 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 	public Task<bool> StopReplayBufferAsync() => RunAsync(_client.StopReplayBuffer);
 	public Task<bool> ToggleReplayBufferAsync() => RunAsync(_client.ToggleReplayBuffer);
 	public Task<bool> SaveReplayBufferAsync() => RunAsync(_client.SaveReplayBuffer);
+	public Task<ObsCommandResult> SplitRecordFileAsync() => RunForResultAsync(_client.SplitRecordFile);
+
+	public Task<ObsCommandResult> CreateRecordChapterAsync(string? chapterName)
+		=> RunForResultAsync(() => _client.CreateRecordChapter(chapterName));
+
+	public Task<ObsCommandResult> SetRecordDirectoryAsync(string directory)
+		=> RunForResultAsync(() => _client.SetRecordDirectory(directory));
 
 	public Task<bool> SetSourceVisibleAsync(string sceneName, string sourceName, bool visible)
 		=> RunAsync(() => _client.SetSourceVisible(sceneName, sourceName, visible));
@@ -368,6 +402,8 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		_client.Disconnected -= OnDisconnected;
 		_client.InputMuteChanged -= OnInputMuteChanged;
 		_client.ReplayBufferSaved -= OnReplayBufferSaved;
+		_client.RecordFileChanged -= OnRecordFileChanged;
+		_client.ScreenshotSaved -= OnScreenshotSaved;
 		_client.StateChanged -= OnStateChanged;
 		_client.InputSettingsChanged -= OnInputSettingsChanged;
 		_client.SourceFilterChanged -= OnSourceFilterChanged;
@@ -664,6 +700,44 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		}
 	}
 
+	private void OnRecordFileChanged(object? sender, string path)
+	{
+		var published = false;
+		lock (_publicationGate)
+		{
+			if (!_cts.IsCancellationRequested && Volatile.Read(ref _disposed) == 0)
+			{
+				_lastRecordingFilePath = path;
+				_events?.PublishRecordFileChanged(path);
+				published = true;
+			}
+		}
+
+		if (published)
+		{
+			_onVariablesChanged?.Invoke();
+		}
+	}
+
+	private void OnScreenshotSaved(object? sender, string path)
+	{
+		var published = false;
+		lock (_publicationGate)
+		{
+			if (!_cts.IsCancellationRequested && Volatile.Read(ref _disposed) == 0)
+			{
+				_lastScreenshotPath = path;
+				_events?.PublishScreenshotSaved(path);
+				published = true;
+			}
+		}
+
+		if (published)
+		{
+			_onVariablesChanged?.Invoke();
+		}
+	}
+
 	private void OnDisconnected(object? sender, string? reason)
 	{
 		if (_cts.IsCancellationRequested)
@@ -757,6 +831,34 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		{
 			_logger.Error(ex, "OBS command failed");
 			return false;
+		}
+	});
+
+	private Task<ObsCommandResult> RunForResultAsync(Action action) => Task.Run(() =>
+	{
+		if (!IsConnected)
+		{
+			return ObsCommandResult.NotConnected;
+		}
+
+		try
+		{
+			action();
+			return ObsCommandResult.Success;
+		}
+		catch (ObsRequestException ex) when (ex.Code == ObsRequestException.OutputNotRunning)
+		{
+			return ObsCommandResult.NotRecording;
+		}
+		catch (ObsRequestException ex)
+		{
+			_logger.Warning(ex, "OBS rejected a request with code {Code}", ex.Code);
+			return ObsCommandResult.Rejected(ex.Message);
+		}
+		catch (Exception ex)
+		{
+			_logger.Error(ex, "OBS command failed");
+			return IsConnected ? ObsCommandResult.Rejected(ex.Message) : ObsCommandResult.NotConnected;
 		}
 	});
 

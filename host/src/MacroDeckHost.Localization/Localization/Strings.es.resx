@@ -20024,6 +20024,66 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.YouTube.Config.UnknownStep" xml:space="preserve">
     <value>Paso desconocido</value>
   </data>
+  <data name="Integrations.Obs.Actions.SplitRecordFile.Name" xml:space="preserve">
+    <value>Dividir archivo de grabación</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SplitRecordFile.Description" xml:space="preserve">
+    <value>Inicia un nuevo archivo de grabación mientras la grabación continúa</value>
+  </data>
+  <data name="Integrations.Obs.Actions.CreateRecordChapter.Name" xml:space="preserve">
+    <value>Crear capítulo de grabación</value>
+  </data>
+  <data name="Integrations.Obs.Actions.CreateRecordChapter.Description" xml:space="preserve">
+    <value>Añade una marca de capítulo al archivo que se está grabando. OBS solo lo admite con el formato Hybrid MP4.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.CreateRecordChapter.ChapterNameLabel" xml:space="preserve">
+    <value>Nombre del capítulo</value>
+  </data>
+  <data name="Integrations.Obs.Actions.CreateRecordChapter.ChapterNameDescription" xml:space="preserve">
+    <value>Opcional. Déjalo vacío para que OBS ponga el nombre.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetRecordDirectory.Name" xml:space="preserve">
+    <value>Establecer carpeta de grabación</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetRecordDirectory.Description" xml:space="preserve">
+    <value>Establece la carpeta en la que OBS guarda las nuevas grabaciones</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetRecordDirectory.DirectoryLabel" xml:space="preserve">
+    <value>Carpeta</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetRecordDirectory.DirectoryDescription" xml:space="preserve">
+    <value>Ruta de la carpeta en el equipo donde se ejecuta OBS</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NotRecording" xml:space="preserve">
+    <value>OBS no está grabando.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.RequestRejected" xml:space="preserve">
+    <value>OBS rechazó la solicitud: {message}</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NoDirectorySelected" xml:space="preserve">
+    <value>Introduce una carpeta de grabación.</value>
+  </data>
+  <data name="Integrations.Obs.Events.RecordFileChangedName" xml:space="preserve">
+    <value>Archivo de grabación cambiado</value>
+  </data>
+  <data name="Integrations.Obs.Events.RecordFileChangedDescription" xml:space="preserve">
+    <value>La grabación se inició, pasó a un nuevo archivo o se detuvo. La ruta es el archivo que indica OBS.</value>
+  </data>
+  <data name="Integrations.Obs.Events.ScreenshotSavedName" xml:space="preserve">
+    <value>Captura de pantalla guardada</value>
+  </data>
+  <data name="Integrations.Obs.Events.ScreenshotSavedDescription" xml:space="preserve">
+    <value>OBS guardó una captura de pantalla en el disco.</value>
+  </data>
+  <data name="Integrations.Obs.Events.ScreenshotsCategory" xml:space="preserve">
+    <value>Capturas de pantalla</value>
+  </data>
+  <data name="Integrations.Obs.Variables.LastRecordingFile" xml:space="preserve">
+    <value>Último archivo de grabación</value>
+  </data>
+  <data name="Integrations.Obs.Variables.LastScreenshot" xml:space="preserve">
+    <value>Última captura de pantalla</value>
+  </data>
   <data name="Integrations.Obs.Actions.StartOutput.Name" xml:space="preserve">
     <value>Iniciar salida</value>
   </data>

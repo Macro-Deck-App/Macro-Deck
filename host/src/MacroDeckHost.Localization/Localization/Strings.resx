@@ -20028,6 +20028,66 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.YouTube.Config.UnknownStep" xml:space="preserve">
     <value>Unknown step</value>
   </data>
+  <data name="Integrations.Obs.Actions.SplitRecordFile.Name" xml:space="preserve">
+    <value>Split Recording File</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SplitRecordFile.Description" xml:space="preserve">
+    <value>Starts a new recording file while the recording keeps running</value>
+  </data>
+  <data name="Integrations.Obs.Actions.CreateRecordChapter.Name" xml:space="preserve">
+    <value>Create Recording Chapter</value>
+  </data>
+  <data name="Integrations.Obs.Actions.CreateRecordChapter.Description" xml:space="preserve">
+    <value>Adds a chapter marker to the file being recorded. OBS supports this only for the Hybrid MP4 format.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.CreateRecordChapter.ChapterNameLabel" xml:space="preserve">
+    <value>Chapter name</value>
+  </data>
+  <data name="Integrations.Obs.Actions.CreateRecordChapter.ChapterNameDescription" xml:space="preserve">
+    <value>Optional. Leave empty to let OBS name the chapter.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetRecordDirectory.Name" xml:space="preserve">
+    <value>Set Recording Directory</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetRecordDirectory.Description" xml:space="preserve">
+    <value>Sets the folder OBS writes new recordings to</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetRecordDirectory.DirectoryLabel" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetRecordDirectory.DirectoryDescription" xml:space="preserve">
+    <value>Path of the folder on the computer running OBS</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NotRecording" xml:space="preserve">
+    <value>OBS is not recording.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.RequestRejected" xml:space="preserve">
+    <value>OBS rejected the request: {message}</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NoDirectorySelected" xml:space="preserve">
+    <value>Enter a recording folder.</value>
+  </data>
+  <data name="Integrations.Obs.Events.RecordFileChangedName" xml:space="preserve">
+    <value>Recording File Changed</value>
+  </data>
+  <data name="Integrations.Obs.Events.RecordFileChangedDescription" xml:space="preserve">
+    <value>The recording started, moved to a new file or stopped. The path is the file OBS reports.</value>
+  </data>
+  <data name="Integrations.Obs.Events.ScreenshotSavedName" xml:space="preserve">
+    <value>Screenshot Saved</value>
+  </data>
+  <data name="Integrations.Obs.Events.ScreenshotSavedDescription" xml:space="preserve">
+    <value>OBS saved a screenshot to disk.</value>
+  </data>
+  <data name="Integrations.Obs.Events.ScreenshotsCategory" xml:space="preserve">
+    <value>Screenshots</value>
+  </data>
+  <data name="Integrations.Obs.Variables.LastRecordingFile" xml:space="preserve">
+    <value>Last Recording File</value>
+  </data>
+  <data name="Integrations.Obs.Variables.LastScreenshot" xml:space="preserve">
+    <value>Last Screenshot</value>
+  </data>
   <data name="Integrations.Obs.Actions.StartOutput.Name" xml:space="preserve">
     <value>Start Output</value>
   </data>
