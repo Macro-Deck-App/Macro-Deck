@@ -18320,6 +18320,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.Gauges.Color" xml:space="preserve">
     <value>Couleur de l'anneau</value>
   </data>
+  <data name="Widgets.Gauges.ColorThresholdsDescription" xml:space="preserve">
+    <value>Colore l'anneau selon la plage dans laquelle se trouve sa valeur, au lieu de la couleur de l'anneau et de l'alerte.</value>
+  </data>
   <data name="Widgets.Gauges.EmptyHint" xml:space="preserve">
     <value>Aucune jauge pour l'instant. Ajoute-en une dans les réglages du widget.</value>
   </data>

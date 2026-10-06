@@ -12,6 +12,7 @@ using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Widgets;
+using MacroDeckHost.Widgets.Gauges;
 using MacroDeckHost.Widgets.HistoryGraph;
 using MacroDeckHost.Widgets.Slider;
 using static MacroDeckHost.Tests.UnitTests.Widgets.Ui.HistoryGraphTestSupport;
@@ -91,7 +92,9 @@ public class WidgetColorThresholdsTests
 	}
 
 	private static UiTestHost SliderConfig(object data, VariableRegistry? variables = null)
-		=> UiTestHost.Render(SliderWidgetConfigView.Build(JsonSerializer.SerializeToElement(data), variables ?? new VariableRegistry()));
+		=> UiTestHost.Render(SliderWidgetConfigView.Build(JsonSerializer.SerializeToElement(data),
+			variables ?? new VariableRegistry(),
+			new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache()));
 
 	[Test]
 	public void An_untouched_slider_config_carries_a_null_thresholds_value_so_a_save_writes_no_key()
@@ -278,5 +281,115 @@ public class WidgetColorThresholdsTests
 
 		Assert.That(JsonElement.DeepEquals(host.ById(WidgetThresholds.ValueKey).Property(UiConfigProperties.Value)!.Value,
 			UiCanonicalJson.ToElement(JsonSerializer.SerializeToElement(_twoBands))), Is.True);
+	}
+
+	private static GaugeConfig Gauge(object item)
+		=> GaugeConfig.Parse(JsonSerializer.SerializeToElement(item), "one");
+
+	[TestCase(10, _green)]
+	[TestCase(80, _orange)]
+	[TestCase(95, _red)]
+	public void A_gauge_with_thresholds_on_colours_its_ring_by_the_default_band_of_its_range(double value, string expected)
+		=> Assert.That(GaugesViewStateResolver.ColorOf(value, Gauge(new { max = 100, color = "#123456", thresholdsEnabled = true }), null),
+			Is.EqualTo(expected));
+
+	[Test]
+	public void A_gauge_with_thresholds_on_ignores_its_single_warning_and_follows_its_stored_bands()
+	{
+		var gauge = Gauge(new
+		{
+			max = 100, color = "#123456", warnWhen = "above", warnAt = 10, thresholdsEnabled = true, thresholds = _twoBands,
+		});
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(GaugesViewStateResolver.ColorOf(20, gauge, null), Is.EqualTo("#0000ff"));
+			Assert.That(GaugesViewStateResolver.ColorOf(40, gauge, null), Is.EqualTo("#ff0000"));
+		});
+	}
+
+	[Test]
+	public void A_gauge_with_thresholds_off_keeps_its_colour_and_warning()
+	{
+		var gauge = Gauge(new { max = 100, color = "#123456", warnWhen = "above", warnAt = 90, thresholds = _twoBands });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(GaugesViewStateResolver.ColorOf(50, gauge, null), Is.EqualTo("#123456"));
+			Assert.That(GaugesViewStateResolver.ColorOf(95, gauge, null), Is.EqualTo(GaugesViewStateResolver.WarningColor));
+		});
+	}
+
+	private static readonly object _gauges = new
+	{
+		gauges = new object[]
+		{
+			new { id = "one", variable = "temp", max = 0, warnWhen = "above", warnAt = 80 },
+			new { id = "two", variable = "temp", max = 100 },
+		},
+	};
+
+	private static VariableEntity Temperature()
+		=> new()
+		{
+			Name = "temp",
+			Scope = VariableScope.Global,
+			Type = VariableType.Numeric,
+			Classification = VariableClassification.User,
+			Value = "40",
+			Max = 120,
+			Unit = "°C",
+		};
+
+	private static UiTestHost GaugesConfig(object data)
+		=> UiTestHost.Render(GaugesWidgetConfigView.Build(JsonSerializer.SerializeToElement(data),
+			name => name == "temp" ? Temperature() : null));
+
+	[Test]
+	public void Turning_on_gauge_thresholds_shows_the_editor_over_the_ring_range_and_hides_the_single_warning()
+	{
+		var host = GaugesConfig(_gauges);
+
+		Assert.That(host.FindById("gauges.one.thresholds"), Is.Null);
+		Assert.That(host.FindById("gauges.one.warnWhen"), Is.Not.Null);
+
+		Assert.That(host.ById("gauges.one.thresholdsEnabled").Change(true).IsAccepted, Is.True);
+		var editor = host.ById("gauges.one.thresholds");
+		var stored = host.ById("gauges").Property(UiConfigProperties.Value)!.Value[0];
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.FindById("gauges.one.warnWhen"), Is.Null);
+			Assert.That(editor.Number(UiConfigProperties.Max), Is.EqualTo(120), "an automatic maximum follows the variable");
+			Assert.That(editor.Property(UiConfigProperties.Unit)!.Value.ToString(), Does.Contain("°C"));
+			Assert.That(stored.GetProperty("thresholdsEnabled").GetBoolean(), Is.True);
+			Assert.That(stored.TryGetProperty("thresholds", out _), Is.False, "an untouched editor stores no bands");
+			Assert.That(stored.GetProperty("warnAt").GetDouble(), Is.EqualTo(80), "the hidden warning keeps its value");
+		});
+	}
+
+	[Test]
+	public void Edited_gauge_thresholds_are_stored_on_that_gauge_only_reset_removes_them_and_the_result_validates()
+	{
+		var host = GaugesConfig(_gauges);
+
+		host.ById("gauges.one.thresholdsEnabled").Change(true);
+		host.ById("gauges.one.thresholds").Change(_twoBands);
+
+		var gauges = host.ById("gauges").Property(UiConfigProperties.Value)!.Value;
+		var provider = new WidgetDataSchemaProvider(new WidgetTypeRegistry(new RecordingMediator()));
+		Assert.That(provider.TryGet(WidgetTypeIds.Gauges, out var schema), Is.True);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(GaugesWidgetData.ParseGauges(gauges)[0].Thresholds!.ColorAt(41), Is.EqualTo("#ff0000"));
+			Assert.That(gauges[1].TryGetProperty("thresholds", out _), Is.False);
+			Assert.That(WidgetDataSchema.Validate(schema!, JsonSerializer.SerializeToElement(new { gauges })), Is.Empty);
+		});
+
+		Assert.That(host.ById("gauges.one.thresholds").Change(JsonDocument.Parse("null").RootElement).IsAccepted, Is.True);
+
+		Assert.That(host.ById("gauges").Property(UiConfigProperties.Value)!.Value[0].TryGetProperty("thresholds", out _),
+			Is.False);
 	}
 }

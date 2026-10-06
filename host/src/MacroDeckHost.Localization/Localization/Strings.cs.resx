@@ -18320,6 +18320,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.Gauges.Color" xml:space="preserve">
     <value>Barva kruhu</value>
   </data>
+  <data name="Widgets.Gauges.ColorThresholdsDescription" xml:space="preserve">
+    <value>Obarví kruh podle rozsahu, ve kterém leží jeho hodnota, místo barvy kruhu a upozornění.</value>
+  </data>
   <data name="Widgets.Gauges.EmptyHint" xml:space="preserve">
     <value>Zatím žádné ukazatele. Přidat je lze v nastavení widgetu.</value>
   </data>

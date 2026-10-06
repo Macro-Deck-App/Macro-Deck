@@ -7866,6 +7866,7 @@ export const AppStrings = {
 		Gauges: {
 			AddGauge: 'macrodeck.app:Widgets.Gauges.AddGauge',
 			Color: 'macrodeck.app:Widgets.Gauges.Color',
+			ColorThresholdsDescription: 'macrodeck.app:Widgets.Gauges.ColorThresholdsDescription',
 			EmptyHint: 'macrodeck.app:Widgets.Gauges.EmptyHint',
 			FullHint: 'macrodeck.app:Widgets.Gauges.FullHint',
 			GaugeNumber: 'macrodeck.app:Widgets.Gauges.GaugeNumber',
@@ -14584,6 +14585,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Widgets.Folder.WidgetCount.Other': '{count} widgets',
 	'macrodeck.app:Widgets.Gauges.AddGauge': 'Add gauge',
 	'macrodeck.app:Widgets.Gauges.Color': 'Ring color',
+	'macrodeck.app:Widgets.Gauges.ColorThresholdsDescription': 'Colors the ring by the range its value is in, instead of the ring color and warning.',
 	'macrodeck.app:Widgets.Gauges.EmptyHint': 'No gauges yet. Add one in the widget settings.',
 	'macrodeck.app:Widgets.Gauges.FullHint': 'This widget is full. Remove a gauge to add another.',
 	'macrodeck.app:Widgets.Gauges.GaugeNumber': 'Gauge {number}',

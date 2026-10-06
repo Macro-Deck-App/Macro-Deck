@@ -314,7 +314,7 @@ new UiThresholdsInput
 The editor draws a bar from `Min` to `Max`, coloured band by band, with a draggable handle on every boundary;
 the selected handle shows its value in `Unit`, and every band lists its range below the bar. Clicking the bar
 adds a boundary at that point, and the user recolours and removes bands from the list; on a focused range, `+`
-splits it and `Delete` removes it. The Slider and History Graph widgets use the same editor for their own
+splits it and `Delete` removes it. The Slider, History Graph and Gauges widgets use the same editor for their own
 colour thresholds. It works in a [config flow](/ui/views/configuration/) as well as in a widget
 configuration.
 

@@ -18320,6 +18320,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Widgets.Gauges.Color" xml:space="preserve">
     <value>Color del anillo</value>
   </data>
+  <data name="Widgets.Gauges.ColorThresholdsDescription" xml:space="preserve">
+    <value>Colorea el anillo según el rango en el que está su valor, en lugar del color del anillo y el aviso.</value>
+  </data>
   <data name="Widgets.Gauges.EmptyHint" xml:space="preserve">
     <value>Aún no hay indicadores. Añade uno en los ajustes del widget.</value>
   </data>

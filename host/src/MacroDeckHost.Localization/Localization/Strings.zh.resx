@@ -18322,6 +18322,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Widgets.Gauges.Color" xml:space="preserve">
     <value>圆环颜色</value>
   </data>
+  <data name="Widgets.Gauges.ColorThresholdsDescription" xml:space="preserve">
+    <value>按数值所在区间为圆环着色，而不使用圆环颜色和警告。</value>
+  </data>
   <data name="Widgets.Gauges.EmptyHint" xml:space="preserve">
     <value>暂无仪表。请在组件设置中添加。</value>
   </data>

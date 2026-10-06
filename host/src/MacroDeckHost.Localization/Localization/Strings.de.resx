@@ -18318,6 +18318,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Gauges.Color" xml:space="preserve">
     <value>Ringfarbe</value>
   </data>
+  <data name="Widgets.Gauges.ColorThresholdsDescription" xml:space="preserve">
+    <value>Färbt den Ring nach dem Bereich, in dem sein Wert liegt, statt mit Ringfarbe und Warnung.</value>
+  </data>
   <data name="Widgets.Gauges.EmptyHint" xml:space="preserve">
     <value>Noch keine Anzeigen. Füge eine in den Widget-Einstellungen hinzu.</value>
   </data>

@@ -18322,6 +18322,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.Gauges.Color" xml:space="preserve">
     <value>Ring color</value>
   </data>
+  <data name="Widgets.Gauges.ColorThresholdsDescription" xml:space="preserve">
+    <value>Colors the ring by the range its value is in, instead of the ring color and warning.</value>
+  </data>
   <data name="Widgets.Gauges.EmptyHint" xml:space="preserve">
     <value>No gauges yet. Add one in the widget settings.</value>
   </data>

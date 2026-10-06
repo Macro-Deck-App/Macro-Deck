@@ -75,7 +75,7 @@ to store a new random number in a variable each time the action runs.
 - **Run** in the editor runs the actions right away, without pressing the button.
 - Use **Switch** instead of several **If / Else** blocks when one value has many outcomes, for example a
   button that does something different for each repeat mode of a music player.
-- **Color thresholds** color a slider or history graph by its value: green, yellow, orange and red by default.
+- **Color thresholds** color a slider, history graph or gauge by its value: green, yellow, orange and red by default.
   Drag a handle on the bar to move a limit, click the bar to add a limit there, and select a range to recolor
   or remove it. **Reset to defaults** brings back the standard ranges.
 - **Set Accent Color** recolors a slider or history graph while its color thresholds are off. Put it inside an
