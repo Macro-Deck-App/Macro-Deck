@@ -9621,7 +9621,7 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>用户名颜色</value>
   </data>
   <data name="Integrations.StreamChat.Widget.NameColorDescription" xml:space="preserve">
-    <value>留空则每个用户名使用其自己的颜色。</value>
+    <value>重置后每个用户名使用其自己的颜色。</value>
   </data>
   <data name="Integrations.StreamChat.Widget.NameSeparator" xml:space="preserve">
     <value>：</value>

@@ -10799,7 +10799,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Integrations.StreamChat.Widget.FirstAccount': 'First connected account',
 	'macrodeck.app:Integrations.StreamChat.Widget.MessageColor': 'Message color',
 	'macrodeck.app:Integrations.StreamChat.Widget.NameColor': 'Name color',
-	'macrodeck.app:Integrations.StreamChat.Widget.NameColorDescription': 'Leave empty to show each chatter\'s name in its own color.',
+	'macrodeck.app:Integrations.StreamChat.Widget.NameColorDescription': 'Reset to show each chatter\'s name in its own color.',
 	'macrodeck.app:Integrations.StreamChat.Widget.NameSeparator': ': ',
 	'macrodeck.app:Integrations.StreamChat.Widget.SampleChatter1': 'PixelPanda',
 	'macrodeck.app:Integrations.StreamChat.Widget.SampleChatter2': 'NightOwl',

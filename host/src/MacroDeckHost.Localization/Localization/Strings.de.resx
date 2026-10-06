@@ -9618,7 +9618,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Namensfarbe</value>
   </data>
   <data name="Integrations.StreamChat.Widget.NameColorDescription" xml:space="preserve">
-    <value>Lass das Feld leer, damit jeder Name in seiner eigenen Farbe erscheint.</value>
+    <value>Setze die Farbe zurück, damit jeder Name in seiner eigenen Farbe erscheint.</value>
   </data>
   <data name="Integrations.StreamChat.Widget.NameSeparator" xml:space="preserve">
     <value>: </value>

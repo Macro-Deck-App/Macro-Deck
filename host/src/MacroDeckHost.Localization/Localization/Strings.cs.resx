@@ -9620,7 +9620,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Barva uživatelských jmen</value>
   </data>
   <data name="Integrations.StreamChat.Widget.NameColorDescription" xml:space="preserve">
-    <value>Pokud pole zůstane prázdné, zobrazí se každé jméno ve vlastní barvě.</value>
+    <value>Po obnovení výchozí barvy se každé jméno zobrazí ve vlastní barvě.</value>
   </data>
   <data name="Integrations.StreamChat.Widget.NameSeparator" xml:space="preserve">
     <value>: </value>

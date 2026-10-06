@@ -9620,7 +9620,7 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>Colore dei nomi</value>
   </data>
   <data name="Integrations.StreamChat.Widget.NameColorDescription" xml:space="preserve">
-    <value>Lascia vuoto per mostrare ogni nome nel suo colore.</value>
+    <value>Reimposta per mostrare ogni nome nel suo colore.</value>
   </data>
   <data name="Integrations.StreamChat.Widget.NameSeparator" xml:space="preserve">
     <value>: </value>

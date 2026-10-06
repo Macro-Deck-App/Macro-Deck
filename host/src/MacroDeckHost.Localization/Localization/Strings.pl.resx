@@ -9620,7 +9620,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Kolor nazw użytkowników</value>
   </data>
   <data name="Integrations.StreamChat.Widget.NameColorDescription" xml:space="preserve">
-    <value>Puste pole oznacza, że każda nazwa jest wyświetlana we własnym kolorze.</value>
+    <value>Po przywróceniu domyślnego koloru każda nazwa jest wyświetlana we własnym kolorze.</value>
   </data>
   <data name="Integrations.StreamChat.Widget.NameSeparator" xml:space="preserve">
     <value>: </value>

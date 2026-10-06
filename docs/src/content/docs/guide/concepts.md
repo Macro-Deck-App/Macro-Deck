@@ -85,7 +85,7 @@ To make the chat easier to read on your background, pick a **Message color** for
 **Name color** to show every chatter's name in that one color instead of each chatter's own color. Reset
 either one to go back to the theme's text color or the chatters' own colors. The widget's title and its
 status notices keep the theme's text color. Like the size, both colors apply to the widget; the chat dialog
-keeps the theme's colors.
+is not affected.
 
 ### The Stream Stats widgets
 
