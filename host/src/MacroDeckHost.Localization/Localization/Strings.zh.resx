@@ -20028,4 +20028,49 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.YouTube.Config.UnknownStep" xml:space="preserve">
     <value>未知步骤</value>
   </data>
+  <data name="Integrations.Obs.Actions.StartOutput.Name" xml:space="preserve">
+    <value>启动输出</value>
+  </data>
+  <data name="Integrations.Obs.Actions.StartOutput.Description" xml:space="preserve">
+    <value>按名称启动 OBS 输出，包括插件添加的输出</value>
+  </data>
+  <data name="Integrations.Obs.Actions.StopOutput.Name" xml:space="preserve">
+    <value>停止输出</value>
+  </data>
+  <data name="Integrations.Obs.Actions.StopOutput.Description" xml:space="preserve">
+    <value>按名称停止 OBS 输出，包括插件添加的输出</value>
+  </data>
+  <data name="Integrations.Obs.Actions.ToggleOutput.Name" xml:space="preserve">
+    <value>切换输出</value>
+  </data>
+  <data name="Integrations.Obs.Actions.ToggleOutput.Description" xml:space="preserve">
+    <value>按名称启动或停止 OBS 输出，包括插件添加的输出</value>
+  </data>
+  <data name="Integrations.Obs.Actions.GetOutputState.Name" xml:space="preserve">
+    <value>获取输出状态</value>
+  </data>
+  <data name="Integrations.Obs.Actions.GetOutputState.Description" xml:space="preserve">
+    <value>将 OBS 输出是否处于活动状态写入变量</value>
+  </data>
+  <data name="Integrations.Obs.Actions.GetOutputState.VariableDescription" xml:space="preserve">
+    <value>用于写入活动状态的变量名</value>
+  </data>
+  <data name="Integrations.Obs.Params.Output" xml:space="preserve">
+    <value>输出</value>
+  </data>
+  <data name="Integrations.Obs.Params.OutputUnavailable" xml:space="preserve">
+    <value>{name}（不可用）</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NoOutputSelected" xml:space="preserve">
+    <value>未选择输出。</value>
+  </data>
+  <data name="Integrations.Obs.Errors.OutputNotFound" xml:space="preserve">
+    <value>输出“{output}”不存在。</value>
+  </data>
+  <data name="Integrations.Obs.Errors.OutputCommandFailed" xml:space="preserve">
+    <value>OBS 无法更改输出“{output}”。</value>
+  </data>
+  <data name="Integrations.Obs.Errors.OutputsNeedNewerObs" xml:space="preserve">
+    <value>控制输出需要内置 obs-websocket 5.7 或更高版本的 OBS。</value>
+  </data>
 </root>
