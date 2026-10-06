@@ -16252,6 +16252,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="TemplateBuilder.Filters.Lstrip.Hint" xml:space="preserve">
     <value>Usuń białe znaki z początku</value>
   </data>
+  <data name="TemplateBuilder.Filters.MathRandom.Hint" xml:space="preserve">
+    <value>Funkcja natywna Scriban: losowa liczba całkowita od minimum do maksimum, bez maksimum</value>
+  </data>
   <data name="TemplateBuilder.Filters.MathUuid.Hint" xml:space="preserve">
     <value>Funkcja natywna Scriban: wygeneruj losowy unikatowy identyfikator</value>
   </data>

@@ -693,6 +693,18 @@ public class VariableTemplateRendererFilterTests
 	}
 
 	[Test]
+	public void MathRandom_chip_renders_an_integer_within_the_range()
+	{
+		var (_, renderer, context) = Build();
+		for (var i = 0; i < 200; i++)
+		{
+			var value = int.Parse(renderer.Render("{{ math.random 1 7 }}", context),
+				global::System.Globalization.CultureInfo.InvariantCulture);
+			Assert.That(value, Is.InRange(1, 6));
+		}
+	}
+
+	[Test]
 	public void DateNow_chip_renders()
 	{
 		var (_, renderer, context) = Build();

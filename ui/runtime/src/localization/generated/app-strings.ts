@@ -6836,6 +6836,9 @@ export const AppStrings = {
 			Lstrip: {
 				Hint: 'macrodeck.app:TemplateBuilder.Filters.Lstrip.Hint',
 			},
+			MathRandom: {
+				Hint: 'macrodeck.app:TemplateBuilder.Filters.MathRandom.Hint',
+			},
 			MathUuid: {
 				Hint: 'macrodeck.app:TemplateBuilder.Filters.MathUuid.Hint',
 			},
@@ -13438,6 +13441,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:TemplateBuilder.Filters.Join.Hint': 'Join a list into text',
 	'macrodeck.app:TemplateBuilder.Filters.Last.Hint': 'Last item of a list',
 	'macrodeck.app:TemplateBuilder.Filters.Lstrip.Hint': 'Remove whitespace from the start',
+	'macrodeck.app:TemplateBuilder.Filters.MathRandom.Hint': 'Scriban-native: a random whole number from a minimum up to, but not including, a maximum',
 	'macrodeck.app:TemplateBuilder.Filters.MathUuid.Hint': 'Scriban-native: generate a random unique id',
 	'macrodeck.app:TemplateBuilder.Filters.Minus.Hint': 'Subtract a number',
 	'macrodeck.app:TemplateBuilder.Filters.Modulo.Hint': 'Remainder after division',

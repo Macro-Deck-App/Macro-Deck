@@ -16252,6 +16252,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="TemplateBuilder.Filters.Lstrip.Hint" xml:space="preserve">
     <value>Elimina los espacios del principio</value>
   </data>
+  <data name="TemplateBuilder.Filters.MathRandom.Hint" xml:space="preserve">
+    <value>Nativo de Scriban: un número entero aleatorio desde un mínimo hasta un máximo excluido</value>
+  </data>
   <data name="TemplateBuilder.Filters.MathUuid.Hint" xml:space="preserve">
     <value>Nativo de Scriban: genera un id único aleatorio</value>
   </data>

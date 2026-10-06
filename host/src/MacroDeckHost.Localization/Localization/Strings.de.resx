@@ -16250,6 +16250,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="TemplateBuilder.Filters.Lstrip.Hint" xml:space="preserve">
     <value>Leerzeichen am Anfang entfernen</value>
   </data>
+  <data name="TemplateBuilder.Filters.MathRandom.Hint" xml:space="preserve">
+    <value>Scriban-nativ: eine zufällige ganze Zahl von einem Minimum bis ausschließlich einem Maximum</value>
+  </data>
   <data name="TemplateBuilder.Filters.MathUuid.Hint" xml:space="preserve">
     <value>Scriban-nativ: eine zufällige eindeutige ID erzeugen</value>
   </data>

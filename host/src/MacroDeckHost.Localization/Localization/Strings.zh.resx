@@ -16253,6 +16253,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="TemplateBuilder.Filters.Lstrip.Hint" xml:space="preserve">
     <value>去除开头的空白</value>
   </data>
+  <data name="TemplateBuilder.Filters.MathRandom.Hint" xml:space="preserve">
+    <value>Scriban 原生：生成从最小值到最大值（不含最大值）之间的随机整数</value>
+  </data>
   <data name="TemplateBuilder.Filters.MathUuid.Hint" xml:space="preserve">
     <value>Scriban 原生：生成随机的唯一 ID</value>
   </data>

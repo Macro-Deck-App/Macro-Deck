@@ -16252,6 +16252,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="TemplateBuilder.Filters.Lstrip.Hint" xml:space="preserve">
     <value>Odstranit mezery na začátku</value>
   </data>
+  <data name="TemplateBuilder.Filters.MathRandom.Hint" xml:space="preserve">
+    <value>Nativní funkce Scriban: náhodné celé číslo od minima do maxima, které už nezahrnuje</value>
+  </data>
   <data name="TemplateBuilder.Filters.MathUuid.Hint" xml:space="preserve">
     <value>Nativní funkce Scriban: vygenerovat náhodné jedinečné ID</value>
   </data>

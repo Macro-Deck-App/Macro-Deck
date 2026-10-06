@@ -93,6 +93,7 @@ export const LIQUID_FILTERS: LiquidFilterSnippet[] = [
   { key: 'object.to_json', category: 'scriban', label: 'object.to_json', insert: ' | object.to_json', hintKey: AppStrings.TemplateBuilder.Filters.ObjectToJson.Hint },
   { key: 'html.url_encode', category: 'scriban', label: 'html.url_encode', insert: ' | html.url_encode', hintKey: AppStrings.TemplateBuilder.Filters.HtmlUrlEncode.Hint },
   { key: 'html.newline_to_br', category: 'scriban', label: 'html.newline_to_br', insert: ' | html.newline_to_br', hintKey: AppStrings.TemplateBuilder.Filters.HtmlNewlineToBr.Hint },
+  { key: 'math.random', category: 'scriban', label: 'math.random', insert: ' math.random 1 101', hintKey: AppStrings.TemplateBuilder.Filters.MathRandom.Hint },
   { key: 'math.uuid', category: 'scriban', label: 'math.uuid', insert: ' math.uuid', hintKey: AppStrings.TemplateBuilder.Filters.MathUuid.Hint },
   { key: 'date.now', category: 'scriban', label: 'date.now', insert: ' date.now', hintKey: AppStrings.TemplateBuilder.Filters.DateNow.Hint },
 ];
