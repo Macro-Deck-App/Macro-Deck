@@ -1,5 +1,5 @@
 using System.Text.Json;
-using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.StreamChat;
 
 namespace MacroDeckHost.Integrations.Twitch;
 
@@ -10,7 +10,7 @@ internal static class TwitchChatMessageParser
 	public const string ClearType = "channel.chat.clear";
 	public const string ClearUserMessagesType = "channel.chat.clear_user_messages";
 
-	public static TwitchChatEvent? ToChatEvent(
+	public static ChatEvent? ToChatEvent(
 		string accountId,
 		string? subscriptionType,
 		JsonElement payload,
@@ -18,19 +18,19 @@ internal static class TwitchChatMessageParser
 		=> subscriptionType switch
 		{
 			MessageType => Parse(payload, badges) is { } message
-				? new TwitchChatMessageReceived(accountId, message)
+				? new ChatMessageReceived(accountId, message)
 				: null,
 			MessageDeleteType => ReadString(payload, "message_id") is { Length: > 0 } messageId
-				? new TwitchChatMessageDeleted(accountId, messageId)
+				? new ChatMessageDeleted(accountId, messageId)
 				: null,
-			ClearType => new TwitchChatCleared(accountId),
+			ClearType => new ChatCleared(accountId),
 			ClearUserMessagesType => ReadString(payload, "target_user_id") is { Length: > 0 } userId
-				? new TwitchChatUserCleared(accountId, userId)
+				? new ChatUserCleared(accountId, userId)
 				: null,
 			_ => null
 		};
 
-	public static TwitchChatMessage? Parse(JsonElement payload, TwitchChatBadgeMap badges)
+	public static ChatMessage? Parse(JsonElement payload, TwitchChatBadgeMap badges)
 	{
 		if (payload.ValueKind is not JsonValueKind.Object ||
 			ReadString(payload, "message_id") is not { Length: > 0 } messageId ||
@@ -42,11 +42,11 @@ internal static class TwitchChatMessageParser
 		var login = ReadString(payload, "chatter_user_login") ?? string.Empty;
 		var name = ReadString(payload, "chatter_user_name") is { Length: > 0 } displayName ? displayName : login;
 
-		return new TwitchChatMessage(messageId,
+		return new ChatMessage(messageId,
 			chatterId,
 			login,
 			name,
-			TwitchChatStyle.NormalizeColor(ReadString(payload, "color"), chatterId),
+			ChatStyle.NormalizeColor(ReadString(payload, "color"), chatterId),
 			ReadBadges(payload, badges),
 			ReadFragments(payload),
 			ReadString(payload, "source_broadcaster_user_id") is { Length: > 0 } sourceId ? sourceId : null,
@@ -55,9 +55,9 @@ internal static class TwitchChatMessageParser
 				: ReadString(payload, "source_broadcaster_user_login"));
 	}
 
-	private static List<TwitchChatBadge> ReadBadges(JsonElement payload, TwitchChatBadgeMap badges)
+	private static List<ChatBadge> ReadBadges(JsonElement payload, TwitchChatBadgeMap badges)
 	{
-		var result = new List<TwitchChatBadge>();
+		var result = new List<ChatBadge>();
 
 		if (!payload.TryGetProperty("badges", out var list) || list.ValueKind is not JsonValueKind.Array)
 		{
@@ -68,16 +68,16 @@ internal static class TwitchChatMessageParser
 		{
 			if (ReadString(badge, "set_id") is { Length: > 0 } setId && ReadString(badge, "id") is { Length: > 0 } id)
 			{
-				result.Add(new TwitchChatBadge(setId, id, badges.Find(setId, id)));
+				result.Add(new ChatBadge(setId, id, badges.Find(setId, id)));
 			}
 		}
 
 		return result;
 	}
 
-	private static List<TwitchChatFragment> ReadFragments(JsonElement payload)
+	private static List<ChatFragment> ReadFragments(JsonElement payload)
 	{
-		var fragments = new List<TwitchChatFragment>();
+		var fragments = new List<ChatFragment>();
 
 		if (!payload.TryGetProperty("message", out var message) || message.ValueKind is not JsonValueKind.Object)
 		{
@@ -97,13 +97,13 @@ internal static class TwitchChatMessageParser
 
 		if (fragments.Count == 0 && ReadString(message, "text") is { Length: > 0 } text)
 		{
-			fragments.Add(new TwitchChatFragment(TwitchChatFragmentKind.Text, text));
+			fragments.Add(new ChatFragment(ChatFragmentKind.Text, text));
 		}
 
 		return fragments;
 	}
 
-	private static TwitchChatFragment? ReadFragment(JsonElement fragment)
+	private static ChatFragment? ReadFragment(JsonElement fragment)
 	{
 		if (fragment.ValueKind is not JsonValueKind.Object || ReadString(fragment, "text") is not { Length: > 0 } text)
 		{
@@ -114,10 +114,10 @@ internal static class TwitchChatMessageParser
 		{
 			"emote" when fragment.TryGetProperty("emote", out var emote) &&
 				ReadString(emote, "id") is { Length: > 0 } emoteId
-				=> new TwitchChatFragment(TwitchChatFragmentKind.Emote, text, emoteId),
-			"mention" => new TwitchChatFragment(TwitchChatFragmentKind.Mention, text),
-			"cheermote" => new TwitchChatFragment(TwitchChatFragmentKind.Cheermote, text),
-			_ => new TwitchChatFragment(TwitchChatFragmentKind.Text, text)
+				=> new ChatFragment(ChatFragmentKind.Emote, text, emoteId),
+			"mention" => new ChatFragment(ChatFragmentKind.Mention, text),
+			"cheermote" => new ChatFragment(ChatFragmentKind.Cheermote, text),
+			_ => new ChatFragment(ChatFragmentKind.Text, text)
 		};
 	}
 

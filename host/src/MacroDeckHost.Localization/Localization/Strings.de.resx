@@ -9560,37 +9560,37 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Twitch.ChatDialog.AccountUnavailable" xml:space="preserve">
     <value>Das Twitch-Konto ist nicht verbunden.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.AllowModeration" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.AllowModeration" xml:space="preserve">
     <value>Moderation im Chat-Dialog erlauben</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.AllowModerationDescription" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.AllowModerationDescription" xml:space="preserve">
     <value>Ein Druck auf das Widget öffnet den Chat. Ist dies an, kann jeder, der dieses Deck bedient, dort eine Nachricht antippen, um sie zu löschen oder den Absender zu timeouten oder zu bannen.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Ban" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Ban" xml:space="preserve">
     <value>Bannen</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Banned" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Banned" xml:space="preserve">
     <value>{name} ist gebannt.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.ConfirmBan" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.ConfirmBan" xml:space="preserve">
     <value>{name} bannen? Bis zum Entbannen kann {name} in diesem Kanal nicht mehr chatten.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.DeleteMessage" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.DeleteMessage" xml:space="preserve">
     <value>Nachricht löschen</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Deleted" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Deleted" xml:space="preserve">
     <value>Nachricht gelöscht.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Failed" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Failed" xml:space="preserve">
     <value>Die Aktion ist nicht durchgegangen. Prüfe die Verbindung und versuche es noch einmal.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.ModerationUnavailable" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.ModerationUnavailable" xml:space="preserve">
     <value>Moderation ist für dieses Widget ausgeschaltet.</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.NotPermitted" xml:space="preserve">
     <value>Twitch hat das nicht erlaubt. Verbinde das Twitch-Konto neu und versuche es noch einmal.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.OwnMessage" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.OwnMessage" xml:space="preserve">
     <value>Nachrichten des Kanalkontos selbst lassen sich nicht moderieren.</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.Refused" xml:space="preserve">
@@ -9599,64 +9599,64 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Twitch.ChatDialog.SharedChat" xml:space="preserve">
     <value>Diese Nachricht stammt aus dem Chat von {channel}. Moderiere sie dort.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.TimedOut" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.TimedOut" xml:space="preserve">
     <value>{name} hat einen Timeout.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Timeout10Minutes" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Timeout10Minutes" xml:space="preserve">
     <value>Timeout 10 Min.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Timeout1Hour" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Timeout1Hour" xml:space="preserve">
     <value>Timeout 1 Std.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Timeout1Minute" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Timeout1Minute" xml:space="preserve">
     <value>Timeout 1 Min.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Unban" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Unban" xml:space="preserve">
     <value>Entbannen</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Unbanned" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Unbanned" xml:space="preserve">
     <value>{name} ist entbannt.</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.AccountDescription" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.AccountDescription" xml:space="preserve">
     <value>Wessen Kanal-Chat angezeigt wird.</value>
   </data>
   <data name="Integrations.Twitch.ChatWidget.Description" xml:space="preserve">
     <value>Zeigt den Chat deines Kanals live, mit Emotes und Abzeichen.</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.Empty" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.Empty" xml:space="preserve">
     <value>Warte auf Chatnachrichten</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.FirstAccount" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.FirstAccount" xml:space="preserve">
     <value>Erstes verbundenes Konto</value>
   </data>
   <data name="Integrations.Twitch.ChatWidget.Name" xml:space="preserve">
     <value>Twitch-Chat</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.NameSeparator" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.NameSeparator" xml:space="preserve">
     <value>: </value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.Title" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.Title" xml:space="preserve">
     <value>Chat von {account}</value>
   </data>
   <data name="Integrations.Twitch.ChatWidget.Offline" xml:space="preserve">
     <value>Nicht mit Twitch verbunden</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleChatter1" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleChatter1" xml:space="preserve">
     <value>PixelPanda</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleChatter2" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleChatter2" xml:space="preserve">
     <value>NightOwl</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleChatter3" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleChatter3" xml:space="preserve">
     <value>CozyGamer</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleMessage1" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleMessage1" xml:space="preserve">
     <value>Hallo zusammen!</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleMessage2" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleMessage2" xml:space="preserve">
     <value>Was für ein Spielzug!</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleMessage3" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleMessage3" xml:space="preserve">
     <value>Bis zum nächsten Stream</value>
   </data>
   <data name="Integrations.Twitch.StatsWidget.Description" xml:space="preserve">
@@ -9668,13 +9668,13 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Twitch.StatsWidget.Heading" xml:space="preserve">
     <value>Twitch</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Live" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Live" xml:space="preserve">
     <value>Live</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Offline" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Offline" xml:space="preserve">
     <value>Offline</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Viewers" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Viewers" xml:space="preserve">
     <value>Zuschauer</value>
   </data>
   <data name="Integrations.Twitch.StatsWidget.Chatters" xml:space="preserve">
@@ -9683,61 +9683,61 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Twitch.StatsWidget.Followers" xml:space="preserve">
     <value>Follower</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Subscribers" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Subscribers" xml:space="preserve">
     <value>Abonnenten</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Style" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Style" xml:space="preserve">
     <value>Stil</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleDescription" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleDescription" xml:space="preserve">
     <value>Legt fest, was das Widget zeigt. Die Größe in Klammern ist die, für die der Stil gestaltet ist; an jede andere Größe passt er sich an.</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleOverview" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleOverview" xml:space="preserve">
     <value>Übersicht (3x2)</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleStatsRow" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleStatsRow" xml:space="preserve">
     <value>Statistikzeile (3x1)</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleLiveRow" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleLiveRow" xml:space="preserve">
     <value>Live-Statuszeile (3x1)</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleValueGraph" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleValueGraph" xml:space="preserve">
     <value>Einzelwert mit Verlauf (2x2)</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleValue" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleValue" xml:space="preserve">
     <value>Einzelwert (1x1)</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Metric" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Metric" xml:space="preserve">
     <value>Wert</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.MetricDescription" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.MetricDescription" xml:space="preserve">
     <value>Welche Zahl das Widget zeigt.</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.OfflineHint" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.OfflineHint" xml:space="preserve">
     <value>Gerade nicht live</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Tiles" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Tiles" xml:space="preserve">
     <value>Statistiken</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.TilesDescription" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.TilesDescription" xml:space="preserve">
     <value>Welche Zahlen die Kacheln in dieser Reihenfolge zeigen. Vier Kacheln passen am besten in ein Widget, das eine Spalte breiter ist als empfohlen.</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Details" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Details" xml:space="preserve">
     <value>Stream-Details</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.DetailsDescription" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.DetailsDescription" xml:space="preserve">
     <value>Welche Details die Übersicht neben dem Vorschaubild zeigt, in dieser Reihenfolge.</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Uptime" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Uptime" xml:space="preserve">
     <value>Laufzeit</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.ShowThumbnail" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.ShowThumbnail" xml:space="preserve">
     <value>Vorschaubild anzeigen</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.AccountDescription" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.AccountDescription" xml:space="preserve">
     <value>Von welchem Kanal die Statistiken angezeigt werden.</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.SampleTitle" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.SampleTitle" xml:space="preserve">
     <value>Night City erkunden</value>
   </data>
   <data name="Integrations.Twitch.StatsWidget.SampleCategory" xml:space="preserve">
@@ -19552,6 +19552,499 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Shell.OutdatedUi.Versions" xml:space="preserve">
     <value>Build der Oberfläche: {device} · Build von Macro Deck: {computer}</value>
+  </data>
+  <data name="Integrations.YouTube.ChatWidget.Name" xml:space="preserve">
+    <value>YouTube-Chat</value>
+  </data>
+  <data name="Integrations.YouTube.ChatWidget.Description" xml:space="preserve">
+    <value>Zeigt den Live-Chat deiner aktuellen Übertragung in Echtzeit, einschließlich Super Chats und neuer Mitglieder.</value>
+  </data>
+  <data name="Integrations.YouTube.ChatWidget.Offline" xml:space="preserve">
+    <value>Gerade kein Live-Chat auf YouTube</value>
+  </data>
+  <data name="Integrations.YouTube.ChatDialog.AccountChanged" xml:space="preserve">
+    <value>Dieses Widget zeigt jetzt einen anderen YouTube-Kanal. Öffne den Chat erneut, um ihn zu moderieren.</value>
+  </data>
+  <data name="Integrations.YouTube.ChatDialog.AccountUnavailable" xml:space="preserve">
+    <value>Der YouTube-Kanal ist gerade nicht live, daher kann sein Chat nicht moderiert werden.</value>
+  </data>
+  <data name="Integrations.YouTube.ChatDialog.NotPermitted" xml:space="preserve">
+    <value>YouTube hat das nicht erlaubt. Verbinde den YouTube-Kanal neu und versuche es noch einmal.</value>
+  </data>
+  <data name="Integrations.YouTube.ChatDialog.Refused" xml:space="preserve">
+    <value>YouTube hat diese Aktion abgelehnt, zum Beispiel weil die Person den Kanal besitzt oder ihn moderiert.</value>
+  </data>
+  <data name="Integrations.YouTube.ChatDialog.Unsupported" xml:space="preserve">
+    <value>Macro Deck kann nur Sperren aufheben, die es während dieses Streams selbst gesetzt hat. Hebe diese Sperre in YouTube Studio auf.</value>
+  </data>
+  <data name="Integrations.YouTube.StatsWidget.Name" xml:space="preserve">
+    <value>YouTube-Stream-Statistiken</value>
+  </data>
+  <data name="Integrations.YouTube.StatsWidget.Description" xml:space="preserve">
+    <value>Zeigt deinen Live-Status, Zuschauer, Likes und Abonnenten auf einen Blick.</value>
+  </data>
+  <data name="Integrations.YouTube.StatsWidget.Heading" xml:space="preserve">
+    <value>YouTube</value>
+  </data>
+  <data name="Integrations.YouTube.StatsWidget.Likes" xml:space="preserve">
+    <value>Likes</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.DisplayName" xml:space="preserve">
+    <value>Kanalname</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.IsLive" xml:space="preserve">
+    <value>Live</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.StreamTitle" xml:space="preserve">
+    <value>Stream-Titel</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.ViewerCount" xml:space="preserve">
+    <value>Zuschaueranzahl</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.LikeCount" xml:space="preserve">
+    <value>Anzahl der Likes</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.SubscriberCount" xml:space="preserve">
+    <value>Abonnentenanzahl</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.UptimeSeconds" xml:space="preserve">
+    <value>Laufzeit (Sekunden)</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.StreamThumbnailUrl" xml:space="preserve">
+    <value>Vorschaubild-URL des Streams</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.AccountLabel" xml:space="preserve">
+    <value>Kanal</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.AccountDescription" xml:space="preserve">
+    <value>Als welcher verbundene YouTube-Kanal agiert werden soll.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.FirstAccountPlaceholder" xml:space="preserve">
+    <value>Erster Kanal</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SendChatMessage.Name" xml:space="preserve">
+    <value>Chatnachricht senden</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SendChatMessage.Description" xml:space="preserve">
+    <value>Schreibt eine Nachricht in den Live-Chat deiner aktuellen Übertragung.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SendChatMessage.MessageLabel" xml:space="preserve">
+    <value>Nachricht</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SendChatMessage.MessageDescription" xml:space="preserve">
+    <value>Bis zu 200 Zeichen. YouTube nimmt Chatnachrichten nur an, während du live bist.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTitle.Name" xml:space="preserve">
+    <value>Stream-Titel festlegen</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTitle.Description" xml:space="preserve">
+    <value>Ändert den Titel deiner aktuellen Übertragung oder, wenn du nicht live bist, der nächsten geplanten.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTitle.TitleLabel" xml:space="preserve">
+    <value>Titel</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetDescription.Name" xml:space="preserve">
+    <value>Stream-Beschreibung festlegen</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetDescription.Description" xml:space="preserve">
+    <value>Ändert die Beschreibung deiner aktuellen Übertragung oder, wenn du nicht live bist, der nächsten geplanten.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetDescription.DescriptionLabel" xml:space="preserve">
+    <value>Beschreibung</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTags.Name" xml:space="preserve">
+    <value>Stream-Tags festlegen</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTags.Description" xml:space="preserve">
+    <value>Ersetzt die Tags deiner aktuellen Übertragung oder, wenn du nicht live bist, der nächsten geplanten.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTags.TagsLabel" xml:space="preserve">
+    <value>Tags</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTags.TagsDescription" xml:space="preserve">
+    <value>Trenne Tags durch Kommas oder Zeilenumbrüche. Leer lassen, um alle Tags zu entfernen.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Name" xml:space="preserve">
+    <value>Werbepause starten</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Description" xml:space="preserve">
+    <value>Bittet YouTube, während deiner Live-Übertragung eine Werbepause einzulegen. Ob wirklich Werbung läuft, entscheidet YouTube.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.DurationLabel" xml:space="preserve">
+    <value>Länge</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Duration30Seconds" xml:space="preserve">
+    <value>30 Sekunden</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Duration60Seconds" xml:space="preserve">
+    <value>1 Minute</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Duration90Seconds" xml:space="preserve">
+    <value>90 Sekunden</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Duration2Minutes" xml:space="preserve">
+    <value>2 Minuten</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Duration3Minutes" xml:space="preserve">
+    <value>3 Minuten</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.GoLive.Name" xml:space="preserve">
+    <value>Live gehen</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.GoLive.Description" xml:space="preserve">
+    <value>Startet die nächste geplante Übertragung, die bereit ist. Starte zuerst deinen Encoder.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.EndStream.Name" xml:space="preserve">
+    <value>Stream beenden</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.EndStream.Description" xml:space="preserve">
+    <value>Beendet deine aktuelle Live-Übertragung.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.AccountNotFound" xml:space="preserve">
+    <value>Der YouTube-Kanal, den diese Aktion verwendet, ist nicht mehr verbunden.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.SignInExpired" xml:space="preserve">
+    <value>Die YouTube-Anmeldung ist abgelaufen. Verbinde den Kanal erneut, um ihn wieder zu verwenden.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.MissingPermission" xml:space="preserve">
+    <value>YouTube hat Macro Deck die Berechtigung dafür nicht erteilt. Verbinde den Kanal erneut, um sie zu erteilen.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.Unreachable" xml:space="preserve">
+    <value>YouTube konnte nicht erreicht werden. Prüfe deine Verbindung und versuche es noch einmal.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.RequestRejected" xml:space="preserve">
+    <value>YouTube hat die Anfrage abgelehnt.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.QuotaExhausted" xml:space="preserve">
+    <value>Das tägliche YouTube-Kontingent deines Google-Cloud-Projekts ist aufgebraucht. Es wird um Mitternacht pazifischer Zeit zurückgesetzt.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.RateLimited" xml:space="preserve">
+    <value>YouTube hat zu viele Anfragen erhalten. Warte einen Moment und versuche es noch einmal.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.StreamInactive" xml:space="preserve">
+    <value>YouTube empfängt noch kein Video. Starte zuerst deinen Encoder.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.InvalidTransition" xml:space="preserve">
+    <value>YouTube kann die Übertragung gerade nicht in diesen Zustand versetzen. Starte zuerst den Stream oder seine Testphase.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.TestStillStarting" xml:space="preserve">
+    <value>YouTube startet die Testphase dieser Übertragung noch. Versuch es gleich noch einmal.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.LiveStreamingNotEnabled" xml:space="preserve">
+    <value>Livestreaming ist für diesen YouTube-Kanal nicht aktiviert. Aktiviere es zuerst in YouTube Studio.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.InsufficientLivePermissions" xml:space="preserve">
+    <value>Dieser YouTube-Kanal darf diese Übertragung nicht verwalten.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.NoLiveChat" xml:space="preserve">
+    <value>Gerade gibt es keinen Live-Chat. Chatnachrichten kannst du nur senden, während du live bist.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.NoBroadcast" xml:space="preserve">
+    <value>Es gibt keine aktuelle oder geplante YouTube-Übertragung, die geändert werden kann.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.NotLive" xml:space="preserve">
+    <value>Der YouTube-Kanal ist gerade nicht live.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.NoReadyBroadcast" xml:space="preserve">
+    <value>Keine geplante Übertragung ist startbereit. Erstelle eine in YouTube Studio und starte deinen Encoder.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.AutoStart" xml:space="preserve">
+    <value>YouTube startet diese Übertragung von selbst, sobald dein Encoder Video sendet. Von hier aus lässt sie sich daher nicht starten.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.MessageEmpty" xml:space="preserve">
+    <value>Gib eine Nachricht ein, die gesendet werden soll.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.MessageTooLong" xml:space="preserve">
+    <value>Die Nachricht ist länger als 200 Zeichen.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.TitleRequired" xml:space="preserve">
+    <value>Gib einen Titel ein.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.TitleInvalid" xml:space="preserve">
+    <value>Der Titel darf höchstens 100 Zeichen lang sein und weder &lt; noch &gt; enthalten.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.DescriptionInvalid" xml:space="preserve">
+    <value>Die Beschreibung darf höchstens 5.000 Byte lang sein und weder &lt; noch &gt; enthalten.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.TagsInvalid" xml:space="preserve">
+    <value>Die Tags dürfen zusammen höchstens 500 Zeichen lang sein und weder &lt; noch &gt; enthalten.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.SignInExpiredTitle" xml:space="preserve">
+    <value>YouTube-Anmeldung für {account} abgelaufen</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.SignInExpiredDescription" xml:space="preserve">
+    <value>Macro Deck kann diesen YouTube-Kanal nicht mehr verwenden. Solange dein Google-Cloud-Projekt im Status Testing ist, beendet Google die Anmeldung nach 7 Tagen. Verbinde ihn mit derselben Client-ID und demselben Clientschlüssel erneut, um ihn wiederherzustellen.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ReconnectAction" xml:space="preserve">
+    <value>Erneut verbinden</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ReconnectResolution" xml:space="preserve">
+    <value>Verbinde den YouTube-Kanal erneut.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.QuotaExhaustedTitle" xml:space="preserve">
+    <value>YouTube-Kontingent aufgebraucht</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
+    <value>Dein Google-Cloud-Projekt hat sein tägliches YouTube-Kontingent aufgebraucht, daher hat Macro Deck die Aktualisierung von Live-Status und Chat pausiert. Sie läuft nach Mitternacht pazifischer Zeit weiter, wenn Google das Kontingent zurücksetzt.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
+    <value>YouTube-Kanal zweimal verbunden</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.DuplicateChannelDescription" xml:space="preserve">
+    <value>„{title}“ ist eine ältere Verbindung für denselben YouTube-Kanal und wird nicht verwendet. Entferne sie in der Liste der Konfigurationen unten.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StreamCategory" xml:space="preserve">
+    <value>Stream</value>
+  </data>
+  <data name="Integrations.YouTube.Events.SuperChatCategory" xml:space="preserve">
+    <value>Super Chat</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MembershipsCategory" xml:space="preserve">
+    <value>Mitgliedschaften</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AdvancedCategory" xml:space="preserve">
+    <value>Erweitert</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StreamOnlineName" xml:space="preserve">
+    <value>Stream Online</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StreamOnlineDescription" xml:space="preserve">
+    <value>Der Kanal ist live gegangen.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StreamOfflineName" xml:space="preserve">
+    <value>Stream Offline</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StreamOfflineDescription" xml:space="preserve">
+    <value>Die Live-Übertragung des Kanals ist beendet.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.SuperChatName" xml:space="preserve">
+    <value>Super Chat</value>
+  </data>
+  <data name="Integrations.YouTube.Events.SuperChatDescription" xml:space="preserve">
+    <value>Jemand hat einen Super Chat gesendet.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.SuperStickerName" xml:space="preserve">
+    <value>Super Sticker</value>
+  </data>
+  <data name="Integrations.YouTube.Events.SuperStickerDescription" xml:space="preserve">
+    <value>Jemand hat einen Super Sticker gesendet.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.NewMemberName" xml:space="preserve">
+    <value>Neues Mitglied</value>
+  </data>
+  <data name="Integrations.YouTube.Events.NewMemberDescription" xml:space="preserve">
+    <value>Jemand ist Mitglied des Kanals geworden oder hat die Mitgliedschaft aufgewertet.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MemberMilestoneName" xml:space="preserve">
+    <value>Mitglieds-Meilenstein</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MemberMilestoneDescription" xml:space="preserve">
+    <value>Ein Mitglied hat einen Meilenstein seiner Mitgliedschaft im Chat geteilt.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MembershipGiftName" xml:space="preserve">
+    <value>Verschenkte Mitgliedschaften</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MembershipGiftDescription" xml:space="preserve">
+    <value>Jemand hat anderen Zuschauern Mitgliedschaften geschenkt.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AnyName" xml:space="preserve">
+    <value>YouTube-Ereignis (erweitert)</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AnyDescription" xml:space="preserve">
+    <value>Jedes YouTube-Ereignis dieser Liste in einem Auslöser. Nach Typ filtern.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Channel" xml:space="preserve">
+    <value>Kanal</value>
+  </data>
+  <data name="Integrations.YouTube.Events.ChannelDescription" xml:space="preserve">
+    <value>Optional. Nur für diesen YouTube-Kanal ausführen.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.FirstChannelPlaceholder" xml:space="preserve">
+    <value>Erster Kanal</value>
+  </data>
+  <data name="Integrations.YouTube.Events.ChannelId" xml:space="preserve">
+    <value>Kanal-ID</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Title" xml:space="preserve">
+    <value>Titel</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StartedAt" xml:space="preserve">
+    <value>Gestartet um</value>
+  </data>
+  <data name="Integrations.YouTube.Events.BroadcastId" xml:space="preserve">
+    <value>Übertragungs-ID</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MessageId" xml:space="preserve">
+    <value>Nachrichten-ID</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AuthorChannelId" xml:space="preserve">
+    <value>Kanal-ID des Absenders</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AuthorName" xml:space="preserve">
+    <value>Absender</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Amount" xml:space="preserve">
+    <value>Betrag</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AmountMicros" xml:space="preserve">
+    <value>Betrag (Mikroeinheiten)</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Currency" xml:space="preserve">
+    <value>Währung</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Tier" xml:space="preserve">
+    <value>Stufe</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Comment" xml:space="preserve">
+    <value>Kommentar</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Sticker" xml:space="preserve">
+    <value>Sticker</value>
+  </data>
+  <data name="Integrations.YouTube.Events.LevelName" xml:space="preserve">
+    <value>Mitgliedschaftsstufe</value>
+  </data>
+  <data name="Integrations.YouTube.Events.IsUpgrade" xml:space="preserve">
+    <value>Aufwertung</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Months" xml:space="preserve">
+    <value>Monate</value>
+  </data>
+  <data name="Integrations.YouTube.Events.GiftCount" xml:space="preserve">
+    <value>Verschenkte Mitgliedschaften</value>
+  </data>
+  <data name="Integrations.YouTube.Events.EventType" xml:space="preserve">
+    <value>Ereignistyp</value>
+  </data>
+  <data name="Integrations.YouTube.Events.EventTypeDescription" xml:space="preserve">
+    <value>Optional. Nur für diese Art von Ereignis ausführen, z. B. super-chat.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AnyEventPlaceholder" xml:space="preserve">
+    <value>Jedes Ereignis</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Message" xml:space="preserve">
+    <value>Nachricht</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientTitle" xml:space="preserve">
+    <value>YouTube-Kanal verbinden</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientDescription" xml:space="preserve">
+    <value>Macro Deck verbindet sich über ein eigenes Google-Cloud-Projekt mit YouTube. Die Einrichtung dauert ein paar Minuten und ist nur einmal nötig.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.CreateProjectInstruction" xml:space="preserve">
+    <value>Erstelle in der Google Cloud Console ein Projekt und aktiviere dafür die YouTube Data API v3.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ConsentScreenInstruction" xml:space="preserve">
+    <value>Richte den OAuth-Zustimmungsbildschirm ein und füge das Google-Konto, dem dein Kanal gehört, als Testnutzer hinzu.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.CreateClientInstruction" xml:space="preserve">
+    <value>Erstelle eine OAuth-Client-ID mit dem Anwendungstyp TVs and Limited Input devices.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.CopyCredentialsInstruction" xml:space="preserve">
+    <value>Kopiere die Client-ID und den Clientschlüssel in die Felder unten.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ApiLibraryLinkLabel" xml:space="preserve">
+    <value>YouTube Data API v3</value>
+  </data>
+  <data name="Integrations.YouTube.Config.CredentialsLinkLabel" xml:space="preserve">
+    <value>Google-Cloud-Anmeldedaten</value>
+  </data>
+  <data name="Integrations.YouTube.Config.GuideLinkLabel" xml:space="preserve">
+    <value>Schritt-für-Schritt-Anleitung</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientIdLabel" xml:space="preserve">
+    <value>Client-ID</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientIdPlaceholder" xml:space="preserve">
+    <value>123456789012-abc.apps.googleusercontent.com</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientSecretLabel" xml:space="preserve">
+    <value>Clientschlüssel</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientSecretDescription" xml:space="preserve">
+    <value>Wird verschlüsselt auf diesem Computer gespeichert und nur an Google gesendet.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.DailyQuotaLabel" xml:space="preserve">
+    <value>Tageskontingent (Einheiten)</value>
+  </data>
+  <data name="Integrations.YouTube.Config.DailyQuotaDescription" xml:space="preserve">
+    <value>Wie viele Kontingenteinheiten dein Google-Cloud-Projekt pro Tag verbrauchen darf. Google gewährt standardmäßig 10.000; ändere den Wert nur, wenn Google dir mehr gewährt hat.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.DailyQuotaInvalid" xml:space="preserve">
+    <value>Gib eine ganze Zahl von mindestens 1 ein.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.EnterClientId" xml:space="preserve">
+    <value>Gib die Client-ID ein.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.EnterClientSecret" xml:space="preserve">
+    <value>Gib den Clientschlüssel ein.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientRejected" xml:space="preserve">
+    <value>Google hat diesen Client nicht akzeptiert. Prüfe Client-ID und Clientschlüssel und ob der Clienttyp TVs and Limited Input devices ist.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.CouldNotBeReached" xml:space="preserve">
+    <value>Google konnte nicht erreicht werden. Prüfe deine Verbindung und fahre fort, um es erneut zu versuchen.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.LinkTitle" xml:space="preserve">
+    <value>Zugriff bei Google bestätigen</value>
+  </data>
+  <data name="Integrations.YouTube.Config.LinkDescription.One" xml:space="preserve">
+    <value>Der Code ist noch {count} Minute lang gültig.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.YouTube.Config.LinkDescription.Other" xml:space="preserve">
+    <value>Der Code ist noch {count} Minuten lang gültig.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.YouTube.Config.LinkDescriptionExpired.One" xml:space="preserve">
+    <value>Der vorherige Code ist abgelaufen, hier ist ein neuer. Der Code ist noch {count} Minute lang gültig.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.YouTube.Config.LinkDescriptionExpired.Other" xml:space="preserve">
+    <value>Der vorherige Code ist abgelaufen, hier ist ein neuer. Der Code ist noch {count} Minuten lang gültig.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.YouTube.Config.OpenGoogleInstruction" xml:space="preserve">
+    <value>Öffne Google mit der Schaltfläche unten und melde dich mit dem Konto an, dem dein Kanal gehört.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.EnterCodeInstruction" xml:space="preserve">
+    <value>Gib diesen Code ein:</value>
+  </data>
+  <data name="Integrations.YouTube.Config.DeviceCodeLabel" xml:space="preserve">
+    <value>Gerätecode</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ApproveAccessInstruction" xml:space="preserve">
+    <value>Wähle deinen Kanal und erlaube den Zugriff. Solange das Projekt im Status Testing ist, warnt Google, dass die App nicht überprüft wurde; fahre trotzdem fort.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ComeBackPressContinueInstruction" xml:space="preserve">
+    <value>Komm hierher zurück und klicke auf Weiter.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ThenPressContinueInstruction" xml:space="preserve">
+    <value>Klicke dann auf Weiter.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.OpenGoogleLinkLabel" xml:space="preserve">
+    <value>Google öffnen und bestätigen</value>
+  </data>
+  <data name="Integrations.YouTube.Config.WaitingTitle" xml:space="preserve">
+    <value>Warten auf Google</value>
+  </data>
+  <data name="Integrations.YouTube.Config.WaitingDescription" xml:space="preserve">
+    <value>Die Anfrage wurde noch von niemandem bestätigt.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.PollingFailed" xml:space="preserve">
+    <value>Google konnte nicht erreicht werden. Fahre fort, um es erneut zu versuchen.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.RequestDeclined" xml:space="preserve">
+    <value>Du hast die Anfrage bei Google abgelehnt. Bestätige sie mit dem neuen Code unten, um es erneut zu versuchen.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ChannelLookupFailed" xml:space="preserve">
+    <value>Google hat den Zugriff bestätigt, aber YouTube hat nicht mitgeteilt, zu welchem Kanal er gehört. Fahre fort, um es erneut zu versuchen.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.NoChannel" xml:space="preserve">
+    <value>Dieses Google-Konto hat keinen YouTube-Kanal. Bestätige den neuen Code unten mit dem Konto, dem dein Kanal gehört.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.UnknownStep" xml:space="preserve">
+    <value>Unbekannter Schritt</value>
   </data>
   <data name="Integrations.Obs.Actions.SplitRecordFile.Name" xml:space="preserve">
     <value>Aufnahmedatei teilen</value>

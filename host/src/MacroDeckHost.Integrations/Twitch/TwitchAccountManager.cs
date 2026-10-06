@@ -1,6 +1,6 @@
 using System.Globalization;
-using MacroDeckHost.Application.Twitch.Chat;
-using MacroDeckHost.Application.Twitch.Stats;
+using MacroDeckHost.Application.StreamChat;
+using MacroDeckHost.Application.StreamStats;
 using MacroDeckHost.Integrations.Twitch.Auth;
 using MacroDeckHost.Integrations.Twitch.Protocol;
 using MacroDeck.Sdk.Actions;
@@ -23,7 +23,7 @@ internal sealed class TwitchAccountManager : IDisposable
 	private readonly ILogger _logger;
 
 	private TwitchEventEmitter? _emitter;
-	private ITwitchChatSink? _chatSink;
+	private IStreamChatSink? _chatSink;
 
 	private volatile List<TwitchAccountConnection> _connections = [];
 	private volatile List<StaleEntry> _staleEntries = [];
@@ -44,13 +44,15 @@ internal sealed class TwitchAccountManager : IDisposable
 
 	public IReadOnlyList<TwitchAccountConnection> Connections => _connections;
 
-	public void UseChatSink(ITwitchChatSink? chatSink) => _chatSink = chatSink;
+	public void UseChatSink(IStreamChatSink? chatSink) => _chatSink = chatSink;
 
-	public IReadOnlyList<TwitchChatAccount> ChatAccounts()
-		=> [.. _connections.Select(c => new TwitchChatAccount(c.Account.UserId, c.Account.Label))];
+	public IReadOnlyList<ChatAccount> ChatAccounts()
+		=> [.. _connections.Select(c => new ChatAccount(c.Account.UserId, c.Account.Label))];
 
-	public IReadOnlyList<TwitchStatsAccount> StatsAccounts()
-		=> [.. _connections.Select(c => new TwitchStatsAccount(c.Account.UserId, c.Account.Label, c.Account.VariableKey))];
+	public IReadOnlyList<StreamStatsAccount> StatsAccounts()
+		=> [.. _connections.Select(c => new StreamStatsAccount(c.Account.UserId,
+			c.Account.Label,
+			TwitchVariables.AccountPrefix(c.Account.VariableKey)))];
 
 	public async Task ReloadAsync(
 		IIntegrationConfig config,
