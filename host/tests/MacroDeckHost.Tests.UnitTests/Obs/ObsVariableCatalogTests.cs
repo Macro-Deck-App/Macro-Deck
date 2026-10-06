@@ -317,7 +317,7 @@ internal sealed class ObsVariableCatalogTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(reading.Value, Is.EqualTo(-17.7d));
-			Assert.That(reading.Min, Is.EqualTo(-60d));
+			Assert.That(reading.Min, Is.EqualTo(-100d));
 			Assert.That(reading.Step, Is.EqualTo(0.1d));
 		});
 	}
@@ -343,6 +343,46 @@ internal sealed class ObsVariableCatalogTests
 		});
 
 		Assert.That((await provider.ReadAsync(volumeId)).Value, Is.EqualTo(-17.7d));
+	}
+
+	[Test]
+	public async Task Volume_below_minus_60_decibels_is_reported_down_to_the_obs_floor()
+	{
+		var client = new FakeObsClient { IsConnected = true, InputNames = ["Desktop Audio", "Muted Mic"] };
+		client.InputVolumes["Desktop Audio"] = (float)Math.Pow(10, -74.8 / 20);
+		client.InputVolumes["Muted Mic"] = 0f;
+		var runtime = CreateRuntime(client);
+		var provider = new ObsVariableCatalog(() => [runtime]);
+
+		var quiet = await provider.ReadAsync(await InputLeafIdAsync(provider, runtime.Id, "Desktop Audio", "volume"));
+		var silent = await provider.ReadAsync(await InputLeafIdAsync(provider, runtime.Id, "Muted Mic", "volume"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(quiet.Value, Is.EqualTo(-74.8d));
+			Assert.That(quiet.Min, Is.EqualTo(-100d));
+			Assert.That(silent.Value, Is.EqualTo(-100d));
+		});
+	}
+
+	[Test]
+	public async Task Writing_below_minus_60_decibels_is_applied_and_minus_100_is_silence()
+	{
+		var client = new FakeObsClient { IsConnected = true, InputNames = ["Desktop Audio"] };
+		client.InputVolumes["Desktop Audio"] = 1.0f;
+		var runtime = CreateRuntime(client);
+		var provider = new ObsVariableCatalog(() => [runtime]);
+		var volumeId = await InputLeafIdAsync(provider, runtime.Id, "Desktop Audio", "volume");
+
+		await provider.SetValueAsync(volumeId, -80d);
+		var atMinus80 = client.InputVolumes["Desktop Audio"];
+		await provider.SetValueAsync(volumeId, -150d);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(atMinus80, Is.EqualTo(0.0001f).Within(0.00001f));
+			Assert.That(client.InputVolumes["Desktop Audio"], Is.EqualTo(0f));
+		});
 	}
 
 	[Test]

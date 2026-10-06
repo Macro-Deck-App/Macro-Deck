@@ -50,6 +50,10 @@ export const routes: Routes = [
           {
             path: 'icon-packs',
             loadComponent: () => import('./components/pages').then(m => m.IconPacksPageComponent)
+          },
+          {
+            path: 'fonts',
+            loadComponent: () => import('./components/pages').then(m => m.FontsLibraryPageComponent)
           }
         ]
       },

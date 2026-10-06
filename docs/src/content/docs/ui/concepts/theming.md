@@ -90,6 +90,8 @@ languages and a language change is a client-side re-render.
 
 Without `Wrap` a run stays on one line and ellipsizes, which is also what a reader that does not know the
 key does. `FontFace` names a face in Macro Deck's font catalogue - an identifier, not a resource handle.
+The catalogue holds the fonts installed on the host's computer and the fonts the user imported, and an
+imported face can be removed while the host runs.
 A reader holds the run back until the face is usable instead of swapping from a fallback, and shows it in
 its default face if the face never arrives or cannot be resolved.
 

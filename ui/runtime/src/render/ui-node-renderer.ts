@@ -26,6 +26,7 @@ import { createTextFitScope, MountedFit, TextFit, TextFitScope } from './text-fi
 import { MODIFIER_BORDER_PART, planNodeModifiers, UiModifierPlan } from './node-modifiers';
 import { bindNodeGestures } from './node-gesture-recognizer';
 import { bindNodePointers } from './node-pointer-tracker';
+import { UiComponents } from '../ui-components/ui-component-types';
 
 export interface UiNodeRenderHandle {
   element(): Element | null;
@@ -66,7 +67,8 @@ export function renderUiNode(
   const registry = options?.registry ?? DEFAULT_UI_COMPONENT_REGISTRY;
   const timers = options?.timers ?? REAL_TIMERS;
   return renderInScope(
-    container, node, box, crossExtent, initialBasis, host, registry, timers, createTextFitScope(), () => false, undefined);
+    container, node, box, crossExtent, initialBasis, host, registry, timers, createTextFitScope(), () => false, () => false,
+    undefined);
 }
 
 function renderInScope(
@@ -80,6 +82,7 @@ function renderInScope(
   timers: UiRenderTimers,
   scope: TextFitScope,
   parentDisabled: () => boolean,
+  parentInsideButton: () => boolean,
   inheritedTreeRoot: boolean | undefined,
 ): UiNodeRenderHandle {
   function setStyle(element: HTMLElement | SVGElement, name: string, value: string | null): void {
@@ -125,6 +128,10 @@ function renderInScope(
 
   function isDisabled(): boolean {
     return parentDisabled() || nodeIsDisabledRegion(renderNode);
+  }
+
+  function insideButton(): boolean {
+    return parentInsideButton() || renderNode.type === UiComponents.Button;
   }
 
   function emit(target: UiNode, name: string, payload?: unknown): void {
@@ -257,7 +264,7 @@ function renderInScope(
 
       next.push(renderInScope(
         parent, entry.child, entry.box, entry.crossExtent, basis, host, registry, timers, scope, isDisabled,
-        activeDefinition?.transparentRoot ? isTreeRoot : undefined));
+        insideButton, activeDefinition?.transparentRoot ? isTreeRoot : undefined));
     }
 
     let cursor: Node | null = before;
@@ -356,6 +363,7 @@ function renderInScope(
     emit,
     pressTint,
     isDisabled,
+    insideButton,
     repaint(): void {
       if (root !== null) render(lastNode, lastBox, lastCross);
     },

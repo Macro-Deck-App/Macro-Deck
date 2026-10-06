@@ -94,6 +94,66 @@ public class ActionButtonWidgetDataTests
 		});
 	}
 
+	[Test]
+	public void Label_styling_keeps_the_shadow_and_draws_no_outline_or_box_border_for_stored_data_without_the_keys()
+	{
+		var legacy = ActionButtonWidgetData.Parse(JsonDocument.Parse("""{"label":"Old","labelColor":"#eeeeee"}""").RootElement)
+			.Resolve(null);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(legacy.LabelShadow, Is.True);
+			Assert.That(legacy.HasLabelOutline, Is.False);
+			Assert.That(legacy.HasLabelBoxBorder, Is.False);
+		});
+	}
+
+	[Test]
+	public void Label_styling_cascades_state_then_root()
+	{
+		var staged = ActionButtonWidgetData.Parse(JsonDocument.Parse("""
+			{"stateMode":true,"labelShadow":false,"labelOutlineColor":"#111111","labelOutlineWidth":2,
+			 "labelBoxBorderColor":"#333333","labelBoxBorderWidth":3,
+			 "states":[
+			   {"id":"a","appearance":{"labelShadow":true,"labelOutlineColor":"#222222","labelOutlineWidth":2.5,
+			     "labelBoxBorderColor":"#444444","labelBoxBorderWidth":1}},
+			   {"id":"b","appearance":{"label":"B"}}]}
+			""").RootElement);
+
+		var a = staged.Resolve("a");
+		var b = staged.Resolve("b");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(a.LabelShadow, Is.True);
+			Assert.That(a.LabelOutlineColor, Is.EqualTo("#222222"));
+			Assert.That(a.LabelOutlineWidth, Is.EqualTo(2.5));
+			Assert.That(a.LabelBoxBorderColor, Is.EqualTo("#444444"));
+			Assert.That(a.LabelBoxBorderWidth, Is.EqualTo(1));
+			Assert.That(b.LabelShadow, Is.False);
+			Assert.That(b.LabelOutlineColor, Is.EqualTo("#111111"));
+			Assert.That(b.LabelOutlineWidth, Is.EqualTo(2));
+			Assert.That(b.LabelBoxBorderColor, Is.EqualTo("#333333"));
+			Assert.That(b.LabelBoxBorderWidth, Is.EqualTo(3));
+		});
+	}
+
+	[TestCase("""{"labelOutlineColor":"#111111"}""", true, 1d)]
+	[TestCase("""{"labelOutlineColor":"#111111","labelOutlineWidth":0}""", false, 0d)]
+	[TestCase("""{"labelOutlineWidth":3}""", false, 3d)]
+	[TestCase("""{"labelOutlineColor":"#111111","labelOutlineWidth":40}""", true, 3d)]
+	[TestCase("""{"labelOutlineColor":"#111111","labelOutlineWidth":-2}""", false, 0d)]
+	public void A_label_outline_needs_a_colour_and_a_width_within_range(string data, bool outlined, double width)
+	{
+		var appearance = ActionButtonWidgetData.Parse(JsonDocument.Parse(data).RootElement).Resolve(null);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(appearance.HasLabelOutline, Is.EqualTo(outlined));
+			Assert.That(appearance.LabelOutlineWidth, Is.EqualTo(width));
+		});
+	}
+
 	// An absent key advances: a button saved before the flag existed keeps cycling, and only an
 	// explicit false turns it off.
 	[TestCase("""{"stateMode":true,"states":[{"id":"a"},{"id":"b"}]}""", true)]

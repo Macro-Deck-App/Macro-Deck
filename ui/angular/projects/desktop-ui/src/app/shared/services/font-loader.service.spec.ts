@@ -41,6 +41,12 @@ class RecordingFontFaceBackend implements FontFaceBackend {
     this.addCalls.push(face);
   }
 
+  readonly deleteCalls: FontFaceHandle[] = [];
+
+  delete(face: FontFaceHandle): void {
+    this.deleteCalls.push(face);
+  }
+
   get lastLoadPromise(): Promise<FontFaceHandle> {
     return this.pending[this.pending.length - 1].handle.load();
   }
@@ -175,7 +181,25 @@ describe('FontLoaderService failure handling (issue #457 finding 8.1, REGRESSION
 });
 
 describe('FontLoaderService failure recovery (issue #457 finding 8.2)', () => {
+  afterEach(() => jasmine.clock().uninstall());
+
+  it('keeps a failed face failed for repeated requests, so text shows in the default face', async () => {
+    const backend = new RecordingFontFaceBackend();
+    const { loader, api } = configure(backend);
+
+    loader.ensureFace(FACE_ID);
+    backend.rejectLast(new Error('not found'));
+    await flush();
+
+    const again = loader.ensureFace(FACE_ID);
+
+    expect(again()).toBe('failed');
+    expect(api.getFontFileUrl).toHaveBeenCalledTimes(1);
+  });
+
   it('retries the fetch on a later request for the same face after a failure', async () => {
+    jasmine.clock().install();
+    jasmine.clock().mockDate(new Date(2026, 0, 1));
     const backend = new RecordingFontFaceBackend();
     const { loader, api } = configure(backend);
 
@@ -183,14 +207,66 @@ describe('FontLoaderService failure recovery (issue #457 finding 8.2)', () => {
     backend.rejectLast(new Error('network down'));
     await flush();
 
+    jasmine.clock().mockDate(new Date(2026, 0, 1, 0, 1));
     const status2 = loader.ensureFace(FACE_ID);
 
-    expect(status2()).toBe('loading');
+    expect(status2()).toBe('failed');
     expect(api.getFontFileUrl).toHaveBeenCalledTimes(2);
 
     backend.resolveLast();
     await flush();
 
     expect(status2()).toBe('ready');
+  });
+});
+
+describe('FontLoaderService eviction of a removed font', () => {
+  it('unregisters a loaded face so text falls back right away', async () => {
+    const backend = new RecordingFontFaceBackend();
+    const { loader } = configure(backend);
+
+    loader.ensureFace(FACE_ID);
+    backend.resolveLast();
+    await flush();
+    const registered = backend.addCalls[0];
+
+    loader.evict([FACE_ID]);
+
+    expect(backend.deleteCalls).toEqual([registered]);
+  });
+
+  it('fetches the face again when it is requested after an eviction', async () => {
+    const backend = new RecordingFontFaceBackend();
+    const { loader, api } = configure(backend);
+
+    loader.ensureFace(FACE_ID);
+    backend.resolveLast();
+    await flush();
+    loader.evict([FACE_ID]);
+
+    const status = loader.ensureFace(FACE_ID);
+
+    expect(status()).toBe('loading');
+    expect(api.getFontFileUrl).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not register a face whose download finishes after it was evicted', async () => {
+    const backend = new RecordingFontFaceBackend();
+    const { loader } = configure(backend);
+
+    loader.ensureFace(FACE_ID);
+    loader.evict([FACE_ID]);
+    backend.resolveLast();
+    await flush();
+
+    expect(backend.addCalls.length).toBe(0);
+  });
+
+  it('ignores faces it never loaded', () => {
+    const backend = new RecordingFontFaceBackend();
+    const { loader } = configure(backend);
+
+    expect(() => loader.evict(['never-loaded-400-5-upright'])).not.toThrow();
+    expect(backend.deleteCalls.length).toBe(0);
   });
 });

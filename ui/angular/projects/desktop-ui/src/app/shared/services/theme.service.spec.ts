@@ -160,6 +160,32 @@ describe('ThemeService', () => {
     expect(document.documentElement.style.getPropertyValue('--font-sans')).toBe('');
   });
 
+  it('never renders the app interface in an imported font', async () => {
+    apiSpy.getSystemFonts.and.resolveTo({
+      faces: [
+        {
+          faceId: 'inter-400', family: 'Inter', weight: 400, width: 5, slant: 'upright', styleName: 'Regular',
+          remoteRenderable: true,
+        },
+        {
+          faceId: 'inter-imported-700', family: 'Inter', weight: 700, width: 5, slant: 'upright', styleName: 'Bold',
+          remoteRenderable: true, userImported: true,
+        },
+      ],
+    });
+    const service = create();
+
+    service.setFontFamily('Inter');
+    TestBed.tick();
+    await Promise.resolve();
+    await Promise.resolve();
+    TestBed.tick();
+
+    const requested = apiSpy.getFontFileUrl.calls.allArgs().map(args => args[0]);
+    expect(requested).toContain('inter-400');
+    expect(requested).not.toContain('inter-imported-700');
+  });
+
   it('tells the renderers the UI font changed, so fitted text measures again', () => {
     const service = create();
     const uiFonts = TestBed.inject(UiFontService);

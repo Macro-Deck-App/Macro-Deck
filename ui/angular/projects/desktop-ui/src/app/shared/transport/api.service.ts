@@ -185,6 +185,9 @@ import {
   GetStoreTestsResponse,
   GetStoreUpdatesResponse,
   GetSystemFontsResponse,
+  GetUserFontsResponse,
+  ImportUserFontsResponse,
+  DeleteUserFontResponse,
   GetUserNotificationsResponse,
   GetVariablesRequest,
   GetVariablesResponse,
@@ -2093,6 +2096,24 @@ export class ApiService {
 
   getSystemFonts(): Promise<GetSystemFontsResponse> {
     return this.http('GET', '/api/system/fonts');
+  }
+
+  getUserFonts(): Promise<GetUserFontsResponse> {
+    return this.http('GET', '/api/fonts');
+  }
+
+  async importUserFonts(files: File[]): Promise<ImportUserFontsResponse> {
+    const form = new FormData();
+    for (const file of files) {
+      form.append('files', file, file.name);
+    }
+
+    const response = await this.fetchWithAuth('/api/fonts/import', { method: 'POST', body: form });
+    return ApiService.parseResponse<ImportUserFontsResponse>(response);
+  }
+
+  deleteUserFont(fontId: string): Promise<DeleteUserFontResponse> {
+    return this.http('DELETE', `/api/fonts/${encodeURIComponent(fontId)}`);
   }
 
   getConnectionInfo(): Promise<GetConnectionInfoResponse> {

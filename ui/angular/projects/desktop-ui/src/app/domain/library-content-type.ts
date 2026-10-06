@@ -13,6 +13,8 @@ export const LIBRARY_ROUTE = '/library';
 
 export const ICON_PACKS_CONTENT_TYPE = 'icon-packs';
 
+export const FONTS_CONTENT_TYPE = 'fonts';
+
 export const LIBRARY_CONTENT_TYPES = new InjectionToken<readonly LibraryContentType[]>(
   'library.contentTypes',
   {
@@ -24,6 +26,13 @@ export const LIBRARY_CONTENT_TYPES = new InjectionToken<readonly LibraryContentT
         labelKey: AppStrings.Nav.IconPacks,
         descriptionKey: AppStrings.Library.Page.IconPacksDescription,
         icon: 'image',
+      },
+      {
+        id: FONTS_CONTENT_TYPE,
+        route: '/library/fonts',
+        labelKey: AppStrings.Nav.Fonts,
+        descriptionKey: AppStrings.Library.Page.FontsDescription,
+        icon: 'type',
       },
     ],
   },

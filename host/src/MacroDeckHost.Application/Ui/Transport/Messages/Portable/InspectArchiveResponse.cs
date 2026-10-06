@@ -42,6 +42,8 @@ public sealed class ArchiveSummary
 
 	public int VariableCount { get; set; }
 
+	public int FontCount { get; set; }
+
 	public List<ArchiveIntegration> Integrations { get; set; } = [];
 }
 
@@ -71,6 +73,7 @@ public sealed class InspectArchiveResponse
 				ScriptCount = info.ScriptCount,
 				SecretCount = info.SecretCount,
 				VariableCount = info.VariableCount,
+				FontCount = info.FontCount,
 				Integrations = info.Integrations
 					.Select(integration => new ArchiveIntegration
 					{

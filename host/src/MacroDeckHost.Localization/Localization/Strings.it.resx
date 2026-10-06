@@ -658,10 +658,10 @@
     <value>Automazioni</value>
   </data>
   <data name="Backup.Group.Icons.Description" xml:space="preserve">
-    <value>I pacchetti di icone installati e le icone importate.</value>
+    <value>I pacchetti di icone installati, le icone importate e i font importati.</value>
   </data>
   <data name="Backup.Group.Icons.Label" xml:space="preserve">
-    <value>Icone e pacchetti di icone</value>
+    <value>Icone, pacchetti di icone e font</value>
   </data>
   <data name="Backup.Group.Integrations.Description" xml:space="preserve">
     <value>Le impostazioni delle integrazioni e ogni password o token salvato.</value>
@@ -7166,17 +7166,38 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.Obs.Actions.SaveReplayBuffer.Name" xml:space="preserve">
     <value>Salva buffer di replay</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelStepDescription" xml:space="preserve">
+    <value>Di quanti dB il volume sale o scende a ogni pressione</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelStepLabel" xml:space="preserve">
+    <value>Incremento (dB)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelsDescription" xml:space="preserve">
+    <value>Volume di destinazione in dB (-100 è il silenzio, 0 è il volume massimo)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelsLabel" xml:space="preserve">
+    <value>Volume (dB)</value>
+  </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.Description" xml:space="preserve">
     <value>Imposta, aumenta o diminuisce il volume di un input audio</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeDecrease" xml:space="preserve">
-    <value>Diminuisci di</value>
+    <value>Diminuisci di (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeDecreaseDecibels" xml:space="preserve">
+    <value>Diminuisci di (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeIncrease" xml:space="preserve">
-    <value>Aumenta di</value>
+    <value>Aumenta di (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeIncreaseDecibels" xml:space="preserve">
+    <value>Aumenta di (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeSet" xml:space="preserve">
-    <value>Imposta a</value>
+    <value>Imposta a (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeSetDecibels" xml:space="preserve">
+    <value>Imposta a (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.Name" xml:space="preserve">
     <value>Imposta volume input</value>
@@ -12575,6 +12596,14 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>{count} variabili del widget</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Portable.ArchivePreview.FontCount.One" xml:space="preserve">
+    <value>{count} font</value>
+    <comment>[plural] Number of fonts in an archive, shown in the import preview.</comment>
+  </data>
+  <data name="Portable.ArchivePreview.FontCount.Other" xml:space="preserve">
+    <value>{count} font</value>
+    <comment>[plural] Number of fonts in an archive, shown in the import preview.</comment>
+  </data>
   <data name="Portable.ArchivePreview.WidgetCount.One" xml:space="preserve">
     <value>{count} widget</value>
     <comment>[plural]</comment>
@@ -17618,11 +17647,26 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Etichetta</value>
   </data>
+  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
+    <value>Colore bordo riquadro etichetta</value>
+  </data>
+  <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
+    <value>Spessore bordo riquadro (%)</value>
+  </data>
   <data name="Widgets.Editor.LabelBoxColor" xml:space="preserve">
     <value>Colore riquadro etichetta</value>
   </data>
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Colore etichetta</value>
+  </data>
+  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
+    <value>Colore contorno etichetta</value>
+  </data>
+  <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
+    <value>Spessore contorno (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelShadow" xml:space="preserve">
+    <value>Ombra etichetta</value>
   </data>
   <data name="Widgets.Editor.Live" xml:space="preserve">
     <value>live</value>
@@ -18666,6 +18710,79 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Library.Page.ContentTypeAriaLabel" xml:space="preserve">
     <value>Contenuti della libreria</value>
+  </data>
+  <data name="Nav.Fonts" xml:space="preserve">
+    <value>Font</value>
+  </data>
+  <data name="Library.Page.FontsDescription" xml:space="preserve">
+    <value>File di font che hai importato per etichette e testi.</value>
+  </data>
+  <data name="Library.Page.FontCount.One" xml:space="preserve">
+    <value>{count} font</value>
+    <comment>[plural] Shown on a content type card in the library.</comment>
+  </data>
+  <data name="Library.Page.FontCount.Other" xml:space="preserve">
+    <value>{count} font</value>
+    <comment>[plural] Shown on a content type card in the library.</comment>
+  </data>
+  <data name="Library.Fonts.ImportAction" xml:space="preserve">
+    <value>Importa font</value>
+  </data>
+  <data name="Library.Fonts.EmptyTitle" xml:space="preserve">
+    <value>Nessun font importato</value>
+  </data>
+  <data name="Library.Fonts.EmptyDescription" xml:space="preserve">
+    <value>Importa file TTF o OTF per usarli su pulsanti e widget di testo, oppure trascinali qui.</value>
+  </data>
+  <data name="Library.Fonts.LicenseNote" xml:space="preserve">
+    <value>Importa solo font la cui licenza consente questo uso. I font usati sui pulsanti vengono inclusi quando esporti profili, cartelle o widget, quindi condividendo un'esportazione condividi anche il font.</value>
+  </data>
+  <data name="Library.Fonts.Sample" xml:space="preserve">
+    <value>Aa Bb Cc 0123456789</value>
+  </data>
+  <data name="Library.Fonts.RemoveAriaLabel" xml:space="preserve">
+    <value>Rimuovi {name}</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmHeading" xml:space="preserve">
+    <value>Rimuovere il font?</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmMessage" xml:space="preserve">
+    <value>{name} verrà rimosso. I pulsanti che lo usano passano al font predefinito.</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmAction" xml:space="preserve">
+    <value>Rimuovi</value>
+  </data>
+  <data name="Library.Fonts.RemoveFailed" xml:space="preserve">
+    <value>Impossibile rimuovere il font.</value>
+  </data>
+  <data name="Library.Fonts.ImportFailed" xml:space="preserve">
+    <value>Impossibile importare i font.</value>
+  </data>
+  <data name="Library.Fonts.Imported.One" xml:space="preserve">
+    <value>{count} font importato</value>
+    <comment>[plural] Toast after a successful import.</comment>
+  </data>
+  <data name="Library.Fonts.Imported.Other" xml:space="preserve">
+    <value>{count} font importati</value>
+    <comment>[plural] Toast after a successful import.</comment>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyPresent" xml:space="preserve">
+    <value>{fileName} è già importato.</value>
+  </data>
+  <data name="Library.Fonts.Status.UnsupportedFormat" xml:space="preserve">
+    <value>{fileName}: sono supportati solo file TTF e OTF.</value>
+  </data>
+  <data name="Library.Fonts.Status.TooLarge" xml:space="preserve">
+    <value>{fileName} supera i 32 MB.</value>
+  </data>
+  <data name="Library.Fonts.Status.InvalidFont" xml:space="preserve">
+    <value>{fileName} non è un file di font utilizzabile.</value>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyInstalled" xml:space="preserve">
+    <value>{fileName}: questa famiglia di font è già installata su questo computer, quindi non può essere importata.</value>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyImported" xml:space="preserve">
+    <value>{fileName}: un font con la stessa famiglia e lo stesso stile è già importato. Rimuovilo prima per sostituirlo.</value>
   </data>
   <data name="Onboarding.Back" xml:space="preserve">
     <value>Indietro</value>

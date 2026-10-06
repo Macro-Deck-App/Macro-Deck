@@ -26,6 +26,8 @@ public class MacroDeckPaths : IMacroDeckPaths
 
 	public string IconStagingDirectory => Path.Combine(IconsDirectory, "staging");
 
+	public string FontsDirectory => Path.Combine(DataDirectory, "fonts");
+
 	public string DatabasePath => Path.Combine(DataRootDirectory, "database.db");
 
 	public string DatabaseMigrationsDirectory => Path.Combine(BaseDirectory, "DatabaseMigrations");
@@ -80,6 +82,7 @@ public class MacroDeckPaths : IMacroDeckPaths
 		Directory.CreateDirectory(IconsDirectory);
 		Directory.CreateDirectory(IconPacksDirectory);
 		Directory.CreateDirectory(IconStagingDirectory);
+		Directory.CreateDirectory(FontsDirectory);
 		Directory.CreateDirectory(ConfigDirectory);
 		Directory.CreateDirectory(LogsDirectory);
 		Directory.CreateDirectory(KeysDirectory);

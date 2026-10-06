@@ -60,21 +60,38 @@ internal static class ActionButtonWidgetView
 			// default - MaxLines is deliberately left unset so `wrap: true` alone resolves to the
 			// renderer's uncapped line count, matching that parity exactly.
 			Wrap = UiValue.Of(true),
+			Shadow = UiValue.Optional(() =>
+				Appearance(config, activeState).LabelShadow ? UiValue.None<bool>() : UiValue.Of(false)),
+			StrokeColor = UiValue.Optional(() =>
+				Appearance(config, activeState) is { HasLabelOutline: true } appearance
+					? UiValue.Of(appearance.LabelOutlineColor!)
+					: UiValue.None<string>()),
+			StrokeWidth = UiSize.Optional(() =>
+				Appearance(config, activeState) is { HasLabelOutline: true } appearance
+					? UiSize.FromBasis(appearance.LabelOutlineWidth / 100.0)
+					: UiSize.None()),
 		};
 
 		var labelBox = new UiModifier
 		{
 			Key = "labelBox",
-			Padding = UiSize.From(() => UiLength.OfBasis(
-				Appearance(config, activeState).LabelBoxColor is null ? 0 : _labelBoxPadding)),
+			Padding = UiSize.From(() => UiLength.OfBasis(LabelBoxPadding(Appearance(config, activeState)))),
 			Background = UiValue.Optional(() =>
 				Appearance(config, activeState).LabelBoxColor is { } color
 					? UiValue.Of(UiBackground.Solid(color))
 					: UiValue.None<UiBackground>()),
 			Radius = UiSize.From(() => UiLength.OfBasis(
-				Appearance(config, activeState).LabelBoxColor is null ? 0 : _labelBoxRadius)),
+				HasLabelBox(Appearance(config, activeState)) ? _labelBoxRadius : 0)),
+			BorderWidth = UiSize.Optional(() =>
+				Appearance(config, activeState) is { HasLabelBoxBorder: true } appearance
+					? UiSize.FromBasis(appearance.LabelBoxBorderWidth / 100.0)
+					: UiSize.None()),
+			BorderColor = UiValue.Optional(() =>
+				Appearance(config, activeState) is { HasLabelBoxBorder: true } appearance
+					? UiValue.Of(appearance.LabelBoxBorderColor!)
+					: UiValue.None<string>()),
 			Fill = UiValue.Optional(() =>
-				Appearance(config, activeState).LabelBoxColor is null ? UiValue.Of(true) : UiValue.None<bool>()),
+				HasLabelBox(Appearance(config, activeState)) ? UiValue.None<bool>() : UiValue.Of(true)),
 			Child = label,
 		};
 
@@ -83,7 +100,7 @@ internal static class ActionButtonWidgetView
 			Key = "labelRow",
 			Direction = UiComponentDirections.Horizontal,
 			Justify = UiValue.Optional(() =>
-				Appearance(config, activeState) is { LabelBoxColor: not null } appearance
+				Appearance(config, activeState) is var appearance && HasLabelBox(appearance)
 					? UiValue.Of(JustifyForAlign(appearance.TextAlign))
 					: UiValue.None<string>()),
 			Children = [labelBox],
@@ -159,6 +176,20 @@ internal static class ActionButtonWidgetView
 				Children = [label],
 			},
 		};
+	}
+
+	private static bool HasLabelBox(ActionButtonResolvedAppearance appearance)
+		=> appearance.LabelBoxColor is not null || appearance.HasLabelBoxBorder;
+
+	// The modifier border is drawn inside the box edge, so the padding grows with it to keep it off the text.
+	private static double LabelBoxPadding(ActionButtonResolvedAppearance appearance)
+	{
+		if (!HasLabelBox(appearance))
+		{
+			return 0;
+		}
+
+		return _labelBoxPadding + (appearance.HasLabelBoxBorder ? appearance.LabelBoxBorderWidth / 100.0 : 0);
 	}
 
 	private static ActionButtonResolvedAppearance Appearance(UiState<ActionButtonWidgetData> config,

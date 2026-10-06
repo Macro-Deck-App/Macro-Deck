@@ -371,6 +371,129 @@ internal sealed class ObsActionsTests
 		Assert.That(client.Calls, Does.Contain("SetInputVolume:Mic/Aux:0"));
 	}
 
+	private static async Task RunVolumeAction(ObsConnection connection, Dictionary<string, object> parameters)
+	{
+		parameters[SetInputVolumeActionDefinition.InputParameter] = "Mic/Aux";
+		await new SetInputVolumeActionDefinition(() => connection).CreateExecutor()
+			.ExecuteAsync(Context(parameters));
+	}
+
+	private static double Decibels(float multiplier) => 20 * Math.Log10(multiplier);
+
+	[Test]
+	public async Task SetInputVolume_DecreaseDecibels_MovesTheSameNumberOfDecibelsEveryPress()
+	{
+		var (connection, client) = ConnectedConnection();
+		client.InputVolumes["Mic/Aux"] = 1f;
+		var levels = new List<double>();
+		using (connection)
+		{
+			for (var press = 0; press < 10; press++)
+			{
+				await RunVolumeAction(connection, new Dictionary<string, object>
+				{
+					[SetInputVolumeActionDefinition.ModeParameter] = "decrease-db",
+					[SetInputVolumeActionDefinition.DecibelStepParameter] = 5
+				});
+				levels.Add(Decibels(client.InputVolumes["Mic/Aux"]));
+			}
+		}
+
+		Assert.That(levels, Is.EqualTo(Enumerable.Range(1, 10).Select(i => -5d * i)).Within(0.01));
+	}
+
+	[Test]
+	public async Task SetInputVolume_DecreaseDecibels_StopsAtTheObsFloor()
+	{
+		var (connection, client) = ConnectedConnection();
+		client.InputVolumes["Mic/Aux"] = (float)Math.Pow(10, -99d / 20);
+		using (connection)
+		{
+			await RunVolumeAction(connection, new Dictionary<string, object>
+			{
+				[SetInputVolumeActionDefinition.ModeParameter] = "decrease-db",
+				[SetInputVolumeActionDefinition.DecibelStepParameter] = 5
+			});
+		}
+
+		Assert.That(client.Calls, Does.Contain("SetInputVolume:Mic/Aux:0"));
+	}
+
+	[Test]
+	public async Task SetInputVolume_IncreaseDecibels_IsCappedAtZeroDecibels()
+	{
+		var (connection, client) = ConnectedConnection();
+		client.InputVolumes["Mic/Aux"] = 0.9f;
+		using (connection)
+		{
+			await RunVolumeAction(connection, new Dictionary<string, object>
+			{
+				[SetInputVolumeActionDefinition.ModeParameter] = "increase-db",
+				[SetInputVolumeActionDefinition.DecibelStepParameter] = 6
+			});
+		}
+
+		Assert.That(client.Calls, Does.Contain("SetInputVolume:Mic/Aux:1"));
+	}
+
+	[Test]
+	public async Task SetInputVolume_SetDecibels_WritesTheMatchingMultiplier()
+	{
+		var (connection, client) = ConnectedConnection();
+		using (connection)
+		{
+			await RunVolumeAction(connection, new Dictionary<string, object>
+			{
+				[SetInputVolumeActionDefinition.ModeParameter] = "set-db",
+				[SetInputVolumeActionDefinition.DecibelsParameter] = -20
+			});
+		}
+
+		Assert.That(client.InputVolumes["Mic/Aux"], Is.EqualTo(0.1f).Within(0.0001f));
+	}
+
+	[Test]
+	public async Task SetInputVolume_DecibelModes_FallBackToTheDeclaredDefaultsWhenTheParameterIsMissing()
+	{
+		var (connection, client) = ConnectedConnection();
+		client.InputVolumes["Mic/Aux"] = 0.5f;
+		double afterSet;
+		using (connection)
+		{
+			await RunVolumeAction(connection, new Dictionary<string, object>
+				{ [SetInputVolumeActionDefinition.ModeParameter] = "set-db" });
+			afterSet = Decibels(client.InputVolumes["Mic/Aux"]);
+			client.InputVolumes["Mic/Aux"] = 0.5f;
+			await RunVolumeAction(connection, new Dictionary<string, object>
+				{ [SetInputVolumeActionDefinition.ModeParameter] = "decrease-db" });
+		}
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(afterSet, Is.EqualTo(0d).Within(0.01));
+			Assert.That(Decibels(client.InputVolumes["Mic/Aux"]), Is.EqualTo(Decibels(0.5f) - 3).Within(0.01));
+		});
+	}
+
+	[Test]
+	public void SetInputVolume_ShowsOnlyTheFieldsOfTheChosenUnit()
+	{
+		var parameters = new SetInputVolumeActionDefinition(() => null).Parameters
+			.ToDictionary(p => p.Name);
+		var modes = parameters[SetInputVolumeActionDefinition.ModeParameter].Options!.Select(o => o.Value);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(modes, Is.SupersetOf(new[] { "set", "increase", "decrease" }));
+			Assert.That(parameters[SetInputVolumeActionDefinition.VolumeParameter].VisibleWhen!.Values,
+				Is.EquivalentTo(new[] { "set", "increase", "decrease" }));
+			Assert.That(parameters[SetInputVolumeActionDefinition.DecibelsParameter].VisibleWhen!.Values,
+				Is.EquivalentTo(new[] { "set-db" }));
+			Assert.That(parameters[SetInputVolumeActionDefinition.DecibelStepParameter].VisibleWhen!.Values,
+				Is.EquivalentTo(new[] { "increase-db", "decrease-db" }));
+		});
+	}
+
 	[Test]
 	public async Task SetSourceFilter_EnableMode_ExecutesSetSourceFilterEnabledTrue()
 	{

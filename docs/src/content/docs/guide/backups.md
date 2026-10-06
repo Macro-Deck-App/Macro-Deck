@@ -4,7 +4,7 @@ description: Create backups, keep the recovery key safe, and restore a backup, a
 ---
 
 **Settings > Backups** keeps full backups of your profiles, scripts, automations, variables, icons,
-plugins, integrations, app settings and account. Every backup is encrypted.
+imported fonts, plugins, integrations, app settings and account. Every backup is encrypted.
 
 ## Create a backup
 
@@ -29,6 +29,9 @@ When you regenerate the recovery key, backups made before that still need the ol
 1. Open the backup's menu and choose **Restore…**.
 2. Choose what to restore. Anything you select replaces the same data on this installation.
 3. Confirm with **Restore**.
+
+Imported fonts belong to **Icons, icon packs and fonts**. Restoring that group from a backup made before
+Macro Deck could import fonts removes the fonts you imported since.
 
 The restore is applied the next time Macro Deck starts. The installed app restarts on its own. Macro Deck
 first makes a backup marked **Safety backup**, so you can go back.

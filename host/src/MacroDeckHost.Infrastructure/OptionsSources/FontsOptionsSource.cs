@@ -42,7 +42,7 @@ public sealed class FontsOptionsSource : IHostOptionsSource
 		{
 			Options = options,
 			AllowsCustomValue = false,
-			CacheSeconds = 60
+			CacheSeconds = 0
 		});
 	}
 }

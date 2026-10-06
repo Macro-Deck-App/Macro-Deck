@@ -7,7 +7,12 @@ public sealed record FontFaceInfo(
 	int Width,
 	string Slant,
 	string StyleName,
-	bool RemoteRenderable);
+	bool RemoteRenderable)
+{
+	public bool UserImported { get; init; }
+
+	public string? ContentHash { get; init; }
+}
 
 public interface IFontCatalog
 {
@@ -16,4 +21,14 @@ public interface IFontCatalog
 	byte[]? GetFaceFile(string faceId);
 
 	string ResolveFaceId(string faceId) => faceId;
+
+	FontFaceInfo? FindFace(string faceId)
+	{
+		var resolved = ResolveFaceId(faceId);
+		return GetFaces().FirstOrDefault(face => string.Equals(face.FaceId, resolved, StringComparison.Ordinal));
+	}
+
+	void Reload()
+	{
+	}
 }

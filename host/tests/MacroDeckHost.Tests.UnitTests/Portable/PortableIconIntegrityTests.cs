@@ -200,7 +200,7 @@ public class PortableIconIntegrityTests
 	}
 
 	private Task<IReadOnlyDictionary<Guid, Guid>> Import(PortableContent content, List<PortableIconFile> files)
-		=> _harness.AssetManager.Import(content, files, CancellationToken.None);
+		=> _harness.AssetManager.Import(content, files, [], CancellationToken.None);
 
 	private static PortableContent BundledIcon(out List<PortableIconFile> files, bool withSize = false)
 	{

@@ -413,7 +413,8 @@ public class Startup
 		services.AddSingleton<IPersistenceRecoveryReporter, PersistenceRecoveryNotifier>();
 		services.AddScoped<INetworkRestartNotifier, NetworkRestartNotifier>();
 		services.AddScoped<IPublicListenerUnavailableNotifier, PublicListenerUnavailableNotifier>();
-		services.AddSingleton<IFontCatalog, SkiaFontCatalog>();
+		services.AddSingleton<IFontCatalog>(sp => new SkiaFontCatalog(sp.GetRequiredService<IMacroDeckPaths>()));
+		services.AddSingleton<IUserFontLibrary, FileSystemUserFontLibrary>();
 		services.AddSingleton<LabelRenderChannel>();
 		services.AddSingleton<LabelSubscriptionTracker>();
 		services.AddScoped<ILabelTextService, LabelTextService>();

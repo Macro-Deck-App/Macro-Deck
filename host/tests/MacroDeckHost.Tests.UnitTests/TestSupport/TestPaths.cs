@@ -17,6 +17,7 @@ internal sealed class TestPaths : IMacroDeckPaths
 	public string IconsDirectory => Path.Combine(DataDirectory, "icons");
 	public string IconPacksDirectory => Path.Combine(IconsDirectory, "packs");
 	public string IconStagingDirectory => Path.Combine(IconsDirectory, "staging");
+	public string FontsDirectory => Path.Combine(DataDirectory, "fonts");
 	public string DatabasePath => Path.Combine(BaseDirectory, "database.db");
 	public string DatabaseMigrationsDirectory => Path.Combine(BaseDirectory, "DatabaseMigrations");
 	public string ConfigDirectory => Path.Combine(BaseDirectory, "config");
@@ -33,7 +34,7 @@ internal sealed class TestPaths : IMacroDeckPaths
 		foreach (var directory in new[]
 			{
 				ResourcesDirectory, ImagesDirectory, DataDirectory, ProfilesDirectory, ScriptsDirectory,
-				AutomationsDirectory, IconsDirectory, IconPacksDirectory, IconStagingDirectory, ConfigDirectory,
+				AutomationsDirectory, IconsDirectory, IconPacksDirectory, IconStagingDirectory, FontsDirectory, ConfigDirectory,
 				LogsDirectory, KeysDirectory, PluginsDirectory, PluginStagingDirectory, PluginCacheDirectory,
 				BackupsDirectory, RestoreStagingDirectory
 			})

@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 import { AppStrings } from '@macro-deck/runtime';
 import { ApiService } from '@shared';
 import {
+  FONTS_CONTENT_TYPE,
   ICON_PACKS_CONTENT_TYPE,
   LIBRARY_CONTENT_TYPES,
   LibraryContentType,
@@ -50,9 +51,11 @@ describe('LibraryOverviewComponent', () => {
   async function render(
     contentTypes: readonly LibraryContentType[],
     packs: unknown[] = [],
+    fonts: unknown[] = [],
   ): Promise<void> {
-    const apiSpy = jasmine.createSpyObj<ApiService>('ApiService', ['getIconPacks', 'onNotification']);
+    const apiSpy = jasmine.createSpyObj<ApiService>('ApiService', ['getIconPacks', 'getUserFonts', 'onNotification']);
     apiSpy.getIconPacks.and.resolveTo({ packs } as never);
+    apiSpy.getUserFonts.and.resolveTo({ fonts } as never);
     apiSpy.onNotification.and.callFake(() => new Subject());
 
     TestBed.configureTestingModule({
@@ -131,6 +134,18 @@ describe('LibraryOverviewComponent', () => {
     const [single] = summaries();
     expect(single).toBe(bundledTranslator(`${AppStrings.Library.Page.PackCount}.One`, { count: 1 }));
     expect(single).not.toBe(bundledTranslator(`${AppStrings.Library.Page.PackCount}.Other`, { count: 1 }));
+  });
+
+  it('reports how many fonts are imported', async () => {
+    await render(
+      [{ ...FAKE_TYPES[0], id: FONTS_CONTENT_TYPE, route: '/library/fonts' }],
+      [],
+      [{ fontId: 'a' }, { fontId: 'b' }],
+    );
+
+    expect(summaries()).toEqual([
+      bundledTranslator(`${AppStrings.Library.Page.FontCount}.Other`, { count: 2 }),
+    ]);
   });
 
   it('shows no summary for a content type that has none', async () => {
