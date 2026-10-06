@@ -164,7 +164,8 @@ event trigger a **Name** to tell several of them apart in the **Events** list.
 
 Once a widget has a Double Tap action, its Short Press waits a moment to see whether a second tap follows,
 so a single tap runs slightly later. A double tap runs only the Double Tap action. On a slider, a double tap
-still moves the level with each tap.
+still moves the level with each tap, and the tile flashes like a pressed button once the double tap is
+recognised.
 
 Actions run top to bottom. **If / Else**, **Switch**, **Repeat** and **Wait** build longer flows, for example:
 *mute the mic, wait 3 seconds, switch the scene*. **Run** tries them out right away.

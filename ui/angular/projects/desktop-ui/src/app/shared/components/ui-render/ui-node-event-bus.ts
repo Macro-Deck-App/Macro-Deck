@@ -25,4 +25,12 @@ export class UiNodeEventBus {
   setPressed(node: UiNode, pressed: boolean): void {
     this.pressedSubject.next({ nodeId: node.id, pressed });
   }
+
+  private readonly flashedSubject = new Subject<string>();
+
+  readonly flashed$: Observable<string> = this.flashedSubject.asObservable();
+
+  flashPressed(node: UiNode): void {
+    this.flashedSubject.next(node.id);
+  }
 }

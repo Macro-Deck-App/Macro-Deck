@@ -13,7 +13,8 @@
     [root]="renderedRoot()"
     [box]="treeBox()"
     (nodeEvent)="onTreeEvent($event)"
-    (nodePressedChange)="onNodePressedChange($event)" />
+    (nodePressedChange)="onNodePressedChange($event)"
+    (nodeFlashed)="onNodeFlashed($event)" />
 
   <div class="press-overlay"></div>
 </div>
