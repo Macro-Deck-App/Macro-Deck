@@ -13,6 +13,9 @@ public sealed class IconImportBatchTracker
 		public int Total;
 		public int Processed;
 		public int Failed;
+		public int AppearanceTotal;
+		public int AppearanceProcessed;
+		public int AppearanceFailed;
 		public long LastProgressEmitTicks;
 	}
 
@@ -39,16 +42,23 @@ public sealed class IconImportBatchTracker
 
 	public (int Total, int Processed, int Failed) GetCounters(Guid batchId)
 		=> _batches.TryGetValue(batchId, out var tracked)
-			? (tracked.Total, tracked.Processed, tracked.Failed)
+			? (Volatile.Read(ref tracked.Total) - Volatile.Read(ref tracked.AppearanceTotal),
+				Volatile.Read(ref tracked.Processed) - Volatile.Read(ref tracked.AppearanceProcessed),
+				Volatile.Read(ref tracked.Failed) - Volatile.Read(ref tracked.AppearanceFailed))
 			: (0, 0, 0);
 
-	public void SetCounters(Guid batchId, int total, int processed, int failed)
+	public void SetCounters(Guid batchId,
+		(int Total, int Processed, int Failed) icons,
+		(int Total, int Processed, int Failed) appearances)
 	{
 		if (_batches.TryGetValue(batchId, out var tracked))
 		{
-			tracked.Total = total;
-			tracked.Processed = processed;
-			tracked.Failed = failed;
+			tracked.Total = icons.Total + appearances.Total;
+			tracked.Processed = icons.Processed + appearances.Processed;
+			tracked.Failed = icons.Failed + appearances.Failed;
+			tracked.AppearanceTotal = appearances.Total;
+			tracked.AppearanceProcessed = appearances.Processed;
+			tracked.AppearanceFailed = appearances.Failed;
 		}
 	}
 
@@ -60,10 +70,24 @@ public sealed class IconImportBatchTracker
 		}
 	}
 
-	public void IncrementProcessed(Guid batchId)
+	public void AddToTotal(Guid batchId, IReadOnlyCollection<IconEntity> items)
 	{
 		if (_batches.TryGetValue(batchId, out var tracked))
 		{
+			Interlocked.Add(ref tracked.AppearanceTotal, items.Count(item => item.AppearanceOfId is not null));
+			Interlocked.Add(ref tracked.Total, items.Count);
+		}
+	}
+
+	public void IncrementProcessed(Guid batchId, bool appearance = false)
+	{
+		if (_batches.TryGetValue(batchId, out var tracked))
+		{
+			if (appearance)
+			{
+				Interlocked.Increment(ref tracked.AppearanceProcessed);
+			}
+
 			Interlocked.Increment(ref tracked.Processed);
 		}
 	}
@@ -76,13 +100,21 @@ public sealed class IconImportBatchTracker
 		}
 	}
 
-	public void IncrementFailed(Guid batchId)
+	public void IncrementFailed(Guid batchId, bool appearance = false)
 	{
 		if (_batches.TryGetValue(batchId, out var tracked))
 		{
+			if (appearance)
+			{
+				Interlocked.Increment(ref tracked.AppearanceFailed);
+			}
+
 			Interlocked.Increment(ref tracked.Failed);
 		}
 	}
+
+	public bool HasItems(Guid batchId)
+		=> _batches.TryGetValue(batchId, out var tracked) && Volatile.Read(ref tracked.Total) > 0;
 
 	public bool IsFinished(Guid batchId)
 	{

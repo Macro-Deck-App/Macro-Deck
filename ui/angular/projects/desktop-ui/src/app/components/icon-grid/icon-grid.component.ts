@@ -41,6 +41,7 @@ export class IconGridComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   @Output() iconClick = new EventEmitter<IconTileClick>();
   @Output() iconContextMenu = new EventEmitter<{ icon: IconModel; x: number; y: number }>();
+  @Output() iconOpen = new EventEmitter<IconModel>();
 
   protected readonly containerWidth = signal(0);
   protected readonly iconList = signal<IconModel[]>([]);

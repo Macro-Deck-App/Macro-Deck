@@ -59,6 +59,8 @@ The pack must pass these checks, or nothing is changed:
 - Every icon has a master image, and every icon name is unique (compared case-insensitively) and usable as
   an address: not blank, no surrounding whitespace, no `/`, no control characters, at most 128 characters
   (`icon-pack-names-invalid`, which lists every offending name).
+  [Appearances](/guide/concepts/#icon-appearances) are not icons of their own: they need no name, and the
+  plugin addresses an icon by its name whatever appearances it has.
 - A pack that declares AI-generated assets needs the plugin to declare them too: set `ai.generatedAssets`
   to `true` in `manifest.json` first (`ai-declaration-mismatch`). A pack that declares nothing about AI is
   added with the warning `icon-pack-ai-undeclared`, because its icons ship as part of the plugin.

@@ -71,12 +71,14 @@ using MacroDeckHost.Application.Timers;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Application.Widgets.Icons;
 using MacroDeckHost.Application.Weather;
-using MacroDeckHost.Application.Twitch.Chat;
-using MacroDeckHost.Application.Twitch.Stats;
+using MacroDeckHost.Application.StreamChat;
+using MacroDeckHost.Application.StreamStats;
+using MacroDeckHost.Infrastructure.StreamStats;
 using MacroDeckHost.Infrastructure.Twitch;
-using MacroDeckHost.Widgets.TwitchChat;
-using MacroDeckHost.Widgets.TwitchStats;
+using MacroDeckHost.Widgets.StreamChat;
+using MacroDeckHost.Widgets.StreamStats;
 using MacroDeckHost.Application.Icons;
+using MacroDeckHost.Application.Icons.Included;
 using MacroDeckHost.Application.Icons.Ownership;
 using MacroDeckHost.Application.Migration;
 using MacroDeckHost.Application.Portable;
@@ -96,6 +98,7 @@ using MacroDeckHost.Infrastructure.Variables;
 using MacroDeckHost.Infrastructure.Logging;
 using MacroDeckHost.Infrastructure.Caching;
 using MacroDeckHost.Infrastructure.Deck;
+using MacroDeckHost.Infrastructure.IconPacks;
 using MacroDeckHost.Infrastructure.Icons;
 using MacroDeckHost.Infrastructure.Icons.AppIcons;
 using MacroDeckHost.Infrastructure.Lifecycle;
@@ -146,6 +149,7 @@ using MacroDeckHost.Plugins;
 using MacroDeckHost.Ui;
 using MacroDeckHost.Widgets.ActionButton;
 using MacroDeckHost.Widgets.Clock;
+using MacroDeckHost.Widgets.Gauges;
 using MacroDeckHost.Widgets.HistoryGraph;
 using MacroDeckHost.Widgets.MusicPlayer;
 using MacroDeckHost.Widgets.ScreenSavers;
@@ -291,6 +295,7 @@ public class Startup
 		services.AddSingleton<IBuiltInWidgetUiProvider, ActionButtonWidgetUiProvider>();
 		services.AddSingleton<IBuiltInWidgetUiProvider, MusicPlayerWidgetUiProvider>();
 		services.AddSingleton<IBuiltInWidgetUiProvider, HistoryGraphWidgetUiProvider>();
+		services.AddSingleton<IBuiltInWidgetUiProvider, GaugesWidgetUiProvider>();
 		services.AddSingleton<TimerWidgetStore>();
 		services.AddSingleton<TimerWidgetVariableWriter>();
 		services.AddSingleton<CountdownDurationDrafts>();
@@ -325,23 +330,31 @@ public class Startup
 		services.AddHttpClient(TwitchChatImageCache.HttpClientName)
 			.ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(15))
 			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
-		services.AddHttpClient(TwitchStreamThumbnailCache.HttpClientName)
+		services.AddHttpClient(StreamThumbnailCache.HttpClientName)
 			.ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(15))
 			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
-		services.AddSingleton<TwitchStreamThumbnailCache>();
-		services.AddSingleton<ITwitchStreamThumbnails>(provider => provider.GetRequiredService<TwitchStreamThumbnailCache>());
-		services.AddSingleton<TwitchStatsWidgetUiProvider>();
 		services.AddSingleton<TwitchChatImageCache>();
 		services.AddSingleton<ITwitchChatImages>(provider => provider.GetRequiredService<TwitchChatImageCache>());
-		services.AddSingleton(provider => new TwitchChatHub(provider.GetRequiredService<TimeProvider>(),
-			provider.GetRequiredService<Serilog.ILogger>(),
-			provider.GetRequiredService<ITwitchChatImages>()));
-		services.AddSingleton<ITwitchChatSink>(provider => provider.GetRequiredService<TwitchChatHub>());
-		services.AddSingleton<ITwitchChatFeed>(provider => provider.GetRequiredService<TwitchChatHub>());
-		services.AddSingleton<IBuiltInIntegrationUiProvider, TwitchChatWidgetUiProvider>();
-		services.AddSingleton<TwitchStatsAccountsHub>();
-		services.AddSingleton<ITwitchStatsSink>(provider => provider.GetRequiredService<TwitchStatsAccountsHub>());
-		services.AddSingleton<ITwitchStatsAccounts>(provider => provider.GetRequiredService<TwitchStatsAccountsHub>());
+		services.AddSingleton(provider => new StreamPlatformServices(StreamPlatforms.All.Select(platform =>
+			StreamPlatformServiceSet.Create(platform,
+				new StreamChatHub(provider.GetRequiredService<TimeProvider>(),
+					provider.GetRequiredService<Serilog.ILogger>(),
+					ChatImagesFor(provider, platform)),
+				new StreamStatsAccountsHub(),
+				new StreamThumbnailCache(platform,
+					provider.GetRequiredService<IHttpClientFactory>(),
+					provider.GetRequiredService<IUiResourceStore>(),
+					provider.GetRequiredService<TimeProvider>(),
+					provider.GetRequiredService<Serilog.ILogger>()),
+				ChatImagesFor(provider, platform)))));
+		services.AddSingleton<IStreamPlatformServices>(provider =>
+			provider.GetRequiredService<StreamPlatformServices>());
+
+		foreach (var platform in StreamPlatforms.All)
+		{
+			services.AddSingleton<IBuiltInIntegrationUiProvider>(provider => StreamChatProvider(provider, platform));
+		}
+
 		services.AddSingleton<BuiltInScreenSaverProvider>();
 		services.AddSingleton<IBuiltInIntegrationUiProvider>(provider => provider.GetRequiredService<BuiltInScreenSaverProvider>());
 		services.AddSingleton<IScreenSaverProvider>(provider => provider.GetRequiredService<BuiltInScreenSaverProvider>());
@@ -356,7 +369,7 @@ public class Startup
 		services.AddSingleton<IModalUiSessionOpener, ModalUiSessionOpener>();
 		services.AddHostedService<UiSessionDrainBackgroundService>();
 		services.AddHostedService<ModalSessionWatcher>();
-		services.AddHostedService<TwitchChatPumpBackgroundService>();
+		services.AddHostedService<StreamChatPumpBackgroundService>();
 		services.AddHostedService<LoopbackPortFileService>();
 		services.AddMediator();
 
@@ -905,10 +918,16 @@ public class Startup
 		services.AddScoped<IIconImportService, IconImportService>();
 		services.AddScoped<IIconPackService, IconPackService>();
 		services.AddScoped<IIconService, IconService>();
+		services.AddSingleton<IconAppearanceEditLocks>();
+		services.AddScoped<IIconAppearanceService, IconAppearanceService>();
+		services.AddScoped<IIconReferenceRewriter, IconReferenceRewriter>();
 		services.AddScoped<IIconPackExportService, IconPackExportService>();
 		services.AddScoped<IIconPackRestoreService, IconPackRestoreService>();
 		services.AddSingleton<IIconPackOwner, StoreIconPackOwner>();
 		services.AddSingleton<IIconPackOwner, PluginIconPackOwner>();
+		services.AddSingleton<IIconPackOwner, BuiltInIconPackOwner>();
+		services.AddSingleton<IIncludedIconAssets, EmbeddedIncludedIconAssets>();
+		services.AddSingleton<IIncludedIconPackSync, IncludedIconPackSync>();
 		services.AddSingleton<IIconPackOwnerRegistry, IconPackOwnerRegistry>();
 		services.AddSingleton<IIconUsageScanner, IconUsageScanner>();
 		services.AddSingleton<IPluginBundledIconPackDeclarations, PluginBundledIconPackDeclarations>();
@@ -997,6 +1016,34 @@ public class Startup
 		{
 			FreezeBackgroundWork(services);
 		}
+	}
+
+	private static ITwitchChatImages? ChatImagesFor(IServiceProvider provider, StreamPlatform platform)
+		=> platform == StreamPlatforms.Twitch ? provider.GetRequiredService<ITwitchChatImages>() : null;
+
+	private static StreamChatWidgetUiProvider StreamChatProvider(IServiceProvider provider, StreamPlatform platform)
+	{
+		var services = provider.GetRequiredService<IStreamPlatformServices>().Find(platform.OwnerId)!;
+
+		return new StreamChatWidgetUiProvider(platform,
+			services.ChatFeed,
+			services.ChatImages,
+			provider.GetRequiredService<IWidgetSampleTextResolver>(),
+			provider.GetRequiredService<IIntegrationRegistry>(),
+			provider.GetRequiredService<IUiResourceStore>(),
+			provider.GetRequiredService<IUiInteractionsFactory>(),
+			provider.GetRequiredService<IFolderCache>(),
+			provider.GetRequiredService<IHostLockState>(),
+			provider.GetRequiredService<Serilog.ILogger>(),
+			new StreamStatsWidgetUiProvider(platform,
+				services.StatsAccounts,
+				services.Thumbnails,
+				provider.GetRequiredService<VariableRegistry>(),
+				provider.GetRequiredService<IVariableHistory>(),
+				provider.GetRequiredService<IVariableChangeNotifier>(),
+				provider.GetRequiredService<IWidgetSampleTextResolver>(),
+				provider.GetRequiredService<IIntegrationRegistry>(),
+				provider.GetRequiredService<IUiResourceStore>()));
 	}
 
 	/// <summary>

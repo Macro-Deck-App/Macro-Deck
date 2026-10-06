@@ -471,7 +471,8 @@ public class ActionButtonWidgetUiProviderTests
 				TimeProvider.System,
 				Serilog.Core.Logger.None),
 			TestLocalization.Resolver,
-			TimeProvider.System);
+			TimeProvider.System,
+			new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache());
 	}
 
 	private static UiSessionRequest PreviewRequest(string data, string? variableScopeWidgetId)

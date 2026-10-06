@@ -215,10 +215,10 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 
 		if (icon.ImportBatchId is not null)
 		{
-			_batchTracker.IncrementProcessed(icon.ImportBatchId.Value);
+			_batchTracker.IncrementProcessed(icon.ImportBatchId.Value, appearance: icon.AppearanceOfId is not null);
 		}
 
-		await mediator.Publish(new IconUpdatedNotification(icon), cancellationToken);
+		await PublishUpdated(icon, mediator, cancellationToken);
 	}
 
 	private async Task MarkFailed(IconEntity icon,
@@ -232,13 +232,22 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 
 		if (icon.ImportBatchId is not null)
 		{
-			_batchTracker.IncrementFailed(icon.ImportBatchId.Value);
+			_batchTracker.IncrementFailed(icon.ImportBatchId.Value, appearance: icon.AppearanceOfId is not null);
 		}
 
 		_logger.Warning("Icon {IconName} ({IconId}) failed to process: {Error}", icon.Name, icon.Id, error);
-		await mediator.Publish(new IconUpdatedNotification(icon), cancellationToken);
+		await PublishUpdated(icon, mediator, cancellationToken);
 	}
 
+
+	private async Task PublishUpdated(IconEntity icon, IMediator mediator, CancellationToken cancellationToken)
+	{
+		var target = icon.AppearanceOfId is { } parentId ? _iconPackCache.GetIconById(parentId) : icon;
+		if (target is not null)
+		{
+			await mediator.Publish(new IconUpdatedNotification(target), cancellationToken);
+		}
+	}
 
 	private async Task ExtractBatch(Guid batchId, IMediator mediator, CancellationToken cancellationToken)
 	{
@@ -310,7 +319,7 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 		}
 
 		var (total, processed, failed) = _batchTracker.GetCounters(batchId);
-		batch.State = total == 0 && batch.Error is not null
+		batch.State = !_batchTracker.HasItems(batchId) && batch.Error is not null
 			? IconImportBatchState.Failed
 			: IconImportBatchState.Processing;
 		batch.Total = total;
@@ -348,67 +357,106 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 			? CreateNewPacksResolver(batch, archive, archivePath, archiveDisplayName, mediator)
 			: null;
 
+		var entries = archive.Entries
+			.Where(entry => entry.Name.Length > 0 && IconImportFiles.IsSupportedImportEntry(entry.FullName))
+			.ToList();
+		if (entries.Count > MaxArchiveEntries)
+		{
+			batch.Error = $"{archiveDisplayName} contains more than {MaxArchiveEntries} images";
+			_logger.Warning("Archive {Archive} exceeds the entry limit; remaining entries are skipped",
+				archiveDisplayName);
+			entries = entries.Take(MaxArchiveEntries).ToList();
+		}
+
+		var groups = IconImportFiles.GroupAppearanceFiles(entries,
+			entry => IconImportFiles.DirectoryOf(entry.FullName),
+			entry => entry.FullName);
 		var chunk = new List<IconEntity>();
-		var entryCount = 0;
-		foreach (var entry in archive.Entries)
+		var claims = new IconImportAppearanceClaims(_iconPackCache, batch.Id);
+		foreach (var group in groups)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
-			if (entry.Name.Length == 0 || !IconImportFiles.IsSupportedImportEntry(entry.FullName))
-			{
-				continue;
-			}
-
-			if (++entryCount > MaxArchiveEntries)
-			{
-				batch.Error = $"{archiveDisplayName} contains more than {MaxArchiveEntries} images";
-				_logger.Warning("Archive {Archive} exceeds the entry limit; remaining entries are skipped",
-					archiveDisplayName);
-				break;
-			}
-
+			var entry = group.Item;
 			var key = $"{archiveDisplayName}/{entry.FullName}";
+			IconEntity? parent;
 			if (existingKeys.Contains(key))
 			{
-				continue;
+				parent = group.Appearances.Count == 0 ? null : CommittedIcon(batch.Id, key);
 			}
-
-			var packId = packResolver is null ? batch.PackId : await packResolver(entry, cancellationToken);
-			var icon = new IconEntity
+			else
 			{
-				Id = Guid.CreateVersion7(),
-				PackId = packId,
-				Name = iconNames?.GetValueOrDefault(Path.GetFileName(entry.FullName)) ??
-					Path.GetFileNameWithoutExtension(entry.Name),
-				OriginalFileName = key,
-				ProcessingState = IconProcessingState.Pending,
-				ImportBatchId = batch.Id,
-				CreatedAt = DateTime.UtcNow,
-				UpdatedAt = DateTime.UtcNow
-			};
-
-			SourceContentHash sourceHash;
-			await using (var entryStream = await entry.OpenAsync(cancellationToken))
-			{
-				sourceHash = await _storage.StageOriginal(batch.Id,
-					icon.Id,
-					entry.Name,
-					entryStream,
-					cancellationToken);
-			}
-
-			if (_iconPackCache.FindBySourceContentHash(sourceHash, packId) is not null ||
-				_coalescer.TryReserve(packId, sourceHash, icon.Id) is not null)
-			{
-				_storage.DeleteStagedOriginal(batch.Id, icon.Id);
-				_logger.Debug("Skipping archive entry {Entry}: pack {PackId} already holds that content", key, packId);
-				batch.Skipped++;
+				var packId = packResolver is null ? batch.PackId : await packResolver(entry, cancellationToken);
+				var (staged, duplicateOf) =
+					await StageArchiveEntry(batch, entry, key, packId, IconName(entry, iconNames), cancellationToken);
 				existingKeys.Add(key);
-				continue;
+				if (staged is not null)
+				{
+					chunk.Add(staged);
+				}
+
+				parent = staged ?? ResolveDuplicate(duplicateOf, packId, chunk);
 			}
 
-			icon.SourceContentHash = sourceHash.Value;
-			chunk.Add(icon);
-			existingKeys.Add(key);
+			foreach (var appearance in group.Appearances)
+			{
+				var appearanceKey = $"{archiveDisplayName}/{appearance.Item.FullName}";
+				if (existingKeys.Contains(appearanceKey))
+				{
+					continue;
+				}
+
+				existingKeys.Add(appearanceKey);
+				var claim = parent is null
+					? IconImportAppearanceClaim.Refused
+					: claims.Claim(parent, appearance.Traits);
+				if (claim == IconImportAppearanceClaim.Taken)
+				{
+					batch.Skipped++;
+					continue;
+				}
+
+				if (claim == IconImportAppearanceClaim.Refused)
+				{
+					var packId = parent?.PackId ??
+						(packResolver is null ? batch.PackId : await packResolver(appearance.Item, cancellationToken));
+					var (staged, _) = await StageArchiveEntry(batch,
+						appearance.Item,
+						appearanceKey,
+						packId,
+						IconName(appearance.Item, iconNames),
+						cancellationToken);
+					if (staged is not null)
+					{
+						chunk.Add(staged);
+					}
+
+					continue;
+				}
+
+				var asset = new IconEntity
+				{
+					Id = Guid.CreateVersion7(),
+					PackId = parent!.PackId,
+					Name = parent.Name,
+					OriginalFileName = appearanceKey,
+					ProcessingState = IconProcessingState.Pending,
+					ImportBatchId = batch.Id,
+					AppearanceOfId = parent.Id,
+					AppearanceTraits = new Dictionary<string, string>(appearance.Traits, StringComparer.Ordinal),
+					CreatedAt = DateTime.UtcNow,
+					UpdatedAt = DateTime.UtcNow
+				};
+				await using (var entryStream = await appearance.Item.OpenAsync(cancellationToken))
+				{
+					asset.SourceContentHash = (await _storage.StageOriginal(batch.Id,
+						asset.Id,
+						appearance.Item.Name,
+						entryStream,
+						cancellationToken)).Value;
+				}
+
+				chunk.Add(asset);
+			}
 
 			if (chunk.Count >= ExtractChunkSize)
 			{
@@ -418,6 +466,64 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 
 		await CommitChunk(batch, chunk, mediator, cancellationToken);
 	}
+
+	private async Task<(IconEntity? Staged, Guid? DuplicateOf)> StageArchiveEntry(IconImportBatchEntity batch,
+		ZipArchiveEntry entry,
+		string key,
+		Guid packId,
+		string name,
+		CancellationToken cancellationToken)
+	{
+		var icon = new IconEntity
+		{
+			Id = Guid.CreateVersion7(),
+			PackId = packId,
+			Name = name,
+			OriginalFileName = key,
+			ProcessingState = IconProcessingState.Pending,
+			ImportBatchId = batch.Id,
+			CreatedAt = DateTime.UtcNow,
+			UpdatedAt = DateTime.UtcNow
+		};
+
+		SourceContentHash sourceHash;
+		await using (var entryStream = await entry.OpenAsync(cancellationToken))
+		{
+			sourceHash = await _storage.StageOriginal(batch.Id,
+				icon.Id,
+				entry.Name,
+				entryStream,
+				cancellationToken);
+		}
+
+		var duplicateOf = _iconPackCache.FindBySourceContentHash(sourceHash, packId)?.Id ??
+			_coalescer.TryReserve(packId, sourceHash, icon.Id);
+		if (duplicateOf is not null)
+		{
+			_storage.DeleteStagedOriginal(batch.Id, icon.Id);
+			_logger.Debug("Skipping archive entry {Entry}: pack {PackId} already holds that content", key, packId);
+			batch.Skipped++;
+			return (null, duplicateOf);
+		}
+
+		icon.SourceContentHash = sourceHash.Value;
+		return (icon, null);
+	}
+
+	private IconEntity? ResolveDuplicate(Guid? iconId, Guid packId, List<IconEntity> chunk)
+	{
+		if (iconId is not { } id)
+		{
+			return null;
+		}
+
+		var icon = _iconPackCache.GetIconById(id) ?? chunk.Find(staged => staged.Id == id);
+		return icon is { AppearanceOfId: null } && icon.PackId == packId ? icon : null;
+	}
+
+	private IconEntity? CommittedIcon(Guid batchId, string key)
+		=> _iconPackCache.GetIconsByBatchId(batchId)
+			.FirstOrDefault(icon => icon.AppearanceOfId is null && icon.OriginalFileName == key);
 
 	private async Task CommitChunk(IconImportBatchEntity batch,
 		List<IconEntity> chunk,
@@ -436,10 +542,14 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 		{
 			var packIcons = group.ToList();
 			await _iconPackCache.AddIcons(group.Key, packIcons);
-			await mediator.Publish(new IconsAddedNotification(batch.Id, group.Key, packIcons), cancellationToken);
+			var parents = packIcons.Where(icon => icon.AppearanceOfId is null).ToList();
+			if (parents.Count > 0)
+			{
+				await mediator.Publish(new IconsAddedNotification(batch.Id, group.Key, parents), cancellationToken);
+			}
 		}
 
-		_batchTracker.AddToTotal(batch.Id, icons.Count);
+		_batchTracker.AddToTotal(batch.Id, icons);
 		foreach (var icon in icons)
 		{
 			_processingChannel.Enqueue(new ProcessIconWorkItem(icon.Id));
@@ -692,6 +802,10 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 		return (name, author, version);
 	}
 
+	private static string IconName(ZipArchiveEntry entry, Dictionary<string, string>? iconNames)
+		=> iconNames?.GetValueOrDefault(Path.GetFileName(entry.FullName)) ??
+			Path.GetFileNameWithoutExtension(entry.Name);
+
 	private static Dictionary<string, string>? ParseStreamDeckIconNames(ZipArchive archive)
 	{
 		var entry = archive.Entries.FirstOrDefault(e =>
@@ -810,6 +924,8 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 		var icons = _iconPackCache.GetIconsByBatchId(batch.Id);
 		var ready = 0;
 		var failed = 0;
+		var appearancesReady = 0;
+		var appearancesFailed = 0;
 		var toProcess = new List<Guid>();
 		var toRemove = new List<Guid>();
 
@@ -817,8 +933,14 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 		{
 			switch (icon.ProcessingState)
 			{
+				case IconProcessingState.Ready when icon.AppearanceOfId is not null:
+					appearancesReady++;
+					break;
 				case IconProcessingState.Ready:
 					ready++;
+					break;
+				case IconProcessingState.Failed when icon.AppearanceOfId is not null:
+					appearancesFailed++;
 					break;
 				case IconProcessingState.Failed:
 					failed++;
@@ -843,7 +965,14 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 						icon.ProcessingState = IconProcessingState.Failed;
 						icon.ProcessingError = "Original file was lost";
 						await _iconPackCache.UpdateIcon(icon);
-						failed++;
+						if (icon.AppearanceOfId is null)
+						{
+							failed++;
+						}
+						else
+						{
+							appearancesFailed++;
+						}
 					}
 
 					break;
@@ -852,14 +981,28 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 
 		if (toRemove.Count > 0)
 		{
-			await _iconPackCache.RemoveIcons(batch.PackId, toRemove);
+			var removed = IconRemoval.ExpandWithAppearances(_iconPackCache,
+				toRemove.Select(_iconPackCache.GetIconById).OfType<IconEntity>());
+			await _iconPackCache.RemoveIcons(batch.PackId, removed.Select(icon => icon.Id).ToList());
+			foreach (var icon in removed)
+			{
+				_coalescer.ReleaseAll(icon.Id);
+				_storage.DeleteIconFiles(icon.PackId, icon.Id);
+			}
 		}
 
+		var kept = icons
+			.Where(icon => !toRemove.Contains(icon.Id) &&
+				!(icon.AppearanceOfId is { } parentId && toRemove.Contains(parentId)))
+			.ToList();
+		var appearanceTotal = kept.Count(icon => icon.AppearanceOfId is not null);
 		var total = batch.State == IconImportBatchState.Discovering
-			? icons.Count - toRemove.Count
-			: batch.Total ?? icons.Count;
+			? kept.Count - appearanceTotal
+			: batch.Total ?? kept.Count - appearanceTotal;
 		_batchTracker.Register(batch);
-		_batchTracker.SetCounters(batch.Id, total, ready, failed);
+		_batchTracker.SetCounters(batch.Id,
+			(total, ready, failed),
+			(appearanceTotal, appearancesReady, appearancesFailed));
 
 		foreach (var iconId in toProcess)
 		{
@@ -904,7 +1047,7 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 			icon.ProcessingState = IconProcessingState.Failed;
 			icon.ProcessingError = "The import was interrupted and the original file is no longer available";
 			await _iconPackCache.UpdateIcon(icon);
-			await mediator.Publish(new IconUpdatedNotification(icon), cancellationToken);
+			await PublishUpdated(icon, mediator, cancellationToken);
 		}
 
 		_logger.Warning("Marked {Count} orphaned icon(s) from interrupted imports as failed", orphans.Count);

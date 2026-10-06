@@ -164,6 +164,10 @@
         "reference": {
           "type": "string",
           "description": "Provider-specific reference. Opaque here - never assumed to be a GUID."
+        },
+        "appearance": {
+          "type": "string",
+          "description": "A pinned appearance of an icon-pack icon: a canonical trait key such as 'colorScheme=dark', or 'default' for the icon's own image. Absent, the appearance is selected automatically."
         }
       },
       "required": ["type", "reference"]

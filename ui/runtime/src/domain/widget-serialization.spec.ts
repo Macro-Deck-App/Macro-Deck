@@ -579,6 +579,26 @@ describe('the widget icon reference model (issue #425)', () => {
     expect(bag.icon).toEqual(unknownProvider);
   });
 
+  it('keeps a pinned icon appearance through load and save, at the root, per state and on a Slider', () => {
+    const light = { type: 'icon-pack', reference: 'LAMP', appearance: 'colorScheme=light' };
+    const original = { type: 'icon-pack', reference: 'LAMP', appearance: 'default' };
+
+    const button = saved(WidgetType.ActionButton, { label: 'Lamp', stateMode: false, icon: light });
+    const states = saved(WidgetType.ActionButton, {
+      stateMode: true,
+      states: [
+        { id: 'off', label: 'Off', appearance: { icon: original } },
+        { id: 'on', label: 'On', appearance: { icon: light } },
+      ],
+    });
+    const slider = saved(WidgetType.Slider, { label: 'Volume', icon: light });
+
+    expect(button['icon']).toEqual(light);
+    expect(stateById(states['states'], 'off').appearance!['icon']).toEqual(original);
+    expect(stateById(states['states'], 'on').appearance!['icon']).toEqual(light);
+    expect(slider['icon']).toEqual(light);
+  });
+
   it('keeps a dangling icon-pack reference stored rather than clearing it on save', () => {
     const data = parseWidgetData(WidgetType.ActionButton, JSON.stringify({
       label: 'X',

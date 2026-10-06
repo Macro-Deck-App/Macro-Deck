@@ -1,6 +1,7 @@
 import {
   ClientAppStrings,
   disablePageZoom,
+  iconAppearanceContext,
   randomToken,
   Strings,
   UiFont,
@@ -19,6 +20,7 @@ import { Client } from './client';
 import { FontLoader } from './fonts';
 import { RenderingModeStore } from './rendering-mode';
 import { IconResolutionStore } from './icon-resolution';
+import { MotionPreference } from './motion-preference';
 import { ServerClock } from './server-clock';
 import { Shell } from './shell';
 import { WakeLock } from './wake-lock';
@@ -89,6 +91,7 @@ export function start(root: HTMLElement, target: WebClientTarget = ACTIVE_TARGET
     faceId => `${hostBaseUrl()}/api/system/fonts/${encodeURIComponent(faceId)}/file`);
   const rendering = new RenderingModeStore();
   const iconResolution = new IconResolutionStore();
+  const motion = new MotionPreference();
   const wakeLock = new WakeLock(CLIENT_TYPE, target.capabilities.wakeLock ? undefined : null);
   const pwa = setupPwa(target.capabilities.serviceWorker ? {} : { devMode: true });
   const videoStreams = new VideoStreamClient(uiConnectionVideoStreamPort(client.connection));
@@ -96,7 +99,11 @@ export function start(root: HTMLElement, target: WebClientTarget = ACTIVE_TARGET
   const host: UiRenderHost = {
     // The host's catalogue once it has answered, and the one compiled into the package until then.
     localization: client.localization,
-    resourceUrl: (resource, hint) => uiResourceUrl(hostBaseUrl(), resource, iconResolution.sizeFor(resource, hint)),
+    resourceUrl: (resource, hint) => uiResourceUrl(
+      hostBaseUrl(),
+      resource,
+      iconResolution.sizeFor(resource, hint),
+      iconAppearanceContext(appearance.resolvedTheme(), motion.reduced())),
     // The host's clock, not the device's: the looping border animations are phase-locked to it, and
     // two clients an unsynchronised second apart run visibly out of step.
     now: () => clock.now(),
@@ -186,6 +193,7 @@ export function start(root: HTMLElement, target: WebClientTarget = ACTIVE_TARGET
     icons.warm();
   });
   appearance.onChange(() => shell.repaint());
+  motion.onChange(() => shell.repaint());
   appearance.setPersistence((mode, accent) => void client.saveAppearance(mode, accent));
 
   // A tab that was in the background may have missed a whole session; the clock may also have

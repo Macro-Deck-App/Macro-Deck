@@ -3672,6 +3672,98 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="IconPacks.AiNotDeclared" xml:space="preserve">
     <value>Non indiqué</value>
   </data>
+  <data name="IconPacks.Appearances.Add" xml:space="preserve">
+    <value>Ajouter une apparence</value>
+  </data>
+  <data name="IconPacks.Appearances.AddFailed" xml:space="preserve">
+    <value>Impossible d'ajouter l'apparence.</value>
+  </data>
+  <data name="IconPacks.Appearances.AutoHint" xml:space="preserve">
+    <value>Macro Deck affiche l'apparence adaptée au thème et au réglage d'animation actuels, sinon celle par défaut.</value>
+  </data>
+  <data name="IconPacks.Appearances.Badge.One" xml:space="preserve">
+    <value>{count} autre apparence</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="IconPacks.Appearances.Badge.Other" xml:space="preserve">
+    <value>{count} autres apparences</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="IconPacks.Appearances.Default" xml:space="preserve">
+    <value>Par défaut</value>
+  </data>
+  <data name="IconPacks.Appearances.DialogTitle" xml:space="preserve">
+    <value>Apparences de « {name} »</value>
+  </data>
+  <data name="IconPacks.Appearances.Empty" xml:space="preserve">
+    <value>Aucune autre apparence pour l'instant.</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Animated" xml:space="preserve">
+    <value>Animée</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Custom" xml:space="preserve">
+    <value>Personnalisée ({traits})</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Dark" xml:space="preserve">
+    <value>Sombre</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.DarkAnimated" xml:space="preserve">
+    <value>Sombre, animée</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.DarkStatic" xml:space="preserve">
+    <value>Sombre, statique</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Light" xml:space="preserve">
+    <value>Claire</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.LightAnimated" xml:space="preserve">
+    <value>Claire, animée</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.LightStatic" xml:space="preserve">
+    <value>Claire, statique</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Static" xml:space="preserve">
+    <value>Statique</value>
+  </data>
+  <data name="IconPacks.Appearances.MenuItem" xml:space="preserve">
+    <value>Apparences…</value>
+  </data>
+  <data name="IconPacks.Appearances.Merge" xml:space="preserve">
+    <value>Utiliser une icône existante…</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeConfirm" xml:space="preserve">
+    <value>Utiliser comme apparence</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeFailed" xml:space="preserve">
+    <value>Impossible d'utiliser l'icône comme apparence.</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeHint" xml:space="preserve">
+    <value>L'icône rejoint « {name} ». Les boutons et les actions qui l'utilisaient passent à « {name} ».</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeKindLabel" xml:space="preserve">
+    <value>Utiliser comme</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeTitle" xml:space="preserve">
+    <value>Utiliser une icône existante</value>
+  </data>
+  <data name="IconPacks.Appearances.PreviewAlt" xml:space="preserve">
+    <value>Apparence « {kind} » de « {name} »</value>
+  </data>
+  <data name="IconPacks.Appearances.ReadOnly" xml:space="preserve">
+    <value>Ce pack est en lecture seule, ses apparences ne peuvent donc pas être modifiées.</value>
+  </data>
+  <data name="IconPacks.Appearances.RemoveConfirmMessage" xml:space="preserve">
+    <value>Retirer l'apparence « {kind} » de « {name} » ? Les boutons qui l'utilisent passent à une autre apparence.</value>
+  </data>
+  <data name="IconPacks.Appearances.RemoveConfirmTitle" xml:space="preserve">
+    <value>Retirer l'apparence</value>
+  </data>
+  <data name="IconPacks.Appearances.RemoveFailed" xml:space="preserve">
+    <value>Impossible de retirer l'apparence.</value>
+  </data>
+  <data name="IconPacks.Appearances.Replace" xml:space="preserve">
+    <value>Remplacer</value>
+  </data>
   <data name="IconPacks.AuthorFieldLabel" xml:space="preserve">
     <value>Auteur</value>
   </data>
@@ -3808,8 +3900,14 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="IconPacks.ImportPackAction" xml:space="preserve">
     <value>Importer un pack…</value>
   </data>
+  <data name="IconPacks.IncludedPackName" xml:space="preserve">
+    <value>Incluses</value>
+  </data>
   <data name="IconPacks.LoadingIconPacks" xml:space="preserve">
     <value>Chargement des packs d'icônes…</value>
+  </data>
+  <data name="IconPacks.ManagedByMacroDeck" xml:space="preserve">
+    <value>Fourni avec Macro Deck et mis à jour avec lui</value>
   </data>
   <data name="IconPacks.ManagedByPlugin" xml:space="preserve">
     <value>Fourni par {name} et mis à jour avec l’extension</value>
@@ -3910,6 +4008,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="IconPacks.SelectAnIconPackMessage" xml:space="preserve">
     <value>Choisis un pack à gauche pour parcourir ses icônes.</value>
+  </data>
+  <data name="IconPacks.SourceBuiltIn" xml:space="preserve">
+    <value>Intégré</value>
   </data>
   <data name="IconPacks.SourcePlugin" xml:space="preserve">
     <value>Extension</value>
@@ -7244,6 +7345,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Obs.Actions.SetProfile.Name" xml:space="preserve">
     <value>Définir le profil</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetSceneCollection.Description" xml:space="preserve">
+    <value>Bascule OBS vers une autre collection de scènes</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetSceneCollection.Name" xml:space="preserve">
+    <value>Définir la collection de scènes</value>
+  </data>
   <data name="Integrations.Obs.Actions.SetScene.Description" xml:space="preserve">
     <value>Change la scène de programme active</value>
   </data>
@@ -7446,6 +7553,18 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Obs.Errors.NoProfileSelected" xml:space="preserve">
     <value>Aucun profil n'a été sélectionné.</value>
   </data>
+  <data name="Integrations.Obs.Errors.NoSceneCollectionSelected" xml:space="preserve">
+    <value>Aucune collection de scènes n'a été sélectionnée.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SceneCollectionLoading" xml:space="preserve">
+    <value>OBS charge encore une collection de scènes. Réessaie une fois le chargement terminé.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SceneCollectionNotFound" xml:space="preserve">
+    <value>OBS n'a aucune collection de scènes nommée {name}.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SceneCollectionSlowToLoad" xml:space="preserve">
+    <value>OBS n'a pas répondu à temps pendant le chargement de la collection de scènes. Le changement se termine généralement quand même.</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoSceneOrSourceSelected" xml:space="preserve">
     <value>Aucune scène ou source n'a été sélectionnée.</value>
   </data>
@@ -7628,6 +7747,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Integrations.Obs.Params.Profile" xml:space="preserve">
     <value>Profil</value>
+  </data>
+  <data name="Integrations.Obs.Params.SceneCollection" xml:space="preserve">
+    <value>Collection de scènes</value>
   </data>
   <data name="Integrations.Obs.Params.SaveToVariable" xml:space="preserve">
     <value>Enregistrer dans une variable</value>
@@ -9565,37 +9687,37 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Twitch.ChatDialog.AccountUnavailable" xml:space="preserve">
     <value>Le compte Twitch n'est pas connecté.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.AllowModeration" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.AllowModeration" xml:space="preserve">
     <value>Autoriser la modération dans la fenêtre du chat</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.AllowModerationDescription" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.AllowModerationDescription" xml:space="preserve">
     <value>Appuyer sur le widget ouvre le chat. Si cette option est activée, toute personne utilisant ce deck peut toucher un message pour le supprimer, ou pour exclure temporairement ou bannir son auteur.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Ban" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Ban" xml:space="preserve">
     <value>Bannir</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Banned" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Banned" xml:space="preserve">
     <value>{name} est banni.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.ConfirmBan" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.ConfirmBan" xml:space="preserve">
     <value>Bannir {name} ? Cette personne ne pourra plus écrire dans ce canal tant qu'elle n'est pas débannie.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.DeleteMessage" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.DeleteMessage" xml:space="preserve">
     <value>Supprimer le message</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Deleted" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Deleted" xml:space="preserve">
     <value>Message supprimé.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Failed" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Failed" xml:space="preserve">
     <value>L'action n'a pas abouti. Vérifie la connexion et réessaie.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.ModerationUnavailable" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.ModerationUnavailable" xml:space="preserve">
     <value>La modération est désactivée pour ce widget.</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.NotPermitted" xml:space="preserve">
     <value>Twitch ne l'a pas autorisé. Reconnecte le compte Twitch et réessaie.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.OwnMessage" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.OwnMessage" xml:space="preserve">
     <value>Les messages du compte du canal lui-même ne peuvent pas être modérés.</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.Refused" xml:space="preserve">
@@ -9604,64 +9726,64 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Twitch.ChatDialog.SharedChat" xml:space="preserve">
     <value>Ce message vient du chat de {channel}. Modère-le là-bas.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.TimedOut" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.TimedOut" xml:space="preserve">
     <value>{name} est exclu temporairement.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Timeout10Minutes" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Timeout10Minutes" xml:space="preserve">
     <value>Exclure 10 min</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Timeout1Hour" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Timeout1Hour" xml:space="preserve">
     <value>Exclure 1 h</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Timeout1Minute" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Timeout1Minute" xml:space="preserve">
     <value>Exclure 1 min</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Unban" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Unban" xml:space="preserve">
     <value>Débannir</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Unbanned" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Unbanned" xml:space="preserve">
     <value>{name} est débanni.</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.AccountDescription" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.AccountDescription" xml:space="preserve">
     <value>La chaîne dont afficher le chat.</value>
   </data>
   <data name="Integrations.Twitch.ChatWidget.Description" xml:space="preserve">
     <value>Affiche le chat de ta chaîne en direct, avec emotes et badges.</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.Empty" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.Empty" xml:space="preserve">
     <value>En attente de messages du chat</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.FirstAccount" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.FirstAccount" xml:space="preserve">
     <value>Premier compte connecté</value>
   </data>
   <data name="Integrations.Twitch.ChatWidget.Name" xml:space="preserve">
     <value>Chat Twitch</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.NameSeparator" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.NameSeparator" xml:space="preserve">
     <value> : </value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.Title" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.Title" xml:space="preserve">
     <value>Chat de {account}</value>
   </data>
   <data name="Integrations.Twitch.ChatWidget.Offline" xml:space="preserve">
     <value>Non connecté à Twitch</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleChatter1" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleChatter1" xml:space="preserve">
     <value>PixelPanda</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleChatter2" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleChatter2" xml:space="preserve">
     <value>NightOwl</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleChatter3" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleChatter3" xml:space="preserve">
     <value>CozyGamer</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleMessage1" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleMessage1" xml:space="preserve">
     <value>Salut tout le monde !</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleMessage2" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleMessage2" xml:space="preserve">
     <value>Quelle action !</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleMessage3" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleMessage3" xml:space="preserve">
     <value>À la prochaine diffusion</value>
   </data>
   <data name="Integrations.Twitch.StatsWidget.Description" xml:space="preserve">
@@ -9673,13 +9795,13 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Twitch.StatsWidget.Heading" xml:space="preserve">
     <value>Twitch</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Live" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Live" xml:space="preserve">
     <value>En direct</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Offline" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Offline" xml:space="preserve">
     <value>Hors ligne</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Viewers" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Viewers" xml:space="preserve">
     <value>Spectateurs</value>
   </data>
   <data name="Integrations.Twitch.StatsWidget.Chatters" xml:space="preserve">
@@ -9688,61 +9810,61 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Twitch.StatsWidget.Followers" xml:space="preserve">
     <value>Followers</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Subscribers" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Subscribers" xml:space="preserve">
     <value>Abonnés</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Style" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Style" xml:space="preserve">
     <value>Style</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleDescription" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleDescription" xml:space="preserve">
     <value>Détermine ce que le widget affiche. La taille entre parenthèses est celle pour laquelle le style est conçu ; il s'adapte à toute autre taille.</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleOverview" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleOverview" xml:space="preserve">
     <value>Vue d'ensemble (3x2)</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleStatsRow" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleStatsRow" xml:space="preserve">
     <value>Ligne de statistiques (3x1)</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleLiveRow" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleLiveRow" xml:space="preserve">
     <value>Ligne d'état du direct (3x1)</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleValueGraph" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleValueGraph" xml:space="preserve">
     <value>Valeur unique avec graphique (2x2)</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleValue" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleValue" xml:space="preserve">
     <value>Valeur unique (1x1)</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Metric" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Metric" xml:space="preserve">
     <value>Valeur</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.MetricDescription" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.MetricDescription" xml:space="preserve">
     <value>Le nombre que le widget affiche.</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.OfflineHint" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.OfflineHint" xml:space="preserve">
     <value>Pas en direct pour le moment</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Tiles" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Tiles" xml:space="preserve">
     <value>Statistiques</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.TilesDescription" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.TilesDescription" xml:space="preserve">
     <value>Les nombres affichés par les tuiles, dans cet ordre. Quatre tuiles tiennent mieux dans un widget plus large d'une colonne que recommandé.</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Details" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Details" xml:space="preserve">
     <value>Détails du stream</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.DetailsDescription" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.DetailsDescription" xml:space="preserve">
     <value>Les détails affichés par la vue d'ensemble à côté de la miniature, dans cet ordre.</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Uptime" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Uptime" xml:space="preserve">
     <value>Durée du direct</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.ShowThumbnail" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.ShowThumbnail" xml:space="preserve">
     <value>Afficher la miniature</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.AccountDescription" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.AccountDescription" xml:space="preserve">
     <value>De quelle chaîne afficher les statistiques.</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.SampleTitle" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.SampleTitle" xml:space="preserve">
     <value>Exploration de Night City</value>
   </data>
   <data name="Integrations.Twitch.StatsWidget.SampleCategory" xml:space="preserve">
@@ -11330,6 +11452,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Widgets.Actions.FontSizeLabel" xml:space="preserve">
     <value>Taille</value>
   </data>
+  <data name="Integrations.Widgets.Actions.IconAppearanceDescription" xml:space="preserve">
+    <value>Automatique choisit l'apparence adaptée à l'écran, Par défaut affiche toujours l'image propre de l'icône. Si l'icône n'a pas l'apparence choisie, une apparence est choisie automatiquement.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.IconAppearanceLabel" xml:space="preserve">
+    <value>Apparence</value>
+  </data>
   <data name="Integrations.Widgets.Actions.IconDescription" xml:space="preserve">
     <value>Laisse vide pour retirer l'icône.</value>
   </data>
@@ -11428,6 +11556,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Integrations.Widgets.Actions.SetFontName" xml:space="preserve">
     <value>Définir la police du libellé</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconAppearanceDescription" xml:space="preserve">
+    <value>Choisit quelle apparence de l'icône d'un widget est affichée, par exemple sa version sombre ou statique.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconAppearanceName" xml:space="preserve">
+    <value>Définir l'apparence de l'icône</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetIconDescription" xml:space="preserve">
     <value>Change l'icône affichée par un widget.</value>
@@ -12262,6 +12396,40 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Notifications.HttpsNotRunningMessage" xml:space="preserve">
     <value>Macro Deck est joignable en HTTP, mais l'écouteur HTTPS n'a pas démarré. Vérifie le port HTTPS et le certificat dans Paramètres &gt; Réseau.</value>
+  </data>
+  <data name="Notifications.IconImport.CompletedWithWarnings.One" xml:space="preserve">
+    <value>{count} icône importée dans {pack} avec des avertissements</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.IconImport.CompletedWithWarnings.Other" xml:space="preserve">
+    <value>{count} icônes importées dans {pack} avec des avertissements</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.IconImport.DefaultPackName" xml:space="preserve">
+    <value>pack d'icônes</value>
+  </data>
+  <data name="Notifications.IconImport.Failed" xml:space="preserve">
+    <value>Impossible d'importer les icônes dans {pack}</value>
+  </data>
+  <data name="Notifications.IconImport.Importing" xml:space="preserve">
+    <value>Importation des icônes dans {pack}</value>
+  </data>
+  <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
+    <value>Rien n'a pu être importé comme icône.</value>
+  </data>
+  <data name="Notifications.IconImport.NothingImported" xml:space="preserve">
+    <value>Rien à importer dans {pack}</value>
+  </data>
+  <data name="Notifications.IconImport.PartlyFailed" xml:space="preserve">
+    <value>{imported} importées, {failed} en échec dans {pack}</value>
+  </data>
+  <data name="Notifications.IconImport.Skipped.One" xml:space="preserve">
+    <value>{count} fichier était déjà dans ce pack et a été ignoré.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.IconImport.Skipped.Other" xml:space="preserve">
+    <value>{count} fichiers étaient déjà dans ce pack et ont été ignorés.</value>
+    <comment>[plural]</comment>
   </data>
   <data name="Notifications.InstallationDamagedMessage" xml:space="preserve">
     <value>Certains fichiers de Macro Deck sont absents ou ne correspondent pas à la version installée. Cela arrive quand une mise à jour a été interrompue, par exemple parce qu'un antivirus a retenu certains de ses fichiers. Télécharge la dernière version de Macro Deck et installe-la de nouveau. Les journaux indiquent les fichiers concernés.</value>
@@ -16276,6 +16444,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="TemplateBuilder.Filters.Lstrip.Hint" xml:space="preserve">
     <value>Supprime les espaces au début</value>
   </data>
+  <data name="TemplateBuilder.Filters.MathRandom.Hint" xml:space="preserve">
+    <value>Natif Scriban : un entier aléatoire de un minimum jusqu'à un maximum exclu</value>
+  </data>
   <data name="TemplateBuilder.Filters.MathUuid.Hint" xml:space="preserve">
     <value>Natif Scriban : génère un identifiant unique aléatoire</value>
   </data>
@@ -17120,6 +17291,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="WebClient.Widgets.Countdown.Name" xml:space="preserve">
     <value>Compte à rebours</value>
   </data>
+  <data name="WebClient.Widgets.Gauges.Description" xml:space="preserve">
+    <value>Plusieurs variables numériques sous forme d'anneaux compacts avec icônes, comme un aperçu des batteries</value>
+  </data>
+  <data name="WebClient.Widgets.Gauges.Name" xml:space="preserve">
+    <value>Jauges</value>
+  </data>
   <data name="WebClient.Widgets.HistoryGraph.Description" xml:space="preserve">
     <value>Carte graphique en direct pour une variable numérique (CPU, RAM, GPU…) avec un graphique déroulant</value>
   </data>
@@ -17305,6 +17482,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Widgets.Appearance.Font.Unchanged" xml:space="preserve">
     <value>Inchangé</value>
+  </data>
+  <data name="Widgets.Appearance.Icon.Appearance" xml:space="preserve">
+    <value>Apparence de l'icône</value>
+  </data>
+  <data name="Widgets.Appearance.Icon.AppearanceAutomatic" xml:space="preserve">
+    <value>Automatique</value>
   </data>
   <data name="Widgets.Appearance.Icon.ChangeIcon" xml:space="preserve">
     <value>Changer l'icône</value>
@@ -18131,6 +18314,60 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.GridSettings.WidgetSpacing" xml:space="preserve">
     <value>Espacement des widgets</value>
   </data>
+  <data name="Widgets.Gauges.AddGauge" xml:space="preserve">
+    <value>Ajouter une jauge</value>
+  </data>
+  <data name="Widgets.Gauges.Color" xml:space="preserve">
+    <value>Couleur de l'anneau</value>
+  </data>
+  <data name="Widgets.Gauges.EmptyHint" xml:space="preserve">
+    <value>Aucune jauge pour l'instant. Ajoute-en une dans les réglages du widget.</value>
+  </data>
+  <data name="Widgets.Gauges.FullHint" xml:space="preserve">
+    <value>Ce widget est plein. Retire une jauge pour en ajouter une autre.</value>
+  </data>
+  <data name="Widgets.Gauges.GaugeNumber" xml:space="preserve">
+    <value>Jauge {number}</value>
+  </data>
+  <data name="Widgets.Gauges.ListHeading" xml:space="preserve">
+    <value>Jauges</value>
+  </data>
+  <data name="Widgets.Gauges.MaximumHint" xml:space="preserve">
+    <value>0 utilise le maximum de la variable, sinon minimum + 100.</value>
+  </data>
+  <data name="Widgets.Gauges.Name" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="Widgets.Gauges.NameHint" xml:space="preserve">
+    <value>Affiché sous la valeur. Peut contenir des variables.</value>
+  </data>
+  <data name="Widgets.Gauges.NamePlaceholder" xml:space="preserve">
+    <value>p. ex. CPU</value>
+  </data>
+  <data name="Widgets.Gauges.StyleArc" xml:space="preserve">
+    <value>Arc</value>
+  </data>
+  <data name="Widgets.Gauges.StyleRing" xml:space="preserve">
+    <value>Anneau</value>
+  </data>
+  <data name="Widgets.Gauges.Threshold" xml:space="preserve">
+    <value>Seuil</value>
+  </data>
+  <data name="Widgets.Gauges.Warning" xml:space="preserve">
+    <value>Alerte</value>
+  </data>
+  <data name="Widgets.Gauges.WarningAbove" xml:space="preserve">
+    <value>Égale ou supérieure au seuil</value>
+  </data>
+  <data name="Widgets.Gauges.WarningBelow" xml:space="preserve">
+    <value>Égale ou inférieure au seuil</value>
+  </data>
+  <data name="Widgets.Gauges.WarningHint" xml:space="preserve">
+    <value>L'anneau devient rouge quand la valeur atteint le seuil.</value>
+  </data>
+  <data name="Widgets.Gauges.WarningOff" xml:space="preserve">
+    <value>Désactivé</value>
+  </data>
   <data name="Widgets.History.AccentColor" xml:space="preserve">
     <value>Couleur d'accent</value>
   </data>
@@ -18346,6 +18583,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Widgets.SamplePreview.ActionButtonLabel" xml:space="preserve">
     <value>Couper le son</value>
+  </data>
+  <data name="Widgets.SamplePreview.GaugesMemory" xml:space="preserve">
+    <value>Mémoire</value>
+  </data>
+  <data name="Widgets.SamplePreview.GaugesBattery" xml:space="preserve">
+    <value>Batterie</value>
   </data>
   <data name="Widgets.SamplePreview.HistoryGraphSubtitle" xml:space="preserve">
     <value>Données d'exemple</value>
@@ -18628,6 +18871,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Integrations.Obs.Variables.CurrentProfile" xml:space="preserve">
     <value>Profil actuel</value>
+  </data>
+  <data name="Integrations.Obs.Variables.CurrentSceneCollection" xml:space="preserve">
+    <value>Collection de scènes actuelle</value>
   </data>
   <data name="Integrations.Obs.Variables.CurrentScene" xml:space="preserve">
     <value>Scène actuelle</value>
@@ -19564,6 +19810,499 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Shell.OutdatedUi.Versions" xml:space="preserve">
     <value>Build de l'interface : {device} · Build de Macro Deck : {computer}</value>
   </data>
+  <data name="Integrations.YouTube.ChatWidget.Name" xml:space="preserve">
+    <value>Chat YouTube</value>
+  </data>
+  <data name="Integrations.YouTube.ChatWidget.Description" xml:space="preserve">
+    <value>Affiche en temps réel le chat en direct de ta diffusion en cours, y compris les Super Chats et les nouveaux membres.</value>
+  </data>
+  <data name="Integrations.YouTube.ChatWidget.Offline" xml:space="preserve">
+    <value>Aucun chat en direct sur YouTube pour le moment</value>
+  </data>
+  <data name="Integrations.YouTube.ChatDialog.AccountChanged" xml:space="preserve">
+    <value>Ce widget affiche maintenant une autre chaîne YouTube. Rouvre le chat pour le modérer.</value>
+  </data>
+  <data name="Integrations.YouTube.ChatDialog.AccountUnavailable" xml:space="preserve">
+    <value>La chaîne YouTube n'est pas en direct pour le moment, son chat ne peut donc pas être modéré.</value>
+  </data>
+  <data name="Integrations.YouTube.ChatDialog.NotPermitted" xml:space="preserve">
+    <value>YouTube ne l'a pas autorisé. Reconnecte la chaîne YouTube et réessaie.</value>
+  </data>
+  <data name="Integrations.YouTube.ChatDialog.Refused" xml:space="preserve">
+    <value>YouTube a refusé cette action, par exemple parce que cette personne est propriétaire ou modératrice de la chaîne.</value>
+  </data>
+  <data name="Integrations.YouTube.ChatDialog.Unsupported" xml:space="preserve">
+    <value>Macro Deck ne peut lever que les bannissements qu'il a lui-même appliqués pendant ce direct. Lève celui-ci dans YouTube Studio.</value>
+  </data>
+  <data name="Integrations.YouTube.StatsWidget.Name" xml:space="preserve">
+    <value>Statistiques de direct YouTube</value>
+  </data>
+  <data name="Integrations.YouTube.StatsWidget.Description" xml:space="preserve">
+    <value>Affiche d'un coup d'œil ton statut en direct, tes spectateurs, tes « J'aime » et tes abonnés.</value>
+  </data>
+  <data name="Integrations.YouTube.StatsWidget.Heading" xml:space="preserve">
+    <value>YouTube</value>
+  </data>
+  <data name="Integrations.YouTube.StatsWidget.Likes" xml:space="preserve">
+    <value>J'aime</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.DisplayName" xml:space="preserve">
+    <value>Nom de la chaîne</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.IsLive" xml:space="preserve">
+    <value>En direct</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.StreamTitle" xml:space="preserve">
+    <value>Titre du direct</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.ViewerCount" xml:space="preserve">
+    <value>Nombre de spectateurs</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.LikeCount" xml:space="preserve">
+    <value>Nombre de « J'aime »</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.SubscriberCount" xml:space="preserve">
+    <value>Nombre d'abonnés</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.UptimeSeconds" xml:space="preserve">
+    <value>Temps en direct (secondes)</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.StreamThumbnailUrl" xml:space="preserve">
+    <value>URL de la miniature du direct</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.AccountLabel" xml:space="preserve">
+    <value>Chaîne</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.AccountDescription" xml:space="preserve">
+    <value>La chaîne YouTube connectée à utiliser.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.FirstAccountPlaceholder" xml:space="preserve">
+    <value>Première chaîne</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SendChatMessage.Name" xml:space="preserve">
+    <value>Envoyer un message dans le chat</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SendChatMessage.Description" xml:space="preserve">
+    <value>Publie un message dans le chat en direct de ta diffusion en cours.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SendChatMessage.MessageLabel" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SendChatMessage.MessageDescription" xml:space="preserve">
+    <value>Jusqu'à 200 caractères. YouTube n'accepte les messages du chat que lorsque tu es en direct.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTitle.Name" xml:space="preserve">
+    <value>Définir le titre du direct</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTitle.Description" xml:space="preserve">
+    <value>Modifie le titre de ta diffusion en cours ou, si tu n'es pas en direct, de la prochaine diffusion planifiée.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTitle.TitleLabel" xml:space="preserve">
+    <value>Titre</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetDescription.Name" xml:space="preserve">
+    <value>Définir la description du direct</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetDescription.Description" xml:space="preserve">
+    <value>Modifie la description de ta diffusion en cours ou, si tu n'es pas en direct, de la prochaine diffusion planifiée.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetDescription.DescriptionLabel" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTags.Name" xml:space="preserve">
+    <value>Définir les tags du direct</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTags.Description" xml:space="preserve">
+    <value>Remplace les tags de ta diffusion en cours ou, si tu n'es pas en direct, de la prochaine diffusion planifiée.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTags.TagsLabel" xml:space="preserve">
+    <value>Tags</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTags.TagsDescription" xml:space="preserve">
+    <value>Sépare les tags par des virgules ou des retours à la ligne. Laisse vide pour supprimer tous les tags.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Name" xml:space="preserve">
+    <value>Lancer une pause publicitaire</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Description" xml:space="preserve">
+    <value>Demande à YouTube de diffuser une pause publicitaire pendant ton direct. YouTube décide si des publicités sont réellement diffusées.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.DurationLabel" xml:space="preserve">
+    <value>Durée</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Duration30Seconds" xml:space="preserve">
+    <value>30 secondes</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Duration60Seconds" xml:space="preserve">
+    <value>1 minute</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Duration90Seconds" xml:space="preserve">
+    <value>90 secondes</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Duration2Minutes" xml:space="preserve">
+    <value>2 minutes</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Duration3Minutes" xml:space="preserve">
+    <value>3 minutes</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.GoLive.Name" xml:space="preserve">
+    <value>Passer en direct</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.GoLive.Description" xml:space="preserve">
+    <value>Démarre la prochaine diffusion planifiée qui est prête. Lance d'abord ton encodeur.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.EndStream.Name" xml:space="preserve">
+    <value>Terminer le direct</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.EndStream.Description" xml:space="preserve">
+    <value>Termine ta diffusion en direct en cours.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.AccountNotFound" xml:space="preserve">
+    <value>La chaîne YouTube utilisée par cette action n'est plus connectée.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.SignInExpired" xml:space="preserve">
+    <value>La connexion YouTube a expiré. Reconnecte la chaîne pour l'utiliser à nouveau.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.MissingPermission" xml:space="preserve">
+    <value>YouTube n'a pas accordé cette autorisation à Macro Deck. Reconnecte la chaîne pour l'accorder.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.Unreachable" xml:space="preserve">
+    <value>Impossible de joindre YouTube. Vérifie ta connexion et réessaie.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.RequestRejected" xml:space="preserve">
+    <value>YouTube a rejeté la demande.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.QuotaExhausted" xml:space="preserve">
+    <value>Le quota YouTube quotidien de ton projet Google Cloud est épuisé. Il est réinitialisé à minuit, heure du Pacifique.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.RateLimited" xml:space="preserve">
+    <value>YouTube a reçu trop de demandes. Patiente un instant et réessaie.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.StreamInactive" xml:space="preserve">
+    <value>YouTube ne reçoit encore aucune vidéo. Lance d'abord ton encodeur.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.InvalidTransition" xml:space="preserve">
+    <value>YouTube ne peut pas faire passer la diffusion dans cet état pour le moment. Lance d'abord le direct ou sa phase de test.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.TestStillStarting" xml:space="preserve">
+    <value>YouTube démarre encore la phase de test de cette diffusion. Réessaie dans un instant.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.LiveStreamingNotEnabled" xml:space="preserve">
+    <value>Le streaming en direct n'est pas activé pour cette chaîne YouTube. Active-le d'abord dans YouTube Studio.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.InsufficientLivePermissions" xml:space="preserve">
+    <value>Cette chaîne YouTube n'est pas autorisée à gérer cette diffusion.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.NoLiveChat" xml:space="preserve">
+    <value>Il n'y a pas de chat en direct pour le moment. Tu ne peux envoyer des messages que lorsque tu es en direct.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.NoBroadcast" xml:space="preserve">
+    <value>Il n'y a aucune diffusion YouTube en cours ou planifiée à modifier.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.NotLive" xml:space="preserve">
+    <value>La chaîne YouTube n'est pas en direct pour le moment.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.NoReadyBroadcast" xml:space="preserve">
+    <value>Aucune diffusion planifiée n'est prête à démarrer. Crées-en une dans YouTube Studio et lance ton encodeur.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.AutoStart" xml:space="preserve">
+    <value>YouTube démarre cette diffusion tout seul dès que ton encodeur envoie de la vidéo, elle ne peut donc pas être lancée d'ici.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.MessageEmpty" xml:space="preserve">
+    <value>Saisis un message à envoyer.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.MessageTooLong" xml:space="preserve">
+    <value>Le message dépasse 200 caractères.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.TitleRequired" xml:space="preserve">
+    <value>Saisis un titre.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.TitleInvalid" xml:space="preserve">
+    <value>Le titre peut contenir jusqu'à 100 caractères, sans &lt; ni &gt;.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.DescriptionInvalid" xml:space="preserve">
+    <value>La description peut contenir jusqu'à 5 000 octets, sans &lt; ni &gt;.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.TagsInvalid" xml:space="preserve">
+    <value>Les tags peuvent contenir jusqu'à 500 caractères au total, sans &lt; ni &gt;.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.SignInExpiredTitle" xml:space="preserve">
+    <value>Connexion YouTube expirée pour {account}</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.SignInExpiredDescription" xml:space="preserve">
+    <value>Macro Deck ne peut plus utiliser cette chaîne YouTube. Tant que ton projet Google Cloud est en mode Testing, Google met fin à la connexion au bout de 7 jours. Reconnecte-la avec le même ID client et le même code secret du client pour la rétablir.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ReconnectAction" xml:space="preserve">
+    <value>Reconnecter</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ReconnectResolution" xml:space="preserve">
+    <value>Reconnecte la chaîne YouTube.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.QuotaExhaustedTitle" xml:space="preserve">
+    <value>Quota YouTube épuisé</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
+    <value>Ton projet Google Cloud a épuisé son quota YouTube quotidien, Macro Deck a donc mis en pause la mise à jour du statut en direct et du chat. Elle reprend après minuit, heure du Pacifique, lorsque Google réinitialise le quota.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
+    <value>Chaîne YouTube connectée deux fois</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.DuplicateChannelDescription" xml:space="preserve">
+    <value>« {title} » est une ancienne connexion pour la même chaîne YouTube et n'est pas utilisée. Retire-la dans la liste des configurations ci-dessous.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StreamCategory" xml:space="preserve">
+    <value>Direct</value>
+  </data>
+  <data name="Integrations.YouTube.Events.SuperChatCategory" xml:space="preserve">
+    <value>Super Chat</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MembershipsCategory" xml:space="preserve">
+    <value>Abonnements</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AdvancedCategory" xml:space="preserve">
+    <value>Avancé</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StreamOnlineName" xml:space="preserve">
+    <value>Direct démarré</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StreamOnlineDescription" xml:space="preserve">
+    <value>La chaîne est passée en direct.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StreamOfflineName" xml:space="preserve">
+    <value>Direct terminé</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StreamOfflineDescription" xml:space="preserve">
+    <value>La diffusion en direct de la chaîne est terminée.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.SuperChatName" xml:space="preserve">
+    <value>Super Chat</value>
+  </data>
+  <data name="Integrations.YouTube.Events.SuperChatDescription" xml:space="preserve">
+    <value>Quelqu'un a envoyé un Super Chat.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.SuperStickerName" xml:space="preserve">
+    <value>Super Sticker</value>
+  </data>
+  <data name="Integrations.YouTube.Events.SuperStickerDescription" xml:space="preserve">
+    <value>Quelqu'un a envoyé un Super Sticker.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.NewMemberName" xml:space="preserve">
+    <value>Nouveau membre</value>
+  </data>
+  <data name="Integrations.YouTube.Events.NewMemberDescription" xml:space="preserve">
+    <value>Quelqu'un est devenu membre de la chaîne ou a amélioré son abonnement.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MemberMilestoneName" xml:space="preserve">
+    <value>Étape d'abonnement</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MemberMilestoneDescription" xml:space="preserve">
+    <value>Un membre a partagé une étape de son abonnement dans le chat.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MembershipGiftName" xml:space="preserve">
+    <value>Abonnements offerts</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MembershipGiftDescription" xml:space="preserve">
+    <value>Quelqu'un a offert des abonnements à d'autres spectateurs.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AnyName" xml:space="preserve">
+    <value>Événement YouTube (avancé)</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AnyDescription" xml:space="preserve">
+    <value>Tous les événements YouTube de cette liste dans un seul déclencheur. Filtre par type.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Channel" xml:space="preserve">
+    <value>Chaîne</value>
+  </data>
+  <data name="Integrations.YouTube.Events.ChannelDescription" xml:space="preserve">
+    <value>Facultatif. S'exécuter uniquement pour cette chaîne YouTube.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.FirstChannelPlaceholder" xml:space="preserve">
+    <value>Première chaîne</value>
+  </data>
+  <data name="Integrations.YouTube.Events.ChannelId" xml:space="preserve">
+    <value>ID de la chaîne</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Title" xml:space="preserve">
+    <value>Titre</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StartedAt" xml:space="preserve">
+    <value>Démarré à</value>
+  </data>
+  <data name="Integrations.YouTube.Events.BroadcastId" xml:space="preserve">
+    <value>ID de la diffusion</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MessageId" xml:space="preserve">
+    <value>ID du message</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AuthorChannelId" xml:space="preserve">
+    <value>ID de la chaîne de l'auteur</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AuthorName" xml:space="preserve">
+    <value>Auteur</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Amount" xml:space="preserve">
+    <value>Montant</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AmountMicros" xml:space="preserve">
+    <value>Montant (micro-unités)</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Currency" xml:space="preserve">
+    <value>Devise</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Tier" xml:space="preserve">
+    <value>Niveau</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Comment" xml:space="preserve">
+    <value>Commentaire</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Sticker" xml:space="preserve">
+    <value>Sticker</value>
+  </data>
+  <data name="Integrations.YouTube.Events.LevelName" xml:space="preserve">
+    <value>Niveau d'abonnement</value>
+  </data>
+  <data name="Integrations.YouTube.Events.IsUpgrade" xml:space="preserve">
+    <value>Amélioration</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Months" xml:space="preserve">
+    <value>Mois</value>
+  </data>
+  <data name="Integrations.YouTube.Events.GiftCount" xml:space="preserve">
+    <value>Abonnements offerts</value>
+  </data>
+  <data name="Integrations.YouTube.Events.EventType" xml:space="preserve">
+    <value>Type d'événement</value>
+  </data>
+  <data name="Integrations.YouTube.Events.EventTypeDescription" xml:space="preserve">
+    <value>Facultatif. S'exécuter uniquement pour ce type d'événement, par exemple super-chat.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AnyEventPlaceholder" xml:space="preserve">
+    <value>N'importe quel événement</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Message" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientTitle" xml:space="preserve">
+    <value>Connecter une chaîne YouTube</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientDescription" xml:space="preserve">
+    <value>Macro Deck se connecte à YouTube via ton propre projet Google Cloud. La configuration prend quelques minutes et ne se fait qu'une fois.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.CreateProjectInstruction" xml:space="preserve">
+    <value>Dans la console Google Cloud, crée un projet et active l'API YouTube Data API v3 pour celui-ci.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ConsentScreenInstruction" xml:space="preserve">
+    <value>Configure l'écran de consentement OAuth et ajoute le compte Google propriétaire de ta chaîne comme utilisateur test.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.CreateClientInstruction" xml:space="preserve">
+    <value>Crée un ID client OAuth avec le type d'application TVs and Limited Input devices.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.CopyCredentialsInstruction" xml:space="preserve">
+    <value>Copie son ID client et son code secret du client dans les champs ci-dessous.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ApiLibraryLinkLabel" xml:space="preserve">
+    <value>YouTube Data API v3</value>
+  </data>
+  <data name="Integrations.YouTube.Config.CredentialsLinkLabel" xml:space="preserve">
+    <value>Identifiants Google Cloud</value>
+  </data>
+  <data name="Integrations.YouTube.Config.GuideLinkLabel" xml:space="preserve">
+    <value>Guide pas à pas</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientIdLabel" xml:space="preserve">
+    <value>ID client</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientIdPlaceholder" xml:space="preserve">
+    <value>123456789012-abc.apps.googleusercontent.com</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientSecretLabel" xml:space="preserve">
+    <value>Code secret du client</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientSecretDescription" xml:space="preserve">
+    <value>Stocké chiffré sur cet ordinateur et envoyé uniquement à Google.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.DailyQuotaLabel" xml:space="preserve">
+    <value>Quota quotidien (unités)</value>
+  </data>
+  <data name="Integrations.YouTube.Config.DailyQuotaDescription" xml:space="preserve">
+    <value>Le nombre d'unités de quota que ton projet Google Cloud peut utiliser par jour. Google en accorde 10 000 par défaut ; ne modifie cette valeur que si Google t'en a accordé davantage.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.DailyQuotaInvalid" xml:space="preserve">
+    <value>Saisis un nombre entier supérieur ou égal à 1.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.EnterClientId" xml:space="preserve">
+    <value>Saisis l'ID client.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.EnterClientSecret" xml:space="preserve">
+    <value>Saisis le code secret du client.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientRejected" xml:space="preserve">
+    <value>Google n'a pas accepté ce client. Vérifie l'ID client et le code secret du client, ainsi que le type de client TVs and Limited Input devices.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.CouldNotBeReached" xml:space="preserve">
+    <value>Impossible de joindre Google. Vérifie ta connexion et continue pour réessayer.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.LinkTitle" xml:space="preserve">
+    <value>Approuver l'accès sur Google</value>
+  </data>
+  <data name="Integrations.YouTube.Config.LinkDescription.One" xml:space="preserve">
+    <value>Le code reste valide pendant {count} minute.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.YouTube.Config.LinkDescription.Other" xml:space="preserve">
+    <value>Le code reste valide pendant {count} minutes.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.YouTube.Config.LinkDescriptionExpired.One" xml:space="preserve">
+    <value>Le code précédent a expiré, en voici un nouveau. Le code reste valide pendant {count} minute.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.YouTube.Config.LinkDescriptionExpired.Other" xml:space="preserve">
+    <value>Le code précédent a expiré, en voici un nouveau. Le code reste valide pendant {count} minutes.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.YouTube.Config.OpenGoogleInstruction" xml:space="preserve">
+    <value>Ouvre Google avec le bouton ci-dessous et connecte-toi avec le compte propriétaire de ta chaîne.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.EnterCodeInstruction" xml:space="preserve">
+    <value>Saisis ce code :</value>
+  </data>
+  <data name="Integrations.YouTube.Config.DeviceCodeLabel" xml:space="preserve">
+    <value>Code de l'appareil</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ApproveAccessInstruction" xml:space="preserve">
+    <value>Choisis ta chaîne et autorise l'accès. Tant que le projet est en mode Testing, Google avertit que l'application n'est pas validée ; continue quand même.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ComeBackPressContinueInstruction" xml:space="preserve">
+    <value>Reviens ici et appuie sur Continuer.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ThenPressContinueInstruction" xml:space="preserve">
+    <value>Appuie ensuite sur Continuer.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.OpenGoogleLinkLabel" xml:space="preserve">
+    <value>Ouvrir Google et approuver</value>
+  </data>
+  <data name="Integrations.YouTube.Config.WaitingTitle" xml:space="preserve">
+    <value>En attente de Google</value>
+  </data>
+  <data name="Integrations.YouTube.Config.WaitingDescription" xml:space="preserve">
+    <value>Personne n'a encore approuvé la demande.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.PollingFailed" xml:space="preserve">
+    <value>Impossible de joindre Google. Continue pour réessayer.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.RequestDeclined" xml:space="preserve">
+    <value>Tu as refusé la demande sur Google. Approuve-la avec le nouveau code ci-dessous pour réessayer.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ChannelLookupFailed" xml:space="preserve">
+    <value>Google a approuvé l'accès, mais YouTube n'a pas indiqué à quelle chaîne il appartient. Continue pour réessayer.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.NoChannel" xml:space="preserve">
+    <value>Ce compte Google n'a pas de chaîne YouTube. Approuve le nouveau code ci-dessous avec le compte propriétaire de ta chaîne.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.UnknownStep" xml:space="preserve">
+    <value>Étape inconnue</value>
+  </data>
   <data name="Integrations.Obs.Actions.SplitRecordFile.Name" xml:space="preserve">
     <value>Diviser le fichier d'enregistrement</value>
   </data>
@@ -19668,5 +20407,35 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Integrations.Obs.Errors.OutputsNeedNewerObs" xml:space="preserve">
     <value>Le contrôle des sorties nécessite une version d'OBS avec obs-websocket 5.7 ou plus récent.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Name" xml:space="preserve">
+    <value>Définir un paramètre de l'entrée</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Description" xml:space="preserve">
+    <value>Modifie un paramètre d'une source OBS, par exemple le texte d'une source texte, le fichier d'une source image ou média, ou l'URL d'une source navigateur.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingLabel" xml:space="preserve">
+    <value>Paramètre</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingDescription" xml:space="preserve">
+    <value>Nom du paramètre tel qu'OBS l'enregistre, par exemple text, file, local_file ou url. Choisis-le dans la liste ou saisis-le.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueLabel" xml:space="preserve">
+    <value>Valeur</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueDescription" xml:space="preserve">
+    <value>La nouvelle valeur. Saisis true ou false pour un paramètre activé/désactivé, un nombre pour un paramètre numérique et du JSON pour un paramètre qui contient un groupe ou une liste.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NoSettingSelected" xml:space="preserve">
+    <value>Aucun paramètre n'a été sélectionné.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsBoolean" xml:space="preserve">
+    <value>Le paramètre {setting} attend true ou false.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsNumber" xml:space="preserve">
+    <value>Le paramètre {setting} attend un nombre.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsJson" xml:space="preserve">
+    <value>Le paramètre {setting} attend du JSON de la même forme que sa valeur actuelle.</value>
   </data>
 </root>

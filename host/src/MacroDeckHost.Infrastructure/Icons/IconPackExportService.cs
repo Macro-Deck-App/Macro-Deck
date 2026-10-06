@@ -69,8 +69,12 @@ public sealed class IconPackExportService : IIconPackExportService
 		}
 
 		await _iconPackCache.FlushPendingWrites();
-		var icons = _iconPackCache.GetIconsByPackId(packId)
+		var parents = _iconPackCache.GetIconsByPackId(packId)
 			.Where(icon => icon.ProcessingState == IconProcessingState.Ready)
+			.ToList();
+		var icons = parents
+			.Concat(parents.SelectMany(icon => _iconPackCache.GetAppearances(icon.Id))
+				.Where(appearance => appearance.ProcessingState == IconProcessingState.Ready))
 			.ToList();
 
 		var manifest = IconManifestMapper.ToManifest(pack, icons);
@@ -83,7 +87,7 @@ public sealed class IconPackExportService : IIconPackExportService
 		{
 			manifest.SourceType = IconPackSourceType.User;
 		}
-		foreach (var entry in manifest.Icons)
+		foreach (var entry in manifest.Icons.SelectMany(entry => (entry.Appearances ?? []).Prepend(entry)))
 		{
 			entry.ImportBatchId = null;
 			entry.AvailableSizes = [];
@@ -145,6 +149,7 @@ public sealed class IconPackExportService : IIconPackExportService
 	{
 		await using var archive = new ZipArchive(destination, ZipArchiveMode.Create, leaveOpen: true);
 		var files = new List<PackageFileDigest>();
+		var missingAppearances = new HashSet<Guid>();
 
 		foreach (var icon in icons)
 		{
@@ -153,6 +158,11 @@ public sealed class IconPackExportService : IIconPackExportService
 			if (content is null)
 			{
 				_logger.Warning("Missing master for icon {IconId} in pack {PackId}; skipping", icon.Id, packId);
+				if (icon.AppearanceOfId is not null)
+				{
+					missingAppearances.Add(icon.Id);
+				}
+
 				continue;
 			}
 
@@ -168,6 +178,14 @@ public sealed class IconPackExportService : IIconPackExportService
 
 		files.Sort((a, b) => string.CompareOrdinal(a.Path, b.Path));
 		manifest.Files = files;
+		foreach (var entry in manifest.Icons.Where(entry => entry.Appearances is not null))
+		{
+			entry.Appearances!.RemoveAll(appearance => missingAppearances.Contains(appearance.Id));
+			if (entry.Appearances.Count == 0)
+			{
+				entry.Appearances = null;
+			}
+		}
 
 		var manifestBytes = JsonSerializer.SerializeToUtf8Bytes(manifest, PersistenceJsonOptions.Default);
 		if (manifestBytes.Length > IconPackArchiveLimits.MaxUnsignedManifestBytes)

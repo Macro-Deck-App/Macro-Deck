@@ -1,5 +1,5 @@
 using MacroDeck.Ui.Model.Resources;
-using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.StreamChat;
 using MacroDeckHost.Application.Ui.Resources;
 
 namespace MacroDeckHost.Tests.UnitTests.Twitch.Chat;
@@ -31,14 +31,14 @@ internal sealed class FakeTwitchChatImages : ITwitchChatImages
 	{
 		var resource = _store?.Register(new UiResourceRegistration
 			{
-				OwnerId = TwitchChatWidgetType.OwnerId,
+				OwnerId = StreamPlatforms.Twitch.OwnerId,
 				Name = image.ResourceName,
 				MediaType = "image/png",
 				Content = new byte[] { 0x89, 0x50, 0x4E, 0x47, 1, 2, 3, 4 },
 			}) ??
 			new UiResource
 			{
-				ResourceId = TwitchChatWidgetType.OwnerId + "." + image.ResourceName,
+				ResourceId = StreamPlatforms.Twitch.OwnerId + "." + image.ResourceName,
 				ContentHash = "sha256:" + new string('a', 64),
 			};
 

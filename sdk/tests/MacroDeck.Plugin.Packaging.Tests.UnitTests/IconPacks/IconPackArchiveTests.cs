@@ -159,6 +159,66 @@ internal sealed class IconPackArchiveTests
 		});
 	}
 
+	[Test]
+	public void A_pack_whose_icons_carry_appearances_reads_as_its_parent_icons_only()
+	{
+		var parentId = Guid.NewGuid();
+		var darkId = Guid.NewGuid();
+		var staticId = Guid.NewGuid();
+		var manifest = new JsonObject
+		{
+			["name"] = "Logos",
+			["version"] = "1.1.0",
+			["icons"] = new JsonArray(new JsonObject
+			{
+				["id"] = parentId.ToString(),
+				["name"] = "spotify",
+				["appearances"] = new JsonArray(
+					new JsonObject
+					{
+						["id"] = darkId.ToString(),
+						["name"] = "spotify",
+						["traits"] = new JsonObject { ["colorScheme"] = "dark" }
+					},
+					new JsonObject
+					{
+						["id"] = staticId.ToString(),
+						["name"] = "spotify",
+						["traits"] = new JsonObject { ["motion"] = "static" }
+					})
+			})
+		};
+
+		var stream = new MemoryStream();
+		using (var archive = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true))
+		{
+			using (var writer = new StreamWriter(archive.CreateEntry("pack.json").Open()))
+			{
+				writer.Write(manifest.ToJsonString());
+			}
+
+			foreach (var id in new[] { parentId, darkId, staticId })
+			{
+				using var entry = archive.CreateEntry($"icons/{id}/master.webp").Open();
+				entry.Write("RIFF-webp-bytes"u8);
+			}
+		}
+
+		stream.Position = 0;
+		using (stream)
+		{
+			var result = IconPackArchive.Read(stream);
+
+			Assert.That(result.Success, Is.True, result.Error);
+			Assert.Multiple(() =>
+			{
+				Assert.That(result.Info!.Icons.Select(icon => icon.Id), Is.EqualTo(new[] { parentId }));
+				Assert.That(result.Info.Icons.Single().HasMaster, Is.True);
+				Assert.That(result.Info.NamesAreValid, Is.True, "an appearance shares its icon's name without a clash");
+			});
+		}
+	}
+
 	private static MemoryStream PaddedPack(int entries, int manifestPadding = 0)
 	{
 		var id = Guid.NewGuid();

@@ -39,5 +39,9 @@ public class IconEntity : BaseEntity
 
 	public Guid? ImportBatchId { get; set; }
 
+	public Guid? AppearanceOfId { get; set; }
+
+	public IReadOnlyDictionary<string, string>? AppearanceTraits { get; set; }
+
 	public DateTime UpdatedAt { get; set; }
 }

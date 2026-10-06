@@ -118,6 +118,7 @@ export const WIDGET_APPEARANCE_ACTION_IDS = [
   'set-icon',
   'set-icon-display',
   'set-icon-color',
+  'set-icon-appearance',
   'set-font',
   'set-border',
 ] as const;

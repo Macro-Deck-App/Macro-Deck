@@ -35,14 +35,31 @@ public static class PluginIconReferences
 		return PluginBundledIconPacks.IsValidKey(key) && !name.Contains('/');
 	}
 
-	public static string ResourceId(Guid iconId) => $"{ResourceOwnerId}.{iconId:D}";
+	public const string AppearanceSuffix = ".a";
+
+	public static string ResourceId(Guid iconId, bool hasAppearances = false)
+		=> hasAppearances ? $"{ResourceOwnerId}.{iconId:D}{AppearanceSuffix}" : $"{ResourceOwnerId}.{iconId:D}";
 
 	public static bool TryParseResourceId(string? resourceId, out Guid iconId)
+		=> TryParseResourceId(resourceId, out iconId, out _);
+
+	public static bool TryParseResourceId(string? resourceId, out Guid iconId, out bool appearanceAware)
 	{
 		iconId = Guid.Empty;
+		appearanceAware = false;
 		var prefix = ResourceOwnerId + ".";
-		return resourceId is not null &&
-			resourceId.StartsWith(prefix, StringComparison.Ordinal) &&
-			Guid.TryParseExact(resourceId[prefix.Length..], "D", out iconId);
+		if (resourceId is null || !resourceId.StartsWith(prefix, StringComparison.Ordinal))
+		{
+			return false;
+		}
+
+		var id = resourceId[prefix.Length..];
+		if (id.EndsWith(AppearanceSuffix, StringComparison.Ordinal))
+		{
+			appearanceAware = true;
+			id = id[..^AppearanceSuffix.Length];
+		}
+
+		return Guid.TryParseExact(id, "D", out iconId);
 	}
 }

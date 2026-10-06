@@ -1,5 +1,7 @@
 using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Ui.Model.Resources;
+using MacroDeckHost.Application.Caching;
+using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Widgets.Icons;
 using MacroDeckHost.Domain.Widgets;
@@ -59,6 +61,7 @@ public sealed class WidgetIconResources : IWidgetIconResources
 
 	private readonly IWidgetIconSourceRegistry _sources;
 	private readonly IUiResourceStore _resourceStore;
+	private readonly IIconPackCache _iconPackCache;
 	private readonly ILogger _logger;
 
 	// Keyed by type+reference and holding only a resource that resolved: a transient read failure must not
@@ -70,10 +73,14 @@ public sealed class WidgetIconResources : IWidgetIconResources
 	private readonly Dictionary<CacheKey, UiResource> _registered = new();
 	private readonly Lock _sync = new();
 
-	public WidgetIconResources(IWidgetIconSourceRegistry sources, IUiResourceStore resourceStore, ILogger logger)
+	public WidgetIconResources(IWidgetIconSourceRegistry sources,
+		IUiResourceStore resourceStore,
+		ILogger logger,
+		IIconPackCache iconPackCache)
 	{
 		_sources = sources;
 		_resourceStore = resourceStore;
+		_iconPackCache = iconPackCache;
 		_logger = logger.ForContext<WidgetIconResources>();
 	}
 
@@ -86,9 +93,11 @@ public sealed class WidgetIconResources : IWidgetIconResources
 
 		lock (_sync)
 		{
-			foreach (var limit in Enum.GetValues<WidgetIconLimit>())
+			foreach (var key in _registered.Keys
+				.Where(key => key.Reference.Type == reference.Type &&
+					string.Equals(key.Reference.Reference, reference.Reference, StringComparison.Ordinal))
+				.ToList())
 			{
-				var key = new CacheKey(reference, limit);
 				if (_order.Remove(key, out var node))
 				{
 					_recency.Remove(node);
@@ -122,11 +131,13 @@ public sealed class WidgetIconResources : IWidgetIconResources
 			return null;
 		}
 
+		var target = Target(value, limit);
+
 		try
 		{
 			var maxBytes = MaxBytes(limit);
 			var rendition = await WidgetIconRenditions.ProduceAsync(source,
-					value.Reference,
+					target.Reference,
 					WidgetIconRenditions.DefaultSize,
 					maxBytes,
 					cancellationToken)
@@ -139,10 +150,11 @@ public sealed class WidgetIconResources : IWidgetIconResources
 					var resource = _resourceStore.Register(new UiResourceRegistration
 					{
 						OwnerId = OwnerId,
-						Name = ResourceName(value, limit),
+						Name = target.Name,
 						MediaType = rendition.MediaType!,
 						Content = rendition.Content!,
 						MaxBytes = maxBytes,
+						Variation = target.Variation,
 					});
 
 					Store(key, resource);
@@ -182,6 +194,39 @@ public sealed class WidgetIconResources : IWidgetIconResources
 			: $"{reference.Type}.{reference.Reference}";
 
 	internal const string ProtocolNameSuffix = ".protocol";
+
+	internal const string AppearanceNameSuffix = ".a";
+
+	private ResolveTarget Target(WidgetIconReference reference, WidgetIconLimit limit)
+	{
+		var plain = new ResolveTarget(reference.Reference, ResourceName(reference, limit), null);
+		if (reference.Type != WidgetIconReference.IconPackType ||
+			!Guid.TryParse(reference.Reference, out var iconId) ||
+			_iconPackCache.GetIconById(iconId) is not { AppearanceOfId: null } icon)
+		{
+			return plain;
+		}
+
+		var appearances = _iconPackCache.GetAppearances(icon.Id);
+		if (appearances.Count == 0 || reference.Appearance == WidgetIconReference.DefaultAppearance)
+		{
+			return plain;
+		}
+
+		if (reference.Appearance is { } pin && IconAppearanceSelector.FindPinned(appearances, pin) is { } asset)
+		{
+			var pinned = WidgetIconReference.IconPack(asset.Id.ToString());
+			return new ResolveTarget(pinned.Reference, ResourceName(pinned, limit), null);
+		}
+
+		return limit == WidgetIconLimit.Protocol
+			? plain
+			: new ResolveTarget(reference.Reference,
+				ResourceName(reference, limit) + AppearanceNameSuffix,
+				IconImageVersion.Of(icon, appearances));
+	}
+
+	private readonly record struct ResolveTarget(string Reference, string Name, string? Variation);
 
 	private static int MaxBytes(WidgetIconLimit limit)
 		=> limit == WidgetIconLimit.Protocol

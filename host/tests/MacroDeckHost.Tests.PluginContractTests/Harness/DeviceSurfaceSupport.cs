@@ -222,6 +222,8 @@ internal sealed class ContractIconPacks : IIconPackCache
 
 	public IconEntity? GetIconById(Guid iconId) => null;
 
+	public IReadOnlyList<IconEntity> GetAppearances(Guid parentId) => [];
+
 	public List<IconEntity> GetIconsByPackId(Guid packId) => [];
 
 	public List<IconEntity> GetIconsByBatchId(Guid batchId) => [];

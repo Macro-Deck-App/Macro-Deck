@@ -160,7 +160,8 @@ public sealed class ExecuteActionButtonTriggerRequestMessageHandler
 			or WidgetTypeIds.MusicPlayer
 			or WidgetTypeIds.Weather
 			or WidgetTypeIds.HistoryGraph
-			or WidgetTypeIds.Clock))
+			or WidgetTypeIds.Clock
+			or WidgetTypeIds.Gauges))
 		{
 			return new ExecuteActionButtonTriggerResponse
 			{

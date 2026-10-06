@@ -2901,13 +2901,13 @@ Android robot
 Dashboard Icons
   License: Apache-2.0
   URL: https://github.com/homarr-labs/dashboard-icons
-  Note: Logos of the Discord, Home Assistant, Spotify, Twitch and YouTube Music integrations, and the Windows logo marking the platforms a Store package supports. The logos are trademarks of their respective owners and are used to identify the integration or platform only.
+  Note: Logos of the Discord, Home Assistant, Spotify, Twitch, YouTube and YouTube Music integrations, and the Windows logo marking the platforms a Store package supports. The logos are trademarks of their respective owners and are used to identify the integration or platform only.
   Texts: [272]
 
 Lucide icons
   License: ISC AND MIT
   URL: https://github.com/lucide-icons/lucide
-  Note: Lucide 1.47.0 icons (MIT for the icons derived from Feather), used in the configuration UI, the web client, the music player widget and the integration icons, some recoloured or placed in a badge.
+  Note: Lucide 1.47.0 icons (MIT for the icons derived from Feather), used in the configuration UI, the web client, the music player widget, the integration icons and the Included icon pack the host ships, some recoloured or placed in a badge.
   Texts: [273]
 
 Macro Deck name, logo and branding assets

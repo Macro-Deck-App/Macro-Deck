@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages;
@@ -10,10 +11,12 @@ namespace MacroDeckHost.Application.Ui.Handlers;
 public class UpdateIconRequestMessageHandler : IUiTransportMessageHandler<UpdateIconRequest, UpdateIconResponse>
 {
 	private readonly IIconService _iconService;
+	private readonly IIconPackCache _iconPackCache;
 
-	public UpdateIconRequestMessageHandler(IIconService iconService)
+	public UpdateIconRequestMessageHandler(IIconService iconService, IIconPackCache iconPackCache)
 	{
 		_iconService = iconService;
+		_iconPackCache = iconPackCache;
 	}
 
 	public async ValueTask<UpdateIconResponse> Handle(UpdateIconRequest request,
@@ -36,7 +39,7 @@ public class UpdateIconRequestMessageHandler : IUiTransportMessageHandler<Update
 		var response = new UpdateIconResponse { Success = result.Success };
 		if (result.Success)
 		{
-			response.Icon = IconMapper.ToDto(result.Data!);
+			response.Icon = IconMapper.ToDto(result.Data!, _iconPackCache);
 		}
 		else
 		{

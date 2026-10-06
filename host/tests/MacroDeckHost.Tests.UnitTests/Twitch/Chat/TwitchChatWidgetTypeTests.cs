@@ -1,4 +1,4 @@
-using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.StreamChat;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Integrations.Twitch;
@@ -41,7 +41,7 @@ internal sealed class TwitchChatWidgetTypeTests
 		await _manager.ReloadAsync(_config);
 		await _host.StartAsync(_integration);
 
-		Assert.That(_registry.IsRegistered(TwitchChatWidgetType.QualifiedId), Is.False);
+		Assert.That(_registry.IsRegistered(StreamPlatforms.Twitch.ChatWidgetTypeId), Is.False);
 	}
 
 	[Test]
@@ -53,7 +53,7 @@ internal sealed class TwitchChatWidgetTypeTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_registry.TryResolve(TwitchChatWidgetType.QualifiedId, out var entry), Is.True);
+			Assert.That(_registry.TryResolve(StreamPlatforms.Twitch.ChatWidgetTypeId, out var entry), Is.True);
 			Assert.That(entry.ProviderId, Is.EqualTo(TwitchIntegration.IntegrationId));
 			Assert.That(entry.Descriptor.HasConfiguration, Is.True);
 			Assert.That(TestLocalization.Resolve(entry.Descriptor.Name), Is.EqualTo("Twitch Chat"));
@@ -67,7 +67,7 @@ internal sealed class TwitchChatWidgetTypeTests
 		await _manager.ReloadAsync(_config);
 		await _host.StartAsync(_integration);
 
-		Assert.That(_registry.TryResolve(TwitchChatWidgetType.QualifiedId, out var entry), Is.True);
+		Assert.That(_registry.TryResolve(StreamPlatforms.Twitch.ChatWidgetTypeId, out var entry), Is.True);
 
 		using var schema = global::System.Text.Json.JsonDocument.Parse(entry.Descriptor.DataSchema!);
 		var fontSize = schema.RootElement.GetProperty("properties").GetProperty("textSize");
@@ -91,14 +91,14 @@ internal sealed class TwitchChatWidgetTypeTests
 		await _manager.ReloadAsync(_config);
 		await _host.StartAsync(_integration);
 
-		Assert.That(_registry.IsRegistered(TwitchChatWidgetType.QualifiedId), Is.False);
+		Assert.That(_registry.IsRegistered(StreamPlatforms.Twitch.ChatWidgetTypeId), Is.False);
 	}
 
 	[Test]
 	public async Task Shutting_down_tells_the_chat_that_no_account_is_left()
 	{
 		var sink = new RecordingTwitchChatSink();
-		_integration.UseTwitchChatSink(sink);
+		_integration.UseStreamChatSink(sink);
 
 		await _integration.ShutdownAsync();
 

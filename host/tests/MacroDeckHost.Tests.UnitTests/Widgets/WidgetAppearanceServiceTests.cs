@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Rendering;
-using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.StreamChat;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Common;
@@ -432,6 +432,10 @@ public class WidgetAppearanceServiceTests
 				Does.Contain(WidgetAppearanceProperty.IconColor));
 			Assert.That(slider.Service.GetWidgets().Single().AppearanceProperties,
 				Does.Not.Contain(WidgetAppearanceProperty.IconColor));
+			Assert.That(button.Service.GetWidgets().Single().AppearanceProperties,
+				Does.Contain(WidgetAppearanceProperty.IconAppearance));
+			Assert.That(slider.Service.GetWidgets().Single().AppearanceProperties,
+				Does.Contain(WidgetAppearanceProperty.IconAppearance));
 			Assert.That(slider.Service.GetWidgets().Single().AppearanceProperties,
 				Does.Contain(WidgetAppearanceProperty.Icon).And.Not.Contain(WidgetAppearanceProperty.IconDisplay));
 			Assert.That(clock.Service.GetWidgets().Single().AppearanceProperties,
@@ -440,6 +444,63 @@ public class WidgetAppearanceServiceTests
 					WidgetAppearanceProperty.BackgroundColor, WidgetAppearanceProperty.Border,
 					WidgetAppearanceProperty.BorderColor
 				}));
+		});
+	}
+
+	[Test]
+	public async Task IconAppearance_IsStoredUnderItsCanonicalKey()
+	{
+		var fixture = new Fixture("""{"icon":{"type":"icon-pack","reference":"0198aaaa-1111-2222-3333-444444444444"}}""");
+
+		var outcome = await fixture.Service.ApplyWithOutcomeAsync(
+			Patch(new WidgetAppearancePatch { IconAppearance = "motion=static;colorScheme=dark" }));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome, Is.EqualTo(WidgetAppearanceOutcome.Changed));
+			Assert.That(JsonNode.Parse(fixture.Widget.Data!)!["icon"]!["appearance"]!.GetValue<string>(),
+				Is.EqualTo("colorScheme=dark;motion=static"));
+		});
+	}
+
+	[TestCase("dark")]
+	[TestCase("ColorScheme=dark")]
+	[TestCase("colorScheme=dark;colorScheme=light")]
+	public async Task IconAppearance_ThatIsNotAnAppearanceKey_IsRejected_AndNotWritten(string appearance)
+	{
+		var fixture = new Fixture("""{"icon":{"type":"icon-pack","reference":"0198aaaa-1111-2222-3333-444444444444"}}""");
+
+		var outcome = await fixture.Service.ApplyWithOutcomeAsync(
+			Patch(new WidgetAppearancePatch { IconAppearance = appearance }));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome, Is.EqualTo(WidgetAppearanceOutcome.Rejected));
+			Assert.That(fixture.Widgets.Updated, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task IconAppearance_OnAProviderControlledButton_IsDroppedLikeTheIcon()
+	{
+		var fixture = new Fixture("""
+								  {"stateMode":true,"states":[{"id":"off","label":"Off","appearance":{}},
+								  {"id":"on","label":"On","appearance":{"icon":{"type":"icon-pack","reference":"0198aaaa-1111-2222-3333-444444444444"}}}],
+								  "iconProvider":{"blockId":"blk-1","integrationId":"spotify","actionId":"current-track"},
+								  "flows":"[{\"triggerId\":\"t\",\"triggerType\":\"onShortPress\",\"children\":[{\"id\":\"blk-1\",\"type\":\"action\",\"blockType\":\"spotify.current-track\",\"integrationId\":\"spotify\",\"actionId\":\"current-track\",\"parameters\":[]}]}]"}
+								  """);
+
+		var applied = await fixture.Service.ApplyAsync(new WidgetAppearanceRequest
+		{
+			WidgetId = _widgetId.ToString(),
+			Patch = new WidgetAppearancePatch { IconAppearance = "colorScheme=dark" },
+			StateIds = ["on"]
+		});
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(applied, Is.False);
+			Assert.That(StateAppearance(fixture, "on")!["icon"]!.AsObject().ContainsKey("appearance"), Is.False);
 		});
 	}
 
@@ -576,7 +637,7 @@ public class WidgetAppearanceServiceTests
 			(_, _) => new FakeTwitchHelixClient());
 		await accounts.ReloadAsync(config);
 		using var integration = new TwitchIntegration(accounts);
-		var chat = integration.GetWidgetTypes().Single(type => type.Id == TwitchChatWidgetType.LocalId);
+		var chat = integration.GetWidgetTypes().Single(type => type.Id == StreamChatWidgetType.LocalId);
 		var fixture = await Fixture.ForProviderType(chat, """{"account":""}""");
 
 		var set = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch

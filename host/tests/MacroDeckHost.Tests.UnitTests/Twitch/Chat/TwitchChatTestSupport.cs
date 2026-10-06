@@ -1,6 +1,6 @@
 using System.Globalization;
 using MacroDeck.Sdk.Events;
-using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.StreamChat;
 using MacroDeckHost.Integrations.Twitch;
 using MacroDeckHost.Integrations.Twitch.Auth;
 
@@ -27,15 +27,15 @@ internal static class TwitchChatTestSupport
 			});
 }
 
-internal sealed class RecordingTwitchChatSink : ITwitchChatSink
+internal sealed class RecordingTwitchChatSink : IStreamChatSink
 {
-	public List<IReadOnlyList<TwitchChatAccount>> AccountLists { get; } = [];
+	public List<IReadOnlyList<ChatAccount>> AccountLists { get; } = [];
 
-	public List<TwitchChatEvent> Posted { get; } = [];
+	public List<ChatEvent> Posted { get; } = [];
 
-	public void SetAccounts(IReadOnlyList<TwitchChatAccount> accounts) => AccountLists.Add(accounts);
+	public void SetAccounts(IReadOnlyList<ChatAccount> accounts) => AccountLists.Add(accounts);
 
-	public void Post(TwitchChatEvent chatEvent) => Posted.Add(chatEvent);
+	public void Post(ChatEvent chatEvent) => Posted.Add(chatEvent);
 }
 
 internal sealed class RecordingTwitchEventPublisher : IEventPublisher

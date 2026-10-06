@@ -1,6 +1,6 @@
-using MacroDeck.Plugin.Protocol.Assets;
 using MacroDeck.Ui.Model.Resources;
 using MacroDeckHost.Application.Caching;
+using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Application.Widgets.Icons;
@@ -74,7 +74,7 @@ public sealed class PluginIconUiResources(
 			: new PluginIconResourceResult(status,
 				new UiResource
 				{
-					ResourceId = PluginIconReferences.ResourceId(icon.Id),
+					ResourceId = PluginIconReferences.ResourceId(icon.Id, iconPackCache.GetAppearances(icon.Id).Count > 0),
 					ContentHash = content!.ContentHash,
 					MediaType = content.MediaType,
 					ByteLength = content.Content.Length
@@ -84,7 +84,8 @@ public sealed class PluginIconUiResources(
 	private async Task<(PluginIconResourceStatus Status, UiResourceContent? Content)> ProduceAsync(IconEntity icon,
 		CancellationToken cancellationToken)
 	{
-		var hash = icon.MasterContentHash ?? icon.SourceContentHash ?? string.Empty;
+		var appearances = iconPackCache.GetAppearances(icon.Id);
+		var hash = IconImageVersion.Of(icon, appearances) ?? string.Empty;
 		if (TryGetCached(icon.Id, hash) is { } cached)
 		{
 			return (PluginIconResourceStatus.Found, cached);
@@ -103,7 +104,7 @@ public sealed class PluginIconUiResources(
 				{
 					Content = rendition.Content!,
 					MediaType = rendition.MediaType!,
-					ContentHash = AssetContentHash.Compute(rendition.Content)
+					ContentHash = UiResourceStore.HashOf(rendition.Content!, appearances.Count > 0 ? hash : null)
 				};
 				Store(icon.Id, hash, content);
 				return (PluginIconResourceStatus.Found, content);

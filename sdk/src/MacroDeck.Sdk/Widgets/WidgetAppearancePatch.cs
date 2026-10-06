@@ -47,6 +47,16 @@ public sealed record WidgetAppearancePatch
 	public string? IconColor { get; init; }
 
 	/// <summary>
+	/// Which appearance of the icon to show, overriding automatic selection: a canonical appearance key
+	/// such as <c>colorScheme=dark</c> or <c>colorScheme=dark;motion=static</c>, or <c>default</c> for the
+	/// icon's own image. An empty string, or clearing <see cref="WidgetAppearanceProperty.IconAppearance" />,
+	/// returns to automatic selection. A key that is not a valid appearance key is rejected; one naming an
+	/// appearance the icon lacks falls back to automatic selection. A host that predates this property
+	/// ignores it.
+	/// </summary>
+	public string? IconAppearance { get; init; }
+
+	/// <summary>
 	/// Stable id of the label's font face, in the host's face-catalog id format. A style that does not
 	/// exist for the chosen family is simply not offered - this never carries a family name alone, so
 	/// there is nothing here that could silently resolve to the wrong weight or style.
@@ -87,6 +97,7 @@ public sealed record WidgetAppearancePatch
 		IconOffsetY is null &&
 		IconOpacity is null &&
 		IconColor is null &&
+		IconAppearance is null &&
 		FontFaceId is null &&
 		FontSize is null &&
 		TextAlign is null &&

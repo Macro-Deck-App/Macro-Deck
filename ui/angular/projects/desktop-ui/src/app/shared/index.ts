@@ -16,6 +16,7 @@ export { DismissibleHintService } from './services/dismissible-hint.service';
 export { FolderViewService } from './services/folder-view.service';
 export { ScreenSaverService } from './services/screensaver.service';
 export { FolderService } from './services/folder.service';
+export { IconAppearanceContextService } from './services/icon-appearance-context.service';
 export { IconImageService } from './services/icon-image.service';
 export { IconPrefetchService } from './services/icon-prefetch.service';
 export { KeyRingService } from './services/key-ring.service';

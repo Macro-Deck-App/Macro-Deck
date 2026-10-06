@@ -43,28 +43,34 @@ The tiles in a folder:
 | Slider | Mic volume. Turn on **Color thresholds** to color it by the range its value is in |
 | Clock | The current time and date |
 | History Graph | CPU load over the last minutes, green under 50 % and red above 90 % with **Color thresholds** |
+| Gauges | CPU, RAM and GPU load side by side as rings with an icon, like a battery overview |
 | Weather | Today and the next days for your city. Press it for the full details |
 | Music Player | What Spotify is playing, with play and skip. Some players offer extra settings for each widget below the player choice |
 | Twitch Chat | Your channel's chat with emotes and badges, offered once a Twitch account is connected |
 | Twitch Stream Stats | Whether you are live, your viewers, chatters, followers and subscribers, the stream title, category and uptime, and a small graph, in a style you choose, offered once a Twitch account is connected |
+| YouTube Chat | Your live stream's chat, offered once a [YouTube channel](/guide/youtube/) is connected |
+| YouTube Stream Stats | Whether you are live, your viewers, likes and subscribers, the stream title and uptime, and a small graph, in a style you choose, offered once a YouTube channel is connected |
 | Countdown | A pizza timer that counts down and alerts you when it runs out |
 | Stopwatch | How long the current segment of your stream has been running |
 
 Labels and text use the fonts installed on your computer, plus any you import under
 [Library > Fonts](/guide/fonts/).
 
-### Moderating from the Twitch Chat widget
+### Moderating from the chat widgets
 
-Press the **Twitch Chat** widget to open the chat in a larger dialog. It stays at the newest message while
+Press the **Twitch Chat** or **YouTube Chat** widget to open the chat in a larger dialog. It stays at the newest message while
 you are at the bottom. Scroll up to read, and the chat stops moving; **Jump to latest** takes you back.
 
 Tap a message to delete it, time out its sender for 1 minute, 10 minutes or 1 hour, ban or unban them. A ban
-asks you to confirm first. The dialog says whether the action worked, or why Twitch refused it:
+asks you to confirm first. The dialog says whether the action worked, or why Twitch or YouTube refused it:
 
 - **Twitch did not grant Macro Deck the permission for this action**: reconnect the Twitch account in
   **Integrations** to grant the moderation permissions.
 - **Twitch did not allow this**: reconnect the Twitch account in **Integrations** and try again.
 - **The host is locked**: unlock the computer running Macro Deck, as for any other action.
+
+On YouTube, **Unban** only lifts bans you made through Macro Deck during the current broadcast; lift other bans
+in YouTube Studio. See [YouTube](/guide/youtube/#moderating-youtube-chat).
 
 Your channel's own messages, and messages that reach your chat from another channel's Shared Chat, offer no
 actions; moderate those on Twitch. Anyone who can use your deck can moderate through the dialog. To only
@@ -76,9 +82,9 @@ On a small device or a large widget, change **Size (%)** in the widget's setting
 smaller. 100 is the default and values from 25 to 300 are accepted. The size applies to the widget; the chat
 dialog keeps its own.
 
-### The Twitch Stream Stats widget
+### The Stream Stats widgets
 
-Pick what the widget shows with **Style** in its settings. Each style names the size it is designed for, and
+The **Twitch Stream Stats** and **YouTube Stream Stats** widgets work the same way. Pick what the widget shows with **Style** in its settings. Each style names the size it is designed for, and
 keeps the same content at any other size, only larger or smaller:
 
 | Style | Shows |
@@ -89,16 +95,18 @@ keeps the same content at any other size, only larger or smaller:
 | **Single value with graph (2x2)** | One number, the live status and a graph of that number |
 | **Single value (1x1)** | One number with a live dot |
 
-For the Overview and the Stats row, **Stats** chooses which tiles appear, out of viewers, chatters, followers
-and subscribers, and in which order: drag a row or use its arrows. Viewers, chatters and followers are on by
-default. Four tiles fit best in a widget one column wider than the style's size. The Overview also has
-**Stream details**, which chooses and orders the title, category and uptime next to the thumbnail, and
+For the Overview and the Stats row, **Stats** chooses which tiles appear and in which order: drag a row or use
+its arrows. Twitch offers viewers, chatters, followers and subscribers, with the first three on by default.
+YouTube offers viewers, likes and subscribers, all on by default. Four tiles fit best in a widget one column wider than the style's size. The Overview also has
+**Stream details**, which chooses and orders the title, category (Twitch only) and uptime next to the thumbnail, and
 **Show thumbnail**. For the other three styles, **Value** chooses the number they show.
 
 The graph follows the chosen number. It starts when the widget is first shown and begins again after Macro
 Deck restarts, so it fills over time; followers and subscribers change slowly, so their graph often stays
 flat. Offline, viewers and chatters show a dash, while followers and subscribers stay. Subscribers also show a
-dash while Twitch does not report them to Macro Deck.
+dash while Twitch does not report them to Macro Deck. On YouTube, viewers and likes show a dash offline, and
+viewers and subscribers also while you hide those counts on YouTube. The Live status row shows the stream title
+instead of the category.
 
 Everything the widget shows is also a regular variable of the Twitch integration, named
 `twitch_<account>_viewer_count`, `twitch_<account>_chatter_count`, `twitch_<account>_follower_count`,
@@ -106,7 +114,8 @@ Everything the widget shows is also a regular variable of the Twitch integration
 `twitch_<account>_stream_category`, `twitch_<account>_uptime_seconds`, `twitch_<account>_is_live` and
 `twitch_<account>_stream_thumbnail_url`. Use them in your own widgets, actions
 and conditions. The chatter count is everyone in your chat, including you and bots, and needs one more
-permission: if **Integrations** shows that the account lacks it, reconnect the Twitch account.
+permission: if **Integrations** shows that the account lacks it, reconnect the Twitch account. The YouTube
+variables are listed on the [YouTube](/guide/youtube/#what-you-can-use) page.
 
 ### Countdown and Stopwatch
 
@@ -142,6 +151,28 @@ These change every second while a timer runs, so an automation on **Variable Cha
 runs every second too. A running countdown or stopwatch starts over when Macro Deck restarts. On a
 hardware deck, the key shows the widget's label and colors but not the time.
 
+### Gauges
+
+A **Gauges** widget shows up to eight numbers as rings, each with an icon in the middle and its value and an
+optional name below. A new one starts with CPU and RAM. The rings arrange themselves for the tile: four of
+them sit in two rows on a square tile and in one row on a wide one.
+
+In the widget's settings, pick the ring to edit from the list under **Gauges**. **Add gauge** adds an empty
+one, **Delete** removes the one you picked, and **Presets** add a ready ring for CPU, RAM or GPU. A full
+widget hides the presets. For the ring you picked:
+
+- Choose a **Variable** with a number and a **Name**. The name can include variables, for example the
+  processor's model under its CPU ring.
+- **Icon** opens the icon picker. Macro Deck ships the read-only **Included** pack with icons for CPU,
+  memory, graphics card, drives, network, battery, temperature, fans, audio and more; any other icon pack
+  works too. **Icon Color** recolors the icon.
+- **Minimum** and **Maximum** set the values of an empty and a full ring. With **Maximum** at 0 the ring
+  uses the variable's own maximum, otherwise the minimum plus 100.
+- **Ring color** colors the ring; without one it follows your accent color. **Warning** turns the ring red
+  at or above, or at or below, a **Threshold**, for example a CPU that runs hot or a battery that runs low.
+
+**Style** draws every ring of the widget as a full **Ring** or as an open **Arc**.
+
 ## Actions and triggers
 
 What a widget does, and when. The **Scenes** button runs **Change Folder to** on a short press:
@@ -164,7 +195,8 @@ event trigger a **Name** to tell several of them apart in the **Events** list.
 
 Once a widget has a Double Tap action, its Short Press waits a moment to see whether a second tap follows,
 so a single tap runs slightly later. A double tap runs only the Double Tap action. On a slider, a double tap
-still moves the level with each tap.
+still moves the level with each tap, and the tile flashes like a pressed button once the double tap is
+recognised.
 
 Actions run top to bottom. **If / Else**, **Switch**, **Repeat** and **Wait** build longer flows, for example:
 *mute the mic, wait 3 seconds, switch the scene*. **Run** tries them out right away.
@@ -190,6 +222,39 @@ marks them, and each one gets a button to let it drive this button's states. Whe
 the editor offers this right away. The action then decides which states exist, and you still style each of
 them. The **×** next to *Provided by* brings your own states back. Plugin actions that supply an icon work the same
 way for the button's icon.
+
+## Icon appearances
+
+An icon can have more than one appearance: a light and a dark version, or an animated icon and a still
+version of it. It stays one icon in **Library > Icon Packs** and in the icon picker, and Macro Deck shows the
+appearance that fits:
+
+- **Light** or **Dark** follows the theme of the screen showing the deck: the Macro Deck app and the deck you
+  open in a browser. With the theme set to **System**, each of them follows its own device's setting. The
+  Companion app shows the **Default** until it supports appearances.
+- **Static** is shown where the system asks for reduced motion, and **Animated** everywhere else. An animated
+  icon without a static appearance keeps playing.
+- A device that can't play animations, such as some stream controllers, shows the **Static** appearance when
+  there is one.
+- When no appearance fits, the icon's own image, the **Default**, is shown.
+
+Icons with appearances have a layered mark in the corner. Double-click an icon, or right-click it and choose
+**Appearances…**, to see them. There you add an appearance from an image file, replace or remove one, or use an
+existing icon from the same pack as an appearance. That icon then disappears from the pack, and buttons and
+actions that used it switch to the icon it became part of. Appearances of icons in Store and plugin packs come
+with the pack and can't be changed.
+
+To always show one appearance on a button or slider, pick it under **Icon appearance** next to the icon.
+**Automatic** goes back to choosing by theme and motion. A flow can switch it with the **Set Icon Appearance**
+action.
+
+When you import images, files named like `play.png`, `play.dark.png` and `play.static.gif` in the same folder
+become one icon `play` with a dark and a static appearance. The words `light`, `dark`, `static` and `animated`
+work this way, also combined, as in `play.dark.static.png`. Other names import as separate icons as before.
+
+Appearances travel with the icon when you export a pack or a profile. A Macro Deck version without
+appearances shows only the default images, and if you go back to such a version, its icon packs lose their
+appearances.
 
 ## Variables
 
@@ -292,7 +357,7 @@ starts playing.
 ## Integrations and the Store
 
 Integrations connect Macro Deck to other apps: OBS, Home Assistant, Voicemeeter, Spotify, Twitch,
-Discord and more. Turn on the ones you use under **Integrations**.
+[YouTube](/guide/youtube/), Discord and more. Turn on the ones you use under **Integrations**.
 
 ![The Integrations page with ADB, Discord, Home Assistant, HTTP and Keyboard](../../../assets/guide/integrations.png)
 
@@ -434,6 +499,14 @@ when the latest version is older than yours, or uninstall it.
 When the latest version of an item is withdrawn, the item disappears from the Store and can no longer be
 installed or updated. If you have it installed, it stays under **Installed**, marked **Removed from the
 Store**, and its page says why; you can still uninstall it there.
+
+### The Included icon pack
+
+Macro Deck ships its own icon pack, **Included**, with simple line icons for hardware, network, battery,
+weather and audio, for example for the rings of a **Gauges** widget. It appears under **Library > Icon
+Packs** and in the icon picker like any other pack and works on every widget. Like a Store pack it is
+read-only and can't be deleted. The icons are grey so they read on dark and light tiles; use **Icon Color**
+on a widget to recolor them.
 
 ### Icon packs from plugins
 

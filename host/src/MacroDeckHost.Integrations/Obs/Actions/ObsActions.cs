@@ -25,6 +25,7 @@ internal static class ObsActions
 			preview: true,
 			resolver),
 		new ProfileActionDefinition(resolver),
+		new SceneCollectionActionDefinition(resolver),
 
 		new ObsAction("start-recording",
 			AppStrings.Integrations.Obs.Actions.StartRecording.Name(),
@@ -136,6 +137,7 @@ internal static class ObsActions
 		new MuteInputActionDefinition(resolver),
 		new SetInputVolumeActionDefinition(resolver),
 		new SetSourceFilterActionDefinition(resolver),
+		new SetInputSettingActionDefinition(resolver),
 		new GetInputVolumeActionDefinition(resolver, variables),
 		new GetSourceFilterStateActionDefinition(resolver, variables),
 		new GetInputMuteActionDefinition(resolver, variables),

@@ -19,7 +19,9 @@ public class ImportSingleIconFromPathRequestMessageHandlerTests
 	{
 		_harness = new IconTestHarness();
 		_extractor = new FakeAppIconExtractor();
-		_handler = new ImportSingleIconFromPathRequestMessageHandler(_extractor, _harness.CreateImportService());
+		_handler = new ImportSingleIconFromPathRequestMessageHandler(_extractor,
+			_harness.CreateImportService(),
+			_harness.Cache);
 	}
 
 	[TearDown]
