@@ -7312,6 +7312,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.Obs.Actions.SetProfile.Name" xml:space="preserve">
     <value>Establecer perfil</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetSceneCollection.Description" xml:space="preserve">
+    <value>Cambia OBS a otra colección de escenas</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetSceneCollection.Name" xml:space="preserve">
+    <value>Establecer colección de escenas</value>
+  </data>
   <data name="Integrations.Obs.Actions.SetScene.Description" xml:space="preserve">
     <value>Cambia la escena de programa activa</value>
   </data>
@@ -7514,6 +7520,18 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.Obs.Errors.NoProfileSelected" xml:space="preserve">
     <value>No se seleccionó ningún perfil.</value>
   </data>
+  <data name="Integrations.Obs.Errors.NoSceneCollectionSelected" xml:space="preserve">
+    <value>No se seleccionó ninguna colección de escenas.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SceneCollectionLoading" xml:space="preserve">
+    <value>OBS todavía está cargando una colección de escenas. Vuelve a intentarlo cuando termine.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SceneCollectionNotFound" xml:space="preserve">
+    <value>OBS no tiene ninguna colección de escenas llamada {name}.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SceneCollectionSlowToLoad" xml:space="preserve">
+    <value>OBS no respondió a tiempo mientras cargaba la colección de escenas. Normalmente el cambio se completa igualmente.</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoSceneOrSourceSelected" xml:space="preserve">
     <value>No se seleccionó ninguna escena ni fuente.</value>
   </data>
@@ -7696,6 +7714,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Integrations.Obs.Params.Profile" xml:space="preserve">
     <value>Perfil</value>
+  </data>
+  <data name="Integrations.Obs.Params.SceneCollection" xml:space="preserve">
+    <value>Colección de escenas</value>
   </data>
   <data name="Integrations.Obs.Params.SaveToVariable" xml:space="preserve">
     <value>Guardar en variable</value>
@@ -18742,6 +18763,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Integrations.Obs.Variables.CurrentProfile" xml:space="preserve">
     <value>Perfil actual</value>
+  </data>
+  <data name="Integrations.Obs.Variables.CurrentSceneCollection" xml:space="preserve">
+    <value>Colección de escenas actual</value>
   </data>
   <data name="Integrations.Obs.Variables.CurrentScene" xml:space="preserve">
     <value>Escena actual</value>

@@ -50,6 +50,8 @@ internal interface IObsClient
 
 	IReadOnlyList<string> GetProfileNames();
 
+	IReadOnlyList<string> GetSceneCollectionNames();
+
 	IReadOnlyList<string> GetOutputNames();
 
 	void SetCurrentScene(string sceneName);
@@ -57,6 +59,8 @@ internal interface IObsClient
 	void SetPreviewScene(string sceneName);
 
 	void SetCurrentProfile(string profileName);
+
+	void SetCurrentSceneCollection(string sceneCollectionName);
 
 	void StartRecord();
 
@@ -144,6 +148,14 @@ internal sealed class ObsRequestException : Exception
 {
 	internal const int OutputNotRunning = 501;
 
+	internal const int NotReady = 207;
+
+	internal const int ResourceNotFound = 600;
+
+	// obs-websocket-dotnet reports a request that got no answer within its timeout as code 1, which is
+	// not an obs-websocket status code.
+	internal const int TimedOut = 1;
+
 	public ObsRequestException(int code, string message)
 		: base(message)
 	{
@@ -152,6 +164,9 @@ internal sealed class ObsRequestException : Exception
 
 	public int Code { get; }
 }
+
+internal sealed class ObsNotReadyException(Exception inner)
+	: Exception("OBS is not ready to answer requests", inner);
 
 internal readonly record struct ObsInputMuteChange(string InputName, bool Muted);
 
@@ -178,6 +193,8 @@ internal sealed record ObsStatus
 	public string? PreviewScene { get; init; }
 
 	public string? CurrentProfile { get; init; }
+
+	public string? CurrentSceneCollection { get; init; }
 
 	public bool IsRecording { get; init; }
 

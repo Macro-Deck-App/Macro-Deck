@@ -7312,6 +7312,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Obs.Actions.SetProfile.Name" xml:space="preserve">
     <value>Ustaw profil</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetSceneCollection.Description" xml:space="preserve">
+    <value>Przełącza OBS na inny zbiór scen</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetSceneCollection.Name" xml:space="preserve">
+    <value>Ustaw zbiór scen</value>
+  </data>
   <data name="Integrations.Obs.Actions.SetScene.Description" xml:space="preserve">
     <value>Przełącza aktywną scenę programu</value>
   </data>
@@ -7514,6 +7520,18 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Obs.Errors.NoProfileSelected" xml:space="preserve">
     <value>Nie wybrano profilu.</value>
   </data>
+  <data name="Integrations.Obs.Errors.NoSceneCollectionSelected" xml:space="preserve">
+    <value>Nie wybrano zbioru scen.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SceneCollectionLoading" xml:space="preserve">
+    <value>OBS nadal wczytuje zbiór scen. Po zakończeniu wczytywania spróbuj ponownie.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SceneCollectionNotFound" xml:space="preserve">
+    <value>OBS nie ma zbioru scen o nazwie {name}.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SceneCollectionSlowToLoad" xml:space="preserve">
+    <value>OBS nie odpowiedział na czas podczas wczytywania zbioru scen. Przełączenie zwykle i tak zostaje zakończone.</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoSceneOrSourceSelected" xml:space="preserve">
     <value>Nie wybrano sceny ani źródła.</value>
   </data>
@@ -7696,6 +7714,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Obs.Params.Profile" xml:space="preserve">
     <value>Profil</value>
+  </data>
+  <data name="Integrations.Obs.Params.SceneCollection" xml:space="preserve">
+    <value>Zbiór scen</value>
   </data>
   <data name="Integrations.Obs.Params.SaveToVariable" xml:space="preserve">
     <value>Zapisz do zmiennej</value>
@@ -18742,6 +18763,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Obs.Variables.CurrentProfile" xml:space="preserve">
     <value>Bieżący profil</value>
+  </data>
+  <data name="Integrations.Obs.Variables.CurrentSceneCollection" xml:space="preserve">
+    <value>Bieżący zbiór scen</value>
   </data>
   <data name="Integrations.Obs.Variables.CurrentScene" xml:space="preserve">
     <value>Bieżąca scena</value>
