@@ -269,6 +269,11 @@ if (appearance?.IconId is { } iconId)
 - **`knownETag`** skips an unchanged transfer: the result has `NotModified` set and empty `Content`.
 - **Cache by `IconId` and `IconVersion`.** Re-rendering an icon keeps its id; the version says the bytes
   changed.
+- **`IconId` names the image to draw.** When the user's icon has
+  [appearances](/guide/concepts/#icon-appearances), `IconId` is the GUID of the appearance Macro Deck chose
+  for this device, which can differ from the icon id stored on the widget. If your layout declares
+  `Visuals` with `AnimatedIcons` false, that is the icon's static appearance when it has one. Fetch it with
+  `GetIconAsync` like any other id; it does not appear in icon listings.
 - **`size: null`** serves the largest size variant (512 px), which Macro Deck creates from the master when a
   pack arrived without it. An icon no larger than that is served as it is.
 - **Too large** throws `DeviceSessionException` with `ReasonCode` `IconTooLarge`; the session stays open.

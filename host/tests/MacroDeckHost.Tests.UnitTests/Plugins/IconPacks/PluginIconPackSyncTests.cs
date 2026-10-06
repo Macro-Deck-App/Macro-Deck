@@ -1,8 +1,10 @@
+using System.Text;
 using MacroDeck.Plugin.Protocol.Versioning;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.IconPacks;
 using MacroDeckHost.Domain.Enums;
+using MacroDeckHost.Domain.Icons;
 
 namespace MacroDeckHost.Tests.UnitTests.Plugins.IconPacks;
 
@@ -95,6 +97,41 @@ internal sealed class PluginIconPackSyncTests
 			Assert.That(_host.Icons.Mediator.Published.OfType<IconUpdatedNotification>(), Is.Empty);
 			Assert.That(_host.Icons.Mediator.Published.OfType<IconPackUpdatedNotification>(), Is.Empty);
 		});
+	}
+
+	[Test]
+	public async Task A_new_plugin_release_that_changes_only_an_appearance_updates_that_icon_in_place()
+	{
+		await _host.SyncDevelopment(PluginId, ("logos", await ArchiveWithDarkAppearance("dark-one")));
+		var pack = _host.PluginPack(PluginId, "logos")!;
+		var home = _host.Icon(pack, "home");
+		_host.Icons.Mediator.Published.Clear();
+
+		var result = await _host.SyncDevelopment(PluginId, ("logos", await ArchiveWithDarkAppearance("dark-two")));
+
+		var dark = _host.Icons.Cache.GetAppearances(home.Id).Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Changed, Is.True);
+			Assert.That(_host.Icon(pack, "home").Id, Is.EqualTo(home.Id));
+			Assert.That(dark.MasterContentHash, Is.EqualTo(MasterContentHash.Compute(Encoding.UTF8.GetBytes("dark-two")).Value));
+			Assert.That(_host.Icons.Mediator.Published.OfType<IconUpdatedNotification>().Select(n => n.Icon.Id),
+				Is.EqualTo(new[] { home.Id }));
+		});
+	}
+
+	private async Task<byte[]> ArchiveWithDarkAppearance(string darkBody)
+	{
+		var source = await _host.Icons.CreatePack($"Logos-{Guid.NewGuid():N}");
+		source.Name = "Logos";
+		await _host.Icons.Cache.AddOrUpdatePack(source);
+		var home = await _host.Icons.AddReadyIcon(source.Id, "home", Encoding.UTF8.GetBytes("home"));
+		await _host.Icons.AddReadyAppearance(home, "colorScheme=dark", Encoding.UTF8.GetBytes(darkBody));
+		using var archive = new MemoryStream();
+		Assert.That((await _host.Icons.CreateExportService().Export(source.Id, archive, CancellationToken.None)).Success,
+			Is.True);
+		await _host.Icons.Cache.RemovePack(source.Id);
+		return archive.ToArray();
 	}
 
 	[Test]

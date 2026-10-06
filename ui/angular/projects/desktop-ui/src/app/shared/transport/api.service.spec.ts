@@ -488,6 +488,49 @@ describe('ApiService', () => {
         '/api/icons/icon-1/image?size=128&v=sha256%3Aa%2Fb',
       );
     });
+
+    it('asks for the appearance that fits the theme and motion setting when given them', () => {
+      const api = configure();
+
+      expect(api.getIconImageUrl('icon-1', 128, 'h', { colorScheme: 'dark', motion: 'static' })).toBe(
+        '/api/icons/icon-1/image?size=128&v=h&colorScheme=dark&motion=static',
+      );
+    });
+  });
+
+  describe('icon appearance transport', () => {
+    function okResponse(): Response {
+      return new Response(JSON.stringify({ icon: { id: 'icon-1' } }), { status: 200 });
+    }
+
+    it('uploads a new appearance with its kind and file under the fields the host binds', async () => {
+      const api = configure();
+      const fetchSpy = spyOn(window, 'fetch').and.resolveTo(okResponse());
+
+      await api.addIconAppearance('icon-1', 'colorScheme=dark', new File(['png'], 'dark.png'));
+
+      const [url, init] = fetchSpy.calls.mostRecent().args;
+      expect(url as string).toMatch(/\/api\/icons\/icon-1\/appearances$/);
+      expect((init as RequestInit).method).toBe('POST');
+      const form = (init as RequestInit).body as FormData;
+      expect(form.get('key')).toBe('colorScheme=dark');
+      expect((form.get('file') as File).name).toBe('dark.png');
+    });
+
+    it('removes one appearance by its id and merges an icon by id and kind', async () => {
+      const api = configure();
+      const fetchSpy = spyOn(window, 'fetch').and.callFake(() => Promise.resolve(okResponse()));
+
+      await api.removeIconAppearance('icon-1', 'asset-1');
+      const [removeUrl, removeInit] = fetchSpy.calls.mostRecent().args;
+      await api.mergeIconAppearance('icon-1', { iconId: 'icon-2', key: 'motion=static' });
+      const [mergeUrl, mergeInit] = fetchSpy.calls.mostRecent().args;
+
+      expect(removeUrl as string).toMatch(/\/api\/icons\/icon-1\/appearances\/asset-1$/);
+      expect((removeInit as RequestInit).method).toBe('DELETE');
+      expect(mergeUrl as string).toMatch(/\/api\/icons\/icon-1\/appearances\/merge$/);
+      expect(JSON.parse((mergeInit as RequestInit).body as string)).toEqual({ iconId: 'icon-2', key: 'motion=static' });
+    });
   });
 
   describe('integration icon urls', () => {

@@ -19,6 +19,7 @@ import { archiveDropKind } from '../../../domain/archive-drop.util';
 import { savedFileDetail } from '../../../services/file-save.service';
 import { IconModel, IconPackModel, IconPackService } from '../../../services/icon-pack.service';
 import { TextClipboardService, clipboardFailureDetail } from '../../../services/text-clipboard.service';
+import { IconAppearancesDialogComponent } from './icon-appearances-dialog.component';
 import { PackEditDialogComponent, PackEditResult } from './pack-edit-dialog.component';
 
 interface IconContextMenuState {
@@ -46,6 +47,7 @@ interface PackContextMenuState {
     ErrorBannerComponent,
     FileBrowserDialogComponent,
     FileDropDirective,
+    IconAppearancesDialogComponent,
     IconDropTargetDirective,
     IconGridComponent,
     ImportProgressComponent,
@@ -82,6 +84,7 @@ export class IconPacksPageComponent {
   protected readonly packMenu = signal<PackContextMenuState | null>(null);
   protected readonly iconMenu = signal<IconContextMenuState | null>(null);
   protected readonly iconPendingRename = signal<IconModel | null>(null);
+  protected readonly appearancesIconId = signal<string | null>(null);
   protected readonly renameValue = signal('');
   protected readonly showPathBrowser = signal(false);
   protected readonly manualCopy = signal<{ value: string; message: string } | null>(null);
@@ -97,6 +100,11 @@ export class IconPacksPageComponent {
   protected readonly icons = computed(() => {
     const packId = this.selectedPackId();
     return packId ? this.iconPacks.iconsFor(packId)() : [];
+  });
+
+  protected readonly appearancesIcon = computed(() => {
+    const iconId = this.appearancesIconId();
+    return iconId ? this.icons().find(icon => icon.id === iconId) ?? null : null;
   });
 
   protected readonly filteredIcons = computed(() => {
@@ -129,6 +137,7 @@ export class IconPacksPageComponent {
     const bulk = menuIcon && selection.has(menuIcon.id) && selection.size > 1 ? selection.size : 0;
     return [
       { id: 'rename', label: this.localization.translateKey(Strings.Common.Rename), icon: 'icon-pencil', disabled: readOnly || bulk > 0 },
+      { id: 'appearances', label: this.localization.translateKey(AppStrings.IconPacks.Appearances.MenuItem), icon: 'icon-layers', disabled: bulk > 0 },
       { id: 'copy-id', label: this.localization.translateKey(AppStrings.IconPacks.CopyIconIdAction), icon: 'icon-copy', dividerAfter: true },
       {
         id: 'delete',
@@ -182,6 +191,7 @@ export class IconPacksPageComponent {
   protected selectPack(pack: IconPackModel): void {
     this.selectedPackId.set(pack.id);
     this.searchQuery.set('');
+    this.appearancesIconId.set(null);
     this.clearSelection();
   }
 
@@ -224,7 +234,7 @@ export class IconPacksPageComponent {
   @HostListener('document:keydown', ['$event'])
   protected onKeyDown(event: KeyboardEvent): void {
     if (this.packDialogMode() || this.iconPendingRename() || this.iconsPendingDeletion()
-      || this.packPendingDeletion() || this.showPathBrowser()) {
+      || this.packPendingDeletion() || this.showPathBrowser() || this.appearancesIcon()) {
       return;
     }
 
@@ -321,12 +331,18 @@ export class IconPacksPageComponent {
         return this.localization.translateKey(AppStrings.IconPacks.SourceStore);
       case 'Plugin':
         return this.localization.translateKey(AppStrings.IconPacks.SourcePlugin);
+      case 'BuiltIn':
+        return this.localization.translateKey(AppStrings.IconPacks.SourceBuiltIn);
       default:
         return null;
     }
   }
 
   protected sourceTitle(pack: IconPackModel): string {
+    if (pack.ownerKind === 'BuiltIn') {
+      return this.localization.translateKey(AppStrings.IconPacks.ManagedByMacroDeck);
+    }
+
     if (pack.ownerKind !== 'Plugin') {
       return this.localization.translateKey(AppStrings.IconPacks.ManagedByStore);
     }
@@ -403,6 +419,9 @@ export class IconPacksPageComponent {
         this.renameValue.set(icon.name);
         this.iconPendingRename.set(icon);
         break;
+      case 'appearances':
+        this.openAppearances(icon);
+        break;
       case 'copy-id':
         await this.copyIconId(icon);
         break;
@@ -417,6 +436,10 @@ export class IconPacksPageComponent {
         break;
       }
     }
+  }
+
+  protected openAppearances(icon: IconModel): void {
+    this.appearancesIconId.set(icon.id);
   }
 
   private async copyIconId(icon: IconModel): Promise<void> {

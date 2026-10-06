@@ -11,7 +11,8 @@
         [multiSelect]="multiSelect"
         [selectionActive]="(selectedIconIds?.size ?? 0) > 0"
         (tileClick)="iconClick.emit($event)"
-        (tileContextMenu)="iconContextMenu.emit($event)" />
+        (tileContextMenu)="iconContextMenu.emit($event)"
+        (tileOpen)="iconOpen.emit($event)" />
     }
   </div>
 </cdk-virtual-scroll-viewport>

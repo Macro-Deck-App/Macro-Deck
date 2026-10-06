@@ -836,7 +836,8 @@ public class SliderWidgetSessionTests
 			new RecordingTriggerService(),
 			new StubFolderCache(),
 			new NullUiTransport(),
-			new RecordingRenderSignals());
+			new RecordingRenderSignals(),
+			new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache());
 	}
 
 	private static SliderUnderTest Writable(

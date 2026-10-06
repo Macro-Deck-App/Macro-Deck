@@ -39,7 +39,7 @@ public class IconService : IIconService
 	public async Task<Result<IconEntity, IconError>> Rename(Guid iconId, string name)
 	{
 		var icon = _iconPackCache.GetIconById(iconId);
-		if (icon is null)
+		if (icon is null || icon.AppearanceOfId is not null)
 		{
 			return Result.Fail<IconEntity, IconError>(IconError.NotFound);
 		}
@@ -57,6 +57,12 @@ public class IconService : IIconService
 
 		icon.Name = name.Trim();
 		await _iconPackCache.UpdateIcon(icon);
+		foreach (var appearance in _iconPackCache.GetAppearances(icon.Id))
+		{
+			appearance.Name = icon.Name;
+			await _iconPackCache.UpdateIcon(appearance);
+		}
+
 		await _iconPackCache.ForgetSourceRevision(icon.PackId);
 		await _mediator.Publish(new IconUpdatedNotification(icon));
 		return Result.Ok<IconEntity, IconError>(icon);
@@ -75,11 +81,11 @@ public class IconService : IIconService
 			return Result.Fail(IconError.PackReadOnly, "Icons in read-only packs cannot be deleted");
 		}
 
-		await _iconPackCache.RemoveIcon(iconId);
-		_coalescer.ReleaseAll(iconId);
-		_storage.DeleteIconFiles(icon.PackId, iconId);
+		var removed = IconRemoval.ExpandWithAppearances(_iconPackCache, [icon]);
+		await _iconPackCache.RemoveIcons(icon.PackId, removed.Select(i => i.Id).ToList());
+		ReleaseFiles(removed);
 		await _iconPackCache.ForgetSourceRevision(icon.PackId);
-		await _mediator.Publish(new IconDeletedNotification(iconId, icon.PackId));
+		await PublishRemoved(icon);
 		return Result.Ok<IconError>();
 	}
 
@@ -100,41 +106,69 @@ public class IconService : IIconService
 			}
 		}
 
+		var requested = icons.Select(i => i.Id).ToHashSet();
 		foreach (var packGroup in icons.GroupBy(i => i.PackId))
 		{
-			await _iconPackCache.RemoveIcons(packGroup.Key, packGroup.Select(i => i.Id).ToList());
+			var removed = IconRemoval.ExpandWithAppearances(_iconPackCache, packGroup);
+			await _iconPackCache.RemoveIcons(packGroup.Key, removed.Select(i => i.Id).ToList());
 			await _iconPackCache.ForgetSourceRevision(packGroup.Key);
-			foreach (var icon in packGroup)
+			ReleaseFiles(removed);
+			foreach (var icon in packGroup.Where(i => i.AppearanceOfId is not { } parentId || !requested.Contains(parentId)))
 			{
-				_coalescer.ReleaseAll(icon.Id);
-				_storage.DeleteIconFiles(icon.PackId, icon.Id);
-				await _mediator.Publish(new IconDeletedNotification(icon.Id, icon.PackId));
+				await PublishRemoved(icon);
 			}
 		}
 
 		return Result.Ok<int, IconError>(icons.Count);
 	}
 
+	private void ReleaseFiles(IEnumerable<IconEntity> removed)
+	{
+		foreach (var icon in removed)
+		{
+			_coalescer.ReleaseAll(icon.Id);
+			_storage.DeleteIconFiles(icon.PackId, icon.Id);
+		}
+	}
+
+	private async Task PublishRemoved(IconEntity icon)
+	{
+		if (icon.AppearanceOfId is not { } parentId)
+		{
+			await _mediator.Publish(new IconDeletedNotification(icon.Id, icon.PackId));
+			return;
+		}
+
+		if (_iconPackCache.GetIconById(parentId) is { } parent)
+		{
+			await _mediator.Publish(new IconUpdatedNotification(parent));
+		}
+	}
+
 	public async Task<Result<IconImageResult, IconError>> GetImage(Guid iconId,
 		int? size,
 		bool acceptWebp,
 		bool staticFrame,
-		CancellationToken cancellationToken)
+		CancellationToken cancellationToken,
+		IconAppearanceContext? context = null)
 	{
-		var icon = _iconPackCache.GetIconById(iconId);
-		if (icon is null)
+		var requested = _iconPackCache.GetIconById(iconId);
+		if (requested is null)
 		{
 			return Result.Fail<IconImageResult, IconError>(IconError.NotFound);
 		}
 
-		if (icon.ProcessingState != IconProcessingState.Ready)
+		if (requested.ProcessingState != IconProcessingState.Ready)
 		{
 			return Result.Fail<IconImageResult, IconError>(IconError.NotReady);
 		}
 
+		var appearances = requested.AppearanceOfId is null ? _iconPackCache.GetAppearances(requested.Id) : [];
+		var icon = IconAppearanceSelector.Select(requested, appearances, context ?? IconAppearanceContext.None);
+
 		// One snapshot labels the response: a pack upgrade replaces these fields on the live entity mid-request.
 		var masterContentHash = icon.MasterContentHash;
-		var version = IconImageVersion.Of(icon);
+		var version = IconImageVersion.Of(requested, appearances);
 		var identity = IconEtagIdentity(icon);
 
 		var variant = IconVariants.Resolve(size, icon.AvailableSizes.ToList());

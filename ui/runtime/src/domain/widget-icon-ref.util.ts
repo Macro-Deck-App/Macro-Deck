@@ -1,6 +1,7 @@
 export interface WidgetIconRef {
   type: string;
   reference: string;
+  appearance?: string;
 }
 
 export const ICON_PACK_ICON_TYPE = 'icon-pack';
@@ -23,7 +24,8 @@ export function readWidgetIconRef(icon: unknown, legacyIconId: string | undefine
     typeof (icon as WidgetIconRef).type === 'string' && (icon as WidgetIconRef).type &&
     typeof (icon as WidgetIconRef).reference === 'string' && (icon as WidgetIconRef).reference
   ) {
-    return { type: (icon as WidgetIconRef).type, reference: (icon as WidgetIconRef).reference };
+    const { type, reference, appearance } = icon as WidgetIconRef;
+    return typeof appearance === 'string' && appearance ? { type, reference, appearance } : { type, reference };
   }
 
   const trimmed = legacyIconId?.trim();

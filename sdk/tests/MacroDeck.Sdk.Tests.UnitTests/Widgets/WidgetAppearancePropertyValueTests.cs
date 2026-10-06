@@ -14,6 +14,7 @@ internal sealed class WidgetAppearancePropertyValueTests
 	[TestCase(WidgetAppearanceProperty.BorderColor, 6)]
 	[TestCase(WidgetAppearanceProperty.IconDisplay, 7)]
 	[TestCase(WidgetAppearanceProperty.IconColor, 9)]
+	[TestCase(WidgetAppearanceProperty.IconAppearance, 10)]
 	public void Every_value_keeps_the_number_plugins_and_stored_data_already_use(
 		WidgetAppearanceProperty property,
 		int expected)
@@ -25,5 +26,11 @@ internal sealed class WidgetAppearancePropertyValueTests
 	public void An_icon_color_alone_is_a_change()
 	{
 		Assert.That(new WidgetAppearancePatch { IconColor = "#ef4444" }.IsEmpty, Is.False);
+	}
+
+	[Test]
+	public void An_icon_appearance_alone_is_a_change()
+	{
+		Assert.That(new WidgetAppearancePatch { IconAppearance = "default" }.IsEmpty, Is.False);
 	}
 }

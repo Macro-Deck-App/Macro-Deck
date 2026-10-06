@@ -101,6 +101,30 @@ internal sealed class IconTestHarness : IDisposable
 		return icon;
 	}
 
+	public async Task<IconEntity> AddReadyAppearance(IconEntity parent, string key, byte[] master)
+	{
+		if (!IconAppearanceTraits.TryParse(key, out var traits))
+		{
+			throw new ArgumentException($"{key} is not a canonical appearance key", nameof(key));
+		}
+
+		var asset = new IconEntity
+		{
+			Id = Guid.CreateVersion7(),
+			PackId = parent.PackId,
+			Name = parent.Name,
+			SourceContentHash = SourceContentHash.Compute(master).Value,
+			MasterContentHash = MasterContentHash.Compute(master).Value,
+			ProcessingState = IconProcessingState.Ready,
+			AppearanceOfId = parent.Id,
+			AppearanceTraits = traits,
+			CreatedAt = DateTime.UtcNow
+		};
+		await Cache.AddIcons(parent.PackId, [asset]);
+		await Storage.WriteVariant(parent.PackId, asset.Id, IconVariants.Master, master, CancellationToken.None);
+		return asset;
+	}
+
 	public void Dispose()
 	{
 		Cache.Dispose();

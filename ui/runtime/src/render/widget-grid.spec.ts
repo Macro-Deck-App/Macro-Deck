@@ -796,6 +796,108 @@ describe('runtime widget grid', () => {
     }
   });
 
+  describe('a slider double tap', () => {
+    const slider = (events: string[]): UiNode =>
+      ({ id: 'slider', type: 'ui.slider', properties: { events } }) as UiNode;
+
+    const sliderTile = (events: string[]): UiNode =>
+      ({
+        id: 'root',
+        type: 'ui.stack',
+        properties: {},
+        children: [{ id: 'lead', type: 'ui.text', properties: { text: 'Volume' } }, slider(events)],
+      }) as UiNode;
+
+    const at = (type: string, x: number): Event => {
+      const event = pointer(type) as Event & { clientX: number };
+      event.clientX = x;
+      return event;
+    };
+
+    const tap = (element: HTMLElement, x = 0): void => {
+      element.dispatchEvent(at('pointerdown', x));
+      element.dispatchEvent(at('pointerup', x));
+    };
+
+    const mountSlider = (root: UiNode) => {
+      mount().update([widget('a', 0, 0)], () => root);
+      return {
+        tile: container.querySelector('.deck-grid-tile') as HTMLElement,
+        slider: container.querySelector('[data-node-id="slider"]') as HTMLElement,
+      };
+    };
+
+    beforeEach(() => {
+      jasmine.clock().install();
+      jasmine.clock().mockDate();
+    });
+
+    afterEach(() => jasmine.clock().uninstall());
+
+    it('flashes the tile like a button press when the double tap is recognised', () => {
+      const { tile, slider: element } = mountSlider(sliderTile(['adjust', 'change', 'double-press']));
+
+      tap(element);
+      expect(tile.classList.contains('deck-grid-tile-pressed')).toBeFalse();
+      jasmine.clock().tick(200);
+      tap(element);
+
+      expect(tile.classList.contains('deck-grid-tile-pressed')).toBeTrue();
+      jasmine.clock().tick(PRESS_FEEDBACK_MIN_VISIBLE_MS);
+      expect(tile.classList.contains('deck-grid-tile-pressed')).toBeFalse();
+    });
+
+    it('does not flash for two taps further apart than a double tap', () => {
+      const { tile, slider: element } = mountSlider(sliderTile(['adjust', 'change', 'double-press']));
+
+      tap(element);
+      jasmine.clock().tick(500);
+      tap(element);
+
+      expect(tile.classList.contains('deck-grid-tile-pressed')).toBeFalse();
+    });
+
+    it('does not flash when a drag is followed by a tap', () => {
+      const { tile, slider: element } = mountSlider(sliderTile(['adjust', 'change', 'double-press']));
+
+      element.dispatchEvent(at('pointerdown', 0));
+      element.dispatchEvent(at('pointermove', 40));
+      element.dispatchEvent(at('pointerup', 40));
+      jasmine.clock().tick(100);
+      tap(element, 40);
+
+      expect(tile.classList.contains('deck-grid-tile-pressed')).toBeFalse();
+    });
+
+    it('does not flash a slider that has no double tap action', () => {
+      const { tile, slider: element } = mountSlider(sliderTile(['adjust', 'change']));
+
+      tap(element);
+      jasmine.clock().tick(200);
+      tap(element);
+
+      expect(tile.classList.contains('deck-grid-tile-pressed')).toBeFalse();
+    });
+
+    it('leaves the tile alone for a slider nested after another control of the tile', () => {
+      const { tile, slider: element } = mountSlider({
+        id: 'root',
+        type: 'ui.stack',
+        properties: {},
+        children: [
+          { id: 'nested', type: 'ui.button', properties: { events: ['press'] } },
+          slider(['adjust', 'change', 'double-press']),
+        ],
+      } as UiNode);
+
+      tap(element);
+      jasmine.clock().tick(200);
+      tap(element);
+
+      expect(tile.classList.contains('deck-grid-tile-pressed')).toBeFalse();
+    });
+  });
+
   it('re-solves for a folder with a grid of its own', () => {
     const handle = mount();
     handle.update([widget('a', 0, 0)], () => undefined);

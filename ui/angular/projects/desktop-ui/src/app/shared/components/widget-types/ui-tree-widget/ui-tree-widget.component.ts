@@ -20,6 +20,7 @@ import {
   activationClaim,
   effectiveTreeRoot,
   activationFor,
+  findInteractiveNode,
   emitsEvent,
   hasRunnableFlow,
   TapSequencer,
@@ -170,6 +171,12 @@ export class UiTreeWidgetComponent implements OnInit, OnChanges, OnDestroy {
     if (event.pressed && event.nodeId !== effectiveTreeRoot(this.renderedRoot(), this.treeBox())?.id) return;
     this.treeNodePressed.set(event.pressed);
     this.pressedChange.emit(event.pressed);
+  }
+
+  protected onNodeFlashed(nodeId: string): void {
+    if (this.disabled || nodeId !== findInteractiveNode(this.renderedRoot(), this.treeBox())?.id) return;
+    this.pressFeedback.press();
+    this.pressFeedback.release();
   }
 
   private openSession(): void {

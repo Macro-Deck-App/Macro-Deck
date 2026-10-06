@@ -26,15 +26,19 @@ export class UiWidgetTreeComponent {
 
   readonly nodePressedChange = output<UiNodePressedEvent>();
 
+  readonly nodeFlashed = output<string>();
+
   private readonly eventBus = inject(UiNodeEventBus);
 
   constructor() {
     const destroyRef = inject(DestroyRef);
     const eventsSub = this.eventBus.events$.subscribe(event => this.nodeEvent.emit(event));
     const pressedSub = this.eventBus.pressed$.subscribe(event => this.nodePressedChange.emit(event));
+    const flashedSub = this.eventBus.flashed$.subscribe(nodeId => this.nodeFlashed.emit(nodeId));
     destroyRef.onDestroy(() => {
       eventsSub.unsubscribe();
       pressedSub.unsubscribe();
+      flashedSub.unsubscribe();
     });
   }
 }

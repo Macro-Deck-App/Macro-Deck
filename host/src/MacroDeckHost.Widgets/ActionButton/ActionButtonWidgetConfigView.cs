@@ -115,7 +115,7 @@ internal static class ActionButtonWidgetConfigView
 		var liveStateLabel = new UiState<string>(liveState is null ? string.Empty : context.Resolve(liveState.Label));
 
 		var label = new UiState<string>(WidgetConfigJson.ReadString(data, "label") ?? string.Empty);
-		var icon = new UiState<UiIconReference>(ReadIcon(data)!);
+		var icon = new UiState<WidgetIconReference?>(ReadIcon(data));
 		var iconDisplayData = WidgetConfigJson.ReadObject(data, "iconDisplay");
 		var iconFit = new UiState<string>(WidgetConfigJson.ReadString(iconDisplayData, "fit") ?? "contain");
 		var iconZoom = new UiState<double>(WidgetConfigJson.ReadDouble(iconDisplayData, "zoom") ?? 100);
@@ -776,7 +776,8 @@ internal static class ActionButtonWidgetConfigView
 			UiBinding<string> labelBoxBorderColorBinding,
 			UiBinding<double> labelBoxBorderWidthBinding,
 			UiBinding<string> backgroundColorBinding,
-			UiBinding<UiIconReference> iconBinding,
+			Func<WidgetIconReference?> readIcon,
+			Action<WidgetIconReference?> writeIcon,
 			UiBinding<UiIconDisplay> iconDisplayBinding,
 			UiBinding<string> iconColorBinding,
 			UiObjectInput borderNode,
@@ -984,13 +985,12 @@ internal static class ActionButtonWidgetConfigView
 						Children =
 						[
 							WidgetConfigFragments.Background(backgroundColorBinding),
-							new UiIconReferenceInput
-							{
-								Key = "icon",
-								Label = AppStrings.Widgets.Editor.Icon(),
-								Binding = iconBinding,
-								Disabled = UiValue.From(() => iconProviderState.Value is not null),
-							},
+							WidgetIconField.Build("icon",
+								AppStrings.Widgets.Editor.Icon(),
+								readIcon,
+								writeIcon,
+								context.Icons,
+								UiValue.From(() => iconProviderState.Value is not null)),
 							new UiWhen
 							{
 								Key = "icon-color-when",
@@ -1240,7 +1240,6 @@ internal static class ActionButtonWidgetConfigView
 
 		UiObjectInput BuildStateAppearance(string stateId)
 		{
-			var iconBinding = StateIconBinding(states, stateId);
 			var iconDisplayBinding = StateIconDisplayBinding(states, stateId);
 
 			return new UiObjectInput
@@ -1280,7 +1279,8 @@ internal static class ActionButtonWidgetConfigView
 						labelBoxBorderWidthBinding:
 							StateDoubleBinding(states, stateId, "labelBoxBorderWidth", () => labelBoxBorderWidth.Value),
 						backgroundColorBinding: StateStringBinding(states, stateId, "backgroundColor"),
-						iconBinding: iconBinding,
+						readIcon: () => ReadStateWidgetIcon(states.Value, stateId),
+						writeIcon: value => WriteStateIcon(states, stateId, value),
 						iconDisplayBinding: iconDisplayBinding,
 						iconColorBinding: StateStringBinding(states, stateId, "iconColor"),
 						// "off" is the style a state with no border of its own has, and naming it here is what
@@ -1693,7 +1693,8 @@ internal static class ActionButtonWidgetConfigView
 			labelBoxBorderColorBinding: Bind.To(labelBoxBorderColor),
 			labelBoxBorderWidthBinding: Bind.To(labelBoxBorderWidth),
 			backgroundColorBinding: Bind.To(backgroundColor),
-			iconBinding: Bind.To(icon),
+			readIcon: () => icon.Value,
+			writeIcon: value => icon.Value = value,
 			iconDisplayBinding: Bind.Custom(() => new UiIconDisplay(iconFit.Value,
 					iconZoom.Value,
 					iconOffsetX.Value,
@@ -1728,7 +1729,7 @@ internal static class ActionButtonWidgetConfigView
 				}),
 			iconColorBinding: Bind.To(iconColor),
 			borderNode: WidgetConfigFragments.Border(borderStyle, borderColor, labelled: false),
-			currentIcon: () => icon.Value!,
+			currentIcon: () => ToUiIcon(icon.Value)!,
 			currentBackgroundColor: () => backgroundColor.Value,
 			currentIconColor: () => iconColor.Value);
 
@@ -1929,30 +1930,32 @@ internal static class ActionButtonWidgetConfigView
 			},
 		];
 
-	private static UiIconReference? ReadStateIcon(IReadOnlyList<ActionButtonStateEntry> states, string stateId)
-	{
-		var appearance = states.FirstOrDefault(s => s.Id == stateId)?.Appearance;
-		var reference = WidgetIconReference.Read(appearance?["icon"], null);
-
-		return reference is { } value ? new UiIconReference(value.Type, value.Reference) : null;
-	}
-
-	private static UiBinding<UiIconReference> StateIconBinding(UiState<List<ActionButtonStateEntry>> states,
+	private static WidgetIconReference? ReadStateWidgetIcon(IReadOnlyList<ActionButtonStateEntry> states,
 		string stateId)
-		=> Bind.Custom(() => ReadStateIcon(states.Value, stateId)!,
-			value => MutateAppearance(states,
-				stateId,
-				appearance =>
+		=> WidgetIconReference.Read(states.FirstOrDefault(s => s.Id == stateId)?.Appearance?["icon"], null);
+
+	private static UiIconReference? ReadStateIcon(IReadOnlyList<ActionButtonStateEntry> states, string stateId)
+		=> ToUiIcon(ReadStateWidgetIcon(states, stateId));
+
+	private static UiIconReference? ToUiIcon(WidgetIconReference? reference)
+		=> reference is { } value ? new UiIconReference(value.Type, value.Reference) : null;
+
+	private static void WriteStateIcon(UiState<List<ActionButtonStateEntry>> states,
+		string stateId,
+		WidgetIconReference? value)
+		=> MutateAppearance(states,
+			stateId,
+			appearance =>
+			{
+				if (value is null)
 				{
-					if (value is null)
-					{
-						appearance.Remove("icon");
+					appearance.Remove("icon");
 
-						return;
-					}
+					return;
+				}
 
-					appearance["icon"] = new JsonObject { ["type"] = value.Type, ["reference"] = value.Reference };
-				}));
+				appearance["icon"] = value.Value.ToJson();
+			});
 
 	/// <summary>The per-state counterpart of the root <c>iconDisplay</c> binding built inline in
 	/// <see cref="Build" />: one value carrying the whole framing object, read with the same fallbacks a
@@ -2253,7 +2256,7 @@ internal static class ActionButtonWidgetConfigView
 
 	private sealed record ProviderSwitch(string Capability, ActionButtonFlowBlockInfo Block, ActionStateSnapshot? States);
 
-	private static UiIconReference? ReadIcon(JsonElement data)
+	private static WidgetIconReference? ReadIcon(JsonElement data)
 	{
 		var iconNode = data.ValueKind == JsonValueKind.Object &&
 			data.TryGetProperty("icon", out var iconElement) &&
@@ -2262,8 +2265,6 @@ internal static class ActionButtonWidgetConfigView
 				: null;
 
 		var legacyIconId = WidgetConfigJson.ReadString(data, "iconId");
-		var reference = WidgetIconReference.Read(iconNode, legacyIconId);
-
-		return reference is { } value ? new UiIconReference(value.Type, value.Reference) : null;
+		return WidgetIconReference.Read(iconNode, legacyIconId);
 	}
 }

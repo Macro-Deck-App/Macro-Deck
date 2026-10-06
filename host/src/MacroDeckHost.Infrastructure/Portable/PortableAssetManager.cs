@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Icons;
+using MacroDeckHost.Application.Icons.Ownership;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Portable;
 using MacroDeckHost.Application.Rendering;
@@ -41,6 +42,7 @@ public sealed class PortableAssetManager : IPortableAssetManager
 	private readonly ILocalizationResolver _localization;
 	private readonly IFontCatalog _fontCatalog;
 	private readonly IUserFontLibrary _userFonts;
+	private readonly IIconPackOwnerRegistry _ownerRegistry;
 	private readonly ILogger _logger;
 
 	public PortableAssetManager(
@@ -55,9 +57,11 @@ public sealed class PortableAssetManager : IPortableAssetManager
 		ILocalizationResolver localization,
 		IFontCatalog fontCatalog,
 		IUserFontLibrary userFonts,
+		IIconPackOwnerRegistry ownerRegistry,
 		ILogger logger)
 	{
 		_fontCatalog = fontCatalog;
+		_ownerRegistry = ownerRegistry;
 		_userFonts = userFonts;
 		_iconPackCache = iconPackCache;
 		_iconStorage = iconStorage;
@@ -82,6 +86,7 @@ public sealed class PortableAssetManager : IPortableAssetManager
 
 		var icons = new List<PortableIcon>();
 		var files = new List<PortableIconFile>();
+		var bundledFiles = new HashSet<Guid>();
 		var referencedIcons = options.IncludeIcons ? ReferencedIconIds(referencingData) : [];
 		foreach (var iconId in referencedIcons)
 		{
@@ -103,8 +108,14 @@ public sealed class PortableAssetManager : IPortableAssetManager
 			{
 				[IconVariants.Master] = ContentHash.Compute(master)
 			};
-			files.Add(new PortableIconFile(icon.Id, IconVariants.Master, master));
+			if (bundledFiles.Add(icon.Id))
+			{
+				files.Add(new PortableIconFile(icon.Id, IconVariants.Master, master));
+			}
 
+			var appearances = icon.AppearanceOfId is null
+				? CollectAppearances(icon, files, bundledFiles)
+				: [];
 			icons.Add(new PortableIcon
 			{
 				Id = icon.Id,
@@ -116,7 +127,8 @@ public sealed class PortableAssetManager : IPortableAssetManager
 				SourceContentHash = icon.SourceContentHash ?? icon.DeclaredSourceContentHash,
 				FileContentHashes = fileHashes,
 				OriginalFileName = icon.OriginalFileName,
-				OriginalFormat = icon.OriginalFormat
+				OriginalFormat = icon.OriginalFormat,
+				Appearances = appearances.Count > 0 ? appearances : null
 			});
 		}
 
@@ -132,6 +144,50 @@ public sealed class PortableAssetManager : IPortableAssetManager
 			variables,
 			fonts,
 			fontFiles);
+	}
+
+	private List<PortableIconAppearance> CollectAppearances(IconEntity icon,
+		List<PortableIconFile> files,
+		HashSet<Guid> bundledFiles)
+	{
+		var appearances = new List<PortableIconAppearance>();
+		foreach (var asset in _iconPackCache.GetAppearances(icon.Id))
+		{
+			if (asset.ProcessingState != IconProcessingState.Ready || asset.AppearanceTraits is not { } traits)
+			{
+				continue;
+			}
+
+			var master = ReadVariant(asset, IconVariants.Master);
+			if (master is null)
+			{
+				_logger.Warning("Skipping appearance {AppearanceId} during export: master variant missing", asset.Id);
+				continue;
+			}
+
+			if (bundledFiles.Add(asset.Id))
+			{
+				files.Add(new PortableIconFile(asset.Id, IconVariants.Master, master));
+			}
+
+			appearances.Add(new PortableIconAppearance
+			{
+				Id = asset.Id,
+				Traits = new Dictionary<string, string>(traits, StringComparer.Ordinal),
+				Width = asset.Width,
+				Height = asset.Height,
+				IsAnimated = asset.IsAnimated,
+				FrameCount = asset.FrameCount,
+				SourceContentHash = asset.SourceContentHash ?? asset.DeclaredSourceContentHash,
+				FileContentHashes = new Dictionary<string, string>(StringComparer.Ordinal)
+				{
+					[IconVariants.Master] = ContentHash.Compute(master)
+				},
+				OriginalFormat = asset.OriginalFormat
+			});
+		}
+
+		return appearances;
 	}
 
 	private (List<PortableFont> Fonts, List<PortableFontFile> Files) CollectFonts(IReadOnlyList<string?> referencingData)
@@ -589,13 +645,15 @@ public sealed class PortableAssetManager : IPortableAssetManager
 
 		var importedThisRun = new Dictionary<string, Guid>(StringComparer.Ordinal);
 		var newIcons = new List<IconEntity>();
+		var newAppearances = new List<IconEntity>();
+		var reusedWithNewAppearances = new List<(IconEntity Parent, List<IconEntity> Added)>();
 		var reused = 0;
 		foreach (var portableIcon in importable)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 
 			var variants = filesByIcon[portableIcon.Id];
-			if (!VerifyBundledFiles(portableIcon, variants))
+			if (!VerifyBundledFiles(portableIcon.Id, portableIcon.FileContentHashes, variants))
 			{
 				continue;
 			}
@@ -621,6 +679,12 @@ public sealed class PortableAssetManager : IPortableAssetManager
 				idMap[portableIcon.Id] = existing.Id;
 				importedThisRun[masterHash.Value] = existing.Id;
 				reused++;
+				var missing = await MissingAppearances(existing, portableIcon, filesByIcon, cancellationToken);
+				if (missing.Count > 0)
+				{
+					reusedWithNewAppearances.Add((existing, missing));
+				}
+
 				continue;
 			}
 
@@ -633,7 +697,7 @@ public sealed class PortableAssetManager : IPortableAssetManager
 			var newId = Guid.CreateVersion7();
 			await _iconStorage.WriteVariant(pack.Id, newId, IconVariants.Master, masterBytes, cancellationToken);
 
-			newIcons.Add(new IconEntity
+			var newIcon = new IconEntity
 			{
 				Id = newId,
 				PackId = pack.Id,
@@ -650,19 +714,22 @@ public sealed class PortableAssetManager : IPortableAssetManager
 				ProcessingState = IconProcessingState.Ready,
 				CreatedAt = DateTime.UtcNow,
 				UpdatedAt = DateTime.UtcNow
-			});
+			};
+			newIcons.Add(newIcon);
+			newAppearances.AddRange(await ImportAppearances(newIcon, portableIcon, filesByIcon, cancellationToken));
 
 			idMap[portableIcon.Id] = newId;
 			importedThisRun[masterHash.Value] = newId;
 		}
 
 		_logger.Information("Imported {Created} icon(s) and reused {Reused} already present", newIcons.Count, reused);
+		await AddReusedIconAppearances(reusedWithNewAppearances, cancellationToken);
 		if (newIcons.Count == 0)
 		{
 			return;
 		}
 
-		await _iconPackCache.AddIcons(pack.Id, newIcons);
+		await _iconPackCache.AddIcons(pack.Id, [.. newIcons, .. newAppearances]);
 		if (isNewPack)
 		{
 			await _mediator.Publish(new IconPackCreatedNotification(pack, newIcons.Count), cancellationToken);
@@ -673,18 +740,20 @@ public sealed class PortableAssetManager : IPortableAssetManager
 		}
 	}
 
-	private bool VerifyBundledFiles(PortableIcon icon, List<PortableIconFile> variants)
+	private bool VerifyBundledFiles(Guid iconId,
+		Dictionary<string, string> fileContentHashes,
+		List<PortableIconFile> variants)
 	{
 		foreach (var variant in variants)
 		{
-			var declared = ContentHash.Normalize(icon.FileContentHashes.GetValueOrDefault(variant.Variant));
+			var declared = ContentHash.Normalize(fileContentHashes.GetValueOrDefault(variant.Variant));
 			if (declared is null || declared == ContentHash.Compute(variant.Bytes))
 			{
 				continue;
 			}
 
 			_logger.Warning("Skipping icon {IconId} from archive: bundled {Variant} fails its declared hash",
-				icon.Id,
+				iconId,
 				variant.Variant);
 			return false;
 		}
@@ -692,10 +761,93 @@ public sealed class PortableAssetManager : IPortableAssetManager
 		return true;
 	}
 
+	private async Task<List<IconEntity>> MissingAppearances(IconEntity existing,
+		PortableIcon portableIcon,
+		Dictionary<Guid, List<PortableIconFile>> filesByIcon,
+		CancellationToken cancellationToken)
+	{
+		if (portableIcon.Appearances is not { Count: > 0 } ||
+			existing.AppearanceOfId is not null ||
+			_iconPackCache.GetPackById(existing.PackId) is not { } pack ||
+			_ownerRegistry.IsReadOnly(pack))
+		{
+			return [];
+		}
+
+		return await ImportAppearances(existing, portableIcon, filesByIcon, cancellationToken);
+	}
+
+	private async Task AddReusedIconAppearances(List<(IconEntity Parent, List<IconEntity> Added)> additions,
+		CancellationToken cancellationToken)
+	{
+		foreach (var pack in additions.GroupBy(addition => addition.Parent.PackId))
+		{
+			await _iconPackCache.AddIcons(pack.Key, pack.SelectMany(addition => addition.Added).ToList());
+		}
+
+		foreach (var (parent, _) in additions)
+		{
+			await _mediator.Publish(new IconUpdatedNotification(parent), cancellationToken);
+		}
+	}
+
+	private async Task<List<IconEntity>> ImportAppearances(IconEntity parent,
+		PortableIcon portableIcon,
+		Dictionary<Guid, List<PortableIconFile>> filesByIcon,
+		CancellationToken cancellationToken)
+	{
+		var keys = _iconPackCache.GetAppearances(parent.Id)
+			.Select(asset => asset.AppearanceTraits is { } traits ? IconAppearanceTraits.ToKey(traits) : string.Empty)
+			.ToHashSet(StringComparer.Ordinal);
+		var added = new List<IconEntity>();
+		foreach (var appearance in portableIcon.Appearances ?? [])
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+			if (keys.Count >= IconAppearanceTraits.MaxAppearancesPerIcon)
+			{
+				break;
+			}
+
+			if (!IconAppearanceTraits.IsValid(appearance.Traits) ||
+				keys.Contains(IconAppearanceTraits.ToKey(appearance.Traits)) ||
+				!filesByIcon.TryGetValue(appearance.Id, out var variants) ||
+				variants.FirstOrDefault(variant => variant.Variant == IconVariants.Master) is not { } master ||
+				!VerifyBundledFiles(appearance.Id, appearance.FileContentHashes, variants))
+			{
+				continue;
+			}
+
+			var assetId = Guid.CreateVersion7();
+			await _iconStorage.WriteVariant(parent.PackId, assetId, IconVariants.Master, master.Bytes, cancellationToken);
+			keys.Add(IconAppearanceTraits.ToKey(appearance.Traits));
+			added.Add(new IconEntity
+			{
+				Id = assetId,
+				PackId = parent.PackId,
+				Name = parent.Name,
+				Width = appearance.Width,
+				Height = appearance.Height,
+				IsAnimated = appearance.IsAnimated,
+				FrameCount = appearance.FrameCount,
+				MasterContentHash = MasterContentHash.Compute(master.Bytes).Value,
+				DeclaredSourceContentHash = ContentHash.Normalize(appearance.SourceContentHash),
+				OriginalFormat = appearance.OriginalFormat,
+				ProcessingState = IconProcessingState.Ready,
+				AppearanceOfId = parent.Id,
+				AppearanceTraits = new Dictionary<string, string>(appearance.Traits, StringComparer.Ordinal),
+				CreatedAt = DateTime.UtcNow,
+				UpdatedAt = DateTime.UtcNow
+			});
+		}
+
+		return added;
+	}
+
 	private async Task<IconEntity?> FindByBackfilledMasterHash(MasterContentHash hash,
 		CancellationToken cancellationToken)
 	{
-		foreach (var candidate in _iconPackCache.GetIconsMissingMasterContentHash())
+		foreach (var candidate in _iconPackCache.GetIconsMissingMasterContentHash()
+			.Where(icon => icon.AppearanceOfId is null))
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 			var bytes = ReadVariant(candidate, IconVariants.Master);

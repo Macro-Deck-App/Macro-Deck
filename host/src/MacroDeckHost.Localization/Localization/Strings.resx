@@ -3649,6 +3649,98 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="IconPacks.AiNotDeclared" xml:space="preserve">
     <value>Not declared</value>
   </data>
+  <data name="IconPacks.Appearances.Add" xml:space="preserve">
+    <value>Add appearance</value>
+  </data>
+  <data name="IconPacks.Appearances.AddFailed" xml:space="preserve">
+    <value>The appearance could not be added.</value>
+  </data>
+  <data name="IconPacks.Appearances.AutoHint" xml:space="preserve">
+    <value>Macro Deck shows the appearance that fits the current theme and motion setting, and the default when none fits.</value>
+  </data>
+  <data name="IconPacks.Appearances.Badge.One" xml:space="preserve">
+    <value>{count} more appearance</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="IconPacks.Appearances.Badge.Other" xml:space="preserve">
+    <value>{count} more appearances</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="IconPacks.Appearances.Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="IconPacks.Appearances.DialogTitle" xml:space="preserve">
+    <value>Appearances of “{name}”</value>
+  </data>
+  <data name="IconPacks.Appearances.Empty" xml:space="preserve">
+    <value>No other appearances yet.</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Animated" xml:space="preserve">
+    <value>Animated</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Custom" xml:space="preserve">
+    <value>Custom ({traits})</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Dark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.DarkAnimated" xml:space="preserve">
+    <value>Dark, animated</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.DarkStatic" xml:space="preserve">
+    <value>Dark, static</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.LightAnimated" xml:space="preserve">
+    <value>Light, animated</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.LightStatic" xml:space="preserve">
+    <value>Light, static</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Static" xml:space="preserve">
+    <value>Static</value>
+  </data>
+  <data name="IconPacks.Appearances.MenuItem" xml:space="preserve">
+    <value>Appearances…</value>
+  </data>
+  <data name="IconPacks.Appearances.Merge" xml:space="preserve">
+    <value>Use an existing icon…</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeConfirm" xml:space="preserve">
+    <value>Use as appearance</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeFailed" xml:space="preserve">
+    <value>The icon could not be used as an appearance.</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeHint" xml:space="preserve">
+    <value>The icon becomes part of “{name}”. Buttons and actions that used it switch to “{name}”.</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeKindLabel" xml:space="preserve">
+    <value>Use as</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeTitle" xml:space="preserve">
+    <value>Use an existing icon</value>
+  </data>
+  <data name="IconPacks.Appearances.PreviewAlt" xml:space="preserve">
+    <value>“{kind}” appearance of “{name}”</value>
+  </data>
+  <data name="IconPacks.Appearances.ReadOnly" xml:space="preserve">
+    <value>This pack is read-only, so its appearances cannot be changed.</value>
+  </data>
+  <data name="IconPacks.Appearances.RemoveConfirmMessage" xml:space="preserve">
+    <value>Remove the “{kind}” appearance from “{name}”? Buttons that use it switch to another appearance.</value>
+  </data>
+  <data name="IconPacks.Appearances.RemoveConfirmTitle" xml:space="preserve">
+    <value>Remove appearance</value>
+  </data>
+  <data name="IconPacks.Appearances.RemoveFailed" xml:space="preserve">
+    <value>The appearance could not be removed.</value>
+  </data>
+  <data name="IconPacks.Appearances.Replace" xml:space="preserve">
+    <value>Replace</value>
+  </data>
   <data name="IconPacks.AuthorFieldLabel" xml:space="preserve">
     <value>Author</value>
   </data>
@@ -3785,8 +3877,14 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="IconPacks.ImportPackAction" xml:space="preserve">
     <value>Import pack…</value>
   </data>
+  <data name="IconPacks.IncludedPackName" xml:space="preserve">
+    <value>Included</value>
+  </data>
   <data name="IconPacks.LoadingIconPacks" xml:space="preserve">
     <value>Loading icon packs…</value>
+  </data>
+  <data name="IconPacks.ManagedByMacroDeck" xml:space="preserve">
+    <value>Included with Macro Deck and updated with it</value>
   </data>
   <data name="IconPacks.ManagedByPlugin" xml:space="preserve">
     <value>Provided by {name} and updated with it</value>
@@ -3887,6 +3985,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="IconPacks.SelectAnIconPackMessage" xml:space="preserve">
     <value>Choose a pack on the left to browse its icons.</value>
+  </data>
+  <data name="IconPacks.SourceBuiltIn" xml:space="preserve">
+    <value>Built-in</value>
   </data>
   <data name="IconPacks.SourcePlugin" xml:space="preserve">
     <value>Plugin</value>
@@ -7221,6 +7322,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Obs.Actions.SetProfile.Name" xml:space="preserve">
     <value>Set Profile</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetSceneCollection.Description" xml:space="preserve">
+    <value>Switches OBS to another scene collection</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetSceneCollection.Name" xml:space="preserve">
+    <value>Set Scene Collection</value>
+  </data>
   <data name="Integrations.Obs.Actions.SetScene.Description" xml:space="preserve">
     <value>Switches the active program scene</value>
   </data>
@@ -7423,6 +7530,18 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Obs.Errors.NoProfileSelected" xml:space="preserve">
     <value>No profile was selected.</value>
   </data>
+  <data name="Integrations.Obs.Errors.NoSceneCollectionSelected" xml:space="preserve">
+    <value>No scene collection was selected.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SceneCollectionLoading" xml:space="preserve">
+    <value>OBS is still loading a scene collection. Try again when it is done.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SceneCollectionNotFound" xml:space="preserve">
+    <value>OBS has no scene collection named {name}.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SceneCollectionSlowToLoad" xml:space="preserve">
+    <value>OBS did not answer in time while loading the scene collection. It usually still finishes the switch.</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoSceneOrSourceSelected" xml:space="preserve">
     <value>No scene or source was selected.</value>
   </data>
@@ -7605,6 +7724,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.Obs.Params.Profile" xml:space="preserve">
     <value>Profile</value>
+  </data>
+  <data name="Integrations.Obs.Params.SceneCollection" xml:space="preserve">
+    <value>Scene Collection</value>
   </data>
   <data name="Integrations.Obs.Params.SaveToVariable" xml:space="preserve">
     <value>Save to variable</value>
@@ -11316,6 +11438,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Widgets.Actions.FontSizeLabel" xml:space="preserve">
     <value>Size</value>
   </data>
+  <data name="Integrations.Widgets.Actions.IconAppearanceDescription" xml:space="preserve">
+    <value>Automatic picks the appearance that suits the screen, Default always shows the icon's own image. If the icon lacks the chosen appearance, one is picked automatically.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.IconAppearanceLabel" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
   <data name="Integrations.Widgets.Actions.IconDescription" xml:space="preserve">
     <value>Leave empty to remove the icon.</value>
   </data>
@@ -11414,6 +11542,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.Widgets.Actions.SetFontName" xml:space="preserve">
     <value>Set Label Font</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconAppearanceDescription" xml:space="preserve">
+    <value>Chooses which appearance of a widget's icon is shown, such as its dark or static version.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconAppearanceName" xml:space="preserve">
+    <value>Set Icon Appearance</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetIconDescription" xml:space="preserve">
     <value>Changes the icon a widget shows.</value>
@@ -12248,6 +12382,40 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Notifications.HttpsNotRunningMessage" xml:space="preserve">
     <value>Macro Deck is reachable over HTTP, but the HTTPS listener did not start. Check the HTTPS port and certificate in Settings &gt; Network.</value>
+  </data>
+  <data name="Notifications.IconImport.CompletedWithWarnings.One" xml:space="preserve">
+    <value>Imported {count} icon into {pack} with warnings</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.IconImport.CompletedWithWarnings.Other" xml:space="preserve">
+    <value>Imported {count} icons into {pack} with warnings</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.IconImport.DefaultPackName" xml:space="preserve">
+    <value>icon pack</value>
+  </data>
+  <data name="Notifications.IconImport.Failed" xml:space="preserve">
+    <value>Failed to import icons into {pack}</value>
+  </data>
+  <data name="Notifications.IconImport.Importing" xml:space="preserve">
+    <value>Importing icons into {pack}</value>
+  </data>
+  <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
+    <value>Nothing there could be imported as an icon.</value>
+  </data>
+  <data name="Notifications.IconImport.NothingImported" xml:space="preserve">
+    <value>Nothing to import into {pack}</value>
+  </data>
+  <data name="Notifications.IconImport.PartlyFailed" xml:space="preserve">
+    <value>{imported} imported, {failed} failed into {pack}</value>
+  </data>
+  <data name="Notifications.IconImport.Skipped.One" xml:space="preserve">
+    <value>{count} file was already in this pack and was skipped.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.IconImport.Skipped.Other" xml:space="preserve">
+    <value>{count} files were already in this pack and were skipped.</value>
+    <comment>[plural]</comment>
   </data>
   <data name="Notifications.InstallationDamagedMessage" xml:space="preserve">
     <value>Some of Macro Deck's files are missing or do not match the installed version. This happens when an update was interrupted, for example when antivirus software held back some of its files. Download the latest version of Macro Deck and install it again. The logs list the affected files.</value>
@@ -16262,6 +16430,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="TemplateBuilder.Filters.Lstrip.Hint" xml:space="preserve">
     <value>Remove whitespace from the start</value>
   </data>
+  <data name="TemplateBuilder.Filters.MathRandom.Hint" xml:space="preserve">
+    <value>Scriban-native: a random whole number from a minimum up to, but not including, a maximum</value>
+  </data>
   <data name="TemplateBuilder.Filters.MathUuid.Hint" xml:space="preserve">
     <value>Scriban-native: generate a random unique id</value>
   </data>
@@ -17106,6 +17277,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="WebClient.Widgets.Countdown.Name" xml:space="preserve">
     <value>Countdown</value>
   </data>
+  <data name="WebClient.Widgets.Gauges.Description" xml:space="preserve">
+    <value>Several numeric variables as compact rings with icons, like a battery overview</value>
+  </data>
+  <data name="WebClient.Widgets.Gauges.Name" xml:space="preserve">
+    <value>Gauges</value>
+  </data>
   <data name="WebClient.Widgets.HistoryGraph.Description" xml:space="preserve">
     <value>Live graph card for a numeric variable (CPU, RAM, GPU…) with a rolling chart</value>
   </data>
@@ -17291,6 +17468,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Widgets.Appearance.Font.Unchanged" xml:space="preserve">
     <value>Unchanged</value>
+  </data>
+  <data name="Widgets.Appearance.Icon.Appearance" xml:space="preserve">
+    <value>Icon appearance</value>
+  </data>
+  <data name="Widgets.Appearance.Icon.AppearanceAutomatic" xml:space="preserve">
+    <value>Automatic</value>
   </data>
   <data name="Widgets.Appearance.Icon.ChangeIcon" xml:space="preserve">
     <value>Change icon</value>
@@ -18115,6 +18298,60 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.GridSettings.WidgetSpacing" xml:space="preserve">
     <value>Widget spacing</value>
   </data>
+  <data name="Widgets.Gauges.AddGauge" xml:space="preserve">
+    <value>Add gauge</value>
+  </data>
+  <data name="Widgets.Gauges.Color" xml:space="preserve">
+    <value>Ring color</value>
+  </data>
+  <data name="Widgets.Gauges.EmptyHint" xml:space="preserve">
+    <value>No gauges yet. Add one in the widget settings.</value>
+  </data>
+  <data name="Widgets.Gauges.FullHint" xml:space="preserve">
+    <value>This widget is full. Remove a gauge to add another.</value>
+  </data>
+  <data name="Widgets.Gauges.GaugeNumber" xml:space="preserve">
+    <value>Gauge {number}</value>
+  </data>
+  <data name="Widgets.Gauges.ListHeading" xml:space="preserve">
+    <value>Gauges</value>
+  </data>
+  <data name="Widgets.Gauges.MaximumHint" xml:space="preserve">
+    <value>0 uses the variable's own maximum, otherwise minimum + 100.</value>
+  </data>
+  <data name="Widgets.Gauges.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Widgets.Gauges.NameHint" xml:space="preserve">
+    <value>Shown below the value. Can include variables.</value>
+  </data>
+  <data name="Widgets.Gauges.NamePlaceholder" xml:space="preserve">
+    <value>e.g. CPU</value>
+  </data>
+  <data name="Widgets.Gauges.StyleArc" xml:space="preserve">
+    <value>Arc</value>
+  </data>
+  <data name="Widgets.Gauges.StyleRing" xml:space="preserve">
+    <value>Ring</value>
+  </data>
+  <data name="Widgets.Gauges.Threshold" xml:space="preserve">
+    <value>Threshold</value>
+  </data>
+  <data name="Widgets.Gauges.Warning" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="Widgets.Gauges.WarningAbove" xml:space="preserve">
+    <value>At or above the threshold</value>
+  </data>
+  <data name="Widgets.Gauges.WarningBelow" xml:space="preserve">
+    <value>At or below the threshold</value>
+  </data>
+  <data name="Widgets.Gauges.WarningHint" xml:space="preserve">
+    <value>The ring turns red when the value reaches the threshold.</value>
+  </data>
+  <data name="Widgets.Gauges.WarningOff" xml:space="preserve">
+    <value>Off</value>
+  </data>
   <data name="Widgets.History.AccentColor" xml:space="preserve">
     <value>Accent color</value>
   </data>
@@ -18327,6 +18564,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Widgets.SamplePreview.ActionButtonLabel" xml:space="preserve">
     <value>Mute</value>
+  </data>
+  <data name="Widgets.SamplePreview.GaugesMemory" xml:space="preserve">
+    <value>Memory</value>
+  </data>
+  <data name="Widgets.SamplePreview.GaugesBattery" xml:space="preserve">
+    <value>Battery</value>
   </data>
   <data name="Widgets.SamplePreview.HistoryGraphSubtitle" xml:space="preserve">
     <value>Sample data</value>
@@ -18608,6 +18851,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.Obs.Variables.CurrentProfile" xml:space="preserve">
     <value>Current Profile</value>
+  </data>
+  <data name="Integrations.Obs.Variables.CurrentSceneCollection" xml:space="preserve">
+    <value>Current Scene Collection</value>
   </data>
   <data name="Integrations.Obs.Variables.CurrentScene" xml:space="preserve">
     <value>Current Scene</value>
@@ -20141,5 +20387,35 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.Obs.Errors.OutputsNeedNewerObs" xml:space="preserve">
     <value>Controlling outputs needs an OBS version with obs-websocket 5.7 or newer.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Name" xml:space="preserve">
+    <value>Set Input Setting</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Description" xml:space="preserve">
+    <value>Changes one setting of an OBS source, for example the text of a text source, the file of an image or media source, or the URL of a browser source.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingLabel" xml:space="preserve">
+    <value>Setting</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingDescription" xml:space="preserve">
+    <value>Name of the setting as OBS stores it, for example text, file, local_file or url. Pick it from the list or type it.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueLabel" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueDescription" xml:space="preserve">
+    <value>The new value. Enter true or false for an on/off setting, a number for a numeric setting and JSON for a setting that holds a group or a list.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NoSettingSelected" xml:space="preserve">
+    <value>No setting was selected.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsBoolean" xml:space="preserve">
+    <value>The setting {setting} expects true or false.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsNumber" xml:space="preserve">
+    <value>The setting {setting} expects a number.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsJson" xml:space="preserve">
+    <value>The setting {setting} expects JSON in the same form as its current value.</value>
   </data>
 </root>

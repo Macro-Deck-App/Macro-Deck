@@ -1,4 +1,5 @@
 using MacroDeck.Sdk.Logging;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OBSWebsocketDotNet;
 using OBSWebsocketDotNet.Communication;
@@ -41,6 +42,7 @@ internal sealed class ObsClient : IObsClient
 		_obs.VirtualcamStateChanged += (_, _) => RaiseStateChanged();
 		_obs.StudioModeStateChanged += (_, _) => RaiseStateChanged();
 		_obs.CurrentProfileChanged += (_, _) => RaiseStateChanged();
+		_obs.CurrentSceneCollectionChanged += (_, _) => RaiseStateChanged();
 
 		_obs.InputMuteStateChanged += (_, args) =>
 			InputMuteChanged?.Invoke(this, new ObsInputMuteChange(args.InputName, args.InputMuted));
@@ -108,11 +110,12 @@ internal sealed class ObsClient : IObsClient
 
 		status = status with
 		{
-			CurrentScene = Try(() => _obs.GetCurrentProgramScene(), status.CurrentScene),
-			CurrentProfile = Try(() => _obs.GetProfileList().CurrentProfileName, status.CurrentProfile)
+			CurrentScene = ReadStatus(() => _obs.GetCurrentProgramScene(), status.CurrentScene),
+			CurrentProfile = ReadStatus(() => _obs.GetProfileList().CurrentProfileName, status.CurrentProfile),
+			CurrentSceneCollection = ReadStatus(() => _obs.GetCurrentSceneCollection(), status.CurrentSceneCollection)
 		};
 
-		var record = Try(() => _obs.GetRecordStatus(), null);
+		var record = ReadStatus(() => _obs.GetRecordStatus(), null);
 		if (record is not null)
 		{
 			status = status with
@@ -124,7 +127,7 @@ internal sealed class ObsClient : IObsClient
 			};
 		}
 
-		var stream = Try(() => _obs.GetStreamStatus(), null);
+		var stream = ReadStatus(() => _obs.GetStreamStatus(), null);
 		if (stream is not null)
 		{
 			status = status with
@@ -137,7 +140,7 @@ internal sealed class ObsClient : IObsClient
 			};
 		}
 
-		var virtualCam = Try(() => _obs.GetVirtualCamStatus(), null);
+		var virtualCam = ReadStatus(() => _obs.GetVirtualCamStatus(), null);
 		if (virtualCam is not null)
 		{
 			status = status with { VirtualCamActive = virtualCam.IsActive };
@@ -145,16 +148,16 @@ internal sealed class ObsClient : IObsClient
 
 		status = status with
 		{
-			ReplayBufferActive = Try(() => _obs.GetReplayBufferStatus(), status.ReplayBufferActive),
-			StudioModeActive = Try(() => _obs.GetStudioModeEnabled(), status.StudioModeActive)
+			ReplayBufferActive = ReadStatus(() => _obs.GetReplayBufferStatus(), status.ReplayBufferActive),
+			StudioModeActive = ReadStatus(() => _obs.GetStudioModeEnabled(), status.StudioModeActive)
 		};
 
 		if (status.StudioModeActive)
 		{
-			status = status with { PreviewScene = Try(() => _obs.GetCurrentPreviewScene(), status.PreviewScene) };
+			status = status with { PreviewScene = ReadStatus(() => _obs.GetCurrentPreviewScene(), status.PreviewScene) };
 		}
 
-		var stats = Try(() => _obs.GetStats(), null);
+		var stats = ReadStatus(() => _obs.GetStats(), null);
 		if (stats is not null)
 		{
 			status = status with
@@ -166,7 +169,7 @@ internal sealed class ObsClient : IObsClient
 			};
 		}
 
-		var video = Try(() => _obs.GetVideoSettings(), null);
+		var video = ReadStatus(() => _obs.GetVideoSettings(), null);
 		if (video is not null && video.FpsDenominator > 0)
 		{
 			status = status with { MaxFps = video.FpsNumerator / (double)video.FpsDenominator };
@@ -221,6 +224,9 @@ internal sealed class ObsClient : IObsClient
 		return profiles?.Profiles.ToList() ?? [];
 	}
 
+	public IReadOnlyList<string> GetSceneCollectionNames()
+		=> Try(() => _obs.GetSceneCollectionList(), null) ?? [];
+
 	public IReadOnlyList<string> GetOutputNames()
 	{
 		var response = TranslateOutputErrors("GetOutputList", string.Empty,
@@ -235,6 +241,9 @@ internal sealed class ObsClient : IObsClient
 	public void SetPreviewScene(string sceneName) => _obs.SetCurrentPreviewScene(sceneName);
 
 	public void SetCurrentProfile(string profileName) => _obs.SetCurrentProfile(profileName);
+
+	public void SetCurrentSceneCollection(string sceneCollectionName)
+		=> Request(() => _obs.SetCurrentSceneCollection(sceneCollectionName));
 
 	public void StartRecord() => _obs.StartRecord();
 
@@ -356,6 +365,24 @@ internal sealed class ObsClient : IObsClient
 	// handles.
 	public string GetInputSettings(string inputName) => _obs.GetInputSettings(inputName).Settings.ToString();
 
+	public string GetInputDefaultSettings(string inputName)
+		=> _obs.GetInputDefaultSettings(_obs.GetInputSettings(inputName).InputKind).ToString();
+
+	public void SetInputSettings(string inputName, string settingsJson)
+		=> Request(() => _obs.SetInputSettings(inputName, ParseSettings(settingsJson), overlay: true));
+
+	// Newtonsoft turns ISO-8601 looking strings into dates by default and writes them back reformatted,
+	// so text a user sends to a text source would not arrive verbatim.
+	internal static JObject ParseSettings(string settingsJson)
+	{
+		using var reader = new JsonTextReader(new StringReader(settingsJson))
+		{
+			DateParseHandling = DateParseHandling.None,
+			FloatParseHandling = FloatParseHandling.Double
+		};
+		return JObject.Load(reader);
+	}
+
 	// obs-websocket-dotnet's ConnectAsync is void and starts the underlying Websocket.Client via a
 	// fire-and-forget StartOrFail(); a refused connection (OBS closed) faults that unobserved task,
 	// which the finalizer rethrows as an UnobservedTaskException. Probing reachability first lets us
@@ -454,6 +481,25 @@ internal sealed class ObsClient : IObsClient
 			call();
 			return true;
 		});
+
+	// obs-websocket answers 207 to every request while OBS starts or loads a scene collection. A status
+	// pieced together from those fallbacks would read as everything stopped, so the whole read is abandoned.
+	private T ReadStatus<T>(Func<T> read, T fallback)
+	{
+		try
+		{
+			return read();
+		}
+		catch (ErrorResponseException ex) when (ex.ErrorCode == ObsRequestException.NotReady)
+		{
+			throw new ObsNotReadyException(ex);
+		}
+		catch (Exception ex)
+		{
+			_logger.Debug(ex, "OBS query failed; using fallback value");
+			return fallback;
+		}
+	}
 
 	private T Try<T>(Func<T> read, T fallback)
 	{

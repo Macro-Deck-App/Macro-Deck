@@ -26,6 +26,8 @@ export interface UiRenderHost {
 
   setPressed?(node: UiNode, pressed: boolean): void;
 
+  flashPressed?(node: UiNode): void;
+
   /**
    * Whether the surface embedding this tree draws the ring for a `ui.button` that is the tree's own
    * root, instead of the button painting it itself.

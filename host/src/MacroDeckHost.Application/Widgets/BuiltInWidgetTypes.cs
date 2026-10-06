@@ -1,5 +1,6 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Widgets;
+using MacroDeckHost.Application.Icons.Included;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Localization;
 
@@ -44,6 +45,7 @@ public static class BuiltInWidgetTypes
 		WidgetTypeIds.Clock => AppStrings.WebClient.Widgets.Clock.Name(),
 		WidgetTypeIds.Countdown => AppStrings.WebClient.Widgets.Countdown.Name(),
 		WidgetTypeIds.Stopwatch => AppStrings.WebClient.Widgets.Stopwatch.Name(),
+		WidgetTypeIds.Gauges => AppStrings.WebClient.Widgets.Gauges.Name(),
 		_ => default,
 	};
 
@@ -57,6 +59,7 @@ public static class BuiltInWidgetTypes
 		WidgetTypeIds.Clock => AppStrings.WebClient.Widgets.Clock.Description(),
 		WidgetTypeIds.Countdown => AppStrings.WebClient.Widgets.Countdown.Description(),
 		WidgetTypeIds.Stopwatch => AppStrings.WebClient.Widgets.Stopwatch.Description(),
+		WidgetTypeIds.Gauges => AppStrings.WebClient.Widgets.Gauges.Description(),
 		_ => default,
 	};
 
@@ -75,6 +78,8 @@ public static class BuiltInWidgetTypes
 		WidgetTypeIds.Clock => """{"style":"digital","showSeconds":true,"showDate":true}""",
 		WidgetTypeIds.Countdown => """{"mode":"fixed","durationHours":0,"durationMinutes":5,"durationSeconds":0}""",
 		WidgetTypeIds.Stopwatch => "{}",
+		WidgetTypeIds.Gauges =>
+			$$"""{"gauges":[{"id":"cpu","variable":"system_cpu_usage_percent","name":"CPU","icon":{"type":"icon-pack","reference":"{{IncludedIconPack.IconId(IncludedIconPack.Cpu)}}"},"max":100},{"id":"ram","variable":"system_ram_usage_percent","name":"RAM","icon":{"type":"icon-pack","reference":"{{IncludedIconPack.IconId(IncludedIconPack.MemoryStick)}}"},"max":100}]}""",
 		_ => "{}",
 	};
 }

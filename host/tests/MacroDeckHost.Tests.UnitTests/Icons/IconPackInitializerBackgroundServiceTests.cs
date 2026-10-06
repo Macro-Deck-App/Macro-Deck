@@ -1,9 +1,15 @@
+using MacroDeckHost.Application.Icons;
+using MacroDeckHost.Application.Icons.Included;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Store.Installation;
 using MacroDeckHost.Application.Store.Model;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure.BackgroundServices;
+using MacroDeckHost.Infrastructure.IconPacks;
+using MacroDeckHost.Infrastructure.Icons;
 using MacroDeckHost.Infrastructure.Store;
+using Mediator;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace MacroDeckHost.Tests.UnitTests.Icons;
@@ -61,6 +67,7 @@ internal sealed class IconPackInitializerBackgroundServiceTests
 		var service = new IconPackInitializerBackgroundService(new StartedHostLifetime(),
 			_harness.Cache,
 			reconciler,
+			new ThrowingIncludedIconPackSync(),
 			_harness.Paths,
 			new StartupReadiness(),
 			_harness.Logger);
@@ -78,6 +85,78 @@ internal sealed class IconPackInitializerBackgroundServiceTests
 			Assert.That(_installations.Find(StoreExtensionKind.IconPack, "com.acme.orphan"), Is.Null);
 			Assert.That(_installations.Find(StoreExtensionKind.IconPack, "com.acme.still-here"), Is.Not.Null);
 		});
+	}
+
+	[Test]
+	public async Task Icon_packs_become_ready_when_the_included_pack_cannot_be_synced_at_all()
+	{
+		var readiness = new StartupReadiness();
+
+		await Run(new ThrowingIncludedIconPackSync(), readiness);
+
+		Assert.That(readiness.WhenIconPacksReady.IsCompletedSuccessfully, Is.True);
+	}
+
+	[Test]
+	public async Task Icon_packs_become_ready_with_the_rest_of_the_included_pack_when_one_icon_fails()
+	{
+		var readiness = new StartupReadiness();
+		var services = new ServiceCollection().AddSingleton<IMediator>(_harness.Mediator).BuildServiceProvider();
+		var processor = new IncludedIconPackSyncTests.CountingProcessor(new ImageSharpIconProcessor(_harness.Logger))
+		{
+			FailFor = IncludedIconPack.Gpu
+		};
+		var assets = new EmbeddedIncludedIconAssets().Load()
+			.Where(asset => asset.Name is IncludedIconPack.Cpu or IncludedIconPack.Gpu or IncludedIconPack.Battery)
+			.ToList();
+		var sync = new IncludedIconPackSync(new IncludedIconPackSyncTests.FakeAssets(assets),
+			_harness.Cache,
+			_harness.Storage,
+			processor,
+			new IconUsageScannerStub(),
+			services.GetRequiredService<IServiceScopeFactory>(),
+			readiness,
+			TimeProvider.System,
+			_harness.Logger);
+
+		await Run(sync, readiness);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(readiness.WhenIconPacksReady.IsCompletedSuccessfully, Is.True);
+			Assert.That(_harness.Cache.GetIconById(IncludedIconPack.IconId(IncludedIconPack.Cpu)), Is.Not.Null);
+			Assert.That(_harness.Cache.GetIconById(IncludedIconPack.IconId(IncludedIconPack.Battery)), Is.Not.Null);
+			Assert.That(_harness.Cache.GetIconById(IncludedIconPack.IconId(IncludedIconPack.Gpu)), Is.Null);
+		});
+	}
+
+	private async Task Run(IIncludedIconPackSync sync, StartupReadiness readiness)
+	{
+		var service = new IconPackInitializerBackgroundService(new StartedHostLifetime(),
+			_harness.Cache,
+			new StoreInstallationReconciler(_installations, _harness.Cache),
+			sync,
+			_harness.Paths,
+			readiness,
+			_harness.Logger);
+
+		await service.StartAsync(CancellationToken.None);
+		if (service.ExecuteTask is { } executeTask)
+		{
+			await executeTask;
+		}
+
+		await service.StopAsync(CancellationToken.None);
+	}
+
+	private sealed class ThrowingIncludedIconPackSync : IIncludedIconPackSync
+	{
+		public Task SyncAsync(CancellationToken cancellationToken) => throw new InvalidOperationException("broken");
+	}
+
+	private sealed class IconUsageScannerStub : IIconUsageScanner
+	{
+		public IReadOnlySet<Guid> FindReferencedIconIds() => new HashSet<Guid>();
 	}
 
 	private sealed class StartedHostLifetime : IHostApplicationLifetime

@@ -4,6 +4,7 @@ using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Widgets.Clock;
+using MacroDeckHost.Widgets.Gauges;
 using MacroDeckHost.Widgets.HistoryGraph;
 using MacroDeckHost.Widgets.MusicPlayer;
 using MacroDeckHost.Widgets.Slider;
@@ -355,6 +356,109 @@ public class WidgetAppearanceJsonTests
 		});
 	}
 
+	[TestCase(WidgetTypeIds.ActionButton)]
+	[TestCase(WidgetTypeIds.Slider)]
+	public void PinningAnAppearance_WritesItOnTheIconAndKeepsTheIcon(string type)
+	{
+		var data = Parse("""{"mode":"momentary","icon":{"type":"icon-pack","reference":"i"}}""");
+
+		var changed = WidgetAppearanceJson.Apply(data,
+			type,
+			new WidgetAppearancePatch { IconAppearance = "colorScheme=dark;motion=static" },
+			_offOnly);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(changed, Is.True);
+			Assert.That(data["icon"]!["type"]!.GetValue<string>(), Is.EqualTo("icon-pack"));
+			Assert.That(data["icon"]!["reference"]!.GetValue<string>(), Is.EqualTo("i"));
+			Assert.That(data["icon"]!["appearance"]!.GetValue<string>(), Is.EqualTo("colorScheme=dark;motion=static"));
+		});
+	}
+
+	[Test]
+	public void ToggleButton_PinsTheIconOfTheSelectedStateOnly()
+	{
+		var data = Parse(
+			"""{"stateMode":true,"states":[{"id":"off","label":"Off","appearance":{"icon":{"type":"icon-pack","reference":"a"}}},{"id":"on","label":"On","appearance":{"icon":{"type":"icon-pack","reference":"b"}}}]}""");
+
+		var changed = WidgetAppearanceJson.Apply(data,
+			WidgetTypeIds.ActionButton,
+			new WidgetAppearancePatch { IconAppearance = "default" },
+			["on"]);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(changed, Is.True);
+			Assert.That(Appearance(data, "on")!["icon"]!["appearance"]!.GetValue<string>(), Is.EqualTo("default"));
+			Assert.That(Appearance(data, "off")!["icon"]!["appearance"], Is.Null);
+		});
+	}
+
+	[Test]
+	public void MomentaryButton_PinningALegacyIcon_HoistsItAndStoresTheTypedShape()
+	{
+		var data = Parse("""{"states":[{"id":"off","label":"Off","appearance":{"iconId":"icon-old"}}]}""");
+
+		WidgetAppearanceJson.Apply(data,
+			WidgetTypeIds.ActionButton,
+			new WidgetAppearancePatch { IconAppearance = "colorScheme=dark" },
+			_offOnly);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(data["icon"]!["reference"]!.GetValue<string>(), Is.EqualTo("icon-old"));
+			Assert.That(data["icon"]!["appearance"]!.GetValue<string>(), Is.EqualTo("colorScheme=dark"));
+			Assert.That(data.ContainsKey("iconId"), Is.False);
+			Assert.That(Appearance(data, "off")!.ContainsKey("iconId"), Is.False);
+		});
+	}
+
+	[TestCase(WidgetTypeIds.ActionButton, """{"mode":"momentary","label":"Mic"}""")]
+	[TestCase(WidgetTypeIds.Clock, """{"icon":{"type":"icon-pack","reference":"i"}}""")]
+	public void PinningAnAppearance_WithoutAnIconToPin_ChangesNothing(string type, string json)
+	{
+		var data = Parse(json);
+		var before = data.ToJsonString();
+
+		var changed = WidgetAppearanceJson.Apply(data,
+			type,
+			new WidgetAppearancePatch { IconAppearance = "colorScheme=dark" },
+			_offOnly);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(changed, Is.False);
+			Assert.That(data.ToJsonString(), Is.EqualTo(before));
+		});
+	}
+
+	[Test]
+	public void ClearingOrEmptyingTheIconAppearance_ReturnsToAutomaticAndKeepsTheIcon()
+	{
+		const string pinned = """{"mode":"momentary","icon":{"type":"icon-pack","reference":"i","appearance":"motion=static"}}""";
+		var cleared = Parse(pinned);
+		var emptied = Parse(pinned);
+
+		var clearChanged = WidgetAppearanceJson.ClearProperty(cleared,
+			WidgetTypeIds.ActionButton,
+			WidgetAppearanceProperty.IconAppearance,
+			"off");
+		WidgetAppearanceJson.Apply(emptied,
+			WidgetTypeIds.ActionButton,
+			new WidgetAppearancePatch { IconAppearance = string.Empty },
+			_offOnly);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(clearChanged, Is.True);
+			Assert.That(cleared["icon"]!.AsObject().ContainsKey("appearance"), Is.False);
+			Assert.That(cleared["icon"]!["reference"]!.GetValue<string>(), Is.EqualTo("i"));
+			Assert.That(emptied["icon"]!.AsObject().ContainsKey("appearance"), Is.False);
+			Assert.That(emptied["icon"]!["reference"]!.GetValue<string>(), Is.EqualTo("i"));
+		});
+	}
+
 	[Test]
 	public void NoMode_DefaultsToMomentaryBehaviour()
 	{
@@ -418,6 +522,8 @@ public class WidgetAppearanceJsonTests
 	[TestCase(WidgetTypeIds.MusicPlayer, "transparent")]
 	[TestCase(WidgetTypeIds.Countdown, "#123456")]
 	[TestCase(WidgetTypeIds.Stopwatch, "transparent")]
+	[TestCase(WidgetTypeIds.Gauges, "#123456")]
+	[TestCase(WidgetTypeIds.Gauges, "transparent")]
 	public void BackgroundColor_IsStoredWhereTheWidgetPaintsItFrom(string type, string color)
 	{
 		var data = Parse("""{"border":{"style":"static"}}""");
@@ -440,6 +546,7 @@ public class WidgetAppearanceJsonTests
 	[TestCase(WidgetTypeIds.MusicPlayer)]
 	[TestCase(WidgetTypeIds.Countdown)]
 	[TestCase(WidgetTypeIds.Stopwatch)]
+	[TestCase(WidgetTypeIds.Gauges)]
 	public void ResettingTheBackgroundColor_ReturnsTheWidgetToItsDefault(string type)
 	{
 		var data = Parse("""{"backgroundColor":"transparent","border":{"style":"static"}}""");
@@ -661,6 +768,7 @@ public class WidgetAppearanceJsonTests
 			WidgetTypeIds.HistoryGraph => HistoryGraphWidgetData.Parse(Element(data)).BackgroundColor,
 			WidgetTypeIds.MusicPlayer => MusicPlayerWidgetData.Parse(Element(data)).BackgroundColor,
 			WidgetTypeIds.Countdown or WidgetTypeIds.Stopwatch => TimerWidgetSettings.Parse(Element(data)).BackgroundColor,
+			WidgetTypeIds.Gauges => GaugesWidgetData.Parse(Element(data)).BackgroundColor,
 			_ => throw new ArgumentOutOfRangeException(nameof(type)),
 		};
 }
