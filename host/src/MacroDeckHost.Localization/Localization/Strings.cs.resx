@@ -19531,4 +19531,49 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Shell.OutdatedUi.Versions" xml:space="preserve">
     <value>Sestavení rozhraní: {device} · Sestavení Macro Deck: {computer}</value>
   </data>
+  <data name="Integrations.Obs.Actions.StartOutput.Name" xml:space="preserve">
+    <value>Spustit výstup</value>
+  </data>
+  <data name="Integrations.Obs.Actions.StartOutput.Description" xml:space="preserve">
+    <value>Spustí výstup OBS podle názvu, včetně výstupů přidaných pluginy</value>
+  </data>
+  <data name="Integrations.Obs.Actions.StopOutput.Name" xml:space="preserve">
+    <value>Zastavit výstup</value>
+  </data>
+  <data name="Integrations.Obs.Actions.StopOutput.Description" xml:space="preserve">
+    <value>Zastaví výstup OBS podle názvu, včetně výstupů přidaných pluginy</value>
+  </data>
+  <data name="Integrations.Obs.Actions.ToggleOutput.Name" xml:space="preserve">
+    <value>Přepnout výstup</value>
+  </data>
+  <data name="Integrations.Obs.Actions.ToggleOutput.Description" xml:space="preserve">
+    <value>Spustí nebo zastaví výstup OBS podle názvu, včetně výstupů přidaných pluginy</value>
+  </data>
+  <data name="Integrations.Obs.Actions.GetOutputState.Name" xml:space="preserve">
+    <value>Zjistit stav výstupu</value>
+  </data>
+  <data name="Integrations.Obs.Actions.GetOutputState.Description" xml:space="preserve">
+    <value>Zapíše do proměnné, zda je výstup OBS aktivní</value>
+  </data>
+  <data name="Integrations.Obs.Actions.GetOutputState.VariableDescription" xml:space="preserve">
+    <value>Název proměnné, do které se zapíše stav aktivity</value>
+  </data>
+  <data name="Integrations.Obs.Params.Output" xml:space="preserve">
+    <value>Výstup</value>
+  </data>
+  <data name="Integrations.Obs.Params.OutputUnavailable" xml:space="preserve">
+    <value>{name} (nedostupné)</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NoOutputSelected" xml:space="preserve">
+    <value>Nebyl vybrán žádný výstup.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.OutputNotFound" xml:space="preserve">
+    <value>Výstup „{output}“ neexistuje.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.OutputCommandFailed" xml:space="preserve">
+    <value>OBS nemohl změnit výstup „{output}“.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.OutputsNeedNewerObs" xml:space="preserve">
+    <value>Ovládání výstupů vyžaduje verzi OBS s obs-websocket 5.7 nebo novějším.</value>
+  </data>
 </root>

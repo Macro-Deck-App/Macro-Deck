@@ -43,6 +43,12 @@ internal sealed class FakeObsClient : IObsClient
 
 	public Dictionary<string, IReadOnlyList<string>> SourceFilters { get; } = new(StringComparer.Ordinal);
 
+	public IReadOnlyList<string> OutputNames { get; set; } = [];
+
+	public Dictionary<string, bool> OutputStates { get; } = new(StringComparer.Ordinal);
+
+	public Exception? OutputFailure { get; set; }
+
 	public Dictionary<string, bool> FilterStates { get; } = new(StringComparer.Ordinal);
 
 	public Dictionary<string, string> InputAudioMonitorTypes { get; } = new(StringComparer.Ordinal);
@@ -249,6 +255,39 @@ internal sealed class FakeObsClient : IObsClient
 		Calls.Add($"ToggleSourceFilterEnabled:{sourceName}:{filterName}");
 	}
 
+	public IReadOnlyList<string> GetOutputNames()
+	{
+		Calls.Add("GetOutputNames");
+		return OutputFailure is null ? OutputNames : throw OutputFailure;
+	}
+
+	public void StartOutput(string outputName)
+	{
+		EnsureOutput(outputName);
+		OutputStates[outputName] = true;
+		Calls.Add($"StartOutput:{outputName}");
+	}
+
+	public void StopOutput(string outputName)
+	{
+		EnsureOutput(outputName);
+		OutputStates[outputName] = false;
+		Calls.Add($"StopOutput:{outputName}");
+	}
+
+	public void ToggleOutput(string outputName)
+	{
+		EnsureOutput(outputName);
+		OutputStates[outputName] = !OutputStates.GetValueOrDefault(outputName, false);
+		Calls.Add($"ToggleOutput:{outputName}");
+	}
+
+	public bool GetOutputActive(string outputName)
+	{
+		EnsureOutput(outputName);
+		return OutputStates.GetValueOrDefault(outputName, false);
+	}
+
 	public void SetStudioMode(bool enabled) => Calls.Add($"SetStudioMode:{enabled}");
 
 	public string GetInputAudioMonitorType(string inputName)
@@ -292,6 +331,19 @@ internal sealed class FakeObsClient : IObsClient
 	private void CountRead(string key) => Reads[key] = Reads.GetValueOrDefault(key) + 1;
 
 	private static string FilterKey(string sourceName, string filterName) => $"{sourceName}::{filterName}";
+
+	private void EnsureOutput(string outputName)
+	{
+		if (OutputFailure is not null)
+		{
+			throw OutputFailure;
+		}
+
+		if (!OutputNames.Contains(outputName))
+		{
+			throw new ObsOutputNotFoundException(outputName);
+		}
+	}
 
 	private void EnsureExists(params string[] names)
 	{
