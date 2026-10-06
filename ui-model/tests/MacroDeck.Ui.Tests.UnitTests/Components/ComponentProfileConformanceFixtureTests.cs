@@ -435,6 +435,13 @@ public class ComponentProfileConformanceFixtureTests
 			Assert.That(boundaryLabel.Properties["fontFace"].GetString(), Is.EqualTo("mono-14"));
 			Assert.That(pressLabel.Properties.ContainsKey("fontFace"), Is.False);
 
+			Assert.That(pressLabel.Properties["shadow"].GetBoolean(), Is.False);
+			Assert.That(pressLabel.Properties["strokeColor"].GetString(), Is.EqualTo("#000000"));
+			Assert.That(pressLabel.Properties["strokeWidth"].GetRawText(), Is.EqualTo("""{"basis":0.01}"""));
+			Assert.That(title.Properties.ContainsKey("shadow"), Is.False);
+			Assert.That(title.Properties.ContainsKey("strokeColor"), Is.False);
+			Assert.That(title.Properties.ContainsKey("strokeWidth"), Is.False);
+
 			// Label position and alignment in both extremes, so a renderer conflating the main and
 			// cross axis fails on at least one of them.
 			Assert.That(full.Properties["justify"].GetString(), Is.EqualTo(UiComponentJustify.Start));

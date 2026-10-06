@@ -133,6 +133,10 @@
   line-height: 1.2;
 }
 
+.widget-button .widget-text.widget-text-no-shadow {
+  text-shadow: none;
+}
+
 .widget-button-artwork {
   position: absolute;
   top: 0;

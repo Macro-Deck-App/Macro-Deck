@@ -17637,11 +17637,26 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Beschriftung</value>
   </data>
+  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
+    <value>Rahmenfarbe des Textfelds</value>
+  </data>
+  <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
+    <value>Rahmenbreite des Textfelds (%)</value>
+  </data>
   <data name="Widgets.Editor.LabelBoxColor" xml:space="preserve">
     <value>Farbe des Textfelds</value>
   </data>
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Textfarbe</value>
+  </data>
+  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
+    <value>Konturfarbe</value>
+  </data>
+  <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
+    <value>Konturbreite (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelShadow" xml:space="preserve">
+    <value>Textschatten</value>
   </data>
   <data name="Widgets.Editor.Live" xml:space="preserve">
     <value>live</value>

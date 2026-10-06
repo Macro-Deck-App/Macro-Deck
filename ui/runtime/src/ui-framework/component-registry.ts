@@ -57,6 +57,8 @@ export interface UiComponentContext<TState = unknown> {
 
   isDisabled(): boolean;
 
+  insideButton(): boolean;
+
   repaint(): void;
 
   state: TState;

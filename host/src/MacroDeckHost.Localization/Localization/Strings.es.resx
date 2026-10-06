@@ -17639,11 +17639,26 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Etiqueta</value>
   </data>
+  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
+    <value>Color del borde del recuadro</value>
+  </data>
+  <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
+    <value>Grosor del borde del recuadro (%)</value>
+  </data>
   <data name="Widgets.Editor.LabelBoxColor" xml:space="preserve">
     <value>Color del recuadro de la etiqueta</value>
   </data>
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Color de la etiqueta</value>
+  </data>
+  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
+    <value>Color del contorno de la etiqueta</value>
+  </data>
+  <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
+    <value>Grosor del contorno (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelShadow" xml:space="preserve">
+    <value>Sombra de la etiqueta</value>
   </data>
   <data name="Widgets.Editor.Live" xml:space="preserve">
     <value>en vivo</value>

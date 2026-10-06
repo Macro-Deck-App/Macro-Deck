@@ -17640,11 +17640,26 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Label</value>
   </data>
+  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
+    <value>Label Box Border Color</value>
+  </data>
+  <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
+    <value>Label Box Border Width (%)</value>
+  </data>
   <data name="Widgets.Editor.LabelBoxColor" xml:space="preserve">
     <value>Label Box Color</value>
   </data>
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Label Color</value>
+  </data>
+  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
+    <value>Label Outline Color</value>
+  </data>
+  <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
+    <value>Label Outline Width (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelShadow" xml:space="preserve">
+    <value>Label Shadow</value>
   </data>
   <data name="Widgets.Editor.Live" xml:space="preserve">
     <value>live</value>

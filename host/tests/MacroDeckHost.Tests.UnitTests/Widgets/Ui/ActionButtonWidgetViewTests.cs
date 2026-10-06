@@ -105,6 +105,90 @@ public class ActionButtonWidgetViewTests
 	}
 
 	[Test]
+	public void A_default_label_leaves_shadow_and_outline_to_the_reader()
+	{
+		var host = Render(new { });
+		var label = host.ById("actionButton.labelRow.labelBox.label");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(label.HasProperty("shadow"), Is.False);
+			Assert.That(label.HasProperty("strokeColor"), Is.False);
+			Assert.That(label.HasProperty("strokeWidth"), Is.False);
+		});
+	}
+
+	[Test]
+	public void Turning_the_label_shadow_off_tells_the_reader_to_draw_none()
+	{
+		var host = Render(new { labelShadow = false });
+
+		Assert.That(host.ById("actionButton.labelRow.labelBox.label").Flag("shadow"), Is.False);
+	}
+
+	[Test]
+	public void A_label_outline_reaches_the_label_as_a_basis_fraction()
+	{
+		var host = Render(new { labelOutlineColor = "#FF0000", labelOutlineWidth = 2.5 });
+		var label = host.ById("actionButton.labelRow.labelBox.label");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(label.Text("strokeColor"), Is.EqualTo("#ff0000"));
+			Assert.That(label.Property("strokeWidth")!.Value.GetProperty("basis").GetDouble(), Is.EqualTo(0.025));
+		});
+	}
+
+	[Test]
+	public void A_label_box_border_alone_draws_an_unfilled_box_whose_padding_keeps_the_border_off_the_text()
+	{
+		var bordered = Render(new { labelBoxBorderColor = "#00ff00", labelBoxBorderWidth = 2 });
+		var filledOnly = Render(new { labelBoxColor = "#ffaa00" });
+		var box = bordered.ById("actionButton.labelRow.labelBox");
+		var modifiers = box.Property("modifiers")!.Value;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(BoxBackground(box), Is.Null);
+			Assert.That(box.HasProperty("fill"), Is.False);
+			Assert.That(modifiers.GetProperty("borderColor").GetString(), Is.EqualTo("#00ff00"));
+			Assert.That(modifiers.GetProperty("borderWidth").GetProperty("basis").GetDouble(), Is.EqualTo(0.02));
+			Assert.That(BoxPadding(box),
+				Is.EqualTo(BoxPadding(filledOnly.ById("actionButton.labelRow.labelBox")) + 0.02).Within(1e-9));
+			Assert.That(bordered.ById("actionButton.labelRow").Text("justify"), Is.EqualTo(UiComponentJustify.Center));
+		});
+	}
+
+	[Test]
+	public void A_state_label_style_wins_and_an_unset_state_falls_back_to_the_root_style()
+	{
+		var data = new
+		{
+			stateMode = true,
+			labelShadow = false,
+			labelOutlineColor = "#111111",
+			labelOutlineWidth = 1,
+			states = new object[]
+			{
+				new { id = "a", appearance = new { labelShadow = true, labelOutlineWidth = 3 } },
+				new { id = "b", appearance = new { label = "B" } },
+			},
+		};
+
+		var stateA = Render(data, activeStateId: "a").ById("actionButton.labelRow.labelBox.label");
+		var stateB = Render(data, activeStateId: "b").ById("actionButton.labelRow.labelBox.label");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(stateA.HasProperty("shadow"), Is.False);
+			Assert.That(stateA.Text("strokeColor"), Is.EqualTo("#111111"));
+			Assert.That(stateA.Property("strokeWidth")!.Value.GetProperty("basis").GetDouble(), Is.EqualTo(0.03));
+			Assert.That(stateB.Flag("shadow"), Is.False);
+			Assert.That(stateB.Property("strokeWidth")!.Value.GetProperty("basis").GetDouble(), Is.EqualTo(0.01));
+		});
+	}
+
+	[Test]
 	public void The_label_wraps_with_no_line_cap_matching_the_retired_component()
 	{
 		// The retired ActionButtonWidgetComponent's label CSS was `white-space: pre-wrap;
@@ -430,6 +514,9 @@ public class ActionButtonWidgetViewTests
 	}
 
 	private static UiResource Icon() => new() { ResourceId = "res-1" };
+
+	private static double BoxPadding(UiTestNode box)
+		=> box.Property("padding")!.Value.GetProperty("basis").GetDouble();
 
 	private static string? BoxBackground(UiTestNode box)
 		=> box.Property("modifiers") is { ValueKind: JsonValueKind.Object } modifiers &&

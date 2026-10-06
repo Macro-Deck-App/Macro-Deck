@@ -1,6 +1,6 @@
 import { UiNode } from '../ui-framework/ui-node.interface';
-import { nodeNumber, nodeString } from '../ui-framework/node-properties.util';
-import { nodeLength, resolveLength } from '../ui-framework/length';
+import { nodeBoolean, nodeNumber, nodeString } from '../ui-framework/node-properties.util';
+import { nodeHexColor, nodeLength, resolveLength } from '../ui-framework/length';
 import { UiComponentProperties } from './component-properties';
 import {
   textAlign,
@@ -14,6 +14,9 @@ import type { UiComponentContext } from '../ui-framework/component-registry';
 import { textFit } from '../render/text-fit';
 import { px } from './px.util';
 import { forgetTextSpans, paintTextSpans, textSpansSignature, UiTextSpanRun } from './text-spans';
+import { textOutlineFilterId } from './text-outline';
+
+const MAX_OUTLINE_OF_BASIS = 0.1;
 
 export function paintTextCommon<TState>(
   node: UiNode,
@@ -28,11 +31,33 @@ export function paintTextCommon<TState>(
   const faceId = nodeString(node, UiComponentProperties.FontFace);
   const digits = textDigits(node);
 
+  const outlineColor = nodeHexColor(node, UiComponentProperties.StrokeColor);
+  const outlineWidth = resolveLength(nodeLength(node, UiComponentProperties.StrokeWidth), ctx.basis, null);
+  const outline = outlineColor !== undefined && outlineWidth !== undefined && outlineWidth > 0 && isFinite(outlineWidth)
+    ? Math.min(outlineWidth, ctx.basis * MAX_OUTLINE_OF_BASIS)
+    : null;
+  const shadowOff = nodeBoolean(node, UiComponentProperties.Shadow) === false;
+
   ctx.setClassName(element, extraClass === null ? 'widget-text' : `widget-text ${extraClass}`);
   ctx.setClass(element, 'widget-text-clamp', maxLines > 1);
   ctx.setClass(element, 'widget-text-tabular', digits !== null);
+  ctx.setClass(element, 'widget-text-no-shadow', shadowOff);
+  ctx.setClass(element, 'widget-text-outlined', outline !== null);
 
-  ctx.setStyle(element, 'width', px(ctx.box.width));
+  ctx.setStyle(element, 'width', px(ctx.box.width === null ? null : ctx.box.width + 2 * (outline ?? 0)));
+  ctx.setStyle(element, 'text-shadow', outline === null ? null : 'none');
+  ctx.setStyle(element, 'filter', outline === null
+    ? null
+    : `url(#${textOutlineFilterId(element.ownerDocument, outlineColor!, outline, !shadowOff && ctx.insideButton())})`);
+  ctx.setStyle(element, 'padding-left', outline === null ? null : px(outline));
+  ctx.setStyle(element, 'padding-right', outline === null ? null : px(outline));
+  ctx.setStyle(element, 'margin-left', outline === null ? null : px(-outline));
+  ctx.setStyle(element, 'margin-right', outline === null ? null : px(-outline));
+  ctx.setStyle(element, 'padding-top', outline === null ? null : `calc(0.2em + ${px(outline)})`);
+  ctx.setStyle(element, 'padding-bottom', outline === null ? null : `calc(0.2em + ${px(outline)})`);
+  ctx.setStyle(element, 'margin-top', outline === null ? null : `calc(-0.2em - ${px(outline)})`);
+  ctx.setStyle(element, 'margin-bottom', outline === null ? null : `calc(-0.2em - ${px(outline)})`);
+  ctx.setStyle(element, 'max-height', outline === null ? null : `calc(100% + 0.4em + ${px(2 * outline)})`);
   ctx.setStyle(element, 'font-weight', String(textFontWeight(node)));
   ctx.setStyle(element, 'color', textFillColor(node));
   ctx.setStyle(element, 'text-align', textAlign(node));

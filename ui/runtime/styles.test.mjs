@@ -485,3 +485,26 @@ test('a button that fades its background stops fading when the viewer asks for l
   assert.ok(stilled.includes('.widget-button'),
     'a button eases its background colour, so the reduce query has to still it like every other transition');
 });
+
+test('a button label keeps the legibility shadow unless its node turns it off', async () => {
+  const { JSDOM } = await import('jsdom');
+  const renderer = readFileSync(path.join(HERE, 'styles', 'renderer.css'), 'utf8');
+  const { window } = new JSDOM(`<style>${renderer}</style><div class="widget-button">
+    <div id="plain" class="widget-text"></div>
+    <div id="off" class="widget-text widget-text-no-shadow"></div>
+  </div>`);
+  const style = id => window.getComputedStyle(window.document.getElementById(id));
+
+  assert.match(style('plain').textShadow, /rgba\(0, 0, 0, 0\.5\)/);
+  assert.doesNotMatch(style('off').textShadow, /0\.5/);
+});
+
+test('an outlined label draws the same legibility shadow inside its filter as the stylesheet draws', () => {
+  const renderer = readFileSync(path.join(HERE, 'styles', 'renderer.css'), 'utf8');
+  const outline = readFileSync(path.join(HERE, 'src', 'ui-components', 'text-outline.ts'), 'utf8');
+  const shadow = renderer.match(/\.widget-button \.widget-text \{[^}]*text-shadow:\s*0 (\d+)px (\d+)px rgba\(0, 0, 0, ([\d.]+)\)/);
+  const mirrored = outline.match(/LEGIBILITY_SHADOW = \{ offsetY: (\d+), blur: (\d+), opacity: ([\d.]+) \}/);
+  assert.ok(shadow, 'renderer.css declares no button text-shadow');
+  assert.ok(mirrored, 'text-outline.ts declares no LEGIBILITY_SHADOW');
+  assert.deepEqual(mirrored.slice(1).map(Number), shadow.slice(1).map(Number));
+});

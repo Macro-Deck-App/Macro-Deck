@@ -17639,11 +17639,26 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Popisek</value>
   </data>
+  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
+    <value>Barva okraje pozadí popisku</value>
+  </data>
+  <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
+    <value>Šířka okraje pozadí popisku (%)</value>
+  </data>
   <data name="Widgets.Editor.LabelBoxColor" xml:space="preserve">
     <value>Barva pozadí popisku</value>
   </data>
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Barva popisku</value>
+  </data>
+  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
+    <value>Barva obrysu popisku</value>
+  </data>
+  <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
+    <value>Šířka obrysu (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelShadow" xml:space="preserve">
+    <value>Stín popisku</value>
   </data>
   <data name="Widgets.Editor.Live" xml:space="preserve">
     <value>živě</value>

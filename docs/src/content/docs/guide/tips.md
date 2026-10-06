@@ -30,6 +30,10 @@ Unlock the deck to edit it, lock it to press buttons.
 - **Let the folder background show through:** choose the checkered **Transparent** swatch. The tile loses
   its own background and shadow, the border stays.
 - **Set Background Color** changes it from an action, and **Reset** there clears it again.
+- **Style an Action Button's label:** in the **Label** tab, turn off **Label Shadow**, give the text an
+  outline with **Label Outline Color** and its width, or frame it with **Label Box Border Color** and its
+  width. Each state can have its own. Hardware devices and the Companion app keep the default label look for
+  now.
 - **Hide empty cells:** set **Empty cells** to **Transparent** in the profile's settings, and the running
   deck shows only its widgets on the folder background. A folder's grid settings can override it with
   **Visible** or **Transparent**; **Inherited** takes the value from the parent folder, then the profile.
