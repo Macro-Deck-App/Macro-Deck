@@ -176,6 +176,45 @@ describe('shared-ui-node every configuration primitive', () => {
     expect(rendered.events).toEqual([{ nodeId: 'n', name: 'change', data: 'full' }]);
   });
 
+  it('draws a choice whose options name a font face as a searchable list that clears back to the empty option', async () => {
+    const rendered = await renderTree({
+      id: 'n',
+      type: 'choice',
+      properties: {
+        value: 'Inter',
+        events: ['change'],
+        options: [
+          { value: '', label: 'Inherited' },
+          { value: 'Inter', label: 'Inter', metadata: { fontFaceId: 'inter-400-5-upright' } },
+          { value: 'Acme', label: 'Acme', metadata: { fontFaceId: 'acme-400-5-upright' } },
+        ],
+      },
+    });
+    const host = el(rendered);
+    const input = host.querySelector<HTMLInputElement>('shared-combobox .cb-input');
+
+    expect(host.querySelector('shared-select')).toBeNull();
+    expect(input?.value).toBe('Inter');
+
+    host.querySelector<HTMLButtonElement>('shared-combobox .cb-clear')!.click();
+    await tick(rendered);
+
+    expect(rendered.events).toEqual([{ nodeId: 'n', name: 'change', data: '' }]);
+  });
+
+  it('offers no clear button on a font choice without an empty option to clear to', async () => {
+    const rendered = await renderTree({
+      id: 'n',
+      type: 'choice',
+      properties: {
+        value: 'Inter',
+        options: [{ value: 'Inter', label: 'Inter', metadata: { fontFaceId: 'inter-400-5-upright' } }],
+      },
+    });
+
+    expect(el(rendered).querySelector('shared-combobox .cb-clear')).toBeNull();
+  });
+
   // Weather's forecast length is the case: seven values that each read as a phrase, so the field is a
   // list to pick from - while the value it stores stays the number the schema declares.
   it('draws a number carrying options as a select, and still emits a number', async () => {

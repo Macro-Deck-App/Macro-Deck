@@ -46,6 +46,11 @@ public class ActionButtonWidgetConfigTests
 		host.ById("labelPosition").Change("top");
 		host.ById("labelColor").Change("#111111");
 		host.ById("labelBoxColor").Change("#444444");
+		host.ById("labelShadow").Change(false);
+		host.ById("labelOutlineColor").Change("#555555");
+		host.ById("labelOutlineWidth").Change(2.5d);
+		host.ById("labelBoxBorderColor").Change("#666666");
+		host.ById("labelBoxBorderWidth").Change(5d);
 		host.ById("backgroundColor").Change("#222222");
 		host.ById("icon").Change(new { type = "icon-pack", reference = "bolt" });
 		host.ById("iconDisplay")
@@ -67,6 +72,11 @@ public class ActionButtonWidgetConfigTests
 			Assert.That(composed.GetProperty("labelPosition").GetString(), Is.EqualTo("top"));
 			Assert.That(composed.GetProperty("labelColor").GetString(), Is.EqualTo("#111111"));
 			Assert.That(composed.GetProperty("labelBoxColor").GetString(), Is.EqualTo("#444444"));
+			Assert.That(composed.GetProperty("labelShadow").GetBoolean(), Is.False);
+			Assert.That(composed.GetProperty("labelOutlineColor").GetString(), Is.EqualTo("#555555"));
+			Assert.That(composed.GetProperty("labelOutlineWidth").GetDouble(), Is.EqualTo(2.5));
+			Assert.That(composed.GetProperty("labelBoxBorderColor").GetString(), Is.EqualTo("#666666"));
+			Assert.That(composed.GetProperty("labelBoxBorderWidth").GetDouble(), Is.EqualTo(5));
 			Assert.That(composed.GetProperty("backgroundColor").GetString(), Is.EqualTo("#222222"));
 			Assert.That(composed.GetProperty("icon").GetProperty("reference").GetString(), Is.EqualTo("bolt"));
 			Assert.That(composed.GetProperty("iconDisplay").GetProperty("zoom").GetDouble(), Is.EqualTo(150));
@@ -636,6 +646,7 @@ public class ActionButtonWidgetConfigTests
 				Is.SupersetOf(new[]
 				{
 					"label", "fontFaceId", "fontSize", "textAlign", "labelPosition", "labelColor", "labelBoxColor",
+					"labelShadow", "labelOutlineColor", "labelOutlineWidth", "labelBoxBorderColor", "labelBoxBorderWidth",
 				}));
 			Assert.That(labelIds, Has.No.Member("backgroundColor"));
 			Assert.That(labelIds, Has.No.Member("icon"));
@@ -797,6 +808,7 @@ public class ActionButtonWidgetConfigTests
 			Is.EquivalentTo(new[]
 			{
 				"label", "fontFaceId", "fontSize", "textAlign", "labelPosition", "labelColor", "labelBoxColor",
+				"labelShadow", "labelOutlineColor", "labelOutlineWidth", "labelBoxBorderColor", "labelBoxBorderWidth",
 				"backgroundColor", "icon",
 				"iconDisplay", "iconColor", "border",
 			}),
@@ -841,6 +853,24 @@ public class ActionButtonWidgetConfigTests
 				.Select(o => o.GetProperty("value").GetString()).ToList();
 			Assert.That(familyNames, Is.EquivalentTo(new[] { "", "Inter", "Acme" }));
 		});
+	}
+
+	[Test]
+	public void Each_family_option_names_its_regular_face_so_the_picker_can_draw_it_in_that_font()
+	{
+		var host = Render(new { fontFaceId = "inter-400" },
+			fonts: new FakeFontCatalog(_interBold, _interRegular, _acmeRegular));
+
+		var previews = host.ById("fontFamily").Property(UiConfigProperties.Options)!.Value.EnumerateArray()
+			.Where(o => o.GetProperty("value").GetString() != "")
+			.ToDictionary(o => o.GetProperty("value").GetString()!,
+				o => o.GetProperty("metadata").GetProperty("fontFaceId").GetString());
+
+		Assert.That(previews, Is.EquivalentTo(new Dictionary<string, string?>
+		{
+			["Inter"] = "inter-400",
+			["Acme"] = "acme-400"
+		}));
 	}
 
 	[Test]
@@ -1103,6 +1133,65 @@ public class ActionButtonWidgetConfigTests
 	}
 
 	[Test]
+	public void A_new_button_starts_with_the_shadow_on_and_offers_outline_widths_up_to_three_and_box_borders_up_to_five()
+	{
+		var host = Render(new { });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.ById("labelShadow").Flag(UiConfigProperties.Value), Is.True);
+			Assert.That(host.ById("labelOutlineColor").Flag(UiConfigProperties.SupportsReset), Is.True);
+			Assert.That(host.ById("labelBoxBorderColor").Flag(UiConfigProperties.SupportsReset), Is.True);
+			Assert.That(host.ById("labelOutlineWidth").Number(UiConfigProperties.Max), Is.EqualTo(3));
+			Assert.That(host.ById("labelBoxBorderWidth").Number(UiConfigProperties.Max), Is.EqualTo(5));
+			Assert.That(host.ById("labelOutlineWidth").Flag(UiConfigProperties.Disabled), Is.Not.True);
+		});
+	}
+
+	[Test]
+	public void A_state_shows_the_root_label_style_it_inherits_until_it_overrides_one_part_of_it()
+	{
+		var host = Render(new
+		{
+			stateMode = true,
+			labelShadow = false,
+			labelOutlineColor = "#111111",
+			labelOutlineWidth = 2d,
+			states = new object[] { new { id = "off", label = "Off" }, new { id = "on", label = "On" } },
+		});
+
+		host.ById("activeStateId").Change("on");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.ById("states.on.appearance.labelShadow").Flag(UiConfigProperties.Value), Is.False);
+			Assert.That(host.ById("states.on.appearance.labelOutlineWidth").Number(UiConfigProperties.Value),
+				Is.EqualTo(2));
+		});
+
+		host.ById("states.on.appearance.labelOutlineWidth").Change(2.5d);
+
+		var on = ReadStates(host).First(s => Id(s) == "on").GetProperty("appearance");
+		var data = JsonSerializer.SerializeToElement(new
+		{
+			stateMode = true,
+			labelOutlineColor = "#111111",
+			labelOutlineWidth = 2d,
+			states = new object[] { new { id = "on", appearance = JsonNode.Parse(on.GetRawText()) } },
+		});
+		var resolved = ActionButtonWidgetData.Parse(data).Resolve("on");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(on.GetProperty("labelOutlineWidth").GetDouble(), Is.EqualTo(2.5));
+			Assert.That(on.TryGetProperty("labelOutlineColor", out _), Is.False);
+			Assert.That(resolved.LabelOutlineColor, Is.EqualTo("#111111"));
+			Assert.That(resolved.LabelOutlineWidth, Is.EqualTo(2.5));
+		});
+		AssertValidatesAgainstSchema(ComposeRootWithStates(host));
+	}
+
+	[Test]
 	public void Background_and_border_colours_support_reset_to_unset()
 	{
 		var host = Render(new { backgroundColor = "#123456", border = new { style = "static", color = "#654321" } });
@@ -1280,6 +1369,11 @@ public class ActionButtonWidgetConfigTests
 			["labelPosition"] = host.ById("labelPosition").Text(UiConfigProperties.Value),
 			["labelColor"] = host.ById("labelColor").Text(UiConfigProperties.Value),
 			["labelBoxColor"] = host.ById("labelBoxColor").Text(UiConfigProperties.Value),
+			["labelShadow"] = host.ById("labelShadow").Flag(UiConfigProperties.Value),
+			["labelOutlineColor"] = host.ById("labelOutlineColor").Text(UiConfigProperties.Value),
+			["labelOutlineWidth"] = host.ById("labelOutlineWidth").Number(UiConfigProperties.Value),
+			["labelBoxBorderColor"] = host.ById("labelBoxBorderColor").Text(UiConfigProperties.Value),
+			["labelBoxBorderWidth"] = host.ById("labelBoxBorderWidth").Number(UiConfigProperties.Value),
 			["backgroundColor"] = host.ById("backgroundColor").Text(UiConfigProperties.Value),
 			["icon"] = host.ById("icon").Property(UiConfigProperties.Value),
 			["iconDisplay"] = host.FindById("iconDisplay")?.Property(UiConfigProperties.Value),

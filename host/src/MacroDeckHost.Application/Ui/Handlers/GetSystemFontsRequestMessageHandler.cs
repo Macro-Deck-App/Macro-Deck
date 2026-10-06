@@ -28,7 +28,8 @@ public class GetSystemFontsRequestMessageHandler
 				Width = face.Width,
 				Slant = face.Slant,
 				StyleName = face.StyleName,
-				RemoteRenderable = face.RemoteRenderable
+				RemoteRenderable = face.RemoteRenderable,
+				UserImported = face.UserImported
 			}));
 		return ValueTask.FromResult(response);
 	}

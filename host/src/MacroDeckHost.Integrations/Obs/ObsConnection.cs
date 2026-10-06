@@ -324,6 +324,15 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		_client.SetInputVolume(inputName, ToMultiplier(target));
 	});
 
+	public Task<bool> SetInputVolumeDecibelsAsync(string inputName, double decibels)
+		=> RunAsync(() => _client.SetInputVolume(inputName, ObsVolumeScale.ToMultiplier(decibels)));
+
+	public Task<bool> AdjustInputVolumeDecibelsAsync(string inputName, double deltaDecibels) => RunAsync(() =>
+	{
+		var target = ObsVolumeScale.ToDecibels(_client.GetInputVolume(inputName)) + deltaDecibels;
+		_client.SetInputVolume(inputName, ObsVolumeScale.ToMultiplier(target));
+	});
+
 	public Task<bool?> GetSourceFilterEnabledAsync(string sourceName, string filterName)
 		=> QueryValueAsync<bool?>(() => _client.GetSourceFilterEnabled(sourceName, filterName), null);
 

@@ -658,10 +658,10 @@
     <value>Automatizaciones</value>
   </data>
   <data name="Backup.Group.Icons.Description" xml:space="preserve">
-    <value>Paquetes de iconos instalados e iconos importados.</value>
+    <value>Paquetes de iconos instalados, iconos importados y fuentes importadas.</value>
   </data>
   <data name="Backup.Group.Icons.Label" xml:space="preserve">
-    <value>Iconos y paquetes de iconos</value>
+    <value>Iconos, paquetes de iconos y fuentes</value>
   </data>
   <data name="Backup.Group.Integrations.Description" xml:space="preserve">
     <value>La configuración de las integraciones y todas las contraseñas o tokens guardados.</value>
@@ -7166,17 +7166,38 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.Obs.Actions.SaveReplayBuffer.Name" xml:space="preserve">
     <value>Guardar búfer de repetición</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelStepDescription" xml:space="preserve">
+    <value>Cuántos dB sube o baja el volumen en cada pulsación</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelStepLabel" xml:space="preserve">
+    <value>Paso (dB)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelsDescription" xml:space="preserve">
+    <value>Volumen objetivo en dB (-100 es silencio, 0 es volumen máximo)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelsLabel" xml:space="preserve">
+    <value>Volumen (dB)</value>
+  </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.Description" xml:space="preserve">
     <value>Establece, aumenta o disminuye el volumen de una entrada de audio</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeDecrease" xml:space="preserve">
-    <value>Disminuir en</value>
+    <value>Disminuir en (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeDecreaseDecibels" xml:space="preserve">
+    <value>Disminuir en (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeIncrease" xml:space="preserve">
-    <value>Aumentar en</value>
+    <value>Aumentar en (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeIncreaseDecibels" xml:space="preserve">
+    <value>Aumentar en (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeSet" xml:space="preserve">
-    <value>Establecer en</value>
+    <value>Establecer en (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeSetDecibels" xml:space="preserve">
+    <value>Establecer en (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.Name" xml:space="preserve">
     <value>Establecer volumen de entrada</value>
@@ -12575,6 +12596,14 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>{count} variables de widget</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Portable.ArchivePreview.FontCount.One" xml:space="preserve">
+    <value>{count} fuente</value>
+    <comment>[plural] Number of fonts in an archive, shown in the import preview.</comment>
+  </data>
+  <data name="Portable.ArchivePreview.FontCount.Other" xml:space="preserve">
+    <value>{count} fuentes</value>
+    <comment>[plural] Number of fonts in an archive, shown in the import preview.</comment>
+  </data>
   <data name="Portable.ArchivePreview.WidgetCount.One" xml:space="preserve">
     <value>{count} widget</value>
     <comment>[plural]</comment>
@@ -17618,11 +17647,26 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Etiqueta</value>
   </data>
+  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
+    <value>Color del borde del recuadro</value>
+  </data>
+  <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
+    <value>Grosor del borde del recuadro (%)</value>
+  </data>
   <data name="Widgets.Editor.LabelBoxColor" xml:space="preserve">
     <value>Color del recuadro de la etiqueta</value>
   </data>
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Color de la etiqueta</value>
+  </data>
+  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
+    <value>Color del contorno de la etiqueta</value>
+  </data>
+  <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
+    <value>Grosor del contorno (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelShadow" xml:space="preserve">
+    <value>Sombra de la etiqueta</value>
   </data>
   <data name="Widgets.Editor.Live" xml:space="preserve">
     <value>en vivo</value>
@@ -18666,6 +18710,79 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Library.Page.ContentTypeAriaLabel" xml:space="preserve">
     <value>Contenido de la biblioteca</value>
+  </data>
+  <data name="Nav.Fonts" xml:space="preserve">
+    <value>Fuentes</value>
+  </data>
+  <data name="Library.Page.FontsDescription" xml:space="preserve">
+    <value>Archivos de fuente que importaste para etiquetas y textos.</value>
+  </data>
+  <data name="Library.Page.FontCount.One" xml:space="preserve">
+    <value>{count} fuente</value>
+    <comment>[plural] Shown on a content type card in the library.</comment>
+  </data>
+  <data name="Library.Page.FontCount.Other" xml:space="preserve">
+    <value>{count} fuentes</value>
+    <comment>[plural] Shown on a content type card in the library.</comment>
+  </data>
+  <data name="Library.Fonts.ImportAction" xml:space="preserve">
+    <value>Importar fuentes</value>
+  </data>
+  <data name="Library.Fonts.EmptyTitle" xml:space="preserve">
+    <value>Todavía no has importado fuentes</value>
+  </data>
+  <data name="Library.Fonts.EmptyDescription" xml:space="preserve">
+    <value>Importa archivos TTF u OTF para usarlos en botones y widgets de texto, o arrástralos aquí.</value>
+  </data>
+  <data name="Library.Fonts.LicenseNote" xml:space="preserve">
+    <value>Importa solo fuentes cuya licencia permita este uso. Las fuentes que uses en tus botones se incluyen al exportar perfiles, carpetas o widgets, así que al compartir una exportación también compartes la fuente.</value>
+  </data>
+  <data name="Library.Fonts.Sample" xml:space="preserve">
+    <value>Aa Bb Cc 0123456789</value>
+  </data>
+  <data name="Library.Fonts.RemoveAriaLabel" xml:space="preserve">
+    <value>Quitar {name}</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmHeading" xml:space="preserve">
+    <value>¿Quitar la fuente?</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmMessage" xml:space="preserve">
+    <value>{name} se quitará. Los botones que la usan cambiarán a la fuente predeterminada.</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmAction" xml:space="preserve">
+    <value>Quitar</value>
+  </data>
+  <data name="Library.Fonts.RemoveFailed" xml:space="preserve">
+    <value>No se pudo quitar la fuente.</value>
+  </data>
+  <data name="Library.Fonts.ImportFailed" xml:space="preserve">
+    <value>No se pudieron importar las fuentes.</value>
+  </data>
+  <data name="Library.Fonts.Imported.One" xml:space="preserve">
+    <value>{count} fuente importada</value>
+    <comment>[plural] Toast after a successful import.</comment>
+  </data>
+  <data name="Library.Fonts.Imported.Other" xml:space="preserve">
+    <value>{count} fuentes importadas</value>
+    <comment>[plural] Toast after a successful import.</comment>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyPresent" xml:space="preserve">
+    <value>{fileName} ya está importado.</value>
+  </data>
+  <data name="Library.Fonts.Status.UnsupportedFormat" xml:space="preserve">
+    <value>{fileName}: solo se admiten archivos TTF y OTF.</value>
+  </data>
+  <data name="Library.Fonts.Status.TooLarge" xml:space="preserve">
+    <value>{fileName} ocupa más de 32 MB.</value>
+  </data>
+  <data name="Library.Fonts.Status.InvalidFont" xml:space="preserve">
+    <value>{fileName} no es un archivo de fuente utilizable.</value>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyInstalled" xml:space="preserve">
+    <value>{fileName}: esta familia de fuentes ya está instalada en este equipo, así que no se puede importar.</value>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyImported" xml:space="preserve">
+    <value>{fileName}: ya hay una fuente importada con la misma familia y estilo. Quítala primero para reemplazarla.</value>
   </data>
   <data name="Onboarding.Back" xml:space="preserve">
     <value>Atrás</value>

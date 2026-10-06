@@ -658,10 +658,10 @@
     <value>Automatisations</value>
   </data>
   <data name="Backup.Group.Icons.Description" xml:space="preserve">
-    <value>Packs d'icônes installés et icônes importées.</value>
+    <value>Packs d'icônes installés, icônes importées et polices importées.</value>
   </data>
   <data name="Backup.Group.Icons.Label" xml:space="preserve">
-    <value>Icônes et packs d'icônes</value>
+    <value>Icônes, packs d'icônes et polices</value>
   </data>
   <data name="Backup.Group.Integrations.Description" xml:space="preserve">
     <value>Paramètres d'intégration et chaque mot de passe ou jeton enregistré.</value>
@@ -7166,17 +7166,38 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Obs.Actions.SaveReplayBuffer.Name" xml:space="preserve">
     <value>Enregistrer le tampon de relecture</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelStepDescription" xml:space="preserve">
+    <value>Nombre de dB dont le volume monte ou descend à chaque appui</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelStepLabel" xml:space="preserve">
+    <value>Pas (dB)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelsDescription" xml:space="preserve">
+    <value>Volume cible en dB (-100 correspond au silence, 0 au volume maximal)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelsLabel" xml:space="preserve">
+    <value>Volume (dB)</value>
+  </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.Description" xml:space="preserve">
     <value>Définit, augmente ou diminue le volume d'une entrée audio</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeDecrease" xml:space="preserve">
-    <value>Diminuer de</value>
+    <value>Diminuer de (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeDecreaseDecibels" xml:space="preserve">
+    <value>Diminuer de (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeIncrease" xml:space="preserve">
-    <value>Augmenter de</value>
+    <value>Augmenter de (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeIncreaseDecibels" xml:space="preserve">
+    <value>Augmenter de (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeSet" xml:space="preserve">
-    <value>Définir à</value>
+    <value>Définir à (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeSetDecibels" xml:space="preserve">
+    <value>Définir à (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.Name" xml:space="preserve">
     <value>Définir le volume de l'entrée</value>
@@ -12575,6 +12596,14 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>{count} variables de widget</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Portable.ArchivePreview.FontCount.One" xml:space="preserve">
+    <value>{count} police</value>
+    <comment>[plural] Number of fonts in an archive, shown in the import preview.</comment>
+  </data>
+  <data name="Portable.ArchivePreview.FontCount.Other" xml:space="preserve">
+    <value>{count} polices</value>
+    <comment>[plural] Number of fonts in an archive, shown in the import preview.</comment>
+  </data>
   <data name="Portable.ArchivePreview.WidgetCount.One" xml:space="preserve">
     <value>{count} widget</value>
     <comment>[plural]</comment>
@@ -17618,11 +17647,26 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Libellé</value>
   </data>
+  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
+    <value>Couleur de la bordure du cadre</value>
+  </data>
+  <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
+    <value>Épaisseur de la bordure du cadre (%)</value>
+  </data>
   <data name="Widgets.Editor.LabelBoxColor" xml:space="preserve">
     <value>Couleur du cadre du libellé</value>
   </data>
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Couleur du libellé</value>
+  </data>
+  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
+    <value>Couleur du contour du libellé</value>
+  </data>
+  <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
+    <value>Épaisseur du contour (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelShadow" xml:space="preserve">
+    <value>Ombre du libellé</value>
   </data>
   <data name="Widgets.Editor.Live" xml:space="preserve">
     <value>en direct</value>
@@ -18666,6 +18710,79 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Library.Page.ContentTypeAriaLabel" xml:space="preserve">
     <value>Contenus de la bibliothèque</value>
+  </data>
+  <data name="Nav.Fonts" xml:space="preserve">
+    <value>Polices</value>
+  </data>
+  <data name="Library.Page.FontsDescription" xml:space="preserve">
+    <value>Fichiers de police que tu as importés pour les libellés et les textes.</value>
+  </data>
+  <data name="Library.Page.FontCount.One" xml:space="preserve">
+    <value>{count} police</value>
+    <comment>[plural] Shown on a content type card in the library.</comment>
+  </data>
+  <data name="Library.Page.FontCount.Other" xml:space="preserve">
+    <value>{count} polices</value>
+    <comment>[plural] Shown on a content type card in the library.</comment>
+  </data>
+  <data name="Library.Fonts.ImportAction" xml:space="preserve">
+    <value>Importer des polices</value>
+  </data>
+  <data name="Library.Fonts.EmptyTitle" xml:space="preserve">
+    <value>Aucune police importée</value>
+  </data>
+  <data name="Library.Fonts.EmptyDescription" xml:space="preserve">
+    <value>Importe des fichiers TTF ou OTF pour les utiliser sur les boutons et les widgets de texte, ou dépose-les ici.</value>
+  </data>
+  <data name="Library.Fonts.LicenseNote" xml:space="preserve">
+    <value>N'importe que des polices dont la licence autorise cet usage. Les polices utilisées sur tes boutons sont incluses quand tu exportes des profils, des dossiers ou des widgets : partager un export partage donc aussi la police.</value>
+  </data>
+  <data name="Library.Fonts.Sample" xml:space="preserve">
+    <value>Aa Bb Cc 0123456789</value>
+  </data>
+  <data name="Library.Fonts.RemoveAriaLabel" xml:space="preserve">
+    <value>Retirer {name}</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmHeading" xml:space="preserve">
+    <value>Retirer la police ?</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmMessage" xml:space="preserve">
+    <value>{name} sera retirée. Les boutons qui l'utilisent passent à la police par défaut.</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmAction" xml:space="preserve">
+    <value>Retirer</value>
+  </data>
+  <data name="Library.Fonts.RemoveFailed" xml:space="preserve">
+    <value>Impossible de retirer la police.</value>
+  </data>
+  <data name="Library.Fonts.ImportFailed" xml:space="preserve">
+    <value>Impossible d'importer les polices.</value>
+  </data>
+  <data name="Library.Fonts.Imported.One" xml:space="preserve">
+    <value>{count} police importée</value>
+    <comment>[plural] Toast after a successful import.</comment>
+  </data>
+  <data name="Library.Fonts.Imported.Other" xml:space="preserve">
+    <value>{count} polices importées</value>
+    <comment>[plural] Toast after a successful import.</comment>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyPresent" xml:space="preserve">
+    <value>{fileName} est déjà importé.</value>
+  </data>
+  <data name="Library.Fonts.Status.UnsupportedFormat" xml:space="preserve">
+    <value>{fileName} : seuls les fichiers TTF et OTF sont pris en charge.</value>
+  </data>
+  <data name="Library.Fonts.Status.TooLarge" xml:space="preserve">
+    <value>{fileName} dépasse 32 Mo.</value>
+  </data>
+  <data name="Library.Fonts.Status.InvalidFont" xml:space="preserve">
+    <value>{fileName} n'est pas un fichier de police utilisable.</value>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyInstalled" xml:space="preserve">
+    <value>{fileName} : cette famille de polices est déjà installée sur cet ordinateur, elle ne peut donc pas être importée.</value>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyImported" xml:space="preserve">
+    <value>{fileName} : une police avec la même famille et le même style est déjà importée. Retire-la d'abord pour la remplacer.</value>
   </data>
   <data name="Onboarding.Back" xml:space="preserve">
     <value>Retour</value>
