@@ -761,6 +761,143 @@ describe('widget node renderer', () => {
     });
   });
 
+  describe('ui.text shadow and outline', () => {
+    const label = () => container.querySelector('.widget-text') as HTMLElement;
+    const filterOf = (text: HTMLElement) => {
+      const id = /url\(["']?#([^"')]+)["']?\)/.exec(text.style.filter)?.[1];
+      return id === undefined ? null : document.getElementById(id);
+    };
+
+    it('leaves a button label to the stylesheet when the producer sent none of the keys', () => {
+      mount(node('ui.button', {}, [node('ui.text', { text: 'Play' })]));
+
+      expect(label().classList.contains('widget-text-no-shadow')).toBeFalse();
+      expect(label().classList.contains('widget-text-outlined')).toBeFalse();
+      expect(label().style.textShadow).toBe('');
+      expect(label().style.filter).toBe('');
+      expect(label().style.paddingLeft).toBe('');
+      expect(label().style.marginLeft).toBe('');
+    });
+
+    it('marks a label whose node turns the shadow off', () => {
+      mount(node('ui.button', {}, [node('ui.text', { text: 'Play', shadow: false })]));
+
+      expect(label().classList.contains('widget-text-no-shadow')).toBeTrue();
+    });
+
+    it('keeps the shadow when the node asks for the default explicitly', () => {
+      mount(node('ui.button', {}, [node('ui.text', { text: 'Play', shadow: true })]));
+
+      expect(label().classList.contains('widget-text-no-shadow')).toBeFalse();
+    });
+
+    it('draws an outline of the given colour and width through a filter and gives it room on every side', () => {
+      mount(node('ui.text', { text: 'Play', strokeColor: '#ff0000', strokeWidth: { basis: 0.025 } }), 120, 120);
+      const filter = filterOf(label());
+
+      expect(label().classList.contains('widget-text-outlined')).toBeTrue();
+      expect(label().style.textShadow).toBe('none');
+      expect(filter).not.toBeNull();
+      expect(filter!.querySelector('feFlood')!.getAttribute('flood-color')).toBe('#ff0000');
+      expect(filter!.querySelector('feMorphology')!.getAttribute('radius')).toBe('1.05');
+      expect(label().style.width).toBe('126px');
+      expect(label().style.paddingLeft).toBe('3px');
+      expect(label().style.paddingRight).toBe('3px');
+      expect(label().style.marginLeft).toBe('-3px');
+      expect(label().style.marginRight).toBe('-3px');
+      expect(label().style.paddingTop).toContain('3px');
+      expect(label().style.marginBottom).toContain('3px');
+    });
+
+    it('draws the legibility shadow with the outline only where a button label would have one', () => {
+      mount(node('ui.stack', {}, [
+        node('ui.text', { text: 'free', strokeColor: '#ff0000', strokeWidth: { basis: 0.025 } }),
+        node('ui.button', {}, [
+          node('ui.stack', {}, [
+            node('ui.text', { text: 'label', strokeColor: '#ff0000', strokeWidth: { basis: 0.025 } }),
+            node('ui.text', { text: 'off', strokeColor: '#ff0000', strokeWidth: { basis: 0.025 }, shadow: false }),
+          ]),
+        ]),
+      ]));
+      const byText = (text: string) => (Array.from(container.querySelectorAll('.widget-text')) as HTMLElement[])
+        .find(element => element.textContent === text)!;
+
+      expect(filterOf(byText('free'))!.querySelector('feOffset')).toBeNull();
+      expect(filterOf(byText('label'))!.querySelector('feOffset')).not.toBeNull();
+      expect(filterOf(byText('off'))!.querySelector('feOffset')).toBeNull();
+    });
+
+    it('releases the filters of outlines nothing draws any more', async () => {
+      const outlined = (color: string) =>
+        node2('ui.text', { text: 'Play', strokeColor: color, strokeWidth: { basis: 0.025 } });
+      const handle = mount(outlined('#000000'));
+      for (let step = 1; step <= 100; step++) {
+        handle.update(outlined(`#0000${step.toString(16).padStart(2, '0')}`), { width: 120, height: 120 }, null);
+      }
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      expect(document.querySelectorAll('.widget-text-outline-filters filter').length).toBeLessThanOrEqual(33);
+      expect(filterOf(label())).not.toBeNull();
+    });
+
+    it('names a filter after its outline, so a recreated filter can never stand in for another', () => {
+      mount(node('ui.text', { text: 'Play', strokeColor: '#AB12CD', strokeWidth: { basis: 0.025 } }), 120, 120);
+
+      expect(filterOf(label())!.id).toBe('widget-text-outline-ab12cd-300-n');
+    });
+
+    it('shares one filter between labels with the same outline', () => {
+      mount(node('ui.stack', {}, [
+        node('ui.text', { text: 'a', strokeColor: '#00ff00', strokeWidth: { basis: 0.02 } }),
+        node('ui.text', { text: 'b', strokeColor: '#00ff00', strokeWidth: { basis: 0.02 } }),
+        node('ui.text', { text: 'c', strokeColor: '#0000ff', strokeWidth: { basis: 0.02 } }),
+      ]));
+      const [a, b, c] = Array.from(container.querySelectorAll('.widget-text')) as HTMLElement[];
+
+      expect(a.style.filter).toBe(b.style.filter);
+      expect(a.style.filter).not.toBe(c.style.filter);
+    });
+
+    it('draws at most a tenth of the basis and no outline for an infinite width', () => {
+      mount(node('ui.stack', {}, [
+        node('ui.text', { text: 'a', strokeColor: '#ff0000', strokeWidth: { basis: 1e300 } }),
+        node('ui.text', { text: 'b', strokeColor: '#ff0000', strokeWidth: { basis: 1e308 } }),
+      ]));
+      const [huge, infinite] = Array.from(container.querySelectorAll('.widget-text')) as HTMLElement[];
+
+      expect(huge.style.paddingLeft).toBe('12px');
+      expect(filterOf(huge)!.querySelector('feMorphology')!.getAttribute('radius')).toBe('4.2');
+      expect(infinite.classList.contains('widget-text-outlined')).toBeFalse();
+      expect(infinite.style.filter).toBe('');
+    });
+
+    it('draws no outline without a colour or with a zero width', () => {
+      mount(node('ui.stack', {}, [
+        node('ui.text', { text: 'a', strokeWidth: { basis: 0.02 } }),
+        node('ui.text', { text: 'b', strokeColor: '#ff0000', strokeWidth: { basis: 0 } }),
+      ]));
+
+      for (const text of Array.from(container.querySelectorAll('.widget-text')) as HTMLElement[]) {
+        expect(text.classList.contains('widget-text-outlined')).toBeFalse();
+        expect(text.style.filter).toBe('');
+      }
+    });
+
+    it('takes the outline and its room away again when the keys go', () => {
+      const handle = mount(
+        node2('ui.text', { text: 'Play', strokeColor: '#ff0000', strokeWidth: { basis: 0.025 }, shadow: false }));
+      handle.update(node2('ui.text', { text: 'Play' }), { width: 120, height: 120 }, null);
+
+      expect(label().classList.contains('widget-text-outlined')).toBeFalse();
+      expect(label().classList.contains('widget-text-no-shadow')).toBeFalse();
+      expect(label().style.textShadow).toBe('');
+      expect(label().style.filter).toBe('');
+      expect(label().style.width).toBe('120px');
+      expect(label().style.paddingTop).toBe('');
+      expect(label().style.maxHeight).toBe('');
+    });
+  });
+
   describe('ui.text spans', () => {
     const emote = { resourceId: 'emote-1', contentHash: 'h1' };
     const text = () => container.querySelector('.widget-text') as HTMLElement;

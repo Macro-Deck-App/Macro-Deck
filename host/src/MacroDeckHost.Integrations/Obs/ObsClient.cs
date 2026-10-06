@@ -221,6 +221,15 @@ internal sealed class ObsClient : IObsClient
 		return profiles?.Profiles.ToList() ?? [];
 	}
 
+	public IReadOnlyList<string> GetOutputNames()
+	{
+		var response = TranslateOutputErrors("GetOutputList", string.Empty,
+			() => _obs.SendRequest("GetOutputList", new JObject()));
+		return response?["outputs"] is JArray outputs
+			? outputs.Select(o => o.Value<string>("outputName")).OfType<string>().Distinct(StringComparer.Ordinal).ToList()
+			: [];
+	}
+
 	public void SetCurrentScene(string sceneName) => _obs.SetCurrentProgramScene(sceneName);
 
 	public void SetPreviewScene(string sceneName) => _obs.SetCurrentPreviewScene(sceneName);
@@ -261,6 +270,18 @@ internal sealed class ObsClient : IObsClient
 		string.IsNullOrWhiteSpace(chapterName) ? null : new JObject { ["chapterName"] = chapterName }));
 
 	public void SetRecordDirectory(string directory) => Request(() => _obs.SetRecordDirectory(directory));
+
+	public void StartOutput(string outputName)
+		=> TranslateOutputErrors("StartOutput", outputName, () => _obs.StartOutput(outputName));
+
+	public void StopOutput(string outputName)
+		=> TranslateOutputErrors("StopOutput", outputName, () => _obs.StopOutput(outputName));
+
+	public void ToggleOutput(string outputName)
+		=> TranslateOutputErrors("ToggleOutput", outputName, () => _obs.ToggleOutput(outputName));
+
+	public bool GetOutputActive(string outputName)
+		=> TranslateOutputErrors("GetOutputStatus", outputName, () => _obs.GetOutputStatus(outputName).IsActive);
 
 	public bool GetSourceVisible(string sceneName, string sourceName)
 		=> _obs.GetSceneItemEnabled(sceneName, _obs.GetSceneItemId(sceneName, sourceName, 0));
@@ -408,6 +429,31 @@ internal sealed class ObsClient : IObsClient
 			throw new ObsRequestException(ex.ErrorCode, ex.Message);
 		}
 	}
+
+	// obs-websocket answers 204 to a request type it does not know (a server older than 5.7) and 600 to a
+	// name it cannot find.
+	private static T TranslateOutputErrors<T>(string request, string outputName, Func<T> call)
+	{
+		try
+		{
+			return call();
+		}
+		catch (ErrorResponseException ex) when (ex.ErrorCode == 204)
+		{
+			throw new ObsRequestUnsupportedException(request);
+		}
+		catch (ErrorResponseException ex) when (ex.ErrorCode == 600)
+		{
+			throw new ObsOutputNotFoundException(outputName);
+		}
+	}
+
+	private static void TranslateOutputErrors(string request, string outputName, Action call)
+		=> TranslateOutputErrors(request, outputName, () =>
+		{
+			call();
+			return true;
+		});
 
 	private T Try<T>(Func<T> read, T fallback)
 	{

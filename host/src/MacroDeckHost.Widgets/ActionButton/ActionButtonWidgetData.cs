@@ -113,6 +113,20 @@ public sealed record ActionButtonResolvedAppearance
 
 	public string? LabelBoxColor { get; init; }
 
+	public bool LabelShadow { get; init; } = true;
+
+	public string? LabelOutlineColor { get; init; }
+
+	public double LabelOutlineWidth { get; init; }
+
+	public string? LabelBoxBorderColor { get; init; }
+
+	public double LabelBoxBorderWidth { get; init; }
+
+	public bool HasLabelOutline => LabelOutlineColor is not null && LabelOutlineWidth > 0;
+
+	public bool HasLabelBoxBorder => LabelBoxBorderColor is not null && LabelBoxBorderWidth > 0;
+
 	public string? FontFace { get; init; }
 
 	public required string TextAlign { get; init; }
@@ -188,6 +202,10 @@ internal static class ActionButtonFlowTriggers
 /// </summary>
 public sealed class ActionButtonWidgetData
 {
+	public const double DefaultLabelStrokeWidth = 1;
+	public const double MaxLabelOutlineWidth = 3;
+	public const double MaxLabelBoxBorderWidth = 5;
+
 	private readonly ActionButtonStateModel _model;
 
 	private ActionButtonWidgetData(ActionButtonStateModel model, IReadOnlySet<string> triggerTypes, bool hasDoublePressFlow)
@@ -302,6 +320,15 @@ public sealed class ActionButtonWidgetData
 				WidgetColor.Normalize(ReadString(root, "labelColor")) ?? "#ffffff",
 			LabelBoxColor = WidgetColor.Normalize(ReadString(appearance, "labelBoxColor")) ??
 				WidgetColor.Normalize(ReadString(root, "labelBoxColor")),
+			LabelShadow = ReadBool(appearance, "labelShadow") ?? ReadBool(root, "labelShadow") ?? true,
+			LabelOutlineColor = WidgetColor.Normalize(ReadString(appearance, "labelOutlineColor")) ??
+				WidgetColor.Normalize(ReadString(root, "labelOutlineColor")),
+			LabelOutlineWidth = LabelStrokeWidth(ReadDouble(appearance, "labelOutlineWidth") ??
+				ReadDouble(root, "labelOutlineWidth"), MaxLabelOutlineWidth),
+			LabelBoxBorderColor = WidgetColor.Normalize(ReadString(appearance, "labelBoxBorderColor")) ??
+				WidgetColor.Normalize(ReadString(root, "labelBoxBorderColor")),
+			LabelBoxBorderWidth = LabelStrokeWidth(ReadDouble(appearance, "labelBoxBorderWidth") ??
+				ReadDouble(root, "labelBoxBorderWidth"), MaxLabelBoxBorderWidth),
 			FontFace = Trimmed(ReadString(appearance, "fontFaceId")) ?? Trimmed(ReadString(root, "fontFaceId")),
 			TextAlign = ReadString(appearance, "textAlign") ?? ReadString(root, "textAlign") ?? "center",
 			LabelPosition = ReadString(appearance, "labelPosition") ?? ReadString(root, "labelPosition") ?? "center",
@@ -387,6 +414,12 @@ public sealed class ActionButtonWidgetData
 	public string? ImageUrl => StateMode ? null : Trimmed(ReadString(_model.Data, "imageUrl"));
 
 	private static string? Trimmed(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+	private static double LabelStrokeWidth(double? value, double max)
+		=> value is { } v && double.IsFinite(v) ? Math.Clamp(v, 0, max) : DefaultLabelStrokeWidth;
+
+	private static bool? ReadBool(JsonObject? data, string key)
+		=> data?[key] is JsonValue value && value.TryGetValue<bool>(out var b) ? b : null;
 
 	private static string? ReadString(JsonObject? data, string key)
 		=> data?[key] is JsonValue value && value.TryGetValue<string>(out var s) ? s : null;

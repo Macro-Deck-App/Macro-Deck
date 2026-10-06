@@ -42,6 +42,7 @@ public class AppearanceSettingsHandlersTests
 			new("inter-400", "Inter", 400, 5, "upright", "Regular", RemoteRenderable: true),
 			new("inter-700", "Inter", 700, 5, "upright", "Bold", RemoteRenderable: true),
 			new("locked-400", "Locked", 400, 5, "upright", "Regular", RemoteRenderable: false),
+			new("imported-400", "Imported", 400, 5, "upright", "Regular", RemoteRenderable: true) { UserImported = true },
 		];
 
 		public byte[]? GetFaceFile(string faceId) => null;
@@ -131,6 +132,18 @@ public class AppearanceSettingsHandlersTests
 
 		var updated = await updateHandler.Handle(new UpdateAppearanceSettingsRequest
 				{ ThemeMode = "dark", AccentColor = "#3b82f6", FontFamily = "Locked" },
+			CancellationToken.None);
+
+		Assert.That(updated.FontFamily, Is.Empty);
+	}
+
+	[Test]
+	public async Task An_imported_family_cannot_become_the_app_font()
+	{
+		var updateHandler = CreateUpdateHandler(CreateService());
+
+		var updated = await updateHandler.Handle(new UpdateAppearanceSettingsRequest
+				{ ThemeMode = "dark", AccentColor = "#3b82f6", FontFamily = "Imported" },
 			CancellationToken.None);
 
 		Assert.That(updated.FontFamily, Is.Empty);

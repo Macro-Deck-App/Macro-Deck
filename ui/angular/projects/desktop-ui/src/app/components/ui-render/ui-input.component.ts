@@ -216,6 +216,15 @@ export class UiInputComponent {
   protected readonly comboboxOptions = computed<ComboboxOption[]>(() =>
     (this.options() ?? []).map(toComboboxOption),
   );
+  protected readonly fontPreview = computed(() =>
+    (this.options() ?? []).some(option => typeof option.metadata?.['fontFaceId'] === 'string'),
+  );
+  protected readonly hasEmptyOption = computed(() => (this.options() ?? []).some(option => option.value === ''));
+  protected readonly selectedOptionLabel = computed(() => {
+    const value = this.stringValue();
+    const option = (this.options() ?? []).find(candidate => candidate.value === value);
+    return option ? option.label ?? option.value : value;
+  });
   protected readonly cardOptions = computed(() =>
     (this.options() ?? []).map(option => ({
       value: option.value,
@@ -461,7 +470,10 @@ function toSelectOption(option: UiNodeOption): SelectOption {
 }
 
 function toComboboxOption(option: UiNodeOption): ComboboxOption {
-  return { value: option.value, label: option.label ?? option.value };
+  const fontFaceId = option.metadata?.['fontFaceId'];
+  return typeof fontFaceId === 'string'
+    ? { value: option.value, label: option.label ?? option.value, fontFaceId }
+    : { value: option.value, label: option.label ?? option.value };
 }
 
 function isPlainRecord(value: unknown): value is Record<string, unknown> {

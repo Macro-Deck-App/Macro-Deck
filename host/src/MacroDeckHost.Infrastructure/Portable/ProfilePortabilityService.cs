@@ -86,7 +86,7 @@ public sealed class ProfilePortabilityService : IProfilePortabilityService
 			assets,
 			profile.Name,
 			widgets.Count);
-		var bytes = PortableArchive.Write(manifest, content, assets.Files, options.Password);
+		var bytes = PortableArchive.Write(manifest, content, assets.Files, options.Password, assets.FontFiles);
 		return Result.Ok<byte[], PortabilityError>(bytes);
 	}
 
@@ -108,11 +108,12 @@ public sealed class ProfilePortabilityService : IProfilePortabilityService
 				"The archive does not contain a profile");
 		}
 
-		return await ImportContent(content, outcome.Icons, cancellationToken);
+		return await ImportContent(content, outcome.Icons, outcome.Fonts, cancellationToken);
 	}
 
 	public async Task<Result<ProfileEntity, PortabilityError>> ImportContent(PortableContent content,
 		IReadOnlyList<PortableIconFile> iconFiles,
+		IReadOnlyList<PortableFontFile> fontFiles,
 		CancellationToken cancellationToken)
 	{
 		if (content.Profile is null)
@@ -123,7 +124,7 @@ public sealed class ProfilePortabilityService : IProfilePortabilityService
 
 		try
 		{
-			var assetIdMap = await _assetManager.Import(content, iconFiles, cancellationToken);
+			var assetIdMap = await _assetManager.Import(content, iconFiles, fontFiles, cancellationToken);
 			var mintedIds = MintIds(content.Profile);
 			var (profile, folders) = BuildEntities(content.Profile, assetIdMap, mintedIds);
 

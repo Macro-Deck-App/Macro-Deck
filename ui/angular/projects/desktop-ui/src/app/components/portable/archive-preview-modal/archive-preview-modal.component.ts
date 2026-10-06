@@ -31,6 +31,7 @@ const COUNT_KEY = {
   icon: AppStrings.Portable.ArchivePreview.IconCount,
   script: AppStrings.Portable.ArchivePreview.ScriptCount,
   variable: AppStrings.Portable.ArchivePreview.VariableCount,
+  font: AppStrings.Portable.ArchivePreview.FontCount,
   secret: AppStrings.Portable.ArchivePreview.SecretCount
 };
 
@@ -135,6 +136,9 @@ export class ArchivePreviewModalComponent {
     }
     if (summary.variableCount > 0) {
       entries.push({ icon: 'braces-x', label: this.plural(summary.variableCount, COUNT_KEY.variable) });
+    }
+    if ((summary.fontCount ?? 0) > 0) {
+      entries.push({ icon: 'type', label: this.plural(summary.fontCount ?? 0, COUNT_KEY.font) });
     }
     if (summary.secretCount > 0) {
       entries.push({ icon: 'lock', label: this.plural(summary.secretCount, COUNT_KEY.secret) });

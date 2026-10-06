@@ -50,6 +50,9 @@ The tiles in a folder:
 | Countdown | A pizza timer that counts down and alerts you when it runs out |
 | Stopwatch | How long the current segment of your stream has been running |
 
+Labels and text use the fonts installed on your computer, plus any you import under
+[Library > Fonts](/guide/fonts/).
+
 ### Moderating from the Twitch Chat widget
 
 Press the **Twitch Chat** widget to open the chat in a larger dialog. It stays at the newest message while

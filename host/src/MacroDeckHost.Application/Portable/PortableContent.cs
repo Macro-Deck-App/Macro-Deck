@@ -19,4 +19,6 @@ public sealed class PortableContent
 	public List<PortableSecret> Secrets { get; set; } = [];
 
 	public List<PortableVariable> Variables { get; set; } = [];
+
+	public List<PortableFont> Fonts { get; set; } = [];
 }

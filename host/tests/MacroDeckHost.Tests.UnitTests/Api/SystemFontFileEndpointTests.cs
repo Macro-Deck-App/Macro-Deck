@@ -19,6 +19,8 @@ public class SystemFontFileEndpointTests
 {
 	private const string TrueTypeFaceId = "stub-family-700-5-italic";
 	private const string CffFaceId = "stub-family-400-5-upright";
+	private const string ImportedFaceId = "imported-family-400-5-upright";
+	private const string ImportedContentHash = "sha256:00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
 
 	private IHost _host = null!;
 	private HttpClient _client = null!;
@@ -103,6 +105,20 @@ public class SystemFontFileEndpointTests
 	}
 
 	[Test]
+	public async Task Serving_an_imported_face_is_revalidated_by_its_content_rather_than_cached_forever()
+	{
+		var response = await _client.GetAsync($"/api/system/fonts/{ImportedFaceId}/file");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+			Assert.That(response.Headers.CacheControl?.NoCache, Is.True);
+			Assert.That(response.Headers.CacheControl?.MaxAge, Is.Null);
+			Assert.That(response.Headers.ETag?.Tag, Is.EqualTo($"\"{ImportedContentHash}\""));
+		});
+	}
+
+	[Test]
 	public async Task Serving_a_cff_face_reports_it_as_an_opentype_font()
 	{
 		var response = await _client.GetAsync($"/api/system/fonts/{CffFaceId}/file");
@@ -123,13 +139,19 @@ public class SystemFontFileEndpointTests
 		private static readonly Dictionary<string, byte[]> Files = new(StringComparer.Ordinal)
 		{
 			[TrueTypeFaceId] = [0x00, 0x01, 0x00, 0x00, 0x11, 0x22, 0x33, 0x44],
-			[CffFaceId] = [(byte)'O', (byte)'T', (byte)'T', (byte)'O', 0x11, 0x22, 0x33, 0x44]
+			[CffFaceId] = [(byte)'O', (byte)'T', (byte)'T', (byte)'O', 0x11, 0x22, 0x33, 0x44],
+			[ImportedFaceId] = [0x00, 0x01, 0x00, 0x00, 0x55, 0x66, 0x77, 0x88]
 		};
 
 		public IReadOnlyList<FontFaceInfo> GetFaces() =>
 		[
 			new(TrueTypeFaceId, "Stub Family", 700, 5, "italic", "Bold Italic", true),
-			new(CffFaceId, "Stub Family", 400, 5, "upright", "Regular", true)
+			new(CffFaceId, "Stub Family", 400, 5, "upright", "Regular", true),
+			new(ImportedFaceId, "Imported Family", 400, 5, "upright", "Regular", true)
+			{
+				UserImported = true,
+				ContentHash = ImportedContentHash
+			}
 		];
 
 		public byte[]? GetFaceFile(string faceId) => Files.GetValueOrDefault(faceId);

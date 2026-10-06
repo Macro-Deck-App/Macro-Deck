@@ -155,6 +155,15 @@
             [value]="stringValue()"
             [ariaLabel]="label() ?? ''"
             (valueChange)="onChange($event)" />
+        } @else if (fontPreview()) {
+          <shared-combobox
+            [value]="stringValue()"
+            [displayLabel]="selectedOptionLabel()"
+            [placeholder]="placeholder()"
+            [options]="comboboxOptions()"
+            [clearable]="hasEmptyOption()"
+            (valueChange)="onChange($event)"
+            (opened)="onOpen()" />
         } @else if (allowsCustomValue()) {
           <shared-combobox
             [value]="stringValue()"

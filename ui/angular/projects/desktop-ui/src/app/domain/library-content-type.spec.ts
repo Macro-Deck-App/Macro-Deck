@@ -22,6 +22,13 @@ describe('LIBRARY_CONTENT_TYPES', () => {
     expect(shipped.map(type => type.id)).not.toContain('automations');
   });
 
+  it('ships the imported font library', () => {
+    const fonts = TestBed.inject(LIBRARY_CONTENT_TYPES).find(type => type.route === '/library/fonts');
+
+    expect(fonts).withContext('fonts are missing from the library').toBeTruthy();
+    expect(fonts!.labelKey).toBe(AppStrings.Nav.Fonts);
+  });
+
   // A card labelled with a key nobody added to the catalogue renders as literal "[[macrodeck.app:…]]".
   it('labels and describes every content type with a key the catalogue carries', () => {
     for (const type of TestBed.inject(LIBRARY_CONTENT_TYPES)) {

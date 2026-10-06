@@ -10,6 +10,7 @@ using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Domain.Icons;
 using MacroDeckHost.Infrastructure.Caching;
 using MacroDeckHost.Infrastructure.Portable;
+using MacroDeckHost.Infrastructure.Rendering;
 using MacroDeckHost.Tests.UnitTests.Icons;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 
@@ -27,6 +28,8 @@ internal sealed class PortabilityTestHarness : IDisposable
 	public VariableRegistry VariableRegistry { get; } = new();
 	public IVariableService Variables { get; }
 	public WidgetVariableCloner VariableCloner { get; }
+	public SkiaFontCatalog FontCatalog { get; }
+	public FileSystemUserFontLibrary UserFonts { get; }
 	public PortableAssetManager AssetManager { get; }
 	public ProfilePortabilityService ProfileService { get; }
 	public WidgetPortabilityService WidgetService { get; }
@@ -34,7 +37,9 @@ internal sealed class PortabilityTestHarness : IDisposable
 
 	public PortabilityTestHarness()
 	{
-		ProfileCache = new ProfileCache(new InMemoryProfileStore(), Icons.Logger);
+		FontCatalog = new SkiaFontCatalog([], () => [], Icons.Paths.FontsDirectory);
+		UserFonts = new FileSystemUserFontLibrary(FontCatalog, Icons.Paths);
+		ProfileCache = new ProfileCache(new InMemoryProfileStore(), Icons.Logger, FontCatalog);
 		ProfileCache.InitializeCache().GetAwaiter().GetResult();
 		FolderCache = new FolderCache(ProfileCache);
 		ScriptCache = new ScriptCache(new InMemoryScriptStore(), Icons.Logger);
@@ -56,6 +61,8 @@ internal sealed class PortabilityTestHarness : IDisposable
 			Icons.Mediator,
 			TestLocalization.Preferences,
 			TestLocalization.Resolver,
+			FontCatalog,
+			UserFonts,
 			Icons.Logger);
 		ProfileService
 			= new ProfilePortabilityService(ProfileCache, FolderCache, AssetManager, Icons.Mediator, Icons.Logger);
