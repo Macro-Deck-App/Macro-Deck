@@ -134,6 +134,10 @@ internal interface IObsClient
 
 	/// <summary>The input's settings as OBS reports them, verbatim JSON text.</summary>
 	string GetInputSettings(string inputName);
+
+	string GetInputDefaultSettings(string inputName);
+
+	void SetInputSettings(string inputName, string settingsJson);
 }
 
 internal sealed class ObsRequestException : Exception

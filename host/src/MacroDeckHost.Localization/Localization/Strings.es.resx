@@ -20129,4 +20129,34 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.Obs.Errors.OutputsNeedNewerObs" xml:space="preserve">
     <value>Controlar salidas requiere una versión de OBS con obs-websocket 5.7 o posterior.</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Name" xml:space="preserve">
+    <value>Establecer ajuste de entrada</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Description" xml:space="preserve">
+    <value>Cambia un ajuste de una fuente de OBS, por ejemplo el texto de una fuente de texto, el archivo de una fuente de imagen o multimedia o la URL de una fuente de navegador.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingLabel" xml:space="preserve">
+    <value>Ajuste</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingDescription" xml:space="preserve">
+    <value>Nombre del ajuste tal como lo guarda OBS, por ejemplo text, file, local_file o url. Elígelo de la lista o escríbelo.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueLabel" xml:space="preserve">
+    <value>Valor</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueDescription" xml:space="preserve">
+    <value>El nuevo valor. Introduce true o false para un ajuste de activar/desactivar, un número para un ajuste numérico y JSON para un ajuste que contiene un grupo o una lista.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NoSettingSelected" xml:space="preserve">
+    <value>No se seleccionó ningún ajuste.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsBoolean" xml:space="preserve">
+    <value>El ajuste {setting} espera true o false.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsNumber" xml:space="preserve">
+    <value>El ajuste {setting} espera un número.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsJson" xml:space="preserve">
+    <value>El ajuste {setting} espera JSON con la misma forma que su valor actual.</value>
+  </data>
 </root>

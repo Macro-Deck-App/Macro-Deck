@@ -476,7 +476,7 @@ internal sealed class ObsVariableCatalog
 		}
 
 		var json = await connection.GetInputSettingsJsonAsync(inputName).ConfigureAwait(false);
-		if (json is not null && TryGetSettingKeys(json, out var keys))
+		if (json is not null && ObsSettingsJson.TryGetKeys(json, out var keys))
 		{
 			foreach (var name in keys)
 			{
@@ -742,36 +742,6 @@ internal sealed class ObsVariableCatalog
 		}
 
 		return builder.ToString();
-	}
-
-	private static bool TryGetSettingKeys(string json, out List<string> keys)
-	{
-		keys = [];
-
-		JsonDocument document;
-		try
-		{
-			document = JsonDocument.Parse(json);
-		}
-		catch (JsonException)
-		{
-			return false;
-		}
-
-		using (document)
-		{
-			if (document.RootElement.ValueKind != JsonValueKind.Object)
-			{
-				return false;
-			}
-
-			foreach (var property in document.RootElement.EnumerateObject())
-			{
-				keys.Add(property.Name);
-			}
-
-			return true;
-		}
 	}
 
 	private static bool TryGetSetting(string json, string key, out VariableType type, out object value)

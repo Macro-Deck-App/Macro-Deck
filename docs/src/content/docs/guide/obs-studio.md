@@ -1,10 +1,41 @@
 ---
 title: OBS Studio
-description: How Macro Deck follows changes in OBS Studio and reacts to events your OBS scripts send.
+description: How Macro Deck changes what OBS Studio sources show, follows changes in OBS and reacts to events your OBS scripts send.
 ---
 
 Macro Deck connects to OBS Studio through its built-in WebSocket server (obs-websocket 5.x). Add the
 connection under **Integrations**, then use OBS actions, variables and triggers in your deck.
+
+## Changing what a source shows
+
+The action **Set Input Setting** changes one setting of an OBS source. Choose the source under **Input**,
+the setting under **Setting** and enter the new value. Other settings of the source stay as they are.
+
+| Source type | Setting | Value |
+| --- | --- | --- |
+| Text (GDI+), Text (FreeType 2) | `text` | The text to show |
+| Image | `file` | Path of the image file |
+| Media Source | `local_file` | Path of the video or audio file |
+| Browser | `url` | The address to load |
+
+Enter paths as OBS sees them: when OBS runs on another computer, that is a file on that computer. The value
+can contain variables, for example `Now playing: {{ vars.song }}` for a text source.
+
+**Setting** suggests the names the chosen source reports. You can also type a name that is not listed, for
+example `text` on a text source you have not typed anything into yet. To find the names of other settings,
+add the source's setting variables from the OBS variables: they use the same names.
+
+The value takes the type the setting already has in OBS:
+
+- An on/off setting needs `true` or `false`.
+- A numeric setting needs a number, such as `75` or `0.5`. OBS stores colours as numbers too, so a value
+  like `#FF0000` does not work.
+- A setting that holds a group, such as `font`, needs the whole group as JSON, for example
+  `{"face": "Arial", "size": 72}`. OBS replaces the group, so leave nothing out.
+- Every other setting gets the text as you entered it. An empty value clears a text.
+
+The action fails with a message when the value does not fit the setting, when the source does not exist or
+when OBS refuses the change.
 
 ## Changes show up quickly
 

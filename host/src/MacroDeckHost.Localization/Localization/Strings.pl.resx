@@ -20129,4 +20129,34 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Obs.Errors.OutputsNeedNewerObs" xml:space="preserve">
     <value>Sterowanie wyjściami wymaga wersji OBS z obs-websocket 5.7 lub nowszym.</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Name" xml:space="preserve">
+    <value>Ustaw ustawienie wejścia</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Description" xml:space="preserve">
+    <value>Zmienia jedno ustawienie źródła OBS, na przykład tekst źródła tekstowego, plik źródła obrazu lub multimediów albo URL źródła przeglądarki.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingLabel" xml:space="preserve">
+    <value>Ustawienie</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingDescription" xml:space="preserve">
+    <value>Nazwa ustawienia w postaci zapisywanej przez OBS, na przykład text, file, local_file lub url. Wybierz ją z listy lub wpisz.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueLabel" xml:space="preserve">
+    <value>Wartość</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueDescription" xml:space="preserve">
+    <value>Nowa wartość. Dla ustawienia wł./wył. wpisz true lub false, dla ustawienia liczbowego liczbę, a dla ustawienia zawierającego grupę lub listę JSON.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NoSettingSelected" xml:space="preserve">
+    <value>Nie wybrano ustawienia.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsBoolean" xml:space="preserve">
+    <value>Ustawienie {setting} wymaga wartości true lub false.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsNumber" xml:space="preserve">
+    <value>Ustawienie {setting} wymaga liczby.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsJson" xml:space="preserve">
+    <value>Ustawienie {setting} wymaga JSON w tej samej postaci co jego bieżąca wartość.</value>
+  </data>
 </root>

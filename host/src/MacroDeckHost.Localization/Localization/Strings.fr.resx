@@ -20129,4 +20129,34 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Obs.Errors.OutputsNeedNewerObs" xml:space="preserve">
     <value>Le contrôle des sorties nécessite une version d'OBS avec obs-websocket 5.7 ou plus récent.</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Name" xml:space="preserve">
+    <value>Définir un paramètre de l'entrée</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Description" xml:space="preserve">
+    <value>Modifie un paramètre d'une source OBS, par exemple le texte d'une source texte, le fichier d'une source image ou média, ou l'URL d'une source navigateur.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingLabel" xml:space="preserve">
+    <value>Paramètre</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingDescription" xml:space="preserve">
+    <value>Nom du paramètre tel qu'OBS l'enregistre, par exemple text, file, local_file ou url. Choisis-le dans la liste ou saisis-le.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueLabel" xml:space="preserve">
+    <value>Valeur</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueDescription" xml:space="preserve">
+    <value>La nouvelle valeur. Saisis true ou false pour un paramètre activé/désactivé, un nombre pour un paramètre numérique et du JSON pour un paramètre qui contient un groupe ou une liste.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NoSettingSelected" xml:space="preserve">
+    <value>Aucun paramètre n'a été sélectionné.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsBoolean" xml:space="preserve">
+    <value>Le paramètre {setting} attend true ou false.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsNumber" xml:space="preserve">
+    <value>Le paramètre {setting} attend un nombre.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsJson" xml:space="preserve">
+    <value>Le paramètre {setting} attend du JSON de la même forme que sa valeur actuelle.</value>
+  </data>
 </root>
