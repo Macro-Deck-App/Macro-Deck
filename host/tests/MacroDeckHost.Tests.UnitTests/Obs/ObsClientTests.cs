@@ -106,6 +106,71 @@ internal sealed class ObsClientTests
 			"CustomEvent (General), profile (Config), scenes, mute and settings (Inputs), filters, outputs and studio mode (Ui)");
 	}
 
+	[Test]
+	public async Task A_status_read_while_obs_is_loading_is_abandoned_instead_of_reading_as_stopped()
+	{
+		await using var server = new FakeObsWebSocketServer(_ => ObsRequestException.NotReady);
+		var client = await ConnectedClientAsync(server);
+		try
+		{
+			Assert.Throws<ObsNotReadyException>(() => client.QueryStatus());
+		}
+		finally
+		{
+			client.Disconnect();
+		}
+	}
+
+	[Test]
+	public async Task A_status_read_that_obs_refuses_for_another_reason_still_answers()
+	{
+		await using var server = new FakeObsWebSocketServer(_ => ObsRequestException.ResourceNotFound);
+		var client = await ConnectedClientAsync(server);
+		ObsStatus status;
+		try
+		{
+			status = client.QueryStatus();
+		}
+		finally
+		{
+			client.Disconnect();
+		}
+
+		Assert.That(status.IsStreaming, Is.False);
+	}
+
+	[Test]
+	public async Task Switching_to_a_scene_collection_obs_does_not_have_reports_its_code()
+	{
+		await using var server = new FakeObsWebSocketServer(_ => ObsRequestException.ResourceNotFound);
+		var client = await ConnectedClientAsync(server);
+		ObsRequestException? error;
+		try
+		{
+			error = Assert.Throws<ObsRequestException>(() => client.SetCurrentSceneCollection("Deleted"));
+		}
+		finally
+		{
+			client.Disconnect();
+		}
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(error!.Code, Is.EqualTo(ObsRequestException.ResourceNotFound));
+			Assert.That(server.Requests, Does.Contain("SetCurrentSceneCollection"));
+		});
+	}
+
+	private static async Task<ObsClient> ConnectedClientAsync(FakeObsWebSocketServer server)
+	{
+		var client = new ObsClient();
+		var connected = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		client.Connected += (_, _) => connected.TrySetResult();
+		client.Connect(server.Url, null);
+		await connected.Task.WaitAsync(TimeSpan.FromSeconds(10));
+		return client;
+	}
+
 	private sealed class CollectingSink : ILogEventSink
 	{
 		public List<LogEvent> Events { get; } = [];

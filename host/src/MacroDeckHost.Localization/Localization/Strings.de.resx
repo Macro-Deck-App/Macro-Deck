@@ -7218,6 +7218,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Obs.Actions.SetProfile.Name" xml:space="preserve">
     <value>Profil festlegen</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetSceneCollection.Description" xml:space="preserve">
+    <value>Wechselt OBS zu einer anderen Szenensammlung</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetSceneCollection.Name" xml:space="preserve">
+    <value>Szenensammlung festlegen</value>
+  </data>
   <data name="Integrations.Obs.Actions.SetScene.Description" xml:space="preserve">
     <value>Wechselt die aktive Programmszene</value>
   </data>
@@ -7420,6 +7426,18 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Obs.Errors.NoProfileSelected" xml:space="preserve">
     <value>Es wurde kein Profil ausgewählt.</value>
   </data>
+  <data name="Integrations.Obs.Errors.NoSceneCollectionSelected" xml:space="preserve">
+    <value>Es wurde keine Szenensammlung ausgewählt.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SceneCollectionLoading" xml:space="preserve">
+    <value>OBS lädt noch eine Szenensammlung. Versuche es erneut, wenn sie fertig geladen ist.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SceneCollectionNotFound" xml:space="preserve">
+    <value>OBS hat keine Szenensammlung namens {name}.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SceneCollectionSlowToLoad" xml:space="preserve">
+    <value>OBS hat beim Laden der Szenensammlung nicht rechtzeitig geantwortet. Der Wechsel wird meist trotzdem abgeschlossen.</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoSceneOrSourceSelected" xml:space="preserve">
     <value>Es wurde weder eine Szene noch eine Quelle ausgewählt.</value>
   </data>
@@ -7602,6 +7620,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.Obs.Params.Profile" xml:space="preserve">
     <value>Profil</value>
+  </data>
+  <data name="Integrations.Obs.Params.SceneCollection" xml:space="preserve">
+    <value>Szenensammlung</value>
   </data>
   <data name="Integrations.Obs.Params.SaveToVariable" xml:space="preserve">
     <value>In Variable speichern</value>
@@ -18593,6 +18614,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.Obs.Variables.CurrentProfile" xml:space="preserve">
     <value>Aktuelles Profil</value>
+  </data>
+  <data name="Integrations.Obs.Variables.CurrentSceneCollection" xml:space="preserve">
+    <value>Aktuelle Szenensammlung</value>
   </data>
   <data name="Integrations.Obs.Variables.CurrentScene" xml:space="preserve">
     <value>Aktuelle Szene</value>

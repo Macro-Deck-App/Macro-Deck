@@ -25,6 +25,7 @@ internal static class ObsActions
 			preview: true,
 			resolver),
 		new ProfileActionDefinition(resolver),
+		new SceneCollectionActionDefinition(resolver),
 
 		new ObsAction("start-recording",
 			AppStrings.Integrations.Obs.Actions.StartRecording.Name(),

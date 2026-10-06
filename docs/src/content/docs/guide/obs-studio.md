@@ -1,6 +1,6 @@
 ---
 title: OBS Studio
-description: How Macro Deck follows changes in OBS Studio and reacts to events your OBS scripts send.
+description: How Macro Deck switches OBS Studio profiles and scene collections, follows changes in OBS and reacts to events your OBS scripts send.
 ---
 
 Macro Deck connects to OBS Studio through its built-in WebSocket server (obs-websocket 5.x). Add the
@@ -18,6 +18,27 @@ a change.
 
 Macro Deck never listens to the per-frame OBS events (audio level meters and scene item transforms),
 so a busy OBS does not slow Macro Deck down.
+
+## Profiles and scene collections
+
+**Set Profile** and **Set Scene Collection** switch OBS to the profile or scene collection you pick. The
+list shows what OBS has right now, so create or rename them in OBS first.
+
+A button with one of these actions lights up while its profile or scene collection is active, also when
+you switch in OBS itself. The variables **Current Profile** and **Current Scene Collection** show the
+active names.
+
+Loading a scene collection can take OBS a few seconds. Until it is done, Macro Deck keeps showing the
+state from before the switch, so a running stream or recording does not briefly read as stopped and
+fires no **Streaming Stopped** or **Recording Stopped** trigger. The same applies while OBS starts up:
+Macro Deck reports OBS as connected, and fires **Connected**, once OBS has finished loading.
+
+The action fails with a message when:
+
+- the scene collection was renamed or deleted in OBS. Pick it again from the list.
+- OBS is still loading another scene collection. Press again when it is done.
+- OBS takes longer than about 10 seconds to load the scene collection. OBS usually still finishes the
+  switch, and the button lights up once it has.
 
 ## Triggers
 

@@ -30,7 +30,8 @@ internal static class ObsVariables
 		new("skipped_frames_percent", VariableType.Numeric, 1, TimeSpan.FromSeconds(1)),
 		new("current_profile", VariableType.Text, null, TimeSpan.FromSeconds(1)),
 		new("last_recording_file", VariableType.Text, null, TimeSpan.FromSeconds(1)),
-		new("last_screenshot", VariableType.Text, null, TimeSpan.FromSeconds(1))
+		new("last_screenshot", VariableType.Text, null, TimeSpan.FromSeconds(1)),
+		new("current_scene_collection", VariableType.Text, null, TimeSpan.FromSeconds(1))
 	];
 
 	public static IReadOnlyList<VariableDefinition> Templates { get; } =
@@ -80,6 +81,7 @@ internal static class ObsVariables
 		"current_profile" => AppStrings.Integrations.Obs.Variables.CurrentProfile(),
 		"last_recording_file" => AppStrings.Integrations.Obs.Variables.LastRecordingFile(),
 		"last_screenshot" => AppStrings.Integrations.Obs.Variables.LastScreenshot(),
+		"current_scene_collection" => AppStrings.Integrations.Obs.Variables.CurrentSceneCollection(),
 		_ => default
 	};
 
@@ -146,6 +148,7 @@ internal static class ObsVariables
 		"current_scene" => state.CurrentScene,
 		"preview_scene" => state.PreviewScene,
 		"current_profile" => state.CurrentProfile,
+		"current_scene_collection" => state.CurrentSceneCollection,
 		"is_recording" => state.IsRecording,
 		"recording_paused" => state.RecordingPaused,
 		"recording_timecode" => state.RecordingTimecode,

@@ -23,7 +23,7 @@ internal sealed class ObsMultipleConfigurationsTests
 {
 	private static readonly string[] _actionIds =
 	[
-		"set-scene", "set-preview-scene", "set-profile", "start-recording", "stop-recording", "toggle-recording",
+		"set-scene", "set-preview-scene", "set-profile", "set-scene-collection", "start-recording", "stop-recording", "toggle-recording",
 		"toggle-pause-recording", "start-streaming", "stop-streaming", "toggle-streaming",
 		"start-virtual-camera", "stop-virtual-camera", "toggle-virtual-camera", "start-replay-buffer",
 		"stop-replay-buffer", "toggle-replay-buffer", "save-replay-buffer", "split-record-file",
@@ -166,7 +166,7 @@ internal sealed class ObsMultipleConfigurationsTests
 			Assert.That(collision.Key, Does.StartWith("main_obs_"));
 			Assert.That(empty.Key, Does.StartWith("configuration_"));
 			Assert.That(renamed.Key, Is.Not.EqualTo(main.Key));
-			Assert.That(before, Has.Count.EqualTo(23));
+			Assert.That(before, Has.Count.EqualTo(24));
 			Assert.That(before.Select(variable => variable.Name), Is.Unique);
 			Assert.That(after.Select(variable => variable.Id),
 				Is.EqualTo(before.Select(variable => variable.Id)));
@@ -307,7 +307,7 @@ internal sealed class ObsMultipleConfigurationsTests
 			Assert.That(first.Success, Is.True);
 			Assert.That(afterFirst.Count(variable =>
 					ObsVariables.TryGetConfigurationEntryId(variable.DefinitionId, out _)),
-				Is.EqualTo(23));
+				Is.EqualTo(24));
 			Assert.That(afterFirst.Any(variable => variable.Id == push.Data!.Id), Is.True);
 			Assert.That(second.Success, Is.True);
 			Assert.That(afterSecond.Select(variable => variable.Id), Is.EqualTo(new[] { push.Data!.Id }));
@@ -343,7 +343,7 @@ internal sealed class ObsMultipleConfigurationsTests
 			Assert.That(parsed, Is.True);
 			Assert.That(stored.Values[ObsConfigKeys.ConfigurationName].GetString(), Is.EqualTo("Studio"));
 			Assert.That(identity.Key, Is.EqualTo("studio_1234"));
-			Assert.That(variables, Has.Count.EqualTo(23));
+			Assert.That(variables, Has.Count.EqualTo(24));
 			Assert.That(
 				variables.All(variable => variable.Name.StartsWith("obs_studio_1234_", StringComparison.Ordinal)),
 				Is.True);

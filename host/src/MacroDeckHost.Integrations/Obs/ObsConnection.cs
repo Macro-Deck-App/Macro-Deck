@@ -21,7 +21,7 @@ internal enum ObsCommandOutcome
 	Rejected
 }
 
-internal readonly record struct ObsCommandResult(ObsCommandOutcome Outcome, string? Message = null)
+internal readonly record struct ObsCommandResult(ObsCommandOutcome Outcome, string? Message = null, int? Code = null)
 {
 	public static ObsCommandResult Success { get; } = new(ObsCommandOutcome.Success);
 
@@ -29,7 +29,8 @@ internal readonly record struct ObsCommandResult(ObsCommandOutcome Outcome, stri
 
 	public static ObsCommandResult NotRecording { get; } = new(ObsCommandOutcome.NotRecording);
 
-	public static ObsCommandResult Rejected(string message) => new(ObsCommandOutcome.Rejected, message);
+	public static ObsCommandResult Rejected(string message, int? code = null)
+		=> new(ObsCommandOutcome.Rejected, message, code);
 }
 
 internal sealed class ObsConnection : IDisposable, IAsyncDisposable
@@ -160,6 +161,8 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 
 	public Task<IReadOnlyList<string>> GetProfileNamesAsync() => QueryAsync(_client.GetProfileNames);
 
+	public Task<IReadOnlyList<string>> GetSceneCollectionNamesAsync() => QueryAsync(_client.GetSceneCollectionNames);
+
 	public Task<IReadOnlyList<string>> GetOutputNamesAsync() => QueryAsync(_client.GetOutputNames);
 
 	public Task<ObsOutputOutcome> StartOutputAsync(string outputName)
@@ -184,6 +187,10 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 	public Task<bool> SetSceneAsync(string sceneName) => RunAsync(() => _client.SetCurrentScene(sceneName));
 	public Task<bool> SetPreviewSceneAsync(string sceneName) => RunAsync(() => _client.SetPreviewScene(sceneName));
 	public Task<bool> SetProfileAsync(string profileName) => RunAsync(() => _client.SetCurrentProfile(profileName));
+
+	public Task<ObsCommandResult> SetSceneCollectionAsync(string sceneCollectionName)
+		=> RunForResultAsync(() => _client.SetCurrentSceneCollection(sceneCollectionName));
+
 	public Task<bool> StartRecordingAsync() => RunAsync(_client.StartRecord);
 	public Task<bool> StopRecordingAsync() => RunAsync(_client.StopRecord);
 	public Task<bool> ToggleRecordingAsync() => RunAsync(_client.ToggleRecord);
@@ -481,9 +488,14 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 					_status = ObsConnectionStatus.Connected;
 					Interlocked.Exchange(ref _reconnectFailures, 0);
 					LogConnected();
-					if (RefreshState())
+					var refresh = RefreshState();
+					if (refresh != StateRefresh.Failed)
 					{
 						StartPolling();
+					}
+
+					if (refresh == StateRefresh.Published)
+					{
 						_onVariablesChanged?.Invoke();
 					}
 
@@ -573,10 +585,16 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 
 		Interlocked.Exchange(ref _disconnectedLogged, 0);
 		_status = ObsConnectionStatus.Connected;
-		if (RefreshState())
+		var refresh = RefreshState();
+		if (refresh == StateRefresh.Failed)
 		{
-			StartPolling();
-			_signals.Writer.TryWrite(ConnectionSignal.Established);
+			return;
+		}
+
+		StartPolling();
+		_signals.Writer.TryWrite(ConnectionSignal.Established);
+		if (refresh == StateRefresh.Published)
+		{
 			_onVariablesChanged?.Invoke();
 		}
 	}
@@ -771,17 +789,17 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 
 	private void OnStateChanged(object? sender, EventArgs e)
 	{
-		if (RefreshState())
+		if (RefreshState() == StateRefresh.Published)
 		{
 			_onVariablesChanged?.Invoke();
 		}
 	}
 
-	private bool RefreshState()
+	private StateRefresh RefreshState()
 	{
 		if (_cts.IsCancellationRequested || Volatile.Read(ref _disposed) != 0 || !_client.IsConnected)
 		{
-			return false;
+			return StateRefresh.Failed;
 		}
 
 		try
@@ -791,18 +809,23 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 			{
 				if (_cts.IsCancellationRequested || Volatile.Read(ref _disposed) != 0 || !_client.IsConnected)
 				{
-					return false;
+					return StateRefresh.Failed;
 				}
 
 				_state = state;
 				_events?.Observe(state);
-				return true;
+				return StateRefresh.Published;
 			}
+		}
+		catch (ObsNotReadyException)
+		{
+			_logger.Debug("OBS is not ready yet; keeping the last published state");
+			return StateRefresh.NotReady;
 		}
 		catch (Exception ex)
 		{
 			_logger.Warning(ex, "Failed to read OBS state");
-			return false;
+			return StateRefresh.Failed;
 		}
 	}
 
@@ -853,7 +876,7 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		catch (ObsRequestException ex)
 		{
 			_logger.Warning(ex, "OBS rejected a request with code {Code}", ex.Code);
-			return ObsCommandResult.Rejected(ex.Message);
+			return ObsCommandResult.Rejected(ex.Message, ex.Code);
 		}
 		catch (Exception ex)
 		{
@@ -930,6 +953,13 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 	});
 
 	private static float ToMultiplier(double percent) => (float)(Math.Clamp(percent, 0d, 100d) / 100d);
+
+	private enum StateRefresh
+	{
+		Published,
+		NotReady,
+		Failed
+	}
 
 	private readonly record struct ConnectionSignal(bool Connected, string? Reason)
 	{
