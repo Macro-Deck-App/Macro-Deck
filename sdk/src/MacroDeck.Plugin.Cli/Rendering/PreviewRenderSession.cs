@@ -13,7 +13,7 @@ internal static class PreviewRenderSession
 		Func<string, CancellationToken, Task<IPreviewScreenshotter>>? screenshotterFactory,
 		CancellationToken cancellationToken)
 	{
-		if (!TryValidate(console, options, out var explicitSizes))
+		if (!TryValidate(console, options, out var explicitSizes, out var videoStreamImage))
 		{
 			return ExitCode.UsageError;
 		}
@@ -70,8 +70,8 @@ internal static class PreviewRenderSession
 
 		await using (plugin.ConfigureAwait(false))
 		{
-			return await RenderAsync(console, options, explicitSizes, browser, session, previews, screenshotterFactory,
-				cancellationToken).ConfigureAwait(false);
+			return await RenderAsync(console, options, explicitSizes, videoStreamImage, browser, session, previews,
+				screenshotterFactory, cancellationToken).ConfigureAwait(false);
 		}
 	}
 
@@ -79,6 +79,7 @@ internal static class PreviewRenderSession
 		CliConsole console,
 		PreviewRenderOptions options,
 		List<PreviewSize> explicitSizes,
+		string? videoStreamImage,
 		string browser,
 		PluginSessionView session,
 		IReadOnlyList<UiPreviewDescriptorDto> declared,
@@ -145,7 +146,7 @@ internal static class PreviewRenderSession
 					try
 					{
 						await screenshotter.CaptureAsync(
-							new PreviewShot(PreviewScene.Build(root, size, options, resources, translations), size, options.Scale, target),
+							new PreviewShot(PreviewScene.Build(root, size, options, resources, translations, videoStreamImage), size, options.Scale, target),
 							cancellationToken).ConfigureAwait(false);
 						console.Info($"Wrote {CliText.DisplayPath(target)}");
 						written++;
@@ -232,9 +233,11 @@ internal static class PreviewRenderSession
 		return selected;
 	}
 
-	private static bool TryValidate(CliConsole console, PreviewRenderOptions options, out List<PreviewSize> sizes)
+	private static bool TryValidate(CliConsole console, PreviewRenderOptions options, out List<PreviewSize> sizes,
+		out string? videoStreamImage)
 	{
 		sizes = [];
+		videoStreamImage = null;
 
 		var selectors = new[] { options.Project, options.Executable, options.Artifact }.Count(value => value is not null);
 		if (selectors != 1)
@@ -274,6 +277,11 @@ internal static class PreviewRenderSession
 		if (!IsColor(options.Background))
 		{
 			console.WriteError("invalid-background", "--background must be transparent, a color name or a #hex color.");
+			return false;
+		}
+
+		if (options.VideoStreamImage is { } imagePath && !VideoStreamStill.TryRead(console, imagePath, out videoStreamImage))
+		{
 			return false;
 		}
 

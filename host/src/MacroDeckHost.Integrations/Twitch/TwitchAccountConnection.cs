@@ -1,5 +1,5 @@
 using System.Text.Json;
-using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.StreamChat;
 using MacroDeckHost.Integrations.Twitch.Auth;
 using MacroDeckHost.Integrations.Twitch.Protocol;
 using Serilog;
@@ -10,7 +10,7 @@ internal sealed class TwitchAccountConnection : IDisposable
 {
 	private readonly ILogger _logger;
 	private readonly TwitchEventEmitter? _emitter;
-	private readonly ITwitchChatSink? _chatSink;
+	private readonly IStreamChatSink? _chatSink;
 	private readonly Lock _sync = new();
 	private readonly CancellationTokenSource _stopping = new();
 
@@ -32,7 +32,7 @@ internal sealed class TwitchAccountConnection : IDisposable
 		ITwitchHelixClient helix,
 		TwitchEventEmitter? emitter,
 		ILogger logger,
-		ITwitchChatSink? chatSink = null)
+		IStreamChatSink? chatSink = null)
 	{
 		Account = account;
 		Tokens = tokens;
@@ -136,7 +136,7 @@ internal sealed class TwitchAccountConnection : IDisposable
 	{
 		Merge(state => state with { IsConnected = connected });
 		_emitter?.PublishConnection(Account, connected);
-		_chatSink?.Post(new TwitchChatConnectionChanged(Account.UserId, connected));
+		_chatSink?.Post(new ChatConnectionChanged(Account.UserId, connected));
 
 		if (connected)
 		{

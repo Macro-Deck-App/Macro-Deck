@@ -10,6 +10,7 @@ export interface SystemFontFace {
   slant: FontFaceSlant;
   styleName: string;
   remoteRenderable: boolean;
+  userImported?: boolean;
 }
 
 export interface GetSystemFontsResponse {

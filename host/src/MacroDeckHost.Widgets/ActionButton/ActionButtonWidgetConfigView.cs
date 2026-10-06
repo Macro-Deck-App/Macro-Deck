@@ -61,6 +61,26 @@ internal static class ActionButtonWidgetConfigView
 			.OrderBy(family => family, StringComparer.OrdinalIgnoreCase)
 			.ToList();
 
+		var previewFaces = fonts.GetFaces()
+			.Where(face => face.RemoteRenderable)
+			.GroupBy(face => face.Family, StringComparer.Ordinal)
+			.ToDictionary(group => group.Key,
+				group => group
+					.OrderBy(face => face.Slant == FontFaceIdentity.UprightSlant ? 0 : 1)
+					.ThenBy(face => Math.Abs(face.Weight - FontFaceIdentity.RegularWeight))
+					.ThenBy(face => Math.Abs(face.Width - FontFaceIdentity.NormalWidth))
+					.First()
+					.FaceId,
+				StringComparer.Ordinal);
+
+		UiOption FamilyOption(string family)
+			=> previewFaces.TryGetValue(family, out var previewFaceId)
+				? UiOption.Of(family, family) with
+				{
+					Metadata = new Dictionary<string, string> { ["fontFaceId"] = previewFaceId }
+				}
+				: UiOption.Of(family, family);
+
 		string FamilyOf(string faceId)
 			=> string.IsNullOrEmpty(faceId)
 				? string.Empty
@@ -107,6 +127,15 @@ internal static class ActionButtonWidgetConfigView
 			new UiState<string>(WidgetConfigJson.ReadString(data, "backgroundColor") ?? string.Empty);
 		var labelColor = new UiState<string>(WidgetConfigJson.ReadString(data, "labelColor") ?? string.Empty);
 		var labelBoxColor = new UiState<string>(WidgetConfigJson.ReadString(data, "labelBoxColor") ?? string.Empty);
+		var labelShadow = new UiState<bool>(WidgetConfigJson.ReadBool(data, "labelShadow") ?? true);
+		var labelOutlineColor =
+			new UiState<string>(WidgetConfigJson.ReadString(data, "labelOutlineColor") ?? string.Empty);
+		var labelOutlineWidth = new UiState<double>(WidgetConfigJson.ReadDouble(data, "labelOutlineWidth") ??
+			ActionButtonWidgetData.DefaultLabelStrokeWidth);
+		var labelBoxBorderColor =
+			new UiState<string>(WidgetConfigJson.ReadString(data, "labelBoxBorderColor") ?? string.Empty);
+		var labelBoxBorderWidth = new UiState<double>(WidgetConfigJson.ReadDouble(data, "labelBoxBorderWidth") ??
+			ActionButtonWidgetData.DefaultLabelStrokeWidth);
 		var fontFaceId = new UiState<string>(WidgetConfigJson.ReadString(data, "fontFaceId") ?? string.Empty);
 		var fontSize = new UiState<double>(WidgetConfigJson.ReadDouble(data, "fontSize") ?? 14);
 		var textAlign = new UiState<string>(WidgetConfigJson.ReadString(data, "textAlign") ?? "center");
@@ -741,6 +770,11 @@ internal static class ActionButtonWidgetConfigView
 			UiBinding<string> labelPositionBinding,
 			UiBinding<string> labelColorBinding,
 			UiBinding<string> labelBoxColorBinding,
+			UiBinding<bool> labelShadowBinding,
+			UiBinding<string> labelOutlineColorBinding,
+			UiBinding<double> labelOutlineWidthBinding,
+			UiBinding<string> labelBoxBorderColorBinding,
+			UiBinding<double> labelBoxBorderWidthBinding,
 			UiBinding<string> backgroundColorBinding,
 			UiBinding<UiIconReference> iconBinding,
 			UiBinding<UiIconDisplay> iconDisplayBinding,
@@ -805,7 +839,7 @@ internal static class ActionButtonWidgetConfigView
 									{
 										Value = string.Empty, Label = AppStrings.Forms.InheritableSetting.Inherited(),
 									},
-									.. fontFamilies.Select(family => UiOption.Of(family, family)),
+									.. fontFamilies.Select(FamilyOption),
 								]),
 							},
 							new UiConfigStack
@@ -921,6 +955,26 @@ internal static class ActionButtonWidgetConfigView
 								SupportsReset = true,
 								DefaultValue = string.Empty,
 							},
+							new UiBooleanInput
+							{
+								Key = "labelShadow",
+								Label = AppStrings.Widgets.Editor.LabelShadow(),
+								Binding = labelShadowBinding,
+							},
+							.. LabelStroke("labelOutlineColor",
+								AppStrings.Widgets.Editor.LabelOutlineColor(),
+								labelOutlineColorBinding,
+								"labelOutlineWidth",
+								AppStrings.Widgets.Editor.LabelOutlineWidth(),
+								labelOutlineWidthBinding,
+								ActionButtonWidgetData.MaxLabelOutlineWidth),
+							.. LabelStroke("labelBoxBorderColor",
+								AppStrings.Widgets.Editor.LabelBoxBorderColor(),
+								labelBoxBorderColorBinding,
+								"labelBoxBorderWidth",
+								AppStrings.Widgets.Editor.LabelBoxBorderWidth(),
+								labelBoxBorderWidthBinding,
+								ActionButtonWidgetData.MaxLabelBoxBorderWidth),
 						],
 					},
 					new UiTab
@@ -1218,6 +1272,13 @@ internal static class ActionButtonWidgetConfigView
 						labelPositionBinding: StateStringBinding(states, stateId, "labelPosition", fallback: "center"),
 						labelColorBinding: StateStringBinding(states, stateId, "labelColor"),
 						labelBoxColorBinding: StateStringBinding(states, stateId, "labelBoxColor"),
+						labelShadowBinding: StateBoolBinding(states, stateId, "labelShadow", () => labelShadow.Value),
+						labelOutlineColorBinding: StateStringBinding(states, stateId, "labelOutlineColor"),
+						labelOutlineWidthBinding:
+							StateDoubleBinding(states, stateId, "labelOutlineWidth", () => labelOutlineWidth.Value),
+						labelBoxBorderColorBinding: StateStringBinding(states, stateId, "labelBoxBorderColor"),
+						labelBoxBorderWidthBinding:
+							StateDoubleBinding(states, stateId, "labelBoxBorderWidth", () => labelBoxBorderWidth.Value),
 						backgroundColorBinding: StateStringBinding(states, stateId, "backgroundColor"),
 						iconBinding: iconBinding,
 						iconDisplayBinding: iconDisplayBinding,
@@ -1626,6 +1687,11 @@ internal static class ActionButtonWidgetConfigView
 			labelPositionBinding: Bind.To(labelPosition),
 			labelColorBinding: Bind.To(labelColor),
 			labelBoxColorBinding: Bind.To(labelBoxColor),
+			labelShadowBinding: Bind.To(labelShadow),
+			labelOutlineColorBinding: Bind.To(labelOutlineColor),
+			labelOutlineWidthBinding: Bind.To(labelOutlineWidth),
+			labelBoxBorderColorBinding: Bind.To(labelBoxBorderColor),
+			labelBoxBorderWidthBinding: Bind.To(labelBoxBorderWidth),
 			backgroundColorBinding: Bind.To(backgroundColor),
 			iconBinding: Bind.To(icon),
 			iconDisplayBinding: Bind.Custom(() => new UiIconDisplay(iconFit.Value,
@@ -1806,13 +1872,62 @@ internal static class ActionButtonWidgetConfigView
 		string stateId,
 		string field,
 		double fallback)
+		=> StateDoubleBinding(states, stateId, field, () => fallback);
+
+	private static UiBinding<double> StateDoubleBinding(
+		UiState<List<ActionButtonStateEntry>> states,
+		string stateId,
+		string field,
+		Func<double> fallback)
 		=> Bind.Custom(() =>
 			{
 				var appearance = states.Value.FirstOrDefault(s => s.Id == stateId)?.Appearance;
 
-				return appearance?[field] is JsonValue value && value.TryGetValue<double>(out var d) ? d : fallback;
+				return appearance?[field] is JsonValue value && value.TryGetValue<double>(out var d) ? d : fallback();
 			},
 			value => MutateAppearance(states, stateId, appearance => appearance[field] = value));
+
+	private static UiBinding<bool> StateBoolBinding(
+		UiState<List<ActionButtonStateEntry>> states,
+		string stateId,
+		string field,
+		Func<bool> fallback)
+		=> Bind.Custom(() =>
+			{
+				var appearance = states.Value.FirstOrDefault(s => s.Id == stateId)?.Appearance;
+
+				return appearance?[field] is JsonValue value && value.TryGetValue<bool>(out var b) ? b : fallback();
+			},
+			value => MutateAppearance(states, stateId, appearance => appearance[field] = value));
+
+	private static UiElement[] LabelStroke(
+		string colorKey,
+		UiText colorLabel,
+		UiBinding<string> colorBinding,
+		string widthKey,
+		UiText widthLabel,
+		UiBinding<double> widthBinding,
+		double maxWidth)
+		=>
+		[
+			new UiColorInput
+			{
+				Key = colorKey,
+				Label = colorLabel,
+				Binding = colorBinding,
+				SupportsReset = true,
+				DefaultValue = string.Empty,
+			},
+			new UiNumberInput
+			{
+				Key = widthKey,
+				Label = widthLabel,
+				Binding = widthBinding,
+				Min = 0,
+				Max = maxWidth,
+				Step = 0.5,
+			},
+		];
 
 	private static UiIconReference? ReadStateIcon(IReadOnlyList<ActionButtonStateEntry> states, string stateId)
 	{

@@ -22,10 +22,10 @@ export function sessionCode(secret, nowSeconds, nonce) {
 }
 
 export async function openDesktop(page) {
-  // The Production host reads the live Platform, so a published announcement opens its modal at any
-  // moment and covers the UI; dismiss it whenever it blocks an action.
+  // A Production host opens the live Platform's announcement at any moment. Dismiss it with a bare click
+  // event: a real click's mousedown would close whatever menu the interrupted step had just opened.
   await page.addLocatorHandler(page.locator('app-announcement-modal .modal-overlay'), async overlay => {
-    await overlay.getByRole('button', { name: 'Got it' }).click();
+    await overlay.getByRole('button', { name: 'Got it' }).dispatchEvent('click');
   });
   const code = sessionCode(loopbackSecret(), Math.floor(Date.now() / 1000), randomBytes(16).toString('hex'));
   await page.goto(`/api/auth/loopback-session?code=${code}`);

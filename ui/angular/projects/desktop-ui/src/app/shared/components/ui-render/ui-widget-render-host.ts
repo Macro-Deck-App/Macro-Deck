@@ -47,7 +47,7 @@ export class UiWidgetRenderHostFactory {
       culture: () => this.localization.culture(),
       hourCycle: () => this.localization.hourCycle(),
       simpleRendering: () => this.renderingMode.mode() === 'simple',
-      fontFamily: faceId => internalFontFamily(faceId),
+      fontFamily: faceId => `${internalFontFamily(faceId)}, var(--font-sans)`,
       // Reading the face's status signal inside the paint is the whole of the readiness gate: the
       // renderer hides text in a face that is still loading, and the read is what brings the frame
       // back once the face lands (issue #457 findings 7/8).

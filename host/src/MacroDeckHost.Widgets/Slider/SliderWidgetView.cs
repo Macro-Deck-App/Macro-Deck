@@ -156,7 +156,13 @@ internal static class SliderWidgetView
 
 		if (icon is { } resolvedIcon)
 		{
-			children.Add(new UiImage { Key = "icon", Size = 0.16, Source = UiValue.Of(resolvedIcon) });
+			children.Add(new UiImage
+			{
+				Key = "icon",
+				Size = 0.16,
+				Source = UiValue.Of(resolvedIcon),
+				Tint = ColorValue(config.IconColor),
+			});
 		}
 
 		if (config.ShowLabel && config.Label is { } label)

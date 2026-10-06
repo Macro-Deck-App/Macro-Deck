@@ -2,6 +2,7 @@ using MacroDeck.Sdk.Logging;
 using Newtonsoft.Json.Linq;
 using OBSWebsocketDotNet;
 using OBSWebsocketDotNet.Communication;
+using OBSWebsocketDotNet.Types;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.Obs;
@@ -11,12 +12,24 @@ internal sealed class ObsClient : IObsClient
 	private readonly ILogger _logger;
 	private readonly TimeSpan _reachabilityTimeout;
 
+	// Every category a handler below needs and nothing else. The library default is All, which also
+	// carries SceneItems, MediaInputs, Vendors and Canvases traffic nothing here reads.
+	internal const EventSubscription BaseSubscriptions = EventSubscription.General |
+		EventSubscription.Config |
+		EventSubscription.Scenes |
+		EventSubscription.Inputs |
+		EventSubscription.Filters |
+		EventSubscription.Outputs |
+		EventSubscription.Ui;
+
 	private readonly OBSWebsocket _obs = new();
+	private int _activityHandlersAttached;
 
 	internal ObsClient(ILogger? logger = null, TimeSpan? reachabilityTimeout = null)
 	{
 		_logger = logger ?? IntegrationLog.For<ObsClient>(ObsIntegration.IntegrationId);
 		_reachabilityTimeout = reachabilityTimeout ?? TimeSpan.FromSeconds(2);
+		_obs.EventSubscriptions = BaseSubscriptions;
 		_obs.Connected += OnConnected;
 		_obs.Disconnected += OnDisconnected;
 
@@ -32,9 +45,23 @@ internal sealed class ObsClient : IObsClient
 		_obs.InputMuteStateChanged += (_, args) =>
 			InputMuteChanged?.Invoke(this, new ObsInputMuteChange(args.InputName, args.InputMuted));
 		_obs.ReplayBufferSaved += (_, args) => ReplayBufferSaved?.Invoke(this, args.SavedReplayPath);
+		_obs.RecordFileChanged += (_, args) => RecordFileChanged?.Invoke(this, args.NewOutputPath);
+		_obs.ScreenshotSaved += (_, args) => ScreenshotSaved?.Invoke(this, args.SavedScreenshotPath);
 
-		// Deliberately not subscribed: InputVolumeMeters fires at the audio meter refresh rate
-		// (tens of times a second). Nothing downstream should ever be driven by it.
+		_obs.InputSettingsChanged += (_, args) => Raise(() =>
+		{
+			var keys = args.InputSettings?.Properties().Select(property => property.Name).ToList() ?? [];
+			InputSettingsChanged?.Invoke(this, new ObsInputSettingsChange(args.InputName, keys));
+		});
+		_obs.SourceFilterSettingsChanged += (_, args) =>
+			SourceFilterChanged?.Invoke(this, new ObsFilterChange(args.SourceName, args.FilterName));
+		_obs.SourceFilterEnableStateChanged += (_, args) =>
+			SourceFilterChanged?.Invoke(this, new ObsFilterChange(args.SourceName, args.FilterName));
+		_obs.CustomEvent += (_, args) => Raise(() =>
+			CustomEventReceived?.Invoke(this, ObsCustomEvent.Serialize(args.EventData)));
+
+		// Deliberately never subscribed: InputVolumeMeters and SceneItemTransformChanged fire at audio
+		// meter and frame rate. Nothing downstream should ever be driven by them.
 	}
 
 	public event EventHandler? Connected;
@@ -46,6 +73,22 @@ internal sealed class ObsClient : IObsClient
 	public event EventHandler<ObsInputMuteChange>? InputMuteChanged;
 
 	public event EventHandler<string>? ReplayBufferSaved;
+
+	public event EventHandler<string>? RecordFileChanged;
+
+	public event EventHandler<string>? ScreenshotSaved;
+
+	public event EventHandler<ObsInputSettingsChange>? InputSettingsChanged;
+
+	public event EventHandler<ObsFilterChange>? SourceFilterChanged;
+
+	public event EventHandler<ObsInputFlagChange>? InputActiveChanged;
+
+	public event EventHandler<ObsInputFlagChange>? InputShowingChanged;
+
+	public event EventHandler<string>? CustomEventReceived;
+
+	internal EventSubscription EventSubscriptions => _obs.EventSubscriptions;
 
 	public bool IsConnected => _obs.IsConnected;
 
@@ -178,6 +221,15 @@ internal sealed class ObsClient : IObsClient
 		return profiles?.Profiles.ToList() ?? [];
 	}
 
+	public IReadOnlyList<string> GetOutputNames()
+	{
+		var response = TranslateOutputErrors("GetOutputList", string.Empty,
+			() => _obs.SendRequest("GetOutputList", new JObject()));
+		return response?["outputs"] is JArray outputs
+			? outputs.Select(o => o.Value<string>("outputName")).OfType<string>().Distinct(StringComparer.Ordinal).ToList()
+			: [];
+	}
+
 	public void SetCurrentScene(string sceneName) => _obs.SetCurrentProgramScene(sceneName);
 
 	public void SetPreviewScene(string sceneName) => _obs.SetCurrentPreviewScene(sceneName);
@@ -211,6 +263,25 @@ internal sealed class ObsClient : IObsClient
 	public void ToggleReplayBuffer() => _obs.ToggleReplayBuffer();
 
 	public void SaveReplayBuffer() => _obs.SaveReplayBuffer();
+
+	public void SplitRecordFile() => Request(_obs.SplitRecordFile);
+
+	public void CreateRecordChapter(string? chapterName) => Request(() => _obs.SendRequest("CreateRecordChapter",
+		string.IsNullOrWhiteSpace(chapterName) ? null : new JObject { ["chapterName"] = chapterName }));
+
+	public void SetRecordDirectory(string directory) => Request(() => _obs.SetRecordDirectory(directory));
+
+	public void StartOutput(string outputName)
+		=> TranslateOutputErrors("StartOutput", outputName, () => _obs.StartOutput(outputName));
+
+	public void StopOutput(string outputName)
+		=> TranslateOutputErrors("StopOutput", outputName, () => _obs.StopOutput(outputName));
+
+	public void ToggleOutput(string outputName)
+		=> TranslateOutputErrors("ToggleOutput", outputName, () => _obs.ToggleOutput(outputName));
+
+	public bool GetOutputActive(string outputName)
+		=> TranslateOutputErrors("GetOutputStatus", outputName, () => _obs.GetOutputStatus(outputName).IsActive);
 
 	public bool GetSourceVisible(string sceneName, string sourceName)
 		=> _obs.GetSceneItemEnabled(sceneName, _obs.GetSceneItemId(sceneName, sourceName, 0));
@@ -296,6 +367,8 @@ internal sealed class ObsClient : IObsClient
 	{
 		try
 		{
+			AttachActivityHandlers();
+
 			if (!await ObsReachabilityProbe.IsReachableAsync(url, _reachabilityTimeout).ConfigureAwait(false))
 			{
 				Disconnected?.Invoke(this, "unreachable");
@@ -311,12 +384,76 @@ internal sealed class ObsClient : IObsClient
 		}
 	}
 
+	// These two are high-volume in obs-websocket: attaching a handler is what opts in, so it happens once
+	// and only when a connection is actually attempted.
+	private void AttachActivityHandlers()
+	{
+		if (Interlocked.Exchange(ref _activityHandlersAttached, 1) != 0)
+		{
+			return;
+		}
+
+		_obs.InputActiveStateChanged += (_, args) =>
+			InputActiveChanged?.Invoke(this, new ObsInputFlagChange(args.InputName, args.VideoActive));
+		_obs.InputShowStateChanged += (_, args) =>
+			InputShowingChanged?.Invoke(this, new ObsInputFlagChange(args.InputName, args.VideoShowing));
+	}
+
+	private void Raise(Action raise)
+	{
+		try
+		{
+			raise();
+		}
+		catch (Exception ex)
+		{
+			_logger.Debug(ex, "OBS event handler failed");
+		}
+	}
+
 	private void OnConnected(object? sender, EventArgs e) => Connected?.Invoke(this, EventArgs.Empty);
 
 	private void OnDisconnected(object? sender, ObsDisconnectionInfo e)
 		=> Disconnected?.Invoke(this, e.DisconnectReason);
 
 	private void RaiseStateChanged() => StateChanged?.Invoke(this, EventArgs.Empty);
+
+	private static void Request(Action request)
+	{
+		try
+		{
+			request();
+		}
+		catch (ErrorResponseException ex)
+		{
+			throw new ObsRequestException(ex.ErrorCode, ex.Message);
+		}
+	}
+
+	// obs-websocket answers 204 to a request type it does not know (a server older than 5.7) and 600 to a
+	// name it cannot find.
+	private static T TranslateOutputErrors<T>(string request, string outputName, Func<T> call)
+	{
+		try
+		{
+			return call();
+		}
+		catch (ErrorResponseException ex) when (ex.ErrorCode == 204)
+		{
+			throw new ObsRequestUnsupportedException(request);
+		}
+		catch (ErrorResponseException ex) when (ex.ErrorCode == 600)
+		{
+			throw new ObsOutputNotFoundException(outputName);
+		}
+	}
+
+	private static void TranslateOutputErrors(string request, string outputName, Action call)
+		=> TranslateOutputErrors(request, outputName, () =>
+		{
+			call();
+			return true;
+		});
 
 	private T Try<T>(Func<T> read, T fallback)
 	{

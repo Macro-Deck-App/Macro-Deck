@@ -9,6 +9,9 @@ public static class ProfileDtoMapper
 {
 	public static Profile MapJsonProfile(ProfileEntity entity) => MapJsonProfile(entity, constraint: null);
 
+	public static ProfilePlacement MapToPlacement(ProfileEntity entity)
+		=> new() { Id = entity.Id.ToString(), Order = entity.Order };
+
 	public static Profile MapJsonProfile(ProfileEntity entity, DeviceGridConstraint? constraint)
 		=> new()
 		{

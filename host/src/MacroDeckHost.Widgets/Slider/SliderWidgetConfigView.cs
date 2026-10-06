@@ -31,6 +31,7 @@ internal static class SliderWidgetConfigView
 		// annotation; declaring the state as UiIconReference? here would fail to unify with the input's own
 		// UiBinding<UiIconReference> at the generic level.
 		var icon = new UiState<UiIconReference>(ReadIcon(data)!);
+		var iconColor = new UiState<string>(WidgetConfigJson.ReadString(data, "iconColor") ?? string.Empty);
 		var orientation = new UiState<string>(WidgetConfigJson.ReadString(data, "orientation") ?? "horizontal");
 		var interaction = new UiState<string>(WidgetConfigJson.ReadString(data, "interaction") ?? "absolute");
 		var color = new UiState<string>(WidgetConfigJson.ReadString(data, "color") ?? string.Empty);
@@ -160,6 +161,19 @@ internal static class SliderWidgetConfigView
 					},
 					new UiIconReferenceInput
 						{ Key = "icon", Label = AppStrings.Widgets.Editor.Icon(), Binding = Bind.To(icon) },
+					new UiWhen
+					{
+						Key = "icon-color-when",
+						Condition = () => icon.Value is not null,
+						Content = () => new UiColorInput
+						{
+							Key = "iconColor",
+							Label = AppStrings.Widgets.Editor.IconColor(),
+							Binding = Bind.To(iconColor),
+							SupportsReset = true,
+							DefaultValue = string.Empty,
+						},
+					},
 					new UiChoiceInput
 					{
 						Key = "orientation",

@@ -1,12 +1,12 @@
 using MacroDeck.Sdk.Logging;
-using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.StreamChat;
 using MacroDeckHost.Integrations.Twitch.Protocol;
 using Serilog;
 using TwitchLib.Api.Core.Exceptions;
 
 namespace MacroDeckHost.Integrations.Twitch;
 
-internal sealed class TwitchChatModerator : ITwitchChatModerator
+internal sealed class TwitchChatModerator : IStreamChatModerator
 {
 	private static readonly ILogger _logger = IntegrationLog.For<TwitchChatModerator>(TwitchIntegration.IntegrationId);
 
@@ -17,9 +17,9 @@ internal sealed class TwitchChatModerator : ITwitchChatModerator
 		_accounts = accounts;
 	}
 
-	public async Task<TwitchChatModerationResult> ModerateAsync(
+	public async Task<ChatModerationResult> ModerateAsync(
 		string accountId,
-		TwitchChatModerationRequest request,
+		ChatModerationRequest request,
 		CancellationToken cancellationToken)
 	{
 		ArgumentNullException.ThrowIfNull(request);
@@ -28,7 +28,7 @@ internal sealed class TwitchChatModerator : ITwitchChatModerator
 		if (string.IsNullOrEmpty(accountId) ||
 			_accounts().Resolve(accountId) is not { State.IsConnected: true } connection)
 		{
-			return TwitchChatModerationResult.AccountUnavailable;
+			return ChatModerationResult.AccountUnavailable;
 		}
 
 		var channel = connection.Account.UserId;
@@ -38,50 +38,50 @@ internal sealed class TwitchChatModerator : ITwitchChatModerator
 			switch (request)
 			{
 				// A missing message id makes Helix delete every message in the chat.
-				case { Kind: TwitchChatModerationKind.DeleteMessage, MessageId: { Length: > 0 } messageId }:
+				case { Kind: ChatModerationKind.DeleteMessage, MessageId: { Length: > 0 } messageId }:
 					await connection.Helix.DeleteChatMessagesAsync(channel, channel, messageId, cancellationToken);
 					break;
-				case { Kind: TwitchChatModerationKind.Timeout, ChatterId: { Length: > 0 } chatterId, DurationSeconds: > 0 }:
+				case { Kind: ChatModerationKind.Timeout, AuthorId: { Length: > 0 } chatterId, DurationSeconds: > 0 }:
 					await connection.Helix.BanUserAsync(channel, channel, chatterId, request.DurationSeconds, null,
 						cancellationToken);
 					break;
-				case { Kind: TwitchChatModerationKind.Ban, ChatterId: { Length: > 0 } chatterId }:
+				case { Kind: ChatModerationKind.Ban, AuthorId: { Length: > 0 } chatterId }:
 					await connection.Helix.BanUserAsync(channel, channel, chatterId, null, null, cancellationToken);
 					break;
-				case { Kind: TwitchChatModerationKind.Unban, ChatterId: { Length: > 0 } chatterId }:
+				case { Kind: ChatModerationKind.Unban, AuthorId: { Length: > 0 } chatterId }:
 					await connection.Helix.UnbanUserAsync(channel, channel, chatterId, cancellationToken);
 					break;
 				default:
-					return TwitchChatModerationResult.Refused;
+					return ChatModerationResult.Refused;
 			}
 
-			return TwitchChatModerationResult.Succeeded;
+			return ChatModerationResult.Succeeded;
 		}
 		catch (TwitchScopeException)
 		{
 			_logger.Warning("Twitch chat moderation skipped: {Account} did not grant the permission for it",
 				connection.Account.Login);
 
-			return TwitchChatModerationResult.MissingScope;
+			return ChatModerationResult.MissingScope;
 		}
 		catch (BadTokenException exception)
 		{
 			_logger.Warning(exception, "Twitch refused {Kind} for {Account}", request.Kind, connection.Account.Login);
 
-			return TwitchChatModerationResult.NotPermitted;
+			return ChatModerationResult.NotPermitted;
 		}
 		catch (Exception exception) when (exception is BadRequestException or BadParameterException)
 		{
 			_logger.Warning(exception, "Twitch rejected {Kind} for {Account}", request.Kind, connection.Account.Login);
 
-			return TwitchChatModerationResult.Refused;
+			return ChatModerationResult.Refused;
 		}
 		catch (Exception exception) when (exception is not OperationCanceledException ||
 			!cancellationToken.IsCancellationRequested)
 		{
 			_logger.Warning(exception, "Twitch chat moderation {Kind} failed", request.Kind);
 
-			return TwitchChatModerationResult.Failed;
+			return ChatModerationResult.Failed;
 		}
 	}
 }

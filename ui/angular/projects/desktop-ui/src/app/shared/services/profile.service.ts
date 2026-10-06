@@ -3,14 +3,33 @@ import {
   AppStrings,
   emptyCellStyleFromWire,
   type IpcProfile,
+  type IpcProfilePlacement,
   Profile,
   type ProfileCreatedEvent,
   type ProfileDeletedEvent,
+  type ProfilesReorderedEvent,
   type ProfileUpdatedEvent,
   type Result,
 } from '@macro-deck/runtime';
 import { ApiService } from '../transport';
 import { LocalizationService } from '../localization';
+
+type ProfileMovePosition = 'before' | 'after';
+
+function compareProfiles(a: Profile, b: Profile): number {
+  if (a.isVirtual !== b.isVirtual) {
+    return a.isVirtual ? 1 : -1;
+  }
+  if (a.order !== b.order) {
+    return a.order - b.order;
+  }
+  const left = a.name.toUpperCase();
+  const right = b.name.toUpperCase();
+  if (left !== right) {
+    return left < right ? -1 : 1;
+  }
+  return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +44,7 @@ export class ProfileService {
   readonly loadError = signal<string | null>(null);
 
   readonly sortedProfiles = computed(() =>
-    [...this.profiles()].sort((a, b) => a.order - b.order)
+    [...this.profiles()].sort(compareProfiles)
   );
 
   readonly selectedProfile = computed(() =>
@@ -65,6 +84,10 @@ export class ProfileService {
       }
     });
 
+    this.api.onNotification<ProfilesReorderedEvent>('ProfilesReorderedEvent').subscribe(event => {
+      this.applyPlacements(event.profiles ?? []);
+    });
+
     this.api.onNotification<ProfileDeletedEvent>('ProfileDeletedEvent').subscribe(event => {
       if (event.profileId) {
         this.removeFromState(event.profileId);
@@ -81,7 +104,7 @@ export class ProfileService {
       const profiles = (response.profiles ?? []).map(p => this.mapIpcProfile(p));
       this.profiles.set(profiles);
 
-      const sorted = [...profiles].sort((a, b) => a.order - b.order);
+      const sorted = [...profiles].sort(compareProfiles);
       const currentId = this.selectedProfileId();
       if ((!currentId || !profiles.some(p => p.id === currentId)) && sorted.length > 0) {
         const preferred = preferredProfileId && profiles.some(p => p.id === preferredProfileId)
@@ -173,6 +196,37 @@ export class ProfileService {
     }
   }
 
+  async moveProfile(id: string, targetId: string, position: ProfileMovePosition): Promise<Result> {
+    const previous = this.profiles();
+    const ordered = this.sortedProfiles().filter(p => !p.isVirtual);
+    const moving = ordered.find(p => p.id === id);
+    if (!moving || id === targetId || !ordered.some(p => p.id === targetId)) {
+      return { success: false, error: { code: 'VALIDATION_ERROR', message: this.localization.translateKey(AppStrings.Errors.Profile.MoveFailed) } };
+    }
+
+    const reordered = ordered.filter(p => p.id !== id);
+    const targetIndex = reordered.findIndex(p => p.id === targetId);
+    reordered.splice(position === 'after' ? targetIndex + 1 : targetIndex, 0, moving);
+    this.applyPlacements(reordered.map((profile, order) => ({ id: profile.id, order })));
+
+    try {
+      const response = await this.api.moveProfile({ id, targetId, position });
+      if (!response.success) {
+        this.profiles.set(previous);
+        return { success: false, error: response.error };
+      }
+      this.applyPlacements(response.profiles ?? []);
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to move profile:', error);
+      this.profiles.set(previous);
+      return {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: this.localization.translateKey(AppStrings.Errors.Profile.MoveFailed) }
+      };
+    }
+  }
+
   async deleteProfile(id: string): Promise<Result> {
     try {
       const response = await this.api.deleteProfile({ id });
@@ -214,6 +268,17 @@ export class ProfileService {
         error: { code: 'INTERNAL_ERROR', message: this.localization.translateKey(AppStrings.Errors.Profile.DuplicateFailed) }
       };
     }
+  }
+
+  private applyPlacements(placements: IpcProfilePlacement[]): void {
+    if (placements.length === 0) {
+      return;
+    }
+    const orders = new Map(placements.map(placement => [placement.id, placement.order]));
+    this.profiles.update(profiles => profiles.map(profile => {
+      const order = orders.get(profile.id);
+      return order === undefined || order === profile.order ? profile : { ...profile, order };
+    }));
   }
 
   private removeFromState(id: string): void {

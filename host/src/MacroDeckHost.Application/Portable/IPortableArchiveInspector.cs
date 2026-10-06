@@ -24,7 +24,10 @@ public sealed record PortableArchiveInfo(
 	int ScriptCount,
 	int SecretCount,
 	int VariableCount,
-	IReadOnlyList<PortableIntegrationInfo> Integrations);
+	IReadOnlyList<PortableIntegrationInfo> Integrations)
+{
+	public int FontCount { get; init; }
+}
 
 public interface IPortableArchiveInspector
 {

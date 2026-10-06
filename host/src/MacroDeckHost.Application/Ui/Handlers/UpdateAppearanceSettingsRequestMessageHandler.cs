@@ -52,7 +52,8 @@ public class UpdateAppearanceSettingsRequestMessageHandler
 		}
 
 		return _fonts.GetFaces()
-			.Any(face => face.RemoteRenderable && string.Equals(face.Family, family, StringComparison.Ordinal))
+			.Any(face => face is { RemoteRenderable: true, UserImported: false } &&
+				string.Equals(face.Family, family, StringComparison.Ordinal))
 			? family
 			: string.Empty;
 	}

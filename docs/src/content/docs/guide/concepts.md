@@ -19,6 +19,10 @@ Automatic activation stays with the original, so set it up again for the copy if
 Edit a profile from the profile menu to set its default grid size, widget spacing and corner radius.
 Turn **Widget shadows** off there for a flat deck, which also looks cleaner with very small spacing.
 
+To change the order of your profiles, open the profile menu and drag a profile by its handle, or choose
+**Move Up** or **Move Down** from its **More actions** menu. A device without a profile of its own opens
+the first one, and the Companion app's two-finger swipe follows this order once the app reconnects.
+
 ## Folders
 
 Inside **Streaming**: a start folder **Home** with **Scenes**, **Audio** and **Chat** subfolders,
@@ -44,21 +48,29 @@ The tiles in a folder:
 | Music Player | What Spotify is playing, with play and skip. Some players offer extra settings for each widget below the player choice |
 | Twitch Chat | Your channel's chat with emotes and badges, offered once a Twitch account is connected |
 | Twitch Stream Stats | Whether you are live, your viewers, chatters, followers and subscribers, the stream title, category and uptime, and a small graph, in a style you choose, offered once a Twitch account is connected |
+| YouTube Chat | Your live stream's chat, offered once a [YouTube channel](/guide/youtube/) is connected |
+| YouTube Stream Stats | Whether you are live, your viewers, likes and subscribers, the stream title and uptime, and a small graph, in a style you choose, offered once a YouTube channel is connected |
 | Countdown | A pizza timer that counts down and alerts you when it runs out |
 | Stopwatch | How long the current segment of your stream has been running |
 
-### Moderating from the Twitch Chat widget
+Labels and text use the fonts installed on your computer, plus any you import under
+[Library > Fonts](/guide/fonts/).
 
-Press the **Twitch Chat** widget to open the chat in a larger dialog. It stays at the newest message while
+### Moderating from the chat widgets
+
+Press the **Twitch Chat** or **YouTube Chat** widget to open the chat in a larger dialog. It stays at the newest message while
 you are at the bottom. Scroll up to read, and the chat stops moving; **Jump to latest** takes you back.
 
 Tap a message to delete it, time out its sender for 1 minute, 10 minutes or 1 hour, ban or unban them. A ban
-asks you to confirm first. The dialog says whether the action worked, or why Twitch refused it:
+asks you to confirm first. The dialog says whether the action worked, or why Twitch or YouTube refused it:
 
 - **Twitch did not grant Macro Deck the permission for this action**: reconnect the Twitch account in
   **Integrations** to grant the moderation permissions.
 - **Twitch did not allow this**: reconnect the Twitch account in **Integrations** and try again.
 - **The host is locked**: unlock the computer running Macro Deck, as for any other action.
+
+On YouTube, **Unban** only lifts bans you made through Macro Deck during the current broadcast; lift other bans
+in YouTube Studio. See [YouTube](/guide/youtube/#moderating-youtube-chat).
 
 Your channel's own messages, and messages that reach your chat from another channel's Shared Chat, offer no
 actions; moderate those on Twitch. Anyone who can use your deck can moderate through the dialog. To only
@@ -70,9 +82,9 @@ On a small device or a large widget, change **Size (%)** in the widget's setting
 smaller. 100 is the default and values from 25 to 300 are accepted. The size applies to the widget; the chat
 dialog keeps its own.
 
-### The Twitch Stream Stats widget
+### The Stream Stats widgets
 
-Pick what the widget shows with **Style** in its settings. Each style names the size it is designed for, and
+The **Twitch Stream Stats** and **YouTube Stream Stats** widgets work the same way. Pick what the widget shows with **Style** in its settings. Each style names the size it is designed for, and
 keeps the same content at any other size, only larger or smaller:
 
 | Style | Shows |
@@ -83,16 +95,18 @@ keeps the same content at any other size, only larger or smaller:
 | **Single value with graph (2x2)** | One number, the live status and a graph of that number |
 | **Single value (1x1)** | One number with a live dot |
 
-For the Overview and the Stats row, **Stats** chooses which tiles appear, out of viewers, chatters, followers
-and subscribers, and in which order: drag a row or use its arrows. Viewers, chatters and followers are on by
-default. Four tiles fit best in a widget one column wider than the style's size. The Overview also has
-**Stream details**, which chooses and orders the title, category and uptime next to the thumbnail, and
+For the Overview and the Stats row, **Stats** chooses which tiles appear and in which order: drag a row or use
+its arrows. Twitch offers viewers, chatters, followers and subscribers, with the first three on by default.
+YouTube offers viewers, likes and subscribers, all on by default. Four tiles fit best in a widget one column wider than the style's size. The Overview also has
+**Stream details**, which chooses and orders the title, category (Twitch only) and uptime next to the thumbnail, and
 **Show thumbnail**. For the other three styles, **Value** chooses the number they show.
 
 The graph follows the chosen number. It starts when the widget is first shown and begins again after Macro
 Deck restarts, so it fills over time; followers and subscribers change slowly, so their graph often stays
 flat. Offline, viewers and chatters show a dash, while followers and subscribers stay. Subscribers also show a
-dash while Twitch does not report them to Macro Deck.
+dash while Twitch does not report them to Macro Deck. On YouTube, viewers and likes show a dash offline, and
+viewers and subscribers also while you hide those counts on YouTube. The Live status row shows the stream title
+instead of the category.
 
 Everything the widget shows is also a regular variable of the Twitch integration, named
 `twitch_<account>_viewer_count`, `twitch_<account>_chatter_count`, `twitch_<account>_follower_count`,
@@ -100,7 +114,8 @@ Everything the widget shows is also a regular variable of the Twitch integration
 `twitch_<account>_stream_category`, `twitch_<account>_uptime_seconds`, `twitch_<account>_is_live` and
 `twitch_<account>_stream_thumbnail_url`. Use them in your own widgets, actions
 and conditions. The chatter count is everyone in your chat, including you and bots, and needs one more
-permission: if **Integrations** shows that the account lacks it, reconnect the Twitch account.
+permission: if **Integrations** shows that the account lacks it, reconnect the Twitch account. The YouTube
+variables are listed on the [YouTube](/guide/youtube/#what-you-can-use) page.
 
 ### Countdown and Stopwatch
 
@@ -308,7 +323,7 @@ starts playing.
 ## Integrations and the Store
 
 Integrations connect Macro Deck to other apps: OBS, Home Assistant, Voicemeeter, Spotify, Twitch,
-Discord and more. Turn on the ones you use under **Integrations**.
+[YouTube](/guide/youtube/), Discord and more. Turn on the ones you use under **Integrations**.
 
 ![The Integrations page with ADB, Discord, Home Assistant, HTTP and Keyboard](../../../assets/guide/integrations.png)
 
@@ -478,6 +493,26 @@ once more and any changes you made to it in the meantime are replaced by the plu
 
 While a plugin developer runs a plugin from its project, its packs appear the same way. If that plugin is never
 installed, the packs stay as ordinary icon packs after the developer stops it.
+
+## Managing OBS recordings
+
+Besides starting and stopping a recording, the OBS Studio integration can manage one while it runs:
+
+- **Split Recording File** starts a new file and keeps recording.
+- **Create Recording Chapter** adds a chapter marker, optionally with a name. OBS supports chapters only for
+  the **Hybrid MP4** format.
+- **Set Recording Directory** changes the folder OBS saves new recordings to. Enter the path as OBS sees it:
+  when OBS runs on another computer, that is a folder on that computer.
+
+Split and chapter only work while OBS is recording. Otherwise the action fails and says that OBS is not
+recording. If OBS refuses a request, for example a chapter in a format without chapter support or a folder it
+cannot use, the action fails and shows OBS's reason.
+
+Use the events **Recording File Changed** (when a recording starts, moves to a new file or stops) and
+**Screenshot Saved** as triggers, for example to move a finished file or to send yourself a notification. Both
+carry the file's path. The variables **Last Recording File** and **Last Screenshot** hold the latest of these
+paths. They keep their value across splits and when OBS disconnects, and start empty again when Macro Deck
+restarts or you edit the OBS configuration.
 
 ## Devices
 

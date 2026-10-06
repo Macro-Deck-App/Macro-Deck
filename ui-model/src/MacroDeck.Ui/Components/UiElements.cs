@@ -261,6 +261,19 @@ public sealed record UiTextRun : UiComponentLeaf
 	/// </summary>
 	public UiValue<IReadOnlyList<UiTextSpan>> Spans { get; init; }
 
+	/// <summary>Whether the run keeps the legibility shadow a reader may draw behind text, such as the one
+	/// Macro Deck's renderer draws behind text on a button. Absent or <c>true</c> leaves it to the reader;
+	/// <c>false</c> draws none. A reader that does not know the key keeps its default.</summary>
+	public UiValue<bool> Shadow { get; init; }
+
+	/// <summary>The colour of an outline drawn around the glyphs, as <c>#rrggbb</c>. Drawn only together
+	/// with a positive <see cref="StrokeWidth" />. A reader that does not know the key draws no outline.</summary>
+	public UiValue<string> StrokeColor { get; init; }
+
+	/// <summary>How far the glyph outline reaches outside each glyph. The outline never changes the run's
+	/// box or its fit. Absent or zero draws no outline.</summary>
+	public UiSize StrokeWidth { get; init; }
+
 	/// <inheritdoc />
 	public override string Type => UiComponents.Text;
 
@@ -283,6 +296,9 @@ public sealed record UiTextRun : UiComponentLeaf
 		properties.Set(UiComponentProperties.FontFace, FontFace);
 		properties.Set(UiComponentProperties.Digits, Digits);
 		properties.Set(UiComponentProperties.Spans, Spans);
+		properties.Set(UiComponentProperties.Shadow, Shadow);
+		properties.Set(UiComponentProperties.StrokeColor, StrokeColor);
+		properties.Set(UiComponentProperties.StrokeWidth, StrokeWidth.Value);
 	}
 }
 
@@ -344,6 +360,10 @@ public sealed record UiImage : UiComponentLeaf
 	/// </summary>
 	public UiValue<double> Saturation { get; init; }
 
+	/// <summary>The image recoloured, as <c>#rrggbb</c> - see <see cref="UiComponentProperties.Tint" />,
+	/// which states the normative result. Absent means the image's own colours.</summary>
+	public UiValue<string> Tint { get; init; }
+
 	/// <inheritdoc />
 	public override string Type => UiComponents.Image;
 
@@ -359,6 +379,7 @@ public sealed record UiImage : UiComponentLeaf
 		properties.Set(UiComponentProperties.Opacity, Opacity);
 		properties.Set(UiComponentProperties.Brightness, Brightness);
 		properties.Set(UiComponentProperties.Saturation, Saturation);
+		properties.Set(UiComponentProperties.Tint, Tint);
 		properties.Set(UiComponentProperties.Size, Size.Value);
 	}
 }

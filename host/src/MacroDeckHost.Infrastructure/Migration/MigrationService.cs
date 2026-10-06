@@ -214,7 +214,7 @@ public sealed class MigrationService : IMigrationService
 				}
 			}
 
-			var imported = await _profiles.ImportContent(content, [], cancellationToken);
+			var imported = await _profiles.ImportContent(content, [], [], cancellationToken);
 			if (imported.Success)
 			{
 				created.Add(imported.Data!.Id);

@@ -12,6 +12,20 @@ internal interface IObsClient
 
 	event EventHandler<string>? ReplayBufferSaved;
 
+	event EventHandler<string>? RecordFileChanged;
+
+	event EventHandler<string>? ScreenshotSaved;
+
+	event EventHandler<ObsInputSettingsChange>? InputSettingsChanged;
+
+	event EventHandler<ObsFilterChange>? SourceFilterChanged;
+
+	event EventHandler<ObsInputFlagChange>? InputActiveChanged;
+
+	event EventHandler<ObsInputFlagChange>? InputShowingChanged;
+
+	event EventHandler<string>? CustomEventReceived;
+
 	bool IsConnected { get; }
 
 	void Connect(string url, string? password);
@@ -35,6 +49,8 @@ internal interface IObsClient
 	IReadOnlyList<string> GetSourceFilterNames(string sourceName);
 
 	IReadOnlyList<string> GetProfileNames();
+
+	IReadOnlyList<string> GetOutputNames();
 
 	void SetCurrentScene(string sceneName);
 
@@ -69,6 +85,20 @@ internal interface IObsClient
 	void ToggleReplayBuffer();
 
 	void SaveReplayBuffer();
+
+	void SplitRecordFile();
+
+	void CreateRecordChapter(string? chapterName);
+
+	void SetRecordDirectory(string directory);
+
+	void StartOutput(string outputName);
+
+	void StopOutput(string outputName);
+
+	void ToggleOutput(string outputName);
+
+	bool GetOutputActive(string outputName);
 
 	bool GetSourceVisible(string sceneName, string sourceName);
 
@@ -106,7 +136,26 @@ internal interface IObsClient
 	string GetInputSettings(string inputName);
 }
 
+internal sealed class ObsRequestException : Exception
+{
+	internal const int OutputNotRunning = 501;
+
+	public ObsRequestException(int code, string message)
+		: base(message)
+	{
+		Code = code;
+	}
+
+	public int Code { get; }
+}
+
 internal readonly record struct ObsInputMuteChange(string InputName, bool Muted);
+
+internal sealed record ObsInputSettingsChange(string InputName, IReadOnlyList<string> ChangedKeys);
+
+internal readonly record struct ObsFilterChange(string SourceName, string FilterName);
+
+internal readonly record struct ObsInputFlagChange(string InputName, bool Value);
 
 /// <summary>Which of OBS's six audio tracks an input is assigned to, in track order 1..6.</summary>
 internal sealed record ObsAudioTracks(IReadOnlyList<bool> Tracks);

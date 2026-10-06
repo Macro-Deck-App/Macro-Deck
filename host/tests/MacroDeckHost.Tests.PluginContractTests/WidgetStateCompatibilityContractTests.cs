@@ -467,6 +467,9 @@ internal sealed class WidgetStateCompatibilityContractTests
 		public Task InitializeCache() => Task.CompletedTask;
 		public Task AddOrUpdate(ProfileEntity profile) => Task.CompletedTask;
 
+		public Task<IReadOnlyList<ProfileEntity>> ApplyOrders(IReadOnlyDictionary<Guid, int> orders)
+			=> Task.FromResult<IReadOnlyList<ProfileEntity>>([]);
+
 		public Task AddOrUpdateAggregate(ProfileEntity profile, IReadOnlyCollection<FolderEntity> folders)
 			=> Task.CompletedTask;
 

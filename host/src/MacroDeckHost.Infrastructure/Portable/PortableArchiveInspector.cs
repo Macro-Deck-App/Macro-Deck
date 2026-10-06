@@ -52,7 +52,10 @@ public sealed class PortableArchiveInspector : IPortableArchiveInspector
 			manifest.Contents.ScriptCount,
 			manifest.Contents.SecretCount,
 			manifest.Contents.VariableCount,
-			integrations);
+			integrations)
+		{
+			FontCount = manifest.Contents.FontCount
+		};
 
 		return Result.Ok<PortableArchiveInfo, PortabilityError>(info);
 	}

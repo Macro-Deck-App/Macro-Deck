@@ -575,6 +575,18 @@ public class AuthPolicyMatrixTests
 	}
 
 	[Test]
+	public async Task The_github_star_prompt_is_admin_only()
+	{
+		var responses = new[]
+		{
+			await Send(HttpMethod.Get, "/api/github-star-prompt", _clientToken),
+			await Send(HttpMethod.Post, "/api/github-star-prompt/shown", _clientToken)
+		};
+
+		Assert.That(responses.Select(response => response.StatusCode), Is.All.EqualTo(HttpStatusCode.Forbidden));
+	}
+
+	[Test]
 	public async Task Store_tests_and_installing_a_test_build_are_admin_only()
 	{
 		var responses = new[]
@@ -682,6 +694,10 @@ public class AuthPolicyMatrixTests
 			$"/api/profiles/{Guid.NewGuid()}/duplicate",
 			new { },
 			_clientToken);
+		var moveProfile = await SendJson(HttpMethod.Post,
+			$"/api/profiles/{Guid.NewGuid()}/move",
+			new { targetId = Guid.NewGuid().ToString(), position = "before" },
+			_clientToken);
 		var logging = await Send(HttpMethod.Get, "/api/settings/logging", _clientToken);
 		var pluginTokens = await Send(HttpMethod.Get, "/api/plugin-tokens", _clientToken);
 		var pluginSessions = await Send(HttpMethod.Get, "/api/plugin-sessions", _clientToken);
@@ -715,6 +731,7 @@ public class AuthPolicyMatrixTests
 			Assert.That(runningApplications.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 			Assert.That(setFocusRule.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 			Assert.That(duplicateProfile.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+			Assert.That(moveProfile.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 			Assert.That(deleteFocusRule.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 			Assert.That(setStartupProfile.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 			Assert.That(openProfileOnDevice.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));

@@ -13,6 +13,25 @@ internal enum ObsConnectionStatus
 	Disconnected
 }
 
+internal enum ObsCommandOutcome
+{
+	Success,
+	NotConnected,
+	NotRecording,
+	Rejected
+}
+
+internal readonly record struct ObsCommandResult(ObsCommandOutcome Outcome, string? Message = null)
+{
+	public static ObsCommandResult Success { get; } = new(ObsCommandOutcome.Success);
+
+	public static ObsCommandResult NotConnected { get; } = new(ObsCommandOutcome.NotConnected);
+
+	public static ObsCommandResult NotRecording { get; } = new(ObsCommandOutcome.NotRecording);
+
+	public static ObsCommandResult Rejected(string message) => new(ObsCommandOutcome.Rejected, message);
+}
+
 internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 {
 	private static readonly TimeSpan _maxReconnectDelay = TimeSpan.FromMinutes(1);
@@ -38,6 +57,9 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 	private readonly ObsEventEmitter? _events;
 	private readonly FailureEpisodeTracker _failures;
 	private readonly object _publicationGate = new();
+	private readonly ObsChangeCoalescer _changes;
+	private readonly ObsCustomEventLimiter _customEventLimiter;
+	private readonly Action<IReadOnlyList<ObsTargetChange>>? _onTargetsChanged;
 
 	private readonly Lock _targetReadGate = new();
 
@@ -56,6 +78,8 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 	private int _disconnectedLogged;
 	private int _reconnectFailures;
 	private volatile string? _lastError;
+	private volatile string? _lastRecordingFilePath;
+	private volatile string? _lastScreenshotPath;
 
 	internal ObsConnection(
 		IObsClient client,
@@ -66,7 +90,9 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		ILogger? logger = null,
 		TimeSpan? failureSummaryInterval = null,
 		Action? onVariablesChanged = null,
-		TimeSpan? pollInterval = null)
+		TimeSpan? pollInterval = null,
+		Action<IReadOnlyList<ObsTargetChange>>? onTargetsChanged = null,
+		TimeProvider? timeProvider = null)
 	{
 		_client = client;
 		_logger = logger ?? IntegrationLog.For<ObsConnection>(ObsIntegration.IntegrationId);
@@ -77,17 +103,31 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		_onVariablesChanged = onVariablesChanged;
 		_pollInterval = pollInterval ?? TimeSpan.FromSeconds(1);
 		_failures = new FailureEpisodeTracker(failureSummaryInterval);
+		_onTargetsChanged = onTargetsChanged;
+		_changes = new ObsChangeCoalescer(FlushTargetChanges, TimeSpan.FromMilliseconds(100), timeProvider);
+		_customEventLimiter = new ObsCustomEventLimiter(timeProvider);
 
 		_client.Connected += OnConnected;
 		_client.Disconnected += OnDisconnected;
 		_client.StateChanged += OnStateChanged;
 		_client.InputMuteChanged += OnInputMuteChanged;
 		_client.ReplayBufferSaved += OnReplayBufferSaved;
+		_client.RecordFileChanged += OnRecordFileChanged;
+		_client.ScreenshotSaved += OnScreenshotSaved;
+		_client.InputSettingsChanged += OnInputSettingsChanged;
+		_client.SourceFilterChanged += OnSourceFilterChanged;
+		_client.InputActiveChanged += OnInputActiveChanged;
+		_client.InputShowingChanged += OnInputShowingChanged;
+		_client.CustomEventReceived += OnCustomEventReceived;
 	}
 
 	public ObsState State => _state;
 
 	public ObsConnectionStatus Status => _status;
+
+	public string? LastRecordingFilePath => _lastRecordingFilePath;
+
+	public string? LastScreenshotPath => _lastScreenshotPath;
 
 	public bool IsConnected => _client.IsConnected;
 
@@ -120,6 +160,27 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 
 	public Task<IReadOnlyList<string>> GetProfileNamesAsync() => QueryAsync(_client.GetProfileNames);
 
+	public Task<IReadOnlyList<string>> GetOutputNamesAsync() => QueryAsync(_client.GetOutputNames);
+
+	public Task<ObsOutputOutcome> StartOutputAsync(string outputName)
+		=> OutputCommandAsync(() => _client.StartOutput(outputName));
+
+	public Task<ObsOutputOutcome> StopOutputAsync(string outputName)
+		=> OutputCommandAsync(() => _client.StopOutput(outputName));
+
+	public Task<ObsOutputOutcome> ToggleOutputAsync(string outputName)
+		=> OutputCommandAsync(() => _client.ToggleOutput(outputName));
+
+	public Task<ObsOutputRead> GetOutputActiveAsync(string outputName) => Task.Run(() =>
+	{
+		var active = false;
+		var outcome = RunOutputCommand(() => active = _client.GetOutputActive(outputName));
+		return new ObsOutputRead(outcome, active);
+	});
+
+	public Task<bool?> GetOutputActiveCachedAsync(string outputName)
+		=> CachedTargetReadAsync<bool>($"output-active:{outputName}", () => _client.GetOutputActive(outputName));
+
 	public Task<bool> SetSceneAsync(string sceneName) => RunAsync(() => _client.SetCurrentScene(sceneName));
 	public Task<bool> SetPreviewSceneAsync(string sceneName) => RunAsync(() => _client.SetPreviewScene(sceneName));
 	public Task<bool> SetProfileAsync(string profileName) => RunAsync(() => _client.SetCurrentProfile(profileName));
@@ -137,6 +198,13 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 	public Task<bool> StopReplayBufferAsync() => RunAsync(_client.StopReplayBuffer);
 	public Task<bool> ToggleReplayBufferAsync() => RunAsync(_client.ToggleReplayBuffer);
 	public Task<bool> SaveReplayBufferAsync() => RunAsync(_client.SaveReplayBuffer);
+	public Task<ObsCommandResult> SplitRecordFileAsync() => RunForResultAsync(_client.SplitRecordFile);
+
+	public Task<ObsCommandResult> CreateRecordChapterAsync(string? chapterName)
+		=> RunForResultAsync(() => _client.CreateRecordChapter(chapterName));
+
+	public Task<ObsCommandResult> SetRecordDirectoryAsync(string directory)
+		=> RunForResultAsync(() => _client.SetRecordDirectory(directory));
 
 	public Task<bool> SetSourceVisibleAsync(string sceneName, string sourceName, bool visible)
 		=> RunAsync(() => _client.SetSourceVisible(sceneName, sourceName, visible));
@@ -290,6 +358,15 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		_client.SetInputVolume(inputName, ToMultiplier(target));
 	});
 
+	public Task<bool> SetInputVolumeDecibelsAsync(string inputName, double decibels)
+		=> RunAsync(() => _client.SetInputVolume(inputName, ObsVolumeScale.ToMultiplier(decibels)));
+
+	public Task<bool> AdjustInputVolumeDecibelsAsync(string inputName, double deltaDecibels) => RunAsync(() =>
+	{
+		var target = ObsVolumeScale.ToDecibels(_client.GetInputVolume(inputName)) + deltaDecibels;
+		_client.SetInputVolume(inputName, ObsVolumeScale.ToMultiplier(target));
+	});
+
 	public Task<bool?> GetSourceFilterEnabledAsync(string sourceName, string filterName)
 		=> QueryValueAsync<bool?>(() => _client.GetSourceFilterEnabled(sourceName, filterName), null);
 
@@ -325,7 +402,15 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		_client.Disconnected -= OnDisconnected;
 		_client.InputMuteChanged -= OnInputMuteChanged;
 		_client.ReplayBufferSaved -= OnReplayBufferSaved;
+		_client.RecordFileChanged -= OnRecordFileChanged;
+		_client.ScreenshotSaved -= OnScreenshotSaved;
 		_client.StateChanged -= OnStateChanged;
+		_client.InputSettingsChanged -= OnInputSettingsChanged;
+		_client.SourceFilterChanged -= OnSourceFilterChanged;
+		_client.InputActiveChanged -= OnInputActiveChanged;
+		_client.InputShowingChanged -= OnInputShowingChanged;
+		_client.CustomEventReceived -= OnCustomEventReceived;
+		_changes.Dispose();
 		StopPolling();
 
 		try
@@ -507,6 +592,103 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		}
 	}
 
+	private void OnInputSettingsChanged(object? sender, ObsInputSettingsChange change)
+		=> _changes.Add(new ObsTargetChange(ObsTargetKind.InputSettings, change.InputName, null, change.ChangedKeys));
+
+	private void OnSourceFilterChanged(object? sender, ObsFilterChange change)
+		=> _changes.Add(new ObsTargetChange(ObsTargetKind.Filter, change.SourceName, change.FilterName));
+
+	private void OnInputActiveChanged(object? sender, ObsInputFlagChange change)
+	{
+		_changes.Add(new ObsTargetChange(ObsTargetKind.SourceActivity, change.InputName));
+		PublishInputActivity(change.Value ? ObsEventIds.InputBecameActive : ObsEventIds.InputBecameInactive,
+			change.InputName);
+	}
+
+	private void OnInputShowingChanged(object? sender, ObsInputFlagChange change)
+	{
+		_changes.Add(new ObsTargetChange(ObsTargetKind.SourceActivity, change.InputName));
+		PublishInputActivity(change.Value ? ObsEventIds.InputStartedShowing : ObsEventIds.InputStoppedShowing,
+			change.InputName);
+	}
+
+	private void PublishInputActivity(string eventId, string inputName)
+	{
+		lock (_publicationGate)
+		{
+			if (!_cts.IsCancellationRequested && Volatile.Read(ref _disposed) == 0)
+			{
+				_events?.PublishInputActivity(eventId, inputName);
+			}
+		}
+	}
+
+	private void OnCustomEventReceived(object? sender, string json)
+	{
+		try
+		{
+			if (!_customEventLimiter.TryAcquire(out var droppedBefore))
+			{
+				return;
+			}
+
+			if (droppedBefore > 0)
+			{
+				_logger.Warning("Dropped {Count} OBS custom events that arrived faster than the allowed rate",
+					droppedBefore);
+			}
+
+			var payload = ObsCustomEvent.Parse(json);
+			if (payload is null)
+			{
+				_logger.Debug("Ignored an OBS custom event that is oversized or not valid JSON");
+				return;
+			}
+
+			lock (_publicationGate)
+			{
+				if (!_cts.IsCancellationRequested && Volatile.Read(ref _disposed) == 0)
+				{
+					_events?.PublishCustomEvent(payload);
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			_logger.Debug(ex, "Failed to process an OBS custom event");
+		}
+	}
+
+	private void FlushTargetChanges(IReadOnlyList<ObsTargetChange> changes)
+	{
+		try
+		{
+			if (_cts.IsCancellationRequested || Volatile.Read(ref _disposed) != 0)
+			{
+				return;
+			}
+
+			lock (_targetReadGate)
+			{
+				foreach (var change in changes)
+				{
+					_targetReads.Remove(change.Kind switch
+					{
+						ObsTargetKind.InputSettings => $"settings:{change.Name}",
+						ObsTargetKind.SourceActivity => $"source-active:{change.Name}",
+						_ => $"filter:{change.Name}\u0000{change.Child}"
+					});
+				}
+			}
+
+			_onTargetsChanged?.Invoke(changes);
+		}
+		catch (Exception ex)
+		{
+			_logger.Debug(ex, "Failed to apply OBS change notifications");
+		}
+	}
+
 	private void OnReplayBufferSaved(object? sender, string path)
 	{
 		lock (_publicationGate)
@@ -515,6 +697,44 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 			{
 				_events?.PublishReplayBufferSaved(path);
 			}
+		}
+	}
+
+	private void OnRecordFileChanged(object? sender, string path)
+	{
+		var published = false;
+		lock (_publicationGate)
+		{
+			if (!_cts.IsCancellationRequested && Volatile.Read(ref _disposed) == 0)
+			{
+				_lastRecordingFilePath = path;
+				_events?.PublishRecordFileChanged(path);
+				published = true;
+			}
+		}
+
+		if (published)
+		{
+			_onVariablesChanged?.Invoke();
+		}
+	}
+
+	private void OnScreenshotSaved(object? sender, string path)
+	{
+		var published = false;
+		lock (_publicationGate)
+		{
+			if (!_cts.IsCancellationRequested && Volatile.Read(ref _disposed) == 0)
+			{
+				_lastScreenshotPath = path;
+				_events?.PublishScreenshotSaved(path);
+				published = true;
+			}
+		}
+
+		if (published)
+		{
+			_onVariablesChanged?.Invoke();
 		}
 	}
 
@@ -613,6 +833,65 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 			return false;
 		}
 	});
+
+	private Task<ObsCommandResult> RunForResultAsync(Action action) => Task.Run(() =>
+	{
+		if (!IsConnected)
+		{
+			return ObsCommandResult.NotConnected;
+		}
+
+		try
+		{
+			action();
+			return ObsCommandResult.Success;
+		}
+		catch (ObsRequestException ex) when (ex.Code == ObsRequestException.OutputNotRunning)
+		{
+			return ObsCommandResult.NotRecording;
+		}
+		catch (ObsRequestException ex)
+		{
+			_logger.Warning(ex, "OBS rejected a request with code {Code}", ex.Code);
+			return ObsCommandResult.Rejected(ex.Message);
+		}
+		catch (Exception ex)
+		{
+			_logger.Error(ex, "OBS command failed");
+			return IsConnected ? ObsCommandResult.Rejected(ex.Message) : ObsCommandResult.NotConnected;
+		}
+	});
+
+	private Task<ObsOutputOutcome> OutputCommandAsync(Action action) => Task.Run(() => RunOutputCommand(action));
+
+	private ObsOutputOutcome RunOutputCommand(Action action)
+	{
+		if (!IsConnected)
+		{
+			return ObsOutputOutcome.NotConnected;
+		}
+
+		try
+		{
+			action();
+			return ObsOutputOutcome.Done;
+		}
+		catch (ObsRequestUnsupportedException ex)
+		{
+			_logger.Warning(ex, "OBS output request unsupported");
+			return ObsOutputOutcome.Unsupported;
+		}
+		catch (ObsOutputNotFoundException ex)
+		{
+			_logger.Warning(ex, "OBS output not found");
+			return ObsOutputOutcome.NotFound;
+		}
+		catch (Exception ex)
+		{
+			_logger.Error(ex, "OBS output request failed");
+			return ObsOutputOutcome.Failed;
+		}
+	}
 
 	private Task<IReadOnlyList<string>> QueryAsync(Func<IReadOnlyList<string>> query) => Task.Run(() =>
 	{

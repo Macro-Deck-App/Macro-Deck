@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using MacroDeck.Plugin.Cli.Rendering;
 using MacroDeck.Plugin.Cli.Runtime;
@@ -317,12 +318,186 @@ public class PreviewRenderCommandTests
 		});
 	}
 
+	[Test]
+	public async Task A_video_stream_image_is_handed_to_every_scene_and_is_absent_without_the_option()
+	{
+		Directory.CreateDirectory(_output);
+		var image = Path.Combine(_output, "camera.png");
+		await File.WriteAllBytesAsync(image, [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 1, 2, 3]);
+		var with = new FakeScreenshotter();
+		var without = new FakeScreenshotter();
+
+		var (_, _, exitCode) = await Render(with, "--preview", "Station tile", "--size", "200x200", "--size", "100x100",
+			"--video-stream-image", image);
+		await Render(without, "--preview", "Station tile");
+
+		var scenes = with.Shots.Select(shot => JsonDocument.Parse(shot.SceneJson).RootElement).ToList();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(exitCode, Is.EqualTo(ExitCode.Success));
+			Assert.That(scenes, Has.Count.EqualTo(2));
+			Assert.That(scenes.Select(scene => scene.GetProperty("videoStreamImage").GetString()),
+				Is.All.EqualTo("data:image/png;base64,iVBORw0KGgoBAgM="));
+			Assert.That(JsonDocument.Parse(without.Shots.Single().SceneJson).RootElement.TryGetProperty("videoStreamImage", out _),
+				Is.False);
+		});
+	}
+
+	[TestCase("missing.png", null, "does not exist")]
+	[TestCase("webp-as.jpg", new byte[] { 0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50 }, "not a PNG, JPEG or WebP")]
+	[TestCase("notes.txt", new byte[] { 1, 2, 3 }, "must be a .png")]
+	[TestCase("fake.png", new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, "not a PNG, JPEG or WebP")]
+	[TestCase("png-as.jpg", new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A }, "not a PNG, JPEG or WebP")]
+	[TestCase("jpeg-as.png", new byte[] { 0xFF, 0xD8, 0xFF, 0xE0 }, "not a PNG, JPEG or WebP")]
+	public async Task A_video_stream_image_that_is_not_a_usable_image_is_a_usage_error(string name, byte[]? content, string message)
+	{
+		Directory.CreateDirectory(_output);
+		var image = Path.Combine(_output, name);
+
+		if (content is not null)
+		{
+			await File.WriteAllBytesAsync(image, content);
+		}
+
+		var screenshotter = new FakeScreenshotter();
+
+		var (_, error, exitCode) = await Render(screenshotter, "--video-stream-image", image);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(exitCode, Is.EqualTo(ExitCode.UsageError));
+			Assert.That(error, Does.Contain("invalid-video-stream-image").And.Contain(message));
+			Assert.That(screenshotter.Shots, Is.Empty);
+		});
+	}
+
+	[TestCase("camera.jpg", new byte[] { 0xFF, 0xD8, 0xFF, 0xE0, 1 }, "data:image/jpeg;base64,/9j/4AE=")]
+	[TestCase("camera.jpeg", new byte[] { 0xFF, 0xD8, 0xFF, 0xE0, 1 }, "data:image/jpeg;base64,/9j/4AE=")]
+	[TestCase("camera.webp", new byte[] { 0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50 }, "data:image/webp;base64,UklGRgAAAABXRUJQ")]
+	public async Task A_jpeg_or_webp_video_stream_image_is_accepted(string name, byte[] content, string dataUrl)
+	{
+		Directory.CreateDirectory(_output);
+		var image = Path.Combine(_output, name);
+		await File.WriteAllBytesAsync(image, content);
+		var screenshotter = new FakeScreenshotter();
+
+		var (_, _, exitCode) = await Render(screenshotter, "--preview", "Station tile", "--video-stream-image", image);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(exitCode, Is.EqualTo(ExitCode.Success));
+			Assert.That(JsonDocument.Parse(screenshotter.Shots.Single().SceneJson).RootElement.GetProperty("videoStreamImage").GetString(),
+				Is.EqualTo(dataUrl));
+		});
+	}
+
+	[Test]
+	public async Task A_video_stream_image_over_the_size_limit_is_a_usage_error()
+	{
+		Directory.CreateDirectory(_output);
+		var image = Path.Combine(_output, "big.png");
+		var bytes = new byte[8 * 1024 * 1024 + 1];
+		bytes[0] = 0x89;
+		await File.WriteAllBytesAsync(image, bytes);
+
+		var (_, error, exitCode) = await Render(new FakeScreenshotter(), "--video-stream-image", image);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(exitCode, Is.EqualTo(ExitCode.UsageError));
+			Assert.That(error, Does.Contain("invalid-video-stream-image").And.Contain("larger than 8 MB"));
+		});
+	}
+
+	[Test]
+	public async Task A_video_stream_is_drawn_as_the_still_image_by_a_real_browser_and_stays_empty_without_one()
+	{
+		var browser = RealBrowser();
+		Directory.CreateDirectory(_output);
+		var root = JsonDocument.Parse(
+			"""{"id":"v","type":"macrodeck.video-stream","properties":{"stream":{"provider":"p","id":"s"},"fit":"cover"},"children":[]}""")
+			.RootElement;
+		var size = PreviewSize.OfCells(1, 1);
+		var shotter = await ChromeScreenshotter.StartAsync(browser, CancellationToken.None);
+		await using var _ = shotter.ConfigureAwait(false);
+
+		foreach (var (name, still) in new[] { ("empty", null), ("still", SolidRedPng()) })
+		{
+			var options = new PreviewRenderOptions { Background = "#000000", Radius = 0 };
+			await shotter.CaptureAsync(
+				new PreviewShot(PreviewScene.Build(root, size, options, new Dictionary<string, string>(), new Dictionary<string, string>(), still),
+					size, 1, Path.Combine(_output, name + ".png")),
+				CancellationToken.None);
+		}
+
+		var empty = PngProbe.Read(Path.Combine(_output, "empty.png")).PixelAt(60, 60);
+		var drawn = PngProbe.Read(Path.Combine(_output, "still.png")).PixelAt(60, 60);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(drawn[0], Is.GreaterThan(200));
+			Assert.That(drawn[1], Is.LessThan(50));
+			Assert.That(empty[0], Is.LessThan(50));
+		});
+	}
+
+	private static string SolidRedPng()
+	{
+		static byte[] BigEndian(uint value) => [(byte)(value >> 24), (byte)(value >> 16), (byte)(value >> 8), (byte)value];
+
+		static byte[] Chunk(string type, byte[] data)
+		{
+			var body = Encoding.ASCII.GetBytes(type).Concat(data).ToArray();
+			var crc = 0xFFFFFFFFu;
+
+			foreach (var value in body)
+			{
+				crc ^= value;
+
+				for (var bit = 0; bit < 8; bit++)
+				{
+					crc = (crc & 1) != 0 ? (crc >> 1) ^ 0xEDB88320u : crc >> 1;
+				}
+			}
+
+			return [.. BigEndian((uint)data.Length), .. body, .. BigEndian(~crc)];
+		}
+
+		var raw = new List<byte>();
+
+		for (var y = 0; y < 4; y++)
+		{
+			raw.Add(0);
+
+			for (var x = 0; x < 4; x++)
+			{
+				raw.AddRange([255, 0, 0]);
+			}
+		}
+
+		using var compressed = new MemoryStream();
+
+		using (var zlib = new System.IO.Compression.ZLibStream(compressed, System.IO.Compression.CompressionMode.Compress, true))
+		{
+			zlib.Write(raw.ToArray());
+		}
+
+		var header = new byte[] { 0, 0, 0, 4, 0, 0, 0, 4, 8, 2, 0, 0, 0 };
+		var png = new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A }
+			.Concat(Chunk("IHDR", header)).Concat(Chunk("IDAT", compressed.ToArray())).Concat(Chunk("IEND", []));
+
+		return "data:image/png;base64," + Convert.ToBase64String(png.ToArray());
+	}
+
 	private async Task<(string Output, string Error, int ExitCode)> Render(FakeScreenshotter screenshotter, params string[] extra)
 		=> await CliRunner.RunPreview(screenshotter.Factory,
 			[.. new[] { "preview", "render", "--executable", FixturePlugins.WellBehaved(), "--browser", FixturePlugins.WellBehaved(), "--output", _output }, .. extra]);
 
 	private static string RealBrowser()
-		=> BrowserLocator.Find(null, Environment.GetEnvironmentVariable, File.Exists) ??
+		=> !RendererAssets.IsEmbedded
+			? throw new IgnoreException("The CLI was built without the preview renderer: run npm ci in ui to run the real-browser preview tests.")
+			: BrowserLocator.Find(null, Environment.GetEnvironmentVariable, File.Exists) ??
 			Environment.GetEnvironmentVariable("CHROME_BIN") ??
 			throw new IgnoreException("No Chrome, Chromium or Edge found: set MACRODECK_BROWSER to run the real-browser preview tests.");
 }

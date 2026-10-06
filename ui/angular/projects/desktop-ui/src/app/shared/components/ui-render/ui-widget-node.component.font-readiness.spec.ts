@@ -113,7 +113,7 @@ describe('shared-ui-widget-node font readiness', () => {
     // The declared family stays on the element, but nothing ever registered it with the browser -
     // so the glyphs come from the fallback stack. Registering under a synthetic family name is
     // exactly what makes that safe (issue #457 finding 6): no installed font can answer to it.
-    expect(run.style.fontFamily).toBe(internalFontFamily('brand-face-3'));
+    expect(run.style.fontFamily).toBe(`${internalFontFamily('brand-face-3')}, var(--font-sans)`);
   });
 
   it('renders a run with no fontFace visible immediately, with no async gate at all', async () => {

@@ -24,12 +24,16 @@ Unlock the deck to edit it, lock it to press buttons.
 ## Backgrounds
 
 - **Color a widget's background:** open the widget and pick a **Background Color**.
-  Action Button, Slider, Clock, Countdown, Stopwatch, Weather, History Graph, Gauges, Music Player and
-  Twitch Chat all have one.
+  Action Button, Slider, Clock, Countdown, Stopwatch, Weather, History Graph, Gauges, Music Player,
+  Twitch Chat and YouTube Chat all have one.
   **Reset** returns to the default look; on a Music Player that is the album art's color.
 - **Let the folder background show through:** choose the checkered **Transparent** swatch. The tile loses
   its own background and shadow, the border stays.
 - **Set Background Color** changes it from an action, and **Reset** there clears it again.
+- **Style an Action Button's label:** in the **Label** tab, turn off **Label Shadow**, give the text an
+  outline with **Label Outline Color** and its width, or frame it with **Label Box Border Color** and its
+  width. Each state can have its own. Hardware devices and the Companion app keep the default label look for
+  now.
 - **Hide empty cells:** set **Empty cells** to **Transparent** in the profile's settings, and the running
   deck shows only its widgets on the folder background. A folder's grid settings can override it with
   **Visible** or **Transparent**; **Inherited** takes the value from the parent folder, then the profile.
@@ -69,6 +73,12 @@ Deaths: {{ vars.deaths }}
   button that does something different for each repeat mode of a music player.
 - **Set Accent Color** recolors a slider or history graph. Put it inside an **If / Else** on a value, for
   example to turn a graph red above a limit and back to blue below it. **Reset** returns to your theme color.
+- **Control any OBS output:** **Start Output**, **Stop Output** and **Toggle Output** work on every output OBS
+  lists by name, including the ones OBS plugins add, such as a multi-RTMP stream or a second recording.
+  **Get Output State** writes whether an output is active into a variable, and **Toggle Output** can drive the
+  button's states. An output you chose that OBS does not list right now stays selected and is marked
+  unavailable, and running the action then reports that the output does not exist. These actions need an OBS
+  whose obs-websocket is version 5.7 or newer; with an older one they report that.
 
 ## Share and back up
 

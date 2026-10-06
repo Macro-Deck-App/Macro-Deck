@@ -33,7 +33,7 @@ describe('backup component groups', () => {
     const message = backupDependencyWarningMessage('Variables', 'Icons', t);
 
     expect(message).toContain('Variables');
-    expect(message).toContain('icons and icon packs');
+    expect(message).toContain('icons, icon packs and fonts');
   });
 
   it('falls back to the raw id only when the group is unknown', () => {

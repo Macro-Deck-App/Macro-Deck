@@ -82,6 +82,46 @@ public class SliderWidgetConfigTests
 	}
 
 	[Test]
+	public void The_icon_colour_is_offered_only_while_an_icon_is_set_and_reads_back_what_was_picked()
+	{
+		var withoutIcon = Render(new { }, new VariableRegistry());
+		var withIcon = Render(new { icon = new { type = "icon-pack", reference = "abc" } }, new VariableRegistry());
+
+		withIcon.ById("iconColor").Change("#ef4444");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(WidgetConfigTestSupport.IsVisible(withoutIcon, "iconColor"), Is.False);
+			Assert.That(WidgetConfigTestSupport.IsVisible(withIcon, "iconColor"), Is.True);
+			Assert.That(withIcon.ById("iconColor").Text(UiConfigProperties.Value), Is.EqualTo("#ef4444"));
+		});
+	}
+
+	[Test]
+	public void A_stored_icon_colour_is_shown_and_an_unset_one_saves_as_untinted()
+	{
+		var stored = Render(new { icon = new { type = "icon-pack", reference = "abc" }, iconColor = "#ef4444" },
+			new VariableRegistry());
+		var unset = Render(new { icon = new { type = "icon-pack", reference = "abc" } }, new VariableRegistry());
+
+		var saved = JsonSerializer.SerializeToElement(new
+		{
+			iconColor = unset.ById("iconColor").Text(UiConfigProperties.Value),
+		});
+		var provider = new WidgetDataSchemaProvider(new WidgetTypeRegistry(new RecordingMediator()));
+
+		Assert.That(provider.TryGet(WidgetTypeIds.Slider, out var schema), Is.True);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(stored.ById("iconColor").Text(UiConfigProperties.Value), Is.EqualTo("#ef4444"));
+			Assert.That(SliderWidgetData.Parse(saved).IconColor, Is.Null);
+			Assert.That(WidgetDataSchema.Validate(schema!, JsonSerializer.SerializeToElement(new { iconColor = "#ef4444" })),
+				Is.Empty);
+		});
+	}
+
+	[Test]
 	public void A_bound_variable_declaring_its_own_minimum_hides_min_while_max_and_step_stay_visible()
 	{
 		var registry = new VariableRegistry();

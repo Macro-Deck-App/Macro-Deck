@@ -26,17 +26,22 @@ internal sealed class ObsMultipleConfigurationsTests
 		"set-scene", "set-preview-scene", "set-profile", "start-recording", "stop-recording", "toggle-recording",
 		"toggle-pause-recording", "start-streaming", "stop-streaming", "toggle-streaming",
 		"start-virtual-camera", "stop-virtual-camera", "toggle-virtual-camera", "start-replay-buffer",
-		"stop-replay-buffer", "toggle-replay-buffer", "save-replay-buffer", "set-source-visibility",
+		"stop-replay-buffer", "toggle-replay-buffer", "save-replay-buffer", "split-record-file",
+		"create-record-chapter", "set-record-directory", "set-source-visibility",
 		"set-input-mute", "set-input-volume", "set-source-filter", "get-input-volume",
-		"get-source-filter-state", "get-input-mute", "get-source-visibility", "toggle-studio-mode"
+		"get-source-filter-state", "get-input-mute", "get-source-visibility", "toggle-studio-mode",
+		"start-output", "stop-output", "toggle-output", "get-output-state"
 	];
 
 	private static readonly string[] _eventIds =
 	[
 		"scene-changed", "preview-scene-changed", "recording-started", "recording-stopped",
 		"recording-paused", "recording-resumed", "streaming-started", "streaming-stopped",
-		"replay-buffer-started", "replay-buffer-stopped", "replay-buffer-saved", "virtual-cam-started",
-		"virtual-cam-stopped", "studio-mode-changed", "input-mute-changed", "connected", "disconnected"
+		"replay-buffer-started", "replay-buffer-stopped", "replay-buffer-saved", "record-file-changed",
+		"screenshot-saved", "virtual-cam-started",
+		"virtual-cam-stopped", "studio-mode-changed", "input-mute-changed", "connected", "disconnected",
+		"input-became-active", "input-became-inactive", "input-started-showing", "input-stopped-showing",
+		"custom-event"
 	];
 
 	private static readonly string[] _bScene = ["B scene"];
@@ -161,7 +166,7 @@ internal sealed class ObsMultipleConfigurationsTests
 			Assert.That(collision.Key, Does.StartWith("main_obs_"));
 			Assert.That(empty.Key, Does.StartWith("configuration_"));
 			Assert.That(renamed.Key, Is.Not.EqualTo(main.Key));
-			Assert.That(before, Has.Count.EqualTo(21));
+			Assert.That(before, Has.Count.EqualTo(23));
 			Assert.That(before.Select(variable => variable.Name), Is.Unique);
 			Assert.That(after.Select(variable => variable.Id),
 				Is.EqualTo(before.Select(variable => variable.Id)));
@@ -302,7 +307,7 @@ internal sealed class ObsMultipleConfigurationsTests
 			Assert.That(first.Success, Is.True);
 			Assert.That(afterFirst.Count(variable =>
 					ObsVariables.TryGetConfigurationEntryId(variable.DefinitionId, out _)),
-				Is.EqualTo(21));
+				Is.EqualTo(23));
 			Assert.That(afterFirst.Any(variable => variable.Id == push.Data!.Id), Is.True);
 			Assert.That(second.Success, Is.True);
 			Assert.That(afterSecond.Select(variable => variable.Id), Is.EqualTo(new[] { push.Data!.Id }));
@@ -338,7 +343,7 @@ internal sealed class ObsMultipleConfigurationsTests
 			Assert.That(parsed, Is.True);
 			Assert.That(stored.Values[ObsConfigKeys.ConfigurationName].GetString(), Is.EqualTo("Studio"));
 			Assert.That(identity.Key, Is.EqualTo("studio_1234"));
-			Assert.That(variables, Has.Count.EqualTo(21));
+			Assert.That(variables, Has.Count.EqualTo(23));
 			Assert.That(
 				variables.All(variable => variable.Name.StartsWith("obs_studio_1234_", StringComparison.Ordinal)),
 				Is.True);

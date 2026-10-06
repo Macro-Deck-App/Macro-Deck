@@ -42,6 +42,18 @@ Text from the plugin's own localization catalog is drawn in the `--locale` langu
 read, the run continues with a `preview-localization-unavailable` warning and the plugin's strings show as
 placeholders.
 
+## Video streams
+
+A preview has no running host and so no live video. A video stream component is left empty, which shows only what
+the widget draws behind it. Pass `--video-stream-image <file>` to draw that image in every video stream instead, framed
+by the component's own `fit`: `contain` keeps the whole picture and `cover` fills the component. Space left by `contain`
+stays transparent, so the widget's own background shows. A bad path, an unsupported type, a file whose content is not the
+image its extension claims, or one over 8 MB is a usage error with the code `invalid-video-stream-image`.
+
+```bash
+macrodeck-plugin preview render --project src/PrinterStatus --cells 2x1 --video-stream-image assets/camera.png
+```
+
 The image is the tile: its background and rounded corners are part of the picture. `--background` is what shows
 behind the corners.
 
@@ -60,6 +72,7 @@ Pick exactly one of `--project`, `--executable` or `--artifact`, as for [`run`](
 | `--background <color>` | `transparent` (the default), a color name or a `#hex` color. |
 | `--radius <px>` | The tile's corner radius in the 120 px reference cell, scaled with the tile as on the deck. Defaults to `22`, the deck's default. |
 | `--locale <culture>` | The culture dates and numbers are formatted in, and the language of the plugin's own text. Plugin text falls back to the plugin's default language when it has no resources for the culture. Defaults to `en-US`. |
+| `--video-stream-image <file>` | A PNG, JPEG or WebP of up to 8 MB, drawn in place of every video stream. See [Video streams](#video-streams). |
 | `--output <dir>` | Where the files go. Defaults to `./previews`. |
 | `--browser <path>` | The browser to use, see below. |
 
@@ -87,7 +100,7 @@ on your computer. Render on the same kind of machine every time when the images 
 | --- | --- |
 | 0 | Every selected preview was rendered or skipped, or the plugin declares no previews. |
 | 1 | A scenario could not be built or drawn. The other images are still written. |
-| 2 | Usage error: a bad size, scale, radius, background or theme, no or several subject selectors, or an unknown `--preview`. |
+| 2 | Usage error: a bad size, scale, radius, background, theme or `--video-stream-image`, no or several subject selectors, or an unknown `--preview`. |
 | 3 | The plugin could not be launched or built, or no browser was found. |
 | 4 | Cancelled (Ctrl-C). |
 

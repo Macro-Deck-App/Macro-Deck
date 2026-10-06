@@ -5,6 +5,7 @@ export * from './integration-detail-page/integration-detail-page.component';
 export * from './scripts-page/scripts-page.component';
 export * from './automations-page/automations-page.component';
 export * from './icon-packs-page/icon-packs-page.component';
+export * from './fonts-page/fonts-library-page.component';
 export * from './library-page/library-page.component';
 export * from './library-page/library-overview.component';
 export * from './variables-page/variables-page.component';

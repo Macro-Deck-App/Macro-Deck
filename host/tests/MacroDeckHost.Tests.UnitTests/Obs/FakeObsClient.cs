@@ -43,6 +43,12 @@ internal sealed class FakeObsClient : IObsClient
 
 	public Dictionary<string, IReadOnlyList<string>> SourceFilters { get; } = new(StringComparer.Ordinal);
 
+	public IReadOnlyList<string> OutputNames { get; set; } = [];
+
+	public Dictionary<string, bool> OutputStates { get; } = new(StringComparer.Ordinal);
+
+	public Exception? OutputFailure { get; set; }
+
 	public Dictionary<string, bool> FilterStates { get; } = new(StringComparer.Ordinal);
 
 	public Dictionary<string, string> InputAudioMonitorTypes { get; } = new(StringComparer.Ordinal);
@@ -64,6 +70,8 @@ internal sealed class FakeObsClient : IObsClient
 
 	public List<string> Calls { get; } = [];
 
+	public ObsRequestException? RequestFailure { get; set; }
+
 	public event EventHandler? Connected;
 
 	public event EventHandler<string?>? Disconnected;
@@ -74,10 +82,46 @@ internal sealed class FakeObsClient : IObsClient
 
 	public event EventHandler<string>? ReplayBufferSaved;
 
+	public event EventHandler<string>? RecordFileChanged;
+
+	public event EventHandler<string>? ScreenshotSaved;
+
+	public event EventHandler<ObsInputSettingsChange>? InputSettingsChanged;
+
+	public event EventHandler<ObsFilterChange>? SourceFilterChanged;
+
+	public event EventHandler<ObsInputFlagChange>? InputActiveChanged;
+
+	public event EventHandler<ObsInputFlagChange>? InputShowingChanged;
+
+	public event EventHandler<string>? CustomEventReceived;
+
+	public int QueryStatusCount { get; private set; }
+
+	public Dictionary<string, int> Reads { get; } = new(StringComparer.Ordinal);
+
+	public void RaiseInputSettingsChanged(string inputName, params string[] keys)
+		=> InputSettingsChanged?.Invoke(this, new ObsInputSettingsChange(inputName, keys));
+
+	public void RaiseSourceFilterChanged(string sourceName, string filterName)
+		=> SourceFilterChanged?.Invoke(this, new ObsFilterChange(sourceName, filterName));
+
+	public void RaiseInputActiveChanged(string inputName, bool active)
+		=> InputActiveChanged?.Invoke(this, new ObsInputFlagChange(inputName, active));
+
+	public void RaiseInputShowingChanged(string inputName, bool showing)
+		=> InputShowingChanged?.Invoke(this, new ObsInputFlagChange(inputName, showing));
+
+	public void RaiseCustomEvent(string json) => CustomEventReceived?.Invoke(this, json);
+
 	public void RaiseInputMuteChanged(string inputName, bool muted)
 		=> InputMuteChanged?.Invoke(this, new ObsInputMuteChange(inputName, muted));
 
 	public void RaiseReplayBufferSaved(string path) => ReplayBufferSaved?.Invoke(this, path);
+
+	public void RaiseRecordFileChanged(string path) => RecordFileChanged?.Invoke(this, path);
+
+	public void RaiseScreenshotSaved(string path) => ScreenshotSaved?.Invoke(this, path);
 
 	public void Connect(string url, string? password)
 	{
@@ -103,7 +147,11 @@ internal sealed class FakeObsClient : IObsClient
 		Calls.Add("Disconnect");
 	}
 
-	public ObsStatus QueryStatus() => QueryStatusHandler?.Invoke() ?? Status;
+	public ObsStatus QueryStatus()
+	{
+		QueryStatusCount++;
+		return QueryStatusHandler?.Invoke() ?? Status;
+	}
 
 	public IReadOnlyList<string> GetSceneNames() => SceneNames;
 
@@ -157,6 +205,32 @@ internal sealed class FakeObsClient : IObsClient
 
 	public void SaveReplayBuffer() => Calls.Add("SaveReplayBuffer");
 
+	public void SplitRecordFile()
+	{
+		Calls.Add("SplitRecordFile");
+		ThrowRequestFailure();
+	}
+
+	public void CreateRecordChapter(string? chapterName)
+	{
+		Calls.Add($"CreateRecordChapter:{chapterName ?? "<none>"}");
+		ThrowRequestFailure();
+	}
+
+	public void SetRecordDirectory(string directory)
+	{
+		Calls.Add($"SetRecordDirectory:{directory}");
+		ThrowRequestFailure();
+	}
+
+	private void ThrowRequestFailure()
+	{
+		if (RequestFailure is not null)
+		{
+			throw RequestFailure;
+		}
+	}
+
 	public Dictionary<string, bool> MutedInputs { get; } = new(StringComparer.Ordinal);
 
 	public Dictionary<string, bool> VisibleSources { get; } = new(StringComparer.Ordinal);
@@ -199,6 +273,7 @@ internal sealed class FakeObsClient : IObsClient
 
 	public bool GetSourceFilterEnabled(string sourceName, string filterName)
 	{
+		CountRead("filter:" + sourceName + "::" + filterName);
 		EnsureExists(sourceName);
 		return FilterStates.GetValueOrDefault(FilterKey(sourceName, filterName), false);
 	}
@@ -214,6 +289,39 @@ internal sealed class FakeObsClient : IObsClient
 		var key = FilterKey(sourceName, filterName);
 		FilterStates[key] = !FilterStates.GetValueOrDefault(key, false);
 		Calls.Add($"ToggleSourceFilterEnabled:{sourceName}:{filterName}");
+	}
+
+	public IReadOnlyList<string> GetOutputNames()
+	{
+		Calls.Add("GetOutputNames");
+		return OutputFailure is null ? OutputNames : throw OutputFailure;
+	}
+
+	public void StartOutput(string outputName)
+	{
+		EnsureOutput(outputName);
+		OutputStates[outputName] = true;
+		Calls.Add($"StartOutput:{outputName}");
+	}
+
+	public void StopOutput(string outputName)
+	{
+		EnsureOutput(outputName);
+		OutputStates[outputName] = false;
+		Calls.Add($"StopOutput:{outputName}");
+	}
+
+	public void ToggleOutput(string outputName)
+	{
+		EnsureOutput(outputName);
+		OutputStates[outputName] = !OutputStates.GetValueOrDefault(outputName, false);
+		Calls.Add($"ToggleOutput:{outputName}");
+	}
+
+	public bool GetOutputActive(string outputName)
+	{
+		EnsureOutput(outputName);
+		return OutputStates.GetValueOrDefault(outputName, false);
 	}
 
 	public void SetStudioMode(bool enabled) => Calls.Add($"SetStudioMode:{enabled}");
@@ -238,12 +346,14 @@ internal sealed class FakeObsClient : IObsClient
 
 	public ObsSourceActivity GetSourceActive(string sourceName)
 	{
+		CountRead("active:" + sourceName);
 		EnsureExists(sourceName);
 		return SourceActivity.GetValueOrDefault(sourceName, _inactive);
 	}
 
 	public string GetInputSettings(string inputName)
 	{
+		CountRead("settings:" + inputName);
 		EnsureExists(inputName);
 		return InputSettingsJson.GetValueOrDefault(inputName, "{}");
 	}
@@ -254,7 +364,22 @@ internal sealed class FakeObsClient : IObsClient
 
 	public void RaiseStateChanged() => StateChanged?.Invoke(this, EventArgs.Empty);
 
+	private void CountRead(string key) => Reads[key] = Reads.GetValueOrDefault(key) + 1;
+
 	private static string FilterKey(string sourceName, string filterName) => $"{sourceName}::{filterName}";
+
+	private void EnsureOutput(string outputName)
+	{
+		if (OutputFailure is not null)
+		{
+			throw OutputFailure;
+		}
+
+		if (!OutputNames.Contains(outputName))
+		{
+			throw new ObsOutputNotFoundException(outputName);
+		}
+	}
 
 	private void EnsureExists(params string[] names)
 	{

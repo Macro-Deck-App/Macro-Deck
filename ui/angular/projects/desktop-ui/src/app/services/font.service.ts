@@ -13,6 +13,21 @@ function compareFaces(a: SystemFontFace, b: SystemFontFace): number {
   return a.weight - b.weight || SLANT_ORDER[a.slant] - SLANT_ORDER[b.slant];
 }
 
+function groupByFamily(faces: readonly SystemFontFace[]): FontFamily[] {
+  const byFamily = new Map<string, SystemFontFace[]>();
+  for (const face of faces) {
+    const list = byFamily.get(face.family);
+    if (list) {
+      list.push(face);
+    } else {
+      byFamily.set(face.family, [face]);
+    }
+  }
+  return [...byFamily.entries()]
+    .map(([family, grouped]) => ({ family, faces: grouped.slice().sort(compareFaces) }))
+    .sort((a, b) => a.family.localeCompare(b.family));
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -22,20 +37,10 @@ export class FontService {
   private readonly faces = signal<SystemFontFace[]>([]);
   readonly isLoading = signal(false);
 
-  readonly families = computed<FontFamily[]>(() => {
-    const byFamily = new Map<string, SystemFontFace[]>();
-    for (const face of this.faces()) {
-      const list = byFamily.get(face.family);
-      if (list) {
-        list.push(face);
-      } else {
-        byFamily.set(face.family, [face]);
-      }
-    }
-    return [...byFamily.entries()]
-      .map(([family, faces]) => ({ family, faces: faces.slice().sort(compareFaces) }))
-      .sort((a, b) => a.family.localeCompare(b.family));
-  });
+  readonly families = computed<FontFamily[]>(() => groupByFamily(this.faces()));
+
+  readonly systemFamilies = computed<FontFamily[]>(() =>
+    groupByFamily(this.faces().filter(face => !face.userImported)));
 
   async loadSystemFonts(): Promise<void> {
     this.isLoading.set(true);

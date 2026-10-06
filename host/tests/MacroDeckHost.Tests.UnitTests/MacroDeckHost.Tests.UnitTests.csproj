@@ -11,6 +11,7 @@
 
     <ItemGroup>
     <None Update="Auth/host-identity-vector.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../../docs/public/fonts/Anta-Regular.ttf" Link="Rendering/Fixtures/Anta-Regular.ttf" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

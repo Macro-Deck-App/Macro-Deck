@@ -41,8 +41,7 @@ public sealed class ProfileRegistry : IProfileRegistry
 
 	public IReadOnlyList<TransportProfile> GetProfiles()
 	{
-		var profiles = _profileCache.GetAll()
-			.OrderBy(p => p.Order)
+		var profiles = ProfileOrdering.Sort(_profileCache.GetAll())
 			.Select(entity => ProfileDtoMapper.MapJsonProfile(entity, _layoutConstraints.Get(entity.Id.ToString())))
 			.ToList();
 

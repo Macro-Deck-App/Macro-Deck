@@ -658,10 +658,10 @@
     <value>Automatizace</value>
   </data>
   <data name="Backup.Group.Icons.Description" xml:space="preserve">
-    <value>Nainstalované sady ikon a importované ikony.</value>
+    <value>Nainstalované sady ikon, importované ikony a importovaná písma.</value>
   </data>
   <data name="Backup.Group.Icons.Label" xml:space="preserve">
-    <value>Ikony a sady ikon</value>
+    <value>Ikony, sady ikon a písma</value>
   </data>
   <data name="Backup.Group.Integrations.Description" xml:space="preserve">
     <value>Nastavení integrací a všechna uložená hesla či tokeny.</value>
@@ -2852,6 +2852,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Profile.LoadFailed" xml:space="preserve">
     <value>Načtení profilů se nezdařilo</value>
   </data>
+  <data name="Errors.Profile.MoveFailed" xml:space="preserve">
+    <value>Přesun profilu se nezdařil</value>
+  </data>
   <data name="Errors.Profile.NoProfileReturned" xml:space="preserve">
     <value>Nebyl vrácen žádný profil</value>
   </data>
@@ -2860,6 +2863,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Errors.Profiles.GridLockedByDevice" xml:space="preserve">
     <value>Mřížka je uzamčena zařízením {deviceName} na {columns} x {rows}.</value>
+  </data>
+  <data name="Errors.Profiles.InvalidMovePosition" xml:space="preserve">
+    <value>Pozice musí být „before“ nebo „after“</value>
+  </data>
+  <data name="Errors.Profiles.MoveIdsRequired" xml:space="preserve">
+    <value>Jsou vyžadovány platné ID profilu a ID cíle</value>
   </data>
   <data name="Errors.Profiles.VirtualCannotBeDeleted" xml:space="preserve">
     <value>Virtuální profily nelze odstranit</value>
@@ -7166,17 +7175,38 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Obs.Actions.SaveReplayBuffer.Name" xml:space="preserve">
     <value>Uložit vyrovnávací paměť opakování</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelStepDescription" xml:space="preserve">
+    <value>O kolik dB se hlasitost změní při každém stisku</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelStepLabel" xml:space="preserve">
+    <value>Krok (dB)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelsDescription" xml:space="preserve">
+    <value>Cílová hlasitost v dB (-100 je ticho, 0 je plná hlasitost)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelsLabel" xml:space="preserve">
+    <value>Hlasitost (dB)</value>
+  </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.Description" xml:space="preserve">
     <value>Nastaví, zvýší nebo sníží hlasitost audio vstupu</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeDecrease" xml:space="preserve">
-    <value>Snížit o</value>
+    <value>Snížit o (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeDecreaseDecibels" xml:space="preserve">
+    <value>Snížit o (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeIncrease" xml:space="preserve">
-    <value>Zvýšit o</value>
+    <value>Zvýšit o (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeIncreaseDecibels" xml:space="preserve">
+    <value>Zvýšit o (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeSet" xml:space="preserve">
-    <value>Nastavit na</value>
+    <value>Nastavit na (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeSetDecibels" xml:space="preserve">
+    <value>Nastavit na (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.Name" xml:space="preserve">
     <value>Nastavit hlasitost vstupu</value>
@@ -7427,6 +7457,54 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Obs.Events.ConnectionCategory" xml:space="preserve">
     <value>Připojení</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomCategory" xml:space="preserve">
+    <value>Vlastní</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomEventDescription" xml:space="preserve">
+    <value>Událost, kterou do OBS odeslal skript nebo plugin. Obsahuje JSON vysílaný odesílatelem.</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomEventName" xml:space="preserve">
+    <value>Vlastní událost</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomEventNameConfigDescription" xml:space="preserve">
+    <value>Reagovat pouze na události s tímto názvem. Prázdné pole znamená libovolnou vlastní událost.</value>
+  </data>
+  <data name="Integrations.Obs.Events.EventDataLabel" xml:space="preserve">
+    <value>Data události (JSON)</value>
+  </data>
+  <data name="Integrations.Obs.Events.EventNameLabel" xml:space="preserve">
+    <value>Název události</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputActivityConfigDescription" xml:space="preserve">
+    <value>Reagovat pouze na tento vstup. Prázdné pole znamená libovolný vstup.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameActiveDescription" xml:space="preserve">
+    <value>Vstup se začal vykreslovat ve výstupu programu, například webkamera, která jde živě.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameActiveName" xml:space="preserve">
+    <value>Vstup se stal aktivním</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameInactiveDescription" xml:space="preserve">
+    <value>Vstup se přestal vykreslovat ve výstupu programu.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameInactiveName" xml:space="preserve">
+    <value>Vstup se stal neaktivním</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStartedShowingDescription" xml:space="preserve">
+    <value>Vstup se začal vykreslovat ve výstupu programu nebo náhledu.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStartedShowingName" xml:space="preserve">
+    <value>Vstup se zobrazuje</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStoppedShowingDescription" xml:space="preserve">
+    <value>Vstup se již nevykresluje ve výstupu programu ani náhledu.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStoppedShowingName" xml:space="preserve">
+    <value>Vstup se přestal zobrazovat</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputsCategory" xml:space="preserve">
+    <value>Vstupy</value>
   </data>
   <data name="Integrations.Obs.Events.InputMuteChangedDescription" xml:space="preserve">
     <value>Audio vstup byl ztlumen nebo bylo ztlumení zrušeno.</value>
@@ -9472,37 +9550,37 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Twitch.ChatDialog.AccountUnavailable" xml:space="preserve">
     <value>Účet Twitch není připojen.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.AllowModeration" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.AllowModeration" xml:space="preserve">
     <value>Povolit moderování v dialogu chatu</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.AllowModerationDescription" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.AllowModerationDescription" xml:space="preserve">
     <value>Stisknutím widgetu se otevře chat. Pokud je tato volba zapnutá, může kdokoli, kdo používá tento deck, klepnout na zprávu a smazat ji nebo autorovi udělit timeout či ban.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Ban" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Ban" xml:space="preserve">
     <value>Zabanovat</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Banned" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Banned" xml:space="preserve">
     <value>Uživatel {name} je zabanován.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.ConfirmBan" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.ConfirmBan" xml:space="preserve">
     <value>Zabanovat uživatele {name}? Do odbanování nebude moci v tomto kanálu chatovat.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.DeleteMessage" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.DeleteMessage" xml:space="preserve">
     <value>Smazat zprávu</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Deleted" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Deleted" xml:space="preserve">
     <value>Zpráva byla smazána.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Failed" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Failed" xml:space="preserve">
     <value>Akce se nezdařila. Je potřeba zkontrolovat připojení a zkusit to znovu.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.ModerationUnavailable" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.ModerationUnavailable" xml:space="preserve">
     <value>Moderování je pro tento widget vypnuté.</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.NotPermitted" xml:space="preserve">
     <value>Twitch to nepovolil. Je potřeba znovu připojit účet Twitch a zkusit to znovu.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.OwnMessage" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.OwnMessage" xml:space="preserve">
     <value>Zprávy samotného účtu kanálu nelze moderovat.</value>
   </data>
   <data name="Integrations.Twitch.ChatDialog.Refused" xml:space="preserve">
@@ -9511,64 +9589,64 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Twitch.ChatDialog.SharedChat" xml:space="preserve">
     <value>Tato zpráva pochází z chatu kanálu {channel}. Moderovat ji lze tam.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.TimedOut" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.TimedOut" xml:space="preserve">
     <value>Uživatel {name} má timeout.</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Timeout10Minutes" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Timeout10Minutes" xml:space="preserve">
     <value>Timeout 10 min</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Timeout1Hour" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Timeout1Hour" xml:space="preserve">
     <value>Timeout 1 h</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Timeout1Minute" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Timeout1Minute" xml:space="preserve">
     <value>Timeout 1 min</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Unban" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Unban" xml:space="preserve">
     <value>Odbanovat</value>
   </data>
-  <data name="Integrations.Twitch.ChatDialog.Unbanned" xml:space="preserve">
+  <data name="Integrations.StreamChat.Dialog.Unbanned" xml:space="preserve">
     <value>Uživatel {name} je odbanován.</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.AccountDescription" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.AccountDescription" xml:space="preserve">
     <value>Chat kterého kanálu se má zobrazit.</value>
   </data>
   <data name="Integrations.Twitch.ChatWidget.Description" xml:space="preserve">
     <value>Zobrazuje chat kanálu v reálném čase včetně emotů a odznaků.</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.Empty" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.Empty" xml:space="preserve">
     <value>Čeká se na zprávy v chatu</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.FirstAccount" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.FirstAccount" xml:space="preserve">
     <value>První připojený účet</value>
   </data>
   <data name="Integrations.Twitch.ChatWidget.Name" xml:space="preserve">
     <value>Chat Twitch</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.NameSeparator" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.NameSeparator" xml:space="preserve">
     <value>: </value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.Title" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.Title" xml:space="preserve">
     <value>Chat: {account}</value>
   </data>
   <data name="Integrations.Twitch.ChatWidget.Offline" xml:space="preserve">
     <value>Nepřipojeno k Twitchi</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleChatter1" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleChatter1" xml:space="preserve">
     <value>PixelPanda</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleChatter2" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleChatter2" xml:space="preserve">
     <value>NightOwl</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleChatter3" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleChatter3" xml:space="preserve">
     <value>CozyGamer</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleMessage1" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleMessage1" xml:space="preserve">
     <value>Ahoj všichni!</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleMessage2" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleMessage2" xml:space="preserve">
     <value>To byla skvělá akce!</value>
   </data>
-  <data name="Integrations.Twitch.ChatWidget.SampleMessage3" xml:space="preserve">
+  <data name="Integrations.StreamChat.Widget.SampleMessage3" xml:space="preserve">
     <value>Na viděnou u dalšího streamu</value>
   </data>
   <data name="Integrations.Twitch.StatsWidget.Description" xml:space="preserve">
@@ -9580,13 +9658,13 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Twitch.StatsWidget.Heading" xml:space="preserve">
     <value>Twitch</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Live" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Live" xml:space="preserve">
     <value>Živě</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Offline" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Offline" xml:space="preserve">
     <value>Offline</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Viewers" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Viewers" xml:space="preserve">
     <value>Diváci</value>
   </data>
   <data name="Integrations.Twitch.StatsWidget.Chatters" xml:space="preserve">
@@ -9595,61 +9673,61 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Twitch.StatsWidget.Followers" xml:space="preserve">
     <value>Sledující</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Subscribers" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Subscribers" xml:space="preserve">
     <value>Odběratelé</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Style" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Style" xml:space="preserve">
     <value>Styl</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleDescription" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleDescription" xml:space="preserve">
     <value>Určuje, co widget zobrazuje. Velikost v závorce je ta, pro kterou je styl navržen; přizpůsobí se i jiné velikosti.</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleOverview" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleOverview" xml:space="preserve">
     <value>Přehled (3x2)</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleStatsRow" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleStatsRow" xml:space="preserve">
     <value>Řádek statistik (3x1)</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleLiveRow" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleLiveRow" xml:space="preserve">
     <value>Řádek stavu vysílání (3x1)</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleValueGraph" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleValueGraph" xml:space="preserve">
     <value>Jedna hodnota s grafem (2x2)</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.StyleValue" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.StyleValue" xml:space="preserve">
     <value>Jedna hodnota (1x1)</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Metric" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Metric" xml:space="preserve">
     <value>Hodnota</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.MetricDescription" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.MetricDescription" xml:space="preserve">
     <value>Které číslo widget zobrazuje.</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.OfflineHint" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.OfflineHint" xml:space="preserve">
     <value>Právě se nevysílá</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Tiles" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Tiles" xml:space="preserve">
     <value>Statistiky</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.TilesDescription" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.TilesDescription" xml:space="preserve">
     <value>Která čísla dlaždice zobrazují, v tomto pořadí. Čtyři dlaždice se nejlépe vejdou do widgetu o jeden sloupec širšího, než je doporučeno.</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Details" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Details" xml:space="preserve">
     <value>Podrobnosti vysílání</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.DetailsDescription" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.DetailsDescription" xml:space="preserve">
     <value>Které podrobnosti přehled zobrazuje vedle náhledu, v tomto pořadí.</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.Uptime" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.Uptime" xml:space="preserve">
     <value>Doba vysílání</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.ShowThumbnail" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.ShowThumbnail" xml:space="preserve">
     <value>Zobrazit náhled</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.AccountDescription" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.AccountDescription" xml:space="preserve">
     <value>Statistiky kterého kanálu zobrazit.</value>
   </data>
-  <data name="Integrations.Twitch.StatsWidget.SampleTitle" xml:space="preserve">
+  <data name="Integrations.StreamStats.Widget.SampleTitle" xml:space="preserve">
     <value>Průzkum Night City</value>
   </data>
   <data name="Integrations.Twitch.StatsWidget.SampleCategory" xml:space="preserve">
@@ -12527,6 +12605,14 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Proměnných widgetu: {count}</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Portable.ArchivePreview.FontCount.One" xml:space="preserve">
+    <value>{count} písmo</value>
+    <comment>[plural] Number of fonts in an archive, shown in the import preview.</comment>
+  </data>
+  <data name="Portable.ArchivePreview.FontCount.Other" xml:space="preserve">
+    <value>Písma: {count}</value>
+    <comment>[plural] Number of fonts in an archive, shown in the import preview.</comment>
+  </data>
   <data name="Portable.ArchivePreview.WidgetCount.One" xml:space="preserve">
     <value>{count} widget</value>
     <comment>[plural]</comment>
@@ -15026,6 +15112,36 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Shell.Footer.Version" xml:space="preserve">
     <value>Verze {version}</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.Heading" xml:space="preserve">
+    <value>Líbí se Macro Deck?</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.AskText" xml:space="preserve">
+    <value>Macro Deck se už nějakou dobu používá.</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.YesAction" xml:space="preserve">
+    <value>Ano!</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.NoAction" xml:space="preserve">
+    <value>Ne úplně</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.StarText" xml:space="preserve">
+    <value>Hvězdička na GitHubu pomáhá ostatním Macro Deck najít a podporuje projekt.</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.StarAction" xml:space="preserve">
+    <value>Dát hvězdičku na GitHubu</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.NoThanksAction" xml:space="preserve">
+    <value>Ne, děkuji</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.FeedbackText" xml:space="preserve">
+    <value>Zpětná vazba na GitHubu o tom, co chybí nebo co vadí, pomůže Macro Deck vylepšit.</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.FeedbackAction" xml:space="preserve">
+    <value>Poslat zpětnou vazbu</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.CloseAction" xml:space="preserve">
+    <value>Zavřít</value>
   </data>
   <data name="Shell.Notifications.Action.EnablePluginAdb" xml:space="preserve">
     <value>Povolit</value>
@@ -17546,11 +17662,26 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Popisek</value>
   </data>
+  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
+    <value>Barva okraje pozadí popisku</value>
+  </data>
+  <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
+    <value>Šířka okraje pozadí popisku (%)</value>
+  </data>
   <data name="Widgets.Editor.LabelBoxColor" xml:space="preserve">
     <value>Barva pozadí popisku</value>
   </data>
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Barva popisku</value>
+  </data>
+  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
+    <value>Barva obrysu popisku</value>
+  </data>
+  <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
+    <value>Šířka obrysu (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelShadow" xml:space="preserve">
+    <value>Stín popisku</value>
   </data>
   <data name="Widgets.Editor.Live" xml:space="preserve">
     <value>živě</value>
@@ -18655,6 +18786,79 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Library.Page.ContentTypeAriaLabel" xml:space="preserve">
     <value>Obsah knihovny</value>
   </data>
+  <data name="Nav.Fonts" xml:space="preserve">
+    <value>Písma</value>
+  </data>
+  <data name="Library.Page.FontsDescription" xml:space="preserve">
+    <value>Importované soubory písem pro popisky a texty.</value>
+  </data>
+  <data name="Library.Page.FontCount.One" xml:space="preserve">
+    <value>{count} písmo</value>
+    <comment>[plural] Shown on a content type card in the library.</comment>
+  </data>
+  <data name="Library.Page.FontCount.Other" xml:space="preserve">
+    <value>Písma: {count}</value>
+    <comment>[plural] Shown on a content type card in the library.</comment>
+  </data>
+  <data name="Library.Fonts.ImportAction" xml:space="preserve">
+    <value>Importovat písma</value>
+  </data>
+  <data name="Library.Fonts.EmptyTitle" xml:space="preserve">
+    <value>Zatím nejsou importována žádná písma</value>
+  </data>
+  <data name="Library.Fonts.EmptyDescription" xml:space="preserve">
+    <value>Importujte soubory TTF nebo OTF a použijte je na tlačítkách a textových widgetech, nebo je sem přetáhněte.</value>
+  </data>
+  <data name="Library.Fonts.LicenseNote" xml:space="preserve">
+    <value>Importujte jen písma, jejichž licence takové použití povoluje. Písma použitá na tlačítkách jsou součástí exportu profilů, složek a widgetů, takže sdílením exportu se sdílí i písmo.</value>
+  </data>
+  <data name="Library.Fonts.Sample" xml:space="preserve">
+    <value>Aa Bb Cc 0123456789</value>
+  </data>
+  <data name="Library.Fonts.RemoveAriaLabel" xml:space="preserve">
+    <value>Odebrat {name}</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmHeading" xml:space="preserve">
+    <value>Odebrat písmo?</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmMessage" xml:space="preserve">
+    <value>Písmo {name} bude odebráno. Tlačítka, která ho používají, přejdou na výchozí písmo.</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmAction" xml:space="preserve">
+    <value>Odebrat</value>
+  </data>
+  <data name="Library.Fonts.RemoveFailed" xml:space="preserve">
+    <value>Písmo se nepodařilo odebrat.</value>
+  </data>
+  <data name="Library.Fonts.ImportFailed" xml:space="preserve">
+    <value>Písma se nepodařilo importovat.</value>
+  </data>
+  <data name="Library.Fonts.Imported.One" xml:space="preserve">
+    <value>{count} písmo importováno</value>
+    <comment>[plural] Toast after a successful import.</comment>
+  </data>
+  <data name="Library.Fonts.Imported.Other" xml:space="preserve">
+    <value>Importovaná písma: {count}</value>
+    <comment>[plural] Toast after a successful import.</comment>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyPresent" xml:space="preserve">
+    <value>Soubor {fileName} je už importován.</value>
+  </data>
+  <data name="Library.Fonts.Status.UnsupportedFormat" xml:space="preserve">
+    <value>{fileName}: podporovány jsou jen soubory TTF a OTF.</value>
+  </data>
+  <data name="Library.Fonts.Status.TooLarge" xml:space="preserve">
+    <value>Soubor {fileName} je větší než 32 MB.</value>
+  </data>
+  <data name="Library.Fonts.Status.InvalidFont" xml:space="preserve">
+    <value>Soubor {fileName} není použitelný soubor písma.</value>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyInstalled" xml:space="preserve">
+    <value>{fileName}: tato rodina písem je už v tomto počítači nainstalována, proto ji nelze importovat.</value>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyImported" xml:space="preserve">
+    <value>{fileName}: písmo se stejnou rodinou a stylem je už importováno. Pro nahrazení ho nejprve odeberte.</value>
+  </data>
   <data name="Onboarding.Back" xml:space="preserve">
     <value>Zpět</value>
   </data>
@@ -19401,5 +19605,603 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Shell.OutdatedUi.Versions" xml:space="preserve">
     <value>Sestavení rozhraní: {device} · Sestavení Macro Deck: {computer}</value>
+  </data>
+  <data name="Integrations.YouTube.ChatWidget.Name" xml:space="preserve">
+    <value>Chat YouTube</value>
+  </data>
+  <data name="Integrations.YouTube.ChatWidget.Description" xml:space="preserve">
+    <value>Zobrazuje živý chat aktuálního přenosu v reálném čase, včetně Super Chatů a nových členů.</value>
+  </data>
+  <data name="Integrations.YouTube.ChatWidget.Offline" xml:space="preserve">
+    <value>Na YouTube teď neprobíhá žádný živý chat</value>
+  </data>
+  <data name="Integrations.YouTube.ChatDialog.AccountChanged" xml:space="preserve">
+    <value>Tento widget teď zobrazuje jiný kanál YouTube. Pro moderování otevřete chat znovu.</value>
+  </data>
+  <data name="Integrations.YouTube.ChatDialog.AccountUnavailable" xml:space="preserve">
+    <value>Kanál YouTube teď nevysílá živě, jeho chat proto nelze moderovat.</value>
+  </data>
+  <data name="Integrations.YouTube.ChatDialog.NotPermitted" xml:space="preserve">
+    <value>YouTube to nepovolil. Je potřeba znovu připojit kanál YouTube a zkusit to znovu.</value>
+  </data>
+  <data name="Integrations.YouTube.ChatDialog.Refused" xml:space="preserve">
+    <value>YouTube tuto akci odmítl, například proto, že tento uživatel je vlastníkem nebo moderátorem kanálu.</value>
+  </data>
+  <data name="Integrations.YouTube.ChatDialog.Unsupported" xml:space="preserve">
+    <value>Macro Deck může zrušit jen zákazy, které sám udělil během tohoto vysílání. Tento zákaz zrušte v YouTube Studiu.</value>
+  </data>
+  <data name="Integrations.YouTube.StatsWidget.Name" xml:space="preserve">
+    <value>Statistiky vysílání YouTube</value>
+  </data>
+  <data name="Integrations.YouTube.StatsWidget.Description" xml:space="preserve">
+    <value>Zobrazuje na první pohled stav živého vysílání, diváky, hodnocení To se mi líbí a odběratele.</value>
+  </data>
+  <data name="Integrations.YouTube.StatsWidget.Heading" xml:space="preserve">
+    <value>YouTube</value>
+  </data>
+  <data name="Integrations.YouTube.StatsWidget.Likes" xml:space="preserve">
+    <value>Líbí se</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.DisplayName" xml:space="preserve">
+    <value>Název kanálu</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.IsLive" xml:space="preserve">
+    <value>Živě</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.StreamTitle" xml:space="preserve">
+    <value>Název vysílání</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.ViewerCount" xml:space="preserve">
+    <value>Počet diváků</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.LikeCount" xml:space="preserve">
+    <value>Počet hodnocení To se mi líbí</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.SubscriberCount" xml:space="preserve">
+    <value>Počet odběratelů</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.UptimeSeconds" xml:space="preserve">
+    <value>Doba běhu (sekund)</value>
+  </data>
+  <data name="Integrations.YouTube.Variables.StreamThumbnailUrl" xml:space="preserve">
+    <value>Adresa náhledu vysílání</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.AccountLabel" xml:space="preserve">
+    <value>Kanál</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.AccountDescription" xml:space="preserve">
+    <value>Který připojený kanál YouTube se má použít.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.FirstAccountPlaceholder" xml:space="preserve">
+    <value>První kanál</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SendChatMessage.Name" xml:space="preserve">
+    <value>Odeslat zprávu do chatu</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SendChatMessage.Description" xml:space="preserve">
+    <value>Odešle zprávu do živého chatu aktuálního přenosu.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SendChatMessage.MessageLabel" xml:space="preserve">
+    <value>Zpráva</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SendChatMessage.MessageDescription" xml:space="preserve">
+    <value>Nejvýše 200 znaků. YouTube přijímá zprávy do chatu jen během živého vysílání.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTitle.Name" xml:space="preserve">
+    <value>Nastavit název vysílání</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTitle.Description" xml:space="preserve">
+    <value>Změní název aktuálního přenosu, nebo mimo živé vysílání název příštího naplánovaného.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTitle.TitleLabel" xml:space="preserve">
+    <value>Název</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetDescription.Name" xml:space="preserve">
+    <value>Nastavit popis vysílání</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetDescription.Description" xml:space="preserve">
+    <value>Změní popis aktuálního přenosu, nebo mimo živé vysílání popis příštího naplánovaného.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetDescription.DescriptionLabel" xml:space="preserve">
+    <value>Popis</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTags.Name" xml:space="preserve">
+    <value>Nastavit štítky vysílání</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTags.Description" xml:space="preserve">
+    <value>Nahradí štítky aktuálního přenosu, nebo mimo živé vysílání štítky příštího naplánovaného.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTags.TagsLabel" xml:space="preserve">
+    <value>Štítky</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.SetTags.TagsDescription" xml:space="preserve">
+    <value>Štítky oddělte čárkami nebo zalomením řádku. Ponechte prázdné pro odebrání všech štítků.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Name" xml:space="preserve">
+    <value>Spustit reklamní přestávku</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Description" xml:space="preserve">
+    <value>Požádá YouTube o reklamní přestávku během živého vysílání. Zda se reklamy skutečně přehrají, rozhoduje YouTube.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.DurationLabel" xml:space="preserve">
+    <value>Délka</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Duration30Seconds" xml:space="preserve">
+    <value>30 sekund</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Duration60Seconds" xml:space="preserve">
+    <value>1 minuta</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Duration90Seconds" xml:space="preserve">
+    <value>90 sekund</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Duration2Minutes" xml:space="preserve">
+    <value>2 minuty</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.StartAdBreak.Duration3Minutes" xml:space="preserve">
+    <value>3 minuty</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.GoLive.Name" xml:space="preserve">
+    <value>Zahájit živé vysílání</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.GoLive.Description" xml:space="preserve">
+    <value>Spustí příští naplánovaný přenos, který je připravený. Nejdříve spusťte kodér.</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.EndStream.Name" xml:space="preserve">
+    <value>Ukončit vysílání</value>
+  </data>
+  <data name="Integrations.YouTube.Actions.EndStream.Description" xml:space="preserve">
+    <value>Ukončí aktuální živý přenos.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.AccountNotFound" xml:space="preserve">
+    <value>Kanál YouTube použitý touto akcí už není připojen.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.SignInExpired" xml:space="preserve">
+    <value>Přihlášení k YouTube vypršelo. Pro další použití kanál připojte znovu.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.MissingPermission" xml:space="preserve">
+    <value>YouTube neudělil Macro Decku oprávnění k této akci. Pro jeho udělení kanál připojte znovu.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.Unreachable" xml:space="preserve">
+    <value>YouTube nebyl dostupný. Zkontrolujte připojení a zkuste to znovu.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.RequestRejected" xml:space="preserve">
+    <value>YouTube požadavek odmítl.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.QuotaExhausted" xml:space="preserve">
+    <value>Denní kvóta YouTube projektu Google Cloud je vyčerpána. Obnoví se o půlnoci tichomořského času.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.RateLimited" xml:space="preserve">
+    <value>YouTube obdržel příliš mnoho požadavků. Chvíli počkejte a zkuste to znovu.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.StreamInactive" xml:space="preserve">
+    <value>YouTube zatím nepřijímá žádné video. Nejdříve spusťte kodér.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.InvalidTransition" xml:space="preserve">
+    <value>YouTube teď nemůže přepnout přenos do tohoto stavu. Nejdříve spusťte vysílání nebo jeho testovací fázi.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.TestStillStarting" xml:space="preserve">
+    <value>YouTube ještě spouští testovací fázi tohoto přenosu. Zkuste to znovu za chvíli.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.LiveStreamingNotEnabled" xml:space="preserve">
+    <value>Živé vysílání není pro tento kanál YouTube povoleno. Nejdříve ho povolte v YouTube Studiu.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.InsufficientLivePermissions" xml:space="preserve">
+    <value>Tento kanál YouTube nemá oprávnění spravovat tento přenos.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.NoLiveChat" xml:space="preserve">
+    <value>Teď neprobíhá žádný živý chat. Zprávy lze odesílat jen během živého vysílání.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.NoBroadcast" xml:space="preserve">
+    <value>Neexistuje žádný aktuální ani naplánovaný přenos YouTube, který by šlo změnit.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.NotLive" xml:space="preserve">
+    <value>Kanál YouTube teď nevysílá živě.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.NoReadyBroadcast" xml:space="preserve">
+    <value>Žádný naplánovaný přenos není připravený ke spuštění. Vytvořte ho v YouTube Studiu a spusťte kodér.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.AutoStart" xml:space="preserve">
+    <value>YouTube tento přenos spustí sám, jakmile kodér začne odesílat video, proto ho odsud nelze spustit.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.MessageEmpty" xml:space="preserve">
+    <value>Zadejte zprávu k odeslání.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.MessageTooLong" xml:space="preserve">
+    <value>Zpráva je delší než 200 znaků.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.TitleRequired" xml:space="preserve">
+    <value>Zadejte název.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.TitleInvalid" xml:space="preserve">
+    <value>Název může mít nejvýše 100 znaků a nesmí obsahovat &lt; ani &gt;.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.DescriptionInvalid" xml:space="preserve">
+    <value>Popis může mít nejvýše 5 000 bajtů a nesmí obsahovat &lt; ani &gt;.</value>
+  </data>
+  <data name="Integrations.YouTube.Errors.TagsInvalid" xml:space="preserve">
+    <value>Štítky mohou mít celkem nejvýše 500 znaků a nesmí obsahovat &lt; ani &gt;.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.SignInExpiredTitle" xml:space="preserve">
+    <value>Přihlášení k YouTube vypršelo pro {account}</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.SignInExpiredDescription" xml:space="preserve">
+    <value>Macro Deck už tento kanál YouTube nemůže používat. Dokud je projekt Google Cloud ve stavu Testing, Google ukončí přihlášení po 7 dnech. Pro obnovení kanál připojte znovu se stejným ID klienta a tajným klíčem klienta.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ReconnectAction" xml:space="preserve">
+    <value>Připojit znovu</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.ReconnectResolution" xml:space="preserve">
+    <value>Připojte kanál YouTube znovu.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.QuotaExhaustedTitle" xml:space="preserve">
+    <value>Kvóta YouTube vyčerpána</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.QuotaExhaustedDescription" xml:space="preserve">
+    <value>Projekt Google Cloud vyčerpal denní kvótu YouTube, proto Macro Deck pozastavil aktualizaci stavu vysílání a chatu. Obnoví se po půlnoci tichomořského času, kdy Google kvótu vynuluje.</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.DuplicateChannelTitle" xml:space="preserve">
+    <value>Kanál YouTube připojen dvakrát</value>
+  </data>
+  <data name="Integrations.YouTube.Issues.DuplicateChannelDescription" xml:space="preserve">
+    <value>"{title}" je starší připojení pro stejný kanál YouTube a nepoužívá se. Odeberte ho v seznamu konfigurací níže.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StreamCategory" xml:space="preserve">
+    <value>Vysílání</value>
+  </data>
+  <data name="Integrations.YouTube.Events.SuperChatCategory" xml:space="preserve">
+    <value>Super Chat</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MembershipsCategory" xml:space="preserve">
+    <value>Členství</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AdvancedCategory" xml:space="preserve">
+    <value>Pokročilé</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StreamOnlineName" xml:space="preserve">
+    <value>Vysílání zahájeno</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StreamOnlineDescription" xml:space="preserve">
+    <value>Kanál začal vysílat.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StreamOfflineName" xml:space="preserve">
+    <value>Vysílání ukončeno</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StreamOfflineDescription" xml:space="preserve">
+    <value>Živý přenos kanálu skončil.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.SuperChatName" xml:space="preserve">
+    <value>Super Chat</value>
+  </data>
+  <data name="Integrations.YouTube.Events.SuperChatDescription" xml:space="preserve">
+    <value>Někdo poslal Super Chat.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.SuperStickerName" xml:space="preserve">
+    <value>Super Sticker</value>
+  </data>
+  <data name="Integrations.YouTube.Events.SuperStickerDescription" xml:space="preserve">
+    <value>Někdo poslal Super Sticker.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.NewMemberName" xml:space="preserve">
+    <value>Nový člen</value>
+  </data>
+  <data name="Integrations.YouTube.Events.NewMemberDescription" xml:space="preserve">
+    <value>Někdo se stal členem kanálu nebo si členství povýšil.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MemberMilestoneName" xml:space="preserve">
+    <value>Milník členství</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MemberMilestoneDescription" xml:space="preserve">
+    <value>Člen sdílel v chatu milník svého členství.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MembershipGiftName" xml:space="preserve">
+    <value>Darovaná členství</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MembershipGiftDescription" xml:space="preserve">
+    <value>Někdo daroval členství dalším divákům.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AnyName" xml:space="preserve">
+    <value>Událost YouTube (pokročilé)</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AnyDescription" xml:space="preserve">
+    <value>Jakákoli událost YouTube z tohoto seznamu v jednom spouštěči. Filtrujte podle typu.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Channel" xml:space="preserve">
+    <value>Kanál</value>
+  </data>
+  <data name="Integrations.YouTube.Events.ChannelDescription" xml:space="preserve">
+    <value>Volitelné. Spustit pouze pro tento kanál YouTube.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.FirstChannelPlaceholder" xml:space="preserve">
+    <value>První kanál</value>
+  </data>
+  <data name="Integrations.YouTube.Events.ChannelId" xml:space="preserve">
+    <value>ID kanálu</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Title" xml:space="preserve">
+    <value>Název</value>
+  </data>
+  <data name="Integrations.YouTube.Events.StartedAt" xml:space="preserve">
+    <value>Zahájeno v</value>
+  </data>
+  <data name="Integrations.YouTube.Events.BroadcastId" xml:space="preserve">
+    <value>ID přenosu</value>
+  </data>
+  <data name="Integrations.YouTube.Events.MessageId" xml:space="preserve">
+    <value>ID zprávy</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AuthorChannelId" xml:space="preserve">
+    <value>ID kanálu autora</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AuthorName" xml:space="preserve">
+    <value>Autor</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Amount" xml:space="preserve">
+    <value>Částka</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AmountMicros" xml:space="preserve">
+    <value>Částka (mikrojednotky)</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Currency" xml:space="preserve">
+    <value>Měna</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Tier" xml:space="preserve">
+    <value>Úroveň</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Comment" xml:space="preserve">
+    <value>Komentář</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Sticker" xml:space="preserve">
+    <value>Nálepka</value>
+  </data>
+  <data name="Integrations.YouTube.Events.LevelName" xml:space="preserve">
+    <value>Úroveň členství</value>
+  </data>
+  <data name="Integrations.YouTube.Events.IsUpgrade" xml:space="preserve">
+    <value>Povýšení</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Months" xml:space="preserve">
+    <value>Měsíce</value>
+  </data>
+  <data name="Integrations.YouTube.Events.GiftCount" xml:space="preserve">
+    <value>Darovaná členství</value>
+  </data>
+  <data name="Integrations.YouTube.Events.EventType" xml:space="preserve">
+    <value>Typ události</value>
+  </data>
+  <data name="Integrations.YouTube.Events.EventTypeDescription" xml:space="preserve">
+    <value>Volitelné. Spustit pouze pro tento druh události, např. super-chat.</value>
+  </data>
+  <data name="Integrations.YouTube.Events.AnyEventPlaceholder" xml:space="preserve">
+    <value>Jakákoli událost</value>
+  </data>
+  <data name="Integrations.YouTube.Events.Message" xml:space="preserve">
+    <value>Zpráva</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientTitle" xml:space="preserve">
+    <value>Připojit kanál YouTube</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientDescription" xml:space="preserve">
+    <value>Macro Deck se k YouTube připojuje přes vlastní projekt Google Cloud. Nastavení trvá pár minut a stačí ho provést jednou.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.CreateProjectInstruction" xml:space="preserve">
+    <value>V konzoli Google Cloud vytvořte projekt a povolte pro něj YouTube Data API v3.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ConsentScreenInstruction" xml:space="preserve">
+    <value>Nastavte obrazovku souhlasu OAuth a jako testovacího uživatele přidejte účet Google, kterému kanál patří.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.CreateClientInstruction" xml:space="preserve">
+    <value>Vytvořte ID klienta OAuth s typem aplikace TVs and Limited Input devices.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.CopyCredentialsInstruction" xml:space="preserve">
+    <value>Zkopírujte jeho ID klienta a tajný klíč klienta do polí níže.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ApiLibraryLinkLabel" xml:space="preserve">
+    <value>YouTube Data API v3</value>
+  </data>
+  <data name="Integrations.YouTube.Config.CredentialsLinkLabel" xml:space="preserve">
+    <value>Přihlašovací údaje Google Cloud</value>
+  </data>
+  <data name="Integrations.YouTube.Config.GuideLinkLabel" xml:space="preserve">
+    <value>Podrobný návod</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientIdLabel" xml:space="preserve">
+    <value>ID klienta</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientIdPlaceholder" xml:space="preserve">
+    <value>123456789012-abc.apps.googleusercontent.com</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientSecretLabel" xml:space="preserve">
+    <value>Tajný klíč klienta</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientSecretDescription" xml:space="preserve">
+    <value>Ukládá se šifrovaně v tomto počítači a odesílá se jen společnosti Google.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.DailyQuotaLabel" xml:space="preserve">
+    <value>Denní kvóta (jednotky)</value>
+  </data>
+  <data name="Integrations.YouTube.Config.DailyQuotaDescription" xml:space="preserve">
+    <value>Kolik jednotek kvóty smí projekt Google Cloud denně spotřebovat. Google ve výchozím stavu přiděluje 10 000; hodnotu změňte jen tehdy, když Google přidělil víc.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.DailyQuotaInvalid" xml:space="preserve">
+    <value>Zadejte celé číslo, nejméně 1.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.EnterClientId" xml:space="preserve">
+    <value>Zadejte ID klienta.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.EnterClientSecret" xml:space="preserve">
+    <value>Zadejte tajný klíč klienta.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ClientRejected" xml:space="preserve">
+    <value>Google tohoto klienta nepřijal. Zkontrolujte ID klienta a tajný klíč klienta a to, že typ klienta je TVs and Limited Input devices.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.CouldNotBeReached" xml:space="preserve">
+    <value>Google nebyl dostupný. Zkontrolujte připojení a pokračujte pro nový pokus.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.LinkTitle" xml:space="preserve">
+    <value>Schválit přístup u Googlu</value>
+  </data>
+  <data name="Integrations.YouTube.Config.LinkDescription.One" xml:space="preserve">
+    <value>Kód zůstává platný {count} minutu.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.YouTube.Config.LinkDescription.Other" xml:space="preserve">
+    <value>Počet minut platnosti kódu: {count}.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.YouTube.Config.LinkDescriptionExpired.One" xml:space="preserve">
+    <value>Předchozí kód vypršel, tady je nový. Kód zůstává platný {count} minutu.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.YouTube.Config.LinkDescriptionExpired.Other" xml:space="preserve">
+    <value>Předchozí kód vypršel, tady je nový. Počet minut platnosti kódu: {count}.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.YouTube.Config.OpenGoogleInstruction" xml:space="preserve">
+    <value>Otevřete Google tlačítkem níže a přihlaste se účtem, kterému kanál patří.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.EnterCodeInstruction" xml:space="preserve">
+    <value>Zadejte tento kód:</value>
+  </data>
+  <data name="Integrations.YouTube.Config.DeviceCodeLabel" xml:space="preserve">
+    <value>Kód zařízení</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ApproveAccessInstruction" xml:space="preserve">
+    <value>Vyberte kanál a povolte přístup. Dokud je projekt ve stavu Testing, Google upozorní, že aplikace není ověřená; přesto pokračujte.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ComeBackPressContinueInstruction" xml:space="preserve">
+    <value>Vraťte se sem a stiskněte Pokračovat.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ThenPressContinueInstruction" xml:space="preserve">
+    <value>Potom stiskněte Pokračovat.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.OpenGoogleLinkLabel" xml:space="preserve">
+    <value>Otevřít Google a schválit</value>
+  </data>
+  <data name="Integrations.YouTube.Config.WaitingTitle" xml:space="preserve">
+    <value>Čeká se na Google</value>
+  </data>
+  <data name="Integrations.YouTube.Config.WaitingDescription" xml:space="preserve">
+    <value>Zatím nikdo žádost neschválil.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.PollingFailed" xml:space="preserve">
+    <value>Google nebyl dostupný. Pokračujte pro nový pokus.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.RequestDeclined" xml:space="preserve">
+    <value>Žádost jste u Googlu odmítli. Pro nový pokus ji schvalte s novým kódem níže.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.ChannelLookupFailed" xml:space="preserve">
+    <value>Google přístup schválil, ale YouTube nesdělil, ke kterému kanálu patří. Pokračujte pro nový pokus.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.NoChannel" xml:space="preserve">
+    <value>Tento účet Google nemá kanál YouTube. Schvalte nový kód níže účtem, kterému kanál patří.</value>
+  </data>
+  <data name="Integrations.YouTube.Config.UnknownStep" xml:space="preserve">
+    <value>Neznámý krok</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SplitRecordFile.Name" xml:space="preserve">
+    <value>Rozdělit soubor nahrávky</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SplitRecordFile.Description" xml:space="preserve">
+    <value>Zahájí nový soubor nahrávky, zatímco nahrávání pokračuje</value>
+  </data>
+  <data name="Integrations.Obs.Actions.CreateRecordChapter.Name" xml:space="preserve">
+    <value>Vytvořit kapitolu nahrávky</value>
+  </data>
+  <data name="Integrations.Obs.Actions.CreateRecordChapter.Description" xml:space="preserve">
+    <value>Přidá do nahrávaného souboru značku kapitoly. OBS to podporuje pouze ve formátu Hybrid MP4.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.CreateRecordChapter.ChapterNameLabel" xml:space="preserve">
+    <value>Název kapitoly</value>
+  </data>
+  <data name="Integrations.Obs.Actions.CreateRecordChapter.ChapterNameDescription" xml:space="preserve">
+    <value>Volitelné. Ponechte prázdné a název kapitoly určí OBS.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetRecordDirectory.Name" xml:space="preserve">
+    <value>Nastavit složku nahrávek</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetRecordDirectory.Description" xml:space="preserve">
+    <value>Nastaví složku, do které OBS ukládá nové nahrávky</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetRecordDirectory.DirectoryLabel" xml:space="preserve">
+    <value>Složka</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetRecordDirectory.DirectoryDescription" xml:space="preserve">
+    <value>Cesta ke složce v počítači, na kterém běží OBS</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NotRecording" xml:space="preserve">
+    <value>OBS nenahrává.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.RequestRejected" xml:space="preserve">
+    <value>OBS požadavek odmítl: {message}</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NoDirectorySelected" xml:space="preserve">
+    <value>Zadejte složku nahrávek.</value>
+  </data>
+  <data name="Integrations.Obs.Events.RecordFileChangedName" xml:space="preserve">
+    <value>Soubor nahrávky změněn</value>
+  </data>
+  <data name="Integrations.Obs.Events.RecordFileChangedDescription" xml:space="preserve">
+    <value>Nahrávání bylo zahájeno, přešlo do nového souboru nebo skončilo. Cesta je soubor, který OBS nahlásil.</value>
+  </data>
+  <data name="Integrations.Obs.Events.ScreenshotSavedName" xml:space="preserve">
+    <value>Snímek obrazovky uložen</value>
+  </data>
+  <data name="Integrations.Obs.Events.ScreenshotSavedDescription" xml:space="preserve">
+    <value>OBS uložil snímek obrazovky na disk.</value>
+  </data>
+  <data name="Integrations.Obs.Events.ScreenshotsCategory" xml:space="preserve">
+    <value>Snímky obrazovky</value>
+  </data>
+  <data name="Integrations.Obs.Variables.LastRecordingFile" xml:space="preserve">
+    <value>Poslední soubor nahrávky</value>
+  </data>
+  <data name="Integrations.Obs.Variables.LastScreenshot" xml:space="preserve">
+    <value>Poslední snímek obrazovky</value>
+  </data>
+  <data name="Integrations.Obs.Actions.StartOutput.Name" xml:space="preserve">
+    <value>Spustit výstup</value>
+  </data>
+  <data name="Integrations.Obs.Actions.StartOutput.Description" xml:space="preserve">
+    <value>Spustí výstup OBS podle názvu, včetně výstupů přidaných pluginy</value>
+  </data>
+  <data name="Integrations.Obs.Actions.StopOutput.Name" xml:space="preserve">
+    <value>Zastavit výstup</value>
+  </data>
+  <data name="Integrations.Obs.Actions.StopOutput.Description" xml:space="preserve">
+    <value>Zastaví výstup OBS podle názvu, včetně výstupů přidaných pluginy</value>
+  </data>
+  <data name="Integrations.Obs.Actions.ToggleOutput.Name" xml:space="preserve">
+    <value>Přepnout výstup</value>
+  </data>
+  <data name="Integrations.Obs.Actions.ToggleOutput.Description" xml:space="preserve">
+    <value>Spustí nebo zastaví výstup OBS podle názvu, včetně výstupů přidaných pluginy</value>
+  </data>
+  <data name="Integrations.Obs.Actions.GetOutputState.Name" xml:space="preserve">
+    <value>Zjistit stav výstupu</value>
+  </data>
+  <data name="Integrations.Obs.Actions.GetOutputState.Description" xml:space="preserve">
+    <value>Zapíše do proměnné, zda je výstup OBS aktivní</value>
+  </data>
+  <data name="Integrations.Obs.Actions.GetOutputState.VariableDescription" xml:space="preserve">
+    <value>Název proměnné, do které se zapíše stav aktivity</value>
+  </data>
+  <data name="Integrations.Obs.Params.Output" xml:space="preserve">
+    <value>Výstup</value>
+  </data>
+  <data name="Integrations.Obs.Params.OutputUnavailable" xml:space="preserve">
+    <value>{name} (nedostupné)</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NoOutputSelected" xml:space="preserve">
+    <value>Nebyl vybrán žádný výstup.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.OutputNotFound" xml:space="preserve">
+    <value>Výstup „{output}“ neexistuje.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.OutputCommandFailed" xml:space="preserve">
+    <value>OBS nemohl změnit výstup „{output}“.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.OutputsNeedNewerObs" xml:space="preserve">
+    <value>Ovládání výstupů vyžaduje verzi OBS s obs-websocket 5.7 nebo novějším.</value>
   </data>
 </root>

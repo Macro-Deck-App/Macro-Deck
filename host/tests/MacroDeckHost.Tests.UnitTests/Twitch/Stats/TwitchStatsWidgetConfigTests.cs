@@ -3,14 +3,15 @@ using Json.Schema;
 using MacroDeck.Localization;
 using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Testing;
-using MacroDeckHost.Application.Twitch.Stats;
+using MacroDeckHost.Application.StreamChat;
+using MacroDeckHost.Application.StreamStats;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Integrations.Twitch;
 using MacroDeckHost.Localization;
 using MacroDeckHost.Tests.UnitTests.Twitch.Chat;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Widgets.Ui;
-using MacroDeckHost.Widgets.TwitchStats;
+using MacroDeckHost.Widgets.StreamStats;
 using Serilog.Core;
 
 namespace MacroDeckHost.Tests.UnitTests.Twitch.Stats;
@@ -22,19 +23,19 @@ internal sealed class TwitchStatsWidgetConfigTests
 	public void Every_style_is_offered_with_the_size_it_is_designed_for()
 	{
 		var host = Render(new { account = "" });
-		var options = host.ById(TwitchStatsWidgetType.StyleKey).Property(UiConfigProperties.Options)!.Value
+		var options = host.ById(StreamStatsWidgetType.StyleKey).Property(UiConfigProperties.Options)!.Value
 			.EnumerateArray()
 			.Select(option => (option.GetProperty("value").GetString(), option.GetProperty("label").GetRawText()))
 			.ToList();
 
 		var expected = new (string Value, LocalizedString Label, string English)[]
 		{
-			("overview", AppStrings.Integrations.Twitch.StatsWidget.StyleOverview(), "Overview (3x2)"),
-			("statsRow", AppStrings.Integrations.Twitch.StatsWidget.StyleStatsRow(), "Stats row (3x1)"),
-			("liveRow", AppStrings.Integrations.Twitch.StatsWidget.StyleLiveRow(), "Live status row (3x1)"),
-			("valueGraph", AppStrings.Integrations.Twitch.StatsWidget.StyleValueGraph(),
+			("overview", AppStrings.Integrations.StreamStats.Widget.StyleOverview(), "Overview (3x2)"),
+			("statsRow", AppStrings.Integrations.StreamStats.Widget.StyleStatsRow(), "Stats row (3x1)"),
+			("liveRow", AppStrings.Integrations.StreamStats.Widget.StyleLiveRow(), "Live status row (3x1)"),
+			("valueGraph", AppStrings.Integrations.StreamStats.Widget.StyleValueGraph(),
 				"Single value with graph (2x2)"),
-			("value", AppStrings.Integrations.Twitch.StatsWidget.StyleValue(), "Single value (1x1)"),
+			("value", AppStrings.Integrations.StreamStats.Widget.StyleValue(), "Single value (1x1)"),
 		};
 
 		Assert.Multiple(() =>
@@ -56,8 +57,8 @@ internal sealed class TwitchStatsWidgetConfigTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(host.ById(TwitchStatsWidgetType.StyleKey).Text(UiConfigProperties.Value), Is.EqualTo("overview"));
-			Assert.That(Strings(host.ById(TwitchStatsWidgetType.TilesKey).Property(UiConfigProperties.Value)),
+			Assert.That(host.ById(StreamStatsWidgetType.StyleKey).Text(UiConfigProperties.Value), Is.EqualTo("overview"));
+			Assert.That(Strings(host.ById(StreamStatsWidgetType.TilesKey).Property(UiConfigProperties.Value)),
 				Is.EqualTo(new[] { "viewers", "chatters", "followers" }));
 		});
 	}
@@ -73,10 +74,10 @@ internal sealed class TwitchStatsWidgetConfigTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(WidgetConfigTestSupport.IsVisible(host, TwitchStatsWidgetType.MetricKey), Is.EqualTo(metric));
-			Assert.That(WidgetConfigTestSupport.IsVisible(host, TwitchStatsWidgetType.TilesKey), Is.EqualTo(tiles));
-			Assert.That(WidgetConfigTestSupport.IsVisible(host, TwitchStatsWidgetType.DetailsKey), Is.EqualTo(details));
-			Assert.That(WidgetConfigTestSupport.IsVisible(host, TwitchStatsWidgetType.ThumbnailKey), Is.EqualTo(details));
+			Assert.That(WidgetConfigTestSupport.IsVisible(host, StreamStatsWidgetType.MetricKey), Is.EqualTo(metric));
+			Assert.That(WidgetConfigTestSupport.IsVisible(host, StreamStatsWidgetType.TilesKey), Is.EqualTo(tiles));
+			Assert.That(WidgetConfigTestSupport.IsVisible(host, StreamStatsWidgetType.DetailsKey), Is.EqualTo(details));
+			Assert.That(WidgetConfigTestSupport.IsVisible(host, StreamStatsWidgetType.ThumbnailKey), Is.EqualTo(details));
 		});
 	}
 
@@ -86,8 +87,8 @@ internal sealed class TwitchStatsWidgetConfigTests
 		{
 			var host = Render(new { account = "" });
 
-			Assert.That(host.ById(TwitchStatsWidgetType.TilesKey).Flag(UiConfigProperties.Reorderable), Is.True);
-			Assert.That(host.ById(TwitchStatsWidgetType.DetailsKey).Flag(UiConfigProperties.Reorderable), Is.True);
+			Assert.That(host.ById(StreamStatsWidgetType.TilesKey).Flag(UiConfigProperties.Reorderable), Is.True);
+			Assert.That(host.ById(StreamStatsWidgetType.DetailsKey).Flag(UiConfigProperties.Reorderable), Is.True);
 		});
 
 	[Test]
@@ -100,25 +101,25 @@ internal sealed class TwitchStatsWidgetConfigTests
 			(_, _) => new FakeTwitchHelixClient());
 		using var integration = new TwitchIntegration(manager);
 		await manager.ReloadAsync(config);
-		var descriptor = integration.GetWidgetTypes().Single(type => type.Id == TwitchStatsWidgetType.LocalId);
+		var descriptor = integration.GetWidgetTypes().Single(type => type.Id == StreamStatsWidgetType.LocalId);
 		var schema = JsonSchema.FromText(descriptor.DataSchema!);
 		var defaults = JsonDocument.Parse(descriptor.DefaultData!).RootElement;
 
 		var host = Render(defaults);
-		host.ById(TwitchStatsWidgetType.StyleKey).Change("value");
-		host.ById(TwitchStatsWidgetType.MetricKey).Change("subscribers");
-		host.ById(TwitchStatsWidgetType.TilesKey).Change(new[] { "subscribers", "viewers" });
-		host.ById(TwitchStatsWidgetType.DetailsKey).Change(new[] { "uptime" });
-		host.ById(TwitchStatsWidgetType.ThumbnailKey).Change(false);
+		host.ById(StreamStatsWidgetType.StyleKey).Change("value");
+		host.ById(StreamStatsWidgetType.MetricKey).Change("subscribers");
+		host.ById(StreamStatsWidgetType.TilesKey).Change(new[] { "subscribers", "viewers" });
+		host.ById(StreamStatsWidgetType.DetailsKey).Change(new[] { "uptime" });
+		host.ById(StreamStatsWidgetType.ThumbnailKey).Change(false);
 
 		var edited = JsonSerializer.SerializeToElement(new Dictionary<string, object?>
 		{
 			["account"] = "",
-			["style"] = host.ById(TwitchStatsWidgetType.StyleKey).Text(UiConfigProperties.Value),
-			["metric"] = host.ById(TwitchStatsWidgetType.MetricKey).Text(UiConfigProperties.Value),
-			["tiles"] = host.ById(TwitchStatsWidgetType.TilesKey).Property(UiConfigProperties.Value),
-			["details"] = host.ById(TwitchStatsWidgetType.DetailsKey).Property(UiConfigProperties.Value),
-			["showThumbnail"] = host.ById(TwitchStatsWidgetType.ThumbnailKey).Flag(UiConfigProperties.Value),
+			["style"] = host.ById(StreamStatsWidgetType.StyleKey).Text(UiConfigProperties.Value),
+			["metric"] = host.ById(StreamStatsWidgetType.MetricKey).Text(UiConfigProperties.Value),
+			["tiles"] = host.ById(StreamStatsWidgetType.TilesKey).Property(UiConfigProperties.Value),
+			["details"] = host.ById(StreamStatsWidgetType.DetailsKey).Property(UiConfigProperties.Value),
+			["showThumbnail"] = host.ById(StreamStatsWidgetType.ThumbnailKey).Flag(UiConfigProperties.Value),
 		});
 
 		Assert.Multiple(() =>
@@ -126,14 +127,15 @@ internal sealed class TwitchStatsWidgetConfigTests
 			Assert.That(WidgetDataSchema.Validate(schema, defaults), Is.Empty);
 			Assert.That(WidgetDataSchema.Validate(schema, edited), Is.Empty);
 			Assert.That(Strings(edited.GetProperty("tiles")), Is.EqualTo(new[] { "subscribers", "viewers" }));
-			Assert.That(TwitchStatsWidgetSettings.Options(edited).Metric, Is.EqualTo("subscribers"));
+			Assert.That(StreamStatsWidgetSettings.Options(StreamPlatforms.Twitch, edited).Metric,
+				Is.EqualTo("subscribers"));
 		});
 	}
 
 	private static UiTestHost Render(object data)
-		=> UiTestHost.Render(TwitchStatsWidgetConfigView.Build(
+		=> UiTestHost.Render(StreamStatsWidgetConfigView.Build(StreamPlatforms.Twitch,
 			data is JsonElement element ? element : JsonSerializer.SerializeToElement(data),
-			[new TwitchStatsAccount("111", "Streamer", "streamer")]));
+			[new StreamStatsAccount("111", "Streamer", "twitch_streamer_")]));
 
 	private static string[] Strings(JsonElement? list)
 		=> [.. list!.Value.EnumerateArray().Select(item => item.GetString()!)];
