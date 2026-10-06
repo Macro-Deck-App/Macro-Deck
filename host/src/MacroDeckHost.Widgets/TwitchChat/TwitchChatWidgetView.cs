@@ -10,15 +10,21 @@ internal static class TwitchChatWidgetView
 {
 	public const int FallbackMaxLines = 2;
 
-	private sealed record Metrics(UiLength TextSize, UiLength LogPadding, UiLength LineGap, UiLength HeaderGap)
+	private sealed record Metrics(
+		UiLength TextSize,
+		UiLength LogPadding,
+		UiLength LineGap,
+		UiLength HeaderGap,
+		string? MessageColor = null)
 	{
 		// The padding stays at least a fifth of the text size, so the clipped edge
 		// never cuts the last line's descenders.
-		public static Metrics For(double scale) => new(
+		public static Metrics For(double scale, string? messageColor = null) => new(
 			UiLength.Capped(0.1 * scale, 12 * scale),
 			UiLength.Capped(0.025 * scale, 3 * scale),
 			UiLength.Capped(0.015 * scale, 2 * scale),
-			UiLength.Capped(0.03 * scale, 4 * scale));
+			UiLength.Capped(0.03 * scale, 4 * scale),
+			messageColor);
 	}
 
 	public static UiElement Build(
@@ -27,11 +33,12 @@ internal static class TwitchChatWidgetView
 		UiResource? icon = null,
 		IReadOnlyList<UiEventHandler>? events = null,
 		string? backgroundColor = null,
-		double scale = 1)
+		double scale = 1,
+		string? messageColor = null)
 	{
 		ArgumentNullException.ThrowIfNull(state);
 
-		var metrics = Metrics.For(scale);
+		var metrics = Metrics.For(scale, messageColor);
 
 		return new UiStack
 		{
@@ -102,10 +109,11 @@ internal static class TwitchChatWidgetView
 		};
 	}
 
-	public static UiTextRun Message(TwitchChatLine line, double scale = 1) => Message(line, Metrics.For(scale));
+	public static UiTextRun Message(TwitchChatLine line, double scale = 1, string? messageColor = null)
+		=> Message(line, Metrics.For(scale, messageColor));
 
-	public static UiTextRun FallbackMessage(TwitchChatLine line, double scale = 1)
-		=> FallbackMessage(line, Metrics.For(scale));
+	public static UiTextRun FallbackMessage(TwitchChatLine line, double scale = 1, string? messageColor = null)
+		=> FallbackMessage(line, Metrics.For(scale, messageColor));
 
 	private static UiTextRun Message(TwitchChatLine line, Metrics metrics)
 	{
@@ -117,6 +125,7 @@ internal static class TwitchChatWidgetView
 			Text = line.Text,
 			Spans = UiValue.Of(line.Spans),
 			Size = metrics.TextSize,
+			Color = Tint(metrics.MessageColor),
 			Wrap = true,
 		};
 	}
@@ -130,6 +139,7 @@ internal static class TwitchChatWidgetView
 			Key = line.FallbackKey,
 			Text = line.Text,
 			Size = metrics.TextSize,
+			Color = Tint(metrics.MessageColor),
 			Wrap = true,
 			MaxLines = FallbackMaxLines,
 		};
@@ -175,6 +185,9 @@ internal static class TwitchChatWidgetView
 				],
 			},
 		};
+
+	private static UiValue<string> Tint(string? color)
+		=> color is null ? UiValue.None<string>() : UiValue.Of(color);
 
 	private static UiTextRun Notice(string key, UiText text, Metrics metrics)
 		=> new()

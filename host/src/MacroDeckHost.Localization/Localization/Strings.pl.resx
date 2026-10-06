@@ -9610,8 +9610,17 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Twitch.ChatWidget.FirstAccount" xml:space="preserve">
     <value>Pierwsze połączone konto</value>
   </data>
+  <data name="Integrations.Twitch.ChatWidget.MessageColor" xml:space="preserve">
+    <value>Kolor wiadomości</value>
+  </data>
   <data name="Integrations.Twitch.ChatWidget.Name" xml:space="preserve">
     <value>Czat Twitch</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.NameColor" xml:space="preserve">
+    <value>Kolor nazw użytkowników</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.NameColorDescription" xml:space="preserve">
+    <value>Puste pole oznacza, że każda nazwa jest wyświetlana we własnym kolorze z Twitcha.</value>
   </data>
   <data name="Integrations.Twitch.ChatWidget.NameSeparator" xml:space="preserve">
     <value>: </value>

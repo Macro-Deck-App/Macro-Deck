@@ -136,6 +136,81 @@ internal sealed class TwitchChatWidgetViewTests
 	}
 
 	[Test]
+	public async Task A_message_colour_paints_the_chat_text_and_a_name_colour_replaces_every_chatters_own()
+	{
+		Connect();
+		_hub.Post(new TwitchChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1")));
+		_hub.Tick();
+
+		await using var session = await OpenAsync(new { account = "", messageColor = "#FFCC00", nameColor = "#00ff00" });
+
+		var root = session.BuildTree().Root;
+		var line = MessageNodes(root).Single();
+		var spans = line.Properties[UiComponentProperties.Spans].EnumerateArray().ToList();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(line.Properties[UiComponentProperties.Color].GetString(), Is.EqualTo("#ffcc00"));
+			Assert.That(FallbackNodes(root).Select(node => node.Properties[UiComponentProperties.Color].GetString()),
+				Is.Not.Empty.And.All.EqualTo("#ffcc00"));
+			Assert.That(spans[0].GetProperty("text").GetString(), Is.EqualTo("Viewer"));
+			Assert.That(spans[0].GetProperty("color").GetString(), Is.EqualTo("#00ff00"));
+			Assert.That(spans.Skip(1).Any(span => span.TryGetProperty("color", out _)), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task Without_valid_colours_the_chat_keeps_the_theme_text_and_each_chatters_own_colour()
+	{
+		Connect();
+		_hub.Post(new TwitchChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1")));
+		_hub.Tick();
+
+		await using var unset = await OpenAsync();
+		await using var cleared = await OpenAsync(new { account = "", messageColor = "", nameColor = "" });
+		await using var invalid = await OpenAsync(new { account = "", messageColor = "var(--x)", nameColor = "#12" });
+
+		foreach (var session in new[] { unset, cleared, invalid })
+		{
+			var root = session.BuildTree().Root;
+			var line = MessageNodes(root).Single();
+			var name = line.Properties[UiComponentProperties.Spans].EnumerateArray().First();
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(line.Properties.ContainsKey(UiComponentProperties.Color), Is.False);
+				Assert.That(FallbackNodes(root).Any(node => node.Properties.ContainsKey(UiComponentProperties.Color)),
+					Is.False);
+				Assert.That(name.GetProperty("color").GetString(), Is.EqualTo("#1e90ff"));
+			});
+		}
+	}
+
+	[Test]
+	public async Task The_sample_preview_follows_the_chat_colours()
+	{
+		await using var sample = await _provider.CreateSessionAsync(
+			new UiSessionRequest
+			{
+				Surface = Surface(UiSurfaceKinds.Preview, sample: true,
+					data: new { account = "", messageColor = "#ffcc00", nameColor = "#00ff00" }),
+				UiModelVersion = 1,
+			},
+			CancellationToken.None);
+
+		var lines = MessageNodes(sample!.BuildTree().Root).ToList();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(lines, Has.Count.EqualTo(3));
+			Assert.That(lines.Select(line => line.Properties[UiComponentProperties.Color].GetString()),
+				Is.All.EqualTo("#ffcc00"));
+			Assert.That(lines.Select(line => line.Properties[UiComponentProperties.Spans][0].GetProperty("color")
+				.GetString()), Is.All.EqualTo("#00ff00"));
+		});
+	}
+
+	[Test]
 	public async Task The_sample_preview_follows_the_font_size()
 	{
 		await using var plain = await _provider.CreateSessionAsync(
@@ -446,6 +521,12 @@ internal sealed class TwitchChatWidgetViewTests
 	private static IEnumerable<UiNode> MessageNodes(UiNode root)
 		=> Flatten(root, includeFallback: false)
 			.Where(node => node.Type == UiComponents.Text && node.Properties.ContainsKey(UiComponentProperties.Spans));
+
+	private static IEnumerable<UiNode> FallbackNodes(UiNode root)
+		=> Flatten(root, includeFallback: false)
+			.Where(node => node.Fallback is not null)
+			.SelectMany(node => Flatten(node.Fallback!))
+			.Where(node => node.Type == UiComponents.Text);
 
 	private static IEnumerable<UiNode> Flatten(UiNode node, bool includeFallback = true)
 	{

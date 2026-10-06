@@ -9611,8 +9611,17 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Twitch.ChatWidget.FirstAccount" xml:space="preserve">
     <value>First connected account</value>
   </data>
+  <data name="Integrations.Twitch.ChatWidget.MessageColor" xml:space="preserve">
+    <value>Message color</value>
+  </data>
   <data name="Integrations.Twitch.ChatWidget.Name" xml:space="preserve">
     <value>Twitch Chat</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.NameColor" xml:space="preserve">
+    <value>Name color</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.NameColorDescription" xml:space="preserve">
+    <value>Leave empty to show each chatter's own Twitch color.</value>
   </data>
   <data name="Integrations.Twitch.ChatWidget.NameSeparator" xml:space="preserve">
     <value>: </value>

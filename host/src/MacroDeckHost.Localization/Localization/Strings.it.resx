@@ -9610,8 +9610,17 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.Twitch.ChatWidget.FirstAccount" xml:space="preserve">
     <value>Primo account connesso</value>
   </data>
+  <data name="Integrations.Twitch.ChatWidget.MessageColor" xml:space="preserve">
+    <value>Colore dei messaggi</value>
+  </data>
   <data name="Integrations.Twitch.ChatWidget.Name" xml:space="preserve">
     <value>Chat di Twitch</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.NameColor" xml:space="preserve">
+    <value>Colore dei nomi</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.NameColorDescription" xml:space="preserve">
+    <value>Lascia vuoto per mostrare ogni nome nel suo colore di Twitch.</value>
   </data>
   <data name="Integrations.Twitch.ChatWidget.NameSeparator" xml:space="preserve">
     <value>: </value>

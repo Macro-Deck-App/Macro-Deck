@@ -121,7 +121,9 @@ public sealed class TwitchChatWidgetUiProvider : IBuiltInIntegrationUiProvider
 			? TwitchChatWidgetSettings.BackgroundColor(widgetData)
 			: null;
 		var scale = widgetData.ValueKind == JsonValueKind.Undefined ? 1 : TwitchChatWidgetSettings.FontScale(widgetData);
-		var layout = TwitchChatLines.WidgetLayout(scale);
+		var messageColor = TwitchChatWidgetSettings.MessageColor(widgetData);
+		var nameColor = TwitchChatWidgetSettings.NameColor(widgetData);
+		var layout = TwitchChatLines.WidgetLayout(scale, messageColor, nameColor);
 
 		if (WidgetSamplePreview.IsRequested(surface))
 		{
@@ -129,7 +131,7 @@ public sealed class TwitchChatWidgetUiProvider : IBuiltInIntegrationUiProvider
 
 			return new StaticWidgetUiSession(new UiView(surface,
 				TwitchChatWidgetView.Build(new UiState<TwitchChatViewState>(sample), cornerRadius, _icon.Value,
-					backgroundColor: backgroundColor, scale: scale)));
+					backgroundColor: backgroundColor, scale: scale, messageColor: messageColor)));
 		}
 
 		var accountId = ReadAccount(surface);
@@ -144,7 +146,7 @@ public sealed class TwitchChatWidgetUiProvider : IBuiltInIntegrationUiProvider
 			: [];
 
 		var view = new UiView(surface, TwitchChatWidgetView.Build(state, cornerRadius, _icon.Value, events,
-			backgroundColor, scale));
+			backgroundColor, scale, messageColor));
 		session = new TwitchChatWidgetSession(view, state, lines, _feed, accountId, snapshot.Account?.UserId);
 
 		return session;

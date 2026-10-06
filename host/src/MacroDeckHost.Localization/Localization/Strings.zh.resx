@@ -9611,8 +9611,17 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.Twitch.ChatWidget.FirstAccount" xml:space="preserve">
     <value>第一个已连接的账户</value>
   </data>
+  <data name="Integrations.Twitch.ChatWidget.MessageColor" xml:space="preserve">
+    <value>消息颜色</value>
+  </data>
   <data name="Integrations.Twitch.ChatWidget.Name" xml:space="preserve">
     <value>Twitch 聊天</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.NameColor" xml:space="preserve">
+    <value>用户名颜色</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.NameColorDescription" xml:space="preserve">
+    <value>留空则每个用户名使用其自己的 Twitch 颜色。</value>
   </data>
   <data name="Integrations.Twitch.ChatWidget.NameSeparator" xml:space="preserve">
     <value>：</value>

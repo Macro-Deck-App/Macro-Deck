@@ -20,6 +20,10 @@ internal static class TwitchChatWidgetConfigView
 			string.Empty);
 		var allowModeration = new UiState<bool>(TwitchChatWidgetSettings.AllowsModeration(data));
 		var fontSize = new UiState<double>(TwitchChatWidgetSettings.FontScale(data) * 100);
+		var messageColor = new UiState<string>(
+			WidgetConfigJson.ReadString(data, TwitchChatWidgetSettings.MessageColorKey) ?? string.Empty);
+		var nameColor = new UiState<string>(
+			WidgetConfigJson.ReadString(data, TwitchChatWidgetSettings.NameColorKey) ?? string.Empty);
 
 		return new UiWidgetConfiguration
 		{
@@ -59,6 +63,23 @@ internal static class TwitchChatWidgetConfigView
 						Max = TwitchChatWidgetSettings.MaxFontSizePercent,
 						Step = 5,
 						Binding = Bind.To(fontSize),
+					},
+					new UiColorInput
+					{
+						Key = TwitchChatWidgetSettings.MessageColorKey,
+						Label = AppStrings.Integrations.Twitch.ChatWidget.MessageColor(),
+						Binding = Bind.To(messageColor),
+						SupportsReset = true,
+						DefaultValue = string.Empty,
+					},
+					new UiColorInput
+					{
+						Key = TwitchChatWidgetSettings.NameColorKey,
+						Label = AppStrings.Integrations.Twitch.ChatWidget.NameColor(),
+						Description = AppStrings.Integrations.Twitch.ChatWidget.NameColorDescription(),
+						Binding = Bind.To(nameColor),
+						SupportsReset = true,
+						DefaultValue = string.Empty,
 					},
 					UiWidgetAppearance.Section(data,
 						UiWidgetAppearanceFields.Border | UiWidgetAppearanceFields.BackgroundColor |

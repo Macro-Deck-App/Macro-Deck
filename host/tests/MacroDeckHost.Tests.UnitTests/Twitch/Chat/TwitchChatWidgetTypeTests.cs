@@ -80,6 +80,29 @@ internal sealed class TwitchChatWidgetTypeTests
 	}
 
 	[Test]
+	public async Task The_chat_widget_data_schema_offers_optional_message_and_name_colours()
+	{
+		TwitchChatTestSupport.AddAccount(_config, "111", "streamer");
+		await _manager.ReloadAsync(_config);
+		await _host.StartAsync(_integration);
+
+		Assert.That(_registry.TryResolve(TwitchChatWidgetType.QualifiedId, out var entry), Is.True);
+
+		using var schema = global::System.Text.Json.JsonDocument.Parse(entry.Descriptor.DataSchema!);
+		var properties = schema.RootElement.GetProperty("properties");
+
+		Assert.Multiple(() =>
+		{
+			foreach (var key in new[] { "messageColor", "nameColor" })
+			{
+				var types = properties.GetProperty(key).GetProperty("type").EnumerateArray()
+					.Select(type => type.GetString()).ToList();
+				Assert.That(types, Is.EquivalentTo(new[] { "string", "null" }), key);
+			}
+		});
+	}
+
+	[Test]
 	public async Task Removing_the_last_account_withdraws_the_chat_widget_on_reinitialization()
 	{
 		TwitchChatTestSupport.AddAccount(_config, "111", "streamer");

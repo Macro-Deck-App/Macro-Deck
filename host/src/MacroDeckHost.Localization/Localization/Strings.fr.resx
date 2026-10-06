@@ -9610,8 +9610,17 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Twitch.ChatWidget.FirstAccount" xml:space="preserve">
     <value>Premier compte connecté</value>
   </data>
+  <data name="Integrations.Twitch.ChatWidget.MessageColor" xml:space="preserve">
+    <value>Couleur des messages</value>
+  </data>
   <data name="Integrations.Twitch.ChatWidget.Name" xml:space="preserve">
     <value>Chat Twitch</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.NameColor" xml:space="preserve">
+    <value>Couleur des noms</value>
+  </data>
+  <data name="Integrations.Twitch.ChatWidget.NameColorDescription" xml:space="preserve">
+    <value>Laisse vide pour afficher chaque nom dans sa propre couleur Twitch.</value>
   </data>
   <data name="Integrations.Twitch.ChatWidget.NameSeparator" xml:space="preserve">
     <value> : </value>

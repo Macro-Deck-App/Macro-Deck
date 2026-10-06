@@ -43,7 +43,8 @@ internal sealed record TwitchChatLineLayout(
 	Func<TwitchChatLine, UiElement> FallbackMessage,
 	int MaxMessages,
 	int MaxBytes,
-	int FallbackMessages);
+	int FallbackMessages,
+	string? NameColor = null);
 
 internal sealed class TwitchChatLines
 {
@@ -65,12 +66,13 @@ internal sealed class TwitchChatLines
 
 	public static readonly TwitchChatLineLayout Widget = WidgetLayout(1);
 
-	public static TwitchChatLineLayout WidgetLayout(double scale)
-		=> new(line => TwitchChatWidgetView.Message(line, scale),
-			line => TwitchChatWidgetView.FallbackMessage(line, scale),
+	public static TwitchChatLineLayout WidgetLayout(double scale, string? messageColor = null, string? nameColor = null)
+		=> new(line => TwitchChatWidgetView.Message(line, scale, messageColor),
+			line => TwitchChatWidgetView.FallbackMessage(line, scale, messageColor),
 			MaxMessages,
 			MaxBytes,
-			FallbackMessages);
+			FallbackMessages,
+			nameColor);
 
 	private readonly string _separator;
 	private readonly ITwitchChatImages? _images;
@@ -164,7 +166,8 @@ internal sealed class TwitchChatLines
 			spans.Add(UiTextSpan.FromText(" "));
 		}
 
-		spans.Add(UiTextSpan.FromText(message.ChatterName, message.Color, UiComponentTextWeights.SemiBold));
+		spans.Add(UiTextSpan.FromText(message.ChatterName, layout.NameColor ?? message.Color,
+			UiComponentTextWeights.SemiBold));
 		spans.Add(UiTextSpan.FromText(separator));
 
 		var text = new StringBuilder();

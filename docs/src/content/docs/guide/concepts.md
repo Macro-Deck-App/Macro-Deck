@@ -76,6 +76,12 @@ On a small device or a large widget, change **Size (%)** in the widget's setting
 smaller. 100 is the default and values from 25 to 300 are accepted. The size applies to the widget; the chat
 dialog keeps its own.
 
+To make the chat easier to read on your background, pick a **Message color** for the chat text. Pick a
+**Name color** to show every chatter's name in that one color instead of the color each chatter chose on
+Twitch. Reset either one to go back to the theme's text color or the chatters' own colors. The widget's
+title and its status notices keep the theme's text color. Like the size, both colors apply to the widget; the
+chat dialog keeps the theme's colors.
+
 ### The Twitch Stream Stats widget
 
 Pick what the widget shows with **Style** in its settings. Each style names the size it is designed for, and
