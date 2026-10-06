@@ -7,6 +7,7 @@ using MacroDeckHost.Infrastructure.Backups;
 using MacroDeckHost.Application.Backups.Storage;
 using MacroDeckHost.Application.Backups.Retention;
 using MacroDeckHost.Application.Backups;
+using MacroDeckHost.Application.Feedback;
 using MacroDeckHost.Application.Messaging;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
@@ -403,7 +404,8 @@ public class Startup
 		services.AddSingleton<IPersistenceRecoveryReporter, PersistenceRecoveryNotifier>();
 		services.AddScoped<INetworkRestartNotifier, NetworkRestartNotifier>();
 		services.AddScoped<IPublicListenerUnavailableNotifier, PublicListenerUnavailableNotifier>();
-		services.AddSingleton<IFontCatalog, SkiaFontCatalog>();
+		services.AddSingleton<IFontCatalog>(sp => new SkiaFontCatalog(sp.GetRequiredService<IMacroDeckPaths>()));
+		services.AddSingleton<IUserFontLibrary, FileSystemUserFontLibrary>();
 		services.AddSingleton<LabelRenderChannel>();
 		services.AddSingleton<LabelSubscriptionTracker>();
 		services.AddScoped<ILabelTextService, LabelTextService>();
@@ -777,6 +779,7 @@ public class Startup
 		services.AddSingleton<IStoreLinkResolver, StoreLinkResolver>();
 		services.AddSingleton<IStoreReviewService, StoreReviewService>();
 		services.AddSingleton<IStoreRatingPromptService, StoreRatingPromptService>();
+		services.AddSingleton<IGitHubStarPromptService, GitHubStarPromptService>();
 		services.AddSingleton<StoreCatalogPopularity>();
 		services.AddSingleton<StoreSimilarPackages>();
 		services.AddSingleton<MacroDeckHost.Application.Store.Testing.IStoreTestService, MacroDeckHost.Application.Store.Testing.StoreTestService>();

@@ -30,10 +30,9 @@ internal sealed class ObsVariableCatalog
 
 	private static readonly ILogger _logger = IntegrationLog.For<ObsVariableCatalog>(ObsIntegration.IntegrationId);
 
-	// Decibels, not the raw multiplier OBS's protocol carries: OBS's own audio mixer is a -60..0 dB
-	// scale, and a linear multiplier squeezes every useful mixing position into the bottom tenth of a
-	// control, which is unusable to drag. The multiplier stays the wire representation on both sides.
-	private const double MinimumVolumeDb = -60;
+	// Decibels, not the raw multiplier: a linear scale squeezes every useful mixing position into
+	// the bottom tenth of a control. The multiplier stays the wire representation.
+	private const double MinimumVolumeDb = ObsVolumeScale.MinimumDecibels;
 
 	private static readonly LeafSpec _volumeSpec = new("volume",
 		VariableType.Numeric,
@@ -104,11 +103,35 @@ internal sealed class ObsVariableCatalog
 		_runtimes = runtimes;
 	}
 
+	public static IEnumerable<string> DefinitionIdsFor(Guid runtimeId, IEnumerable<ObsTargetChange> changes)
+	{
+		foreach (var change in changes)
+		{
+			switch (change.Kind)
+			{
+				case ObsTargetKind.InputSettings:
+					foreach (var key in change.Keys ?? [])
+					{
+						yield return InputSettingId(runtimeId, change.Name, key);
+					}
+
+					break;
+				case ObsTargetKind.SourceActivity:
+					yield return InputLeafId(runtimeId, change.Name, _activeSpec.Segment);
+					yield return InputLeafId(runtimeId, change.Name, _showingSpec.Segment);
+					break;
+				default:
+					yield return InputFilterEnabledId(runtimeId, change.Name, change.Child!);
+					yield return SceneFilterEnabledId(runtimeId, change.Name, change.Child!);
+					break;
+			}
+		}
+	}
+
 	public static string CatalogName => "OBS Studio";
 
-	// OBS has no event stream for volume, input settings, audio tracks or monitor type, and SupportsPush is
-	// all-or-nothing per provider: reporting true here would turn off polling for the whole provider, not
-	// just the resources OBS happens to push, freezing every event-less one at its first value forever.
+	// OBS has no event stream for volume, audio tracks or monitor type, and SupportsPush is all-or-nothing
+	// per provider: true would stop polling for every resource, freezing the event-less ones forever.
 	public static bool SupportsPush => false;
 
 	// A single OBS install has dozens of resources, not thousands; the host then correctly omits the
@@ -352,15 +375,10 @@ internal sealed class ObsVariableCatalog
 	}
 
 	/// <summary>OBS's linear multiplier as a percentage, expressed on OBS's own decibel scale.</summary>
-	private static double ToDecibels(double percent)
-	{
-		var multiplier = percent / 100.0;
-		return multiplier <= 0
-			? MinimumVolumeDb
-			: Math.Max(MinimumVolumeDb, 20 * Math.Log10(multiplier));
-	}
+	private static double ToDecibels(double percent) => ObsVolumeScale.ToDecibels(percent / 100.0);
 
-	private static double ToPercent(double decibels) => Math.Pow(10, decibels / 20.0) * 100.0;
+	private static double ToPercent(double decibels)
+		=> decibels <= MinimumVolumeDb ? 0d : Math.Pow(10, decibels / 20.0) * 100.0;
 
 	private static bool TryReadNumber(object? value, out double percent)
 	{

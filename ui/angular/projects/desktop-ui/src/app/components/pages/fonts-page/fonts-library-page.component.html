@@ -1,0 +1,76 @@
+<div class="fonts-page" sharedFileDrop (filesDropped)="onFilesDropped($event)">
+  <header class="fonts-header">
+    <div>
+      <h1 class="fonts-title">{{ 'macrodeck.app:Nav.Fonts' | translate }}</h1>
+      <p class="fonts-subtitle">{{ 'macrodeck.app:Library.Page.FontsDescription' | translate }}</p>
+    </div>
+    <shared-button variant="primary" [disabled]="isImporting()" (click)="pickFiles()">
+      <span class="icon icon-plus icon-sm" aria-hidden="true"></span>
+      {{ 'macrodeck.app:Library.Fonts.ImportAction' | translate }}
+    </shared-button>
+  </header>
+
+  <p class="fonts-license">
+    <span class="icon icon-info icon-sm" aria-hidden="true"></span>
+    <span>{{ 'macrodeck.app:Library.Fonts.LicenseNote' | translate }}</span>
+  </p>
+
+  @if (groups().length === 0) {
+    @if (!userFonts.isLoading()) {
+      <shared-empty-state
+        icon="type"
+        [heading]="'macrodeck.app:Library.Fonts.EmptyTitle' | translate"
+        [message]="'macrodeck.app:Library.Fonts.EmptyDescription' | translate" />
+    }
+  } @else {
+    <div class="font-families">
+      @for (group of groups(); track group.family) {
+        <section class="font-family">
+          <h2 class="font-family-name">{{ group.family }}</h2>
+          <ul class="font-faces">
+            @for (font of group.faces; track font.fontId) {
+              <li class="font-face">
+                <div class="font-face-meta">
+                  <span class="font-face-style">{{ font.styleName }}</span>
+                  <span class="tag">{{ font.format.toUpperCase() }}</span>
+                </div>
+                @if (font.faceId) {
+                  <span class="font-face-sample" [style.font-family]="sampleFamily(font)">
+                    {{ 'macrodeck.app:Library.Fonts.Sample' | translate }}
+                  </span>
+                } @else {
+                  <span class="font-face-sample"></span>
+                }
+                <shared-button
+                  variant="danger-ghost"
+                  size="icon"
+                  [title]="removeLabel(font)"
+                  [ariaLabel]="removeLabel(font)"
+                  (click)="fontPendingRemoval.set(font)">
+                  <span class="icon icon-trash icon-sm" aria-hidden="true"></span>
+                </shared-button>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+    </div>
+  }
+
+  <div class="drop-hint" aria-hidden="true">
+    <span class="icon icon-download icon-2xl"></span>
+    <span>{{ 'macrodeck.app:Library.Fonts.ImportAction' | translate }}</span>
+  </div>
+</div>
+
+<input #fileInput type="file" hidden multiple accept=".ttf,.otf" (change)="onFilesPicked(fileInput)" />
+
+@if (fontPendingRemoval(); as font) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Library.Fonts.RemoveConfirmHeading' | translate"
+    [message]="removeMessage(font)"
+    [confirmText]="'macrodeck.app:Library.Fonts.RemoveConfirmAction' | translate"
+    [danger]="true"
+    (confirm)="confirmRemove()"
+    (cancel)="fontPendingRemoval.set(null)" />
+}

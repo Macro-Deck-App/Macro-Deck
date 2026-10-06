@@ -16,5 +16,7 @@ public sealed class PortableArchiveContents
 
 	public int VariableCount { get; set; }
 
+	public int FontCount { get; set; }
+
 	public List<PortableIntegrationRequirement> Integrations { get; set; } = [];
 }

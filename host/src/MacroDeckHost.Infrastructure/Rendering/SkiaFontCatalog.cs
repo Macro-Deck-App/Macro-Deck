@@ -1,6 +1,8 @@
 using System.Buffers.Binary;
 using System.Globalization;
+using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Rendering;
+using MacroDeckHost.Domain.Icons;
 using SkiaSharp;
 
 namespace MacroDeckHost.Infrastructure.Rendering;
@@ -14,10 +16,18 @@ public sealed class SkiaFontCatalog : IFontCatalog
 	private static readonly HashSet<string> FontFileExtensions =
 		new([".ttf", ".otf", ".ttc", ".otc"], StringComparer.OrdinalIgnoreCase);
 
-	private readonly Lazy<Catalog> _catalog;
+	private readonly Lazy<Catalog> _system;
+	private readonly string? _userFontDirectory;
+	private readonly Lock _userGate = new();
+	private Catalog? _current;
 
 	public SkiaFontCatalog()
 		: this(LinuxFontDirectories.Resolve())
+	{
+	}
+
+	public SkiaFontCatalog(IMacroDeckPaths paths)
+		: this(LinuxFontDirectories.Resolve(), EnumerateSystemFaces, paths.FontsDirectory)
 	{
 	}
 
@@ -28,22 +38,60 @@ public sealed class SkiaFontCatalog : IFontCatalog
 
 	internal SkiaFontCatalog(
 		IReadOnlyList<string> additionalFontDirectories,
-		Func<IEnumerable<SystemFaceEntry>> systemFaces)
+		Func<IEnumerable<SystemFaceEntry>> systemFaces,
+		string? userFontDirectory = null)
 	{
-		_catalog = new Lazy<Catalog>(() => Load(additionalFontDirectories, systemFaces()),
+		_system = new Lazy<Catalog>(() => Load(additionalFontDirectories, systemFaces()),
 			LazyThreadSafetyMode.ExecutionAndPublication);
+		_userFontDirectory = userFontDirectory;
 	}
 
-	public IReadOnlyList<FontFaceInfo> GetFaces() => _catalog.Value.Faces;
+	private Catalog Current
+	{
+		get
+		{
+			var current = Volatile.Read(ref _current);
+			if (current is not null)
+			{
+				return current;
+			}
+
+			lock (_userGate)
+			{
+				return _current ??= WithUserFaces(_system.Value);
+			}
+		}
+	}
+
+	public IReadOnlyList<FontFaceInfo> GetFaces() => Current.Faces;
 
 	public string ResolveFaceId(string faceId) =>
-		_catalog.Value.Aliases.TryGetValue(faceId, out var canonical) ? canonical : faceId;
+		Current.Aliases.TryGetValue(faceId, out var canonical) ? canonical : faceId;
+
+	public void Reload()
+	{
+		var system = _system.Value;
+		lock (_userGate)
+		{
+			Volatile.Write(ref _current, WithUserFaces(system));
+		}
+	}
 
 	public byte[]? GetFaceFile(string faceId)
 	{
-		if (string.IsNullOrWhiteSpace(faceId) || !_catalog.Value.Sources.TryGetValue(faceId, out var source))
+		if (string.IsNullOrWhiteSpace(faceId))
 		{
 			return null;
+		}
+
+		if (!Current.Sources.TryGetValue(faceId, out var source))
+		{
+			return null;
+		}
+
+		if (source.UserFile)
+		{
+			return ReadUserFace(source);
 		}
 
 		if (source.FilePath is not null)
@@ -75,6 +123,85 @@ public sealed class SkiaFontCatalog : IFontCatalog
 
 		using var typeface = styles.CreateTypeface(source.StyleIndex);
 		return typeface is null ? null : SfntFaceExtractor.Extract(typeface);
+	}
+
+	private static byte[]? ReadUserFace(FaceSource source)
+	{
+		byte[] bytes;
+		try
+		{
+			bytes = File.ReadAllBytes(source.FilePath!);
+		}
+		catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+		{
+			return null;
+		}
+
+		using var typeface = UserFontFiles.Open(bytes);
+		if (typeface is null ||
+			!string.Equals(typeface.FamilyName, source.Family, StringComparison.Ordinal) ||
+			typeface.FontWeight != source.Weight ||
+			typeface.FontWidth != source.Width ||
+			typeface.FontSlant != source.Slant)
+		{
+			return null;
+		}
+
+		return SfntFaceExtractor.Extract(typeface);
+	}
+
+	// User faces never join or shadow an installed family: an imported archive must not be able to
+	// change how installed fonts, including the app font, render.
+	private Catalog WithUserFaces(Catalog system)
+	{
+		if (_userFontDirectory is null)
+		{
+			return system;
+		}
+
+		var faces = new List<FontFaceInfo>(system.Faces);
+		var sources = new Dictionary<string, FaceSource>(system.Sources, StringComparer.Ordinal);
+		var installedFamilies = system.Faces
+			.Select(face => face.Family)
+			.ToHashSet(StringComparer.OrdinalIgnoreCase);
+		var userKeys = new HashSet<FaceKey>();
+
+		foreach (var path in UserFontFiles.Enumerate(_userFontDirectory))
+		{
+			byte[] bytes;
+			try
+			{
+				bytes = File.ReadAllBytes(path);
+			}
+			catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+			{
+				continue;
+			}
+
+			var face = UserFontFiles.Inspect(bytes);
+			if (face is null || installedFamilies.Contains(face.Family) ||
+				!userKeys.Add(new FaceKey(face.Family.ToUpperInvariant(), face.Weight, face.Width, SlantId(face.Slant))))
+			{
+				continue;
+			}
+
+			using var style = new SKFontStyle(face.Weight, face.Width, face.Slant);
+			var faceId = ReserveFaceId(sources, face.Family, style);
+			sources[faceId] = new FaceSource(face.Family, 0, face.Weight, face.Width, face.Slant, path, UserFile: true);
+			faces.Add(new FontFaceInfo(faceId,
+				face.Family,
+				face.Weight,
+				face.Width,
+				SlantId(face.Slant),
+				StyleName(style),
+				face.RemoteRenderable)
+			{
+				UserImported = true,
+				ContentHash = ContentHash.Compute(bytes)
+			});
+		}
+
+		return new Catalog(faces, sources, system.Aliases);
 	}
 
 	private static Catalog Load(IReadOnlyList<string> additionalFontDirectories, IEnumerable<SystemFaceEntry> systemFaces)
@@ -296,6 +423,12 @@ public sealed class SkiaFontCatalog : IFontCatalog
 		_ => FontFaceIdentity.UprightSlant
 	};
 
+	internal static string StyleNameOf(int weight, int width, SKFontStyleSlant slant)
+	{
+		using var style = new SKFontStyle(weight, width, slant);
+		return StyleName(style);
+	}
+
 	private static string StyleName(SKFontStyle style)
 	{
 		var parts = new List<string>(3);
@@ -352,7 +485,8 @@ public sealed class SkiaFontCatalog : IFontCatalog
 		int Weight,
 		int Width,
 		SKFontStyleSlant Slant,
-		string? FilePath = null);
+		string? FilePath = null,
+		bool UserFile = false);
 
 	private readonly record struct FaceKey(string Family, int Weight, int Width, string Slant);
 

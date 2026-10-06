@@ -56,6 +56,7 @@ export interface ArchiveSummary {
   iconCount: number;
   scriptCount: number;
   variableCount: number;
+  fontCount?: number;
   secretCount: number;
   integrations: ArchiveIntegration[];
 }

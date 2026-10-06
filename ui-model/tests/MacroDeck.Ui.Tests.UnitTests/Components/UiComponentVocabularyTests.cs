@@ -61,7 +61,7 @@ public class UiComponentVocabularyTests
 		"answer", "placeholder", "rotation", "originX", "originY", "shape", "cornerRadius", "strokeColor",
 		"strokeWidth", "path", "icon", "columns", "rows", "columnSpan", "rowSpan", "startAngle", "endAngle",
 		"on", "selected",
-		"modifiers", "frame", "clip", "mask", "variants", "spans", "overflow", "anchor", "stream",
+		"modifiers", "frame", "clip", "mask", "variants", "spans", "overflow", "anchor", "stream", "shadow",
 	];
 
 	private static readonly string[] _expectedIconsVersion1 =
@@ -365,6 +365,9 @@ public class UiComponentVocabularyTests
 					MaxLines = 2,
 					Wrap = true,
 					FontFace = "app.macro-deck.font.condensed",
+					Shadow = false,
+					StrokeColor = "#000000",
+					StrokeWidth = 0.01,
 					MainSize = UiSize.FromBasis(0.144, 1.2),
 					Fill = false,
 				},
@@ -872,6 +875,41 @@ public class UiComponentVocabularyTests
 				"""[{"text":"hi ","color":"#9146ff","weight":"bold"},""" +
 				"""{"image":{"resourceId":"acme.emote-25","contentHash":"sha256:0000000000000000000000000000000000000000000000000000000000000000"},"alt":"Kappa"},""" +
 				"""{"image":{"resourceId":"acme.emote-25","contentHash":"sha256:0000000000000000000000000000000000000000000000000000000000000000"}}]"""));
+		});
+	}
+
+	[Test]
+	public void Text_shadow_and_outline_reach_the_wire_only_when_declared()
+	{
+		var tree = UiViewBuilder.Build(WidgetSurface(),
+			new UiStack
+			{
+				Key = "root",
+				Children =
+				[
+					new UiTextRun { Key = "plain", Text = "a" },
+					new UiTextRun
+					{
+						Key = "styled",
+						Text = "b",
+						Shadow = false,
+						StrokeColor = "#112233",
+						StrokeWidth = 0.02,
+					},
+				],
+			});
+
+		var plain = tree.Root.Children[0];
+		var styled = tree.Root.Children[1];
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(plain.Properties.ContainsKey("shadow"), Is.False);
+			Assert.That(plain.Properties.ContainsKey("strokeColor"), Is.False);
+			Assert.That(plain.Properties.ContainsKey("strokeWidth"), Is.False);
+			Assert.That(styled.Properties["shadow"].GetBoolean(), Is.False);
+			Assert.That(styled.Properties["strokeColor"].GetString(), Is.EqualTo("#112233"));
+			Assert.That(styled.Properties["strokeWidth"].GetRawText(), Is.EqualTo("""{"basis":0.02}"""));
 		});
 	}
 

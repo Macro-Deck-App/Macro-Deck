@@ -13,6 +13,7 @@ public interface IMacroDeckPaths
 	string IconsDirectory { get; }
 	string IconPacksDirectory { get; }
 	string IconStagingDirectory { get; }
+	string FontsDirectory { get; }
 	string DatabasePath { get; }
 	string DatabaseMigrationsDirectory { get; }
 	string ConfigDirectory { get; }

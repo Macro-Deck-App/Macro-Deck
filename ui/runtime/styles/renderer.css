@@ -133,6 +133,10 @@
   line-height: 1.2;
 }
 
+.widget-button .widget-text.widget-text-no-shadow {
+  text-shadow: none;
+}
+
 .widget-button-artwork {
   position: absolute;
   top: 0;
@@ -427,6 +431,12 @@
 
 .widget-video-stream:not([data-status="playing"]) .widget-video-stream-media {
   opacity: 0;
+}
+
+.widget-video-stream-still {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .widget-video-stream-status {

@@ -189,6 +189,13 @@ public class SystemController : ControllerBase
 			return NotFound();
 		}
 
+		// An imported face can be removed and imported again under the same id, so only installed faces are immutable.
+		if (_fontCatalog.FindFace(faceId!) is { UserImported: true, ContentHash: { } contentHash })
+		{
+			Response.Headers.CacheControl = "no-cache";
+			return File(bytes, SfntContentType(bytes), lastModified: null, new EntityTagHeaderValue($"\"{contentHash}\""));
+		}
+
 		Response.Headers.CacheControl = "public, max-age=31536000, immutable";
 		return File(bytes, SfntContentType(bytes), lastModified: null, new EntityTagHeaderValue($"\"{faceId}\""));
 	}

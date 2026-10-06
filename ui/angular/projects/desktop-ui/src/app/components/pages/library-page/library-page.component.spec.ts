@@ -21,8 +21,9 @@ describe('LibraryPageComponent', () => {
   let router: Router;
 
   beforeEach(() => {
-    const apiSpy = jasmine.createSpyObj<ApiService>('ApiService', ['getIconPacks', 'onNotification']);
+    const apiSpy = jasmine.createSpyObj<ApiService>('ApiService', ['getIconPacks', 'getUserFonts', 'onNotification']);
     apiSpy.getIconPacks.and.resolveTo({ packs: [] });
+    apiSpy.getUserFonts.and.resolveTo({ fonts: [] });
     apiSpy.onNotification.and.callFake(() => new Subject());
 
     TestBed.configureTestingModule({
@@ -69,6 +70,14 @@ describe('LibraryPageComponent', () => {
 
     expect(text()).toContain(bundledTranslator(AppStrings.Nav.IconPacks));
     expect(text()).toContain(bundledTranslator(AppStrings.IconPacks.NoPacksYetHeading));
+  });
+
+  it('shows the imported font library under fonts', async () => {
+    await open('/library/fonts');
+
+    expect(text()).toContain(bundledTranslator(AppStrings.Library.Fonts.EmptyTitle));
+    const active = fixture.nativeElement.querySelector('.seg-option.active') as HTMLElement | null;
+    expect(active?.textContent!.trim()).toBe(bundledTranslator(AppStrings.Nav.Fonts));
   });
 
   it('marks the shown content type as the current one', async () => {

@@ -14,4 +14,5 @@ public class SystemFontFace
 	public string Slant { get; set; } = string.Empty;
 	public string StyleName { get; set; } = string.Empty;
 	public bool RemoteRenderable { get; set; }
+	public bool UserImported { get; set; }
 }

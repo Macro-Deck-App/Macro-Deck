@@ -103,7 +103,7 @@ export class ThemeService {
     if (this.fontFacesRequested) return;
     this.fontFacesRequested = true;
     this.api.getSystemFonts().then(
-      response => this.fontFaces.set(response.faces ?? []),
+      response => this.fontFaces.set((response.faces ?? []).filter(face => !face.userImported)),
       () => {
         this.fontFacesRequested = false;
       });

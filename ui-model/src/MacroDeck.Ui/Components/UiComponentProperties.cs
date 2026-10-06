@@ -235,10 +235,12 @@ public static class UiComponentProperties
 	/// <summary>A <see cref="UiShape" />'s corner radius, as a <see cref="UiLength" />.</summary>
 	public const string CornerRadius = "cornerRadius";
 
-	/// <summary>A <see cref="UiShape" />'s outline colour, as <c>#rrggbb</c>.</summary>
+	/// <summary>The outline colour of a <see cref="UiShape" /> or of a <see cref="UiTextRun" />'s glyphs, as
+	/// <c>#rrggbb</c>.</summary>
 	public const string StrokeColor = "strokeColor";
 
-	/// <summary>A <see cref="UiShape" />'s outline width, as a <see cref="UiLength" />.</summary>
+	/// <summary>The outline width of a <see cref="UiShape" /> or of a <see cref="UiTextRun" />'s glyphs, as a
+	/// <see cref="UiLength" />.</summary>
 	public const string StrokeWidth = "strokeWidth";
 
 	/// <summary>A <see cref="UiShape" />'s outline as restricted path data - see
@@ -317,6 +319,10 @@ public static class UiComponentProperties
 	/// <see cref="Model.References.UiVideoStreamReference" />.</summary>
 	public const string Stream = "stream";
 
+	/// <summary>Whether a <see cref="UiTextRun" /> keeps the legibility shadow a reader draws behind text,
+	/// as a boolean - see <see cref="UiTextRun.Shadow" />.</summary>
+	public const string Shadow = "shadow";
+
 	/// <summary>The property keys this profile ships.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
 	[
@@ -326,6 +332,6 @@ public static class UiComponentProperties
 		Format, Seconds, Level, Step, LevelColor, Interaction, BorderStyle, BorderColor, Corner, Points, PlotTop,
 		Digits, Answer, Placeholder, Rotation, OriginX, OriginY, Shape, CornerRadius, StrokeColor,
 		StrokeWidth, Path, Icon, Columns, Rows, ColumnSpan, RowSpan, StartAngle, EndAngle, On, Selected,
-		Modifiers, Frame, Clip, Mask, Variants, Spans, Overflow, Anchor, Stream,
+		Modifiers, Frame, Clip, Mask, Variants, Spans, Overflow, Anchor, Stream, Shadow,
 	];
 }

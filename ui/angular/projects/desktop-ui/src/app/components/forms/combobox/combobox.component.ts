@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 
 import { OverlayPanelComponent, TranslatePipe } from '@shared';
 import { SelectCaretComponent } from '../select-caret/select-caret.component';
+import { FontPreviewDirective } from './font-preview.directive';
 
 export interface ComboboxOption {
   value: string;
@@ -19,12 +20,13 @@ export interface ComboboxOption {
   disabled?: boolean;
   metadata?: Record<string, string>;
   keywords?: string[];
+  fontFaceId?: string;
 }
 
 @Component({
   selector: 'shared-combobox',
   standalone: true,
-  imports: [FormsModule, OverlayPanelComponent, SelectCaretComponent, TranslatePipe],
+  imports: [FontPreviewDirective, FormsModule, OverlayPanelComponent, SelectCaretComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <input
@@ -77,7 +79,11 @@ export interface ComboboxOption {
             [disabled]="option.disabled"
             (mousedown)="$event.preventDefault()"
             (click)="pick(option)">
-            {{ option.label ?? option.value }}
+            @if (option.fontFaceId) {
+              <span [sharedFontPreview]="option.fontFaceId">{{ option.label ?? option.value }}</span>
+            } @else {
+              {{ option.label ?? option.value }}
+            }
           </button>
         }
       }

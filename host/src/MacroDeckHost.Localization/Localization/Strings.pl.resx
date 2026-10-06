@@ -658,10 +658,10 @@
     <value>Automatyzacje</value>
   </data>
   <data name="Backup.Group.Icons.Description" xml:space="preserve">
-    <value>Zainstalowane pakiety ikon i zaimportowane ikony.</value>
+    <value>Zainstalowane pakiety ikon, zaimportowane ikony i zaimportowane czcionki.</value>
   </data>
   <data name="Backup.Group.Icons.Label" xml:space="preserve">
-    <value>Ikony i pakiety ikon</value>
+    <value>Ikony, pakiety ikon i czcionki</value>
   </data>
   <data name="Backup.Group.Integrations.Description" xml:space="preserve">
     <value>Ustawienia integracji oraz wszystkie zapisane hasła i tokeny.</value>
@@ -2852,6 +2852,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.Profile.LoadFailed" xml:space="preserve">
     <value>Nie udało się wczytać profili</value>
   </data>
+  <data name="Errors.Profile.MoveFailed" xml:space="preserve">
+    <value>Nie udało się przenieść profilu</value>
+  </data>
   <data name="Errors.Profile.NoProfileReturned" xml:space="preserve">
     <value>Nie zwrócono żadnego profilu</value>
   </data>
@@ -2860,6 +2863,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Errors.Profiles.GridLockedByDevice" xml:space="preserve">
     <value>Siatka jest zablokowana przez urządzenie {deviceName} na {columns} x {rows}.</value>
+  </data>
+  <data name="Errors.Profiles.InvalidMovePosition" xml:space="preserve">
+    <value>Pozycja musi mieć wartość „before” lub „after”</value>
+  </data>
+  <data name="Errors.Profiles.MoveIdsRequired" xml:space="preserve">
+    <value>Wymagany jest prawidłowy identyfikator profilu i celu</value>
   </data>
   <data name="Errors.Profiles.VirtualCannotBeDeleted" xml:space="preserve">
     <value>Nie można usuwać profili wirtualnych</value>
@@ -7157,17 +7166,38 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Obs.Actions.SaveReplayBuffer.Name" xml:space="preserve">
     <value>Zapisz bufor powtórek</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelStepDescription" xml:space="preserve">
+    <value>O ile dB zmienia się głośność przy każdym naciśnięciu</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelStepLabel" xml:space="preserve">
+    <value>Krok (dB)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelsDescription" xml:space="preserve">
+    <value>Docelowa głośność w dB (-100 to cisza, 0 to pełna głośność)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.DecibelsLabel" xml:space="preserve">
+    <value>Głośność (dB)</value>
+  </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.Description" xml:space="preserve">
     <value>Ustawia, zwiększa lub zmniejsza głośność wejścia audio</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeDecrease" xml:space="preserve">
-    <value>Zmniejsz o</value>
+    <value>Zmniejsz o (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeDecreaseDecibels" xml:space="preserve">
+    <value>Zmniejsz o (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeIncrease" xml:space="preserve">
-    <value>Zwiększ o</value>
+    <value>Zwiększ o (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeIncreaseDecibels" xml:space="preserve">
+    <value>Zwiększ o (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.ModeSet" xml:space="preserve">
-    <value>Ustaw na</value>
+    <value>Ustaw na (%)</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputVolume.ModeSetDecibels" xml:space="preserve">
+    <value>Ustaw na (dB)</value>
   </data>
   <data name="Integrations.Obs.Actions.SetInputVolume.Name" xml:space="preserve">
     <value>Ustaw głośność wejścia</value>
@@ -7418,6 +7448,54 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Obs.Events.ConnectionCategory" xml:space="preserve">
     <value>Połączenie</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomCategory" xml:space="preserve">
+    <value>Niestandardowe</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomEventDescription" xml:space="preserve">
+    <value>Zdarzenie wysłane do OBS przez skrypt lub wtyczkę. Zawiera JSON nadany przez nadawcę.</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomEventName" xml:space="preserve">
+    <value>Zdarzenie niestandardowe</value>
+  </data>
+  <data name="Integrations.Obs.Events.CustomEventNameConfigDescription" xml:space="preserve">
+    <value>Reagowanie tylko na zdarzenia o tej nazwie. Puste pole oznacza dowolne zdarzenie niestandardowe.</value>
+  </data>
+  <data name="Integrations.Obs.Events.EventDataLabel" xml:space="preserve">
+    <value>Dane zdarzenia (JSON)</value>
+  </data>
+  <data name="Integrations.Obs.Events.EventNameLabel" xml:space="preserve">
+    <value>Nazwa zdarzenia</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputActivityConfigDescription" xml:space="preserve">
+    <value>Reagowanie tylko na to wejście. Puste pole oznacza dowolne wejście.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameActiveDescription" xml:space="preserve">
+    <value>Wejście zaczęło być renderowane w wyjściu programu, na przykład kamera internetowa rozpoczynająca transmisję.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameActiveName" xml:space="preserve">
+    <value>Wejście stało się aktywne</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameInactiveDescription" xml:space="preserve">
+    <value>Wejście przestało być renderowane w wyjściu programu.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputBecameInactiveName" xml:space="preserve">
+    <value>Wejście stało się nieaktywne</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStartedShowingDescription" xml:space="preserve">
+    <value>Wejście zaczęło być renderowane w wyjściu programu lub podglądu.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStartedShowingName" xml:space="preserve">
+    <value>Wejście jest wyświetlane</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStoppedShowingDescription" xml:space="preserve">
+    <value>Wejście nie jest już renderowane w wyjściu programu ani podglądu.</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputStoppedShowingName" xml:space="preserve">
+    <value>Wejście przestało być wyświetlane</value>
+  </data>
+  <data name="Integrations.Obs.Events.InputsCategory" xml:space="preserve">
+    <value>Wejścia</value>
   </data>
   <data name="Integrations.Obs.Events.InputMuteChangedDescription" xml:space="preserve">
     <value>Wejście audio zostało wyciszone lub wyłączono jego wyciszenie.</value>
@@ -12518,6 +12596,14 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Liczba zmiennych widżetu: {count}</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Portable.ArchivePreview.FontCount.One" xml:space="preserve">
+    <value>{count} czcionka</value>
+    <comment>[plural] Number of fonts in an archive, shown in the import preview.</comment>
+  </data>
+  <data name="Portable.ArchivePreview.FontCount.Other" xml:space="preserve">
+    <value>Liczba czcionek: {count}</value>
+    <comment>[plural] Number of fonts in an archive, shown in the import preview.</comment>
+  </data>
   <data name="Portable.ArchivePreview.WidgetCount.One" xml:space="preserve">
     <value>{count} widget</value>
     <comment>[plural]</comment>
@@ -15017,6 +15103,36 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Shell.Footer.Version" xml:space="preserve">
     <value>Wersja {version}</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.Heading" xml:space="preserve">
+    <value>Podoba się Macro Deck?</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.AskText" xml:space="preserve">
+    <value>Macro Deck jest już używany od jakiegoś czasu.</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.YesAction" xml:space="preserve">
+    <value>Tak!</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.NoAction" xml:space="preserve">
+    <value>Nie bardzo</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.StarText" xml:space="preserve">
+    <value>Gwiazdka na GitHubie pomaga innym znaleźć Macro Deck i wspiera projekt.</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.StarAction" xml:space="preserve">
+    <value>Daj gwiazdkę na GitHubie</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.NoThanksAction" xml:space="preserve">
+    <value>Nie, dziękuję</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.FeedbackText" xml:space="preserve">
+    <value>Opinia na GitHubie o tym, czego brakuje lub co przeszkadza, pomoże ulepszyć Macro Deck.</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.FeedbackAction" xml:space="preserve">
+    <value>Prześlij opinię</value>
+  </data>
+  <data name="Shell.GitHubStarPrompt.CloseAction" xml:space="preserve">
+    <value>Zamknij</value>
   </data>
   <data name="Shell.Notifications.Action.EnablePluginAdb" xml:space="preserve">
     <value>Zezwól</value>
@@ -17531,11 +17647,26 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Etykieta</value>
   </data>
+  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
+    <value>Kolor obramowania ramki etykiety</value>
+  </data>
+  <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
+    <value>Grubość obramowania ramki (%)</value>
+  </data>
   <data name="Widgets.Editor.LabelBoxColor" xml:space="preserve">
     <value>Kolor ramki etykiety</value>
   </data>
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Kolor etykiety</value>
+  </data>
+  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
+    <value>Kolor obrysu etykiety</value>
+  </data>
+  <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
+    <value>Grubość obrysu (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelShadow" xml:space="preserve">
+    <value>Cień etykiety</value>
   </data>
   <data name="Widgets.Editor.Live" xml:space="preserve">
     <value>na żywo</value>
@@ -18579,6 +18710,79 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Library.Page.ContentTypeAriaLabel" xml:space="preserve">
     <value>Zawartość biblioteki</value>
+  </data>
+  <data name="Nav.Fonts" xml:space="preserve">
+    <value>Czcionki</value>
+  </data>
+  <data name="Library.Page.FontsDescription" xml:space="preserve">
+    <value>Zaimportowane pliki czcionek do etykiet i tekstów.</value>
+  </data>
+  <data name="Library.Page.FontCount.One" xml:space="preserve">
+    <value>{count} czcionka</value>
+    <comment>[plural] Shown on a content type card in the library.</comment>
+  </data>
+  <data name="Library.Page.FontCount.Other" xml:space="preserve">
+    <value>Liczba czcionek: {count}</value>
+    <comment>[plural] Shown on a content type card in the library.</comment>
+  </data>
+  <data name="Library.Fonts.ImportAction" xml:space="preserve">
+    <value>Importuj czcionki</value>
+  </data>
+  <data name="Library.Fonts.EmptyTitle" xml:space="preserve">
+    <value>Brak zaimportowanych czcionek</value>
+  </data>
+  <data name="Library.Fonts.EmptyDescription" xml:space="preserve">
+    <value>Zaimportuj pliki TTF lub OTF, aby używać ich na przyciskach i w widżetach tekstowych, albo przeciągnij je tutaj.</value>
+  </data>
+  <data name="Library.Fonts.LicenseNote" xml:space="preserve">
+    <value>Importuj tylko czcionki, których licencja pozwala na takie użycie. Czcionki użyte na przyciskach są dołączane do eksportu profili, folderów i widżetów, więc udostępnienie eksportu udostępnia też czcionkę.</value>
+  </data>
+  <data name="Library.Fonts.Sample" xml:space="preserve">
+    <value>Aa Bb Cc 0123456789</value>
+  </data>
+  <data name="Library.Fonts.RemoveAriaLabel" xml:space="preserve">
+    <value>Usuń {name}</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmHeading" xml:space="preserve">
+    <value>Usunąć czcionkę?</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmMessage" xml:space="preserve">
+    <value>Czcionka {name} zostanie usunięta. Przyciski, które jej używają, przejdą na czcionkę domyślną.</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmAction" xml:space="preserve">
+    <value>Usuń</value>
+  </data>
+  <data name="Library.Fonts.RemoveFailed" xml:space="preserve">
+    <value>Nie udało się usunąć czcionki.</value>
+  </data>
+  <data name="Library.Fonts.ImportFailed" xml:space="preserve">
+    <value>Nie udało się zaimportować czcionek.</value>
+  </data>
+  <data name="Library.Fonts.Imported.One" xml:space="preserve">
+    <value>{count} czcionka zaimportowana</value>
+    <comment>[plural] Toast after a successful import.</comment>
+  </data>
+  <data name="Library.Fonts.Imported.Other" xml:space="preserve">
+    <value>Zaimportowane czcionki: {count}</value>
+    <comment>[plural] Toast after a successful import.</comment>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyPresent" xml:space="preserve">
+    <value>Plik {fileName} jest już zaimportowany.</value>
+  </data>
+  <data name="Library.Fonts.Status.UnsupportedFormat" xml:space="preserve">
+    <value>{fileName}: obsługiwane są tylko pliki TTF i OTF.</value>
+  </data>
+  <data name="Library.Fonts.Status.TooLarge" xml:space="preserve">
+    <value>Plik {fileName} jest większy niż 32 MB.</value>
+  </data>
+  <data name="Library.Fonts.Status.InvalidFont" xml:space="preserve">
+    <value>Plik {fileName} nie jest użytecznym plikiem czcionki.</value>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyInstalled" xml:space="preserve">
+    <value>{fileName}: ta rodzina czcionek jest już zainstalowana na tym komputerze, więc nie można jej zaimportować.</value>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyImported" xml:space="preserve">
+    <value>{fileName}: czcionka z tą samą rodziną i stylem jest już zaimportowana. Aby ją zastąpić, najpierw ją usuń.</value>
   </data>
   <data name="Onboarding.Back" xml:space="preserve">
     <value>Wstecz</value>

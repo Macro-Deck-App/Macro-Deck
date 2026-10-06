@@ -120,6 +120,7 @@ assets:
       - ui/runtime/styles/icons/sun.svg
       - ui/runtime/styles/icons/tag.svg
       - ui/runtime/styles/icons/trash.svg
+      - ui/runtime/styles/icons/type.svg
       - ui/runtime/styles/icons/undo.svg
       - ui/runtime/styles/icons/unlock.svg
       - ui/runtime/styles/icons/upload.svg

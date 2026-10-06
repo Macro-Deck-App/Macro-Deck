@@ -253,7 +253,12 @@ appearance actions to reach them.
 - Saving without touching a field leaves its key as it was stored. An empty label or border colour is
   removed rather than stored empty.
 - The font field lists the host's fonts from the `macrodeck.fonts` option source. The desktop editor
-  resolves that source for your tree; it is the only host source it resolves for a provider's tree.
+  resolves that source for your tree; it is the only host source it resolves for a provider's tree. The
+  list includes fonts the user imported and can change while the host runs, so do not cache it.
+- A choice whose options carry a `fontFaceId` entry in `Metadata` is drawn by the desktop editor as a
+  searchable list that shows each option in that face, loaded once the row scrolls into view. It is a
+  rendering hint only: the stored value is still the option's `Value`, and a client that does not know the
+  key draws an ordinary choice.
 - On a Macro Deck release older than these fields, the font list stays empty and the field labels show as
   `[[macrodeck:...]]` keys, because Macro Deck resolves the `macrodeck` catalog from its own copy.
 - Transparency is opt-in. Add `UiWidgetAppearanceFields.TransparentBackground` next to `BackgroundColor`

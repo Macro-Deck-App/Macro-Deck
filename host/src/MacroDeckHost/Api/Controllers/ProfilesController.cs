@@ -20,6 +20,7 @@ public class ProfilesController : ControllerBase
 	private readonly IUiTransportMessageHandler<UpdateProfileRequest, UpdateProfileResponse> _updateProfile;
 	private readonly IUiTransportMessageHandler<DeleteProfileRequest, DeleteProfileResponse> _deleteProfile;
 	private readonly IUiTransportMessageHandler<DuplicateProfileRequest, DuplicateProfileResponse> _duplicateProfile;
+	private readonly IUiTransportMessageHandler<MoveProfileRequest, MoveProfileResponse> _moveProfile;
 	private readonly IProfilePortabilityService _portability;
 
 	public ProfilesController(
@@ -28,6 +29,7 @@ public class ProfilesController : ControllerBase
 		IUiTransportMessageHandler<UpdateProfileRequest, UpdateProfileResponse> updateProfile,
 		IUiTransportMessageHandler<DeleteProfileRequest, DeleteProfileResponse> deleteProfile,
 		IUiTransportMessageHandler<DuplicateProfileRequest, DuplicateProfileResponse> duplicateProfile,
+		IUiTransportMessageHandler<MoveProfileRequest, MoveProfileResponse> moveProfile,
 		IProfilePortabilityService portability)
 	{
 		_getProfiles = getProfiles;
@@ -35,6 +37,7 @@ public class ProfilesController : ControllerBase
 		_updateProfile = updateProfile;
 		_deleteProfile = deleteProfile;
 		_duplicateProfile = duplicateProfile;
+		_moveProfile = moveProfile;
 		_portability = portability;
 	}
 
@@ -60,6 +63,13 @@ public class ProfilesController : ControllerBase
 		[FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] DuplicateProfileRequest? body,
 		CancellationToken ct)
 		=> _duplicateProfile.Handle(new DuplicateProfileRequest { Id = id, Name = body?.Name }, ct).AsTask();
+
+	[HttpPost("{id}/move")]
+	public Task<MoveProfileResponse> Move(string id, MoveProfileRequest body, CancellationToken ct)
+	{
+		body.Id = id;
+		return _moveProfile.Handle(body, ct).AsTask();
+	}
 
 	[HttpPost("{id}/export")]
 	public async Task<IActionResult> Export(string id, ExportProfileRequest body, CancellationToken ct)
