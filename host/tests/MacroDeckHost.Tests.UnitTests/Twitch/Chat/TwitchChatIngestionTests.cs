@@ -1,5 +1,5 @@
 using System.Text.Json;
-using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.StreamChat;
 using MacroDeckHost.Integrations.Twitch;
 using MacroDeckHost.Integrations.Twitch.Protocol;
 using Serilog.Core;
@@ -63,21 +63,21 @@ internal sealed class TwitchChatIngestionTests
 	{
 		_connection.HandleNotification(FakeEventSubClient.Notification("n1", "channel.chat.message", ChatLine));
 
-		var received = _sink.Posted.OfType<TwitchChatMessageReceived>().Single();
+		var received = _sink.Posted.OfType<ChatMessageReceived>().Single();
 		var message = received.Message;
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(received.AccountId, Is.EqualTo("111"));
 			Assert.That(message.MessageId, Is.EqualTo("cc106a89-1814-919d-454c-f4f2f970aae7"));
-			Assert.That(message.ChatterName, Is.EqualTo("CozyViewer"));
+			Assert.That(message.AuthorName, Is.EqualTo("CozyViewer"));
 			Assert.That(message.Color, Is.EqualTo("#1e90ff"));
 			Assert.That(message.PlainText, Is.EqualTo("Hi chat Kappa 🎉 你好 @streamer"));
 			Assert.That(message.Fragments.Select(f => f.Kind),
 				Is.EqualTo(new[]
 				{
-					TwitchChatFragmentKind.Text, TwitchChatFragmentKind.Emote, TwitchChatFragmentKind.Text,
-					TwitchChatFragmentKind.Mention
+					ChatFragmentKind.Text, ChatFragmentKind.Emote, ChatFragmentKind.Text,
+					ChatFragmentKind.Mention
 				}));
 			Assert.That(message.Fragments[1].EmoteId, Is.EqualTo("25"));
 			Assert.That(message.Badges.Select(b => b.SetId), Is.EqualTo(new[] { "moderator", "subscriber" }));
@@ -100,7 +100,7 @@ internal sealed class TwitchChatIngestionTests
 		_connection.HandleNotification(FakeEventSubClient.Notification("n2", "channel.chat.message",
 			shared.Replace("cc106a89", "dd106a89", StringComparison.Ordinal)));
 
-		var messages = _sink.Posted.OfType<TwitchChatMessageReceived>().Select(received => received.Message).ToList();
+		var messages = _sink.Posted.OfType<ChatMessageReceived>().Select(received => received.Message).ToList();
 
 		Assert.Multiple(() =>
 		{
@@ -121,7 +121,7 @@ internal sealed class TwitchChatIngestionTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(_events.Published, Is.Empty);
-			Assert.That(_sink.Posted.OfType<TwitchChatUserCleared>().Single().UserId, Is.EqualTo("4242"));
+			Assert.That(_sink.Posted.OfType<ChatUserCleared>().Single().UserId, Is.EqualTo("4242"));
 		});
 	}
 
@@ -137,8 +137,8 @@ internal sealed class TwitchChatIngestionTests
 		{
 			Assert.That(_events.Published, Does.Contain(TwitchEventIds.ChatMessageDeleted));
 			Assert.That(_events.Published, Does.Contain(TwitchEventIds.ChatCleared));
-			Assert.That(_sink.Posted.OfType<TwitchChatMessageDeleted>().Single().MessageId, Is.EqualTo("abc"));
-			Assert.That(_sink.Posted.OfType<TwitchChatCleared>(), Has.Exactly(1).Items);
+			Assert.That(_sink.Posted.OfType<ChatMessageDeleted>().Single().MessageId, Is.EqualTo("abc"));
+			Assert.That(_sink.Posted.OfType<ChatCleared>(), Has.Exactly(1).Items);
 		});
 	}
 
@@ -169,7 +169,7 @@ internal sealed class TwitchChatIngestionTests
 	{
 		var message = Parse(ChatLine.Replace("#1E90FF", sent, StringComparison.Ordinal));
 
-		Assert.That(message.Color, Is.EqualTo(TwitchChatStyle.DefaultColor("4242")));
+		Assert.That(message.Color, Is.EqualTo(ChatStyle.DefaultColor("4242")));
 	}
 
 	[Test]
@@ -186,7 +186,7 @@ internal sealed class TwitchChatIngestionTests
 		await _connection.LoadBadgesAsync(CancellationToken.None);
 		_connection.HandleNotification(FakeEventSubClient.Notification("n1", "channel.chat.message", ChatLine));
 
-		var badges = _sink.Posted.OfType<TwitchChatMessageReceived>().Single().Message.Badges;
+		var badges = _sink.Posted.OfType<ChatMessageReceived>().Single().Message.Badges;
 		Assert.That(badges.Select(b => b.ImageUrl),
 			Is.EqualTo(new[]
 			{
@@ -202,7 +202,7 @@ internal sealed class TwitchChatIngestionTests
 		await _connection.LoadBadgesAsync(CancellationToken.None);
 		_connection.HandleNotification(FakeEventSubClient.Notification("n1", "channel.chat.message", ChatLine));
 
-		var message = _sink.Posted.OfType<TwitchChatMessageReceived>().Single().Message;
+		var message = _sink.Posted.OfType<ChatMessageReceived>().Single().Message;
 		Assert.That(message.Badges.Select(b => b.ImageUrl), Is.All.Null);
 	}
 
@@ -217,14 +217,14 @@ internal sealed class TwitchChatIngestionTests
 		_connection.OnConnectionChanged(true);
 
 		var deadline = DateTime.UtcNow.AddSeconds(5);
-		TwitchChatMessage message;
+		ChatMessage message;
 		do
 		{
 			_sink.Posted.Clear();
 			_connection.HandleNotification(FakeEventSubClient.Notification(Guid.NewGuid().ToString("N"),
 				"channel.chat.message",
 				ChatLine));
-			message = _sink.Posted.OfType<TwitchChatMessageReceived>().Single().Message;
+			message = _sink.Posted.OfType<ChatMessageReceived>().Single().Message;
 			if (message.Badges.Any(badge => badge.ImageUrl is not null))
 			{
 				break;
@@ -237,7 +237,7 @@ internal sealed class TwitchChatIngestionTests
 		Assert.That(message.Badges.Select(badge => badge.ImageUrl), Does.Contain("https://static-cdn.jtvnw.net/badges/v1/mod/2"));
 	}
 
-	private static TwitchChatMessage Parse(string json)
+	private static ChatMessage Parse(string json)
 		=> TwitchChatMessageParser.Parse(JsonDocument.Parse(json).RootElement,
 			TwitchChatBadgeMap.Empty)!;
 }

@@ -8,10 +8,10 @@ using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Serialization;
 using MacroDeck.Ui.Model.Surfaces;
-using MacroDeckHost.Application.Twitch.Chat;
+using MacroDeckHost.Application.StreamChat;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
-using MacroDeckHost.Widgets.TwitchChat;
+using MacroDeckHost.Widgets.StreamChat;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using Serilog.Core;
 
@@ -24,18 +24,19 @@ internal sealed class TwitchChatWidgetViewTests
 
 	private UiResourceStore _store = null!;
 	private FakeTwitchChatImages _images = null!;
-	private TwitchChatHub _hub = null!;
-	private TwitchChatWidgetUiProvider _provider = null!;
+	private StreamChatHub _hub = null!;
+	private StreamChatWidgetUiProvider _provider = null!;
 
 	[SetUp]
 	public void SetUp()
 	{
 		_store = new UiResourceStore();
 		_images = new FakeTwitchChatImages(_store);
-		_hub = new TwitchChatHub(new FakeTimeProvider(), Logger.None);
+		_hub = new StreamChatHub(new FakeTimeProvider(), Logger.None);
 		var integrations = new FakeIntegrationRegistry();
 		integrations.Add(new IconIntegration());
-		_provider = new TwitchChatWidgetUiProvider(_hub, _images, TestLocalization.SampleText, integrations, _store,
+		_provider = new StreamChatWidgetUiProvider(StreamPlatforms.Twitch, _hub, _images, TestLocalization.SampleText,
+			integrations, _store,
 			new RecordingUiInteractions(), new FakeFolderCache(), new FakeHostLockState(), Logger.None);
 	}
 
@@ -45,7 +46,7 @@ internal sealed class TwitchChatWidgetViewTests
 	[Test]
 	public async Task Without_a_connection_the_widget_says_it_is_not_connected()
 	{
-		_hub.SetAccounts([new TwitchChatAccount(Streamer, "Streamer")]);
+		_hub.SetAccounts([new ChatAccount(Streamer, "Streamer")]);
 		_hub.Tick();
 
 		await using var session = await OpenAsync();
@@ -76,7 +77,7 @@ internal sealed class TwitchChatWidgetViewTests
 	public async Task The_font_size_scales_the_chat_text_and_leaves_an_unset_widget_as_it_was()
 	{
 		Connect();
-		_hub.Post(new TwitchChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1")));
+		_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1")));
 		_hub.Tick();
 
 		await using var unset = await OpenAsync();
@@ -98,7 +99,7 @@ internal sealed class TwitchChatWidgetViewTests
 	public async Task The_font_size_is_limited_to_25_and_300_percent()
 	{
 		Connect();
-		_hub.Post(new TwitchChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1")));
+		_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1")));
 		_hub.Tick();
 
 		await using var unset = await OpenAsync();
@@ -117,12 +118,12 @@ internal sealed class TwitchChatWidgetViewTests
 	{
 		Connect();
 
-		for (var index = 0; index < TwitchChatLines.MaxMessages; index++)
+		for (var index = 0; index < StreamChatLines.MaxMessages; index++)
 		{
-			_hub.Post(new TwitchChatMessageReceived(Streamer,
+			_hub.Post(new ChatMessageReceived(Streamer,
 				TwitchChatHubTests.Message("m" + index) with
 				{
-					Fragments = [new TwitchChatFragment(TwitchChatFragmentKind.Text, new string('x', 400))],
+					Fragments = [new ChatFragment(ChatFragmentKind.Text, new string('x', 400))],
 				}));
 		}
 
@@ -139,7 +140,7 @@ internal sealed class TwitchChatWidgetViewTests
 	public async Task A_message_colour_paints_the_chat_text_and_a_name_colour_replaces_every_chatters_own()
 	{
 		Connect();
-		_hub.Post(new TwitchChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1")));
+		_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1")));
 		_hub.Tick();
 
 		await using var session = await OpenAsync(new { account = "", messageColor = "#FFCC00", nameColor = "#00ff00" });
@@ -163,7 +164,7 @@ internal sealed class TwitchChatWidgetViewTests
 	public async Task Without_valid_colours_the_chat_keeps_the_theme_text_and_each_chatters_own_colour()
 	{
 		Connect();
-		_hub.Post(new TwitchChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1")));
+		_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1")));
 		_hub.Tick();
 
 		await using var unset = await OpenAsync();
@@ -234,7 +235,7 @@ internal sealed class TwitchChatWidgetViewTests
 
 		await using var session = await OpenAsync();
 
-		Assert.That(Texts(session.BuildTree().Root), Has.Some.Contains("Integrations.Twitch.ChatWidget.Empty"));
+		Assert.That(Texts(session.BuildTree().Root), Has.Some.Contains("Integrations.StreamChat.Widget.Empty"));
 	}
 
 	[Test]
@@ -244,7 +245,7 @@ internal sealed class TwitchChatWidgetViewTests
 		var emote = _images.Resolve(TwitchChatImage.Emote("25"));
 		await using var session = await OpenAsync();
 
-		_hub.Post(new TwitchChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1", emoteId: "25")));
+		_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1", emoteId: "25")));
 		_hub.Tick();
 
 		var line = MessageNodes(session.BuildTree().Root).Single();
@@ -269,7 +270,7 @@ internal sealed class TwitchChatWidgetViewTests
 		Connect();
 		await using var session = await OpenAsync();
 
-		_hub.Post(new TwitchChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1", emoteId: "25")));
+		_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1", emoteId: "25")));
 		_hub.Tick();
 
 		var spans = MessageNodes(session.BuildTree().Root).Single().Properties[UiComponentProperties.Spans];
@@ -288,7 +289,7 @@ internal sealed class TwitchChatWidgetViewTests
 
 		for (var index = 0; index < 5; index++)
 		{
-			_hub.Post(new TwitchChatMessageReceived(Streamer, TwitchChatHubTests.Message("m" + index)));
+			_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("m" + index)));
 		}
 
 		_hub.Tick();
@@ -315,18 +316,18 @@ internal sealed class TwitchChatWidgetViewTests
 	{
 		Connect();
 		await using var session = await OpenAsync();
-		_hub.Post(new TwitchChatMessageReceived(Streamer, TwitchChatHubTests.Message("gone")));
-		_hub.Post(new TwitchChatMessageReceived(Streamer, TwitchChatHubTests.Message("stays")));
+		_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("gone")));
+		_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("stays")));
 		_hub.Tick();
 
-		_hub.Post(new TwitchChatMessageDeleted(Streamer, "gone"));
+		_hub.Post(new ChatMessageDeleted(Streamer, "gone"));
 		_hub.Tick();
 
 		var ids = MessageNodes(session.BuildTree().Root).Select(node => node.Id).ToList();
 		Assert.Multiple(() =>
 		{
 			Assert.That(ids, Has.Count.EqualTo(1));
-			Assert.That(ids[0], Does.EndWith(TwitchChatStyle.MessageKey("stays")));
+			Assert.That(ids[0], Does.EndWith(ChatStyle.MessageKey("stays")));
 		});
 	}
 
@@ -343,7 +344,7 @@ internal sealed class TwitchChatWidgetViewTests
 		{
 			for (var index = 0; index < 100; index++)
 			{
-				_hub.Post(new TwitchChatMessageReceived(Streamer, HeavyMessage($"b{burst}-{index}")));
+				_hub.Post(new ChatMessageReceived(Streamer, HeavyMessage($"b{burst}-{index}")));
 			}
 
 			_hub.Tick();
@@ -359,8 +360,8 @@ internal sealed class TwitchChatWidgetViewTests
 			Assert.That(patchSizes, Is.Not.Empty);
 			Assert.That(patchSizes, Is.All.LessThan(ProtocolLimits.MaxUiPatchBytes));
 			Assert.That(UiCanonicalJson.SerializeToUtf8Bytes(tree).Length, Is.LessThan(ProtocolLimits.MaxUiTreeBytes));
-			Assert.That(lines, Is.Not.Empty.And.Count.LessThanOrEqualTo(TwitchChatLines.MaxMessages));
-			Assert.That(lines[^1].Id, Does.EndWith(TwitchChatStyle.MessageKey("b1-99")), "the newest line is shown");
+			Assert.That(lines, Is.Not.Empty.And.Count.LessThanOrEqualTo(StreamChatLines.MaxMessages));
+			Assert.That(lines[^1].Id, Does.EndWith(ChatStyle.MessageKey("b1-99")), "the newest line is shown");
 		});
 	}
 
@@ -375,7 +376,7 @@ internal sealed class TwitchChatWidgetViewTests
 		{
 			Connect();
 			await using var session = await OpenAsync();
-			_hub.Post(new TwitchChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1")));
+			_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1")));
 			_hub.Tick();
 
 			var spans = MessageNodes(session.BuildTree().Root).Single().Properties[UiComponentProperties.Spans];
@@ -398,24 +399,24 @@ internal sealed class TwitchChatWidgetViewTests
 		Assert.That(MessageNodes(session.BuildTree().Root).Count(), Is.EqualTo(3));
 	}
 
-	private TwitchChatMessage HeavyMessage(string id)
+	private ChatMessage HeavyMessage(string id)
 	{
-		var fragments = new List<TwitchChatFragment>();
+		var fragments = new List<ChatFragment>();
 
 		for (var index = 0; index < 20; index++)
 		{
 			var emoteId = ("emotesv2_" + id.Replace('-', '_') + "_" + index).PadRight(64, 'x');
 			_images.Resolve(TwitchChatImage.Emote(emoteId));
-			fragments.Add(new TwitchChatFragment(TwitchChatFragmentKind.Text, "😀漢字テスト "));
-			fragments.Add(new TwitchChatFragment(TwitchChatFragmentKind.Emote, "PogChamp", emoteId));
+			fragments.Add(new ChatFragment(ChatFragmentKind.Text, "😀漢字テスト "));
+			fragments.Add(new ChatFragment(ChatFragmentKind.Emote, "PogChamp", emoteId));
 		}
 
-		return new TwitchChatMessage(id,
+		return new ChatMessage(id,
 			"42",
 			"viewer",
 			"Viewer",
 			"#ff4500",
-			[new TwitchChatBadge("subscriber", "12", null)],
+			[new ChatBadge("subscriber", "12", null)],
 			fragments);
 	}
 
@@ -432,7 +433,7 @@ internal sealed class TwitchChatWidgetViewTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(Texts(root), Has.Some.Contains("Integrations.Twitch.ChatWidget.Title").And.Contains("Streamer"));
+			Assert.That(Texts(root), Has.Some.Contains("Integrations.StreamChat.Widget.Title").And.Contains("Streamer"));
 			Assert.That(_store.TryGet(resourceId, out _), Is.True);
 		});
 	}
@@ -445,12 +446,12 @@ internal sealed class TwitchChatWidgetViewTests
 		_images.Resolve(TwitchChatImage.Badge("subscriber", "12", "https://static-cdn.jtvnw.net/badges/v1/s/2"));
 		await using var session = await OpenAsync();
 
-		_hub.Post(new TwitchChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1") with
+		_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1") with
 		{
 			Badges =
 			[
-				new TwitchChatBadge("broadcaster", "1", "https://static-cdn.jtvnw.net/badges/v1/b/2"),
-				new TwitchChatBadge("subscriber", "12", "https://static-cdn.jtvnw.net/badges/v1/s/2"),
+				new ChatBadge("broadcaster", "1", "https://static-cdn.jtvnw.net/badges/v1/b/2"),
+				new ChatBadge("subscriber", "12", "https://static-cdn.jtvnw.net/badges/v1/s/2"),
 			],
 		}));
 		_hub.Tick();
@@ -470,7 +471,7 @@ internal sealed class TwitchChatWidgetViewTests
 
 	private sealed class IconIntegration : IIntegration, IIntegrationIconProvider
 	{
-		public string Id => TwitchChatWidgetType.OwnerId;
+		public string Id => StreamPlatforms.Twitch.OwnerId;
 
 		public LocalizedText Name => "Twitch";
 
@@ -491,8 +492,8 @@ internal sealed class TwitchChatWidgetViewTests
 
 	private void Connect()
 	{
-		_hub.SetAccounts([new TwitchChatAccount(Streamer, "Streamer")]);
-		_hub.Post(new TwitchChatConnectionChanged(Streamer, true));
+		_hub.SetAccounts([new ChatAccount(Streamer, "Streamer")]);
+		_hub.Post(new ChatConnectionChanged(Streamer, true));
 		_hub.Tick();
 	}
 
@@ -506,7 +507,7 @@ internal sealed class TwitchChatWidgetViewTests
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
 			[UiWidgetSurfaceAttributes.WidgetType]
-				= JsonSerializer.SerializeToElement(TwitchChatWidgetType.QualifiedId),
+				= JsonSerializer.SerializeToElement(StreamPlatforms.Twitch.ChatWidgetTypeId),
 			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data ?? new { account = "" }),
 		};
 

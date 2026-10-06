@@ -1,5 +1,5 @@
-using MacroDeckHost.Application.Twitch.Chat;
-using MacroDeckHost.Application.Twitch.Stats;
+using MacroDeckHost.Application.StreamChat;
+using MacroDeckHost.Application.StreamStats;
 using MacroDeckHost.Integrations.Twitch.Actions;
 using MacroDeckHost.Integrations.Twitch.Auth;
 using MacroDeck.Localization;
@@ -28,9 +28,9 @@ public sealed class TwitchIntegration
 		IIntegrationIssueProvider,
 		IMigrationProvider,
 		IWidgetTypeProvider,
-		ITwitchChatSinkConsumer,
-		ITwitchStatsSinkConsumer,
-		ITwitchChatModerator,
+		IStreamChatSinkConsumer,
+		IStreamStatsSinkConsumer,
+		IStreamChatModerator,
 		IDisposable
 {
 	public const string IntegrationId = "app.macro-deck.twitch";
@@ -44,14 +44,8 @@ public sealed class TwitchIntegration
 	private readonly TwitchAccountManager _accounts;
 	private readonly TwitchChatModerator _moderator;
 
-	private const string ChatDataSchema
-		= """{"type":"object","properties":{"account":{"type":"string"},"allowModeration":{"type":"boolean"},"backgroundColor":{"type":["string","null"],"description":"#rrggbb or transparent"},"textSize":{"type":["number","null"],"minimum":25,"maximum":300,"description":"Chat text size in percent, 100 when unset"},"messageColor":{"type":["string","null"],"description":"#rrggbb for the chat message text, the theme text colour when unset"},"nameColor":{"type":["string","null"],"description":"#rrggbb for every chatter name, each chatter's own Twitch colour when unset"}}}""";
-
-	private const string StatsDataSchema
-		= """{"type":"object","properties":{"account":{"type":"string"},"style":{"type":"string","enum":["overview","statsRow","liveRow","valueGraph","value"]},"metric":{"type":"string","enum":["viewers","chatters","followers","subscribers"]},"tiles":{"type":"array","items":{"type":"string","enum":["viewers","chatters","followers","subscribers"]}},"details":{"type":"array","items":{"type":"string","enum":["title","category","uptime"]}},"showThumbnail":{"type":"boolean"},"backgroundColor":{"type":["string","null"],"description":"#rrggbb or transparent"}}}""";
-
-	private ITwitchChatSink? _chatSink;
-	private ITwitchStatsSink? _statsSink;
+	private IStreamChatSink? _chatSink;
+	private IStreamStatsSink? _statsSink;
 	private IVariableApi? _variables;
 	private IUserVariableApi? _userVariables;
 
@@ -135,13 +129,13 @@ public sealed class TwitchIntegration
 		await _accounts.ShutdownAsync();
 	}
 
-	public void UseTwitchChatSink(ITwitchChatSink sink) => _chatSink = sink;
+	public void UseStreamChatSink(IStreamChatSink sink) => _chatSink = sink;
 
-	public void UseTwitchStatsSink(ITwitchStatsSink sink) => _statsSink = sink;
+	public void UseStreamStatsSink(IStreamStatsSink sink) => _statsSink = sink;
 
-	public Task<TwitchChatModerationResult> ModerateAsync(
+	public Task<ChatModerationResult> ModerateAsync(
 		string accountId,
-		TwitchChatModerationRequest request,
+		ChatModerationRequest request,
 		CancellationToken cancellationToken)
 		=> _moderator.ModerateAsync(accountId, request, cancellationToken);
 
@@ -210,27 +204,9 @@ public sealed class TwitchIntegration
 
 	public void Dispose() => _accounts.Dispose();
 
-	private static WidgetTypeDescriptor ChatWidgetType()
-		=> new(TwitchChatWidgetType.LocalId,
-			AppStrings.Integrations.Twitch.ChatWidget.Name(),
-			AppStrings.Integrations.Twitch.ChatWidget.Description(),
-			DefaultData: """{"account":"","allowModeration":true}""",
-			DataSchema: ChatDataSchema,
-			HasConfiguration: true)
-		{
-			AppearanceProperties = [WidgetAppearanceProperty.BackgroundColor],
-		};
+	private static WidgetTypeDescriptor ChatWidgetType() => StreamPlatforms.Twitch.ChatWidgetDescriptor();
 
-	private static WidgetTypeDescriptor StatsWidgetType()
-		=> new(TwitchStatsWidgetType.LocalId,
-			AppStrings.Integrations.Twitch.StatsWidget.Name(),
-			AppStrings.Integrations.Twitch.StatsWidget.Description(),
-			DefaultData: $$"""{"account":"","style":"{{TwitchStatsWidgetType.DefaultStyle}}","metric":"{{TwitchStatsWidgetType.DefaultMetric}}","tiles":["viewers","chatters","followers"],"details":["title","category","uptime"],"showThumbnail":true}""",
-			DataSchema: StatsDataSchema,
-			HasConfiguration: true)
-		{
-			AppearanceProperties = [WidgetAppearanceProperty.BackgroundColor],
-		};
+	private static WidgetTypeDescriptor StatsWidgetType() => StreamPlatforms.Twitch.StatsWidgetDescriptor();
 
 	private IReadOnlyList<ActionParameterOption> RewardOptions(string? accountId)
 	{

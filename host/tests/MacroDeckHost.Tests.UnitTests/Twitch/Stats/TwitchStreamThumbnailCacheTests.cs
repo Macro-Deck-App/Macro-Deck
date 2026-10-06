@@ -1,6 +1,7 @@
 using System.Net;
+using MacroDeckHost.Application.StreamChat;
 using MacroDeckHost.Application.Ui.Resources;
-using MacroDeckHost.Infrastructure.Twitch;
+using MacroDeckHost.Infrastructure.StreamStats;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using Serilog.Core;
 
@@ -16,7 +17,7 @@ internal sealed class TwitchStreamThumbnailCacheTests
 	private FakeTimeProvider _time = null!;
 	private UiResourceStore _store = null!;
 	private Handler _handler = null!;
-	private TwitchStreamThumbnailCache _cache = null!;
+	private StreamThumbnailCache _cache = null!;
 
 	[SetUp]
 	public void SetUp()
@@ -24,7 +25,7 @@ internal sealed class TwitchStreamThumbnailCacheTests
 		_time = new FakeTimeProvider();
 		_store = new UiResourceStore();
 		_handler = new Handler();
-		_cache = new TwitchStreamThumbnailCache(_handler, _store, _time, Logger.None);
+		_cache = new StreamThumbnailCache(StreamPlatforms.Twitch, _handler, _store, _time, Logger.None);
 	}
 
 	[TearDown]
@@ -89,7 +90,7 @@ internal sealed class TwitchStreamThumbnailCacheTests
 	{
 		await TrackAsync("111", Url);
 		await TrackAsync("111", Url);
-		_time.Advance(TwitchStreamThumbnailCache.RefreshInterval + TimeSpan.FromSeconds(1));
+		_time.Advance(StreamThumbnailCache.RefreshInterval + TimeSpan.FromSeconds(1));
 		await TrackAsync("111", Url);
 
 		Assert.That(_handler.Requests, Is.EqualTo(2));
