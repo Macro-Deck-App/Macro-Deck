@@ -28,5 +28,6 @@ public interface IProfilePortabilityService
 	/// </remarks>
 	Task<Result<ProfileEntity, PortabilityError>> ImportContent(PortableContent content,
 		IReadOnlyList<PortableIconFile> iconFiles,
+		IReadOnlyList<PortableFontFile> fontFiles,
 		CancellationToken cancellationToken);
 }

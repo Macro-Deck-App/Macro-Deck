@@ -657,10 +657,10 @@
     <value>自动化</value>
   </data>
   <data name="Backup.Group.Icons.Description" xml:space="preserve">
-    <value>已安装的图标包和导入的图标。</value>
+    <value>已安装的图标包、导入的图标和导入的字体。</value>
   </data>
   <data name="Backup.Group.Icons.Label" xml:space="preserve">
-    <value>图标与图标包</value>
+    <value>图标、图标包与字体</value>
   </data>
   <data name="Backup.Group.Integrations.Description" xml:space="preserve">
     <value>集成设置，以及所有已保存的密码或令牌。</value>
@@ -12597,6 +12597,14 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>{count} 个组件变量</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Portable.ArchivePreview.FontCount.One" xml:space="preserve">
+    <value>{count} 个字体</value>
+    <comment>[plural] Number of fonts in an archive, shown in the import preview.</comment>
+  </data>
+  <data name="Portable.ArchivePreview.FontCount.Other" xml:space="preserve">
+    <value>{count} 个字体</value>
+    <comment>[plural] Number of fonts in an archive, shown in the import preview.</comment>
+  </data>
   <data name="Portable.ArchivePreview.WidgetCount.One" xml:space="preserve">
     <value>{count} 个组件</value>
     <comment>[plural]</comment>
@@ -18706,6 +18714,79 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Library.Page.ContentTypeAriaLabel" xml:space="preserve">
     <value>资源库内容</value>
+  </data>
+  <data name="Nav.Fonts" xml:space="preserve">
+    <value>字体</value>
+  </data>
+  <data name="Library.Page.FontsDescription" xml:space="preserve">
+    <value>为按钮标签和文本导入的字体文件。</value>
+  </data>
+  <data name="Library.Page.FontCount.One" xml:space="preserve">
+    <value>{count} 个字体</value>
+    <comment>[plural] Shown on a content type card in the library.</comment>
+  </data>
+  <data name="Library.Page.FontCount.Other" xml:space="preserve">
+    <value>{count} 个字体</value>
+    <comment>[plural] Shown on a content type card in the library.</comment>
+  </data>
+  <data name="Library.Fonts.ImportAction" xml:space="preserve">
+    <value>导入字体</value>
+  </data>
+  <data name="Library.Fonts.EmptyTitle" xml:space="preserve">
+    <value>尚未导入字体</value>
+  </data>
+  <data name="Library.Fonts.EmptyDescription" xml:space="preserve">
+    <value>导入 TTF 或 OTF 文件以在按钮和文本组件中使用，也可以将文件拖放到此处。</value>
+  </data>
+  <data name="Library.Fonts.LicenseNote" xml:space="preserve">
+    <value>仅导入许可证允许此用途的字体。按钮上使用的字体会包含在导出的配置文件、文件夹或组件中，因此分享导出内容也会分享该字体。</value>
+  </data>
+  <data name="Library.Fonts.Sample" xml:space="preserve">
+    <value>Aa Bb Cc 0123456789</value>
+  </data>
+  <data name="Library.Fonts.RemoveAriaLabel" xml:space="preserve">
+    <value>移除 {name}</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmHeading" xml:space="preserve">
+    <value>移除字体？</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmMessage" xml:space="preserve">
+    <value>将移除 {name}。使用该字体的按钮将改用默认字体。</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmAction" xml:space="preserve">
+    <value>移除</value>
+  </data>
+  <data name="Library.Fonts.RemoveFailed" xml:space="preserve">
+    <value>无法移除字体。</value>
+  </data>
+  <data name="Library.Fonts.ImportFailed" xml:space="preserve">
+    <value>无法导入字体。</value>
+  </data>
+  <data name="Library.Fonts.Imported.One" xml:space="preserve">
+    <value>已导入 {count} 个字体</value>
+    <comment>[plural] Toast after a successful import.</comment>
+  </data>
+  <data name="Library.Fonts.Imported.Other" xml:space="preserve">
+    <value>已导入 {count} 个字体</value>
+    <comment>[plural] Toast after a successful import.</comment>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyPresent" xml:space="preserve">
+    <value>{fileName} 已导入。</value>
+  </data>
+  <data name="Library.Fonts.Status.UnsupportedFormat" xml:space="preserve">
+    <value>{fileName}：仅支持 TTF 和 OTF 文件。</value>
+  </data>
+  <data name="Library.Fonts.Status.TooLarge" xml:space="preserve">
+    <value>{fileName} 超过 32 MB。</value>
+  </data>
+  <data name="Library.Fonts.Status.InvalidFont" xml:space="preserve">
+    <value>{fileName} 不是可用的字体文件。</value>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyInstalled" xml:space="preserve">
+    <value>{fileName}：此字体系列已安装在这台电脑上，因此无法导入。</value>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyImported" xml:space="preserve">
+    <value>{fileName}：已导入相同系列和样式的字体。请先将其移除再替换。</value>
   </data>
   <data name="Onboarding.Back" xml:space="preserve">
     <value>返回</value>

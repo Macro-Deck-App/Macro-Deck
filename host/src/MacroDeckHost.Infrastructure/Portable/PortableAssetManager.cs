@@ -1,8 +1,11 @@
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Portable;
+using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Scripts;
 using MacroDeckHost.Application.Secrets;
 using MacroDeckHost.Application.Services;
@@ -10,6 +13,7 @@ using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Icons;
+using MacroDeckHost.Infrastructure.Rendering;
 using MacroDeck.Localization;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.ConfigFlow;
@@ -23,6 +27,9 @@ public sealed class PortableAssetManager : IPortableAssetManager
 	private const string ImportedIconsPackSourceId = "portable:imported-icons";
 	private const string ImportedIconsPackName = "Imported Icons";
 
+	// Icons and content.json share the encrypted payload cap with the fonts.
+	private const long FontExportBudget = 48L * 1024 * 1024;
+
 	private readonly IIconPackCache _iconPackCache;
 	private readonly IIconStorage _iconStorage;
 	private readonly ISecretService _secretService;
@@ -32,6 +39,8 @@ public sealed class PortableAssetManager : IPortableAssetManager
 	private readonly IMediator _mediator;
 	private readonly IAppPreferenceService _preferences;
 	private readonly ILocalizationResolver _localization;
+	private readonly IFontCatalog _fontCatalog;
+	private readonly IUserFontLibrary _userFonts;
 	private readonly ILogger _logger;
 
 	public PortableAssetManager(
@@ -44,8 +53,12 @@ public sealed class PortableAssetManager : IPortableAssetManager
 		IMediator mediator,
 		IAppPreferenceService preferences,
 		ILocalizationResolver localization,
+		IFontCatalog fontCatalog,
+		IUserFontLibrary userFonts,
 		ILogger logger)
 	{
+		_fontCatalog = fontCatalog;
+		_userFonts = userFonts;
 		_iconPackCache = iconPackCache;
 		_iconStorage = iconStorage;
 		_secretService = secretService;
@@ -110,12 +123,280 @@ public sealed class PortableAssetManager : IPortableAssetManager
 		var secrets = options.IncludeSecrets ? await CollectSecrets(referencingData) : [];
 		var variables = await CollectVariables(widgets);
 		var culture = (await _preferences.GetLocalization()).Culture;
+		var (fonts, fontFiles) = CollectFonts(referencingData);
 		return new PortableAssetBundle(icons,
 			files,
 			scripts,
 			secrets,
 			CollectIntegrations(referencingData, culture),
-			variables);
+			variables,
+			fonts,
+			fontFiles);
+	}
+
+	private (List<PortableFont> Fonts, List<PortableFontFile> Files) CollectFonts(IReadOnlyList<string?> referencingData)
+	{
+		var userFaces = _fontCatalog.GetFaces()
+			.Where(face => face is { UserImported: true, ContentHash: not null })
+			.ToDictionary(face => face.FaceId, StringComparer.Ordinal);
+		var fonts = new List<PortableFont>();
+		var files = new List<PortableFontFile>();
+		if (userFaces.Count == 0)
+		{
+			return (fonts, files);
+		}
+
+		var byHash = new Dictionary<string, PortableFont>(StringComparer.Ordinal);
+		var budget = FontExportBudget;
+		foreach (var reference in referencingData.SelectMany(JsonStringValues).Distinct(StringComparer.Ordinal))
+		{
+			if (!userFaces.TryGetValue(_fontCatalog.ResolveFaceId(reference), out var face))
+			{
+				continue;
+			}
+
+			if (!byHash.TryGetValue(face.ContentHash!, out var font))
+			{
+				var file = _userFonts.ReadFile(UserFontFiles.FontIdOf(face.ContentHash!));
+				if (file is null || file.Bytes.LongLength > budget)
+				{
+					_logger.Warning("Skipping font {FaceId} during export: file missing or over the size budget", face.FaceId);
+					continue;
+				}
+
+				budget -= file.Bytes.LongLength;
+				font = new PortableFont
+				{
+					FontId = file.FontId,
+					Format = file.Format,
+					ContentHash = face.ContentHash!,
+					Family = face.Family,
+					StyleName = face.StyleName
+				};
+				byHash[face.ContentHash!] = font;
+				fonts.Add(font);
+				files.Add(new PortableFontFile(file.FontId, file.Format, file.Bytes));
+			}
+
+			foreach (var id in new[] { reference, face.FaceId })
+			{
+				if (!font.FaceIds.Contains(id))
+				{
+					font.FaceIds.Add(id);
+				}
+			}
+		}
+
+		return (fonts, files);
+	}
+
+	private static IEnumerable<string> JsonStringValues(string? data)
+	{
+		if (string.IsNullOrWhiteSpace(data))
+		{
+			return [];
+		}
+
+		JsonNode? root;
+		try
+		{
+			root = JsonNode.Parse(data);
+		}
+		catch (JsonException)
+		{
+			return [];
+		}
+
+		var values = new List<string>();
+		var pending = new Stack<JsonNode?>([root]);
+		while (pending.TryPop(out var node))
+		{
+			switch (node)
+			{
+				case JsonObject obj:
+					foreach (var (_, child) in obj)
+					{
+						pending.Push(child);
+					}
+
+					break;
+				case JsonArray array:
+					foreach (var child in array)
+					{
+						pending.Push(child);
+					}
+
+					break;
+				case JsonValue value when value.TryGetValue<string>(out var text):
+					values.Add(text);
+					break;
+			}
+		}
+
+		return values;
+	}
+
+	private static bool MatchesRecordedHash(PortableFont font, PortableFontFile file)
+	{
+		var hash = ContentHash.Compute(file.Bytes);
+		return hash == font.ContentHash && UserFontFiles.FontIdOf(hash) == font.FontId;
+	}
+
+	private async Task ImportFonts(PortableContent content,
+		IReadOnlyList<PortableFontFile> fontFiles,
+		CancellationToken cancellationToken)
+	{
+		if (content.Fonts.Count == 0 || fontFiles.Count == 0)
+		{
+			return;
+		}
+
+		var filesById = fontFiles
+			.GroupBy(file => file.FontId, StringComparer.Ordinal)
+			.ToDictionary(group => group.Key, group => group.First(), StringComparer.Ordinal);
+		var verified = new List<(PortableFont Font, PortableFontFile File)>();
+		foreach (var font in content.Fonts)
+		{
+			// The file name and the recorded hash are archive claims, so both are checked against the bytes.
+			if (!filesById.TryGetValue(font.FontId, out var file) || !MatchesRecordedHash(font, file))
+			{
+				_logger.Warning("Skipping font {FontId} during import: file missing or does not match its hash", font.FontId);
+				continue;
+			}
+
+			verified.Add((font, file));
+		}
+
+		if (verified.Count == 0)
+		{
+			return;
+		}
+
+		try
+		{
+			await _userFonts.Import(verified
+					.Select(entry => new UserFontUpload($"{entry.File.FontId}.{entry.File.Format}", entry.File.Bytes))
+					.ToList(),
+				cancellationToken);
+		}
+		catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+		{
+			_logger.Warning(exception, "Skipping the bundled fonts during import: they could not be stored");
+			return;
+		}
+
+		var localFaces = _fontCatalog.GetFaces();
+		var listedIds = localFaces.Select(face => face.FaceId).ToHashSet(StringComparer.Ordinal);
+		var renames = new Dictionary<string, string>(StringComparer.Ordinal);
+		foreach (var (font, file) in verified)
+		{
+			var inspected = UserFontFiles.Inspect(file.Bytes);
+			if (inspected is null)
+			{
+				continue;
+			}
+
+			var slant = inspected.Slant switch
+			{
+				SkiaSharp.SKFontStyleSlant.Italic => FontFaceIdentity.ItalicSlant,
+				SkiaSharp.SKFontStyleSlant.Oblique => FontFaceIdentity.ObliqueSlant,
+				_ => FontFaceIdentity.UprightSlant
+			};
+			var local = localFaces.FirstOrDefault(face =>
+				string.Equals(face.Family, inspected.Family, StringComparison.OrdinalIgnoreCase) &&
+				face.Weight == inspected.Weight &&
+				face.Width == inspected.Width &&
+				face.Slant == slant);
+			if (local is null)
+			{
+				continue;
+			}
+
+			foreach (var faceId in font.FaceIds.Where(id => !listedIds.Contains(id) && id != local.FaceId))
+			{
+				renames.TryAdd(faceId, local.FaceId);
+			}
+		}
+
+		// Only the imported content is rewritten, so an archive can never redirect existing widgets.
+		RewriteFaceIds(content, renames);
+	}
+
+	private static void RewriteFaceIds(PortableContent content, Dictionary<string, string> renames)
+	{
+		if (renames.Count == 0)
+		{
+			return;
+		}
+
+		foreach (var widget in content.Widgets ?? [])
+		{
+			widget.Data = RewriteFaceIds(widget.Data, renames);
+		}
+
+		foreach (var widget in (content.Folders ?? []).Concat(content.Profile?.Folders ?? []).SelectMany(folder => folder.Widgets))
+		{
+			widget.Data = RewriteFaceIds(widget.Data, renames);
+		}
+
+		foreach (var script in content.Scripts)
+		{
+			script.Flows = RewriteFaceIds(script.Flows, renames) ?? string.Empty;
+		}
+	}
+
+	private static string? RewriteFaceIds(string? json, Dictionary<string, string> renames)
+	{
+		if (string.IsNullOrWhiteSpace(json))
+		{
+			return json;
+		}
+
+		try
+		{
+			var root = JsonNode.Parse(json);
+			return root is not null && Rewrite(root, renames) ? root.ToJsonString() : json;
+		}
+		catch (JsonException)
+		{
+			return json;
+		}
+	}
+
+	private static bool Rewrite(JsonNode node, Dictionary<string, string> renames)
+	{
+		var changed = false;
+		switch (node)
+		{
+			case JsonObject obj:
+				foreach (var key in obj.Select(property => property.Key).ToList())
+				{
+					changed |= RewriteChild(obj[key], replacement => obj[key] = replacement, renames);
+				}
+
+				break;
+			case JsonArray array:
+				for (var index = 0; index < array.Count; index++)
+				{
+					var position = index;
+					changed |= RewriteChild(array[index], replacement => array[position] = replacement, renames);
+				}
+
+				break;
+		}
+
+		return changed;
+	}
+
+	private static bool RewriteChild(JsonNode? child, Action<string> replace, Dictionary<string, string> renames)
+	{
+		if (child is JsonValue value && value.TryGetValue<string>(out var text) && renames.TryGetValue(text, out var renamed))
+		{
+			replace(renamed);
+			return true;
+		}
+
+		return child is not null and not JsonValue && Rewrite(child, renames);
 	}
 
 	private async Task<List<PortableVariable>> CollectVariables(IReadOnlyList<PortableWidgetSource> widgets)
@@ -163,8 +444,10 @@ public sealed class PortableAssetManager : IPortableAssetManager
 
 	public async Task<IReadOnlyDictionary<Guid, Guid>> Import(PortableContent content,
 		IReadOnlyList<PortableIconFile> iconFiles,
+		IReadOnlyList<PortableFontFile> fontFiles,
 		CancellationToken cancellationToken)
 	{
+		await ImportFonts(content, fontFiles, cancellationToken);
 		var idMap = new Dictionary<Guid, Guid>();
 		await ImportIcons(content, iconFiles, idMap, cancellationToken);
 

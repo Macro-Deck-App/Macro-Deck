@@ -102,7 +102,7 @@ public sealed class FolderPortabilityService : IFolderPortabilityService
 			assets,
 			folder.Name,
 			widgets.Count);
-		var bytes = PortableArchive.Write(manifest, content, assets.Files, options.Password);
+		var bytes = PortableArchive.Write(manifest, content, assets.Files, options.Password, assets.FontFiles);
 		return Result.Ok<byte[], PortabilityError>(bytes);
 	}
 
@@ -178,7 +178,7 @@ public sealed class FolderPortabilityService : IFolderPortabilityService
 
 		try
 		{
-			foreach (var (oldId, newId) in await _assetManager.Import(content, outcome.Icons, cancellationToken))
+			foreach (var (oldId, newId) in await _assetManager.Import(content, outcome.Icons, outcome.Fonts, cancellationToken))
 			{
 				idMap[oldId] = newId;
 			}

@@ -1190,6 +1190,15 @@ export {
   type UninstallStoreExtensionResponse,
 } from './protocol/messages/store';
 export {
+  type DeleteUserFontResponse,
+  type GetUserFontsResponse,
+  type ImportUserFontsResponse,
+  type UserFont,
+  type UserFontFormat,
+  type UserFontImportResult,
+  type UserFontImportStatus,
+} from './protocol/messages/fonts';
+export {
   type ApplicationIdentityKind,
   type ConnectionEndpoint,
   type DeviceSetupCertificateAuthorityInfo,

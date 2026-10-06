@@ -233,6 +233,10 @@
   mask-image: url('./icons/image.svg');
   -webkit-mask-image: url('./icons/image.svg');
 }
+.icon-type {
+  mask-image: url('./icons/type.svg');
+  -webkit-mask-image: url('./icons/type.svg');
+}
 .icon-upload {
   mask-image: url('./icons/upload.svg');
   -webkit-mask-image: url('./icons/upload.svg');

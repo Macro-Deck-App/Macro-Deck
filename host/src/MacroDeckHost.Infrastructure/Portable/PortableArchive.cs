@@ -6,6 +6,7 @@ using MacroDeckHost.Application.Packaging;
 using MacroDeckHost.Application.Portable;
 using MacroDeckHost.Domain.Icons;
 using MacroDeckHost.Infrastructure.Persistence;
+using MacroDeckHost.Infrastructure.Rendering;
 
 namespace MacroDeckHost.Infrastructure.Portable;
 
@@ -22,7 +23,10 @@ public sealed record PortableReadOutcome(
 	PortableReadStatus Status,
 	PortableArchiveManifest? Manifest,
 	PortableContent? Content,
-	IReadOnlyList<PortableIconFile> Icons);
+	IReadOnlyList<PortableIconFile> Icons)
+{
+	public IReadOnlyList<PortableFontFile> Fonts { get; init; } = [];
+}
 
 public static class PortableArchive
 {
@@ -35,12 +39,15 @@ public static class PortableArchive
 	private const long MaxPayloadBytes = 192L * 1024 * 1024;
 	private const long MaxIconBytes = 16L * 1024 * 1024;
 	private const long MaxTotalIconBytes = 128L * 1024 * 1024;
+	public const long MaxTotalFontBytes = 64L * 1024 * 1024;
 
 	public static byte[] Write(PortableArchiveManifest manifest,
 		PortableContent content,
 		IReadOnlyList<PortableIconFile> icons,
-		string? password)
+		string? password,
+		IReadOnlyList<PortableFontFile>? fonts = null)
 	{
+		fonts ??= [];
 		if (!string.IsNullOrEmpty(password))
 		{
 			manifest.Encryption = PortableArchiveCrypto.CreateParameters();
@@ -51,7 +58,7 @@ public static class PortableArchive
 			// Deck decrypt an archive this build wrote.
 			var manifestBytes = SerializeManifest(manifest);
 
-			var innerBytes = WriteBundle(content, icons);
+			var innerBytes = WriteBundle(content, icons, fonts);
 			var payload = PortableArchiveCrypto.Encrypt(innerBytes, password, manifest.Encryption, manifestBytes);
 
 			using var outer = new MemoryStream();
@@ -70,7 +77,7 @@ public static class PortableArchive
 		using var buffer = new MemoryStream();
 		using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
 		{
-			manifest.Files = WriteBundleEntries(zip, content, icons);
+			manifest.Files = WriteBundleEntries(zip, content, icons, fonts);
 			WriteManifest(zip, SerializeManifest(manifest));
 		}
 
@@ -137,7 +144,7 @@ public static class PortableArchive
 		var icons = ReadIcons(zip);
 		return icons is null
 			? Fail(PortableReadStatus.InvalidArchive)
-			: new PortableReadOutcome(PortableReadStatus.Success, manifest, content, icons);
+			: new PortableReadOutcome(PortableReadStatus.Success, manifest, content, icons) { Fonts = ReadFonts(zip) };
 	}
 
 	private static PortableReadOutcome ReadEncrypted(ZipArchive zip,
@@ -200,7 +207,7 @@ public static class PortableArchive
 			var icons = ReadIcons(inner);
 			return icons is null
 				? Fail(PortableReadStatus.InvalidArchive)
-				: new PortableReadOutcome(PortableReadStatus.Success, manifest, content, icons);
+				: new PortableReadOutcome(PortableReadStatus.Success, manifest, content, icons) { Fonts = ReadFonts(inner) };
 		}
 		catch (InvalidDataException)
 		{
@@ -208,14 +215,16 @@ public static class PortableArchive
 		}
 	}
 
-	private static byte[] WriteBundle(PortableContent content, IReadOnlyList<PortableIconFile> icons)
+	private static byte[] WriteBundle(PortableContent content,
+		IReadOnlyList<PortableIconFile> icons,
+		IReadOnlyList<PortableFontFile> fonts)
 	{
 		using var buffer = new MemoryStream();
 		using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
 		{
 			// The inner bundle is opaque once encrypted - nothing reads content.json or the icon entries
 			// independently - so the per-entry digests this returns are not needed here.
-			WriteBundleEntries(zip, content, icons);
+			WriteBundleEntries(zip, content, icons, fonts);
 		}
 
 		return buffer.ToArray();
@@ -223,7 +232,8 @@ public static class PortableArchive
 
 	private static List<PackageFileDigest> WriteBundleEntries(ZipArchive zip,
 		PortableContent content,
-		IReadOnlyList<PortableIconFile> icons)
+		IReadOnlyList<PortableIconFile> icons,
+		IReadOnlyList<PortableFontFile> fonts)
 	{
 		var files = new List<PackageFileDigest>();
 
@@ -246,6 +256,18 @@ public static class PortableArchive
 			}
 
 			files.Add(ComputeFileDigest(path, icon.Bytes));
+		}
+
+		foreach (var font in fonts)
+		{
+			var path = $"fonts/{font.FontId}.{font.Format}";
+			var entry = zip.CreateEntry(path, CompressionLevel.Optimal);
+			using (var stream = entry.Open())
+			{
+				stream.Write(font.Bytes);
+			}
+
+			files.Add(ComputeFileDigest(path, font.Bytes));
 		}
 
 		files.Sort((a, b) => string.CompareOrdinal(a.Path, b.Path));
@@ -351,6 +373,36 @@ public static class PortableArchive
 		}
 
 		return icons;
+	}
+
+	private static List<PortableFontFile> ReadFonts(ZipArchive zip)
+	{
+		var fonts = new List<PortableFontFile>();
+		var budget = MaxTotalFontBytes;
+		foreach (var entry in zip.Entries)
+		{
+			var segments = entry.FullName.Replace('\\', '/').Split('/');
+			if (segments.Length != 2 ||
+				!segments[0].Equals("fonts", StringComparison.Ordinal) ||
+				!UserFontFiles.HasFontExtension(segments[1]) ||
+				!UserFontFiles.IsFontId(Path.GetFileNameWithoutExtension(segments[1])))
+			{
+				continue;
+			}
+
+			var bytes = ReadEntry(entry, Math.Min(UserFontFiles.MaxFileBytes, budget));
+			if (bytes is null)
+			{
+				continue;
+			}
+
+			budget -= bytes.Length;
+			fonts.Add(new PortableFontFile(Path.GetFileNameWithoutExtension(segments[1]),
+				Path.GetExtension(segments[1]).TrimStart('.').ToLowerInvariant(),
+				bytes));
+		}
+
+		return fonts;
 	}
 
 	private static byte[]? ReadEntry(ZipArchiveEntry entry, long limit)

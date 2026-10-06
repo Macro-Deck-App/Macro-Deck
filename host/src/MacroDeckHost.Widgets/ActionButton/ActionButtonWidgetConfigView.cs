@@ -61,6 +61,26 @@ internal static class ActionButtonWidgetConfigView
 			.OrderBy(family => family, StringComparer.OrdinalIgnoreCase)
 			.ToList();
 
+		var previewFaces = fonts.GetFaces()
+			.Where(face => face.RemoteRenderable)
+			.GroupBy(face => face.Family, StringComparer.Ordinal)
+			.ToDictionary(group => group.Key,
+				group => group
+					.OrderBy(face => face.Slant == FontFaceIdentity.UprightSlant ? 0 : 1)
+					.ThenBy(face => Math.Abs(face.Weight - FontFaceIdentity.RegularWeight))
+					.ThenBy(face => Math.Abs(face.Width - FontFaceIdentity.NormalWidth))
+					.First()
+					.FaceId,
+				StringComparer.Ordinal);
+
+		UiOption FamilyOption(string family)
+			=> previewFaces.TryGetValue(family, out var previewFaceId)
+				? UiOption.Of(family, family) with
+				{
+					Metadata = new Dictionary<string, string> { ["fontFaceId"] = previewFaceId }
+				}
+				: UiOption.Of(family, family);
+
 		string FamilyOf(string faceId)
 			=> string.IsNullOrEmpty(faceId)
 				? string.Empty
@@ -819,7 +839,7 @@ internal static class ActionButtonWidgetConfigView
 									{
 										Value = string.Empty, Label = AppStrings.Forms.InheritableSetting.Inherited(),
 									},
-									.. fontFamilies.Select(family => UiOption.Of(family, family)),
+									.. fontFamilies.Select(FamilyOption),
 								]),
 							},
 							new UiConfigStack

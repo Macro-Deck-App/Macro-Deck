@@ -856,6 +856,24 @@ public class ActionButtonWidgetConfigTests
 	}
 
 	[Test]
+	public void Each_family_option_names_its_regular_face_so_the_picker_can_draw_it_in_that_font()
+	{
+		var host = Render(new { fontFaceId = "inter-400" },
+			fonts: new FakeFontCatalog(_interBold, _interRegular, _acmeRegular));
+
+		var previews = host.ById("fontFamily").Property(UiConfigProperties.Options)!.Value.EnumerateArray()
+			.Where(o => o.GetProperty("value").GetString() != "")
+			.ToDictionary(o => o.GetProperty("value").GetString()!,
+				o => o.GetProperty("metadata").GetProperty("fontFaceId").GetString());
+
+		Assert.That(previews, Is.EquivalentTo(new Dictionary<string, string?>
+		{
+			["Inter"] = "inter-400",
+			["Acme"] = "acme-400"
+		}));
+	}
+
+	[Test]
 	public void Picking_a_family_resolves_it_to_that_familys_first_real_fontFaceId()
 	{
 		// The family control's own write never reaches the draft - config-draft.util.spec.ts covers that,

@@ -27,6 +27,7 @@ internal static class PortableManifestFactory
 				ScriptCount = content.Scripts.Count,
 				SecretCount = content.Secrets.Count,
 				VariableCount = content.Variables.Count,
+				FontCount = content.Fonts.Count,
 				Integrations = assets.Integrations.ToList()
 			}
 		};

@@ -657,10 +657,10 @@
     <value>Automations</value>
   </data>
   <data name="Backup.Group.Icons.Description" xml:space="preserve">
-    <value>Installed icon packs and imported icons.</value>
+    <value>Installed icon packs, imported icons and imported fonts.</value>
   </data>
   <data name="Backup.Group.Icons.Label" xml:space="preserve">
-    <value>Icons and icon packs</value>
+    <value>Icons, icon packs and fonts</value>
   </data>
   <data name="Backup.Group.Integrations.Description" xml:space="preserve">
     <value>Integration settings and every saved password or token.</value>
@@ -12597,6 +12597,14 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>{count} widget variables</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Portable.ArchivePreview.FontCount.One" xml:space="preserve">
+    <value>{count} font</value>
+    <comment>[plural] Number of fonts in an archive, shown in the import preview.</comment>
+  </data>
+  <data name="Portable.ArchivePreview.FontCount.Other" xml:space="preserve">
+    <value>{count} fonts</value>
+    <comment>[plural] Number of fonts in an archive, shown in the import preview.</comment>
+  </data>
   <data name="Portable.ArchivePreview.WidgetCount.One" xml:space="preserve">
     <value>{count} widget</value>
     <comment>[plural]</comment>
@@ -18706,6 +18714,79 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Library.Page.ContentTypeAriaLabel" xml:space="preserve">
     <value>Library content</value>
+  </data>
+  <data name="Nav.Fonts" xml:space="preserve">
+    <value>Fonts</value>
+  </data>
+  <data name="Library.Page.FontsDescription" xml:space="preserve">
+    <value>Font files you imported for button labels and text.</value>
+  </data>
+  <data name="Library.Page.FontCount.One" xml:space="preserve">
+    <value>{count} font</value>
+    <comment>[plural] Shown on a content type card in the library.</comment>
+  </data>
+  <data name="Library.Page.FontCount.Other" xml:space="preserve">
+    <value>{count} fonts</value>
+    <comment>[plural] Shown on a content type card in the library.</comment>
+  </data>
+  <data name="Library.Fonts.ImportAction" xml:space="preserve">
+    <value>Import fonts</value>
+  </data>
+  <data name="Library.Fonts.EmptyTitle" xml:space="preserve">
+    <value>No fonts imported yet</value>
+  </data>
+  <data name="Library.Fonts.EmptyDescription" xml:space="preserve">
+    <value>Import TTF or OTF files to use them on buttons and text widgets, or drop them here.</value>
+  </data>
+  <data name="Library.Fonts.LicenseNote" xml:space="preserve">
+    <value>Only import fonts whose licence allows this use. Fonts used on your buttons are included when you export profiles, folders or widgets, so sharing an export also shares the font.</value>
+  </data>
+  <data name="Library.Fonts.Sample" xml:space="preserve">
+    <value>Aa Bb Cc 0123456789</value>
+  </data>
+  <data name="Library.Fonts.RemoveAriaLabel" xml:space="preserve">
+    <value>Remove {name}</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmHeading" xml:space="preserve">
+    <value>Remove font?</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmMessage" xml:space="preserve">
+    <value>{name} will be removed. Buttons that use it switch to the default font.</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmAction" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Library.Fonts.RemoveFailed" xml:space="preserve">
+    <value>The font could not be removed.</value>
+  </data>
+  <data name="Library.Fonts.ImportFailed" xml:space="preserve">
+    <value>The fonts could not be imported.</value>
+  </data>
+  <data name="Library.Fonts.Imported.One" xml:space="preserve">
+    <value>{count} font imported</value>
+    <comment>[plural] Toast after a successful import.</comment>
+  </data>
+  <data name="Library.Fonts.Imported.Other" xml:space="preserve">
+    <value>{count} fonts imported</value>
+    <comment>[plural] Toast after a successful import.</comment>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyPresent" xml:space="preserve">
+    <value>{fileName} is already imported.</value>
+  </data>
+  <data name="Library.Fonts.Status.UnsupportedFormat" xml:space="preserve">
+    <value>{fileName}: only TTF and OTF files are supported.</value>
+  </data>
+  <data name="Library.Fonts.Status.TooLarge" xml:space="preserve">
+    <value>{fileName} is larger than 32 MB.</value>
+  </data>
+  <data name="Library.Fonts.Status.InvalidFont" xml:space="preserve">
+    <value>{fileName} is not a usable font file.</value>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyInstalled" xml:space="preserve">
+    <value>{fileName}: this font family is already installed on this computer, so it cannot be imported.</value>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyImported" xml:space="preserve">
+    <value>{fileName}: a font with the same family and style is already imported. Remove it first to replace it.</value>
   </data>
   <data name="Onboarding.Back" xml:space="preserve">
     <value>Back</value>

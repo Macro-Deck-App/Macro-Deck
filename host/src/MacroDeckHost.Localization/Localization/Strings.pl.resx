@@ -658,10 +658,10 @@
     <value>Automatyzacje</value>
   </data>
   <data name="Backup.Group.Icons.Description" xml:space="preserve">
-    <value>Zainstalowane pakiety ikon i zaimportowane ikony.</value>
+    <value>Zainstalowane pakiety ikon, zaimportowane ikony i zaimportowane czcionki.</value>
   </data>
   <data name="Backup.Group.Icons.Label" xml:space="preserve">
-    <value>Ikony i pakiety ikon</value>
+    <value>Ikony, pakiety ikon i czcionki</value>
   </data>
   <data name="Backup.Group.Integrations.Description" xml:space="preserve">
     <value>Ustawienia integracji oraz wszystkie zapisane hasła i tokeny.</value>
@@ -12596,6 +12596,14 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Liczba zmiennych widżetu: {count}</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Portable.ArchivePreview.FontCount.One" xml:space="preserve">
+    <value>{count} czcionka</value>
+    <comment>[plural] Number of fonts in an archive, shown in the import preview.</comment>
+  </data>
+  <data name="Portable.ArchivePreview.FontCount.Other" xml:space="preserve">
+    <value>Liczba czcionek: {count}</value>
+    <comment>[plural] Number of fonts in an archive, shown in the import preview.</comment>
+  </data>
   <data name="Portable.ArchivePreview.WidgetCount.One" xml:space="preserve">
     <value>{count} widget</value>
     <comment>[plural]</comment>
@@ -18702,6 +18710,79 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Library.Page.ContentTypeAriaLabel" xml:space="preserve">
     <value>Zawartość biblioteki</value>
+  </data>
+  <data name="Nav.Fonts" xml:space="preserve">
+    <value>Czcionki</value>
+  </data>
+  <data name="Library.Page.FontsDescription" xml:space="preserve">
+    <value>Zaimportowane pliki czcionek do etykiet i tekstów.</value>
+  </data>
+  <data name="Library.Page.FontCount.One" xml:space="preserve">
+    <value>{count} czcionka</value>
+    <comment>[plural] Shown on a content type card in the library.</comment>
+  </data>
+  <data name="Library.Page.FontCount.Other" xml:space="preserve">
+    <value>Liczba czcionek: {count}</value>
+    <comment>[plural] Shown on a content type card in the library.</comment>
+  </data>
+  <data name="Library.Fonts.ImportAction" xml:space="preserve">
+    <value>Importuj czcionki</value>
+  </data>
+  <data name="Library.Fonts.EmptyTitle" xml:space="preserve">
+    <value>Brak zaimportowanych czcionek</value>
+  </data>
+  <data name="Library.Fonts.EmptyDescription" xml:space="preserve">
+    <value>Zaimportuj pliki TTF lub OTF, aby używać ich na przyciskach i w widżetach tekstowych, albo przeciągnij je tutaj.</value>
+  </data>
+  <data name="Library.Fonts.LicenseNote" xml:space="preserve">
+    <value>Importuj tylko czcionki, których licencja pozwala na takie użycie. Czcionki użyte na przyciskach są dołączane do eksportu profili, folderów i widżetów, więc udostępnienie eksportu udostępnia też czcionkę.</value>
+  </data>
+  <data name="Library.Fonts.Sample" xml:space="preserve">
+    <value>Aa Bb Cc 0123456789</value>
+  </data>
+  <data name="Library.Fonts.RemoveAriaLabel" xml:space="preserve">
+    <value>Usuń {name}</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmHeading" xml:space="preserve">
+    <value>Usunąć czcionkę?</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmMessage" xml:space="preserve">
+    <value>Czcionka {name} zostanie usunięta. Przyciski, które jej używają, przejdą na czcionkę domyślną.</value>
+  </data>
+  <data name="Library.Fonts.RemoveConfirmAction" xml:space="preserve">
+    <value>Usuń</value>
+  </data>
+  <data name="Library.Fonts.RemoveFailed" xml:space="preserve">
+    <value>Nie udało się usunąć czcionki.</value>
+  </data>
+  <data name="Library.Fonts.ImportFailed" xml:space="preserve">
+    <value>Nie udało się zaimportować czcionek.</value>
+  </data>
+  <data name="Library.Fonts.Imported.One" xml:space="preserve">
+    <value>{count} czcionka zaimportowana</value>
+    <comment>[plural] Toast after a successful import.</comment>
+  </data>
+  <data name="Library.Fonts.Imported.Other" xml:space="preserve">
+    <value>Zaimportowane czcionki: {count}</value>
+    <comment>[plural] Toast after a successful import.</comment>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyPresent" xml:space="preserve">
+    <value>Plik {fileName} jest już zaimportowany.</value>
+  </data>
+  <data name="Library.Fonts.Status.UnsupportedFormat" xml:space="preserve">
+    <value>{fileName}: obsługiwane są tylko pliki TTF i OTF.</value>
+  </data>
+  <data name="Library.Fonts.Status.TooLarge" xml:space="preserve">
+    <value>Plik {fileName} jest większy niż 32 MB.</value>
+  </data>
+  <data name="Library.Fonts.Status.InvalidFont" xml:space="preserve">
+    <value>Plik {fileName} nie jest użytecznym plikiem czcionki.</value>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyInstalled" xml:space="preserve">
+    <value>{fileName}: ta rodzina czcionek jest już zainstalowana na tym komputerze, więc nie można jej zaimportować.</value>
+  </data>
+  <data name="Library.Fonts.Status.AlreadyImported" xml:space="preserve">
+    <value>{fileName}: czcionka z tą samą rodziną i stylem jest już zaimportowana. Aby ją zastąpić, najpierw ją usuń.</value>
   </data>
   <data name="Onboarding.Back" xml:space="preserve">
     <value>Wstecz</value>

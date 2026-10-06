@@ -9,6 +9,7 @@ public static class PortableContentFactory
 			Icons = [.. assets.Icons],
 			Scripts = [.. assets.Scripts],
 			Secrets = [.. assets.Secrets],
-			Variables = [.. assets.Variables]
+			Variables = [.. assets.Variables],
+			Fonts = [.. assets.Fonts]
 		};
 }
