@@ -123,9 +123,9 @@ public sealed class CalendarTriggerScheduler : IDisposable
 		catch (Exception exception)
 		{
 			_logger.Error(exception,
-				"Calendar trigger {Kind} for event {InstanceKey} failed",
+				"Calendar trigger {Kind} for an event of {IntegrationId} failed",
 				firing.Target.Kind,
-				firing.Event.InstanceKey);
+				firing.Event.IntegrationId);
 		}
 	}
 

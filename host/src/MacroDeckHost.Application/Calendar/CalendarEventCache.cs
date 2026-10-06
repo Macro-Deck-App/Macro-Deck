@@ -122,9 +122,7 @@ public sealed class CalendarEventCache : ICalendarEventCache, IDisposable
 		catch (Exception exception)
 		{
 			_logger.Warning(exception,
-				"Reading calendar event {EventId} of account {AccountId} failed; showing the synced summary",
-				eventId,
-				accountId);
+				"Reading calendar event details failed; showing the synced summary");
 			return Fallback(cached);
 		}
 	}
@@ -204,8 +202,8 @@ public sealed class CalendarEventCache : ICalendarEventCache, IDisposable
 		catch (Exception exception)
 		{
 			_logger.Warning(exception,
-				"Syncing calendar account {AccountId} failed; keeping its last synced events",
-				account.AccountId);
+				"Syncing a calendar account of {IntegrationId} failed; keeping its last synced events",
+				account.IntegrationId);
 
 			var lastCalendars = previous.Accounts
 				.FirstOrDefault(state => state.Account.AccountId == account.AccountId)

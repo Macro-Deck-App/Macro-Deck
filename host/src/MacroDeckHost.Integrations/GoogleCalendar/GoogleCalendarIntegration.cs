@@ -117,8 +117,7 @@ public sealed class GoogleCalendarIntegration
 			catch (HttpRequestException exception) when (exception.StatusCode is HttpStatusCode.NotFound)
 			{
 				_logger.Warning(exception,
-					"Google Calendar no longer has calendar {CalendarId}; skipping it",
-					calendarId);
+					"Google Calendar no longer has one of the account's calendars; skipping it");
 				lastLostAccess = exception;
 			}
 		}

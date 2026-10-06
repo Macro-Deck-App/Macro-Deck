@@ -56,8 +56,8 @@ public sealed class RemoteCalendarProvider(
 		if (result?.Truncated == true)
 		{
 			_logger.Warning(
-				"Plugin {PluginId} truncated the calendar events of account {AccountId} between {From} and {To}",
-				pluginId, accountId, query.From, query.To);
+				"Plugin {PluginId} truncated the calendar events between {From} and {To}",
+				pluginId, query.From, query.To);
 		}
 
 		return result is null ? [] : [.. result.Events.Select(CalendarMapper.ToDomain)];

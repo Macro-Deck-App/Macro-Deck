@@ -141,10 +141,10 @@ public sealed class CalendarWidgetTriggerScheduler : IDisposable
 		catch (Exception exception)
 		{
 			_logger.Error(exception,
-				"{Trigger} flow of calendar widget {WidgetId} for event {InstanceKey} failed",
+				"{Trigger} flow of calendar widget {WidgetId} for an event of {IntegrationId} failed",
 				target.Trigger,
 				target.WidgetId,
-				firing.Event.InstanceKey);
+				firing.Event.IntegrationId);
 		}
 	}
 
