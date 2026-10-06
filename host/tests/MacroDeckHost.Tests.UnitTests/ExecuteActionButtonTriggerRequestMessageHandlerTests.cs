@@ -503,13 +503,14 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 
 	// Issue #748 migrated the Action Button onto Macro Deck UI sessions, but this REST/WebSocket handler
 	// still has to serve every non-Action-Button tile that presses through it - MusicPlayer, Weather,
-	// HistoryGraph and Clock - and an older or non-Angular client that never adopted a UI session for an
+	// HistoryGraph, Clock and Gauges - and an older or non-Angular client that never adopted a UI session for an
 	// ActionButton either. Both keep going through IWidgetTriggerService exactly like an ActionButton
 	// press does.
 	[TestCase(WidgetTypeIds.MusicPlayer)]
 	[TestCase(WidgetTypeIds.Weather)]
 	[TestCase(WidgetTypeIds.HistoryGraph)]
 	[TestCase(WidgetTypeIds.Clock)]
+	[TestCase(WidgetTypeIds.Gauges)]
 	public async Task A_non_action_button_tile_still_runs_its_flow_through_this_handler(string widgetType)
 	{
 		_folders = new FakeFolderCache(ActionButtonWidget(widgetType));

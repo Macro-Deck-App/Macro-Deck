@@ -1,4 +1,4 @@
-import { ResultResponse } from './common';
+import { ApiError, ResultResponse } from './common';
 
 export type IconProcessingState = 'Pending' | 'Processing' | 'Ready' | 'Failed';
 
@@ -35,6 +35,18 @@ export interface IpcIconPack {
   aiAssets?: IconPackAiAssets;
 }
 
+export interface IpcIconAppearance {
+  id: string;
+  key: string;
+  traits: Record<string, string>;
+  contentHash: string | null;
+  isAnimated: boolean;
+  width: number | null;
+  height: number | null;
+  processingState: IconProcessingState;
+  processingError: string | null;
+}
+
 export interface IpcIcon {
   id: string;
   packId: string;
@@ -49,6 +61,8 @@ export interface IpcIcon {
   contentHash?: string | null;
   originalFileName?: string;
   createdAt: string;
+  // Absent from an older host.
+  appearances?: IpcIconAppearance[];
 }
 
 export interface IpcIconImportBatch {
@@ -112,6 +126,21 @@ export interface UpdateIconResponse extends ResultResponse {
 }
 
 export interface DeleteIconResponse extends ResultResponse {}
+
+export interface IconAppearanceResponse {
+  success?: boolean;
+  error?: ApiError;
+  icon?: IpcIcon;
+}
+
+export interface MergeIconAppearanceRequest {
+  iconId: string;
+  key: string;
+}
+
+export interface MergeIconAppearanceResponse extends IconAppearanceResponse {
+  mergedIconId?: string;
+}
 
 export interface DeleteIconsRequest {
   ids: string[];

@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.macro-deck.app/widget-data-gauges-v1.schema.json",
+  "title": "Macro Deck Gauges widget data (v1)",
+  "description": "Describes the JSON stored in WidgetEntity.Data for a Gauges widget (WidgetType.Gauges).",
+  "$comment": "No top-level 'required' and additionalProperties left unset on every object, for the same reasons as the other widget schemas: a fresh widget's data is near-empty, and older or newer clients may write keys this schema does not know. 'gauges' has no maxItems: the widget draws the first eight gauges.",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Optional title above the gauges."
+    },
+    "style": {
+      "enum": [
+        "ring",
+        "arc",
+        null
+      ],
+      "description": "How every gauge is drawn: a full ring from twelve o'clock (default) or a three-quarter arc open at the bottom."
+    },
+    "gauges": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/gauge"
+      },
+      "description": "The gauges, in display order. Only the first eight are drawn."
+    },
+    "backgroundColor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Widget background color, as #rrggbb or transparent. Absent or null keeps the widget's default background; transparent also removes the deck's tile behind the widget."
+    },
+    "border": {
+      "$ref": "#/$defs/widgetBorder",
+      "description": "Outline drawn along the widget edge."
+    },
+    "flows": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/actionFlow"
+          }
+        }
+      ],
+      "description": "Press-trigger action flows, stored the same way as an Action Button's. Stored on the wire as a nested JSON string; the editor may show it inlined as an array. Both forms are accepted here."
+    }
+  },
+  "$defs": {
+    "gauge": {
+      "type": "object",
+      "description": "One gauge.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable identity of the gauge within the widget. Assigned when absent."
+        },
+        "variable": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Numeric variable the gauge shows, e.g. 'system_cpu_usage_percent'."
+        },
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Optional name drawn below the value."
+        },
+        "icon": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "An icon reference, as stored by Action Buttons: { type, reference }, for example an icon of the read-only Included pack. Drawn inside the ring.",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "reference": {
+              "type": "string"
+            }
+          }
+        },
+        "min": {
+          "type": "number",
+          "description": "Value at an empty ring. Absent means 0."
+        },
+        "max": {
+          "type": "number",
+          "description": "Value at a full ring. Absent, 0 or not above 'min' means automatic: the variable's own maximum when it declares one above 'min', otherwise min + 100."
+        },
+        "color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Ring color as #rrggbb; the accent color when absent or null."
+        },
+        "iconColor": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Color of the icon inside the ring as #rrggbb, drawn as a silhouette. The icon's own colors when absent or null."
+        },
+        "warnWhen": {
+          "enum": [
+            "above",
+            "below",
+            null
+          ],
+          "description": "When the ring turns the warning color: at or above, or at or below, 'warnAt'. Absent or null means never."
+        },
+        "warnAt": {
+          "type": "number",
+          "description": "Warning threshold, in the variable's own units."
+        }
+      }
+    },
+    "widgetBorder": {
+      "type": "object",
+      "description": "Outline drawn along the inner edge of the widget.",
+      "properties": {
+        "style": {
+          "enum": [
+            "off",
+            "static",
+            "heartbeat",
+            "breathing",
+            "blink",
+            "comet",
+            "ants",
+            "hue-shift",
+            "rgb",
+            null
+          ],
+          "description": "Visual style; absent, null or 'off' means no border. The color-tinted styles are static, heartbeat, breathing, blink, comet and ants; hue-shift and rgb ignore color."
+        },
+        "color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Ring color for the color-tinted styles. Falls back to a default color when absent or null; ignored by hue-shift and rgb."
+        }
+      }
+    },
+    "actionFlow": {
+      "type": "object",
+      "description": "One action-flow entry (a trigger and its action blocks). Its internal structure is deliberately not validated here - deep flow validation is out of scope for this schema."
+    }
+  }
+}

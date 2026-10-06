@@ -52,7 +52,7 @@ public static class WidgetAppearanceJson
 				WidgetTypeIds.Slider => ApplyToSlider(data, patch),
 				WidgetTypeIds.HistoryGraph => ApplyToHistoryGraph(data, patch),
 				WidgetTypeIds.Clock or WidgetTypeIds.Weather or WidgetTypeIds.MusicPlayer or WidgetTypeIds.Countdown
-					or WidgetTypeIds.Stopwatch =>
+					or WidgetTypeIds.Stopwatch or WidgetTypeIds.Gauges =>
 					SetIfPresent(data, "backgroundColor", patch.BackgroundColor) | ApplyBorder(data, patch),
 				_ => ApplyBorder(data, patch)
 			};
@@ -112,6 +112,7 @@ public static class WidgetAppearanceJson
 				WidgetAppearanceProperty.Icon,
 				WidgetAppearanceProperty.IconDisplay,
 				WidgetAppearanceProperty.IconColor,
+				WidgetAppearanceProperty.IconAppearance,
 				WidgetAppearanceProperty.Font,
 				WidgetAppearanceProperty.Border,
 				WidgetAppearanceProperty.BorderColor
@@ -122,6 +123,7 @@ public static class WidgetAppearanceJson
 				WidgetAppearanceProperty.BackgroundColor,
 				WidgetAppearanceProperty.LabelColor,
 				WidgetAppearanceProperty.Icon,
+				WidgetAppearanceProperty.IconAppearance,
 				WidgetAppearanceProperty.Border,
 				WidgetAppearanceProperty.BorderColor,
 				WidgetAppearanceProperty.AccentColor
@@ -132,7 +134,7 @@ public static class WidgetAppearanceJson
 				WidgetAppearanceProperty.BorderColor, WidgetAppearanceProperty.AccentColor
 			],
 			WidgetTypeIds.Clock or WidgetTypeIds.Weather or WidgetTypeIds.MusicPlayer or WidgetTypeIds.Countdown
-					or WidgetTypeIds.Stopwatch =>
+					or WidgetTypeIds.Stopwatch or WidgetTypeIds.Gauges =>
 			[
 				WidgetAppearanceProperty.BackgroundColor, WidgetAppearanceProperty.Border,
 				WidgetAppearanceProperty.BorderColor
@@ -295,6 +297,7 @@ public static class WidgetAppearanceJson
 
 			var changed = ApplyLabelProperties(stateObject, patch);
 			changed |= SetIcon(stateObject, patch.IconId);
+			changed |= SetIconAppearance(stateObject, patch.IconAppearance);
 			changed |= ApplyIconDisplay(stateObject, patch);
 			changed |= SetIfPresent(stateObject, "iconColor", patch.IconColor);
 			changed |= ApplyBorder(stateObject, patch);
@@ -304,12 +307,14 @@ public static class WidgetAppearanceJson
 		var flatChanged = ApplyLabelProperties(data, patch);
 		flatChanged |= ApplyBorder(data, patch);
 
-		if (patch.IconId is not null || HasIconDisplay(patch) || patch.IconColor is not null)
+		if (patch.IconId is not null || HasIconDisplay(patch) || patch.IconColor is not null ||
+			patch.IconAppearance is not null)
 		{
 			flatChanged |= HoistLegacyMomentaryIcon(data);
 		}
 
 		flatChanged |= SetIcon(data, patch.IconId);
+		flatChanged |= SetIconAppearance(data, patch.IconAppearance);
 		flatChanged |= ApplyIconDisplay(data, patch);
 		flatChanged |= SetIfPresent(data, "iconColor", patch.IconColor);
 
@@ -337,13 +342,32 @@ public static class WidgetAppearanceJson
 			return target.Remove("icon") | legacyRemoved;
 		}
 
-		var next = WidgetIconReference.IconPack(iconId).ToJson();
-		if (target["icon"] is JsonObject existing && JsonNode.DeepEquals(existing, next))
+		var next = WidgetIconReference.IconPack(iconId);
+		if (WidgetIconReference.Read(target["icon"], null) is { } existing && existing.SameIcon(next))
 		{
 			return legacyRemoved;
 		}
 
-		target["icon"] = next;
+		target["icon"] = next.ToJson();
+		return true;
+	}
+
+	private static bool SetIconAppearance(JsonObject target, string? appearance)
+	{
+		if (appearance is null ||
+			WidgetIconReference.Read(target["icon"], ReadString(target, "iconId")) is not { } current)
+		{
+			return false;
+		}
+
+		var pin = appearance.Length == 0 ? null : appearance;
+		if (target["icon"] is JsonObject && string.Equals(current.Appearance, pin, StringComparison.Ordinal))
+		{
+			return false;
+		}
+
+		target.Remove("iconId");
+		target["icon"] = (current with { Appearance = pin }).ToJson();
 		return true;
 	}
 
@@ -398,7 +422,7 @@ public static class WidgetAppearanceJson
 		var changed = ClearOn(data, property, labelKey: "label");
 
 		if (property is WidgetAppearanceProperty.Icon or WidgetAppearanceProperty.IconDisplay
-				or WidgetAppearanceProperty.IconColor &&
+				or WidgetAppearanceProperty.IconColor or WidgetAppearanceProperty.IconAppearance &&
 			data["states"] is JsonArray states &&
 			states.OfType<JsonObject>().FirstOrDefault()?["appearance"] is JsonObject firstAppearance)
 		{
@@ -417,6 +441,7 @@ public static class WidgetAppearanceJson
 			WidgetAppearanceProperty.Icon => Remove(target, "icon", "iconId"),
 			WidgetAppearanceProperty.IconDisplay => Remove(target, "iconDisplay"),
 			WidgetAppearanceProperty.IconColor => Remove(target, "iconColor"),
+			WidgetAppearanceProperty.IconAppearance => target["icon"] is JsonObject icon && Remove(icon, "appearance"),
 			WidgetAppearanceProperty.Font => Remove(target,
 				"fontFaceId",
 				"fontSize",
@@ -493,6 +518,7 @@ public static class WidgetAppearanceJson
 		changed |= SetIfPresent(data, "labelColor", patch.LabelColor);
 		changed |= SetIfPresent(data, "backgroundColor", patch.BackgroundColor);
 		changed |= SetIcon(data, patch.IconId);
+		changed |= SetIconAppearance(data, patch.IconAppearance);
 		changed |= SetIfPresent(data, "color", patch.AccentColor);
 		return changed | ApplyBorder(data, patch);
 	}

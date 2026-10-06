@@ -1,10 +1,41 @@
 ---
 title: OBS Studio
-description: How Macro Deck follows changes in OBS Studio and reacts to events your OBS scripts send.
+description: How Macro Deck changes what OBS Studio sources show, switches profiles and scene collections, follows changes in OBS and reacts to events your OBS scripts send.
 ---
 
 Macro Deck connects to OBS Studio through its built-in WebSocket server (obs-websocket 5.x). Add the
 connection under **Integrations**, then use OBS actions, variables and triggers in your deck.
+
+## Changing what a source shows
+
+The action **Set Input Setting** changes one setting of an OBS source. Choose the source under **Input**,
+the setting under **Setting** and enter the new value. Other settings of the source stay as they are.
+
+| Source type | Setting | Value |
+| --- | --- | --- |
+| Text (GDI+), Text (FreeType 2) | `text` | The text to show |
+| Image | `file` | Path of the image file |
+| Media Source | `local_file` | Path of the video or audio file |
+| Browser | `url` | The address to load |
+
+Enter paths as OBS sees them: when OBS runs on another computer, that is a file on that computer. The value
+can contain variables, for example `Now playing: {{ vars.song }}` for a text source.
+
+**Setting** suggests the names the chosen source reports. You can also type a name that is not listed, for
+example `text` on a text source you have not typed anything into yet. To find the names of other settings,
+add the source's setting variables from the OBS variables: they use the same names.
+
+The value takes the type the setting already has in OBS:
+
+- An on/off setting needs `true` or `false`.
+- A numeric setting needs a number, such as `75` or `0.5`. OBS stores colours as numbers too, so a value
+  like `#FF0000` does not work.
+- A setting that holds a group, such as `font`, needs the whole group as JSON, for example
+  `{"face": "Arial", "size": 72}`. OBS replaces the group, so leave nothing out.
+- Every other setting gets the text as you entered it. An empty value clears a text.
+
+The action fails with a message when the value does not fit the setting, when the source does not exist or
+when OBS refuses the change.
 
 ## Changes show up quickly
 
@@ -18,6 +49,27 @@ a change.
 
 Macro Deck never listens to the per-frame OBS events (audio level meters and scene item transforms),
 so a busy OBS does not slow Macro Deck down.
+
+## Profiles and scene collections
+
+**Set Profile** and **Set Scene Collection** switch OBS to the profile or scene collection you pick. The
+list shows what OBS has right now, so create or rename them in OBS first.
+
+A button with one of these actions lights up while its profile or scene collection is active, also when
+you switch in OBS itself. The variables **Current Profile** and **Current Scene Collection** show the
+active names.
+
+Loading a scene collection can take OBS a few seconds. Until it is done, Macro Deck keeps showing the
+state from before the switch, so a running stream or recording does not briefly read as stopped and
+fires no **Streaming Stopped** or **Recording Stopped** trigger. The same applies while OBS starts up:
+Macro Deck reports OBS as connected, and fires **Connected**, once OBS has finished loading.
+
+The action fails with a message when:
+
+- the scene collection was renamed or deleted in OBS. Pick it again from the list.
+- OBS is still loading another scene collection. Press again when it is done.
+- OBS takes longer than about 10 seconds to load the scene collection. OBS usually still finishes the
+  switch, and the button lights up once it has.
 
 ## Triggers
 

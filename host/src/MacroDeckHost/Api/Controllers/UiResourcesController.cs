@@ -1,6 +1,8 @@
 using System.Globalization;
+using MacroDeckHost.Api.Support;
 using MacroDeckHost.Application.Plugins.IconPacks;
 using MacroDeckHost.Application.Ui.Resources;
+using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -98,11 +100,22 @@ public class UiResourcesController : ControllerBase
 	}
 
 	private async Task<SizedIconResource?> FindSized(string resourceId, string? size, CancellationToken cancellationToken)
-		=> _sizedIcons is not null &&
-			int.TryParse(size, NumberStyles.None, CultureInfo.InvariantCulture, out var requested) &&
-			requested > 0
-				? await _sizedIcons.TryGetAsync(resourceId, requested, cancellationToken)
-				: null;
+	{
+		if (_sizedIcons is null)
+		{
+			return null;
+		}
+
+		var context = IconAppearanceContextQuery.FromRequest(HttpContext);
+		if (int.TryParse(size, NumberStyles.None, CultureInfo.InvariantCulture, out var requested) && requested > 0)
+		{
+			return await _sizedIcons.TryGetAsync(resourceId, requested, cancellationToken, context);
+		}
+
+		return context.IsEmpty
+			? null
+			: await _sizedIcons.TryGetAsync(resourceId, WidgetIconRenditions.DefaultSize, cancellationToken, context);
+	}
 
 	private async Task<UiResourceContent?> Find(string resourceId, CancellationToken cancellationToken)
 	{

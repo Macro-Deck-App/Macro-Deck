@@ -161,7 +161,8 @@
           [multiSelect]="true"
           [selectedIconIds]="selectedIconIds()"
           (iconClick)="onIconClick($event)"
-          (iconContextMenu)="openIconMenu($event)" />
+          (iconContextMenu)="openIconMenu($event)"
+          (iconOpen)="openAppearances($event)" />
       }
 
       @if (!pack.isReadOnly) {
@@ -260,6 +261,15 @@
       </div>
     </form>
   </shared-modal>
+}
+
+@if (appearancesIcon(); as icon) {
+  @if (selectedPack(); as pack) {
+    <app-icon-appearances-dialog
+      [icon]="icon"
+      [pack]="pack"
+      (closed)="appearancesIconId.set(null)" />
+  }
 }
 
 @if (manualCopy(); as copy) {

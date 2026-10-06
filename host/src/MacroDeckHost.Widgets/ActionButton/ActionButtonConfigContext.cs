@@ -1,6 +1,7 @@
 using MacroDeck.Localization;
 using MacroDeck.Ui.Runtime;
 using MacroDeckHost.Application.Actions;
+using MacroDeckHost.Application.Caching;
 
 namespace MacroDeckHost.Widgets.ActionButton;
 
@@ -9,6 +10,7 @@ internal sealed class ActionButtonConfigContext(
 	ILocalizationResolver localization,
 	string? culture,
 	TimeProvider timeProvider,
+	IIconPackCache icons,
 	CancellationToken sessionToken)
 {
 	public static readonly TimeSpan SettleDelay = TimeSpan.FromMilliseconds(400);
@@ -16,6 +18,8 @@ internal sealed class ActionButtonConfigContext(
 	private UiView? _view;
 
 	public ActionProviderProbe Probe { get; } = probe;
+
+	public IIconPackCache Icons { get; } = icons;
 
 	public ILocalizationResolver Localization { get; } = localization;
 

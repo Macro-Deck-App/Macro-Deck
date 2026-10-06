@@ -48,6 +48,11 @@ function registerWidgets(registry: WidgetRegistryService): () => void {
       type: WidgetType.Stopwatch,
       component: UiTreeWidgetComponent,
     });
+
+    registry.register({
+      type: WidgetType.Gauges,
+      component: UiTreeWidgetComponent,
+    });
   };
 }
 

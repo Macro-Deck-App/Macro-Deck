@@ -433,7 +433,8 @@ public class SliderWidgetConfigTests
 			new SliderWidgetSessionTests.RecordingTriggerService(),
 			new StubFolderCache(),
 			new SliderWidgetSessionTests.NullUiTransport(),
-			new MacroDeckHost.Application.Rendering.WidgetRenderSignals());
+			new MacroDeckHost.Application.Rendering.WidgetRenderSignals(),
+			new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache());
 
 	[Test]
 	public async Task A_config_surface_naming_a_different_widget_type_is_declined()
@@ -494,7 +495,9 @@ public class SliderWidgetConfigTests
 		};
 
 	private static UiTestHost Render(object data, VariableRegistry variables)
-		=> UiTestHost.Render(SliderWidgetConfigView.Build(JsonSerializer.SerializeToElement(data), variables));
+		=> UiTestHost.Render(SliderWidgetConfigView.Build(JsonSerializer.SerializeToElement(data),
+			variables,
+			new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache()));
 
 	private static UiSurface ConfigSurface(string widgetType, string widgetData)
 		=> new()

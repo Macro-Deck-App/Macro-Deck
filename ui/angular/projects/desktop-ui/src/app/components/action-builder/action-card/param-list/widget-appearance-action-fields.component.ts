@@ -6,18 +6,20 @@ import { TranslatePipe } from '@shared';
 import { ActionOptionsService } from '../../../../services/action-options.service';
 import { ColorPickerComponent } from '../../../forms/color-picker/color-picker.component';
 import { ParamInputComponent } from '../../../forms/param-input/param-input.component';
+import { SelectComponent, SelectOption } from '../../../forms/select/select.component';
 import { WidgetBorderControlComponent } from '../../../widget-appearance/widget-border-control.component';
 import { WidgetFontAppearanceChange, WidgetFontAppearanceControlComponent } from '../../../widget-appearance/widget-font-appearance-control.component';
 import { WidgetIconControlComponent } from '../../../widget-appearance/widget-icon-control.component';
 import { WidgetIconDisplayControlComponent } from '../../../widget-appearance/widget-icon-display-control.component';
 import { ActionFlowStore } from '../../services/action-flow.store';
 
-type AppearanceKind = 'label' | 'background' | 'labelColor' | 'accentColor' | 'icon' | 'iconDisplay' | 'iconColor' | 'font' | 'border';
+type AppearanceKind = 'label' | 'background' | 'labelColor' | 'accentColor' | 'icon' | 'iconDisplay' | 'iconColor'
+  | 'iconAppearance' | 'font' | 'border';
 
 @Component({
   selector: 'shared-widget-appearance-action-fields',
   standalone: true,
-  imports: [FormsModule, ColorPickerComponent, ParamInputComponent, WidgetFontAppearanceControlComponent,
+  imports: [FormsModule, ColorPickerComponent, ParamInputComponent, SelectComponent, WidgetFontAppearanceControlComponent,
     WidgetBorderControlComponent, WidgetIconControlComponent, WidgetIconDisplayControlComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -45,6 +47,11 @@ type AppearanceKind = 'label' | 'background' | 'labelColor' | 'accentColor' | 'i
         @case ('iconColor') {
           <div class="form-group form-group--dense"><label>{{ 'macrodeck.app:ActionBuilder.WidgetAppearance.ColorField' | translate }}</label><shared-color-picker [ngModel]="stringValue('color')"
             [resetValue]="resetValue" (ngModelChange)="write('color', $event)" /></div>
+        }
+        @case ('iconAppearance') {
+          <div class="form-group form-group--dense"><label>{{ parameter('iconAppearance')?.label }}</label><shared-select
+            [options]="iconAppearanceOptions" [ngModel]="stringValue('iconAppearance')"
+            (ngModelChange)="write('iconAppearance', $event)" /></div>
         }
         @case ('icon') {
           <div class="form-group form-group--dense"><label>{{ 'macrodeck.app:ActionBuilder.WidgetAppearance.IconField' | translate }}</label><shared-widget-icon-control [icon]="iconValue()"
@@ -101,6 +108,10 @@ export class WidgetAppearanceActionFieldsComponent implements OnInit, OnChanges 
       offsetY: this.numberValue('iconOffsetY'),
       opacity: this.numberValue('iconOpacity'),
     };
+  }
+
+  protected get iconAppearanceOptions(): SelectOption[] {
+    return (this.parameter('iconAppearance')?.options ?? []).map(option => ({ value: `${option.value}`, label: option.label }));
   }
 
   protected get framingReset(): boolean {
@@ -186,7 +197,7 @@ export class WidgetAppearanceActionFieldsComponent implements OnInit, OnChanges 
     return supported === null || supported.has(WidgetAppearanceActionFieldsComponent.propertyFor(this.kind));
   }
 
-  private parameter(name: string): ActionBlockParameter | undefined {
+  protected parameter(name: string): ActionBlockParameter | undefined {
     return this.block.parameters?.find(parameter => parameter.name === name);
   }
 
@@ -219,6 +230,7 @@ export class WidgetAppearanceActionFieldsComponent implements OnInit, OnChanges 
       case 'set-icon': return 'icon';
       case 'set-icon-display': return 'iconDisplay';
       case 'set-icon-color': return 'iconColor';
+      case 'set-icon-appearance': return 'iconAppearance';
       case 'set-font': return 'font';
       case 'set-border': return 'border';
       default: return 'label';
@@ -233,6 +245,7 @@ export class WidgetAppearanceActionFieldsComponent implements OnInit, OnChanges 
       case 'icon': return 'Icon';
       case 'iconDisplay': return 'IconDisplay';
       case 'iconColor': return 'IconColor';
+      case 'iconAppearance': return 'IconAppearance';
       case 'font': return 'Font';
       case 'border': return 'Border';
       default: return 'Label';

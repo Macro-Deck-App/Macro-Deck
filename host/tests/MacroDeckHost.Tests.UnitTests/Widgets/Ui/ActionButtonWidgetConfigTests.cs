@@ -1231,7 +1231,8 @@ public class ActionButtonWidgetConfigTests
 			new FakeFontCatalog(),
 			null!,
 			null!,
-			TimeProvider.System);
+			TimeProvider.System,
+			new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache());
 
 		var surface = ConfigSurface(WidgetTypeIds.Clock, "{}");
 
@@ -1290,6 +1291,7 @@ public class ActionButtonWidgetConfigTests
 				TestLocalization.Resolver,
 				"en",
 				clock,
+				new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache(),
 				CancellationToken.None)));
 	}
 

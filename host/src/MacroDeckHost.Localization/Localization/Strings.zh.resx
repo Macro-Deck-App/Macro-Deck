@@ -3736,6 +3736,98 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="IconPacks.AiNotDeclared" xml:space="preserve">
     <value>未声明</value>
   </data>
+  <data name="IconPacks.Appearances.Add" xml:space="preserve">
+    <value>添加外观</value>
+  </data>
+  <data name="IconPacks.Appearances.AddFailed" xml:space="preserve">
+    <value>无法添加外观。</value>
+  </data>
+  <data name="IconPacks.Appearances.AutoHint" xml:space="preserve">
+    <value>Macro Deck 会显示与当前主题和动态效果设置相符的外观，没有相符的外观时显示默认外观。</value>
+  </data>
+  <data name="IconPacks.Appearances.Badge.One" xml:space="preserve">
+    <value>另有 {count} 个外观</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="IconPacks.Appearances.Badge.Other" xml:space="preserve">
+    <value>另有 {count} 个外观</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="IconPacks.Appearances.Default" xml:space="preserve">
+    <value>默认</value>
+  </data>
+  <data name="IconPacks.Appearances.DialogTitle" xml:space="preserve">
+    <value>“{name}”的外观</value>
+  </data>
+  <data name="IconPacks.Appearances.Empty" xml:space="preserve">
+    <value>暂无其他外观。</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Animated" xml:space="preserve">
+    <value>动画</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Custom" xml:space="preserve">
+    <value>自定义（{traits}）</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Dark" xml:space="preserve">
+    <value>深色</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.DarkAnimated" xml:space="preserve">
+    <value>深色，动画</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.DarkStatic" xml:space="preserve">
+    <value>深色，静态</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Light" xml:space="preserve">
+    <value>浅色</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.LightAnimated" xml:space="preserve">
+    <value>浅色，动画</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.LightStatic" xml:space="preserve">
+    <value>浅色，静态</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Static" xml:space="preserve">
+    <value>静态</value>
+  </data>
+  <data name="IconPacks.Appearances.MenuItem" xml:space="preserve">
+    <value>外观…</value>
+  </data>
+  <data name="IconPacks.Appearances.Merge" xml:space="preserve">
+    <value>使用现有图标…</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeConfirm" xml:space="preserve">
+    <value>用作外观</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeFailed" xml:space="preserve">
+    <value>无法将该图标用作外观。</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeHint" xml:space="preserve">
+    <value>该图标将并入“{name}”。使用它的按钮和操作会改用“{name}”。</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeKindLabel" xml:space="preserve">
+    <value>用作</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeTitle" xml:space="preserve">
+    <value>使用现有图标</value>
+  </data>
+  <data name="IconPacks.Appearances.PreviewAlt" xml:space="preserve">
+    <value>“{name}”的“{kind}”外观</value>
+  </data>
+  <data name="IconPacks.Appearances.ReadOnly" xml:space="preserve">
+    <value>此图标包为只读，因此无法更改其外观。</value>
+  </data>
+  <data name="IconPacks.Appearances.RemoveConfirmMessage" xml:space="preserve">
+    <value>要从“{name}”移除“{kind}”外观吗？使用它的按钮会改用其他外观。</value>
+  </data>
+  <data name="IconPacks.Appearances.RemoveConfirmTitle" xml:space="preserve">
+    <value>移除外观</value>
+  </data>
+  <data name="IconPacks.Appearances.RemoveFailed" xml:space="preserve">
+    <value>无法移除外观。</value>
+  </data>
+  <data name="IconPacks.Appearances.Replace" xml:space="preserve">
+    <value>替换</value>
+  </data>
   <data name="IconPacks.AuthorFieldLabel" xml:space="preserve">
     <value>作者</value>
   </data>
@@ -3872,8 +3964,14 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="IconPacks.ImportPackAction" xml:space="preserve">
     <value>导入图标包…</value>
   </data>
+  <data name="IconPacks.IncludedPackName" xml:space="preserve">
+    <value>随附图标</value>
+  </data>
   <data name="IconPacks.LoadingIconPacks" xml:space="preserve">
     <value>正在加载图标包…</value>
+  </data>
+  <data name="IconPacks.ManagedByMacroDeck" xml:space="preserve">
+    <value>随 Macro Deck 提供，并随其更新</value>
   </data>
   <data name="IconPacks.ManagedByPlugin" xml:space="preserve">
     <value>由{name}提供，并随其更新</value>
@@ -3974,6 +4072,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="IconPacks.SelectAnIconPackMessage" xml:space="preserve">
     <value>在左侧选择一个图标包以浏览其中的图标。</value>
+  </data>
+  <data name="IconPacks.SourceBuiltIn" xml:space="preserve">
+    <value>内置</value>
   </data>
   <data name="IconPacks.SourcePlugin" xml:space="preserve">
     <value>插件</value>
@@ -7425,6 +7526,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.Obs.Actions.SetProfile.Name" xml:space="preserve">
     <value>设置配置文件</value>
   </data>
+  <data name="Integrations.Obs.Actions.SetSceneCollection.Description" xml:space="preserve">
+    <value>将 OBS 切换到另一个场景集合</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetSceneCollection.Name" xml:space="preserve">
+    <value>设置场景集合</value>
+  </data>
   <data name="Integrations.Obs.Actions.SetScene.Description" xml:space="preserve">
     <value>切换当前的节目场景</value>
   </data>
@@ -7627,6 +7734,18 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.Obs.Errors.NoProfileSelected" xml:space="preserve">
     <value>未选择配置文件。</value>
   </data>
+  <data name="Integrations.Obs.Errors.NoSceneCollectionSelected" xml:space="preserve">
+    <value>未选择场景集合。</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SceneCollectionLoading" xml:space="preserve">
+    <value>OBS 仍在加载场景集合。加载完成后请重试。</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SceneCollectionNotFound" xml:space="preserve">
+    <value>OBS 中没有名为 {name} 的场景集合。</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SceneCollectionSlowToLoad" xml:space="preserve">
+    <value>OBS 在加载场景集合时未及时响应。切换通常仍会完成。</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoSceneOrSourceSelected" xml:space="preserve">
     <value>未选择场景或来源。</value>
   </data>
@@ -7809,6 +7928,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Integrations.Obs.Params.Profile" xml:space="preserve">
     <value>配置文件</value>
+  </data>
+  <data name="Integrations.Obs.Params.SceneCollection" xml:space="preserve">
+    <value>场景集合</value>
   </data>
   <data name="Integrations.Obs.Params.SaveToVariable" xml:space="preserve">
     <value>保存到变量</value>
@@ -11511,6 +11633,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.Widgets.Actions.FontSizeLabel" xml:space="preserve">
     <value>大小</value>
   </data>
+  <data name="Integrations.Widgets.Actions.IconAppearanceDescription" xml:space="preserve">
+    <value>“自动”会选择适合屏幕的外观，“默认”始终显示图标本身的图像。如果图标没有所选外观，则自动选择一种外观。</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.IconAppearanceLabel" xml:space="preserve">
+    <value>外观</value>
+  </data>
   <data name="Integrations.Widgets.Actions.IconDescription" xml:space="preserve">
     <value>留空则移除图标。</value>
   </data>
@@ -11609,6 +11737,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Integrations.Widgets.Actions.SetFontName" xml:space="preserve">
     <value>设置标签字体</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconAppearanceDescription" xml:space="preserve">
+    <value>选择组件图标显示哪种外观，例如深色或静态版本。</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconAppearanceName" xml:space="preserve">
+    <value>设置图标外观</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetIconDescription" xml:space="preserve">
     <value>更改组件显示的图标。</value>
@@ -12443,6 +12577,40 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Notifications.HttpsNotRunningMessage" xml:space="preserve">
     <value>Macro Deck 可通过 HTTP 访问，但 HTTPS 监听器未能启动。请在“设置 &gt; 网络”中检查 HTTPS 端口和证书。</value>
+  </data>
+  <data name="Notifications.IconImport.CompletedWithWarnings.One" xml:space="preserve">
+    <value>已将 {count} 个图标导入 {pack}，但有警告</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.IconImport.CompletedWithWarnings.Other" xml:space="preserve">
+    <value>已将 {count} 个图标导入 {pack}，但有警告</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.IconImport.DefaultPackName" xml:space="preserve">
+    <value>图标包</value>
+  </data>
+  <data name="Notifications.IconImport.Failed" xml:space="preserve">
+    <value>无法将图标导入 {pack}</value>
+  </data>
+  <data name="Notifications.IconImport.Importing" xml:space="preserve">
+    <value>正在将图标导入 {pack}</value>
+  </data>
+  <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
+    <value>其中没有可作为图标导入的内容。</value>
+  </data>
+  <data name="Notifications.IconImport.NothingImported" xml:space="preserve">
+    <value>没有可导入 {pack} 的内容</value>
+  </data>
+  <data name="Notifications.IconImport.PartlyFailed" xml:space="preserve">
+    <value>{pack}：已导入 {imported} 个，失败 {failed} 个</value>
+  </data>
+  <data name="Notifications.IconImport.Skipped.One" xml:space="preserve">
+    <value>有 {count} 个文件已在此图标包中，已跳过。</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.IconImport.Skipped.Other" xml:space="preserve">
+    <value>有 {count} 个文件已在此图标包中，已跳过。</value>
+    <comment>[plural]</comment>
   </data>
   <data name="Notifications.InstallationDamagedMessage" xml:space="preserve">
     <value>Macro Deck 的部分文件缺失，或与已安装的版本不匹配。更新被中断时会出现这种情况，例如杀毒软件拦截了部分文件。请下载最新版本的 Macro Deck 并重新安装。日志中列出了受影响的文件。</value>
@@ -16457,6 +16625,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="TemplateBuilder.Filters.Lstrip.Hint" xml:space="preserve">
     <value>去除开头的空白</value>
   </data>
+  <data name="TemplateBuilder.Filters.MathRandom.Hint" xml:space="preserve">
+    <value>Scriban 原生：生成从最小值到最大值（不含最大值）之间的随机整数</value>
+  </data>
   <data name="TemplateBuilder.Filters.MathUuid.Hint" xml:space="preserve">
     <value>Scriban 原生：生成随机的唯一 ID</value>
   </data>
@@ -17301,6 +17472,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="WebClient.Widgets.Countdown.Name" xml:space="preserve">
     <value>倒计时</value>
   </data>
+  <data name="WebClient.Widgets.Gauges.Description" xml:space="preserve">
+    <value>以带图标的紧凑圆环显示多个数值变量，类似电池概览</value>
+  </data>
+  <data name="WebClient.Widgets.Gauges.Name" xml:space="preserve">
+    <value>仪表</value>
+  </data>
   <data name="WebClient.Widgets.HistoryGraph.Description" xml:space="preserve">
     <value>用于数字变量（CPU、内存、GPU…）的实时图表卡片，带滚动图表</value>
   </data>
@@ -17486,6 +17663,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Widgets.Appearance.Font.Unchanged" xml:space="preserve">
     <value>不变</value>
+  </data>
+  <data name="Widgets.Appearance.Icon.Appearance" xml:space="preserve">
+    <value>图标外观</value>
+  </data>
+  <data name="Widgets.Appearance.Icon.AppearanceAutomatic" xml:space="preserve">
+    <value>自动</value>
   </data>
   <data name="Widgets.Appearance.Icon.ChangeIcon" xml:space="preserve">
     <value>更换图标</value>
@@ -18527,6 +18710,60 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Widgets.GridSettings.WidgetSpacing" xml:space="preserve">
     <value>组件间距</value>
   </data>
+  <data name="Widgets.Gauges.AddGauge" xml:space="preserve">
+    <value>添加仪表</value>
+  </data>
+  <data name="Widgets.Gauges.Color" xml:space="preserve">
+    <value>圆环颜色</value>
+  </data>
+  <data name="Widgets.Gauges.EmptyHint" xml:space="preserve">
+    <value>暂无仪表。请在组件设置中添加。</value>
+  </data>
+  <data name="Widgets.Gauges.FullHint" xml:space="preserve">
+    <value>此组件已满。移除一个仪表后才能添加新的。</value>
+  </data>
+  <data name="Widgets.Gauges.GaugeNumber" xml:space="preserve">
+    <value>仪表 {number}</value>
+  </data>
+  <data name="Widgets.Gauges.ListHeading" xml:space="preserve">
+    <value>仪表</value>
+  </data>
+  <data name="Widgets.Gauges.MaximumHint" xml:space="preserve">
+    <value>0 表示使用变量自身的最大值，否则为最小值 + 100。</value>
+  </data>
+  <data name="Widgets.Gauges.Name" xml:space="preserve">
+    <value>名称</value>
+  </data>
+  <data name="Widgets.Gauges.NameHint" xml:space="preserve">
+    <value>显示在数值下方，可包含变量。</value>
+  </data>
+  <data name="Widgets.Gauges.NamePlaceholder" xml:space="preserve">
+    <value>例如 CPU</value>
+  </data>
+  <data name="Widgets.Gauges.StyleArc" xml:space="preserve">
+    <value>弧形</value>
+  </data>
+  <data name="Widgets.Gauges.StyleRing" xml:space="preserve">
+    <value>圆环</value>
+  </data>
+  <data name="Widgets.Gauges.Threshold" xml:space="preserve">
+    <value>阈值</value>
+  </data>
+  <data name="Widgets.Gauges.Warning" xml:space="preserve">
+    <value>警告</value>
+  </data>
+  <data name="Widgets.Gauges.WarningAbove" xml:space="preserve">
+    <value>达到或高于阈值</value>
+  </data>
+  <data name="Widgets.Gauges.WarningBelow" xml:space="preserve">
+    <value>达到或低于阈值</value>
+  </data>
+  <data name="Widgets.Gauges.WarningHint" xml:space="preserve">
+    <value>数值达到阈值时圆环变为红色。</value>
+  </data>
+  <data name="Widgets.Gauges.WarningOff" xml:space="preserve">
+    <value>关闭</value>
+  </data>
   <data name="Widgets.History.AccentColor" xml:space="preserve">
     <value>强调色</value>
   </data>
@@ -18739,6 +18976,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Widgets.SamplePreview.ActionButtonLabel" xml:space="preserve">
     <value>静音</value>
+  </data>
+  <data name="Widgets.SamplePreview.GaugesMemory" xml:space="preserve">
+    <value>内存</value>
+  </data>
+  <data name="Widgets.SamplePreview.GaugesBattery" xml:space="preserve">
+    <value>电池</value>
   </data>
   <data name="Widgets.SamplePreview.HistoryGraphSubtitle" xml:space="preserve">
     <value>示例数据</value>
@@ -19020,6 +19263,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Integrations.Obs.Variables.CurrentProfile" xml:space="preserve">
     <value>当前配置文件</value>
+  </data>
+  <data name="Integrations.Obs.Variables.CurrentSceneCollection" xml:space="preserve">
+    <value>当前场景集合</value>
   </data>
   <data name="Integrations.Obs.Variables.CurrentScene" xml:space="preserve">
     <value>当前场景</value>
@@ -20553,5 +20799,35 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Integrations.Obs.Errors.OutputsNeedNewerObs" xml:space="preserve">
     <value>控制输出需要内置 obs-websocket 5.7 或更高版本的 OBS。</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Name" xml:space="preserve">
+    <value>更改输入设置</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Description" xml:space="preserve">
+    <value>更改 OBS 来源的一项设置，例如文本来源的文本、图像或媒体来源的文件，或浏览器来源的 URL。</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingLabel" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingDescription" xml:space="preserve">
+    <value>OBS 保存的设置名称，例如 text、file、local_file 或 url。从列表中选择或直接输入。</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueLabel" xml:space="preserve">
+    <value>值</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueDescription" xml:space="preserve">
+    <value>新值。开关类设置请输入 true 或 false，数值类设置请输入数字，包含组或列表的设置请输入 JSON。</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NoSettingSelected" xml:space="preserve">
+    <value>未选择设置。</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsBoolean" xml:space="preserve">
+    <value>设置 {setting} 需要 true 或 false。</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsNumber" xml:space="preserve">
+    <value>设置 {setting} 需要一个数字。</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsJson" xml:space="preserve">
+    <value>设置 {setting} 需要与其当前值形式相同的 JSON。</value>
   </data>
 </root>

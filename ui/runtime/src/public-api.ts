@@ -69,6 +69,12 @@ export {
   type BackupTranslator,
 } from './domain/backup-component-groups';
 export {
+  ICON_APPEARANCE_KINDS,
+  type IconAppearanceKind,
+  iconAppearanceKindLabel,
+  type IconAppearanceKindLabel,
+} from './domain/icon-appearance-kind';
+export {
   createPendingStateLabelVariable,
   createPendingStateVariable,
   STATE_LABEL_VARIABLE_NAME,
@@ -376,7 +382,18 @@ export {
 } from './ui-framework/node-resolution.util';
 export { type UiNode, type UiNodeEvent } from './ui-framework/ui-node.interface';
 export { applyUiPatch, type UiPatch, type UiPatchOperation, UiPatchOperations } from './ui-framework/ui-patch';
-export { isIconUiResource, nodeResource, type UiResource, type UiResourceHint } from './ui-framework/ui-resource';
+export {
+  hasIconAppearances,
+  iconAppearanceContext,
+  type IconAppearanceContext,
+  iconAppearanceQuery,
+  type IconColorScheme,
+  type IconMotion,
+  isIconUiResource,
+  nodeResource,
+  type UiResource,
+  type UiResourceHint,
+} from './ui-framework/ui-resource';
 export { UI_COMPONENT_EVENTS_WELL_KNOWN, UiComponentEvents } from './ui-components/component-events';
 export {
   nodeHexColor,
@@ -806,6 +823,7 @@ export {
   type GetIconPacksResponse,
   type GetIconsRequest,
   type GetIconsResponse,
+  type IconAppearanceResponse,
   type IconDeletedEvent,
   type IconImportBatchState,
   type IconImportProgressEvent,
@@ -822,8 +840,11 @@ export {
   type ImportSingleIconFromPathRequest,
   type ImportSingleIconResponse,
   type IpcIcon,
+  type IpcIconAppearance,
   type IpcIconImportBatch,
   type IpcIconPack,
+  type MergeIconAppearanceRequest,
+  type MergeIconAppearanceResponse,
   type UpdateIconPackRequest,
   type UpdateIconPackResponse,
   type UpdateIconRequest,

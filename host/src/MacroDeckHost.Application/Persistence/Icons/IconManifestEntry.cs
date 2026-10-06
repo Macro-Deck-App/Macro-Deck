@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using MacroDeckHost.Domain.Enums;
 
 namespace MacroDeckHost.Application.Persistence.Icons;
@@ -41,4 +42,10 @@ public sealed class IconManifestEntry
 	public DateTime CreatedAt { get; set; }
 
 	public DateTime UpdatedAt { get; set; }
+
+	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+	public Dictionary<string, string>? Traits { get; set; }
+
+	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+	public List<IconManifestEntry>? Appearances { get; set; }
 }

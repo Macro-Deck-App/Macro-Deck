@@ -14,4 +14,5 @@ public class Icon
 	public string? ContentHash { get; set; }
 	public string? OriginalFileName { get; set; }
 	public DateTime CreatedAt { get; set; }
+	public List<IconAppearance> Appearances { get; set; } = [];
 }

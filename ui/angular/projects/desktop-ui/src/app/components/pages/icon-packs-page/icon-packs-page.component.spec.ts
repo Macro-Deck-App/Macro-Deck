@@ -402,6 +402,7 @@ describe('IconPacksPageComponent source label rendering', () => {
         pack('store-pack', { ownerKind: 'Store' }),
         pack('user-pack', { ownerKind: 'User' }),
         pack('plugin-pack', { ownerKind: 'Plugin', ownerName: 'Spotify', isReadOnly: true, canDelete: false }),
+        pack('included-pack', { ownerKind: 'BuiltIn', isReadOnly: true, canDelete: false }),
       ],
     });
     apiSpy.onNotification.and.callFake(() => new Subject());
@@ -435,6 +436,16 @@ describe('IconPacksPageComponent source label rendering', () => {
     expect(tag?.getAttribute('title'))
       .toBe(localization.translateKey(AppStrings.IconPacks.ManagedByPlugin, { name: 'Spotify' }));
     expect(railRow('plugin-pack').querySelector('.icon-lock')).not.toBeNull();
+  });
+
+  it('marks the pack shipped with Macro Deck with the built-in tag and says so in its title', () => {
+    const localization = TestBed.inject(LocalizationService);
+    const row = railRow(localization.translateKey(AppStrings.IconPacks.IncludedPackName));
+    const tag = row.querySelector('.tag');
+
+    expect(tag?.textContent?.trim()).toBe(localization.translateKey(AppStrings.IconPacks.SourceBuiltIn));
+    expect(tag?.getAttribute('title')).toBe(localization.translateKey(AppStrings.IconPacks.ManagedByMacroDeck));
+    expect(row.querySelector('.icon-lock')).not.toBeNull();
   });
 });
 

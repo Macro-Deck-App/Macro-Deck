@@ -342,6 +342,8 @@ public class CreateWidgetFromApplicationRequestMessageHandlerTests
 
 		public IconEntity? GetIconById(Guid iconId) => _icons.GetValueOrDefault(iconId);
 
+		public IReadOnlyList<IconEntity> GetAppearances(Guid parentId) => [];
+
 		public Task InitializeCache() => Task.CompletedTask;
 
 		public IconPackEntity? GetPackById(Guid id) => null;

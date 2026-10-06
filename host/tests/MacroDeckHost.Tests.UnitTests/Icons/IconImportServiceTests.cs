@@ -1121,6 +1121,102 @@ public class IconImportServiceTests
 		});
 	}
 
+	[Test]
+	public async Task ImportFromPath_SuffixedFileBesideItsIcon_BecomesThatIconsAppearance()
+	{
+		var pack = await _harness.CreatePack();
+		var root = Path.Combine(_harness.Paths.BaseDirectory, "media");
+		Directory.CreateDirectory(root);
+		await File.WriteAllBytesAsync(Path.Combine(root, "play.png"), [1]);
+		await File.WriteAllBytesAsync(Path.Combine(root, "play.dark.png"), [2]);
+
+		var result = await _service.ImportFromPath(pack.Id, [root], CancellationToken.None);
+
+		var play = _harness.Cache.GetIconsByPackId(pack.Id).Single();
+		var dark = _harness.Cache.GetAppearances(play.Id).Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(play.Name, Is.EqualTo("play"));
+			Assert.That(dark.AppearanceTraits, Is.EqualTo(new Dictionary<string, string> { ["colorScheme"] = "dark" }));
+			Assert.That(dark.ProcessingState, Is.EqualTo(IconProcessingState.Pending));
+			Assert.That(dark.ImportBatchId, Is.EqualTo(result.Data!.Id));
+			Assert.That(result.Data!.Total, Is.EqualTo(1), "the user-facing count is icons, not their appearances");
+			Assert.That(_harness.Mediator.Published.OfType<IconsAddedNotification>().SelectMany(n => n.Icons).Select(i => i.Id),
+				Is.EqualTo(new[] { play.Id }));
+			Assert.That(DrainChannel().OfType<ProcessIconWorkItem>().Select(item => item.IconId),
+				Is.EquivalentTo(new[] { play.Id, dark.Id }));
+		});
+	}
+
+	[Test]
+	public async Task Import_SuffixedFileUploadedBeforeItsIcon_StillBecomesItsAppearance()
+	{
+		var pack = await _harness.CreatePack();
+
+		await _service.Import(pack.Id,
+			null,
+			Files(("set/play.static.gif", [2]), ("set/play.dark.png", [3]), ("set/play.png", [1])),
+			CancellationToken.None);
+
+		var play = _harness.Cache.GetIconsByPackId(pack.Id).Single();
+		Assert.That(_harness.Cache.GetAppearances(play.Id).Select(a => IconAppearanceTraits.ToKey(a.AppearanceTraits!)),
+			Is.EqualTo(new[] { "colorScheme=dark", "motion=static" }));
+	}
+
+	[Test]
+	public async Task Import_SuffixedFileWhoseIconNeverArrives_IsAnIconNamedAfterTheWholeFile()
+	{
+		var pack = await _harness.CreatePack();
+
+		var result = await _service.Import(pack.Id, null, Files(("play.dark.png", [2])), CancellationToken.None);
+
+		var icon = _harness.Cache.GetIconsByPackId(pack.Id).Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(icon.Name, Is.EqualTo("play.dark"));
+			Assert.That(icon.AppearanceOfId, Is.Null);
+			Assert.That(result.Data!.Total, Is.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task Import_UnknownSuffix_IsAnIconOfItsOwn()
+	{
+		var pack = await _harness.CreatePack();
+
+		await _service.Import(pack.Id, null, Files(("play.png", [1]), ("play.blue.png", [2])), CancellationToken.None);
+
+		var icons = _harness.Cache.GetIconsByPackId(pack.Id);
+		Assert.Multiple(() =>
+		{
+			Assert.That(icons.Select(icon => icon.Name), Is.EquivalentTo(new[] { "play", "play.blue" }));
+			Assert.That(icons.SelectMany(icon => _harness.Cache.GetAppearances(icon.Id)), Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task ImportFromPath_IconThePackAlreadyHolds_GainsTheAppearancesItLacks()
+	{
+		var pack = await _harness.CreatePack();
+		var existing = await _harness.AddReadyIcon(pack.Id, "play", [1]);
+		await _harness.AddReadyAppearance(existing, "colorScheme=light", [5]);
+		var root = Path.Combine(_harness.Paths.BaseDirectory, "again");
+		Directory.CreateDirectory(root);
+		await File.WriteAllBytesAsync(Path.Combine(root, "play.png"), [1]);
+		await File.WriteAllBytesAsync(Path.Combine(root, "play.light.png"), [6]);
+		await File.WriteAllBytesAsync(Path.Combine(root, "play.dark.png"), [2]);
+
+		var result = await _service.ImportFromPath(pack.Id, [root], CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_harness.Cache.GetIconsByPackId(pack.Id).Select(icon => icon.Id), Is.EqualTo(new[] { existing.Id }));
+			Assert.That(_harness.Cache.GetAppearances(existing.Id).Select(a => IconAppearanceTraits.ToKey(a.AppearanceTraits!)),
+				Is.EqualTo(new[] { "colorScheme=dark", "colorScheme=light" }));
+			Assert.That(result.Data!.Skipped, Is.EqualTo(2), "the icon and the kind it already has are skipped");
+		});
+	}
+
 	private async Task<byte[]> StagedBytes(Guid batchId, Guid iconId)
 	{
 		await using var staged = _harness.Storage.OpenStagedOriginal(batchId, iconId);

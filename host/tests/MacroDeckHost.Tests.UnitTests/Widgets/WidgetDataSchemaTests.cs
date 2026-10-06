@@ -75,6 +75,7 @@ public class WidgetDataSchemaTests
 	[TestCase(WidgetTypeIds.Slider)]
 	[TestCase(WidgetTypeIds.Countdown)]
 	[TestCase(WidgetTypeIds.Stopwatch)]
+	[TestCase(WidgetTypeIds.Gauges)]
 	public void A_transparent_a_hex_or_a_cleared_background_validates(string type)
 	{
 		Assert.Multiple(() =>
@@ -90,6 +91,7 @@ public class WidgetDataSchemaTests
 	[TestCase(WidgetTypeIds.MusicPlayer)]
 	[TestCase(WidgetTypeIds.Weather)]
 	[TestCase(WidgetTypeIds.HistoryGraph)]
+	[TestCase(WidgetTypeIds.Gauges)]
 	public void The_background_is_a_declared_key_so_a_non_string_is_rejected(string type)
 	{
 		Assert.That(Validate(type, """{"backgroundColor":5}"""), Is.Not.Empty);
@@ -110,6 +112,7 @@ public class WidgetDataSchemaTests
 	[TestCase(WidgetTypeIds.HistoryGraph)]
 	[TestCase(WidgetTypeIds.Clock)]
 	[TestCase(WidgetTypeIds.Slider)]
+	[TestCase(WidgetTypeIds.Gauges)]
 	public void Flows_as_a_nested_JSON_string_validates(string type)
 	{
 		var problems = Validate(type, """{"flows":"[{\"triggerType\":\"onShortPress\",\"children\":[]}]"}""");

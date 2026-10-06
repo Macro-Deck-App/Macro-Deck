@@ -6,5 +6,6 @@ public enum IconPackOwnerKind
 {
 	User,
 	Store,
-	Plugin
+	Plugin,
+	BuiltIn
 }

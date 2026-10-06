@@ -29,6 +29,7 @@ public sealed class SliderWidgetUiProvider : IBuiltInWidgetUiProvider
 	private readonly IFolderCache _folderCache;
 	private readonly IUiTransport _uiTransport;
 	private readonly IWidgetRenderSignals _renderSignals;
+	private readonly IIconPackCache _iconPackCache;
 
 	public SliderWidgetUiProvider(IWidgetIconResources iconResources,
 		IHostLockState lockState,
@@ -40,9 +41,11 @@ public sealed class SliderWidgetUiProvider : IBuiltInWidgetUiProvider
 		IWidgetTriggerService triggerService,
 		IFolderCache folderCache,
 		IUiTransport uiTransport,
-		IWidgetRenderSignals renderSignals)
+		IWidgetRenderSignals renderSignals,
+		IIconPackCache iconPackCache)
 	{
 		_renderSignals = renderSignals;
+		_iconPackCache = iconPackCache;
 		_triggerService = triggerService;
 		_folderCache = folderCache;
 		_uiTransport = uiTransport;
@@ -89,7 +92,7 @@ public sealed class SliderWidgetUiProvider : IBuiltInWidgetUiProvider
 			}
 
 			var configView = new UiView(request.Surface,
-				SliderWidgetConfigView.Build(configData, _variables, configWidgetId));
+				SliderWidgetConfigView.Build(configData, _variables, _iconPackCache, configWidgetId));
 
 			return new WidgetConfigSession(configView);
 		}

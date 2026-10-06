@@ -310,6 +310,78 @@ public class WidgetActionTargetTests
 		});
 	}
 
+	[TestCase("colorScheme=dark;motion=static")]
+	[TestCase("default")]
+	public async Task ChosenAppearance_OnSetIconAppearance_PinsIt(string appearance)
+	{
+		await Execute("set-icon-appearance",
+			new Dictionary<string, object>
+			{
+				["widget"] = _selfWidget,
+				["iconAppearance"] = appearance
+			},
+			ownerWidgetId: _selfWidget);
+
+		var request = _widgets.Applied.Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(request.Patch.IconAppearance, Is.EqualTo(appearance));
+			Assert.That(request.ClearProperties, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task Automatic_OnSetIconAppearance_RemovesThePin()
+	{
+		await Execute("set-icon-appearance",
+			new Dictionary<string, object>
+			{
+				["widget"] = _selfWidget,
+				["iconAppearance"] = WidgetAppearanceValues.Reset
+			},
+			ownerWidgetId: _selfWidget);
+
+		var request = _widgets.Applied.Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(request.Patch.IsEmpty, Is.True);
+			Assert.That(request.ClearProperties, Is.EqualTo(new[] { WidgetAppearanceProperty.IconAppearance }));
+		});
+	}
+
+	[Test]
+	public void SetIconAppearance_OffersAutomaticDefaultAndEveryKnownKind_StartingAtAutomatic()
+	{
+		var parameter = _integration.Actions.Single(a => a.Id == "set-icon-appearance")
+			.Parameters.Single(p => p.Name == "iconAppearance");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(parameter.Type, Is.EqualTo(ActionParameterType.Choice));
+			Assert.That(parameter.DefaultValue, Is.EqualTo(WidgetAppearanceValues.Reset));
+			Assert.That(parameter.Options!.Select(option => option.Value), Is.EqualTo(new[]
+			{
+				WidgetAppearanceValues.Reset, "default", "colorScheme=light", "colorScheme=dark", "motion=static",
+				"motion=animated", "colorScheme=light;motion=static", "colorScheme=light;motion=animated",
+				"colorScheme=dark;motion=static", "colorScheme=dark;motion=animated"
+			}));
+		});
+	}
+
+	[Test]
+	public async Task NothingApplied_OnAnIconProviderButton_RefusesTheAppearanceLikeTheIcon()
+	{
+		await UseWidgets(new FakeOutcomeWidgetApi { ApplyResult = false });
+		_widgets.Targets.Add(Target(_selfWidget, WidgetAppearanceProperty.IconAppearance,
+			hasActiveIconProvider: true));
+
+		var result = await Execute("set-icon-appearance",
+			new Dictionary<string, object> { ["widget"] = _selfWidget, ["iconAppearance"] = "colorScheme=dark" },
+			ownerWidgetId: _selfWidget);
+
+		Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.PermissionDenied));
+	}
+
 	[TestCase("set-label-color")]
 	[TestCase("set-icon-color")]
 	[TestCase("set-border")]

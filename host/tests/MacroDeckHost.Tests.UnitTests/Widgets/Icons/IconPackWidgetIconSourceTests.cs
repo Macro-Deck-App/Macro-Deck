@@ -25,6 +25,8 @@ public class IconPackWidgetIconSourceTests
 
 		public IconEntity? GetIconById(Guid iconId) => Icons.GetValueOrDefault(iconId);
 
+		public IReadOnlyList<IconEntity> GetAppearances(Guid parentId) => [];
+
 		public Task InitializeCache() => throw new NotSupportedException();
 
 		public IconPackEntity? GetPackById(Guid id) => throw new NotSupportedException();
@@ -83,7 +85,8 @@ public class IconPackWidgetIconSourceTests
 			int? size,
 			bool acceptWebp,
 			bool staticFrame,
-			CancellationToken cancellationToken)
+			CancellationToken cancellationToken,
+			IconAppearanceContext? context = null)
 		{
 			GetImageCallCount++;
 			return OnGetImage!(iconId, size, acceptWebp);

@@ -1,4 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { type IconAppearanceContext } from '@macro-deck/runtime';
 import { ApiService } from '../transport';
 
 export interface IconImageVersion {
@@ -13,8 +14,13 @@ export class IconImageService {
   private readonly api = inject(ApiService);
   private readonly versions = signal<ReadonlyMap<string, string>>(new Map());
 
-  getIconUrl(iconId: string | null | undefined, size?: number, version?: string | null): string | null {
-    return iconId ? this.api.getIconImageUrl(iconId, size, version ?? this.versions().get(iconId)) : null;
+  getIconUrl(
+    iconId: string | null | undefined,
+    size?: number,
+    version?: string | null,
+    context?: IconAppearanceContext,
+  ): string | null {
+    return iconId ? this.api.getIconImageUrl(iconId, size, version ?? this.versions().get(iconId), context) : null;
   }
 
   rememberVersions(icons: readonly IconImageVersion[]): void {

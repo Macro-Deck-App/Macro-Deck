@@ -201,6 +201,11 @@ import {
   ImportIconPacksResponse,
   ImportIconsFromPathRequest,
   ImportIconsResponse,
+  IconAppearanceContext,
+  IconAppearanceResponse,
+  iconAppearanceQuery,
+  MergeIconAppearanceRequest,
+  MergeIconAppearanceResponse,
   ImportProfileResponse,
   ImportSingleIconFromPathRequest,
   ImportSingleIconResponse,
@@ -2088,10 +2093,39 @@ export class ApiService {
     return this.http('POST', `/api/icons/import-batches/${encodeURIComponent(batchId)}/cancel`);
   }
 
-  getIconImageUrl(iconId: string, size?: number, version?: string | null): string {
+  async addIconAppearance(iconId: string, key: string, file: File): Promise<IconAppearanceResponse> {
+    const form = new FormData();
+    form.append('key', key);
+    form.append('file', file, file.name);
+    const response = await this.fetchWithAuth(
+      `/api/icons/${encodeURIComponent(iconId)}/appearances`,
+      { method: 'POST', body: form });
+    return ApiService.parseResponse<IconAppearanceResponse>(response);
+  }
+
+  removeIconAppearance(iconId: string, appearanceId: string): Promise<IconAppearanceResponse> {
+    return this.http(
+      'DELETE',
+      `/api/icons/${encodeURIComponent(iconId)}/appearances/${encodeURIComponent(appearanceId)}`);
+  }
+
+  mergeIconAppearance(iconId: string, request: MergeIconAppearanceRequest): Promise<MergeIconAppearanceResponse> {
+    return this.http('POST', `/api/icons/${encodeURIComponent(iconId)}/appearances/merge`, request);
+  }
+
+  getIconImageUrl(
+    iconId: string,
+    size?: number,
+    version?: string | null,
+    context?: IconAppearanceContext,
+  ): string {
     // Always send v: the URL without it may still be cached as immutable by an older host, and an empty v
     // asks this host to revalidate.
-    const query = [...(size ? [`size=${size}`] : []), `v=${encodeURIComponent(version ?? '')}`].join('&');
+    const query = [
+      ...(size ? [`size=${size}`] : []),
+      `v=${encodeURIComponent(version ?? '')}`,
+      ...(context ? [iconAppearanceQuery(context)] : []),
+    ].join('&');
     return `${this.baseUrl}/api/icons/${encodeURIComponent(iconId)}/image?${query}`;
   }
 

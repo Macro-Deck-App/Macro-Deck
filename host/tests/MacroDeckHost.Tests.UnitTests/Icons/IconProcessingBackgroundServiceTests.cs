@@ -190,6 +190,74 @@ public class IconProcessingBackgroundServiceTests
 	}
 
 	[Test]
+	public async Task ZipImport_GroupsSuffixedFilesInOneFolderIntoAppearancesOfTheirIcon()
+	{
+		var pack = await _harness.CreatePack();
+		var importService = _harness.CreateImportService();
+		var zip = CreateZip(("media/play.dark.static.png", CreatePng(32, 32, tint: 1)),
+			("media/play.png", CreatePng(32, 32, tint: 2)),
+			("media/play.LIGHT.png", CreatePng(32, 32, tint: 3)),
+			("other/play.dark.png", CreatePng(32, 32, tint: 4)));
+
+		var result = await importService.Import(pack.Id, "icons.zip", Files(("icons.zip", zip)), CancellationToken.None);
+		var batchId = result.Data!.Id;
+
+		await _service.StartAsync(CancellationToken.None);
+		await WaitUntil(() => _harness.BatchTracker.Get(batchId) is null &&
+			_harness.Cache.GetIconsByBatchId(batchId).All(IsTerminal));
+
+		var icons = _harness.Cache.GetIconsByPackId(pack.Id);
+		var play = icons.Single(icon => icon.OriginalFileName == "icons.zip/media/play.png");
+		var appearances = _harness.Cache.GetAppearances(play.Id);
+		var added = _harness.Mediator.Published.OfType<IconsAddedNotification>().SelectMany(n => n.Icons).ToList();
+		var finished = _harness.Mediator.Published.OfType<IconImportProgressNotification>().Last();
+		Assert.Multiple(() =>
+		{
+			Assert.That(icons.Select(icon => icon.Name), Is.EquivalentTo(new[] { "play", "play.dark" }),
+				"a suffixed file whose icon lives in another folder imports as an icon of its own");
+			Assert.That(appearances.Select(appearance => IconAppearanceTraits.ToKey(appearance.AppearanceTraits!)),
+				Is.EqualTo(new[] { "colorScheme=dark;motion=static", "colorScheme=light" }));
+			Assert.That(appearances.All(appearance => appearance.ProcessingState == IconProcessingState.Ready), Is.True);
+			Assert.That(added.Select(icon => icon.Id), Is.EquivalentTo(icons.Select(icon => icon.Id)));
+			Assert.That((finished.Total, finished.Processed), Is.EqualTo((2, 2)),
+				"the user-facing count is the two icons, not their two appearances");
+		});
+	}
+
+	[Test]
+	public async Task ArchiveImport_ThatOnlyAddsAppearances_KeepsThemWhenAnotherArchiveFails()
+	{
+		var pack = await _harness.CreatePack();
+		var playPng = CreatePng(32, 32, tint: 2);
+		var play = await _harness.AddReadyIcon(pack.Id, "play", playPng, source: playPng);
+		var importService = _harness.CreateImportService();
+		var zip = CreateZip(("play.png", playPng), ("play.dark.png", CreatePng(32, 32, tint: 1)));
+
+		var result = await importService.Import(pack.Id,
+			"icons.zip",
+			Files(("icons.zip", zip), ("broken.zip", Encoding.UTF8.GetBytes("not an archive"))),
+			CancellationToken.None);
+		var batchId = result.Data!.Id;
+
+		await _service.StartAsync(CancellationToken.None);
+		await WaitUntil(() => _harness.BatchTracker.Get(batchId) is null &&
+			_harness.Cache.GetAppearances(play.Id).All(IsTerminal));
+
+		var appearances = _harness.Cache.GetAppearances(play.Id);
+		var states = _harness.Mediator.Published.OfType<IconImportProgressNotification>()
+			.Select(notification => notification.Batch.State)
+			.ToList();
+		Assert.Multiple(() =>
+		{
+			Assert.That(appearances.Select(appearance => IconAppearanceTraits.ToKey(appearance.AppearanceTraits!)),
+				Is.EqualTo(new[] { "colorScheme=dark" }));
+			Assert.That(appearances.All(appearance => appearance.ProcessingState == IconProcessingState.Ready), Is.True);
+			Assert.That(states, Does.Not.Contain(IconImportBatchState.Failed),
+				"an import that still has appearances to process is not a failed import");
+		});
+	}
+
+	[Test]
 	public async Task StreamDeckIconPack_WithoutExplicitDestination_CreatesItsOwnPack()
 	{
 		await _harness.CreatePack("Imported Icons", isDefault: true);
@@ -221,6 +289,27 @@ public class IconProcessingBackgroundServiceTests
 			Assert.That(created.SourceType, Is.EqualTo(IconPackSourceType.StreamDeckImport));
 			Assert.That(_harness.Cache.GetIconsByPackId(created.Id), Has.Count.EqualTo(1));
 		});
+	}
+
+	[Test]
+	public async Task StreamDeckIconPack_SuffixedFileWithoutItsIcon_KeepsThePublishersName()
+	{
+		var pack = await _harness.CreatePack();
+		var importService = _harness.CreateImportService();
+		var package = CreateZip(("manifest.json", Encoding.UTF8.GetBytes("""{"Name":"Cool Pack"}""")),
+			("icons.json", Encoding.UTF8.GetBytes("""[{"path":"mute.dark.png","name":"Mute (night)"}]""")),
+			("icons/mute.dark.png", CreatePng(32, 32)));
+
+		var result = await importService.Import(pack.Id,
+			"cool.streamDeckIconPack",
+			Files(("cool.streamDeckIconPack", package)),
+			CancellationToken.None);
+		var batchId = result.Data!.Id;
+		await _service.StartAsync(CancellationToken.None);
+		await WaitUntil(() => _harness.BatchTracker.Get(batchId) is null &&
+			_harness.Cache.GetIconsByBatchId(batchId).All(IsTerminal));
+
+		Assert.That(_harness.Cache.GetIconsByPackId(pack.Id).Select(icon => icon.Name), Is.EqualTo(new[] { "Mute (night)" }));
 	}
 
 	[Test]

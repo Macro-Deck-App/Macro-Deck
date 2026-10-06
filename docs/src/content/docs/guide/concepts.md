@@ -43,6 +43,7 @@ The tiles in a folder:
 | Slider | Mic volume |
 | Clock | The current time and date |
 | History Graph | CPU load over the last minutes |
+| Gauges | CPU, RAM and GPU load side by side as rings with an icon, like a battery overview |
 | Weather | Today and the next days for your city. Press it for the full details |
 | Calendar | Today's date with your next meetings, the next few days on a larger widget, or your next meeting and how long until it starts. Press it for the details |
 | Music Player | What Spotify is playing, with play and skip. Some players offer extra settings for each widget below the player choice |
@@ -258,6 +259,28 @@ don't trust use.
 A profile with calendar widgets that you import into a Macro Deck version without calendar support shows
 those widgets as not available.
 
+### Gauges
+
+A **Gauges** widget shows up to eight numbers as rings, each with an icon in the middle and its value and an
+optional name below. A new one starts with CPU and RAM. The rings arrange themselves for the tile: four of
+them sit in two rows on a square tile and in one row on a wide one.
+
+In the widget's settings, pick the ring to edit from the list under **Gauges**. **Add gauge** adds an empty
+one, **Delete** removes the one you picked, and **Presets** add a ready ring for CPU, RAM or GPU. A full
+widget hides the presets. For the ring you picked:
+
+- Choose a **Variable** with a number and a **Name**. The name can include variables, for example the
+  processor's model under its CPU ring.
+- **Icon** opens the icon picker. Macro Deck ships the read-only **Included** pack with icons for CPU,
+  memory, graphics card, drives, network, battery, temperature, fans, audio and more; any other icon pack
+  works too. **Icon Color** recolors the icon.
+- **Minimum** and **Maximum** set the values of an empty and a full ring. With **Maximum** at 0 the ring
+  uses the variable's own maximum, otherwise the minimum plus 100.
+- **Ring color** colors the ring; without one it follows your accent color. **Warning** turns the ring red
+  at or above, or at or below, a **Threshold**, for example a CPU that runs hot or a battery that runs low.
+
+**Style** draws every ring of the widget as a full **Ring** or as an open **Arc**.
+
 ## Actions and triggers
 
 What a widget does, and when. The **Scenes** button runs **Change Folder to** on a short press:
@@ -281,7 +304,8 @@ event trigger a **Name** to tell several of them apart in the **Events** list.
 
 Once a widget has a Double Tap action, its Short Press waits a moment to see whether a second tap follows,
 so a single tap runs slightly later. A double tap runs only the Double Tap action. On a slider, a double tap
-still moves the level with each tap.
+still moves the level with each tap, and the tile flashes like a pressed button once the double tap is
+recognised.
 
 Actions run top to bottom. **If / Else**, **Switch**, **Repeat** and **Wait** build longer flows, for example:
 *mute the mic, wait 3 seconds, switch the scene*. **Run** tries them out right away.
@@ -307,6 +331,39 @@ marks them, and each one gets a button to let it drive this button's states. Whe
 the editor offers this right away. The action then decides which states exist, and you still style each of
 them. The **×** next to *Provided by* brings your own states back. Plugin actions that supply an icon work the same
 way for the button's icon.
+
+## Icon appearances
+
+An icon can have more than one appearance: a light and a dark version, or an animated icon and a still
+version of it. It stays one icon in **Library > Icon Packs** and in the icon picker, and Macro Deck shows the
+appearance that fits:
+
+- **Light** or **Dark** follows the theme of the screen showing the deck: the Macro Deck app and the deck you
+  open in a browser. With the theme set to **System**, each of them follows its own device's setting. The
+  Companion app shows the **Default** until it supports appearances.
+- **Static** is shown where the system asks for reduced motion, and **Animated** everywhere else. An animated
+  icon without a static appearance keeps playing.
+- A device that can't play animations, such as some stream controllers, shows the **Static** appearance when
+  there is one.
+- When no appearance fits, the icon's own image, the **Default**, is shown.
+
+Icons with appearances have a layered mark in the corner. Double-click an icon, or right-click it and choose
+**Appearances…**, to see them. There you add an appearance from an image file, replace or remove one, or use an
+existing icon from the same pack as an appearance. That icon then disappears from the pack, and buttons and
+actions that used it switch to the icon it became part of. Appearances of icons in Store and plugin packs come
+with the pack and can't be changed.
+
+To always show one appearance on a button or slider, pick it under **Icon appearance** next to the icon.
+**Automatic** goes back to choosing by theme and motion. A flow can switch it with the **Set Icon Appearance**
+action.
+
+When you import images, files named like `play.png`, `play.dark.png` and `play.static.gif` in the same folder
+become one icon `play` with a dark and a static appearance. The words `light`, `dark`, `static` and `animated`
+work this way, also combined, as in `play.dark.static.png`. Other names import as separate icons as before.
+
+Appearances travel with the icon when you export a pack or a profile. A Macro Deck version without
+appearances shows only the default images, and if you go back to such a version, its icon packs lose their
+appearances.
 
 ## Variables
 
@@ -598,6 +655,14 @@ when the latest version is older than yours, or uninstall it.
 When the latest version of an item is withdrawn, the item disappears from the Store and can no longer be
 installed or updated. If you have it installed, it stays under **Installed**, marked **Removed from the
 Store**, and its page says why; you can still uninstall it there.
+
+### The Included icon pack
+
+Macro Deck ships its own icon pack, **Included**, with simple line icons for hardware, network, battery,
+weather and audio, for example for the rings of a **Gauges** widget. It appears under **Library > Icon
+Packs** and in the icon picker like any other pack and works on every widget. Like a Store pack it is
+read-only and can't be deleted. The icons are grey so they read on dark and light tiles; use **Icon Color**
+on a widget to recolor them.
 
 ### Icon packs from plugins
 

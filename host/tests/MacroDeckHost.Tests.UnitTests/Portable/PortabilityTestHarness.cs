@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using MacroDeckHost.Application.Icons;
+using MacroDeckHost.Application.Icons.Ownership;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Variables;
@@ -31,6 +32,7 @@ internal sealed class PortabilityTestHarness : IDisposable
 	public SkiaFontCatalog FontCatalog { get; }
 	public FileSystemUserFontLibrary UserFonts { get; }
 	public PortableAssetManager AssetManager { get; }
+	public IconPackOwnerRegistry OwnerRegistry { get; } = new([]);
 	public ProfilePortabilityService ProfileService { get; }
 	public WidgetPortabilityService WidgetService { get; }
 	public FolderPortabilityService FolderService { get; }
@@ -63,6 +65,7 @@ internal sealed class PortabilityTestHarness : IDisposable
 			TestLocalization.Resolver,
 			FontCatalog,
 			UserFonts,
+			OwnerRegistry,
 			Icons.Logger);
 		ProfileService
 			= new ProfilePortabilityService(ProfileCache, FolderCache, AssetManager, Icons.Mediator, Icons.Logger);

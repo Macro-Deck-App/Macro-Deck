@@ -72,6 +72,7 @@ public sealed class IconImportService : IIconImportService
 		var stagedIcons = new List<IconEntity>();
 		var duplicates = 0;
 		var hasArchives = false;
+		var appearances = new AppearanceStaging(batch, _iconPackCache, stagedIcons);
 		await foreach (var file in files.WithCancellation(cancellationToken))
 		{
 			if (IconImportFiles.IsArchive(file.FileName))
@@ -92,9 +93,19 @@ public sealed class IconImportService : IIconImportService
 				var outcome = await StageAppIconFromContent(batch, file.FileName, file.Content, cancellationToken);
 				ApplyStageOutcome(outcome, batch, file.FileName, stagedIcons, ref duplicates);
 			}
+			else if (IconImportFiles.IsSupportedImportEntry(file.FileName) &&
+				IconImportFiles.TryParseAppearanceName(file.FileName, out var baseName, out var traits))
+			{
+				duplicates += await StageUploadedAppearance(appearances,
+					file,
+					baseName,
+					traits,
+					cancellationToken);
+			}
 			else if (IconImportFiles.IsUploadedIcon(file.FileName))
 			{
-				var staged = await StageImage(batch, file.FileName, file.Content, cancellationToken);
+				var (staged, duplicateOf) =
+					await StageImageOrFindDuplicate(batch, file.FileName, file.Content, cancellationToken);
 				if (staged is null)
 				{
 					duplicates++;
@@ -103,6 +114,10 @@ public sealed class IconImportService : IIconImportService
 				{
 					stagedIcons.Add(staged);
 				}
+
+				duplicates += RegisterUploadedBase(appearances,
+					file.FileName,
+					staged ?? appearances.Resolve(duplicateOf));
 			}
 			else
 			{
@@ -115,6 +130,14 @@ public sealed class IconImportService : IIconImportService
 			{
 				await RegisterStagedIcons(batch, pack.Id, stagedIcons, cancellationToken);
 				stagedIcons.Clear();
+			}
+		}
+
+		foreach (var orphan in appearances.TakeOrphans())
+		{
+			if (!StageOrphanAsIcon(appearances, orphan))
+			{
+				duplicates++;
 			}
 		}
 
@@ -223,9 +246,15 @@ public sealed class IconImportService : IIconImportService
 		var stagedIcons = new List<IconEntity>();
 		var duplicates = 0;
 		var hasArchives = false;
-		foreach (var (relativeName, fullPath) in sourceFiles)
+		var appearances = new AppearanceStaging(batch, _iconPackCache, stagedIcons);
+		var groups = IconImportFiles.GroupAppearanceFiles(sourceFiles,
+			file => Path.GetDirectoryName(file.FullPath) ?? string.Empty,
+			file => file.RelativeName);
+		foreach (var group in groups)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
+			var (relativeName, fullPath) = group.Item;
+			IconEntity? parent = null;
 			try
 			{
 				if (IconImportFiles.IsAppIconSource(relativeName))
@@ -250,7 +279,8 @@ public sealed class IconImportService : IIconImportService
 					}
 					else if (IconImportFiles.IsSupportedImportEntry(relativeName))
 					{
-						var staged = await StageImage(batch, relativeName, stream, cancellationToken);
+						var (staged, duplicateOf) =
+							await StageImageOrFindDuplicate(batch, relativeName, stream, cancellationToken);
 						if (staged is null)
 						{
 							duplicates++;
@@ -259,12 +289,38 @@ public sealed class IconImportService : IIconImportService
 						{
 							stagedIcons.Add(staged);
 						}
+
+						parent = staged ?? appearances.Resolve(duplicateOf);
 					}
 				}
 			}
 			catch (Exception ex) when (ex is not OperationCanceledException)
 			{
 				_logger.Warning(ex, "Failed to stage {Path} for import batch {BatchId}", fullPath, batch.Id);
+			}
+
+			foreach (var appearance in group.Appearances)
+			{
+				try
+				{
+					await using var stream = File.OpenRead(appearance.Item.FullPath);
+					if (!await StageGroupedAppearance(appearances,
+						parent,
+						appearance.Item.RelativeName,
+						appearance.Traits,
+						stream,
+						cancellationToken))
+					{
+						duplicates++;
+					}
+				}
+				catch (Exception ex) when (ex is not OperationCanceledException)
+				{
+					_logger.Warning(ex,
+						"Failed to stage {Path} for import batch {BatchId}",
+						appearance.Item.FullPath,
+						batch.Id);
+				}
 			}
 
 			if (stagedIcons.Count >= 100)
@@ -423,12 +479,25 @@ public sealed class IconImportService : IIconImportService
 			.ToList();
 		foreach (var packGroup in unfinished.GroupBy(icon => icon.PackId))
 		{
-			await _iconPackCache.RemoveIcons(packGroup.Key, packGroup.Select(icon => icon.Id).ToList());
-			foreach (var icon in packGroup)
+			var removed = IconRemoval.ExpandWithAppearances(_iconPackCache, packGroup);
+			await _iconPackCache.RemoveIcons(packGroup.Key, removed.Select(icon => icon.Id).ToList());
+			foreach (var icon in removed)
 			{
 				_coalescer.ReleaseAll(icon.Id);
 				_storage.DeleteIconFiles(icon.PackId, icon.Id);
-				await _mediator.Publish(new IconDeletedNotification(icon.Id, icon.PackId), cancellationToken);
+			}
+
+			var removedIds = removed.Select(icon => icon.Id).ToHashSet();
+			foreach (var icon in packGroup)
+			{
+				if (icon.AppearanceOfId is not { } parentId)
+				{
+					await _mediator.Publish(new IconDeletedNotification(icon.Id, icon.PackId), cancellationToken);
+				}
+				else if (!removedIds.Contains(parentId) && _iconPackCache.GetIconById(parentId) is { } parent)
+				{
+					await _mediator.Publish(new IconUpdatedNotification(parent), cancellationToken);
+				}
 			}
 		}
 
@@ -652,23 +721,162 @@ public sealed class IconImportService : IIconImportService
 		string fileName,
 		Stream content,
 		CancellationToken cancellationToken)
+		=> (await StageImageOrFindDuplicate(batch, fileName, content, cancellationToken)).Staged;
+
+	private async Task<(IconEntity? Staged, Guid? DuplicateOf)> StageImageOrFindDuplicate(
+		IconImportBatchEntity batch,
+		string fileName,
+		Stream content,
+		CancellationToken cancellationToken)
 	{
 		var iconId = Guid.CreateVersion7();
 		var sourceHash = await _storage.StageOriginal(batch.Id, iconId, fileName, content, cancellationToken);
-
-		// Scoped to the destination pack: a pack import populates the pack the user chose, so an identical
-		// icon sitting in some other pack must not stand in for the item they asked for. Losing the
-		// reservation is enough to skip - unlike the single-icon path this caller has no use for the
-		// winning entity, only for the fact that something else is already importing this content.
-		if (_iconPackCache.FindBySourceContentHash(sourceHash, batch.PackId) is not null ||
-			_coalescer.TryReserve(batch.PackId, sourceHash, iconId) is not null)
+		var duplicateOf = DuplicateOf(batch, iconId, sourceHash);
+		if (duplicateOf is not null)
 		{
 			_storage.DeleteStagedOriginal(batch.Id, iconId);
-			return null;
+			return (null, duplicateOf);
 		}
 
-		return NewStagedIcon(batch, iconId, fileName, sourceHash);
+		return (NewStagedIcon(batch, iconId, fileName, sourceHash), null);
 	}
+
+	// Scoped to the destination pack: a pack import populates the pack the user chose, so an identical
+	// icon sitting in some other pack must not stand in for the item they asked for.
+	private Guid? DuplicateOf(IconImportBatchEntity batch, Guid iconId, SourceContentHash sourceHash)
+		=> _iconPackCache.FindBySourceContentHash(sourceHash, batch.PackId)?.Id ??
+			_coalescer.TryReserve(batch.PackId, sourceHash, iconId);
+
+	private async Task<int> StageUploadedAppearance(AppearanceStaging appearances,
+		IconImportFile file,
+		string baseName,
+		IReadOnlyDictionary<string, string> traits,
+		CancellationToken cancellationToken)
+	{
+		var groupKey = (IconImportFiles.DirectoryOf(file.FileName), baseName);
+		if (appearances.BaseOf(groupKey) is { } parent)
+		{
+			return await StageGroupedAppearance(appearances, parent, file.FileName, traits, file.Content, cancellationToken)
+				? 0
+				: 1;
+		}
+
+		var assetId = Guid.CreateVersion7();
+		var sourceHash = await _storage.StageOriginal(appearances.Batch.Id,
+			assetId,
+			file.FileName,
+			file.Content,
+			cancellationToken);
+		appearances.AddOrphan(groupKey, new StagedAppearanceFile(assetId, file.FileName, sourceHash, traits));
+		return 0;
+	}
+
+	private int RegisterUploadedBase(AppearanceStaging appearances, string fileName, IconEntity? parent)
+	{
+		var groupKey = UploadGroupKey(fileName);
+		if (parent is null || !appearances.TryAddBase(groupKey, parent))
+		{
+			return 0;
+		}
+
+		var duplicates = 0;
+		foreach (var orphan in appearances.TakeOrphans(groupKey))
+		{
+			switch (appearances.Claim(parent, orphan.Traits))
+			{
+				case IconImportAppearanceClaim.Claimed:
+					appearances.StagedIcons.Add(NewStagedAppearance(appearances.Batch,
+						parent,
+						orphan.AssetId,
+						orphan.FileName,
+						orphan.SourceHash,
+						orphan.Traits));
+					break;
+				case IconImportAppearanceClaim.Taken:
+					_storage.DeleteStagedOriginal(appearances.Batch.Id, orphan.AssetId);
+					duplicates++;
+					break;
+				default:
+					if (!StageOrphanAsIcon(appearances, orphan))
+					{
+						duplicates++;
+					}
+
+					break;
+			}
+		}
+
+		return duplicates;
+	}
+
+	private async Task<bool> StageGroupedAppearance(AppearanceStaging appearances,
+		IconEntity? parent,
+		string fileName,
+		IReadOnlyDictionary<string, string> traits,
+		Stream content,
+		CancellationToken cancellationToken)
+	{
+		var batch = appearances.Batch;
+		var claim = parent is null ? IconImportAppearanceClaim.Refused : appearances.Claim(parent, traits);
+		if (claim == IconImportAppearanceClaim.Taken)
+		{
+			return false;
+		}
+
+		if (claim == IconImportAppearanceClaim.Refused)
+		{
+			var staged = await StageImage(batch, fileName, content, cancellationToken);
+			if (staged is null)
+			{
+				return false;
+			}
+
+			appearances.StagedIcons.Add(staged);
+			return true;
+		}
+
+		var assetId = Guid.CreateVersion7();
+		var sourceHash = await _storage.StageOriginal(batch.Id, assetId, fileName, content, cancellationToken);
+		appearances.StagedIcons.Add(NewStagedAppearance(batch, parent!, assetId, fileName, sourceHash, traits));
+		return true;
+	}
+
+	private bool StageOrphanAsIcon(AppearanceStaging appearances, StagedAppearanceFile orphan)
+	{
+		var batch = appearances.Batch;
+		if (DuplicateOf(batch, orphan.AssetId, orphan.SourceHash) is not null)
+		{
+			_storage.DeleteStagedOriginal(batch.Id, orphan.AssetId);
+			return false;
+		}
+
+		appearances.StagedIcons.Add(NewStagedIcon(batch, orphan.AssetId, orphan.FileName, orphan.SourceHash));
+		return true;
+	}
+
+	private static (string Directory, string BaseName) UploadGroupKey(string fileName)
+		=> (IconImportFiles.DirectoryOf(fileName), IconImportFiles.AppearanceBaseNameOf(fileName));
+
+	private static IconEntity NewStagedAppearance(IconImportBatchEntity batch,
+		IconEntity parent,
+		Guid assetId,
+		string fileName,
+		SourceContentHash sourceHash,
+		IReadOnlyDictionary<string, string> traits)
+		=> new()
+		{
+			Id = assetId,
+			PackId = parent.PackId,
+			Name = parent.Name,
+			SourceContentHash = sourceHash.Value,
+			OriginalFileName = fileName,
+			ProcessingState = IconProcessingState.Pending,
+			ImportBatchId = batch.Id,
+			AppearanceOfId = parent.Id,
+			AppearanceTraits = new Dictionary<string, string>(traits, StringComparer.Ordinal),
+			CreatedAt = DateTime.UtcNow,
+			UpdatedAt = DateTime.UtcNow
+		};
 
 	private static IconEntity NewStagedIcon(IconImportBatchEntity batch,
 		Guid iconId,
@@ -732,8 +940,13 @@ public sealed class IconImportService : IIconImportService
 		}
 
 		await _iconPackCache.AddIcons(packId, icons);
-		_batchTracker.AddToTotal(batch.Id, icons.Count);
-		await _mediator.Publish(new IconsAddedNotification(batch.Id, packId, icons.ToList()), cancellationToken);
+		_batchTracker.AddToTotal(batch.Id, icons);
+		var parents = icons.Where(icon => icon.AppearanceOfId is null).ToList();
+		if (parents.Count > 0)
+		{
+			await _mediator.Publish(new IconsAddedNotification(batch.Id, packId, parents), cancellationToken);
+		}
+
 		foreach (var icon in icons)
 		{
 			_processingChannel.Enqueue(new ProcessIconWorkItem(icon.Id));
@@ -749,5 +962,69 @@ public sealed class IconImportService : IIconImportService
 		await _mediator.Publish(new IconImportProgressNotification(batch, total, processed, failed),
 			cancellationToken);
 		await _batchFinalizer.TryFinalize(batch.Id, _mediator, cancellationToken);
+	}
+
+	private sealed record StagedAppearanceFile(Guid AssetId,
+		string FileName,
+		SourceContentHash SourceHash,
+		IReadOnlyDictionary<string, string> Traits);
+
+	private sealed class AppearanceStaging
+	{
+		private readonly IIconPackCache _cache;
+		private readonly IconImportAppearanceClaims _claims;
+		private readonly Dictionary<(string Directory, string BaseName), IconEntity> _bases = new();
+		private readonly Dictionary<(string Directory, string BaseName), List<StagedAppearanceFile>> _orphans = new();
+
+		public AppearanceStaging(IconImportBatchEntity batch, IIconPackCache cache, List<IconEntity> stagedIcons)
+		{
+			Batch = batch;
+			_cache = cache;
+			_claims = new IconImportAppearanceClaims(cache, batch.Id);
+			StagedIcons = stagedIcons;
+		}
+
+		public IconImportBatchEntity Batch { get; }
+
+		public List<IconEntity> StagedIcons { get; }
+
+		public IconEntity? Resolve(Guid? iconId)
+		{
+			if (iconId is not { } id)
+			{
+				return null;
+			}
+
+			var icon = _cache.GetIconById(id) ?? StagedIcons.Find(staged => staged.Id == id);
+			return icon is { AppearanceOfId: null } && icon.PackId == Batch.PackId ? icon : null;
+		}
+
+		public IconImportAppearanceClaim Claim(IconEntity parent, IReadOnlyDictionary<string, string> traits)
+			=> _claims.Claim(parent, traits);
+
+		public IconEntity? BaseOf((string Directory, string BaseName) key) => _bases.GetValueOrDefault(key);
+
+		public bool TryAddBase((string Directory, string BaseName) key, IconEntity parent) => _bases.TryAdd(key, parent);
+
+		public void AddOrphan((string Directory, string BaseName) key, StagedAppearanceFile orphan)
+		{
+			if (!_orphans.TryGetValue(key, out var orphans))
+			{
+				orphans = [];
+				_orphans[key] = orphans;
+			}
+
+			orphans.Add(orphan);
+		}
+
+		public List<StagedAppearanceFile> TakeOrphans((string Directory, string BaseName) key)
+			=> _orphans.Remove(key, out var orphans) ? orphans : [];
+
+		public List<StagedAppearanceFile> TakeOrphans()
+		{
+			var all = _orphans.Values.SelectMany(orphans => orphans).ToList();
+			_orphans.Clear();
+			return all;
+		}
 	}
 }
