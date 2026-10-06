@@ -89,16 +89,11 @@ async function openProfileMenu(page, profileName) {
 }
 
 async function clickProfileAction(page, profileName, action) {
+  await openProfileMenu(page, profileName);
   const profileRow = page.locator('.profile-list-item').filter({
     has: page.getByText(profileName, { exact: true }),
   });
-  // Dismissing a late announcement modal is an outside click that closes the open menu, so reopen it.
-  await expect(async () => {
-    if (!(await profileRow.isVisible())) {
-      await openProfileMenu(page, profileName);
-    }
-    await expect(profileRow).toBeVisible({ timeout: 2000 });
-  }).toPass({ timeout: 15000 });
+  await expect(profileRow).toBeVisible();
   await profileRow.getByRole('button', { name: `More actions for ${profileName}` }).click();
   await page.locator('.menu-item').filter({ hasText: new RegExp(`^\\s*${action}\\s*$`) }).click();
 }
