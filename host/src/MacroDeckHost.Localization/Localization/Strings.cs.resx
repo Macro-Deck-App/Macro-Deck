@@ -3612,6 +3612,30 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Forms.TabBar.RemoveTab" xml:space="preserve">
     <value>Odebrat {label}</value>
   </data>
+  <data name="Forms.ThresholdEditor.AddRange" xml:space="preserve">
+    <value>Přidat rozsah</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Color" xml:space="preserve">
+    <value>Barva</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Range" xml:space="preserve">
+    <value>{from} – {to}</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Ranges" xml:space="preserve">
+    <value>Rozsahy</value>
+  </data>
+  <data name="Forms.ThresholdEditor.RangeWithUnit" xml:space="preserve">
+    <value>{from} – {to} {unit}</value>
+  </data>
+  <data name="Forms.ThresholdEditor.RemoveRange" xml:space="preserve">
+    <value>Odebrat rozsah</value>
+  </data>
+  <data name="Forms.ThresholdEditor.ResetToDefaults" xml:space="preserve">
+    <value>Obnovit výchozí</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Threshold" xml:space="preserve">
+    <value>Práh {n}</value>
+  </data>
   <data name="Forms.VariableTextInput.UnknownVariable" xml:space="preserve">
     <value>{raw} – proměnná s tímto názvem zde není k dispozici</value>
   </data>
@@ -11376,7 +11400,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Nahoře</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>Změní zvýrazňující barvu posuvníku nebo grafu historie.</value>
+    <value>Změní zvýrazňující barvu posuvníku nebo grafu historie. Nemá vliv, dokud jsou zapnuté barevné prahy.</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>Nastavit zvýrazňující barvu</value>
@@ -17578,6 +17602,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.Editor.ClearStateMapping" xml:space="preserve">
     <value>Odebrat mapování stavů</value>
   </data>
+  <data name="Widgets.Editor.ColorThresholds" xml:space="preserve">
+    <value>Barevné prahy</value>
+  </data>
   <data name="Widgets.Editor.CombinedProviderHeading" xml:space="preserve">
     <value>Tato akce může řídit stav i ikonu tohoto tlačítka.</value>
   </data>
@@ -18122,6 +18149,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.History.ChartMinimumHint" xml:space="preserve">
     <value>Pevná dolní hranice, může být záporná (např. -100). Pro automatické měřítko zadejte 0.</value>
   </data>
+  <data name="Widgets.History.ColorThresholdsDescription" xml:space="preserve">
+    <value>Obarví graf a hodnotu podle rozsahu, ve kterém leží poslední hodnota, místo zvýrazňující barvy.</value>
+  </data>
   <data name="Widgets.History.MetricSection" xml:space="preserve">
     <value>Metrika</value>
   </data>
@@ -18343,6 +18373,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Widgets.Slider.ChooseIcon" xml:space="preserve">
     <value>Vybrat ikonu</value>
+  </data>
+  <data name="Widgets.Slider.ColorThresholdsDescription" xml:space="preserve">
+    <value>Obarví posuvník podle rozsahu, ve kterém leží jeho hodnota, místo barvy posuvníku.</value>
   </data>
   <data name="Widgets.Slider.CustomStep" xml:space="preserve">
     <value>Vlastní krok</value>

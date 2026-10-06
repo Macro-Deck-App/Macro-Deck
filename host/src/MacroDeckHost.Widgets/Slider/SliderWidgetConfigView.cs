@@ -49,6 +49,10 @@ internal static class SliderWidgetConfigView
 		var max = new UiState<double>(WidgetConfigJson.ReadDouble(data, "max") ?? 100);
 		var step = new UiState<double>(WidgetConfigJson.ReadDouble(data, "step") ?? 1);
 		var flows = new UiState<JsonElement>(WidgetConfigJson.ReadFlows(data));
+		var thresholdsEnabled = new UiState<bool>(WidgetThresholds.ReadEnabled(data));
+		var thresholds = new UiState<UiThresholds>(WidgetThresholds.ReadStored(data)!);
+
+		(double Min, double Max) Range() => SliderRange.Resolve(Picked(variables, widgetId, valueVariable.Value), min.Value, max.Value);
 
 		return new UiWidgetConfiguration
 		{
@@ -206,6 +210,26 @@ internal static class SliderWidgetConfigView
 						SupportsReset = true,
 						DefaultValue = string.Empty,
 					},
+					new UiBooleanInput
+					{
+						Key = WidgetThresholds.EnabledKey,
+						Label = AppStrings.Widgets.Editor.ColorThresholds(),
+						Description = AppStrings.Widgets.Slider.ColorThresholdsDescription(),
+						Binding = Bind.To(thresholdsEnabled),
+					},
+					new UiThresholdsInput
+					{
+						Key = WidgetThresholds.ValueKey,
+						Label = AppStrings.Widgets.Editor.ColorThresholds(),
+						HideLabel = true,
+						Binding = Bind.To(thresholds),
+						Min = UiValue.From(() => Range().Min),
+						Max = UiValue.From(() => Range().Max),
+						Unit = UiText.Optional(() => Unit(Picked(variables, widgetId, valueVariable.Value))),
+						DefaultValue = UiValue.From(() => WidgetThresholds.Defaults(Range().Min, Range().Max)),
+						SupportsReset = true,
+						VisibleWhen = new UiVisibleWhen { ParameterName = WidgetThresholds.EnabledKey, Values = ["true"] },
+					},
 					new UiColorInput
 					{
 						Key = "labelColor", Label = AppStrings.Widgets.Editor.LabelColor(),
@@ -277,6 +301,11 @@ internal static class SliderWidgetConfigView
 			},
 			Content = content,
 		};
+
+	private static UiText Unit(VariableEntity? variable)
+		=> variable?.Unit is { Length: > 0 } unit
+			? VariableValueFormatter.Format(0, null, unit, null).Unit
+			: UiText.None();
 
 	private static VariableEntity? Picked(VariableRegistry variables, Guid? widgetId, string name)
 		=> string.IsNullOrEmpty(name) ? null : SliderDefaultVariable.Find(variables, widgetId, name);

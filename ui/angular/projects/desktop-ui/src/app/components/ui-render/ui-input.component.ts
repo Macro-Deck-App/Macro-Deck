@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, Injector, computed, effect, forwardRef, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { AppStrings, UiConfigEvents, UiConfigPrimitives, UiConfigProperties, UiNode, UiNodeOption, resolveLocalizedText, WidgetIconDisplay, WidgetIconRef, emitsEvent, iconPackRef, iconPackReferenceOf, isIconPackRef, nodeBoolean, nodeNumber, nodeOptions, nodeRaw, nodeString, nodeStringArray, nodeText, readWidgetIconRef } from '@macro-deck/runtime';
+import { AppStrings, UiConfigEvents, readThresholds, UiConfigPrimitives, UiConfigProperties, UiNode, UiNodeOption, resolveLocalizedText, WidgetIconDisplay, WidgetIconRef, emitsEvent, iconPackRef, iconPackReferenceOf, isIconPackRef, nodeBoolean, nodeNumber, nodeOptions, nodeRaw, nodeString, nodeStringArray, nodeText, readWidgetIconRef } from '@macro-deck/runtime';
 import { ButtonComponent, IconImageService, InputComponent, LocalizationService, SegmentedControlComponent, SegmentedOption, ToggleSwitchComponent, TranslatePipe } from '@shared';
 import type { ActionFlow, HotkeyValue, KeyboardComboValue, KeyboardSequenceValue, VariableType } from '@macro-deck/runtime';
 import { normalizeHttpsUrl } from '../../domain/url-input.util';
@@ -28,6 +28,7 @@ import { NodeParamInputComponent } from '../forms/param-input-field/param-input-
 import { NodeActionBuilderComponent, type ProviderChangeRequest } from '../action-builder/node-action-builder.component';
 import { NodeActionPickerComponent } from '../action-builder/action-picker/node-action-picker.component';
 import { NodeStateMappingEditorComponent, type StateMappingValue } from '../widgets/state-mapping/node-state-mapping-editor.component';
+import { ThresholdEditorComponent } from '../forms/threshold-editor/threshold-editor.component';
 import { ActionOptionsService } from '../../services/action-options.service';
 import { UiRenderContext } from './ui-render-context';
 import { UiNodeComponent } from './ui-node.component';
@@ -77,6 +78,7 @@ const HOST_RESOLVED_OPTION_SOURCES: readonly string[] = ['macrodeck.fonts'];
     // load time.
     forwardRef(() => NodeActionBuilderComponent),
     NodeStateMappingEditorComponent,
+    ThresholdEditorComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './ui-input.component.html',
@@ -367,6 +369,21 @@ export class UiInputComponent {
   protected onStateMappingChange(value: StateMappingValue): void {
     this.onChange(value);
   }
+
+  // --- thresholds
+  private readonly storedThresholds = computed(() => readThresholds(this.rawValue()));
+  private readonly defaultThresholds = computed(() => readThresholds(nodeRaw(this.node(), Properties.DefaultValue)));
+  protected readonly thresholdsValue = computed(
+    () => this.storedThresholds() ?? this.defaultThresholds() ?? { bands: [{ id: 'band-1', color: '#34c759' }] },
+  );
+  protected readonly thresholdsUnit = computed(() => nodeText(this.node(), Properties.Unit, this.localization));
+  protected readonly thresholdsCanReset = computed(() => {
+    const stored = this.storedThresholds();
+    return this.supportsReset() && stored !== null && JSON.stringify(stored) !== JSON.stringify(this.defaultThresholds());
+  });
+  protected readonly fixedCount = computed(() => nodeBoolean(this.node(), Properties.FixedCount) === true);
+  protected readonly fixedColors = computed(() => nodeBoolean(this.node(), Properties.FixedColors) === true);
+  protected readonly maxCount = computed(() => nodeNumber(this.node(), Properties.MaxCount) ?? null);
 
   // --- variable-picker: the actual `VariableService` lookup and `writableOnly` filtering live in
   // `NodeVariablePickerComponent`, not here - see that component's doc comment for why.

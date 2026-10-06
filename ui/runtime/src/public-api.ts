@@ -353,6 +353,23 @@ export { UiConfigEntryPoints } from './ui-config/config-entry-points';
 export { UiConfigEvents } from './ui-config/config-events';
 export { UI_CONFIG_PRIMITIVES_WELL_KNOWN, UiConfigPrimitives } from './ui-config/config-primitives';
 export { UiConfigProperties, type UiNodeOption } from './ui-config/config-properties';
+export {
+  MAX_THRESHOLD_BANDS,
+  insertThresholdBoundary,
+  moveThresholdBoundary,
+  readThresholds,
+  recolorThresholdBand,
+  removeThresholdBand,
+  snapThresholdValue,
+  thresholdAxis,
+  thresholdBandAt,
+  thresholdBandIndexAt,
+  thresholdBandRange,
+  thresholdStepDecimals,
+  type ThresholdAxis,
+  type ThresholdBand,
+  type ThresholdsValue,
+} from './ui-config/thresholds.util';
 export { supportsUiModelVersion, UiModelVersions } from './ui-framework/ui-model-version';
 export {
   emitsEvent,

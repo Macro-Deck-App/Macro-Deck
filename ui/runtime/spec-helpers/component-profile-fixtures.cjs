@@ -11,15 +11,22 @@
 const fs = require('fs');
 const path = require('path');
 
-globalThis.__loadWidgetProfileFixture = function loadWidgetProfileFixture(name) {
+function fixturesRoot() {
   let dir = __dirname;
   for (;;) {
     const candidate = path.join(dir, 'ui-model', 'fixtures');
-    if (fs.existsSync(candidate)) {
-      return JSON.parse(fs.readFileSync(path.join(candidate, 'component-profile', name), 'utf8'));
-    }
+    if (fs.existsSync(candidate)) return candidate;
     const parent = path.dirname(dir);
     if (parent === dir) throw new Error(`ui-model/fixtures was not found above ${__dirname}`);
     dir = parent;
   }
+}
+
+globalThis.__loadWidgetProfileFixture = function loadWidgetProfileFixture(name) {
+  return JSON.parse(fs.readFileSync(path.join(fixturesRoot(), 'component-profile', name), 'utf8'));
+};
+
+// The thresholds spec checks readThresholds against the same cases the C# UiThresholds tests use.
+globalThis.__loadThresholdFixture = function loadThresholdFixture() {
+  return JSON.parse(fs.readFileSync(path.join(fixturesRoot(), 'thresholds', 'threshold-values.json'), 'utf8'));
 };

@@ -409,6 +409,38 @@ public class HistoryGraphWidgetSessionTests
 		});
 	}
 
+	[Test]
+	public async Task A_colour_only_save_of_a_graph_with_stored_thresholds_still_repaints_in_place()
+	{
+		object Data(string? accentColor) => new
+		{
+			valueVariable = Metric,
+			maxValue = 100,
+			accentColor,
+			thresholdsEnabled = false,
+			thresholds = new
+			{
+				bands = new object[]
+				{
+					new { id = "low", color = "#34c759" }, new { id = "high", color = "#ff3b30", from = 80 },
+				},
+			},
+		};
+
+		await using var fixture = new Fixture(Data(null));
+
+		var recoloured = fixture.Signals.RaiseDataChanged(new WidgetEntity
+		{
+			Id = fixture.WidgetId, Type = WidgetTypeIds.HistoryGraph, Data = JsonSerializer.Serialize(Data("#ef4444")),
+		});
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(recoloured, Is.True, "equal thresholds must not count as a change");
+			Assert.That(ChartColor(fixture), Is.EqualTo("#ef4444"));
+		});
+	}
+
 	private static WidgetEntity SavedGraph(Fixture fixture, string? accentColor, string title = "CPU Load")
 		=> new()
 		{

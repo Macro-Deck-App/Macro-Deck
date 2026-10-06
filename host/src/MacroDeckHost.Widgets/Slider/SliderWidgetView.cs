@@ -236,7 +236,7 @@ internal static class SliderWidgetView
 		// across, so a heavier track would swallow it.
 		var thickness = isVertical ? UiSize.FromBasis(0.11, 0.35) : UiSize.FromBasis(0.09, 0.4);
 		var level = LevelValue(config, state);
-		var fallbackColor = UiValue.From(() => accent.Value ?? _defaultAccent);
+		var fallbackColor = UiValue.From(() => TrackColor(config, state.Value, accent.Value) ?? _defaultAccent);
 
 		return new UiSlider
 		{
@@ -248,7 +248,7 @@ internal static class SliderWidgetView
 				: UiValue.None<string>(),
 			Level = level,
 			Step = StepValue(config, state),
-			LevelColor = UiValue.Optional(() => ColorValue(accent.Value)),
+			LevelColor = UiValue.Optional(() => ColorValue(TrackColor(config, state.Value, accent.Value))),
 			Thickness = thickness,
 			Events = sliderEvents,
 			Fallback = new UiRangeBar
@@ -261,6 +261,25 @@ internal static class SliderWidgetView
 				EndColor = fallbackColor,
 			},
 		};
+	}
+
+	internal static string? TrackColor(SliderWidgetData config, SliderWidgetReadout readout, string? accent)
+	{
+		if (!config.ThresholdsEnabled)
+		{
+			return accent;
+		}
+
+		if (!IsBound(config))
+		{
+			var preview = config.Min + (_unboundPreviewLevel * (config.Max - config.Min));
+
+			return WidgetThresholds.Effective(config.Thresholds, config.Min, config.Max).ColorAt(preview) ?? accent;
+		}
+
+		return readout.Found
+			? WidgetThresholds.Effective(config.Thresholds, readout.Min, readout.Max).ColorAt(readout.Value) ?? accent
+			: accent;
 	}
 
 	private static UiValue<double> LevelValue(SliderWidgetData config, UiState<SliderWidgetReadout> state)

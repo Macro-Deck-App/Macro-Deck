@@ -3,6 +3,8 @@ using MacroDeck.Localization;
 using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Runtime;
+using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Localization;
 using MacroDeckHost.Widgets.Configuration;
 
@@ -23,7 +25,7 @@ internal static class HistoryGraphWidgetConfigView
 	private const string _gpuUsagePercent = "system_gpu_0_usage_percent";
 	private const string _gpuName = "system_gpu_0_name";
 
-	public static UiElement Build(JsonElement data)
+	public static UiElement Build(JsonElement data, Func<string, VariableEntity?>? findVariable = null)
 	{
 		var valueVariable = new UiState<string>(WidgetConfigJson.ReadString(data, "valueVariable") ?? string.Empty);
 		var title = new UiState<string>(WidgetConfigJson.ReadString(data, "title") ?? string.Empty);
@@ -44,6 +46,15 @@ internal static class HistoryGraphWidgetConfigView
 		var borderColor = new UiState<string>(WidgetConfigJson.ReadString(border, "color") ?? string.Empty);
 
 		var flows = new UiState<JsonElement>(WidgetConfigJson.ReadFlows(data));
+		var thresholdsEnabled = new UiState<bool>(WidgetThresholds.ReadEnabled(data));
+		var thresholds = new UiState<UiThresholds>(WidgetThresholds.ReadStored(data)!);
+
+		VariableEntity? Picked()
+			=> findVariable is null || string.IsNullOrEmpty(valueVariable.Value) ? null : findVariable(valueVariable.Value);
+
+		(double Min, double Max) Scale() => HistoryGraphViewStateResolver.ThresholdScale(
+			new HistoryGraphWidgetData { MinValue = minValue.Value, MaxValue = maxValue.Value },
+			Picked());
 
 		// Writes several UiState cells from one interaction, the pattern
 		// docs/sdk/ui/concepts/state-and-bindings.md sanctions; a button, so no key holds the preset's name.
@@ -155,6 +166,28 @@ internal static class HistoryGraphWidgetConfigView
 						// changes - the same "keep an unset colour unset" rule the Action Button label uses.
 						SupportsReset = true,
 						DefaultValue = string.Empty,
+					},
+					new UiBooleanInput
+					{
+						Key = WidgetThresholds.EnabledKey,
+						Label = AppStrings.Widgets.Editor.ColorThresholds(),
+						Description = AppStrings.Widgets.History.ColorThresholdsDescription(),
+						Binding = Bind.To(thresholdsEnabled),
+					},
+					new UiThresholdsInput
+					{
+						Key = WidgetThresholds.ValueKey,
+						Label = AppStrings.Widgets.Editor.ColorThresholds(),
+						HideLabel = true,
+						Binding = Bind.To(thresholds),
+						Min = UiValue.From(() => Scale().Min),
+						Max = UiValue.From(() => Scale().Max),
+						Unit = UiText.Optional(() => Picked()?.Unit is { Length: > 0 } unit
+							? VariableValueFormatter.Format(0, null, unit, null).Unit
+							: UiText.None()),
+						DefaultValue = UiValue.From(() => WidgetThresholds.Defaults(Scale().Min, Scale().Max)),
+						SupportsReset = true,
+						VisibleWhen = new UiVisibleWhen { ParameterName = WidgetThresholds.EnabledKey, Values = ["true"] },
 					},
 					new UiProse { Key = "press-hint", Text = AppStrings.Widgets.History.PressHint() },
 					new UiHeading { Key = "appearance-heading", Text = AppStrings.Widgets.Editor.Appearance() },

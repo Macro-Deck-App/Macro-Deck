@@ -198,7 +198,8 @@ What did **not** need a major:
 - Widget appearance gained an accent colour: `WidgetAppearancePatch.AccentColor`,
   `WidgetAppearanceProperty.AccentColor` and an optional `accentColor` field on the wire patch. An older
   host ignores the field, so a patch carrying only it applies nothing there and `ApplyAsync` returns
-  `false`.
+  `false`. While a Slider's or History Graph's colour thresholds are on, a stored accent has no visible
+  effect.
 - [Video streams](/features/video-streams/) added a capability kind, `video-stream-provider`, a host API,
   `video-streams`, and `video_stream_` error reasons under the existing `CAPABILITY_UNAVAILABLE` code, all
   within major `3`. An older host rejects the kind non-fatally, and a plugin that does not implement

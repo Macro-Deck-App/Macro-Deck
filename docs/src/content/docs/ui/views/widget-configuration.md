@@ -157,6 +157,7 @@ new UiActionsListEditor { Key = "flows", Binding = Bind.To(flows), CanRun = true
 | `integration-picker` | `UiIntegrationPickerInput` | One integration, or one of its configuration entries |
 | `icon` | `UiIconReferenceInput` | One icon, as a typed provider reference |
 | `icon-display` | `UiIconDisplayInput` | An icon's framing (fit, zoom, offset, opacity) over a preview of `Icon` at `AspectRatio` against `Background`; with `Tint` set, the preview draws the icon in that colour, keeping its transparency |
+| `thresholds` | `UiThresholdsInput` | A range divided into coloured bands, edited on a bar with a draggable handle between each pair - see [Colour thresholds](#colour-thresholds) |
 
 Each renderer maps these onto the editors it already ships; a plugin ships no renderer code for them.
 
@@ -285,6 +286,80 @@ new UiColorInput
 `transparent` instead of a `#rrggbb` value. Set it only for a value your widget knows how to read: a stack or
 button `background` accepts it, a modifier's does not. Without the flag, or on a Macro Deck release that
 does not know it, the picker offers colours only and the node is serialised exactly as before.
+
+## Colour thresholds
+
+```csharp
+UiThresholds.TryParse(data.TryGetProperty("thresholds", out var raw) ? raw : default, out var stored);
+var thresholds = new UiState<UiThresholds>(stored!); // null until the user edits
+
+new UiThresholdsInput
+{
+    Key = "thresholds",
+    Label = Strings.ColourThresholds(),
+    Binding = Bind.To(thresholds),
+    Min = 0,
+    Max = 100,
+    Step = 1,
+    Unit = "%",
+    DefaultValue = new UiThresholds([
+        new UiThresholdBand("ok", "#34c759"),
+        new UiThresholdBand("busy", "#ffcc00", 60),
+        new UiThresholdBand("hot", "#ff3b30", 85),
+    ]),
+    SupportsReset = true,
+}
+```
+
+The editor draws a bar from `Min` to `Max`, coloured band by band, with a draggable handle on every boundary;
+the selected handle shows its value in `Unit`, and every band lists its range below the bar. Clicking the bar
+adds a boundary at that point, and the user recolours and removes bands from the list; on a focused range, `+`
+splits it and `Delete` removes it. The Slider and History Graph widgets use the same editor for their own
+colour thresholds. It works in a [config flow](/ui/views/configuration/) as well as in a widget
+configuration.
+
+The value is a `UiThresholds`, stored and sent as:
+
+```json
+{ "bands": [
+  { "id": "ok", "color": "#34c759" },
+  { "id": "busy", "color": "#ffcc00", "from": 60 },
+  { "id": "hot", "color": "#ff3b30", "from": 85 }
+] }
+```
+
+Each band runs from its `from` up to the next band's. The first band has no `from` and covers everything
+below the second. Later starts are finite and strictly increasing, so handles never cross. A value carries 1
+to 64 bands with unique, non-empty ids and `#rgb` or `#rrggbb` colours, normalised to lowercase `#rrggbb`. The
+`UiThresholds` constructor throws on anything else, and a `change` that breaks a rule is rejected before it
+reaches your binding.
+
+| Property | Meaning |
+| --- | --- |
+| `Min`, `Max` | The bar's extent. A boundary outside it widens the bar instead of being moved. |
+| `Step` | What a handle moves by, and the narrowest a band can be dragged. |
+| `Unit` | Drawn after every value. A `UiText`, so a word unit can be localized. |
+| `DefaultValue` | The bands shown while the value is null, and what reset returns to. |
+| `SupportsReset` | Offers a reset while the value differs from the defaults. Reset writes **null**, not a copy of the defaults. |
+| `Disabled` | Read-only: the bar and list show, nothing can be changed. |
+| `FixedCount` | No adding or removing: the number of bands stays the default's. Handles still move and colours still change. |
+| `FixedColors` | No recolouring and no new band. Handles still move and bands can still be removed. |
+| `MaxCount` | Caps adding. A stored value already above it stays editable. |
+
+- **Null means "use the defaults".** Bind a null until the user edits and give your defaults as
+  `DefaultValue`, so a widget whose defaults depend on another setting keeps following that setting. Read the
+  stored value with `UiThresholds.TryParse`, which never throws, and fall back to your defaults:
+
+  ```csharp
+  var colour = (stored ?? defaults).ColorAt(reading); // "#ffcc00" for 70 in the example above
+  ```
+
+- **The modes are enforced on your binding only.** A change that breaks `Disabled`, `FixedCount`,
+  `FixedColors` or `MaxCount` never reaches a writable binding. A read-only binding paired with your own
+  `change` handler receives every change unchecked. A widget's stored configuration is drafted by the client
+  and can hold any value that is valid in shape, so read it with `TryParse` and tolerate any band count.
+- **A Macro Deck release that predates `thresholds`** declines the node and draws its `Fallback`, or shows the
+  field as unsupported without one. A `json` input cannot stand in for it, because its value is text.
 
 ## Declining
 

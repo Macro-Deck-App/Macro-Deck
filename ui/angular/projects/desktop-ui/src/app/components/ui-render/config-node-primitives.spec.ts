@@ -9,7 +9,7 @@ const VOCABULARY = [
   'multiselect', 'color', 'file', 'folder', 'hotkey', 'duration', 'datetime', 'json', 'code', 'keyvalue',
   'object', 'array', 'ipaddress', 'url', 'icon', 'image', 'keyboard-sequence', 'keyboard-combo',
   'widget-target', 'actions-list-editor', 'action-picker', 'variable-picker', 'device-picker',
-  'integration-picker', 'icon-display', 'state-mapping-editor', 'flow', 'step', 'stack',
+  'integration-picker', 'icon-display', 'state-mapping-editor', 'thresholds', 'flow', 'step', 'stack',
   'tabs', 'tab', 'heading', 'prose', 'instructions', 'instruction', 'copy-value', 'link',
   'advanced-section', 'divider', 'banner', 'validation-message', 'busy', 'widget-configuration',
   'widget-properties', 'widget-editor',

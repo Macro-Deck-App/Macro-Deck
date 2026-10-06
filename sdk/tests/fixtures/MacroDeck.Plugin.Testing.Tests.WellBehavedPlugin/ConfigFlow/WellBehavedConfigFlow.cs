@@ -79,6 +79,14 @@ internal sealed class WellBehavedConfigFlow : IConfigFlow, IUiConfigFlow
 		return Task.FromResult<IUiSession?>(new WellBehavedUiSession(view));
 	}
 
+	internal const string AlertBandsFieldName = "alertBands";
+
+	internal static readonly UiThresholds AlertBandDefaults = new([
+		new UiThresholdBand("calm", "#34c759"),
+		new UiThresholdBand("busy", "#ffcc00", 60),
+		new UiThresholdBand("alert", "#ff3b30", 85)
+	]);
+
 	// Shared with WellBehavedConfigFlowPreviews so a preview renders the tree this flow really serves
 	// rather than a copy of it that can drift.
 	internal static UiElement BuildTree(string location) => new UiFlow
@@ -102,6 +110,19 @@ internal sealed class WellBehavedConfigFlow : IConfigFlow, IUiConfigFlow
 						Label = "Location name",
 						Binding = Bind.To(new UiState<string>(location)),
 						Required = true
+					},
+					new UiThresholdsInput
+					{
+						Key = AlertBandsFieldName,
+						Label = "Alert bands",
+						Binding = Bind.To(new UiState<UiThresholds>(null!)),
+						Min = 0,
+						Max = 100,
+						Step = 1,
+						Unit = "%",
+						DefaultValue = AlertBandDefaults,
+						SupportsReset = true,
+						FixedCount = true
 					}
 				]
 			}

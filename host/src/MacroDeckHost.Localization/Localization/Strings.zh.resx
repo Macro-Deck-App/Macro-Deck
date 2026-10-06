@@ -3613,6 +3613,30 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Forms.TabBar.RemoveTab" xml:space="preserve">
     <value>移除{label}</value>
   </data>
+  <data name="Forms.ThresholdEditor.AddRange" xml:space="preserve">
+    <value>添加区间</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Color" xml:space="preserve">
+    <value>颜色</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Range" xml:space="preserve">
+    <value>{from} – {to}</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Ranges" xml:space="preserve">
+    <value>区间</value>
+  </data>
+  <data name="Forms.ThresholdEditor.RangeWithUnit" xml:space="preserve">
+    <value>{from} – {to} {unit}</value>
+  </data>
+  <data name="Forms.ThresholdEditor.RemoveRange" xml:space="preserve">
+    <value>移除区间</value>
+  </data>
+  <data name="Forms.ThresholdEditor.ResetToDefaults" xml:space="preserve">
+    <value>恢复默认值</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Threshold" xml:space="preserve">
+    <value>阈值 {n}</value>
+  </data>
   <data name="Forms.VariableTextInput.UnknownVariable" xml:space="preserve">
     <value>{raw} - 此处没有使用该名称的变量</value>
   </data>
@@ -11377,7 +11401,7 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>顶部</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>更改滑块或历史图表的强调色。</value>
+    <value>更改滑块或历史图表的强调色。启用颜色阈值时无效。</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>设置强调色</value>
@@ -17579,6 +17603,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Widgets.Editor.ClearStateMapping" xml:space="preserve">
     <value>移除状态映射</value>
   </data>
+  <data name="Widgets.Editor.ColorThresholds" xml:space="preserve">
+    <value>颜色阈值</value>
+  </data>
   <data name="Widgets.Editor.CombinedProviderHeading" xml:space="preserve">
     <value>此动作可以控制此按钮的状态和图标。</value>
   </data>
@@ -18124,6 +18151,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Widgets.History.ChartMinimumHint" xml:space="preserve">
     <value>固定下限，可以为负数（例如 -100）。设为 0 则自动缩放。</value>
   </data>
+  <data name="Widgets.History.ColorThresholdsDescription" xml:space="preserve">
+    <value>按最新数值所在区间为图表和数值着色，而不使用强调色。</value>
+  </data>
   <data name="Widgets.History.MetricSection" xml:space="preserve">
     <value>指标</value>
   </data>
@@ -18345,6 +18375,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Widgets.Slider.ChooseIcon" xml:space="preserve">
     <value>选择图标</value>
+  </data>
+  <data name="Widgets.Slider.ColorThresholdsDescription" xml:space="preserve">
+    <value>按数值所在区间为滑块着色，而不使用滑块颜色。</value>
   </data>
   <data name="Widgets.Slider.CustomStep" xml:space="preserve">
     <value>自定义步长</value>

@@ -1,0 +1,100 @@
+<div class="te" [class.te-disabled]="disabled()" role="group" [attr.aria-label]="label()">
+  <div class="te-scale">
+    <div class="te-badges" aria-hidden="true">
+      @for (handle of handles(); track handle.index) {
+        @if (handle.index === selectedIndex()) {
+          <span class="te-badge" [style.left.%]="handle.left">{{ handle.text }}</span>
+        }
+      }
+    </div>
+    <div
+      class="te-track"
+      #track
+      [class.te-track-insertable]="canInsert()"
+      [attr.title]="canInsert() ? ('macrodeck.app:Forms.ThresholdEditor.AddRange' | translate) : null"
+      (pointerdown)="onTrackPointerDown($event)"
+      (click)="onTrackClick($event)">
+      @for (band of bands(); track band.id) {
+        <span
+          class="te-segment"
+          [class.te-segment-first]="$first"
+          [class.te-segment-last]="$last"
+          [style.left.%]="band.left"
+          [style.width.%]="band.width"
+          [style.background]="band.color"></span>
+      }
+      @for (handle of handles(); track handle.index) {
+        <span
+          class="te-handle"
+          role="slider"
+          [class.te-handle-selected]="handle.index === selectedIndex()"
+          [style.left.%]="handle.left"
+          [attr.tabindex]="disabled() ? -1 : 0"
+          [attr.aria-label]="handle.label"
+          [attr.aria-valuemin]="axis().start"
+          [attr.aria-valuemax]="axis().end"
+          [attr.aria-valuenow]="handle.value"
+          [attr.aria-valuetext]="handle.text"
+          [attr.aria-disabled]="disabled() ? 'true' : null"
+          (pointerdown)="onHandlePointerDown($event, handle.index)"
+          (pointermove)="onHandlePointerMove($event)"
+          (pointerup)="onHandlePointerUp()"
+          (pointercancel)="onHandlePointerUp()"
+          (keydown)="onHandleKeydown($event, handle.index)"
+          (focus)="select(handle.index)"></span>
+      }
+    </div>
+    <div class="te-axis" aria-hidden="true">
+      @for (text of axisLabels(); track $index) {
+        <span>{{ text }}</span>
+      }
+    </div>
+  </div>
+
+  <ul class="te-ranges" [attr.aria-label]="'macrodeck.app:Forms.ThresholdEditor.Ranges' | translate">
+    @for (band of bands(); track band.id) {
+      <li class="te-range" [class.te-range-selected]="band.index === selectedIndex()">
+        <button
+          type="button"
+          class="te-range-select"
+          [attr.aria-pressed]="band.index === selectedIndex()"
+          [attr.aria-keyshortcuts]="rangeShortcuts()"
+          (keydown)="onRangeKeydown($event, band.index)"
+          (click)="select(band.index)">
+          <span class="te-swatch" [style.background]="band.color" aria-hidden="true"></span>
+          <span class="te-range-text">{{ band.range }}</span>
+        </button>
+        @if (showRemove() && !disabled() && band.index === selectedIndex()) {
+          <shared-button
+            variant="danger-ghost"
+            size="icon-compact"
+            iconOnly
+            [disabled]="!canRemove()"
+            [ariaLabel]="'macrodeck.app:Forms.ThresholdEditor.RemoveRange' | translate"
+            (click)="onRemove()">
+            <span class="icon icon-trash icon-sm" aria-hidden="true"></span>
+          </shared-button>
+        }
+      </li>
+    }
+  </ul>
+
+  @if (!disabled() && !fixedColors()) {
+    <div class="form-group form-group--dense">
+      <span class="form-label">{{ 'macrodeck.app:Forms.ThresholdEditor.Color' | translate }}</span>
+      <shared-color-picker
+        [presets]="colorPresets()"
+        [ngModel]="selectedBand().color"
+        (ngModelChange)="onColorChange($event)" />
+    </div>
+  }
+
+  @if (canReset() && !disabled()) {
+    <div class="te-footer">
+      <shared-button variant="ghost" size="compact" (click)="onReset()">
+        <span class="icon icon-undo icon-sm" aria-hidden="true"></span>
+        {{ 'macrodeck.app:Forms.ThresholdEditor.ResetToDefaults' | translate }}
+      </shared-button>
+    </div>
+  }
+</div>

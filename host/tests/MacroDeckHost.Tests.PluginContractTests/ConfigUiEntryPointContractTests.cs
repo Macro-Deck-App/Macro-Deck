@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using MacroDeck.Plugin.Hosting.Capabilities.ConfigFlow;
 using MacroDeck.Plugin.Hosting.Capabilities.Ui;
@@ -226,6 +227,75 @@ internal sealed class ConfigUiEntryPointContractTests : UiContractFixture
 		{
 			Assert.That(completed.Kind, Is.EqualTo(ConfigFlowResultKind.Complete));
 			Assert.That(ConfigFlowSubmitInvocationCount(), Is.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task S12b_A_thresholds_value_crosses_the_wire_into_the_plugin_binding_and_a_mode_breaking_one_does_not()
+	{
+		await ConnectFixtureAsync();
+		var (flow, _) = await StartConfigFlowAsync();
+
+		var surface = new UiSurface
+		{
+			Kind = UiSurfaceKinds.Config,
+			SessionMode = UiSessionModes.Exclusive,
+			Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
+			{
+				[UiConfigSurfaceAttributes.EntryPoint]
+					= JsonSerializer.SerializeToElement(UiConfigEntryPoints.IntegrationConfig),
+				[UiConfigSurfaceAttributes.IntegrationId] = JsonSerializer.SerializeToElement(PluginId),
+				[UiConfigSurfaceAttributes.ConfigFlowSessionId] = JsonSerializer.SerializeToElement(flow.SessionId)
+			}
+		};
+
+		var ticket = await Broker.OpenAsync(PluginId, surface, OwnerPrincipal, CancellationToken.None);
+		Assert.That(ticket.Accepted, Is.True, ticket.Message);
+		Attach(ticket.SessionId, "c1");
+		await WaitForUiAsync(() => UiTransport.MessagesFor<UiSessionTreeUpdatedEvent>("c1").Count == 1,
+			"The client never received the config flow's tree.");
+
+		var tree = Encoding.UTF8.GetString(UiTransport.For("c1").Single(recorded => recorded.Message is UiSessionTreeUpdatedEvent)
+			.Payload!);
+
+		UiSendEventResponse Send(object bands)
+			=> Broker.SendEvent(new UiSendEventRequest
+				{
+					SessionId = ticket.SessionId,
+					NodeId = WellBehavedConfigFlow.AlertBandsFieldName,
+					Name = UiConfigEvents.Change,
+					Data = UiRawJson.FromElement(JsonSerializer.SerializeToElement(new { bands }))
+				},
+				"c1");
+
+		var fourBands = Send(new object[]
+		{
+			new { id = "calm", color = "#34c759" }, new { id = "busy", color = "#ffcc00", from = 60 },
+			new { id = "alert", color = "#ff3b30", from = 85 }, new { id = "extra", color = "#000000", from = 95 }
+		});
+		var moved = Send(new object[]
+		{
+			new { id = "calm", color = "#34c759" }, new { id = "busy", color = "#ffcc00", from = 55 },
+			new { id = "alert", color = "#ff3b30", from = 80 }
+		});
+
+		await WaitForUiAsync(() => UiTransport.MessagesFor<UiSessionPatchedEvent>("c1").Count >= 1,
+			"The plugin never patched the editor after a valid thresholds change.");
+
+		var patches = UiTransport.For("c1")
+			.Where(recorded => recorded.Message is UiSessionPatchedEvent)
+			.Select(recorded => Encoding.UTF8.GetString(recorded.Payload!))
+			.ToList();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(tree, Does.Contain("\"type\":\"thresholds\""));
+			Assert.That(tree, Does.Contain("\"fixedCount\":true"));
+			Assert.That(fourBands.Accepted, Is.True, fourBands.Message);
+			Assert.That(moved.Accepted, Is.True, moved.Message);
+			Assert.That(patches, Has.Count.EqualTo(1), "only the count-keeping change reaches the binding");
+			Assert.That(patches.Single(), Does.Contain("\"from\":80"));
+			Assert.That(patches.Single(), Does.Not.Contain("extra"));
 		});
 	}
 

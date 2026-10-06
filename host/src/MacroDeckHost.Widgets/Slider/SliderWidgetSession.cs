@@ -714,14 +714,10 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 		var binding = _variable!;
 		var entity = Entity();
 
-		// A provider's declared bound is an unvalidated double, and a NaN one would reach UiCanonicalJson,
-		// whose Strict number handling throws rather than writing it - faulting the whole session over one
-		// bad division inside an integration. A non-finite bound falls back exactly as an absent one does.
-		var min = Bound(entity?.Min, binding.Min);
-		var max = Bound(entity?.Max, binding.Max);
+		var (min, max) = SliderRange.Resolve(entity, binding.Min, binding.Max);
 		var step = binding.CustomStep && binding.Step > 0 && binding.Step <= max - min
 			? binding.Step
-			: Bound(entity?.Step, binding.Step);
+			: SliderRange.Bound(entity?.Step, binding.Step);
 
 		var parsed = entity is not null && binding.Variables.IsAvailable(entity.Id)
 			? ParseNumeric(entity.Value)
@@ -736,9 +732,6 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 			entity?.Unit,
 			entity?.DecimalPlaces);
 	}
-
-	private static double Bound(double? declared, double fallback)
-		=> declared is { } value && double.IsFinite(value) ? value : fallback;
 
 	/// <summary>
 	/// The hold decision <see cref="HandleInteraction" />'s own comment promises: the value the user just

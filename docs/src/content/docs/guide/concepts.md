@@ -40,9 +40,9 @@ The tiles in a folder:
 | Widget | Example |
 | --- | --- |
 | Action Button | **Scenes**, **Go live**, **BRB** |
-| Slider | Mic volume |
+| Slider | Mic volume. Turn on **Color thresholds** to color it by the range its value is in |
 | Clock | The current time and date |
-| History Graph | CPU load over the last minutes |
+| History Graph | CPU load over the last minutes, green under 50 % and red above 90 % with **Color thresholds** |
 | Weather | Today and the next days for your city. Press it for the full details |
 | Music Player | What Spotify is playing, with play and skip. Some players offer extra settings for each widget below the player choice |
 | Twitch Chat | Your channel's chat with emotes and badges, offered once a Twitch account is connected |

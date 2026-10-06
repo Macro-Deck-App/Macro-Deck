@@ -1,7 +1,7 @@
 namespace MacroDeck.Ui.Config;
 
 /// <summary>
-/// The node type strings the configuration profile ships: thirty-four inputs and twenty chrome elements.
+/// The node type strings the configuration profile ships: thirty-five inputs and twenty chrome elements.
 ///
 /// <para>
 /// <b>Derived, not invented.</b> The first twenty-seven input names are exactly the control names the existing
@@ -15,10 +15,10 @@ namespace MacroDeck.Ui.Config;
 /// </para>
 ///
 /// <para>
-/// <b>The rest are Macro Deck's own.</b> The seven inputs after the parameter counterparts name editors the
+/// <b>The rest are Macro Deck's own.</b> The eight inputs after the parameter counterparts name editors the
 /// application already ships - the action list, the pickers for actions, variables, devices and
-/// integrations, the icon-framing control from the widget appearance form, and the button state-mapping
-/// editor - so a widget reaches one by naming it rather than by rebuilding it from primitives. The three
+/// integrations, the icon-framing control from the widget appearance form, the button state-mapping
+/// editor and the colour-threshold editor - so a widget reaches one by naming it rather than by rebuilding it from primitives. The three
 /// chrome types after the flow's own name the regions of a widget's configuration surface. Both groups are
 /// app-specific by design and neither has a parameter counterpart.
 /// </para>
@@ -142,6 +142,10 @@ public static class UiConfigPrimitives
 	/// fallback state used when none match.</summary>
 	public const string StateMappingEditor = "state-mapping-editor";
 
+	/// <summary>A numeric range divided into coloured bands, edited on a bar with a draggable handle between
+	/// each pair.</summary>
+	public const string Thresholds = "thresholds";
+
 	/// <summary>A multi-step configuration flow: the root of a configuration surface.</summary>
 	public const string Flow = "flow";
 
@@ -232,7 +236,7 @@ public static class UiConfigPrimitives
 		String, Number, Boolean, Choice, Password, Secret, DynamicChoice, Autocomplete, MultiSelect, Color,
 		File, Folder, Hotkey, Duration, DateTime, Json, Code, KeyValue, Object, Array, IpAddress, Url, Icon,
 		Image, KeyboardSequence, KeyboardCombo, WidgetTarget, ActionsListEditor, ActionPicker, VariablePicker,
-		DevicePicker, IntegrationPicker, IconDisplay, StateMappingEditor, Flow, Step, Stack, Tabs,
+		DevicePicker, IntegrationPicker, IconDisplay, StateMappingEditor, Thresholds, Flow, Step, Stack, Tabs,
 		Tab, Heading, Prose, Instructions, Instruction, CopyValue, Link, AdvancedSection, Divider, Banner,
 		ValidationMessage, Busy, Button, WidgetConfiguration, WidgetProperties, WidgetEditor, Status,
 		Menu, Dialog,

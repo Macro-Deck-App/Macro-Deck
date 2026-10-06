@@ -3612,6 +3612,30 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Forms.TabBar.RemoveTab" xml:space="preserve">
     <value>Retirer {label}</value>
   </data>
+  <data name="Forms.ThresholdEditor.AddRange" xml:space="preserve">
+    <value>Ajouter une plage</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Color" xml:space="preserve">
+    <value>Couleur</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Range" xml:space="preserve">
+    <value>{from} – {to}</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Ranges" xml:space="preserve">
+    <value>Plages</value>
+  </data>
+  <data name="Forms.ThresholdEditor.RangeWithUnit" xml:space="preserve">
+    <value>{from} – {to} {unit}</value>
+  </data>
+  <data name="Forms.ThresholdEditor.RemoveRange" xml:space="preserve">
+    <value>Supprimer la plage</value>
+  </data>
+  <data name="Forms.ThresholdEditor.ResetToDefaults" xml:space="preserve">
+    <value>Rétablir les valeurs par défaut</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Threshold" xml:space="preserve">
+    <value>Seuil {n}</value>
+  </data>
   <data name="Forms.VariableTextInput.UnknownVariable" xml:space="preserve">
     <value>{raw} - aucune variable portant ce nom n'est disponible ici</value>
   </data>
@@ -11376,7 +11400,7 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>Haut</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>Change la couleur d'accent d'un curseur ou d'un graphique d'historique.</value>
+    <value>Change la couleur d'accent d'un curseur ou d'un graphique d'historique. Sans effet tant que ses seuils de couleur sont activés.</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>Définir la couleur d'accent</value>
@@ -17578,6 +17602,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.Editor.ClearStateMapping" xml:space="preserve">
     <value>Supprimer la correspondance des états</value>
   </data>
+  <data name="Widgets.Editor.ColorThresholds" xml:space="preserve">
+    <value>Seuils de couleur</value>
+  </data>
   <data name="Widgets.Editor.CombinedProviderHeading" xml:space="preserve">
     <value>Cette action peut contrôler l'état et l'icône de ce bouton.</value>
   </data>
@@ -18122,6 +18149,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.History.ChartMinimumHint" xml:space="preserve">
     <value>Limite inférieure fixe, peut être négative (ex. -100). Mets 0 pour une mise à l'échelle automatique.</value>
   </data>
+  <data name="Widgets.History.ColorThresholdsDescription" xml:space="preserve">
+    <value>Colore le graphique et la valeur selon la plage dans laquelle se trouve la dernière valeur, au lieu de la couleur d'accent.</value>
+  </data>
   <data name="Widgets.History.MetricSection" xml:space="preserve">
     <value>Métrique</value>
   </data>
@@ -18343,6 +18373,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Widgets.Slider.ChooseIcon" xml:space="preserve">
     <value>Choisir une icône</value>
+  </data>
+  <data name="Widgets.Slider.ColorThresholdsDescription" xml:space="preserve">
+    <value>Colore le curseur selon la plage dans laquelle se trouve sa valeur, au lieu de la couleur du curseur.</value>
   </data>
   <data name="Widgets.Slider.CustomStep" xml:space="preserve">
     <value>Pas personnalisé</value>
