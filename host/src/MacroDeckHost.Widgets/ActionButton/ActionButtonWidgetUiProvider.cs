@@ -45,6 +45,7 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 	private readonly ActionProviderProbe _providerProbe;
 	private readonly ILocalizationResolver _localization;
 	private readonly TimeProvider _timeProvider;
+	private readonly IIconPackCache _iconPackCache;
 
 	public ActionButtonWidgetUiProvider(
 		IFolderCache folderCache,
@@ -63,8 +64,10 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 		IFontCatalog fonts,
 		ActionProviderProbe providerProbe,
 		ILocalizationResolver localization,
-		TimeProvider timeProvider)
+		TimeProvider timeProvider,
+		IIconPackCache iconPackCache)
 	{
+		_iconPackCache = iconPackCache;
 		_folderCache = folderCache;
 		_iconResources = iconResources;
 		_resourceStore = resourceStore;
@@ -126,6 +129,7 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 				_localization,
 				culture,
 				_timeProvider,
+				_iconPackCache,
 				sessionLifetime.Token);
 			var configView = new UiView(request.Surface,
 				ActionButtonWidgetConfigView.Build(configData,

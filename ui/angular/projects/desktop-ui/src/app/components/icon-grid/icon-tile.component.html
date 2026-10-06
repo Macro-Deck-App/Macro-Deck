@@ -6,6 +6,7 @@
   [attr.aria-label]="icon.name"
   [attr.aria-pressed]="selected"
   (click)="onClick($event)"
+  (dblclick)="onDoubleClick()"
   (contextmenu)="onContextMenu($event)">
   @if (multiSelect) {
     <span
@@ -25,9 +26,18 @@
     @switch (icon.processingState) {
       @case ('Ready') {
         <img [src]="imageUrl" [alt]="icon.name" loading="lazy" decoding="async" />
-        @if (icon.isAnimated) {
-          <span class="badge" role="img" [title]="animatedIconLabel()" [attr.aria-label]="animatedIconLabel()">
-            <span class="icon icon-play icon-xs"></span>
+        @if (icon.isAnimated || appearanceCount > 0) {
+          <span class="badges">
+            @if (appearanceCount > 0) {
+              <span class="badge appearances-badge" role="img" [title]="appearancesLabel" [attr.aria-label]="appearancesLabel">
+                <span class="icon icon-layers icon-xs"></span>
+              </span>
+            }
+            @if (icon.isAnimated) {
+              <span class="badge" role="img" [title]="animatedIconLabel()" [attr.aria-label]="animatedIconLabel()">
+                <span class="icon icon-play icon-xs"></span>
+              </span>
+            }
           </span>
         }
       }

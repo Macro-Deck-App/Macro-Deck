@@ -4,6 +4,7 @@ using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Config.Options;
 using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Runtime;
+using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
@@ -19,18 +20,17 @@ namespace MacroDeckHost.Widgets.Slider;
 /// </summary>
 internal static class SliderWidgetConfigView
 {
-	public static UiElement Build(JsonElement data, VariableRegistry variables, Guid? widgetId = null)
+	public static UiElement Build(JsonElement data,
+		VariableRegistry variables,
+		IIconPackCache icons,
+		Guid? widgetId = null)
 	{
 		ArgumentNullException.ThrowIfNull(variables);
 
 		var label = new UiState<string>(WidgetConfigJson.ReadString(data, "label") ?? string.Empty);
 		var showLabel = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showLabel") ?? true);
 		var showValue = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showValue") ?? false);
-		// UiIconReferenceInput binds UiIconReference rather than UiIconReference? - an icon is a reference
-		// type, so the runtime accepts a null value ("no icon") through it despite the non-nullable
-		// annotation; declaring the state as UiIconReference? here would fail to unify with the input's own
-		// UiBinding<UiIconReference> at the generic level.
-		var icon = new UiState<UiIconReference>(ReadIcon(data)!);
+		var icon = new UiState<WidgetIconReference?>(ReadIcon(data));
 		var iconColor = new UiState<string>(WidgetConfigJson.ReadString(data, "iconColor") ?? string.Empty);
 		var orientation = new UiState<string>(WidgetConfigJson.ReadString(data, "orientation") ?? "horizontal");
 		var interaction = new UiState<string>(WidgetConfigJson.ReadString(data, "interaction") ?? "absolute");
@@ -159,8 +159,11 @@ internal static class SliderWidgetConfigView
 					{
 						Key = "showValue", Label = AppStrings.Widgets.Slider.ShowValue(), Binding = Bind.To(showValue),
 					},
-					new UiIconReferenceInput
-						{ Key = "icon", Label = AppStrings.Widgets.Editor.Icon(), Binding = Bind.To(icon) },
+					WidgetIconField.Build("icon",
+						AppStrings.Widgets.Editor.Icon(),
+						() => icon.Value,
+						value => icon.Value = value,
+						icons),
 					new UiWhen
 					{
 						Key = "icon-color-when",
@@ -281,7 +284,7 @@ internal static class SliderWidgetConfigView
 	private static VariableEntity? Picked(VariableRegistry variables, Guid? widgetId, string name)
 		=> string.IsNullOrEmpty(name) ? null : SliderDefaultVariable.Find(variables, widgetId, name);
 
-	private static UiIconReference? ReadIcon(JsonElement data)
+	private static WidgetIconReference? ReadIcon(JsonElement data)
 	{
 		var icon = data.ValueKind == JsonValueKind.Object &&
 			data.TryGetProperty("icon", out var iconElement) &&
@@ -290,8 +293,6 @@ internal static class SliderWidgetConfigView
 				: null;
 
 		var legacyIconId = WidgetConfigJson.ReadString(data, "iconId");
-		var reference = WidgetIconReference.Read(icon, legacyIconId);
-
-		return reference is { } value ? new UiIconReference(value.Type, value.Reference) : null;
+		return WidgetIconReference.Read(icon, legacyIconId);
 	}
 }

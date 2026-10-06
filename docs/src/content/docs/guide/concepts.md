@@ -200,6 +200,39 @@ the editor offers this right away. The action then decides which states exist, a
 them. The **×** next to *Provided by* brings your own states back. Plugin actions that supply an icon work the same
 way for the button's icon.
 
+## Icon appearances
+
+An icon can have more than one appearance: a light and a dark version, or an animated icon and a still
+version of it. It stays one icon in **Library > Icon Packs** and in the icon picker, and Macro Deck shows the
+appearance that fits:
+
+- **Light** or **Dark** follows the theme of the screen showing the deck: the Macro Deck app and the deck you
+  open in a browser. With the theme set to **System**, each of them follows its own device's setting. The
+  Companion app shows the **Default** until it supports appearances.
+- **Static** is shown where the system asks for reduced motion, and **Animated** everywhere else. An animated
+  icon without a static appearance keeps playing.
+- A device that can't play animations, such as some stream controllers, shows the **Static** appearance when
+  there is one.
+- When no appearance fits, the icon's own image, the **Default**, is shown.
+
+Icons with appearances have a layered mark in the corner. Double-click an icon, or right-click it and choose
+**Appearances…**, to see them. There you add an appearance from an image file, replace or remove one, or use an
+existing icon from the same pack as an appearance. That icon then disappears from the pack, and buttons and
+actions that used it switch to the icon it became part of. Appearances of icons in Store and plugin packs come
+with the pack and can't be changed.
+
+To always show one appearance on a button or slider, pick it under **Icon appearance** next to the icon.
+**Automatic** goes back to choosing by theme and motion. A flow can switch it with the **Set Icon Appearance**
+action.
+
+When you import images, files named like `play.png`, `play.dark.png` and `play.static.gif` in the same folder
+become one icon `play` with a dark and a static appearance. The words `light`, `dark`, `static` and `animated`
+work this way, also combined, as in `play.dark.static.png`. Other names import as separate icons as before.
+
+Appearances travel with the icon when you export a pack or a profile. A Macro Deck version without
+appearances shows only the default images, and if you go back to such a version, its icon packs lose their
+appearances.
+
 ## Variables
 
 Values you can show and use anywhere:

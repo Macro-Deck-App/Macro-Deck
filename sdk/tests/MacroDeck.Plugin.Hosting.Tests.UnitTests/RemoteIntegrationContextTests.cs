@@ -663,6 +663,45 @@ public class RemoteIntegrationContextTests
 	}
 
 	[Test]
+	public void A_widget_push_listing_the_icon_appearance_keeps_it_beside_the_older_values()
+	{
+		var connection = new PluginConnectionState { NegotiatedVersion = 2 };
+		var stateCache = new HostStateCache(connection);
+		var widgets = new RemoteWidgetApi(new RecordingHostInvoker(), connection, stateCache);
+
+		stateCache.Apply(StatePush(HostApis.Widgets,
+			new List<WidgetTargetInfoDtoV2>
+			{
+				new() { Id = "w1", Label = "Mic", Location = "Home", Type = "action-button",
+					AppearanceProperties = [3, 9, 10] }
+			}));
+
+		Assert.That(widgets.GetWidgets().Single().AppearanceProperties, Is.EqualTo(new[]
+		{
+			WidgetAppearanceProperty.Icon, WidgetAppearanceProperty.IconColor, WidgetAppearanceProperty.IconAppearance
+		}));
+	}
+
+	[Test]
+	public async Task The_icon_appearance_and_its_reset_reach_the_host_on_the_wire()
+	{
+		await _context.Widgets.ApplyAsync(new WidgetAppearanceRequest
+		{
+			WidgetId = "w1",
+			Patch = new WidgetAppearancePatch { IconAppearance = "colorScheme=dark" },
+			ClearProperties = [WidgetAppearanceProperty.IconAppearance]
+		});
+
+		var wire = JsonSerializer.SerializeToElement(_invoker.LastArguments, PluginProtocolJson.Options);
+		Assert.Multiple(() =>
+		{
+			Assert.That(wire.GetProperty("patch").GetProperty("iconAppearance").GetString(), Is.EqualTo("colorScheme=dark"));
+			Assert.That(wire.GetProperty("clearProperties").EnumerateArray().Select(value => value.GetInt32()),
+				Is.EqualTo(new[] { 10 }));
+		});
+	}
+
+	[Test]
 	public void Event_bindings_are_empty_before_the_host_pushed_any()
 		=> Assert.That(_context.Events.GetBindings(), Is.Empty);
 

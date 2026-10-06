@@ -5,10 +5,12 @@ import {
   UiNode,
   UiRenderHost,
   containsTickingNode,
+  hasIconAppearances,
   uiResourceUrl,
 } from '@macro-deck/runtime';
 
 import { FontLoaderService, internalFontFamily } from '../../services/font-loader.service';
+import { IconAppearanceContextService } from '../../services/icon-appearance-context.service';
 import { LocalizationService } from '../../localization';
 import { RenderingModeService } from '../../services/rendering-mode.service';
 import { ServerClockService } from '../../services/server-clock.service';
@@ -27,6 +29,7 @@ export class UiWidgetRenderHostFactory {
   private readonly fontLoader = inject(FontLoaderService);
   private readonly uiFonts = inject(UiFontService);
   private readonly videoStreams = inject(VideoStreamService);
+  private readonly iconAppearance = inject(IconAppearanceContextService);
 
   private readonly baseUrl = signal<string | null>(this.resourceBaseUrl.current);
 
@@ -41,7 +44,9 @@ export class UiWidgetRenderHostFactory {
       localization: this.localization,
       resourceUrl: resource => {
         const base = this.baseUrl();
-        return base === null ? null : uiResourceUrl(base, resource);
+        if (base === null) return null;
+        const context = hasIconAppearances(resource) ? this.iconAppearance.current() : undefined;
+        return uiResourceUrl(base, resource, undefined, context);
       },
       now: () => this.serverClock.now(),
       culture: () => this.localization.culture(),

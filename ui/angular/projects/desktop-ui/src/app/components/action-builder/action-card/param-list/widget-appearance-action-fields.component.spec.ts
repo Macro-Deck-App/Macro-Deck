@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 import { ActionBlock, WIDGET_APPEARANCE_RESET } from '@macro-deck/runtime';
 import { ApiService, IconImageService } from '@shared';
 import { ColorPickerComponent } from '../../../forms/color-picker/color-picker.component';
+import { SelectComponent } from '../../../forms/select/select.component';
 import { WidgetFontAppearanceControlComponent } from '../../../widget-appearance/widget-font-appearance-control.component';
 import { WidgetIconDisplayControlComponent } from '../../../widget-appearance/widget-icon-display-control.component';
 import { ActionOptionsService } from '../../../../services/action-options.service';
@@ -201,6 +202,45 @@ describe('WidgetAppearanceActionFieldsComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.debugElement.query(By.directive(ColorPickerComponent))).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('does not support this appearance setting');
+  });
+
+  it('offers the icon appearances of Set Icon Appearance and writes the chosen one', async () => {
+    options.getOptions.and.resolveTo({
+      options: [{ value: 'button', metadata: { appearanceProperties: 'Icon,IconColor,IconAppearance' } }],
+      allowsCustomValue: false,
+    });
+    const appearanceBlock = block('set-icon-appearance', 'button');
+    appearanceBlock.parameters = [...appearanceBlock.parameters!, {
+      name: 'iconAppearance', type: 'choice', label: 'Appearance', value: WIDGET_APPEARANCE_RESET,
+      options: [{ value: WIDGET_APPEARANCE_RESET, label: 'Automatic' }, { value: 'colorScheme=dark', label: 'Dark' }],
+    }];
+    fixture.componentRef.setInput('block', appearanceBlock);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const select = fixture.debugElement.query(By.directive(SelectComponent));
+    expect(select).not.toBeNull();
+    expect((select.componentInstance as SelectComponent).options.map(option => option.value))
+      .toEqual([WIDGET_APPEARANCE_RESET, 'colorScheme=dark']);
+    expect(fixture.nativeElement.textContent).toContain('Appearance');
+
+    select.triggerEventHandler('ngModelChange', 'colorScheme=dark');
+    expect(updateParam.calls.mostRecent().args).toEqual(['action-1', 'iconAppearance', 'colorScheme=dark']);
+  });
+
+  it('hides Set Icon Appearance for a widget whose icon cannot be pinned', async () => {
+    options.getOptions.and.resolveTo({
+      options: [{ value: 'clock', metadata: { appearanceProperties: 'BackgroundColor,Border,BorderColor' } }],
+      allowsCustomValue: false,
+    });
+    fixture.componentRef.setInput('block', block('set-icon-appearance', 'clock'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.debugElement.query(By.directive(SelectComponent))).toBeNull();
     expect(fixture.nativeElement.textContent).toContain('does not support this appearance setting');
   });
 

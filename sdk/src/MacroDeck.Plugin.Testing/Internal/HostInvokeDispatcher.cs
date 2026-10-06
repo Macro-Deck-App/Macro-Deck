@@ -939,7 +939,8 @@ internal static class HostInvokeDispatcher
 			LabelPosition = dto.LabelPosition,
 			BorderStyle = dto.BorderStyle,
 			BorderColor = dto.BorderColor,
-			AccentColor = dto.AccentColor
+			AccentColor = dto.AccentColor,
+			IconAppearance = dto.IconAppearance
 		};
 
 	private static HostInvokeOutcome Notifications(FakeIntegrationContext context, HostInvokePayload payload)

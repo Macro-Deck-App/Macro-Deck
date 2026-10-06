@@ -89,4 +89,28 @@ public class IconImportFilesTests
 	{
 		Assert.That(IconImportFiles.IsFolderImportEntry(fileName), Is.False);
 	}
+
+	[TestCase("play.dark.png", "play", "colorScheme=dark")]
+	[TestCase("sub/play.Static.GIF", "play", "motion=static")]
+	[TestCase("play.static.dark.webp", "play", "colorScheme=dark;motion=static")]
+	[TestCase("my.icon.animated.light.png", "my.icon", "colorScheme=light;motion=animated")]
+	public void A_known_suffix_names_an_appearance_of_the_base_name(string fileName, string baseName, string key)
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(IconImportFiles.TryParseAppearanceName(fileName, out var parsedBase, out var traits), Is.True);
+			Assert.That(parsedBase, Is.EqualTo(baseName));
+			Assert.That(IconAppearanceTraits.ToKey(traits), Is.EqualTo(key));
+		});
+	}
+
+	[TestCase("play.png")]
+	[TestCase("play.blue.png")]
+	[TestCase("dark.png")]
+	[TestCase("play.dark.light.png")]
+	[TestCase("play.dark.blue.png")]
+	public void Anything_else_is_a_plain_file_name(string fileName)
+	{
+		Assert.That(IconImportFiles.TryParseAppearanceName(fileName, out _, out _), Is.False);
+	}
 }

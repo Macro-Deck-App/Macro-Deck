@@ -20,6 +20,8 @@ public interface IIconPackCache
 
 	IconEntity? GetIconById(Guid iconId);
 
+	IReadOnlyList<IconEntity> GetAppearances(Guid parentId);
+
 	List<IconEntity> GetIconsByPackId(Guid packId);
 
 	List<IconEntity> GetIconsByBatchId(Guid batchId);

@@ -1,4 +1,5 @@
 using MacroDeck.Localization;
+using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages;
@@ -13,12 +14,15 @@ public class ImportSingleIconFromPathRequestMessageHandler
 {
 	private readonly IAppIconExtractor _appIconExtractor;
 	private readonly IIconImportService _iconImportService;
+	private readonly IIconPackCache _iconPackCache;
 
 	public ImportSingleIconFromPathRequestMessageHandler(IAppIconExtractor appIconExtractor,
-		IIconImportService iconImportService)
+		IIconImportService iconImportService,
+		IIconPackCache iconPackCache)
 	{
 		_appIconExtractor = appIconExtractor;
 		_iconImportService = iconImportService;
+		_iconPackCache = iconPackCache;
 	}
 
 	public async ValueTask<ImportSingleIconResponse> Handle(ImportSingleIconFromPathRequest request,
@@ -73,7 +77,7 @@ public class ImportSingleIconFromPathRequestMessageHandler
 			new IconImportFile(icon.FileName, content),
 			cancellationToken);
 
-		return IconMapper.ToSingleImportResponse(result);
+		return IconMapper.ToSingleImportResponse(result, _iconPackCache);
 	}
 
 	private static ImportSingleIconResponse Invalid(LocalizedText message)

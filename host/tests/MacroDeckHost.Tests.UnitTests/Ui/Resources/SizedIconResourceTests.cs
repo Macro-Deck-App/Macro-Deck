@@ -152,7 +152,8 @@ internal sealed class SizedIconResourceTests
 		var store = new UiResourceStore();
 		var widgetIcons = new WidgetIconResources(new WidgetIconSourceRegistry([_iconPackSource]),
 			store,
-			Serilog.Core.Logger.None);
+			Serilog.Core.Logger.None,
+			new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache());
 		var handle = await widgetIcons.ResolveAsync(WidgetIconReference.IconPack(icon.Id.ToString()), CancellationToken.None);
 
 		var served = await Controller(store).Get(handle!.ResourceId, handle.ContentHash, "128") as FileContentResult;
@@ -253,7 +254,10 @@ internal sealed class SizedIconResourceTests
 
 	private static async Task<MacroDeck.Ui.Model.Resources.UiResource> RegisterFake(UiResourceStore store, FakeSource source)
 	{
-		var widgetIcons = new WidgetIconResources(new WidgetIconSourceRegistry([source]), store, Serilog.Core.Logger.None);
+		var widgetIcons = new WidgetIconResources(new WidgetIconSourceRegistry([source]),
+			store,
+			Serilog.Core.Logger.None,
+			new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache());
 		return (await widgetIcons.ResolveAsync(new WidgetIconReference(FakeSource.SourceType, "logo"), CancellationToken.None))!;
 	}
 

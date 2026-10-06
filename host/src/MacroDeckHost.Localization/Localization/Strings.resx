@@ -3649,6 +3649,98 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="IconPacks.AiNotDeclared" xml:space="preserve">
     <value>Not declared</value>
   </data>
+  <data name="IconPacks.Appearances.Add" xml:space="preserve">
+    <value>Add appearance</value>
+  </data>
+  <data name="IconPacks.Appearances.AddFailed" xml:space="preserve">
+    <value>The appearance could not be added.</value>
+  </data>
+  <data name="IconPacks.Appearances.AutoHint" xml:space="preserve">
+    <value>Macro Deck shows the appearance that fits the current theme and motion setting, and the default when none fits.</value>
+  </data>
+  <data name="IconPacks.Appearances.Badge.One" xml:space="preserve">
+    <value>{count} more appearance</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="IconPacks.Appearances.Badge.Other" xml:space="preserve">
+    <value>{count} more appearances</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="IconPacks.Appearances.Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="IconPacks.Appearances.DialogTitle" xml:space="preserve">
+    <value>Appearances of “{name}”</value>
+  </data>
+  <data name="IconPacks.Appearances.Empty" xml:space="preserve">
+    <value>No other appearances yet.</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Animated" xml:space="preserve">
+    <value>Animated</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Custom" xml:space="preserve">
+    <value>Custom ({traits})</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Dark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.DarkAnimated" xml:space="preserve">
+    <value>Dark, animated</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.DarkStatic" xml:space="preserve">
+    <value>Dark, static</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.LightAnimated" xml:space="preserve">
+    <value>Light, animated</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.LightStatic" xml:space="preserve">
+    <value>Light, static</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Static" xml:space="preserve">
+    <value>Static</value>
+  </data>
+  <data name="IconPacks.Appearances.MenuItem" xml:space="preserve">
+    <value>Appearances…</value>
+  </data>
+  <data name="IconPacks.Appearances.Merge" xml:space="preserve">
+    <value>Use an existing icon…</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeConfirm" xml:space="preserve">
+    <value>Use as appearance</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeFailed" xml:space="preserve">
+    <value>The icon could not be used as an appearance.</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeHint" xml:space="preserve">
+    <value>The icon becomes part of “{name}”. Buttons and actions that used it switch to “{name}”.</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeKindLabel" xml:space="preserve">
+    <value>Use as</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeTitle" xml:space="preserve">
+    <value>Use an existing icon</value>
+  </data>
+  <data name="IconPacks.Appearances.PreviewAlt" xml:space="preserve">
+    <value>“{kind}” appearance of “{name}”</value>
+  </data>
+  <data name="IconPacks.Appearances.ReadOnly" xml:space="preserve">
+    <value>This pack is read-only, so its appearances cannot be changed.</value>
+  </data>
+  <data name="IconPacks.Appearances.RemoveConfirmMessage" xml:space="preserve">
+    <value>Remove the “{kind}” appearance from “{name}”? Buttons that use it switch to another appearance.</value>
+  </data>
+  <data name="IconPacks.Appearances.RemoveConfirmTitle" xml:space="preserve">
+    <value>Remove appearance</value>
+  </data>
+  <data name="IconPacks.Appearances.RemoveFailed" xml:space="preserve">
+    <value>The appearance could not be removed.</value>
+  </data>
+  <data name="IconPacks.Appearances.Replace" xml:space="preserve">
+    <value>Replace</value>
+  </data>
   <data name="IconPacks.AuthorFieldLabel" xml:space="preserve">
     <value>Author</value>
   </data>
@@ -11307,6 +11399,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Widgets.Actions.FontSizeLabel" xml:space="preserve">
     <value>Size</value>
   </data>
+  <data name="Integrations.Widgets.Actions.IconAppearanceDescription" xml:space="preserve">
+    <value>Automatic picks the appearance that suits the screen, Default always shows the icon's own image. If the icon lacks the chosen appearance, one is picked automatically.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.IconAppearanceLabel" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
   <data name="Integrations.Widgets.Actions.IconDescription" xml:space="preserve">
     <value>Leave empty to remove the icon.</value>
   </data>
@@ -11405,6 +11503,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.Widgets.Actions.SetFontName" xml:space="preserve">
     <value>Set Label Font</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconAppearanceDescription" xml:space="preserve">
+    <value>Chooses which appearance of a widget's icon is shown, such as its dark or static version.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconAppearanceName" xml:space="preserve">
+    <value>Set Icon Appearance</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetIconDescription" xml:space="preserve">
     <value>Changes the icon a widget shows.</value>
@@ -12239,6 +12343,40 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Notifications.HttpsNotRunningMessage" xml:space="preserve">
     <value>Macro Deck is reachable over HTTP, but the HTTPS listener did not start. Check the HTTPS port and certificate in Settings &gt; Network.</value>
+  </data>
+  <data name="Notifications.IconImport.CompletedWithWarnings.One" xml:space="preserve">
+    <value>Imported {count} icon into {pack} with warnings</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.IconImport.CompletedWithWarnings.Other" xml:space="preserve">
+    <value>Imported {count} icons into {pack} with warnings</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.IconImport.DefaultPackName" xml:space="preserve">
+    <value>icon pack</value>
+  </data>
+  <data name="Notifications.IconImport.Failed" xml:space="preserve">
+    <value>Failed to import icons into {pack}</value>
+  </data>
+  <data name="Notifications.IconImport.Importing" xml:space="preserve">
+    <value>Importing icons into {pack}</value>
+  </data>
+  <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
+    <value>Nothing there could be imported as an icon.</value>
+  </data>
+  <data name="Notifications.IconImport.NothingImported" xml:space="preserve">
+    <value>Nothing to import into {pack}</value>
+  </data>
+  <data name="Notifications.IconImport.PartlyFailed" xml:space="preserve">
+    <value>{imported} imported, {failed} failed into {pack}</value>
+  </data>
+  <data name="Notifications.IconImport.Skipped.One" xml:space="preserve">
+    <value>{count} file was already in this pack and was skipped.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.IconImport.Skipped.Other" xml:space="preserve">
+    <value>{count} files were already in this pack and were skipped.</value>
+    <comment>[plural]</comment>
   </data>
   <data name="Notifications.InstallationDamagedMessage" xml:space="preserve">
     <value>Some of Macro Deck's files are missing or do not match the installed version. This happens when an update was interrupted, for example when antivirus software held back some of its files. Download the latest version of Macro Deck and install it again. The logs list the affected files.</value>
@@ -17282,6 +17420,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Widgets.Appearance.Font.Unchanged" xml:space="preserve">
     <value>Unchanged</value>
+  </data>
+  <data name="Widgets.Appearance.Icon.Appearance" xml:space="preserve">
+    <value>Icon appearance</value>
+  </data>
+  <data name="Widgets.Appearance.Icon.AppearanceAutomatic" xml:space="preserve">
+    <value>Automatic</value>
   </data>
   <data name="Widgets.Appearance.Icon.ChangeIcon" xml:space="preserve">
     <value>Change icon</value>

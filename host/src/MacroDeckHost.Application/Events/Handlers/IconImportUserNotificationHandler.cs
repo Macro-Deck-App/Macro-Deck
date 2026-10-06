@@ -1,8 +1,13 @@
+using System.Globalization;
+using MacroDeck.Localization;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Notifications;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
+using MacroDeckHost.Localization;
 using Mediator;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MacroDeckHost.Application.Events.Handlers;
 
@@ -10,14 +15,21 @@ public sealed class IconImportUserNotificationHandler : INotificationHandler<Ico
 {
 	private readonly IUserNotificationStore _store;
 	private readonly IIconPackCache _iconPackCache;
+	private readonly IServiceScopeFactory _scopeFactory;
+	private readonly ILocalizationResolver _localization;
 
-	public IconImportUserNotificationHandler(IUserNotificationStore store, IIconPackCache iconPackCache)
+	public IconImportUserNotificationHandler(IUserNotificationStore store,
+		IIconPackCache iconPackCache,
+		IServiceScopeFactory scopeFactory,
+		ILocalizationResolver localization)
 	{
 		_store = store;
 		_iconPackCache = iconPackCache;
+		_scopeFactory = scopeFactory;
+		_localization = localization;
 	}
 
-	public ValueTask Handle(IconImportProgressNotification notification, CancellationToken cancellationToken)
+	public async ValueTask Handle(IconImportProgressNotification notification, CancellationToken cancellationToken)
 	{
 		var batch = notification.Batch;
 		var isTerminal = batch.State is IconImportBatchState.Completed
@@ -26,7 +38,7 @@ public sealed class IconImportUserNotificationHandler : INotificationHandler<Ico
 			or IconImportBatchState.Cancelled;
 
 		var dedupeKey = DedupeKey(batch);
-		var draft = BuildDraft(batch, notification.Total, notification.Processed, notification.Failed, isTerminal);
+		var draft = await BuildDraft(batch, notification.Total, notification.Processed, notification.Failed, isTerminal);
 		if (draft is null)
 		{
 			if (isTerminal)
@@ -34,7 +46,7 @@ public sealed class IconImportUserNotificationHandler : INotificationHandler<Ico
 				_store.Retire(dedupeKey);
 			}
 
-			return ValueTask.CompletedTask;
+			return;
 		}
 
 		if (isTerminal)
@@ -45,68 +57,71 @@ public sealed class IconImportUserNotificationHandler : INotificationHandler<Ico
 		{
 			_store.UpdateProgress(draft.DedupeKey!, draft.Progress!);
 		}
-
-		return ValueTask.CompletedTask;
 	}
 
-	private static string SkippedNote(IconImportBatchEntity batch)
-		=> batch.Skipped switch
-		{
-			0 => "Nothing there could be imported as an icon.",
-			1 => "1 file was already in this pack and was skipped.",
-			_ => $"{batch.Skipped} files were already in this pack and were skipped."
-		};
+	private static LocalizedText SkippedNote(IconImportBatchEntity batch)
+		=> batch.Skipped == 0
+			? AppStrings.Notifications.IconImport.NothingImportable()
+			: AppStrings.Notifications.IconImport.Skipped(count: batch.Skipped);
 
-	private UserNotificationDraft? BuildDraft(IconImportBatchEntity batch,
+	private async Task<UserNotificationDraft?> BuildDraft(IconImportBatchEntity batch,
 		int? total,
 		int processed,
 		int failed,
 		bool isTerminal)
 	{
-		var packName = _iconPackCache.GetPackById(batch.PackId)?.Name ?? batch.SourceName ?? "icon pack";
-
-		(UserNotificationSeverity Severity, string Title, string? Message)? content = batch.State switch
-		{
-			IconImportBatchState.Completed when batch.Error is null =>
-				processed == 0
-					? (UserNotificationSeverity.Info, $"Nothing to import into {packName}", SkippedNote(batch))
-					: null,
-			IconImportBatchState.Completed =>
-				(UserNotificationSeverity.Warning,
-					$"Imported {processed} icons into {packName} with warnings",
-					batch.Error),
-			IconImportBatchState.CompletedWithErrors =>
-				(UserNotificationSeverity.Warning, $"{processed} imported, {failed} failed into {packName}",
-					batch.Error),
-			IconImportBatchState.Failed =>
-				(UserNotificationSeverity.Error, $"Failed to import icons into {packName}", batch.Error),
-			IconImportBatchState.Cancelled => null,
-			_ => (UserNotificationSeverity.Info, $"Importing icons into {packName}", null)
-		};
-
-		if (batch.Silent &&
-			content?.Severity is not (UserNotificationSeverity.Warning or UserNotificationSeverity.Error))
+		if (batch.State is IconImportBatchState.Cancelled ||
+			(batch.State is IconImportBatchState.Completed && batch.Error is null && processed > 0))
 		{
 			return null;
 		}
 
-		if (content is null)
+		var culture = await ActiveLocalization.Culture(_scopeFactory);
+		var pack = _iconPackCache.GetPackById(batch.PackId)?.Name ??
+			batch.SourceName ??
+			Resolve(AppStrings.Notifications.IconImport.DefaultPackName(), culture);
+
+		(UserNotificationSeverity Severity, LocalizedText Title, string? Message) content = batch.State switch
+		{
+			IconImportBatchState.Completed when batch.Error is null =>
+				(UserNotificationSeverity.Info,
+					AppStrings.Notifications.IconImport.NothingImported(pack: pack),
+					Resolve(SkippedNote(batch), culture)),
+			IconImportBatchState.Completed =>
+				(UserNotificationSeverity.Warning,
+					AppStrings.Notifications.IconImport.CompletedWithWarnings(count: processed, pack: pack),
+					batch.Error),
+			IconImportBatchState.CompletedWithErrors =>
+				(UserNotificationSeverity.Warning,
+					AppStrings.Notifications.IconImport.PartlyFailed(
+						imported: processed.ToString(CultureInfo.InvariantCulture),
+						failed: failed.ToString(CultureInfo.InvariantCulture),
+						pack: pack),
+					batch.Error),
+			IconImportBatchState.Failed =>
+				(UserNotificationSeverity.Error, AppStrings.Notifications.IconImport.Failed(pack: pack), batch.Error),
+			_ => (UserNotificationSeverity.Info, AppStrings.Notifications.IconImport.Importing(pack: pack), null)
+		};
+
+		if (batch.Silent && content.Severity is not (UserNotificationSeverity.Warning or UserNotificationSeverity.Error))
 		{
 			return null;
 		}
 
 		return new UserNotificationDraft
 		{
-			Severity = content.Value.Severity,
+			Severity = content.Severity,
 			Kind = UserNotificationKind.IconImport,
-			Title = content.Value.Title,
-			Message = content.Value.Message,
+			Title = Resolve(content.Title, culture),
+			Message = content.Message,
 			Action = new UserNotificationAction(UserNotificationActionKind.OpenIconPacks, batch.PackId.ToString()),
 			Progress = isTerminal ? null : new UserNotificationProgress(processed, total),
 			CancelKey = isTerminal ? null : batch.Id.ToString(),
 			DedupeKey = DedupeKey(batch)
 		};
 	}
+
+	private string Resolve(LocalizedText text, string? culture) => _localization.Resolve(text, culture) ?? string.Empty;
 
 	private static string DedupeKey(IconImportBatchEntity batch) => $"icon-import:{batch.Id}";
 }

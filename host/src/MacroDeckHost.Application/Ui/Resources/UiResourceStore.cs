@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Text;
 using MacroDeck.Plugin.Protocol.Assets;
 using MacroDeck.Ui.Model.Identity;
 using MacroDeck.Ui.Model.Resources;
@@ -42,7 +43,7 @@ public sealed class UiResourceStore : IUiResourceStore
 		{
 			Content = registration.Content,
 			MediaType = registration.MediaType,
-			ContentHash = AssetContentHash.Compute(registration.Content.Span),
+			ContentHash = HashOf(registration),
 		};
 
 		_resources[resourceId] = content;
@@ -55,6 +56,23 @@ public sealed class UiResourceStore : IUiResourceStore
 			ByteLength = registration.Content.Length,
 		};
 	}
+
+	internal static string HashOf(ReadOnlyMemory<byte> content, string? variation)
+	{
+		if (variation is null)
+		{
+			return AssetContentHash.Compute(content.Span);
+		}
+
+		var suffix = Encoding.UTF8.GetBytes("\n" + variation);
+		var combined = new byte[content.Length + suffix.Length];
+		content.Span.CopyTo(combined);
+		suffix.CopyTo(combined.AsSpan(content.Length));
+		return AssetContentHash.Compute(combined);
+	}
+
+	private static string HashOf(UiResourceRegistration registration)
+		=> HashOf(registration.Content, registration.Variation);
 
 	public bool TryGet(string resourceId, out UiResourceContent content)
 	{
