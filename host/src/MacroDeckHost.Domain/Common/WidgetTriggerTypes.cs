@@ -31,4 +31,10 @@ public static class WidgetTriggerTypes
 	public const string StopwatchPaused = "onStopwatchPaused";
 
 	public const string StopwatchReset = "onStopwatchReset";
+
+	public const string CalendarEventStartsSoon = "onCalendarEventStartsSoon";
+
+	public const string CalendarEventStarted = "onCalendarEventStarted";
+
+	public const string CalendarEventEnded = "onCalendarEventEnded";
 }

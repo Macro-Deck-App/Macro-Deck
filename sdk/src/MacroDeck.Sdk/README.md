@@ -8,7 +8,7 @@ What is in here:
 
 - `IIntegration` and `IIntegrationContext` - the base contract and the host services handed to it.
 - Capability interfaces - actions, config flow, variables, events, music players, weather stations,
-  virtual profiles, icons and issues.
+  calendars, virtual profiles, icons and issues.
 - `MacroDeck.Sdk.Identity` - `MacroDeckId` and `QualifiedId`, the id rules every owner and capability
   is validated against.
 

@@ -46,6 +46,15 @@ export function timerTriggerTabs(t: Translator): readonly TriggerTab[] {
   ];
 }
 
+export function calendarTriggerTabs(t: Translator): readonly TriggerTab[] {
+  const T = AppStrings.ActionBuilder.Trigger;
+  return [
+    { triggerType: 'onCalendarEventStartsSoon', label: t(T.CalendarEventStartsSoon) },
+    { triggerType: 'onCalendarEventStarted', label: t(T.CalendarEventStarted) },
+    { triggerType: 'onCalendarEventEnded', label: t(T.CalendarEventEnded) },
+  ];
+}
+
 export function widgetTriggerCatalog(t: Translator): readonly TriggerTab[] {
   return [
     ...defaultTriggerTabs(t),
@@ -53,18 +62,29 @@ export function widgetTriggerCatalog(t: Translator): readonly TriggerTab[] {
   ];
 }
 
+function ownTriggerTabs(t: Translator): readonly TriggerTab[] {
+  return [...timerTriggerTabs(t), ...calendarTriggerTabs(t)];
+}
+
 export function interactionTriggerTabsFor(triggers: readonly string[] | undefined, t: Translator): TriggerTab[] | null {
   const named = triggers ?? [];
-  const known = timerTriggerTabs(t);
-  if (named.length === 0 || named.some(trigger => !known.some(tab => tab.triggerType === trigger))) return null;
+  const own = ownTriggerTabs(t);
+  const presses = defaultTriggerTabs(t);
+  const isOwn = (trigger: string): boolean => own.some(tab => tab.triggerType === trigger);
+  const isPress = (trigger: string): boolean => presses.some(tab => tab.triggerType === trigger);
+  if (!named.some(isOwn) || named.some(trigger => !isOwn(trigger) && !isPress(trigger))) return null;
 
-  return named.map(trigger => known.find(tab => tab.triggerType === trigger)!);
+  return [
+    ...presses.filter(tab => named.includes(tab.triggerType)),
+    ...named.filter(isOwn).map(trigger => own.find(tab => tab.triggerType === trigger)!),
+  ];
 }
 
 export function fixedTriggerTabsFor(triggers: readonly string[] | undefined, t: Translator): TriggerTab[] | null {
   const named = triggers ?? [];
   const presses = new Set(defaultTriggerTabs(t).map(tab => tab.triggerType).filter(type => type !== DOUBLE_PRESS_TRIGGER_TYPE));
   if (named.length === 0 || named.some(trigger => presses.has(trigger))) return null;
+  if (interactionTriggerTabsFor(named, t)) return null;
 
   const tabs = widgetTriggerCatalog(t).filter(tab => named.includes(tab.triggerType));
   return tabs.length > 0 ? tabs : null;

@@ -432,6 +432,15 @@
   <data name="ActionBuilder.Toolbar.VariablesOfThisWidget" xml:space="preserve">
     <value>Zmienne tego widżetu</value>
   </data>
+  <data name="ActionBuilder.Trigger.CalendarEventEnded" xml:space="preserve">
+    <value>Wydarzenie się zakończyło</value>
+  </data>
+  <data name="ActionBuilder.Trigger.CalendarEventStarted" xml:space="preserve">
+    <value>Wydarzenie się rozpoczęło</value>
+  </data>
+  <data name="ActionBuilder.Trigger.CalendarEventStartsSoon" xml:space="preserve">
+    <value>Wydarzenie wkrótce się rozpocznie</value>
+  </data>
   <data name="ActionBuilder.Trigger.CountdownDismissed" xml:space="preserve">
     <value>Potwierdzono</value>
   </data>
@@ -3050,6 +3059,84 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.Widgets.UnsupportedActionTriggers" xml:space="preserve">
     <value>Widżet nie obsługuje wyzwalaczy akcji</value>
   </data>
+  <data name="Events.Calendar.AccountFilterDescription" xml:space="preserve">
+    <value>Opcjonalne. Uruchamiać tylko dla wydarzeń z tego konta.</value>
+  </data>
+  <data name="Events.Calendar.AccountLabel" xml:space="preserve">
+    <value>Konto</value>
+  </data>
+  <data name="Events.Calendar.AccountNameLabel" xml:space="preserve">
+    <value>Nazwa konta</value>
+  </data>
+  <data name="Events.Calendar.AllDayLabel" xml:space="preserve">
+    <value>Cały dzień</value>
+  </data>
+  <data name="Events.Calendar.AnyAccountPlaceholder" xml:space="preserve">
+    <value>Dowolne konto</value>
+  </data>
+  <data name="Events.Calendar.AnyCalendarPlaceholder" xml:space="preserve">
+    <value>Dowolny kalendarz</value>
+  </data>
+  <data name="Events.Calendar.CalendarFilterDescription" xml:space="preserve">
+    <value>Opcjonalne. Uruchamiać tylko dla wydarzeń z tego kalendarza.</value>
+  </data>
+  <data name="Events.Calendar.CalendarLabel" xml:space="preserve">
+    <value>Kalendarz</value>
+  </data>
+  <data name="Events.Calendar.CalendarNameLabel" xml:space="preserve">
+    <value>Nazwa kalendarza</value>
+  </data>
+  <data name="Events.Calendar.Category" xml:space="preserve">
+    <value>Wydarzenia kalendarza</value>
+  </data>
+  <data name="Events.Calendar.EndedDescription" xml:space="preserve">
+    <value>Uruchamia się, gdy kończy się wydarzenie w kalendarzu.</value>
+  </data>
+  <data name="Events.Calendar.EndedName" xml:space="preserve">
+    <value>Wydarzenie się zakończyło</value>
+  </data>
+  <data name="Events.Calendar.EndLabel" xml:space="preserve">
+    <value>Koniec</value>
+  </data>
+  <data name="Events.Calendar.EventIdLabel" xml:space="preserve">
+    <value>Identyfikator wydarzenia</value>
+  </data>
+  <data name="Events.Calendar.LeadTimeDescription" xml:space="preserve">
+    <value>Jak długo przed rozpoczęciem wydarzenia uruchomić.</value>
+  </data>
+  <data name="Events.Calendar.LeadTimeLabel" xml:space="preserve">
+    <value>Wyprzedzenie</value>
+  </data>
+  <data name="Events.Calendar.LocationLabel" xml:space="preserve">
+    <value>Miejsce</value>
+  </data>
+  <data name="Events.Calendar.MeetingUrlLabel" xml:space="preserve">
+    <value>Link do spotkania</value>
+  </data>
+  <data name="Events.Calendar.ProviderLabel" xml:space="preserve">
+    <value>Dostawca</value>
+  </data>
+  <data name="Events.Calendar.ProviderName" xml:space="preserve">
+    <value>Kalendarz</value>
+  </data>
+  <data name="Events.Calendar.StartedDescription" xml:space="preserve">
+    <value>Uruchamia się, gdy rozpoczyna się wydarzenie w kalendarzu.</value>
+  </data>
+  <data name="Events.Calendar.StartedName" xml:space="preserve">
+    <value>Wydarzenie się rozpoczęło</value>
+  </data>
+  <data name="Events.Calendar.StartLabel" xml:space="preserve">
+    <value>Początek</value>
+  </data>
+  <data name="Events.Calendar.StartsSoonDescription" xml:space="preserve">
+    <value>Uruchamia się z ustalonym wyprzedzeniem przed rozpoczęciem wydarzenia w kalendarzu.</value>
+  </data>
+  <data name="Events.Calendar.StartsSoonName" xml:space="preserve">
+    <value>Wydarzenie wkrótce się rozpocznie</value>
+  </data>
+  <data name="Events.Calendar.TitleLabel" xml:space="preserve">
+    <value>Tytuł</value>
+  </data>
   <data name="Events.Common.AnyDevicePlaceholder" xml:space="preserve">
     <value>Dowolne urządzenie</value>
   </data>
@@ -4306,6 +4393,51 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Adb.Variables.DeviceScreenOn" xml:space="preserve">
     <value>Ekran urządzenia włączony</value>
   </data>
+  <data name="Integrations.Calendar.Actions.JoinMeeting.CalendarDescription" xml:space="preserve">
+    <value>Opcjonalne. Dołączać tylko do wydarzeń z tego kalendarza.</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.JoinMeeting.Description" xml:space="preserve">
+    <value>Otwiera na tym komputerze link do spotkania wydarzenia, które trwa lub zaraz się rozpocznie.</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.JoinMeeting.HostLocked" xml:space="preserve">
+    <value>Nie można otworzyć linku do spotkania, gdy ten komputer jest zablokowany.</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.JoinMeeting.Name" xml:space="preserve">
+    <value>Dołącz do spotkania</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.JoinMeeting.NoMeeting" xml:space="preserve">
+    <value>Żadne wydarzenie z linkiem do spotkania nie trwa ani wkrótce się nie rozpocznie.</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.JoinMeeting.OpenFailed" xml:space="preserve">
+    <value>Nie udało się otworzyć linku do spotkania na tym komputerze.</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.JoinMeeting.WindowDescription" xml:space="preserve">
+    <value>Dołączać także do wydarzenia, które rozpocznie się w tym czasie.</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.JoinMeeting.WindowLabel" xml:space="preserve">
+    <value>Rozpoczyna się w ciągu</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.ShowDetails.Description" xml:space="preserve">
+    <value>Otwiera szczegóły widżetu kalendarza na ekranie, na którym go naciśnięto: wydarzenie wyświetlane w układzie Następne wydarzenie lub nadchodzące wydarzenia układu Agenda.</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.ShowDetails.Name" xml:space="preserve">
+    <value>Pokaż szczegóły kalendarza</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.ShowDetails.NoEvent" xml:space="preserve">
+    <value>Widżet nie wyświetla teraz żadnego wydarzenia.</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.ShowDetails.NotCalendarWidget" xml:space="preserve">
+    <value>Szczegóły kalendarza może wyświetlić tylko widżet kalendarza.</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.ShowDetails.WidgetMissing" xml:space="preserve">
+    <value>Ten widżet kalendarza już nie istnieje.</value>
+  </data>
+  <data name="Integrations.Calendar.Widget.Description" xml:space="preserve">
+    <value>Pokazuje nadchodzące wydarzenia z kalendarzy jako agendę lub następne wydarzenie z odliczaniem.</value>
+  </data>
+  <data name="Integrations.Calendar.Name" xml:space="preserve">
+    <value>Kalendarz</value>
+  </data>
   <data name="Integrations.Capability.ActionIcons" xml:space="preserve">
     <value>Ikony przycisków</value>
   </data>
@@ -4314,6 +4446,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Capability.ActionStates" xml:space="preserve">
     <value>Stany przycisków</value>
+  </data>
+  <data name="Integrations.Capability.Calendar" xml:space="preserve">
+    <value>Kalendarz</value>
   </data>
   <data name="Integrations.Capability.DeviceProvider" xml:space="preserve">
     <value>Urządzenia</value>
@@ -5671,6 +5806,75 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Example.Variables.Flaky" xml:space="preserve">
     <value>Niestabilna wartość</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Config.AuthorizationNotCompleted" xml:space="preserve">
+    <value>Logowanie Google zostało anulowane lub nie zostało dokończone. Kontynuacja otworzy je ponownie.</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Config.CalendarApiLinkLabel" xml:space="preserve">
+    <value>Włącz Google Calendar API</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Config.ClientIdPlaceholder" xml:space="preserve">
+    <value>Identyfikator klienta typu Aplikacja komputerowa</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Config.ClientSecretDescription" xml:space="preserve">
+    <value>Przechowywany w postaci zaszyfrowanej i wysyłany wyłącznie do Google.</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Config.ConnectDescription" xml:space="preserve">
+    <value>Macro Deck odczytuje kalendarze przez własnego klienta OAuth w Google Cloud. Nic nie jest sprawdzane przed naciśnięciem Dalej, które otwiera logowanie Google w przeglądarce.</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Config.ConnectTitle" xml:space="preserve">
+    <value>Połącz Kalendarz Google</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Config.ConsentScreenInstruction" xml:space="preserve">
+    <value>Skonfiguruj ekran zgody OAuth i ustaw jego stan publikacji na W wersji produkcyjnej. Dopóki pozostaje w trybie Testowanie, Google kończy każde logowanie po 7 dniach.</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Config.ConsoleLinkLabel" xml:space="preserve">
+    <value>Otwórz Google Cloud Console</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Config.CopyCredentialsInstruction" xml:space="preserve">
+    <value>Skopiuj identyfikator klienta i tajny klucz klienta nowego klienta i wklej je poniżej.</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Config.CreateClientInstruction" xml:space="preserve">
+    <value>Utwórz identyfikator klienta OAuth z typem aplikacji Aplikacja komputerowa.</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Config.EnableApiInstruction" xml:space="preserve">
+    <value>W Google Cloud Console utwórz lub wybierz projekt i włącz dla niego Google Calendar API.</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Config.EnterClientId" xml:space="preserve">
+    <value>Wpisz identyfikator klienta OAuth z Google Cloud.</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Config.EnterClientSecret" xml:space="preserve">
+    <value>Wpisz tajny klucz klienta OAuth z Google Cloud.</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Config.MissingCalendarPermission" xml:space="preserve">
+    <value>Google nie przyznał dostępu do kalendarzy. Spróbuj ponownie i zezwól aplikacji na wyświetlanie kalendarzy.</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Config.MissingRefreshToken" xml:space="preserve">
+    <value>Google nie przyznał trwałego dostępu, więc Macro Deck nie może pozostać zalogowany. Spróbuj ponownie; jeśli problem się powtarza, najpierw usuń dostęp aplikacji na koncie Google.</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Config.RedirectUriInstruction" xml:space="preserve">
+    <value>Google odsyła logowanie do Macro Deck na ten adres na tym komputerze. Klient typu Aplikacja komputerowa akceptuje go bez dodatkowej konfiguracji:</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Config.TokenExchangeFailed" xml:space="preserve">
+    <value>Google nie zaakceptował logowania. Sprawdź identyfikator klienta i tajny klucz, a następnie spróbuj ponownie.</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Config.UnverifiedAppInstruction" xml:space="preserve">
+    <value>Google ostrzeże wtedy, że nie zweryfikował aplikacji. W przypadku własnego klienta jest to oczekiwane: wybierz Zaawansowane, przejdź do aplikacji i zezwól na dostęp do kalendarzy.</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Issues.DuplicateAccountDescription" xml:space="preserve">
+    <value>"{title}" to starsze połączenie tego samego konta Google i nie jest używane. Usuń je z listy konfiguracji poniżej.</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Issues.DuplicateAccountTitle" xml:space="preserve">
+    <value>Konto Google połączone dwukrotnie</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Issues.ReconnectResolution" xml:space="preserve">
+    <value>Połącz ponownie konto Google.</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Issues.SignInExpiredDescription" xml:space="preserve">
+    <value>Google nie akceptuje już logowania dla tego konta. Najczęściej ekran zgody OAuth klienta Google Cloud jest nadal w trybie Testowanie, który kończy każde logowanie po 7 dniach: ustaw go na W wersji produkcyjnej, a następnie połącz konto ponownie. Dostęp mógł też zostać usunięty na koncie Google lub klient mógł zostać usunięty.</value>
+  </data>
+  <data name="Integrations.GoogleCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
+    <value>Logowanie Google dla {account} wygasło</value>
   </data>
   <data name="Integrations.HomeAssistant.Actions.Automation.CommandDisable" xml:space="preserve">
     <value>Wyłącz</value>
@@ -17548,6 +17752,223 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Widgets.Appearance.IconDisplay.ZoomLabel" xml:space="preserve">
     <value>Powiększenie (%)</value>
+  </data>
+  <data name="Widgets.Calendar.Today" xml:space="preserve">
+    <value>Dziś</value>
+  </data>
+  <data name="Widgets.Calendar.Tomorrow" xml:space="preserve">
+    <value>Jutro</value>
+  </data>
+  <data name="Widgets.Calendar.DayHeading" xml:space="preserve">
+    <value>{weekday}, {date}</value>
+  </data>
+  <data name="Widgets.Calendar.DateLine" xml:space="preserve">
+    <value>{weekday} {day}</value>
+  </data>
+  <data name="Widgets.Calendar.AllDay" xml:space="preserve">
+    <value>Cały dzień</value>
+  </data>
+  <data name="Widgets.Calendar.Until" xml:space="preserve">
+    <value>Do {time}</value>
+  </data>
+  <data name="Widgets.Calendar.TimeRange" xml:space="preserve">
+    <value>{start} – {end}</value>
+  </data>
+  <data name="Widgets.Calendar.DayTimeRange" xml:space="preserve">
+    <value>{day}, {start} – {end}</value>
+  </data>
+  <data name="Widgets.Calendar.DayAllDay" xml:space="preserve">
+    <value>{day}, cały dzień</value>
+  </data>
+  <data name="Widgets.Calendar.Untitled" xml:space="preserve">
+    <value>(Bez tytułu)</value>
+  </data>
+  <data name="Widgets.Calendar.NoCalendars" xml:space="preserve">
+    <value>Brak połączonego kalendarza</value>
+  </data>
+  <data name="Widgets.Calendar.NoEvents" xml:space="preserve">
+    <value>Brak wydarzeń</value>
+  </data>
+  <data name="Widgets.Calendar.NoUpcomingEvents" xml:space="preserve">
+    <value>Brak nadchodzących wydarzeń</value>
+  </data>
+  <data name="Widgets.Calendar.NoMoreEventsToday" xml:space="preserve">
+    <value>Dziś brak kolejnych wydarzeń</value>
+  </data>
+  <data name="Widgets.Calendar.MoreEvents.One" xml:space="preserve">
+    <value>{count} kolejne wydarzenie</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Calendar.MoreEvents.Other" xml:space="preserve">
+    <value>Kolejne wydarzenia: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Calendar.AccountError" xml:space="preserve">
+    <value>Nie udało się zaktualizować niektórych kalendarzy</value>
+  </data>
+  <data name="Widgets.Calendar.NextEvent.StartsIn" xml:space="preserve">
+    <value>za {duration}</value>
+  </data>
+  <data name="Widgets.Calendar.NextEvent.Now" xml:space="preserve">
+    <value>Teraz</value>
+  </data>
+  <data name="Widgets.Calendar.Countdown.UnderMinute" xml:space="preserve">
+    <value>mniej niż minutę</value>
+  </data>
+  <data name="Widgets.Calendar.Countdown.Days.One" xml:space="preserve">
+    <value>{count} dzień</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Calendar.Countdown.Days.Other" xml:space="preserve">
+    <value>{count} d</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Calendar.Countdown.Hours.One" xml:space="preserve">
+    <value>{count} godzinę</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Calendar.Countdown.Hours.Other" xml:space="preserve">
+    <value>{count} godz.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Calendar.Countdown.Minutes.One" xml:space="preserve">
+    <value>{count} minutę</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Calendar.Countdown.Minutes.Other" xml:space="preserve">
+    <value>{count} min</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Calendar.Countdown.Pair" xml:space="preserve">
+    <value>{first} {second}</value>
+  </data>
+  <data name="Widgets.Calendar.Details.AllDayDate" xml:space="preserve">
+    <value>{date}, cały dzień</value>
+  </data>
+  <data name="Widgets.Calendar.Details.DateRange" xml:space="preserve">
+    <value>{start} – {end}</value>
+  </data>
+  <data name="Widgets.Calendar.Details.TimedRange" xml:space="preserve">
+    <value>{date}, {start} – {end}</value>
+  </data>
+  <data name="Widgets.Calendar.Details.TimedRangeAcrossDays" xml:space="preserve">
+    <value>{startDate}, {startTime} – {endDate}, {endTime}</value>
+  </data>
+  <data name="Widgets.Calendar.Details.MeetingOpened" xml:space="preserve">
+    <value>Link do spotkania został przekazany do komputera, na którym działa Macro Deck.</value>
+  </data>
+  <data name="Widgets.Calendar.Details.Unavailable" xml:space="preserve">
+    <value>To wydarzenie nie jest już dostępne.</value>
+  </data>
+  <data name="Widgets.Calendar.Details.Source" xml:space="preserve">
+    <value>{calendar} – {account} ({provider})</value>
+  </data>
+  <data name="Widgets.Calendar.Details.Description" xml:space="preserve">
+    <value>Opis</value>
+  </data>
+  <data name="Widgets.Calendar.Details.Participants" xml:space="preserve">
+    <value>Uczestnicy</value>
+  </data>
+  <data name="Widgets.Calendar.Details.JoinMeeting" xml:space="preserve">
+    <value>Dołącz do spotkania</value>
+  </data>
+  <data name="Widgets.Calendar.Details.Organizer" xml:space="preserve">
+    <value>Organizator</value>
+  </data>
+  <data name="Widgets.Calendar.Details.ResponseAccepted" xml:space="preserve">
+    <value>Zaakceptowano</value>
+  </data>
+  <data name="Widgets.Calendar.Details.ResponseDeclined" xml:space="preserve">
+    <value>Odrzucono</value>
+  </data>
+  <data name="Widgets.Calendar.Details.ResponseTentative" xml:space="preserve">
+    <value>Może</value>
+  </data>
+  <data name="Widgets.Calendar.Details.ResponseNeedsAction" xml:space="preserve">
+    <value>Brak odpowiedzi</value>
+  </data>
+  <data name="Widgets.Calendar.Config.Calendars" xml:space="preserve">
+    <value>Kalendarze</value>
+  </data>
+  <data name="Widgets.Calendar.Config.CalendarsDescription" xml:space="preserve">
+    <value>Bez wyboru wyświetlane są wydarzenia ze wszystkich kalendarzy.</value>
+  </data>
+  <data name="Widgets.Calendar.Config.NoCalendarsHint" xml:space="preserve">
+    <value>Aby wybrać kalendarze, należy połączyć konto kalendarza w sekcji Integracje.</value>
+  </data>
+  <data name="Widgets.Calendar.Config.AccountProvider" xml:space="preserve">
+    <value>{account} ({provider})</value>
+  </data>
+  <data name="Widgets.Calendar.Config.Layout" xml:space="preserve">
+    <value>Układ</value>
+  </data>
+  <data name="Widgets.Calendar.Layouts.Agenda" xml:space="preserve">
+    <value>Agenda</value>
+  </data>
+  <data name="Widgets.Calendar.Layouts.NextEvent" xml:space="preserve">
+    <value>Następne wydarzenie</value>
+  </data>
+  <data name="Widgets.Calendar.Config.Days" xml:space="preserve">
+    <value>Dni</value>
+  </data>
+  <data name="Widgets.Calendar.Config.DaysDescription" xml:space="preserve">
+    <value>Liczba dni, na które agenda pokazuje wydarzenia z wyprzedzeniem. Mały widżet wyświetla najbliższe wydarzenia z tego okresu, większy pokazuje sekcję dla każdego dnia.</value>
+  </data>
+  <data name="Widgets.Calendar.Config.ShowAllDay" xml:space="preserve">
+    <value>Pokaż wydarzenia całodniowe</value>
+  </data>
+  <data name="Widgets.Calendar.Config.ShowTime" xml:space="preserve">
+    <value>Pokaż godzinę</value>
+  </data>
+  <data name="Widgets.Calendar.Config.ShowLocation" xml:space="preserve">
+    <value>Pokaż miejsce</value>
+  </data>
+  <data name="Widgets.Calendar.Config.ShowCalendar" xml:space="preserve">
+    <value>Pokaż nazwę kalendarza</value>
+  </data>
+  <data name="Widgets.Calendar.Config.ShowDate" xml:space="preserve">
+    <value>Pokaż datę</value>
+  </data>
+  <data name="Widgets.Calendar.Config.WhenStarted" xml:space="preserve">
+    <value>Po rozpoczęciu wydarzenia</value>
+  </data>
+  <data name="Widgets.Calendar.Config.WhenStartedNow" xml:space="preserve">
+    <value>Pokazuj je do końca</value>
+  </data>
+  <data name="Widgets.Calendar.Config.WhenStartedNext" xml:space="preserve">
+    <value>Pokaż następne wydarzenie</value>
+  </data>
+  <data name="Widgets.Calendar.Config.LeadTime" xml:space="preserve">
+    <value>Wyprzedzenie dla „Wydarzenie wkrótce się rozpocznie”</value>
+  </data>
+  <data name="Widgets.Calendar.Config.LeadTimeDescription" xml:space="preserve">
+    <value>Jak długo przed rozpoczęciem wydarzenia uruchamia się wyzwalacz „Wydarzenie wkrótce się rozpocznie” tego widżetu.</value>
+  </data>
+  <data name="Widgets.Calendar.Config.LeadTimeMinutes.One" xml:space="preserve">
+    <value>{count} minuta</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Calendar.Config.LeadTimeMinutes.Other" xml:space="preserve">
+    <value>{count} min</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Calendar.Sample.WorkCalendar" xml:space="preserve">
+    <value>Praca</value>
+  </data>
+  <data name="Widgets.Calendar.Sample.Standup" xml:space="preserve">
+    <value>Codzienne spotkanie zespołu</value>
+  </data>
+  <data name="Widgets.Calendar.Sample.DesignReview" xml:space="preserve">
+    <value>Przegląd projektu</value>
+  </data>
+  <data name="Widgets.Calendar.Sample.Lunch" xml:space="preserve">
+    <value>Lunch z Alexem</value>
+  </data>
+  <data name="Widgets.Calendar.Sample.Offsite" xml:space="preserve">
+    <value>Wyjazd firmowy</value>
+  </data>
+  <data name="Widgets.Calendar.Sample.Room" xml:space="preserve">
+    <value>Sala konferencyjna 3</value>
   </data>
   <data name="Widgets.Clock.CaptionHint" xml:space="preserve">
     <value>Podpis nad zegarem. Puste pole podąża za wybraną strefą czasową.</value>

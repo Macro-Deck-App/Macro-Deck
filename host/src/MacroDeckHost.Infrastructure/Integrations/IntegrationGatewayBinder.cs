@@ -1,9 +1,11 @@
+using MacroDeckHost.Application.Calendar;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.StreamChat;
 using MacroDeckHost.Application.StreamStats;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations;
 using MacroDeckHost.Integrations.Adb;
+using MacroDeckHost.Integrations.Calendar;
 using MacroDeckHost.Integrations.Companion;
 using MacroDeckHost.Integrations.HomeAssistant;
 using MacroDeckHost.Integrations.System;
@@ -20,8 +22,14 @@ internal static class IntegrationGatewayBinder
 		IVariableRefreshSignal refreshSignal,
 		IKnownAudioDeviceStore? knownAudioDevices = null,
 		IVariablePollingInvalidationSignal? pollingInvalidation = null,
-		IStreamPlatformServices? streamPlatforms = null)
+		IStreamPlatformServices? streamPlatforms = null,
+		CalendarHostServices? calendarServices = null)
 	{
+		if (calendarServices is not null && integration is ICalendarHostServicesConsumer calendarConsumer)
+		{
+			calendarConsumer.UseCalendarServices(calendarServices);
+		}
+
 		var platform = streamPlatforms?.Find(integration.Id);
 
 		if (platform is not null && integration is IStreamStatsSinkConsumer statsConsumer)

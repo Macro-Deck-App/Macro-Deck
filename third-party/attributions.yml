@@ -239,13 +239,17 @@ assets:
       Logos of the applications Macro Deck integrates with, shown only to identify the integration. The SinusBot
       file carries a no-redistribution notice from WebAilesi; the maintainer is asking the SinusBot developer for
       permission.
-    note: OBS Studio, Streamer.bot, Meld, Streamlabs Desktop and SinusBot logos. Trademarks of their respective owners.
+    note: >-
+      OBS Studio, Streamer.bot, Meld, Streamlabs Desktop, SinusBot and Google Calendar logos. Trademarks of their
+      respective owners. The Google Calendar logo is Google's 2026 icon from Wikimedia Commons
+      (File:Google_Calendar_icon_(2026).svg), with editor metadata and inline styles removed and a viewBox added.
     paths:
       - host/src/MacroDeckHost.Integrations/Obs/obs-icon.svg
       - host/src/MacroDeckHost.Integrations/Streamerbot/streamerbot-icon.svg
       - host/src/MacroDeckHost.Integrations/Meld/meld-icon.svg
       - host/src/MacroDeckHost.Integrations/StreamlabsDesktop/streamlabs-icon.png
       - host/src/MacroDeckHost.Integrations/SinusBot/sinusbot-icon.svg
+      - host/src/MacroDeckHost.Integrations/GoogleCalendar/google-calendar-icon.svg
 
   - name: Weather icons (Makin-Things/weather-icons)
     url: https://github.com/Makin-Things/weather-icons

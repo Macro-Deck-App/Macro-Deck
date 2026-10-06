@@ -45,6 +45,7 @@ The tiles in a folder:
 | History Graph | CPU load over the last minutes, green under 50 % and red above 90 % with **Color thresholds** |
 | Gauges | CPU, RAM and GPU load side by side as rings with an icon, like a battery overview. **Color thresholds** color each ring by its value instead of a single warning |
 | Weather | Today and the next days for your city. Press it for the full details |
+| Calendar | Today's date with your next meetings, the next few days on a larger widget, or your next meeting and how long until it starts. Press it for the details |
 | Music Player | What Spotify is playing, with play and skip. Some players offer extra settings for each widget below the player choice |
 | Twitch Chat | Your channel's chat with emotes and badges, offered once a Twitch account is connected |
 | Twitch Stream Stats | Whether you are live, your viewers, chatters, followers and subscribers, the stream title, category and uptime, and a small graph, in a style you choose, offered once a Twitch account is connected |
@@ -157,6 +158,113 @@ These change every second while a timer runs, so an automation on **Variable Cha
 runs every second too. A running countdown or stopwatch starts over when Macro Deck restarts. On a
 hardware deck, the key shows the widget's label and colors but not the time.
 
+### Calendar widget
+
+The **Calendar** widget shows the events of the calendars you connected under **Integrations**, for
+example [Google Calendar](#connect-google-calendar). Until a calendar is connected it says **No calendar
+connected**. Each event is marked in its calendar's color. Its **Layout** decides what it shows:
+**Agenda**, the default, lists your upcoming events, and **Next event** counts down to the next one. The
+settings change with the layout, so you only see the ones that apply.
+
+![The Home folder with three Calendar widgets: a 2x2 Agenda listing today's, tomorrow's and Thursday's events, a 2x1 Next event counting down to Design review, and a 1x1 Agenda with the date above the next two events](../../../assets/guide/calendar.png)
+
+With **Show date** on, which it is by default, the widget looks like a calendar on a phone's home screen:
+the weekday in small red capitals above a large day of the month, in Macro Deck's language. On a 1x1 **Agenda**, the date sits above the next two events, each with its title and time; when
+nothing is left today it says **No more events today**, or **No upcoming events** if its **Days** reach past
+today and nothing is planned. A 2x1 Agenda puts the date on the left and up to four events on the right, and
+from 2x2 on the date heads a section for each day. A **Next event** layout shows the weekday and date in a
+small red line on top. Turn **Show date** off for the plain list.
+
+Without the date, an **Agenda** smaller than 2x2 lists the next events within its **Days**, up to four,
+with the day in front of events after today; one cell wide, the time sits above each title. From 2x2 on, it
+shows a section for each day, headed **Today**, **Tomorrow** and then the weekday and date, with up to six
+events a day. Events that have ended leave the list. The widget's settings:
+
+| Setting | What it does |
+| --- | --- |
+| **Layout** | **Agenda** or **Next event**. |
+| **Calendars** | The calendars to show, each listed with its account and provider. Leave it empty for every calendar, including ones you connect later. |
+| **Days** | How many days ahead, from 1 to 7, the agenda looks, picked from a list. Agenda only. |
+| **Event Starts Soon lead time** | How long before an event starts the widget's own **Event Starts Soon** trigger runs, from 1 minute to 1 hour, picked from a list. 15 minutes by default. |
+| **Show date** | Shows today's weekday and date. On by default. |
+| **Show all-day events** | Lists all-day events, such as holidays or a day off. A new widget starts with it on for an Agenda and off for Next event; once saved, it keeps its value when you change the layout. |
+| **Show time**, **Show location**, **Show calendar name** | What each event shows besides its title. Agenda only. |
+
+The **Next event** layout shows the next event's title, how long until it starts, for example *in 25
+minutes* or *in 5 days*, and its time and location; one cell wide, it shows only the title and how long
+until it starts. It adds **When an event has started**: **Keep showing it until it ends** shows **Now** for
+the running event, while **Show the next event** moves on as soon as an event starts.
+
+The details dialog shows when an event is, its calendar, account and provider, the location, the
+description and who is invited, with their answers. A very long description is shortened, and the
+dialog lists the first 100 people invited. **Join meeting** opens the meeting link on the
+computer running Macro Deck, not on the device you pressed. While that computer is locked, Macro Deck
+refuses to open the link. The dialog opens on the device you pressed.
+
+Press a calendar widget in the **Next event** layout to open the details of the event it shows. Press an
+**Agenda** to open a dialog that lists its upcoming events by day, for its **Calendars**, **Days** and **Show all-day
+events**; press an event there to see its details in the same dialog, and **Back** to return to the list.
+The list shows up to 50 events and says how many more are coming up after them.
+The list follows your calendars while it is open, and says **This calendar widget no longer exists.** once
+the widget is deleted. Give the widget a **Short Press** action of your own and yours runs instead.
+
+The widget takes actions in the widget editor like a button, in either layout, on **Short Press**, **Long Press**, **Touch
+Start**, **Touch End** and **Double Tap**, and offer three triggers of their own under **Add trigger**:
+
+| Trigger | Runs |
+| --- | --- |
+| **Event Starts Soon** | The widget's **Event Starts Soon lead time** before an event starts. |
+| **Event Started** | When an event starts. |
+| **Event Ended** | When an event ends. |
+
+They run for the events in the widget's **Calendars**, all-day events only with **Show all-day events**
+on, and follow the same rules as the [Calendar triggers](#calendar-triggers-and-join-meeting): each runs
+once per event, and an event that started or ended while Macro Deck was off, or more than a few minutes
+ago, does not run them afterwards. Their actions can use the event's values with the same names, such as
+`{{ event.title }}`. The **Calendar** events under **+ Add event trigger** are the general Calendar
+triggers instead: they ignore the widget's calendars and lead time and have their own **Account**,
+**Calendar** and **Lead time**.
+
+The **Show Calendar Details** action, under **Calendar**, opens the same dialog as a press, for example
+on a **Long Press**: the details of the event the **Next event** layout shows, or an Agenda's list of
+events. It works in a calendar widget's own actions only. In the Next event layout it fails with **The
+widget shows no event right now.** when there is none; an Agenda without upcoming events still opens its list, which says
+**No events**.
+
+The widget also keeps variables of its own about the event it shows: the event of the Next event layout,
+or the first event an Agenda lists, so they change when you switch the layout. The widget's own actions can use them, for example in **If / Else**:
+
+| Variable | Holds |
+| --- | --- |
+| `calendar_next_title` | The event's title. |
+| `calendar_next_start`, `calendar_next_end` | Date and time in the local time of the computer running Macro Deck, such as `2026-10-05T09:00:00.0000000+02:00`. |
+| `calendar_next_countdown` | How long until it starts, as the widget says it, such as *in 30 minutes*, or *Now* while it runs, in the language Macro Deck is set to. |
+| `calendar_next_minutes` | Minutes until it starts, rounded up, and `0` while it runs. |
+| `calendar_next_running` | Whether it is running. |
+| `calendar_next_location`, `calendar_next_meeting_url` | Its location and meeting link. Empty when the event has none. |
+| `calendar_next_calendar` | The name of its calendar. |
+
+While the widget shows no event, these variables do not exist, so a condition can check them with **is
+not available**. The countdown and the minutes change once a minute while an event is coming up, so an
+automation on **Variable Changed** without a filter runs every minute too.
+
+A hardware deck has no screen for these dialogs, so pressing a calendar widget there runs only your
+own press actions and does nothing without them. To join a meeting from a key, give it the
+[**Join Meeting**](#calendar-triggers-and-join-meeting) action.
+
+Macro Deck reads your calendars every few minutes, so a new event can take a moment to appear. It reads
+about a week ahead, from yesterday through the day a week from today: the Next event layout says **No
+upcoming events** when nothing is planned in that time, even if a later event exists. When an
+account cannot be read, the widgets keep its last events and say **Some calendars couldn't be updated**;
+check that account's integration under **Integrations**.
+
+Everything these widgets show, including the descriptions and participants in the details dialog, can be
+seen on every device connected to your Macro Deck. Keep calendar widgets off profiles that devices you
+don't trust use.
+
+A profile with calendar widgets that you import into a Macro Deck version without calendar support shows
+those widgets as not available.
+
 ### Gauges
 
 A **Gauges** widget shows up to eight numbers as rings, each with an icon in the middle and its value and an
@@ -193,8 +301,9 @@ What a widget does, and when. The **Scenes** button runs **Change Folder to** on
 | Event | Turn the mic slider's accent red when OBS reports **Streaming Started** |
 
 Some widgets already do something on a short press before you add anything: pressing a **Weather** widget
-opens its details. Give such a widget a Short Press action of your own and yours runs instead. A hardware
-deck has no screen for the weather details, so the Weather widget does nothing there until you add an action.
+opens its details, and a **Calendar** widget its list of events or the details of its next event. Give such
+a widget a Short Press action of your own and yours runs instead. A hardware deck has no screen for these
+details, so these widgets do nothing there until you add an action.
 
 Every widget with actions, sliders included, can add event triggers next to its press triggers. Give an
 event trigger a **Name** to tell several of them apart in the **Events** list.
@@ -360,12 +469,59 @@ Deck can change it. A Macro Deck from before variable sharing simply shares noth
 Other events: a device connects, a variable changes, OBS reports **Streaming Started**, a song
 starts playing.
 
+### Calendar triggers and Join Meeting
+
+Three events from **Calendar** run actions around your meetings, in an automation or as an event trigger
+on a widget. The Calendar widget also has [triggers of its own](#calendar-widget)
+with the same names, which follow the widget's calendars and lead time:
+
+| Event | Runs |
+| --- | --- |
+| **Event Starts Soon** | A set time before an event starts. Set it with **Lead time**, 15 minutes by default. |
+| **Event Started** | When an event starts. |
+| **Event Ended** | When an event ends. |
+
+Each can be limited to one **Account** or one **Calendar**; left empty, it runs for the events of every
+connected calendar. All-day events start and end at midnight. Each runs once per event.
+
+**Event Starts Soon** also runs for an event Macro Deck first sees inside its lead time, such as one
+created or moved a few minutes before it starts, or when Macro Deck starts during that time, as long as
+the event has not started yet. **Event Started** and **Event Ended** only run while Macro Deck is running:
+an event that started while it was off does not run its actions afterwards. An event added shortly
+before it starts, while Macro Deck runs, still runs them when Macro Deck next reads your calendars, a few
+minutes late at most. A start or end that is more than a few minutes ago is never caught up, also not
+for a trigger you create later. If the
+same invitation is in two connected accounts, limit the trigger to one **Account** so it runs only once.
+
+The actions they run can use the event's values, such as `{{ event.title }}` in a text field:
+
+| Value | Holds |
+| --- | --- |
+| `title`, `location`, `meetingUrl` | The event's title, location and meeting link. Empty when the event has none. |
+| `start`, `end` | Date and time in the local time of the computer running Macro Deck, such as `2026-10-05T09:00:00.0000000+02:00`. |
+| `allDay` | Whether it is an all-day event. |
+| `calendar`, `account`, `provider` | The names of its calendar, account and provider, such as *Work*, *you@example.com* and *Google Calendar*. |
+| `eventId`, `calendarId`, `accountId` | Ids, for conditions that compare them. |
+
+The **Join Meeting** action opens the meeting link of the event that is running or starts within
+**Starts within**, 15 minutes by default, on the computer running Macro Deck. When several qualify, it
+picks the one starting closest to now. **Calendar** limits it to one calendar. All-day events and events
+without a meeting link are skipped, and when nothing qualifies, the action fails with **No event with a
+meeting link is running or starting soon**. Like the button in the details dialog, it does not open the
+link while the computer is locked. Put it on a key of a hardware deck, or run it from an automation on
+**Event Starts Soon** with a short lead time to join meetings automatically.
+
+Meeting links come from invitations, and anyone can send you an invitation, so an automation that joins
+every meeting can open a link from a stranger. Limit such a trigger to the **Calendar** or **Account** your
+meetings are in, or add a condition, for example on `{{ event.title }}`, so it joins only the meetings
+you expect.
+
 ## Integrations and the Store
 
 Integrations connect Macro Deck to other apps: OBS, Home Assistant, Voicemeeter, Spotify, Twitch,
-[YouTube](/guide/youtube/), Discord and more. Turn on the ones you use under **Integrations**.
+[YouTube](/guide/youtube/), Discord, Google Calendar and more. Turn on the ones you use under **Integrations**.
 
-![The Integrations page with ADB, Discord, Home Assistant, HTTP and Keyboard](../../../assets/guide/integrations.png)
+![The Integrations page listing ADB, Discord, Google Calendar, Home Assistant, HTTP, Keyboard and Macro Deck Companion, with HTTP and Keyboard turned on](../../../assets/guide/integrations.png)
 
 The **Store** offers more plugins and icon packs. Everything published there is reviewed and signed
 first.
@@ -533,6 +689,34 @@ once more and any changes you made to it in the meantime are replaced by the plu
 
 While a plugin developer runs a plugin from its project, its packs appear the same way. If that plugin is never
 installed, the packs stay as ordinary icon packs after the developer stops it.
+
+### Connect Google Calendar
+
+Macro Deck reads Google Calendar through an OAuth client of your own in Google Cloud. Setting it up is
+free and needed once; the setup in Macro Deck walks you through it and links to the right pages.
+
+1. Under **Integrations**, open **Google Calendar** and start its setup.
+2. In the [Google Cloud Console](https://console.cloud.google.com/apis/credentials), create or pick a
+   project and enable the **Google Calendar API** for it.
+3. Set up the OAuth consent screen and set its publishing status to **In production**. While it stays in
+   **Testing**, Google ends every sign-in after 7 days, and you would have to connect the account again
+   every week.
+4. Create an OAuth client ID with the application type **Desktop app**. The setup shows the **Redirect
+   URI** Google sends the sign-in back to, such as `http://127.0.0.1:8193/api/integrations/oauth/callback`;
+   a Desktop app client accepts it without adding it anywhere.
+5. Copy the client's **Client ID** and **Client Secret** into the setup and continue. Your browser opens
+   the Google sign-in.
+6. Google warns that it has not verified the app. That is expected for a client of your own: choose
+   **Advanced**, continue to your app and allow access to your calendars.
+
+Macro Deck asks Google only for read access to your calendars and for your email address, which names the
+account. Calendars you hid in Google Calendar's list are left out of Macro Deck too; show them there to
+see their events. The client secret is stored encrypted and only ever sent to Google.
+
+To connect another Google account, choose **Add configuration** on the Google Calendar page and sign in
+with that account; the same OAuth client works for all of them. If you connect an account that is already
+connected, **Integrations** shows **Google account connected twice**: remove the older configuration. When
+Google asks you to sign in again, see [Troubleshooting](/guide/troubleshooting/#google-calendar-asks-you-to-sign-in-again).
 
 ## Managing OBS recordings
 

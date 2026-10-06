@@ -202,6 +202,36 @@ Vesktop, Equibop, Legcord or Dorion can share game activity, but Macro Deck cann
 Start the official Discord desktop app, including the Flatpak or Snap version on Linux, and try
 again. The third-party client can keep running alongside it.
 
+## Google Calendar asks you to sign in again
+
+**Integrations** shows **Google sign-in expired** for an account, and calendar widgets say **Some
+calendars couldn't be updated** while they keep showing that account's last known events.
+
+- **Every 7 days:** the OAuth consent screen of your Google Cloud client is still in **Testing**, and
+  Google ends every sign-in after 7 days. In the Google Cloud Console, set its publishing status to **In
+  production**, then sign in again as below. After that, Google no longer ends the sign-in after 7 days.
+- **Sign in again** with **Edit connection** or **Reconfigure** next to the account on the Google Calendar
+  page. That keeps the account, so widgets and triggers set to its calendars keep working. If you add it
+  with **Add configuration** instead, **Integrations** then shows **Google account connected twice**:
+  remove the older configuration, and pick the account's calendars again where you had chosen them.
+- **Access removed:** if you removed Macro Deck's access in your Google account, or deleted the OAuth
+  client in Google Cloud, sign in again, with a new client if needed.
+- **Google did not grant lasting access** while connecting: remove the app's access in your Google
+  account, then connect again.
+
+## Google sign-in does not come back to Macro Deck
+
+The browser shows an error from Google, or a page that cannot be reached, instead of returning to
+Macro Deck after you allowed access.
+
+- Check that the OAuth client's application type is **Desktop app**. Other types only accept redirect
+  addresses you register yourself.
+- When Macro Deck only accepts HTTPS, the **Redirect URI** in the setup starts with `https://`. Google may
+  not accept a secure local address for a Desktop app client, and the browser may not trust Macro Deck's
+  certificate for it. If signing in fails this way, set **Listener mode** in **Settings > Network** to
+  **Use additional HTTPS port**, or turn HTTPS off while you connect the account, then start the setup
+  again.
+
 ## A variable that reads from a file stays unavailable
 
 Check that the file exists at the exact path in the variable's **File settings**, and that it holds

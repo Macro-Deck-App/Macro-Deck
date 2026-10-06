@@ -1,4 +1,5 @@
 using MacroDeck.Plugin.Hosting.Capabilities.Actions;
+using MacroDeck.Plugin.Hosting.Capabilities.Calendar;
 using MacroDeck.Plugin.Hosting.Capabilities.ConfigFlow;
 using MacroDeck.Plugin.Hosting.Capabilities.Events;
 using MacroDeck.Plugin.Hosting.Capabilities.Icons;
@@ -129,6 +130,19 @@ internal sealed class CapabilityOperationCoverageTests : CapabilityContractFixtu
 			[CapabilityKinds.Weather]);
 
 		await AssertNoneUnsupportedAsync(CapabilityKinds.Weather, ProviderCapabilityId.LocalId);
+	}
+
+	[Test]
+	public async Task Every_calendar_operation_is_recognised()
+	{
+		await ConnectAsync([
+				new CalendarCapabilityHandler([new TestCalendarIntegration("Google Calendar", "alice")],
+					TestMetadata.Default)
+			],
+			[Provider(CapabilityKinds.Calendar)],
+			[CapabilityKinds.Calendar]);
+
+		await AssertNoneUnsupportedAsync(CapabilityKinds.Calendar, ProviderCapabilityId.LocalId);
 	}
 
 	[Test]

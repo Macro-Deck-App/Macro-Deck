@@ -134,6 +134,7 @@ export default defineConfig({
 										'features/setup-flows',
 										'features/music-players',
 										'features/weather',
+										'features/calendars',
 										'features/virtual-profiles',
 										{ label: 'Devices', slug: 'features/devices' },
 										{ label: 'Layouts', slug: 'features/layouts' },

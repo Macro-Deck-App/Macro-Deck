@@ -388,6 +388,7 @@ export interface WidgetTypeInfo {
   providerId: string;
   isBuiltIn: boolean;
   providerName?: LocalizedText | null;
+  isPluginProvided?: boolean;
   name?: LocalizedText;
   description?: LocalizedText;
   defaultData: Record<string, unknown>;

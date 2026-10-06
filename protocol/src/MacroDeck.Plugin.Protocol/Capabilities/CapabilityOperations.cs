@@ -374,6 +374,32 @@ public static class CapabilityOperations
 			[Describe, Streams, SessionOpen, SessionSuspend, SessionResume, SessionClose];
 	}
 
+	/// <summary>
+	/// Reads of a calendar provider. Accounts are config-entry shaped and change at runtime, so every
+	/// operation but <see cref="Describe" /> and <see cref="Accounts" /> carries the account id in its
+	/// arguments rather than in the declared local id.
+	/// </summary>
+	public static class Calendar
+	{
+		public const string Describe = "describe";
+
+		public const string Accounts = "accounts";
+
+		public const string Calendars = "calendars";
+
+		/// <summary>
+		/// Summaries of the events of one account in a range, without description and participants, cut to
+		/// <c>ProtocolLimits.MaxCalendarReplyBytes</c>.
+		/// </summary>
+		public const string Events = "events";
+
+		/// <summary>One event with description and participants; an event the provider no longer has is a
+		/// null event, not a failure.</summary>
+		public const string Event = "event";
+
+		public static readonly IReadOnlyList<string> All = [Describe, Accounts, Calendars, Events, Event];
+	}
+
 	private static readonly Dictionary<string, IReadOnlyList<string>> _byKind =
 		new(StringComparer.Ordinal)
 		{
@@ -396,6 +422,7 @@ public static class CapabilityOperations
 			[Handshake.CapabilityKinds.WidgetTypeProvider] = WidgetTypeProvider.All,
 			[Handshake.CapabilityKinds.Messaging] = Messaging.All,
 			[Handshake.CapabilityKinds.VideoStreamProvider] = VideoStreamProvider.All,
+			[Handshake.CapabilityKinds.Calendar] = Calendar.All,
 		};
 
 	public static IReadOnlyList<string> For(string kind) => _byKind[kind];

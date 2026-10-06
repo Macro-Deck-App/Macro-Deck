@@ -22,6 +22,10 @@ public class ProtocolLimitsTests
 		=> Assert.That(ProtocolLimits.MaxAssetChunkBytes, Is.LessThan(ProtocolLimits.MaxMessageBytes));
 
 	[Test]
+	public void A_calendar_reply_fits_one_message_with_room_for_its_envelope()
+		=> Assert.That(ProtocolLimits.MaxCalendarReplyBytes, Is.LessThan(ProtocolLimits.MaxMessageBytes));
+
+	[Test]
 	public void Max_json_depth_matches_the_serializers_configured_max_depth()
 		=> Assert.That(PluginProtocolJson.Options.MaxDepth, Is.EqualTo(ProtocolLimits.MaxJsonDepth));
 

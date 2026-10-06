@@ -51,6 +51,46 @@ describe('interactionTriggerTabsFor', () => {
   });
 });
 
+describe('calendar widget trigger tabs', () => {
+  const t = (key: string): string => key;
+  const T = AppStrings.ActionBuilder.Trigger;
+  const calendarWidgetTriggers = [
+    'onShortPress', 'onLongPress', 'onDoublePress', 'onTouchStart', 'onTouchEnd',
+    'onCalendarEventStartsSoon', 'onCalendarEventStarted', 'onCalendarEventEnded',
+  ];
+
+  it('gives a calendar widget the five press tabs followed by its three calendar triggers, Short Press first', () => {
+    expect(interactionTriggerTabsFor(calendarWidgetTriggers, t)).toEqual([
+      { triggerType: 'onShortPress', label: T.ShortPress },
+      { triggerType: 'onLongPress', label: T.LongPress },
+      { triggerType: 'onTouchStart', label: T.TouchStart },
+      { triggerType: 'onTouchEnd', label: T.TouchEnd },
+      { triggerType: 'onDoublePress', label: T.DoublePress },
+      { triggerType: 'onCalendarEventStartsSoon', label: T.CalendarEventStartsSoon },
+      { triggerType: 'onCalendarEventStarted', label: T.CalendarEventStarted },
+      { triggerType: 'onCalendarEventEnded', label: T.CalendarEventEnded },
+    ]);
+    expect(fixedTriggerTabsFor(calendarWidgetTriggers, t)).toBeNull();
+  });
+
+  it('leaves the tab sets of buttons, weather, timers and sliders as they were', () => {
+    const actionButton = ['onShortPress', 'onLongPress', 'onTouchStart', 'onTouchEnd', 'onDoublePress'];
+    expect(interactionTriggerTabsFor(actionButton, t)).toBeNull();
+    expect(fixedTriggerTabsFor(actionButton, t)).toBeNull();
+    expect(interactionTriggerTabsFor([...actionButton, 'onStateChange'], t)).toBeNull();
+    expect(fixedTriggerTabsFor([...actionButton, 'onStateChange'], t)).toBeNull();
+
+    expect(interactionTriggerTabsFor(undefined, t)).toBeNull();
+    expect(fixedTriggerTabsFor(undefined, t)).toBeNull();
+
+    expect(interactionTriggerTabsFor(['onStopwatchStarted', 'onStopwatchPaused', 'onStopwatchReset'], t)!
+      .map(tab => tab.triggerType)).toEqual(['onStopwatchStarted', 'onStopwatchPaused', 'onStopwatchReset']);
+
+    expect(interactionTriggerTabsFor(['onDoublePress'], t)).toBeNull();
+    expect(fixedTriggerTabsFor(['onDoublePress'], t)!.map(tab => tab.triggerType)).toEqual(['onDoublePress']);
+  });
+});
+
 describe('comparisonOperatorOptions', () => {
   it('D1: returns the full operator list, in order, an added operator cannot silently displace an existing one', () => {
     const options = comparisonOperatorOptions(key => key);

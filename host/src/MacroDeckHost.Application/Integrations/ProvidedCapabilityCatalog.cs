@@ -2,6 +2,7 @@ using MacroDeck.Localization;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Calendar;
 using MacroDeck.Sdk.Devices;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.FolderViews;
@@ -46,6 +47,8 @@ public static class ProvidedCapabilityCatalog
 			integration => integration is IMusicPlayerProvider),
 		(CapabilityKinds.Weather, AppStrings.Integrations.Capability.Weather(),
 			integration => integration is IWeatherProvider),
+		(CapabilityKinds.Calendar, AppStrings.Integrations.Capability.Calendar(),
+			integration => integration is ICalendarProvider),
 		(CapabilityKinds.VirtualProfiles, AppStrings.Integrations.Capability.VirtualProfiles(),
 			integration => integration is IProfileProvider),
 		(CapabilityKinds.DeviceProvider, AppStrings.Integrations.Capability.DeviceProvider(),

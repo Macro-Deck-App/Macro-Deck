@@ -34,6 +34,7 @@ internal sealed class FakeIntegrationRegistry : IIntegrationRegistry
 
 	private readonly List<IIntegration> _integrations = [];
 	private readonly HashSet<string> _disabled = [];
+	private readonly Dictionary<string, IntegrationOrigin> _origins = new(StringComparer.Ordinal);
 
 	public IReadOnlyList<IIntegration> Integrations => _integrations;
 
@@ -90,7 +91,8 @@ internal sealed class FakeIntegrationRegistry : IIntegrationRegistry
 		}
 	}
 
-	public IntegrationOrigin GetOrigin(string integrationId) => IntegrationOrigin.BuiltIn;
+	public IntegrationOrigin GetOrigin(string integrationId)
+		=> _origins.TryGetValue(integrationId, out var origin) ? origin : IntegrationOrigin.BuiltIn;
 
 	public Task<IntegrationRegistrationResult> RegisterAsync(
 		IIntegration integration,
@@ -98,6 +100,7 @@ internal sealed class FakeIntegrationRegistry : IIntegrationRegistry
 		IntegrationMetadata? metadata = null)
 	{
 		_integrations.Add(integration);
+		_origins[integration.Id] = origin;
 		return Task.FromResult(IntegrationRegistrationResult.Success);
 	}
 

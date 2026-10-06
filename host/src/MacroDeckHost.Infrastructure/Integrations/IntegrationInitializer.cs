@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using MacroDeckHost.Application.Calendar;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Messaging;
 using MacroDeckHost.Application.Persistence;
@@ -59,6 +60,7 @@ public sealed class IntegrationInitializer
 	private readonly IKnownAudioDeviceStore? _knownAudioDevices;
 	private readonly IVariablePollingInvalidationSignal? _pollingInvalidation;
 	private readonly IStreamPlatformServices? _streamPlatforms;
+	private readonly CalendarHostServices? _calendarServices;
 
 	private readonly ConcurrentDictionary<string, byte> _attempted = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, IntegrationEventPublisher> _eventPublishers = new(StringComparer.Ordinal);
@@ -91,9 +93,11 @@ public sealed class IntegrationInitializer
 		IMessageBroker messageBroker,
 		IKnownAudioDeviceStore? knownAudioDevices = null,
 		IVariablePollingInvalidationSignal? pollingInvalidation = null,
-		IStreamPlatformServices? streamPlatforms = null)
+		IStreamPlatformServices? streamPlatforms = null,
+		CalendarHostServices? calendarServices = null)
 	{
 		_streamPlatforms = streamPlatforms;
+		_calendarServices = calendarServices;
 		_messageBroker = messageBroker;
 		_knownAudioDevices = knownAudioDevices;
 		_pollingInvalidation = pollingInvalidation;
@@ -131,7 +135,8 @@ public sealed class IntegrationInitializer
 			_refreshSignal,
 			_knownAudioDevices,
 			_pollingInvalidation,
-			_streamPlatforms);
+			_streamPlatforms,
+			_calendarServices);
 
 	public async Task<IntegrationInitializationOutcome> InitializeAsync(
 		IIntegration integration,

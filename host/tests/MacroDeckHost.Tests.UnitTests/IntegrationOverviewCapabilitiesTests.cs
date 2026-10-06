@@ -303,6 +303,7 @@ public class IntegrationOverviewCapabilitiesTests
 					(CapabilityKinds.Variables, "Variables"),
 					(CapabilityKinds.MusicPlayer, "Music Player"),
 					(CapabilityKinds.Weather, "Weather"),
+					(CapabilityKinds.Calendar, "Calendar"),
 					(CapabilityKinds.VirtualProfiles, "Virtual Profiles"),
 					(CapabilityKinds.DeviceProvider, "Devices"),
 					(CapabilityKinds.LayoutProvider, "Layouts"),

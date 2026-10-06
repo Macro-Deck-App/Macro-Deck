@@ -66,6 +66,12 @@ x-macrodeck-limits:
   maxVariableCatalogPageSize: 200
   maxVariableSubscriptions: 1024
   maxVariableValuesPerBatch: 128
+  maxCalendarReplyBytes: 196608
+  maxCalendarTitleLength: 256
+  maxCalendarLocationLength: 512
+  maxCalendarMeetingUrlLength: 2048
+  maxCalendarDescriptionLength: 16384
+  maxCalendarParticipants: 100
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Limits.ProtocolTimeouts (camelCase + Ms suffix, whole milliseconds)
 x-macrodeck-timeouts:
@@ -99,6 +105,7 @@ x-macrodeck-capability-kinds:
   - screensaver-provider
   - messaging
   - video-stream-provider
+  - calendar
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Compatibility.PluginCompatibilityStates.All (ascending severity)
 x-macrodeck-compatibility-states:

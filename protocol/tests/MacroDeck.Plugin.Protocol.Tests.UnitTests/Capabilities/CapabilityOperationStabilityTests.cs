@@ -47,6 +47,7 @@ public class CapabilityOperationStabilityTests
 				"describe", "streams", "session.open", "session.suspend", "session.resume",
 				"session.close",
 			],
+			[CapabilityKinds.Calendar] = ["describe", "accounts", "calendars", "events", "event"],
 		};
 
 	[Test]

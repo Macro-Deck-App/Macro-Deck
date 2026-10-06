@@ -3,6 +3,7 @@ using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeckHost.Application.Plugins.Capabilities;
 using MacroDeckHost.Infrastructure.Plugins;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
+using MacroDeck.Sdk.Calendar;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Variables;
 using Serilog;
@@ -225,6 +226,45 @@ internal sealed class RemotePluginSnapshotStoreTests
 			Assert.That(reloaded.EventProviderName, Is.EqualTo("OBS Studio"));
 			Assert.That(eventIds, Is.EqualTo(expectedEventIds));
 			Assert.That(reloaded.HasDynamicEventOptions, Is.True);
+		});
+	}
+
+	[Test]
+	public async Task The_calendar_section_round_trips_through_a_fresh_store()
+	{
+		var store = new RemotePluginSnapshotStore(_paths, Log.Logger);
+
+		await store.SaveAsync(RemotePluginCapabilitySnapshot.Empty("com.example.plugin") with
+		{
+			AcceptedKinds = [CapabilityKinds.Calendar],
+			CalendarProviderName = "Google Calendar",
+			CalendarAccounts = [new CalendarAccount { Id = "alice", DisplayName = "alice@example.com" }]
+		});
+
+		var reloaded = new RemotePluginSnapshotStore(_paths, Log.Logger).GetSnapshot("com.example.plugin");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(reloaded.CalendarProviderName, Is.EqualTo("Google Calendar"));
+			Assert.That(reloaded.CalendarAccounts.Single().Id, Is.EqualTo("alice"));
+			Assert.That(reloaded.CalendarAccounts.Single().DisplayName, Is.EqualTo("alice@example.com"));
+		});
+	}
+
+	[Test]
+	public void A_document_written_before_calendars_existed_reads_with_no_calendar_accounts()
+	{
+		Directory.CreateDirectory(_paths.ConfigDirectory);
+		File.WriteAllText(Path.Combine(_paths.ConfigDirectory, "plugin-capability-snapshots.json"),
+			PreAdr0081Document);
+
+		var snapshot = new RemotePluginSnapshotStore(_paths, Log.Logger).GetSnapshot("com.example.plugin");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(snapshot.CalendarProviderName, Is.Empty);
+			Assert.That(snapshot.CalendarAccounts, Is.Empty);
+			Assert.That(snapshot.WeatherInstances.Single().Id, Is.EqualTo("home"));
 		});
 	}
 

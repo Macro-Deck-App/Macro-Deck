@@ -1,6 +1,6 @@
 namespace MacroDeck.Plugin.Protocol.Handshake;
 
-/// <summary>The nineteen capability kinds a plugin can declare.</summary>
+/// <summary>The twenty capability kinds a plugin can declare.</summary>
 public static class CapabilityKinds
 {
 	public const string Actions = "actions";
@@ -52,11 +52,17 @@ public static class CapabilityKinds
 	/// </summary>
 	public const string VideoStreamProvider = "video-stream-provider";
 
+	/// <summary>
+	/// Reads calendar accounts, calendars and events. Declared at
+	/// <see cref="Capabilities.ProviderCapabilityId.LocalId" />.
+	/// </summary>
+	public const string Calendar = "calendar";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		Actions, Events, Variables, Icons, ConfigFlow, MusicPlayer, Weather, VirtualProfiles, Issues, Ui,
 		Localization, DeviceProvider, LayoutProvider, FolderViewProvider, Migration, WidgetTypeProvider,
-		ScreenSaverProvider, Messaging, VideoStreamProvider,
+		ScreenSaverProvider, Messaging, VideoStreamProvider, Calendar,
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using MacroDeck.Plugin.Protocol.Capabilities;
 using MacroDeck.Plugin.Protocol.Capabilities.Actions;
+using MacroDeck.Plugin.Protocol.Capabilities.Calendar;
 using MacroDeck.Plugin.Protocol.Capabilities.Migration;
 using MacroDeck.Plugin.Protocol.Capabilities.MusicPlayer;
 using MacroDeck.Plugin.Protocol.Capabilities.VirtualProfiles;
@@ -95,6 +96,37 @@ public class RemotePluginSnapshotRefresherTests
 			Assert.That(result.AllSucceeded, Is.True);
 			Assert.That(result.Snapshot.MusicPlayerInstances.Single().Options.Select(option => option.Name),
 				Is.EqualTo(new[] { "cycleSeconds" }));
+		});
+	}
+
+	[Test]
+	public async Task RefreshKindAsync_for_calendar_rereads_the_accounts_and_preserves_the_provider_name()
+	{
+		var invoker = new RecordingInvoker
+		{
+			Result = new CalendarAccountsResult
+			{
+				Accounts =
+				[
+					new CalendarAccountDto { Id = "alice", DisplayName = "alice@example.com" },
+					new CalendarAccountDto { Id = "bob", DisplayName = "bob@example.com" }
+				]
+			}
+		};
+		var store = new InMemorySnapshotStore();
+		await store.SaveAsync(
+			RemotePluginCapabilitySnapshot.Empty(PluginId) with { CalendarProviderName = "Google Calendar" });
+		var refresher = new RemotePluginSnapshotRefresher(invoker, store);
+
+		var result = await refresher.RefreshKindAsync(PluginId, CapabilityKinds.Calendar, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(invoker.LastRequest!.Operation, Is.EqualTo(CapabilityOperations.Calendar.Accounts));
+			Assert.That(invoker.LastRequest.LocalId, Is.EqualTo(ProviderCapabilityId.LocalId));
+			Assert.That(result.Snapshot.CalendarAccounts.Select(account => account.Id),
+				Is.EqualTo(new[] { "alice", "bob" }));
+			Assert.That(result.Snapshot.CalendarProviderName, Is.EqualTo("Google Calendar"));
 		});
 	}
 

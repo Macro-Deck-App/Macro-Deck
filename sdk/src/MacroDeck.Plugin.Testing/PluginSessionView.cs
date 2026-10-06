@@ -29,6 +29,7 @@ public sealed class PluginSessionView : ICapabilityInvoker
 		ConfigFlow = new ConfigFlowTestClient(this);
 		MusicPlayer = new MusicPlayerTestClient(this);
 		Weather = new WeatherTestClient(this);
+		Calendar = new CalendarTestClient(this);
 		VirtualProfiles = new VirtualProfilesTestClient(this);
 		DeviceProvider = new DeviceProviderTestClient(this);
 		LayoutProvider = new LayoutProviderTestClient(this);
@@ -76,6 +77,9 @@ public sealed class PluginSessionView : ICapabilityInvoker
 
 	/// <summary>The <c>weather</c> capability.</summary>
 	public WeatherTestClient Weather { get; }
+
+	/// <summary>The <c>calendar</c> capability.</summary>
+	public CalendarTestClient Calendar { get; }
 
 	/// <summary>The <c>virtual-profiles</c> capability.</summary>
 	public VirtualProfilesTestClient VirtualProfiles { get; }

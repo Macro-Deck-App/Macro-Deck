@@ -1,5 +1,6 @@
 using MacroDeck.Plugin.Hosting.Capabilities;
 using MacroDeck.Plugin.Hosting.Capabilities.Actions;
+using MacroDeck.Plugin.Hosting.Capabilities.Calendar;
 using MacroDeck.Plugin.Hosting.Capabilities.ConfigFlow;
 using MacroDeck.Plugin.Hosting.Capabilities.DeviceProvider;
 using MacroDeck.Plugin.Hosting.Capabilities.FolderViewProvider;
@@ -16,6 +17,7 @@ using MacroDeck.Plugin.Hosting.Capabilities.VirtualProfiles;
 using MacroDeck.Plugin.Hosting.Capabilities.Migration;
 using MacroDeck.Plugin.Hosting.Capabilities.Weather;
 using MacroDeck.Sdk;
+using MacroDeck.Sdk.Calendar;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Devices;
 using MacroDeck.Sdk.Events;
@@ -171,6 +173,11 @@ internal static class MacroDeckServiceCollectionExtensions
 		if (typeof(IWeatherProvider).IsAssignableFrom(typeof(TIntegration)))
 		{
 			services.TryAddEnumerable(ServiceDescriptor.Singleton<ICapabilityHandler, WeatherCapabilityHandler>());
+		}
+
+		if (typeof(ICalendarProvider).IsAssignableFrom(typeof(TIntegration)))
+		{
+			services.TryAddEnumerable(ServiceDescriptor.Singleton<ICapabilityHandler, CalendarCapabilityHandler>());
 		}
 
 		if (typeof(IMigrationProvider).IsAssignableFrom(typeof(TIntegration)))

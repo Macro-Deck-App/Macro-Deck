@@ -239,11 +239,16 @@ internal sealed class ConfigurableIntegrationRegistry : IIntegrationRegistry
 
 	private readonly List<IIntegration> _integrations;
 	private readonly HashSet<string> _disabled;
+	private readonly HashSet<string> _plugins;
 
-	public ConfigurableIntegrationRegistry(IEnumerable<IIntegration> integrations, IEnumerable<string>? disabled = null)
+	public ConfigurableIntegrationRegistry(
+		IEnumerable<IIntegration> integrations,
+		IEnumerable<string>? disabled = null,
+		IEnumerable<string>? plugins = null)
 	{
 		_integrations = integrations.ToList();
 		_disabled = new HashSet<string>(disabled ?? []);
+		_plugins = new HashSet<string>(plugins ?? []);
 	}
 
 	public IReadOnlyList<IIntegration> Integrations => _integrations;
@@ -292,7 +297,8 @@ internal sealed class ConfigurableIntegrationRegistry : IIntegrationRegistry
 		}
 	}
 
-	public IntegrationOrigin GetOrigin(string integrationId) => IntegrationOrigin.BuiltIn;
+	public IntegrationOrigin GetOrigin(string integrationId)
+		=> _plugins.Contains(integrationId) ? IntegrationOrigin.Plugin : IntegrationOrigin.BuiltIn;
 
 	public Task<IntegrationRegistrationResult> RegisterAsync(
 		IIntegration integration,

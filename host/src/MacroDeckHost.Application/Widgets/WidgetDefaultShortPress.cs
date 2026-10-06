@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Application.Actions;
+using MacroDeckHost.Application.Calendar;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
@@ -86,6 +87,15 @@ public sealed class WidgetDefaultShortPress : IWidgetDefaultShortPress
 					string.IsNullOrEmpty(instanceId)
 						? null
 						: new Dictionary<string, string> { [WeatherInstanceKey] = instanceId }),
+				SupportsFlows: true,
+				NeedsScreen: true);
+		}
+
+		// Not DefaultShortPressAction: that one also runs on hardware decks, which have no screen for the dialog.
+		if (CalendarWidgetTypes.IsCalendarWidget(widget.Type))
+		{
+			return new DeclaredDefault(CalendarWidgetTypes.OwnerId,
+				new WidgetDefaultAction(CalendarWidgetTypes.ShowDetailsActionId, null),
 				SupportsFlows: true,
 				NeedsScreen: true);
 		}
