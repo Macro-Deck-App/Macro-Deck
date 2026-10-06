@@ -1,5 +1,6 @@
 import { ActionFlow, ConditionExpression } from './action-builder.interface';
 import type { WidgetIconRef } from './widget-icon-ref.util';
+import type { ThresholdsValue } from '../ui-config/thresholds.util';
 
 export type ActionButtonTriggerType = 'onShortPress' | 'onLongPress' | 'onTouchStart' | 'onTouchEnd' | 'onDoublePress' | 'onStateChange';
 
@@ -202,6 +203,8 @@ export interface SliderData {
   max?: number;
   step?: number;
   customStep?: boolean;
+  thresholdsEnabled?: boolean;
+  thresholds?: ThresholdsValue | null;
 }
 
 export interface WeatherData {
@@ -227,6 +230,8 @@ export interface HistoryGraphData {
   maxValue?: number;
   minValue?: number;
   historyLength?: number;
+  thresholdsEnabled?: boolean;
+  thresholds?: ThresholdsValue | null;
   border?: WidgetBorder;
   flows?: ActionFlow[];
 }

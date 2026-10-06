@@ -33,12 +33,12 @@ public class UiConfigVocabularyTests
 		"widget-target",
 	];
 
-	/// <summary>The seven high-level controls, which name editors the application already ships rather than a
+	/// <summary>The eight high-level controls, which name editors the application already ships rather than a
 	/// parameter type. They follow the parameter counterparts and precede the chrome.</summary>
 	private static readonly string[] _expectedMacroDeckInputs =
 	[
 		"actions-list-editor", "action-picker", "variable-picker", "device-picker", "integration-picker",
-		"icon-display", "state-mapping-editor",
+		"icon-display", "state-mapping-editor", "thresholds",
 	];
 
 	/// <summary>The seventeen chrome names, in the order this package declares them.</summary>
@@ -91,11 +91,11 @@ public class UiConfigVocabularyTests
 		{
 			Assert.That(UiConfigPrimitives.WellKnown,
 				Is.EqualTo(expected).AsCollection,
-				"the primitive vocabulary is the 27 control names, then the 7 high-level controls, then the " +
+				"the primitive vocabulary is the 27 control names, then the 8 high-level controls, then the " +
 				"17 chrome names, then the 3 widget configuration regions, then later chrome, in order");
-			Assert.That(UiConfigPrimitives.WellKnown, Has.Count.EqualTo(57));
+			Assert.That(UiConfigPrimitives.WellKnown, Has.Count.EqualTo(58));
 			Assert.That(UiConfigPrimitives.WellKnown.Distinct(StringComparer.Ordinal).Count(),
-				Is.EqualTo(57));
+				Is.EqualTo(58));
 
 			foreach (var forbidden in _forbiddenPrimitives)
 			{
@@ -364,6 +364,17 @@ public class UiConfigVocabularyTests
 							Key = "stateMapping",
 							States = UiValue.Of<IReadOnlyList<UiOption>>([UiOption.Of("off", "Off")]),
 						}),
+						Configure(new UiThresholdsInput
+						{
+							Key = "thresholds",
+							Min = 0,
+							Max = 100,
+							Step = 1,
+							Unit = "%",
+							FixedCount = true,
+							FixedColors = true,
+							MaxCount = 6,
+						}),
 						new UiTabs
 						{
 							Key = "tabs",
@@ -456,6 +467,8 @@ public class UiConfigVocabularyTests
 				UiValue.Of<IReadOnlyDictionary<string, string>>(new Dictionary<string, string> { ["a"] = "b" })),
 			UiInput<UiIconDisplay> typed => Shared(typed,
 				new UiIconDisplay(Fit: "cover", Zoom: 150, OffsetX: 5, OffsetY: -5, Opacity: 80)),
+			UiInput<UiThresholds> typed => Shared(typed,
+				new UiThresholds([new UiThresholdBand("low", "#34c759"), new UiThresholdBand("high", "#ff3b30", 80)])),
 			_ => throw new InvalidOperationException($"Unhandled input value type on '{input.Key}'."),
 		};
 

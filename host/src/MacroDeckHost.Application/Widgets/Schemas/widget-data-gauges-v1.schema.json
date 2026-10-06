@@ -55,6 +55,26 @@
     }
   },
   "$defs": {
+    "colorThresholds": {
+      "type": ["object", "null"],
+      "description": "A numeric range divided into colored bands, the value a thresholds editor writes. Each band runs from its 'from' up to the next band's; the first band has no 'from' and covers everything below the second.",
+      "properties": {
+        "bands": {
+          "type": "array",
+          "description": "One to 64 bands, lowest first.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "description": "Stable, non-empty key, unique within the value." },
+              "color": { "type": "string", "description": "The band color, as #rgb or #rrggbb." },
+              "from": { "type": ["number", "null"], "description": "Where the band starts; strictly increasing, absent on the first band." }
+            },
+            "required": ["id", "color"]
+          }
+        }
+      },
+      "required": ["bands"]
+    },
     "gauge": {
       "type": "object",
       "description": "One gauge.",
@@ -125,6 +145,14 @@
         "warnAt": {
           "type": "number",
           "description": "Warning threshold, in the variable's own units."
+        },
+        "thresholdsEnabled": {
+          "type": ["boolean", "null"],
+          "description": "Whether the ring takes its color from 'thresholds' instead of 'color' and the warning. Absent, null or false keeps 'color' and the warning."
+        },
+        "thresholds": {
+          "$ref": "#/$defs/colorThresholds",
+          "description": "The color thresholds used while 'thresholdsEnabled' is true. Absent or null uses the default green, yellow, orange and red bands at 0, 50, 75 and 90 percent of the ring's range."
         }
       }
     },

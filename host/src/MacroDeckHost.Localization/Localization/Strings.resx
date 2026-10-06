@@ -3613,6 +3613,30 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Forms.TabBar.RemoveTab" xml:space="preserve">
     <value>Remove {label}</value>
   </data>
+  <data name="Forms.ThresholdEditor.AddRange" xml:space="preserve">
+    <value>Add range</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Color" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Range" xml:space="preserve">
+    <value>{from} – {to}</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Ranges" xml:space="preserve">
+    <value>Ranges</value>
+  </data>
+  <data name="Forms.ThresholdEditor.RangeWithUnit" xml:space="preserve">
+    <value>{from} – {to} {unit}</value>
+  </data>
+  <data name="Forms.ThresholdEditor.RemoveRange" xml:space="preserve">
+    <value>Remove range</value>
+  </data>
+  <data name="Forms.ThresholdEditor.ResetToDefaults" xml:space="preserve">
+    <value>Reset to defaults</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Threshold" xml:space="preserve">
+    <value>Threshold {n}</value>
+  </data>
   <data name="Forms.VariableTextInput.UnknownVariable" xml:space="preserve">
     <value>{raw} - no variable of this name is available here</value>
   </data>
@@ -11514,7 +11538,7 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Top</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>Changes the accent color of a slider or history graph.</value>
+    <value>Changes the accent color of a slider or history graph. Has no effect while its color thresholds are on.</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>Set Accent Color</value>
@@ -17771,6 +17795,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.Editor.ClearStateMapping" xml:space="preserve">
     <value>Remove state mapping</value>
   </data>
+  <data name="Widgets.Editor.ColorThresholds" xml:space="preserve">
+    <value>Color thresholds</value>
+  </data>
   <data name="Widgets.Editor.CombinedProviderHeading" xml:space="preserve">
     <value>This action can control this button's state and icon.</value>
   </data>
@@ -18304,6 +18331,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.Gauges.Color" xml:space="preserve">
     <value>Ring color</value>
   </data>
+  <data name="Widgets.Gauges.ColorThresholdsDescription" xml:space="preserve">
+    <value>Colors the ring by the range its value is in, instead of the ring color and warning.</value>
+  </data>
   <data name="Widgets.Gauges.EmptyHint" xml:space="preserve">
     <value>No gauges yet. Add one in the widget settings.</value>
   </data>
@@ -18369,6 +18399,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Widgets.History.ChartMinimumHint" xml:space="preserve">
     <value>Fixed lower bound, may be negative (e.g. -100). Set 0 to scale automatically.</value>
+  </data>
+  <data name="Widgets.History.ColorThresholdsDescription" xml:space="preserve">
+    <value>Colors the graph and the value by the range the latest value is in, instead of the accent color.</value>
   </data>
   <data name="Widgets.History.MetricSection" xml:space="preserve">
     <value>Metric</value>
@@ -18597,6 +18630,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Widgets.Slider.ChooseIcon" xml:space="preserve">
     <value>Choose icon</value>
+  </data>
+  <data name="Widgets.Slider.ColorThresholdsDescription" xml:space="preserve">
+    <value>Colors the slider by the range its value is in, instead of the slider color.</value>
   </data>
   <data name="Widgets.Slider.CustomStep" xml:space="preserve">
     <value>Custom step</value>

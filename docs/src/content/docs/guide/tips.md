@@ -75,8 +75,11 @@ to store a new random number in a variable each time the action runs.
 - **Run** in the editor runs the actions right away, without pressing the button.
 - Use **Switch** instead of several **If / Else** blocks when one value has many outcomes, for example a
   button that does something different for each repeat mode of a music player.
-- **Set Accent Color** recolors a slider or history graph. Put it inside an **If / Else** on a value, for
-  example to turn a graph red above a limit and back to blue below it. **Reset** returns to your theme color.
+- **Color thresholds** color a slider, history graph or gauge by its value: green, yellow, orange and red by default.
+  Drag a handle on the bar to move a limit, click the bar to add a limit there, and select a range to recolor
+  or remove it. **Reset to defaults** brings back the standard ranges.
+- **Set Accent Color** recolors a slider or history graph while its color thresholds are off. Put it inside an
+  **If / Else** on a value for a rule thresholds cannot express. **Reset** returns to your theme color.
 - **Control any OBS output:** **Start Output**, **Stop Output** and **Toggle Output** work on every output OBS
   lists by name, including the ones OBS plugins add, such as a multi-RTMP stream or a second recording.
   **Get Output State** writes whether an output is active into a variable, and **Toggle Output** can drive the

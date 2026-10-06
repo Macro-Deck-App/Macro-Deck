@@ -42,6 +42,14 @@
       "type": "number",
       "description": "How many recent samples to retain and plot."
     },
+    "thresholdsEnabled": {
+      "type": ["boolean", "null"],
+      "description": "Whether the chart and the value takes its color from 'thresholds' instead of 'accentColor'. Absent, null or false keeps 'accentColor'."
+    },
+    "thresholds": {
+      "$ref": "#/$defs/colorThresholds",
+      "description": "The color thresholds used while 'thresholdsEnabled' is true. Absent or null uses the default green, yellow, orange and red bands at 0, 50, 75 and 90 percent of the chart scale."
+    },
     "backgroundColor": {
       "type": ["string", "null"],
       "description": "Widget background color, as #rrggbb or transparent. Absent or null keeps the widget's default background; transparent also removes the deck's tile behind the widget."
@@ -59,6 +67,26 @@
     }
   },
   "$defs": {
+    "colorThresholds": {
+      "type": ["object", "null"],
+      "description": "A numeric range divided into colored bands, the value a thresholds editor writes. Each band runs from its 'from' up to the next band's; the first band has no 'from' and covers everything below the second.",
+      "properties": {
+        "bands": {
+          "type": "array",
+          "description": "One to 64 bands, lowest first.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "description": "Stable, non-empty key, unique within the value." },
+              "color": { "type": "string", "description": "The band color, as #rgb or #rrggbb." },
+              "from": { "type": ["number", "null"], "description": "Where the band starts; strictly increasing, absent on the first band." }
+            },
+            "required": ["id", "color"]
+          }
+        }
+      },
+      "required": ["bands"]
+    },
     "widgetBorder": {
       "type": "object",
       "description": "Outline drawn along the inner edge of the widget.",

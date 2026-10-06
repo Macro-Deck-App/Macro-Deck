@@ -372,6 +372,22 @@
           [stateOptions]="nodeStateOptions()"
           (valueChange)="onStateMappingChange($event)" />
       }
+      @case (types.Thresholds) {
+        <shared-threshold-editor
+          [value]="thresholdsValue()"
+          [min]="min()"
+          [max]="max()"
+          [step]="step()"
+          [unit]="thresholdsUnit()"
+          [label]="label()"
+          [disabled]="disabled()"
+          [fixedCount]="fixedCount()"
+          [fixedColors]="fixedColors()"
+          [maxCount]="maxCount()"
+          [canReset]="thresholdsCanReset()"
+          (valueChange)="onChange($event)"
+          (reset)="onChange(null)" />
+      }
       @case (types.VariablePicker) {
         <shared-node-variable-picker
           [value]="stringValue()"

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using MacroDeck.Ui.Config;
 using MacroDeckHost.Domain.Widgets;
 
 namespace MacroDeckHost.Widgets.Gauges;
@@ -122,6 +123,10 @@ public sealed record GaugeConfig
 
 	public double? WarnAt { get; init; }
 
+	public bool ThresholdsEnabled { get; init; }
+
+	public UiThresholds? Thresholds { get; init; }
+
 	public static GaugeConfig Parse(JsonElement item, string id)
 	{
 		var warnWhen = GaugesWidgetData.ReadString(item, "warnWhen");
@@ -140,6 +145,8 @@ public sealed record GaugeConfig
 			IconColor = WidgetColor.Normalize(GaugesWidgetData.ReadString(item, "iconColor")),
 			WarnWhen = warnWhen is WarnAbove or WarnBelow ? warnWhen : null,
 			WarnAt = GaugesWidgetData.ReadDouble(item, "warnAt"),
+			ThresholdsEnabled = WidgetThresholds.ReadEnabled(item),
+			Thresholds = WidgetThresholds.ReadStored(item),
 		};
 	}
 }

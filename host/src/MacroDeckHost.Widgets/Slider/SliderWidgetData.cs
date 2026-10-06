@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using MacroDeck.Ui.Config;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Widgets;
@@ -55,6 +56,10 @@ public sealed record SliderWidgetData
 
 	public bool HasDoublePressFlow { get; init; }
 
+	public bool ThresholdsEnabled { get; init; }
+
+	public UiThresholds? Thresholds { get; init; }
+
 	public static SliderWidgetData Parse(JsonElement data)
 	{
 		if (data.ValueKind != JsonValueKind.Object)
@@ -80,6 +85,8 @@ public sealed record SliderWidgetData
 			Step = ReadDouble(data, "step") ?? 1,
 			CustomStep = ReadBool(data, "customStep") ?? false,
 			HasDoublePressFlow = WidgetFlowsJson.HasRunnableFlow(WidgetConfigJson.ReadFlows(data), WidgetTriggerTypes.DoublePress),
+			ThresholdsEnabled = WidgetThresholds.ReadEnabled(data),
+			Thresholds = WidgetThresholds.ReadStored(data),
 		};
 	}
 

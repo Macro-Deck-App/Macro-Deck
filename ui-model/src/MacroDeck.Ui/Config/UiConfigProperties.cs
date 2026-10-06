@@ -261,6 +261,18 @@ public static class UiConfigProperties
 	/// </summary>
 	public const string AllowTransparent = "allowTransparent";
 
+	/// <summary>The unit a thresholds editor draws after every value.</summary>
+	public const string Unit = "unit";
+
+	/// <summary>Whether a thresholds editor keeps its number of bands.</summary>
+	public const string FixedCount = "fixedCount";
+
+	/// <summary>Whether a thresholds editor keeps every band's colour and adds no band.</summary>
+	public const string FixedColors = "fixedColors";
+
+	/// <summary>The most bands a thresholds editor lets the user add up to.</summary>
+	public const string MaxCount = "maxCount";
+
 #pragma warning restore CA1720
 
 	/// <summary>The property keys this package ships names for, in declaration order. Not exhaustive - see the
@@ -275,6 +287,7 @@ public static class UiConfigProperties
 		IntegrationId, VariableTypes, WritableOnly, Capability, ConfigurationEntries, Segmented, Cards, Icon,
 		AspectRatio, Background, Tint, States, FalseLabel, TrueLabel, RowWeight, Wrap, HideLabel,
 		Reorderable, OffersStateProvider, OffersIconProvider, StateProviderBlockId, IconProviderBlockId,
-		ConfirmTitle, ConfirmMessage, ConfirmLabel, ConfirmDanger, PromptValue, AllowTransparent,
+		ConfirmTitle, ConfirmMessage, ConfirmLabel, ConfirmDanger, PromptValue, AllowTransparent, Unit, FixedCount,
+		FixedColors, MaxCount,
 	];
 }

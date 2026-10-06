@@ -193,7 +193,19 @@ public abstract record UiInput<T> : UiElement, IUiInputElement
 			return false;
 		}
 
+		if (!AcceptsValue(decoded, out rejection))
+		{
+			return false;
+		}
+
 		Binding.Write(decoded);
+		rejection = null;
+
+		return true;
+	}
+
+	private protected virtual bool AcceptsValue(T? value, out string? rejection)
+	{
 		rejection = null;
 
 		return true;

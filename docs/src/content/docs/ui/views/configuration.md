@@ -259,6 +259,12 @@ In a declared field list, the counterparts are `ActionParameter.File` (with `fil
 `ActionParameter.Folder` and `ActionParameter.Image`, which takes no extensions and always offers the
 image formats.
 
+## Letting the user set colour thresholds
+
+A `UiThresholdsInput` works in a config flow and an action's configuration as it does in a
+[widget configuration](/ui/views/widget-configuration/#colour-thresholds): a bar of coloured bands with draggable
+boundaries, whose value arrives in your binding as a `UiThresholds`.
+
 ## Showing what governs a setting
 
 `UiStatus` is a compact, framed line for "this setting is currently controlled by something else": an

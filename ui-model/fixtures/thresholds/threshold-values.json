@@ -1,0 +1,45 @@
+{
+  "valid": [
+    {
+      "name": "four bands",
+      "value": { "bands": [ { "id": "green", "color": "#34C759" }, { "id": "yellow", "color": "#ffcc00", "from": 26 }, { "id": "orange", "color": "#ff9500", "from": 63 }, { "id": "red", "color": "#ff3b30", "from": 90 } ] },
+      "normalized": { "bands": [ { "id": "green", "color": "#34c759" }, { "id": "yellow", "color": "#ffcc00", "from": 26 }, { "id": "orange", "color": "#ff9500", "from": 63 }, { "id": "red", "color": "#ff3b30", "from": 90 } ] }
+    },
+    {
+      "name": "one band",
+      "value": { "bands": [ { "id": "only", "color": "#123456" } ] },
+      "normalized": { "bands": [ { "id": "only", "color": "#123456" } ] }
+    },
+    {
+      "name": "short colour, negative and fractional starts",
+      "value": { "bands": [ { "id": "cold", "color": "#0af" }, { "id": "mild", "color": "#0f0", "from": -10.5 }, { "id": "warm", "color": "#f00", "from": 0.25 } ] },
+      "normalized": { "bands": [ { "id": "cold", "color": "#00aaff" }, { "id": "mild", "color": "#00ff00", "from": -10.5 }, { "id": "warm", "color": "#ff0000", "from": 0.25 } ] }
+    },
+    {
+      "name": "unknown members and null optionals are ignored",
+      "value": { "version": 2, "bands": [ { "id": "a", "color": "#000000", "from": null, "label": "Old name", "extra": { "x": 1 } }, { "id": "b", "color": "#ffffff", "from": 5, "opacity": 0.5 } ] },
+      "normalized": { "bands": [ { "id": "a", "color": "#000000" }, { "id": "b", "color": "#ffffff", "from": 5 } ] }
+    }
+  ],
+  "invalid": [
+    { "name": "null", "value": null },
+    { "name": "array instead of object", "value": [ { "id": "a", "color": "#000000" } ] },
+    { "name": "missing bands", "value": {} },
+    { "name": "bands not an array", "value": { "bands": { "id": "a", "color": "#000000" } } },
+    { "name": "no bands", "value": { "bands": [] } },
+    { "name": "band not an object", "value": { "bands": [ "a" ] } },
+    { "name": "missing id", "value": { "bands": [ { "color": "#000000" } ] } },
+    { "name": "empty id", "value": { "bands": [ { "id": "", "color": "#000000" } ] } },
+    { "name": "duplicate id", "value": { "bands": [ { "id": "a", "color": "#000000" }, { "id": "a", "color": "#ffffff", "from": 1 } ] } },
+    { "name": "id not a string", "value": { "bands": [ { "id": 1, "color": "#000000" } ] } },
+    { "name": "missing colour", "value": { "bands": [ { "id": "a" } ] } },
+    { "name": "named colour", "value": { "bands": [ { "id": "a", "color": "red" } ] } },
+    { "name": "colour with alpha", "value": { "bands": [ { "id": "a", "color": "#00000080" } ] } },
+    { "name": "colour without hash", "value": { "bands": [ { "id": "a", "color": "000000" } ] } },
+    { "name": "first band with from", "value": { "bands": [ { "id": "a", "color": "#000000", "from": 0 } ] } },
+    { "name": "later band without from", "value": { "bands": [ { "id": "a", "color": "#000000" }, { "id": "b", "color": "#ffffff" } ] } },
+    { "name": "from not a number", "value": { "bands": [ { "id": "a", "color": "#000000" }, { "id": "b", "color": "#ffffff", "from": "5" } ] } },
+    { "name": "equal starts", "value": { "bands": [ { "id": "a", "color": "#000000" }, { "id": "b", "color": "#ffffff", "from": 5 }, { "id": "c", "color": "#ff0000", "from": 5 } ] } },
+    { "name": "decreasing starts", "value": { "bands": [ { "id": "a", "color": "#000000" }, { "id": "b", "color": "#ffffff", "from": 50 }, { "id": "c", "color": "#ff0000", "from": 20 } ] } }
+  ]
+}

@@ -68,8 +68,34 @@ internal sealed class HistoryGraphViewStateResolver
 			Digits = Digits(variable),
 			Subtitle = ResolveSubtitle(),
 			Points = Normalize(samples),
+			Color = ThresholdColor(variable),
 		};
 	}
+
+	internal static (double Min, double Max) ThresholdScale(HistoryGraphWidgetData config, VariableEntity? variable)
+	{
+		var max = Bound(config.MaxValue) is { } ceiling and > 0 ? ceiling : Finite(variable?.Max) ?? 100;
+		var min = Bound(config.MinValue) ?? Finite(variable?.Min) ?? 0;
+
+		return (min, max);
+	}
+
+	private string? ThresholdColor(VariableEntity? variable)
+	{
+		if (!_config.ThresholdsEnabled ||
+			variable is null ||
+			!double.TryParse(variable.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var value) ||
+			!double.IsFinite(value))
+		{
+			return null;
+		}
+
+		var (min, max) = ThresholdScale(_config, variable);
+
+		return WidgetThresholds.Effective(_config.Thresholds, min, max).ColorAt(value);
+	}
+
+	private static double? Finite(double? value) => value is { } finite && double.IsFinite(finite) ? finite : null;
 
 	/// <summary>
 	/// The window mapped onto the chart's plot band. A configured bound pins that end of the scale so two

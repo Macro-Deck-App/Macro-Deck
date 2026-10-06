@@ -3612,6 +3612,30 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Forms.TabBar.RemoveTab" xml:space="preserve">
     <value>Rimuovi {label}</value>
   </data>
+  <data name="Forms.ThresholdEditor.AddRange" xml:space="preserve">
+    <value>Aggiungi intervallo</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Color" xml:space="preserve">
+    <value>Colore</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Range" xml:space="preserve">
+    <value>{from} – {to}</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Ranges" xml:space="preserve">
+    <value>Intervalli</value>
+  </data>
+  <data name="Forms.ThresholdEditor.RangeWithUnit" xml:space="preserve">
+    <value>{from} – {to} {unit}</value>
+  </data>
+  <data name="Forms.ThresholdEditor.RemoveRange" xml:space="preserve">
+    <value>Rimuovi intervallo</value>
+  </data>
+  <data name="Forms.ThresholdEditor.ResetToDefaults" xml:space="preserve">
+    <value>Ripristina predefiniti</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Threshold" xml:space="preserve">
+    <value>Soglia {n}</value>
+  </data>
   <data name="Forms.VariableTextInput.UnknownVariable" xml:space="preserve">
     <value>{raw} - qui non è disponibile nessuna variabile con questo nome</value>
   </data>
@@ -11513,7 +11537,7 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>In alto</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>Cambia il colore accento di un cursore o di un grafico cronologico.</value>
+    <value>Cambia il colore accento di un cursore o di un grafico cronologico. Non ha effetto finché le sue soglie di colore sono attive.</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>Imposta colore accento</value>
@@ -17770,6 +17794,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Widgets.Editor.ClearStateMapping" xml:space="preserve">
     <value>Rimuovi mappatura degli stati</value>
   </data>
+  <data name="Widgets.Editor.ColorThresholds" xml:space="preserve">
+    <value>Soglie di colore</value>
+  </data>
   <data name="Widgets.Editor.CombinedProviderHeading" xml:space="preserve">
     <value>Questa azione può controllare lo stato e l'icona di questo pulsante.</value>
   </data>
@@ -18302,6 +18329,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Widgets.Gauges.Color" xml:space="preserve">
     <value>Colore dell'anello</value>
   </data>
+  <data name="Widgets.Gauges.ColorThresholdsDescription" xml:space="preserve">
+    <value>Colora l'anello in base all'intervallo in cui si trova il suo valore, invece del colore dell'anello e dell'avviso.</value>
+  </data>
   <data name="Widgets.Gauges.EmptyHint" xml:space="preserve">
     <value>Ancora nessun indicatore. Aggiungine uno nelle impostazioni del widget.</value>
   </data>
@@ -18367,6 +18397,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Widgets.History.ChartMinimumHint" xml:space="preserve">
     <value>Limite inferiore fisso, può essere negativo (ad es. -100). Imposta 0 per la scala automatica.</value>
+  </data>
+  <data name="Widgets.History.ColorThresholdsDescription" xml:space="preserve">
+    <value>Colora il grafico e il valore in base all'intervallo in cui si trova l'ultimo valore, invece del colore accento.</value>
   </data>
   <data name="Widgets.History.MetricSection" xml:space="preserve">
     <value>Metrica</value>
@@ -18595,6 +18628,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Widgets.Slider.ChooseIcon" xml:space="preserve">
     <value>Scegli icona</value>
+  </data>
+  <data name="Widgets.Slider.ColorThresholdsDescription" xml:space="preserve">
+    <value>Colora il cursore in base all'intervallo in cui si trova il suo valore, invece del colore del cursore.</value>
   </data>
   <data name="Widgets.Slider.CustomStep" xml:space="preserve">
     <value>Passo personalizzato</value>

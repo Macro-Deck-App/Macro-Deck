@@ -1,4 +1,5 @@
 using System.Text.Json;
+using MacroDeck.Ui.Config;
 
 namespace MacroDeckHost.Widgets.HistoryGraph;
 
@@ -30,6 +31,10 @@ public sealed record HistoryGraphWidgetData
 
 	public int HistoryLength { get; init; } = DefaultHistoryLength;
 
+	public bool ThresholdsEnabled { get; init; }
+
+	public UiThresholds? Thresholds { get; init; }
+
 	public static HistoryGraphWidgetData Parse(JsonElement data)
 	{
 		if (data.ValueKind != JsonValueKind.Object)
@@ -55,6 +60,8 @@ public sealed record HistoryGraphWidgetData
 			HistoryLength = historyLength is > 1 and <= int.MaxValue
 				? (int)Math.Floor(historyLength.Value)
 				: DefaultHistoryLength,
+			ThresholdsEnabled = WidgetThresholds.ReadEnabled(data),
+			Thresholds = WidgetThresholds.ReadStored(data),
 		};
 	}
 

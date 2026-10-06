@@ -53,12 +53,12 @@ internal static class HistoryGraphWidgetView
 
 		// Built once and shared between the layer and its fallback, the way MusicPlayerWidgetView shares
 		// its rows: an element is an immutable description, and only one of the two is ever drawn.
-		var value = Value(state);
+		var value = Value(state, config.ThresholdsEnabled);
 
 		var layer = new UiLayer
 		{
 			Key = "historyGraph",
-			Children = [Chart(state, accent), Labels(state, config, safeArea), value],
+			Children = [Chart(state, accent, config.ThresholdsEnabled), Labels(state, config, safeArea), value],
 
 			// An older reader that cannot layer draws the card's substance - the value - rather than a
 			// placeholder: the labels and the chart are context for a number, not the point of the widget.
@@ -78,12 +78,14 @@ internal static class HistoryGraphWidgetView
 		};
 	}
 
-	private static UiChart Chart(UiState<HistoryGraphViewState> state, UiState<string?> accent)
+	private static UiChart Chart(UiState<HistoryGraphViewState> state, UiState<string?> accent, bool thresholds)
 		=> new()
 		{
 			Key = "chart",
 			Points = UiValue.From(() => state.Value.Points),
-			Color = UiValue.Optional(() => accent.Value is { } color ? UiValue.Of(color) : UiValue.None<string>()),
+			Color = UiValue.Optional(() => ((thresholds ? state.Value.Color : null) ?? accent.Value) is { } color
+				? UiValue.Of(color)
+				: UiValue.None<string>()),
 			PlotTop = ChartTop,
 			Thickness = _lineThickness,
 
@@ -137,7 +139,7 @@ internal static class HistoryGraphWidgetView
 		};
 	}
 
-	private static UiStack Value(UiState<HistoryGraphViewState> state)
+	private static UiStack Value(UiState<HistoryGraphViewState> state, bool thresholds)
 	{
 		var children = new List<UiElement>
 		{
@@ -148,6 +150,9 @@ internal static class HistoryGraphWidgetView
 				Size = _valueSize,
 				Weight = UiComponentTextWeights.Bold,
 				Role = UiComponentTextRoles.Primary,
+				Color = UiValue.Optional(() => thresholds && state.Value.Color is { } color
+					? UiValue.Of(color)
+					: UiValue.None<string>()),
 				Align = UiComponentAlignments.Center,
 				Digits = UiValue.From(() => state.Value.Digits),
 			},

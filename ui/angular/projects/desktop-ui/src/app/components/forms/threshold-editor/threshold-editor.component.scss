@@ -1,0 +1,181 @@
+@use '../../../../styles/index' as ds;
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.te {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.te-scale {
+  position: relative;
+  padding: 1.5rem 0.5rem 0;
+}
+
+.te-badges {
+  position: absolute;
+  inset: 0 0.5rem auto;
+  height: 1.25rem;
+}
+
+.te-badge {
+  @include ds.badge;
+
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.te-track {
+  position: relative;
+  height: 0.375rem;
+  margin-block: 0.25rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-tertiary);
+}
+
+.te-track::before {
+  content: '';
+  position: absolute;
+  inset: -0.5rem 0;
+}
+
+.te-track-insertable {
+  cursor: copy;
+}
+
+.te-segment {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.te-segment-first {
+  border-top-left-radius: var(--radius-sm);
+  border-bottom-left-radius: var(--radius-sm);
+}
+
+.te-segment-last {
+  border-top-right-radius: var(--radius-sm);
+  border-bottom-right-radius: var(--radius-sm);
+}
+
+.te-handle {
+  position: absolute;
+  top: 50%;
+  width: 0.8125rem;
+  height: 0.8125rem;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background-color: var(--color-text-primary);
+  box-shadow: 0 0 0 2px var(--color-bg-secondary);
+  cursor: ew-resize;
+  touch-action: none;
+  outline: none;
+  transition: transform var(--transition-fast), background-color var(--transition-fast);
+
+  &:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--color-bg-secondary), 0 0 0 4px var(--color-accent);
+  }
+}
+
+.te-handle-selected {
+  background-color: var(--color-accent);
+}
+
+.te-disabled .te-handle {
+  cursor: default;
+  background-color: var(--color-text-muted);
+
+  &:hover {
+    transform: translate(-50%, -50%);
+  }
+}
+
+.te-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.te-ranges {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.te-range {
+  @include ds.interactive-row;
+
+  gap: var(--space-1);
+  padding-inline-end: var(--space-1);
+  border: 1px solid transparent;
+  color: var(--color-text-secondary);
+
+  &:focus-within {
+    border-color: var(--color-accent);
+  }
+}
+
+.te-range-selected {
+  background-color: var(--color-bg-tertiary);
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.te-range-select {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  min-height: var(--control-height-compact);
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--text-base);
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+}
+
+.te-swatch {
+  flex: 0 0 auto;
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 0 0 1px var(--color-border-overlay);
+}
+
+.te-range-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+
+  @include ds.truncate;
+}
+
+
+.te-footer {
+  display: flex;
+  justify-content: flex-end;
+}

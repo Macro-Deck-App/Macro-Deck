@@ -72,6 +72,10 @@ export const UiConfigProperties = {
   ConfirmDanger: 'confirmDanger',
   PromptValue: 'promptValue',
   AllowTransparent: 'allowTransparent',
+  Unit: 'unit',
+  FixedCount: 'fixedCount',
+  FixedColors: 'fixedColors',
+  MaxCount: 'maxCount',
 } as const;
 
 export interface UiNodeOption {

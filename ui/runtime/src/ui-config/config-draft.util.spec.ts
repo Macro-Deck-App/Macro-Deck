@@ -203,6 +203,28 @@ describe('composeConfigDraft', () => {
     });
   });
 
+  it('writes no thresholds key for an editor the user never touched, and the whole value once they edit', () => {
+    const editor = (value: unknown): UiNode => ({
+      id: 'root',
+      type: 'stack',
+      children: [
+        {
+          id: 'thresholds',
+          type: UiConfigPrimitives.Thresholds,
+          properties: {
+            value,
+            defaultValue: { bands: [{ id: 'green', color: '#34c759' }, { id: 'red', color: '#ff3b30', from: 90 }] },
+            events: ['change'],
+          },
+        },
+      ],
+    });
+    const edited = { bands: [{ id: 'green', color: '#34c759' }, { id: 'red', color: '#ff3b30', from: 80 }] };
+
+    expect(composeConfigDraft(editor(null), { min: 0 })).toEqual({ min: 0 });
+    expect(composeConfigDraft(editor(edited), { min: 0 })).toEqual({ min: 0, thresholds: edited });
+  });
+
   it('writes a hidden, read-only bound object the host owns, and drops the key once the host clears it', () => {
     const hostOwned = (value: unknown): UiNode => ({
       id: 'root',

@@ -6,6 +6,8 @@ using MacroDeck.Ui.Runtime;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Widgets;
+using MacroDeckHost.Domain.Entities;
+using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Widgets.Configuration;
 using MacroDeckHost.Widgets.Preview;
@@ -54,7 +56,8 @@ public sealed class GaugesWidgetUiProvider : IBuiltInWidgetUiProvider
 			}
 
 			var configView = new UiView(request.Surface,
-				GaugesWidgetConfigView.Build(WidgetConfigSurfaces.Data(request.Surface)));
+				GaugesWidgetConfigView.Build(WidgetConfigSurfaces.Data(request.Surface),
+					name => FindVariable(name, WidgetConfigSurfaces.WidgetId(request.Surface)?.ToString())));
 
 			return new WidgetConfigSession(configView);
 		}
@@ -115,4 +118,8 @@ public sealed class GaugesWidgetUiProvider : IBuiltInWidgetUiProvider
 
 	private static JsonElement DataElement(UiSurface surface)
 		=> surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var data) ? data : default;
+
+	private VariableEntity? FindVariable(string name, string? scope)
+		=> (scope is null ? null : _variables.FindByName(VariableScope.Widget, scope, name)) ??
+			_variables.FindByName(VariableScope.Global, null, name);
 }

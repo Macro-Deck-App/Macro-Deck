@@ -5,6 +5,7 @@ using MacroDeck.Ui.Runtime;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Widgets.Configuration;
 using MacroDeckHost.Widgets.Preview;
@@ -56,7 +57,11 @@ public sealed class HistoryGraphWidgetUiProvider : IBuiltInWidgetUiProvider
 			}
 
 			var configData = WidgetConfigSurfaces.Data(request.Surface);
-			var configView = new UiView(request.Surface, HistoryGraphWidgetConfigView.Build(configData));
+			var configScope = WidgetConfigSurfaces.WidgetId(request.Surface)?.ToString();
+			var configView = new UiView(request.Surface,
+				HistoryGraphWidgetConfigView.Build(configData,
+					name => (configScope is null ? null : _variables.FindByName(VariableScope.Widget, configScope, name)) ??
+						_variables.FindByName(VariableScope.Global, null, name)));
 
 			return new WidgetConfigSession(configView);
 		}

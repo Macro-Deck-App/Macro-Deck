@@ -3612,6 +3612,30 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Forms.TabBar.RemoveTab" xml:space="preserve">
     <value>Usuń {label}</value>
   </data>
+  <data name="Forms.ThresholdEditor.AddRange" xml:space="preserve">
+    <value>Dodaj zakres</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Color" xml:space="preserve">
+    <value>Kolor</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Range" xml:space="preserve">
+    <value>{from} – {to}</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Ranges" xml:space="preserve">
+    <value>Zakresy</value>
+  </data>
+  <data name="Forms.ThresholdEditor.RangeWithUnit" xml:space="preserve">
+    <value>{from} – {to} {unit}</value>
+  </data>
+  <data name="Forms.ThresholdEditor.RemoveRange" xml:space="preserve">
+    <value>Usuń zakres</value>
+  </data>
+  <data name="Forms.ThresholdEditor.ResetToDefaults" xml:space="preserve">
+    <value>Przywróć domyślne</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Threshold" xml:space="preserve">
+    <value>Próg {n}</value>
+  </data>
   <data name="Forms.VariableTextInput.UnknownVariable" xml:space="preserve">
     <value>{raw} — w tym miejscu nie ma zmiennej o tej nazwie</value>
   </data>
@@ -11513,7 +11537,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Na górze</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>Zmienia kolor akcentu suwaka lub wykresu historii.</value>
+    <value>Zmienia kolor akcentu suwaka lub wykresu historii. Nie działa, gdy włączone są progi kolorów.</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>Ustaw kolor akcentu</value>
@@ -17770,6 +17794,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Widgets.Editor.ClearStateMapping" xml:space="preserve">
     <value>Usuń mapowanie stanów</value>
   </data>
+  <data name="Widgets.Editor.ColorThresholds" xml:space="preserve">
+    <value>Progi kolorów</value>
+  </data>
   <data name="Widgets.Editor.CombinedProviderHeading" xml:space="preserve">
     <value>Ta akcja może sterować stanem i ikoną tego przycisku.</value>
   </data>
@@ -18302,6 +18329,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Widgets.Gauges.Color" xml:space="preserve">
     <value>Kolor pierścienia</value>
   </data>
+  <data name="Widgets.Gauges.ColorThresholdsDescription" xml:space="preserve">
+    <value>Koloruje pierścień według zakresu, w którym znajduje się jego wartość, zamiast koloru pierścienia i ostrzeżenia.</value>
+  </data>
   <data name="Widgets.Gauges.EmptyHint" xml:space="preserve">
     <value>Brak wskaźników. Wskaźnik można dodać w ustawieniach widżetu.</value>
   </data>
@@ -18367,6 +18397,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Widgets.History.ChartMinimumHint" xml:space="preserve">
     <value>Stała dolna granica, może być ujemna (np. -100). Aby skalować automatycznie, wpisz 0.</value>
+  </data>
+  <data name="Widgets.History.ColorThresholdsDescription" xml:space="preserve">
+    <value>Koloruje wykres i wartość według zakresu, w którym znajduje się najnowsza wartość, zamiast koloru akcentu.</value>
   </data>
   <data name="Widgets.History.MetricSection" xml:space="preserve">
     <value>Metryka</value>
@@ -18595,6 +18628,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Widgets.Slider.ChooseIcon" xml:space="preserve">
     <value>Wybierz ikonę</value>
+  </data>
+  <data name="Widgets.Slider.ColorThresholdsDescription" xml:space="preserve">
+    <value>Koloruje suwak według zakresu, w którym znajduje się jego wartość, zamiast koloru suwaka.</value>
   </data>
   <data name="Widgets.Slider.CustomStep" xml:space="preserve">
     <value>Własny krok</value>

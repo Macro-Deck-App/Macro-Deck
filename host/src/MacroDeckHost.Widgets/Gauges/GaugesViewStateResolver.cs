@@ -49,7 +49,7 @@ internal sealed class GaugesViewStateResolver
 			Level = Level(value, gauge, variable),
 			Value = formatted.Value.Literal ?? Unavailable,
 			Unit = formatted.Unit,
-			Color = IsWarning(value, gauge) ? WarningColor : gauge.Color,
+			Color = ColorOf(value, gauge, variable),
 			Name = ResolveName(gauge.Name),
 		};
 	}
@@ -94,6 +94,18 @@ internal sealed class GaugesViewStateResolver
 		return variable?.Max is { } declared && double.IsFinite(declared) && declared > min
 			? (min, declared)
 			: (min, min + AutoSpan);
+	}
+
+	public static string? ColorOf(double value, GaugeConfig gauge, VariableEntity? variable)
+	{
+		if (!gauge.ThresholdsEnabled)
+		{
+			return IsWarning(value, gauge) ? WarningColor : gauge.Color;
+		}
+
+		var (min, max) = Bounds(gauge, variable);
+
+		return WidgetThresholds.Effective(gauge.Thresholds, min, max).ColorAt(value) ?? gauge.Color;
 	}
 
 	public static bool IsWarning(double value, GaugeConfig gauge)

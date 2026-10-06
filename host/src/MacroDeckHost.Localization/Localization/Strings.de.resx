@@ -3611,6 +3611,30 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Forms.TabBar.RemoveTab" xml:space="preserve">
     <value>{label} entfernen</value>
   </data>
+  <data name="Forms.ThresholdEditor.AddRange" xml:space="preserve">
+    <value>Bereich hinzufügen</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Color" xml:space="preserve">
+    <value>Farbe</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Range" xml:space="preserve">
+    <value>{from} – {to}</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Ranges" xml:space="preserve">
+    <value>Bereiche</value>
+  </data>
+  <data name="Forms.ThresholdEditor.RangeWithUnit" xml:space="preserve">
+    <value>{from} – {to} {unit}</value>
+  </data>
+  <data name="Forms.ThresholdEditor.RemoveRange" xml:space="preserve">
+    <value>Bereich entfernen</value>
+  </data>
+  <data name="Forms.ThresholdEditor.ResetToDefaults" xml:space="preserve">
+    <value>Auf Standard zurücksetzen</value>
+  </data>
+  <data name="Forms.ThresholdEditor.Threshold" xml:space="preserve">
+    <value>Schwelle {n}</value>
+  </data>
   <data name="Forms.VariableTextInput.UnknownVariable" xml:space="preserve">
     <value>{raw} - hier ist keine Variable mit diesem Namen verfügbar</value>
   </data>
@@ -11511,7 +11535,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Oben</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>Ändert die Akzentfarbe eines Schiebereglers oder Verlaufsdiagramms.</value>
+    <value>Ändert die Akzentfarbe eines Schiebereglers oder Verlaufsdiagramms. Wirkt nicht, solange seine Farbschwellen aktiv sind.</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>Akzentfarbe festlegen</value>
@@ -17768,6 +17792,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Editor.ClearStateMapping" xml:space="preserve">
     <value>Statuszuordnung entfernen</value>
   </data>
+  <data name="Widgets.Editor.ColorThresholds" xml:space="preserve">
+    <value>Farbschwellen</value>
+  </data>
   <data name="Widgets.Editor.CombinedProviderHeading" xml:space="preserve">
     <value>Diese Aktion kann den Status und das Symbol dieses Buttons steuern.</value>
   </data>
@@ -18300,6 +18327,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Gauges.Color" xml:space="preserve">
     <value>Ringfarbe</value>
   </data>
+  <data name="Widgets.Gauges.ColorThresholdsDescription" xml:space="preserve">
+    <value>Färbt den Ring nach dem Bereich, in dem sein Wert liegt, statt mit Ringfarbe und Warnung.</value>
+  </data>
   <data name="Widgets.Gauges.EmptyHint" xml:space="preserve">
     <value>Noch keine Anzeigen. Füge eine in den Widget-Einstellungen hinzu.</value>
   </data>
@@ -18365,6 +18395,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Widgets.History.ChartMinimumHint" xml:space="preserve">
     <value>Feste Untergrenze, darf negativ sein (z. B. -100). Setze 0 für automatische Skalierung.</value>
+  </data>
+  <data name="Widgets.History.ColorThresholdsDescription" xml:space="preserve">
+    <value>Färbt Diagramm und Wert nach dem Bereich, in dem der neueste Wert liegt, statt mit der Akzentfarbe.</value>
   </data>
   <data name="Widgets.History.MetricSection" xml:space="preserve">
     <value>Messwert</value>
@@ -18593,6 +18626,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Widgets.Slider.ChooseIcon" xml:space="preserve">
     <value>Symbol auswählen</value>
+  </data>
+  <data name="Widgets.Slider.ColorThresholdsDescription" xml:space="preserve">
+    <value>Färbt den Schieberegler nach dem Bereich, in dem sein Wert liegt, statt mit der Schieberfarbe.</value>
   </data>
   <data name="Widgets.Slider.CustomStep" xml:space="preserve">
     <value>Eigene Schrittweite</value>

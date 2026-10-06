@@ -81,8 +81,9 @@ public sealed record WidgetAppearancePatch
 	/// The widget's highlight colour, as <c>#rrggbb</c>: a Slider's filled level and a History Graph's line
 	/// and fill. Other widget types have none and drop it. Clearing it with
 	/// <see cref="WidgetAppearanceProperty.AccentColor" /> returns the widget to the reader's theme accent.
-	/// A value that is not a colour is stored but drawn as the theme accent. A host that predates this
-	/// property ignores it.
+	/// A value that is not a colour is stored but drawn as the theme accent. While the widget's colour
+	/// thresholds are on, the thresholds pick the colour and a stored accent has no visible effect. A host
+	/// that predates this property ignores it.
 	/// </summary>
 	public string? AccentColor { get; init; }
 
