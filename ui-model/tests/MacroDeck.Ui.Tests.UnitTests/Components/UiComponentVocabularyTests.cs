@@ -376,6 +376,7 @@ public class UiComponentVocabularyTests
 					Opacity = 0.6,
 					Brightness = 0.6,
 					Saturation = 0.55,
+					Tint = "#f5c542",
 					Source = UiValue.Of(new UiResource
 					{
 						ResourceId = "app.macro-deck.weather.clear-day",

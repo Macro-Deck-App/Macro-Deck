@@ -221,6 +221,51 @@ describe('widget node renderer', () => {
       expect(image().style.opacity).toBe('1');
     });
 
+    describe('on a ui.image', () => {
+      const plain = () => container.querySelector('.widget-image img') as HTMLImageElement | null;
+      const layer = () => container.querySelector('.widget-image-tint') as HTMLElement | null;
+
+      it('draws a loaded image as a silhouette in the tint colour over the hidden image', () => {
+        loaded = true;
+        mount(node('ui.image', { size: { basis: 0.5 }, source: { resourceId: 'abc' }, tint: '#4f8cff', opacity: 0.5 }));
+
+        expect(layer()).not.toBeNull();
+        expect(layer()!.style.backgroundColor).toBe('rgb(79, 140, 255)');
+        expect(layer()!.style.getPropertyValue('mask-image')).toBe('url("/api/ui/resources/abc")');
+        expect(layer()!.style.opacity).toBe('0.5');
+        expect(plain()!.style.opacity).toBe('0');
+      });
+
+      it('keeps the untinted image until it has loaded, then tints it', () => {
+        mount(node('ui.image', { size: { basis: 0.5 }, source: { resourceId: 'abc' }, tint: '#4f8cff' }));
+
+        expect(layer()).toBeNull();
+        expect(plain()!.style.opacity).toBe('1');
+
+        loaded = true;
+        plain()!.dispatchEvent(new Event('load'));
+
+        expect(layer()).not.toBeNull();
+      });
+
+      it('draws its own colours where the engine cannot mask, and without a tint', () => {
+        loaded = true;
+        delete globals.CSS;
+        mount(node('ui.image', { size: { basis: 0.5 }, source: { resourceId: 'abc' }, tint: '#4f8cff' }));
+
+        expect(layer()).toBeNull();
+        expect(plain()!.style.opacity).toBe('1');
+      });
+
+      it('draws no layer for an image without a tint', () => {
+        loaded = true;
+        mount(node('ui.image', { size: { basis: 0.5 }, source: { resourceId: 'abc' } }));
+
+        expect(layer()).toBeNull();
+        expect(plain()!.style.opacity).toBe('1');
+      });
+    });
+
     it('ignores a tint that is not a colour', () => {
       loaded = true;
       mount(node('ui.button', { source: { resourceId: 'abc' }, tint: 'blue; background: red' }));

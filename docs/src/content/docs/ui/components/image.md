@@ -49,6 +49,16 @@ A paused cover, as the built-in Music player draws it. `Brightness` changes the 
 same on any background - use it, not a lower `Opacity`, for "the same picture, darker". `Opacity` lets what
 is behind show through. `Saturation = 0` draws in greys.
 
+## Recolouring an icon
+
+```csharp
+Tint = "#4f8cff",
+```
+
+Draws the image as a silhouette in that colour: every pixel keeps its own transparency, so a white icon on a
+transparent background becomes a blue icon, while an image without transparency becomes a solid rectangle.
+The built-in Slider uses it for its Icon Color setting.
+
 ## A source that may be missing
 
 ```csharp
@@ -70,6 +80,7 @@ should not take up space either.
 | `Opacity` (`opacity`) | `0..1` | Fully opaque | How opaque the image is drawn. |
 | `Brightness` (`brightness`) | `0..2` | `1` | A multiplier of the image's own luminance. |
 | `Saturation` (`saturation`) | `0..2` | `1` | A multiplier of the image's own saturation; `0` is greyscale. |
+| `Tint` (`tint`) | `#rrggbb` | The image's own colours | Draws the image in this colour, keeping each pixel's transparency. |
 | `MainSize` (`mainSize`), `Fill` (`fill`) | See [Sizing](/ui/concepts/sizing/) | `Size` | The image's extent along the parent stack's main axis. |
 
 ## Events
@@ -100,6 +111,8 @@ An image is `size` on both axes, fitted into a square box. Along its parent stac
   compositing at `opacity`, and clamp each channel rather than wrapping it.
 - `saturation` is normative: `out = luma + saturation * (channel - luma)`, with
   `luma = 0.213 R + 0.715 G + 0.072 B`, applied after `brightness`.
+- `tint` is normative: every pixel takes the colour and keeps its own alpha, then `opacity` applies. A reader
+  that does not implement the key, or whose engine cannot mask, draws the image in its own colours.
 
 ## See also
 

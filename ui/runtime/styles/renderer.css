@@ -459,6 +459,20 @@
   object-fit: contain;
 }
 
+.widget-image-tint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  mask-size: contain;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  pointer-events: none;
+}
+
 /*
  * A crossfade stacks the incoming artwork on the settled one and fades it in, so a source change
  * never cuts and never flashes an empty box. An animation rather than a transition: a transition off

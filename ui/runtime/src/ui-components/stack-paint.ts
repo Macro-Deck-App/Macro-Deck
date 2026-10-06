@@ -26,6 +26,7 @@ import { renderWidgetBorder, WidgetBorderHandle } from '../render/widget-border'
 import { ArtworkCrossfadeState, swapArtwork } from './artwork-crossfade';
 import { px } from './px.util';
 import { setImageSource } from './image-recovery';
+import { maskImageUrl, repaintOnLoad, supportsMasks } from './artwork-tint';
 import { nodeModifierOwns } from '../render/node-modifiers';
 
 const BUTTON_CORNER_RATIO = 0.12;
@@ -81,24 +82,12 @@ export function paintStackLayout<TState>(node: UiNode, ctx: UiComponentContext<T
   ctx.pressTint(node);
 }
 
-function supportsMasks(): boolean {
-  return typeof CSS !== 'undefined' && typeof CSS.supports === 'function' &&
-    (CSS.supports('mask-image', 'url("x")') || CSS.supports('-webkit-mask-image', 'url("x")'));
-}
-
-function repaintOnLoad<TState>(image: HTMLImageElement, ctx: UiComponentContext<TState>): void {
-  const flagged = image as HTMLImageElement & { __mdTintRepaint?: boolean };
-  if (flagged.__mdTintRepaint === true) return;
-  flagged.__mdTintRepaint = true;
-  image.addEventListener('load', () => ctx.repaint());
-}
-
 function paintArtworkTint<TState>(node: UiNode, ctx: UiComponentContext<TState>, tint: string, src: string): void {
   const layer = ctx.part('artwork-tint', 'div') as HTMLElement;
   ctx.setClassName(layer, 'widget-button-artwork');
   ctx.setAttribute(layer, 'aria-hidden', 'true');
   ctx.setStyle(layer, 'background-color', tint);
-  ctx.setStyle(layer, 'mask-image', `url("${src.replace(/["\\]/g, '\\$&')}")`);
+  ctx.setStyle(layer, 'mask-image', maskImageUrl(src));
   ctx.setStyle(layer, 'mask-size', buttonFit(node));
   ctx.setStyle(layer, 'mask-position', 'center');
   ctx.setStyle(layer, 'mask-repeat', 'no-repeat');

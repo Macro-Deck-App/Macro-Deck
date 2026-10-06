@@ -344,6 +344,10 @@ public sealed record UiImage : UiComponentLeaf
 	/// </summary>
 	public UiValue<double> Saturation { get; init; }
 
+	/// <summary>The image recoloured, as <c>#rrggbb</c> - see <see cref="UiComponentProperties.Tint" />,
+	/// which states the normative result. Absent means the image's own colours.</summary>
+	public UiValue<string> Tint { get; init; }
+
 	/// <inheritdoc />
 	public override string Type => UiComponents.Image;
 
@@ -359,6 +363,7 @@ public sealed record UiImage : UiComponentLeaf
 		properties.Set(UiComponentProperties.Opacity, Opacity);
 		properties.Set(UiComponentProperties.Brightness, Brightness);
 		properties.Set(UiComponentProperties.Saturation, Saturation);
+		properties.Set(UiComponentProperties.Tint, Tint);
 		properties.Set(UiComponentProperties.Size, Size.Value);
 	}
 }

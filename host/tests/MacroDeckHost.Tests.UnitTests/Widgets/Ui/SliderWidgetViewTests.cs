@@ -1,5 +1,6 @@
 using System.Text.Json;
 using MacroDeck.Ui.Dsl;
+using MacroDeck.Ui.Model.Resources;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
 using MacroDeck.Ui.Testing;
@@ -268,13 +269,44 @@ public class SliderWidgetViewTests
 		});
 	}
 
+	[TestCase("horizontal")]
+	[TestCase("vertical")]
+	public void The_icon_is_drawn_in_the_configured_colour_in_either_orientation(string orientation)
+	{
+		var host = Render(new { orientation, iconColor = "#ef4444" }, icon: _icon);
+
+		Assert.That(host.ById("slider.header.lead.icon").Text("tint"), Is.EqualTo("#ef4444"));
+	}
+
+	[TestCase(null)]
+	[TestCase("var(--color-accent)")]
+	[TestCase("")]
+	public void An_icon_without_a_valid_colour_keeps_its_own_colours(string? iconColor)
+	{
+		var host = Render(new { iconColor }, icon: _icon);
+
+		Assert.That(host.ById("slider.header.lead.icon").HasProperty("tint"), Is.False);
+	}
+
+	[Test]
+	public void The_icon_colour_is_read_from_the_stored_iconColor_key()
+	{
+		var config = SliderWidgetData.Parse(JsonSerializer.SerializeToElement(new { iconColor = "#ef4444" }));
+
+		Assert.That(config.IconColor, Is.EqualTo("#ef4444"));
+	}
+
+	private static readonly UiResource _icon = new() { ResourceId = "icon-1" };
+
 	private static object Action() => new { integrationId = "integration", actionId = "action" };
 
-	private static UiTestHost Render(object data, IReadOnlyList<UiEventHandler>? events = null)
+	private static UiTestHost Render(object data,
+		IReadOnlyList<UiEventHandler>? events = null,
+		UiResource? icon = null)
 	{
 		var config = SliderWidgetData.Parse(JsonSerializer.SerializeToElement(data));
 		var state = new UiState<SliderWidgetReadout>(new SliderWidgetReadout(true, 0, 100, 0, 42));
-		var element = SliderWidgetView.Build(config, state, icon: null, events ?? []);
+		var element = SliderWidgetView.Build(config, state, icon, events ?? []);
 
 		return UiTestHost.Render(element,
 			new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared });
