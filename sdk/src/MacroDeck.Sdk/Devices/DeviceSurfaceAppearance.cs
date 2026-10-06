@@ -16,12 +16,11 @@ public sealed record DeviceSurfaceAppearance
 	public string? BackgroundColor { get; init; }
 
 	/// <summary>
-	/// An icon-pack icon's bare id, and nothing else - never a provider reference, never a synthesised
-	/// id. <see cref="IconId" /> carries no marker saying so because none has ever been needed: every
-	/// value this field has ever held is a GUID, so a provider may parse it as one. When the currently
+	/// A GUID that <see cref="IDeviceSession.GetIconAsync" /> serves, never a provider reference, so a
+	/// provider may parse it as one. For an icon with appearances it is the id of the appearance chosen
+	/// for this device, which can differ from the icon id stored on the widget. When the currently
 	/// rendered icon instead comes from an action icon provider, this is null and
-	/// <see cref="HasProviderIcon" /> is true - widening this field to carry anything else would be a
-	/// silent contract break for every provider already relying on that assumption.
+	/// <see cref="HasProviderIcon" /> is true.
 	/// </summary>
 	public string? IconId { get; init; }
 

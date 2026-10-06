@@ -1,7 +1,7 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Observable, Subject } from 'rxjs';
-import { AppStrings, IpcIcon, IpcIconPack } from '@macro-deck/runtime';
+import { AppStrings, IpcIcon, IpcIconPack, TransportError } from '@macro-deck/runtime';
 import { ApiService, IconImageService, IconPackExportError, LocalizationService } from '@shared';
 import { FileSaveService } from './file-save.service';
 import { IconPackService } from './icon-pack.service';
@@ -66,6 +66,9 @@ describe('IconPackService', () => {
       'exportIconPack',
       'cancelIconImportBatch',
       'getIconImageUrl',
+      'addIconAppearance',
+      'removeIconAppearance',
+      'mergeIconAppearance',
     ]);
     apiSpy.getIconImageUrl.and.callFake((iconId: string, size?: number, version?: string | null) =>
       `/api/icons/${iconId}/image?size=${size}${version ? `&v=${version}` : ''}`);
@@ -247,6 +250,75 @@ describe('IconPackService', () => {
 
     expect(service.iconsFor(packId)().length).toBe(0);
     expect(service.packs()[0].iconCount).toBe(0);
+  });
+
+  describe('appearances', () => {
+    const darkAppearance = {
+      id: 'asset-1',
+      key: 'colorScheme=dark',
+      traits: { colorScheme: 'dark' },
+      contentHash: 'sha256:dark',
+      isAnimated: false,
+      width: 256,
+      height: 256,
+      processingState: 'Pending' as const,
+      processingError: null,
+    };
+
+    beforeEach(async () => {
+      apiSpy.getIconPacks.and.resolveTo({ packs: [ipcPack(packId, 'Pack A', { iconCount: 2 })] });
+      apiSpy.getIcons.and.resolveTo({ icons: [ipcIcon('icon-1', 'logo'), ipcIcon('icon-2', 'logo dark')] });
+      await service.loadPacks();
+      await service.loadIcons(packId);
+    });
+
+    it('shows the parent the host answers with after adding an appearance', async () => {
+      apiSpy.addIconAppearance.and.resolveTo({ icon: ipcIcon('icon-1', 'logo', { appearances: [darkAppearance] }) });
+      const file = new File(['png'], 'dark.png');
+
+      const result = await service.addAppearance('icon-1', 'colorScheme=dark', file);
+
+      expect(result).toBeTrue();
+      expect(apiSpy.addIconAppearance).toHaveBeenCalledWith('icon-1', 'colorScheme=dark', file);
+      expect(service.iconsFor(packId)().find(icon => icon.id === 'icon-1')?.appearances?.map(a => a.key))
+        .toEqual(['colorScheme=dark']);
+    });
+
+    it('keeps the icon listed with its remaining appearances after removing one', async () => {
+      apiSpy.removeIconAppearance.and.resolveTo({ icon: ipcIcon('icon-1', 'logo', { appearances: [] }) });
+
+      const result = await service.removeAppearance('icon-1', 'asset-1');
+
+      expect(result).toBeTrue();
+      expect(apiSpy.removeIconAppearance).toHaveBeenCalledWith('icon-1', 'asset-1');
+      expect(service.iconsFor(packId)().map(icon => icon.id)).toEqual(['icon-1', 'icon-2']);
+    });
+
+    it('takes the merged icon out of the list and the count, once even when the host also reports it deleted', async () => {
+      apiSpy.mergeIconAppearance.and.resolveTo({
+        icon: ipcIcon('icon-1', 'logo', { appearances: [{ ...darkAppearance, processingState: 'Ready' }] }),
+        mergedIconId: 'icon-2',
+      });
+
+      const result = await service.mergeAppearance('icon-1', 'icon-2', 'colorScheme=dark');
+      push('IconDeletedEvent', { iconId: 'icon-2', packId });
+
+      expect(result).toBeTrue();
+      expect(apiSpy.mergeIconAppearance).toHaveBeenCalledWith('icon-1', { iconId: 'icon-2', key: 'colorScheme=dark' });
+      expect(service.iconsFor(packId)().map(icon => icon.id)).toEqual(['icon-1']);
+      expect(service.iconsFor(packId)()[0].appearances?.length).toBe(1);
+      expect(service.packs()[0].iconCount).toBe(1);
+    });
+
+    it('leaves the library untouched when the host refuses a merge', async () => {
+      apiSpy.mergeIconAppearance.and.rejectWith(new TransportError(409, 'read-only'));
+
+      const result = await service.mergeAppearance('icon-1', 'icon-2', 'colorScheme=dark');
+
+      expect(result).toBeFalse();
+      expect(service.iconsFor(packId)().length).toBe(2);
+      expect(service.packs()[0].iconCount).toBe(2);
+    });
   });
 
   it('tracks import progress events and dismisses batches', async () => {

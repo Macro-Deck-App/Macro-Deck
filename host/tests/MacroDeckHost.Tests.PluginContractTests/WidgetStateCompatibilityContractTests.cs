@@ -212,6 +212,43 @@ internal sealed class WidgetStateCompatibilityContractTests
 		});
 	}
 
+	[Test]
+	public async Task IconAppearanceField_PinsTheIcon_AndClearingItByOrdinalReturnsToAutomatic()
+	{
+		var pinned = new Fixture("""{"icon":{"type":"icon-pack","reference":"i1"}}""", negotiatedVersion: 2);
+		var pinApplied = await pinned.InvokeV2(
+			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{"iconAppearance":"colorScheme=dark"},"stateIds":["{{WidgetStates.Current}}"],"clearProperties":[]}""");
+
+		var cleared = new Fixture("""{"icon":{"type":"icon-pack","reference":"i1","appearance":"colorScheme=dark"}}""",
+			negotiatedVersion: 2);
+		var clearApplied = await cleared.InvokeV2(
+			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{},"stateIds":["{{WidgetStates.Current}}"],"clearProperties":[{{(int)WidgetAppearanceProperty.IconAppearance}}]}""");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(pinApplied, Is.True);
+			Assert.That(pinned.StoredIcon()?["appearance"]?.GetValue<string>(), Is.EqualTo("colorScheme=dark"));
+			Assert.That(clearApplied, Is.True);
+			Assert.That(cleared.StoredIcon()?["appearance"], Is.Null, "cleared back to automatic selection");
+			Assert.That(cleared.StoredIcon()?["reference"]?.GetValue<string>(), Is.EqualTo("i1"));
+		});
+	}
+
+	[Test]
+	public async Task APatchFromAPluginThatPredatesIconAppearance_KeepsThePinOfTheSameIcon()
+	{
+		var fixture = new Fixture("""{"icon":{"type":"icon-pack","reference":"i1","appearance":"motion=static"}}""");
+
+		var applied = await fixture.InvokeV1(
+			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{"label":"Mic","iconId":"i1"},"state":{{SelectorCurrent}},"clearProperties":[]}""");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(applied, Is.True);
+			Assert.That(fixture.StoredIcon()?["appearance"]?.GetValue<string>(), Is.EqualTo("motion=static"));
+		});
+	}
+
 	private static string ThreeStateData(string first, string second, string third, string active)
 		=> "{\"stateMode\":true,\"states\":[" +
 			$"{{\"id\":\"{first}\",\"label\":\"{Capitalize(first)}\",\"appearance\":{{}}}}," +
@@ -325,6 +362,8 @@ internal sealed class WidgetStateCompatibilityContractTests
 		public string? StateColor(string stateId) => Appearance(stateId)?["backgroundColor"]?.GetValue<string>();
 
 		public string? StoredString(string key) => JsonNode.Parse(Widget.Data!)![key]?.GetValue<string>();
+
+		public JsonObject? StoredIcon() => JsonNode.Parse(Widget.Data!)!["icon"] as JsonObject;
 
 		private JsonObject? Appearance(string stateId)
 			=> ((JsonObject)JsonNode.Parse(Widget.Data!)!)["states"]!.AsArray()

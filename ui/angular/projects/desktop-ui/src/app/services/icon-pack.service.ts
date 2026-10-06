@@ -1,5 +1,5 @@
 import { Injectable, Signal, WritableSignal, inject, signal, untracked } from '@angular/core';
-import { AppStrings, IconDeletedEvent, IconImportBatchState, IconImportProgressEvent, IconPackCreatedEvent, IconPackDeletedEvent, IconPackUpdatedEvent, IconProcessingState, IconPackAiAssets, IconUpdatedEvent, IconsAddedEvent, IpcIcon, IpcIconImportBatch, IpcIconPack } from '@macro-deck/runtime';
+import { AppStrings, IconAppearanceResponse, IconDeletedEvent, IconImportBatchState, IconImportProgressEvent, IconPackCreatedEvent, IconPackDeletedEvent, IconPackUpdatedEvent, IconProcessingState, IconPackAiAssets, IconUpdatedEvent, IconsAddedEvent, IpcIcon, IpcIconAppearance, IpcIconImportBatch, IpcIconPack } from '@macro-deck/runtime';
 import { ApiService, IconImageService, IconPackExportError, LocalizationService } from '@shared';
 import { FileSaveService } from './file-save.service';
 
@@ -22,6 +22,18 @@ export interface IconPackModel {
   aiAssets?: IconPackAiAssets;
 }
 
+export interface IconAppearanceModel {
+  id: string;
+  key: string;
+  traits: Record<string, string>;
+  contentHash: string | null;
+  isAnimated: boolean;
+  width: number | null;
+  height: number | null;
+  processingState: IconProcessingState;
+  processingError: string | null;
+}
+
 export interface IconModel {
   id: string;
   packId: string;
@@ -34,6 +46,7 @@ export interface IconModel {
   availableSizes: number[];
   contentHash?: string | null;
   originalFileName?: string;
+  appearances?: IconAppearanceModel[];
 }
 
 export interface IconImportBatchModel {
@@ -263,6 +276,31 @@ export class IconPackService {
     }
   }
 
+  async addAppearance(iconId: string, key: string, file: File): Promise<boolean> {
+    return this.changeAppearances(() => this.api.addIconAppearance(iconId, key, file), 'Failed to add icon appearance:');
+  }
+
+  async removeAppearance(iconId: string, appearanceId: string): Promise<boolean> {
+    return this.changeAppearances(
+      () => this.api.removeIconAppearance(iconId, appearanceId),
+      'Failed to remove icon appearance:');
+  }
+
+  async mergeAppearance(targetId: string, sourceIconId: string, key: string): Promise<boolean> {
+    const merged: { packId?: string; iconId?: string } = {};
+    const result = await this.changeAppearances(async () => {
+      const response = await this.api.mergeIconAppearance(targetId, { iconId: sourceIconId, key });
+      merged.packId = response.icon?.packId;
+      merged.iconId = response.mergedIconId ?? sourceIconId;
+      return response;
+    }, 'Failed to merge icon into appearances:');
+    if (result && merged.packId && merged.iconId) {
+      this.removeIconLocally(merged.packId, merged.iconId);
+    }
+
+    return result;
+  }
+
   async import(packId: string | null, files: File[]): Promise<IconImportBatchModel | null> {
     if (files.length === 0) {
       return null;
@@ -458,29 +496,11 @@ export class IconPackService {
     });
 
     this.api.onNotification<IconUpdatedEvent>('IconUpdatedEvent').subscribe(event => {
-      const icon = mapIcon(event.icon);
-      this.iconImage.rememberVersions([icon]);
-      this.resolveReadyWaiters(icon);
-      if (!this.loadedPacks.has(icon.packId)) {
-        return;
-      }
-
-      this.iconsSignal(icon.packId).update(icons =>
-        icons.map(i => (i.id === icon.id ? icon : i))
-      );
+      this.applyIconUpdate(mapIcon(event.icon));
     });
 
     this.api.onNotification<IconDeletedEvent>('IconDeletedEvent').subscribe(event => {
-      if (this.loadedPacks.has(event.packId)) {
-        this.iconsSignal(event.packId).update(icons => {
-          if (!icons.some(i => i.id === event.iconId)) {
-            return icons;
-          }
-
-          this.adjustIconCount(event.packId, -1);
-          return icons.filter(i => i.id !== event.iconId);
-        });
-      }
+      this.removeIconLocally(event.packId, event.iconId);
     });
 
     this.api.onNotification<IconImportProgressEvent>('IconImportProgressEvent').subscribe(event => {
@@ -495,6 +515,51 @@ export class IconPackService {
         error: event.error,
       });
     });
+  }
+
+  private async changeAppearances(
+    request: () => Promise<IconAppearanceResponse>,
+    failure: string,
+  ): Promise<boolean> {
+    try {
+      const response = await request();
+      if (response.success === false || !response.icon) {
+        console.error(failure, response.error?.message);
+        return false;
+      }
+
+      this.applyIconUpdate(mapIcon(response.icon));
+      return true;
+    } catch (error) {
+      console.error(failure, error);
+      return false;
+    }
+  }
+
+  private applyIconUpdate(icon: IconModel): void {
+    this.iconImage.rememberVersions([icon]);
+    this.resolveReadyWaiters(icon);
+    if (!this.loadedPacks.has(icon.packId)) {
+      return;
+    }
+
+    this.iconsSignal(icon.packId).update(icons =>
+      icons.map(i => (i.id === icon.id ? icon : i))
+    );
+  }
+
+  private removeIconLocally(packId: string, iconId: string): void {
+    if (!this.loadedPacks.has(packId)) {
+      return;
+    }
+
+    const icons = this.iconsSignal(packId);
+    if (!icons().some(i => i.id === iconId)) {
+      return;
+    }
+
+    icons.update(current => current.filter(i => i.id !== iconId));
+    this.adjustIconCount(packId, -1);
   }
 
   private resolveReadyWaiters(icon: IconModel): void {
@@ -615,6 +680,21 @@ function mapIcon(icon: IpcIcon): IconModel {
     availableSizes: icon.availableSizes ?? [],
     contentHash: icon.contentHash ?? null,
     originalFileName: icon.originalFileName,
+    appearances: (icon.appearances ?? []).map(mapAppearance),
+  };
+}
+
+function mapAppearance(appearance: IpcIconAppearance): IconAppearanceModel {
+  return {
+    id: appearance.id,
+    key: appearance.key,
+    traits: appearance.traits ?? {},
+    contentHash: appearance.contentHash ?? null,
+    isAnimated: appearance.isAnimated,
+    width: appearance.width ?? null,
+    height: appearance.height ?? null,
+    processingState: appearance.processingState,
+    processingError: appearance.processingError ?? null,
   };
 }
 

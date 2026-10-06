@@ -1,5 +1,6 @@
 using System.Text.Json.Nodes;
 using MacroDeckHost.Application.Caching;
+using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Domain.Entities;
@@ -107,6 +108,13 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 			return WidgetAppearanceOutcome.Unchanged;
 		}
 
+		if (!TryCanonicalizeIconAppearance(request.Patch, out var requestedPatch))
+		{
+			_logger.Warning("Widget appearance change on widget {WidgetId} skipped: the icon appearance is not a valid key",
+				request.WidgetId);
+			return WidgetAppearanceOutcome.Rejected;
+		}
+
 		var widget = Locate(request.WidgetId);
 		if (widget is null)
 		{
@@ -129,8 +137,8 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 			_derivedStates.TryGet(widget.Id));
 
 		var (patch, clearProperties) = HasActiveIconProvider(widget, data)
-			? WithoutIcon(request.Patch, request.ClearProperties)
-			: (request.Patch, request.ClearProperties);
+			? WithoutIcon(requestedPatch, request.ClearProperties)
+			: (requestedPatch, request.ClearProperties);
 
 		var providerSupported = ProviderSupported(widget);
 		var before = providerSupported is null ? null : data.DeepClone().AsObject();
@@ -226,10 +234,28 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 	/// </summary>
 	private static (WidgetAppearancePatch Patch, IReadOnlyCollection<WidgetAppearanceProperty> ClearProperties)
 		WithoutIcon(WidgetAppearancePatch patch, IReadOnlyCollection<WidgetAppearanceProperty> clearProperties)
-		=> (patch with { IconId = null },
+		=> (patch with { IconId = null, IconAppearance = null },
 			clearProperties.Count == 0
 				? clearProperties
-				: clearProperties.Where(property => property != WidgetAppearanceProperty.Icon).ToList());
+				: clearProperties.Where(property => property is not (WidgetAppearanceProperty.Icon
+					or WidgetAppearanceProperty.IconAppearance)).ToList());
+
+	private static bool TryCanonicalizeIconAppearance(WidgetAppearancePatch patch, out WidgetAppearancePatch canonical)
+	{
+		canonical = patch;
+		if (patch.IconAppearance is not { Length: > 0 } pin || pin == WidgetIconReference.DefaultAppearance)
+		{
+			return true;
+		}
+
+		if (!IconAppearanceTraits.TryParse(pin, out var traits))
+		{
+			return false;
+		}
+
+		canonical = patch with { IconAppearance = IconAppearanceTraits.ToKey(traits) };
+		return true;
+	}
 
 	private async Task<bool> Write(WidgetEntity widget, JsonObject data)
 	{

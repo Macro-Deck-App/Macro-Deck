@@ -14,6 +14,8 @@ public sealed record UiResourceRegistration
 	public required ReadOnlyMemory<byte> Content { get; init; }
 
 	public int MaxBytes { get; init; } = ProtocolLimits.MaxUiResourceBytes;
+
+	public string? Variation { get; init; }
 }
 
 public sealed record UiResourceContent

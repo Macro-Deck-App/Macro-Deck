@@ -3647,6 +3647,98 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="IconPacks.AiNotDeclared" xml:space="preserve">
     <value>Nicht angegeben</value>
   </data>
+  <data name="IconPacks.Appearances.Add" xml:space="preserve">
+    <value>Erscheinungsbild hinzufügen</value>
+  </data>
+  <data name="IconPacks.Appearances.AddFailed" xml:space="preserve">
+    <value>Das Erscheinungsbild konnte nicht hinzugefügt werden.</value>
+  </data>
+  <data name="IconPacks.Appearances.AutoHint" xml:space="preserve">
+    <value>Macro Deck zeigt das Erscheinungsbild, das zum aktuellen Design und zur Bewegungseinstellung passt, und sonst das Standardbild.</value>
+  </data>
+  <data name="IconPacks.Appearances.Badge.One" xml:space="preserve">
+    <value>{count} weiteres Erscheinungsbild</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="IconPacks.Appearances.Badge.Other" xml:space="preserve">
+    <value>{count} weitere Erscheinungsbilder</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="IconPacks.Appearances.Default" xml:space="preserve">
+    <value>Standard</value>
+  </data>
+  <data name="IconPacks.Appearances.DialogTitle" xml:space="preserve">
+    <value>Erscheinungsbilder von „{name}“</value>
+  </data>
+  <data name="IconPacks.Appearances.Empty" xml:space="preserve">
+    <value>Noch keine weiteren Erscheinungsbilder.</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Animated" xml:space="preserve">
+    <value>Animiert</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Custom" xml:space="preserve">
+    <value>Benutzerdefiniert ({traits})</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Dark" xml:space="preserve">
+    <value>Dunkel</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.DarkAnimated" xml:space="preserve">
+    <value>Dunkel, animiert</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.DarkStatic" xml:space="preserve">
+    <value>Dunkel, statisch</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Light" xml:space="preserve">
+    <value>Hell</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.LightAnimated" xml:space="preserve">
+    <value>Hell, animiert</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.LightStatic" xml:space="preserve">
+    <value>Hell, statisch</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Static" xml:space="preserve">
+    <value>Statisch</value>
+  </data>
+  <data name="IconPacks.Appearances.MenuItem" xml:space="preserve">
+    <value>Erscheinungsbilder…</value>
+  </data>
+  <data name="IconPacks.Appearances.Merge" xml:space="preserve">
+    <value>Vorhandenes Symbol verwenden…</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeConfirm" xml:space="preserve">
+    <value>Als Erscheinungsbild verwenden</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeFailed" xml:space="preserve">
+    <value>Das Symbol konnte nicht als Erscheinungsbild verwendet werden.</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeHint" xml:space="preserve">
+    <value>Das Symbol wird Teil von „{name}“. Schaltflächen und Aktionen, die es verwendet haben, wechseln zu „{name}“.</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeKindLabel" xml:space="preserve">
+    <value>Verwenden als</value>
+  </data>
+  <data name="IconPacks.Appearances.MergeTitle" xml:space="preserve">
+    <value>Vorhandenes Symbol verwenden</value>
+  </data>
+  <data name="IconPacks.Appearances.PreviewAlt" xml:space="preserve">
+    <value>Erscheinungsbild „{kind}“ von „{name}“</value>
+  </data>
+  <data name="IconPacks.Appearances.ReadOnly" xml:space="preserve">
+    <value>Dieses Paket ist schreibgeschützt, daher kannst du seine Erscheinungsbilder nicht ändern.</value>
+  </data>
+  <data name="IconPacks.Appearances.RemoveConfirmMessage" xml:space="preserve">
+    <value>Erscheinungsbild „{kind}“ von „{name}“ entfernen? Schaltflächen, die es verwenden, wechseln zu einem anderen Erscheinungsbild.</value>
+  </data>
+  <data name="IconPacks.Appearances.RemoveConfirmTitle" xml:space="preserve">
+    <value>Erscheinungsbild entfernen</value>
+  </data>
+  <data name="IconPacks.Appearances.RemoveFailed" xml:space="preserve">
+    <value>Das Erscheinungsbild konnte nicht entfernt werden.</value>
+  </data>
+  <data name="IconPacks.Appearances.Replace" xml:space="preserve">
+    <value>Ersetzen</value>
+  </data>
   <data name="IconPacks.AuthorFieldLabel" xml:space="preserve">
     <value>Autor</value>
   </data>
@@ -11325,6 +11417,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Widgets.Actions.FontSizeLabel" xml:space="preserve">
     <value>Größe</value>
   </data>
+  <data name="Integrations.Widgets.Actions.IconAppearanceDescription" xml:space="preserve">
+    <value>Automatisch wählt das Erscheinungsbild, das zum Bildschirm passt, Standard zeigt immer das eigene Bild des Symbols. Fehlt dem Symbol das gewählte Erscheinungsbild, wird automatisch eines gewählt.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.IconAppearanceLabel" xml:space="preserve">
+    <value>Erscheinungsbild</value>
+  </data>
   <data name="Integrations.Widgets.Actions.IconDescription" xml:space="preserve">
     <value>Leer lassen, um das Symbol zu entfernen.</value>
   </data>
@@ -11423,6 +11521,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.Widgets.Actions.SetFontName" xml:space="preserve">
     <value>Beschriftungsschrift festlegen</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconAppearanceDescription" xml:space="preserve">
+    <value>Legt fest, welches Erscheinungsbild des Symbols eines Widgets angezeigt wird, etwa die dunkle oder die statische Variante.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.SetIconAppearanceName" xml:space="preserve">
+    <value>Erscheinungsbild des Symbols festlegen</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetIconDescription" xml:space="preserve">
     <value>Ändert das Symbol, das ein Widget anzeigt.</value>
@@ -12257,6 +12361,40 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Notifications.HttpsNotRunningMessage" xml:space="preserve">
     <value>Macro Deck ist über HTTP erreichbar, aber der HTTPS-Listener wurde nicht gestartet. Prüfe HTTPS-Port und Zertifikat unter Einstellungen &gt; Netzwerk.</value>
+  </data>
+  <data name="Notifications.IconImport.CompletedWithWarnings.One" xml:space="preserve">
+    <value>{count} Symbol mit Warnungen in {pack} importiert</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.IconImport.CompletedWithWarnings.Other" xml:space="preserve">
+    <value>{count} Symbole mit Warnungen in {pack} importiert</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.IconImport.DefaultPackName" xml:space="preserve">
+    <value>Symbolpaket</value>
+  </data>
+  <data name="Notifications.IconImport.Failed" xml:space="preserve">
+    <value>Symbole konnten nicht in {pack} importiert werden</value>
+  </data>
+  <data name="Notifications.IconImport.Importing" xml:space="preserve">
+    <value>Symbole werden in {pack} importiert</value>
+  </data>
+  <data name="Notifications.IconImport.NothingImportable" xml:space="preserve">
+    <value>Nichts davon konnte als Symbol importiert werden.</value>
+  </data>
+  <data name="Notifications.IconImport.NothingImported" xml:space="preserve">
+    <value>Nichts in {pack} zu importieren</value>
+  </data>
+  <data name="Notifications.IconImport.PartlyFailed" xml:space="preserve">
+    <value>{imported} importiert, {failed} fehlgeschlagen in {pack}</value>
+  </data>
+  <data name="Notifications.IconImport.Skipped.One" xml:space="preserve">
+    <value>{count} Datei war schon in diesem Paket und wurde übersprungen.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Notifications.IconImport.Skipped.Other" xml:space="preserve">
+    <value>{count} Dateien waren schon in diesem Paket und wurden übersprungen.</value>
+    <comment>[plural]</comment>
   </data>
   <data name="Notifications.InstallationDamagedMessage" xml:space="preserve">
     <value>Einige Dateien von Macro Deck fehlen oder passen nicht zur installierten Version. Das passiert, wenn ein Update unterbrochen wurde, zum Beispiel weil ein Virenschutzprogramm einige Dateien zurückgehalten hat. Lade die neueste Version von Macro Deck herunter und installiere sie erneut. In den Logs stehen die betroffenen Dateien.</value>
@@ -17301,6 +17439,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Appearance.Font.Unchanged" xml:space="preserve">
     <value>Unverändert</value>
   </data>
+  <data name="Widgets.Appearance.Icon.Appearance" xml:space="preserve">
+    <value>Erscheinungsbild des Symbols</value>
+  </data>
+  <data name="Widgets.Appearance.Icon.AppearanceAutomatic" xml:space="preserve">
+    <value>Automatisch</value>
+  </data>
   <data name="Widgets.Appearance.Icon.ChangeIcon" xml:space="preserve">
     <value>Symbol ändern</value>
   </data>
@@ -20150,5 +20294,35 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.Obs.Errors.OutputsNeedNewerObs" xml:space="preserve">
     <value>Zum Steuern von Ausgaben braucht es eine OBS-Version mit obs-websocket 5.7 oder neuer.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Name" xml:space="preserve">
+    <value>Eingangseinstellung festlegen</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.Description" xml:space="preserve">
+    <value>Ändert eine Einstellung einer OBS-Quelle, zum Beispiel den Text einer Textquelle, die Datei einer Bild- oder Medienquelle oder die URL einer Browserquelle.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingLabel" xml:space="preserve">
+    <value>Einstellung</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.SettingDescription" xml:space="preserve">
+    <value>Name der Einstellung, wie OBS sie speichert, zum Beispiel text, file, local_file oder url. Wähle sie aus der Liste oder tippe sie ein.</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueLabel" xml:space="preserve">
+    <value>Wert</value>
+  </data>
+  <data name="Integrations.Obs.Actions.SetInputSetting.ValueDescription" xml:space="preserve">
+    <value>Der neue Wert. Gib true oder false für eine Ein/Aus-Einstellung ein, eine Zahl für eine numerische Einstellung und JSON für eine Einstellung, die eine Gruppe oder Liste enthält.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NoSettingSelected" xml:space="preserve">
+    <value>Es wurde keine Einstellung ausgewählt.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsBoolean" xml:space="preserve">
+    <value>Die Einstellung {setting} erwartet true oder false.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsNumber" xml:space="preserve">
+    <value>Die Einstellung {setting} erwartet eine Zahl.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.SettingExpectsJson" xml:space="preserve">
+    <value>Die Einstellung {setting} erwartet JSON in derselben Form wie ihr aktueller Wert.</value>
   </data>
 </root>

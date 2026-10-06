@@ -12,6 +12,14 @@ public readonly record struct WidgetIconReference(string Type, string Reference)
 {
 	public const string IconPackType = "icon-pack";
 
+	public const string DefaultAppearance = "default";
+
+	public string? Appearance { get; init; }
+
+	public bool SameIcon(WidgetIconReference other)
+		=> string.Equals(Type, other.Type, StringComparison.Ordinal) &&
+			string.Equals(Reference, other.Reference, StringComparison.Ordinal);
+
 	public static WidgetIconReference IconPack(string reference) => new(IconPackType, reference);
 
 	/// <summary>
@@ -29,14 +37,29 @@ public readonly record struct WidgetIconReference(string Type, string Reference)
 			referenceValue.TryGetValue<string>(out var reference) &&
 			!string.IsNullOrEmpty(reference))
 		{
-			return new WidgetIconReference(type, reference);
+			return new WidgetIconReference(type, reference)
+			{
+				Appearance = iconObject["appearance"] is JsonValue appearanceValue &&
+					appearanceValue.TryGetValue<string>(out var appearance) &&
+					!string.IsNullOrEmpty(appearance)
+						? appearance
+						: null
+			};
 		}
 
 		return string.IsNullOrWhiteSpace(legacyIconId) ? null : IconPack(legacyIconId.Trim());
 	}
 
-	public JsonObject ToJson() => new()
-		{ ["type"] = JsonValue.Create(Type), ["reference"] = JsonValue.Create(Reference) };
+	public JsonObject ToJson()
+	{
+		var json = new JsonObject { ["type"] = JsonValue.Create(Type), ["reference"] = JsonValue.Create(Reference) };
+		if (Appearance is not null)
+		{
+			json["appearance"] = JsonValue.Create(Appearance);
+		}
+
+		return json;
+	}
 
 	/// <summary>
 	/// Rewrites a legacy bare <c>iconId</c> key on <paramref name="node" /> into the typed <c>icon</c>

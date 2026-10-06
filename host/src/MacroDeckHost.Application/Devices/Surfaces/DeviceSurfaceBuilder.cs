@@ -4,6 +4,7 @@ using MacroDeck.Sdk.Devices;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Icons;
+using MacroDeckHost.Application.Layouts;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Rendering;
@@ -112,12 +113,13 @@ public sealed class DeviceSurfaceBuilder
 		}
 
 		var culture = (await _preferences.GetLocalization()).Culture;
+		var iconContext = IconContextOf(device);
 		var widgets = new List<DeviceSurfaceWidget>();
 		var subscriptions = new List<DeviceSurfaceSubscription>();
 		var widgetFolderIds = new Dictionary<string, string>(StringComparer.Ordinal);
 		foreach (var (widget, ownerFolderId) in SurfaceFolderChain.DisplayedWidgets(folder, folders))
 		{
-			widgets.Add(await BuildWidget(widget, culture, subscriptions, cancellationToken));
+			widgets.Add(await BuildWidget(widget, culture, iconContext, subscriptions, cancellationToken));
 			widgetFolderIds[widget.Id] = ownerFolderId;
 		}
 
@@ -200,14 +202,14 @@ public sealed class DeviceSurfaceBuilder
 	/// <summary>
 	/// The same state-wins-else-root cascade <see cref="Pick" /> applies to a plain field, but reading the
 	/// typed <c>icon</c> shape (falling back to a legacy bare <c>iconId</c>) and returning only an
-	/// icon-pack reference's bare id - <see cref="MacroDeck.Sdk.Devices.DeviceSurfaceAppearance.IconId" />
+	/// icon-pack reference - <see cref="MacroDeck.Sdk.Devices.DeviceSurfaceAppearance.IconId" />
 	/// stays GUID-only forever, so a reference naming any other provider resolves to no icon here exactly
 	/// as an unparseable legacy id always has.
 	/// </summary>
-	private static string? PickIconPackReference(JsonObject? state, JsonObject root)
+	private static WidgetIconReference? PickIconPackReference(JsonObject? state, JsonObject root)
 	{
 		var reference = ReadIconReference(state) ?? ReadIconReference(root);
-		return reference is { Type: WidgetIconReference.IconPackType } value ? value.Reference : null;
+		return reference is { Type: WidgetIconReference.IconPackType } value ? value : null;
 	}
 
 	private static WidgetIconReference? ReadIconReference(JsonObject? appearance)
@@ -216,6 +218,7 @@ public sealed class DeviceSurfaceBuilder
 	private async Task<DeviceSurfaceWidget> BuildWidget(
 		Widget widget,
 		string culture,
+		IconAppearanceContext iconContext,
 		List<DeviceSurfaceSubscription> subscriptions,
 		CancellationToken cancellationToken)
 	{
@@ -223,7 +226,7 @@ public sealed class DeviceSurfaceBuilder
 		var state = isPersisted ? await _widgetStates.Resolve(widgetId, cancellationToken) : null;
 		var stateId = state?.StateId;
 
-		var appearance = await BuildAppearance(widget, widgetId, isPersisted, stateId, cancellationToken);
+		var appearance = await BuildAppearance(widget, widgetId, isPersisted, stateId, iconContext, cancellationToken);
 		if (isPersisted)
 		{
 			subscriptions.Add(new DeviceSurfaceSubscription(widgetId, stateId ?? LabelGroups.Normalize(string.Empty)));
@@ -255,6 +258,7 @@ public sealed class DeviceSurfaceBuilder
 		Guid widgetId,
 		bool isPersisted,
 		string? stateId,
+		IconAppearanceContext iconContext,
 		CancellationToken cancellationToken)
 	{
 		var model = ActionButtonStateModel.Read(widget.Data);
@@ -276,6 +280,7 @@ public sealed class DeviceSurfaceBuilder
 		// IconId never carries anything but an icon-pack GUID, so an active provider forces it null here
 		// rather than widening it to a provider reference - see DeviceSurfaceAppearance.IconId's remarks.
 		var iconPackReference = providerIcon.IsActive ? null : PickIconPackReference(state, root);
+		var (iconId, iconVersion) = ResolveDeviceIcon(iconPackReference, iconContext);
 		var providerResource = providerIcon is { IsActive: true, Resource: { } resource } ? resource : null;
 
 		return new DeviceSurfaceAppearance
@@ -283,11 +288,11 @@ public sealed class DeviceSurfaceBuilder
 			Label = label ?? Pick(state, root, "label"),
 			LabelColor = Pick(state, root, "labelColor"),
 			BackgroundColor = DeviceBackground(Pick(state, root, "backgroundColor")),
-			IconId = iconPackReference,
+			IconId = iconId,
 			// Carried so that re-rendering an icon under the same id (or the same provider) still changes
 			// the projected surface: without it the push rule sees an identical surface and the device
 			// keeps its stale bytes.
-			IconVersion = providerResource?.ContentHash ?? IconVersionOf(iconPackReference),
+			IconVersion = providerResource?.ContentHash ?? iconVersion,
 			HasProviderIcon = providerResource is not null,
 			IconFit = ReadString(iconDisplay, "fit"),
 			IconZoom = ReadDouble(iconDisplay, "zoom"),
@@ -299,14 +304,41 @@ public sealed class DeviceSurfaceBuilder
 		};
 	}
 
-	private string? IconVersionOf(string? iconId)
+	private (string? IconId, string? Version) ResolveDeviceIcon(WidgetIconReference? reference,
+		IconAppearanceContext context)
 	{
-		if (!Guid.TryParse(iconId, out var id) || _icons.GetIconById(id) is not { } icon)
+		if (reference is not { } value)
 		{
-			return null;
+			return (null, null);
 		}
 
-		return IconImageVersion.Of(icon);
+		if (!Guid.TryParse(value.Reference, out var id) || _icons.GetIconById(id) is not { } icon)
+		{
+			return (value.Reference, null);
+		}
+
+		var appearances = icon.AppearanceOfId is null ? _icons.GetAppearances(icon.Id) : [];
+		var selected = value.Appearance switch
+		{
+			_ when appearances.Count == 0 => icon,
+			WidgetIconReference.DefaultAppearance => icon,
+			{ } pin when IconAppearanceSelector.FindPinned(appearances, pin) is { } pinned => pinned,
+			_ => IconAppearanceSelector.Select(icon, appearances, context)
+		};
+
+		return selected == icon
+			? (value.Reference, IconImageVersion.Of(icon))
+			: (selected.Id.ToString(), IconImageVersion.Of(selected));
+	}
+
+	private static IconAppearanceContext IconContextOf(DeviceEntity device)
+	{
+		var visuals = LayoutSnapshotSerializer.TryDeserialize(device.LayoutSnapshot, out var layout)
+			? layout.PrimaryGrid?.Visuals ?? layout.Capabilities?.Visuals
+			: null;
+
+		return new IconAppearanceContext(null,
+			visuals is { AnimatedIcons: false } ? IconAppearanceTraits.Static : IconAppearanceTraits.Animated);
 	}
 
 	// A cross-profile navigation moves the session off the device's assigned profile, so the session's

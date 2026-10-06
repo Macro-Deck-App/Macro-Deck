@@ -235,6 +235,7 @@ function trackSliderTap(ctx: UiComponentContext<UiSliderState>, wasTap: boolean)
   const near = Math.hypot(state.tapStartX - state.lastTapX, state.tapStartY - state.lastTapY) <= SLIDER_DOUBLE_TAP_DISTANCE_PX;
   if (state.lastTapAt !== null && near && now - state.lastTapAt <= SLIDER_DOUBLE_TAP_WINDOW_MS) {
     state.lastTapAt = null;
+    if (ctx.host.flashPressed) ctx.host.flashPressed(node);
     ctx.emit(node, UiComponentEvents.DoublePress);
     return;
   }

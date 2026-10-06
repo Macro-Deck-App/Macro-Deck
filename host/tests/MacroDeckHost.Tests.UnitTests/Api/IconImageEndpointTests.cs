@@ -43,7 +43,7 @@ public class IconImageEndpointTests
 	public async Task A_url_carrying_the_version_from_the_icon_listing_is_cached_for_good()
 	{
 		var icon = await AddReadyIcon(_original);
-		var version = IconMapper.ToDto(icon).ContentHash;
+		var version = IconMapper.ToDto(icon, _harness.Cache).ContentHash;
 		var controller = Controller();
 
 		var result = await controller.GetImage(icon.Id.ToString(), 128, version, CancellationToken.None);
@@ -60,9 +60,9 @@ public class IconImageEndpointTests
 	public async Task Replacing_an_icons_bytes_under_the_same_id_gives_it_a_new_url_and_stops_the_old_one_caching()
 	{
 		var icon = await AddReadyIcon(_original);
-		var before = IconMapper.ToDto(icon).ContentHash;
+		var before = IconMapper.ToDto(icon, _harness.Cache).ContentHash;
 		await Replace(icon, _replacement);
-		var after = IconMapper.ToDto(_harness.Cache.GetIconById(icon.Id)!).ContentHash;
+		var after = IconMapper.ToDto(_harness.Cache.GetIconById(icon.Id)!, _harness.Cache).ContentHash;
 
 		var stale = Controller();
 		var staleResult = await stale.GetImage(icon.Id.ToString(), 128, before, CancellationToken.None);
@@ -180,7 +180,7 @@ public class IconImageEndpointTests
 			httpContext.Request.Headers.IfNoneMatch = ifNoneMatch;
 		}
 
-		return new IconsController(null!, null!, null!, null!, null!, null!, null!, null!, _service, null!)
+		return new IconsController(null!, null!, null!, null!, null!, null!, null!, null!, _service, null!, null!, _harness.Cache)
 		{
 			ControllerContext = new ControllerContext { HttpContext = httpContext }
 		};

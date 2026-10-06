@@ -213,6 +213,9 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 	public Task<ObsCommandResult> SetRecordDirectoryAsync(string directory)
 		=> RunForResultAsync(() => _client.SetRecordDirectory(directory));
 
+	public Task<ObsCommandResult> SetInputSettingsAsync(string inputName, string settingsJson)
+		=> RunForResultAsync(() => _client.SetInputSettings(inputName, settingsJson));
+
 	public Task<bool> SetSourceVisibleAsync(string sceneName, string sourceName, bool visible)
 		=> RunAsync(() => _client.SetSourceVisible(sceneName, sourceName, visible));
 
@@ -284,6 +287,9 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 	/// </summary>
 	public Task<string?> GetInputSettingsJsonAsync(string inputName)
 		=> CachedTargetReadReferenceAsync<string>($"settings:{inputName}", () => _client.GetInputSettings(inputName));
+
+	public Task<string?> GetInputDefaultSettingsJsonAsync(string inputName)
+		=> QueryValueAsync<string?>(() => _client.GetInputDefaultSettings(inputName), null);
 
 	// Two near-identical methods, not one, because an unconstrained "T?" erases to bare T for a value type
 	// at this generic method's own definition - only a "where T : struct" constraint makes the C# compiler

@@ -26,6 +26,9 @@ public sealed class IconPackCache : IIconPackCache, IDisposable
 	// reference - the background worker sets the hashes on the very object already held here and only then
 	// calls UpdateIcon, so the previous values are gone by the time the index would need to drop them.
 	private readonly ConcurrentDictionary<Guid, IndexedHashes> _indexedHashes = new();
+	private readonly Dictionary<Guid, HashSet<Guid>> _appearancesByParent = new();
+	private readonly Dictionary<Guid, Guid> _parentByAppearance = new();
+	private readonly Lock _appearanceSync = new();
 	private readonly SemaphoreSlim _initializationLock = new(1, 1);
 	private readonly SemaphoreSlim _updateLock = new(1, 1);
 	private readonly Timer _flushTimer;
@@ -64,6 +67,8 @@ public sealed class IconPackCache : IIconPackCache, IDisposable
 				}
 			}
 
+			DropOrphanedAppearances();
+			RebuildAppearanceIndex();
 			RebuildContentIndexes();
 			_isInitialized = true;
 		}
@@ -113,6 +118,7 @@ public sealed class IconPackCache : IIconPackCache, IDisposable
 				_icons.TryRemove(iconId, out _);
 			}
 
+			RebuildAppearanceIndex();
 			RebuildContentIndexes();
 			_dirtyPacks.TryRemove(id, out _);
 			_store.Delete(id);
@@ -131,9 +137,31 @@ public sealed class IconPackCache : IIconPackCache, IDisposable
 		return icon;
 	}
 
+	public IReadOnlyList<IconEntity> GetAppearances(Guid parentId)
+	{
+		Guid[] ids;
+		lock (_appearanceSync)
+		{
+			if (!_appearancesByParent.TryGetValue(parentId, out var assets) || assets.Count == 0)
+			{
+				return [];
+			}
+
+			ids = [.. assets];
+		}
+
+		return ids
+			.Select(id => _icons.TryGetValue(id, out var asset) ? asset : null)
+			.OfType<IconEntity>()
+			.Where(asset => asset.AppearanceOfId == parentId)
+			.OrderBy(asset => asset.AppearanceTraits is { } traits ? IconAppearanceTraits.ToKey(traits) : string.Empty,
+				StringComparer.Ordinal)
+			.ToList();
+	}
+
 	public List<IconEntity> GetIconsByPackId(Guid packId)
 		=> _icons.Values
-			.Where(i => i.PackId == packId)
+			.Where(i => i.PackId == packId && i.AppearanceOfId is null)
 			.OrderBy(i => i.Name, StringComparer.OrdinalIgnoreCase)
 			.ToList();
 
@@ -143,7 +171,7 @@ public sealed class IconPackCache : IIconPackCache, IDisposable
 	public List<IconEntity> GetIconsByState(params IconProcessingState[] states)
 		=> _icons.Values.Where(i => states.Contains(i.ProcessingState)).ToList();
 
-	public int GetIconCount(Guid packId) => _icons.Values.Count(i => i.PackId == packId);
+	public int GetIconCount(Guid packId) => _icons.Values.Count(i => i.PackId == packId && i.AppearanceOfId is null);
 
 	public IconEntity? FindBySourceContentHash(SourceContentHash hash, Guid? withinPackId = null)
 		=> ResolveIndexed(_sourceIndex, hash.Value, withinPackId);
@@ -168,6 +196,7 @@ public sealed class IconPackCache : IIconPackCache, IDisposable
 			{
 				icon.PackId = packId;
 				_icons.AddOrUpdate(icon.Id, icon, (_, _) => icon);
+				TrackAppearance(icon);
 				clean &= IndexIcon(icon);
 			}
 
@@ -191,6 +220,7 @@ public sealed class IconPackCache : IIconPackCache, IDisposable
 		{
 			icon.UpdatedAt = DateTime.UtcNow;
 			_icons.AddOrUpdate(icon.Id, icon, (_, _) => icon);
+			TrackAppearance(icon);
 			if (!IndexIcon(icon))
 			{
 				RebuildContentIndexes();
@@ -212,6 +242,8 @@ public sealed class IconPackCache : IIconPackCache, IDisposable
 		{
 			if (_icons.TryRemove(iconId, out var icon))
 			{
+				RemoveAppearancesOf([iconId]);
+				RebuildAppearanceIndex();
 				RebuildContentIndexes();
 				Persist(icon.PackId);
 			}
@@ -235,6 +267,8 @@ public sealed class IconPackCache : IIconPackCache, IDisposable
 
 			if (removedAny)
 			{
+				RemoveAppearancesOf(iconIds);
+				RebuildAppearanceIndex();
 				RebuildContentIndexes();
 				Persist(packId);
 			}
@@ -291,11 +325,107 @@ public sealed class IconPackCache : IIconPackCache, IDisposable
 		}
 	}
 
+	private void DropOrphanedAppearances()
+	{
+		foreach (var asset in _icons.Values.Where(IsOrphanedAppearance).ToList())
+		{
+			_icons.TryRemove(asset.Id, out _);
+			_iconStorage.DeleteIconFiles(asset.PackId, asset.Id);
+			_dirtyPacks.TryAdd(asset.PackId, 0);
+			_flushTimer.Change(_flushDelay, Timeout.InfiniteTimeSpan);
+			_logger.Warning("Dropped appearance {AppearanceId} of missing icon {IconId}",
+				asset.Id,
+				asset.AppearanceOfId);
+		}
+	}
+
+	private bool IsOrphanedAppearance(IconEntity icon)
+		=> icon.AppearanceOfId is { } parentId &&
+			(!_icons.TryGetValue(parentId, out var parent) ||
+				parent.AppearanceOfId is not null ||
+				parent.PackId != icon.PackId);
+
+	private void RemoveAppearancesOf(IReadOnlyList<Guid> parentIds)
+	{
+		var removed = parentIds.ToHashSet();
+		var assetIds = new List<Guid>();
+		lock (_appearanceSync)
+		{
+			foreach (var parentId in removed)
+			{
+				if (_appearancesByParent.TryGetValue(parentId, out var assets))
+				{
+					assetIds.AddRange(assets);
+				}
+			}
+		}
+
+		foreach (var assetId in assetIds)
+		{
+			if (_icons.TryGetValue(assetId, out var asset) &&
+				asset.AppearanceOfId is { } parentId &&
+				removed.Contains(parentId) &&
+				_icons.TryRemove(assetId, out _))
+			{
+				_iconStorage.DeleteIconFiles(asset.PackId, asset.Id);
+			}
+		}
+	}
+
+	private void RebuildAppearanceIndex()
+	{
+		lock (_appearanceSync)
+		{
+			_appearancesByParent.Clear();
+			_parentByAppearance.Clear();
+			foreach (var icon in _icons.Values)
+			{
+				if (icon.AppearanceOfId is { } parentId)
+				{
+					IndexAppearance(icon.Id, parentId);
+				}
+			}
+		}
+	}
+
+	private void TrackAppearance(IconEntity icon)
+	{
+		lock (_appearanceSync)
+		{
+			if (_parentByAppearance.Remove(icon.Id, out var previousParentId) &&
+				_appearancesByParent.TryGetValue(previousParentId, out var previous))
+			{
+				previous.Remove(icon.Id);
+				if (previous.Count == 0)
+				{
+					_appearancesByParent.Remove(previousParentId);
+				}
+			}
+
+			if (icon.AppearanceOfId is { } parentId)
+			{
+				IndexAppearance(icon.Id, parentId);
+			}
+		}
+	}
+
+	private void IndexAppearance(Guid assetId, Guid parentId)
+	{
+		if (!_appearancesByParent.TryGetValue(parentId, out var assets))
+		{
+			assets = [];
+			_appearancesByParent[parentId] = assets;
+		}
+
+		assets.Add(assetId);
+		_parentByAppearance[assetId] = parentId;
+	}
+
 	private bool IndexIcon(IconEntity icon)
 	{
 		// Pending and Failed icons stay out: an import must never be handed an id whose image cannot be
 		// served, and a failed icon would otherwise poison every later import of the same bytes.
-		var indexable = icon.ProcessingState == IconProcessingState.Ready;
+		var indexable = icon.ProcessingState == IconProcessingState.Ready && icon.AppearanceOfId is null;
 		var entry = new IndexedHashes(icon.PackId,
 			indexable ? icon.SourceContentHash : null,
 			indexable ? icon.MasterContentHash : null);

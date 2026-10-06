@@ -14,6 +14,11 @@ Start this version  ->  upload .macroDeckIconPack  ->  Add to submission  ->  Su
 In Macro Deck, open **Icon packs**, open the pack's menu and select **Export pack**. You get a
 `.macroDeckIconPack` file.
 
+Icons keep their [appearances](/guide/concepts/#icon-appearances) in the export, so one icon can ship light,
+dark, animated and static versions. In `pack.json` each appearance is nested under its icon's entry, in
+`appearances`, with its `traits` (for example `{"colorScheme": "dark"}`), and its master is a file of its own
+in `files`. A Macro Deck without appearances imports the pack and shows the default images.
+
 Before you export, open the pack's menu, select **Edit pack** and set **AI-created icons**. The setting is
 saved in the exported pack's `pack.json` as the same [`ai` declaration](/reference/manifest/#ai) plugins
 use. **Not declared** is never treated as free of AI.
@@ -21,7 +26,7 @@ use. **Not declared** is never treated as free of AI.
 ### Size limits
 
 A pack holds at most 29,996 files, `pack.json` included, and a `pack.json` of at most 32 MiB minus 64 KiB. Every icon takes one file,
-its master image, and `pack.json` lists each icon and each file. The two limits apply separately: icons with
+its master image, plus one more file for each of its appearances, and `pack.json` lists each icon and each file. The two limits apply separately: icons with
 long non-Latin names fill `pack.json` well before the file limit.
 
 The smaller sizes a deck shows are not part of the pack: the Macro Deck that installs it creates them from each

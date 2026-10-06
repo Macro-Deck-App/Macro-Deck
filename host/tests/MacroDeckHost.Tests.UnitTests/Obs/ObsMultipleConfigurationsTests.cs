@@ -28,7 +28,7 @@ internal sealed class ObsMultipleConfigurationsTests
 		"start-virtual-camera", "stop-virtual-camera", "toggle-virtual-camera", "start-replay-buffer",
 		"stop-replay-buffer", "toggle-replay-buffer", "save-replay-buffer", "split-record-file",
 		"create-record-chapter", "set-record-directory", "set-source-visibility",
-		"set-input-mute", "set-input-volume", "set-source-filter", "get-input-volume",
+		"set-input-mute", "set-input-volume", "set-source-filter", "set-input-setting", "get-input-volume",
 		"get-source-filter-state", "get-input-mute", "get-source-visibility", "toggle-studio-mode",
 		"start-output", "stop-output", "toggle-output", "get-output-state"
 	];

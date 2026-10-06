@@ -50,7 +50,10 @@ public class WidgetIconResourcesTests
 	{
 		var source = new FakeWidgetIconSource();
 		var store = new UiResourceStore();
-		var resources = new WidgetIconResources(new SingleSourceRegistry(source), store, Log.Logger);
+		var resources = new WidgetIconResources(new SingleSourceRegistry(source),
+			store,
+			Log.Logger,
+			new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache());
 
 		return (resources, source, store);
 	}

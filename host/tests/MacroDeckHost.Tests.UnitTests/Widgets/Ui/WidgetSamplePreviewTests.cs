@@ -112,7 +112,8 @@ public class WidgetSamplePreviewTests
 			new SliderWidgetSessionTests.RecordingTriggerService(),
 			new StubFolderCache(),
 			new SliderWidgetSessionTests.NullUiTransport(),
-			new MacroDeckHost.Application.Rendering.WidgetRenderSignals());
+			new MacroDeckHost.Application.Rendering.WidgetRenderSignals(),
+			new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache());
 
 		var sample = await Tree(provider, sample: true);
 

@@ -153,7 +153,8 @@ internal sealed class DeviceSurfaceIconTests
 			int? size,
 			bool acceptWebp,
 			bool staticFrame,
-			CancellationToken cancellationToken)
+			CancellationToken cancellationToken,
+			IconAppearanceContext? context = null)
 		{
 			if (iconId != IconId)
 			{

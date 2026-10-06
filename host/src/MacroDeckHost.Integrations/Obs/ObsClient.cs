@@ -1,4 +1,5 @@
 using MacroDeck.Sdk.Logging;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OBSWebsocketDotNet;
 using OBSWebsocketDotNet.Communication;
@@ -363,6 +364,24 @@ internal sealed class ObsClient : IObsClient
 	// this project's surface; callers parse it with System.Text.Json like every other JSON this project
 	// handles.
 	public string GetInputSettings(string inputName) => _obs.GetInputSettings(inputName).Settings.ToString();
+
+	public string GetInputDefaultSettings(string inputName)
+		=> _obs.GetInputDefaultSettings(_obs.GetInputSettings(inputName).InputKind).ToString();
+
+	public void SetInputSettings(string inputName, string settingsJson)
+		=> Request(() => _obs.SetInputSettings(inputName, ParseSettings(settingsJson), overlay: true));
+
+	// Newtonsoft turns ISO-8601 looking strings into dates by default and writes them back reformatted,
+	// so text a user sends to a text source would not arrive verbatim.
+	internal static JObject ParseSettings(string settingsJson)
+	{
+		using var reader = new JsonTextReader(new StringReader(settingsJson))
+		{
+			DateParseHandling = DateParseHandling.None,
+			FloatParseHandling = FloatParseHandling.Double
+		};
+		return JObject.Load(reader);
+	}
 
 	// obs-websocket-dotnet's ConnectAsync is void and starts the underlying Websocket.Client via a
 	// fire-and-forget StartOrFail(); a refused connection (OBS closed) faults that unobserved task,

@@ -39,6 +39,7 @@ code, protocol schemas, issue discussions or exhaustive option lists.
 - [0022 - Icon identity is a locally computed hash, and a widget icon is a typed provider reference](0022-icon-identity-and-widget-icons.md)
 - [0056 - Widget state is addressed by stable state id](0056-widget-state-is-addressed-by-stable-state-id.md)
 - [0081 - Variables come from one provider catalog and carry attributes and a write capability](0081-variables-carry-attributes-and-a-write-capability.md)
+- [0103 - Icon appearances are trait-tagged assets of one icon](0103-icon-appearances-are-trait-tagged-assets-of-one-icon.md)
 
 ## Plugins
 

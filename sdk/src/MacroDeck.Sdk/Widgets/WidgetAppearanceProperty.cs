@@ -36,5 +36,11 @@ public enum WidgetAppearanceProperty
 	/// The colour an action button draws its icon in - see <see cref="WidgetAppearancePatch.IconColor" />.
 	/// Clearing it returns the icon to its own colours.
 	/// </summary>
-	IconColor = 9
+	IconColor = 9,
+
+	/// <summary>
+	/// Which appearance of the icon is shown - see <see cref="WidgetAppearancePatch.IconAppearance" />.
+	/// Clearing it returns the icon to automatic selection.
+	/// </summary>
+	IconAppearance = 10
 }

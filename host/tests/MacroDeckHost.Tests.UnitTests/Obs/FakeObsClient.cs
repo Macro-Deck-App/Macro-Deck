@@ -63,6 +63,12 @@ internal sealed class FakeObsClient : IObsClient
 
 	public Dictionary<string, string> InputSettingsJson { get; } = new(StringComparer.Ordinal);
 
+	public Dictionary<string, string> InputDefaultSettingsJson { get; } = new(StringComparer.Ordinal);
+
+	public Exception? DefaultSettingsFailure { get; set; }
+
+	public bool DisconnectOnDefaultSettingsRead { get; set; }
+
 	/// <summary>
 	/// Names that used to exist but no longer do. A real OBS instance fails every request naming a gone
 	/// input or source; this is what lets tests simulate that instead of the dictionaries below silently
@@ -366,6 +372,31 @@ internal sealed class FakeObsClient : IObsClient
 		CountRead("settings:" + inputName);
 		EnsureExists(inputName);
 		return InputSettingsJson.GetValueOrDefault(inputName, "{}");
+	}
+
+	public string GetInputDefaultSettings(string inputName)
+	{
+		CountRead("default-settings:" + inputName);
+		EnsureExists(inputName);
+		if (DisconnectOnDefaultSettingsRead)
+		{
+			IsConnected = false;
+			throw new InvalidOperationException("connection closed");
+		}
+
+		if (DefaultSettingsFailure is not null)
+		{
+			throw DefaultSettingsFailure;
+		}
+
+		return InputDefaultSettingsJson.GetValueOrDefault(inputName, "{}");
+	}
+
+	public void SetInputSettings(string inputName, string settingsJson)
+	{
+		Calls.Add($"SetInputSettings:{inputName}:{settingsJson}");
+		EnsureExists(inputName);
+		ThrowRequestFailure();
 	}
 
 	public void RaiseConnected() => Connected?.Invoke(this, EventArgs.Empty);
