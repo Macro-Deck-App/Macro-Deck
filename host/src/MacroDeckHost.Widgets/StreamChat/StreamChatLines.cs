@@ -43,7 +43,8 @@ internal sealed record StreamChatLineLayout(
 	Func<StreamChatLine, UiElement> FallbackMessage,
 	int MaxMessages,
 	int MaxBytes,
-	int FallbackMessages);
+	int FallbackMessages,
+	string? NameColor = null);
 
 internal sealed class StreamChatLines
 {
@@ -65,12 +66,13 @@ internal sealed class StreamChatLines
 
 	public static readonly StreamChatLineLayout Widget = WidgetLayout(1);
 
-	public static StreamChatLineLayout WidgetLayout(double scale)
-		=> new(line => StreamChatWidgetView.Message(line, scale),
-			line => StreamChatWidgetView.FallbackMessage(line, scale),
+	public static StreamChatLineLayout WidgetLayout(double scale, string? messageColor = null, string? nameColor = null)
+		=> new(line => StreamChatWidgetView.Message(line, scale, messageColor),
+			line => StreamChatWidgetView.FallbackMessage(line, scale, messageColor),
 			MaxMessages,
 			MaxBytes,
-			FallbackMessages);
+			FallbackMessages,
+			nameColor);
 
 	private readonly string _separator;
 	private readonly ITwitchChatImages? _images;
@@ -164,7 +166,8 @@ internal sealed class StreamChatLines
 			spans.Add(UiTextSpan.FromText(" "));
 		}
 
-		spans.Add(UiTextSpan.FromText(message.AuthorName, message.Color, UiComponentTextWeights.SemiBold));
+		spans.Add(UiTextSpan.FromText(message.AuthorName, layout.NameColor ?? message.Color,
+			UiComponentTextWeights.SemiBold));
 		spans.Add(UiTextSpan.FromText(separator));
 
 		var text = new StringBuilder();

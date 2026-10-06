@@ -9736,6 +9736,15 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Twitch.ChatWidget.Name" xml:space="preserve">
     <value>Twitch Chat</value>
   </data>
+  <data name="Integrations.StreamChat.Widget.MessageColor" xml:space="preserve">
+    <value>Message color</value>
+  </data>
+  <data name="Integrations.StreamChat.Widget.NameColor" xml:space="preserve">
+    <value>Name color</value>
+  </data>
+  <data name="Integrations.StreamChat.Widget.NameColorDescription" xml:space="preserve">
+    <value>Reset to show each chatter's name in its own color.</value>
+  </data>
   <data name="Integrations.StreamChat.Widget.NameSeparator" xml:space="preserve">
     <value>: </value>
   </data>

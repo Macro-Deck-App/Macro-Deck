@@ -39,7 +39,7 @@ public sealed class StreamPlatform
 	public const string ChatDefaultData = """{"account":"","allowModeration":true}""";
 
 	public const string ChatDataSchema
-		= """{"type":"object","properties":{"account":{"type":"string"},"allowModeration":{"type":"boolean"},"backgroundColor":{"type":["string","null"],"description":"#rrggbb or transparent"},"textSize":{"type":["number","null"],"minimum":25,"maximum":300,"description":"Chat text size in percent, 100 when unset"}}}""";
+		= """{"type":"object","properties":{"account":{"type":"string"},"allowModeration":{"type":"boolean"},"backgroundColor":{"type":["string","null"],"description":"#rrggbb or transparent"},"textSize":{"type":["number","null"],"minimum":25,"maximum":300,"description":"Chat text size in percent, 100 when unset"},"messageColor":{"type":["string","null"],"description":"#rrggbb for the chat message text, the theme text colour when unset"},"nameColor":{"type":["string","null"],"description":"#rrggbb for every chatter name, each chatter's own colour when unset"}}}""";
 
 	public required string OwnerId { get; init; }
 

@@ -131,6 +131,36 @@ internal sealed class TwitchChatWidgetSessionTests : UiSessionFixture
 	}
 
 	[Test]
+	public async Task The_configuration_offers_the_stored_chat_colours()
+	{
+		var surface = new UiSurface
+		{
+			Kind = UiSurfaceKinds.Config,
+			SessionMode = UiSessionModes.Exclusive,
+			Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
+			{
+				[UiConfigSurfaceAttributes.EntryPoint] = Json(UiConfigEntryPoints.WidgetConfig),
+				[UiConfigSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(Guid.NewGuid().ToString()),
+				[UiConfigSurfaceAttributes.WidgetType] = Json(StreamPlatforms.Twitch.ChatWidgetTypeId),
+				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.SerializeToElement(
+					new { account = "", messageColor = "#ffcc00", nameColor = "#00ff00" }),
+			}
+		};
+
+		var tree = await OpenTreeAsync(surface);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(tree, Does.Contain("\"messageColor\""));
+			Assert.That(tree, Does.Contain("#ffcc00"));
+			Assert.That(tree, Does.Contain("Integrations.StreamChat.Widget.MessageColor"));
+			Assert.That(tree, Does.Contain("\"nameColor\""));
+			Assert.That(tree, Does.Contain("#00ff00"));
+			Assert.That(tree, Does.Contain("Integrations.StreamChat.Widget.NameColorDescription"));
+		});
+	}
+
+	[Test]
 	public async Task A_surface_for_another_widget_type_is_declined()
 	{
 		var surface = WidgetSurface(UiSurfaceKinds.Widget) with

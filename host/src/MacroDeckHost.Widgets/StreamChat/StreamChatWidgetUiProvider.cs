@@ -130,7 +130,9 @@ public sealed class StreamChatWidgetUiProvider : IBuiltInIntegrationUiProvider
 			? StreamChatWidgetSettings.BackgroundColor(widgetData)
 			: null;
 		var scale = widgetData.ValueKind == JsonValueKind.Undefined ? 1 : StreamChatWidgetSettings.FontScale(widgetData);
-		var layout = StreamChatLines.WidgetLayout(scale);
+		var messageColor = StreamChatWidgetSettings.MessageColor(widgetData);
+		var nameColor = StreamChatWidgetSettings.NameColor(widgetData);
+		var layout = StreamChatLines.WidgetLayout(scale, messageColor, nameColor);
 
 		if (WidgetSamplePreview.IsRequested(surface))
 		{
@@ -142,7 +144,8 @@ public sealed class StreamChatWidgetUiProvider : IBuiltInIntegrationUiProvider
 					cornerRadius,
 					_icon.Value,
 					backgroundColor: backgroundColor,
-					scale: scale)));
+					scale: scale,
+					messageColor: messageColor)));
 		}
 
 		var accountId = ReadAccount(surface);
@@ -157,7 +160,7 @@ public sealed class StreamChatWidgetUiProvider : IBuiltInIntegrationUiProvider
 			: [];
 
 		var view = new UiView(surface, StreamChatWidgetView.Build(_platform, state, cornerRadius, _icon.Value, events,
-			backgroundColor, scale));
+			backgroundColor, scale, messageColor));
 		session = new StreamChatWidgetSession(view, state, lines, _feed, accountId, snapshot.Account?.AccountId);
 
 		return session;

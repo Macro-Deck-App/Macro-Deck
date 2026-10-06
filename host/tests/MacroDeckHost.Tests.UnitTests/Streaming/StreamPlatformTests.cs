@@ -42,7 +42,7 @@ internal sealed class StreamPlatformTests
 			Assert.That(twitch.DialogViewId, Is.EqualTo("twitch-chat"));
 			Assert.That(twitch.ChatWidgetDescriptor().DefaultData, Is.EqualTo("""{"account":"","allowModeration":true}"""));
 			Assert.That(twitch.ChatWidgetDescriptor().DataSchema, Is.EqualTo(
-				"""{"type":"object","properties":{"account":{"type":"string"},"allowModeration":{"type":"boolean"},"backgroundColor":{"type":["string","null"],"description":"#rrggbb or transparent"},"textSize":{"type":["number","null"],"minimum":25,"maximum":300,"description":"Chat text size in percent, 100 when unset"}}}"""));
+				"""{"type":"object","properties":{"account":{"type":"string"},"allowModeration":{"type":"boolean"},"backgroundColor":{"type":["string","null"],"description":"#rrggbb or transparent"},"textSize":{"type":["number","null"],"minimum":25,"maximum":300,"description":"Chat text size in percent, 100 when unset"},"messageColor":{"type":["string","null"],"description":"#rrggbb for the chat message text, the theme text colour when unset"},"nameColor":{"type":["string","null"],"description":"#rrggbb for every chatter name, each chatter's own colour when unset"}}}"""));
 			Assert.That(twitch.StatsWidgetDescriptor().DefaultData, Is.EqualTo(
 				"""{"account":"","style":"overview","metric":"viewers","tiles":["viewers","chatters","followers"],"details":["title","category","uptime"],"showThumbnail":true}"""));
 			Assert.That(twitch.StatsWidgetDescriptor().DataSchema, Is.EqualTo(

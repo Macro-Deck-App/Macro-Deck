@@ -9736,6 +9736,15 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.Twitch.ChatWidget.Name" xml:space="preserve">
     <value>Twitch 聊天</value>
   </data>
+  <data name="Integrations.StreamChat.Widget.MessageColor" xml:space="preserve">
+    <value>消息颜色</value>
+  </data>
+  <data name="Integrations.StreamChat.Widget.NameColor" xml:space="preserve">
+    <value>用户名颜色</value>
+  </data>
+  <data name="Integrations.StreamChat.Widget.NameColorDescription" xml:space="preserve">
+    <value>重置后每个用户名使用其自己的颜色。</value>
+  </data>
   <data name="Integrations.StreamChat.Widget.NameSeparator" xml:space="preserve">
     <value>：</value>
   </data>

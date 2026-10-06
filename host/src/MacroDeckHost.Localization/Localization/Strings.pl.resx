@@ -9735,6 +9735,15 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Twitch.ChatWidget.Name" xml:space="preserve">
     <value>Czat Twitch</value>
   </data>
+  <data name="Integrations.StreamChat.Widget.MessageColor" xml:space="preserve">
+    <value>Kolor wiadomości</value>
+  </data>
+  <data name="Integrations.StreamChat.Widget.NameColor" xml:space="preserve">
+    <value>Kolor nazw użytkowników</value>
+  </data>
+  <data name="Integrations.StreamChat.Widget.NameColorDescription" xml:space="preserve">
+    <value>Po przywróceniu domyślnego koloru każda nazwa jest wyświetlana we własnym kolorze.</value>
+  </data>
   <data name="Integrations.StreamChat.Widget.NameSeparator" xml:space="preserve">
     <value>: </value>
   </data>

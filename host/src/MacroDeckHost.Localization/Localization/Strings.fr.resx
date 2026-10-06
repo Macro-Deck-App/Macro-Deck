@@ -9735,6 +9735,15 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Twitch.ChatWidget.Name" xml:space="preserve">
     <value>Chat Twitch</value>
   </data>
+  <data name="Integrations.StreamChat.Widget.MessageColor" xml:space="preserve">
+    <value>Couleur des messages</value>
+  </data>
+  <data name="Integrations.StreamChat.Widget.NameColor" xml:space="preserve">
+    <value>Couleur des noms</value>
+  </data>
+  <data name="Integrations.StreamChat.Widget.NameColorDescription" xml:space="preserve">
+    <value>Réinitialise pour afficher chaque nom dans sa propre couleur.</value>
+  </data>
   <data name="Integrations.StreamChat.Widget.NameSeparator" xml:space="preserve">
     <value> : </value>
   </data>
