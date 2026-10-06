@@ -16,6 +16,7 @@ export const WidgetType = {
   Clock: 'Clock',
   Countdown: 'Countdown',
   Stopwatch: 'Stopwatch',
+  Gauges: 'Gauges',
 } as const;
 
 export type WidgetType = string;

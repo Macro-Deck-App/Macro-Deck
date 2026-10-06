@@ -385,6 +385,22 @@ describe('IconPackService', () => {
     expect(service.packs()[0].canDelete).toBeFalse();
   });
 
+  it('names the built-in pack in the reader\'s language and keeps every other pack\'s own name', async () => {
+    apiSpy.getIconPacks.and.resolveTo({
+      packs: [
+        ipcPack(packId, 'Stored Name', { ownerKind: 'BuiltIn', canDelete: false }),
+        ipcPack(otherPackId, 'Included', { ownerKind: 'User' }),
+      ],
+    });
+
+    await service.loadPacks();
+
+    const expected = TestBed.inject(LocalizationService).translateKey(AppStrings.IconPacks.IncludedPackName);
+    expect(expected).not.toBe('Stored Name');
+    expect(service.packs().find(pack => pack.id === packId)?.name).toBe(expected);
+    expect(service.packs().find(pack => pack.id === otherPackId)?.name).toBe('Included');
+  });
+
   it('defaults ownerKind to User and canDelete to true when the payload omits them', async () => {
     const { ownerKind: _ownerKind, canDelete: _canDelete, ...bare } = ipcPack(packId, 'Old Host Pack');
     apiSpy.getIconPacks.and.resolveTo({ packs: [bare as IpcIconPack] });

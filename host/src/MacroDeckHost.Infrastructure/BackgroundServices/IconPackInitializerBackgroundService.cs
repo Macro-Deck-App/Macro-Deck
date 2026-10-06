@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Caching;
+using MacroDeckHost.Application.Icons.Included;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Store.Installation;
@@ -12,6 +13,7 @@ public class IconPackInitializerBackgroundService : HostReadyBackgroundService
 {
 	private readonly IIconPackCache _iconPackCache;
 	private readonly IStoreInstallationReconciler _installationReconciler;
+	private readonly IIncludedIconPackSync _includedIconPackSync;
 	private readonly IMacroDeckPaths _paths;
 	private readonly StartupReadiness _readiness;
 	private readonly ILogger _logger;
@@ -20,6 +22,7 @@ public class IconPackInitializerBackgroundService : HostReadyBackgroundService
 		IHostApplicationLifetime lifetime,
 		IIconPackCache iconPackCache,
 		IStoreInstallationReconciler installationReconciler,
+		IIncludedIconPackSync includedIconPackSync,
 		IMacroDeckPaths paths,
 		StartupReadiness readiness,
 		ILogger logger)
@@ -27,6 +30,7 @@ public class IconPackInitializerBackgroundService : HostReadyBackgroundService
 	{
 		_iconPackCache = iconPackCache;
 		_installationReconciler = installationReconciler;
+		_includedIconPackSync = includedIconPackSync;
 		_paths = paths;
 		_readiness = readiness;
 		_logger = logger;
@@ -58,12 +62,31 @@ public class IconPackInitializerBackgroundService : HostReadyBackgroundService
 				});
 			}
 
+			await SyncIncludedIconPack(stoppingToken);
+
 			_readiness.MarkIconPacksReady();
 		}
 		catch (Exception ex)
 		{
 			_readiness.MarkIconPacksFailed(ex);
 			throw;
+		}
+	}
+
+	// Never fails the initializer: plugin icon pack sync waits on icon pack readiness, so a broken included
+	// pack must not hold back every other pack.
+	private async Task SyncIncludedIconPack(CancellationToken cancellationToken)
+	{
+		try
+		{
+			await _includedIconPackSync.SyncAsync(cancellationToken);
+		}
+		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+		{
+		}
+		catch (Exception ex)
+		{
+			_logger.Error(ex, "Failed to sync the included icon pack");
 		}
 	}
 

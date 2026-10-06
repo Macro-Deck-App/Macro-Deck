@@ -331,12 +331,18 @@ export class IconPacksPageComponent {
         return this.localization.translateKey(AppStrings.IconPacks.SourceStore);
       case 'Plugin':
         return this.localization.translateKey(AppStrings.IconPacks.SourcePlugin);
+      case 'BuiltIn':
+        return this.localization.translateKey(AppStrings.IconPacks.SourceBuiltIn);
       default:
         return null;
     }
   }
 
   protected sourceTitle(pack: IconPackModel): string {
+    if (pack.ownerKind === 'BuiltIn') {
+      return this.localization.translateKey(AppStrings.IconPacks.ManagedByMacroDeck);
+    }
+
     if (pack.ownerKind !== 'Plugin') {
       return this.localization.translateKey(AppStrings.IconPacks.ManagedByStore);
     }

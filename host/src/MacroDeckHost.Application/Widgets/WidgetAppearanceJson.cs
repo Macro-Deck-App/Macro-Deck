@@ -52,7 +52,7 @@ public static class WidgetAppearanceJson
 				WidgetTypeIds.Slider => ApplyToSlider(data, patch),
 				WidgetTypeIds.HistoryGraph => ApplyToHistoryGraph(data, patch),
 				WidgetTypeIds.Clock or WidgetTypeIds.Weather or WidgetTypeIds.MusicPlayer or WidgetTypeIds.Countdown
-					or WidgetTypeIds.Stopwatch =>
+					or WidgetTypeIds.Stopwatch or WidgetTypeIds.Gauges =>
 					SetIfPresent(data, "backgroundColor", patch.BackgroundColor) | ApplyBorder(data, patch),
 				_ => ApplyBorder(data, patch)
 			};
@@ -134,7 +134,7 @@ public static class WidgetAppearanceJson
 				WidgetAppearanceProperty.BorderColor, WidgetAppearanceProperty.AccentColor
 			],
 			WidgetTypeIds.Clock or WidgetTypeIds.Weather or WidgetTypeIds.MusicPlayer or WidgetTypeIds.Countdown
-					or WidgetTypeIds.Stopwatch =>
+					or WidgetTypeIds.Stopwatch or WidgetTypeIds.Gauges =>
 			[
 				WidgetAppearanceProperty.BackgroundColor, WidgetAppearanceProperty.Border,
 				WidgetAppearanceProperty.BorderColor

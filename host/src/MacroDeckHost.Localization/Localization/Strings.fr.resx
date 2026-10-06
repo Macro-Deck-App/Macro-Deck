@@ -3876,8 +3876,14 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="IconPacks.ImportPackAction" xml:space="preserve">
     <value>Importer un pack…</value>
   </data>
+  <data name="IconPacks.IncludedPackName" xml:space="preserve">
+    <value>Incluses</value>
+  </data>
   <data name="IconPacks.LoadingIconPacks" xml:space="preserve">
     <value>Chargement des packs d'icônes…</value>
+  </data>
+  <data name="IconPacks.ManagedByMacroDeck" xml:space="preserve">
+    <value>Fourni avec Macro Deck et mis à jour avec lui</value>
   </data>
   <data name="IconPacks.ManagedByPlugin" xml:space="preserve">
     <value>Fourni par {name} et mis à jour avec l’extension</value>
@@ -3978,6 +3984,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="IconPacks.SelectAnIconPackMessage" xml:space="preserve">
     <value>Choisis un pack à gauche pour parcourir ses icônes.</value>
+  </data>
+  <data name="IconPacks.SourceBuiltIn" xml:space="preserve">
+    <value>Intégré</value>
   </data>
   <data name="IconPacks.SourcePlugin" xml:space="preserve">
     <value>Extension</value>
@@ -17258,6 +17267,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="WebClient.Widgets.Countdown.Name" xml:space="preserve">
     <value>Compte à rebours</value>
   </data>
+  <data name="WebClient.Widgets.Gauges.Description" xml:space="preserve">
+    <value>Plusieurs variables numériques sous forme d'anneaux compacts avec icônes, comme un aperçu des batteries</value>
+  </data>
+  <data name="WebClient.Widgets.Gauges.Name" xml:space="preserve">
+    <value>Jauges</value>
+  </data>
   <data name="WebClient.Widgets.HistoryGraph.Description" xml:space="preserve">
     <value>Carte graphique en direct pour une variable numérique (CPU, RAM, GPU…) avec un graphique déroulant</value>
   </data>
@@ -18272,6 +18287,60 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.GridSettings.WidgetSpacing" xml:space="preserve">
     <value>Espacement des widgets</value>
   </data>
+  <data name="Widgets.Gauges.AddGauge" xml:space="preserve">
+    <value>Ajouter une jauge</value>
+  </data>
+  <data name="Widgets.Gauges.Color" xml:space="preserve">
+    <value>Couleur de l'anneau</value>
+  </data>
+  <data name="Widgets.Gauges.EmptyHint" xml:space="preserve">
+    <value>Aucune jauge pour l'instant. Ajoute-en une dans les réglages du widget.</value>
+  </data>
+  <data name="Widgets.Gauges.FullHint" xml:space="preserve">
+    <value>Ce widget est plein. Retire une jauge pour en ajouter une autre.</value>
+  </data>
+  <data name="Widgets.Gauges.GaugeNumber" xml:space="preserve">
+    <value>Jauge {number}</value>
+  </data>
+  <data name="Widgets.Gauges.ListHeading" xml:space="preserve">
+    <value>Jauges</value>
+  </data>
+  <data name="Widgets.Gauges.MaximumHint" xml:space="preserve">
+    <value>0 utilise le maximum de la variable, sinon minimum + 100.</value>
+  </data>
+  <data name="Widgets.Gauges.Name" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="Widgets.Gauges.NameHint" xml:space="preserve">
+    <value>Affiché sous la valeur. Peut contenir des variables.</value>
+  </data>
+  <data name="Widgets.Gauges.NamePlaceholder" xml:space="preserve">
+    <value>p. ex. CPU</value>
+  </data>
+  <data name="Widgets.Gauges.StyleArc" xml:space="preserve">
+    <value>Arc</value>
+  </data>
+  <data name="Widgets.Gauges.StyleRing" xml:space="preserve">
+    <value>Anneau</value>
+  </data>
+  <data name="Widgets.Gauges.Threshold" xml:space="preserve">
+    <value>Seuil</value>
+  </data>
+  <data name="Widgets.Gauges.Warning" xml:space="preserve">
+    <value>Alerte</value>
+  </data>
+  <data name="Widgets.Gauges.WarningAbove" xml:space="preserve">
+    <value>Égale ou supérieure au seuil</value>
+  </data>
+  <data name="Widgets.Gauges.WarningBelow" xml:space="preserve">
+    <value>Égale ou inférieure au seuil</value>
+  </data>
+  <data name="Widgets.Gauges.WarningHint" xml:space="preserve">
+    <value>L'anneau devient rouge quand la valeur atteint le seuil.</value>
+  </data>
+  <data name="Widgets.Gauges.WarningOff" xml:space="preserve">
+    <value>Désactivé</value>
+  </data>
   <data name="Widgets.History.AccentColor" xml:space="preserve">
     <value>Couleur d'accent</value>
   </data>
@@ -18484,6 +18553,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Widgets.SamplePreview.ActionButtonLabel" xml:space="preserve">
     <value>Couper le son</value>
+  </data>
+  <data name="Widgets.SamplePreview.GaugesMemory" xml:space="preserve">
+    <value>Mémoire</value>
+  </data>
+  <data name="Widgets.SamplePreview.GaugesBattery" xml:space="preserve">
+    <value>Batterie</value>
   </data>
   <data name="Widgets.SamplePreview.HistoryGraphSubtitle" xml:space="preserve">
     <value>Données d'exemple</value>
