@@ -21,6 +21,8 @@ public sealed record SliderWidgetData
 
 	public string? BackgroundColor { get; init; }
 
+	public string? IconColor { get; init; }
+
 	/// <summary>The optional icon shown inside the slider body. Reads the typed <c>icon</c> shape first
 	/// and a legacy bare <c>iconId</c> second, tolerant forever.</summary>
 	public WidgetIconReference? Icon { get; init; }
@@ -69,6 +71,7 @@ public sealed record SliderWidgetData
 			LabelColor = WidgetColor.Normalize(ReadString(data, "labelColor")),
 			BackgroundColor = WidgetColor.NormalizeBackground(ReadString(data, "backgroundColor")),
 			Icon = ReadIcon(data),
+			IconColor = WidgetColor.Normalize(ReadString(data, "iconColor")),
 			ShowLabel = ReadBool(data, "showLabel") ?? true,
 			ShowValue = ReadBool(data, "showValue") ?? false,
 			ValueVariable = Trimmed(ReadString(data, "valueVariable")),
