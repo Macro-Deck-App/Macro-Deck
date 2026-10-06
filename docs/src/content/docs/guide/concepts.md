@@ -39,6 +39,7 @@ The tiles in a folder:
 | Slider | Mic volume |
 | Clock | The current time and date |
 | History Graph | CPU load over the last minutes |
+| Gauges | CPU, RAM and GPU load side by side as rings with an icon, like a battery overview |
 | Weather | Today and the next days for your city. Press it for the full details |
 | Music Player | What Spotify is playing, with play and skip. Some players offer extra settings for each widget below the player choice |
 | Twitch Chat | Your channel's chat with emotes and badges, offered once a Twitch account is connected |
@@ -134,6 +135,28 @@ or a **Set Variable** that copies the time into one of your variables:
 These change every second while a timer runs, so an automation on **Variable Changed** without a filter
 runs every second too. A running countdown or stopwatch starts over when Macro Deck restarts. On a
 hardware deck, the key shows the widget's label and colors but not the time.
+
+### Gauges
+
+A **Gauges** widget shows up to eight numbers as rings, each with an icon in the middle and its value and an
+optional name below. A new one starts with CPU and RAM. The rings arrange themselves for the tile: four of
+them sit in two rows on a square tile and in one row on a wide one.
+
+In the widget's settings, pick the ring to edit from the list under **Gauges**. **Add gauge** adds an empty
+one, **Delete** removes the one you picked, and **Presets** add a ready ring for CPU, RAM or GPU. A full
+widget hides the presets. For the ring you picked:
+
+- Choose a **Variable** with a number and a **Name**. The name can include variables, for example the
+  processor's model under its CPU ring.
+- **Icon** opens the icon picker. Macro Deck ships the read-only **Included** pack with icons for CPU,
+  memory, graphics card, drives, network, battery, temperature, fans, audio and more; any other icon pack
+  works too. **Icon Color** recolors the icon.
+- **Minimum** and **Maximum** set the values of an empty and a full ring. With **Maximum** at 0 the ring
+  uses the variable's own maximum, otherwise the minimum plus 100.
+- **Ring color** colors the ring; without one it follows your accent color. **Warning** turns the ring red
+  at or above, or at or below, a **Threshold**, for example a CPU that runs hot or a battery that runs low.
+
+**Style** draws every ring of the widget as a full **Ring** or as an open **Arc**.
 
 ## Actions and triggers
 
@@ -427,6 +450,14 @@ when the latest version is older than yours, or uninstall it.
 When the latest version of an item is withdrawn, the item disappears from the Store and can no longer be
 installed or updated. If you have it installed, it stays under **Installed**, marked **Removed from the
 Store**, and its page says why; you can still uninstall it there.
+
+### The Included icon pack
+
+Macro Deck ships its own icon pack, **Included**, with simple line icons for hardware, network, battery,
+weather and audio, for example for the rings of a **Gauges** widget. It appears under **Library > Icon
+Packs** and in the icon picker like any other pack and works on every widget. Like a Store pack it is
+read-only and can't be deleted. The icons are grey so they read on dark and light tiles; use **Icon Color**
+on a widget to recolor them.
 
 ### Icon packs from plugins
 

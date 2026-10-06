@@ -3775,8 +3775,14 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="IconPacks.ImportPackAction" xml:space="preserve">
     <value>Importovat sadu…</value>
   </data>
+  <data name="IconPacks.IncludedPackName" xml:space="preserve">
+    <value>Součást aplikace</value>
+  </data>
   <data name="IconPacks.LoadingIconPacks" xml:space="preserve">
     <value>Načítání sad ikon…</value>
+  </data>
+  <data name="IconPacks.ManagedByMacroDeck" xml:space="preserve">
+    <value>Dodáváno s Macro Deckem a aktualizuje se spolu s ním</value>
   </data>
   <data name="IconPacks.ManagedByPlugin" xml:space="preserve">
     <value>Poskytuje plugin {name} a aktualizuje se spolu s ním</value>
@@ -3877,6 +3883,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="IconPacks.SelectAnIconPackMessage" xml:space="preserve">
     <value>Vyberte sadu vlevo a procházejte její ikony.</value>
+  </data>
+  <data name="IconPacks.SourceBuiltIn" xml:space="preserve">
+    <value>Vestavěná</value>
   </data>
   <data name="IconPacks.SourcePlugin" xml:space="preserve">
     <value>Plugin</value>
@@ -16980,6 +16989,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="WebClient.Widgets.Countdown.Name" xml:space="preserve">
     <value>Odpočet</value>
   </data>
+  <data name="WebClient.Widgets.Gauges.Description" xml:space="preserve">
+    <value>Několik číselných proměnných jako kompaktní kruhy s ikonami, podobně jako přehled baterií</value>
+  </data>
+  <data name="WebClient.Widgets.Gauges.Name" xml:space="preserve">
+    <value>Ukazatele</value>
+  </data>
   <data name="WebClient.Widgets.HistoryGraph.Description" xml:space="preserve">
     <value>Karta s živým grafem pro číselnou proměnnou (CPU, RAM, GPU…) s posuvným grafem</value>
   </data>
@@ -17973,6 +17988,60 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.GridSettings.WidgetSpacing" xml:space="preserve">
     <value>Rozestupy widgetů</value>
   </data>
+  <data name="Widgets.Gauges.AddGauge" xml:space="preserve">
+    <value>Přidat ukazatel</value>
+  </data>
+  <data name="Widgets.Gauges.Color" xml:space="preserve">
+    <value>Barva kruhu</value>
+  </data>
+  <data name="Widgets.Gauges.EmptyHint" xml:space="preserve">
+    <value>Zatím žádné ukazatele. Přidat je lze v nastavení widgetu.</value>
+  </data>
+  <data name="Widgets.Gauges.FullHint" xml:space="preserve">
+    <value>Widget je plný. Pro přidání dalšího ukazatele odeberte některý stávající.</value>
+  </data>
+  <data name="Widgets.Gauges.GaugeNumber" xml:space="preserve">
+    <value>Ukazatel {number}</value>
+  </data>
+  <data name="Widgets.Gauges.ListHeading" xml:space="preserve">
+    <value>Ukazatele</value>
+  </data>
+  <data name="Widgets.Gauges.MaximumHint" xml:space="preserve">
+    <value>0 použije maximum proměnné, jinak minimum + 100.</value>
+  </data>
+  <data name="Widgets.Gauges.Name" xml:space="preserve">
+    <value>Název</value>
+  </data>
+  <data name="Widgets.Gauges.NameHint" xml:space="preserve">
+    <value>Zobrazuje se pod hodnotou. Může obsahovat proměnné.</value>
+  </data>
+  <data name="Widgets.Gauges.NamePlaceholder" xml:space="preserve">
+    <value>např. CPU</value>
+  </data>
+  <data name="Widgets.Gauges.StyleArc" xml:space="preserve">
+    <value>Oblouk</value>
+  </data>
+  <data name="Widgets.Gauges.StyleRing" xml:space="preserve">
+    <value>Kruh</value>
+  </data>
+  <data name="Widgets.Gauges.Threshold" xml:space="preserve">
+    <value>Práh</value>
+  </data>
+  <data name="Widgets.Gauges.Warning" xml:space="preserve">
+    <value>Upozornění</value>
+  </data>
+  <data name="Widgets.Gauges.WarningAbove" xml:space="preserve">
+    <value>Na prahu nebo nad ním</value>
+  </data>
+  <data name="Widgets.Gauges.WarningBelow" xml:space="preserve">
+    <value>Na prahu nebo pod ním</value>
+  </data>
+  <data name="Widgets.Gauges.WarningHint" xml:space="preserve">
+    <value>Kruh zčervená, když hodnota dosáhne prahu.</value>
+  </data>
+  <data name="Widgets.Gauges.WarningOff" xml:space="preserve">
+    <value>Vypnuto</value>
+  </data>
   <data name="Widgets.History.AccentColor" xml:space="preserve">
     <value>Zvýrazňující barva</value>
   </data>
@@ -18185,6 +18254,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Widgets.SamplePreview.ActionButtonLabel" xml:space="preserve">
     <value>Ztlumit</value>
+  </data>
+  <data name="Widgets.SamplePreview.GaugesMemory" xml:space="preserve">
+    <value>Paměť</value>
+  </data>
+  <data name="Widgets.SamplePreview.GaugesBattery" xml:space="preserve">
+    <value>Baterie</value>
   </data>
   <data name="Widgets.SamplePreview.HistoryGraphSubtitle" xml:space="preserve">
     <value>Ukázková data</value>

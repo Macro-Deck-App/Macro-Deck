@@ -12,6 +12,7 @@ const WIRE_TYPE_NAMES: Record<WidgetType, string> = {
   [WidgetType.Clock]: 'Clock',
   [WidgetType.Countdown]: 'Countdown',
   [WidgetType.Stopwatch]: 'Stopwatch',
+  [WidgetType.Gauges]: 'Gauges',
 };
 
 @Injectable({ providedIn: 'root' })

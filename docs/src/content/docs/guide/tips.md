@@ -24,8 +24,8 @@ Unlock the deck to edit it, lock it to press buttons.
 ## Backgrounds
 
 - **Color a widget's background:** open the widget and pick a **Background Color**.
-  Action Button, Slider, Clock, Countdown, Stopwatch, Weather, History Graph, Music Player and Twitch Chat
-  all have one.
+  Action Button, Slider, Clock, Countdown, Stopwatch, Weather, History Graph, Gauges, Music Player and
+  Twitch Chat all have one.
   **Reset** returns to the default look; on a Music Player that is the album art's color.
 - **Let the folder background show through:** choose the checkered **Transparent** swatch. The tile loses
   its own background and shadow, the border stays.

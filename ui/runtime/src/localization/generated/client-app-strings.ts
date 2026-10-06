@@ -375,6 +375,10 @@ export const ClientAppStrings = {
 				Description: 'macrodeck.app:WebClient.Widgets.Countdown.Description',
 				Name: 'macrodeck.app:WebClient.Widgets.Countdown.Name',
 			},
+			Gauges: {
+				Description: 'macrodeck.app:WebClient.Widgets.Gauges.Description',
+				Name: 'macrodeck.app:WebClient.Widgets.Gauges.Name',
+			},
 			HistoryGraph: {
 				Description: 'macrodeck.app:WebClient.Widgets.HistoryGraph.Description',
 				Name: 'macrodeck.app:WebClient.Widgets.HistoryGraph.Name',
@@ -683,6 +687,8 @@ export const ClientAppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:WebClient.Widgets.Clock.Name': 'Clock',
 	'macrodeck.app:WebClient.Widgets.Countdown.Description': 'Timer that counts down from a set time and signals when it runs out',
 	'macrodeck.app:WebClient.Widgets.Countdown.Name': 'Countdown',
+	'macrodeck.app:WebClient.Widgets.Gauges.Description': 'Several numeric variables as compact rings with icons, like a battery overview',
+	'macrodeck.app:WebClient.Widgets.Gauges.Name': 'Gauges',
 	'macrodeck.app:WebClient.Widgets.HistoryGraph.Description': 'Live graph card for a numeric variable (CPU, RAM, GPU…) with a rolling chart',
 	'macrodeck.app:WebClient.Widgets.HistoryGraph.Name': 'History Graph',
 	'macrodeck.app:WebClient.Widgets.MusicPlayer.Description': 'Show what\'s playing on a connected music provider',

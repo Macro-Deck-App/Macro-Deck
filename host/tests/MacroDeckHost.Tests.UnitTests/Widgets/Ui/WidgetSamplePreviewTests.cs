@@ -71,6 +71,25 @@ public class WidgetSamplePreviewTests
 	}
 
 	[Test]
+	public async Task The_gauges_show_filled_rings_where_the_ordinary_preview_has_none()
+	{
+		var provider = new MacroDeckHost.Widgets.Gauges.GaugesWidgetUiProvider(new VariableRegistry(),
+			new VariableChangeNotifier(),
+			new SliderWidgetConfigTests.FakeWidgetIconResources(),
+			TestLocalization.SampleText);
+
+		var sample = await Tree(provider, sample: true);
+		var live = await Tree(provider, sample: false);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Properties(sample, "level"), Does.Contain("0.42"), "the sample card must fill its rings");
+			Assert.That(TextsOf(sample), Does.Contain(Resolve(AppStrings.Widgets.SamplePreview.GaugesBattery())));
+			Assert.That(Properties(live, "level"), Is.Empty);
+		});
+	}
+
+	[Test]
 	public async Task The_music_player_shows_a_track_where_the_ordinary_preview_reports_no_connection()
 	{
 		var provider = new MacroDeckHost.Widgets.MusicPlayer.MusicPlayerWidgetUiProvider(new StubRegistry(),

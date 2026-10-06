@@ -100,7 +100,7 @@ export class IconPackService {
     this.loadError.set(null);
     try {
       const response = await this.api.getIconPacks();
-      this.packs.set((response.packs ?? []).map(mapPack).sort(comparePacks));
+      this.packs.set((response.packs ?? []).map(pack => this.mapPack(pack)).sort(comparePacks));
     } catch (error) {
       console.error('Failed to load icon packs:', error);
       this.loadError.set(this.localization.translateKey(AppStrings.Errors.IconPack.LoadFailed));
@@ -144,7 +144,7 @@ export class IconPackService {
         return null;
       }
 
-      const pack = mapPack(response.pack);
+      const pack = this.mapPack(response.pack);
       this.upsertPack(pack);
       return pack;
     } catch (error) {
@@ -169,7 +169,7 @@ export class IconPackService {
       }
 
       if (response.pack) {
-        this.upsertPack(mapPack(response.pack));
+        this.upsertPack(this.mapPack(response.pack));
       }
 
       return true;
@@ -295,7 +295,7 @@ export class IconPackService {
       }
 
       for (const pack of response.packs ?? []) {
-        this.upsertPack(mapPack(pack));
+        this.upsertPack(this.mapPack(pack));
       }
 
       if (response.batch) {
@@ -317,7 +317,7 @@ export class IconPackService {
         return null;
       }
 
-      const restored = (response.packs ?? []).map(mapPack);
+      const restored = (response.packs ?? []).map(pack => this.mapPack(pack));
       for (const pack of restored) {
         this.upsertPack(pack);
       }
@@ -430,11 +430,11 @@ export class IconPackService {
 
   private subscribeToEvents(): void {
     this.api.onNotification<IconPackCreatedEvent>('IconPackCreatedEvent').subscribe(event => {
-      this.upsertPack(mapPack(event.pack));
+      this.upsertPack(this.mapPack(event.pack));
     });
 
     this.api.onNotification<IconPackUpdatedEvent>('IconPackUpdatedEvent').subscribe(event => {
-      this.upsertPack(mapPack(event.pack));
+      this.upsertPack(this.mapPack(event.pack));
     });
 
     this.api.onNotification<IconPackDeletedEvent>('IconPackDeletedEvent').subscribe(event => {
@@ -571,6 +571,13 @@ export class IconPackService {
 
     return icons;
   }
+
+  // The host keeps the built-in pack's stored English name; the reader's own language names it here.
+  private mapPack(pack: IpcIconPack): IconPackModel {
+    return mapPack(pack, pack.ownerKind === 'BuiltIn'
+      ? this.localization.translateKey(AppStrings.IconPacks.IncludedPackName)
+      : pack.name);
+  }
 }
 
 export function isTerminalBatchState(state: IconImportBatchState): boolean {
@@ -581,10 +588,10 @@ function comparePacks(a: IconPackModel, b: IconPackModel): number {
   return Number(b.isDefault) - Number(a.isDefault) || a.name.localeCompare(b.name);
 }
 
-function mapPack(pack: IpcIconPack): IconPackModel {
+function mapPack(pack: IpcIconPack, name: string): IconPackModel {
   return {
     id: pack.id,
-    name: pack.name,
+    name,
     description: pack.description,
     author: pack.author,
     version: pack.version,

@@ -83,6 +83,7 @@ cargo:
 # Files that must be covered by an attribution or listed as first-party (see CLAUDE.md, Icons).
 assets:
   roots:
+    - host/src/MacroDeckHost.Infrastructure/IconPacks
     - host/src/MacroDeckHost.Integrations
     - host/src/MacroDeckHost.Widgets
     - ui/runtime/styles/icons

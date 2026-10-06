@@ -49,7 +49,8 @@ assets:
     licenseFile: third-party/licenses/Lucide-icons-LICENSE.txt
     note: >-
       Lucide 1.47.0 icons (MIT for the icons derived from Feather), used in the configuration UI, the web
-      client, the music player widget and the integration icons, some recoloured or placed in a badge.
+      client, the music player widget, the integration icons and the Included icon pack the host ships,
+      some recoloured or placed in a badge.
     paths:
       - ui/runtime/styles/icons/action-button-type.svg
       - ui/runtime/styles/icons/alert-triangle.svg
@@ -134,6 +135,30 @@ assets:
       - host/src/MacroDeckHost.Widgets/MusicPlayer/Icons/music-note.svg
       - host/src/MacroDeckHost.Widgets/MusicPlayer/Icons/paused.svg
       - host/src/MacroDeckHost.Widgets/MusicPlayer/Icons/warning.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/activity.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/battery.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/battery-charging.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/cloud.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/cpu.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/droplet.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/fan.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/gauge.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/gpu.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/hard-drive.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/headphones.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/memory-stick.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/mic.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/monitor.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/moon.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/music.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/network.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/power.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/server.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/sun.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/thermometer.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/volume-2.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/wifi.svg
+      - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/zap.svg
       - host/src/MacroDeckHost.Integrations/Companion/companion-icon.svg
       - host/src/MacroDeckHost.Integrations/Http/http-icon.svg
       - host/src/MacroDeckHost.Integrations/Keyboard/keyboard-icon.svg
