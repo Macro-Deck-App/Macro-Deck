@@ -19531,4 +19531,49 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Shell.OutdatedUi.Versions" xml:space="preserve">
     <value>Build de l'interface : {device} · Build de Macro Deck : {computer}</value>
   </data>
+  <data name="Integrations.Obs.Actions.StartOutput.Name" xml:space="preserve">
+    <value>Démarrer la sortie</value>
+  </data>
+  <data name="Integrations.Obs.Actions.StartOutput.Description" xml:space="preserve">
+    <value>Démarre une sortie OBS par son nom, y compris les sorties ajoutées par des plugins</value>
+  </data>
+  <data name="Integrations.Obs.Actions.StopOutput.Name" xml:space="preserve">
+    <value>Arrêter la sortie</value>
+  </data>
+  <data name="Integrations.Obs.Actions.StopOutput.Description" xml:space="preserve">
+    <value>Arrête une sortie OBS par son nom, y compris les sorties ajoutées par des plugins</value>
+  </data>
+  <data name="Integrations.Obs.Actions.ToggleOutput.Name" xml:space="preserve">
+    <value>Basculer la sortie</value>
+  </data>
+  <data name="Integrations.Obs.Actions.ToggleOutput.Description" xml:space="preserve">
+    <value>Démarre ou arrête une sortie OBS par son nom, y compris les sorties ajoutées par des plugins</value>
+  </data>
+  <data name="Integrations.Obs.Actions.GetOutputState.Name" xml:space="preserve">
+    <value>Obtenir l'état de la sortie</value>
+  </data>
+  <data name="Integrations.Obs.Actions.GetOutputState.Description" xml:space="preserve">
+    <value>Écrit dans une variable si une sortie OBS est active</value>
+  </data>
+  <data name="Integrations.Obs.Actions.GetOutputState.VariableDescription" xml:space="preserve">
+    <value>Nom de la variable où écrire l'état actif</value>
+  </data>
+  <data name="Integrations.Obs.Params.Output" xml:space="preserve">
+    <value>Sortie</value>
+  </data>
+  <data name="Integrations.Obs.Params.OutputUnavailable" xml:space="preserve">
+    <value>{name} (indisponible)</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NoOutputSelected" xml:space="preserve">
+    <value>Aucune sortie n'a été sélectionnée.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.OutputNotFound" xml:space="preserve">
+    <value>La sortie '{output}' n'existe pas.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.OutputCommandFailed" xml:space="preserve">
+    <value>OBS n'a pas pu modifier la sortie '{output}'.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.OutputsNeedNewerObs" xml:space="preserve">
+    <value>Le contrôle des sorties nécessite une version d'OBS avec obs-websocket 5.7 ou plus récent.</value>
+  </data>
 </root>

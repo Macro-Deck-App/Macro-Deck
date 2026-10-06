@@ -133,6 +133,27 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 
 	public Task<IReadOnlyList<string>> GetProfileNamesAsync() => QueryAsync(_client.GetProfileNames);
 
+	public Task<IReadOnlyList<string>> GetOutputNamesAsync() => QueryAsync(_client.GetOutputNames);
+
+	public Task<ObsOutputOutcome> StartOutputAsync(string outputName)
+		=> OutputCommandAsync(() => _client.StartOutput(outputName));
+
+	public Task<ObsOutputOutcome> StopOutputAsync(string outputName)
+		=> OutputCommandAsync(() => _client.StopOutput(outputName));
+
+	public Task<ObsOutputOutcome> ToggleOutputAsync(string outputName)
+		=> OutputCommandAsync(() => _client.ToggleOutput(outputName));
+
+	public Task<ObsOutputRead> GetOutputActiveAsync(string outputName) => Task.Run(() =>
+	{
+		var active = false;
+		var outcome = RunOutputCommand(() => active = _client.GetOutputActive(outputName));
+		return new ObsOutputRead(outcome, active);
+	});
+
+	public Task<bool?> GetOutputActiveCachedAsync(string outputName)
+		=> CachedTargetReadAsync<bool>($"output-active:{outputName}", () => _client.GetOutputActive(outputName));
+
 	public Task<bool> SetSceneAsync(string sceneName) => RunAsync(() => _client.SetCurrentScene(sceneName));
 	public Task<bool> SetPreviewSceneAsync(string sceneName) => RunAsync(() => _client.SetPreviewScene(sceneName));
 	public Task<bool> SetProfileAsync(string profileName) => RunAsync(() => _client.SetCurrentProfile(profileName));
@@ -738,6 +759,37 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 			return false;
 		}
 	});
+
+	private Task<ObsOutputOutcome> OutputCommandAsync(Action action) => Task.Run(() => RunOutputCommand(action));
+
+	private ObsOutputOutcome RunOutputCommand(Action action)
+	{
+		if (!IsConnected)
+		{
+			return ObsOutputOutcome.NotConnected;
+		}
+
+		try
+		{
+			action();
+			return ObsOutputOutcome.Done;
+		}
+		catch (ObsRequestUnsupportedException ex)
+		{
+			_logger.Warning(ex, "OBS output request unsupported");
+			return ObsOutputOutcome.Unsupported;
+		}
+		catch (ObsOutputNotFoundException ex)
+		{
+			_logger.Warning(ex, "OBS output not found");
+			return ObsOutputOutcome.NotFound;
+		}
+		catch (Exception ex)
+		{
+			_logger.Error(ex, "OBS output request failed");
+			return ObsOutputOutcome.Failed;
+		}
+	}
 
 	private Task<IReadOnlyList<string>> QueryAsync(Func<IReadOnlyList<string>> query) => Task.Run(() =>
 	{

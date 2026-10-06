@@ -19531,4 +19531,49 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Shell.OutdatedUi.Versions" xml:space="preserve">
     <value>Build dell'interfaccia: {device} · Build di Macro Deck: {computer}</value>
   </data>
+  <data name="Integrations.Obs.Actions.StartOutput.Name" xml:space="preserve">
+    <value>Avvia output</value>
+  </data>
+  <data name="Integrations.Obs.Actions.StartOutput.Description" xml:space="preserve">
+    <value>Avvia un output di OBS in base al nome, anche gli output aggiunti dai plugin</value>
+  </data>
+  <data name="Integrations.Obs.Actions.StopOutput.Name" xml:space="preserve">
+    <value>Interrompi output</value>
+  </data>
+  <data name="Integrations.Obs.Actions.StopOutput.Description" xml:space="preserve">
+    <value>Interrompe un output di OBS in base al nome, anche gli output aggiunti dai plugin</value>
+  </data>
+  <data name="Integrations.Obs.Actions.ToggleOutput.Name" xml:space="preserve">
+    <value>Attiva/disattiva output</value>
+  </data>
+  <data name="Integrations.Obs.Actions.ToggleOutput.Description" xml:space="preserve">
+    <value>Avvia o interrompe un output di OBS in base al nome, anche gli output aggiunti dai plugin</value>
+  </data>
+  <data name="Integrations.Obs.Actions.GetOutputState.Name" xml:space="preserve">
+    <value>Leggi stato output</value>
+  </data>
+  <data name="Integrations.Obs.Actions.GetOutputState.Description" xml:space="preserve">
+    <value>Scrive in una variabile se un output di OBS è attivo</value>
+  </data>
+  <data name="Integrations.Obs.Actions.GetOutputState.VariableDescription" xml:space="preserve">
+    <value>Nome della variabile in cui scrivere lo stato attivo</value>
+  </data>
+  <data name="Integrations.Obs.Params.Output" xml:space="preserve">
+    <value>Output</value>
+  </data>
+  <data name="Integrations.Obs.Params.OutputUnavailable" xml:space="preserve">
+    <value>{name} (non disponibile)</value>
+  </data>
+  <data name="Integrations.Obs.Errors.NoOutputSelected" xml:space="preserve">
+    <value>Nessun output selezionato.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.OutputNotFound" xml:space="preserve">
+    <value>L'output "{output}" non esiste.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.OutputCommandFailed" xml:space="preserve">
+    <value>OBS non ha potuto modificare l'output "{output}".</value>
+  </data>
+  <data name="Integrations.Obs.Errors.OutputsNeedNewerObs" xml:space="preserve">
+    <value>Per controllare gli output serve una versione di OBS con obs-websocket 5.7 o successivo.</value>
+  </data>
 </root>
