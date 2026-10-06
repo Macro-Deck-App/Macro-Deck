@@ -26,6 +26,7 @@ A plugin implements the same SDK contracts as an in-process integration, but the
 | Config flows | Yes | Differs | Flow sessions work; OAuth and session context cross as invocation state, not as a live host object. |
 | Music players | Yes | Same | Instances, state, controls, artwork, catalog, devices and transfer work; state reads can degrade to unavailable, but catalog and device failures stay real failures. |
 | Weather | Yes | Same | Instances and snapshots work; unavailable remote state becomes an unavailable snapshot. |
+| Calendars | Yes | Differs | Accounts, calendars, events and single-event details work. The account list is snapshot-backed, an `events` reply carries no description or participants and is cut to a size limit, and read failures stay real failures - see [Calendars over the plugin protocol](/features/calendars/#over-the-plugin-protocol). |
 | Virtual profiles | Yes | Differs | Catalogs and widget interactions work; the catalog is snapshot-backed and interaction delivery is fire-and-forget. |
 | Device providers | Yes | Same | Full parity from capability version 2, but sessions are always re-opened, never resumed - see [Device provider sessions](#device-provider-sessions). |
 | Folder view providers | Yes | Same | Registered through the `folder-views` host API; see [Provider catalogues across a disconnect](#provider-catalogues-across-a-disconnect). |

@@ -18,7 +18,7 @@ under [behaviour changes that moved no version](/ui/reference/compatibility/#beh
 | UI model | `MacroDeck.Ui`, `MacroDeck.Ui.Model`, `MacroDeck.Ui.Testing` | Frozen like the SDK; the UI model's wire major is negotiated separately - see [the UI model majors](#ui-model-majors). |
 | Protocol | `MacroDeck.Plugin.Protocol`: the envelope, DTOs, message types, error codes | Append-only within a protocol major; a break needs a new major. |
 | Plugin HTTP and WebSocket | `/api/plugins/*`, `/plugins/ws` | Existing endpoints keep their shape and meaning - see [the protocol reference](/reference/protocol/). |
-| Capability and host API catalogues | `device-provider`/`devices`, `layout-provider`/`layouts`, `folder-view-provider`/`folder-views`, `widget-type-provider`/`widget-types`, `screensaver-provider`/`screensavers`, `messaging`/`messaging`, `video-stream-provider`/`video-streams`, `event-bindings` | Names stay; see [capability operations](/reference/protocol/#capability-operations). |
+| Capability and host API catalogues | `device-provider`/`devices`, `layout-provider`/`layouts`, `folder-view-provider`/`folder-views`, `widget-type-provider`/`widget-types`, `screensaver-provider`/`screensavers`, `messaging`/`messaging`, `video-stream-provider`/`video-streams`, `calendar`, `event-bindings` | Names stay; see [capability operations](/reference/protocol/#capability-operations). |
 | Manifest and package format | `manifest.json`, the `.macroDeckPlugin` package | An existing manifest and package keep installing - see [the manifest reference](/reference/manifest/). |
 | Analyzer diagnostic ids | `MDP1001`, …, the `MDLOC` family `MDLOC001`-`MDLOC008` | An id keeps its meaning and is never reused - see [analyzers](/reference/analyzers/). |
 | Conformance check ids | `MDC0305`, … | Stable, so you can gate CI on them - see [conformance](/reference/conformance/). |
@@ -205,6 +205,11 @@ What did **not** need a major:
   `IVideoStreamIntegration` never declares it. The surface was reshaped before any release: Macro Deck now
   relays the media itself, and signaling, the consumer context and the `webrtc` and `whep` transports are
   gone. A development build written against the earlier, unreleased shape must be updated.
+- [Calendars](/features/calendars/) added a capability kind, `calendar`, at capability version `1`, with
+  its own operations, DTOs and reply limits, all within major `3`. An older host rejects the kind
+  non-fatally and the plugin's other capabilities keep working, and a plugin that does not implement
+  `ICalendarProvider` never declares it. The host's calendar widget types and the `calendar` trigger
+  provider are host-owned additions, not protocol changes.
 - Localization moved the **UI model** major, not this one - see [the localization major](#the-localization-major).
 
 **Negotiation happens exactly once**, in `POST /api/plugins/sessions`:

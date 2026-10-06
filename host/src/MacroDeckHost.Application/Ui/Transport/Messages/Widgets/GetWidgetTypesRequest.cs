@@ -28,6 +28,10 @@ public class WidgetTypeDto
 
 	public LocalizedText ProviderName { get; set; }
 
+	/// <summary>Whether a plugin provides the type, as opposed to the host itself or one of its own
+	/// integrations. The widget picker badges only these with <see cref="ProviderName" />.</summary>
+	public bool IsPluginProvided { get; set; }
+
 	/// <summary>The type's name as the picker shows it. Localized rather than resolved here, so a language
 	/// change is a client-side re-render rather than a refetch.</summary>
 	public LocalizedText Name { get; set; }

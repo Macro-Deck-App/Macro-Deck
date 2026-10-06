@@ -57,6 +57,8 @@ internal static class ConformanceCheckSupport
 			CapabilityOperations.ScreenSaverProvider.Describe,
 		_ when string.Equals(kind, CapabilityKinds.VideoStreamProvider, StringComparison.Ordinal) =>
 			CapabilityOperations.VideoStreamProvider.Describe,
+		_ when string.Equals(kind, CapabilityKinds.Calendar, StringComparison.Ordinal) => CapabilityOperations.Calendar
+			.Describe,
 		_ => null
 	};
 

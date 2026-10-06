@@ -7,6 +7,7 @@ using MacroDeck.Plugin.Protocol.Capabilities.MusicPlayer;
 using MacroDeck.Plugin.Protocol.Capabilities.Variables;
 using MacroDeck.Plugin.Protocol.Capabilities.VirtualProfiles;
 using MacroDeck.Plugin.Protocol.Capabilities.Weather;
+using MacroDeck.Plugin.Protocol.Capabilities.Calendar;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Plugins.Capabilities;
 using MacroDeckHost.Application.Plugins.Capabilities.Mapping;
@@ -139,6 +140,10 @@ public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore
 			WeatherProviderName = persisted.Weather?.ProviderName ?? string.Empty,
 			WeatherInstances = persisted.Weather?.Instances is { } weatherInstances
 				? [.. weatherInstances.Select(WeatherCatalogMapper.ToDomain)]
+				: [],
+			CalendarProviderName = persisted.Calendar?.ProviderName ?? string.Empty,
+			CalendarAccounts = persisted.Calendar?.Accounts is { } calendarAccounts
+				? [.. calendarAccounts.Select(CalendarMapper.ToDomain)]
 				: [],
 			ProfileProviderName = persisted.VirtualProfiles?.ProviderName ?? string.Empty,
 			Profiles = persisted.VirtualProfiles?.Profiles is { } profiles
@@ -274,6 +279,11 @@ public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore
 				ProviderName = snapshot.WeatherProviderName,
 				Instances = [.. snapshot.WeatherInstances.Select(WeatherCatalogMapper.ToDto)]
 			},
+			Calendar = new CalendarDescribePayload
+			{
+				ProviderName = snapshot.CalendarProviderName,
+				Accounts = [.. snapshot.CalendarAccounts.Select(CalendarMapper.ToDto)]
+			},
 			VirtualProfiles = new VirtualProfilesDescribePayload
 			{
 				ProviderName = snapshot.ProfileProviderName,
@@ -332,6 +342,8 @@ public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore
 		public PersistedIcon? Icon { get; init; }
 
 		public WeatherDescribePayload? Weather { get; init; }
+
+		public CalendarDescribePayload? Calendar { get; init; }
 
 		public VirtualProfilesDescribePayload? VirtualProfiles { get; init; }
 	}

@@ -160,7 +160,7 @@ are listed in the descriptor's `capabilityKinds`:
 `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`,
 `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`,
 `folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`, `messaging`,
-`video-stream-provider`.
+`video-stream-provider`, `calendar`.
 
 - **Do not invent operation names inside an existing kind.** Additions to the operation vocabulary are
   compatibility-sensitive protocol changes. Exact operations and payloads are in the protocol package
@@ -177,6 +177,9 @@ are listed in the descriptor's `capabilityKinds`:
   answers an identity, not bytes; `icon.content` fetches the bytes only when that identity changes,
   uploaded over the `asset.*` pipeline, never inside the capability reply. The `widgets` host API's
   `invalidate-icon` asks the host to re-read an action sooner than its next poll.
+- `calendar` was added as a new kind at capability version `1`, additively in major `3`. A host that
+  predates it rejects the declaration non-fatally (`accepted: false`) and the session goes on without it.
+  Its operations and reply limits are in the [WebSocket reference](/reference/websocket/#calendar).
 
 See [capabilities](/features/) and [Capability parity](/reference/capability-parity/).
 

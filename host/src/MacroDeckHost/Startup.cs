@@ -19,6 +19,7 @@ using MacroDeck.Plugin.Protocol;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Application.Applications;
+using MacroDeckHost.Application.Calendar;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Connect;
@@ -75,6 +76,7 @@ using MacroDeckHost.Application.StreamChat;
 using MacroDeckHost.Application.StreamStats;
 using MacroDeckHost.Infrastructure.StreamStats;
 using MacroDeckHost.Infrastructure.Twitch;
+using MacroDeckHost.Widgets.Calendar;
 using MacroDeckHost.Widgets.StreamChat;
 using MacroDeckHost.Widgets.StreamStats;
 using MacroDeckHost.Application.Icons;
@@ -350,6 +352,7 @@ public class Startup
 		{
 			services.AddSingleton<IBuiltInIntegrationUiProvider>(provider => StreamChatProvider(provider, platform));
 		}
+		services.AddSingleton<IBuiltInIntegrationUiProvider, CalendarUiProvider>();
 
 		services.AddSingleton<BuiltInScreenSaverProvider>();
 		services.AddSingleton<IBuiltInIntegrationUiProvider>(provider => provider.GetRequiredService<BuiltInScreenSaverProvider>());
@@ -395,6 +398,9 @@ public class Startup
 		services.AddHostedService<VariableCatalogUpdateBackgroundService>();
 		services.AddHostedService<MusicPlayerStateBroadcastBackgroundService>();
 		services.AddHostedService<WeatherStateBroadcastBackgroundService>();
+		services.AddHostedService<CalendarSyncBackgroundService>();
+		services.AddHostedService<CalendarTriggerBackgroundService>();
+		services.AddHostedService<CalendarWidgetBackgroundService>();
 		services.AddHostedService<IntegrationIssueBroadcastBackgroundService>();
 		services.AddHostedService<InstallationIdInitializeBackgroundService>();
 		services.AddHostedService<KeyRingProtectionStartupService>();
@@ -446,6 +452,7 @@ public class Startup
 		services.AddSingleton<IHostEventProvider, TimeEventProvider>();
 		services.AddSingleton<MusicPlayerEventProvider>();
 		services.AddSingleton<IHostEventProvider>(sp => sp.GetRequiredService<MusicPlayerEventProvider>());
+		services.AddSingleton<IHostEventProvider, CalendarEventProvider>();
 		services.AddSingleton<DeviceConnectionTracker>();
 		services.AddSingleton<ProviderDevicePresenceTracker>();
 		services.AddSingleton<ILayoutRegistry, LayoutRegistry>();
@@ -496,6 +503,7 @@ public class Startup
 		services.AddSingleton<EventPreviewSamples>();
 		services.AddScoped<IEventSubscriptionMatcher, EventSubscriptionMatcher>();
 		services.AddScoped<IEventTriggerRunner, EventTriggerRunner>();
+		services.AddScoped<IEventTriggerContextResolver, EventTriggerContextResolver>();
 
 		services.AddSingleton<VariableRegistry>();
 		services.AddSingleton<IVariableFileSystem, VariableFileSystem>();
@@ -809,6 +817,7 @@ public class Startup
 		services.AddSingleton<IAutostartService, AutostartService>();
 		services.AddSingleton<IApplicationRestartService, ApplicationRestartService>();
 		services.AddSingleton<IFolderRevealService, FolderRevealService>();
+		services.AddSingleton<IExternalUrlOpener, ExternalUrlOpener>();
 		services.TryAddSingleton<IHostListenerState>(_ => new HostListenerState(ResolvedPublicEndpoints.Value, false));
 		services.AddAdbManager();
 		services.AddNativeUsb();
@@ -891,6 +900,18 @@ public class Startup
 		services.AddSingleton<IMusicPlayerVariants, MusicPlayerVariants>();
 		services.AddSingleton<IWeatherRegistry, WeatherRegistry>();
 		services.AddSingleton<IWeatherBroadcastTrigger, WeatherBroadcastTrigger>();
+		services.AddSingleton<ICalendarRegistry, CalendarRegistry>();
+		services.AddSingleton<ICalendarEventCache, CalendarEventCache>();
+		services.AddSingleton<ICalendarSyncSignal, CalendarSyncSignal>();
+		services.AddSingleton<CalendarTriggerScheduler>();
+		services.AddSingleton<CalendarWidgetTriggerScheduler>();
+		services.AddSingleton<CalendarWidgetVariableWriter>();
+		services.AddSingleton<CalendarWidgetChanges>();
+		services.AddSingleton<CalendarWidgetLifecycle>();
+		services.AddSingleton(sp => new CalendarHostServices(sp.GetRequiredService<ICalendarEventCache>(),
+			sp.GetRequiredService<IExternalUrlOpener>(),
+			sp.GetRequiredService<TimeProvider>(),
+			sp.GetRequiredService<IFolderCache>()));
 		services.AddSingleton<IArtworkProcessor, ImageSharpArtworkProcessor>();
 		services.AddSingleton<IArtworkPaletteExtractor, ImageSharpArtworkPaletteExtractor>();
 		services.AddSingleton<IMusicPlayerArtworkService, MusicPlayerArtworkService>();
@@ -968,6 +989,8 @@ public class Startup
 		services.AddSingleton<IHostOptionsSource, VariablesOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, UserVariablesOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, MusicPlayerInstancesOptionsSource>();
+		services.AddSingleton<IHostOptionsSource, CalendarAccountsOptionsSource>();
+		services.AddSingleton<IHostOptionsSource, CalendarCalendarsOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, ProfilesOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, FoldersOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, IntegrationsOptionsSource>();

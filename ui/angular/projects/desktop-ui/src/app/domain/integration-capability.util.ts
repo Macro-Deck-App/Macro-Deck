@@ -10,6 +10,7 @@ const CAPABILITY_ICONS: Record<string, string> = {
   variables: 'sliders',
   'music-player': 'music-player-type',
   weather: 'weather-type',
+  calendar: 'clock-type',
   'virtual-profiles': 'layers',
 };
 

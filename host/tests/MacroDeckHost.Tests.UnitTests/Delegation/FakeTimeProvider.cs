@@ -20,6 +20,17 @@ internal sealed class FakeTimeProvider : TimeProvider
 		}
 	}
 
+	public IReadOnlyList<DateTimeOffset> ActiveDueTimes
+	{
+		get
+		{
+			lock (_lock)
+			{
+				return [.. _timers.Where(t => t.IsActive).Select(t => t.DueAt)];
+			}
+		}
+	}
+
 	public override ITimer CreateTimer(TimerCallback callback, object? state, TimeSpan dueTime, TimeSpan period)
 	{
 		var timer = new ManualTimer(this, callback, state);

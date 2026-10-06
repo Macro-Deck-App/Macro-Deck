@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 import { ApiService } from '@shared';
 import { ActionBuilderComponent } from './action-builder.component';
 import { ActionFlowStore } from './services/action-flow.store';
+import { interactionTriggerTabsFor } from './default-action-defs';
 
 function fakeApiService(): ApiService {
   const apiSpy = jasmine.createSpyObj<ApiService>('ApiService', ['onNotification']);
@@ -57,6 +58,37 @@ describe('ActionBuilderComponent configured trigger tabs', () => {
     fixture.detectChanges();
 
     expect(store.flows().map(f => f.triggerType)).toEqual(['onCountdownFinished', 'onCountdownStarted']);
+  });
+
+  describe('for a calendar widget', () => {
+    const calendarTabs = interactionTriggerTabsFor([
+      'onShortPress', 'onLongPress', 'onDoublePress', 'onTouchStart', 'onTouchEnd',
+      'onCalendarEventStartsSoon', 'onCalendarEventStarted', 'onCalendarEventEnded',
+    ], key => key);
+
+    it('starts on Short Press and offers the other presses and the calendar triggers to add', () => {
+      fixture.componentRef.setInput('interactionTriggerTabs', calendarTabs);
+      fixture.componentRef.setInput('flows', []);
+      fixture.detectChanges();
+
+      expect(component.triggerTabItems().map(t => t.id)).toEqual(['onShortPress']);
+      expect(component.addableTriggerTabs().map(t => t.triggerType)).toEqual([
+        'onLongPress', 'onTouchStart', 'onTouchEnd', 'onDoublePress',
+        'onCalendarEventStartsSoon', 'onCalendarEventStarted', 'onCalendarEventEnded',
+      ]);
+    });
+
+    it('keeps a configured calendar trigger next to the presses, in canonical order', () => {
+      fixture.componentRef.setInput('interactionTriggerTabs', calendarTabs);
+      fixture.componentRef.setInput('flows', [
+        { triggerId: 'onCalendarEventStarted', triggerType: 'onCalendarEventStarted', children: [{ id: 'b1' }] },
+        { triggerId: 'onLongPress', triggerType: 'onLongPress', children: [] },
+      ]);
+      fixture.detectChanges();
+
+      expect(component.triggerTabItems().map(t => t.id)).toEqual(['onLongPress', 'onCalendarEventStarted']);
+      expect(component.triggerTabItems().find(t => t.id === 'onCalendarEventStarted')!.removable).toBeTrue();
+    });
   });
 
   it('shows only Short Press for a widget with no flows', () => {

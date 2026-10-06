@@ -6,6 +6,7 @@ using MacroDeck.Ui.Model.Versioning;
 using MacroDeckHost.Api.Controllers;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Events.Handlers;
+using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Ui.Handlers;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
@@ -131,6 +132,38 @@ public class WidgetTypesEndpointTests
 			Assert.That(response.Types.Single(type => type.Id == "com.example.orphan::dial").ProviderName,
 				Is.EqualTo((LocalizedText)"com.example.orphan"),
 				"a provider the integration registry does not know still gets a label rather than none");
+		});
+	}
+
+	[Test]
+	public async Task GetTypes_marks_only_a_type_a_plugin_provides_as_plugin_provided()
+	{
+		var integrations = new FakeIntegrationRegistry();
+		await integrations.RegisterAsync(new FakeIntegration { Id = "com.example.gauges" }, IntegrationOrigin.Plugin);
+		await integrations.RegisterAsync(new FakeIntegration { Id = "app.macro-deck.calendar" });
+		var registry = new FakeWidgetTypeRegistry(new WidgetTypeCatalogEntry(WidgetTypeIds.Clock,
+				string.Empty,
+				new WidgetTypeDescriptor(WidgetTypeIds.Clock, LocalizedText.FromLiteral("Clock"))),
+			new WidgetTypeCatalogEntry("com.example.gauges::gauge",
+				"com.example.gauges",
+				new WidgetTypeDescriptor("gauge", LocalizedText.FromLiteral("Gauge"))),
+			new WidgetTypeCatalogEntry("app.macro-deck.calendar::calendar",
+				"app.macro-deck.calendar",
+				new WidgetTypeDescriptor("calendar", LocalizedText.FromLiteral("Calendar"))));
+		var controller = CreateController(new GetWidgetTypesRequestMessageHandler(registry, integrations));
+
+		var response = await controller.GetTypes(CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Types.Single(type => type.Id == "com.example.gauges::gauge").IsPluginProvided, Is.True);
+			Assert.That(response.Types.Single(type => type.Id == "app.macro-deck.calendar::calendar").IsPluginProvided,
+				Is.False,
+				"a type of one of the host's own integrations is not a plugin's");
+			Assert.That(response.Types.Single(type => type.Id == "app.macro-deck.calendar::calendar").ProviderName,
+				Is.EqualTo((LocalizedText)"Test Integration"),
+				"the provider is still named, so a search can find it");
+			Assert.That(response.Types.Single(type => type.Id == WidgetTypeIds.Clock).IsPluginProvided, Is.False);
 		});
 	}
 

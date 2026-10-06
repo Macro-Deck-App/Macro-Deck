@@ -25,6 +25,7 @@ public class EventRegistryTests
 		yield return new CoreEventProvider();
 		yield return new MusicPlayerEventProvider(new RecordingEventBus());
 		yield return new TimeEventProvider();
+		yield return new CalendarEventProvider();
 	}
 
 	[TestCaseSource(nameof(HostProviders))]

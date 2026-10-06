@@ -37,7 +37,7 @@ Routes under `/_macrodeck/*` are reserved by the SDK for health, readiness and d
 yourself fails at startup rather than silently at request time.
 
 Every capability kind an in-process integration can implement - actions, events, variables, icons,
-config flow, music players, weather, virtual profiles and issues - has a working remote adapter, and
+config flow, music players, weather, calendars, virtual profiles and issues - has a working remote adapter, and
 `IIntegrationContext` is a real, working call back into the host. **Status:** the host endpoints a
 plugin connects to are not in a released Macro Deck yet
 ([#411](https://github.com/Macro-Deck-App/Macro-Deck/issues/411)).

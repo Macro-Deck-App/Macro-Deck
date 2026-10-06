@@ -55,9 +55,11 @@ internal sealed class FakeLocalizationPreferences : IAppPreferenceService
 {
 	public string Culture { get; set; } = "en";
 
+	public string TimeFormat { get; set; } = AppPreferenceService.TimeFormatSystem;
+
 	public Task<LocalizationSettings> GetLocalization() => Task.FromResult(new LocalizationSettings(Culture));
 
-	public Task<string> GetTimeFormat() => Task.FromResult(AppPreferenceService.TimeFormatSystem);
+	public Task<string> GetTimeFormat() => Task.FromResult(TimeFormat);
 
 	public Task<string> SetTimeFormat(string? timeFormat) => throw new NotSupportedException();
 

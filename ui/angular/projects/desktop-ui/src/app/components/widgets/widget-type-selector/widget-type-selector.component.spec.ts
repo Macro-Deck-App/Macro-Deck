@@ -161,9 +161,22 @@ describe('WidgetTypeSelectorComponent', () => {
       id: GAUGE_TYPE,
       providerId: 'com.example.gauges',
       isBuiltIn: false,
+      isPluginProvided: true,
       providerName: 'Gauge Pack',
       name: 'Gauge',
       description: 'A dial',
+    }),
+  ];
+  const integrationCatalog = [
+    ...builtInCatalog,
+    catalogEntry({
+      id: 'app.macro-deck.twitch::chat',
+      providerId: 'app.macro-deck.twitch',
+      isBuiltIn: false,
+      isPluginProvided: false,
+      providerName: 'Twitch',
+      name: 'Chat',
+      description: 'Shows the chat',
     }),
   ];
 
@@ -334,6 +347,19 @@ describe('WidgetTypeSelectorComponent', () => {
       await settle();
 
       expect(rowNames()).toEqual(['Action Button', 'Gauge', 'Weather']);
+    });
+  });
+
+  describe('with a type one of the host\'s own integrations provides', () => {
+    beforeEach(() => createFixture(integrationCatalog));
+
+    it('shows no integration badge, because only plugin-provided types carry one', () => {
+      expect(cardNamed('Chat').querySelector('.type-provider')).toBeNull();
+    });
+
+    it('still finds the type by the name of the integration that provides it', async () => {
+      await search('twitch');
+      expect(cardNames()).toEqual(['Chat']);
     });
   });
 

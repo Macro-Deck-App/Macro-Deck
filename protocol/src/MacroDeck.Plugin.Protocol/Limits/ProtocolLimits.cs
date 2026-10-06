@@ -163,4 +163,27 @@ public static class ProtocolLimits
 	/// <summary>Bounds one <c>value</c> push. The host's callback throttle bounds the rate of host
 	/// callbacks; this bounds the size of one.</summary>
 	public const int MaxVariableValuesPerBatch = 128;
+
+	/// <summary>Bounds the serialized result of a <c>calendar</c> <c>events</c> or <c>event</c> reply, below
+	/// <see cref="MaxMessageBytes" /> so the reply plus its envelope fits one frame. An <c>events</c> reply
+	/// that would exceed it drops its latest events and says so in <c>Truncated</c>.</summary>
+	public const int MaxCalendarReplyBytes = 192 * 1024;
+
+	/// <summary>Bounds a calendar event's title, a calendar's name and a participant's name and email.
+	/// Longer text is cut.</summary>
+	public const int MaxCalendarTitleLength = 256;
+
+	/// <summary>Bounds a calendar event's location. Longer text is cut.</summary>
+	public const int MaxCalendarLocationLength = 512;
+
+	/// <summary>Bounds a calendar event's meeting URL. A longer URL is dropped rather than cut, since a cut
+	/// URL no longer works.</summary>
+	public const int MaxCalendarMeetingUrlLength = 2048;
+
+	/// <summary>Bounds the description an <c>event</c> reply carries. Longer text is cut.</summary>
+	public const int MaxCalendarDescriptionLength = 16 * 1024;
+
+	/// <summary>Bounds the participants an <c>event</c> reply carries. Further participants are
+	/// dropped.</summary>
+	public const int MaxCalendarParticipants = 100;
 }

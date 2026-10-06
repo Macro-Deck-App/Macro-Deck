@@ -27,6 +27,7 @@ public static class WidgetTypeDtoMapper
 			ProviderId = entry.ProviderId,
 			IsBuiltIn = entry.IsBuiltIn,
 			ProviderName = ProviderNameOf(entry, integrations),
+			IsPluginProvided = !entry.IsBuiltIn && integrations.GetOrigin(entry.ProviderId) == IntegrationOrigin.Plugin,
 			Name = entry.Descriptor.Name,
 			Description = entry.Descriptor.Description ?? default,
 			DefaultData = ParseDefaultData(entry.Descriptor.DefaultData),

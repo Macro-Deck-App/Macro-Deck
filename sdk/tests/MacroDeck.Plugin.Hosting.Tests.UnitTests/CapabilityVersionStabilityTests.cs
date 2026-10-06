@@ -58,6 +58,7 @@ public class CapabilityVersionStabilityTests
 			[CapabilityKinds.ScreenSaverProvider] = (1, 1),
 			[CapabilityKinds.Messaging] = (1, 1),
 			[CapabilityKinds.VideoStreamProvider] = (1, 1),
+			[CapabilityKinds.Calendar] = (1, 1),
 		};
 
 	/// <summary>The kinds the fixture below actually gets a declaration out of, listed so the assertion
@@ -74,6 +75,7 @@ public class CapabilityVersionStabilityTests
 		CapabilityKinds.Issues,
 		CapabilityKinds.Messaging,
 		CapabilityKinds.VideoStreamProvider,
+		CapabilityKinds.Calendar,
 	];
 
 	[Test]
@@ -98,9 +100,13 @@ public class CapabilityVersionStabilityTests
 		});
 	}
 
-	private static Dictionary<string, List<CapabilityVersionRange>> Declare()
+	[Test]
+	public void A_plugin_without_a_calendar_provider_declares_no_calendar_capability()
+		=> Assert.That(Declare(withCalendar: false).Keys, Does.Not.Contain(CapabilityKinds.Calendar));
+
+	private static Dictionary<string, List<CapabilityVersionRange>> Declare(bool withCalendar = true)
 	{
-		using var plugin = MacroDeckPlugin.CreatePlugin()
+		var builder = MacroDeckPlugin.CreatePlugin()
 			.RegisterIntegration(_ => new TestIntegration(new TestAction("do-something")))
 			.RegisterIntegration(_ => new TestVariableIntegration([
 				VariableDefinition.Eager("temperature", VariableType.Numeric)
@@ -119,8 +125,14 @@ public class CapabilityVersionStabilityTests
 				[new VirtualProfileDescriptor("p", "Profile", ProfileLayout.Grid(1, 1), [])]))
 			.RegisterIntegration(_ => new TestIssueIntegration(() =>
 				[new IntegrationIssue { Id = "i", Title = "Issue" }]))
-			.RegisterIntegration(_ => new TestVideoIntegration())
-			.Build();
+			.RegisterIntegration(_ => new TestVideoIntegration());
+
+		if (withCalendar)
+		{
+			builder.RegisterIntegration(_ => new TestCalendarIntegration("Calendar", "alice"));
+		}
+
+		using var plugin = builder.Build();
 
 		var declared = new Dictionary<string, List<CapabilityVersionRange>>(StringComparer.Ordinal);
 		foreach (var capability in plugin.Services.GetServices<ICapabilityHandler>()

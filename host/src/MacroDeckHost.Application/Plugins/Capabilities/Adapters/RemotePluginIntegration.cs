@@ -10,6 +10,7 @@ using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Plugins.Assets;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Actions;
+using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Calendar;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.ConfigFlow;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.MusicPlayer;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Variables;
@@ -18,6 +19,7 @@ using MacroDeckHost.Application.Plugins.Capabilities.Mapping;
 using MacroDeckHost.Localization;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Calendar;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Devices;
 using MacroDeck.Sdk.Events;
@@ -44,6 +46,7 @@ public abstract class RemotePluginIntegration :
 	IEventProvider,
 	IMusicPlayerProvider,
 	IWeatherProvider,
+	ICalendarProvider,
 	IProfileProvider,
 	IMigrationProvider,
 	IDeviceProvider,
@@ -395,6 +398,31 @@ public abstract class RemotePluginIntegration :
 		=> Snapshot.WeatherInstances.Any(instance => string.Equals(instance.Id, instanceId, StringComparison.Ordinal))
 			? new RemoteWeatherStation(Id, instanceId, _invoker)
 			: null;
+
+	string ICalendarProvider.ProviderName => Snapshot.CalendarProviderName;
+
+	IReadOnlyList<CalendarAccount> ICalendarProvider.GetAccounts() => Snapshot.CalendarAccounts;
+
+	Task<IReadOnlyList<CalendarInfo>> ICalendarProvider.GetCalendarsAsync(
+		string accountId,
+		CancellationToken cancellationToken)
+		=> CreateCalendarProvider().GetCalendarsAsync(accountId, cancellationToken);
+
+	Task<IReadOnlyList<CalendarEvent>> ICalendarProvider.GetEventsAsync(
+		string accountId,
+		CalendarEventQuery query,
+		CancellationToken cancellationToken)
+		=> CreateCalendarProvider().GetEventsAsync(accountId, query, cancellationToken);
+
+	Task<CalendarEvent?> ICalendarProvider.GetEventAsync(
+		string accountId,
+		string calendarId,
+		string eventId,
+		CancellationToken cancellationToken)
+		=> CreateCalendarProvider().GetEventAsync(accountId, calendarId, eventId, cancellationToken);
+
+	private RemoteCalendarProvider CreateCalendarProvider()
+		=> new(Id, Snapshot.CalendarProviderName, Snapshot.CalendarAccounts, _invoker);
 
 	// A plugin owns its own device discovery, so the host neither starts nor stops it - the plugin's own
 	// hosting runs InitializeAsync/ShutdownAsync in its process, and registrations arrive as callbacks.

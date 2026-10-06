@@ -89,7 +89,7 @@ export class WidgetTypeSelectorComponent implements AfterViewInit, OnDestroy, On
     if (!needle) return new Set(types.map(type => type.id));
 
     return new Set(types
-      .filter(type => [this.name(type), this.description(type), this.providerLabel(type)]
+      .filter(type => [this.name(type), this.description(type), this.providerName(type)]
         .some(text => fold(text).includes(needle)))
       .map(type => type.id));
   });
@@ -117,6 +117,10 @@ export class WidgetTypeSelectorComponent implements AfterViewInit, OnDestroy, On
   }
 
   protected providerLabel(type: WidgetTypeInfo): string {
+    return type.isPluginProvided === true ? this.providerName(type) : '';
+  }
+
+  private providerName(type: WidgetTypeInfo): string {
     if (type.isBuiltIn || !type.providerName) return '';
     return resolveLocalizedText(type.providerName, this.localization);
   }

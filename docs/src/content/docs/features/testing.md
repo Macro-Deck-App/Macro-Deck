@@ -192,6 +192,24 @@ returns: Macro Deck's relay does that, and the harness has none. Use a fresh ses
 refusal is a failed outcome whose `details.reason` is a `video_stream_` reason. See
 [Video streams](/features/video-streams/#testing).
 
+## Testing calendars
+
+```csharp
+var outcome = await harness.Calendar.GetEventAsync(new CalendarEventArguments
+{
+	AccountId = accountId, CalendarId = "team", EventId = "standup"
+});
+
+Assert.That(outcome.DataAs<CalendarEventResult>()!.Event!.Participants, Has.Count.EqualTo(3));
+```
+
+`harness.Calendar`, a `CalendarTestClient`, drives the `calendar` capability the way the host does, with
+`DescribeAsync`, `GetAccountsAsync`, `GetCalendarsAsync`, `GetEventsAsync` and `GetEventAsync`. The account
+being read is in each call's arguments, a record from `MacroDeck.Plugin.Protocol.Capabilities.Calendar`.
+Results are what the host receives: `events` returns summaries without description and participants, with
+the reply limits applied, and an account id the plugin does not know is a failed outcome. See
+[Calendars](/features/calendars/#testing).
+
 ## Testing previews
 
 `session.Ui`, a `UiTestClient` on the session `MacroDeckTestHost` returns, lists the plugin's

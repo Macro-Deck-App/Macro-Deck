@@ -3,6 +3,7 @@ using MacroDeck.Plugin.Protocol.Assets;
 using MacroDeck.Plugin.Protocol.Capabilities;
 using MacroDeck.Plugin.Protocol.Capabilities.Migration;
 using MacroDeck.Plugin.Protocol.Capabilities.Actions;
+using MacroDeck.Plugin.Protocol.Capabilities.Calendar;
 using MacroDeck.Plugin.Protocol.Capabilities.ConfigFlow;
 using MacroDeck.Plugin.Protocol.Capabilities.Events;
 using MacroDeck.Plugin.Protocol.Capabilities.Icons;
@@ -49,6 +50,7 @@ public sealed class RemotePluginSnapshotRefresher
 				[CapabilityKinds.Events] = ApplyEventsDescribe,
 				[CapabilityKinds.MusicPlayer] = ApplyMusicPlayerDescribe,
 				[CapabilityKinds.Weather] = ApplyWeatherDescribe,
+				[CapabilityKinds.Calendar] = ApplyCalendarDescribe,
 				[CapabilityKinds.VirtualProfiles] = ApplyVirtualProfilesDescribe,
 				[CapabilityKinds.ConfigFlow] = ApplyConfigFlowDescribe,
 				[CapabilityKinds.Icons] = ApplyIconsDescribe,
@@ -64,6 +66,7 @@ public sealed class RemotePluginSnapshotRefresher
 			{
 				[CapabilityKinds.MusicPlayer] = (CapabilityOperations.MusicPlayer.Instances, ApplyMusicPlayerInstances),
 				[CapabilityKinds.Weather] = (CapabilityOperations.Weather.Instances, ApplyWeatherInstances),
+				[CapabilityKinds.Calendar] = (CapabilityOperations.Calendar.Accounts, ApplyCalendarAccounts),
 				[CapabilityKinds.VirtualProfiles] = (CapabilityOperations.VirtualProfiles.Profiles,
 					ApplyVirtualProfilesInstances)
 			};
@@ -310,6 +313,36 @@ public sealed class RemotePluginSnapshotRefresher
 		}
 
 		return snapshot with { WeatherInstances = [.. payload.Instances.Select(WeatherCatalogMapper.ToDomain)] };
+	}
+
+	private static RemotePluginCapabilitySnapshot ApplyCalendarDescribe(
+		RemotePluginCapabilitySnapshot snapshot,
+		JsonElement? data)
+	{
+		var payload = data?.Deserialize<CalendarDescribePayload>(PluginProtocolJson.Options);
+		if (payload is null)
+		{
+			return snapshot;
+		}
+
+		return snapshot with
+		{
+			CalendarProviderName = payload.ProviderName,
+			CalendarAccounts = [.. payload.Accounts.Select(CalendarMapper.ToDomain)]
+		};
+	}
+
+	private static RemotePluginCapabilitySnapshot ApplyCalendarAccounts(
+		RemotePluginCapabilitySnapshot snapshot,
+		JsonElement? data)
+	{
+		var payload = data?.Deserialize<CalendarAccountsResult>(PluginProtocolJson.Options);
+		if (payload is null)
+		{
+			return snapshot;
+		}
+
+		return snapshot with { CalendarAccounts = [.. payload.Accounts.Select(CalendarMapper.ToDomain)] };
 	}
 
 	private static RemotePluginCapabilitySnapshot ApplyVirtualProfilesDescribe(

@@ -188,7 +188,7 @@ Capabilities are first declared on the `POST /api/plugins/sessions` request; `ca
 
 | Shape | Field | Type | Required | Meaning |
 | --- | --- | --- | --- | --- |
-| `DeclaredCapability` | `kind` | string | yes | One of the nineteen kinds below. |
+| `DeclaredCapability` | `kind` | string | yes | One of the twenty kinds below. |
 | | `localId` | string | yes | The capability's id within the plugin. |
 | | `versionRange` | `{minimum, maximum}` | yes | Integer capability versions the plugin serves. |
 | | `displayName` | string | no | Human-readable name. |
@@ -199,7 +199,7 @@ Capabilities are first declared on the `POST /api/plugins/sessions` request; `ca
 
 Negotiation fails **non-fatally**: an unsupported or unknown kind comes back rejected with a reason, and the session proceeds degraded.
 
-The nineteen `kind` values: `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`, `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`, `folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`, `messaging`, `video-stream-provider`. `operation` comes from a fixed vocabulary per kind - see [capability operations](/reference/protocol/#capability-operations). Two more captured invokes:
+The twenty `kind` values: `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`, `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`, `folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`, `messaging`, `video-stream-provider`, `calendar`. `operation` comes from a fixed vocabulary per kind - see [capability operations](/reference/protocol/#capability-operations). Two more captured invokes:
 
 ```json
 {"type":"capability.invoke","id":"01a09528-bc57-7b85-bed4-952327ffedcd",
@@ -239,6 +239,22 @@ The only kind that is **item-shaped and provider-shaped at once**. The eager hal
 | `subscribe` | `ids` (array) | `values` (array) | Replaces the catalog working set wholesale (empty is "watch nothing", ≤ 1024 ids) and returns current values. |
 
 `get` and `set` address the variable through the invoke's own `localId`; `describe` and the catalog operations ignore it. A definition's `materialization` (`eager` or `on-demand`) is validated against the operation it arrived on. See [Variables](/features/variables/).
+
+#### `calendar`
+
+Provider-shaped, like `weather`: one capability at the local id `provider`, whatever the number of accounts. Accounts come and go with the plugin's configuration, so every operation but `describe` and `accounts` names the account in its arguments. All five operations are `capability.invoke`.
+
+| Operation | Arguments | Result | Meaning |
+| --- | --- | --- | --- |
+| `describe` | none | `providerName`, `accounts` | The provider name and the accounts (`id`, `displayName`). The host keeps them as the snapshot behind `GetAccounts()`. |
+| `accounts` | none | `accounts` | The same account list on its own. The host reads it after a `state.update` for the kind. |
+| `calendars` | `accountId` | `calendars` | The account's calendars: `id`, `name`, `color` (`#RRGGBB` or absent), `isPrimary`. |
+| `events` | `accountId`, `from`, `to`, `calendarIds` | `events`, `truncated` | Summaries of the events overlapping `from` up to, not including, `to`, ordered by start: `id`, `calendarId`, `title`, `start`, `end`, `isAllDay`, `location`, `meetingUrl`. Empty `calendarIds` means every calendar. |
+| `event` | `accountId`, `calendarId`, `eventId` | `event` (nullable) | One event with `description` and `participants` (`name`, `email`, `isOrganizer`, `response`). `null` means the event no longer exists. |
+
+An account id the plugin does not know is `CAPABILITY_UNAVAILABLE`, and a failed read is a failed invoke, never an empty result. `response` is a `CalendarResponseStatus` member name as a string; a reader treats a name it does not know as `Unknown`.
+
+The reply caps are fixed in `ProtocolLimits` rather than advertised, and `MacroDeck.Plugin.Hosting` applies them for you: `maxCalendarReplyBytes` (192 KiB) bounds an `events` or `event` reply, and an `events` reply that would exceed it drops its latest events and sets `truncated`. Titles, calendar names and participant names and emails are cut to `maxCalendarTitleLength` (256), a location to `maxCalendarLocationLength` (512) and a description to `maxCalendarDescriptionLength` (16 KiB); a meeting URL longer than `maxCalendarMeetingUrlLength` (2048) is dropped, because a cut URL would not work, and an event carries at most `maxCalendarParticipants` (100) participants. See [Calendars](/features/calendars/) and `MacroDeck.Plugin.Protocol.Capabilities.Calendar`.
 
 ### Host callbacks
 
