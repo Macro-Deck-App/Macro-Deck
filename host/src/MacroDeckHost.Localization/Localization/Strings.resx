@@ -16391,6 +16391,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="TemplateBuilder.Filters.Lstrip.Hint" xml:space="preserve">
     <value>Remove whitespace from the start</value>
   </data>
+  <data name="TemplateBuilder.Filters.MathRandom.Hint" xml:space="preserve">
+    <value>Scriban-native: a random whole number from a minimum up to, but not including, a maximum</value>
+  </data>
   <data name="TemplateBuilder.Filters.MathUuid.Hint" xml:space="preserve">
     <value>Scriban-native: generate a random unique id</value>
   </data>

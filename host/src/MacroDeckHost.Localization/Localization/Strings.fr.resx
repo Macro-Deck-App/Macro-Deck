@@ -16390,6 +16390,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="TemplateBuilder.Filters.Lstrip.Hint" xml:space="preserve">
     <value>Supprime les espaces au début</value>
   </data>
+  <data name="TemplateBuilder.Filters.MathRandom.Hint" xml:space="preserve">
+    <value>Natif Scriban : un entier aléatoire de un minimum jusqu'à un maximum exclu</value>
+  </data>
   <data name="TemplateBuilder.Filters.MathUuid.Hint" xml:space="preserve">
     <value>Natif Scriban : génère un identifiant unique aléatoire</value>
   </data>

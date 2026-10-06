@@ -59,6 +59,10 @@ Labels and many action parameters accept variables:
 Deaths: {{ vars.deaths }}
 ```
 
+Random values work the same way. Use `{{ math.random 1 7 }}` for a whole number from 1 to 6 (the maximum is
+not included) and `{{ math.uuid }}` for a random unique id. Put one in the value of a **Set Variable** action
+to store a new random number in a variable each time the action runs.
+
 ## A folder that opens by itself
 
 **Automatic activation** opens a folder on a device when an app gets focus, for example your
