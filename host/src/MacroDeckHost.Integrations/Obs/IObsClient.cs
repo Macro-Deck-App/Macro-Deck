@@ -12,6 +12,10 @@ internal interface IObsClient
 
 	event EventHandler<string>? ReplayBufferSaved;
 
+	event EventHandler<string>? RecordFileChanged;
+
+	event EventHandler<string>? ScreenshotSaved;
+
 	event EventHandler<ObsInputSettingsChange>? InputSettingsChanged;
 
 	event EventHandler<ObsFilterChange>? SourceFilterChanged;
@@ -82,6 +86,12 @@ internal interface IObsClient
 
 	void SaveReplayBuffer();
 
+	void SplitRecordFile();
+
+	void CreateRecordChapter(string? chapterName);
+
+	void SetRecordDirectory(string directory);
+
 	void StartOutput(string outputName);
 
 	void StopOutput(string outputName);
@@ -124,6 +134,19 @@ internal interface IObsClient
 
 	/// <summary>The input's settings as OBS reports them, verbatim JSON text.</summary>
 	string GetInputSettings(string inputName);
+}
+
+internal sealed class ObsRequestException : Exception
+{
+	internal const int OutputNotRunning = 501;
+
+	public ObsRequestException(int code, string message)
+		: base(message)
+	{
+		Code = code;
+	}
+
+	public int Code { get; }
 }
 
 internal readonly record struct ObsInputMuteChange(string InputName, bool Muted);

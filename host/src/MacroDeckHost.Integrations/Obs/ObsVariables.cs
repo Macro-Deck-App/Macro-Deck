@@ -28,7 +28,9 @@ internal static class ObsVariables
 		new("dropped_frames_percent", VariableType.Numeric, 1, TimeSpan.FromSeconds(1)),
 		new("skipped_frames", VariableType.Numeric, 0, TimeSpan.FromSeconds(1)),
 		new("skipped_frames_percent", VariableType.Numeric, 1, TimeSpan.FromSeconds(1)),
-		new("current_profile", VariableType.Text, null, TimeSpan.FromSeconds(1))
+		new("current_profile", VariableType.Text, null, TimeSpan.FromSeconds(1)),
+		new("last_recording_file", VariableType.Text, null, TimeSpan.FromSeconds(1)),
+		new("last_screenshot", VariableType.Text, null, TimeSpan.FromSeconds(1))
 	];
 
 	public static IReadOnlyList<VariableDefinition> Templates { get; } =
@@ -76,6 +78,8 @@ internal static class ObsVariables
 		"skipped_frames" => AppStrings.Integrations.Obs.Variables.SkippedFrames(),
 		"skipped_frames_percent" => AppStrings.Integrations.Obs.Variables.SkippedFramesPercent(),
 		"current_profile" => AppStrings.Integrations.Obs.Variables.CurrentProfile(),
+		"last_recording_file" => AppStrings.Integrations.Obs.Variables.LastRecordingFile(),
+		"last_screenshot" => AppStrings.Integrations.Obs.Variables.LastScreenshot(),
 		_ => default
 	};
 
@@ -128,6 +132,13 @@ internal static class ObsVariables
 		slot = candidate;
 		return true;
 	}
+
+	public static object? Read(ObsConnection connection, string slot) => slot switch
+	{
+		"last_recording_file" => connection.LastRecordingFilePath,
+		"last_screenshot" => connection.LastScreenshotPath,
+		_ => Read(connection.State, slot)
+	};
 
 	public static object? Read(ObsState state, string slot) => slot switch
 	{

@@ -110,6 +110,10 @@ internal static class ObsActions
 			resolver,
 			c => c.SaveReplayBufferAsync()),
 
+		new SplitRecordFileActionDefinition(resolver),
+		new CreateRecordChapterActionDefinition(resolver),
+		new SetRecordDirectoryActionDefinition(resolver),
+
 		new OutputActionDefinition("start-output",
 			AppStrings.Integrations.Obs.Actions.StartOutput.Name(),
 			AppStrings.Integrations.Obs.Actions.StartOutput.Description(),

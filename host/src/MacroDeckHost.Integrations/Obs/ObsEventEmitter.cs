@@ -114,6 +114,14 @@ internal sealed class ObsEventEmitter
 		=> Publish(ObsEventIds.ReplayBufferSaved,
 			new Dictionary<string, object?>(StringComparer.Ordinal) { ["path"] = path });
 
+	public void PublishRecordFileChanged(string path)
+		=> Publish(ObsEventIds.RecordFileChanged,
+			new Dictionary<string, object?>(StringComparer.Ordinal) { ["path"] = path });
+
+	public void PublishScreenshotSaved(string path)
+		=> Publish(ObsEventIds.ScreenshotSaved,
+			new Dictionary<string, object?>(StringComparer.Ordinal) { ["path"] = path });
+
 	private void PublishToggle(bool previous, bool current, string onEventId, string offEventId)
 	{
 		if (previous != current)

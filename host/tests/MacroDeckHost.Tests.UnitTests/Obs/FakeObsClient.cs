@@ -70,6 +70,8 @@ internal sealed class FakeObsClient : IObsClient
 
 	public List<string> Calls { get; } = [];
 
+	public ObsRequestException? RequestFailure { get; set; }
+
 	public event EventHandler? Connected;
 
 	public event EventHandler<string?>? Disconnected;
@@ -79,6 +81,10 @@ internal sealed class FakeObsClient : IObsClient
 	public event EventHandler<ObsInputMuteChange>? InputMuteChanged;
 
 	public event EventHandler<string>? ReplayBufferSaved;
+
+	public event EventHandler<string>? RecordFileChanged;
+
+	public event EventHandler<string>? ScreenshotSaved;
 
 	public event EventHandler<ObsInputSettingsChange>? InputSettingsChanged;
 
@@ -112,6 +118,10 @@ internal sealed class FakeObsClient : IObsClient
 		=> InputMuteChanged?.Invoke(this, new ObsInputMuteChange(inputName, muted));
 
 	public void RaiseReplayBufferSaved(string path) => ReplayBufferSaved?.Invoke(this, path);
+
+	public void RaiseRecordFileChanged(string path) => RecordFileChanged?.Invoke(this, path);
+
+	public void RaiseScreenshotSaved(string path) => ScreenshotSaved?.Invoke(this, path);
 
 	public void Connect(string url, string? password)
 	{
@@ -194,6 +204,32 @@ internal sealed class FakeObsClient : IObsClient
 	public void ToggleReplayBuffer() => Calls.Add("ToggleReplayBuffer");
 
 	public void SaveReplayBuffer() => Calls.Add("SaveReplayBuffer");
+
+	public void SplitRecordFile()
+	{
+		Calls.Add("SplitRecordFile");
+		ThrowRequestFailure();
+	}
+
+	public void CreateRecordChapter(string? chapterName)
+	{
+		Calls.Add($"CreateRecordChapter:{chapterName ?? "<none>"}");
+		ThrowRequestFailure();
+	}
+
+	public void SetRecordDirectory(string directory)
+	{
+		Calls.Add($"SetRecordDirectory:{directory}");
+		ThrowRequestFailure();
+	}
+
+	private void ThrowRequestFailure()
+	{
+		if (RequestFailure is not null)
+		{
+			throw RequestFailure;
+		}
+	}
 
 	public Dictionary<string, bool> MutedInputs { get; } = new(StringComparer.Ordinal);
 
