@@ -72,7 +72,7 @@ The companion app is available for a one-time license fee. Buying it directly su
 | Platform | Download |
 | --- | --- |
 | Android | [Get it on Google Play](https://play.google.com/store/apps/details?id=app.macrodeck.companion) |
-| iOS | Coming soon |
+| iOS | [Download on the App Store](https://apps.apple.com/app/id6810664560) |
 
 ### Security-first plugin ecosystem
 
