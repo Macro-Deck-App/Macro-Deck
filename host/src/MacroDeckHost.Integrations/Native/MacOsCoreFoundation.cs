@@ -10,6 +10,7 @@ internal static class MacOsCoreFoundation
 	private const string CoreFoundation = MacOsAccessibility.CoreFoundation;
 
 	private const int CFNumberSInt32Type = 3; // kCFNumberSInt32Type
+	private const int CFNumberSInt64Type = 4;
 
 	public static bool TryReadCFBool(IntPtr dictionary, IntPtr key, out bool value)
 	{
@@ -29,6 +30,13 @@ internal static class MacOsCoreFoundation
 		value = 0;
 		var number = CFDictionaryGetValue(dictionary, key);
 		return number != IntPtr.Zero && CFNumberGetValue(number, CFNumberSInt32Type, out value);
+	}
+
+	public static bool TryReadCFLong(IntPtr dictionary, IntPtr key, out long value)
+	{
+		value = 0;
+		var number = CFDictionaryGetValue(dictionary, key);
+		return number != IntPtr.Zero && CFNumberGetValue(number, CFNumberSInt64Type, out value);
 	}
 
 	private const uint CFStringEncodingUtf8 = 0x08000100;
@@ -109,4 +117,8 @@ internal static class MacOsCoreFoundation
 	[DllImport(CoreFoundation)]
 	[return: MarshalAs(UnmanagedType.I1)]
 	private static extern bool CFNumberGetValue(IntPtr number, int type, out int value);
+
+	[DllImport(CoreFoundation)]
+	[return: MarshalAs(UnmanagedType.I1)]
+	private static extern bool CFNumberGetValue(IntPtr number, int type, out long value);
 }

@@ -15,6 +15,8 @@ public interface ISystemMetricsService
 	Task<double?> GetGpuUsageAsync(int gpuIndex, CancellationToken cancellationToken = default);
 
 	Task<string?> GetGpuNameAsync(int gpuIndex, CancellationToken cancellationToken = default);
+
+	Task<IReadOnlyList<DiskSample>> GetDisksAsync(CancellationToken cancellationToken = default);
 }
 
 public sealed record MemoryInfo(long TotalBytes, long AvailableBytes)

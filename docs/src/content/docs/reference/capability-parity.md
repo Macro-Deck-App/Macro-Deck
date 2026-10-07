@@ -74,6 +74,8 @@ When the plugin is disconnected, a read answers **unavailable**, never a stale v
 
 A button following a state provider lags by up to its poll interval. There is no push: `state.update` is keyed by declared capability id (the action *type*), and a configured instance has no wire identity, so a plugin cannot say which instance changed.
 
+Two moments do not wait for the next poll. When the user presses a button and its own provider action succeeds, the host reads the state again right away, with or without an expected state id. When a button starts being displayed after it was hidden, its polling returns to the requested interval on the next scheduling tick instead of keeping the slower idle cadence it used while nothing showed it.
+
 ```csharp
 // A request, not a guarantee: the host clamps it to 1 s - 2 min.
 public TimeSpan StatePollInterval => TimeSpan.FromMilliseconds(200); // polled every 1 s
@@ -91,7 +93,7 @@ Answer a state read from what the provider already holds; do not connect or auth
 
 ## The icon-poll window
 
-An icon provider is polled like a state provider: `IIconProviderActionDefinition.IconPollInterval` (default 5 seconds) is a request, clamped the same way, and polled less often while nothing displays the widget. It also has a push, which does not replace polling:
+An icon provider is polled like a state provider: `IIconProviderActionDefinition.IconPollInterval` (default 5 seconds) is a request, clamped the same way, and polled less often while nothing displays the widget. When the widget starts being displayed again, polling returns to the requested interval on the next scheduling tick. It also has a push, which does not replace polling:
 
 ```csharp
 await context.Widgets.InvalidateIconAsync("now-playing", cancellationToken);

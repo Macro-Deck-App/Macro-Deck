@@ -4519,6 +4519,15 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.Calendar.Actions.JoinMeeting.WindowLabel" xml:space="preserve">
     <value>开始时间范围</value>
   </data>
+  <data name="Integrations.Calendar.Actions.RefreshCalendars.Description" xml:space="preserve">
+    <value>立即读取所有已连接日历的事件，而不必等待下一次更新（Macro Deck 默认每五分钟更新一次）。</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.RefreshCalendars.Name" xml:space="preserve">
+    <value>刷新日历</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.RefreshCalendars.Unavailable" xml:space="preserve">
+    <value>目前无法刷新日历。</value>
+  </data>
   <data name="Integrations.Calendar.Actions.ShowDetails.Description" xml:space="preserve">
     <value>在按下日历组件的屏幕上打开其详情：“下一个事件”布局显示的事件，或“日程”布局中即将到来的事件。</value>
   </data>
@@ -5977,6 +5986,93 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Integrations.GoogleCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
     <value>{account} 的 Google 登录已过期</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.AuthorizationNotCompleted" xml:space="preserve">
+    <value>Microsoft 登录已取消或未完成。按“继续”重新打开。</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsDescription" xml:space="preserve">
+    <value>只有在此处选择的日历会出现在 Macro Deck 中。之后如需添加或移除日历，请编辑此配置。</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsLabel" xml:space="preserve">
+    <value>日历</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsTitle" xml:space="preserve">
+    <value>选择日历</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsUnavailable" xml:space="preserve">
+    <value>已登录，但无法从 Microsoft 读取日历。请稍后重试。</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ClientIdLabel" xml:space="preserve">
+    <value>应用程序(客户端) ID</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ClientIdPlaceholder" xml:space="preserve">
+    <value>Macro Deck 的应用</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ConnectDescription" xml:space="preserve">
+    <value>Macro Deck 读取 Outlook 和 Microsoft 365 日历。按“继续”会在浏览器中打开 Microsoft 账户登录页面，允许 Macro Deck 读取日历即可。个人、工作和学校账户均可使用。</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ConnectTitle" xml:space="preserve">
+    <value>连接 Outlook 日历</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ConsentRequired" xml:space="preserve">
+    <value>该应用尚未获准读取日历。请为应用添加 Calendars.Read 权限后重试；在组织中，可能需要由管理员授予。</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.EnterClientId" xml:space="preserve">
+    <value>请输入有效的应用程序(客户端) ID，或留空以使用 Macro Deck 的应用。</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.InvalidTenant" xml:space="preserve">
+    <value>请输入 common、organizations、consumers、租户 ID 或域名（例如 contoso.com）。</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.MissingCalendarPermission" xml:space="preserve">
+    <value>Microsoft 未授予日历访问权限。请重试，并允许应用读取日历。</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.MissingRefreshToken" xml:space="preserve">
+    <value>Microsoft 未授予长期访问权限，因此 Macro Deck 无法保持登录。请重试，并允许应用保持登录。</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.PublicClientRequired" xml:space="preserve">
+    <value>Microsoft 要求提供客户端密码，说明重定向 URI 添加到了错误的平台。请将其添加到“移动和桌面应用程序”而不是“Web”，然后重试。</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.SelectCalendar" xml:space="preserve">
+    <value>请至少选择一个日历。</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.SharedCalendarName" xml:space="preserve">
+    <value>{calendar}（由 {owner} 共享）</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.TenantDescription" xml:space="preserve">
+    <value>使用个人、工作或学校账户时留空。仅当自己的应用只接受某个组织的账户时，才填写该组织的租户 ID 或域名。</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.TenantLabel" xml:space="preserve">
+    <value>租户</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.TokenExchangeFailed" xml:space="preserve">
+    <value>Microsoft 未接受此次登录。请重试；如果在“高级”中填写了自己的应用，请检查其应用程序(客户端) ID 和重定向 URI。</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.DuplicateAccountDescription" xml:space="preserve">
+    <value>“{title}”是同一 Microsoft 账户的旧连接，不会被使用。请在下方的配置列表中将其移除。</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.DuplicateAccountTitle" xml:space="preserve">
+    <value>Microsoft 账户连接了两次</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.ReconnectResolution" xml:space="preserve">
+    <value>重新连接 Microsoft 账户。</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.SignInExpiredDescription" xml:space="preserve">
+    <value>Microsoft 不再接受此账户的登录。访问权限可能已在 Microsoft 账户中被移除、被组织撤销，或者应用注册已被更改或删除。请重新连接该账户。</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
+    <value>{account} 的 Microsoft 登录已过期</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.CalendarsUnreadableDescription" xml:space="preserve">
+    <value>Microsoft 不再返回为此账户选择的一个或多个日历，例如日历已被删除或不再与你共享。这些日历的事件不会显示。请编辑连接，重新选择该账户的日历。</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.CalendarsUnreadableTitle" xml:space="preserve">
+    <value>无法读取 {account} 的部分日历</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.AdminConsentInstruction" xml:space="preserve">
+    <value>有些组织只允许管理员批准应用。此时登录需要管理员批准后才能继续。</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ClientIdDescription" xml:space="preserve">
+    <value>留空则通过 Macro Deck 的应用登录。如需使用自己的应用，请在 Azure 门户的“应用注册”中，在 Microsoft Entra 目录里注册应用；个人 Microsoft 账户需要先有一个目录，例如通过免费的 Azure 账户获得。添加“移动和桌面应用程序”平台及重定向 URI {redirectUri}，添加委托权限 Calendars.Read，然后在此填写应用的应用程序(客户端) ID。</value>
   </data>
   <data name="Integrations.HomeAssistant.Actions.Automation.CommandDisable" xml:space="preserve">
     <value>禁用</value>
@@ -9599,6 +9695,39 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Integrations.System.Variables.GpuNameIndexed" xml:space="preserve">
     <value>GPU {index} 名称</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskNameIndexed" xml:space="preserve">
+    <value>磁盘 {index} 名称</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskMountPointIndexed" xml:space="preserve">
+    <value>磁盘 {index} 挂载点</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskFileSystemIndexed" xml:space="preserve">
+    <value>磁盘 {index} 文件系统</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskTotalIndexed" xml:space="preserve">
+    <value>磁盘 {index} 总空间</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskUsedIndexed" xml:space="preserve">
+    <value>磁盘 {index} 已用空间</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskFreeIndexed" xml:space="preserve">
+    <value>磁盘 {index} 可用空间</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskUsageIndexed" xml:space="preserve">
+    <value>磁盘 {index} 使用率</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskReadSpeedIndexed" xml:space="preserve">
+    <value>磁盘 {index} 读取速度</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskWriteSpeedIndexed" xml:space="preserve">
+    <value>磁盘 {index} 写入速度</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskReadActivityIndexed" xml:space="preserve">
+    <value>磁盘 {index} 读取活动</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskWriteActivityIndexed" xml:space="preserve">
+    <value>磁盘 {index} 写入活动</value>
   </data>
   <data name="Integrations.System.Variables.PcName" xml:space="preserve">
     <value>电脑名称</value>

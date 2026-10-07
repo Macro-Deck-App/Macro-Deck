@@ -19,4 +19,7 @@ internal sealed class NullSystemMetricsService : ISystemMetricsService
 
 	public Task<string?> GetGpuNameAsync(int gpuIndex, CancellationToken cancellationToken = default)
 		=> Task.FromResult<string?>(null);
+
+	public Task<IReadOnlyList<DiskSample>> GetDisksAsync(CancellationToken cancellationToken = default)
+		=> Task.FromResult<IReadOnlyList<DiskSample>>([]);
 }

@@ -125,6 +125,68 @@ public class CalendarIntegrationTests
 		});
 	}
 
+	[Test]
+	public async Task Refresh_calendars_reads_new_events_right_away()
+	{
+		var cache = Cache(_time, integrations: _provider);
+		await cache.SyncAsync(CancellationToken.None);
+		_provider.WithEvent("alice", Event("added", Noon.AddHours(2), TimeSpan.FromMinutes(30)));
+
+		var result = await RefreshAsync(cache);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
+			Assert.That(cache.Snapshot.Events.Select(e => e.EventId), Does.Contain("added"));
+		});
+	}
+
+	[Test]
+	public async Task Refresh_calendars_fails_when_an_account_cannot_be_read()
+	{
+		var cache = Cache(_time, integrations: _provider);
+		_provider.FailingAccounts.Add("alice");
+
+		var result = await RefreshAsync(cache);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
+			Assert.That(TestLocalization.Resolve(result.ErrorMessage), Is.EqualTo("Some calendars couldn't be updated"));
+		});
+	}
+
+	[Test]
+	public async Task Refresh_calendars_pressed_again_while_refreshing_joins_the_running_refresh()
+	{
+		var cache = Cache(_time, integrations: _provider);
+		var integration = new CalendarIntegration();
+		integration.UseCalendarServices(new CalendarHostServices(cache, _opener, _time, new MutableFolderCache()));
+		var action = integration.Actions.Single(a => a.Id == "refresh-calendars");
+		var held = new TaskCompletionSource();
+		_provider.ReadsHeldBy = held.Task;
+
+		var first = action.CreateExecutor().ExecuteAsync(new ActionExecutionContext { Parameters = new Dictionary<string, object>() });
+		var second = action.CreateExecutor().ExecuteAsync(new ActionExecutionContext { Parameters = new Dictionary<string, object>() });
+		held.SetResult();
+		var results = await Task.WhenAll(first, second);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(results.Select(r => r.Status), Is.All.EqualTo(ActionResultStatus.Succeeded));
+			Assert.That(_provider.Queries, Has.Count.EqualTo(1));
+		});
+	}
+
+	private Task<ActionResult> RefreshAsync(ICalendarEventCache cache)
+	{
+		var integration = new CalendarIntegration();
+		integration.UseCalendarServices(new CalendarHostServices(cache, _opener, _time, new MutableFolderCache()));
+		return integration.Actions.Single(a => a.Id == "refresh-calendars")
+			.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext { Parameters = new Dictionary<string, object>() });
+	}
+
 	private async Task<ActionResult> JoinAsync(double? windowMilliseconds = null, string? calendarKey = null)
 	{
 		var cache = Cache(_time, integrations: _provider);

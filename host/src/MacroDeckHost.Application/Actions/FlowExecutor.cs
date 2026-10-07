@@ -13,6 +13,7 @@ using MacroDeckHost.Application.Secrets;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Variables.Colors;
+using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Enums;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
@@ -141,7 +142,9 @@ public sealed class FlowExecutor : IFlowExecutor
 		var run = new FlowRun(request.ExecutionId,
 			variableContext,
 			request.OriginClientId,
-			request.OwnerWidgetId);
+			request.OwnerWidgetId,
+			request.Origin,
+			request.FlowsSource);
 
 		try
 		{
@@ -478,6 +481,14 @@ public sealed class FlowExecutor : IFlowExecutor
 				if (optimisticIdentity is not null &&
 					result.ExpectedStateId is { Length: > 0 } expectedStateId &&
 					_optimisticStates!.TryApply(optimisticIdentity, optimisticGeneration, expectedStateId))
+				{
+					_stateEvalQueue?.Enqueue(optimisticIdentity.WidgetId);
+				}
+				// Host runs are excluded: an onStateChange flow toggling its own provider would otherwise
+				// re-trigger itself through the queue, past the reconciler's synchronous depth guard.
+				else if (optimisticIdentity is not null &&
+					run.Origin == ExecutionOrigin.Client &&
+					string.Equals(run.ProviderBlockId, block.Id, StringComparison.Ordinal))
 				{
 					_stateEvalQueue?.Enqueue(optimisticIdentity.WidgetId);
 				}
@@ -929,18 +940,29 @@ public sealed class FlowExecutor : IFlowExecutor
 
 	private sealed class FlowRun
 	{
-		public FlowRun(Guid executionId, VariableContext variables, string? originClientId, Guid? ownerWidgetId)
+		private readonly Lazy<string?> _providerBlockId;
+
+		public FlowRun(Guid executionId,
+			VariableContext variables,
+			string? originClientId,
+			Guid? ownerWidgetId,
+			ExecutionOrigin origin,
+			string? flowsSource)
 		{
 			ExecutionId = executionId;
 			Variables = variables;
 			OriginClientId = originClientId;
 			OwnerWidgetId = ownerWidgetId;
+			Origin = origin;
+			_providerBlockId = new Lazy<string?>(() => ActionButtonStateModel.Read(flowsSource).StateProvider?.BlockId);
 		}
 
 		public Guid ExecutionId { get; }
 		public VariableContext Variables { get; }
 		public string? OriginClientId { get; }
 		public Guid? OwnerWidgetId { get; }
+		public ExecutionOrigin Origin { get; }
+		public string? ProviderBlockId => _providerBlockId.Value;
 		public List<ActionExecutionOutcome> Outcomes { get; } = [];
 
 		public void Record(
