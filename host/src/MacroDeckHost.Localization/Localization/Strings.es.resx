@@ -8248,6 +8248,123 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.SinusBot.Variables.Volume" xml:space="preserve">
     <value>Volumen</value>
   </data>
+  <data name="Integrations.SoundPad.Actions.AllSounds" xml:space="preserve">
+    <value>Todos los sonidos</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.CategoryDescription" xml:space="preserve">
+    <value>Déjalo vacío para elegir entre todos los sonidos.</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.CategoryLabel" xml:space="preserve">
+    <value>Categoría</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlayOnMicrophoneLabel" xml:space="preserve">
+    <value>Reproducir por el micrófono</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlayOnSpeakersLabel" xml:space="preserve">
+    <value>Reproducir en los altavoces</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlayRandomSoundDescription" xml:space="preserve">
+    <value>Reproduce un sonido aleatorio de todos los sonidos o de una categoría.</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlayRandomSoundName" xml:space="preserve">
+    <value>Reproducir sonido aleatorio</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlaySoundDescription" xml:space="preserve">
+    <value>Reproduce un sonido de tu lista de SoundPad. Deja el sonido vacío para elegirlo al pulsar el botón.</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlaySoundName" xml:space="preserve">
+    <value>Reproducir sonido</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.SourceDefault" xml:space="preserve">
+    <value>Predeterminado de SoundPad</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.SourceLabel" xml:space="preserve">
+    <value>Grabar desde</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.SourceMicrophone" xml:space="preserve">
+    <value>Micrófono</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.SourceSpeakers" xml:space="preserve">
+    <value>Altavoces</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StartRecordingDescription" xml:space="preserve">
+    <value>Inicia una grabación en SoundPad.</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StartRecordingName" xml:space="preserve">
+    <value>Iniciar grabación</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StopPlaybackDescription" xml:space="preserve">
+    <value>Detiene el sonido que se está reproduciendo.</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StopPlaybackName" xml:space="preserve">
+    <value>Detener reproducción</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StopRecordingDescription" xml:space="preserve">
+    <value>Detiene la grabación en curso de SoundPad.</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StopRecordingName" xml:space="preserve">
+    <value>Detener grabación</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.ToggleMuteDescription" xml:space="preserve">
+    <value>Silencia o reactiva el sonido de SoundPad.</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.ToggleMuteName" xml:space="preserve">
+    <value>Alternar silencio</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.Description" xml:space="preserve">
+    <value>Macro Deck controla SoundPad en este PC mediante la interfaz de control remoto de SoundPad.</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.KeepRunning" xml:space="preserve">
+    <value>Mantén SoundPad abierto mientras lo controlas desde Macro Deck.</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.NotReachable" xml:space="preserve">
+    <value>SoundPad no ha respondido. Asegúrate de que se está ejecutando en este PC y vuelve a intentarlo.</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.StartSoundPad" xml:space="preserve">
+    <value>Abre SoundPad en este PC.</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.Title" xml:space="preserve">
+    <value>Conectar SoundPad</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.UnknownStep" xml:space="preserve">
+    <value>Paso de configuración desconocido.</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.WebsiteLinkLabel" xml:space="preserve">
+    <value>Sitio web de SoundPad</value>
+  </data>
+  <data name="Integrations.SoundPad.Migration.SetUpIntegration" xml:space="preserve">
+    <value>Configura la integración de SoundPad en Macro Deck, en Integraciones, mientras SoundPad está abierto.</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.CurrentArtist" xml:space="preserve">
+    <value>Artista actual</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.CurrentSound" xml:space="preserve">
+    <value>Sonido actual</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.Duration" xml:space="preserve">
+    <value>Duración del sonido</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.IsConnected" xml:space="preserve">
+    <value>SoundPad conectado</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.IsMuted" xml:space="preserve">
+    <value>Silenciado</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.IsPlaying" xml:space="preserve">
+    <value>Reproduciendo</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.PlaybackState" xml:space="preserve">
+    <value>Estado de reproducción</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.Position" xml:space="preserve">
+    <value>Posición de reproducción</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.Recording" xml:space="preserve">
+    <value>Grabando</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.Volume" xml:space="preserve">
+    <value>Volumen</value>
+  </data>
   <data name="Integrations.Spotify.Actions.ModeAdd" xml:space="preserve">
     <value>Agregar</value>
   </data>
