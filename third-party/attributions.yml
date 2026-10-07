@@ -251,9 +251,10 @@ assets:
       file carries a no-redistribution notice from WebAilesi; the maintainer is asking the SinusBot developer for
       permission.
     note: >-
-      OBS Studio, Streamer.bot, Meld, Streamlabs Desktop, SinusBot and Google Calendar logos. Trademarks of their
-      respective owners. The Google Calendar logo is Google's 2026 icon from Wikimedia Commons
+      OBS Studio, Streamer.bot, Meld, Streamlabs Desktop, SinusBot, Google Calendar and SoundPad logos. Trademarks of
+      their respective owners. The Google Calendar logo is Google's 2026 icon from Wikimedia Commons
       (File:Google_Calendar_icon_(2026).svg), with editor metadata and inline styles removed and a viewBox added.
+      The SoundPad logo is Leppsoft's own, from leppsoft.com/soundpad/images/logos/main-128.png.
     paths:
       - host/src/MacroDeckHost.Integrations/Obs/obs-icon.svg
       - host/src/MacroDeckHost.Integrations/Streamerbot/streamerbot-icon.svg
@@ -261,6 +262,7 @@ assets:
       - host/src/MacroDeckHost.Integrations/StreamlabsDesktop/streamlabs-icon.png
       - host/src/MacroDeckHost.Integrations/SinusBot/sinusbot-icon.svg
       - host/src/MacroDeckHost.Integrations/GoogleCalendar/google-calendar-icon.svg
+      - host/src/MacroDeckHost.Integrations/SoundPad/soundpad-icon.png
 
   - name: Weather icons (Makin-Things/weather-icons)
     url: https://github.com/Makin-Things/weather-icons

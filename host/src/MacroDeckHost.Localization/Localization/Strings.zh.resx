@@ -8446,6 +8446,123 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.SinusBot.Variables.Volume" xml:space="preserve">
     <value>音量</value>
   </data>
+  <data name="Integrations.SoundPad.Actions.AllSounds" xml:space="preserve">
+    <value>全部声音</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.CategoryDescription" xml:space="preserve">
+    <value>留空则从全部声音中选择。</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.CategoryLabel" xml:space="preserve">
+    <value>分类</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlayOnMicrophoneLabel" xml:space="preserve">
+    <value>通过麦克风播放</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlayOnSpeakersLabel" xml:space="preserve">
+    <value>在扬声器上播放</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlayRandomSoundDescription" xml:space="preserve">
+    <value>从全部声音或某个分类中随机播放一个声音。</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlayRandomSoundName" xml:space="preserve">
+    <value>随机播放声音</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlaySoundDescription" xml:space="preserve">
+    <value>播放 SoundPad 列表中的声音。声音留空则在按下按钮时选择。</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlaySoundName" xml:space="preserve">
+    <value>播放声音</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.SourceDefault" xml:space="preserve">
+    <value>SoundPad 默认</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.SourceLabel" xml:space="preserve">
+    <value>录制来源</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.SourceMicrophone" xml:space="preserve">
+    <value>麦克风</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.SourceSpeakers" xml:space="preserve">
+    <value>扬声器</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StartRecordingDescription" xml:space="preserve">
+    <value>开始 SoundPad 录音。</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StartRecordingName" xml:space="preserve">
+    <value>开始录音</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StopPlaybackDescription" xml:space="preserve">
+    <value>停止正在播放的声音。</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StopPlaybackName" xml:space="preserve">
+    <value>停止播放</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StopRecordingDescription" xml:space="preserve">
+    <value>停止当前的 SoundPad 录音。</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StopRecordingName" xml:space="preserve">
+    <value>停止录音</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.ToggleMuteDescription" xml:space="preserve">
+    <value>将 SoundPad 静音或取消静音。</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.ToggleMuteName" xml:space="preserve">
+    <value>切换静音</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.Description" xml:space="preserve">
+    <value>Macro Deck 通过 SoundPad 的远程控制接口控制本机上的 SoundPad。</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.KeepRunning" xml:space="preserve">
+    <value>通过 Macro Deck 控制期间，请保持 SoundPad 运行。</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.NotReachable" xml:space="preserve">
+    <value>SoundPad 没有响应。请确认它正在本机上运行，然后重试。</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.StartSoundPad" xml:space="preserve">
+    <value>在本机上启动 SoundPad。</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.Title" xml:space="preserve">
+    <value>连接 SoundPad</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.UnknownStep" xml:space="preserve">
+    <value>未知的设置步骤。</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.WebsiteLinkLabel" xml:space="preserve">
+    <value>SoundPad 官网</value>
+  </data>
+  <data name="Integrations.SoundPad.Migration.SetUpIntegration" xml:space="preserve">
+    <value>请在 SoundPad 运行时，在 Macro Deck 的“集成”中设置 SoundPad 集成。</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.CurrentArtist" xml:space="preserve">
+    <value>当前艺人</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.CurrentSound" xml:space="preserve">
+    <value>当前声音</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.Duration" xml:space="preserve">
+    <value>声音时长</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.IsConnected" xml:space="preserve">
+    <value>SoundPad 已连接</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.IsMuted" xml:space="preserve">
+    <value>已静音</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.IsPlaying" xml:space="preserve">
+    <value>正在播放</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.PlaybackState" xml:space="preserve">
+    <value>播放状态</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.Position" xml:space="preserve">
+    <value>播放位置</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.Recording" xml:space="preserve">
+    <value>正在录音</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.Volume" xml:space="preserve">
+    <value>音量</value>
+  </data>
   <data name="Integrations.Spotify.Actions.ModeAdd" xml:space="preserve">
     <value>添加</value>
   </data>
