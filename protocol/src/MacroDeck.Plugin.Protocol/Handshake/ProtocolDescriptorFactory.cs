@@ -55,7 +55,8 @@ public static class ProtocolDescriptorFactory
 		MaxUiResourcesPerPlugin = ProtocolLimits.MaxUiResourcesPerPlugin,
 		MaxUiAttachmentsPerSession = ProtocolLimits.MaxUiAttachmentsPerSession,
 		MaxUiSessionsPerProvider = ProtocolLimits.MaxUiSessionsPerProvider,
-		MaxUiWidgetSessionsPerProvider = ProtocolLimits.MaxUiWidgetSessionsPerProvider
+		MaxUiWidgetSessionsPerProvider = ProtocolLimits.MaxUiWidgetSessionsPerProvider,
+		MaxColorWatches = ProtocolLimits.MaxColorWatches
 	};
 
 	public static PluginProtocolTimeoutsDescriptor CreateTimeoutsDescriptor() => new()

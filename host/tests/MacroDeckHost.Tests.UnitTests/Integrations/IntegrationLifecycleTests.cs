@@ -78,7 +78,8 @@ internal sealed class IntegrationLifecycleTests
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
 			Serilog.Log.Logger,
-			new MessageBroker(Serilog.Log.Logger));
+			new MessageBroker(Serilog.Log.Logger),
+			TestColors.Watches);
 
 		_lifecycle = new IntegrationLifecycle(_registry,
 			scopeFactory,

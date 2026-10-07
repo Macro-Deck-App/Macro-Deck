@@ -12,6 +12,8 @@ using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Actions;
 using MacroDeckHost.Domain.Entities;
 using Microsoft.Extensions.DependencyInjection;
+using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Variables.Colors;
 
 namespace MacroDeckHost.Tests.PluginContractTests.Harness;
 
@@ -44,6 +46,7 @@ internal sealed class DeviceSurfaceWorld : IDisposable
 		services.AddSingleton<IIconPackCache>(new ContractIconPacks());
 		services.AddSingleton<MacroDeckHost.Application.Widgets.IWidgetDefaultShortPress>(new ContractNoDefaultShortPress());
 		services.AddSingleton<DeviceSurfaceBuilder>();
+		services.AddSingleton<IColorReferenceResolver>(new ColorReferenceResolver(new VariableRegistry()));
 		services
 			.AddSingleton<IUiTransportMessageHandler<ExecuteActionButtonTriggerRequest,
 				ExecuteActionButtonTriggerResponse>>(Triggers);

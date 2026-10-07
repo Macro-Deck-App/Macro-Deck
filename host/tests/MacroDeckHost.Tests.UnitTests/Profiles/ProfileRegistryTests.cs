@@ -39,7 +39,8 @@ public class ProfileRegistryTests
 			integrationRegistry,
 			new WidgetTypeRegistry(new RecordingMediator()),
 			TestDeviceLayoutConstraintTracker.Build(),
-			new LoggerConfiguration().CreateLogger());
+			new LoggerConfiguration().CreateLogger(),
+			TestColors.None);
 	}
 
 	[Test]
@@ -92,7 +93,8 @@ public class ProfileRegistryTests
 			new ConfigurableIntegrationRegistry([integration], disabled: ["spotify"]),
 			new WidgetTypeRegistry(new RecordingMediator()),
 			TestDeviceLayoutConstraintTracker.Build(),
-			new LoggerConfiguration().CreateLogger());
+			new LoggerConfiguration().CreateLogger(),
+			TestColors.None);
 
 		Assert.That(registry.GetProfiles(), Is.Empty);
 	}

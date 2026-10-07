@@ -94,6 +94,7 @@ internal sealed class CompanionHarness
 			null!,
 			Events,
 			null!,
+			null!,
 			null!);
 
 		if (register)

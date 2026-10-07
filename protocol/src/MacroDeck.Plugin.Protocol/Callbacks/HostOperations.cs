@@ -310,6 +310,17 @@ public static class HostOperations
 			[ProvidersChanged, StreamsChanged, SessionUpdate, SessionClose];
 	}
 
+	public static class Colors
+	{
+		/// <summary>Resolves one colour value and answers with the colour, or none.</summary>
+		public const string Resolve = "resolve";
+
+		/// <summary>Replaces this plugin's whole table of watched colours. Idempotent.</summary>
+		public const string Watches = "watches";
+
+		public static readonly IReadOnlyList<string> All = [Resolve, Watches];
+	}
+
 	/// <summary>The <c>event-bindings</c> host api is push-only, so it declares no operations.</summary>
 	public static class EventBindings
 	{
@@ -339,6 +350,7 @@ public static class HostOperations
 			[HostApis.Messaging] = Messaging.All,
 			[HostApis.IconPacks] = IconPacks.All,
 			[HostApis.VideoStreams] = VideoStreams.All,
+			[HostApis.Colors] = Colors.All,
 		};
 
 	public static IReadOnlyList<string> For(string api) => _byApi[api];

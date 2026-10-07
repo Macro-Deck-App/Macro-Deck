@@ -1,4 +1,5 @@
 using System.Globalization;
+using MacroDeckHost.Application.Variables.Colors;
 using MacroDeckHost.Domain.Enums;
 
 namespace MacroDeckHost.Application.Variables;
@@ -48,6 +49,9 @@ public static class VariableValueSerializer
 				return b ? "true" : "false";
 			}
 
+			case VariableType.Color:
+				return RgbaColor.Canonicalize(raw?.ToString()) ?? RgbaColor.Black.ToString();
+
 			default:
 				throw new ArgumentOutOfRangeException(nameof(type), type, "Unsupported variable type");
 		}
@@ -65,6 +69,7 @@ public static class VariableValueSerializer
 				? d
 				: 0m,
 			VariableType.Boolean => string.Equals(value, "true", StringComparison.OrdinalIgnoreCase),
+			VariableType.Color => RgbaColor.Canonicalize(value) ?? RgbaColor.Black.ToString(),
 			_ => null
 		};
 	}

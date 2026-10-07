@@ -1,6 +1,11 @@
 {
   "valid": [
     {
+      "name": "empty colour for a band whose variable is gone",
+      "value": { "bands": [ { "id": "a", "color": "" }, { "id": "b", "color": "#ff0000", "from": 5 } ] },
+      "normalized": { "bands": [ { "id": "a", "color": "" }, { "id": "b", "color": "#ff0000", "from": 5 } ] }
+    },
+    {
       "name": "four bands",
       "value": { "bands": [ { "id": "green", "color": "#34C759" }, { "id": "yellow", "color": "#ffcc00", "from": 26 }, { "id": "orange", "color": "#ff9500", "from": 63 }, { "id": "red", "color": "#ff3b30", "from": 90 } ] },
       "normalized": { "bands": [ { "id": "green", "color": "#34c759" }, { "id": "yellow", "color": "#ffcc00", "from": 26 }, { "id": "orange", "color": "#ff9500", "from": 63 }, { "id": "red", "color": "#ff3b30", "from": 90 } ] }
@@ -19,9 +24,23 @@
       "name": "unknown members and null optionals are ignored",
       "value": { "version": 2, "bands": [ { "id": "a", "color": "#000000", "from": null, "label": "Old name", "extra": { "x": 1 } }, { "id": "b", "color": "#ffffff", "from": 5, "opacity": 0.5 } ] },
       "normalized": { "bands": [ { "id": "a", "color": "#000000" }, { "id": "b", "color": "#ffffff", "from": 5 } ] }
+    },
+    {
+      "name": "colour with alpha, an opaque alpha dropped",
+      "value": { "bands": [ { "id": "a", "color": "#00000080" }, { "id": "b", "color": "#FFFFFFFF", "from": 5 } ] },
+      "normalized": { "bands": [ { "id": "a", "color": "#00000080" }, { "id": "b", "color": "#ffffff", "from": 5 } ] }
+    },
+    {
+      "name": "colour variable reference kept as written",
+      "value": { "bands": [ { "id": "a", "color": "{{ vars.primary | color | color_darken: 20 }}" }, { "id": "b", "color": "#ff0000", "from": 5 } ] },
+      "normalized": { "bands": [ { "id": "a", "color": "{{ vars.primary | color | color_darken: 20 }}" }, { "id": "b", "color": "#ff0000", "from": 5 } ] }
     }
   ],
   "invalid": [
+    {
+      "name": "colour reference with an unknown step",
+      "value": { "bands": [ { "id": "a", "color": "{{ vars.primary | color | upcase }}" } ] }
+    },
     { "name": "null", "value": null },
     { "name": "array instead of object", "value": [ { "id": "a", "color": "#000000" } ] },
     { "name": "missing bands", "value": {} },
@@ -34,7 +53,6 @@
     { "name": "id not a string", "value": { "bands": [ { "id": 1, "color": "#000000" } ] } },
     { "name": "missing colour", "value": { "bands": [ { "id": "a" } ] } },
     { "name": "named colour", "value": { "bands": [ { "id": "a", "color": "red" } ] } },
-    { "name": "colour with alpha", "value": { "bands": [ { "id": "a", "color": "#00000080" } ] } },
     { "name": "colour without hash", "value": { "bands": [ { "id": "a", "color": "000000" } ] } },
     { "name": "first band with from", "value": { "bands": [ { "id": "a", "color": "#000000", "from": 0 } ] } },
     { "name": "later band without from", "value": { "bands": [ { "id": "a", "color": "#000000" }, { "id": "b", "color": "#ffffff" } ] } },

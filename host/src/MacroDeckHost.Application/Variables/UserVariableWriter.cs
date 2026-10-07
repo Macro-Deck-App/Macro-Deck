@@ -1,6 +1,7 @@
 using System.Globalization;
 using MacroDeckHost.Application.Scripts;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Variables.Colors;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -200,6 +201,7 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 			{
 				DomainVariableType.Numeric => ComputedValue.Ok(0m),
 				DomainVariableType.Boolean => ComputedValue.Ok(false),
+				DomainVariableType.Color => ComputedValue.Ok(RgbaColor.Black.ToString()),
 				_ => ComputedValue.Ok(string.Empty)
 			};
 		}
@@ -214,9 +216,15 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 			DomainVariableType.Boolean => TryParseBoolean(text, out var flag)
 				? ComputedValue.Ok(flag)
 				: ComputedValue.Invalid($"'{text}' is not true or false."),
+			DomainVariableType.Color => ParseColor(text),
 			_ => ComputedValue.Ok(text)
 		};
 	}
+
+	private static ComputedValue ParseColor(string text)
+		=> RgbaColor.Canonicalize(text) is { } color
+			? ComputedValue.Ok(color)
+			: ComputedValue.Invalid($"'{text}' is not a color.");
 
 	private static Task<VariableEntity?> Resolve(IVariableService service, string name, string? ownerWidgetId)
 		=> string.IsNullOrWhiteSpace(ownerWidgetId)
@@ -238,6 +246,7 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 					DomainVariableType.Boolean => TryParseBoolean(text, out var flag)
 						? ComputedValue.Ok(flag)
 						: ComputedValue.Invalid($"'{text}' is not true or false."),
+					DomainVariableType.Color => ParseColor(text),
 					_ => ComputedValue.Ok(text)
 				};
 			}

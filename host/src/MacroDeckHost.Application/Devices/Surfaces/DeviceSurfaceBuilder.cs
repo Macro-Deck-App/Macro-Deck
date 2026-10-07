@@ -10,9 +10,11 @@ using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Timers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
+using MacroDeckHost.Application.Variables.Colors;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
+using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
 
 namespace MacroDeckHost.Application.Devices.Surfaces;
@@ -70,6 +72,7 @@ public sealed class DeviceSurfaceBuilder
 	private readonly IAppPreferenceService _preferences;
 	private readonly IIconPackCache _icons;
 	private readonly IWidgetDefaultShortPress _defaultShortPress;
+	private readonly IColorReferenceResolver _colors;
 
 	public DeviceSurfaceBuilder(
 		IProfileRegistry profiles,
@@ -79,8 +82,10 @@ public sealed class DeviceSurfaceBuilder
 		ILocalizationResolver localization,
 		IAppPreferenceService preferences,
 		IIconPackCache icons,
-		IWidgetDefaultShortPress defaultShortPress)
+		IWidgetDefaultShortPress defaultShortPress,
+		IColorReferenceResolver colors)
 	{
+		_colors = colors;
 		_icons = icons;
 		_defaultShortPress = defaultShortPress;
 		_profiles = profiles;
@@ -136,8 +141,8 @@ public sealed class DeviceSurfaceBuilder
 				WidgetBorderRadius = SurfaceFolderChain.ResolveWidgetBorderRadius(folder,
 					folders,
 					profile.DefaultWidgetBorderRadius),
-				BackgroundColor = SurfaceFolderChain.ResolveBackgroundColor(folder,
-					profile.DefaultBackgroundColor),
+				BackgroundColor = DeviceColor(SurfaceFolderChain.ResolveBackgroundColor(folder,
+					profile.DefaultBackgroundColor), null),
 				// Echoed verbatim: the host never parses it and never fits the grid or the widget
 				// positions to the device's physical capabilities.
 				LayoutReference = device.LayoutReference
@@ -195,6 +200,30 @@ public sealed class DeviceSurfaceBuilder
 	// Providers predate transparent widget backgrounds and may parse this as a colour, so it arrives as no colour.
 	private static string? DeviceBackground(string? value)
 		=> string.Equals(value?.Trim(), "transparent", StringComparison.OrdinalIgnoreCase) ? null : value;
+
+	// Providers predate colour references and alpha: a reference arrives resolved and a translucent colour
+	// as opaque #rrggbb, while every other value is passed exactly as stored, as it always was.
+	private string? DeviceColor(string? value, Guid? widgetId)
+	{
+		if (value is null)
+		{
+			return null;
+		}
+
+		var resolved = value;
+		if (ColorReference.TryParse(value, out _))
+		{
+			resolved = _colors.Resolve(value,
+				widgetId is null ? VariableScope.Global : VariableScope.Widget,
+				widgetId?.ToString());
+			if (resolved.Length == 0)
+			{
+				return null;
+			}
+		}
+
+		return RgbaColor.Parse(resolved) is { IsOpaque: false } translucent ? translucent.ToOpaqueString() : resolved;
+	}
 
 	private static string? Pick(JsonObject? state, JsonObject root, string key)
 		=> ReadString(state, key) is { Length: > 0 } value ? value : ReadString(root, key);
@@ -286,8 +315,9 @@ public sealed class DeviceSurfaceBuilder
 		return new DeviceSurfaceAppearance
 		{
 			Label = label ?? Pick(state, root, "label"),
-			LabelColor = Pick(state, root, "labelColor"),
-			BackgroundColor = DeviceBackground(Pick(state, root, "backgroundColor")),
+			LabelColor = DeviceColor(Pick(state, root, "labelColor"), isPersisted ? widgetId : null),
+			BackgroundColor = DeviceColor(DeviceBackground(Pick(state, root, "backgroundColor")),
+				isPersisted ? widgetId : null),
 			IconId = iconId,
 			// Carried so that re-rendering an icon under the same id (or the same provider) still changes
 			// the projected surface: without it the push rule sees an identical surface and the device

@@ -54,7 +54,8 @@ describe('AppearanceSettingsComponent', () => {
   });
 
   it('renders all three theme-mode options', () => {
-    const buttons = fixture.nativeElement.querySelectorAll('.seg-option');
+    const themeMode: HTMLElement = fixture.nativeElement.querySelector('shared-segmented-control:not(.cp-mode)');
+    const buttons = themeMode.querySelectorAll('.seg-option');
     expect(buttons.length).toBe(3);
   });
 
@@ -121,5 +122,16 @@ describe('AppearanceSettingsComponent', () => {
     expect(sections.length).toBe(3);
     expect(fixture.nativeElement.querySelector('shared-slider')).toBeNull();
     expect(fixture.nativeElement.querySelector('.slider-input')).toBeNull();
+  });
+
+  it('sends a picked accent with an explicit source, so a stored variable reference is replaced or kept', () => {
+    const reference = '{{ vars.primary | color | color_darken: 20 }}';
+
+    fixture.componentInstance.onAccentChange(reference);
+    expect(api.updateAppearanceSettings).toHaveBeenCalledWith(jasmine.objectContaining({ accentColorSource: reference }));
+
+    fixture.componentInstance.onAccentChange('#ff0000');
+    expect(api.updateAppearanceSettings).toHaveBeenCalledWith(
+      jasmine.objectContaining({ accentColor: '#ff0000', accentColorSource: '#ff0000' }));
   });
 });

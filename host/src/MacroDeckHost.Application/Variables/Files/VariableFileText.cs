@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using MacroDeckHost.Application.Variables.Colors;
 using MacroDeckHost.Domain.Enums;
 
 namespace MacroDeckHost.Application.Variables.Files;
@@ -28,6 +29,10 @@ public static class VariableFileText
 
 			case VariableType.Boolean when TryParseBoolean(content.Trim(), out var flag):
 				value = VariableValueSerializer.Serialize(type, flag, decimalPlaces);
+				return true;
+
+			case VariableType.Color when RgbaColor.Canonicalize(content) is { } color:
+				value = color;
 				return true;
 
 			default:

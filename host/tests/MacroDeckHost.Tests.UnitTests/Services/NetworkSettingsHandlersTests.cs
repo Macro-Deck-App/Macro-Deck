@@ -137,7 +137,11 @@ public class NetworkSettingsHandlersTests
 			PublicEndpoints = publicEndpoints,
 			ActiveCertificateFingerprint = activeCertificateFingerprint
 		};
-		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), listenerState, certificateStore);
+		var service = new AppPreferenceService(repository,
+			new FakeBuildEnvironment(),
+			listenerState,
+			TestColors.None,
+			certificateStore);
 		var restartService = new FakeRestartService { Availability = restart ?? new RestartAvailability(true, null) };
 
 		var notifications = new UserNotificationStore();

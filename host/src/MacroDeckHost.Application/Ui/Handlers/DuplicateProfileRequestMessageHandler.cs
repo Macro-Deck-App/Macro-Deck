@@ -4,6 +4,7 @@ using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Application.Ui.Transport.Messages.Profiles;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Localization;
+using MacroDeckHost.Application.Variables.Colors;
 
 namespace MacroDeckHost.Application.Ui.Handlers;
 
@@ -11,9 +12,11 @@ public class DuplicateProfileRequestMessageHandler
 	: IUiTransportMessageHandler<DuplicateProfileRequest, DuplicateProfileResponse>
 {
 	private readonly IProfileService _profileService;
+	private readonly IColorReferenceResolver _colors;
 
-	public DuplicateProfileRequestMessageHandler(IProfileService profileService)
+	public DuplicateProfileRequestMessageHandler(IProfileService profileService, IColorReferenceResolver colors)
 	{
+		_colors = colors;
 		_profileService = profileService;
 	}
 
@@ -40,7 +43,7 @@ public class DuplicateProfileRequestMessageHandler
 
 		if (result.Success)
 		{
-			response.Profile = ProfileDtoMapper.MapJsonProfile(result.Data!);
+			response.Profile = ProfileDtoMapper.MapJsonProfile(result.Data!, _colors);
 		}
 		else
 		{

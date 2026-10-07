@@ -134,6 +134,16 @@
           name="label" />
       </label>
 
+      @if (form().type === 'color') {
+        <shared-color-picker
+          class="form-group"
+          defaultColor=""
+          [label]="'macrodeck.app:Scripts.DefaultFieldLabel' | translate"
+          [allowAlpha]="true"
+          [ngModel]="form().defaultValue"
+          (ngModelChange)="setFormDefault($event)"
+          name="defaultValue" />
+      } @else {
       <label class="form-group">
         <span class="form-label">{{ 'macrodeck.app:Scripts.DefaultFieldLabel' | translate }}</span>
         @switch (form().type) {
@@ -161,6 +171,7 @@
           }
         }
       </label>
+      }
 
       <div class="form-group">
         <shared-checkbox

@@ -13,6 +13,7 @@ using MacroDeckHost.Infrastructure.Variables;
 using MacroDeckHost.Infrastructure.Widgets;
 using MacroDeckHost.Integrations.Adb;
 using MacroDeckHost.Integrations.Companion;
+using MacroDeckHost.Application.Variables.Colors;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Scripts;
@@ -66,6 +67,8 @@ public sealed class IntegrationInitializer
 	private readonly ConcurrentDictionary<string, IntegrationEventPublisher> _eventPublishers = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, InProcessMessageChannel> _messageChannels = new(StringComparer.Ordinal);
 	private readonly IMessageBroker _messageBroker;
+	private readonly PluginColorWatches _colorWatches;
+	private readonly ConcurrentDictionary<string, InProcessColorApi> _colorApis = new(StringComparer.Ordinal);
 
 	public IntegrationInitializer(
 		IServiceScopeFactory serviceScopeFactory,
@@ -91,6 +94,7 @@ public sealed class IntegrationInitializer
 		TimeProvider timeProvider,
 		ILogger logger,
 		IMessageBroker messageBroker,
+		PluginColorWatches colorWatches,
 		IKnownAudioDeviceStore? knownAudioDevices = null,
 		IVariablePollingInvalidationSignal? pollingInvalidation = null,
 		IStreamPlatformServices? streamPlatforms = null,
@@ -99,6 +103,7 @@ public sealed class IntegrationInitializer
 		_streamPlatforms = streamPlatforms;
 		_calendarServices = calendarServices;
 		_messageBroker = messageBroker;
+		_colorWatches = colorWatches;
 		_knownAudioDevices = knownAudioDevices;
 		_pollingInvalidation = pollingInvalidation;
 		_serviceScopeFactory = serviceScopeFactory;
@@ -161,7 +166,8 @@ public sealed class IntegrationInitializer
 			widgetApi,
 			events,
 			new IntegrationUserNotifier(integration.Id, integrationName, _userNotificationStore, _logger),
-			await RenewMessageChannelAsync(integration.Id));
+			await RenewMessageChannelAsync(integration.Id),
+			await RenewColorApiAsync(integration.Id));
 
 		// IIntegration.IsInitialized has no setter, so it is the SDK's own word on whether initialization
 		// finished, not on whether it was attempted. Shutdown needs the latter to avoid leaking whatever a
@@ -238,6 +244,11 @@ public sealed class IntegrationInitializer
 		{
 			await channel.DisposeAsync();
 		}
+
+		if (_colorApis.TryRemove(integrationId, out var colors))
+		{
+			await colors.DisposeAsync();
+		}
 	}
 
 	public async Task ReleaseAllMessagingAsync()
@@ -246,6 +257,18 @@ public sealed class IntegrationInitializer
 		{
 			await ReleaseMessagingAsync(integrationId);
 		}
+	}
+
+	private async Task<InProcessColorApi> RenewColorApiAsync(string integrationId)
+	{
+		if (_colorApis.TryRemove(integrationId, out var previous))
+		{
+			await previous.DisposeAsync();
+		}
+
+		var colors = new InProcessColorApi(_colorWatches, _logger);
+		_colorApis[integrationId] = colors;
+		return colors;
 	}
 
 	private async Task<InProcessMessageChannel> RenewMessageChannelAsync(string integrationId)

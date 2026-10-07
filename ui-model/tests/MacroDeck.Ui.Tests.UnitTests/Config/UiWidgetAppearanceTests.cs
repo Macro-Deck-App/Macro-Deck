@@ -136,6 +136,28 @@ public class UiWidgetAppearanceTests
 	}
 
 	[Test]
+	public void Colour_fields_offer_variables_only_when_the_widget_opts_in()
+	{
+		const UiWidgetAppearanceFields Colors = UiWidgetAppearanceFields.BackgroundColor |
+			UiWidgetAppearanceFields.LabelColor | UiWidgetAppearanceFields.AccentColor;
+		var plain = View("{}", Colors);
+		var optedIn = View("{}", Colors | UiWidgetAppearanceFields.ColorVariables);
+
+		Assert.Multiple(() =>
+		{
+			foreach (var key in new[]
+				{
+					UiWidgetAppearanceKeys.BackgroundColor, UiWidgetAppearanceKeys.LabelColor,
+					UiWidgetAppearanceKeys.AccentColor,
+				})
+			{
+				Assert.That(Node(plain, key).Properties.ContainsKey(UiConfigProperties.AllowVariables), Is.False, key);
+				Assert.That(Node(optedIn, key).Properties[UiConfigProperties.AllowVariables].GetBoolean(), Is.True, key);
+			}
+		});
+	}
+
+	[Test]
 	public void A_stored_transparent_background_shows_in_its_field()
 	{
 		var view = View("""{"backgroundColor":"transparent"}""",

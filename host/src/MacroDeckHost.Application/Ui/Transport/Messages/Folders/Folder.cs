@@ -16,6 +16,8 @@ public class Folder
 
 	public string? BackgroundColor { get; set; }
 
+	public string? BackgroundColorSource { get; set; }
+
 	public int? WidgetSpacing { get; set; }
 
 	public int? WidgetBorderRadius { get; set; }

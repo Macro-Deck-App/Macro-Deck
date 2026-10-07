@@ -159,6 +159,7 @@ internal static class HistoryGraphWidgetConfigView
 					new UiColorInput
 					{
 						Key = "accentColor",
+						AllowVariables = true,
 						Label = AppStrings.Widgets.History.AccentColor(),
 						Binding = Bind.To(accentColor),
 						// Reset returns to unset rather than to a literal hex (issue #896): the chart's real
@@ -177,6 +178,7 @@ internal static class HistoryGraphWidgetConfigView
 					new UiThresholdsInput
 					{
 						Key = WidgetThresholds.ValueKey,
+						AllowVariables = true,
 						Label = AppStrings.Widgets.Editor.ColorThresholds(),
 						HideLabel = true,
 						Binding = Bind.To(thresholds),

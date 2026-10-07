@@ -21,6 +21,7 @@ import { ConfirmationModalComponent } from '../overlay/confirmation-modal/confir
 import { DropdownMenuComponent } from '../overlay/dropdown-menu/dropdown-menu.component';
 import { EmptyStateComponent } from '../feedback/empty-state/empty-state.component';
 import { SelectComponent, SelectOption } from '../forms/select/select.component';
+import { ColorPickerComponent } from '../forms/color-picker/color-picker.component';
 import { FilePathInputComponent } from '../forms/file-path-input/file-path-input.component';
 import { VariableCatalogService } from '../../services/variable-catalog.service';
 import { IntegrationService } from '../../services/integration.service';
@@ -63,6 +64,8 @@ const CLASSIFICATION_LABEL_KEYS: Record<VariableClassification, string> = {
 
 const DELEGATE_INTEGRATION_ID = 'app.macro-deck.delegate';
 
+const DEFAULT_COLOR_VALUE = '#000000';
+
 @Component({
   selector: 'shared-variables-manager',
   standalone: true,
@@ -73,6 +76,7 @@ const DELEGATE_INTEGRATION_ID = 'app.macro-deck.delegate';
     ConfirmationModalComponent,
     ButtonComponent,
     ButtonGroupComponent,
+    ColorPickerComponent,
     DropdownMenuComponent,
     EmptyStateComponent,
     ErrorBannerComponent,
@@ -157,7 +161,7 @@ export class VariablesManagerComponent implements OnInit {
     integration: this.localization.translateKey(CLASSIFICATION_LABEL_KEYS.integration),
     widget: this.localization.translateKey(CLASSIFICATION_LABEL_KEYS.widget),
   }));
-  readonly types: VariableType[] = ['text', 'numeric', 'boolean'];
+  readonly types: VariableType[] = ['text', 'numeric', 'boolean', 'color'];
 
   readonly typeOptions = computed<SelectOption[]>(() =>
     this.types.map(t => ({ value: t, label: this.typeLabels()[t] })));
@@ -592,7 +596,7 @@ export class VariablesManagerComponent implements OnInit {
   }
 
   setFormType(type: VariableType): void {
-    this.createForm.update(f => ({ ...f, type, initialValue: type === 'boolean' ? 'false' : '' }));
+    this.createForm.update(f => ({ ...f, type, initialValue: initialValueFor(type) }));
   }
 
   setFormDecimalPlaces(value: number): void {
@@ -849,5 +853,16 @@ export class VariablesManagerComponent implements OnInit {
       filePath: '',
       allowWriteBack: false,
     };
+  }
+}
+
+function initialValueFor(type: VariableType): string {
+  switch (type) {
+    case 'boolean':
+      return 'false';
+    case 'color':
+      return DEFAULT_COLOR_VALUE;
+    default:
+      return '';
   }
 }

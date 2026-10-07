@@ -360,7 +360,8 @@ internal sealed class IntegrationInitializerTests
 			TestDeviceProviders.Host(),
 			timeProvider,
 			new LoggerConfiguration().CreateLogger(),
-			new MessageBroker(Serilog.Core.Logger.None));
+			new MessageBroker(Serilog.Core.Logger.None),
+			TestColors.Watches);
 
 	private static ServiceProvider BuildScopeServices()
 		=> new ServiceCollection()

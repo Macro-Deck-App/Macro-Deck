@@ -63,6 +63,8 @@ public sealed class PluginSessionRecord
 
 	public string? DeclaredName { get; init; }
 
+	public IReadOnlyList<string> HostApiFeatures { get; init; } = [];
+
 	public required IReadOnlyDictionary<string, CapabilityNegotiationResult> Capabilities { get; set; }
 
 	public required IReadOnlyList<DeclaredCapability> DeclaredCapabilities { get; set; }
@@ -151,6 +153,8 @@ public interface IPluginSessionRegistry
 	/// has none. Lets a wire-shape decision (e.g. the widgets host api's per-version DTOs) be made
 	/// without threading the session record itself through callers that only need this one field.</summary>
 	int? GetNegotiatedVersion(string pluginId);
+
+	bool HasHostApiFeature(string pluginId, string feature) => false;
 
 	IReadOnlyDictionary<string, CapabilityNegotiationResult>? UpdateDeclaredCapabilities(
 		string pluginId,
@@ -421,6 +425,16 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 				_bySessionId.TryGetValue(sessionId, out var record)
 					? record.NegotiatedVersion
 					: null;
+		}
+	}
+
+	public bool HasHostApiFeature(string pluginId, string feature)
+	{
+		lock (_gate)
+		{
+			return _sessionIdByPluginId.TryGetValue(pluginId, out var sessionId) &&
+				_bySessionId.TryGetValue(sessionId, out var record) &&
+				record.HostApiFeatures.Contains(feature, StringComparer.Ordinal);
 		}
 	}
 

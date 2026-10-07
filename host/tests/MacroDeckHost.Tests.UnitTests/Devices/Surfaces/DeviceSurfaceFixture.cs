@@ -24,6 +24,8 @@ using MacroDeckHost.Tests.UnitTests.Auth;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Triggers;
 using Microsoft.Extensions.DependencyInjection;
+using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Variables.Colors;
 
 namespace MacroDeckHost.Tests.UnitTests.Devices.Surfaces;
 
@@ -82,6 +84,7 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 		services.AddSingleton<IUiResourceStore>(Resources);
 		services.AddSingleton<IWidgetDefaultShortPress>(DefaultShortPress);
 		services.AddSingleton<DeviceSurfaceBuilder>();
+		services.AddSingleton<IColorReferenceResolver>(new ColorReferenceResolver(new VariableRegistry()));
 		if (icons is not null)
 		{
 			services.AddSingleton(icons);

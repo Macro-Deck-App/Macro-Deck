@@ -1,7 +1,11 @@
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Events.Handlers;
+using System.Text.Json.Nodes;
 using MacroDeckHost.Application.Rendering;
+using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Variables.Colors;
 using MacroDeckHost.Domain.Entities;
+using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Widgets.Ui;
@@ -19,7 +23,8 @@ public class WidgetDataChangedRebuildTests
 		var handler = new WidgetUpdatedNotificationHandler(new SliderWidgetSessionTests.NullUiTransport(),
 			new LabelRenderChannel(),
 			signals,
-			sessions);
+			sessions,
+			TestColors.None);
 		var widget = new WidgetEntity
 		{
 			Id = Guid.NewGuid(), FolderId = Guid.NewGuid(), Type = WidgetTypeIds.Slider, Data = "{}"
@@ -45,5 +50,45 @@ public class WidgetDataChangedRebuildTests
 			Assert.That(rebuiltWhenAllTookIt, Is.Empty);
 			Assert.That(sessions.InvalidatedWidgets, Is.EqualTo(new[] { widget.Id }));
 		});
+	}
+
+	[Test]
+	public async Task A_saved_colour_reference_reaches_open_sessions_resolved()
+	{
+		var registry = new VariableRegistry();
+		registry.Upsert(new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = "primary",
+			Scope = VariableScope.Global,
+			Type = VariableType.Color,
+			Classification = VariableClassification.User,
+			Value = "#3366ff"
+		});
+		var signals = new WidgetRenderSignals();
+		var handler = new WidgetUpdatedNotificationHandler(new SliderWidgetSessionTests.NullUiTransport(),
+			new LabelRenderChannel(),
+			signals,
+			new RecordingUiSessionBroker(),
+			new ColorReferenceResolver(registry));
+		var widget = new WidgetEntity
+		{
+			Id = Guid.NewGuid(),
+			FolderId = Guid.NewGuid(),
+			Type = WidgetTypeIds.Slider,
+			Data = """{"color":"{{ vars.primary | color | color_opacity: 50 }}"}"""
+		};
+		WidgetEntity? received = null;
+
+		using (signals.SubscribeDataChanged(widget.Id.ToString(), entity =>
+		{
+			received = entity;
+			return true;
+		}))
+		{
+			await handler.Handle(new WidgetUpdatedNotification(widget), CancellationToken.None);
+		}
+
+		Assert.That(JsonNode.Parse(received!.Data!)!["color"]!.GetValue<string>(), Is.EqualTo("#3366ff80"));
 	}
 }

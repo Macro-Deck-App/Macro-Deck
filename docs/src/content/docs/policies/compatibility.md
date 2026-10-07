@@ -211,6 +211,24 @@ What did **not** need a major:
   non-fatally and the plugin's other capabilities keep working, and a plugin that does not implement
   `ICalendarProvider` never declares it. The host's calendar widget types and the `calendar` trigger
   provider are host-owned additions, not protocol changes.
+- Colour variables added `VariableType.Color`, whose values travel as an ordinary `text` value, and an
+  optional `allowAlpha` field on `ActionParameterDto` (`ActionParameter.AllowAlpha`), all within major `3`.
+  An older host drops a variable definition that declares `Color` and ignores `allowAlpha`. A colour
+  parameter without `allowAlpha` still receives opaque `#rrggbb`, also when the user bound it to a
+  variable. A new optional `hostApiFeatures` list on the session request lets a plugin declare
+  `scripts.input-color`; only then does a Color script input reach it as `color`, every other plugin keeps
+  receiving it as `text` with the hex value. The SDK declares it automatically. See
+  [Color variables](/features/variables/#color-variables).
+- Colour variables are also a one-way step for the host's own data, which no plugin contract covers: once
+  a user variable of type `Color` exists, the persisted user-variables file cannot be read by a Macro Deck
+  release from before `Color`, which then starts without any user variables. Downgrading the host is
+  unsupported from that point; see [Colors from a variable](/guide/tips/#colors-from-a-variable).
+- Resolving colours added the `colors` host api (`resolve`, `watches` and a `colors` `host.state`), the
+  optional `maxColorWatches` field in the protocol descriptor's limits, and `IIntegrationContext.Colors` as
+  a default interface member, so an existing `IIntegrationContext` implementation keeps compiling and
+  loading. An older host answers `CAPABILITY_UNSUPPORTED`, and the SDK falls back to resolving fixed colours
+  locally, giving `null` for a reference and delivering a watch once. See
+  [Resolving colours yourself](/features/variables/#resolving-colours-yourself).
 - Localization moved the **UI model** major, not this one - see [the localization major](#the-localization-major).
 
 **Negotiation happens exactly once**, in `POST /api/plugins/sessions`:

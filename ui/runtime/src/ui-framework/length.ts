@@ -55,7 +55,7 @@ export function resolveLength(
   return resolved;
 }
 
-const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
+const HEX_COLOR = /^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 
 export function nodeHexColor(node: UiNode | null | undefined, key: string): string | undefined {
   return asHexColor(nodeRaw(node, key));

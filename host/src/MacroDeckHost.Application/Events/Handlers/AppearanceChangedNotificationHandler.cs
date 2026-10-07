@@ -19,6 +19,7 @@ public sealed class AppearanceChangedNotificationHandler : INotificationHandler<
 		{
 			ThemeMode = notification.ThemeMode,
 			AccentColor = notification.AccentColor,
+			AccentColorSource = notification.AccentColorSource,
 			FontFamily = notification.FontFamily
 		};
 		return new ValueTask(_uiTransport.Send(evt, cancellationToken));

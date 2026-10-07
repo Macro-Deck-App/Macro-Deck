@@ -22,6 +22,7 @@ export function folderFromWire(ipc: IpcFolder): Folder {
     background: ipc.backgroundColor === LEGACY_DEFAULT_BACKGROUND
       ? DEFAULT_BACKGROUND
       : (ipc.backgroundColor ?? DEFAULT_BACKGROUND),
+    ...(ipc.backgroundColorSource ? { backgroundSource: ipc.backgroundColorSource } : {}),
     spacing: ipc.widgetSpacing ?? null,
     borderRadius: ipc.widgetBorderRadius ?? null,
     emptyCellStyle: emptyCellStyleFromWire(ipc.emptyCellStyle),

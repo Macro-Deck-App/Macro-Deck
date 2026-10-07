@@ -20,8 +20,12 @@ public sealed class VariableTemplateContext : LiquidTemplateContext
 	public override int ToInt(SourceSpan span, object? value)
 		=> base.ToInt(span, VariableTemplateValue.Unwrap(value));
 
+	// A colour filter has to know whether its input came from a Color variable, so it gets the argument
+	// before unwrapping.
 	public override object? ToObject(SourceSpan span, object? value, Type destinationType)
-		=> base.ToObject(span, VariableTemplateValue.Unwrap(value), destinationType);
+		=> destinationType == typeof(TemplateFilterArgument)
+			? value as TemplateFilterArgument ?? new TemplateFilterArgument(value)
+			: base.ToObject(span, VariableTemplateValue.Unwrap(value), destinationType);
 
 	public override string? ObjectToString(object? value, bool nested = false)
 		=> base.ObjectToString(VariableTemplateValue.Unwrap(value), nested);

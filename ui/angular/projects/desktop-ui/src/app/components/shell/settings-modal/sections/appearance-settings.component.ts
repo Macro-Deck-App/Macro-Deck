@@ -21,7 +21,7 @@ export class AppearanceSettingsComponent {
   private readonly fonts = inject(FontService);
 
   readonly themeMode = this.themeService.themeMode;
-  readonly accentColor = this.themeService.accentColor;
+  readonly accentColor = this.themeService.accentEditorValue;
   readonly fontFamily = this.themeService.fontFamily;
   readonly defaultAccent = DEFAULT_ACCENT_COLOR;
 

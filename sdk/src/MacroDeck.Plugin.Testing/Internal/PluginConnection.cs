@@ -33,6 +33,7 @@ internal sealed class PluginConnection : IAsyncDisposable
 	private readonly PluginEventCollector _events;
 	private readonly ChannelWriter<ProtocolEnvelope> _fromPlugin;
 	private readonly TestHostMessaging _messaging;
+	private readonly TestHostColors _colors;
 	private readonly SemaphoreSlim _sending = new(1, 1);
 
 	private readonly ConcurrentDictionary<string, TaskCompletionSource<ProtocolEnvelope>> _pending
@@ -56,9 +57,11 @@ internal sealed class PluginConnection : IAsyncDisposable
 		PluginLogCollector logs,
 		PluginEventCollector events,
 		ChannelWriter<ProtocolEnvelope> fromPlugin,
-		TestHostMessaging messaging)
+		TestHostMessaging messaging,
+		TestHostColors colors)
 	{
 		_messaging = messaging;
+		_colors = colors;
 		_socket = socket;
 		_session = session;
 		Resumed = resumed;
@@ -430,7 +433,8 @@ internal sealed class PluginConnection : IAsyncDisposable
 					_messaging,
 					_session.PluginId,
 					_uiResourceUploads,
-					UiPreviews)
+					UiPreviews,
+					_colors)
 				.ConfigureAwait(false);
 		}
 

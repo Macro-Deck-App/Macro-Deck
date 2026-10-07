@@ -1,16 +1,24 @@
+using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Application.Ui.Transport.Messages.Folders;
+using MacroDeckHost.Application.Variables.Colors;
 
 namespace MacroDeckHost.Application.Ui.Handlers;
 
 public class UpdateFolderRequestMessageHandler : IUiTransportMessageHandler<UpdateFolderRequest, UpdateFolderResponse>
 {
 	private readonly IFolderService _folderService;
+	private readonly IColorReferenceResolver _colors;
+	private readonly IFolderCache _folders;
 
-	public UpdateFolderRequestMessageHandler(IFolderService folderService)
+	public UpdateFolderRequestMessageHandler(IFolderService folderService,
+		IColorReferenceResolver colors,
+		IFolderCache folders)
 	{
+		_colors = colors;
+		_folders = folders;
 		_folderService = folderService;
 	}
 
@@ -24,7 +32,10 @@ public class UpdateFolderRequestMessageHandler : IUiTransportMessageHandler<Upda
 		var rows = request.Rows;
 		var columns = request.Columns;
 		var name = request.Name;
-		var backgroundColor = request.BackgroundColor;
+		var backgroundColor = ColorSource.Incoming(request.BackgroundColorSource,
+			request.BackgroundColor,
+			_folders.GetFolderById(id)?.BackgroundColor,
+			_colors);
 
 		var result = await _folderService.Update(id,
 			name,
@@ -44,7 +55,7 @@ public class UpdateFolderRequestMessageHandler : IUiTransportMessageHandler<Upda
 
 		if (result.Success)
 		{
-			response.Folder = FolderDtoMapper.MapToDto(result.Data!);
+			response.Folder = FolderDtoMapper.MapToDto(result.Data!, _colors);
 		}
 		else
 		{

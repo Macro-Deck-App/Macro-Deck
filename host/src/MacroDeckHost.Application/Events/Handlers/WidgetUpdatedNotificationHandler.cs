@@ -3,6 +3,7 @@ using MacroDeckHost.Application.Ui.Handlers;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
+using MacroDeckHost.Application.Variables.Colors;
 using Mediator;
 
 namespace MacroDeckHost.Application.Events.Handlers;
@@ -13,13 +14,16 @@ public sealed class WidgetUpdatedNotificationHandler : INotificationHandler<Widg
 	private readonly LabelRenderChannel _renderQueue;
 	private readonly IWidgetRenderSignals _renderSignals;
 	private readonly IUiSessionBroker _sessions;
+	private readonly IColorReferenceResolver _colors;
 
 	public WidgetUpdatedNotificationHandler(
 		IUiTransport uiTransport,
 		LabelRenderChannel renderQueue,
 		IWidgetRenderSignals renderSignals,
-		IUiSessionBroker sessions)
+		IUiSessionBroker sessions,
+		IColorReferenceResolver colors)
 	{
+		_colors = colors;
 		_uiTransport = uiTransport;
 		_renderQueue = renderQueue;
 		_renderSignals = renderSignals;
@@ -41,7 +45,8 @@ public sealed class WidgetUpdatedNotificationHandler : INotificationHandler<Widg
 		// no way to observe stored data at all - would go on drawing the configuration it opened with,
 		// leaving a saved edit sitting unapplied on every deck until something happened to reopen it.
 		// Rebuilding is the only way that tree comes up to date, and reopening is how a client rebuilds.
-		if (notification.DataChanged && !_renderSignals.RaiseDataChanged(widget))
+		if (notification.DataChanged &&
+			!_renderSignals.RaiseDataChanged(_colors.Resolved(widget)))
 		{
 			_sessions.InvalidateWidgetSessions(widget.Id);
 		}

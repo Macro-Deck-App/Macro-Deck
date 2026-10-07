@@ -3462,6 +3462,15 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Forms.CodeEditor.InvalidJson" xml:space="preserve">
     <value>JSON 无效</value>
   </data>
+  <data name="Forms.ColorPicker.AddModifier" xml:space="preserve">
+    <value>添加修饰符</value>
+  </data>
+  <data name="Forms.ColorPicker.AlphaLabel" xml:space="preserve">
+    <value>不透明度</value>
+  </data>
+  <data name="Forms.ColorPicker.AmountLabel" xml:space="preserve">
+    <value>程度</value>
+  </data>
   <data name="Forms.ColorPicker.Blue" xml:space="preserve">
     <value>蓝色</value>
   </data>
@@ -3486,8 +3495,73 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Forms.ColorPicker.HueLabel" xml:space="preserve">
     <value>色相</value>
   </data>
+  <data name="Forms.ColorPicker.MissingVariable" xml:space="preserve">
+    <value>未找到变量“{name}”</value>
+  </data>
+  <data name="Forms.ColorPicker.MixWithLabel" xml:space="preserve">
+    <value>混合颜色</value>
+  </data>
+  <data name="Forms.ColorPicker.ModeLabel" xml:space="preserve">
+    <value>颜色来源</value>
+  </data>
+  <data name="Forms.ColorPicker.ModeStatic" xml:space="preserve">
+    <value>颜色</value>
+  </data>
+  <data name="Forms.ColorPicker.ModeVariable" xml:space="preserve">
+    <value>变量</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.Darken" xml:space="preserve">
+    <value>调暗</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.Desaturate" xml:space="preserve">
+    <value>降低饱和度</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.Hue" xml:space="preserve">
+    <value>调整色相</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.IncreaseOpacity" xml:space="preserve">
+    <value>增加不透明度</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.Lighten" xml:space="preserve">
+    <value>调亮</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.Mix" xml:space="preserve">
+    <value>混合</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.Opacity" xml:space="preserve">
+    <value>设置不透明度</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.ReduceOpacity" xml:space="preserve">
+    <value>降低不透明度</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.Saturate" xml:space="preserve">
+    <value>增加饱和度</value>
+  </data>
+  <data name="Forms.ColorPicker.ModifierCount.One" xml:space="preserve">
+    <value>{count} 个修饰符</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Forms.ColorPicker.ModifierCount.Other" xml:space="preserve">
+    <value>{count} 个修饰符</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Forms.ColorPicker.ModifierLabel" xml:space="preserve">
+    <value>修饰符</value>
+  </data>
+  <data name="Forms.ColorPicker.ModifierSummary" xml:space="preserve">
+    <value>{modifier} {amount}</value>
+  </data>
+  <data name="Forms.ColorPicker.NoColorVariables" xml:space="preserve">
+    <value>尚无颜色变量。请在“变量”中创建。</value>
+  </data>
+  <data name="Forms.ColorPicker.NoMatchingVariables" xml:space="preserve">
+    <value>没有匹配的变量</value>
+  </data>
   <data name="Forms.ColorPicker.Orange" xml:space="preserve">
     <value>橙色</value>
+  </data>
+  <data name="Forms.ColorPicker.OriginalLabel" xml:space="preserve">
+    <value>原始颜色</value>
   </data>
   <data name="Forms.ColorPicker.Pink" xml:space="preserve">
     <value>粉色</value>
@@ -3498,11 +3572,29 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Forms.ColorPicker.Red" xml:space="preserve">
     <value>红色</value>
   </data>
+  <data name="Forms.ColorPicker.RemoveModifierAriaLabel" xml:space="preserve">
+    <value>移除修饰符</value>
+  </data>
   <data name="Forms.ColorPicker.ResetAriaLabel" xml:space="preserve">
     <value>重置为默认颜色</value>
   </data>
+  <data name="Forms.ColorPicker.ResultLabel" xml:space="preserve">
+    <value>结果</value>
+  </data>
   <data name="Forms.ColorPicker.SaturationBrightnessLabel" xml:space="preserve">
     <value>饱和度和亮度</value>
+  </data>
+  <data name="Forms.ColorPicker.SearchVariablesPlaceholder" xml:space="preserve">
+    <value>搜索变量…</value>
+  </data>
+  <data name="Forms.ColorPicker.UnsupportedReference" xml:space="preserve">
+    <value>无法在此编辑此颜色引用。</value>
+  </data>
+  <data name="Forms.ColorPicker.VariableLabel" xml:space="preserve">
+    <value>颜色变量</value>
+  </data>
+  <data name="Forms.ColorPicker.VariablePlaceholder" xml:space="preserve">
+    <value>选择颜色变量</value>
   </data>
   <data name="Forms.ColorPicker.Yellow" xml:space="preserve">
     <value>黄色</value>
@@ -13203,6 +13295,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Scripts.InputTypeBoolean" xml:space="preserve">
     <value>布尔</value>
   </data>
+  <data name="Scripts.InputTypeColor" xml:space="preserve">
+    <value>颜色</value>
+  </data>
   <data name="Scripts.InputTypeNumeric" xml:space="preserve">
     <value>数字</value>
   </data>
@@ -16977,6 +17072,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Variables.Manager.DeleteMessage" xml:space="preserve">
     <value>确定要删除 vars.{name} 吗？</value>
+  </data>
+  <data name="Variables.Manager.TypeColor" xml:space="preserve">
+    <value>颜色</value>
   </data>
   <data name="Variables.Manager.UnbindAction" xml:space="preserve">
     <value>解除绑定</value>

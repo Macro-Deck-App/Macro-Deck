@@ -368,7 +368,7 @@ describe('ScriptInputsPanelComponent runs-on-widget toggle', () => {
     fixture.detectChanges();
   });
 
-  it('offers exactly text, numeric and boolean as declarable input types', () => {
+  it('offers exactly text, numeric, boolean and color as declarable input types', () => {
     // The type select lives in the create/edit dialog, closed by default; open it, then open the
     // select's own listbox popup, so the rendered options actually exist in the DOM.
     (fixture.componentInstance as unknown as { openCreate(): void }).openCreate();
@@ -384,7 +384,7 @@ describe('ScriptInputsPanelComponent runs-on-widget toggle', () => {
       document.querySelectorAll<HTMLButtonElement>('.sel-option'),
     ).map(option => option.textContent!.trim());
 
-    expect(rendered).toEqual(['Text', 'Numeric', 'Boolean']);
+    expect(rendered).toEqual(['Text', 'Numeric', 'Boolean', 'Color']);
   });
 
   it('reflects the input as unchecked by default', () => {

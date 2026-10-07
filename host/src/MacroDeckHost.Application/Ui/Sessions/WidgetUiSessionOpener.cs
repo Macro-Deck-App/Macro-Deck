@@ -3,6 +3,7 @@ using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
+using MacroDeckHost.Application.Variables.Colors;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
@@ -26,6 +27,7 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 	private readonly IUiSessionBroker _broker;
 	private readonly IWidgetProviderAvailability _availability;
 	private readonly UnavailableWidgetSessionRecovery _recovery;
+	private readonly IColorReferenceResolver _colors;
 
 	public WidgetUiSessionOpener(
 		IFolderCache folderCache,
@@ -35,8 +37,10 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 		UiSessionRegistry registry,
 		IUiSessionBroker broker,
 		IWidgetProviderAvailability availability,
-		UnavailableWidgetSessionRecovery recovery)
+		UnavailableWidgetSessionRecovery recovery,
+		IColorReferenceResolver colors)
 	{
+		_colors = colors;
 		_availability = availability;
 		_recovery = recovery;
 		_folderCache = folderCache;
@@ -307,7 +311,7 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 		{
 			[UiWidgetSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(widgetId.ToString()),
 			[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(widget.Type),
-			[UiWidgetSurfaceAttributes.Data] = ParseStoredData(widget.Data),
+			[UiWidgetSurfaceAttributes.Data] = ParseStoredData(_colors.ResolveData(widget.Data, widgetId)),
 			[UiWidgetSurfaceAttributes.CornerRadius] = JsonSerializer.SerializeToElement(CornerRadiusOf(folder))
 		};
 
@@ -339,7 +343,7 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 	private FolderEntity? FindFolderOf(Guid widgetId)
 		=> _folderCache.GetAllFolders().FirstOrDefault(folder => folder.Widgets.Any(w => w.Id == widgetId));
 
-	private static Dictionary<string, JsonElement> BuildPreviewAttributes(string widgetType,
+	private Dictionary<string, JsonElement> BuildPreviewAttributes(string widgetType,
 		JsonElement data,
 		bool sample,
 		Guid? variableScopeWidgetId)
@@ -347,7 +351,7 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
 			[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(widgetType),
-			[UiWidgetSurfaceAttributes.Data] = data
+			[UiWidgetSurfaceAttributes.Data] = _colors.ResolveData(data, variableScopeWidgetId)
 		};
 
 		if (variableScopeWidgetId is { } scope)

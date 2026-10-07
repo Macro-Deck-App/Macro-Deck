@@ -1,3 +1,4 @@
+using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Compatibility;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Handshake;
@@ -89,6 +90,21 @@ public class PluginSessionServiceTests
 			Assert.That(result.Succeeded, Is.True);
 			Assert.That(result.Response!.Capabilities, Has.Count.EqualTo(1));
 			Assert.That(result.Response.Capabilities[0].Accepted, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_session_remembers_the_host_api_features_it_declared_and_an_older_plugin_has_none()
+	{
+		await _service.Create(Identity("com.example.new"),
+			Request() with { HostApiFeatures = [HostApiFeatures.ScriptInputColor, "some.future-feature"] });
+		await _service.Create(Identity("com.example.old"), Request());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_registry.HasHostApiFeature("com.example.new", HostApiFeatures.ScriptInputColor), Is.True);
+			Assert.That(_registry.HasHostApiFeature("com.example.new", "some.future-feature"), Is.False);
+			Assert.That(_registry.HasHostApiFeature("com.example.old", HostApiFeatures.ScriptInputColor), Is.False);
 		});
 	}
 

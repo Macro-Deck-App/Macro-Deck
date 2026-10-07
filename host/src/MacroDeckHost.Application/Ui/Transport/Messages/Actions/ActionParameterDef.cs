@@ -26,6 +26,9 @@ public class ActionParameterDef
 	public bool Multiline { get; set; }
 
 	public bool SupportsReset { get; set; }
+
+	public bool? AllowAlpha { get; set; }
+
 	public bool LiteralOnly { get; set; }
 
 	public string? ValidationRegex { get; set; }

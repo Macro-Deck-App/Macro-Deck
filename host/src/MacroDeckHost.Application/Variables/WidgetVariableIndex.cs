@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Caching;
+using MacroDeckHost.Application.Variables.Colors;
 using MacroDeckHost.Domain.Widgets;
 
 namespace MacroDeckHost.Application.Variables;
@@ -18,6 +19,10 @@ public interface IWidgetVariableIndex
 	bool LabelReferences(Guid widgetId, string variableName);
 
 	bool StateMappingReferences(Guid widgetId, string variableName);
+
+	IReadOnlyList<Guid> FindColorReferences(string variableName) => [];
+
+	bool ColorReferences(Guid widgetId, string variableName) => false;
 
 	void Rebuild();
 
@@ -80,13 +85,25 @@ public sealed class WidgetVariableIndex : IWidgetVariableIndex
 		=> _snapshot.ByWidget.TryGetValue(widgetId, out var references) &&
 			references.StateMappingNames.Contains(variableName);
 
+	public IReadOnlyList<Guid> FindColorReferences(string variableName)
+		=> _snapshot.ByColorName.TryGetValue(variableName, out var widgets) ? widgets : [];
+
+	public bool ColorReferences(Guid widgetId, string variableName)
+		=> _snapshot.ColorsByWidget.TryGetValue(widgetId, out var names) && names.Contains(variableName);
+
 	public void Rebuild()
 	{
 		lock (_writeLock)
 		{
 			var byWidget = new Dictionary<Guid, WidgetVariableReferences>();
+			var colorsByWidget = new Dictionary<Guid, IReadOnlySet<string>>();
 			foreach (var widget in _folderCache.GetAllFolders().SelectMany(folder => folder.Widgets))
 			{
+				if (ColorReferenceScanner.Names(widget.Data) is { Count: > 0 } colors)
+				{
+					colorsByWidget[widget.Id] = colors;
+				}
+
 				if (widget.Type != WidgetTypeIds.ActionButton)
 				{
 					continue;
@@ -99,7 +116,7 @@ public sealed class WidgetVariableIndex : IWidgetVariableIndex
 				}
 			}
 
-			Swap(byWidget);
+			Swap(byWidget, colorsByWidget);
 		}
 	}
 
@@ -108,11 +125,16 @@ public sealed class WidgetVariableIndex : IWidgetVariableIndex
 		var references = type == WidgetTypeIds.ActionButton
 			? WidgetVariableReferenceParser.Parse(data)
 			: WidgetVariableReferences.Empty;
+		var colors = ColorReferenceScanner.Names(data);
 
 		lock (_writeLock)
 		{
 			var current = _snapshot.ByWidget;
-			if (references.IsEmpty && !current.ContainsKey(widgetId))
+			var currentColors = _snapshot.ColorsByWidget;
+			if (references.IsEmpty &&
+				!current.ContainsKey(widgetId) &&
+				colors.Count == 0 &&
+				!currentColors.ContainsKey(widgetId))
 			{
 				return;
 			}
@@ -127,7 +149,17 @@ public sealed class WidgetVariableIndex : IWidgetVariableIndex
 				byWidget[widgetId] = references;
 			}
 
-			Swap(byWidget);
+			var colorsByWidget = new Dictionary<Guid, IReadOnlySet<string>>(currentColors);
+			if (colors.Count == 0)
+			{
+				colorsByWidget.Remove(widgetId);
+			}
+			else
+			{
+				colorsByWidget[widgetId] = colors;
+			}
+
+			Swap(byWidget, colorsByWidget);
 		}
 	}
 
@@ -135,18 +167,22 @@ public sealed class WidgetVariableIndex : IWidgetVariableIndex
 	{
 		lock (_writeLock)
 		{
-			if (!_snapshot.ByWidget.ContainsKey(widgetId))
+			if (!_snapshot.ByWidget.ContainsKey(widgetId) && !_snapshot.ColorsByWidget.ContainsKey(widgetId))
 			{
 				return;
 			}
 
 			var byWidget = new Dictionary<Guid, WidgetVariableReferences>(_snapshot.ByWidget);
 			byWidget.Remove(widgetId);
-			Swap(byWidget);
+			var colorsByWidget = new Dictionary<Guid, IReadOnlySet<string>>(_snapshot.ColorsByWidget);
+			colorsByWidget.Remove(widgetId);
+			Swap(byWidget, colorsByWidget);
 		}
 	}
 
-	private void Swap(Dictionary<Guid, WidgetVariableReferences> byWidget)
+	private void Swap(
+		Dictionary<Guid, WidgetVariableReferences> byWidget,
+		Dictionary<Guid, IReadOnlySet<string>> colorsByWidget)
 	{
 		var byLabelName = new Dictionary<string, List<Guid>>(StringComparer.Ordinal);
 		var byStateMappingName = new Dictionary<string, List<Guid>>(StringComparer.Ordinal);
@@ -161,7 +197,19 @@ public sealed class WidgetVariableIndex : IWidgetVariableIndex
 			AddProvider(byIconProvider, references.IconProvider, widgetId);
 		}
 
-		_snapshot = new Snapshot(byWidget, Freeze(byLabelName), Freeze(byStateMappingName), byProvider, byIconProvider);
+		var byColorName = new Dictionary<string, List<Guid>>(StringComparer.Ordinal);
+		foreach (var (widgetId, names) in colorsByWidget)
+		{
+			Add(byColorName, names, widgetId);
+		}
+
+		_snapshot = new Snapshot(byWidget,
+			Freeze(byLabelName),
+			Freeze(byStateMappingName),
+			byProvider,
+			byIconProvider,
+			colorsByWidget,
+			Freeze(byColorName));
 	}
 
 	private static void AddProvider(
@@ -215,12 +263,16 @@ public sealed class WidgetVariableIndex : IWidgetVariableIndex
 		IReadOnlyDictionary<string, IReadOnlyList<Guid>> ByLabelName,
 		IReadOnlyDictionary<string, IReadOnlyList<Guid>> ByStateMappingName,
 		IReadOnlyDictionary<(string IntegrationId, string ActionId), List<Guid>> ByProvider,
-		IReadOnlyDictionary<(string IntegrationId, string ActionId), List<Guid>> ByIconProvider)
+		IReadOnlyDictionary<(string IntegrationId, string ActionId), List<Guid>> ByIconProvider,
+		IReadOnlyDictionary<Guid, IReadOnlySet<string>> ColorsByWidget,
+		IReadOnlyDictionary<string, IReadOnlyList<Guid>> ByColorName)
 	{
 		public static readonly Snapshot Empty = new(new Dictionary<Guid, WidgetVariableReferences>(),
 			new Dictionary<string, IReadOnlyList<Guid>>(StringComparer.Ordinal),
 			new Dictionary<string, IReadOnlyList<Guid>>(StringComparer.Ordinal),
 			new Dictionary<(string IntegrationId, string ActionId), List<Guid>>(),
-			new Dictionary<(string IntegrationId, string ActionId), List<Guid>>());
+			new Dictionary<(string IntegrationId, string ActionId), List<Guid>>(),
+			new Dictionary<Guid, IReadOnlySet<string>>(),
+			new Dictionary<string, IReadOnlyList<Guid>>(StringComparer.Ordinal));
 	}
 }

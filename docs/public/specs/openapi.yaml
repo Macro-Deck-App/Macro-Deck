@@ -65,6 +65,9 @@ x-macrodeck-limits:
   maxUiWidgetSessionsPerProvider: 128
   maxVariableCatalogPageSize: 200
   maxVariableSubscriptions: 1024
+  maxColorWatches: 1024
+  maxColorReferenceLength: 1024
+  maxColorReferenceSteps: 32
   maxVariableValuesPerBatch: 128
   maxCalendarReplyBytes: 196608
   maxCalendarTitleLength: 256
@@ -600,6 +603,11 @@ components:
           type: integer
         maxSessionsPerPlugin:
           type: integer
+        maxColorWatches:
+          type: integer
+          description: >-
+            How many colours one plugin may watch through the colors host api. Absent from a host
+            that predates that api.
 
     PluginProtocolTimeoutsDescriptor:
       type: object

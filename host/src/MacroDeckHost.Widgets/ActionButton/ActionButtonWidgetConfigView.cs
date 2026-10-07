@@ -940,6 +940,7 @@ internal static class ActionButtonWidgetConfigView
 							new UiColorInput
 							{
 								Key = "labelColor",
+								AllowVariables = true,
 								Label = AppStrings.Widgets.Editor.LabelColor(),
 								Binding = labelColorBinding,
 								// A reset affordance ahead of the swatches (issue #837), returning to unset -
@@ -951,6 +952,7 @@ internal static class ActionButtonWidgetConfigView
 							new UiColorInput
 							{
 								Key = "labelBoxColor",
+								AllowVariables = true,
 								Label = AppStrings.Widgets.Editor.LabelBoxColor(),
 								Binding = labelBoxColorBinding,
 								SupportsReset = true,
@@ -998,6 +1000,7 @@ internal static class ActionButtonWidgetConfigView
 								Content = () => new UiColorInput
 								{
 									Key = "iconColor",
+									AllowVariables = true,
 									Label = AppStrings.Widgets.Editor.IconColor(),
 									Binding = iconColorBinding,
 									SupportsReset = true,
@@ -1914,6 +1917,7 @@ internal static class ActionButtonWidgetConfigView
 			new UiColorInput
 			{
 				Key = colorKey,
+				AllowVariables = true,
 				Label = colorLabel,
 				Binding = colorBinding,
 				SupportsReset = true,

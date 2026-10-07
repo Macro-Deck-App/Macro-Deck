@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using MacroDeckHost.Application.Actions;
+using MacroDeckHost.Application.Variables.Colors;
 using MacroDeckHost.Domain.Entities;
 
 namespace MacroDeckHost.Application.Scripts;
@@ -141,6 +142,10 @@ public static class ScriptInputBinder
 						value = null;
 						return false;
 				}
+
+			case ScriptInputType.Color:
+				value = RgbaColor.Canonicalize(display);
+				return value is not null;
 
 			case ScriptInputType.Text:
 			default:
