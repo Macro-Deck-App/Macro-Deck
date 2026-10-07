@@ -108,7 +108,7 @@ internal static partial class ColorGrammar
 		RegexOptions.CultureInvariant)]
 	private static partial Regex MixStepPattern();
 
-	[GeneratedRegex(@"\A(?<fn>rgba?)\(\s*(?<r>\d{1,3})\s*,\s*(?<g>\d{1,3})\s*,\s*(?<b>\d{1,3})\s*(?:,\s*(?<a>\d*\.?\d+)\s*)?\)\z",
+	[GeneratedRegex(@"\A(?<fn>rgba?)\(\s*(?<r>\d{1,3})\s*,\s*(?<g>\d{1,3})\s*,\s*(?<b>\d{1,3})\s*(?:,\s*(?<a>\d+(?:\.\d+)?|\.\d+)\s*)?\)\z",
 		RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
 	private static partial Regex FunctionalPattern();
 }
