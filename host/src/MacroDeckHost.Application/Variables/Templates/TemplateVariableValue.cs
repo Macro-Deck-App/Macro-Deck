@@ -1,4 +1,5 @@
 using System.Globalization;
+using MacroDeckHost.Application.Variables.Colors;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 
@@ -39,6 +40,11 @@ public static class TemplateVariableValue
 
 				return (null, new VariableTemplateError(VariableTemplateError.NotBoolean, rendered));
 			}
+
+			case VariableType.Color:
+				return RgbaColor.Canonicalize(rendered.Trim()) is { } color
+					? (color, null)
+					: (null, new VariableTemplateError(VariableTemplateError.NotColor, rendered));
 
 			default:
 				return (rendered, null);

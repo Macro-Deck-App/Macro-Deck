@@ -166,6 +166,18 @@
   box-shadow: inset 0 0 0 1px var(--color-border-overlay);
 }
 
+.te-swatch-missing {
+  box-shadow: none;
+  border: 1px dashed var(--color-warning);
+}
+
+.te-range-missing {
+  @include ds.truncate;
+  min-width: 0;
+  font-size: var(--text-sm);
+  color: var(--color-warning);
+}
+
 .te-range-text {
   flex: 1 1 auto;
   min-width: 0;

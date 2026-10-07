@@ -69,7 +69,8 @@ public class NetworkRestartNotifierTests
 		};
 		var preferences = new AppPreferenceService(new FakeAppPreferenceRepository(),
 			new FakeBuildEnvironment(),
-			listenerState);
+			listenerState,
+			TestColors.None);
 		var notifications = new UserNotificationStore();
 		var restart = new FakeRestartService
 		{

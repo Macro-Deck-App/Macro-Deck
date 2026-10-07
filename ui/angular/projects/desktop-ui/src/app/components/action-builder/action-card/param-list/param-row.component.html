@@ -239,6 +239,9 @@
         @case ('color') {
           <shared-color-picker
             [ngModel]="stringValue"
+            [allowVariables]="allowReferences && !param.literalOnly"
+            [allowAlpha]="param.allowAlpha === true"
+            [variableScopeRefId]="store.previewScopeRefId()"
             [resetValue]="colorResetValue"
             (ngModelChange)="onChange($event)">
           </shared-color-picker>

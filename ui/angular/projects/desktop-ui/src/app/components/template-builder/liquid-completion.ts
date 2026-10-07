@@ -69,7 +69,7 @@ export function liquidCompletions(doc: string, pos: number, variables: readonly 
         .map(snippet => ({
           kind: 'filter',
           label: snippet.label,
-          insert: snippet.insert.replace(/^ \| /, ''),
+          insert: snippet.insert.replace(/^ \| /, '').trimStart(),
           hintKey: snippet.hintKey,
         })),
     };

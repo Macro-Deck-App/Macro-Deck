@@ -4,7 +4,11 @@ using MacroDeckHost.Application.Network.Tls;
 
 namespace MacroDeckHost.Application.Services;
 
-public record AppearanceSettings(string ThemeMode, string AccentColor, string FontFamily = "");
+public record AppearanceSettings(
+	string ThemeMode,
+	string AccentColor,
+	string FontFamily = "",
+	string? AccentColorSource = null);
 
 public record LoggingSettings(LogEntryLevel MinimumLevel, LogEntryLevel DefaultMinimumLevel);
 

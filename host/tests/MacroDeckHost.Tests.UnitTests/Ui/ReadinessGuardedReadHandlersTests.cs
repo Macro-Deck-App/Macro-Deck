@@ -62,7 +62,7 @@ public class ReadinessGuardedReadHandlersTests
 	public async Task GetFolders_waits_for_startup_readiness()
 	{
 		var readiness = new StartupReadiness();
-		var handler = new GetFoldersRequestMessageHandler(new StubFolderCache(), new StubProfileRegistry(), readiness);
+		var handler = new GetFoldersRequestMessageHandler(new StubFolderCache(), new StubProfileRegistry(), readiness, TestColors.None);
 
 		var pending = handler.Handle(new GetFoldersRequest(), CancellationToken.None);
 		Assert.That(pending.IsCompleted, Is.False);

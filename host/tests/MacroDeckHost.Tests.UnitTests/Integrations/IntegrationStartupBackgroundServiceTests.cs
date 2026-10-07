@@ -248,7 +248,8 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
 			new LoggerConfiguration().CreateLogger(),
-			new MessageBroker(Serilog.Core.Logger.None));
+			new MessageBroker(Serilog.Core.Logger.None),
+			TestColors.Watches);
 
 	private static IntegrationInitializer CreateRealInitializer(IServiceScopeFactory scopeFactory)
 		=> new(scopeFactory,
@@ -273,7 +274,8 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
 			new LoggerConfiguration().CreateLogger(),
-			new MessageBroker(Serilog.Core.Logger.None));
+			new MessageBroker(Serilog.Core.Logger.None),
+			TestColors.Watches);
 
 	private static ServiceProvider BuildScopeServices()
 		=> new ServiceCollection()

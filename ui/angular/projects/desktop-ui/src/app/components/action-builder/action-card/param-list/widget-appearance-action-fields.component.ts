@@ -34,18 +34,22 @@ type AppearanceKind = 'label' | 'background' | 'labelColor' | 'accentColor' | 'i
         }
         @case ('background') {
           <div class="form-group form-group--dense"><label>{{ 'macrodeck.app:ActionBuilder.WidgetAppearance.ColorField' | translate }}</label><shared-color-picker [ngModel]="stringValue('color')"
+            [allowVariables]="true" [allowAlpha]="true" [variableScopeRefId]="store.previewScopeRefId()"
             [resetValue]="resetValue" (ngModelChange)="write('color', $event)" /></div>
         }
         @case ('labelColor') {
           <div class="form-group form-group--dense"><label>{{ 'macrodeck.app:ActionBuilder.WidgetAppearance.ColorField' | translate }}</label><shared-color-picker [ngModel]="stringValue('color')"
+            [allowVariables]="true" [allowAlpha]="true" [variableScopeRefId]="store.previewScopeRefId()"
             [resetValue]="resetValue" (ngModelChange)="write('color', $event)" /></div>
         }
         @case ('accentColor') {
           <div class="form-group form-group--dense"><label>{{ 'macrodeck.app:ActionBuilder.WidgetAppearance.ColorField' | translate }}</label><shared-color-picker [ngModel]="stringValue('color')"
+            [allowVariables]="true" [allowAlpha]="true" [variableScopeRefId]="store.previewScopeRefId()"
             [resetValue]="resetValue" (ngModelChange)="write('color', $event)" /></div>
         }
         @case ('iconColor') {
           <div class="form-group form-group--dense"><label>{{ 'macrodeck.app:ActionBuilder.WidgetAppearance.ColorField' | translate }}</label><shared-color-picker [ngModel]="stringValue('color')"
+            [allowVariables]="true" [allowAlpha]="true" [variableScopeRefId]="store.previewScopeRefId()"
             [resetValue]="resetValue" (ngModelChange)="write('color', $event)" /></div>
         }
         @case ('iconAppearance') {

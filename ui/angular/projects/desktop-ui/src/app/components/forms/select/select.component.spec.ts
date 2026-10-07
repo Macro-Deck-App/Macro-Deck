@@ -1,4 +1,5 @@
-import { Component, provideZonelessChangeDetection, ChangeDetectionStrategy } from '@angular/core';
+import { Component, provideZonelessChangeDetection, ChangeDetectionStrategy, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SelectComponent, SelectOption } from './select.component';
 import { provideLocalizationTesting } from '../../../../testing/localization-test-support';
@@ -249,5 +250,138 @@ describe('SelectComponent type-ahead', () => {
     type('Enter');
 
     expect(changes).toEqual(['raspberry']);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SelectComponent, FormsModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: `
+    <shared-select
+      placeholder="Choose"
+      searchPlaceholder="Search"
+      emptyText="None yet"
+      noMatchesText="No match"
+      [searchable]="true"
+      [fitContent]="true"
+      [showTitle]="true"
+      [options]="options()"
+      [ngModel]="value()"
+      (ngModelChange)="value.set($event)" />
+  `,
+})
+class SearchableHostComponent {
+  options = signal<SelectOption[]>([
+    { value: 'primary', label: 'primary', swatch: '#3366ff' },
+    { value: 'secondary', label: 'secondary', swatch: '#ff000080' },
+    { value: 'surface', label: 'surface', swatch: null },
+  ]);
+  value = signal<string | null>('primary');
+}
+
+describe('SelectComponent with icons, swatches and search', () => {
+  let fixture: ComponentFixture<SearchableHostComponent>;
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      imports: [SearchableHostComponent],
+      providers: [provideZonelessChangeDetection(), ...provideLocalizationTesting()],
+    });
+    fixture = TestBed.createComponent(SearchableHostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+  });
+
+  function trigger(): HTMLButtonElement {
+    return fixture.nativeElement.querySelector('button.control') as HTMLButtonElement;
+  }
+
+  function search(): HTMLInputElement {
+    return document.querySelector('.sel-search-input') as HTMLInputElement;
+  }
+
+  function optionLabels(): string[] {
+    return Array.from(document.querySelectorAll('.sel-option .sel-option-label')).map(label => label.textContent!.trim());
+  }
+
+  function key(target: HTMLElement, name: string): void {
+    target.dispatchEvent(new KeyboardEvent('keydown', { key: name, bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+  }
+
+  function open(): void {
+    trigger().click();
+    fixture.detectChanges();
+  }
+
+  it('shows the selected option with its swatch and a tooltip on the trigger', () => {
+    expect(trigger().textContent).toContain('primary');
+    expect(trigger().getAttribute('title')).toBe('primary');
+    expect((trigger().querySelector('.sel-swatch') as HTMLElement).style.getPropertyValue('--sel-swatch')).toBe('#3366ff');
+  });
+
+  it('draws a swatch per option, an empty one for no colour, and an icon where one is given', () => {
+    fixture.componentInstance.options.update(options => [...options, { value: 'mix', label: 'Mix', icon: 'blend' }]);
+    fixture.detectChanges();
+    open();
+
+    const options = Array.from(document.querySelectorAll('.sel-option'));
+    expect(options[2].querySelector('.sel-swatch-empty')).toBeTruthy();
+    expect(options[3].querySelector('.icon-blend')).toBeTruthy();
+  });
+
+  it('filters by the search text and says when nothing matches or nothing exists', () => {
+    open();
+    search().value = 'SEC';
+    search().dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(optionLabels()).toEqual(['secondary']);
+
+    search().value = 'zzz';
+    search().dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(document.querySelector('.sel-empty')!.textContent!.trim()).toBe('No match');
+
+    key(search(), 'Tab');
+    fixture.componentInstance.options.set([]);
+    fixture.detectChanges();
+    open();
+    expect(document.querySelector('.sel-empty')!.textContent!.trim()).toBe('None yet');
+  });
+
+  it('moves with the arrow keys from the search field, picks with Enter and returns focus on Tab', () => {
+    open();
+    search().focus();
+    key(search(), 'ArrowDown');
+    const active = document.getElementById(search().getAttribute('aria-activedescendant')!)!;
+    expect(active.textContent).toContain('secondary');
+
+    key(search(), 'Enter');
+    expect(fixture.componentInstance.value()).toBe('secondary');
+    expect(document.activeElement).toBe(trigger());
+
+    open();
+    search().focus();
+    key(search(), 'Tab');
+    expect(trigger().getAttribute('aria-expanded')).toBe('false');
+    expect(document.activeElement).toBe(trigger());
+  });
+
+  it('sizes a fit-content panel to its labels rather than to a narrow trigger', () => {
+    fixture.componentInstance.options.set([
+      { value: 'a', label: 'Increase saturation considerably', icon: 'contrast' },
+      { value: 'b', label: 'Darken', icon: 'sun-dim' },
+    ]);
+    (fixture.nativeElement.querySelector('shared-select') as HTMLElement).style.width = '60px';
+    fixture.detectChanges();
+    open();
+
+    const listbox = document.querySelector('.sel-listbox') as HTMLElement;
+    expect(listbox.getBoundingClientRect().width).toBeGreaterThan(trigger().getBoundingClientRect().width);
+    for (const label of Array.from(document.querySelectorAll<HTMLElement>('.sel-option-label'))) {
+      expect(label.scrollWidth).toBeLessThanOrEqual(label.clientWidth);
+    }
   });
 });

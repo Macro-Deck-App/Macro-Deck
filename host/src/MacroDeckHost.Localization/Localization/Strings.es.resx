@@ -3470,6 +3470,15 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Forms.CodeEditor.InvalidJson" xml:space="preserve">
     <value>JSON no válido</value>
   </data>
+  <data name="Forms.ColorPicker.AddModifier" xml:space="preserve">
+    <value>Añadir modificador</value>
+  </data>
+  <data name="Forms.ColorPicker.AlphaLabel" xml:space="preserve">
+    <value>Opacidad</value>
+  </data>
+  <data name="Forms.ColorPicker.AmountLabel" xml:space="preserve">
+    <value>Cantidad</value>
+  </data>
   <data name="Forms.ColorPicker.Blue" xml:space="preserve">
     <value>Azul</value>
   </data>
@@ -3494,8 +3503,73 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Forms.ColorPicker.HueLabel" xml:space="preserve">
     <value>Tono</value>
   </data>
+  <data name="Forms.ColorPicker.MissingVariable" xml:space="preserve">
+    <value>No se encontró la variable "{name}"</value>
+  </data>
+  <data name="Forms.ColorPicker.MixWithLabel" xml:space="preserve">
+    <value>Mezclar con</value>
+  </data>
+  <data name="Forms.ColorPicker.ModeLabel" xml:space="preserve">
+    <value>Origen del color</value>
+  </data>
+  <data name="Forms.ColorPicker.ModeStatic" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="Forms.ColorPicker.ModeVariable" xml:space="preserve">
+    <value>Variable</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.Darken" xml:space="preserve">
+    <value>Oscurecer</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.Desaturate" xml:space="preserve">
+    <value>Reducir saturación</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.Hue" xml:space="preserve">
+    <value>Desplazar tono</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.IncreaseOpacity" xml:space="preserve">
+    <value>Aumentar opacidad</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.Lighten" xml:space="preserve">
+    <value>Aclarar</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.Mix" xml:space="preserve">
+    <value>Mezclar</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.Opacity" xml:space="preserve">
+    <value>Establecer opacidad</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.ReduceOpacity" xml:space="preserve">
+    <value>Reducir opacidad</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.Saturate" xml:space="preserve">
+    <value>Aumentar saturación</value>
+  </data>
+  <data name="Forms.ColorPicker.ModifierCount.One" xml:space="preserve">
+    <value>{count} modificador</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Forms.ColorPicker.ModifierCount.Other" xml:space="preserve">
+    <value>{count} modificadores</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Forms.ColorPicker.ModifierLabel" xml:space="preserve">
+    <value>Modificador</value>
+  </data>
+  <data name="Forms.ColorPicker.ModifierSummary" xml:space="preserve">
+    <value>{modifier} {amount}</value>
+  </data>
+  <data name="Forms.ColorPicker.NoColorVariables" xml:space="preserve">
+    <value>Aún no hay variables de color. Crea una en Variables.</value>
+  </data>
+  <data name="Forms.ColorPicker.NoMatchingVariables" xml:space="preserve">
+    <value>No hay variables que coincidan</value>
+  </data>
   <data name="Forms.ColorPicker.Orange" xml:space="preserve">
     <value>Naranja</value>
+  </data>
+  <data name="Forms.ColorPicker.OriginalLabel" xml:space="preserve">
+    <value>Original</value>
   </data>
   <data name="Forms.ColorPicker.Pink" xml:space="preserve">
     <value>Rosa</value>
@@ -3506,11 +3580,29 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Forms.ColorPicker.Red" xml:space="preserve">
     <value>Rojo</value>
   </data>
+  <data name="Forms.ColorPicker.RemoveModifierAriaLabel" xml:space="preserve">
+    <value>Quitar modificador</value>
+  </data>
   <data name="Forms.ColorPicker.ResetAriaLabel" xml:space="preserve">
     <value>Restablecer al color predeterminado</value>
   </data>
+  <data name="Forms.ColorPicker.ResultLabel" xml:space="preserve">
+    <value>Resultado</value>
+  </data>
   <data name="Forms.ColorPicker.SaturationBrightnessLabel" xml:space="preserve">
     <value>Saturación y brillo</value>
+  </data>
+  <data name="Forms.ColorPicker.SearchVariablesPlaceholder" xml:space="preserve">
+    <value>Buscar variables…</value>
+  </data>
+  <data name="Forms.ColorPicker.UnsupportedReference" xml:space="preserve">
+    <value>Esta referencia de color no se puede editar aquí.</value>
+  </data>
+  <data name="Forms.ColorPicker.VariableLabel" xml:space="preserve">
+    <value>Variable de color</value>
+  </data>
+  <data name="Forms.ColorPicker.VariablePlaceholder" xml:space="preserve">
+    <value>Elige una variable de color</value>
   </data>
   <data name="Forms.ColorPicker.Yellow" xml:space="preserve">
     <value>Amarillo</value>
@@ -13211,6 +13303,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Scripts.InputTypeBoolean" xml:space="preserve">
     <value>Booleano</value>
   </data>
+  <data name="Scripts.InputTypeColor" xml:space="preserve">
+    <value>Color</value>
+  </data>
   <data name="Scripts.InputTypeNumeric" xml:space="preserve">
     <value>Numérico</value>
   </data>
@@ -16606,6 +16701,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="TemplateBuilder.FilterCategory.Numbers" xml:space="preserve">
     <value>Números</value>
   </data>
+  <data name="TemplateBuilder.FilterCategory.Colors" xml:space="preserve">
+    <value>Colores</value>
+  </data>
   <data name="TemplateBuilder.FilterCategory.Scriban" xml:space="preserve">
     <value>Avanzado (Scriban)</value>
   </data>
@@ -16710,6 +16808,36 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="TemplateBuilder.Filters.Round.Hint" xml:space="preserve">
     <value>Redondear un número a N decimales</value>
+  </data>
+  <data name="TemplateBuilder.Filters.Color.Hint" xml:space="preserve">
+    <value>Leer un valor como color</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorLighten.Hint" xml:space="preserve">
+    <value>Aclarar un color un N por ciento</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorDarken.Hint" xml:space="preserve">
+    <value>Oscurecer un color un N por ciento</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorSaturate.Hint" xml:space="preserve">
+    <value>Saturar un color un N por ciento</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorDesaturate.Hint" xml:space="preserve">
+    <value>Desaturar un color un N por ciento</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorOpacity.Hint" xml:space="preserve">
+    <value>Fijar la opacidad de un color en N por ciento</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorIncreaseOpacity.Hint" xml:space="preserve">
+    <value>Hacer un color un N por ciento más opaco</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorReduceOpacity.Hint" xml:space="preserve">
+    <value>Hacer un color un N por ciento más transparente</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorHue.Hint" xml:space="preserve">
+    <value>Desplazar el tono de un color N grados</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorMix.Hint" xml:space="preserve">
+    <value>Mezclar otro color al N por ciento</value>
   </data>
   <data name="TemplateBuilder.Filters.Size.Hint" xml:space="preserve">
     <value>Número de elementos o caracteres</value>
@@ -16986,6 +17114,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Variables.Manager.DeleteMessage" xml:space="preserve">
     <value>¿Seguro que quieres eliminar vars.{name}?</value>
   </data>
+  <data name="Variables.Manager.TypeColor" xml:space="preserve">
+    <value>Color</value>
+  </data>
   <data name="Variables.Manager.UnbindAction" xml:space="preserve">
     <value>Desvincular</value>
   </data>
@@ -17149,6 +17280,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Variables.Manager.TemplateErrors.NotBoolean" xml:space="preserve">
     <value>La plantilla produce «{value}», que no es true ni false</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.NotColor" xml:space="preserve">
+    <value>La plantilla produce «{value}», que no es un color</value>
   </data>
   <data name="Variables.Manager.TemplateErrors.CircularReference" xml:space="preserve">
     <value>La plantilla se lee a sí misma a través de otras variables de plantilla</value>

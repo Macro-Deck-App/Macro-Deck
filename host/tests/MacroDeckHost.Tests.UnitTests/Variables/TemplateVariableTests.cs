@@ -155,6 +155,37 @@ public class TemplateVariableTests
 	}
 
 	[Test]
+	public async Task A_color_template_stores_the_canonical_color_and_follows_its_source()
+	{
+		var primary = await Plain("primary", VariableType.Color, "#FF0000");
+		var created = await Template("primary_dark", VariableType.Color, "{{ vars.primary | color | color_darken: 50 }}");
+
+		var first = Value(created.Data!);
+		await _service.SetValue(primary.Id, "rgb(0, 0, 255)");
+		await Settle();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(first, Is.EqualTo("#800000"));
+			Assert.That(Value(created.Data!), Is.EqualTo("#000080"));
+			Assert.That(_registry.IsAvailable(created.Data!.Id), Is.True);
+		});
+	}
+
+	[TestCase("blue-ish")]
+	[TestCase("")]
+	public async Task A_color_template_that_renders_no_color_is_unavailable(string rendered)
+	{
+		var created = await Template("accent", VariableType.Color, rendered);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_registry.IsAvailable(created.Data!.Id), Is.False);
+			Assert.That(created.Data.TemplateError!.Code, Is.EqualTo(VariableTemplateError.NotColor));
+		});
+	}
+
+	[Test]
 	public async Task An_invalid_result_does_not_stop_other_template_variables_from_updating()
 	{
 		var source = await Plain("source", VariableType.Text, "1");

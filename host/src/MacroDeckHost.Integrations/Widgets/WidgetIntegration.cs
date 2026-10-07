@@ -121,9 +121,7 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			AppStrings.Integrations.Widgets.Actions.SetBackgroundColorDescription(),
 			WidgetAppearanceProperty.BackgroundColor,
 			[
-				ActionParameter.Color("color",
-					label: AppStrings.Integrations.Widgets.Actions.ColorLabel(),
-					supportsReset: true)
+				AlphaColor(AppStrings.Integrations.Widgets.Actions.ColorLabel())
 			],
 			() => _widgets,
 			context => new WidgetAppearancePatch
@@ -142,9 +140,7 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			AppStrings.Integrations.Widgets.Actions.SetLabelColorDescription(),
 			WidgetAppearanceProperty.LabelColor,
 			[
-				ActionParameter.Color("color",
-					label: AppStrings.Integrations.Widgets.Actions.ColorLabel(),
-					supportsReset: true)
+				AlphaColor(AppStrings.Integrations.Widgets.Actions.ColorLabel())
 			],
 			() => _widgets,
 			context => new WidgetAppearancePatch
@@ -163,9 +159,7 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			AppStrings.Integrations.Widgets.Actions.SetAccentColorDescription(),
 			WidgetAppearanceProperty.AccentColor,
 			[
-				ActionParameter.Color("color",
-					label: AppStrings.Integrations.Widgets.Actions.ColorLabel(),
-					supportsReset: true)
+				AlphaColor(AppStrings.Integrations.Widgets.Actions.ColorLabel())
 			],
 			() => _widgets,
 			context => new WidgetAppearancePatch
@@ -184,9 +178,7 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			AppStrings.Integrations.Widgets.Actions.SetIconColorDescription(),
 			WidgetAppearanceProperty.IconColor,
 			[
-				ActionParameter.Color("color",
-					label: AppStrings.Integrations.Widgets.Actions.ColorLabel(),
-					supportsReset: true)
+				AlphaColor(AppStrings.Integrations.Widgets.Actions.ColorLabel())
 			],
 			() => _widgets,
 			context => new WidgetAppearancePatch
@@ -372,10 +364,8 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 					],
 					label: AppStrings.Integrations.Widgets.Actions.StyleLabel(),
 					defaultValue: WidgetActionParameters.Unchanged),
-				ActionParameter.Color("color",
-					label: AppStrings.Integrations.Widgets.Actions.ColorLabel(),
-					description: AppStrings.Integrations.Widgets.Actions.BorderColorDescription(),
-					supportsReset: true)
+				AlphaColor(AppStrings.Integrations.Widgets.Actions.ColorLabel(),
+					AppStrings.Integrations.Widgets.Actions.BorderColorDescription())
 			],
 			() => _widgets,
 			context => new WidgetAppearancePatch
@@ -388,6 +378,17 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			context => WidgetActionParameters.IsReset(context, "color")
 				? [WidgetAppearanceProperty.BorderColor]
 				: []);
+
+	private static ActionParameter AlphaColor(LocalizedText label, LocalizedText description = default)
+		=> new()
+		{
+			Name = "color",
+			Type = ActionParameterType.Color,
+			Label = label,
+			Description = description,
+			SupportsReset = true,
+			AllowAlpha = true
+		};
 
 	private static string? ReadText(ActionExecutionContext context, string name)
 		=> context.Parameters.TryGetValue(name, out var value) ? value.ToString() ?? string.Empty : null;

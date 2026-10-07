@@ -53,4 +53,12 @@ public class PluginConnectionHostedServiceTests
 
 		Assert.That(request.Sdk, Is.Null);
 	}
+
+	[Test]
+	public void The_built_session_request_announces_that_it_reads_colour_script_inputs()
+	{
+		var request = PluginConnectionHostedService.BuildSessionRequest([], _metadata, null);
+
+		Assert.That(request.HostApiFeatures, Does.Contain(MacroDeck.Plugin.Protocol.Callbacks.HostApiFeatures.ScriptInputColor));
+	}
 }

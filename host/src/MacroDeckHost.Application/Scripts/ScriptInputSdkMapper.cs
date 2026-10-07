@@ -20,6 +20,7 @@ public static class ScriptInputSdkMapper
 	{
 		ScriptInputType.Numeric => SdkScriptInputType.Numeric,
 		ScriptInputType.Boolean => SdkScriptInputType.Boolean,
+		ScriptInputType.Color => SdkScriptInputType.Color,
 		_ => SdkScriptInputType.Text
 	};
 }

@@ -75,6 +75,7 @@ internal static class ClockWidgetConfigView
 					new UiColorInput
 					{
 						Key = "textColor",
+						AllowVariables = true,
 						Label = AppStrings.Widgets.Clock.TextColor(),
 						Binding = Bind.To(textColor),
 						SupportsReset = true,

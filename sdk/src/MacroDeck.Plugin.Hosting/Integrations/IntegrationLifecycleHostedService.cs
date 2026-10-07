@@ -118,11 +118,13 @@ internal sealed class IntegrationLifecycleHostedService(
 
 		await _gate.WaitAsync(CancellationToken.None);
 		var messages = services.GetService<RemoteMessageChannel>();
+		var colors = services.GetService<RemoteColorApi>();
 		try
 		{
 			// Before ShutdownAsync: an integration disposing its registrations there must not hand
 			// its topics to another plugin while it is about to register them again.
 			messages?.ReleaseLifecycleRegistrations();
+			colors?.ReleaseLifecycleWatches();
 			await ReleaseVideoStreamsAsync(videoStreams => videoStreams.ReleaseAllAsync(notifyHost: true));
 
 			if (_initialized.Count > 0)
@@ -208,6 +210,11 @@ internal sealed class IntegrationLifecycleHostedService(
 			if (messages is not null)
 			{
 				await CompleteMessagingReleaseAsync(messages);
+			}
+
+			if (colors is not null)
+			{
+				await colors.SyncAfterReleaseAsync();
 			}
 		}
 		finally

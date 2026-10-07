@@ -80,6 +80,7 @@ internal static class VariableDtoMapper
 		DomainType.Text => "text",
 		DomainType.Numeric => "numeric",
 		DomainType.Boolean => "boolean",
+		DomainType.Color => "color",
 		_ => t.ToString().ToLowerInvariant()
 	};
 
@@ -95,6 +96,7 @@ internal static class VariableDtoMapper
 			"text" => DomainType.Text,
 			"numeric" => DomainType.Numeric,
 			"boolean" => DomainType.Boolean,
+			"color" => DomainType.Color,
 			_ => null
 		};
 	}

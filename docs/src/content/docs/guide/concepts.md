@@ -381,6 +381,10 @@ Values you can show and use anywhere:
 
 Show one in a label with `{{ vars.deaths }}`, like the **Deaths: 3** button above.
 
+A user variable is **Text**, **Numeric**, **Boolean** or **Color**. A Color variable holds a color such as
+`#3366ff` that widgets, folder backgrounds and the accent color can follow, see
+[Colors from a variable](/guide/tips/#colors-from-a-variable).
+
 Every speaker and microphone gets its own volume and mute variable, named after the device, for
 example `system_audio_input_usb_mic_volume_percent`. An unplugged device keeps its variables; they
 read as unavailable until it is back. The volume actions can control the default output, the default
@@ -451,7 +455,7 @@ only when its value really changes. **Template settings** in the variable's menu
 the decimal places later; to change the type, create the variable again.
 
 The type is checked: a **Numeric** variable needs a number with a dot as the decimal separator, a
-**Boolean** variable needs `true`, `false`, `1` or `0`. While the template produces something else or
+**Boolean** variable needs `true`, `false`, `1` or `0`, a **Color** variable a color such as `#FF8800`. While the template produces something else or
 cannot be rendered, the variable reads as unavailable and its row says why. A template that reads its
 own variable, directly or through other template variables, is refused, and if a later change closes
 such a loop, the variables in it read as unavailable until the loop is gone.

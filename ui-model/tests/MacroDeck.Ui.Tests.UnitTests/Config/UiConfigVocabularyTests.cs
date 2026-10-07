@@ -171,6 +171,32 @@ public class UiConfigVocabularyTests
 	}
 
 	[Test]
+	public void Colour_and_thresholds_inputs_authored_without_the_variables_flag_emit_the_same_nodes_as_before()
+	{
+		var color = UiViewBuilder.Build(ConfigSurface(), Configure(new UiColorInput { Key = "color" }));
+		var thresholds = UiViewBuilder.Build(ConfigSurface(), Configure(new UiThresholdsInput { Key = "thresholds" }));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Walk(color.Root).Single(n => n.Type == UiConfigPrimitives.Color).Properties.Keys,
+				Does.Not.Contain(UiConfigProperties.AllowVariables));
+			Assert.That(Walk(thresholds.Root).Single(n => n.Type == UiConfigPrimitives.Thresholds).Properties.Keys,
+				Does.Not.Contain(UiConfigProperties.AllowVariables));
+		});
+	}
+
+	[Test]
+	public void A_colour_input_offering_variables_carries_the_flag()
+	{
+		var tree = UiViewBuilder.Build(ConfigSurface(),
+			Configure(new UiColorInput { Key = "color", AllowVariables = true }));
+
+		var node = Walk(tree.Root).Single(n => n.Type == UiConfigPrimitives.Color);
+
+		Assert.That(node.Properties[UiConfigProperties.AllowVariables].GetBoolean(), Is.True);
+	}
+
+	[Test]
 	public void A_colour_input_offering_transparent_carries_the_flag()
 	{
 		var tree = UiViewBuilder.Build(ConfigSurface(),
@@ -310,7 +336,7 @@ public class UiConfigVocabularyTests
 						Configure(
 							WithOptions(new UiMultiSelectInput { Key = "orderedMultiSelect", Reorderable = true })),
 						Configure(new UiColorInput { Key = "color" }),
-						Configure(new UiColorInput { Key = "background", AllowTransparent = true }),
+						Configure(new UiColorInput { Key = "background", AllowTransparent = true, AllowVariables = true }),
 						Configure(new UiFileInput
 							{ Key = "file", FileExtensions = UiValue.Of<IReadOnlyList<string>>(["txt"]) }),
 						Configure(new UiFolderInput { Key = "folder" }),
@@ -374,6 +400,7 @@ public class UiConfigVocabularyTests
 							FixedCount = true,
 							FixedColors = true,
 							MaxCount = 6,
+							AllowVariables = true,
 						}),
 						new UiTabs
 						{

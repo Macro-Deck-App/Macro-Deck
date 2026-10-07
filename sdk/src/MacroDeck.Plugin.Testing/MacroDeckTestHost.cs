@@ -63,6 +63,8 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 	{
 		_application = application;
 		_options = options;
+		Colors.Sender = (pluginId, envelope)
+			=> _liveByPluginId.TryGetValue(pluginId, out var connection) ? connection.SendAsync(envelope) : Task.CompletedTask;
 	}
 
 	/// <summary>The url a plugin under test should be pointed at.</summary>
@@ -108,6 +110,9 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 
 	/// <summary>The <c>messaging</c> host api every hosted plugin reaches - see <see cref="TestHostMessaging" />.</summary>
 	public TestHostMessaging Messaging { get; } = new();
+
+	/// <summary>The <c>colors</c> host api every hosted plugin reaches - see <see cref="TestHostColors" />.</summary>
+	public TestHostColors Colors { get; } = new();
 
 	/// <summary>Starts a new host on a random loopback port.</summary>
 	public static async Task<MacroDeckTestHost> StartAsync(MacroDeckTestHostOptions? options = null)
@@ -717,7 +722,8 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 			Logs,
 			Events,
 			_fromPlugin.Writer,
-			Messaging);
+			Messaging,
+			Colors);
 
 		record.DroppedAt = null;
 		record.Ended = false;

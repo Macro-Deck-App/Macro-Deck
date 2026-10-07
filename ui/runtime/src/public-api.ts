@@ -200,6 +200,29 @@ export {
   scriptInputVariables,
 } from './domain/script-input.util';
 export {
+  applyColorModifier,
+  canonicalColor,
+  COLOR_MODIFIER_OPS,
+  type ColorModifierOp,
+  formatColor,
+  isOpaqueColor,
+  parseColor,
+  type RgbaColor,
+} from './domain/color/color';
+export {
+  type ColorMixTarget,
+  type ColorModifier,
+  type ColorReference,
+  isColorReference,
+  isUnsupportedColorTemplate,
+  MAX_COLOR_MODIFIERS,
+  MAX_COLOR_REFERENCE_LENGTH,
+  parseColorReference,
+  type ColorVariableLookup,
+  resolveColorReference,
+  serializeColorReference,
+} from './domain/color/color-reference';
+export {
   type Script,
   SCRIPT_TRIGGER_TYPE,
   scriptActionCount,

@@ -1,3 +1,5 @@
+import { isColorReference } from '../domain/color/color-reference';
+
 export interface ThresholdBand {
   id: string;
   color: string;
@@ -15,7 +17,12 @@ export interface ThresholdAxis {
 
 export const MAX_THRESHOLD_BANDS = 64;
 
-const COLOR_PATTERN = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+const COLOR_PATTERN = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+
+// An empty colour is a band whose reference lost its variable: the widget's own colour applies.
+function isBandColor(color: unknown): color is string {
+  return typeof color === 'string' && (color === '' || COLOR_PATTERN.test(color) || isColorReference(color));
+}
 
 // Same rules as UiThresholds in ui-model; both are checked against ui-model/fixtures/thresholds.
 export function readThresholds(raw: unknown): ThresholdsValue | null {
@@ -32,7 +39,7 @@ export function readThresholds(raw: unknown): ThresholdsValue | null {
     if (!isRecord(item)) return null;
     const { id, color, from } = item;
     if (typeof id !== 'string' || id.length === 0 || ids.has(id)) return null;
-    if (typeof color !== 'string' || !COLOR_PATTERN.test(color)) return null;
+    if (!isBandColor(color)) return null;
     if (from !== undefined && from !== null && typeof from !== 'number') return null;
 
     const start = typeof from === 'number' ? from : undefined;
@@ -133,7 +140,7 @@ export function removeThresholdBand(thresholds: ThresholdsValue, index: number):
 }
 
 export function recolorThresholdBand(thresholds: ThresholdsValue, index: number, color: string): ThresholdsValue {
-  if (!COLOR_PATTERN.test(color)) return thresholds;
+  if (!isBandColor(color)) return thresholds;
   return {
     bands: thresholds.bands.map((band, i) => (i === index ? { ...band, color: normalizeColor(color) } : band)),
   };
@@ -146,8 +153,10 @@ export function snapThresholdValue(value: number, step: number | null | undefine
 }
 
 function normalizeColor(color: string): string {
+  if (!COLOR_PATTERN.test(color)) return color;
   const hex = color.slice(1).toLowerCase();
-  return hex.length === 3 ? `#${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}` : `#${hex}`;
+  if (hex.length === 3) return `#${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+  return hex.length === 8 && hex.slice(6) === 'ff' ? `#${hex.slice(0, 6)}` : `#${hex}`;
 }
 
 export function thresholdStepDecimals(step: number): number {

@@ -153,7 +153,8 @@ internal sealed class CallbackContractTests
 				new MacroDeck.Plugin.Hosting.PluginMetadata { Id = "com.example.callbacks", Name = "Callbacks", Version = "1.0.0" },
 				TimeProvider.System,
 				Serilog.Core.Logger.None),
-			new RemoteUiResourceRegistry(_hostInvoker, new FakeAssetUploader()));
+			new RemoteUiResourceRegistry(_hostInvoker, new FakeAssetUploader()),
+			new RemoteColorApi(_hostInvoker, _state, _stateCache, Serilog.Core.Logger.None));
 	}
 
 	[TearDown]

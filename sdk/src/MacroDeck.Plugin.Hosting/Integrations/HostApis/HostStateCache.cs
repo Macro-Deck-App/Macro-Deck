@@ -52,6 +52,8 @@ internal sealed class HostStateCache
 
 	public event Action? EventBindingsChanged;
 
+	public event Action? ColorsChanged;
+
 	/// <summary>Applies one <c>host.state</c> push, replacing whatever was cached for its API.</summary>
 	public void Apply(ProtocolEnvelope envelope)
 	{
@@ -66,6 +68,16 @@ internal sealed class HostStateCache
 			if (ApplyRevisioned(api, payload.Data))
 			{
 				DeckChanged?.Invoke();
+			}
+
+			return;
+		}
+
+		if (string.Equals(api, Protocol.Callbacks.HostApis.Colors, StringComparison.Ordinal))
+		{
+			if (ApplyRevisioned(api, payload.Data))
+			{
+				ColorsChanged?.Invoke();
 			}
 
 			return;

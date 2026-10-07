@@ -54,6 +54,10 @@ public sealed record ActionParameterDto
 
 	public bool SupportsReset { get; init; }
 
+	/// <summary>Whether a colour parameter accepts <c>#rrggbbaa</c>. Optional and additive: absent means
+	/// false, so a plugin that predates it keeps receiving opaque <c>#rrggbb</c> values.</summary>
+	public bool? AllowAlpha { get; init; }
+
 	public bool LiteralOnly { get; init; }
 
 	public string? ValidationRegex { get; init; }

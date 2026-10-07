@@ -13,8 +13,13 @@ namespace MacroDeck.Ui.Config;
 /// </summary>
 /// <param name="Id">A stable key, unique within the value. Editors keep it across moves and recolours, so
 /// a band can be recognised after the user edits it.</param>
-/// <param name="Color">The band's colour as <c>#rgb</c> or <c>#rrggbb</c>, normalised to lowercase
-/// <c>#rrggbb</c>.</param>
+/// <param name="Color">The band's colour as <c>#rgb</c>, <c>#rrggbb</c> or <c>#rrggbbaa</c>, normalised to
+/// lowercase <c>#rrggbb</c>, or <c>#rrggbbaa</c> when it is not fully opaque. Inside an editor whose input sets
+/// <see cref="UiThresholdsInput.AllowVariables" /> it may instead hold a Color variable reference, kept as
+/// written; Macro Deck resolves the reference to a colour before a widget reads its stored thresholds. An empty
+/// colour gives the band no colour of its own, which is what a reference to a missing variable resolves to;
+/// <see cref="UiThresholds.ColorAt" /> answers <c>null</c> for it so the reader falls back to its own colour.
+/// </param>
 /// <param name="From">Where the band starts. Absent on the first band, which covers everything below the
 /// second band's start; required and strictly increasing on every later band.</param>
 public sealed record UiThresholdBand(string Id, string Color, double? From = null);
@@ -75,9 +80,9 @@ public sealed partial record UiThresholds
 		return band;
 	}
 
-	/// <summary>The colour of the band <paramref name="value" /> falls in, or <c>null</c> for NaN. See
-	/// <see cref="BandAt" />.</summary>
-	public string? ColorAt(double value) => BandAt(value)?.Color;
+	/// <summary>The colour of the band <paramref name="value" /> falls in, or <c>null</c> for NaN and for a band
+	/// without a colour of its own. See <see cref="BandAt" />.</summary>
+	public string? ColorAt(double value) => BandAt(value)?.Color is { Length: > 0 } color ? color : null;
 
 	/// <summary>Reads a value from JSON in the shape a <see cref="UiThresholdsInput" /> sends and Macro
 	/// Deck stores. Returns <c>false</c> for anything that is not a valid value, including JSON null.
@@ -142,7 +147,7 @@ public sealed partial record UiThresholds
 
 			if (NormalizeColor(band.Color) is not { } color)
 			{
-				return $"Band '{band.Id}' has no valid #rgb or #rrggbb colour.";
+				return $"Band '{band.Id}' has no valid #rgb, #rrggbb or #rrggbbaa colour.";
 			}
 
 			if (i == 0 && band.From is not null)
@@ -168,6 +173,12 @@ public sealed partial record UiThresholds
 
 	private static string? NormalizeColor(string? color)
 	{
+		if (color is not null &&
+			(color.Length == 0 || (color.Length <= MaxReferenceLength && ReferencePattern().IsMatch(color))))
+		{
+			return color;
+		}
+
 		if (color is null || !ColorPattern().IsMatch(color))
 		{
 			return null;
@@ -175,13 +186,24 @@ public sealed partial record UiThresholds
 
 		var hex = color[1..].ToLowerInvariant();
 
-		return hex.Length == 3
-			? string.Create(CultureInfo.InvariantCulture, $"#{hex[0]}{hex[0]}{hex[1]}{hex[1]}{hex[2]}{hex[2]}")
-			: "#" + hex;
+		return hex.Length switch
+		{
+			3 => string.Create(CultureInfo.InvariantCulture, $"#{hex[0]}{hex[0]}{hex[1]}{hex[1]}{hex[2]}{hex[2]}"),
+			8 when hex.EndsWith("ff", StringComparison.Ordinal) => "#" + hex[..6],
+			_ => "#" + hex,
+		};
 	}
 
-	[GeneratedRegex("^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$")]
+	[GeneratedRegex("^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$")]
 	private static partial Regex ColorPattern();
+
+	private const int MaxReferenceLength = 1024;
+
+	// The same grammar and bounds the host resolves: a Color variable, then at most 32 known colour
+	// modifiers, in at most MaxReferenceLength characters.
+	[GeneratedRegex("""\A\s*\{\{\s*vars\.[a-z][a-z0-9_]*\s*\|\s*color\s*(?:\|\s*(?:color_(?:lighten|darken|saturate|desaturate|opacity|increase_opacity|reduce_opacity|hue)\s*:\s*-?\d+(?:\.\d+)?|color_mix\s*:\s*(?:vars\.[a-z][a-z0-9_]*|"#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3})")\s*,\s*-?\d+(?:\.\d+)?)\s*){0,32}\}\}\s*\z""",
+		RegexOptions.CultureInvariant)]
+	private static partial Regex ReferencePattern();
 }
 
 internal sealed class UiThresholdsJsonConverter : JsonConverter<UiThresholds>
@@ -314,7 +336,12 @@ internal sealed class UiThresholdsJsonConverter : JsonConverter<UiThresholds>
 			}
 		}
 
-		return new UiThresholdBand(id ?? string.Empty, color ?? string.Empty, from);
+		if (color is null)
+		{
+			throw new JsonException("A band carries a 'color'.");
+		}
+
+		return new UiThresholdBand(id ?? string.Empty, color, from);
 	}
 
 	private static string ReadString(ref Utf8JsonReader reader, string? name)
@@ -368,6 +395,10 @@ public sealed record UiThresholdsInput : UiInput<UiThresholds>
 	/// <summary>The most bands the user may add up to.</summary>
 	public UiValue<int> MaxCount { get; init; }
 
+	/// <summary>Also offers a Color variable reference for a band's colour - see
+	/// <see cref="UiColorInput.AllowVariables" /> for when to set it.</summary>
+	public UiValue<bool> AllowVariables { get; init; }
+
 	/// <inheritdoc />
 	public override string Type => UiConfigPrimitives.Thresholds;
 
@@ -385,6 +416,7 @@ public sealed record UiThresholdsInput : UiInput<UiThresholds>
 		properties.Set(UiConfigProperties.FixedCount, FixedCount);
 		properties.Set(UiConfigProperties.FixedColors, FixedColors);
 		properties.Set(UiConfigProperties.MaxCount, MaxCount);
+		properties.Set(UiConfigProperties.AllowVariables, AllowVariables);
 	}
 
 	private protected override bool AcceptsValue(UiThresholds? value, out string? rejection)

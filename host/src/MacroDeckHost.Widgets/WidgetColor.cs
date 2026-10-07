@@ -1,16 +1,17 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
+using MacroDeckHost.Application.Variables.Colors;
 
 namespace MacroDeckHost.Widgets;
 
 /// <summary>
 /// Normalises a colour the way the client's own CSS binding already accepts one, to the literal
-/// <c>#rrggbb</c> every widget colour property requires.
+/// <c>#rrggbb</c>, or <c>#rrggbbaa</c> for a translucent colour, that every widget colour property takes.
 ///
 /// <para>
 /// The plugin widget-appearance API (<c>WidgetAppearanceJson</c>) passes colours through unvalidated, and
 /// the retired clients bound them straight to CSS - so a plugin that set <c>"red"</c>, or a user's saved
-/// <c>rgba(...)</c>, has to keep working. Anything this cannot resolve to an opaque colour - notably the literal
+/// <c>rgba(...)</c>, has to keep working. Anything this cannot resolve to a colour - notably the literal
 /// <c>var(--color-accent)</c> already sitting in stored widget data - normalises to <c>null</c>, meaning
 /// "unset, use the theme colour", which is exactly what that token meant client-side.
 /// </para>
@@ -58,14 +59,7 @@ internal static partial class WidgetColor
 			return null;
 		}
 
-		return hex.Length switch
-		{
-			3 => Compose(Double(hex[0]), Double(hex[1]), Double(hex[2])),
-			4 => Compose(Double(hex[0]), Double(hex[1]), Double(hex[2])),
-			6 => $"#{hex.ToLowerInvariant()}",
-			// 8: #rrggbbaa - alpha dropped, the same posture NormalizeFunctional takes on rgba()'s alpha.
-			_ => $"#{hex[..6].ToLowerInvariant()}",
-		};
+		return RgbaColor.Canonicalize(value);
 	}
 
 	private static string? NormalizeFunctional(string body)
@@ -87,7 +81,26 @@ internal static partial class WidgetColor
 			return null;
 		}
 
-		return Compose(r, g, b);
+		if (tokens.Length < 4)
+		{
+			return Compose(r, g, b);
+		}
+
+		return TryAlpha(tokens[3], out var a) ? new RgbaColor(r, g, b, a).ToString() : null;
+	}
+
+	private static bool TryAlpha(string token, out byte alpha)
+	{
+		alpha = 0;
+		var percent = token.EndsWith('%');
+		if (!double.TryParse(percent ? token[..^1] : token, NumberStyles.Float, CultureInfo.InvariantCulture,
+				out var number))
+		{
+			return false;
+		}
+
+		alpha = ToByte(Math.Clamp(percent ? number / 100 : number, 0, 1) * 255);
+		return true;
 	}
 
 	private static bool TryComponent(string token, out byte component)
@@ -133,7 +146,6 @@ internal static partial class WidgetColor
 
 	private static string Compose(byte r, byte g, byte b) => $"#{r:x2}{g:x2}{b:x2}";
 
-	private static byte Double(char nibble) => (byte)(Convert.ToInt32(nibble.ToString(), 16) * 17);
 
 	private static readonly IReadOnlyDictionary<string, string> _namedColors
 		= new Dictionary<string, string>(StringComparer.Ordinal)

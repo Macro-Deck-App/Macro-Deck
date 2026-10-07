@@ -91,13 +91,19 @@ export function widgetTileTransparent(root: UiNode | null | undefined, box: UiCo
   return nodeBackgroundColor(node, UiComponentProperties.Background) === TRANSPARENT_BACKGROUND;
 }
 
-// A hex colour has no alpha and a button without one falls back to the accent, so both paint opaque.
+// Only an opaque hex fills the tile; a translucent one paints over the tile face. A button without
+// a background falls back to the opaque accent.
 export function widgetTileFilled(root: UiNode | null | undefined, box: UiComponentBox | null = null): boolean {
   const node = effectiveTreeRoot(root, box);
   if (node === null) return false;
   const background = nodeBackgroundColor(node, UiComponentProperties.Background);
-  if (node.type === UiComponents.Stack) return background !== undefined && background !== TRANSPARENT_BACKGROUND;
-  return node.type === UiComponents.Button && background !== TRANSPARENT_BACKGROUND;
+  if (node.type === UiComponents.Stack) return background !== undefined && isOpaqueBackground(background);
+  return node.type === UiComponents.Button && (background === undefined || isOpaqueBackground(background));
+}
+
+function isOpaqueBackground(background: string): boolean {
+  if (background === TRANSPARENT_BACKGROUND) return false;
+  return background.length !== 9 || background.slice(7).toLowerCase() === 'ff';
 }
 
 export function buttonTakesTileCorner(node: UiNode): boolean {

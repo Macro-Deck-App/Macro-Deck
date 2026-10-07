@@ -261,6 +261,10 @@ public static class UiConfigProperties
 	/// </summary>
 	public const string AllowTransparent = "allowTransparent";
 
+	/// <summary>Whether a colour or thresholds input also offers a Color variable reference instead of a fixed
+	/// colour.</summary>
+	public const string AllowVariables = "allowVariables";
+
 	/// <summary>The unit a thresholds editor draws after every value.</summary>
 	public const string Unit = "unit";
 
@@ -287,7 +291,7 @@ public static class UiConfigProperties
 		IntegrationId, VariableTypes, WritableOnly, Capability, ConfigurationEntries, Segmented, Cards, Icon,
 		AspectRatio, Background, Tint, States, FalseLabel, TrueLabel, RowWeight, Wrap, HideLabel,
 		Reorderable, OffersStateProvider, OffersIconProvider, StateProviderBlockId, IconProviderBlockId,
-		ConfirmTitle, ConfirmMessage, ConfirmLabel, ConfirmDanger, PromptValue, AllowTransparent, Unit, FixedCount,
-		FixedColors, MaxCount,
+		ConfirmTitle, ConfirmMessage, ConfirmLabel, ConfirmDanger, PromptValue, AllowTransparent, AllowVariables, Unit,
+		FixedCount, FixedColors, MaxCount,
 	];
 }

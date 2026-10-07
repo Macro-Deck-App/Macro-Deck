@@ -42,4 +42,9 @@
         <InternalsVisibleTo Include="MacroDeck.Sdk.Tests.UnitTests" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Compile Include="..\MacroDeck.Sdk\Colors\ColorGrammar.cs" Link="Colors\ColorGrammar.cs" />
+        <Compile Include="..\MacroDeck.Sdk\Colors\LocalColorApi.cs" Link="Colors\LocalColorApi.cs" />
+    </ItemGroup>
+
 </Project>

@@ -20,6 +20,7 @@
       [label]="'macrodeck.app:Settings.Appearance.AccentLabel' | translate"
       [description]="'macrodeck.app:Settings.Appearance.AccentPickDescription' | translate">
       <shared-color-picker
+        [allowVariables]="true"
         [ngModel]="accentColor()"
         (ngModelChange)="onAccentChange($event)"
         [defaultColor]="defaultAccent">

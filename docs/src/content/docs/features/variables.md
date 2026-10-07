@@ -60,7 +60,7 @@ anything else with `with { ... }`.
 | --- | --- | --- |
 | `Name` | Variable name in templates. | `"weather_temperature"` |
 | `Id` | Local id passed to `ReadAsync` / `SetValueAsync`. Stable once shipped. | `"temperature"` |
-| `Type` | `Text`, `Numeric` or `Boolean`. | `VariableType.Numeric` |
+| `Type` | `Text`, `Numeric`, `Boolean` or `Color` - see [Color variables](#color-variables). | `VariableType.Numeric` |
 | `DisplayName`, `Description` | Localized text shown in the variable picker. | `Strings.Variables.Temperature()` |
 | `Unit` | Symbol shown next to the value, reachable as `vars.x.unit`. | `"°C"`, `"%"`, `"GB"` |
 | `SemanticKind` | How the host formats it - see below. | `VariableSemanticKinds.Percentage` |
@@ -84,6 +84,66 @@ An unknown kind renders as a plain number with its unit, so naming a newer one i
 
 A provider may declare at most `VariableLimits.MaxEagerVariablesPerProvider` (256) eager variables; the
 host keeps the first 256 and logs an error. More than that belongs in [the catalog](#the-variable-catalog).
+
+## Color variables
+
+`VariableType.Color` holds a color. Its value is text, lowercase `#rrggbb` when opaque or `#rrggbbaa` with
+alpha: return it from `ReadAsync` as a string, and expect one in `SetValueAsync`. The host also accepts
+`#rgb`, `#rgba`, `rgb(...)` and `rgba(...)` from you and stores the canonical form; anything else is
+invalid. Over the protocol the value travels as a `text` value, like any string.
+
+Users can bind a widget's colors, folder and profile backgrounds, the accent color and action color
+parameters to a Color variable. See [Colors from a variable](/guide/tips/#colors-from-a-variable) for
+what they see.
+
+A Macro Deck release from before `Color` drops a definition that declares it, with the rest of your
+variables unaffected.
+
+A script input can be a color too, `ScriptInputType.Color` with a value in the same format. A plugin built
+on this SDK announces that it knows the type and sees such an input as `color`; an older plugin sees it as
+`text` carrying the hex value.
+
+### Resolving colours yourself
+
+Two places hand you colours already resolved: a `Color` [action parameter](/features/actions/) when the
+action runs, and the widget data Macro Deck gives your widget's session. Anywhere else a colour may be a
+reference string such as `{{ vars.primary | color | color_darken: 20 }}`: your own settings, a config or
+setup flow, or a view of your own with
+[`AllowVariables`](/ui/views/widget-configuration/#offering-a-colour-variable). Resolve those through
+`IIntegrationContext.Colors`, an `IColorApi`:
+
+```csharp
+var color = await context.Colors.ResolveAsync(settings.LightColor) ?? "#ffffff";
+
+_colorWatch = await context.Colors.WatchAsync(settings.LightColor, async (color, ct) =>
+	await _lights.SetColorAsync(color ?? "#ffffff", ct));
+
+// later, to stop:
+await _colorWatch.DisposeAsync();
+```
+
+- Both take a fixed colour or a reference and return lowercase `#rrggbb` or `#rrggbbaa`, or `null` for "no
+  colour, use your default": the variable is missing, unavailable or not a `Color`. Pass a `widgetId` to let
+  that widget's own variables shadow global ones; an unknown widget gives `null`.
+- `ColorReference.IsReference(value)` tells a reference from a fixed colour without asking the host.
+- A watch's callback receives the current colour once, then again only when it changes, including to
+  `null`. Watches survive reconnects and are released when the integration is shut down or initialized
+  again; dispose one to stop it earlier. Callbacks run on thread-pool threads.
+- A plugin may hold at most `ProtocolLimits.MaxColorWatches` (1024) watches across its integrations;
+  `WatchAsync` throws `InvalidOperationException` above that.
+- A reference is at most `ProtocolLimits.MaxColorReferenceLength` (1024) characters with at most
+  `MaxColorReferenceSteps` (32) modifiers. A longer value is not a reference.
+- On a Macro Deck release without colour resolution, a fixed colour still resolves locally, a reference
+  gives `null`, and a watch delivers its value once.
+
+In tests, `PluginTestHarness`'s `Context.Colors` is a `FakeColorApi`: seed a value with `Set(value, color)`,
+which also notifies matching watches, and check `ActiveWatchCount`. Over the wire, `MacroDeckTestHost.Colors`
+does the same with `SetAsync`, and `WatchesOf(pluginId)` lists a plugin's watches. Unseeded, a fixed colour
+resolves to its canonical form and a reference to `null`.
+
+```csharp
+await harness.Context.Colors.Set("{{ vars.primary | color }}", "#3366ff");
+```
 
 ## Writable variables
 
@@ -188,6 +248,26 @@ reference: `{{ vars.cpu.unit }}`, `{{ vars.room_sensor.room }}`.
 ```liquid
 {% if vars.music_artist.state.is_not_empty %}By {{ vars.music_artist }}{% endif %}
 ```
+
+Color filters derive a shade from a color. The value piped in must be a `Color` variable or a color
+literal; a `Text` variable is refused even when it holds a hex value. `color` reads the value as it is, and
+the result of every filter is `#rrggbb` or `#rrggbbaa`:
+
+```liquid
+{{ vars.primary | color | color_darken: 20 | color_opacity: 70 }}
+{{ "#ff0000" | color_darken: 10 }}
+```
+
+| filter | argument |
+| --- | --- |
+| `color_lighten`, `color_darken` | percent of lightness to add or remove |
+| `color_saturate`, `color_desaturate` | percent of saturation to add or remove |
+| `color_opacity` | the alpha to set, in percent |
+| `color_increase_opacity`, `color_reduce_opacity` | percent to move the alpha toward opaque, or to reduce it by |
+| `color_hue` | degrees to rotate the hue |
+| `color_mix` | another color (`"#ffffff"` or a Color variable such as `vars.other`) and the percent of it to blend in |
+
+A missing, unavailable or invalid color renders as an empty string, which a color field treats as unset.
 
 Because `state` is resolved first, an `Attributes` key named `state` is unreachable. `state` works on
 `vars` references only, not on `event` parameters or script inputs.
@@ -313,7 +393,7 @@ a global of the same name; the host refuses an unknown widget id.
 
 `ApplyAsync`'s `Set` also works on provider variables that declare `Write`; `NotEditable` for the rest.
 `Add`, `Toggle` and `Append` are user-variable only, because they compute from the last value the host
-saw. `Unavailable` means the owner accepts writes but could not take this one - retry later.
+saw. A `Color` user variable takes `Set` only, with a value in the formats above. `Unavailable` means the owner accepts writes but could not take this one - retry later.
 
 A user variable can read its value from a file. Without **Allow write-back** it is read-only: every
 operation answers `NotEditable` and the file is left alone. With write-back it behaves like any other

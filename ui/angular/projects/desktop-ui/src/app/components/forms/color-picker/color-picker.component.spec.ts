@@ -1,6 +1,10 @@
 import { Component, provideZonelessChangeDetection, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
+import { By } from '@angular/platform-browser';
+import { parseColorReference, resolveColorReference, type Variable } from '@macro-deck/runtime';
+import { LocalizationService, OverlayPanelComponent, VariableService } from '@shared';
+import { SelectComponent } from '../select/select.component';
 import { hexToHsv } from './color-conversion';
 import { ColorPickerComponent, ColorPreset } from './color-picker.component';
 import { provideLocalizationTesting } from '../../../../testing/localization-test-support';
@@ -336,5 +340,312 @@ describe('ColorPickerComponent', () => {
       const custom = fixture.nativeElement.querySelector('.cp-custom');
       expect(custom.classList).not.toContain('cp-selected');
     });
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [FormsModule, ColorPickerComponent, OverlayPanelComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: `
+    <shared-color-picker
+      [allowVariables]="allowVariables()"
+      [allowAlpha]="allowAlpha()"
+      [ngModel]="value()"
+      (ngModelChange)="value.set($event)" />
+    <shared-overlay-panel [isOpen]="otherOverlayOpen()" [x]="0" [y]="0">
+      <span class="unrelated-panel">unrelated</span>
+    </shared-overlay-panel>
+  `,
+})
+class VariableHostComponent {
+  otherOverlayOpen = signal(false);
+  allowVariables = signal(true);
+  allowAlpha = signal(true);
+  value = signal('');
+}
+
+describe('ColorPickerComponent with color variables', () => {
+  let fixture: ComponentFixture<VariableHostComponent>;
+
+  const variable = (name: string, type: Variable['type'], value: string): Variable => ({
+    id: name,
+    name,
+    scope: 'global',
+    type,
+    classification: 'user',
+    value,
+  });
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [VariableHostComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        ...provideLocalizationTesting(),
+        {
+          provide: VariableService,
+          useValue: {
+            variables: signal([
+              variable('primary', 'color', '#3366ff'),
+              variable('accent', 'color', '#ffffff'),
+              variable('greeting', 'text', 'hello'),
+            ]),
+          },
+        },
+      ],
+    });
+    fixture = TestBed.createComponent(VariableHostComponent);
+  });
+
+  async function settle(): Promise<void> {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    fixture.detectChanges();
+  }
+
+  async function show(value: string, open = true): Promise<void> {
+    fixture.componentInstance.value.set(value);
+    await settle();
+    const chip = document.querySelector<HTMLButtonElement>('.cp-chip');
+    if (open && chip && chip.getAttribute('aria-expanded') !== 'true') {
+      chip.click();
+      await settle();
+    }
+  }
+
+  function element<T extends Element>(selector: string): T | null {
+    return document.querySelector(selector) as T | null;
+  }
+
+  function selects(): SelectComponent[] {
+    return fixture.debugElement.queryAll(By.directive(SelectComponent)).map(debug => debug.componentInstance);
+  }
+
+  it('offers no variable mode where the field does not allow variables, as for an old plugin', async () => {
+    fixture.componentInstance.allowVariables.set(false);
+    await show('#3366ff');
+
+    expect(element('.cp-mode')).toBeNull();
+    expect(element('.cp-variable')).toBeNull();
+    expect(element('.cp-track')).toBeTruthy();
+  });
+
+  it('shows a closed reference as one chip with its resolved swatch, variable name and modifier count', async () => {
+    await show('{{ vars.primary | color | color_darken: 20 | color_opacity: 50 }}', false);
+
+    const chip = element<HTMLButtonElement>('.cp-chip')!;
+    expect(chip.querySelector('.cp-chip-label')!.textContent!.trim()).toBe('primary');
+    expect(chip.getAttribute('title')).toBe('primary');
+    expect(chip.querySelector('.cp-chip-badge')!.textContent!.trim()).toBe('2');
+    expect((chip.querySelector('.cp-chip-swatch') as HTMLElement).style.getPropertyValue('--cp-fill')).toBe('#003df580');
+    expect(element('.cp-editor')).toBeNull();
+  });
+
+  it('names a missing variable on the chip itself', async () => {
+    await show('{{ vars.gone | color }}', false);
+
+    expect(element('.cp-chip-label')!.textContent).toContain('gone');
+    expect(element('.cp-chip-badge')).toBeNull();
+  });
+
+  it('opens the editor from the chip and hands focus back to the chip on Escape', async () => {
+    await show('{{ vars.primary | color }}', false);
+    const chip = element<HTMLButtonElement>('.cp-chip')!;
+
+    chip.click();
+    await settle();
+    const editor = element<HTMLElement>('.cp-editor')!;
+    expect(editor).toBeTruthy();
+    expect(editor.contains(document.activeElement)).toBeTrue();
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await settle();
+    expect(element('.cp-editor')).toBeNull();
+    expect(document.activeElement).toBe(chip);
+  });
+
+  it('describes the modifier count on the chip in words while the badge shows the digit', async () => {
+    await show('{{ vars.primary | color | color_darken: 20 | color_opacity: 50 }}', false);
+
+    const chip = element<HTMLButtonElement>('.cp-chip')!;
+    const description = document.getElementById(chip.getAttribute('aria-describedby')!)!;
+    expect(description.textContent!.trim()).toBe('2 modifiers');
+    expect(element('.cp-chip-badge')!.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('stays open while a click lands in its own nested select, but closes for a click elsewhere', async () => {
+    await show('{{ vars.primary | color }}');
+
+    element<HTMLButtonElement>('.cp-editor .cp-variable-select button.control')!.click();
+    await settle();
+    document.querySelector('.cp-editor .sel-option, .sel-option')!.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    await settle();
+    expect(element('.cp-editor')).toBeTruthy();
+
+    document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    await settle();
+    document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    await settle();
+    expect(element('.cp-editor')).toBeNull();
+  });
+
+  it('is not held open by an unrelated overlay elsewhere in the app', async () => {
+    await show('{{ vars.primary | color }}');
+    fixture.componentInstance.otherOverlayOpen.set(true);
+    await settle();
+    expect(element('.unrelated-panel')).toBeTruthy();
+
+    document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    await settle();
+    expect(element('.cp-editor')).toBeNull();
+  });
+
+  it('closes and hands focus back to the chip when tabbing past its last control', async () => {
+    await show('{{ vars.primary | color }}');
+    const last = element<HTMLButtonElement>('.cp-editor .cp-add')!;
+    last.focus();
+
+    last.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }));
+    await settle();
+
+    expect(element('.cp-editor')).toBeNull();
+    expect(document.activeElement).toBe(element('.cp-chip'));
+  });
+
+  it('opens the editor right away when switching from a color to a variable', async () => {
+    await show('#3366ff');
+
+    (document.querySelectorAll('.cp-mode .seg-option')[1] as HTMLButtonElement).click();
+    await settle();
+
+    expect(fixture.componentInstance.value()).toBe('{{ vars.accent | color }}');
+    expect(element('.cp-editor')).toBeTruthy();
+  });
+
+  it('opens a stored reference in variable mode, lists only color variables and previews the resolved color', async () => {
+    await show('{{ vars.primary | color | color_darken: 20 }}');
+
+    expect(element('.cp-variable')).toBeTruthy();
+    expect(selects()[0].options.map(option => option.value)).toEqual(['accent', 'primary']);
+    expect(selects()[0].options.map(option => option.swatch)).toEqual(['#ffffff', '#3366ff']);
+    expect(element<HTMLElement>('.cpr-resolved')!.style.getPropertyValue('--cpr-fill')).toBe('#003df5');
+  });
+
+  it('shows the original and result preview only once there is a modifier', async () => {
+    await show('{{ vars.primary | color }}');
+    expect(element('shared-color-picker-result')).toBeNull();
+
+    element<HTMLButtonElement>('.cp-add')!.click();
+    await show(fixture.componentInstance.value());
+    expect(element('shared-color-picker-result')).toBeTruthy();
+  });
+
+  it('stops offering new modifiers once a reference holds the most it may', async () => {
+    const steps = Array.from({ length: 32 }, () => ' | color_hue: 1').join('');
+    await show(`{{ vars.primary | color${steps} }}`);
+
+    const add = element<HTMLButtonElement>('.cp-add')!;
+    expect(add.disabled).toBeTrue();
+    add.click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.value()).toBe(`{{ vars.primary | color${steps} }}`);
+  });
+
+  it('writes every modifier edit back as the canonical reference', async () => {
+    await show('{{vars.primary|color|color_darken: 20}}');
+
+    element<HTMLButtonElement>('.cp-add')!.click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.value()).toBe('{{ vars.primary | color | color_darken: 20 | color_lighten: 20 }}');
+    await show(fixture.componentInstance.value());
+
+    const amount = document.querySelectorAll('.cp-amount input')[0] as HTMLInputElement;
+    amount.value = '35';
+    amount.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.value()).toBe('{{ vars.primary | color | color_darken: 35 | color_lighten: 20 }}');
+    await show(fixture.componentInstance.value());
+
+    (document.querySelectorAll('.cp-remove')[1] as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.value()).toBe('{{ vars.primary | color | color_darken: 35 }}');
+  });
+
+  it('previews the original and the result hex exactly as the runtime math resolves them', async () => {
+    const reference = '{{ vars.primary | color | color_darken: 20 | color_mix: vars.accent, 50 | color_reduce_opacity: 30 }}';
+    await show(reference);
+
+    const expected = resolveColorReference(parseColorReference(reference)!, name => ({ primary: '#3366ff', accent: '#ffffff' })[name])!;
+    const hexes = Array.from(document.querySelectorAll('.cpr-hex')).map(hex => (hex as HTMLElement).textContent!.trim());
+    expect(hexes).toEqual(['#3366FF', expected.toUpperCase()]);
+    expect(document.querySelectorAll('.cpr-summary-item').length).toBe(3);
+    expect(Array.from(document.querySelectorAll('.cp-step-index')).map(index => (index as HTMLElement).textContent!.trim()))
+      .toEqual(['1', '2', '3']);
+  });
+
+  it('keeps the steps a plain ordered list and writes their amounts in the UI language', async () => {
+    TestBed.inject(LocalizationService).culture.set('de');
+    await show('{{ vars.primary | color | color_lighten: 12.5 | color_hue: -30 }}');
+
+    const steps = Array.from(document.querySelectorAll('.cp-chain > li')) as HTMLElement[];
+    expect(steps.length).toBe(2);
+    expect(steps.every(step => step.getAttribute('role') === null)).toBeTrue();
+    const summaries = Array.from(document.querySelectorAll('.cpr-summary-item'))
+      .map(item => (item as HTMLElement).textContent!.trim());
+    expect(summaries[0]).toContain('12,5%');
+    expect(summaries[1]).toContain('-30\u00b0');
+  });
+
+  it('clamps a typed amount to its range', async () => {
+    await show('{{ vars.primary | color | color_lighten: 50 | color_hue: 0 }}');
+    const type = (index: number, text: string) => {
+      const field = document.querySelectorAll('.cp-amount input')[index] as HTMLInputElement;
+      field.value = text;
+      field.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+    };
+
+    type(0, '150');
+    expect(fixture.componentInstance.value()).toBe('{{ vars.primary | color | color_lighten: 100 | color_hue: 0 }}');
+    await show(fixture.componentInstance.value());
+
+    type(1, '-500');
+    expect(fixture.componentInstance.value()).toBe('{{ vars.primary | color | color_lighten: 100 | color_hue: -360 }}');
+    expect(Array.from(document.querySelectorAll('.cp-amount-unit')).map(unit => (unit as HTMLElement).textContent!.trim()))
+      .toEqual(['%', '\u00b0']);
+  });
+
+  it('switches back to a static color holding what the reference currently resolves to', async () => {
+    await show('{{ vars.primary | color | color_opacity: 50 }}');
+
+    const staticOption = document.querySelector('.cp-mode .seg-option') as HTMLButtonElement;
+    staticOption.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.value()).toBe('#3366ff80');
+  });
+
+  it('takes an eight-digit hex and emits it canonically when alpha is allowed', async () => {
+    await show('#3366ff');
+
+    element<HTMLButtonElement>('.cp-custom')!.click();
+    fixture.detectChanges();
+    const hex = document.querySelector('.cp-hex') as HTMLInputElement;
+    expect(document.querySelector('.cp-alpha')).toBeTruthy();
+    hex.value = '#3366FFCC';
+    hex.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.value()).toBe('#3366ffcc');
+  });
+
+  it('shows a template it cannot edit read-only and offers only a reset', async () => {
+    await show('{{ vars.primary | upcase }}');
+
+    expect(element('.cp-unsupported')).toBeTruthy();
+    expect(element('.cp-mode')).toBeNull();
+    expect(fixture.componentInstance.value()).toBe('{{ vars.primary | upcase }}');
   });
 });

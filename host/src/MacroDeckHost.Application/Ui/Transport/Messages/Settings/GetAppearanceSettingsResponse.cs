@@ -6,5 +6,7 @@ public class GetAppearanceSettingsResponse
 
 	public string AccentColor { get; set; } = string.Empty;
 
+	public string? AccentColorSource { get; set; }
+
 	public string FontFamily { get; set; } = string.Empty;
 }

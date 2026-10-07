@@ -9,7 +9,11 @@ public enum ScriptInputType
 {
 	Text = 0,
 	Numeric = 1,
-	Boolean = 2
+	Boolean = 2,
+
+	/// <summary>A colour, coerced to lowercase <c>#rrggbb</c>, or <c>#rrggbbaa</c> when it is not fully opaque.
+	/// </summary>
+	Color = 3
 }
 
 /// <summary>

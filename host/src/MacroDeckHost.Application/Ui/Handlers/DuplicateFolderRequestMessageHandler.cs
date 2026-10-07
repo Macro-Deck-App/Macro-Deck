@@ -2,6 +2,7 @@ using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Application.Ui.Transport.Messages.Folders;
+using MacroDeckHost.Application.Variables.Colors;
 
 namespace MacroDeckHost.Application.Ui.Handlers;
 
@@ -9,9 +10,11 @@ public class
 	DuplicateFolderRequestMessageHandler : IUiTransportMessageHandler<DuplicateFolderRequest, DuplicateFolderResponse>
 {
 	private readonly IFolderService _folderService;
+	private readonly IColorReferenceResolver _colors;
 
-	public DuplicateFolderRequestMessageHandler(IFolderService folderService)
+	public DuplicateFolderRequestMessageHandler(IFolderService folderService, IColorReferenceResolver colors)
 	{
+		_colors = colors;
 		_folderService = folderService;
 	}
 
@@ -26,7 +29,7 @@ public class
 
 		if (result.Success)
 		{
-			response.Folder = FolderDtoMapper.MapToDto(result.Data!);
+			response.Folder = FolderDtoMapper.MapToDto(result.Data!, _colors);
 		}
 		else
 		{

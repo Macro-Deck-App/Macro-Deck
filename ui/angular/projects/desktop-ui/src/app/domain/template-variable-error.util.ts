@@ -11,6 +11,8 @@ export function templateVariableErrorMessage(localization: LocalizationService, 
       return localization.translateKey(AppStrings.Variables.Manager.TemplateErrors.NotNumeric, { value: detail });
     case 'NotBoolean':
       return localization.translateKey(AppStrings.Variables.Manager.TemplateErrors.NotBoolean, { value: detail });
+    case 'NotColor':
+      return localization.translateKey(AppStrings.Variables.Manager.TemplateErrors.NotColor, { value: detail });
     case 'CircularReference':
       return localization.translateKey(AppStrings.Variables.Manager.TemplateErrors.CircularReference);
     default:

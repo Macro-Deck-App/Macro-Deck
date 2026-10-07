@@ -3469,6 +3469,15 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Forms.CodeEditor.InvalidJson" xml:space="preserve">
     <value>Ungültiges JSON</value>
   </data>
+  <data name="Forms.ColorPicker.AddModifier" xml:space="preserve">
+    <value>Modifikator hinzufügen</value>
+  </data>
+  <data name="Forms.ColorPicker.AlphaLabel" xml:space="preserve">
+    <value>Deckkraft</value>
+  </data>
+  <data name="Forms.ColorPicker.AmountLabel" xml:space="preserve">
+    <value>Stärke</value>
+  </data>
   <data name="Forms.ColorPicker.Blue" xml:space="preserve">
     <value>Blau</value>
   </data>
@@ -3493,8 +3502,73 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Forms.ColorPicker.HueLabel" xml:space="preserve">
     <value>Farbton</value>
   </data>
+  <data name="Forms.ColorPicker.MissingVariable" xml:space="preserve">
+    <value>Variable „{name}“ nicht gefunden</value>
+  </data>
+  <data name="Forms.ColorPicker.MixWithLabel" xml:space="preserve">
+    <value>Mischen mit</value>
+  </data>
+  <data name="Forms.ColorPicker.ModeLabel" xml:space="preserve">
+    <value>Farbquelle</value>
+  </data>
+  <data name="Forms.ColorPicker.ModeStatic" xml:space="preserve">
+    <value>Farbe</value>
+  </data>
+  <data name="Forms.ColorPicker.ModeVariable" xml:space="preserve">
+    <value>Variable</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.Darken" xml:space="preserve">
+    <value>Abdunkeln</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.Desaturate" xml:space="preserve">
+    <value>Sättigung verringern</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.Hue" xml:space="preserve">
+    <value>Farbton verschieben</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.IncreaseOpacity" xml:space="preserve">
+    <value>Deckkraft erhöhen</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.Lighten" xml:space="preserve">
+    <value>Aufhellen</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.Mix" xml:space="preserve">
+    <value>Mischen</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.Opacity" xml:space="preserve">
+    <value>Deckkraft festlegen</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.ReduceOpacity" xml:space="preserve">
+    <value>Deckkraft verringern</value>
+  </data>
+  <data name="Forms.ColorPicker.Modifier.Saturate" xml:space="preserve">
+    <value>Sättigung erhöhen</value>
+  </data>
+  <data name="Forms.ColorPicker.ModifierCount.One" xml:space="preserve">
+    <value>{count} Modifikator</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Forms.ColorPicker.ModifierCount.Other" xml:space="preserve">
+    <value>{count} Modifikatoren</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Forms.ColorPicker.ModifierLabel" xml:space="preserve">
+    <value>Modifikator</value>
+  </data>
+  <data name="Forms.ColorPicker.ModifierSummary" xml:space="preserve">
+    <value>{modifier} {amount}</value>
+  </data>
+  <data name="Forms.ColorPicker.NoColorVariables" xml:space="preserve">
+    <value>Noch keine Farbvariablen. Lege unter Variablen eine an.</value>
+  </data>
+  <data name="Forms.ColorPicker.NoMatchingVariables" xml:space="preserve">
+    <value>Keine passenden Variablen</value>
+  </data>
   <data name="Forms.ColorPicker.Orange" xml:space="preserve">
     <value>Orange</value>
+  </data>
+  <data name="Forms.ColorPicker.OriginalLabel" xml:space="preserve">
+    <value>Original</value>
   </data>
   <data name="Forms.ColorPicker.Pink" xml:space="preserve">
     <value>Pink</value>
@@ -3505,11 +3579,29 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Forms.ColorPicker.Red" xml:space="preserve">
     <value>Rot</value>
   </data>
+  <data name="Forms.ColorPicker.RemoveModifierAriaLabel" xml:space="preserve">
+    <value>Modifikator entfernen</value>
+  </data>
   <data name="Forms.ColorPicker.ResetAriaLabel" xml:space="preserve">
     <value>Auf Standardfarbe zurücksetzen</value>
   </data>
+  <data name="Forms.ColorPicker.ResultLabel" xml:space="preserve">
+    <value>Ergebnis</value>
+  </data>
   <data name="Forms.ColorPicker.SaturationBrightnessLabel" xml:space="preserve">
     <value>Sättigung und Helligkeit</value>
+  </data>
+  <data name="Forms.ColorPicker.SearchVariablesPlaceholder" xml:space="preserve">
+    <value>Variablen suchen…</value>
+  </data>
+  <data name="Forms.ColorPicker.UnsupportedReference" xml:space="preserve">
+    <value>Diese Farbreferenz kann hier nicht bearbeitet werden.</value>
+  </data>
+  <data name="Forms.ColorPicker.VariableLabel" xml:space="preserve">
+    <value>Farbvariable</value>
+  </data>
+  <data name="Forms.ColorPicker.VariablePlaceholder" xml:space="preserve">
+    <value>Wähle eine Farbvariable</value>
   </data>
   <data name="Forms.ColorPicker.Yellow" xml:space="preserve">
     <value>Gelb</value>
@@ -13209,6 +13301,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Scripts.InputTypeBoolean" xml:space="preserve">
     <value>Boolescher Wert</value>
   </data>
+  <data name="Scripts.InputTypeColor" xml:space="preserve">
+    <value>Farbe</value>
+  </data>
   <data name="Scripts.InputTypeNumeric" xml:space="preserve">
     <value>Numerisch</value>
   </data>
@@ -16604,6 +16699,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="TemplateBuilder.FilterCategory.Numbers" xml:space="preserve">
     <value>Zahlen</value>
   </data>
+  <data name="TemplateBuilder.FilterCategory.Colors" xml:space="preserve">
+    <value>Farben</value>
+  </data>
   <data name="TemplateBuilder.FilterCategory.Scriban" xml:space="preserve">
     <value>Erweitert (Scriban)</value>
   </data>
@@ -16708,6 +16806,36 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="TemplateBuilder.Filters.Round.Hint" xml:space="preserve">
     <value>Zahl auf N Nachkommastellen runden</value>
+  </data>
+  <data name="TemplateBuilder.Filters.Color.Hint" xml:space="preserve">
+    <value>Wert als Farbe lesen</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorLighten.Hint" xml:space="preserve">
+    <value>Farbe um N Prozent aufhellen</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorDarken.Hint" xml:space="preserve">
+    <value>Farbe um N Prozent abdunkeln</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorSaturate.Hint" xml:space="preserve">
+    <value>Farbe um N Prozent sättigen</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorDesaturate.Hint" xml:space="preserve">
+    <value>Farbe um N Prozent entsättigen</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorOpacity.Hint" xml:space="preserve">
+    <value>Deckkraft einer Farbe auf N Prozent setzen</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorIncreaseOpacity.Hint" xml:space="preserve">
+    <value>Farbe um N Prozent deckender machen</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorReduceOpacity.Hint" xml:space="preserve">
+    <value>Farbe um N Prozent transparenter machen</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorHue.Hint" xml:space="preserve">
+    <value>Farbton um N Grad verschieben</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorMix.Hint" xml:space="preserve">
+    <value>Andere Farbe zu N Prozent beimischen</value>
   </data>
   <data name="TemplateBuilder.Filters.Size.Hint" xml:space="preserve">
     <value>Anzahl der Elemente oder Zeichen</value>
@@ -16984,6 +17112,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Variables.Manager.DeleteMessage" xml:space="preserve">
     <value>Möchtest du vars.{name} wirklich löschen?</value>
   </data>
+  <data name="Variables.Manager.TypeColor" xml:space="preserve">
+    <value>Farbe</value>
+  </data>
   <data name="Variables.Manager.UnbindAction" xml:space="preserve">
     <value>Verknüpfung aufheben</value>
   </data>
@@ -17147,6 +17278,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Variables.Manager.TemplateErrors.NotBoolean" xml:space="preserve">
     <value>Die Vorlage ergibt „{value}“, das ist weder true noch false</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.NotColor" xml:space="preserve">
+    <value>Die Vorlage ergibt „{value}“, das ist keine Farbe</value>
   </data>
   <data name="Variables.Manager.TemplateErrors.CircularReference" xml:space="preserve">
     <value>Die Vorlage liest sich über andere Vorlagenvariablen selbst</value>

@@ -175,6 +175,7 @@ internal static class SliderWidgetConfigView
 						Content = () => new UiColorInput
 						{
 							Key = "iconColor",
+							AllowVariables = true,
 							Label = AppStrings.Widgets.Editor.IconColor(),
 							Binding = Bind.To(iconColor),
 							SupportsReset = true,
@@ -208,6 +209,7 @@ internal static class SliderWidgetConfigView
 					new UiColorInput
 					{
 						Key = "color",
+						AllowVariables = true,
 						Label = AppStrings.Widgets.Slider.SliderColor(),
 						Binding = Bind.To(color),
 						SupportsReset = true,
@@ -223,6 +225,7 @@ internal static class SliderWidgetConfigView
 					new UiThresholdsInput
 					{
 						Key = WidgetThresholds.ValueKey,
+						AllowVariables = true,
 						Label = AppStrings.Widgets.Editor.ColorThresholds(),
 						HideLabel = true,
 						Binding = Bind.To(thresholds),
@@ -236,6 +239,7 @@ internal static class SliderWidgetConfigView
 					new UiColorInput
 					{
 						Key = "labelColor", Label = AppStrings.Widgets.Editor.LabelColor(),
+						AllowVariables = true,
 						Binding = Bind.To(labelColor),
 						SupportsReset = true,
 						DefaultValue = string.Empty,

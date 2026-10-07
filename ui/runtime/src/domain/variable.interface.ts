@@ -2,7 +2,7 @@ import type { LocalizedText } from '../localization/localized-text';
 
 export type VariableScope = 'global' | 'widget';
 
-export type VariableType = 'text' | 'numeric' | 'boolean';
+export type VariableType = 'text' | 'numeric' | 'boolean' | 'color';
 
 export type VariableClassification = 'user' | 'integration' | 'widget';
 
@@ -16,7 +16,7 @@ export interface VariableTemplateSource {
 }
 
 export interface VariableTemplateError {
-  code: 'RenderFailed' | 'NotNumeric' | 'NotBoolean' | 'CircularReference' | string;
+  code: 'RenderFailed' | 'NotNumeric' | 'NotBoolean' | 'NotColor' | 'CircularReference' | string;
   detail?: string | null;
 }
 

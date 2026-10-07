@@ -2,13 +2,14 @@ using MacroDeckHost.Application.FolderViews;
 using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Ui.Transport.Messages.Folders;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
+using MacroDeckHost.Application.Variables.Colors;
 using MacroDeckHost.Domain.Entities;
 
 namespace MacroDeckHost.Application.Ui.Handlers;
 
 public static class FolderDtoMapper
 {
-	public static Folder MapToDto(FolderEntity entity)
+	public static Folder MapToDto(FolderEntity entity, IColorReferenceResolver? colors = null)
 	{
 		var folder = new Folder
 		{
@@ -35,10 +36,7 @@ public static class FolderDtoMapper
 			folder.ParentId = entity.ParentId.Value.ToString();
 		}
 
-		if (entity.BackgroundColor is not null)
-		{
-			folder.BackgroundColor = entity.BackgroundColor;
-		}
+		(folder.BackgroundColor, folder.BackgroundColorSource) = ColorSource.Present(entity.BackgroundColor, colors);
 
 		folder.Widgets.AddRange(entity.Widgets.Select(MapWidgetToDto));
 

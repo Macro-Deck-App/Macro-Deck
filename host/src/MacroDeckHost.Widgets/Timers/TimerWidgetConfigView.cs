@@ -80,6 +80,7 @@ internal static class TimerWidgetConfigView
 			new UiColorInput
 			{
 				Key = "accentColor",
+				AllowVariables = true,
 				Label = AppStrings.Widgets.History.AccentColor(),
 				Binding = Bind.To(accentColor),
 				SupportsReset = true,

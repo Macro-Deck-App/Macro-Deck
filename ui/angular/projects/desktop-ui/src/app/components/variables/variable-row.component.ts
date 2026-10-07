@@ -2,7 +2,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { AppStrings } from '@macro-deck/runtime';
 import { LocalizationService } from '@shared';
-import type { VariableType } from '@macro-deck/runtime';
+import { canonicalColor, type VariableType } from '@macro-deck/runtime';
 import { variableTypeLabels } from '../../domain/variable-source.util';
 
 export const VARIABLE_ROW_HEIGHT = 60;
@@ -48,6 +48,8 @@ export class VariableRowComponent {
 
   protected readonly unavailableLabel = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Manager.ValueUnavailableShort));
+
+  protected readonly swatch = computed(() => (this.type() === 'color' ? canonicalColor(this.value()) : null));
 
   protected readonly typeLabel = computed(() => {
     const type = this.type();

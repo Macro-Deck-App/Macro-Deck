@@ -18,6 +18,9 @@
     @if (unavailable(); as reason) {
       <span class="vr-unavailable" role="img" [title]="reason" [attr.aria-label]="reason">{{ unavailableLabel() }}</span>
     } @else if (value() !== null) {
+      @if (swatch(); as fill) {
+        <span class="vr-swatch" aria-hidden="true" [style.--vr-swatch]="fill"></span>
+      }
       <span class="vr-value" [title]="value()">{{ value() }}</span>
     } @else if (actionLabel(); as label) {
       <span class="vr-action">{{ label }}</span>

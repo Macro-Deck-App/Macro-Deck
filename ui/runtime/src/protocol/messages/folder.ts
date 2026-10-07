@@ -11,6 +11,7 @@ export interface IpcFolder {
   rows?: number;
   columns?: number;
   backgroundColor?: string;
+  backgroundColorSource?: string;
   widgetSpacing?: number;
   widgetBorderRadius?: number;
   emptyCellStyle?: string;
@@ -38,6 +39,7 @@ export interface UpdateFolderRequest {
   rows?: number;
   columns?: number;
   backgroundColor?: string;
+  backgroundColorSource?: string;
   widgetSpacing?: number;
   widgetBorderRadius?: number;
   emptyCellStyle?: string;

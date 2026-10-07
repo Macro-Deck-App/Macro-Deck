@@ -28,7 +28,8 @@ public class WidgetEventDtoTests
 		var handler = new WidgetUpdatedNotificationHandler(_transport,
 			_renderQueue,
 			new WidgetRenderSignals(),
-			new RecordingUiSessionBroker());
+			new RecordingUiSessionBroker(),
+			TestColors.None);
 
 		await handler.Handle(new WidgetUpdatedNotification(PinnedWidget()), CancellationToken.None);
 
@@ -44,7 +45,8 @@ public class WidgetEventDtoTests
 		var handler = new WidgetUpdatedNotificationHandler(_transport,
 			_renderQueue,
 			new WidgetRenderSignals(),
-			new RecordingUiSessionBroker());
+			new RecordingUiSessionBroker(),
+			TestColors.None);
 
 		await handler.Handle(new WidgetUpdatedNotification(widget), CancellationToken.None);
 
@@ -67,7 +69,8 @@ public class WidgetEventDtoTests
 		var handler = new WidgetUpdatedNotificationHandler(_transport,
 			_renderQueue,
 			new WidgetRenderSignals(),
-			broker);
+			broker,
+			TestColors.None);
 
 		await handler.Handle(new WidgetUpdatedNotification(widget), CancellationToken.None);
 
@@ -81,7 +84,7 @@ public class WidgetEventDtoTests
 		var signals = new WidgetRenderSignals();
 		var widget = PinnedWidget();
 		using var subscription = signals.SubscribeDataChanged(widget.Id.ToString(), _ => { });
-		var handler = new WidgetUpdatedNotificationHandler(_transport, _renderQueue, signals, broker);
+		var handler = new WidgetUpdatedNotificationHandler(_transport, _renderQueue, signals, broker, TestColors.None);
 
 		await handler.Handle(new WidgetUpdatedNotification(widget), CancellationToken.None);
 
@@ -98,7 +101,8 @@ public class WidgetEventDtoTests
 		var handler = new WidgetUpdatedNotificationHandler(_transport,
 			_renderQueue,
 			new WidgetRenderSignals(),
-			broker);
+			broker,
+			TestColors.None);
 
 		await handler.Handle(new WidgetUpdatedNotification(widget, DataChanged: false), CancellationToken.None);
 
@@ -116,7 +120,7 @@ public class WidgetEventDtoTests
 	{
 		var broker = new RecordingUiSessionBroker();
 		var folder = FolderWithOneWidget();
-		var handler = new FolderUpdatedNotificationHandler(_transport, broker);
+		var handler = new FolderUpdatedNotificationHandler(_transport, broker, TestColors.None);
 
 		await handler.Handle(new FolderUpdatedNotification(folder, CornerRadiusChanged: true),
 			CancellationToken.None);
@@ -130,7 +134,7 @@ public class WidgetEventDtoTests
 	public async Task FolderUpdated_LeavesItsWidgetsAloneForEveryOtherEdit()
 	{
 		var broker = new RecordingUiSessionBroker();
-		var handler = new FolderUpdatedNotificationHandler(_transport, broker);
+		var handler = new FolderUpdatedNotificationHandler(_transport, broker, TestColors.None);
 
 		await handler.Handle(new FolderUpdatedNotification(FolderWithOneWidget()), CancellationToken.None);
 
@@ -174,7 +178,8 @@ public class WidgetEventDtoTests
 		var handler = new WidgetUpdatedNotificationHandler(_transport,
 			_renderQueue,
 			renderSignals,
-			new RecordingUiSessionBroker());
+			new RecordingUiSessionBroker(),
+			TestColors.None);
 
 		await handler.Handle(new WidgetUpdatedNotification(widget), CancellationToken.None);
 

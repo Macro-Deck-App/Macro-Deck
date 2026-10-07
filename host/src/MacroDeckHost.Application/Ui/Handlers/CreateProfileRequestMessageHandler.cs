@@ -2,6 +2,7 @@ using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Application.Ui.Transport.Messages.Profiles;
+using MacroDeckHost.Application.Variables.Colors;
 
 namespace MacroDeckHost.Application.Ui.Handlers;
 
@@ -9,9 +10,11 @@ public class
 	CreateProfileRequestMessageHandler : IUiTransportMessageHandler<CreateProfileRequest, CreateProfileResponse>
 {
 	private readonly IProfileService _profileService;
+	private readonly IColorReferenceResolver _colors;
 
-	public CreateProfileRequestMessageHandler(IProfileService profileService)
+	public CreateProfileRequestMessageHandler(IProfileService profileService, IColorReferenceResolver colors)
 	{
+		_colors = colors;
 		_profileService = profileService;
 	}
 
@@ -33,7 +36,7 @@ public class
 
 		if (result.Success)
 		{
-			response.Profile = ProfileDtoMapper.MapJsonProfile(result.Data!);
+			response.Profile = ProfileDtoMapper.MapJsonProfile(result.Data!, _colors);
 		}
 		else
 		{

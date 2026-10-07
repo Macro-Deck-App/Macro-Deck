@@ -10,6 +10,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { Strings } from '@macro-deck/runtime';
@@ -22,14 +23,18 @@ export interface SelectOption {
   disabled?: boolean;
   group?: string;
   badge?: string;
+  icon?: string;
+  swatch?: string | null;
 }
 
 const TYPEAHEAD_RESET_MS = 500;
 
+let nextSelectId = 0;
+
 @Component({
   selector: 'shared-select',
   standalone: true,
-  imports: [OverlayPanelComponent, SelectCaretComponent, TranslatePipe],
+  imports: [OverlayPanelComponent, SelectCaretComponent, TranslatePipe, NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [{
     provide: NG_VALUE_ACCESSOR,
@@ -44,10 +49,14 @@ const TYPEAHEAD_RESET_MS = 500;
       role="combobox"
       aria-haspopup="listbox"
       [attr.aria-expanded]="isOpen()"
+      [attr.title]="showTitle ? selectedLabel() : null"
       [disabled]="disabled"
       (click)="toggle()"
       (keydown)="onTriggerKeydown($event)"
       (blur)="onTouched()">
+      @if (selectedOption(); as selected) {
+        <ng-container [ngTemplateOutlet]="leading" [ngTemplateOutletContext]="{ $implicit: selected }" />
+      }
       <span class="sel-label" [class.sel-placeholder]="selectedLabel() === null">
         {{ selectedLabel() ?? placeholder }}
       </span>
@@ -71,15 +80,49 @@ const TYPEAHEAD_RESET_MS = 500;
       </button>
     }
 
+    <ng-template #leading let-option>
+      @if (option.swatch !== undefined) {
+        <span
+          class="sel-swatch"
+          aria-hidden="true"
+          [class.sel-swatch-empty]="!option.swatch"
+          [style.--sel-swatch]="option.swatch || null"></span>
+      } @else if (option.icon) {
+        <span class="icon icon-sm icon-{{ option.icon }} sel-option-icon" aria-hidden="true"></span>
+      }
+    </ng-template>
+
     <shared-overlay-panel
       [anchor]="trigger"
       [isOpen]="isOpen()"
-      [matchAnchorWidth]="true"
+      [matchAnchorWidth]="!fitContent"
+      [minWidth]="fitContent ? panelMinWidth() : null"
       [anchorOffset]="0"
       (dismissed)="close()">
-      <div class="sel-listbox" role="listbox">
-        @for (option of options; track option.value; let i = $index) {
-          @if (option.group && (i === 0 || options[i - 1].group !== option.group)) {
+      @if (searchable) {
+        <div class="sel-search">
+          <span class="icon icon-xs icon-search sel-search-icon" aria-hidden="true"></span>
+          <input
+            #search
+            class="control sel-search-input"
+            type="text"
+            role="combobox"
+            aria-autocomplete="list"
+            autocomplete="off"
+            spellcheck="false"
+            [attr.aria-label]="searchPlaceholder || null"
+            [attr.aria-controls]="listboxId"
+            [attr.aria-expanded]="true"
+            [attr.aria-activedescendant]="activeOptionId()"
+            [placeholder]="searchPlaceholder"
+            [value]="query()"
+            (input)="onSearchInput($event)"
+            (keydown)="onSearchKeydown($event)">
+        </div>
+      }
+      <div class="sel-listbox" role="listbox" [id]="listboxId" [class.sel-listbox-fit]="fitContent">
+        @for (option of visibleOptions; track option.value; let i = $index) {
+          @if (option.group && (i === 0 || visibleOptions[i - 1].group !== option.group)) {
             <div class="sel-group">{{ option.group }}</div>
           }
           <button
@@ -93,14 +136,21 @@ const TYPEAHEAD_RESET_MS = 500;
             [disabled]="option.disabled"
             (mousedown)="$event.preventDefault()"
             (click)="pick(option)">
+            <ng-container [ngTemplateOutlet]="leading" [ngTemplateOutletContext]="{ $implicit: option }" />
             <span class="sel-option-label">{{ option.label }}</span>
             @if (option.badge) {
               <span class="sel-option-badge">{{ option.badge }}</span>
             }
           </button>
         }
-        @if (options.length === 0) {
-          <div class="sel-empty">{{ 'macrodeck.app:Forms.Select.NoOptions' | translate }}</div>
+        @if (visibleOptions.length === 0) {
+          @if (options.length > 0) {
+            <div class="sel-empty">{{ noMatchesText }}</div>
+          } @else if (emptyText) {
+            <div class="sel-empty">{{ emptyText }}</div>
+          } @else {
+            <div class="sel-empty">{{ 'macrodeck.app:Forms.Select.NoOptions' | translate }}</div>
+          }
         }
       </div>
     </shared-overlay-panel>
@@ -122,10 +172,22 @@ export class SelectComponent implements ControlValueAccessor {
     return this.placeholderOverride ?? this.localization.translateKey(Strings.Common.Select);
   }
   @Input() clearable = false;
+  @Input() searchable = false;
+  @Input() searchPlaceholder = '';
+  @Input() noMatchesText = '';
+  @Input() emptyText = '';
+  @Input() fitContent = false;
+  @Input() showTitle = false;
 
   @Output() readonly opened = new EventEmitter<void>();
 
   @ViewChild('trigger') private triggerRef?: ElementRef<HTMLButtonElement>;
+  @ViewChild('search') private searchRef?: ElementRef<HTMLInputElement>;
+
+  private readonly idPrefix = `sel-${++nextSelectId}`;
+  readonly listboxId = `${this.idPrefix}-listbox`;
+  readonly query = signal('');
+  readonly panelMinWidth = signal<number | null>(null);
 
   private readonly valueSignal = signal<string | number | null>(null);
   readonly isOpen = signal(false);
@@ -152,6 +214,21 @@ export class SelectComponent implements ControlValueAccessor {
     this.isOpen.set(false);
   }
 
+  get visibleOptions(): SelectOption[] {
+    const query = this.searchable ? this.query().trim().toLowerCase() : '';
+    return query === '' ? this.options : this.options.filter(option => option.label.toLowerCase().includes(query));
+  }
+
+  selectedOption(): SelectOption | null {
+    const value = this.valueSignal();
+    return value === null ? null : this.options.find(o => o.value === String(value)) ?? null;
+  }
+
+  activeOptionId(): string | null {
+    const index = this.activeIndex();
+    return index >= 0 && index < this.visibleOptions.length ? this.optionId(index) : null;
+  }
+
   selectedLabel(): string | null {
     const value = this.valueSignal();
     if (value === null || value === '') {
@@ -167,7 +244,7 @@ export class SelectComponent implements ControlValueAccessor {
   }
 
   optionId(index: number): string {
-    return `sel-option-${index}`;
+    return `${this.idPrefix}-option-${index}`;
   }
 
   writeValue(value: string | number | null): void {
@@ -198,11 +275,18 @@ export class SelectComponent implements ControlValueAccessor {
     if (this.disabled) {
       return;
     }
+    this.query.set('');
     const value = this.valueSignal();
     const selected = this.options.findIndex(o => value !== null && String(value) === o.value);
     this.activeIndex.set(selected >= 0 ? selected : this.firstEnabled(0, 1));
     this.typeaheadBuffer = '';
+    if (this.fitContent) {
+      this.panelMinWidth.set(this.triggerRef?.nativeElement.getBoundingClientRect().width || null);
+    }
     this.isOpen.set(true);
+    if (this.searchable) {
+      requestAnimationFrame(() => this.searchRef?.nativeElement.focus());
+    }
     if (this.activeIndex() >= 0) {
       this.scrollActiveIntoView(this.activeIndex());
     }
@@ -222,6 +306,35 @@ export class SelectComponent implements ControlValueAccessor {
     this.valueSignal.set(option.value);
     this.onChange(option.value);
     this.close();
+  }
+
+  onSearchInput(event: Event): void {
+    this.query.set((event.target as HTMLInputElement).value);
+    this.activeIndex.set(this.firstEnabled(0, 1));
+  }
+
+  onSearchKeydown(event: KeyboardEvent): void {
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        this.moveActive(1);
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        this.moveActive(-1);
+        break;
+      case 'Enter': {
+        event.preventDefault();
+        const active = this.visibleOptions[this.activeIndex()];
+        if (active) {
+          this.pick(active);
+        }
+        break;
+      }
+      case 'Tab':
+        this.close();
+        break;
+    }
   }
 
   onTriggerKeydown(event: KeyboardEvent): void {
@@ -256,12 +369,12 @@ export class SelectComponent implements ControlValueAccessor {
         break;
       case 'End':
         event.preventDefault();
-        this.activeIndex.set(this.firstEnabled(this.options.length - 1, -1));
+        this.activeIndex.set(this.firstEnabled(this.visibleOptions.length - 1, -1));
         break;
       case 'Enter':
       case ' ': {
         event.preventDefault();
-        const active = this.options[this.activeIndex()];
+        const active = this.visibleOptions[this.activeIndex()];
         if (active) {
           this.pick(active);
         }
@@ -304,14 +417,14 @@ export class SelectComponent implements ControlValueAccessor {
   }
 
   private findByPrefix(prefix: string, fromNext: boolean): number {
-    const count = this.options.length;
+    const count = this.visibleOptions.length;
     if (count === 0) {
       return -1;
     }
     const start = this.activeIndex() + (fromNext ? 1 : 0);
     for (let step = 0; step < count; step++) {
       const index = ((start + step) % count + count) % count;
-      const option = this.options[index];
+      const option = this.visibleOptions[index];
       if (!option.disabled && option.label.toLowerCase().startsWith(prefix)) {
         return index;
       }
@@ -324,18 +437,18 @@ export class SelectComponent implements ControlValueAccessor {
     let index = start;
     do {
       index += step;
-      if (index < 0 || index >= this.options.length) {
+      if (index < 0 || index >= this.visibleOptions.length) {
         return;
       }
-    } while (this.options[index]?.disabled);
+    } while (this.visibleOptions[index]?.disabled);
     this.activeIndex.set(index);
     this.scrollActiveIntoView(index);
   }
 
   private firstEnabled(start: number, step: number): number {
     let index = start;
-    while (index >= 0 && index < this.options.length) {
-      if (!this.options[index].disabled) {
+    while (index >= 0 && index < this.visibleOptions.length) {
+      if (!this.visibleOptions[index].disabled) {
         return index;
       }
       index += step;

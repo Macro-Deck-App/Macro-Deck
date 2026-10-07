@@ -5,6 +5,7 @@ export const VARIABLE_TYPE_LABEL_KEYS: Record<VariableType, string> = {
   text: AppStrings.Variables.Manager.TypeText,
   numeric: AppStrings.Variables.Manager.TypeNumeric,
   boolean: AppStrings.Variables.Manager.TypeBoolean,
+  color: AppStrings.Variables.Manager.TypeColor,
 };
 
 export function variableTypeLabels(translate: (key: string) => string): Record<VariableType, string> {
@@ -12,6 +13,7 @@ export function variableTypeLabels(translate: (key: string) => string): Record<V
     text: translate(VARIABLE_TYPE_LABEL_KEYS.text),
     numeric: translate(VARIABLE_TYPE_LABEL_KEYS.numeric),
     boolean: translate(VARIABLE_TYPE_LABEL_KEYS.boolean),
+    color: translate(VARIABLE_TYPE_LABEL_KEYS.color),
   };
 }
 

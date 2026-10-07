@@ -292,6 +292,77 @@ public class UserVariableWriterTests
 		Assert.That(await ValueOf("count", WidgetId), Is.EqualTo("10"));
 	}
 
+	[Test]
+	public async Task A_color_variable_created_without_a_value_starts_black()
+	{
+		var created = await _writer.CreateAsync("primary", null, SdkVariableType.Color);
+
+		Assert.That(created.Status, Is.EqualTo(UserVariableCreateStatus.Created));
+		Assert.That(await ValueOf("primary"), Is.EqualTo("#000000"));
+	}
+
+	[TestCase("#3366FFCC", "#3366ffcc")]
+	[TestCase("#3366ffff", "#3366ff")]
+	[TestCase("rgba(51, 102, 255, 0.5)", "#3366ff80")]
+	public async Task A_color_variable_stores_its_value_in_canonical_form(string initial, string expected)
+	{
+		var created = await _writer.CreateAsync("primary", null, SdkVariableType.Color, initial);
+
+		Assert.That(created.Status, Is.EqualTo(UserVariableCreateStatus.Created));
+		Assert.That(await ValueOf("primary"), Is.EqualTo(expected));
+	}
+
+	[TestCase("red")]
+	[TestCase("#12345")]
+	[TestCase("")]
+	public async Task A_color_variable_is_not_created_from_something_that_is_not_a_color(string initial)
+	{
+		var created = await _writer.CreateAsync("primary", null, SdkVariableType.Color, initial);
+
+		Assert.That(created.Status, Is.EqualTo(UserVariableCreateStatus.InvalidValue));
+		Assert.That(await _service.Resolve("primary", VariableScope.Global, null), Is.Null);
+	}
+
+	[Test]
+	public async Task Set_replaces_a_color_and_refuses_text_that_is_not_one()
+	{
+		await CreateUserVariable("primary", DomainVariableType.Color, "#3366ff");
+
+		var valid = await Apply("primary", UserVariableOperation.Set, "#FF000080");
+		var invalid = await Apply("primary", UserVariableOperation.Set, "blue-ish");
+
+		Assert.Multiple(async () =>
+		{
+			Assert.That(valid.Status, Is.EqualTo(UserVariableWriteStatus.Applied));
+			Assert.That(invalid.Status, Is.EqualTo(UserVariableWriteStatus.InvalidValue));
+			Assert.That(await ValueOf("primary"), Is.EqualTo("#ff000080"));
+		});
+	}
+
+	[TestCase(UserVariableOperation.Add, "1")]
+	[TestCase(UserVariableOperation.Toggle, null)]
+	[TestCase(UserVariableOperation.Append, "ff")]
+	public async Task Only_set_applies_to_a_color_variable(UserVariableOperation operation, string? value)
+	{
+		await CreateUserVariable("primary", DomainVariableType.Color, "#3366ff");
+
+		var result = await Apply("primary", operation, value);
+
+		Assert.That(result.Status, Is.EqualTo(UserVariableWriteStatus.InvalidValue));
+		Assert.That(await ValueOf("primary"), Is.EqualTo("#3366ff"));
+	}
+
+	[Test]
+	public async Task The_variable_service_refuses_a_color_that_does_not_parse()
+	{
+		var created = await CreateUserVariable("primary", DomainVariableType.Color, "#3366ff");
+
+		var result = await _service.SetValue(created.Data!.Id, "not a color");
+
+		Assert.That(result.Error, Is.EqualTo(VariableError.InvalidValue));
+		Assert.That(await ValueOf("primary"), Is.EqualTo("#3366ff"));
+	}
+
 	private Task<UserVariableWriteResult> Apply(string name, UserVariableOperation operation, string? value)
 		=> _writer.ApplyAsync(name, null, operation, value);
 

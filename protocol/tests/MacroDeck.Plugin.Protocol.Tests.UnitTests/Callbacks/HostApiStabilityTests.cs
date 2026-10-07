@@ -14,6 +14,7 @@ public class HostApiStabilityTests
 	[
 		"action-interactions",
 		"adb",
+		"colors",
 		"config",
 		"deck",
 		"devices",
@@ -60,6 +61,7 @@ public class HostApiStabilityTests
 			[HostApis.IconPacks] = ["sync-bundled", "get-icon-resource", "get-icon"],
 			[HostApis.VideoStreams] =
 				["providers-changed", "streams-changed", "session-update", "session-close"],
+			[HostApis.Colors] = ["resolve", "watches"],
 		};
 
 	[Test]

@@ -1,4 +1,5 @@
 using MacroDeck.Sdk;
+using MacroDeck.Sdk.Colors;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Events;
@@ -47,6 +48,7 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 		VideoStreams = new FakeVideoStreamProviderContext();
 		Messages = new FakeMessageChannel();
 		UiResources = new FakeUiResourceRegistry();
+		Colors = new FakeColorApi();
 	}
 
 	/// <summary>The plugin's own variables - see <see cref="FakeVariableApi" />.</summary>
@@ -142,6 +144,12 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 
 	/// <inheritdoc />
 	IMessageChannel IIntegrationContext.Messages => Messages;
+
+	/// <summary>Colour resolution and watches - see <see cref="FakeColorApi" />.</summary>
+	public FakeColorApi Colors { get; }
+
+	/// <inheritdoc />
+	IColorApi IIntegrationContext.Colors => Colors;
 
 	/// <inheritdoc />
 	IUiResourceRegistry IIntegrationContext.UiResources => UiResources;

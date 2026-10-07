@@ -1,5 +1,5 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
-import { type AppearanceChangedEvent, type SystemFontFace, type ThemeMode, UiFont } from '@macro-deck/runtime';
+import { type AppearanceChangedEvent, isColorReference, type SystemFontFace, type ThemeMode, UiFont } from '@macro-deck/runtime';
 import { ApiService } from '../transport';
 
 export type ResolvedTheme = 'light' | 'dark';
@@ -27,6 +27,8 @@ export class ThemeService {
 
   readonly themeMode = signal<ThemeMode>(DEFAULT_THEME_MODE);
   readonly accentColor = signal<string>(DEFAULT_ACCENT_COLOR);
+  readonly accentColorSource = signal<string | null>(null);
+  readonly accentEditorValue = computed(() => this.accentColorSource() ?? this.accentColor());
   readonly fontFamily = signal<string>('');
 
   private readonly systemPrefersDark = signal<boolean>(true);
@@ -65,7 +67,7 @@ export class ThemeService {
 
     this.api
       .onNotification<AppearanceChangedEvent>('AppearanceChangedEvent')
-      .subscribe(evt => this.applyServerSettings(evt.themeMode, evt.accentColor, evt.fontFamily));
+      .subscribe(evt => this.applyServerSettings(evt.themeMode, evt.accentColor, evt.fontFamily, evt.accentColorSource));
 
     // The one load during startup can land before there is a session to answer it, and it fails
     // quietly when it does - leaving the deck on its cached colours for the rest of the visit. Every
@@ -79,7 +81,7 @@ export class ThemeService {
   async loadFromHost(): Promise<void> {
     try {
       const settings = await this.api.getAppearanceSettings();
-      this.applyServerSettings(settings.themeMode, settings.accentColor, settings.fontFamily);
+      this.applyServerSettings(settings.themeMode, settings.accentColor, settings.fontFamily, settings.accentColorSource);
     } catch {
     }
   }
@@ -88,9 +90,11 @@ export class ThemeService {
     themeMode: ThemeMode | undefined,
     accentColor: string | undefined,
     fontFamily: string | undefined,
+    accentColorSource: string | undefined,
   ): void {
     this.themeMode.set(themeMode ?? DEFAULT_THEME_MODE);
     this.accentColor.set(accentColor ?? DEFAULT_ACCENT_COLOR);
+    this.accentColorSource.set(accentColorSource || null);
     if (fontFamily !== undefined) this.fontFamily.set(fontFamily);
   }
 
@@ -115,17 +119,28 @@ export class ThemeService {
   }
 
   setAccentColor(color: string): void {
-    this.accentColor.set(color);
-    void this.persist();
+    if (isColorReference(color)) {
+      this.accentColorSource.set(color);
+    } else {
+      this.accentColor.set(color);
+      this.accentColorSource.set(null);
+    }
+    void this.persist(color);
   }
 
-  private async persist(): Promise<void> {
+  // A source-less update keeps a stored reference only while the colour is unchanged, so an explicit
+  // pick always carries its source; a literal one detaches the reference.
+  private async persist(accentColorSource: string | undefined = this.accentColorSource() ?? undefined): Promise<void> {
     try {
-      await this.api.updateAppearanceSettings({
+      const response = await this.api.updateAppearanceSettings({
         themeMode: this.themeMode(),
         accentColor: this.accentColor(),
+        accentColorSource,
         fontFamily: this.fontFamily()
       });
+      if (response?.accentColor && isColorReference(accentColorSource) && this.accentColorSource() === accentColorSource) {
+        this.accentColor.set(response.accentColor);
+      }
     } catch {
     }
   }

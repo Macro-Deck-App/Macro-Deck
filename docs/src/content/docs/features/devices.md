@@ -171,7 +171,12 @@ device stays registration-only forever.
   background transparent, its `Appearance.BackgroundColor` is null, the same as a widget with no colour of
   its own: draw the folder background behind that key, or your own default where there is none.
   `Layout.BackgroundColor` carries the folder background as the user stored it, which can be a CSS colour
-  such as `rgba(...)` or the literal `transparent` rather than `#rrggbb`.
+  such as `rgb(...)` or the literal `transparent` rather than `#rrggbb`.
+- **Two kinds of colour arrive flattened to an opaque `#rrggbb`:** one that follows a
+  [Color variable](/features/variables/#color-variables), resolved to its current value, and one stored as
+  translucent, such as `rgba(...)` or `#rrggbbaa` below full opacity, with the alpha dropped. This applies to the layout and widget
+  colours alike, and the surface is rebuilt when a referenced variable changes. Every other colour arrives
+  exactly as stored.
 
 ## Reporting interactions
 

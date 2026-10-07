@@ -117,6 +117,10 @@ public sealed record PluginProtocolLimitsDescriptor
 	public int? MaxUiSessionsPerProvider { get; init; }
 
 	public int? MaxUiWidgetSessionsPerProvider { get; init; }
+
+	/// <summary>How many colours one plugin may watch. Absent from a host that predates the <c>colors</c>
+	/// host api.</summary>
+	public int? MaxColorWatches { get; init; }
 }
 
 /// <summary>Wire copy of <c>Limits.ProtocolTimeouts</c>.</summary>

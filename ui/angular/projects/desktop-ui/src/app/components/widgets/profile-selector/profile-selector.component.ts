@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, Injector, ViewChild, af
 import { FormsModule } from '@angular/forms';
 
 import { FileOpenService } from '../../../services';
-import { type EmptyCellStyle, Profile, WIDGET_REFERENCE_GAP, AppStrings, Strings } from '@macro-deck/runtime';
+import { type EmptyCellStyle, Profile, WIDGET_REFERENCE_GAP, AppStrings, isColorReference, Strings } from '@macro-deck/runtime';
 import { ProfileService, ToastService, ModalComponent, ButtonComponent, ButtonGroupComponent, ContextMenuComponent, ContextMenuItem, ErrorBannerComponent, InputComponent, dismissModal, LocalizationService, TranslatePipe } from '@shared';
 import { SelectCaretComponent } from '../../forms/select-caret/select-caret.component';
 import { GridSettingsComponent } from '../../grid-settings/grid-settings.component';
@@ -327,7 +327,7 @@ export class ProfileSelectorComponent {
     this.editName.set(profile.name);
     this.editRows.set(profile.defaultRows);
     this.editColumns.set(profile.defaultColumns);
-    this.editBackground.set(profile.defaultBackground ?? '');
+    this.editBackground.set(profile.defaultBackgroundSource ?? profile.defaultBackground ?? '');
     this.editSpacing.set(profile.defaultSpacing);
     this.editBorderRadius.set(profile.defaultBorderRadius);
     this.editEmptyCellStyle.set(profile.defaultEmptyCellStyle ?? null);
@@ -342,11 +342,13 @@ export class ProfileSelectorComponent {
       return;
     }
     this.editError.set(null);
+    const background = this.editBackground().trim() || undefined;
     const result = await this.profileService.updateProfile(profile.id, {
       name: this.editName().trim() || profile.name,
       defaultRows: this.editRows(),
       defaultColumns: this.editColumns(),
-      defaultBackgroundColor: this.editBackground().trim() || undefined,
+      defaultBackgroundColor: background !== undefined && isColorReference(background) ? undefined : background,
+      defaultBackgroundColorSource: background,
       defaultWidgetSpacing: this.editSpacing() ?? -1,
       defaultWidgetBorderRadius: this.editBorderRadius() ?? -1,
       defaultEmptyCellStyle: this.editEmptyCellStyle() ?? '',

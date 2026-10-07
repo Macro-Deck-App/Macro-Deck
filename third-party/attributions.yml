@@ -62,15 +62,19 @@ assets:
       - ui/runtime/styles/icons/arrow-right.svg
       - ui/runtime/styles/icons/arrow-up.svg
       - ui/runtime/styles/icons/bell.svg
+      - ui/runtime/styles/icons/blend.svg
       - ui/runtime/styles/icons/braces-x.svg
       - ui/runtime/styles/icons/bug.svg
       - ui/runtime/styles/icons/chart.svg
       - ui/runtime/styles/icons/check.svg
+      - ui/runtime/styles/icons/chevron-down.svg
       - ui/runtime/styles/icons/chevron-left.svg
       - ui/runtime/styles/icons/chevron-right.svg
+      - ui/runtime/styles/icons/chevron-up.svg
       - ui/runtime/styles/icons/clipboard.svg
       - ui/runtime/styles/icons/clock-type.svg
       - ui/runtime/styles/icons/code.svg
+      - ui/runtime/styles/icons/contrast.svg
       - ui/runtime/styles/icons/copy.svg
       - ui/runtime/styles/icons/crosshair.svg
       - ui/runtime/styles/icons/device-desktop.svg
@@ -80,6 +84,9 @@ assets:
       - ui/runtime/styles/icons/disc.svg
       - ui/runtime/styles/icons/dots-vertical.svg
       - ui/runtime/styles/icons/download.svg
+      - ui/runtime/styles/icons/droplet-off.svg
+      - ui/runtime/styles/icons/droplet.svg
+      - ui/runtime/styles/icons/droplets.svg
       - ui/runtime/styles/icons/external-link.svg
       - ui/runtime/styles/icons/file-text.svg
       - ui/runtime/styles/icons/folder-plus.svg
@@ -109,6 +116,7 @@ assets:
       - ui/runtime/styles/icons/power.svg
       - ui/runtime/styles/icons/puzzle.svg
       - ui/runtime/styles/icons/refresh.svg
+      - ui/runtime/styles/icons/rotate-cw.svg
       - ui/runtime/styles/icons/scissors.svg
       - ui/runtime/styles/icons/search.svg
       - ui/runtime/styles/icons/settings.svg
@@ -118,6 +126,7 @@ assets:
       - ui/runtime/styles/icons/sparkles.svg
       - ui/runtime/styles/icons/star.svg
       - ui/runtime/styles/icons/store.svg
+      - ui/runtime/styles/icons/sun-dim.svg
       - ui/runtime/styles/icons/sun.svg
       - ui/runtime/styles/icons/tag.svg
       - ui/runtime/styles/icons/trash.svg

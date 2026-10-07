@@ -95,6 +95,33 @@ public class UiThresholdsTests
 		=> Assert.That(_fourBands.BandAt(value)?.Id, Is.EqualTo(expected));
 
 	[Test]
+	public void A_band_without_a_colour_keeps_its_place_and_answers_no_colour()
+	{
+		var thresholds = new UiThresholds([
+			new UiThresholdBand("ok", "#34c759"),
+			new UiThresholdBand("gone", "", 50),
+			new UiThresholdBand("bad", "#ff3b30", 90),
+		]);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(thresholds.BandAt(60)?.Id, Is.EqualTo("gone"));
+			Assert.That(thresholds.ColorAt(60), Is.Null);
+			Assert.That(thresholds.ColorAt(95), Is.EqualTo("#ff3b30"));
+		});
+	}
+
+	[TestCase("{{ vars.primary | color | color_reduce_opacity: 20 | color_increase_opacity: 5 }}", true)]
+	[TestCase("{{ vars.primary | color | color_mix: \"#fff\", 50 }}", true)]
+	[TestCase("{{ vars.primary | color | upcase }}", false)]
+	[TestCase("{{ vars.primary | color | color_darken }}", false)]
+	[TestCase("{{ vars.Primary | color }}", false)]
+	[TestCase("{{ vars.primary }}", false)]
+	public void A_band_colour_may_be_a_colour_reference_in_the_hosts_grammar_only(string color, bool valid)
+		=> Assert.That(() => new UiThresholds([new UiThresholdBand("a", color)]),
+			valid ? Throws.Nothing : Throws.ArgumentException);
+
+	[Test]
 	public void NaN_falls_in_no_band()
 		=> Assert.That(_fourBands.ColorAt(double.NaN), Is.Null);
 

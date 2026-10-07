@@ -34,6 +34,14 @@ public sealed class ActionParameter
 	/// </summary>
 	public bool SupportsReset { get; init; }
 
+	/// <summary>
+	/// Whether a <c>Color</c> parameter accepts a translucent value. Off by default: the action then always
+	/// receives an opaque <c>#rrggbb</c>, also when the user picked a Color variable whose value or modifiers
+	/// carry alpha. An action that opts in may receive <c>#rrggbbaa</c>. A Macro Deck release that predates
+	/// this flag ignores it.
+	/// </summary>
+	public bool AllowAlpha { get; init; }
+
 	/// <summary>The value is authored literally; no variable binding is offered.</summary>
 	public bool LiteralOnly { get; init; }
 
