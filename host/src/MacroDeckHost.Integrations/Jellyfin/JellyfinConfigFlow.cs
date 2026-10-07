@@ -52,12 +52,17 @@ public sealed class JellyfinConfigFlow : IConfigFlow
 		IReadOnlyDictionary<string, object?> input,
 		IConfigFlowContext context,
 		CancellationToken cancellationToken)
-	{
-		if (stepId != StepId)
+		=> stepId switch
 		{
-			return ConfigFlowResult.Error(ConnectionStep(context), Strings.UnknownStep());
-		}
+			StepId => await SubmitConnectionAsync(input, context, cancellationToken).ConfigureAwait(false),
+			_ => ConfigFlowResult.Error(ConnectionStep(context), Strings.UnknownStep())
+		};
 
+	private async Task<ConfigFlowResult> SubmitConnectionAsync(
+		IReadOnlyDictionary<string, object?> input,
+		IConfigFlowContext context,
+		CancellationToken cancellationToken)
+	{
 		var entryTitle = (context as IConfigFlowEntryContext)?.EntryTitle;
 		var name = entryTitle ?? Read(input, JellyfinConfigKeys.ConfigurationName).Trim();
 		var url = Read(input, JellyfinConfigKeys.Url).Trim();
