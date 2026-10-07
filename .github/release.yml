@@ -23,6 +23,14 @@ changelog:
       labels:
         - compat:deprecation
 
+    - title: 🔌 New Integrations
+      labels:
+        - new-integration
+
+    - title: 🧱 New Widgets
+      labels:
+        - new-widget
+
     - title: 🎉 Exciting New Features
       labels:
         - feature
