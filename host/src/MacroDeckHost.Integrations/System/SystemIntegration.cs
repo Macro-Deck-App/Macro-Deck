@@ -51,7 +51,7 @@ public sealed class SystemIntegration
 	private const string InputVolumePercentId = "system-input-volume-percent";
 	private const string InputMutedId = "system-input-muted";
 
-	private static readonly TimeSpan _audioDiscoveryInterval = TimeSpan.FromSeconds(5);
+	private static readonly TimeSpan _discoveryInterval = TimeSpan.FromSeconds(5);
 
 	private const int MaxIndexedGpus = 8;
 
@@ -99,12 +99,15 @@ public sealed class SystemIntegration
 	private IVariableRefreshSignal? _refreshSignal;
 
 	private readonly IReadOnlyList<VariableDefinition> _fixedVariables;
+	private readonly global::System.Threading.Lock _refreshLock = new();
 	private volatile AudioState _audio;
+	private volatile IReadOnlyList<string?> _diskSlots = [];
+	private volatile IReadOnlyList<VariableDefinition> _variables;
 	private IKnownAudioDeviceStore? _audioStore;
 	private IVariablePollingInvalidationSignal? _pollingInvalidation;
 	private bool _persistAudioDevices;
-	private CancellationTokenSource? _audioDiscoveryCancellation;
-	private Task? _audioDiscoveryLoop;
+	private CancellationTokenSource? _discoveryCancellation;
+	private Task? _discoveryLoop;
 
 	public SystemIntegration()
 		: this(ApplicationServiceFactory.Create(),
@@ -133,7 +136,8 @@ public sealed class SystemIntegration
 		_lock = lockStateReader ?? new NullLockStateReader();
 
 		_fixedVariables = BuildVariables(_metrics.GpuCount);
-		_audio = new AudioState([], new HashSet<string>(StringComparer.Ordinal), null, _fixedVariables);
+		_audio = new AudioState([], new HashSet<string>(StringComparer.Ordinal), null);
+		_variables = _fixedVariables;
 
 		Actions =
 		[
@@ -170,7 +174,7 @@ public sealed class SystemIntegration
 
 	public IReadOnlyList<IIntegrationMigration> Migrations { get; } = [new WindowsUtilsMacroDeck2Migration()];
 
-	public IReadOnlyList<VariableDefinition> Variables => _audio.Variables;
+	public IReadOnlyList<VariableDefinition> Variables => _variables;
 
 	private static IReadOnlyList<VariableDefinition> BuildVariables(int gpuCount) =>
 	[
@@ -312,7 +316,7 @@ public sealed class SystemIntegration
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
-		await StopAudioDiscoveryAsync();
+		await StopDiscoveryAsync();
 
 		_variableAccessor.Current = context.Variables;
 		_variableAccessor.UserVariables = context.UserVariables;
@@ -341,15 +345,16 @@ public sealed class SystemIntegration
 		// IsInitialized is always true, so the poller may already have registered the fixed list; the
 		// first refresh always republishes so the stored devices are declared too.
 		await RefreshAudioDevicesAsync(republish: true, CancellationToken.None);
+		await RefreshDisksAsync(CancellationToken.None);
 
 		var cancellation = new CancellationTokenSource();
-		_audioDiscoveryCancellation = cancellation;
-		_audioDiscoveryLoop = Task.Run(() => RunAudioDiscoveryLoopAsync(cancellation.Token));
+		_discoveryCancellation = cancellation;
+		_discoveryLoop = Task.Run(() => RunDiscoveryLoopAsync(cancellation.Token));
 	}
 
 	public async Task ShutdownAsync()
 	{
-		await StopAudioDiscoveryAsync();
+		await StopDiscoveryAsync();
 		_volume.Changed -= OnVolumeChanged;
 		FocusedApplicationSnapshot.Current.Changed -= OnFocusChanged;
 		_focusChannel?.Writer.TryComplete();
@@ -372,6 +377,8 @@ public sealed class SystemIntegration
 	public void UseKnownAudioDeviceStore(IKnownAudioDeviceStore store) => _audioStore = store;
 
 	internal Task RefreshAudioDevicesAsync() => RefreshAudioDevicesAsync(republish: false, CancellationToken.None);
+
+	internal Task RefreshDisksAsync() => RefreshDisksAsync(CancellationToken.None);
 
 	private void OnVolumeChanged()
 	{
@@ -399,6 +406,7 @@ public sealed class SystemIntegration
 
 		var audio = _audio;
 		_audio = BuildAudioState(AudioDeviceVariables.Valid(stored), audio.Present, audio.DefaultOutputId);
+		ComposeVariables();
 	}
 
 	private async Task RefreshAudioDevicesAsync(bool republish, CancellationToken cancellationToken)
@@ -419,6 +427,14 @@ public sealed class SystemIntegration
 			devices = [];
 		}
 
+		lock (_refreshLock)
+		{
+			ApplyAudioDevices(devices, republish);
+		}
+	}
+
+	private void ApplyAudioDevices(IReadOnlyList<AudioDevice> devices, bool republish)
+	{
 		var current = _audio;
 		var known = AudioDeviceVariables.Merge(current.Known, devices);
 		var declarationChanged = !known.SequenceEqual(current.Known);
@@ -437,23 +453,80 @@ public sealed class SystemIntegration
 		}
 
 		_audio = BuildAudioState(known, present, defaultOutput);
+		ComposeVariables();
 		_pollingInvalidation?.MarkStale(IntegrationId);
 	}
 
-	private AudioState BuildAudioState(
+	private static AudioState BuildAudioState(
 		IReadOnlyList<KnownAudioDevice> known,
 		HashSet<string> present,
 		string? defaultOutput)
-		=> new(known, present, defaultOutput, [.. _fixedVariables, .. known.SelectMany(AudioDeviceVariables.Declare)]);
+		=> new(known, present, defaultOutput);
 
-	private async Task RunAudioDiscoveryLoopAsync(CancellationToken cancellationToken)
+	private async Task RefreshDisksAsync(CancellationToken cancellationToken)
+	{
+		IReadOnlyList<DiskSample> disks;
+		try
+		{
+			disks = await _metrics.GetDisksAsync(cancellationToken);
+		}
+		catch (Exception ex) when (ex is not OperationCanceledException)
+		{
+			_logger.Warning(ex, "Could not list the disks");
+			return;
+		}
+
+		// A failed read lists no disks at all; keeping the slots stops one bad read from renumbering them.
+		if (disks.Count == 0)
+		{
+			return;
+		}
+
+		IReadOnlyList<string?> current;
+		IReadOnlyList<string?> slots;
+		lock (_refreshLock)
+		{
+			current = _diskSlots;
+			slots = DiskVariables.AssignSlots(current, disks.Select(disk => disk.MountPoint));
+			_diskSlots = slots;
+			if (slots.Count != current.Count)
+			{
+				ComposeVariables();
+				_pollingInvalidation?.MarkStale(IntegrationId);
+			}
+		}
+
+		for (var index = 0; index < current.Count; index++)
+		{
+			if (current[index] != slots[index])
+			{
+				foreach (var definition in DiskVariables.Declare(index))
+				{
+					_refreshSignal?.RequestDefinitionRefresh(IntegrationId, definition.ResolvedId!);
+				}
+			}
+		}
+	}
+
+	// Disks come before audio devices so that a remembered-device list loaded over its cap is what the
+	// host trims at the eager variable limit, never a disk.
+	private void ComposeVariables()
+		=> _variables =
+		[
+			.. _fixedVariables,
+			.. Enumerable.Range(0, _diskSlots.Count).SelectMany(DiskVariables.Declare),
+			.. _audio.Known.SelectMany(AudioDeviceVariables.Declare)
+		];
+
+	private async Task RunDiscoveryLoopAsync(CancellationToken cancellationToken)
 	{
 		try
 		{
 			while (true)
 			{
-				await Task.Delay(_audioDiscoveryInterval, cancellationToken);
+				await Task.Delay(_discoveryInterval, cancellationToken);
 				await RefreshAudioDevicesAsync(republish: false, cancellationToken);
+				await RefreshDisksAsync(cancellationToken);
 			}
 		}
 		catch (OperationCanceledException)
@@ -461,22 +534,22 @@ public sealed class SystemIntegration
 		}
 	}
 
-	private async Task StopAudioDiscoveryAsync()
+	private async Task StopDiscoveryAsync()
 	{
-		if (_audioDiscoveryCancellation is not { } cancellation)
+		if (_discoveryCancellation is not { } cancellation)
 		{
 			return;
 		}
 
 		await cancellation.CancelAsync();
-		if (_audioDiscoveryLoop is { } loop)
+		if (_discoveryLoop is { } loop)
 		{
 			await loop;
 		}
 
 		cancellation.Dispose();
-		_audioDiscoveryCancellation = null;
-		_audioDiscoveryLoop = null;
+		_discoveryCancellation = null;
+		_discoveryLoop = null;
 	}
 
 	private AudioTarget? ResolveKnownTarget(AudioFlow flow, string key)
@@ -503,8 +576,7 @@ public sealed class SystemIntegration
 	private sealed record AudioState(
 		IReadOnlyList<KnownAudioDevice> Known,
 		HashSet<string> Present,
-		string? DefaultOutputId,
-		IReadOnlyList<VariableDefinition> Variables);
+		string? DefaultOutputId);
 
 	// One consumer draining a capacity-1 drop-oldest channel, rather than an unordered Task per focus
 	// change: the variable API is async and Changed fires synchronously on the focus pipeline's own
@@ -580,8 +652,24 @@ public sealed class SystemIntegration
 			// clients can never momentarily disagree; the reader answers only until the first one lands.
 			"system-locked" when _lock.IsSupported =>
 				VariableReading.Of(LockStateSnapshot.Current.Value ?? _lock.IsLocked()),
+			_ when DiskVariables.TryParseId(localId, out var diskIndex, out var statistic) =>
+				await ReadDiskAsync(diskIndex, statistic, cancellationToken),
 			_ => await ReadIndexedGpuAsync(localId, cancellationToken)
 		};
+	}
+
+	private async ValueTask<VariableReading> ReadDiskAsync(int index, string statistic, CancellationToken cancellationToken)
+	{
+		var slots = _diskSlots;
+		if (index >= slots.Count || slots[index] is not { } mountPoint)
+		{
+			return VariableReading.Unavailable;
+		}
+
+		var disks = await _metrics.GetDisksAsync(cancellationToken);
+		return disks.FirstOrDefault(disk => disk.MountPoint == mountPoint) is { } sample
+			? VariableReading.Of(DiskVariables.Read(sample, statistic))
+			: VariableReading.Unavailable;
 	}
 
 	private async ValueTask<VariableReading> ReadVolumePercentAsync(AudioTarget target, CancellationToken cancellationToken)

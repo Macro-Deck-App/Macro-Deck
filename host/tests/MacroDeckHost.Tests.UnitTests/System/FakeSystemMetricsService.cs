@@ -28,6 +28,8 @@ internal sealed class FakeSystemMetricsService : ISystemMetricsService
 
 	public Dictionary<int, string?> GpuNameByIndex { get; } = new();
 
+	public List<DiskSample> Disks { get; } = [];
+
 	public Task<double?> GetCpuUsageAsync(CancellationToken cancellationToken = default)
 		=> Task.FromResult(CpuUsage);
 
@@ -47,4 +49,7 @@ internal sealed class FakeSystemMetricsService : ISystemMetricsService
 			: GpuNameByIndex.TryGetValue(gpuIndex, out var name)
 				? name
 				: GpuName);
+
+	public Task<IReadOnlyList<DiskSample>> GetDisksAsync(CancellationToken cancellationToken = default)
+		=> Task.FromResult<IReadOnlyList<DiskSample>>(Disks.ToList());
 }

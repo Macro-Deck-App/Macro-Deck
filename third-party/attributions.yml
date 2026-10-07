@@ -189,13 +189,15 @@ assets:
     license: Apache-2.0
     copyright: Dashboard Icons contributors
     note: >-
-      Logos of the Discord, Home Assistant, Jellyfin, Spotify, Twitch, YouTube and YouTube Music integrations, and the
-      Windows logo marking the platforms a Store package supports. The logos are trademarks of their respective owners and
-      are used to identify the integration or platform only.
+      Logos of the Discord, Home Assistant, Jellyfin, Outlook Calendar, Spotify, Twitch, YouTube and YouTube Music
+      integrations, and the Windows logo marking the platforms a Store package supports. The logos are trademarks of their
+      respective owners and are used to identify the integration or platform only. The Jellyfin and Outlook Calendar logos
+      have their CSS converted to presentation attributes.
     paths:
       - host/src/MacroDeckHost.Integrations/Discord/discord-icon.svg
       - host/src/MacroDeckHost.Integrations/HomeAssistant/home-assistant-icon.svg
       - host/src/MacroDeckHost.Integrations/Jellyfin/jellyfin-icon.svg
+      - host/src/MacroDeckHost.Integrations/MicrosoftCalendar/outlook-calendar-icon.svg
       - host/src/MacroDeckHost.Integrations/Spotify/spotify-icon.svg
       - host/src/MacroDeckHost.Integrations/Twitch/twitch-icon.svg
       - host/src/MacroDeckHost.Integrations/YouTube/youtube-icon.svg
