@@ -5,7 +5,10 @@ using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Handlers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Settings;
+using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Variables.Colors;
 using MacroDeckHost.Domain.Entities;
+using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.Services;
@@ -49,12 +52,12 @@ public class AppearanceSettingsHandlersTests
 	}
 
 	private static AppPreferenceService CreateService()
-		=> new(new FakeAppPreferenceRepository(), new FakeBuildEnvironment(), new FakeHostListenerState());
+		=> new(new FakeAppPreferenceRepository(), new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
 
 	private static UpdateAppearanceSettingsRequestMessageHandler CreateUpdateHandler(
 		IAppPreferenceService service,
 		RecordingMediator? mediator = null)
-		=> new(service, mediator ?? new RecordingMediator(), new FakeFontCatalog());
+		=> new(service, mediator ?? new RecordingMediator(), new FakeFontCatalog(), TestColors.None);
 
 	[Test]
 	public async Task Get_handler_returns_persisted_settings()
@@ -202,6 +205,106 @@ public class AppearanceSettingsHandlersTests
 			Assert.That(published.ThemeMode, Is.EqualTo("system"));
 			Assert.That(published.AccentColor, Is.EqualTo("#3b82f6"));
 			Assert.That(published.FontFamily, Is.EqualTo("Inter"));
+		});
+	}
+
+	private const string AccentReference = "{{ vars.brand | color | color_opacity: 50 }}";
+
+	private static (AppPreferenceService Service, UpdateAppearanceSettingsRequestMessageHandler Update,
+		RecordingMediator Mediator) WithBrandVariable()
+	{
+		var registry = new VariableRegistry();
+		registry.Upsert(new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = "brand",
+			Scope = VariableScope.Global,
+			Type = VariableType.Color,
+			Classification = VariableClassification.User,
+			Value = "#10b981"
+		});
+		var colors = new ColorReferenceResolver(registry);
+		var service = new AppPreferenceService(new FakeAppPreferenceRepository(),
+			new FakeBuildEnvironment(),
+			new FakeHostListenerState(),
+			colors: colors);
+		var mediator = new RecordingMediator();
+		return (service, new UpdateAppearanceSettingsRequestMessageHandler(service, mediator, new FakeFontCatalog(), colors),
+			mediator);
+	}
+
+	[Test]
+	public async Task An_accent_from_a_color_variable_is_shown_opaque_with_its_reference()
+	{
+		var (service, update, mediator) = WithBrandVariable();
+
+		var updated = await update.Handle(new UpdateAppearanceSettingsRequest
+				{ ThemeMode = "dark", AccentColorSource = AccentReference },
+			CancellationToken.None);
+		var reloaded = await new GetAppearanceSettingsRequestMessageHandler(service)
+			.Handle(new GetAppearanceSettingsRequest(), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(updated.AccentColor, Is.EqualTo("#10b981"));
+			Assert.That(updated.AccentColorSource, Is.EqualTo(AccentReference));
+			Assert.That(reloaded.AccentColor, Is.EqualTo("#10b981"));
+			Assert.That(reloaded.AccentColorSource, Is.EqualTo(AccentReference));
+			Assert.That(mediator.Published.OfType<AppearanceChangedNotification>().Single().AccentColorSource,
+				Is.EqualTo(AccentReference));
+		});
+	}
+
+	[Test]
+	public async Task A_client_that_only_changes_the_theme_keeps_the_accent_reference()
+	{
+		var (_, update, _) = WithBrandVariable();
+		await update.Handle(new UpdateAppearanceSettingsRequest { ThemeMode = "dark", AccentColorSource = AccentReference },
+			CancellationToken.None);
+
+		var updated = await update.Handle(new UpdateAppearanceSettingsRequest
+				{ ThemeMode = "light", AccentColor = "#10B981", FontFamily = "" },
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(updated.ThemeMode, Is.EqualTo("light"));
+			Assert.That(updated.AccentColorSource, Is.EqualTo(AccentReference));
+		});
+	}
+
+	[Test]
+	public async Task A_different_accent_replaces_the_reference()
+	{
+		var (_, update, _) = WithBrandVariable();
+		await update.Handle(new UpdateAppearanceSettingsRequest { ThemeMode = "dark", AccentColorSource = AccentReference },
+			CancellationToken.None);
+
+		var updated = await update.Handle(new UpdateAppearanceSettingsRequest { ThemeMode = "dark", AccentColor = "#3b82f6" },
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(updated.AccentColor, Is.EqualTo("#3b82f6"));
+			Assert.That(updated.AccentColorSource, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task An_explicit_fixed_source_detaches_even_at_the_same_colour()
+	{
+		var (_, update, _) = WithBrandVariable();
+		await update.Handle(new UpdateAppearanceSettingsRequest { ThemeMode = "dark", AccentColorSource = AccentReference },
+			CancellationToken.None);
+
+		var updated = await update.Handle(new UpdateAppearanceSettingsRequest
+				{ ThemeMode = "dark", AccentColor = "#10b981", AccentColorSource = "#10b981" },
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(updated.AccentColor, Is.EqualTo("#10b981"));
+			Assert.That(updated.AccentColorSource, Is.Null);
 		});
 	}
 }

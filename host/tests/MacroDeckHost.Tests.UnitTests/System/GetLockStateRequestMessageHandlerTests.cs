@@ -37,7 +37,7 @@ public class GetLockStateRequestMessageHandlerTests
 	public async Task Reports_the_three_facts_independently()
 	{
 		var repository = new FakeAppPreferenceRepository();
-		var preferences = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState());
+		var preferences = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
 		await preferences.SetLockScreen(false);
 		var lockState = new FakeHostLockState { IsSupported = true, IsLocked = true };
 		var handler = new GetLockStateRequestMessageHandler(lockState, preferences);
@@ -56,7 +56,7 @@ public class GetLockStateRequestMessageHandlerTests
 	public async Task Unsupported_platform_reports_not_locked_and_not_supported()
 	{
 		var repository = new FakeAppPreferenceRepository();
-		var preferences = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState());
+		var preferences = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
 		var lockState = new FakeHostLockState { IsSupported = false, IsLocked = false };
 		var handler = new GetLockStateRequestMessageHandler(lockState, preferences);
 

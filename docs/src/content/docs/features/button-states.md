@@ -133,7 +133,8 @@ configures the action, with a partial parameter set, so it must not throw. It al
   failure to your own `unavailable` state tells the user more.
 
 `StatePollInterval` (default two seconds) is a request. The host clamps it and reads less often, or not
-at all, while nothing displays the button. See
+at all, while nothing displays the button. A button that starts being displayed goes back to the requested
+cadence within about a second. See
 [the state-poll window](/reference/capability-parity/#the-state-poll-window).
 
 ## Bridging the poll delay
@@ -147,11 +148,16 @@ public async Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
 }
 ```
 
-A button follows its provider within about one poll interval, not instantly. When the action is also
-the button's provider, its executor can return `Success(expectedStateId)` or
+A button follows its provider within about one poll interval, not instantly. When the user presses the
+button and its own provider action succeeds, the host calls `GetActionStateAsync` again right away
+instead of waiting for the next poll. If your target applies the change asynchronously and that read
+still sees the old state, the regular poll picks the change up afterwards.
+
+To show the new state even before that read, the executor can return `Success(expectedStateId)` or
 `Accepted(message, expectedStateId)` to name the state it expects next. The host may show that state
 briefly while it waits for a read to confirm it. The id must be one `GetActionStateAsync` advertises.
-Failures and results without an expected id keep normal polling.
+Failed results get neither, and a flow the host runs on its own (an `onStateChange` flow, a timer, an
+event trigger) keeps normal polling.
 
 ## Over the plugin protocol
 

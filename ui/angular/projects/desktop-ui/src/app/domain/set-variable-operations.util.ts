@@ -20,6 +20,8 @@ export function operationsFor(type: VariableType | undefined): SetVariableOperat
       return ['set', 'add'];
     case 'text':
       return ['set', 'append'];
+    case 'color':
+      return ['set'];
     default:
       return ['set', 'add', 'toggle', 'append'];
   }

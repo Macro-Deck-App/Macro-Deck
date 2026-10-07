@@ -86,7 +86,8 @@ internal sealed class DisablingAnIntegrationTests
 			deviceHost,
 			TimeProvider.System,
 			Serilog.Log.Logger,
-			new MessageBroker(Serilog.Log.Logger));
+			new MessageBroker(Serilog.Log.Logger),
+			TestColors.Watches);
 
 		var lifecycle = new IntegrationLifecycle(_integrations,
 			scopeFactory,

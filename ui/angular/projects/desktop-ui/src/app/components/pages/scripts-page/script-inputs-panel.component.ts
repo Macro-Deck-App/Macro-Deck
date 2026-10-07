@@ -15,6 +15,7 @@ import { AppStrings, ScriptInput, ScriptInputType } from '@macro-deck/runtime';
 import { ButtonComponent, ButtonGroupComponent, CheckboxComponent, InputComponent, LocalizationService, ModalComponent, ToggleSwitchComponent, TranslatePipe, VariableService, dismissModal } from '@shared';
 import { EmptyStateComponent } from '../../feedback/empty-state/empty-state.component';
 import { SelectComponent, SelectOption } from '../../forms/select/select.component';
+import { ColorPickerComponent } from '../../forms/color-picker/color-picker.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
 import { DropdownMenuComponent } from '../../overlay/dropdown-menu/dropdown-menu.component';
 
@@ -38,6 +39,7 @@ function emptyForm(): InputForm {
     ButtonComponent,
     ButtonGroupComponent,
     CheckboxComponent,
+    ColorPickerComponent,
     ConfirmationModalComponent,
     DropdownMenuComponent,
     EmptyStateComponent,
@@ -73,6 +75,7 @@ export class ScriptInputsPanelComponent {
     { value: 'text', label: this.localization.translateKey(AppStrings.Scripts.InputTypeText) },
     { value: 'numeric', label: this.localization.translateKey(AppStrings.Scripts.InputTypeNumeric) },
     { value: 'boolean', label: this.localization.translateKey(AppStrings.Scripts.InputTypeBoolean) },
+    { value: 'color', label: this.localization.translateKey(AppStrings.Scripts.InputTypeColor) },
   ]);
 
   protected readonly booleanOptions = computed<SelectOption[]>(() => [
@@ -84,6 +87,7 @@ export class ScriptInputsPanelComponent {
     text: this.localization.translateKey(AppStrings.Scripts.InputTypeText),
     numeric: this.localization.translateKey(AppStrings.Scripts.InputTypeNumeric),
     boolean: this.localization.translateKey(AppStrings.Scripts.InputTypeBoolean),
+    color: this.localization.translateKey(AppStrings.Scripts.InputTypeColor),
   }));
 
   @ViewChild(ModalComponent) private modal?: ModalComponent;

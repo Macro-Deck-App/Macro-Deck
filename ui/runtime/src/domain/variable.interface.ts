@@ -2,7 +2,7 @@ import type { LocalizedText } from '../localization/localized-text';
 
 export type VariableScope = 'global' | 'widget';
 
-export type VariableType = 'text' | 'numeric' | 'boolean';
+export type VariableType = 'text' | 'numeric' | 'boolean' | 'color';
 
 export type VariableClassification = 'user' | 'integration' | 'widget';
 

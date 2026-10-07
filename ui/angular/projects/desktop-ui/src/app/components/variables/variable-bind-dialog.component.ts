@@ -61,7 +61,7 @@ export class VariableBindDialogComponent implements OnInit {
   readonly canSubmit = computed(() =>
     !this.submitting() && this.nameSanitized().isValid && !this.nameTaken());
 
-  private static readonly allTypes: readonly VariableType[] = ['text', 'numeric', 'boolean'];
+  private static readonly allTypes: readonly VariableType[] = ['text', 'numeric', 'boolean', 'color'];
 
   readonly types = computed<readonly VariableType[]>(() => {
     const accepted = this.acceptedTypes();

@@ -225,14 +225,14 @@ type and write the value to the stored data, under these keys:
 | Key | Property | Value |
 | --- | --- | --- |
 | `border` | `Border`, `BorderColor` | `{ "style": "...", "color": "#rrggbb" }`. `style` is `off`, `static`, `heartbeat`, `breathing`, `blink`, `comet`, `ants`, `hue-shift` or `rgb`; without `color` the ring uses its default colour |
-| `backgroundColor` | `BackgroundColor` | `#rrggbb`, or `transparent` |
+| `backgroundColor` | `BackgroundColor` | `#rrggbb` or `#rrggbbaa`, or `transparent` |
 | `label` | `Label` | The text as entered |
-| `labelColor` | `LabelColor` | `#rrggbb` |
+| `labelColor` | `LabelColor` | `#rrggbb` or `#rrggbbaa` |
 | `fontFaceId` | `Font` | A face id from the host's font catalogue (the `macrodeck.fonts` option source) |
 | `fontSize` | `Font` | Size as a whole-number percentage |
 | `textAlign` | `Font` | `left`, `center` or `right` |
 | `labelPosition` | `Font` | `top`, `center` or `bottom` |
-| `accentColor` | `AccentColor` | `#rrggbb` |
+| `accentColor` | `AccentColor` | `#rrggbb` or `#rrggbbaa` |
 
 `UiWidgetAppearanceKeys` holds the names. Clearing a setting removes its key. Other values of
 `WidgetAppearanceProperty`, such as `Icon`, are ignored for a provider's type.
@@ -284,6 +284,9 @@ fields for the same keys.
   `transparent`, Macro Deck also leaves out the tile's own face and shadow, so the folder background shows
   through. The border ring is still drawn. A background of `transparent` on any node below the root, or a
   root that is not a stack or button, keeps the tile face.
+- **A colour can carry alpha.** The actions store `#rrggbbaa` for a translucent colour, including one taken
+  from a [Color variable](/features/variables/#color-variables) when the action ran. Pass it on as it is: a
+  reader draws it translucent.
 - **The label is stored as entered.** It may contain a `{{ ... }}` variable template, which Macro Deck
   renders only for its own Action Button. Show the text as it is, or render it yourself.
 - **Hardware devices read these keys too.** A device plugin receives `label`, `labelColor`,

@@ -44,6 +44,7 @@ export interface Profile {
   defaultRows: number;
   defaultColumns: number;
   defaultBackground: string | null;
+  defaultBackgroundSource?: string;
   defaultSpacing: number | null;
   defaultBorderRadius: number | null;
   defaultEmptyCellStyle?: EmptyCellStyle | null;

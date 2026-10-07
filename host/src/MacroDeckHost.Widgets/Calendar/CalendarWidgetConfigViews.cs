@@ -14,7 +14,8 @@ namespace MacroDeckHost.Widgets.Calendar;
 internal static class CalendarWidgetConfigViews
 {
 	private const UiWidgetAppearanceFields _appearance = UiWidgetAppearanceFields.Border |
-		UiWidgetAppearanceFields.BackgroundColor | UiWidgetAppearanceFields.TransparentBackground;
+		UiWidgetAppearanceFields.BackgroundColor | UiWidgetAppearanceFields.TransparentBackground |
+		UiWidgetAppearanceFields.ColorVariables;
 
 	public static UiElement Build(JsonElement data, ICalendarEventCache cache)
 	{

@@ -131,7 +131,8 @@ internal sealed class CompanionConfigFlowTests
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
 			CompanionHarness.Logger,
-			new MessageBroker(CompanionHarness.Logger));
+			new MessageBroker(CompanionHarness.Logger),
+			TestColors.Watches);
 		var startup = new IntegrationStartupBackgroundService(new LifetimeStub(),
 			harness.Registry,
 			harness.ScopeFactory,

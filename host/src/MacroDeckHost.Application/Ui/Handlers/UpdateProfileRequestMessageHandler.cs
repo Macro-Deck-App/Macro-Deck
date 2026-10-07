@@ -1,9 +1,11 @@
+using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Application.Ui.Transport.Messages.Profiles;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Localization;
+using MacroDeckHost.Application.Variables.Colors;
 
 namespace MacroDeckHost.Application.Ui.Handlers;
 
@@ -11,9 +13,15 @@ public class
 	UpdateProfileRequestMessageHandler : IUiTransportMessageHandler<UpdateProfileRequest, UpdateProfileResponse>
 {
 	private readonly IProfileService _profileService;
+	private readonly IColorReferenceResolver _colors;
+	private readonly IProfileCache _profiles;
 
-	public UpdateProfileRequestMessageHandler(IProfileService profileService)
+	public UpdateProfileRequestMessageHandler(IProfileService profileService,
+		IColorReferenceResolver colors,
+		IProfileCache profiles)
 	{
+		_colors = colors;
+		_profiles = profiles;
 		_profileService = profileService;
 	}
 
@@ -39,7 +47,10 @@ public class
 			request.Order,
 			request.DefaultRows,
 			request.DefaultColumns,
-			request.DefaultBackgroundColor,
+			ColorSource.Incoming(request.DefaultBackgroundColorSource,
+				request.DefaultBackgroundColor,
+				_profiles.GetById(id)?.DefaultBackgroundColor,
+				_colors),
 			request.DefaultWidgetSpacing,
 			request.DefaultWidgetBorderRadius,
 			request.DefaultEmptyCellStyle,
@@ -49,7 +60,7 @@ public class
 
 		if (result.Success)
 		{
-			response.Profile = ProfileDtoMapper.MapJsonProfile(result.Data!);
+			response.Profile = ProfileDtoMapper.MapJsonProfile(result.Data!, _colors);
 		}
 		else
 		{

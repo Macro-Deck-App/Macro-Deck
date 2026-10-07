@@ -151,7 +151,7 @@ public class ScriptInputWireTests
 	}
 
 	// Acceptance scenario 6: the widget-owned run feature is additive - it must not have bumped the
-	// protocol major, and ScriptInputType must still be exactly its three original members, at their
+	// protocol major, and ScriptInputType must still have its three original members, at their
 	// original ordinals, with their original wire spellings.
 	[Test]
 	public void The_protocol_stays_at_its_pre_feature_versions()
@@ -165,14 +165,13 @@ public class ScriptInputWireTests
 	}
 
 	[Test]
-	public void ScriptInputType_has_exactly_its_three_original_members()
+	public void ScriptInputType_has_its_three_original_members()
 	{
 		Assert.Multiple(() =>
 		{
 			Assert.That((int)ScriptInputType.Text, Is.EqualTo(0));
 			Assert.That((int)ScriptInputType.Numeric, Is.EqualTo(1));
 			Assert.That((int)ScriptInputType.Boolean, Is.EqualTo(2));
-			Assert.That(Enum.GetValues<ScriptInputType>(), Has.Length.EqualTo(3));
 		});
 	}
 

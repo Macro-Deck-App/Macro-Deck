@@ -267,6 +267,10 @@ appearance actions to reach them.
   when your view passes that value on to its root node (see
   [widget types](/ui/views/widget-types/#standard-appearance)). `All` does not include it, and on its own it
   builds nothing.
+- Colour variables are opt-in too. Add `UiWidgetAppearanceFields.ColorVariables` and every colour field of
+  the section offers the **Color** | **Variable** switch described in
+  [Offering a colour variable](#offering-a-colour-variable). `All` does not include it, and on its own it
+  builds nothing.
 
 ## Offering a transparent colour
 
@@ -286,6 +290,29 @@ new UiColorInput
 `transparent` instead of a `#rrggbb` value. Set it only for a value your widget knows how to read: a stack or
 button `background` accepts it, a modifier's does not. Without the flag, or on a Macro Deck release that
 does not know it, the picker offers colours only and the node is serialised exactly as before.
+
+## Offering a colour variable
+
+```csharp
+new UiColorInput { Key = "accentColor", Binding = Bind.To(accent), AllowVariables = true }
+new UiThresholdsInput { Key = "thresholds", Binding = Bind.To(thresholds), AllowVariables = true }
+```
+
+`AllowVariables` adds a **Color** | **Variable** switch to the picker, or to each band's colour, so the user
+can follow a [Color variable](/features/variables/#color-variables) with modifiers instead of a fixed colour.
+The stored value is then a reference string, not a colour:
+
+```text
+{{ vars.primary | color | color_darken: 20 | color_opacity: 70 }}
+```
+
+Your binding receives that string as it is; in a `UiThresholds` it is the band's `color`. Set the flag only
+when your code can take it. When Macro Deck opens your widget's session, the widget data it hands over in
+`UiWidgetSurfaceAttributes.Data` has every reference already resolved to `#rrggbb` or `#rrggbbaa`, or to
+an empty string when the variable is unavailable, so draw your default colour then. A value you read
+anywhere else, such as your own settings or a config flow, still holds the reference: resolve it with
+[`IColorApi`](/features/variables/#resolving-colours-yourself). Without the flag, or on a Macro Deck release
+that does not know it, the picker offers fixed colours only.
 
 ## Colour thresholds
 
@@ -330,7 +357,10 @@ The value is a `UiThresholds`, stored and sent as:
 
 Each band runs from its `from` up to the next band's. The first band has no `from` and covers everything
 below the second. Later starts are finite and strictly increasing, so handles never cross. A value carries 1
-to 64 bands with unique, non-empty ids and `#rgb` or `#rrggbb` colours, normalised to lowercase `#rrggbb`. The
+to 64 bands with unique, non-empty ids and `#rgb`, `#rrggbb` or `#rrggbbaa` colours, normalised to lowercase
+`#rrggbb` or `#rrggbbaa`. With [`AllowVariables`](#offering-a-colour-variable) a band's
+colour can also be a colour reference. When its variable is missing or unavailable, that band has no colour
+of its own in the resolved data, so the range falls back to the widget's own colour while the other bands keep theirs. The
 `UiThresholds` constructor throws on anything else, and a `change` that breaks a rule is rejected before it
 reaches your binding.
 

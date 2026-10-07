@@ -8,6 +8,7 @@ using MacroDeckHost.Auth;
 using MacroDeckHost.Domain.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MacroDeckHost.Application.Variables.Colors;
 
 namespace MacroDeckHost.Api.Controllers;
 
@@ -28,6 +29,7 @@ public class FoldersController : ControllerBase
 		_deleteFocusRule;
 
 	private readonly IFolderPortabilityService _portability;
+	private readonly IColorReferenceResolver _colors;
 
 	public FoldersController(
 		IUiTransportMessageHandler<GetFoldersRequest, GetFoldersResponse> getFolders,
@@ -39,8 +41,10 @@ public class FoldersController : ControllerBase
 		IUiTransportMessageHandler<GetFolderFocusRulesRequest, GetFolderFocusRulesResponse> getFocusRules,
 		IUiTransportMessageHandler<SetFolderFocusRuleRequest, SetFolderFocusRuleResponse> setFocusRule,
 		IUiTransportMessageHandler<DeleteFolderFocusRuleRequest, DeleteFolderFocusRuleResponse> deleteFocusRule,
-		IFolderPortabilityService portability)
+		IFolderPortabilityService portability,
+		IColorReferenceResolver colors)
 	{
+		_colors = colors;
 		_getFolders = getFolders;
 		_createFolder = createFolder;
 		_updateFolder = updateFolder;
@@ -185,7 +189,7 @@ public class FoldersController : ControllerBase
 		return new ImportFolderResponse
 		{
 			Success = true,
-			Folder = FolderDtoMapper.MapToDto(result.Data![0]),
+			Folder = FolderDtoMapper.MapToDto(result.Data![0], _colors),
 			FolderCount = result.Data!.Count
 		};
 	}

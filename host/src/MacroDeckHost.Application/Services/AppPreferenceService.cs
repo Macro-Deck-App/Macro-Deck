@@ -7,6 +7,7 @@ using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Logging;
 using MacroDeckHost.Application.Network.Tls;
 using MacroDeckHost.Application.Persistence.Repositories;
+using MacroDeckHost.Application.Variables.Colors;
 
 namespace MacroDeckHost.Application.Services;
 
@@ -146,12 +147,15 @@ public partial class AppPreferenceService : IAppPreferenceService
 	private readonly IBuildEnvironment _buildEnvironment;
 	private readonly IHostListenerState _listenerState;
 	private readonly IPublicTlsCertificateStore? _certificateStore;
+	private readonly IColorReferenceResolver _colors;
 
 	public AppPreferenceService(IAppPreferenceRepository repository,
 		IBuildEnvironment buildEnvironment,
 		IHostListenerState listenerState,
+		IColorReferenceResolver colors,
 		IPublicTlsCertificateStore? certificateStore = null)
 	{
+		_colors = colors;
 		_repository = repository;
 		_buildEnvironment = buildEnvironment;
 		_listenerState = listenerState;
@@ -164,9 +168,20 @@ public partial class AppPreferenceService : IAppPreferenceService
 		var accentColor = (await _repository.GetByKey(AccentColorKey))?.Value;
 		var fontFamily = (await _repository.GetByKey(FontFamilyKey))?.Value;
 
-		return new AppearanceSettings(NormalizeThemeMode(themeMode),
+		return PresentAppearance(NormalizeThemeMode(themeMode),
 			NormalizeAccentColor(accentColor),
 			fontFamily?.Trim() ?? string.Empty);
+	}
+
+	private AppearanceSettings PresentAppearance(string themeMode, string accentColor, string fontFamily)
+	{
+		if (!ColorReference.TryParse(accentColor, out _))
+		{
+			return new AppearanceSettings(themeMode, accentColor, fontFamily);
+		}
+
+		var resolved = RgbaColor.Parse(_colors.Resolve(accentColor))?.ToOpaqueString() ?? DefaultAccentColor;
+		return new AppearanceSettings(themeMode, resolved, fontFamily, accentColor);
 	}
 
 	public async Task<AppearanceSettings> SetAppearance(string? themeMode,
@@ -181,7 +196,7 @@ public partial class AppPreferenceService : IAppPreferenceService
 		await _repository.SetValue(AccentColorKey, resolved.AccentColor);
 		await _repository.SetValue(FontFamilyKey, resolved.FontFamily);
 
-		return resolved;
+		return PresentAppearance(resolved.ThemeMode, resolved.AccentColor, resolved.FontFamily);
 	}
 
 	public async Task<Guid> GetInstallationId()
@@ -692,7 +707,9 @@ public partial class AppPreferenceService : IAppPreferenceService
 			: fallback;
 
 	private static string NormalizeAccentColor(string? value)
-		=> value is not null && HexColorRegex().IsMatch(value) ? value : DefaultAccentColor;
+		=> value is not null && (HexColorRegex().IsMatch(value) || ColorReference.TryParse(value, out _))
+			? value
+			: DefaultAccentColor;
 
 	// Both adb flags default to off: adb spawns external processes and, once USB connections are
 	// enabled, opens a reverse tunnel, so an upgrade or a blank store must not turn either on by itself.

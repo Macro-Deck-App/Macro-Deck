@@ -50,6 +50,7 @@ public sealed class VariableTemplateValue : IScriptObject, IScriptCustomBinaryOp
 	{
 		Value = value;
 		_isAvailable = isAvailable;
+		IsColor = entity.Type == Domain.Enums.VariableType.Color;
 
 		// Emptiness is a property of what the reference renders as, measured with the same three shapes
 		// ToString() uses, so "state.is_empty" and "{{ vars.x }}" can never disagree. Gated on
@@ -107,6 +108,8 @@ public sealed class VariableTemplateValue : IScriptObject, IScriptCustomBinaryOp
 	}
 
 	public object? Value { get; }
+
+	public bool IsColor { get; }
 
 	/// <summary>
 	/// The four state predicates behind <c>vars.x.state</c>, mirroring the condition operators of the same

@@ -44,6 +44,7 @@ export interface IpcProfile {
   defaultRows: number;
   defaultColumns: number;
   defaultBackgroundColor?: string;
+  defaultBackgroundColorSource?: string;
   defaultWidgetSpacing?: number;
   defaultWidgetBorderRadius?: number;
   defaultEmptyCellStyle?: string;
@@ -76,6 +77,7 @@ export interface UpdateProfileRequest {
   defaultRows?: number;
   defaultColumns?: number;
   defaultBackgroundColor?: string;
+  defaultBackgroundColorSource?: string;
   defaultWidgetSpacing?: number;
   defaultWidgetBorderRadius?: number;
   defaultEmptyCellStyle?: string;

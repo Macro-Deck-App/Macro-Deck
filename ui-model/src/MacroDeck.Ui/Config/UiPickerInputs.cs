@@ -48,6 +48,13 @@ public sealed record UiColorInput : UiInput<string>
 	/// </summary>
 	public UiValue<bool> AllowTransparent { get; init; }
 
+	/// <summary>Also offers a Color variable, optionally with modifiers, instead of a fixed colour. The value
+	/// then holds a reference such as <c>{{ vars.primary | color | color_darken: 20 }}</c> rather than a hex
+	/// colour. Only set it for a value Macro Deck resolves before the reader sees it, which it does for a
+	/// widget's stored configuration; absent or false keeps the picker to fixed colours. A renderer that does
+	/// not know the flag ignores it.</summary>
+	public UiValue<bool> AllowVariables { get; init; }
+
 	/// <inheritdoc />
 	public override string Type => UiConfigPrimitives.Color;
 
@@ -59,6 +66,7 @@ public sealed record UiColorInput : UiInput<string>
 		base.DeclareProperties(properties);
 
 		properties.Set(UiConfigProperties.AllowTransparent, AllowTransparent);
+		properties.Set(UiConfigProperties.AllowVariables, AllowVariables);
 	}
 }
 

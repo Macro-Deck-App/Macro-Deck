@@ -237,7 +237,8 @@ internal sealed class IntegrationGatewayBinderTests
 			TestDeviceProviders.Host(),
 			TimeProvider.System,
 			new LoggerConfiguration().CreateLogger(),
-			new MessageBroker(Serilog.Core.Logger.None));
+			new MessageBroker(Serilog.Core.Logger.None),
+			TestColors.Watches);
 
 	private static ServiceProvider BuildScopeServices()
 		=> new ServiceCollection()

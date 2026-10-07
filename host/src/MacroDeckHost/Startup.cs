@@ -67,6 +67,7 @@ using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Application.Triggers.Providers;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Variables.Colors;
 using MacroDeckHost.Application.Variables.Files;
 using MacroDeckHost.Application.Timers;
 using MacroDeckHost.Application.Widgets;
@@ -512,6 +513,9 @@ public class Startup
 		services.AddScoped<IEventTriggerContextResolver, EventTriggerContextResolver>();
 
 		services.AddSingleton<VariableRegistry>();
+		services.AddSingleton<IColorReferenceResolver, ColorReferenceResolver>();
+		services.AddSingleton<ColorChangeSignal>();
+		services.AddSingleton<PluginColorWatches>();
 		services.AddSingleton<IVariableFileSystem, VariableFileSystem>();
 		services.AddSingleton<FileVariableSynchronizer>();
 		services.AddSingleton<IUserVariableStore, JsonUserVariableStore>();

@@ -136,6 +136,12 @@ public IReadOnlyList<ActionParameter> Parameters { get; } =
 `Url`, `Icon`, `Image`, `KeyboardSequence`, `KeyboardCombo` and `WidgetTarget`. The executor reads
 values by `Name` from `context.Parameters`.
 
+A `Color` parameter receives `#rrggbb`. The user can bind it to a
+[Color variable](/features/variables/#color-variables); the host resolves it when the action runs and drops
+any alpha, so you still get six digits, or an empty value when the variable is unavailable. Set the parameter's `AllowAlpha` to `true` when your action can use
+transparency: the picker then offers opacity and the value may be `#rrggbbaa`. A Macro Deck release from
+before `AllowAlpha` ignores it.
+
 `OnlyWhen` is presentation only: a hidden parameter keeps what the user typed, is skipped by validation,
 and **is still sent to the executor** - never infer anything from a field being hidden.
 

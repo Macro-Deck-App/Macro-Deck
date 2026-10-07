@@ -1,3 +1,4 @@
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Logging;
 using MacroDeckHost.Application.Persistence.Repositories;
@@ -36,7 +37,8 @@ public class LoggingSettingsHandlersTests
 	private static AppPreferenceService CreateService(BuildChannel channel = BuildChannel.Production)
 		=> new(new FakeAppPreferenceRepository(),
 			new FakeBuildEnvironment { Channel = channel },
-			new FakeHostListenerState());
+			new FakeHostListenerState(),
+			TestColors.None);
 
 	[Test]
 	public async Task Get_handler_returns_the_channel_default_when_unset()

@@ -317,30 +317,17 @@ public class FlowExecutorTests
 		Assert.That(_action.CapturedOwnerWidgetId, Is.EqualTo(widgetId));
 	}
 
-	[TestCase(ActionResultStatus.Succeeded, true, true)]
-	[TestCase(ActionResultStatus.Accepted, true, true)]
-	[TestCase(ActionResultStatus.Failed, true, false)]
-	[TestCase(ActionResultStatus.Succeeded, false, false)]
-	[TestCase(ActionResultStatus.Accepted, false, false)]
-	public async Task OnlyNonFailedStateProviderResults_ApplyExpectedStateAndQueueWidgetEvaluation(
+	[TestCase(ActionResultStatus.Succeeded, true, true, true)]
+	[TestCase(ActionResultStatus.Accepted, true, true, true)]
+	[TestCase(ActionResultStatus.Failed, true, false, false)]
+	[TestCase(ActionResultStatus.Succeeded, false, false, true)]
+	[TestCase(ActionResultStatus.Accepted, false, false, true)]
+	public async Task PressingTheProviderAction_QueuesAReRead_AndAppliesOnlyANamedExpectedState(
 		ActionResultStatus status,
 		bool includeExpectedState,
-		bool expectedToApply)
+		bool expectedToApply,
+		bool expectedToQueue)
 	{
-		const string widgetData = """
-								  {
-								    "flows": [
-								      {
-								        "triggerId": "t1",
-								        "triggerType": "onShortPress",
-								        "children": [
-								          { "id": "b1", "type": "action", "blockType": "provider.toggle",
-								            "integrationId": "provider", "actionId": "toggle", "parameters": [] }
-								        ]
-								      }
-								    ]
-								  }
-								  """;
 		var result = (status, includeExpectedState) switch
 		{
 			(ActionResultStatus.Succeeded, true) => ActionResult.Success("on"),
@@ -355,11 +342,93 @@ public class FlowExecutorTests
 				ExpectedStateId = "on"
 			}
 		};
-		var action = new FakeStateProviderAction
+		var (executor, optimisticStates, evalQueue) = CreateStateProviderExecutor(result);
+		var widgetId = Guid.NewGuid();
+
+		await executor.ExecuteAsync(new FlowExecutionRequest
+			{
+				FlowsSource = ProviderButtonData("b1"),
+				Trigger = TriggerSelector.ByType("onShortPress"),
+				Scope = VariableScope.Widget,
+				OwnerWidgetId = widgetId
+			},
+			CancellationToken.None);
+
+		var identity = new WidgetOptimisticStateIdentity(widgetId, "b1", "provider", "toggle");
+		Assert.Multiple(() =>
 		{
-			Id = "toggle", Result = result
-		};
-		_registry.Add(new FakeIntegration { Id = "provider", Actions = [action] });
+			Assert.That(optimisticStates.Get(identity)?.ExpectedStateId,
+				expectedToApply ? Is.EqualTo("on") : Is.Null);
+			Assert.That(evalQueue.Reader.TryRead(out var queuedWidgetId), Is.EqualTo(expectedToQueue));
+			if (expectedToQueue)
+			{
+				Assert.That(queuedWidgetId, Is.EqualTo(widgetId));
+			}
+		});
+	}
+
+	[Test]
+	public async Task HostRunOfTheProviderAction_WithoutExpectedState_DoesNotQueueAReRead()
+	{
+		var (executor, _, evalQueue) = CreateStateProviderExecutor(ActionResult.Success());
+
+		await executor.ExecuteAsync(new FlowExecutionRequest
+			{
+				FlowsSource = ProviderButtonData("b1"),
+				Trigger = TriggerSelector.ByType("onShortPress"),
+				Scope = VariableScope.Widget,
+				OwnerWidgetId = Guid.NewGuid(),
+				Origin = ExecutionOrigin.Host
+			},
+			CancellationToken.None);
+
+		Assert.That(evalQueue.Reader.TryRead(out _), Is.False);
+	}
+
+	[Test]
+	public async Task PressingAStateProviderActionThatIsNotTheButtonsProvider_DoesNotQueueAReRead()
+	{
+		var (executor, _, evalQueue) = CreateStateProviderExecutor(ActionResult.Success());
+
+		await executor.ExecuteAsync(new FlowExecutionRequest
+			{
+				FlowsSource = ProviderButtonData("another-block"),
+				Trigger = TriggerSelector.ByType("onShortPress"),
+				Scope = VariableScope.Widget,
+				OwnerWidgetId = Guid.NewGuid()
+			},
+			CancellationToken.None);
+
+		Assert.That(evalQueue.Reader.TryRead(out _), Is.False);
+	}
+
+	private static string ProviderButtonData(string providerBlockId)
+		=> $$"""
+			{
+			  "stateMode": true,
+			  "states": [{ "id": "off", "label": "Off" }, { "id": "on", "label": "On" }],
+			  "stateProvider": { "blockId": "{{providerBlockId}}", "integrationId": "provider", "actionId": "toggle" },
+			  "flows": [
+			    {
+			      "triggerId": "t1",
+			      "triggerType": "onShortPress",
+			      "children": [
+			        { "id": "b1", "type": "action", "blockType": "provider.toggle",
+			          "integrationId": "provider", "actionId": "toggle", "parameters": [] }
+			      ]
+			    }
+			  ]
+			}
+			""";
+
+	private (FlowExecutor Executor, WidgetOptimisticStateStore OptimisticStates, WidgetStateEvalChannel EvalQueue)
+		CreateStateProviderExecutor(ActionResult result)
+	{
+		_registry.Add(new FakeIntegration
+		{
+			Id = "provider",
+			Actions = [new FakeStateProviderAction { Id = "toggle", Result = result }]
+		});
 		var optimisticStates = new WidgetOptimisticStateStore(TimeProvider.System);
 		var evalQueue = new WidgetStateEvalChannel();
 		var executor = new FlowExecutor(_registry,
@@ -376,28 +445,7 @@ public class FlowExecutorTests
 			_logger,
 			optimisticStates,
 			evalQueue);
-		var widgetId = Guid.NewGuid();
-
-		await executor.ExecuteAsync(new FlowExecutionRequest
-			{
-				FlowsSource = widgetData,
-				Trigger = TriggerSelector.ByType("onShortPress"),
-				Scope = VariableScope.Widget,
-				OwnerWidgetId = widgetId
-			},
-			CancellationToken.None);
-
-		var identity = new WidgetOptimisticStateIdentity(widgetId, "b1", "provider", "toggle");
-		Assert.Multiple(() =>
-		{
-			Assert.That(optimisticStates.Get(identity)?.ExpectedStateId,
-				expectedToApply ? Is.EqualTo("on") : Is.Null);
-			Assert.That(evalQueue.Reader.TryRead(out var queuedWidgetId), Is.EqualTo(expectedToApply));
-			if (expectedToApply)
-			{
-				Assert.That(queuedWidgetId, Is.EqualTo(widgetId));
-			}
-		});
+		return (executor, optimisticStates, evalQueue);
 	}
 
 	[Test]

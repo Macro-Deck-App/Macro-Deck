@@ -68,6 +68,7 @@ internal static class StreamChatWidgetConfigView
 					new UiColorInput
 					{
 						Key = StreamChatWidgetSettings.MessageColorKey,
+						AllowVariables = true,
 						Label = AppStrings.Integrations.StreamChat.Widget.MessageColor(),
 						Binding = Bind.To(messageColor),
 						SupportsReset = true,
@@ -76,6 +77,7 @@ internal static class StreamChatWidgetConfigView
 					new UiColorInput
 					{
 						Key = StreamChatWidgetSettings.NameColorKey,
+						AllowVariables = true,
 						Label = AppStrings.Integrations.StreamChat.Widget.NameColor(),
 						Description = AppStrings.Integrations.StreamChat.Widget.NameColorDescription(),
 						Binding = Bind.To(nameColor),
@@ -84,7 +86,8 @@ internal static class StreamChatWidgetConfigView
 					},
 					UiWidgetAppearance.Section(data,
 						UiWidgetAppearanceFields.Border | UiWidgetAppearanceFields.BackgroundColor |
-						UiWidgetAppearanceFields.TransparentBackground),
+						UiWidgetAppearanceFields.TransparentBackground |
+						UiWidgetAppearanceFields.ColorVariables),
 				],
 			},
 		};

@@ -59,7 +59,7 @@ public class AdbSettingsHandlersTests
 	{
 		var repository = new FakeAppPreferenceRepository();
 		var listenerState = new FakeHostListenerState { PublicPort = ActivePort };
-		var preferences = new AppPreferenceService(repository, new FakeBuildEnvironment(), listenerState);
+		var preferences = new AppPreferenceService(repository, new FakeBuildEnvironment(), listenerState, TestColors.None);
 		var adbManager = new FakeAdbManager();
 		var installer = new FakeAdbPlatformToolsInstaller();
 		var mediator = new RecordingMediator();
@@ -460,7 +460,8 @@ public class AdbSettingsHandlersTests
 		};
 		var handler = new ConnectAdbDeviceRequestMessageHandler(new AppPreferenceService(fixture.Repository,
 				new FakeBuildEnvironment(),
-				new FakeHostListenerState { PublicPort = ActivePort }),
+				new FakeHostListenerState { PublicPort = ActivePort },
+				TestColors.None),
 			fixture.AdbManager,
 			new FakeHostListenerState { PublicPort = ActivePort },
 			operations);

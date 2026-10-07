@@ -8,6 +8,7 @@ using MacroDeckHost.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using MacroDeckHost.Application.Variables.Colors;
 
 namespace MacroDeckHost.Api.Controllers;
 
@@ -22,6 +23,7 @@ public class ProfilesController : ControllerBase
 	private readonly IUiTransportMessageHandler<DuplicateProfileRequest, DuplicateProfileResponse> _duplicateProfile;
 	private readonly IUiTransportMessageHandler<MoveProfileRequest, MoveProfileResponse> _moveProfile;
 	private readonly IProfilePortabilityService _portability;
+	private readonly IColorReferenceResolver _colors;
 
 	public ProfilesController(
 		IUiTransportMessageHandler<GetProfilesRequest, GetProfilesResponse> getProfiles,
@@ -30,8 +32,10 @@ public class ProfilesController : ControllerBase
 		IUiTransportMessageHandler<DeleteProfileRequest, DeleteProfileResponse> deleteProfile,
 		IUiTransportMessageHandler<DuplicateProfileRequest, DuplicateProfileResponse> duplicateProfile,
 		IUiTransportMessageHandler<MoveProfileRequest, MoveProfileResponse> moveProfile,
-		IProfilePortabilityService portability)
+		IProfilePortabilityService portability,
+		IColorReferenceResolver colors)
 	{
+		_colors = colors;
 		_getProfiles = getProfiles;
 		_createProfile = createProfile;
 		_updateProfile = updateProfile;
@@ -141,7 +145,7 @@ public class ProfilesController : ControllerBase
 		return new ImportProfileResponse
 		{
 			Success = true,
-			Profile = ProfileDtoMapper.MapJsonProfile(result.Data!)
+			Profile = ProfileDtoMapper.MapJsonProfile(result.Data!, _colors)
 		};
 	}
 

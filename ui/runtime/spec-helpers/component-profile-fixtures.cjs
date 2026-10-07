@@ -30,3 +30,7 @@ globalThis.__loadWidgetProfileFixture = function loadWidgetProfileFixture(name) 
 globalThis.__loadThresholdFixture = function loadThresholdFixture() {
   return JSON.parse(fs.readFileSync(path.join(fixturesRoot(), 'thresholds', 'threshold-values.json'), 'utf8'));
 };
+
+globalThis.__loadColorFixture = function loadColorFixture() {
+  return JSON.parse(fs.readFileSync(path.join(fixturesRoot(), 'colors', 'color-references.json'), 'utf8'));
+};

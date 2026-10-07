@@ -24,6 +24,7 @@ public class GetAppearanceSettingsRequestMessageHandler
 		{
 			ThemeMode = settings.ThemeMode,
 			AccentColor = settings.AccentColor,
+			AccentColorSource = settings.AccentColorSource,
 			FontFamily = settings.FontFamily
 		};
 	}

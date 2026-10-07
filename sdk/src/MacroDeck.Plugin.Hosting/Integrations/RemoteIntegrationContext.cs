@@ -1,5 +1,6 @@
 using MacroDeck.Plugin.Hosting.Integrations.HostApis;
 using MacroDeck.Sdk;
+using MacroDeck.Sdk.Colors;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Events;
@@ -30,7 +31,8 @@ internal sealed class RemoteIntegrationContext(
 	RemoteEventPublisher events,
 	RemoteUserNotifier notifications,
 	RemoteMessageChannel messages,
-	RemoteUiResourceRegistry uiResources) : IIntegrationContext
+	RemoteUiResourceRegistry uiResources,
+	RemoteColorApi colors) : IIntegrationContext
 {
 	public IVariableApi Variables { get; } = variables;
 
@@ -51,4 +53,6 @@ internal sealed class RemoteIntegrationContext(
 	public IMessageChannel Messages { get; } = messages.Lifecycle;
 
 	public IUiResourceRegistry UiResources { get; } = uiResources;
+
+	public IColorApi Colors { get; } = colors.Lifecycle;
 }

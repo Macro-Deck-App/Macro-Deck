@@ -151,13 +151,26 @@ public sealed class HostStatePusher(
 
 	private async ValueTask BroadcastScriptsAsync(CancellationToken cancellationToken)
 	{
-		var payload = BuildEnvelope(HostApis.Scripts, scriptApi.GetScripts());
-		await BroadcastAsync(payload, cancellationToken);
+		var scripts = scriptApi.GetScripts();
+
+		var pluginIds = sessionRegistry.Snapshot()
+			.Where(session => session.State == PluginSessionState.Connected)
+			.Select(session => session.PluginId)
+			.ToList();
+
+		foreach (var pluginId in pluginIds)
+		{
+			await sessionRegistry.SendToPlugin(pluginId, ScriptsEnvelope(pluginId, scripts), cancellationToken);
+		}
 	}
 
-	// Widgets is the one push whose wire shape differs by negotiated version (see
-	// WidgetStateWireCompatibility), so - unlike BroadcastDeckAsync/BroadcastScriptsAsync - this cannot
-	// share one envelope across every connected plugin; it builds one per plugin instead.
+	private ProtocolEnvelope ScriptsEnvelope(string pluginId, IReadOnlyList<Script> scripts)
+		=> BuildEnvelope(HostApis.Scripts,
+			ScriptWireCompatibility.ToWirePayload(scripts,
+				sessionRegistry.HasHostApiFeature(pluginId, HostApiFeatures.ScriptInputColor)));
+
+	// Widgets differ by negotiated version (see WidgetStateWireCompatibility), so unlike
+	// BroadcastDeckAsync this builds one envelope per plugin instead of sharing one.
 	private async ValueTask BroadcastWidgetsAsync(CancellationToken cancellationToken)
 	{
 		var widgets = widgetApi.GetWidgets();
@@ -181,9 +194,7 @@ public sealed class HostStatePusher(
 			cancellationToken);
 
 	private Task<bool> PushScriptsAsync(string pluginId, CancellationToken cancellationToken)
-		=> sessionRegistry.SendToPlugin(pluginId,
-			BuildEnvelope(HostApis.Scripts, scriptApi.GetScripts()),
-			cancellationToken);
+		=> sessionRegistry.SendToPlugin(pluginId, ScriptsEnvelope(pluginId, scriptApi.GetScripts()), cancellationToken);
 
 	private Task<bool> PushWidgetsAsync(string pluginId, CancellationToken cancellationToken)
 		=> sessionRegistry.SendToPlugin(pluginId,

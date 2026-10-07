@@ -10,9 +10,12 @@ using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
+using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Variables.Colors;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
+using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Tests.UnitTests.Auth;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -75,7 +78,8 @@ internal sealed class WidgetUiSessionTests
 			_registry,
 			_broker,
 			availability,
-			_recovery);
+			_recovery,
+			TestColors.None);
 	}
 
 	[TearDown]
@@ -715,6 +719,49 @@ internal sealed class WidgetUiSessionTests
 		Assert.That(tree, Is.Not.Null, "the placeholder produced no tree");
 		using var document = JsonDocument.Parse(tree!.Value.Utf8);
 		return document.RootElement.GetRawText();
+	}
+
+	[Test]
+	public async Task A_widget_and_its_preview_read_colour_references_already_resolved()
+	{
+		var variables = new VariableRegistry();
+		variables.Upsert(new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = "primary",
+			Scope = VariableScope.Global,
+			Type = VariableType.Color,
+			Classification = VariableClassification.User,
+			Value = "#3366ff"
+		});
+		var opener = new WidgetUiSessionOpener(_folders,
+			new EmptyProfileCache(),
+			new WidgetDataSchemaProvider(_widgetTypes),
+			_widgetTypes,
+			_registry,
+			_broker,
+			new WidgetProviderAvailability(_widgetTypes, _integrations, _connections),
+			_recovery,
+			new ColorReferenceResolver(variables));
+		const string Data = """{"backgroundColor":"{{ vars.primary | color | color_opacity: 50 }}"}""";
+		var widget = AddWidget(WidgetTypeIds.Weather, Data);
+		using var draft = JsonDocument.Parse(Data);
+
+		var live = opener.Open(new OpenWidgetUiSessionRequest { WidgetId = widget.Id.ToString() }, DeviceA, false);
+		var preview = opener.Open(new OpenWidgetUiSessionRequest { WidgetType = WidgetTypeIds.Weather, Data = draft.RootElement },
+			DeviceA,
+			isAdmin: true);
+		await live.Ready;
+		await preview.Ready;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_registry.Find(live.SessionId)!.Surface.Attributes[UiWidgetSurfaceAttributes.Data]
+				.GetProperty("backgroundColor").GetString(), Is.EqualTo("#3366ff80"));
+			Assert.That(_registry.Find(preview.SessionId)!.Surface.Attributes[UiWidgetSurfaceAttributes.Data]
+				.GetProperty("backgroundColor").GetString(), Is.EqualTo("#3366ff80"));
+			Assert.That(widget.Data, Is.EqualTo(Data), "the stored reference stays for the editor");
+		});
 	}
 
 	private WidgetEntity AddWidget(string type, string? data)

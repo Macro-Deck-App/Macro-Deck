@@ -43,6 +43,26 @@ describe('readThresholds', () => {
     });
   }
 
+  it('keeps a color reference band as written so the editor can round-trip it', () => {
+    const reference = '{{ vars.primary | color | color_darken: 20 }}';
+    const value = {
+      bands: [{ id: 'a', color: reference }, { id: 'b', color: '#FF000080', from: 5 }, { id: 'c', color: '#00FF00FF', from: 9 }],
+    };
+
+    expect(readThresholds(value)).toEqual({
+      bands: [{ id: 'a', color: reference }, { id: 'b', color: '#ff000080', from: 5 }, { id: 'c', color: '#00ff00', from: 9 }],
+    });
+    expect(recolorThresholdBand(fourBands(), 1, reference).bands[1].color).toBe(reference);
+    expect(readThresholds({ bands: [{ id: 'a', color: '{{ vars.primary }}' }] })).toBeNull();
+  });
+
+  it('accepts a band with no colour of its own, as a reference to a deleted variable resolves to', () => {
+    const value = { bands: [{ id: 'a', color: '' }, { id: 'b', color: '#FF0000', from: 5 }] };
+
+    expect(readThresholds(value)).toEqual({ bands: [{ id: 'a', color: '' }, { id: 'b', color: '#ff0000', from: 5 }] });
+    expect(readThresholds({ bands: [{ id: 'a' }] })).toBeNull();
+  });
+
   it('rejects more than 64 bands', () => {
     const bands = Array.from({ length: 65 }, (_, i) => (i === 0 ? { id: 'b0', color: '#000000' } : { id: `b${i}`, color: '#000000', from: i }));
     expect(readThresholds({ bands })).toBeNull();

@@ -257,6 +257,7 @@ internal static class GaugesWidgetConfigView
 				new UiColorInput
 				{
 					Key = "iconColor",
+					AllowVariables = true,
 					Label = AppStrings.Widgets.Editor.IconColor(),
 					Binding = StringField(gauges, id, "iconColor"),
 					SupportsReset = true,
@@ -278,6 +279,7 @@ internal static class GaugesWidgetConfigView
 				new UiColorInput
 				{
 					Key = "color",
+					AllowVariables = true,
 					Label = AppStrings.Widgets.Gauges.Color(),
 					Binding = StringField(gauges, id, "color"),
 					SupportsReset = true,
@@ -297,6 +299,7 @@ internal static class GaugesWidgetConfigView
 					Content = () => new UiThresholdsInput
 					{
 						Key = WidgetThresholds.ValueKey,
+						AllowVariables = true,
 						Label = AppStrings.Widgets.Editor.ColorThresholds(),
 						HideLabel = true,
 						Binding = ThresholdsField(gauges, id),

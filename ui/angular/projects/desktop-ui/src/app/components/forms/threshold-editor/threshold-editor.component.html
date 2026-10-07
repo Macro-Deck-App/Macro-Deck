@@ -61,8 +61,15 @@
           [attr.aria-keyshortcuts]="rangeShortcuts()"
           (keydown)="onRangeKeydown($event, band.index)"
           (click)="select(band.index)">
-          <span class="te-swatch" [style.background]="band.color" aria-hidden="true"></span>
+          <span
+            class="te-swatch"
+            aria-hidden="true"
+            [class.te-swatch-missing]="band.missing !== null"
+            [style.background]="band.color"></span>
           <span class="te-range-text">{{ band.range }}</span>
+          @if (band.missing; as missing) {
+            <span class="te-range-missing">{{ missing }}</span>
+          }
         </button>
         @if (showRemove() && !disabled() && band.index === selectedIndex()) {
           <shared-button
@@ -84,6 +91,9 @@
       <span class="form-label">{{ 'macrodeck.app:Forms.ThresholdEditor.Color' | translate }}</span>
       <shared-color-picker
         [presets]="colorPresets()"
+        [allowVariables]="allowVariables()"
+        [allowAlpha]="allowVariables()"
+        [variableScopeRefId]="variableScopeRefId()"
         [ngModel]="selectedBand().color"
         (ngModelChange)="onColorChange($event)" />
     </div>

@@ -66,7 +66,7 @@
             "type": "object",
             "properties": {
               "id": { "type": "string", "description": "Stable, non-empty key, unique within the value." },
-              "color": { "type": "string", "description": "The band color, as #rgb or #rrggbb." },
+              "color": { "type": "string", "description": "The band color, as #rgb, #rrggbb or #rrggbbaa, or a Color variable reference such as {{ vars.primary | color }}, which the host resolves before a widget reads it." },
               "from": { "type": ["number", "null"], "description": "Where the band starts; strictly increasing, absent on the first band." }
             },
             "required": ["id", "color"]

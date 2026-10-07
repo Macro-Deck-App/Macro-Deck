@@ -68,6 +68,7 @@ internal static class WidgetConfigFragments
 				new UiColorInput
 				{
 					Key = "color",
+					AllowVariables = true,
 					Label = AppStrings.Widgets.Appearance.Border.ColorLabel(),
 					Binding = color,
 					// Reset clears the colour (issue #896); the renderer substitutes the default ring
@@ -106,6 +107,7 @@ internal static class WidgetConfigFragments
 			SupportsReset = true,
 			DefaultValue = string.Empty,
 			AllowTransparent = true,
+			AllowVariables = true,
 		};
 
 	/// <summary>The widget's specialized region, holding only the press-trigger flows editor - the room every

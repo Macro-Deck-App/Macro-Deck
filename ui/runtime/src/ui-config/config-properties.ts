@@ -72,6 +72,7 @@ export const UiConfigProperties = {
   ConfirmDanger: 'confirmDanger',
   PromptValue: 'promptValue',
   AllowTransparent: 'allowTransparent',
+  AllowVariables: 'allowVariables',
   Unit: 'unit',
   FixedCount: 'fixedCount',
   FixedColors: 'fixedColors',

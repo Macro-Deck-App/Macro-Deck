@@ -373,3 +373,39 @@
   mask-image: url('./icons/search.svg');
   -webkit-mask-image: url('./icons/search.svg');
 }
+.icon-sun-dim {
+  mask-image: url('./icons/sun-dim.svg');
+  -webkit-mask-image: url('./icons/sun-dim.svg');
+}
+.icon-contrast {
+  mask-image: url('./icons/contrast.svg');
+  -webkit-mask-image: url('./icons/contrast.svg');
+}
+.icon-rotate-cw {
+  mask-image: url('./icons/rotate-cw.svg');
+  -webkit-mask-image: url('./icons/rotate-cw.svg');
+}
+.icon-droplet {
+  mask-image: url('./icons/droplet.svg');
+  -webkit-mask-image: url('./icons/droplet.svg');
+}
+.icon-droplets {
+  mask-image: url('./icons/droplets.svg');
+  -webkit-mask-image: url('./icons/droplets.svg');
+}
+.icon-droplet-off {
+  mask-image: url('./icons/droplet-off.svg');
+  -webkit-mask-image: url('./icons/droplet-off.svg');
+}
+.icon-blend {
+  mask-image: url('./icons/blend.svg');
+  -webkit-mask-image: url('./icons/blend.svg');
+}
+.icon-chevron-down {
+  mask-image: url('./icons/chevron-down.svg');
+  -webkit-mask-image: url('./icons/chevron-down.svg');
+}
+.icon-chevron-up {
+  mask-image: url('./icons/chevron-up.svg');
+  -webkit-mask-image: url('./icons/chevron-up.svg');
+}

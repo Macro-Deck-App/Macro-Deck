@@ -3,6 +3,7 @@ using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Folders;
+using MacroDeckHost.Application.Variables.Colors;
 
 namespace MacroDeckHost.Application.Ui.Handlers;
 
@@ -11,12 +12,15 @@ public class GetFoldersRequestMessageHandler : IUiTransportMessageHandler<GetFol
 	private readonly IFolderCache _folderCache;
 	private readonly IProfileRegistry _profileRegistry;
 	private readonly StartupReadiness _readiness;
+	private readonly IColorReferenceResolver _colors;
 
 	public GetFoldersRequestMessageHandler(
 		IFolderCache folderCache,
 		IProfileRegistry profileRegistry,
-		StartupReadiness readiness)
+		StartupReadiness readiness,
+		IColorReferenceResolver colors)
 	{
+		_colors = colors;
 		_folderCache = folderCache;
 		_profileRegistry = profileRegistry;
 		_readiness = readiness;
@@ -32,7 +36,7 @@ public class GetFoldersRequestMessageHandler : IUiTransportMessageHandler<GetFol
 
 		response.Folders.AddRange(!string.IsNullOrEmpty(request.ProfileId)
 			? _profileRegistry.GetFoldersForProfile(request.ProfileId)
-			: _folderCache.GetAllFolders().Select(FolderDtoMapper.MapToDto));
+			: _folderCache.GetAllFolders().Select(folder => FolderDtoMapper.MapToDto(folder, _colors)));
 
 		return response;
 	}

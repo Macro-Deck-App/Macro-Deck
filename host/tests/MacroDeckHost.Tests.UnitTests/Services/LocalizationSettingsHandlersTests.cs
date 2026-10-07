@@ -62,7 +62,7 @@ public class LocalizationSettingsHandlersTests
 	}
 
 	private static AppPreferenceService CreateService(IAppPreferenceRepository repository)
-		=> new(repository, new FakeBuildEnvironment(), new FakeHostListenerState());
+		=> new(repository, new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
 
 	[Test]
 	public async Task The_culture_survives_a_restart()

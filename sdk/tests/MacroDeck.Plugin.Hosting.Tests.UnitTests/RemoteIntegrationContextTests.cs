@@ -52,7 +52,8 @@ public class RemoteIntegrationContextTests
 				new PluginMetadata { Id = "com.example.test", Name = "Test Plugin", Version = "1.0.0" },
 				TimeProvider.System,
 				Serilog.Core.Logger.None),
-			new RemoteUiResourceRegistry(_invoker, new Support.FakeAssetUploader()));
+			new RemoteUiResourceRegistry(_invoker, new Support.FakeAssetUploader()),
+			new RemoteColorApi(_invoker, new PluginConnectionState(), stateCache, Serilog.Core.Logger.None));
 	}
 
 	[TearDown]
@@ -77,6 +78,7 @@ public class RemoteIntegrationContextTests
 		Assert.That(() => _context.Events.Publish("evt"), Throws.Nothing);
 		Assert.That(() => _context.Notifications.Notify(new UserNotificationRequest { Title = "t" }), Throws.Nothing);
 		Assert.That(() => _context.Notifications.Dismiss("key"), Throws.Nothing);
+		Assert.DoesNotThrowAsync(async () => await _context.Colors.ResolveAsync("#3366ff"));
 
 		// A production instance of MacroDeck.Sdk.Actions.IActionInteractions is handed out per
 		// actions/execute invocation (RemoteActionInteractions), not through IIntegrationContext -
@@ -121,6 +123,10 @@ public class RemoteIntegrationContextTests
 		yield return Case(HostApis.UserVariables,
 			HostOperations.UserVariables.Create,
 			(context, invoker) => context.UserVariables.CreateAsync("n", null, VariableType.Text, "1"));
+
+		yield return Case(HostApis.Colors,
+			HostOperations.Colors.Resolve,
+			(context, invoker) => context.Colors.ResolveAsync("{{ vars.primary | color }}", "w1"));
 
 		yield return Case(HostApis.Config,
 			HostOperations.Config.Entries,
@@ -540,6 +546,8 @@ public class RemoteIntegrationContextTests
 		{
 			covered.Add((HostApis.Messaging, operation));
 		}
+
+		covered.Add((HostApis.Colors, HostOperations.Colors.Watches));
 
 		var declared = HostApis.All.SelectMany(api => HostOperations.For(api).Select(operation => (api, operation)));
 

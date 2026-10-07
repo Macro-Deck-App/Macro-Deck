@@ -3,6 +3,7 @@ using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Folders;
 using Mediator;
+using MacroDeckHost.Application.Variables.Colors;
 
 namespace MacroDeckHost.Application.Events.Handlers;
 
@@ -10,9 +11,13 @@ public sealed class FolderUpdatedNotificationHandler : INotificationHandler<Fold
 {
 	private readonly IUiTransport _uiTransport;
 	private readonly IUiSessionBroker _sessions;
+	private readonly IColorReferenceResolver _colors;
 
-	public FolderUpdatedNotificationHandler(IUiTransport uiTransport, IUiSessionBroker sessions)
+	public FolderUpdatedNotificationHandler(IUiTransport uiTransport,
+		IUiSessionBroker sessions,
+		IColorReferenceResolver colors)
 	{
+		_colors = colors;
 		_uiTransport = uiTransport;
 		_sessions = sessions;
 	}
@@ -32,7 +37,7 @@ public sealed class FolderUpdatedNotificationHandler : INotificationHandler<Fold
 			}
 		}
 
-		var evt = new FolderUpdatedEvent { Folder = FolderDtoMapper.MapToDto(notification.Folder) };
+		var evt = new FolderUpdatedEvent { Folder = FolderDtoMapper.MapToDto(notification.Folder, _colors) };
 		await _uiTransport.Send(evt, cancellationToken);
 	}
 }

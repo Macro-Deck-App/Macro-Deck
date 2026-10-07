@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.RegularExpressions;
 using MacroDeck.Sdk.Variables;
 
 namespace MacroDeck.Plugin.Testing.Fakes;
@@ -23,7 +24,7 @@ namespace MacroDeck.Plugin.Testing.Fakes;
 /// apply using the same spelling.
 /// </para>
 /// </summary>
-public sealed class FakeUserVariableApi : IUserVariableApi
+public sealed partial class FakeUserVariableApi : IUserVariableApi
 {
 	private readonly Lock _gate = new();
 	private readonly Dictionary<string, VariableRecord> _global = new(StringComparer.Ordinal);
@@ -207,6 +208,7 @@ public sealed class FakeUserVariableApi : IUserVariableApi
 			{
 				VariableType.Numeric => 0m,
 				VariableType.Boolean => false,
+				VariableType.Color => "#000000",
 				_ => string.Empty
 			};
 			return true;
@@ -226,6 +228,10 @@ public sealed class FakeUserVariableApi : IUserVariableApi
 				var isBoolean = bool.TryParse(initialValue, out var flag);
 				value = isBoolean ? flag : null;
 				return isBoolean;
+
+			case VariableType.Color:
+				value = CanonicalColor(initialValue);
+				return value is not null;
 
 			default:
 				value = initialValue;
@@ -270,6 +276,15 @@ public sealed class FakeUserVariableApi : IUserVariableApi
 				}
 
 				record.Value = flag;
+				break;
+
+			case VariableType.Color:
+				if (CanonicalColor(text) is not { } color)
+				{
+					return Invalid($"'{text}' is not a color.");
+				}
+
+				record.Value = color;
 				break;
 
 			default:
@@ -343,6 +358,28 @@ public sealed class FakeUserVariableApi : IUserVariableApi
 				return false;
 		}
 	}
+
+	// The host's colour grammar for hex values: #rgb, #rgba, #rrggbb and #rrggbbaa, lowercased, with an
+	// opaque alpha dropped. The host also accepts rgb() and rgba(), which a test can spell as hex instead.
+	private static string? CanonicalColor(string? text)
+	{
+		var trimmed = text?.Trim() ?? string.Empty;
+		if (!HexColor().IsMatch(trimmed))
+		{
+			return null;
+		}
+
+		var hex = trimmed[1..].ToLowerInvariant();
+		if (hex.Length is 3 or 4)
+		{
+			hex = string.Concat(hex.Select(nibble => new string(nibble, 2)));
+		}
+
+		return hex.Length == 8 && hex.EndsWith("ff", StringComparison.Ordinal) ? "#" + hex[..6] : "#" + hex;
+	}
+
+	[GeneratedRegex("^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$")]
+	private static partial Regex HexColor();
 
 	private static decimal ToDecimalOrZero(object? value)
 	{

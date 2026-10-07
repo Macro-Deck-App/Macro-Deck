@@ -384,6 +384,10 @@ Values you can show and use anywhere:
 
 Show one in a label with `{{ vars.deaths }}`, like the **Deaths: 3** button above.
 
+A user variable is **Text**, **Numeric**, **Boolean** or **Color**. A Color variable holds a color such as
+`#3366ff` that widgets, folder backgrounds and the accent color can follow, see
+[Colors from a variable](/guide/tips/#colors-from-a-variable).
+
 Every speaker and microphone gets its own volume and mute variable, named after the device, for
 example `system_audio_input_usb_mic_volume_percent`. An unplugged device keeps its variables; they
 read as unavailable until it is back. Macro Deck remembers up to 64 devices; after that, the oldest
@@ -540,8 +544,9 @@ you expect.
 
 ## Integrations and the Store
 
-Integrations connect Macro Deck to other apps: OBS, Home Assistant, Voicemeeter, Spotify, Twitch,
-[YouTube](/guide/youtube/), [Jellyfin](/guide/jellyfin/), Discord, Google Calendar, Outlook Calendar and more. Turn on the ones you use under **Integrations**.
+Integrations connect Macro Deck to other apps: OBS, Home Assistant, Voicemeeter, Spotify,
+[SoundPad](/guide/soundpad/), Twitch, [YouTube](/guide/youtube/), [Jellyfin](/guide/jellyfin/), Discord, Google Calendar,
+Outlook Calendar and more. Turn on the ones you use under **Integrations**.
 
 ![The Integrations page listing ADB, Discord, Google Calendar, Home Assistant, HTTP, Jellyfin and Keyboard, with HTTP, Jellyfin and Keyboard turned on](../../../assets/guide/integrations.png)
 

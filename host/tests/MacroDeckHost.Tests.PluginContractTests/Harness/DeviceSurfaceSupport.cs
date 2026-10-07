@@ -16,6 +16,8 @@ using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Domain.Icons;
 using MacroDeck.Sdk.Profiles;
+using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Variables.Colors;
 
 namespace MacroDeckHost.Tests.PluginContractTests.Harness;
 
@@ -382,18 +384,18 @@ internal static class ContractDeck
 			}
 		});
 
-	public static DeviceSurfaceBuilder Builder()
-	{
-		var profiles = Registry();
-		return new DeviceSurfaceBuilder(profiles,
+	public static DeviceSurfaceBuilder Builder() => Builder(Registry());
+
+	public static DeviceSurfaceBuilder Builder(ContractProfileRegistry profiles, IColorReferenceResolver? colors = null)
+		=> new(profiles,
 			new ContractWidgetStates(),
 			new ContractWidgetIcons(),
 			new ContractLabelText(),
 			new LocalizationResolver(new LocalizationCatalogRegistry()),
 			new ContractAppPreferences(),
 			new ContractIconPacks(),
-			new ContractNoDefaultShortPress());
-	}
+			new ContractNoDefaultShortPress(),
+			colors ?? new ColorReferenceResolver(new VariableRegistry()));
 
 	/// <summary>The deck itself: a Studio profile whose default grid is 3x5, a Home folder that inherits
 	/// it, and a Lights folder to navigate to.</summary>

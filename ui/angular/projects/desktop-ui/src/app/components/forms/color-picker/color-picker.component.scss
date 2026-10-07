@@ -159,8 +159,12 @@
 	pointer-events: none;
 }
 
-.cp-hue {
+.cp-hue,
+.cp-alpha {
 	@include ds.control-slider;
+}
+
+.cp-hue {
 	background-image: linear-gradient(
 		to right,
 		#f00 0%,
@@ -218,4 +222,201 @@
 	width: 0.875rem;
 	height: 0.875rem;
 	pointer-events: none;
+}
+
+.cp-alpha {
+	background-image:
+		linear-gradient(to right, rgba(0, 0, 0, 0), var(--cp-opaque, #000)),
+		repeating-conic-gradient(#c8c8c8 0% 25%, #ffffff 0% 50%);
+	background-size: 100% 100%, 0.5rem 0.5rem;
+}
+
+.cp-mode {
+	align-self: flex-start;
+}
+
+.cp-variable {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	min-width: 0;
+}
+
+.cp-editor {
+	width: 23.5rem;
+	max-width: calc(100vw - 2rem);
+	padding: var(--space-2);
+}
+
+.cp-grow {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.cp-hint {
+	font-size: var(--text-sm);
+	color: var(--color-text-muted);
+}
+
+.cp-hint-warning {
+	color: var(--color-warning);
+}
+
+.cp-chain {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cp-step {
+	position: relative;
+	display: flex;
+	align-items: flex-start;
+	gap: var(--space-2);
+	min-width: 0;
+}
+
+.cp-step:not(:last-child)::before {
+	content: '';
+	position: absolute;
+	top: calc((var(--control-height) + 1.25rem) / 2);
+	bottom: calc(-1 * (var(--space-2) + (var(--control-height) - 1.25rem) / 2));
+	left: calc(0.625rem - 0.5px);
+	width: 1px;
+	background-color: var(--color-border-light);
+}
+
+.cp-step-index {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 1.25rem;
+	height: 1.25rem;
+	margin-top: calc((var(--control-height) - 1.25rem) / 2);
+	border: 1px solid var(--color-border-light);
+	border-radius: 50%;
+	background-color: var(--color-bg-primary);
+	color: var(--color-text-secondary);
+	font-size: var(--text-xs);
+	font-variant-numeric: tabular-nums;
+}
+
+.cp-step-body {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	gap: var(--space-2);
+	min-width: 0;
+}
+
+.cp-step-row {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+	min-width: 0;
+}
+
+@media (max-width: 26rem) {
+	.cp-step-row-split {
+		flex-wrap: wrap;
+	}
+
+	.cp-step-row-split > .cp-step-lead {
+		flex-basis: 100%;
+	}
+
+	.cp-step-row-split > .cp-amount {
+		flex: 1 1 auto;
+	}
+}
+
+.cp-amount {
+	display: flex;
+	align-items: center;
+	flex: 0 0 auto;
+	gap: var(--space-1);
+	min-width: 0;
+}
+
+.cp-amount > shared-input {
+	flex: 1 1 auto;
+	width: 4rem;
+	min-width: 3.5rem;
+}
+
+.cp-amount-unit {
+	flex: 0 0 auto;
+	min-width: 0.75rem;
+	color: var(--color-text-muted);
+	font-size: var(--text-sm);
+}
+
+.cp-icon-button,
+.cp-add {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--space-2);
+	padding: 0;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-md);
+	background-color: var(--color-bg-primary);
+	color: var(--color-text-secondary);
+	cursor: pointer;
+	transition: color var(--transition-fast), border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.cp-icon-button {
+	flex: 0 0 auto;
+	width: var(--control-height);
+	height: var(--control-height);
+}
+
+.cp-add {
+	align-self: flex-start;
+	height: var(--control-height);
+	padding-inline: var(--space-3);
+	font-size: var(--text-sm);
+}
+
+.cp-add:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.cp-icon-button:hover,
+.cp-add:hover:not(:disabled) {
+	border-color: var(--color-border-light);
+	background-color: var(--color-bg-hover);
+	color: var(--color-text-primary);
+}
+
+.cp-icon-button:focus-visible,
+.cp-add:focus-visible {
+	outline: none;
+	box-shadow: var(--focus-ring);
+}
+
+.cp-unsupported {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--space-2);
+}
+
+.cp-unsupported-body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-1);
+	min-width: 0;
+}
+
+.cp-unsupported-value {
+	font-family: var(--font-mono);
+	font-size: var(--text-sm);
+	color: var(--color-text-secondary);
+	overflow-wrap: anywhere;
 }

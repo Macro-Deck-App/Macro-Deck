@@ -6,7 +6,7 @@ namespace MacroDeckHost.Domain.Serialization;
 
 /// <summary>
 /// Writes a script input's type as the lowercase spelling the clients are written against
-/// ("text", "numeric", "boolean") rather than the enum's own casing, and reads any casing back.
+/// ("text", "numeric", "boolean", "color") rather than the enum's own casing, and reads any casing back.
 /// </summary>
 public sealed class ScriptInputTypeJsonConverter : JsonConverter<ScriptInputType>
 {

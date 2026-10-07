@@ -152,6 +152,8 @@ export class UiInputComponent {
   protected readonly language = computed(() => nodeString(this.node(), Properties.Language));
 
   protected readonly supportsReset = computed(() => nodeBoolean(this.node(), Properties.SupportsReset) === true);
+  protected readonly colorAllowsVariables = computed(() => nodeBoolean(this.node(), Properties.AllowVariables) === true);
+  protected readonly variableScopeRefId = computed(() => this.context.scopeRefId);
   protected readonly colorDefaultValue = computed(() =>
     this.supportsReset() ? (nodeString(this.node(), Properties.DefaultValue) ?? '') : undefined,
   );

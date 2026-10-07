@@ -12,6 +12,8 @@ using MacroDeckHost.Application.Scripts;
 using MacroDeckHost.Application.Secrets;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Variables.Colors;
+using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Enums;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
@@ -140,7 +142,9 @@ public sealed class FlowExecutor : IFlowExecutor
 		var run = new FlowRun(request.ExecutionId,
 			variableContext,
 			request.OriginClientId,
-			request.OwnerWidgetId);
+			request.OwnerWidgetId,
+			request.Origin,
+			request.FlowsSource);
 
 		try
 		{
@@ -420,7 +424,7 @@ public sealed class FlowExecutor : IFlowExecutor
 			return;
 		}
 
-		var parameters = await BuildParameterDictionary(block.Parameters, run.Variables);
+		var parameters = await BuildParameterDictionary(block.Parameters, run.Variables, action.Parameters);
 		var stopwatch = Stopwatch.StartNew();
 		WidgetOptimisticStateIdentity? optimisticIdentity = null;
 		long optimisticGeneration = 0;
@@ -477,6 +481,14 @@ public sealed class FlowExecutor : IFlowExecutor
 				if (optimisticIdentity is not null &&
 					result.ExpectedStateId is { Length: > 0 } expectedStateId &&
 					_optimisticStates!.TryApply(optimisticIdentity, optimisticGeneration, expectedStateId))
+				{
+					_stateEvalQueue?.Enqueue(optimisticIdentity.WidgetId);
+				}
+				// Host runs are excluded: an onStateChange flow toggling its own provider would otherwise
+				// re-trigger itself through the queue, past the reconciler's synchronous depth guard.
+				else if (optimisticIdentity is not null &&
+					run.Origin == ExecutionOrigin.Client &&
+					string.Equals(run.ProviderBlockId, block.Id, StringComparison.Ordinal))
 				{
 					_stateEvalQueue?.Enqueue(optimisticIdentity.WidgetId);
 				}
@@ -654,7 +666,8 @@ public sealed class FlowExecutor : IFlowExecutor
 
 	private async Task<Dictionary<string, object>> BuildParameterDictionary(
 		IEnumerable<ActionBlockParameter> parameters,
-		VariableContext variables)
+		VariableContext variables,
+		IReadOnlyList<ActionParameter>? declared = null)
 	{
 		var result = new Dictionary<string, object>();
 		foreach (var parameter in parameters)
@@ -664,10 +677,32 @@ public sealed class FlowExecutor : IFlowExecutor
 				continue;
 			}
 
-			result[parameter.Name] = await ConvertParameterValue(parameter, variables) ?? string.Empty;
+			var value = await ConvertParameterValue(parameter, variables) ?? string.Empty;
+			result[parameter.Name] = FlattenTemplatedColor(parameter, value, declared);
 		}
 
 		return result;
+	}
+
+	// A colour reference can carry alpha, which an action that never declared AllowAlpha has never been
+	// sent; a literal value is passed on exactly as authored.
+	private static object FlattenTemplatedColor(
+		ActionBlockParameter parameter,
+		object value,
+		IReadOnlyList<ActionParameter>? declared)
+	{
+		if (!string.Equals(parameter.Type, "color", StringComparison.OrdinalIgnoreCase) ||
+			value is not string rendered ||
+			parameter.Value.ValueKind != JsonValueKind.String ||
+			!ColorReference.TryParse(parameter.Value.GetString(), out _) ||
+			declared?.FirstOrDefault(candidate =>
+				string.Equals(candidate.Name, parameter.Name, StringComparison.OrdinalIgnoreCase)) is
+			{ AllowAlpha: true })
+		{
+			return value;
+		}
+
+		return RgbaColor.Parse(rendered)?.ToOpaqueString() ?? rendered;
 	}
 
 	private async Task<object?> GetParameterValue(ActionBlock block, string name, VariableContext variables)
@@ -905,18 +940,29 @@ public sealed class FlowExecutor : IFlowExecutor
 
 	private sealed class FlowRun
 	{
-		public FlowRun(Guid executionId, VariableContext variables, string? originClientId, Guid? ownerWidgetId)
+		private readonly Lazy<string?> _providerBlockId;
+
+		public FlowRun(Guid executionId,
+			VariableContext variables,
+			string? originClientId,
+			Guid? ownerWidgetId,
+			ExecutionOrigin origin,
+			string? flowsSource)
 		{
 			ExecutionId = executionId;
 			Variables = variables;
 			OriginClientId = originClientId;
 			OwnerWidgetId = ownerWidgetId;
+			Origin = origin;
+			_providerBlockId = new Lazy<string?>(() => ActionButtonStateModel.Read(flowsSource).StateProvider?.BlockId);
 		}
 
 		public Guid ExecutionId { get; }
 		public VariableContext Variables { get; }
 		public string? OriginClientId { get; }
 		public Guid? OwnerWidgetId { get; }
+		public ExecutionOrigin Origin { get; }
+		public string? ProviderBlockId => _providerBlockId.Value;
 		public List<ActionExecutionOutcome> Outcomes { get; } = [];
 
 		public void Record(

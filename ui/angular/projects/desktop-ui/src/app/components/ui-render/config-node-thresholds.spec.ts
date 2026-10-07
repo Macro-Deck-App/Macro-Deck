@@ -1,5 +1,7 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { UiNode } from '@macro-deck/runtime';
+import { UiNode, type Variable } from '@macro-deck/runtime';
+import { VariableService } from '@shared';
 import { el, renderTree, tick } from './ui-render-test-support';
 
 const fourBands = {
@@ -53,6 +55,30 @@ describe('shared-ui-input thresholds', () => {
       '90 – 100 %',
     ]);
     expect(rendered.events).toEqual([]);
+  });
+
+  it('keeps editing bands whose colour variable is gone or that have no colour of their own', async () => {
+    const primary: Variable = { id: 'p', name: 'primary', scope: 'global', type: 'color', classification: 'user', value: '#3366ff' };
+    const value = {
+      bands: [
+        { id: 'own', color: '{{ vars.primary | color | color_darken: 20 }}' },
+        { id: 'gone', color: '{{ vars.deleted | color }}', from: 30 },
+        { id: 'none', color: '', from: 60 },
+      ],
+    };
+    const rendered = await renderTree(root({ value, allowVariables: true }), null, [
+      { provide: VariableService, useValue: { variables: signal([primary]) } },
+    ]);
+    const host = el(rendered);
+
+    expect(host.querySelector('.config-node-unsupported')).toBeNull();
+    expect(host.querySelectorAll('.te-range-text').length).toBe(3);
+    const swatches = Array.from(host.querySelectorAll<HTMLElement>('.te-swatch'));
+    expect(swatches[0].style.background).toBe('rgb(0, 61, 245)');
+    expect(swatches.map(swatch => swatch.classList.contains('te-swatch-missing'))).toEqual([false, true, false]);
+    const missing = Array.from(host.querySelectorAll('.te-range-missing')).map(text => text.textContent?.trim());
+    expect(missing.length).toBe(1);
+    expect(missing[0]).toContain('deleted');
   });
 
   it('moves a handle with the keyboard and stops it one step short of its neighbour', async () => {

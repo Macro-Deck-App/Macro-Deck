@@ -13,6 +13,13 @@ describe('set-variable-operations.util', () => {
     expect(operationsFor('text')).toEqual(['set', 'append']);
   });
 
+  it('only lets a color be set, never added to, toggled or appended to', () => {
+    expect(operationsFor('color')).toEqual(['set']);
+    expect(isOperationAllowed('append', 'color')).toBeFalse();
+    expect(isOperationAllowed('add', 'color')).toBeFalse();
+    expect(isOperationAllowed('toggle', 'color')).toBeFalse();
+  });
+
   it('offers everything while the type is unknown', () => {
     expect(operationsFor(undefined)).toEqual(['set', 'add', 'toggle', 'append']);
   });

@@ -50,7 +50,8 @@ internal sealed class StoreRatingPromptServiceTests
 			.AddScoped<IAppPreferenceService>(provider => new AppPreferenceService(
 				provider.GetRequiredService<IAppPreferenceRepository>(),
 				new BuildEnvironmentStub(),
-				new FakeHostListenerState()))
+				new FakeHostListenerState(),
+				TestColors.None))
 			.BuildServiceProvider();
 
 		var options = StoreRegistryOptions.Default;

@@ -160,6 +160,18 @@ public static class ProtocolLimits
 	/// <summary>Bounds how many resources one plugin's variable working set may cover at once.</summary>
 	public const int MaxVariableSubscriptions = 1024;
 
+	/// <summary>Bounds how many colours one plugin may watch through the <c>colors</c> host api, counted
+	/// across all of its integrations.</summary>
+	public const int MaxColorWatches = 1024;
+
+	/// <summary>The longest colour value, in characters, Macro Deck reads as a Color variable reference.
+	/// A longer value is not a reference.</summary>
+	public const int MaxColorReferenceLength = 1024;
+
+	/// <summary>The most modifier steps a Color variable reference may chain. A value with more is not a
+	/// reference.</summary>
+	public const int MaxColorReferenceSteps = 32;
+
 	/// <summary>Bounds one <c>value</c> push. The host's callback throttle bounds the rate of host
 	/// callbacks; this bounds the size of one.</summary>
 	public const int MaxVariableValuesPerBatch = 128;
