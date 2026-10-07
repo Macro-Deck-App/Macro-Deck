@@ -33,6 +33,10 @@ public sealed class WidgetIconProviderPollService : HostReadyBackgroundService
 	// less often, so a later subscriber's first render is reasonably fresh rather than starting blank.
 	internal static readonly TimeSpan IdlePollInterval = TimeSpan.FromSeconds(30);
 
+	// A PeriodicTimer tick can land a few milliseconds early; without slack an interval of whole
+	// seconds would slip to the next tick.
+	private static readonly TimeSpan _tickJitterTolerance = TimeSpan.FromMilliseconds(100);
+
 	private readonly WidgetIconEvalChannel _queue;
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly IWidgetRenderSignals _renderSignals;
@@ -41,8 +45,9 @@ public sealed class WidgetIconProviderPollService : HostReadyBackgroundService
 	private readonly StartupReadiness _readiness;
 	private readonly IDeviceSurfaceRenderSink? _deviceSurfaces;
 	private readonly ILogger _logger;
+	private readonly TimeProvider _timeProvider;
 
-	private readonly Dictionary<Guid, DateTimeOffset> _nextPollAt = new();
+	private readonly Dictionary<Guid, DateTimeOffset> _lastPolledAt = new();
 	private readonly Dictionary<Guid, WidgetIconResolution> _lastResolution = new();
 
 	public WidgetIconProviderPollService(
@@ -54,7 +59,8 @@ public sealed class WidgetIconProviderPollService : HostReadyBackgroundService
 		IFolderCache folderCache,
 		StartupReadiness readiness,
 		ILogger logger,
-		IDeviceSurfaceRenderSink? deviceSurfaces = null)
+		IDeviceSurfaceRenderSink? deviceSurfaces = null,
+		TimeProvider? timeProvider = null)
 		: base(lifetime)
 	{
 		_queue = queue;
@@ -65,6 +71,7 @@ public sealed class WidgetIconProviderPollService : HostReadyBackgroundService
 		_readiness = readiness;
 		_deviceSurfaces = deviceSurfaces;
 		_logger = logger.ForContext<WidgetIconProviderPollService>();
+		_timeProvider = timeProvider ?? TimeProvider.System;
 	}
 
 	protected override async Task ExecuteWhenReady(CancellationToken stoppingToken)
@@ -131,7 +138,7 @@ public sealed class WidgetIconProviderPollService : HostReadyBackgroundService
 	{
 		using var scope = _scopeFactory.CreateScope();
 		var iconService = scope.ServiceProvider.GetRequiredService<IWidgetIconService>();
-		var now = DateTimeOffset.UtcNow;
+		var now = _timeProvider.GetUtcNow();
 		var seen = new HashSet<Guid>();
 
 		foreach (var widget in _folderCache.GetAllFolders().SelectMany(folder => folder.Widgets))
@@ -149,18 +156,13 @@ public sealed class WidgetIconProviderPollService : HostReadyBackgroundService
 			// before the parse a false positive would have cost anyway.
 			if (widget.Data is null || !widget.Data.Contains("iconProvider", StringComparison.Ordinal))
 			{
-				_nextPollAt.Remove(widget.Id);
+				_lastPolledAt.Remove(widget.Id);
 				continue;
 			}
 
 			if (iconService.GetProviderPollInterval(widget.Id) is not { } declared)
 			{
-				_nextPollAt.Remove(widget.Id);
-				continue;
-			}
-
-			if (_nextPollAt.TryGetValue(widget.Id, out var dueAt) && dueAt > now)
-			{
+				_lastPolledAt.Remove(widget.Id);
 				continue;
 			}
 
@@ -171,15 +173,21 @@ public sealed class WidgetIconProviderPollService : HostReadyBackgroundService
 				interval = IdlePollInterval;
 			}
 
-			_nextPollAt[widget.Id] = now + interval;
+			if (_lastPolledAt.TryGetValue(widget.Id, out var lastPolledAt) &&
+				now < lastPolledAt + interval - _tickJitterTolerance)
+			{
+				continue;
+			}
+
+			_lastPolledAt[widget.Id] = now;
 			_queue.Enqueue(widget.Id);
 		}
 
-		if (_nextPollAt.Count > 0)
+		if (_lastPolledAt.Count > 0)
 		{
-			foreach (var staleId in _nextPollAt.Keys.Where(id => !seen.Contains(id)).ToList())
+			foreach (var staleId in _lastPolledAt.Keys.Where(id => !seen.Contains(id)).ToList())
 			{
-				_nextPollAt.Remove(staleId);
+				_lastPolledAt.Remove(staleId);
 			}
 		}
 	}
