@@ -24,7 +24,7 @@ export function refineEventConfigurationParameters(
   if (!watchedName) return parameters;
 
   const watched = variables.find(v => v.name === watchedName && v.origin !== 'event');
-  if (!watched || watched.type === 'text') return parameters;
+  if (!watched || watched.type === 'text' || watched.type === 'color') return parameters;
 
   const payloadNames = new Set(definition.payloadParameters.map(p => p.name));
 

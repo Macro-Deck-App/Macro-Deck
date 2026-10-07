@@ -369,7 +369,9 @@ export class ParamRowComponent implements OnInit, OnChanges {
       case 'url':
       case 'ipaddress':
       case 'autocomplete':
-        return ['text', 'numeric', 'boolean'];
+        return ['text', 'numeric', 'boolean', 'color'];
+      case 'color':
+        return ['color'];
       case 'number':
       case 'duration':
         return ['numeric'];

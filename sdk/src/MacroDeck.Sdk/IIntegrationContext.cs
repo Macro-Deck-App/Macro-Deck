@@ -1,3 +1,4 @@
+using MacroDeck.Sdk.Colors;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Events;
@@ -50,4 +51,13 @@ public interface IIntegrationContext
 	/// <see cref="UiResourceException" /> with <see cref="UiResourceErrorCode.Unsupported" />.
 	/// </summary>
 	IUiResourceRegistry UiResources => UnsupportedUiResourceRegistry.Instance;
+
+	/// <summary>
+	/// Resolves and watches colour values, including Color variable references, from this integration's
+	/// own stored settings. Watches made here are released when the integration is shut down or initialized
+	/// again. A context from a Macro Deck that cannot resolve colours, and any implementation that does not
+	/// override this member, resolves fixed colours locally, resolves every reference to <c>null</c>, and
+	/// delivers a watch's value once.
+	/// </summary>
+	IColorApi Colors => LocalColorApi.Instance;
 }

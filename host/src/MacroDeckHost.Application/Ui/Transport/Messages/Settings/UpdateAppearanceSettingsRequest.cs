@@ -6,5 +6,7 @@ public class UpdateAppearanceSettingsRequest
 
 	public string? AccentColor { get; set; }
 
+	public string? AccentColorSource { get; set; }
+
 	public string? FontFamily { get; set; }
 }

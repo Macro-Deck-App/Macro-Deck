@@ -4,15 +4,18 @@ using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Application.Ui.Transport.Messages.Folders;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Localization;
+using MacroDeckHost.Application.Variables.Colors;
 
 namespace MacroDeckHost.Application.Ui.Handlers;
 
 public class CreateFolderRequestMessageHandler : IUiTransportMessageHandler<CreateFolderRequest, CreateFolderResponse>
 {
 	private readonly IFolderService _folderService;
+	private readonly IColorReferenceResolver _colors;
 
-	public CreateFolderRequestMessageHandler(IFolderService folderService)
+	public CreateFolderRequestMessageHandler(IFolderService folderService, IColorReferenceResolver colors)
 	{
+		_colors = colors;
 		_folderService = folderService;
 	}
 
@@ -45,7 +48,7 @@ public class CreateFolderRequestMessageHandler : IUiTransportMessageHandler<Crea
 
 		if (result.Success)
 		{
-			response.Folder = FolderDtoMapper.MapToDto(result.Data!);
+			response.Folder = FolderDtoMapper.MapToDto(result.Data!, _colors);
 		}
 		else
 		{

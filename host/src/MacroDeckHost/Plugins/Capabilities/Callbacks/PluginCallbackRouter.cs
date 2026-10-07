@@ -48,6 +48,7 @@ using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Devices;
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.Notifications;
+using MacroDeckHost.Application.Variables.Colors;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
@@ -98,6 +99,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	private readonly IPluginIconPackUploads? _iconPackUploads;
 	private readonly IPluginIconUiResources? _pluginIconResources;
 	private readonly IPluginIconResolver? _pluginIconResolver;
+	private readonly PluginColorWatches? _colorWatches;
 
 	// Rate limiting alone does not bound this: an icon transfer outlives the call that started it, so a
 	// plugin fetching a full deck's icons at once would otherwise hold every image, and its base64 chunk
@@ -146,8 +148,10 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		VideoStreamCallbackThrottle? videoStreamThrottle = null,
 		IMusicPlayerArtworkService? musicPlayerArtwork = null,
 		MusicPlayerArtworkCallbackThrottle? musicPlayerArtworkThrottle = null,
-		TimeSpan? musicPlayerArtworkTimeout = null)
+		TimeSpan? musicPlayerArtworkTimeout = null,
+		PluginColorWatches? colorWatches = null)
 	{
+		_colorWatches = colorWatches;
 		_musicPlayerArtworkTimeout = musicPlayerArtworkTimeout ?? MusicPlayerArtworkTimeout;
 		_videoStreamProviders = videoStreamProviders;
 		_videoStreamSessions = videoStreamSessions;
@@ -243,6 +247,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				HostApis.ScreenSavers => await RouteScreenSaversAsync(pluginId, payload, cancellationToken),
 				HostApis.IconPacks => await RouteIconPacksAsync(pluginId, sessionId, payload, cancellationToken),
 				HostApis.VideoStreams => RouteVideoStreams(pluginId, sessionId, connection, payload),
+				HostApis.Colors => RouteColors(pluginId, payload),
 				_ => HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
 					$"The host has no api '{payload.Api}'.")
 			};
@@ -1984,6 +1989,45 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				$"No rendition of this icon fits the {ProtocolLimits.MaxUiResourceBytes} byte UI resource limit."),
 			_ => HostCallbackResult.Fail(notFoundCode, ProtocolErrorMessages.For(notFoundCode))
 		};
+
+	private HostCallbackResult RouteColors(string pluginId, HostInvokePayload payload)
+	{
+		if (_colorWatches is null)
+		{
+			return UnknownOperation(payload);
+		}
+
+		switch (payload.Operation)
+		{
+			case HostOperations.Colors.Resolve:
+			{
+				var arguments = Deserialize<ColorsResolveArguments>(payload.Arguments);
+				return arguments is null
+					? MissingArguments()
+					: HostCallbackResult.Ok(new ColorsResolveResult
+					{
+						Color = _colorWatches.Resolve(arguments.Value, arguments.WidgetId)
+					});
+			}
+
+			case HostOperations.Colors.Watches:
+			{
+				var arguments = Deserialize<ColorsWatchesArguments>(payload.Arguments);
+				if (arguments is null)
+				{
+					return MissingArguments();
+				}
+
+				return _colorWatches.TrySetWatches(pluginId, arguments.Watches)
+					? HostCallbackResult.Ok()
+					: HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
+						$"A plugin can watch at most {ProtocolLimits.MaxColorWatches} colours.");
+			}
+
+			default:
+				return UnknownOperation(payload);
+		}
+	}
 
 	private static HostCallbackResult MissingArguments()
 		=> HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload, "This operation requires arguments.");

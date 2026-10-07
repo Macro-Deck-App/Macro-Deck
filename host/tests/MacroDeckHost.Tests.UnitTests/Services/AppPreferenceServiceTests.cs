@@ -1,3 +1,4 @@
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Logging;
 using MacroDeckHost.Application.Persistence.Repositories;
@@ -42,7 +43,8 @@ public class AppPreferenceServiceTests
 		BuildChannel channel = BuildChannel.Production)
 		=> new(repository,
 			new FakeBuildEnvironment { IsBeta = isBeta, Channel = channel },
-			new FakeHostListenerState());
+			new FakeHostListenerState(),
+			TestColors.None);
 
 	[Test]
 	public async Task GetOnboarding_is_not_pending_when_unset()
@@ -186,7 +188,7 @@ public class AppPreferenceServiceTests
 	{
 		var repository = new FakeAppPreferenceRepository();
 		await repository.SetValue(AppPreferenceService.InstallationIdKey, "not-a-guid");
-		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState());
+		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
 
 		var id = await service.GetInstallationId();
 		var reloaded = await service.GetInstallationId();
@@ -275,7 +277,7 @@ public class AppPreferenceServiceTests
 	{
 		var repository = new FakeAppPreferenceRepository();
 		await repository.SetValue(AppPreferenceService.MinimumLogLevelKey, stored);
-		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState());
+		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
 
 		var settings = await service.GetLogging();
 
@@ -287,7 +289,7 @@ public class AppPreferenceServiceTests
 	{
 		var repository = new FakeAppPreferenceRepository();
 		await repository.SetValue(AppPreferenceService.MinimumLogLevelKey, "verbose");
-		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState());
+		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
 
 		var settings = await service.GetLogging();
 
@@ -429,7 +431,7 @@ public class AppPreferenceServiceTests
 	{
 		var repository = new FakeAppPreferenceRepository();
 		await repository.SetValue(AppPreferenceService.AdbEnabledKey, "maybe");
-		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState());
+		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
 
 		var settings = await service.GetAdb();
 
@@ -441,7 +443,7 @@ public class AppPreferenceServiceTests
 	{
 		var repository = new FakeAppPreferenceRepository();
 		await repository.SetValue(AppPreferenceService.AdbDefaultDeviceSerialKey, "not a valid serial!");
-		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState());
+		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
 
 		var settings = await service.GetAdb();
 
@@ -489,7 +491,7 @@ public class AppPreferenceServiceTests
 	{
 		var repository = new FakeAppPreferenceRepository();
 		await repository.SetValue(AppPreferenceService.LockScreenEnabledKey, "maybe");
-		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState());
+		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
 
 		var settings = await service.GetLockScreen();
 
@@ -584,7 +586,7 @@ public class AppPreferenceServiceTests
 	{
 		var repository = new FakeAppPreferenceRepository();
 		await repository.SetValue(AppPreferenceService.ExtensionsRefreshIntervalMinutesKey, "not a number");
-		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState());
+		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
 
 		var settings = await service.GetExtensions();
 

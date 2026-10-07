@@ -139,6 +139,8 @@
     </label>
     <shared-color-picker
       [presets]="backgroundPresets()"
+      [allowVariables]="true"
+      [allowAlpha]="true"
       defaultColor=""
       [ngModel]="background || ''"
       (ngModelChange)="onBackgroundChange($event)">

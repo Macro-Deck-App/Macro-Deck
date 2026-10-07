@@ -59,7 +59,7 @@ public sealed record UiModifier : UiComponentContainer
 	/// <summary>The border width, drawn inside the edge without taking space. Absent means no border.</summary>
 	public UiSize BorderWidth { get; init; }
 
-	/// <summary>The border colour, as <c>#rrggbb</c>.</summary>
+	/// <summary>The border colour, as <c>#rrggbb</c>, or <c>#rrggbbaa</c> for a translucent one.</summary>
 	public UiValue<string> BorderColor { get; init; }
 
 	/// <summary>The border line style - see <see cref="UiComponentBorderLines" />. Absent means solid.</summary>
@@ -142,7 +142,7 @@ public sealed record UiModifier : UiComponentContainer
 internal readonly record struct UiModifierMember(string Key, Func<JsonElement?> Evaluate);
 
 /// <summary>
-/// A node background: a literal colour, written as the bare string <c>#rrggbb</c>, or a
+/// A node background: a literal colour, written as the bare string <c>#rrggbb</c> or <c>#rrggbbaa</c>, or a
 /// <see cref="UiGradient" />, written as its object. A string converts implicitly.
 /// </summary>
 [JsonConverter(typeof(UiBackgroundJsonConverter))]
@@ -160,9 +160,10 @@ public sealed record UiBackground
 	/// <summary>The gradient, or <c>null</c> for a literal colour.</summary>
 	public UiGradient? Gradient { get; }
 
-	/// <summary>A literal colour, as <c>#rrggbb</c>. The implicit conversions from a string go through
-	/// here.</summary>
-	/// <exception cref="ArgumentException"><paramref name="color" /> is not written <c>#rrggbb</c>.</exception>
+	/// <summary>A literal colour, as <c>#rrggbb</c> or <c>#rrggbbaa</c>. The implicit conversions from a string
+	/// go through here.</summary>
+	/// <exception cref="ArgumentException"><paramref name="color" /> is not written <c>#rrggbb</c> or
+	/// <c>#rrggbbaa</c>.</exception>
 	public static UiBackground Solid(string color)
 		=> new(UiModifierValidation.HexColor(color, nameof(color)), null);
 
@@ -285,8 +286,9 @@ public sealed record UiGradientStop
 		init => field = UiModifierValidation.Fraction(value, nameof(Offset));
 	}
 
-	/// <summary>The colour at the stop, as <c>#rrggbb</c>.</summary>
-	/// <exception cref="ArgumentException">The value is not written <c>#rrggbb</c>.</exception>
+	/// <summary>The colour at the stop, as <c>#rrggbb</c> or <c>#rrggbbaa</c>.</summary>
+	/// <exception cref="ArgumentException">The value is not written <c>#rrggbb</c> or <c>#rrggbbaa</c>.
+	/// </exception>
 	[JsonPropertyOrder(1)]
 	public required string Color
 	{
@@ -469,9 +471,9 @@ internal static class UiModifierValidation
 	}
 
 	internal static string HexColor(string value, string name)
-		=> value is not null && System.Text.RegularExpressions.Regex.IsMatch(value, "^#[0-9a-fA-F]{6}$")
+		=> value is not null && System.Text.RegularExpressions.Regex.IsMatch(value, "^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$")
 			? value
-			: throw new ArgumentException("A colour must be written #rrggbb.", name);
+			: throw new ArgumentException("A colour must be written #rrggbb or #rrggbbaa.", name);
 }
 
 internal sealed record UiShapeWire<TStop>

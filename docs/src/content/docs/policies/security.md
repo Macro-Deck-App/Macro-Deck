@@ -363,6 +363,15 @@ and requests to any handled topic, and handle any topic nobody has claimed yet. 
 other input from another process: validate its payload, and check `Sender` before acting on a command
 where it matters who asked. `host:messaging` is declared, not enforced.
 
+## Colour variables
+
+Any plugin can resolve the current value of any Color variable through
+[`IColorApi`](/features/variables/#resolving-colours-yourself): every global one, and the widget-scoped ones
+of any existing widget, whichever plugin or user created them. It can also watch them for changes. That is
+all the `colors` host api reveals: a variable of any other type, a missing one or an unknown widget
+resolves to no colour, and the api accepts only a colour or a Color variable reference, never an arbitrary
+template, so it cannot be used to read text, numbers or other values. No permission covers it.
+
 ## Video streams
 
 A [video stream provider](/features/video-streams/) gives Macro Deck the URL of a stream, and Macro Deck

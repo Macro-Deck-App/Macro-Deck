@@ -170,6 +170,7 @@ export class ProfileService {
       defaultRows?: number;
       defaultColumns?: number;
       defaultBackgroundColor?: string;
+      defaultBackgroundColorSource?: string;
       defaultWidgetSpacing?: number;
       defaultWidgetBorderRadius?: number;
       defaultEmptyCellStyle?: string;
@@ -311,6 +312,7 @@ export class ProfileService {
       defaultBackground: ipc.defaultBackgroundColor === 'rgba(18, 18, 18, 0.6)'
         ? null
         : (ipc.defaultBackgroundColor ?? null),
+      ...(ipc.defaultBackgroundColorSource ? { defaultBackgroundSource: ipc.defaultBackgroundColorSource } : {}),
       defaultSpacing: ipc.defaultWidgetSpacing ?? null,
       defaultBorderRadius: ipc.defaultWidgetBorderRadius ?? null,
       defaultEmptyCellStyle: emptyCellStyleFromWire(ipc.defaultEmptyCellStyle),

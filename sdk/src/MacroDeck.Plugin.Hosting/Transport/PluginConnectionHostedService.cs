@@ -427,7 +427,8 @@ internal sealed class PluginConnectionHostedService(
 		Capabilities = declared,
 		DeclaredName = metadata.Name,
 		DeclaredVersion = metadata.Version,
-		Sdk = sdkUsage
+		Sdk = sdkUsage,
+		HostApiFeatures = MacroDeck.Plugin.Protocol.Callbacks.HostApiFeatures.All
 	};
 
 	private static bool SameHost(string left, string right)

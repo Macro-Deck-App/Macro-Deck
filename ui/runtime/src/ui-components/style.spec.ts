@@ -114,6 +114,14 @@ describe('widget node presentation', () => {
       expect(widgetTileFilled(typed('ui.button', { background: 'transparent' }))).toBeFalse();
       expect(widgetTileFilled(typed('ui.text', { background: '#ff0000' }))).toBeFalse();
     });
+
+    it('fills with an opaque eight-digit colour but lets a translucent one paint over the tile face', () => {
+      expect(widgetTileFilled(typed('ui.stack', { background: '#ff0000ff' }))).toBeTrue();
+      expect(widgetTileFilled(typed('ui.stack', { background: '#ff000080' }))).toBeFalse();
+      expect(widgetTileFilled(typed('ui.button', { background: '#ff000080' }))).toBeFalse();
+      expect(widgetTileFilled(typed('ui.button', { background: '#ff000000' }))).toBeFalse();
+      expect(widgetTileTransparent(typed('ui.button', { background: '#ff000000' }))).toBeFalse();
+    });
   });
 
   describe('transparent tile face', () => {

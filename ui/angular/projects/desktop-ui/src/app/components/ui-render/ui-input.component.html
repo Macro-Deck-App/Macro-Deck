@@ -264,6 +264,9 @@
         <shared-color-picker
           [defaultColor]="colorDefaultValue()"
           [presets]="colorPresets()"
+          [allowVariables]="colorAllowsVariables()"
+          [allowAlpha]="colorAllowsVariables()"
+          [variableScopeRefId]="variableScopeRefId()"
           [ngModel]="stringValue()"
           (ngModelChange)="onChange($event)" />
       }
@@ -385,6 +388,8 @@
           [fixedColors]="fixedColors()"
           [maxCount]="maxCount()"
           [canReset]="thresholdsCanReset()"
+          [allowVariables]="colorAllowsVariables()"
+          [variableScopeRefId]="variableScopeRefId()"
           (valueChange)="onChange($event)"
           (reset)="onChange(null)" />
       }

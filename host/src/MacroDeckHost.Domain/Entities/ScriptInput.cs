@@ -8,7 +8,8 @@ public enum ScriptInputType
 {
 	Text = 0,
 	Numeric = 1,
-	Boolean = 2
+	Boolean = 2,
+	Color = 3
 }
 
 public sealed record ScriptInput

@@ -75,11 +75,19 @@ public static class HostApis
 	/// </summary>
 	public const string VideoStreams = "video-streams";
 
+	/// <summary>
+	/// The <c>colors</c> host api: resolves colour values a plugin stored, including Color variable
+	/// references, and replaces the table of colours the plugin watches. Watched values arrive as a
+	/// revisioned <c>host.state</c> push of the whole resolved table, only while the plugin watches any. A
+	/// host that predates it answers <c>CAPABILITY_UNSUPPORTED</c>.
+	/// </summary>
+	public const string Colors = "colors";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		Variables, UserVariables, Config, Deck, Scripts, Widgets, Notifications, ActionInteractions, Ui,
 		Devices, VariableValues, Layouts, FolderViews, WidgetTypes, EventBindings, ScreenSavers, Adb, Messaging,
-		IconPacks, VideoStreams,
+		IconPacks, VideoStreams, Colors,
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);

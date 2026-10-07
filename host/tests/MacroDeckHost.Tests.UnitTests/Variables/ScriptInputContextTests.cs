@@ -239,4 +239,21 @@ public class ScriptInputContextTests
 
 		Assert.That(evaluator.RenderTemplateString("{{ vars.scene }}", VariableContext.Empty), Is.Empty);
 	}
+
+	[Test]
+	public void A_color_input_arrives_in_canonical_form_and_works_with_the_colour_filters()
+	{
+		var (evaluator, context) = Build([Declare("tint", ScriptInputType.Color)], Supplied(("tint", "#3366FF")));
+
+		Assert.That(evaluator.RenderTemplateString("{{ vars.tint | color | color_opacity: 50 }}", context),
+			Is.EqualTo("#3366ff80"));
+	}
+
+	[Test]
+	public void A_color_input_refuses_text_that_is_not_a_colour()
+	{
+		var binding = ScriptInputBinder.Bind([Declare("tint", ScriptInputType.Color)], Supplied(("tint", "teal-ish")));
+
+		Assert.That(binding.Success, Is.False);
+	}
 }

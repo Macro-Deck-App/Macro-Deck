@@ -39,6 +39,54 @@ Unlock the deck to edit it, lock it to press buttons.
   **Visible** or **Transparent**; **Inherited** takes the value from the parent folder, then the profile.
   While you edit the deck, hidden empty cells show a dashed outline, so you can still place widgets. The setting
   does not apply to hardware devices.
+
+## Colors from a variable
+
+Keep your colors in **Color** variables and change a whole deck at once. Create a user variable of type
+**Color** on the **Variables** page, for example `primary` with `#3366ff`. Its value is `#rrggbb`, or
+`#rrggbbaa` for a translucent color; the **Opacity** slider sets the last two digits.
+
+Every color picker of a widget, a color threshold band, a folder's or profile's grid **Background**, the
+**Accent** color in **Settings > Appearance** and the color of an action such as **Set Background Color** can
+switch from **Color** to **Variable**. Choose a **Color variable**, then **Add modifier** to derive a shade
+from it:
+
+| Modifier | Does |
+| --- | --- |
+| **Brighten**, **Darken** | Makes the color lighter or darker by **Amount** percent |
+| **Set opacity** | Sets how opaque the color is, from 0 to 100 percent |
+| **Increase opacity**, **Reduce opacity** | Makes the color more opaque or more transparent by **Amount** percent |
+| **Increase saturation**, **Reduce saturation** | Makes the color more vivid or greyer by **Amount** percent |
+| **Shift hue** | Turns the color around the color wheel by **Amount** degrees |
+| **Mix** | Blends in another color or color variable, chosen under **Mix with**, by **Amount** percent |
+
+Modifiers apply from top to bottom, so a button can use `primary` darkened by 20 % at 70 % opacity while a
+slider uses `primary` as it is. Change the variable, by hand or with **Set Variable**, and every widget,
+folder and the accent color that use it update right away.
+
+- The accent color stays opaque, so the opacity modifiers have no effect there.
+- An action's color is worked out when the action runs. **Set Background Color** with a variable writes the
+  color the variable has at that moment; the widget does not keep following the variable.
+- If the variable is deleted, unavailable or no longer a **Color**, the field falls back to the theme's color.
+  A color threshold band whose variable is missing has no color of its own: that range shows the widget's
+  own color, and the other bands keep theirs.
+- Only **Color** variables work. A **Text** variable that holds `#3366ff` is not offered and does not work in
+  a template either; create a Color variable instead.
+- The same works in text, as a template: `{{ vars.primary | color | color_darken: 20 | color_opacity: 70 }}`
+  gives the color as `#rrggbbaa`. The other modifiers are `color_lighten`, `color_saturate`,
+  `color_desaturate`, `color_increase_opacity`, `color_reduce_opacity`, `color_hue` and
+  `color_mix: "#ffffff", 50` or `color_mix: vars.other, 50`. A fixed color works too:
+  `{{ "#ff0000" | color_darken: 10 }}`.
+- Hardware devices show these colors without transparency. Older versions of the Companion app show the
+  theme's color instead of a translucent one.
+- Colors with transparency now look translucent on the deck. A color stored as `rgba(...)` or `#rrggbbaa`,
+  for example by a plugin, used to be drawn fully opaque.
+
+:::caution
+If you go back to an older Macro Deck version after creating a Color variable, that version cannot read your
+variables and starts without any of your user variables. Delete your Color variables before you go back.
+:::
+
 ## Finding a widget type
 
 When you add a widget, type in the search field to filter by name, description or integration. Widgets

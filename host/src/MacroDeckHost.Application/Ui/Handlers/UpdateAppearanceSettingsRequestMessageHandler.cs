@@ -3,6 +3,7 @@ using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Settings;
+using MacroDeckHost.Application.Variables.Colors;
 using Mediator;
 
 namespace MacroDeckHost.Application.Ui.Handlers;
@@ -13,11 +14,14 @@ public class UpdateAppearanceSettingsRequestMessageHandler
 	private readonly IAppPreferenceService _service;
 	private readonly IMediator _mediator;
 	private readonly IFontCatalog _fonts;
+	private readonly IColorReferenceResolver _colors;
 
 	public UpdateAppearanceSettingsRequestMessageHandler(IAppPreferenceService service,
 		IMediator mediator,
-		IFontCatalog fonts)
+		IFontCatalog fonts,
+		IColorReferenceResolver colors)
 	{
+		_colors = colors;
 		_service = service;
 		_mediator = mediator;
 		_fonts = fonts;
@@ -27,18 +31,29 @@ public class UpdateAppearanceSettingsRequestMessageHandler
 		UpdateAppearanceSettingsRequest request,
 		CancellationToken cancellationToken)
 	{
+		var current = await _service.GetAppearance();
+		var accent = current.AccentColorSource is { } stored
+			? ColorSource.Incoming(request.AccentColorSource, request.AccentColor, stored, _colors,
+				resolved => RgbaColor.Parse(resolved)?.ToOpaqueString() ?? AppPreferenceService.DefaultAccentColor) ??
+			stored
+			: request.AccentColorSource ?? request.AccentColor;
+
 		var settings = await _service.SetAppearance(request.ThemeMode,
-			request.AccentColor,
+			accent,
 			NormalizeFontFamily(request.FontFamily));
 
 		await _mediator.Publish(
-			new AppearanceChangedNotification(settings.ThemeMode, settings.AccentColor, settings.FontFamily),
+			new AppearanceChangedNotification(settings.ThemeMode,
+				settings.AccentColor,
+				settings.FontFamily,
+				settings.AccentColorSource),
 			cancellationToken);
 
 		return new UpdateAppearanceSettingsResponse
 		{
 			ThemeMode = settings.ThemeMode,
 			AccentColor = settings.AccentColor,
+			AccentColorSource = settings.AccentColorSource,
 			FontFamily = settings.FontFamily
 		};
 	}

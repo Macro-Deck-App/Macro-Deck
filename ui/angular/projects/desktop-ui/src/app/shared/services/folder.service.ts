@@ -27,6 +27,7 @@ import {
   type IpcFolderPlacement,
   type IpcWidget,
   type IpcWidgetType,
+  isColorReference,
   isFailureExecutionStatus,
   isWidgetGridView,
   type LocalizedText,
@@ -468,6 +469,12 @@ export class FolderService {
     this.resolveInherited(this.selectedFolder(), f => f.rows, p => p.defaultRows) ?? this.DEFAULT_ROWS);
   readonly currentBackground = computed(() =>
     this.selectedFolder()?.background || this.profileService.selectedProfile()?.defaultBackground || this.DEFAULT_BACKGROUND);
+  readonly currentBackgroundSource = computed(() => {
+    const folder = this.selectedFolder();
+    const profile = this.profileService.selectedProfile();
+    return folder?.backgroundSource || folder?.background
+      || profile?.defaultBackgroundSource || profile?.defaultBackground || this.DEFAULT_BACKGROUND;
+  });
   readonly currentWidgets = computed(() => collectDisplayedWidgets(this.folders(), this.selectedFolderId()));
 
   readonly currentSpacing = computed(() =>
@@ -672,12 +679,19 @@ export class FolderService {
     const folderId = this.selectedFolderId();
     if (!folderId) return;
 
+    const isReference = isColorReference(background);
     this.folders.update(folders =>
-      folders.map(f => f.id === folderId ? { ...f, background } : f)
+      folders.map(f => {
+        if (f.id !== folderId) return f;
+        const { backgroundSource: _previous, ...rest } = f;
+        return isReference ? { ...rest, backgroundSource: background } : { ...rest, background };
+      })
     );
 
     try {
-      await this.api.updateFolder({ id: folderId, backgroundColor: background });
+      await this.api.updateFolder(isReference
+        ? { id: folderId, backgroundColorSource: background }
+        : { id: folderId, backgroundColor: background, backgroundColorSource: background });
     } catch (error) {
       console.error(`Failed to persist background color for folder ${folderId}:`, error);
     }

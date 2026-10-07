@@ -37,4 +37,12 @@ public sealed record PluginSessionRequest
 	/// still negotiate normally, and the host reports its compatibility as unknown rather than guessing.
 	/// </summary>
 	public PluginSdkUsage? Sdk { get; init; }
+
+	/// <summary>
+	/// The optional host API behaviours this plugin understands, from
+	/// <see cref="Callbacks.HostApiFeatures" />. Optional and additive: a plugin that sends nothing gets
+	/// every host API payload in the shape its SDK was built for, and the host ignores names it does not
+	/// know.
+	/// </summary>
+	public IReadOnlyList<string>? HostApiFeatures { get; init; }
 }

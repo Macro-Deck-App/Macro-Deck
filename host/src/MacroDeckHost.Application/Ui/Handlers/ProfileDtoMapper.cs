@@ -1,19 +1,26 @@
 using MacroDeckHost.Application.Layouts;
 using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Ui.Transport.Messages.Profiles;
+using MacroDeckHost.Application.Variables.Colors;
 using MacroDeckHost.Domain.Entities;
 
 namespace MacroDeckHost.Application.Ui.Handlers;
 
 public static class ProfileDtoMapper
 {
-	public static Profile MapJsonProfile(ProfileEntity entity) => MapJsonProfile(entity, constraint: null);
+	public static Profile MapJsonProfile(ProfileEntity entity, IColorReferenceResolver? colors = null)
+		=> MapJsonProfile(entity, constraint: null, colors);
 
 	public static ProfilePlacement MapToPlacement(ProfileEntity entity)
 		=> new() { Id = entity.Id.ToString(), Order = entity.Order };
 
-	public static Profile MapJsonProfile(ProfileEntity entity, DeviceGridConstraint? constraint)
-		=> new()
+	public static Profile MapJsonProfile(
+		ProfileEntity entity,
+		DeviceGridConstraint? constraint,
+		IColorReferenceResolver? colors = null)
+	{
+		var (background, backgroundSource) = ColorSource.Present(entity.DefaultBackgroundColor, colors);
+		return new Profile
 		{
 			Id = entity.Id.ToString(),
 			Name = entity.Name,
@@ -32,12 +39,14 @@ public static class ProfileDtoMapper
 			},
 			DefaultRows = entity.DefaultRows,
 			DefaultColumns = entity.DefaultColumns,
-			DefaultBackgroundColor = entity.DefaultBackgroundColor,
+			DefaultBackgroundColor = background,
+			DefaultBackgroundColorSource = backgroundSource,
 			DefaultWidgetSpacing = entity.DefaultWidgetSpacing,
 			DefaultWidgetBorderRadius = entity.DefaultWidgetBorderRadius,
 			DefaultEmptyCellStyle = EmptyCellStyleText.Format(entity.DefaultEmptyCellStyle),
 			DefaultWidgetShadows = entity.DefaultWidgetShadows
 		};
+	}
 
 	private static ProfileLayoutConstraint? MapConstraint(DeviceGridConstraint? constraint)
 		=> constraint is null

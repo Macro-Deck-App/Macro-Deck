@@ -7,6 +7,7 @@ using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Identity;
 using MacroDeck.Sdk.Profiles;
+using MacroDeckHost.Application.Variables.Colors;
 using MacroDeckHost.Application.Widgets;
 using TransportProfile = MacroDeckHost.Application.Ui.Transport.Messages.Profiles.Profile;
 using TransportProfileLayout = MacroDeckHost.Application.Ui.Transport.Messages.Profiles.ProfileLayout;
@@ -22,6 +23,7 @@ public sealed class ProfileRegistry : IProfileRegistry
 	private readonly IWidgetTypeRegistry _widgetTypes;
 	private readonly DeviceLayoutConstraintTracker _layoutConstraints;
 	private readonly ILogger _logger;
+	private readonly IColorReferenceResolver _colors;
 
 	public ProfileRegistry(
 		IProfileCache profileCache,
@@ -29,8 +31,10 @@ public sealed class ProfileRegistry : IProfileRegistry
 		IIntegrationRegistry integrations,
 		IWidgetTypeRegistry widgetTypes,
 		DeviceLayoutConstraintTracker layoutConstraints,
-		ILogger logger)
+		ILogger logger,
+		IColorReferenceResolver colors)
 	{
+		_colors = colors;
 		_profileCache = profileCache;
 		_folderCache = folderCache;
 		_integrations = integrations;
@@ -42,7 +46,9 @@ public sealed class ProfileRegistry : IProfileRegistry
 	public IReadOnlyList<TransportProfile> GetProfiles()
 	{
 		var profiles = ProfileOrdering.Sort(_profileCache.GetAll())
-			.Select(entity => ProfileDtoMapper.MapJsonProfile(entity, _layoutConstraints.Get(entity.Id.ToString())))
+			.Select(entity => ProfileDtoMapper.MapJsonProfile(entity,
+				_layoutConstraints.Get(entity.Id.ToString()),
+				_colors))
 			.ToList();
 
 		var nextOrder = profiles.Count > 0 ? profiles.Max(p => p.Order) + 1 : 0;
@@ -77,7 +83,7 @@ public sealed class ProfileRegistry : IProfileRegistry
 		}
 
 		return _folderCache.GetFoldersByProfileId(id)
-			.Select(FolderDtoMapper.MapToDto)
+			.Select(folder => FolderDtoMapper.MapToDto(folder, _colors))
 			.ToList();
 	}
 

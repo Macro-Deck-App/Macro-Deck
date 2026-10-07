@@ -99,6 +99,7 @@ x-macrodeck-host-operations:
   messaging: [publish, send, request, subscriptions]
   icon-packs: [sync-bundled, get-icon-resource, get-icon]
   video-streams: [providers-changed, streams-changed, session-update, session-close]
+  colors: [resolve, watches]
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Assets.AssetKinds.All - the kind values an asset.begin may carry.
 x-macrodeck-asset-kinds:
@@ -782,7 +783,88 @@ components:
         api:
           type: string
         data:
-          description: The pushed state, shaped by the api. Absent when the api has nothing to push.
+          description: >-
+            The pushed state, shaped by the api. Absent when the api has nothing to push. For the
+            colors api it is a ColorWatchStateDto.
+
+    ColorsResolveArguments:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.ColorsResolveArguments, the arguments of
+        colors/resolve. Answered with a ColorsResolveResult. Only Color variables resolve; any
+        other variable type, a missing or unavailable variable or an unknown widget gives no colour.
+      required: [value]
+      properties:
+        value:
+          type: string
+          description: >-
+            A colour, or a Color variable reference such as
+            "{{ vars.primary | color | color_darken: 20 }}" of at most maxColorReferenceLength
+            characters and maxColorReferenceSteps modifier steps.
+        widgetId:
+          type: string
+          description: The widget whose own variables shadow global ones. Absent for global variables only.
+
+    ColorsResolveResult:
+      type: object
+      description: Mirrors MacroDeck.Plugin.Protocol.Callbacks.ColorsResolveResult.
+      properties:
+        color:
+          type: string
+          description: Lowercase #rrggbb or #rrggbbaa. Absent when the value resolves to no colour.
+
+    ColorsWatchesArguments:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.ColorsWatchesArguments, the arguments of
+        colors/watches. The plugin's whole table of watched colours, replacing the previous one;
+        idempotent. A table above maxColorWatches entries is refused with INVALID_PAYLOAD. The host answers with no data and
+        pushes the resolved table as a colors host.state.
+      properties:
+        watches:
+          type: array
+          items:
+            $ref: "#/components/schemas/ColorWatchDto"
+
+    ColorWatchDto:
+      type: object
+      description: Mirrors MacroDeck.Plugin.Protocol.Callbacks.ColorWatchDto.
+      required: [watchId, value]
+      properties:
+        watchId:
+          type: string
+          description: The plugin's own id for the watch, unique within its table.
+        value:
+          type: string
+        widgetId:
+          type: string
+
+    ColorWatchStateDto:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.ColorWatchStateDto, the data of a colors
+        host.state: every watch of the plugin's current table, resolved. A push whose revision is at
+        or below the last one applied in the same session is stale and ignored.
+      required: [revision, values]
+      properties:
+        revision:
+          type: integer
+          format: int64
+        values:
+          type: array
+          items:
+            $ref: "#/components/schemas/ColorWatchValueDto"
+
+    ColorWatchValueDto:
+      type: object
+      description: Mirrors MacroDeck.Plugin.Protocol.Callbacks.ColorWatchValueDto.
+      required: [watchId]
+      properties:
+        watchId:
+          type: string
+        color:
+          type: string
+          description: The colour. Absent when the watched value resolves to no colour.
 
     AssetBeginPayload:
       type: object

@@ -48,7 +48,7 @@ export interface IpcIntegrationActionCapability {
 
 export interface IpcIntegrationVariableCapability {
   name: string;
-  type: 'text' | 'numeric' | 'boolean';
+  type: 'text' | 'numeric' | 'boolean' | 'color';
   decimalPlaces?: number | null;
   refreshIntervalSeconds?: number | null;
   isTemplate: boolean;

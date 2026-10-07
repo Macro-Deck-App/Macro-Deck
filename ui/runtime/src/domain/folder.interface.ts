@@ -10,6 +10,7 @@ export interface Folder {
   cols: number | null;
   rows: number | null;
   background: string;
+  backgroundSource?: string;
   spacing: number | null;
   borderRadius: number | null;
   emptyCellStyle?: EmptyCellStyle | null;

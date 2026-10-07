@@ -13,6 +13,8 @@ public class Profile
 	public int DefaultColumns { get; set; }
 	public string? DefaultBackgroundColor { get; set; }
 
+	public string? DefaultBackgroundColorSource { get; set; }
+
 	public int? DefaultWidgetSpacing { get; set; }
 
 	public int? DefaultWidgetBorderRadius { get; set; }

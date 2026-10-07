@@ -40,6 +40,7 @@ internal static class ActionParameterMapper
 			Required = parameter.Required,
 			Multiline = parameter.Multiline,
 			SupportsReset = parameter.SupportsReset,
+			AllowAlpha = parameter.AllowAlpha ? true : null,
 			LiteralOnly = parameter.LiteralOnly,
 			ValidationRegex = parameter.ValidationRegex,
 			MaxLength = parameter.MaxLength,

@@ -118,6 +118,7 @@
 }
 .input-type-badge.type-numeric { background-color: var(--type-numeric-bg); color: var(--type-numeric-fg); }
 .input-type-badge.type-boolean { background-color: var(--type-boolean-bg); color: var(--type-boolean-fg); }
+.input-type-badge.type-color { background-color: var(--type-resource-bg); color: var(--type-resource-fg); }
 
 .input-required-badge {
   background-color: var(--color-danger-muted);

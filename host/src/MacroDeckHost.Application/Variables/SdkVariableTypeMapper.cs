@@ -9,6 +9,7 @@ public static class SdkVariableTypeMapper
 	{
 		SdkVariableType.Numeric => DomainVariableType.Numeric,
 		SdkVariableType.Boolean => DomainVariableType.Boolean,
+		SdkVariableType.Color => DomainVariableType.Color,
 		_ => DomainVariableType.Text
 	};
 }

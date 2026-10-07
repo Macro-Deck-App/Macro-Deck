@@ -35,7 +35,7 @@ public class LockScreenSettingsHandlersTests
 	}
 
 	private static AppPreferenceService CreateService()
-		=> new(new FakeAppPreferenceRepository(), new FakeBuildEnvironment(), new FakeHostListenerState());
+		=> new(new FakeAppPreferenceRepository(), new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
 
 	[Test]
 	public async Task Default_is_disabled()

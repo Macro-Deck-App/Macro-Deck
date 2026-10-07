@@ -44,6 +44,28 @@ public class A12_VariableFakeTests
 	}
 
 	[Test]
+	public async Task FakeUserVariableApi_validates_a_color_variable_like_the_host()
+	{
+		var api = new FakeUserVariableApi();
+
+		var created = await api.CreateAsync("primary", null, VariableType.Color);
+		var refused = await api.CreateAsync("accent", null, VariableType.Color, "red");
+		var set = await api.ApplyAsync("primary", null, UserVariableOperation.Set, "#3366FFCC");
+		var invalid = await api.ApplyAsync("primary", null, UserVariableOperation.Set, "not a colour");
+		var append = await api.ApplyAsync("primary", null, UserVariableOperation.Append, "ff");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(created.Status, Is.EqualTo(UserVariableCreateStatus.Created));
+			Assert.That(refused.Status, Is.EqualTo(UserVariableCreateStatus.InvalidValue));
+			Assert.That(set.Status, Is.EqualTo(UserVariableWriteStatus.Applied));
+			Assert.That(invalid.Status, Is.EqualTo(UserVariableWriteStatus.InvalidValue));
+			Assert.That(append.Status, Is.EqualTo(UserVariableWriteStatus.InvalidValue));
+			Assert.That(api.GetCurrentValue("primary"), Is.EqualTo("#3366ffcc"));
+		});
+	}
+
+	[Test]
 	public async Task FakeUserVariableApi_create_reproduces_the_documented_refusals()
 	{
 		var api = new FakeUserVariableApi();

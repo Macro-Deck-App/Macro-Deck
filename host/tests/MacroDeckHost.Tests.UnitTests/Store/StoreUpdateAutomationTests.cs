@@ -49,7 +49,8 @@ internal sealed class StoreUpdateAutomationTests
 		_notifications = new UserNotificationStore();
 		_preferences = new AppPreferenceService(new InMemoryPreferenceRepository(),
 			new StubBuildEnvironment(),
-			new FakeHostListenerState());
+			new FakeHostListenerState(),
+			TestColors.None);
 
 		var services = new ServiceCollection();
 		services.AddSingleton<IAppPreferenceService>(_preferences);

@@ -66,6 +66,13 @@ export class OverlayPanelComponent implements AfterViewChecked, OnChanges, OnDes
     return OverlayPanelComponent.openInstances.size > 0;
   }
 
+  static isAnyOpenWithin(container: Element): boolean {
+    for (const instance of OverlayPanelComponent.openInstances) {
+      if (container.contains(instance.host.nativeElement)) return true;
+    }
+    return false;
+  }
+
   readonly pos = signal<{ top: number; left: number; width: number | null }>({
     top: 0,
     left: 0,

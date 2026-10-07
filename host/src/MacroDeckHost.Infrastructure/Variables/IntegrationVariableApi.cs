@@ -112,6 +112,7 @@ public sealed class IntegrationVariableApi : IVariableApi
 		DomainVariableType.Text => SdkVariableType.Text,
 		DomainVariableType.Numeric => SdkVariableType.Numeric,
 		DomainVariableType.Boolean => SdkVariableType.Boolean,
+		DomainVariableType.Color => SdkVariableType.Color,
 		_ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown variable type")
 	};
 

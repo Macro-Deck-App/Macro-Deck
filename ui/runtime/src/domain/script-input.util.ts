@@ -45,6 +45,8 @@ export function scriptInputControlType(type: ScriptInputType): ActionParamContro
       return 'number';
     case 'boolean':
       return 'boolean';
+    case 'color':
+      return 'color';
     default:
       return 'string';
   }
@@ -123,9 +125,10 @@ export function scriptInputParameter(input: ScriptInput, value: ParameterValue):
     acceptedVariableTypes: [input.type],
   };
   if (input.description) parameter.description = input.description;
+  if (input.type === 'color') parameter.allowAlpha = true;
   return parameter;
 }
 
 function isScriptInputType(value: unknown): value is ScriptInputType {
-  return value === 'text' || value === 'numeric' || value === 'boolean';
+  return value === 'text' || value === 'numeric' || value === 'boolean' || value === 'color';
 }

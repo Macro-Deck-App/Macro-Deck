@@ -368,7 +368,15 @@
         </label>
       }
 
-      @if (createForm().source === 'value') {
+      @if (createForm().source === 'value' && createForm().type === 'color') {
+        <shared-color-picker
+          class="form-group"
+          [label]="initialValueLabel()"
+          [allowAlpha]="true"
+          [ngModel]="createForm().initialValue"
+          (ngModelChange)="setFormInitialValue($event)"
+          name="initialValue" />
+      } @else if (createForm().source === 'value') {
       <label class="form-group">
         <span class="form-label">{{ initialValueLabel() }}</span>
         @if (createForm().type === 'boolean') {
@@ -404,6 +412,15 @@
 @if (editingVariable(); as variable) {
   <shared-modal [heading]="editValueLabel()" size="small" [showFooter]="false" (close)="cancelEdit()">
     <form class="create-form" (ngSubmit)="commitEdit(variable)">
+      @if (variable.type === 'color') {
+        <shared-color-picker
+          class="form-group"
+          [label]="publicName(variable)"
+          [allowAlpha]="true"
+          [ngModel]="editingValue()"
+          (ngModelChange)="editingValue.set($event)"
+          name="value" />
+      } @else {
       <label class="form-group">
         <span class="form-label">{{ publicName(variable) }}</span>
         @if (variable.type === 'boolean') {
@@ -429,6 +446,7 @@
             name="value" />
         }
       </label>
+      }
 
       <shared-button-group class="form-actions" align="end">
         <shared-button type="button" variant="secondary" (click)="cancelEdit()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>

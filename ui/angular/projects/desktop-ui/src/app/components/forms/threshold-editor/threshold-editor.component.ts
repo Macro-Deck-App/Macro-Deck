@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import {
   AppStrings,
   MAX_THRESHOLD_BANDS,
+  parseColorReference,
   insertThresholdBoundary,
   thresholdBandIndexAt,
   moveThresholdBoundary,
@@ -15,8 +16,13 @@ import {
   type ThresholdAxis,
   type ThresholdsValue,
 } from '@macro-deck/runtime';
-import { ButtonComponent, LocalizationService, TranslatePipe } from '@shared';
-import { ColorPickerComponent, defaultColorPresets } from '../color-picker/color-picker.component';
+import { ButtonComponent, LocalizationService, TranslatePipe, VariableService } from '@shared';
+import {
+  ColorPickerComponent,
+  colorVariablesInScope,
+  defaultColorPresets,
+  displayColor,
+} from '../color-picker/color-picker.component';
 
 const NEW_BAND_COLORS = ['#34c759', '#ffcc00', '#ff9500', '#ff3b30', '#0a84ff', '#af52de', '#5ac8fa', '#ff2d55'];
 
@@ -24,6 +30,7 @@ interface BandView {
   index: number;
   id: string;
   color: string;
+  missing: string | null;
   range: string;
   left: number;
   width: number;
@@ -57,6 +64,8 @@ export class ThresholdEditorComponent {
   readonly fixedColors = input(false);
   readonly maxCount = input<number | null>(null);
   readonly canReset = input(false);
+  readonly allowVariables = input(false);
+  readonly variableScopeRefId = input<string | undefined>(undefined);
 
   readonly valueChange = output<ThresholdsValue>();
   readonly reset = output<void>();
@@ -67,6 +76,10 @@ export class ThresholdEditorComponent {
   private readonly track = viewChild<ElementRef<HTMLElement>>('track');
 
   protected readonly colorPresets = computed(() => defaultColorPresets(this.localization));
+  private readonly colorVariables = computed(() =>
+    this.allowVariables()
+      ? colorVariablesInScope(this.injector.get(VariableService).variables(), this.variableScopeRefId())
+      : []);
   protected readonly selected = signal(0);
   private readonly dragDraft = signal<ThresholdsValue | null>(null);
   private readonly dragAxis = signal<ThresholdAxis | null>(null);
@@ -115,13 +128,20 @@ export class ThresholdEditorComponent {
       return {
         index,
         id: band.id,
-        color: band.color,
+        color: displayColor(band.color, this.colorVariables()) ?? '',
+        missing: this.missingVariableText(band.color),
         range: this.rangeText(from, to),
         left: this.percent(from),
         width: Math.max(this.percent(to) - this.percent(from), 0),
       };
     });
   });
+
+  private missingVariableText(color: string): string | null {
+    const reference = parseColorReference(color);
+    if (!reference || displayColor(color, this.colorVariables()) !== null) return null;
+    return this.localization.translateKey(AppStrings.Forms.ColorPicker.MissingVariable, { name: reference.variable });
+  }
 
   protected readonly handles = computed<HandleView[]>(() =>
     this.current()

@@ -1,3 +1,4 @@
+using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Plugin.Protocol.Versioning;
@@ -81,6 +82,12 @@ public class PluginSessionService : IPluginSessionService
 		_compatibility = compatibility;
 	}
 
+	// Only names this host defines are kept, so an untrusted list cannot grow the session record.
+	private static IReadOnlyList<string> KnownFeatures(IReadOnlyList<string>? requested)
+		=> requested is null
+			? []
+			: [.. HostApiFeatures.All.Where(feature => requested.Contains(feature, StringComparer.Ordinal))];
+
 	public async Task<PluginSessionCreationResult> Create(PluginSessionIdentity identity,
 		PluginSessionRequest request)
 	{
@@ -163,6 +170,7 @@ public class PluginSessionService : IPluginSessionService
 			NegotiatedVersion = versionOutcome.NegotiatedVersion!.Value,
 			DeclaredName = request.DeclaredName,
 			DeclaredVersion = request.DeclaredVersion,
+			HostApiFeatures = KnownFeatures(request.HostApiFeatures),
 			Capabilities = capabilityResults.ToDictionary(c => c.Kind, StringComparer.Ordinal),
 			DeclaredCapabilities = request.Capabilities,
 			State = PluginSessionState.Awaiting,

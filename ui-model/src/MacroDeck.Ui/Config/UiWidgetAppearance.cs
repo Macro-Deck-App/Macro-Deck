@@ -97,6 +97,13 @@ public enum UiWidgetAppearanceFields
 	/// of the section with no <c>MacroDeck.Sdk.Widgets.WidgetAppearanceProperty</c> counterpart; on its own it
 	/// builds nothing.</summary>
 	TransparentBackground = 64,
+
+	/// <summary>Every colour field the section builds also offers a Color variable reference, see
+	/// <see cref="UiColorInput.AllowVariables" />. Macro Deck resolves the reference in the widget's stored
+	/// data before a session reads it; a Macro Deck release older than this option shows fixed colours only.
+	/// A presentation option with no <c>MacroDeck.Sdk.Widgets.WidgetAppearanceProperty</c> counterpart; on its
+	/// own it builds nothing.</summary>
+	ColorVariables = 128,
 }
 
 /// <summary>A widget's standard appearance values as read from its stored data. Null means not set.</summary>
@@ -164,7 +171,8 @@ public static class UiWidgetAppearance
 	{
 		var children = new List<UiElement>();
 
-		if ((fields & ~(UiWidgetAppearanceFields.Border | UiWidgetAppearanceFields.TransparentBackground)) !=
+		if ((fields & ~(UiWidgetAppearanceFields.Border | UiWidgetAppearanceFields.TransparentBackground |
+				UiWidgetAppearanceFields.ColorVariables)) !=
 			UiWidgetAppearanceFields.None)
 		{
 			children.Add(new UiHeading { Key = "appearance-heading", Text = MacroDeckStrings.Widgets.Appearance.Heading() });
@@ -183,7 +191,7 @@ public static class UiWidgetAppearance
 		if (fields.HasFlag(UiWidgetAppearanceFields.BackgroundColor))
 		{
 			var background = Color(data, UiWidgetAppearanceKeys.BackgroundColor,
-				MacroDeckStrings.Widgets.Appearance.BackgroundColor());
+				MacroDeckStrings.Widgets.Appearance.BackgroundColor(), fields);
 
 			children.Add(fields.HasFlag(UiWidgetAppearanceFields.TransparentBackground)
 				? background with { AllowTransparent = true }
@@ -192,12 +200,14 @@ public static class UiWidgetAppearance
 
 		if (fields.HasFlag(UiWidgetAppearanceFields.LabelColor))
 		{
-			children.Add(Color(data, UiWidgetAppearanceKeys.LabelColor, MacroDeckStrings.Widgets.Appearance.LabelColor()));
+			children.Add(Color(data, UiWidgetAppearanceKeys.LabelColor, MacroDeckStrings.Widgets.Appearance.LabelColor(),
+				fields));
 		}
 
 		if (fields.HasFlag(UiWidgetAppearanceFields.AccentColor))
 		{
-			children.Add(Color(data, UiWidgetAppearanceKeys.AccentColor, MacroDeckStrings.Widgets.Appearance.AccentColor()));
+			children.Add(Color(data, UiWidgetAppearanceKeys.AccentColor, MacroDeckStrings.Widgets.Appearance.AccentColor(),
+				fields));
 		}
 
 		if (fields.HasFlag(UiWidgetAppearanceFields.Font))
@@ -208,7 +218,7 @@ public static class UiWidgetAppearance
 		if (fields.HasFlag(UiWidgetAppearanceFields.Border))
 		{
 			children.Add(new UiHeading { Key = "border-heading", Text = MacroDeckStrings.Widgets.Appearance.Border() });
-			children.Add(BorderField(data));
+			children.Add(BorderField(data, fields));
 		}
 
 		return new UiFragment { Key = key, Children = children };
@@ -235,12 +245,22 @@ public static class UiWidgetAppearance
 		};
 	}
 
-	private static UiColorInput Color(JsonElement data, string key, LocalizedString label)
+	private static UiColorInput Color(JsonElement data, string key, LocalizedString label, UiWidgetAppearanceFields fields)
 	{
 		var state = new UiState<string>(ReadString(data, key) ?? string.Empty);
 
-		return new UiColorInput { Key = key, Label = label, Binding = Bind.To(state), SupportsReset = true };
+		return new UiColorInput
+		{
+			Key = key,
+			Label = label,
+			Binding = Bind.To(state),
+			SupportsReset = true,
+			AllowVariables = AllowsVariables(fields),
+		};
 	}
+
+	private static UiValue<bool> AllowsVariables(UiWidgetAppearanceFields fields)
+		=> fields.HasFlag(UiWidgetAppearanceFields.ColorVariables) ? UiValue.Of(true) : UiValue.None<bool>();
 
 	private static IEnumerable<UiElement> FontFields(JsonElement data)
 	{
@@ -289,7 +309,7 @@ public static class UiWidgetAppearance
 		};
 	}
 
-	private static UiObjectInput BorderField(JsonElement data)
+	private static UiObjectInput BorderField(JsonElement data, UiWidgetAppearanceFields fields)
 	{
 		var stored = data.ValueKind == JsonValueKind.Object &&
 			data.TryGetProperty(UiWidgetAppearanceKeys.Border, out var node) &&
@@ -347,6 +367,7 @@ public static class UiWidgetAppearance
 					Label = MacroDeckStrings.Widgets.Appearance.BorderColor(),
 					Binding = Bind.To(color),
 					SupportsReset = true,
+					AllowVariables = AllowsVariables(fields),
 					DefaultValue = string.Empty,
 					VisibleWhen = new UiVisibleWhen
 					{

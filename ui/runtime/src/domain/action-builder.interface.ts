@@ -158,7 +158,9 @@ export interface ActionBlockParameter {
 
   visibleWhen?: { parameterName: string; values: string[] };
 
-  acceptedVariableTypes?: ('text' | 'numeric' | 'boolean')[];
+  acceptedVariableTypes?: ('text' | 'numeric' | 'boolean' | 'color')[];
+
+  allowAlpha?: boolean;
 
   valueLabel?: string;
 

@@ -55,7 +55,8 @@ internal static class HostInvokeDispatcher
 		TestHostMessaging? messaging = null,
 		string? pluginId = null,
 		UiResourceUploads? uiResourceUploads = null,
-		UiPreviewSink? uiPreviews = null)
+		UiPreviewSink? uiPreviews = null,
+		TestHostColors? colors = null)
 	{
 		ArgumentNullException.ThrowIfNull(context);
 		ArgumentNullException.ThrowIfNull(interactions);
@@ -102,6 +103,7 @@ internal static class HostInvokeDispatcher
 				HostApis.VideoStreams => await VideoStreamsAsync(context, payload, cancellationToken)
 					.ConfigureAwait(false),
 				HostApis.Messaging when messaging is not null && pluginId is not null => messaging.Dispatch(pluginId, payload),
+				HostApis.Colors when colors is not null && pluginId is not null => colors.Dispatch(pluginId, payload),
 				HostApis.IconPacks when payload.Operation == HostOperations.IconPacks.GetIconResource
 					=> await PluginIconAsync(context, payload, cancellationToken).ConfigureAwait(false),
 				HostApis.IconPacks when payload.Operation == HostOperations.IconPacks.GetIcon

@@ -1,3 +1,4 @@
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 using System.Reflection;
 using MacroDeckHost.Application.Adb;
 using MacroDeckHost.Application.Configuration;
@@ -268,7 +269,7 @@ public class NativeUsbSettingsTests
 		=> serials.Select(serial => new RememberedUsbDevice(serial, null)).ToList();
 
 	private static AppPreferenceService Preferences(IAppPreferenceRepository store)
-		=> new(store, new TestBuildEnvironment(), new FakeHostListenerState());
+		=> new(store, new TestBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
 
 	private static (NativeUsbManager Manager, FakeUsb Usb, List<FakeLinkSession> Sessions, MemoryPreferences Store,
 		UnreachableUsbmux Usbmux) Fixture(PublicEndpointSet endpoints,

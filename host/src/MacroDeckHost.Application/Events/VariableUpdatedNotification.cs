@@ -3,4 +3,4 @@ using Mediator;
 
 namespace MacroDeckHost.Application.Events;
 
-public sealed record VariableUpdatedNotification(VariableEntity Variable) : INotification;
+public sealed record VariableUpdatedNotification(VariableEntity Variable, string? PreviousName = null) : INotification;

@@ -1,3 +1,4 @@
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 using System.Net;
 using System.Net.NetworkInformation;
 using MacroDeckHost.Application.Configuration;
@@ -121,7 +122,7 @@ internal sealed class ServiceAdvertisementBackgroundServiceTests
 		var listenerState = new HostListenerState(endpoints ?? PublicEndpointSet.HttpOnly(8193), false);
 		var services = new ServiceCollection();
 		services.AddScoped<IAppPreferenceService>(_ =>
-			new AppPreferenceService(preferences, new FakeBuildEnvironment(), listenerState));
+			new AppPreferenceService(preferences, new FakeBuildEnvironment(), listenerState, TestColors.None));
 		var provider = services.BuildServiceProvider();
 		var advertiser = new RecordingAdvertiser();
 		var interfaces = new FakeInterfaces();

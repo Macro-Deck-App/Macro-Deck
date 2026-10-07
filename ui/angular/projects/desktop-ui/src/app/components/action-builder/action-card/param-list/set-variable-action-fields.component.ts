@@ -6,6 +6,7 @@ import { InputComponent, LocalizationService, TranslatePipe } from '@shared';
 import type { VariableType } from '@macro-deck/runtime';
 import { ParamInputComponent } from '../../../forms/param-input/param-input.component';
 import { SelectComponent, SelectOption } from '../../../forms/select/select.component';
+import { ColorPickerComponent } from '../../../forms/color-picker/color-picker.component';
 import { VariablePickerComponent } from '../../../variable-picker/variable-picker.component';
 import { ActionFlowStore } from '../../services/action-flow.store';
 import { SET_VARIABLE_DEFAULT_OPERATION, isOperationAllowed, operationOptionsFor } from '../../../../domain/set-variable-operations.util';
@@ -13,7 +14,7 @@ import { SET_VARIABLE_DEFAULT_OPERATION, isOperationAllowed, operationOptionsFor
 @Component({
   selector: 'shared-set-variable-action-fields',
   standalone: true,
-  imports: [FormsModule, InputComponent, ParamInputComponent, SelectComponent, VariablePickerComponent, TranslatePipe],
+  imports: [FormsModule, ColorPickerComponent, InputComponent, ParamInputComponent, SelectComponent, VariablePickerComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="form-group form-group--dense">
@@ -41,6 +42,12 @@ import { SET_VARIABLE_DEFAULT_OPERATION, isOperationAllowed, operationOptionsFor
                 <shared-select
                   [placeholder]="'macrodeck.app:ActionBuilder.SetVariable.ChooseTrueOrFalse' | translate"
                   [options]="booleanOptions"
+                  [ngModel]="stringValue"
+                  (ngModelChange)="write($event)" />
+              }
+              @case ('color') {
+                <shared-color-picker
+                  [allowAlpha]="true"
                   [ngModel]="stringValue"
                   (ngModelChange)="write($event)" />
               }
@@ -117,7 +124,7 @@ export class SetVariableActionFieldsComponent implements OnChanges {
   }
 
   protected get showsVariablePicker(): boolean {
-    return this.variableType === 'numeric' || this.variableType === 'boolean';
+    return this.variableType === 'numeric' || this.variableType === 'boolean' || this.variableType === 'color';
   }
 
   protected get acceptedVariableTypes(): VariableType[] | undefined {

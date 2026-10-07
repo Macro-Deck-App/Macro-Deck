@@ -49,13 +49,17 @@ freeze it against the reader's theme.
 
 ```csharp
 Color = "#34c759"        // accepted
+Color = "#34c759b3"      // accepted: 70 % opaque
 Color = "#3c5"           // rejected: treated as absent
 Color = "green"          // rejected: treated as absent
 ```
 
 Send a literal only where the colour is data - a value's colour, or one a person picked - which must not
-change when the reader switches theme. A reader accepts exactly `#` plus six hex digits and rejects any
-other spelling rather than passing it to its styling layer, so the property behaves as if omitted.
+change when the reader switches theme. A reader accepts exactly `#` plus six hex digits, or eight with the
+alpha last (`#rrggbbaa`, wherever the table below says `#rrggbb`), and rejects any other spelling rather than
+passing it to its styling layer, so the property behaves as if omitted. A reader from before eight digits,
+such as an older Companion app, treats them as absent, so send one only where the theme's colour is an
+acceptable fallback.
 
 | Property | Takes | Omitted means |
 |---|---|---|

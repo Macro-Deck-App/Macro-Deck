@@ -1,4 +1,5 @@
 using MacroDeck.Sdk;
+using MacroDeck.Sdk.Colors;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Events;
@@ -21,8 +22,10 @@ public class IntegrationContext : IIntegrationContext
 		IWidgetApi widgets,
 		IEventPublisher events,
 		IUserNotifier notifications,
-		IMessageChannel messages)
+		IMessageChannel messages,
+		IColorApi colors)
 	{
+		Colors = colors;
 		Variables = variables;
 		UserVariables = userVariables;
 		Config = config;
@@ -51,4 +54,6 @@ public class IntegrationContext : IIntegrationContext
 	public IUserNotifier Notifications { get; }
 
 	public IMessageChannel Messages { get; }
+
+	public IColorApi Colors { get; }
 }

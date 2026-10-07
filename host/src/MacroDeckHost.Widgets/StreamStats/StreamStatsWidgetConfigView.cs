@@ -132,7 +132,8 @@ internal static class StreamStatsWidgetConfigView
 					},
 					UiWidgetAppearance.Section(data,
 						UiWidgetAppearanceFields.Border | UiWidgetAppearanceFields.BackgroundColor |
-						UiWidgetAppearanceFields.TransparentBackground),
+						UiWidgetAppearanceFields.TransparentBackground |
+						UiWidgetAppearanceFields.ColorVariables),
 				],
 			},
 		};

@@ -24,6 +24,7 @@ export function mapActionParameterDef(
     max: p.max,
     step: p.step,
     showSlider: p.showSlider,
+    allowAlpha: p.allowAlpha,
     options: p.options?.map(o => ({
       label: resolveLocalizedText(o.label, localization) || o.value,
       value: o.value,

@@ -2,6 +2,7 @@ using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Variables.Colors;
 using MacroDeckHost.Application.Variables.Files;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
@@ -643,6 +644,11 @@ public class VariableService : IVariableService
 				"decimalPlaces must be between 0 and 28");
 		}
 
+		if (IsInvalidColor(type, initialValue))
+		{
+			return InvalidColor(initialValue);
+		}
+
 		var entity = NewEntity(canonicalName,
 			scope,
 			scopeRefId,
@@ -695,6 +701,7 @@ public class VariableService : IVariableService
 		VariableBounds? bounds)
 	{
 		var prevValue = entity.Value;
+		var prevName = entity.Name;
 		var valueChanged = false;
 		var metadataChanged = false;
 
@@ -733,6 +740,11 @@ public class VariableService : IVariableService
 
 			entity.DecimalPlaces = decimalPlaces.Value;
 			metadataChanged = true;
+		}
+
+		if (IsInvalidColor(entity.Type, value))
+		{
+			return InvalidColor(value);
 		}
 
 		if (value is not null)
@@ -776,7 +788,8 @@ public class VariableService : IVariableService
 		var becameAvailable = !wasAvailable && _registry.IsAvailable(entity.Id);
 		if (valueChanged || metadataChanged || becameAvailable)
 		{
-			await _mediator.Publish(new VariableUpdatedNotification(entity));
+			await _mediator.Publish(new VariableUpdatedNotification(entity,
+				string.Equals(prevName, entity.Name, StringComparison.Ordinal) ? null : prevName));
 		}
 
 		if (valueChanged || becameAvailable)
@@ -786,6 +799,12 @@ public class VariableService : IVariableService
 
 		return Result.Ok<VariableEntity, VariableError>(entity);
 	}
+
+	private static bool IsInvalidColor(VariableType type, object? value)
+		=> type == VariableType.Color && value is not null && !RgbaColor.TryParse(value.ToString(), out _);
+
+	private static Result<VariableEntity, VariableError> InvalidColor(object? value)
+		=> Result.Fail<VariableEntity, VariableError>(VariableError.InvalidValue, $"'{value}' is not a color.");
 
 	private void PersistUserVariables()
 		=> _userStore.Save(_registry.GetAll().Where(v => v.Classification == VariableClassification.User));

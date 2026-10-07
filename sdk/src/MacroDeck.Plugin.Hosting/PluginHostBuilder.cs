@@ -25,6 +25,7 @@ using MacroDeck.Sdk.FolderViews;
 using MacroDeck.Sdk.ScreenSavers;
 using MacroDeck.Sdk.VideoStreams;
 using MacroDeck.Sdk.Layouts;
+using MacroDeck.Sdk.Colors;
 using MacroDeck.Sdk.Messaging;
 using MacroDeck.Sdk.Widgets;
 using Microsoft.AspNetCore.Builder;
@@ -493,6 +494,8 @@ public sealed class PluginHostBuilder
 		Services.TryAddSingleton<IAndroidDeviceManager, RemoteAndroidDeviceManager>();
 		Services.TryAddSingleton<RemoteMessageChannel>();
 		Services.TryAddSingleton<IMessageChannel>(provider => provider.GetRequiredService<RemoteMessageChannel>());
+		Services.TryAddSingleton<RemoteColorApi>();
+		Services.TryAddSingleton<IColorApi>(provider => provider.GetRequiredService<RemoteColorApi>());
 
 		// The producer half of state.update (#413's remote weather-location bug fix): a plugin author
 		// injects this directly, not through IIntegrationContext - unlike Events/Notifications, it is

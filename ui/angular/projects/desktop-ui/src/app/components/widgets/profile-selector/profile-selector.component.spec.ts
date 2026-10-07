@@ -117,6 +117,30 @@ describe('ProfileSelectorComponent editing', () => {
     }));
   });
 
+  it('keeps a color variable background when the profile is only renamed', async () => {
+    const component = createComponent();
+    const reference = '{{ vars.primary | color | color_darken: 20 }}';
+    component.startEdit(profile({ defaultBackground: '#003df5', defaultBackgroundSource: reference }));
+
+    await component.confirmEdit();
+
+    const sent = profileServiceStub.updateProfile.calls.mostRecent().args[1];
+    expect(sent.defaultBackgroundColorSource).toBe(reference);
+    expect(sent.defaultBackgroundColor).toBeUndefined();
+  });
+
+  it('sends a static background as both the color and an explicit source', async () => {
+    const component = createComponent();
+    component.startEdit(profile({ defaultBackground: '#112233' }));
+
+    await component.confirmEdit();
+
+    expect(profileServiceStub.updateProfile).toHaveBeenCalledWith('p1', jasmine.objectContaining({
+      defaultBackgroundColor: '#112233',
+      defaultBackgroundColorSource: '#112233',
+    }));
+  });
+
   it('keeps widget shadows on for a profile that never chose, and saves the choice either way', async () => {
     const component = createComponent();
     component.startEdit(profile());

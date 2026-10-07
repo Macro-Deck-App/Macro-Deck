@@ -226,6 +226,7 @@ internal sealed class DelegateClient : IDelegateClient
 		"text" => VariableType.Text,
 		"numeric" => VariableType.Numeric,
 		"boolean" => VariableType.Boolean,
+		"color" => VariableType.Color,
 		_ => null
 	};
 

@@ -874,7 +874,9 @@ internal sealed class FakeDeckNavigator : IDeckNavigator
 
 internal sealed class FakeScriptApi : IScriptApi
 {
-	public IReadOnlyList<Script> GetScripts() => [];
+	public IReadOnlyList<Script> Scripts { get; set; } = [];
+
+	public IReadOnlyList<Script> GetScripts() => Scripts;
 
 	public Task<ActionResult> RunAsync(string scriptId,
 		IReadOnlyDictionary<string, object?>? inputs = null,
