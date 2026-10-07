@@ -9496,6 +9496,39 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.System.Variables.GpuNameIndexed" xml:space="preserve">
     <value>Name GPU {index}</value>
   </data>
+  <data name="Integrations.System.Variables.DiskNameIndexed" xml:space="preserve">
+    <value>Name Laufwerk {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskMountPointIndexed" xml:space="preserve">
+    <value>Einhängepunkt Laufwerk {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskFileSystemIndexed" xml:space="preserve">
+    <value>Dateisystem Laufwerk {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskTotalIndexed" xml:space="preserve">
+    <value>Gesamtspeicher Laufwerk {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskUsedIndexed" xml:space="preserve">
+    <value>Belegter Speicher Laufwerk {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskFreeIndexed" xml:space="preserve">
+    <value>Freier Speicher Laufwerk {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskUsageIndexed" xml:space="preserve">
+    <value>Belegung Laufwerk {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskReadSpeedIndexed" xml:space="preserve">
+    <value>Lesegeschwindigkeit Laufwerk {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskWriteSpeedIndexed" xml:space="preserve">
+    <value>Schreibgeschwindigkeit Laufwerk {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskReadActivityIndexed" xml:space="preserve">
+    <value>Leseaktivität Laufwerk {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskWriteActivityIndexed" xml:space="preserve">
+    <value>Schreibaktivität Laufwerk {index}</value>
+  </data>
   <data name="Integrations.System.Variables.PcName" xml:space="preserve">
     <value>PC-Name</value>
   </data>

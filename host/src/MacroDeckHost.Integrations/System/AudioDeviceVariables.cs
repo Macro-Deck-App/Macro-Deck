@@ -13,9 +13,9 @@ internal static partial class AudioDeviceVariables
 	public const string OutputFlow = "output";
 	public const string InputFlow = "input";
 
-	// Each device costs two of the provider's 256 eager variables, so once the list is full the oldest
-	// absent devices make room; a present device is never forgotten.
-	public const int MaxKnownDevices = 100;
+	// Each device costs two of the provider's 256 eager variables, left after the fixed, GPU and disk
+	// variables; once the list is full the oldest absent devices make room, a present one never goes.
+	public const int MaxKnownDevices = 64;
 
 	// system_audio_output_ + slug + _volume_percent must fit the 64-character name limit; a slug that
 	// needs a collision suffix is cut shorter so _<key> still fits.

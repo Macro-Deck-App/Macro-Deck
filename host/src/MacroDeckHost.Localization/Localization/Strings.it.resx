@@ -9498,6 +9498,39 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.System.Variables.GpuNameIndexed" xml:space="preserve">
     <value>Nome GPU {index}</value>
   </data>
+  <data name="Integrations.System.Variables.DiskNameIndexed" xml:space="preserve">
+    <value>Nome disco {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskMountPointIndexed" xml:space="preserve">
+    <value>Punto di montaggio disco {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskFileSystemIndexed" xml:space="preserve">
+    <value>File system disco {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskTotalIndexed" xml:space="preserve">
+    <value>Spazio totale disco {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskUsedIndexed" xml:space="preserve">
+    <value>Spazio utilizzato disco {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskFreeIndexed" xml:space="preserve">
+    <value>Spazio libero disco {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskUsageIndexed" xml:space="preserve">
+    <value>Utilizzo disco {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskReadSpeedIndexed" xml:space="preserve">
+    <value>Velocità di lettura disco {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskWriteSpeedIndexed" xml:space="preserve">
+    <value>Velocità di scrittura disco {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskReadActivityIndexed" xml:space="preserve">
+    <value>Attività di lettura disco {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskWriteActivityIndexed" xml:space="preserve">
+    <value>Attività di scrittura disco {index}</value>
+  </data>
   <data name="Integrations.System.Variables.PcName" xml:space="preserve">
     <value>Nome del PC</value>
   </data>

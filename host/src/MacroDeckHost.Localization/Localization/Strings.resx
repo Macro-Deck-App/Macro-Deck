@@ -9499,6 +9499,39 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.System.Variables.GpuNameIndexed" xml:space="preserve">
     <value>GPU {index} Name</value>
   </data>
+  <data name="Integrations.System.Variables.DiskNameIndexed" xml:space="preserve">
+    <value>Disk {index} Name</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskMountPointIndexed" xml:space="preserve">
+    <value>Disk {index} Mount Point</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskFileSystemIndexed" xml:space="preserve">
+    <value>Disk {index} File System</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskTotalIndexed" xml:space="preserve">
+    <value>Disk {index} Total Space</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskUsedIndexed" xml:space="preserve">
+    <value>Disk {index} Used Space</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskFreeIndexed" xml:space="preserve">
+    <value>Disk {index} Free Space</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskUsageIndexed" xml:space="preserve">
+    <value>Disk {index} Usage</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskReadSpeedIndexed" xml:space="preserve">
+    <value>Disk {index} Read Speed</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskWriteSpeedIndexed" xml:space="preserve">
+    <value>Disk {index} Write Speed</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskReadActivityIndexed" xml:space="preserve">
+    <value>Disk {index} Read Activity</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskWriteActivityIndexed" xml:space="preserve">
+    <value>Disk {index} Write Activity</value>
+  </data>
   <data name="Integrations.System.Variables.PcName" xml:space="preserve">
     <value>PC Name</value>
   </data>

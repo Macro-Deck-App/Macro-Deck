@@ -22,4 +22,9 @@ public static class VariableSemanticKinds
 	/// <summary>A count of bytes, rendered on the 1024 ladder. Declare it only for a value that really
 	/// is in bytes - a reading already scaled to GB is <see cref="None"/> with a <c>GB</c> unit.</summary>
 	public const string Bytes = "bytes";
+
+	/// <summary>A rate in bytes per second, rendered on the 1024 ladder as <c>B/s</c>, <c>KB/s</c> and so on.
+	/// Declare a <c>B/s</c> unit as well: a host built before this kind existed renders the plain number with
+	/// it.</summary>
+	public const string BytesPerSecond = "bytesPerSecond";
 }

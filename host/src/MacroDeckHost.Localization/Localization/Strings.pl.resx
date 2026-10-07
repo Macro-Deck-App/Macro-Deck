@@ -9498,6 +9498,39 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.System.Variables.GpuNameIndexed" xml:space="preserve">
     <value>Nazwa karty graficznej {index}</value>
   </data>
+  <data name="Integrations.System.Variables.DiskNameIndexed" xml:space="preserve">
+    <value>Nazwa dysku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskMountPointIndexed" xml:space="preserve">
+    <value>Punkt montowania dysku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskFileSystemIndexed" xml:space="preserve">
+    <value>System plików dysku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskTotalIndexed" xml:space="preserve">
+    <value>Całkowita pojemność dysku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskUsedIndexed" xml:space="preserve">
+    <value>Zajęte miejsce na dysku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskFreeIndexed" xml:space="preserve">
+    <value>Wolne miejsce na dysku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskUsageIndexed" xml:space="preserve">
+    <value>Zajętość dysku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskReadSpeedIndexed" xml:space="preserve">
+    <value>Szybkość odczytu dysku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskWriteSpeedIndexed" xml:space="preserve">
+    <value>Szybkość zapisu dysku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskReadActivityIndexed" xml:space="preserve">
+    <value>Aktywność odczytu dysku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskWriteActivityIndexed" xml:space="preserve">
+    <value>Aktywność zapisu dysku {index}</value>
+  </data>
   <data name="Integrations.System.Variables.PcName" xml:space="preserve">
     <value>Nazwa komputera</value>
   </data>

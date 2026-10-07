@@ -383,8 +383,26 @@ Show one in a label with `{{ vars.deaths }}`, like the **Deaths: 3** button abov
 
 Every speaker and microphone gets its own volume and mute variable, named after the device, for
 example `system_audio_input_usb_mic_volume_percent`. An unplugged device keeps its variables; they
-read as unavailable until it is back. The volume actions can control the default output, the default
+read as unavailable until it is back. Macro Deck remembers up to 64 devices; after that, the oldest
+unplugged device makes room. The volume actions can control the default output, the default
 input or one specific device.
+
+Every disk gets numbered variables too: `system_disk_0_*` is the system disk (the drive Windows runs
+from, or `/` on macOS and Linux), and the others follow, up to eight. Each disk has:
+
+| Variable | Shows |
+| --- | --- |
+| `system_disk_0_name`, `_mount_point`, `_file_system` | The disk's name, where it is mounted (for example `C:\` or `/Volumes/Backup`) and its file system. |
+| `system_disk_0_total_bytes`, `_used_bytes`, `_free_bytes`, `_usage_percent` | Its size, the space in use, the space still free for you, and how full it is. The numbers match Finder and Explorer: space the system keeps in reserve counts as used. |
+| `system_disk_0_read_bytes_per_second`, `_write_bytes_per_second` | How fast it is reading and writing right now. |
+| `system_disk_0_read_usage_percent`, `_write_usage_percent` | How busy it is with reading and with writing. A fast SSD handling many requests at once reaches 100 % quickly. |
+
+A disk you plug in while Macro Deck runs gets the lowest free number within a few seconds. A disk you
+remove keeps its variables; they read as unavailable until a disk takes its number again. After a
+restart the numbering starts over, so a removable disk can end up with a different number. Network
+drives and hidden system volumes are left out. On macOS, read and write figures come
+from the physical disk, so all volumes on one disk show the same activity. Linux shows no activity
+for ZFS pools.
 
 Some integrations, such as Home Assistant, offer far more values than they list up front. These wait
 in a collapsed **Unbound variables** group at the top of the integration's variables, on the Variables
