@@ -16,6 +16,10 @@ public sealed class WidgetStateEvalBackgroundService : HostReadyBackgroundServic
 	private static readonly TimeSpan _minPollInterval = TimeSpan.FromSeconds(1);
 	private static readonly TimeSpan _maxPollInterval = TimeSpan.FromMinutes(2);
 
+	// A PeriodicTimer tick can land a few milliseconds early; without slack a 2 s interval would
+	// slip to the next tick and poll every 3 s.
+	private static readonly TimeSpan _tickJitterTolerance = TimeSpan.FromMilliseconds(100);
+
 	// Nothing else would ever enqueue a provider-backed button - providers are not variable-driven -
 	// so an idle one (nothing subscribed) is still polled, just far less often, to keep vars.state and
 	// a later subscriber's first push reasonably fresh without hammering the provider for nothing.
@@ -29,8 +33,9 @@ public sealed class WidgetStateEvalBackgroundService : HostReadyBackgroundServic
 	private readonly StartupReadiness _readiness;
 	private readonly ILogger _logger;
 	private readonly WidgetOptimisticStateStore? _optimisticStates;
+	private readonly TimeProvider _timeProvider;
 
-	private readonly Dictionary<Guid, DateTimeOffset> _nextPollAt = new();
+	private readonly Dictionary<Guid, DateTimeOffset> _lastPolledAt = new();
 
 	public WidgetStateEvalBackgroundService(
 		IHostApplicationLifetime lifetime,
@@ -41,7 +46,8 @@ public sealed class WidgetStateEvalBackgroundService : HostReadyBackgroundServic
 		IWidgetVariableIndex variableIndex,
 		StartupReadiness readiness,
 		ILogger logger,
-		WidgetOptimisticStateStore? optimisticStates = null)
+		WidgetOptimisticStateStore? optimisticStates = null,
+		TimeProvider? timeProvider = null)
 		: base(lifetime)
 	{
 		_queue = queue;
@@ -52,6 +58,7 @@ public sealed class WidgetStateEvalBackgroundService : HostReadyBackgroundServic
 		_readiness = readiness;
 		_logger = logger;
 		_optimisticStates = optimisticStates;
+		_timeProvider = timeProvider ?? TimeProvider.System;
 	}
 
 	protected override async Task ExecuteWhenReady(CancellationToken stoppingToken)
@@ -111,7 +118,7 @@ public sealed class WidgetStateEvalBackgroundService : HostReadyBackgroundServic
 		}
 	}
 
-	private void EnqueueDueProviders()
+	internal void EnqueueDueProviders()
 	{
 		foreach (var widgetId in _optimisticStates?.Expire() ?? [])
 		{
@@ -120,7 +127,7 @@ public sealed class WidgetStateEvalBackgroundService : HostReadyBackgroundServic
 
 		using var scope = _scopeFactory.CreateScope();
 		var stateService = scope.ServiceProvider.GetRequiredService<IWidgetStateService>();
-		var now = DateTimeOffset.UtcNow;
+		var now = _timeProvider.GetUtcNow();
 		var seen = new HashSet<Guid>();
 
 		foreach (var widget in _folderCache.GetAllFolders().SelectMany(folder => folder.Widgets))
@@ -139,7 +146,7 @@ public sealed class WidgetStateEvalBackgroundService : HostReadyBackgroundServic
 			// WidgetVariableReferenceParser uses, for the same reason.
 			if (widget.Data is null || !widget.Data.Contains("stateProvider", StringComparison.Ordinal))
 			{
-				_nextPollAt.Remove(widget.Id);
+				_lastPolledAt.Remove(widget.Id);
 				continue;
 			}
 
@@ -147,12 +154,7 @@ public sealed class WidgetStateEvalBackgroundService : HostReadyBackgroundServic
 			// interval, never the provider itself.
 			if (stateService.GetProviderPollInterval(widget.Id) is not { } declared)
 			{
-				_nextPollAt.Remove(widget.Id);
-				continue;
-			}
-
-			if (_nextPollAt.TryGetValue(widget.Id, out var dueAt) && dueAt > now)
-			{
+				_lastPolledAt.Remove(widget.Id);
 				continue;
 			}
 
@@ -163,15 +165,21 @@ public sealed class WidgetStateEvalBackgroundService : HostReadyBackgroundServic
 				interval = _idlePollInterval;
 			}
 
-			_nextPollAt[widget.Id] = now + interval;
+			if (_lastPolledAt.TryGetValue(widget.Id, out var lastPolledAt) &&
+				now < lastPolledAt + interval - _tickJitterTolerance)
+			{
+				continue;
+			}
+
+			_lastPolledAt[widget.Id] = now;
 			_queue.Enqueue(widget.Id);
 		}
 
-		if (_nextPollAt.Count > 0)
+		if (_lastPolledAt.Count > 0)
 		{
-			foreach (var staleId in _nextPollAt.Keys.Where(id => !seen.Contains(id)).ToList())
+			foreach (var staleId in _lastPolledAt.Keys.Where(id => !seen.Contains(id)).ToList())
 			{
-				_nextPollAt.Remove(staleId);
+				_lastPolledAt.Remove(staleId);
 			}
 		}
 	}
