@@ -6614,6 +6614,327 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.Issues.UnknownIssue" xml:space="preserve">
     <value>Problema sconosciuto.</value>
   </data>
+  <data name="Integrations.Jellyfin.Actions.ChooseItem" xml:space="preserve">
+    <value>Scegli cosa riprodurre.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Actions.DisplayMessageDescription" xml:space="preserve">
+    <value>Mostra un messaggio sul client Jellyfin.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Actions.DisplayMessageName" xml:space="preserve">
+    <value>Mostra messaggio</value>
+  </data>
+  <data name="Integrations.Jellyfin.Actions.Failed" xml:space="preserve">
+    <value>Jellyfin non è riuscito a eseguire questa azione.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Actions.MuteDescription" xml:space="preserve">
+    <value>Disattiva l'audio del client Jellyfin.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Actions.MuteName" xml:space="preserve">
+    <value>Disattiva audio</value>
+  </data>
+  <data name="Integrations.Jellyfin.Actions.NoServer" xml:space="preserve">
+    <value>Nessun server Jellyfin configurato.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Actions.PlayMediaDescription" xml:space="preserve">
+    <value>Avvia un film, un episodio, un brano o un album sul client Jellyfin.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Actions.PlayMediaName" xml:space="preserve">
+    <value>Riproduci contenuto</value>
+  </data>
+  <data name="Integrations.Jellyfin.Actions.SeekBackwardDescription" xml:space="preserve">
+    <value>Torna indietro nel contenuto attuale.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Actions.SeekBackwardName" xml:space="preserve">
+    <value>Riavvolgi</value>
+  </data>
+  <data name="Integrations.Jellyfin.Actions.SeekForwardDescription" xml:space="preserve">
+    <value>Va avanti nel contenuto attuale.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Actions.SeekForwardName" xml:space="preserve">
+    <value>Avanti veloce</value>
+  </data>
+  <data name="Integrations.Jellyfin.Actions.StopDescription" xml:space="preserve">
+    <value>Interrompe la riproduzione sul client Jellyfin.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Actions.StopName" xml:space="preserve">
+    <value>Interrompi</value>
+  </data>
+  <data name="Integrations.Jellyfin.Actions.ToggleMuteDescription" xml:space="preserve">
+    <value>Disattiva o riattiva l'audio del client Jellyfin.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Actions.ToggleMuteName" xml:space="preserve">
+    <value>Attiva/disattiva audio</value>
+  </data>
+  <data name="Integrations.Jellyfin.Actions.UnmuteDescription" xml:space="preserve">
+    <value>Riattiva l'audio del client Jellyfin.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Actions.UnmuteName" xml:space="preserve">
+    <value>Riattiva audio</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.ApiKeyDescription" xml:space="preserve">
+    <value>Creane una nella dashboard di Jellyfin in Chiavi API.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.ApiKeyLabel" xml:space="preserve">
+    <value>Chiave API</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.ApiKeyRejected" xml:space="preserve">
+    <value>Jellyfin non ha accettato questa chiave API.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.AuthApiKey" xml:space="preserve">
+    <value>Chiave API</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.AuthLogin" xml:space="preserve">
+    <value>Nome utente e password</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.AuthMethodLabel" xml:space="preserve">
+    <value>Accedi con</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.ConnectDescription" xml:space="preserve">
+    <value>Inserisci l'indirizzo del tuo server Jellyfin e il modo in cui Macro Deck accede.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.ConnectTitle" xml:space="preserve">
+    <value>Connetti a Jellyfin</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.ConnectionFailed" xml:space="preserve">
+    <value>Impossibile raggiungere Jellyfin su {url}.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.ConnectionTimedOut" xml:space="preserve">
+    <value>Jellyfin su {url} non ha risposto in tempo.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.DocumentationLink" xml:space="preserve">
+    <value>Documentazione di Jellyfin</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.EnterApiKey" xml:space="preserve">
+    <value>Inserisci una chiave API.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.EnterPassword" xml:space="preserve">
+    <value>Inserisci la password.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.EnterUsername" xml:space="preserve">
+    <value>Inserisci un nome utente.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.EnterValidUrl" xml:space="preserve">
+    <value>Inserisci un indirizzo come http://192.168.1.10:8096.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.InstructionApiKey" xml:space="preserve">
+    <value>Con una chiave API di un amministratore, Macro Deck vede e controlla tutte le sessioni sul server.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.InstructionLogin" xml:space="preserve">
+    <value>Con nome utente e password, Macro Deck vede solo le sessioni che quell'account può controllare. La password viene usata una volta e non viene salvata.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.LoginRejected" xml:space="preserve">
+    <value>Jellyfin non ha accettato questo nome utente e questa password.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.PasswordDescription" xml:space="preserve">
+    <value>Lascia vuoto per mantenere l'accesso attuale.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.PasswordLabel" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.UnknownStep" xml:space="preserve">
+    <value>Questo passaggio di configurazione non è noto.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.UrlDescription" xml:space="preserve">
+    <value>Includi la porta ed eventuale percorso di base, ad esempio http://192.168.1.10:8096.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.UrlLabel" xml:space="preserve">
+    <value>Indirizzo del server</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.UsernameLabel" xml:space="preserve">
+    <value>Nome utente</value>
+  </data>
+  <data name="Integrations.Jellyfin.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>Impossibile trovare nomi di variabile liberi per questo server. Scegli un nome diverso.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Errors.CommandFailed" xml:space="preserve">
+    <value>{device} non ha accettato il comando.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Errors.NoSession" xml:space="preserve">
+    <value>Questo dispositivo non ha una sessione Jellyfin aperta.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Errors.NotSupportedByClient" xml:space="preserve">
+    <value>{device} non supporta questo comando.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Errors.NothingPlaying" xml:space="preserve">
+    <value>Nessuna riproduzione in corso.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Errors.ServerUnreachable" xml:space="preserve">
+    <value>Il server Jellyfin {server} non è raggiungibile.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Events.Category" xml:space="preserve">
+    <value>Jellyfin</value>
+  </data>
+  <data name="Integrations.Jellyfin.Events.ItemChangedDescription" xml:space="preserve">
+    <value>Una sessione è passata a un altro film, episodio o brano.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Events.ItemChangedName" xml:space="preserve">
+    <value>Contenuto in riproduzione cambiato</value>
+  </data>
+  <data name="Integrations.Jellyfin.Events.PlaybackPausedDescription" xml:space="preserve">
+    <value>La riproduzione è stata messa in pausa in una sessione.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Events.PlaybackPausedName" xml:space="preserve">
+    <value>Riproduzione in pausa</value>
+  </data>
+  <data name="Integrations.Jellyfin.Events.PlaybackResumedDescription" xml:space="preserve">
+    <value>Una riproduzione in pausa è ripresa in una sessione.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Events.PlaybackResumedName" xml:space="preserve">
+    <value>Riproduzione ripresa</value>
+  </data>
+  <data name="Integrations.Jellyfin.Events.PlaybackStartedDescription" xml:space="preserve">
+    <value>Una sessione ha avviato una riproduzione.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Events.PlaybackStartedName" xml:space="preserve">
+    <value>Riproduzione avviata</value>
+  </data>
+  <data name="Integrations.Jellyfin.Events.PlaybackStoppedDescription" xml:space="preserve">
+    <value>Una sessione ha interrotto la riproduzione.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Events.PlaybackStoppedName" xml:space="preserve">
+    <value>Riproduzione interrotta</value>
+  </data>
+  <data name="Integrations.Jellyfin.Events.SessionConnectedDescription" xml:space="preserve">
+    <value>Un client Jellyfin ha aperto una sessione sul server.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Events.SessionConnectedName" xml:space="preserve">
+    <value>Sessione connessa</value>
+  </data>
+  <data name="Integrations.Jellyfin.Events.SessionDisconnectedDescription" xml:space="preserve">
+    <value>Il server ha chiuso la sessione di un client.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Events.SessionDisconnectedName" xml:space="preserve">
+    <value>Sessione disconnessa</value>
+  </data>
+  <data name="Integrations.Jellyfin.Issues.AuthenticationFailedDescription" xml:space="preserve">
+    <value>Jellyfin non accetta più l'accesso per: {servers}. Configura di nuovo il server.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Issues.AuthenticationFailedTitle" xml:space="preserve">
+    <value>Accesso a Jellyfin rifiutato</value>
+  </data>
+  <data name="Integrations.Jellyfin.Issues.OpenSetupAction" xml:space="preserve">
+    <value>Configura di nuovo</value>
+  </data>
+  <data name="Integrations.Jellyfin.Issues.UnreachableDescription" xml:space="preserve">
+    <value>Macro Deck non riesce a raggiungere: {servers}. Continua a riprovare in background.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Issues.UnreachableTitle" xml:space="preserve">
+    <value>Server Jellyfin non raggiungibile</value>
+  </data>
+  <data name="Integrations.Jellyfin.Params.ActiveSession" xml:space="preserve">
+    <value>Sessione attiva</value>
+  </data>
+  <data name="Integrations.Jellyfin.Params.Album" xml:space="preserve">
+    <value>Album o stagione</value>
+  </data>
+  <data name="Integrations.Jellyfin.Params.Client" xml:space="preserve">
+    <value>Client</value>
+  </data>
+  <data name="Integrations.Jellyfin.Params.Device" xml:space="preserve">
+    <value>Dispositivo</value>
+  </data>
+  <data name="Integrations.Jellyfin.Params.Item" xml:space="preserve">
+    <value>Contenuto</value>
+  </data>
+  <data name="Integrations.Jellyfin.Params.ItemId" xml:space="preserve">
+    <value>ID elemento</value>
+  </data>
+  <data name="Integrations.Jellyfin.Params.ItemName" xml:space="preserve">
+    <value>Titolo</value>
+  </data>
+  <data name="Integrations.Jellyfin.Params.ItemType" xml:space="preserve">
+    <value>Tipo di media</value>
+  </data>
+  <data name="Integrations.Jellyfin.Params.MessageHeader" xml:space="preserve">
+    <value>Intestazione</value>
+  </data>
+  <data name="Integrations.Jellyfin.Params.MessageText" xml:space="preserve">
+    <value>Messaggio</value>
+  </data>
+  <data name="Integrations.Jellyfin.Params.MessageTimeout" xml:space="preserve">
+    <value>Mostra per (secondi)</value>
+  </data>
+  <data name="Integrations.Jellyfin.Params.Player" xml:space="preserve">
+    <value>Sessione</value>
+  </data>
+  <data name="Integrations.Jellyfin.Params.PlayerDescription" xml:space="preserve">
+    <value>Un server segue la sua riproduzione più recente; un dispositivo resta sempre su quel dispositivo.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Params.Seconds" xml:space="preserve">
+    <value>Secondi</value>
+  </data>
+  <data name="Integrations.Jellyfin.Params.Series" xml:space="preserve">
+    <value>Serie</value>
+  </data>
+  <data name="Integrations.Jellyfin.Params.Server" xml:space="preserve">
+    <value>Server</value>
+  </data>
+  <data name="Integrations.Jellyfin.Params.Session" xml:space="preserve">
+    <value>ID sessione</value>
+  </data>
+  <data name="Integrations.Jellyfin.Params.User" xml:space="preserve">
+    <value>Utente</value>
+  </data>
+  <data name="Integrations.Jellyfin.Variables.ActiveSessions" xml:space="preserve">
+    <value>Sessioni attive</value>
+  </data>
+  <data name="Integrations.Jellyfin.Variables.Album" xml:space="preserve">
+    <value>Album o stagione</value>
+  </data>
+  <data name="Integrations.Jellyfin.Variables.Client" xml:space="preserve">
+    <value>Client</value>
+  </data>
+  <data name="Integrations.Jellyfin.Variables.Device" xml:space="preserve">
+    <value>Dispositivo</value>
+  </data>
+  <data name="Integrations.Jellyfin.Variables.Duration" xml:space="preserve">
+    <value>Durata</value>
+  </data>
+  <data name="Integrations.Jellyfin.Variables.IsActive" xml:space="preserve">
+    <value>Riproduzione attiva</value>
+  </data>
+  <data name="Integrations.Jellyfin.Variables.IsMuted" xml:space="preserve">
+    <value>Silenziato</value>
+  </data>
+  <data name="Integrations.Jellyfin.Variables.IsPaused" xml:space="preserve">
+    <value>In pausa</value>
+  </data>
+  <data name="Integrations.Jellyfin.Variables.IsPlaying" xml:space="preserve">
+    <value>In riproduzione</value>
+  </data>
+  <data name="Integrations.Jellyfin.Variables.IsTranscoding" xml:space="preserve">
+    <value>Transcodifica in corso</value>
+  </data>
+  <data name="Integrations.Jellyfin.Variables.MediaType" xml:space="preserve">
+    <value>Tipo di media</value>
+  </data>
+  <data name="Integrations.Jellyfin.Variables.Position" xml:space="preserve">
+    <value>Posizione</value>
+  </data>
+  <data name="Integrations.Jellyfin.Variables.ProgressPercent" xml:space="preserve">
+    <value>Avanzamento</value>
+  </data>
+  <data name="Integrations.Jellyfin.Variables.Series" xml:space="preserve">
+    <value>Serie</value>
+  </data>
+  <data name="Integrations.Jellyfin.Variables.Title" xml:space="preserve">
+    <value>Titolo</value>
+  </data>
+  <data name="Integrations.Jellyfin.Variables.TotalActiveSessions" xml:space="preserve">
+    <value>Sessioni Jellyfin attive</value>
+  </data>
+  <data name="Integrations.Jellyfin.Variables.User" xml:space="preserve">
+    <value>Utente</value>
+  </data>
+  <data name="Integrations.Jellyfin.Variables.Volume" xml:space="preserve">
+    <value>Volume</value>
+  </data>
+  <data name="Integrations.Jellyfin.Widget.Description" xml:space="preserve">
+    <value>Mostra cosa è in riproduzione sui tuoi server Jellyfin.</value>
+  </data>
+  <data name="Integrations.Jellyfin.Widget.Name" xml:space="preserve">
+    <value>Sessioni Jellyfin</value>
+  </data>
   <data name="Integrations.Keyboard.Actions.KeyDownDescription" xml:space="preserve">
     <value>Preme e tiene premuto un tasto finché non viene rilasciato con "Rilascia tasto".</value>
   </data>
@@ -18875,6 +19196,35 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Widgets.Item.PinnedTitleSubtree" xml:space="preserve">
     <value>Fissato: mostrato in questa cartella e nelle sue sottocartelle e bloccato in posizione. Fai clic destro o clic centrale per rimuovere il fissaggio.</value>
+  </data>
+  <data name="Widgets.JellyfinSessions.ActiveSessions.One" xml:space="preserve">
+    <value>{count} sessione attiva</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.JellyfinSessions.ActiveSessions.Other" xml:space="preserve">
+    <value>{count} sessioni attive</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.JellyfinSessions.AllServers" xml:space="preserve">
+    <value>Tutti i server</value>
+  </data>
+  <data name="Widgets.JellyfinSessions.Name" xml:space="preserve">
+    <value>Sessioni Jellyfin</value>
+  </data>
+  <data name="Widgets.JellyfinSessions.NoServer" xml:space="preserve">
+    <value>Aggiungi un server Jellyfin in Integrazioni.</value>
+  </data>
+  <data name="Widgets.JellyfinSessions.NotConnected" xml:space="preserve">
+    <value>Jellyfin non è raggiungibile.</value>
+  </data>
+  <data name="Widgets.JellyfinSessions.NothingPlaying" xml:space="preserve">
+    <value>Nessuna riproduzione in corso.</value>
+  </data>
+  <data name="Widgets.JellyfinSessions.Server" xml:space="preserve">
+    <value>Server</value>
+  </data>
+  <data name="Widgets.JellyfinSessions.ServerDescription" xml:space="preserve">
+    <value>Mostra le sessioni di un server o di tutti.</value>
   </data>
   <data name="Widgets.Music.Album" xml:space="preserve">
     <value>Album</value>

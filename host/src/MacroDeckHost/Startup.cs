@@ -77,6 +77,7 @@ using MacroDeckHost.Application.StreamStats;
 using MacroDeckHost.Infrastructure.StreamStats;
 using MacroDeckHost.Infrastructure.Twitch;
 using MacroDeckHost.Widgets.Calendar;
+using MacroDeckHost.Widgets.Jellyfin;
 using MacroDeckHost.Widgets.StreamChat;
 using MacroDeckHost.Widgets.StreamStats;
 using MacroDeckHost.Application.Icons;
@@ -357,6 +358,7 @@ public class Startup
 			services.AddSingleton<IBuiltInIntegrationUiProvider>(provider => StreamChatProvider(provider, platform));
 		}
 		services.AddSingleton<IBuiltInIntegrationUiProvider, CalendarUiProvider>();
+		services.AddSingleton<IBuiltInIntegrationUiProvider, JellyfinSessionsUiProvider>();
 
 		services.AddSingleton<BuiltInScreenSaverProvider>();
 		services.AddSingleton<IBuiltInIntegrationUiProvider>(provider => provider.GetRequiredService<BuiltInScreenSaverProvider>());
@@ -831,6 +833,7 @@ public class Startup
 		services.AddSingleton<IOAuthCallbackCoordinator, OAuthCallbackCoordinator>();
 		services.AddSingleton<IConfigFlowManager, ConfigFlowManager>();
 		services.AddSingleton<IIntegrationConfigMutationAdapter, ObsConfigurationMutationAdapter>();
+		services.AddSingleton<IIntegrationConfigMutationAdapter, JellyfinConfigurationMutationAdapter>();
 		services.AddSingleton<IIntegrationConfigMutationAdapter, CompanionConfigurationMutationAdapter>();
 		services.AddSingleton<Func<IIntegrationConfigMutationCoordinator>>(sp =>
 			sp.GetRequiredService<IIntegrationConfigMutationCoordinator>);
