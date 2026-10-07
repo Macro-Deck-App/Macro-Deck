@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.AdGuardHome;
 using MacroDeckHost.Application.Calendar;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.StreamChat;
@@ -23,8 +24,14 @@ internal static class IntegrationGatewayBinder
 		IKnownAudioDeviceStore? knownAudioDevices = null,
 		IVariablePollingInvalidationSignal? pollingInvalidation = null,
 		IStreamPlatformServices? streamPlatforms = null,
-		CalendarHostServices? calendarServices = null)
+		CalendarHostServices? calendarServices = null,
+		IAdGuardHomeSink? adGuardHomeSink = null)
 	{
+		if (adGuardHomeSink is not null && integration is IAdGuardHomeSinkConsumer adGuardHomeConsumer)
+		{
+			adGuardHomeConsumer.UseAdGuardHomeSink(adGuardHomeSink);
+		}
+
 		if (calendarServices is not null && integration is ICalendarHostServicesConsumer calendarConsumer)
 		{
 			calendarConsumer.UseCalendarServices(calendarServices);

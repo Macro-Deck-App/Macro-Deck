@@ -20871,4 +20871,336 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Obs.Errors.SettingExpectsJson" xml:space="preserve">
     <value>Le paramètre {setting} attend du JSON de la même forme que sa valeur actuelle.</value>
   </data>
+  <data name="Integrations.AdGuardHome.Actions.EnableProtection.Name" xml:space="preserve">
+    <value>Activer la protection</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.EnableProtection.Description" xml:space="preserve">
+    <value>Active la protection d'AdGuard Home et met fin à toute pause en cours.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.DisableProtection.Name" xml:space="preserve">
+    <value>Désactiver la protection</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.DisableProtection.Description" xml:space="preserve">
+    <value>Désactive la protection d'AdGuard Home jusqu'à ce qu'elle soit réactivée.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.ToggleProtection.Name" xml:space="preserve">
+    <value>Basculer la protection</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.ToggleProtection.Description" xml:space="preserve">
+    <value>Active la protection d'AdGuard Home lorsqu'elle est désactivée, et la désactive lorsqu'elle est activée.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.PauseProtection.Name" xml:space="preserve">
+    <value>Désactiver temporairement la protection</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.PauseProtection.Description" xml:space="preserve">
+    <value>Désactive la protection d'AdGuard Home pendant un moment. Elle se réactive d'elle-même une fois le délai écoulé.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.EnableFiltering.Name" xml:space="preserve">
+    <value>Activer le filtrage</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.EnableFiltering.Description" xml:space="preserve">
+    <value>Active le blocage par les listes de filtres.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.DisableFiltering.Name" xml:space="preserve">
+    <value>Désactiver le filtrage</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.DisableFiltering.Description" xml:space="preserve">
+    <value>Désactive le blocage par les listes de filtres. Le reste de la protection reste inchangé.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.ToggleFiltering.Name" xml:space="preserve">
+    <value>Basculer le filtrage</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.ToggleFiltering.Description" xml:space="preserve">
+    <value>Active le blocage par les listes de filtres lorsqu'il est désactivé, et le désactive lorsqu'il est activé.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.RefreshFilters.Name" xml:space="preserve">
+    <value>Mettre à jour les listes de filtres</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.RefreshFilters.Description" xml:space="preserve">
+    <value>Télécharge la dernière version de chaque liste de blocage et liste d'autorisation.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.ConnectionTitle" xml:space="preserve">
+    <value>Se connecter à AdGuard Home</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.ConnectionDescription" xml:space="preserve">
+    <value>Saisis l'adresse de l'interface web d'AdGuard Home et le compte avec lequel tu t'y connectes.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.WebsiteLinkLabel" xml:space="preserve">
+    <value>À propos d'AdGuard Home</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.NamePlaceholder" xml:space="preserve">
+    <value>Maison</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.AddressLabel" xml:space="preserve">
+    <value>Adresse</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.AddressDescription" xml:space="preserve">
+    <value>L'adresse avec laquelle tu ouvres l'interface web d'AdGuard Home, port compris.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.UsernameLabel" xml:space="preserve">
+    <value>Nom d'utilisateur</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.UsernameDescription" xml:space="preserve">
+    <value>Laisse vide si ton AdGuard Home ne demande pas de connexion.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.PasswordLabel" xml:space="preserve">
+    <value>Mot de passe</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.AcceptUntrustedCertificateLabel" xml:space="preserve">
+    <value>Accepter un certificat autosigné</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.AcceptUntrustedCertificateDescription" xml:space="preserve">
+    <value>Uniquement pour une adresse HTTPS dont le certificat n'est pas approuvé par ton ordinateur. Macro Deck ne vérifie alors plus avec qui il communique.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.EnterName" xml:space="preserve">
+    <value>Saisis un nom pour cette instance.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.EnterAddress" xml:space="preserve">
+    <value>Saisis une adresse valide, par exemple {exampleUrl}.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.EnterUsername" xml:space="preserve">
+    <value>Saisis le nom d'utilisateur associé à ce mot de passe.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.AuthenticationFailed" xml:space="preserve">
+    <value>AdGuard Home a rejeté le nom d'utilisateur ou le mot de passe.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.UnknownStep" xml:space="preserve">
+    <value>Cette étape de configuration n'est plus valide. Recommence la configuration.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Errors.Unreachable" xml:space="preserve">
+    <value>AdGuard Home est injoignable. Vérifie l'adresse et que le serveur est en cours d'exécution.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Errors.Unauthorized" xml:space="preserve">
+    <value>AdGuard Home a rejeté le nom d'utilisateur ou le mot de passe. Mets-les à jour dans les réglages de l'intégration.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Errors.Timeout" xml:space="preserve">
+    <value>AdGuard Home n'a pas répondu à temps.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Errors.Incompatible" xml:space="preserve">
+    <value>Le serveur n'a pas répondu comme AdGuard Home. Vérifie l'adresse ou mets à jour AdGuard Home.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Errors.Redirected" xml:space="preserve">
+    <value>AdGuard Home a redirigé la requête. Utilise l'adresse exacte, par exemple avec https:// si l'interface web l'utilise.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Errors.InstanceNotFound" xml:space="preserve">
+    <value>Cette instance d'AdGuard Home n'existe plus. Choisis-en une autre.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Errors.SelectInstance" xml:space="preserve">
+    <value>Choisis une instance d'AdGuard Home.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Errors.InvalidDuration" xml:space="preserve">
+    <value>Choisis une durée comprise entre 1 seconde et 7 jours.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Errors.CommandFailed" xml:space="preserve">
+    <value>AdGuard Home n'a pas pu exécuter la commande.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Params.Instance" xml:space="preserve">
+    <value>Instance</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Params.Duration" xml:space="preserve">
+    <value>Durée</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Params.CustomDuration" xml:space="preserve">
+    <value>Durée personnalisée</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Durations.Custom" xml:space="preserve">
+    <value>Personnalisée</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Durations.Indefinitely" xml:space="preserve">
+    <value>Indéfiniment</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Durations.Minutes.One" xml:space="preserve">
+    <value>{count} minute</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.AdGuardHome.Durations.Minutes.Other" xml:space="preserve">
+    <value>{count} minutes</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.AdGuardHome.Durations.Hours.One" xml:space="preserve">
+    <value>{count} heure</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.AdGuardHome.Durations.Hours.Other" xml:space="preserve">
+    <value>{count} heures</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.IsReachable" xml:space="preserve">
+    <value>Joignable</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.ProtectionEnabled" xml:space="preserve">
+    <value>Protection activée</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.ProtectionDisabledUntil" xml:space="preserve">
+    <value>Protection désactivée jusqu'à</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.DnsQueries" xml:space="preserve">
+    <value>Requêtes DNS</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.BlockedQueries" xml:space="preserve">
+    <value>Bloquées par les filtres</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.BlockedPercentage" xml:space="preserve">
+    <value>Pourcentage bloqué</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.AverageProcessingTime" xml:space="preserve">
+    <value>Temps de traitement moyen</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.SafeBrowsingBlocked" xml:space="preserve">
+    <value>Logiciels malveillants et hameçonnage bloqués</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.ParentalBlocked" xml:space="preserve">
+    <value>Sites pour adultes bloqués</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.SafeSearchEnforced" xml:space="preserve">
+    <value>Recherche sécurisée imposée</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.Version" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Widget.Name" xml:space="preserve">
+    <value>AdGuard Home</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Widget.Description" xml:space="preserve">
+    <value>Affiche l'état de la protection et les statistiques d'une instance d'AdGuard Home, avec des boutons pour mettre la protection en pause.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Name" xml:space="preserve">
+    <value>AdGuard Home</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.Instance" xml:space="preserve">
+    <value>Instance</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.InstanceDescription" xml:space="preserve">
+    <value>L'instance d'AdGuard Home que ce widget affiche et contrôle.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.FirstInstance" xml:space="preserve">
+    <value>Première instance</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.DisplayName" xml:space="preserve">
+    <value>Nom d'affichage</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.DisplayNamePlaceholder" xml:space="preserve">
+    <value>Nom de l'instance</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.View" xml:space="preserve">
+    <value>Affichage</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.ViewDescription" xml:space="preserve">
+    <value>Ce que le widget affiche. Un widget plus grand affiche plus de boutons et de statistiques.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.ViewControl" xml:space="preserve">
+    <value>Contrôles de la protection</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.ViewStatistics" xml:space="preserve">
+    <value>Statistiques</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.ViewOverview" xml:space="preserve">
+    <value>Contrôles et statistiques</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.Durations" xml:space="preserve">
+    <value>Boutons de pause</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.DurationsDescription" xml:space="preserve">
+    <value>Les durées proposées tant que la protection est activée. Un petit widget affiche les deux premières.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.Statistics" xml:space="preserve">
+    <value>Statistiques</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.StatisticsDescription" xml:space="preserve">
+    <value>Les valeurs à afficher, dans cet ordre. Un petit widget affiche les premières.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.ShowVersion" xml:space="preserve">
+    <value>Afficher la version d'AdGuard Home</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.ShowStatus" xml:space="preserve">
+    <value>Afficher l'indicateur d'état</value>
+  </data>
+  <data name="Widgets.AdGuardHome.NotConfigured" xml:space="preserve">
+    <value>Ajoute une instance d'AdGuard Home dans les réglages de l'intégration.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.InstanceNotFound" xml:space="preserve">
+    <value>Cette instance d'AdGuard Home n'existe plus. Choisis-en une autre dans les réglages du widget.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Connecting" xml:space="preserve">
+    <value>Connexion…</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Offline" xml:space="preserve">
+    <value>AdGuard Home est injoignable.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Unauthorized" xml:space="preserve">
+    <value>Connexion refusée. Vérifie le nom d'utilisateur et le mot de passe.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Timeout" xml:space="preserve">
+    <value>AdGuard Home n'a pas répondu à temps.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Incompatible" xml:space="preserve">
+    <value>Ce serveur ne répond pas comme AdGuard Home.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Redirected" xml:space="preserve">
+    <value>AdGuard Home a redirigé la requête. Vérifie l'adresse.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.CommandFailed" xml:space="preserve">
+    <value>La commande n'a pas pu être exécutée.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.DnsStopped" xml:space="preserve">
+    <value>Serveur DNS arrêté</value>
+  </data>
+  <data name="Widgets.AdGuardHome.ProtectionEnabled" xml:space="preserve">
+    <value>Protection activée</value>
+  </data>
+  <data name="Widgets.AdGuardHome.ProtectionDisabled" xml:space="preserve">
+    <value>Protection désactivée</value>
+  </data>
+  <data name="Widgets.AdGuardHome.ResumesInMinutes.One" xml:space="preserve">
+    <value>En pause, reprend dans {count} minute</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.AdGuardHome.ResumesInMinutes.Other" xml:space="preserve">
+    <value>En pause, reprend dans {count} minutes</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.AdGuardHome.ResumesInHours.One" xml:space="preserve">
+    <value>En pause, reprend dans {count} heure</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.AdGuardHome.ResumesInHours.Other" xml:space="preserve">
+    <value>En pause, reprend dans {count} heures</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.AdGuardHome.EnableProtection" xml:space="preserve">
+    <value>Activer la protection</value>
+  </data>
+  <data name="Widgets.AdGuardHome.DisableIndefinitely" xml:space="preserve">
+    <value>Désactiver</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Statistics.DnsQueries" xml:space="preserve">
+    <value>Requêtes DNS</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Statistics.Blocked" xml:space="preserve">
+    <value>Bloquées</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Statistics.BlockedPercentage" xml:space="preserve">
+    <value>Part bloquée</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Statistics.AverageProcessingTime" xml:space="preserve">
+    <value>Réponse moy.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Statistics.SafeBrowsing" xml:space="preserve">
+    <value>Logiciels malveillants bloqués</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Statistics.Parental" xml:space="preserve">
+    <value>Contenu adulte bloqué</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Statistics.SafeSearch" xml:space="preserve">
+    <value>Recherche sécurisée</value>
+  </data>
+  <data name="Widgets.AdGuardHome.ShortMinutes" xml:space="preserve">
+    <value>{count} min</value>
+  </data>
+  <data name="Widgets.AdGuardHome.ShortHours" xml:space="preserve">
+    <value>{count} h</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Off" xml:space="preserve">
+    <value>Désact.</value>
+  </data>
 </root>

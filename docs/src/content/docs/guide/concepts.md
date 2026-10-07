@@ -520,7 +520,7 @@ you expect.
 ## Integrations and the Store
 
 Integrations connect Macro Deck to other apps: OBS, Home Assistant, Voicemeeter, Spotify, Twitch,
-[YouTube](/guide/youtube/), Discord, Google Calendar and more. Turn on the ones you use under **Integrations**.
+[YouTube](/guide/youtube/), Discord, Google Calendar, [AdGuard Home](/guide/adguard-home/) and more. Turn on the ones you use under **Integrations**.
 
 ![The Integrations page listing ADB, Discord, Google Calendar, Home Assistant, HTTP, Keyboard and Macro Deck Companion, with HTTP and Keyboard turned on](../../../assets/guide/integrations.png)
 
