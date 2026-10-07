@@ -29,6 +29,7 @@ public sealed class CalendarIntegration : IIntegration, ISystemIntegration, IWid
 		[
 			new JoinMeetingActionDefinition(() => _services),
 			new ShowDetailsActionDefinition(() => _services),
+			new RefreshCalendarsActionDefinition(() => _services),
 		];
 	}
 

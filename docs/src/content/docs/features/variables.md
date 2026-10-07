@@ -77,9 +77,12 @@ anything else with `with { ... }`.
 | `duration` | `s` | `187` | `03:07` |
 | `percentage` | `%` | `12.5` | `12.5 %` |
 | `bytes` | `B` | `1536` | `1.5 KB` |
+| `bytesPerSecond` | `B/s` | `3670016` | `3.5 MB/s` |
 | `none` | `fps` | `60` | `60 fps` |
 
-An unknown kind renders as a plain number with its unit, so naming a newer one is never an error. Use
+An unknown kind renders as a plain number with its unit, so naming a newer one is never an error. A host
+built before `bytesPerSecond` existed shows such a value as `3670016 B/s`, which is why the unit is still
+declared. Use
 `bytes` only for a value that really is in bytes - a value already in GB is `none` with a `GB` unit.
 
 A provider may declare at most `VariableLimits.MaxEagerVariablesPerProvider` (256) eager variables; the

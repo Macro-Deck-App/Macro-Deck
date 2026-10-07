@@ -4509,6 +4509,15 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Calendar.Actions.JoinMeeting.WindowLabel" xml:space="preserve">
     <value>Rozpoczyna się w ciągu</value>
   </data>
+  <data name="Integrations.Calendar.Actions.RefreshCalendars.Description" xml:space="preserve">
+    <value>Od razu odczytuje wydarzenia wszystkich połączonych kalendarzy zamiast czekać na następną aktualizację, którą Macro Deck wykonuje co pięć minut.</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.RefreshCalendars.Name" xml:space="preserve">
+    <value>Odśwież kalendarze</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.RefreshCalendars.Unavailable" xml:space="preserve">
+    <value>Nie można teraz odświeżyć kalendarzy.</value>
+  </data>
   <data name="Integrations.Calendar.Actions.ShowDetails.Description" xml:space="preserve">
     <value>Otwiera szczegóły widżetu kalendarza na ekranie, na którym go naciśnięto: wydarzenie wyświetlane w układzie Następne wydarzenie lub nadchodzące wydarzenia układu Agenda.</value>
   </data>
@@ -5967,6 +5976,93 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.GoogleCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
     <value>Logowanie Google dla {account} wygasło</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.AuthorizationNotCompleted" xml:space="preserve">
+    <value>Logowanie Microsoft zostało anulowane lub nie zostało ukończone. Naciśnięcie Kontynuuj otworzy je ponownie.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsDescription" xml:space="preserve">
+    <value>W Macro Deck pojawiają się tylko kalendarze wybrane tutaj. Aby później dodać lub usunąć kalendarze, edytuj tę konfigurację.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsLabel" xml:space="preserve">
+    <value>Kalendarze</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsTitle" xml:space="preserve">
+    <value>Wybór kalendarzy</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsUnavailable" xml:space="preserve">
+    <value>Zalogowano, ale nie udało się odczytać kalendarzy z Microsoft. Spróbuj ponownie za chwilę.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ClientIdLabel" xml:space="preserve">
+    <value>Identyfikator aplikacji (klienta)</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ClientIdPlaceholder" xml:space="preserve">
+    <value>Aplikacja Macro Deck</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ConnectDescription" xml:space="preserve">
+    <value>Macro Deck odczytuje kalendarze Outlook i Microsoft 365. Naciśnięcie Kontynuuj otwiera w przeglądarce logowanie kontem Microsoft, gdzie można zezwolić Macro Deck na odczyt kalendarzy. Działają konta osobiste, służbowe i szkolne.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ConnectTitle" xml:space="preserve">
+    <value>Połącz Kalendarz Outlook</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ConsentRequired" xml:space="preserve">
+    <value>Aplikacja nie ma jeszcze zgody na odczyt kalendarzy. Dodaj do aplikacji uprawnienie Calendars.Read i spróbuj ponownie; w organizacji może je musieć przyznać administrator.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.EnterClientId" xml:space="preserve">
+    <value>Wpisz prawidłowy identyfikator aplikacji (klienta) lub pozostaw pole puste, aby użyć aplikacji Macro Deck.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.InvalidTenant" xml:space="preserve">
+    <value>Wpisz common, organizations, consumers, identyfikator dzierżawy lub domenę, np. contoso.com.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.MissingCalendarPermission" xml:space="preserve">
+    <value>Microsoft nie przyznał dostępu do kalendarzy. Spróbuj ponownie i zezwól aplikacji na odczyt kalendarzy.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.MissingRefreshToken" xml:space="preserve">
+    <value>Microsoft nie przyznał trwałego dostępu, więc Macro Deck nie mógł pozostać zalogowany. Spróbuj ponownie i zezwól aplikacji na pozostanie zalogowaną.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.PublicClientRequired" xml:space="preserve">
+    <value>Microsoft oczekuje wpisu tajnego klienta, więc identyfikator URI przekierowania dodano do niewłaściwej platformy. Dodaj go w Aplikacje mobilne i klasyczne zamiast Sieć Web i spróbuj ponownie.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.SelectCalendar" xml:space="preserve">
+    <value>Wybierz co najmniej jeden kalendarz.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.SharedCalendarName" xml:space="preserve">
+    <value>{calendar} (udostępnia: {owner})</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.TenantDescription" xml:space="preserve">
+    <value>Pozostaw puste dla kont osobistych, służbowych i szkolnych. Tylko dla własnej aplikacji akceptującej konta jednej organizacji wpisz identyfikator dzierżawy lub domenę tej organizacji.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.TenantLabel" xml:space="preserve">
+    <value>Dzierżawa</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.TokenExchangeFailed" xml:space="preserve">
+    <value>Microsoft nie zaakceptował logowania. Spróbuj ponownie; jeśli w sekcji Zaawansowane wpisano własną aplikację, sprawdź jej identyfikator aplikacji (klienta) i identyfikator URI przekierowania.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.DuplicateAccountDescription" xml:space="preserve">
+    <value>"{title}" to starsze połączenie tego samego konta Microsoft i nie jest używane. Usuń je z listy konfiguracji poniżej.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.DuplicateAccountTitle" xml:space="preserve">
+    <value>Konto Microsoft połączone dwukrotnie</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.ReconnectResolution" xml:space="preserve">
+    <value>Połącz konto Microsoft ponownie.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.SignInExpiredDescription" xml:space="preserve">
+    <value>Microsoft nie akceptuje już logowania tego konta. Dostęp mógł zostać usunięty w koncie Microsoft lub cofnięty przez organizację, albo rejestracja aplikacji została zmieniona lub usunięta. Połącz konto ponownie.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
+    <value>Logowanie Microsoft dla {account} wygasło</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.CalendarsUnreadableDescription" xml:space="preserve">
+    <value>Microsoft nie zwraca już jednego lub więcej kalendarzy wybranych dla tego konta, na przykład dlatego, że kalendarz został usunięty lub nie jest już udostępniony. Ich wydarzenia są pomijane. Edytuj połączenie, aby ponownie wybrać kalendarze konta.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.CalendarsUnreadableTitle" xml:space="preserve">
+    <value>Nie można odczytać niektórych kalendarzy konta {account}</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.AdminConsentInstruction" xml:space="preserve">
+    <value>Niektóre organizacje pozwalają zatwierdzać aplikacje tylko administratorom. Wtedy logowanie wymaga zgody administratora przed kontynuowaniem.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ClientIdDescription" xml:space="preserve">
+    <value>Pozostaw puste, aby logować się przez aplikację Macro Deck. Aby użyć własnej aplikacji, zarejestruj ją w portalu Azure w Rejestracjach aplikacji, w katalogu Microsoft Entra; osobiste konto Microsoft potrzebuje do tego najpierw katalogu, np. z bezpłatnego konta Azure. Dodaj platformę Aplikacje mobilne i klasyczne z identyfikatorem URI przekierowania {redirectUri} oraz delegowane uprawnienie Calendars.Read, a następnie wpisz tutaj identyfikator aplikacji (klienta).</value>
   </data>
   <data name="Integrations.HomeAssistant.Actions.Automation.CommandDisable" xml:space="preserve">
     <value>Wyłącz</value>
@@ -9589,6 +9685,39 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.System.Variables.GpuNameIndexed" xml:space="preserve">
     <value>Nazwa karty graficznej {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskNameIndexed" xml:space="preserve">
+    <value>Nazwa dysku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskMountPointIndexed" xml:space="preserve">
+    <value>Punkt montowania dysku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskFileSystemIndexed" xml:space="preserve">
+    <value>System plików dysku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskTotalIndexed" xml:space="preserve">
+    <value>Całkowita pojemność dysku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskUsedIndexed" xml:space="preserve">
+    <value>Zajęte miejsce na dysku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskFreeIndexed" xml:space="preserve">
+    <value>Wolne miejsce na dysku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskUsageIndexed" xml:space="preserve">
+    <value>Zajętość dysku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskReadSpeedIndexed" xml:space="preserve">
+    <value>Szybkość odczytu dysku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskWriteSpeedIndexed" xml:space="preserve">
+    <value>Szybkość zapisu dysku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskReadActivityIndexed" xml:space="preserve">
+    <value>Aktywność odczytu dysku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskWriteActivityIndexed" xml:space="preserve">
+    <value>Aktywność zapisu dysku {index}</value>
   </data>
   <data name="Integrations.System.Variables.PcName" xml:space="preserve">
     <value>Nazwa komputera</value>

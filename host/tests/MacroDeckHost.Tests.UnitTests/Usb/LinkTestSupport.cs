@@ -163,7 +163,7 @@ internal sealed class LoopbackTestDialer : ILinkStreamDialer, IDisposable
 		{
 			var client = new TcpClient { NoDelay = true };
 			await client.ConnectAsync(IPAddress.Loopback, ((IPEndPoint)_listener.LocalEndpoint).Port, cancellationToken);
-			var server = await _listener.AcceptTcpClientAsync(cancellationToken);
+			var server = await AcceptPeerOfAsync(client, cancellationToken);
 			lock (_clients)
 			{
 				_clients.Add(client);
@@ -176,6 +176,22 @@ internal sealed class LoopbackTestDialer : ILinkStreamDialer, IDisposable
 		finally
 		{
 			_oneDialAtATime.Release();
+		}
+	}
+
+	// The ephemeral port may be one another test's client still reconnects to; bridging that stranger
+	// leaves the link stream reading from a socket nobody writes to.
+	private async Task<TcpClient> AcceptPeerOfAsync(TcpClient client, CancellationToken cancellationToken)
+	{
+		while (true)
+		{
+			var accepted = await _listener.AcceptTcpClientAsync(cancellationToken);
+			if (((IPEndPoint)accepted.Client.RemoteEndPoint!).Port == ((IPEndPoint)client.Client.LocalEndPoint!).Port)
+			{
+				return accepted;
+			}
+
+			accepted.Dispose();
 		}
 	}
 
