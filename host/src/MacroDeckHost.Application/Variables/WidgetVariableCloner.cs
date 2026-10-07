@@ -25,7 +25,8 @@ public sealed class WidgetVariableCloner : IWidgetVariableCloner
 				variable.Type,
 				variable.Value,
 				variable.DecimalPlaces,
-				variable.FileSource))
+				variable.FileSource,
+				variable.TemplateSource))
 			.ToList();
 	}
 
@@ -53,7 +54,8 @@ public sealed class WidgetVariableCloner : IWidgetVariableCloner
 					variable.Type,
 					variable.Value,
 					variable.DecimalPlaces,
-					variable.FileSource);
+					variable.FileSource,
+					variable.TemplateSource);
 				if (!result.Success)
 				{
 					_logger.Warning(

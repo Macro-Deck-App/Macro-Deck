@@ -1,14 +1,20 @@
-import type { VariableScope } from '../../domain/variable.interface';
+import type { VariableScope, VariableTemplateError, VariableType } from '../../domain/variable.interface';
 import { ResultResponse } from './common';
 
 export interface RenderTemplateRequest {
   template: string;
   scope?: VariableScope;
   scopeRefId?: string;
+  resultType?: VariableType;
+  decimalPlaces?: number;
+  variableId?: string;
+  variableName?: string;
 }
 
 export interface RenderTemplateResponse extends ResultResponse {
   rendered: string;
+  value?: string | null;
+  templateError?: VariableTemplateError | null;
 }
 
 export interface ConditionSidePayload {

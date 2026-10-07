@@ -382,6 +382,45 @@ describe('TemplateEditorComponent', () => {
     expect(editorComponentOf(fixture).value).toBe('second');
     expect(preview.renderTemplate.calls.mostRecent().args[0]).toBe('second');
   });
+
+  describe('previewing a template variable of a type', () => {
+    let typed: jasmine.Spy;
+
+    beforeEach(() => {
+      typed = jasmine.createSpy('previewTemplateVariable');
+      preview.previewTemplateVariable = typed;
+    });
+
+    async function renderTyped(template: string): Promise<void> {
+      fixture.componentRef.setInput('resultType', 'numeric');
+      fixture.componentRef.setInput('resultOptions', { decimalPlaces: 1, variableName: 'cpu_text' });
+      fixture.componentRef.setInput('value', template);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+    }
+
+    it('asks for the value of the chosen type and shows it under the preview', async () => {
+      typed.and.resolveTo({ rendered: '42', value: '42.0', error: null });
+
+      await renderTyped('{{ vars.cpu }}');
+
+      expect(typed.calls.mostRecent().args[3]).toEqual(
+        { resultType: 'numeric', decimalPlaces: 1, variableName: 'cpu_text' });
+      expect(fixture.nativeElement.querySelector('.tb-typed-value-text').textContent).toBe('42.0');
+      expect(fixture.nativeElement.querySelector('.tb-typed-error')).toBeNull();
+    });
+
+    it('explains a result that does not fit the type instead of showing a value', async () => {
+      typed.and.resolveTo({ rendered: 'abc', value: null, error: { code: 'NotNumeric', detail: 'abc' } });
+
+      await renderTyped('abc');
+
+      expect(fixture.nativeElement.querySelector('.tb-typed-error').textContent).toContain('abc');
+      expect(fixture.nativeElement.querySelector('.tb-typed-value-text')).toBeNull();
+      expect(previewNode(fixture).textContent).toBe('abc');
+    });
+  });
 });
 
 describe('TemplateEditorComponent without a preview service', () => {

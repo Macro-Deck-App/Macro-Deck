@@ -2996,6 +2996,15 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Errors.Variables.FileReadOnly" xml:space="preserve">
     <value>此变量从文件读取其值，不会写回文件</value>
   </data>
+  <data name="Errors.Variables.TemplateReadOnly" xml:space="preserve">
+    <value>此变量的值由模板计算得出</value>
+  </data>
+  <data name="Errors.Variables.InvalidTemplate" xml:space="preserve">
+    <value>模板有错误：{details}</value>
+  </data>
+  <data name="Errors.Variables.CircularTemplate" xml:space="preserve">
+    <value>该模板会通过其他模板变量读回此变量</value>
+  </data>
   <data name="Errors.Variables.InvalidFilePath" xml:space="preserve">
     <value>请输入文件的完整路径</value>
   </data>
@@ -17117,6 +17126,36 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Variables.Manager.FileUnavailable" xml:space="preserve">
     <value>没有值：文件缺失、无法读取，或与变量的类型不符</value>
+  </data>
+  <data name="Variables.Manager.SourceTemplate" xml:space="preserve">
+    <value>来自模板</value>
+  </data>
+  <data name="Variables.Manager.SourceHintTemplate" xml:space="preserve">
+    <value>该值由模板生成，并会跟随其读取的变量的每次更改。</value>
+  </data>
+  <data name="Variables.Manager.TemplateField" xml:space="preserve">
+    <value>模板</value>
+  </data>
+  <data name="Variables.Manager.TemplateSettings" xml:space="preserve">
+    <value>模板设置</value>
+  </data>
+  <data name="Variables.Manager.TemplateResult" xml:space="preserve">
+    <value>变量值</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.RenderFailed" xml:space="preserve">
+    <value>无法渲染模板：{details}</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.NotNumeric" xml:space="preserve">
+    <value>模板生成的“{value}”不是数字</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.NotBoolean" xml:space="preserve">
+    <value>模板生成的“{value}”既不是 true 也不是 false</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.CircularReference" xml:space="preserve">
+    <value>该模板会通过其他模板变量读取自身</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.Unknown" xml:space="preserve">
+    <value>模板当前无法生成值</value>
   </data>
   <data name="Variables.Manager.CreateFailed" xml:space="preserve">
     <value>无法创建变量。请重试。</value>

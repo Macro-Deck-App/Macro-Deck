@@ -2997,6 +2997,15 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.Variables.FileReadOnly" xml:space="preserve">
     <value>Ta zmienna odczytuje wartość z pliku i nie zapisuje jej z powrotem</value>
   </data>
+  <data name="Errors.Variables.TemplateReadOnly" xml:space="preserve">
+    <value>Ta zmienna oblicza wartość na podstawie szablonu</value>
+  </data>
+  <data name="Errors.Variables.InvalidTemplate" xml:space="preserve">
+    <value>Szablon zawiera błąd: {details}</value>
+  </data>
+  <data name="Errors.Variables.CircularTemplate" xml:space="preserve">
+    <value>Szablon odczytuje tę zmienną z powrotem przez inne zmienne szablonowe</value>
+  </data>
   <data name="Errors.Variables.InvalidFilePath" xml:space="preserve">
     <value>Wprowadź pełną ścieżkę do pliku</value>
   </data>
@@ -17116,6 +17125,36 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Variables.Manager.FileUnavailable" xml:space="preserve">
     <value>Brak wartości: pliku brak, nie da się go odczytać lub nie pasuje do typu zmiennej</value>
+  </data>
+  <data name="Variables.Manager.SourceTemplate" xml:space="preserve">
+    <value>Z szablonu</value>
+  </data>
+  <data name="Variables.Manager.SourceHintTemplate" xml:space="preserve">
+    <value>Wartość jest tworzona z szablonu i aktualizowana przy każdej zmianie odczytywanych przez niego zmiennych.</value>
+  </data>
+  <data name="Variables.Manager.TemplateField" xml:space="preserve">
+    <value>Szablon</value>
+  </data>
+  <data name="Variables.Manager.TemplateSettings" xml:space="preserve">
+    <value>Ustawienia szablonu</value>
+  </data>
+  <data name="Variables.Manager.TemplateResult" xml:space="preserve">
+    <value>Wartość zmiennej</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.RenderFailed" xml:space="preserve">
+    <value>Nie można wyrenderować szablonu: {details}</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.NotNumeric" xml:space="preserve">
+    <value>Szablon zwraca „{value}”, co nie jest liczbą</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.NotBoolean" xml:space="preserve">
+    <value>Szablon zwraca „{value}”, co nie jest wartością true ani false</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.CircularReference" xml:space="preserve">
+    <value>Szablon odczytuje sam siebie przez inne zmienne szablonowe</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.Unknown" xml:space="preserve">
+    <value>Szablon nie może teraz wygenerować wartości</value>
   </data>
   <data name="Variables.Manager.CreateFailed" xml:space="preserve">
     <value>Nie udało się utworzyć zmiennej. Spróbuj ponownie.</value>

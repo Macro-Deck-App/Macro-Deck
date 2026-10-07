@@ -2997,6 +2997,15 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Errors.Variables.FileReadOnly" xml:space="preserve">
     <value>Esta variable lee su valor de un archivo y no lo escribe de vuelta</value>
   </data>
+  <data name="Errors.Variables.TemplateReadOnly" xml:space="preserve">
+    <value>Esta variable calcula su valor a partir de una plantilla</value>
+  </data>
+  <data name="Errors.Variables.InvalidTemplate" xml:space="preserve">
+    <value>La plantilla contiene un error: {details}</value>
+  </data>
+  <data name="Errors.Variables.CircularTemplate" xml:space="preserve">
+    <value>La plantilla vuelve a leer esta variable a través de otras variables de plantilla</value>
+  </data>
   <data name="Errors.Variables.InvalidFilePath" xml:space="preserve">
     <value>Introduce la ruta completa de un archivo</value>
   </data>
@@ -17116,6 +17125,36 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Variables.Manager.FileUnavailable" xml:space="preserve">
     <value>Sin valor: el archivo falta, no se puede leer o no encaja con el tipo de la variable</value>
+  </data>
+  <data name="Variables.Manager.SourceTemplate" xml:space="preserve">
+    <value>Desde una plantilla</value>
+  </data>
+  <data name="Variables.Manager.SourceHintTemplate" xml:space="preserve">
+    <value>El valor se genera a partir de una plantilla y sigue cada cambio en las variables que lee.</value>
+  </data>
+  <data name="Variables.Manager.TemplateField" xml:space="preserve">
+    <value>Plantilla</value>
+  </data>
+  <data name="Variables.Manager.TemplateSettings" xml:space="preserve">
+    <value>Ajustes de la plantilla</value>
+  </data>
+  <data name="Variables.Manager.TemplateResult" xml:space="preserve">
+    <value>Valor de la variable</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.RenderFailed" xml:space="preserve">
+    <value>No se puede renderizar la plantilla: {details}</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.NotNumeric" xml:space="preserve">
+    <value>La plantilla produce «{value}», que no es un número</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.NotBoolean" xml:space="preserve">
+    <value>La plantilla produce «{value}», que no es true ni false</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.CircularReference" xml:space="preserve">
+    <value>La plantilla se lee a sí misma a través de otras variables de plantilla</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.Unknown" xml:space="preserve">
+    <value>La plantilla no puede producir un valor ahora mismo</value>
   </data>
   <data name="Variables.Manager.CreateFailed" xml:space="preserve">
     <value>No se pudo crear la variable. Inténtalo de nuevo.</value>

@@ -354,7 +354,8 @@ internal sealed class IntegrationLifecycleTests
 			DomainVariableType type,
 			object? initialValue,
 			int? decimalPlaces,
-			VariableFileSource? fileSource = null)
+			VariableFileSource? fileSource = null,
+			VariableTemplateSource? templateSource = null)
 			=> throw new NotSupportedException();
 
 		public Task<Result<VariableEntity, VariableError>> SetValue(Guid id,
@@ -364,7 +365,8 @@ internal sealed class IntegrationLifecycleTests
 		public Task<Result<VariableEntity, VariableError>> UpdateUserVariable(Guid id,
 			string? name,
 			int? decimalPlaces,
-			VariableFileSource? fileSource = null) => throw new NotSupportedException();
+			VariableFileSource? fileSource = null,
+			VariableTemplateSource? templateSource = null) => throw new NotSupportedException();
 
 		public Task<Result<VariableError>> DeleteUserVariable(Guid id) => throw new NotSupportedException();
 

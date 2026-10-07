@@ -87,6 +87,31 @@ public class SetVariableValueHandlerTests
 		});
 	}
 
+	[Test]
+	public async Task A_template_variable_is_refused_as_not_writable_in_words_a_person_can_read()
+	{
+		var (handler, _, _, service) = BuildParts(new VariableWriteCapability());
+		var created = await service.CreateUserVariable("computed",
+			VariableScope.Global,
+			null,
+			DomainVariableType.Text,
+			null,
+			null,
+			templateSource: new VariableTemplateSource("fixed"));
+
+		var response = await handler.Handle(
+			new SetVariableValueRequest { Id = created.Data!.Id.ToString(), Value = "other" },
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Success, Is.False);
+			Assert.That(response.Error!.Code, Is.EqualTo(nameof(VariableError.NotWritable)));
+			Assert.That(response.Error.Message.Localized?.Key,
+				Is.EqualTo(AppStrings.Errors.Variables.TemplateReadOnly().Key));
+		});
+	}
+
 	private static (SetVariableValueRequestMessageHandler Handler, FakeWritableVariableProviderIntegration Provider,
 		Guid Id) Build(VariableWriteCapability? write)
 	{

@@ -84,3 +84,21 @@
   font-weight: var(--font-semibold);
   font-family: var(--font-mono, monospace);
 }
+
+.tb-typed-value {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.tb-typed-value-text {
+  font-family: var(--font-mono);
+  color: var(--color-text-primary);
+  word-break: break-word;
+}
+
+.tb-typed-error {
+  color: var(--color-danger);
+}

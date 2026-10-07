@@ -56,12 +56,20 @@ public class VariableEntity : BaseEntity
 	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 	public VariableFileSource? FileSource { get; set; }
 
+	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+	public VariableTemplateSource? TemplateSource { get; set; }
+
+	[JsonIgnore]
+	public VariableTemplateError? TemplateError { get; set; }
+
 	// Computed, never stored: user variables are loaded straight into the registry from
 	// user-variables.json and are never re-registered, so a persisted flag would come back false after
 	// the first restart and turn every user variable read-only.
 	[JsonIgnore]
 	public bool CanWrite =>
-		(Classification == VariableClassification.User && FileSource is not { AllowWriteBack: false }) ||
+		(Classification == VariableClassification.User &&
+			FileSource is not { AllowWriteBack: false } &&
+			TemplateSource is null) ||
 		Write is not null;
 
 	[JsonIgnore]

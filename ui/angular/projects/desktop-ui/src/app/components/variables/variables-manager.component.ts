@@ -1,17 +1,20 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   EventEmitter,
   Input,
   OnInit,
   Output,
   ViewChild,
   computed,
+  effect,
   inject,
   signal,
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { NgTemplateOutlet } from '@angular/common';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { AppStrings, VariableCatalogNode, resolveLocalizedText } from '@macro-deck/runtime';
 import { ButtonComponent, ButtonGroupComponent, ErrorBannerComponent, InputComponent, LocalizationService, ModalComponent, ToggleSwitchComponent, TranslatePipe, VariableService, dismissModal } from '@shared';
@@ -22,6 +25,10 @@ import { DropdownMenuComponent } from '../overlay/dropdown-menu/dropdown-menu.co
 import { EmptyStateComponent } from '../feedback/empty-state/empty-state.component';
 import { SelectComponent, SelectOption } from '../forms/select/select.component';
 import { FilePathInputComponent } from '../forms/file-path-input/file-path-input.component';
+import { TemplateVariableFieldComponent } from './template-variable-field.component';
+import { TEMPLATE_PREVIEW_SERVICE } from '../../domain/template-preview.interface';
+import type { TemplateVariablePreviewOptions } from '../../domain/template-preview.interface';
+import { templateVariableErrorMessage } from '../../domain/template-variable-error.util';
 import { VariableCatalogService } from '../../services/variable-catalog.service';
 import { IntegrationService } from '../../services/integration.service';
 import { VariableCatalogIdInputComponent } from './variable-catalog-id-input.component';
@@ -29,7 +36,7 @@ import { VariableCatalogRow, createVariableCatalogRows } from './variable-catalo
 import { VariableGroupHeaderComponent } from './variable-group-header.component';
 import { VARIABLE_ROW_HEIGHT, VARIABLE_ROW_INDENT, VariableRowComponent } from './variable-row.component';
 
-type VariableSource = 'value' | 'file';
+type VariableSource = 'value' | 'file' | 'template';
 
 interface CreateForm {
   rawName: string;
@@ -40,6 +47,16 @@ interface CreateForm {
   decimalPlaces: number;
   filePath: string;
   allowWriteBack: boolean;
+  template: string;
+}
+
+interface TemplateSettingsForm {
+  variableId: string;
+  template: string;
+  type: VariableType;
+  decimalPlaces: number;
+  scope: VariableScope;
+  scopeRefId?: string;
 }
 
 interface FileSettingsForm {
@@ -79,6 +96,8 @@ const DELEGATE_INTEGRATION_ID = 'app.macro-deck.delegate';
     FilePathInputComponent,
     InputComponent,
     SelectComponent,
+    NgTemplateOutlet,
+    TemplateVariableFieldComponent,
     ToggleSwitchComponent,
     TranslatePipe,
     VariableCatalogIdInputComponent,
@@ -234,7 +253,16 @@ export class VariablesManagerComponent implements OnInit {
   readonly sourceOptions = computed<SelectOption[]>(() => [
     { value: 'value', label: this.localization.translateKey(AppStrings.Variables.Manager.SourceOwnValue) },
     { value: 'file', label: this.localization.translateKey(AppStrings.Variables.Manager.SourceFile) },
+    { value: 'template', label: this.localization.translateKey(AppStrings.Variables.Manager.SourceTemplate) },
   ]);
+  readonly sourceHintTemplate = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Manager.SourceHintTemplate));
+  readonly templateFieldLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Manager.TemplateField));
+  readonly templateSettingsLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Manager.TemplateSettings));
+  readonly templateResultLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Variables.Manager.TemplateResult));
   readonly sourceHintValue = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Manager.SourceHintOwnValue));
   readonly sourceHintFile = computed(() =>
@@ -294,10 +322,14 @@ export class VariablesManagerComponent implements OnInit {
   readonly createError = signal<string | null>(null);
   readonly fileSettings = signal<FileSettingsForm | null>(null);
   readonly fileSettingsError = signal<string | null>(null);
+  readonly templateSettings = signal<TemplateSettingsForm | null>(null);
+  readonly templateSettingsError = signal<string | null>(null);
 
   readonly canSubmitCreate = computed(() => {
     const form = this.createForm();
-    return this.nameSanitized().isValid && (form.source !== 'file' || form.filePath.trim().length > 0);
+    return this.nameSanitized().isValid &&
+      (form.source !== 'file' || form.filePath.trim().length > 0) &&
+      (form.source !== 'template' || form.template.trim().length > 0);
   });
   readonly nameSanitized = signal<{ sanitized: string; isValid: boolean }>({
     sanitized: '',
@@ -611,6 +643,28 @@ export class VariablesManagerComponent implements OnInit {
     this.createForm.update(f => ({ ...f, filePath }));
   }
 
+  setFormTemplate(template: string): void {
+    this.createForm.update(f => ({ ...f, template }));
+  }
+
+  readonly createScoped = computed(() =>
+    this.createForm().scope === 'widget' && this.scopeRefIdState() !== null);
+
+  readonly createScopeRefId = computed(() =>
+    this.createScoped() ? this.scopeRefIdState() ?? undefined : undefined);
+
+  readonly createTemplateVariables = computed(() => this.createScoped()
+    ? this.variableService.visibleForContext('widget', this.createScopeRefId())
+    : this.variableService.visibleForContext('global'));
+
+  readonly createTemplateOptions = computed(() => {
+    const form = this.createForm();
+    return {
+      decimalPlaces: form.type === 'numeric' ? form.decimalPlaces : undefined,
+      variableName: this.nameSanitized().sanitized || undefined,
+    };
+  });
+
   setFormAllowWriteBack(allowWriteBack: boolean): void {
     this.createForm.update(f => ({ ...f, allowWriteBack }));
   }
@@ -620,6 +674,7 @@ export class VariablesManagerComponent implements OnInit {
     const { sanitized, isValid } = this.variableService.sanitizeNameLocal(form.rawName);
     if (!isValid || !this.canSubmitCreate()) return;
     const fromFile = form.source === 'file';
+    const fromTemplate = form.source === 'template';
 
     const initialValue = form.type === 'boolean'
       ? (form.initialValue === 'true' ? 'true' : 'false')
@@ -633,15 +688,129 @@ export class VariablesManagerComponent implements OnInit {
       scope: scoped ? 'widget' : 'global',
       scopeRefId: scoped ? scopeRefId : undefined,
       type: form.type,
-      initialValue: fromFile ? undefined : initialValue,
+      initialValue: fromFile || fromTemplate ? undefined : initialValue,
       decimalPlaces: form.type === 'numeric' ? form.decimalPlaces : undefined,
       fileSource: fromFile ? { path: form.filePath.trim(), allowWriteBack: form.allowWriteBack } : undefined,
+      templateSource: fromTemplate ? { template: form.template } : undefined,
     });
 
     if (result.variable) {
       dismissModal(this.modal, () => this.showCreateModal.set(false));
     } else {
-      this.createError.set(this.saveErrorMessage(result.errorCode, AppStrings.Variables.Manager.CreateFailed));
+      this.createError.set(this.saveErrorMessage(result.errorCode, AppStrings.Variables.Manager.CreateFailed,
+        result.errorMessage));
+    }
+  }
+
+  openTemplateSettings(variable: Variable): void {
+    if (!variable.templateSource) return;
+    this.templateSettingsError.set(null);
+    this.templateSettings.set({
+      variableId: variable.id,
+      template: variable.templateSource.template,
+      type: variable.type,
+      decimalPlaces: variable.decimalPlaces ?? 0,
+      scope: variable.scope,
+      scopeRefId: variable.scopeRefId,
+    });
+  }
+
+  readonly templateResult = signal<{ value: string | null; error: string | null } | null>(null);
+
+  private readonly templatePreview = inject(TEMPLATE_PREVIEW_SERVICE, { optional: true });
+  private templatePreviewHandle: ReturnType<typeof setTimeout> | null = null;
+  private templatePreviewSeq = 0;
+  private readonly templatePreviewCleanup = inject(DestroyRef).onDestroy(() => {
+    this.templatePreviewSeq++;
+    if (this.templatePreviewHandle) clearTimeout(this.templatePreviewHandle);
+  });
+
+  private readonly templatePreviewEffect = effect(() => {
+    const settings = this.templateSettings();
+    const form = this.createForm();
+    if (settings) {
+      this.scheduleTemplatePreview(settings.template, settings.scope, settings.scopeRefId,
+        { resultType: settings.type, ...this.templateSettingsOptions() });
+    } else if (this.showCreateModal() && form.source === 'template') {
+      this.scheduleTemplatePreview(form.template, this.createScoped() ? 'widget' : 'global', this.createScopeRefId(),
+        { resultType: form.type, ...this.createTemplateOptions() });
+    } else {
+      this.scheduleTemplatePreview('', 'global', undefined, null);
+    }
+  });
+
+  private scheduleTemplatePreview(
+    template: string,
+    scope: VariableScope,
+    scopeRefId: string | undefined,
+    options: TemplateVariablePreviewOptions | null,
+  ): void {
+    if (this.templatePreviewHandle) clearTimeout(this.templatePreviewHandle);
+    const seq = ++this.templatePreviewSeq;
+    if (!options || template.trim() === '' || !this.templatePreview?.previewTemplateVariable) {
+      this.templateResult.set(null);
+      return;
+    }
+
+    const preview = this.templatePreview;
+    this.templatePreviewHandle = setTimeout(async () => {
+      try {
+        const result = await preview.previewTemplateVariable!(template, scope, scopeRefId, options);
+        if (seq !== this.templatePreviewSeq) return;
+        this.templateResult.set(result.error
+          ? { value: null, error: templateVariableErrorMessage(this.localization, result.error) }
+          : { value: result.value, error: null });
+      } catch (err) {
+        if (seq !== this.templatePreviewSeq) return;
+        this.templateResult.set({ value: null, error: err instanceof Error ? err.message : String(err) });
+      }
+    }, 250);
+  }
+
+  readonly templateSettingsVariables = computed(() => {
+    const form = this.templateSettings();
+    if (!form) return [];
+    return form.scope === 'widget' && form.scopeRefId
+      ? this.variableService.visibleForContext('widget', form.scopeRefId)
+      : this.variableService.visibleForContext('global');
+  });
+
+  readonly templateSettingsOptions = computed(() => {
+    const form = this.templateSettings();
+    return {
+      decimalPlaces: form?.type === 'numeric' ? form.decimalPlaces : undefined,
+      variableId: form?.variableId,
+    };
+  });
+
+  setTemplateSettingsTemplate(template: string): void {
+    this.templateSettings.update(f => f && { ...f, template });
+  }
+
+  setTemplateSettingsDecimalPlaces(value: number): void {
+    this.templateSettings.update(f => f && { ...f, decimalPlaces: Number(value) || 0 });
+  }
+
+  closeTemplateSettings(): void {
+    dismissModal(this.modal, () => this.templateSettings.set(null));
+  }
+
+  async saveTemplateSettings(): Promise<void> {
+    const form = this.templateSettings();
+    if (!form || form.template.trim().length === 0) return;
+
+    this.templateSettingsError.set(null);
+    const result = await this.variableService.update({
+      id: form.variableId,
+      templateSource: { template: form.template },
+      decimalPlaces: form.type === 'numeric' ? form.decimalPlaces : undefined,
+    });
+
+    if (result.variable) {
+      this.closeTemplateSettings();
+    } else {
+      this.templateSettingsError.set(this.saveErrorMessage(result.errorCode, AppStrings.Variables.Manager.SaveFailed,
+        result.errorMessage));
     }
   }
 
@@ -684,7 +853,10 @@ export class VariablesManagerComponent implements OnInit {
     }
   }
 
-  private saveErrorMessage(errorCode: string | null, fallbackKey: string): string {
+  private saveErrorMessage(errorCode: string | null, fallbackKey: string, message?: string | null): string {
+    if ((errorCode === 'InvalidTemplate' || errorCode === 'CircularTemplate') && message) {
+      return message;
+    }
     return this.localization.translateKey(
       errorCode === 'InvalidFilePath' ? AppStrings.Errors.Variables.InvalidFilePath : fallbackKey);
   }
@@ -821,6 +993,10 @@ export class VariablesManagerComponent implements OnInit {
     if (variable.fileSource) {
       return this.fileUnavailableLabel();
     }
+    if (variable.templateSource) {
+      return templateVariableErrorMessage(this.localization,
+        variable.templateError ?? { code: 'Unknown' });
+    }
     return this.isBoundDynamic(variable) ? this.resourceUnavailableLabel() : this.valueUnavailableLabel();
   }
 
@@ -848,6 +1024,7 @@ export class VariablesManagerComponent implements OnInit {
       decimalPlaces: 0,
       filePath: '',
       allowWriteBack: false,
+      template: '',
     };
   }
 }

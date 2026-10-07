@@ -1,6 +1,9 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { EditorState } from '@codemirror/state';
+import { EditorView } from '@codemirror/view';
+
 import { LiquidEditorComponent } from './liquid-editor.component';
 
 // CodeMirror never boots under Karma (jsdom-less ChromeHeadless can load the chunk, but nothing in
@@ -121,5 +124,99 @@ describe('LiquidEditorComponent (textarea fallback)', () => {
     component.insertAtCursor('{{ vars.b }}');
 
     expect(component.value).toBe('{{ vars.a }}{{ vars.b }}');
+  });
+
+  it('completes a variable with its localized hint text and places the caret after the insertion', () => {
+    component.variables = [
+      { id: 'cpu', name: 'cpu', scope: 'global', type: 'numeric', classification: 'user', value: '12' },
+    ];
+    component.hintText = key => `hint:${key}`;
+    const state = EditorState.create({ doc: '{{ vars.c' });
+
+    const result = component.complete({ state, pos: state.doc.length, explicit: false })!;
+    const view = new EditorView({ state });
+    const option = result.options[0];
+    (option.apply as (v: EditorView, c: typeof option, from: number, to: number) => void)(
+      view, option, result.from, result.to ?? state.doc.length);
+
+    expect(option.label).toBe('vars.cpu');
+    expect(option.detail).toBe('12');
+    expect(view.state.doc.toString()).toBe('{{ vars.cpu }}');
+    expect(view.state.selection.main.head).toBe('{{ vars.cpu }}'.length);
+    view.destroy();
+  });
+
+  it('describes a filter with the resolved hint text', () => {
+    component.hintText = key => `hint:${key}`;
+    const state = EditorState.create({ doc: '{{ vars.cpu | upc' });
+
+    const result = component.complete({ state, pos: state.doc.length, explicit: false })!;
+
+    expect(result.options.map(option => option.label)).toEqual(['upcase']);
+    expect(String(result.options[0].info)).toContain('hint:');
+  });
+
+  it('dismisses the suggestion list on Escape without letting the key reach the surrounding modal', async () => {
+    document.body.appendChild(fixture.nativeElement);
+    component.variables = [
+      { id: 'cpu', name: 'cpu', scope: 'global', type: 'numeric', classification: 'user', value: '12' },
+    ];
+    fixture.componentRef.setInput('value', '{{ vars.c');
+    fixture.detectChanges();
+    for (let attempt = 0; attempt < 50 && !component.ready(); attempt++) {
+      await new Promise(resolve => setTimeout(resolve, 20));
+    }
+    const view = (component as unknown as { view: EditorView }).view;
+    const { startCompletion, completionStatus } = await import('@codemirror/autocomplete');
+    view.dispatch({ selection: { anchor: view.state.doc.length } });
+    view.focus();
+    startCompletion(view);
+    for (let attempt = 0; attempt < 50 && completionStatus(view.state) !== 'active'; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, 20));
+    }
+    let reachedDocument = 0;
+    const listener = (event: KeyboardEvent) => { if (event.key === 'Escape') reachedDocument++; };
+    document.addEventListener('keydown', listener);
+
+    try {
+      view.contentDOM.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+    } finally {
+      document.removeEventListener('keydown', listener);
+      fixture.nativeElement.remove();
+    }
+
+    expect(component.ready()).toBeTrue();
+    expect(completionStatus(view.state)).toBeNull();
+    expect(reachedDocument).toBe(0);
+  });
+
+  it('accepts the selected suggestion with Tab', async () => {
+    document.body.appendChild(fixture.nativeElement);
+    component.variables = [
+      { id: 'cpu', name: 'cpu', scope: 'global', type: 'numeric', classification: 'user', value: '12' },
+    ];
+    fixture.componentRef.setInput('value', '{{ vars.c');
+    fixture.detectChanges();
+    for (let attempt = 0; attempt < 50 && !component.ready(); attempt++) {
+      await new Promise(resolve => setTimeout(resolve, 20));
+    }
+    const view = (component as unknown as { view: EditorView }).view;
+    const { startCompletion, completionStatus } = await import('@codemirror/autocomplete');
+    view.dispatch({ selection: { anchor: view.state.doc.length } });
+    view.focus();
+    startCompletion(view);
+    for (let attempt = 0; attempt < 50 && completionStatus(view.state) !== 'active'; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, 20));
+    }
+    // acceptCompletion ignores a list opened less than 75 ms ago.
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    try {
+      view.contentDOM.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }));
+    } finally {
+      fixture.nativeElement.remove();
+    }
+
+    expect(view.state.doc.toString()).toBe('{{ vars.cpu }}');
   });
 });

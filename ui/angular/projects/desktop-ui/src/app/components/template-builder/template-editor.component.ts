@@ -17,8 +17,14 @@ import {
 
 import { AppStrings } from '@macro-deck/runtime';
 import { LocalizationService, TranslatePipe, VariableService } from '@shared';
-import type { Variable, VariableScope } from '@macro-deck/runtime';
-import { TEMPLATE_PREVIEW_SERVICE, TemplatePreviewError, TemplatePreviewService } from '../../domain/template-preview.interface';
+import type { Variable, VariableScope, VariableType } from '@macro-deck/runtime';
+import {
+  TEMPLATE_PREVIEW_SERVICE,
+  TemplatePreviewError,
+  TemplatePreviewService,
+  TemplateVariablePreviewOptions,
+} from '../../domain/template-preview.interface';
+import { templateVariableErrorMessage } from '../../domain/template-variable-error.util';
 import { TemplateBrowserComponent } from './template-browser.component';
 import { LiquidEditorComponent } from './liquid-editor.component';
 import { SnippetInsertion } from './template-snippet-list.component';
@@ -39,6 +45,8 @@ import { SnippetInsertion } from './template-snippet-list.component';
         #editor
         class="tb-editor-host"
         [value]="draft()"
+        [variables]="variables"
+        [hintText]="hintText"
         [placeholder]="editorPlaceholder()"
         (valueChange)="onDraftChange($event)" />
 
@@ -52,6 +60,16 @@ import { SnippetInsertion } from './template-snippet-list.component';
             }
             {{ error.message }}
           </p>
+        }
+        @if (resultType) {
+          @if (typedError(); as typed) {
+            <p class="tb-preview-error tb-typed-error" role="alert">{{ typed }}</p>
+          } @else if (typedValue() !== null) {
+            <p class="tb-typed-value">
+              <span class="tb-preview-label">{{ 'macrodeck.app:Variables.Manager.TemplateResult' | translate }}</span>
+              <span class="tb-typed-value-text">{{ typedValue() }}</span>
+            </p>
+          }
         }
       </div>
     </div>
@@ -79,6 +97,22 @@ export class TemplateEditorComponent {
   }
   get value(): string { return this.draft(); }
 
+  @Input() set resultType(value: VariableType | undefined) {
+    this.typedOptions = value ? { ...this.typedOptions, resultType: value } : undefined;
+    this.refreshPreview(this.draft());
+  }
+  get resultType(): VariableType | undefined { return this.typedOptions?.resultType; }
+
+  @Input() set resultOptions(value: Omit<TemplateVariablePreviewOptions, 'resultType'> | undefined) {
+    const next = value ?? {};
+    if (JSON.stringify(next) === JSON.stringify(this.typedExtras)) return;
+    this.typedExtras = next;
+    if (this.typedOptions) {
+      this.typedOptions = { ...this.typedExtras, resultType: this.typedOptions.resultType };
+      this.refreshPreview(this.draft());
+    }
+  }
+
   @Output() valueChange = new EventEmitter<string>();
 
   @ViewChild('editor') private editor?: LiquidEditorComponent;
@@ -86,6 +120,11 @@ export class TemplateEditorComponent {
   readonly draft = signal('');
   readonly previewText = signal('');
   readonly previewError = signal<{ code?: string; message: string } | null>(null);
+  readonly typedValue = signal<string | null>(null);
+  readonly typedError = signal<string | null>(null);
+
+  private typedOptions?: TemplateVariablePreviewOptions;
+  private typedExtras: Omit<TemplateVariablePreviewOptions, 'resultType'> = {};
 
   private scopeLabelOverride?: string;
   private refreshHandle: ReturnType<typeof setTimeout> | null = null;
@@ -93,6 +132,8 @@ export class TemplateEditorComponent {
   private readonly variableService = inject(VariableService, { optional: true });
   private readonly localization = inject(LocalizationService);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly hintText = (key: string): string => this.localization.translateKey(key);
 
   readonly editorPlaceholder = computed(() =>
     this.localization.translateKey(AppStrings.TemplateBuilder.EditorPlaceholder));
@@ -131,6 +172,8 @@ export class TemplateEditorComponent {
       this.requestSeq++;
       this.previewText.set('');
       this.previewError.set(null);
+      this.typedValue.set(null);
+      this.typedError.set(null);
       return;
     }
 
@@ -141,7 +184,19 @@ export class TemplateEditorComponent {
     }
 
     const seq = ++this.requestSeq;
+    const typed = this.typedOptions;
     try {
+      if (typed && this.preview.previewTemplateVariable) {
+        const result = await this.preview.previewTemplateVariable(template, this.scope, this.scopeRefId,
+          { ...typed, ...this.typedExtras, resultType: typed.resultType });
+        if (seq !== this.requestSeq) return;
+        this.previewText.set(result.rendered);
+        this.previewError.set(null);
+        this.typedValue.set(result.error ? null : result.value);
+        this.typedError.set(result.error ? templateVariableErrorMessage(this.localization, result.error) : null);
+        return;
+      }
+
       const rendered = await this.preview.renderTemplate(template, this.scope, this.scopeRefId);
       if (seq !== this.requestSeq) return;
       this.previewText.set(rendered);
@@ -151,6 +206,8 @@ export class TemplateEditorComponent {
       const code = err instanceof TemplatePreviewError ? err.code : undefined;
       const message = err instanceof Error ? err.message : String(err);
       this.previewError.set({ code, message });
+      this.typedValue.set(null);
+      this.typedError.set(null);
     }
   }
 }

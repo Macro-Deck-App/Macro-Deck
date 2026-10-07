@@ -1,5 +1,11 @@
 import type { LocalizedText } from '../../localization/localized-text';
-import type { Variable, VariableFileSource, VariableScope, VariableType } from '../../domain/variable.interface';
+import type {
+  Variable,
+  VariableFileSource,
+  VariableScope,
+  VariableTemplateSource,
+  VariableType,
+} from '../../domain/variable.interface';
 import { ApiError, ResultResponse } from './common';
 
 export interface GetVariablesRequest {
@@ -21,6 +27,7 @@ export interface CreateVariableRequest {
   resourceIntegrationId?: string;
   resourceKey?: string;
   fileSource?: VariableFileSource;
+  templateSource?: VariableTemplateSource;
 }
 
 export interface CreateVariableResponse extends ResultResponse {
@@ -35,6 +42,7 @@ export interface UpdateVariableRequest {
   resourceIntegrationId?: string;
   resourceKey?: string;
   fileSource?: VariableFileSource;
+  templateSource?: VariableTemplateSource;
 }
 
 export interface UpdateVariableResponse extends ResultResponse {

@@ -467,8 +467,9 @@ public sealed class PortableAssetManager : IPortableAssetManager
 					WidgetId = widget.Id,
 					Name = snapshot.Name,
 					Type = snapshot.Type,
-					Value = snapshot.FileSource is null ? snapshot.Value : string.Empty,
-					DecimalPlaces = snapshot.DecimalPlaces
+					Value = snapshot.FileSource is null && snapshot.TemplateSource is null ? snapshot.Value : string.Empty,
+					DecimalPlaces = snapshot.DecimalPlaces,
+					Template = snapshot.TemplateSource?.Template
 				});
 			}
 		}
@@ -548,7 +549,8 @@ public sealed class PortableAssetManager : IPortableAssetManager
 			snapshots.Add(new WidgetVariableSnapshot(variable.Name,
 				variable.Type,
 				variable.Value,
-				variable.DecimalPlaces));
+				variable.DecimalPlaces,
+				TemplateSource: variable.Template is { } template ? new VariableTemplateSource(template) : null));
 		}
 
 		foreach (var (targetWidgetId, snapshots) in byTargetWidget)

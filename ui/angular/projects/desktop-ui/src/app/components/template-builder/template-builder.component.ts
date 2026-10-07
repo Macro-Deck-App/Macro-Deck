@@ -12,7 +12,8 @@ import {
 
 import { AppStrings } from '@macro-deck/runtime';
 import { ButtonComponent, LocalizationService, ModalComponent, TranslatePipe, dismissModal } from '@shared';
-import type { Variable, VariableScope } from '@macro-deck/runtime';
+import type { Variable, VariableScope, VariableType } from '@macro-deck/runtime';
+import type { TemplateVariablePreviewOptions } from '../../domain/template-preview.interface';
 import { TemplateEditorComponent } from './template-editor.component';
 
 @Component({
@@ -43,6 +44,8 @@ import { TemplateEditorComponent } from './template-editor.component';
           [variables]="variables"
           [scope]="scope"
           [scopeRefId]="scopeRefId"
+          [resultType]="resultType"
+          [resultOptions]="resultOptions"
           [value]="draft()"
           (valueChange)="draft.set($event)" />
 
@@ -70,6 +73,9 @@ export class TemplateBuilderComponent {
   @Input() scopeRefId?: string;
 
   @Input() disabled = false;
+
+  @Input() resultType?: VariableType;
+  @Input() resultOptions?: Omit<TemplateVariablePreviewOptions, 'resultType'>;
 
   @Output() apply$ = new EventEmitter<string>();
 

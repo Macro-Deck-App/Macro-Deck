@@ -13,11 +13,15 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import type { Variable } from '@macro-deck/runtime';
+
+import type { Completion, CompletionContext, CompletionResult } from '@codemirror/autocomplete';
 
 import type { EditorView as CmEditorView } from '@codemirror/view';
 import type { Extension } from '@codemirror/state';
 
 import { isInsideLiquidTag } from './liquid-context.util';
+import { LiquidCompletionItem, liquidCompletions } from './liquid-completion';
 
 export interface InsertForms {
   bare?: string;
@@ -47,6 +51,8 @@ import { createLiquidHighlightStyle, createLiquidLanguage } from './liquid-langu
 export class LiquidEditorComponent implements OnInit, OnChanges, OnDestroy {
   @Input() value = '';
   @Input() placeholder = '';
+  @Input() variables: readonly Variable[] = [];
+  @Input() hintText: (key: string) => string = key => key;
 
   @Output() valueChange = new EventEmitter<string>();
 
@@ -143,12 +149,13 @@ export class LiquidEditorComponent implements OnInit, OnChanges, OnDestroy {
 
   private async bootstrap(): Promise<void> {
     try {
-      const [state, viewMod, language, commands, highlight] = await Promise.all([
+      const [state, viewMod, language, commands, highlight, autocomplete] = await Promise.all([
         import('@codemirror/state'),
         import('@codemirror/view'),
         import('@codemirror/language'),
         import('@codemirror/commands'),
         import('@lezer/highlight'),
+        import('@codemirror/autocomplete'),
       ]);
 
       if (this.destroyed) return;
@@ -175,11 +182,75 @@ export class LiquidEditorComponent implements OnInit, OnChanges, OnDestroy {
         '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
           backgroundColor: 'var(--color-accent-muted) !important',
         },
+        '.cm-tooltip': {
+          backgroundColor: 'var(--color-bg-elevated)',
+          color: 'var(--color-text-primary)',
+          border: '1px solid var(--color-border-overlay)',
+          borderRadius: 'var(--radius-lg)',
+          boxShadow: 'var(--shadow-popover)',
+        },
+        '.cm-tooltip.cm-tooltip-autocomplete > ul': {
+          fontFamily: 'inherit',
+          minWidth: '240px',
+          maxWidth: 'min(22.75rem, 80vw)',
+          maxHeight: '220px',
+          padding: 'var(--space-1)',
+        },
+        '.cm-tooltip.cm-tooltip-autocomplete > ul > li': {
+          display: 'flex',
+          alignItems: 'baseline',
+          justifyContent: 'space-between',
+          gap: 'var(--space-3)',
+          padding: '0.3125rem 0.5rem',
+          borderRadius: 'var(--radius-sm)',
+          color: 'var(--color-text-primary)',
+          fontSize: 'var(--text-sm)',
+          lineHeight: 'normal',
+        },
+        '.cm-tooltip-autocomplete > ul > li:hover, .cm-tooltip-autocomplete > ul > li[aria-selected]': {
+          backgroundColor: 'var(--color-bg-hover)',
+          color: 'var(--color-text-primary)',
+        },
+        '.cm-completionLabel': {
+          flex: '1 1 auto',
+          minWidth: '0',
+          fontFamily: 'var(--font-mono)',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        },
+        '.cm-completionMatchedText': {
+          textDecoration: 'none',
+        },
+        '.cm-completionDetail': {
+          flex: '0 1 auto',
+          maxWidth: '40%',
+          marginLeft: '0',
+          fontStyle: 'normal',
+          color: 'var(--color-text-muted)',
+          fontSize: 'var(--text-xs)',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        },
+        '.cm-tooltip.cm-completionInfo': {
+          maxWidth: '22rem',
+          padding: 'var(--space-2)',
+          fontSize: 'var(--text-sm)',
+          whiteSpace: 'pre-wrap',
+        },
       });
 
       const extensions: Extension[] = [
         liquidLanguage,
         language.syntaxHighlighting(highlightStyle),
+        autocomplete.autocompletion({ override: [context => this.complete(context)], icons: false }),
+        // The editor lives in a modal that closes on any Escape reaching the document, so dismissing
+        // the suggestion list has to stop the key here.
+        state.Prec.highest(viewMod.keymap.of([
+          { key: 'Escape', run: autocomplete.closeCompletion, stopPropagation: true },
+          { key: 'Tab', run: autocomplete.acceptCompletion },
+        ])),
         commands.history(),
         viewMod.keymap.of([...commands.historyKeymap, ...commands.defaultKeymap]),
         viewMod.EditorView.lineWrapping,
@@ -199,6 +270,30 @@ export class LiquidEditorComponent implements OnInit, OnChanges, OnDestroy {
       // Chunk failed to load (offline, blocked, ...): `ready` never flips and the textarea stays
       // the live editor - see the class doc.
     }
+  }
+
+  complete(context: Pick<CompletionContext, 'state' | 'pos' | 'explicit'>): CompletionResult | null {
+    const found = liquidCompletions(context.state.doc.toString(), context.pos, this.variables);
+    if (!found || found.items.length === 0) return null;
+    return {
+      from: found.from,
+      to: found.to,
+      filter: false,
+      options: found.items.map(item => this.toCompletion(item)),
+    };
+  }
+
+  private toCompletion(item: LiquidCompletionItem): Completion {
+    return {
+      label: item.label,
+      detail: item.detail,
+      info: item.hintKey ? this.hintText(item.hintKey) : undefined,
+      type: item.kind === 'variable' ? 'variable' : item.kind === 'filter' ? 'function' : 'keyword',
+      apply: (view, _completion, from, to) => view.dispatch({
+        changes: { from, to, insert: item.insert },
+        selection: { anchor: from + (item.caret ?? item.insert.length) },
+      }),
+    };
   }
 
   private syncViewText(value: string): void {

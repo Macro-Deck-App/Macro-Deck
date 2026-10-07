@@ -107,6 +107,26 @@ public class VariableServiceTests
 	}
 
 	[Test]
+	public async Task A_renamed_user_variable_resolves_under_its_new_name_only()
+	{
+		var create = await _service.CreateUserVariable("old_name",
+			VariableScope.Global,
+			null,
+			VariableType.Text,
+			"hello",
+			null);
+
+		await _service.UpdateUserVariable(create.Data!.Id, "new_name", null);
+
+		Assert.Multiple(async () =>
+		{
+			Assert.That(await _service.Resolve("old_name", VariableScope.Global, null), Is.Null);
+			Assert.That((await _service.Resolve("new_name", VariableScope.Global, null))?.Id,
+				Is.EqualTo(create.Data.Id));
+		});
+	}
+
+	[Test]
 	public async Task UpsertWidgetVariable_creates_read_only_widget_variable()
 	{
 		await _service.UpsertWidgetVariable(VariableScope.Widget, "w1", "toggled", VariableType.Boolean, true);

@@ -22,7 +22,8 @@ public interface IVariableService
 		VariableType type,
 		object? initialValue,
 		int? decimalPlaces,
-		VariableFileSource? fileSource = null);
+		VariableFileSource? fileSource = null,
+		VariableTemplateSource? templateSource = null);
 
 	/// <summary>
 	/// The one write path. Dispatches on the entity's owner: a user variable is stored, a widget variable
@@ -42,13 +43,14 @@ public interface IVariableService
 
 	/// <summary>
 	/// Edits a user variable's definition - its name, its numeric precision and, for a variable that reads
-	/// from a file, its file source. The value goes through <see cref="SetValue"/> instead.
+	/// from a file or a template, that source. The value goes through <see cref="SetValue"/> instead.
 	/// </summary>
 	Task<Result<VariableEntity, VariableError>> UpdateUserVariable(
 		Guid id,
 		string? name,
 		int? decimalPlaces,
-		VariableFileSource? fileSource = null);
+		VariableFileSource? fileSource = null,
+		VariableTemplateSource? templateSource = null);
 
 	Task<Result<VariableError>> DeleteUserVariable(Guid id);
 

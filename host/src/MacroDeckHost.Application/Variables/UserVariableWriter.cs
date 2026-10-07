@@ -88,7 +88,7 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 			if (entity.Classification == VariableClassification.User)
 			{
 				var update = await service.SetValue(entity.Id, computed.Value, cancellationToken);
-				if (update.Error == VariableError.FileReadOnly)
+				if (update.Error is VariableError.FileReadOnly or VariableError.TemplateReadOnly)
 				{
 					return UserVariableWriteResult.Failed(UserVariableWriteStatus.NotEditable,
 						await ActiveLocalization.Resolve(scope.ServiceProvider,

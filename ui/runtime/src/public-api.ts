@@ -238,6 +238,8 @@ export {
   type Variable,
   type VariableClassification,
   type VariableFileSource,
+  type VariableTemplateError,
+  type VariableTemplateSource,
   type VariableScope,
   type VariableType,
 } from './domain/variable.interface';

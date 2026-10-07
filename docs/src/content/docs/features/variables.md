@@ -318,5 +318,7 @@ saw. `Unavailable` means the owner accepts writes but could not take this one - 
 A user variable can read its value from a file. Without **Allow write-back** it is read-only: every
 operation answers `NotEditable` and the file is left alone. With write-back it behaves like any other
 user variable, and Macro Deck also writes the new value to the file. This needs no new SDK: a plugin built
-against an older one gets the same `NotEditable` it already handles for read-only variables. `CreateAsync`
-always creates a variable that holds its own value.
+against an older one gets the same `NotEditable` it already handles for read-only variables. A user
+variable that renders a template is read-only the same way: every operation answers `NotEditable`, and
+its value changes only when a variable its template reads changes. `CreateAsync` always creates a
+variable that holds its own value.

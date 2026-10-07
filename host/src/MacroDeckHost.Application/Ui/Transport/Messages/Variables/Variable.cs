@@ -71,4 +71,8 @@ public class Variable
 	public string? DynamicResourceId { get; set; }
 
 	public VariableFileSourceDto? FileSource { get; set; }
+
+	public VariableTemplateSourceDto? TemplateSource { get; set; }
+
+	public VariableTemplateErrorDto? TemplateError { get; set; }
 }

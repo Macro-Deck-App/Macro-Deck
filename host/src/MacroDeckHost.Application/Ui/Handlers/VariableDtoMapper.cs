@@ -33,6 +33,12 @@ internal static class VariableDtoMapper
 			FileSource = entity.FileSource is { } source
 				? new VariableFileSourceDto { Path = source.Path, AllowWriteBack = source.AllowWriteBack }
 				: null,
+			TemplateSource = entity.TemplateSource is { } template
+				? new VariableTemplateSourceDto { Template = template.Template }
+				: null,
+			TemplateError = entity.TemplateError is { } templateError
+				? new VariableTemplateErrorDto { Code = templateError.Code, Detail = templateError.Detail }
+				: null,
 			Min = entity.Min,
 			Max = entity.Max,
 			Step = entity.Step,
@@ -104,6 +110,9 @@ internal static class VariableDtoMapper
 	public static VariableFileSource? FileSourceFromWire(VariableFileSourceDto? dto)
 		=> dto is null ? null : new VariableFileSource(dto.Path, dto.AllowWriteBack);
 
+	public static VariableTemplateSource? TemplateSourceFromWire(VariableTemplateSourceDto? dto)
+		=> dto is null ? null : new VariableTemplateSource(dto.Template);
+
 	public static object? ParseInputValue(DomainType type, string? raw)
 	{
 		return type switch
@@ -125,6 +134,15 @@ internal static class VariableDtoMapper
 				{ Code = error.ToString(), Message = AppStrings.Errors.Variables.InvalidFilePath() },
 			VariableError.FileReadOnly => new Transport.Messages.TransportError
 				{ Code = nameof(VariableError.NotWritable), Message = AppStrings.Errors.Variables.FileReadOnly() },
+			VariableError.TemplateReadOnly => new Transport.Messages.TransportError
+				{ Code = nameof(VariableError.NotWritable), Message = AppStrings.Errors.Variables.TemplateReadOnly() },
+			VariableError.InvalidTemplate => new Transport.Messages.TransportError
+			{
+				Code = error.ToString(),
+				Message = AppStrings.Errors.Variables.InvalidTemplate(details: message ?? string.Empty)
+			},
+			VariableError.CircularTemplate => new Transport.Messages.TransportError
+				{ Code = error.ToString(), Message = AppStrings.Errors.Variables.CircularTemplate() },
 			_ => new Transport.Messages.TransportError
 			{
 				Code = error.ToString(),

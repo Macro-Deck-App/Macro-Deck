@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using MacroDeckHost.Domain.Enums;
 
 namespace MacroDeckHost.Application.Portable;
@@ -18,4 +19,7 @@ public sealed class PortableVariable
 	public string Value { get; set; } = string.Empty;
 
 	public int? DecimalPlaces { get; set; }
+
+	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+	public string? Template { get; set; }
 }

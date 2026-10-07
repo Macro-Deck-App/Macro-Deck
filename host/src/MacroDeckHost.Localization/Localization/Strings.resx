@@ -2996,6 +2996,15 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.Variables.FileReadOnly" xml:space="preserve">
     <value>This variable reads its value from a file and does not write back</value>
   </data>
+  <data name="Errors.Variables.TemplateReadOnly" xml:space="preserve">
+    <value>This variable computes its value from a template</value>
+  </data>
+  <data name="Errors.Variables.InvalidTemplate" xml:space="preserve">
+    <value>The template has an error: {details}</value>
+  </data>
+  <data name="Errors.Variables.CircularTemplate" xml:space="preserve">
+    <value>The template reads this variable back through other template variables</value>
+  </data>
   <data name="Errors.Variables.InvalidFilePath" xml:space="preserve">
     <value>Enter the full path to a file</value>
   </data>
@@ -17117,6 +17126,36 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Variables.Manager.FileUnavailable" xml:space="preserve">
     <value>No value: the file is missing, can't be read or doesn't fit the variable's type</value>
+  </data>
+  <data name="Variables.Manager.SourceTemplate" xml:space="preserve">
+    <value>From template</value>
+  </data>
+  <data name="Variables.Manager.SourceHintTemplate" xml:space="preserve">
+    <value>The value is rendered from a template and follows every change to the variables it reads.</value>
+  </data>
+  <data name="Variables.Manager.TemplateField" xml:space="preserve">
+    <value>Template</value>
+  </data>
+  <data name="Variables.Manager.TemplateSettings" xml:space="preserve">
+    <value>Template settings</value>
+  </data>
+  <data name="Variables.Manager.TemplateResult" xml:space="preserve">
+    <value>Variable value</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.RenderFailed" xml:space="preserve">
+    <value>The template can’t be rendered: {details}</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.NotNumeric" xml:space="preserve">
+    <value>The template produces “{value}”, which is not a number</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.NotBoolean" xml:space="preserve">
+    <value>The template produces “{value}”, which is not true or false</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.CircularReference" xml:space="preserve">
+    <value>The template reads itself through other template variables</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.Unknown" xml:space="preserve">
+    <value>The template can’t produce a value right now</value>
   </data>
   <data name="Variables.Manager.CreateFailed" xml:space="preserve">
     <value>Couldn't create the variable. Try again.</value>

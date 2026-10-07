@@ -12,6 +12,7 @@ import type {
   VariableClassification,
 } from '@macro-deck/runtime';
 import { VariableCatalogService } from '../../services/variable-catalog.service';
+import { TEMPLATE_PREVIEW_SERVICE, TemplatePreviewService } from '../../domain/template-preview.interface';
 import { VariableCatalogIdInputComponent } from './variable-catalog-id-input.component';
 import { VariablesManagerComponent } from './variables-manager.component';
 
@@ -68,6 +69,8 @@ describe('VariablesManagerComponent', () => {
   let setVariableValueSpy: jasmine.Spy;
   let updateVariableSpy: jasmine.Spy;
   let setVariableSharedSpy: jasmine.Spy;
+  let templatePreview: jasmine.SpyObj<TemplatePreviewService>;
+  let previewTemplateVariable: jasmine.Spy;
 
   const variables: Variable[] = [
     variable('1', 'user'),
@@ -113,9 +116,19 @@ describe('VariablesManagerComponent', () => {
     updateVariableSpy = apiSpy.updateVariable;
     setVariableSharedSpy = apiSpy.setVariableShared;
 
+    templatePreview = jasmine.createSpyObj<TemplatePreviewService>('TemplatePreviewService',
+      ['renderTemplate', 'evaluateCondition', 'evaluateExpression']);
+    templatePreview.renderTemplate.and.resolveTo('');
+    previewTemplateVariable = jasmine.createSpy('previewTemplateVariable');
+    templatePreview.previewTemplateVariable = previewTemplateVariable;
+
     TestBed.configureTestingModule({
       imports: [VariablesManagerComponent],
-      providers: [provideZonelessChangeDetection(), { provide: ApiService, useValue: apiSpy }],
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: ApiService, useValue: apiSpy },
+        { provide: TEMPLATE_PREVIEW_SERVICE, useValue: templatePreview },
+      ],
     });
 
     fixture = TestBed.createComponent(VariablesManagerComponent);
@@ -1205,6 +1218,126 @@ describe('VariablesManagerComponent', () => {
       await openUnbound('zzz');
 
       expect(catalogRows().filter(r => r.kind === 'catalog-branch').map(r => r.node!.id)).toEqual(['entity/light.one']);
+    });
+  });
+
+  describe('a variable that renders a template', () => {
+    const broken: Variable = {
+      ...variable('t1', 'user'),
+      type: 'numeric',
+      decimalPlaces: 2,
+      canWrite: false,
+      available: false,
+      templateSource: { template: 'CPU {{ vars.cpu }}' },
+      templateError: { code: 'NotNumeric', detail: 'CPU 12' },
+    };
+
+    it('creates with the template and the chosen type instead of an initial value', async () => {
+      component.openCreate();
+      await component.onNameInput('cpu_text');
+      component.setFormSource('template');
+      component.setFormInitialValue('ignored');
+      expect(component.canSubmitCreate()).toBeFalse();
+
+      component.setFormTemplate('CPU: {{ vars.cpu }}%');
+      await component.submitCreate();
+
+      const request = createVariableSpy.calls.mostRecent().args[0];
+      expect(request.templateSource).toEqual({ template: 'CPU: {{ vars.cpu }}%' });
+      expect(request.type).toBe('text');
+      expect(request.initialValue).toBeUndefined();
+      expect(request.fileSource).toBeUndefined();
+    });
+
+    it('shows the host\'s reason when it refuses a template that reads itself back', async () => {
+      createVariableSpy.and.resolveTo({
+        success: false,
+        error: {
+          code: 'CircularTemplate',
+          message: { $localized: { scope: 'macrodeck.app', key: 'Errors.Variables.CircularTemplate' } },
+        },
+      });
+      component.openCreate();
+      await component.onNameInput('loop');
+      component.setFormSource('template');
+      component.setFormTemplate('{{ vars.loop }}');
+
+      await component.submitCreate();
+
+      expect(component.showCreateModal()).toBeTrue();
+      expect(component.createError()).toBe(
+        'The template reads this variable back through other template variables');
+    });
+
+    async function previewLine(): Promise<string> {
+      jasmine.clock().install();
+      try {
+        fixture.detectChanges();
+        jasmine.clock().tick(300);
+      } finally {
+        jasmine.clock().uninstall();
+      }
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const line = document.querySelector('.vars-template-error, .vars-template-value');
+      return line?.textContent?.trim() ?? '';
+    }
+
+    it('previews the value the new variable would get for its type', async () => {
+      previewTemplateVariable.and.resolveTo({ rendered: '42', value: '42.00', error: null });
+      component.openCreate();
+      await component.onNameInput('cpu_value');
+      component.setFormSource('template');
+      component.setFormType('numeric');
+      component.setFormDecimalPlaces(2);
+      component.setFormTemplate('{{ vars.cpu }}');
+
+      expect(await previewLine()).toBe('42.00');
+      const [template, scope, , options] = previewTemplateVariable.calls.mostRecent().args;
+      expect(template).toBe('{{ vars.cpu }}');
+      expect(scope).toBe('global');
+      expect(options).toEqual({ resultType: 'numeric', decimalPlaces: 2, variableName: 'cpu_value' });
+    });
+
+    it('explains in the settings dialog why the edited template does not fit the type', async () => {
+      previewTemplateVariable.and.resolveTo(
+        { rendered: 'CPU 12', value: null, error: { code: 'NotNumeric', detail: 'CPU 12' } });
+      component.openTemplateSettings(broken);
+
+      const line = await previewLine();
+
+      expect(line).toContain('CPU 12');
+      expect(previewTemplateVariable.calls.mostRecent().args[3])
+        .toEqual({ resultType: 'numeric', decimalPlaces: 2, variableId: 't1' });
+    });
+
+    it('marks the row as a template, locks its value and explains why it has none', async () => {
+      fixture.componentRef.setInput('variables', [broken]);
+      await fixture.whenStable();
+      await flushViewport();
+
+      const row = (Array.from(fixture.nativeElement.querySelectorAll('.vars-row')) as HTMLElement[])
+        .find(candidate => candidate.textContent?.includes('var_t1'));
+
+      expect(row?.querySelector('.vars-file-badge')?.getAttribute('title')).toBe('CPU {{ vars.cpu }}');
+      expect(row?.querySelector('.read-only-icon')).not.toBeNull();
+      expect(component.unavailableTooltip(broken)).toContain('CPU 12');
+    });
+
+    it('saves an edited template and precision through an update of the template source', async () => {
+      updateVariableSpy.and.resolveTo({ success: true, variable: broken });
+      component.openTemplateSettings(broken);
+      component.setTemplateSettingsTemplate('{{ vars.cpu }}');
+      component.setTemplateSettingsDecimalPlaces(1);
+
+      await component.saveTemplateSettings();
+
+      expect(updateVariableSpy).toHaveBeenCalledWith({
+        id: 't1',
+        templateSource: { template: '{{ vars.cpu }}' },
+        decimalPlaces: 1,
+      });
+      expect(component.templateSettings()).toBeNull();
     });
   });
 

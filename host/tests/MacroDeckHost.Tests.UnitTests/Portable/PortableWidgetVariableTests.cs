@@ -157,6 +157,38 @@ public class PortableWidgetVariableTests
 	}
 
 	[Test]
+	public async Task A_template_variable_travels_as_its_template_and_renders_again_after_import()
+	{
+		var (_, sourceFolder, widget) = await _harness.SeedProfile(null);
+		await _harness.Variables.CreateUserVariable("greeting",
+			VariableScope.Widget,
+			widget.Id.ToString(),
+			VariableType.Text,
+			null,
+			null,
+			templateSource: new VariableTemplateSource("Hello {{ 'deck' | upcase }}"));
+
+		var export = await _harness.WidgetService.Export(sourceFolder.Id,
+			[widget.Id],
+			PortableExportOptions.Default,
+			CancellationToken.None);
+		var (_, content, _) = ReadRaw(export.Data!);
+		var copyId = Guid.NewGuid();
+		await _harness.AssetManager.RestoreWidgetVariables(content,
+			new Dictionary<Guid, Guid> { [widget.Id] = copyId },
+			CancellationToken.None);
+
+		var imported = (await _harness.Variables.GetByScope(VariableScope.Widget, copyId.ToString())).Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(content.Variables.Single().Value, Is.Empty);
+			Assert.That(content.Variables.Single().Template, Is.EqualTo("Hello {{ 'deck' | upcase }}"));
+			Assert.That(imported.TemplateSource, Is.EqualTo(new VariableTemplateSource("Hello {{ 'deck' | upcase }}")));
+			Assert.That(imported.Value, Is.EqualTo("Hello DECK"));
+		});
+	}
+
+	[Test]
 	public async Task ImportingTheSameArchiveTwice_YieldsIndependentCopies()
 	{
 		var (profile, sourceFolder, widget) = await _harness.SeedProfile(null);

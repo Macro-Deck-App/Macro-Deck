@@ -2996,6 +2996,15 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Errors.Variables.FileReadOnly" xml:space="preserve">
     <value>Diese Variable liest ihren Wert aus einer Datei und schreibt nicht zurück</value>
   </data>
+  <data name="Errors.Variables.TemplateReadOnly" xml:space="preserve">
+    <value>Diese Variable berechnet ihren Wert aus einer Vorlage</value>
+  </data>
+  <data name="Errors.Variables.InvalidTemplate" xml:space="preserve">
+    <value>Die Vorlage enthält einen Fehler: {details}</value>
+  </data>
+  <data name="Errors.Variables.CircularTemplate" xml:space="preserve">
+    <value>Die Vorlage liest diese Variable über andere Vorlagenvariablen wieder ein</value>
+  </data>
   <data name="Errors.Variables.InvalidFilePath" xml:space="preserve">
     <value>Gib den vollständigen Pfad zu einer Datei ein</value>
   </data>
@@ -17114,6 +17123,36 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Variables.Manager.FileUnavailable" xml:space="preserve">
     <value>Kein Wert: Die Datei fehlt, ist nicht lesbar oder passt nicht zum Typ der Variable</value>
+  </data>
+  <data name="Variables.Manager.SourceTemplate" xml:space="preserve">
+    <value>Aus Vorlage</value>
+  </data>
+  <data name="Variables.Manager.SourceHintTemplate" xml:space="preserve">
+    <value>Der Wert wird aus einer Vorlage erzeugt und folgt jeder Änderung an den Variablen, die sie liest.</value>
+  </data>
+  <data name="Variables.Manager.TemplateField" xml:space="preserve">
+    <value>Vorlage</value>
+  </data>
+  <data name="Variables.Manager.TemplateSettings" xml:space="preserve">
+    <value>Vorlageneinstellungen</value>
+  </data>
+  <data name="Variables.Manager.TemplateResult" xml:space="preserve">
+    <value>Wert der Variable</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.RenderFailed" xml:space="preserve">
+    <value>Die Vorlage lässt sich nicht erzeugen: {details}</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.NotNumeric" xml:space="preserve">
+    <value>Die Vorlage ergibt „{value}“, das ist keine Zahl</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.NotBoolean" xml:space="preserve">
+    <value>Die Vorlage ergibt „{value}“, das ist weder true noch false</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.CircularReference" xml:space="preserve">
+    <value>Die Vorlage liest sich über andere Vorlagenvariablen selbst</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.Unknown" xml:space="preserve">
+    <value>Die Vorlage kann gerade keinen Wert erzeugen</value>
   </data>
   <data name="Variables.Manager.CreateFailed" xml:space="preserve">
     <value>Variable konnte nicht angelegt werden. Versuch es erneut.</value>
