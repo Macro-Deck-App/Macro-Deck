@@ -346,10 +346,11 @@ An icon can have more than one appearance: a light and a dark version, or an ani
 version of it. It stays one icon in **Library > Icon Packs** and in the icon picker, and Macro Deck shows the
 appearance that fits:
 
-- **Light** or **Dark** follows the theme of the screen showing the deck: the Macro Deck app and the deck you
-  open in a browser. With the theme set to **System**, each of them follows its own device's setting. The
-  Companion app shows the **Default** until it supports appearances.
-- **Static** is shown where the system asks for reduced motion, and **Animated** everywhere else. An animated
+- **Light** or **Dark** follows the theme of the screen showing the deck: the Macro Deck app, the deck you
+  open in a browser and the Companion app. With the theme set to **System**, each of them follows its own
+  device's setting.
+- **Static** is shown where the system asks for reduced motion, and **Animated** everywhere else. In the
+  Companion app that is **Remove animations** on Android and **Reduce Motion** on iPhone and iPad. An animated
   icon without a static appearance keeps playing.
 - A device that can't play animations, such as some stream controllers, shows the **Static** appearance when
   there is one.
