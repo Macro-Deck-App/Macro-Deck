@@ -11,6 +11,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Weather\Icons\**\*.svg" />
     <EmbeddedResource Include="MusicPlayer\Icons\**\*.svg" />
+    <EmbeddedResource Include="AdGuardHome\Icons\**\*.svg" />
   </ItemGroup>
 
   <ItemGroup>

@@ -21215,4 +21215,336 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Obs.Errors.SettingExpectsJson" xml:space="preserve">
     <value>Nastavení {setting} očekává JSON ve stejném tvaru jako jeho aktuální hodnota.</value>
   </data>
+  <data name="Integrations.AdGuardHome.Actions.EnableProtection.Name" xml:space="preserve">
+    <value>Zapnout ochranu</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.EnableProtection.Description" xml:space="preserve">
+    <value>Zapne ochranu AdGuard Home a ukončí případné pozastavení.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.DisableProtection.Name" xml:space="preserve">
+    <value>Vypnout ochranu</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.DisableProtection.Description" xml:space="preserve">
+    <value>Vypne ochranu AdGuard Home, dokud nebude znovu zapnuta.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.ToggleProtection.Name" xml:space="preserve">
+    <value>Přepnout ochranu</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.ToggleProtection.Description" xml:space="preserve">
+    <value>Zapne ochranu AdGuard Home, když je vypnutá, a vypne ji, když je zapnutá.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.PauseProtection.Name" xml:space="preserve">
+    <value>Dočasně vypnout ochranu</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.PauseProtection.Description" xml:space="preserve">
+    <value>Vypne ochranu AdGuard Home na určitou dobu. Po uplynutí času se znovu zapne.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.EnableFiltering.Name" xml:space="preserve">
+    <value>Zapnout filtrování</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.EnableFiltering.Description" xml:space="preserve">
+    <value>Zapne blokování pomocí seznamů filtrů.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.DisableFiltering.Name" xml:space="preserve">
+    <value>Vypnout filtrování</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.DisableFiltering.Description" xml:space="preserve">
+    <value>Vypne blokování pomocí seznamů filtrů. Ostatní ochrana zůstane beze změny.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.ToggleFiltering.Name" xml:space="preserve">
+    <value>Přepnout filtrování</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.ToggleFiltering.Description" xml:space="preserve">
+    <value>Zapne blokování pomocí seznamů filtrů, když je vypnuté, a vypne ho, když je zapnuté.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.RefreshFilters.Name" xml:space="preserve">
+    <value>Aktualizovat seznamy filtrů</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Actions.RefreshFilters.Description" xml:space="preserve">
+    <value>Stáhne nejnovější verzi všech seznamů blokovaných a povolených položek.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.ConnectionTitle" xml:space="preserve">
+    <value>Připojení k AdGuard Home</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.ConnectionDescription" xml:space="preserve">
+    <value>Zadejte adresu webového rozhraní AdGuard Home a účet, který slouží k přihlášení do něj.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.WebsiteLinkLabel" xml:space="preserve">
+    <value>O AdGuard Home</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.NamePlaceholder" xml:space="preserve">
+    <value>Domov</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.AddressLabel" xml:space="preserve">
+    <value>Adresa</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.AddressDescription" xml:space="preserve">
+    <value>Adresa, na které se otevírá webové rozhraní AdGuard Home, včetně portu.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.UsernameLabel" xml:space="preserve">
+    <value>Uživatelské jméno</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.UsernameDescription" xml:space="preserve">
+    <value>Ponechte prázdné, pokud AdGuard Home přihlášení nevyžaduje.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.PasswordLabel" xml:space="preserve">
+    <value>Heslo</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.AcceptUntrustedCertificateLabel" xml:space="preserve">
+    <value>Přijmout certifikát podepsaný sám sebou</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.AcceptUntrustedCertificateDescription" xml:space="preserve">
+    <value>Pouze pro adresu HTTPS, jejímuž certifikátu počítač nedůvěřuje. Macro Deck pak už neověřuje, s kým komunikuje.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.EnterName" xml:space="preserve">
+    <value>Zadejte název této instance.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.EnterAddress" xml:space="preserve">
+    <value>Zadejte platnou adresu, například {exampleUrl}.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.EnterUsername" xml:space="preserve">
+    <value>Zadejte uživatelské jméno, ke kterému patří toto heslo.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.AuthenticationFailed" xml:space="preserve">
+    <value>AdGuard Home odmítl uživatelské jméno nebo heslo.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Config.UnknownStep" xml:space="preserve">
+    <value>Tento krok nastavení již není platný. Spusťte nastavení znovu.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Errors.Unreachable" xml:space="preserve">
+    <value>AdGuard Home je nedostupný. Zkontrolujte adresu a to, zda server běží.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Errors.Unauthorized" xml:space="preserve">
+    <value>AdGuard Home odmítl uživatelské jméno nebo heslo. Aktualizujte je v nastavení integrace.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Errors.Timeout" xml:space="preserve">
+    <value>AdGuard Home neodpověděl včas.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Errors.Incompatible" xml:space="preserve">
+    <value>Server neodpověděl jako AdGuard Home. Zkontrolujte adresu nebo aktualizujte AdGuard Home.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Errors.Redirected" xml:space="preserve">
+    <value>AdGuard Home požadavek přesměroval. Použijte přesnou adresu, například s https://, pokud ho webové rozhraní používá.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Errors.InstanceNotFound" xml:space="preserve">
+    <value>Tato instance AdGuard Home již neexistuje. Vyberte jinou.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Errors.SelectInstance" xml:space="preserve">
+    <value>Vyberte instanci AdGuard Home.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Errors.InvalidDuration" xml:space="preserve">
+    <value>Vyberte dobu trvání od 1 sekundy do 7 dní.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Errors.CommandFailed" xml:space="preserve">
+    <value>AdGuard Home nemohl příkaz provést.</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Params.Instance" xml:space="preserve">
+    <value>Instance</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Params.Duration" xml:space="preserve">
+    <value>Doba trvání</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Params.CustomDuration" xml:space="preserve">
+    <value>Vlastní doba trvání</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Durations.Custom" xml:space="preserve">
+    <value>Vlastní</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Durations.Indefinitely" xml:space="preserve">
+    <value>Neomezeně</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Durations.Minutes.One" xml:space="preserve">
+    <value>{count} min</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.AdGuardHome.Durations.Minutes.Other" xml:space="preserve">
+    <value>{count} min</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.AdGuardHome.Durations.Hours.One" xml:space="preserve">
+    <value>{count} hodina</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.AdGuardHome.Durations.Hours.Other" xml:space="preserve">
+    <value>{count} h</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.IsReachable" xml:space="preserve">
+    <value>Dostupné</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.ProtectionEnabled" xml:space="preserve">
+    <value>Ochrana zapnuta</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.ProtectionDisabledUntil" xml:space="preserve">
+    <value>Ochrana vypnuta do</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.DnsQueries" xml:space="preserve">
+    <value>Dotazy DNS</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.BlockedQueries" xml:space="preserve">
+    <value>Blokováno filtry</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.BlockedPercentage" xml:space="preserve">
+    <value>Podíl blokovaných</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.AverageProcessingTime" xml:space="preserve">
+    <value>Průměrná doba zpracování</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.SafeBrowsingBlocked" xml:space="preserve">
+    <value>Blokovaný malware a phishing</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.ParentalBlocked" xml:space="preserve">
+    <value>Blokované weby pro dospělé</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.SafeSearchEnforced" xml:space="preserve">
+    <value>Vynucené bezpečné vyhledávání</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Variables.Version" xml:space="preserve">
+    <value>Verze</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Widget.Name" xml:space="preserve">
+    <value>AdGuard Home</value>
+  </data>
+  <data name="Integrations.AdGuardHome.Widget.Description" xml:space="preserve">
+    <value>Zobrazuje stav ochrany a statistiky instance AdGuard Home s tlačítky pro pozastavení ochrany.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Name" xml:space="preserve">
+    <value>AdGuard Home</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.Instance" xml:space="preserve">
+    <value>Instance</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.InstanceDescription" xml:space="preserve">
+    <value>Instance AdGuard Home, kterou tento widget zobrazuje a ovládá.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.FirstInstance" xml:space="preserve">
+    <value>První instance</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.DisplayName" xml:space="preserve">
+    <value>Zobrazovaný název</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.DisplayNamePlaceholder" xml:space="preserve">
+    <value>Název instance</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.View" xml:space="preserve">
+    <value>Zobrazení</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.ViewDescription" xml:space="preserve">
+    <value>Co widget zobrazuje. Větší widget zobrazí více tlačítek a statistik.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.ViewControl" xml:space="preserve">
+    <value>Ovládání ochrany</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.ViewStatistics" xml:space="preserve">
+    <value>Statistiky</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.ViewOverview" xml:space="preserve">
+    <value>Ovládání a statistiky</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.Durations" xml:space="preserve">
+    <value>Tlačítka pozastavení</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.DurationsDescription" xml:space="preserve">
+    <value>Doby trvání nabízené, když je ochrana zapnutá. Malý widget zobrazí první dvě.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.Statistics" xml:space="preserve">
+    <value>Statistiky</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.StatisticsDescription" xml:space="preserve">
+    <value>Zobrazované hodnoty v tomto pořadí. Malý widget zobrazí jen první z nich.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.ShowVersion" xml:space="preserve">
+    <value>Zobrazit verzi AdGuard Home</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Config.ShowStatus" xml:space="preserve">
+    <value>Zobrazit indikátor stavu</value>
+  </data>
+  <data name="Widgets.AdGuardHome.NotConfigured" xml:space="preserve">
+    <value>Přidejte instanci AdGuard Home v nastavení integrace.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.InstanceNotFound" xml:space="preserve">
+    <value>Tato instance AdGuard Home již neexistuje. Vyberte jinou v nastavení widgetu.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Connecting" xml:space="preserve">
+    <value>Připojování…</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Offline" xml:space="preserve">
+    <value>AdGuard Home je nedostupný.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Unauthorized" xml:space="preserve">
+    <value>Přihlášení odmítnuto. Zkontrolujte uživatelské jméno a heslo.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Timeout" xml:space="preserve">
+    <value>AdGuard Home neodpověděl včas.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Incompatible" xml:space="preserve">
+    <value>Tento server neodpovídá jako AdGuard Home.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Redirected" xml:space="preserve">
+    <value>AdGuard Home požadavek přesměroval. Zkontrolujte adresu.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.CommandFailed" xml:space="preserve">
+    <value>Příkaz se nepodařilo provést.</value>
+  </data>
+  <data name="Widgets.AdGuardHome.DnsStopped" xml:space="preserve">
+    <value>Server DNS zastaven</value>
+  </data>
+  <data name="Widgets.AdGuardHome.ProtectionEnabled" xml:space="preserve">
+    <value>Ochrana zapnuta</value>
+  </data>
+  <data name="Widgets.AdGuardHome.ProtectionDisabled" xml:space="preserve">
+    <value>Ochrana vypnuta</value>
+  </data>
+  <data name="Widgets.AdGuardHome.ResumesInMinutes.One" xml:space="preserve">
+    <value>Pozastaveno, obnoví se za {count} minutu</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.AdGuardHome.ResumesInMinutes.Other" xml:space="preserve">
+    <value>Pozastaveno, obnoví se za {count} min</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.AdGuardHome.ResumesInHours.One" xml:space="preserve">
+    <value>Pozastaveno, obnoví se za {count} hodinu</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.AdGuardHome.ResumesInHours.Other" xml:space="preserve">
+    <value>Pozastaveno, obnoví se za {count} h</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.AdGuardHome.EnableProtection" xml:space="preserve">
+    <value>Zapnout ochranu</value>
+  </data>
+  <data name="Widgets.AdGuardHome.DisableIndefinitely" xml:space="preserve">
+    <value>Vypnout</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Statistics.DnsQueries" xml:space="preserve">
+    <value>Dotazy DNS</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Statistics.Blocked" xml:space="preserve">
+    <value>Blokováno</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Statistics.BlockedPercentage" xml:space="preserve">
+    <value>Podíl blokovaných</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Statistics.AverageProcessingTime" xml:space="preserve">
+    <value>Prům. odezva</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Statistics.SafeBrowsing" xml:space="preserve">
+    <value>Blokovaný malware</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Statistics.Parental" xml:space="preserve">
+    <value>Obsah pro dospělé</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Statistics.SafeSearch" xml:space="preserve">
+    <value>Bezpečné vyhledávání</value>
+  </data>
+  <data name="Widgets.AdGuardHome.ShortMinutes" xml:space="preserve">
+    <value>{count} min</value>
+  </data>
+  <data name="Widgets.AdGuardHome.ShortHours" xml:space="preserve">
+    <value>{count} h</value>
+  </data>
+  <data name="Widgets.AdGuardHome.Off" xml:space="preserve">
+    <value>Vyp.</value>
+  </data>
 </root>
