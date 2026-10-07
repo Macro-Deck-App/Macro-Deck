@@ -4418,6 +4418,15 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Calendar.Actions.JoinMeeting.WindowLabel" xml:space="preserve">
     <value>Starts within</value>
   </data>
+  <data name="Integrations.Calendar.Actions.RefreshCalendars.Description" xml:space="preserve">
+    <value>Reads the events of all connected calendars right away instead of waiting for the next update, which Macro Deck otherwise does every five minutes.</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.RefreshCalendars.Name" xml:space="preserve">
+    <value>Refresh Calendars</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.RefreshCalendars.Unavailable" xml:space="preserve">
+    <value>Calendars can't be refreshed right now.</value>
+  </data>
   <data name="Integrations.Calendar.Actions.ShowDetails.Description" xml:space="preserve">
     <value>Opens the details of a calendar widget on the screen it was pressed on: the event the Next event layout shows, or the upcoming events of the Agenda layout.</value>
   </data>
@@ -5876,6 +5885,93 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.GoogleCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
     <value>Google sign-in expired for {account}</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.AuthorizationNotCompleted" xml:space="preserve">
+    <value>The Microsoft sign-in was cancelled or not finished. Continue to open it again.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsDescription" xml:space="preserve">
+    <value>Only the calendars you choose here appear in Macro Deck. To add or remove calendars later, edit this configuration.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsLabel" xml:space="preserve">
+    <value>Calendars</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsTitle" xml:space="preserve">
+    <value>Choose calendars</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsUnavailable" xml:space="preserve">
+    <value>Signed in, but your calendars could not be read from Microsoft. Try again in a moment.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ClientIdLabel" xml:space="preserve">
+    <value>Application (client) ID</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ClientIdPlaceholder" xml:space="preserve">
+    <value>Macro Deck's app</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ConnectDescription" xml:space="preserve">
+    <value>Macro Deck reads your Outlook and Microsoft 365 calendars. Press Continue to sign in with your Microsoft account in your browser and allow Macro Deck to read your calendars. Personal, work and school accounts all work.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ConnectTitle" xml:space="preserve">
+    <value>Connect Outlook Calendar</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ConsentRequired" xml:space="preserve">
+    <value>The app has not been allowed to read your calendars. Add the Calendars.Read permission to the app and try again; in an organization, an administrator may have to grant it.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.EnterClientId" xml:space="preserve">
+    <value>Enter a valid Application (client) ID, or leave the field empty to use Macro Deck's app.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.InvalidTenant" xml:space="preserve">
+    <value>Enter common, organizations, consumers, a tenant ID or a domain such as contoso.com.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.MissingCalendarPermission" xml:space="preserve">
+    <value>Microsoft did not grant access to your calendars. Try again and allow the app to read your calendars.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.MissingRefreshToken" xml:space="preserve">
+    <value>Microsoft did not grant lasting access, so Macro Deck could not stay signed in. Try again and allow the app to stay signed in.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.PublicClientRequired" xml:space="preserve">
+    <value>Microsoft expects a client secret, which means the redirect URI was added under the wrong platform. Add it under Mobile and desktop applications instead of Web, then try again.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.SelectCalendar" xml:space="preserve">
+    <value>Choose at least one calendar.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.SharedCalendarName" xml:space="preserve">
+    <value>{calendar} (shared by {owner})</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.TenantDescription" xml:space="preserve">
+    <value>Leave empty for personal, work and school accounts. Only for an app of your own that accepts the accounts of a single organization, enter that organization's tenant ID or domain.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.TenantLabel" xml:space="preserve">
+    <value>Tenant</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.TokenExchangeFailed" xml:space="preserve">
+    <value>Microsoft did not accept the sign-in. Try again; if you entered an app of your own under Advanced, check its Application (client) ID and redirect URI.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.DuplicateAccountDescription" xml:space="preserve">
+    <value>"{title}" is an older connection for the same Microsoft account and is not used. Remove it from the list of configurations below.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.DuplicateAccountTitle" xml:space="preserve">
+    <value>Microsoft account connected twice</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.ReconnectResolution" xml:space="preserve">
+    <value>Connect the Microsoft account again.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.SignInExpiredDescription" xml:space="preserve">
+    <value>Microsoft no longer accepts the sign-in for this account. The access may have been removed in your Microsoft account, your organization may have revoked it, or the app registration was changed or deleted. Connect the account again.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
+    <value>Microsoft sign-in expired for {account}</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.CalendarsUnreadableDescription" xml:space="preserve">
+    <value>Microsoft no longer returns one or more of the calendars chosen for this account, for example because a calendar was deleted or is no longer shared with you. Their events are left out. Edit the connection to choose the account's calendars again.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.CalendarsUnreadableTitle" xml:space="preserve">
+    <value>Some calendars of {account} can't be read</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.AdminConsentInstruction" xml:space="preserve">
+    <value>Some organizations only let administrators allow apps. Then the sign-in asks for an administrator's approval before you can continue.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ClientIdDescription" xml:space="preserve">
+    <value>Leave empty to sign in through Macro Deck's app. To use an app of your own, register it under App registrations in the Azure portal, in a Microsoft Entra directory; a personal Microsoft account needs a directory first, for example from a free Azure account. Add the platform Mobile and desktop applications with the redirect URI {redirectUri} and the delegated permission Calendars.Read, then enter the app's Application (client) ID here.</value>
   </data>
   <data name="Integrations.HomeAssistant.Actions.Automation.CommandDisable" xml:space="preserve">
     <value>Disable</value>
