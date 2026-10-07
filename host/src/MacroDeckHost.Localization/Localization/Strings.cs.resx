@@ -4417,6 +4417,15 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Calendar.Actions.JoinMeeting.WindowLabel" xml:space="preserve">
     <value>Začíná do</value>
   </data>
+  <data name="Integrations.Calendar.Actions.RefreshCalendars.Description" xml:space="preserve">
+    <value>Načte události všech připojených kalendářů hned, místo čekání na další aktualizaci, kterou Macro Deck jinak provádí každých pět minut.</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.RefreshCalendars.Name" xml:space="preserve">
+    <value>Aktualizovat kalendáře</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.RefreshCalendars.Unavailable" xml:space="preserve">
+    <value>Kalendáře teď nelze aktualizovat.</value>
+  </data>
   <data name="Integrations.Calendar.Actions.ShowDetails.Description" xml:space="preserve">
     <value>Otevře podrobnosti widgetu kalendáře na obrazovce, na které byl stisknut: událost zobrazenou v rozvržení Další událost nebo nadcházející události rozvržení Program.</value>
   </data>
@@ -5875,6 +5884,93 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.GoogleCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
     <value>Přihlášení Google pro {account} vypršelo</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.AuthorizationNotCompleted" xml:space="preserve">
+    <value>Přihlášení Microsoft bylo zrušeno nebo nebylo dokončeno. Stisknutím Pokračovat se otevře znovu.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsDescription" xml:space="preserve">
+    <value>V Macro Decku se zobrazí jen kalendáře vybrané zde. Pro pozdější přidání nebo odebrání kalendářů upravte tuto konfiguraci.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsLabel" xml:space="preserve">
+    <value>Kalendáře</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsTitle" xml:space="preserve">
+    <value>Výběr kalendářů</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsUnavailable" xml:space="preserve">
+    <value>Přihlášení proběhlo, ale kalendáře se od Microsoftu nepodařilo načíst. Zkuste to za chvíli znovu.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ClientIdLabel" xml:space="preserve">
+    <value>ID aplikace (klienta)</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ClientIdPlaceholder" xml:space="preserve">
+    <value>Aplikace Macro Decku</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ConnectDescription" xml:space="preserve">
+    <value>Macro Deck čte kalendáře Outlook a Microsoft 365. Stisknutím Pokračovat se v prohlížeči otevře přihlášení účtem Microsoft, kde se Macro Decku povolí čtení kalendářů. Fungují osobní, pracovní i školní účty.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ConnectTitle" xml:space="preserve">
+    <value>Připojit kalendář Outlook</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ConsentRequired" xml:space="preserve">
+    <value>Aplikace zatím nemá povolené čtení kalendářů. Přidejte aplikaci oprávnění Calendars.Read a zkuste to znovu; v organizaci ho možná musí udělit správce.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.EnterClientId" xml:space="preserve">
+    <value>Zadejte platné ID aplikace (klienta), nebo pole ponechte prázdné pro použití aplikace Macro Decku.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.InvalidTenant" xml:space="preserve">
+    <value>Zadejte common, organizations, consumers, ID tenanta nebo doménu, například contoso.com.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.MissingCalendarPermission" xml:space="preserve">
+    <value>Microsoft neudělil přístup ke kalendářům. Zkuste to znovu a povolte aplikaci číst kalendáře.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.MissingRefreshToken" xml:space="preserve">
+    <value>Microsoft neudělil trvalý přístup, takže Macro Deck nemohl zůstat přihlášený. Zkuste to znovu a povolte aplikaci zůstat přihlášenou.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.PublicClientRequired" xml:space="preserve">
+    <value>Microsoft očekává tajný klíč klienta, takže identifikátor URI přesměrování byl přidán u nesprávné platformy. Přidejte ho u Mobilní a desktopové aplikace místo Web a zkuste to znovu.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.SelectCalendar" xml:space="preserve">
+    <value>Vyberte alespoň jeden kalendář.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.SharedCalendarName" xml:space="preserve">
+    <value>{calendar} (sdílí {owner})</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.TenantDescription" xml:space="preserve">
+    <value>Pro osobní, pracovní a školní účty ponechte prázdné. Jen pro vlastní aplikaci, která přijímá účty jediné organizace, zadejte ID tenanta nebo doménu této organizace.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.TenantLabel" xml:space="preserve">
+    <value>Tenant</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.TokenExchangeFailed" xml:space="preserve">
+    <value>Microsoft přihlášení nepřijal. Zkuste to znovu; pokud byla v části Upřesnit zadána vlastní aplikace, zkontrolujte její ID aplikace (klienta) a identifikátor URI přesměrování.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.DuplicateAccountDescription" xml:space="preserve">
+    <value>„{title}“ je starší připojení stejného účtu Microsoft a nepoužívá se. Odeberte ho ze seznamu konfigurací níže.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.DuplicateAccountTitle" xml:space="preserve">
+    <value>Účet Microsoft připojen dvakrát</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.ReconnectResolution" xml:space="preserve">
+    <value>Připojte účet Microsoft znovu.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.SignInExpiredDescription" xml:space="preserve">
+    <value>Microsoft již nepřijímá přihlášení tohoto účtu. Přístup mohl být odebrán v účtu Microsoft nebo odvolán organizací, případně byla registrace aplikace změněna či odstraněna. Připojte účet znovu.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
+    <value>Platnost přihlášení Microsoft pro {account} vypršela</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.CalendarsUnreadableDescription" xml:space="preserve">
+    <value>Microsoft už nevrací jeden nebo více kalendářů vybraných pro tento účet, například protože byl kalendář odstraněn nebo už není sdílen. Jejich události chybí. Upravte připojení a vyberte kalendáře účtu znovu.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.CalendarsUnreadableTitle" xml:space="preserve">
+    <value>Některé kalendáře účtu {account} nelze načíst</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.AdminConsentInstruction" xml:space="preserve">
+    <value>Některé organizace povolují schvalování aplikací jen správcům. Přihlášení pak před pokračováním vyžaduje souhlas správce.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ClientIdDescription" xml:space="preserve">
+    <value>Pro přihlášení přes aplikaci Macro Decku ponechte prázdné. Pro vlastní aplikaci ji zaregistrujte na portálu Azure v části Registrace aplikací v adresáři Microsoft Entra; osobní účet Microsoft k tomu nejprve potřebuje adresář, například z bezplatného účtu Azure. Přidejte platformu Mobilní a desktopové aplikace s identifikátorem URI přesměrování {redirectUri} a delegované oprávnění Calendars.Read a pak sem zadejte ID aplikace (klienta).</value>
   </data>
   <data name="Integrations.HomeAssistant.Actions.Automation.CommandDisable" xml:space="preserve">
     <value>Vypnout</value>
@@ -9614,6 +9710,39 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.System.Variables.GpuNameIndexed" xml:space="preserve">
     <value>Název GPU {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskNameIndexed" xml:space="preserve">
+    <value>Název disku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskMountPointIndexed" xml:space="preserve">
+    <value>Přípojný bod disku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskFileSystemIndexed" xml:space="preserve">
+    <value>Souborový systém disku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskTotalIndexed" xml:space="preserve">
+    <value>Celková kapacita disku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskUsedIndexed" xml:space="preserve">
+    <value>Využité místo na disku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskFreeIndexed" xml:space="preserve">
+    <value>Volné místo na disku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskUsageIndexed" xml:space="preserve">
+    <value>Zaplnění disku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskReadSpeedIndexed" xml:space="preserve">
+    <value>Rychlost čtení disku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskWriteSpeedIndexed" xml:space="preserve">
+    <value>Rychlost zápisu disku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskReadActivityIndexed" xml:space="preserve">
+    <value>Aktivita čtení disku {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskWriteActivityIndexed" xml:space="preserve">
+    <value>Aktivita zápisu disku {index}</value>
   </data>
   <data name="Integrations.System.Variables.PcName" xml:space="preserve">
     <value>Název počítače</value>

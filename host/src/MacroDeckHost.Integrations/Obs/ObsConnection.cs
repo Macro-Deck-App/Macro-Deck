@@ -217,10 +217,12 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		=> RunForResultAsync(() => _client.SetInputSettings(inputName, settingsJson));
 
 	public Task<bool> SetSourceVisibleAsync(string sceneName, string sourceName, bool visible)
-		=> RunAsync(() => _client.SetSourceVisible(sceneName, sourceName, visible));
+		=> RunAndForgetTargetReadAsync(() => _client.SetSourceVisible(sceneName, sourceName, visible),
+			$"visible:{sceneName}\u0000{sourceName}");
 
 	public Task<bool> ToggleSourceVisibleAsync(string sceneName, string sourceName)
-		=> RunAsync(() => _client.ToggleSourceVisible(sceneName, sourceName));
+		=> RunAndForgetTargetReadAsync(() => _client.ToggleSourceVisible(sceneName, sourceName),
+			$"visible:{sceneName}\u0000{sourceName}");
 
 	/// <summary>Whether an input is muted, or <c>null</c> when it cannot be read.</summary>
 	public Task<bool?> GetInputMutedAsync(string inputName)
@@ -343,6 +345,23 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		}
 	}
 
+	// Forgotten after the write completes, so a read already in flight from before the write is
+	// dropped too and the next asker queries OBS again.
+	private async Task<bool> RunAndForgetTargetReadAsync(Action action, string key)
+	{
+		var succeeded = await RunAsync(action).ConfigureAwait(false);
+		ForgetTargetRead(key);
+		return succeeded;
+	}
+
+	private void ForgetTargetRead(string key)
+	{
+		lock (_targetReadGate)
+		{
+			_targetReads.Remove(key);
+		}
+	}
+
 	private void PruneStaleTargetReads(DateTime now)
 	{
 		foreach (var stale in _targetReads
@@ -355,9 +374,10 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 	}
 
 	public Task<bool> SetInputMuteAsync(string inputName, bool muted)
-		=> RunAsync(() => _client.SetInputMute(inputName, muted));
+		=> RunAndForgetTargetReadAsync(() => _client.SetInputMute(inputName, muted), $"mute:{inputName}");
 
-	public Task<bool> ToggleInputMuteAsync(string inputName) => RunAsync(() => _client.ToggleInputMute(inputName));
+	public Task<bool> ToggleInputMuteAsync(string inputName)
+		=> RunAndForgetTargetReadAsync(() => _client.ToggleInputMute(inputName), $"mute:{inputName}");
 
 	public Task<double?> GetInputVolumePercentAsync(string inputName)
 		=> QueryValueAsync<double?>(() => _client.GetInputVolume(inputName) * 100d, null);
@@ -393,10 +413,12 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 			() => _client.GetSourceFilterEnabled(sourceName, filterName));
 
 	public Task<bool> SetSourceFilterEnabledAsync(string sourceName, string filterName, bool enabled)
-		=> RunAsync(() => _client.SetSourceFilterEnabled(sourceName, filterName, enabled));
+		=> RunAndForgetTargetReadAsync(() => _client.SetSourceFilterEnabled(sourceName, filterName, enabled),
+			$"filter:{sourceName}\u0000{filterName}");
 
 	public Task<bool> ToggleSourceFilterAsync(string sourceName, string filterName)
-		=> RunAsync(() => _client.ToggleSourceFilterEnabled(sourceName, filterName));
+		=> RunAndForgetTargetReadAsync(() => _client.ToggleSourceFilterEnabled(sourceName, filterName),
+			$"filter:{sourceName}\u0000{filterName}");
 
 	public Task<bool> SetStudioModeAsync(bool enabled) => RunAsync(() => _client.SetStudioMode(enabled));
 
@@ -607,6 +629,7 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 
 	private void OnInputMuteChanged(object? sender, ObsInputMuteChange change)
 	{
+		ForgetTargetRead($"mute:{change.InputName}");
 		lock (_publicationGate)
 		{
 			if (!_cts.IsCancellationRequested && Volatile.Read(ref _disposed) == 0)

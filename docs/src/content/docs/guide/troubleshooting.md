@@ -219,6 +219,47 @@ calendars couldn't be updated** while they keep showing that account's last know
 - **Google did not grant lasting access** while connecting: remove the app's access in your Google
   account, then connect again.
 
+## Outlook Calendar asks you to sign in again
+
+**Integrations** shows **Microsoft sign-in expired** for an account, and calendar widgets say **Some
+calendars couldn't be updated** while they keep showing that account's last known events.
+
+- **Sign in again** with **Edit connection** or **Reconfigure** next to the account on the Outlook Calendar
+  page, and confirm its calendars. That keeps the account, so widgets and triggers set to its calendars keep
+  working. If you add it with **Add configuration** instead, **Integrations** then shows **Microsoft account
+  connected twice**: remove the older configuration.
+- **Access removed:** if you removed the app's access in your Microsoft account, your organization revoked it,
+  or the app registration of your own app was deleted or its permissions changed, sign in again.
+
+## Some calendars of an Outlook account can't be read
+
+**Integrations** shows **Some calendars of** your account **can't be read**: Microsoft no longer returns a
+calendar you chose for that account, because it was deleted, its owner stopped sharing it, or it moved. The
+account's other calendars keep working. Choose **Edit connection** next to the account, sign in again and pick
+its calendars anew.
+
+## Outlook Calendar sign-in fails
+
+- **The sign-in asks for an administrator's approval:** your organization lets only administrators allow
+  apps. Ask an administrator to allow Macro Deck, or to grant the **Calendars.Read** permission of an
+  [app of your own](/guide/concepts/#use-an-app-of-your-own), then connect again.
+- **The Azure portal does not let you register an app** with a personal Microsoft account: Microsoft only
+  allows app registrations in a Microsoft Entra directory. Create one first, for example with a free Azure
+  account, or sign in through Macro Deck's app by leaving **Advanced** empty.
+
+With an app of your own:
+
+- **Microsoft's sign-in page says the app is not configured for your account type** (AADSTS50194 or a
+  similar message): the app's **Supported account types** do not include your account. For personal and
+  work accounts, choose **Accounts in any organizational directory and personal Microsoft accounts**; for an
+  app of a single organization, enter that organization's tenant under **Advanced** in the setup.
+- **Microsoft says the application was not found** (AADSTS700016): check the **Application (client) ID**, and
+  that you sign in with an account the app accepts.
+- **The setup says Microsoft expects a client secret:** the redirect URI was added under the **Web**
+  platform. Remove it there and add it under **Mobile and desktop applications**.
+- **The browser cannot return to Macro Deck:** the redirect URI in the app registration must be exactly the
+  one the setup shows, apart from the port.
+
 ## Google sign-in does not come back to Macro Deck
 
 The browser shows an error from Google, or a page that cannot be reached, instead of returning to

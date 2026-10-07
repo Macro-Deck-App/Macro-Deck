@@ -21,6 +21,7 @@ public readonly record struct FormattedVariableValue(LocalizedText Value, Locali
 public static class VariableValueFormatter
 {
 	private static readonly string[] _byteRungs = ["B", "KB", "MB", "GB", "TB", "PB"];
+	private static readonly string[] _byteRateRungs = ["B/s", "KB/s", "MB/s", "GB/s", "TB/s", "PB/s"];
 
 	public static FormattedVariableValue Format(VariableEntity entity)
 	{
@@ -48,7 +49,8 @@ public static class VariableValueFormatter
 		return semanticKind switch
 		{
 			VariableSemanticKinds.Duration => new FormattedVariableValue(Duration(value), default),
-			VariableSemanticKinds.Bytes => Bytes(value),
+			VariableSemanticKinds.Bytes => Bytes(value, _byteRungs),
+			VariableSemanticKinds.BytesPerSecond => Bytes(value, _byteRateRungs),
 			_ => new FormattedVariableValue(Number(value, decimalPlaces), Unit(unit))
 		};
 	}
@@ -68,18 +70,18 @@ public static class VariableValueFormatter
 
 	// The declared unit is superseded by the rung the value lands on: a value already scaled by its
 	// provider says so with a kind other than bytes.
-	private static FormattedVariableValue Bytes(double value)
+	private static FormattedVariableValue Bytes(double value, string[] rungs)
 	{
 		var scaled = value;
 		var rung = 0;
-		while (Math.Abs(scaled) >= 1024 && rung < _byteRungs.Length - 1)
+		while (Math.Abs(scaled) >= 1024 && rung < rungs.Length - 1)
 		{
 			scaled /= 1024;
 			rung++;
 		}
 
 		var text = scaled.ToString(rung == 0 ? "F0" : "F1", CultureInfo.InvariantCulture);
-		return new FormattedVariableValue(text, _byteRungs[rung]);
+		return new FormattedVariableValue(text, rungs[rung]);
 	}
 
 	private static LocalizedText Number(double value, int? decimalPlaces)

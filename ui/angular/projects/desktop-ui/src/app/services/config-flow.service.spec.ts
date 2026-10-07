@@ -240,6 +240,38 @@ describe('ConfigFlowService', () => {
     expect(service.values()).toEqual({ clientId: 'abc' });
   });
 
+  it('preselects a step offered after an authorization and signs in again after going back', async () => {
+    const calendarsStep = {
+      stepId: 'calendars',
+      fields: [{
+        name: 'calendarIds',
+        type: ActionParameterType.MultiSelect,
+        description: '',
+        required: true,
+        defaultValue: ['cal-1', 'cal-3'],
+      }],
+    };
+    submitResponses.push({ kind: 'External', externalUrl: AUTH_URL, resumeStepId: 'authorize' });
+    submitResponses.push({ kind: 'Step', step: calendarsStep });
+    submitResponses.push({ kind: 'External', externalUrl: AUTH_URL, resumeStepId: 'authorize' });
+    await service.start('spotify');
+    service.setValue('clientId', 'abc');
+    await service.submit();
+    notifications.next({ flowId: 'flow-1', success: true });
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(service.step()?.stepId).toBe('calendars');
+    expect(service.values()).toEqual({ calendarIds: ['cal-1', 'cal-3'] });
+
+    service.back();
+    await service.submit();
+
+    expect(submitted.map(request => request.stepId)).toEqual(['credentials', 'authorize', 'credentials']);
+    expect(openedLinks).toEqual([AUTH_URL, AUTH_URL]);
+    expect(service.waitingForAuth()).toBeTrue();
+  });
+
   it('does not treat an empty array as satisfying a required MultiSelect field', () => {
     service.step.set({
       stepId: 'entities',

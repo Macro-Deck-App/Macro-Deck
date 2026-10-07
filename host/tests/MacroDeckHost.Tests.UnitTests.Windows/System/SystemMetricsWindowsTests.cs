@@ -39,4 +39,27 @@ public class SystemMetricsWindowsTests
 			Assert.That(await metrics.GetGpuUsageAsync(metrics.GpuCount), Is.Null);
 		}
 	}
+
+	[Test]
+	public async Task The_system_drive_is_listed_with_capacity_and_activity()
+	{
+		var systemDrive = (Environment.GetEnvironmentVariable("SystemDrive") ?? "C:") + "\\";
+		var metrics = SystemMetricsServiceFactory.Create();
+		using (metrics as IDisposable)
+		{
+			await metrics.GetDisksAsync();
+			await Task.Delay(TimeSpan.FromSeconds(1.6));
+			var drive = (await metrics.GetDisksAsync())
+				.SingleOrDefault(disk => string.Equals(disk.MountPoint, systemDrive, StringComparison.OrdinalIgnoreCase));
+
+			Assert.That(drive, Is.Not.Null);
+			Assert.Multiple(() =>
+			{
+				Assert.That(drive!.Name, Is.Not.Empty);
+				Assert.That(drive.TotalBytes, Is.GreaterThan(0));
+				Assert.That(drive.FreeBytes, Is.InRange(0, drive.TotalBytes!.Value));
+				Assert.That(drive.Activity, Is.Not.Null);
+			});
+		}
+	}
 }
