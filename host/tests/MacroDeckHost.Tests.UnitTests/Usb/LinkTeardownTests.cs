@@ -79,8 +79,8 @@ public class LinkTeardownTests
 			var read = carrier.ReadAsync(new byte[LinkProtocol.MaxFrameLength], CancellationToken.None).AsTask();
 			var write = carrier.WriteFrameAsync(new byte[10], CancellationToken.None).AsTask();
 			await carrier.DisposeAsync();
-			_ = read.Exception;
-			_ = write.Exception;
+			Assert.That(async () => await read, Throws.TypeOf<LinkLostException>());
+			Assert.That(async () => await write, Throws.TypeOf<LinkLostException>());
 		});
 
 		Assert.That(unobserved, Is.Empty);
