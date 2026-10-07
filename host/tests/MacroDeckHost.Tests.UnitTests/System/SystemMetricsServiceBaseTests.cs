@@ -156,6 +156,40 @@ public class SystemMetricsServiceBaseTests
 		Assert.That(await service.GetGpuNameAsync(0), Is.Null);
 	}
 
+	[Test]
+	public async Task Disk_rates_come_from_two_reads_and_one_read_serves_every_caller_until_it_expires()
+	{
+		var clock = new TestClock();
+		var service = new CountingMetricsService(clock);
+		service.DiskReadings.Enqueue([new DiskReading("/", "Disk", "ext4", 100, 40, new DiskCounters(0, 0, TimeSpan.Zero, TimeSpan.Zero))]);
+		service.DiskReadings.Enqueue([new DiskReading("/", "Disk", "ext4", 100, 40,
+			new DiskCounters(4096, 2048, TimeSpan.FromMilliseconds(500), TimeSpan.Zero))]);
+
+		var first = await service.GetDisksAsync();
+		var cached = await service.GetDisksAsync();
+		clock.Advance(TimeSpan.FromSeconds(2));
+		var second = await service.GetDisksAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(first.Single().Activity, Is.Null);
+			Assert.That(cached, Is.SameAs(first));
+			Assert.That(second.Single().Activity!.ReadBytesPerSecond, Is.EqualTo(2048));
+			Assert.That(second.Single().Activity!.WriteBytesPerSecond, Is.EqualTo(1024));
+			Assert.That(second.Single().Activity!.ReadActivePercent, Is.EqualTo(25));
+			Assert.That(second.Single().UsedBytes, Is.EqualTo(60));
+			Assert.That(service.DiskReads, Is.EqualTo(2));
+		});
+	}
+
+	[Test]
+	public async Task A_failing_disk_read_reports_no_disks()
+	{
+		var service = new CountingMetricsService { ThrowOnRead = true };
+
+		Assert.That(await service.GetDisksAsync(), Is.Empty);
+	}
+
 	private sealed class TestClock : TimeProvider
 	{
 		private DateTimeOffset _now = DateTimeOffset.UnixEpoch;
@@ -185,6 +219,10 @@ public class SystemMetricsServiceBaseTests
 		public int MemoryReads { get; private set; }
 
 		public int GpuReads { get; private set; }
+
+		public Queue<IReadOnlyList<DiskReading>> DiskReadings { get; } = new();
+
+		public int DiskReads { get; private set; }
 
 		public override int GpuCount => GpuCountValue;
 
@@ -218,6 +256,17 @@ public class SystemMetricsServiceBaseTests
 
 			GpuReads++;
 			return Task.FromResult(Snapshot);
+		}
+
+		protected override Task<IReadOnlyList<DiskReading>> ReadDisksAsync(CancellationToken cancellationToken)
+		{
+			if (ThrowOnRead)
+			{
+				throw new InvalidOperationException("read failed");
+			}
+
+			DiskReads++;
+			return Task.FromResult(DiskReadings.Count > 0 ? DiskReadings.Dequeue() : (IReadOnlyList<DiskReading>)[]);
 		}
 	}
 }

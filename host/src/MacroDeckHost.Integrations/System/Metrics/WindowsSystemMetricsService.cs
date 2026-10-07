@@ -13,6 +13,7 @@ internal sealed class WindowsSystemMetricsService : SystemMetricsServiceBase
 
 	private readonly bool _hasNvidiaSmi = ProcessRunner.CommandExists("nvidia-smi");
 	private readonly WindowsGpuInterop _interop = new();
+	private readonly WindowsDiskCounters _diskCounters = new();
 	private readonly IReadOnlyList<WindowsGpuAdapter> _adapters;
 
 	private bool _loggedEmptyCounters;
@@ -62,11 +63,46 @@ internal sealed class WindowsSystemMetricsService : SystemMetricsServiceBase
 		return snapshot;
 	}
 
+	protected override Task<IReadOnlyList<DiskReading>> ReadDisksAsync(CancellationToken cancellationToken)
+	{
+		var activity = _diskCounters.Read();
+		var readings = new List<DiskReading>();
+		foreach (var drive in DriveInfo.GetDrives())
+		{
+			if (drive.DriveType is not (DriveType.Fixed or DriveType.Removable))
+			{
+				continue;
+			}
+
+			try
+			{
+				if (!drive.IsReady)
+				{
+					continue;
+				}
+
+				var letter = drive.Name.TrimEnd('\\');
+				readings.Add(new DiskReading(drive.Name,
+					drive.VolumeLabel is { Length: > 0 } label ? label : letter,
+					drive.DriveFormat,
+					drive.TotalSize,
+					drive.AvailableFreeSpace,
+					Activity: activity?.GetValueOrDefault(letter)));
+			}
+			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+			{
+			}
+		}
+
+		return Task.FromResult<IReadOnlyList<DiskReading>>(readings);
+	}
+
 	protected override void Dispose(bool disposing)
 	{
 		if (disposing)
 		{
 			_interop.Dispose();
+			_diskCounters.Dispose();
 		}
 
 		base.Dispose(disposing);

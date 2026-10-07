@@ -4,16 +4,22 @@ internal abstract class SystemMetricsServiceBase : ISystemMetricsService, IDispo
 {
 	private static readonly TimeSpan _memoryCacheTtl = TimeSpan.FromMilliseconds(900);
 	private static readonly TimeSpan _gpuCacheTtl = TimeSpan.FromMilliseconds(2500);
+	private static readonly TimeSpan _diskCacheTtl = TimeSpan.FromMilliseconds(1500);
 
 	private readonly TimeProvider _time;
 	private readonly SemaphoreSlim _lock = new(1, 1);
 	private readonly Dictionary<int, string> _lastKnownGpuNames = new();
+	private readonly SemaphoreSlim _diskLock = new(1, 1);
+	private readonly Dictionary<string, (DiskCounters Counters, DateTimeOffset ReadAt)> _previousDiskCounters =
+		new(StringComparer.Ordinal);
 
 	private CpuTimes? _previousCpuTimes;
 	private MemoryInfo? _cachedMemory;
 	private DateTimeOffset? _memoryReadAt;
 	private IReadOnlyList<GpuSample> _cachedGpuSnapshot = [];
 	private DateTimeOffset? _gpuReadAt;
+	private IReadOnlyList<DiskSample> _cachedDisks = [];
+	private DateTimeOffset? _disksReadAt;
 
 	protected SystemMetricsServiceBase(TimeProvider? time = null)
 	{
@@ -121,6 +127,41 @@ internal abstract class SystemMetricsServiceBase : ISystemMetricsService, IDispo
 		}
 	}
 
+	public async Task<IReadOnlyList<DiskSample>> GetDisksAsync(CancellationToken cancellationToken = default)
+	{
+		await _diskLock.WaitAsync(cancellationToken);
+		try
+		{
+			var now = _time.GetUtcNow();
+			if (_disksReadAt is { } readAt && now - readAt < _diskCacheTtl)
+			{
+				return _cachedDisks;
+			}
+
+			IReadOnlyList<DiskReading> readings;
+			try
+			{
+				readings = await ReadDisksAsync(cancellationToken);
+			}
+			catch (OperationCanceledException)
+			{
+				throw;
+			}
+			catch
+			{
+				readings = [];
+			}
+
+			_cachedDisks = ToSamples(readings, now);
+			_disksReadAt = now;
+			return _cachedDisks;
+		}
+		finally
+		{
+			_diskLock.Release();
+		}
+	}
+
 	public void Dispose()
 	{
 		Dispose(true);
@@ -132,6 +173,7 @@ internal abstract class SystemMetricsServiceBase : ISystemMetricsService, IDispo
 		if (disposing)
 		{
 			_lock.Dispose();
+			_diskLock.Dispose();
 		}
 	}
 
@@ -140,6 +182,42 @@ internal abstract class SystemMetricsServiceBase : ISystemMetricsService, IDispo
 	protected abstract Task<MemoryInfo?> ReadMemoryAsync(CancellationToken cancellationToken);
 
 	protected abstract Task<IReadOnlyList<GpuSample>> ReadGpuSnapshotAsync(CancellationToken cancellationToken);
+
+	protected abstract Task<IReadOnlyList<DiskReading>> ReadDisksAsync(CancellationToken cancellationToken);
+
+	private List<DiskSample> ToSamples(IReadOnlyList<DiskReading> readings, DateTimeOffset now)
+	{
+		var samples = new List<DiskSample>(readings.Count);
+		var seen = new HashSet<string>(StringComparer.Ordinal);
+		foreach (var reading in readings)
+		{
+			var activity = reading.Activity;
+			if (reading.Counters is { } counters)
+			{
+				if (_previousDiskCounters.TryGetValue(reading.MountPoint, out var previous))
+				{
+					activity ??= DiskRateCalculator.Calculate(previous.Counters, counters, now - previous.ReadAt);
+				}
+
+				_previousDiskCounters[reading.MountPoint] = (counters, now);
+			}
+
+			seen.Add(reading.MountPoint);
+			samples.Add(new DiskSample(reading.MountPoint,
+				reading.Name,
+				reading.FileSystem,
+				reading.TotalBytes,
+				reading.FreeBytes,
+				activity));
+		}
+
+		foreach (var gone in _previousDiskCounters.Keys.Where(key => !seen.Contains(key)).ToList())
+		{
+			_previousDiskCounters.Remove(gone);
+		}
+
+		return samples;
+	}
 
 	private async Task<GpuSample?> GetGpuAsync(int gpuIndex, CancellationToken cancellationToken)
 	{
