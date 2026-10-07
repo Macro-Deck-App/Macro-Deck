@@ -19,6 +19,7 @@ using MacroDeck.Plugin.Protocol;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Application.Applications;
+using MacroDeckHost.Application.AdGuardHome;
 using MacroDeckHost.Application.Calendar;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Configuration;
@@ -77,6 +78,7 @@ using MacroDeckHost.Application.StreamChat;
 using MacroDeckHost.Application.StreamStats;
 using MacroDeckHost.Infrastructure.StreamStats;
 using MacroDeckHost.Infrastructure.Twitch;
+using MacroDeckHost.Widgets.AdGuardHome;
 using MacroDeckHost.Widgets.Calendar;
 using MacroDeckHost.Widgets.Jellyfin;
 using MacroDeckHost.Widgets.StreamChat;
@@ -360,6 +362,10 @@ public class Startup
 		}
 		services.AddSingleton<IBuiltInIntegrationUiProvider, CalendarUiProvider>();
 		services.AddSingleton<IBuiltInIntegrationUiProvider, JellyfinSessionsUiProvider>();
+		services.AddSingleton<AdGuardHomeHub>();
+		services.AddSingleton<IAdGuardHomeInstances>(sp => sp.GetRequiredService<AdGuardHomeHub>());
+		services.AddSingleton<IAdGuardHomeSink>(sp => sp.GetRequiredService<AdGuardHomeHub>());
+		services.AddSingleton<IBuiltInIntegrationUiProvider, AdGuardHomeUiProvider>();
 
 		services.AddSingleton<BuiltInScreenSaverProvider>();
 		services.AddSingleton<IBuiltInIntegrationUiProvider>(provider => provider.GetRequiredService<BuiltInScreenSaverProvider>());
@@ -839,6 +845,7 @@ public class Startup
 		services.AddSingleton<IIntegrationConfigMutationAdapter, ObsConfigurationMutationAdapter>();
 		services.AddSingleton<IIntegrationConfigMutationAdapter, JellyfinConfigurationMutationAdapter>();
 		services.AddSingleton<IIntegrationConfigMutationAdapter, CompanionConfigurationMutationAdapter>();
+		services.AddSingleton<IIntegrationConfigMutationAdapter, AdGuardHomeConfigurationMutationAdapter>();
 		services.AddSingleton<Func<IIntegrationConfigMutationCoordinator>>(sp =>
 			sp.GetRequiredService<IIntegrationConfigMutationCoordinator>);
 		services.AddSingleton<CompanionCommandRequests>();

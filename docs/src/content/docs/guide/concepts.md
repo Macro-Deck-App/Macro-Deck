@@ -546,7 +546,7 @@ you expect.
 
 Integrations connect Macro Deck to other apps: OBS, Home Assistant, Voicemeeter, Spotify,
 [SoundPad](/guide/soundpad/), Twitch, [YouTube](/guide/youtube/), [Jellyfin](/guide/jellyfin/), Discord, Google Calendar,
-Outlook Calendar and more. Turn on the ones you use under **Integrations**.
+Outlook Calendar, [AdGuard Home](/guide/adguard-home/) and more. Turn on the ones you use under **Integrations**.
 
 ![The Integrations page listing ADB, Discord, Google Calendar, Home Assistant, HTTP, Jellyfin and Keyboard, with HTTP, Jellyfin and Keyboard turned on](../../../assets/guide/integrations.png)
 

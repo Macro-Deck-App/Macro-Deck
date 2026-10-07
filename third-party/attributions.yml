@@ -49,9 +49,18 @@ assets:
     licenseFile: third-party/licenses/Lucide-icons-LICENSE.txt
     note: >-
       Lucide 1.47.0 icons (MIT for the icons derived from Feather), used in the configuration UI, the web
-      client, the music player widget, the integration icons and the Included icon pack the host ships,
-      some recoloured or placed in a badge.
+      client, the music player and AdGuard Home widgets, the integration icons and the Included icon pack the
+      host ships, some recoloured or placed in a badge.
     paths:
+      - host/src/MacroDeckHost.Widgets/AdGuardHome/Icons/blocked.svg
+      - host/src/MacroDeckHost.Widgets/AdGuardHome/Icons/blocked-percentage.svg
+      - host/src/MacroDeckHost.Widgets/AdGuardHome/Icons/dns-queries.svg
+      - host/src/MacroDeckHost.Widgets/AdGuardHome/Icons/parental.svg
+      - host/src/MacroDeckHost.Widgets/AdGuardHome/Icons/processing-time.svg
+      - host/src/MacroDeckHost.Widgets/AdGuardHome/Icons/protected.svg
+      - host/src/MacroDeckHost.Widgets/AdGuardHome/Icons/safe-browsing.svg
+      - host/src/MacroDeckHost.Widgets/AdGuardHome/Icons/safe-search.svg
+      - host/src/MacroDeckHost.Widgets/AdGuardHome/Icons/unprotected.svg
       - ui/runtime/styles/icons/action-button-type.svg
       - ui/runtime/styles/icons/alert-triangle.svg
       - ui/runtime/styles/icons/align-center.svg
@@ -198,11 +207,13 @@ assets:
     license: Apache-2.0
     copyright: Dashboard Icons contributors
     note: >-
-      Logos of the Discord, Home Assistant, Jellyfin, Outlook Calendar, Spotify, Twitch, YouTube and YouTube Music
-      integrations, and the Windows logo marking the platforms a Store package supports. The logos are trademarks of their
-      respective owners and are used to identify the integration or platform only. The Jellyfin and Outlook Calendar logos
-      have their CSS converted to presentation attributes.
+      Logos of the AdGuard Home, Discord, Home Assistant, Jellyfin, Outlook Calendar, Spotify, Twitch, YouTube and
+      YouTube Music integrations, and the Windows logo marking the platforms a Store package supports. The logos are
+      trademarks of their respective owners and are used to identify the integration or platform only. The AdGuard
+      Home and Jellyfin logos' inline styles were rewritten as presentation attributes, and the Outlook Calendar logo is
+      microsoft-outlook.svg with its CSS converted to presentation attributes.
     paths:
+      - host/src/MacroDeckHost.Integrations/AdGuardHome/adguard-home-icon.svg
       - host/src/MacroDeckHost.Integrations/Discord/discord-icon.svg
       - host/src/MacroDeckHost.Integrations/HomeAssistant/home-assistant-icon.svg
       - host/src/MacroDeckHost.Integrations/Jellyfin/jellyfin-icon.svg

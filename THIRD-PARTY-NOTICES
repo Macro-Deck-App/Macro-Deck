@@ -2906,13 +2906,13 @@ Android robot
 Dashboard Icons
   License: Apache-2.0
   URL: https://github.com/homarr-labs/dashboard-icons
-  Note: Logos of the Discord, Home Assistant, Jellyfin, Outlook Calendar, Spotify, Twitch, YouTube and YouTube Music integrations, and the Windows logo marking the platforms a Store package supports. The logos are trademarks of their respective owners and are used to identify the integration or platform only. The Jellyfin and Outlook Calendar logos have their CSS converted to presentation attributes.
+  Note: Logos of the AdGuard Home, Discord, Home Assistant, Jellyfin, Outlook Calendar, Spotify, Twitch, YouTube and YouTube Music integrations, and the Windows logo marking the platforms a Store package supports. The logos are trademarks of their respective owners and are used to identify the integration or platform only. The AdGuard Home and Jellyfin logos' inline styles were rewritten as presentation attributes, and the Outlook Calendar logo is microsoft-outlook.svg with its CSS converted to presentation attributes.
   Texts: [273]
 
 Lucide icons
   License: ISC AND MIT
   URL: https://github.com/lucide-icons/lucide
-  Note: Lucide 1.47.0 icons (MIT for the icons derived from Feather), used in the configuration UI, the web client, the music player widget, the integration icons and the Included icon pack the host ships, some recoloured or placed in a badge.
+  Note: Lucide 1.47.0 icons (MIT for the icons derived from Feather), used in the configuration UI, the web client, the music player and AdGuard Home widgets, the integration icons and the Included icon pack the host ships, some recoloured or placed in a badge.
   Texts: [274]
 
 Macro Deck name, logo and branding assets
