@@ -46,7 +46,8 @@ The tiles in a folder:
 | Gauges | CPU, RAM and GPU load side by side as rings with an icon, like a battery overview. **Color thresholds** color each ring by its value instead of a single warning |
 | Weather | Today and the next days for your city. Press it for the full details |
 | Calendar | Today's date with your next meetings, the next few days on a larger widget, or your next meeting and how long until it starts. Press it for the details |
-| Music Player | What Spotify is playing, with play and skip. Some players offer extra settings for each widget below the player choice |
+| Music Player | What Spotify or [Jellyfin](/guide/jellyfin/) is playing, with play and skip. Some players offer extra settings for each widget below the player choice |
+| Jellyfin Sessions | What plays on your [Jellyfin](/guide/jellyfin/) servers, on whose device, offered once a Jellyfin server is set up |
 | Twitch Chat | Your channel's chat with emotes and badges, offered once a Twitch account is connected |
 | Twitch Stream Stats | Whether you are live, your viewers, chatters, followers and subscribers, the stream title, category and uptime, and a small graph, in a style you choose, offered once a Twitch account is connected |
 | YouTube Chat | Your live stream's chat, offered once a [YouTube channel](/guide/youtube/) is connected |
@@ -577,10 +578,10 @@ you expect.
 ## Integrations and the Store
 
 Integrations connect Macro Deck to other apps: OBS, Home Assistant, Voicemeeter, Spotify,
-[SoundPad](/guide/soundpad/), Twitch, [YouTube](/guide/youtube/), Discord, Google Calendar, Outlook Calendar,
-[AdGuard Home](/guide/adguard-home/) and more. Turn on the ones you use under **Integrations**.
+[SoundPad](/guide/soundpad/), Twitch, [YouTube](/guide/youtube/), [Jellyfin](/guide/jellyfin/), Discord, Google Calendar,
+Outlook Calendar, [AdGuard Home](/guide/adguard-home/) and more. Turn on the ones you use under **Integrations**.
 
-![The Integrations page listing ADB, Discord, Google Calendar, Home Assistant, HTTP, Keyboard and Macro Deck Companion, with HTTP and Keyboard turned on](../../../assets/guide/integrations.png)
+![The Integrations page listing ADB, Discord, Google Calendar, Home Assistant, HTTP, Jellyfin and Keyboard, with HTTP, Jellyfin and Keyboard turned on](../../../assets/guide/integrations.png)
 
 The **Store** offers more plugins and icon packs. Everything published there is reviewed and signed
 first.

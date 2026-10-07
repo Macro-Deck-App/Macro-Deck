@@ -273,6 +273,19 @@ Macro Deck after you allowed access.
   **Use additional HTTPS port**, or turn HTTPS off while you connect the account, then start the setup
   again.
 
+## Jellyfin does not connect or a button does nothing
+
+- **Jellyfin server unreachable** under **Integrations**: check the address in the configuration, including
+  the port and, behind a reverse proxy, the path such as `/jellyfin`. Macro Deck keeps retrying on its own.
+- **Jellyfin sign-in rejected**: the API key was deleted or the password changed. Edit the configuration and
+  enter a new API key, or the password to sign in again.
+- **A press fails**: the Jellyfin client may not support that command, or nothing plays on it. Browser tabs
+  usually cannot change the volume or mute. Try the Jellyfin app on that device.
+- **A device is missing from the list**: Macro Deck learns a device when it first sees it connected while
+  it can be remote-controlled. A client that cannot be controlled appears only in the variables, once it
+  plays something. With a username and password, Macro Deck only sees the sessions of that account; use
+  an API key to see everyone's.
+
 ## A variable that reads from a file stays unavailable
 
 Check that the file exists at the exact path in the variable's **File settings**, and that it holds

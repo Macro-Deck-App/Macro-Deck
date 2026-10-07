@@ -81,6 +81,7 @@ using MacroDeckHost.Infrastructure.StreamStats;
 using MacroDeckHost.Infrastructure.Twitch;
 using MacroDeckHost.Widgets.AdGuardHome;
 using MacroDeckHost.Widgets.Calendar;
+using MacroDeckHost.Widgets.Jellyfin;
 using MacroDeckHost.Widgets.StreamChat;
 using MacroDeckHost.Widgets.StreamStats;
 using MacroDeckHost.Application.Icons;
@@ -361,6 +362,7 @@ public class Startup
 			services.AddSingleton<IBuiltInIntegrationUiProvider>(provider => StreamChatProvider(provider, platform));
 		}
 		services.AddSingleton<IBuiltInIntegrationUiProvider, CalendarUiProvider>();
+		services.AddSingleton<IBuiltInIntegrationUiProvider, JellyfinSessionsUiProvider>();
 		services.AddSingleton<AdGuardHomeHub>();
 		services.AddSingleton<IAdGuardHomeInstances>(sp => sp.GetRequiredService<AdGuardHomeHub>());
 		services.AddSingleton<IAdGuardHomeSink>(sp => sp.GetRequiredService<AdGuardHomeHub>());
@@ -844,6 +846,7 @@ public class Startup
 		services.AddSingleton<IOAuthCallbackCoordinator, OAuthCallbackCoordinator>();
 		services.AddSingleton<IConfigFlowManager, ConfigFlowManager>();
 		services.AddSingleton<IIntegrationConfigMutationAdapter, ObsConfigurationMutationAdapter>();
+		services.AddSingleton<IIntegrationConfigMutationAdapter, JellyfinConfigurationMutationAdapter>();
 		services.AddSingleton<IIntegrationConfigMutationAdapter, CompanionConfigurationMutationAdapter>();
 		services.AddSingleton<IIntegrationConfigMutationAdapter, AdGuardHomeConfigurationMutationAdapter>();
 		services.AddSingleton<Func<IIntegrationConfigMutationCoordinator>>(sp =>
