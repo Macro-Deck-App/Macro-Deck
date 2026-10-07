@@ -1,6 +1,6 @@
 import { AppStrings } from '@macro-deck/runtime';
 
-export type FilterCategory = 'text' | 'numbers' | 'dates' | 'lists' | 'fallbacks' | 'scriban';
+export type FilterCategory = 'text' | 'numbers' | 'colors' | 'dates' | 'lists' | 'fallbacks' | 'scriban';
 
 export interface LiquidFilterSnippet {
   key: string;
@@ -22,6 +22,7 @@ export interface LiquidControlSnippet {
 const FILTER_CATEGORY_KEYS: Record<FilterCategory, string> = {
   text: AppStrings.TemplateBuilder.FilterCategory.Text,
   numbers: AppStrings.TemplateBuilder.FilterCategory.Numbers,
+  colors: AppStrings.TemplateBuilder.FilterCategory.Colors,
   dates: AppStrings.TemplateBuilder.FilterCategory.Dates,
   lists: AppStrings.TemplateBuilder.FilterCategory.Lists,
   fallbacks: AppStrings.TemplateBuilder.FilterCategory.Fallbacks,
@@ -32,7 +33,7 @@ export function filterCategoryLabelKey(category: FilterCategory): string {
   return FILTER_CATEGORY_KEYS[category];
 }
 
-export const FILTER_CATEGORIES: FilterCategory[] = ['text', 'numbers', 'dates', 'lists', 'fallbacks', 'scriban'];
+export const FILTER_CATEGORIES: FilterCategory[] = ['text', 'numbers', 'colors', 'dates', 'lists', 'fallbacks', 'scriban'];
 
 export const LIQUID_FILTERS: LiquidFilterSnippet[] = [
   // Text
@@ -62,6 +63,18 @@ export const LIQUID_FILTERS: LiquidFilterSnippet[] = [
   { key: 'ceil', category: 'numbers', label: 'ceil', insert: ' | ceil', hintKey: AppStrings.TemplateBuilder.Filters.Ceil.Hint },
   { key: 'modulo', category: 'numbers', label: 'modulo', insert: ' | modulo: 3', hintKey: AppStrings.TemplateBuilder.Filters.Modulo.Hint },
   { key: 'abs', category: 'numbers', label: 'abs', insert: ' | abs', hintKey: AppStrings.TemplateBuilder.Filters.Abs.Hint },
+
+  // Colors
+  { key: 'color', category: 'colors', label: 'color', insert: ' | color', hintKey: AppStrings.TemplateBuilder.Filters.Color.Hint },
+  { key: 'color_lighten', category: 'colors', label: 'color_lighten', insert: ' | color_lighten: 20', hintKey: AppStrings.TemplateBuilder.Filters.ColorLighten.Hint },
+  { key: 'color_darken', category: 'colors', label: 'color_darken', insert: ' | color_darken: 20', hintKey: AppStrings.TemplateBuilder.Filters.ColorDarken.Hint },
+  { key: 'color_saturate', category: 'colors', label: 'color_saturate', insert: ' | color_saturate: 20', hintKey: AppStrings.TemplateBuilder.Filters.ColorSaturate.Hint },
+  { key: 'color_desaturate', category: 'colors', label: 'color_desaturate', insert: ' | color_desaturate: 20', hintKey: AppStrings.TemplateBuilder.Filters.ColorDesaturate.Hint },
+  { key: 'color_opacity', category: 'colors', label: 'color_opacity', insert: ' | color_opacity: 70', hintKey: AppStrings.TemplateBuilder.Filters.ColorOpacity.Hint },
+  { key: 'color_increase_opacity', category: 'colors', label: 'color_increase_opacity', insert: ' | color_increase_opacity: 20', hintKey: AppStrings.TemplateBuilder.Filters.ColorIncreaseOpacity.Hint },
+  { key: 'color_reduce_opacity', category: 'colors', label: 'color_reduce_opacity', insert: ' | color_reduce_opacity: 20', hintKey: AppStrings.TemplateBuilder.Filters.ColorReduceOpacity.Hint },
+  { key: 'color_hue', category: 'colors', label: 'color_hue', insert: ' | color_hue: 30', hintKey: AppStrings.TemplateBuilder.Filters.ColorHue.Hint },
+  { key: 'color_mix', category: 'colors', label: 'color_mix', insert: ' | color_mix: "#ffffff", 50', hintKey: AppStrings.TemplateBuilder.Filters.ColorMix.Hint },
 
   // Dates
   { key: 'date', category: 'dates', label: 'date', insert: ' | date: "%Y-%m-%d"', hintKey: AppStrings.TemplateBuilder.Filters.Date.Hint },

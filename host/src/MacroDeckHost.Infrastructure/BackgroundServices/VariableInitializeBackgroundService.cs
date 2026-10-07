@@ -2,6 +2,7 @@ using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Variables.Files;
+using MacroDeckHost.Application.Variables.Templates;
 using MacroDeckHost.Domain.Entities;
 using Microsoft.Extensions.Hosting;
 using ILogger = Serilog.ILogger;
@@ -14,6 +15,7 @@ public sealed class VariableInitializeBackgroundService : HostReadyBackgroundSer
 
 	private readonly VariableRegistry _registry;
 	private readonly FileVariableSynchronizer _files;
+	private readonly TemplateVariableSynchronizer _templates;
 	private readonly IUserVariableStore _userStore;
 	private readonly StartupReadiness _readiness;
 	private readonly IHostApplicationLifetime _lifetime;
@@ -25,11 +27,13 @@ public sealed class VariableInitializeBackgroundService : HostReadyBackgroundSer
 		IUserVariableStore userStore,
 		StartupReadiness readiness,
 		ILogger logger,
-		FileVariableSynchronizer files)
+		FileVariableSynchronizer files,
+		TemplateVariableSynchronizer templates)
 		: base(lifetime)
 	{
 		_registry = registry;
 		_files = files;
+		_templates = templates;
 		_userStore = userStore;
 		_readiness = readiness;
 		_lifetime = lifetime;
@@ -80,6 +84,8 @@ public sealed class VariableInitializeBackgroundService : HostReadyBackgroundSer
 				_files.ScheduleRefresh(variable.Id);
 			}
 		}
+
+		await _templates.InitializeAsync();
 
 		_readiness.MarkVariablesReady();
 		_logger.Information("Loaded {Count} user variable(s) into the registry", stored.Count);

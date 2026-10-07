@@ -5,6 +5,7 @@ import {
   createPendingStateVariable,
   type CreateVariableRequest,
   DEFAULT_OFF_STATE_ID,
+  resolveLocalizedText,
   STATE_LABEL_VARIABLE_NAME,
   STATE_VARIABLE_NAME,
   type UpdateVariableRequest,
@@ -19,6 +20,7 @@ import { LocalizationService } from '../localization';
 export interface VariableSaveResult {
   variable: Variable | null;
   errorCode: string | null;
+  errorMessage?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -120,7 +122,7 @@ export class VariableService {
     const response = await this.ipc.createVariable(request);
     if (!response.success || !response.variable) {
       console.warn('createVariable failed:', response.error);
-      return { variable: null, errorCode: response.error?.code ?? null };
+      return { variable: null, errorCode: response.error?.code ?? null, errorMessage: resolveLocalizedText(response.error?.message, this.localization) || null };
     }
     this.upsertLocal(response.variable);
     return { variable: response.variable, errorCode: null };
@@ -130,7 +132,7 @@ export class VariableService {
     const response = await this.ipc.updateVariable(request);
     if (!response.success || !response.variable) {
       console.warn('updateVariable failed:', response.error);
-      return { variable: null, errorCode: response.error?.code ?? null };
+      return { variable: null, errorCode: response.error?.code ?? null, errorMessage: resolveLocalizedText(response.error?.message, this.localization) || null };
     }
     this.upsertLocal(response.variable);
     return { variable: response.variable, errorCode: null };

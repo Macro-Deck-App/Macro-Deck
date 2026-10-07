@@ -2997,6 +2997,15 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Errors.Variables.FileReadOnly" xml:space="preserve">
     <value>Cette variable lit sa valeur dans un fichier et ne la réécrit pas</value>
   </data>
+  <data name="Errors.Variables.TemplateReadOnly" xml:space="preserve">
+    <value>Cette variable calcule sa valeur à partir d’un modèle</value>
+  </data>
+  <data name="Errors.Variables.InvalidTemplate" xml:space="preserve">
+    <value>Le modèle contient une erreur : {details}</value>
+  </data>
+  <data name="Errors.Variables.CircularTemplate" xml:space="preserve">
+    <value>Le modèle relit cette variable via d’autres variables de modèle</value>
+  </data>
   <data name="Errors.Variables.InvalidFilePath" xml:space="preserve">
     <value>Saisis le chemin complet d'un fichier</value>
   </data>
@@ -16938,6 +16947,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="TemplateBuilder.FilterCategory.Numbers" xml:space="preserve">
     <value>Nombres</value>
   </data>
+  <data name="TemplateBuilder.FilterCategory.Colors" xml:space="preserve">
+    <value>Couleurs</value>
+  </data>
   <data name="TemplateBuilder.FilterCategory.Scriban" xml:space="preserve">
     <value>Avancé (Scriban)</value>
   </data>
@@ -17042,6 +17054,36 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="TemplateBuilder.Filters.Round.Hint" xml:space="preserve">
     <value>Arrondit un nombre à N décimales</value>
+  </data>
+  <data name="TemplateBuilder.Filters.Color.Hint" xml:space="preserve">
+    <value>Lire une valeur comme couleur</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorLighten.Hint" xml:space="preserve">
+    <value>Éclaircir une couleur de N pour cent</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorDarken.Hint" xml:space="preserve">
+    <value>Assombrir une couleur de N pour cent</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorSaturate.Hint" xml:space="preserve">
+    <value>Saturer une couleur de N pour cent</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorDesaturate.Hint" xml:space="preserve">
+    <value>Désaturer une couleur de N pour cent</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorOpacity.Hint" xml:space="preserve">
+    <value>Régler l’opacité d’une couleur à N pour cent</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorIncreaseOpacity.Hint" xml:space="preserve">
+    <value>Rendre une couleur plus opaque de N pour cent</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorReduceOpacity.Hint" xml:space="preserve">
+    <value>Rendre une couleur plus transparente de N pour cent</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorHue.Hint" xml:space="preserve">
+    <value>Décaler la teinte d’une couleur de N degrés</value>
+  </data>
+  <data name="TemplateBuilder.Filters.ColorMix.Hint" xml:space="preserve">
+    <value>Mélanger une autre couleur à N pour cent</value>
   </data>
   <data name="TemplateBuilder.Filters.Size.Hint" xml:space="preserve">
     <value>Nombre d'éléments ou de caractères</value>
@@ -17460,6 +17502,39 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Variables.Manager.FileUnavailable" xml:space="preserve">
     <value>Aucune valeur : le fichier est absent, illisible ou ne correspond pas au type de la variable</value>
+  </data>
+  <data name="Variables.Manager.SourceTemplate" xml:space="preserve">
+    <value>Depuis un modèle</value>
+  </data>
+  <data name="Variables.Manager.SourceHintTemplate" xml:space="preserve">
+    <value>La valeur est générée à partir d’un modèle et suit chaque modification des variables qu’il lit.</value>
+  </data>
+  <data name="Variables.Manager.TemplateField" xml:space="preserve">
+    <value>Modèle</value>
+  </data>
+  <data name="Variables.Manager.TemplateSettings" xml:space="preserve">
+    <value>Paramètres du modèle</value>
+  </data>
+  <data name="Variables.Manager.TemplateResult" xml:space="preserve">
+    <value>Valeur de la variable</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.RenderFailed" xml:space="preserve">
+    <value>Impossible de générer le modèle : {details}</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.NotNumeric" xml:space="preserve">
+    <value>Le modèle produit « {value} », qui n’est pas un nombre</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.NotBoolean" xml:space="preserve">
+    <value>Le modèle produit « {value} », qui n’est ni true ni false</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.NotColor" xml:space="preserve">
+    <value>Le modèle produit « {value} », qui n’est pas une couleur</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.CircularReference" xml:space="preserve">
+    <value>Le modèle se lit lui-même via d’autres variables de modèle</value>
+  </data>
+  <data name="Variables.Manager.TemplateErrors.Unknown" xml:space="preserve">
+    <value>Le modèle ne peut pas produire de valeur pour le moment</value>
   </data>
   <data name="Variables.Manager.CreateFailed" xml:space="preserve">
     <value>Impossible de créer la variable. Réessaie.</value>

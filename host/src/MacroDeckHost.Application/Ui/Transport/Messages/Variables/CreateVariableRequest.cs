@@ -9,4 +9,5 @@ public class CreateVariableRequest
 	public string? InitialValue { get; set; }
 	public int? DecimalPlaces { get; set; }
 	public VariableFileSourceDto? FileSource { get; set; }
+	public VariableTemplateSourceDto? TemplateSource { get; set; }
 }

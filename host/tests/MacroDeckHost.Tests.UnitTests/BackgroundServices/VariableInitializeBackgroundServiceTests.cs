@@ -4,6 +4,7 @@ using MacroDeckHost.Application.Ui.Handlers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Variables;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Variables.Files;
+using MacroDeckHost.Application.Variables.Templates;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure.BackgroundServices;
@@ -29,7 +30,8 @@ internal sealed class VariableInitializeBackgroundServiceTests
 			new FailingUserVariableStore(),
 			readiness,
 			Log.Logger,
-			new FileVariableSynchronizer(registry, new RecordingMediator(), new FakeVariableFileSystem(), Log.Logger));
+			new FileVariableSynchronizer(registry, new RecordingMediator(), new FakeVariableFileSystem(), Log.Logger),
+			new TemplateVariableSynchronizer(registry, new RecordingMediator()));
 
 		await service.StartAsync(CancellationToken.None);
 		await service.ExecuteTask!;
@@ -64,7 +66,8 @@ internal sealed class VariableInitializeBackgroundServiceTests
 			new StoredUserVariableStore(stored),
 			readiness,
 			Log.Logger,
-			synchronizer);
+			synchronizer,
+			new TemplateVariableSynchronizer(registry, mediator));
 
 		await service.StartAsync(CancellationToken.None);
 		await service.ExecuteTask!;
@@ -107,7 +110,8 @@ internal sealed class VariableInitializeBackgroundServiceTests
 			new StoredUserVariableStore([deaths]),
 			readiness,
 			Log.Logger,
-			new FileVariableSynchronizer(registry, mediator, new FakeVariableFileSystem(), Log.Logger));
+			new FileVariableSynchronizer(registry, mediator, new FakeVariableFileSystem(), Log.Logger),
+			new TemplateVariableSynchronizer(registry, mediator));
 
 		await service.StartAsync(CancellationToken.None);
 		await service.ExecuteTask!;

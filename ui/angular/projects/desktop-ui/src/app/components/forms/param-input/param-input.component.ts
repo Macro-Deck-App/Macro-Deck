@@ -16,6 +16,7 @@ import {
 import { InputComponent } from '@shared';
 import type { Variable, VariableScope, VariableType } from '@macro-deck/runtime';
 import { TemplateBuilderComponent } from '../../template-builder/template-builder.component';
+import type { TemplateVariablePreviewOptions } from '../../../domain/template-preview.interface';
 import { VariableTextInputComponent } from '../variable-text-input/variable-text-input.component';
 
 @Component({
@@ -78,6 +79,8 @@ import { VariableTextInputComponent } from '../variable-text-input/variable-text
           [variables]="variables"
           [scope]="scope"
           [scopeRefId]="scopeRefId"
+          [resultType]="resultType"
+          [resultOptions]="resultOptions"
           [disabled]="disabledState()"
           [value]="valueState()"
           (apply$)="onTemplateApply($event)">
@@ -108,6 +111,9 @@ export class ParamInputComponent implements ControlValueAccessor {
   @Input() allowReferences = true;
   @Input() scope: VariableScope = 'global';
   @Input() scopeRefId?: string;
+
+  @Input() resultType?: VariableType;
+  @Input() resultOptions?: Omit<TemplateVariablePreviewOptions, 'resultType'>;
 
   @Output() valueChange = new EventEmitter<string>();
   @Output() valueBlur = new EventEmitter<string>();

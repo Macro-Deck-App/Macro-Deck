@@ -1,8 +1,15 @@
 import { Injectable, inject } from '@angular/core';
-import { AppStrings, isComparisonExpression } from '@macro-deck/runtime';
+import { AppStrings, isComparisonExpression, resolveLocalizedText } from '@macro-deck/runtime';
 import { ApiService, LocalizationService } from '@shared';
 import type { ConditionExpression, ConditionExpressionPayload, ParameterValue, VariableScope } from '@macro-deck/runtime';
-import { TemplatePreviewError, ConditionEvaluationResult, ExpressionEvaluationResult, TemplatePreviewService } from '../domain/template-preview.interface';
+import {
+  TemplatePreviewError,
+  ConditionEvaluationResult,
+  ExpressionEvaluationResult,
+  TemplatePreviewService,
+  TemplateVariablePreview,
+  TemplateVariablePreviewOptions,
+} from '../domain/template-preview.interface';
 
 @Injectable({ providedIn: 'root' })
 export class TemplatePreviewApiService implements TemplatePreviewService {
@@ -20,9 +27,31 @@ export class TemplatePreviewApiService implements TemplatePreviewService {
     return response.rendered;
   }
 
-  private async renderTemplateResponse(template: string, scope?: VariableScope, scopeRefId?: string) {
+  async previewTemplateVariable(
+    template: string,
+    scope: VariableScope | undefined,
+    scopeRefId: string | undefined,
+    options: TemplateVariablePreviewOptions,
+  ): Promise<TemplateVariablePreview> {
+    const response = await this.renderTemplateResponse(template, scope, scopeRefId, options);
+    if (!response.success) {
+      throw new TemplatePreviewError(
+        resolveLocalizedText(response.error?.message, this.localization)
+          || this.localization.translateKey(AppStrings.Errors.TemplatePreview.RenderFailed),
+        response.error?.code,
+      );
+    }
+    return { rendered: response.rendered, value: response.value ?? null, error: response.templateError ?? null };
+  }
+
+  private async renderTemplateResponse(
+    template: string,
+    scope?: VariableScope,
+    scopeRefId?: string,
+    options?: TemplateVariablePreviewOptions,
+  ) {
     try {
-      return await this.api.renderTemplate({ template, scope, scopeRefId });
+      return await this.api.renderTemplate({ template, scope, scopeRefId, ...options });
     } catch {
       throw new TemplatePreviewError(
         this.localization.translateKey(AppStrings.Errors.TemplatePreview.RenderFailed),

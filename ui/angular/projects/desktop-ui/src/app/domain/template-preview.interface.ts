@@ -1,5 +1,11 @@
 import { InjectionToken } from '@angular/core';
-import type { ConditionExpression, ParameterValue, VariableScope } from '@macro-deck/runtime';
+import type {
+  ConditionExpression,
+  ParameterValue,
+  VariableScope,
+  VariableTemplateError,
+  VariableType,
+} from '@macro-deck/runtime';
 
 export interface ConditionEvaluationResult {
   result: boolean;
@@ -19,6 +25,19 @@ export interface ExpressionEvaluationResult {
   leaves: Record<string, ComparisonLeafResult>;
 }
 
+export interface TemplateVariablePreviewOptions {
+  resultType: VariableType;
+  decimalPlaces?: number;
+  variableId?: string;
+  variableName?: string;
+}
+
+export interface TemplateVariablePreview {
+  rendered: string;
+  value: string | null;
+  error: VariableTemplateError | null;
+}
+
 export class TemplatePreviewError extends Error {
   readonly code?: string;
 
@@ -31,6 +50,13 @@ export class TemplatePreviewError extends Error {
 
 export interface TemplatePreviewService {
   renderTemplate(template: string, scope?: VariableScope, scopeRefId?: string): Promise<string>;
+
+  previewTemplateVariable?(
+    template: string,
+    scope: VariableScope | undefined,
+    scopeRefId: string | undefined,
+    options: TemplateVariablePreviewOptions,
+  ): Promise<TemplateVariablePreview>;
 
   evaluateCondition(
     left: ParameterValue,

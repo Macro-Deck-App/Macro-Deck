@@ -4,6 +4,7 @@ using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Variables.Colors;
 using MacroDeckHost.Application.Variables.Files;
+using MacroDeckHost.Application.Variables.Templates;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -22,6 +23,7 @@ public class VariableService : IVariableService
 	private readonly IVariableRefreshSignal _refreshSignal;
 	private readonly IMusicPlayerPollNudge _musicPlayerPollNudge;
 	private readonly FileVariableSynchronizer _files;
+	private readonly TemplateVariableSynchronizer _templates;
 
 	public VariableService(
 		VariableRegistry registry,
@@ -30,7 +32,8 @@ public class VariableService : IVariableService
 		VariableCatalogProviders providers,
 		IVariableRefreshSignal refreshSignal,
 		IMusicPlayerPollNudge musicPlayerPollNudge,
-		FileVariableSynchronizer files)
+		FileVariableSynchronizer files,
+		TemplateVariableSynchronizer templates)
 	{
 		_registry = registry;
 		_userStore = userStore;
@@ -39,6 +42,7 @@ public class VariableService : IVariableService
 		_refreshSignal = refreshSignal;
 		_musicPlayerPollNudge = musicPlayerPollNudge;
 		_files = files;
+		_templates = templates;
 	}
 
 	public Task<IReadOnlyList<VariableEntity>> GetAll() => Task.FromResult(_registry.GetAll());
@@ -77,7 +81,8 @@ public class VariableService : IVariableService
 		VariableType type,
 		object? initialValue,
 		int? decimalPlaces,
-		VariableFileSource? fileSource = null)
+		VariableFileSource? fileSource = null,
+		VariableTemplateSource? templateSource = null)
 		=> CreateInternal(name,
 			scope,
 			scopeRefId,
@@ -86,13 +91,15 @@ public class VariableService : IVariableService
 			decimalPlaces,
 			VariableClassification.User,
 			null,
-			fileSource: fileSource);
+			fileSource: fileSource,
+			templateSource: templateSource);
 
 	public async Task<Result<VariableEntity, VariableError>> UpdateUserVariable(
 		Guid id,
 		string? name,
 		int? decimalPlaces,
-		VariableFileSource? fileSource = null)
+		VariableFileSource? fileSource = null,
+		VariableTemplateSource? templateSource = null)
 	{
 		var entity = _registry.GetById(id);
 		if (entity is null)
@@ -106,12 +113,35 @@ public class VariableService : IVariableService
 				"Only user-classified variables can be renamed or have their precision changed");
 		}
 
+		if (fileSource is not null && templateSource is not null)
+		{
+			return Result.Fail<VariableEntity, VariableError>(VariableError.ValidationError,
+				"A variable reads either from a file or from a template");
+		}
+
+		if (templateSource is not null)
+		{
+			return await UpdateTemplate(entity, name, decimalPlaces, templateSource);
+		}
+
+		if (entity.TemplateSource is not null && name is not null &&
+			_templates.WouldCloseCycle(entity, CanonicalName(name), entity.TemplateSource.Template))
+		{
+			return Result.Fail<VariableEntity, VariableError>(VariableError.CircularTemplate,
+				"The template would read the renamed variable itself");
+		}
+
 		if (fileSource is null)
 		{
 			var updated = await ApplyUpdate(entity, name, null, decimalPlaces, null);
 			if (updated.Success && entity.FileSource is not null && decimalPlaces.HasValue)
 			{
 				await _files.RefreshAsync(entity.Id);
+			}
+
+			if (updated.Success && entity.TemplateSource is not null && decimalPlaces.HasValue)
+			{
+				await _templates.ChangeAsync(entity.Id, null);
 			}
 
 			return updated;
@@ -155,6 +185,57 @@ public class VariableService : IVariableService
 		return Result.Ok<VariableEntity, VariableError>(entity);
 	}
 
+	private async Task<Result<VariableEntity, VariableError>> UpdateTemplate(
+		VariableEntity entity,
+		string? name,
+		int? decimalPlaces,
+		VariableTemplateSource templateSource)
+	{
+		if (entity.TemplateSource is null)
+		{
+			return Result.Fail<VariableEntity, VariableError>(VariableError.ValidationError,
+				"Only a variable that reads from a template can change its template");
+		}
+
+		if (_templates.FindParseError(templateSource.Template) is { } parseError)
+		{
+			return Result.Fail<VariableEntity, VariableError>(VariableError.InvalidTemplate, parseError);
+		}
+
+		var finalName = name is null ? entity.Name : CanonicalName(name);
+		if (_templates.WouldCloseCycle(entity, finalName, templateSource.Template))
+		{
+			return Result.Fail<VariableEntity, VariableError>(VariableError.CircularTemplate,
+				"The template reads itself through other template variables");
+		}
+
+		if (decimalPlaces is < 0 or > 28)
+		{
+			return Result.Fail<VariableEntity, VariableError>(VariableError.InvalidValue,
+				"decimalPlaces must be between 0 and 28");
+		}
+
+		// Precision changes with the template under the synchronizer's lock, so a render in between
+		// cannot announce a value with the old template and the new precision.
+		var result = await ApplyUpdate(entity, name, null, null, null);
+		if (!result.Success)
+		{
+			return result;
+		}
+
+		if (!await _templates.ChangeAsync(entity.Id, templateSource, decimalPlaces))
+		{
+			return Result.Fail<VariableEntity, VariableError>(VariableError.CircularTemplate,
+				"The template reads itself through other template variables");
+		}
+
+		PersistUserVariables();
+		return result;
+	}
+
+	private static string CanonicalName(string name)
+		=> VariableNameSanitizer.IsValid(name) ? name : VariableNameSanitizer.Sanitize(name);
+
 	public async Task<Result<VariableEntity, VariableError>> SetValue(
 		Guid id,
 		object? value,
@@ -174,6 +255,10 @@ public class VariableService : IVariableService
 
 		switch (entity.Classification)
 		{
+			case VariableClassification.User when entity.TemplateSource is not null:
+				return Result.Fail<VariableEntity, VariableError>(VariableError.TemplateReadOnly,
+					$"Variable '{entity.Name}' computes its value from a template");
+
 			case VariableClassification.User when entity.FileSource is { AllowWriteBack: false }:
 				return Result.Fail<VariableEntity, VariableError>(VariableError.FileReadOnly,
 					$"Variable '{entity.Name}' reads its value from a file and does not write back");
@@ -288,6 +373,7 @@ public class VariableService : IVariableService
 
 		_registry.Remove(id);
 		_files.Detach(id);
+		_templates.Forget(id);
 		PersistUserVariables();
 		await _mediator.Publish(new VariableDeletedNotification(entity));
 		return Result.Ok<VariableError>();
@@ -537,6 +623,7 @@ public class VariableService : IVariableService
 		{
 			_registry.Remove(v.Id);
 			_files.Detach(v.Id);
+			_templates.Forget(v.Id);
 			removedUser |= v.Classification == VariableClassification.User;
 		}
 
@@ -617,8 +704,15 @@ public class VariableService : IVariableService
 		string? definitionId = null,
 		VariableDeclaration? declaration = null,
 		VariableUpdateMode updateMode = VariableUpdateMode.Polled,
-		VariableFileSource? fileSource = null)
+		VariableFileSource? fileSource = null,
+		VariableTemplateSource? templateSource = null)
 	{
+		if (fileSource is not null && templateSource is not null)
+		{
+			return Result.Fail<VariableEntity, VariableError>(VariableError.ValidationError,
+				"A variable reads either from a file or from a template");
+		}
+
 		var canonicalName = VariableNameSanitizer.IsValid(name) ? name : VariableNameSanitizer.Sanitize(name);
 		if (!VariableNameSanitizer.IsValid(canonicalName))
 		{
@@ -675,9 +769,28 @@ public class VariableService : IVariableService
 			available = initial.Available;
 		}
 
+		if (templateSource is not null)
+		{
+			if (_templates.FindParseError(templateSource.Template) is { } parseError)
+			{
+				return Result.Fail<VariableEntity, VariableError>(VariableError.InvalidTemplate, parseError);
+			}
+
+			entity.TemplateSource = templateSource;
+			var evaluation = await _templates.AttachAsync(entity);
+			if (evaluation.Error?.Code == VariableTemplateError.CircularReference)
+			{
+				return Result.Fail<VariableEntity, VariableError>(VariableError.CircularTemplate,
+					"The template reads itself through other template variables");
+			}
+
+			available = evaluation.Error is null;
+		}
+
 		if (!_registry.TryAdd(entity, available))
 		{
 			_files.Detach(entity.Id);
+			_templates.Forget(entity.Id);
 			return Result.Fail<VariableEntity, VariableError>(VariableError.AlreadyExists,
 				$"A variable named '{canonicalName}' already exists in this scope");
 		}
@@ -717,13 +830,13 @@ public class VariableService : IVariableService
 			if (canonical != entity.Name)
 			{
 				var collision = _registry.FindByName(entity.Scope, entity.ScopeRefId, canonical);
-				if (collision is not null && collision.Id != entity.Id)
+				if ((collision is not null && collision.Id != entity.Id) ||
+					!_registry.Rename(entity.Id, canonical, DateTime.UtcNow))
 				{
 					return Result.Fail<VariableEntity, VariableError>(VariableError.AlreadyExists,
 						$"A variable named '{canonical}' already exists in this scope");
 				}
 
-				entity.Name = canonical;
 				metadataChanged = true;
 			}
 		}
@@ -771,7 +884,7 @@ public class VariableService : IVariableService
 		var wasAvailable = _registry.IsAvailable(entity.Id);
 
 		entity.UpdatedAt = DateTime.UtcNow;
-		if (entity.FileSource is not null)
+		if (entity.FileSource is not null || entity.TemplateSource is not null)
 		{
 			_registry.UpsertKeepingAvailability(entity);
 		}

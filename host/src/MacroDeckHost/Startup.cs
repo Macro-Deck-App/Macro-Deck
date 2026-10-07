@@ -70,6 +70,7 @@ using MacroDeckHost.Application.Triggers.Providers;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Variables.Colors;
 using MacroDeckHost.Application.Variables.Files;
+using MacroDeckHost.Application.Variables.Templates;
 using MacroDeckHost.Application.Timers;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Application.Widgets.Icons;
@@ -403,6 +404,7 @@ public class Startup
 		services.AddHostedService<ScheduledEventBackgroundService>();
 		services.AddHostedService<BackupScheduleBackgroundService>();
 		services.AddHostedService<VariableInitializeBackgroundService>();
+		services.AddHostedService<TemplateVariableBackgroundService>();
 		services.AddHostedService<FileVariableShutdownBackgroundService>();
 		services.AddHostedService<IntegrationVariablePollingBackgroundService>();
 		services.AddHostedService<VariableBindingRestoreBackgroundService>();
@@ -522,6 +524,7 @@ public class Startup
 		services.AddSingleton<PluginColorWatches>();
 		services.AddSingleton<IVariableFileSystem, VariableFileSystem>();
 		services.AddSingleton<FileVariableSynchronizer>();
+		services.AddSingleton<TemplateVariableSynchronizer>();
 		services.AddSingleton<IUserVariableStore, JsonUserVariableStore>();
 		services.AddSingleton<IVariableBindingStore, JsonVariableBindingStore>();
 		services.AddSingleton<ISharedVariableStore, JsonSharedVariableStore>();

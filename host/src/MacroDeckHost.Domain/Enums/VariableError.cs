@@ -14,5 +14,8 @@ public enum VariableError
 	OwnerUnavailable,
 	WriteFailed,
 	FileReadOnly,
-	InvalidFilePath
+	InvalidFilePath,
+	TemplateReadOnly,
+	InvalidTemplate,
+	CircularTemplate
 }

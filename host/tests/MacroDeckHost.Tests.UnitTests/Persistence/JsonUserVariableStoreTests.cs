@@ -78,6 +78,31 @@ public class JsonUserVariableStoreTests
 	}
 
 	[Test]
+	public void A_template_variable_keeps_its_template_but_not_its_rendered_value()
+	{
+		var live = new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = "cpu_text",
+			Scope = VariableScope.Global,
+			Type = VariableType.Text,
+			Classification = VariableClassification.User,
+			Value = "CPU: 12%",
+			TemplateSource = new VariableTemplateSource("CPU: {{ vars.cpu }}%")
+		};
+
+		_store.Save([live]);
+		var loaded = _store.Load().Single();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(loaded.TemplateSource, Is.EqualTo(new VariableTemplateSource("CPU: {{ vars.cpu }}%")));
+			Assert.That(loaded.Value, Is.Empty);
+			Assert.That(live.Value, Is.EqualTo("CPU: 12%"));
+		});
+	}
+
+	[Test]
 	public void A_variable_without_a_file_source_is_saved_without_the_property()
 	{
 		_store.Save([
@@ -93,7 +118,11 @@ public class JsonUserVariableStoreTests
 		]);
 
 		var json = File.ReadAllText(Path.Combine(_paths.DataDirectory, "user-variables.json"));
-		Assert.That(json, Does.Not.Contain("fileSource"));
+		Assert.Multiple(() =>
+		{
+			Assert.That(json, Does.Not.Contain("fileSource"));
+			Assert.That(json, Does.Not.Contain("templateSource"));
+		});
 	}
 
 	[Test]

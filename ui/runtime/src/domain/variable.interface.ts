@@ -11,6 +11,15 @@ export interface VariableFileSource {
   allowWriteBack: boolean;
 }
 
+export interface VariableTemplateSource {
+  template: string;
+}
+
+export interface VariableTemplateError {
+  code: 'RenderFailed' | 'NotNumeric' | 'NotBoolean' | 'NotColor' | 'CircularReference' | string;
+  detail?: string | null;
+}
+
 export interface Variable {
   id: string;
   name: string;
@@ -37,6 +46,8 @@ export interface Variable {
   commitOnRelease?: boolean;
   shared?: boolean;
   fileSource?: VariableFileSource | null;
+  templateSource?: VariableTemplateSource | null;
+  templateError?: VariableTemplateError | null;
 }
 
 export type { VariableReference } from './action-builder.interface';

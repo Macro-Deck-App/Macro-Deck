@@ -166,6 +166,9 @@
                 @if (row.variable.fileSource; as fileSource) {
                   <span row-meta class="vars-file-badge" [title]="fileSource.path">{{ fileFieldLabel() }}</span>
                 }
+                @if (row.variable.templateSource; as templateSource) {
+                  <span row-meta class="vars-file-badge" [title]="templateSource.template">{{ templateFieldLabel() }}</span>
+                }
                 @if (row.variable.shared) {
                   <span row-meta class="vars-shared-badge" [title]="sharedTooltip()">{{ sharedLabel() }}</span>
                 }
@@ -217,6 +220,12 @@
                             <button type="button" class="vars-menu-item" (click)="openFileSettings(row.variable)">
                               <span class="icon icon-file-text icon-sm"></span>
                               <span>{{ fileSettingsLabel() }}</span>
+                            </button>
+                          }
+                          @if (row.variable.templateSource) {
+                            <button type="button" class="vars-menu-item" (click)="openTemplateSettings(row.variable)">
+                              <span class="icon icon-code icon-sm"></span>
+                              <span>{{ templateSettingsLabel() }}</span>
                             </button>
                           }
                           @if (canShare(row.variable)) {
@@ -316,6 +325,8 @@
           <span class="hint">
             @if (createForm().source === 'file') {
               {{ sourceHintFile() }}
+            } @else if (createForm().source === 'template') {
+              {{ sourceHintTemplate() }}
             } @else {
               {{ sourceHintValue() }}
             }
@@ -366,6 +377,23 @@
             (ngModelChange)="setFormDecimalPlaces($event)"
             name="decimalPlaces" />
         </label>
+      }
+
+      @if (createForm().source === 'template') {
+        <div class="form-group">
+          <span class="form-label">{{ templateFieldLabel() }}</span>
+          <shared-template-variable-field
+            class="vars-input"
+            [ariaLabel]="templateFieldLabel()"
+            [variables]="createTemplateVariables()"
+            [scope]="createScoped() ? 'widget' : 'global'"
+            [scopeRefId]="createScopeRefId()"
+            [resultType]="createForm().type"
+            [resultOptions]="createTemplateOptions()"
+            [value]="createForm().template"
+            (valueChange)="setFormTemplate($event)" />
+          <ng-container *ngTemplateOutlet="templateResultLine" />
+        </div>
       }
 
       @if (createForm().source === 'value' && createForm().type === 'color') {
@@ -456,6 +484,50 @@
   </shared-modal>
 }
 
+@if (templateSettings(); as settings) {
+  <shared-modal [heading]="templateSettingsLabel()" size="small" [showFooter]="false" (close)="closeTemplateSettings()">
+    <form class="create-form" (ngSubmit)="saveTemplateSettings()">
+      <div class="form-group">
+        <span class="form-label">{{ templateFieldLabel() }}</span>
+        <shared-template-variable-field
+          class="vars-input"
+          [ariaLabel]="templateFieldLabel()"
+          [variables]="templateSettingsVariables()"
+          [scope]="settings.scope"
+          [scopeRefId]="settings.scopeRefId"
+          [resultType]="settings.type"
+          [resultOptions]="templateSettingsOptions()"
+          [value]="settings.template"
+          (valueChange)="setTemplateSettingsTemplate($event)" />
+        <ng-container *ngTemplateOutlet="templateResultLine" />
+      </div>
+
+      @if (settings.type === 'numeric') {
+        <label class="form-group">
+          <span class="form-label">{{ decimalPlacesLabel() }}</span>
+          <shared-input
+            class="vars-input"
+            type="number"
+            [min]="0"
+            [max]="10"
+            [ngModel]="settings.decimalPlaces"
+            (ngModelChange)="setTemplateSettingsDecimalPlaces($event)"
+            name="decimalPlaces" />
+        </label>
+      }
+
+      @if (templateSettingsError(); as error) {
+        <shared-error-banner [message]="error" [dismissible]="false" />
+      }
+
+      <shared-button-group class="form-actions" align="end">
+        <shared-button type="button" variant="secondary" (click)="closeTemplateSettings()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+        <shared-button type="submit" variant="primary" [disabled]="settings.template.trim().length === 0">{{ 'macrodeck:Common.Save' | translate }}</shared-button>
+      </shared-button-group>
+    </form>
+  </shared-modal>
+}
+
 @if (fileSettings(); as settings) {
   <shared-modal [heading]="fileSettingsLabel()" size="small" [showFooter]="false" (close)="closeFileSettings()">
     <form class="create-form" (ngSubmit)="saveFileSettings()">
@@ -511,3 +583,15 @@
     (confirm)="confirmUnbind()"
     (cancel)="cancelUnbind()" />
 }
+
+<ng-template #templateResultLine>
+  @if (templateResult(); as result) {
+    <span class="form-preview">
+      @if (result.error) {
+        <span class="vars-template-error" role="alert">{{ result.error }}</span>
+      } @else {
+        <span class="hint">{{ templateResultLabel() }}: <span class="vars-template-value">{{ result.value }}</span></span>
+      }
+    </span>
+  }
+</ng-template>

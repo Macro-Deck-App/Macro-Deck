@@ -47,7 +47,8 @@ public class CreateVariableRequestMessageHandler
 			type.Value,
 			initialValue,
 			request.DecimalPlaces,
-			VariableDtoMapper.FileSourceFromWire(request.FileSource));
+			VariableDtoMapper.FileSourceFromWire(request.FileSource),
+			VariableDtoMapper.TemplateSourceFromWire(request.TemplateSource));
 
 		if (!result.Success || result.Data is null)
 		{

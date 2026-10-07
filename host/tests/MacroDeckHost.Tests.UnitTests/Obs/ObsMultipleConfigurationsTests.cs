@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Variables.Files;
+using MacroDeckHost.Application.Variables.Templates;
 using System.Text.Json;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Events;
@@ -460,7 +461,8 @@ internal sealed class ObsMultipleConfigurationsTests
 				new FileVariableSynchronizer(VariableRegistry,
 					new RecordingMediator(),
 					new FakeVariableFileSystem(),
-					Serilog.Core.Logger.None));
+					Serilog.Core.Logger.None),
+				new TemplateVariableSynchronizer(VariableRegistry, new RecordingMediator()));
 			Store = new MemoryConfigStore();
 			var services = new ServiceCollection();
 			services.AddSingleton<IIntegrationConfigStore>(Store);

@@ -12,7 +12,7 @@ namespace MacroDeckHost.Application.Variables;
 // rather than to nothing, so "vars.typo.state.is_not_available" answers the same as the isNotAvailable
 // condition operator does. The stub renders as nothing and is falsy, so every template that only ever
 // reads the value is unaffected.
-internal sealed class VariablesScriptObject : ScriptObject
+internal class VariablesScriptObject : ScriptObject
 {
 	public override bool TryGetValue(TemplateContext? context, SourceSpan span, string member, out object? value)
 	{
@@ -22,6 +22,26 @@ internal sealed class VariablesScriptObject : ScriptObject
 		}
 
 		value = VariableTemplateValue.Unknown;
+		return true;
+	}
+}
+
+// Records every name read, resolved or not: a variable created later must still wake its readers.
+internal sealed class RecordingVariablesScriptObject : VariablesScriptObject
+{
+	private readonly Func<string, object> _resolve;
+	private readonly ISet<string> _reads;
+
+	public RecordingVariablesScriptObject(Func<string, object> resolve, ISet<string> reads)
+	{
+		_resolve = resolve;
+		_reads = reads;
+	}
+
+	public override bool TryGetValue(TemplateContext? context, SourceSpan span, string member, out object? value)
+	{
+		_reads.Add(member);
+		value = _resolve(member);
 		return true;
 	}
 }
@@ -194,6 +214,44 @@ public class VariableTemplateRenderer : IVariableTemplateRenderer
 
 		var root = new ScriptObject { ["vars"] = vars, ["event"] = new ScriptObject() };
 		return Render(template, new VariableContext(resolvable, root));
+	}
+
+	internal string RenderRecording(
+		string templateText,
+		VariableScope contextScope,
+		string? contextScopeRefId,
+		ISet<string> reads)
+	{
+		if (!ContainsLiquid(templateText))
+		{
+			return templateText;
+		}
+
+		var readsLocals = contextScope != VariableScope.Global && !string.IsNullOrEmpty(contextScopeRefId);
+		var vars = new RecordingVariablesScriptObject(name =>
+			{
+				var entity = (readsLocals ? _registry.FindByName(contextScope, contextScopeRefId, name) : null) ??
+					_registry.FindByName(VariableScope.Global, null, name);
+				return entity is null
+					? VariableTemplateValue.Unknown
+					: EntryOf(entity, _registry.IsAvailable(entity.Id));
+			},
+			reads);
+
+		var root = new ScriptObject { ["vars"] = vars, ["event"] = new ScriptObject() };
+		return Render(Parse(templateText).Template,
+			new VariableContext(new Dictionary<string, VariableEntity>(StringComparer.Ordinal), root));
+	}
+
+	internal string? FindParseError(string templateText)
+	{
+		if (!ContainsLiquid(templateText))
+		{
+			return null;
+		}
+
+		var template = Parse(templateText).Template;
+		return template.HasErrors ? string.Join("; ", template.Messages.Select(message => message.Message)) : null;
 	}
 
 	private ParsedTemplate Parse(string templateText)

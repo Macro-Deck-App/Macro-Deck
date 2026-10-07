@@ -458,6 +458,39 @@ example the current OBS scene or `system_cpu_usage_percent`, create an automatio
 **Variable Changed** watching that variable runs **Write Variable to File** for the same variable.
 Every change then lands in the file.
 
+### Template variables
+
+A **template variable** combines other variables, text and filters into a new variable. Choose
+**From template** as the source when you create a variable, pick its type and write the template in the
+same syntax labels use, for example `CPU: {{ vars.system_cpu_usage_percent }}%` or
+`{{ vars.weather_temperature }} °C - {{ vars.weather_condition }}`. Below the field you see the value the
+variable would get. The `{{ }}` button opens the template editor, which lists your variables, filters
+and logic blocks to insert and previews the result. While you type there, it suggests variables after
+`{{` or `vars.`, filters after `|` and logic blocks such as `if` or `for` after `{%`.
+
+The value follows every change to the variables the template reads, including other template variables:
+with `template_status` reading `template_temperature_text`, which reads `weather_temperature`, a new
+temperature updates both. A template variable announces a change, for example to **Variable Changed**,
+only when its value really changes. **Template settings** in the variable's menu changes the template or
+the decimal places later; to change the type, create the variable again.
+
+The type is checked: a **Numeric** variable needs a number with a dot as the decimal separator, a
+**Boolean** variable needs `true`, `false`, `1` or `0`, a **Color** variable a color such as `#FF8800`. While the template produces something else or
+cannot be rendered, the variable reads as unavailable and its row says why. A template that reads its
+own variable, directly or through other template variables, is refused, and if a later change closes
+such a loop, the variables in it read as unavailable until the loop is gone.
+
+Some things to know:
+
+- A template variable is read-only: **Set Variable**, sliders and plugins cannot write to it.
+- Templates are rendered again only when a variable they read changes. A template with the current time
+  does not tick on its own.
+- After a start, a template that reads a plugin's variables shows empty values until the plugin is
+  ready, and then updates.
+- An automation that writes a variable whenever a template variable reading it changes is a loop
+  Macro Deck cannot see. Avoid it.
+- When you export widgets, a template variable travels as its template and renders again after import.
+
 ### Share variables with another Macro Deck
 
 With **Macro Deck Delegate**, one Macro Deck can use the variables of another one, for example to show

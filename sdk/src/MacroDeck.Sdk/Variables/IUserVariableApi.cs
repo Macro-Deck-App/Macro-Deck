@@ -10,11 +10,11 @@ public interface IUserVariableApi
 	/// <see cref="UserVariableOperation.Set" /> reaches any variable whose owner accepts a write - a user
 	/// variable, or a provider variable whose definition declares a write capability - and is refused with
 	/// <see cref="UserVariableWriteStatus.NotEditable" /> for the rest. A user variable that reads its value
-	/// from a file without write-back is among the rest, for every operation. The read-modify-write operations
-	/// (<see cref="UserVariableOperation.Add" />, <see cref="UserVariableOperation.Toggle" />,
-	/// <see cref="UserVariableOperation.Append" />) stay user-variable-only: they compute from the value
-	/// the host last saw, which for a provider variable is a reading the owner may already have moved on
-	/// from, so an increment against one would silently be lost.
+	/// from a file without write-back, or renders it from a template, is among the rest, for every operation.
+	/// The read-modify-write operations (<see cref="UserVariableOperation.Add" />,
+	/// <see cref="UserVariableOperation.Toggle" />, <see cref="UserVariableOperation.Append" />) stay
+	/// user-variable-only: they compute from the value the host last saw, which for a provider variable is a
+	/// reading the owner may already have moved on from, so an increment against one would silently be lost.
 	/// </para>
 	/// </summary>
 	Task<UserVariableWriteResult> ApplyAsync(
@@ -65,8 +65,8 @@ public enum UserVariableWriteStatus
 	NotFound = 1,
 
 	/// <summary>The variable's owner does not accept this operation - a provider variable that declares no
-	/// write capability, a user variable that reads from a file without write-back, or any non-user
-	/// variable under a read-modify-write operation.</summary>
+	/// write capability, a user variable that reads from a file without write-back or renders a template,
+	/// or any non-user variable under a read-modify-write operation.</summary>
 	NotEditable = 2,
 
 	InvalidValue = 3,

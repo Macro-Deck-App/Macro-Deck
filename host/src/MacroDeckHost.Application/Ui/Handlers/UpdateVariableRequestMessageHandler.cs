@@ -69,12 +69,16 @@ public class UpdateVariableRequestMessageHandler
 
 		// Definition first: a rename the user asked for in the same request must survive a value write that
 		// is only applied by the owner and reported back later.
-		if (request.Name is not null || request.DecimalPlaces is not null || request.FileSource is not null)
+		if (request.Name is not null ||
+			request.DecimalPlaces is not null ||
+			request.FileSource is not null ||
+			request.TemplateSource is not null)
 		{
 			var definition = await _service.UpdateUserVariable(id,
 				request.Name,
 				request.DecimalPlaces,
-				VariableDtoMapper.FileSourceFromWire(request.FileSource));
+				VariableDtoMapper.FileSourceFromWire(request.FileSource),
+				VariableDtoMapper.TemplateSourceFromWire(request.TemplateSource));
 			if (!definition.Success || definition.Data is null)
 			{
 				return Failed(definition.Error!.Value, definition.ErrorMessage, entity.OwnerIntegrationId);

@@ -8,7 +8,8 @@ public sealed record WidgetVariableSnapshot(
 	VariableType Type,
 	string Value,
 	int? DecimalPlaces,
-	VariableFileSource? FileSource = null);
+	VariableFileSource? FileSource = null,
+	VariableTemplateSource? TemplateSource = null);
 
 public interface IWidgetVariableCloner
 {

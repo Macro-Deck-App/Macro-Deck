@@ -204,3 +204,14 @@
 .form-actions {
   margin-top: var(--space-2);
 }
+
+.vars-template-error {
+  color: var(--color-danger);
+  word-break: break-word;
+}
+
+.vars-template-value {
+  font-family: var(--font-mono);
+  color: var(--color-text-primary);
+  word-break: break-word;
+}
