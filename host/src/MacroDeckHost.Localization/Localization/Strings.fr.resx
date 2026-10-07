@@ -4417,6 +4417,15 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Calendar.Actions.JoinMeeting.WindowLabel" xml:space="preserve">
     <value>Commence d'ici</value>
   </data>
+  <data name="Integrations.Calendar.Actions.RefreshCalendars.Description" xml:space="preserve">
+    <value>Lit tout de suite les événements de tous les calendriers connectés au lieu d'attendre la prochaine actualisation, que Macro Deck fait sinon toutes les cinq minutes.</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.RefreshCalendars.Name" xml:space="preserve">
+    <value>Actualiser les calendriers</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.RefreshCalendars.Unavailable" xml:space="preserve">
+    <value>Les calendriers ne peuvent pas être actualisés pour le moment.</value>
+  </data>
   <data name="Integrations.Calendar.Actions.ShowDetails.Description" xml:space="preserve">
     <value>Ouvre les détails d'un widget de calendrier sur l'écran où il a été touché : l'événement affiché par la disposition Prochain événement, ou les événements à venir de la disposition Agenda.</value>
   </data>
@@ -5875,6 +5884,93 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Integrations.GoogleCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
     <value>Connexion Google expirée pour {account}</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.AuthorizationNotCompleted" xml:space="preserve">
+    <value>La connexion Microsoft a été annulée ou n'a pas été terminée. Appuie sur Continuer pour la rouvrir.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsDescription" xml:space="preserve">
+    <value>Seuls les calendriers que tu choisis ici apparaissent dans Macro Deck. Pour ajouter ou retirer des calendriers plus tard, modifie cette configuration.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsLabel" xml:space="preserve">
+    <value>Calendriers</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsTitle" xml:space="preserve">
+    <value>Choisir les calendriers</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsUnavailable" xml:space="preserve">
+    <value>Connexion réussie, mais tes calendriers n'ont pas pu être lus chez Microsoft. Réessaie dans un instant.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ClientIdLabel" xml:space="preserve">
+    <value>ID d'application (client)</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ClientIdPlaceholder" xml:space="preserve">
+    <value>Application de Macro Deck</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ConnectDescription" xml:space="preserve">
+    <value>Macro Deck lit tes calendriers Outlook et Microsoft 365. Appuie sur Continuer pour te connecter avec ton compte Microsoft dans ton navigateur et autoriser Macro Deck à lire tes calendriers. Les comptes personnels, professionnels et scolaires fonctionnent tous.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ConnectTitle" xml:space="preserve">
+    <value>Connecter le Calendrier Outlook</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ConsentRequired" xml:space="preserve">
+    <value>L'application n'a pas encore le droit de lire tes calendriers. Ajoute l'autorisation Calendars.Read à l'application et réessaie ; dans une organisation, un administrateur devra peut-être l'accorder.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.EnterClientId" xml:space="preserve">
+    <value>Saisis un ID d'application (client) valide, ou laisse le champ vide pour utiliser l'application de Macro Deck.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.InvalidTenant" xml:space="preserve">
+    <value>Saisis common, organizations, consumers, un ID de locataire ou un domaine comme contoso.com.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.MissingCalendarPermission" xml:space="preserve">
+    <value>Microsoft n'a pas accordé l'accès à tes calendriers. Réessaie et autorise l'application à lire tes calendriers.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.MissingRefreshToken" xml:space="preserve">
+    <value>Microsoft n'a pas accordé d'accès durable, Macro Deck n'a donc pas pu rester connecté. Réessaie et autorise l'application à rester connectée.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.PublicClientRequired" xml:space="preserve">
+    <value>Microsoft attend un secret client : l'URI de redirection a donc été ajouté sur la mauvaise plateforme. Ajoute-le sous Applications mobiles et de bureau au lieu de Web, puis réessaie.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.SelectCalendar" xml:space="preserve">
+    <value>Choisis au moins un calendrier.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.SharedCalendarName" xml:space="preserve">
+    <value>{calendar} (partagé par {owner})</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.TenantDescription" xml:space="preserve">
+    <value>Laisse vide pour les comptes personnels, professionnels et scolaires. Uniquement pour ta propre application qui n'accepte que les comptes d'une seule organisation, saisis l'ID de locataire ou le domaine de cette organisation.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.TenantLabel" xml:space="preserve">
+    <value>Locataire</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.TokenExchangeFailed" xml:space="preserve">
+    <value>Microsoft n'a pas accepté la connexion. Réessaie ; si tu as saisi ta propre application sous Avancé, vérifie son ID d'application (client) et l'URI de redirection.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.DuplicateAccountDescription" xml:space="preserve">
+    <value>« {title} » est une ancienne connexion du même compte Microsoft et n'est pas utilisée. Retire-la de la liste des configurations ci-dessous.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.DuplicateAccountTitle" xml:space="preserve">
+    <value>Compte Microsoft connecté deux fois</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.ReconnectResolution" xml:space="preserve">
+    <value>Reconnecte le compte Microsoft.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.SignInExpiredDescription" xml:space="preserve">
+    <value>Microsoft n'accepte plus la connexion de ce compte. L'accès a peut-être été retiré dans ton compte Microsoft, révoqué par ton organisation, ou l'inscription de l'application a été modifiée ou supprimée. Reconnecte le compte.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
+    <value>Connexion Microsoft expirée pour {account}</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.CalendarsUnreadableDescription" xml:space="preserve">
+    <value>Microsoft ne renvoie plus un ou plusieurs des calendriers choisis pour ce compte, par exemple parce qu'un calendrier a été supprimé ou n'est plus partagé avec toi. Leurs événements sont absents. Modifie la connexion pour choisir à nouveau les calendriers du compte.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.CalendarsUnreadableTitle" xml:space="preserve">
+    <value>Certains calendriers de {account} ne peuvent pas être lus</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.AdminConsentInstruction" xml:space="preserve">
+    <value>Certaines organisations ne laissent que les administrateurs autoriser des applications. La connexion demande alors l'approbation d'un administrateur avant de continuer.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ClientIdDescription" xml:space="preserve">
+    <value>Laisse vide pour te connecter via l'application de Macro Deck. Pour utiliser ta propre application, inscris-la dans le portail Azure sous Inscriptions d'applications, dans un annuaire Microsoft Entra ; un compte Microsoft personnel a d'abord besoin d'un annuaire, par exemple via un compte Azure gratuit. Ajoute la plateforme Applications mobiles et de bureau avec l'URI de redirection {redirectUri} et l'autorisation déléguée Calendars.Read, puis saisis ici l'ID d'application (client).</value>
   </data>
   <data name="Integrations.HomeAssistant.Actions.Automation.CommandDisable" xml:space="preserve">
     <value>Désactiver</value>

@@ -6,7 +6,8 @@ description: Expose calendar accounts and events with ICalendarProvider - accoun
 An integration exposes calendars by implementing `ICalendarProvider`. It lists the accounts it can read,
 and for each account returns its calendars, the events in a time range and the full details of one event.
 Macro Deck merges the accounts of every provider, so the user's widgets, triggers and the **Join Meeting**
-action work with your service next to Google Calendar without any further code.
+action work with your service next to the built-in Google Calendar and Outlook Calendar providers without any
+further code.
 
 Connecting an account is not part of this contract. Signing in, storing tokens and asking the user to
 sign in again belong to your [setup flow](/features/setup-flows/) and your
@@ -180,6 +181,8 @@ offers for calendars. You declare none of it:
   meeting link.
 - The **Join Meeting** action, which opens the meeting link of the event that is running or about to start
   on the computer running Macro Deck.
+- The **Refresh Calendars** action, which reads every provider's accounts right away instead of waiting
+  for the next update.
 
 The [user guide](/guide/concepts/#calendar-widget) describes them from the user's side. Do not
 build your own versions of these. If your service offers more, such as accepting an invitation, add

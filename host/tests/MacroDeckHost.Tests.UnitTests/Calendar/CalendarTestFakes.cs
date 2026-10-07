@@ -48,6 +48,8 @@ internal sealed class FakeCalendarIntegration : IIntegration, ICalendarProvider
 
 	public Exception? DetailsFailure { get; set; }
 
+	public Task ReadsHeldBy { get; set; } = Task.CompletedTask;
+
 	public FakeCalendarIntegration WithAccount(string accountId, params string[] calendarIds)
 	{
 		Accounts.Add(new CalendarAccount { Id = accountId, DisplayName = accountId + "@example.com" });
@@ -72,11 +74,12 @@ internal sealed class FakeCalendarIntegration : IIntegration, ICalendarProvider
 		return Task.FromResult<IReadOnlyList<CalendarInfo>>(_calendars[accountId]);
 	}
 
-	public Task<IReadOnlyList<CalendarEvent>> GetEventsAsync(
+	public async Task<IReadOnlyList<CalendarEvent>> GetEventsAsync(
 		string accountId,
 		CalendarEventQuery query,
 		CancellationToken cancellationToken)
 	{
+		await ReadsHeldBy;
 		ThrowIfFailing(accountId);
 		Queries.Add((accountId, query));
 
@@ -84,7 +87,7 @@ internal sealed class FakeCalendarIntegration : IIntegration, ICalendarProvider
 			? _events[accountId]
 			: _events[accountId].Where(e => e.Start < query.To && e.End > query.From);
 		IReadOnlyList<CalendarEvent> reply = [.. events.OrderBy(e => e.Start).Take(MaxEventsPerReply ?? int.MaxValue)];
-		return Task.FromResult(reply);
+		return reply;
 	}
 
 	public Task<CalendarEvent?> GetEventAsync(
