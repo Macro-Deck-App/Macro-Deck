@@ -5,6 +5,7 @@ using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Infrastructure.BackgroundServices;
+using MacroDeckHost.Tests.UnitTests.Delegation;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -125,11 +126,95 @@ internal sealed class WidgetIconProviderPollServiceTests
 		});
 	}
 
+	[Test]
+	public void WidgetPolledWhileHidden_IsPolledOnTheNextTickOnceSomethingDisplaysIt()
+	{
+		var widgetId = Guid.NewGuid();
+		var iconService = new FakeWidgetIconServiceForPoll();
+		iconService.PollIntervalByWidget[widgetId] = TimeSpan.FromSeconds(5);
+		var queue = new WidgetIconEvalChannel();
+		var subscriptions = new WidgetStateSubscriptionTracker();
+		var time = new FakeTimeProvider();
+		var service = CreateService(queue, iconService, new FakeFolderCache(Button(widgetId)), subscriptions, time);
+
+		Assert.That(Tick(service, queue, widgetId), Is.True);
+		time.Advance(TimeSpan.FromSeconds(6));
+		Assert.That(Tick(service, queue, widgetId), Is.False, "hidden widgets are polled at the idle cadence");
+
+		subscriptions.Add("deck", widgetId.ToString());
+		time.Advance(TimeSpan.FromSeconds(1));
+
+		Assert.That(Tick(service, queue, widgetId), Is.True);
+	}
+
+	[Test]
+	public void DisplayedWidget_IsPolledAtItsDeclaredInterval_EvenWhenTheTickLandsSlightlyEarly()
+	{
+		var widgetId = Guid.NewGuid();
+		var iconService = new FakeWidgetIconServiceForPoll();
+		iconService.PollIntervalByWidget[widgetId] = TimeSpan.FromSeconds(2);
+		var queue = new WidgetIconEvalChannel();
+		var subscriptions = new WidgetStateSubscriptionTracker();
+		subscriptions.Add("deck", widgetId.ToString());
+		var time = new FakeTimeProvider();
+		var service = CreateService(queue, iconService, new FakeFolderCache(Button(widgetId)), subscriptions, time);
+		Tick(service, queue, widgetId);
+
+		time.Advance(TimeSpan.FromMilliseconds(999));
+		var firstTick = Tick(service, queue, widgetId);
+		time.Advance(TimeSpan.FromMilliseconds(999));
+		var secondTick = Tick(service, queue, widgetId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(firstTick, Is.False);
+			Assert.That(secondTick, Is.True);
+		});
+	}
+
+	[Test]
+	public void DisplayedWidget_IsNeverPolledFasterThanDeclared()
+	{
+		var widgetId = Guid.NewGuid();
+		var iconService = new FakeWidgetIconServiceForPoll();
+		iconService.PollIntervalByWidget[widgetId] = TimeSpan.FromMilliseconds(1500);
+		var queue = new WidgetIconEvalChannel();
+		var subscriptions = new WidgetStateSubscriptionTracker();
+		subscriptions.Add("deck", widgetId.ToString());
+		var time = new FakeTimeProvider();
+		var service = CreateService(queue, iconService, new FakeFolderCache(Button(widgetId)), subscriptions, time);
+		Tick(service, queue, widgetId);
+
+		time.Advance(TimeSpan.FromSeconds(1));
+		var afterOneSecond = Tick(service, queue, widgetId);
+		time.Advance(TimeSpan.FromSeconds(1));
+		var afterTwoSeconds = Tick(service, queue, widgetId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(afterOneSecond, Is.False);
+			Assert.That(afterTwoSeconds, Is.True);
+		});
+	}
+
+	private static bool Tick(WidgetIconProviderPollService service, WidgetIconEvalChannel queue, Guid widgetId)
+	{
+		service.EnqueueDueProviders();
+		var enqueued = false;
+		while (queue.Reader.TryRead(out var id))
+		{
+			enqueued |= id == widgetId;
+		}
+
+		return enqueued;
+	}
+
 	private static WidgetIconProviderPollService CreateService(
 		WidgetIconEvalChannel queue,
 		FakeWidgetIconServiceForPoll iconService,
 		FakeFolderCache folderCache,
-		WidgetStateSubscriptionTracker? subscriptions = null)
+		WidgetStateSubscriptionTracker? subscriptions = null,
+		TimeProvider? timeProvider = null)
 	{
 		var serviceProvider = new ServiceCollection()
 			.AddScoped<IWidgetIconService>(_ => iconService)
@@ -142,7 +227,8 @@ internal sealed class WidgetIconProviderPollServiceTests
 			subscriptions ?? new WidgetStateSubscriptionTracker(),
 			folderCache,
 			ReadyStartup(),
-			Serilog.Log.Logger);
+			Serilog.Log.Logger,
+			timeProvider: timeProvider);
 	}
 
 	private static Application.Services.StartupReadiness ReadyStartup()

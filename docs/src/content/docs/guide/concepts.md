@@ -161,7 +161,7 @@ hardware deck, the key shows the widget's label and colors but not the time.
 ### Calendar widget
 
 The **Calendar** widget shows the events of the calendars you connected under **Integrations**, for
-example [Google Calendar](#connect-google-calendar). Until a calendar is connected it says **No calendar
+example [Google Calendar](#connect-google-calendar) or [Outlook Calendar](#connect-outlook-calendar). Until a calendar is connected it says **No calendar
 connected**. Each event is marked in its calendar's color. Its **Layout** decides what it shows:
 **Agenda**, the default, lists your upcoming events, and **Next event** counts down to the next one. The
 settings change with the layout, so you only see the ones that apply.
@@ -252,7 +252,9 @@ A hardware deck has no screen for these dialogs, so pressing a calendar widget t
 own press actions and does nothing without them. To join a meeting from a key, give it the
 [**Join Meeting**](#calendar-triggers-and-join-meeting) action.
 
-Macro Deck reads your calendars every few minutes, so a new event can take a moment to appear. It reads
+Macro Deck reads your calendars every five minutes, so a new event can take a moment to appear; the
+**Refresh Calendars** action, under **Calendar**, reads them right away and fails with **Some calendars
+couldn't be updated** when an account cannot be read. It reads
 about a week ahead, from yesterday through the day a week from today: the Next event layout says **No
 upcoming events** when nothing is planned in that time, even if a later event exists. When an
 account cannot be read, the widgets keep its last events and say **Some calendars couldn't be updated**;
@@ -383,8 +385,26 @@ Show one in a label with `{{ vars.deaths }}`, like the **Deaths: 3** button abov
 
 Every speaker and microphone gets its own volume and mute variable, named after the device, for
 example `system_audio_input_usb_mic_volume_percent`. An unplugged device keeps its variables; they
-read as unavailable until it is back. The volume actions can control the default output, the default
+read as unavailable until it is back. Macro Deck remembers up to 64 devices; after that, the oldest
+unplugged device makes room. The volume actions can control the default output, the default
 input or one specific device.
+
+Every disk gets numbered variables too: `system_disk_0_*` is the system disk (the drive Windows runs
+from, or `/` on macOS and Linux), and the others follow, up to eight. Each disk has:
+
+| Variable | Shows |
+| --- | --- |
+| `system_disk_0_name`, `_mount_point`, `_file_system` | The disk's name, where it is mounted (for example `C:\` or `/Volumes/Backup`) and its file system. |
+| `system_disk_0_total_bytes`, `_used_bytes`, `_free_bytes`, `_usage_percent` | Its size, the space in use, the space still free for you, and how full it is. The numbers match Finder and Explorer: space the system keeps in reserve counts as used. |
+| `system_disk_0_read_bytes_per_second`, `_write_bytes_per_second` | How fast it is reading and writing right now. |
+| `system_disk_0_read_usage_percent`, `_write_usage_percent` | How busy it is with reading and with writing. A fast SSD handling many requests at once reaches 100 % quickly. |
+
+A disk you plug in while Macro Deck runs gets the lowest free number within a few seconds. A disk you
+remove keeps its variables; they read as unavailable until a disk takes its number again. After a
+restart the numbering starts over, so a removable disk can end up with a different number. Network
+drives and hidden system volumes are left out. On macOS, read and write figures come
+from the physical disk, so all volumes on one disk show the same activity. Linux shows no activity
+for ZFS pools.
 
 Some integrations, such as Home Assistant, offer far more values than they list up front. These wait
 in a collapsed **Unbound variables** group at the top of the integration's variables, on the Variables
@@ -519,8 +539,9 @@ you expect.
 
 ## Integrations and the Store
 
-Integrations connect Macro Deck to other apps: OBS, Home Assistant, Voicemeeter, Spotify, Twitch,
-[YouTube](/guide/youtube/), Discord, Google Calendar, [AdGuard Home](/guide/adguard-home/) and more. Turn on the ones you use under **Integrations**.
+Integrations connect Macro Deck to other apps: OBS, Home Assistant, Voicemeeter, Spotify,
+[SoundPad](/guide/soundpad/), Twitch, [YouTube](/guide/youtube/), Discord, Google Calendar, Outlook Calendar,
+[AdGuard Home](/guide/adguard-home/) and more. Turn on the ones you use under **Integrations**.
 
 ![The Integrations page listing ADB, Discord, Google Calendar, Home Assistant, HTTP, Keyboard and Macro Deck Companion, with HTTP and Keyboard turned on](../../../assets/guide/integrations.png)
 
@@ -718,6 +739,47 @@ To connect another Google account, choose **Add configuration** on the Google Ca
 with that account; the same OAuth client works for all of them. If you connect an account that is already
 connected, **Integrations** shows **Google account connected twice**: remove the older configuration. When
 Google asks you to sign in again, see [Troubleshooting](/guide/troubleshooting/#google-calendar-asks-you-to-sign-in-again).
+
+### Connect Outlook Calendar
+
+**Outlook Calendar** reads the calendars of a personal Microsoft account (Outlook.com, Hotmail, Live) or of a
+Microsoft 365 work or school account.
+
+1. Under **Integrations**, open **Outlook Calendar** and start its setup.
+2. Choose **Continue**. Your browser opens the Microsoft sign-in: sign in and allow Macro Deck to read your
+   calendars.
+3. Choose the calendars Macro Deck should use. Your own calendars and calendars others shared with you are
+   listed; a shared one shows who shares it.
+
+Macro Deck asks Microsoft only for read access to your calendars and for your name and email address, which
+name the account. Recurring meetings show each occurrence, and a Teams meeting's link is the event's meeting
+link for **Join Meeting**. Only the calendars you chose reach widgets and triggers. A calendar you create or
+that someone shares with you later is not added on its own: choose **Edit connection** next to the account,
+sign in again and pick it. Some organizations only let an administrator allow apps; then the sign-in asks
+for an administrator's approval.
+
+#### Use an app of your own
+
+The sign-in goes through Macro Deck's app at Microsoft. If your organization does not allow it, you can
+register an app of your own and enter it under **Advanced** in the setup. Microsoft only lets you register
+apps in a Microsoft Entra directory: a personal Microsoft account needs one first, for example from a free
+Azure account.
+
+1. In the [Azure portal](https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade),
+   open **App registrations** and register a new application. Under **Supported account types**, choose the
+   accounts it should accept.
+2. Under **Authentication**, add the platform **Mobile and desktop applications** with the **Redirect URI**
+   the setup shows, such as `http://127.0.0.1:8193/api/integrations/oauth/callback`. Do not add it under
+   **Web**: that platform expects a client secret, and Macro Deck uses none.
+3. Under **API permissions**, add the delegated Microsoft Graph permission **Calendars.Read**.
+4. In the setup, open **Advanced** and enter the app's **Application (client) ID**. If the app accepts only
+   the accounts of one organization, enter that organization's tenant ID or domain as **Tenant**.
+
+To connect another Microsoft account, choose **Add configuration** on the Outlook Calendar page and sign in
+with that account. If you connect an
+account that is already connected, **Integrations** shows **Microsoft account connected twice**: remove the
+older configuration. When Microsoft asks you to sign in again, see
+[Troubleshooting](/guide/troubleshooting/#outlook-calendar-asks-you-to-sign-in-again).
 
 ## Managing OBS recordings
 

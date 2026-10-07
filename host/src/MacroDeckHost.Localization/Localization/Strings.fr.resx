@@ -4417,6 +4417,15 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Calendar.Actions.JoinMeeting.WindowLabel" xml:space="preserve">
     <value>Commence d'ici</value>
   </data>
+  <data name="Integrations.Calendar.Actions.RefreshCalendars.Description" xml:space="preserve">
+    <value>Lit tout de suite les événements de tous les calendriers connectés au lieu d'attendre la prochaine actualisation, que Macro Deck fait sinon toutes les cinq minutes.</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.RefreshCalendars.Name" xml:space="preserve">
+    <value>Actualiser les calendriers</value>
+  </data>
+  <data name="Integrations.Calendar.Actions.RefreshCalendars.Unavailable" xml:space="preserve">
+    <value>Les calendriers ne peuvent pas être actualisés pour le moment.</value>
+  </data>
   <data name="Integrations.Calendar.Actions.ShowDetails.Description" xml:space="preserve">
     <value>Ouvre les détails d'un widget de calendrier sur l'écran où il a été touché : l'événement affiché par la disposition Prochain événement, ou les événements à venir de la disposition Agenda.</value>
   </data>
@@ -5875,6 +5884,93 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Integrations.GoogleCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
     <value>Connexion Google expirée pour {account}</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.AuthorizationNotCompleted" xml:space="preserve">
+    <value>La connexion Microsoft a été annulée ou n'a pas été terminée. Appuie sur Continuer pour la rouvrir.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsDescription" xml:space="preserve">
+    <value>Seuls les calendriers que tu choisis ici apparaissent dans Macro Deck. Pour ajouter ou retirer des calendriers plus tard, modifie cette configuration.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsLabel" xml:space="preserve">
+    <value>Calendriers</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsTitle" xml:space="preserve">
+    <value>Choisir les calendriers</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.CalendarsUnavailable" xml:space="preserve">
+    <value>Connexion réussie, mais tes calendriers n'ont pas pu être lus chez Microsoft. Réessaie dans un instant.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ClientIdLabel" xml:space="preserve">
+    <value>ID d'application (client)</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ClientIdPlaceholder" xml:space="preserve">
+    <value>Application de Macro Deck</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ConnectDescription" xml:space="preserve">
+    <value>Macro Deck lit tes calendriers Outlook et Microsoft 365. Appuie sur Continuer pour te connecter avec ton compte Microsoft dans ton navigateur et autoriser Macro Deck à lire tes calendriers. Les comptes personnels, professionnels et scolaires fonctionnent tous.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ConnectTitle" xml:space="preserve">
+    <value>Connecter le Calendrier Outlook</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ConsentRequired" xml:space="preserve">
+    <value>L'application n'a pas encore le droit de lire tes calendriers. Ajoute l'autorisation Calendars.Read à l'application et réessaie ; dans une organisation, un administrateur devra peut-être l'accorder.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.EnterClientId" xml:space="preserve">
+    <value>Saisis un ID d'application (client) valide, ou laisse le champ vide pour utiliser l'application de Macro Deck.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.InvalidTenant" xml:space="preserve">
+    <value>Saisis common, organizations, consumers, un ID de locataire ou un domaine comme contoso.com.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.MissingCalendarPermission" xml:space="preserve">
+    <value>Microsoft n'a pas accordé l'accès à tes calendriers. Réessaie et autorise l'application à lire tes calendriers.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.MissingRefreshToken" xml:space="preserve">
+    <value>Microsoft n'a pas accordé d'accès durable, Macro Deck n'a donc pas pu rester connecté. Réessaie et autorise l'application à rester connectée.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.PublicClientRequired" xml:space="preserve">
+    <value>Microsoft attend un secret client : l'URI de redirection a donc été ajouté sur la mauvaise plateforme. Ajoute-le sous Applications mobiles et de bureau au lieu de Web, puis réessaie.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.SelectCalendar" xml:space="preserve">
+    <value>Choisis au moins un calendrier.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.SharedCalendarName" xml:space="preserve">
+    <value>{calendar} (partagé par {owner})</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.TenantDescription" xml:space="preserve">
+    <value>Laisse vide pour les comptes personnels, professionnels et scolaires. Uniquement pour ta propre application qui n'accepte que les comptes d'une seule organisation, saisis l'ID de locataire ou le domaine de cette organisation.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.TenantLabel" xml:space="preserve">
+    <value>Locataire</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.TokenExchangeFailed" xml:space="preserve">
+    <value>Microsoft n'a pas accepté la connexion. Réessaie ; si tu as saisi ta propre application sous Avancé, vérifie son ID d'application (client) et l'URI de redirection.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.DuplicateAccountDescription" xml:space="preserve">
+    <value>« {title} » est une ancienne connexion du même compte Microsoft et n'est pas utilisée. Retire-la de la liste des configurations ci-dessous.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.DuplicateAccountTitle" xml:space="preserve">
+    <value>Compte Microsoft connecté deux fois</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.ReconnectResolution" xml:space="preserve">
+    <value>Reconnecte le compte Microsoft.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.SignInExpiredDescription" xml:space="preserve">
+    <value>Microsoft n'accepte plus la connexion de ce compte. L'accès a peut-être été retiré dans ton compte Microsoft, révoqué par ton organisation, ou l'inscription de l'application a été modifiée ou supprimée. Reconnecte le compte.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
+    <value>Connexion Microsoft expirée pour {account}</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.CalendarsUnreadableDescription" xml:space="preserve">
+    <value>Microsoft ne renvoie plus un ou plusieurs des calendriers choisis pour ce compte, par exemple parce qu'un calendrier a été supprimé ou n'est plus partagé avec toi. Leurs événements sont absents. Modifie la connexion pour choisir à nouveau les calendriers du compte.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Issues.CalendarsUnreadableTitle" xml:space="preserve">
+    <value>Certains calendriers de {account} ne peuvent pas être lus</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.AdminConsentInstruction" xml:space="preserve">
+    <value>Certaines organisations ne laissent que les administrateurs autoriser des applications. La connexion demande alors l'approbation d'un administrateur avant de continuer.</value>
+  </data>
+  <data name="Integrations.MicrosoftCalendar.Config.ClientIdDescription" xml:space="preserve">
+    <value>Laisse vide pour te connecter via l'application de Macro Deck. Pour utiliser ta propre application, inscris-la dans le portail Azure sous Inscriptions d'applications, dans un annuaire Microsoft Entra ; un compte Microsoft personnel a d'abord besoin d'un annuaire, par exemple via un compte Azure gratuit. Ajoute la plateforme Applications mobiles et de bureau avec l'URI de redirection {redirectUri} et l'autorisation déléguée Calendars.Read, puis saisis ici l'ID d'application (client).</value>
   </data>
   <data name="Integrations.HomeAssistant.Actions.Automation.CommandDisable" xml:space="preserve">
     <value>Désactiver</value>
@@ -8248,6 +8344,123 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.SinusBot.Variables.Volume" xml:space="preserve">
     <value>Volume</value>
   </data>
+  <data name="Integrations.SoundPad.Actions.AllSounds" xml:space="preserve">
+    <value>Tous les sons</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.CategoryDescription" xml:space="preserve">
+    <value>Laisse vide pour choisir parmi tous les sons.</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.CategoryLabel" xml:space="preserve">
+    <value>Catégorie</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlayOnMicrophoneLabel" xml:space="preserve">
+    <value>Lire via le micro</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlayOnSpeakersLabel" xml:space="preserve">
+    <value>Lire sur les haut-parleurs</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlayRandomSoundDescription" xml:space="preserve">
+    <value>Lit un son aléatoire parmi tous les sons ou dans une catégorie.</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlayRandomSoundName" xml:space="preserve">
+    <value>Lire un son aléatoire</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlaySoundDescription" xml:space="preserve">
+    <value>Lit un son de ta liste SoundPad. Laisse le son vide pour le choisir au moment d'appuyer sur le bouton.</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlaySoundName" xml:space="preserve">
+    <value>Lire un son</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.SourceDefault" xml:space="preserve">
+    <value>Par défaut de SoundPad</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.SourceLabel" xml:space="preserve">
+    <value>Enregistrer depuis</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.SourceMicrophone" xml:space="preserve">
+    <value>Micro</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.SourceSpeakers" xml:space="preserve">
+    <value>Haut-parleurs</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StartRecordingDescription" xml:space="preserve">
+    <value>Démarre un enregistrement dans SoundPad.</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StartRecordingName" xml:space="preserve">
+    <value>Démarrer l'enregistrement</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StopPlaybackDescription" xml:space="preserve">
+    <value>Arrête le son en cours de lecture.</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StopPlaybackName" xml:space="preserve">
+    <value>Arrêter la lecture</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StopRecordingDescription" xml:space="preserve">
+    <value>Arrête l'enregistrement en cours dans SoundPad.</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StopRecordingName" xml:space="preserve">
+    <value>Arrêter l'enregistrement</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.ToggleMuteDescription" xml:space="preserve">
+    <value>Coupe ou rétablit le son de SoundPad.</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.ToggleMuteName" xml:space="preserve">
+    <value>Activer/désactiver la sourdine</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.Description" xml:space="preserve">
+    <value>Macro Deck contrôle SoundPad sur ce PC via l'interface de contrôle à distance de SoundPad.</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.KeepRunning" xml:space="preserve">
+    <value>Garde SoundPad ouvert pendant que tu le contrôles depuis Macro Deck.</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.NotReachable" xml:space="preserve">
+    <value>SoundPad n'a pas répondu. Vérifie qu'il est lancé sur ce PC, puis réessaie.</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.StartSoundPad" xml:space="preserve">
+    <value>Lance SoundPad sur ce PC.</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.Title" xml:space="preserve">
+    <value>Connecter SoundPad</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.UnknownStep" xml:space="preserve">
+    <value>Étape de configuration inconnue.</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.WebsiteLinkLabel" xml:space="preserve">
+    <value>Site web de SoundPad</value>
+  </data>
+  <data name="Integrations.SoundPad.Migration.SetUpIntegration" xml:space="preserve">
+    <value>Configure l'intégration SoundPad dans Macro Deck, sous Intégrations, pendant que SoundPad est lancé.</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.CurrentArtist" xml:space="preserve">
+    <value>Artiste actuel</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.CurrentSound" xml:space="preserve">
+    <value>Son actuel</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.Duration" xml:space="preserve">
+    <value>Durée du son</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.IsConnected" xml:space="preserve">
+    <value>SoundPad connecté</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.IsMuted" xml:space="preserve">
+    <value>En sourdine</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.IsPlaying" xml:space="preserve">
+    <value>En lecture</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.PlaybackState" xml:space="preserve">
+    <value>État de lecture</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.Position" xml:space="preserve">
+    <value>Position de lecture</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.Recording" xml:space="preserve">
+    <value>Enregistrement en cours</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.Volume" xml:space="preserve">
+    <value>Volume</value>
+  </data>
   <data name="Integrations.Spotify.Actions.ModeAdd" xml:space="preserve">
     <value>Ajouter</value>
   </data>
@@ -9497,6 +9710,39 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Integrations.System.Variables.GpuNameIndexed" xml:space="preserve">
     <value>Nom du GPU {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskNameIndexed" xml:space="preserve">
+    <value>Nom du disque {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskMountPointIndexed" xml:space="preserve">
+    <value>Point de montage du disque {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskFileSystemIndexed" xml:space="preserve">
+    <value>Système de fichiers du disque {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskTotalIndexed" xml:space="preserve">
+    <value>Espace total du disque {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskUsedIndexed" xml:space="preserve">
+    <value>Espace utilisé du disque {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskFreeIndexed" xml:space="preserve">
+    <value>Espace libre du disque {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskUsageIndexed" xml:space="preserve">
+    <value>Utilisation du disque {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskReadSpeedIndexed" xml:space="preserve">
+    <value>Vitesse de lecture du disque {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskWriteSpeedIndexed" xml:space="preserve">
+    <value>Vitesse d'écriture du disque {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskReadActivityIndexed" xml:space="preserve">
+    <value>Activité de lecture du disque {index}</value>
+  </data>
+  <data name="Integrations.System.Variables.DiskWriteActivityIndexed" xml:space="preserve">
+    <value>Activité d'écriture du disque {index}</value>
   </data>
   <data name="Integrations.System.Variables.PcName" xml:space="preserve">
     <value>Nom du PC</value>

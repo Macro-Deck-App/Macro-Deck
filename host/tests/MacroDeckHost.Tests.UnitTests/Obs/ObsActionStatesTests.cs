@@ -38,6 +38,49 @@ internal sealed class ObsActionStatesTests
 	private static readonly string[] _recordingStateIds = ["not-recording", "recording", "paused", "unavailable"];
 
 	[Test]
+	public async Task SetInputMute_ReadRightAfterPressingIt_ShowsTheNewState()
+	{
+		var client = Running();
+		using var connection = Connect(client);
+		var action = Action("set-input-mute", connection);
+		var mic = new Dictionary<string, object?> { [MuteInputActionDefinition.InputParameter] = "Mic" };
+
+		var before = await ((IStateProviderActionDefinition)action).GetActionStateAsync(mic, default);
+		client.MutedInputs["Mic"] = true;
+		await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
+		{
+			Parameters = new Dictionary<string, object> { [MuteInputActionDefinition.InputParameter] = "Mic" }
+		});
+		var after = await ((IStateProviderActionDefinition)action).GetActionStateAsync(mic, default);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(before!.ActiveStateId, Is.EqualTo("unmuted"));
+			Assert.That(after!.ActiveStateId, Is.EqualTo("muted"));
+		});
+	}
+
+	[Test]
+	public async Task SetInputMute_FollowsAMuteMadeInObs_WithoutWaitingOutTheReadCache()
+	{
+		var client = Running();
+		using var connection = Connect(client);
+		var provider = (IStateProviderActionDefinition)Action("set-input-mute", connection);
+		var mic = new Dictionary<string, object?> { [MuteInputActionDefinition.InputParameter] = "Mic" };
+
+		var before = await provider.GetActionStateAsync(mic, default);
+		client.MutedInputs["Mic"] = true;
+		client.RaiseInputMuteChanged("Mic", true);
+		var after = await provider.GetActionStateAsync(mic, default);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(before!.ActiveStateId, Is.EqualTo("unmuted"));
+			Assert.That(after!.ActiveStateId, Is.EqualTo("muted"));
+		});
+	}
+
+	[Test]
 	public async Task SetProfile_FollowsAProfileSwitchMadeInObs()
 	{
 		var client = Running(new ObsStatus { CurrentProfile = "Streaming" });

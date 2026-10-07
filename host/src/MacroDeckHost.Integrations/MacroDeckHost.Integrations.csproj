@@ -25,6 +25,7 @@
     <ItemGroup>
       <PackageReference Include="SpotifyAPI.Web" />
       <PackageReference Include="obs-websocket-dotnet" />
+      <PackageReference Include="SoundpadConnector" />
       <PackageReference Include="TwitchLib.Api" />
     </ItemGroup>
 
