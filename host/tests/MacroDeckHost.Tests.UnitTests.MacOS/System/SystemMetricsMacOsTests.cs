@@ -5,6 +5,8 @@ namespace MacroDeckHost.Tests.UnitTests.MacOS.System;
 [Platform("MacOsX")]
 public class SystemMetricsMacOsTests
 {
+	private const long ConcurrentDiskChurnBytes = 256L * 1024 * 1024;
+
 	[Test]
 	public async Task Factory_creates_macos_service_that_reads_total_memory_and_reports_gpu_support()
 	{
@@ -33,8 +35,9 @@ public class SystemMetricsMacOsTests
 		{
 			await metrics.GetDisksAsync();
 			await Task.Delay(TimeSpan.FromSeconds(1.6));
-			var startup = (await metrics.GetDisksAsync()).SingleOrDefault(disk => disk.MountPoint == "/");
 			var data = new DriveInfo("/System/Volumes/Data");
+			var dataUsedBytes = data.TotalSize - data.TotalFreeSpace;
+			var startup = (await metrics.GetDisksAsync()).SingleOrDefault(disk => disk.MountPoint == "/");
 
 			Assert.That(startup, Is.Not.Null);
 			Assert.Multiple(() =>
@@ -42,7 +45,8 @@ public class SystemMetricsMacOsTests
 				Assert.That(startup!.Name, Is.Not.Empty.And.Not.EqualTo("/"));
 				Assert.That(startup.FileSystem, Is.EqualTo("apfs"));
 				Assert.That(startup.TotalBytes, Is.GreaterThan(0));
-				Assert.That(startup.UsedBytes, Is.GreaterThanOrEqualTo(data.TotalSize - data.TotalFreeSpace));
+				// Other processes write and delete files between the two samples; allow that churn.
+				Assert.That(startup.UsedBytes, Is.GreaterThanOrEqualTo(dataUsedBytes - ConcurrentDiskChurnBytes));
 				Assert.That(startup.Activity, Is.Not.Null);
 			});
 		}
