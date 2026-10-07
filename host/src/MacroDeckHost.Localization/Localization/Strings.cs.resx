@@ -8344,6 +8344,123 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.SinusBot.Variables.Volume" xml:space="preserve">
     <value>Hlasitost</value>
   </data>
+  <data name="Integrations.SoundPad.Actions.AllSounds" xml:space="preserve">
+    <value>Všechny zvuky</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.CategoryDescription" xml:space="preserve">
+    <value>Ponechte prázdné pro výběr ze všech zvuků.</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.CategoryLabel" xml:space="preserve">
+    <value>Kategorie</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlayOnMicrophoneLabel" xml:space="preserve">
+    <value>Přehrát přes mikrofon</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlayOnSpeakersLabel" xml:space="preserve">
+    <value>Přehrát na reproduktorech</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlayRandomSoundDescription" xml:space="preserve">
+    <value>Přehraje náhodný zvuk ze všech zvuků nebo z jedné kategorie.</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlayRandomSoundName" xml:space="preserve">
+    <value>Přehrát náhodný zvuk</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlaySoundDescription" xml:space="preserve">
+    <value>Přehraje zvuk ze seznamu SoundPadu. Když zvuk zůstane prázdný, vybírá se při stisknutí tlačítka.</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.PlaySoundName" xml:space="preserve">
+    <value>Přehrát zvuk</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.SourceDefault" xml:space="preserve">
+    <value>Výchozí nastavení SoundPadu</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.SourceLabel" xml:space="preserve">
+    <value>Nahrávat z</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.SourceMicrophone" xml:space="preserve">
+    <value>Mikrofon</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.SourceSpeakers" xml:space="preserve">
+    <value>Reproduktory</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StartRecordingDescription" xml:space="preserve">
+    <value>Spustí nahrávání v SoundPadu.</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StartRecordingName" xml:space="preserve">
+    <value>Spustit nahrávání</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StopPlaybackDescription" xml:space="preserve">
+    <value>Zastaví právě přehrávaný zvuk.</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StopPlaybackName" xml:space="preserve">
+    <value>Zastavit přehrávání</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StopRecordingDescription" xml:space="preserve">
+    <value>Zastaví probíhající nahrávání v SoundPadu.</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.StopRecordingName" xml:space="preserve">
+    <value>Zastavit nahrávání</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.ToggleMuteDescription" xml:space="preserve">
+    <value>Ztlumí SoundPad nebo zruší ztlumení.</value>
+  </data>
+  <data name="Integrations.SoundPad.Actions.ToggleMuteName" xml:space="preserve">
+    <value>Přepnout ztlumení</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.Description" xml:space="preserve">
+    <value>Macro Deck ovládá SoundPad na tomto počítači přes jeho rozhraní pro dálkové ovládání.</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.KeepRunning" xml:space="preserve">
+    <value>Při ovládání z Macro Decku musí SoundPad zůstat spuštěný.</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.NotReachable" xml:space="preserve">
+    <value>SoundPad neodpověděl. Ověřte, že na tomto počítači běží, a zkuste to znovu.</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.StartSoundPad" xml:space="preserve">
+    <value>Spusťte SoundPad na tomto počítači.</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.Title" xml:space="preserve">
+    <value>Připojit SoundPad</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.UnknownStep" xml:space="preserve">
+    <value>Neznámý krok nastavení.</value>
+  </data>
+  <data name="Integrations.SoundPad.Config.WebsiteLinkLabel" xml:space="preserve">
+    <value>Web SoundPadu</value>
+  </data>
+  <data name="Integrations.SoundPad.Migration.SetUpIntegration" xml:space="preserve">
+    <value>Nastavte integraci SoundPad v Macro Decku v části Integrace, zatímco SoundPad běží.</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.CurrentArtist" xml:space="preserve">
+    <value>Aktuální interpret</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.CurrentSound" xml:space="preserve">
+    <value>Aktuální zvuk</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.Duration" xml:space="preserve">
+    <value>Délka zvuku</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.IsConnected" xml:space="preserve">
+    <value>SoundPad připojen</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.IsMuted" xml:space="preserve">
+    <value>Ztlumeno</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.IsPlaying" xml:space="preserve">
+    <value>Přehrává se</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.PlaybackState" xml:space="preserve">
+    <value>Stav přehrávání</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.Position" xml:space="preserve">
+    <value>Pozice přehrávání</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.Recording" xml:space="preserve">
+    <value>Nahrávání probíhá</value>
+  </data>
+  <data name="Integrations.SoundPad.Variables.Volume" xml:space="preserve">
+    <value>Hlasitost</value>
+  </data>
   <data name="Integrations.Spotify.Actions.ModeAdd" xml:space="preserve">
     <value>Přidat</value>
   </data>
