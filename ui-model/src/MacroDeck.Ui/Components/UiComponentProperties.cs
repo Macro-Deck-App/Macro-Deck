@@ -190,6 +190,10 @@ public static class UiComponentProperties
 	/// colour.</summary>
 	public const string LevelColor = "levelColor";
 
+	/// <summary>A gauge's unfilled track colour, as <c>#rrggbb</c>. Absent means the reader's tertiary
+	/// surface colour, which is also what a reader that does not implement the key draws.</summary>
+	public const string TrackColor = "trackColor";
+
 	/// <summary>How a pointer on a slider maps to its level - see <see cref="UiComponentSliderInteractions" />.
 	/// Absent means absolute: the level jumps to the pointer. A reader that does not implement the key
 	/// ignores it and keeps that absolute behaviour, which still leaves a working slider.</summary>
@@ -333,5 +337,6 @@ public static class UiComponentProperties
 		Digits, Answer, Placeholder, Rotation, OriginX, OriginY, Shape, CornerRadius, StrokeColor,
 		StrokeWidth, Path, Icon, Columns, Rows, ColumnSpan, RowSpan, StartAngle, EndAngle, On, Selected,
 		Modifiers, Frame, Clip, Mask, Variants, Spans, Overflow, Anchor, Stream, Shadow,
+		TrackColor,
 	];
 }

@@ -69,6 +69,8 @@ acceptable fallback.
 | `UiButton.Background` | `#rrggbb` | the reader's accent colour |
 | `UiButton.BorderColor` | `#rrggbb` | the border style supplies its own colour |
 | `UiSlider.LevelColor` | `#rrggbb` | the reader's accent colour |
+| `UiGauge.LevelColor` | `#rrggbb` | the reader's accent colour |
+| `UiGauge.TrackColor` | `#rrggbb` | the reader's tertiary surface colour |
 | `UiChart.Color` | `#rrggbb` | the reader's accent colour |
 | `UiProgressBar.StartColor`, `.EndColor` | `#rrggbb` | the reader's accent colour, each end on its own |
 | `UiRangeBar.StartColor`, `.EndColor` | `#rrggbb` | no fill; the span needs both |

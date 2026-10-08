@@ -1571,9 +1571,10 @@ public sealed record UiGrid : UiComponentContainer
 /// <c>360</c>.</item>
 /// <item>The arc is centred in the box, <see cref="Thickness" /> wide, with a centreline radius of
 /// <c>(min(width, height) - thickness) / 2</c> and fully rounded caps.</item>
-/// <item>The track covers the whole sweep in the reader's tertiary surface colour. The filled arc runs from
-/// the start over <see cref="Level" /> of the sweep in <see cref="LevelColor" />, or the reader's accent
-/// colour when that is absent. A level of <c>0</c> paints no filled arc.</item>
+/// <item>The track covers the whole sweep in <see cref="TrackColor" />, or the reader's tertiary surface
+/// colour when that is absent. The filled arc runs from the start over <see cref="Level" /> of the sweep in
+/// <see cref="LevelColor" />, or the reader's accent colour when that is absent. A level of <c>0</c> paints
+/// no filled arc.</item>
 /// </list>
 ///
 /// <para>
@@ -1596,6 +1597,10 @@ public sealed record UiGauge : UiComponentLeaf
 	/// colour.</summary>
 	public UiValue<string> LevelColor { get; init; }
 
+	/// <summary>The unfilled track's colour, as <c>#rrggbb</c>. Absent means the reader's tertiary surface
+	/// colour. A reader from before the key draws that colour whatever is set.</summary>
+	public UiValue<string> TrackColor { get; init; }
+
 	/// <summary>The arc's width.</summary>
 	public UiSize Thickness { get; init; }
 
@@ -1613,6 +1618,7 @@ public sealed record UiGauge : UiComponentLeaf
 		properties.Set(UiComponentProperties.StartAngle, StartAngle);
 		properties.Set(UiComponentProperties.EndAngle, EndAngle);
 		properties.Set(UiComponentProperties.LevelColor, LevelColor);
+		properties.Set(UiComponentProperties.TrackColor, TrackColor);
 		properties.Set(UiComponentProperties.Thickness, Thickness.Value);
 	}
 }
