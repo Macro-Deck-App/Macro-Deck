@@ -7960,6 +7960,12 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Integrations.Mouse.Issues.WaylandDegradedReason" xml:space="preserve">
     <value>Ini adalah sesi Wayland, sehingga input mouse berjalan melalui XWayland. Klik, seret, dan gulir berfungsi, tetapi compositor mungkin mengabaikan penempatan penunjuk absolut, sehingga pemindahan ke koordinat tetap bisa mendarat di tempat lain atau tidak melakukan apa pun.</value>
   </data>
+  <data name="Integrations.MusicPlayer.Name" xml:space="preserve">
+    <value>Pemutar musik</value>
+  </data>
+  <data name="Integrations.MusicPlayer.Variables.AlbumColorDisplayName" xml:space="preserve">
+    <value>Warna album</value>
+  </data>
   <data name="Integrations.Obs.Actions.GetFilterState.Description" xml:space="preserve">
     <value>Membaca apakah filter sumber aktif ke dalam variabel</value>
   </data>

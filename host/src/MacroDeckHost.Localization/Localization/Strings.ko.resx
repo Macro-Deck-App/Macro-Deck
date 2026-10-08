@@ -7960,6 +7960,12 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Integrations.Mouse.Issues.WaylandDegradedReason" xml:space="preserve">
     <value>이 세션은 Wayland 세션이므로 마우스 입력은 XWayland를 통해 동작합니다. 클릭, 드래그, 스크롤은 작동하지만 컴포지터가 절대 포인터 위치 지정을 무시할 수 있습니다. 이 경우 고정 좌표로의 이동은 다른 곳에 도착하거나 아무 일도 일어나지 않습니다.</value>
   </data>
+  <data name="Integrations.MusicPlayer.Name" xml:space="preserve">
+    <value>음악 플레이어</value>
+  </data>
+  <data name="Integrations.MusicPlayer.Variables.AlbumColorDisplayName" xml:space="preserve">
+    <value>앨범 색상</value>
+  </data>
   <data name="Integrations.Obs.Actions.GetFilterState.Description" xml:space="preserve">
     <value>소스 필터가 사용 중인지 여부를 변수에 읽어 옵니다</value>
   </data>
