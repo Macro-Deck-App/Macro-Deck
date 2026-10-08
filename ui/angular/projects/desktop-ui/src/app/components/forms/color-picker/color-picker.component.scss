@@ -84,6 +84,9 @@
 }
 
 .cp-swatch {
+	background:
+		linear-gradient(var(--cp-fill), var(--cp-fill)),
+		repeating-conic-gradient(#c8c8c8 0% 25%, #ffffff 0% 50%) 50% / 0.5rem 0.5rem;
 	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
 }
 
@@ -198,7 +201,6 @@
 .cp-popover-wide {
 	width: 23.5rem;
 	max-width: calc(100vw - 2rem);
-	padding: var(--space-2);
 }
 
 .cp-area {
