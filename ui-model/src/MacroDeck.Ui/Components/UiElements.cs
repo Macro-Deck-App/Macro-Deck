@@ -198,11 +198,13 @@ public sealed record UiTextRun : UiComponentLeaf
 	/// <see cref="UiComponentTextRoles.Primary" />. Ignored when <see cref="Color" /> is present.</summary>
 	public UiValue<string> Role { get; init; }
 
-	/// <summary>A literal colour, as <c>#rrggbb</c>, overriding <see cref="Role" />. For a colour the
-	/// <i>user</i> chose rather than one the theme owns - what they picked must not change with the reader's
-	/// theme, which is the same split <see cref="UiRangeBar.StartColor" /> makes. Absent means the role
-	/// decides. A reader rejects any other spelling rather than passing it through to its styling
-	/// layer.</summary>
+	/// <summary>A literal colour, as <c>#rrggbb</c>, or <c>#rrggbbaa</c> for a translucent one, overriding
+	/// <see cref="Role" />. For a colour the <i>user</i> chose rather than one the theme owns - what they
+	/// picked must not change with the reader's theme, which is the same split
+	/// <see cref="UiRangeBar.StartColor" /> makes. A translucent colour is drawn over whatever is behind the
+	/// run, so a fainter shade of the user's colour needs no knowledge of the backdrop. Absent means the role
+	/// decides. A reader rejects any other spelling rather than passing it through to its styling layer, and
+	/// a reader that predates eight digits draws the role's colour instead.</summary>
 	public UiValue<string> Color { get; init; }
 
 	/// <summary>Alignment within the run's own box - see <see cref="UiComponentAlignments" />. Absent means
@@ -492,10 +494,10 @@ public sealed record UiDynamicText : UiComponentLeaf
 	/// <see cref="UiComponentTextRoles.Primary" />. Ignored when <see cref="Color" /> is present.</summary>
 	public UiValue<string> Role { get; init; }
 
-	/// <summary>A literal run colour, as <c>#rrggbb</c>, for the reason <see cref="UiTextRun.Color" />
-	/// gives. Absent means the <see cref="Role" /> colour. The seconds keep their own muted treatment
-	/// either way: they are the one part of a time run whose colour is normative rather than
-	/// chosen.</summary>
+	/// <summary>A literal run colour, as <c>#rrggbb</c>, or <c>#rrggbbaa</c> for a translucent one, for the
+	/// reason <see cref="UiTextRun.Color" /> gives. Absent means the <see cref="Role" /> colour. The seconds
+	/// keep their own muted treatment either way: they are the one part of a time run whose colour is
+	/// normative rather than chosen.</summary>
 	public UiValue<string> Color { get; init; }
 
 	/// <summary>Alignment within the run's own box - see <see cref="UiComponentAlignments" />. Absent means
@@ -1486,7 +1488,8 @@ public sealed record UiIcon : UiComponentLeaf
 	/// <see cref="UiComponentTextRoles.Primary" />. Ignored when <see cref="Color" /> is present.</summary>
 	public UiValue<string> Role { get; init; }
 
-	/// <summary>A literal colour, as <c>#rrggbb</c>, overriding <see cref="Role" />.</summary>
+	/// <summary>A literal colour, as <c>#rrggbb</c>, or <c>#rrggbbaa</c> for a translucent one, overriding
+	/// <see cref="Role" />.</summary>
 	public UiValue<string> Color { get; init; }
 
 	/// <inheritdoc />

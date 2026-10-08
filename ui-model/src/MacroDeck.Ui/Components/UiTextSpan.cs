@@ -26,8 +26,8 @@ public sealed record UiTextSpan
 	[JsonPropertyOrder(2)]
 	public string? Alt { get; init; }
 
-	/// <summary>A literal colour for a text span, as <c>#rrggbb</c>. Absent means the run's own colour. A
-	/// reader ignores any other spelling.</summary>
+	/// <summary>A literal colour for a text span, as <c>#rrggbb</c>, or <c>#rrggbbaa</c> for a translucent
+	/// one. Absent means the run's own colour. A reader ignores any other spelling.</summary>
 	[JsonPropertyOrder(3)]
 	public string? Color { get; init; }
 
