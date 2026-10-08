@@ -50,7 +50,7 @@ export function snapDialLevel(travel: number, span: number, step: number | undef
 function paintDial(node: UiNode, ctx: UiComponentContext<UiDialState>): void {
   const level = dialDisplayLevel(node, ctx.state);
   const metrics = paintGaugeArc(node, ctx, level);
-  const thickness = nodeThicknessPx(node, ctx.basis, ctx.crossExtent);
+  const thickness = nodeThicknessPx(node, ctx);
   const sweep = arcSweep(node);
   const at = arcPoint(metrics, sweep.start + sweep.sweep * level);
 
@@ -99,7 +99,7 @@ function trackPointer(element: Element, event: PointerEvent, ctx: UiComponentCon
   // Measured rather than taken from the box: the tile scales its content, so the box is in reference pixels.
   const rect = element.getBoundingClientRect();
   const scale = ctx.box.width ? rect.width / ctx.box.width : 1;
-  const metrics = arcMetrics(rect.width, rect.height, nodeThicknessPx(node, ctx.basis, ctx.crossExtent) * scale);
+  const metrics = arcMetrics(rect.width, rect.height, nodeThicknessPx(node, ctx) * scale);
   const angle = pointerAngle(metrics, event.clientX - rect.left, event.clientY - rect.top);
   const state = ctx.state;
 

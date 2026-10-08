@@ -39,7 +39,7 @@ export const uiChartComponent: UiComponentDefinition = {
     const line = ctx.part('chartLine', 'path', SVG_NS);
     ctx.setClassName(line, 'widget-chart-line');
     ctx.setAttribute(line, 'd', paths.line);
-    ctx.setAttribute(line, 'stroke-width', String(nodeThicknessPx(node, ctx.basis, ctx.crossExtent)));
+    ctx.setAttribute(line, 'stroke-width', String(nodeThicknessPx(node, ctx)));
     ctx.setStyle(line, 'stroke', colour);
   },
 };

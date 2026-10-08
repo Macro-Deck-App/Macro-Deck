@@ -48,8 +48,8 @@ function buttonCornerPx(element: HTMLElement, boxHeight: number | null): number 
 export function paintStackLayout<TState>(node: UiNode, ctx: UiComponentContext<TState>, isButton: boolean): void {
   const element = ctx.element as HTMLElement;
   const horizontal = nodeIsHorizontal(node);
-  const padding = nodePaddingPx(node, ctx.basis, ctx.crossExtent);
-  const gap = nodeGapPx(node, ctx.basis, ctx.crossExtent);
+  const padding = nodePaddingPx(node, ctx);
+  const gap = nodeGapPx(node, ctx);
 
   ctx.setClassName(element, isButton ? 'widget-button' : 'widget-stack');
   ctx.setClass(element, 'widget-artwork-eased', artworkCrossfades(node));

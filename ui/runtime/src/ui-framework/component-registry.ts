@@ -1,5 +1,6 @@
 import { UiNode } from './ui-node.interface';
 import { UiComponentBox, UiIntrinsicMetrics } from './layout';
+import type { LengthScope } from './length';
 import { UiComponentRange } from './ui-capabilities';
 import { UiRenderHost } from '../render/ui-render-host';
 import { TextFit } from '../render/text-fit';
@@ -9,14 +10,10 @@ import { MACRO_DECK_COMPONENTS as MACRO_DECK_DEFINITIONS } from '../macrodeck-co
 
 const DEFAULT_COMPONENT_VERSION_RANGE: UiComponentRange = { minimum: 1, maximum: 1 };
 
-export interface UiComponentContext<TState = unknown> {
+export interface UiComponentContext<TState = unknown> extends LengthScope {
   readonly element: HTMLElement | SVGElement;
 
   readonly host: UiRenderHost;
-
-  readonly basis: number;
-
-  readonly crossExtent: number | null;
 
   readonly box: UiComponentBox;
 
@@ -44,7 +41,7 @@ export interface UiComponentContext<TState = unknown> {
 
   syncChildren(
     parent: Element,
-    entries: Array<{ child: UiNode; box: UiComponentBox; crossExtent: number | null }>,
+    entries: Array<{ child: UiNode; box: UiComponentBox; crossExtent: number | null; container?: number | null }>,
   ): void;
 
   keepFit(element: Element, fit: TextFit, signature: string): void;

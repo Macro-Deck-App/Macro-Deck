@@ -31,6 +31,18 @@ namespace MacroDeck.Ui.Components;
 /// something other than a cell grid, and so cannot determine a cell extent, ignores the clamp rather than
 /// guessing.
 /// </para>
+///
+/// <para>
+/// <b>What <see cref="ParentFraction" /> is for.</b> A part of a widget - a ring's stroke, the icon and the
+/// percentage inside it - has to scale with the box it is laid out in, not with the whole widget, or the
+/// author must know how big that box will be. When set, the length resolves to
+/// <c>ParentFraction * min(width, height)</c> of the <b>containing box</b> in place of the
+/// <c>Basis</c> term: for a grid child the cells it spans, for a layer child the layer's box, for a stack
+/// child the stack's content box. <see cref="MaxOfCross" /> and <see cref="MaxOfCell" /> still clamp the
+/// result. A reader that cannot determine a definite containing box, or that does not know the member,
+/// resolves <see cref="Basis" /> against the widget instead, so always give <see cref="Basis" /> the value
+/// that reads acceptably there.
+/// </para>
 /// </summary>
 public sealed record UiLength
 {
@@ -62,8 +74,26 @@ public sealed record UiLength
 	[JsonPropertyOrder(2)]
 	public double? MaxOfCell { get; init; }
 
+	/// <summary>The fraction of the containing box's smaller side this length resolves to in place of
+	/// <see cref="Basis" />. Omitted when absent.</summary>
+	[JsonPropertyName("ofParent")]
+	[JsonPropertyOrder(3)]
+	public double? ParentFraction { get; init; }
+
 	/// <summary>A length that is purely a fraction of the widget basis.</summary>
 	public static UiLength OfBasis(double basis) => new() { Basis = basis };
+
+	/// <summary>A length that is a fraction of the containing box's smaller side. A reader that does not
+	/// know the member draws the same fraction of the <b>widget</b> basis, which on a part of a small cell
+	/// is far too large: use <see cref="OfParent(double, double)" /> to say what such a reader should
+	/// use.</summary>
+	public static UiLength OfParent(double fraction) => OfParent(fraction, fraction);
+
+	/// <summary>A length that is a fraction of the containing box's smaller side, with the fraction of the
+	/// widget basis a reader uses when it does not know the member or has no definite containing
+	/// box.</summary>
+	public static UiLength OfParent(double fraction, double fallbackBasis)
+		=> new() { Basis = fallbackBasis, ParentFraction = fraction };
 
 	/// <summary>A length clamped against the containing stack's cross extent.</summary>
 	public static UiLength OfBasis(double basis, double maxOfCross)
@@ -119,6 +149,15 @@ public readonly record struct UiSize
 	/// <see cref="UiLength.Capped" />.</summary>
 	public static UiSize Capped(double basis, double referenceExtent)
 		=> Of(UiLength.Capped(basis, referenceExtent));
+
+	/// <summary>A fraction of the containing box's smaller side - see <see cref="UiLength.OfParent(double)" />.
+	/// </summary>
+	public static UiSize FromParent(double fraction) => Of(UiLength.OfParent(fraction));
+
+	/// <summary>A fraction of the containing box's smaller side with the widget-basis fraction older
+	/// readers use - see <see cref="UiLength.OfParent(double, double)" />.</summary>
+	public static UiSize FromParent(double fraction, double fallbackBasis)
+		=> Of(UiLength.OfParent(fraction, fallbackBasis));
 
 	/// <summary>A constant length, for a call site that cannot rely on the implicit conversion.</summary>
 	public static UiSize Of(UiLength length) => new(UiValue.Of(length));

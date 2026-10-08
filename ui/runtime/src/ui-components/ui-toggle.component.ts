@@ -3,7 +3,7 @@ import { UiComponents } from './ui-component-types';
 import { UiComponentProperties } from './component-properties';
 import { UiComponentEvents } from './component-events';
 import { nodeBoolean } from '../ui-framework/node-properties.util';
-import { nodeLength, resolveLength } from '../ui-framework/length';
+import { LengthScope, nodeLength, resolveLength } from '../ui-framework/length';
 import type { UiComponentDefinition } from '../ui-framework/component-registry';
 import { sliderLevelColor } from './bar';
 import { px } from './px.util';
@@ -32,8 +32,8 @@ export function toggleDisplayedOn(node: UiNode, state: UiToggleState): boolean {
   return state.held !== null && producer === state.producerAtRelease ? state.held : producer;
 }
 
-export function toggleTrackHeight(node: UiNode, width: number, height: number, basis: number, cross: number | null): number {
-  return resolveLength(nodeLength(node, UiComponentProperties.Size), basis, cross)
+export function toggleTrackHeight(node: UiNode, width: number, height: number, scope: LengthScope): number {
+  return resolveLength(nodeLength(node, UiComponentProperties.Size), scope)
     ?? Math.min(height, width / TOGGLE_ASPECT);
 }
 
@@ -67,7 +67,7 @@ export const uiToggleComponent: UiComponentDefinition<UiToggleState> = {
 
     const width = ctx.box.width ?? ctx.basis;
     const height = ctx.box.height ?? ctx.basis;
-    const trackHeight = toggleTrackHeight(node, width, height, ctx.basis, ctx.crossExtent);
+    const trackHeight = toggleTrackHeight(node, width, height, ctx);
     const trackWidth = TOGGLE_ASPECT * trackHeight;
     const on = toggleDisplayedOn(node, ctx.state);
 
@@ -97,7 +97,7 @@ export const uiToggleComponent: UiComponentDefinition<UiToggleState> = {
   },
 
   intrinsicMainPx(node, m) {
-    const size = resolveLength(nodeLength(node, UiComponentProperties.Size), m.basis, m.crossExtent) ?? 0;
+    const size = resolveLength(nodeLength(node, UiComponentProperties.Size), m) ?? 0;
     return m.horizontal ? TOGGLE_ASPECT * size : size;
   },
 };

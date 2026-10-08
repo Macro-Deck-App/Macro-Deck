@@ -127,8 +127,8 @@ export const macrodeckDynamicTextComponent: UiComponentDefinition<UiDynamicTextS
     if (seconds.textContent !== run.seconds) seconds.textContent = run.seconds;
     ctx.setStyle(seconds, 'color', 'var(--color-text-muted)');
 
-    const declared = resolveLength(nodeLength(node, UiComponentProperties.Size), ctx.basis, ctx.crossExtent);
-    const minSize = resolveLength(nodeLength(node, UiComponentProperties.MinSize), ctx.basis, ctx.crossExtent);
+    const declared = resolveLength(nodeLength(node, UiComponentProperties.Size), ctx);
+    const minSize = resolveLength(nodeLength(node, UiComponentProperties.MinSize), ctx);
     ctx.keepFit(element, textFit(element, declared, minSize, size => {
       ctx.setStyle(seconds, 'font-size', size === undefined ? null : px(size * 0.55));
     }), `${declared}|${minSize}|${run.before}${run.seconds}${run.after}|${ctx.host.uiFontKey?.() ?? ''}`);

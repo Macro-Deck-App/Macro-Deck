@@ -59,14 +59,16 @@ describe('widget node presentation', () => {
   });
 
   describe('lengths', () => {
+    const scope = (basis: number) => ({ basis, crossExtent: null, container: null });
+
     it('treats an absent padding or gap as none', () => {
-      expect(nodePaddingPx(node(), 100, null)).toBe(0);
-      expect(nodeGapPx(node(), 100, null)).toBe(0);
+      expect(nodePaddingPx(node(), scope(100))).toBe(0);
+      expect(nodeGapPx(node(), scope(100))).toBe(0);
     });
 
     it('resolves padding and gap as fractions of the basis', () => {
-      expect(nodePaddingPx(node({ padding: { basis: 0.1 } }), 200, null)).toBe(20);
-      expect(nodeGapPx(node({ gap: { basis: 0.05 } }), 200, null)).toBe(10);
+      expect(nodePaddingPx(node({ padding: { basis: 0.1 } }), scope(200))).toBe(20);
+      expect(nodeGapPx(node({ gap: { basis: 0.05 } }), scope(200))).toBe(10);
     });
   });
 

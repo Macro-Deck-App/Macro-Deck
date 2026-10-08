@@ -1,4 +1,5 @@
 import { UiNode } from '../ui-framework/ui-node.interface';
+import type { UiIntrinsicMetrics } from '../ui-framework/layout';
 import { renderUiNode } from './ui-node-renderer';
 import { UiRenderHost } from './ui-render-host';
 import { activationClaim } from '../ui-framework/node-gestures';
@@ -109,9 +110,10 @@ describe('ui.first-fit', () => {
 
   it('sizes itself like its last layout where the box does not decide', () => {
     const sizes: Record<string, number> = { 'group.inline': 10, 'group.mid': 20, 'group.stacked': 50 };
-    const extent = uiFirstFitComponent.intrinsicMainPx!(tree, {
-      basis: 120, crossExtent: null, horizontal: false, ofChild: child => sizes[child.id],
-    });
+    const m: UiIntrinsicMetrics = {
+      basis: 120, crossExtent: null, container: null, horizontal: false, ofChild: child => sizes[child.id], nested: () => m,
+    };
+    const extent = uiFirstFitComponent.intrinsicMainPx!(tree, m);
 
     expect(extent).toBe(50);
   });

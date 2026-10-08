@@ -438,10 +438,14 @@ export {
 } from './ui-framework/ui-resource';
 export { UI_COMPONENT_EVENTS_WELL_KNOWN, UiComponentEvents } from './ui-components/component-events';
 export {
+  boxExtent,
+  lengthReference,
   nodeHexColor,
   nodeLength,
   resolveLength,
   UI_COMPONENT_CELL,
+  withoutCross,
+  type LengthScope,
   type UiLength,
 } from './ui-framework/length';
 export {
@@ -572,7 +576,7 @@ export {
   type ArcMetrics,
   type ArcSweep,
 } from './ui-components/arc';
-export { layoutGridCells, placeGridChildren, type UiGridCell, type UiGridPlacement } from './ui-components/grid-layout';
+export { chooseColumns, layoutGridCells, placeGridChildren, type UiGridCell, type UiGridPlacement } from './ui-components/grid-layout';
 export { isShapePathData, shapeOutline } from './ui-components/ui-shape.component';
 export {
   dialAngles,

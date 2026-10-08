@@ -18,6 +18,6 @@ export const uiRangeBarComponent: UiComponentDefinition = {
   intrinsicMainPx(node, m) {
     return m.horizontal
       ? 0
-      : resolveLength(nodeLength(node, UiComponentProperties.Thickness), m.basis, m.crossExtent) ?? 0;
+      : resolveLength(nodeLength(node, UiComponentProperties.Thickness), m) ?? 0;
   },
 };

@@ -54,7 +54,7 @@ export const macrodeckVideoStreamComponent: UiComponentDefinition<VideoStreamSta
 
   paint(node, ctx) {
     const element = ctx.element as HTMLElement;
-    const extent = resolveLength(nodeLength(node, UiComponentProperties.Size), ctx.basis, ctx.crossExtent) ?? 0;
+    const extent = resolveLength(nodeLength(node, UiComponentProperties.Size), ctx) ?? 0;
     const box = { width: ctx.box.width ?? extent, height: ctx.box.height ?? extent };
     ctx.setClassName(element, 'widget-video-stream-host');
     ctx.sizeTo(element, box);
@@ -89,6 +89,6 @@ export const macrodeckVideoStreamComponent: UiComponentDefinition<VideoStreamSta
   },
 
   intrinsicMainPx(node, m) {
-    return resolveLength(nodeLength(node, UiComponentProperties.Size), m.basis, m.crossExtent) ?? 0;
+    return resolveLength(nodeLength(node, UiComponentProperties.Size), m) ?? 0;
   },
 };

@@ -70,6 +70,6 @@ export const uiTransformComponent: UiComponentDefinition<UiTransformState> = {
 
   intrinsicMainPx(node, m) {
     const children = node.children ?? [];
-    return children.reduce((widest, child) => Math.max(widest, m.ofChild(child)), 0);
+    return children.reduce((widest, child) => Math.max(widest, m.nested().ofChild(child)), 0);
   },
 };

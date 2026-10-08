@@ -26,7 +26,7 @@ export function paintBarCommon<TState>(node: UiNode, ctx: UiComponentContext<TSt
     return;
   }
 
-  const thickness = nodeThicknessPx(node, ctx.basis, ctx.crossExtent);
+  const thickness = nodeThicknessPx(node, ctx);
   const track = ctx.part('barTrack', 'div');
   ctx.setClassName(track, 'widget-range-bar-track');
   ctx.setStyle(track, 'height', px(thickness));

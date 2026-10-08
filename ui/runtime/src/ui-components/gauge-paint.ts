@@ -12,7 +12,7 @@ export function paintGaugeArc<TState>(node: UiNode, ctx: UiComponentContext<TSta
   ctx.setAttribute(element, 'width', String(width));
   ctx.setAttribute(element, 'height', String(height));
 
-  const thickness = nodeThicknessPx(node, ctx.basis, ctx.crossExtent);
+  const thickness = nodeThicknessPx(node, ctx);
   const metrics = arcMetrics(width, height, thickness);
   const sweep = arcSweep(node);
 

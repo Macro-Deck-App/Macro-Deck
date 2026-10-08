@@ -956,6 +956,44 @@ describe('component-profile conformance fixtures: building-blocks tree', () => {
   }
 });
 
+describe('component-profile conformance fixtures: container-length tree', () => {
+  const tree = loadTree('conformance-container-length-tree.json');
+  const layout = loadJson<LayoutFixture>('conformance-container-length-layout.json');
+  type Rect = { left: number; top: number; width: number; height: number };
+
+  for (const testCase of layout.cases) {
+    describe(`tile ${testCase.tile.width}x${testCase.tile.height}`, () => {
+      beforeEach(() => mount(tree, testCase.tile, testCase.basis));
+
+      for (const [id, spec] of Object.entries(testCase.nodes)) {
+        it(`resolves ${id}`, () => {
+          const el = byId(id);
+          if ('cell' in spec) {
+            const cell = spec.cell as Rect;
+            expect(num(el.style.left)).withContext(`${id}.cell.left`).toBeCloseTo(cell.left, 2);
+            expect(num(el.style.top)).withContext(`${id}.cell.top`).toBeCloseTo(cell.top, 2);
+            expect(num(el.style.width)).withContext(`${id}.cell.width`).toBeCloseTo(cell.width, 2);
+            if (el.style.height !== '') {
+              expect(num(el.style.height)).withContext(`${id}.cell.height`).toBeCloseTo(cell.height, 2);
+            }
+          }
+          if ('fontSize' in spec) {
+            expect(num(el.style.fontSize)).withContext(`${id}.fontSize`).toBeCloseTo(spec.fontSize as number, 2);
+          }
+          if ('arcStrokeWidth' in spec) {
+            expect(num(el.querySelector('.widget-gauge-track')!.getAttribute('stroke-width') ?? ''))
+              .withContext(`${id}.arcStrokeWidth`).toBeCloseTo(spec.arcStrokeWidth as number, 2);
+          }
+          if ('glyphEdge' in spec) {
+            expect(num((el.querySelector('.widget-icon-glyph') as HTMLElement).style.width))
+              .withContext(`${id}.glyphEdge`).toBeCloseTo(spec.glyphEdge as number, 2);
+          }
+        });
+      }
+    });
+  }
+});
+
 describe('component-profile conformance fixtures: modifier tree', () => {
   const tree = loadTree('conformance-modifier-tree.json');
   const layout = loadJson<LayoutFixture>('conformance-modifier-layout.json');
@@ -1072,6 +1110,7 @@ describe('component-profile conformance fixtures: coverage', () => {
     'conformance-history-graph-layout.json',
     'conformance-gauge-layout.json',
     'conformance-building-blocks-layout.json',
+    'conformance-container-length-layout.json',
     'conformance-modifier-layout.json',
     'conformance-anchored-list-layout.json',
     'conformance-video-stream-layout.json',
@@ -1102,8 +1141,8 @@ describe('component-profile conformance fixtures: coverage', () => {
       'conformance-clock-formats-tree.json', 'conformance-slider-tree.json',
       'conformance-action-button-tree.json', 'conformance-music-player-tree.json',
       'conformance-history-graph-tree.json', 'conformance-gauge-tree.json',
-      'conformance-building-blocks-tree.json', 'conformance-modifier-tree.json',
-      'conformance-chat-tree.json', 'conformance-anchored-list-tree.json',
+      'conformance-building-blocks-tree.json', 'conformance-container-length-tree.json',
+      'conformance-modifier-tree.json', 'conformance-chat-tree.json', 'conformance-anchored-list-tree.json',
       'conformance-video-stream-tree.json', 'conformance-first-fit-tree.json',
     ];
     for (const name of exercised) expect(() => loadTree(name)).not.toThrow();
