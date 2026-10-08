@@ -23,7 +23,7 @@
         @if (failedImages().has(run.src)) {
           <span>{{ run.alt }}</span>
         } @else {
-          <img class="md-image" [src]="run.src" [alt]="run.alt" loading="lazy" referrerpolicy="no-referrer" (error)="imageFailed(run.src)">
+          <img class="md-image" [src]="run.src" [alt]="run.alt" [attr.width]="run.width ?? null" [attr.height]="run.height ?? null" loading="lazy" referrerpolicy="no-referrer" (error)="imageFailed(run.src)">
         }
       }
       @case ('video') {

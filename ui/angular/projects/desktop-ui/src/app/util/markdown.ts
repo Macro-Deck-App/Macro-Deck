@@ -8,7 +8,7 @@ export type MarkdownInline =
   | { kind: 'code'; text: string }
   | { kind: 'br' }
   | { kind: 'link'; href: string; title: string | null; children: MarkdownInline[]; bare?: true }
-  | { kind: 'image' | 'video'; src: string; alt: string };
+  | { kind: 'image' | 'video'; src: string; alt: string; width?: number; height?: number };
 
 export interface MarkdownListItem {
   task: boolean;
@@ -37,6 +37,9 @@ export interface MarkdownOptions {
 }
 
 const COMMENT = /<!--[\s\S]*?(?:-->|$)/g;
+const IMG_TAG = /<img(?=[\s/>])((?:"[^"]*"|'[^']*'|[^>"'])*)>/gi;
+const TAG_ATTRIBUTE = /([^\s=/"'<>]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?/g;
+const MAX_DIMENSION = 10000;
 
 function httpsHref(raw: string): string | null {
   try {
@@ -129,7 +132,38 @@ class MarkdownWalker {
     if (rest !== text) {
       return rest.trim() ? parseMarkdown(rest.trim(), this.options) : [];
     }
-    return [{ kind: 'paragraph', inlines: [{ kind: 'text', text: text.trim() }] }];
+    const inlines = this.rawHtml(text.trim());
+    return inlines.every(run => run.kind === 'text' && run.text === '') ? [] : [{ kind: 'paragraph', inlines }];
+  }
+
+  private rawHtml(text: string): MarkdownInline[] {
+    const runs: MarkdownInline[] = [];
+    let last = 0;
+    for (const match of text.matchAll(IMG_TAG)) {
+      if (match.index > last) {
+        runs.push({ kind: 'text', text: text.slice(last, match.index) });
+      }
+      runs.push(this.imgTag(match[1]));
+      last = match.index + match[0].length;
+    }
+    if (runs.length === 0) {
+      return [{ kind: 'text', text }];
+    }
+    if (last < text.length) {
+      runs.push({ kind: 'text', text: text.slice(last) });
+    }
+    return runs.filter(run => run.kind !== 'text' || run.text !== '');
+  }
+
+  private imgTag(attributes: string): MarkdownInline {
+    const values = new Map<string, string>();
+    for (const match of attributes.matchAll(TAG_ATTRIBUTE)) {
+      const name = match[1].toLowerCase();
+      if (!values.has(name)) {
+        values.set(name, decodeEntities(match[2] ?? match[3] ?? match[4] ?? ''));
+      }
+    }
+    return this.media(values.get('src') ?? '', values.get('alt') ?? '', dimension(values.get('width')), dimension(values.get('height')));
   }
 
   private inlines(tokens: Token[] | undefined): MarkdownInline[] {
@@ -176,10 +210,10 @@ class MarkdownWalker {
         return [link.autolink ? { kind: 'link', href, title, children, bare: true } : { kind: 'link', href, title, children }];
       }
       case 'image':
-        return [this.media(token as Tokens.Image)];
+        return [this.media((token as Tokens.Image).href, decodeEntities((token as Tokens.Image).text))];
       case 'html':
       case 'tag':
-        return [{ kind: 'text', text: (token as Tokens.Tag).text }];
+        return this.rawHtml((token as Tokens.Tag).text);
       case 'checkbox':
         return [];
       default:
@@ -187,17 +221,33 @@ class MarkdownWalker {
     }
   }
 
-  private media(image: Tokens.Image): MarkdownInline {
-    const alt = decodeEntities(image.text);
+  private media(src: string, alt: string, width?: number, height?: number): MarkdownInline {
     let url: URL;
     try {
-      url = new URL(image.href.trim());
+      url = new URL(src.trim());
     } catch {
       return { kind: 'text', text: alt };
     }
     const kind = url.protocol === 'https:' ? this.options.media(url) : null;
-    return kind ? { kind, src: url.href, alt } : { kind: 'text', text: alt };
+    if (!kind) {
+      return { kind: 'text', text: alt };
+    }
+    return {
+      kind,
+      src: url.href,
+      alt,
+      ...(width === undefined ? {} : { width }),
+      ...(height === undefined ? {} : { height }),
+    };
   }
+}
+
+function dimension(value: string | undefined): number | undefined {
+  if (value === undefined || !/^\d+$/.test(value.trim())) {
+    return undefined;
+  }
+  const size = Number(value.trim());
+  return size > 0 && size <= MAX_DIMENSION ? size : undefined;
 }
 
 function plain(text: string): MarkdownInline[] {
