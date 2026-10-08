@@ -68,6 +68,10 @@ const UPDATE_STOP_TIMEOUT: Duration = Duration::from_secs(35);
 
 const FORCED_STOP_TIMEOUT: Duration = Duration::from_secs(10);
 
+// Must match UserSessionEnd.ShutdownReason in the host.
+#[cfg(any(windows, test))]
+const SESSION_END_REASON: &str = "session-end";
+
 // Windows kills a windowless app that has not answered WM_ENDSESSION within 5 s, and shows its
 // blocking screen to one with a window; staying under that still covers the 2 s dispatch window.
 #[cfg(any(windows, test))]
@@ -1061,7 +1065,7 @@ pub fn stop_before_exit(app: &AppHandle) {
     #[cfg(windows)]
     tauri::async_runtime::block_on(async {
         let stop = async {
-            let port = request_stop(app, "exit").await;
+            let port = request_stop(app, SESSION_END_REASON).await;
             wait_until_stopped(app, port, SESSION_END_STOP_TIMEOUT).await
         };
         if !matches!(
@@ -1866,6 +1870,11 @@ mod tests {
             UPDATE_STOP_TIMEOUT,
             FORCED_STOP_TIMEOUT
         ));
+    }
+
+    #[test]
+    fn the_session_end_reason_is_the_one_the_host_recognises() {
+        assert_eq!(SESSION_END_REASON, "session-end");
     }
 
     #[test]

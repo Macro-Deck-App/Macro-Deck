@@ -18,6 +18,8 @@ internal sealed class FakeAdbProcessRunner : IAdbProcessRunner
 
 	public int DrainAsyncCallCount { get; private set; }
 
+	public Func<IReadOnlyList<string>, AdbProcessResult?>? Override { get; set; }
+
 	public void When(Func<IReadOnlyList<string>, bool> matches, AdbProcessResult result) =>
 		_scripts.Add((matches, _ => result));
 
@@ -35,6 +37,11 @@ internal sealed class FakeAdbProcessRunner : IAdbProcessRunner
 		if (HangForever is not null)
 		{
 			return HangForever.Task;
+		}
+
+		if (Override?.Invoke(arguments) is { } overridden)
+		{
+			return Task.FromResult(overridden);
 		}
 
 		foreach (var (matches, respond) in _scripts)
