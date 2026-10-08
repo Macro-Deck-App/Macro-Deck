@@ -431,7 +431,9 @@ describe('SettingsModalComponent', () => {
     expect(service.isOpen()).toBeFalse();
   });
 
-  function expectEscapeClosesOnlyTheOverlayFirst(triggerSelector: string): void {
+  async function expectEscapeClosesOnlyTheOverlayFirst(triggerSelector: string): Promise<void> {
+    await fixture.whenStable();
+    fixture.detectChanges();
     jasmine.clock().install();
     try {
       const trigger = fixture.nativeElement.querySelector(triggerSelector) as HTMLButtonElement;
@@ -456,12 +458,12 @@ describe('SettingsModalComponent', () => {
     }
   }
 
-  it('closes only the open font family select on Escape, and the dialog on the next Escape', () => {
-    expectEscapeClosesOnlyTheOverlayFirst('.font-select button.control');
+  it('closes only the open font family select on Escape, and the dialog on the next Escape', async () => {
+    await expectEscapeClosesOnlyTheOverlayFirst('.font-select button.control');
   });
 
-  it('closes only the open custom accent colour popover on Escape, and the dialog on the next Escape', () => {
-    expectEscapeClosesOnlyTheOverlayFirst('.cp-custom');
+  it('closes only the open custom accent colour popover on Escape, and the dialog on the next Escape', async () => {
+    await expectEscapeClosesOnlyTheOverlayFirst('.cp-custom');
   });
 
   it('plays the exit animation before closing from the custom close button', () => {
