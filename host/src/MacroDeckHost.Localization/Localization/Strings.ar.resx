@@ -7964,6 +7964,12 @@
   <data name="Integrations.Mouse.Issues.WaylandDegradedReason" xml:space="preserve">
     <value>هذه جلسة Wayland، لذا يعمل إدخال الفأرة عبر XWayland. النقر والسحب والتمرير تعمل، لكن مدير النوافذ قد يتجاهل تحديد المؤشر بإحداثيات مطلقة، فيصل التحريك إلى إحداثيات ثابتة إلى مكان آخر أو لا يفعل شيئاً.</value>
   </data>
+  <data name="Integrations.MusicPlayer.Name" xml:space="preserve">
+    <value>مشغّل الموسيقى</value>
+  </data>
+  <data name="Integrations.MusicPlayer.Variables.AlbumColorDisplayName" xml:space="preserve">
+    <value>لون الألبوم</value>
+  </data>
   <data name="Integrations.Obs.Actions.GetFilterState.Description" xml:space="preserve">
     <value>يقرأ ما إذا كان مرشّح المصدر مفعّلاً إلى متغير</value>
   </data>

@@ -7964,6 +7964,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.Mouse.Issues.WaylandDegradedReason" xml:space="preserve">
     <value>これは Wayland セッションのため、マウス入力は XWayland 経由で行われます。クリック、ドラッグ、スクロールは動作しますが、コンポジターが絶対ポインター位置の指定を無視する場合があります。その場合、固定座標への移動は別の場所に届くか、何も起こりません。</value>
   </data>
+  <data name="Integrations.MusicPlayer.Name" xml:space="preserve">
+    <value>ミュージックプレーヤー</value>
+  </data>
+  <data name="Integrations.MusicPlayer.Variables.AlbumColorDisplayName" xml:space="preserve">
+    <value>アルバムの色</value>
+  </data>
   <data name="Integrations.Obs.Actions.GetFilterState.Description" xml:space="preserve">
     <value>ソースのフィルターが有効かどうかを変数に読み取ります</value>
   </data>

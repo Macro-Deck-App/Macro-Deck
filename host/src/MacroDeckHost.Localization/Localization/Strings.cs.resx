@@ -7963,6 +7963,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Mouse.Issues.WaylandDegradedReason" xml:space="preserve">
     <value>Toto je sezení Wayland, takže vstup z myši prochází přes XWayland. Klikání, tažení a rolování fungují, ale kompozitor může ignorovat absolutní polohování kurzoru – přesun na pevnou souřadnici pak skončí jinde nebo se neprovede vůbec.</value>
   </data>
+  <data name="Integrations.MusicPlayer.Name" xml:space="preserve">
+    <value>Přehrávač hudby</value>
+  </data>
+  <data name="Integrations.MusicPlayer.Variables.AlbumColorDisplayName" xml:space="preserve">
+    <value>Barva alba</value>
+  </data>
   <data name="Integrations.Obs.Actions.GetFilterState.Description" xml:space="preserve">
     <value>Načte, zda je filtr zdroje zapnutý, do proměnné</value>
   </data>

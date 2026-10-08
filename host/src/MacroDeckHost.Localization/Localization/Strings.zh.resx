@@ -7964,6 +7964,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.Mouse.Issues.WaylandDegradedReason" xml:space="preserve">
     <value>这是 Wayland 会话，因此鼠标输入经由 XWayland 运行。点击、拖动和滚动可以正常使用，但合成器可能会忽略绝对指针定位，此时移动到固定坐标会落到别处或毫无反应。</value>
   </data>
+  <data name="Integrations.MusicPlayer.Name" xml:space="preserve">
+    <value>音乐播放器</value>
+  </data>
+  <data name="Integrations.MusicPlayer.Variables.AlbumColorDisplayName" xml:space="preserve">
+    <value>专辑颜色</value>
+  </data>
   <data name="Integrations.Obs.Actions.GetFilterState.Description" xml:space="preserve">
     <value>将来源滤镜是否启用读取到变量中</value>
   </data>

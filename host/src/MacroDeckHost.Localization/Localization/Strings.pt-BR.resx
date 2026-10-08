@@ -7964,6 +7964,12 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Integrations.Mouse.Issues.WaylandDegradedReason" xml:space="preserve">
     <value>Esta é uma sessão Wayland, então a entrada do mouse passa pelo XWayland. Clicar, arrastar e rolar funcionam, mas o compositor pode ignorar o posicionamento absoluto do ponteiro. Nesse caso, mover para uma coordenada fixa pode levar a outro lugar ou não fazer nada.</value>
   </data>
+  <data name="Integrations.MusicPlayer.Name" xml:space="preserve">
+    <value>Reprodutor de música</value>
+  </data>
+  <data name="Integrations.MusicPlayer.Variables.AlbumColorDisplayName" xml:space="preserve">
+    <value>Cor do álbum</value>
+  </data>
   <data name="Integrations.Obs.Actions.GetFilterState.Description" xml:space="preserve">
     <value>Lê se um filtro de fonte está ativado e grava o resultado em uma variável</value>
   </data>

@@ -7961,6 +7961,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Mouse.Issues.WaylandDegradedReason" xml:space="preserve">
     <value>Dies ist eine Wayland-Sitzung, daher läuft die Mauseingabe über XWayland. Klicken, Ziehen und Scrollen funktionieren, aber der Compositor ignoriert möglicherweise die absolute Zeigerpositionierung; ein Sprung zu einer festen Koordinate landet dann woanders oder passiert gar nicht.</value>
   </data>
+  <data name="Integrations.MusicPlayer.Name" xml:space="preserve">
+    <value>Musik-Player</value>
+  </data>
+  <data name="Integrations.MusicPlayer.Variables.AlbumColorDisplayName" xml:space="preserve">
+    <value>Albumfarbe</value>
+  </data>
   <data name="Integrations.Obs.Actions.GetFilterState.Description" xml:space="preserve">
     <value>Liest, ob ein Quellenfilter aktiviert ist, in eine Variable ein</value>
   </data>

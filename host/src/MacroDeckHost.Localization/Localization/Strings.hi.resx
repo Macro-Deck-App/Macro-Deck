@@ -7964,6 +7964,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.Mouse.Issues.WaylandDegradedReason" xml:space="preserve">
     <value>यह Wayland सेशन है, इसलिए माउस इनपुट XWayland के ज़रिए चलता है। क्लिक, खींचना और स्क्रॉल काम करते हैं, लेकिन कंपोज़िटर पूर्ण पॉइंटर स्थिति को अनदेखा कर सकता है, और तब किसी तय निर्देशांक पर ले जाने पर पॉइंटर कहीं और जा सकता है या कुछ नहीं करता।</value>
   </data>
+  <data name="Integrations.MusicPlayer.Name" xml:space="preserve">
+    <value>म्यूज़िक प्लेयर</value>
+  </data>
+  <data name="Integrations.MusicPlayer.Variables.AlbumColorDisplayName" xml:space="preserve">
+    <value>एल्बम का रंग</value>
+  </data>
   <data name="Integrations.Obs.Actions.GetFilterState.Description" xml:space="preserve">
     <value>किसी सोर्स फ़िल्टर के सक्षम होने की स्थिति वेरिएबल में पढ़ता है</value>
   </data>

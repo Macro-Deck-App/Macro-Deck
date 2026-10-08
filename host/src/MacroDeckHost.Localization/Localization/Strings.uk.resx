@@ -7964,6 +7964,12 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Integrations.Mouse.Issues.WaylandDegradedReason" xml:space="preserve">
     <value>Це сеанс Wayland, тому введення миші працює через XWayland. Клацання, перетягування й прокручування працюють, але композитор може ігнорувати абсолютне позиціонування вказівника; тоді переміщення до фіксованої координати потрапить деінде або не відбудеться.</value>
   </data>
+  <data name="Integrations.MusicPlayer.Name" xml:space="preserve">
+    <value>Музичний програвач</value>
+  </data>
+  <data name="Integrations.MusicPlayer.Variables.AlbumColorDisplayName" xml:space="preserve">
+    <value>Колір альбому</value>
+  </data>
   <data name="Integrations.Obs.Actions.GetFilterState.Description" xml:space="preserve">
     <value>Зчитує, чи увімкнено фільтр джерела, у змінну</value>
   </data>

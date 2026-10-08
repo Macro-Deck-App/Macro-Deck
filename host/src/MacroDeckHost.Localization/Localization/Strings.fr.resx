@@ -7963,6 +7963,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Mouse.Issues.WaylandDegradedReason" xml:space="preserve">
     <value>Il s'agit d'une session Wayland, la saisie de la souris passe donc par XWayland. Le clic, le glissement et le défilement fonctionnent, mais le compositeur peut ignorer le positionnement absolu du pointeur ; dans ce cas, un déplacement vers une coordonnée fixe aboutit ailleurs ou ne fait rien.</value>
   </data>
+  <data name="Integrations.MusicPlayer.Name" xml:space="preserve">
+    <value>Lecteur de musique</value>
+  </data>
+  <data name="Integrations.MusicPlayer.Variables.AlbumColorDisplayName" xml:space="preserve">
+    <value>Couleur de l'album</value>
+  </data>
   <data name="Integrations.Obs.Actions.GetFilterState.Description" xml:space="preserve">
     <value>Lit si un filtre de source est activé dans une variable</value>
   </data>

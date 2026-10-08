@@ -7963,6 +7963,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.Mouse.Issues.WaylandDegradedReason" xml:space="preserve">
     <value>Esta es una sesión Wayland, así que la entrada del ratón pasa por XWayland. Hacer clic, arrastrar y desplazar funcionan, pero el compositor puede ignorar el posicionamiento absoluto del puntero, en cuyo caso un movimiento a una coordenada fija termina en otro lugar o no hace nada.</value>
   </data>
+  <data name="Integrations.MusicPlayer.Name" xml:space="preserve">
+    <value>Reproductor de música</value>
+  </data>
+  <data name="Integrations.MusicPlayer.Variables.AlbumColorDisplayName" xml:space="preserve">
+    <value>Color del álbum</value>
+  </data>
   <data name="Integrations.Obs.Actions.GetFilterState.Description" xml:space="preserve">
     <value>Guarda si un filtro de fuente está activado en una variable</value>
   </data>

@@ -7964,6 +7964,12 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Integrations.Mouse.Issues.WaylandDegradedReason" xml:space="preserve">
     <value>Dit is een Wayland-sessie, dus muisinvoer loopt via XWayland. Klikken, slepen en scrollen werken, maar de compositor kan absolute aanwijzerpositionering negeren. Dan komt een verplaatsing naar een vaste coördinaat ergens anders terecht, of gebeurt er niets.</value>
   </data>
+  <data name="Integrations.MusicPlayer.Name" xml:space="preserve">
+    <value>Muziekspeler</value>
+  </data>
+  <data name="Integrations.MusicPlayer.Variables.AlbumColorDisplayName" xml:space="preserve">
+    <value>Albumkleur</value>
+  </data>
   <data name="Integrations.Obs.Actions.GetFilterState.Description" xml:space="preserve">
     <value>Leest of een bronfilter is ingeschakeld en schrijft dat naar een variabele</value>
   </data>

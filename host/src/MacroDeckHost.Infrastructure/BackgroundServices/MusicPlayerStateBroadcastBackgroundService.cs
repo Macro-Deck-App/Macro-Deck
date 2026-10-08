@@ -3,10 +3,12 @@ using System.Diagnostics;
 using System.Text.Json;
 using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Triggers.Providers;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.MusicPlayer;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.MusicPlayer;
+using MacroDeckHost.Integrations.MusicPlayer;
 using Microsoft.Extensions.Hosting;
 using ILogger = Serilog.ILogger;
 
@@ -35,6 +37,7 @@ public sealed class MusicPlayerStateBroadcastBackgroundService : HostReadyBackgr
 	private readonly IMusicPlayerInstancesSnapshot _instancesSnapshot;
 	private readonly IMusicPlayerStateNotifier _notifier;
 	private readonly IMusicPlayerVariants _variants;
+	private readonly IVariablePollingInvalidationSignal? _variableInvalidation;
 	private readonly ILogger _logger;
 	private readonly TimeSpan _interval;
 
@@ -65,7 +68,8 @@ public sealed class MusicPlayerStateBroadcastBackgroundService : HostReadyBackgr
 		IMusicPlayerVariants variants,
 		ILogger logger,
 		TimeSpan? failureSummaryInterval = null,
-		TimeSpan? pollInterval = null)
+		TimeSpan? pollInterval = null,
+		IVariablePollingInvalidationSignal? variableInvalidation = null)
 		: base(lifetime)
 	{
 		_registry = registry;
@@ -76,6 +80,7 @@ public sealed class MusicPlayerStateBroadcastBackgroundService : HostReadyBackgr
 		_instancesSnapshot = instancesSnapshot;
 		_notifier = notifier;
 		_variants = variants;
+		_variableInvalidation = variableInvalidation;
 		_logger = logger.ForContext<MusicPlayerStateBroadcastBackgroundService>();
 		_failureSummaryInterval = failureSummaryInterval;
 		_interval = pollInterval ?? _defaultInterval;
@@ -344,6 +349,7 @@ public sealed class MusicPlayerStateBroadcastBackgroundService : HostReadyBackgr
 
 		if (changed)
 		{
+			_variableInvalidation?.MarkStale(MusicPlayerIntegration.IntegrationId);
 			// Rare by construction (lifecycle events only), so this cannot spam the file sink.
 			_logger.Information("Music player instances changed: {InstanceIds}",
 				dtos.Select(d => d.InstanceId).ToList());

@@ -1,6 +1,8 @@
 using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Triggers.Providers;
 using MacroDeckHost.Application.Ui.Transport.Messages.MusicPlayer;
+using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Integrations.MusicPlayer;
 using MacroDeckHost.Infrastructure.BackgroundServices;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;
@@ -40,6 +42,19 @@ internal sealed class MusicPlayerStateBroadcastBackgroundServiceTests
 				Is.EqualTo(_spotifyInstanceId));
 			Assert.That(TestLocalization.Resolve(announced[0].Instances[0].ProviderName), Is.EqualTo("Spotify"));
 		});
+	}
+
+	[Test]
+	public async Task A_changed_player_list_makes_the_music_player_variables_re_register()
+	{
+		var registry = new FakeMusicPlayerRegistry();
+		var invalidation = new VariablePollingInvalidationSignal();
+		var service = CreateService(registry, new RecordingUiTransport(), variableInvalidation: invalidation);
+
+		registry.Add("app.macro-deck.spotify::entry", "Spotify");
+		await service.Tick(CancellationToken.None);
+
+		Assert.That(invalidation.DrainStale(), Is.EqualTo(new[] { MusicPlayerIntegration.IntegrationId }));
 	}
 
 	[Test]
@@ -463,7 +478,8 @@ internal sealed class MusicPlayerStateBroadcastBackgroundServiceTests
 		TimeSpan? pollInterval = null,
 		IMusicPlayerInstancesSnapshot? instancesSnapshot = null,
 		IMusicPlayerStateNotifier? notifier = null,
-		IMusicPlayerVariants? variants = null)
+		IMusicPlayerVariants? variants = null,
+		IVariablePollingInvalidationSignal? variableInvalidation = null)
 		=> new(new StartedHostLifetime(),
 			registry,
 			transport,
@@ -474,7 +490,8 @@ internal sealed class MusicPlayerStateBroadcastBackgroundServiceTests
 			notifier ?? new MusicPlayerStateNotifier(),
 			variants ?? new MusicPlayerVariants(new NeverNudge()),
 			logger ?? SilentLogger(),
-			pollInterval: pollInterval);
+			pollInterval: pollInterval,
+			variableInvalidation: variableInvalidation);
 
 	private sealed class NeverNudge : IMusicPlayerPollNudge
 	{

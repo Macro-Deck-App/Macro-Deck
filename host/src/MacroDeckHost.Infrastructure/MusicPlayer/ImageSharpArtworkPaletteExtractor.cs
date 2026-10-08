@@ -77,8 +77,12 @@ public sealed class ImageSharpArtworkPaletteExtractor : IArtworkPaletteExtractor
 		var count = SampleEdge * SampleEdge;
 
 		return new ArtworkPalette(Hex(Lighten(red / count), Lighten(green / count), Lighten(blue / count)),
-			Hex(Darken(red / count), Darken(green / count), Darken(blue / count)));
+			Hex(Darken(red / count), Darken(green / count), Darken(blue / count)),
+			Hex(Mean(red), Mean(green), Mean(blue)));
 	}
+
+	private static int Mean(long channelSum)
+		=> (int)Math.Round((double)channelSum / (SampleEdge * SampleEdge), MidpointRounding.AwayFromZero);
 
 	private static int Darken(long channel) => (int)Math.Round(channel * 0.5, MidpointRounding.AwayFromZero);
 

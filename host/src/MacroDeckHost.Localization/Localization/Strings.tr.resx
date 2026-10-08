@@ -7964,6 +7964,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Integrations.Mouse.Issues.WaylandDegradedReason" xml:space="preserve">
     <value>Bu bir Wayland oturumudur, bu nedenle fare girişi XWayland üzerinden çalışır. Tıklama, sürükleme ve kaydırma çalışır; ancak birleştirici mutlak imleç konumlandırmasını yok sayabilir. Bu durumda sabit bir koordinata taşıma başka bir yere gider veya hiçbir şey yapmaz.</value>
   </data>
+  <data name="Integrations.MusicPlayer.Name" xml:space="preserve">
+    <value>Müzik Oynatıcı</value>
+  </data>
+  <data name="Integrations.MusicPlayer.Variables.AlbumColorDisplayName" xml:space="preserve">
+    <value>Albüm rengi</value>
+  </data>
   <data name="Integrations.Obs.Actions.GetFilterState.Description" xml:space="preserve">
     <value>Bir kaynak filtresinin etkin olup olmadığını bir değişkene okur</value>
   </data>

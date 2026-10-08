@@ -84,6 +84,33 @@ public class ImageSharpArtworkPaletteExtractorTests
 	}
 
 	[Test]
+	public void The_average_is_the_covers_own_mean_colour_not_a_tint_of_it()
+	{
+		Assert.That(Extract(new Rgba32(200, 40, 90))!.Average, Is.EqualTo("#c8285a"));
+	}
+
+	[Test]
+	public void A_half_and_half_cover_has_the_mean_of_its_halves_as_its_average()
+	{
+		using var image = new Image<Rgba32>(64, 64);
+
+		image.ProcessPixelRows(accessor =>
+		{
+			for (var y = 0; y < accessor.Height; y++)
+			{
+				var row = accessor.GetRowSpan(y);
+
+				for (var x = 0; x < row.Length; x++)
+				{
+					row[x] = x < 32 ? new Rgba32(200, 0, 0) : new Rgba32(0, 0, 100);
+				}
+			}
+		});
+
+		Assert.That(Extract(image)!.Average, Is.EqualTo("#640032"));
+	}
+
+	[Test]
 	public void Bytes_that_are_not_an_image_leave_the_widget_on_its_theme()
 	{
 		var extractor = new ImageSharpArtworkPaletteExtractor(new LoggerConfiguration().CreateLogger());
