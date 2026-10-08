@@ -88,7 +88,7 @@
   @include ds.truncate;
 
   flex: 1;
-  text-align: left;
+  text-align: start;
 }
 
 .cp-interface-lock {
@@ -113,7 +113,7 @@
   flex-direction: column;
   gap: var(--space-1);
   margin-top: var(--space-1);
-  padding-left: var(--space-3);
+  padding-inline-start: var(--space-3);
   animation: ds-pop-in var(--transition-fast);
 }
 

@@ -25,7 +25,7 @@ Three artefacts, and the third is the one that does the work:
 | `conformance-history-graph-layout.json` | the chart's **normative geometry** resolved: the plot band, every point of a dense series, and which term of each length actually binds |
 | `conformance-gauge-tree.json` | the wire form of the transformed shapes - a needle turned about a pivot below its centre, an identity transform, and two nested transforms |
 | `conformance-gauge-layout.json` | the transform and pivot each `ui.transform` resolves to, and the box its children are drawn across |
-| `conformance-building-blocks-tree.json` | the wire form of the building blocks - a grid placing a shape, an icon, a gauge, a toggle, a segmented control, a dial and a path, each with the fallback an older reader draws |
+| `conformance-building-blocks-tree.json` | the wire form of the building blocks - a grid placing a shape, an icon, a gauge with a `trackColor`, a toggle, a segmented control, a dial and a path, each with the fallback an older reader draws |
 | `conformance-building-blocks-layout.json` | each grid cell resolved, plus the shape, glyph, arc, toggle track and segment face geometry at two bases |
 | `conformance-container-length-tree.json` | the wire form of lengths relative to the containing box (`ofParent` beside the `basis` an older reader uses) and of a grid that chooses its own columns (`minCellSize` beside the `columns` an older reader draws) |
 | `conformance-container-length-layout.json` | hand-derived from the rules at two tile shapes: the columns each grid chooses in a definite and in an open height, the sizes that follow from each cell, and the node whose containing box is not definite and so resolves from `basis` |
@@ -313,6 +313,8 @@ wrong.
 - a decorative path shape with **no fallback at all**, because drawing nothing is an allowed degradation;
 - a toggle that is on and a segmented control with a selection, so the painted state is checked, not only
   the track;
+- a gauge with a `levelColor` and a literal `trackColor`: a reader paints the unfilled arc in it, and one that
+  does not know the key draws the theme's track colour;
 - a full-turn dial (`0` to `360`), the case the seam rule exists for.
 
 ## What the chat tree deliberately contains

@@ -1,7 +1,8 @@
-import { Component, provideZonelessChangeDetection, ChangeDetectionStrategy } from '@angular/core';
+import { Component, provideZonelessChangeDetection, ChangeDetectionStrategy, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ModalComponent, dismissModal } from './modal.component';
 import { provideLocalizationTesting } from '../../../localization/localization-test-support';
+import { OverlayPanelComponent } from '../overlay-panel/overlay-panel.component';
 
 describe('ModalComponent closing animation', () => {
   let fixture: ComponentFixture<ModalComponent>;
@@ -191,5 +192,95 @@ describe('ModalComponent nested inside a sized modal', () => {
     const [outer, inner] = hosts;
     expect(getComputedStyle(outer).getPropertyValue('--modal-height').trim()).toBe('min(48.75rem, 90vh)');
     expect(getComputedStyle(inner).getPropertyValue('--modal-height').trim()).toBe('auto');
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [ModalComponent, OverlayPanelComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: `
+    <button #anchor type="button">Add</button>
+    <shared-overlay-panel [anchor]="anchor" [isOpen]="menuOpen()" (dismissed)="menuOpen.set(false)">
+      Menu
+    </shared-overlay-panel>
+    @if (dialogOpen()) {
+      <shared-modal heading="Dialog" (close)="dialogOpen.set(false)">
+        @if (confirmOpen()) {
+          <shared-modal heading="Confirm" (close)="confirmOpen.set(false)">Sure?</shared-modal>
+        }
+      </shared-modal>
+    }
+  `,
+})
+class DialogWithMenuHostComponent {
+  readonly dialogOpen = signal(false);
+  readonly confirmOpen = signal(false);
+  readonly menuOpen = signal(false);
+}
+
+describe('ModalComponent Escape with other overlays open', () => {
+  let fixture: ComponentFixture<DialogWithMenuHostComponent>;
+  let host: DialogWithMenuHostComponent;
+
+  beforeEach(() => {
+    jasmine.clock().install();
+    TestBed.configureTestingModule({
+      imports: [DialogWithMenuHostComponent],
+      providers: [provideZonelessChangeDetection(), ...provideLocalizationTesting()],
+    });
+    fixture = TestBed.createComponent(DialogWithMenuHostComponent);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    fixture.destroy();
+    jasmine.clock().uninstall();
+  });
+
+  function set(change: () => void): void {
+    change();
+    fixture.detectChanges();
+  }
+
+  function pressEscape(): void {
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    fixture.detectChanges();
+    jasmine.clock().tick(150);
+    fixture.detectChanges();
+  }
+
+  it('closes a menu opened from the dialog first, even when the menu is rendered outside it', () => {
+    set(() => host.dialogOpen.set(true));
+    set(() => host.menuOpen.set(true));
+
+    pressEscape();
+
+    expect(host.menuOpen()).toBeFalse();
+    expect(host.dialogOpen()).toBeTrue();
+
+    pressEscape();
+
+    expect(host.dialogOpen()).toBeFalse();
+  });
+
+  it('is not held open by a menu that was already open before the dialog', () => {
+    set(() => host.menuOpen.set(true));
+    set(() => host.dialogOpen.set(true));
+
+    pressEscape();
+
+    expect(host.dialogOpen()).toBeFalse();
+  });
+
+  it('closes only a confirmation opened inside the dialog', () => {
+    set(() => host.dialogOpen.set(true));
+    set(() => host.confirmOpen.set(true));
+
+    pressEscape();
+
+    expect(host.confirmOpen()).toBeFalse();
+    expect(host.dialogOpen()).toBeTrue();
   });
 });

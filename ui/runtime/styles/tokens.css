@@ -213,6 +213,33 @@
   --color-scrim: rgba(0, 0, 0, 0.6);
 }
 
+html[lang|="ja"] {
+  --font-sans-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic UI', Meiryo, 'Noto Sans CJK JP', 'Noto Sans JP', Roboto, sans-serif;
+}
+
+html[lang|="ko"] {
+  --font-sans-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', 'Noto Sans KR', Roboto, sans-serif;
+}
+
+html[lang|="zh"] {
+  --font-sans-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', Roboto, sans-serif;
+}
+
+html[lang="zh-TW"],
+html[lang="zh-HK"],
+html[lang="zh-MO"],
+html[lang|="zh-Hant"] {
+  --font-sans-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei UI', 'Microsoft JhengHei', 'Noto Sans CJK TC', 'Noto Sans TC', Roboto, sans-serif;
+}
+
+html[lang|="ar"] {
+  --font-sans-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Geeza Pro', 'Noto Sans Arabic', Tahoma, Roboto, sans-serif;
+}
+
+html[lang|="hi"] {
+  --font-sans-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Kohinoor Devanagari', 'Nirmala UI', 'Noto Sans Devanagari', Mangal, Roboto, sans-serif;
+}
+
 .light {
   color-scheme: light;
 

@@ -31,7 +31,7 @@ shared-condition-builder {
 /* The remove × pushes itself to the row's far right and only appears
    on hover so it doesn't claim layout space at idle. */
 .cb-row > .cb-remove-btn {
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 
@@ -101,7 +101,7 @@ shared-condition-builder {
   width: 0.6875rem;
   height: 0.6875rem;
   padding: 0;
-  margin-right: -0.125rem;
+  margin-inline-end: -0.125rem;
   background: none;
   border: none;
   border-radius: 0.125rem;
@@ -176,7 +176,7 @@ shared-condition-builder {
 }
 
 .cb-operator-option {
-  text-align: left;
+  text-align: start;
   padding: 0.3125rem 0.5rem;
   background: none;
   border: none;
@@ -244,9 +244,9 @@ shared-condition-builder {
 }
 
 .cb-group-nested {
-  padding-left: 0.5rem;
+  padding-inline-start: 0.5rem;
   margin: var(--space-1) 0;
-  border-left: 1px solid var(--color-border);
+  border-inline-start: 1px solid var(--color-border);
 }
 
 .cb-group-item {

@@ -66,7 +66,8 @@ Macro Deck leaves the ADB server running when it exits, unless you turn on **Sto
 Macro Deck exits** under **Status**. Macro Deck then stops the server when it exits, restarts or
 installs an update, but only a server Macro Deck started itself; one that was already running is left
 alone. Other programs using that server, such as Android Studio, lose their connection. If you turn
-off **Enable ADB** before quitting, the server keeps running.
+off **Enable ADB** before quitting, the server keeps running. When Windows shuts down or you sign
+out, Macro Deck does not stop the server itself; Windows ends it with the session.
 
 ## Plugins and ADB
 

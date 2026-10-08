@@ -62,6 +62,7 @@ public class UiComponentVocabularyTests
 		"strokeWidth", "path", "icon", "columns", "rows", "minCellSize", "columnSpan", "rowSpan", "startAngle", "endAngle",
 		"on", "selected",
 		"modifiers", "frame", "clip", "mask", "variants", "spans", "overflow", "anchor", "stream", "shadow",
+		"trackColor",
 	];
 
 	private static readonly string[] _expectedIconsVersion1 =
@@ -601,6 +602,7 @@ public class UiComponentVocabularyTests
 					StartAngle = -120,
 					EndAngle = 120,
 					LevelColor = "#ff9500",
+					TrackColor = "#3A3A3C",
 					Thickness = 0.06,
 				},
 				new UiToggle
@@ -765,6 +767,30 @@ public class UiComponentVocabularyTests
 		{
 			Assert.That(lists["plain"].Properties.ContainsKey("direction"), Is.False);
 			Assert.That(lists["row"].Properties["direction"].GetString(), Is.EqualTo("horizontal"));
+		});
+	}
+
+	[Test]
+	public void A_gauge_emits_its_track_colour_only_when_one_is_declared()
+	{
+		var tree = UiViewBuilder.Build(WidgetSurface(),
+			new UiStack
+			{
+				Key = "root",
+				Children =
+				[
+					new UiGauge { Key = "themed", Level = 0.85, LevelColor = "#FFFFFF" },
+					new UiGauge { Key = "custom", Level = 0.85, LevelColor = "#FFFFFF", TrackColor = "#3A3A3C" },
+				],
+			});
+
+		var gauges = Walk(tree.Root).Where(node => node.Type == "ui.gauge")
+			.ToDictionary(node => node.Id.Split('.')[^1], StringComparer.Ordinal);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(gauges["themed"].Properties.ContainsKey("trackColor"), Is.False);
+			Assert.That(gauges["custom"].Properties["trackColor"].GetString(), Is.EqualTo("#3A3A3C"));
 		});
 	}
 

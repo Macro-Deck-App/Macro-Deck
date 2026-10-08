@@ -174,6 +174,7 @@
   function render(view, previous) {
     const root = document.documentElement;
     root.lang = view.lang ?? '';
+    root.dir = view.dir ?? 'ltr';
     root.classList.toggle('light', view.theme === 'light');
     root.classList.toggle('dark', view.theme === 'dark');
     if (/^#[0-9a-f]{6}$/i.test(view.accent ?? '')) {

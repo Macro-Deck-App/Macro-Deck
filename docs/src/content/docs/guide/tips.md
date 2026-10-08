@@ -144,3 +144,14 @@ to store a new random number in a variable each time the action runs.
 ## Test automations
 
 **Developer Tools > Trigger event** fires an event for real. Every automation listening to it runs.
+
+## Language
+
+**Settings > Language** switches every connected client at once, without a restart. Macro Deck is
+available in English, German, French, Spanish, Italian, Dutch, Brazilian Portuguese, Czech, Polish,
+Russian, Ukrainian, Turkish, Arabic, Hindi, Indonesian, Japanese, Korean, Simplified Chinese and
+Traditional Chinese. **System** follows the operating system's language and uses English when Macro Deck
+does not have it.
+
+In Arabic the app reads right to left. Your deck keeps its layout: buttons stay where you placed them in
+every language.

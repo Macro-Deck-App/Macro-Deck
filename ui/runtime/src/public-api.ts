@@ -1472,6 +1472,8 @@ export {
   resolveLocalizedText,
 } from './localization/localized-text';
 export { pluralForm } from './localization/plural-form.util';
+export { cultureChain, effectiveCulture, textDirection } from './localization/text-direction.util';
+export type { TextDirection } from './localization/text-direction.util';
 
 // Normalized client input
 export { type ClientInputEvent } from './client-input/client-input-event';

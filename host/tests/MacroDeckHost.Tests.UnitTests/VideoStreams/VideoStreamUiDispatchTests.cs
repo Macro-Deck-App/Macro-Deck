@@ -115,7 +115,7 @@ internal sealed class VideoStreamUiDispatchTests : UiSessionFixture
 	[Test]
 	public void Every_refusal_has_its_own_text_in_every_shipped_language()
 	{
-		string[] cultures = ["en", "de", "it", "cs", "pl", "es", "fr"];
+		string[] cultures = ["en", "de", "it", "cs", "pl", "es", "fr", "zh", "ru", "uk", "ja", "ko", "pt-BR", "ar", "hi", "tr", "nl", "id", "zh-TW"];
 		var errors = Enum.GetValues<VideoStreamError>();
 
 		var english = errors.Select(error => Text(error, "en")).ToList();

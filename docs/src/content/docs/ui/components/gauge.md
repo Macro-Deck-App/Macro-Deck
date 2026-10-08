@@ -55,6 +55,16 @@ length relative to the containing box keeps it a fraction of the ring's own cell
 [grid](/ui/components/grid/#choosing-the-columns) with `MinCellSize` and one tree fits any widget shape. See
 [Sizing](/ui/concepts/sizing/#relative-to-the-containing-box).
 
+## Track colour
+
+The unfilled track follows the theme unless you set `TrackColor`, for a ring on a custom background:
+
+```csharp
+new UiGauge { Key = "battery", Level = 0.85, StartAngle = 0, EndAngle = 360, LevelColor = "#ffffff", TrackColor = "#3a3a3c" }
+```
+
+A reader from before `trackColor` ignores it and draws the theme's track.
+
 ## Properties
 
 | Property | Values | Default (absent) | Meaning |
@@ -63,10 +73,12 @@ length relative to the containing box keeps it a fraction of the ring's own cell
 | `StartAngle` (`startAngle`) | `double`, degrees | `-135` | Where the arc begins, clockwise from twelve o'clock. |
 | `EndAngle` (`endAngle`) | `double`, degrees | `135` | Where the arc ends. |
 | `LevelColor` (`levelColor`) | `#rrggbb` | The reader's own accent colour | The filled arc's colour. |
+| `TrackColor` (`trackColor`) | `#rrggbb` | The reader's tertiary surface colour | The unfilled track's colour. |
 | `Thickness` (`thickness`) | length | Left to the reader | The arc's width. |
 | `MainSize` (`mainSize`), `Fill` (`fill`) | - | - | Shared with every leaf - see [Sizing](/ui/concepts/sizing/). |
 
-`LevelColor` is a literal colour, not a theme role - see [Colours and text](/ui/concepts/theming/).
+`LevelColor` and `TrackColor` are literal colours, not theme roles - see [Colours and text](/ui/concepts/theming/).
+[`ui.dial`](/ui/components/dial/) has no `TrackColor`; its track always follows the theme.
 
 ## Events
 
@@ -92,9 +104,9 @@ remarks.
 - The sweep is `endAngle - startAngle`, signed, with its magnitude clamped to `360`.
 - The arc is centred in the box, `thickness` wide, with a centreline radius of
   `(min(width, height) - thickness) / 2` and fully rounded caps.
-- The track covers the whole sweep in the reader's tertiary surface colour. The filled arc runs from the
-  start over `level` of the sweep in `levelColor` or the accent colour; `level` is clamped to `0..1`, and `0`
-  paints no filled arc.
+- The track covers the whole sweep in `trackColor`, or the reader's tertiary surface colour when that is
+  absent. The filled arc runs from the start over `level` of the sweep in `levelColor` or the accent colour;
+  `level` is clamped to `0..1`, and `0` paints no filled arc.
 - A reader that does not know `ui.gauge` draws the node's `fallback`, typically a `ui.range-bar` at the
   same level:
 

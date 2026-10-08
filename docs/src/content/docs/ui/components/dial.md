@@ -82,8 +82,8 @@ it takes `MainSize` or `Fill`, and without either it is `0` long. See [Sizing](/
 
 ## Reader behaviour
 
-- **Geometry:** the arc and fill exactly as [`ui.gauge`](/ui/components/gauge/#reader-behaviour) draws them,
-  plus a thumb disc of radius `1.25 * thickness` on the arc at the level, in the primary text colour, ringed
+- **Geometry:** the arc and fill exactly as [`ui.gauge`](/ui/components/gauge/#reader-behaviour) draws them, except that
+  the track always follows the theme, plus a thumb disc of radius `1.25 * thickness` on the arc at the level, in the primary text colour, ringed
   by `0.28 * thickness` in the widget's own background colour.
 - **Interaction only where declared.** A dial with no events is drawn and cannot be touched.
 - **Pointer mapping:** the pointer's angle about the box centre, projected onto the sweep and tracked

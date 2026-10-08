@@ -26,7 +26,7 @@ A Project starts as **Draft**. Nothing is public until a review is approved.
 | Field | Example |
 | --- | --- |
 | Summary | `Buttons that greet your deck.` |
-| Description | Markdown, shown on the package page |
+| Description | GitHub-flavoured Markdown, shown on the package page. `https` images are shown; any other image shows its alt text |
 | Author link | `https://github.com/example` |
 | Licence | `MIT` |
 | Tags | `utilities`, `home-automation` (up to ten) |

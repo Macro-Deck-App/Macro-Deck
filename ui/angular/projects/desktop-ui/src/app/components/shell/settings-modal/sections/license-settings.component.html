@@ -46,7 +46,7 @@
         aria-controls="license-details"
         (click)="detailsOpen.set(!detailsOpen())">
         <span
-          class="icon icon-chevron-right icon-sm license-settings__chevron"
+          class="icon icon-chevron-right rtl-mirror icon-sm license-settings__chevron"
           [class.license-settings__chevron--open]="detailsOpen()"
           aria-hidden="true"></span>
         {{ (detailsOpen() ? 'macrodeck.app:Settings.License.HideDetails' : 'macrodeck.app:Settings.License.ShowDetails') | translate }}

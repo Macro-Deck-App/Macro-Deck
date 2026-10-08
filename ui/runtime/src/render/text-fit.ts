@@ -100,7 +100,7 @@ function textMeasurer(element: HTMLElement): ((fontSizePx: number) => number) | 
   if (measuringElement === null || measuringElement.ownerDocument !== owner) {
     measuringElement = owner.createElement('span');
     measuringElement.setAttribute('aria-hidden', 'true');
-    measuringElement.style.position = 'absolute';
+    measuringElement.style.position = 'fixed';
     measuringElement.style.top = '-9999px';
     measuringElement.style.left = '-9999px';
     measuringElement.style.visibility = 'hidden';

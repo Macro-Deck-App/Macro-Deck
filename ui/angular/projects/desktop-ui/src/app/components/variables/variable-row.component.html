@@ -1,6 +1,6 @@
 <ng-template #body>
   @if (branch()) {
-    <span class="icon icon-xs icon-chevron-right vr-chevron" [class.vr-chevron-open]="expanded()" aria-hidden="true"></span>
+    <span class="icon icon-xs icon-chevron-right rtl-mirror vr-chevron" [class.vr-chevron-open]="expanded()" aria-hidden="true"></span>
   }
   <span class="vr-text">
     <span class="vr-primary" [class.vr-mono]="primaryMono()" [title]="primary()">{{ primary() }}</span>

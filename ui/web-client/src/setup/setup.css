@@ -48,6 +48,11 @@
   line-height: var(--leading-normal);
 }
 
+[dir="rtl"] .wc-setup-platform-steps ol {
+  padding-left: 0;
+  padding-right: 1.25em;
+}
+
 .wc-setup-hint[hidden],
 .wc-setup-fingerprint-block[hidden],
 .wc-setup-open-secure[hidden] {

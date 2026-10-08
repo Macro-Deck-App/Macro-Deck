@@ -45,7 +45,11 @@ describe('LocalizationService', () => {
     });
   });
 
-  afterEach(() => localStorage.clear());
+  afterEach(() => {
+    localStorage.clear();
+    document.documentElement.removeAttribute('dir');
+    document.documentElement.lang = 'en';
+  });
 
   function create(): LocalizationService {
     return TestBed.inject(LocalizationService);
@@ -151,6 +155,37 @@ describe('LocalizationService', () => {
     await service.loadFromHost();
 
     expect(service.translateKey('macrodeck:Common.Save')).toBe('Speichern');
+  });
+
+  it('lays the app out right to left in Arabic and back to left to right after switching away', async () => {
+    const service = create();
+    apiSpy.getLocalization.and.resolveTo({
+      culture: 'ar', fallbackCulture: 'en', translations: {}, followSystem: false, availableCultures: ['en', 'ar', 'de'],
+    });
+    await service.loadFromHost();
+
+    expect(document.documentElement.dir).toBe('rtl');
+    expect(document.documentElement.lang).toBe('ar');
+
+    apiSpy.getLocalization.and.resolveTo({
+      culture: 'de-DE', fallbackCulture: 'en', translations: {}, followSystem: false, availableCultures: ['en', 'ar', 'de'],
+    });
+    notifications.get('LocalizationCultureChangedEvent')!.next({ culture: 'de-DE', fallbackCulture: 'en' });
+    await settle();
+
+    expect(document.documentElement.dir).toBe('ltr');
+    expect(document.documentElement.lang).toBe('de');
+  });
+
+  it('keeps a right-to-left system language without a catalog left to right and in English', async () => {
+    const service = create();
+    apiSpy.getLocalization.and.resolveTo({
+      culture: 'he-IL', fallbackCulture: 'en', translations: {}, followSystem: true, availableCultures: ['en', 'ar'],
+    });
+    await service.loadFromHost();
+
+    expect(document.documentElement.dir).toBe('ltr');
+    expect(document.documentElement.lang).toBe('en');
   });
 
   it('lists the cultures the host reports', async () => {
