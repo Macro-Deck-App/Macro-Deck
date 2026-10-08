@@ -267,6 +267,62 @@
   font-weight: var(--font-medium);
 }
 
+.config-node-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.config-node-label-reset {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 1.125rem;
+  height: 1.125rem;
+  padding: 0;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+
+  svg {
+    width: 0.6875rem;
+    height: 0.6875rem;
+  }
+
+  &:hover:not(:disabled) {
+    color: var(--color-text-primary);
+    border-color: var(--color-text-secondary);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+// A hidden caption still reserves its line in a one-line row that has captioned inputs, so the
+// control lines up with them; a row of only uncaptioned controls stays as it is.
+.config-node-field.is-label-hidden::before {
+  content: '\00a0';
+  display: none;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+}
+
+:host-context(.config-chrome-stack-captioned) .config-node-field.is-label-hidden::before {
+  display: block;
+}
+
 /* A plain boolean is one row - caption left, switch right - the shape a widget's toggle list has
    always had; only the caption above a control would push each toggle onto two lines. */
 .config-node-field.is-toggle {

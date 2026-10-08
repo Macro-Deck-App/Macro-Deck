@@ -27,18 +27,27 @@ Unlock the deck to edit it, lock it to press buttons.
   Action Button, Slider, Clock, Countdown, Stopwatch, Weather, History Graph, Gauges, Music Player,
   Twitch Chat and YouTube Chat all have one.
   **Reset** returns to the default look; on a Music Player that is the album art's color.
-- **Let the folder background show through:** choose the checkered **Transparent** swatch. The tile loses
-  its own background and shadow, the border stays.
+- **Let the folder background show through:** open the color field and choose the checkered
+  **Transparent** swatch. The tile loses its own background and shadow, the border stays.
 - **Set Background Color** changes it from an action, and **Reset** there clears it again.
 - **Style an Action Button's label:** in the **Label** tab, turn off **Label Shadow**, give the text an
-  outline with **Label Outline Color** and its width, or frame it with **Label Box Border Color** and its
-  width. Each state can have its own. Hardware devices and the Companion app keep the default label look for
-  now.
+  outline with **Label Outline** and the width next to it, or frame it with **Label Box Border** and its
+  width. A width can be changed once its color is set. Each state can have its own. Hardware devices and
+  the Companion app keep the default label look for now.
 - **Hide empty cells:** set **Empty cells** to **Transparent** in the profile's settings, and the running
   deck shows only its widgets on the folder background. A folder's grid settings can override it with
   **Visible** or **Transparent**; **Inherited** takes the value from the parent folder, then the profile.
   While you edit the deck, hidden empty cells show a dashed outline, so you can still place widgets. The setting
   does not apply to hardware devices.
+
+## Your color palette
+
+Every color field opens a popover with a color picker and your color palette, which starts with Macro
+Deck's default colors. Pick a color and select **+** to add it, and it shows up in every color field from
+then on, including those of plugins. To remove one, hover over it and select its **×**, or focus it and
+press Delete; this works for the default colors too. **Settings > Appearance > Color palette** lists every
+color, lets you add and remove them, and **Restore default colors** brings the defaults back. The palette
+holds up to 24 colors. A field that cannot be translucent only shows the palette's opaque colors.
 
 ## Colors from a variable
 
@@ -47,9 +56,9 @@ Keep your colors in **Color** variables and change a whole deck at once. Create 
 `#rrggbbaa` for a translucent color; the **Opacity** slider sets the last two digits.
 
 Every color picker of a widget, a color threshold band, a folder's or profile's grid **Background**, the
-**Accent** color in **Settings > Appearance** and the color of an action such as **Set Background Color** can
-switch from **Color** to **Variable**. Choose a **Color variable**, then **Add modifier** to derive a shade
-from it:
+**Accent** color in **Settings > Appearance** and the color of an action such as **Set Background Color**
+opens a popover when you select it; switch its tab from **Color** to **Variable**. Choose a
+**Color variable**, then **Add modifier** to derive a shade from it:
 
 | Modifier | Does |
 | --- | --- |

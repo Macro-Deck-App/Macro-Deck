@@ -3,11 +3,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { parseColorReference, resolveColorReference, type Variable } from '@macro-deck/runtime';
-import { LocalizationService, OverlayPanelComponent, VariableService } from '@shared';
+import { LocalizationService, MAX_PALETTE_COLORS, OverlayPanelComponent, VariableService } from '@shared';
 import { SelectComponent } from '../select/select.component';
 import { hexToHsv } from './color-conversion';
 import { ColorPickerComponent, ColorPreset } from './color-picker.component';
 import { provideLocalizationTesting } from '../../../../testing/localization-test-support';
+import { FakeColorPalette, provideColorPaletteTesting } from '../../../../testing/color-palette-test-support';
 
 @Component({
   standalone: true,
@@ -19,32 +20,39 @@ import { provideLocalizationTesting } from '../../../../testing/localization-tes
       [defaultColor]="defaultColor()"
       [resetValue]="resetValue()"
       [allowCustom]="allowCustom()"
+      [allowAlpha]="allowAlpha()"
+      [disabled]="disabled()"
       [ngModel]="value()"
       (ngModelChange)="value.set($event)" />
   `,
 })
 class HostComponent {
-  presets = signal<ColorPreset[]>([
+  presets = signal<ColorPreset[] | undefined>([
     { label: 'Red', value: '#ef4444' },
     { label: 'Green', value: '#22c55e' },
   ]);
   defaultColor = signal<string | undefined>(undefined);
   resetValue = signal<string | undefined>(undefined);
   allowCustom = signal(true);
+  allowAlpha = signal(false);
+  disabled = signal(false);
   value = signal('');
 }
 
 describe('ColorPickerComponent', () => {
   let fixture: ComponentFixture<HostComponent>;
+  let palette: FakeColorPalette;
   const originalEyeDropper = (window as unknown as { EyeDropper?: unknown }).EyeDropper;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    palette = new FakeColorPalette();
     TestBed.configureTestingModule({
       imports: [HostComponent],
-      providers: [provideZonelessChangeDetection(), ...provideLocalizationTesting()],
+      providers: [provideZonelessChangeDetection(), ...provideLocalizationTesting(), ...provideColorPaletteTesting(palette)],
     });
     fixture = TestBed.createComponent(HostComponent);
     fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   afterEach(() => {
@@ -55,21 +63,40 @@ describe('ColorPickerComponent', () => {
     }
   });
 
-  function swatches(): HTMLButtonElement[] {
-    return Array.from(fixture.nativeElement.querySelectorAll('.cp-swatch'));
+  async function show(value: string): Promise<void> {
+    fixture.componentInstance.value.set(value);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
   }
 
-  function customCell(): HTMLButtonElement {
-    return fixture.nativeElement.querySelector('.cp-custom') as HTMLButtonElement;
+  function field(): HTMLButtonElement {
+    return fixture.nativeElement.querySelector('.cp-chip') as HTMLButtonElement;
   }
 
-  function openCustomPicker(): void {
-    customCell().click();
+  function fieldText(): string {
+    return field().querySelector('.cp-chip-label')!.textContent!.trim();
+  }
+
+  function open(): void {
+    field().click();
     fixture.detectChanges();
   }
 
   function query<T extends Element>(selector: string): T | null {
-    return document.querySelector(selector) as T | null;
+    return fixture.nativeElement.querySelector(selector) as T | null;
+  }
+
+  function presetSwatches(): HTMLButtonElement[] {
+    return Array.from(fixture.nativeElement.querySelectorAll('.cp-popover .cp-swatch:not(.cp-palette-swatch)'));
+  }
+
+  function paletteSwatches(): HTMLButtonElement[] {
+    return Array.from(fixture.nativeElement.querySelectorAll('.cp-popover .cp-palette-swatch'));
+  }
+
+  function addButton(): HTMLButtonElement {
+    return query<HTMLButtonElement>('.cp-add-palette')!;
   }
 
   // Read once per instance, so the component is rebuilt against whichever platform is being faked.
@@ -89,130 +116,122 @@ describe('ColorPickerComponent', () => {
     fixture.detectChanges();
   }
 
-  it('renders one swatch per preset', () => {
-    expect(swatches().length).toBe(2);
-  });
+  describe('field', () => {
+    it('is one compact field naming the colour by its hex code, with nothing else drawn inline', async () => {
+      await show('#22C55E');
 
-  it('marks the swatch that matches the bound value and shows a checkmark', async () => {
-    fixture.componentInstance.value.set('#22c55e');
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    const green = swatches()[1];
-    expect(green.classList).toContain('cp-selected');
-    expect(green.querySelector('.cp-check')).toBeTruthy();
-  });
-
-  it('emits the preset value when a swatch is clicked', () => {
-    swatches()[0].click();
-    fixture.detectChanges();
-    expect(fixture.componentInstance.value()).toBe('#ef4444');
-  });
-
-  it('hides the reset cell when no default color is provided', () => {
-    expect(fixture.nativeElement.querySelector('.cp-reset')).toBeNull();
-  });
-
-  it('shows a reset cell that selects an empty default color', () => {
-    fixture.componentInstance.defaultColor.set('');
-    fixture.componentInstance.value.set('#ef4444');
-    fixture.detectChanges();
-
-    const reset = fixture.nativeElement.querySelector('.cp-reset') as HTMLButtonElement;
-    expect(reset).toBeTruthy();
-    reset.click();
-    fixture.detectChanges();
-    expect(fixture.componentInstance.value()).toBe('');
-  });
-
-  it('flags a non-preset value as a custom selection', async () => {
-    fixture.componentInstance.value.set('#123456');
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    const custom = fixture.nativeElement.querySelector('.cp-custom');
-    expect(custom.classList).toContain('cp-selected');
-  });
-
-  it('does not treat the default value as custom', async () => {
-    fixture.componentInstance.defaultColor.set('');
-    fixture.componentInstance.value.set('');
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    const custom = fixture.nativeElement.querySelector('.cp-custom');
-    expect(custom.classList).not.toContain('cp-selected');
-  });
-
-  it('draws a transparent preset as a pattern rather than a blank cell and never counts it as custom', async () => {
-    fixture.componentInstance.presets.set([
-      { label: 'Red', value: '#ef4444' },
-      { label: 'Transparent', value: 'transparent' },
-    ]);
-    fixture.detectChanges();
-
-    await fixture.whenStable();
-
-    swatches()[1].click();
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    expect(fixture.componentInstance.value()).toBe('transparent');
-
-    expect(swatches()[1].classList).toContain('cp-transparent');
-    expect(swatches()[1].classList).toContain('cp-selected');
-    expect(swatches()[0].classList).not.toContain('cp-transparent');
-    expect(customCell().classList).not.toContain('cp-selected');
-  });
-
-  it('keeps the custom picker on the last real colour after transparent was chosen', async () => {
-    fixture.componentInstance.presets.set([{ label: 'Transparent', value: 'transparent' }]);
-    fixture.componentInstance.value.set('#123456');
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-    swatches()[0].click();
-    fixture.detectChanges();
-
-    openCustomPicker();
-
-    expect(query<HTMLInputElement>('.cp-hex')!.value).toBe('#123456');
-  });
-
-  it('omits the custom cell when allowCustom is false', () => {
-    fixture.componentInstance.allowCustom.set(false);
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.cp-custom')).toBeNull();
-  });
-
-  describe('custom colour picker', () => {
-    it('opens an in-app picker rather than delegating to a native colour dialog', () => {
+      expect(fieldText()).toBe('22C55E');
+      expect((field().querySelector('.cp-chip-swatch') as HTMLElement).style.getPropertyValue('--cp-fill')).toBe('#22C55E');
+      expect(fixture.nativeElement.querySelector('.cp-swatch')).toBeNull();
       expect(query('.cp-popover')).toBeNull();
+    });
 
-      openCustomPicker();
+    it('says Not set with the reset glyph while nothing is chosen and there is no default to show', async () => {
+      await show('');
+
+      expect(fieldText()).toBe('Not set');
+      expect(field().querySelector('.cp-chip-glyph')).toBeTruthy();
+      expect(field().querySelector('.cp-chip-swatch')).toBeNull();
+    });
+
+    it('shows the default colour while the value is empty and the default is a real colour', async () => {
+      fixture.componentInstance.defaultColor.set('#ef4444');
+      await show('');
+
+      expect(fieldText()).toBe('ef4444');
+      expect(field().querySelector('.cp-chip-glyph')).toBeNull();
+    });
+
+    it('names a transparent value instead of drawing an empty swatch', async () => {
+      fixture.componentInstance.presets.set([{ label: 'Transparent', value: 'transparent' }]);
+      await show('transparent');
+
+      expect(fieldText()).toBe('Transparent');
+    });
+
+    it('cannot be opened while disabled', async () => {
+      fixture.componentInstance.disabled.set(true);
+      await show('#ef4444');
+
+      expect(field().disabled).toBeTrue();
+      open();
+      expect(query('.cp-popover')).toBeNull();
+    });
+  });
+
+  describe('popover', () => {
+    it('opens an in-app picker with the presets rather than delegating to a native colour dialog', () => {
+      open();
 
       expect(query('.cp-popover')).toBeTruthy();
       expect(query('.cp-area')).toBeTruthy();
       expect(query('.cp-hue')).toBeTruthy();
       expect(query<HTMLInputElement>('.cp-hex')).toBeTruthy();
+      expect(presetSwatches().length).toBe(2);
+    });
+
+    it('offers no Color and Variable tabs where the field does not allow variables', () => {
+      open();
+
+      expect(query('.cp-mode')).toBeNull();
+    });
+
+    it('emits the preset value when a swatch is clicked and marks it with a checkmark', async () => {
+      open();
+      presetSwatches()[1].click();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.value()).toBe('#22c55e');
+      expect(presetSwatches()[1].classList).toContain('cp-selected');
+      expect(presetSwatches()[1].querySelector('.cp-check')).toBeTruthy();
+    });
+
+    it('moves the picker to a preset that was chosen while it is open', async () => {
+      open();
+      presetSwatches()[0].click();
+      fixture.detectChanges();
+
+      expect(query<HTMLInputElement>('.cp-hex')!.value).toBe('#ef4444');
+    });
+
+    it('draws a transparent preset as a pattern and keeps the picker on the last real colour', async () => {
+      fixture.componentInstance.presets.set([
+        { label: 'Red', value: '#ef4444' },
+        { label: 'Transparent', value: 'transparent' },
+      ]);
+      await show('#123456');
+      open();
+
+      presetSwatches()[1].click();
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.value()).toBe('transparent');
+      expect(presetSwatches()[1].classList).toContain('cp-transparent');
+      expect(presetSwatches()[0].classList).not.toContain('cp-transparent');
+      expect(query<HTMLInputElement>('.cp-hex')!.value).toBe('#123456');
+    });
+
+    it('offers only the presets when allowCustom is false', () => {
+      fixture.componentInstance.allowCustom.set(false);
+      fixture.detectChanges();
+      open();
+
+      expect(query('.cp-area')).toBeNull();
+      expect(query('.cp-add-palette')).toBeNull();
+      expect(presetSwatches().length).toBe(2);
     });
 
     it('starts from the colour that is currently selected', async () => {
-      fixture.componentInstance.value.set('#123456');
-      fixture.detectChanges();
-      await fixture.whenStable();
-
-      openCustomPicker();
+      await show('#123456');
+      open();
 
       expect(query<HTMLInputElement>('.cp-hex')!.value).toBe('#123456');
     });
 
     it('emits the colour typed into the hex field', () => {
-      openCustomPicker();
+      open();
 
       const hex = query<HTMLInputElement>('.cp-hex')!;
       hex.value = '#0af';
@@ -223,7 +242,7 @@ describe('ColorPickerComponent', () => {
     });
 
     it('ignores an incomplete hex value while it is being typed', () => {
-      openCustomPicker();
+      open();
       const hex = query<HTMLInputElement>('.cp-hex')!;
 
       hex.value = '#00aaff';
@@ -238,11 +257,8 @@ describe('ColorPickerComponent', () => {
     });
 
     it('emits a colour of the chosen hue when the hue slider moves', async () => {
-      fixture.componentInstance.value.set('#ff0000');
-      fixture.detectChanges();
-      await fixture.whenStable();
-
-      openCustomPicker();
+      await show('#ff0000');
+      open();
 
       const hue = query<HTMLInputElement>('.cp-hue')!;
       hue.value = '240';
@@ -253,11 +269,8 @@ describe('ColorPickerComponent', () => {
     });
 
     it('moves along the saturation axis with the arrow keys', async () => {
-      fixture.componentInstance.value.set('#ff0000');
-      fixture.detectChanges();
-      await fixture.whenStable();
-
-      openCustomPicker();
+      await show('#ff0000');
+      open();
 
       const area = query<HTMLElement>('.cp-area')!;
       area.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', shiftKey: true }));
@@ -274,14 +287,14 @@ describe('ColorPickerComponent', () => {
 
     it('hides the eyedropper where the platform has no screen picker', () => {
       withEyeDropper(undefined);
-      openCustomPicker();
+      open();
 
       expect(query('.cp-eyedropper')).toBeNull();
     });
 
     it('applies the colour the screen eyedropper returns', async () => {
       withEyeDropper('#00AAFF');
-      openCustomPicker();
+      open();
 
       query<HTMLButtonElement>('.cp-eyedropper')!.click();
       await Promise.resolve();
@@ -291,54 +304,218 @@ describe('ColorPickerComponent', () => {
       expect(fixture.componentInstance.value()).toBe('#00aaff');
     });
 
-    it('closes the picker when the custom cell is clicked again', () => {
-      openCustomPicker();
-      openCustomPicker();
+    it('closes when the field is clicked again', () => {
+      open();
+      open();
 
       expect(query('.cp-popover')).toBeNull();
     });
   });
 
-  describe('resetValue', () => {
-    it('shows the reset cell when only resetValue is set, with no defaultColor', () => {
-      fixture.componentInstance.resetValue.set('$reset');
+  describe('inline', () => {
+    it('draws the picker without a field and lets Tab and Shift+Tab leave it at either edge', async () => {
+      delete (window as unknown as { EyeDropper?: unknown }).EyeDropper;
+      const inline = TestBed.createComponent(ColorPickerComponent);
+      inline.componentRef.setInput('inline', true);
+      inline.componentRef.setInput('showPalette', false);
+      inline.detectChanges();
+      const host = inline.nativeElement as HTMLElement;
+      document.body.appendChild(host);
+
+      expect(host.querySelector('.cp-chip')).toBeNull();
+      const focusable = Array.from(host.querySelectorAll<HTMLElement>('button:not([disabled]), input, [tabindex]'))
+        .filter(element => element.getClientRects().length > 0);
+      const forward = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+      const backward = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, cancelable: true });
+      focusable[focusable.length - 1].focus();
+      focusable[focusable.length - 1].dispatchEvent(forward);
+      focusable[0].focus();
+      focusable[0].dispatchEvent(backward);
+
+      expect(focusable[focusable.length - 1].classList).toContain('cp-hex');
+      expect(focusable[0].classList).toContain('cp-area');
+      expect(forward.defaultPrevented).toBeFalse();
+      expect(backward.defaultPrevented).toBeFalse();
+      host.remove();
+    });
+  });
+
+  describe('palette', () => {
+    it('lists the palette after the field\'s own swatches and selects a colour on click', async () => {
+      palette.colors.set(['#3ff4ee', '#123456']);
+      open();
+
+      expect(paletteSwatches().map(swatch => swatch.style.getPropertyValue('--cp-fill'))).toEqual(['#3ff4ee', '#123456']);
+      expect(paletteSwatches()[0].getAttribute('aria-label')).toBe('Custom color #3ff4ee');
+
+      paletteSwatches()[0].click();
       fixture.detectChanges();
+      expect(fixture.componentInstance.value()).toBe('#3ff4ee');
+    });
+
+    it('names a default colour in the palette by its name', () => {
+      palette.colors.set(['#3b82f6']);
+      open();
+
+      expect(paletteSwatches()[0].getAttribute('aria-label')).toBe('Blue');
+    });
+
+    it('offers no palette colours at all once the user removed every one of them', () => {
+      fixture.componentInstance.presets.set(undefined);
+      fixture.detectChanges();
+      open();
+
+      expect(presetSwatches().length).toBe(0);
+      expect(paletteSwatches().length).toBe(0);
+      expect(query('.cp-add-palette')).toBeTruthy();
+    });
+
+    it('does not repeat a preset that is also in the palette', () => {
+      palette.colors.set(['#ef4444', '#3ff4ee']);
+      open();
+
+      expect(paletteSwatches().map(swatch => swatch.style.getPropertyValue('--cp-fill'))).toEqual(['#3ff4ee']);
+    });
+
+    it('offers translucent palette colours only to a field that can store them', () => {
+      palette.colors.set(['#3ff4ee', '#ef444480']);
+      open();
+      expect(paletteSwatches().length).toBe(1);
+
+      open();
+      fixture.componentInstance.allowAlpha.set(true);
+      fixture.detectChanges();
+      open();
+      expect(paletteSwatches().length).toBe(2);
+    });
+
+    it('adds the current colour with plus', async () => {
+      await show('#3ff4ee');
+      open();
+
+      addButton().click();
+      fixture.detectChanges();
+
+      expect(palette.added).toEqual(['#3ff4ee']);
+      expect(paletteSwatches().length).toBe(1);
+      expect(addButton().disabled).toBeTrue();
+    });
+
+    for (const [name, value] of [
+      ['nothing chosen', ''],
+      ['transparent', 'transparent'],
+      ['a preset', '#ef4444'],
+    ] as const) {
+      it(`cannot add ${name}`, async () => {
+        fixture.componentInstance.presets.set([
+          { label: 'Red', value: '#ef4444' },
+          { label: 'Transparent', value: 'transparent' },
+        ]);
+        await show(value);
+        open();
+
+        expect(addButton().disabled).toBeTrue();
+      });
+    }
+
+    it('cannot add to a full palette and says why', async () => {
+      palette.colors.set(Array.from({ length: MAX_PALETTE_COLORS }, (_, i) => `#0000${i.toString(16).padStart(2, '0')}`));
+      await show('#abcdef');
+      open();
+
+      expect(addButton().disabled).toBeTrue();
+      expect(addButton().title).toContain(String(MAX_PALETTE_COLORS));
+    });
+
+    it('asks before removing a colour with its remove button or the Delete key', async () => {
+      palette.colors.set(['#111111', '#222222']);
+      open();
+      const modal = () => document.querySelector('shared-confirmation-modal');
+      const modalButton = (text: string) =>
+        Array.from(modal()!.querySelectorAll<HTMLButtonElement>('button')).find(b => b.textContent!.trim() === text)!;
+      const closed = async () => {
+        for (let attempt = 0; attempt < 40 && modal(); attempt++) {
+          await new Promise(resolve => setTimeout(resolve, 25));
+          fixture.detectChanges();
+        }
+      };
+
+      query<HTMLButtonElement>('.cp-palette-remove')!.click();
+      fixture.detectChanges();
+      expect(modal()).toBeTruthy();
+      expect(palette.removed).toEqual([]);
+      expect(query('.cp-popover')).toBeNull();
+
+      modalButton('Remove').click();
+      await closed();
+      expect(palette.removed).toEqual(['#111111']);
+      expect(query('.cp-popover')).toBeTruthy();
+
+      paletteSwatches()[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Delete', bubbles: true }));
+      fixture.detectChanges();
+      modalButton('Cancel').click();
+      await closed();
+
+      expect(palette.removed).toEqual(['#111111']);
+      expect(paletteSwatches().length).toBe(1);
+      expect(fixture.componentInstance.value()).toBe('');
+    });
+  });
+
+  describe('reset', () => {
+    it('offers no reset when no default color is provided', async () => {
+      await show('#ef4444');
+
+      expect(fixture.nativeElement.querySelector('.cp-reset')).toBeNull();
+    });
+
+    it('offers a reset next to the field that returns to an empty default', async () => {
+      fixture.componentInstance.defaultColor.set('');
+      await show('#ef4444');
+
+      const reset = fixture.nativeElement.querySelector('.cp-reset') as HTMLButtonElement;
+      reset.click();
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.value()).toBe('');
+      expect(fixture.nativeElement.querySelector('.cp-reset')).toBeNull();
+    });
+
+    it('offers the reset when only resetValue is set, with no defaultColor', async () => {
+      fixture.componentInstance.resetValue.set('$reset');
+      await show('#ef4444');
 
       expect(fixture.nativeElement.querySelector('.cp-reset')).toBeTruthy();
     });
 
-    it('emits resetValue rather than defaultColor when both are set', () => {
+    it('emits resetValue rather than defaultColor when both are set', async () => {
       fixture.componentInstance.defaultColor.set('#ef4444');
       fixture.componentInstance.resetValue.set('$reset');
-      fixture.detectChanges();
+      await show('#22c55e');
 
-      const reset = fixture.nativeElement.querySelector('.cp-reset') as HTMLButtonElement;
-      reset.click();
+      (fixture.nativeElement.querySelector('.cp-reset') as HTMLButtonElement).click();
       fixture.detectChanges();
 
       expect(fixture.componentInstance.value()).toBe('$reset');
     });
 
-    it('an editor picker with only defaultColor still emits the colour, unaffected by resetValue existing', () => {
+    it('emits the default colour when only defaultColor is set', async () => {
       fixture.componentInstance.defaultColor.set('#ef4444');
-      fixture.detectChanges();
+      await show('#22c55e');
 
-      const reset = fixture.nativeElement.querySelector('.cp-reset') as HTMLButtonElement;
-      reset.click();
+      (fixture.nativeElement.querySelector('.cp-reset') as HTMLButtonElement).click();
       fixture.detectChanges();
 
       expect(fixture.componentInstance.value()).toBe('#ef4444');
     });
 
-    it('does not render the sentinel value as a broken custom colour', async () => {
+    it('does not render the sentinel value as a broken colour but as the default', async () => {
       fixture.componentInstance.resetValue.set('$reset');
-      fixture.componentInstance.value.set('$reset');
-      fixture.detectChanges();
-      await fixture.whenStable();
-      fixture.detectChanges();
+      await show('$reset');
 
-      const custom = fixture.nativeElement.querySelector('.cp-custom');
-      expect(custom.classList).not.toContain('cp-selected');
+      expect(fieldText()).toBe('Default color');
+      expect(field().querySelector('.cp-chip-glyph')).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('.cp-reset')).toBeNull();
     });
   });
 });
@@ -383,6 +560,7 @@ describe('ColorPickerComponent with color variables', () => {
       providers: [
         provideZonelessChangeDetection(),
         ...provideLocalizationTesting(),
+        ...provideColorPaletteTesting(),
         {
           provide: VariableService,
           useValue: {
@@ -429,7 +607,7 @@ describe('ColorPickerComponent with color variables', () => {
 
     expect(element('.cp-mode')).toBeNull();
     expect(element('.cp-variable')).toBeNull();
-    expect(element('.cp-track')).toBeTruthy();
+    expect(element('.cp-palette')).toBeTruthy();
   });
 
   it('shows a closed reference as one chip with its resolved swatch, variable name and modifier count', async () => {
@@ -440,7 +618,7 @@ describe('ColorPickerComponent with color variables', () => {
     expect(chip.getAttribute('title')).toBe('primary');
     expect(chip.querySelector('.cp-chip-badge')!.textContent!.trim()).toBe('2');
     expect((chip.querySelector('.cp-chip-swatch') as HTMLElement).style.getPropertyValue('--cp-fill')).toBe('#003df580');
-    expect(element('.cp-editor')).toBeNull();
+    expect(element('.cp-popover')).toBeNull();
   });
 
   it('names a missing variable on the chip itself', async () => {
@@ -456,13 +634,13 @@ describe('ColorPickerComponent with color variables', () => {
 
     chip.click();
     await settle();
-    const editor = element<HTMLElement>('.cp-editor')!;
+    const editor = element<HTMLElement>('.cp-popover')!;
     expect(editor).toBeTruthy();
     expect(editor.contains(document.activeElement)).toBeTrue();
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     await settle();
-    expect(element('.cp-editor')).toBeNull();
+    expect(element('.cp-popover')).toBeNull();
     expect(document.activeElement).toBe(chip);
   });
 
@@ -478,17 +656,17 @@ describe('ColorPickerComponent with color variables', () => {
   it('stays open while a click lands in its own nested select, but closes for a click elsewhere', async () => {
     await show('{{ vars.primary | color }}');
 
-    element<HTMLButtonElement>('.cp-editor .cp-variable-select button.control')!.click();
+    element<HTMLButtonElement>('.cp-popover .cp-variable-select button.control')!.click();
     await settle();
-    document.querySelector('.cp-editor .sel-option, .sel-option')!.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    document.querySelector('.cp-popover .sel-option, .sel-option')!.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
     await settle();
-    expect(element('.cp-editor')).toBeTruthy();
+    expect(element('.cp-popover')).toBeTruthy();
 
     document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
     await settle();
     document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
     await settle();
-    expect(element('.cp-editor')).toBeNull();
+    expect(element('.cp-popover')).toBeNull();
   });
 
   it('is not held open by an unrelated overlay elsewhere in the app', async () => {
@@ -499,29 +677,29 @@ describe('ColorPickerComponent with color variables', () => {
 
     document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
     await settle();
-    expect(element('.cp-editor')).toBeNull();
+    expect(element('.cp-popover')).toBeNull();
   });
 
   it('closes and hands focus back to the chip when tabbing past its last control', async () => {
     await show('{{ vars.primary | color }}');
-    const last = element<HTMLButtonElement>('.cp-editor .cp-add')!;
+    const last = element<HTMLButtonElement>('.cp-popover .cp-add')!;
     last.focus();
 
     last.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }));
     await settle();
 
-    expect(element('.cp-editor')).toBeNull();
+    expect(element('.cp-popover')).toBeNull();
     expect(document.activeElement).toBe(element('.cp-chip'));
   });
 
-  it('opens the editor right away when switching from a color to a variable', async () => {
+  it('keeps the popover open on the Variable tab when switching from a color to a variable', async () => {
     await show('#3366ff');
 
     (document.querySelectorAll('.cp-mode .seg-option')[1] as HTMLButtonElement).click();
     await settle();
 
     expect(fixture.componentInstance.value()).toBe('{{ vars.accent | color }}');
-    expect(element('.cp-editor')).toBeTruthy();
+    expect(element('.cp-variable')).toBeTruthy();
   });
 
   it('opens a stored reference in variable mode, lists only color variables and previews the resolved color', async () => {
@@ -630,8 +808,6 @@ describe('ColorPickerComponent with color variables', () => {
   it('takes an eight-digit hex and emits it canonically when alpha is allowed', async () => {
     await show('#3366ff');
 
-    element<HTMLButtonElement>('.cp-custom')!.click();
-    fixture.detectChanges();
     const hex = document.querySelector('.cp-hex') as HTMLInputElement;
     expect(document.querySelector('.cp-alpha')).toBeTruthy();
     hex.value = '#3366FFCC';

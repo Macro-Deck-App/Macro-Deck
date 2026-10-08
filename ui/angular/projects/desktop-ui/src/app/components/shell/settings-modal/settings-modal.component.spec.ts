@@ -5,6 +5,7 @@ import { DeveloperSettingsChangedEvent, LogEntryLevel } from '@macro-deck/runtim
 import { ApiService, LocalizationService } from '@shared';
 import { SettingsModalService } from '../../../services/settings-modal.service';
 import { SETTINGS_RAIL_COLLAPSED_KEY, SettingsModalComponent } from './settings-modal.component';
+import { provideColorPaletteTesting } from '../../../../testing/color-palette-test-support';
 
 const TLS_DEFAULTS = {
   tlsEnabled: false,
@@ -179,7 +180,7 @@ describe('SettingsModalComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [SettingsModalComponent],
-      providers: [provideZonelessChangeDetection(), { provide: ApiService, useValue: api }],
+      providers: [provideZonelessChangeDetection(), ...provideColorPaletteTesting(), { provide: ApiService, useValue: api }],
     }).compileComponents();
 
     service = TestBed.inject(SettingsModalService);
@@ -367,7 +368,7 @@ describe('SettingsModalComponent', () => {
       TestBed.resetTestingModule();
       await TestBed.configureTestingModule({
         imports: [SettingsModalComponent],
-        providers: [provideZonelessChangeDetection(), { provide: ApiService, useValue: api }],
+        providers: [provideZonelessChangeDetection(), ...provideColorPaletteTesting(), { provide: ApiService, useValue: api }],
       }).compileComponents();
       service = TestBed.inject(SettingsModalService);
       service.open('appearance');

@@ -13,6 +13,7 @@ import { ActionOptionsService } from '../../../../services/action-options.servic
 import { FontService } from '../../../../services/font.service';
 import { ActionFlowStore } from '../../services/action-flow.store';
 import { WidgetAppearanceActionFieldsComponent } from './widget-appearance-action-fields.component';
+import { provideColorPaletteTesting } from '../../../../../testing/color-palette-test-support';
 
 describe('WidgetAppearanceActionFieldsComponent', () => {
   let fixture: ComponentFixture<WidgetAppearanceActionFieldsComponent>;
@@ -44,7 +45,7 @@ describe('WidgetAppearanceActionFieldsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [WidgetAppearanceActionFieldsComponent],
       providers: [
-        provideZonelessChangeDetection(),
+        provideZonelessChangeDetection(), ...provideColorPaletteTesting(),
         { provide: ActionOptionsService, useValue: options },
         { provide: FontService, useValue: { families: signal([]), loadSystemFonts: () => Promise.resolve(),
           faceById: () => undefined, facesForFamily: () => [] } },

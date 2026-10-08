@@ -2565,6 +2565,13 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Errors.Clipboard.Unsupported" xml:space="preserve">
     <value>Tu navegador no permite que esta página copie al portapapeles.</value>
   </data>
+  <data name="Errors.ColorPalette.Full" xml:space="preserve">
+    <value>La paleta admite como máximo {max} colores.</value>
+    <comment>[max:int]</comment>
+  </data>
+  <data name="Errors.ColorPalette.InvalidColor" xml:space="preserve">
+    <value>No es un color válido.</value>
+  </data>
   <data name="Errors.Common.HostLocked" xml:space="preserve">
     <value>El host está bloqueado.</value>
   </data>
@@ -3473,6 +3480,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Forms.ColorPicker.AddModifier" xml:space="preserve">
     <value>Añadir modificador</value>
   </data>
+  <data name="Forms.ColorPicker.AddToPalette" xml:space="preserve">
+    <value>Añadir a la paleta</value>
+  </data>
   <data name="Forms.ColorPicker.AlphaLabel" xml:space="preserve">
     <value>Opacidad</value>
   </data>
@@ -3487,6 +3497,10 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Forms.ColorPicker.CustomColorTitle" xml:space="preserve">
     <value>Color personalizado</value>
+  </data>
+  <data name="Forms.ColorPicker.CustomSwatch" xml:space="preserve">
+    <value>Color personalizado {hex}</value>
+    <comment>[hex:string]</comment>
   </data>
   <data name="Forms.ColorPicker.DefaultColorTitle" xml:space="preserve">
     <value>Color predeterminado</value>
@@ -3565,11 +3579,20 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Forms.ColorPicker.NoMatchingVariables" xml:space="preserve">
     <value>No hay variables que coincidan</value>
   </data>
+  <data name="Forms.ColorPicker.NotSet" xml:space="preserve">
+    <value>Sin definir</value>
+  </data>
   <data name="Forms.ColorPicker.Orange" xml:space="preserve">
     <value>Naranja</value>
   </data>
   <data name="Forms.ColorPicker.OriginalLabel" xml:space="preserve">
     <value>Original</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteLabel" xml:space="preserve">
+    <value>Paleta</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteSaveFailed" xml:space="preserve">
+    <value>No se pudo guardar la paleta de colores.</value>
   </data>
   <data name="Forms.ColorPicker.Pink" xml:space="preserve">
     <value>Rosa</value>
@@ -3579,6 +3602,17 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Forms.ColorPicker.Red" xml:space="preserve">
     <value>Rojo</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPalette" xml:space="preserve">
+    <value>Quitar {hex} de la paleta</value>
+    <comment>[hex:string]</comment>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmHeading" xml:space="preserve">
+    <value>¿Quitar el color de la paleta?</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmMessage" xml:space="preserve">
+    <value>Este color ({name}) se quita de tu paleta y ya no se ofrece en ningún campo de color.</value>
+    <comment>[name:string]</comment>
   </data>
   <data name="Forms.ColorPicker.RemoveModifierAriaLabel" xml:space="preserve">
     <value>Quitar modificador</value>
@@ -14443,6 +14477,30 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Settings.Appearance.Light" xml:space="preserve">
     <value>Claro</value>
   </data>
+  <data name="Settings.Appearance.PaletteDescription" xml:space="preserve">
+    <value>Los colores que ofrece cada campo de color. Quita los que quieras, incluidos los predeterminados, o añade los tuyos.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteEmpty" xml:space="preserve">
+    <value>La paleta está vacía. Añade un color o restaura los predeterminados.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteHeading" xml:space="preserve">
+    <value>Paleta de colores</value>
+  </data>
+  <data name="Settings.Appearance.PaletteLabel" xml:space="preserve">
+    <value>Colores</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmButton" xml:space="preserve">
+    <value>Restaurar</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmHeading" xml:space="preserve">
+    <value>¿Restaurar los colores predeterminados?</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmMessage" xml:space="preserve">
+    <value>Tu paleta se sustituye por los colores predeterminados de Macro Deck. Los colores que añadiste se quitan de ella.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreDefaults" xml:space="preserve">
+    <value>Restaurar los colores predeterminados</value>
+  </data>
   <data name="Settings.Appearance.System" xml:space="preserve">
     <value>Sistema</value>
   </data>
@@ -19027,8 +19085,8 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Etiqueta</value>
   </data>
-  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
-    <value>Color del borde del recuadro</value>
+  <data name="Widgets.Editor.LabelBoxBorder" xml:space="preserve">
+    <value>Borde del recuadro</value>
   </data>
   <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
     <value>Grosor del borde del recuadro (%)</value>
@@ -19039,8 +19097,8 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Color de la etiqueta</value>
   </data>
-  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
-    <value>Color del contorno de la etiqueta</value>
+  <data name="Widgets.Editor.LabelOutline" xml:space="preserve">
+    <value>Contorno de la etiqueta</value>
   </data>
   <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
     <value>Grosor del contorno (%)</value>

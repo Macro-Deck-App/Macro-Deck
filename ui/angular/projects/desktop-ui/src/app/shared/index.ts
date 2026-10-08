@@ -35,6 +35,7 @@ export { WidgetClipboardService } from './services/widget-clipboard.service';
 export { WidgetRegistryService } from './services/widget-registry.service';
 export { WidgetTypeCatalogService } from './services/widget-type-catalog.service';
 export { WidgetTypeFavoritesService } from './services/widget-type-favorites.service';
+export { ColorPaletteService, MAX_PALETTE_COLORS } from './services/color-palette.service';
 
 // Angular adapter - components
 export { LoginFormComponent } from './components/auth/login-form/login-form.component';

@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Subject } from 'rxjs';
 import { ApiService } from '@shared';
 import { GridSettingsComponent } from './grid-settings.component';
+import { provideColorPaletteTesting } from '../../../testing/color-palette-test-support';
 
 describe('GridSettingsComponent', () => {
   beforeEach(() => {
@@ -12,7 +13,7 @@ describe('GridSettingsComponent', () => {
 
     TestBed.configureTestingModule({
       imports: [GridSettingsComponent],
-      providers: [provideZonelessChangeDetection(), { provide: ApiService, useValue: apiSpy }],
+      providers: [provideZonelessChangeDetection(), ...provideColorPaletteTesting(), { provide: ApiService, useValue: apiSpy }],
     });
   });
 

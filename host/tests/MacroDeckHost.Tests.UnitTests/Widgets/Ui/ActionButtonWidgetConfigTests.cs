@@ -1144,7 +1144,56 @@ public class ActionButtonWidgetConfigTests
 			Assert.That(host.ById("labelBoxBorderColor").Flag(UiConfigProperties.SupportsReset), Is.True);
 			Assert.That(host.ById("labelOutlineWidth").Number(UiConfigProperties.Max), Is.EqualTo(3));
 			Assert.That(host.ById("labelBoxBorderWidth").Number(UiConfigProperties.Max), Is.EqualTo(5));
+		});
+	}
+
+	[Test]
+	public void The_shadow_comes_first_and_each_stroke_width_shares_one_line_with_its_colour()
+	{
+		var host = Render(new { });
+		var labelTab = host.SingleByType(UiConfigPrimitives.Tabs).Children
+			.First(t => DescendantIds(t).Contains("label"));
+		var order = DescendantIds(labelTab);
+
+		Assert.That(new[] { "labelShadow", "labelColor", "labelOutlineColor", "labelBoxColor", "labelBoxBorderColor" }
+				.Select(id => order.IndexOf(id)),
+			Is.Ordered.And.All.GreaterThanOrEqualTo(0));
+
+		foreach (var (color, width) in new[]
+			{ ("labelOutlineColor", "labelOutlineWidth"), ("labelBoxBorderColor", "labelBoxBorderWidth") })
+		{
+			var row = ParentOf(labelTab, color)!;
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(row.Type, Is.EqualTo(UiConfigPrimitives.Stack));
+				Assert.That(row.Text(UiConfigProperties.Direction), Is.EqualTo("horizontal"));
+				Assert.That(row.Flag(UiConfigProperties.Wrap), Is.False);
+				Assert.That(row.Children.Select(c => c.Id), Is.EqualTo(new[] { color, width }));
+				Assert.That(host.ById(width).Flag(UiConfigProperties.HideLabel), Is.True);
+				Assert.That(host.ById(width).Text(UiConfigProperties.Label), Is.Not.Empty);
+			});
+		}
+	}
+
+	[Test]
+	public void A_stroke_width_is_editable_only_while_its_colour_is_set()
+	{
+		var host = Render(new { labelBoxBorderColor = "#123456" });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.ById("labelOutlineWidth").Flag(UiConfigProperties.Disabled), Is.True);
+			Assert.That(host.ById("labelBoxBorderWidth").Flag(UiConfigProperties.Disabled), Is.Not.True);
+		});
+
+		host.ById("labelOutlineColor").Change("#ff0000");
+		host.ById("labelBoxBorderColor").Change(string.Empty);
+
+		Assert.Multiple(() =>
+		{
 			Assert.That(host.ById("labelOutlineWidth").Flag(UiConfigProperties.Disabled), Is.Not.True);
+			Assert.That(host.ById("labelBoxBorderWidth").Flag(UiConfigProperties.Disabled), Is.True);
 		});
 	}
 
@@ -1167,6 +1216,10 @@ public class ActionButtonWidgetConfigTests
 			Assert.That(host.ById("states.on.appearance.labelShadow").Flag(UiConfigProperties.Value), Is.False);
 			Assert.That(host.ById("states.on.appearance.labelOutlineWidth").Number(UiConfigProperties.Value),
 				Is.EqualTo(2));
+			Assert.That(host.ById("states.on.appearance.labelOutlineWidth").Flag(UiConfigProperties.Disabled),
+				Is.Not.True);
+			Assert.That(host.ById("states.on.appearance.labelBoxBorderWidth").Flag(UiConfigProperties.Disabled),
+				Is.True);
 		});
 
 		host.ById("states.on.appearance.labelOutlineWidth").Change(2.5d);
@@ -1331,6 +1384,11 @@ public class ActionButtonWidgetConfigTests
 
 		return ids;
 	}
+
+	private static UiTestNode? ParentOf(UiTestNode node, string childId)
+		=> node.Children.Any(c => c.Id == childId)
+			? node
+			: node.Children.Select(c => ParentOf(c, childId)).FirstOrDefault(p => p is not null);
 
 	private static List<JsonElement> ReadStates(UiTestHost host)
 	{

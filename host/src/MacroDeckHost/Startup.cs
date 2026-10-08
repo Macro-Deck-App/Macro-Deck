@@ -7,6 +7,7 @@ using MacroDeckHost.Infrastructure.Backups;
 using MacroDeckHost.Application.Backups.Storage;
 using MacroDeckHost.Application.Backups.Retention;
 using MacroDeckHost.Application.Backups;
+using MacroDeckHost.Application.ColorPalette;
 using MacroDeckHost.Application.Feedback;
 using MacroDeckHost.Application.Messaging;
 using System.Text.Json.Serialization;
@@ -892,6 +893,7 @@ public class Startup
 		services.AddSingleton<IWidgetDataSchemaProvider, WidgetDataSchemaProvider>();
 		services.AddSingleton<IWidgetTypeRegistry, WidgetTypeRegistry>();
 		services.AddSingleton<IWidgetTypeFavoritesService, WidgetTypeFavoritesService>();
+		services.AddSingleton<IColorPaletteService, ColorPaletteService>();
 		services.AddSingleton<IUserVariableApi, UserVariableWriter>();
 		services.AddSingleton<IAutomationStore, JsonAutomationStore>();
 		services.AddSingleton<AutomationCache>();

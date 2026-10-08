@@ -2565,6 +2565,13 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Errors.Clipboard.Unsupported" xml:space="preserve">
     <value>Il browser non consente a questa pagina di copiare negli appunti.</value>
   </data>
+  <data name="Errors.ColorPalette.Full" xml:space="preserve">
+    <value>La tavolozza può contenere al massimo {max} colori.</value>
+    <comment>[max:int]</comment>
+  </data>
+  <data name="Errors.ColorPalette.InvalidColor" xml:space="preserve">
+    <value>Questo non è un colore valido.</value>
+  </data>
   <data name="Errors.Common.HostLocked" xml:space="preserve">
     <value>L'host è bloccato.</value>
   </data>
@@ -3473,6 +3480,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Forms.ColorPicker.AddModifier" xml:space="preserve">
     <value>Aggiungi modificatore</value>
   </data>
+  <data name="Forms.ColorPicker.AddToPalette" xml:space="preserve">
+    <value>Aggiungi alla tavolozza</value>
+  </data>
   <data name="Forms.ColorPicker.AlphaLabel" xml:space="preserve">
     <value>Opacità</value>
   </data>
@@ -3487,6 +3497,10 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Forms.ColorPicker.CustomColorTitle" xml:space="preserve">
     <value>Colore personalizzato</value>
+  </data>
+  <data name="Forms.ColorPicker.CustomSwatch" xml:space="preserve">
+    <value>Colore personalizzato {hex}</value>
+    <comment>[hex:string]</comment>
   </data>
   <data name="Forms.ColorPicker.DefaultColorTitle" xml:space="preserve">
     <value>Colore predefinito</value>
@@ -3565,11 +3579,20 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Forms.ColorPicker.NoMatchingVariables" xml:space="preserve">
     <value>Nessuna variabile corrispondente</value>
   </data>
+  <data name="Forms.ColorPicker.NotSet" xml:space="preserve">
+    <value>Non impostato</value>
+  </data>
   <data name="Forms.ColorPicker.Orange" xml:space="preserve">
     <value>Arancione</value>
   </data>
   <data name="Forms.ColorPicker.OriginalLabel" xml:space="preserve">
     <value>Originale</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteLabel" xml:space="preserve">
+    <value>Tavolozza</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteSaveFailed" xml:space="preserve">
+    <value>Impossibile salvare la tavolozza dei colori.</value>
   </data>
   <data name="Forms.ColorPicker.Pink" xml:space="preserve">
     <value>Rosa</value>
@@ -3579,6 +3602,17 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Forms.ColorPicker.Red" xml:space="preserve">
     <value>Rosso</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPalette" xml:space="preserve">
+    <value>Rimuovi {hex} dalla tavolozza</value>
+    <comment>[hex:string]</comment>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmHeading" xml:space="preserve">
+    <value>Rimuovere il colore dalla tavolozza?</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmMessage" xml:space="preserve">
+    <value>Questo colore ({name}) viene rimosso dalla tua tavolozza e non viene più proposto in nessun campo colore.</value>
+    <comment>[name:string]</comment>
   </data>
   <data name="Forms.ColorPicker.RemoveModifierAriaLabel" xml:space="preserve">
     <value>Rimuovi modificatore</value>
@@ -14443,6 +14477,30 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Settings.Appearance.Light" xml:space="preserve">
     <value>Chiaro</value>
   </data>
+  <data name="Settings.Appearance.PaletteDescription" xml:space="preserve">
+    <value>I colori offerti da ogni campo colore. Rimuovi quelli che vuoi, anche quelli predefiniti, o aggiungi i tuoi.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteEmpty" xml:space="preserve">
+    <value>La tavolozza è vuota. Aggiungi un colore o ripristina quelli predefiniti.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteHeading" xml:space="preserve">
+    <value>Tavolozza dei colori</value>
+  </data>
+  <data name="Settings.Appearance.PaletteLabel" xml:space="preserve">
+    <value>Colori</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmButton" xml:space="preserve">
+    <value>Ripristina</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmHeading" xml:space="preserve">
+    <value>Ripristinare i colori predefiniti?</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmMessage" xml:space="preserve">
+    <value>La tua tavolozza viene sostituita dai colori predefiniti di Macro Deck. I colori che hai aggiunto vengono rimossi.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreDefaults" xml:space="preserve">
+    <value>Ripristina i colori predefiniti</value>
+  </data>
   <data name="Settings.Appearance.System" xml:space="preserve">
     <value>Sistema</value>
   </data>
@@ -19027,8 +19085,8 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Etichetta</value>
   </data>
-  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
-    <value>Colore bordo riquadro etichetta</value>
+  <data name="Widgets.Editor.LabelBoxBorder" xml:space="preserve">
+    <value>Bordo riquadro etichetta</value>
   </data>
   <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
     <value>Spessore bordo riquadro (%)</value>
@@ -19039,8 +19097,8 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Colore etichetta</value>
   </data>
-  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
-    <value>Colore contorno etichetta</value>
+  <data name="Widgets.Editor.LabelOutline" xml:space="preserve">
+    <value>Contorno etichetta</value>
   </data>
   <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
     <value>Spessore contorno (%)</value>
