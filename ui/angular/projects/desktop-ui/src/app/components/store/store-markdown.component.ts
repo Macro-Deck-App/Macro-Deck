@@ -1,10 +1,9 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { MarkdownBlock, parseMarkdown } from '../../util/markdown';
 
-// Renders registry-supplied markdown (issue #517) through real Angular control flow - never
-// innerHTML or DomSanitizer. The safe-subset parser in util/markdown.ts is the only thing
-// between third-party content and the page, not a sanitizer bypass.
+// Renders registry-supplied markdown through Angular control flow, never innerHTML or DomSanitizer:
+// util/markdown.ts turns it into a typed model, so there is no HTML string to sanitize.
 @Component({
   selector: 'shared-store-markdown',
   standalone: true,
@@ -18,4 +17,9 @@ export class StoreMarkdownComponent {
   readonly blocks = input<MarkdownBlock[] | null>(null);
 
   protected readonly rendered = computed<MarkdownBlock[]>(() => this.blocks() ?? parseMarkdown(this.text()));
+  protected readonly failedImages = signal<ReadonlySet<string>>(new Set());
+
+  protected imageFailed(src: string): void {
+    this.failedImages.update(failed => new Set(failed).add(src));
+  }
 }

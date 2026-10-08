@@ -72,6 +72,10 @@ describe('AnnouncementMarkdownComponent', () => {
     expect(element.textContent).toContain('<!-- a comment -->');
   });
 
+  it('shows a comment on its own line as text, like the Creator Portal preview', () => {
+    expect(render('<!-- a block comment -->\n\nAfter').textContent).toContain('<!-- a block comment -->');
+  });
+
   it('decodes character references in text but keeps code literal', () => {
     const element = render('&lt;b&gt; &copy; &#169; &amp; `&amp;`');
 
