@@ -95,19 +95,53 @@ public class ShippedCatalogTests
 	}
 
 	[TestCaseSource(nameof(Catalogs))]
-	public void Every_chinese_text_keeps_the_placeholders_of_the_default_text(string scope, string[] directory)
+	public void Every_translation_keeps_the_placeholders_of_the_default_text(string scope, string[] directory)
 	{
 		var result = Compile(scope, directory);
 		var byDefault = result.Catalog[result.DefaultCulture];
-		var chinese = result.Catalog["zh"];
 
 		Assert.Multiple(() =>
 		{
-			foreach (var (key, defaultText) in byDefault)
+			foreach (var culture in result.Cultures.Where(culture => !string.Equals(culture, result.DefaultCulture, StringComparison.OrdinalIgnoreCase)))
 			{
-				Assert.That(chinese.TryGetValue(key, out var text) ? Placeholders(text) : [],
-					Is.EqualTo(Placeholders(defaultText)),
-					$"'{scope}:{key}' in zh must use the same placeholders as the default text");
+				var translated = result.Catalog[culture];
+				foreach (var (key, defaultText) in byDefault)
+				{
+					var expected = Placeholders(defaultText);
+					var actual = translated.TryGetValue(key, out var text) ? Placeholders(text) : [];
+
+					if (IsPluralForm(byDefault, key))
+					{
+						Assert.That(actual, Is.SubsetOf(FamilyPlaceholders(byDefault, key)),
+							$"'{scope}:{key}' in {culture} introduces a placeholder the default text does not have");
+						Assert.That(expected.Where(name => name != "count"), Is.SubsetOf(actual),
+							$"'{scope}:{key}' in {culture} drops a placeholder the default text shows");
+					}
+					else
+					{
+						Assert.That(actual, Is.EqualTo(expected),
+							$"'{scope}:{key}' in {culture} must use the same placeholders as the default text");
+					}
+				}
+			}
+		});
+	}
+
+	[TestCaseSource(nameof(Catalogs))]
+	public void No_language_is_left_largely_in_English(string scope, string[] directory)
+	{
+		var result = Compile(scope, directory);
+		var byDefault = result.Catalog[result.DefaultCulture];
+
+		Assert.Multiple(() =>
+		{
+			foreach (var culture in result.Cultures.Where(culture => !string.Equals(culture, result.DefaultCulture, StringComparison.OrdinalIgnoreCase)))
+			{
+				var translated = result.Catalog[culture];
+				var untouched = byDefault.Count(entry => translated.TryGetValue(entry.Key, out var text) && text == entry.Value);
+
+				Assert.That(untouched, Is.LessThan(byDefault.Count / 10),
+					$"{untouched} of {byDefault.Count} '{scope}' texts in {culture} are identical to English");
 			}
 		});
 	}
@@ -128,6 +162,22 @@ public class ShippedCatalogTests
 		}
 	}
 
+	[TestCase("zh-TW")]
+	[TestCase("zh-HK")]
+	[TestCase("zh-MO")]
+	[TestCase("zh-Hant-TW")]
+	public void A_traditional_chinese_system_culture_reaches_the_taiwan_catalog(string systemCulture)
+	{
+		foreach (var catalog in _catalogs)
+		{
+			var result = Compile(catalog.Scope, catalog.Directory);
+			var served = LocalizationCultureChain.For(systemCulture, result.DefaultCulture)
+				.First(culture => result.Cultures.Contains(culture, StringComparer.OrdinalIgnoreCase));
+
+			Assert.That(served, Is.EqualTo("zh-TW"), $"'{catalog.Scope}' must serve {systemCulture} in Traditional Chinese");
+		}
+	}
+
 	[Test]
 	public void The_chinese_catalog_carries_chinese_text()
 	{
@@ -136,12 +186,41 @@ public class ShippedCatalogTests
 		Assert.That(result.Catalog["zh"]["Common.Cancel"], Is.EqualTo("取消"));
 	}
 
+	[Test]
+	public void The_taiwan_catalog_is_written_in_traditional_characters()
+	{
+		var result = Compile(LocalizationScope.MacroDeck, _catalogs[0].Directory);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Catalog["zh-TW"]["Common.Delete"], Is.EqualTo("刪除"));
+			Assert.That(result.Catalog["zh"]["Common.Delete"], Is.EqualTo("删除"));
+		});
+	}
+
 	private static string[] Placeholders(string text)
 		=> Regex.Matches(text, @"\{([A-Za-z_][A-Za-z0-9_]*)\}")
 			.Select(match => match.Groups[1].Value)
 			.Distinct()
 			.Order(StringComparer.Ordinal)
 			.ToArray();
+
+	private static string[] FamilyPlaceholders(Dictionary<string, string> templates, string formKey)
+	{
+		var baseKey = formKey[..formKey.LastIndexOf('.')];
+		return new[] { baseKey + ".One", baseKey + ".Other" }
+			.Where(templates.ContainsKey)
+			.SelectMany(form => Placeholders(templates[form]))
+			.Append("count")
+			.Distinct()
+			.ToArray();
+	}
+
+	private static bool IsPluralForm(Dictionary<string, string> templates, string key)
+	{
+		var separator = key.LastIndexOf('.');
+		return separator > 0 && key[(separator + 1)..] is "One" or "Other" && IsPluralFamily(templates, key[..separator]);
+	}
 
 	private static bool IsPluralFamily(Dictionary<string, string> templates, string baseKey)
 		=> templates.ContainsKey(baseKey + ".Other");

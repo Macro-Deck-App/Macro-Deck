@@ -1,7 +1,7 @@
 <div #surface class="dp-surface" [class.dp-leaving]="leaving()" (animationend)="onSurfaceAnimationEnd($event)">
   <header class="dp-topbar">
     <button type="button" class="dp-back" [attr.aria-label]="backLabel" (click)="requestClose()">
-      <span class="icon icon-arrow-left icon-md" aria-hidden="true"></span>
+      <span class="icon icon-arrow-left rtl-mirror icon-md" aria-hidden="true"></span>
     </button>
     <ng-content select="[detailPageHeader]" />
   </header>

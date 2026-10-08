@@ -14,7 +14,7 @@ import { VARIABLE_ROW_INDENT } from './variable-row.component';
         [attr.aria-label]="ariaLabel()"
         [attr.aria-description]="hint()"
         (click)="toggle.emit()">
-        <span class="icon icon-xs icon-chevron-right vgh-chevron" [class.vgh-chevron-open]="expanded()" aria-hidden="true"></span>
+        <span class="icon icon-xs icon-chevron-right rtl-mirror vgh-chevron" [class.vgh-chevron-open]="expanded()" aria-hidden="true"></span>
         <span class="vgh-label">{{ label() }}</span>
         @if (count() !== null) {
           <span class="vgh-count">{{ count() }}</span>

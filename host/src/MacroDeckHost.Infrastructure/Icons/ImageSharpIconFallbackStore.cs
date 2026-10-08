@@ -104,7 +104,7 @@ public sealed class ImageSharpIconFallbackStore : IIconImageFallbackStore, IDisp
 
 		try
 		{
-			using var image = await Image.LoadAsync<Rgba32>(source, cancellationToken);
+			using var image = await Image.LoadAsync<Rgba32>(ImageSharpDecoding.Options, source, cancellationToken);
 			Directory.CreateDirectory(Path.GetDirectoryName(cachePath)!);
 
 			var tempPath = cachePath + ".tmp";

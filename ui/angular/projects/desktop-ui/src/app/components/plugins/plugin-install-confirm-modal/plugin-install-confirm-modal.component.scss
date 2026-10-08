@@ -182,18 +182,18 @@
     display: flex;
     flex-direction: column;
     gap: 0.125rem;
-    padding-left: var(--space-2);
-    border-left: 2px solid transparent;
+    padding-inline-start: var(--space-2);
+    border-inline-start: 2px solid transparent;
     font-size: var(--text-base);
     line-height: var(--leading-relaxed);
     overflow-wrap: anywhere;
 
     &.is-warn {
-      border-left-color: var(--color-warning);
+      border-inline-start-color: var(--color-warning);
     }
 
     &.is-error {
-      border-left-color: var(--color-danger);
+      border-inline-start-color: var(--color-danger);
     }
   }
 }

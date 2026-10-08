@@ -19,10 +19,10 @@
         @if (layout() === 'row') {
           <div class="store-section-nav">
             <button type="button" class="nav-button" (click)="scroll(-1)" [attr.aria-label]="'macrodeck.app:Store.Page.ScrollBackAction' | translate">
-              <span class="icon icon-chevron-left icon-sm" aria-hidden="true"></span>
+              <span class="icon icon-chevron-left rtl-mirror icon-sm" aria-hidden="true"></span>
             </button>
             <button type="button" class="nav-button" (click)="scroll(1)" [attr.aria-label]="'macrodeck.app:Store.Page.ScrollForwardAction' | translate">
-              <span class="icon icon-chevron-right icon-sm" aria-hidden="true"></span>
+              <span class="icon icon-chevron-right rtl-mirror icon-sm" aria-hidden="true"></span>
             </button>
           </div>
         }

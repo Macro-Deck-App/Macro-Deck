@@ -20,7 +20,7 @@
                     [attr.aria-expanded]="card.expanded"
                     [attr.aria-controls]="card.expanded ? 'test-builds-' + card.test.packageId : null"
                     (click)="toggleCard(card.test.packageId)">
-                    <span class="icon icon-chevron-right icon-xs test-card-chevron" [class.open]="card.expanded" aria-hidden="true"></span>
+                    <span class="icon icon-chevron-right rtl-mirror icon-xs test-card-chevron" [class.open]="card.expanded" aria-hidden="true"></span>
                     <span class="test-icon">
                       @if (card.iconUrl; as icon) {
                         <img [src]="icon" alt="" loading="lazy" (error)="onIconError(card.test.packageId)">

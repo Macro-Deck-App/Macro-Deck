@@ -313,6 +313,22 @@ public class ImageSharpIconProcessorTests
 	}
 
 	[Test]
+	public async Task Process_Tiff_FailsWithUnsupportedFormat()
+	{
+		using var image = new Image<Rgba32>(300, 200, new Rgba32(10, 20, 30));
+		using var stream = new MemoryStream();
+		await image.SaveAsTiffAsync(stream);
+
+		var result = await _processor.Process(new MemoryStream(stream.ToArray()), "scan.tiff", CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.False);
+			Assert.That(result.Error, Is.EqualTo(IconError.UnsupportedFormat));
+		});
+	}
+
+	[Test]
 	public async Task Process_EmptyFile_Fails()
 	{
 		var result = await _processor.Process(new MemoryStream([]), "empty.png", CancellationToken.None);

@@ -113,4 +113,49 @@ public class FallbackChainTests
 		Assert.That(resolver.Resolve(Greeting(), "de-DE"),
 			Is.EqualTo("[[plugin:com.example.test:Greeting]]"));
 	}
+
+	private static LocalizationResolver ChineseResolver(params (string Culture, string Text)[] cultures)
+	{
+		var templates = new Dictionary<string, IReadOnlyDictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
+		foreach (var (culture, text) in cultures)
+		{
+			templates[culture] = new Dictionary<string, string>(StringComparer.Ordinal) { [_key] = text };
+		}
+
+		var registry = new LocalizationCatalogRegistry();
+		registry.Register(new LocalizationCatalog(LocalizationScope.ForPlugin("com.example.test"), "en", templates));
+		return new LocalizationResolver(registry);
+	}
+
+	[TestCase("zh-TW")]
+	[TestCase("zh-HK")]
+	[TestCase("zh-MO")]
+	[TestCase("zh-Hant")]
+	[TestCase("zh-Hant-TW")]
+	[TestCase("zh-Hant-HK")]
+	public void A_Traditional_Chinese_reader_gets_the_Taiwan_catalog_before_the_Simplified_one(string requested)
+		=> Assert.That(ChineseResolver(("zh", "Simplified"), ("zh-TW", "Traditional"), ("en", "English"))
+				.Resolve(Greeting(), requested),
+			Is.EqualTo("Traditional"));
+
+	[TestCase("zh-CN")]
+	[TestCase("zh-SG")]
+	[TestCase("zh-Hans")]
+	[TestCase("zh-Hans-TW")]
+	public void A_Simplified_Chinese_reader_never_gets_the_Taiwan_catalog(string requested)
+		=> Assert.That(ChineseResolver(("zh", "Simplified"), ("zh-TW", "Traditional"), ("en", "English"))
+				.Resolve(Greeting(), requested),
+			Is.EqualTo("Simplified"));
+
+	[TestCase("zh-HK")]
+	[TestCase("zh-Hant-TW")]
+	public void A_catalog_that_only_ships_Chinese_still_serves_it_to_Traditional_readers(string requested)
+		=> Assert.That(ChineseResolver(("zh", "Simplified"), ("en", "English")).Resolve(Greeting(), requested),
+			Is.EqualTo("Simplified"));
+
+	[Test]
+	public void A_catalog_shipping_its_own_Traditional_variant_keeps_serving_it()
+		=> Assert.That(ChineseResolver(("zh-Hant", "Hant"), ("zh-TW", "Taiwan"), ("zh", "Simplified"), ("en", "English"))
+				.Resolve(Greeting(), "zh-HK"),
+			Is.EqualTo("Hant"));
 }

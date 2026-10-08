@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.MusicPlayer;
+using MacroDeckHost.Infrastructure.Icons;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.Processing;
@@ -43,7 +44,7 @@ public sealed class ImageSharpArtworkProcessor : IArtworkProcessor
 
 	private static async Task<ProcessedArtworkResult> Encode(byte[] bytes, CancellationToken cancellationToken)
 	{
-		using var image = Image.Load(bytes);
+		using var image = Image.Load(ImageSharpDecoding.Options, bytes);
 		while (image.Frames.Count > 1)
 		{
 			image.Frames.RemoveFrame(1);

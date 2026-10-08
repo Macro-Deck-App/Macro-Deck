@@ -12,7 +12,18 @@
       "packaging/macos/pl.lproj/InfoPlist.strings": "pl.lproj/InfoPlist.strings",
       "packaging/macos/es.lproj/InfoPlist.strings": "es.lproj/InfoPlist.strings",
       "packaging/macos/fr.lproj/InfoPlist.strings": "fr.lproj/InfoPlist.strings",
-      "packaging/macos/zh-Hans.lproj/InfoPlist.strings": "zh-Hans.lproj/InfoPlist.strings"
+      "packaging/macos/zh-Hans.lproj/InfoPlist.strings": "zh-Hans.lproj/InfoPlist.strings",
+      "packaging/macos/ru.lproj/InfoPlist.strings": "ru.lproj/InfoPlist.strings",
+      "packaging/macos/uk.lproj/InfoPlist.strings": "uk.lproj/InfoPlist.strings",
+      "packaging/macos/ja.lproj/InfoPlist.strings": "ja.lproj/InfoPlist.strings",
+      "packaging/macos/ko.lproj/InfoPlist.strings": "ko.lproj/InfoPlist.strings",
+      "packaging/macos/pt-BR.lproj/InfoPlist.strings": "pt-BR.lproj/InfoPlist.strings",
+      "packaging/macos/ar.lproj/InfoPlist.strings": "ar.lproj/InfoPlist.strings",
+      "packaging/macos/hi.lproj/InfoPlist.strings": "hi.lproj/InfoPlist.strings",
+      "packaging/macos/tr.lproj/InfoPlist.strings": "tr.lproj/InfoPlist.strings",
+      "packaging/macos/nl.lproj/InfoPlist.strings": "nl.lproj/InfoPlist.strings",
+      "packaging/macos/id.lproj/InfoPlist.strings": "id.lproj/InfoPlist.strings",
+      "packaging/macos/zh-Hant.lproj/InfoPlist.strings": "zh-Hant.lproj/InfoPlist.strings"
     },
     "macOS": {
       "minimumSystemVersion": "11.0",
