@@ -66,6 +66,8 @@ export function renderUiNode(
 ): UiNodeRenderHandle {
   const registry = options?.registry ?? DEFAULT_UI_COMPONENT_REGISTRY;
   const timers = options?.timers ?? REAL_TIMERS;
+  // Widget trees keep their authored left-to-right layout inside a right-to-left app.
+  container.setAttribute('dir', 'ltr');
   return renderInScope(
     container, node, box, crossExtent, initialBasis, host, registry, timers, createTextFitScope(), () => false, () => false,
     undefined);

@@ -17,6 +17,7 @@ import {
 import { ACTIVE_TARGET } from './targets/active-target';
 import { Appearance } from './appearance';
 import { Client } from './client';
+import { applyDocumentLanguage } from './document-language';
 import { FontLoader } from './fonts';
 import { RenderingModeStore } from './rendering-mode';
 import { IconResolutionStore } from './icon-resolution';
@@ -212,7 +213,7 @@ export function start(root: HTMLElement, target: WebClientTarget = ACTIVE_TARGET
 }
 
 function syncDocumentLanguage(client: Client): void {
-  document.documentElement.lang = client.localization.culture();
+  applyDocumentLanguage(document.documentElement, client.localization.servedCulture());
   document.title = client.translate(ClientAppStrings.WebClient.Meta.Title);
 }
 

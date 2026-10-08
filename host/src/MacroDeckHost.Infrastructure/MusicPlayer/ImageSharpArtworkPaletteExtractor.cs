@@ -1,5 +1,6 @@
 using System.Globalization;
 using MacroDeckHost.Application.MusicPlayer;
+using MacroDeckHost.Infrastructure.Icons;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -50,7 +51,7 @@ public sealed class ImageSharpArtworkPaletteExtractor : IArtworkPaletteExtractor
 
 	private static ArtworkPalette Average(byte[] bytes)
 	{
-		using var image = Image.Load<Rgba32>(bytes);
+		using var image = Image.Load<Rgba32>(ImageSharpDecoding.Options, bytes);
 
 		// Stretched, not fitted: the canvas this replaces drew the whole cover into a 16x16 box, so every
 		// part of the artwork contributed to the average regardless of its shape.

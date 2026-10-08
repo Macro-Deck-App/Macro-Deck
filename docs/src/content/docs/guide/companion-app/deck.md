@@ -68,6 +68,39 @@ is already on can always be turned off.
 
 iPhone and iPad cannot turn the screen on or off, so these settings do not appear there.
 
+## Wake the computer
+
+The app can wake a sleeping computer with Wake-on-LAN. This works once the computer told the app its network card,
+which Macro Deck does each time you connect to it over the network, and when the computer and its network card
+support Wake-on-LAN. A computer connected over USB cannot be woken.
+
+In the app, choose **Wake** for the connection, or turn on **Wake this computer when connecting** in its settings.
+To wake it without opening the app:
+
+| Where | How |
+| --- | --- |
+| Macro Deck host widget | Tap the power button on the widget. On iPhone and iPad this needs iOS 17. Tapping anywhere else still opens the deck. |
+| Quick Settings (Android) | Add a wake tile: in the **⋮** menu of the connection choose **Add wake tile**, or add one under **Wake tiles** in the **Automation** settings. You can have up to three. In the list of available tiles it is called **Wake computer** with a number from 1 to 3. |
+| Home screen (Android) | In the **⋮** menu of the connection choose **Add wake shortcut to Home screen**. This needs Android 8 or later. |
+| Shortcuts and Siri (iPhone and iPad) | The **Wake Computer** action, or ask Siri "Wake *Streaming Computer* with Macro Deck". This needs iOS 16. |
+| Control Center (iPhone and iPad) | Add the **Wake computer** control and choose the computer. This needs iOS 18. |
+
+![The Macro Deck host widget on Android with its power button](../../../../assets/guide/companion/android-wake-widget.png)
+
+![A wake tile in the Quick Settings panel on Android, saying the computer is awake](../../../../assets/guide/companion/android-wake-tile.png)
+
+![The Macro Deck host widget on iPhone with its power button](../../../../assets/guide/companion/ios-wake-widget.png)
+
+The app sends the wake signal for up to 25 seconds and waits for the computer to answer. It then says **Awake**, or
+**No answer yet** when the computer did not answer in that time. A computer that takes longer to start still wakes.
+**Not woken** means this device can only wake a computer that went to sleep recently: iPhone and iPad, and some
+Android devices, are not allowed to send the signal to the whole network. **Not sent** means this device was not on a
+network. The widget and the tile show the outcome for a few seconds, a home screen shortcut in a short message, and
+Shortcuts says it in a sentence. A home screen shortcut is called **Wake** and the computer's name.
+
+Waking works on a locked device, from a tile, the Lock Screen or Control Center, because it only sends the signal
+and does nothing else on the computer.
+
 ## What the computer controls
 
 Macro Deck decides a few things for each device, under **Settings > Devices** on the computer:

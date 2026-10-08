@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Common.Add" xml:space="preserve">
+    <value>Adicionar</value>
+  </data>
+  <data name="Common.Back" xml:space="preserve">
+    <value>Voltar</value>
+  </data>
+  <data name="Common.Cancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="Common.Close" xml:space="preserve">
+    <value>Fechar</value>
+  </data>
+  <data name="Common.Confirm" xml:space="preserve">
+    <value>Confirmar</value>
+  </data>
+  <data name="Common.Continue" xml:space="preserve">
+    <value>Continuar</value>
+  </data>
+  <data name="Common.Copy" xml:space="preserve">
+    <value>Copiar</value>
+  </data>
+  <data name="Common.Create" xml:space="preserve">
+    <value>Criar</value>
+  </data>
+  <data name="Common.Delete" xml:space="preserve">
+    <value>Excluir</value>
+  </data>
+  <data name="Common.Disabled" xml:space="preserve">
+    <value>Desativado</value>
+  </data>
+  <data name="Common.Done" xml:space="preserve">
+    <value>Concluído</value>
+  </data>
+  <data name="Common.Edit" xml:space="preserve">
+    <value>Editar</value>
+  </data>
+  <data name="Common.Enabled" xml:space="preserve">
+    <value>Ativado</value>
+  </data>
+  <data name="Common.Export" xml:space="preserve">
+    <value>Exportar</value>
+  </data>
+  <data name="Common.Import" xml:space="preserve">
+    <value>Importar</value>
+  </data>
+  <data name="Common.Loading" xml:space="preserve">
+    <value>Carregando…</value>
+  </data>
+  <data name="Common.Next" xml:space="preserve">
+    <value>Próximo</value>
+  </data>
+  <data name="Common.No" xml:space="preserve">
+    <value>Não</value>
+  </data>
+  <data name="Common.None" xml:space="preserve">
+    <value>Nenhum</value>
+  </data>
+  <data name="Common.Refresh" xml:space="preserve">
+    <value>Atualizar</value>
+  </data>
+  <data name="Common.Remove" xml:space="preserve">
+    <value>Remover</value>
+  </data>
+  <data name="Common.Rename" xml:space="preserve">
+    <value>Renomear</value>
+  </data>
+  <data name="Common.Retry" xml:space="preserve">
+    <value>Tentar novamente</value>
+  </data>
+  <data name="Common.Save" xml:space="preserve">
+    <value>Salvar</value>
+  </data>
+  <data name="Common.Select" xml:space="preserve">
+    <value>Selecionar…</value>
+  </data>
+  <data name="Common.Yes" xml:space="preserve">
+    <value>Sim</value>
+  </data>
+  <data name="ConfigFlow.SetUpIntegration" xml:space="preserve">
+    <value>Configurar integração</value>
+  </data>
+  <data name="Connection.Connected" xml:space="preserve">
+    <value>Conectado</value>
+  </data>
+  <data name="Connection.Connecting" xml:space="preserve">
+    <value>Conectando…</value>
+  </data>
+  <data name="Connection.Disconnected" xml:space="preserve">
+    <value>Desconectado</value>
+  </data>
+  <data name="Connection.Reconnecting" xml:space="preserve">
+    <value>Reconectando…</value>
+  </data>
+  <data name="Settings.About" xml:space="preserve">
+    <value>Sobre</value>
+  </data>
+  <data name="Settings.Adb" xml:space="preserve">
+    <value>ADB</value>
+  </data>
+  <data name="Settings.Advanced" xml:space="preserve">
+    <value>Avançado</value>
+  </data>
+  <data name="Settings.Appearance" xml:space="preserve">
+    <value>Aparência</value>
+  </data>
+  <data name="Settings.BackupAndData" xml:space="preserve">
+    <value>Backup e dados</value>
+  </data>
+  <data name="Settings.Backups" xml:space="preserve">
+    <value>Backups</value>
+  </data>
+  <data name="Settings.Connectivity" xml:space="preserve">
+    <value>Conectividade</value>
+  </data>
+  <data name="Settings.DataAndPrivacy" xml:space="preserve">
+    <value>Dados e privacidade</value>
+  </data>
+  <data name="Settings.Developer" xml:space="preserve">
+    <value>Desenvolvedor</value>
+  </data>
+  <data name="Settings.Devices" xml:space="preserve">
+    <value>Dispositivos</value>
+  </data>
+  <data name="Settings.General" xml:space="preserve">
+    <value>Geral</value>
+  </data>
+  <data name="Settings.Language" xml:space="preserve">
+    <value>Idioma</value>
+  </data>
+  <data name="Settings.Logging" xml:space="preserve">
+    <value>Registro</value>
+  </data>
+  <data name="Settings.Network" xml:space="preserve">
+    <value>Rede</value>
+  </data>
+  <data name="Settings.PrivacyAndSecurity" xml:space="preserve">
+    <value>Privacidade e segurança</value>
+  </data>
+  <data name="Settings.Security" xml:space="preserve">
+    <value>Segurança</value>
+  </data>
+  <data name="Settings.Startup" xml:space="preserve">
+    <value>Inicialização</value>
+  </data>
+  <data name="Settings.Title" xml:space="preserve">
+    <value>Configurações</value>
+  </data>
+  <data name="States.Active" xml:space="preserve">
+    <value>Ativo</value>
+  </data>
+  <data name="States.Hidden" xml:space="preserve">
+    <value>Oculto</value>
+  </data>
+  <data name="States.Inactive" xml:space="preserve">
+    <value>Inativo</value>
+  </data>
+  <data name="States.InPlaylist" xml:space="preserve">
+    <value>Na lista de reprodução</value>
+  </data>
+  <data name="States.Liked" xml:space="preserve">
+    <value>Curtido</value>
+  </data>
+  <data name="States.Monitoring" xml:space="preserve">
+    <value>Monitoramento ativado</value>
+  </data>
+  <data name="States.Muted" xml:space="preserve">
+    <value>Silenciado</value>
+  </data>
+  <data name="States.NotInPlaylist" xml:space="preserve">
+    <value>Fora da lista de reprodução</value>
+  </data>
+  <data name="States.NotLiked" xml:space="preserve">
+    <value>Não curtido</value>
+  </data>
+  <data name="States.NotMonitoring" xml:space="preserve">
+    <value>Monitoramento desativado</value>
+  </data>
+  <data name="States.NotRecording" xml:space="preserve">
+    <value>Não está gravando</value>
+  </data>
+  <data name="States.NotStreaming" xml:space="preserve">
+    <value>Não está transmitindo</value>
+  </data>
+  <data name="States.Off" xml:space="preserve">
+    <value>Desligado</value>
+  </data>
+  <data name="States.On" xml:space="preserve">
+    <value>Ligado</value>
+  </data>
+  <data name="States.Paused" xml:space="preserve">
+    <value>Pausado</value>
+  </data>
+  <data name="States.Playing" xml:space="preserve">
+    <value>Reproduzindo</value>
+  </data>
+  <data name="States.PushToTalk" xml:space="preserve">
+    <value>Pressionar para falar</value>
+  </data>
+  <data name="States.Recording" xml:space="preserve">
+    <value>Gravando</value>
+  </data>
+  <data name="States.RecordingPaused" xml:space="preserve">
+    <value>Gravação pausada</value>
+  </data>
+  <data name="States.RepeatContext" xml:space="preserve">
+    <value>Repetir tudo</value>
+  </data>
+  <data name="States.RepeatOff" xml:space="preserve">
+    <value>Repetição desativada</value>
+  </data>
+  <data name="States.RepeatTrack" xml:space="preserve">
+    <value>Repetir faixa</value>
+  </data>
+  <data name="States.Stopped" xml:space="preserve">
+    <value>Parado</value>
+  </data>
+  <data name="States.Streaming" xml:space="preserve">
+    <value>Transmitindo</value>
+  </data>
+  <data name="States.Unavailable" xml:space="preserve">
+    <value>Indisponível</value>
+  </data>
+  <data name="States.Unmuted" xml:space="preserve">
+    <value>Com som</value>
+  </data>
+  <data name="States.Visible" xml:space="preserve">
+    <value>Visível</value>
+  </data>
+  <data name="States.VoiceActivity" xml:space="preserve">
+    <value>Atividade de voz</value>
+  </data>
+  <data name="Validation.AtLeast" xml:space="preserve">
+    <value>{field} deve ser no mínimo {minimum}</value>
+    <comment>[minimum:double]</comment>
+  </data>
+  <data name="Validation.AtMost" xml:space="preserve">
+    <value>{field} deve ser no máximo {maximum}</value>
+    <comment>[maximum:double]</comment>
+  </data>
+  <data name="Validation.InvalidIpAddress" xml:space="preserve">
+    <value>{field} não é um endereço IP válido</value>
+  </data>
+  <data name="Validation.InvalidJson" xml:space="preserve">
+    <value>{field} não é um JSON válido</value>
+  </data>
+  <data name="Validation.InvalidUrl" xml:space="preserve">
+    <value>{field} não é uma URL válida</value>
+  </data>
+  <data name="Validation.InvalidValue" xml:space="preserve">
+    <value>{field} não é um valor válido</value>
+  </data>
+  <data name="Validation.PatternMismatch" xml:space="preserve">
+    <value>{field} não corresponde ao formato esperado</value>
+  </data>
+  <data name="Validation.Required" xml:space="preserve">
+    <value>{field} é obrigatório</value>
+    <comment>Shown under an empty required field. {field} is the field's own label.</comment>
+  </data>
+  <data name="Validation.TooLong" xml:space="preserve">
+    <value>{field} excede {limit} caracteres</value>
+    <comment>[limit:int] Character limit, not byte length.</comment>
+  </data>
+  <data name="Widgets.Appearance.Heading" xml:space="preserve">
+    <value>Aparência</value>
+    <comment>Heading above a widget's standard appearance fields.</comment>
+  </data>
+  <data name="Widgets.Appearance.BackgroundColor" xml:space="preserve">
+    <value>Cor do plano de fundo</value>
+  </data>
+  <data name="Widgets.Appearance.Label" xml:space="preserve">
+    <value>Rótulo</value>
+    <comment>The text a widget shows as its caption.</comment>
+  </data>
+  <data name="Widgets.Appearance.LabelColor" xml:space="preserve">
+    <value>Cor do rótulo</value>
+  </data>
+  <data name="Widgets.Appearance.AccentColor" xml:space="preserve">
+    <value>Cor de destaque</value>
+  </data>
+  <data name="Widgets.Appearance.Font" xml:space="preserve">
+    <value>Fonte</value>
+  </data>
+  <data name="Widgets.Appearance.FontSize" xml:space="preserve">
+    <value>Tamanho (%)</value>
+    <comment>Label size as a percentage.</comment>
+  </data>
+  <data name="Widgets.Appearance.TextAlign" xml:space="preserve">
+    <value>Alinhar</value>
+    <comment>Horizontal alignment of the label.</comment>
+  </data>
+  <data name="Widgets.Appearance.TextAlignLeft" xml:space="preserve">
+    <value>Esquerda</value>
+  </data>
+  <data name="Widgets.Appearance.TextAlignCenter" xml:space="preserve">
+    <value>Centro</value>
+  </data>
+  <data name="Widgets.Appearance.TextAlignRight" xml:space="preserve">
+    <value>Direita</value>
+  </data>
+  <data name="Widgets.Appearance.LabelPosition" xml:space="preserve">
+    <value>Posição</value>
+    <comment>Vertical position of the label on the widget.</comment>
+  </data>
+  <data name="Widgets.Appearance.LabelPositionTop" xml:space="preserve">
+    <value>Topo</value>
+  </data>
+  <data name="Widgets.Appearance.LabelPositionCenter" xml:space="preserve">
+    <value>Centro</value>
+  </data>
+  <data name="Widgets.Appearance.LabelPositionBottom" xml:space="preserve">
+    <value>Base</value>
+  </data>
+  <data name="Widgets.Appearance.Border" xml:space="preserve">
+    <value>Borda</value>
+  </data>
+  <data name="Widgets.Appearance.BorderStyle" xml:space="preserve">
+    <value>Estilo</value>
+    <comment>Animation style of a widget's border.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderColor" xml:space="preserve">
+    <value>Cor</value>
+    <comment>Colour of a widget's border.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderOff" xml:space="preserve">
+    <value>Desativada</value>
+    <comment>Border style: no border.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderStatic" xml:space="preserve">
+    <value>Estática</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderHeartbeat" xml:space="preserve">
+    <value>Batimento</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderBreathing" xml:space="preserve">
+    <value>Respiração</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderBlink" xml:space="preserve">
+    <value>Piscar</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderComet" xml:space="preserve">
+    <value>Cometa</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderMarchingAnts" xml:space="preserve">
+    <value>Formigas em marcha</value>
+    <comment>Border style: a dashed line moving around the widget.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderHueShift" xml:space="preserve">
+    <value>Mudança de matiz</value>
+    <comment>Border style: the colour cycles through the hues.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderRgb" xml:space="preserve">
+    <value>RGB</value>
+    <comment>Border style: rainbow colours.</comment>
+  </data>
+</root>

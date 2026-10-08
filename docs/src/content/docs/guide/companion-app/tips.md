@@ -90,7 +90,9 @@ do: a computer that is off cannot send **Turn screen off**.
 - **Burn-in:** a deck that is always on shows the same picture for hours. With **Keep screen on**, also set up a
   **Screensaver** for the device in **Settings > Devices**, a dark theme and a lower brightness.
 - **Wake the computer:** turn on **Wake this computer when connecting** for a connection, and the app wakes the
-  computer with Wake-on-LAN when you open its deck.
+  computer with Wake-on-LAN when you open its deck. To wake it without opening the app, use the power button on the
+  host widget, a wake tile or shortcut on Android, or the **Wake Computer** action and control on iPhone and iPad;
+  see [Wake the computer](/guide/companion-app/deck/#wake-the-computer).
 - **Several computers:** open the decks of all your computers once, then switch between them with a three-finger
   swipe.
 - **iPhone and iPad:** run Macro Deck scripts from the Shortcuts app, from Siri or from a Shortcuts automation,

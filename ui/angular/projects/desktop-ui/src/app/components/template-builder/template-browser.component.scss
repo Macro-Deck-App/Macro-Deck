@@ -31,7 +31,7 @@
   min-height: 0;
   // Owns its own right border - this containment is what makes the tab bar inside "scoped to the
   // left pane" a DOM fact rather than a convention (issue #238).
-  border-right: 1px solid var(--color-border);
+  border-inline-end: 1px solid var(--color-border);
   background-color: var(--color-bg-secondary);
 }
 

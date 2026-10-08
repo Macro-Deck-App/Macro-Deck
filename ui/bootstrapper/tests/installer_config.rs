@@ -353,7 +353,10 @@ fn macos_ships_the_apple_events_prompt_in_every_declared_language() {
         "macOS only looks in an .lproj for a bundle that declares its localizations"
     );
 
-    for lproj in ["en", "de", "it", "cs", "pl", "es", "fr", "zh-Hans"] {
+    for lproj in [
+        "en", "de", "it", "cs", "pl", "es", "fr", "zh-Hans", "ru", "uk", "ja", "ko", "pt-BR", "ar",
+        "hi", "tr", "nl", "id", "zh-Hant",
+    ] {
         let source = format!("packaging/macos/{lproj}.lproj/InfoPlist.strings");
         let target = format!("{lproj}.lproj/InfoPlist.strings");
         assert_eq!(

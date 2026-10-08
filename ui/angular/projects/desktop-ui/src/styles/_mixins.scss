@@ -256,7 +256,7 @@
   scrollbar-gutter: stable;
 
   @media (pointer: coarse) {
-    padding-right: $clearance;
+    padding-inline-end: $clearance;
   }
 }
 

@@ -1,6 +1,9 @@
+const DISPLAY_TAGS: Readonly<Record<string, string>> = { zh: 'zh-Hans', 'zh-tw': 'zh-Hant-TW' };
+
 export function cultureDisplayName(culture: string): string {
   try {
-    const name = new Intl.DisplayNames([culture], { type: 'language' }).of(culture);
+    const tag = DISPLAY_TAGS[culture.toLowerCase()] ?? culture;
+    const name = new Intl.DisplayNames([tag], { type: 'language' }).of(tag);
     if (!name || name.toLowerCase() === culture.toLowerCase()) {
       return culture;
     }

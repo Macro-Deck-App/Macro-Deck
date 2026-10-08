@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Common.Add" xml:space="preserve">
+    <value>जोड़ें</value>
+  </data>
+  <data name="Common.Back" xml:space="preserve">
+    <value>वापस</value>
+  </data>
+  <data name="Common.Cancel" xml:space="preserve">
+    <value>रद्द करें</value>
+  </data>
+  <data name="Common.Close" xml:space="preserve">
+    <value>बंद करें</value>
+  </data>
+  <data name="Common.Confirm" xml:space="preserve">
+    <value>पुष्टि करें</value>
+  </data>
+  <data name="Common.Continue" xml:space="preserve">
+    <value>जारी रखें</value>
+  </data>
+  <data name="Common.Copy" xml:space="preserve">
+    <value>कॉपी करें</value>
+  </data>
+  <data name="Common.Create" xml:space="preserve">
+    <value>बनाएं</value>
+  </data>
+  <data name="Common.Delete" xml:space="preserve">
+    <value>हटाएं</value>
+  </data>
+  <data name="Common.Disabled" xml:space="preserve">
+    <value>अक्षम</value>
+  </data>
+  <data name="Common.Done" xml:space="preserve">
+    <value>हो गया</value>
+  </data>
+  <data name="Common.Edit" xml:space="preserve">
+    <value>संपादित करें</value>
+  </data>
+  <data name="Common.Enabled" xml:space="preserve">
+    <value>सक्षम</value>
+  </data>
+  <data name="Common.Export" xml:space="preserve">
+    <value>निर्यात करें</value>
+  </data>
+  <data name="Common.Import" xml:space="preserve">
+    <value>आयात करें</value>
+  </data>
+  <data name="Common.Loading" xml:space="preserve">
+    <value>लोड हो रहा है…</value>
+  </data>
+  <data name="Common.Next" xml:space="preserve">
+    <value>आगे</value>
+  </data>
+  <data name="Common.No" xml:space="preserve">
+    <value>नहीं</value>
+  </data>
+  <data name="Common.None" xml:space="preserve">
+    <value>कोई नहीं</value>
+  </data>
+  <data name="Common.Refresh" xml:space="preserve">
+    <value>ताज़ा करें</value>
+  </data>
+  <data name="Common.Remove" xml:space="preserve">
+    <value>निकालें</value>
+  </data>
+  <data name="Common.Rename" xml:space="preserve">
+    <value>नाम बदलें</value>
+  </data>
+  <data name="Common.Retry" xml:space="preserve">
+    <value>फिर से प्रयास करें</value>
+  </data>
+  <data name="Common.Save" xml:space="preserve">
+    <value>सहेजें</value>
+  </data>
+  <data name="Common.Select" xml:space="preserve">
+    <value>चुनें…</value>
+  </data>
+  <data name="Common.Yes" xml:space="preserve">
+    <value>हाँ</value>
+  </data>
+  <data name="ConfigFlow.SetUpIntegration" xml:space="preserve">
+    <value>एकीकरण सेट अप करें</value>
+  </data>
+  <data name="Connection.Connected" xml:space="preserve">
+    <value>कनेक्टेड</value>
+  </data>
+  <data name="Connection.Connecting" xml:space="preserve">
+    <value>कनेक्ट हो रहा है…</value>
+  </data>
+  <data name="Connection.Disconnected" xml:space="preserve">
+    <value>डिस्कनेक्ट किया गया</value>
+  </data>
+  <data name="Connection.Reconnecting" xml:space="preserve">
+    <value>फिर से कनेक्ट हो रहा है…</value>
+  </data>
+  <data name="Settings.About" xml:space="preserve">
+    <value>परिचय</value>
+  </data>
+  <data name="Settings.Adb" xml:space="preserve">
+    <value>ADB</value>
+  </data>
+  <data name="Settings.Advanced" xml:space="preserve">
+    <value>उन्नत</value>
+  </data>
+  <data name="Settings.Appearance" xml:space="preserve">
+    <value>दिखावट</value>
+  </data>
+  <data name="Settings.BackupAndData" xml:space="preserve">
+    <value>बैकअप और डेटा</value>
+  </data>
+  <data name="Settings.Backups" xml:space="preserve">
+    <value>बैकअप</value>
+  </data>
+  <data name="Settings.Connectivity" xml:space="preserve">
+    <value>कनेक्टिविटी</value>
+  </data>
+  <data name="Settings.DataAndPrivacy" xml:space="preserve">
+    <value>डेटा और गोपनीयता</value>
+  </data>
+  <data name="Settings.Developer" xml:space="preserve">
+    <value>डेवलपर</value>
+  </data>
+  <data name="Settings.Devices" xml:space="preserve">
+    <value>डिवाइस</value>
+  </data>
+  <data name="Settings.General" xml:space="preserve">
+    <value>सामान्य</value>
+  </data>
+  <data name="Settings.Language" xml:space="preserve">
+    <value>भाषा</value>
+  </data>
+  <data name="Settings.Logging" xml:space="preserve">
+    <value>लॉगिंग</value>
+  </data>
+  <data name="Settings.Network" xml:space="preserve">
+    <value>नेटवर्क</value>
+  </data>
+  <data name="Settings.PrivacyAndSecurity" xml:space="preserve">
+    <value>गोपनीयता और सुरक्षा</value>
+  </data>
+  <data name="Settings.Security" xml:space="preserve">
+    <value>सुरक्षा</value>
+  </data>
+  <data name="Settings.Startup" xml:space="preserve">
+    <value>स्टार्टअप</value>
+  </data>
+  <data name="Settings.Title" xml:space="preserve">
+    <value>सेटिंग्स</value>
+  </data>
+  <data name="States.Active" xml:space="preserve">
+    <value>सक्रिय</value>
+  </data>
+  <data name="States.Hidden" xml:space="preserve">
+    <value>छिपा हुआ</value>
+  </data>
+  <data name="States.Inactive" xml:space="preserve">
+    <value>निष्क्रिय</value>
+  </data>
+  <data name="States.InPlaylist" xml:space="preserve">
+    <value>प्लेलिस्ट में</value>
+  </data>
+  <data name="States.Liked" xml:space="preserve">
+    <value>पसंद किया गया</value>
+  </data>
+  <data name="States.Monitoring" xml:space="preserve">
+    <value>निगरानी चालू</value>
+  </data>
+  <data name="States.Muted" xml:space="preserve">
+    <value>म्यूट</value>
+  </data>
+  <data name="States.NotInPlaylist" xml:space="preserve">
+    <value>प्लेलिस्ट में नहीं</value>
+  </data>
+  <data name="States.NotLiked" xml:space="preserve">
+    <value>पसंद नहीं किया गया</value>
+  </data>
+  <data name="States.NotMonitoring" xml:space="preserve">
+    <value>निगरानी बंद</value>
+  </data>
+  <data name="States.NotRecording" xml:space="preserve">
+    <value>रिकॉर्ड नहीं हो रहा</value>
+  </data>
+  <data name="States.NotStreaming" xml:space="preserve">
+    <value>स्ट्रीम नहीं हो रही</value>
+  </data>
+  <data name="States.Off" xml:space="preserve">
+    <value>बंद</value>
+  </data>
+  <data name="States.On" xml:space="preserve">
+    <value>चालू</value>
+  </data>
+  <data name="States.Paused" xml:space="preserve">
+    <value>रुका हुआ</value>
+  </data>
+  <data name="States.Playing" xml:space="preserve">
+    <value>चल रहा है</value>
+  </data>
+  <data name="States.PushToTalk" xml:space="preserve">
+    <value>पुश टू टॉक</value>
+  </data>
+  <data name="States.Recording" xml:space="preserve">
+    <value>रिकॉर्डिंग हो रही है</value>
+  </data>
+  <data name="States.RecordingPaused" xml:space="preserve">
+    <value>रिकॉर्डिंग रुकी हुई</value>
+  </data>
+  <data name="States.RepeatContext" xml:space="preserve">
+    <value>सभी दोहराएं</value>
+  </data>
+  <data name="States.RepeatOff" xml:space="preserve">
+    <value>दोहराना बंद</value>
+  </data>
+  <data name="States.RepeatTrack" xml:space="preserve">
+    <value>ट्रैक दोहराएं</value>
+  </data>
+  <data name="States.Stopped" xml:space="preserve">
+    <value>रुका हुआ</value>
+  </data>
+  <data name="States.Streaming" xml:space="preserve">
+    <value>स्ट्रीमिंग हो रही है</value>
+  </data>
+  <data name="States.Unavailable" xml:space="preserve">
+    <value>उपलब्ध नहीं</value>
+  </data>
+  <data name="States.Unmuted" xml:space="preserve">
+    <value>अनम्यूट</value>
+  </data>
+  <data name="States.Visible" xml:space="preserve">
+    <value>दिखाई दे रहा</value>
+  </data>
+  <data name="States.VoiceActivity" xml:space="preserve">
+    <value>वॉयस गतिविधि</value>
+  </data>
+  <data name="Validation.AtLeast" xml:space="preserve">
+    <value>{field} कम से कम {minimum} होना चाहिए</value>
+    <comment>[minimum:double]</comment>
+  </data>
+  <data name="Validation.AtMost" xml:space="preserve">
+    <value>{field} अधिकतम {maximum} होना चाहिए</value>
+    <comment>[maximum:double]</comment>
+  </data>
+  <data name="Validation.InvalidIpAddress" xml:space="preserve">
+    <value>{field} एक मान्य IP पता नहीं है</value>
+  </data>
+  <data name="Validation.InvalidJson" xml:space="preserve">
+    <value>{field} मान्य JSON नहीं है</value>
+  </data>
+  <data name="Validation.InvalidUrl" xml:space="preserve">
+    <value>{field} एक मान्य URL नहीं है</value>
+  </data>
+  <data name="Validation.InvalidValue" xml:space="preserve">
+    <value>{field} एक मान्य मान नहीं है</value>
+  </data>
+  <data name="Validation.PatternMismatch" xml:space="preserve">
+    <value>{field} अपेक्षित प्रारूप से मेल नहीं खाता</value>
+  </data>
+  <data name="Validation.Required" xml:space="preserve">
+    <value>{field} आवश्यक है</value>
+    <comment>Shown under an empty required field. {field} is the field's own label.</comment>
+  </data>
+  <data name="Validation.TooLong" xml:space="preserve">
+    <value>{field} {limit} अक्षरों से अधिक है</value>
+    <comment>[limit:int] Character limit, not byte length.</comment>
+  </data>
+  <data name="Widgets.Appearance.Heading" xml:space="preserve">
+    <value>दिखावट</value>
+    <comment>Heading above a widget's standard appearance fields.</comment>
+  </data>
+  <data name="Widgets.Appearance.BackgroundColor" xml:space="preserve">
+    <value>पृष्ठभूमि का रंग</value>
+  </data>
+  <data name="Widgets.Appearance.Label" xml:space="preserve">
+    <value>लेबल</value>
+    <comment>The text a widget shows as its caption.</comment>
+  </data>
+  <data name="Widgets.Appearance.LabelColor" xml:space="preserve">
+    <value>लेबल का रंग</value>
+  </data>
+  <data name="Widgets.Appearance.AccentColor" xml:space="preserve">
+    <value>एक्सेंट रंग</value>
+  </data>
+  <data name="Widgets.Appearance.Font" xml:space="preserve">
+    <value>फ़ॉन्ट</value>
+  </data>
+  <data name="Widgets.Appearance.FontSize" xml:space="preserve">
+    <value>आकार (%)</value>
+    <comment>Label size as a percentage.</comment>
+  </data>
+  <data name="Widgets.Appearance.TextAlign" xml:space="preserve">
+    <value>संरेखण</value>
+    <comment>Horizontal alignment of the label.</comment>
+  </data>
+  <data name="Widgets.Appearance.TextAlignLeft" xml:space="preserve">
+    <value>बाएँ</value>
+  </data>
+  <data name="Widgets.Appearance.TextAlignCenter" xml:space="preserve">
+    <value>केंद्र</value>
+  </data>
+  <data name="Widgets.Appearance.TextAlignRight" xml:space="preserve">
+    <value>दाएँ</value>
+  </data>
+  <data name="Widgets.Appearance.LabelPosition" xml:space="preserve">
+    <value>स्थिति</value>
+    <comment>Vertical position of the label on the widget.</comment>
+  </data>
+  <data name="Widgets.Appearance.LabelPositionTop" xml:space="preserve">
+    <value>ऊपर</value>
+  </data>
+  <data name="Widgets.Appearance.LabelPositionCenter" xml:space="preserve">
+    <value>केंद्र</value>
+  </data>
+  <data name="Widgets.Appearance.LabelPositionBottom" xml:space="preserve">
+    <value>नीचे</value>
+  </data>
+  <data name="Widgets.Appearance.Border" xml:space="preserve">
+    <value>बॉर्डर</value>
+  </data>
+  <data name="Widgets.Appearance.BorderStyle" xml:space="preserve">
+    <value>शैली</value>
+    <comment>Animation style of a widget's border.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderColor" xml:space="preserve">
+    <value>रंग</value>
+    <comment>Colour of a widget's border.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderOff" xml:space="preserve">
+    <value>बंद</value>
+    <comment>Border style: no border.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderStatic" xml:space="preserve">
+    <value>स्थिर</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderHeartbeat" xml:space="preserve">
+    <value>हार्टबीट</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderBreathing" xml:space="preserve">
+    <value>ब्रीदिंग</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderBlink" xml:space="preserve">
+    <value>ब्लिंक</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderComet" xml:space="preserve">
+    <value>धूमकेतु</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderMarchingAnts" xml:space="preserve">
+    <value>मार्चिंग एंट्स</value>
+    <comment>Border style: a dashed line moving around the widget.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderHueShift" xml:space="preserve">
+    <value>ह्यू शिफ़्ट</value>
+    <comment>Border style: the colour cycles through the hues.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderRgb" xml:space="preserve">
+    <value>RGB</value>
+    <comment>Border style: rainbow colours.</comment>
+  </data>
+</root>

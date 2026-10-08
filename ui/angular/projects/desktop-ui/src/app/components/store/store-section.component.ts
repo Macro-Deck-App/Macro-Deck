@@ -53,6 +53,7 @@ export class StoreSectionComponent {
     if (!track) {
       return;
     }
-    track.scrollBy({ left: direction * track.clientWidth * 0.9, behavior: 'smooth' });
+    const forward = getComputedStyle(track).direction === 'rtl' ? -direction : direction;
+    track.scrollBy({ left: forward * track.clientWidth * 0.9, behavior: 'smooth' });
   }
 }

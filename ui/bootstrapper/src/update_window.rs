@@ -74,6 +74,7 @@ pub(crate) struct WindowStatus {
 #[serde(rename_all = "camelCase")]
 pub(crate) struct WindowView {
     pub lang: String,
+    pub dir: &'static str,
     pub theme: Option<&'static str>,
     pub accent: String,
     pub title: String,
@@ -220,7 +221,8 @@ pub(crate) fn view(snapshot: &UpdateSnapshot, action_error: Option<&str>) -> Win
     };
 
     WindowView {
-        lang: localization::culture(),
+        lang: localization::served_culture(),
+        dir: localization::direction(),
         theme: None,
         accent: Appearance::default().accent_color,
         title: localization::t(keys::UPDATE_AVAILABLE_TITLE),

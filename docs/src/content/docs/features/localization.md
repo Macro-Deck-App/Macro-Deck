@@ -132,11 +132,12 @@ Strings.Status.Scenes(3);  // one member at the base key, count first
 ### Only `One` and `Other`
 
 The rule is `count == 1` for every culture. It is not CLDR: the host, the Angular clients and the
-bootstrapper must all pick the same form. The rule is exact for English, German, Italian, Spanish and
-French. Chinese has no plural forms, so `One` and `Other` carry the same wording. Czech and Polish need
-`few`/`many` forms that this model does not have. For those, phrase `Other` so that it avoids noun-count
-agreement: use a count-agnostic label rather than a declined noun. A language that cannot be phrased that
-way needs the closed set of forms extended first.
+bootstrapper must all pick the same form. The rule is exact for English, German, Italian, Spanish, French,
+Dutch and Turkish. Chinese, Japanese, Korean and Indonesian have no plural forms, so `One` and `Other` carry
+the same wording. Czech, Polish, Russian, Ukrainian and Arabic need `few`/`many` (and for Arabic `zero`/`two`)
+forms that this model does not have, and Brazilian Portuguese and Hindi treat `0` like `1`. For those,
+phrase `Other` so that it avoids noun-count agreement: use a count-agnostic label rather than a declined
+noun. A language that cannot be phrased that way needs the closed set of forms extended first.
 
 ## Adding a language
 
@@ -201,6 +202,11 @@ never asks for it. The host resolves each reference by trying the cultures in th
 | 2. its neutral culture | `de` |
 | 3. the catalog's default language | `en` |
 | 4. Macro Deck's default | `en` (duplicate, collapsed) |
+
+A Traditional Chinese request - script `Hant`, or region `TW`, `HK` or `MO` without a script - tries
+`zh-Hant` and then `zh-TW` right after the requested culture, before the neutral `zh`. So a `zh-HK` reader
+gets your `zh-Hant` or `zh-TW` catalog when you ship one, and your `zh` catalog otherwise. No other regional
+culture falls back sideways: a `pt-PT` reader does not reach a `pt-BR` catalog.
 
 A key that no culture carries renders as `[[scope:Key]]`, never blank - for example
 `[[plugin:com.example.demo:Status.Scenes]]`. You see this when a key was removed by an update, or when the
