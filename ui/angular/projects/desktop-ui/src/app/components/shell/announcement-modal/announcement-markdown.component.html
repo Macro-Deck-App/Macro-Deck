@@ -24,7 +24,7 @@
         @if (failedMedia().has(run.src)) {
           <span>{{ run.alt }}</span>
         } @else {
-          <img class="md-media" [src]="run.src" [alt]="run.alt" (error)="mediaFailed(run.src)">
+          <img class="md-media" [src]="run.src" [alt]="run.alt" [attr.width]="run.width ?? null" [attr.height]="run.height ?? null" (error)="mediaFailed(run.src)">
         }
       }
       @case ('video') {

@@ -76,7 +76,7 @@ describe('parseMarkdown', () => {
   });
 
   it('renders raw HTML in the source as literal text, never as its own block or element', () => {
-    const blocks = parseMarkdown('<script>alert(1)</script>\n\n<img src=x onerror="alert(1)">');
+    const blocks = parseMarkdown('<script>alert(1)</script>\n\n<div onclick="alert(1)">hi</div>');
 
     for (const block of blocks) {
       expect(block.kind === 'code' || block.kind === 'rule').toBeFalse();
@@ -85,7 +85,7 @@ describe('parseMarkdown', () => {
     const text = blockText(blocks);
 
     expect(text).toContain('<script>alert(1)</script>');
-    expect(text).toContain('onerror="alert(1)"');
+    expect(text).toContain('onclick="alert(1)"');
   });
 
   it('parses ATX headings, a bulleted list, a fenced code block and bold text into the expected kinds', () => {
@@ -275,5 +275,57 @@ describe('parseMarkdown', () => {
       }],
     });
     expect(links([empty])).toEqual([{ text: 'https://example.com/empty', href: 'https://example.com/empty' }]);
+  });
+
+  describe('img tags', () => {
+    const images = (source: string) => parseMarkdown(source).flatMap(block => (block.kind === 'paragraph' ? block.inlines : []));
+
+    it('shows a GitHub upload tag as an image with numeric size, in a block and inline', () => {
+      const tag = '<img width="1457" height="886" alt="image" src="https://github.com/user-attachments/assets/abc?x=1&amp;y=2" />';
+
+      const expected: MarkdownInline = { kind: 'image', src: 'https://github.com/user-attachments/assets/abc?x=1&y=2', alt: 'image', width: 1457, height: 886 };
+      expect(images(tag)).toEqual([expected]);
+      expect(images(`Before ${tag} after`)).toEqual([
+        { kind: 'text', text: 'Before ' },
+        expected,
+        { kind: 'text', text: ' after' },
+      ]);
+    });
+
+    it('falls back to the description for an http, relative or missing source', () => {
+      expect(images('<img alt="Plain" src="http://example.com/a.png">')).toEqual([{ kind: 'text', text: 'Plain' }]);
+      expect(images('<img alt="Rel" src="/a.png">')).toEqual([{ kind: 'text', text: 'Rel' }]);
+      expect(images('<img alt="None">')).toEqual([{ kind: 'text', text: 'None' }]);
+    });
+
+    it('drops every attribute but src, alt, width and height, and non-numeric sizes', () => {
+      const [image] = images('<img src="https://example.com/a.png" alt="A" onerror="alert(1)" style="x" width="50%" height="12px">');
+
+      expect(image).toEqual({ kind: 'image', src: 'https://example.com/a.png', alt: 'A' });
+      expect(JSON.stringify(image)).not.toContain('alert');
+    });
+
+    it('leaves other raw HTML as text around the image', () => {
+      expect(images('<p align="center">\n<img src="https://example.com/a.png" alt="A">\n</p>')).toEqual([
+        { kind: 'text', text: '<p align="center">\n' },
+        { kind: 'image', src: 'https://example.com/a.png', alt: 'A' },
+        { kind: 'text', text: '\n</p>' },
+      ]);
+      expect(images('<div>hi</div>')).toEqual([{ kind: 'text', text: '<div>hi</div>' }]);
+      expect(images('<imgx src="https://example.com/a.png">')).toEqual([{ kind: 'text', text: '<imgx src="https://example.com/a.png">' }]);
+    });
+
+    it('drops a block whose only content is an unusable image without a description', () => {
+      expect(parseMarkdown('<img src="http://example.com/a.png">')).toEqual([]);
+      expect(images('<img src="https://example.com/a.png" width="0" height="99999" ALT=\'Up\'>')).toEqual([
+        { kind: 'image', src: 'https://example.com/a.png', alt: 'Up' },
+      ]);
+    });
+
+    it('never shows a hidden comment around an image', () => {
+      expect(images('<!-- note --><img src="https://example.com/a.png" alt="A">')).toEqual([
+        { kind: 'image', src: 'https://example.com/a.png', alt: 'A' },
+      ]);
+    });
   });
 });

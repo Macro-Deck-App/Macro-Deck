@@ -66,6 +66,31 @@ describe('StoreMarkdownComponent', () => {
     expect(element.querySelector('a')?.textContent?.trim()).toBe('ko-fi');
   });
 
+  it('renders an img tag like a Markdown image and never lets other attributes reach the DOM', () => {
+    const fixture = TestBed.createComponent(StoreMarkdownComponent);
+    fixture.componentRef.setInput('text', '<img width="320" height="200" alt="Shot" src="https://example.com/a.png" onerror="alert(1)" style="x:y">');
+    fixture.detectChanges();
+    const image = (fixture.nativeElement as HTMLElement).querySelector('img')!;
+
+    expect(image.getAttribute('src')).toBe('https://example.com/a.png');
+    expect(image.alt).toBe('Shot');
+    expect(image.getAttribute('width')).toBe('320');
+    expect(image.getAttribute('height')).toBe('200');
+    expect(image.referrerPolicy).toBe('no-referrer');
+    expect(image.hasAttribute('onerror')).toBeFalse();
+    expect(image.hasAttribute('style')).toBeFalse();
+  });
+
+  it('shows the description of an img tag with an insecure source', () => {
+    const fixture = TestBed.createComponent(StoreMarkdownComponent);
+    fixture.componentRef.setInput('text', '<img alt="Fallback" src="http://example.com/a.png">');
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+
+    expect(element.querySelector('img')).toBeNull();
+    expect(element.textContent?.trim()).toBe('Fallback');
+  });
+
   it('keeps the start number of an ordered list', () => {
     expect(render('3. third\n4. fourth').querySelector('ol')?.getAttribute('start')).toBe('3');
   });
