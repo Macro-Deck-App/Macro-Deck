@@ -34,7 +34,7 @@
 .profile-trigger-name {
   flex: 1;
   min-width: 0;
-  text-align: left;
+  text-align: start;
   font-weight: var(--font-medium);
   font-size: var(--text-base);
   color: var(--color-text-primary);
@@ -127,7 +127,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  padding-right: var(--space-1);
+  padding-inline-end: var(--space-1);
   border: 1px solid transparent;
   border-radius: var(--radius-md);
   color: var(--color-text-secondary);
@@ -150,7 +150,7 @@
 .profile-drag-handle {
   display: flex;
   flex-shrink: 0;
-  margin-left: var(--space-1);
+  margin-inline-start: var(--space-1);
   color: var(--color-text-muted);
   cursor: grab;
   touch-action: none;
@@ -182,7 +182,7 @@
   border: none;
   border-radius: inherit;
   color: inherit;
-  text-align: left;
+  text-align: start;
   cursor: pointer;
 }
 

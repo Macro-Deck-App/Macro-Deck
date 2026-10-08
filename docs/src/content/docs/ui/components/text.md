@@ -91,10 +91,10 @@ new UiTextRun
 ```
 
 `Spans` draws styled text and inline images as one paragraph, in place of `Text`. A text span may set its
-own `#rrggbb` colour and weight; anything it leaves out comes from the run. An image span is a square one
-line high, so the line height stays exactly one and the run is as tall as it is without images. While an
-image cannot be shown, its `alt` text is drawn in its place; an image without `alt` is decorative and
-draws nothing.
+own `#rrggbb` or `#rrggbbaa` colour and weight; anything it leaves out comes from the run. An image span is
+a square one line high, so the line height stays exactly one and the run is as tall as it is without
+images. While an image cannot be shown, its `alt` text is drawn in its place; an image without `alt` is
+decorative and draws nothing.
 
 Keep `Text` the plain equivalent of the spans - the same words, with each image as the text it stands for.
 A reader that does not know `spans` draws `Text` instead. A span's text is drawn exactly as given: it is
@@ -109,6 +109,16 @@ Color = "#ff8800",                        // a colour the user chose; wins over 
 
 Use `Role` for theme colours and `Color` only for a colour that is data. See
 [Colours and text](/ui/concepts/theming/).
+
+To show the user's colour at a lower emphasis, add alpha as a last pair of hex digits instead of mixing the
+colour with a background you cannot see:
+
+```csharp
+Color = "#ffffffcc",                      // the user's white at 80 % opacity, over any backdrop
+```
+
+A reader from before eight-digit colours draws the `Role` colour instead. See
+[Compatibility](/ui/reference/compatibility/).
 
 ## Localized text
 
@@ -128,7 +138,7 @@ A localization reference resolves in each reader's own active language.
 | `MinSize` (`minSize`) | `UiSize` length | Never shrinks; ellipsizes | The floor `Size` may shrink to so the run fits. |
 | `Weight` (`weight`) | `UiComponentTextWeights`: `regular`, `medium`, `semibold`, `bold` | `regular` | The font weight. |
 | `Role` (`role`) | `UiComponentTextRoles`: `primary`, `secondary`, `muted` | `primary` | The semantic colour, ignored when `Color` is set. |
-| `Color` (`color`) | `#rrggbb` | `Role` decides | A literal colour that overrides `Role`. |
+| `Color` (`color`) | `#rrggbb` or `#rrggbbaa` | `Role` decides | A literal colour that overrides `Role`. The alpha pair makes it translucent over whatever is behind the run. |
 | `Align` (`align`) | `UiComponentAlignments`: `start`, `center`, `end`, `stretch`, `baseline` | `start` | Alignment within the run's own box. |
 | `MaxLines` (`maxLines`) | `int` | One; no limit when `Wrap` is true | How many lines the run may occupy before it ellipsizes. |
 | `Wrap` (`wrap`) | `bool` | One line, ellipsized | Whether the run may break across lines at all. |
@@ -179,8 +189,8 @@ takes their width too and pushes them out of the box. See [Sizing](/ui/concepts/
 - Lay the run out with a line height of one; stack gaps are the only vertical spacing.
 - Absent `wrap` means one line, ellipsized. A reader that does not know the key does the same, so the run
   stays inside its box.
-- Reject any `color` that is not `#rrggbb`, and any `role` outside the listed values, rather than passing
-  it through to the styling layer.
+- Reject any `color` that is not `#rrggbb` or `#rrggbbaa`, and any `role` outside the listed values, rather
+  than passing it through to the styling layer.
 - `fontFace`: hold the run back until the face is usable, then reveal it - never draw a fallback face and
   swap. If the face never arrives, or the identifier cannot be resolved, reveal the run in the default face.
 - `digits`: draw every digit on the same advance width, and centre the content in the reservation when it
@@ -188,8 +198,8 @@ takes their width too and pushes them out of the box. See [Sizing](/ui/concepts/
 - `spans`: draw the spans in one inline flow instead of `text`, bounded by `wrap` and `maxLines` like
   `text`. Draw each image square and one line high, aligned to the top of its line, so the line height
   stays one; draw its `alt` text while the image is unavailable, or nothing when `alt` is absent. Ignore a
-  span `color` that is not `#rrggbb` and a span that carries neither `text` nor `image`. A reader that does
-  not implement `spans` draws `text`.
+  span `color` that is not `#rrggbb` or `#rrggbbaa` and a span that carries neither `text` nor `image`. A
+  reader that does not implement `spans` draws `text`.
 - `shadow`: when `false`, draw no legibility shadow behind the run. Absent or `true` keeps the reader's
   default. A reader that does not know the key keeps its default.
 - `strokeColor` and `strokeWidth`: draw an outline of that colour around every glyph, reaching `strokeWidth`

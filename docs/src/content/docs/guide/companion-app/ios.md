@@ -1,22 +1,24 @@
 ---
 title: iPhone and iPad
-description: What the Companion app does differently on iPhone and iPad, including Shortcuts, Siri, the Home Screen and Lock Screen widgets and the Control Center control.
+description: What the Companion app does differently on iPhone and iPad, including Shortcuts, Siri, the Home Screen and Lock Screen widgets and the Control Center controls.
 ---
 
 The app runs on iPhone and iPad with iOS or iPadOS 15 or later, in portrait and landscape. Shortcuts and Siri
-need iOS 16, the script widget needs iOS 17, and the Control Center control needs iOS 18.
+need iOS 16, the script widget and the host widget's wake button need iOS 17, and the Control Center controls need
+iOS 18.
 
 ![The Connections screen on iPhone with the Streaming Computer connected](../../../../assets/guide/companion/ios-connections.png)
 
 ## Shortcuts and Siri
 
-The app adds three actions to the Shortcuts app. You can use them in your own shortcuts and automations, or ask
+The app adds four actions to the Shortcuts app. You can use them in your own shortcuts and automations, or ask
 Siri:
 
 | Action | Does | Ask Siri |
 | --- | --- | --- |
 | **Open Macro Deck** | Opens the app on the Connections screen or in the settings (**Area**). | "Open Macro Deck" |
 | **Connect to Host** | Opens the deck of one of your saved computers (**Host**). | "Connect to *Streaming Computer* in Macro Deck" |
+| **Wake Computer** | Wakes one of your saved computers with Wake-on-LAN (**Computer**), without opening the app. See [Wake the computer](/guide/companion-app/deck/#wake-the-computer). | "Wake *Streaming Computer* with Macro Deck" |
 | **Run Script** | Runs a Macro Deck script on its computer, without opening the app. **Input Values** takes the script's inputs as a dictionary, or one `name=value` per line. | "Run a script in Macro Deck" |
 
 **Run Script** lists every script of your saved computers that does not run on a widget. It needs a license or a
@@ -34,11 +36,15 @@ Other apps can run a script with a `macrodeck-companion://run-script` link once 
 
 - **Quick actions:** touch and hold the app icon to open one of up to four saved computers directly.
 - **Macro Deck host widget:** in small and medium size, it opens the deck of the computer you choose for it. Touch
-  and hold the widget and choose **Edit Widget** to pick the computer.
+  and hold the widget and choose **Edit Widget** to pick the computer. On iOS 17 and later, a computer that can be
+  woken gets a power button on the widget, which wakes it without opening the app; see
+  [Wake the computer](/guide/companion-app/deck/#wake-the-computer).
 - **Macro Deck scripts widget:** runs scripts of one saved computer with a tap, without opening the app. It needs
   iOS 17.
 - **Macro Deck script control:** runs one script from Control Center. It needs iOS 18; see
   [Macro Deck script control](#macro-deck-script-control).
+- **Wake computer control:** wakes one computer from Control Center. It needs iOS 18; see
+  [Wake computer control](#wake-computer-control).
 
 ### Macro Deck scripts widget
 
@@ -103,6 +109,19 @@ Some limits:
 - **The control offers the scripts the app last listed.** The app refreshes them when you open it, at most once an
   hour for each computer, so open Macro Deck once after you add a script on the computer.
 - Input values are saved in the control's settings on your phone and are not a place for secrets.
+
+### Wake computer control
+
+On iOS 18 and later, the **Wake computer** control wakes one of your saved computers with Wake-on-LAN, without
+opening the app. Add it the same way as the script control, choose **Wake computer** under Macro Deck and choose the
+**Computer**. Only computers that can be woken are offered.
+
+![The Wake computer control in Control Center, set to Studio PC](../../../../assets/guide/companion/ios-wake-control.png)
+
+Tapping the control sends the wake signal through the Macro Deck app in the background, and the app does not come
+to the front. A host widget set to the same computer shows how it went. A control whose computer you removed, or
+that cannot be woken, cannot be tapped and shows a gear symbol. See
+[Wake the computer](/guide/companion-app/deck/#wake-the-computer).
 
 ## Differences from Android
 

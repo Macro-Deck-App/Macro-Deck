@@ -16,7 +16,7 @@
   // Reserved unconditionally, whether or not a clear button is currently rendered, so the box
   // never changes width the moment one appears - that width jump is what makes the caret
   // beside it look like it moved.
-  padding-right: var(--trailing-gutter);
+  padding-inline-end: var(--trailing-gutter);
 }
 
 // A sibling of the input, not a child - the input cannot contain children - positioned at the
@@ -65,7 +65,7 @@
 }
 
 .cb-option {
-  text-align: left;
+  text-align: start;
   padding: 0.3125rem 0.5rem;
   background: none;
   border: none;
@@ -78,4 +78,16 @@
 .cb-option:hover,
 .cb-option-active {
   background-color: var(--color-bg-hover);
+}
+
+:host-context([dir='rtl']) {
+  .cb-caret {
+    right: auto;
+    left: var(--space-3);
+  }
+
+  .cb-clear {
+    right: auto;
+    left: var(--clear-inset);
+  }
 }

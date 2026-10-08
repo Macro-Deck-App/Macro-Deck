@@ -6,6 +6,12 @@ describe('cultureDisplayName', () => {
     expect(cultureDisplayName('ja')).toBe('日本語');
   });
 
+  it('tells Simplified and Traditional Chinese apart', () => {
+    expect(cultureDisplayName('zh')).not.toBe(cultureDisplayName('zh-TW'));
+    expect(cultureDisplayName('zh')).toContain('简体');
+    expect(cultureDisplayName('zh-TW')).toContain('繁體');
+  });
+
   it('falls back to the tag when the platform has no name for it', () => {
     expect(cultureDisplayName('qya')).toBe('qya');
   });

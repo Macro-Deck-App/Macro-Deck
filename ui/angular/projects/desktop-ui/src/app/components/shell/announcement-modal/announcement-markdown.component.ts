@@ -1,7 +1,20 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { ExternalLinkService } from '../../../services/external-link.service';
-import { parseAnnouncement } from './announcement-markdown';
+import { MarkdownOptions, parseMarkdown } from '../../../util/markdown';
+
+const IMAGE_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp']);
+const VIDEO_EXTENSIONS = new Set(['mp4', 'webm']);
+
+// Same options as the Creator Portal preview, which is the reference for how an announcement looks.
+const ANNOUNCEMENT: MarkdownOptions = {
+  media: url => {
+    const extension = url.pathname.split('.').pop()?.toLowerCase() ?? '';
+    return IMAGE_EXTENSIONS.has(extension) ? 'image' : VIDEO_EXTENSIONS.has(extension) ? 'video' : null;
+  },
+  href: href => (/^(https?:|mailto:)/i.test(href.trim()) ? href.trim() : null),
+  hideComments: false,
+};
 
 @Component({
   selector: 'app-announcement-markdown',
@@ -16,7 +29,7 @@ export class AnnouncementMarkdownComponent {
 
   readonly text = input('');
 
-  protected readonly blocks = computed(() => parseAnnouncement(this.text()));
+  protected readonly blocks = computed(() => parseMarkdown(this.text(), ANNOUNCEMENT));
   protected readonly failedMedia = signal<ReadonlySet<string>>(new Set());
 
   protected openLink(event: MouseEvent, href: string): void {

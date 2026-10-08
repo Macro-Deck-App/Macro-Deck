@@ -14,7 +14,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  text-align: left;
+  text-align: start;
   cursor: pointer;
   @include ds.control-base;
   @include ds.control-interactive;
@@ -28,7 +28,7 @@
   // beside it look like it moved. Only the clear button's own width and gap: the label is a flex
   // sibling of the caret, so it already ends at --clear-inset from the trigger's right edge and
   // reserving the full --trailing-gutter here would count the caret and the padding twice.
-  padding-right: var(--clear-gutter);
+  padding-inline-end: var(--clear-gutter);
 }
 
 .sel-placeholder {
@@ -78,7 +78,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  text-align: left;
+  text-align: start;
   padding: 0.3125rem var(--space-2);
   background: none;
   border: none;
@@ -164,7 +164,7 @@
 .sel-search-input {
   width: 100%;
   cursor: text;
-  padding-left: calc(var(--space-2) * 2 + 14px);
+  padding-inline-start: calc(var(--space-2) * 2 + 14px);
 }
 
 .sel-listbox-fit {
@@ -173,4 +173,16 @@
 
 .sel-listbox-fit .sel-option {
   white-space: nowrap;
+}
+
+:host-context([dir='rtl']) {
+  .sel-clear {
+    right: auto;
+    left: var(--clear-inset);
+  }
+
+  .sel-search-icon {
+    left: auto;
+    right: var(--space-2);
+  }
 }

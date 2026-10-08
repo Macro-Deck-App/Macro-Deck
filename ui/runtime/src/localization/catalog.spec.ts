@@ -70,6 +70,16 @@ describe('LocalizationCatalog', () => {
     expect(catalog.culture()).toBe(DEFAULT_CULTURE);
   });
 
+  it('reports the culture its text is actually served in', () => {
+    const catalog = new LocalizationCatalog();
+
+    catalog.apply({ culture: 'zh-HK', availableCultures: ['en', 'zh', 'zh-TW'], translations: {} });
+    expect(catalog.servedCulture()).toBe('zh-TW');
+
+    catalog.apply({ culture: 'he-IL', availableCultures: ['en', 'ar'], translations: {} });
+    expect(catalog.servedCulture()).toBe('en');
+  });
+
   it('renders an unresolved key conspicuously rather than blank', () => {
     const catalog = new LocalizationCatalog();
 

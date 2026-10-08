@@ -162,7 +162,7 @@
 
 .migration-preview-warning-detail {
   /* Indented under the subject, clearing the icon beside it - 14px is what .icon-xs is fixed at. */
-  padding-left: calc(14px + var(--spacing-xs, 0.3125rem));
+  padding-inline-start: calc(14px + var(--spacing-xs, 0.3125rem));
   color: var(--text-secondary);
   font-size: var(--text-base);
 }

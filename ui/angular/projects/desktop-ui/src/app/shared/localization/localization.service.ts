@@ -3,6 +3,7 @@ import { ApiService } from '../transport';
 import {
   AppStringsDefaults,
   asLocalizedRef,
+  effectiveCulture,
   formatTemplate,
   GetLocalizationResponse,
   LocalizationCatalogChangedEvent,
@@ -11,6 +12,7 @@ import {
   LocalizationTimeFormat,
   pluralForm,
   StringsDefaults,
+  textDirection,
   UpdateLocalizationSettingsRequest,
 } from '@macro-deck/runtime';
 
@@ -146,7 +148,15 @@ export class LocalizationService {
     this.timeFormat.set(isTimeFormat(response.timeFormat) ? response.timeFormat : 'system');
     this.hourCycle.set(isHourCycle(response.hourCycle) ? response.hourCycle : undefined);
     this.catalogVersion.update(v => v + 1);
+    this.syncDocument();
     this.persist();
+  }
+
+  private syncDocument(): void {
+    const served = effectiveCulture(this.culture(), this.availableCultures());
+    const root = document.documentElement;
+    root.lang = served;
+    root.dir = textDirection(served);
   }
 
   private merge(translations: Record<string, string>): void {
@@ -192,6 +202,7 @@ export class LocalizationService {
       }
     } catch {
     }
+    this.syncDocument();
   }
 }
 

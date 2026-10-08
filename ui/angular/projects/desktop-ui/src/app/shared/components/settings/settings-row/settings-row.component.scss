@@ -67,7 +67,7 @@
 // it shrinks the label instead. Worth it to keep a toggle where it belongs.
 :host-context(.no-flex-gap) {
   .settings-row > * + * {
-    margin-left: var(--space-4);
+    margin-inline-start: var(--space-4);
   }
 
   .settings-row__info {

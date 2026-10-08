@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Lifecycle;
 using MacroDeckHost.Application.Logging;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Infrastructure.Adb;
@@ -116,6 +117,8 @@ internal sealed class AdbManagerHarness : IDisposable
 
 	public ManualTimeProvider TimeProvider { get; } = new();
 
+	public bool SessionShuttingDown { get; set; }
+
 	public AdbManager Manager { get; }
 
 	public AdbManagerHarness(int publicPort = 8193, TestPaths? paths = null)
@@ -132,7 +135,8 @@ internal sealed class AdbManagerHarness : IDisposable
 			Paths,
 			ListenerState,
 			TimeProvider,
-			new LoggerConfiguration().CreateLogger());
+			new LoggerConfiguration().CreateLogger(),
+			new UserSessionEnd(() => SessionShuttingDown));
 	}
 
 	public void Dispose()

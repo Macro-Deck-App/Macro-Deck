@@ -232,7 +232,7 @@ public sealed class ImageSharpIconProcessor : IIconProcessor
 	{
 		try
 		{
-			return Image.Load(bytes);
+			return Image.Load(ImageSharpDecoding.Options, bytes);
 		}
 		catch (Exception) when (LooksLikeGif(bytes))
 		{

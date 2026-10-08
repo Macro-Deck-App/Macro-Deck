@@ -49,7 +49,7 @@
 }
 
 .bpc-percent {
-  margin-left: auto;
+  margin-inline-start: auto;
   font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
@@ -84,6 +84,6 @@
 }
 
 @keyframes bpc-indeterminate {
-  0% { margin-left: -40%; }
-  100% { margin-left: 100%; }
+  0% { margin-inline-start: -40%; }
+  100% { margin-inline-start: 100%; }
 }

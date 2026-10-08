@@ -101,7 +101,7 @@ a lone `One` into a build error. And **`One` and `Other` only, selected by `coun
 culture** — not CLDR. The same choice has to be made identically by the C# resolver, the browser clients
 and the Rust bootstrapper, and .NET ships no plural-rule data, so CLDR here would mean three
 hand-maintained copies of a large rule set kept in step by hope. One rule that is visibly the same in all
-three fails less quietly. It is exact for English, German, Italian, Spanish and French; a language needing
+three fails less quietly. It is exact for English, German, Italian, Spanish, French, Dutch and Turkish; a language needing
 `few` or `many` requires extending the closed set first, which is why the form names are checked at build
 time rather than being free text.
 
