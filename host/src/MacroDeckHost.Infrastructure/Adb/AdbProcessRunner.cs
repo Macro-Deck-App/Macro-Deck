@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
+using MacroDeckHost.Application.Lifecycle;
 using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Infrastructure.Adb;
@@ -65,10 +66,13 @@ internal sealed class AdbProcessRunner : IAdbProcessRunner, IDisposable
 {
 	private readonly ConcurrentDictionary<int, Process> _liveProcesses = new();
 	private readonly ILogger _logger;
+	private readonly UserSessionEnd _sessionEnd;
+	private int _refusalLogged;
 
-	public AdbProcessRunner(ILogger logger)
+	public AdbProcessRunner(ILogger logger, UserSessionEnd sessionEnd)
 	{
 		_logger = logger.ForContext<AdbProcessRunner>();
+		_sessionEnd = sessionEnd;
 	}
 
 	public async Task<AdbProcessResult> RunAsync(
@@ -252,10 +256,22 @@ internal sealed class AdbProcessRunner : IAdbProcessRunner, IDisposable
 		_liveProcesses.Clear();
 	}
 
-	private static Process StartProcess(string executablePath,
+	private Process StartProcess(string executablePath,
 		IReadOnlyList<string> arguments,
 		bool closeStandardInput = false)
 	{
+		// Windows fails DLL init (0xc0000142) for a process started while the session ends and shows
+		// an error dialog for it, so nothing new is spawned once the session is ending.
+		if (_sessionEnd.IsEnding)
+		{
+			if (Interlocked.Exchange(ref _refusalLogged, 1) == 0)
+			{
+				_logger.Information("Refusing to start adb while the user session is ending");
+			}
+
+			throw new InvalidOperationException("The user session is ending.");
+		}
+
 		var startInfo = new ProcessStartInfo(executablePath)
 		{
 			UseShellExecute = false,

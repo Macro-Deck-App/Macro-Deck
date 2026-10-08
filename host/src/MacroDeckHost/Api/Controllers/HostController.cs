@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Lifecycle;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Host;
 using MacroDeckHost.Application.Ui.Transport.Messages.Notifications;
@@ -23,6 +24,7 @@ public class HostController : ControllerBase
 	private readonly ILogger _logger;
 	private readonly IHostApplicationLifetime _lifetime;
 	private readonly IShellNotificationBridge _shellNotifications;
+	private readonly UserSessionEnd _sessionEnd;
 
 	private readonly IUiTransportMessageHandler<ReportUpdateStateRequest, ReportUpdateStateResponse>
 		_reportUpdateState;
@@ -52,7 +54,8 @@ public class HostController : ControllerBase
 		IUiTransportMessageHandler<GetDataDirectoryRequest, GetDataDirectoryResponse> getDataDirectory,
 		IUiTransportMessageHandler<OpenDataDirectoryRequest, OpenDataDirectoryResponse> openDataDirectory,
 		IUiTransportMessageHandler<GetHostSessionRequest, GetHostSessionResponse> getHostSession,
-		IShellNotificationBridge shellNotifications)
+		IShellNotificationBridge shellNotifications,
+		UserSessionEnd sessionEnd)
 	{
 		_logger = logger;
 		_shellNotifications = shellNotifications;
@@ -63,6 +66,7 @@ public class HostController : ControllerBase
 		_getDataDirectory = getDataDirectory;
 		_openDataDirectory = openDataDirectory;
 		_getHostSession = getHostSession;
+		_sessionEnd = sessionEnd;
 	}
 
 	[HttpGet("session")]
@@ -78,6 +82,11 @@ public class HostController : ControllerBase
 		}
 
 		_logger.Information("Shutdown requested via API, reason: {Reason}", reason ?? "none");
+		if (reason == UserSessionEnd.ShutdownReason)
+		{
+			_sessionEnd.Mark();
+		}
+
 		_lifetime.StopApplication();
 		return Ok();
 	}
