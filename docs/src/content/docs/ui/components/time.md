@@ -124,7 +124,7 @@ hand and hub keep the theme.
 | `MinSize` (`minSize`) | A length | Never shrinks; ellipsizes instead | The floor `size` may shrink to so the run fits. |
 | `Weight` (`weight`) | A font weight | `regular` | The font weight. |
 | `Role` (`role`) | A text role | `primary` | The semantic colour. |
-| `Color` (`color`) | `#rrggbb` | The `role` colour | A literal run colour that overrides `role`. |
+| `Color` (`color`) | `#rrggbb` or `#rrggbbaa` | The `role` colour | A literal run colour that overrides `role`; the alpha pair makes it translucent. |
 | `Align` (`align`) | A `UiComponentAlignments` value | `start` | Alignment within the run's own box. |
 
 ### `macrodeck.clock-dial`

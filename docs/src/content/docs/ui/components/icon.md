@@ -78,7 +78,7 @@ records why it is frozen.
 | `Icon` (`icon`) | a `UiIcons` name | Draws nothing | The glyph. |
 | `Size` (`size`) | length | The box's smaller side | The edge of the square the glyph is drawn in. |
 | `Role` (`role`) | `UiComponentTextRoles` | `primary` | The theme colour; ignored when `Color` is present. |
-| `Color` (`color`) | `#rrggbb` | Uses `Role` | A literal colour overriding `Role`. |
+| `Color` (`color`) | `#rrggbb` or `#rrggbbaa` | Uses `Role` | A literal colour overriding `Role`; the alpha pair makes it translucent. |
 | `MainSize` (`mainSize`), `Fill` (`fill`) | - | - | Shared with every leaf - see [Sizing](/ui/concepts/sizing/). |
 
 ## Events

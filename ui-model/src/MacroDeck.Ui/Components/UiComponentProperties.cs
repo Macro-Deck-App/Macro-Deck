@@ -67,9 +67,10 @@ public static class UiComponentProperties
 	/// present.</summary>
 	public const string Role = "role";
 
-	/// <summary>A text's literal colour, as <c>#rrggbb</c>, overriding its <see cref="Role" />. For a colour
-	/// the <i>user</i> chose rather than one the theme owns: a theme change must not repaint it, which is the
-	/// same split <see cref="StartColor" /> makes. Absent means the role decides.</summary>
+	/// <summary>A text's literal colour, as <c>#rrggbb</c>, or <c>#rrggbbaa</c> for a translucent one,
+	/// overriding its <see cref="Role" />. For a colour the <i>user</i> chose rather than one the theme owns:
+	/// a theme change must not repaint it, which is the same split <see cref="StartColor" /> makes. Absent
+	/// means the role decides.</summary>
 	public const string Color = "color";
 
 	/// <summary>How many lines a text may occupy before it ellipsizes. Absent means one.</summary>

@@ -14,6 +14,7 @@ import {
   nodePaddingPx,
   stackBackground,
   textDigits,
+  textFillColor,
   textFontWeight,
   textRoleColor,
   textWraps,
@@ -218,6 +219,17 @@ describe('widget node presentation', () => {
       expect(textRoleColor(node())).toBe('var(--color-text-primary)');
       expect(textRoleColor(node({ role: 'secondary' }))).toBe('var(--color-text-secondary)');
       expect(textRoleColor(node({ role: 'muted' }))).toBe('var(--color-text-muted)');
+    });
+
+    it('paints a literal colour, translucent when it carries alpha, over the role', () => {
+      expect(textFillColor(node({ role: 'secondary', color: '#ffffff' }))).toBe('#ffffff');
+      expect(textFillColor(node({ role: 'secondary', color: '#ffffffcc' }))).toBe('#ffffffcc');
+    });
+
+    it('falls back to the role for a colour that is neither six nor eight hex digits', () => {
+      expect(textFillColor(node({ role: 'muted', color: '#fff' }))).toBe('var(--color-text-muted)');
+      expect(textFillColor(node({ role: 'muted', color: '#ffffffc' }))).toBe('var(--color-text-muted)');
+      expect(textFillColor(node({ role: 'muted', color: 'white' }))).toBe('var(--color-text-muted)');
     });
 
     it('reserves no digit width unless a positive count was sent', () => {
