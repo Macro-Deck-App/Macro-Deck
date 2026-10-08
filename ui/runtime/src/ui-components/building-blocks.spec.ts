@@ -218,6 +218,36 @@ describe('the building-block components', () => {
       expect(fill.getAttribute('d')!.match(/A /g)!.length).toBe(2);
       expect(fill.style.stroke).toBe('var(--color-accent)');
     });
+
+    it('paints the track in the theme colour unless a trackColor is given', () => {
+      mount(node('g', 'ui.gauge', { thickness: { basis: 0.1 } }));
+      expect(find('.widget-gauge-track')!.style.stroke).toBe('');
+
+      container.replaceChildren();
+      mount(node('g', 'ui.gauge', { thickness: { basis: 0.1 }, trackColor: '#3a3a3c' }));
+      expect(find('.widget-gauge-track')!.style.stroke).toBe('rgb(58, 58, 60)');
+    });
+
+    it('returns the track to the theme colour when the trackColor goes away', () => {
+      const handle = mount(node('g', 'ui.gauge', { trackColor: '#3a3a3c' }));
+      expect(find('.widget-gauge-track')!.style.stroke).toBe('rgb(58, 58, 60)');
+
+      handle.update(node('g', 'ui.gauge', {}), { width: 120, height: 80 }, null);
+
+      expect(find('.widget-gauge-track')!.style.stroke).toBe('');
+    });
+
+    it('ignores a trackColor that is not a hex colour', () => {
+      mount(node('g', 'ui.gauge', { trackColor: 'red' }));
+
+      expect(find('.widget-gauge-track')!.style.stroke).toBe('');
+    });
+
+    it('leaves a dial track to the theme even when the node carries a trackColor', () => {
+      mount(node('d', 'ui.dial', { trackColor: '#3a3a3c' }));
+
+      expect(find('.widget-gauge-track')!.style.stroke).toBe('');
+    });
   });
 
   describe('ui.toggle', () => {

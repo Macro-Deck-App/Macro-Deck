@@ -954,6 +954,15 @@ describe('component-profile conformance fixtures: building-blocks tree', () => {
       }
     });
   }
+
+  it('paints the gauge track in its trackColor and leaves the dial track to the theme', () => {
+    const first = layout.cases[0];
+    mount(tree, first.tile, first.basis);
+
+    expect((byId('conformance.gauge').querySelector('.widget-gauge-track') as SVGElement).style.stroke)
+      .toBe('rgb(58, 58, 60)');
+    expect((byId('conformance.dial').querySelector('.widget-gauge-track') as SVGElement).style.stroke).toBe('');
+  });
 });
 
 describe('component-profile conformance fixtures: modifier tree', () => {
