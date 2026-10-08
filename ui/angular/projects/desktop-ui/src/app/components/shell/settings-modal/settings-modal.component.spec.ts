@@ -431,6 +431,39 @@ describe('SettingsModalComponent', () => {
     expect(service.isOpen()).toBeFalse();
   });
 
+  function expectEscapeClosesOnlyTheOverlayFirst(triggerSelector: string): void {
+    jasmine.clock().install();
+    try {
+      const trigger = fixture.nativeElement.querySelector(triggerSelector) as HTMLButtonElement;
+      const pressEscape = () => trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      trigger.click();
+      fixture.detectChanges();
+      expect(trigger.getAttribute('aria-expanded')).toBe('true');
+
+      pressEscape();
+      fixture.detectChanges();
+      jasmine.clock().tick(150);
+
+      expect(trigger.getAttribute('aria-expanded')).toBe('false');
+      expect(service.isOpen()).toBeTrue();
+
+      pressEscape();
+      jasmine.clock().tick(150);
+
+      expect(service.isOpen()).toBeFalse();
+    } finally {
+      jasmine.clock().uninstall();
+    }
+  }
+
+  it('closes only the open font family select on Escape, and the dialog on the next Escape', () => {
+    expectEscapeClosesOnlyTheOverlayFirst('.font-select button.control');
+  });
+
+  it('closes only the open custom accent colour popover on Escape, and the dialog on the next Escape', () => {
+    expectEscapeClosesOnlyTheOverlayFirst('.cp-custom');
+  });
+
   it('plays the exit animation before closing from the custom close button', () => {
     jasmine.clock().install();
     try {

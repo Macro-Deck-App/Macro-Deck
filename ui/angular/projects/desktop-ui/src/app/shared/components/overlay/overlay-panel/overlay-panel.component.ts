@@ -61,6 +61,18 @@ export class OverlayPanelComponent implements AfterViewChecked, OnChanges, OnDes
   private static readonly _exitDurationMs = 150;
 
   private static readonly openInstances = new Set<OverlayPanelComponent>();
+  private static lastOpenOrder = 0;
+
+  static nextOpenOrder(): number {
+    return ++OverlayPanelComponent.lastOpenOrder;
+  }
+
+  static isAnyOpenSince(order: number): boolean {
+    for (const instance of OverlayPanelComponent.openInstances) {
+      if (instance.openOrder > order) return true;
+    }
+    return false;
+  }
 
   static isAnyOpen(): boolean {
     return OverlayPanelComponent.openInstances.size > 0;
@@ -83,6 +95,7 @@ export class OverlayPanelComponent implements AfterViewChecked, OnChanges, OnDes
   readonly closing = signal(false);
 
   private _exitTimer: ReturnType<typeof setTimeout> | null = null;
+  private openOrder = 0;
   private listening = false;
 
   private readonly onPointerDown = (event: MouseEvent): void => {
@@ -117,6 +130,9 @@ export class OverlayPanelComponent implements AfterViewChecked, OnChanges, OnDes
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen'] || changes['x'] || changes['y'] || changes['anchor'] || changes['placement']) {
       if (this.isOpen) {
+        if (!OverlayPanelComponent.openInstances.has(this)) {
+          this.openOrder = OverlayPanelComponent.nextOpenOrder();
+        }
         OverlayPanelComponent.openInstances.add(this);
         this.clearExitTimer();
         this.closing.set(false);
