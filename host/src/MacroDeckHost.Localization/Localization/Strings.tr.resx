@@ -2724,6 +2724,10 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Errors.Folders.UnknownFolderView" xml:space="preserve">
     <value>Bu klasör görünümü kullanılamıyor.</value>
   </data>
+  <data name="Errors.Http.InvalidUserAgent" xml:space="preserve">
+    <value>Geçerli bir User-Agent girin: Product/1.0 biçiminde, en fazla {maxLength} yazdırılabilir ASCII karakteri.</value>
+    <comment>[maxLength:int]</comment>
+  </data>
   <data name="Errors.IconPack.ExportFailed" xml:space="preserve">
     <value>Dışa aktarma başarısız</value>
   </data>
@@ -15162,6 +15166,31 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Settings.Extensions.UpdatesSection" xml:space="preserve">
     <value>Güncellemeler</value>
+  </data>
+  <data name="Settings.Http.Description" xml:space="preserve">
+    <value>Macro Deck'in yerleşik entegrasyonlarının yaptığı HTTP istekleri ve bağlantıları için ayarlar.</value>
+  </data>
+  <data name="Settings.Http.Heading" xml:space="preserve">
+    <value>HTTP</value>
+  </data>
+  <data name="Settings.Http.LoadFailed" xml:space="preserve">
+    <value>HTTP ayarları yüklenemedi.</value>
+  </data>
+  <data name="Settings.Http.SaveFailed" xml:space="preserve">
+    <value>HTTP ayarları kaydedilemedi.</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Default" xml:space="preserve">
+    <value>Varsayılan: {userAgent}</value>
+    <comment>[userAgent:string]</comment>
+  </data>
+  <data name="Settings.Http.UserAgent.Description" xml:space="preserve">
+    <value>Yerleşik entegrasyonların HTTP isteklerinde gönderdiği User-Agent değerini özelleştirin. Bu, ters proxy'ler ve bot koruma sistemleriyle uyumluluk sorunlarını çözmeye yardımcı olabilir. Üçüncü taraf eklentiler etkilenmez ve kendi User-Agent değerlerini ayarlamalıdır. Değişiklik yeni isteklere ve yeni bağlantılara uygulanır; zaten açık olan bağlantılar yeniden bağlanana kadar önceki değeri korur.</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Label" xml:space="preserve">
+    <value>HTTP User-Agent</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Restore" xml:space="preserve">
+    <value>Varsayılana döndür</value>
   </data>
   <data name="Settings.Language.ActiveDescription" xml:space="preserve">
     <value>Bağlı her istemciye hemen uygulanır.</value>
