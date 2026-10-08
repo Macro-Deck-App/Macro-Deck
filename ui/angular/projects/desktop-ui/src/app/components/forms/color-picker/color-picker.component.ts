@@ -210,6 +210,8 @@ export class ColorPickerComponent implements ControlValueAccessor {
   public readonly lastCustomColor = signal(CUSTOM_FALLBACK);
 
   protected readonly isOpen = signal(false);
+  private lastStatic: string | null = null;
+  private lastReference: string | null = null;
   protected readonly pendingRemoval = signal<string | null>(null);
   protected readonly popoverMaxHeight = signal<number | null>(null);
   private readonly disabledByForm = signal(false);
@@ -428,7 +430,12 @@ export class ColorPickerComponent implements ControlValueAccessor {
   private _onTouched: () => void = () => { };
 
   public writeValue(value: string): void {
+    if ((value ?? '') !== this.value()) {
+      this.lastStatic = null;
+      this.lastReference = null;
+    }
     this.value.set(value ?? '');
+    this.remember(value ?? '');
     this.modeOverride.set(null);
     if (value && value.startsWith('#')) {
       this.lastCustomColor.set(value);
@@ -463,6 +470,7 @@ export class ColorPickerComponent implements ControlValueAccessor {
 
   private applySelection(color: string): void {
     this.value.set(color);
+    this.remember(color);
     if (color.startsWith('#')) {
       this.lastCustomColor.set(color);
     }
@@ -511,14 +519,20 @@ export class ColorPickerComponent implements ControlValueAccessor {
     if (mode === 'variable') {
       this.modeOverride.set('variable');
       const first = this.colorVariables()[0];
-      if (first) this.emitReference({ variable: first.name, modifiers: [] });
+      if (this.lastReference) this.applySelection(this.lastReference);
+      else if (first) this.emitReference({ variable: first.name, modifiers: [] });
       return;
     }
 
     const snapshot = this.previewColor();
     this.modeOverride.set('static');
-    this.select(snapshot ?? this.effectiveResetValue() ?? '');
+    this.select(this.lastStatic ?? snapshot ?? this.effectiveResetValue() ?? '');
     this.modeOverride.set(null);
+  }
+
+  private remember(value: string): void {
+    if (parseColorReference(value)) this.lastReference = value;
+    else if (!isUnsupportedColorTemplate(value)) this.lastStatic = value;
   }
 
   protected toggle(): void {

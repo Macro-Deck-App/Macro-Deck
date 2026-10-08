@@ -805,6 +805,40 @@ describe('ColorPickerComponent with color variables', () => {
     expect(fixture.componentInstance.value()).toBe('#3366ff80');
   });
 
+  it('keeps each tab\'s own value when switching between Color and Variable and back', async () => {
+    await show('#123456');
+    const tab = (index: number) => (document.querySelectorAll('.cp-mode .seg-option')[index] as HTMLButtonElement);
+
+    tab(1).click();
+    await settle();
+    element<HTMLButtonElement>('.cp-add')!.click();
+    await settle();
+    const reference = fixture.componentInstance.value();
+    expect(reference).toContain('vars.accent');
+    expect(reference).toContain('color_lighten');
+
+    tab(0).click();
+    await settle();
+    expect(fixture.componentInstance.value()).toBe('#123456');
+
+    tab(1).click();
+    await settle();
+    expect(fixture.componentInstance.value()).toBe(reference);
+  });
+
+  it('forgets the other tab\'s value once a different value is bound from outside', async () => {
+    await show('#123456');
+    (document.querySelectorAll('.cp-mode .seg-option')[1] as HTMLButtonElement).click();
+    await settle();
+
+    fixture.componentInstance.value.set('{{ vars.primary | color | color_opacity: 50 }}');
+    await settle();
+    (document.querySelector('.cp-mode .seg-option') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.value()).toBe('#3366ff80');
+  });
+
   it('takes an eight-digit hex and emits it canonically when alpha is allowed', async () => {
     await show('#3366ff');
 
