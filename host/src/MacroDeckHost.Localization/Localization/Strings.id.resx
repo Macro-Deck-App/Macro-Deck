@@ -2564,6 +2564,13 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Errors.Clipboard.Unsupported" xml:space="preserve">
     <value>Browser Anda tidak mengizinkan halaman ini menyalin ke papan klip.</value>
   </data>
+  <data name="Errors.ColorPalette.Full" xml:space="preserve">
+    <value>Palet dapat memuat paling banyak {max} warna.</value>
+    <comment>[max:int]</comment>
+  </data>
+  <data name="Errors.ColorPalette.InvalidColor" xml:space="preserve">
+    <value>Ini bukan warna yang valid.</value>
+  </data>
   <data name="Errors.Common.HostLocked" xml:space="preserve">
     <value>Host terkunci.</value>
   </data>
@@ -3474,6 +3481,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Forms.ColorPicker.AddModifier" xml:space="preserve">
     <value>Tambahkan modifier</value>
   </data>
+  <data name="Forms.ColorPicker.AddToPalette" xml:space="preserve">
+    <value>Tambahkan ke palet</value>
+  </data>
   <data name="Forms.ColorPicker.AlphaLabel" xml:space="preserve">
     <value>Opasitas</value>
   </data>
@@ -3488,6 +3498,10 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Forms.ColorPicker.CustomColorTitle" xml:space="preserve">
     <value>Warna kustom</value>
+  </data>
+  <data name="Forms.ColorPicker.CustomSwatch" xml:space="preserve">
+    <value>Warna kustom {hex}</value>
+    <comment>[hex:string]</comment>
   </data>
   <data name="Forms.ColorPicker.DefaultColorTitle" xml:space="preserve">
     <value>Warna bawaan</value>
@@ -3566,11 +3580,20 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Forms.ColorPicker.NoMatchingVariables" xml:space="preserve">
     <value>Tidak ada variabel yang cocok</value>
   </data>
+  <data name="Forms.ColorPicker.NotSet" xml:space="preserve">
+    <value>Belum diatur</value>
+  </data>
   <data name="Forms.ColorPicker.Orange" xml:space="preserve">
     <value>Oranye</value>
   </data>
   <data name="Forms.ColorPicker.OriginalLabel" xml:space="preserve">
     <value>Asli</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteLabel" xml:space="preserve">
+    <value>Palet</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteSaveFailed" xml:space="preserve">
+    <value>Palet warna tidak dapat disimpan.</value>
   </data>
   <data name="Forms.ColorPicker.Pink" xml:space="preserve">
     <value>Merah muda</value>
@@ -3580,6 +3603,17 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Forms.ColorPicker.Red" xml:space="preserve">
     <value>Merah</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPalette" xml:space="preserve">
+    <value>Hapus {hex} dari palet</value>
+    <comment>[hex:string]</comment>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmHeading" xml:space="preserve">
+    <value>Hapus warna dari palet?</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmMessage" xml:space="preserve">
+    <value>Warna ini ({name}) dihapus dari palet dan tidak lagi ditawarkan di kolom warna mana pun.</value>
+    <comment>[name:string]</comment>
   </data>
   <data name="Forms.ColorPicker.RemoveModifierAriaLabel" xml:space="preserve">
     <value>Keluarkan modifier</value>
@@ -14444,6 +14478,30 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Settings.Appearance.Light" xml:space="preserve">
     <value>Terang</value>
   </data>
+  <data name="Settings.Appearance.PaletteDescription" xml:space="preserve">
+    <value>Warna yang ditawarkan setiap kolom warna. Hapus yang mana saja, termasuk warna bawaan, atau tambahkan warna sendiri.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteEmpty" xml:space="preserve">
+    <value>Palet kosong. Tambahkan warna atau pulihkan warna bawaan.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteHeading" xml:space="preserve">
+    <value>Palet warna</value>
+  </data>
+  <data name="Settings.Appearance.PaletteLabel" xml:space="preserve">
+    <value>Warna</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmButton" xml:space="preserve">
+    <value>Pulihkan</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmHeading" xml:space="preserve">
+    <value>Pulihkan warna bawaan?</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmMessage" xml:space="preserve">
+    <value>Palet diganti dengan warna bawaan Macro Deck. Warna yang ditambahkan dihapus dari palet.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreDefaults" xml:space="preserve">
+    <value>Pulihkan warna bawaan</value>
+  </data>
   <data name="Settings.Appearance.System" xml:space="preserve">
     <value>Sistem</value>
   </data>
@@ -19046,8 +19104,8 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Label</value>
   </data>
-  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
-    <value>Warna bingkai kotak label</value>
+  <data name="Widgets.Editor.LabelBoxBorder" xml:space="preserve">
+    <value>Bingkai kotak label</value>
   </data>
   <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
     <value>Lebar bingkai kotak label (%)</value>
@@ -19058,8 +19116,8 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Warna label</value>
   </data>
-  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
-    <value>Warna garis tepi label</value>
+  <data name="Widgets.Editor.LabelOutline" xml:space="preserve">
+    <value>Garis tepi label</value>
   </data>
   <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
     <value>Lebar garis tepi label (%)</value>

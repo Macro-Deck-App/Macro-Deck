@@ -2564,6 +2564,13 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Errors.Clipboard.Unsupported" xml:space="preserve">
     <value>Ваш браузер не дозволяє цій сторінці копіювати в буфер обміну.</value>
   </data>
+  <data name="Errors.ColorPalette.Full" xml:space="preserve">
+    <value>Максимальна кількість кольорів у палітрі: {max}.</value>
+    <comment>[max:int]</comment>
+  </data>
+  <data name="Errors.ColorPalette.InvalidColor" xml:space="preserve">
+    <value>Це недійсний колір.</value>
+  </data>
   <data name="Errors.Common.HostLocked" xml:space="preserve">
     <value>Хост заблоковано.</value>
   </data>
@@ -3474,6 +3481,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Forms.ColorPicker.AddModifier" xml:space="preserve">
     <value>Додати модифікатор</value>
   </data>
+  <data name="Forms.ColorPicker.AddToPalette" xml:space="preserve">
+    <value>Додати до палітри</value>
+  </data>
   <data name="Forms.ColorPicker.AlphaLabel" xml:space="preserve">
     <value>Непрозорість</value>
   </data>
@@ -3488,6 +3498,10 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Forms.ColorPicker.CustomColorTitle" xml:space="preserve">
     <value>Користувацький колір</value>
+  </data>
+  <data name="Forms.ColorPicker.CustomSwatch" xml:space="preserve">
+    <value>Користувацький колір {hex}</value>
+    <comment>[hex:string]</comment>
   </data>
   <data name="Forms.ColorPicker.DefaultColorTitle" xml:space="preserve">
     <value>Колір за замовчуванням</value>
@@ -3566,11 +3580,20 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Forms.ColorPicker.NoMatchingVariables" xml:space="preserve">
     <value>Немає відповідних змінних</value>
   </data>
+  <data name="Forms.ColorPicker.NotSet" xml:space="preserve">
+    <value>Не задано</value>
+  </data>
   <data name="Forms.ColorPicker.Orange" xml:space="preserve">
     <value>Помаранчевий</value>
   </data>
   <data name="Forms.ColorPicker.OriginalLabel" xml:space="preserve">
     <value>Оригінал</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteLabel" xml:space="preserve">
+    <value>Палітра</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteSaveFailed" xml:space="preserve">
+    <value>Не вдалося зберегти палітру кольорів.</value>
   </data>
   <data name="Forms.ColorPicker.Pink" xml:space="preserve">
     <value>Рожевий</value>
@@ -3580,6 +3603,17 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Forms.ColorPicker.Red" xml:space="preserve">
     <value>Червоний</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPalette" xml:space="preserve">
+    <value>Видалити {hex} з палітри</value>
+    <comment>[hex:string]</comment>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmHeading" xml:space="preserve">
+    <value>Видалити колір з палітри?</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmMessage" xml:space="preserve">
+    <value>Цей колір ({name}) буде видалено з палітри, і він більше не пропонуватиметься в жодному полі кольору.</value>
+    <comment>[name:string]</comment>
   </data>
   <data name="Forms.ColorPicker.RemoveModifierAriaLabel" xml:space="preserve">
     <value>Вилучити модифікатор</value>
@@ -14444,6 +14478,30 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Settings.Appearance.Light" xml:space="preserve">
     <value>Світла</value>
   </data>
+  <data name="Settings.Appearance.PaletteDescription" xml:space="preserve">
+    <value>Кольори, які пропонує кожне поле кольору. Видаліть будь-які з них, зокрема стандартні, або додайте власні.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteEmpty" xml:space="preserve">
+    <value>Палітра порожня. Додайте колір або відновіть стандартні кольори.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteHeading" xml:space="preserve">
+    <value>Палітра кольорів</value>
+  </data>
+  <data name="Settings.Appearance.PaletteLabel" xml:space="preserve">
+    <value>Кольори</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmButton" xml:space="preserve">
+    <value>Відновити</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmHeading" xml:space="preserve">
+    <value>Відновити стандартні кольори?</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmMessage" xml:space="preserve">
+    <value>Палітру буде замінено стандартними кольорами Macro Deck. Додані кольори буде з неї видалено.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreDefaults" xml:space="preserve">
+    <value>Відновити стандартні кольори</value>
+  </data>
   <data name="Settings.Appearance.System" xml:space="preserve">
     <value>Системна</value>
   </data>
@@ -19046,8 +19104,8 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Мітка</value>
   </data>
-  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
-    <value>Колір рамки мітки</value>
+  <data name="Widgets.Editor.LabelBoxBorder" xml:space="preserve">
+    <value>Рамка мітки</value>
   </data>
   <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
     <value>Товщина рамки мітки (%)</value>
@@ -19058,8 +19116,8 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Колір мітки</value>
   </data>
-  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
-    <value>Колір контуру мітки</value>
+  <data name="Widgets.Editor.LabelOutline" xml:space="preserve">
+    <value>Контур мітки</value>
   </data>
   <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
     <value>Товщина контуру мітки (%)</value>

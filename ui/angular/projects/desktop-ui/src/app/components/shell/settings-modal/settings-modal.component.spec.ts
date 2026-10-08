@@ -463,8 +463,8 @@ describe('SettingsModalComponent', () => {
     await expectEscapeClosesOnlyTheOverlayFirst('.font-select button.control');
   });
 
-  it('closes only the open custom accent colour popover on Escape, and the dialog on the next Escape', async () => {
-    await expectEscapeClosesOnlyTheOverlayFirst('.cp-custom');
+  it('closes only the open accent colour popover on Escape, and the dialog on the next Escape', async () => {
+    await expectEscapeClosesOnlyTheOverlayFirst('app-appearance-settings .cp-chip');
   });
 
   it('plays the exit animation before closing from the custom close button', () => {
